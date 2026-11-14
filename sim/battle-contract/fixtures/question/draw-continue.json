@@ -1,0 +1,64 @@
+{
+  "id": "q-draw_continue",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "draw_continue",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 4,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": {
+      "kind": "repeat",
+      "actor": "p1",
+      "round": 2
+    },
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "stepwise",
+          "step": "continue"
+        },
+        "cost": null
+      },
+      {
+        "id": "c2",
+        "value": {
+          "kind": "stepwise",
+          "step": "stop"
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 1
+    },
+    "count": null,
+    "earlier": [],
+    "capacity": null
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

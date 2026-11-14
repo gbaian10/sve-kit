@@ -1,0 +1,80 @@
+{
+  "id": "q-token_capacity",
+  "actor": "p1",
+  "purpose": "rule_choice",
+  "use": "token_capacity",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 2,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "tokens",
+          "tokens": [
+            {
+              "rules_name": "合成トークン甲",
+              "card": {
+                "printing_id": "SYN01-090",
+                "face": 0
+              }
+            }
+          ]
+        },
+        "cost": null
+      },
+      {
+        "id": "c2",
+        "value": {
+          "kind": "tokens",
+          "tokens": [
+            {
+              "rules_name": "合成トークン乙",
+              "card": null
+            }
+          ]
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 1
+    },
+    "count": null,
+    "earlier": [],
+    "capacity": {
+      "destination": {
+        "player": "p1",
+        "zone": "field",
+        "position": null
+      },
+      "available": 1
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

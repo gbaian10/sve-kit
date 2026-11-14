@@ -1,22 +1,14 @@
-"""Nullable FK activation, future DSL constraints and independent relation edges."""
+"""Nullable FK activation, DSL constraints and independent relation edges."""
 
 import sqlite3
-from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build import (
-    Column,
-    Kind,
-    Table,
-    compile_schema,
-    create_database,
-    rebuild_database,
-)
+from sve_carddb.build import Json, compile_schema, create_database, rebuild_database
 from sve_carddb.build.t0_json import schemas as t0_schemas
-from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, REGISTRY
-from sve_carddb.build.t1_json import schemas as t1_schemas
+from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, REGISTRY, compile_build
+from sve_carddb.core.json import canonical, digest
 from tests.support.schema_helpers import compile_minimum
 
 from ..support.build_db_t1_fixtures import populate as populate_a
@@ -27,35 +19,40 @@ from .test_build_db_t1b import key
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from pydantic import JsonValue
+
     from sve_carddb.build import CompiledSchema, Database
 
 
-def future_dsl() -> CompiledSchema:
-    tables = tuple(
-        Table(name, (Column("id", Kind.ID),), ("id",))
-        for name in ("dsl_document", "dsl_load")
-    )
-    registry = replace(
-        REGISTRY,
-        tables=(*REGISTRY.tables, *tables),
-        capabilities=tuple(
-            replace(cap, implemented=True) if cap.name == "dsl" else cap
-            for cap in REGISTRY.capabilities
-        ),
-    )
-    return compile_schema(
-        registry,
-        (*MINIMUM_CAPABILITIES, "en", "dsl"),
-        t0_schemas() | t1_schemas(),
-        version=3,
+def dsl_schema() -> CompiledSchema:
+    return compile_build((*MINIMUM_CAPABILITIES, "en", "dsl"))
+
+
+def insert_program(database: Database) -> None:
+    program: dict[str, JsonValue] = {
+        "card_id": "card",
+        "scope": "shared",
+        "abilities": [],
+    }
+    database.insert(
+        "dsl_document",
+        {
+            "id": "dsl",
+            "card_id": "card",
+            "scope": "shared",
+            "dsl_version": "1.0",
+            "status": "draft",
+            "ast": Json(program),
+            "program_hash": digest(canonical(program)),
+        },
     )
 
 
 def test_reskin_dsl_null_check_is_independent_of_disabled_capability() -> None:
-    with create_database(future_dsl()) as database:
+    with create_database(dsl_schema()) as database:
         with database.transaction():
             populate(database)
-            database.insert("dsl_document", {"id": "dsl"})
+            insert_program(database)
         with pytest.raises(sqlite3.IntegrityError), database.transaction():
             database.update("card_related", key("card_related"), {"dsl_id": "dsl"})
         with database.transaction():
@@ -67,10 +64,10 @@ def test_reskin_dsl_null_check_is_independent_of_disabled_capability() -> None:
 
 
 def test_divergence_override_requires_document_when_dsl_enabled() -> None:
-    with create_database(future_dsl()) as database:
+    with create_database(dsl_schema()) as database:
         with database.transaction():
             populate(database)
-            database.insert("dsl_document", {"id": "dsl"})
+            insert_program(database)
         with pytest.raises(sqlite3.IntegrityError), database.transaction():
             database.update(
                 "region_divergence",
@@ -92,9 +89,7 @@ def test_divergence_override_requires_document_when_dsl_enabled() -> None:
         ("region_divergence", "override_dsl_id"),
     ],
 )
-def test_unimplemented_dsl_remains_null_only(
-    db: Database, table: str, column: str
-) -> None:
+def test_disabled_dsl_remains_null_only(db: Database, table: str, column: str) -> None:
     with db.transaction():
         db.update("card_related", key("card_related"), {"relation": "mentions"})
     with pytest.raises(sqlite3.IntegrityError), db.transaction():
@@ -211,7 +206,7 @@ def test_rebuild_revalidates_art(tmp_path: Path) -> None:
     assert path.read_bytes() == before
     rebuild_database(compile_minimum(include_en=True), path, populate)
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchall() == [(18,)]
+        assert connection.execute("PRAGMA user_version").fetchall() == [(19,)]
         assert connection.execute(
             "SELECT count(*) FROM sqlite_schema WHERE type='table'"
         ).fetchall() == [(63,)]

@@ -83,6 +83,10 @@ component_management:
         - sim/web/src/settings/**
         - sim/web/src/i18n/**
         - sim/web/src/cloudflare/**
+    - component_id: battle_contract
+      name: battle contract
+      paths:
+        - sim/battle-contract/src/**
     - component_id: engine
       name: engine
       paths:
@@ -91,3 +95,7 @@ component_management:
       name: scenario runner
       paths:
         - sim/scenario-runner/src/**
+    - component_id: battle_host
+      name: battle host
+      paths:
+        - sim/battle-host/src/**

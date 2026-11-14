@@ -98,16 +98,17 @@ adds it for you. Messages that start with `Merge`, `Revert`, `Pull request`, `fi
 
 Use the component as the scope, so `git log --grep '(carddb)'` shows one component's history:
 
-| Scope        | Component                                    |
-| ------------ | -------------------------------------------- |
-| `carddb`     | Card data pipeline                           |
-| `authored`   | Human-maintained data                        |
-| `dsl`        | Effect DSL schema                            |
-| `sim/engine` | Rules engine                                 |
-| `sim/server` | Game server                                  |
-| `sim/web`    | Web client                                   |
-| `docs`       | ADRs and design docs                         |
-| _(none)_     | CI, tools, top-level docs (`ci` issue label) |
+| Scope                 | Component                                    |
+| --------------------- | -------------------------------------------- |
+| `carddb`              | Card data pipeline                           |
+| `authored`            | Human-maintained data                        |
+| `dsl`                 | Effect DSL schema                            |
+| `sim/battle-contract` | Battle wire contract                         |
+| `sim/engine`          | Rules engine                                 |
+| `sim/server`          | Game server                                  |
+| `sim/web`             | Web client                                   |
+| `docs`                | ADRs and design docs                         |
+| _(none)_              | CI, tools, top-level docs (`ci` issue label) |
 
 Each component is versioned on its own, and its next version is worked out from the commits
 that carry its scope. So keep one component per commit: when a change touches several components,
@@ -274,6 +275,9 @@ Install these tools with their own installers (each is one command; see the link
 | [rustup](https://rustup.rs)      | Rust; the toolchain version is pinned in `rust-toolchain.toml` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
 | [uv](https://docs.astral.sh/uv/) | Python (`carddb`, `tools/schema-er`)                           | `curl -LsSf https://astral.sh/uv/install.sh \| sh`                |
 | [mise](https://mise.jdx.dev)     | Bun and Node.js plus shared project environment variables      | `curl https://mise.run \| sh`, then `mise install` in the repo    |
+
+`sim/web` needs both mise and rustup: its scripts generate the battle contract's TypeScript types and
+validator from the Rust types in `sim/battle-contract` with cargo, and nothing generated is committed.
 
 mise manages Bun and Node.js versions and shared project environment variables.
 Rust and Python toolchains remain managed by rustup and uv; do not add them to

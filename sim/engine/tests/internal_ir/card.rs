@@ -7,6 +7,8 @@ mod condition_inputs;
 mod deck_edges;
 #[path = "card/dice.rs"]
 mod dice;
+#[path = "card/event_batches.rs"]
+mod event_batches;
 #[path = "card/event_combat_life.rs"]
 mod event_combat_life;
 #[path = "card/event_damage_consumer.rs"]

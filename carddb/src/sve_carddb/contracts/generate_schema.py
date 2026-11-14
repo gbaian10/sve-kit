@@ -6,7 +6,8 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.profiles import MEDIA, PROFILES, profile
+from sve_carddb.contracts.profiles import MEDIA, PROFILES, PROGRAMS, profile
+from sve_carddb.contracts.program_schema import definitions as program_definitions
 from sve_carddb.contracts.schema_patterns import patterns
 from sve_carddb.core.json import array, object_value, parse, string
 
@@ -120,16 +121,24 @@ def _changes(
 
 
 def generate(format_version: str = MEDIA) -> bytes:
-    """Regenerate schema bytes solely from the packaged declarative source."""
-    source = object_value(
-        parse(
-            files("sve_carddb.contracts")
-            .joinpath("schema/" + profile(format_version).resource + "/source.json")
-            .read_bytes()
+    """Regenerate from wire sources and the checkout's authoritative DSL schemas."""
+    selected = profile(format_version)
+    directory = files("sve_carddb.contracts").joinpath("schema")
+    source = object_value(parse(directory.joinpath("v3/source.json").read_bytes()))
+    if selected.version == PROGRAMS:
+        overrides = object_value(
+            parse(directory.joinpath(selected.resource + "/source.json").read_bytes())
         )
-    )
+        for section in ("envelope", "definitions"):
+            source[section] = object_value(source[section]) | object_value(
+                overrides[section]
+            )
     _patterns(source)
     definitions = object_value(source["definitions"])
+    if selected.version == PROGRAMS:
+        extra = program_definitions()
+        definitions.update(extra)
+        source["order"] = [*array(source["order"]), *sorted(extra)]
     tuples = object_value(source["tuples"])
     for name in tuples:
         definitions[name] = _tuple(name, tuples)

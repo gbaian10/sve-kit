@@ -637,7 +637,18 @@ fn ordinary_unloaded_cards_have_no_evolution_resource_ability_exemption() {
 
 #[test]
 fn an_admitted_resource_role_does_not_prove_an_empty_printed_ability_set() {
-    let mut game = selected_game(&initial("BP01-110", "BP01-111", "P1"), "BP01-110");
+    // BP01-111 itself is admitted now; omitting it keeps its printed abilities unknown here.
+    let selected = runtime::selection_without_abilities(inputs().clone(), &["BP01-111"]);
+    assert!(selected.current.contains_key("BP01-110"));
+    assert!(!selected.current.contains_key("BP01-111"));
+    let mut game = Game::from_selected_effects(
+        selected,
+        &initial("BP01-110", "BP01-111", "P1"),
+        &Value::Null,
+        &Value::Null,
+        "unknown-resource-abilities",
+    )
+    .unwrap();
     evolve(&mut game, &json!({"pp":0_u8,"ep":1_u8}));
     let before = views(&game);
     let error = game

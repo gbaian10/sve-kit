@@ -85,6 +85,7 @@ impl Game {
         if previous.is_empty() {
             return Ok(false);
         }
+        let player_batch = self.player_event_mark();
         let group = self.group();
         let destroyed_subjects = destroyed
             .iter()
@@ -97,6 +98,7 @@ impl Game {
                 group,
             );
         }
+        self.seal_player_event_batch(player_batch);
         let mut frame = Frame {
             cause: json!({"rule":"11"}),
             ..Frame::default()
@@ -109,7 +111,13 @@ impl Game {
             .iter()
             .map(|object| object.id.clone())
             .collect::<Vec<_>>();
+        let player_movement = self.player_event_mark();
         self.move_objects(&ids, "cemetery", None, None, &frame)?;
+        self.player_movement_method(
+            player_movement,
+            &destroyed_subjects,
+            super::player::events::MovementMethod::RuleDestroy,
+        );
         if previous.iter().all(|before| {
             self.state.objects.get(&before.id).is_some_and(|after| {
                 after.zone == before.zone

@@ -75,8 +75,10 @@ jobs:
               - 'carddb/pyproject.toml'
               - 'pyproject.toml'
               - 'uv.lock'
+              - 'sim/battle-contract/**'
               - 'sim/engine/**'
               - 'sim/scenario-runner/**'
+              - 'sim/battle-host/**'
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'rust-toolchain.toml'
@@ -89,6 +91,10 @@ jobs:
               - 'tests/engine/*.yaml'
             web:
               - 'sim/web/**'
+              - 'sim/battle-contract/**' # the web contract types and validator are generated from this crate
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'rust-toolchain.toml'
               - 'bunfig.toml' # bun fmt settings; Tailwind class order is only checked here, with node_modules
               - 'docs/schema/export/public-annotation-cases.json'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
@@ -690,12 +696,22 @@ jobs:
         with:
           cache: true
           cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      # Every web script first generates the battle contract types and validator from sim/battle-contract.
+      - name: Install the pinned Rust toolchain
+        run: rustup show active-toolchain || rustup toolchain install
+      - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
+        with:
+          save-if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
       - run: bun install --frozen-lockfile
+      # The generated files are never committed: a second generation must reproduce the first byte for
+      # byte, and every fixture must survive Rust → JSON → generated validator → Rust unchanged.
+      - name: Battle contract generation is reproducible and round-trips
+        run: bun run check:contract
       - name: Web formatting, lint, types and both Knip modes
         run: bun run format:check && bun run lint:all && bun run typecheck && bun run knip
       - name: Vitest

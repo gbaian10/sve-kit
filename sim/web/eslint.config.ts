@@ -137,7 +137,14 @@ function apiBans(...bans: (typeof fetchBan)[]): Linter.RulesRecord {
 }
 
 export default defineConfig(
-  globalIgnores(["dist/", "node_modules/", "tests/lint-fixtures/", ".playwright-mcp/"]),
+  globalIgnores([
+    "dist/",
+    "node_modules/",
+    "tests/lint-fixtures/",
+    ".playwright-mcp/",
+    // Generated from sim/battle-contract; never edited or committed.
+    "src/battle/contract/generated/",
+  ]),
 
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,

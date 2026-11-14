@@ -1,4 +1,4 @@
-# 卡表快照格式（4.0.0 候選，N0 已交付）
+# 卡表快照格式（4.0.0／4.1.0 候選）
 
 本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
 瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（§4.1）。
@@ -15,7 +15,7 @@
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
 本文的 basis、annotation 與改動欄序依 [4.0.0 公開 annotation 契約](public-annotation.md)。
-目前 producer／reader 為 4.0.0；已接線四層建置、annotation、每包每區基本目錄及固定背景帶。詳情字典按檔局部化，JP 來源正文譯文固定共用，來源呈現按一跳載入；容量與記憶體效能依 [size-budget](size-budget.md) 分別驗收。
+文字欄序使用 4.0.0 profile；有作者程式時 producer 選用 4.1.0，增加 `dsl-programs-v1` 必要能力及最低 reader 4.1.0，程式封套見傳輸 §3.4。已接線四層建置、annotation、每包每區基本目錄及固定背景帶。詳情字典按檔局部化，JP 來源正文譯文固定共用，來源呈現按一跳載入；容量與記憶體效能依 [size-budget](size-budget.md) 分別驗收。
 
 ## 1. 快照清單（manifest）、版本與容器
 

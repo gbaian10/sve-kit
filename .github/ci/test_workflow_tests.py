@@ -58,6 +58,32 @@ class DirectTestTests(unittest.TestCase):
         )
         assert any(fnmatchcase("bunfig.toml", pattern) for pattern in filters["web"])
 
+    def test_battle_contract_changes_run_the_web_job_with_a_rust_toolchain(
+        self,
+    ) -> None:
+        """The web types and validator are generated from the contract crate before any web check."""
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        filters = yaml.safe_load(
+            next(
+                step["with"]["filters"]
+                for step in workflow["jobs"]["changes"]["steps"]
+                if step.get("id") == "filter"
+            )
+        )
+        for path in (
+            "sim/battle-contract/src/lib.rs",
+            "Cargo.lock",
+            "rust-toolchain.toml",
+        ):
+            assert any(fnmatchcase(path, pattern) for pattern in filters["web"])
+        commands = [
+            str(step.get("run", "")) for step in workflow["jobs"]["web"]["steps"]
+        ]
+        toolchain = next(i for i, run in enumerate(commands) if "rustup" in run)
+        contract = next(i for i, run in enumerate(commands) if "check:contract" in run)
+        checks = next(i for i, run in enumerate(commands) if "bun run typecheck" in run)
+        assert toolchain < contract < checks
+
     def test_publish_changes_select_the_python_job(self) -> None:
         """Publisher changes select the Python job that runs publisher tests."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
@@ -259,6 +285,7 @@ class DirectTestTests(unittest.TestCase):
             )
         )
         for path in (
+            "sim/battle-contract/src/lib.rs",
             "sim/engine/src/lib.rs",
             "tests/engine/card-input.json",
         ):

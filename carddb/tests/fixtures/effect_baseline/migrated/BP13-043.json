@@ -1,0 +1,151 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "condition": {
+          "read": "self.is_active"
+        },
+        "else": {
+          "op": "seq",
+          "steps": [
+            {
+              "bind": "gift_other",
+              "by": "opponent",
+              "max": 1,
+              "min": 1,
+              "op": "select",
+              "select": {
+                "side": "opponent",
+                "type": "follower",
+                "zone": "field"
+              }
+            },
+            {
+              "bind": "gift_self",
+              "max": 1,
+              "min": 1,
+              "op": "select",
+              "select": {
+                "side": "self",
+                "type": "follower",
+                "zone": "field"
+              }
+            },
+            {
+              "condition": {
+                "args": [
+                  {
+                    "count": {
+                      "side": "self",
+                      "zone": "field"
+                    }
+                  },
+                  5
+                ],
+                "fn": "lt"
+              },
+              "op": "if",
+              "then": {
+                "op": "control",
+                "side": "self",
+                "subjects": "gift_other"
+              }
+            },
+            {
+              "condition": {
+                "args": [
+                  {
+                    "count": {
+                      "side": "opponent",
+                      "zone": "field"
+                    }
+                  },
+                  5
+                ],
+                "fn": "lt"
+              },
+              "op": "if",
+              "then": {
+                "op": "control",
+                "side": "opponent",
+                "subjects": "gift_self"
+              }
+            }
+          ]
+        },
+        "op": "if",
+        "then": {
+          "op": "seq",
+          "steps": [
+            {
+              "bind": "gift_self",
+              "max": 1,
+              "min": 1,
+              "op": "select",
+              "select": {
+                "side": "self",
+                "type": "follower",
+                "zone": "field"
+              }
+            },
+            {
+              "bind": "gift_other",
+              "by": "opponent",
+              "max": 1,
+              "min": 1,
+              "op": "select",
+              "select": {
+                "side": "opponent",
+                "type": "follower",
+                "zone": "field"
+              }
+            },
+            {
+              "condition": {
+                "args": [
+                  {
+                    "count": {
+                      "side": "opponent",
+                      "zone": "field"
+                    }
+                  },
+                  5
+                ],
+                "fn": "lt"
+              },
+              "op": "if",
+              "then": {
+                "op": "control",
+                "side": "opponent",
+                "subjects": "gift_self"
+              }
+            },
+            {
+              "condition": {
+                "args": [
+                  {
+                    "count": {
+                      "side": "self",
+                      "zone": "field"
+                    }
+                  },
+                  5
+                ],
+                "fn": "lt"
+              },
+              "op": "if",
+              "then": {
+                "op": "control",
+                "side": "self",
+                "subjects": "gift_other"
+              }
+            }
+          ]
+        }
+      },
+      "kind": "spell",
+      "line": 1
+    }
+  ],
+  "status": "complete"
+}

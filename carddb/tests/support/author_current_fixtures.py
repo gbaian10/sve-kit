@@ -304,6 +304,7 @@ def current_source_fixture(
     snapshot: Snapshot | None = None,
     parser_version: str = PARSER,
     preparation: bytes | CurrentSourceInputs | None = None,
+    capabilities: tuple[str, ...] = (),
 ) -> CurrentSourceFixture:
     """Share fixed input graphs while keeping each database and page cache private."""
     if isinstance(preparation, CurrentSourceInputs):
@@ -352,7 +353,9 @@ def current_source_fixture(
         observations.configuration(vocabulary, ())
         | {"product_identity": inputs.official.identities.configuration()},
     )
-    schema = compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence"))
+    schema = compile_build(
+        (*MINIMUM_CAPABILITIES, "en", "translation_evidence", *capabilities)
+    )
     with create_database(schema) as db:
         with db.transaction():
             populate_product_preview(
