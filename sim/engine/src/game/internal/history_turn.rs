@@ -307,14 +307,24 @@ fn filtered_played(execution: &Execution, game: &Game, plan: &PlayedHistoryFilte
     let filters = plan.subjects();
     let mut count = 0_u64;
     for fact in all {
+        if filters.iter().any(|filter| filter.name.is_some()) && fact.names.is_none() {
+            return Err(unsupported("unadmitted historical subject names"));
+        }
         let kind = saved_kind(&fact.kind)?;
         let traits = fact.traits.iter().cloned().map(TraitId).collect::<Vec<_>>();
+        let names = fact
+            .names
+            .iter()
+            .flatten()
+            .cloned()
+            .map(CardName)
+            .collect::<Vec<_>>();
         let information = SubjectInformation {
             original_cost: None,
             keywords: &[],
             kind: Some(kind),
             traits: &traits,
-            names: &[],
+            names: &names,
             class: None,
         };
         if filters.iter().any(|filter| {

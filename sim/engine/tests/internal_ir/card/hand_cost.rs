@@ -559,3 +559,68 @@ fn a_hand_cost_does_not_start_preparing_a_dynamic_comparison_operand() {
     ));
     assert_eq!(exact_authority(&game), before);
 }
+
+#[test]
+fn negative_class_hand_cost_selects_only_the_eligible_private_card() {
+    let program = filtered_program(
+        &json!({"who":"self","zone":"hand","not_class":"ウィッチ"}),
+        false,
+    );
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            if row["number"] == "unit-spell" {
+                row["faces"][0]["card_class"] = json!("ウィッチ");
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+    );
+    let mut initial = setup(1, json!([{"id":"drawn","card":"unit-spell"}]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"witch","card":"unit-spell"},{"id":"neutral","card":"unit-amulet"}
+    ]);
+    let mut game = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "negative-class-cost",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    let CardPlay::Awaiting(q) = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("private hand materials");
+    };
+    let InputDomain::CostMaterials(domain) = &q.domain else {
+        panic!("hand cost");
+    };
+    assert_eq!(domain.members.len(), 1);
+    assert_eq!(domain.members[0].card.as_deref(), Some("unit-amulet"));
+    assert!(game.internal_decision(View::P2).is_none());
+    resolved(
+        game.answer_internal_card(
+            q.actor,
+            q.token,
+            Answer::CostMaterials(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"], json!(["neutral"]));
+    assert_eq!(state["P1"]["hand"], json!(["witch", "drawn"]));
+    assert_eq!(state["P1"]["pp"]["current"], 1_u8);
+}

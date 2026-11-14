@@ -24,6 +24,14 @@ fn program(upto: bool) -> WellFormedCardProgram {
 }
 
 fn board(program: &WellFormedCardProgram) -> Game {
+    board_with_maximum(program, 2)
+}
+
+fn board_with_maximum(program: &WellFormedCardProgram, maximum: u64) -> Game {
+    board_with_resources(program, 2, maximum)
+}
+
+fn board_with_resources(program: &WellFormedCardProgram, current: u64, maximum: u64) -> Game {
     let (mut snapshot, registry, document) = catalog_documents(&json!("1"));
     snapshot.push('\n');
     snapshot.push_str(&json!({"number":"form","faces":[{"name":"form","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"5","traits":[],"text":null,"sections":[]}]}).to_string());
@@ -37,6 +45,7 @@ fn board(program: &WellFormedCardProgram) -> Game {
         .unwrap(),
     );
     let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":current,"max":maximum});
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["ep"] = json!(0);
@@ -265,4 +274,51 @@ fn flip_result_does_not_grant_attributes_or_escape_its_optional_branch() {
         input["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = body;
         lowerer().lower(&input).unwrap_err();
     }
+}
+
+#[test]
+fn public_face_up_evolve_set_is_counted_before_all_its_members_flip() {
+    let mut expanded = tree(&query(), false);
+    expanded["cards"]["unit-follower"]["abilities"][0]["activate"] = json!({"cost":{"pp":0},"do":[
+        {"pp":{"who":"self","delta":{"count":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true}}}},
+        {"flip_down":{"ref":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true}}}
+    ]});
+    let program = lowerer()
+        .lower(&expanded)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut game = board_with_resources(&program, 0, 10);
+    let before = game.projection(View::Referee).unwrap();
+    let result = resolved(
+        game.activate_internal_card(
+            "s",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 2_u8);
+    for object in ["up-a", "up-b"] {
+        assert_eq!(state["objects"][object]["face_up"], false);
+        assert_eq!(
+            state["objects"][object]["generation"],
+            before["objects"][object]["generation"]
+        );
+        assert!(
+            game.projection(View::P2).unwrap()["objects"]
+                .get(object)
+                .is_none()
+        );
+    }
+    assert_eq!(state["objects"]["opposing"]["face_up"], true);
+    assert_eq!(state["objects"]["down"]["face_up"], false);
+    assert!(
+        result
+            .progress
+            .receipts
+            .values()
+            .any(|r| matches!(r,InstructionOutcome::Flip(f) if f.successful.len()==2))
+    );
 }

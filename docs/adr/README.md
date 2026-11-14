@@ -3,7 +3,7 @@
 只在三個條件同時成立時寫 ADR：難以回頭、缺少背景會令人不解，而且確實比較過有取捨的替代方案。
 一份只記一個決定，以一段一至三句交代背景、選擇與理由；標題直接寫決定。
 只有能補充實質資訊時才加 `Status` frontmatter、Considered Options 或 Consequences。
-欄位、流程及驗收規格放 `docs/schema/` 或 `docs/dsl/`，ADR 連到它們；排程、進度及待決問題放 issue／milestone。
+欄位、流程及驗收規格放 `docs/schema/`、`docs/dsl/` 或 `docs/sim/`，ADR 連到它們；排程、進度及待決問題放 issue／milestone。
 
 全 repo 共用序號，檔名為 `NNNN-<主題>.md`，新增時取現有最大編號加一，內文用繁體中文。
 決定改變時新增一份，舊文以 frontmatter `Status: superseded by ADR-NNNN` 指向新決定；不在舊文底下疊落地註記。
@@ -33,3 +33,4 @@
 | [ADR-0019](0019-publish-typed-ir.md) | 公開程式包承載已展開的有型別 IR |
 | [ADR-0020](0020-effect-anchors.md) | 手寫效果與精確來源錨點分開保存 |
 | [ADR-0021](0021-direct-effect-admission.md) | 以直接作者准入取代機器錨點與巨集資格 |
+| [ADR-0022](0022-battle-contract.md) | 本機與線上共用有型別的對戰契約 |
