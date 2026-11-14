@@ -267,7 +267,7 @@ instead 僅掛 damage/move/buff/life/grant/choice/create/draw/search/banish/dest
 | GAP-A-016 | `$` → `static`；`static` → `effects`；`static.effects[]` → `cannot`；`static.effects[].cannot` → `during, what, who`；`static.effects[].cannot.during` → `not_phase` |
 | GAP-A-017 | `$` → `fanfare`；`fanfare` → `do`；`fanfare.do[]` → `optional`；`fanfare.do[].optional` → `do`；`fanfare.do[].optional.do[]` → `create`；`fanfare.do[].optional.do[].create` → `n, to, token`；`fanfare.do[].optional.do[].create.to` → `by, one_of, scope` |
 | GAP-A-018 | `$` → `activate`；`activate` → `cost, do, zone`；`activate.cost` → `steps`；`activate.cost.steps[]` → `discard, pp`；`activate.cost.steps[].discard` → `groups`；`activate.cost.steps[].discard.groups[]` → `n, sel`；`activate.cost.steps[].discard.groups[].sel` → `class, in, orig_cost_ge, who, zone`；`activate.do[]` → `draw`；`activate.do[].draw` → `n` |
-| GAP-A-019 | `$` → `deck_rule`；`deck_rule` → `deck, same_name_max` |
+| GAP-A-019 | `$` → `deck_rule`；`DeckRule` → `deck, same_name_max`；`ConditionalDeckRule` → `when:self_in_main, decks, exclude_name_contains, same_name_max`（互斥分支） |
 | GAP-A-020 | `$` → `attack_time`；`attack_time` → `do`；`attack_time.do[]` → `damage`；`attack_time.do[].damage` → `n, to`；`attack_time.do[].damage.to` → `leaders` |
 | GAP-A-021 | `$` → `static`；`static` → `effects`；`static.effects[]` → `cannot`；`static.effects[].cannot` → `by, on, what` |
 | GAP-A-022 | `$` → `auto`；`auto` → `do, on`；`auto.on` → `stat_changed`；`auto.on.stat_changed` → `direction, ref, stat`；`auto.do[]` → `grant`；`auto.do[].grant` → `keywords, on` |
