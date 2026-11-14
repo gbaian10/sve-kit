@@ -1115,7 +1115,8 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || fusion_events::filter(ability).is_some()
         || fusion_events::material_filter(ability).is_some();
     let hand_trigger = triggers::hand_discard(ability) || triggers::hand_banish(ability);
-    let cemetery_entry_trigger = triggers::cemetery_entry(ability);
+    let cemetery_entry_trigger =
+        triggers::cemetery_entry(ability) || triggers::cemetery_discard(ability);
     let equipment_trigger = triggers::equipment_header(ability)?;
     if (ability.active_zones != [zones]
         && !zone_activation

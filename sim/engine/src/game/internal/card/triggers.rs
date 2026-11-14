@@ -37,6 +37,7 @@ mod drive;
 mod equipment;
 mod fusion;
 pub(in crate::game::internal) use banish::hand_header as hand_banish;
+pub(in crate::game::internal) use discard::cemetery_header as cemetery_discard;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
 pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
 pub(in crate::game::internal) use equipment::check_header as equipment_header;

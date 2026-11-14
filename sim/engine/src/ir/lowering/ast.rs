@@ -3097,7 +3097,9 @@ impl Auto {
     pub(super) const fn cemetery_observer(&self) -> bool {
         matches!(
             self.on,
-            PhaseSubscription::Played(_) | PhaseSubscription::EnterField(_)
+            PhaseSubscription::Played(_)
+                | PhaseSubscription::EnterField(_)
+                | PhaseSubscription::Discarded(_)
         ) && match &self.zone {
             Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
             Some(ActivationZones::Many(zones)) => {
