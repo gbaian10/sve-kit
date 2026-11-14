@@ -4,8 +4,9 @@
 //! call, so a rejected command cannot touch rules state or randomness.
 
 use crate::wire::{
-    HostError, HostErrorReason, InputState, MAX_SAFE_INTEGER, Outgoing, Receipt, ReceiptResult,
-    Rejection, Seat, Submit, SubmitCommand, TEMPORARY_FORMAT, TemporaryAnswer, Update,
+    HostError, HostErrorReason, InputState, Nat, Outgoing, QuestionId, Receipt, ReceiptResult,
+    RequestId, Seat, Submit, SubmitCommand, TEMPORARY_FORMAT, TemporaryAnswer, Update, seat_named,
+    seat_of, viewer_of,
 };
 use core::fmt;
 use serde::Serialize;
@@ -35,21 +36,21 @@ pub struct Delivery {
 
 #[derive(Debug)]
 struct Issued {
-    id: String,
+    id: QuestionId,
     token: QuestionToken,
 }
 
 #[derive(Debug, PartialEq, Eq)]
 struct Seen {
-    question: Option<String>,
+    question: Option<QuestionId>,
     input: Input,
     observation: Observation,
 }
 
 #[derive(Debug, Default)]
 struct Channel {
-    update_seq: u64,
-    issued: u64,
+    update_seq: Nat,
+    issued: Nat,
     current: Option<Issued>,
     seen: Option<Seen>,
 }
@@ -126,7 +127,7 @@ impl LocalSession {
             out.push(host_error(seat, reason));
             return out;
         }
-        let viewer = Viewer::from(seat);
+        let viewer = viewer_of(seat);
         if self.control_of(viewer) == SeatControl::Player {
             match self.refresh(viewer, true) {
                 Ok(update) => out.extend(update.map(|update| Delivery {
@@ -142,7 +143,7 @@ impl LocalSession {
     /// Process a command routed by seat name, as the Worker passes it. An unknown seat name is a
     /// malformed message: interaction stops for every player seat.
     pub fn submit_named(&mut self, seat: &str, message: &str) -> Vec<Delivery> {
-        match Seat::from_name(seat) {
+        match seat_named(seat) {
             Some(seat) => self.submit_json(seat, message),
             None => self.malformed(),
         }
@@ -150,7 +151,7 @@ impl LocalSession {
 
     /// [`Self::baseline`] routed by seat name; an unknown name stops interaction.
     pub fn baseline_named(&mut self, seat: &str) -> Vec<Delivery> {
-        match Seat::from_name(seat) {
+        match seat_named(seat) {
             Some(seat) => self.baseline(seat),
             None => self.malformed(),
         }
@@ -164,15 +165,16 @@ impl LocalSession {
     }
 
     /// Parse and process one command; malformed messages stop interaction.
+    /// Numbers outside the safe integer range stop with `range`, other malformed input with `format`.
     pub fn submit_json(&mut self, seat: Seat, message: &str) -> Vec<Delivery> {
-        match serde_json::from_str::<Submit>(message) {
+        match sve_battle_contract::decode::<Submit>(message) {
             Ok(submit) => self.submit(seat, submit),
-            Err(_error) => {
+            Err(error) => {
                 let mut out = Vec::new();
                 if let Some(reason) = self.stopped {
                     out.push(host_error(seat, reason));
                 } else {
-                    self.stop(HostErrorReason::Format, &mut out);
+                    self.stop(error.reason, &mut out);
                 }
                 out
             }
@@ -186,7 +188,7 @@ impl LocalSession {
             out.push(host_error(seat, reason));
             return out;
         }
-        let viewer = Viewer::from(seat);
+        let viewer = viewer_of(seat);
         let kind = if self.control_of(viewer) == SeatControl::Policy {
             Ok(None)
         } else {
@@ -228,7 +230,7 @@ impl LocalSession {
     fn delegate(
         &mut self,
         viewer: Viewer,
-        question_id: &str,
+        question_id: &QuestionId,
     ) -> Result<Option<SubmissionKind>, HostErrorReason> {
         let Input::Question(question) = self.game.input(viewer) else {
             return Ok(None);
@@ -241,7 +243,7 @@ impl LocalSession {
         if !channel
             .current
             .as_ref()
-            .is_some_and(|issued| issued.id == question_id && issued.token == question.token)
+            .is_some_and(|issued| issued.id == *question_id && issued.token == question.token)
         {
             return Ok(None);
         }
@@ -306,7 +308,7 @@ impl LocalSession {
             }
             match self.refresh(viewer, force) {
                 Ok(update) => updates.extend(update.map(|update| Delivery {
-                    seat: viewer.into(),
+                    seat: seat_of(viewer),
                     message: Outgoing::Update(update),
                 })),
                 Err(reason) => {
@@ -334,7 +336,7 @@ impl LocalSession {
                     let next = safe_increment(channel.issued)?;
                     channel.issued = next;
                     // The seat prefix keeps one seat's stale id from naming the other seat's question.
-                    let id = format!("{}-q{next}", seat_name(viewer));
+                    let id = QuestionId::new(format!("{}-q{}", seat_name(viewer), next.get()));
                     channel.current = Some(Issued {
                         id: id.clone(),
                         token: question.token,
@@ -358,11 +360,11 @@ impl LocalSession {
         if channel.seen.as_ref() != Some(&seen) {
             channel.update_seq = safe_increment(channel.update_seq)?;
         }
-        let state = input_state(&seen.input, seen.question.as_deref());
+        let state = input_state(&seen.input, seen.question.as_ref());
         channel.seen = Some(seen);
         Ok(Some(Update {
             format: TEMPORARY_FORMAT,
-            viewer: viewer.into(),
+            viewer: seat_of(viewer),
             update_seq: channel.update_seq,
             baseline: force,
             input: state,
@@ -373,7 +375,7 @@ impl LocalSession {
         self.stopped = Some(reason);
         for viewer in SEATS {
             if self.control_of(viewer) == SeatControl::Player {
-                out.push(host_error(viewer.into(), reason));
+                out.push(host_error(seat_of(viewer), reason));
             }
         }
     }
@@ -395,18 +397,18 @@ impl LocalSession {
     }
 }
 
-fn input_state(input: &Input, question: Option<&str>) -> InputState {
+fn input_state(input: &Input, question: Option<&QuestionId>) -> InputState {
     match (input, question) {
         (Input::Question(native), Some(id)) => InputState::Question {
-            id: id.to_owned(),
+            id: id.clone(),
             purpose: native.purpose.into(),
             shape: (&native.shape).into(),
         },
         (Input::Waiting(waiting), _) => InputState::Waiting {
-            actor: waiting.actor.into(),
+            actor: seat_of(waiting.actor),
         },
         (Input::Finished { winner }, _) => InputState::Finished {
-            winner: winner.map(Seat::from),
+            winner: winner.map(seat_of),
         },
         // Native surrender clears a fault, so the authority still accepts it here.
         // A question always has an issued id; the unreachable pairing is reported the same way.
@@ -423,10 +425,11 @@ const fn seat_name(viewer: Viewer) -> &'static str {
     }
 }
 
-fn safe_increment(value: u64) -> Result<u64, HostErrorReason> {
+fn safe_increment(value: Nat) -> Result<Nat, HostErrorReason> {
     value
+        .get()
         .checked_add(1)
-        .filter(|next| *next <= MAX_SAFE_INTEGER)
+        .and_then(|next| Nat::try_from(next).ok())
         .ok_or(HostErrorReason::Range)
 }
 
@@ -445,7 +448,7 @@ const fn stop_reason(outcome: HostOutcome) -> HostErrorReason {
     }
 }
 
-fn receipt(seat: Seat, request_id: String, kind: Option<SubmissionKind>) -> Delivery {
+fn receipt(seat: Seat, request_id: RequestId, kind: Option<SubmissionKind>) -> Delivery {
     let result = match kind {
         None | Some(SubmissionKind::Rejected) => ReceiptResult::Rejected,
         Some(SubmissionKind::Applied) => ReceiptResult::Applied,
@@ -455,20 +458,14 @@ fn receipt(seat: Seat, request_id: String, kind: Option<SubmissionKind>) -> Deli
     };
     Delivery {
         seat,
-        message: Outgoing::Receipt(Receipt {
-            request_id,
-            result,
-            rejection: (result == ReceiptResult::Rejected).then_some(Rejection::InvalidSubmission),
-        }),
+        // The contract pairs `rejected` with `invalid_submission` and nothing else.
+        message: Outgoing::Receipt(Receipt::new(request_id, result)),
     }
 }
 
 const fn host_error(seat: Seat, reason: HostErrorReason) -> Delivery {
     Delivery {
         seat,
-        message: Outgoing::HostError(HostError {
-            format: TEMPORARY_FORMAT,
-            reason,
-        }),
+        message: Outgoing::HostError(HostError::new(reason)),
     }
 }

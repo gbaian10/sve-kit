@@ -1,12 +1,12 @@
 //! Build a local session from host-supplied text; nothing reads the filesystem.
 
 use crate::session::{LocalSession, SeatControl};
-use crate::wire::Seat;
+use crate::wire::{Seat, viewer_of};
 use serde::Deserialize;
 use serde_json::Value;
 use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput};
 use sve_engine::game::Game;
-use sve_engine::game::player::{DeckConstruction, PlayerDeck, Viewer};
+use sve_engine::game::player::{DeckConstruction, PlayerDeck};
 use sve_engine::host::HostLimits;
 
 /// The trusted host's match parameters. The seed and first chooser stay inside the Worker.
@@ -117,7 +117,7 @@ pub fn load(inputs: Inputs<'_>, setup: &str) -> Result<LocalSession, LoadError> 
     let game = Game::start_player_game(
         selected,
         [deck(first), deck(second)],
-        Viewer::from(setup.first_chooser),
+        viewer_of(setup.first_chooser),
         &setup.seed,
     )
     .map_err(|_error| LoadError::Match)?;

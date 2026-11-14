@@ -17,6 +17,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+sve-battle-contract = { path = "../battle-contract" }
 sve-engine = { path = "../engine", default-features = false }
 
 # Exact: the generated JavaScript glue must come from the same wasm-bindgen CLI version.

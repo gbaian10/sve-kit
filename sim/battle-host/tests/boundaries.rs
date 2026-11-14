@@ -10,8 +10,8 @@ extern crate alloc;
 
 use alloc::sync::Arc;
 use sve_battle_host::wire::{
-    HostError, HostErrorReason, InputState, Outgoing, Receipt, ReceiptResult, Rejection, Seat,
-    Submit, SubmitCommand, TemporaryAnswer, Update,
+    HostError, HostErrorReason, InputState, Outgoing, QuestionId, Receipt, ReceiptResult,
+    RequestId, Seat, Submit, SubmitCommand, TemporaryAnswer, Update,
 };
 use sve_battle_host::{Delivery, LocalSession, SeatControl};
 use sve_engine::catalog::Catalog;
@@ -76,17 +76,17 @@ const HOT_SEAT: [SeatControl; 2] = [SeatControl::Player, SeatControl::Player];
 
 fn answer(id: &str, request: &str) -> Submit {
     Submit {
-        request_id: request.into(),
+        request_id: RequestId::new(request.into()),
         command: SubmitCommand::Answer {
-            question_id: id.into(),
+            question_id: QuestionId::new(id.into()),
             answer: TemporaryAnswer::Policy,
         },
     }
 }
 
-const fn concede(request: String) -> Submit {
+fn concede(request: String) -> Submit {
     Submit {
-        request_id: request,
+        request_id: RequestId::new(request),
         command: SubmitCommand::Concede,
     }
 }
@@ -100,18 +100,17 @@ fn authority(session: &LocalSession) -> String {
 fn rejected(seat: Seat, request: &str) -> Vec<Delivery> {
     vec![Delivery {
         seat,
-        message: Outgoing::Receipt(Receipt {
-            request_id: request.into(),
-            result: ReceiptResult::Rejected,
-            rejection: Some(Rejection::InvalidSubmission),
-        }),
+        message: Outgoing::Receipt(Receipt::new(
+            RequestId::new(request.into()),
+            ReceiptResult::Rejected,
+        )),
     }]
 }
 
 const fn stopped(seat: Seat, reason: HostErrorReason) -> Delivery {
     Delivery {
         seat,
-        message: Outgoing::HostError(HostError { format: 0, reason }),
+        message: Outgoing::HostError(HostError::new(reason)),
     }
 }
 
@@ -143,7 +142,7 @@ impl Seats {
             .iter()
             .flatten()
             .find_map(|update| match &update.input {
-                InputState::Question { id, .. } => Some((update.viewer, id.clone())),
+                InputState::Question { id, .. } => Some((update.viewer, id.as_str().to_owned())),
                 InputState::Waiting { .. }
                 | InputState::Finished { .. }
                 | InputState::EngineFault { .. } => None,
@@ -190,7 +189,7 @@ fn a_stale_id_from_the_other_seat_never_names_its_current_question() {
     assert_ne!(held, first_id, "seat-scoped ids must differ");
     let out = session.submit(holder, answer(&held, "valid"));
     assert!(matches!(&out[0].message,
-        Outgoing::Receipt(receipt) if receipt.result == ReceiptResult::Applied));
+        Outgoing::Receipt(receipt) if receipt.result() == ReceiptResult::Applied));
     let after = authority(&session);
     assert_eq!(
         session.submit(holder, answer(&held, "repeat")),
@@ -267,7 +266,7 @@ fn concede_while_waiting_finishes_for_both_seats_and_cannot_repeat() {
     let waiting = other(deciding);
     let out = session.submit(waiting, concede("give-up".into()));
     assert!(matches!(&out[0].message,
-        Outgoing::Receipt(receipt) if receipt.result == ReceiptResult::Applied));
+        Outgoing::Receipt(receipt) if receipt.result() == ReceiptResult::Applied));
     seats.absorb(&out);
     for update in seats.0.iter().flatten() {
         assert_eq!(
@@ -314,7 +313,7 @@ fn an_exhausted_budget_stops_interaction() {
     let (seat, id) = seats.question().unwrap();
     let out = session.submit(seat, answer(&id, "within"));
     assert!(matches!(&out[0].message,
-        Outgoing::Receipt(receipt) if receipt.result == ReceiptResult::Applied));
+        Outgoing::Receipt(receipt) if receipt.result() == ReceiptResult::Applied));
     seats.absorb(&out);
     let (next_seat, next_id) = seats.question().unwrap();
     let before = authority(&session);
@@ -389,6 +388,25 @@ fn an_unknown_seat_name_stops_interaction_like_any_malformed_message() {
 }
 
 #[test]
+fn an_unsafe_integer_stops_with_range_before_reaching_the_engine() {
+    let mut session = session(HOT_SEAT, 100);
+    let _started = session.start();
+    let before = authority(&session);
+    let out = session.submit_json(
+        Seat::P1,
+        r#"{"request_id":9007199254740993,"command":{"kind":"concede"}}"#,
+    );
+    assert_eq!(
+        out,
+        vec![
+            stopped(Seat::P1, HostErrorReason::Range),
+            stopped(Seat::P2, HostErrorReason::Range),
+        ]
+    );
+    assert_eq!(authority(&session), before);
+}
+
+#[test]
 fn a_host_stopped_before_start_never_lets_the_policy_answer() {
     // P1 chooses first and is a policy seat, so a start that ignored the stop would submit.
     let mut session = session([SeatControl::Policy, SeatControl::Player], 100);
@@ -413,6 +431,11 @@ fn wire_messages_use_the_temporary_format_and_snake_case_tags() {
         json,
         json!({"kind":"update","format":0_u8,"viewer":"p1","update_seq":1_u8,"baseline":true,
             "input":{"kind":"question","id":"p1-q1","purpose":"rule_choice","shape":"opening"}})
+    );
+    let stop = serde_json::to_value(&stopped(Seat::P1, HostErrorReason::Range).message).unwrap();
+    assert_eq!(
+        stop,
+        json!({"kind":"host_error","format":1_u8,"reason":"range"})
     );
     let receipt = serde_json::to_value(&rejected(Seat::P1, "r")[0].message).unwrap();
     assert_eq!(

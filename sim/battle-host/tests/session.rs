@@ -12,7 +12,8 @@ use sha2::{Digest as _, Sha256};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
 use sve_battle_host::load::{Inputs, load};
 use sve_battle_host::wire::{
-    InputState, Outgoing, ReceiptResult, Seat, Submit, SubmitCommand, TemporaryAnswer, Update,
+    InputState, Outgoing, ReceiptResult, RequestId, Seat, Submit, SubmitCommand, TemporaryAnswer,
+    Update,
 };
 use sve_battle_host::{Delivery, LocalSession, SeatControl};
 use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
@@ -129,7 +130,7 @@ fn play_out(session: &mut LocalSession) -> [Option<Update>; 2] {
         let out = session.submit(
             seat,
             Submit {
-                request_id: request.clone(),
+                request_id: RequestId::new(request.clone()),
                 command: SubmitCommand::Answer {
                     question_id: id,
                     answer: TemporaryAnswer::Policy,
@@ -140,8 +141,8 @@ fn play_out(session: &mut LocalSession) -> [Option<Update>; 2] {
         assert_eq!(first.seat, seat, "the receipt goes to the submitting seat");
         assert!(
             matches!(&first.message,
-            Outgoing::Receipt(receipt) if receipt.request_id == request
-                && receipt.result == ReceiptResult::Applied),
+            Outgoing::Receipt(receipt) if receipt.request_id().as_str() == request
+                && receipt.result() == ReceiptResult::Applied),
             "the receipt comes first: {first:?}"
         );
         assert!(
