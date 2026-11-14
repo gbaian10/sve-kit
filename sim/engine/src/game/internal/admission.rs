@@ -897,6 +897,7 @@ fn supported(code: &str) -> bool {
             | "internal.Role.Owner"
             | "internal.Role.Controller"
             | "player.require-one"
+            | "shape.TurnOperation.SkipNext"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
             | "shape.Action.RemoveAbility"

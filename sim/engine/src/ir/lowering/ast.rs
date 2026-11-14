@@ -270,6 +270,7 @@ pub(super) enum CostOperation {
     Lesson(u64),
     Counter(CounterCost),
     EarthRite(u64),
+    SkipTurn(SkipTurnCost),
     LeaderLife(u64),
     ToCemetery(Material),
     ReturnToHand(Material),
@@ -284,6 +285,12 @@ pub(super) enum CostOperation {
     SelfToCemetery(bool),
     /// 「手札のこれをEXエリアに置く」; only a hand activation pays it.
     SelfToEx(bool),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SkipTurnCost {
+    pub who: SelfPlayer,
 }
 
 #[derive(Deserialize)]
