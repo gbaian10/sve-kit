@@ -1046,3 +1046,6 @@ mod mixed_subscription;
 
 #[path = "card/evolution_original_cost.rs"]
 mod evolution_original_cost;
+
+#[path = "card/ex_departure_batch.rs"]
+mod ex_departure_batch;

@@ -44,6 +44,7 @@ pub(in crate::game::internal) use equipment::check_header as equipment_header;
 mod entry;
 pub(in crate::game::internal) mod event_operand;
 mod evolution;
+mod ex_departure;
 mod mill;
 mod movement;
 pub(in crate::game::internal) use evolution::ex_evolution;
@@ -142,6 +143,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || dice::check_header(ability)?
         || equipment::check_header(ability)?
         || mill::check_header(ability)?
+        || ex_departure::check_header(ability)?
         || change::check_header(ability)?
         || movement::check_header(ability)?
         || entry::check_header(ability)?

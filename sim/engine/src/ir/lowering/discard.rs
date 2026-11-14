@@ -235,6 +235,11 @@ pub(super) fn aggregation(
                 key: BatchPolicy::Instruction {},
             })
         }
+        Some(ast::AutoAggregation::Batch) if matches!(&auto.on, ast::PhaseSubscription::Moved(event) if matches!(&event.from, ast::MoveOrigin::Owned {zone:ast::MoveZone::Ex,..})) => {
+            Ok(TriggerAggregation::PerBatch {
+                key: BatchPolicy::Instruction {},
+            })
+        }
         Some(ast::AutoAggregation::Batch) => Err(unsupported(path)),
     }
 }

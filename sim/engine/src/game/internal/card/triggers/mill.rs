@@ -8,7 +8,7 @@ use super::{
 use crate::game::internal::admission::PlannedAbility;
 use crate::ir::events::mill::MillFilter;
 use crate::ir::events::subscriptions;
-use crate::ir::{Generation, MoveEvent, MoveMethod, ObjectRef, Position};
+use crate::ir::{Generation, MoveEvent, MoveMethod, Nat, ObjectRef, Position};
 
 fn filter(ability: &Ability) -> Option<MillFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. }) {
@@ -128,6 +128,7 @@ impl Game {
                 position: Position::Top {},
                 method: MoveMethod::Mill,
                 entered_from: None,
+                batch_size: Nat(1),
             };
             let mut shared_header: Option<EventHeader> = None;
             for (holder, abilities) in &observers {

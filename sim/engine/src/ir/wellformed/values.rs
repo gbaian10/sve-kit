@@ -71,6 +71,7 @@ impl Checker {
                 | IntFrozen::LifeChangeDelta { event } => self.event_field(*event),
                 IntFrozen::CounterChangeDelta { event } => self.event_field(*event),
                 IntFrozen::DamageAmount { event } => self.event_field(*event),
+                IntFrozen::MoveBatchCount { event } => self.event_field(*event),
                 IntFrozen::StatDelta { event } => self.event_field(*event),
             },
             Expr::Compute(operation) => match operation.as_ref() {

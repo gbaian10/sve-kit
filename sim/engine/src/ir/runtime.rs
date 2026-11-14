@@ -59,7 +59,7 @@ runtime_variants!(EventPayload {
 
 runtime_variants!(#[derive(Copy)] PlaySubject { Card { object: ObjectRef }, Ability { ability: RuntimeAbilityReference } });
 
-runtime_record!(#[derive(Copy)] MoveEvent { before: ObjectRef, after: ObjectRef, from: RuntimeZoneRef, to: RuntimeZoneRef, position: Position, method: MoveMethod, entered_from: Option<ZoneKind> });
+runtime_record!(#[derive(Copy)] MoveEvent { before: ObjectRef, after: ObjectRef, from: RuntimeZoneRef, to: RuntimeZoneRef, position: Position, method: MoveMethod, entered_from: Option<ZoneKind>, batch_size: Nat });
 
 runtime_record!(
     #[derive(Copy)]

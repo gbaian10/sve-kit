@@ -998,30 +998,30 @@ impl Checker {
         let Expr::Frozen(field) = left else {
             return self.reject();
         };
-        // A leave or mill names one public destination; the deck origin is mill-only.
-        let expected = match field.as_ref() {
+        let Expr::Compute(operation) = right else {
+            return self.reject();
+        };
+        let ZoneOperation::OfPlayer { player, kind } = operation.as_ref();
+        // Zone identity is public; these comparisons never enumerate a deck or hand.
+        let allowed = match field.as_ref() {
             ZoneFrozen::LeaveFieldTo { event } => {
                 self.reference(*event, BindingKind::Value)?;
-                ZoneKind::Cemetery
+                *kind == ZoneKind::Cemetery
             }
             ZoneFrozen::MoveFrom { event } => {
                 self.reference(*event, BindingKind::Value)?;
-                ZoneKind::Deck
+                matches!(kind, ZoneKind::Deck | ZoneKind::Ex)
             }
             ZoneFrozen::MoveTo { event } => {
                 self.reference(*event, BindingKind::Value)?;
-                ZoneKind::Cemetery
+                matches!(kind, ZoneKind::Cemetery | ZoneKind::Hand)
             }
             ZoneFrozen::PlayOriginZone { .. }
             | ZoneFrozen::DiscardActualTo { .. }
             | ZoneFrozen::BanishFrom { .. }
             | ZoneFrozen::DriveCheckedFinalDestination { .. } => return self.reject(),
         };
-        let Expr::Compute(operation) = right else {
-            return self.reject();
-        };
-        let ZoneOperation::OfPlayer { player, kind } = operation.as_ref();
-        if *kind != expected {
+        if !allowed {
             return self.reject();
         }
         self.player(player)

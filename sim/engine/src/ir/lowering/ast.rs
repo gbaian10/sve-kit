@@ -3157,7 +3157,7 @@ impl Auto {
 #[serde(deny_unknown_fields)]
 pub(super) struct MoveSubscription {
     pub from: MoveOrigin,
-    pub to: DepartureDestination,
+    pub to: Option<DepartureDestination>,
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     pub sel: Option<MovementSubject>,
@@ -3173,6 +3173,7 @@ pub(super) enum MoveOrigin {
 #[serde(rename_all = "snake_case")]
 pub(super) enum MoveZone {
     Field,
+    Ex,
     /// Only a public deck-to-cemetery move; the deck owner must be named.
     Deck,
 }
