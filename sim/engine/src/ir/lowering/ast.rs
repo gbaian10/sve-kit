@@ -430,7 +430,7 @@ pub(super) enum Step {
     Stand(ObjectAction),
     Steal(Steal),
     Give(Give),
-    FlipDown(ObjectAction),
+    FlipDown(FlipDown),
     Buff(Modify),
     Grant(Grant),
     SetStat(Modify),
@@ -984,6 +984,16 @@ pub(super) struct PublicBanishUnion {
 pub(super) struct PublicBanishZone {
     pub who: Side,
     pub zone: Zone,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum FlipDown {
+    Public {
+        r#ref: CountQuery,
+        result: Option<String>,
+    },
+    Selected(ObjectAction),
 }
 
 #[derive(Deserialize)]
@@ -3062,6 +3072,7 @@ pub(super) struct HandQuery {
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub class: Option<String>,
+    pub not_class: Option<String>,
     pub keyword: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,
@@ -3243,6 +3254,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    BanishInstead(BanishReplacement),
     UnlimitedEvolve(StaticPlayerRule),
     ChoiceAny(StaticPlayerRule),
     Reroll(Reroll),
@@ -3257,6 +3269,14 @@ pub(super) enum StaticEffect {
     DamageCap(DamageCap),
     NoTrigger(NoTrigger),
     IgnoreWard(IgnoreWard),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BanishReplacement {
+    pub on: Option<Objects>,
+    pub from: String,
+    pub to: String,
 }
 
 #[derive(Deserialize)]

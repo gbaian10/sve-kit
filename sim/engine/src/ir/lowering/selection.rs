@@ -175,6 +175,13 @@ impl BodyContext<'_> {
         })
     }
 
+    pub(super) fn public_binding(&self, name: &str) -> bool {
+        self.targets.contains_key(name)
+            && !self.hand_targets.contains(name)
+            && !self.observed_targets.contains(name)
+            && !self.flip_targets.contains(name)
+    }
+
     /// Hands and looked cards are shown only to the chooser; a public reveal is shown to all.
     fn choice_visibility(
         &self,
@@ -188,7 +195,7 @@ impl BodyContext<'_> {
                 Some(super::super::ObjectReceipt::Reveal { .. })
             )
         });
-        if (observation.is_some() && !revealed) || hand {
+        if (observation.is_some_and(|name| !self.public_binding(name)) && !revealed) || hand {
             Visibility::Only {
                 players: super::super::PlayerSet {
                     relation: super::super::PlayerRelation::SelfPlayer,
@@ -238,7 +245,13 @@ impl BodyContext<'_> {
             .observation
             .as_ref()
             .is_some_and(|name| self.look_viewers.get(name) == Some(&actor));
-        if ((from.observation.is_some() && !revealed && !looked_by_actor) || hand)
+        if ((from
+            .observation
+            .as_ref()
+            .is_some_and(|name| !self.public_binding(name))
+            && !revealed
+            && !looked_by_actor)
+            || hand)
             && actor != (PlayerRef::Controller {})
             && !own_hand
         {
