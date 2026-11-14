@@ -8,6 +8,7 @@ use core::slice::from_ref;
 use serde_json::{Value, json};
 use sve_engine::EngineFailure;
 use sve_engine::catalog::{Catalog, EngineIdentityInput};
+use sve_engine::game::player::Viewer;
 use sve_engine::game::{Game, View};
 
 #[path = "support/rule_fixtures.rs"]
@@ -4996,6 +4997,16 @@ fn effect_evolution_selects_named_faces_and_keeps_an_empty_choice_when_unavailab
     let loaded = Arc::new(effect_evolution_catalog(
         &json!({"op":"if_done","attempt":{"op":"evolve","subjects":"self","name":"other-evolution"},"then":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}),
     ));
+    let remembered = |engine: &Game| {
+        engine
+            .observe(Viewer::P2)
+            .unwrap()
+            .remembered
+            .into_iter()
+            .filter(|face| face.card == "unit-dual")
+            .map(|face| face.face)
+            .collect::<Vec<_>>()
+    };
     for unavailable in [false, true] {
         let mut initial = setup();
         initial["players"]["P1"]["zones"]["evolve_deck"] =
@@ -5008,6 +5019,10 @@ fn effect_evolution_selects_named_faces_and_keeps_an_empty_choice_when_unavailab
             "effect-evolve",
         )
         .unwrap();
+        assert_eq!(
+            remembered(&engine),
+            if unavailable { vec![0_u64] } else { vec![] }
+        );
         assert_eq!(
             engine
                 .decide(
@@ -5027,6 +5042,14 @@ fn effect_evolution_selects_named_faces_and_keeps_an_empty_choice_when_unavailab
         assert_eq!(
             engine.decide(&choice, "choose").unwrap().outcome,
             "resolved"
+        );
+        assert_eq!(
+            remembered(&engine),
+            if unavailable {
+                vec![0_u64]
+            } else {
+                vec![1_u64]
+            }
         );
         assert_eq!(
             engine.query(View::P1, "P1.field.a.power").unwrap(),

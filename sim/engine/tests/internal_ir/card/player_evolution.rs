@@ -153,6 +153,10 @@ fn choosing_a_later_evolution_face_does_not_publish_the_default_face_memory() {
             .unwrap();
         assert_eq!(form.card.physical.face, 0);
         assert!(form.card.face_up);
+        assert_eq!(
+            remembered_form_faces(&game, opponent),
+            vec![(0, actor), (1, actor)]
+        );
     }
 }
 

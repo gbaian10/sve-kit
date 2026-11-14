@@ -231,6 +231,7 @@ impl Game {
             ));
         }
         self.numeric_evolution_allowed(source, false)?;
+        self.object_mut(resource)?.state["face"] = json!(face);
         self.reveal(&[resource.into()], "all", frame, false)?;
         self.apply_evolution(source, resource, face, 0, frame)?;
         frame.performed = 1;
