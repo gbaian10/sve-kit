@@ -1,6 +1,7 @@
 use super::*;
 use std::fs::read_to_string;
 use std::path::PathBuf;
+use sve_scenario_runner::{ScenarioReport, Verdict};
 
 #[test]
 fn karen_pays_lesson_to_buff_the_field_then_damages_itself_without_another_cool_follower() {
@@ -54,6 +55,14 @@ fn karen_pays_lesson_to_buff_the_field_then_damages_itself_without_another_cool_
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
     event_cemetery::finish_checks(&mut game);
+    while game.internal_pending_choice().unwrap().is_none() {
+        let Some(window) = game.internal_quick_choice().unwrap() else {
+            break;
+        };
+        game.answer_internal_card(window.actor, window.token, Answer::Quick(None))
+            .unwrap();
+        event_cemetery::finish_checks(&mut game);
+    }
     let pending = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &pending.domain else {
         panic!("own End-phase ability");
@@ -172,39 +181,86 @@ fn aston_machan_race_buffs_then_self_damages_even_without_an_enemy_target() {
     }
 }
 
-#[test]
-fn admitted_self_damage_card_unblocks_the_seven_meal_and_carrot_exam_scenarios() {
+fn self_damage_exam_reports() -> &'static [ScenarioReport] {
     use sve_engine::adapter::TypedAdapter;
-    use sve_scenario_runner::{AwaitingMode, RunOptions, Verdict, parse_question, run};
-    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let questions = ["card-ECP01-019", "rule-14.2-01"].map(|name| {
-        parse_question(
-            &read_to_string(root.join(format!("tests/rules-scenarios/questions/{name}.yaml")))
-                .unwrap(),
-        )
-        .unwrap()
-    });
-    let reports = run(
-        &mut TypedAdapter::new(selection_with_rules().clone()),
-        &questions,
-        None,
-        RunOptions {
-            require_verified: true,
-            awaiting: AwaitingMode::FirstStage,
-        },
-    )
-    .unwrap();
-    assert_eq!(reports.len(), 7);
-    let failures = reports
-        .into_iter()
-        .filter(|report| !matches!(report.verdict, Verdict::Pass))
-        .map(|report| {
-            format!(
-                "{}: {}",
-                report.scenario,
-                serde_json::to_value(&report.verdict).unwrap()
+    use sve_scenario_runner::{AwaitingMode, RunOptions, parse_question, run};
+    static REPORTS: OnceLock<Vec<ScenarioReport>> = OnceLock::new();
+    REPORTS.get_or_init(|| {
+        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+        let questions = ["card-ECP01-019", "rule-14.2-01"].map(|name| {
+            parse_question(
+                &read_to_string(root.join(format!("tests/rules-scenarios/questions/{name}.yaml")))
+                    .unwrap(),
             )
-        })
-        .collect::<Vec<_>>();
-    assert!(failures.is_empty(), "{}", failures.join("\n"));
+            .unwrap()
+        });
+        let reports = run(
+            &mut TypedAdapter::new(selection_with_rules().clone()),
+            &questions,
+            None,
+            RunOptions {
+                require_verified: true,
+                awaiting: AwaitingMode::FirstStage,
+            },
+        )
+        .unwrap();
+        assert_eq!(reports.len(), 7, "both questions contain seven scenarios");
+        reports
+    })
+}
+
+fn self_damage_exam_verdict(question: &str, scenario: char) -> &'static Verdict {
+    &self_damage_exam_reports()
+        .iter()
+        .find(|report| report.question == question && report.scenario.starts_with(scenario))
+        .unwrap()
+        .verdict
+}
+
+fn assert_self_damage_exam_passes(question: &str, scenario: char) {
+    let verdict = self_damage_exam_verdict(question, scenario);
+    assert!(
+        matches!(verdict, Verdict::Pass),
+        "{question} {scenario}: {verdict:?}"
+    );
+}
+
+#[test]
+fn admitted_self_damage_card_unblocks_carrot_reuse_after_lethal_race_damage() {
+    assert_self_damage_exam_passes("card-ECP01-019", 'A');
+}
+
+#[test]
+fn admitted_self_damage_card_unblocks_cancelling_when_no_face_up_carrot_exists() {
+    assert_self_damage_exam_passes("card-ECP01-019", 'B');
+}
+
+#[test]
+fn admitted_self_damage_card_unblocks_the_nine_card_cemetery_counterexample() {
+    assert_self_damage_exam_passes("card-ECP01-019", 'C');
+}
+
+#[test]
+fn a_named_race_event_still_requires_the_existing_typed_runner_interface() {
+    let verdict = self_damage_exam_verdict("rule-14.2-01", 'A');
+    assert!(
+        matches!(verdict, Verdict::Unsupported { reason }
+            if reason == r#"typed runner: pending event {"n":1,"raced":"a1"} cannot be checked"#),
+        "the runner must verify the explicitly named occurrence: {verdict:?}"
+    );
+}
+
+#[test]
+fn admitted_self_damage_card_unblocks_the_two_meal_material_requirement() {
+    assert_self_damage_exam_passes("rule-14.2-01", 'B');
+}
+
+#[test]
+fn admitted_self_damage_card_unblocks_the_meal_and_evolution_exclusion() {
+    assert_self_damage_exam_passes("rule-14.2-01", 'C');
+}
+
+#[test]
+fn admitted_self_damage_card_unblocks_paying_one_meal_pp_with_ep() {
+    assert_self_damage_exam_passes("rule-14.2-01", 'D');
 }

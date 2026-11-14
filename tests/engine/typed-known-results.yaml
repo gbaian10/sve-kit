@@ -1359,6 +1359,11 @@ known:
     status: unsupported
     error: "legacy-state (#2008)"
     reason: "no authored program: EBD03-008"
+  - question: "rule-14.2-01"
+    scenario: "A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張"
+    status: unsupported
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending event {"n":1,"raced":"a1"} cannot be checked'
   - question: "rule-14.2.3-01"
     scenario: "同一從者出走兩次；先解第 2 次，再解第 1 次"
     status: unsupported
