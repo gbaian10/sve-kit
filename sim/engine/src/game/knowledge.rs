@@ -90,6 +90,14 @@ impl Knowledge {
         Ok(())
     }
 
+    /// Every handle this viewer can currently use to identify an object.
+    pub(super) fn held_handles(&self) -> BTreeSet<String> {
+        self.handles
+            .values()
+            .map(|entry| entry.value.clone())
+            .collect()
+    }
+
     pub(super) fn forget_location(&mut self, id: &str) {
         self.located.remove(id);
         self.handles.remove(id);
