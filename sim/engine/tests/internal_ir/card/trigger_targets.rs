@@ -423,3 +423,23 @@ fn fanfare_distributes_damage_after_declaring_its_targets() {
     assert_eq!(state["objects"]["a"]["damage"], 1);
     assert_eq!(state["objects"]["b"]["damage"], 2);
 }
+
+#[test]
+fn attack_target_condition_can_share_a_capability_with_its_prevention_body() {
+    let program = program(
+        "attack_time",
+        json!({"do":[{"if":{
+            "cond":{"is":{"ref":"attack_target","kind":"follower"}},
+            "then":[{"apply":{"on":"this","until":"turn","effect":{"prevent":{"kind":"any"}}}}]
+        }}]}),
+    );
+    let mut game = Game::new(
+        catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "shared-capability",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+}
