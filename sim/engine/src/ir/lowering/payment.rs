@@ -314,6 +314,24 @@ fn lower_operations(
                 },
                 reason: MoveReason::Put,
             },
+            // 「これをデッキの下に置く」 names the source itself, not a revealed binding.
+            ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(material))
+                if material.sel.r#in == "this" && material.n == 1 =>
+            {
+                Action::Move {
+                    objects: numeric::holder(),
+                    movement: MoveSpec {
+                        to: MoveDestination::Owners {
+                            zone: OwnerZone::Deck,
+                        },
+                        position: Some(Position::Bottom {}),
+                        order: None,
+                        initial_posture: None,
+                        entry_effects: vec![],
+                    },
+                    reason: MoveReason::Put,
+                }
+            }
             ast::CostOperation::SelfToEx(true)
                 if context.activation_zone == Some(ZoneKind::Hand) =>
             {

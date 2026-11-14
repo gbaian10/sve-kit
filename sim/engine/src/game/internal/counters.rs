@@ -273,6 +273,30 @@ impl Game {
                 ));
             }
         }
+        let current = self.object(&id)?;
+        if !payment
+            && !matches!(object, ObjectOperand::SourceHolder {})
+            && current.generation != reference.generation.0
+            && !matches!(current.zone.as_str(), "field" | "ex")
+        {
+            // A chosen holder now outside Field and EX, such as a source paid to the deck, cannot
+            // hold counters, so the instruction does nothing. A new Field or EX object still
+            // rejects: following it needs an explicit `follow`, and the source rolls back.
+            execution.receipts.insert(
+                instruction.receipt,
+                InstructionOutcome::Counter(CounterChangeEvent {
+                    holder: RuntimeHolder::Object { object: reference },
+                    kind: CounterKind(self.catalog.keyword_id(&kind.0)),
+                    before: Nat(0),
+                    after: Nat(0),
+                    delta: Int(0),
+                }),
+            );
+            return Ok(Quantity {
+                amount: Int(0),
+                unit: QuantityUnit::Counters,
+            });
+        }
         let before = execution.counter(self, holder, kind)?;
         if !matches!(self.object(&id)?.zone.as_str(), "field" | "ex") {
             return Err(unsupported("counter holder must be in Field or EX"));
