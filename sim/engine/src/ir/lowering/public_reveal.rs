@@ -108,10 +108,8 @@ impl BodyContext<'_> {
             return Ok(None);
         };
         if !self.observations.get(name).is_some_and(|r| matches!(r, ObjectReceipt::Look { receipt } if matches!(receipt.location(), ReceiptLocation::Local { id } if self.receipt_reads.published_looks.contains(id)))) { return Ok(None); }
-        if observed.except.is_some() {
-            return Ok(None);
-        }
-        if value.top.is_some()
+        if observed.except.is_some()
+            || value.top.is_some()
             || value.position.is_some()
             || value.order.is_some()
             || value.acted.is_some()

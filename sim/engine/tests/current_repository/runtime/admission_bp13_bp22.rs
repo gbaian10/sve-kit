@@ -1,4 +1,4 @@
-use super::tier0_b::{
+use super::admission_bp_cp_fixture::{
     activate, destruction_game, evolve, game, keyword, next_main, play, position, settle,
 };
 use super::*;
@@ -122,20 +122,40 @@ fn bp14_057_freezes_existing_enemies_and_its_lastword_destroys_acted_enemies() {
 }
 
 #[test]
-fn bp15_102_checks_standing_after_declaring_the_opponents_main_phase_target() {
-    for acted in [false, true] {
+fn bp15_102_and_bp15_103_prevent_all_attacks_only_while_standing() {
+    for (evolved, acted, target) in [
+        (false, false, "P1.leader"),
+        (false, false, "ally"),
+        (false, true, "P1.leader"),
+        (false, true, "ally"),
+        (true, false, "P1.leader"),
+        (true, false, "ally"),
+        (true, true, "P1.leader"),
+        (true, true, "ally"),
+    ] {
         let mut initial = position("BP15-102");
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
-        initial["players"]["P1"]["zones"]["field"] =
-            json!([{"id":"source","card":"BP15-102","state":{"acted":acted}}]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP15-102","state":{"acted":acted}},
+                {"id":"ally","card":"BP01-037","state":{"acted":true}}]);
         initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+        if evolved {
+            initial["players"]["P1"]["zones"]["evolve_deck"] =
+                json!([{"id":"form","card":"BP15-103"}]);
+        }
         let mut board = game(&initial);
+        if evolved {
+            evolve(&mut board, "form", 1);
+        }
         next_main(&mut board);
         let outcome = board
-            .internal_rule_action(&json!({"do":"attack","attacker":"enemy","target":"P1.leader"}))
+            .internal_rule_action(&json!({"do":"attack","attacker":"enemy","target":target}))
             .unwrap()
             .outcome;
-        assert_eq!(outcome, if acted { "resolved" } else { "cannot-attack" });
+        assert_eq!(
+            outcome,
+            if acted { "resolved" } else { "cannot-attack" },
+            "evolved={evolved}, acted={acted}, target={target}"
+        );
     }
 }
 

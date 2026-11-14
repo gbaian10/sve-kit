@@ -25,7 +25,7 @@ pub(super) fn game(initial: &Value) -> Game {
         initial,
         &Value::Null,
         &Value::Null,
-        "tier0-b",
+        "admission-bp-cp",
     )
     .unwrap()
 }

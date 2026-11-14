@@ -1,4 +1,4 @@
-use super::tier0_b::{destruction_game, evolve, game, play, position, settle};
+use super::admission_bp_cp_fixture::{destruction_game, evolve, game, play, position, settle};
 use super::*;
 
 #[test]
@@ -88,7 +88,7 @@ fn cp02_037_captures_the_selected_ex_cost_then_plays_it_free_and_uses_its_activa
         board.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
         8_u8
     );
-    tier0_b::activate(&mut board, "CP02-037");
+    admission_bp_cp_fixture::activate(&mut board, "CP02-037");
     let state = board.projection(View::Referee).unwrap();
     assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));
     assert_eq!(state["P1"]["cemetery"], json!(["discard"]));

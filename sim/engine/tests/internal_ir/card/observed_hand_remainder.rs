@@ -41,22 +41,23 @@ fn observed_remainder_moves_to_hand_after_actual_field_arrivals() {
         game.load_internal_card("unit-amulet", &card(vec![]))
             .unwrap();
         let step = game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
-        if let CardPlay::Awaiting(q) = step {
-            let InputDomain::Targets(domain) = &q.domain else {
-                unreachable!()
-            };
-            let limit = usize::try_from(domain.cardinality.maximum.unwrap_or(Nat(2)).0).unwrap();
-            let handles = domain
-                .members
-                .iter()
-                .take(limit)
-                .map(|m| m.handle)
-                .collect();
-            resolved(
-                game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
-                    .unwrap(),
-            );
-        }
+        let CardPlay::Awaiting(q) = step else {
+            unreachable!("Both empty and nonempty selections must ask for targets")
+        };
+        let InputDomain::Targets(domain) = &q.domain else {
+            unreachable!()
+        };
+        let limit = usize::try_from(domain.cardinality.maximum.unwrap_or(Nat(2)).0).unwrap();
+        let handles = domain
+            .members
+            .iter()
+            .take(limit)
+            .map(|m| m.handle)
+            .collect();
+        resolved(
+            game.answer_internal_card(q.actor, q.token, Answer::Targets(handles))
+                .unwrap(),
+        );
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["P1"]["field"].as_array().unwrap().len(), 5_usize);
         assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 3 - free);
