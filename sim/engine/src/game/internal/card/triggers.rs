@@ -100,12 +100,12 @@ struct PendingSourceDeparture {
     generation: u64,
 }
 
-pub(in crate::game::internal) fn ex_phase(ability: &Ability) -> bool {
+pub(in crate::game::internal) fn phase_in_zone(ability: &Ability, zone: ZoneKind) -> bool {
     ability.kind == AbilityKind::Triggered
         && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
-        && ability.active_zones == [ZoneKind::Ex]
+        && ability.active_zones == [zone]
         && ability.trigger.as_ref().is_some_and(|trigger| {
-            trigger.active_zones == [ZoneKind::Ex]
+            trigger.active_zones == [zone]
                 && matches!(
                     trigger.on,
                     TriggerCondition::Event {

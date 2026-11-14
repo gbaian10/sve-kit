@@ -96,6 +96,11 @@ fn holder_move_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Strin
             Node::Instruction { instruction } if returns_holder(&instruction.action) => {
                 paths.insert(format!("{path}/instruction/action/objects/objects/0"));
             }
+            Node::Control {
+                control: Control::Pay { on_paid, .. },
+            } => {
+                holder_move_paths(on_paid, &format!("{path}/control/on_paid"), paths);
+            }
             // 「…てよい」 keeps the same self-return inside its May body.
             Node::Control {
                 control: Control::Sequence { body } | Control::May { body, .. },

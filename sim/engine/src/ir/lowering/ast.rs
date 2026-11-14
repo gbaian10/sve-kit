@@ -3104,11 +3104,13 @@ pub(super) enum PlayedSubject {
     Union { any_of: Box<[MovementSubject; 2]> },
 }
 impl Auto {
-    /// 「自分の場に…が出たとき」 or a Play observed by a card in its owner's cemetery.
+    /// Cemetery subscriptions share the same source-movement boundary across event kinds.
     pub(super) const fn cemetery_observer(&self) -> bool {
         matches!(
             self.on,
-            PhaseSubscription::Played(_) | PhaseSubscription::EnterField(_)
+            PhaseSubscription::Played(_)
+                | PhaseSubscription::EnterField(_)
+                | PhaseSubscription::Phase(_)
         ) && match &self.zone {
             Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
             Some(ActivationZones::Many(zones)) => {

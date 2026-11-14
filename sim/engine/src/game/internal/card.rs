@@ -1112,7 +1112,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         )
         && (matches!(ability.source.origin, AbilityOrigin::Printed { .. })
             || is_printed_quick(ability));
-    let ex_trigger = triggers::ex_phase(ability) || triggers::ex_self_entry(ability);
+    let nonfield_trigger = triggers::phase_in_zone(ability, ZoneKind::Ex)
+        || triggers::phase_in_zone(ability, ZoneKind::Cemetery)
+        || triggers::ex_self_entry(ability);
     let played_trigger = filter(ability).is_some()
         || fusion_events::filter(ability).is_some()
         || fusion_events::material_filter(ability).is_some();
@@ -1121,7 +1123,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     let equipment_trigger = triggers::equipment_header(ability)?;
     if (ability.active_zones != [zones]
         && !zone_activation
-        && !ex_trigger
+        && !nonfield_trigger
         && !played_trigger
         && !hand_trigger
         && !cemetery_entry_trigger
