@@ -1,0 +1,67 @@
+cards:
+  BP10-039:
+    abilities:
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  spellchain: 5
+                then:
+                  - damage:
+                      n: 3
+                      to: chosen
+            - if:
+                cond:
+                  spellchain: 10
+                then:
+                  - damage:
+                      n: 2
+                      to:
+                        leader: opp
+                  - life:
+                      delta: 2
+                      who: self
+            - if:
+                cond:
+                  spellchain: 15
+                then:
+                  - move:
+                      ref:
+                        name: 決意の予言者・ルーニィ
+                        who: self
+                        zone: cemetery
+                      to: ex
+            - if:
+                cond:
+                  spellchain: 20
+                then:
+                  - buff:
+                      hp: 2
+                      on:
+                        any_of:
+                          - kind: follower
+                            name: 決意の予言者・ルーニィ
+                            who: self
+                            zone: field
+                          - kind: follower
+                            name: 決意の予言者・ルーニィ
+                            who: self
+                            zone: ex
+                      power: 2
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              upto: 1
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

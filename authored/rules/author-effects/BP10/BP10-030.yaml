@@ -1,0 +1,57 @@
+cards:
+  BP10-030:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - aura
+                on:
+                  kind: follower
+                  where:
+                    cmp:
+                      left:
+                        power_of: item
+                      op: eq
+                      right: 1
+                  who: self
+                  zone: field
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage:
+                        n: 3
+                        to: enemy
+                  - - search:
+                        n: 1
+                        sel:
+                          kind: follower
+                          orig_cost_le: 2
+                          trait: 童話
+                          who: self
+                          zone: deck
+                        to: field
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set
