@@ -10,7 +10,7 @@ use sve_engine::game::player::events::{ActionKind, EventKind};
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     Command, DeckConstruction, Input, OpeningAnswer, OpeningQuestion, PlayerDeck, Question,
-    QuestionShape, SubmissionKind, Viewer,
+    QuestionShape, StrictStartError, SubmissionKind, Viewer,
 };
 
 fn question(game: &Game, viewer: Viewer) -> Question {
@@ -277,19 +277,19 @@ fn player_opening_load_errors_are_distinct_from_game_submission_errors() {
     absent[0].main[0] = "missing-printing".into();
     assert!(matches!(
         Game::start_player_game(selection().clone(), absent, Viewer::P1, "opening").unwrap_err(),
-        EngineFailure::Invalid(_)
+        StrictStartError::Admission(_)
     ));
     let mut short = decks();
     short[0].main.truncate(3);
     assert!(matches!(
         Game::start_player_game(selection().clone(), short, Viewer::P1, "opening").unwrap_err(),
-        EngineFailure::Invalid(_)
+        StrictStartError::Initialization(EngineFailure::Invalid(_))
     ));
     let mut changed = selection().clone();
     changed.current.remove("BP01-P25");
     assert!(matches!(
         Game::start_player_game(changed, decks(), Viewer::P1, "opening").unwrap_err(),
-        EngineFailure::Invalid(_)
+        StrictStartError::Initialization(EngineFailure::Invalid(_))
     ));
     let mut game =
         Game::start_player_game(selection().clone(), decks(), Viewer::P1, "opening").unwrap();
