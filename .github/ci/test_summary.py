@@ -322,7 +322,7 @@ RUST_BINARY = re.compile(
 )
 
 RUST_PANIC_LOCATION = re.compile(
-    r"^thread '[^\n]*' panicked at "
+    r"^thread '[^\n]*'(?: \([0-9]+\))? panicked at "
     r"((?:sim/(?:engine|scenario-runner|battle-contract|prototype)/)?"
     r"(?:src|tests|examples|benches)/(?:[A-Za-z0-9_-]+/)*"
     r"[A-Za-z0-9_-]+\.rs:[1-9][0-9]*:[1-9][0-9]*):$",

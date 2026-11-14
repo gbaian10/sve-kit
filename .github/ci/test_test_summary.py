@@ -389,6 +389,7 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         (self.folder / "test.log").write_text(
             f"thread '{PRIVATE}' panicked at sim/engine/tests/cards.rs:93:10:\n"
             f"{PRIVATE}\n"
+            f"thread '{PRIVATE}' (12345) panicked at sim/engine/src/game.rs:5:2:\n"
             "thread 'safe' panicked at src/lib.rs:12:3:\n"
             f"thread 'safe' panicked at /tmp/{PRIVATE}.rs:1:1:\n"
             "thread 'safe' panicked at tests/../ASCII_PRIVATE_SENTINEL.rs:1:1:\n"
@@ -403,6 +404,8 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         summary = rust_summary(self.folder)
         assert "sim/engine/tests/cards.rs:93:10" in summary
         assert "src/lib.rs:12:3" in summary
+        assert "sim/engine/src/game.rs:5:2" in summary
+        assert "12345" not in summary
         assert PRIVATE not in summary
         assert "ASCII_PRIVATE_SENTINEL" not in summary
         assert "thread" not in summary
