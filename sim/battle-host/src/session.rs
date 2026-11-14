@@ -104,6 +104,11 @@ impl LocalSession {
     /// Let policy seats reach the first player stop, then send each player seat its baseline.
     pub fn start(&mut self) -> Vec<Delivery> {
         let mut out = Vec::new();
+        if let Some(reason) = self.stopped {
+            // Repeat the existing error; a stopped host never advances policies again.
+            self.stop(reason, &mut out);
+            return out;
+        }
         if let Err(reason) = self.advance_policies() {
             self.stop(reason, &mut out);
             return out;
@@ -303,7 +308,8 @@ impl LocalSession {
                 Some(_) | None => {
                     let next = safe_increment(channel.issued)?;
                     channel.issued = next;
-                    let id = format!("q{next}");
+                    // The seat prefix keeps one seat's stale id from naming the other seat's question.
+                    let id = format!("{}-q{next}", seat_name(viewer));
                     channel.current = Some(Issued {
                         id: id.clone(),
                         token: question.token,
@@ -382,6 +388,13 @@ fn input_state(input: &Input, question: Option<&str>) -> InputState {
         (Input::EngineFault | Input::Question(_), _) => {
             InputState::EngineFault { can_concede: true }
         }
+    }
+}
+
+const fn seat_name(viewer: Viewer) -> &'static str {
+    match viewer {
+        Viewer::P1 => "p1",
+        Viewer::P2 => "p2",
     }
 }
 
