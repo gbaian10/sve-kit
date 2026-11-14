@@ -1043,3 +1043,6 @@ mod skip_turn_evolution;
 
 #[path = "card/mixed_subscription.rs"]
 mod mixed_subscription;
+
+#[path = "card/evolution_original_cost.rs"]
+mod evolution_original_cost;

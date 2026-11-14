@@ -4,6 +4,7 @@ use crate::game::Frame;
 use crate::game::internal::SubjectHistoryEvent;
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
+use crate::game::internal::cost::printed_cost;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{Ability, AbilityOrigin, KeywordId};
@@ -37,6 +38,7 @@ pub(in crate::game::internal) fn ex_evolution(ability: &Ability) -> bool {
 
 pub(in crate::game) struct EvolutionPlan {
     before: Characteristics,
+    original_cost: Option<i64>,
     at: SnapshotId,
 }
 
@@ -109,8 +111,36 @@ impl Game {
         if !interested {
             return Ok(None);
         }
+        let reads_original_cost = self.evolution_observers()?.iter().any(|(_, abilities)| {
+            abilities.iter().any(|ability| {
+                observer_filter(&ability.node).is_some_and(|filter| filter.original_cost.is_some())
+            })
+        });
+        let form_reads_original_cost = self
+            .card_runtime
+            .definitions
+            .cards
+            .get(&form.card)
+            .is_some_and(|program| {
+                program.card().abilities.iter().any(|ability| {
+                    observer_filter(&ability.node)
+                        .is_some_and(|filter| filter.original_cost.is_some())
+                        && super::printed_origin(&ability.node.source.origin).is_ok_and(
+                            |(printed, _)| {
+                                self.printed_face_ordinal(&form.card, printed)
+                                    .is_ok_and(|ordinal| ordinal == face)
+                            },
+                        )
+                })
+            });
+        let original_cost = if reads_original_cost || form_reads_original_cost {
+            Some(printed_cost(&self.internal_cost_print(holder)?["cost"])?)
+        } else {
+            None
+        };
         Ok(Some(EvolutionPlan {
             before: self.internal_characteristics(holder)?,
+            original_cost,
             at: SnapshotId(self.state.ir_epoch),
         }))
     }
@@ -164,7 +194,7 @@ impl Game {
                 let eligible = if let Some(filter) = observer_filter(&ability.node) {
                     subject_condition::matches(
                         &filter,
-                        &SubjectInformation::from_characters(&event.after, None),
+                        &SubjectInformation::from_characters(&event.after, plan.original_cost),
                         observer == holder,
                         controller,
                         subject_controller,
