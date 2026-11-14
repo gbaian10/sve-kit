@@ -1,8 +1,3 @@
-#![expect(
-    clippy::indexing_slicing,
-    reason = "Synthetic author and snapshot fixtures have complete literal shapes."
-)]
-
 use super::{author, rule_fixtures, selection};
 use core::array::from_fn;
 use serde_json::{Value, json};
@@ -41,7 +36,10 @@ fn rejected(selected: SelectedEffects, decks: [PlayerDeck; 2]) -> StrictAdmissio
     let StrictStartError::Admission(report) = error else {
         panic!("expected a deck admission rejection");
     };
-    assert!(!report.is_admitted());
+    assert!(
+        !report.is_admitted(),
+        "An admission rejection must contain a missing requirement"
+    );
     report
 }
 
@@ -101,7 +99,7 @@ fn strict_known_snapshot_cards_need_a_current_whole_card_program() {
         report.gaps(Viewer::P2),
         [gap("not-authored", AdmissionGapReason::MissingProgram)]
     );
-    assert!(report.gaps(Viewer::P1).is_empty());
+    assert_eq!(report.gaps(Viewer::P1), []);
 }
 
 #[test]
@@ -114,7 +112,7 @@ fn strict_checks_evolve_decks_before_starting() {
         report.gaps(Viewer::P2),
         [gap("missing-evolve", AdmissionGapReason::MissingSnapshot)]
     );
-    assert!(report.gaps(Viewer::P1).is_empty());
+    assert_eq!(report.gaps(Viewer::P1), []);
 }
 
 #[test]
@@ -140,7 +138,7 @@ fn strict_rejects_prototype_only_token_dependencies() {
         report.gaps(Viewer::P1),
         [gap("token", AdmissionGapReason::MissingProgram)]
     );
-    assert!(report.gaps(Viewer::P2).is_empty());
+    assert_eq!(report.gaps(Viewer::P2), []);
 }
 
 #[test]
@@ -229,7 +227,7 @@ fn strict_unresolved_rulings_are_reported_only_to_the_affected_owner() {
         report.gaps(Viewer::P1),
         [gap("unresolved", AdmissionGapReason::UnresolvedRuling)]
     );
-    assert!(report.gaps(Viewer::P2).is_empty());
+    assert_eq!(report.gaps(Viewer::P2), []);
 }
 
 #[test]
@@ -316,7 +314,7 @@ fn strict_rule_generated_opening_ex_resources_require_current_admission() {
         "format: 1\nkind: effect_set\ncards:\n  resource:\n    status: complete\n    abilities: []\n"
     ]]);
     let report = rejected(load(&input), decks);
-    assert!(report.gaps(Viewer::P1).is_empty());
+    assert_eq!(report.gaps(Viewer::P1), []);
     assert_eq!(
         report.gaps(Viewer::P2),
         [gap("resource", AdmissionGapReason::MissingProgram)]
