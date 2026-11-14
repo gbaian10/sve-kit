@@ -244,6 +244,18 @@ pub(in crate::game) fn viewer(value: &str) -> Result<Viewer> {
     }
 }
 
+pub(in crate::game) fn face_up(object: &Object) -> Result<bool> {
+    match object.state.get("face_up") {
+        Some(value) => value
+            .as_bool()
+            .ok_or_else(|| invalid("unknown card facing")),
+        None => Ok(!matches!(
+            object.zone.as_str(),
+            "deck" | "hand" | "evolve_deck"
+        )),
+    }
+}
+
 pub(in crate::game) fn zone(value: &str) -> Result<ObservedZone> {
     match value {
         "deck" => Ok(ObservedZone::Deck),
@@ -408,12 +420,7 @@ impl Game {
             .ok_or_else(|| invalid("card is not identifiable"))?;
         self.resolve_player_object(perspective, &handle)?;
         let object = self.object(id)?;
-        let face_up = match object.state.get("face_up") {
-            Some(value) => value
-                .as_bool()
-                .ok_or_else(|| invalid("unknown card facing"))?,
-            None => !matches!(object.zone.as_str(), "deck" | "hand" | "evolve_deck"),
-        };
+        let face_up = face_up(object)?;
         Ok(CardObservation {
             handle,
             physical: self.physical_card_face(id)?,

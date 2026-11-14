@@ -2,6 +2,7 @@
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::EngineFailure;
+use crate::game::player::observation::face_up;
 use crate::ir::observation::{self, Consumer, LeafKind, Position, Shape};
 use crate::ir::perspective;
 use crate::ir::{
@@ -55,7 +56,7 @@ impl Game {
     pub(in crate::game) fn public_card_disclosure(&self, id: &str) -> Result<bool> {
         let object = self.object(id)?;
         if object.state["pregame_hidden"] != true
-            && object.state["face_up"] != false
+            && face_up(object)?
             && matches!(
                 object.zone.as_str(),
                 "field"

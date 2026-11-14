@@ -225,3 +225,18 @@ fn an_evolved_face_index_does_not_relabel_the_physical_base() {
         assert_eq!(remembered, vec![0, 1]);
     }
 }
+
+#[test]
+fn evolve_deck_missing_facing_defaults_to_private_and_face_down() {
+    let original = game(&position("secret-a"));
+    let mut saved = serde_json::to_value(&original).unwrap();
+    saved["state"]["objects"]["face-down-evolve"]["state"]
+        .as_object_mut()
+        .unwrap()
+        .remove("face_up");
+    let restored: Game = serde_json::from_value(saved).unwrap();
+    let observation = restored.observe(Viewer::P2).unwrap();
+    let form = card(&observation, Viewer::P2, ObservedZone::EvolveDeck);
+    assert!(!form.face_up);
+    assert!(!form.public);
+}
