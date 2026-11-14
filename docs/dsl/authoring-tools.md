@@ -1251,3 +1251,5 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 正式目標的動態張數及既有動態費用上限可讀來源自己的指示物數量與來源資訊數值，例如 `upto: {counter: {on: this, name: 魔力カウンター}}`，或 `from.orig_cost_le: {power_of: this}`。讀值與候選無關，沿用原本的公開選取、張數及印刷原費檢查。
 
 已宣告正式目標的角色也可作姿態指示的對象，例如 `act: {role: {of: enemies, name: rest}}`。它與傷害角色共用同一份已選取集合，不再詢問第二次選取；`n: 2` 搭配一體 primary 與 remaining 可表示兩個相異從者的不同指示。
+
+Token 建立的數量可使用已准入的公開人口計數，例如 `create: {token: エンシェントアーティファクト, n: {count: {who: opp, zone: field, kind: follower}}, to: field}`。數值在該指示解算時讀取，建立數量仍受目的區容量限制；計數不授予選取私有物件的權限。
