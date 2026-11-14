@@ -383,7 +383,17 @@ impl Execution {
 
     // Members compare by generation, so a returned object is not the one first selected.
     fn intersection(&self, game: &Game, sets: &[Selector]) -> Result<Vec<ObjectRef>> {
-        let mut sets = sets.iter();
+        // A hand only narrows explicit members such as 「手札のこれ」; it is never enumerated.
+        let (hands, sets): (Vec<&Selector>, Vec<&Selector>) = sets.iter().partition(|set| {
+            matches!(
+                set,
+                Selector::Zone {
+                    zone: ZoneKind::Hand,
+                    ..
+                }
+            )
+        });
+        let mut sets = sets.into_iter();
         let mut members = sets
             .next()
             .map(|set| self.objects(game, set))
@@ -392,6 +402,29 @@ impl Execution {
         for set in sets {
             let other = self.objects(game, set)?;
             members.retain(|object| other.contains(object));
+        }
+        for hand in hands {
+            let Selector::Zone {
+                players, predicate, ..
+            } = hand
+            else {
+                return Err(invalid("hand intersection"));
+            };
+            if !self.boolean(game, predicate)?.0 {
+                return Ok(Vec::new());
+            }
+            let mut held = BTreeSet::new();
+            for player in self.players(game, players)? {
+                held.extend(game.zone_ids(seat_name(player)?, "hand"));
+            }
+            members.retain(|object| {
+                self.object_id(*object).is_ok_and(|id| {
+                    held.contains(id)
+                        && game
+                            .object(id)
+                            .is_ok_and(|current| current.generation == object.generation.0)
+                })
+            });
         }
         Ok(members)
     }

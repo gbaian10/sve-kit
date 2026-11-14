@@ -277,8 +277,8 @@ pub(super) fn cemetery_ex_move(action: &Action) -> bool {
             if zone.player == (PlayerRef::Controller {}) && zone.kind == ZoneKind::Ex))
 }
 
-/// A private hand card moves when it was chosen privately, or when it pays
-/// 「手札のこれをEXエリアに置く」 for its own activation.
+/// A private hand card moves when it was chosen privately, or when its own activation pays or
+/// resolves 「手札のこれをEXエリアに置く」.
 fn private_hand_member(
     execution: &Execution,
     instruction: &Instruction,
@@ -289,7 +289,10 @@ fn private_hand_member(
     execution.is_private_hand_target(objects, member)
         || (object.id == execution.context.source
             && member.generation == execution.context.generation
-            && instruction.context == InstructionContext::Cost
+            && matches!(
+                instruction.context,
+                InstructionContext::Cost | InstructionContext::Effect
+            )
             && super::card::hand_payment::source_to_ex(&instruction.action))
 }
 

@@ -217,6 +217,16 @@ pub(super) fn check_node_with_x(
     mask_public_selectors(&mut inspected)?;
     super::tokens::mask_operands(&mut inspected, x);
     mask_granted_definitions(&mut inspected);
+    if let Node::Instruction { instruction } = &mut inspected
+        && instruction.context == InstructionContext::Effect
+        && super::card::hand_payment::source_to_ex(&instruction.action)
+        && let Action::Move { objects, .. } = &mut instruction.action
+    {
+        // The checked hand selector names only the activating source, never another hand card.
+        *objects = Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        };
+    }
 
     if let Node::Instruction { instruction } = &mut inspected
         && super::movement::deck_top(&instruction.action).is_some()

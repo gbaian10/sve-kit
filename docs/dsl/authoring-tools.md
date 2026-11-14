@@ -1241,3 +1241,14 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 `distinct_orig_costs: {in: {objects_of: milled, view: before}}` 沿既有種類數聚合，僅讀同一本文先前由自己牌庫頂固定正張數送到墓場的實際成功成員。
 `== 1` 同時表示成員非空且原費全部相同；不以指示要求的張數或墓場目前全部卡片代替。回條不存在、來自其他來源／目的地、After 投影或附加篩選皆拒絕；原費讀不可變本體印刷，不套用目前費用修正。
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
+
+## 公開候選的 counter 門檻與 EX 卡觀察進場
+
+公開區域查詢的 `where` 除了 `power_of: item`，也接受 `counter: {on: item, name: …}` 與常值比較（`ge`／`le`），
+逐張讀候選目前的 counter。例如 BP21-060 的「自分のEXエリアのカード1枚の情熱カウンターが4個以上なら」寫成
+`exists: {who: self, zone: ex, where: {cmp: {left: {counter: {on: item, name: 情熱カウンター}}, op: ge, right: 4}}}`；
+任何一張達門檻即成立，不加總多張的 counter。counter 只在公開區域的現存物件上讀取，私有區域選取不開放此篩選。
+
+`auto.zone: ex` 可用 `on.enter_field`（不寫 `ref: this`）觀察其他卡進入場上，BP21-057 在 EX 時，每有一張自己的学院從者出場
+就在 EX 的自身放一個 counter（Q2736；同時出場兩張誘發兩次，Q2740）。在場上的同一張卡不因此誘發；
+從 EX 打出到場上時 counter 保留（Q2737）。

@@ -593,6 +593,70 @@ impl BodyContext<'_> {
         })
     }
 
+    fn field_objects_move(
+        &mut self,
+        value: &ast::Move,
+        objects: &ast::Objects,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        if matches!(objects, ast::Objects::Bound(name) if self.hand_targets.contains(name))
+            && matches!(
+                value.to,
+                ast::Destination::Hand | ast::Destination::Cemetery
+            )
+        {
+            return Err(unsupported(path));
+        }
+        if matches!(value.to, ast::Destination::Deck) {
+            return self.selected_deck_move(value, objects, path);
+        }
+        if value.position.is_some()
+            || value.order.is_some()
+            || !self.supports_move_result(value, objects)
+        {
+            return Err(unsupported(path));
+        }
+        let zone = match value.to {
+            ast::Destination::Hand => OwnerZone::Hand,
+            ast::Destination::Cemetery => OwnerZone::Cemetery,
+            ast::Destination::Ex => OwnerZone::Ex,
+            ast::Destination::Deck | ast::Destination::Field => {
+                return Err(unsupported(path));
+            }
+        };
+        if matches!(objects, ast::Objects::This(_))
+            && zone == OwnerZone::Ex
+            && self.leave_event.is_some()
+            && !self.departure_to_cemetery
+        {
+            return Err(unsupported(path));
+        }
+        if matches!(objects, ast::Objects::This(_))
+            && zone == OwnerZone::Ex
+            && self.activation_zone == Some(ZoneKind::Hand)
+        {
+            // 「自分の手札のこれをEXエリアに置く」 as the effect names only the private source.
+            return Ok(owner_put(
+                super::hand_payment::source(self.card_allocator, path)?,
+                OwnerZone::Ex,
+            ));
+        }
+        let objects = match (objects, self.leave_event, zone) {
+            (ast::Objects::This(_), Some(event), OwnerZone::Ex) => Selector::Objects {
+                objects: vec![ObjectOperand::FollowEventMove {
+                    event: MovementEvent::LeaveField { event },
+                }],
+            },
+            _ => self.objects(objects, path)?,
+        };
+        if zone == OwnerZone::Ex
+            && matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if self.opponent_cemetery_targets.contains(name))
+        {
+            return Ok(shared_put(objects, ZoneKind::Ex));
+        }
+        Ok(owner_put(objects, zone))
+    }
+
     pub(super) fn observed_move(
         &mut self,
         value: &ast::Move,
@@ -623,52 +687,7 @@ impl BodyContext<'_> {
             return self.top_move(value, top, path);
         }
         if let Some(ast::MoveObjects::Field(objects)) = &value.r#ref {
-            if matches!(objects, ast::Objects::Bound(name) if self.hand_targets.contains(name))
-                && matches!(
-                    value.to,
-                    ast::Destination::Hand | ast::Destination::Cemetery
-                )
-            {
-                return Err(unsupported(path));
-            }
-            if matches!(value.to, ast::Destination::Deck) {
-                return self.selected_deck_move(value, objects, path);
-            }
-            if value.position.is_some()
-                || value.order.is_some()
-                || !self.supports_move_result(value, objects)
-            {
-                return Err(unsupported(path));
-            }
-            let zone = match value.to {
-                ast::Destination::Hand => OwnerZone::Hand,
-                ast::Destination::Cemetery => OwnerZone::Cemetery,
-                ast::Destination::Ex => OwnerZone::Ex,
-                ast::Destination::Deck | ast::Destination::Field => {
-                    return Err(unsupported(path));
-                }
-            };
-            if matches!(objects, ast::Objects::This(_))
-                && zone == OwnerZone::Ex
-                && self.leave_event.is_some()
-                && !self.departure_to_cemetery
-            {
-                return Err(unsupported(path));
-            }
-            let objects = match (objects, self.leave_event, zone) {
-                (ast::Objects::This(_), Some(event), OwnerZone::Ex) => Selector::Objects {
-                    objects: vec![ObjectOperand::FollowEventMove {
-                        event: MovementEvent::LeaveField { event },
-                    }],
-                },
-                _ => self.objects(objects, path)?,
-            };
-            if zone == OwnerZone::Ex
-                && matches!(&value.r#ref, Some(ast::MoveObjects::Field(ast::Objects::Bound(name))) if self.opponent_cemetery_targets.contains(name))
-            {
-                return Ok(shared_put(objects, ZoneKind::Ex));
-            }
-            return Ok(owner_put(objects, zone));
+            return self.field_objects_move(value, objects, path);
         }
         let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref else {
             return Err(unsupported(path));

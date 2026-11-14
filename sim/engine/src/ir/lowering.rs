@@ -849,6 +849,9 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
                     // 「EXエリアにこれが置かれたとき」 observes only its own arrival in EX.
                     && !matches!(&auto.on, ast::PhaseSubscription::PlacedEx(placed)
                         if placed.reference.is_some())
+                    // 「自分の場に…が出たとき」 from EX watches other cards; it never sees itself enter.
+                    && !matches!(&auto.on, ast::PhaseSubscription::EnterField(subscription)
+                        if subscription.reference.is_none())
                     && !matches!(&auto.on, ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::AnyOf(_))))
         {
             return Err(unsupported(path));
