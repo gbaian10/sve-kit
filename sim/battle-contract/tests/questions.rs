@@ -204,6 +204,25 @@ fn occurrences_of_one_source_keep_the_public_details_that_tell_them_apart() {
         .map(|option| tag(option, "/value/event/kind"))
         .collect();
     assert_eq!(listed, variants("TriggerEvent", "/properties/kind/const"));
+
+    // A plain departure and a material's own fusion are events of their own, not a
+    // destruction, a deck move or a watched fusion with an unknown slot.
+    let event = |kind: &str| {
+        options
+            .iter()
+            .map(|option| option.pointer("/value").unwrap())
+            .find(|value| tag(value, "/event/kind") == kind)
+            .unwrap()
+    };
+    assert_eq!(
+        event("leave_field").get("position"),
+        Some(&Value::from(1_u8))
+    );
+    assert_eq!(
+        event("fused_as_material").get("position"),
+        Some(&Value::Null)
+    );
+    assert_eq!(event("fusion").get("position"), Some(&Value::from(1_u8)));
 }
 
 #[test]

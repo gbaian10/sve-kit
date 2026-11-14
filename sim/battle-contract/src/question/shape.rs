@@ -138,10 +138,14 @@ pub enum TriggerEvent {
     },
     /// A card was destroyed.
     Destroy,
+    /// The source itself left the field, by any route that is not one of the events here.
+    LeaveField,
     /// Union Burst was activated.
     UnionBurst,
-    /// Cards were fused.
+    /// Cards were fused while the source watched.
     Fusion,
+    /// The source itself was used as a fusion material; it has no slot any more.
+    FusedAsMaterial,
     /// A card was played.
     Play,
     /// Cards were discarded.

@@ -656,9 +656,9 @@
           },
           "controller": "p1",
           "event": {
-            "kind": "discard"
+            "kind": "leave_field"
           },
-          "position": null
+          "position": 1
         },
         "cost": null
       },
@@ -683,7 +683,7 @@
           },
           "controller": "p1",
           "event": {
-            "kind": "banish"
+            "kind": "fused_as_material"
           },
           "position": null
         },
@@ -710,7 +710,7 @@
           },
           "controller": "p1",
           "event": {
-            "kind": "draw"
+            "kind": "discard"
           },
           "position": null
         },
@@ -737,7 +737,7 @@
           },
           "controller": "p1",
           "event": {
-            "kind": "drive_checked"
+            "kind": "banish"
           },
           "position": null
         },
@@ -764,7 +764,7 @@
           },
           "controller": "p1",
           "event": {
-            "kind": "drive_trigger"
+            "kind": "draw"
           },
           "position": null
         },
@@ -772,6 +772,60 @@
       },
       {
         "id": "c28",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "drive_checked"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c29",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "main",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "drive_trigger"
+          },
+          "position": null
+        },
+        "cost": null
+      },
+      {
+        "id": "c30",
         "value": {
           "kind": "occurrence",
           "source": {
