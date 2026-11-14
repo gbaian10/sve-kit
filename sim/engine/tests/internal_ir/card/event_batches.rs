@@ -407,3 +407,152 @@ fn event_batches_put_in_cemetery_does_not_claim_destruction() {
         }
     )));
 }
+
+#[test]
+fn event_batches_simultaneous_token_deaths_erase_together_after_moving() {
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            if row["number"] == "unit-follower" {
+                row["faces"][0]["card_type"] = json!("フォロワー・トークン");
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"f","card":"unit-follower"},
+        {"id":"g","card":"unit-follower"}
+    ]);
+    let mut game = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "token-batches",
+    )
+    .unwrap();
+    game.advance_player_input();
+    game.execute_internal(
+        &checked(vec![damage(1, aoe_targets(99), 3)]),
+        &source("synthetic"),
+        context(1),
+    )
+    .unwrap();
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let history = batches(&game, viewer);
+        assert_eq!(history.len(), 4);
+        assert!(actions(&history[0], ActionKind::Damage));
+        assert!(actions(&history[1], ActionKind::Destroy));
+        assert_eq!(history[2].events.len(), 2);
+        assert!(history[2].events.iter().all(|event| matches!(
+            &event.kind,
+            EventKind::Movement {
+                method: MovementMethod::RuleDestroy,
+                ..
+            }
+        )));
+        assert!(actions(&history[3], ActionKind::Erase));
+        assert_eq!(
+            history[3].events.len(),
+            2,
+            "both tokens erase in one later batch"
+        );
+    }
+}
+
+#[test]
+fn event_batches_stack_replacements_counters_and_successful_movement_stay_together() {
+    let (snapshot, _, document) = catalog_documents(&json!("1"));
+    let mut document: Value = serde_json::from_str(&document).unwrap();
+    document["cards"]["unit-spell"]["abilities"] = json!([{
+        "kind":"spell","line":1,
+        "body":{"op":"move","subjects":{"zone":"field","side":"opponent"},"to":"cemetery"}
+    }]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot,
+            include_str!(concat!(
+                env!("CARGO_MANIFEST_DIR"),
+                "/../../authored/rules/keywords.yaml"
+            )),
+            &[("unit.yaml".into(), document.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"f","card":"unit-amulet","state":{"keywords":["stack"],"counters":{"stack_counter":2}}},
+        {"id":"g","card":"unit-amulet","state":{"keywords":["stack"],"counters":{"stack_counter":2}}},
+        {"id":"h","card":"unit-follower"}
+    ]);
+    let mut game = Game::new(
+        catalog,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "stack-batches",
+    )
+    .unwrap();
+    game.advance_player_input();
+    game.decide(&json!({"do":"play","card":"s"}), "stack-move")
+        .unwrap();
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let history = batches(&game, viewer);
+        let replaced = history
+            .iter()
+            .filter(|batch| {
+                batch.events.iter().any(|event| matches!(
+            &event.kind, EventKind::Action(action) if action.kind == ActionKind::Replacement
+        ))
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            replaced.len(),
+            1,
+            "replacements belong to this movement batch"
+        );
+        let batch = replaced[0];
+        assert_eq!(batch.events.len(), 5);
+        for kind in [ActionKind::Replacement, ActionKind::Counter] {
+            assert_eq!(
+                batch
+                    .events
+                    .iter()
+                    .filter(|event| matches!(
+                        &event.kind, EventKind::Action(action) if action.kind == kind
+                    ))
+                    .count(),
+                2
+            );
+        }
+        assert_eq!(
+            batch
+                .events
+                .iter()
+                .filter(|event| matches!(
+                    &event.kind,
+                    EventKind::Movement {
+                        method: MovementMethod::Procedure,
+                        ..
+                    }
+                ))
+                .count(),
+            1
+        );
+    }
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P2"]["field"], json!(["f", "g"]));
+    assert_eq!(state["P2"]["cemetery"], json!(["h"]));
+    for id in ["f", "g"] {
+        assert_eq!(state["objects"][id]["counters"]["スタックカウンター"], 1);
+    }
+}

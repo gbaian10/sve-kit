@@ -652,6 +652,7 @@ impl Game {
         frame: &Frame,
         carry_grants: bool,
     ) -> Result<()> {
+        let player_batch = self.player_event_mark();
         let mut movable = Vec::new();
         for id in ids {
             if self.stack_replaces_departure(id, zone)? {
@@ -669,7 +670,6 @@ impl Game {
                 movable.push(id.clone());
             }
         }
-        let player_batch = self.player_event_mark();
         let typed_entry_before = SnapshotId(self.state.ir_epoch);
         let destinations = self.movement_destinations(&movable, zone, frame)?;
         self.rule_carry_movement_ready(&movable, &destinations, carry_grants)?;
@@ -782,6 +782,7 @@ impl Game {
         self.conceal_placement_order(&plans, frame);
         self.player_movement_after(player_before);
         self.seal_player_event_batch(player_batch);
+        let erase_batch = self.player_event_mark();
         let erase_group = self.group();
         for id in erased {
             let player_subject = self.player_subject_before(&id);
@@ -804,6 +805,7 @@ impl Game {
             );
             self.player_subject_after(&player_step, player_subject);
         }
+        self.seal_player_event_batch(erase_batch);
         self.return_advances(&advances)?;
         self.release_links(&leaving, frame)?;
         let ex_entered = plans
