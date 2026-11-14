@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP18-004:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          on:
+            placed_ex:
+              who: self
+              sel: { trait: クリスタリア }
+              during: { turn: self }
+          per_turn: 1
+          do:
+            - draw: { n: 1 }
+      - line: 2
+        fanfare:
+          do:
+            - create: { token: クリスタリア・イヴ, n: 1, to: ex }
+      - line: 3
+        activate:
+          cost: { act_self: true }
+          targets:
+            - bind: eve
+              from: { who: self, zone: ex, name: クリスタリア・イヴ }
+              n: 1
+          do:
+            - apply:
+                "on": eve
+                until: turn
+                effect:
+                  cost_mod:
+                    when_playing: { in: affected }
+                    delta:
+                      minus:
+                        - 0
+                        - history_count: { event: played, window: this_turn, who: self }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"

@@ -147,6 +147,7 @@ pub(in crate::game) struct CardRuntime {
     pub(in crate::game::internal) quick_start: bool,
     pub(in crate::game::internal) banish_play: BTreeMap<u32, play_restrictions::BanishPermission>,
     pub(in crate::game::internal) other_costs: Vec<other_costs::InstalledCost>,
+    pub(in crate::game::internal) live_costs: BTreeMap<u64, super::cost::LiveCost>,
 }
 
 impl CardRuntime {

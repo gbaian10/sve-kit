@@ -1293,7 +1293,7 @@ pub(super) struct EvolutionCostModifier {
 #[serde(deny_unknown_fields)]
 pub(super) struct CostModifier {
     pub when_playing: Playing,
-    pub delta: Option<i64>,
+    pub delta: Option<Value>,
     pub set: Option<i64>,
     pub next_only: Option<bool>,
 }
