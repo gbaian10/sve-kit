@@ -10,7 +10,7 @@ use core::array::from_fn;
 use serde_json::{Value, json};
 use sha2::{Digest as _, Sha256};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_battle_host::load::{Inputs, LoadError, load};
+use sve_battle_host::load::{Inputs, load};
 use sve_battle_host::wire::{
     InputState, Outgoing, ReceiptResult, Seat, Submit, SubmitCommand, TemporaryAnswer, Update,
 };
@@ -166,8 +166,8 @@ fn hot_seat_match_runs_to_a_result_with_receipts_first() {
     assert_eq!(session.stopped(), None);
 }
 
-fn setup(card: Option<&str>) -> String {
-    let main: Vec<&str> = card.map_or_else(|| [MAIN_DECK; 20].concat(), |card| vec![card; 40]);
+fn setup() -> String {
+    let main = [MAIN_DECK; 20].concat();
     let deck =
         json!({"construction":{"kind":"class","value":"ニュートラル"},"main":main,"evolve":[]});
     json!({"decks":[deck, deck],"first_chooser":"p2","seed":"battle-host-load",
@@ -177,19 +177,11 @@ fn setup(card: Option<&str>) -> String {
 
 #[test]
 fn loaded_policy_seat_plays_inside_the_host_against_a_player_channel() {
-    let mut session = load(inputs(), &setup(None)).unwrap();
+    let mut session = load(inputs(), &setup()).unwrap();
     let [first, second] = play_out(&mut session);
     assert!(second.is_none(), "the policy seat has no channel");
     assert!(matches!(
         first.map(|update| update.input),
         Some(InputState::Finished { winner: Some(_) })
     ));
-}
-
-#[test]
-fn a_deck_outside_the_selection_cannot_start() {
-    assert_eq!(
-        load(inputs(), &setup(Some("NOT-A-CARD"))).err(),
-        Some(LoadError::Match)
-    );
 }

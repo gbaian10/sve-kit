@@ -354,6 +354,41 @@ fn malformed_messages_stop_interaction_and_nothing_restarts_it() {
 }
 
 #[test]
+fn an_unknown_seat_name_stops_interaction_like_any_malformed_message() {
+    let both = vec![
+        stopped(Seat::P1, HostErrorReason::Format),
+        stopped(Seat::P2, HostErrorReason::Format),
+    ];
+    for unknown in ["submit", "baseline"] {
+        let mut session = session(HOT_SEAT, 100);
+        let mut seats = Seats::default();
+        seats.absorb(&session.start());
+        let (seat, id) = seats.question().unwrap();
+        let name = if seat == Seat::P1 { "p1" } else { "p2" };
+        let valid = serde_json::to_string(&json!({"request_id":"valid","command":{
+            "kind":"answer","question_id":id,"answer":{"kind":"policy"}}}))
+        .unwrap();
+        let before = authority(&session);
+        let out = if unknown == "submit" {
+            session.submit_named("p3", &valid)
+        } else {
+            session.baseline_named("p3")
+        };
+        assert_eq!(out, both, "{unknown}");
+        assert_eq!(
+            session.submit_named(name, &valid),
+            vec![stopped(seat, HostErrorReason::Format)]
+        );
+        assert_eq!(
+            session.baseline_named(name),
+            vec![stopped(seat, HostErrorReason::Format)]
+        );
+        assert_eq!(session.baseline_named("p3"), both);
+        assert_eq!(authority(&session), before);
+    }
+}
+
+#[test]
 fn a_host_stopped_before_start_never_lets_the_policy_answer() {
     // P1 chooses first and is a policy seat, so a start that ignored the stop would submit.
     let mut session = session([SeatControl::Policy, SeatControl::Player], 100);

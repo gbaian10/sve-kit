@@ -22,6 +22,18 @@ pub enum Seat {
     P2,
 }
 
+impl Seat {
+    /// The seat named on the wire, if any.
+    #[must_use]
+    pub fn from_name(name: &str) -> Option<Self> {
+        match name {
+            "p1" => Some(Self::P1),
+            "p2" => Some(Self::P2),
+            _ => None,
+        }
+    }
+}
+
 impl From<Viewer> for Seat {
     fn from(viewer: Viewer) -> Self {
         match viewer {

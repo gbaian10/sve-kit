@@ -139,6 +139,30 @@ impl LocalSession {
         out
     }
 
+    /// Process a command routed by seat name, as the Worker passes it. An unknown seat name is a
+    /// malformed message: interaction stops for every player seat.
+    pub fn submit_named(&mut self, seat: &str, message: &str) -> Vec<Delivery> {
+        match Seat::from_name(seat) {
+            Some(seat) => self.submit_json(seat, message),
+            None => self.malformed(),
+        }
+    }
+
+    /// [`Self::baseline`] routed by seat name; an unknown name stops interaction.
+    pub fn baseline_named(&mut self, seat: &str) -> Vec<Delivery> {
+        match Seat::from_name(seat) {
+            Some(seat) => self.baseline(seat),
+            None => self.malformed(),
+        }
+    }
+
+    fn malformed(&mut self) -> Vec<Delivery> {
+        let mut out = Vec::new();
+        let reason = self.stopped.unwrap_or(HostErrorReason::Format);
+        self.stop(reason, &mut out);
+        out
+    }
+
     /// Parse and process one command; malformed messages stop interaction.
     pub fn submit_json(&mut self, seat: Seat, message: &str) -> Vec<Delivery> {
         match serde_json::from_str::<Submit>(message) {

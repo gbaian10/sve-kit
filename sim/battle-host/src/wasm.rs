@@ -1,9 +1,9 @@
 //! Browser Worker bindings. Every call is synchronous; the Worker queues commands so
-//! exactly one runs at a time.
+//! exactly one runs at a time. Seat names and messages are validated by the session, so
+//! a malformed call stops interaction instead of throwing past it.
 
 use crate::load::{Inputs, load};
 use crate::session::{Delivery, LocalSession};
-use crate::wire::Seat;
 use wasm_bindgen::prelude::{JsError, wasm_bindgen};
 
 /// One local match inside the Worker.
@@ -43,30 +43,14 @@ impl Session {
         deliveries(&self.inner.start())
     }
 
-    /// Process one JSON command from `seat`.
-    ///
-    /// # Errors
-    /// Throws `format` for an unknown seat name.
-    pub fn submit(&mut self, seat: &str, message: &str) -> Result<String, JsError> {
-        Ok(deliveries(
-            &self.inner.submit_json(parse_seat(seat)?, message),
-        ))
+    /// Process one JSON command from the seat named `seat`.
+    pub fn submit(&mut self, seat: &str, message: &str) -> String {
+        deliveries(&self.inner.submit_named(seat, message))
     }
 
-    /// Resend `seat`'s complete current state.
-    ///
-    /// # Errors
-    /// Throws `format` for an unknown seat name.
-    pub fn baseline(&mut self, seat: &str) -> Result<String, JsError> {
-        Ok(deliveries(&self.inner.baseline(parse_seat(seat)?)))
-    }
-}
-
-fn parse_seat(seat: &str) -> Result<Seat, JsError> {
-    match seat {
-        "p1" => Ok(Seat::P1),
-        "p2" => Ok(Seat::P2),
-        _ => Err(JsError::new("format")),
+    /// Resend the named seat's complete current state.
+    pub fn baseline(&mut self, seat: &str) -> String {
+        deliveries(&self.inner.baseline_named(seat))
     }
 }
 
