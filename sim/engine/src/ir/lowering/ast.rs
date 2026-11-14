@@ -1412,7 +1412,7 @@ pub(super) struct SearchQuery {
     pub cost_eq: Option<u64>,
     pub cost_le: Option<NumericArgument>,
     pub cost_ge: Option<u64>,
-    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_eq: Option<NumericArgument>,
     pub orig_cost_le: Option<NumericArgument>,
     pub orig_cost_ge: Option<u64>,
     pub has_evolve: Option<True>,
@@ -1974,7 +1974,7 @@ pub(super) enum Number {
         cost_of: Observation,
     },
     OriginalCost {
-        orig_cost_of: This,
+        orig_cost_of: Observation,
     },
     HistoryCount {
         history_count: HistoryQuery,

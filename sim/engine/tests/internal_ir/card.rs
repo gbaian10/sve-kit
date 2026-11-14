@@ -53,6 +53,8 @@ mod prevent_controller;
 mod public_hand_numbers;
 #[path = "card/public_return_union.rs"]
 mod public_return_union;
+#[path = "card/search_dynamic_cost.rs"]
+mod search_dynamic_cost;
 #[path = "card/target_union.rs"]
 mod target_union;
 #[path = "card/token_follower_union.rs"]

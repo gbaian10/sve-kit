@@ -104,11 +104,26 @@ fn query_filter(
         _ => return Err(unsupported(path)),
     };
     let predicate = super::selection::field_filter(&filter, candidate);
-    let predicate = context.numeric_limits(
+    let predicate = context.dynamic_limits(
         predicate,
         candidate,
-        query.cost_le.as_ref(),
-        query.orig_cost_le.as_ref(),
+        &[
+            (
+                query.cost_le.as_ref(),
+                CharacteristicView::Effective,
+                Comparison::LessEqual,
+            ),
+            (
+                query.orig_cost_le.as_ref(),
+                CharacteristicView::Original,
+                Comparison::LessEqual,
+            ),
+            (
+                query.orig_cost_eq.as_ref(),
+                CharacteristicView::Original,
+                Comparison::Equal,
+            ),
+        ],
         path,
     )?;
     if !query.not_same_name_as_this {
