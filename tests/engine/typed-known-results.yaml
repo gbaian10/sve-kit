@@ -827,18 +827,18 @@ known:
   - question: "card-ECP01-019"
     scenario: "A 選表向きの n2 翻回裏向き → 用它食事 a2 → a2 出走時自傷致死 → n2 表向き回エボルヴデッキ"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder a2 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: current holder carries unadmitted resource links (#2008)"
+    reason: "internal D1 does not support current holder carries unadmitted resource links"
   - question: "card-ECP01-019"
     scenario: "B エボルヴデッキ沒有表向きにんじん；出走領域的 n1 不算 → 待機取消"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder a2 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: current holder carries unadmitted resource links (#2008)"
+    reason: "internal D1 does not support current holder carries unadmitted resource links"
   - question: "card-ECP01-019"
     scenario: "C 墓場ウマ娘只有 9 張 → 選了 n2 但不翻面"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder a2 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: current holder carries unadmitted resource links (#2008)"
+    reason: "internal D1 does not support current holder carries unadmitted resource links"
   - question: "card-ECP01-053"
     scenario: "B 主要階段來臨 → 不付費 → 維持アクト、PP 不變"
     status: fail
@@ -1377,23 +1377,13 @@ known:
   - question: "rule-14.2-01"
     scenario: "A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-14.2-01"
-    scenario: "B 只有 1 張にんじん → 2 回食事付不出 → cannot-activate；1 回食事可以"
-    status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending event {"n":1,"raced":"a1"} cannot be checked'
   - question: "rule-14.2-01"
     scenario: "C 出走後：再食事不行（已關聯にんじん）；同回合進化另一隻也不行（食事是進化相当）"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-14.2-01"
-    scenario: "D 食事的 PP 1 改用 EP 支付（14.2.2.4）"
-    status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: anonymous deck members (#2008)"
+    reason: "internal D1 does not support anonymous deck members"
   - question: "rule-14.2.3-01"
     scenario: "同一從者出走兩次；先解第 2 次，再解第 1 次"
     status: unsupported

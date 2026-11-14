@@ -227,6 +227,9 @@ mod evolution;
 #[path = "card/player_evolution.rs"]
 mod player_evolution;
 
+#[path = "card/self_damage.rs"]
+mod self_damage;
+
 #[path = "card/second.rs"]
 mod second;
 
