@@ -5,6 +5,10 @@
 讀取不執行規則、不配置物件代號、不消耗亂數。另一觀看者、另一對局及未到達的
 cursor 回 `InvalidCursor`。這是 Rust 行程內介面，沒有穩定的 wire 或存檔格式。
 
+`Game::event_batches(viewer, after)` 讀取完整的同時事件批次，事件與逐筆入口一一對應。
+後續 cursor 必須是某批的最後一筆；傳入批次中間的事件回 `InvalidCursor`。
+批次只含該觀看者獲授權的成員，不交付空批次或隱藏佔位。
+
 `observe` 仍是當前局面的權威。事件保留移動方法、發生順序與已知因果，不能當成
 完整的權威重播。`cause` 與 `group` 都只在該觀看者的流內編號；`parent` 僅連向
 已經公開且來源明確指定的 Step 父事件，沒有可授權父事件時為 `None`。
@@ -41,12 +45,17 @@ Step 在實際 `emit` 時記錄；typed facts 在中央 `record_fact` 寫入時�
 facts 不再產生事件。反覆讀取累積的 `Progress` 不會重發歷史。
 
 同一物理移動只發一筆 `Movement`，方法可區分抽牌、棄牌、typed Put／Destroy／
-Banish／Return 與一般程序。抽牌和棄牌的宣告 trace 由各自 primitive 明確補到
-同一次移動；typed Movement 的方法由該次 mutator 的來源範圍補入。
+Banish／Return、規則破壞與一般程序。規則破壞由該次規則清理 producer 明確補為
+`RuleDestroy`；堆疊歸零等其他移區不因此變成破壞。抽牌和棄牌的宣告 trace 由各自
+primitive 明確補到同一次移動；typed Movement 的方法由該次 mutator 的來源範圍補入。
 傷害、姿態、擲骰、裝備與正式卡片打出／解決，由共用 primitive 記錄同一結果；
 typed facts 保留在權威 Progress。傷害分類透過實際 emit 回傳的 Step ID 補入。
 效果進化也以該 primitive 回傳的明確 Step ID 補為 `EffectEvolve`，保留其規則角色。
 沒有以顯示文字相等或最近一行的猜測來去重。
+
+完整同時事件批次由 producer 在全部結果凍結後，以 `player_event_mark`／
+`seal_player_event_batch` 封口，不能由共同 cause 或 group 推論。未封口的結果各自形成
+單件批次；多物件 producer 必須明確封口，後續規則動作若屬另一時點，須另批封口。
 
 | 來源 | 公開事件 |
 | --- | --- |

@@ -276,6 +276,7 @@ impl Game {
         if !self.player_events.active() {
             return;
         }
+        let player_batch = self.player_event_mark();
         for id in ids {
             let views = [Viewer::P1, Viewer::P2].map(|viewer| {
                 let mut result = action(ActionKind::Reveal);
@@ -285,6 +286,7 @@ impl Game {
             });
             self.record_player_fact_views(views, &serde_json::json!({"rule":"14.4"}), None);
         }
+        self.seal_player_event_batch(player_batch);
     }
 
     pub(in crate::game) const fn player_event_mark(&self) -> usize {

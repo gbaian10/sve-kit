@@ -14,6 +14,7 @@ mod occurrences;
 mod opening;
 mod pipeline;
 mod selection;
+mod strict;
 
 pub use closing::{ClosingAnswer, ClosingQuestion};
 pub use decision::{
@@ -34,6 +35,7 @@ pub use opening::{DeckConstruction, OpeningAnswer, OpeningQuestion, PlayerDeck};
 pub use selection::{
     DistributionQuestion, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole,
 };
+pub use strict::{AdmissionGap, AdmissionGapReason, StrictAdmission, StrictStartError};
 
 pub use super::internal::{Answer, DamageShare, SearchAnswer, TargetRoleAssignment};
 
