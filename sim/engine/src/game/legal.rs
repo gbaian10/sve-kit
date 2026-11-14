@@ -199,15 +199,22 @@ impl Game {
             .collect())
     }
 
-    /// Complete decision set, before search pruning. Parameterized actions are expanded.
+    /// Complete prototype decision set. Parameterized actions are expanded.
     ///
     /// # Errors
     /// A live card uses semantics the prototype cannot enumerate.
+    // Test and runner driver only: players and hosts read questions through the player interface.
+    #[cfg(feature = "runner")]
+    pub fn legal(&self) -> Result<Vec<Value>> {
+        self.legal_actions()
+    }
+
+    /// The referee packet still lists the prototype decision set.
     #[expect(
         clippy::too_many_lines,
         reason = "The legal decision union enumerates each distinct input kind once."
     )]
-    pub fn legal(&self) -> Result<Vec<Value>> {
+    pub(crate) fn legal_actions(&self) -> Result<Vec<Value>> {
         if !self.card_runtime.is_empty() {
             self.check_internal_resources()?;
         }

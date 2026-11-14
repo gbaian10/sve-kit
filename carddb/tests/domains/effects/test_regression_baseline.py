@@ -50,12 +50,6 @@ def location(ability: dict[str, JsonValue]) -> str:
     )
 
 
-def test_baseline_covers_every_authored_pack() -> None:
-    assert {p.stem for p in BASELINE.glob("*.json")} == {
-        p.stem for p in (ROOT / "authored/rules/effects").glob("*.yaml")
-    } | {p.stem.split("-", 1)[0] for p in (BASELINE / "migrated").glob("*.json")}
-
-
 @pytest.fixture(scope="session")
 def migrated_printings() -> frozenset[str]:
     """Include reprints whose permanent identity already has an author program."""
@@ -75,6 +69,18 @@ def migrated_printings() -> frozenset[str]:
     )
 
 
+def test_baseline_covers_every_authored_pack(
+    migrated_printings: frozenset[str],
+) -> None:
+    prototypes = {p.stem for p in (ROOT / "authored/rules/effects").glob("*.yaml")}
+    baselines = {p.stem: p for p in BASELINE.glob("*.json")}
+    assert prototypes <= baselines.keys()
+    # A pack whose prototype file is gone may only have left it through admission.
+    for pack in baselines.keys() - prototypes:
+        cards = OBJECT.validate_json(baselines[pack].read_bytes())
+        assert set(cards) <= migrated_printings, pack
+
+
 @pytest.mark.parametrize("path", sorted(BASELINE.glob("*.json")), ids=lambda p: p.stem)
 def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     path: Path,
@@ -83,11 +89,7 @@ def test_handwritten_programs_keep_the_reviewed_positions_and_inputs(
     expected = OBJECT.validate_json(path.read_bytes())
     prototype = ROOT / "authored/rules/effects" / f"{path.stem}.yaml"
     actual = object_value(read_yaml(prototype)["cards"]) if prototype.exists() else {}
-    migrated = set(migrated_printings)
-    migrated.update(
-        file.stem for file in (BASELINE / "migrated").glob(f"{path.stem}-*.json")
-    )
-    assert set(actual) == set(expected) - migrated
+    assert set(actual) == set(expected) - migrated_printings
     for number, value in actual.items():
         baseline = object_value(expected[number])
         # Hash diagnostics cannot disclose official wording on a failing test.
@@ -253,16 +255,11 @@ def test_reverse_positions_preserve_concrete_cross_line_coverage(
                 "跨行涵蓋",
                 "真正缺漏",
             }, key
-            # Direct author admissions replace prototype coverage without requiring frozen ASTs.
-            frozen = BASELINE / "migrated" / f"{number}.json"
-            if not frozen.exists() and number not in cards:
+            # Author admissions replace prototype coverage; no prototype AST remains.
+            if number not in cards:
                 assert number in admitted, number
                 continue
-            card = (
-                OBJECT.validate_json(frozen.read_bytes())
-                if frozen.exists()
-                else object_value(cards[number])
-            )
+            card = object_value(cards[number])
             abilities = array(card["abilities"])
             reverse_location = json.dumps(
                 [row[k] for k in ("face", "field", "section", "line")]
