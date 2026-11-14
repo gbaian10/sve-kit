@@ -606,6 +606,11 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
         run: python3 .github/ci/test_summary.py rust "$REPORT_DIR"
+      - name: Safe self-damage failure facts (temporary)
+        if: ${{ !cancelled() && steps.tests.outcome == 'failure' }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
+        run: python3 .github/ci/self_damage_diagnostics.py "$REPORT_DIR/test.log"
       # The profile and the objects' coverage sections hold function names, source paths and counters only:
       # no card text or test output (official test data is read at runtime, never compiled in).
       - name: Hand the shard's coverage to rust-coverage
