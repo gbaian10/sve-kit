@@ -6,6 +6,7 @@
 use super::*;
 use crate::player_pipeline::question;
 use sve_engine::game::player::events::{ActionKind, EventKind};
+use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     Command, EvolutionAnswer, EvolutionQuestion, Input, MainActionAnswer, MainIntentKind,
     QuestionShape, SubmissionKind, Viewer,
@@ -59,6 +60,100 @@ fn form(game: &mut Game, actor: Viewer) {
         SubmissionKind::Applied,
         "The selected form advances to the existing payment stages"
     );
+}
+
+fn remembered_form_faces(game: &Game, viewer: Viewer) -> Vec<(u64, Viewer)> {
+    game.observe(viewer)
+        .unwrap()
+        .remembered
+        .into_iter()
+        .filter(|face| face.card == "unit-form")
+        .map(|face| (face.face, face.owner))
+        .collect()
+}
+
+#[test]
+fn choosing_a_later_evolution_face_does_not_publish_the_default_face_memory() {
+    let (base, _) = evolution::programs();
+    for (actor, opponent, super_evolution) in [
+        (Viewer::P1, Viewer::P2, false),
+        (Viewer::P2, Viewer::P1, true),
+    ] {
+        let mut game = evolution::position_with_form_faces(
+            actor.player().seat,
+            base,
+            &card(vec![]),
+            &["unit-follower", "unit-follower"],
+        );
+        assert_eq!(remembered_form_faces(&game, opponent).len(), 0);
+        start(&mut game, actor);
+        assert_eq!(
+            remembered_form_faces(&game, opponent).len(),
+            0,
+            "declaring evolution must not disclose its private resource"
+        );
+        let first = question(&game, actor);
+        let QuestionShape::Evolution(EvolutionQuestion::Form(forms)) = first.shape else {
+            panic!("evolution forms");
+        };
+        let later = forms.iter().find(|form| form.face == 1).unwrap();
+        assert_eq!(
+            game.submit_player(
+                actor,
+                Command::Evolution {
+                    token: first.token,
+                    answer: EvolutionAnswer::Form(later.id),
+                },
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+        assert_eq!(
+            remembered_form_faces(&game, opponent).len(),
+            0,
+            "selecting a destination face must not disclose the current private resource"
+        );
+        let payment = question(&game, actor);
+        assert_eq!(
+            game.submit_player(
+                actor,
+                Command::Evolution {
+                    token: payment.token,
+                    answer: EvolutionAnswer::Payment {
+                        pp: 1,
+                        ep: false,
+                        super_evolution,
+                    },
+                },
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+        assert_eq!(remembered_form_faces(&game, opponent), vec![(1, actor)]);
+        resolved(
+            game.activate_internal_card("u", AbilityId(8), actor.player())
+                .unwrap(),
+        );
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let returned = game.observe(opponent).unwrap();
+        let form = returned
+            .players
+            .iter()
+            .find(|player| player.player == actor)
+            .unwrap()
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::EvolveDeck)
+            .unwrap()
+            .cards
+            .iter()
+            .find(|entry| entry.card.physical.card == "unit-form")
+            .unwrap();
+        assert_eq!(form.card.physical.face, 0);
+        assert!(form.card.face_up);
+    }
 }
 
 #[test]

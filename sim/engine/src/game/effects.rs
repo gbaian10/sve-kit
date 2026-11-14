@@ -715,14 +715,14 @@ impl Game {
             let owner = &plan.controller;
             let printed = self
                 .catalog
-                .face(&previous.card, Self::movement_face(previous)?)?
+                .face(&previous.card, Self::movement_face(previous, destination)?)?
                 .clone();
             let object = self.object_mut(id)?;
             object.zone = destination.into();
             object.controller.clone_from(owner);
             if previous.zone != destination || previous.controller != *owner {
                 object.generation = object.generation.saturating_add(1);
-                object.state = Self::moved_attributes(previous, &printed, destination);
+                object.state = Self::moved_attributes(previous, &printed, destination)?;
             }
             let from = format!("{}.{}", previous.controller, previous.zone);
             if destination == "field" {

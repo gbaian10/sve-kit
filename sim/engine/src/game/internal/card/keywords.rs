@@ -90,9 +90,9 @@ impl Game {
             return Ok(false);
         }
         let previous = self.object(holder)?;
-        let face = Self::movement_face(previous)?;
+        let face = Self::movement_face(previous, "field")?;
         let printed = self.catalog.face(&previous.card, face)?;
-        let state = Self::moved_attributes(previous, printed, "field");
+        let state = Self::moved_attributes(previous, printed, "field")?;
         // CR 12.8.2 uses the arriving information, including a reset of old-zone ability loss.
         let mut prospective = self.clone();
         let arrived = prospective.object_mut(holder)?;

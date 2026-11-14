@@ -194,33 +194,37 @@ impl Game {
         Ok(())
     }
 
-    // Only birth honours the template's selected face; later moves keep the normal reset.
-    pub(super) fn movement_face(previous: &Object) -> Result<usize> {
-        let face = if previous.zone == "void" {
-            int(&previous.state["face"])
+    // Birth and evolution must disclose the selected face without learning a temporary face zero.
+    pub(super) fn movement_face(previous: &Object, destination: &str) -> Result<usize> {
+        let face = if previous.zone == "void"
+            || (previous.zone == "evolve_deck" && destination == "evolution")
+        {
+            previous.state["face"]
+                .as_u64()
+                .ok_or_else(|| invalid("unknown movement face"))?
         } else {
             0
         };
         usize::try_from(face).map_err(invalid)
     }
 
-    pub(super) fn moved_attributes(previous: &Object, printed: &Value, destination: &str) -> Value {
+    pub(super) fn moved_attributes(
+        previous: &Object,
+        printed: &Value,
+        destination: &str,
+    ) -> Result<Value> {
         if matches!(previous.zone.as_str(), "ex" | "resolution")
             && matches!(destination, "resolution" | "field")
         {
-            return previous.state.clone();
+            return Ok(previous.state.clone());
         }
-        let face = if previous.zone == "void" {
-            int(&previous.state["face"])
-        } else {
-            0
-        };
+        let face = Self::movement_face(previous, destination)?;
         let acted = destination == "field" && previous.state["acted"] == true;
         let mut attributes = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":face,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false,"attacks_this_turn":0_i64});
         if destination == "banish" {
             attributes["face_up"] = json!(true);
         }
-        attributes
+        Ok(attributes)
     }
 
     pub(super) fn movable_subjects(&self, node: &Value, frame: &Frame) -> Result<Vec<String>> {
