@@ -303,27 +303,36 @@ impl Game {
                 let resource = linked
                     .as_str()
                     .ok_or_else(|| invalid("invalid resource entry link"))?;
-                let object = self.object(resource)?;
-                let (Some(source_id), Some(resource_id)) = (
-                    self.state.ir_objects.get(holder),
-                    self.state.ir_objects.get(resource),
-                ) else {
-                    return Ok(false);
-                };
-                if source.zone != "field"
-                    || object.zone != zone
-                    || !self.card_runtime.links.contains_key(&(
-                        *source_id,
-                        source.generation,
-                        *resource_id,
-                        object.generation,
-                    ))
-                {
+                if !self.internal_resource_link_current(holder, resource, zone)? {
                     return Ok(false);
                 }
             }
         }
         Ok(true)
+    }
+
+    pub(in crate::game) fn internal_resource_link_current(
+        &self,
+        holder: &str,
+        resource: &str,
+        zone: &str,
+    ) -> Result<bool> {
+        let source = self.object(holder)?;
+        let object = self.object(resource)?;
+        let (Some(source_id), Some(resource_id)) = (
+            self.state.ir_objects.get(holder),
+            self.state.ir_objects.get(resource),
+        ) else {
+            return Ok(false);
+        };
+        Ok(source.zone == "field"
+            && object.zone == zone
+            && self.card_runtime.links.contains_key(&(
+                *source_id,
+                source.generation,
+                *resource_id,
+                object.generation,
+            )))
     }
 
     pub(super) fn check_resource_entry_available(

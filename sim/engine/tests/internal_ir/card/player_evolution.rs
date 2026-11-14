@@ -6,7 +6,7 @@
 use super::*;
 use crate::player_pipeline::question;
 use sve_engine::game::player::events::{ActionKind, EventKind};
-use sve_engine::game::player::observation::ObservedZone;
+use sve_engine::game::player::observation::{ObservedZone, Relationship, RelationshipKind};
 use sve_engine::game::player::{
     Command, EvolutionAnswer, EvolutionQuestion, Input, MainActionAnswer, MainIntentKind,
     QuestionShape, SubmissionKind, Viewer,
@@ -72,6 +72,37 @@ fn remembered_form_faces(game: &Game, viewer: Viewer) -> Vec<(u64, Viewer)> {
         .collect()
 }
 
+fn assert_evolution_relationship(game: &Game, actor: Viewer) {
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let observation = game.observe(viewer).unwrap();
+        let player = observation
+            .players
+            .iter()
+            .find(|player| player.player == actor)
+            .unwrap();
+        let handle = |kind| {
+            player
+                .zones
+                .iter()
+                .find(|zone| zone.kind == kind)
+                .unwrap()
+                .cards[0]
+                .card
+                .handle
+                .clone()
+        };
+        assert_eq!(
+            observation.relationships,
+            vec![Relationship {
+                kind: RelationshipKind::Evolution,
+                from: handle(ObservedZone::Evolution),
+                to: handle(ObservedZone::Field),
+            }],
+            "An attached evolution form must point at its current field follower"
+        );
+    }
+}
+
 #[test]
 fn choosing_a_later_evolution_face_does_not_publish_the_default_face_memory() {
     let (base, _) = evolution::programs();
@@ -130,6 +161,7 @@ fn choosing_a_later_evolution_face_does_not_publish_the_default_face_memory() {
             SubmissionKind::Applied
         );
         assert_eq!(remembered_form_faces(&game, opponent), vec![(1, actor)]);
+        assert_evolution_relationship(&game, actor);
         resolved(
             game.activate_internal_card("u", AbilityId(8), actor.player())
                 .unwrap(),
@@ -138,6 +170,7 @@ fn choosing_a_later_evolution_face_does_not_publish_the_default_face_memory() {
             game.resume_internal_card().unwrap();
         }
         let returned = game.observe(opponent).unwrap();
+        assert_eq!(returned.relationships, Vec::<Relationship>::new());
         let form = returned
             .players
             .iter()

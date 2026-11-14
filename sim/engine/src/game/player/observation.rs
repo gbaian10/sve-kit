@@ -7,7 +7,7 @@ pub use context::{
 };
 
 mod board;
-pub use board::AttackObservation;
+pub use board::{AttackObservation, Relationship, RelationshipKind};
 
 mod costs;
 pub use costs::{
@@ -227,6 +227,8 @@ pub struct Observation {
     pub attack: Option<AttackObservation>,
     /// Both players in seat order.
     pub players: [PlayerObservation; 2],
+    /// Current attachments whose two endpoints are identifiable to this viewer.
+    pub relationships: Vec<Relationship>,
     /// Historical memory independent of current location knowledge.
     pub remembered: Vec<CardMemory>,
     /// Viewer-authorized estimates and unresolved play costs.
@@ -330,6 +332,7 @@ impl Game {
                 self.observed_player(perspective, Viewer::P1)?,
                 self.observed_player(perspective, Viewer::P2)?,
             ],
+            relationships: self.observed_relationships(perspective)?,
             remembered: self.card_memory(perspective)?,
             costs: self.observed_costs(perspective)?,
             pending: self.observed_pending(perspective)?,
@@ -426,13 +429,7 @@ impl Game {
         perspective: Viewer,
         id: &str,
     ) -> Result<CardObservation> {
-        let handle = self
-            .state
-            .knowledge
-            .get(seat(perspective))
-            .and_then(|knowledge| knowledge.handle(id))
-            .ok_or_else(|| invalid("card is not identifiable"))?;
-        self.resolve_player_object(perspective, &handle)?;
+        let handle = self.observed_object_handle(perspective, id)?;
         let object = self.object(id)?;
         let face_up = face_up(object)?;
         Ok(CardObservation {
@@ -442,6 +439,21 @@ impl Game {
             face_up,
             properties: self.observed_card_properties(perspective, id)?,
         })
+    }
+
+    pub(in crate::game) fn observed_object_handle(
+        &self,
+        perspective: Viewer,
+        id: &str,
+    ) -> Result<ObjectHandle> {
+        let handle = self
+            .state
+            .knowledge
+            .get(seat(perspective))
+            .and_then(|knowledge| knowledge.handle(id))
+            .ok_or_else(|| invalid("card is not identifiable"))?;
+        self.resolve_player_object(perspective, &handle)?;
+        Ok(handle)
     }
 
     pub(in crate::game) fn physical_card_face(&self, id: &str) -> Result<CardFace> {

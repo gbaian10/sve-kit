@@ -1,6 +1,7 @@
 use super::*;
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::events::{ActionKind, EventKind};
+use sve_engine::game::player::observation::{ObservedZone, Relationship, RelationshipKind};
 
 fn equip_action() -> Action {
     Action::Equip {
@@ -101,6 +102,38 @@ fn equipment_uses_its_own_zone_without_a_field_capacity_limit_and_cleans_up_with
     assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
     let equipment = view["P1"]["equipment"].as_array().unwrap().clone();
     assert_eq!(equipment.len(), 2);
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let observed = game.observe(viewer).unwrap();
+        let player = &observed.players[0];
+        let bearer = player
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap()
+            .cards[0]
+            .card
+            .handle
+            .clone();
+        let mut expected = player
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Equipment)
+            .unwrap()
+            .cards
+            .iter()
+            .map(|member| Relationship {
+                kind: RelationshipKind::Equipment,
+                from: member.card.handle.clone(),
+                to: bearer.clone(),
+            })
+            .collect::<Vec<_>>();
+        expected.sort();
+        assert_eq!(observed.relationships, expected);
+        assert_ne!(
+            observed.relationships[0].from,
+            observed.relationships[1].from
+        );
+    }
     resolved(
         game.activate_internal_card("s", AbilityId(2), PlayerId { seat: 1 })
             .unwrap(),
@@ -108,6 +141,12 @@ fn equipment_uses_its_own_zone_without_a_field_capacity_limit_and_cleans_up_with
     game.resume_internal_card().unwrap();
     let departed = game.projection(View::Referee).unwrap();
     assert_eq!(departed["P1"]["equipment"], json!([]));
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            game.observe(viewer).unwrap().relationships,
+            Vec::<Relationship>::new()
+        );
+    }
     for id in equipment {
         assert!(departed["objects"][id.as_str().unwrap()].is_null());
     }
