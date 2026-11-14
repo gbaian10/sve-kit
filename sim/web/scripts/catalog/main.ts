@@ -160,11 +160,11 @@ try {
   const outputDir = path.join(temporary, "build")
   await build({
     root,
-    worker: { rollupOptions: { output: { intro: CATALOG_OBSERVER } } },
+    worker: { rolldownOptions: { output: { intro: CATALOG_OBSERVER } } },
     build: {
       outDir: outputDir,
       emptyOutDir: true,
-      rollupOptions: { input: path.join(root, "bench/catalog.html") },
+      rolldownOptions: { input: path.join(root, "bench/catalog.html") },
     },
   })
   server = await preview({

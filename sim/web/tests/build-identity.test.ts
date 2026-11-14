@@ -46,7 +46,7 @@ it("injects the same identity into an executable production search Worker", asyn
     const result = await build({
       configFile: path.resolve(import.meta.dirname, "../vite.config.ts"),
       logLevel: "silent",
-      build: { write: false, minify: false, rollupOptions: { input: entry } },
+      build: { write: false, minify: false, rolldownOptions: { input: entry } },
     })
     if ("on" in result) throw new Error("unexpected watch build")
     const outputs = Array.isArray(result) ? result : [result]
