@@ -98,6 +98,22 @@ lowering 核對宣告及整卡覆蓋後，沿用既有的空能力卡程式。
 
 ## 對局能力
 
+場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
+`not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
+
+```yaml
+static:
+  effects:
+    - prevent:
+        kind: ability
+        on:
+          any_of:
+            - {who: self, zone: field, kind: follower, trait: 学院, not_same_name_as_this: true}
+            - {who: self, zone: field, kind: follower, trait: 獣}
+```
+
+符合多個分支仍是同一個受益物件；來源失去能力或離場後，沿用既有的持續防傷求值規則。
+
 自己的墓場或消滅區可用分組正式目標表示不同原費條件的從者：
 
 ```yaml

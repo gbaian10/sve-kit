@@ -1132,6 +1132,8 @@ pub(super) struct ObjectQuery {
     pub acted: Option<bool>,
     pub except: Option<Box<BoundExcept>>,
     #[serde(default)]
+    pub not_same_name_as_this: bool,
+    #[serde(default)]
     pub other: bool,
 }
 

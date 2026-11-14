@@ -37,6 +37,160 @@ fn amulet(mut abilities: Vec<Located<Ability>>) -> WellFormedCardProgram {
 fn ordinary_self_ability_damage_prevention_is_a_valid_lower_load_baseline() {
     lower_and_load(&json!({"prevent":{"kind":"ability"}}));
 }
+
+fn union_prevention() -> WellFormedCardProgram {
+    lowerer().lower(&input(&json!({"prevent":{"kind":"ability","on":{"any_of":[
+        {"who":"self","zone":"field","kind":"follower","trait":"academy","not_same_name_as_this":true},
+        {"who":"self","zone":"field","kind":"follower","trait":"beast"}
+    ]}}}))).unwrap().remove("unit-follower").unwrap()
+}
+
+fn union_catalog() -> Arc<Catalog> {
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let mut rows = snapshot
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    let template = rows
+        .iter_mut()
+        .find(|row| row["number"] == "unit-follower")
+        .unwrap();
+    template["faces"][0]["traits"] = json!(["academy"]);
+    let template = template.clone();
+    let mut document: Value = serde_json::from_str(&document).unwrap();
+    for (number, name, traits) in [
+        ("academy-peer", "other-name", json!(["academy"])),
+        ("beast-peer", "unit-follower", json!(["beast"])),
+        ("ordinary-peer", "ordinary-name", json!([])),
+    ] {
+        let mut row = template.clone();
+        row["number"] = json!(number);
+        row["faces"][0]["name"] = json!(name);
+        row["faces"][0]["traits"] = traits;
+        rows.push(row);
+        document["cards"][number] =
+            json!({"status":"complete","review":"synthetic","abilities":[]});
+    }
+    let snapshot = rows
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    Arc::new(
+        Catalog::from_documents(
+            &snapshot,
+            &registry,
+            &[("unit.yaml".into(), document.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+fn union_board(silenced: bool) -> Game {
+    let mut position = setup(1, json!([]));
+    position["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"provider","card":"unit-follower","state":{"silenced":silenced}},
+        {"id":"same-name","card":"unit-follower","state":{"silenced":true}},
+        {"id":"academy","card":"academy-peer"},
+        {"id":"beast","card":"beast-peer"},
+        {"id":"ordinary","card":"ordinary-peer"}
+    ]);
+    position["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"academy-peer"}]);
+    let mut game = Game::new(
+        union_catalog(),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "prevention-union",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &union_prevention())
+        .unwrap();
+    for number in ["unit-spell", "academy-peer", "beast-peer", "ordinary-peer"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    game
+}
+
+#[test]
+fn prevention_union_keeps_name_exclusion_in_its_own_branch_and_is_live() {
+    for silenced in [false, true] {
+        let mut game = union_board(silenced);
+        game.execute_internal(
+            &checked(vec![damage(
+                1,
+                RecipientSet::Objects {
+                    objects: zone(ZoneKind::Field, 99),
+                },
+                2,
+            )]),
+            &source("synthetic"),
+            context(1),
+        )
+        .unwrap();
+        let view = game.projection(View::Referee).unwrap();
+        for id in ["provider", "same-name", "ordinary", "enemy"] {
+            assert_eq!(view["objects"][id]["damage"], 2, "unprotected {id}");
+        }
+        for id in ["academy", "beast"] {
+            assert_eq!(
+                view["objects"][id]["damage"],
+                if silenced { 2 } else { 0 },
+                "protected {id}"
+            );
+        }
+    }
+}
+
+#[test]
+fn prevention_union_does_not_authorize_a_private_branch() {
+    let mut raw = union_prevention().card().clone();
+    let Effect::Replacement {
+        pattern:
+            ProposedEventPattern::Damage {
+                recipient: Some(recipient),
+                ..
+            },
+        ..
+    } = &mut raw.abilities[0].node.declarations[0]
+    else {
+        panic!("replacement")
+    };
+    let Expr::Compute(predicate) = &mut recipient.condition else {
+        panic!("recipient")
+    };
+    let Predicate::RecipientIsFollower {
+        objects: Selector::Union { sets },
+        ..
+    } = predicate.as_mut()
+    else {
+        panic!("union")
+    };
+    let Selector::Zone { zone, .. } = &mut sets[1] else {
+        panic!("zone")
+    };
+    *zone = ZoneKind::Hand;
+    let program = WellFormedCardProgram::check(raw).unwrap();
+    let mut game = Game::new(
+        union_catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "private-prevention-branch",
+    )
+    .unwrap();
+    let mut control = game.clone();
+    control
+        .load_internal_card("unit-follower", &union_prevention())
+        .unwrap();
+    let error = game
+        .load_internal_card("unit-follower", &program)
+        .unwrap_err();
+    assert!(
+        error.to_string().contains("private observation"),
+        "the same catalog accepts the original program and rejects the private branch at its privacy boundary: {error}"
+    );
+}
 #[test]
 fn ordinary_own_followers_ability_damage_reduction_is_a_valid_lower_load_baseline() {
     lower_and_load(
@@ -621,4 +775,60 @@ fn installed_object_prevention_observation_matches_the_real_damage_replacement()
         "frozen scope links must not bypass the retired source identity"
     );
     assert!(rule_observation::field(&game,Viewer::P1,0).effects.iter().any(|effect| matches!(&effect.change,InstalledChange::Prevention { recipients: Some(links), .. } if links == &[EffectRecipient::Card(own.clone())])),"continuous owner knowledge keeps its authorized scope link");
+}
+
+#[test]
+fn prevention_union_name_exclusion_also_keeps_extremum_populations_consistent() {
+    let population =
+        json!({"who":"self","zone":"field","kind":"follower","not_same_name_as_this":true});
+    let mut query = population.clone();
+    query["where"] = json!({"cmp":{"left":{"power_of":"item"},"op":"eq","right":{"agg":{"of":population,"attr":"power","fn":"max"}}}});
+    let tree = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[{"destroy":{"ref":query}}]}}),
+        "unit-follower",
+    );
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"unit-follower","state":{"power":10}},
+        {"id":"same-name","card":"beast-peer","state":{"power":8}},
+        {"id":"high","card":"academy-peer","state":{"power":5}},
+        {"id":"low","card":"ordinary-peer","state":{"power":2}}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = Game::new(
+        union_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "excluded-extremum",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    for number in ["unit-spell", "academy-peer", "beast-peer", "ordinary-peer"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    resolved(
+        game.activate_internal_card(
+            "source",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+        json!(["high"]),
+        "the highest candidate is measured after excluding all source names from both populations"
+    );
+    let mut inconsistent = tree;
+    inconsistent["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0]["destroy"]["ref"]["where"]["cmp"]["right"]["agg"]["of"].as_object_mut().unwrap().remove("not_same_name_as_this");
+    assert!(
+        lowerer().lower(&inconsistent).is_err(),
+        "the existing same-population check detects a different aggregate population"
+    );
 }
