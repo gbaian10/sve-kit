@@ -12,7 +12,11 @@ from datetime import date, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from sve_carddb.contracts.construction_rules import PATTERNS, copy_rule
+from sve_carddb.contracts.construction_rules import (
+    CONDITIONAL_PATTERN,
+    PATTERNS,
+    copy_rule,
+)
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
 
 if TYPE_CHECKING:
@@ -32,10 +36,7 @@ _TITLE_RULES = {"cardfight_vanguard": "vanguard"}
 # Card text that changes construction (CR 6.1.2), per region. A sentence that looks like a
 # copy rule but matches no template stops the export rather than being silently ignored.
 _SINGLETON = {
-    "jp": re.compile(
-        r"カード名に『(?P<part>[^』]+)』を含まないカードは、"
-        r"メインデッキやエボルヴデッキにそれぞれ1枚までしか入れられない。"
-    ),
+    "jp": CONDITIONAL_PATTERN,
     "en": re.compile(
         r"Your main deck and evolve deck may only contain 1 copy of any card without "
         r"\"(?P<part>[^\"]+)\" in its name\."
@@ -285,6 +286,10 @@ def _text_rules(
                 continue
             singleton = _SINGLETON[region].fullmatch(line)
             if singleton:
+                if region == "jp" and int(singleton["n"]) != 1:
+                    raise ConstructionIndexError(
+                        "Unrecognised construction rule in card text"
+                    )
                 exempt: list[JsonValue] = list(names.containing(singleton["part"]))
                 singletons.append([position, exempt])
                 continue
