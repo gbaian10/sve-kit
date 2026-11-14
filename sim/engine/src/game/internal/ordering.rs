@@ -420,6 +420,14 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             Action::Draw { count: amount, .. } | Action::Resource { amount, .. } => {
                 mask_public_number(amount);
             }
+            // A by_kind follower is the one member of a public recipient choice; well-formedness
+            // checked that access, so the bound operand reads no private zone.
+            Action::Modify {
+                subjects: Selector::Objects { objects },
+                ..
+            } if matches!(objects.as_slice(), [ObjectOperand::Bound { .. }]) => {
+                *objects = vec![ObjectOperand::SourceHolder {}];
+            }
             Action::Counter {
                 holder: Holder::Object { object },
                 amount,
@@ -581,6 +589,7 @@ fn mask_public_number(number: &mut Expr<Int>) {
 
     // A chosen public field follower's live stat (BP17-090) is as public as the attack target's.
     if matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects, property: NumericProperty::Attack | NumericProperty::Life } if target_plan(objects).is_some() || matches!(objects, Selector::Bound { .. })))
+        || matches!(number, Expr::Compute(operation) if matches!(operation.as_ref(), IntOperation::Sum { objects: Selector::Bound { .. }, property: NumericProperty::OriginalCost }))
     {
         *number = Expr::Literal(Int(0));
         return;

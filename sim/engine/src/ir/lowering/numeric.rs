@@ -106,7 +106,9 @@ impl BodyContext<'_> {
             ast::LifeHolder::MasterOf { master_of } => {
                 self.selected_player(master_of, super::super::Role::Controller, path)?
             }
-            ast::LifeHolder::Bound(_) => return Err(unsupported(path)),
+            ast::LifeHolder::Bound(name) => PlayerRef::Bound {
+                binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
+            },
         };
         Ok(Action::Life {
             player,
@@ -208,6 +210,11 @@ impl BodyContext<'_> {
                             }],
                         })
                         .ok_or_else(|| unsupported(path));
+                }
+                if let Some(binding) = self.kind_followers.get(name) {
+                    return Ok(Selector::Objects {
+                        objects: vec![ObjectOperand::Bound { binding: *binding }],
+                    });
                 }
                 return self
                     .targets

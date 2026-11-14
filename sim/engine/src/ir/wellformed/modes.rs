@@ -7,7 +7,7 @@ use crate::ir::{
     PlayerResource,
 };
 use crate::ir::{
-    Bool, Cardinality, ChoiceDomain, Control, CostSpec, DecisionKind, EntryOrigin,
+    Bool, Cardinality, ChoiceDomain, Control, CostSpec, Decision, DecisionKind, EntryOrigin,
     EntryOriginFields, Expr, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, Nat, NatFrozen,
     NatOperation, Node, PlaySlot, PlayerRef, Predicate, Program, SpellCountTime, ValueEquality,
     Visibility, ZoneKind,
@@ -395,6 +395,67 @@ pub(super) fn play_modes_without_fees(program: &Program) -> bool {
         | Node::Capture { .. }
         | Node::Decision { .. } => true,
     })
+}
+
+/// Whether every printed mode pays only through its own declared parameters, never fixed steps.
+pub(super) fn play_modes_without_fixed_costs(program: &Program) -> bool {
+    program.steps.iter().all(|step| match &step.node {
+        Node::Control {
+            control: Control::Sequence { body },
+        } => play_modes_without_fixed_costs(body),
+        Node::Control {
+            control:
+                Control::Mode {
+                    modes,
+                    choice_kind: ModeChoiceKind::ChoiceKeyword,
+                    ..
+                },
+        } => modes
+            .iter()
+            .all(|mode| matches!(&mode.costs, CostSpec::Ordered { steps } if steps.is_empty())),
+        Node::Instruction { .. }
+        | Node::Control { .. }
+        | Node::Capture { .. }
+        | Node::Decision { .. } => true,
+    })
+}
+
+/// Material decisions owned by the printed modes, for the disjointness check beside head costs.
+pub(super) fn play_mode_materials(program: &Program) -> Vec<&Decision> {
+    program
+        .steps
+        .iter()
+        .flat_map(|step| match &step.node {
+            Node::Control {
+                control: Control::Sequence { body },
+            } => play_mode_materials(body),
+            Node::Control {
+                control:
+                    Control::Mode {
+                        modes,
+                        choice_kind: ModeChoiceKind::ChoiceKeyword,
+                        ..
+                    },
+            } => modes
+                .iter()
+                .flat_map(|mode| {
+                    mode.parameters.iter().filter(|decision| {
+                        matches!(
+                            decision.kind,
+                            DecisionKind::PlayParameter {
+                                slot: PlaySlot::CostMaterials,
+                                ..
+                            }
+                        )
+                    })
+                })
+                .collect(),
+            Node::Instruction { .. }
+            | Node::Control { .. }
+            | Node::Capture { .. }
+            | Node::Decision { .. } => Vec::new(),
+        })
+        .collect()
 }
 
 pub(super) fn play_mode_groups(program: &Program) -> usize {

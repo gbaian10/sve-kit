@@ -1,0 +1,54 @@
+cards:
+  BP13-053:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -1
+            if:
+              cmp:
+                left:
+                  count:
+                    trait: チェス
+                    who: self
+                    zone: cemetery
+                op: ge
+                right: 5
+      - line: 2
+        spell:
+          do:
+            - destroy: chosen
+            - search:
+                n: 1
+                result: entered
+                sel:
+                  kind: follower
+                  orig_cost_eq:
+                    plus:
+                      - orig_cost_of: chosen
+                      - 2
+                  trait: チェス
+                  who: self
+                  zone: deck
+                to: field
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                trait: チェス
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

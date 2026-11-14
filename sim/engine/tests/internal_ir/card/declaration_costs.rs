@@ -230,10 +230,11 @@ fn selectable_mode_material_fees_cannot_share_one_material_pool() {
             json!({"do":[{"choice":{"n":2,"options":[paid(&ex),paid(&ex)]}}]}),
             Some("several selectable mode material fees"),
         ),
+        // A hand discard and an EX material can never name the same card.
         (
             "activate",
             json!({"cost":hand,"do":[{"choice":{"n":1,"options":[paid(&ex),plain]}}]}),
-            Some("mode material fee beside another material cost"),
+            None,
         ),
     ];
     for (head, body, reason) in cases {

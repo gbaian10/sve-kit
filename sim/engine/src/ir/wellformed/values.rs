@@ -12,7 +12,7 @@ use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
-    PaymentReference, PlayerRead, PostureRead,
+    NumericProperty, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, LkiReason, MemberProjection,
@@ -114,7 +114,7 @@ impl Checker {
                     self.integer(then_value)?;
                     self.integer(else_value)
                 }
-                IntOperation::Sum { objects, .. } => self.selector(objects),
+                IntOperation::Sum { objects, property } => self.sum(objects, *property),
                 IntOperation::InformationOrZero { information } => match information {
                     NumberRead::Cost { object, view } | NumberRead::Stats { object, view, .. } => {
                         if !matches!(
@@ -128,6 +128,18 @@ impl Checker {
                 },
             },
         }
+    }
+
+    /// A printed cost may outlive its card's public move, but never a private pick.
+    fn sum(&mut self, objects: &Selector, property: NumericProperty) -> Checked {
+        if let Selector::Bound { reference } = objects
+            && property == NumericProperty::OriginalCost
+            && (!self.env.public_board_singles.contains(&reference.key())
+                || self.env.access.get(&reference.key()) != Some(&Visibility::Public {}))
+        {
+            return self.reject();
+        }
+        self.selector(objects)
     }
 
     fn history_count_read(&mut self, query: &HistoryQuery, count: HistoryCount) -> Checked {

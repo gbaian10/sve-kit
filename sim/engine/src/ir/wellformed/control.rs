@@ -4,8 +4,8 @@ use super::{
     RepeatBody, ScopeId, Termination, TypeId, WellFormedReason,
 };
 use crate::ir::{
-    Decision, DecisionKind, Declinable, EvolutionOutcome, IterationOrder, PlayerRef, PlayerStage,
-    ReceiptId, StageMode,
+    DamageRecipient, Decision, DecisionKind, Declinable, EvolutionOutcome, IterationOrder,
+    ObjectRef, PlayerRef, PlayerStage, ReceiptId, StageMode,
 };
 use crate::ir::{advance_entry, effect_evolution};
 use alloc::collections::BTreeMap;
@@ -31,6 +31,10 @@ impl Checker {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every control kind is checked from one exhaustive dispatch."
+    )]
     fn control_inner(&mut self, control: &Control) -> Checked {
         if let Some(projection) = advance_entry::projection(control) {
             return self.isolated(|checker| checker.advance_entry(projection));
@@ -120,8 +124,49 @@ impl Checker {
                 chosen,
                 choice_kind,
             } => self.modes(modes, count, chosen, *choice_kind),
-            Control::Match { .. } | Control::Repeat { .. } => self.reject(),
+            Control::Match {
+                recipients,
+                leader,
+                leader_body,
+                follower,
+                follower_body,
+            } => self.by_kind(
+                *recipients,
+                (*leader, leader_body),
+                (*follower, follower_body),
+            ),
+            Control::Repeat { .. } => self.reject(),
         }
+    }
+
+    /// Only a resolved choice of exactly one recipient has a single kind to branch on.
+    fn by_kind(
+        &mut self,
+        recipients: Binding<Vec<DamageRecipient>>,
+        leader: (Binding<PlayerRef>, &Program),
+        follower: (Binding<ObjectRef>, &Program),
+    ) -> Checked {
+        self.reference(recipients, BindingKind::Value)?;
+        if !self.env.single_recipients.contains(&recipients.key()) {
+            return self.reject();
+        }
+        let access = self.env.access.get(&recipients.key()).cloned();
+        self.at("leader_body", |checker| {
+            checker.isolated(|checker| {
+                checker.env.scope = leader.1.scope;
+                checker.define(leader.0, BindingKind::Value)?;
+                checker.save_access(leader.0.key(), access.clone());
+                checker.program(leader.1)
+            })
+        })?;
+        self.at("follower_body", |checker| {
+            checker.isolated(|checker| {
+                checker.env.scope = follower.1.scope;
+                checker.define(follower.0, BindingKind::Value)?;
+                checker.save_access(follower.0.key(), access);
+                checker.program(follower.1)
+            })
+        })
     }
 
     fn each_player(&mut self, player: Binding<PlayerRef>, stages: &[PlayerStage]) -> Checked {
