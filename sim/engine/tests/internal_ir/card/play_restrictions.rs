@@ -96,7 +96,7 @@ fn played_name_restriction_checks_prior_commits_and_keeps_names_after_ability_lo
         .play_internal_card("s", PlayerId { seat: 1 })
         .unwrap_err();
     assert!(
-        matches!(&error, sve_engine::EngineFailure::Unsupported(reason)
+        matches!(&error, EngineFailure::Unsupported(reason)
         if reason == "internal D1 does not support card play holder, permission or timing"),
         "the saved name reaches the existing permission gate: {error:?}"
     );
