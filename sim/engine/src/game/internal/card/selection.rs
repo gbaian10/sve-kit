@@ -1532,6 +1532,15 @@ impl Game {
         // Only answers of a legal size are tried, stopping at the first that leaves the rest
         // answerable, so one card among many (a cemetery) costs one attempt per card.
         let rest = parameters.iter().skip(1).cloned().collect::<VecDeque<_>>();
+        // Proved before this answer exists, the rest either reads it and fails to evaluate, or
+        // ignores it and sees at least the candidates any answer would leave; no answer then
+        // rescues a rest that is already unanswerable, so independent questions skip enumeration.
+        if matches!(
+            self.internal_feasible_targets(&candidate, &candidate.slots, &rest),
+            Ok(false)
+        ) {
+            return Ok(false);
+        }
         let mut attempts = 0_u32;
         for members in sized_selections(&wait.members, wait.bounds) {
             if !wait.compatible(&members)? {

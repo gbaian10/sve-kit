@@ -238,9 +238,11 @@ fn a_mode_target_may_read_the_original_cost_of_an_earlier_target() {
 
 #[test]
 fn a_mode_with_many_cemetery_candidates_keeps_its_menu() {
-    let program = unit_spell(&json!({
+    // Three of twenty is 1140 answers; the independent enemy half must not force trying them.
+    for (picked, graves) in [(1_u8, 11_u8), (3, 20)] {
+        let program = unit_spell(&json!({
         "targets":[
-            {"bind":"grave","option":1,"from":{"who":"self","zone":"cemetery","kind":"follower"},"n":1},
+            {"bind":"grave","option":1,"from":{"who":"self","zone":"cemetery","kind":"follower"},"n":picked},
             {"bind":"enemy","option":1,"from":{"who":"opp","zone":"field","kind":"follower"},"n":1}
         ],
         "do":[{"choice":{"n":1,"options":[
@@ -249,55 +251,56 @@ fn a_mode_with_many_cemetery_candidates_keeps_its_menu() {
         ]}}]
     }))
     .unwrap();
-    for (enemies, expected) in [
-        (
-            json!([{"id":"enemy","card":"two"}]),
-            vec![ModeId(1), ModeId(2)],
-        ),
-        (json!([]), vec![ModeId(2)]),
-    ] {
-        let mut initial = setup(1, json!([{"id":"d1","card":"one"}]));
-        initial["players"]["P1"]["zones"]["cemetery"] = (0..11)
-            .map(|index| json!({"id":format!("g{index}"),"card":"one"}))
-            .collect();
-        initial["players"]["P2"]["zones"]["field"] = enemies;
-        let mut game = Game::new(
-            catalog(),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "many-graves",
-        )
-        .unwrap();
-        game.load_internal_card("unit-spell", &program).unwrap();
-        for (number, _) in FOLLOWERS {
-            game.load_internal_card(number, &card(vec![])).unwrap();
-        }
-        let CardPlay::Awaiting(question) =
-            game.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
-        else {
-            panic!("a mode question")
-        };
-        let InputDomain::Modes { modes, .. } = &question.domain else {
-            panic!("a mode question: {:?}", question.domain)
-        };
-        assert_eq!(
-            *modes, expected,
-            "eleven cemetery candidates still leave the menu, and the draw mode, available"
-        );
-        if expected.len() == 1 {
-            let step = game
-                .answer_internal_card(question.actor, question.token, Answer::Modes(expected))
-                .unwrap();
-            assert!(
-                !matches!(step, CardPlay::Awaiting(_)),
-                "the draw mode asks nothing more"
-            );
+        for (enemies, expected) in [
+            (
+                json!([{"id":"enemy","card":"two"}]),
+                vec![ModeId(1), ModeId(2)],
+            ),
+            (json!([]), vec![ModeId(2)]),
+        ] {
+            let mut initial = setup(1, json!([{"id":"d1","card":"one"}]));
+            initial["players"]["P1"]["zones"]["cemetery"] = (0..graves)
+                .map(|index| json!({"id":format!("g{index}"),"card":"one"}))
+                .collect();
+            initial["players"]["P2"]["zones"]["field"] = enemies;
+            let mut game = Game::new(
+                catalog(),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "many-graves",
+            )
+            .unwrap();
+            game.load_internal_card("unit-spell", &program).unwrap();
+            for (number, _) in FOLLOWERS {
+                game.load_internal_card(number, &card(vec![])).unwrap();
+            }
+            let CardPlay::Awaiting(question) =
+                game.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
+            else {
+                panic!("a mode question")
+            };
+            let InputDomain::Modes { modes, .. } = &question.domain else {
+                panic!("a mode question: {:?}", question.domain)
+            };
             assert_eq!(
-                game.projection(View::Referee).unwrap()["P1"]["hand"],
-                json!(["d1"]),
-                "the draw mode resolves"
+                *modes, expected,
+                "eleven cemetery candidates still leave the menu, and the draw mode, available"
             );
+            if expected.len() == 1 {
+                let step = game
+                    .answer_internal_card(question.actor, question.token, Answer::Modes(expected))
+                    .unwrap();
+                assert!(
+                    !matches!(step, CardPlay::Awaiting(_)),
+                    "the draw mode asks nothing more"
+                );
+                assert_eq!(
+                    game.projection(View::Referee).unwrap()["P1"]["hand"],
+                    json!(["d1"]),
+                    "the draw mode resolves"
+                );
+            }
         }
     }
 }
