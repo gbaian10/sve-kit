@@ -3,8 +3,10 @@
 //! Native coordinates stay in the projector. Hosts bind each projection to its
 //! authenticated seat and current question before submitting the decoded answer.
 
+mod references;
 mod selection;
 
+pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use selection::{CandidateDetails, SelectionProjection};
 
 use sve_battle_contract::{HostError, HostErrorReason};

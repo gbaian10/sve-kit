@@ -468,6 +468,16 @@ impl RuleBindings {
         Ok(())
     }
 
+    pub(crate) fn snapshot_background(&self) -> Option<(&str, &str)> {
+        let Background::Bound(background) = &self.background else {
+            return None;
+        };
+        Some((
+            background.get("region")?.as_str()?,
+            background.get("snapshot_sha256")?.as_str()?,
+        ))
+    }
+
     pub(crate) fn title_code(&self, code: &str, label: &str) -> Result<Option<String>> {
         if code.is_empty() && label.is_empty() {
             return Ok(None);
