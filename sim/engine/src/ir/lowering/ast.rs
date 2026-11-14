@@ -1144,6 +1144,7 @@ pub(super) struct ObjectQuery {
 pub(super) enum ObjectQueryWhere {
     Extremum(Box<QueryExtremumWhere>),
     Damaged(DamagedThisTurnWhere),
+    Power(PublicPowerWhere),
 }
 
 #[derive(Clone, Deserialize)]
@@ -2737,7 +2738,7 @@ pub(super) struct PublicQuery {
     pub r#where: Option<PublicPowerWhere>,
 }
 
-/// `where: {cmp: {left: {power_of: item}, op: ge|le, right: N}}` on each public candidate.
+/// `where: {cmp: {left: {power_of: item}, op: ge|le|eq, right: N}}` on each public candidate.
 #[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicPowerWhere {
@@ -2766,6 +2767,7 @@ pub(super) enum Item {
 pub(super) enum PowerBound {
     Ge,
     Le,
+    Eq,
 }
 
 #[derive(Deserialize)]

@@ -122,7 +122,7 @@ impl BodyContext<'_> {
         let condition = match &query.r#where {
             Some(ast::ObjectQueryWhere::Extremum(condition)) => Some(condition.as_ref()),
             Some(ast::ObjectQueryWhere::Damaged(_)) => return Err(unsupported(path)),
-            None => None,
+            Some(ast::ObjectQueryWhere::Power(_)) | None => None,
         };
         self.checked_extremum(query.alias.as_deref(), condition, &population, input, path)
     }
