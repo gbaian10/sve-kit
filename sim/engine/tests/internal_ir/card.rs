@@ -1033,3 +1033,6 @@ mod observed_hand_remainder;
 
 #[path = "card/optional_selected_scalar.rs"]
 mod optional_selected_scalar;
+
+#[path = "card/selected_play_cost.rs"]
+mod selected_play_cost;

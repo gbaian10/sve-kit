@@ -579,14 +579,7 @@ impl BodyContext<'_> {
         let ast::InstalledEffect::CostMod(modifier) = &installation.effect else {
             return Err(unsupported(path));
         };
-        let ast::Objects::Follow { follow } = &installation.on else {
-            return Err(unsupported(path));
-        };
-        let objects = self
-            .ex_outputs
-            .get(follow)
-            .cloned()
-            .ok_or_else(|| unsupported(path))?;
+        let objects = self.objects(&installation.on, path)?;
         let ast::Playing::Affected(filter) = &modifier.when_playing else {
             return Err(unsupported(path));
         };
