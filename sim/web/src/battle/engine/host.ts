@@ -21,6 +21,9 @@ export type CreateSession = (inputs: MatchInputs, setup: string) => Promise<Engi
 
 type Random = (bytes: Uint8Array<ArrayBuffer>) => Uint8Array<ArrayBuffer>
 
+/** Checks a contract message before it leaves the Worker; dev builds and tests pass the generated validator. */
+export type ValidateContract = (message: unknown) => boolean
+
 export interface SeatPort {
   postMessage(message: SeatMessage): void
   onmessage: ((event: MessageEvent<SeatRequest>) => void) | null
@@ -42,14 +45,20 @@ function randomSeed(random: Random): string {
 export class BattleHost {
   readonly #create: CreateSession
   readonly #random: Random
+  readonly #validate: ValidateContract | undefined
   readonly #ports = new Map<Seat, SeatPort>()
   #queue: Promise<void> = Promise.resolve()
   #session: EngineSession | undefined
   #stopped = false
 
-  constructor(create: CreateSession, random: Random = (bytes) => crypto.getRandomValues(bytes)) {
+  constructor(
+    create: CreateSession,
+    random: Random = (bytes) => crypto.getRandomValues(bytes),
+    validate?: ValidateContract,
+  ) {
     this.#create = create
     this.#random = random
+    this.#validate = validate
   }
 
   init({ inputs, options, ports }: InitMessage): void {
@@ -108,6 +117,14 @@ export class BattleHost {
       deliveries = JSON.parse(run(session)) as Delivery[]
     } catch {
       // A trapped WebAssembly instance cannot be trusted again.
+      this.#fail()
+      return
+    }
+    // The temporary update has no contract schema yet; receipts and host errors are contract messages.
+    const invalid = deliveries.some(
+      ({ message }) => message.kind !== "update" && this.#validate?.(message) === false,
+    )
+    if (invalid) {
       this.#fail()
       return
     }
