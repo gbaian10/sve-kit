@@ -52,6 +52,10 @@ impl fmt::Debug for BattleReferences {
 impl BattleReferences {
     /// Bind trusted snapshot identities without creating another card database.
     ///
+    /// Legacy JP backgrounds are allowed because permanent IDs are supplied,
+    /// never inferred from legacy numbers. Explicit face mappings also support a
+    /// legacy projection whose face order differs from the published printing layout.
+    ///
     /// # Errors
     /// Refuses unbound or mismatched backgrounds, missing faces, aliases,
     /// collisions and coordinates outside either printing's face closure.
