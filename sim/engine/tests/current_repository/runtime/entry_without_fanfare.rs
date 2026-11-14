@@ -106,15 +106,15 @@ fn bp04_039_puts_any_followers_without_fanfare_and_a_later_play_still_triggers()
     assert_eq!(view["P1"]["deck"], json!(["top"]), "neither put card draws");
     let step = game.play_internal_card("c", PlayerId { seat: 1 }).unwrap();
     settle(&mut game, Some(step), 1);
-    let view = game.projection(View::Referee).unwrap();
+    let played = game.projection(View::Referee).unwrap();
     assert_eq!(
-        view["P1"]["field"].as_array().unwrap()[1..],
+        played["P1"]["field"].as_array().unwrap()[1..],
         [json!("a"), json!("b"), json!("c")]
     );
     assert_eq!(
-        view["P1"]["deck"],
+        played["P1"]["deck"],
         json!([]),
         "the played card's Fanfare draws"
     );
-    assert_eq!(view["P1"]["banish"], json!(["top"]));
+    assert_eq!(played["P1"]["banish"], json!(["top"]));
 }
