@@ -12,6 +12,7 @@ use core::result;
 
 #[cfg(feature = "runner")]
 pub mod adapter;
+pub mod battle;
 pub mod catalog;
 pub mod game;
 pub mod host;
