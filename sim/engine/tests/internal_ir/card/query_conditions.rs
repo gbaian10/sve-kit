@@ -321,3 +321,69 @@ fn keyword_filtered_buff_uses_effective_abilities_and_the_controller() {
         assert_eq!(state["objects"][object]["hp"], 3_u8);
     }
 }
+
+#[test]
+fn keyword_filtered_numeric_changes_exclude_their_own_holder() {
+    let mut document = equipment_played::tree(
+        &json!({"static":{"effects":[{"grant":{"keywords":["ward"]}}]}}),
+        "unit-follower",
+    );
+    let mut activation = document["cards"]["unit-follower"]["abilities"][0].clone();
+    activation.as_object_mut().unwrap().remove("static");
+    activation["sources"][0]["ability_scope"] = json!("buff-other-ward");
+    activation["activate"] = json!({"cost":{"pp":0},"do":[{"buff":{
+        "on":{"who":"self","zone":"field","kind":"follower","keyword":"ward","other":true},"power":1,"hp":2
+    }}]});
+    document["cards"]["unit-follower"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(activation);
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"source","card":"unit-follower"},{"id":"other","card":"unit-follower"}]);
+    let mut game = Game::new(
+        static_keywords::keyword_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "other-ward-buff",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    resolved(
+        game.activate_internal_card(
+            "source",
+            program.card().abilities[1].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["source"]["power"], 2_u8);
+    assert_eq!(state["objects"]["source"]["hp"], 3_u8);
+    assert_eq!(state["objects"]["other"]["power"], 3_u8);
+    assert_eq!(state["objects"]["other"]["hp"], 5_u8);
+    assert_eq!(state["objects"]["f"]["power"], 2_u8);
+}
+
+#[test]
+fn numeric_keyword_filters_keep_the_existing_field_and_ex_zone_boundary() {
+    for kind in ["buff", "set_stat"] {
+        let mut step = json!({});
+        step[kind] = json!({"on":{"who":"self","zone":"field","keyword":"ward"},"power":1});
+        let mut document = equipment_played::tree(
+            &json!({"activate":{"cost":{"pp":0},"do":[step]}}),
+            "unit-follower",
+        );
+        lowerer().lower(&document).unwrap();
+        document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0][kind]["on"]["zone"] =
+            json!("cemetery");
+        lowerer().lower(&document).unwrap_err();
+    }
+}

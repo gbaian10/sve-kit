@@ -1010,7 +1010,6 @@ pub(super) struct Modify {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum NumericSubjects {
     Single(Objects),
-    Public(Box<PublicQuery>),
     Union { any_of: Box<[ObjectQuery; 2]> },
 }
 
@@ -1091,6 +1090,7 @@ pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<FieldKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,

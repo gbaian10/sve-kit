@@ -257,6 +257,7 @@ impl BodyContext<'_> {
                 who: ast::Side::Opponent,
                 zone: ast::Zone::Field,
                 kind: Some(ast::FieldKind::Follower),
+                keyword: None,
                 r#trait: None,
                 class: None,
                 not_class: None,
@@ -323,6 +324,7 @@ impl BodyContext<'_> {
             predicate: Box::new(super::selection::field_filter(
                 &super::selection::ObjectFilter {
                     kind: kind.as_ref().map(super::search::card_kind),
+                    keyword: query.keyword.map(|keyword| keyword.0),
                     trait_id: query.r#trait.as_deref(),
                     class: query.class.as_deref(),
                     not_class: query.not_class.as_deref(),
@@ -444,13 +446,6 @@ impl BodyContext<'_> {
                 | ast::Objects::Zone(_)
                 | ast::Objects::EventHolder { .. } => self.objects(objects, path)?,
             },
-            ast::NumericSubjects::Public(query) => {
-                let binding = Binding::new(
-                    self.card_allocator.id(path)?,
-                    self.card_allocator.scope(path)?,
-                );
-                super::costs::named_public_query(query, binding, path)?
-            }
             ast::NumericSubjects::Union { any_of } if !set => {
                 self.token_follower_union(any_of, path)?
             }
@@ -483,6 +478,7 @@ impl BodyContext<'_> {
                 who: ast::Side::Controller,
                 zone: ast::Zone::Field | ast::Zone::Ex,
                 kind: Some(ast::FieldKind::Follower),
+                keyword: None,
                 r#trait: Some(trait_id),
                 class: None,
                 not_class: None,
