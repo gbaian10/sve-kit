@@ -599,3 +599,43 @@ fn transfer_does_not_rebind_a_target_to_a_later_generation_after_it_leaves_the_f
         before["objects"]["victim"]["generation"].as_u64().unwrap() + 1_u64
     );
 }
+#[test]
+fn a_stolen_follower_destroyed_by_lethal_damage_still_offers_its_lastword_to_the_thief() {
+    // Q1761: the rule destruction after lethal damage is still a departure from the thief's field.
+    let mut document = tree();
+    document["cards"]["unit-follower"]["abilities"][1]["activate"]["do"] =
+        json!([{"damage":{"to":"own","n":10}}]);
+    let programs = lowerer().lower(&document).unwrap();
+    let mut game = loaded(&initial(1, false), &programs, false);
+    steal(&mut game, &programs, 1);
+    finish(&mut game);
+    let target = question(
+        game.activate_internal_card(
+            "source",
+            programs["unit-follower"].card().abilities[1].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    let InputDomain::Targets(domain) = &target.domain else {
+        panic!("own target")
+    };
+    let handle = domain
+        .members
+        .iter()
+        .find(|member| member.card.as_deref() == Some("unit-amulet"))
+        .unwrap()
+        .handle;
+    resolved(
+        game.answer_internal_card(target.actor, target.token, Answer::Targets(vec![handle]))
+            .unwrap(),
+    );
+    finish(&mut game);
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P2"]["cemetery"], json!(["victim"]), "{after}");
+    let pending = game
+        .internal_pending_choice()
+        .unwrap()
+        .expect("the stolen follower's Lastword is pending");
+    assert_eq!(pending.actor, PlayerId { seat: 1 });
+}

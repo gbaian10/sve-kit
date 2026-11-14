@@ -1,0 +1,32 @@
+cards:
+  BP01-111:
+    abilities:
+      - evolve_time:
+          do:
+            - damage:
+                n: 2
+                to:
+                  leader: self
+            - reveal:
+                bind: shown
+                ref:
+                  who: opp
+                  zone: hand
+            - choose:
+                bind: picked
+                from:
+                  in: shown
+                n: 1
+            - discard:
+                ref: picked
+                who: opp
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set
