@@ -74,16 +74,6 @@ known:
     status: unsupported
     error: "unadmitted BP02-SL17 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP02-SL17/0, query complete card names: current ability definitions unavailable"
-  - question: "card-BP03-011"
-    scenario: "A 自己的主要階段來臨 → 茨の森自毀 → 之後攻擊沒有附加傷害"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP03-011"
-    scenario: "B 打出當回合：攻撃時 2 傷害打死體力 2 的目標 → 不交戰、攻擊者體力不減"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP03-109"
     scenario: "A 奪走出走中的ハルウララ → 仍有突進 → 攻擊アクト狀態的ファイター → 互相受傷"
     status: unsupported
@@ -929,16 +919,6 @@ known:
     status: unsupported
     error: "unadmitted BP15-SL13 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-attack-reference-r3-01"
-    scenario: "攻擊有オーラ的從者"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder m generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-attack-reference-r3-01"
-    scenario: "攻擊主戰者條件不成立"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder m generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-equipment-capacity-r3-01"
     scenario: "PP=2"
     status: unsupported
