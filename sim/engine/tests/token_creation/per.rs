@@ -125,13 +125,14 @@ fn public_per_reads_after_the_preceding_instruction_moves_a_card() {
 }
 
 #[test]
-fn public_per_retains_the_existing_public_filter_policy() {
+fn public_per_reuses_the_existing_public_filter_policy() {
     let filtered = json!({"count":{"who":"self","zone":"cemetery","kind":"spell"}});
-    for count in [filtered.clone(), json!({"per":{"of":filtered,"unit":3_u8}})] {
-        assert!(
-            matches!(author_game(count, 3, 0), Err(EngineFailure::Unsupported(_))),
-            "a formula does not grant a new identity-reading selector spine"
-        );
+    for (count, expected) in [
+        (filtered.clone(), 3_usize),
+        (json!({"per":{"of":filtered,"unit":3_u8}}), 1),
+    ] {
+        let mut game = author_game(count, 3, 0).unwrap();
+        assert_eq!(created(&mut game), expected);
     }
 }
 
@@ -594,4 +595,30 @@ fn arithmetic_does_not_hide_an_unproved_conditional_branch() {
         raw_game(0).prepare_internal_play(&checked, &source, context()),
         Err(EngineFailure::Unsupported(_))
     ));
+}
+
+#[test]
+fn public_opponent_follower_count_is_a_valid_token_quantity() {
+    let (snapshot, keywords, input) =
+        input(json!({"count":{"who":"opp","zone":"field","kind":"follower"}}));
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let mut position = initial(0);
+    position["players"]["P1"]["zones"]["field"] = json!([{"id":"own","card":"token"}]);
+    position["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"enemy-a","card":"token"},{"id":"enemy-b","card":"token"}]);
+    let mut game = Game::from_selected_effects(
+        selected,
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "public-token-count",
+    )
+    .unwrap();
+    assert_eq!(created(&mut game), 2_usize);
+    author_game(
+        json!({"count":{"who":"opp","zone":"hand","kind":"follower"}}),
+        0,
+        0,
+    )
+    .unwrap_err();
 }
