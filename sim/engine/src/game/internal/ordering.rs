@@ -3,6 +3,7 @@
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::CardOption;
 use crate::game::player::Viewer;
+use crate::ir::play_restrictions;
 
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
@@ -656,7 +657,7 @@ fn mask_public_recipients(recipients: &mut RecipientSet) {
 }
 
 fn mask_public_predicate(selector: &mut Selector) {
-    if target_plan(selector).is_some() {
+    if target_plan(selector).is_some() || play_restrictions::source_zone_query(selector).is_some() {
         *selector = Selector::Objects { objects: vec![] };
         return;
     }
