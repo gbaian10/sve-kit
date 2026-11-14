@@ -77,7 +77,8 @@ fn attack(game: &mut Game) {
         game.internal_rule_action(&json!({"do":"attack","attacker":"source","target":"enemy"}))
             .unwrap()
             .outcome,
-        "resolved"
+        "resolved",
+        "the attack is declared"
     );
     drain(game);
 }

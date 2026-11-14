@@ -99,7 +99,11 @@ fn activate(game: &mut Game, card: &str, line: u32, modes: &[ModeId]) {
         .node
         .id;
     let step = game.activate_internal_card("source", ability, PLAYER).unwrap();
-    assert!(settle(game, Some(step), modes).is_empty());
+    assert_eq!(
+        settle(game, Some(step), modes),
+        Vec::<usize>::new(),
+        "no trigger quota choice"
+    );
 }
 
 fn state(game: &Game) -> Value {
@@ -107,8 +111,8 @@ fn state(game: &Game) -> Value {
 }
 
 fn grown(view: &Value, id: &str, printed: &Value) -> bool {
-    view["objects"][id]["power"].as_u64().unwrap() == printed["power"].as_u64().unwrap() + 1
-        && view["objects"][id]["hp"].as_u64().unwrap() == printed["hp"].as_u64().unwrap() + 1
+    view["objects"][id]["power"].as_u64() == printed["power"].as_u64().and_then(|n| n.checked_add(1))
+        && view["objects"][id]["hp"].as_u64() == printed["hp"].as_u64().and_then(|n| n.checked_add(1))
 }
 
 #[test]
@@ -119,13 +123,25 @@ fn bp03_089_buffs_only_the_next_played_follower() {
         .unwrap()
         .push(json!({"id":"command","card":"BP03-089"}));
     let mut game = loaded(&initial);
-    assert!(play(&mut game, "command").is_empty());
+    assert_eq!(
+        play(&mut game, "command"),
+        Vec::<usize>::new(),
+        "no trigger quota choice"
+    );
     let cast = state(&game);
     assert_eq!(cast["P1"]["leader"]["life"], 9_u8);
-    assert!(play(&mut game, "first").is_empty());
+    assert_eq!(
+        play(&mut game, "first"),
+        Vec::<usize>::new(),
+        "no trigger quota choice"
+    );
     let entered = state(&game);
     let printed = entered["objects"]["second"].clone();
-    assert!(play(&mut game, "second").is_empty());
+    assert_eq!(
+        play(&mut game, "second"),
+        Vec::<usize>::new(),
+        "no trigger quota choice"
+    );
     let view = state(&game);
     assert!(grown(&view, "first", &printed), "the next played follower");
     assert!(!grown(&view, "second", &printed), "only once");
@@ -140,8 +156,16 @@ fn sp01_026_grows_the_next_entering_follower_and_draws() {
     let activated = state(&game);
     assert_eq!(activated["P1"]["hand"].as_array().unwrap().len(), 4, "mode 4 draws");
     let printed = activated["objects"]["second"].clone();
-    assert!(play(&mut game, "first").is_empty());
-    assert!(play(&mut game, "second").is_empty());
+    assert_eq!(
+        play(&mut game, "first"),
+        Vec::<usize>::new(),
+        "no trigger quota choice"
+    );
+    assert_eq!(
+        play(&mut game, "second"),
+        Vec::<usize>::new(),
+        "no trigger quota choice"
+    );
     let view = state(&game);
     assert!(grown(&view, "first", &printed));
     assert!(!grown(&view, "second", &printed));
@@ -176,6 +200,10 @@ fn sp01_026_grows_one_follower_of_a_simultaneous_entry() {
         })
         .count();
     assert_eq!(grown_fairies, 1, "only one of them");
-    assert!(play(&mut game, "first").is_empty());
+    assert_eq!(
+        play(&mut game, "first"),
+        Vec::<usize>::new(),
+        "no trigger quota choice"
+    );
     assert!(!grown(&state(&game), "first", &printed), "the quota is spent");
 }

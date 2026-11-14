@@ -83,7 +83,8 @@ fn attack(game: &mut Game, attacker: &str, target: &str) {
         game.internal_rule_action(&json!({"do":"attack","attacker":attacker,"target":target}))
             .unwrap()
             .outcome,
-        "resolved"
+        "resolved",
+        "the attack is declared"
     );
     settle(game, None, &[], &mut None);
 }
@@ -164,10 +165,10 @@ fn bp08_024_cap_is_a_gained_ability_lost_with_all_abilities() {
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
     settle(&mut game, None, &[], &mut None);
-    let step = game
+    let cast = game
         .play_internal_card("silence", PlayerId { seat: 2 })
         .unwrap();
-    settle(&mut game, Some(step), &[], &mut None);
+    settle(&mut game, Some(cast), &[], &mut None);
     attack(&mut game, "enemy", "ally");
     assert_eq!(
         damage(&game, "ally"),
@@ -193,7 +194,8 @@ fn bp05_101_caps_each_leader_damage_this_turn() {
         game.internal_rule_action(&json!({"do":"attack","attacker":"enemy","target":"P1.leader"}))
             .unwrap()
             .outcome,
-        "resolved"
+        "resolved",
+        "the attack is declared"
     );
     let mut quick = Some("BP05-101");
     settle(&mut game, None, &[], &mut quick);

@@ -103,13 +103,14 @@ fn installed_life_watch_triggers_on_a_later_own_leader_decrease_this_turn() {
             .any(|effect| effect.change
                 == InstalledChange::Delayed {
                     timing: TriggerTiming::LifeChange
-                })
+                }),
+        "the installed watch is public as a life-change trigger"
     );
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {
         panic!("installed life occurrence");
     };
-    assert_eq!(options.len(), 1);
+    assert_eq!(options.len(), 1, "one life decrease, one occurrence");
     resolved(
         game.answer_internal_card(
             question.actor,
@@ -123,7 +124,8 @@ fn installed_life_watch_triggers_on_a_later_own_leader_decrease_this_turn() {
     }
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["hand"],
-        json!(["d1"])
+        json!(["d1"]),
+        "the callback draws once"
     );
 }
 

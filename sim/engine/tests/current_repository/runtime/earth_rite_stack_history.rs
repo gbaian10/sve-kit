@@ -31,10 +31,10 @@ fn game(initial: &Value) -> Game {
 
 /// Plays BP01-063, answers its optional Earth Rite with `pay` and lets both golems enter standing.
 fn cast(game: &mut Game, pay: bool) {
-    let mut play = game
+    let mut outcome = game
         .play_internal_card("golems", PlayerId { seat: 1 })
         .unwrap();
-    while let CardPlay::Awaiting(question) = play {
+    while let CardPlay::Awaiting(question) = outcome {
         let answer = match &question.domain {
             InputDomain::OptionalCost => Answer::OptionalCost(pay),
             InputDomain::CostMaterials(domain) => {
@@ -45,7 +45,7 @@ fn cast(game: &mut Game, pay: bool) {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             _ => panic!("unexpected decision: {:?}", question.domain),
         };
-        play = game
+        outcome = game
             .answer_internal_card(question.actor, question.token, answer)
             .unwrap();
     }
