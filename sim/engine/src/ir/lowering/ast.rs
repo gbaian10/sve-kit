@@ -3554,8 +3554,17 @@ pub(super) struct DamageModifier {
     pub on: Option<Recipients>,
     pub source: Option<PreventionSource>,
     pub kind: Option<PreventionKind>,
-    pub delta: i64,
+    pub delta: Number,
     pub next_only: Option<bool>,
+}
+impl DamageModifier {
+    pub(super) const fn literal_delta(&self) -> Option<i64> {
+        if let Number::Literal(delta) = self.delta {
+            Some(delta)
+        } else {
+            None
+        }
+    }
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

@@ -1,0 +1,57 @@
+cards:
+  BP20-020:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      counter:
+                        name: 融合カウンター
+                        on: this
+                    op: ge
+                    right: 1
+                else:
+                  - create:
+                      n: 1
+                      to: ex
+                      token: 黄金の小剣
+                then:
+                  - draw:
+                      n: 1
+        line: 2
+      - activate:
+          do:
+            - counter:
+                delta:
+                  count:
+                    in:
+                      objects_of: fused
+                      view: before
+                name: 融合カウンター
+                on: this
+          fusion:
+            result: fused
+            sel:
+              orig_cost_ge: 1
+              trait: 財宝
+              who: self
+              zone:
+                - hand
+                - ex
+            upto: 2
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

@@ -1241,3 +1241,10 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 `distinct_orig_costs: {in: {objects_of: milled, view: before}}` 沿既有種類數聚合，僅讀同一本文先前由自己牌庫頂固定正張數送到墓場的實際成功成員。
 `== 1` 同時表示成員非空且原費全部相同；不以指示要求的張數或墓場目前全部卡片代替。回條不存在、來自其他來源／目的地、After 投影或附加篩選皆拒絕；原費讀不可變本體印刷，不套用目前費用修正。
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
+
+## 持續傷害加值讀來源 counter
+
+場上常在的 `damage_mod.delta` 除常值外，也接受 `{times: [{counter: {on: this, name: …}}, N]}`（N 為正整數），
+在每次提出傷害時讀能力持有者目前的 counter 數乘以 N。BP20-021「これの融合カウンター1個につき、これが与える能力ダメージを+2する」
+寫成 `damage_mod: {source: this, kind: ability, delta: {times: [{counter: {on: this, name: 融合カウンター}}, 2]}}`；
+counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `damage_mod` 仍只接受常值。
