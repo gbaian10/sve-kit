@@ -70,8 +70,13 @@ pub(in crate::game::internal) fn ex_self_entry(ability: &Ability) -> bool {
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
-    if filter(ability).is_none() {
+    let Some(plan) = filter(ability) else {
         return Ok(false);
+    };
+    // 「これと同名を除く」 is admitted for history queries only; observers never capture the
+    // holder's names, so such a header would fail on the first matching departure.
+    if plan.not_same_name {
+        return Err(unsupported("movement observer holder name exclusion"));
     }
     let trigger = ability
         .trigger
@@ -477,3 +482,6 @@ impl Game {
         self.internal_admit_pending(candidates)
     }
 }
+
+#[cfg(test)]
+mod tests;

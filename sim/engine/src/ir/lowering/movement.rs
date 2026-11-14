@@ -15,6 +15,8 @@ pub(super) enum FilterSupport {
     OriginalCost,
     EntryCost,
     CemeteryWard,
+    /// A current-turn history query compares saved subject names with the holder (BP10-009).
+    History,
 }
 
 pub(super) fn subscription(
@@ -279,7 +281,8 @@ pub(super) fn movement_filter(
         Some(_) => return Err(unsupported(path)),
     };
     if subject.is_some_and(|sel| {
-        sel.not_same_name_as_this == Some(true) && !matches!(support, FilterSupport::EntryCost)
+        sel.not_same_name_as_this == Some(true)
+            && !matches!(support, FilterSupport::EntryCost | FilterSupport::History)
     }) {
         return Err(unsupported(path));
     }
