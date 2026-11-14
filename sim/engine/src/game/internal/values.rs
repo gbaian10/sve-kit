@@ -731,6 +731,18 @@ impl Execution {
                     .ok_or_else(|| invalid("missing player turn ordinal"))
             }
             NatRead::Counter { holder, kind } => self.counter(game, holder, kind),
+            NatRead::OtherHandCount { player, excluding } => {
+                let excluded = self.object(game, excluding)?;
+                let excluded_id = self.object_id(excluded)?;
+                let current = game.object(excluded_id)?.generation == excluded.generation.0;
+                let hand = game.zone_ids(seat_name(self.player(game, player)?)?, "hand");
+                Ok(Nat(u64::try_from(
+                    hand.iter()
+                        .filter(|id| !current || id.as_str() != excluded_id)
+                        .count(),
+                )
+                .map_err(invalid)?))
+            }
             NatRead::Combo { player, execution } => {
                 super::history_turn::combo(self, game, player, *execution)
             }

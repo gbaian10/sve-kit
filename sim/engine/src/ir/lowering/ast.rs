@@ -2209,7 +2209,7 @@ impl CountKind {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
     pub face_up: Option<bool>,
@@ -2232,7 +2232,7 @@ pub(super) struct CountQuery {
     pub not_token: Option<bool>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
     EvolveDeck,
@@ -2674,9 +2674,16 @@ pub(super) enum Comparison {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PublicNumber {
     Literal(i64),
-    Count { count: PublicQuery },
+    Count { count: CostCountQuery },
     DistinctNames { distinct_names: PublicQuery },
     DistinctOriginalCosts { distinct_orig_costs: PublicQuery },
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum CostCountQuery {
+    Public(PublicQuery),
+    General(CountQuery),
 }
 
 #[derive(Clone, Deserialize, PartialEq, Eq)]

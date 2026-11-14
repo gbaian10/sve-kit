@@ -538,6 +538,7 @@ tags!(PlayerResource {
 variants!(NatRead {
     Counter { holder: Holder, kind: CounterKind } => ["read.counter"],
     ZoneCount { selector: Selector } => ["read.zone-count"],
+    OtherHandCount { player: PlayerRef, excluding: ObjectOperand } => ["read.other-hand-count"],
     ZoneCapacity { player: PlayerRef, zone: CapacityZone, property: CapacityProperty } => ["read.zone-capacity"],
     Combo { player: PlayerRef, execution: ExecutionRef } => ["read.combo"],
     HistoryCount { query: HistoryQuery, count: HistoryCount } => ["read.history.count"],

@@ -4,8 +4,8 @@ use super::super::card::selection::public_zone_selector;
 use crate::ir::history_turn::HistoryPlan;
 use crate::ir::{
     Arithmetic, Bool, BoolRead, ExecutionRef, Expr, HistoryCount, Int, IntOperation, IntRead, Nat,
-    NatOperation, NatRead, ObjectProperty, PlayerRef, PlayerResource, Predicate, SelectionView,
-    Selector, ZoneKind,
+    NatOperation, NatRead, ObjectOperand, ObjectProperty, PlayerRef, PlayerResource, Predicate,
+    SelectionView, Selector, ZoneKind,
 };
 
 pub(super) fn admits_natural(value: &Expr<Nat>) -> bool {
@@ -31,7 +31,11 @@ pub(super) fn admits_natural(value: &Expr<Nat>) -> bool {
                 true
             }
             NatRead::ZoneCount { selector } => public_zone_selector(selector).is_ok(),
-            NatRead::TurnOrdinal { .. } => true,
+            NatRead::TurnOrdinal { .. }
+            | NatRead::OtherHandCount {
+                player: PlayerRef::Controller {},
+                excluding: ObjectOperand::SourceHolder {},
+            } => true,
             _ => false,
         },
         Expr::Compute(operation) => matches!(operation.as_ref(),
