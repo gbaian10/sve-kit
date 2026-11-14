@@ -1372,6 +1372,10 @@ impl Game {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every runnable node kind is dispatched from one execution loop."
+    )]
     fn internal_run_current(&mut self, execution: &mut Execution) -> Result<()> {
         while execution.waiting.is_none() {
             if self.state.game["ended"] == true {

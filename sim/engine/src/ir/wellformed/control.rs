@@ -31,6 +31,10 @@ impl Checker {
         Ok(())
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every control kind is checked from one exhaustive dispatch."
+    )]
     fn control_inner(&mut self, control: &Control) -> Checked {
         if let Some(projection) = advance_entry::projection(control) {
             return self.isolated(|checker| checker.advance_entry(projection));

@@ -1435,7 +1435,7 @@ struct BodyContext<'definitions> {
     card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
     players: BTreeMap<String, Binding<PlayerRef>>,
-    /// The follower a by_kind branch narrowed its chosen recipient to, by its local name.
+    /// The follower a `by_kind` branch narrowed its chosen recipient to, by its local name.
     kind_followers: BTreeMap<String, Binding<super::ObjectRef>>,
     /// The innermost enclosing procedure's player, from whose perspective `other_players` reads.
     procedure_player: Option<Binding<PlayerRef>>,

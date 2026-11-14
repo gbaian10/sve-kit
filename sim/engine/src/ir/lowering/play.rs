@@ -1688,7 +1688,7 @@ fn target_players(side: &ast::Side, path: &str) -> Result<PlayerSet, LoweringErr
 }
 
 /// 「自分のリーダーか自分の場の(他の／特徴)フォロワー」 written as a bare leader branch and one
-/// follower branch of the same player is the leader_or target with that follower filter.
+/// follower branch of the same player is the `leader_or` target with that follower filter.
 fn leader_or_union(target: &ast::Target) -> Option<ast::Target> {
     let [first, second] = target.any_of.as_deref()? else {
         return None;
@@ -1731,7 +1731,7 @@ fn leader_or_union(target: &ast::Target) -> Option<ast::Target> {
 }
 
 /// No filter at all, so a leader branch adds nothing but the leader itself.
-fn bare_query(query: &ast::TargetQuery) -> bool {
+const fn bare_query(query: &ast::TargetQuery) -> bool {
     // Exhaustive so a new query field cannot be silently dropped from the leader branch.
     let ast::TargetQuery {
         except: None,

@@ -63,7 +63,7 @@ impl Game {
     }
 }
 
-/// Control paths of every by_kind and the branch bodies that may read its narrowed bindings.
+/// Control paths of every `by_kind` and the branch bodies that may read its narrowed bindings.
 #[derive(Default)]
 pub(super) struct Paths {
     controls: Vec<String>,
@@ -130,10 +130,10 @@ fn collect(program: &Program, prefix: &str, paths: &mut Paths) {
                 ..
             } => collect(body, &format!("{path}/control/body/body"), paths),
             Control::EachPlayer { stages, .. } => {
-                for (index, stage) in stages.iter().enumerate() {
+                for (stage_index, stage) in stages.iter().enumerate() {
                     collect(
                         &stage.body,
-                        &format!("{path}/control/stages/{index}/body"),
+                        &format!("{path}/control/stages/{stage_index}/body"),
                         paths,
                     );
                 }

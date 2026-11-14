@@ -373,6 +373,10 @@ fn granted_definition_roots(requirements: &Requirements, card: bool) -> Vec<(Str
         .collect()
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Every path-scoped capability exemption is listed in one auditable filter."
+)]
 fn check_requirements(
     program: &Program,
     source: &SourceSpan,
@@ -658,6 +662,10 @@ fn check_player_stage(
     Ok(())
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Every admitted control shape is dispatched in one exhaustive match."
+)]
 fn check_program(
     program: &Program,
     source: &SourceSpan,

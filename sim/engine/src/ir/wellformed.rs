@@ -227,7 +227,7 @@ struct Environment {
     access: BTreeMap<Key, super::Visibility>,
     /// Public answers naming at most one field or EX card, whose printed cost anyone may read.
     public_board_singles: BTreeSet<Key>,
-    /// Recipient choices of exactly one leader or follower, the only ones by_kind may narrow.
+    /// Recipient choices of exactly one leader or follower, the only ones `by_kind` may narrow.
     single_recipients: BTreeSet<Key>,
     receipt_access: BTreeMap<ReceiptId, super::Visibility>,
     movement_before_access: BTreeMap<ReceiptId, super::Visibility>,

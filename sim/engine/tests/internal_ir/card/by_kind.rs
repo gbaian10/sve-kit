@@ -201,7 +201,7 @@ fn by_kind_inside_a_fixed_repeat_is_admitted_and_runs() {
     assert_eq!(hp(&view, "ally"), 1_u8);
 }
 
-/// A field follower whose end-phase auto pays PP1, then runs by_kind with `follower` steps.
+/// A field follower whose end-phase auto pays PP1, then runs `by_kind` with `follower` steps.
 fn paying_follower(follower: &Value) -> WellFormedCardProgram {
     let mut tree = fanfare::expanded::tree().clone();
     let card = &tree["cards"]["BP08-038"];
@@ -240,6 +240,10 @@ fn paying_game() -> Game {
 }
 
 #[test]
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Any other question means the payment flow under test went wrong."
+)]
 fn by_kind_inside_a_triggered_payment_runs_after_paying() {
     let program =
         paying_follower(&json!([{"buff":{"on":"item","power":1}},{"buff":{"on":"item","hp":2}}]));
