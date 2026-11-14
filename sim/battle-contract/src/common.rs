@@ -124,6 +124,34 @@ opaque! {
     /// A client's label pairing one submission with its receipt.
     RequestId
 }
+opaque! {
+    /// One committed event in a viewer's own numbering.
+    EventId
+}
+opaque! {
+    /// One complete batch of committed events.
+    BatchId
+}
+opaque! {
+    /// A viewer-local cause shared by related events.
+    CauseId
+}
+opaque! {
+    /// One provisional event; its committed event refers back to it.
+    PresentationId
+}
+opaque! {
+    /// One provisional batch.
+    PresentationBatchId
+}
+opaque! {
+    /// One provisional scope, promoted or cancelled as a whole.
+    ScopeId
+}
+opaque! {
+    /// One notice.
+    NoticeId
+}
 
 /// A card face in the snapshot pinned by this game.
 #[derive(
