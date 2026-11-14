@@ -41,6 +41,12 @@ BP14-043 的「其他宴楽卡」以入場事件的固定方式分支：本卡�
 前四者可用 `who: self|opp`；`moved` 以 `from: field` 或
 `from: {who: self|opp, zone: field}` 表達來源，`to` 可省略或指定 `cemetery|hand`。
 `sel` 沿用已接通的主體種類、職業、類型、名稱、token 與 `other` 篩選。
+`sel.not_same_name_as_this: true`（「これと同名を除く」）以事件當時保存的主體卡名，
+對照能力持有卡讀取當下的卡名；打出費用條件讀的是正在打出的這張卡。
+例如 BP10-009 `play.cost_delta.if: {history: {event: moved, from: {who: self, zone: field}, to: hand, window: this_turn, sel: {kind: follower, trait: 獣, not_same_name_as_this: true}}}`：
+另一張サルビアパンサー回手不算，其他獣從者回手才減費。缺少已保存卡名的歷史照名稱篩選的完整性邊界拒絕。
+這個排除只開放給歷史查詢；離場、送墓或回手的觸發標頭帶它時，載入即拒絕。
+打出費用條件可讀 `moved` 的回手子集。
 `history.at_least` 省略為 1；數值 `history_count` 不收該門檻。
 除下列進化序數子集外，這些查詢不接受 `at: event`；排除執行、其他視窗或未接通的事件欄位仍拒絕。
 

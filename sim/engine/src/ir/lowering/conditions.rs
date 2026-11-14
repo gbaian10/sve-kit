@@ -737,7 +737,7 @@ impl BodyContext<'_> {
             subject,
             false,
             path,
-            super::movement::FilterSupport::Basic,
+            super::movement::FilterSupport::History,
         )?;
         let kind = match history.event {
             ast::HistoryEvent::Attacked => SubjectHistoryKind::Attack,

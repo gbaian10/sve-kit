@@ -451,14 +451,23 @@ pub(super) fn count(
             }
             ub_count(execution, game, player.as_ref(), *exclude_current)
         }
-        HistoryPlan::Subject { event, filter } => subject_count_at(
-            game,
-            execution.ability,
-            execution.context.controller,
-            *event,
-            filter,
-            count,
-        ),
+        HistoryPlan::Subject { event, filter } => {
+            // 「これと同名を除く」 reads the card itself as it is now; during a play that is
+            // the card on its way to the field, not an earlier generation (BP10-009).
+            let excluded = filter
+                .not_same_name
+                .then(|| game.card_names(&execution.context.source))
+                .transpose()?;
+            subject_count_at(
+                game,
+                execution.ability,
+                execution.context.controller,
+                *event,
+                filter,
+                count,
+                excluded.as_deref(),
+            )
+        }
         HistoryPlan::PlayedFiltered { filter, .. } => {
             if count != HistoryCount::Facts {
                 return Err(unsupported("played history subject count"));
@@ -490,6 +499,13 @@ pub(super) fn count(
     }
 }
 
+/// 「これと同名を除く」: any shared name excludes the subject; an unknown name is never taken as a
+/// different one.
+fn shares_holder_name(saved: Option<&[String]>, holder: &[String]) -> Result<bool> {
+    let saved = saved.ok_or_else(|| unsupported("unadmitted historical subject names"))?;
+    Ok(saved.iter().any(|name| holder.contains(name)))
+}
+
 pub(super) fn subject_count_at(
     game: &Game,
     source: Option<super::RuntimeAbilitySource>,
@@ -497,7 +513,11 @@ pub(super) fn subject_count_at(
     event: SubjectHistoryKind,
     filter: &SubjectFilter,
     count: HistoryCount,
+    excluded: Option<&[String]>,
 ) -> Result<Nat> {
+    if filter.not_same_name != excluded.is_some() {
+        return Err(unsupported("history holder name exclusion"));
+    }
     let mut facts = 0_u64;
     let mut identities = BTreeSet::new();
     for fact in &game.state.ir_subject_history {
@@ -525,6 +545,11 @@ pub(super) fn subject_count_at(
         let traits = fact.traits.iter().cloned().map(TraitId).collect::<Vec<_>>();
         if filter.name.is_some() && fact.names.is_none() {
             return Err(unsupported("unadmitted historical subject names"));
+        }
+        if let Some(holder) = excluded
+            && shares_holder_name(fact.names.as_deref(), holder)?
+        {
+            continue;
         }
         let names = fact
             .names
@@ -648,3 +673,6 @@ impl Game {
         })
     }
 }
+
+#[cfg(test)]
+mod tests;

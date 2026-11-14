@@ -877,6 +877,7 @@ impl PendingOccurrence {
                 event,
                 &filter,
                 HistoryCount::Facts,
+                None,
             )?;
             let (key, slot) = match capture {
                 Capture::Integer { into, .. } => (

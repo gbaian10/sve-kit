@@ -853,6 +853,9 @@ mod quick_hand;
 #[path = "card/same_name.rs"]
 mod same_name;
 
+#[path = "card/history_holder_names.rs"]
+mod history_holder_names;
+
 #[path = "card/reveal_cost.rs"]
 mod reveal_cost;
 

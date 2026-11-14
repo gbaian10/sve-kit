@@ -1,0 +1,35 @@
+cards:
+  BP10-009:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              history:
+                event: moved
+                from:
+                  who: self
+                  zone: field
+                sel:
+                  kind: follower
+                  not_same_name_as_this: true
+                  trait: 獣
+                to: hand
+                window: this_turn
+      - evolve:
+          cost:
+            pp: 2
+        line: 2
+      - keywords:
+          - storm
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set
