@@ -766,14 +766,9 @@ known:
     reason: "internal D1 does not support unloaded whole card CP04-088/0, holder h1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-CP04-103"
     scenario: "找到=True"
-    status: unsupported
-    error: "unadmitted CP04-P56 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-P56/0, holder d generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-CP04-103"
-    scenario: "找到=False"
-    status: unsupported
-    error: "unadmitted CP04-P56 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-P56/0, holder d generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "d is not a card candidate"
   - question: "card-CP04-104"
     scenario: "zero"
     status: unsupported
@@ -1011,9 +1006,9 @@ known:
     reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-visibility-01"
     scenario: "A 搜尋加入手牌：對手識別那張，不識別其餘手牌"
-    status: unsupported
-    error: "unadmitted CP04-072 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-072/0, holder a4 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "a4 is not a card candidate"
   - question: "rule-1.3.2-01"
     scenario: "C ギンネ【1】對已アクト的從者：アクト不做、不發事件；「次のスタートフェイズにスタンドしない」仍適用"
     status: fail
