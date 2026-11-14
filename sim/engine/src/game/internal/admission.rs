@@ -1159,6 +1159,8 @@ fn supported(code: &str) -> bool {
             | "read.card-play-origin"
             | "shape.BoolRead.FieldEntryOrigin"
             | "read.field-entry-origin"
+            | "shape.BoolRead.FieldEntryMethod"
+            | "read.field-entry-method"
             | "shape.NatRead.Combo"
             | "read.combo"
             | "shape.NatRead.HistoryCount"
