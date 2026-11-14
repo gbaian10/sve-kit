@@ -14,6 +14,7 @@ fn recipient(player: &PlayerRef) -> bool {
         | PlayerRef::Owner {}
         | PlayerRef::Active {}
         | PlayerRef::ProposedDamageRecipient {}
+        | PlayerRef::ProposedMoveController {}
         | PlayerRef::ProposedDamageController {} => false,
     }
 }

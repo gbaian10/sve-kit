@@ -83,10 +83,10 @@ impl BodyContext<'_> {
         let (from, union) = match &choice.from {
             ast::ChooseFrom::Advance(_) => return Err(unsupported(path)),
             ast::ChooseFrom::Query(query) => (query.as_ref(), None),
-            ast::ChooseFrom::Union { any_of } => match any_of.as_slice() {
-                [first, _, ..] if private_union(any_of) => (first, Some(any_of.as_slice())),
-                _ => return Err(unsupported(path)),
-            },
+            ast::ChooseFrom::Union { any_of } => (
+                private_union(any_of).ok_or_else(|| unsupported(path))?,
+                Some(any_of.as_slice()),
+            ),
         };
         let hand = matches!(
             from.zone,
@@ -175,6 +175,13 @@ impl BodyContext<'_> {
         })
     }
 
+    pub(super) fn public_binding(&self, name: &str) -> bool {
+        self.targets.contains_key(name)
+            && !self.hand_targets.contains(name)
+            && !self.observed_targets.contains(name)
+            && !self.flip_targets.contains(name)
+    }
+
     /// Hands and looked cards are shown only to the chooser; a public reveal is shown to all.
     fn choice_visibility(
         &self,
@@ -188,7 +195,7 @@ impl BodyContext<'_> {
                 Some(super::super::ObjectReceipt::Reveal { .. })
             )
         });
-        if (observation.is_some() && !revealed) || hand {
+        if (observation.is_some_and(|name| !self.public_binding(name)) && !revealed) || hand {
             Visibility::Only {
                 players: super::super::PlayerSet {
                     relation: super::super::PlayerRelation::SelfPlayer,
@@ -238,7 +245,13 @@ impl BodyContext<'_> {
             .observation
             .as_ref()
             .is_some_and(|name| self.look_viewers.get(name) == Some(&actor));
-        if ((from.observation.is_some() && !revealed && !looked_by_actor) || hand)
+        if ((from
+            .observation
+            .as_ref()
+            .is_some_and(|name| !self.public_binding(name))
+            && !revealed
+            && !looked_by_actor)
+            || hand)
             && actor != (PlayerRef::Controller {})
             && !own_hand
         {
@@ -460,27 +473,39 @@ pub(super) struct ObjectFilter<'query> {
     pub not_same_name_as_this: bool,
 }
 
-/// Every branch reads one private Look receipt, or the controller's own hand (「手札のAかB」, BP18-098).
-fn private_union(any_of: &[ast::TargetQuery]) -> bool {
-    let first = any_of
-        .first()
-        .and_then(|branch| branch.observation.as_ref());
-    (first.is_some()
+/// Private branches share one observation or one holder's hand and EX authority.
+fn private_union(any_of: &[ast::TargetQuery]) -> Option<&ast::TargetQuery> {
+    let [first, _, ..] = any_of else {
+        return None;
+    };
+    if first.observation.is_some()
         && any_of
             .iter()
-            .all(|branch| branch.observation.as_ref() == first))
-        || [ast::Side::Controller, ast::Side::Opponent]
-            .iter()
-            .any(|holder| any_of.iter().all(|branch| own_hand_branch(branch, holder)))
+            .all(|branch| branch.observation == first.observation)
+    {
+        return Some(first);
+    }
+    let hand = any_of.iter().find(|branch| {
+        matches!(
+            branch.zone,
+            Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
+        )
+    })?;
+    let holder = hand.who.as_ref()?;
+    (!matches!(holder, ast::Side::All)
+        && any_of.iter().all(|branch| own_hand_branch(branch, holder)))
+    .then_some(hand)
 }
 
-/// Every branch reads one holder's own hand, so the chooser's authority covers the union.
+/// The chooser may inspect its hand and the public cards in its own EX.
 fn own_hand_branch(branch: &ast::TargetQuery, holder: &ast::Side) -> bool {
     branch.observation.is_none()
         && branch.who.as_ref() == Some(holder)
         && matches!(
             branch.zone,
-            Some(ast::TargetZone::Single(ast::TargetSingleZone::Hand))
+            Some(ast::TargetZone::Single(
+                ast::TargetSingleZone::Hand | ast::TargetSingleZone::Ex
+            ))
         )
 }
 

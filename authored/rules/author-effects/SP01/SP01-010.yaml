@@ -1,0 +1,56 @@
+format: 2
+kind: author_effect_set
+cards:
+  SP01-010:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6
+          date: "2026-11-14"
+    abilities:
+      - line: 1
+        auto:
+          on:
+            enter_field:
+              who: self
+              sel:
+                kind: follower
+                trait: 兵士
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 3
+      - line: 2
+        activate:
+          cost:
+            pp: 0
+          per_turn: 1
+          do:
+            - choose:
+                bind: soldier
+                from:
+                  any_of:
+                    - who: self
+                      zone: hand
+                      kind: follower
+                      trait: 兵士
+                      orig_cost_le: 2
+                    - who: self
+                      zone: ex
+                      kind: follower
+                      trait: 兵士
+                      orig_cost_le: 2
+                upto: 1
+            - move:
+                ref: soldier
+                to: field
+                result: entered
