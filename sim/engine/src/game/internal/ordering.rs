@@ -420,6 +420,14 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             Action::Draw { count: amount, .. } | Action::Resource { amount, .. } => {
                 mask_public_number(amount);
             }
+            // A by_kind follower is the one member of a public recipient choice; well-formedness
+            // checked that access, so the bound operand reads no private zone.
+            Action::Modify {
+                subjects: Selector::Objects { objects },
+                ..
+            } if matches!(objects.as_slice(), [ObjectOperand::Bound { .. }]) => {
+                *objects = vec![ObjectOperand::SourceHolder {}];
+            }
             Action::Counter {
                 holder: Holder::Object { object },
                 amount,

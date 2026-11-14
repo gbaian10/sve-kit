@@ -193,7 +193,8 @@ variants!(Capture {
 });
 variants!(@visit Control {
     Simultaneous { batch: InstructionBatch, receipt: ReceiptId } => ["control.simultaneous", "transaction.shared-capacity"],
-    Match { value: DamageRecipient, leader: Binding<PlayerRef>, leader_body: Program, follower: Binding<ObjectRef>, follower_body: Program } => ["control.match"],
+    // `recipients` is a resolved choice of exactly one leader or follower; each body sees it narrowed.
+    Match { recipients: Binding<Vec<DamageRecipient>>, leader: Binding<PlayerRef>, leader_body: Program, follower: Binding<ObjectRef>, follower_body: Program } => ["control.match"],
     Sequence { body: Program } => ["control.sequence"],
     If { condition: Expr<Bool>, then_body: Program, else_body: Option<Program> } => ["control.if"],
     May { body: Program, choice: Decision, receipt: ReceiptId } => ["control.may"],

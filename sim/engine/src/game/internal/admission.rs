@@ -282,6 +282,27 @@ fn source_paths(
                 }
             }
             Node::Control {
+                control:
+                    Control::Match {
+                        leader_body,
+                        follower_body,
+                        ..
+                    },
+            } => {
+                source_paths(
+                    leader_body,
+                    &format!("{path}/control/leader_body"),
+                    origin,
+                    paths,
+                );
+                source_paths(
+                    follower_body,
+                    &format!("{path}/control/follower_body"),
+                    origin,
+                    paths,
+                );
+            }
+            Node::Control {
                 control: Control::Mode { modes, .. },
             } => {
                 for (mode_index, mode) in modes.iter().enumerate() {
@@ -365,6 +386,7 @@ fn check_requirements(
     };
     let requirements = parent_requirements(&located, card);
     let token_paths = super::tokens::paths(program, x);
+    let kind_paths = super::by_kind::paths(program);
     let mut attack_targets = BTreeSet::new();
     super::card::triggers::event_operand::target_paths(program, "", &mut attack_targets);
     let missing = requirements
@@ -374,6 +396,7 @@ fn check_requirements(
             requirement.capability.version != NonZeroU32::MIN
                 || !(supported(requirement.capability.code)
                     || super::tokens::requirement(requirement, &token_paths)
+                    || super::by_kind::requirement(requirement, &kind_paths)
                     || requirement.locations.iter().all(|location| {
                         attack_targets.iter().any(|path| {
                             location.ir_path == *path
@@ -692,6 +715,17 @@ fn check_program(
                 if let Some(body) = else_body {
                     check_program(body, source, origin, reads, x)?;
                 }
+            }
+            Node::Control {
+                control:
+                    Control::Match {
+                        leader_body,
+                        follower_body,
+                        ..
+                    },
+            } => {
+                check_program(leader_body, source, origin, reads, x)?;
+                check_program(follower_body, source, origin, reads, x)?;
             }
             Node::Instruction { instruction } => {
                 if let Action::Delay { body, trigger, .. } = &instruction.action {

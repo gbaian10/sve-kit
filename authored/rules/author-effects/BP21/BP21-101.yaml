@@ -1,0 +1,51 @@
+cards:
+  BP21-101:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+          on:
+            stat_changed:
+              direction: up
+              ref: this
+              stat: hp
+        line: 1
+      - evolve_time:
+          do:
+            - by_kind:
+                follower:
+                  - buff:
+                      hp: 2
+                      on: item
+                leader:
+                  - life:
+                      delta: 2
+                      who: item
+                ref: ally
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                leader_or: true
+                who: self
+                zone: field
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

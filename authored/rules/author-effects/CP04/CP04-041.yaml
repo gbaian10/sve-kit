@@ -1,0 +1,47 @@
+cards:
+  CP04-041:
+    abilities:
+      - fanfare:
+          do:
+            - by_kind:
+                follower:
+                  - buff:
+                      hp: 1
+                      on: item
+                leader:
+                  - life:
+                      delta: 1
+                      who: item
+                ref: ally
+          targets:
+            - bind: ally
+              from:
+                any_of:
+                  - leader: self
+                  - kind: follower
+                    other: true
+                    who: self
+                    zone: field
+              n: 1
+          ub: true
+        line: 1
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

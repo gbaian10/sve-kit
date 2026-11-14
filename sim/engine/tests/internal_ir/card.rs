@@ -1,4 +1,6 @@
 use super::*;
+#[path = "card/by_kind.rs"]
+mod by_kind;
 #[path = "card/condition_inputs.rs"]
 mod condition_inputs;
 #[path = "card/deck_edges.rs"]

@@ -222,6 +222,7 @@ impl BodyContext<'_> {
             | ast::Step::Race(_)
             | ast::Step::Evolve(_)
             | ast::Step::If(_)
+            | ast::Step::ByKind(_)
             | ast::Step::Choose(_)
             | ast::Step::Choice(_)
             | ast::Step::Either(_)
