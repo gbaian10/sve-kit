@@ -654,6 +654,16 @@ known:
     status: unsupported
     error: "unadmitted BP19-SL26 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+  - question: "card-BP20-020"
+    scenario: "X=2 選擇素材=1"
+    status: fail
+    error: "interface: typed fusion has no separate X declaration; X is the chosen material count (#2090)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient assert P1.hand; after-decision-1 omniscient forbidden_events"
+  - question: "card-BP20-020"
+    scenario: "X=3 選擇素材=2"
+    status: fail
+    error: "interface: typed fusion has no separate X declaration; X is the chosen material count (#2090)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient assert P1.hand; after-decision-1 omniscient forbidden_events"
   - question: "card-BP20-P12"
     scenario: "[astra] 沒付追加費用"
     status: fail

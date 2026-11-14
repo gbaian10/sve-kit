@@ -3,7 +3,7 @@
 # and on a listed scenario whose verdict kind changed. Each entry points to
 # the engine tracking issue; validation requirements are in docs/dsl/validation.md.
 expected_scenarios: 708
-# Retired BP18-SL16 prototype coverage is recorded separately from the typed gate.
+# Retired BP18-SL16 and BP20-020 prototype coverage is recorded separately from the typed gate.
 known:
   - question: "card-BP18-SL16"
     scenario: "A ファフニール 交戰破壞機械鋸の死運び → 消滅、ラストワード 不誘發"
@@ -25,3 +25,23 @@ known:
     status: "unsupported"
     error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
     reason: "no authored program: BP18-SL16"
+  - question: "card-BP20-020"
+    scenario: "X=1 選擇素材=1"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP20-020"
+  - question: "card-BP20-020"
+    scenario: "X=2 選擇素材=2"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP20-020"
+  - question: "card-BP20-020"
+    scenario: "X=2 選擇素材=1"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP20-020"
+  - question: "card-BP20-020"
+    scenario: "X=3 選擇素材=2"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP20-020"
