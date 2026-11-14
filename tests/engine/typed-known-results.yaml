@@ -104,21 +104,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-1 omniscient events"
-  - question: "card-BP04-007"
-    scenario: "已打出卡片 0"
-    status: unsupported
-    error: "unadmitted BP04-007 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP04-007/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP04-007"
-    scenario: "已打出卡片 2"
-    status: unsupported
-    error: "unadmitted BP04-007 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP04-007/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP04-007"
-    scenario: "已打出卡片 3"
-    status: unsupported
-    error: "unadmitted BP04-007 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP04-007/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP05-006"
     scenario: "A P2 選【1】→ P2 的下一個開始階段不抽牌（PP 最大值照常 +1）"
     status: unsupported
