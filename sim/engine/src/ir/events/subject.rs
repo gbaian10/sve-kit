@@ -855,7 +855,15 @@ impl SubjectFilter {
         {
             return Some(());
         }
-        if matches!(fields, SubjectFields::Entry(_)) && *part == holder_name_exclusion(fields) {
+        // Entering subjects and saved departure facts both carry names to compare (BP10-009).
+        if matches!(
+            fields,
+            SubjectFields::Entry(_)
+                | SubjectFields::Leave(_)
+                | SubjectFields::Cemetery(_)
+                | SubjectFields::Hand(_)
+        ) && *part == holder_name_exclusion(fields)
+        {
             self.not_same_name = true;
             return Some(());
         }

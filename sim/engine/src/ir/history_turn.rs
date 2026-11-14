@@ -38,7 +38,10 @@ impl<'query> HistoryPlan<'query> {
             self,
             Self::Discarded | Self::Played(_) | Self::PlayedFiltered { .. }
         ) || matches!(self, Self::Subject {
-                event: SubjectHistoryKind::Attack | SubjectHistoryKind::Evolve | SubjectHistoryKind::Leave,
+                event: SubjectHistoryKind::Attack
+                    | SubjectHistoryKind::Evolve
+                    | SubjectHistoryKind::Leave
+                    | SubjectHistoryKind::Hand,
                 filter,
             } if filter.original_cost.is_none()
                 && filter.name_contains.is_none()
