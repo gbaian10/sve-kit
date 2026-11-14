@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-026:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            pp: 2
+            result: boosted
+      - line: 2
+        covers:
+          - 2
+          - 3
+        spell:
+          do:
+            - choice:
+                n: 1
+                instead:
+                  - if:
+                      paid:
+                        receipt: boosted
+                    upto: 2
+                options:
+                  - - search:
+                        n: 1
+                        sel:
+                          who: self
+                          zone: deck
+                          kind: follower
+                          name_contains: エミリア
+                        to: field
+                  - - search:
+                        n: 1
+                        sel:
+                          who: self
+                          zone: deck
+                          kind: follower
+                          name_contains: リーシャ
+                        to: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Claude
+            model: claude-opus-5-5
+          date: "2026-11-14"

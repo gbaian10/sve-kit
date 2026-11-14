@@ -1817,7 +1817,11 @@ impl Game {
                 play.chosen.insert(group.chosen.id, Vec::new());
                 continue;
             }
-            let count = execution.natural(self, &group.count)?;
+            // The count may read this play's declaration, held by the detached play state.
+            let detached = execution.play.replace(play.clone());
+            let count = execution.natural(self, &group.count);
+            execution.play = detached;
+            let count = count?;
             let ChoiceDomain::Modes {
                 modes,
                 cardinality,

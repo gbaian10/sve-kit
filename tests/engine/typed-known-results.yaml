@@ -164,16 +164,6 @@ known:
     status: unsupported
     error: "typed-gap: anonymous deck members (#2008)"
     reason: "internal D1 does not support anonymous deck members"
-  - question: "card-BP08-011"
-    scenario: "A EX 的 2 張操り人形 → 消滅（消去）→ EX 出現ロイド與ヴィクトリア各 1"
-    status: unsupported
-    error: "unadmitted BP08-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP08-011"
-    scenario: "B 只有 1 張操り人形 → 不能打出"
-    status: unsupported
-    error: "unadmitted BP08-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP08-028"
     scenario: "B 選 5 體：4 傷害無法每體 ≥1 → 不能打出"
     status: fail

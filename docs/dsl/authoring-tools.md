@@ -526,7 +526,12 @@ EP／SEP 卡（種類 `ep`／`sep`）沒有卡片能力：EP、SEP 是玩家持�
 
 Token 建立的數量可使用已准入的公開人口計數，例如 `create: {token: エンシェントアーティファクト, n: {count: {who: opp, zone: field, kind: follower}}, to: field}`。數值在該指示解算時讀取，建立數量仍受目的區容量限制；計數不授予選取私有物件的權限。
 
-EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用 `self`／`opp` 限制玩家。`transform: {ref: chosen, into: ドラゴン}` 目前接受已綁定的 EX 選取與單一 token 模板：先消滅仍屬該世代的物件，再依實際成功量於原 EX 玩家處建立新 token；原卡的持有者不會改變新 token 的目的 EX。新物件使用印刷數值與新身分，舊 token 消滅後依共用規則消去。模板仍須整卡准入，建立仍受共用容量規則限制；多模板分配與進場附加效果須另行准入。EX 資源的目標保護沿用規則綁定。
+EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用 `self`／`opp` 限制玩家。`transform: {ref: chosen, into: ドラゴン}` 目前接受已綁定的 EX 選取與單一 token 模板：先消滅仍屬該世代的物件，再依實際成功量於原 EX 玩家處建立新 token；原卡的持有者不會改變新 token 的目的 EX。新物件使用印刷數值與新身分，舊 token 消滅後依共用規則消去。模板仍須整卡准入，建立仍受共用容量規則限制；進場附加效果須另行准入。EX 資源的目標保護沿用規則綁定。
+
+「それはそれぞれ『ロイド』と『ヴィクトリア』に変身する」寫成 `into: {allocate: {among: [ロイド, ヴィクトリア], each_exactly_once: true}}`（BP08-011）。
+依 CR 5.17.1 先消滅、再依實際消滅數建立：新 token 放在各原物件控制者的 EX，模板一律由能力的控制者決定。
+依回合玩家優先逐一處理各 EX 玩家；該玩家還能從剩餘模板中選出不同組合時，控制者以結算選擇（ResolutionChoice）回答，題目沿用模板組合的 `token-capacity` 形狀，`destination` 是收到 token 的玩家、`available` 是該玩家的成功數（受 EX 容量限制），組合唯一時不發問；零張不建立也不發問。模板不對應原卡，打出時仍須選足目標（Q1060、Q1061）。
+`among` 至少兩個不重複的名稱；載入時要求選取的上限不超過模板數，分配決策的 ID 不得與其他決策重複。`total`、`by` 與動態數量不開放。
 
 回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱接受單一區域的 Main／End 時點，以及下述融合事件與融合／打出共用事件；有效區本身不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
 
@@ -789,6 +794,7 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 `auto.per_turn` 與 `activate.per_turn` 接受正安全整數 N，額度按能力實例與每個實際回合分開；觸發在進入待機時消耗，起動在付款成功且適正打出時消耗。`activate.usable_if` 與 `per_turn` 可並用，例如墓場キュート卡至少五張才可每回合起動一次；資格不符、拒付與付款失敗都不消耗起動額度。沒有上限時省略 `per_turn`，不能以零表示無限次。
 
 打出時宣告增加 PP 使用 `play.optional_cost: {pp: 4, result: enhanced}`；`pp` 是正整數，不能同時指定材料、`one_of`、`optional_cost_delta` 或 `optional_cost_set`。接受宣告後，增加量與其他費用增減一起報價，最後才套用零下限，整次打出只支付一次 PP。拒絕宣告不加費；本文可用 `paid: {receipt: enhanced}` 讀取已完成的宣告，即使折扣使總費用成為 0。宣告在模式與目標之前，所有輸入完成後才付款；付不起則還原整次出牌。這與能力本文的可選付款不同。
+同一法術的模式數可用 `choice.instead: [{if: {paid: {receipt: boosted}}, upto: 2}]` 讀這個宣告（BP21-026「コストを+2したなら、代わりに2つまで」）。模式在付款前選，此時讀接受宣告的答案；付款失敗會還原整次出牌，所以與付款完成的結果一致。
 
 `play.optional_cost.act` 可選擇橫置自己場上符合篩選的固定張數卡片，配 `optional_cost_delta` 交換減費。
 例如魔術指南使用 `{sel: {who: self, zone: field, kind: follower, trait: 学院}, n: 2}` 與 `optional_cost_delta: -2`；
@@ -967,6 +973,11 @@ cost:
 將自己一張符合條件的手牌作為成本移到自己 EX；`to_deck_bottom` 使用相同選材形狀，改放自己牌庫底。
 例如 BP14-118 支付後才計算 EX 宴樂卡張數，BP14-008 置底後回復領袖體力，
 BP17-071 將自身橫置與手牌到 EX 放在同一個 `cost.steps`。
+
+「これを{アクト}デッキの下に置く」寫成 `cost.steps: [{act_self: true}, {to_deck_bottom: {sel: {in: this}, n: 1}}]`（BP07-012）。
+`in: this` 指付款的來源自身，降低為與自身送墓相同的來源移動，改放持有者牌庫底；正式目標先選，可選來源自身，
+但來源移走後成為新物件，本文對它的指示不再生效。橫置仍只能由場上的來源支付，已橫置時整份付款不成立。
+`in` 其他綁定名稱仍只用於法術追加費用中前一步公開的手牌（BP17-054）。
 
 場上起動能力與誘發能力頭付款沿用私下的材料問答，正式目標仍先選。
 付款不額外公開手牌、不算棄牌；EX 到達後公開，置底保持隱藏。EX 已滿不能支付，

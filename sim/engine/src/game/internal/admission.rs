@@ -1048,6 +1048,8 @@ fn supported(code: &str) -> bool {
             | "shape.Action.Transform"
             | "action.transform"
             | "shape.TokenAllocation.Single"
+            | "shape.TokenAllocation.EachExactlyOnce"
+            | "transform.token-allocation"
             | "shape.Action.Banish"
             | "action.banish"
             | "shape.Action.Posture"

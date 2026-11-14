@@ -26,10 +26,10 @@ use crate::ir::{
     AbilityQualification, AbilitySource, Action, AssociationId, CharacteristicPatch, Control,
     CostSpec, DamageAmount, DiscardMode, Effect, ExecutionId, Expr, FaceId, Generation,
     GrantedAbility, Instruction, InstructionContext, Int, KeywordId, Located, MealRaceOperation,
-    MoveDestination, MoveReason, MoveSpec, Nat, Node, NumericChange, ObjectOperand, ObjectRef,
-    OwnerZone, PlayerId, PlayerRef, Posture, Quantity, QuantityUnit, Requirements, Resource,
-    ResourceOperation, RideDriveOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
-    StepwiseMode, WellFormedCardProgram, ZoneKind,
+    MoveReason, MoveSpec, Nat, Node, NumericChange, ObjectOperand, ObjectRef, PlayerId, PlayerRef,
+    Posture, Quantity, QuantityUnit, Requirements, Resource, ResourceOperation, RideDriveOperation,
+    RuleId, RuntimeAbilitySource, Selector, SourceSpan, StepwiseMode, WellFormedCardProgram,
+    ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReason};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
@@ -1294,17 +1294,7 @@ pub(super) fn check_payment(
                 objects: Selector::Objects { objects },
                 movement,
                 reason: MoveReason::Put,
-            } => {
-                objects == &[ObjectOperand::SourceHolder {}]
-                    && movement.to
-                        == (MoveDestination::Owners {
-                            zone: OwnerZone::Cemetery,
-                        })
-                    && movement.position.is_none()
-                    && movement.order.is_none()
-                    && movement.initial_posture.is_none()
-                    && movement.entry_effects.is_empty()
-            }
+            } => objects == &[ObjectOperand::SourceHolder {}] && material::source_put(movement),
             action @ Action::Banish { .. } if super::movement::deck_top(action).is_some() => !quick,
             action if reveal_payment::selected(action, &play.parameters) => !quick,
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
