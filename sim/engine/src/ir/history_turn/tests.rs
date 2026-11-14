@@ -87,12 +87,13 @@ fn played_subject_query(filter: &SubjectFilter) -> HistoryQuery {
 }
 
 #[test]
-fn played_intersections_refuse_unsaved_fields_at_the_raw_query_boundary() {
+fn played_intersections_accept_saved_names_and_reject_unsupported_fields() {
     let filter = SubjectFilter {
         own: Some(true),
         kind: Some(CardKind::Follower),
         trait_id: Some(TraitId("fixture".into())),
         token: Some(true),
+        name: Some(super::super::CardName("saved-name".into())),
         ..SubjectFilter::default()
     };
     assert!(matches!(
@@ -109,7 +110,7 @@ fn played_intersections_refuse_unsaved_fields_at_the_raw_query_boundary() {
             ..filter.clone()
         },
         SubjectFilter {
-            name: Some(super::super::CardName("hidden".into())),
+            name: Some(super::super::CardName(String::new())),
             ..filter.clone()
         },
         SubjectFilter {
