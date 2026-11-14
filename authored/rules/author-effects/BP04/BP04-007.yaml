@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-007:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6
+          date: "2026-11-14"
+    abilities:
+      - line: 1
+        activate:
+          cost:
+            act_self: true
+          targets:
+            - bind: ally
+              option: 1
+              from:
+                who: self
+                zone: field
+                kind: follower
+                other: true
+              n: 1
+            - bind: enemy
+              option: 2
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  combo: 3
+                then:
+                  - choice:
+                      n: 1
+                      options:
+                        - - buff:
+                              on: ally
+                              power: 2
+                              hp: 2
+                        - - buff:
+                              on: enemy
+                              power: -2
+                              hp: -2

@@ -130,6 +130,9 @@ mod lastword_revive;
 #[path = "card/trigger_targets.rs"]
 mod trigger_targets;
 
+#[path = "card/conditioned_choice.rs"]
+mod conditioned_choice;
+
 #[path = "card/trigger_choice.rs"]
 mod trigger_choice;
 
@@ -910,6 +913,8 @@ mod fusion;
 mod fusion_exact;
 #[path = "card/material_search.rs"]
 mod material_search;
+#[path = "card/search_mixed_union.rs"]
+mod search_mixed_union;
 
 #[path = "card/shuffle.rs"]
 mod shuffle;

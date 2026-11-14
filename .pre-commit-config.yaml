@@ -142,6 +142,8 @@ repos:
         entry: mise exec -- cargo clippy --locked --workspace --all-targets -- -D warnings
         pass_filenames: false
         files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^clippy\.toml|^rust-toolchain\.toml)$
+        # Compiles the whole workspace, so it runs once per push instead of on every commit; CI's rust job runs it too.
+        stages: [pre-push, manual]
       - id: cargo-test
         name: cargo test (with line coverage >= 90%)
         language: system
