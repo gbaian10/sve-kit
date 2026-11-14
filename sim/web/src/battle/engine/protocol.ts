@@ -1,5 +1,6 @@
-// Temporary local-battle messages (format 0). The generated battle contract types replace the
-// seat payloads; the Worker init and port routing below stay.
+// Local-battle messages. Receipt and HostError follow the battle contract (format 1); Update and
+// Submit stay temporary (format 0) until the generated contract types replace these declarations.
+// The Worker init and port routing below stay.
 
 export type Seat = "p1" | "p2"
 export const SEATS: readonly Seat[] = ["p1", "p2"]
@@ -29,7 +30,7 @@ export interface Receipt {
 
 interface HostError {
   kind: "host_error"
-  format: 0
+  format: 1
   reason: "format" | "range" | "projection" | "budget"
 }
 

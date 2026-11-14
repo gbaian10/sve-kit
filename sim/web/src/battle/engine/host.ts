@@ -117,7 +117,7 @@ export class BattleHost {
   #fail(): void {
     if (this.#stopped) return
     this.#stopped = true
-    this.#broadcast({ kind: "host_error", format: 0, reason: "projection" })
+    this.#broadcast({ kind: "host_error", format: 1, reason: "projection" })
   }
 
   #broadcast(message: SeatMessage): void {

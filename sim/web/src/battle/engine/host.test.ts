@@ -192,7 +192,7 @@ describe("BattleHost", () => {
     p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
     p1.send({ kind: "baseline", request_id: "b1" })
     await settle()
-    const stopped = { kind: "host_error", format: 0, reason: "projection" }
+    const stopped = { kind: "host_error", format: 1, reason: "projection" }
     expect(p1.received).toEqual([stopped])
     expect(p2.received).toEqual([stopped])
   })

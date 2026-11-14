@@ -89,7 +89,7 @@ describe("SeatChannel", () => {
     channel.listen((message) => seen.push(message))
     const pending = channel.submit(concede)
     worker.postMessage(update("p1", 1))
-    worker.postMessage({ kind: "host_error", format: 0, reason: "budget" })
+    worker.postMessage({ kind: "host_error", format: 1, reason: "budget" })
     await expect(pending).rejects.toBeInstanceOf(ChannelStoppedError)
     expect(seen.map((message) => message.kind)).toEqual(["update", "host_error"])
   })
@@ -196,7 +196,7 @@ describe("HotSeat", () => {
   })
 
   for (const stop of [
-    { kind: "host_error", format: 0, reason: "projection" },
+    { kind: "host_error", format: 1, reason: "projection" },
     { kind: "load_error", code: "engine" },
   ] as const) {
     for (const inFlight of [false, true]) {
