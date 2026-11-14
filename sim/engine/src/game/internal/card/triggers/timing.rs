@@ -707,7 +707,8 @@ impl Game {
                     })
                 )
             })
-        }) {
+        }) && self.card_runtime.delayed.is_empty()
+        {
             return Ok(());
         }
         let active = player_id(self.active())?;
@@ -749,7 +750,7 @@ impl Game {
                     }
                 }
             }
-            if observers.is_empty() {
+            if observers.is_empty() && !self.delayed_life_matches(event, active) {
                 continue;
             }
             let source = if battle {
@@ -776,6 +777,7 @@ impl Game {
                 return Err(unsupported("unadmitted life change producer"));
             };
             let header = self.pending_header(actor, authority, source, snapshot)?;
+            pending.extend(self.delayed_life_pending(event, &header, active)?);
             for (holder, ability) in observers {
                 pending.push(self.timing_occurrence(
                     &holder,

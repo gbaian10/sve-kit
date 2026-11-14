@@ -110,7 +110,7 @@ pub(crate) fn valid(action: &Action) -> bool {
     {
         return false;
     }
-    let observes_entry = match (&trigger.on, captures.as_slice()) {
+    let general_body = match (&trigger.on, captures.as_slice()) {
         (
             TriggerCondition::Event {
                 pattern: EventPattern::LeaveField { binding, predicate },
@@ -134,13 +134,24 @@ pub(crate) fn valid(action: &Action) -> bool {
         {
             true
         }
+        (
+            TriggerCondition::Event {
+                pattern: EventPattern::LifeChange { binding, predicate },
+            },
+            [],
+        ) if super::events::life::LifeFilter::parse(*binding, predicate).is_some()
+            && trigger.view == EventSnapshotPolicy::AfterEntry
+            && trigger.limit.is_none_or(|limit| limit == NEXT_ONLY) =>
+        {
+            true
+        }
         _ => return false,
     };
     body.steps.iter().all(|step| {
         let instruction = match &step.node {
             Node::Instruction { instruction } => instruction.as_ref(),
             // 「次に…出たとき、その中の1体は進化する」 reuses the closed effect evolution.
-            Node::Control { control } if observes_entry => {
+            Node::Control { control } if general_body => {
                 let Some(projection) = super::effect_evolution::projection(control) else {
                     return false;
                 };
@@ -152,8 +163,8 @@ pub(crate) fn valid(action: &Action) -> bool {
             && instruction.context == InstructionContext::Effect
             && instruction.precondition.is_none()
             && instruction.actor == (PlayerRef::Controller {})
-            // Entry callbacks run the ordinary card body admission; departures stay closed.
-            && if observes_entry {
+            // Entry and life callbacks run the ordinary card body admission; departures stay closed.
+            && if general_body {
                 !matches!(instruction.action, Action::Delay { .. })
             } else {
                 fixed_action(&instruction.action)

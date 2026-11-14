@@ -9,12 +9,13 @@ use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
 use crate::game::{Frame, Object};
 use crate::ir::delayed as delayed_ir;
+use crate::ir::events::life::LifeFilter;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
     AbilityId, AbilityInstanceId, AbilityKind, AbilityQualification, Action, CostSpec, Instruction,
     PlaySpec, SnapshotId,
 };
-use crate::ir::{EnterFieldEvent, EntryMethod, EventPattern, TriggerCondition};
+use crate::ir::{EnterFieldEvent, EntryMethod, EventPattern, LifeChangeEvent, TriggerCondition};
 use crate::ir::{RuntimeZoneRef, ZoneKind};
 
 /// What installed entry observers read before the entry event is published.
@@ -69,6 +70,8 @@ impl Game {
                 change: InstalledChange::Delayed {
                     timing: if record.entry_plan().is_some() {
                         TriggerTiming::EnterField
+                    } else if record.life_filter().is_some() {
+                        TriggerTiming::LifeChange
                     } else {
                         TriggerTiming::LeaveField
                     },
@@ -309,6 +312,45 @@ impl Game {
             .collect()
     }
 
+    /// 「このターン、自分のリーダーの体力が減少したとき」 installations matching one change.
+    pub(super) fn delayed_life_matches(&self, event: LifeChangeEvent, active: PlayerId) -> bool {
+        self.card_runtime.delayed.iter().any(|record| {
+            record
+                .life_filter()
+                .is_some_and(|filter| filter.matches(event, record.source.controller, active))
+        })
+    }
+
+    pub(super) fn delayed_life_pending(
+        &mut self,
+        event: LifeChangeEvent,
+        header: &EventHeader,
+        active: PlayerId,
+    ) -> Result<Vec<PendingOccurrence>> {
+        let records = self
+            .card_runtime
+            .delayed
+            .iter()
+            .filter(|record| {
+                record
+                    .life_filter()
+                    .is_some_and(|filter| filter.matches(event, record.source.controller, active))
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        records
+            .iter()
+            .map(|record| {
+                self.installed_pending(
+                    record,
+                    header,
+                    None,
+                    Some(EventPayload::LifeChange { event }),
+                )
+            })
+            .collect()
+    }
+
     pub(in crate::game) fn internal_delayed_end_turn(&mut self, turn: u64) {
         self.card_runtime
             .delayed
@@ -317,6 +359,21 @@ impl Game {
 }
 
 impl Installed {
+    fn life_filter(&self) -> Option<LifeFilter> {
+        let Some(TriggerCondition::Event {
+            pattern: EventPattern::LifeChange { binding, predicate },
+        }) = self
+            .ability
+            .node
+            .trigger
+            .as_ref()
+            .map(|trigger| &trigger.on)
+        else {
+            return None;
+        };
+        LifeFilter::parse(*binding, predicate)
+    }
+
     fn entry_plan(&self) -> Option<delayed_ir::EntryPlan> {
         let Some(TriggerCondition::Event {
             pattern: EventPattern::EnterField { binding, predicate },
