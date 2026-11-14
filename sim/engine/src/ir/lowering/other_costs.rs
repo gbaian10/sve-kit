@@ -23,9 +23,9 @@ fn players(side: &ast::Side, path: &str) -> Result<PlayerSet, LoweringError> {
 }
 
 fn change(value: &ast::CostModifier, path: &str) -> Result<CostChange, LoweringError> {
-    match (value.delta, value.set) {
+    match (value.delta.as_ref(), value.set) {
         (Some(amount), None) => Ok(CostChange::Delta {
-            amount: Expr::Literal(Int(amount)),
+            amount: Expr::Literal(Int(super::decode(amount.clone(), path)?)),
         }),
         (None, Some(amount)) if amount >= 0 => Ok(CostChange::Set {
             amount: Expr::Literal(Int(amount)),

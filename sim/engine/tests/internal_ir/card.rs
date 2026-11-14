@@ -1031,3 +1031,6 @@ mod next_turn_cost;
 
 #[path = "card/granted_attack_target.rs"]
 mod granted_attack_target;
+
+#[path = "card/live_cost_history.rs"]
+mod live_cost_history;
