@@ -389,6 +389,8 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         (self.folder / "test.log").write_text(
             f"thread '{PRIVATE}' panicked at sim/engine/tests/cards.rs:93:10:\n"
             f"{PRIVATE}\n"
+            f'Invalid("unsupported_construct at /cards/BP15-102/faces/f:abc/abilities/1"); {PRIVATE}\n'
+            f"current selection identity or prototype overlap; {PRIVATE}\n"
             f"thread '{PRIVATE}' (12345) panicked at sim/engine/src/game.rs:5:2:\n"
             "thread 'safe' panicked at src/lib.rs:12:3:\n"
             f"thread 'safe' panicked at /tmp/{PRIVATE}.rs:1:1:\n"
@@ -403,6 +405,11 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         self.write_shard("shard.json", 1, 1, collected=1, selected=1)
         summary = rust_summary(self.folder)
         assert "sim/engine/tests/cards.rs:93:10" in summary
+        assert (
+            "unsupported_construct at /cards/BP15-102/faces/f:abc/abilities/1"
+            in summary
+        )
+        assert "current selection identity or prototype overlap" in summary
         assert "src/lib.rs:12:3" in summary
         assert "sim/engine/src/game.rs:5:2" in summary
         assert "12345" not in summary

@@ -329,6 +329,21 @@ RUST_PANIC_LOCATION = re.compile(
     re.MULTILINE,
 )
 
+RUST_LOWERING_LOCATION = re.compile(
+    r"\b(unsupported_construct|invalid_expanded|invalid_schema|ill_formed|"
+    r"invalid_current_identity|invalid_current_source|current_ability_closure_mismatch)"
+    r" at (/cards/[A-Za-z0-9_-]+(?:/[A-Za-z0-9_:~.-]+)*)"
+)
+
+SELECTION_FAILURES = (
+    "invalid current selection",
+    "unresolved current card overlaps a prototype",
+    "current selection identity or representative missing",
+    "duplicate current printing",
+    "current selection identity or prototype overlap",
+    "token source requires a complete token card",
+)
+
 
 def binary_section(source: str) -> list[str]:
     """Time each test binary, so per-binary setup costs stay visible across shards."""
@@ -367,13 +382,26 @@ def rust_summary(folder: Path) -> str:
         re.MULTILINE,
     )
     panic_locations = list(dict.fromkeys(RUST_PANIC_LOCATION.findall(source)))
+    selection_locations = list(
+        dict.fromkeys(
+            f"{code} at {path}" for code, path in RUST_LOWERING_LOCATION.findall(source)
+        )
+    )
+    selection_locations.extend(text for text in SELECTION_FAILURES if text in source)
     source_locations = (
         ["", "### Failure source locations", "", *(f"- `{p}`" for p in panic_locations)]
         if panic_locations
         else []
     )
     failures = "\n".join(
-        failure_section(locations) + source_locations + binary_section(source)
+        failure_section(locations)
+        + source_locations
+        + (
+            ["", "### Selection checks", "", *(f"- `{p}`" for p in selection_locations)]
+            if selection_locations
+            else []
+        )
+        + binary_section(source)
     )
     return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{shard_line}\n{failures}\n"
 
