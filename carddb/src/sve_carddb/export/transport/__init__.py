@@ -6,10 +6,18 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.profiles import MEDIA
+from sve_carddb.contracts.profiles import MEDIA, PROGRAMS
 from sve_carddb.contracts.profiles import profile as profile_for
 from sve_carddb.contracts.snapshot import definition, tables
-from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
+from sve_carddb.core.json import (
+    array,
+    canonical,
+    digest,
+    integer,
+    object_value,
+    parse,
+    string,
+)
 from sve_carddb.export.name_annotations import compact_names
 from sve_carddb.export.project.source import json_list
 from sve_carddb.export.reader import join_payloads, read_snapshot, validate_manifest
@@ -51,6 +59,9 @@ class Snapshot:
         )
         if joined != projection.tables:
             raise ValueError("Export join differs from public logical projection")
+        entries = object_value(parse(self.payloads["programs"].raw))["entries"]
+        if entries != list(projection.programs):
+            raise ValueError("Export differs from public programs")
 
 
 def _description(raw: bytes) -> Record:
@@ -152,13 +163,16 @@ def export_snapshot(
     batch: Batch,
     *,
     brotli: Brotli | None = None,
-    format_version: str = MEDIA,
+    format_version: str | None = None,
 ) -> Snapshot:
     """Export an explicitly selected fixed wire profile and verify the independent join."""
     if not batch.data_version.startswith("preview-"):
         raise ValueError("Candidate exporter requires a preview data version")
     if set(projection.tables) != set(tables()):
         raise ValueError("Exact public collection whitelist required")
+    format_version = format_version or (PROGRAMS if projection.programs else MEDIA)
+    if projection.programs and format_version != PROGRAMS:
+        raise ValueError("Nonempty programs require snapshot format 4.1.0")
     selected = profile_for(format_version)
     properties = object_value(definition("Manifest", format_version)["properties"])
     profile = object_value(object_value(properties["partitioning"])["properties"])
@@ -181,7 +195,7 @@ def export_snapshot(
         files.add(
             "programs",
             "programs",
-            {"format_version": format_version, "entries": []},
+            {"format_version": format_version, "entries": list(projection.programs)},
             [],
         )
         FamilyLayout(layout).seal(files, config)

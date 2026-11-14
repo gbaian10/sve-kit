@@ -1,0 +1,677 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:program:1.0",
+  "title": "Expanded public DSL 1.0 card program",
+  "type": "object",
+  "properties": {
+    "card_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "scope": {
+      "const": "shared"
+    },
+    "abilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Ability"
+      }
+    },
+    "faces": {
+      "type": "object",
+      "additionalProperties": {
+        "$ref": "#/$defs/Face"
+      }
+    },
+    "deck_rule": {
+      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/DeckRule"
+    },
+    "token": {
+      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/TokenIdentity"
+    }
+  },
+  "required": [
+    "card_id",
+    "scope"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "ability.fanfare": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "fanfare": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "fanfare"
+      ],
+      "additionalProperties": false
+    },
+    "ability.lastword": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "lastword": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.lastword"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "lastword"
+      ],
+      "additionalProperties": false
+    },
+    "ability.evolve-time": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "evolve_time": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "evolve_time"
+      ],
+      "additionalProperties": false
+    },
+    "ability.super-evolve-time": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "super_evolve_time": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "super_evolve_time"
+      ],
+      "additionalProperties": false
+    },
+    "ability.attack-time": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "attack_time": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "attack_time"
+      ],
+      "additionalProperties": false
+    },
+    "ability.race-time": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "race_time": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "race_time"
+      ],
+      "additionalProperties": false
+    },
+    "ability.drive-time": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "drive_time": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.trigger"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "drive_time"
+      ],
+      "additionalProperties": false
+    },
+    "ability.auto": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "auto": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.auto"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "auto"
+      ],
+      "additionalProperties": false
+    },
+    "ability.activate": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "activate": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.activate"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "activate"
+      ],
+      "additionalProperties": false
+    },
+    "ability.static": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "static": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.static"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "static"
+      ],
+      "additionalProperties": false
+    },
+    "ability.play": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "play": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.play"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "play"
+      ],
+      "additionalProperties": false
+    },
+    "ability.keywords": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/EmptyPorts"
+        },
+        "keywords": {
+          "type": "array",
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Concept"
+              },
+              {
+                "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
+              }
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "keywords"
+      ],
+      "additionalProperties": false
+    },
+    "ability.evolve": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "evolve": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.evolve"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "evolve"
+      ],
+      "additionalProperties": false
+    },
+    "ability.ride": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "ride": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.ride"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "ride"
+      ],
+      "additionalProperties": false
+    },
+    "ability.feed": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "feed": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.feed"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "feed"
+      ],
+      "additionalProperties": false
+    },
+    "ability.spell": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        },
+        "section": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Nat"
+        },
+        "imports": {
+          "minProperties": 1,
+          "type": "object",
+          "propertyNames": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Code"
+          },
+          "additionalProperties": {
+            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ImportUse"
+          }
+        },
+        "ports": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Ports"
+        },
+        "spell": {
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/A.head.spell"
+        }
+      },
+      "required": [
+        "line",
+        "ports",
+        "spell"
+      ],
+      "additionalProperties": false
+    },
+    "Ability": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ability.fanfare"
+        },
+        {
+          "$ref": "#/$defs/ability.lastword"
+        },
+        {
+          "$ref": "#/$defs/ability.evolve-time"
+        },
+        {
+          "$ref": "#/$defs/ability.super-evolve-time"
+        },
+        {
+          "$ref": "#/$defs/ability.attack-time"
+        },
+        {
+          "$ref": "#/$defs/ability.race-time"
+        },
+        {
+          "$ref": "#/$defs/ability.drive-time"
+        },
+        {
+          "$ref": "#/$defs/ability.auto"
+        },
+        {
+          "$ref": "#/$defs/ability.activate"
+        },
+        {
+          "$ref": "#/$defs/ability.static"
+        },
+        {
+          "$ref": "#/$defs/ability.play"
+        },
+        {
+          "$ref": "#/$defs/ability.keywords"
+        },
+        {
+          "$ref": "#/$defs/ability.evolve"
+        },
+        {
+          "$ref": "#/$defs/ability.ride"
+        },
+        {
+          "$ref": "#/$defs/ability.feed"
+        },
+        {
+          "$ref": "#/$defs/ability.spell"
+        }
+      ]
+    },
+    "Face": {
+      "type": "object",
+      "properties": {
+        "abilities": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Ability"
+          }
+        }
+      },
+      "required": [
+        "abilities"
+      ],
+      "additionalProperties": false
+    },
+    "authorParam": {
+      "$dynamicAnchor": "authorParam",
+      "not": {}
+    },
+    "authorGenerated": {
+      "$dynamicAnchor": "authorGenerated",
+      "not": {}
+    }
+  }
+}

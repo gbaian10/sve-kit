@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.profiles import MEDIA, READER_VERSION, profile
+from sve_carddb.contracts.profiles import MEDIA, profile
 from sve_carddb.contracts.snapshot import (
     decode,
     definition,
@@ -439,9 +439,53 @@ def _walk(value: JsonValue, targets: dict[str, set[str]]) -> None:
             for member in array(item)
         ):
             raise ValueError(f"Dangling array reference: {key}")
-        if key == "program_ref" and item is not None:
-            raise ValueError("No programs supported in this profile")
         _walk(item, targets)
+
+
+def _program_closure(
+    view: View, files: dict[str, Row], payloads: Mapping[str, bytes]
+) -> None:
+    program_file = next(file for file in files.values() if file["role"] == "programs")
+    programs = object_value(parse(payloads[string(program_file["key"])]))
+    entries = [object_value(entry) for entry in array(programs["entries"])]
+    _ordered([entry["id"] for entry in entries])
+    by_id = {string(entry["id"]): entry for entry in entries}
+    faces = {string(row["id"]): row["card_id"] for row in view["face"]}
+    for candidate in entries:
+        ast = object_value(candidate["ast"])
+        if any(
+            faces.get(face) != ast["card_id"]
+            for face in object_value(ast.get("faces", {}))
+        ):
+            raise ValueError("Program face belongs to another card")
+    used: set[str] = set()
+    for row in view["card_engine_support"]:
+        supports = [
+            object_value(row["shared"]),
+            *(
+                object_value(object_value(item)["support"])
+                for item in array(row["overrides"])
+            ),
+        ]
+        for support in supports:
+            reference = support["program_ref"]
+            if reference is None:
+                continue
+            if programs["format_version"] == MEDIA:
+                raise ValueError("No programs supported in this profile")
+            ref = object_value(reference)
+            entry = by_id.get(string(ref["entry_id"]))
+            if ref["file_key"] != program_file["key"] or entry is None:
+                raise ValueError("Dangling program reference")
+            if (
+                entry["dsl_version"] != support["dsl_version"]
+                or entry["id"] != support["dsl_id"]
+                or object_value(entry["ast"])["card_id"] != row["card_id"]
+            ):
+                raise ValueError("Program support identity or version mismatch")
+            used.add(string(entry["id"]))
+    if used != set(by_id):
+        raise ValueError("Unreferenced program entry")
 
 
 def _closure(view: View, manifest: Row) -> None:
@@ -577,7 +621,7 @@ def validate_manifest(manifest_value: JsonValue) -> None:
     manifest = object_value(manifest_value)
     validate("Manifest", manifest, string(manifest["format_version"]))
     selected = profile(string(manifest["format_version"]))
-    if manifest["min_reader_version"] != READER_VERSION or set(
+    if manifest["min_reader_version"] != selected.min_reader_version or set(
         map(string, array(manifest["required_capabilities"]))
     ) != set(selected.capabilities):
         raise ValueError("Unsupported reader version or capability")
@@ -608,6 +652,7 @@ def join_payloads(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     view = _logical(fragments, files)
     _unique(view)
     _closure(view, manifest)
+    _program_closure(view, files, payloads)
     _current(view, fragments)
     _catalog_metadata(view, fragments, files)
     validate_local_dictionaries(fragments, files)
@@ -632,7 +677,7 @@ def compatible(entry: Row) -> bool:
         selected = profile(string(entry["format_version"]))
     except ValueError:
         return False
-    return entry["min_reader_version"] == READER_VERSION and set(
+    return entry["min_reader_version"] == selected.min_reader_version and set(
         map(string, array(entry["required_capabilities"]))
     ) <= set(selected.capabilities)
 

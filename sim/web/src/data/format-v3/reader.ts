@@ -13,9 +13,8 @@ import {
 } from "./json"
 import { primaryKey, rowType } from "./schema"
 
-const FORMAT = "4.0.0"
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "4.0.2"
+const READER_CONTRACT_VERSION = "4.1.0"
 const CAPABILITIES: readonly string[] = [
   "column-partition-v1",
   "fragment-container-v1",
@@ -46,12 +45,15 @@ export function isCompatible(entry: JsonObject): boolean {
   const capabilities = arrayValue(entry["required_capabilities"] ?? null).map((item) =>
     stringValue(item),
   )
+  const version = stringValue(entry["format_version"])
+  const expected = version === "4.1.0" ? [...CAPABILITIES, "dsl-programs-v1"] : CAPABILITIES
+  const reader = version === "4.1.0" ? READER_CONTRACT_VERSION : "4.0.2"
   return (
-    stringValue(entry["format_version"]) === FORMAT &&
-    entry["min_reader_version"] === READER_CONTRACT_VERSION &&
-    capabilities.length === CAPABILITIES.length &&
-    CAPABILITIES.every((capability) => capabilities.includes(capability)) &&
-    capabilities.every((capability) => CAPABILITIES.includes(capability))
+    (version === "4.0.0" || version === "4.1.0") &&
+    entry["min_reader_version"] === reader &&
+    capabilities.length === expected.length &&
+    expected.every((capability) => capabilities.includes(capability)) &&
+    capabilities.every((capability) => expected.includes(capability))
   )
 }
 
