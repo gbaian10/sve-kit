@@ -74,7 +74,8 @@ fn act(
     };
     assert_eq!(
         game.submit_player(viewer, command).kind,
-        SubmissionKind::Applied
+        SubmissionKind::Applied,
+        "{viewer:?} takes the main action"
     );
 }
 
@@ -194,7 +195,7 @@ fn bp01_161_each_player_draws_back_its_own_hand_and_the_caster_one_more() {
     let asked = settle(&mut game, &mut |_, viewer, domain| {
         panic!("BP01-161 asks nothing: {viewer:?} {domain:?}")
     });
-    assert!(chooser(&asked).is_empty());
+    assert_eq!(chooser(&asked), Vec::<Viewer>::new(), "nobody chooses");
     assert_eq!(ids(&game, "P1", "hand").len(), 3, "two back and one more");
     assert_eq!(ids(&game, "P2", "hand").len(), 3, "its own three back");
     assert_eq!(ids(&game, "P1", "deck").len(), 5);
@@ -250,8 +251,8 @@ fn bp01_008_the_chosen_followers_player_puts_it_at_the_deck_bottom() {
                 .roles
                 .iter()
                 .find(|role| match role.position {
-                    Some(Position::Top { .. }) => top,
-                    Some(Position::Bottom { .. }) => !top,
+                    Some(Position::Top {}) => top,
+                    Some(Position::Bottom {}) => !top,
                     Some(Position::Index { .. }) | None => false,
                 })
                 .unwrap()
