@@ -225,6 +225,8 @@ struct Environment {
     destroyed_before: BTreeSet<Key>,
     distributions: BTreeMap<Key, super::RecipientSet>,
     access: BTreeMap<Key, super::Visibility>,
+    /// Public answers naming at most one field or EX card, whose printed cost anyone may read.
+    public_board_singles: BTreeSet<Key>,
     receipt_access: BTreeMap<ReceiptId, super::Visibility>,
     movement_before_access: BTreeMap<ReceiptId, super::Visibility>,
     bindings: BTreeMap<Key, Slot>,
@@ -252,6 +254,8 @@ impl Environment {
         self.single_discards
             .extend(other.single_discards.iter().copied());
         self.access.extend(other.access.clone());
+        self.public_board_singles
+            .extend(other.public_board_singles.iter().copied());
         self.receipt_access.extend(other.receipt_access.clone());
         self.movement_before_access
             .extend(other.movement_before_access.clone());
@@ -311,6 +315,7 @@ impl Checker {
             destroyed_before: BTreeSet::new(),
             distributions: BTreeMap::new(),
             access: BTreeMap::new(),
+            public_board_singles: BTreeSet::new(),
             receipt_access: BTreeMap::new(),
             movement_before_access: BTreeMap::new(),
             bindings: BTreeMap::new(),

@@ -1,7 +1,7 @@
 use super::{Checked, Checker, Key};
 use crate::ir::{
     Action, CaptureTime, Cardinality, ChoiceDomain, Instruction, Nat, PlayerRef, PlayerRelation,
-    PlayerSet, ReceiptLocation, ReceiptReference, Selector, Visibility,
+    PlayerSet, ReceiptLocation, ReceiptReference, Selector, Visibility, ZoneKind,
 };
 use crate::ir::{
     Binding, Control, CostSpec, Declaration, Node, ObjectReceipt, Program, RepeatBody,
@@ -117,9 +117,21 @@ impl Checker {
             ChoiceDomain::Objects {
                 binding,
                 target_roles,
-                ..
+                constraint,
             } => {
                 self.env.access.insert(binding.key(), visibility.clone());
+                if *visibility == (Visibility::Public {})
+                    && constraint
+                        .cardinality
+                        .maximum
+                        .is_some_and(|maximum| maximum.0 <= 1)
+                    && constraint
+                        .groups
+                        .iter()
+                        .all(|group| board_selector(&group.selector))
+                {
+                    self.env.public_board_singles.insert(binding.key());
+                }
                 if let Some(roles) = target_roles {
                     for role in &roles.roles {
                         self.env
@@ -333,4 +345,20 @@ pub(super) const fn only(player: PlayerRef) -> Visibility {
 pub(super) fn private_to(visibility: &Visibility, actor: &PlayerRef) -> bool {
     matches!(visibility, Visibility::Only { players }
         if players.relation == PlayerRelation::SelfPlayer && &players.relative_to == actor)
+}
+
+/// Every candidate stands on a field or in an EX area, both public to every player.
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Any other selector may reach a private zone and lends no public cost."
+)]
+fn board_selector(selector: &Selector) -> bool {
+    match selector {
+        Selector::Zone { zone, .. } => matches!(zone, ZoneKind::Field | ZoneKind::Ex),
+        Selector::Union { sets } => sets.iter().all(board_selector),
+        Selector::Filter { input, .. } | Selector::Difference { input, .. } => {
+            board_selector(input)
+        }
+        _ => false,
+    }
 }

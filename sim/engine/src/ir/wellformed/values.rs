@@ -12,7 +12,7 @@ use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, BoolFrozen, CaptureTime, CharacteristicView,
     EventPattern, EvolutionRead, ExecutionRef, HistoryCount, HistoryQuery, NumberRead,
-    PaymentReference, PlayerRead, PostureRead,
+    NumericProperty, PaymentReference, PlayerRead, PostureRead,
 };
 use crate::ir::{
     CardKind, CardName, ClassRead, DiscardOutcome, Info, KindRead, LkiReason, MemberProjection,
@@ -113,6 +113,15 @@ impl Checker {
                     self.boolean(condition)?;
                     self.integer(then_value)?;
                     self.integer(else_value)
+                }
+                // A printed cost may outlive its card's public move, but never a private pick.
+                IntOperation::Sum {
+                    objects: Selector::Bound { reference },
+                    property: NumericProperty::OriginalCost,
+                } if !self.env.public_board_singles.contains(&reference.key())
+                    || self.env.access.get(&reference.key()) != Some(&Visibility::Public {}) =>
+                {
+                    self.reject()
                 }
                 IntOperation::Sum { objects, .. } => self.selector(objects),
                 IntOperation::InformationOrZero { information } => match information {

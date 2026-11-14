@@ -694,7 +694,20 @@ impl Execution {
     }
 
     /// A printed original cost belongs to the card, so a moved target still has it.
+    /// Only a public pick of at most one field or EX card lends it; a private pick never does.
     fn selected_original_cost(&self, game: &Game, objects: &Selector) -> Result<i64> {
+        let Selector::Bound { reference } = objects else {
+            return Err(unsupported("original cost of an unselected object"));
+        };
+        if !self
+            .targets
+            .get(&reference.key())
+            .is_some_and(super::card::selection::TargetWait::public_board_single)
+        {
+            return Err(unsupported(
+                "original cost of a private or multiple selection",
+            ));
+        }
         super::aggregates::checked_sum(
             self.objects(game, objects)?.into_iter().map(|object| {
                 super::aggregates::numeric_value(

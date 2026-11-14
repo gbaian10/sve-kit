@@ -20,7 +20,7 @@ use crate::ir::{
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
 };
-use crate::ir::{Bool, Expr, MemberProjection, ObjectFrozen, SelectionView, ZoneKind};
+use crate::ir::{Bool, Expr, MemberProjection, ObjectFrozen, SelectionView, Visibility, ZoneKind};
 use crate::ir::{Position, ReceiptLocation, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
@@ -214,6 +214,16 @@ impl TargetWait {
             }
         }
         Ok(())
+    }
+
+    /// Every candidate stood on a field or in an EX area when this public pick of one was made.
+    pub(in crate::game::internal) fn public_board_single(&self) -> bool {
+        self.decision.visibility == (Visibility::Public {})
+            && self.bounds.maximum.is_some_and(|maximum| maximum.0 <= 1)
+            && self
+                .characteristics
+                .iter()
+                .all(|(_, saved)| matches!(saved.zone.as_str(), "field" | "ex"))
     }
 
     fn is_private_look_member(&self, member: ObjectRef) -> bool {
@@ -1451,28 +1461,19 @@ impl Game {
             && self.card_name_matches(id, |own| selection.name.matches(own))?)
     }
 
+    /// A later target may read an earlier answer (an original cost limit), so each target is
+    /// proved under a bound answer to the ones before it, as an ordinary target sequence is.
     pub(super) fn internal_mode_targets_feasible(
         &self,
         execution: &Execution,
         parameters: &[Decision],
     ) -> Result<bool> {
-        for decision in parameters
+        let targets = parameters
             .iter()
             .filter(|decision| !super::material::is_parameter(decision))
-        {
-            let feasible = if matches!(decision.domain, ChoiceDomain::Recipients { .. }) {
-                let (_, domain) = self.recipient_target_domain(execution, decision)?;
-                domain.cardinality.minimum.0
-                    <= u64::try_from(domain.members.len()).map_err(invalid)?
-            } else {
-                let (wait, _) = self.target_domain(execution, decision)?;
-                wait.bounds.minimum.0 <= wait.capacity()?
-            };
-            if !feasible {
-                return Ok(false);
-            }
-        }
-        Ok(true)
+            .cloned()
+            .collect::<VecDeque<_>>();
+        self.internal_feasible_targets(execution, &execution.slots, &targets)
     }
 
     pub(super) fn internal_feasible_targets(
