@@ -1028,3 +1028,6 @@ mod earth_exchange;
 
 #[path = "card/next_turn_cost.rs"]
 mod next_turn_cost;
+
+#[path = "card/granted_attack_target.rs"]
+mod granted_attack_target;

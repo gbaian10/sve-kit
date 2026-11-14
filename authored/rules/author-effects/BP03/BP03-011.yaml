@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-011:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          on:
+            phase: { whose: self, which: main }
+          do:
+            - destroy: this
+      - line: 2
+        static:
+          effects:
+            - grant:
+                "on": { who: self, zone: field, kind: follower }
+                abilities:
+                  - attack_time:
+                      do:
+                        - if:
+                            cond:
+                              is: { ref: attack_target, kind: follower }
+                            then:
+                              - damage: { to: attack_target, n: 2 }
+      - line: 3
+        fanfare:
+          do:
+            - create: { token: フェアリー, n: 1, to: field, result: fairy }
+            - if:
+                cond: { combo: 3 }
+                then:
+                  - grant:
+                      "on": fairy
+                      keywords: [rush]
+    token_sources:
+      - section: 1
+        line: 1
+        card: BP03-T01
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"
