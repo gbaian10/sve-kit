@@ -381,6 +381,10 @@ fn cost_count(
                     })),
                 })));
             }
+            // Private zones stay closed to cost conditions apart from the hand count above.
+            if matches!(query.zone, ast::CountZone::Hand | ast::CountZone::Deck) {
+                return Err(unsupported(path));
+            }
             context.zone_count(query, path)
         }
     }
