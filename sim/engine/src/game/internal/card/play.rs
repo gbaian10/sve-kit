@@ -436,8 +436,7 @@ fn check_private_mode_cost(ability: &Ability, mode: &Mode) -> Result<()> {
 fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut distribution = false;
     let mut material = false;
-    let mut target = None;
-    let mut target_count = 0_usize;
+    let mut targets = BTreeSet::new();
     for (index, decision) in parameters.iter().enumerate() {
         if x_payment::parameter(decision).is_some() {
             if index != 0 {
@@ -473,8 +472,9 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
                         super::selection::field_selector(&group.selector)?;
                     }
                 }
-                target = target_roles.is_none().then_some(*binding);
-                target_count = target_count.saturating_add(1);
+                if target_roles.is_none() {
+                    targets.insert(binding.key());
+                }
             }
             (
                 DecisionKind::PlayParameter {
@@ -491,7 +491,7 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
                     minimum: Nat(1),
                     ..
                 },
-            ) if Some(*reference) == target => {
+            ) if targets.contains(&reference.key()) => {
                 distribution = true;
             }
             (
@@ -508,8 +508,6 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
                 },
             ) if !distribution => {
                 super::recipient_targets::check(candidates, *cardinality)?;
-                target = None;
-                target_count = target_count.saturating_add(1);
                 if !decision.captures.is_empty() {
                     return Err(unsupported("recipient target captures"));
                 }
@@ -521,9 +519,6 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
         {
             return Err(unsupported("play parameter actor or visibility"));
         }
-    }
-    if distribution && target_count != 1 {
-        return Err(unsupported("distribution needs exactly one target group"));
     }
     Ok(())
 }
