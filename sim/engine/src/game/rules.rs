@@ -874,6 +874,7 @@ impl Game {
         self.internal_numeric_begin_turn()?;
         self.internal_suppressions_begin_turn()?;
         self.internal_preventions_begin_turn()?;
+        self.internal_player_cost_begin_turn()?;
         self.internal_attack_restrictions_begin_turn()?;
         self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});

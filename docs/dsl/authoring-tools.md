@@ -1265,3 +1265,5 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 進化能力的 `usable_if.entered_by: {ref: this, by: ability | play}` 讀取該物件目前世代的已確認進場方式，跨回合保留。入場曲本文仍讀它所屬的進場事件；離場再入場後依新事件重記，不接受初始物件狀態中自行標示的進場旗標作為證據。
 
 `play.optional_cost: {earth_rite: N}` 可搭配 `optional_cost_set` 或 `optional_cost_delta`，在同一次出牌報價中選擇是否支付土之秘術。材料保留 Stack 關鍵字及實付 counter 的付款事件；支付後剩餘 Stack 為零時依既有規則送墓。拒絕付款時沿用原本出牌費用，不消耗 Stack。
+
+玩家出牌費用修正可用 `until: {during_next_turn: {who: self | opp}}` 指定只在下一個實際開始的指定玩家回合生效；安裝當下尚未生效。額外回合、跳過回合沿用回合排程，該回合結束後清除修正。修正的對象篩選仍相對於原效果控制者。

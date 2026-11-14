@@ -2,7 +2,7 @@ use super::super::number_plan::CostConditionPlan;
 use super::super::observation::EffectOrigin;
 use super::super::{Execution, InstructionOutcome, player_id};
 use super::{Ability, Game, Located, Result, invalid, unsupported};
-use crate::game::internal::duration::EffectEnd;
+use crate::game::internal::duration::{EffectEnd, TurnInterval};
 use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
 use crate::ir::public_numbers;
@@ -10,8 +10,8 @@ use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, Action, CostChange, CostKind, Duration,
     DurationEnd, Effect, EffectReference, Expr, InstallationSubjects, InstallationTime,
-    Instruction, Int, Nat, ObjectOperand, PlayerId, PlayerRef, PlayerRelation, SelectionView,
-    Selector, TimeAnchor, UsageScope, ZoneKind,
+    Instruction, Int, Interval, Nat, ObjectOperand, PlayerId, PlayerRef, PlayerRelation,
+    SelectionView, Selector, TimeAnchor, UsageScope, ZoneKind,
 };
 use core::slice::from_ref;
 
@@ -24,6 +24,7 @@ pub(in crate::game::internal) struct InstalledCost {
     subjects: Selector,
     change: CostChange,
     end: EffectEnd,
+    intervals: Vec<TurnInterval>,
     limited: bool,
 }
 
@@ -61,7 +62,15 @@ fn check_subjects(subjects: &Selector) -> Result<()> {
 }
 
 fn check_duration(duration: &Duration, installed: bool) -> Result<()> {
-    if duration.anchor != (TimeAnchor::Installation {}) || !duration.intervals.is_empty() {
+    if duration.anchor != (TimeAnchor::Installation {}) {
+        return Err(unsupported("player cost lifetime"));
+    }
+    if !(duration.intervals.is_empty()
+        || installed
+            && matches!(duration.intervals.as_slice(),
+        [Interval::DuringNextTurn { player }] if matches!(&duration.end,
+            DurationEnd::NextTurnEnd { player: end } if end == player)))
+    {
         return Err(unsupported("player cost lifetime"));
     }
     if let Some(limit) = &duration.usage
@@ -77,7 +86,7 @@ fn check_duration(duration: &Duration, installed: bool) -> Result<()> {
     }
     match &duration.end {
         DurationEnd::NoTemporalExpiry {} => Ok(()),
-        DurationEnd::CurrentTurnEnd {} if installed => Ok(()),
+        DurationEnd::CurrentTurnEnd {} | DurationEnd::NextTurnEnd { .. } if installed => Ok(()),
         DurationEnd::While { predicate } if !installed => {
             CostConditionPlan::compile(predicate, false).map(|_plan| ())
         }
@@ -263,9 +272,18 @@ impl Game {
                 Ok(InstalledEffect {
                     source: effect.origin.observed(self, perspective),
                     expires: effect.end.observed()?,
-                    main_live: live,
-                    intervals: vec![],
-                    active: live,
+                    main_live: live && effect.intervals.is_empty(),
+                    intervals: effect
+                        .intervals
+                        .iter()
+                        .map(|interval| interval.observed())
+                        .collect::<Result<Vec<_>>>()?
+                        .into_iter()
+                        .flatten()
+                        .collect(),
+                    active: live
+                        && (effect.intervals.is_empty()
+                            || effect.intervals.iter().any(|interval| interval.active())),
                     change: InstalledChange::PlayerCost {
                         change,
                         limited: effect.limited,
@@ -297,6 +315,11 @@ impl Game {
             return Err(unsupported("player cost effect"));
         };
         let end = EffectEnd::at(self, execution, &duration.end)?;
+        let intervals = duration
+            .intervals
+            .iter()
+            .map(|interval| TurnInterval::at(self, execution, interval))
+            .collect::<Result<Vec<_>>>()?;
         let players = execution.players(self, players)?;
         let id = self.state.next_ir_effect;
         self.state.next_ir_effect = id
@@ -310,6 +333,7 @@ impl Game {
             subjects: subjects.clone(),
             change: change.clone(),
             end,
+            intervals,
             limited: duration.usage.is_some(),
         });
         execution
@@ -328,6 +352,8 @@ impl Game {
             .ok_or_else(|| invalid("missing play origin"))?;
         for cost in &self.card_runtime.other_costs {
             if matches!(cost.end, EffectEnd::Turn(turn) if self.state.schedule.current()? != turn)
+                || (!cost.intervals.is_empty()
+                    && !cost.intervals.iter().any(|interval| interval.active()))
                 || !cost.players.contains(&execution.context.controller)
             {
                 continue;
@@ -339,6 +365,17 @@ impl Game {
             }
         }
         Ok(ids)
+    }
+    pub(in crate::game) fn internal_player_cost_begin_turn(&mut self) -> Result<()> {
+        let turn = self.state.schedule.current()?;
+        let player = player_id(self.active())?.seat;
+        for cost in &mut self.card_runtime.other_costs {
+            cost.end.begin(turn, player);
+            for interval in &mut cost.intervals {
+                interval.begin(turn, player);
+            }
+        }
+        Ok(())
     }
     pub(in crate::game::internal) fn internal_player_cost_end_turn(&mut self, turn: u64) {
         self.card_runtime

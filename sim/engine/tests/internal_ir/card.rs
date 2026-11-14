@@ -1025,3 +1025,6 @@ mod trigger_multiplicity;
 
 #[path = "card/earth_exchange.rs"]
 mod earth_exchange;
+
+#[path = "card/next_turn_cost.rs"]
+mod next_turn_cost;
