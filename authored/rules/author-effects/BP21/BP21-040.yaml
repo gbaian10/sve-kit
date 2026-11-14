@@ -1,0 +1,70 @@
+cards:
+  BP21-040:
+    abilities:
+      - auto:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      history_sum:
+                        event: payment
+                        field: removed_stack
+                        where:
+                          cost_kind: earth_rite
+                        who: self
+                        window: this_turn
+                    op: ge
+                    right: 1
+                then:
+                  - damage:
+                      n: 2
+                      to: enemy
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                leader_or: true
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - if:
+                cond:
+                  paid:
+                    receipt: rite
+                then:
+                  - search:
+                      n: 1
+                      sel:
+                        any_of:
+                          - keyword: earth_rite
+                            kind: follower
+                            orig_cost_le: 1
+                            who: self
+                            zone: deck
+                          - kind: amulet
+                            orig_cost_le: 1
+                            trait: 土の印
+                            who: self
+                            zone: deck
+                      to: field
+          optional_cost:
+            earth_rite: 1
+            result: rite
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set
