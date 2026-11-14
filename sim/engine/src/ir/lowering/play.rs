@@ -935,10 +935,9 @@ impl BodyContext<'_> {
                 zone: ZoneKind::Field,
                 view: SelectionView::Current {},
                 binding: candidate,
-                predicate: Box::new(super::search::object_filter(
-                    target.from.kind.as_ref(),
-                    target.from.r#trait.as_deref(),
-                    None,
+                // The same filter an ordinary field target applies, so names are kept too.
+                predicate: Box::new(super::selection::field_filter(
+                    &super::selection::ObjectFilter::from(&target.from),
                     candidate,
                 )),
             };

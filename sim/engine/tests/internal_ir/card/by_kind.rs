@@ -1,5 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_engine::game::internal::InputDomain;
 
 /// A spell choosing `target` and running `steps`, lowered through the author pipeline.
 fn spell(target: &Value, steps: &Value) -> Result<WellFormedCardProgram, lowering::LoweringError> {
@@ -79,5 +80,187 @@ fn by_kind_needs_exactly_one_chosen_recipient_and_keeps_its_names_local() {
         &leader_or("n"),
         &json!([{"by_kind":{"ref":"t","leader":[{"buff":{"on":"item","hp":2}}],"follower":[]}}]),
     )
+    .unwrap_err();
+}
+
+/// Followers named after themselves, so a name filter can tell them apart.
+fn named_catalog() -> Arc<Catalog> {
+    let mut lines = vec![];
+    let mut cards = serde_json::Map::new();
+    for (number, kind) in [
+        ("unit-spell", "スペル"),
+        ("unit-follower", "フォロワー"),
+        ("マホ", "フォロワー"),
+        ("other", "フォロワー"),
+    ] {
+        lines.push(json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"1","hp":"1","traits":[],"text":null,"sections":[]}]}).to_string());
+        cards.insert(
+            number.into(),
+            json!({"status":"complete","review":"synthetic","abilities":[]}),
+        );
+    }
+    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let document = json!({"format":1,"kind":"effect_set","cards":cards}).to_string();
+    Arc::new(
+        Catalog::from_documents(
+            &lines.join("\n"),
+            &registry,
+            &[("unit.yaml".into(), document)],
+        )
+        .unwrap(),
+    )
+}
+
+/// P1 plays the spell with the given field, answering the target with the card `pick`
+/// (None is the leader); returns the offered cards and the final referee view.
+fn play(
+    program: &WellFormedCardProgram,
+    field: &Value,
+    pick: Option<&str>,
+) -> (Vec<Option<String>>, Value) {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+    initial["players"]["P1"]["zones"]["field"] = field.clone();
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = Game::new(
+        named_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "by-kind",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", program).unwrap();
+    for number in ["unit-follower", "マホ", "other"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    let mut offered = Vec::new();
+    let mut step = Some(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    while let Some(CardPlay::Awaiting(q)) = step.take() {
+        let InputDomain::Targets(domain) = &q.domain else {
+            break;
+        };
+        offered = domain.members.iter().map(|m| m.card.clone()).collect();
+        let chosen = domain
+            .members
+            .iter()
+            .filter(|m| m.card.as_deref() == pick)
+            .map(|m| m.handle)
+            .take(1)
+            .collect();
+        step = Some(
+            game.answer_internal_card(q.actor, q.token, Answer::Targets(chosen))
+                .unwrap(),
+        );
+    }
+    (offered, game.projection(View::Referee).unwrap())
+}
+
+fn hp(view: &Value, id: &str) -> Value {
+    view["objects"][id]["hp"].clone()
+}
+
+#[test]
+fn a_leader_or_named_follower_union_keeps_the_name() {
+    for name in [json!({"name":"マホ"}), json!({"name_contains":"ホ"})] {
+        let mut follower = json!({"who":"self","zone":"field","kind":"follower"});
+        follower
+            .as_object_mut()
+            .unwrap()
+            .extend(name.as_object().unwrap().clone());
+        let program = spell(
+            &json!({"bind":"t","from":{"any_of":[{"leader":"self"},follower]},"n":1}),
+            &json!([by_kind(None)]),
+        )
+        .unwrap();
+        let field = json!([{"id":"maho","card":"マホ"},{"id":"plain","card":"other"}]);
+        let (offered, view) = play(&program, &field, Some("マホ"));
+        assert_eq!(
+            offered,
+            [None, Some("マホ".to_owned())],
+            "the differently named follower is not a candidate"
+        );
+        assert_eq!(hp(&view, "maho"), 3_u8);
+        assert_eq!(hp(&view, "plain"), 1_u8);
+    }
+}
+
+#[test]
+fn by_kind_inside_a_fixed_repeat_is_admitted_and_runs() {
+    let program = spell(
+        &leader_or("n"),
+        &json!([{"repeat":{"n":1,"do":[by_kind(None)]}}]),
+    )
+    .unwrap();
+    let (_, view) = play(
+        &program,
+        &json!([{"id":"ally","card":"unit-follower"}]),
+        None,
+    );
+    assert_eq!(view["P1"]["leader"]["life"], 12_u8);
+    assert_eq!(hp(&view, "ally"), 1_u8);
+}
+
+#[test]
+fn by_kind_inside_a_triggered_payment_is_admitted() {
+    let mut tree = fanfare::expanded::tree().clone();
+    let card = &tree["cards"]["BP08-038"];
+    let meta = card["meta"].clone();
+    let mut entry = card["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("fanfare");
+    entry["auto"] = json!({
+        "on":{"phase":{"whose":"self","which":"end"}},
+        "targets":[leader_or("n")],
+        "do":[{"pay":{"cost":{"pp":1},"do":[by_kind(None)]}}]
+    });
+    tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[entry]}});
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut game = Game::new(
+        named_catalog(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "by-kind-pay",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+}
+
+#[test]
+fn kind_branches_share_the_execution_timestamp_checks() {
+    let load = |steps: &Value| {
+        let program = spell(&leader_or("n"), steps).unwrap();
+        let mut game = Game::new(
+            named_catalog(),
+            &setup(1, json!([])),
+            &Value::Null,
+            &Value::Null,
+            "ts",
+        )
+        .unwrap();
+        game.load_internal_card("unit-spell", &program)
+    };
+    let branch = |follower: Value| json!({"by_kind":{"ref":"t","leader":[{"life":{"who":"item","delta":1}}],"follower":follower}});
+    load(&json!([branch(
+        json!([{"buff":{"on":"item","power":2}},{"buff":{"on":"item","hp":2}}])
+    )]))
+    .unwrap();
+    load(&json!([branch(
+        json!([{"set_stat":{"on":"item","power":1}},{"buff":{"on":"item","power":2}}])
+    )]))
+    .unwrap_err();
+    load(&json!([branch(
+        json!([{"set_stat":{"on":"item","hp":1}},{"set_stat":{"on":"item","hp":3}}])
+    )]))
+    .unwrap_err();
+    // A branch write still conflicts with one outside the branch.
+    load(&json!([
+        {"set_stat":{"on":{"who":"self","zone":"field","kind":"follower"},"power":1}},
+        branch(json!([{"buff":{"on":"item","power":2}}]))
+    ]))
     .unwrap_err();
 }

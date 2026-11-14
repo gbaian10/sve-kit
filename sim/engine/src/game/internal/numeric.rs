@@ -193,6 +193,18 @@ fn collect_patches<'program>(
                     collect_patches(&mode.body, patches);
                 }
             }
+            // Either kind branch may run, so both share the execution's timestamp checks.
+            Node::Control {
+                control:
+                    Control::Match {
+                        leader_body,
+                        follower_body,
+                        ..
+                    },
+            } => {
+                collect_patches(leader_body, patches);
+                collect_patches(follower_body, patches);
+            }
             _ => {}
         }
     }

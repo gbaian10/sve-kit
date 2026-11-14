@@ -2,8 +2,8 @@
 
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::ir::{
-    Binding, Control, DamageRecipient, Node, ObjectRef, PlayerRef, Program, Requirement,
-    RuntimeDamageRecipient,
+    Binding, Control, DamageRecipient, Node, ObjectRef, PlayerRef, Program, RepeatBody,
+    Requirement, RuntimeDamageRecipient,
 };
 
 #[expect(
@@ -122,10 +122,24 @@ fn collect(program: &Program, prefix: &str, paths: &mut Paths) {
                     );
                 }
             }
-            Control::Simultaneous { .. }
-            | Control::Repeat { .. }
-            | Control::EachPlayer { .. }
-            | Control::Pay { .. } => {}
+            Control::Pay { on_paid, .. } => {
+                collect(on_paid, &format!("{path}/control/on_paid"), paths);
+            }
+            Control::Repeat {
+                body: RepeatBody::Program { body },
+                ..
+            } => collect(body, &format!("{path}/control/body/body"), paths),
+            Control::EachPlayer { stages, .. } => {
+                for (index, stage) in stages.iter().enumerate() {
+                    collect(
+                        &stage.body,
+                        &format!("{path}/control/stages/{index}/body"),
+                        paths,
+                    );
+                }
+            }
+            // Batches hold instructions only, and a body reference has no inline program.
+            Control::Simultaneous { .. } | Control::Repeat { .. } => {}
         }
     }
 }
