@@ -19,7 +19,7 @@
 | 路徑 | 作者資料與載入 | 執行與使用邊界 |
 | --- | --- | --- |
 | typed | `authored/rules/author-effects/` 與 `effect-bodies/`；Schema 由 `dsl/author-nodes.schema.json` 等定義；Python current reader 展開完整作者選擇，Rust `ExpandedLowerer` 產生受驗 IR | `Catalog::from_current_selection`／`Game::from_selected_effects` 建立已准入整卡的局面，`game/internal/` 執行 typed IR；有 Rust authority API，宿主接通狀態以 #1971 為準 |
-| 舊原型 | `authored/rules/effects/*.yaml`，`dsl/effects.schema.json` 的 `format: 1, kind: effect_set` 選定 `astra/1` 文法；keywords 為 format 1 的 `keyword_registry` | 舊 `decide`／`legal`／`projection`、JSON 效果解譯器、AI 與回放原型；共同規則題本仍經原型 adapter 執行，不能充當 typed 路徑的完整驗收 |
+| 舊原型 | `authored/rules/effects/*.yaml`，`dsl/effects.schema.json` 的 `format: 1, kind: effect_set` 選定 `astra/1` 文法；keywords 為 format 1 的 `keyword_registry` | 舊 `decide`／`legal`／`projection`、JSON 效果解譯器、AI 與回放原型；共同規則題本已改由 typed 玩家入口執行，不再經原型 adapter |
 
 DSL 1.0 已有 Schema、Python typed boundary、作者載入器、Rust lowering、IR 良構與 runtime 准入。
 作者儲存格式與展開入口依[承載契約](../dsl/author-contract-1.0.md)及[作者工具](../dsl/authoring-tools.md)，

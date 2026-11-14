@@ -85,7 +85,7 @@ current cards never acquire prototype programs. Source proof stays inside the
 authority, including after departure. Loaded internal cards still reject saves;
 this entry does not publish capabilities or grant use qualification.
 
-The default `runner` feature enables evaluation adapters and the CLI. The
+The default `runner` feature enables the evaluation adapters. The
 library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
 bindings, host time and execution have not been validated.
 
