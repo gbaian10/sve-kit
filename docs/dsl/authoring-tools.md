@@ -234,6 +234,8 @@ buff:
 
 手牌的 `choose.from: {who: self, zone: hand, ...}` 可接 `move: {ref: selected, to: field, result: entered}`，選項只向控制者公開；成功入場才公開卡片，且不支付印刷打出費用。多張手牌選取（如 BP17-098）與 Look 共用場上空位上限：入場必須緊接選取，出題時最多可選目前空位數。中間插入其他步驟或跨條件分支入場會在載入時拒絕；單張選取沿用既有滿場時留在原區域的處理。「手札のAかB」寫成 `choose.from: {any_of: [{who: self, zone: hand, kind: follower, trait: 透京, orig_cost_le: 3}, {who: self, zone: hand, class: ビショップ, kind: amulet, orig_cost_le: 3}]}`（BP18-098、BP13-090）：每個分支都必須讀自己的手牌並各自帶靜態篩選，同時符合多個分支的卡仍只算一張；混入其他區域、對手手牌、`except`、極值或動態費用的分支在載入時拒絕。
 
+本文 `choose.from: {in: created}` 可從同一能力先前的公開物件綁定再選子集，例如 `create.result` 或正式目標；選擇者沿用 `by`。張數沿用 `n`、`upto`、`any`；選擇時只保留原世代仍在場上、EX、墓場或表向消滅領域的卡，不重新搜尋同名物件。手牌、Look 與進化牌堆的選取仍遵循各自的權限入口。
+
 Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, trait: クリスタリア}, {in: seen, kind: follower, trait: 妖精}]}`，表示「A 或 B」的同一候選集合（BP02-008、BP21-010）；每個分支須讀同一個 Look、各自帶篩選，同時符合多個分支的卡仍只算一張。`groups` 表示兩組或三組各至多 1 張，搭配 `may: true` 與 `upto: <組數>`；每組須有 `kind` 或非空 `trait`，可加 `class` 或 `orig_cost_le`（BP05-003 的エルフ從者與法術、BP11-086 的荒野卡與低費從者、ECP02-034 的キュート／クール／パッション）。每張實體卡最多佔一組，同時符合多組也不能重複選取；某組沒有候選不妨礙選其他組。候選與選擇仍只向控制者公開，放入手牌的公開另寫 `reveal`。`groups` 不與 `any_of`、外層特徵或合計費用並用。可多選的 Look 選取若要進場，`move: {ref: <選取>, to: field}` 必須緊接在 `choose` 之後、位於同一層本文；選項上限在出題時依空位計算，中間或條件分支內的進場會在載入時拒絕。分組或聯集拿回手牌不受場位限制。
 
 已從自己的 Look 選出的牌可用 `banish: {ref: picked, result: banished}` 消滅（CP03-053）。這個觀察綁定的成功 Before 成員可用於 `move: {ref: {in: seen, except: {in: {objects_of: banished, view: before}}}, to: deck, position: bottom, order: chooser}`，扣除實際消滅的牌後，將其餘牌依選擇順序放到牌庫底。不以選取張數或預先計數代替成功回條，也不授權結果的新世代引用。執行時仍須是本次私有 Look 選取的成員、留在自己的牌庫且位置仍已知；未觀察的牌庫、對手的牌庫與直接對整份 Look 的消滅均不接受。墓場或 EX 的公開正式目標可沿用一般 `banish: selected`，不需要先看牌。
