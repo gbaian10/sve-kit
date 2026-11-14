@@ -1263,3 +1263,5 @@ Token 建立的數量可使用已准入的公開人口計數，例如 `create: {
 `apply.effect.cost_mod` 的 `when_playing: {in: affected}` 也可安裝在已宣告的正式目標上，例如 `on: card` 搭配 `set: 0`、`until: turn`。與成功移入 EX 的 `follow` 共用物件世代及費用修正流程；沒有選取物件時不建立修正。
 
 《Advance 起動》的 PP 可替代付款後，後續有序來源成本沿用一般付款流程，例如 `steps: [{pp: 3}, {self_to_cemetery: true}]`，或先橫置自身再移墓。先付完成本才進行具名 Advance 選取；拒絕入場仍不退回已付成本。
+
+群體 `destroy` 的公開區域查詢沿用正式目標的狀態篩選，例如 `ref: {who: opp, zone: field, kind: follower, acted: true}`。在破壞指示解算時讀目前姿態；不改讀離場來源的舊快照，也不授權查詢私有區域。 規則起身限制的 `apply` 也共用已驗證的公開場上篩選；原本的起身時點與物件世代限制不變。
