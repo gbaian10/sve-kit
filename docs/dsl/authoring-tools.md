@@ -1261,3 +1261,5 @@ Token 建立的數量可使用已准入的公開人口計數，例如 `create: {
 可選的單一正式目標（`upto: 1`）可用 `at: selection`、`selection: card` 與 `value: {orig_cost_of: card}` 捕捉選取時數值，`cost_of`、`power_of`、`hp_of` 同理。零張先走既有空集合條件，結果為 0；一張才讀該物件並凍結數值。一般的 `orig_cost_of: this` 仍是來源資訊讀值。
 
 `apply.effect.cost_mod` 的 `when_playing: {in: affected}` 也可安裝在已宣告的正式目標上，例如 `on: card` 搭配 `set: 0`、`until: turn`。與成功移入 EX 的 `follow` 共用物件世代及費用修正流程；沒有選取物件時不建立修正。
+
+《Advance 起動》的 PP 可替代付款後，後續有序來源成本沿用一般付款流程，例如 `steps: [{pp: 3}, {self_to_cemetery: true}]`，或先橫置自身再移墓。先付完成本才進行具名 Advance 選取；拒絕入場仍不退回已付成本。
