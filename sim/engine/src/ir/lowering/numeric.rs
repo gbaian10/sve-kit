@@ -527,7 +527,8 @@ impl BodyContext<'_> {
                 ast::Cannot::Player(_) | ast::Cannot::Removal(_) | ast::Cannot::DealDamage(_),
             )
             | ast::InstalledEffect::Prevent(_)
-            | ast::InstalledEffect::DamageMod(_) => {
+            | ast::InstalledEffect::DamageMod(_)
+            | ast::InstalledEffect::DamageCap(_) => {
                 return self.prevent_apply(installation, source, path);
             }
             ast::InstalledEffect::EvolveCostMod(_) => {

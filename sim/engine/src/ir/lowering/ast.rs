@@ -1283,6 +1283,7 @@ pub(super) enum InstalledEffect {
     EvolveCostMod(EvolutionCostModifier),
     Cannot(Cannot),
     Prevent(Prevent),
+    DamageCap(DamageCap),
 }
 
 #[derive(Deserialize)]

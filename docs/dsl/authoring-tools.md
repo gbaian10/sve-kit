@@ -1302,3 +1302,11 @@ counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `dama
 也不論是效果、成本或規則造成，每一張卡各誘發一次（Q2813）。`who` 指放入的消滅領域屬於誰，也就是卡的擁有者。
 這是場上的觀察；這張卡自己從場上被放入消滅領域時仍會誘發（Q2816），token 放入後立即消去也照樣誘發（Q2814）。
 沒有 `sel`，不篩選放入的卡。
+
+## 安裝有期限的傷害上限
+
+`damage_cap: {threshold: N, set: M}`（N > M）除了常駐，也可以安裝：
+`player_effect: {who: self, effect: {damage_cap: …}, until: turn}` 讓自己的領袖本回合每次受到 N 以上的傷害都變成 M（BP05-101）；
+`apply: {on: …, effect: {damage_cap: …}, until: turn | this_and_next_opp_turn}` 讓選到的物件在期間內同樣處理（BP08-024）。
+上限逐次套用，不是累計（Q760、Q1067）；`this_and_next_opp_turn` 在自己的回合連續時，第二個自己的回合不生效（Q1066）。
+物件上的上限是該物件獲得的能力（「それは『これが受ける4以上のダメージを3にする』を持つ」）：之後失去全部能力時一併失去，失去能力之後才獲得的上限照常生效。

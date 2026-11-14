@@ -1103,6 +1103,7 @@ impl Game {
                 .into_iter()
                 .map(|(_, origin)| origin),
         );
+        origins.extend(self.internal_prevention_grants(holder)?);
         Ok(origins)
     }
 }

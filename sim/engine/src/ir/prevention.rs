@@ -120,19 +120,32 @@ fn source_filter(predicate: &SourcePredicate) -> Option<DamageSource<'_>> {
     (*binding == predicate.binding).then_some(DamageSource::Objects(set))
 }
 
-/// A whole-turn reduction of damage to the own leader without a use count (BP14-T07).
+/// A whole-turn reduction or cap of damage to the own leader without a use count (BP14-T07, BP05-101).
 pub(crate) fn whole_turn_leader_reduction(shape: &Prevention<'_>) -> bool {
     shape.usage.is_none()
         && shape.kind == DamageKind::Any
         && shape.damage_source.is_none()
-        && matches!(
+        && (matches!(
             shape.rewrite,
             EventRewrite::AddDamage {
                 amount: Expr::Literal(super::Int(i64::MIN..=-1))
             }
-        )
+        ) || matches!(shape.rewrite, EventRewrite::CapDamage { .. }))
         && shape.duration.end == (super::DurationEnd::CurrentTurnEnd {})
         && shape.duration.intervals.is_empty()
+}
+
+/// 「このターン(と次の相手のターン中)、…N以上のダメージをMにする」 on chosen objects (BP08-024).
+pub(crate) fn lasting_object_cap(shape: &Prevention<'_>) -> bool {
+    shape.usage.is_none()
+        && shape.kind == DamageKind::Any
+        && shape.damage_source.is_none()
+        && matches!(shape.rewrite, EventRewrite::CapDamage { .. })
+        && shape.duration.end == (super::DurationEnd::CurrentTurnEnd {})
+        && matches!(
+            shape.duration.intervals.as_slice(),
+            [] | [super::Interval::DuringNextTurn { .. }]
+        )
 }
 
 /// 「これの…カウンター1個につき+N」: the provider's own live counter times a positive step.

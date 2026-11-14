@@ -187,7 +187,9 @@ impl BodyContext<'_> {
         }
         if matches!(
             value.effect,
-            ast::InstalledEffect::Prevent(_) | ast::InstalledEffect::DamageMod(_)
+            ast::InstalledEffect::Prevent(_)
+                | ast::InstalledEffect::DamageMod(_)
+                | ast::InstalledEffect::DamageCap(_)
         ) {
             self.player_prevention(value, source, path)
         } else {
@@ -229,6 +231,14 @@ impl BodyContext<'_> {
                     shape.source.as_ref(),
                 )
             }
+            // 「このターン、自分のリーダーが受けるN以上のダメージをMにする」 (BP05-101).
+            ast::InstalledEffect::DamageCap(shape) => (
+                damage_cap(shape, path)?,
+                shape.on.as_ref(),
+                None,
+                None,
+                None,
+            ),
             ast::InstalledEffect::DamageMod(_)
             | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
@@ -238,9 +248,13 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(_) => return Err(unsupported(path)),
         };
-        // Only the fixed reduction may last the whole turn (BP14-T07); full prevention stays once-only.
+        // Fixed reductions and caps may last the whole turn (BP14-T07); full prevention stays once-only.
         let limited = next == Some(true);
-        if (!limited && !matches!(value.effect, ast::InstalledEffect::DamageMod(_)))
+        if (!limited
+            && !matches!(
+                value.effect,
+                ast::InstalledEffect::DamageMod(_) | ast::InstalledEffect::DamageCap(_)
+            ))
             || damage_source.is_some()
             || !matches!(kind, None | Some(ast::PreventionKind::Any))
             || !matches!(
@@ -303,7 +317,8 @@ impl BodyContext<'_> {
         let limited = match &installation.effect {
             ast::InstalledEffect::Prevent(shape) => shape.next_only == Some(true),
             ast::InstalledEffect::DamageMod(shape) => shape.next_only == Some(true),
-            ast::InstalledEffect::PlayPermission(_)
+            ast::InstalledEffect::DamageCap(_)
+            | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)
@@ -361,7 +376,28 @@ impl BodyContext<'_> {
                     path,
                 )?
             }
-            ast::InstalledEffect::DamageMod(_) => return Err(unsupported(path)),
+            // 「このターンと次の相手のターン中、それは『これが受けるN以上のダメージをMにする』を持つ」.
+            ast::InstalledEffect::DamageCap(shape) if shape.on.is_none() => {
+                let recipient = self.prevention_recipients(None, fallback, path)?;
+                let mut effect = self.damage_prevention(
+                    ProposedEventPattern::Damage {
+                        recipient: Some(recipient),
+                        source: None,
+                        kind: DamageKind::Any,
+                    },
+                    source,
+                    condition,
+                    duration.clone(),
+                    path,
+                )?;
+                if let Effect::Replacement { rewrite, .. } = &mut effect {
+                    *rewrite = damage_cap(shape, path)?;
+                }
+                effect
+            }
+            ast::InstalledEffect::DamageMod(_) | ast::InstalledEffect::DamageCap(_) => {
+                return Err(unsupported(path));
+            }
             ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
@@ -517,20 +553,12 @@ pub(super) fn lower_at_source(
                     },
                 )
             }
-            ast::StaticEffect::DamageCap(shape) => {
-                if shape.threshold <= shape.set || shape.threshold > i64::MAX.unsigned_abs() {
-                    return Err(unsupported(path));
-                }
-                (
-                    shape.on.as_ref(),
-                    None,
-                    DamageKind::Any,
-                    EventRewrite::CapDamage {
-                        threshold: Expr::Literal(Nat(shape.threshold)),
-                        replacement: Expr::Literal(Nat(shape.set)),
-                    },
-                )
-            }
+            ast::StaticEffect::DamageCap(shape) => (
+                shape.on.as_ref(),
+                None,
+                DamageKind::Any,
+                damage_cap(shape, path)?,
+            ),
             ast::StaticEffect::BanishInstead(_)
             | ast::StaticEffect::Reroll(_)
             | ast::StaticEffect::ChoiceAny(_)
@@ -589,6 +617,17 @@ pub(super) fn lower_at_source(
             body: None,
             declarations,
         },
+    })
+}
+
+/// 「N以上のダメージをMにする」: each single damage of at least N becomes M (Q760, Q1067).
+fn damage_cap(shape: &ast::DamageCap, path: &str) -> Result<EventRewrite, LoweringError> {
+    if shape.threshold <= shape.set || shape.threshold > i64::MAX.unsigned_abs() {
+        return Err(unsupported(path));
+    }
+    Ok(EventRewrite::CapDamage {
+        threshold: Expr::Literal(Nat(shape.threshold)),
+        replacement: Expr::Literal(Nat(shape.set)),
     })
 }
 
