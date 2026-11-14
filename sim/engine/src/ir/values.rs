@@ -2,15 +2,15 @@ use super::{
     AbilityPredicate, AbilityReference, AttackEvent, BanishEvent, Characteristics,
     CounterChangeEvent, DamageEvent, DamageRecipient, DestroyEvent, DiceEvent, DiscardEvent,
     DiscardOutcome, DrawEvent, DriveCheckedEvent, DriveGainedEvent, DriveTriggerEvent,
-    EarthRitePaidComponent, EnterExEvent, EnterFieldEvent, EquipEvent, Event, EventSnapshotPolicy,
-    EvolutionStateFields, EvolveEvent, FusedEvent, HistoryCount, HistoryQuery, Info,
-    LeaveFieldEvent, LifeChangeEvent, MaterialActOutcome, MeasuredReceipt, MeasuredReceiptList,
-    MoveEvent, MoveOutcome, MoveResult, MovementReceipt, MovementReceiptList, NonEmpty,
-    NumericHistoryQuery, ObjectReceipt, ObjectReceiptList, ObjectRef, PaymentEvent, PaymentReceipt,
-    PaymentResult, PhaseEvent, PhaseFields, PlayEvent, PlaySubject, PostureEvent, PostureFields,
-    RaceEvent, ReceiptList, ReceiptReference, ReceiptStatus, ResolveEvent, RuntimeAbilityReference,
-    RuntimeObjectView, SourcePredicate, StatChangeEvent, StatDelta, TargetedEvent, TokenOutcome,
-    TurnIdFields, UbActivatedEvent, ValueEquality, Visitor, Walk,
+    EarthRitePaidComponent, EnterExEvent, EnterFieldEvent, EntryMethod, EquipEvent, Event,
+    EventSnapshotPolicy, EvolutionStateFields, EvolveEvent, FusedEvent, HistoryCount, HistoryQuery,
+    Info, LeaveFieldEvent, LifeChangeEvent, MaterialActOutcome, MeasuredReceipt,
+    MeasuredReceiptList, MoveEvent, MoveOutcome, MoveResult, MovementReceipt, MovementReceiptList,
+    NonEmpty, NumericHistoryQuery, ObjectReceipt, ObjectReceiptList, ObjectRef, PaymentEvent,
+    PaymentReceipt, PaymentResult, PhaseEvent, PhaseFields, PlayEvent, PlaySubject, PostureEvent,
+    PostureFields, RaceEvent, ReceiptList, ReceiptReference, ReceiptStatus, ResolveEvent,
+    RuntimeAbilityReference, RuntimeObjectView, SourcePredicate, StatChangeEvent, StatDelta,
+    TargetedEvent, TokenOutcome, TurnIdFields, UbActivatedEvent, ValueEquality, Visitor, Walk,
 };
 use core::fmt::Debug;
 use core::marker::PhantomData;
@@ -551,6 +551,7 @@ tags!(SpellCountTime {
 });
 variants!(BoolRead {
     FieldEntryOrigin { object: ObjectOperand, zone: ZoneKind } => ["read.field-entry-origin"],
+    FieldEntryMethod { object: ObjectOperand, method: EntryMethod } => ["read.field-entry-method"],
     CardPlayOrigin { zone: ZoneKind, execution: ExecutionRef } => ["read.card-play-origin"],
     Awakening { player: PlayerRef } => ["read.awakening"],
     Crimson { player: PlayerRef } => ["read.crimson"],

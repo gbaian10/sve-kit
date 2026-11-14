@@ -34,8 +34,10 @@ pub(crate) enum HistoryPlan<'query> {
 
 impl<'query> HistoryPlan<'query> {
     pub(crate) const fn cost_facts(&self) -> bool {
-        matches!(self, Self::Discarded)
-            || matches!(self, Self::Subject {
+        matches!(
+            self,
+            Self::Discarded | Self::Played(_) | Self::PlayedFiltered { .. }
+        ) || matches!(self, Self::Subject {
                 event: SubjectHistoryKind::Attack | SubjectHistoryKind::Evolve | SubjectHistoryKind::Leave,
                 filter,
             } if filter.original_cost.is_none()

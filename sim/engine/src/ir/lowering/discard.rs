@@ -8,6 +8,7 @@ use super::{
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::discard::{DiscardCard, DiscardSource};
 use crate::ir::{BatchPolicy, ClassId, TraitId, TriggerAggregation};
+use alloc::collections::BTreeSet;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -57,7 +58,21 @@ impl BodyContext<'_> {
             Some(ast::LeaderSide::Opponent) => super::super::events::timing::opponent(),
             Some(ast::LeaderSide::Controller) | None => PlayerRef::Controller {},
         };
-        let mode = match (value.n, value.all) {
+        if let Some(ast::DiscardCount::Number(number)) = &value.n {
+            // `all`, `any` and `ref` are separate discard shapes, never a count.
+            if value.all.is_some() || value.any.is_some() || value.reference.is_some() {
+                return Err(unsupported(path));
+            }
+            let population = self.whole_hand(&player, path)?;
+            let count = self.number(number, path, &mut BTreeSet::new())?;
+            let mode = if value.random == Some(true) {
+                DiscardMode::Random { population, count }
+            } else {
+                DiscardMode::ChosenCount { population, count }
+            };
+            return Ok(Action::Discard { player, mode });
+        }
+        let mode = match (value.fixed_n(), value.all) {
             (n, None)
                 if (n.is_some_and(|n| n > 0) || value.any.is_some())
                     && value.random != Some(true) =>
