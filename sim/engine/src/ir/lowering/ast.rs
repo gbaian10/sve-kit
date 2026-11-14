@@ -2756,21 +2756,35 @@ pub(super) struct PublicQuery {
     pub cost_le: Option<u64>,
     pub cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
-    pub r#where: Option<PublicPowerWhere>,
+    pub r#where: Option<PublicCandidateWhere>,
 }
 
-/// `where: {cmp: {left: {power_of: item}, op: ge|le, right: N}}` on each public candidate.
-#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+/// `where: {cmp: {left: {power_of: item} | {counter: {on: item, name}}, op: ge|le, right: N}}`
+/// on each public candidate.
+#[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
-pub(super) struct PublicPowerWhere {
-    pub cmp: PublicPowerComparison,
+pub(super) struct PublicCandidateWhere {
+    pub cmp: PublicCandidateComparison,
 }
-#[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
+#[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
-pub(super) struct PublicPowerComparison {
-    pub left: ItemPower,
+pub(super) struct PublicCandidateComparison {
+    pub left: PublicCandidateNumber,
     pub op: PowerBound,
     pub right: u64,
+}
+#[derive(Clone, Deserialize, PartialEq, Eq)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PublicCandidateNumber {
+    Power(ItemPower),
+    Counter { counter: ItemCounter },
+}
+#[derive(Clone, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ItemCounter {
+    #[serde(rename = "on")]
+    pub _on: Item,
+    pub name: String,
 }
 #[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
@@ -2793,7 +2807,7 @@ pub(super) enum PowerBound {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum ExistsQuery {
-    Public(PublicQuery),
+    Public(Box<PublicQuery>),
     Selected(SelectedQuery),
     FollowedKeyword(FollowedKeywordQuery),
 }

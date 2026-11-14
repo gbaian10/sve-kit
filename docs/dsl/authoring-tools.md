@@ -1277,3 +1277,14 @@ counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `dama
 同一觸發的本文可寫 `evolve: {ref: it}`，讓進場的那張卡進化（BP22-003／004「…が出たとき、それは進化する」）。
 沿用效果進化的選牌：從自己進化牌庫選一張對應的卡，可不選（Q2789），不支付對方《進化》的成本（Q2788）。
 進場的卡已離場或不是自己控制的從者時不進化。
+
+## 公開候選的 counter 門檻與 EX 卡觀察進場
+
+公開區域查詢的 `where` 除了 `power_of: item`，也接受 `counter: {on: item, name: …}` 與常值比較（`ge`／`le`），
+逐張讀候選目前的 counter。例如 BP21-060 的「自分のEXエリアのカード1枚の情熱カウンターが4個以上なら」寫成
+`exists: {who: self, zone: ex, where: {cmp: {left: {counter: {on: item, name: 情熱カウンター}}, op: ge, right: 4}}}`；
+任何一張達門檻即成立，不加總多張的 counter。counter 只在公開區域的現存物件上讀取，私有區域選取不開放此篩選。
+
+`auto.zone: ex` 可用 `on.enter_field`（不寫 `ref: this`）觀察其他卡進入場上，BP21-057 在 EX 時，每有一張自己的学院從者出場
+就在 EX 的自身放一個 counter（Q2736；同時出場兩張誘發兩次，Q2740）。在場上的同一張卡不因此誘發；
+從 EX 打出到場上時 counter 保留（Q2737）。

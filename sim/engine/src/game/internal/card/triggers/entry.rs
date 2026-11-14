@@ -33,6 +33,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         || !optional_payment::trigger_play(ability)
         || trigger.active_zones != ability.active_zones
         || !(trigger.active_zones == [ZoneKind::Field]
+            || ex_header(ability)
             || (trigger.active_zones == [ZoneKind::Cemetery]
                 && super::played::cemetery_body(ability)))
         || trigger.view != EventSnapshotPolicy::AfterEntry
@@ -50,6 +51,12 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
 /// 「自分の場に…が出たとき」 printed on a card that waits in its owner's cemetery.
 pub(in crate::game::internal) fn cemetery_header(ability: &Ability) -> bool {
     ability.active_zones == [ZoneKind::Cemetery] && filter(ability).is_some()
+}
+
+/// 「自分の場に…が出たとき」 printed on a card waiting in EX; it watches other cards only.
+pub(in crate::game::internal) fn ex_header(ability: &Ability) -> bool {
+    ability.active_zones == [ZoneKind::Ex]
+        && filter(ability).is_some_and(|plan| plan.itself != Some(true))
 }
 
 fn filter(ability: &Ability) -> Option<SubjectFilter> {
@@ -134,18 +141,20 @@ fn entry_cause(frame: &Frame) -> Result<(Cause, PlayerId, EntryMethod)> {
     reason = "The shared movement boundary owns entry event admission."
 )]
 impl Game {
-    /// Cemetery cards observe only through abilities active in the cemetery.
+    /// Cemetery and EX cards observe only through abilities active in their own zone.
     fn entry_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         let mut holders = self.field_ids();
-        holders.extend(self.zone_ids("P1", "cemetery"));
-        holders.extend(self.zone_ids("P2", "cemetery"));
+        for zone in ["cemetery", "ex"] {
+            holders.extend(self.zone_ids("P1", zone));
+            holders.extend(self.zone_ids("P2", zone));
+        }
         holders
             .into_iter()
             .map(|id| {
-                let zone = if self.object(&id)?.zone == "field" {
-                    ZoneKind::Field
-                } else {
-                    ZoneKind::Cemetery
+                let zone = match self.object(&id)?.zone.as_str() {
+                    "field" => ZoneKind::Field,
+                    "ex" => ZoneKind::Ex,
+                    _ => ZoneKind::Cemetery,
                 };
                 let abilities = if zone == ZoneKind::Field
                     || self
