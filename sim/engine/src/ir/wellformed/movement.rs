@@ -308,6 +308,9 @@ impl Checker {
                             .map(|maximum| total.saturating_add(maximum.0))
                     });
                     if let Some(capacity) = capacity
+                        && destinations.iter().all(|partition| {
+                            partition.cardinality.maximum == Some(partition.cardinality.minimum)
+                        })
                         && cardinality
                             .maximum
                             .is_none_or(|maximum| maximum.0 > capacity)

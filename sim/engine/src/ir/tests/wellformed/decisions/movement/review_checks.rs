@@ -253,7 +253,7 @@ fn search_requires_a_destination_with_enough_partition_capacity() {
                         zone: MoveDestination::Owners {
                             zone: OwnerZone::Hand,
                         },
-                        cardinality: bounds(0, limit),
+                        cardinality: bounds(limit.unwrap_or(0), limit),
                     })
                     .collect(),
             });
@@ -265,6 +265,29 @@ fn search_requires_a_destination_with_enough_partition_capacity() {
             assert!(error.ir_path.ends_with("/action/destination"));
         }
     }
+}
+
+#[test]
+fn optional_search_partitions_can_leave_found_members_in_the_deck() {
+    let mut step = search();
+    if let Action::Search {
+        cardinality,
+        destination,
+        ..
+    } = action(&mut step)
+    {
+        *cardinality = bounds(0, Some(3));
+        *destination = Some(SearchDestination::Partition {
+            destinations: vec![SearchPartition {
+                decision: DecisionId(9010),
+                zone: MoveDestination::Owners {
+                    zone: OwnerZone::Hand,
+                },
+                cardinality: bounds(0, Some(1)),
+            }],
+        });
+    }
+    accept(body(1, vec![step]));
 }
 
 #[test]

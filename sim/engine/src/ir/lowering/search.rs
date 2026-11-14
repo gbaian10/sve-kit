@@ -493,10 +493,7 @@ impl BodyContext<'_> {
                 order: ast::Printed::Printed,
                 partition,
             } => {
-                if !matches!(partition.as_slice(), [hand, cemetery]
-                    if matches!(hand.zone, ast::SearchZone::Hand) && matches!(cemetery.zone, ast::SearchZone::Cemetery)
-                    && cardinality.maximum.is_some_and(|max| max.0.saturating_sub(hand.n) <= cemetery.n))
-                {
+                if partition.len() < 2 {
                     return Err(unsupported(path));
                 }
                 let mut destinations = Vec::new();
@@ -504,7 +501,7 @@ impl BodyContext<'_> {
                     destinations.push(SearchPartition {
                         decision: DecisionId(self.card_allocator.id(path)?),
                         zone: destination(&part.zone),
-                        cardinality: quantity(Some(part.n), None, path)?,
+                        cardinality: quantity(part.n, part.upto, path)?,
                     });
                 }
                 Ok(SearchDestination::Partition { destinations })

@@ -1,0 +1,82 @@
+cards:
+  BP20-117:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 9
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - search:
+                distinct_by: name
+                sel:
+                  any_of:
+                    - kind: follower
+                      name_contains: マゼルベイン
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: リーシェナ
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: ルルナイ
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: マーウィン
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: ガルミーユ
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: エズディア
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: ヴァーナレク
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: オクトリス
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: ライオ
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                    - kind: follower
+                      name_contains: ギルネリーゼ
+                      trait: 絶傑
+                      who: self
+                      zone: deck
+                to:
+                  order: printed
+                  partition:
+                    - upto: 10
+                      zone: field
+                    - upto: 10
+                      zone: ex
+                upto: 10
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

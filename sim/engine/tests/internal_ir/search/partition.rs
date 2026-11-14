@@ -183,6 +183,67 @@ fn zero_one_and_two_found_follow_printed_order_and_shuffle_only_at_the_end() {
 }
 
 #[test]
+fn fixed_field_and_ex_partitions_respect_partial_capacity_and_keep_the_remainder() {
+    for kind in [ZoneKind::Field, ZoneKind::Ex] {
+        let zone = if kind == ZoneKind::Field {
+            "field"
+        } else {
+            "ex"
+        };
+        let mut position = setup(
+            1,
+            json!([
+                {"id":"d0","card":"unit-follower"}, {"id":"d1","card":"unit-follower"},
+                {"id":"d2","card":"unit-follower"}, {"id":"d3","card":"unit-follower"}
+            ]),
+        );
+        position["players"]["P1"]["zones"]["hand"] = json!([]);
+        position["players"]["P1"]["zones"][zone] = json!((0_u8..4).map(|i| json!({"id":if i == 0 {"s".to_owned()} else {format!("old{i}")},"card":"unit-follower"})).collect::<Vec<_>>());
+        let mut game = Game::new(
+            catalog(),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "fixed-capacity",
+        )
+        .unwrap();
+        let mut step = partition(cardinality(3, 3), cardinality(1, 1));
+        if let Node::Instruction { instruction } = &mut step.node
+            && let Action::Search {
+                destination: Some(SearchDestination::Partition { destinations }),
+                cardinality: count,
+                ..
+            } = &mut instruction.action
+        {
+            *count = cardinality(0, 4);
+            destinations[0].zone = shared(kind);
+            destinations[1].zone = hand();
+        }
+        execute(&mut game, 1, step);
+        answer(&mut game, 1, SearchAnswer::Ungrouped(vec![0, 1, 2]));
+        let (token, handles, bounds) = question(&game, 1);
+        assert_eq!(bounds, cardinality(1, 1));
+        rejected(
+            &mut game,
+            1,
+            token,
+            Answer::SearchPartition(handles.clone()),
+        );
+        allocate(&mut game, 1, vec![handles[0]]);
+        let (_, handles, bounds) = question(&game, 1);
+        assert_eq!(bounds, cardinality(1, 1));
+        let result = allocate(&mut game, 1, vec![handles[0]]);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(state["P1"][zone].as_array().unwrap().len(), 5);
+        assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), 1);
+        assert_eq!(state["P1"]["deck"].as_array().unwrap().len(), 2);
+        assert_eq!(outcome(&result).found.len(), 3);
+        assert_eq!(outcome(&result).moved.len(), 2);
+        assert_eq!(shuffles(&result), 1);
+    }
+}
+
+#[test]
 fn every_stage_rejects_wrong_actor_variant_bounds_and_previous_handles_atomically() {
     for seat in [1, 2] {
         let mut game = game(seat, 3);
