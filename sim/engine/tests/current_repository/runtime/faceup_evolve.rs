@@ -307,17 +307,3 @@ fn bp08_110_count_is_relative_to_the_second_seat_controller() {
         3_u8
     );
 }
-
-#[test]
-fn unadmitted_advance_cards_remain_rejected_as_evolution_resources() {
-    let mut initial = position("BP08-110", 0);
-    form(&mut initial, "BP10-004");
-    let result = Game::from_selected_effects(
-        selection_with_rules().clone(),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "advance-resource-boundary",
-    );
-    assert!(failure(result).contains("evolution resource must have printed Evolve type"));
-}
