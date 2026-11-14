@@ -1121,7 +1121,7 @@ fn evolution_enumerates_resources_and_preserves_existing_damage() {
 }
 
 #[test]
-fn activated_limits_and_x_domains_survive_observation_sampling() {
+fn activated_limits_and_x_domains_are_recorded_in_the_player_packet() {
     let mut doc = document(&json!({"op":"draw","count":0_i64}));
     doc["cards"]["unit-follower"]["abilities"] = json!([{
         "kind":"activated","line":1_i64,"limit":1_i64,
@@ -1646,7 +1646,7 @@ fn pending_events_preserve_instance_identity_until_resolution() {
 }
 
 #[test]
-fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
+fn delayed_end_and_temporary_silence_survive_save_and_restore() {
     let body = json!({"op":"seq","steps":[
         {"op":"modify","subjects":"target.1","remove_abilities":true,"until":"end-of-turn"},
         {"op":"delay","event":"end","once":true,"body":{"op":"damage","subjects":"opponent.leader","amount":3_i64}}
@@ -1794,7 +1794,7 @@ fn life_decreases_are_distinct_from_damage_and_stat_changes_are_per_object() {
 }
 
 #[test]
-fn localized_keyword_and_counter_packets_restore_stable_identifiers() {
+fn localized_keyword_and_counter_packets_keep_stable_identifiers() {
     let mut registry: Value = serde_json::from_str(&registry()).unwrap();
     registry["keywords"]["stack_counter"] = json!({"ja":"スタックカウンター","role":"counter"});
     let catalog = Arc::new(
@@ -5206,7 +5206,7 @@ fn evolution_discounts_only_consume_the_matching_paid_ability() {
 }
 
 #[test]
-fn counter_aliases_import_to_one_identity_and_roundtrip_through_observations() {
+fn counter_aliases_import_to_one_identity_and_roundtrip_through_saves() {
     let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
     definitions["keywords"]["charge"] =
         json!({"ja":"蓄積","aliases":["蓄積カウンター"],"role":"counter"});
@@ -7436,7 +7436,7 @@ fn dual_evolution_catalog() -> Arc<Catalog> {
 }
 
 #[test]
-fn evolved_information_uses_the_linked_visible_face_after_load_play_and_observation() {
+fn evolved_information_uses_the_linked_visible_face_after_load_and_play() {
     for face in [0_i64, 1_i64] {
         for pre_evolved in [false, true] {
             let loaded = dual_evolution_catalog();

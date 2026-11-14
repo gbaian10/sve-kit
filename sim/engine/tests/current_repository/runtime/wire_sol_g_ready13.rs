@@ -297,6 +297,63 @@ fn bp10_072_end_phase_searches_only_while_an_evolved_follower_is_present() {
     }
 }
 
+/// KE-14: only an Onmyoji follower or a spell can be taken; an Onmyoji amulet and an
+/// ordinary follower among the looked-at cards are never offered.
+#[test]
+fn bp20_p28_offers_only_onmyoji_followers_or_spells_from_the_looked_at_cards() {
+    for (deck, offered) in [
+        (["BP20-P28", "BP21-P21", "BP01-173"], "BP20-P28"),
+        (["BP01-173", "BP21-012", "BP21-P21"], "BP21-012"),
+    ] {
+        let mut initial = position("BP20-P28");
+        initial["players"]["P1"]["zones"]["hand"] =
+            json!([{"id":"source","card":"BP20-P28"},{"id":"discard","card":"BP01-171"}]);
+        initial["players"]["P1"]["zones"]["deck"] = Value::Array(
+            deck.iter()
+                .enumerate()
+                .map(|(i, card)| json!({"id":format!("d{i}"),"card":card}))
+                .collect(),
+        );
+        let mut board = game(&initial);
+        let mut step = board.play_internal_card("source", actor()).unwrap();
+        let candidates = loop {
+            let CardPlay::Awaiting(q) = step else {
+                // The fanfare waits as a pending ability after the follower enters.
+                if board.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                    board.resume_internal_card().unwrap();
+                }
+                let pending = board.internal_pending_choice().unwrap().unwrap();
+                let InputDomain::Pending(options) = &pending.domain else {
+                    panic!("BP20-P28 must offer a choice among the looked-at cards")
+                };
+                step = board
+                    .answer_internal_card(
+                        pending.actor,
+                        pending.token,
+                        Answer::Pending(options[0].handle),
+                    )
+                    .unwrap();
+                continue;
+            };
+            let answer = match &q.domain {
+                InputDomain::OptionalCost => Answer::OptionalCost(true),
+                InputDomain::CostMaterials(d) => Answer::CostMaterials(vec![d.members[0].handle]),
+                InputDomain::Targets(d)
+                    if d.members.iter().any(|m| m.card.as_deref() == Some("BP01-171")) =>
+                {
+                    Answer::Targets(vec![d.members[0].handle])
+                }
+                InputDomain::Targets(d) => {
+                    break d.members.iter().filter_map(|m| m.card.clone()).collect::<Vec<_>>();
+                }
+                other => panic!("unexpected decision before the choice: {other:?}"),
+            };
+            step = board.answer_internal_card(q.actor, q.token, answer).unwrap();
+        };
+        assert_eq!(candidates, vec![offered.to_owned()], "{deck:?}");
+    }
+}
+
 #[test]
 fn bp20_054_discards_then_finds_a_spell_and_counts_union_for_shikigami() {
     for card in ["BP20-054", "BP20-P28"] {
