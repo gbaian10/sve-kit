@@ -531,16 +531,26 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     }
 }
 
+pub(super) fn power_bounds(
+    power: Option<ast::PublicPowerComparison>,
+) -> (Option<u64>, Option<u64>) {
+    (
+        power
+            .filter(|cmp| matches!(cmp.op, ast::PowerBound::Ge | ast::PowerBound::Eq))
+            .map(|cmp| cmp.right),
+        power
+            .filter(|cmp| matches!(cmp.op, ast::PowerBound::Le | ast::PowerBound::Eq))
+            .map(|cmp| cmp.right),
+    )
+}
+
 impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::PublicQuery) -> Self {
-        let power = query.r#where.map(|condition| condition.cmp);
+        let (power_at_least, power_at_most) =
+            power_bounds(query.r#where.map(|condition| condition.cmp));
         Self {
-            power_at_most: power
-                .filter(|cmp| matches!(cmp.op, ast::PowerBound::Le | ast::PowerBound::Eq))
-                .map(|cmp| cmp.right),
-            power_at_least: power
-                .filter(|cmp| matches!(cmp.op, ast::PowerBound::Ge | ast::PowerBound::Eq))
-                .map(|cmp| cmp.right),
+            power_at_most,
+            power_at_least,
             racing: query.racing,
             kind: query.kind.as_ref().map(super::search::card_kind),
             keyword: query.keyword.map(|keyword| keyword.0),

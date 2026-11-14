@@ -132,8 +132,7 @@ pub(super) fn lower_at_source(
             return Err(unsupported(path));
         }
         let selector = if equipment {
-            if !matches!(&grant.on, Some(ast::StaticGrantSubjects::Objects(ast::Objects::Bound(name))) if name == "host")
-            {
+            if !matches!(&grant.on, Some(ast::Objects::Bound(name)) if name == "host") {
                 return Err(unsupported(path));
             }
             Selector::Relation {
@@ -143,19 +142,10 @@ pub(super) fn lower_at_source(
                 relation: ObjectRelation::Equipment,
             }
         } else {
-            grant.on.as_ref().map_or_else(
-                || Ok(numeric::holder()),
-                |on| match on {
-                    ast::StaticGrantSubjects::Objects(objects) => context.objects(objects, path),
-                    ast::StaticGrantSubjects::Public(query) => {
-                        let binding = super::Binding::new(
-                            context.card_allocator.id(path)?,
-                            context.card_allocator.scope(path)?,
-                        );
-                        super::costs::named_public_query(query, binding, path)
-                    }
-                },
-            )?
+            grant
+                .on
+                .as_ref()
+                .map_or_else(|| Ok(numeric::holder()), |on| context.objects(on, path))?
         };
         declarations.push(Effect::Continuous {
             id: EffectDefinitionId(context.card_allocator.id(path)?),

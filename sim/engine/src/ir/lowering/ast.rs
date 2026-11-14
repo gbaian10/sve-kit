@@ -1113,6 +1113,7 @@ pub(super) struct ObjectQuery {
 pub(super) enum ObjectQueryWhere {
     Extremum(Box<QueryExtremumWhere>),
     Damaged(DamagedThisTurnWhere),
+    Power(PublicPowerWhere),
 }
 
 #[derive(Clone, Deserialize)]
@@ -3294,7 +3295,7 @@ pub(super) struct AlsoNamed {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct StaticGrant {
-    pub on: Option<StaticGrantSubjects>,
+    pub on: Option<Objects>,
     #[serde(default)]
     pub keywords: Vec<String>,
     #[serde(default)]
@@ -3957,11 +3958,4 @@ impl<'de> Deserialize<'de> for GiveRecipient {
             Self::Player(Side::named(&name))
         })
     }
-}
-
-#[derive(Deserialize)]
-#[serde(untagged)]
-pub(super) enum StaticGrantSubjects {
-    Objects(Objects),
-    Public(Box<PublicQuery>),
 }
