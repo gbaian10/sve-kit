@@ -392,6 +392,48 @@ impl Game {
         Ok(Arc::clone(&self.card_runtime.definitions))
     }
 
+    pub(in crate::game) fn prepare_strict_cards(
+        &mut self,
+        selected: &SelectedEffects,
+        required: &BTreeSet<String>,
+    ) -> BTreeMap<String, crate::game::player::AdmissionGapReason> {
+        use crate::game::player::AdmissionGapReason;
+        let mut definitions = RuntimeCards::default();
+        let mut failures = BTreeMap::new();
+        for number in required {
+            let Some(candidate) = selected.current.get(number) else {
+                continue;
+            };
+            match self
+                .catalog
+                .resolve_current(Arc::clone(candidate))
+                .and_then(|card| {
+                    self.catalog.check_current_printing(number, &card)?;
+                    Ok(card)
+                }) {
+                Ok(card) => {
+                    definitions.current.insert(number.clone(), Arc::new(card));
+                }
+                Err(_private) => {
+                    failures.insert(number.clone(), AdmissionGapReason::SourceMismatch);
+                }
+            }
+        }
+        self.card_runtime.selected = true;
+        self.card_runtime.definitions = Arc::new(definitions);
+        for number in required {
+            if failures.contains_key(number) {
+                continue;
+            }
+            if let Some(candidate) = selected.current.get(number)
+                && self.load_internal_card(number, &candidate.program).is_err()
+            {
+                failures.insert(number.clone(), AdmissionGapReason::UnsupportedRuntime);
+            }
+        }
+        failures
+    }
+
     fn printed_face_ordinal(&self, card: &str, face: &FaceId) -> Result<usize> {
         self.card_runtime
             .definitions
