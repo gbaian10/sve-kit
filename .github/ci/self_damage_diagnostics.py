@@ -7,10 +7,20 @@ from pathlib import Path
 
 def safe_details(source: str) -> list[str]:
     """Only fixed diagnostic forms and bounded source locations may be public."""
+    source = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", source)
+    if (
+        "runtime::self_damage::" not in source
+        and "every_shared_scenario_passes" not in source
+    ):
+        return []
     patterns = (
         (
+            "failed self-damage test",
+            r"^test (runtime::self_damage::[A-Za-z0-9_]+) \.\.\. FAILED$",
+        ),
+        (
             "panic location",
-            r"panicked at ((?:sim/engine|sim/scenario-runner)/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.rs:[0-9]+:[0-9]+):",
+            r"panicked at (?:/(?:[A-Za-z0-9_.-]+/)+)?((?:sim/engine|sim/scenario-runner)/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.rs:[0-9]+:[0-9]+):",
         ),
         (
             "runner shape",
@@ -42,25 +52,22 @@ def safe_details(source: str) -> list[str]:
         ),
     )
     details: list[str] = []
-    for block in re.split(r"(?m)^---- ", source):
-        header = block.partition("\n")[0]
-        if not re.fullmatch(
-            r"(?:runtime::self_damage::[A-Za-z0-9_]+|every_shared_scenario_passes_on_the_typed_entry_or_is_listed) stdout ----",
-            header,
-        ):
-            continue
-        name = header.removesuffix(" stdout ----")
-        for label, pattern in patterns:
-            details.extend(
-                f"{name}: {label}: {' / '.join(match.groups())}"
-                for match in re.finditer(pattern, block)
-            )
+    for label, pattern in patterns:
+        details.extend(
+            f"{label}: {' / '.join(match.groups())}"
+            for match in re.finditer(pattern, source, re.MULTILINE)
+        )
     return list(dict.fromkeys(details))
 
 
 def main() -> None:
     """Read the private log without echoing unrecognised diagnostic contents."""
     source = Path(sys.argv[1]).read_text(encoding="utf-8")
+    sys.stdout.write(
+        f"safe diagnostic shape: panics={source.count('panicked at')}, "
+        f"reason_fields={source.count('reason:')}, "
+        f"self_damage_mentions={source.count('runtime::self_damage::')}\n"
+    )
     for detail in safe_details(source):
         sys.stdout.write(f"safe self-damage diagnostic: {detail}\n")
 
