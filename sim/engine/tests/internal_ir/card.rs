@@ -1030,3 +1030,6 @@ mod target_role_objects;
 
 #[path = "card/observed_hand_remainder.rs"]
 mod observed_hand_remainder;
+
+#[path = "card/optional_selected_scalar.rs"]
+mod optional_selected_scalar;
