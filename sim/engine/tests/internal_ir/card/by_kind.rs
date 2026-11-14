@@ -201,33 +201,98 @@ fn by_kind_inside_a_fixed_repeat_is_admitted_and_runs() {
     assert_eq!(hp(&view, "ally"), 1_u8);
 }
 
-#[test]
-fn by_kind_inside_a_triggered_payment_is_admitted() {
+/// A field follower whose end-phase auto pays PP1, then runs by_kind with `follower` steps.
+fn paying_follower(follower: &Value) -> WellFormedCardProgram {
     let mut tree = fanfare::expanded::tree().clone();
     let card = &tree["cards"]["BP08-038"];
     let meta = card["meta"].clone();
     let mut entry = card["abilities"][0].clone();
     entry.as_object_mut().unwrap().remove("fanfare");
+    let by_kind = json!({"by_kind":{"ref":"t","leader":[{"life":{"who":"item","delta":2}}],
+        "follower":follower}});
     entry["auto"] = json!({
         "on":{"phase":{"whose":"self","which":"end"}},
         "targets":[leader_or("n")],
-        "do":[{"pay":{"cost":{"pp":1},"do":[by_kind(None)]}}]
+        "do":[{"pay":{"cost":{"pp":1},"do":[by_kind]}}]
     });
     tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[entry]}});
-    let program = lowerer()
+    lowerer()
         .lower(&tree)
         .unwrap()
         .remove("unit-follower")
-        .unwrap();
-    let mut game = Game::new(
+        .unwrap()
+}
+
+fn paying_game() -> Game {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"src","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    Game::new(
         named_catalog(),
-        &setup(1, json!([])),
+        &initial,
         &Value::Null,
         &Value::Null,
         "by-kind-pay",
     )
-    .unwrap();
+    .unwrap()
+}
+
+#[test]
+fn by_kind_inside_a_triggered_payment_runs_after_paying() {
+    let program =
+        paying_follower(&json!([{"buff":{"on":"item","power":1}},{"buff":{"on":"item","hp":2}}]));
+    let mut game = paying_game();
     game.load_internal_card("unit-follower", &program).unwrap();
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    let mut step = None;
+    for _ in 0_u8..32_u8 {
+        if let Some(CardPlay::Awaiting(q)) = step.take() {
+            let answer = match &q.domain {
+                InputDomain::Targets(domain) => Answer::Targets(
+                    domain
+                        .members
+                        .iter()
+                        .filter(|member| member.card.is_none())
+                        .map(|member| member.handle)
+                        .collect(),
+                ),
+                InputDomain::OptionalCost => Answer::OptionalCost(true),
+                InputDomain::Pending(options) => Answer::Pending(options[0].handle),
+                other => panic!("unexpected question: {other:?}"),
+            };
+            step = Some(game.answer_internal_card(q.actor, q.token, answer).unwrap());
+            continue;
+        }
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+            continue;
+        }
+        let Some(q) = game.internal_pending_choice().unwrap() else {
+            break;
+        };
+        step = Some(CardPlay::Awaiting(q));
+    }
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["pp"]["current"], 1_u8, "PP1 was paid");
+    assert_eq!(
+        view["P1"]["leader"]["life"], 12_u8,
+        "the paid leader branch ran"
+    );
+}
+
+#[test]
+fn a_paid_kind_branch_shares_the_execution_timestamp_checks() {
+    for follower in [
+        json!([{"set_stat":{"on":"item","power":1}},{"buff":{"on":"item","power":2}}]),
+        json!([{"set_stat":{"on":"item","hp":1}},{"set_stat":{"on":"item","hp":3}}]),
+    ] {
+        paying_game()
+            .load_internal_card("unit-follower", &paying_follower(&follower))
+            .unwrap_err();
+    }
 }
 
 #[test]

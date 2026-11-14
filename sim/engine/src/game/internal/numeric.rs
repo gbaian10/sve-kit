@@ -170,8 +170,12 @@ fn collect_patches<'program>(
                     }
                 }
             }
+            // A paid continuation resolves in the same execution, so it shares the timestamp.
             Node::Control {
-                control: Control::Sequence { body } | Control::May { body, .. },
+                control:
+                    Control::Sequence { body }
+                    | Control::May { body, .. }
+                    | Control::Pay { on_paid: body, .. },
             } => collect_patches(body, patches),
             Node::Control {
                 control:
