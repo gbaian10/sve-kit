@@ -204,6 +204,28 @@ fn player_evolution_normal_and_super_share_native_resources_and_events() {
         assert_eq!(state[seat]["sep"], i64::from(!super_evolution));
         assert_eq!(state["objects"]["s"]["evolved_with"], "e");
         assert_eq!(state["objects"]["s"]["super_evolved"], super_evolution);
+        for viewer in [Viewer::P1, Viewer::P2] {
+            let observed = game.observe(viewer).unwrap();
+            let player = observed
+                .players
+                .iter()
+                .find(|player| player.player == actor)
+                .unwrap();
+            let base = player
+                .zones
+                .iter()
+                .flat_map(|zone| &zone.cards)
+                .find(|entry| {
+                    entry.card.properties.card == "unit-form"
+                        && entry.card.physical.card == "unit-follower"
+                })
+                .unwrap();
+            assert_eq!(base.card.physical.face, 0);
+            assert!(base.card.public);
+            assert!(observed.remembered.iter().any(|memory| {
+                memory.card == "unit-form" && memory.face == 0 && memory.owner == actor
+            }));
+        }
         assert!(game.events(actor, None).unwrap().any(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == ActionKind::Evolve)));
     }
 }

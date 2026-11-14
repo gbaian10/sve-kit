@@ -43,7 +43,11 @@ fn visible(observation: &Observation, player: Viewer, zone: ObservedZone) -> Vec
 }
 
 fn reveal_and_wait() -> WellFormedProgram {
-    checked(vec![
+    reveal_with_tail(vec![])
+}
+
+fn reveal_with_tail(tail: Vec<Located<Node>>) -> WellFormedProgram {
+    let mut steps = vec![
         instruction(
             1,
             Action::Reveal {
@@ -64,7 +68,9 @@ fn reveal_and_wait() -> WellFormedProgram {
         ),
         look(2, 1),
         order(3, looked(2), Position::Top {}),
-    ])
+    ];
+    steps.extend(tail);
+    checked(steps)
 }
 
 fn start(game: &mut Game, program: &WellFormedProgram) -> DecisionView {
@@ -369,6 +375,15 @@ fn published_rollback_does_not_reissue_a_disclosed_handle_and_keeps_continuous_h
     .clone();
     game.answer_internal(question.actor, question.token, Answer::Order(vec![0]))
         .unwrap_err();
+    assert!(
+        game.observe(Viewer::P1)
+            .unwrap()
+            .remembered
+            .iter()
+            .any(|memory| {
+                memory.card == "unit-follower" && memory.face == 0 && memory.owner == Viewer::P1
+            })
+    );
     assert_eq!(
         visible(
             &game.observe(Viewer::P1).unwrap(),
@@ -739,4 +754,30 @@ fn malformed_authority_returns_a_fixed_error_without_private_details() {
             "invalid: player observation unavailable"
         );
     }
+}
+
+#[test]
+fn published_memory_survives_rollback_for_a_previously_unknown_seat() {
+    let mut initial = setup(1, json!([{"id":"d0","card":"unit-follower"}]));
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = exhausted_deck(&initial);
+    assert!(game.observe(Viewer::P2).unwrap().remembered.is_empty());
+    let question = start(&mut game, &reveal_with_tail(vec![draw(4, 1)]));
+    let revealed = game.observe(Viewer::P2).unwrap();
+    let old = visible(&revealed, Viewer::P1, ObservedZone::Hand)[0]
+        .handle
+        .clone();
+    assert_eq!(revealed.remembered.len(), 1);
+    game.answer_internal(question.actor, question.token, Answer::Order(vec![0]))
+        .unwrap_err();
+    let rolled_back = game.observe(Viewer::P2).unwrap();
+    assert_eq!(rolled_back.remembered, revealed.remembered);
+    assert!(visible(&rolled_back, Viewer::P1, ObservedZone::Hand).is_empty());
+    let next = start(&mut game, &reveal_and_wait());
+    let again = game.observe(Viewer::P2).unwrap();
+    assert_ne!(
+        visible(&again, Viewer::P1, ObservedZone::Hand)[0].handle,
+        old
+    );
+    finish_order(&mut game, &next);
 }

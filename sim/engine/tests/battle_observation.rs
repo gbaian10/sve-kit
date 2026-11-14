@@ -1,7 +1,10 @@
 //! Board face identity and disclosure come from authority readers, never UI guesses.
 
 use serde_json::{Value, json};
-use std::sync::{Arc, OnceLock};
+extern crate alloc;
+
+use alloc::sync::Arc;
+use std::sync::OnceLock;
 use sve_engine::catalog::Catalog;
 use sve_engine::game::Game;
 use sve_engine::game::player::Viewer;
@@ -138,7 +141,7 @@ fn private_faces_are_known_only_to_their_viewer_and_queries_stay_read_only() {
 #[test]
 fn damaged_required_face_or_facing_stops_observation() {
     let mut broken_face = position("secret-a");
-    broken_face["players"]["P1"]["zones"]["field"][0]["state"]["face"] = json!("unknown");
+    broken_face["players"]["P1"]["zones"]["evolution"][0]["state"]["face"] = json!("unknown");
     assert!(
         Game::new(
             catalog(),
@@ -194,4 +197,31 @@ fn face_memory_keeps_observed_ordinals_and_deduplicates_physical_copies() {
             .face,
         1
     );
+}
+
+#[test]
+fn an_evolved_face_index_does_not_relabel_the_physical_base() {
+    let mut initial = position("secret-a");
+    initial["players"]["P1"]["zones"]["field"][0]["state"]["face"] = json!(1);
+    initial["players"]["P1"]["zones"]["evolution"] = json!([
+        {"id":"physical-evolved","card":"base","state":{"face":1}}
+    ]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    let game = game(&initial);
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let observed = game.observe(viewer).unwrap();
+        let base = card(&observed, Viewer::P1, ObservedZone::Field);
+        assert_eq!(base.physical.face, 0);
+        assert_eq!(base.properties.face, 1);
+        let form = card(&observed, Viewer::P1, ObservedZone::Evolution);
+        assert_eq!(form.physical.face, 1);
+        assert_ne!(base.handle, form.handle);
+        let remembered = observed
+            .remembered
+            .iter()
+            .filter(|memory| memory.card == "base" && memory.owner == Viewer::P1)
+            .map(|memory| memory.face)
+            .collect::<Vec<_>>();
+        assert_eq!(remembered, vec![0, 1]);
+    }
 }

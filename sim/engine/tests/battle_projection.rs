@@ -1,6 +1,8 @@
 //! Selection projection preserves frozen constraints and opaque answer coordinates.
 
-use std::collections::BTreeMap;
+extern crate alloc;
+
+use alloc::collections::BTreeMap;
 use sve_battle_contract::question::{Distinct, GroupAssignment, RoleSize};
 use sve_battle_contract::{
     Answer, GroupChoice, HostError, Nat, QuestionId, RoleChoice, Seat, Subject,
@@ -19,7 +21,7 @@ fn bounds(minimum: u64, maximum: Option<u64>) -> Cardinality {
     }
 }
 
-fn details() -> CandidateDetails {
+const fn details() -> CandidateDetails {
     CandidateDetails {
         subject: Some(Subject::Leader { player: Seat::P1 }),
         controller: Some(Seat::P1),

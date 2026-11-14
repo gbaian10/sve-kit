@@ -38,6 +38,7 @@ struct HandleEntry {
 struct HandleSnapshot {
     issued: u64,
     handles: BTreeMap<String, HandleEntry>,
+    faces: BTreeSet<KnownFace>,
 }
 
 /// Call-local knowledge boundary; never stored in an execution or event.
@@ -127,11 +128,10 @@ impl Game {
         for (_, id) in members {
             let object = self.object(&id)?;
             let record = json!({"id":id,"card":object.card,"owner":object.owner,"from":self.node});
+            let physical = self.physical_card_face(&id)?;
             let face = KnownFace {
-                card: object.card.clone(),
-                face: object.state["face"]
-                    .as_u64()
-                    .ok_or_else(|| invalid("unknown remembered face"))?,
+                card: physical.card,
+                face: physical.face,
                 owner: object.owner.clone(),
             };
             let knowledge = self.state.knowledge.entry(seat.into()).or_default();
@@ -213,6 +213,7 @@ impl Game {
                         HandleSnapshot {
                             issued: known.issued,
                             handles: known.handles.clone(),
+                            faces: known.faces.clone(),
                         },
                     )
                 })
@@ -228,10 +229,9 @@ impl Game {
     ) -> Result<()> {
         target.state.ir_epoch = self.state.ir_epoch.max(target.state.ir_epoch);
         for (seat, previous) in &published.0 {
-            let Some(knowledge) = target.state.knowledge.get_mut(seat) else {
-                continue;
-            };
+            let knowledge = target.state.knowledge.entry(seat.clone()).or_default();
             knowledge.issued = knowledge.issued.max(previous.issued);
+            knowledge.faces.extend(previous.faces.iter().cloned());
             {
                 let interrupted = knowledge
                     .located

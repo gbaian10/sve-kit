@@ -408,11 +408,6 @@ impl Game {
             .ok_or_else(|| invalid("card is not identifiable"))?;
         self.resolve_player_object(perspective, &handle)?;
         let object = self.object(id)?;
-        let face = object.state["face"]
-            .as_u64()
-            .ok_or_else(|| invalid("unknown physical card face"))?;
-        self.catalog
-            .face(&object.card, usize::try_from(face).map_err(invalid)?)?;
         let face_up = match object.state.get("face_up") {
             Some(value) => value
                 .as_bool()
@@ -421,13 +416,29 @@ impl Game {
         };
         Ok(CardObservation {
             handle,
-            physical: CardFace {
-                card: object.card.clone(),
-                face,
-            },
+            physical: self.physical_card_face(id)?,
             public: self.public_card_disclosure(id)?,
             face_up,
             properties: self.observed_card_properties(perspective, id)?,
+        })
+    }
+
+    pub(in crate::game) fn physical_card_face(&self, id: &str) -> Result<CardFace> {
+        let object = self.object(id)?;
+        let face = if let Some(evolved) = object.state["evolved_with"].as_str() {
+            self.object(evolved)?;
+            // The base stores its evolve card's effective face; its physical front stays zero.
+            0
+        } else {
+            object.state["face"]
+                .as_u64()
+                .ok_or_else(|| invalid("unknown physical card face"))?
+        };
+        self.catalog
+            .face(&object.card, usize::try_from(face).map_err(invalid)?)?;
+        Ok(CardFace {
+            card: object.card.clone(),
+            face,
         })
     }
 

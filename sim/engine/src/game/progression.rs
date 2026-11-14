@@ -359,6 +359,10 @@ impl Game {
         let new = self.catalog.face(&self.object(evolve)?.card, face)?.clone();
         self.move_objects(&[evolve.into()], "evolution", None, None, frame)?;
         self.object_mut(evolve)?.state["face"] = json!(face);
+        // The chosen form is disclosed after movement's default-face reset.
+        for viewer in ["P1", "P2"] {
+            self.learn(viewer, evolve, true)?;
+        }
         self.object_mut(source)?.state["evolved"] = json!(true);
         if self.object(source)?.state["control_changed_this_turn"] == true {
             self.object_mut(source)?.state["evolved_after_control_change"] = json!(true);
