@@ -7,12 +7,18 @@ pub(crate) enum Family {
     Prevention,
     Cost,
     MoveReplacement,
+    TriggerMultiplicity,
 }
 
 pub(crate) fn family(effect: &Effect) -> Option<Family> {
     match effect {
         Effect::Replacement { .. } if super::move_replacement::projection(effect).is_some() => {
             Some(Family::MoveReplacement)
+        }
+        Effect::RuleModifier { .. }
+            if super::trigger_multiplicity::projection(effect).is_some() =>
+        {
+            Some(Family::TriggerMultiplicity)
         }
         Effect::Continuous {
             patch: CharacteristicPatch::GrantAbility { .. },

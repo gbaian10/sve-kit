@@ -632,13 +632,13 @@ known:
   - question: "card-BP19-SL22"
     scenario: "A 一張エルラーデ → 結束階段的能力待機 2 次 → 一次選【1】4 傷害、一次選【3】抽 1"
     status: unsupported
-    error: "unadmitted BP19-SL22 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL22/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending {"line":2,"source":"a1"} matches 2 occurrences'
   - question: "card-BP19-SL22"
     scenario: "B 兩張エルラーデ → 每個能力誘發 3 次、每次可選 2 個 → 全選【3】共抽 6 張"
     status: unsupported
-    error: "unadmitted BP19-SL22 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL22/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending {"line":2,"source":"a1"} matches 3 occurrences'
   - question: "card-BP19-SL26"
     scenario: "可看 1 張"
     status: unsupported

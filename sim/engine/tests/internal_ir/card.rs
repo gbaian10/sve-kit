@@ -1019,3 +1019,6 @@ mod player_choices;
 
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
+
+#[path = "card/trigger_multiplicity.rs"]
+mod trigger_multiplicity;

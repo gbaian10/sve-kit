@@ -875,12 +875,19 @@ impl Game {
         let header = self.pending_header(actor, Cause::Rule { rule }, None, before)?;
         let mut pending = Vec::new();
         for (holder, ability) in candidates {
-            pending.push(self.timing_occurrence(
-                &holder,
-                ability,
-                &header,
-                Event::Phase { event },
-            )?);
+            let source = self.internal_effective_source(&holder, &ability)?;
+            let additional = self.additional_phase_triggers(phase, source.controller)?;
+            let total = additional
+                .checked_add(1)
+                .ok_or_else(|| invalid("trigger multiplicity overflow"))?;
+            for _ in 0..total {
+                pending.push(self.timing_occurrence(
+                    &holder,
+                    ability.clone(),
+                    &header,
+                    Event::Phase { event },
+                )?);
+            }
         }
         self.internal_admit_pending(pending)
     }

@@ -765,9 +765,8 @@ impl Checker {
                 duration,
                 usage: None,
             } => self.cost_declaration(*kind, subjects, change, duration),
-            Effect::RuleModifier { .. } | Effect::DeckRule { .. } | Effect::CostModifier { .. } => {
-                self.reject()
-            }
+            Effect::RuleModifier { .. } => self.trigger_multiplicity(effect, ability_zones),
+            Effect::DeckRule { .. } | Effect::CostModifier { .. } => self.reject(),
         }
     }
 

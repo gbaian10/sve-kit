@@ -3,7 +3,7 @@
 # and on a listed scenario whose verdict kind changed. Each entry points to
 # the engine tracking issue; validation requirements are in docs/dsl/validation.md.
 expected_scenarios: 708
-# Retired BP18-SL16 prototype coverage is recorded separately from the typed gate.
+# Retired prototype coverage is recorded separately from the typed gate.
 known:
   - question: "card-BP18-SL16"
     scenario: "A ファフニール 交戰破壞機械鋸の死運び → 消滅、ラストワード 不誘發"
@@ -25,3 +25,13 @@ known:
     status: "unsupported"
     error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
     reason: "no authored program: BP18-SL16"
+  - question: "card-BP19-SL22"
+    scenario: "A 一張エルラーデ → 結束階段的能力待機 2 次 → 一次選【1】4 傷害、一次選【3】抽 1"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP19-SL22"
+  - question: "card-BP19-SL22"
+    scenario: "B 兩張エルラーデ → 每個能力誘發 3 次、每次可選 2 個 → 全選【3】共抽 6 張"
+    status: "unsupported"
+    error: "legacy prototype retired; current card uses typed entry (#2101, #2090)"
+    reason: "no authored program: BP19-SL22"

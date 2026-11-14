@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-092:
+    admission: light
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - extra_trigger:
+                phase: end
+                who: self
+                n: 1
+      - line: 2
+        covers: [2, 3]
+        auto:
+          on:
+            phase:
+              whose: self
+              which: end
+          targets:
+            - option: 1
+              bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - choice:
+                n: 1
+                instead:
+                  - if:
+                      cmp:
+                        left:
+                          count:
+                            who: self
+                            zone: field
+                            kind: follower
+                            trait: 八獄
+                            other: true
+                        op: ge
+                        right: 1
+                    upto: 2
+                options:
+                  - - damage:
+                        to: enemy
+                        n: 4
+                  - - life:
+                        who: self
+                        delta: 1
+                    - stand: this
+                  - - draw:
+                        n: 1
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"

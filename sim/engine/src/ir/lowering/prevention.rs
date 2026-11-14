@@ -534,6 +534,7 @@ pub(super) fn lower_at_source(
                 )
             }
             ast::StaticEffect::BanishInstead(_)
+            | ast::StaticEffect::ExtraTrigger(_)
             | ast::StaticEffect::Reroll(_)
             | ast::StaticEffect::ChoiceAny(_)
             | ast::StaticEffect::UnlimitedEvolve(_)
