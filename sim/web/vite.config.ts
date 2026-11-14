@@ -379,7 +379,8 @@ export default defineConfig({
     coverage: {
       provider: "v8",
       include: ["src/**/*.{ts,tsx}"],
-      exclude: ["**/*.test.*", "**/*.d.ts"],
+      // The generated contract holds types only; its validator is plain JavaScript, outside `include`.
+      exclude: ["**/*.test.*", "**/*.d.ts", "src/battle/contract/generated/**"],
       reporter: ["lcovonly", "json-summary", "text-summary"],
       thresholds: { branches: 85 },
     },

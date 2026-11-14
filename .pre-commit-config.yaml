@@ -194,6 +194,8 @@ repos:
         types: [yaml]
         stages: [pre-commit, manual]
       # sim/web: `mise exec` pins Bun without relying on the caller's PATH; paths are relative to sim/web.
+      # The lint, type, knip and test scripts first generate the battle contract from sim/battle-contract
+      # with cargo, so a change to that crate reruns them too.
       # Type-aware ESLint loads the whole TS project (~2 GB) however few files it checks, so it runs on
       # push over all of sim/web, as CI does; its cache (flags in lint:js) keeps repeat runs short.
       - id: web-eslint
@@ -201,7 +203,7 @@ repos:
         language: system
         entry: mise exec -- bun run --cwd sim/web lint:js
         pass_filenames: false
-        files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
+        files: ^(sim/web/|sim/battle-contract/|Cargo\.(toml|lock)$|rust-toolchain\.toml$|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
       - id: web-stylelint
         name: stylelint (sim/web)
@@ -215,14 +217,14 @@ repos:
         language: system
         entry: mise exec -- bun run --cwd sim/web typecheck
         pass_filenames: false
-        files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
+        files: ^(sim/web/|sim/battle-contract/|Cargo\.(toml|lock)$|rust-toolchain\.toml$|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
       - id: web-knip
         name: knip dev + prod (sim/web)
         language: system
         entry: mise exec -- bun run --cwd sim/web knip
         pass_filenames: false
-        files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
+        files: ^(sim/web/|sim/battle-contract/|Cargo\.(toml|lock)$|rust-toolchain\.toml$|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
       # Manual locally; CI calls the same test script directly on every web change.
       - id: web-test
