@@ -13,8 +13,7 @@ use crate::ir::{
     Visibility, ZoneKind,
 };
 use crate::ir::{
-    CharacteristicView, NatRead, ObjectOperand, ObjectView, PlayerRelation, SelectionView,
-    Selector, TextQuantifier, TraitsRead,
+    NatRead, ObjectOperand, ObjectView, PlayerRelation, SelectionView, Selector, TextQuantifier,
 };
 use alloc::collections::BTreeSet;
 
@@ -215,8 +214,7 @@ impl Checker {
                     players,
                     zone: ZoneKind::Field,
                     view: SelectionView::Current {},
-                    binding,
-                    predicate,
+                    ..
                 } = selector
                 else {
                     return self.reject();
@@ -232,22 +230,9 @@ impl Checker {
                 {
                     return self.reject();
                 }
-                let Expr::Compute(condition) = predicate.as_ref() else {
-                    return self.reject();
-                };
-                let Predicate::And { predicates } = condition.as_ref() else {
-                    return self.reject();
-                };
-                let [Expr::Compute(trait_check)] = predicates.as_slice() else {
-                    return self.reject();
-                };
-                if !matches!(trait_check.as_ref(), Predicate::HasTrait {
-                    traits: Expr::Live(traits), ..
-                } if matches!(traits.as_ref(), TraitsRead::Traits {
-                    object: ObjectView::Current { object },
-                    view: CharacteristicView::Effective,
-                } if **object == (ObjectOperand::Bound { binding: *binding })))
-                {
+                if !public_numbers::check(&Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: count.clone(),
+                }))) {
                     return self.reject();
                 }
                 Ok(())

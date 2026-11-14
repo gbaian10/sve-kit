@@ -158,6 +158,7 @@ impl BodyContext<'_> {
                 r#trait: None,
                 traits_any: None,
                 name: None,
+                names: Vec::new(),
                 name_contains: None,
                 orig_cost_eq: None,
                 orig_cost_ge: None,
@@ -1174,6 +1175,7 @@ impl BodyContext<'_> {
             || count.r#trait.is_some()
             || count.traits_any.is_some()
             || count.name.is_some()
+            || !count.names.is_empty()
             || count.name_contains.is_some()
             || count.orig_cost_eq.is_some()
             || count.orig_cost_ge.is_some()

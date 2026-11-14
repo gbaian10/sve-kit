@@ -1118,13 +1118,13 @@ impl BodyContext<'_> {
                 keyword: None,
                 r#trait: Some(_),
                 traits_any: None,
-                name: None,
                 name_contains: None,
                 orig_cost_eq: None,
                 orig_cost_ge: None,
                 token: None,
                 not_token: None,
-            } = count
+                ..
+            } = count.as_ref()
             else {
                 return Err(unsupported(path));
             };
