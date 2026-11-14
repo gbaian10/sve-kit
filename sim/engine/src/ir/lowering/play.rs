@@ -1535,7 +1535,7 @@ fn quantity(
 pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, LoweringError> {
     if body.steps.iter().any(|step| matches!(step, ast::Step::If(branch)
         if contains_choice(&branch.then) || branch.r#else.as_ref().is_some_and(|continuation| contains_choice(continuation)))) {
-        return Err(unsupported(path));
+        return trigger_choice(body, true, path);
     }
     match body
         .steps
@@ -1630,7 +1630,9 @@ pub(super) fn trigger_choice(
         [ast::Step::If(branch)]
             if (matches!(
                 branch.cond,
-                ast::Condition::Awakened(true) | ast::Condition::EnteredFrom(_)
+                ast::Condition::Awakened(true)
+                    | ast::Condition::EnteredFrom(_)
+                    | ast::Condition::Combo(_)
             ) || matches!(&branch.cond, ast::Condition::Not(inner) if matches!(inner.as_ref(), ast::Condition::EnteredFrom(_))))
                 && branch.r#else.is_none()
                 && matches!(branch.then.as_slice(), [ast::Step::Choice(_)]) =>
