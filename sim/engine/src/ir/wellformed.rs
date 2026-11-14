@@ -438,11 +438,8 @@ impl Checker {
         let Selector::Bound { reference } = selector else {
             return None;
         };
-        self.env
-            .bindings
-            .get(&reference.key())
-            .and_then(|slot| slot.maximum)
-            .and_then(|Nat(maximum)| usize::try_from(maximum).ok())
+        let Nat(maximum) = self.env.bindings.get(&reference.key())?.maximum?;
+        usize::try_from(maximum).ok()
     }
 
     fn reference<T>(&self, binding: Binding<T>, kind: BindingKind) -> Checked
