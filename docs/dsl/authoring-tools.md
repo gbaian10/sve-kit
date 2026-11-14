@@ -547,6 +547,8 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 手牌的起動能力可用 `activate: {zone: hand, cost: {steps: [{pp: 1}, {self_to_ex: true}]}}` 表示「{コスト1}手札のこれをEXエリアに置く：…」（BP10-017、BP08-072）。本卡依一般移動規則從手牌放到持有者的 EX 並公開；`self_to_ex` 只接受 `zone: hand` 的非 Quick 起動費用；Quick、其他區域、自動能力的 `pay`、進化與打出費用都拒絕（Quick 候選尚未預檢 EX 空位）。
 
+手牌自體棄牌成本可用 `{discard: {ref: this, result: paid}}` 命名結果；後續 `move: {ref: {follow: paid}, to: deck, position: {nth: 3}}` 沿用該棄牌回條的新世代放回牌庫。牌庫不足時放到底部，不沿用棄牌前的舊物件身分。
+
 融合用 `activate: {fusion: {sel: {who: self, zone: [hand, ex], trait: 財宝, orig_cost_ge: 1}, n: 1}, do: [...]}`，省略有效區時固定為手牌，也可明寫 `zone: hand`。沿用私有成本選材問題及原子付款：材料排除來源本身，手牌材料捨棄，EX 材料送墓，再把來源放到自己的 EX。EX 滿格時可先用 EX 材料騰出空位；整份付款失敗一併回復。本文的 `this` 精確跟隨該來源移入 EX 後的世代，原有的發動來源仍保留在能力紀錄。
 
 目前融合入口接受固定 `n: 1` 或 `upto: 2`，材料可依卡型、單一特徵、`token: true` 或 `not_token: true` 與原始費用下限篩選；不接受 `any`、其他張數、Quick、額外成本、可選成本或模式宣告。`upto: 2` 的可選材料非空時至少選一張；沒有材料時可選零張，來源仍移入 EX，整個本文略過。這是融合的最低材料規則與零材料例外，依 [CR 1.28.0 §12.18](https://shadowverse-evolve.com/wordpress/wp-content/uploads/2026/09/28121513/ShadowverseEVOLVE_cr_1.28.0_260928.pdf)，不能套用普通 `upto` 可任意選零的規則。
