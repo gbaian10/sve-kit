@@ -922,6 +922,7 @@ pub(super) enum MoveObjects {
     Whole(WholeDeckReturn),
     Observed(Observed),
     Field(Objects),
+    Public(Box<PublicQuery>),
 }
 
 #[derive(Deserialize)]
