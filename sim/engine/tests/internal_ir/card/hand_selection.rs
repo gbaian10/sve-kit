@@ -431,9 +431,102 @@ fn own_hand_union_offers_each_matching_card_once() {
 }
 
 #[test]
-fn hand_union_branches_must_all_read_the_controllers_own_hand() {
+fn hand_and_ex_union_is_one_private_choice_in_either_branch_order() {
+    for seat in [1_u32, 2] {
+        let actor = if seat == 1 { "P1" } else { "P2" };
+        let opponent = if seat == 1 { View::P2 } else { View::P1 };
+        for ex_first in [false, true] {
+            for chosen in [None, Some("h"), Some("e")] {
+                let mut branches = vec![
+                    json!({"who":"self","zone":"hand","kind":"follower","orig_cost_le":2}),
+                    json!({"who":"self","zone":"ex","kind":"amulet","orig_cost_le":2}),
+                ];
+                if ex_first {
+                    branches.reverse();
+                }
+                let program = program(&json!([
+                    {"choose":{"bind":"selected","from":{"any_of":branches},"upto":1}},
+                    {"move":{"ref":"selected","to":"field","result":"entered"}}
+                ]));
+                let mut initial = setup(seat, json!([]));
+                initial["turn"]["active"] = json!(actor);
+                initial["players"][actor]["pp"] = json!({"current":5,"max":5});
+                initial["players"][actor]["zones"]["field"] =
+                    json!([{"id":"s","card":"unit-follower"}]);
+                initial["players"][actor]["zones"]["hand"] = json!([
+                    {"id":"h","card":"unit-follower"},
+                    {"id":"wrong","card":"unit-spell"},
+                    {"id":"hand-amulet","card":"unit-amulet"}
+                ]);
+                initial["players"][actor]["zones"]["ex"] = json!([
+                    {"id":"e","card":"unit-amulet"},
+                    {"id":"ex-follower","card":"unit-follower"}
+                ]);
+                let mut game =
+                    Game::new(catalog(), &initial, &Value::Null, &Value::Null, "hand-ex").unwrap();
+                game.load_internal_card("unit-follower", &program).unwrap();
+                game.load_internal_card("unit-spell", &card(vec![]))
+                    .unwrap();
+                game.load_internal_card("unit-amulet", &card(vec![]))
+                    .unwrap();
+                let CardPlay::Awaiting(question) = game
+                    .activate_internal_card("s", AbilityId(1), PlayerId { seat })
+                    .unwrap()
+                else {
+                    panic!("one private hand and EX choice");
+                };
+                let InputDomain::Targets(domain) = &question.domain else {
+                    panic!("hand and EX candidates");
+                };
+                assert_eq!(domain.members.len(), 2);
+                assert!(game.internal_decision(opponent).is_none());
+                assert!(game.projection(opponent).unwrap()["objects"]["h"].is_null());
+                let answer = chosen.map_or_else(Vec::new, |id| {
+                    let card = if id == "h" {
+                        "unit-follower"
+                    } else {
+                        "unit-amulet"
+                    };
+                    vec![
+                        domain
+                            .members
+                            .iter()
+                            .find(|member| member.card.as_deref() == Some(card))
+                            .unwrap()
+                            .handle,
+                    ]
+                });
+                resolved(
+                    game.answer_internal_card(
+                        question.actor,
+                        question.token,
+                        Answer::Targets(answer),
+                    )
+                    .unwrap(),
+                );
+                let view = game.projection(View::Referee).unwrap();
+                assert_eq!(
+                    view[actor]["field"].as_array().unwrap().len(),
+                    if chosen.is_some() { 2 } else { 1 }
+                );
+                if let Some(id) = chosen {
+                    assert!(
+                        view[actor]["field"]
+                            .as_array()
+                            .unwrap()
+                            .contains(&json!(id))
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn hand_union_branches_require_the_choosers_hand_and_ex_authority() {
     for other in [
         json!({"who":"opp","zone":"hand"}),
+        json!({"who":"opp","zone":"ex"}),
         json!({"who":"self","zone":"field"}),
         json!({"who":"self","zone":"hand","except":"this"}),
         json!({"who":"self","zone":"hand","power_le":3}),
