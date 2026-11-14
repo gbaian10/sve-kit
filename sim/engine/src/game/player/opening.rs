@@ -2,12 +2,14 @@
 
 use super::observation::{CardObservation, seat};
 use super::{
-    ObjectHandle, Question, QuestionPurpose, QuestionShape, QuestionToken, SubmissionKind, Viewer,
+    ObjectHandle, Question, QuestionPurpose, QuestionShape, QuestionToken, StrictStartError,
+    SubmissionKind, Viewer,
 };
 use crate::catalog::SelectedEffects;
 use crate::game::Game;
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::BTreeSet;
+use core::result;
 use serde_json::{Value, json};
 
 /// Construction basis already checked by the host against the snapshot's construction index.
@@ -65,22 +67,20 @@ impl Game {
     /// No arbitrary position, anonymous cards, physical identities or prototype programs enter.
     ///
     /// # Errors
-    /// Rejects invalid selection provenance, missing typed cards or failed opening initialization.
-    /// These load failures are distinct from a later submission's `EngineFault` result.
+    /// Returns owner-scoped admission gaps or an authority-only initialization failure.
+    /// These startup failures are distinct from a later submission's `EngineFault` result.
     pub fn start_player_game(
         selected: SelectedEffects,
         decks: [PlayerDeck; 2],
         first_chooser: Viewer,
         seed: &str,
-    ) -> Result<Self> {
-        selected.check_runtime()?;
+    ) -> result::Result<Self, StrictStartError> {
+        let (admitted, report) = Self::prepare_strict_player_decks(&selected, &decks)?;
+        if !report.is_admitted() {
+            return Err(StrictStartError::Admission(report));
+        }
         let mut players = serde_json::Map::new();
         for (perspective, deck) in [Viewer::P1, Viewer::P2].into_iter().zip(decks) {
-            for number in deck.main.iter().chain(&deck.evolve) {
-                if !selected.current.contains_key(number) {
-                    return Err(invalid("opening deck requires a selected whole card"));
-                }
-            }
             let cards = |zone: &str, numbers: &[String]| {
                 numbers.iter().enumerate().map(|(index, number)| {
                     json!({"id":format!("{}/{zone}/{index}", seat(perspective)),"card":number})
@@ -102,7 +102,9 @@ impl Game {
         }
         let setup = json!({"pregame":true,"players":players});
         let random = json!({"first_chooser":seat(first_chooser)});
-        let mut game = Self::from_selected_effects(selected, &setup, &Value::Null, &random, seed)?;
+        let mut game = Self::unopened(selected.prototypes, &setup, &Value::Null, &random, seed)?;
+        game.card_runtime = admitted.card_runtime;
+        game.initialize_opening()?;
         // Validate the complete opening hand requirement before returning a live game.
         for player in ["P1", "P2"] {
             let reserved = usize::from(
@@ -112,7 +114,7 @@ impl Game {
                         .is_some_and(|queue| queue.iter().any(|value| value == player)),
             );
             if game.zone_ids(player, "deck").len().saturating_sub(reserved) < 4 {
-                return Err(invalid("opening deck has fewer than four drawable cards"));
+                return Err(invalid("opening deck has fewer than four drawable cards").into());
             }
         }
         game.player_opening_question()?;

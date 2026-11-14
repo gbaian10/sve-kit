@@ -75,6 +75,7 @@ jobs:
               - 'carddb/pyproject.toml'
               - 'pyproject.toml'
               - 'uv.lock'
+              - 'sim/battle-contract/**'
               - 'sim/engine/**'
               - 'sim/scenario-runner/**'
               - 'Cargo.toml'

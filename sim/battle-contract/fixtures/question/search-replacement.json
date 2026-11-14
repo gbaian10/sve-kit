@@ -1,0 +1,70 @@
+{
+  "id": "q-search_replacement",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "search_replacement",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 2,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "destination",
+          "route": "original",
+          "destination": {
+            "player": "p1",
+            "zone": "hand",
+            "position": null
+          }
+        },
+        "cost": null
+      },
+      {
+        "id": "c2",
+        "value": {
+          "kind": "destination",
+          "route": "replacement",
+          "destination": {
+            "player": "p1",
+            "zone": "ex",
+            "position": null
+          }
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 1
+    },
+    "count": null,
+    "earlier": [],
+    "capacity": null
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

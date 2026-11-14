@@ -243,7 +243,9 @@ buff:
 
 場上正式目標與結算選取也接受 `power_le: N`／`power_ge: N`，依候選目前的攻擊力篩選（CSD02b-001「攻撃力3以下の…を選ぶ」、CP04-032「攻撃力3以上の…を選ぶ」）。極值 `where` 與聯集分支不帶這兩個條件，並用時拒絕。
 
-手牌的 `choose.from: {who: self, zone: hand, ...}` 可接 `move: {ref: selected, to: field, result: entered}`，選項只向控制者公開；成功入場才公開卡片，且不支付印刷打出費用。多張手牌選取（如 BP17-098）與 Look 共用場上空位上限：入場必須緊接選取，出題時最多可選目前空位數。中間插入其他步驟或跨條件分支入場會在載入時拒絕；單張選取沿用既有滿場時留在原區域的處理。「手札のAかB」寫成 `choose.from: {any_of: [{who: self, zone: hand, kind: follower, trait: 透京, orig_cost_le: 3}, {who: self, zone: hand, class: ビショップ, kind: amulet, orig_cost_le: 3}]}`（BP18-098、BP13-090）：每個分支都必須讀自己的手牌並各自帶靜態篩選，同時符合多個分支的卡仍只算一張；混入其他區域、對手手牌、`except`、極值或動態費用的分支在載入時拒絕。
+手牌的 `choose.from: {who: self, zone: hand, ...}` 可接 `move: {ref: selected, to: field, result: entered}`，選項只向控制者公開；成功入場才公開卡片，且不支付印刷打出費用。多張手牌選取（如 BP17-098）與 Look 共用場上空位上限：入場必須緊接選取，出題時最多可選目前空位數。中間插入其他步驟或跨條件分支入場會在載入時拒絕；單張選取沿用既有滿場時留在原區域的處理。「手札のAかB」寫成 `choose.from: {any_of: [{who: self, zone: hand, kind: follower, trait: 透京, orig_cost_le: 3}, {who: self, zone: hand, class: ビショップ, kind: amulet, orig_cost_le: 3}]}`（BP18-098、BP13-090）：每個分支各自帶靜態篩選，同時符合多個分支的卡仍只算一張；分支可合併選牌者自己的手牌與 EX，但不可讀其他玩家的手牌或 EX，也不接受其他區域、`except`、極值或動態費用。
+
+「自分の手札か自分のEXエリア」沿用同一個 `choose.from.any_of`（SP01-010），例如 `{any_of: [{who: self, zone: hand, kind: follower, trait: 兵士, orig_cost_le: 2}, {who: self, zone: ex, kind: follower, trait: 兵士, orig_cost_le: 2}]}`。兩區共用一次選擇與 `upto: 1` 上限，分支順序不影響私有權限；整題只向選牌者公開，對手仍看不到手牌候選。後續相鄰的 `move: {ref: selected, to: field, result: entered}` 沿用一般入場容量與事件處理，不支付卡片的打出費用。
 
 本文 `choose.from: {in: created}` 可從同一能力先前的公開物件綁定再選子集，例如 `create.result` 或正式目標；選擇者沿用 `by`。張數沿用 `n`、`upto`、`any`；選擇時只保留原世代仍在場上、EX、墓場或表向消滅領域的卡，不重新搜尋同名物件。手牌、Look 與進化牌堆的選取仍遵循各自的權限入口。
 
@@ -272,6 +274,8 @@ Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, tr
 `play.cost_delta` 可使用既有公開計數、`minus`／`times`／`per`／`min` 運算與 `play.define` 別名，依付款時的公開數量加減印刷費用；正數為加費，負數為減費，所有修正合計後才以零為下限。場上、EX、墓場與自己表向進化卡的計數沿用一般數值與選擇器檢查，不能藉此篩選隱藏手牌／牌庫。消滅區只接受不加篩選的整區張數（`{count: {who: self, zone: banish}}`，BP17-051「自分の消滅領域の枚数」），與本文讀消滅區張數相同；加上種類等篩選仍拒絕。`in_zone: {ref: this, zone: ex}` 在減費條件中讀取本次打出前保存的來源區域，因此卡片移入結算區後仍能正確付款；目前接受手牌與 EX，且可與公開存在／數量條件組合。
 
 場上持續打出費用修改可用 `static.effects: [{cost_mod: {when_playing: {who: opp, kind: spell}, delta: 1}}]`；`when_playing` 可依玩家、卡種、類型、職業、卡名、原始費用上限及 token 篩選，或用 `any_of` 組合。省略區域時包含手牌與 EX，明示 `zone: ex` 時讀本次打出前保存的來源區域。持續來源每次付款依目前場上能力重算，來源離場或失去能力後停止套用；`static.while` 使用已准入的公開付款條件，但不接受僅本次打出才有的來源區域讀值（`in_zone`）。
+
+費用修正條件可讀本回合 `event: played` 的 `history_count`，沿用一般打出歷史的玩家、卡種、類型與 token 篩選；第一張符合的卡正式打出後，後續費用立即依已提交歷史重算。
 
 「本回合下一張」使用 `player_effect: {who: self, effect: {cost_mod: {when_playing: {who: self, trait: 武闘竜人}, delta: -3, next_only: true}}, until: turn}`。此安裝保存玩家與打出篩選，涵蓋稍後才取得的卡片，不捕捉隱藏手牌。整組共用一次額度，僅在符合篩選的卡適正打出且全部付款成功時消耗；預覽、非符合卡及失敗宣告均不消耗。安裝者離場不提早失效，未用額度在本回合結束時移除。`delta` 與非負整數 `set` 二擇一；各費用層的增減合計後才以零為下限。
 
@@ -560,6 +564,8 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 牌庫送墓用 `moved: {from: {who: opp, zone: deck}, to: cemetery}`，例如 BP05-029 的「自分のターン中、相手のデッキ1枚が墓場に置かれたとき」再加 `during: {turn: self}`。每張從牌庫移到墓場的卡各觸發一次；被移動的卡沒有場上資訊，`who` 必填，`ref`、`sel` 與其他目的地拒絕。這個訂閱只由場上的卡觀察。
 
 `discard: {any: true, who: self, result: discarded}` 讓控制者從自己的現有手牌選任意張數（含零），透過私有選擇問題回答。`count_of: discarded` 讀取實際捨棄成功的張數，可用 `draw: {n: {plus: [{count_of: discarded}, 1]}}` 接續抽牌。效果本文的 `discard: {who: self, n: 1, result: discarded}` 也可讀取成功張數：幼狼奮闘以 `optional` 包住捨棄，再用 `count_of: discarded` 等於 1 決定是否堆墓；空手牌接受時仍是零張，拒絕時不執行分支。單張回條也沿用既有 `count: {in: {objects_of: discarded, view: before}, kind: spell}` 的牌面條件計數，空回條為零；這不是保證支付的一張成本，不能用 `cost_of` 讀原費。這次不開放多張固定數量、隨機、全捨、對手或手牌篩選的結果命名。
+
+效果本文的 `discard: {who: self, n: {x_paid: fairies}}` 讓控制者從自己的現有手牌私下選擇與數值相同的張數（BP22-002「EXエリアの妖精・カードX枚を消滅：X枚引く。自分の手札X枚を捨てる。」）。數值在該指示結算時讀取（之前的指示已生效），這裡是頭付款實際消滅的張數，抽牌與棄牌讀同一個回條；零或負數不棄牌也不發問，手牌不足時捨棄全部。`who: opp` 由對手從自己的手牌選；`random: true` 從整個手牌隨機捨棄該數值張數；`result` 可命名實際捨棄的回條，上限與任意張數捨棄相同視為未定。動態數量降低為 `DiscardMode::ChosenCount`，隨機時降低為讀同一數值的 `DiscardMode::Random`；`n` 與 `any`／`all`／`ref` 是不同的捨棄形狀，不能並用。手牌篩選（`sel`）仍是捨棄的共同缺口，常值與數值張數都尚未支援。
 
 `win: {who: self}` 表示能力控制者在效果處理中勝利，沿用共用勝負判定及禁止檢查。勝利即停止剩餘效果並清除所有待解問題，不先執行下一個檢查時機；因此斯巴達克斯先抽空牌庫、再滿足勝利條件時，勝利先於空牌庫的規則敗北。條件只在本次程序指定處檢查，不因其他待機能力稍後抽牌而重驗（Q1162、Q1480）。此變體不含對手／全體、`result` 或 `precondition`；不提供常駐的禁止勝利／敗北能力。
 
@@ -1237,3 +1243,5 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 `distinct_orig_costs: {in: {objects_of: milled, view: before}}` 沿既有種類數聚合，僅讀同一本文先前由自己牌庫頂固定正張數送到墓場的實際成功成員。
 `== 1` 同時表示成員非空且原費全部相同；不以指示要求的張數或墓場目前全部卡片代替。回條不存在、來自其他來源／目的地、After 投影或附加篩選皆拒絕；原費讀不可變本體印刷，不套用目前費用修正。
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
+
+進化能力的 `usable_if.entered_by: {ref: this, by: ability | play}` 讀取該物件目前世代的已確認進場方式，跨回合保留。入場曲本文仍讀它所屬的進場事件；離場再入場後依新事件重記，不接受初始物件狀態中自行標示的進場旗標作為證據。

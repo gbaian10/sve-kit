@@ -325,8 +325,7 @@ def _manifest(root: Path) -> tuple[str, bytes, dict[str, JsonValue]]:
     ):
         raise ExportError("Manifest differs from the preview pointer")
     require_preview(manifest, regions=tuple(map(string, array(manifest["regions"]))))
-    if manifest["format_version"] != MEDIA:
-        raise ExportError("Export requires snapshot format 4.0.0")
+    profile(string(manifest["format_version"]))
     return path, raw, manifest
 
 

@@ -268,3 +268,18 @@ def combat_keyword_handoffs(
             expander=expander,
         )
     )
+
+
+@pytest.fixture(scope="session")
+@slow_fixture(
+    reason="Build the DSL-enabled real-current source template once across xdist workers; program tests restore SQLite copies instead of revalidating every source row."
+)
+def program_current_fixture(
+    current_templates: CurrentFixtureCache,
+) -> CurrentSourceFixture:
+    return current_templates.get(
+        "programs",
+        lambda store: current_source_fixture(
+            store, preparation=current_templates.inputs, capabilities=("dsl",)
+        ),
+    )

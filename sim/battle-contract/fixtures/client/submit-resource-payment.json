@@ -1,0 +1,13 @@
+{
+  "kind": "submit",
+  "request_id": "request-resource-payment",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "resource_payment",
+      "materials": ["c1"],
+      "use_ep": false
+    }
+  }
+}

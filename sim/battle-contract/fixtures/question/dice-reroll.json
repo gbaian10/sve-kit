@@ -1,0 +1,38 @@
+{
+  "id": "q-dice_reroll",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "dice_reroll",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 2,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "dice_reroll",
+    "value": 3,
+    "remaining": 1,
+    "allowed": ["keep", "reroll"]
+  },
+  "auto_answer": {
+    "kind": "not_unique"
+  },
+  "assistance": null,
+  "rules": []
+}

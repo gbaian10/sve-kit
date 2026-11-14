@@ -1,0 +1,67 @@
+{
+  "id": "q-order_cards",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "order_cards",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 2,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "order",
+    "items": [
+      {
+        "id": "c1",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "object": null
+        },
+        "source": null
+      },
+      {
+        "id": "c2",
+        "subject": {
+          "kind": "card",
+          "card": {
+            "printing_id": "SYN01-002",
+            "face": 0
+          },
+          "object": null
+        },
+        "source": null
+      }
+    ],
+    "direction": "top_down",
+    "destination": {
+      "player": "p1",
+      "zone": "deck",
+      "position": "bottom"
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

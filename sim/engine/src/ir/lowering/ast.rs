@@ -769,12 +769,29 @@ pub(super) struct Discard {
     /// 「それを捨てる」: cards chosen earlier, discarded only while still in this player's hand.
     #[serde(rename = "ref")]
     pub reference: Option<String>,
-    pub n: Option<u64>,
+    pub n: Option<DiscardCount>,
     pub all: Option<bool>,
     pub who: Option<LeaderSide>,
     pub random: Option<bool>,
     pub any: Option<True>,
     pub result: Option<String>,
+}
+
+/// A printed count, or a value such as a paid material count read when the discard resolves.
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum DiscardCount {
+    Fixed(u64),
+    Number(Box<Number>),
+}
+
+impl Discard {
+    pub(super) const fn fixed_n(&self) -> Option<u64> {
+        match self.n {
+            Some(DiscardCount::Fixed(n)) => Some(n),
+            Some(DiscardCount::Number(_)) | None => None,
+        }
+    }
 }
 
 #[derive(Deserialize)]

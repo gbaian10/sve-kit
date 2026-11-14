@@ -78,6 +78,8 @@ pub(super) use history_turn::{
     StatGainHistoryFact, SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact,
 };
 mod fact_log;
+mod field_entry;
+pub(in crate::game) use field_entry::FieldEntry;
 mod life;
 mod movement;
 mod number_plan;

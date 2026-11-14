@@ -652,6 +652,7 @@ impl Game {
         frame: &Frame,
         carry_grants: bool,
     ) -> Result<()> {
+        let player_batch = self.player_event_mark();
         let mut movable = Vec::new();
         for id in ids {
             if self.stack_replaces_departure(id, zone)? {
@@ -780,6 +781,8 @@ impl Game {
         self.internal_numeric_cleanup()?;
         self.conceal_placement_order(&plans, frame);
         self.player_movement_after(player_before);
+        self.seal_player_event_batch(player_batch);
+        let erase_batch = self.player_event_mark();
         let erase_group = self.group();
         for id in erased {
             let player_subject = self.player_subject_before(&id);
@@ -802,6 +805,7 @@ impl Game {
             );
             self.player_subject_after(&player_step, player_subject);
         }
+        self.seal_player_event_batch(erase_batch);
         self.return_advances(&advances)?;
         self.release_links(&leaving, frame)?;
         let ex_entered = plans
@@ -839,6 +843,7 @@ impl Game {
             })
             .map(|plan| plan.previous.clone())
             .collect::<Vec<_>>();
+        self.internal_record_field_entry_methods(&entry_previous, frame)?;
         self.internal_field_events(&entry_previous, typed_entry_before, frame)?;
         for (object, cause) in entered {
             self.enter_triggers(&self.object(&object.id)?.clone(), &cause, frame)?;
@@ -853,6 +858,7 @@ impl Game {
                 actual.push(id.clone());
             }
         }
+        let player_batch = self.player_event_mark();
         let group = self.group();
         for id in &actual {
             self.emit(
@@ -861,6 +867,7 @@ impl Game {
                 group,
             );
         }
+        self.seal_player_event_batch(player_batch);
         let mut movement = frame.clone();
         movement
             .values
@@ -1061,6 +1068,7 @@ impl Game {
         frame: &Frame,
         located: bool,
     ) -> Result<()> {
+        let player_batch = self.player_event_mark();
         let group = self.group();
         for seat in ["P1", "P2"] {
             if to == "all" || seat == to {
@@ -1074,6 +1082,7 @@ impl Game {
                 group,
             );
         }
+        self.seal_player_event_batch(player_batch);
         Ok(())
     }
 

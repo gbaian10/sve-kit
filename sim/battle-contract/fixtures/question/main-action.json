@@ -1,0 +1,140 @@
+{
+  "id": "q-main_action",
+  "actor": "p1",
+  "purpose": "main_action",
+  "use": "main_action",
+  "processing": {
+    "stage": "declare",
+    "controller": "p1",
+    "source": null,
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "action_window",
+    "intents": [
+      {
+        "kind": "attack",
+        "id": "c1",
+        "attacker": "o1",
+        "targets": [
+          {
+            "id": "c2",
+            "target": {
+              "kind": "leader",
+              "player": "p2"
+            }
+          },
+          {
+            "id": "c3",
+            "target": {
+              "kind": "card",
+              "object": "o9"
+            }
+          }
+        ]
+      },
+      {
+        "kind": "play",
+        "id": "c4",
+        "source": "o2",
+        "cost": {
+          "basis": "current_context",
+          "total_pp": 2,
+          "groups": [
+            {
+              "role": {
+                "kind": "original"
+              },
+              "lines": [
+                {
+                  "kind": "pp",
+                  "quote": {
+                    "kind": "known",
+                    "amount": 2
+                  }
+                }
+              ]
+            }
+          ],
+          "pending": []
+        }
+      },
+      {
+        "kind": "play",
+        "id": "c5",
+        "source": "o3",
+        "cost": null
+      },
+      {
+        "kind": "activate",
+        "id": "c6",
+        "holder": "o1",
+        "ability": {
+          "kind": "text",
+          "text": {
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "main",
+            "line": 2,
+            "step": null,
+            "granted_by": null,
+            "holder": "o1"
+          }
+        }
+      },
+      {
+        "kind": "evolve",
+        "id": "c7",
+        "holder": "o1",
+        "ability": {
+          "kind": "card",
+          "printing_id": "SYN01-001",
+          "face": null,
+          "line": null,
+          "holder": "o1"
+        },
+        "hint": {
+          "super_possible": true,
+          "ep_possible": null
+        }
+      },
+      {
+        "kind": "evolve",
+        "id": "c8",
+        "holder": "o4",
+        "ability": {
+          "kind": "text",
+          "text": {
+            "card": {
+              "printing_id": "SYN01-004",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "main",
+            "line": 1,
+            "step": null,
+            "granted_by": null,
+            "holder": "o4"
+          }
+        },
+        "hint": null
+      },
+      {
+        "kind": "end_phase",
+        "id": "c9"
+      }
+    ]
+  },
+  "auto_answer": {
+    "kind": "not_unique"
+  },
+  "assistance": null,
+  "rules": []
+}

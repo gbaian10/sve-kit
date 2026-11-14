@@ -101,6 +101,7 @@ tags!(StepwiseTiming {
 variants!(DiscardMode {
     Chosen { constraint: SelectionConstraint } => ["discard.chosen"],
     Random { population: Selector, count: Expr<Int> } => ["discard.random"],
+    ChosenCount { population: Selector, count: Expr<Int> } => ["discard.chosen-count"],
     All { eligible: Selector } => ["discard.all"],
     DownTo { count: Nat } => ["discard.down-to"]
 });
