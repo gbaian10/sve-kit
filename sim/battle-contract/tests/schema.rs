@@ -27,7 +27,9 @@ fn validator(definition: &str) -> Validator {
 fn the_schema_accepts_each_fixture_and_refuses_each_damaged_copy() {
     for (group, definition) in [
         ("host", "HostMessage"),
+        ("client", "ClientMessage"),
         ("observation", "BattleObservation"),
+        ("question", "Question"),
     ] {
         let validator = validator(definition);
         for (name, text) in support::fixtures(group) {

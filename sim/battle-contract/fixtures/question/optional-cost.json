@@ -1,0 +1,38 @@
+{
+  "id": "q-optional_cost",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "optional_cost",
+  "processing": {
+    "stage": "declare",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 1,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "confirm",
+    "allowed": [true, false],
+    "subject": null,
+    "origin": null
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

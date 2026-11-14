@@ -1,0 +1,218 @@
+{
+  "envelope": {
+    "$id": "urn:sve-kit:snapshot:4.1.0",
+    "$comment": "Fixed 4.1.0 profile with public annotations and explicit Japanese translation sources. Generated from source.json."
+  },
+  "definitions": {
+    "Format": {
+      "const": "4.1.0"
+    },
+    "Manifest": {
+      "type": "object",
+      "properties": {
+        "format_version": {
+          "$ref": "#/$defs/Format"
+        },
+        "data_version": {
+          "$ref": "#/$defs/DataVersion"
+        },
+        "published_at": {
+          "$ref": "#/$defs/Instant"
+        },
+        "data_as_of": {
+          "$ref": "#/$defs/Date"
+        },
+        "regions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Region"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Lang"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "min_reader_version": {
+          "const": "4.1.0"
+        },
+        "required_capabilities": {
+          "const": [
+            "column-partition-v1",
+            "digital-same-name-links-v1",
+            "dsl-programs-v1",
+            "fragment-container-v1",
+            "image-entity-buckets-v1",
+            "image-id-url-v1",
+            "jp-source-translation-v1",
+            "public-annotation-v1",
+            "rules-name-on-demand-v1"
+          ]
+        },
+        "engine_support_target": {
+          "$ref": "#/$defs/Target"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/File"
+          }
+        },
+        "config_ref": {
+          "$ref": "#/$defs/FileRef"
+        },
+        "partitioning": {
+          "type": "object",
+          "properties": {
+            "algorithm": {
+              "const": "sha256-mod-v1"
+            },
+            "bucket_count": {
+              "const": 64
+            }
+          },
+          "required": [
+            "algorithm",
+            "bucket_count"
+          ],
+          "additionalProperties": false
+        },
+        "coverage": {
+          "$ref": "#/$defs/Coverage"
+        },
+        "mechanic_universe_id": {
+          "$ref": "#/$defs/Hash"
+        },
+        "restriction_coverage": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/RestrictionCoverage"
+          }
+        },
+        "source_windows": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SourceWindow"
+          }
+        },
+        "qa_card_ids": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ID"
+          }
+        },
+        "errata_card_ids": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "jp",
+              "en"
+            ]
+          },
+          "additionalProperties": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ID"
+            }
+          }
+        },
+        "changes_ref": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Blob"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "qa_card_index": {
+          "type": "object",
+          "propertyNames": {
+            "enum": [
+              "jp",
+              "en"
+            ]
+          },
+          "additionalProperties": {
+            "type": "object",
+            "propertyNames": {
+              "$ref": "#/$defs/ID"
+            },
+            "additionalProperties": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ID"
+              },
+              "minItems": 1,
+              "uniqueItems": true
+            }
+          }
+        }
+      },
+      "required": [
+        "format_version",
+        "data_version",
+        "published_at",
+        "data_as_of",
+        "regions",
+        "languages",
+        "min_reader_version",
+        "required_capabilities",
+        "engine_support_target",
+        "files",
+        "config_ref",
+        "partitioning",
+        "coverage",
+        "mechanic_universe_id",
+        "restriction_coverage",
+        "source_windows",
+        "qa_card_ids",
+        "errata_card_ids",
+        "changes_ref"
+      ],
+      "additionalProperties": false
+    },
+    "Programs": {
+      "type": "object",
+      "properties": {
+        "format_version": {
+          "$ref": "#/$defs/Format"
+        },
+        "entries": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "$ref": "#/$defs/ID"
+              },
+              "dsl_version": {
+                "const": "1.0"
+              },
+              "ast": {
+                "$ref": "#/$defs/DSLProgram"
+              }
+            },
+            "required": [
+              "id",
+              "dsl_version",
+              "ast"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "format_version",
+        "entries"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

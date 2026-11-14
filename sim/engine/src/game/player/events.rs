@@ -69,6 +69,8 @@ pub enum MovementMethod {
     Discard,
     /// Ordinary movement whose procedure is given by its cause.
     Procedure,
+    /// Destruction performed by a state-based rule, recorded by that producer.
+    RuleDestroy,
 }
 
 /// Closed action vocabulary shared by the Step adapter and typed result adapter.
@@ -268,10 +270,17 @@ pub struct PlayerEvent {
     pub kind: EventKind,
 }
 
+/// One complete producer-sealed batch, in rules order.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct PlayerEventBatch {
+    /// All occurrences authorized for this viewer; never empty.
+    pub events: Vec<PlayerEvent>,
+}
+
 /// Event history is unavailable; this does not stop input or observation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum EventError {
-    /// This cursor belongs to another game/viewer or a future occurrence.
+    /// Foreign/future cursor, or a mid-batch cursor passed to the batch reader.
     InvalidCursor,
     /// A source cannot be projected completely and safely for this viewer.
     ProjectionGap,
@@ -282,6 +291,18 @@ pub enum EventError {
     reason = "Events share the game authority without changing its readers."
 )]
 impl Game {
+    /// Read whole committed batches after a cursor at the end of a batch.
+    ///
+    /// # Errors
+    /// Rejects foreign/future or mid-batch cursors and perspective-local projection gaps.
+    pub fn event_batches(
+        &self,
+        viewer: Viewer,
+        after: Option<&EventId>,
+    ) -> Result<impl Iterator<Item = &PlayerEventBatch>, EventError> {
+        self.player_events.read_batches(viewer, after)
+    }
+
     /// Read committed occurrences after this viewer's cursor without advancing rules.
     ///
     /// # Errors

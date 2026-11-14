@@ -1,4 +1,7 @@
-use super::{ActionKind, EventError, EventId, EventKind, EventLocation, PlayerEvent, Viewer};
+use super::{
+    ActionKind, EventError, EventId, EventKind, EventLocation, PlayerEvent, PlayerEventBatch,
+    Viewer,
+};
 use crate::game::Game;
 use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
@@ -24,7 +27,7 @@ fn coordinate(map: &mut Arc<BTreeMap<String, u64>>, key: &str) -> u64 {
 #[derive(Clone, Debug, Default)]
 struct ViewerLog {
     stream: Arc<()>,
-    chunks: Arc<[Arc<[PlayerEvent]>]>,
+    chunks: Arc<[Arc<PlayerEventBatch>]>,
     count: u64,
     causes: Arc<BTreeMap<String, u64>>,
     groups: Arc<BTreeMap<String, u64>>,
@@ -35,6 +38,7 @@ struct ViewerLog {
 #[derive(Clone, Debug)]
 pub(super) struct Pending {
     serial: u64,
+    batch: u64,
     pub(super) step: Option<String>,
     cause: String,
     parent: Option<String>,
@@ -126,6 +130,7 @@ impl Journal {
         };
         self.pending.push(Pending {
             serial,
+            batch: serial,
             step,
             cause: cause.to_string(),
             parent: cause["event"].as_str().map(str::to_owned),
@@ -145,7 +150,9 @@ impl Journal {
             if log.fault {
                 continue;
             }
+            let mut batches: Vec<Arc<PlayerEventBatch>> = Vec::new();
             let mut batch = Vec::new();
+            let mut previous = None;
             let mut ordered = self.pending.iter().collect::<Vec<_>>();
             let mut start = 0;
             while let Some(first) = ordered.get(start) {
@@ -153,7 +160,8 @@ impl Journal {
                 let mut end = start.saturating_add(1);
                 if is_unordered {
                     while ordered.get(end).is_some_and(|entry| {
-                        entry.group == first.group
+                        entry.batch == first.batch
+                            && entry.group == first.group
                             && entry.ordering == first.ordering
                             && entry.object.is_some()
                     }) {
@@ -169,6 +177,12 @@ impl Journal {
                 start = end;
             }
             for entry in ordered {
+                if previous != Some(entry.batch) && !batch.is_empty() {
+                    batches.push(Arc::new(PlayerEventBatch {
+                        events: take(&mut batch),
+                    }));
+                }
+                previous = Some(entry.batch);
                 let Some(view) = entry.views.get(perspective) else {
                     log.fault = true;
                     break;
@@ -212,9 +226,12 @@ impl Journal {
                 });
                 log.count = next;
             }
-            if !log.fault && !batch.is_empty() {
+            if !log.fault {
+                if !batch.is_empty() {
+                    batches.push(Arc::new(PlayerEventBatch { events: batch }));
+                }
                 let mut chunks = log.chunks.to_vec();
-                chunks.push(Arc::from(batch));
+                chunks.extend(batches);
                 log.chunks = Arc::from(chunks);
             }
         }
@@ -223,11 +240,46 @@ impl Journal {
         self.pending.clear();
     }
 
+    pub(in crate::game) fn read_batches(
+        &self,
+        viewer: Viewer,
+        after: Option<&EventId>,
+    ) -> Result<impl Iterator<Item = &PlayerEventBatch>, EventError> {
+        let (log, offset) = self.reader(viewer, after)?;
+        if let Some(id) = after
+            && !log
+                .chunks
+                .iter()
+                .any(|batch| batch.events.last().is_some_and(|event| event.id == *id))
+        {
+            return Err(EventError::InvalidCursor);
+        }
+        Ok(log.chunks.iter().map(Arc::as_ref).filter(move |batch| {
+            batch
+                .events
+                .last()
+                .is_some_and(|event| event.id.index > offset)
+        }))
+    }
+
     pub(in crate::game) fn read(
         &self,
         viewer: Viewer,
         after: Option<&EventId>,
     ) -> Result<impl Iterator<Item = &PlayerEvent>, EventError> {
+        let (log, offset) = self.reader(viewer, after)?;
+        Ok(log
+            .chunks
+            .iter()
+            .flat_map(|chunk| chunk.events.iter())
+            .filter(move |event| event.id.index > offset))
+    }
+
+    fn reader(
+        &self,
+        viewer: Viewer,
+        after: Option<&EventId>,
+    ) -> Result<(&ViewerLog, u64), EventError> {
         let log = self
             .logs
             .get(index(viewer))
@@ -240,11 +292,7 @@ impl Journal {
             Some(id) if Arc::ptr_eq(&id.stream, &log.stream) && id.index <= log.count => id.index,
             Some(_) => return Err(EventError::InvalidCursor),
         };
-        Ok(log
-            .chunks
-            .iter()
-            .flat_map(|chunk| chunk.iter())
-            .filter(move |event| event.id.index > offset))
+        Ok((log, offset))
     }
 }
 
@@ -253,6 +301,17 @@ impl Journal {
     reason = "Journal publication follows the player authority boundary."
 )]
 impl Game {
+    // Completion belongs to the mutator, not to shared cause or group numbers.
+    pub(in crate::game) fn seal_player_event_batch(&mut self, start: usize) {
+        let Some(first) = self.player_events.pending.get(start) else {
+            return;
+        };
+        let batch = first.serial;
+        for entry in self.player_events.pending.iter_mut().skip(start) {
+            entry.batch = batch;
+        }
+    }
+
     pub(in crate::game) fn record_player_fact_views(
         &mut self,
         views: [Result<Option<EventKind>, EventError>; 2],

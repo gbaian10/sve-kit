@@ -8,6 +8,9 @@ The [author 1.0 contract](../docs/dsl/author-contract-1.0.md) specifies separate
 `author_effect_set` and `effect_body_shard` entries. Persisted handwritten inputs
 use format 2 through [author-storage.schema.json](author-storage.schema.json) and
 [effect-body-storage.schema.json](effect-body-storage.schema.json).
+[program.schema.json](program.schema.json) defines the expanded public DSL 1.0
+programs carried by snapshot 4.1.0. Changes to author ability variants must also
+update this schema; its closed public shapes exclude author and source evidence.
 Direct admission uses `admission: light | shared` on a card, use or named body.
 Equivalent wording may share a body without a frame adapter or machine anchors.
 Whole-card line coverage, permanent identities, schema and runtime support remain
