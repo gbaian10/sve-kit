@@ -5,9 +5,9 @@
 )]
 use super::{
     Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Info, Int, IntOperation,
-    IntRead, KindRead, NamesRead, NatOperation, NatRead, NumberRead, ObjectOperand, ObjectProperty,
-    ObjectRef, ObjectView, PlayerRef, PlayerRelation, PlayerResource, Predicate, SelectionView,
-    Selector, TraitsRead, ZoneKind,
+    IntRead, KindRead, NamesRead, NatOperation, NatRead, NumberRead, NumericProperty,
+    ObjectOperand, ObjectProperty, ObjectRef, ObjectView, PlayerRef, PlayerRelation,
+    PlayerResource, Predicate, SelectionView, Selector, TraitsRead, ZoneKind,
 };
 pub(crate) fn check(value: &Expr<Int>) -> bool {
     match value {
@@ -34,8 +34,13 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
             } => {
                 matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector) || hand_count(selector))
             }
+            // A chosen public target's printed original cost is fixed before any candidate is read.
             IntOperation::FromNat {
                 value: Expr::Bound(_),
+            }
+            | IntOperation::Sum {
+                objects: Selector::Bound { .. },
+                property: NumericProperty::OriginalCost,
             } => true,
             // The distinct name count of the same public populations is just as candidate-independent.
             IntOperation::FromNat {

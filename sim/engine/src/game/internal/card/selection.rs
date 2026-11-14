@@ -1,4 +1,4 @@
-use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
+use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait};
 use super::{Execution, Game, Nat, ObjectRef, PlayerId, Result, invalid, player_id, unsupported};
 use crate::game::Object;
 use crate::game::internal::player::CandidateLinks;
@@ -20,11 +20,12 @@ use crate::ir::{
 use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
 };
-use crate::ir::{Bool, Expr, MemberProjection, ObjectFrozen, SelectionView, ZoneKind};
+use crate::ir::{Bool, Expr, MemberProjection, ObjectFrozen, SelectionView, Visibility, ZoneKind};
 use crate::ir::{Position, ReceiptLocation, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use core::iter::from_fn;
 use serde_json::{Value, json};
 
 pub(in crate::game::internal) mod constraints;
@@ -214,6 +215,16 @@ impl TargetWait {
             }
         }
         Ok(())
+    }
+
+    /// Every candidate stood on a field or in an EX area when this public pick of one was made.
+    pub(in crate::game::internal) fn public_board_single(&self) -> bool {
+        self.decision.visibility == (Visibility::Public {})
+            && self.bounds.maximum.is_some_and(|maximum| maximum.0 <= 1)
+            && self
+                .characteristics
+                .iter()
+                .all(|(_, saved)| matches!(saved.zone.as_str(), "field" | "ex"))
     }
 
     fn is_private_look_member(&self, member: ObjectRef) -> bool {
@@ -1451,28 +1462,19 @@ impl Game {
             && self.card_name_matches(id, |own| selection.name.matches(own))?)
     }
 
+    /// A later target may read an earlier answer (an original cost limit), so each target is
+    /// proved under a bound answer to the ones before it, as an ordinary target sequence is.
     pub(super) fn internal_mode_targets_feasible(
         &self,
         execution: &Execution,
         parameters: &[Decision],
     ) -> Result<bool> {
-        for decision in parameters
+        let targets = parameters
             .iter()
             .filter(|decision| !super::material::is_parameter(decision))
-        {
-            let feasible = if matches!(decision.domain, ChoiceDomain::Recipients { .. }) {
-                let (_, domain) = self.recipient_target_domain(execution, decision)?;
-                domain.cardinality.minimum.0
-                    <= u64::try_from(domain.members.len()).map_err(invalid)?
-            } else {
-                let (wait, _) = self.target_domain(execution, decision)?;
-                wait.bounds.minimum.0 <= wait.capacity()?
-            };
-            if !feasible {
-                return Ok(false);
-            }
-        }
-        Ok(true)
+            .cloned()
+            .collect::<VecDeque<_>>();
+        self.internal_feasible_targets(execution, &execution.slots, &targets)
     }
 
     pub(super) fn internal_feasible_targets(
@@ -1528,41 +1530,80 @@ impl Game {
         if parameters.len() == 1 {
             return Ok(wait.bounds.minimum.0 <= wait.capacity()?);
         }
-        // Both public fields have a rules-defined capacity of five, so this proof is finite.
-        if wait.members.len() > 10 {
-            return Err(unsupported("target feasibility exceeds both fields"));
+        // Only answers of a legal size are tried, stopping at the first that leaves the rest
+        // answerable, so one card among many (a cemetery) costs one attempt per card.
+        let rest = parameters.iter().skip(1).cloned().collect::<VecDeque<_>>();
+        // Proved before this answer exists, the rest either reads it and fails to evaluate, or
+        // ignores it and sees at least the candidates any answer would leave; no answer then
+        // rescues a rest that is already unanswerable, so independent questions skip enumeration.
+        if matches!(
+            self.internal_feasible_targets(&candidate, &candidate.slots, &rest),
+            Ok(false)
+        ) {
+            return Ok(false);
         }
-        let end = 1_u64
-            .checked_shl(u32::try_from(wait.members.len()).map_err(invalid)?)
-            .ok_or_else(|| invalid("target plan overflow"))?;
-        for mask in 0..end {
-            let members = wait
-                .members
-                .iter()
-                .enumerate()
-                .filter(|(index, _)| mask & (1_u64 << index) != 0)
-                .map(|(_, member)| *member)
-                .collect::<Vec<_>>();
-            if !contains(
-                wait.bounds,
-                Nat(u64::try_from(members.len()).map_err(invalid)?),
-            ) || !wait.compatible(&members)?
-            {
+        let mut attempts = 0_u32;
+        for members in sized_selections(&wait.members, wait.bounds) {
+            if !wait.compatible(&members)? {
                 continue;
+            }
+            attempts = attempts.saturating_add(1);
+            if attempts > MAX_FEASIBILITY_ATTEMPTS {
+                return Err(unsupported("target feasibility proof is too large"));
             }
             let mut candidate = candidate.clone();
             candidate.bind_targets(&wait, members);
             candidate.captures(self, &first.captures)?;
-            if self.internal_feasible_targets(
-                &candidate,
-                &candidate.slots,
-                &parameters.iter().skip(1).cloned().collect(),
-            )? {
+            if self.internal_feasible_targets(&candidate, &candidate.slots, &rest)? {
                 return Ok(true);
             }
         }
         Ok(false)
     }
+}
+
+/// Legal answers tried before a target feasibility proof gives up rather than stall play.
+const MAX_FEASIBILITY_ATTEMPTS: u32 = 1024;
+
+/// Every subset of `members` whose size the bounds allow, smallest first, in member order.
+fn sized_selections(
+    members: &[ObjectRef],
+    bounds: Cardinality,
+) -> impl Iterator<Item = Vec<ObjectRef>> + '_ {
+    let smallest = usize::try_from(bounds.minimum.0).unwrap_or(usize::MAX);
+    let largest = bounds
+        .maximum
+        .and_then(|maximum| usize::try_from(maximum.0).ok())
+        .unwrap_or(usize::MAX)
+        .min(members.len());
+    (smallest..=largest).flat_map(move |size| {
+        let mut indices = Some((0..size).collect::<Vec<_>>());
+        from_fn(move || {
+            let current = indices.take()?;
+            let selection = current
+                .iter()
+                .filter_map(|index| members.get(*index).copied())
+                .collect();
+            indices = next_combination(current, members.len());
+            Some(selection)
+        })
+    })
+}
+
+/// The lexicographically next set of increasing indices below `len`, if any.
+fn next_combination(mut indices: Vec<usize>, len: usize) -> Option<Vec<usize>> {
+    let size = indices.len();
+    let free = len.checked_sub(size)?;
+    let slot = (0..size).rev().find(|slot| {
+        indices
+            .get(*slot)
+            .is_some_and(|index| *index < free.saturating_add(*slot))
+    })?;
+    let start = indices.get(slot)?.saturating_add(1);
+    for (offset, index) in indices.iter_mut().skip(slot).enumerate() {
+        *index = start.saturating_add(offset);
+    }
+    Some(indices)
 }
 
 #[expect(
