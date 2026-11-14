@@ -190,11 +190,12 @@ pub(crate) fn specification(decision: &Decision) -> Option<Specification> {
         return None;
     };
     if !matches!(
-        subject,
+        &subject,
         ObjectOperand::SourceHolder {}
             | ObjectOperand::Selected { .. }
             | ObjectOperand::Bound { .. }
-    ) {
+    ) && !matches!(&subject, ObjectOperand::FromExpression { value } if matches!(value.as_ref(), Expr::Frozen(_)))
+    {
         return None;
     }
     let destination = Destination::from_predicate_for(predicate, *candidate, &subject)?;

@@ -13,6 +13,7 @@ use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, ObjectRef};
+use core::mem;
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -164,6 +165,21 @@ impl Game {
         Ok(object)
     }
 
+    /// 「これと同名を除く」 compares with the observer as it is now, outside the captured subject.
+    fn shares_observer_name(
+        &mut self,
+        holder: &str,
+        plan: &mut SubjectFilter,
+        subject: &SubjectInformation<'_>,
+    ) -> Result<bool> {
+        Ok(mem::take(&mut plan.not_same_name)
+            && self
+                .internal_characteristics(holder)?
+                .names
+                .iter()
+                .any(|name| subject.names.contains(name)))
+    }
+
     /// The entering card's one-based field slot orders its simultaneous occurrences.
     fn entry_position(&self, controller: PlayerId, id: &str) -> Result<u64> {
         u64::try_from(
@@ -222,8 +238,11 @@ impl Game {
             for (holder, abilities) in &observers {
                 let controller = player_id(&self.object(holder)?.controller)?;
                 for ability in abilities {
-                    let plan =
+                    let mut plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
+                    if self.shares_observer_name(holder, &mut plan, &subject)? {
+                        continue;
+                    }
                     if subject_condition::matches(
                         &plan,
                         &subject,

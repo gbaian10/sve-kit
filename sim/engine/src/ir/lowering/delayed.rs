@@ -103,6 +103,14 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
+        // An installed observer has no card of its own to compare names with.
+        if entry
+            .sel
+            .as_ref()
+            .is_some_and(|sel| sel.not_same_name_as_this.is_some())
+        {
+            return Err(unsupported(path));
+        }
         let parent = self.scope;
         let child = self.card_allocator.scope(path)?;
         let event = Binding::new(self.allocator.id(path)?, child);

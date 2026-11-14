@@ -255,6 +255,10 @@ pub(in crate::game::internal) fn matches(
     active: PlayerId,
     token: bool,
 ) -> Result<bool> {
+    // The observer's names are not captured; entry observers resolve the exclusion first.
+    if filter.not_same_name {
+        return Err(unsupported("captured observer names"));
+    }
     evaluate(
         subject(filter, observer),
         &Captured {
