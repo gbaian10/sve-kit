@@ -21,10 +21,10 @@ pub enum RelationshipKind {
     Evolution,
     /// An equipment token attached to its bearer.
     Equipment,
-    /// A `DrivePoint` paid for Ride.
-    Ride,
     /// A Meal resource attached for racing.
     Race,
+    /// A paid `DrivePoint` attached to its field card.
+    Drive,
 }
 
 /// One current attachment, ordered only by disclosed kind and opaque endpoints.
@@ -51,7 +51,7 @@ impl Game {
             }
             match object.zone.as_str() {
                 "field" => {
-                    self.observed_field_relationships(perspective, object, &mut relationships)?
+                    self.observed_field_relationships(perspective, object, &mut relationships)?;
                 }
                 "equipment" => {
                     if let Some(link) = object
@@ -115,7 +115,7 @@ impl Game {
                     }
                     let kind = match kind.as_str() {
                         "出走" => RelationshipKind::Race,
-                        "憑依" => RelationshipKind::Ride,
+                        "憑依" => RelationshipKind::Drive,
                         _ => return Err(invalid("unknown resource relationship")),
                     };
                     relationships.extend(self.observed_relationship(
@@ -145,14 +145,14 @@ impl Game {
         let zone = match kind {
             RelationshipKind::Evolution => "evolution",
             RelationshipKind::Equipment => "equipment",
-            RelationshipKind::Ride => "drive",
             RelationshipKind::Race => "race",
+            RelationshipKind::Drive => "drive",
         };
         if self.object(from)?.zone != zone || self.object(to)?.zone != "field" {
             return Ok(None);
         }
         match kind {
-            RelationshipKind::Ride | RelationshipKind::Race => {
+            RelationshipKind::Drive | RelationshipKind::Race => {
                 if !self.internal_resource_link_current(to, from, zone)? {
                     return Ok(None);
                 }

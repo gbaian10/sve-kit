@@ -158,7 +158,7 @@ fn board_relationships_follow_typed_meal_and_ride_payment_and_departure() {
                     observed.relationships,
                     vec![Relationship {
                         kind: if ride {
-                            RelationshipKind::Ride
+                            RelationshipKind::Drive
                         } else {
                             RelationshipKind::Race
                         },
