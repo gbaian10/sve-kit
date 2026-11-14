@@ -7,12 +7,15 @@ use super::{
 use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
+use crate::ir::material_sets;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::x_pp as x_payment;
 use crate::ir::{choice_rules, optional_payment};
 
-use crate::ir::{AbilityCostPolicy, FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId};
+use crate::ir::{
+    AbilityCostPolicy, DiscardMode, FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId,
+};
 use crate::ir::{
     AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectOperand,
     ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet, SelectionSnapshot,
@@ -378,6 +381,29 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
     )
 }
 
+/// The eligible sets of every chosen discard among these cost steps.
+fn chosen_discards(costs: &CostSpec) -> Vec<Vec<&Selector>> {
+    let CostSpec::Ordered { steps } = costs else {
+        return Vec::new();
+    };
+    steps
+        .iter()
+        .filter_map(|step| match &step.instruction.action {
+            Action::Discard {
+                mode: DiscardMode::Chosen { constraint },
+                ..
+            } => Some(
+                constraint
+                    .groups
+                    .iter()
+                    .map(|group| &group.selector)
+                    .collect(),
+            ),
+            _ => None,
+        })
+        .collect()
+}
+
 /// Selected cost materials share one pool, so only one chosen source of them is admitted.
 fn check_overlapping_mode_materials(play: &PlaySpec, groups: &[PlayMode]) -> Result<()> {
     let chosen_hand = |costs: &CostSpec| {
@@ -390,6 +416,35 @@ fn check_overlapping_mode_materials(play: &PlaySpec, groups: &[PlayMode]) -> Res
             || optional_payment::mode_declaration(&mode.body)
                 .is_some_and(|(costs, _, _)| chosen_hand(costs))
     };
+    // Choices that can never name the same card pay through the ordinary per-binding flow.
+    // Chosen hand discards are cost steps, not parameters; their eligible sets join the proof.
+    let declarations = groups
+        .iter()
+        .flat_map(|group| &group.modes)
+        .filter_map(|mode| {
+            optional_payment::mode_declaration(&mode.body).map(|(costs, _, _)| costs)
+        })
+        .collect::<Vec<_>>();
+    let mut sets = chosen_discards(&play.costs);
+    sets.extend(declarations.iter().flat_map(|costs| chosen_discards(costs)));
+    let readable = play
+        .parameters
+        .iter()
+        .chain(
+            groups
+                .iter()
+                .flat_map(|group| &group.modes)
+                .flat_map(|mode| &mode.parameters),
+        )
+        .filter(|decision| super::material::is_parameter(decision))
+        .map(material_sets::choice_selectors)
+        .collect::<Option<Vec<_>>>();
+    if let Some(parameters) = readable {
+        sets.extend(parameters);
+        if material_sets::disjoint_sets(&sets) {
+            return Ok(());
+        }
+    }
     let mut paying_groups = 0_usize;
     for group in groups {
         let fees = group.modes.iter().filter(|mode| fee(mode)).count();

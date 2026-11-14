@@ -1,0 +1,89 @@
+{
+  "id": "q-evolution_material",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "evolution_material",
+  "processing": {
+    "stage": "pay",
+    "controller": "p1",
+    "source": null,
+    "subject": {
+      "kind": "card",
+      "card": {
+        "printing_id": "SYN01-001",
+        "face": 0
+      },
+      "object": "o1"
+    },
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "select",
+    "selection": {
+      "candidates": [
+        {
+          "id": "c1",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "object": "o1"
+          },
+          "controller": "p1",
+          "origin": {
+            "player": "p1",
+            "zone": "field",
+            "position": null
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c2",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-002",
+              "face": 0
+            },
+            "object": "o2"
+          },
+          "controller": "p1",
+          "origin": {
+            "player": "p1",
+            "zone": "field",
+            "position": null
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        }
+      ],
+      "shown": [],
+      "bounds": {
+        "min": 1,
+        "max": 1
+      },
+      "groups": [],
+      "group_assignment": "existence",
+      "roles": [],
+      "distinct": [],
+      "original_cost_total": {
+        "min": null,
+        "max": null
+      },
+      "capacity": null
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

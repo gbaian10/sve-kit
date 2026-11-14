@@ -55,6 +55,7 @@ mod damage;
 pub(in crate::game) use damage::DamageOccurrence;
 pub use damage::ReplacementOption;
 mod alternatives;
+mod by_kind;
 mod card;
 mod cost;
 mod counters;
@@ -1371,6 +1372,10 @@ impl Game {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every runnable node kind is dispatched from one execution loop."
+    )]
     fn internal_run_current(&mut self, execution: &mut Execution) -> Result<()> {
         while execution.waiting.is_none() {
             if self.state.game["ended"] == true {
@@ -1449,6 +1454,21 @@ impl Game {
                 Node::Control {
                     control: control @ Control::EachObject { .. },
                 } => self.internal_object_iteration(execution, control)?,
+                Node::Control {
+                    control:
+                        Control::Match {
+                            recipients,
+                            leader,
+                            leader_body,
+                            follower,
+                            follower_body,
+                        },
+                } => self.internal_by_kind(
+                    execution,
+                    recipients,
+                    (leader, leader_body),
+                    (follower, follower_body),
+                )?,
                 Node::Capture { capture } => execution.capture(self, &capture)?,
                 Node::Decision { decision } => self.internal_decision_step(execution, &decision)?,
                 Node::Instruction { instruction } => {

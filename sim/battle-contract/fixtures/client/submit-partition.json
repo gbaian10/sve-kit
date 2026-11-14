@@ -1,0 +1,21 @@
+{
+  "kind": "submit",
+  "request_id": "request-partition",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "partition",
+      "buckets": [
+        {
+          "bucket": 0,
+          "items": ["c2"]
+        },
+        {
+          "bucket": 1,
+          "items": ["c3", "c1"]
+        }
+      ]
+    }
+  }
+}

@@ -975,11 +975,28 @@ impl BodyContext<'_> {
                 }
                 ast::Observation::Binding(_) => Err(unsupported(path)),
             },
-            ast::Number::OriginalCost { orig_cost_of } => Ok(this_number(
-                orig_cost_of,
-                None,
-                CharacteristicView::Original,
-            )),
+            ast::Number::OriginalCost { orig_cost_of } => match orig_cost_of {
+                ast::Observation::Binding(name) if name == "this" => Ok(this_number(
+                    &ast::This::This,
+                    None,
+                    CharacteristicView::Original,
+                )),
+                // 「選んだフォロワーの元のコスト」: printed, so it survives the target leaving.
+                ast::Observation::Binding(name) if self.single_targets.contains(name) => {
+                    let reference = self
+                        .targets
+                        .get(name)
+                        .copied()
+                        .ok_or_else(|| unsupported(path))?;
+                    Ok(Expr::Compute(Box::new(IntOperation::Sum {
+                        objects: Selector::Bound { reference },
+                        property: super::super::NumericProperty::OriginalCost,
+                    })))
+                }
+                ast::Observation::Binding(_) | ast::Observation::Before { .. } => {
+                    Err(unsupported(path))
+                }
+            },
             ast::Number::HistoryCount { history_count } => {
                 if history_count.at_least.is_some() {
                     return Err(unsupported(path));

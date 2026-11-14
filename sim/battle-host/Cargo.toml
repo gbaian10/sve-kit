@@ -1,0 +1,20 @@
+[package]
+name = "sve-battle-host"
+version = "0.1.0"
+description = "Local battle host: ordered per-seat channels over one engine authority"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sve-engine = { path = "../engine", default-features = false }
+
+[dev-dependencies]
+serde-saphyr = "2.0"
+sha2 = "0.11"

@@ -640,6 +640,10 @@ impl Execution {
                     objects: objects @ Selector::Bound { .. },
                     property: property @ (NumericProperty::Attack | NumericProperty::Life),
                 } => self.selected_live_sum(game, objects, *property).map(Int),
+                IntOperation::Sum {
+                    objects: objects @ Selector::Bound { .. },
+                    property: NumericProperty::OriginalCost,
+                } => self.selected_original_cost(game, objects).map(Int),
                 IntOperation::Sum { objects, property }
                     if super::aggregates::followed_sum_plan(objects, *property).is_some() =>
                 {
@@ -691,6 +695,58 @@ impl Execution {
         super::aggregates::checked_sum(
             self.objects(game, objects)?.into_iter().map(|object| {
                 super::aggregates::numeric_value(game, self.object_id(object)?, property)
+            }),
+            "numeric aggregate overflow",
+        )
+    }
+
+    fn frozen_integer(&self, frozen: &IntFrozen) -> Result<Int> {
+        match frozen {
+            IntFrozen::DamageAmount { event } => {
+                let hit = self
+                    .event_reads
+                    .damage(*event)
+                    .ok_or_else(|| invalid("missing damage event authority"))?;
+                Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
+            }
+            IntFrozen::PaidMaterialActs { receipt } => {
+                super::receipt_members::paid_material_acts(self, receipt)
+            }
+            IntFrozen::PaidMaterialNumber { receipt, property } => {
+                super::receipt_members::paid_material_number(self, receipt, *property)
+            }
+            IntFrozen::ReceiptRequested { receipt } => {
+                self.quantity(receipt).map(|(requested, _)| requested)
+            }
+            IntFrozen::DiscardedCost { receipt } => {
+                super::receipt_members::discarded_cost(self, receipt)
+            }
+            _ => Err(unsupported("signed projection")),
+        }
+    }
+
+    /// A printed original cost belongs to the card, so a moved target still has it.
+    /// Only a public pick of at most one field or EX card lends it; a private pick never does.
+    fn selected_original_cost(&self, game: &Game, objects: &Selector) -> Result<i64> {
+        let Selector::Bound { reference } = objects else {
+            return Err(unsupported("original cost of an unselected object"));
+        };
+        if !self
+            .targets
+            .get(&reference.key())
+            .is_some_and(super::card::selection::TargetWait::public_board_single)
+        {
+            return Err(unsupported(
+                "original cost of a private or multiple selection",
+            ));
+        }
+        super::aggregates::checked_sum(
+            self.objects(game, objects)?.into_iter().map(|object| {
+                super::aggregates::numeric_value(
+                    game,
+                    self.object_id(object)?,
+                    NumericProperty::OriginalCost,
+                )
             }),
             "numeric aggregate overflow",
         )

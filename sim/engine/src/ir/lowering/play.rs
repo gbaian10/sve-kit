@@ -316,6 +316,9 @@ impl BodyContext<'_> {
         if target.groups.is_some() {
             return self.grouped_target_choice(target, path, resolution);
         }
+        if let Some(normalized) = leader_or_union(target) {
+            return self.object_choice(&normalized, path, resolution);
+        }
         let dynamic_count = check_choice_shape(target, resolution, path)?;
         self.check_union_branches(target, resolution, path)?;
         if target
@@ -354,7 +357,8 @@ impl BodyContext<'_> {
         self.check_cemetery_target(target, path)?;
         let cardinality = target_cardinality(target, path)?;
         if target.from.leader.is_some() || target.from.leaders.is_some() || target.from.leader_or {
-            if target.from.other {
+            // 「自分のリーダーか自分の場の他のフォロワー」: only the follower half can be other.
+            if target.from.other && !target.from.leader_or {
                 return Err(unsupported(path));
             }
             return self.recipient_choice(target, cardinality, path);
@@ -902,7 +906,6 @@ impl BodyContext<'_> {
         if target.distinct_by.is_some()
             || target.cost_sum_le.is_some()
             || target.from.keyword.is_some()
-            || target.from.r#trait.is_some()
             || !target.from.traits_all.is_empty()
             || target.from.traits_any.is_some()
             || target.from.token.is_some()
@@ -927,25 +930,28 @@ impl BodyContext<'_> {
         };
         let candidates = if target.from.leader_or {
             let candidate = Binding::new(1, self.card_allocator.scope(path)?);
-            RecipientSet::Union {
-                sets: vec![
-                    leaders,
-                    RecipientSet::Objects {
-                        objects: Selector::Zone {
-                            players,
-                            zone: ZoneKind::Field,
-                            view: SelectionView::Current {},
-                            binding: candidate,
-                            predicate: Box::new(super::search::object_filter(
-                                target.from.kind.as_ref(),
-                                None,
-                                None,
-                                candidate,
-                            )),
-                        },
-                    },
-                ],
+            let mut followers = Selector::Zone {
+                players,
+                zone: ZoneKind::Field,
+                view: SelectionView::Current {},
+                binding: candidate,
+                // The same filter an ordinary field target applies, so names are kept too.
+                predicate: Box::new(super::selection::field_filter(
+                    &super::selection::ObjectFilter::from(&target.from),
+                    candidate,
+                )),
+            };
+            if target.from.other {
+                followers = Selector::Difference {
+                    input: Box::new(followers),
+                    except: Box::new(super::numeric::holder()),
+                };
             }
+            RecipientSet::Union {
+                sets: vec![leaders, RecipientSet::Objects { objects: followers }],
+            }
+        } else if target.from.r#trait.is_some() {
+            return Err(unsupported(path));
         } else {
             leaders
         };
@@ -1249,6 +1255,7 @@ impl BodyContext<'_> {
                 source_use: self.source_use,
                 counter_read_view: self.counter_read_view,
                 players: self.players.clone(),
+                kind_followers: self.kind_followers.clone(),
                 procedure_player: self.procedure_player,
                 look_viewers: self.look_viewers.clone(),
                 leave_event: self.leave_event,
@@ -1594,6 +1601,9 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
                     .as_ref()
                     .is_some_and(|else_steps| contains_choice(else_steps))
         }
+        ast::Step::ByKind(by_kind) => {
+            contains_choice(&by_kind.leader) || contains_choice(&by_kind.follower)
+        }
         ast::Step::Dice(_)
         | ast::Step::Shuffle(_)
         | ast::Step::PlayCard(_)
@@ -1677,6 +1687,97 @@ fn target_players(side: &ast::Side, path: &str) -> Result<PlayerSet, LoweringErr
         },
         text_quantifier: TextQuantifier::Implicit,
     })
+}
+
+/// 「自分のリーダーか自分の場の(他の／特徴)フォロワー」 written as a bare leader branch and one
+/// follower branch of the same player is the `leader_or` target with that follower filter.
+fn leader_or_union(target: &ast::Target) -> Option<ast::Target> {
+    let [first, second] = target.any_of.as_deref()? else {
+        return None;
+    };
+    let (leader, follower) = if first.leader.is_some() {
+        (first, second)
+    } else {
+        (second, first)
+    };
+    let side = leader.leader?;
+    let bare_leader = ast::TargetQuery {
+        leader: None,
+        ..leader.clone()
+    };
+    if !bare_query(&bare_leader)
+        || follower.leader.is_some()
+        || follower.leaders.is_some()
+        || follower.leader_or
+        || follower.observation.is_some()
+        || !matches!(follower.kind, Some(ast::SearchKind::Follower))
+        || !matches!(
+            follower.zone,
+            None | Some(ast::TargetZone::Single(ast::TargetSingleZone::Field))
+        )
+        || !matches!(
+            (side, &follower.who),
+            (ast::LeaderSide::Controller, Some(ast::Side::Controller))
+                | (ast::LeaderSide::Opponent, Some(ast::Side::Opponent))
+        )
+    {
+        return None;
+    }
+    let mut normalized = target.clone();
+    normalized.any_of = None;
+    normalized.from = ast::TargetQuery {
+        leader_or: true,
+        ..follower.clone()
+    };
+    Some(normalized)
+}
+
+/// No filter at all, so a leader branch adds nothing but the leader itself.
+const fn bare_query(query: &ast::TargetQuery) -> bool {
+    // Exhaustive so a new query field cannot be silently dropped from the leader branch.
+    let ast::TargetQuery {
+        except: None,
+        alias: None,
+        r#where: None,
+        observation: None,
+        who: None,
+        zone: None,
+        leader: None,
+        leaders: None,
+        leader_or: false,
+        kind: None,
+        keyword: None,
+        r#trait: None,
+        traits_all,
+        traits_any: None,
+        token: None,
+        class: None,
+        not_class: None,
+        name: None,
+        names,
+        name_contains: None,
+        other: false,
+        not_same_name_as_this: false,
+        cost_eq: None,
+        cost_le: None,
+        cost_ge: None,
+        orig_cost_eq: None,
+        orig_cost_le: None,
+        orig_cost_ge: None,
+        hp_le: None,
+        power_le: None,
+        power_ge: None,
+        has_evolve: None,
+        boxed: None,
+        acted: None,
+        evolved: None,
+        entered_this_turn: None,
+        face_up: None,
+    } = query
+    else {
+        return false;
+    };
+    traits_all.is_empty() && names.is_empty()
 }
 
 fn recipient_players(query: &ast::TargetQuery, path: &str) -> Result<PlayerSet, LoweringError> {

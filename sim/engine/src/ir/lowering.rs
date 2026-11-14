@@ -1439,6 +1439,8 @@ struct BodyContext<'definitions> {
     card_allocator: &'definitions mut Allocator,
     definitions: &'definitions BTreeMap<String, ast::Number>,
     players: BTreeMap<String, Binding<PlayerRef>>,
+    /// The follower a `by_kind` branch narrowed its chosen recipient to, by its local name.
+    kind_followers: BTreeMap<String, Binding<super::ObjectRef>>,
     /// The innermost enclosing procedure's player, from whose perspective `other_players` reads.
     procedure_player: Option<Binding<PlayerRef>>,
     /// Who privately looked at each named Look, the only player who may choose from it.
@@ -1524,6 +1526,7 @@ impl<'definitions> BodyContext<'definitions> {
             card_allocator,
             definitions: &body.define,
             players: BTreeMap::new(),
+            kind_followers: BTreeMap::new(),
             procedure_player: None,
             look_viewers: BTreeMap::new(),
             searches: BTreeSet::new(),
@@ -1704,6 +1707,72 @@ impl<'definitions> BodyContext<'definitions> {
             source: located,
             node,
         }
+    }
+
+    /// Each branch names the narrowed recipient; the other kind's branch never runs.
+    fn by_kind(
+        &mut self,
+        by_kind: &ast::ByKind,
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Result<Node, LoweringError> {
+        let recipients = *self
+            .recipient_targets
+            .get(&by_kind.r#ref)
+            .ok_or_else(|| unsupported(path))?;
+        let name = by_kind.r#as.as_deref().unwrap_or("item");
+        // A nested by_kind must name itself instead of shadowing an outer one.
+        if matches!(
+            name,
+            "self" | "opp" | "turn" | "non_turn" | "current" | "this"
+        ) || self.players.contains_key(name)
+            || self.kind_followers.contains_key(name)
+            || self.targets.contains_key(name)
+            || self.recipient_targets.contains_key(name)
+            || self.observations.contains_key(name)
+            || self.searches.contains(name)
+            || self.definitions.contains_key(name)
+        {
+            return Err(unsupported(path));
+        }
+        let parent = self.scope;
+        self.scope = self
+            .card_allocator
+            .scope(&format!("{path}/by_kind/leader"))?;
+        let leader = Binding::new(self.allocator.id(path)?, self.scope);
+        self.players.insert(name.to_owned(), leader);
+        let leader_body = self.steps(
+            &by_kind.leader,
+            &format!("{path}/by_kind/leader"),
+            source,
+            ability_source,
+        );
+        self.players.remove(name);
+        let leader_body = leader_body?;
+        self.scope = self
+            .card_allocator
+            .scope(&format!("{path}/by_kind/follower"))?;
+        let follower = Binding::new(self.allocator.id(path)?, self.scope);
+        self.kind_followers.insert(name.to_owned(), follower);
+        let follower_body = self.steps(
+            &by_kind.follower,
+            &format!("{path}/by_kind/follower"),
+            source,
+            ability_source,
+        );
+        self.kind_followers.remove(name);
+        let follower_body = follower_body?;
+        self.scope = parent;
+        Ok(Node::Control {
+            control: super::Control::Match {
+                recipients,
+                leader,
+                leader_body,
+                follower,
+                follower_body,
+            },
+        })
     }
 
     fn local_bindings(&self) -> LocalBindings {
@@ -1930,6 +1999,11 @@ impl<'definitions> BodyContext<'definitions> {
                 ));
                 continue;
             }
+            if let ast::Step::ByKind(by_kind) = step {
+                let node = self.by_kind(by_kind, &step_path, source, ability_source)?;
+                steps.push(Self::located_step(source, &step_path, node));
+                continue;
+            }
             // The ability entry admits one top-level group; mode bodies reject nested choices.
             if let ast::Step::Either(either) = step {
                 steps.push(self.either(either, &step_path, source, ability_source)?);
@@ -2059,6 +2133,7 @@ impl<'definitions> BodyContext<'definitions> {
             | ast::Step::Either(_)
             | ast::Step::Choose(_)
             | ast::Step::If(_)
+            | ast::Step::ByKind(_)
             | ast::Step::EachPlayer(_)
             | ast::Step::Repeat(_)
             | ast::Step::Simultaneous(_)

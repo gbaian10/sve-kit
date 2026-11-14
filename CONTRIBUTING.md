@@ -276,6 +276,9 @@ Install these tools with their own installers (each is one command; see the link
 | [uv](https://docs.astral.sh/uv/) | Python (`carddb`, `tools/schema-er`)                           | `curl -LsSf https://astral.sh/uv/install.sh \| sh`                |
 | [mise](https://mise.jdx.dev)     | Bun and Node.js plus shared project environment variables      | `curl https://mise.run \| sh`, then `mise install` in the repo    |
 
+`sim/web` needs both mise and rustup: its scripts generate the battle contract's TypeScript types and
+validator from the Rust types in `sim/battle-contract` with cargo, and nothing generated is committed.
+
 mise manages Bun and Node.js versions and shared project environment variables.
 Rust and Python toolchains remain managed by rustup and uv; do not add them to
 `mise.toml`. Machine-specific paths and secrets stay in ignored `mise.local.toml`

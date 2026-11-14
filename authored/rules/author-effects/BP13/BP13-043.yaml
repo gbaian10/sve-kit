@@ -1,0 +1,29 @@
+cards:
+  BP13-043:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - choose:
+                        bind: gift
+                        by: p
+                        from:
+                          kind: follower
+                          who: p
+                          zone: field
+                        n: 1
+                  - - give:
+                        ref: gift
+                        to: other_players
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

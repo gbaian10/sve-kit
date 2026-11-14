@@ -416,6 +416,7 @@ pub(super) enum Step {
     Repeat(Repeat),
     Evolve(NamedEffectEvolution),
     If(Conditional),
+    ByKind(ByKind),
     EachPlayer(EachPlayer),
     Choice(Choice),
     Either(Either),
@@ -1438,7 +1439,7 @@ pub(super) struct SearchQuery {
     pub cost_eq: Option<u64>,
     pub cost_le: Option<NumericArgument>,
     pub cost_ge: Option<u64>,
-    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_eq: Option<NumericArgument>,
     pub orig_cost_le: Option<NumericArgument>,
     pub orig_cost_ge: Option<u64>,
     pub has_evolve: Option<True>,
@@ -2000,7 +2001,7 @@ pub(super) enum Number {
         cost_of: Observation,
     },
     OriginalCost {
-        orig_cost_of: This,
+        orig_cost_of: Observation,
     },
     HistoryCount {
         history_count: HistoryQuery,
@@ -2918,6 +2919,16 @@ pub(super) struct Conditional {
     pub cond: Condition,
     pub then: Vec<Step>,
     pub r#else: Option<Vec<Step>>,
+}
+
+/// A chosen leader-or-follower target, narrowed per kind under `item` or the `as` name.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ByKind {
+    pub r#ref: String,
+    pub r#as: Option<String>,
+    pub leader: Vec<Step>,
+    pub follower: Vec<Step>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]

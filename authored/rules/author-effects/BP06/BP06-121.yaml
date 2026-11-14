@@ -1,0 +1,36 @@
+cards:
+  BP06-121:
+    abilities:
+      - auto:
+          do:
+            - pay:
+                cost:
+                  pp: 2
+                do:
+                  - destroy: this
+                result: paid
+                who: opp
+            - if:
+                cond:
+                  not:
+                    paid:
+                      receipt: paid
+                then:
+                  - damage:
+                      n: 2
+                      to: it
+          "on":
+            attacked:
+              sel:
+                kind: follower
+              who: opp
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

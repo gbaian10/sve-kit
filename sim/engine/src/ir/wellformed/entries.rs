@@ -8,6 +8,7 @@ use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
 use crate::ir::events::{drive, equipment};
 use crate::ir::history_turn::{evolution_capture_query, evolution_trigger};
+use crate::ir::material_sets;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::quick::is_printed_quick;
@@ -558,9 +559,20 @@ impl Checker {
                                             matches!(costs, CostSpec::Ordered { steps } if steps.iter().any(|step| matches!(step.instruction.action, Action::Reveal { .. })))
                                         })
                                 }))
-                            || (ability.kind == AbilityKind::Activated
-                                && super::modes::play_modes_without_fees(body)
-                                && play.parameters.iter().all(public_cost_material)))
+                            // Head-cost materials sit beside fee-free modes, or mode fees no card can share with them.
+                            || (matches!(
+                                ability.kind,
+                                AbilityKind::Activated | AbilityKind::Triggered
+                            ) && play.parameters.iter().all(public_cost_material)
+                                && (super::modes::play_modes_without_fees(body)
+                                    || (super::modes::play_modes_without_fixed_costs(body)
+                                        && material_sets::disjoint(
+                                            &play
+                                                .parameters
+                                                .iter()
+                                                .chain(super::modes::play_mode_materials(body))
+                                                .collect::<Vec<_>>(),
+                                        )))))
                     }))
             {
                 return self.reject();

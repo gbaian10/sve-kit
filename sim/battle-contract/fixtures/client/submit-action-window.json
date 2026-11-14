@@ -1,0 +1,13 @@
+{
+  "kind": "submit",
+  "request_id": "request-action-window",
+  "command": {
+    "kind": "answer",
+    "question_id": "q-1",
+    "answer": {
+      "kind": "action_window",
+      "intent": "c1",
+      "target": "c2"
+    }
+  }
+}

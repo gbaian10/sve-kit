@@ -49,16 +49,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-3 omniscient events"
-  - question: "card-BP01-P23"
-    scenario: "A 公開 3 張 → 選手牌裡的古の英雄（オーラ）→ 對手捨棄 → 之後對手抽的新卡 P1 不知道"
-    status: unsupported
-    error: "unadmitted BP01-P23 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-P23/0, query complete card names: current ability definitions unavailable"
-  - question: "card-BP01-P23"
-    scenario: "B 對手手牌 0 張 → 仍對自己 2 傷害 → 沒有可選的卡"
-    status: unsupported
-    error: "unadmitted BP01-P23 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-P23/0, query complete card names: current ability definitions unavailable"
   - question: "card-BP02-SL16"
     scenario: "能力 1 手牌 0"
     status: unsupported
@@ -280,20 +270,10 @@ known:
     error: "typed-gap: evolution outside fixed Add numeric layers (#2008)"
     reason: "internal D1 does not support evolution outside fixed Add numeric layers"
   - question: "card-BP13-043"
-    scenario: "[astra] cemetery"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP13-043"
-    scenario: "[astra] hand"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP13-043"
     scenario: "[fable] A P1 先指定、P2 後指定；交換後被渡的不能攻擊；被渡的デモンビーター被破壞 → 回 P1 墓場、LW 由 P2 打出讓 P2 回體力"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder a0 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: no pending, ability play/resolve or 体力増加 events (#2008)"
+    reason: "after-decision-5 omniscient events; after-decision-6 omniscient events"
   - question: "card-BP14-023"
     scenario: "A EX 有 3 張金貨 → 起動打出進化時 → 選 2 張消滅、看 5 張 → 達人の芸者 進 EX → 0 費打出"
     status: unsupported
@@ -1000,21 +980,6 @@ known:
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "rule-1.3.4-01"
-    scenario: "[astra] 場數 1/1"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-1.3.4-01"
-    scenario: "[astra] 場數 1/5"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-1.3.4-01"
-    scenario: "[astra] 場數 5/5"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-1.3.4-01"
     scenario: "[fable] A P1（回合玩家）先選捨 1 張，P2 看到後再選捨 2 張"
     status: unsupported
     error: "unadmitted BP10-076 (#2090)"
@@ -1424,21 +1389,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-2 events (#2008)"
     reason: "after-decision-2 omniscient events"
-  - question: "rule-5.22-01"
-    scenario: "BP01-173"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-5.22-01"
-    scenario: "PR-005"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-5.22-01"
-    scenario: "BP01-144"
-    status: unsupported
-    error: "unadmitted BP13-043 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP13-043/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "rule-5.8-01"
     scenario: "有符合=True 找到=True"
     status: adapter-error

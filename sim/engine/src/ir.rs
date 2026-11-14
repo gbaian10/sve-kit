@@ -165,6 +165,7 @@ pub(crate) mod fusion;
 pub(crate) mod granted_cost;
 pub(crate) mod history_turn;
 pub mod lowering;
+pub(crate) mod material_sets;
 pub(crate) mod move_replacement;
 pub(crate) mod names;
 pub(crate) mod nested_play;

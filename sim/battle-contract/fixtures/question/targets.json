@@ -1,0 +1,159 @@
+{
+  "id": "q-targets",
+  "actor": "p1",
+  "purpose": "play_parameter",
+  "use": "targets",
+  "processing": {
+    "stage": "target",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 1,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [
+      {
+        "kind": "modes",
+        "modes": [
+          {
+            "mode": 1,
+            "text": null
+          }
+        ]
+      }
+    ],
+    "payment": null
+  },
+  "shape": {
+    "kind": "select",
+    "selection": {
+      "candidates": [
+        {
+          "id": "c1",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-001",
+              "face": 0
+            },
+            "object": "o1"
+          },
+          "controller": "p2",
+          "origin": {
+            "player": "p2",
+            "zone": "field",
+            "position": null
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c2",
+          "subject": {
+            "kind": "card",
+            "card": {
+              "printing_id": "SYN01-002",
+              "face": 0
+            },
+            "object": "o2"
+          },
+          "controller": "p2",
+          "origin": {
+            "player": "p2",
+            "zone": "field",
+            "position": null
+          },
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        },
+        {
+          "id": "c3",
+          "subject": {
+            "kind": "leader",
+            "player": "p2"
+          },
+          "controller": null,
+          "origin": null,
+          "rules_names": null,
+          "original_cost": null,
+          "classes": null
+        }
+      ],
+      "shown": [],
+      "bounds": {
+        "min": 1,
+        "max": 2
+      },
+      "groups": [
+        {
+          "group": 0,
+          "eligible": ["c1", "c2", "c3"],
+          "bounds": {
+            "min": 1,
+            "max": 2
+          }
+        }
+      ],
+      "group_assignment": "existence",
+      "roles": [
+        {
+          "role": 0,
+          "size": {
+            "kind": "fixed",
+            "bounds": {
+              "min": 1,
+              "max": 1
+            }
+          },
+          "destination": null
+        },
+        {
+          "role": 1,
+          "size": {
+            "kind": "if_nonempty",
+            "count": 1
+          },
+          "destination": {
+            "player": "p2",
+            "zone": "deck",
+            "position": "top"
+          }
+        },
+        {
+          "role": 2,
+          "size": {
+            "kind": "remainder"
+          },
+          "destination": {
+            "player": "p2",
+            "zone": "deck",
+            "position": "bottom"
+          }
+        }
+      ],
+      "distinct": [],
+      "original_cost_total": {
+        "min": 1,
+        "max": null
+      },
+      "capacity": null
+    }
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

@@ -1,0 +1,283 @@
+{
+  "kind": "update",
+  "format": 1,
+  "viewer": "p1",
+  "update_seq": 0,
+  "observation": {
+    "viewer": "p1",
+    "objects": {},
+    "turn": {
+      "active": null,
+      "first_player": null,
+      "phase": null,
+      "elapsed_turns": [0, 0]
+    },
+    "attack": null,
+    "players": [
+      {
+        "seat": "p1",
+        "life": 20,
+        "pp": 0,
+        "max_pp": 0,
+        "ep": 0,
+        "sep": 0,
+        "effects": [],
+        "zones": {
+          "deck": {
+            "count": 50,
+            "capacity": null,
+            "cards": []
+          },
+          "evolve_deck": {
+            "count": 10,
+            "capacity": null,
+            "cards": []
+          },
+          "hand": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "field": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "ex": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "cemetery": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "banish": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "resolution": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "evolution": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "race": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "drive": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "trigger": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "equipment": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          }
+        }
+      },
+      {
+        "seat": "p2",
+        "life": 20,
+        "pp": 0,
+        "max_pp": 0,
+        "ep": 0,
+        "sep": 0,
+        "effects": [],
+        "zones": {
+          "deck": {
+            "count": 50,
+            "capacity": null,
+            "cards": []
+          },
+          "evolve_deck": {
+            "count": 10,
+            "capacity": null,
+            "cards": []
+          },
+          "hand": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "field": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "ex": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "cemetery": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "banish": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "resolution": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "evolution": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "race": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "drive": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "trigger": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "equipment": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          }
+        }
+      }
+    ],
+    "relationships": [],
+    "processing": [],
+    "costs": {
+      "cards": [],
+      "current_play": null
+    },
+    "pending": [],
+    "history": {
+      "subjects": [],
+      "damage": [],
+      "stat_gains": [],
+      "dice": [],
+      "played": [0, 0],
+      "union_bursts": [0, 0]
+    },
+    "remembered": []
+  },
+  "input": {
+    "kind": "question",
+    "question": {
+      "id": "q-start_amulet",
+      "actor": "p1",
+      "purpose": "rule_choice",
+      "use": "start_amulet",
+      "processing": {
+        "stage": "opening",
+        "controller": "p1",
+        "source": null,
+        "subject": null,
+        "rule": {
+          "kind": "cr",
+          "id": "0.0.1",
+          "revision": "synthetic",
+          "strength": "official"
+        },
+        "procedure": {
+          "kind": "each_player",
+          "actor": "p1",
+          "round": null
+        },
+        "declared": [],
+        "payment": null
+      },
+      "shape": {
+        "kind": "select",
+        "selection": {
+          "candidates": [
+            {
+              "id": "c1",
+              "subject": {
+                "kind": "card",
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 0
+                },
+                "object": "o1"
+              },
+              "controller": null,
+              "origin": {
+                "player": "p1",
+                "zone": "deck",
+                "position": null
+              },
+              "rules_names": null,
+              "original_cost": null,
+              "classes": null
+            }
+          ],
+          "shown": [],
+          "bounds": {
+            "min": 1,
+            "max": 1
+          },
+          "groups": [],
+          "group_assignment": "existence",
+          "roles": [],
+          "distinct": [],
+          "original_cost_total": {
+            "min": null,
+            "max": null
+          },
+          "capacity": null
+        }
+      },
+      "auto_answer": {
+        "kind": "unique",
+        "answer": {
+          "kind": "select",
+          "selected": ["c1"],
+          "groups": null,
+          "roles": []
+        },
+        "public": false
+      },
+      "assistance": null,
+      "rules": [
+        {
+          "kind": "cr",
+          "id": "0.0.1",
+          "revision": "synthetic",
+          "strength": "official"
+        }
+      ]
+    }
+  },
+  "events": {
+    "status": "available",
+    "batches": [],
+    "animate": []
+  },
+  "presentation": [],
+  "notices": [],
+  "advice": []
+}

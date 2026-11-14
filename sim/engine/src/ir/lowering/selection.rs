@@ -648,7 +648,10 @@ impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
                 query.cost_ge,
             ],
             original_cost: [
-                query.orig_cost_eq,
+                query
+                    .orig_cost_eq
+                    .as_ref()
+                    .and_then(ast::NumericArgument::literal),
                 query
                     .orig_cost_le
                     .as_ref()
@@ -942,16 +945,38 @@ impl BodyContext<'_> {
         original_cost: Option<&ast::NumericArgument>,
         path: &str,
     ) -> Result<super::Expr<super::Bool>, LoweringError> {
-        use super::super::{
-            CharacteristicView, Comparison, IntOperation, NumberRead, ObjectOperand, ObjectView,
-            Predicate,
-        };
+        use super::super::{CharacteristicView, Comparison};
+        self.dynamic_limits(
+            predicate,
+            candidate,
+            &[
+                (cost, CharacteristicView::Effective, Comparison::LessEqual),
+                (
+                    original_cost,
+                    CharacteristicView::Original,
+                    Comparison::LessEqual,
+                ),
+            ],
+            path,
+        )
+    }
+
+    /// Public numbers compared with each candidate's cost; literal limits stay in the filter.
+    pub(super) fn dynamic_limits(
+        &mut self,
+        predicate: super::Expr<super::Bool>,
+        candidate: super::Binding<super::super::ObjectRef>,
+        limits: &[(
+            Option<&ast::NumericArgument>,
+            super::super::CharacteristicView,
+            super::super::Comparison,
+        )],
+        path: &str,
+    ) -> Result<super::Expr<super::Bool>, LoweringError> {
+        use super::super::{IntOperation, NumberRead, ObjectOperand, ObjectView, Predicate};
         use super::Expr;
         let mut predicates = vec![predicate];
-        for (argument, view) in [
-            (cost, CharacteristicView::Effective),
-            (original_cost, CharacteristicView::Original),
-        ] {
+        for &(argument, view, comparison) in limits {
             if let Some(ast::NumericArgument::Expression(value)) = argument {
                 let number: ast::Number = super::decode(value.as_ref().clone(), path)?;
                 let right = self.number(&number, path, &mut super::BTreeSet::new())?;
@@ -967,7 +992,7 @@ impl BodyContext<'_> {
                             view,
                         },
                     })),
-                    comparison: Comparison::LessEqual,
+                    comparison,
                     right,
                 })));
             }

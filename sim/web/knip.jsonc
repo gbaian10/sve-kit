@@ -4,6 +4,8 @@
     "tests/lint-fixtures/**",
     // Vitest loads setup through its config in dev; it has no production entry.
     "tests/setup.ts",
+    // `battle-contract` generates the contract types and validator; package scripts invoke it.
+    "scripts/battle-contract/main.ts",
     // `catalog` is a development-only CLI invoked by package scripts.
     "scripts/catalog/main.ts",
     // `drawer-check` is a development-only CLI invoked by package scripts.
@@ -13,14 +15,11 @@
     // `screenshots` is a development-only CLI invoked by package scripts.
     "scripts/screenshots/main.ts",
   ],
-  "ignoreDependencies": [
-    "@fontsource/ibm-plex-sans",
-    // The dependency-only PR precedes the battle-contract generator; remove these in the follow-up (#2124).
-    "ajv",
-    "json-schema-to-typescript",
-  ],
+  "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
   "entry": [
     "bench/driver.ts",
+    // The battle Worker and screens (#2127, #2132) import the contract from here; nothing ships yet.
+    "src/battle/contract/index.ts!",
     "scripts/ci/public-junit-reporter.ts",
     // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
     "src/cloudflare/worker.ts!",

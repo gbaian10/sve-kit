@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Annotated
 import typer
 
 from sve_carddb.cli_paths import required_root
-from sve_carddb.contracts.profiles import MEDIA, profile
+from sve_carddb.contracts.profiles import profile
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.stage_log import mark
 from sve_carddb.export.construction_index import (
@@ -55,12 +55,13 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     image_index: Annotated[
         Path | None, typer.Option(exists=True, dir_okay=False)
     ] = None,
-    format_version: Annotated[str, typer.Option()] = MEDIA,
+    format_version: Annotated[str | None, typer.Option()] = None,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
     preview_dir = required_root(preview_dir, "--preview-dir", "SVE_EXPORT_DIR")
     private_dir = required_root(private_dir, "--private-dir", "SVE_CARDDB_PRIVATE_DIR")
-    profile(format_version)
+    if format_version is not None:
+        profile(format_version)
     roots = Roots(preview_dir, private_dir)
     recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
@@ -117,7 +118,7 @@ if TYPE_CHECKING:
 
 
 def _finish(
-    built: Built, roots: Roots, batch: Batch, codec: Brotli | None, version: str
+    built: Built, roots: Roots, batch: Batch, codec: Brotli | None, version: str | None
 ) -> None:
     projection = replace(
         built.projection, config=offline_configuration(built.projection.config)

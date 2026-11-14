@@ -1,6 +1,6 @@
 # 快照機器契約與共用樣本
 
-套件 Schema、Python reader 與 TS 解碼器使用唯一的 `4.0.0` profile，整合
+套件 Schema、Python reader 與 TS 解碼器使用 `4.0.0`（空程式包）與 `4.1.0`（DSL 1.0）profile，整合
 [公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標；格式與語義檢查在匯出及上傳前離線執行。
 [public-annotation.schema.json](public-annotation.schema.json)及
 [固定案例](public-annotation-cases.json)仍供指定邊界的元件驗證，完整快照以套件 Schema 與共用 golden 驗收。
@@ -36,7 +36,7 @@ bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.sta
 | 集合名、`集合名_partition` | 完整邏輯 row tuple、各欄位分割 row tuple |
 | RegionView、PrintingFace、Section 等 | 固定巢狀 tuple，含 PrintingFaceBootstrap／Detail |
 | ParameterSchema、CorrectionValue | 保留為 JSON 的有限值域；field 與更正值另於所屬 tuple 綁定 |
-| Programs | 空程式包 |
+| Programs、DSLProgram（4.1） | 4.0 空程式包；4.1 已展開的正式 DSL 1.0 程式包 |
 | Changes、Index、IndexEntry | 變動摘要與 index_format=2 的 current／previous 入口 |
 
 可直接以 `#/$defs/Manifest` 等片段作驗證入口。`x-columns`、`x-types`、`x-primary-key`、`x-fragments`、`x-tables` 是供固定 accessor 使用的註記；接受／拒絕 JSON 形狀使用標準 keywords。資料內 types 另以 const 驗完整 descriptor，不能讓 payload 的註記改變解碼方式。
@@ -55,6 +55,8 @@ Schema 驗欄序、tuple 長度、required-nullable、額外欄及 enum。跨值
 uv --directory carddb run python -m sve_carddb.contracts.generate_schema
 uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 ```
+
+4.1 資源位於 `schema/v4/`；source.json 只覆寫 4.0 共用 tuple 來源的封套、Manifest 與 Programs，避免維護兩份欄序。4.1 新增 `dsl-programs-v1`，最低 reader 為 4.1.0；原有 tuple 欄序與分片配置沿用 4.0。產生器從 `dsl/program.schema.json` 及 `dsl/author-nodes.schema.json` 取必要閉包，將外部名稱轉成釘住的本地 `$defs`，expanded profile 的動態參數／generated 引用固定拒絕。DSL 原檔變更同樣觸發格式鎖，不能只更新套件 Schema 而漏改權威語法。
 
 `test_schema_regeneration_matches_committed_structure` 從來源重新產生並比較提交版的解析結構；另以未啟用 format checker 的 Draft 2020-12 驗證器拒絕共用形狀反例。產生器只產生 Schema，不生成 golden 或預期 logical view。欄位變更仍須對照 snapshot-format／snapshot-transport 審核，並依傳輸契約判定版本變動。
 
