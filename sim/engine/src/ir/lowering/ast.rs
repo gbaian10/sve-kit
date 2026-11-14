@@ -2675,9 +2675,16 @@ pub(super) enum Comparison {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PublicNumber {
     Literal(i64),
-    Count { count: PublicQuery },
+    Count { count: PublicCountQuery },
     DistinctNames { distinct_names: PublicQuery },
     DistinctOriginalCosts { distinct_orig_costs: PublicQuery },
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PublicCountQuery {
+    Public(PublicQuery),
+    Numeric(CountQuery),
 }
 
 #[derive(Clone, Deserialize, PartialEq, Eq)]

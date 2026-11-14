@@ -337,3 +337,55 @@ fn cost_subject_histories_reject_original_cost_and_fragment_names() {
         );
     }
 }
+
+#[test]
+fn conditional_play_cost_reads_face_up_evolve_followers() {
+    let tree = equipment_played::tree(
+        &json!({"play":{"cost_delta":{"if":{"cmp":{"left":{"count":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true}},"op":"ge","right":2}},"delta":-2}}}),
+        "unit-follower",
+    );
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let (snapshot, keywords, document) = catalog_documents(&json!("3"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            if row["number"] == "unit-amulet" {
+                row["faces"][0]["card_type"] = json!("フォロワー・エボルヴ");
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+    );
+    for (count, paid) in [(1_usize, 3_u8), (2, 1)] {
+        let mut initial = initial();
+        let mut forms = (0..count)
+            .map(|i| json!({"id":format!("used-{i}"),"card":"unit-amulet","face_up":true}))
+            .collect::<Vec<_>>();
+        forms.push(json!({"id":"hidden","card":"unit-amulet","face_up":false}));
+        initial["players"]["P1"]["zones"]["evolve_deck"] = json!(forms);
+        let mut game = Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "cost-faceup-count",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-amulet", &card(vec![]))
+            .unwrap();
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            10 - paid
+        );
+    }
+}

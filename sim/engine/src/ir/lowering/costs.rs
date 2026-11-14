@@ -183,29 +183,7 @@ fn condition(
         },
         ast::CostCondition::History(history) => history_condition(history, entry, allocator, path)?,
         ast::CostCondition::Cmp(value) => Predicate::CompareInt {
-            left: match &value.left {
-                ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
-                ast::PublicNumber::Count { count } => super::numeric::aggregate_count(
-                    condition_count_query(count, allocator, path)?,
-                    None,
-                ),
-                ast::PublicNumber::DistinctNames { distinct_names } => {
-                    super::numeric::distinct_count(
-                        distinct_names,
-                        super::super::ObjectProperty::Names,
-                        Binding::new(allocator.id(path)?, ScopeId(0)),
-                        path,
-                    )?
-                }
-                ast::PublicNumber::DistinctOriginalCosts {
-                    distinct_orig_costs,
-                } => super::numeric::distinct_count(
-                    distinct_orig_costs,
-                    super::super::ObjectProperty::Cost,
-                    Binding::new(allocator.id(path)?, ScopeId(0)),
-                    path,
-                )?,
-            },
+            left: condition_number(&value.left, entry, allocator, path)?,
             comparison: match value.op {
                 ast::Comparison::Eq => Comparison::Equal,
                 ast::Comparison::Ne => Comparison::NotEqual,
@@ -217,6 +195,41 @@ fn condition(
             right: Expr::Literal(Int(value.right)),
         },
     })))
+}
+
+fn condition_number(
+    value: &ast::PublicNumber,
+    entry: &ast::Ability,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Expr<Int>, LoweringError> {
+    Ok(match value {
+        ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
+        ast::PublicNumber::Count {
+            count: ast::PublicCountQuery::Public(count),
+        } => super::numeric::aggregate_count(condition_count_query(count, allocator, path)?, None),
+        ast::PublicNumber::Count {
+            count: ast::PublicCountQuery::Numeric(count),
+        } => {
+            let body = ast::Body::default();
+            let mut context = super::BodyContext::new(entry, ScopeId(0), &body, None, allocator);
+            context.zone_count(count, path)?
+        }
+        ast::PublicNumber::DistinctNames { distinct_names } => super::numeric::distinct_count(
+            distinct_names,
+            super::super::ObjectProperty::Names,
+            Binding::new(allocator.id(path)?, ScopeId(0)),
+            path,
+        )?,
+        ast::PublicNumber::DistinctOriginalCosts {
+            distinct_orig_costs,
+        } => super::numeric::distinct_count(
+            distinct_orig_costs,
+            super::super::ObjectProperty::Cost,
+            Binding::new(allocator.id(path)?, ScopeId(0)),
+            path,
+        )?,
+    })
 }
 
 fn history_condition(
