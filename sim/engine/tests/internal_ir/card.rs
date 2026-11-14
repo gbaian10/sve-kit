@@ -130,6 +130,9 @@ mod lastword_revive;
 #[path = "card/trigger_targets.rs"]
 mod trigger_targets;
 
+#[path = "card/conditioned_choice.rs"]
+mod conditioned_choice;
+
 #[path = "card/trigger_choice.rs"]
 mod trigger_choice;
 
