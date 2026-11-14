@@ -56,25 +56,6 @@ cards:
               type: follower
             min: 1
             max: 1
-  CP04-072:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: draw
-          side: both
-          count: 1
-        event: enter
-        subject: self
-      - line: 2
-        kind: trigger
-        body:
-          op: damage
-          subjects: opponent.leader
-          amount: 1
-        event: field_to_cemetery
-        subject: self
   CP04-088:
     status: complete
     abilities:
@@ -235,22 +216,3 @@ cards:
         event: enter
         subject: self
         section: 0
-  CP04-P56:
-    status: complete
-    abilities:
-      - line: 1
-        kind: trigger
-        body:
-          op: draw
-          side: both
-          count: 1
-        event: enter
-        subject: self
-      - line: 2
-        kind: trigger
-        body:
-          op: damage
-          subjects: opponent.leader
-          amount: 1
-        event: field_to_cemetery
-        subject: self

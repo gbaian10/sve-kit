@@ -339,3 +339,39 @@ fn no_stand_waits_for_the_next_actual_start_despite_extra_and_skipped_turns() {
         false
     );
 }
+
+#[test]
+fn rule_stand_installation_preserves_its_checked_public_kind_filter() {
+    for kind in [CardKind::Follower, CardKind::Amulet] {
+        let mut game = board(1);
+        let mut action = lock();
+        if let Action::InstallEffect {
+            subjects:
+                InstallationSubjects::Objects {
+                    objects:
+                        Selector::Zone {
+                            binding, predicate, ..
+                        },
+                    ..
+                },
+            ..
+        } = &mut action
+        {
+            **predicate = Expr::Compute(Box::new(Predicate::KindEquals {
+                left: Expr::Live(Box::new(KindRead::Kind {
+                    object: ObjectView::Current {
+                        object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                    },
+                    view: CharacteristicView::Effective,
+                })),
+                right: Expr::Literal(kind),
+            }));
+        }
+        run(&mut game, vec![action], 1).unwrap();
+        end(&mut game);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["objects"]["f"]["acted"],
+            kind == CardKind::Follower
+        );
+    }
+}

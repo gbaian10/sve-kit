@@ -1025,3 +1025,28 @@ mod player_choices;
 
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
+#[path = "card/source_posture.rs"]
+mod source_posture;
+
+#[path = "card/spell_origin.rs"]
+mod spell_origin;
+
+#[path = "card/source_counter_quantity.rs"]
+mod source_counter_quantity;
+#[path = "card/target_role_objects.rs"]
+mod target_role_objects;
+
+#[path = "card/observed_hand_remainder.rs"]
+mod observed_hand_remainder;
+
+#[path = "card/optional_selected_scalar.rs"]
+mod optional_selected_scalar;
+
+#[path = "card/selected_play_cost.rs"]
+mod selected_play_cost;
+
+#[path = "card/public_destroy_filter.rs"]
+mod public_destroy_filter;
+
+#[path = "card/hand_source_ex.rs"]
+mod hand_source_ex;

@@ -250,7 +250,7 @@ fn selected_conditions_do_not_authorize_a_private_look_choice() {
 }
 
 #[test]
-fn posture_filter_does_not_authorize_unscoped_holder_state() {
+fn source_posture_condition_is_bound_to_the_current_ability_holder() {
     let condition = Expr::Compute(Box::new(Predicate::PostureEquals {
         left: Expr::Live(Box::new(PostureRead::Posture {
             object: ObjectView::Current {
@@ -272,16 +272,19 @@ fn posture_filter_does_not_authorize_unscoped_holder_state() {
             },
         })],
     )]);
-    let mut game = Game::new(
-        catalog(),
-        &setup(1, json!([])),
-        &Value::Null,
-        &Value::Null,
-        "unscoped-posture",
-    )
-    .unwrap();
-    game.load_internal_card("unit-follower", &program)
-        .unwrap_err();
+    for acted in [false, true] {
+        let mut game = position_with_state(1, &program, &json!({"acted":acted}));
+        activate(&mut game, 1);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["hand"],
+            if acted { json!([]) } else { json!(["d"]) }
+        );
+        assert_eq!(
+            state["P1"]["deck"],
+            if acted { json!(["d"]) } else { json!([]) }
+        );
+    }
 }
 
 #[test]

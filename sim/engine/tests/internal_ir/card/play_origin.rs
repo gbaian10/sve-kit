@@ -15,13 +15,15 @@ fn candidate(zone: &str) -> Value {
 }
 
 #[test]
-fn played_from_accepts_the_registered_ex_origin() {
-    lowerer().lower(&candidate("ex")).unwrap();
+fn played_from_accepts_the_registered_hand_and_ex_origins() {
+    for zone in ["hand", "ex"] {
+        lowerer().lower(&candidate(zone)).unwrap();
+    }
 }
 
 #[test]
-fn played_from_rejects_other_origins_and_nonentry_abilities() {
-    for zone in ["hand", "field", "cemetery", "deck"] {
+fn played_from_rejects_unregistered_origins_and_nonentry_abilities() {
+    for zone in ["field", "cemetery", "deck"] {
         lowerer().lower(&candidate(zone)).unwrap_err();
     }
     let mut tree = candidate("ex");
@@ -60,66 +62,67 @@ fn program(zone: &str, origin: ZoneKind) -> WellFormedCardProgram {
 
 #[test]
 fn played_from_reads_the_frozen_origin_and_requires_an_actual_card_play() {
-    let wanted = "ex";
-    for (from, played) in [
-        ("hand", true),
-        ("ex", true),
-        ("ex", false),
-        ("cemetery", false),
-    ] {
-        let zone = if from == "cemetery" {
-            ZoneKind::Cemetery
-        } else {
-            ZoneKind::Ex
-        };
-        let mut initial = setup(1, json!([]));
-        initial["players"]["P1"]["zones"]["hand"] = json!([]);
-        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
-        initial["players"]["P1"]["zones"][from] = json!([{"id":"incoming","card":"unit-follower","state":{"entered_from":if from == "ex" { "hand" } else { "ex" },"entered_by":"play","entered_by_play":true}}]);
-        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"drawn","card":"unit-spell"}]);
-        let mut game = Game::new(
-            catalog(),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "play-origin",
-        )
-        .unwrap();
-        game.load_internal_card("unit-follower", &program(wanted, zone))
+    for wanted in ["hand", "ex"] {
+        for (from, played) in [
+            ("hand", true),
+            ("ex", true),
+            ("ex", false),
+            ("cemetery", false),
+        ] {
+            let zone = if from == "cemetery" {
+                ZoneKind::Cemetery
+            } else {
+                ZoneKind::Ex
+            };
+            let mut initial = setup(1, json!([]));
+            initial["players"]["P1"]["zones"]["hand"] = json!([]);
+            initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+            initial["players"]["P1"]["zones"][from] = json!([{"id":"incoming","card":"unit-follower","state":{"entered_from":if from == "ex" { "hand" } else { "ex" },"entered_by":"play","entered_by_play":true}}]);
+            initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"drawn","card":"unit-spell"}]);
+            let mut game = Game::new(
+                catalog(),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "play-origin",
+            )
             .unwrap();
-        game.load_internal_card("unit-spell", &card(vec![]))
-            .unwrap();
-        if played {
-            assert!(
-                matches!(
-                    game.play_internal_card("incoming", PlayerId { seat: 1 })
+            game.load_internal_card("unit-follower", &program(wanted, zone))
+                .unwrap();
+            game.load_internal_card("unit-spell", &card(vec![]))
+                .unwrap();
+            if played {
+                assert!(
+                    matches!(
+                        game.play_internal_card("incoming", PlayerId { seat: 1 })
+                            .unwrap(),
+                        CardPlay::Entered(_)
+                    ),
+                    "the printed card enters by a proper play"
+                );
+            } else {
+                resolved(
+                    game.activate_internal_card("s", AbilityId(9), PlayerId { seat: 1 })
                         .unwrap(),
-                    CardPlay::Entered(_)
-                ),
-                "the printed card enters by a proper play"
-            );
-        } else {
+                );
+                game.resume_internal_card().unwrap();
+            }
+            let question = game.internal_pending_choice().unwrap().unwrap();
             resolved(
-                game.activate_internal_card("s", AbilityId(9), PlayerId { seat: 1 })
+                game.answer_internal_card(question.actor, question.token, Answer::Pending(1))
                     .unwrap(),
             );
-            game.resume_internal_card().unwrap();
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(
+                state["P1"]["hand"],
+                if played && from == wanted {
+                    json!(["drawn"])
+                } else {
+                    json!([])
+                },
+                "matched entry authority overrides spoofed persistent flags"
+            );
         }
-        let question = game.internal_pending_choice().unwrap().unwrap();
-        resolved(
-            game.answer_internal_card(question.actor, question.token, Answer::Pending(1))
-                .unwrap(),
-        );
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(
-            state["P1"]["hand"],
-            if played && from == wanted {
-                json!(["drawn"])
-            } else {
-                json!([])
-            },
-            "matched entry authority overrides spoofed persistent flags"
-        );
     }
 }
 

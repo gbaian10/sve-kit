@@ -817,8 +817,7 @@ impl SubjectFilter {
                 plan.characteristic(fields, part)?;
             }
         }
-        (plan.closed_characteristics(fields) && plan.predicate(fields) == *expression)
-            .then_some(plan)
+        (plan.closed_characteristics() && plan.predicate(fields) == *expression).then_some(plan)
     }
 
     fn characteristic(&mut self, fields: SubjectFields, part: &Expr<Bool>) -> Option<()> {
@@ -984,7 +983,7 @@ impl SubjectFilter {
         Some(())
     }
 
-    fn closed_characteristics(&self, fields: SubjectFields) -> bool {
+    fn closed_characteristics(&self) -> bool {
         if !self.name_contains_any.is_empty() && self.name_contains.is_some() {
             return false;
         }
@@ -994,16 +993,6 @@ impl SubjectFilter {
                     own: Some(true),
                     kind: Some(CardKind::Follower),
                     keyword: Some(KeywordId::Ward),
-                    ..Self::default()
-                });
-        }
-        if matches!(fields, SubjectFields::Entry(_)) && self.original_cost.is_some() {
-            return *self
-                == (Self {
-                    own: Some(true),
-                    itself: Some(false),
-                    kind: Some(CardKind::Follower),
-                    original_cost: self.original_cost,
                     ..Self::default()
                 });
         }

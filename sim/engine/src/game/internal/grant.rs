@@ -233,7 +233,8 @@ pub(super) fn supported_definition(ability: &Ability) -> bool {
     // The closed trigger grammar supplies the nested entry's private-read proof.
     ability.kind == AbilityKind::Triggered
         && ability.qualification == AbilityQualification::Ordinary
-        && (ability.active_zones == [ZoneKind::Field] || super::card::triggers::ex_phase(ability))
+        && (ability.active_zones == [ZoneKind::Field]
+            || super::card::triggers::phase_in_zone(ability, ZoneKind::Ex))
         && (matches!(
             ability.trigger.as_ref().map(|trigger| &trigger.on),
             Some(TriggerCondition::Event {

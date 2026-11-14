@@ -237,7 +237,9 @@ buff:
 
 正式目標與本文 `choose.from` 的公開篩選接受 `traits_any: [獣, 魔法生物]`（任一類型；至少兩個互異的非空類型，BP13-051）、`traits_all: [絶傑, 魔界]`（同時具有全部特徵）、`token: true` 及 `names: [没頭の実験体, 多頭の実験体]`（名稱符合任一項），共用既有物件篩選與目標合法性檢查。
 
-場上正式目標另接受 `acted: true | false`（橫置／直立）、`evolved: false | true`（只比對從者；`true` 包含超進化）與 `entered_this_turn: true`（本回合入場，每個回合開始時清除雙方場上的標記）；這些狀態篩選只用於場上候選，不接受領袖、觀察卡或墓場／EX 來源。`not_same_name_as_this: true` 也可用於公開正式目標與本文 `choose`，以能力持有卡本身的卡名比較，因此謝幕在來源離場後仍排除同名卡；與領袖候選並用時拒絕。能力頭成本的素材與棄牌查詢也接受 `traits_any`（BP14-107 墓場消滅、BP10-121 手牌棄牌）；領袖候選、極值查詢與分組 Look 仍拒絕（公開計數見下）。能力頭成本的素材查詢（例如 `return_to_hand.sel`，BP21-016、ECP01-004）與 `exists` 條件（CP01-076）也接受 `not_same_name_as_this: true`，付款或判斷時讀能力持有者目前的卡名；計數、名稱種類數等其他公開數值讀取仍拒絕。場上物件來源（傷害、破壞、起身等的 `{who, zone: field, ...}`）接受 `acted`、`kind: amulet`、`orig_cost_eq: N`（印刷原費恰為 N；數值修正的 `zone: ex` 來源同樣適用，BP12-070 分別對場上與 EX 各寫一次 `buff`），以及 `except: {in: 已選目標}` 排除同一能力先前選定的目標（例如「それ以外の相手の場のフォロワーすべて」）；與 `as`／`where` 極值並用時拒絕。公開存在與計數查詢可用 `where: {cmp: {left: {power_of: item}, op: ge | le, right: N}}` 依有效攻擊力篩選。自己場上、EX 或墓場的 `count` 也接受 `traits_any`（「天使・フォロワーや堕天使・フォロワーが2体以上」，BP09-117），具備任一類型即計入一次；手牌、牌庫、消滅區與進化牌堆仍拒絕。公開存在查詢另接受 `evolved: true | false`（只限場上，BP13-080「エボルヴフォロワーがいるなら」）與 `traits_all`（BP12-011 EX 的妖精・プリンセス從者）；場上物件來源（破壞、傷害等的群體對象）接受 `hp_le: N`（有效體力上限，BP11-056）與 `not_trait`（「Aタイプを持たない」，ECP02-072），與 `where` 極值並用時拒絕。場上限定的持續能力可在 `static.while` 以 `standing: this` 讀取能力持有者目前是否直立；起動條件與本文等其他位置讀取持有者姿態仍不支援。
+場上正式目標另接受 `acted: true | false`（橫置／直立）、`evolved: false | true`（只比對從者；`true` 包含超進化）與 `entered_this_turn: true`（本回合入場，每個回合開始時清除雙方場上的標記）；這些狀態篩選只用於場上候選，不接受領袖、觀察卡或墓場／EX 來源。`not_same_name_as_this: true` 也可用於公開正式目標與本文 `choose`，以能力持有卡本身的卡名比較，因此謝幕在來源離場後仍排除同名卡；與領袖候選並用時拒絕。能力頭成本的素材與棄牌查詢也接受 `traits_any`（BP14-107 墓場消滅、BP10-121 手牌棄牌）；領袖候選、極值查詢與分組 Look 仍拒絕（公開計數見下）。能力頭成本的素材查詢（例如 `return_to_hand.sel`，BP21-016、ECP01-004）與 `exists` 條件（CP01-076）也接受 `not_same_name_as_this: true`，付款或判斷時讀能力持有者目前的卡名；計數、名稱種類數等其他公開數值讀取仍拒絕。場上物件來源（傷害、破壞、起身等的 `{who, zone: field, ...}`）接受 `acted`、`kind: amulet`、`orig_cost_eq: N`（印刷原費恰為 N；數值修正的 `zone: ex` 來源同樣適用，BP12-070 分別對場上與 EX 各寫一次 `buff`），以及 `except: {in: 已選目標}` 排除同一能力先前選定的目標（例如「それ以外の相手の場のフォロワーすべて」）；與 `as`／`where` 極值並用時拒絕。公開存在與計數查詢可用 `where: {cmp: {left: {power_of: item}, op: ge | le, right: N}}` 依有效攻擊力篩選。自己場上、EX 或墓場的 `count` 也接受 `traits_any`（「天使・フォロワーや堕天使・フォロワーが2体以上」，BP09-117），具備任一類型即計入一次；手牌、牌庫、消滅區與進化牌堆仍拒絕。公開存在查詢另接受 `evolved: true | false`（只限場上，BP13-080「エボルヴフォロワーがいるなら」）與 `traits_all`（BP12-011 EX 的妖精・プリンセス從者）；場上物件來源（破壞、傷害等的群體對象）接受 `hp_le: N`（有效體力上限，BP11-056）與 `not_trait`（「Aタイプを持たない」，ECP02-072），與 `where` 極值並用時拒絕。場上限定的持續能力可在 `static.while` 以 `standing: this` 讀取能力持有者目前是否直立；本文條件也讀相同的目前場上世代，來源已離場時不視為直立。起動條件仍不支援持有者姿態讀取。正式目標仍先宣告，才於解算 `standing: this` 時判斷來源目前是否直立；它不是時點事件的觸發篩選。
+
+群體 `destroy` 的公開區域查詢沿用正式目標的狀態篩選，例如 `ref: {who: opp, zone: field, kind: follower, acted: true}`。在破壞指示解算時讀目前姿態；不改讀離場來源的舊快照，也不授權查詢私有區域。
 
 正式目標的「AかB」寫成 `targets[].from: {any_of: [<查詢>, <查詢>]}`（BP03-105 疾走或守護、BP04-128 攻擊力 1 以下或體力 1、BP10-116 只有墮天使分支帶 `other: true`、BP16-098／CSD01-007 墓場的法術或護符）。各分支是獨立的公開正式目標查詢，各自帶篩選、`other` 與區域；同時符合多個分支的卡仍只算一張，張數上限與 `n`／`upto` 共用。分支可讀不同區域，也可帶 `where`／`as` 極值，每個分支沿用單一正式目標的完整查詢；觀察卡（`in`）與領袖候選不屬於公開物件目標，仍各走自己的入口。搭配 `groups` 時，每組的條件加到每個分支上，須與該分支自己的篩選同時成立（例如分支 `orig_cost_le: 3` 與組 `orig_cost_eq: 1`）。後續本文對這個目標的區域與種類判斷只採各分支共同的玩家、區域與種類；只有一個分支帶的篩選不會被當成整個目標的性質。
 
@@ -315,11 +317,15 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`enter_field` 的 `sel` 另接受非空 `name_contains`（「カード名に『アルベール』を含む…が出たとき」，BP13-027），依入場後的完整名稱集合比對片段；其他事件頭不接受此欄。`enter_field` 的 `sel` 也接受 `traits_any: [学院, 獣]`（「学院・フォロワーか獣・フォロワーが出たとき」，BP21-008），至少兩個不重複的類型、任一符合即成立，同時具有多個類型也只觸發一次，不與單一 `trait` 並用；`left_field`、`destroyed` 等離場事件仍拒絕（Played 另有自己的 `traits_any`，見下）。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
+`enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。
+
 事件本文的 `it` 共用標頭的型別綁定，可指向進場、入 EX、攻擊、進化、離場及破壞的主體；`this` 始終是能力來源。進場使用新世代，離場與破壞使用離場前世代；舊事件的主體離場後再回場，不會強化回來的新世代。沒有卡片主體的時點及起動能力不能使用 `it`，也不以來源代替缺少的事件欄位。本文條件可用 `exists: {in: it, trait: 獣}` 檢查該主體是否符合靜態篩選（BP09-002「場に出たフォロワーが獣・フォロワーなら、代わりに…」寫成 `if`／`else` 兩種強化），可與 `not`、`all`、`any` 組合；判斷比照已選正式目標：讀主體目前仍屬於事件那個世代時的特徵，主體已換世代（例如離場、破壞後）就不符合，不會改讀離場前的快照。
 
 「前者の攻撃力」「それの攻撃力」這類在本文前段強化後才讀的值，寫成 `power_of: <目標>`（BP17-090、BP13-008、BP07-007、BP08-058）：接受至多一體、只從場上或 EX 選取的正式目標或本文 `choose`（雙方皆可），讀它結算到這一步時的目前攻擊力，因此包含同一本文先前的強化；EX 的從者讀它在 EX 目前保留的攻擊力，護符、已離開原區域或換世代時讀為 0。多張目標、手牌或其他區域的目標仍拒絕；要固定在選擇當下的數值時仍用 `at: selection`。
 
 `at: selection` 的單一正式目標捕捉可讀 `cost_of` 與 `orig_cost_of`，沿用同一選擇回條與數值捕捉；原始費用取印刷資料，有效費用取當時修正。捕捉發生在選定後、第一個效果指示前，之後目標被破壞或返回手牌都不改變該數值；不授予隱藏區域或任意多物件讀取權限。
+
+可選的單一正式目標（`upto: 1`）可用 `at: selection`、`selection: card` 與 `value: {orig_cost_of: card}` 捕捉選取時數值，`cost_of`、`power_of`、`hp_of` 同理。零張先走既有空集合條件，結果為 0；一張才讀該物件並凍結數值。一般的 `orig_cost_of: this` 仍是來源資訊讀值。
 
 公開正式目標的集合也可捕捉 `{at: selection, selection: chosen, value: {distinct_orig_costs: {in: chosen}}}`，以所選整組卡片的印刷原費計算種類數。它沿用選擇回條與 `DistinctCount`，不受有效費用修正影響；例如 BP08-104 比較結果是否為 1，只有整組原費相同才回手。集合名稱須與 `selection` 一致；私有手牌、Look、未知選擇與本文選取仍拒絕。
 
@@ -359,6 +365,8 @@ Played 的 `sel` 另接受 `orig_cost_eq`、`orig_cost_le` 或 `orig_cost_ge`，
 `history: {window: this_turn, event: discarded, who: self, from: hand}` 查詢本回合自己是否曾捨棄手牌；`history_count` 使用相同查詢計算實際捨棄的張數。只接受這個玩家與來源形狀，`distinct` 可省略或為 `facts`，不接受主體篩選、其他來源、排除執行或 `subjects` 去重。效果、正式費用與手牌上限的捨棄都經共同入口計入；普通移區、消滅與抽牌不計，失敗付款連同歷史回復，雙方歷史在下一回合開始歸零。稍後入場的卡仍能讀取本回合較早的捨棄。
 
 同一個 `history` 條件可放入 `play.cost_delta.if`，在共同打出付款流程讀取，適用手牌與 EX 起點；此費用條件入口不因此開放其他歷史事件。一般 `auto` 仍依 R-0004／R-0009 先選正式 `targets`、結算處理到 `if` 時才讀歷史。結束階段的能力先於手牌上限捨棄結算，因此稍後的規則捨棄不會補做已略過的傷害（Q302）；同一結束階段內較早結算的能力所支付的捨棄則已可讀取。
+
+打出費用條件中的 `count` 可沿用一般數值入口所支援的計數，包括 `zone: evolve_deck`、`face_up: true` 與 `kind: evolve_follower`。因此表向的 Advance、非進化從者及裏向卡不納入此篩選；費用計算與本文使用相同的公開區域讀取邊界。
 
 一般長寫 `auto` 的冒號在本文寫 `pay: {cost: {act_self: true}, do: [...]}`（送墓用 `self_to_cemetery`；可用有序組合）。正式目標在打出時先選，到了該指示才決定付不付；可放在已支援的 `if` 內。拒付或付不起只略過該段本文，能力仍算已打出並結算。付款原子提交，失敗保留先前已結算的效果並回復本段付款；來源須仍在場上，不能用另一張同名卡付款。這個結算付款子集只接受場上普通自動能力的自身橫置／送墓，不接受 EX 來源、私有材料或任意成本。
 
@@ -468,6 +476,8 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 
 `entered_from`、`entered_by`、`played_from` 的 `ref: this` 在入場曲與 `auto.on.enter_field: {ref: this}` 讀取自身入場事件。監看他者入場時，可用 `entered_from: {ref: it, from: cemetery}` 讀取該次事件主體的來源；不把能力持有者當成事件主體，其他事件不提供此讀值。進化能力的 `usable_if` 另可用 `entered_from: {ref: this, from: cemetery}` 查詢持有者本次場上世代的入場來源；離場再回場即重新記錄，普通進化不改變來源，進化資格目前限查詢墓場來源。入場事件接受手牌、牌庫及墓場，`not` 可表示非手牌；不由入場方式推斷來源區域。入場來源條件亦可控制唯一的チョイス群組是否出現；`choice.instead` 另接受墓場來源條件以改變可選模式數，仍在宣告時選模式，並沿用同一事件的凍結來源。自身回場及離場後移 EX 需要該次離場確定落在墓場，目前只有謝幕符合；一般 `left_field` 不開放這兩種動作。
 
+法術本文可用 `played_from: {ref: this, from: hand | ex}` 讀取本次適正打出的起始區域，與付款時使用的打出來源共用既有執行資料。自身入場曲也接受 hand／EX 的適正打出來源，效果直接入場不視為打出。先抽牌或移動其他卡不改變這個值；之後將結算中的自身移入 EX，仍受 EX 容量及一般法術清理規則限制。
+
 EX 裡的フォロワー・トークン可由正式目標或本文 `choose` 選取後以 `move: {to: field}` 放上場（BP01-078 的ドラゴン、BP14-094 的招来の狐、BP13-010 的妖精），與 EX 的一般從者共用進場程序與場位檢查；結算時從自己 EX 多選且緊接進場的 `choose`，張數上限在出題時依空位計算，與 Look 的多選進場相同；アミュレット・トークン與其他區域的 token 不在此列。
 
 法術 token 使用一般 `spell` 本體與印刷 PP 費用，從手牌或 EX 區正式打出；印刷 Quick 同樣經由權威產生的 Quick 問題選用。結算沿用法術流程，離開結算區進入墓場後依 token 規則消去，不留在墓場。
@@ -514,6 +524,8 @@ EP／SEP 卡（種類 `ep`／`sep`）沒有卡片能力：EP、SEP 是玩家持�
 
 目前 `create: {token: フェアリーウィスプ, n: 2, to: ex, result: made}` 支援固定數量、單一規則名稱、自己 EX；`to: field` 支援從者與護符 token 至自己場上。省略 `n` 為 1；EX 與場上各最多五張，只建立並放入仍有容量的數量。`result` 或 `bind` 擇一，綁定實際放入的 token，滿區時為空；authority receipt 同樣只列出成功放入者。token 的整卡 runtime 程式仍須准入。場上建立共用進場事件與守護的選擇橫置程序；沒有先前區域的建立以 `EntryOrigin::Other` 表示，成功建立的每個 token 各發生一次進場。
 
+Token 建立的數量可使用已准入的公開人口計數，例如 `create: {token: エンシェントアーティファクト, n: {count: {who: opp, zone: field, kind: follower}}, to: field}`。數值在該指示解算時讀取，建立數量仍受目的區容量限制；計數不授予選取私有物件的權限。
+
 EX 的正式目標或結算選取可用 `from: {who: all, zone: ex}`，也可用 `self`／`opp` 限制玩家。`transform: {ref: chosen, into: ドラゴン}` 目前接受已綁定的 EX 選取與單一 token 模板：先消滅仍屬該世代的物件，再依實際成功量於原 EX 玩家處建立新 token；原卡的持有者不會改變新 token 的目的 EX。新物件使用印刷數值與新身分，舊 token 消滅後依共用規則消去。模板仍須整卡准入，建立仍受共用容量規則限制；多模板分配與進場附加效果須另行准入。EX 資源的目標保護沿用規則綁定。
 
 回合時點自動能力可用 `auto: {zone: ex, on: {phase: {whose: self, which: end}}, do: [...]}`，只在持有卡位於 EX 時訂閱；省略 `zone` 仍為場上。EX 訂閱接受單一區域的 Main／End 時點，以及下述融合事件與融合／打出共用事件；有效區本身不授予從 EX 打出的許可。條件中的 `count: {who: self, zone: field, kind: follower, trait: 魔法使い}` 讀取結算當下符合條件的場上張數；私有區域計數仍不接受卡型或類型篩選。普通法術可在自身結算期間以 `move: {ref: this, to: ex}` 移動自身；EX 已滿則仍走既有結算清理。
@@ -543,9 +555,13 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 墓場的卡也可訂閱自己場上的進場，例如 BP07-041 的「自分の場に『蒼の反逆者・テトラ』が出たとき、{コスト1}：自分の墓場のこれをEXエリアに置く」寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 蒼の反逆者・テトラ}}}, cost: {pp: 1}, do: [{move: {ref: this, to: ex}}]}`。進場事件提交時擷取雙方墓場中有此訂閱的卡；本文對 `this` 沿用上述墓場限制，`enter_field: {ref: this}` 在墓場沒有意義而拒絕。本文的自身移動也可放在 `optional` 內表示「…てよい」，例如 BP15-101 寫 `optional: {do: [{move: {ref: this, to: ex, result: moved}}, {if: {cond: {did: moved}, then: [...]}}]}`；只有實際移到 EX 才執行「そうしたなら」的後句。
 
+墓場來源也可使用 `auto: {zone: cemetery, on: {phase: {whose: self, which: end}}}` 訂閱既有 Main／End 時點。事件發生時只擷取宣告有效區內的來源，本文沿用一般條件、可選付款與墓場自身移動；不以場上同名卡代替墓場來源。
+
 墓場入場觀測者的自身消滅費用可寫 `auto: {zone: cemetery, on: {enter_field: {who: self, sel: {name: 侮蔑の絶傑・ガルミーユ}}}, cost: {banish_self: true}, targets: [...], do: [...]}`（BP08-068、Q1098）。目前只接受這個能力頭中的單一自身消滅費用；宣告是否支付、正式目標及原子付款沿用既有能力頭流程。拒付取消該次打出，本文不執行；每個墓場副本只支付自己的來源世代，來源已移區後不能改用新世代或另一張同名卡。這個例外不開放本文的 `banish: this`、打出觀測者、其他有效區或與其他費用組合；入場當下不在墓場的卡不補觸發（Q1081）。
 
 手牌的起動能力可用 `activate: {zone: hand, cost: {steps: [{pp: 1}, {self_to_ex: true}]}}` 表示「{コスト1}手札のこれをEXエリアに置く：…」（BP10-017、BP08-072）。本卡依一般移動規則從手牌放到持有者的 EX 並公開；`self_to_ex` 只接受 `zone: hand` 的非 Quick 起動費用；Quick、其他區域、自動能力的 `pay`、進化與打出費用都拒絕（Quick 候選尚未預檢 EX 空位）。
+
+手牌起動能力可把目前綁定的自身放入 EX；付款、物件身分、世代與擁有者須仍屬本次能力來源。與既有自己的手牌選取結果共用 EX／牌庫的移動授權，不因此允許讀取或搬動其他未選手牌。
 
 融合用 `activate: {fusion: {sel: {who: self, zone: [hand, ex], trait: 財宝, orig_cost_ge: 1}, n: 1}, do: [...]}`，省略有效區時固定為手牌，也可明寫 `zone: hand`。沿用私有成本選材問題及原子付款：材料排除來源本身，手牌材料捨棄，EX 材料送墓，再把來源放到自己的 EX。EX 滿格時可先用 EX 材料騰出空位；整份付款失敗一併回復。本文的 `this` 精確跟隨該來源移入 EX 後的世代，原有的發動來源仍保留在能力紀錄。
 
@@ -643,6 +659,8 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 
 Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: chooser, result: placed}` 排回牌庫頂，餘牌寫 `{in: seen, except: {in: {objects_of: placed, view: before}}}`，再排到牌庫底或送墓（CP01-070、CP02-081）。這個 Order 收據只供餘牌差集扣除，不能當移動輸入或追蹤對象。牌庫頂直接移到 EX 的 `move: {top: {who: self, n: 1}, to: ex, result: placed}` 可接 `apply: {on: {follow: placed}, effect: {cost_mod: {when_playing: {in: affected}, delta: -2}}}`；省略 `until` 時減費綁定該物件世代持續（BP01-084）。`delta` 與非負整數 `set` 二擇一：`set: 0` 把該卡的打出費用設為 0（CP01-035「このターン、それをプレイする際、コストを0にする」、BP02-091 不限本回合），沿用同一個移動回條與費用狀態，只套用到實際移到 EX 的新世代；正數 `delta`、負數 `set` 或與 `next_only` 並用仍拒絕。
 
+`apply.effect.cost_mod` 的 `when_playing: {in: affected}` 也可安裝在已宣告的正式目標上，例如 `on: card` 搭配 `set: 0`、`until: turn`。與成功移入 EX 的 `follow` 共用物件世代及費用修正流程；沒有選取物件時不建立修正。
+
 牌庫頂送墓（含對手牌庫）也可帶 `result`，但只供卡片條件讀取，不能當移動輸入或追蹤對象。離開牌庫的卡沒有修正，條件讀其印刷資訊：`cmp: {left: {count: {in: {objects_of: milled, view: before}, not_class: ウィッチ}}, op: ge, right: 1}` 表示「{ウィッチ}でないカードを墓場に置いたなら」（BP17-045）；`kind`、`trait`、`class`、`not_class`、`name`、`name_contains`、`orig_cost_ge` 可組合，多種卡擇一用 `any` 連接多個條件（ECP02-040 依キュート／クール／パッション分別判斷）。看牌後選取再移動的收據（`move: {ref: picked, to: hand, result: taken}`）同樣可讀，表示「〜を公開したなら」（CP02-015）。只接受「至少一張符合／沒有符合」的比較；從場上或其他公開區移動的收據可能帶有場上修正，仍拒絕。
 
 公開場上物件移至 EX 的 `move` 可用 `result: moved`，後續 `if: {cond: {did: moved}, then: [...]}` 只在至少一個成員實際移動成功時執行；選零或目的 EX 已滿不算成功，搬兩張也只執行一次後句。這個子集只接受已綁定的 Move 收據名稱，不接受其他結果種類、過濾條件或前向／分支外引用；一般公開卡與本次已觀察卡移至 EX 時，部分容量另詢問精確剩餘格數；未放入者留在原區且不算成功。
@@ -669,6 +687,8 @@ Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: ch
 手牌作費用的 `discard.sel` 支援 `class`、`orig_cost_eq/ge/le`、`traits_all` 與基本關鍵字 `keyword`（依印刷能力判斷，例如 BP22-095「手札の【守護】を持つフォロワー1枚を捨てる」寫 `keyword: ward`），可與種類、單一特徵、名稱交集。`traits_all` 要求同時具有所有列出的非空特徵名稱；例如 BP20-042 必須捨棄同時具有「絶傑」及「魔法使い」的其他手牌咒術，只有任一特徵或從者都不能支付。篩選讀取印刷職業與原始費用，不受目前費用修正影響。觸發能力的頭費用沿用宣告、正式目標、私有材料選擇、付款的順序；拒付不執行本文，材料不足不提交付款。
 
 BP22-068 的下一次規則起身限制使用下列 `apply`；`who` 的目前支援子集為 `self/opp`，兩處須一致，期限只接受下一個 start 的 end。安裝綁定所選物件世代與指定玩家，經實際回合排程等到該玩家下次開始階段的規則起身，隨後失效。效果造成的 `stand` 不受阻止，來源離場也不提早終止；目標離場後的新世代不沿用限制。
+
+規則起身限制的 `apply` 也共用已驗證的公開場上篩選；原本的起身時點與物件世代限制不變。
 
 ```yaml
 apply:
@@ -704,7 +724,9 @@ apply:
 對應 BP14-071 及其 JP 再版。角色名稱只在作者 DSL 中使用，mapping 的鍵序不影響選取順序。
 `damage.to: {role: {of: enemies, name: primary}}` 引用該目標的角色綁定；
 兩個角色使用同一次正式目標宣告，不能改成兩個獨立目標或以陣列第一個成員代選主目標。
-目前只准入場上的公開正式目標與傷害引用，不接受私有選卡、收件者聯集角色、固定角色數量或結算時 `choose.roles`。
+目前只准入場上的公開正式目標與角色引用，不接受私有選卡、收件者聯集角色或結算時 `choose.roles`。
+
+已宣告正式目標的角色也可作姿態指示的對象，例如 `act: {role: {of: enemies, name: rest}}`。它與傷害角色共用同一份已選取集合，不再詢問第二次選取；`n: 2` 搭配一體 primary 與 remaining 可表示兩個相異從者的不同指示。
 
 權威端的 `awaiting.domain` 在既有 `kind: targets` 題目增加 `roles` 陣列，
 每項為 `{role: <題內整數>, cardinality: {if_nonempty: 1}}` 或
@@ -735,6 +757,8 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 `--card` 可重複，或用 `--all` 選全部輸入卡。只有替換既有原型時帶 `--remove-prototype`；不再要求 `--base`、`--baseline-root` 或 `--storage anchors`。工具先驗整份候選、索引閉包與原型互斥，再寫主檔／本體及索引；I/O 中斷回報已完成檔案，由作者修復 Git diff。
 
 `check` 檢查全部索引作者卡；`body_usage` 依永久 CardId 去重，達三張提示整理共用本體，無額外資格 consumer。review 紀錄只報實際 verdict，不以 SHA freshness 授予核可或阻擋。source pending 不擋直接入口，真正 disputed／revise 只擋受影響卡。
+
+移除既有原型後，若歷史共享情境仍使用該卡，依[舊 DSL 回歸](v0-regression.md#已遷移到-dsl-10-的卡)原樣保存各舊原型印刷條目。歷史 fixture 只供回歸測試，不填回 current 選用，也不作為准入證據。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
 
@@ -797,8 +821,10 @@ check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering�
 `activate.advance: true` 表示印刷的 `{アドバンス起動}`，限自己場上、主階段的一般起動時機。
 印刷 PP 成本可將其中 1 PP 改用 1 EP；與普通進化、食事、ライド共用每回合一次的進化相當額度。
 成本先支付；即使拒絕後續入場，也不退還 PP、EP、自我消滅成本或額度（CR 12.16.3、8.3.2.1）。
-目前成本接受 PP，或依序 PP 與 `banish_self`；使用條件仍寫在 `usable_if`。
+成本接受 PP 與後續有序來源成本；使用條件仍寫在 `usable_if`。
 一般 `activate` 從エボルヴ牌庫入場不因此成為進化相當能力，也不能以 EP 代付。
+
+《Advance 起動》的 PP 可替代付款後，後續有序來源成本沿用一般付款流程，例如 `steps: [{pp: 3}, {self_to_cemetery: true}]`，或先橫置自身再移墓。先付完成本才進行具名 Advance 選取；拒絕入場仍不退回已付成本。
 
 本文中的具名 Advance 入場使用相鄰的選取與移動：
 
@@ -875,7 +901,9 @@ cmp:
 
 「自分のリーダーか自分の場の（他の／特徴）フォロワー1体を選ぶ。それは{体力}+N する」寫成恰好一個（`n: 1`）的接受者目標，再以 `by_kind: {ref, as?, leader, follower}` 依種類分支：`leader` 內 `item`（或 `as` 名稱）是該領袖的玩家，可寫 `life: {who: item, ...}`；`follower` 內是該從者，可寫 `buff: {on: item, ...}`；另一分支不執行（BP21-101、CP04-041、ECP01-057）。目標可寫 `leader_or: true`，或 `any_of: [{leader: self}, {who: self, zone: field, kind: follower, other?, trait?}]`（兩支同一玩家、領袖支不帶其他篩選時視為同一目標）。從者在分支執行前離場則不作用。`item` 只在分支內有效，巢狀時須以 `as` 命名；`upto` 或多張接受者目標沒有單一種類，不能用 by_kind。
 
-正式 `targets.n`／`upto` 及 `targets.from`、`search.sel` 的 `cost_le`／`orig_cost_le` 可使用既有 Number：自己的 PP 最大值、自己場上／EX／墓場的公開計數與同一範圍的 `distinct_names` 卡名種類數，以及這些值的 `plus`／`minus`／`times`／`per`／`min` 與 `define` 別名。計數接受現有常量種類、職業、特徵、精確卡名與原費篩選，並補上常量 `orig_cost_ge`；不授予 `distinct_orig_costs`、隱藏手牌／牌庫、其他玩家、來源屬性、回條或時點覆寫讀值。公開上限不得與私下 Look 選取或 extremum 人口混用。
+正式 `targets.n`／`upto` 及 `targets.from`、`search.sel` 的 `cost_le`／`orig_cost_le` 可使用既有 Number：自己的 PP 最大值、自己場上／EX／墓場的公開計數與同一範圍的 `distinct_names` 卡名種類數，以及這些值的 `plus`／`minus`／`times`／`per`／`min` 與 `define` 別名。計數接受現有常量種類、職業、特徵、精確卡名與原費篩選，並補上常量 `orig_cost_ge`；不授予 `distinct_orig_costs`、隱藏手牌／牌庫、其他玩家、回條或時點覆寫讀值；來源自己的數值讀取見下段。公開上限不得與私下 Look 選取或 extremum 人口混用。
+
+正式目標的動態張數及既有動態費用上限可讀來源自己的指示物數量與來源資訊數值（攻擊力、體力及費用），例如 `upto: {counter: {on: this, name: 魔力カウンター}}`，或 `from.orig_cost_le: {power_of: this}`。讀值與候選無關，沿用原本的公開選取、張數及印刷原費檢查。
 
 `search.sel.orig_cost_eq` 同樣接受 Number，以等於比較候選的印刷原費。`orig_cost_of: <正式目標>` 讀至多一體、只從場上或 EX 選取的正式目標的印刷原費（BP12-114「元のコストX…Xは選んだフォロワーの元のコスト」、BP13-053「元のコスト+2」寫 `plus`）；原費是印刷值，目標在讀取前離場（例如同一本文先破壞）仍讀得到。載入時確認該 binding 來自公開、至多一張、候選全在場上或 EX 的選取，私下選取（例如對手手牌）的原費不能當公開數值；同一模式的後一個目標可讀前一個目標的原費，模式可否選取以綁定前題後的可行答案判斷。其他區域、多張目標與回條成員的原費仍不支援。
 
@@ -1055,6 +1083,8 @@ Twin Drive 在每次事件時捕捉觀察者，兩次檢查與 trigger 效果都
 （CP03-112，Q1439）；模式也必須有合法目標，CP03-107 沒有消滅目標時只可選抽牌（Q1587）。這批只開放上述自己場上的觀察形狀，不開放任意事件篩選或歷史查詢。
 
 ## 原位公開牌庫頂
+
+公開頂牌觀察在選出的從者／護符實際入場後，可把觀察集合扣除該次移動 before 成員的餘集移入手牌。沿用觀察回條與成功移動回條的共同作用域；因場上容量未能移動的成員仍屬餘集，不以原先選取清單替代成功結果。
 
 `reveal: {top: {who: self, n: 1}, bind: shown}` 在能力本文頂層公開牌庫頂，不移動卡片。
 它沿用同一批 Look Before 成員，後續不重新查詢最新頂牌。條件、模式及付款分支內的此入口仍拒絕。

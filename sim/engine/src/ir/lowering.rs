@@ -1471,6 +1471,7 @@ struct BodyContext<'definitions> {
     event_captures: Vec<super::Capture>,
     event_trigger: Option<TriggerSpec>,
     formal_play: bool,
+    spell: Option<&'definitions ast::Body>,
     auto: Option<&'definitions ast::Auto>,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
@@ -1484,6 +1485,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             x: None,
+            spell: entry.spell.as_ref(),
             static_zone: entry
                 .r#static
                 .as_ref()

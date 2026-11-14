@@ -6,8 +6,9 @@ use crate::ir::ObjectProperty;
 use crate::ir::PlayerRelation;
 use crate::ir::events::timing;
 use crate::ir::{
-    Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, EventContext,
-    IntOperation, NameOperation, NumberRead, PlayerRead, Role, ScopeId, Stat,
+    Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, Comparison,
+    EventContext, IntOperation, NameOperation, NatRead, NumberRead, PlayerRead, Predicate, Role,
+    ScopeId, Stat,
 };
 
 #[expect(
@@ -173,7 +174,26 @@ impl BodyContext<'_> {
         if reference != name {
             return Err(unsupported(path));
         }
-        let (index, selection) = self.selected_parameter(name, path)?;
+        let selection = *self.targets.get(name).ok_or_else(|| unsupported(path))?;
+        let (index, optional) = self
+            .parameters
+            .iter()
+            .enumerate()
+            .find_map(|(index, decision)| {
+                let ChoiceDomain::Objects {
+                    binding,
+                    constraint,
+                    ..
+                } = &decision.domain
+                else {
+                    return None;
+                };
+                (*binding == selection
+                    && constraint.cardinality.maximum == Some(Nat(1))
+                    && constraint.cardinality.minimum.0 <= 1)
+                    .then_some((index, constraint.cardinality.minimum == Nat(0)))
+            })
+            .ok_or_else(|| unsupported(path))?;
         let information = match value {
             ast::SelectedStat::Hp(_) | ast::SelectedStat::Power(_) => NumberRead::Stats {
                 object: ObjectView::Selected { selection },
@@ -205,7 +225,28 @@ impl BodyContext<'_> {
             at: CaptureTime::AtSelection {
                 decision: decision.id,
             },
-            value: Expr::Compute(Box::new(IntOperation::InformationOrZero { information })),
+            value: {
+                let scalar =
+                    Expr::Compute(Box::new(IntOperation::InformationOrZero { information }));
+                if optional {
+                    // An empty target has no scalar object; the guarded read stays lazy.
+                    Expr::Compute(Box::new(IntOperation::Conditional {
+                        condition: Expr::Compute(Box::new(Predicate::CompareNat {
+                            left: Expr::Live(Box::new(NatRead::ZoneCount {
+                                selector: Selector::Bound {
+                                    reference: selection,
+                                },
+                            })),
+                            comparison: Comparison::Greater,
+                            right: Expr::Literal(Nat(0)),
+                        })),
+                        then_value: scalar,
+                        else_value: Expr::Literal(Int(0)),
+                    }))
+                } else {
+                    scalar
+                }
+            },
             into,
         });
         Ok(Expr::Captured(into))

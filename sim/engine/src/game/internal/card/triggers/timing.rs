@@ -111,7 +111,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if !admitted
         || ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
-        || (trigger.active_zones != [ZoneKind::Field] && !super::ex_phase(ability))
+        || !timing_zone_allowed(ability, trigger)
         || trigger.view
             != if matches!(
                 trigger.on,
@@ -133,6 +133,13 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         ));
     }
     Ok(true)
+}
+
+fn timing_zone_allowed(ability: &Ability, trigger: &TriggerSpec) -> bool {
+    trigger.active_zones == [ZoneKind::Field]
+        || super::phase_in_zone(ability, ZoneKind::Ex)
+        || (super::phase_in_zone(ability, ZoneKind::Cemetery)
+            && super::played::cemetery_body(ability))
 }
 
 fn aggregation_allowed(trigger: &TriggerSpec) -> bool {
@@ -819,15 +826,22 @@ impl Game {
                 .zone_ids(seat, "field")
                 .into_iter()
                 .chain(self.zone_ids(seat, "ex"))
+                .chain(self.zone_ids(seat, "cemetery"))
             {
+                let zone = match self.object(&holder)?.zone.as_str() {
+                    "ex" => ZoneKind::Ex,
+                    "cemetery" => ZoneKind::Cemetery,
+                    _ => ZoneKind::Field,
+                };
+                if zone == ZoneKind::Cemetery {
+                    let (card, _) = self.internal_effective_print(&holder)?;
+                    if !self.card_runtime.is_loaded(&card) {
+                        continue;
+                    }
+                }
                 for ability in self.timing_abilities(&holder)? {
                     let Some(trigger) = &ability.node.trigger else {
                         continue;
-                    };
-                    let zone = if self.object(&holder)?.zone == "ex" {
-                        ZoneKind::Ex
-                    } else {
-                        ZoneKind::Field
                     };
                     if !trigger.active_zones.contains(&zone) {
                         continue;

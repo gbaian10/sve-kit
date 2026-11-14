@@ -91,16 +91,17 @@ pub(super) fn check_card_with_x(
     )
 }
 
-pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
+pub(super) fn check_play(program: &Program, source: &SourceSpan, source_bound: bool) -> Result<()> {
     let located = Located {
         node: program.clone(),
         source: source.clone(),
     };
-    // Play-time reads precede the body's source producer; a Spell is still in Hand or EX here.
-    if Requirements::derive_program(&located)
-        .required
-        .iter()
-        .any(|requirement| requirement.capability.code == "reference.source-information")
+    // Native card costs precede source binding; ability declarations already bind their source.
+    if !source_bound
+        && Requirements::derive_program(&located)
+            .required
+            .iter()
+            .any(|requirement| requirement.capability.code == "reference.source-information")
     {
         return Err(unsupported("play-time source information"));
     }
@@ -492,6 +493,10 @@ fn play_requirement(code: &str) -> bool {
     matches!(
         code,
         "shape.Control.EachObject"
+            | "shape.Predicate.PostureEquals"
+            | "shape.PostureRead.Posture"
+            | "read.state.posture"
+            | "predicate.posture-equals"
             | "shape.ActionPattern.PlayAbility"
             | "internal.AbilityKind.Activated"
             | "control.each-object"

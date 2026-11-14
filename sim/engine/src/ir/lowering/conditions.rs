@@ -512,8 +512,21 @@ impl BodyContext<'_> {
         condition: &ast::PlayedFromCondition,
         path: &str,
     ) -> Result<Predicate, LoweringError> {
+        let zone = match condition.from {
+            ast::PlayedZone::Hand => ZoneKind::Hand,
+            ast::PlayedZone::Ex => ZoneKind::Ex,
+        };
+        if self.spell.is_some() {
+            return Ok(Predicate::And {
+                predicates: vec![Expr::Live(Box::new(
+                    super::super::BoolRead::CardPlayOrigin {
+                        zone,
+                        execution: super::super::ExecutionRef::Current {},
+                    },
+                ))],
+            });
+        }
         let event = self.entry_event.ok_or_else(|| unsupported(path))?;
-        let ast::PlayedZone::Ex = condition.from;
         let method = Predicate::Equal {
             operands: Box::new(super::super::ValueEquality::EntryMethod {
                 left: Expr::Frozen(Box::new(
@@ -527,7 +540,7 @@ impl BodyContext<'_> {
                 left: Expr::Frozen(Box::new(super::super::EntryOriginFields::EnterFieldFrom {
                     event,
                 })),
-                right: Expr::Literal(super::super::EntryOrigin::Zone { zone: ZoneKind::Ex }),
+                right: Expr::Literal(super::super::EntryOrigin::Zone { zone }),
             }),
         };
         Ok(Predicate::And {

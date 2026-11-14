@@ -648,6 +648,13 @@ impl Boolean {
 }
 
 fn mask_natural(expression: &mut Expr<Nat>) {
+    if matches!(expression, Expr::Live(read) if matches!(read.as_ref(), NatRead::ZoneCount {selector}
+        if super::card::selection::field_selector(selector).is_ok()
+            || super::card::selection::public_zone_selector(selector).is_ok()))
+    {
+        *expression = Expr::Literal(Nat(0));
+        return;
+    }
     if dynamic::projection(expression).is_some() {
         *expression = Expr::Literal(Nat(0));
         return;

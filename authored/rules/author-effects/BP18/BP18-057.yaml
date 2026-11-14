@@ -1,0 +1,48 @@
+cards:
+  BP18-057:
+    abilities:
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - self_to_cemetery: true
+          do:
+            - damage:
+                n: 1
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+          zone: ex
+        line: 1
+      - keywords:
+          - quick
+        line: 1
+        section: 1
+      - line: 2
+        section: 1
+        spell:
+          do:
+            - draw:
+                n: 1
+                who: self
+            - if:
+                cond:
+                  played_from:
+                    from: hand
+                    ref: this
+                then:
+                  - move:
+                      ref: this
+                      to: ex
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

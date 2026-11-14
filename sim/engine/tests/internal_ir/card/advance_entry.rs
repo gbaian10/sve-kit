@@ -1019,3 +1019,36 @@ fn the_named_pick_takes_exactly_one_whole_name_or_name_fragment() {
         lowerer().lower(&rejected).unwrap_err();
     }
 }
+
+#[test]
+fn advance_pays_ordered_source_field_costs_before_its_private_entry() {
+    for act in [false, true] {
+        for accept in [false, true] {
+            let mut input = tree(true, true);
+            let mut costs = vec![json!({"pp":4})];
+            if act {
+                costs.push(json!({"act_self":true}));
+            }
+            costs.push(json!({"self_to_cemetery":true}));
+            input["cards"]["unit-follower"]["abilities"][0]["activate"]["cost"] =
+                json!({"steps":costs});
+            let program = checked_tree(&input);
+            let mut game = board(&program, 4, 0, false, false);
+            let play = game
+                .activate_internal_card("source", AbilityId(1), PlayerId { seat: 1 })
+                .unwrap();
+            let play = payment(&mut game, play, false);
+            resolved(choose(&mut game, play, accept));
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["pp"]["current"], 0);
+            assert_eq!(state["P1"]["cemetery"], json!(["source"]));
+            assert_eq!(
+                state["P1"]["field"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("incoming")),
+                accept
+            );
+        }
+    }
+}

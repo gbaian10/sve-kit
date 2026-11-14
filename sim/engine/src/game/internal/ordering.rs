@@ -16,12 +16,13 @@ use crate::ir::reveal_until as reveal_shape;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
-    ChoiceDomain, Control, CounterOperation, Expr, GrantedAbility, Holder, InstallationSubjects,
-    Instruction, Int, IntOperation, IntRead, Located, LookOutcome, MemberProjection,
-    MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef, OrderAnswer,
-    OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate, Program,
-    ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId, RuntimeObjectView,
-    ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode, Visibility, ZoneKind,
+    ChoiceDomain, Control, CounterOperation, ExecutionRef, Expr, GrantedAbility, Holder,
+    InstallationSubjects, Instruction, Int, IntOperation, IntRead, Located, LookOutcome,
+    MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef,
+    OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate,
+    Program, ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId,
+    RuntimeObjectView, ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode,
+    Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
@@ -198,6 +199,7 @@ pub(super) fn check_node_with_x(
     let mut inspected = node.clone();
     mask_whole_return(&mut inspected);
     mask_prevention(&mut inspected)?;
+    mask_stand_subjects(&mut inspected)?;
     mask_ability_permission(&mut inspected)?;
     mask_discard(&mut inspected)?;
     mask_player_cost_filter(&mut inspected)?;
@@ -414,8 +416,12 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             capture: Capture::Integer { value, .. },
         } => mask_public_number(value),
         Node::Instruction { instruction } => match &mut instruction.action {
-            Action::Destroy { objects } if damaged_plan(objects).is_some() => {
-                *objects = Selector::Objects { objects: vec![] };
+            Action::Destroy { objects } => {
+                if damaged_plan(objects).is_some() {
+                    *objects = Selector::Objects { objects: vec![] };
+                } else {
+                    mask_public_predicate(objects);
+                }
             }
             Action::Draw { count: amount, .. } | Action::Resource { amount, .. } => {
                 mask_public_number(amount);
@@ -539,8 +545,16 @@ fn mask_public_number_patch(patch: &mut CharacteristicPatch) {
 }
 
 fn mask_public_condition(condition: &mut Expr<Bool>) {
+    if matches!(condition, Expr::Live(read) if matches!(read.as_ref(), BoolRead::CardPlayOrigin { zone: ZoneKind::Hand | ZoneKind::Ex, execution: ExecutionRef::Current {} }))
+    {
+        *condition = Expr::Literal(Bool(false));
+        return;
+    }
     if let Expr::Compute(operation) = condition {
         match operation.as_mut() {
+            Predicate::PostureEquals { .. } => {
+                *condition = super::source::mask_holder_posture(condition);
+            }
             Predicate::Exists { objects } => mask_public_predicate(objects),
             Predicate::ReceiptAny {
                 receipt,
@@ -662,6 +676,25 @@ fn mask_public_recipients(recipients: &mut RecipientSet) {
         }
         _ => {}
     }
+}
+
+fn mask_stand_subjects(node: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = node
+        && matches!(&instruction.action, Action::InstallEffect { effect, .. }
+            if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::Stand { .. }, .. }))
+    {
+        super::posture::check_install(&instruction.action)?;
+        if let Action::InstallEffect {
+            subjects: InstallationSubjects::Objects { objects, .. },
+            ..
+        } = &mut instruction.action
+            && super::card::selection::field_selector(objects).is_ok()
+        {
+            // The checked lock reuses the public field predicate authority for its subjects.
+            mask_public_predicate(objects);
+        }
+    }
+    Ok(())
 }
 
 fn mask_public_predicate(selector: &mut Selector) {

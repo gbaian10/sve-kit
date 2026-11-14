@@ -17,9 +17,9 @@ use crate::ir::{
     AbilityCostPolicy, DiscardMode, FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId,
 };
 use crate::ir::{
-    AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId, ObjectOperand,
-    ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet, SelectionSnapshot,
-    Selector, TurnId,
+    AbilityKind, AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId,
+    ObjectOperand, ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet,
+    SelectionSnapshot, Selector, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -378,6 +378,7 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
             steps,
         },
         source,
+        ability.kind != AbilityKind::Spell,
     )
 }
 

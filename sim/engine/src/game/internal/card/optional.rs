@@ -90,7 +90,8 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
             if has_resolution_payment(body)
                 && !(ability.node.kind == AbilityKind::Triggered
                     && matches!(ability.node.source.origin, AbilityOrigin::Printed { .. })
-                    && ((ability.node.active_zones == [ZoneKind::Field]
+                    && (((ability.node.active_zones == [ZoneKind::Field]
+                        || super::triggers::phase_in_zone(&ability.node, ZoneKind::Cemetery))
                         && field_resolution_costs(body))
                         || hand_pp_payment(&ability.node)))
             {

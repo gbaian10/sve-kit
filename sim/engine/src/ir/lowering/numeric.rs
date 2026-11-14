@@ -159,6 +159,14 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         let query = match value {
+            ast::Objects::Role { role } => {
+                return self
+                    .target_roles
+                    .get(&(role.of.clone(), role.name.clone()))
+                    .copied()
+                    .map(|reference| Selector::Bound { reference })
+                    .ok_or_else(|| unsupported(path));
+            }
             ast::Objects::This(_) => return Ok(holder()),
             ast::Objects::EventHolder {
                 event: ast::HolderEvent::Holder,
@@ -446,7 +454,8 @@ impl BodyContext<'_> {
                     self.zone_objects(query, ZoneKind::Ex, path)?
                 }
                 ast::Objects::Follow { follow } => self.followed(follow, path)?,
-                ast::Objects::This(_)
+                ast::Objects::Role { .. }
+                | ast::Objects::This(_)
                 | ast::Objects::Bound(_)
                 | ast::Objects::Zone(_)
                 | ast::Objects::EventHolder { .. } => self.objects(objects, path)?,

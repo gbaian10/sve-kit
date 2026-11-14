@@ -1096,6 +1096,7 @@ pub(super) enum StandPlayer {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Objects {
+    Role { role: RoleReference },
     This(This),
     Bound(String),
     Zone(Box<ObjectQuery>),
@@ -2692,9 +2693,16 @@ pub(super) enum Comparison {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PublicNumber {
     Literal(i64),
-    Count { count: PublicQuery },
+    Count { count: PublicCountQuery },
     DistinctNames { distinct_names: PublicQuery },
     DistinctOriginalCosts { distinct_orig_costs: PublicQuery },
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PublicCountQuery {
+    Public(PublicQuery),
+    Numeric(CountQuery),
 }
 
 #[derive(Clone, Deserialize, PartialEq, Eq)]
@@ -2983,6 +2991,7 @@ pub(super) struct PlayedFromCondition {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum PlayedZone {
+    Hand,
     Ex,
 }
 #[derive(Deserialize)]
@@ -3132,11 +3141,13 @@ pub(super) enum PlayedSubject {
     Union { any_of: Box<[MovementSubject; 2]> },
 }
 impl Auto {
-    /// 「自分の場に…が出たとき」 or a Play observed by a card in its owner's cemetery.
+    /// Cemetery subscriptions share the same source-movement boundary across event kinds.
     pub(super) const fn cemetery_observer(&self) -> bool {
         matches!(
             self.on,
-            PhaseSubscription::Played(_) | PhaseSubscription::EnterField(_)
+            PhaseSubscription::Played(_)
+                | PhaseSubscription::EnterField(_)
+                | PhaseSubscription::Phase(_)
         ) && match &self.zone {
             Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
             Some(ActivationZones::Many(zones)) => {
