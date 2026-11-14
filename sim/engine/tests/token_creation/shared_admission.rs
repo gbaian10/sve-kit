@@ -81,11 +81,23 @@ fn a_program_rejection_is_identical_for_every_printing_and_selection_until_the_p
     reprint["number"] = json!("reprint");
     let snapshot = format!("{plain}{reprint}\n");
     admitted["authors"][0]["printings"] = json!(["creator", "reprint"]);
-    // A count reading card kinds in the cemetery lowers, but no runtime selector admits it.
+    let stages = |extra: Option<Value>| {
+        let mut stages = vec![json!([{"banish":{"top":{"who":"p","n":2_u8}}}])];
+        stages.extend(extra);
+        json!([
+            {"banish":{"ref":{"any_of":[{"who":"all","zone":"field"},{"who":"all","zone":"ex"}]}}},
+            {"each_player":{"as":"p","stages":stages}}
+        ])
+    };
     let mut rejected = admitted.clone();
-    rejected["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
-        ["abilities"][0]["spell"]["do"][0]["create"]["n"] =
-        json!({"count":{"who":"self","zone":"cemetery","kind":"spell"}});
+    for (input, extra) in [
+        (&mut admitted, None),
+        // Each player's deck top stays private, so a further stage that draws is refused at load.
+        (&mut rejected, Some(json!([{"draw":{"n":1_u8}}]))),
+    ] {
+        input["authors"][0]["input"]["tree"]["cards"]["creator"]["faces"]["f:11111111111111111111111111111111"]
+            ["abilities"][0]["spell"]["do"] = stages(extra);
+    }
     let failure = |loader: &CurrentSelectionLoader, input: &Value| {
         let selected = loader.select(&snapshot, &keywords, input).unwrap();
         construct(selected).unwrap_err().to_string()
