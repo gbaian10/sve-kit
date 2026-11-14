@@ -23,11 +23,8 @@
 typed 入口的保存責任、目前存檔限制與後續驗收依[版本與權威恢復契約](../sim/authority-recovery.md)；
 該契約不代表已有線上持久化或重連實作。
 
-現有 [`Replay`](../../sim/engine/src/replay.rs) 原型有 `save`／`restore`，
-保存含完整 `Game` 的節點圖，存檔格式標為 `astra-save/1`；`restore` 的輸入是受信任存檔。
-它不是 Durable Object 儲存轉接層，也不是供玩家上傳的不可信存檔驗證器。
-[引擎現況](../sim/engine-status.md#回放輔助與資訊邊界) 的相關封存記錄仍有待重新確認，
-不能以本機 API 的存在宣稱已有線上恢復保證。
+原型 `Replay` 的 `save`／`restore` 已移除，typed 重播由 #2206 追蹤；
+[引擎現況](../sim/engine-status.md#回放輔助與資訊邊界) 不構成線上恢復保證。
 
 ## Durable Object 工作區與清理
 

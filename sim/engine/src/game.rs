@@ -5,7 +5,6 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 
-mod belief;
 mod combat;
 mod costs;
 mod damage;

@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 
 import pytest
+from jsonschema import Draft202012Validator
 from pydantic import ValidationError
 
 from sve_carddb.core.json import canonical
@@ -10,6 +11,7 @@ from sve_carddb.core.json import canonical
 from .author_numeric_cases import NUMERIC
 from .author_step_cases import CARD_STEPS, SYNTHETIC_ACTIONS, SYNTHETIC_CONTROLS
 from .author_step_types import STEPS
+from .test_author_schema_drift import NODES
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -71,6 +73,33 @@ def test_payment_decision_has_a_separate_preserved_wire_key() -> None:
         {"all": [{"payment_decided": "optional"}, {"not": {"paid": "optional"}}]},
         name="A.cond",
     )
+
+
+@pytest.mark.parametrize(
+    ("part", "accepted"),
+    [
+        ({"zone": "hand", "n": 1}, True),
+        ({"zone": "field", "upto": 10}, True),
+        ({"zone": "ex", "upto": 0}, True),
+        ({"zone": "field", "n": 1, "upto": 10}, False),
+        ({"zone": "field"}, False),
+        ({"zone": "ex", "upto": -1}, False),
+        ({"zone": "field", "upto": 1, "extra": True}, False),
+    ],
+)
+def test_search_partition_accepts_exact_or_optional_exclusive_quantities(
+    part: JsonValue,
+    accepted: bool,
+) -> None:
+    validator = Draft202012Validator(
+        {
+            "$id": NODES["$id"],
+            "$defs": NODES["$defs"],
+            "$ref": "#/$defs/A.search.partition-part",
+        }
+    )
+    assert validator.is_valid(part) is accepted
+    _check(part, name="A.search.partition-part", accepted=accepted)
 
 
 @pytest.mark.parametrize(

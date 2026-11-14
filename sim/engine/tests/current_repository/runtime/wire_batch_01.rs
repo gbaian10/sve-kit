@@ -268,6 +268,32 @@ fn bp16_036_mode_one_makes_three_soldiers() {
     assert_eq!(field, vec!["シールドガーディアン", "スティールナイト", "ナイト"]);
 }
 
+/// The mode count offered when BP16-036 is played from the given position.
+fn bp16_036_mode_count(game: &mut Game) -> u64 {
+    let CardPlay::Awaiting(question) = game.play_internal_card("source", seat(1)).unwrap() else {
+        panic!("BP16-036 asks for its modes")
+    };
+    let InputDomain::Modes { count, .. } = question.domain else {
+        panic!("BP16-036 asks for its modes first")
+    };
+    count.0
+}
+
+/// KE-13: the choice widens only after an evolution this turn; effect evolutions are
+/// covered in `effect_evolution.rs`.
+#[test]
+fn bp16_036_widens_its_modes_only_after_an_evolution() {
+    assert_eq!(bp16_036_mode_count(&mut game(&in_hand("BP16-036"))), 1);
+    let mut evolved = game(&evolved_first("BP16-036"));
+    evolved
+        .internal_rule_action(
+            &json!({"do":"evolve","source":"base","evolve_card":"form","pay":{"pp":0_u8}}),
+        )
+        .unwrap();
+    triggers(&mut evolved, &[]);
+    assert_eq!(bp16_036_mode_count(&mut evolved), 2, "a real evolve action counts");
+}
+
 #[test]
 fn bp16_054_mode_one_makes_an_earth_essence_and_heals() {
     let state = play(&in_hand("BP16-054"), &[1]).projection(View::Referee).unwrap();

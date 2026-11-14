@@ -459,7 +459,8 @@ fn whole_repository_selection_lowers_and_admits_every_printing() {
         .filter(|author| author["status"] == "accepted")
         .map(|author| author["printings"].as_array().unwrap().len())
         .sum::<usize>();
-    let selected = selection();
+    // The rule-bound selection is what a real match loads.
+    let selected = selection_with_rules();
     assert_eq!(selected.current.len(), accepted);
     // Construction returns no game unless every selected printing passes runtime admission.
     Game::from_selected_effects(

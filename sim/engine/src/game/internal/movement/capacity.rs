@@ -135,7 +135,11 @@ fn capacity_zone(zone: ZoneKind) -> Result<(&'static str, i64)> {
     reason = "Capacity questions suspend the existing atomic movement transaction."
 )]
 impl Game {
-    fn movement_free_spaces(&self, player: PlayerId, zone: ZoneKind) -> Result<usize> {
+    pub(in crate::game::internal) fn movement_free_spaces(
+        &self,
+        player: PlayerId,
+        zone: ZoneKind,
+    ) -> Result<usize> {
         let (zone, limit) = capacity_zone(zone)?;
         usize::try_from(
             limit

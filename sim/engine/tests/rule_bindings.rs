@@ -16,7 +16,6 @@ use std::process::id;
 use sve_engine::EngineFailure;
 use sve_engine::catalog::{Catalog, EngineIdentityInput, FaceIdentity};
 use sve_engine::game::{Game, View};
-use sve_engine::replay::Replay;
 
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
@@ -947,7 +946,7 @@ fn legacy_and_role_ride_forms_pay_once_and_malformed_forms_stay_unsupported() {
 }
 
 #[test]
-fn same_version_replay_restores_pending_stack_and_preserves_branches_and_visibility() {
+fn same_version_save_restores_pending_stack_and_hides_private_ids() {
     let mut fixture = Fixture::new();
     resource_programs(&mut fixture);
     let stack = fixture.programs["cards"]["actor"]["abilities"][5].clone();
@@ -958,43 +957,29 @@ fn same_version_replay_restores_pending_stack_and_preserves_branches_and_visibil
         .unwrap()
         .push(json!({"id":"stack","card":"stack","state":{"counters":{"stack_counter":1_u8}}}));
     setup["players"]["P2"]["zones"]["hand"] = json!([{"id":"private-opponent-id","card":"alias"}]);
-    let (mut replay, root) = Replay::start(fixture.game(&setup).unwrap(), "bindings");
-    let (pending, step) = replay
+    let mut original = fixture.game(&setup).unwrap();
+    let step = original
         .decide(
-            &root,
             &json!({"do":"activate","ability":{"source":"actor","line":6_u8}}),
+            "bindings",
         )
         .unwrap();
     assert_eq!(step.outcome, "paused");
-    let blob = replay.save(&pending).unwrap();
-    let (mut restored, selected) = Replay::restore(&blob).unwrap();
-    assert_eq!(pending, selected);
-    assert_eq!(
-        replay.game(&pending).unwrap().legal().unwrap(),
-        restored.game(&selected).unwrap().legal().unwrap()
-    );
-    let action = restored.game(&selected).unwrap().legal().unwrap().remove(0);
-    let (a, original_step) = replay.decide(&pending, &action).unwrap();
-    let (b, restored_step) = restored.decide(&selected, &action).unwrap();
-    assert_eq!(original_step.events, restored_step.events);
-    assert_eq!(
-        replay.game(&a).unwrap().digest().unwrap(),
-        restored.game(&b).unwrap().digest().unwrap()
-    );
-    let branch = restored.branch(&root, true).unwrap();
-    assert_eq!(
-        restored.game(&root).unwrap().legal().unwrap(),
-        restored.game(&branch).unwrap().legal().unwrap()
-    );
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&original).unwrap()).unwrap();
+    assert_eq!(original.legal().unwrap(), restored.legal().unwrap());
     assert!(
         !restored
-            .game(&branch)
-            .unwrap()
             .projection(View::P1)
             .unwrap()
             .to_string()
             .contains("private-opponent-id")
     );
+    let action = restored.legal().unwrap().remove(0);
+    let original_step = original.decide(&action, "resolve").unwrap();
+    let restored_step = restored.decide(&action, "resolve").unwrap();
+    assert_eq!(original_step.events, restored_step.events);
+    assert_eq!(original.digest().unwrap(), restored.digest().unwrap());
 }
 
 #[test]

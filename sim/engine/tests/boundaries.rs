@@ -602,8 +602,6 @@ fn next_spell_discount_tracks_future_cards_and_consumes_only_on_success() {
         packet["semantic_state"]["continuous_effects"][0]["applies_to"],
         json!(["P1"])
     );
-    let rebuilt = Game::from_observation(catalog, &packet, "P1", "discount-world").unwrap();
-    assert_eq!(rebuilt.legal().unwrap(), engine.legal().unwrap());
     let before = engine.digest().unwrap();
     assert_eq!(
         engine
@@ -711,14 +709,7 @@ fn drain_captures_actual_attack_damage_and_survives_its_sources_death() {
         );
         let restored: Game =
             serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        let rebuilt = Game::from_observation(
-            Arc::clone(&catalog),
-            &engine.projection(View::P1).unwrap(),
-            "P1",
-            "drain-world",
-        )
-        .unwrap();
-        for mut candidate in vec![engine, restored, rebuilt].into_boxed_slice() {
+        for mut candidate in vec![engine, restored].into_boxed_slice() {
             assert_eq!(
                 candidate.decide(&choice, "heal").unwrap().outcome,
                 "resolved"
@@ -835,14 +826,7 @@ fn repeated_race_events_remain_distinct_across_restore_and_turns() {
     );
     engine.decide(&choices[1], "second-first").unwrap();
     let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let rebuilt = Game::from_observation(
-        catalog,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "race-world",
-    )
-    .unwrap();
-    for mut candidate in vec![engine, restored, rebuilt].into_boxed_slice() {
+    for mut candidate in vec![engine, restored].into_boxed_slice() {
         assert_eq!(candidate.legal().unwrap(), vec![choices[0].clone()]);
         candidate.decide(&choices[0], "first-last").unwrap();
         assert_eq!(
@@ -1137,7 +1121,7 @@ fn evolution_enumerates_resources_and_preserves_existing_damage() {
 }
 
 #[test]
-fn activated_limits_and_x_domains_survive_observation_sampling() {
+fn activated_limits_and_x_domains_are_recorded_in_the_player_packet() {
     let mut doc = document(&json!({"op":"draw","count":0_i64}));
     doc["cards"]["unit-follower"]["abilities"] = json!([{
         "kind":"activated","line":1_i64,"limit":1_i64,
@@ -1206,8 +1190,6 @@ fn activated_limits_and_x_domains_survive_observation_sampling() {
             .len(),
         1
     );
-    let sampled = Game::from_observation(catalog, &packet, "P1", "sample").unwrap();
-    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
 }
 
 #[test]
@@ -1266,11 +1248,9 @@ fn imported_usage_tracks_object_generations_and_round_trips() {
         ])
     );
     let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled = Game::from_observation(Arc::clone(&catalog), &packet, "P1", "sample").unwrap();
     assert_eq!(restored.legal().unwrap(), engine.legal().unwrap());
-    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
     assert!(
-        sampled
+        restored
             .legal()
             .unwrap()
             .iter()
@@ -1656,9 +1636,6 @@ fn pending_events_preserve_instance_identity_until_resolution() {
         packet["semantic_state"]["pending_triggers"][0]["event"],
         json!({"left_field":"b"})
     );
-    let mut sampled = Game::from_observation(catalog, &packet, "P1", "pending-sample").unwrap();
-    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
-    sampled.decide(singleton, "sampled-instance").unwrap();
     let mut restored: Game =
         serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     restored.decide(singleton, "last-instance").unwrap();
@@ -1669,7 +1646,7 @@ fn pending_events_preserve_instance_identity_until_resolution() {
 }
 
 #[test]
-fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
+fn delayed_end_and_temporary_silence_survive_save_and_restore() {
     let body = json!({"op":"seq","steps":[
         {"op":"modify","subjects":"target.1","remove_abilities":true,"until":"end-of-turn"},
         {"op":"delay","event":"end","once":true,"body":{"op":"damage","subjects":"opponent.leader","amount":3_i64}}
@@ -1693,29 +1670,26 @@ fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
         engine.query(View::P1, "P2.field.b.silenced").unwrap(),
         Some(json!(true))
     );
-    let packet = engine.projection(View::P1).unwrap();
-    let mut sampled =
-        Game::from_observation(Arc::clone(&catalog), &packet, "P1", "sample").unwrap();
-    sampled.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    restored.decide(&json!({"do":"end-phase"}), "end").unwrap();
     engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
-    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
-    let pending = engine.projection(View::P1).unwrap();
-    sampled = Game::from_observation(catalog, &pending, "P1", "pending-sample").unwrap();
-    let decision = sampled.legal().unwrap().into_iter().next().unwrap();
+    assert_eq!(restored.legal().unwrap(), engine.legal().unwrap());
+    let decision = restored.legal().unwrap().into_iter().next().unwrap();
     assert_eq!(decision["do"], "choose-pending");
     assert_eq!(decision["pending"]["ability"]["delayed"], true);
-    sampled.decide(&decision, "resolve").unwrap();
+    restored.decide(&decision, "resolve").unwrap();
     assert_eq!(
-        sampled.query(View::P1, "P2.leader.life").unwrap(),
+        restored.query(View::P1, "P2.leader.life").unwrap(),
         Some(json!(17_i64))
     );
-    sampled.decide(&json!({"do":"pass"}), "pass").unwrap();
+    restored.decide(&json!({"do":"pass"}), "pass").unwrap();
     assert_eq!(
-        sampled.query(View::P1, "P2.field.b.silenced").unwrap(),
+        restored.query(View::P1, "P2.field.b.silenced").unwrap(),
         Some(json!(false))
     );
     assert_eq!(
-        sampled.projection(View::P1).unwrap()["semantic_state"]["delayed_triggers"],
+        restored.projection(View::P1).unwrap()["semantic_state"]["delayed_triggers"],
         json!([])
     );
 }
@@ -1820,7 +1794,7 @@ fn life_decreases_are_distinct_from_damage_and_stat_changes_are_per_object() {
 }
 
 #[test]
-fn localized_keyword_and_counter_packets_restore_stable_identifiers() {
+fn localized_keyword_and_counter_packets_keep_stable_identifiers() {
     let mut registry: Value = serde_json::from_str(&registry()).unwrap();
     registry["keywords"]["stack_counter"] = json!({"ja":"スタックカウンター","role":"counter"});
     let catalog = Arc::new(
@@ -1849,20 +1823,6 @@ fn localized_keyword_and_counter_packets_restore_stable_identifiers() {
     assert_eq!(packet["objects"]["a"]["keywords"], json!(["守護"]));
     assert_eq!(
         packet["objects"]["a"]["counters"]["スタックカウンター"],
-        2_i64
-    );
-    let sampled = Game::from_observation(catalog, &packet, "P1", "sample").unwrap();
-    assert_eq!(
-        sampled.projection(View::P1).unwrap()["objects"],
-        packet["objects"]
-    );
-    let serialized = serde_json::to_value(sampled).unwrap();
-    assert_eq!(
-        serialized["state"]["objects"]["a"]["state"]["keywords"],
-        json!(["guard"])
-    );
-    assert_eq!(
-        serialized["state"]["objects"]["a"]["state"]["counters"]["stack_counter"],
         2_i64
     );
 }
@@ -2424,9 +2384,7 @@ fn stack_enters_with_counters_and_waits_for_recipient_even_when_unique() {
         assert_eq!(legal.len(), if existing { 2 } else { 1 });
         let encoded = serde_json::to_string(&engine).unwrap();
         let mut restored: Game = serde_json::from_str(&encoded).unwrap();
-        let observation = engine.projection(View::P1).unwrap();
-        let mut sampled = Game::from_observation(catalog, &observation, "P1", "restore").unwrap();
-        for instance in [&mut restored, &mut sampled] {
+        for instance in [&mut engine, &mut restored] {
             assert_eq!(instance.legal().unwrap(), legal);
             let done = instance
                 .decide(&json!({"do":"resolve-choice","select":["new-1"]}), "select")
@@ -2548,14 +2506,7 @@ fn labeled_keyword_choices_preserve_modes_and_survive_restore() {
     assert_eq!(engine.digest().unwrap(), before);
     let bytes = serde_json::to_string(&engine).unwrap();
     let mut restored: Game = serde_json::from_str(&bytes).unwrap();
-    let mut sampled = Game::from_observation(
-        catalog,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "labels",
-    )
-    .unwrap();
-    for instance in [&mut restored, &mut sampled] {
+    for instance in [&mut engine, &mut restored] {
         assert_eq!(
             instance
                 .decide(
@@ -2805,13 +2756,8 @@ fn temporary_damage_prevention_survives_its_source_and_expires_at_turn_end() {
         )
         .unwrap();
     assert!(!cast.events.iter().any(|event| event["kind"] == "ダメージ"));
-    let mut restored = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "restore",
-    )
-    .unwrap();
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     for instance in [&mut engine, &mut restored] {
         instance
             .decide(
@@ -3074,14 +3020,7 @@ fn future_restrictions_gate_only_the_named_phase_and_expire_after_use() {
         )
         .unwrap();
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled = Game::from_observation(
-        loaded,
-        &engine.projection(View::P2).unwrap(),
-        "P2",
-        "restore-period",
-    )
-    .unwrap();
-    for mut instance in vec![engine, saved, sampled].into_boxed_slice() {
+    for mut instance in vec![engine, saved].into_boxed_slice() {
         instance.decide(&json!({"do":"end-phase"}), "end").unwrap();
         let before_window = instance.legal().unwrap();
         assert!(before_window.iter().any(|choice| choice["card"] == "c"));
@@ -3291,13 +3230,7 @@ fn invalid_pending_targets_and_distributions_preserve_the_trigger_for_retry() {
             "attack",
         )
         .unwrap();
-    let restored = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "retry-world",
-    )
-    .unwrap();
+    let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     for mut instance in [engine, restored] {
         let before = instance.digest().unwrap();
         for (targets, amounts) in [
@@ -3490,13 +3423,7 @@ fn resolution_selection_chooses_as_many_distinct_names_as_possible_and_restores(
             json!({"do":"resolve-choice","select":["c","d"]})
         ]
     );
-    let restored = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "restore-distinct",
-    )
-    .unwrap();
+    let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     for mut instance in [engine, restored] {
         let before = instance.digest().unwrap();
         assert_eq!(
@@ -3664,13 +3591,8 @@ fn resolution_flip_payment_requires_all_materials_and_groups_the_costs() {
             );
             assert_eq!(engine.digest().unwrap(), before);
         }
-        let mut restored = Game::from_observation(
-            Arc::clone(&loaded),
-            &engine.projection(View::P1).unwrap(),
-            "P1",
-            "restore-payment",
-        )
-        .unwrap();
+        let mut restored: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
         let paid = restored
             .decide(
                 &json!({"do":"resolve-choice","choice":"execute","select":["e1","e0"]}),
@@ -3757,13 +3679,7 @@ fn payment_bindings_restore_after_a_paused_body_without_repaying_additional_cost
         engine.query(View::P1, "P1.pp.current").unwrap(),
         Some(json!(1_i64))
     );
-    let restored = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "restore-scope",
-    )
-    .unwrap();
+    let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     for mut instance in [engine, restored] {
         assert_eq!(
             instance
@@ -3907,10 +3823,6 @@ fn random_materials_remain_private_and_scripts_restore_without_partial_consumpti
     let packet = engine.projection(View::P1).unwrap();
     assert!(!packet.to_string().contains("private-"));
     assert!(packet.get("continuation").is_none());
-    assert!(matches!(
-        Game::from_observation(loaded, &packet, "P1", "sample"),
-        Err(EngineFailure::Unsupported(_))
-    ));
     let mut restored: Game =
         serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     assert_eq!(
@@ -4033,8 +3945,6 @@ fn rerolls_replace_the_result_and_permissions_reset_for_each_new_roll() {
         assert!(packet.get(key).is_none());
         assert!(!packet.to_string().contains(&format!("\"{key}\":")));
     }
-    let sampled = Game::from_observation(loaded, &packet, "P1", "dice-sample").unwrap();
-    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
     assert_eq!(
         engine
             .decide(
@@ -4287,14 +4197,7 @@ fn token_capacity_selects_name_multisets_before_allocating_and_restores_text_ord
     assert_eq!(rejected.outcome, "cannot-play");
     assert_eq!(engine.digest().unwrap(), saved);
     let mut restored: Game = serde_json::from_value(state).unwrap();
-    let mut sampled = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "sample",
-    )
-    .unwrap();
-    for instance in [&mut engine, &mut restored, &mut sampled] {
+    for instance in [&mut engine, &mut restored] {
         assert_eq!(instance.legal().unwrap(), choices);
         let done = instance
             .decide(
@@ -4672,14 +4575,7 @@ fn ep_has_no_gameplay_cap_and_batched_deltas_survive_resume() {
     assert_eq!(changes[0]["group"], changes[1]["group"]);
     let mut restored: Game =
         serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "sample",
-    )
-    .unwrap();
-    for instance in [&mut engine, &mut restored, &mut sampled] {
+    for instance in [&mut engine, &mut restored] {
         let done = instance
             .decide(
                 &json!({"do":"resolve-choice","choice":"execute"}),
@@ -4780,10 +4676,9 @@ fn repeated_skip_costs_apply_to_separate_future_turns_and_roundtrip_publicly() {
         packet["semantic_state"]["turn_schedule"]["skipped"],
         json!([{"player":"P1","count":1_i64},{"player":"P1","count":1_i64}])
     );
-    let mut sampled = Game::from_observation(loaded, &packet, "P1", "sample").unwrap();
     let mut restored: Game =
         serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for instance in [&mut engine, &mut sampled, &mut restored] {
+    for instance in [&mut engine, &mut restored] {
         finish_turn(instance);
         for expected_elapsed in [4_i64, 5_i64] {
             let events = finish_turn(instance);
@@ -4865,10 +4760,9 @@ fn extra_turns_run_latest_first_then_resume_the_original_normal_player() {
     );
     let packet = engine.projection(View::P2).unwrap();
     assert_eq!(packet["semantic_state"]["turn_schedule"]["normal"], "P2");
-    let mut sampled = Game::from_observation(loaded, &packet, "P2", "sample").unwrap();
     let mut restored: Game =
         serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for instance in [&mut engine, &mut sampled, &mut restored] {
+    for instance in [&mut engine, &mut restored] {
         for expected in ["P1", "P2", "P1"] {
             finish_turn(instance);
             assert_eq!(
@@ -5056,14 +4950,7 @@ fn effect_evolution_does_not_pay_resources_or_consume_an_evolution_ability_slot(
         assert_eq!(engine.digest().unwrap(), before);
         let mut restored: Game =
             serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        let mut sampled = Game::from_observation(
-            Arc::clone(&loaded),
-            &engine.projection(View::P1).unwrap(),
-            "P1",
-            "sample",
-        )
-        .unwrap();
-        for instance in [&mut engine, &mut restored, &mut sampled] {
+        for instance in [&mut engine, &mut restored] {
             let done = instance
                 .decide(&json!({"do":"resolve-choice","select":["e1"]}), "choose")
                 .unwrap();
@@ -5244,10 +5131,7 @@ fn evolution_cost_layers_are_shared_by_legal_actions_and_payment() {
     assert_eq!(engine.decide(&json!({"do":"evolve","source":"a","evolve_card":"e","pay":{"pp":0_i64,"ep":0_i64}}), "wrong").unwrap().outcome, "cannot-evolve");
     assert_eq!(engine.digest().unwrap(), before);
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled =
-        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "cost")
-            .unwrap();
-    for instance in [&mut engine, &mut saved, &mut sampled] {
+    for instance in [&mut engine, &mut saved] {
         assert_eq!(instance.decide(&json!({"do":"evolve","source":"a","evolve_card":"e","pay":{"pp":1_i64,"ep":1_i64}}), "evolve").unwrap().outcome, "resolved");
         assert_eq!(
             instance.query(View::P1, "P1.pp.current").unwrap(),
@@ -5322,7 +5206,7 @@ fn evolution_discounts_only_consume_the_matching_paid_ability() {
 }
 
 #[test]
-fn counter_aliases_import_to_one_identity_and_roundtrip_through_observations() {
+fn counter_aliases_import_to_one_identity_and_roundtrip_through_saves() {
     let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
     definitions["keywords"]["charge"] =
         json!({"ja":"蓄積","aliases":["蓄積カウンター"],"role":"counter"});
@@ -5374,14 +5258,7 @@ fn counter_aliases_import_to_one_identity_and_roundtrip_through_observations() {
         );
         let mut saved: Game =
             serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        let mut sampled = Game::from_observation(
-            Arc::clone(&loaded),
-            &engine.projection(View::P1).unwrap(),
-            "P1",
-            "aliases",
-        )
-        .unwrap();
-        for instance in [&mut engine, &mut saved, &mut sampled] {
+        for instance in [&mut engine, &mut saved] {
             instance
                 .decide(
                     &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
@@ -5549,10 +5426,7 @@ fn repeated_stat_events_keep_distinct_contexts_and_identical_trigger_copies() {
     ));
     assert_eq!(engine.digest().unwrap(), before);
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled =
-        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "stats")
-            .unwrap();
-    for instance in [&mut engine, &mut saved, &mut sampled] {
+    for instance in [&mut engine, &mut saved] {
         for (index, life) in [(2, 24_i64), (3, 28_i64), (0, 29_i64), (1, 30_i64)] {
             instance.decide(&legal[index], "trigger").unwrap();
             assert_eq!(
@@ -5641,14 +5515,7 @@ fn empty_stack_waits_for_resolution_and_can_be_refilled_before_check_timing() {
         );
         let mut saved: Game =
             serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        let mut sampled = Game::from_observation(
-            loaded,
-            &engine.projection(View::P1).unwrap(),
-            "P1",
-            "stack-check",
-        )
-        .unwrap();
-        for instance in [&mut engine, &mut saved, &mut sampled] {
+        for instance in [&mut engine, &mut saved] {
             let step = instance
                 .decide(&json!({"do":"resolve-choice","choice":"execute"}), "finish")
                 .unwrap();
@@ -5822,10 +5689,7 @@ fn deck_reordering_preserves_order_identity_state_and_only_counts_changed_positi
             .unwrap();
         let mut saved: Game =
             serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        let mut sampled =
-            Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "order")
-                .unwrap();
-        for instance in [&mut engine, &mut saved, &mut sampled] {
+        for instance in [&mut engine, &mut saved] {
             let step = instance
                 .decide(&json!({"do":"resolve-choice","order":chosen}), "place")
                 .unwrap();
@@ -6012,14 +5876,7 @@ fn full_control_destination_keeps_empty_input_and_resumes_later_transfers() {
         json!([{"do":"resolve-choice","select":[]}])
     );
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "control",
-    )
-    .unwrap();
-    for instance in [&mut engine, &mut saved, &mut sampled] {
+    for instance in [&mut engine, &mut saved] {
         let before = instance.digest().unwrap();
         assert_eq!(
             instance
@@ -6146,10 +6003,7 @@ fn granted_trigger_and_activation_use_the_recipient_and_saved_provider_after_sou
         json!([{"do":"choose-pending","pending":{"ability":reference}}])
     );
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled =
-        Game::from_observation(loaded, &engine.projection(View::P2).unwrap(), "P2", "grant")
-            .unwrap();
-    for instance in [&mut engine, &mut saved, &mut sampled] {
+    for instance in [&mut engine, &mut saved] {
         instance
             .decide(
                 &json!({"do":"choose-pending","pending":{"ability":reference}}),
@@ -6405,14 +6259,7 @@ fn attack_requirements_follow_the_future_period_and_current_object_generation() 
     assert_eq!(counts["P2.attacks"], 1_i64);
     assert!(!engine.legal().unwrap().contains(&json!({"do":"end-phase"})));
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled = Game::from_observation(
-        loaded,
-        &engine.projection(View::P2).unwrap(),
-        "P2",
-        "obligation",
-    )
-    .unwrap();
-    for instance in [&mut engine, &mut saved, &mut sampled] {
+    for instance in [&mut engine, &mut saved] {
         assert!(
             !instance
                 .legal()
@@ -6568,10 +6415,7 @@ fn explicit_and_implicit_ride_costs_choose_and_pay_exactly_one_resource() {
             );
             let mut saved: Game =
                 serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-            let mut sampled =
-                Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "ride")
-                    .unwrap();
-            for instance in [&mut engine, &mut saved, &mut sampled] {
+            for instance in [&mut engine, &mut saved] {
                 let before = instance.digest().unwrap();
                 for material in [json!([]), json!(["used"]), json!(["r1", "r2"])] {
                     assert_eq!(instance.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"costs":{"1":material},"pay":{"pp":1_i64-ep,"ep":ep}}),"bad-resource").unwrap().outcome,"cannot-activate");
@@ -6709,10 +6553,7 @@ fn gained_drive_installs_rule_abilities_and_triggers_only_once_without_a_resourc
         )
         .unwrap();
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled =
-        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "drive")
-            .unwrap();
-    for instance in [&mut engine, &mut saved, &mut sampled] {
+    for instance in [&mut engine, &mut saved] {
         assert_eq!(
             instance.query(View::P1, "P1.field.a.power").unwrap(),
             Some(json!(3_i64))
@@ -6795,10 +6636,7 @@ fn drive_history_survives_silence_and_control_but_a_new_generation_can_gain_agai
         engine.decide(&json!({"do":"activate","ability":{"source":"a","line":line},"targets":{"1":["b"]}}),"silence-control").unwrap();
     }
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let mut sampled =
-        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "drive")
-            .unwrap();
-    for instance in [&mut engine, &mut saved, &mut sampled] {
+    for instance in [&mut engine, &mut saved] {
         instance.decide(&json!({"do":"activate","ability":{"source":"a","line":3_i64},"targets":{"1":["b"]}}),"no-regain").unwrap();
         assert_eq!(
             instance.query(View::P1, "P1.field.b.keywords").unwrap(),
@@ -6899,15 +6737,8 @@ fn observed_ownership_constrains_each_public_deck_list_after_control_changes() {
             .unwrap(),
         Some(json!([]))
     );
-    for (view, seat) in [(View::P1, "P1"), (View::P2, "P2")] {
-        let mut sampled = Game::from_observation(
-            Arc::clone(&loaded),
-            &engine.projection(view).unwrap(),
-            seat,
-            "owner",
-        )
-        .unwrap();
-        let packet = sampled.projection(view).unwrap();
+    for view in [View::P1, View::P2] {
+        let packet = engine.projection(view).unwrap();
         assert!(
             packet["known_cards"]
                 .as_array()
@@ -6915,10 +6746,15 @@ fn observed_ownership_constrains_each_public_deck_list_after_control_changes() {
                 .iter()
                 .any(|known| known["id"] == "b" && known["owner"] == "P2")
         );
-        sampled.decide(&json!({"do":"activate","ability":{"source":"a","line":6_i64},"targets":{"1":["b"]}}),"return").unwrap();
-        assert_eq!(sampled.query(view, "P2.field").unwrap(), Some(json!(["b"])));
+        let mut restored: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        restored.decide(&json!({"do":"activate","ability":{"source":"a","line":6_i64},"targets":{"1":["b"]}}),"return").unwrap();
         assert_eq!(
-            sampled
+            restored.query(view, "P2.field").unwrap(),
+            Some(json!(["b"]))
+        );
+        assert_eq!(
+            restored
                 .query(view, "semantic_state.pending_triggers")
                 .unwrap()
                 .unwrap()[0]["controller"],
@@ -6994,14 +6830,7 @@ fn literal_numeric_history_uses_timestamps_once_and_preserves_explicit_effective
             .unwrap();
             let mut saved: Game =
                 serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-            let mut sampled = Game::from_observation(
-                loaded,
-                &engine.projection(View::P1).unwrap(),
-                "P1",
-                "history",
-            )
-            .unwrap();
-            for instance in [&mut engine, &mut saved, &mut sampled] {
+            for instance in [&mut engine, &mut saved] {
                 for (path, expected) in [
                     ("P1.field.a.power", json!(power)),
                     ("P1.field.a.hp", json!(1_i64)),
@@ -7125,9 +6954,8 @@ fn visible_names_follow_the_current_face_and_rule_name_without_exposing_hidden_c
     let packet = engine.projection(View::P1).unwrap();
     assert!(!packet.to_string().contains("private-rule-name"));
     assert!(!packet.to_string().contains("secret"));
-    let restored = Game::from_observation(loaded, &packet, "P1", "names").unwrap();
     assert_eq!(
-        restored.query(View::P1, "P1.field.a.name").unwrap(),
+        engine.query(View::P1, "P1.field.a.name").unwrap(),
         Some(json!("second-face-name"))
     );
 }
@@ -7333,7 +7161,7 @@ fn suppression_precedes_trigger_limits_and_preserves_unrelated_entry_triggers() 
         } else {
             "合成盤面注記：ファンファーレは誘発しない。"
         };
-        let (catalog, mut engine) = suppression_fixture(local, enabled, reason);
+        let (_, mut engine) = suppression_fixture(local, enabled, reason);
         assert_eq!(
             engine
                 .decide(&json!({"do":"play","card":"s"}), "spell")
@@ -7342,14 +7170,7 @@ fn suppression_precedes_trigger_limits_and_preserves_unrelated_entry_triggers() 
             "paused"
         );
         let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        let sampled = Game::from_observation(
-            catalog,
-            &engine.projection(View::P1).unwrap(),
-            "P1",
-            "suppression",
-        )
-        .unwrap();
-        for mut restored in [saved, sampled] {
+        for mut restored in [saved, engine] {
             let result = restored
                 .decide(&json!({"do":"resolve-choice","choice":"execute"}), "entry")
                 .unwrap();
@@ -7497,11 +7318,6 @@ fn crest_reprints_and_simultaneous_copies_are_filtered_before_capacity_or_identi
     assert_eq!(packet["objects"]["new-2"]["name"], "other-crest");
     assert_eq!(packet["objects"]["new-3"]["name"], "ordinary");
     assert_eq!(packet["objects"]["new-4"]["name"], "ordinary");
-    let rebuilt = Game::from_observation(loaded, &packet, "P1", "crests").unwrap();
-    assert_eq!(
-        rebuilt.projection(View::P1).unwrap()["P1"]["ex"],
-        packet["P1"]["ex"]
-    );
 }
 
 #[test]
@@ -7579,9 +7395,8 @@ fn advances_return_face_up_to_the_owner_before_the_effect_continues() {
                     .unwrap(),
                 Some(json!(true))
             );
-            let rebuilt = Game::from_observation(loaded, &packet, "P1", "advance").unwrap();
             assert_eq!(
-                rebuilt
+                engine
                     .query(View::P1, &format!("{owner}.evolve_deck.b.face_up"))
                     .unwrap(),
                 Some(json!(true))
@@ -7621,7 +7436,7 @@ fn dual_evolution_catalog() -> Arc<Catalog> {
 }
 
 #[test]
-fn evolved_information_uses_the_linked_visible_face_after_load_play_and_observation() {
+fn evolved_information_uses_the_linked_visible_face_after_load_and_play() {
     for face in [0_i64, 1_i64] {
         for pre_evolved in [false, true] {
             let loaded = dual_evolution_catalog();
@@ -7677,8 +7492,7 @@ fn evolved_information_uses_the_linked_visible_face_after_load_play_and_observat
             );
             let saved: Game =
                 serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-            let sampled = Game::from_observation(loaded, &packet, "P1", "dual").unwrap();
-            for mut copy in vec![engine, saved, sampled].into_boxed_slice() {
+            for mut copy in vec![engine, saved].into_boxed_slice() {
                 assert_eq!(
                     copy.projection(View::P1).unwrap()["objects"]["a"]["name"],
                     packet["objects"]["a"]["name"]
@@ -7838,9 +7652,7 @@ fn simultaneous_ex_creation_produces_one_distinguishable_trigger_per_created_obj
         Some(json!(20_i64))
     );
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled =
-        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "ex").unwrap();
-    for mut resumed in [saved, sampled] {
+    for mut resumed in [saved, engine] {
         for object in ["new-2", "new-1"] {
             resumed.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64},"event":{"entered_ex":object}}}),"trigger").unwrap();
         }
@@ -7896,8 +7708,7 @@ fn sequential_ex_entries_obey_trigger_limits_and_wait_for_the_surrounding_effect
         1_i64
     );
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled = Game::from_observation(loaded, &packet, "P1", "ex").unwrap();
-    for mut resumed in [saved, sampled] {
+    for mut resumed in [saved, engine] {
         let result = resumed
             .decide(
                 &json!({"do":"resolve-choice","choice":"decline"}),
@@ -7967,8 +7778,7 @@ fn limited_damage_prevention_preserves_charges_for_zero_and_roundtrips_after_con
     );
     assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled = Game::from_observation(loaded, &packet, "P1", "charges").unwrap();
-    for mut resumed in [saved, sampled] {
+    for mut resumed in [saved, engine] {
         let result = resumed
             .decide(
                 &json!({"do":"resolve-choice","choice":"decline"}),
@@ -8067,14 +7877,7 @@ fn simultaneous_damage_waits_for_every_order_before_charging_and_applying() {
     );
     assert_eq!(engine.digest().unwrap(), before);
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    assert!(matches!(
-        Game::from_observation(Arc::clone(&loaded), &packet, "P2", "batch").unwrap_err(),
-        EngineFailure::Unsupported(_)
-    ));
-    let sampled =
-        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "batch")
-            .unwrap();
-    for mut resumed in [saved, sampled] {
+    for mut resumed in [saved, engine] {
         let result = resumed.decide(&order, "second-order").unwrap();
         assert_eq!(result.outcome, "resolved");
         let hits = result
@@ -8245,10 +8048,8 @@ fn optional_selection_is_one_input_and_decline_clears_the_binding() {
         );
         assert_eq!(engine.digest().unwrap(), before);
     }
-    let packet = engine.projection(View::P1).unwrap();
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled = Game::from_observation(loaded, &packet, "P1", "optional").unwrap();
-    for resumed in [saved, sampled] {
+    for resumed in [saved, engine] {
         for execute in [true, false] {
             let mut branch = resumed.clone();
             let choice = if execute {
@@ -8358,14 +8159,7 @@ fn compound_selection_and_position_use_the_post_draw_state_in_one_input() {
         "cannot-play"
     );
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled = Game::from_observation(
-        loaded,
-        &engine.projection(View::P1).unwrap(),
-        "P1",
-        "compound",
-    )
-    .unwrap();
-    for resumed in [saved, sampled] {
+    for resumed in [saved, engine] {
         for destination in ["top", "bottom"] {
             let mut branch = resumed.clone();
             assert_eq!(
@@ -8758,12 +8552,9 @@ fn movement_capacity_uses_each_destination_and_keeps_an_empty_selection_when_ful
                 vec![json!({"do":"resolve-choice","select":[]})]
             );
             assert!(result.events.iter().all(|event| event["object"] != "b"));
-            let packet = engine.projection(View::P1).unwrap();
             let saved: Game =
                 serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-            let sampled =
-                Game::from_observation(Arc::clone(&loaded), &packet, "P1", "recipient").unwrap();
-            for mut resumed in [saved, sampled] {
+            for mut resumed in [saved, engine] {
                 assert_eq!(
                     resumed
                         .decide(&json!({"do":"resolve-choice","select":[]}), "none")
@@ -9062,8 +8853,7 @@ fn a_limited_simultaneous_trigger_preserves_both_events_but_consumes_one_waiting
         assert_eq!(engine.digest().unwrap(), before);
     }
     let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let sampled = Game::from_observation(Arc::clone(&loaded), &packet, "P1", "limited").unwrap();
-    for original in vec![engine, saved, sampled].into_boxed_slice() {
+    for original in vec![engine, saved].into_boxed_slice() {
         assert_eq!(original.legal().unwrap(), choices);
         for (choice, name) in choices.iter().zip(["red", "blue"]) {
             let mut resumed = original.clone();
@@ -9084,15 +8874,6 @@ fn a_limited_simultaneous_trigger_preserves_both_events_but_consumes_one_waiting
             assert!(again.events.iter().all(|event| event["kind"] != "待機"));
         }
     }
-    let mut incomplete = packet;
-    incomplete["semantic_state"]["pending_triggers"][0]
-        .as_object_mut()
-        .unwrap()
-        .remove("event_alternatives");
-    assert!(matches!(
-        Game::from_observation(loaded, &incomplete, "P1", "missing-alternatives").unwrap_err(),
-        EngineFailure::Unsupported(_)
-    ));
 }
 
 #[test]
