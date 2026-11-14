@@ -3,7 +3,7 @@
 //! They are never rules history: committed readers, cursors and causal parents do not see
 //! them, and showing one changes no rules state, payment or randomness.
 
-use super::{EventError, EventKind, Viewer};
+use super::{EventError, EventKind, PlayerEvent, Viewer};
 use crate::game::Game;
 use alloc::sync::Arc;
 use core::fmt;
@@ -59,6 +59,11 @@ pub struct ProvisionalBatch {
 pub enum PresentationOp {
     /// Show one complete batch now.
     Provisional(ProvisionalBatch),
+    /// The scope's batch has committed unchanged; it becomes history and is not played again.
+    Promote {
+        /// The scope whose occurrences the committed events now refer to.
+        scope: ScopeId,
+    },
 }
 
 /// A position in one viewer's presentation record.
@@ -96,9 +101,18 @@ pub struct PresentationEntry {
 #[derive(Clone, Debug, Default)]
 pub(super) struct Presentation {
     issued: u64,
-    /// Source batches of the scopes that are neither committed nor withdrawn.
-    open: Vec<u64>,
+    /// Scopes that are neither committed nor withdrawn.
+    open: Vec<Shown>,
     record: Arc<[Arc<PresentationEntry>]>,
+}
+
+/// What a viewer was shown, kept to prove that the committed batch is the same one.
+#[derive(Clone, Debug)]
+struct Shown {
+    /// Source batch in the uncommitted journal.
+    batch: u64,
+    scope: ScopeId,
+    events: Arc<[ProvisionalEvent]>,
 }
 
 impl Presentation {
@@ -110,11 +124,10 @@ impl Presentation {
         batch: u64,
         events: Vec<EventKind>,
     ) -> Option<()> {
-        if events.is_empty() || self.open.contains(&batch) {
+        if events.is_empty() || self.open.iter().any(|shown| shown.batch == batch) {
             return Some(());
         }
         let serial = self.issued.checked_add(1)?;
-        let position = u64::try_from(self.record.len()).ok()?.checked_add(1)?;
         let scope = ScopeId {
             stream: Arc::clone(stream),
             serial,
@@ -128,16 +141,62 @@ impl Presentation {
                 },
                 kind,
             })
-            .collect();
+            .collect::<Vec<_>>();
         self.issued = serial;
-        self.open.push(batch);
+        self.open.push(Shown {
+            batch,
+            scope: scope.clone(),
+            events: Arc::from(events.clone()),
+        });
+        self.append(
+            stream,
+            PresentationOp::Provisional(ProvisionalBatch { scope, events }),
+        )
+    }
+
+    /// Link one committed batch to the scope it was shown as. A batch that was never shown
+    /// stays unlinked; `false` means the shown and committed batches differ, so the exact
+    /// correspondence this viewer was promised is lost.
+    pub(super) fn promote(
+        &mut self,
+        stream: &Arc<()>,
+        batch: u64,
+        events: &mut [PlayerEvent],
+    ) -> bool {
+        let Some(position) = self.open.iter().position(|shown| shown.batch == batch) else {
+            return true;
+        };
+        let shown = self.open.remove(position);
+        if shown.events.len() != events.len()
+            || shown
+                .events
+                .iter()
+                .zip(events.iter())
+                .any(|(before, after)| before.kind != after.kind)
+        {
+            return false;
+        }
+        for (event, before) in events.iter_mut().zip(shown.events.iter()) {
+            event.presentation = Some(before.id.clone());
+        }
+        self.append(stream, PresentationOp::Promote { scope: shown.scope })
+            .is_some()
+    }
+
+    /// Whether every shown scope has reached the end of its life.
+    pub(super) const fn settled(&self) -> bool {
+        self.open.is_empty()
+    }
+
+    fn append(&mut self, stream: &Arc<()>, op: PresentationOp) -> Option<()> {
+        let index = u64::try_from(self.record.len()).ok()?.checked_add(1)?;
         let mut record = self.record.to_vec();
         record.push(Arc::new(PresentationEntry {
             cursor: PresentationCursor {
                 stream: Arc::clone(stream),
-                index: position,
+                index,
             },
-            op: PresentationOp::Provisional(ProvisionalBatch { scope, events }),
+            op,
         }));
         self.record = Arc::from(record);
         Some(())

@@ -273,6 +273,9 @@ pub struct PlayerEvent {
     pub parent: Option<EventId>,
     /// Frozen authorized rules result.
     pub kind: EventKind,
+    /// The provisional occurrence this viewer was already shown for this event, if any.
+    /// A whole batch is linked or none of it; a linked batch is history and is not played again.
+    pub presentation: Option<PresentationId>,
 }
 
 /// One complete producer-sealed batch, in rules order.

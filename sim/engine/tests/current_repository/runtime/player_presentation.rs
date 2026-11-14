@@ -6,7 +6,7 @@
 use super::*;
 use sve_engine::game::player::events::{
     ActionKind, EventError, EventKind, MovementMethod, PresentationCursor, PresentationOp,
-    ProvisionalBatch,
+    ProvisionalBatch, ScopeId,
 };
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
@@ -14,9 +14,9 @@ use sve_engine::game::player::{
     QuestionShape, SubmissionKind, Viewer,
 };
 
-const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
+pub(super) const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
 
-fn question(game: &Game) -> Question {
+pub(super) fn question(game: &Game) -> Question {
     let Input::Question(question) = game.input(Viewer::P1) else {
         panic!("player question");
     };
@@ -24,7 +24,7 @@ fn question(game: &Game) -> Question {
 }
 
 /// P1 holds `card` and one other card; the deck has enough cards to draw.
-fn position(card: &str, adjust: impl FnOnce(&mut Value)) -> Game {
+pub(super) fn position(card: &str, adjust: impl FnOnce(&mut Value)) -> Game {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([
         {"id":"source","card":card}, {"id":"kept","card":"BP01-171"}
@@ -42,7 +42,7 @@ fn position(card: &str, adjust: impl FnOnce(&mut Value)) -> Game {
     game
 }
 
-fn declare(game: &mut Game, spell: &str) {
+pub(super) fn declare(game: &mut Game, spell: &str) {
     let main = question(game);
     let QuestionShape::ActionWindow(actions) = &main.shape else {
         panic!("main declarations");
@@ -67,34 +67,51 @@ fn declare(game: &mut Game, spell: &str) {
     );
 }
 
-fn answer(game: &mut Game, answer: Answer) -> SubmissionKind {
+pub(super) fn answer(game: &mut Game, answer: Answer) -> SubmissionKind {
     let token = question(game).token;
     game.submit_player(Viewer::P1, Command::Answer { token, answer })
         .kind
 }
 
-/// Everything recorded for one viewer after a cursor, as a host reads it.
-fn recorded(
+/// Every step recorded for one viewer after a cursor, as a host reads it.
+pub(super) fn recorded(
     game: &Game,
     viewer: Viewer,
     after: Option<&PresentationCursor>,
-) -> (Vec<ProvisionalBatch>, Option<PresentationCursor>) {
+) -> (Vec<PresentationOp>, Option<PresentationCursor>) {
     let entries = game
         .presentation(viewer, after)
         .unwrap()
         .cloned()
         .collect::<Vec<_>>();
     let cursor = entries.last().map(|entry| entry.cursor.clone());
-    let batches = entries
-        .into_iter()
-        .map(|entry| match entry.op {
-            PresentationOp::Provisional(batch) => batch,
-        })
-        .collect();
-    (batches, cursor.or_else(|| after.cloned()))
+    let steps = entries.into_iter().map(|entry| entry.op).collect();
+    (steps, cursor.or_else(|| after.cloned()))
 }
 
-fn kinds(batches: &[ProvisionalBatch]) -> Vec<&EventKind> {
+/// The batches opened by these steps, in delivery order.
+pub(super) fn shown(steps: &[PresentationOp]) -> Vec<ProvisionalBatch> {
+    steps
+        .iter()
+        .filter_map(|step| match step {
+            PresentationOp::Provisional(batch) => Some(batch.clone()),
+            PresentationOp::Promote { .. } => None,
+        })
+        .collect()
+}
+
+/// The scopes these steps turned into history, in delivery order.
+pub(super) fn promoted(steps: &[PresentationOp]) -> Vec<ScopeId> {
+    steps
+        .iter()
+        .filter_map(|step| match step {
+            PresentationOp::Promote { scope } => Some(scope.clone()),
+            PresentationOp::Provisional(_) => None,
+        })
+        .collect()
+}
+
+pub(super) fn kinds(batches: &[ProvisionalBatch]) -> Vec<&EventKind> {
     batches
         .iter()
         .flat_map(|batch| batch.events.iter().map(|event| &event.kind))
@@ -112,7 +129,7 @@ fn position_of(kinds: &[&EventKind], wanted: impl Fn(&EventKind) -> bool) -> usi
     found[0]
 }
 
-fn is_action(kind: &EventKind, wanted: ActionKind) -> bool {
+pub(super) fn is_action(kind: &EventKind, wanted: ActionKind) -> bool {
     matches!(kind, EventKind::Action(action) if action.kind == wanted)
 }
 
@@ -131,16 +148,16 @@ const fn is_draw(kind: &EventKind) -> bool {
 }
 
 /// Ask for a presentation on behalf of both seats and return what each newly received.
-fn present(
+pub(super) fn present(
     game: &mut Game,
     cursors: &mut [Option<PresentationCursor>; 2],
 ) -> [Vec<ProvisionalBatch>; 2] {
     SEATS.map(|viewer| {
         let slot = usize::from(viewer == Viewer::P2);
         game.present_player_events(viewer).unwrap();
-        let (batches, next) = recorded(game, viewer, cursors[slot].as_ref());
+        let (steps, next) = recorded(game, viewer, cursors[slot].as_ref());
         cursors[slot] = next;
-        batches
+        shown(&steps)
     })
 }
 
@@ -394,7 +411,8 @@ fn presentation_shows_only_what_a_viewer_asked_for_and_a_rejection_changes_nothi
     );
     game.present_player_events(Viewer::P1).unwrap();
     let (owner, cursor) = recorded(&game, Viewer::P1, None);
-    let kinds = kinds(&owner);
+    let batches = shown(&owner);
+    let kinds = kinds(&batches);
     assert_eq!(
         kinds.iter().filter(|kind| is_draw(kind)).count(),
         2,

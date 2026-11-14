@@ -37,6 +37,26 @@ struct ViewerLog {
     presentation: Presentation,
 }
 
+impl ViewerLog {
+    /// Finish one committed batch. A batch this viewer was shown early must commit exactly
+    /// as shown; otherwise this viewer's history stops rather than guess the correspondence.
+    fn close(
+        &mut self,
+        serial: u64,
+        mut events: Vec<PlayerEvent>,
+        batches: &mut Vec<Arc<PlayerEventBatch>>,
+    ) -> bool {
+        if !self.presentation.promote(&self.stream, serial, &mut events) {
+            self.fault = true;
+            return false;
+        }
+        if !events.is_empty() {
+            batches.push(Arc::new(PlayerEventBatch { events }));
+        }
+        true
+    }
+}
+
 #[derive(Clone, Debug)]
 pub(super) struct Pending {
     serial: u64,
@@ -215,10 +235,10 @@ impl Journal {
             let mut batch = Vec::new();
             let mut previous = None;
             for entry in ordered(&self.pending, perspective) {
-                if previous != Some(entry.batch) && !batch.is_empty() {
-                    batches.push(Arc::new(PlayerEventBatch {
-                        events: take(&mut batch),
-                    }));
+                if let Some(serial) = previous.filter(|serial| *serial != entry.batch)
+                    && !log.close(serial, take(&mut batch), &mut batches)
+                {
+                    break;
                 }
                 previous = Some(entry.batch);
                 let Some(view) = entry.views.get(perspective) else {
@@ -261,13 +281,16 @@ impl Journal {
                     group,
                     parent,
                     kind,
+                    presentation: None,
                 });
                 log.count = next;
             }
+            if let Some(serial) = previous.filter(|_| !log.fault) {
+                log.close(serial, batch, &mut batches);
+            }
+            // Everything uncommitted has now committed, so a scope left open lost its source.
+            log.fault |= !log.presentation.settled();
             if !log.fault {
-                if !batch.is_empty() {
-                    batches.push(Arc::new(PlayerEventBatch { events: batch }));
-                }
                 let mut chunks = log.chunks.to_vec();
                 chunks.extend(batches);
                 log.chunks = Arc::from(chunks);
@@ -435,3 +458,6 @@ impl Game {
         );
     }
 }
+
+#[cfg(test)]
+mod tests;
