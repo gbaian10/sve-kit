@@ -229,3 +229,11 @@ def test_load_requires_directory_and_preserves_multiple_current_documents(
     (root / "b.yaml").write_bytes(ruling(revision=2).raw)
     with pytest.raises(ValueError, match="Duplicate current ruling"):
         load(tmp_path)
+
+
+def test_ir_expression_control_and_value_references_remain_non_template() -> None:
+    references: list[JsonValue] = ["X.aggregate", "K.may", "V.receipt-field", "I.draw"]
+    report = build((ruling(applies_to=references),))
+    assert report.resolutions == ()
+    assert [item.reference_id for item in report.retained] == references
+    assert all(item.disposition == "retained_non_template" for item in report.retained)
