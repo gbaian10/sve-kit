@@ -318,3 +318,113 @@ fn a_valid_entry_reader_does_not_authorize_an_unhandled_event_reader_in_the_same
         .unwrap_err();
     assert!(format!("{error:?}").contains("read.event-field"));
 }
+
+fn retained_program() -> WellFormedCardProgram {
+    let tree = equipment_played::tree(
+        &json!({"evolve":{"cost":{"pp":1},
+        "usable_if":{"entered_by":{"ref":"this","by":"ability"}}}}),
+        "unit-follower",
+    );
+    let mut raw = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+        .card()
+        .clone();
+    raw.abilities.push(ability(
+        9,
+        vec![entry::enter(90, entry::own_zone(ZoneKind::Ex, 9))],
+    ));
+    raw.abilities.push(ability(
+        10,
+        vec![instruction(
+            91,
+            Action::Move {
+                objects: entry::own_zone(ZoneKind::Field, 91),
+                movement: MoveSpec {
+                    to: MoveDestination::Owners {
+                        zone: OwnerZone::Hand,
+                    },
+                    position: None,
+                    order: None,
+                    initial_posture: None,
+                    entry_effects: vec![],
+                },
+                reason: MoveReason::Put,
+            },
+        )],
+    ));
+    WellFormedCardProgram::check(raw).unwrap()
+}
+
+#[test]
+fn retained_entry_method_qualifies_later_evolution_and_replaces_old_generations() {
+    for route in ["play", "ability", "replayed"] {
+        let base = retained_program();
+        let form = card(vec![]);
+        let mut zones = json!({"P1":{"field":[{"id":"s","card":"unit-follower"}],
+            "hand":[],"ex":[]}});
+        zones["P1"][if route == "play" { "hand" } else { "ex" }] = json!([
+            {"id":"incoming","card":"unit-follower","state":{"entered_by":"ability","entered_by_effect":true}}
+        ]);
+        let mut game = evolution::position_with_zones(1, &base, &form, true, &zones);
+        if route == "play" {
+            assert!(matches!(
+                game.play_internal_card("incoming", PlayerId { seat: 1 })
+                    .unwrap(),
+                CardPlay::Entered(_)
+            ));
+        } else {
+            resolved(
+                game.activate_internal_card("s", AbilityId(9), PlayerId { seat: 1 })
+                    .unwrap(),
+            );
+        }
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        if route == "replayed" {
+            resolved(
+                game.activate_internal_card("s", AbilityId(10), PlayerId { seat: 1 })
+                    .unwrap(),
+            );
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+            assert!(matches!(
+                game.play_internal_card("incoming", PlayerId { seat: 1 })
+                    .unwrap(),
+                CardPlay::Entered(_)
+            ));
+            while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+                game.resume_internal_card().unwrap();
+            }
+        }
+        if route == "ability" {
+            play::next_turn(&mut game);
+            play::next_turn(&mut game);
+        }
+        let before = game.projection(View::Referee).unwrap();
+        let outcome = game
+            .internal_rule_action(
+                &json!({"do":"evolve","source":"incoming","evolve_card":"e","pay":{"pp":1}}),
+            )
+            .unwrap();
+        assert_eq!(
+            outcome.outcome,
+            if route == "ability" {
+                "resolved"
+            } else {
+                "cannot-evolve"
+            }
+        );
+        if route != "ability" {
+            assert_eq!(
+                game.projection(View::Referee).unwrap(),
+                before,
+                "failed qualification changes no authority and ignores spoofed flags"
+            );
+        }
+    }
+}

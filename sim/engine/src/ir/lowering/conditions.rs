@@ -293,7 +293,7 @@ impl BodyContext<'_> {
                 };
             }
             ast::Condition::EnteredFrom(condition) => return self.entered_from(condition, path),
-            ast::Condition::EnteredBy(condition) => self.entered_by(condition, path)?,
+            ast::Condition::EnteredBy(condition) => return self.entered_by(condition, path),
             ast::Condition::PlayedFrom(condition) => self.played_from(condition, path)?,
             ast::Condition::Combo(threshold) => return Self::combo(*threshold, path),
             ast::Condition::Spellchain(threshold) => {
@@ -483,20 +483,30 @@ impl BodyContext<'_> {
         &self,
         condition: &ast::EntryCondition,
         path: &str,
-    ) -> Result<Predicate, LoweringError> {
-        Ok(Predicate::Equal {
-            operands: Box::new(super::super::ValueEquality::EntryMethod {
-                left: Expr::Frozen(Box::new(
-                    super::super::EntryMethodFields::EnterFieldMethod {
-                        event: self.entry_event.ok_or_else(|| unsupported(path))?,
-                    },
-                )),
-                right: Expr::Literal(match condition.by {
-                    ast::EntryMethod::Ability => super::super::EntryMethod::AbilityPut,
-                    ast::EntryMethod::Play => super::super::EntryMethod::Play,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let method = match condition.by {
+            ast::EntryMethod::Ability => super::super::EntryMethod::AbilityPut,
+            ast::EntryMethod::Play => super::super::EntryMethod::Play,
+        };
+        if let Some(event) = self.entry_event {
+            return Ok(Expr::Compute(Box::new(Predicate::Equal {
+                operands: Box::new(super::super::ValueEquality::EntryMethod {
+                    left: Expr::Frozen(Box::new(
+                        super::super::EntryMethodFields::EnterFieldMethod { event },
+                    )),
+                    right: Expr::Literal(method),
                 }),
-            }),
-        })
+            })));
+        }
+        if self.evolution.is_some() {
+            return Ok(Expr::Live(Box::new(
+                super::super::BoolRead::FieldEntryMethod {
+                    object: super::super::ObjectOperand::SourceHolder {},
+                    method,
+                },
+            )));
+        }
+        Err(unsupported(path))
     }
 
     fn played_from(
