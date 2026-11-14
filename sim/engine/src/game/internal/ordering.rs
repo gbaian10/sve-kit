@@ -199,6 +199,7 @@ pub(super) fn check_node_with_x(
     let mut inspected = node.clone();
     mask_whole_return(&mut inspected);
     mask_prevention(&mut inspected)?;
+    mask_stand_subjects(&mut inspected)?;
     mask_ability_permission(&mut inspected)?;
     mask_discard(&mut inspected)?;
     mask_player_cost_filter(&mut inspected)?;
@@ -415,8 +416,12 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
             capture: Capture::Integer { value, .. },
         } => mask_public_number(value),
         Node::Instruction { instruction } => match &mut instruction.action {
-            Action::Destroy { objects } if damaged_plan(objects).is_some() => {
-                *objects = Selector::Objects { objects: vec![] };
+            Action::Destroy { objects } => {
+                if damaged_plan(objects).is_some() {
+                    *objects = Selector::Objects { objects: vec![] };
+                } else {
+                    mask_public_predicate(objects);
+                }
             }
             Action::Draw { count: amount, .. } | Action::Resource { amount, .. } => {
                 mask_public_number(amount);
@@ -662,6 +667,25 @@ fn mask_public_recipients(recipients: &mut RecipientSet) {
         }
         _ => {}
     }
+}
+
+fn mask_stand_subjects(node: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = node
+        && matches!(&instruction.action, Action::InstallEffect { effect, .. }
+            if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::Stand { .. }, .. }))
+    {
+        super::posture::check_install(&instruction.action)?;
+        if let Action::InstallEffect {
+            subjects: InstallationSubjects::Objects { objects, .. },
+            ..
+        } = &mut instruction.action
+            && super::card::selection::field_selector(objects).is_ok()
+        {
+            // The checked lock reuses the public field predicate authority for its subjects.
+            mask_public_predicate(objects);
+        }
+    }
+    Ok(())
 }
 
 fn mask_public_predicate(selector: &mut Selector) {

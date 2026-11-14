@@ -1036,3 +1036,6 @@ mod optional_selected_scalar;
 
 #[path = "card/selected_play_cost.rs"]
 mod selected_play_cost;
+
+#[path = "card/public_destroy_filter.rs"]
+mod public_destroy_filter;
