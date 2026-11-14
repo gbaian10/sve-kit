@@ -967,6 +967,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<RecipientSet, LoweringError> {
         Ok(match recipients {
+            ast::Recipients::Target(name) if name == "this" => RecipientSet::Objects {
+                objects: super::numeric::holder(),
+            },
             ast::Recipients::Role { role } => RecipientSet::Objects {
                 objects: Selector::Bound {
                     reference: *self
