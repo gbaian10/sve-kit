@@ -1502,6 +1502,8 @@ fn choice_count(
     let condition = match &replacement.r#if {
         ast::ModeCondition::Cmp(comparison) => context.public_mode_condition(comparison, path)?,
         ast::ModeCondition::History(history) => context.history_condition(history, path)?,
+        // The play declaration precedes the modes; a failed payment reverts the whole play.
+        ast::ModeCondition::Paid(paid) => context.paid_condition(paid, path)?,
         ast::ModeCondition::EnteredFrom(origin)
             if matches!(origin.zone, ast::EntryOriginZone::Cemetery) =>
         {

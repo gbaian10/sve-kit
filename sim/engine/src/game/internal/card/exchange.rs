@@ -97,6 +97,18 @@ fn available_count(members: &[MaterialCandidate], distinct: Option<ObjectPropert
     }
 }
 
+/// The play declaration answer, read before payment by values fixed during the same play.
+pub(in crate::game::internal) fn declared(
+    execution: &Execution,
+    face: &FaceId,
+    receipt: ReceiptId,
+) -> Option<bool> {
+    let exchange = execution.play.as_ref()?.exchange.as_ref()?;
+    (exchange.face == *face && exchange.definition.receipt == receipt)
+        .then_some(exchange.accepted)
+        .flatten()
+}
+
 pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: bool) -> Result<()> {
     execution
         .play

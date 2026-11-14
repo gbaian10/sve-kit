@@ -3,8 +3,8 @@ use crate::ir::optional_payment;
 use crate::ir::public_numbers;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Binding, BoolRead, BooleanState, Comparison, Int, IntOperation, IntRead, NamesRead, ObjectRef,
-    PlayerResource,
+    Binding, BoolFrozen, BoolRead, BooleanState, Comparison, Int, IntOperation, IntRead, NamesRead,
+    ObjectRef, PaymentReference, PlayerResource,
 };
 use crate::ir::{
     Bool, Cardinality, ChoiceDomain, Control, CostSpec, DecisionKind, EntryOrigin,
@@ -360,6 +360,17 @@ impl Checker {
                 | Predicate::All { .. }
                 | Predicate::Any { .. } => self.reject(),
             },
+            // The spell's own play declaration, fixed before its modes are chosen.
+            Expr::Frozen(read)
+                if matches!(
+                    read.as_ref(),
+                    BoolFrozen::PaymentComplete {
+                        receipt: PaymentReference::CardPlay { .. }
+                    }
+                ) =>
+            {
+                self.boolean(condition)
+            }
             Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => self.reject(),
         }
     }
