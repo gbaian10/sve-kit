@@ -1010,6 +1010,7 @@ pub(super) struct Modify {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum NumericSubjects {
     Single(Objects),
+    Public(Box<PublicQuery>),
     Union { any_of: Box<[ObjectQuery; 2]> },
 }
 

@@ -283,3 +283,41 @@ fn posture_filter_does_not_authorize_unscoped_holder_state() {
     game.load_internal_card("unit-follower", &program)
         .unwrap_err();
 }
+
+#[test]
+fn keyword_filtered_buff_uses_effective_abilities_and_the_controller() {
+    let spell=lowerer().lower_with_printed_costs(&equipment_played::tree(&json!({"spell":{"do":[
+        {"buff":{"on":{"who":"self","zone":"field","kind":"follower","keyword":"ward"},"power":1,"hp":2}}
+    ]}}),"unit-spell"),&BTreeMap::from([("unit-spell".to_owned(),Nat(1))])).unwrap().remove("unit-spell").unwrap();
+    let ward = lowerer()
+        .lower(&equipment_played::tree(
+            &json!({"static":{"effects":[{"grant":{"keywords":["ward"]}}]}}),
+            "unit-follower",
+        ))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"ward","card":"unit-follower"},
+        {"id":"muted","card":"unit-follower","state":{"silenced":true}}
+    ]);
+    let mut game = Game::new(
+        static_keywords::keyword_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "keyword-buff",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &spell).unwrap();
+    game.load_internal_card("unit-follower", &ward).unwrap();
+    resolved(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["ward"]["power"], 3_u8);
+    assert_eq!(state["objects"]["ward"]["hp"], 5_u8);
+    for object in ["muted", "f"] {
+        assert_eq!(state["objects"][object]["power"], 2_u8);
+        assert_eq!(state["objects"][object]["hp"], 3_u8);
+    }
+}

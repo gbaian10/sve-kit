@@ -444,6 +444,13 @@ impl BodyContext<'_> {
                 | ast::Objects::Zone(_)
                 | ast::Objects::EventHolder { .. } => self.objects(objects, path)?,
             },
+            ast::NumericSubjects::Public(query) => {
+                let binding = Binding::new(
+                    self.card_allocator.id(path)?,
+                    self.card_allocator.scope(path)?,
+                );
+                super::costs::named_public_query(query, binding, path)?
+            }
             ast::NumericSubjects::Union { any_of } if !set => {
                 self.token_follower_union(any_of, path)?
             }
