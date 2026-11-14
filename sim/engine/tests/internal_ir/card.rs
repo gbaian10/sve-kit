@@ -910,6 +910,8 @@ mod fusion;
 mod fusion_exact;
 #[path = "card/material_search.rs"]
 mod material_search;
+#[path = "card/search_mixed_union.rs"]
+mod search_mixed_union;
 
 #[path = "card/shuffle.rs"]
 mod shuffle;
