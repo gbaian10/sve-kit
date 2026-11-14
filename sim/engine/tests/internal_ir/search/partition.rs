@@ -417,11 +417,12 @@ fn failure_after_final_partition_restores_execution_and_real_rng() {
             answer(game, seat, SearchAnswer::Ungrouped(vec![0, 1]));
         }
         let (token, handles, _) = question(&games[0], seat);
+        let published = games[0].clone();
         // Both cards to Hand leaves an empty final segment, then a real shuffle before the failing draw.
         games[0]
             .answer_internal(PlayerId { seat }, token, Answer::SearchPartition(handles))
             .unwrap_err();
-        super::super::transactions::assert_reverted(&games[0], &origin);
+        super::super::transactions::assert_reverted_from(&games[0], &origin, &published);
         games[1] = super::super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
@@ -631,6 +632,7 @@ fn failed_final_nonempty_segment_restores_even_the_prior_hand_movement() {
         assert_eq!(shuffles(&progress), 0);
         let (token, remaining, _) = question(&game, seat);
         assert_eq!(token.decision, DecisionId(12));
+        let published = game.clone();
         let error = game
             .answer_internal(PlayerId { seat }, token, Answer::SearchPartition(remaining))
             .unwrap_err();
@@ -640,6 +642,6 @@ fn failed_final_nonempty_segment_restores_even_the_prior_hand_movement() {
                 .contains("draw request exceeds internal execution limit"),
             "{error}"
         );
-        super::super::transactions::assert_reverted(&game, &origin);
+        super::super::transactions::assert_reverted_from(&game, &origin, &published);
     }
 }

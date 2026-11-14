@@ -1,6 +1,5 @@
 use super::*;
 use sve_engine::game::internal::{DamageShare, DecisionToken, InputDomain};
-use sve_engine::game::player::Viewer;
 
 pub(super) fn distribution(
     id: u64,
@@ -459,10 +458,8 @@ fn a_later_infeasible_domain_rolls_back_entire_execution_and_revokes_observed_to
         }
         let views = [View::P1, View::P2, View::Referee];
         let observations = views.map(|view| game.projection(view).unwrap());
-        let mut saved_before = serde_json::to_value(&game).unwrap();
-        let player_views = [Viewer::P1, Viewer::P2];
-        let player_observations = player_views.map(|viewer| game.observe(viewer).unwrap());
-        let authority_before = exact_authority(&game);
+        let origin = game.clone();
+        let saved_before = serde_json::to_value(&game).unwrap();
         let program = checked(vec![
             draw(1, 1),
             distribution(2, leaders(), Expr::Literal(Nat(4)), 1),
@@ -472,7 +469,7 @@ fn a_later_infeasible_domain_rolls_back_entire_execution_and_revokes_observed_to
         game.execute_internal(&program, &source("synthetic"), context(seat))
             .unwrap();
         let old = game.internal_decision(View::Referee).unwrap();
-        let published_issued = transactions::normalize_issuance(&exact_authority(&game)).1;
+        let published = game.clone();
         let error = game
             .answer_internal(old.actor, old.token, answer(&[(0, 3), (1, 1)]))
             .unwrap_err();
@@ -482,32 +479,12 @@ fn a_later_infeasible_domain_rolls_back_entire_execution_and_revokes_observed_to
             views.map(|view| game.projection(view).unwrap()),
             observations
         );
-        let mut saved_after = serde_json::to_value(&game).unwrap();
+        let saved_after = serde_json::to_value(&game).unwrap();
         assert!(
             saved_after["state"]["ir_epoch"].as_u64().unwrap()
                 > saved_before["state"]["ir_epoch"].as_u64().unwrap()
         );
-        assert_eq!(
-            transactions::normalize_issuance(&exact_authority(&game)).1,
-            published_issued
-        );
-        assert_eq!(
-            transactions::normalize_issuance(&exact_authority(&game)).0,
-            transactions::normalize_issuance(&authority_before)
-                .0
-                .replacen(
-                    &format!("ir_epoch: {},", saved_before["state"]["ir_epoch"]),
-                    &format!("ir_epoch: {},", saved_after["state"]["ir_epoch"]),
-                    1,
-                )
-        );
-        saved_after["state"]["ir_epoch"] = saved_before["state"]["ir_epoch"].clone();
-        transactions::normalize_saved_issuance(&mut saved_after, &mut saved_before);
-        assert_eq!(saved_after, saved_before);
-        assert_eq!(
-            player_views.map(|viewer| game.observe(viewer).unwrap()),
-            player_observations
-        );
+        transactions::assert_reverted_from(&game, &origin, &published);
         game.execute_internal(&program, &source("synthetic"), context(seat))
             .unwrap();
         let fresh = game.internal_decision(View::Referee).unwrap();

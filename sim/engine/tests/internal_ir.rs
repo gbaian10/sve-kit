@@ -768,13 +768,14 @@ fn runtime_expression_failure_rolls_back_draw_events_random_and_all_authority_fi
         if with_pause {
             result.unwrap();
             let question = game.internal_decision(View::P1).unwrap();
+            let published = game.clone();
             game.answer_internal(
                 PlayerId { seat: 1 },
                 question.token,
                 Answer::Integer(Nat(1)),
             )
             .unwrap_err();
-            transactions::assert_reverted(&game, &origin);
+            transactions::assert_reverted_from(&game, &origin, &published);
         } else {
             result.unwrap_err();
             assert_eq!(exact_authority(&game), before);
