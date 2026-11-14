@@ -25,4 +25,5 @@ rand = { version = "=0.10.3", default-features = false, features = [
     "unbiased",
 ] }
 rand_chacha = { version = "=0.10.0", default-features = false }
+sve-battle-contract = { path = "../battle-contract" }
 sve-scenario-runner = { path = "../scenario-runner", optional = true }

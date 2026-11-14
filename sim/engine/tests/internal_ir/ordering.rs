@@ -305,6 +305,7 @@ fn subsequent_orders_revoke_old_evidence_and_use_new_epochs() {
             ],
         );
         let question = stale.internal_decision(view(seat)).unwrap();
+        let published = stale.clone();
         stale
             .answer_internal(
                 PlayerId { seat },
@@ -312,7 +313,7 @@ fn subsequent_orders_revoke_old_evidence_and_use_new_epochs() {
                 Answer::Order(vec![0, 1, 2]),
             )
             .unwrap_err();
-        super::transactions::assert_reverted(&stale, &origin);
+        super::transactions::assert_reverted_from(&stale, &origin, &published);
     }
 }
 

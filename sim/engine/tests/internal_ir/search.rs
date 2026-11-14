@@ -203,6 +203,7 @@ fn failure_driven_by_successful_after_restores_the_execution_and_real_rng() {
                 .unwrap();
         }
         let token = games[0].internal_decision(view(seat)).unwrap().token;
+        let published = games[0].clone();
         games[0]
             .answer_internal(
                 PlayerId { seat },
@@ -210,7 +211,7 @@ fn failure_driven_by_successful_after_restores_the_execution_and_real_rng() {
                 Answer::Search(SearchAnswer::Ungrouped(vec![0])),
             )
             .unwrap_err();
-        super::transactions::assert_reverted(&games[0], &origin);
+        super::transactions::assert_reverted_from(&games[0], &origin, &published);
         games[1] = super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))
@@ -808,6 +809,7 @@ fn a_later_failure_rolls_back_the_real_rng_shuffle_with_the_answer() {
                 .unwrap();
         }
         let token = games[0].internal_decision(view(seat)).unwrap().token;
+        let published = games[0].clone();
         games[0]
             .answer_internal(
                 PlayerId { seat },
@@ -815,7 +817,7 @@ fn a_later_failure_rolls_back_the_real_rng_shuffle_with_the_answer() {
                 Answer::Search(SearchAnswer::Ungrouped(vec![0])),
             )
             .unwrap_err();
-        super::transactions::assert_reverted(&games[0], &origin);
+        super::transactions::assert_reverted_from(&games[0], &origin, &published);
         games[1] = super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))

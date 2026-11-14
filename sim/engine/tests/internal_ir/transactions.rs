@@ -8,7 +8,51 @@ use sve_engine::game::internal::{DecisionView, InputDomain, SearchAnswer};
 use sve_engine::game::player::Viewer;
 
 pub(super) fn assert_restored(actual: &Game, expected: &Game) {
-    assert_rollback(actual, expected, false);
+    assert_rollback(actual, expected, None);
+}
+
+fn normalize_memories(debug: &str) -> String {
+    let mut remaining = debug;
+    let mut normalized = String::new();
+    // Only current seat knowledge may differ; catalogue faces and saved origins must still match.
+    for _ in 0..2 {
+        let (before, knowledge) = remaining.split_once("Knowledge { seen: ").unwrap();
+        let (seen, after) = knowledge.split_once(", faces: ").unwrap();
+        let (_, rest) = after.split_once(", located: ").unwrap();
+        normalized.push_str(before);
+        normalized.push_str("Knowledge { seen: ");
+        normalized.push_str(seen);
+        normalized.push_str(", faces: {}, located: ");
+        remaining = rest;
+    }
+    normalized.push_str(remaining);
+    normalized
+}
+
+pub(super) fn normalize_saved_memories(actual: &mut Value, expected: &mut Value) {
+    for seat in ["P1", "P2"] {
+        actual["state"]["knowledge"][seat]["faces"] = Value::Null;
+        expected["state"]["knowledge"][seat]["faces"] = Value::Null;
+    }
+}
+
+pub(super) fn assert_observations_restored(actual: &Game, origin: &Game, published: &Game) {
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let mut expected = origin.observe(viewer).unwrap();
+        for face in published.observe(viewer).unwrap().remembered {
+            if !expected.remembered.contains(&face) {
+                expected.remembered.push(face);
+            }
+        }
+        expected.remembered.sort_by(|left, right| {
+            (&left.card, left.face, left.owner).cmp(&(&right.card, right.face, right.owner))
+        });
+        assert_eq!(
+            actual.observe(viewer).unwrap(),
+            expected,
+            "rollback retains exactly the previously published memories, with origin locations"
+        );
+    }
 }
 
 pub(super) fn normalize_issuance(debug: &str) -> (String, Vec<u64>) {
@@ -55,10 +99,11 @@ pub(super) fn normalize_saved_issuance(actual: &mut Value, expected: &mut Value)
     }
 }
 
-fn assert_rollback(actual: &Game, expected: &Game, published: bool) {
+fn assert_rollback(actual: &Game, expected: &Game, published: Option<&Game>) {
     let mut actual_debug = exact_authority(actual);
     let mut expected_debug = exact_authority(expected);
-    if published {
+    if let Some(published) = published {
+        assert_observations_restored(actual, expected, published);
         let (normalized_actual, issued) = normalize_issuance(&actual_debug);
         let (normalized_expected, previous) = normalize_issuance(&expected_debug);
         assert!(
@@ -68,8 +113,8 @@ fn assert_rollback(actual: &Game, expected: &Game, published: bool) {
                 .all(|(after, before)| after >= before),
             "published handle issuance must never rewind"
         );
-        actual_debug = normalized_actual;
-        expected_debug = normalized_expected;
+        actual_debug = normalize_memories(&normalized_actual);
+        expected_debug = normalize_memories(&normalized_expected);
     }
     let epoch = |debug: &str| -> u64 {
         debug
@@ -95,14 +140,15 @@ fn assert_rollback(actual: &Game, expected: &Game, published: bool) {
             &format!("ir_epoch: {actual_epoch},"),
             1
         ),
-        "rollback must restore every authority field except the epoch high water mark",
+        "rollback must restore authority except verified publication memory and epoch high water marks",
     );
     match serde_json::to_value(expected) {
         Ok(mut before) => {
             let mut after = serde_json::to_value(actual).unwrap();
             after["state"]["ir_epoch"] = before["state"]["ir_epoch"].clone();
-            if published {
+            if published.is_some() {
                 normalize_saved_issuance(&mut after, &mut before);
+                normalize_saved_memories(&mut after, &mut before);
             }
             assert_eq!(after, before, "saved RNG and authority must match");
         }
@@ -129,23 +175,18 @@ pub(super) fn aligned_control(actual: &Game, pristine: &Game) -> Game {
     for seat in ["P1", "P2"] {
         control["state"]["knowledge"][seat]["issued"] =
             current["state"]["knowledge"][seat]["issued"].clone();
+        control["state"]["knowledge"][seat]["faces"] =
+            current["state"]["knowledge"][seat]["faces"].clone();
     }
     serde_json::from_value(control).unwrap()
 }
 
 pub(super) fn assert_reverted(actual: &Game, origin: &Game) {
-    assert_rollback(actual, origin, true);
-    for viewer in [Viewer::P1, Viewer::P2] {
-        assert_eq!(
-            actual.observe(viewer).unwrap(),
-            origin.observe(viewer).unwrap(),
-            "published rollback must preserve uninterrupted visible identities"
-        );
-    }
+    assert_rollback(actual, origin, Some(origin));
 }
 
 pub(super) fn assert_reverted_from(actual: &Game, origin: &Game, published: &Game) {
-    assert_reverted(actual, origin);
+    assert_rollback(actual, origin, Some(published));
     let origin_issued = normalize_issuance(&exact_authority(origin)).1;
     let published_issued = normalize_issuance(&exact_authority(published)).1;
     let expected = origin_issued
@@ -256,7 +297,7 @@ fn every_interaction_rolls_back_all_prior_answers_and_never_revives_tokens() {
                 game.execute_internal(&program, &source("synthetic"), context(seat))
                     .unwrap();
                 let mut old = Vec::new();
-                loop {
+                let published = loop {
                     let question = game.internal_decision(View::Referee).unwrap();
                     let before = exact_authority(&game);
                     game.answer_internal(question.actor, question.token, Answer::Integer(Nat(0)))
@@ -268,6 +309,7 @@ fn every_interaction_rolls_back_all_prior_answers_and_never_revives_tokens() {
                     );
                     let answer = response(&question);
                     old.push((question.clone(), answer.clone()));
+                    let published = game.clone();
                     match game.answer_internal(question.actor, question.token, answer) {
                         Ok(progress) => assert!(!progress.complete),
                         Err(error) => {
@@ -277,11 +319,11 @@ fn every_interaction_rolls_back_all_prior_answers_and_never_revives_tokens() {
                                     .contains("draw request exceeds internal execution limit"),
                                 "{error}"
                             );
-                            break;
+                            break published;
                         }
                     }
-                }
-                assert_reverted(&game, &origin);
+                };
+                assert_reverted_from(&game, &origin, &published);
                 game.execute_internal(&program, &source("synthetic"), context(seat))
                     .unwrap();
                 let fresh = game.internal_decision(View::Referee).unwrap();
@@ -399,17 +441,19 @@ fn search_and_partition_mutation_errors_revoke_the_execution() {
                 .unwrap();
             let question = game.internal_decision(View::Referee).unwrap();
             let answer = response(&question);
+            let mut published = game.clone();
             let result = game.answer_internal(question.actor, question.token, answer);
             let error = if partition {
                 result.unwrap();
                 let question = game.internal_decision(View::Referee).unwrap();
+                published = game.clone();
                 game.answer_internal(question.actor, question.token, response(&question))
                     .unwrap_err()
             } else {
                 result.unwrap_err()
             };
             assert!(error.to_string().contains("generation"), "{error}");
-            assert_restored(&game, &origin);
+            assert_reverted_from(&game, &origin, &published);
         }
     }
 }
@@ -433,17 +477,18 @@ fn search_order_and_partition_next_question_errors_are_commit_failures() {
             steps.push(up_to(90, 1));
             game.execute_internal(&checked(steps), &source("synthetic"), context(seat))
                 .unwrap();
-            loop {
+            let published = loop {
                 let question = game.internal_decision(View::Referee).unwrap();
+                let published = game.clone();
                 match game.answer_internal(question.actor, question.token, response(&question)) {
                     Ok(progress) => assert!(!progress.complete),
                     Err(error) => {
                         assert!(error.to_string().contains("epoch exhausted"), "{error}");
-                        break;
+                        break published;
                     }
                 }
-            }
-            assert_reverted(&game, &origin);
+            };
+            assert_reverted_from(&game, &origin, &published);
         }
     }
 }

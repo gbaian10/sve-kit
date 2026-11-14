@@ -316,6 +316,7 @@ fn failure_after_choice_and_shuffle_restores_execution_and_real_rng() {
             answer(game, seat, SearchAnswer::Ungrouped(vec![0]));
         }
         let token = games[0].internal_decision(view(seat)).unwrap().token;
+        let published = games[0].clone();
         games[0]
             .answer_internal(
                 PlayerId { seat },
@@ -323,7 +324,7 @@ fn failure_after_choice_and_shuffle_restores_execution_and_real_rng() {
                 Answer::SearchReplacement(SearchReplacementAnswer::Replacement),
             )
             .unwrap_err();
-        super::super::transactions::assert_reverted(&games[0], &origin);
+        super::super::transactions::assert_reverted_from(&games[0], &origin, &published);
         games[1] = super::super::transactions::aligned_control(&games[0], &origin);
         for game in &mut games {
             game.execute_internal(&program, &source("synthetic"), context(seat))

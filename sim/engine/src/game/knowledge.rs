@@ -14,10 +14,18 @@ use serde_json::{Value, json};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(super) struct Knowledge {
     pub(super) seen: BTreeMap<String, Value>,
+    pub(super) faces: BTreeSet<KnownFace>,
     located: BTreeSet<String>,
     pub(super) carried: Vec<Value>,
     handles: BTreeMap<String, HandleEntry>,
     issued: u64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub(super) struct KnownFace {
+    pub(super) card: String,
+    pub(super) face: u64,
+    pub(super) owner: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -30,6 +38,7 @@ struct HandleEntry {
 struct HandleSnapshot {
     issued: u64,
     handles: BTreeMap<String, HandleEntry>,
+    faces: BTreeSet<KnownFace>,
 }
 
 /// Call-local knowledge boundary; never stored in an execution or event.
@@ -119,8 +128,15 @@ impl Game {
         for (_, id) in members {
             let object = self.object(&id)?;
             let record = json!({"id":id,"card":object.card,"owner":object.owner,"from":self.node});
+            let physical = self.physical_card_face(&id)?;
+            let face = KnownFace {
+                card: physical.card,
+                face: physical.face,
+                owner: object.owner.clone(),
+            };
             let knowledge = self.state.knowledge.entry(seat.into()).or_default();
             knowledge.seen.entry(id.clone()).or_insert(record);
+            knowledge.faces.insert(face);
             if located {
                 knowledge.locate(&id, &key)?;
             }
@@ -197,6 +213,7 @@ impl Game {
                         HandleSnapshot {
                             issued: known.issued,
                             handles: known.handles.clone(),
+                            faces: known.faces.clone(),
                         },
                     )
                 })
@@ -212,10 +229,9 @@ impl Game {
     ) -> Result<()> {
         target.state.ir_epoch = self.state.ir_epoch.max(target.state.ir_epoch);
         for (seat, previous) in &published.0 {
-            let Some(knowledge) = target.state.knowledge.get_mut(seat) else {
-                continue;
-            };
+            let knowledge = target.state.knowledge.entry(seat.clone()).or_default();
             knowledge.issued = knowledge.issued.max(previous.issued);
+            knowledge.faces.extend(previous.faces.iter().cloned());
             {
                 let interrupted = knowledge
                     .located

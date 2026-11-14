@@ -422,10 +422,11 @@ fn successful_after_is_usable_but_reordering_revokes_old_look_authority() {
             ],
         );
         let question = revoked.internal_decision(view(seat)).unwrap();
+        let published = revoked.clone();
         revoked
             .answer_internal(PlayerId { seat }, question.token, Answer::Order(vec![0]))
             .unwrap_err();
-        transactions::assert_reverted(&revoked, &origin);
+        transactions::assert_reverted_from(&revoked, &origin, &published);
         assert!(revoked.internal_decision(view(seat)).is_none());
     }
 }

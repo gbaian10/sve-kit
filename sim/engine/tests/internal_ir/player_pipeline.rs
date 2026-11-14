@@ -139,6 +139,7 @@ fn player_pipeline_fault_rolls_back_the_play_without_a_rules_defeat() {
         steps.extend(tail);
         game.execute_internal(&checked(steps), &source("synthetic"), context(1))
             .unwrap();
+        let published = game.clone();
         let failed = answer(
             &mut game,
             Viewer::P1,
@@ -154,17 +155,13 @@ fn player_pipeline_fault_rolls_back_the_play_without_a_rules_defeat() {
                 >= expected["state"]["ir_epoch"].as_u64().unwrap()
         );
         restored["state"]["ir_epoch"] = expected["state"]["ir_epoch"].clone();
+        transactions::assert_observations_restored(&game, &origin, &published);
         transactions::normalize_saved_issuance(&mut restored, &mut expected);
+        transactions::normalize_saved_memories(&mut restored, &mut expected);
         assert_eq!(
             restored, expected,
             "all authority and RNG data must roll back"
         );
-        for viewer in [Viewer::P1, Viewer::P2] {
-            assert_eq!(
-                game.observe(viewer).unwrap(),
-                origin.observe(viewer).unwrap()
-            );
-        }
         assert!(!format!("{failed:?}").contains("draw request"));
         assert!(!format!("{failed:?}").contains("integer representation"));
         game.advance_player_input();
