@@ -243,7 +243,9 @@ buff:
 
 場上正式目標與結算選取也接受 `power_le: N`／`power_ge: N`，依候選目前的攻擊力篩選（CSD02b-001「攻撃力3以下の…を選ぶ」、CP04-032「攻撃力3以上の…を選ぶ」）。極值 `where` 與聯集分支不帶這兩個條件，並用時拒絕。
 
-手牌的 `choose.from: {who: self, zone: hand, ...}` 可接 `move: {ref: selected, to: field, result: entered}`，選項只向控制者公開；成功入場才公開卡片，且不支付印刷打出費用。多張手牌選取（如 BP17-098）與 Look 共用場上空位上限：入場必須緊接選取，出題時最多可選目前空位數。中間插入其他步驟或跨條件分支入場會在載入時拒絕；單張選取沿用既有滿場時留在原區域的處理。「手札のAかB」寫成 `choose.from: {any_of: [{who: self, zone: hand, kind: follower, trait: 透京, orig_cost_le: 3}, {who: self, zone: hand, class: ビショップ, kind: amulet, orig_cost_le: 3}]}`（BP18-098、BP13-090）：每個分支都必須讀自己的手牌並各自帶靜態篩選，同時符合多個分支的卡仍只算一張；混入其他區域、對手手牌、`except`、極值或動態費用的分支在載入時拒絕。
+手牌的 `choose.from: {who: self, zone: hand, ...}` 可接 `move: {ref: selected, to: field, result: entered}`，選項只向控制者公開；成功入場才公開卡片，且不支付印刷打出費用。多張手牌選取（如 BP17-098）與 Look 共用場上空位上限：入場必須緊接選取，出題時最多可選目前空位數。中間插入其他步驟或跨條件分支入場會在載入時拒絕；單張選取沿用既有滿場時留在原區域的處理。「手札のAかB」寫成 `choose.from: {any_of: [{who: self, zone: hand, kind: follower, trait: 透京, orig_cost_le: 3}, {who: self, zone: hand, class: ビショップ, kind: amulet, orig_cost_le: 3}]}`（BP18-098、BP13-090）：每個分支各自帶靜態篩選，同時符合多個分支的卡仍只算一張；分支可合併選牌者自己的手牌與 EX，但不可讀其他玩家的手牌或 EX，也不接受其他區域、`except`、極值或動態費用。
+
+「自分の手札か自分のEXエリア」沿用同一個 `choose.from.any_of`（SP01-010），例如 `{any_of: [{who: self, zone: hand, kind: follower, trait: 兵士, orig_cost_le: 2}, {who: self, zone: ex, kind: follower, trait: 兵士, orig_cost_le: 2}]}`。兩區共用一次選擇與 `upto: 1` 上限，分支順序不影響私有權限；整題只向選牌者公開，對手仍看不到手牌候選。後續相鄰的 `move: {ref: selected, to: field, result: entered}` 沿用一般入場容量與事件處理，不支付卡片的打出費用。
 
 本文 `choose.from: {in: created}` 可從同一能力先前的公開物件綁定再選子集，例如 `create.result` 或正式目標；選擇者沿用 `by`。張數沿用 `n`、`upto`、`any`；選擇時只保留原世代仍在場上、EX、墓場或表向消滅領域的卡，不重新搜尋同名物件。手牌、Look 與進化牌堆的選取仍遵循各自的權限入口。
 
