@@ -7,9 +7,10 @@
 )]
 
 use core::array::from_fn;
-use serde_json::Value;
+use serde_json::{Value, json};
 use sha2::{Digest as _, Sha256};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
+use sve_battle_host::load::{Inputs, LoadError, load};
 use sve_battle_host::wire::{
     InputState, Outgoing, ReceiptResult, Seat, Submit, SubmitCommand, TemporaryAnswer, Update,
 };
@@ -27,15 +28,13 @@ fn hex(bytes: &[u8]) -> String {
         .collect()
 }
 
-fn selection() -> &'static SelectedEffects {
-    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
-    SELECTED.get_or_init(|| {
+/// Snapshot, keywords, selection and bound rules, exactly as a host would pass them.
+fn texts() -> &'static [String; 4] {
+    static TEXTS: OnceLock<[String; 4]> = OnceLock::new();
+    TEXTS.get_or_init(|| {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
         let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
-        let input: Value = serde_json::from_str(
-            &read_to_string(var_os("SVE_TEST_CURRENT_SELECTION").unwrap()).unwrap(),
-        )
-        .unwrap();
+        let selection = read_to_string(var_os("SVE_TEST_CURRENT_SELECTION").unwrap()).unwrap();
         let keywords = read_to_string(root.join("authored/rules/keywords.yaml")).unwrap();
         let mut rules: Value = serde_saphyr::from_str(
             &read_to_string(root.join("authored/rules/engine/index.yaml")).unwrap(),
@@ -44,23 +43,43 @@ fn selection() -> &'static SelectedEffects {
         // The pin names the reviewed batch; generated test inputs keep the same rule capabilities.
         *rules.pointer_mut("/input/snapshot_sha256").unwrap() =
             Value::String(hex(snapshot.as_bytes()));
+        [snapshot, keywords, selection, rules.to_string()]
+    })
+}
+
+fn inputs() -> Inputs<'static> {
+    let [snapshot, keywords, selection, rules] = texts();
+    Inputs {
+        snapshot,
+        keywords,
+        selection,
+        rules,
+    }
+}
+
+fn selection() -> &'static SelectedEffects {
+    static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
+    SELECTED.get_or_init(|| {
+        let input = inputs();
         CurrentSelectionLoader::new()
             .unwrap()
             .select_with_rules(
-                &snapshot,
-                &keywords,
-                &input,
-                &rules.to_string(),
+                input.snapshot,
+                input.keywords,
+                &serde_json::from_str(input.selection).unwrap(),
+                input.rules,
                 &EngineIdentityInput::LegacyJp,
             )
             .unwrap()
     })
 }
 
+const MAIN_DECK: [&str; 2] = ["BP10-122", "BP01-173"];
+
 fn session(control: [SeatControl; 2]) -> LocalSession {
     let decks = from_fn(|_| PlayerDeck {
         construction: DeckConstruction::Class("ニュートラル".into()),
-        main: [["BP10-122", "BP01-173"]; 20]
+        main: [MAIN_DECK; 20]
             .concat()
             .into_iter()
             .map(Into::into)
@@ -147,13 +166,30 @@ fn hot_seat_match_runs_to_a_result_with_receipts_first() {
     assert_eq!(session.stopped(), None);
 }
 
+fn setup(card: Option<&str>) -> String {
+    let main: Vec<&str> = card.map_or_else(|| [MAIN_DECK; 20].concat(), |card| vec![card; 40]);
+    let deck =
+        json!({"construction":{"kind":"class","value":"ニュートラル"},"main":main,"evolve":[]});
+    json!({"decks":[deck, deck],"first_chooser":"p2","seed":"battle-host-load",
+        "control":["player","policy"],"max_submissions":10_000_u16})
+    .to_string()
+}
+
 #[test]
-fn policy_seat_plays_inside_the_host_against_a_player_channel() {
-    let mut session = session([SeatControl::Player, SeatControl::Policy]);
+fn loaded_policy_seat_plays_inside_the_host_against_a_player_channel() {
+    let mut session = load(inputs(), &setup(None)).unwrap();
     let [first, second] = play_out(&mut session);
     assert!(second.is_none(), "the policy seat has no channel");
     assert!(matches!(
         first.map(|update| update.input),
         Some(InputState::Finished { winner: Some(_) })
     ));
+}
+
+#[test]
+fn a_deck_outside_the_selection_cannot_start() {
+    assert_eq!(
+        load(inputs(), &setup(Some("NOT-A-CARD"))).err(),
+        Some(LoadError::Match)
+    );
 }

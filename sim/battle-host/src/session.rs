@@ -8,6 +8,7 @@ use crate::wire::{
     Rejection, Seat, Submit, SubmitCommand, TEMPORARY_FORMAT, TemporaryAnswer, Update,
 };
 use core::fmt;
+use serde::Serialize;
 use sve_engine::game::Game;
 use sve_engine::game::player::observation::Observation;
 use sve_engine::game::player::{Command, Input, QuestionToken, Submission, SubmissionKind, Viewer};
@@ -24,7 +25,7 @@ pub enum SeatControl {
 }
 
 /// One outgoing message and the seat channel it belongs to.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Delivery {
     /// Destination channel.
     pub seat: Seat,
