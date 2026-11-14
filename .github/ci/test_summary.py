@@ -321,6 +321,14 @@ RUST_BINARY = re.compile(
     r"^\s*Running (?:unittests )?((?:src|tests|examples|benches)/(?:[A-Za-z0-9_-]+/)*[A-Za-z0-9_-]+\.rs) \(.*?/deps/([A-Za-z0-9_-]+?)-[0-9a-f]+\)$"
 )
 
+RUST_PANIC_LOCATION = re.compile(
+    r"^thread '[^\n]*' panicked at "
+    r"((?:sim/(?:engine|scenario-runner|battle-contract|prototype)/)?"
+    r"(?:src|tests|examples|benches)/(?:[A-Za-z0-9_-]+/)*"
+    r"[A-Za-z0-9_-]+\.rs:[1-9][0-9]*:[1-9][0-9]*):$",
+    re.MULTILINE,
+)
+
 
 def binary_section(source: str) -> list[str]:
     """Time each test binary, so per-binary setup costs stay visible across shards."""
@@ -358,7 +366,15 @@ def rust_summary(folder: Path) -> str:
         source,
         re.MULTILINE,
     )
-    failures = "\n".join(failure_section(locations) + binary_section(source))
+    panic_locations = list(dict.fromkeys(RUST_PANIC_LOCATION.findall(source)))
+    source_locations = (
+        ["", "### Failure source locations", "", *(f"- `{p}`" for p in panic_locations)]
+        if panic_locations
+        else []
+    )
+    failures = "\n".join(
+        failure_section(locations) + source_locations + binary_section(source)
+    )
     return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{shard_line}\n{failures}\n"
 
 
