@@ -9,8 +9,8 @@ use sve_engine::game::player::{QuestionPurpose, QuestionShape, Viewer};
 /// Format number of these temporary messages; the contract starts at 1.
 pub const TEMPORARY_FORMAT: u8 = 0;
 
-/// Largest integer that survives a JavaScript number unchanged.
-pub const MAX_SAFE_INTEGER: u64 = 9_007_199_254_740_991;
+/// Largest integer that survives a JavaScript number unchanged (2^53 - 1).
+pub const MAX_SAFE_INTEGER: u64 = 0x001F_FFFF_FFFF_FFFF;
 
 /// A seat on the wire.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
