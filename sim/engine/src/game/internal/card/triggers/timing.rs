@@ -5,11 +5,13 @@ use super::{
     TriggerAggregation, TriggerCondition, TurnId, ZoneKind, invalid, player_id, unsupported,
 };
 use crate::game::Frame;
+#[cfg(feature = "runner")]
+use crate::game::Step;
 use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::grant;
 use crate::game::internal::source::SourceSnapshot;
 use crate::game::internal::{DamageOccurrence, SubjectHistoryEvent};
-use crate::game::{Step, int, string};
+use crate::game::{int, string};
 use crate::ir::dice as ir_dice;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::fusion;
@@ -232,6 +234,8 @@ impl Game {
     ///
     /// # Errors
     /// Rejects a busy authority, prototype card plays, or an unsupported intervention atomically.
+    // Test and runner driver only: players and hosts submit through the player interface.
+    #[cfg(feature = "runner")]
     pub fn internal_rule_action(&mut self, decision: &Value) -> Result<Step> {
         if !matches!(
             string(&decision["do"]),

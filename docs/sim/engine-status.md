@@ -28,7 +28,7 @@ DSL 1.0 已有 Schema、Python typed boundary、作者載入器、Rust lowering�
 ## 已定的開發邊界
 
 依 [#1971 的維護者決定](https://github.com/gbaian10/sve-kit/issues/1971)，
-舊 façade（`decide`／`legal`）、JSON 效果解譯器與舊玩家封包凍結不修，只供引擎測試驅動；
+舊 façade（`decide`／`legal`）、JSON 效果解譯器與舊玩家封包凍結不修，只供引擎測試驅動，並收在 `runner` feature 後；
 對局入口建在 typed 路徑。原型 AI、回放與輔助已移除，typed 後繼由 #2206、#2207、#2208 追蹤。typed 仍呼叫的抽牌、移區、攻擊、回合、終局等共用規則基本動作不在凍結範圍。
 
 重構期間不新增窄積木或准入卡片以繞過共同地基；同一合法範圍先等價合併，

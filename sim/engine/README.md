@@ -87,7 +87,10 @@ current cards never acquire prototype programs. Source proof stays inside the
 authority, including after departure. Loaded internal cards still reject saves;
 this entry does not publish capabilities or grant use qualification.
 
-The default `runner` feature enables the evaluation adapters. The
+The default `runner` feature enables the evaluation adapters and the old test
+drivers: `Game::decide`, `submit`, `legal`, `internal_rule_action` and the seat
+packets `View::P1`/`View::P2`. Hosts build without it and use the player interface;
+referee reads (`projection(View::Referee)`, `query`) stay available. The
 library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
 bindings, host time and execution have not been validated.
 

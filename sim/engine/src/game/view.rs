@@ -115,7 +115,7 @@ impl Game {
             self.awaited(view)?
         };
         if seat.is_none_or(|seat| self.input_point()["by"] == seat) {
-            packet["legal"] = json!(self.legal()?);
+            packet["legal"] = json!(self.legal_actions()?);
         }
         packet["flow"] = self.state.flow.clone();
         if self.state.flow["kind"] == "pregame"
@@ -237,7 +237,7 @@ impl Game {
         let choices = if let Some(prompt) = &self.state.prompt {
             prompt.choices.clone()
         } else {
-            self.legal()?
+            self.legal_actions()?
         };
         Ok(json!({"by":seat,"at":point["at"],"choices":choices}))
     }
