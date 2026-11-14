@@ -7,11 +7,12 @@ use super::{
 };
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
+use crate::game::internal::movement::ENTRY_WITHOUT_FANFARE;
 use crate::game::{Frame, Object};
-use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
+use crate::ir::{KeywordId, LimitSpec};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -57,6 +58,16 @@ fn filter(ability: &Ability) -> Option<SubjectFilter> {
         return None;
     };
     SubjectFilter::parse(SubjectFields::Entry(*binding), predicate)
+}
+
+fn is_fanfare(ability: &Ability) -> bool {
+    matches!(
+        ability.source.origin,
+        AbilityOrigin::Keyword {
+            keyword: KeywordId::Fanfare,
+            ..
+        }
+    )
 }
 
 fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
@@ -175,6 +186,10 @@ impl Game {
         let active = player_id(self.active())?;
         let effect_source = self.card_runtime.active_source;
         let (cause, actor, method) = entry_cause(frame)?;
+        let without_fanfare = matches!(
+            frame.values.get(ENTRY_WITHOUT_FANFARE),
+            Some(serde_json::Value::Bool(true))
+        );
         let mut candidates = Vec::new();
         for old in previous {
             let object = self.internal_current_reference(&old.id)?;
@@ -198,6 +213,11 @@ impl Game {
             for (holder, abilities) in &observers {
                 let controller = player_id(&self.object(holder)?.controller)?;
                 for ability in abilities {
+                    // 「それの{ファンファーレ}能力を使えない」 removes only the entering card's own Fanfare,
+                    // before it becomes pending or spends a trigger limit; other observers still see it.
+                    if without_fanfare && *holder == old.id && is_fanfare(&ability.node) {
+                        continue;
+                    }
                     let plan =
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
                     if subject_condition::matches(

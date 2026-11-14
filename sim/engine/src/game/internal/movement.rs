@@ -5,11 +5,13 @@ use super::{
 };
 use crate::game::Object;
 use crate::game::effects::token_erasure_zone;
+use crate::ir::Requirements;
 use crate::ir::events::timing::opponent;
 use crate::ir::hand_position;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::perspective;
 use crate::ir::shuffle as shuffle_shape;
+use crate::ir::trigger_restrictions::suppresses_fanfare;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
     DestroyOutcome, DurationEnd, Effect, EffectId, EffectSource, Expr, Generation, Instruction,
@@ -20,8 +22,19 @@ use crate::ir::{
     TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
-use core::num::NonZeroU64;
+use core::num::{NonZeroU32, NonZeroU64};
 use serde_json::json;
+
+/// The frame value that keeps the entering cards' own Fanfare from triggering.
+pub(super) const ENTRY_WITHOUT_FANFARE: &str = "entry_without_fanfare";
+
+/// How committed members arrive when the destination is the field.
+#[derive(Clone, Copy)]
+pub(super) struct FieldArrival {
+    pub(super) posture: Option<Posture>,
+    /// 「それの{ファンファーレ}能力を使えない」 for exactly the cards this movement puts.
+    pub(super) without_fanfare: bool,
+}
 
 mod capacity;
 pub(super) mod mixed;
@@ -62,6 +75,23 @@ pub struct MovementFact {
     pub controller_before: PlayerId,
     /// Immutable base printing, retained even when a token is erased on departure.
     pub card_before: String,
+}
+
+/// Well-formedness admits only the exact Fanfare restriction as a movement's entry effect, and
+/// `admitted_field_entry` executes only that one, so its occurrences are masked before the parent
+/// body is checked; a capability shared with the body keeps the body's own locations.
+pub(super) fn mask_entry_effects(requirements: &mut Requirements) {
+    for requirement in &mut requirements.required {
+        if requirement.capability.version != NonZeroU32::MIN {
+            continue;
+        }
+        requirement
+            .locations
+            .retain(|location| !location.ir_path.contains("/movement/entry_effects/"));
+    }
+    requirements
+        .required
+        .retain(|requirement| !requirement.locations.is_empty());
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
@@ -258,7 +288,7 @@ fn admitted_field_entry(objects: &Selector, movement: &MoveSpec) -> bool {
         && movement.position.is_none()
         && movement.order.is_none()
         && matches!(movement.initial_posture, None | Some(Posture::Acted))
-        && movement.entry_effects.is_empty()
+        && (movement.entry_effects.is_empty() || suppresses_fanfare(&movement.entry_effects))
         && source_allowed
 }
 
@@ -918,7 +948,7 @@ impl Game {
                 return Ok(());
             }
         }
-        let (moved, _) = self.internal_move_members(
+        let entering = self.plan_movements(
             execution,
             &selected,
             "field",
@@ -926,7 +956,21 @@ impl Game {
             MoveMethod::Put,
             owner_destination,
             None,
-            movement.initial_posture,
+        )?;
+        let (moved, _) = self.commit_movement_plan(
+            execution,
+            entering,
+            &[],
+            "field",
+            ZoneKind::Field,
+            MoveMethod::Put,
+            owner_destination,
+            None,
+            FieldArrival {
+                posture: movement.initial_posture,
+                without_fanfare: suppresses_fanfare(&movement.entry_effects),
+            },
+            false,
         )?;
         for member in &moved {
             if member.after.is_some() && movement.initial_posture.is_none() {
@@ -1245,7 +1289,10 @@ impl Game {
             method,
             owner_destination,
             position,
-            initial_posture,
+            FieldArrival {
+                posture: initial_posture,
+                without_fanfare: false,
+            },
             unordered_deck,
         )
     }
@@ -1265,7 +1312,7 @@ impl Game {
         method: MoveMethod,
         owner_destination: bool,
         position: Option<Position>,
-        initial_posture: Option<Posture>,
+        arrival: FieldArrival,
         unordered_deck: bool,
     ) -> Result<(Vec<MoveResult>, Vec<ResultMember>)> {
         if !created.is_empty()
@@ -1318,7 +1365,17 @@ impl Game {
         if owner_destination {
             frame.values.insert("owner_destination".into(), json!(true));
         }
-        match (initial_posture, zone) {
+        match (arrival.without_fanfare, zone) {
+            (false, _) => {}
+            (true, "field") => {
+                // The typed entry occurrence reads it; the legacy Fanfare sentence path does not.
+                frame
+                    .values
+                    .insert(ENTRY_WITHOUT_FANFARE.into(), json!(true));
+            }
+            (true, _) => return Err(unsupported("Fanfare restriction outside a field entry")),
+        }
+        match (arrival.posture, zone) {
             (None, _) => {}
             (Some(Posture::Acted), "field") => {
                 frame.values.insert("field_entry_acted".into(), json!(true));

@@ -1,0 +1,42 @@
+cards:
+  BP04-038:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: picked
+                from:
+                  kind: follower
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                entry_effects:
+                  - cannot:
+                      ability:
+                        keyword: fanfare
+                      what: play_ability
+                ref: picked
+                result: entered
+                to: field
+            - apply:
+                effect:
+                  cannot:
+                    what: attack
+                on:
+                  follow: entered
+                until: turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

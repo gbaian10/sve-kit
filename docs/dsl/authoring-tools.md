@@ -1239,3 +1239,11 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 `distinct_orig_costs: {in: {objects_of: milled, view: before}}` 沿既有種類數聚合，僅讀同一本文先前由自己牌庫頂固定正張數送到墓場的實際成功成員。
 `== 1` 同時表示成員非空且原費全部相同；不以指示要求的張數或墓場目前全部卡片代替。回條不存在、來自其他來源／目的地、After 投影或附加篩選皆拒絕；原費讀不可變本體印刷，不套用目前費用修正。
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
+
+## 放到場上的卡不能使用入場曲
+
+`move` 到場上時可加 `entry_effects: [{cannot: {what: play_ability, ability: {keyword: fanfare}}}]`，
+表示「それの{ファンファーレ}能力を使えない」：這次放上場的卡，自己的入場曲不會成為待機中的能力（GAP-A-044，不改寫成 `no_trigger`）。
+入場曲只會在持有者自己進場時誘發，所以這個限制在該次進場的誘發判定時就處理完，不會留成持續效果；
+同時進場的其他卡與其他觀察進場的能力照常誘發。目前只接受這一種 `entry_effects`，其他形狀與非場上目的地都會拒絕。
+BP04-038 接著用 `apply: {on: {follow: entered}, effect: {cannot: {what: attack}}, until: turn}` 表示「このターン、それは相手を攻撃できない」。

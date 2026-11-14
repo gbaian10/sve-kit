@@ -363,7 +363,8 @@ fn check_requirements(
         node: program.clone(),
         source: source.clone(),
     };
-    let requirements = parent_requirements(&located, card);
+    let mut requirements = parent_requirements(&located, card);
+    super::movement::mask_entry_effects(&mut requirements);
     let token_paths = super::tokens::paths(program, x);
     let mut attack_targets = BTreeSet::new();
     super::card::triggers::event_operand::target_paths(program, "", &mut attack_targets);
