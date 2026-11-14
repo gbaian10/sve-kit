@@ -621,6 +621,7 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
                 .as_ref()
                 .map_or(&[], |union| union.0.as_slice()),
             name: query.name.as_deref(),
+            names: &query.names,
             contains: query.name_contains.as_deref(),
             token: query.token.or_else(|| query.not_token.map(|token| !token)),
             original_cost: [query.orig_cost_eq, None, query.orig_cost_ge],

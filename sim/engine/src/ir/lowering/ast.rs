@@ -1938,7 +1938,7 @@ pub(super) struct Choice {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum ModeCap {
     Fixed(u64),
-    Count { count: CountQuery },
+    Count { count: Box<CountQuery> },
     // Structured counts retain their narrower admission before the numeric fallback.
     Number(Box<Value>),
 }
@@ -2242,6 +2242,8 @@ pub(super) struct CountQuery {
     /// 「AやBの…」: a public count of cards having either trait (BP09-117).
     pub traits_any: Option<TraitUnion>,
     pub name: Option<String>,
+    #[serde(default)]
+    pub names: Vec<String>,
     pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,

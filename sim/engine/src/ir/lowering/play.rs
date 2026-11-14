@@ -1107,6 +1107,10 @@ impl BodyContext<'_> {
             if choice.n.is_some() || choice.instead.is_some() || choice.exclude_chosen.is_some() {
                 return Err(unsupported(path));
             }
+            #[expect(
+                clippy::unneeded_field_pattern,
+                reason = "New count filters must require an explicit admission decision."
+            )]
             let ast::CountQuery {
                 face_up: None,
                 class: None,
@@ -1118,13 +1122,14 @@ impl BodyContext<'_> {
                 keyword: None,
                 r#trait: Some(_),
                 traits_any: None,
-                name: None,
+                name: _,
+                names: _,
                 name_contains: None,
                 orig_cost_eq: None,
                 orig_cost_ge: None,
                 token: None,
                 not_token: None,
-            } = count
+            } = count.as_ref()
             else {
                 return Err(unsupported(path));
             };

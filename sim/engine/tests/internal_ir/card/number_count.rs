@@ -123,6 +123,9 @@ fn scalar_zone_counts_reject_hidden_characteristic_filters_and_unknown_keywords(
         json!({"who":"self","zone":"deck","keyword":"ward"}),
         json!({"who":"self","zone":"hand","other":true}),
         json!({"who":"self","zone":"field","keyword":"unknown"}),
+        json!({"who":"self","zone":"hand","names":["unit-follower"]}),
+        json!({"who":"self","zone":"deck","names":["unit-follower"]}),
+        json!({"who":"self","zone":"banish","names":["unit-follower"]}),
     ] {
         lowerer()
             .lower(&tree(
@@ -595,5 +598,137 @@ fn minimum_pair_discount_requires_the_reduced_cost_in_full() {
             result.unwrap_err();
             assert_eq!(exact_authority(&game), before);
         }
+    }
+}
+
+#[test]
+fn named_count_intersects_other_filters_and_matches_each_card_once() {
+    let program = lowered(&json!({"cost":{"pp":0},"do":[
+        {"life":{"who":"self","delta":{"count":{"who":"self","zone":"cemetery","kind":"follower","names":["unit-follower","unit-spell","unit-follower"]}}}}
+    ]}));
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"follower","card":"unit-follower"},
+        {"id":"spell","card":"unit-spell"},
+        {"id":"other","card":"unit-amulet"}
+    ]);
+    initial["players"]["P2"]["zones"]["cemetery"] =
+        json!([{"id":"opposing","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "named-count",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    activate(&mut game, 1);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        21
+    );
+}
+
+#[test]
+fn a_named_trait_count_limits_modes_to_its_actual_field_population() {
+    for name_filter in [
+        json!({"name":"unit-follower"}),
+        json!({"names":["unit-follower","absent"]}),
+    ] {
+        let mut count = json!({"who":"self","zone":"field","trait":"eligible"});
+        count
+            .as_object_mut()
+            .unwrap()
+            .extend(name_filter.as_object().unwrap().clone());
+        let program = lowerer().lower(&equipment_played::tree(&json!({"activate":{"cost":{"pp":0},"do":[
+            {"choice":{"upto":{"count":count},"options":[[{"life":{"who":"self","delta":1}}],[{"life":{"who":"self","delta":2}}]]}}
+        ]}}),"unit-follower")).unwrap().remove("unit-follower").unwrap();
+        let (snapshot, keywords, effects) = catalog_documents(&json!("1"));
+        let snapshot = snapshot
+            .lines()
+            .map(|line| {
+                let mut row: Value = serde_json::from_str(line).unwrap();
+                row["faces"][0]["traits"] = json!(["eligible"]);
+                row.to_string()
+            })
+            .collect::<Vec<_>>()
+            .join("\n");
+        let catalog = Arc::new(
+            Catalog::from_documents(&snapshot, &keywords, &[("synthetic.yaml".into(), effects)])
+                .unwrap(),
+        );
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"s","card":"unit-follower"},{"id":"other","card":"unit-amulet"}]);
+        let mut game = Game::new(
+            catalog,
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "named-mode-count",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-amulet", &card(vec![]))
+            .unwrap();
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card(
+                "s",
+                program.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap()
+        else {
+            panic!("mode declaration")
+        };
+        let before = game.projection(View::Referee).unwrap();
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(1), ModeId(2)]),
+        )
+        .unwrap_err();
+        assert_eq!(game.projection(View::Referee).unwrap(), before);
+        resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::Modes(vec![ModeId(2)]),
+            )
+            .unwrap(),
+        );
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+            22_u8
+        );
+    }
+}
+
+#[test]
+fn evolve_deck_mode_count_conditions_require_a_single_public_name() {
+    let count = json!({"who":"self","zone":"evolve_deck","face_up":true,"name":"one"});
+    let document = |query| {
+        tree(&json!({"cost":{"pp":0},"do":[{"choice":{
+            "n":1,
+            "instead":[{"if":{"cmp":{"left":{"count":query},"op":"ge","right":1}},"upto":2}],
+            "options":[[{"life":{"who":"self","delta":1}}],[{"life":{"who":"self","delta":2}}]]
+        }}]}))
+    };
+    lowerer().lower(&document(count)).unwrap();
+    for query in [
+        json!({"who":"self","zone":"evolve_deck","face_up":true,"names":["one","two"]}),
+        json!({"who":"self","zone":"evolve_deck","face_up":true,"name":"one","names":["two"]}),
+        json!({"who":"opp","zone":"evolve_deck","face_up":true,"name":"one"}),
+        json!({"who":"self","zone":"evolve_deck","face_up":false,"name":"one"}),
+    ] {
+        lowerer().lower(&document(query)).unwrap_err();
     }
 }
