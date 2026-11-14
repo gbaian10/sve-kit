@@ -787,3 +787,85 @@ fn published_memory_survives_rollback_for_a_previously_unknown_seat() {
     );
     finish_order(&mut game, &next);
 }
+
+#[test]
+fn failed_answer_discards_new_unpublished_faces_but_retains_published_memory() {
+    for actor in [Viewer::P1, Viewer::P2] {
+        for fail_after_look in [false, true] {
+            let initial = setup(
+                actor.player().seat,
+                json!([
+                    {"id":"published-card","card":"unit-follower"},
+                    {"id":"d0","card":"unit-amulet"}
+                ]),
+            );
+            let mut game = exhausted_deck(&initial);
+            let origin = game.clone();
+            let published_face = CardMemory {
+                card: "unit-follower".into(),
+                face: 0,
+                owner: actor,
+            };
+            let unpublished_face = CardMemory {
+                card: "unit-amulet".into(),
+                face: 0,
+                owner: actor,
+            };
+            let mut steps = vec![
+                look(1, 1),
+                order(2, looked(1), Position::Bottom {}),
+                look(3, 1),
+            ];
+            if fail_after_look {
+                steps.push(draw(4, 1));
+            }
+            assert!(
+                !origin
+                    .observe(actor)
+                    .unwrap()
+                    .remembered
+                    .contains(&published_face)
+            );
+            assert!(
+                !origin
+                    .observe(actor)
+                    .unwrap()
+                    .remembered
+                    .contains(&unpublished_face)
+            );
+            assert!(
+                !game
+                    .execute_internal(
+                        &checked(steps),
+                        &source("synthetic"),
+                        context(actor.player().seat)
+                    )
+                    .unwrap()
+                    .complete
+            );
+            let question = game.internal_decision(View::Referee).unwrap();
+            assert_eq!(question.actor, actor.player());
+            let published = game.clone();
+            let before_answer = game.observe(actor).unwrap();
+            assert!(before_answer.remembered.contains(&published_face));
+            assert!(!before_answer.remembered.contains(&unpublished_face));
+            let result =
+                game.answer_internal(question.actor, question.token, Answer::Order(vec![0]));
+            if fail_after_look {
+                assert!(result.unwrap_err().to_string().contains("generation"));
+                transactions::assert_reverted_from(&game, &origin, &published);
+                let after = game.observe(actor).unwrap();
+                assert!(after.remembered.contains(&published_face));
+                assert!(!after.remembered.contains(&unpublished_face));
+            } else {
+                assert!(result.unwrap().complete);
+                assert!(
+                    game.observe(actor)
+                        .unwrap()
+                        .remembered
+                        .contains(&unpublished_face)
+                );
+            }
+        }
+    }
+}
