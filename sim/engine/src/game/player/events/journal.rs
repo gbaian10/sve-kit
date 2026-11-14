@@ -4,7 +4,8 @@ use super::{
     Viewer,
 };
 use crate::game::Game;
-use alloc::collections::BTreeMap;
+use crate::game::player::ObjectHandle;
+use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use core::mem::take;
 use serde_json::Value;
@@ -351,8 +352,15 @@ impl Journal {
             .filter(move |event| event.id.index > offset))
     }
 
-    /// Record every complete batch this viewer has not been shown yet.
-    pub(super) fn present(&mut self, viewer: Viewer) -> Result<(), EventError> {
+    /// One handoff to this viewer: when `ready`, record every complete batch it has not been
+    /// shown yet, in order, up to the first one it cannot identify; then remember `live`,
+    /// the handles it holds now, for the next handoff.
+    pub(super) fn present(
+        &mut self,
+        viewer: Viewer,
+        ready: bool,
+        live: BTreeSet<ObjectHandle>,
+    ) -> Result<(), EventError> {
         let perspective = index(viewer);
         let log = self
             .logs
@@ -361,12 +369,19 @@ impl Journal {
         if log.fault {
             return Err(EventError::ProjectionGap);
         }
-        for (batch, events) in sealed_batches(&self.pending, perspective) {
-            if log.presentation.show(&log.stream, batch, events).is_none() {
-                log.fault = true;
-                return Err(EventError::ProjectionGap);
+        if ready {
+            for (batch, events) in sealed_batches(&self.pending, perspective) {
+                match log.presentation.show(&log.stream, &live, batch, events) {
+                    Some(true) => {}
+                    Some(false) => break,
+                    None => {
+                        log.fault = true;
+                        return Err(EventError::ProjectionGap);
+                    }
+                }
             }
         }
+        log.presentation.hold(live);
         Ok(())
     }
 

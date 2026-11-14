@@ -384,6 +384,21 @@ describe("presentation queue", () => {
     expect(later.state.board).toEqual(board("later"))
   })
 
+  it("goes silent instead of failing when a promotion arrives with events unavailable", () => {
+    const shown = play(accepted(EMPTY, update({ presentation: [provisional("s1", "b1")] }))).state
+    // The committed batch that would prove the promotion cannot be delivered any more.
+    const stopped = accept(
+      shown,
+      update({ board: "gap", unavailable: true, presentation: [promote("s1")] }),
+    )
+    expect(stopped).not.toEqual({ kind: "host_error", reason: "projection" })
+    const settled = play(stopped as PresentationState)
+    expect(settled.beats).toEqual([])
+    expect(settled.state.silent).toBe(true)
+    expect(settled.state.board).toEqual(board("gap"))
+    expect(settled.state.scopes.get("s1")?.life).toBe("promoted")
+  })
+
   it("skips to the newest board and does not restart a skipped scope when it is promoted", () => {
     const queued = accepted(
       accepted(EMPTY, update({ board: "one", presentation: [provisional("s1", "b1")] })),

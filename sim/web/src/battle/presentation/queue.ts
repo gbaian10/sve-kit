@@ -164,8 +164,12 @@ export function accept(
     // history, but its id is recorded as used.
     if (known !== undefined && known.life !== "open") return CONFLICT
     if (op.kind === "promote") {
-      if (known !== undefined && known.batch !== null && promotion(claimed, known.batch) === null)
-        return CONFLICT
+      // With events unavailable the committed batch cannot be shown; the match goes silent
+      // below, so there is nothing left to check the promotion against.
+      const provable = update.events.status === "available"
+      if (provable && known !== undefined && known.batch !== null) {
+        if (promotion(claimed, known.batch) === null) return CONFLICT
+      }
       scopes.set(op.scope_id, { batch: known?.batch ?? null, life: "promoted" })
     } else {
       cancelled.add(op.scope_id)

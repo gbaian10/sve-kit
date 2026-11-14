@@ -3,8 +3,10 @@
 //! They are never rules history: committed readers, cursors and causal parents do not see
 //! them, and showing one changes no rules state, payment or randomness.
 
-use super::{EventError, EventKind, PlayerEvent, Viewer};
+use super::{EventCard, EventError, EventKind, EventSubject, PlayerEvent, Viewer};
 use crate::game::Game;
+use crate::game::player::ObjectHandle;
+use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
 use core::fmt;
 use core::mem::take;
@@ -112,7 +114,28 @@ pub(super) struct Presentation {
     open: Vec<Shown>,
     /// Scopes whose batch a restoration discarded, until the submission's result says why.
     discarded: Vec<ScopeId>,
+    /// Handles of the objects on the board this viewer was handed last.
+    held: Arc<BTreeSet<ObjectHandle>>,
     record: Arc<[Arc<PresentationEntry>]>,
+}
+
+/// Every card identity a result names for its viewer.
+fn cards(kind: &EventKind) -> Vec<&EventCard> {
+    match kind {
+        EventKind::Movement { before, after, .. } => {
+            before.card.iter().chain(after.card.iter()).collect()
+        }
+        EventKind::Action(action) => action
+            .subjects
+            .iter()
+            .flatten()
+            .filter_map(|subject| match subject {
+                EventSubject::Card(card) => Some(card.as_ref()),
+                EventSubject::Leader(_) => None,
+            })
+            .collect(),
+        EventKind::Phase(_) | EventKind::Result { .. } => Vec::new(),
+    }
 }
 
 /// What a viewer was shown, kept to prove that the committed batch is the same one.
@@ -125,16 +148,51 @@ struct Shown {
 }
 
 impl Presentation {
+    /// Whether this viewer can identify every card of these results from the board it has
+    /// now or the one it was last handed. A card revealed and hidden again inside the
+    /// uncommitted window is known only from memory; without separate evidence that the
+    /// viewer saw it, its result waits for commitment.
+    fn identifiable(&self, live: &BTreeSet<ObjectHandle>, events: &[EventKind]) -> bool {
+        events.iter().all(|kind| {
+            let source = match kind {
+                EventKind::Action(action) => action
+                    .source
+                    .as_ref()
+                    .and_then(|source| source.holder.as_ref()),
+                EventKind::Movement { .. } | EventKind::Phase(_) | EventKind::Result { .. } => None,
+            };
+            cards(kind)
+                .into_iter()
+                .map(|card| card.handle.as_ref())
+                .chain(source.map(Some))
+                .all(|handle| {
+                    handle.is_some_and(|known| live.contains(known) || self.held.contains(known))
+                })
+        })
+    }
+
+    /// Remember the board this viewer is handed now.
+    pub(super) fn hold(&mut self, live: BTreeSet<ObjectHandle>) {
+        if *self.held != live {
+            self.held = Arc::new(live);
+        }
+    }
+
     /// Open a scope for one complete batch unless this viewer already has it.
-    /// `None` reports identity exhaustion.
+    /// `Some(false)` means this batch, and therefore every later one, must wait for
+    /// commitment; `None` reports identity exhaustion.
     pub(super) fn show(
         &mut self,
         stream: &Arc<()>,
+        live: &BTreeSet<ObjectHandle>,
         batch: u64,
         events: Vec<EventKind>,
-    ) -> Option<()> {
+    ) -> Option<bool> {
         if events.is_empty() || self.open.iter().any(|shown| shown.batch == batch) {
-            return Some(());
+            return Some(true);
+        }
+        if !self.identifiable(live, &events) {
+            return Some(false);
         }
         let serial = self.issued.checked_add(1)?;
         let scope = ScopeId {
@@ -161,6 +219,7 @@ impl Presentation {
             stream,
             PresentationOp::Provisional(ProvisionalBatch { scope, events }),
         )
+        .map(|()| true)
     }
 
     /// Link one committed batch to the scope it was shown as. A batch that was never shown
@@ -270,13 +329,9 @@ impl Game {
     /// # Errors
     /// A perspective-local projection gap; input and observation are unaffected.
     pub fn present_player_events(&mut self, viewer: Viewer) -> Result<(), EventError> {
-        if !self.provisional_stop() {
-            return self
-                .player_events
-                .read_presentation(viewer, None)
-                .map(|_entries| ());
-        }
-        self.player_events.present(viewer)
+        let live = self.observable_handles(viewer);
+        let ready = self.provisional_stop();
+        self.player_events.present(viewer, ready, live)
     }
 
     /// Read this viewer's recorded presentation steps after a cursor, without changing rules,

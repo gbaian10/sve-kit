@@ -53,6 +53,8 @@ mod player_declarations;
 mod player_main_actions;
 #[path = "card/player_policy.rs"]
 mod player_policy;
+#[path = "card/presentation_erased.rs"]
+mod presentation_erased;
 #[path = "card/presentation_fault.rs"]
 mod presentation_fault;
 #[path = "card/presentation_nested.rs"]

@@ -1,5 +1,8 @@
 use super::*;
-use crate::game::player::events::PresentationOp;
+use crate::game::player::events::{
+    ActionEvent, EventCard, EventSubject, PresentationOp, ProvisionalBatch,
+};
+use crate::game::player::observation::CardProperties;
 use serde_json::json;
 
 fn result(rule: &str) -> EventKind {
@@ -32,7 +35,7 @@ fn journal(rules: &[&str]) -> Journal {
 #[test]
 fn a_batch_changed_after_it_was_shown_stops_that_viewers_history_only() {
     let mut journal = journal(&["first", "second"]);
-    journal.present(Viewer::P1).unwrap();
+    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
     assert_eq!(
         journal.read_presentation(Viewer::P1, None).unwrap().count(),
         2,
@@ -70,7 +73,7 @@ fn a_batch_changed_after_it_was_shown_stops_that_viewers_history_only() {
 #[test]
 fn a_shown_member_that_disappears_before_commit_is_not_promoted() {
     let mut journal = journal(&["only"]);
-    journal.present(Viewer::P2).unwrap();
+    journal.present(Viewer::P2, true, BTreeSet::new()).unwrap();
     journal.pending[0].views = [Ok(Some(result("only"))), Ok(None)];
     journal.commit();
     assert!(
@@ -90,7 +93,7 @@ fn a_shown_member_that_disappears_before_commit_is_not_promoted() {
 #[test]
 fn an_unchanged_batch_is_promoted_with_matching_identities() {
     let mut journal = journal(&["first", "second"]);
-    journal.present(Viewer::P1).unwrap();
+    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
     journal.commit();
     let steps = journal
         .read_presentation(Viewer::P1, None)
@@ -160,7 +163,7 @@ fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
             true,
         );
     }
-    journal.present(Viewer::P1).unwrap();
+    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
     roll_back(&mut journal, &origin);
     journal.settle_presentation(true);
     let withdrawn = steps(&journal, Viewer::P1);
@@ -197,7 +200,7 @@ fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
         None,
         true,
     );
-    journal.present(Viewer::P1).unwrap();
+    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
     journal.settle_presentation(true);
     journal.commit();
     let after = steps(&journal, Viewer::P1);
@@ -222,7 +225,7 @@ fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
 #[test]
 fn a_restoration_that_keeps_a_shown_batch_withdraws_and_promotes_nothing() {
     let mut journal = journal(&["kept"]);
-    journal.present(Viewer::P1).unwrap();
+    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
     let stop = journal.clone();
     journal.push(
         [Ok(Some(result("lost"))), Ok(Some(result("lost")))],
@@ -266,7 +269,7 @@ fn a_rules_rollback_of_a_shown_batch_stops_that_viewers_history() {
         None,
         true,
     );
-    journal.present(Viewer::P1).unwrap();
+    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
     roll_back(&mut journal, &origin);
     journal.settle_presentation(false);
     assert!(
@@ -280,5 +283,127 @@ fn a_rules_rollback_of_a_shown_batch_stops_that_viewers_history() {
         steps(&journal, Viewer::P2),
         vec![],
         "the other viewer is unaffected"
+    );
+}
+
+/// A reveal naming one card by `handle`, visible to both viewers.
+fn reveal(handle: &str) -> EventKind {
+    EventKind::Action(ActionEvent {
+        kind: ActionKind::Reveal,
+        player: None,
+        subjects: vec![Some(EventSubject::Card(Box::new(EventCard {
+            handle: Some(ObjectHandle(handle.into())),
+            properties: CardProperties {
+                card: "unit".into(),
+                face: 0,
+                names: vec!["unit".into()],
+                kind: "follower".into(),
+                traits: Vec::new(),
+                owner: Viewer::P1,
+                controller: Viewer::P1,
+                state: None,
+            },
+        })))],
+        source: None,
+        numbers: Vec::new(),
+        name: None,
+        face_up: Some(true),
+        details: None,
+    })
+}
+
+fn handles(names: &[&str]) -> BTreeSet<ObjectHandle> {
+    names
+        .iter()
+        .map(|name| ObjectHandle((*name).to_owned()))
+        .collect()
+}
+
+fn batches(journal: &Journal, viewer: Viewer) -> Vec<ProvisionalBatch> {
+    steps(journal, viewer)
+        .into_iter()
+        .filter_map(|step| match step {
+            PresentationOp::Provisional(batch) => Some(batch),
+            PresentationOp::Promote { .. } | PresentationOp::Cancel { .. } => None,
+        })
+        .collect()
+}
+
+/// Three sequential batches: a card still on the board, a card that was revealed and
+/// hidden again, and a result that names no card.
+fn revealed_and_hidden() -> Journal {
+    let mut journal = journal(&[]);
+    for (name, kind) in [
+        ("on-board", reveal("board")),
+        ("hidden-again", reveal("hidden")),
+        ("after", result("after")),
+    ] {
+        journal.push(
+            [Ok(Some(kind.clone())), Ok(Some(kind))],
+            None,
+            &json!({"rule":name}),
+            format!("unit/{name}"),
+            None,
+            true,
+        );
+    }
+    journal
+}
+
+#[test]
+fn a_card_seen_only_inside_the_uncommitted_window_stops_early_presentation_there() {
+    let mut journal = revealed_and_hidden();
+    journal
+        .present(Viewer::P1, true, handles(&["board"]))
+        .unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P1).len(),
+        1,
+        "the card revealed and hidden again is not on any board this viewer was handed, so \
+         its batch and everything after it wait for commitment"
+    );
+    journal
+        .present(Viewer::P1, true, handles(&["board"]))
+        .unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P1).len(),
+        1,
+        "a later handoff cannot make the hidden card identifiable"
+    );
+    journal.commit();
+    let history = journal.read(Viewer::P1, None).unwrap().collect::<Vec<_>>();
+    assert_eq!(
+        history
+            .iter()
+            .map(|event| event.presentation.is_some())
+            .collect::<Vec<_>>(),
+        vec![true, false, false],
+        "the waiting batches commit as ordinary history"
+    );
+}
+
+#[test]
+fn a_card_on_the_previously_handed_board_stays_identifiable_after_it_leaves() {
+    let mut journal = revealed_and_hidden();
+    // An earlier handoff, before any result could be shown, already included this card.
+    journal
+        .present(Viewer::P1, false, handles(&["board", "hidden"]))
+        .unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P1).len(),
+        0,
+        "nothing is shown outside a qualifying stop"
+    );
+    journal.present(Viewer::P1, true, handles(&[])).unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P1).len(),
+        3,
+        "cards the viewer held at its previous handoff are evidence enough"
+    );
+    journal.present(Viewer::P2, true, handles(&[])).unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P2).len(),
+        0,
+        "what one viewer held says nothing about the other"
     );
 }
