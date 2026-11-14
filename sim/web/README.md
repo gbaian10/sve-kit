@@ -22,6 +22,16 @@ bun run dev                     # http://localhost:5173, synthetic fixture under
 bun run dev:lan                 # HTTPS on the LAN (self-signed by default); plain HTTP by IP has no WebCrypto or cache
 ```
 
+### Battle engine (WebAssembly)
+
+The local battle Worker runs `sim/battle-host` compiled to WebAssembly. `bun run build:engine` builds
+it with the repo's pinned Rust toolchain (`rust-toolchain.toml` adds the `wasm32-unknown-unknown`
+target) and the `wasm` Cargo profile, then runs `wasm-bindgen --target web` into
+`src/battle/engine/generated/`, which is never committed. The `wasm-bindgen` CLI must match the
+version in `Cargo.lock` exactly; install it with
+`cargo install wasm-bindgen-cli --version <version> --locked`, or point `SVE_WASM_BINDGEN` at a
+matching binary. `check:all` and `deploy:dev` run it first; CI builds it in the web job.
+
 Set `SVE_DEV_TLS_CERT` and `SVE_DEV_TLS_KEY` to absolute paths to use a certificate issued by a locally trusted CA, such as a mkcert certificate for a LAN IP. For example: `SVE_DEV_TLS_CERT=/path/to/cert.pem SVE_DEV_TLS_KEY=/path/to/key.pem bun run dev:lan`.
 
 ### Real data (4.0.0 preview export)
@@ -52,6 +62,7 @@ variables to change them. Only two derived flags reach browser code
 | `bun run lint:all`          | ESLint (`lint:js`) and Stylelint (`lint:css`)                                                        |
 | `bun run typecheck`         | `bun check --threads=4`, Bun's built-in type checker                                                 |
 | `bun run test:all`          | Vitest, including the ESLint and Stylelint rule fixtures                                             |
+| `bun run build:engine`      | Engine WebAssembly and glue (see Battle engine)                                                      |
 | `bun run build:all`         | Production build into `dist/`                                                                        |
 | `bun run shots`             | Manual: real-browser screenshots and geometry (see below)                                            |
 | `bun run generate:contract` | Generate `src/battle/contract/generated/`; the scripts above that need it run it themselves          |
