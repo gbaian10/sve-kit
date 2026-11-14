@@ -130,17 +130,10 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
     ):
         prototype = read_tree(REPO / f"authored/rules/effects/{owner}.yaml")
         current_cards = object_value(prototype["cards"])
-        # Migrated cards keep their old program only in the historical fixtures.
+        # Admitted cards left the prototype set; a minimal program keeps the sibling.
         prototype["cards"] = {
-            number: current_cards[number]
-            if number in current_cards
-            else object_value(
-                parse(
-                    (
-                        REPO
-                        / f"carddb/tests/fixtures/effect_baseline/migrated/{number}.json"
-                    ).read_bytes()
-                )
+            number: current_cards.get(
+                number, {"status": "complete", "review": "synthetic", "abilities": []}
             )
             for number in prototypes
         }
