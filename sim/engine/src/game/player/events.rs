@@ -2,9 +2,14 @@
 
 mod journal;
 mod ordering;
+mod presentation;
 mod steps;
 
 pub(in crate::game) use journal::{Journal, MovementBefore, PublishedEvents};
+pub use presentation::{
+    PresentationCursor, PresentationEntry, PresentationId, PresentationOp, ProvisionalBatch,
+    ProvisionalEvent, ScopeId,
+};
 
 use super::observation::{CardProperties, EffectSource, ObservedZone, TurnObservation};
 use super::{ObjectHandle, Viewer};

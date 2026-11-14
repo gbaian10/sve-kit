@@ -317,6 +317,53 @@ fn player_events_publish_a_multi_question_origin_only_when_it_commits() {
 }
 
 #[test]
+fn player_events_never_present_a_procedure_that_is_not_a_play() {
+    let mut game = game(1, 3);
+    game.advance_player_input();
+    game.execute_internal(
+        &checked(vec![life(1, 1), draw(2, 1), up_to(3, 1)]),
+        &source("synthetic"),
+        context(1),
+    )
+    .unwrap();
+    game.advance_player_input();
+    assert!(
+        matches!(game.input(Viewer::P1), Input::Question(_)),
+        "The optional draw is a real stop after completed results"
+    );
+    for viewer in [Viewer::P1, Viewer::P2] {
+        game.present_player_events(viewer).unwrap();
+        assert_eq!(
+            game.presentation(viewer, None).unwrap().count(),
+            0,
+            "Completed results of a procedure without a played step stay inside its origin"
+        );
+    }
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Stepwise(StepwiseAnswer::Stop)
+        )
+        .kind,
+        SubmissionKind::Applied,
+        "Declining the optional draw completes the procedure"
+    );
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            history(&game, viewer).len(),
+            2,
+            "The life change and the draw commit as ordinary history"
+        );
+        assert_eq!(
+            game.presentation(viewer, None).unwrap().count(),
+            0,
+            "Committing never creates a scope after the fact"
+        );
+    }
+}
+
+#[test]
 fn player_events_fault_discards_the_whole_uncommitted_origin_and_keeps_the_prefix() {
     let mut game = game(1, 3);
     game.advance_player_input();

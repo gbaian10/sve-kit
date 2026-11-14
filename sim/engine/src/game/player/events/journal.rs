@@ -1,3 +1,4 @@
+use super::presentation::{Presentation, PresentationCursor, PresentationEntry};
 use super::{
     ActionKind, EventError, EventId, EventKind, EventLocation, PlayerEvent, PlayerEventBatch,
     Viewer,
@@ -33,6 +34,7 @@ struct ViewerLog {
     groups: Arc<BTreeMap<String, u64>>,
     parents: Arc<BTreeMap<String, EventId>>,
     fault: bool,
+    presentation: Presentation,
 }
 
 #[derive(Clone, Debug)]
@@ -79,6 +81,65 @@ pub(in crate::game) struct MovementBefore {
     pub(super) start: usize,
     pub(super) cards: BTreeMap<String, [Option<EventLocation>; 2]>,
     pub(super) generations: BTreeMap<String, u64>,
+}
+
+/// Rules order as one perspective may see it; shared by commitment and early presentation.
+fn ordered(pending: &[Pending], perspective: usize) -> Vec<&Pending> {
+    let mut ordered = pending.iter().collect::<Vec<_>>();
+    let mut start = 0;
+    while let Some(first) = ordered.get(start) {
+        let is_unordered = first.ordering != BatchOrder::Fixed && first.object.is_some();
+        let mut end = start.saturating_add(1);
+        if is_unordered {
+            while ordered.get(end).is_some_and(|entry| {
+                entry.batch == first.batch
+                    && entry.group == first.group
+                    && entry.ordering == first.ordering
+                    && entry.object.is_some()
+            }) {
+                end = end.saturating_add(1);
+            }
+            if let Some(unordered_batch) = ordered.get_mut(start..end) {
+                // Private permutations cannot order another viewer's authorized revocations.
+                unordered_batch.sort_by_cached_key(|entry| {
+                    entry.views.get(perspective).map(super::ordering::key)
+                });
+            }
+        }
+        start = end;
+    }
+    ordered
+}
+
+/// Leading batches whose every member is final and projectable for this perspective.
+/// A batch without an authorized member is listed empty; it opens no scope.
+fn sealed_batches(pending: &[Pending], perspective: usize) -> Vec<(u64, Vec<EventKind>)> {
+    let mut batches: Vec<(u64, Vec<EventKind>)> = Vec::new();
+    for entry in ordered(pending, perspective) {
+        let view = match entry.views.get(perspective) {
+            Some(Ok(view)) if entry.sealed => view,
+            _ => {
+                // The batch this member belongs to is not complete for this perspective.
+                if batches
+                    .last()
+                    .is_some_and(|(batch, _)| *batch == entry.batch)
+                {
+                    batches.pop();
+                }
+                break;
+            }
+        };
+        if batches
+            .last()
+            .is_none_or(|(batch, _)| *batch != entry.batch)
+        {
+            batches.push((entry.batch, Vec::new()));
+        }
+        if let (Some(kind), Some((_, events))) = (view, batches.last_mut()) {
+            events.push(kind.clone());
+        }
+    }
+    batches
 }
 
 impl Journal {
@@ -153,30 +214,7 @@ impl Journal {
             let mut batches: Vec<Arc<PlayerEventBatch>> = Vec::new();
             let mut batch = Vec::new();
             let mut previous = None;
-            let mut ordered = self.pending.iter().collect::<Vec<_>>();
-            let mut start = 0;
-            while let Some(first) = ordered.get(start) {
-                let is_unordered = first.ordering != BatchOrder::Fixed && first.object.is_some();
-                let mut end = start.saturating_add(1);
-                if is_unordered {
-                    while ordered.get(end).is_some_and(|entry| {
-                        entry.batch == first.batch
-                            && entry.group == first.group
-                            && entry.ordering == first.ordering
-                            && entry.object.is_some()
-                    }) {
-                        end = end.saturating_add(1);
-                    }
-                    if let Some(unordered_batch) = ordered.get_mut(start..end) {
-                        // Private permutations cannot order another viewer's authorized revocations.
-                        unordered_batch.sort_by_cached_key(|entry| {
-                            entry.views.get(perspective).map(super::ordering::key)
-                        });
-                    }
-                }
-                start = end;
-            }
-            for entry in ordered {
+            for entry in ordered(&self.pending, perspective) {
                 if previous != Some(entry.batch) && !batch.is_empty() {
                     batches.push(Arc::new(PlayerEventBatch {
                         events: take(&mut batch),
@@ -273,6 +311,40 @@ impl Journal {
             .iter()
             .flat_map(|chunk| chunk.events.iter())
             .filter(move |event| event.id.index > offset))
+    }
+
+    /// Record every complete batch this viewer has not been shown yet.
+    pub(super) fn present(&mut self, viewer: Viewer) -> Result<(), EventError> {
+        let perspective = index(viewer);
+        let log = self
+            .logs
+            .get_mut(perspective)
+            .ok_or(EventError::ProjectionGap)?;
+        if log.fault {
+            return Err(EventError::ProjectionGap);
+        }
+        for (batch, events) in sealed_batches(&self.pending, perspective) {
+            if log.presentation.show(&log.stream, batch, events).is_none() {
+                log.fault = true;
+                return Err(EventError::ProjectionGap);
+            }
+        }
+        Ok(())
+    }
+
+    pub(super) fn read_presentation(
+        &self,
+        viewer: Viewer,
+        after: Option<&PresentationCursor>,
+    ) -> Result<impl Iterator<Item = &PresentationEntry>, EventError> {
+        let log = self
+            .logs
+            .get(index(viewer))
+            .ok_or(EventError::ProjectionGap)?;
+        if log.fault {
+            return Err(EventError::ProjectionGap);
+        }
+        log.presentation.read(&log.stream, after)
     }
 
     fn reader(
