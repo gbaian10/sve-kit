@@ -1430,6 +1430,13 @@ fn mask_delayed(program: &mut Program) -> Result<()> {
                     | Control::May { body, .. }
                     | Control::Pay { on_paid: body, .. },
             } => mask_delayed(body)?,
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for mode in modes {
+                    mask_delayed(&mut mode.body)?;
+                }
+            }
             _ => {}
         }
     }

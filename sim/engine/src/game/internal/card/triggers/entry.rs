@@ -1,5 +1,6 @@
 //! Entry matching runs after the whole successful batch has installed its effective information.
 use super::super::super::cost::printed_cost;
+use super::delayed::DelayedEntry;
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventPattern, EventPayload, EventSnapshotPolicy,
     Game, PlayerId, Result, SnapshotId, SourceInformation, TriggerAggregation, TriggerCondition,
@@ -11,7 +12,7 @@ use crate::game::{Frame, Object};
 use crate::ir::LimitSpec;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, SubjectInformation};
 use crate::ir::optional_payment;
-use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId};
+use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, ObjectRef};
 
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     let Some(trigger) = &ability.trigger else {
@@ -149,6 +150,33 @@ impl Game {
             .collect()
     }
 
+    /// The entered object, which must be exactly the next generation of the moved card.
+    fn committed_entry(&mut self, old: &Object) -> Result<ObjectRef> {
+        let object = self.internal_current_reference(&old.id)?;
+        if object.generation.0
+            != old
+                .generation
+                .checked_add(1)
+                .ok_or_else(|| invalid("entry generation overflow"))?
+        {
+            return Err(invalid("entry did not commit"));
+        }
+        Ok(object)
+    }
+
+    /// The entering card's one-based field slot orders its simultaneous occurrences.
+    fn entry_position(&self, controller: PlayerId, id: &str) -> Result<u64> {
+        u64::try_from(
+            self.zone_ids(super::super::seat_name(controller)?, "field")
+                .iter()
+                .position(|entered| entered == id)
+                .ok_or_else(|| invalid("entry has no field position"))?,
+        )
+        .map_err(invalid)?
+        .checked_add(1)
+        .ok_or_else(|| invalid("entry position overflow"))
+    }
+
     pub(in crate::game) fn internal_field_events(
         &mut self,
         previous: &[Object],
@@ -156,36 +184,30 @@ impl Game {
         frame: &Frame,
     ) -> Result<()> {
         if previous.is_empty()
-            || !self.card_runtime.definitions.cards.values().any(|program| {
-                program
-                    .card()
-                    .abilities
-                    .iter()
-                    .any(|ability| filter(&ability.node).is_some())
-            })
+            || (!self.has_delayed_entries()
+                && !self.card_runtime.definitions.cards.values().any(|program| {
+                    program
+                        .card()
+                        .abilities
+                        .iter()
+                        .any(|ability| filter(&ability.node).is_some())
+                }))
         {
             return Ok(());
         }
         let observers = self.entry_observers()?;
-        let reads_original_cost = observers.iter().any(|(_, abilities)| {
-            abilities.iter().any(|ability| {
-                filter(&ability.node).is_some_and(|plan| plan.original_cost.is_some())
-            })
-        });
+        let reads_original_cost = self.delayed_entry_reads_original_cost()
+            || observers.iter().any(|(_, abilities)| {
+                abilities.iter().any(|ability| {
+                    filter(&ability.node).is_some_and(|plan| plan.original_cost.is_some())
+                })
+            });
         let active = player_id(self.active())?;
         let effect_source = self.card_runtime.active_source;
         let (cause, actor, method) = entry_cause(frame)?;
         let mut candidates = Vec::new();
         for old in previous {
-            let object = self.internal_current_reference(&old.id)?;
-            if object.generation.0
-                != old
-                    .generation
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("entry generation overflow"))?
-            {
-                return Err(invalid("entry did not commit"));
-            }
+            let object = self.committed_entry(old)?;
             let entry_controller = player_id(&self.object(&old.id)?.controller)?;
             let characters = self.internal_characteristics(&old.id)?;
             let original_cost = if reads_original_cost {
@@ -194,6 +216,8 @@ impl Game {
                 None
             };
             let header = self.pending_header(actor, cause, effect_source, before)?;
+            let token = self.object_type(&old.id)?.contains("トークン");
+            let subject = SubjectInformation::from_characters(&characters, original_cost);
             let mut matched = Vec::new();
             for (holder, abilities) in &observers {
                 let controller = player_id(&self.object(holder)?.controller)?;
@@ -202,19 +226,26 @@ impl Game {
                         filter(&ability.node).ok_or_else(|| invalid("missing entry filter"))?;
                     if subject_condition::matches(
                         &plan,
-                        &SubjectInformation::from_characters(&characters, original_cost),
+                        &subject,
                         *holder == old.id,
                         controller,
                         entry_controller,
                         active,
-                        self.object_type(&old.id)?.contains("トークン"),
+                        token,
                     )? && !self.internal_trigger_forbidden(&ability.node, controller)?
                     {
                         matched.push((holder, ability, controller));
                     }
                 }
             }
-            if matched.is_empty() {
+            let observed = DelayedEntry {
+                method,
+                controller: entry_controller,
+                active,
+                token,
+            };
+            let installed = self.delayed_entry_matches(&subject, &observed)?;
+            if matched.is_empty() && installed.is_empty() {
                 continue;
             }
             // Only a matching occurrence publishes the origin; unadmitted zones still reject it.
@@ -226,6 +257,8 @@ impl Game {
                 method,
                 play_receipt: None,
             };
+            let position = self.entry_position(event.controller, &old.id)?;
+            candidates.extend(self.delayed_entry_pending(&installed, &event, &header, position)?);
             for (holder, ability, controller) in matched {
                 let source = self.internal_card_source(holder, ability.node.id, controller)?;
                 let information = SourceInformation::current(self, source)?;
@@ -237,15 +270,7 @@ impl Game {
                     header.clone(),
                     None,
                 )?;
-                pending.source_position = u64::try_from(
-                    self.zone_ids(super::super::seat_name(event.controller)?, "field")
-                        .iter()
-                        .position(|id| *id == old.id)
-                        .ok_or_else(|| invalid("entry has no field position"))?,
-                )
-                .map_err(invalid)?
-                .checked_add(1)
-                .ok_or_else(|| invalid("entry position overflow"))?;
+                pending.source_position = position;
                 pending.timing = Some(EventPayload::EnterField {
                     event: event.clone(),
                 });

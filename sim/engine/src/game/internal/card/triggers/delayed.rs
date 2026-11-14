@@ -1,18 +1,29 @@
 //! Installed subscriptions retain frozen captures and feed the common pending queue.
 use super::{
-    Ability, EventHeader, Game, LeaveFieldEvent, Located, PendingOccurrence, Result,
-    RuntimeAbilitySource, ScopeId, Slot, SourceInformation, invalid, unsupported,
+    Ability, EventHeader, EventPayload, Game, LeaveFieldEvent, Located, PendingOccurrence,
+    PlayerId, Result, RuntimeAbilitySource, ScopeId, Slot, SourceInformation, invalid, unsupported,
 };
+use crate::game::internal::conditions::subject as subject_condition;
 use crate::game::internal::{Execution, InstructionOutcome};
 use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
 use crate::game::{Frame, Object};
 use crate::ir::delayed as delayed_ir;
+use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
     AbilityId, AbilityInstanceId, AbilityKind, AbilityQualification, Action, CostSpec, Instruction,
     PlaySpec, SnapshotId,
 };
+use crate::ir::{EnterFieldEvent, EntryMethod, EventPattern, TriggerCondition};
 use crate::ir::{RuntimeZoneRef, ZoneKind};
+
+/// What installed entry observers read before the entry event is published.
+pub(super) struct DelayedEntry {
+    pub(super) method: EntryMethod,
+    pub(super) controller: PlayerId,
+    pub(super) active: PlayerId,
+    pub(super) token: bool,
+}
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct Installed {
@@ -20,6 +31,8 @@ pub(in crate::game::internal) struct Installed {
     turn: u64,
     holder: String,
     source: RuntimeAbilitySource,
+    /// The installing ability, which provides the effects its callback creates.
+    parent: RuntimeAbilitySource,
     ability: super::super::super::admission::PlannedAbility,
     information: SourceInformation,
     card: String,
@@ -54,7 +67,11 @@ impl Game {
                 intervals: vec![],
                 active: true,
                 change: InstalledChange::Delayed {
-                    timing: TriggerTiming::LeaveField,
+                    timing: if record.entry_plan().is_some() {
+                        TriggerTiming::EnterField
+                    } else {
+                        TriggerTiming::LeaveField
+                    },
                 },
             })
             .collect()
@@ -122,6 +139,7 @@ impl Game {
             turn: self.state.schedule.current()?,
             holder,
             source,
+            parent: original,
             ability,
             information,
             card,
@@ -140,7 +158,8 @@ impl Game {
         &mut self,
         record: &Installed,
         header: &EventHeader,
-        leave: LeaveFieldEvent,
+        leave: Option<LeaveFieldEvent>,
+        timing: Option<EventPayload>,
     ) -> Result<PendingOccurrence> {
         self.card_runtime.next_pending = self
             .card_runtime
@@ -156,10 +175,10 @@ impl Game {
             information: record.information.clone(),
             subject_information: None,
             header: header.clone(),
-            leave: Some(leave),
+            leave,
             movement_after: None,
             card: record.card.clone(),
-            timing: None,
+            timing,
             source_position: record.position,
             captures: record.captures.clone(),
             installed: true,
@@ -205,7 +224,88 @@ impl Game {
         };
         records
             .iter()
-            .map(|record| self.installed_pending(record, &header, leave))
+            .map(|record| self.installed_pending(record, &header, Some(leave), None))
+            .collect()
+    }
+
+    /// The ability that installed the delayed callback running as `instance`.
+    pub(in crate::game::internal) fn delayed_parent(
+        &self,
+        instance: AbilityInstanceId,
+    ) -> Option<RuntimeAbilitySource> {
+        self.card_runtime
+            .delayed
+            .iter()
+            .find(|record| record.source.instance == instance)
+            .map(|record| record.parent)
+    }
+
+    /// Installed entry observers that read the entering card's printed original cost.
+    pub(super) fn delayed_entry_reads_original_cost(&self) -> bool {
+        self.card_runtime.delayed.iter().any(|record| {
+            record
+                .entry_plan()
+                .is_some_and(|plan| plan.filter.original_cost.is_some())
+        })
+    }
+
+    pub(super) fn has_delayed_entries(&self) -> bool {
+        self.card_runtime
+            .delayed
+            .iter()
+            .any(|record| record.entry_plan().is_some())
+    }
+
+    /// 「次に自分の場に…が出たとき」 installations matching one committed entry.
+    pub(super) fn delayed_entry_matches(
+        &self,
+        subject: &SubjectInformation<'_>,
+        observed: &DelayedEntry,
+    ) -> Result<Vec<Installed>> {
+        let mut matched = Vec::new();
+        for record in &self.card_runtime.delayed {
+            let Some(plan) = record.entry_plan() else {
+                continue;
+            };
+            if plan.method.is_some_and(|method| method != observed.method) {
+                continue;
+            }
+            if subject_condition::matches(
+                &plan.filter,
+                subject,
+                false,
+                record.source.controller,
+                observed.controller,
+                observed.active,
+                observed.token,
+            )? {
+                matched.push(record.clone());
+            }
+        }
+        Ok(matched)
+    }
+
+    pub(super) fn delayed_entry_pending(
+        &mut self,
+        records: &[Installed],
+        event: &EnterFieldEvent,
+        header: &EventHeader,
+        position: u64,
+    ) -> Result<Vec<PendingOccurrence>> {
+        records
+            .iter()
+            .map(|record| {
+                let mut pending = self.installed_pending(
+                    record,
+                    header,
+                    None,
+                    Some(EventPayload::EnterField {
+                        event: event.clone(),
+                    }),
+                )?;
+                pending.source_position = position;
+                Ok(pending)
+            })
             .collect()
     }
 
@@ -213,6 +313,23 @@ impl Game {
         self.card_runtime
             .delayed
             .retain(|record| record.turn != turn);
+    }
+}
+
+impl Installed {
+    fn entry_plan(&self) -> Option<delayed_ir::EntryPlan> {
+        let Some(TriggerCondition::Event {
+            pattern: EventPattern::EnterField { binding, predicate },
+        }) = self
+            .ability
+            .node
+            .trigger
+            .as_ref()
+            .map(|trigger| &trigger.on)
+        else {
+            return None;
+        };
+        delayed_ir::entry(*binding, predicate)
     }
 }
 
