@@ -140,7 +140,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | win／skip_turn／extra_turn | who | 遊戲結果與排程各自降低 |
 | make_type | on、type、until? | 不隱式失去能力 |
 | to.one_of | one_of、by、scope | create 的 scope=each/batch（§13 GAP-A-017） |
-| to.partition | order=printed、partition:[{zone,n}…] | 順序與份額保留 |
+| to.partition | order=printed、partition:[{zone,n / upto}…] | n 與 upto 互斥；順序與份額保留，upto 可任選且受目的區空位限制 |
 | position | top/bottom 或 {nth} 或 {one_of,by} 或 {chosen:BindingName} | nth 為 1 起算；chosen 消費 choose 的 compound 位置回答 |
 | token.allocate | among、total、by? | among 為名稱列表；total 為總量 |
 | into.allocate | among、each_exactly_once:true | 與 token 的總量分配不同 |
