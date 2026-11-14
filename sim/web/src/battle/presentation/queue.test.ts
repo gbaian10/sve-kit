@@ -16,19 +16,26 @@ import { accept, advance, type Beat, EMPTY, type PresentationState, skip } from 
 const board = (name: string) => ({ name }) as unknown as BattleObservation
 const question = (id: string) => ({ id }) as unknown as Question
 const body = (name: string) => ({ kind: name }) as unknown as BattleEvent["body"]
+const about = (name: string) => [{ kind: name }] as unknown as BattleEvent["about"]
 const waiting = { kind: "waiting", actor: "p2", context: {} } as unknown as BattleInput
 const fault: BattleInput = { kind: "engine_fault", can_concede: true }
 const ask = (id: string): BattleInput => ({ kind: "question", question: question(id) })
 
-function committed(id: string, links: (string | null)[] = [null]): EventBatch {
+/** A committed batch; `named` is the batch name its bodies carry when it differs from the id. */
+function committed(
+  id: string,
+  links: (string | null)[] = [null],
+  named = id,
+  subjects: BattleEvent["about"] = [],
+): EventBatch {
   return {
     id,
     events: links.map((presentation_id, index) => ({
       id: `${id}-e${String(index)}`,
       cause: "c",
       parent: null,
-      body: body(`${id}-${String(index)}`),
-      about: [],
+      body: body(`${named}-${String(index)}`),
+      about: subjects,
       presentation_id,
     })),
   }
@@ -161,7 +168,65 @@ describe("presentation queue", () => {
       }),
     )
     expect(play(promoted).beats).toEqual(["b2"])
-    expect(promoted.scopes.has("s1")).toBe(false)
+    expect(promoted.scopes.get("s1")?.life).toBe("promoted")
+  })
+
+  it("still plays a queued scope that is promoted before its turn, and not its committed batch", () => {
+    const queued = accepted(
+      EMPTY,
+      update({ board: "one", batches: [committed("a")], presentation: [provisional("s1", "c")] }),
+    )
+    const playing = advance(queued)
+    expect(playing.beat && name(playing.beat)).toBe("a")
+    // The opponent kept resolving while this seat was still watching the first batch.
+    const promoted = accepted(
+      playing.state,
+      update({
+        board: "two",
+        input: ask("q"),
+        batches: [committed("c", ["s1-p0"]), committed("d")],
+        presentation: [promote("s1")],
+      }),
+    )
+    const rest = play(promoted)
+    expect(rest.beats).toEqual(["s1", "d"])
+    expect(rest.state.board).toEqual(board("two"))
+    expect(rest.state.question).toEqual(question("q"))
+  })
+
+  it("rejects a promotion whose committed subjects differ from what the scope showed", () => {
+    const shown = accepted(EMPTY, update({ presentation: [provisional("s1", "b1")] }))
+    const changed = accept(
+      shown,
+      update({
+        batches: [committed("b1", ["s1-p0"], "b1", about("other"))],
+        presentation: [promote("s1")],
+      }),
+    )
+    expect(changed).toEqual({ kind: "host_error", reason: "projection" })
+  })
+
+  it("rejects committed batches that share, split or orphan a scope's occurrences", () => {
+    const shown = accepted(EMPTY, update({ presentation: [provisional("s1", "b1", 2)] }))
+    const twice = accept(
+      shown,
+      update({
+        batches: [committed("b1", ["s1-p0", "s1-p1"]), committed("copy", ["s1-p0", "s1-p1"], "b1")],
+        presentation: [promote("s1")],
+      }),
+    )
+    const mixed = accept(
+      shown,
+      update({ batches: [committed("b1", ["s1-p0", null])], presentation: [promote("s1")] }),
+    )
+    const unannounced = accept(shown, update({ batches: [committed("b1", ["s1-p0", "s1-p1"])] }))
+    // Even for a scope this screen never held, a batch is linked as a whole or not at all.
+    const partly = accept(
+      EMPTY,
+      update({ batches: [committed("b1", ["gone-p0", null])], presentation: [promote("gone")] }),
+    )
+    for (const result of [twice, mixed, unannounced, partly])
+      expect(result).toEqual({ kind: "host_error", reason: "projection" })
   })
 
   it("rejects a promotion whose committed batch is missing or differs from the scope", () => {
@@ -200,6 +265,37 @@ describe("presentation queue", () => {
     })
   })
 
+  it("keeps a closed scope's content: a repeat is not replayed and a reuse is rejected", () => {
+    const shown = play(
+      accepted(EMPTY, update({ presentation: [provisional("s1", "b1"), provisional("s2", "x")] })),
+    ).state
+    const closed = accepted(
+      shown,
+      update({
+        batches: [committed("b1", ["s1-p0"])],
+        presentation: [promote("s1"), cancel("s2")],
+      }),
+    )
+    for (const scope of [provisional("s1", "b1"), provisional("s2", "x")])
+      expect(play(accepted(closed, update({ presentation: [scope] }))).beats).toEqual([])
+    for (const scope of [provisional("s1", "new"), provisional("s2", "new")])
+      expect(accept(closed, update({ presentation: [scope] }))).toEqual({
+        kind: "host_error",
+        reason: "projection",
+      })
+    for (const end of [promote("s1"), cancel("s1"), promote("s2"), cancel("s2")])
+      expect(accept(closed, update({ presentation: [end] }))).toEqual({
+        kind: "host_error",
+        reason: "projection",
+      })
+  })
+
+  it("does not replay a skipped scope that is delivered again", () => {
+    const skipped = skip(accepted(EMPTY, update({ presentation: [provisional("s1", "b1")] })))
+    const again = accepted(skipped, update({ presentation: [provisional("s1", "b1")] }))
+    expect(play(again).beats).toEqual([])
+  })
+
   it("drops a cancelled scope that has not played and keeps the rest in order", () => {
     const queued = accepted(
       EMPTY,
@@ -214,7 +310,7 @@ describe("presentation queue", () => {
     const rest = play(cancelled)
     expect(rest.beats).toEqual(["b9"])
     expect(rest.state.board).toEqual(board("safe"))
-    expect(rest.state.scopes.has("s2")).toBe(false)
+    expect(rest.state.scopes.get("s2")?.life).toBe("cancelled")
   })
 
   it("stops waiting for playback on an engine fault and aligns with the fault board", () => {
@@ -230,6 +326,23 @@ describe("presentation queue", () => {
     expect(beats).toEqual([])
     expect(state.board).toEqual(board("fault"))
     expect(state.question).toBeNull()
+
+    // The seat concedes: the result is committed and listed for animation, but a faulted
+    // match only follows boards from now on.
+    const finished: BattleInput = { kind: "finished", winner: "p2", reason: "concession" }
+    const conceded = play(
+      accepted(
+        state,
+        update({
+          board: "result",
+          input: finished,
+          batches: [committed("result")],
+          presentation: [provisional("late", "x")],
+        }),
+      ),
+    )
+    expect(conceded.beats).toEqual([])
+    expect(conceded.state.board).toEqual(board("result"))
   })
 
   it("goes silent when events become unavailable but keeps following the board", () => {

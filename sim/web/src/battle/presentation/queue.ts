@@ -1,9 +1,9 @@
 // What one seat's screen plays and shows, in order (battle contract §6.2).
 //
 // Pure bookkeeping over complete updates: the board on screen changes only when an update's
-// playback settles, committed batches play before provisional ones, a promoted scope is never
-// played again and a cancelled one is dropped. Animation, sound and overlays read the beats;
-// nothing here recomputes rules.
+// playback settles, committed batches play before provisional ones, a scope plays at most once
+// whether or not it is promoted meanwhile, and a cancelled one is dropped. Animation, sound and
+// overlays read the beats; nothing here recomputes rules.
 import type {
   BattleObservation,
   BattleUpdate,
@@ -22,6 +22,13 @@ interface PendingUpdate {
   beats: readonly Beat[]
 }
 
+/** One scope's first content and how its life ended; kept so that its id is never reused. */
+interface ScopeRecord {
+  /** Absent for a scope that ended without this screen ever holding it. */
+  batch: PresentationBatch | null
+  life: "open" | "promoted" | "cancelled"
+}
+
 export interface PresentationState {
   /** The board on screen: the last update whose playback settled. Events never edit it. */
   readonly board: BattleObservation | null
@@ -29,11 +36,14 @@ export interface PresentationState {
   readonly question: Question | null
   /** Accepted updates that have not settled, oldest first. */
   readonly pending: readonly PendingUpdate[]
-  /** Every provisional scope still open, by scope id, as first delivered. */
-  readonly scopes: ReadonlyMap<string, PresentationBatch>
+  /** Every provisional scope ever delivered, by scope id. */
+  readonly scopes: ReadonlyMap<string, ScopeRecord>
   /** Committed batches already delivered; a repeated batch is never played twice. */
   readonly delivered: ReadonlySet<string>
-  /** Event and presentation playback stopped; boards still follow every update. */
+  /**
+   * Events stopped or the engine faulted: nothing plays for the rest of the match, and
+   * boards still follow every update.
+   */
   readonly silent: boolean
 }
 
@@ -69,20 +79,41 @@ function same(left: unknown, right: unknown): boolean {
   )
 }
 
-/** Whether the committed batches of this update are exactly the scope's occurrences. */
-function promotes(batches: readonly EventBatch[], scope: PresentationBatch): boolean {
-  const linked = batches.filter((batch) =>
-    batch.events.some((event) => event.presentation_id !== null),
-  )
-  const ids = scope.events.map((event) => event.id)
-  return linked.some(
-    (batch) =>
-      batch.events.length === ids.length &&
-      batch.events.every(
-        (event, index) =>
-          event.presentation_id === ids[index] && same(event.body, scope.events[index]?.body),
-      ),
-  )
+/**
+ * Which committed batch each provisional occurrence became. A batch refers to a scope as a
+ * whole or not at all, and no occurrence is claimed twice; otherwise `null`.
+ */
+function links(batches: readonly EventBatch[]): Map<string, EventBatch> | null {
+  const claimed = new Map<string, EventBatch>()
+  for (const batch of batches) {
+    const ids = batch.events.flatMap((event) => event.presentation_id ?? [])
+    if (ids.length !== 0 && ids.length !== batch.events.length) return null
+    for (const id of ids) {
+      if (claimed.has(id)) return null
+      claimed.set(id, batch)
+    }
+  }
+  return claimed
+}
+
+/** The one committed batch that is exactly this scope: same members, bodies and subjects. */
+function promotion(
+  claimed: ReadonlyMap<string, EventBatch>,
+  scope: PresentationBatch,
+): EventBatch | null {
+  const first = scope.events[0]
+  const batch = first === undefined ? undefined : claimed.get(first.id)
+  if (batch?.events.length !== scope.events.length) return null
+  const unchanged = batch.events.every((event, index) => {
+    const shown = scope.events[index]
+    return (
+      shown !== undefined &&
+      event.presentation_id === shown.id &&
+      same(event.body, shown.body) &&
+      same(event.about, shown.about)
+    )
+  })
+  return unchanged ? batch : null
 }
 
 /**
@@ -96,35 +127,51 @@ export function accept(
   const scopes = new Map(state.scopes)
   const delivered = new Set(state.delivered)
   const batches = update.events.status === "available" ? update.events.batches : []
-  const promoted = new Set<string>()
+  const claimed = links(batches)
+  if (claimed === null) return CONFLICT
+  const promoting = new Set<EventBatch>()
   const cancelled = new Set<string>()
   const provisional: Beat[] = []
 
   for (const op of update.presentation) {
     const known = scopes.get(op.scope_id)
     if (op.kind === "provisional") {
-      // The same scope with the same content is a repeat, not a second performance.
+      // The same scope with the same content is a repeat, not a second performance; this
+      // holds after the scope ended too, because a scope id is never reused.
       if (known !== undefined) {
-        if (!same(known, op.batch)) return CONFLICT
+        if (known.batch === null || !same(known.batch, op.batch)) return CONFLICT
         continue
       }
       if (op.batch.events.length === 0) return CONFLICT
-      scopes.set(op.scope_id, op.batch)
+      scopes.set(op.scope_id, { batch: op.batch, life: "open" })
       provisional.push({
         kind: "provisional",
         update_seq: update.update_seq,
         scope_id: op.scope_id,
         batch: op.batch,
       })
-    } else if (op.kind === "promote") {
-      // A scope this screen never held (a fresh seat baseline) only becomes history.
-      if (known !== undefined && !promotes(batches, known)) return CONFLICT
-      promoted.add(op.scope_id)
-      scopes.delete(op.scope_id)
+      continue
+    }
+    // A scope ends once. One this screen never held (a fresh seat baseline) only becomes
+    // history, but its id is recorded as used.
+    if (known !== undefined && known.life !== "open") return CONFLICT
+    if (op.kind === "promote") {
+      if (known !== undefined && known.batch !== null) {
+        const batch = promotion(claimed, known.batch)
+        if (batch === null) return CONFLICT
+        promoting.add(batch)
+      }
+      scopes.set(op.scope_id, { batch: known?.batch ?? null, life: "promoted" })
     } else {
       cancelled.add(op.scope_id)
-      scopes.delete(op.scope_id)
+      scopes.set(op.scope_id, { batch: known?.batch ?? null, life: "cancelled" })
     }
+  }
+
+  // A committed batch that refers to a scope still open must promote it in this same update.
+  for (const record of scopes.values()) {
+    if (record.life !== "open" || record.batch === null) continue
+    if (record.batch.events.some((event) => claimed.has(event.id))) return CONFLICT
   }
 
   const animate = update.events.status === "available" ? update.events.animate : []
@@ -139,19 +186,19 @@ export function accept(
       committed.push({ kind: "committed", update_seq: update.update_seq, batch })
   }
 
-  // Scopes that ended in this update leave every queue; one already played stays played.
-  const ended = (beat: Beat) =>
-    beat.kind === "provisional" && (promoted.has(beat.scope_id) || cancelled.has(beat.scope_id))
-  const silent = state.silent || update.events.status === "unavailable"
-  // A fault or stopped events leave nothing to wait for: only boards remain to align.
-  const quiet = silent || update.input.kind === "engine_fault"
+  // Only a cancellation removes a queued scope. A promoted one still plays its own queued
+  // beat in order: promotion just keeps the committed batch from playing as well.
+  const withdrawn = (beat: Beat) => beat.kind === "provisional" && cancelled.has(beat.scope_id)
+  // After a fault or stopped events nothing is worth waiting for: only boards remain to align.
+  const silent =
+    state.silent || update.events.status === "unavailable" || update.input.kind === "engine_fault"
   const pending = state.pending.map((entry) => ({
     update: entry.update,
-    beats: quiet ? [] : entry.beats.filter((beat) => !ended(beat)),
+    beats: silent ? [] : entry.beats.filter((beat) => !withdrawn(beat)),
   }))
   pending.push({
     update,
-    beats: quiet ? [] : [...committed, ...provisional.filter((beat) => !ended(beat))],
+    beats: silent ? [] : [...committed, ...provisional.filter((beat) => !withdrawn(beat))],
   })
   return { ...state, question: null, pending, scopes, delivered, silent }
 }
