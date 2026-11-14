@@ -9,7 +9,8 @@ use crate::common::{
 };
 use crate::number::{Int, Nat};
 use crate::observation::{
-    Declared, EvolutionState, Facing, Posture, RelationshipKind, TriggerTiming, TurnView,
+    AbilityKind, Declared, EvolutionState, Facing, Posture, RelationshipKind, TriggerTiming,
+    TurnView,
 };
 use crate::question::TriggerIcon;
 use schemars::JsonSchema;
@@ -121,6 +122,8 @@ pub enum Resource {
     Ep,
     /// Super evolution points.
     Sep,
+    /// Leader life, when a rule raises it as a resource.
+    Life,
 }
 
 /// Whether an evolution came from the rules action or from an effect.
@@ -163,6 +166,31 @@ pub enum PaymentTime {
     PlayParameter,
     /// During resolution.
     ResolutionChoice,
+}
+
+/// The public part of a completed payment; never a receipt or the hidden materials.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum PaymentComponent {
+    /// An ordinary payment with no keyword component of its own.
+    General,
+    /// An Earth Rite payment.
+    EarthRite {
+        /// Rules name of the keyword.
+        keyword: String,
+        /// Number of stacks removed.
+        stacks: Nat,
+    },
+}
+
+/// One zone of one player.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct ZoneRef {
+    /// Owner of the zone.
+    pub player: Seat,
+    /// The zone.
+    pub zone: Zone,
 }
 
 /// Why a game ended.
@@ -237,17 +265,25 @@ pub enum EventBody {
     AbilityPlayed {
         /// Seat that played it.
         player: Seat,
+        /// Card holding the ability, when authorized.
+        holder: Option<Subject>,
         /// The ability's text, when authorized.
         source: Option<SourceRef>,
-        /// How it qualified.
+        /// Category of the ability, when the producer provides it.
+        ability: Option<AbilityKind>,
+        /// How the play qualified; this is not the category.
         qualification: AbilityQualification,
     },
     /// A played ability finished resolving.
     AbilityResolved {
         /// Seat that played it.
         player: Seat,
+        /// Card holding the ability, when authorized.
+        holder: Option<Subject>,
         /// The ability's text, when authorized.
         source: Option<SourceRef>,
+        /// Category of the ability, when the producer provides it.
+        ability: Option<AbilityKind>,
     },
     /// An attack was declared.
     AttackDeclared {
@@ -361,8 +397,12 @@ pub enum EventBody {
     },
     /// A Fusion completed.
     Fusion {
+        /// Controller of the card that fused.
+        player: Seat,
         /// Card that fused.
         subject: Option<Subject>,
+        /// Number of materials; the traits below are a set, not one entry per material.
+        materials: Nat,
         /// Public traits of its materials.
         material_traits: Vec<String>,
     },
@@ -372,6 +412,8 @@ pub enum EventBody {
         player: Seat,
         /// Card that raced.
         subject: Option<Subject>,
+        /// Which race of the turn it was.
+        ordinal: Nat,
     },
     /// Drive was acquired for the first time.
     DriveGained {
@@ -384,17 +426,21 @@ pub enum EventBody {
     DriveTrigger {
         /// Player whose check revealed it.
         player: Seat,
+        /// The checked card, when authorized.
+        card: Option<EventCard>,
         /// Accepted icon.
         icon: TriggerIcon,
     },
     /// A Drive check completed.
     DriveChecked {
+        /// Checking player.
+        player: Seat,
+        /// The checked card, when authorized.
+        card: Option<EventCard>,
         /// Whether its trigger was accepted.
         accepted: bool,
-        /// Owner of the zone the checked card went to.
-        player: Seat,
-        /// That zone.
-        zone: Zone,
+        /// Where the checked card went.
+        destination: ZoneRef,
     },
     /// A payment completed.
     Payment {
@@ -408,6 +454,8 @@ pub enum EventBody {
         zero: bool,
         /// Whether a replacement changed it.
         replaced: bool,
+        /// What was paid, as far as it is public.
+        component: PaymentComponent,
     },
     /// A die value was accepted; rerolled values are no events.
     Dice {

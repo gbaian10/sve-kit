@@ -392,7 +392,10 @@
               "time": "play_parameter",
               "complete": true,
               "zero": false,
-              "replaced": false
+              "replaced": false,
+              "component": {
+                "kind": "general"
+              }
             },
             "about": [],
             "presentation_id": null
@@ -405,6 +408,56 @@
           {
             "id": "e9",
             "cause": "k8",
+            "parent": null,
+            "body": {
+              "kind": "payment",
+              "player": "p1",
+              "time": "resolution_choice",
+              "complete": true,
+              "zero": false,
+              "replaced": false,
+              "component": {
+                "kind": "earth_rite",
+                "keyword": "合成キーワード丁",
+                "stacks": 1
+              }
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b9",
+        "events": [
+          {
+            "id": "e10",
+            "cause": "k9",
+            "parent": "e9",
+            "body": {
+              "kind": "payment",
+              "player": "p1",
+              "time": "resolution_choice",
+              "complete": true,
+              "zero": false,
+              "replaced": false,
+              "component": {
+                "kind": "earth_rite",
+                "keyword": "合成キーワード丁",
+                "stacks": 2
+              }
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b10",
+        "events": [
+          {
+            "id": "e11",
+            "cause": "k10",
             "parent": null,
             "body": {
               "kind": "resource_changed",
@@ -422,12 +475,34 @@
         ]
       },
       {
-        "id": "b9",
+        "id": "b11",
         "events": [
           {
-            "id": "e10",
-            "cause": "k9",
-            "parent": "e9",
+            "id": "e12",
+            "cause": "k11",
+            "parent": null,
+            "body": {
+              "kind": "resource_changed",
+              "player": "p1",
+              "resource": "life",
+              "change": {
+                "before": null,
+                "after": null,
+                "delta": 2
+              }
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b12",
+        "events": [
+          {
+            "id": "e13",
+            "cause": "k12",
+            "parent": "e12",
             "body": {
               "kind": "card_played",
               "player": "p1",
@@ -445,11 +520,11 @@
         ]
       },
       {
-        "id": "b10",
+        "id": "b13",
         "events": [
           {
-            "id": "e11",
-            "cause": "k10",
+            "id": "e14",
+            "cause": "k13",
             "parent": null,
             "body": {
               "kind": "choice_declared",
@@ -466,11 +541,11 @@
         ]
       },
       {
-        "id": "b11",
+        "id": "b14",
         "events": [
           {
-            "id": "e12",
-            "cause": "k11",
+            "id": "e15",
+            "cause": "k14",
             "parent": null,
             "body": {
               "kind": "targets_declared",
@@ -511,12 +586,12 @@
         ]
       },
       {
-        "id": "b12",
+        "id": "b15",
         "events": [
           {
-            "id": "e13",
-            "cause": "k12",
-            "parent": "e12",
+            "id": "e16",
+            "cause": "k15",
+            "parent": "e15",
             "body": {
               "kind": "revealed",
               "cards": [
@@ -542,11 +617,11 @@
         ]
       },
       {
-        "id": "b13",
+        "id": "b16",
         "events": [
           {
-            "id": "e14",
-            "cause": "k13",
+            "id": "e17",
+            "cause": "k16",
             "parent": null,
             "body": {
               "kind": "facing_changed",
@@ -566,15 +641,23 @@
         ]
       },
       {
-        "id": "b14",
+        "id": "b17",
         "events": [
           {
-            "id": "e15",
-            "cause": "k14",
+            "id": "e18",
+            "cause": "k17",
             "parent": null,
             "body": {
               "kind": "ability_played",
               "player": "p1",
+              "holder": {
+                "kind": "card",
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 1
+                },
+                "object": "o1"
+              },
               "source": {
                 "kind": "text",
                 "text": {
@@ -590,6 +673,7 @@
                   "holder": "o1"
                 }
               },
+              "ability": "activated",
               "qualification": "union_burst"
             },
             "about": [],
@@ -598,12 +682,52 @@
         ]
       },
       {
-        "id": "b15",
+        "id": "b18",
         "events": [
           {
-            "id": "e16",
-            "cause": "k15",
-            "parent": "e15",
+            "id": "e19",
+            "cause": "k18",
+            "parent": "e18",
+            "body": {
+              "kind": "ability_played",
+              "player": "p1",
+              "holder": null,
+              "source": null,
+              "ability": "triggered",
+              "qualification": "ordinary"
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b19",
+        "events": [
+          {
+            "id": "e20",
+            "cause": "k19",
+            "parent": null,
+            "body": {
+              "kind": "ability_played",
+              "player": "p1",
+              "holder": null,
+              "source": null,
+              "ability": null,
+              "qualification": "ordinary"
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b20",
+        "events": [
+          {
+            "id": "e21",
+            "cause": "k20",
+            "parent": null,
             "body": {
               "kind": "attack_declared",
               "attacker": {
@@ -625,12 +749,12 @@
         ]
       },
       {
-        "id": "b16",
+        "id": "b21",
         "events": [
           {
-            "id": "e17",
-            "cause": "k16",
-            "parent": null,
+            "id": "e22",
+            "cause": "k21",
+            "parent": "e21",
             "body": {
               "kind": "damage",
               "source": {
@@ -666,8 +790,8 @@
             "presentation_id": "x1"
           },
           {
-            "id": "e18",
-            "cause": "k16",
+            "id": "e23",
+            "cause": "k21",
             "parent": null,
             "body": {
               "kind": "damage",
@@ -696,8 +820,8 @@
             "presentation_id": "x2"
           },
           {
-            "id": "e19",
-            "cause": "k16",
+            "id": "e24",
+            "cause": "k21",
             "parent": null,
             "body": {
               "kind": "damage",
@@ -729,11 +853,11 @@
         ]
       },
       {
-        "id": "b17",
+        "id": "b22",
         "events": [
           {
-            "id": "e20",
-            "cause": "k17",
+            "id": "e25",
+            "cause": "k22",
             "parent": null,
             "body": {
               "kind": "life_changed",
@@ -750,12 +874,12 @@
         ]
       },
       {
-        "id": "b18",
+        "id": "b23",
         "events": [
           {
-            "id": "e21",
-            "cause": "k18",
-            "parent": "e20",
+            "id": "e26",
+            "cause": "k23",
+            "parent": null,
             "body": {
               "kind": "stats_changed",
               "subject": {
@@ -791,12 +915,12 @@
         ]
       },
       {
-        "id": "b19",
+        "id": "b24",
         "events": [
           {
-            "id": "e22",
-            "cause": "k19",
-            "parent": null,
+            "id": "e27",
+            "cause": "k24",
+            "parent": "e26",
             "body": {
               "kind": "counter_changed",
               "subject": {
@@ -820,11 +944,11 @@
         ]
       },
       {
-        "id": "b20",
+        "id": "b25",
         "events": [
           {
-            "id": "e23",
-            "cause": "k20",
+            "id": "e28",
+            "cause": "k25",
             "parent": null,
             "body": {
               "kind": "posture_changed",
@@ -842,8 +966,8 @@
             "presentation_id": null
           },
           {
-            "id": "e24",
-            "cause": "k20",
+            "id": "e29",
+            "cause": "k25",
             "parent": null,
             "body": {
               "kind": "posture_changed",
@@ -856,12 +980,12 @@
         ]
       },
       {
-        "id": "b21",
+        "id": "b26",
         "events": [
           {
-            "id": "e25",
-            "cause": "k21",
-            "parent": "e24",
+            "id": "e30",
+            "cause": "k26",
+            "parent": null,
             "body": {
               "kind": "destroy_attempted",
               "subject": {
@@ -877,8 +1001,8 @@
             "presentation_id": null
           },
           {
-            "id": "e26",
-            "cause": "k21",
+            "id": "e31",
+            "cause": "k26",
             "parent": null,
             "body": {
               "kind": "banish_attempted",
@@ -897,12 +1021,12 @@
         ]
       },
       {
-        "id": "b22",
+        "id": "b27",
         "events": [
           {
-            "id": "e27",
-            "cause": "k22",
-            "parent": null,
+            "id": "e32",
+            "cause": "k27",
+            "parent": "e31",
             "body": {
               "kind": "replacement_applied",
               "subject": {
@@ -933,8 +1057,8 @@
             "presentation_id": null
           },
           {
-            "id": "e28",
-            "cause": "k22",
+            "id": "e33",
+            "cause": "k27",
             "parent": null,
             "body": {
               "kind": "replacement_applied",
@@ -947,11 +1071,11 @@
         ]
       },
       {
-        "id": "b23",
+        "id": "b28",
         "events": [
           {
-            "id": "e29",
-            "cause": "k23",
+            "id": "e34",
+            "cause": "k28",
             "parent": null,
             "body": {
               "kind": "movement",
@@ -988,12 +1112,12 @@
         ]
       },
       {
-        "id": "b24",
+        "id": "b29",
         "events": [
           {
-            "id": "e30",
-            "cause": "k24",
-            "parent": "e29",
+            "id": "e35",
+            "cause": "k29",
+            "parent": null,
             "body": {
               "kind": "erased",
               "subject": {
@@ -1011,12 +1135,12 @@
         ]
       },
       {
-        "id": "b25",
+        "id": "b30",
         "events": [
           {
-            "id": "e31",
-            "cause": "k25",
-            "parent": null,
+            "id": "e36",
+            "cause": "k30",
+            "parent": "e35",
             "body": {
               "kind": "evolved",
               "subject": {
@@ -1041,8 +1165,8 @@
             "presentation_id": null
           },
           {
-            "id": "e32",
-            "cause": "k25",
+            "id": "e37",
+            "cause": "k30",
             "parent": null,
             "body": {
               "kind": "evolved",
@@ -1064,11 +1188,11 @@
         ]
       },
       {
-        "id": "b26",
+        "id": "b31",
         "events": [
           {
-            "id": "e33",
-            "cause": "k26",
+            "id": "e38",
+            "cause": "k31",
             "parent": null,
             "body": {
               "kind": "equipped",
@@ -1095,12 +1219,12 @@
         ]
       },
       {
-        "id": "b27",
+        "id": "b32",
         "events": [
           {
-            "id": "e34",
-            "cause": "k27",
-            "parent": "e33",
+            "id": "e39",
+            "cause": "k32",
+            "parent": null,
             "body": {
               "kind": "relationship_changed",
               "relationship": "ride",
@@ -1126,8 +1250,8 @@
             "presentation_id": null
           },
           {
-            "id": "e35",
-            "cause": "k27",
+            "id": "e40",
+            "cause": "k32",
             "parent": null,
             "body": {
               "kind": "relationship_changed",
@@ -1156,14 +1280,15 @@
         ]
       },
       {
-        "id": "b28",
+        "id": "b33",
         "events": [
           {
-            "id": "e36",
-            "cause": "k28",
-            "parent": null,
+            "id": "e41",
+            "cause": "k33",
+            "parent": "e40",
             "body": {
               "kind": "fusion",
+              "player": "p1",
               "subject": {
                 "kind": "card",
                 "card": {
@@ -1172,6 +1297,7 @@
                 },
                 "object": "o2"
               },
+              "materials": 1,
               "material_traits": ["合成タイプ"]
             },
             "about": [],
@@ -1180,11 +1306,37 @@
         ]
       },
       {
-        "id": "b29",
+        "id": "b34",
         "events": [
           {
-            "id": "e37",
-            "cause": "k29",
+            "id": "e42",
+            "cause": "k34",
+            "parent": null,
+            "body": {
+              "kind": "fusion",
+              "player": "p1",
+              "subject": {
+                "kind": "card",
+                "card": {
+                  "printing_id": "SYN01-002",
+                  "face": 0
+                },
+                "object": "o2"
+              },
+              "materials": 2,
+              "material_traits": ["合成タイプ"]
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b35",
+        "events": [
+          {
+            "id": "e43",
+            "cause": "k35",
             "parent": null,
             "body": {
               "kind": "race",
@@ -1196,7 +1348,8 @@
                   "face": 1
                 },
                 "object": "o1"
-              }
+              },
+              "ordinal": 1
             },
             "about": [],
             "presentation_id": null
@@ -1204,12 +1357,37 @@
         ]
       },
       {
-        "id": "b30",
+        "id": "b36",
         "events": [
           {
-            "id": "e38",
-            "cause": "k30",
-            "parent": "e37",
+            "id": "e44",
+            "cause": "k36",
+            "parent": "e43",
+            "body": {
+              "kind": "race",
+              "player": "p1",
+              "subject": {
+                "kind": "card",
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 1
+                },
+                "object": "o1"
+              },
+              "ordinal": 2
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b37",
+        "events": [
+          {
+            "id": "e45",
+            "cause": "k37",
+            "parent": null,
             "body": {
               "kind": "drive_gained",
               "player": "p1",
@@ -1228,15 +1406,22 @@
         ]
       },
       {
-        "id": "b31",
+        "id": "b38",
         "events": [
           {
-            "id": "e39",
-            "cause": "k31",
+            "id": "e46",
+            "cause": "k38",
             "parent": null,
             "body": {
               "kind": "drive_trigger",
               "player": "p1",
+              "card": {
+                "card": {
+                  "printing_id": "SYN01-004",
+                  "face": 0
+                },
+                "object": null
+              },
               "icon": "heal"
             },
             "about": [],
@@ -1245,17 +1430,23 @@
         ]
       },
       {
-        "id": "b32",
+        "id": "b39",
         "events": [
           {
-            "id": "e40",
-            "cause": "k32",
-            "parent": null,
+            "id": "e47",
+            "cause": "k39",
+            "parent": "e46",
             "body": {
-              "kind": "drive_checked",
-              "accepted": true,
+              "kind": "drive_trigger",
               "player": "p1",
-              "zone": "hand"
+              "card": {
+                "card": {
+                  "printing_id": "SYN01-005",
+                  "face": 0
+                },
+                "object": null
+              },
+              "icon": "heal"
             },
             "about": [],
             "presentation_id": null
@@ -1263,12 +1454,108 @@
         ]
       },
       {
-        "id": "b33",
+        "id": "b40",
         "events": [
           {
-            "id": "e41",
-            "cause": "k33",
-            "parent": "e40",
+            "id": "e48",
+            "cause": "k40",
+            "parent": null,
+            "body": {
+              "kind": "drive_trigger",
+              "player": "p1",
+              "card": null,
+              "icon": "heal"
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b41",
+        "events": [
+          {
+            "id": "e49",
+            "cause": "k41",
+            "parent": null,
+            "body": {
+              "kind": "drive_checked",
+              "player": "p1",
+              "card": {
+                "card": {
+                  "printing_id": "SYN01-004",
+                  "face": 0
+                },
+                "object": null
+              },
+              "accepted": true,
+              "destination": {
+                "player": "p1",
+                "zone": "cemetery"
+              }
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b42",
+        "events": [
+          {
+            "id": "e50",
+            "cause": "k42",
+            "parent": "e49",
+            "body": {
+              "kind": "drive_checked",
+              "player": "p1",
+              "card": {
+                "card": {
+                  "printing_id": "SYN01-005",
+                  "face": 0
+                },
+                "object": null
+              },
+              "accepted": true,
+              "destination": {
+                "player": "p1",
+                "zone": "cemetery"
+              }
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b43",
+        "events": [
+          {
+            "id": "e51",
+            "cause": "k43",
+            "parent": null,
+            "body": {
+              "kind": "drive_checked",
+              "player": "p1",
+              "card": null,
+              "accepted": false,
+              "destination": {
+                "player": "p1",
+                "zone": "deck"
+              }
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
+        "id": "b44",
+        "events": [
+          {
+            "id": "e52",
+            "cause": "k44",
+            "parent": null,
             "body": {
               "kind": "dice",
               "player": "p2",
@@ -1280,12 +1567,12 @@
         ]
       },
       {
-        "id": "b34",
+        "id": "b45",
         "events": [
           {
-            "id": "e42",
-            "cause": "k34",
-            "parent": null,
+            "id": "e53",
+            "cause": "k45",
+            "parent": "e52",
             "body": {
               "kind": "shuffled",
               "player": "p2",
@@ -1297,11 +1584,11 @@
         ]
       },
       {
-        "id": "b35",
+        "id": "b46",
         "events": [
           {
-            "id": "e43",
-            "cause": "k35",
+            "id": "e54",
+            "cause": "k46",
             "parent": null,
             "body": {
               "kind": "control_changed",
@@ -1323,12 +1610,12 @@
         ]
       },
       {
-        "id": "b36",
+        "id": "b47",
         "events": [
           {
-            "id": "e44",
-            "cause": "k36",
-            "parent": "e43",
+            "id": "e55",
+            "cause": "k47",
+            "parent": null,
             "body": {
               "kind": "trigger_pending",
               "controller": "p1",
@@ -1353,8 +1640,8 @@
             "presentation_id": null
           },
           {
-            "id": "e45",
-            "cause": "k36",
+            "id": "e56",
+            "cause": "k47",
             "parent": null,
             "body": {
               "kind": "trigger_pending",
@@ -1374,12 +1661,12 @@
         ]
       },
       {
-        "id": "b37",
+        "id": "b48",
         "events": [
           {
-            "id": "e46",
-            "cause": "k37",
-            "parent": null,
+            "id": "e57",
+            "cause": "k48",
+            "parent": "e56",
             "body": {
               "kind": "pending_cancelled",
               "source": {
@@ -1397,11 +1684,11 @@
         ]
       },
       {
-        "id": "b38",
+        "id": "b49",
         "events": [
           {
-            "id": "e47",
-            "cause": "k38",
+            "id": "e58",
+            "cause": "k49",
             "parent": null,
             "body": {
               "kind": "card_resolved",
@@ -1418,8 +1705,8 @@
             "presentation_id": null
           },
           {
-            "id": "e48",
-            "cause": "k38",
+            "id": "e59",
+            "cause": "k49",
             "parent": null,
             "body": {
               "kind": "card_resolved",
@@ -1432,15 +1719,23 @@
         ]
       },
       {
-        "id": "b39",
+        "id": "b50",
         "events": [
           {
-            "id": "e49",
-            "cause": "k39",
-            "parent": "e48",
+            "id": "e60",
+            "cause": "k50",
+            "parent": null,
             "body": {
               "kind": "ability_resolved",
               "player": "p1",
+              "holder": {
+                "kind": "card",
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 1
+                },
+                "object": "o1"
+              },
               "source": {
                 "kind": "text",
                 "text": {
@@ -1455,19 +1750,22 @@
                   "granted_by": null,
                   "holder": "o1"
                 }
-              }
+              },
+              "ability": "activated"
             },
             "about": [],
             "presentation_id": null
           },
           {
-            "id": "e50",
-            "cause": "k39",
+            "id": "e61",
+            "cause": "k50",
             "parent": null,
             "body": {
               "kind": "ability_resolved",
               "player": "p2",
-              "source": null
+              "holder": null,
+              "source": null,
+              "ability": "triggered"
             },
             "about": [],
             "presentation_id": null
@@ -1475,12 +1773,12 @@
         ]
       },
       {
-        "id": "b40",
+        "id": "b51",
         "events": [
           {
-            "id": "e51",
-            "cause": "k40",
-            "parent": null,
+            "id": "e62",
+            "cause": "k51",
+            "parent": "e61",
             "body": {
               "kind": "turn_skipped",
               "player": "p2",
@@ -1492,11 +1790,11 @@
         ]
       },
       {
-        "id": "b41",
+        "id": "b52",
         "events": [
           {
-            "id": "e52",
-            "cause": "k41",
+            "id": "e63",
+            "cause": "k52",
             "parent": null,
             "body": {
               "kind": "result",
@@ -1514,8 +1812,8 @@
             "presentation_id": null
           },
           {
-            "id": "e53",
-            "cause": "k41",
+            "id": "e64",
+            "cause": "k52",
             "parent": null,
             "body": {
               "kind": "result",
@@ -1546,11 +1844,11 @@
       "b13",
       "b14",
       "b15",
+      "b16",
       "b17",
       "b18",
       "b19",
       "b20",
-      "b21",
       "b22",
       "b23",
       "b24",
@@ -1570,7 +1868,18 @@
       "b38",
       "b39",
       "b40",
-      "b41"
+      "b41",
+      "b42",
+      "b43",
+      "b44",
+      "b45",
+      "b46",
+      "b47",
+      "b48",
+      "b49",
+      "b50",
+      "b51",
+      "b52"
     ]
   },
   "presentation": [

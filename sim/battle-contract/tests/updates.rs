@@ -69,32 +69,14 @@ fn every_event_kind_has_a_committed_fixture() {
 #[test]
 fn every_input_delivery_and_presentation_state_has_a_fixture() {
     let updates = updates();
-    let inputs: BTreeSet<_> = updates
-        .iter()
-        .map(|update| {
-            update
-                .pointer("/input/kind")
-                .unwrap()
-                .as_str()
-                .unwrap()
-                .to_owned()
-        })
-        .collect();
-    assert_eq!(inputs, tags("BattleInput", "kind"));
-
-    let deliveries: BTreeSet<_> = updates
-        .iter()
-        .map(|update| {
-            update
-                .pointer("/events/status")
-                .unwrap()
-                .as_str()
-                .unwrap()
-                .to_owned()
-        })
-        .collect();
-    assert_eq!(deliveries, tags("EventDelivery", "status"));
-
+    assert_eq!(
+        found(&updates, &[], "/input/kind"),
+        tags("BattleInput", "kind")
+    );
+    assert_eq!(
+        found(&updates, &[], "/events/status"),
+        tags("EventDelivery", "status")
+    );
     assert_eq!(
         found(&updates, &["/presentation"], "/kind"),
         tags("PresentationOp", "kind")
@@ -164,4 +146,52 @@ fn a_promoted_batch_links_back_by_presentation_id_and_is_not_animated_again() {
     for id in animate {
         assert!(batches.iter().any(|batch| &batch.id == id));
     }
+}
+
+/// Bodies of one kind in the events fixture, in order.
+fn bodies(kind: &str) -> Vec<Value> {
+    updates()
+        .iter()
+        .filter_map(|update| update.pointer("/events/batches"))
+        .flat_map(|batches| batches.as_array().unwrap())
+        .flat_map(|batch| batch.get("events").unwrap().as_array().unwrap())
+        .map(|event| event.get("body").unwrap())
+        .filter(|body| body.get("kind").unwrap() == kind)
+        .cloned()
+        .collect()
+}
+
+/// Whether two bodies are equal except for the one field at `pointer`.
+fn differ_only_at(first: &Value, second: &Value, pointer: &str) -> bool {
+    let mut aligned = first.clone();
+    *aligned.pointer_mut(pointer).unwrap() = second.pointer(pointer).unwrap().clone();
+    first != second && &aligned == second
+}
+
+#[test]
+fn events_keep_the_public_facts_that_tell_similar_occurrences_apart() {
+    let abilities = bodies("ability_played");
+    assert!(differ_only_at(&abilities[1], &abilities[2], "/ability"));
+
+    let fusions = bodies("fusion");
+    assert!(differ_only_at(&fusions[0], &fusions[1], "/materials"));
+
+    let races = bodies("race");
+    assert!(differ_only_at(&races[0], &races[1], "/ordinal"));
+
+    let triggers = bodies("drive_trigger");
+    assert!(differ_only_at(&triggers[0], &triggers[1], "/card"));
+    assert_eq!(triggers[2].get("card"), Some(&Value::Null));
+
+    let checks = bodies("drive_checked");
+    assert!(differ_only_at(&checks[0], &checks[1], "/card"));
+    assert_eq!(checks[2].get("card"), Some(&Value::Null));
+
+    let payments = bodies("payment");
+    assert_eq!(payments[0].pointer("/component/kind").unwrap(), "general");
+    assert!(differ_only_at(
+        &payments[1],
+        &payments[2],
+        "/component/stacks"
+    ));
 }
