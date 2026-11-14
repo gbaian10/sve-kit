@@ -536,10 +536,10 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
         let power = query.r#where.map(|condition| condition.cmp);
         Self {
             power_at_most: power
-                .filter(|cmp| cmp.op == ast::PowerBound::Le)
+                .filter(|cmp| matches!(cmp.op, ast::PowerBound::Le | ast::PowerBound::Eq))
                 .map(|cmp| cmp.right),
             power_at_least: power
-                .filter(|cmp| cmp.op == ast::PowerBound::Ge)
+                .filter(|cmp| matches!(cmp.op, ast::PowerBound::Ge | ast::PowerBound::Eq))
                 .map(|cmp| cmp.right),
             racing: query.racing,
             kind: query.kind.as_ref().map(super::search::card_kind),

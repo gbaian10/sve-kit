@@ -434,3 +434,58 @@ fn cross_zone_keyword_sources_keep_other_keywords_and_raw_zone_orders_closed() {
 
 #[path = "static_keywords/conditions.rs"]
 mod conditions;
+
+#[test]
+fn static_keyword_power_equality_rechecks_both_sides_of_the_boundary() {
+    let provider = lowerer().lower(&equipment_played::tree(&json!({"static":{"effects":[{"grant":{
+        "on":{"who":"self","zone":"field","kind":"follower","where":{"cmp":{"left":{"power_of":"item"},"op":"eq","right":1}}},
+        "keywords":["aura"]
+    }}]}}),"unit-amulet")).unwrap().remove("unit-amulet").unwrap();
+    let receiver = lowerer()
+        .lower(&equipment_played::tree(
+            &json!({"activate":{"cost":{"pp":0},"do":[{"buff":{"on":"this","power":1,"hp":0}}]}}),
+            "unit-follower",
+        ))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let id = receiver.card().abilities[0].node.id;
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"provider","card":"unit-amulet"},
+        {"id":"below","card":"unit-follower","state":{"power":0_u8}},
+        {"id":"equal","card":"unit-follower","state":{"power":1_u8}},
+        {"id":"above","card":"unit-follower","state":{"power":2_u8}}
+    ]);
+    initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"power":1_u8});
+    let mut game = Game::new(
+        keyword_catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "power-equality",
+    )
+    .unwrap();
+    game.load_internal_card("unit-amulet", &provider).unwrap();
+    game.load_internal_card("unit-follower", &receiver).unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["equal"]["keywords"], json!(["オーラ"]));
+    for object in ["below", "above", "f"] {
+        assert_eq!(state["objects"][object]["keywords"], json!([]));
+    }
+    for object in ["below", "equal"] {
+        resolved(
+            game.activate_internal_card(object, id, PlayerId { seat: 1 })
+                .unwrap(),
+        );
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+    }
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["below"]["keywords"], json!(["オーラ"]));
+    assert_eq!(state["objects"]["equal"]["keywords"], json!([]));
+}
