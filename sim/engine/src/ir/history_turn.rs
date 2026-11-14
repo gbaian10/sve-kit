@@ -114,6 +114,7 @@ pub(crate) enum PlayedHistoryFilter {
         kind: Option<super::CardKind>,
         trait_id: Option<super::TraitId>,
         token: Option<bool>,
+        name: Option<super::CardName>,
     },
 }
 
@@ -125,17 +126,27 @@ impl PlayedHistoryFilter {
                 super::CardKind::Follower | super::CardKind::Spell | super::CardKind::Amulet
             )
         ) || filter.trait_id.as_ref().is_some_and(|id| id.0.is_empty())
-            || (filter.kind.is_none() && filter.trait_id.is_none() && filter.token.is_none())
+            || filter.name.as_ref().is_some_and(|name| name.0.is_empty())
+            || (filter.kind.is_none()
+                && filter.trait_id.is_none()
+                && filter.token.is_none()
+                && filter.name.is_none())
         {
             return None;
         }
-        let plan = match (filter.kind, filter.trait_id.as_ref(), filter.token) {
-            (None, Some(id), None) => Self::Trait(id.clone()),
-            (Some(super::CardKind::Spell), None, None) => Self::Spell,
-            (kind, trait_id, token) => Self::Intersection {
+        let plan = match (
+            filter.kind,
+            filter.trait_id.as_ref(),
+            filter.token,
+            filter.name.as_ref(),
+        ) {
+            (None, Some(id), None, None) => Self::Trait(id.clone()),
+            (Some(super::CardKind::Spell), None, None, None) => Self::Spell,
+            (kind, trait_id, token, name) => Self::Intersection {
                 kind,
                 trait_id: trait_id.cloned(),
                 token,
+                name: name.cloned(),
             },
         };
         (plan.subjects() == [filter.clone()]).then_some(plan)
@@ -156,12 +167,14 @@ impl PlayedHistoryFilter {
                 kind,
                 trait_id,
                 token,
+                name,
             } => {
                 return vec![SubjectFilter {
                     own: Some(true),
                     kind: *kind,
                     trait_id: trait_id.clone(),
                     token: *token,
+                    name: name.clone(),
                     ..SubjectFilter::default()
                 }];
             }
