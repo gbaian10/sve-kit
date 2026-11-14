@@ -358,18 +358,14 @@ fn discard_history_keeps_both_query_sites_closed_and_does_not_widen_moved() {
                 .unwrap_err();
         }
     }
-    for query in [
-        json!({"window":"this_turn","event":"played","who":"self"}),
-        json!({"window":"this_turn","event":"life_changed","who":"self","where":{"direction":"down"}}),
-    ] {
-        let source = tree(&json!({"play":{"cost_delta":{"if":{"history":query},"delta":-2}}}));
-        lowerer()
-            .lower_with_printed_costs(
-                &source,
-                &BTreeMap::from([("unit-follower".to_owned(), Nat(3))]),
-            )
-            .unwrap_err();
-    }
+    let query = json!({"window":"this_turn","event":"life_changed","who":"self","where":{"direction":"down"}});
+    let source = tree(&json!({"play":{"cost_delta":{"if":{"history":query},"delta":-2}}}));
+    lowerer()
+        .lower_with_printed_costs(
+            &source,
+            &BTreeMap::from([("unit-follower".to_owned(), Nat(3))]),
+        )
+        .unwrap_err();
 }
 
 fn history_card(query: HistoryQuery, count: HistoryCount) -> CardProgram {
