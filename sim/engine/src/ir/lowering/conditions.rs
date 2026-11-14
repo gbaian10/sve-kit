@@ -241,7 +241,11 @@ impl BodyContext<'_> {
     ) -> Result<Predicate, LoweringError> {
         let objects = match &location.r#ref {
             ast::Objects::Follow { follow } => self.followed(follow, path)?,
-            reference => self.objects(reference, path)?,
+            reference @ (ast::Objects::Role { .. }
+            | ast::Objects::This(_)
+            | ast::Objects::Bound(_)
+            | ast::Objects::Zone(_)
+            | ast::Objects::EventHolder { .. }) => self.objects(reference, path)?,
         };
         let zone = super::play_restrictions::source_zone(&location.zone)
             .ok_or_else(|| unsupported(path))?;

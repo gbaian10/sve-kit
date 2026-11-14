@@ -189,13 +189,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         }
         Some(SearchDestination::Partition { destinations }) => {
             for partition in destinations {
-                check_movement(&MoveSpec {
-                    to: partition.zone.clone(),
-                    position: None,
-                    order: None,
-                    initial_posture: None,
-                    entry_effects: vec![],
-                })?;
+                check_destination(&partition.zone)?;
             }
             return Ok(());
         }
@@ -245,18 +239,24 @@ fn check_movement(movement: &MoveSpec) -> Result<()> {
         || movement.order.is_some()
         || !posture_allowed
         || !movement.entry_effects.is_empty()
-        || !matches!(
-            &movement.to,
-            MoveDestination::Owners {
-                zone: OwnerZone::Hand | OwnerZone::Cemetery
-            } | MoveDestination::Shared {
-                zone: ZoneRef {
-                    kind: ZoneKind::Ex | ZoneKind::Field,
-                    ..
-                }
-            }
-        )
     {
+        return Err(unsupported("search movement"));
+    }
+    check_destination(&movement.to)
+}
+
+fn check_destination(destination: &MoveDestination) -> Result<()> {
+    if !matches!(
+        destination,
+        MoveDestination::Owners {
+            zone: OwnerZone::Hand | OwnerZone::Cemetery
+        } | MoveDestination::Shared {
+            zone: ZoneRef {
+                kind: ZoneKind::Ex | ZoneKind::Field,
+                ..
+            }
+        }
+    ) {
         return Err(unsupported("search movement"));
     }
     Ok(())
