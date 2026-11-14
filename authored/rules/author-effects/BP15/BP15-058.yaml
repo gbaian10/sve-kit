@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-058:
+    admission: light
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 1 }
+      - line: 2
+        keywords: [bane]
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond: { awakened: true }
+                then:
+                  - player_effect:
+                      who: opp
+                      until:
+                        during_next_turn: { who: opp }
+                      effect:
+                        cost_mod:
+                          when_playing: { who: opp }
+                          delta: 1
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"
