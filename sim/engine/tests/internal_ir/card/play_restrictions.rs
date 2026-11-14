@@ -1,4 +1,5 @@
 use super::*;
+use sve_engine::EngineFailure;
 use sve_engine::game::internal::InputDomain;
 
 fn tree(condition: &Value) -> Value {
@@ -102,7 +103,7 @@ fn printed_play_restrictions_filter_quick_options_but_allow_opponent_turn() {
 fn printed_play_restrictions_reject_other_conditions_and_forged_permissions_atomically() {
     for condition in [
         json!({"opp_turn":true}),
-        json!({"in_zone":{"ref":"this","zone":"hand"}}),
+        json!({"in_zone":{"ref":"this","zone":"evolve_deck"}}),
         json!({"in_zone":{"ref":"target","zone":"ex"}}),
         json!({"all":[{"my_turn":false}]}),
     ] {
@@ -353,4 +354,86 @@ fn granted_cost_modifiers_cannot_silently_add_a_cemetery_play_permission() {
     expanded["cards"]["unit-follower"]["abilities"][0]["activate"]["do"][0]["grant"]["abilities"]
         [0]["play"]["playable_from"] = json!({"zone":"cemetery","if":{"my_turn":true}});
     lowerer().lower(&expanded).unwrap_err();
+}
+
+#[test]
+fn hand_only_restriction_allows_hand_and_rejects_ex_without_spending() {
+    let program = card(vec![
+        play::spell(vec![]),
+        restriction(&json!({"not":{"in_zone":{"ref":"this","zone":"hand"}}})),
+    ]);
+    for zone in ["hand", "ex"] {
+        let mut game = play::position(&program, zone, 0);
+        let before = game.projection(View::Referee).unwrap();
+        let result = game.play_internal_card("s", PlayerId { seat: 1 });
+        if zone == "hand" {
+            resolved(result.unwrap());
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+                json!(["s"])
+            );
+        } else {
+            assert!(matches!(
+                result,
+                Err(EngineFailure::Unsupported(message)) if message == "internal D1 does not support card play holder, permission or timing"
+            ));
+            assert_eq!(game.projection(View::Referee).unwrap(), before);
+        }
+    }
+}
+
+#[test]
+fn source_zone_restriction_is_checked_even_with_a_banish_play_permission() {
+    for only_hand in [true, false] {
+        let granting=lowerer().lower(&equipment_played::tree(&json!({"activate":{"cost":{"pp":0},"do":[
+        {"player_effect":{"who":"self","until":"turn","effect":{"play_permission":{"from":["banish"],"on":{"who":"self","zone":"banish"}}}}}
+    ]}}),"unit-follower")).unwrap().remove("unit-follower").unwrap();
+        let mut abilities = vec![play::spell(vec![])];
+        if only_hand {
+            abilities.push(restriction(
+                &json!({"not":{"in_zone":{"ref":"this","zone":"hand"}}}),
+            ));
+        }
+        let program = card(abilities);
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"grant","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["banish"] = json!([{"id":"s","card":"unit-spell"}]);
+        let mut game = Game::new(
+            catalog(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "hand-only-banish",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &granting).unwrap();
+        game.load_internal_card("unit-spell", &program).unwrap();
+        resolved(
+            game.activate_internal_card(
+                "grant",
+                granting.card().abilities[0].node.id,
+                PlayerId { seat: 1 },
+            )
+            .unwrap(),
+        );
+        while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let before = game.projection(View::Referee).unwrap();
+        let result = game.play_internal_card("s", PlayerId { seat: 1 });
+        if only_hand {
+            assert!(
+                matches!(&result, Err(EngineFailure::Unsupported(message)) if message == "internal D1 does not support card play holder, permission or timing"),
+                "{result:?}"
+            );
+            assert_eq!(game.projection(View::Referee).unwrap(), before);
+        } else {
+            resolved(result.unwrap());
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+                json!(["s"])
+            );
+        }
+    }
 }
