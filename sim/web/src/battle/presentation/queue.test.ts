@@ -265,6 +265,32 @@ describe("presentation queue", () => {
     })
   })
 
+  it("rejects a second scope that reuses an occurrence, so no two scopes share a committed batch", () => {
+    // Two scope ids whose events carry the same presentation ids, bodies and subjects.
+    const first = provisional("s1", "c")
+    const twin: PresentationOp = { ...first, scope_id: "s2" }
+    const together = accept(EMPTY, update({ presentation: [first, twin] }))
+    const later = accept(
+      accepted(EMPTY, update({ presentation: [first] })),
+      update({ presentation: [twin] }),
+    )
+    const closed = accept(
+      accepted(
+        accepted(EMPTY, update({ presentation: [first] })),
+        update({ batches: [committed("c", ["s1-p0"])], presentation: [promote("s1")] }),
+      ),
+      update({ presentation: [twin] }),
+    )
+    const doubled = provisional("s3", "d", 2)
+    if (doubled.kind === "provisional") {
+      const [member] = doubled.batch.events
+      if (member !== undefined) doubled.batch.events = [member, member]
+    }
+    const within = accept(EMPTY, update({ presentation: [doubled] }))
+    for (const result of [together, later, closed, within])
+      expect(result).toEqual({ kind: "host_error", reason: "projection" })
+  })
+
   it("keeps a closed scope's content: a repeat is not replayed and a reuse is rejected", () => {
     const shown = play(
       accepted(EMPTY, update({ presentation: [provisional("s1", "b1"), provisional("s2", "x")] })),

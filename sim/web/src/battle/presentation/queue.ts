@@ -129,7 +129,11 @@ export function accept(
   const batches = update.events.status === "available" ? update.events.batches : []
   const claimed = links(batches)
   if (claimed === null) return CONFLICT
-  const promoting = new Set<EventBatch>()
+  // Every occurrence ever shown. An occurrence belongs to one scope, so two scopes can never
+  // stand for the same committed batch.
+  const occurrences = new Set<string>()
+  for (const record of scopes.values())
+    for (const event of record.batch?.events ?? []) occurrences.add(event.id)
   const cancelled = new Set<string>()
   const provisional: Beat[] = []
 
@@ -143,6 +147,10 @@ export function accept(
         continue
       }
       if (op.batch.events.length === 0) return CONFLICT
+      for (const event of op.batch.events) {
+        if (occurrences.has(event.id)) return CONFLICT
+        occurrences.add(event.id)
+      }
       scopes.set(op.scope_id, { batch: op.batch, life: "open" })
       provisional.push({
         kind: "provisional",
@@ -156,11 +164,8 @@ export function accept(
     // history, but its id is recorded as used.
     if (known !== undefined && known.life !== "open") return CONFLICT
     if (op.kind === "promote") {
-      if (known !== undefined && known.batch !== null) {
-        const batch = promotion(claimed, known.batch)
-        if (batch === null) return CONFLICT
-        promoting.add(batch)
-      }
+      if (known !== undefined && known.batch !== null && promotion(claimed, known.batch) === null)
+        return CONFLICT
       scopes.set(op.scope_id, { batch: known?.batch ?? null, life: "promoted" })
     } else {
       cancelled.add(op.scope_id)
