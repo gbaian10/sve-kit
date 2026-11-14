@@ -102,7 +102,15 @@ impl PlayMode {
             if mode
                 .parameters
                 .iter()
-                .filter(|decision| !super::material::is_parameter(decision))
+                .filter(|decision| {
+                    matches!(
+                        decision.kind,
+                        DecisionKind::PlayParameter {
+                            slot: PlaySlot::Targets,
+                            ..
+                        }
+                    )
+                })
                 .any(|decision| !independent_mode_target(decision))
             {
                 return Err(unsupported(

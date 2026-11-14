@@ -1,5 +1,5 @@
 use super::*;
-use sve_engine::game::internal::InputDomain;
+use sve_engine::game::internal::{DamageShare, InputDomain};
 
 fn body() -> Value {
     json!({
@@ -368,4 +368,114 @@ fn hand_written_ir_cannot_turn_a_public_mode_count_into_a_hidden_hand_count() {
         WellFormedCardProgram::check(bad).is_err(),
         "the checker keeps hidden mode-count reads closed even when the lowerer is bypassed"
     );
+}
+
+fn mode_allocation_position() -> Value {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"s","card":"unit-follower"},{"id":"soil","card":"unit-amulet","state":{"counters":{"test":2_u8}}}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"one","card":"unit-follower","state":{"hp":10_u8,"max_hp":10_u8}},
+        {"id":"two","card":"unit-follower","state":{"hp":10_u8,"max_hp":10_u8}}
+    ]);
+    initial
+}
+
+#[test]
+fn paid_mode_declares_damage_allocation_before_its_counter_material() {
+    let program=lowerer().lower(&equipment_played::tree(&json!({"activate":{"cost":{"pp":0},
+        "targets":[{"bind":"chosen","option":2,"from":{"who":"opp","zone":"field","kind":"follower"},"upto":2}],
+        "do":[{"choice":{"n":1,"options":[[{"life":{"who":"self","delta":1}}],[{"pay":{"cost":{"counter":{"on":{"who":"self","zone":"field","name":"unit-amulet"},"holders":1,"name":"test","n":1}},"do":[{"damage":{"to":"chosen","n":4,"distribute":true}}]}}]]}}]
+    }}),"unit-follower")).unwrap().remove("unit-follower").unwrap();
+    let initial = mode_allocation_position();
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "mode-distribution",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-amulet", &card(vec![]))
+        .unwrap();
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
+    let CardPlay::Awaiting(q) = game
+        .activate_internal_card(
+            "s",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap()
+    else {
+        panic!("mode declaration");
+    };
+    assert!(matches!(q.domain, InputDomain::Modes { .. }));
+    let CardPlay::Awaiting(q) = game
+        .answer_internal_card(q.actor, q.token, Answer::Modes(vec![ModeId(2)]))
+        .unwrap()
+    else {
+        panic!("formal targets");
+    };
+    assert!(
+        matches!(q.domain, InputDomain::OptionalCost),
+        "optional declaration: {:?}",
+        q.domain
+    );
+    let CardPlay::Awaiting(q) = game
+        .answer_internal_card(q.actor, q.token, Answer::OptionalCost(true))
+        .unwrap()
+    else {
+        panic!("formal targets after optional declaration");
+    };
+    let InputDomain::Targets(domain) = &q.domain else {
+        panic!("targets before payment: {:?}", q.domain);
+    };
+    let targets = domain.members.iter().map(|m| m.handle).collect();
+    let CardPlay::Awaiting(q) = game
+        .answer_internal_card(q.actor, q.token, Answer::Targets(targets))
+        .unwrap()
+    else {
+        panic!("distribution declaration");
+    };
+    let InputDomain::Distribution(domain) = &q.domain else {
+        panic!("allocation before materials");
+    };
+    let shares = domain
+        .members
+        .iter()
+        .map(|m| DamageShare {
+            handle: m.handle,
+            amount: Nat(2),
+        })
+        .collect();
+    let CardPlay::Awaiting(q) = game
+        .answer_internal_card(q.actor, q.token, Answer::Distribution(shares))
+        .unwrap()
+    else {
+        panic!("counter materials after allocation");
+    };
+    let InputDomain::CostMaterials(domain) = &q.domain else {
+        panic!("earth rite material");
+    };
+    resolved(
+        game.answer_internal_card(
+            q.actor,
+            q.token,
+            Answer::CostMaterials(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+    let state = game.projection(View::Referee).unwrap();
+    for id in ["one", "two"] {
+        assert_eq!(state["objects"][id]["damage"], 2_u8);
+    }
+    assert_eq!(state["objects"]["soil"]["counters"]["test"], 1_u8);
+    assert_eq!(state["P1"]["pp"]["current"], 2_u8);
 }
