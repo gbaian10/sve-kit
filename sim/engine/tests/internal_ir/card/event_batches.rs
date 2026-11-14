@@ -1,13 +1,9 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected player shapes fail the synthetic scenarios."
-)]
-
 use super::*;
 use crate::player_pipeline::{answer, question};
 use sve_engine::game::player::events::{
     ActionKind, EventError, EventKind, MovementMethod, PlayerEventBatch,
 };
+use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     AttackTarget, Command, DecisionShape, MainActionAnswer, MainIntentKind, QuestionShape,
     SubmissionKind, Viewer,
@@ -19,7 +15,10 @@ fn batches(game: &Game, viewer: Viewer) -> Vec<PlayerEventBatch> {
         .unwrap()
         .cloned()
         .collect::<Vec<_>>();
-    assert!(batches.iter().all(|batch| !batch.events.is_empty()));
+    assert!(
+        batches.iter().all(|batch| !batch.events.is_empty()),
+        "committed batches contain at least one authorized occurrence"
+    );
     assert_eq!(
         batches
             .iter()
@@ -120,8 +119,8 @@ fn event_batches_aoe_and_consecutive_damage_freeze_each_hits_life_then_destroy_t
         );
         assert!(history[3].events.iter().all(|event| matches!(&event.kind,
             EventKind::Movement { method: MovementMethod::RuleDestroy, before, after }
-            if before.zone == Some(sve_engine::game::player::observation::ObservedZone::Field)
-            && after.zone == Some(sve_engine::game::player::observation::ObservedZone::Cemetery))));
+            if before.zone == Some(ObservedZone::Field)
+            && after.zone == Some(ObservedZone::Cemetery))));
         let first = &history[0].events;
         let other = if viewer == Viewer::P1 {
             Viewer::P2
