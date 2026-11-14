@@ -1356,14 +1356,9 @@ known:
     reason: "no authored program: BP19-009"
   - question: "rule-13.5.1.3.2-01"
     scenario: "選項數 NC10：墓場 9 嘗試兩模式"
-    status: unsupported
-    error: "unadmitted ETD02-015 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ETD02-015/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-13.5.1.3.2-01"
-    scenario: "選項數 NC10：墓場 10 嘗試兩模式"
-    status: unsupported
-    error: "unadmitted ETD02-015 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ETD02-015/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "play answer rejected"
   - question: "rule-13.5.1.3.2-01"
     scenario: "解決 NC20 固定：起始 19，先移走魂の一刀"
     status: unsupported
