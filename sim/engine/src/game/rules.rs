@@ -20,6 +20,8 @@ impl Game {
     ///
     /// # Errors
     /// The same transport and semantic errors as `decide`.
+    // Test and runner driver only: players and hosts submit through the player interface.
+    #[cfg(feature = "runner")]
     pub fn submit(&mut self, decision: &Value) -> Result<Step> {
         let node = format!("decision-{}", self.state.next_decision);
         let step = self.decide(decision, &node)?;
@@ -31,6 +33,8 @@ impl Game {
     ///
     /// # Errors
     /// Returns unsupported semantics or malformed transport data; legal rejections are outcomes.
+    // Test and runner driver only: players and hosts submit through the player interface.
+    #[cfg(feature = "runner")]
     pub fn decide(&mut self, decision: &Value, node: &str) -> Result<Step> {
         if !self.card_runtime.is_empty() {
             self.check_internal_resources()?;

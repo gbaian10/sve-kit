@@ -57,9 +57,11 @@ use crate::{EngineFailure, Result, invalid};
 pub enum View {
     /// Full server state, never sent to a player.
     Referee,
-    /// First seat.
+    /// First seat's old player packet; test and runner driver only.
+    #[cfg(feature = "runner")]
     P1,
-    /// Second seat.
+    /// Second seat's old player packet; test and runner driver only.
+    #[cfg(feature = "runner")]
     P2,
 }
 
@@ -67,7 +69,9 @@ impl View {
     pub(crate) const fn player(self) -> Option<&'static str> {
         match self {
             Self::Referee => None,
+            #[cfg(feature = "runner")]
             Self::P1 => Some("P1"),
+            #[cfg(feature = "runner")]
             Self::P2 => Some("P2"),
         }
     }

@@ -342,15 +342,15 @@ fn chosen_and_actual_movement_results_diverge_at_ex_capacity() {
 
 #[test]
 fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
-    // Both cards left the prototype set; their original bodies stay frozen as migration fixtures.
+    // Both cards left the prototype set; the interpreter tests keep their original bodies.
     for (number, frozen) in [
         (
             "BP18-059",
-            include_str!("../../../carddb/tests/fixtures/effect_baseline/migrated/BP18-059.json"),
+            include_str!("fixtures/prototype-bodies/BP18-059.json"),
         ),
         (
             "BP18-SL14",
-            include_str!("../../../carddb/tests/fixtures/effect_baseline/migrated/BP18-SL14.json"),
+            include_str!("fixtures/prototype-bodies/BP18-SL14.json"),
         ),
     ] {
         let original: Value = serde_json::from_str(frozen).unwrap();
@@ -430,19 +430,13 @@ fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
 
 #[test]
 fn authored_ride_costs_share_one_payment_and_reject_missing_resources() {
-    let cocoa: Value = serde_json::from_str(include_str!(
-        "../../../carddb/tests/fixtures/effect_baseline/migrated/CP03-112.json"
-    ))
-    .unwrap();
+    let cocoa: Value =
+        serde_json::from_str(include_str!("fixtures/prototype-bodies/CP03-112.json")).unwrap();
     // The legacy payment regression survives migration without reading the current DSL.
-    let migrated: Value = serde_json::from_str(include_str!(
-        "../../../carddb/tests/fixtures/effect_baseline/migrated/CSD03a-006.json"
-    ))
-    .unwrap();
-    let valeria: Value = serde_json::from_str(include_str!(
-        "../../../carddb/tests/fixtures/effect_baseline/migrated/CP03-009.json"
-    ))
-    .unwrap();
+    let migrated: Value =
+        serde_json::from_str(include_str!("fixtures/prototype-bodies/CSD03a-006.json")).unwrap();
+    let valeria: Value =
+        serde_json::from_str(include_str!("fixtures/prototype-bodies/CP03-009.json")).unwrap();
     for authored in [&valeria, &cocoa, &migrated] {
         let costs = authored["abilities"][0]["costs"].as_array().unwrap();
         let links = costs
