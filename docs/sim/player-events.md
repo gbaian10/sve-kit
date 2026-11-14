@@ -30,6 +30,10 @@ cursor 回 `InvalidCursor`。這是 Rust 行程內介面，沒有穩定的 wire 
 投影缺口只讓對應觀看者的事件流固定回 `ProjectionGap`，之後停供事件，
 不改變 `input`、`submit`、`observe` 的權威結果，也不自行判定勝負。
 
+[對戰契約](battle-contract.md)另外定義供音畫使用的有限暫態呈現。
+它不由 `Game::events` 輸出、不占已提交 cursor，也不放寬上述規則歷史的提交邊界；
+授權、晉升、故障撤銷與播放一次性依該契約處理，不能直接把懸置 buffer 當公開歷史。
+
 ## 來源聯集與重疊
 
 Step 在實際 `emit` 時記錄；typed facts 在中央 `record_fact` 寫入時記錄。

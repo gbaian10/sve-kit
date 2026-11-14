@@ -3070,6 +3070,7 @@ pub(super) struct HandQuery {
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub class: Option<String>,
+    pub not_class: Option<String>,
     pub keyword: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,
