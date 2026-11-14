@@ -235,6 +235,7 @@ pub(super) fn check_node_with_x(
         | Action::Posture {
             objects: selector, ..
         }
+        | Action::FlipDown { objects: selector }
         | Action::Modify {
             subjects: selector, ..
         }

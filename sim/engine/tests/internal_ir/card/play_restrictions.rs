@@ -27,6 +27,87 @@ fn restriction(condition: &Value) -> Located<Ability> {
 }
 
 #[test]
+fn played_name_restriction_checks_prior_commits_and_keeps_names_after_ability_loss() {
+    let condition = json!({"history":{"event":"played","who":"self","window":"this_turn",
+        "sel":{"name":"unit-spell"},"at_least":1}});
+    let spell = card(vec![play::spell(vec![]), restriction(&condition)]);
+    let mut input = equipment_played::tree(
+        &json!({"line":1,"static":{"effects":[{"also_named":{"name":"unit-spell"}}]}}),
+        "unit-follower",
+    );
+    let loss = equipment_played::tree(
+        &json!({"line":2,"activate":{"cost":{"pp":0},"do":[{"apply":{"on":"this","effect":{"lose_abilities":{}}}}]}}),
+        "unit-follower",
+    )["cards"]["unit-follower"]["abilities"][0].clone();
+    input["cards"]["unit-follower"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(loss);
+    let follower = lowerer()
+        .lower(&input)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":4,"max":4});
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"first","card":"unit-follower"},
+        {"id":"s","card":"unit-spell"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "played-names",
+    )
+    .unwrap();
+    game.load_internal_card("unit-spell", &spell).unwrap();
+    game.load_internal_card("unit-follower", &follower).unwrap();
+    let mut ordinary = play::position(&spell, "hand", 0);
+    resolved(
+        ordinary
+            .play_internal_card("s", PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    finish_play_timing(&mut ordinary);
+    assert!(matches!(
+        game.play_internal_card("first", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Entered(_)
+    ));
+    finish_play_timing(&mut game);
+    let loss = follower
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.node.kind == AbilityKind::Activated)
+        .unwrap()
+        .node
+        .id;
+    resolved(
+        game.activate_internal_card("first", loss, PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    finish_play_timing(&mut game);
+    let before = format!("{game:?}");
+    let error = game
+        .play_internal_card("s", PlayerId { seat: 1 })
+        .unwrap_err();
+    assert!(
+        matches!(&error, sve_engine::EngineFailure::Unsupported(reason)
+        if reason == "internal D1 does not support card play holder, permission or timing"),
+        "the saved name reaches the existing permission gate: {error:?}"
+    );
+    assert_eq!(
+        format!("{game:?}"),
+        before,
+        "a past alias remains in history after that ability is lost"
+    );
+}
+
+#[test]
 fn printed_play_restrictions_check_origin_and_turn_before_any_authority_change() {
     for (condition, from_ex) in [
         (json!({"in_zone":{"ref":"this","zone":"ex"}}), true),
