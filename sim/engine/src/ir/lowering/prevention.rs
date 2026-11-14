@@ -197,6 +197,10 @@ impl BodyContext<'_> {
         }
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every player-level prevention and damage rewrite shares one installation boundary."
+    )]
     pub(super) fn player_prevention(
         &mut self,
         value: &ast::PlayerEffect,
@@ -308,6 +312,10 @@ impl BodyContext<'_> {
         })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every object prevention, damage modifier and damage cap shares one installation boundary."
+    )]
     pub(super) fn prevent_apply(
         &mut self,
         installation: &ast::Apply,
@@ -395,10 +403,9 @@ impl BodyContext<'_> {
                 }
                 effect
             }
-            ast::InstalledEffect::DamageMod(_) | ast::InstalledEffect::DamageCap(_) => {
-                return Err(unsupported(path));
-            }
-            ast::InstalledEffect::PlayPermission(_)
+            ast::InstalledEffect::DamageMod(_)
+            | ast::InstalledEffect::DamageCap(_)
+            | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)
             | ast::InstalledEffect::Stat(_)

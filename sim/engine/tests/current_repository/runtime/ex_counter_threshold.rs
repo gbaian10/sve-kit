@@ -41,7 +41,7 @@ fn position(card: &str, own: &[u8], opponent: &[u8]) -> Value {
     initial["players"]["P1"]["zones"]["ex"] = json!(stored("own", own));
     initial["players"]["P2"]["zones"]["ex"] = json!(stored("opp", opponent));
     initial["players"]["P2"]["zones"]["field"] =
-        json!([{"id":"enemy","card":"BP01-037","state":{"hp":12_u8,"max_hp":12_u8}}]);
+        json!([{"id":"enemy","card":"BP01-037","state":{"acted":true,"hp":12_u8,"max_hp":12_u8}}]);
     initial
 }
 
@@ -87,7 +87,7 @@ fn play(game: &mut Game, id: &str) {
     settle(game, Some(step));
 }
 
-/// Picks the opposing follower for targets and resolves every pending ability in order.
+/// Picks the opposing follower for targets (else the only form to evolve into) and resolves every pending ability in order.
 fn settle(game: &mut Game, mut step: Option<CardPlay>) {
     for _ in 0_u8..32_u8 {
         if let Some(CardPlay::Awaiting(q)) = step.take() {
@@ -95,9 +95,10 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>) {
                 InputDomain::Targets(d) => Answer::Targets(
                     d.members
                         .iter()
-                        .filter(|m| m.card.as_deref() == Some("BP01-037"))
+                        .find(|m| m.card.as_deref() == Some("BP01-037"))
+                        .or_else(|| d.members.first())
                         .map(|m| m.handle)
-                        .take(1)
+                        .into_iter()
                         .collect(),
                 ),
                 InputDomain::Pending(options) => Answer::Pending(options[0].handle),
@@ -201,11 +202,9 @@ fn bp21_063_attack_evolves_itself_at_four() {
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP21-064"}]);
     let mut game = loaded(&initial);
     attack(&mut game);
-    assert_eq!(
-        state(&game)["P1"]["evolve_deck"],
-        json!([]),
-        "the form was used"
-    );
+    // The evolved form dies in combat and its card returns to the evolve deck, so the damage
+    // it dealt is the evidence: 3 from the form instead of the base's 1.
+    assert_eq!(state(&game)["objects"]["enemy"]["damage"], 3_u8);
 }
 
 #[test]

@@ -352,6 +352,10 @@ fn granted_definition_roots(requirements: &Requirements, card: bool) -> Vec<(Str
         .collect()
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "Every per-location requirement acceptance is reviewed as one closed set."
+)]
 fn check_requirements(
     program: &Program,
     source: &SourceSpan,

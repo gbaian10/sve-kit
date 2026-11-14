@@ -20,16 +20,16 @@ cards:
               n: 1
         line: 1
       - evolve_time:
+          targets:
+            - bind: picked
+              cost_sum_le: 4
+              from:
+                class: ウィッチ
+                kind: follower
+                who: self
+                zone: banish
+              upto: 2
           do:
-            - choose:
-                bind: picked
-                cost_sum_le: 4
-                from:
-                  class: ウィッチ
-                  kind: follower
-                  who: self
-                  zone: banish
-                upto: 2
             - move:
                 ref: picked
                 result: moved

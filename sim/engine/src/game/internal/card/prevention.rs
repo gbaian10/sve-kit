@@ -938,6 +938,8 @@ pub(in crate::game::internal) fn requirement(
             | "replacement.damage.prevent"
             | "shape.EventRewrite.AddDamage"
             | "replacement.damage.add"
+            | "shape.EventRewrite.CapDamage"
+            | "replacement.damage.cap"
             | "shape.UseLimit"
             | "shape.UsageScope.SharedPlayer"
             | "usage.shared-player"

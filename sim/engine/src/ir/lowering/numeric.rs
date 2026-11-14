@@ -471,6 +471,10 @@ impl BodyContext<'_> {
         Ok(Selector::Union { sets })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every continuous installed effect is dispatched from one closed match."
+    )]
     pub(super) fn continuous(
         &mut self,
         installation: &ast::Apply,

@@ -103,7 +103,7 @@ fn bp08_024_caps_each_damage_this_turn_and_the_next_opposing_turn() {
         {"id":"ally","card":"BP01-037","state":{"power":2_u8,"hp":7_u8,"max_hp":7_u8}}
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([
-        {"id":"enemy","card":"BP01-037","state":{"power":6_u8,"hp":20_u8,"max_hp":20_u8}}
+        {"id":"enemy","card":"BP01-037","state":{"acted":true,"power":6_u8,"hp":20_u8,"max_hp":20_u8}}
     ]);
     // P2 draws when its turn starts.
     initial["players"]["P2"]["zones"]["deck"] =
@@ -142,7 +142,7 @@ fn bp08_024_cap_is_a_gained_ability_lost_with_all_abilities() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = json!([
         {"id":"source","card":"BP08-024"},
-        {"id":"ally","card":"BP01-037","state":{"power":2_u8,"hp":7_u8,"max_hp":7_u8}}
+        {"id":"ally","card":"BP01-037","state":{"acted":true,"power":2_u8,"hp":7_u8,"max_hp":7_u8}}
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([
         {"id":"enemy","card":"BP01-037","state":{"power":6_u8,"hp":20_u8,"max_hp":20_u8}}

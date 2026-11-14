@@ -27,7 +27,7 @@ fn position(counters: u8) -> Value {
     ]);
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP20-021"}]);
     initial["players"]["P2"]["zones"]["field"] =
-        json!([{"id":"enemy","card":"BP01-037","state":{"hp":20_u8,"max_hp":20_u8}}]);
+        json!([{"id":"enemy","card":"BP01-037","state":{"acted":true,"hp":20_u8,"max_hp":20_u8}}]);
     initial
 }
 

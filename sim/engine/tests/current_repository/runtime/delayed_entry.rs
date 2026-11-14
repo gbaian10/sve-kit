@@ -18,15 +18,15 @@ fn loaded(initial: &Value) -> Game {
     .unwrap()
 }
 
-/// P1 holds three vanilla followers; P2 has one follower to target.
+/// P1 holds three vanilla followers (no Fanfare to blur the buff); P2 has one follower to target.
 fn position() -> Value {
     let mut initial = draw_position();
     initial["turn"]["elapsed_turns"] = json!({"P1":7_u8,"P2":6_u8});
     initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
     initial["players"]["P1"]["zones"]["hand"] = json!([
-        {"id":"first","card":"BP01-037"},
-        {"id":"second","card":"BP01-037"},
-        {"id":"third","card":"BP01-037"}
+        {"id":"first","card":"BP01-173"},
+        {"id":"second","card":"BP01-173"},
+        {"id":"third","card":"BP01-173"}
     ]);
     initial["players"]["P1"]["zones"]["deck"] = json!([
         {"id":"top","card":"BP01-037"},

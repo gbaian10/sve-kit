@@ -96,7 +96,7 @@ impl NumericHistoryPlan {
 }
 
 /// The controller's payments only; the payer is the window's relative player.
-pub(crate) fn earth_rite_stack_query(
+pub(crate) const fn earth_rite_stack_query(
     event: Binding<super::PaymentEvent>,
     component: Binding<super::EarthRitePaidComponent>,
 ) -> super::NumericHistoryQuery {

@@ -840,6 +840,10 @@ impl SubjectFilter {
             .then_some(plan)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Each closed characteristic predicate shape is recognised in one place."
+    )]
     fn characteristic(&mut self, fields: SubjectFields, part: &Expr<Bool>) -> Option<()> {
         let Expr::Compute(predicate) = part else {
             return None;

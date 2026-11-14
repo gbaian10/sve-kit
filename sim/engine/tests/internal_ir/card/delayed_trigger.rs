@@ -61,7 +61,7 @@ fn life_watch() -> Value {
 fn installed_life_watch_triggers_on_a_later_own_leader_decrease_this_turn() {
     let mut document = tree(&life_watch());
     document["cards"]["unit-follower"]["abilities"][0]["activate"]["do"] = json!([
-        life_watch(), {"damage":{"to":{"leaders":"self"},"n":1}}
+        life_watch(), {"damage":{"to":{"leader":"self"},"n":1}}
     ]);
     let lowered = lowerer().lower(&document).unwrap();
     let mut initial = setup(
