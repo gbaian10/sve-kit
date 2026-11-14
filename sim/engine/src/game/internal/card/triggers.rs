@@ -45,6 +45,7 @@ pub(in crate::game::internal) mod event_operand;
 mod evolution;
 mod mill;
 mod movement;
+pub(in crate::game::internal) use evolution::ex_evolution;
 pub(in crate::game::internal) use movement::ex_self_entry;
 mod played;
 mod quota;

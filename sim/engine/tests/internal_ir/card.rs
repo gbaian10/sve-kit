@@ -1034,3 +1034,6 @@ mod granted_attack_target;
 
 #[path = "card/live_cost_history.rs"]
 mod live_cost_history;
+
+#[path = "card/ex_evolution_observer.rs"]
+mod ex_evolution_observer;

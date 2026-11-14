@@ -111,7 +111,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if !admitted
         || ability.kind != AbilityKind::Triggered
         || !optional_payment::trigger_play(ability)
-        || (trigger.active_zones != [ZoneKind::Field] && !super::ex_phase(ability))
+        || !active_zone_allowed(ability, trigger)
         || trigger.view
             != if matches!(
                 trigger.on,
@@ -133,6 +133,12 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         ));
     }
     Ok(true)
+}
+
+fn active_zone_allowed(ability: &Ability, trigger: &TriggerSpec) -> bool {
+    trigger.active_zones == [ZoneKind::Field]
+        || super::ex_phase(ability)
+        || super::evolution::ex_evolution(ability)
 }
 
 fn aggregation_allowed(trigger: &TriggerSpec) -> bool {

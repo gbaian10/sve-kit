@@ -9,7 +9,7 @@ use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{Ability, AbilityOrigin, KeywordId};
 use crate::ir::{
     Characteristics, EventPattern, EventPayload, EvolutionState, EvolveEvent, ExecutionId,
-    TriggerCondition,
+    TriggerCondition, ZoneKind,
 };
 
 pub(super) fn observer_filter(ability: &Ability) -> Option<SubjectFilter> {
@@ -25,6 +25,15 @@ pub(super) fn observer_filter(ability: &Ability) -> Option<SubjectFilter> {
     SubjectFilter::parse(SubjectFields::Evolve(*binding), predicate)
 }
 
+pub(in crate::game::internal) fn ex_evolution(ability: &Ability) -> bool {
+    ability.active_zones == [ZoneKind::Ex]
+        && observer_filter(ability).is_some()
+        && ability
+            .trigger
+            .as_ref()
+            .is_some_and(|trigger| trigger.active_zones == [ZoneKind::Ex])
+}
+
 pub(in crate::game) struct EvolutionPlan {
     before: Characteristics,
     at: SnapshotId,
@@ -38,17 +47,25 @@ impl Game {
     fn evolution_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         self.field_ids()
             .into_iter()
+            .chain(self.zone_ids("P1", "ex"))
+            .chain(self.zone_ids("P2", "ex"))
             .map(|id| {
+                let zone = if self.object(&id)?.zone == "ex" {
+                    ZoneKind::Ex
+                } else {
+                    ZoneKind::Field
+                };
                 let abilities = self
                     .internal_printed_abilities(&id)?
                     .into_iter()
                     .filter(|ability| {
-                        matches!(
-                            ability.node.trigger.as_ref().map(|trigger| &trigger.on),
-                            Some(TriggerCondition::Event {
-                                pattern: EventPattern::Evolve { .. }
-                            })
-                        )
+                        ability.node.active_zones == [zone]
+                            && matches!(
+                                ability.node.trigger.as_ref().map(|trigger| &trigger.on),
+                                Some(TriggerCondition::Event {
+                                    pattern: EventPattern::Evolve { .. }
+                                })
+                            )
                     })
                     .collect();
                 Ok((id, abilities))
