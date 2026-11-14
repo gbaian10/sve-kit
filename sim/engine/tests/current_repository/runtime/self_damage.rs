@@ -1,7 +1,7 @@
 use super::*;
 use std::fs::read_to_string;
 use std::path::PathBuf;
-use sve_scenario_runner::{ScenarioReport, Verdict};
+use sve_scenario_runner::{Verdict, runner::ScenarioReport};
 
 #[test]
 fn karen_pays_lesson_to_buff_the_field_then_damages_itself_without_another_cool_follower() {
