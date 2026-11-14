@@ -245,10 +245,6 @@ fn mill(
     })
 }
 
-#[expect(
-    clippy::too_many_lines,
-    reason = "Every movement subject filter field is validated against one support set."
-)]
 pub(super) fn movement_filter(
     own: Option<bool>,
     itself: bool,
