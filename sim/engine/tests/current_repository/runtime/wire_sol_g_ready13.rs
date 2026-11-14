@@ -297,8 +297,9 @@ fn bp10_072_end_phase_searches_only_while_an_evolved_follower_is_present() {
     }
 }
 
-/// KE-14: only an Onmyoji follower or a spell can be taken; an Onmyoji amulet and an
-/// ordinary follower among the looked-at cards are never offered.
+/// KE-14: only an Onmyoji follower or a spell can be taken; an amulet (BP21-P21 is an
+/// Alchemist amulet) and an ordinary follower among the looked-at cards are never offered.
+/// No printed Onmyoji amulet exists; the conditions unit tests cover that combination.
 #[test]
 fn bp20_p28_offers_only_onmyoji_followers_or_spells_from_the_looked_at_cards() {
     for (deck, offered) in [

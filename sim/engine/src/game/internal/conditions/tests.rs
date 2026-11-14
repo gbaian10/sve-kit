@@ -522,3 +522,110 @@ fn captured_kinds_remain_exact_while_candidate_kind_inclusion_stays_unchanged() 
     source.kind = None;
     assert!(!subject::source(&source, CardKind::Follower, &traits[0]).unwrap());
 }
+
+struct KindAndTraits {
+    kind: &'static str,
+    traits: &'static [&'static str],
+}
+
+impl Reader for KindAndTraits {
+    fn boolean(&self, _property: &BooleanProperty) -> Result<bool> {
+        Err(unsupported("kind and trait view"))
+    }
+
+    fn number(&self, _property: &NumberProperty) -> Result<Option<i64>> {
+        Err(unsupported("kind and trait view"))
+    }
+
+    fn matches_labels(
+        &self,
+        property: &LabelsProperty,
+        matches: &dyn Fn(&str) -> bool,
+    ) -> Result<bool> {
+        match property {
+            LabelsProperty::Kind(CharacteristicView::Effective) => Ok(matches(self.kind)),
+            LabelsProperty::Traits(CharacteristicView::Effective) => {
+                Ok(self.traits.iter().any(|value| matches(value)))
+            }
+            _ => Err(unsupported("kind and trait view")),
+        }
+    }
+}
+
+/// KE-14: no printed Onmyoji amulet exists, so BP20-054's selector shape
+/// (an Onmyoji follower, or any spell) is checked against a synthetic one.
+#[test]
+fn an_onmyoji_amulet_matches_neither_the_onmyoji_follower_nor_the_spell_branch() {
+    use crate::ir::TraitId;
+    let binding = Binding::new(1, ScopeId(1));
+    let object = || ObjectView::Current {
+        object: Box::new(ObjectOperand::Bound { binding }),
+    };
+    let kind = |expected: CardKind| {
+        Expr::Compute(Box::new(Predicate::KindEquals {
+            left: Expr::Live(Box::new(KindRead::Kind {
+                object: object(),
+                view: CharacteristicView::Effective,
+            })),
+            right: Expr::Literal(expected),
+        }))
+    };
+    let expression = Expr::Compute(Box::new(Predicate::Or {
+        predicates: vec![
+            Expr::Compute(Box::new(Predicate::And {
+                predicates: vec![
+                    kind(CardKind::Follower),
+                    Expr::Compute(Box::new(Predicate::HasTrait {
+                        traits: Expr::Live(Box::new(TraitsRead::Traits {
+                            object: object(),
+                            view: CharacteristicView::Effective,
+                        })),
+                        trait_id: TraitId("陰陽師".into()),
+                    })),
+                ],
+            })),
+            kind(CardKind::Spell),
+        ],
+    }));
+    let condition = ConditionPlan::compile(&expression, binding, Policy::Selection)
+        .unwrap()
+        .prepare(None)
+        .unwrap();
+    for (card, expected) in [
+        (
+            KindAndTraits {
+                kind: "アミュレット",
+                traits: &["陰陽師"],
+            },
+            false,
+        ),
+        (
+            KindAndTraits {
+                kind: "フォロワー",
+                traits: &["陰陽師"],
+            },
+            true,
+        ),
+        (
+            KindAndTraits {
+                kind: "フォロワー",
+                traits: &["兵士"],
+            },
+            false,
+        ),
+        (
+            KindAndTraits {
+                kind: "スペル",
+                traits: &[],
+            },
+            true,
+        ),
+    ] {
+        assert_eq!(
+            condition.evaluate(&card).unwrap(),
+            expected,
+            "{}",
+            card.kind
+        );
+    }
+}
