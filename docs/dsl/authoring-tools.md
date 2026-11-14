@@ -500,6 +500,10 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 
 `entered_from`、`entered_by`、`played_from` 的 `ref: this` 在入場曲與 `auto.on.enter_field: {ref: this}` 讀取自身入場事件。監看他者入場時，可用 `entered_from: {ref: it, from: cemetery}` 讀取該次事件主體的來源；不把能力持有者當成事件主體，其他事件不提供此讀值。進化能力的 `usable_if` 另可用 `entered_from: {ref: this, from: cemetery}` 查詢持有者本次場上世代的入場來源；離場再回場即重新記錄，普通進化不改變來源，進化資格目前限查詢墓場來源。入場事件接受手牌、牌庫及墓場，`not` 可表示非手牌；不由入場方式推斷來源區域。入場來源條件亦可控制唯一的チョイス群組是否出現；`choice.instead` 另接受墓場來源條件以改變可選模式數，仍在宣告時選模式，並沿用同一事件的凍結來源。自身回場及離場後移 EX 需要該次離場確定落在墓場，目前只有謝幕符合；一般 `left_field` 不開放這兩種動作。
 
+監看他者從場上進墓場的 `auto.on.moved: {from: {who: self, zone: field}, to: cemetery, ...}`，本文可寫 `move: {ref: it, to: field}` 把該次離場的主體放回擁有者的場上（BP19-074「それを場に出す」）；觀察的是對手的卡時，放回的是對手的場，不是觀察者的場。標頭限定送墓，所以 `it` 跟隨這次離場在墓場產生的世代；結算前該卡已被其他效果移出墓場就不追取。可加 `entry_effects: [{cannot: {what: play_ability, ability: {keyword: fanfare}}}]` 讓回場的卡不誘發入場曲，與 BP04-038 的放場相同。
+
+同一標頭的 `sel.where` 可寫公開區域張數門檻，例如 `where: {cmp: {left: {count: {who: self, zone: cemetery}}, op: ge, right: 10}}`（「自分の墓場が10枚以上で…場から墓場に置かれたとき」）。門檻在整批移動之前讀取：墓場 9 張時送墓的那張不算進去，不誘發（Q2590）；與觀察者同時送墓仍會誘發（Q2620）。不成立時不產生待機，因此不消耗 `per_turn`。張數只讀自己或對手的場、EX、墓場，不接受篩選，代表多張的 filler 照張數計入；離場主體的 `orig_cost_le` 等原費篩選讀離場前的印刷原費。
+
 法術本文可用 `played_from: {ref: this, from: hand | ex}` 讀取本次適正打出的起始區域，與付款時使用的打出來源共用既有執行資料。自身入場曲也接受 hand／EX 的適正打出來源，效果直接入場不視為打出。先抽牌或移動其他卡不改變這個值；之後將結算中的自身移入 EX，仍受 EX 容量及一般法術清理規則限制。
 
 EX 裡的フォロワー・トークン可由正式目標或本文 `choose` 選取後以 `move: {to: field}` 放上場（BP01-078 的ドラゴン、BP14-094 的招来の狐、BP13-010 的妖精），與 EX 的一般從者共用進場程序與場位檢查；結算時從自己 EX 多選且緊接進場的 `choose`，張數上限在出題時依空位計算，與 Look 的多選進場相同；アミュレット・トークン與其他區域的 token 不在此列。

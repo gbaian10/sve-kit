@@ -9,6 +9,7 @@ use crate::ir::events::life::LifeFilter;
 use crate::ir::events::played::PlayedFilter;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter, has_keyword_filter};
 use crate::ir::events::subscriptions;
+use crate::ir::events::zone_gate::DepartureGate;
 use crate::ir::history_turn::HistoryPlan;
 use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::{DamageRecipient, PlayEvent, StatChangeEvent};
@@ -564,6 +565,17 @@ impl Checker {
             ),
             EventPattern::LeaveField { binding, predicate }
                 if SourceLink::parse(*binding, predicate).is_some() =>
+            {
+                self.committed_header(
+                    *binding,
+                    EventSnapshotPolicy::BeforeExit,
+                    true,
+                    view,
+                    triggering,
+                )
+            }
+            EventPattern::LeaveField { binding, predicate }
+                if DepartureGate::parse(*binding, predicate).is_some() =>
             {
                 self.committed_header(
                     *binding,

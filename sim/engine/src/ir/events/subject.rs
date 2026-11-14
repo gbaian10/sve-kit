@@ -103,7 +103,8 @@ impl SubjectFields {
 
     fn original_cost(self) -> Option<Expr<Int>> {
         let (event, policy) = match self {
-            Self::Leave(event) => (
+            // A departure keeps the printed cost it had on the field, wherever it arrives.
+            Self::Leave(event) | Self::Cemetery(event) | Self::Hand(event) => (
                 EventContext::LeaveField { event },
                 EventSnapshotPolicy::BeforeExit,
             ),
@@ -120,8 +121,6 @@ impl SubjectFields {
             | Self::DamageSource(_)
             | Self::Played { .. }
             | Self::Destroy(_)
-            | Self::Cemetery(_)
-            | Self::Hand(_)
             | Self::Ex(_)
             | Self::Ub(_) => return None,
         };

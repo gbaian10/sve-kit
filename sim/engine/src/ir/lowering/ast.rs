@@ -3362,7 +3362,7 @@ pub(super) struct ExSubscription {
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
-    pub r#where: Option<Box<SourceLinkCondition>>,
+    pub r#where: Option<Box<MovementCondition>>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
     pub orig_cost_ge: Option<u64>,
@@ -3379,6 +3379,45 @@ pub(super) struct MovementSubject {
     pub not_token: Option<bool>,
     pub other: Option<bool>,
     pub not_same_name_as_this: Option<bool>,
+}
+
+/// A departure header's `where`: a committed damage link, or a public zone count read before the
+/// departing batch moves.
+#[derive(Clone, Deserialize)]
+#[serde(untagged)]
+pub(super) enum MovementCondition {
+    Link(SourceLinkCondition),
+    ZoneCount(ZoneCountCondition),
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ZoneCountCondition {
+    pub cmp: ZoneCountComparison,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ZoneCountComparison {
+    pub left: ZoneCountRead,
+    pub op: Comparison,
+    pub right: u64,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ZoneCountRead {
+    pub count: ZoneCountQuery,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ZoneCountQuery {
+    pub who: LeaderSide,
+    pub zone: GateZone,
+}
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum GateZone {
+    Field,
+    Ex,
+    Cemetery,
 }
 
 #[derive(Clone, Deserialize)]
