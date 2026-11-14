@@ -3252,6 +3252,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    BanishInstead(BanishReplacement),
     UnlimitedEvolve(StaticPlayerRule),
     ChoiceAny(StaticPlayerRule),
     Reroll(Reroll),
@@ -3266,6 +3267,14 @@ pub(super) enum StaticEffect {
     DamageCap(DamageCap),
     NoTrigger(NoTrigger),
     IgnoreWard(IgnoreWard),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BanishReplacement {
+    pub on: Option<Objects>,
+    pub from: String,
+    pub to: String,
 }
 
 #[derive(Deserialize)]
