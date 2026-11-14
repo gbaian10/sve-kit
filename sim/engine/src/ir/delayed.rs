@@ -137,8 +137,16 @@ pub(crate) fn valid(action: &Action) -> bool {
         _ => return false,
     };
     body.steps.iter().all(|step| {
-        let Node::Instruction { instruction } = &step.node else {
-            return false;
+        let instruction = match &step.node {
+            Node::Instruction { instruction } => instruction.as_ref(),
+            // 「次に…出たとき、その中の1体は進化する」 reuses the closed effect evolution.
+            Node::Control { control } if observes_entry => {
+                let Some(projection) = super::effect_evolution::projection(control) else {
+                    return false;
+                };
+                projection.instruction
+            }
+            Node::Control { .. } | Node::Capture { .. } | Node::Decision { .. } => return false,
         };
         instruction.source == *source
             && instruction.context == InstructionContext::Effect

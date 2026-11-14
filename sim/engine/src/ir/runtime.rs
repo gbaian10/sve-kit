@@ -285,6 +285,7 @@ runtime_record!(BanishEvent {
     card_before: ObjectRef,
     from: RuntimeZoneRef,
     actor: PlayerId,
+    owner: PlayerId,
     characters: Characteristics
 });
 runtime_record!(StatChangeEvent { subject: RuntimeHolder, facets: NonEmpty<StatDelta>, reason: StatChangeReason, commit: CommitId, instruction: Option<InstructionId> });

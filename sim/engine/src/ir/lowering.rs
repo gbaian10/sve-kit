@@ -1025,6 +1025,7 @@ fn lowered_trigger(
                     | EventPattern::LeaveField { .. }
                     | EventPattern::Destroy { .. }
                     | EventPattern::Discard { .. }
+                    | EventPattern::Banish { .. }
                     | EventPattern::Move { .. }
             ) {
                 EventSnapshotPolicy::BeforeExit
@@ -1115,7 +1116,20 @@ fn lowered_subscription(
         ast::PhaseSubscription::Discarded(event) => {
             discard::subscription(event, event_id, subject_id, scope, path)
         }
-        ast::PhaseSubscription::Banished(_) => Err(unsupported(path)),
+        ast::PhaseSubscription::Banished(ast::BanishedSubscription::Zone(zone)) => {
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Banish {
+                binding: event,
+                predicate: super::events::banish::zone_predicate(
+                    event,
+                    matches!(zone.who, ast::EntryPlayer::Controller),
+                    zone.during.is_some(),
+                ),
+            })
+        }
+        ast::PhaseSubscription::Banished(ast::BanishedSubscription::Hand(_)) => {
+            Err(unsupported(path))
+        }
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
             let card = Binding::new(subject_id, scope);
