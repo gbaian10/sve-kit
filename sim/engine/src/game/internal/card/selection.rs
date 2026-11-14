@@ -742,6 +742,11 @@ fn target_union(sets: &[Selector]) -> Result<()> {
     Ok(())
 }
 
+fn earlier_public_selection(selector: &Selector) -> bool {
+    matches!(selector, Selector::Bound { .. })
+        || matches!(selector, Selector::Filter { input, .. } if matches!(input.as_ref(), Selector::Bound { .. }))
+}
+
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
     if effect_evolution::is_choice(decision) || advance_entry::selection(decision).is_some() {
         return Ok(());
@@ -819,7 +824,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
     let group = target_group(constraint)?;
     // Objects an earlier selection bound (such as a formal target) were already authorized;
     // each must still be a current public card when this question is asked.
-    let earlier = matches!(group.selector, Selector::Bound { .. });
+    let earlier = earlier_public_selection(&group.selector);
     match &group.selector {
         Selector::Zone {
             zone: ZoneKind::Ex,
@@ -831,6 +836,7 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
             check_predicate(predicate, *binding, false)?;
         }
         Selector::Bound { .. } => {}
+        selector if earlier_public_selection(selector) => public_zone_selector(selector)?,
         selector => target_selector(selector)?,
     }
     if !super::super::alternatives::participant(&decision.actor)
@@ -1223,7 +1229,7 @@ impl Game {
         // An earlier selection's object that has since left its zone is a new object now; only
         // the ones still current remain candidates.
         for (group, members) in constraint.groups.iter().zip(&mut group_members) {
-            if matches!(group.selector, Selector::Bound { .. }) {
+            if earlier_public_selection(&group.selector) {
                 members.retain(|member| {
                     execution
                         .object_id(*member)

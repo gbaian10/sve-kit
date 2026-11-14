@@ -30,6 +30,7 @@ mod hand_position;
 mod keywords;
 mod material;
 mod material_values;
+mod move_replacement;
 mod movement;
 mod name_aliases;
 mod nested_ability;
@@ -529,7 +530,12 @@ impl Allocator {
                 Some(ast::StaticEffect::Cannot(_) | ast::StaticEffect::IgnoreWard(_)) => {
                     attack_restrictions::lower
                 }
-                Some(ast::StaticEffect::If(_) | ast::StaticEffect::Grant(_)) | None => {
+                Some(
+                    ast::StaticEffect::If(_)
+                    | ast::StaticEffect::Grant(_)
+                    | ast::StaticEffect::BanishInstead(_),
+                )
+                | None => {
                     return Err(unsupported(path));
                 }
             };

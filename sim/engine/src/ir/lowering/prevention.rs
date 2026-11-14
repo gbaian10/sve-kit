@@ -517,7 +517,8 @@ pub(super) fn lower_at_source(
                     },
                 )
             }
-            ast::StaticEffect::Reroll(_)
+            ast::StaticEffect::BanishInstead(_)
+            | ast::StaticEffect::Reroll(_)
             | ast::StaticEffect::ChoiceAny(_)
             | ast::StaticEffect::UnlimitedEvolve(_)
             | ast::StaticEffect::AlsoNamed(_)

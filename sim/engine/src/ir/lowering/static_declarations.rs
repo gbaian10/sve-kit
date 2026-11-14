@@ -1,6 +1,6 @@
 use super::{
-    Ability, Allocator, CardCoordinates, Located, LoweringError, ScopeId, ast, other_costs,
-    prevention, source_span, static_keywords, unsupported,
+    Ability, Allocator, CardCoordinates, Located, LoweringError, ScopeId, ast, move_replacement,
+    other_costs, prevention, source_span, static_keywords, unsupported,
 };
 use core::slice::from_ref;
 
@@ -19,6 +19,7 @@ fn provider(effect: &ast::StaticEffect) -> Option<Lower> {
         return Some(static_keywords::lower_at_source);
     }
     match effect {
+        ast::StaticEffect::BanishInstead(_) => Some(move_replacement::lower_at_source),
         ast::StaticEffect::Prevent(_)
         | ast::StaticEffect::DamageMod(_)
         | ast::StaticEffect::DamageCap(_)

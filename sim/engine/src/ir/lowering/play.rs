@@ -318,7 +318,12 @@ impl BodyContext<'_> {
         }
         let dynamic_count = check_choice_shape(target, resolution, path)?;
         self.check_union_branches(target, resolution, path)?;
-        if target.from.observation.is_some() {
+        if target
+            .from
+            .observation
+            .as_ref()
+            .is_some_and(|name| !self.public_binding(name))
+        {
             if target
                 .from
                 .cost_le
@@ -436,6 +441,23 @@ impl BodyContext<'_> {
         target: &ast::Target,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        if let Some(name) = &target.from.observation {
+            let reference = *self.targets.get(name).ok_or_else(|| unsupported(path))?;
+            let input = Selector::Bound { reference };
+            let candidate =
+                Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+            let predicate = observed_predicate(slice::from_ref(&target.from), candidate)
+                .ok_or_else(|| unsupported(path))?;
+            return Ok(if predicate == Expr::Literal(Bool(true)) {
+                input
+            } else {
+                Selector::Filter {
+                    input: Box::new(input),
+                    binding: candidate,
+                    predicate: Box::new(predicate),
+                }
+            });
+        }
         self.branches_selector(
             target
                 .any_of
@@ -689,7 +711,7 @@ impl BodyContext<'_> {
         })
     }
 
-    /// Each branch filters the controller's hand; a card matching several branches is one candidate.
+    /// Branches share the chooser's hand authority; overlapping candidates are offered once.
     pub(super) fn hand_union_choice(
         &mut self,
         target: &ast::Target,
@@ -1554,7 +1576,7 @@ fn quantity(
 pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, LoweringError> {
     if body.steps.iter().any(|step| matches!(step, ast::Step::If(branch)
         if contains_choice(&branch.then) || branch.r#else.as_ref().is_some_and(|continuation| contains_choice(continuation)))) {
-        return Err(unsupported(path));
+        return trigger_choice(body, true, path);
     }
     match body
         .steps
@@ -1649,7 +1671,9 @@ pub(super) fn trigger_choice(
         [ast::Step::If(branch)]
             if (matches!(
                 branch.cond,
-                ast::Condition::Awakened(true) | ast::Condition::EnteredFrom(_)
+                ast::Condition::Awakened(true)
+                    | ast::Condition::EnteredFrom(_)
+                    | ast::Condition::Combo(_)
             ) || matches!(&branch.cond, ast::Condition::Not(inner) if matches!(inner.as_ref(), ast::Condition::EnteredFrom(_))))
                 && branch.r#else.is_none()
                 && matches!(branch.then.as_slice(), [ast::Step::Choice(_)]) =>
