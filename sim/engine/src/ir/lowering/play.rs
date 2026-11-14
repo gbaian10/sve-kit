@@ -1242,6 +1242,7 @@ impl BodyContext<'_> {
                 banish_event: self.banish_event,
                 hand_exit: self.hand_exit,
                 static_zone: self.static_zone,
+                source_stats: self.source_stats,
                 activation_zone: self.activation_zone,
                 subject_event: self.subject_event,
                 damage_event: self.damage_event,
