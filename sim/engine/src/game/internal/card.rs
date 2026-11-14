@@ -1112,7 +1112,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         )
         && (matches!(ability.source.origin, AbilityOrigin::Printed { .. })
             || is_printed_quick(ability));
-    let ex_trigger = triggers::ex_phase(ability) || triggers::ex_self_entry(ability);
+    let ex_trigger = triggers::ex_phase(ability)
+        || triggers::ex_self_entry(ability)
+        || triggers::ex_evolution(ability);
     let played_trigger = filter(ability).is_some()
         || fusion_events::filter(ability).is_some()
         || fusion_events::material_filter(ability).is_some();
