@@ -65,6 +65,7 @@ impl Game {
         cause: &Value,
     ) -> Result<Vec<String>> {
         let before = SnapshotId(self.state.ir_epoch);
+        let player_batch = self.player_event_mark();
         let group = self.group();
         let mut changed = Vec::new();
         for id in ids {
@@ -78,6 +79,7 @@ impl Game {
                 );
             }
         }
+        self.seal_player_event_batch(player_batch);
         self.internal_posture_events(&changed, acted, cause, before)?;
         let pending =
             self.collect_triggers(if acted { "act" } else { "stand" }, &changed, cause)?;

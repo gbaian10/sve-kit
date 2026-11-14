@@ -669,6 +669,7 @@ impl Game {
                 movable.push(id.clone());
             }
         }
+        let player_batch = self.player_event_mark();
         let typed_entry_before = SnapshotId(self.state.ir_epoch);
         let destinations = self.movement_destinations(&movable, zone, frame)?;
         self.rule_carry_movement_ready(&movable, &destinations, carry_grants)?;
@@ -780,6 +781,7 @@ impl Game {
         self.internal_numeric_cleanup()?;
         self.conceal_placement_order(&plans, frame);
         self.player_movement_after(player_before);
+        self.seal_player_event_batch(player_batch);
         let erase_group = self.group();
         for id in erased {
             let player_subject = self.player_subject_before(&id);
@@ -853,6 +855,7 @@ impl Game {
                 actual.push(id.clone());
             }
         }
+        let player_batch = self.player_event_mark();
         let group = self.group();
         for id in &actual {
             self.emit(
@@ -861,6 +864,7 @@ impl Game {
                 group,
             );
         }
+        self.seal_player_event_batch(player_batch);
         let mut movement = frame.clone();
         movement
             .values
@@ -1061,6 +1065,7 @@ impl Game {
         frame: &Frame,
         located: bool,
     ) -> Result<()> {
+        let player_batch = self.player_event_mark();
         let group = self.group();
         for seat in ["P1", "P2"] {
             if to == "all" || seat == to {
@@ -1074,6 +1079,7 @@ impl Game {
                 group,
             );
         }
+        self.seal_player_event_batch(player_batch);
         Ok(())
     }
 
