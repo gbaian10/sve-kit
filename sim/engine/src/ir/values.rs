@@ -811,6 +811,7 @@ variants!(#[derive(Copy)] PlayerFrozen {
     DiscardPlayer { event: Binding<DiscardEvent> } => ["read.event-field"],
     DestroyController { event: Binding<DestroyEvent> } => ["read.event-field"],
     BanishActor { event: Binding<BanishEvent> } => ["read.event-field"],
+    BanishOwner { event: Binding<BanishEvent> } => ["read.event-field"],
     LifeChangeSubject { event: Binding<LifeChangeEvent> } => ["read.event-field"],
     AttackController { event: Binding<AttackEvent> } => ["read.event-field"],
     PhasePlayer { event: Binding<PhaseEvent> } => ["read.event-field"],

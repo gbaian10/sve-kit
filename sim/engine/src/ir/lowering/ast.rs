@@ -2317,7 +2317,7 @@ pub(super) enum PhaseSubscription {
     #[serde(rename = "discarded")]
     Discarded(DiscardSubscription),
     #[serde(rename = "banished")]
-    Banished(HandBanishSubscription),
+    Banished(BanishedSubscription),
     #[serde(rename = "evolved")]
     Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
@@ -2524,6 +2524,21 @@ pub(super) struct DiscardSubscription {
     pub during: Option<During>,
     pub by: Option<DiscardBy>,
     pub sel: Option<MovementSubject>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum BanishedSubscription {
+    Hand(HandBanishSubscription),
+    Zone(BanishZoneSubscription),
+}
+
+/// 「(自分のターン中、)自分の消滅領域にカードが置かれたとき」: any card, from any zone.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BanishZoneSubscription {
+    pub who: EntryPlayer,
+    pub during: Option<During>,
 }
 
 #[derive(Deserialize)]
