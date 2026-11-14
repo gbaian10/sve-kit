@@ -1,4 +1,4 @@
-use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait, contains};
+use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait};
 use super::{Execution, Game, Nat, ObjectRef, PlayerId, Result, invalid, player_id, unsupported};
 use crate::game::Object;
 use crate::game::internal::player::CandidateLinks;
@@ -1529,41 +1529,71 @@ impl Game {
         if parameters.len() == 1 {
             return Ok(wait.bounds.minimum.0 <= wait.capacity()?);
         }
-        // Both public fields have a rules-defined capacity of five, so this proof is finite.
-        if wait.members.len() > 10 {
-            return Err(unsupported("target feasibility exceeds both fields"));
-        }
-        let end = 1_u64
-            .checked_shl(u32::try_from(wait.members.len()).map_err(invalid)?)
-            .ok_or_else(|| invalid("target plan overflow"))?;
-        for mask in 0..end {
-            let members = wait
-                .members
-                .iter()
-                .enumerate()
-                .filter(|(index, _)| mask & (1_u64 << index) != 0)
-                .map(|(_, member)| *member)
-                .collect::<Vec<_>>();
-            if !contains(
-                wait.bounds,
-                Nat(u64::try_from(members.len()).map_err(invalid)?),
-            ) || !wait.compatible(&members)?
-            {
+        // Only answers of a legal size are tried, stopping at the first that leaves the rest
+        // answerable, so one card among many (a cemetery) costs one attempt per card.
+        let rest = parameters.iter().skip(1).cloned().collect::<VecDeque<_>>();
+        let mut attempts = 0_u32;
+        for members in sized_selections(&wait.members, wait.bounds) {
+            if !wait.compatible(&members)? {
                 continue;
+            }
+            attempts = attempts.saturating_add(1);
+            if attempts > MAX_FEASIBILITY_ATTEMPTS {
+                return Err(unsupported("target feasibility proof is too large"));
             }
             let mut candidate = candidate.clone();
             candidate.bind_targets(&wait, members);
             candidate.captures(self, &first.captures)?;
-            if self.internal_feasible_targets(
-                &candidate,
-                &candidate.slots,
-                &parameters.iter().skip(1).cloned().collect(),
-            )? {
+            if self.internal_feasible_targets(&candidate, &candidate.slots, &rest)? {
                 return Ok(true);
             }
         }
         Ok(false)
     }
+}
+
+/// Legal answers tried before a target feasibility proof gives up rather than stall play.
+const MAX_FEASIBILITY_ATTEMPTS: u32 = 1024;
+
+/// Every subset of `members` whose size the bounds allow, smallest first, in member order.
+fn sized_selections(
+    members: &[ObjectRef],
+    bounds: Cardinality,
+) -> impl Iterator<Item = Vec<ObjectRef>> + '_ {
+    let smallest = usize::try_from(bounds.minimum.0).unwrap_or(usize::MAX);
+    let largest = bounds
+        .maximum
+        .and_then(|maximum| usize::try_from(maximum.0).ok())
+        .unwrap_or(usize::MAX)
+        .min(members.len());
+    (smallest..=largest).flat_map(move |size| {
+        let mut indices = Some((0..size).collect::<Vec<_>>());
+        core::iter::from_fn(move || {
+            let current = indices.take()?;
+            let selection = current
+                .iter()
+                .filter_map(|index| members.get(*index).copied())
+                .collect();
+            indices = next_combination(current, members.len());
+            Some(selection)
+        })
+    })
+}
+
+/// The lexicographically next set of increasing indices below `len`, if any.
+fn next_combination(mut indices: Vec<usize>, len: usize) -> Option<Vec<usize>> {
+    let size = indices.len();
+    let free = len.checked_sub(size)?;
+    let slot = (0..size).rev().find(|slot| {
+        indices
+            .get(*slot)
+            .is_some_and(|index| *index < free.saturating_add(*slot))
+    })?;
+    let start = indices.get(slot)?.saturating_add(1);
+    for (offset, index) in indices.iter_mut().skip(slot).enumerate() {
+        *index = start.saturating_add(offset);
+    }
+    Some(indices)
 }
 
 #[expect(
