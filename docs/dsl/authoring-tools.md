@@ -354,6 +354,8 @@ Played 的 `sel` 另接受 `orig_cost_eq`、`orig_cost_le` 或 `orig_cost_ge`，
 `history_sum: {window: this_turn, event: life_changed, who: self, where: {direction: up}, field: delta}` 累加實際增加量；途中減少不扣抵增加量，設定生命亦按實際差額計算。兩者必填玩家與方向；次數查詢接受 `down` 的 `who: self | opp`，另接受 `up` 的 `who: self`，總和只接受 `up`，不接受 `distinct: subjects`，這些入口不接受其他歷史視窗、來源篩選或排除本次執行。
 
 `history_count` 的 `life_changed` 開放本回合自己 `where: {direction: up}` 的事實數；一次實際正增量只計一次，與 `history_sum` 的增加總量分開。零變動、減少與對手增加不計，`set_life` 以實際前後值判斷，回合交替清除。
+
+`history_sum: {window: this_turn, event: payment, who: self, where: {cost_kind: earth_rite}, field: removed_stack}` 累加本回合自己的【土の秘術】實際取下的【スタック】個數，跨多次付款加總（Q1895～Q1897）。只接受 `who: self` 與 `this_turn`；可作 `usable_if` 等條件的數值。付款計入雙方共用的回合計數，拒絕或回復的付款不計，回合開始時清空。
 正式目標 `upto` 可直接讀這個封閉的增加次數查詢；上限為 0 時仍可選 0 個目標並繼續本文。此入口不放寬費用、搜索上限或其他歷史查詢。代表卡 BP21-092／BP21-SL22 與 BP21-T09（Q2769）。
 
 `history: {window: this_turn, event: discarded, who: self, from: hand}` 查詢本回合自己是否曾捨棄手牌；`history_count` 使用相同查詢計算實際捨棄的張數。只接受這個玩家與來源形狀，`distinct` 可省略或為 `facts`，不接受主體篩選、其他來源、排除執行或 `subjects` 去重。效果、正式費用與手牌上限的捨棄都經共同入口計入；普通移區、消滅與抽牌不計，失敗付款連同歷史回復，雙方歷史在下一回合開始歸零。稍後入場的卡仍能讀取本回合較早的捨棄。

@@ -573,7 +573,7 @@ fn mask_public_number(number: &mut Expr<Int>) {
         *number = Expr::Literal(Int(0));
         return;
     }
-    if matches!(number, Expr::Live(read) if matches!(read.as_ref(), IntRead::HistorySum { query } if matches!(NumericHistoryPlan::compile(query), Some(NumericHistoryPlan::LifeSum(_)))))
+    if matches!(number, Expr::Live(read) if matches!(read.as_ref(), IntRead::HistorySum { query } if NumericHistoryPlan::compile(query).is_some()))
     {
         *number = Expr::Literal(Int(0));
         return;

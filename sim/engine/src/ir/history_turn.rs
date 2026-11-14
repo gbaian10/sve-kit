@@ -78,11 +78,38 @@ impl<'query> HistoryPlan<'query> {
 
 pub(crate) enum NumericHistoryPlan {
     LifeSum(super::events::life::LifeFilter),
+    /// Stack the controller's own Earth Rite payments removed this turn.
+    EarthRiteStack,
 }
 
 impl NumericHistoryPlan {
     pub(crate) fn compile(query: &super::NumericHistoryQuery) -> Option<Self> {
+        if let super::NumericHistoryQuery::EarthRiteRemovedStack {
+            event, component, ..
+        } = query
+        {
+            return (earth_rite_stack_query(*event, *component) == *query)
+                .then_some(Self::EarthRiteStack);
+        }
         life_sum_plan(query).map(Self::LifeSum)
+    }
+}
+
+/// The controller's payments only; the payer is the window's relative player.
+pub(crate) fn earth_rite_stack_query(
+    event: Binding<super::PaymentEvent>,
+    component: Binding<super::EarthRitePaidComponent>,
+) -> super::NumericHistoryQuery {
+    super::NumericHistoryQuery::EarthRiteRemovedStack {
+        event,
+        component,
+        predicate: Expr::Literal(Bool(true)),
+        window: HistoryWindow {
+            range: HistoryRange::CurrentTurn {},
+            cutoff: HistoryCutoff::CurrentPoint {},
+            relative_player: Some(PlayerRef::Controller {}),
+        },
+        include_execution: InclusionPolicy::IncludeAll {},
     }
 }
 

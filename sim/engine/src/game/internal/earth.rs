@@ -68,6 +68,13 @@ impl Game {
             .0
             .checked_sub(change.after.0)
             .ok_or_else(|| invalid("Earth Rite counter result"))?);
+        self.bump(
+            &format!(
+                "{}.earth_rite_stack_removed",
+                seat_name(execution.context.controller)?
+            ),
+            i64::try_from(removed.0).map_err(invalid)?,
+        );
         if change.after == Nat(0) {
             self.internal_move_members(
                 execution,

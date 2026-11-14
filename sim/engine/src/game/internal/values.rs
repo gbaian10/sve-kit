@@ -588,7 +588,7 @@ impl Execution {
                 }
                 IntRead::HistorySum { query } => {
                     let plan = NumericHistoryPlan::compile(query)
-                        .ok_or_else(|| unsupported("life history sum"))?;
+                        .ok_or_else(|| unsupported("history sum"))?;
                     super::history_turn::sum(self, game, &plan)
                 }
             },

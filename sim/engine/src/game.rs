@@ -558,6 +558,7 @@ impl Game {
                 "ub_activated",
                 "discarded",
                 "attacks",
+                "earth_rite_stack_removed",
             ] {
                 state.counters.insert(format!("{seat}.{counter}"), 0);
             }

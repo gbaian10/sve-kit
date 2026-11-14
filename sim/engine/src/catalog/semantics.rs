@@ -246,6 +246,7 @@ const TURN_COUNTERS: &[&str] = &[
     "leader_hp_decreased",
     "leader_hp_increased",
     "leader_hp_increase_count",
+    "earth_rite_stack_removed",
 ];
 
 /// Object attributes `read_object_attribute` can return: derived values, object
