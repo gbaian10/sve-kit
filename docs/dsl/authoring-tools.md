@@ -1267,3 +1267,5 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 `play.optional_cost: {earth_rite: N}` 可搭配 `optional_cost_set` 或 `optional_cost_delta`，在同一次出牌報價中選擇是否支付土之秘術。材料保留 Stack 關鍵字及實付 counter 的付款事件；支付後剩餘 Stack 為零時依既有規則送墓。拒絕付款時沿用原本出牌費用，不消耗 Stack。
 
 玩家出牌費用修正可用 `until: {during_next_turn: {who: self | opp}}` 指定只在下一個實際開始的指定玩家回合生效；安裝當下尚未生效。額外回合、跳過回合沿用回合排程，該回合結束後清除修正。修正的對象篩選仍相對於原效果控制者。
+
+出牌費用條件的 `count: {who: self, zone: hand, other: true}` 在當次報價時讀手牌張數，排除正在打出的來源本身。來源原在 EX 時不扣除任何手牌；讀值只計張數，不開放手牌內容或對手手牌篩選。

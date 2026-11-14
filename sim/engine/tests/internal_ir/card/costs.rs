@@ -724,3 +724,111 @@ fn a_player_cost_subject_does_not_gain_prepared_dynamic_operands() {
     ));
     assert_eq!(exact_authority(&game), before);
 }
+
+#[test]
+fn own_other_hand_count_is_live_at_quotation_and_excludes_only_the_source() {
+    let tree = exchange::candidate(
+        "unit-follower",
+        json!({"cost_delta":{
+            "if":{"cmp":{"left":{"count":{"who":"self","zone":"hand","other":true}},"op":"le","right":2}},
+            "delta":-5
+        }}),
+        false,
+    );
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for (origin, others, expected) in [("hand", 2, 5), ("hand", 3, 10), ("ex", 2, 5), ("ex", 3, 10)]
+    {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+        initial["players"]["P1"]["zones"]["field"] = json!([]);
+        initial["players"]["P1"]["zones"]["hand"] = json!(
+            (0..others)
+                .map(|i| json!({"id":format!("other-{i}"),"card":"unit-spell"}))
+                .collect::<Vec<_>>()
+        );
+        let source = json!({"id":"s","card":"unit-follower"});
+        if origin == "hand" {
+            initial["players"]["P1"]["zones"]["hand"]
+                .as_array_mut()
+                .unwrap()
+                .push(source);
+        } else {
+            initial["players"]["P1"]["zones"]["ex"] = json!([source]);
+        }
+        let mut game = Game::new(
+            catalog_with_cost(&json!("10")),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "other-hand-count",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &program).unwrap();
+        game.load_internal_card("unit-spell", &card(vec![]))
+            .unwrap();
+        let observation = game.observe(Viewer::P1).unwrap();
+        let source_handle = observation.players[0]
+            .zones
+            .iter()
+            .flat_map(|zone| &zone.cards)
+            .find(|card| card.card.properties.card == "unit-follower")
+            .unwrap()
+            .card
+            .handle
+            .clone();
+        let quote = observation
+            .costs
+            .cards
+            .iter()
+            .find(|quote| quote.card == source_handle)
+            .unwrap();
+        assert_eq!(
+            quote.cost.total_pp,
+            Some(expected),
+            "the source quotation excludes only itself"
+        );
+        game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            10 - expected
+        );
+    }
+}
+
+#[test]
+fn other_hand_cost_count_keeps_plain_private_zone_counts_closed() {
+    let candidate = |count| {
+        exchange::candidate(
+            "unit-follower",
+            json!({"cost_delta":{
+                "if":{"cmp":{"left":{"count":count},"op":"le","right":2}},
+                "delta":-5
+            }}),
+            false,
+        )
+    };
+    for zone in ["field", "ex", "cemetery"] {
+        lowerer()
+            .lower(&candidate(json!({"who":"self","zone":zone})))
+            .unwrap();
+    }
+    lowerer()
+        .lower(&candidate(json!({"who":"self","zone":"hand","other":true})))
+        .unwrap();
+    for who in ["self", "opp"] {
+        for zone in ["hand", "deck"] {
+            let Err(error) = lowerer().lower(&candidate(json!({"who":who,"zone":zone}))) else {
+                panic!("plain {who} {zone} count must retain its closed cost boundary")
+            };
+            assert_eq!(error.code, "unsupported_construct");
+            assert_eq!(
+                error.path,
+                "/cards/unit-follower/abilities/0/play/cost_delta"
+            );
+        }
+    }
+}

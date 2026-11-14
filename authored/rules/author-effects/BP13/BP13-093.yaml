@@ -1,0 +1,44 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-093:
+    admission: light
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            - if:
+                cmp:
+                  left:
+                    count: { who: self, zone: field }
+                  op: eq
+                  right: 0
+              delta: -5
+            - if:
+                cmp:
+                  left:
+                    count: { who: self, zone: hand, other: true }
+                  op: le
+                  right: 2
+              delta: -5
+            - if:
+                cmp:
+                  left:
+                    count: { who: self, zone: cemetery }
+                  op: ge
+                  right: 15
+              delta: -5
+      - line: 2
+        fanfare:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - destroy: enemy
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: Codex gpt-6.1-sol
+          date: "2026-11-14"

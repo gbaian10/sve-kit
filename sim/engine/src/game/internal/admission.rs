@@ -1213,6 +1213,8 @@ fn supported(code: &str) -> bool {
             | "shape.NatOperation.Conditional"
             | "shape.NatRead.ZoneCount"
             | "read.zone-count"
+            | "shape.NatRead.OtherHandCount"
+            | "read.other-hand-count"
             | "shape.NatRead.TurnOrdinal"
             | "read.turn.ordinal"
             | "shape.Predicate.And"

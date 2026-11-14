@@ -4,8 +4,8 @@ use super::{
     ZoneKind, ast, decode, source_span, unsupported,
 };
 use crate::ir::{
-    BoolRead, Comparison, CostChange, HistoryCount, IntRead, NatRead, ObjectRef, PlayCostModifier,
-    PlayerResource,
+    BoolRead, Comparison, CostChange, HistoryCount, IntOperation, IntRead, NatRead, ObjectOperand,
+    ObjectRef, PlayCostModifier, PlayerResource,
 };
 
 pub(super) fn lower(
@@ -185,10 +185,7 @@ fn condition(
         ast::CostCondition::Cmp(value) => Predicate::CompareInt {
             left: match &value.left {
                 ast::PublicNumber::Literal(amount) => Expr::Literal(Int(*amount)),
-                ast::PublicNumber::Count { count } => super::numeric::aggregate_count(
-                    condition_count_query(count, allocator, path)?,
-                    None,
-                ),
+                ast::PublicNumber::Count { count } => cost_count(count, entry, allocator, path)?,
                 ast::PublicNumber::DistinctNames { distinct_names } => {
                     super::numeric::distinct_count(
                         distinct_names,
@@ -337,4 +334,37 @@ fn public_zone_query(
             binding,
         )),
     })
+}
+
+fn cost_count(
+    count: &ast::CostCountQuery,
+    entry: &ast::Ability,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Expr<Int>, LoweringError> {
+    match count {
+        ast::CostCountQuery::Public(query) => Ok(super::numeric::aggregate_count(
+            condition_count_query(query, allocator, path)?,
+            None,
+        )),
+        ast::CostCountQuery::General(query) => {
+            let body = ast::Body::default();
+            let mut context = super::BodyContext::new(entry, ScopeId(0), &body, None, allocator);
+            if matches!(query.zone, ast::CountZone::Hand)
+                && query.other
+                && matches!(query.who, ast::Side::Controller)
+            {
+                let mut unfiltered = query.clone();
+                unfiltered.other = false;
+                context.zone_count(&unfiltered, path)?;
+                return Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::OtherHandCount {
+                        player: PlayerRef::Controller {},
+                        excluding: ObjectOperand::SourceHolder {},
+                    })),
+                })));
+            }
+            Err(unsupported(path))
+        }
+    }
 }
