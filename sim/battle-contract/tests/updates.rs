@@ -133,7 +133,7 @@ fn a_promoted_batch_links_back_by_presentation_id_and_is_not_animated_again() {
                 .any(|event| event.presentation_id.is_some())
         })
         .collect();
-    assert!(!promoted.is_empty());
+    assert_ne!(promoted, Vec::new());
     for batch in promoted {
         // A scope promotes as a whole: every member carries its link.
         assert!(
