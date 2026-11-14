@@ -75,7 +75,7 @@ function setUp(
   create: (setup: string) => Promise<EngineSession>,
   ports: Partial<Record<Seat, FakePort>>,
   matchOptions: MatchOptions = options,
-  validate?: (message: unknown) => boolean,
+  validate?: ((message: unknown) => boolean) | Promise<(message: unknown) => boolean>,
 ) {
   const host = new BattleHost(
     (_inputs, setup) => create(setup),
@@ -229,5 +229,28 @@ describe("BattleHost", () => {
     ])
     // A result outside the contract is never delivered; interaction stops instead.
     expect(await run(receipt("maybe"))).toEqual([stopped])
+  })
+
+  it("queues commands while a lazily imported validator loads, then still validates", async () => {
+    const p1 = new FakePort()
+    let provide: (validate: (message: unknown) => boolean) => void = () => undefined
+    const validator = new Promise<(message: unknown) => boolean>((resolve) => {
+      provide = resolve
+    })
+    const session: EngineSession = {
+      start: () => "[]",
+      submit: () =>
+        JSON.stringify([
+          { seat: "p1", message: { kind: "receipt", request_id: "r", result: "maybe" } },
+        ]),
+      baseline: () => "[]",
+    }
+    setUp(() => Promise.resolve(session), { p1 }, options, validator)
+    p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
+    await settle()
+    expect(p1.received).toEqual([])
+    provide(validateHostMessage)
+    await settle()
+    expect(p1.received).toEqual([{ kind: "host_error", format: 1, reason: "projection" }])
   })
 })

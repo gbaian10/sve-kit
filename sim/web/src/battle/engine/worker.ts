@@ -1,11 +1,14 @@
 // Local battle Worker: loads the engine WebAssembly and serves the seat ports.
-import { validateHostMessage } from "../contract"
 import init, { Session } from "./generated/engine"
 import { BattleHost } from "./host"
 import type { InitMessage } from "./protocol"
 
 let ready: Promise<unknown> | undefined
-// Production skips full schema validation (the engine still range-checks every number).
+// Production skips full schema validation (the engine still range-checks every number), and the
+// DEV-only dynamic import keeps the generated validator out of the production Worker entirely.
+const validate = import.meta.env.DEV
+  ? import("../contract").then((contract) => contract.validateHostMessage)
+  : undefined
 const host = new BattleHost(
   async (inputs, setup) => {
     ready ??= init()
@@ -13,7 +16,7 @@ const host = new BattleHost(
     return new Session(inputs.snapshot, inputs.keywords, inputs.selection, inputs.rules, setup)
   },
   undefined,
-  import.meta.env.DEV ? validateHostMessage : undefined,
+  validate,
 )
 self.addEventListener(
   "message",

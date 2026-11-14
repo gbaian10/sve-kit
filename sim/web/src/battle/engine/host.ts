@@ -45,7 +45,8 @@ function randomSeed(random: Random): string {
 export class BattleHost {
   readonly #create: CreateSession
   readonly #random: Random
-  readonly #validate: ValidateContract | undefined
+  readonly #validator: ValidateContract | Promise<ValidateContract | undefined> | undefined
+  #validate: ValidateContract | undefined
   readonly #ports = new Map<Seat, SeatPort>()
   #queue: Promise<void> = Promise.resolve()
   #session: EngineSession | undefined
@@ -54,11 +55,11 @@ export class BattleHost {
   constructor(
     create: CreateSession,
     random: Random = (bytes) => crypto.getRandomValues(bytes),
-    validate?: ValidateContract,
+    validate?: ValidateContract | Promise<ValidateContract | undefined>,
   ) {
     this.#create = create
     this.#random = random
-    this.#validate = validate
+    this.#validator = validate
   }
 
   init({ inputs, options, ports }: InitMessage): void {
@@ -83,6 +84,8 @@ export class BattleHost {
     })
     this.#enqueue(async () => {
       try {
+        // A validator still loading delays the engine like any other load step; commands keep queueing.
+        this.#validate = await this.#validator
         this.#session = await this.#create(inputs, setup)
       } catch (error) {
         this.#stopped = true
