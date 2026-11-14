@@ -1,5 +1,7 @@
 //! Face-down effects reuse the ordinary flip mutation and revoke public location knowledge.
 
+use crate::ir::public_evolve;
+
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::ir::{
     Action, FlipOutcome, Instruction, ResultMember, ResultMemberId, RuntimeObjectView, Selector,
@@ -7,7 +9,7 @@ use crate::ir::{
 };
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
-    if matches!(action, Action::FlipDown { objects } if !matches!(objects, Selector::Bound { .. }))
+    if matches!(action, Action::FlipDown { objects } if !matches!(objects, Selector::Bound { .. }) && !public_evolve::selector(objects))
     {
         return Err(unsupported(
             "flip-down requires selected public evolve-deck cards",
