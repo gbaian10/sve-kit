@@ -132,9 +132,9 @@ impl Checker {
         }
         // Entry installation needs a new-generation subject; a source-holder substitution is unsafe.
         // Only the Fanfare suppression is consumed at entry itself and never installed.
-        if !movement.entry_effects.is_empty()
-            && !(suppresses_fanfare(&movement.entry_effects)
-                && matches!(&movement.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field))
+        if !(movement.entry_effects.is_empty()
+            || (suppresses_fanfare(&movement.entry_effects)
+                && matches!(&movement.to, MoveDestination::Shared { zone } if zone.kind == ZoneKind::Field)))
         {
             return self.reject();
         }

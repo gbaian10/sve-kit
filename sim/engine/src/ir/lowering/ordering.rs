@@ -594,6 +594,25 @@ impl BodyContext<'_> {
         })
     }
 
+    /// A move to the field carries its arrival posture and entry effects on the movement itself.
+    fn field_move(&mut self, value: &ast::Move, path: &str) -> Result<Action, LoweringError> {
+        let mut action = match &value.r#ref {
+            Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
+                self.self_return(objects, path)?
+            }
+            _ => self.field_entry_move(value, path)?,
+        };
+        let Action::Move { movement, .. } = &mut action else {
+            if value.entry_effects.is_some() {
+                return Err(unsupported(path));
+            }
+            return Ok(action);
+        };
+        movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
+        movement.entry_effects = entry_effects(value, path)?;
+        Ok(action)
+    }
+
     pub(super) fn observed_move(
         &mut self,
         value: &ast::Move,
@@ -611,19 +630,7 @@ impl BodyContext<'_> {
             return Ok(action);
         }
         if matches!(value.to, ast::Destination::Field) {
-            let mut action = match &value.r#ref {
-                Some(ast::MoveObjects::Field(objects @ ast::Objects::This(_))) => {
-                    self.self_return(objects, path)?
-                }
-                _ => self.field_entry_move(value, path)?,
-            };
-            if let Action::Move { movement, .. } = &mut action {
-                movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
-                movement.entry_effects = entry_effects(value, path)?;
-            } else if value.entry_effects.is_some() {
-                return Err(unsupported(path));
-            }
-            return Ok(action);
+            return self.field_move(value, path);
         }
         if let Some(top) = &value.top {
             return self.top_move(value, top, path);
