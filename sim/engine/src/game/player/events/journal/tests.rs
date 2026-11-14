@@ -204,7 +204,7 @@ fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
     let [
         PresentationOp::Provisional(retry),
         PresentationOp::Promote { scope: promoted },
-    ] = after.get(4..).unwrap()
+    ] = &after[4..]
     else {
         panic!("the new batch is shown under its own scope and promoted: {after:?}");
     };
