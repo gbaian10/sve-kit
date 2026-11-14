@@ -1124,6 +1124,17 @@ impl Execution {
                     HistoryPlan::compile(query).ok_or_else(|| unsupported("boolean expression"))?;
                 super::history_turn::exists(self, game, &plan)
             }
+            BoolRead::FieldEntryMethod {
+                object: ObjectOperand::SourceHolder {},
+                method,
+            } => {
+                let object = self.object(game, &ObjectOperand::SourceHolder {})?;
+                Ok(Bool(game.internal_field_entry_method(
+                    self.object_id(object)?,
+                    object.generation.0,
+                    *method,
+                )?))
+            }
             BoolRead::FieldEntryOrigin {
                 object: ObjectOperand::SourceHolder {},
                 zone: ZoneKind::Cemetery,

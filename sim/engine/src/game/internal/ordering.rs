@@ -1095,14 +1095,21 @@ fn mask_entry_origin(inspected: &mut Node) -> Result<()> {
 
 fn mask_field_entry(value: &mut Expr<Bool>) -> Result<()> {
     match value {
-        Expr::Live(read) => {
-            if let BoolRead::FieldEntryOrigin { object, zone } = read.as_ref() {
+        Expr::Live(read) => match read.as_ref() {
+            BoolRead::FieldEntryOrigin { object, zone } => {
                 if *object != (ObjectOperand::SourceHolder {}) || *zone != ZoneKind::Cemetery {
                     return Err(unsupported("holder field entry origin"));
                 }
                 *value = Expr::Literal(Bool(false));
             }
-        }
+            BoolRead::FieldEntryMethod { object, .. } => {
+                if *object != (ObjectOperand::SourceHolder {}) {
+                    return Err(unsupported("holder field entry method"));
+                }
+                *value = Expr::Literal(Bool(false));
+            }
+            _ => {}
+        },
         Expr::Compute(predicate) => match predicate.as_mut() {
             Predicate::Not { predicate } => mask_field_entry(predicate)?,
             Predicate::And { predicates } | Predicate::Or { predicates } => {
