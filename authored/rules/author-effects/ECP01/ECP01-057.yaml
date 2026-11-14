@@ -1,0 +1,71 @@
+cards:
+  ECP01-057:
+    abilities:
+      - auto:
+          do:
+            - by_kind:
+                follower:
+                  - buff:
+                      hp: 2
+                      on: item
+                leader:
+                  - life:
+                      delta: 2
+                      who: item
+                ref: ally
+          on:
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: ally
+              from:
+                any_of:
+                  - leader: self
+                  - kind: follower
+                    trait: ウマ娘
+                    who: self
+                    zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - choose:
+                bind: uma
+                from:
+                  kind: follower
+                  trait: ウマ娘
+                  who: self
+                  zone: hand
+                upto: 1
+            - move:
+                ref: uma
+                result: entered
+                to: field
+            - grant:
+                abilities:
+                  - auto:
+                      do:
+                        - move:
+                            ref: this
+                            to: hand
+                      on:
+                        phase:
+                          which: end
+                          whose: self
+                on:
+                  follow: entered
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

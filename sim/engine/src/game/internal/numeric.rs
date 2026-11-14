@@ -170,8 +170,12 @@ fn collect_patches<'program>(
                     }
                 }
             }
+            // A paid continuation resolves in the same execution, so it shares the timestamp.
             Node::Control {
-                control: Control::Sequence { body } | Control::May { body, .. },
+                control:
+                    Control::Sequence { body }
+                    | Control::May { body, .. }
+                    | Control::Pay { on_paid: body, .. },
             } => collect_patches(body, patches),
             Node::Control {
                 control:
@@ -192,6 +196,18 @@ fn collect_patches<'program>(
                 for mode in modes {
                     collect_patches(&mode.body, patches);
                 }
+            }
+            // Either kind branch may run, so both share the execution's timestamp checks.
+            Node::Control {
+                control:
+                    Control::Match {
+                        leader_body,
+                        follower_body,
+                        ..
+                    },
+            } => {
+                collect_patches(leader_body, patches);
+                collect_patches(follower_body, patches);
             }
             _ => {}
         }

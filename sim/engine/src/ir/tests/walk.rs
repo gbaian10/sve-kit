@@ -187,9 +187,7 @@ fn controls() -> Program {
     let branches = vec![
         simultaneous(),
         Control::Match {
-            value: DamageRecipient::Leader {
-                player: PlayerRef::Controller {},
-            },
+            recipients: Binding::new(9, ScopeId(1)),
             leader: Binding::new(1, ScopeId(2)),
             leader_body: leaf(2),
             follower: Binding::new(2, ScopeId(3)),

@@ -140,8 +140,15 @@ impl Checker {
                     }
                 }
             }
-            ChoiceDomain::Recipients { binding, .. } => {
+            ChoiceDomain::Recipients {
+                binding,
+                cardinality,
+                ..
+            } => {
                 self.env.access.insert(binding.key(), visibility.clone());
+                if cardinality.minimum.0 == 1 && cardinality.maximum == Some(Nat(1)) {
+                    self.env.single_recipients.insert(binding.key());
+                }
             }
             ChoiceDomain::Integer { binding, .. } => {
                 self.env.access.insert(binding.key(), visibility.clone());

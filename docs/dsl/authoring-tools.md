@@ -873,6 +873,8 @@ cmp:
 
 ## 公開數值宣告與查詢上限
 
+「自分のリーダーか自分の場の（他の／特徴）フォロワー1体を選ぶ。それは{体力}+N する」寫成恰好一個（`n: 1`）的接受者目標，再以 `by_kind: {ref, as?, leader, follower}` 依種類分支：`leader` 內 `item`（或 `as` 名稱）是該領袖的玩家，可寫 `life: {who: item, ...}`；`follower` 內是該從者，可寫 `buff: {on: item, ...}`；另一分支不執行（BP21-101、CP04-041、ECP01-057）。目標可寫 `leader_or: true`，或 `any_of: [{leader: self}, {who: self, zone: field, kind: follower, other?, trait?}]`（兩支同一玩家、領袖支不帶其他篩選時視為同一目標）。從者在分支執行前離場則不作用。`item` 只在分支內有效，巢狀時須以 `as` 命名；`upto` 或多張接受者目標沒有單一種類，不能用 by_kind。
+
 正式 `targets.n`／`upto` 及 `targets.from`、`search.sel` 的 `cost_le`／`orig_cost_le` 可使用既有 Number：自己的 PP 最大值、自己場上／EX／墓場的公開計數與同一範圍的 `distinct_names` 卡名種類數，以及這些值的 `plus`／`minus`／`times`／`per`／`min` 與 `define` 別名。計數接受現有常量種類、職業、特徵、精確卡名與原費篩選，並補上常量 `orig_cost_ge`；不授予 `distinct_orig_costs`、隱藏手牌／牌庫、其他玩家、來源屬性、回條或時點覆寫讀值。公開上限不得與私下 Look 選取或 extremum 人口混用。
 
 `search.sel.orig_cost_eq` 同樣接受 Number，以等於比較候選的印刷原費。`orig_cost_of: <正式目標>` 讀至多一體、只從場上或 EX 選取的正式目標的印刷原費（BP12-114「元のコストX…Xは選んだフォロワーの元のコスト」、BP13-053「元のコスト+2」寫 `plus`）；原費是印刷值，目標在讀取前離場（例如同一本文先破壞）仍讀得到。載入時確認該 binding 來自公開、至多一張、候選全在場上或 EX 的選取，私下選取（例如對手手牌）的原費不能當公開數值；同一模式的後一個目標可讀前一個目標的原費，模式可否選取以綁定前題後的可行答案判斷。其他區域、多張目標與回條成員的原費仍不支援。

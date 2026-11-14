@@ -1400,6 +1400,14 @@ fn check_nested_nodes(
                 check_nodes_with_x(game, &body.steps, source, origin, x)?;
             }
         }
+        Control::Match {
+            leader_body,
+            follower_body,
+            ..
+        } => {
+            check_nodes_with_x(game, &leader_body.steps, source, origin, x)?;
+            check_nodes_with_x(game, &follower_body.steps, source, origin, x)?;
+        }
         _ => return Err(unsupported("nested whole-card control")),
     }
     Ok(())
@@ -1548,7 +1556,8 @@ fn check_nodes_with_x(
                     | Control::Sequence { .. }
                     | Control::Repeat { .. }
                     | Control::Simultaneous { .. }
-                    | Control::If { .. }),
+                    | Control::If { .. }
+                    | Control::Match { .. }),
             } => check_nested_nodes(game, control, source, ability_source, x)?,
             Node::Control {
                 control: Control::Mode { modes, .. },
