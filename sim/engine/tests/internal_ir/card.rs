@@ -1025,3 +1025,5 @@ mod spell_origin;
 
 #[path = "card/source_counter_quantity.rs"]
 mod source_counter_quantity;
+#[path = "card/target_role_objects.rs"]
+mod target_role_objects;

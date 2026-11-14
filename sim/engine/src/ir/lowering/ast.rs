@@ -1078,6 +1078,7 @@ pub(super) enum StandPlayer {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Objects {
+    Role { role: RoleReference },
     This(This),
     Bound(String),
     Zone(Box<ObjectQuery>),
