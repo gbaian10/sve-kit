@@ -158,21 +158,7 @@ impl Game {
     }
 
     fn opening_cards(&self, actor: Viewer, ids: &[String]) -> Result<Vec<CardObservation>> {
-        ids.iter()
-            .map(|id| {
-                let handle = self
-                    .state
-                    .knowledge
-                    .get(seat(actor))
-                    .and_then(|known| known.handle(id))
-                    .ok_or_else(|| invalid("opening candidate is not identifiable"))?;
-                self.resolve_player_object(actor, &handle)?;
-                Ok(CardObservation {
-                    handle,
-                    properties: self.observed_card_properties(actor, id)?,
-                })
-            })
-            .collect()
+        ids.iter().map(|id| self.observed_card(actor, id)).collect()
     }
 
     fn opening_payload(&self, actor: Viewer, answer: OpeningAnswer) -> Result<Value> {

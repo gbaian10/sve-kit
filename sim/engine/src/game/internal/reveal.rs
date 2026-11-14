@@ -52,6 +52,43 @@ pub(super) fn check_objects(objects: &Selector) -> Result<()> {
     reason = "Scoped revelation shares the authoritative Game visibility state."
 )]
 impl Game {
+    pub(in crate::game) fn public_card_disclosure(&self, id: &str) -> Result<bool> {
+        let object = self.object(id)?;
+        if object.state["pregame_hidden"] != true
+            && object.state["face_up"] != false
+            && matches!(
+                object.zone.as_str(),
+                "field"
+                    | "ex"
+                    | "cemetery"
+                    | "banish"
+                    | "resolution"
+                    | "evolution"
+                    | "race"
+                    | "drive"
+                    | "trigger"
+                    | "equipment"
+                    | "evolve_deck"
+            )
+        {
+            return Ok(true);
+        }
+        // Other seats' private knowledge must not change this viewer's metadata.
+        let mut current = self.typed.as_ref();
+        while let Some(execution) = current {
+            if execution.reveals.iter().any(|reveal| {
+                reveal.id == id
+                    && reveal.object.generation.0 == object.generation
+                    && reveal.controller == object.controller
+                    && reveal.zone == object.zone
+            }) {
+                return Ok(true);
+            }
+            current = execution.nested.as_ref().map(|entry| &entry.parent);
+        }
+        Ok(false)
+    }
+
     pub(super) fn internal_reveal(
         &mut self,
         execution: &mut Execution,

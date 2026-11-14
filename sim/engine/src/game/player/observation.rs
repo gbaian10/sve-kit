@@ -22,7 +22,6 @@ use super::{ObjectHandle, Viewer};
 use crate::game::{Game, Object, int};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
-use alloc::collections::BTreeSet;
 
 /// Player-visible zones, including attached evolution cards.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -148,8 +147,23 @@ pub struct CardProperties {
 pub struct CardObservation {
     /// Reference for this viewer's uninterrupted identification period.
     pub handle: ObjectHandle,
+    /// Physical printing and face, distinct from an attached evolve card's characteristics.
+    pub physical: CardFace,
+    /// Disclosed by a public zone or an active public revelation.
+    pub public: bool,
+    /// Whether the physical card is face up in its zone.
+    pub face_up: bool,
     /// Explicit authorized characteristics.
     pub properties: CardProperties,
+}
+
+/// An authorized catalogue face, without a physical object identity.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct CardFace {
+    /// Exact catalogue printing key.
+    pub card: String,
+    /// Physical face ordinal.
+    pub face: u64,
 }
 
 /// A known member of a zone.
@@ -190,6 +204,8 @@ pub struct PlayerObservation {
 pub struct CardMemory {
     /// Remembered public catalog identity.
     pub card: String,
+    /// Face that was actually observed, without inferring the base face.
+    pub face: u64,
     /// Remembered owner.
     pub owner: Viewer,
 }
@@ -310,21 +326,9 @@ impl Game {
             for item in items {
                 if let Some(id) = item.as_str() {
                     if self.player_knows_object(perspective, id) {
-                        let knowledge = self
-                            .state
-                            .knowledge
-                            .get(seat(perspective))
-                            .ok_or_else(|| invalid("missing viewer knowledge"))?;
-                        let handle = knowledge
-                            .handle(id)
-                            .ok_or_else(|| invalid("missing player object handle"))?;
-                        self.resolve_player_object(perspective, &handle)?;
                         cards.push(ZoneCard {
                             position: (name != "hand" || perspective == player).then_some(offset),
-                            card: CardObservation {
-                                handle,
-                                properties: self.observed_card_properties(perspective, id)?,
-                            },
+                            card: self.observed_card(perspective, id)?,
                         });
                     }
                     offset = offset
@@ -364,27 +368,19 @@ impl Game {
     }
 
     fn card_memory(&self, perspective: Viewer) -> Result<Vec<CardMemory>> {
-        let mut faces = BTreeSet::new();
-        if let Some(knowledge) = self.state.knowledge.get(seat(perspective)) {
-            for record in knowledge.seen.values() {
-                let key = (
-                    record["card"]
-                        .as_str()
-                        .ok_or_else(|| invalid("missing remembered card"))?
-                        .to_owned(),
-                    viewer(
-                        record["owner"]
-                            .as_str()
-                            .ok_or_else(|| invalid("missing remembered owner"))?,
-                    )?,
-                );
-                faces.insert(key);
-            }
-        }
-        Ok(faces
+        self.state
+            .knowledge
+            .get(seat(perspective))
             .into_iter()
-            .map(|(card, owner)| CardMemory { card, owner })
-            .collect())
+            .flat_map(|knowledge| &knowledge.faces)
+            .map(|face| {
+                Ok(CardMemory {
+                    card: face.card.clone(),
+                    face: face.face,
+                    owner: viewer(&face.owner)?,
+                })
+            })
+            .collect()
     }
 
     pub(in crate::game) fn player_knows_object(&self, perspective: Viewer, id: &str) -> bool {
@@ -397,6 +393,42 @@ impl Game {
                 .objects
                 .get(id)
                 .is_some_and(|object| object.zone != "void")
+    }
+
+    pub(in crate::game) fn observed_card(
+        &self,
+        perspective: Viewer,
+        id: &str,
+    ) -> Result<CardObservation> {
+        let handle = self
+            .state
+            .knowledge
+            .get(seat(perspective))
+            .and_then(|knowledge| knowledge.handle(id))
+            .ok_or_else(|| invalid("card is not identifiable"))?;
+        self.resolve_player_object(perspective, &handle)?;
+        let object = self.object(id)?;
+        let face = object.state["face"]
+            .as_u64()
+            .ok_or_else(|| invalid("unknown physical card face"))?;
+        self.catalog
+            .face(&object.card, usize::try_from(face).map_err(invalid)?)?;
+        let face_up = match object.state.get("face_up") {
+            Some(value) => value
+                .as_bool()
+                .ok_or_else(|| invalid("unknown card facing"))?,
+            None => !matches!(object.zone.as_str(), "deck" | "hand" | "evolve_deck"),
+        };
+        Ok(CardObservation {
+            handle,
+            physical: CardFace {
+                card: object.card.clone(),
+                face,
+            },
+            public: self.public_card_disclosure(id)?,
+            face_up,
+            properties: self.observed_card_properties(perspective, id)?,
+        })
     }
 
     pub(in crate::game) fn observed_card_properties(
@@ -413,7 +445,9 @@ impl Game {
             .transpose()?;
         Ok(CardProperties {
             card: source.card.clone(),
-            face: u64::try_from(int(&source.state["face"])).map_err(invalid)?,
+            face: source.state["face"]
+                .as_u64()
+                .ok_or_else(|| invalid("unknown effective card face"))?,
             names: self.card_names(id)?,
             kind: self.object_type(id)?.into(),
             traits: self.card_traits(id)?.into_iter().collect(),

@@ -14,10 +14,18 @@ use serde_json::{Value, json};
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub(super) struct Knowledge {
     pub(super) seen: BTreeMap<String, Value>,
+    pub(super) faces: BTreeSet<KnownFace>,
     located: BTreeSet<String>,
     pub(super) carried: Vec<Value>,
     handles: BTreeMap<String, HandleEntry>,
     issued: u64,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
+pub(super) struct KnownFace {
+    pub(super) card: String,
+    pub(super) face: u64,
+    pub(super) owner: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -119,8 +127,16 @@ impl Game {
         for (_, id) in members {
             let object = self.object(&id)?;
             let record = json!({"id":id,"card":object.card,"owner":object.owner,"from":self.node});
+            let face = KnownFace {
+                card: object.card.clone(),
+                face: object.state["face"]
+                    .as_u64()
+                    .ok_or_else(|| invalid("unknown remembered face"))?,
+                owner: object.owner.clone(),
+            };
             let knowledge = self.state.knowledge.entry(seat.into()).or_default();
             knowledge.seen.entry(id.clone()).or_insert(record);
+            knowledge.faces.insert(face);
             if located {
                 knowledge.locate(&id, &key)?;
             }

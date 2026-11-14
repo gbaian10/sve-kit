@@ -204,6 +204,17 @@ fn simultaneous_revelation_ignores_opponent_hand_slots_and_expiry_retires_handle
     );
     finish_order(&mut left, &first_question);
     finish_order(&mut right, &second_question);
+    assert!(
+        visible(&revealed, Viewer::P1, ObservedZone::Hand)
+            .iter()
+            .all(|card| card.public)
+    );
+    let owner_after = left.observe(Viewer::P1).unwrap();
+    assert!(
+        visible(&owner_after, Viewer::P1, ObservedZone::Hand)
+            .iter()
+            .all(|card| !card.public)
+    );
     let expired = left.observe(Viewer::P2).unwrap();
     assert_eq!(visible(&expired, Viewer::P1, ObservedZone::Hand).len(), 0);
     assert_eq!(revealed.remembered, expired.remembered);
@@ -238,6 +249,8 @@ fn known_deck_offsets_survive_reading_but_private_reorder_retires_their_handles(
     let top = observed_zone(&looked_view, Viewer::P1, ObservedZone::Deck);
     assert_eq!(top.cards.len(), 1);
     assert_eq!(top.cards[0].position, Some(0));
+    assert!(!top.cards[0].card.public);
+    assert!(!top.cards[0].card.face_up);
     assert_eq!(
         visible(
             &game.observe(Viewer::P2).unwrap(),
