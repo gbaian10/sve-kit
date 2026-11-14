@@ -1,0 +1,59 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP11-033:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.1-sol
+          date: "2026-11-14"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                top:
+                  who: self
+                  n: 4
+                bind: seen
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  orig_cost_le: 3
+                upto: 1
+            - move:
+                ref: picked
+                to: field
+                result: entered
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
+            - if:
+                cond:
+                  exists:
+                    in:
+                      follow: entered
+                    kind: follower
+                    trait: 盗賊
+                then:
+                  - buff:
+                      on:
+                        follow: entered
+                      power: 1
+                      hp: 1
+                  - grant:
+                      on:
+                        follow: entered
+                      keywords:
+                        - rush

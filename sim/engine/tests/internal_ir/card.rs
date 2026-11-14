@@ -79,6 +79,9 @@ mod advance_entry;
 #[path = "card/advance_spell.rs"]
 mod advance_spell;
 
+#[path = "card/entered_trait.rs"]
+mod entered_trait;
+
 #[path = "card/move_followup.rs"]
 mod move_followup;
 
