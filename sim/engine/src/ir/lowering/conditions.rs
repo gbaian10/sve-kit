@@ -1,13 +1,14 @@
 use super::super::{
-    CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, IntFrozen, IntRead,
-    LifeChangeEvent, NatFrozen, NumberRead, ObjectView, PlayerResource, Precondition,
-    PreconditionKind, PreconditionReason, SnapshotFields, Stat,
+    CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, EventPattern, IntFrozen,
+    IntRead, LifeChangeEvent, NatFrozen, NumberRead, ObjectView, PlayerResource, Precondition,
+    PreconditionKind, PreconditionReason, SnapshotFields, Stat, TriggerCondition,
 };
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, Int,
     IntOperation, LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate,
     SelectionView, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
+use crate::ir::events::ex_departure::ExDepartureFilter;
 use core::slice::from_ref;
 
 pub(super) fn discarded_history(
@@ -158,6 +159,7 @@ impl BodyContext<'_> {
                 r#trait: None,
                 traits_any: None,
                 name: None,
+                names: Vec::new(),
                 name_contains: None,
                 orig_cost_eq: None,
                 orig_cost_ge: None,
@@ -231,15 +233,17 @@ impl BodyContext<'_> {
         })))
     }
 
-    // The source's original generation must still be in its controller's EX at resolution.
-    fn source_in_ex(
+    // Intersection preserves the current source generation when its zone is checked.
+    fn source_in_play_zone(
         &mut self,
         location: &ast::PlayRestrictionZone,
         path: &str,
     ) -> Result<Predicate, LoweringError> {
-        if location.r#ref != "this" || location.zone != "ex" {
+        if location.r#ref != "this" {
             return Err(unsupported(path));
         }
+        let zone = super::play_restrictions::source_zone(&location.zone)
+            .ok_or_else(|| unsupported(path))?;
         Ok(Predicate::Exists {
             objects: Selector::Intersection {
                 sets: vec![
@@ -254,7 +258,7 @@ impl BodyContext<'_> {
                             },
                             text_quantifier: TextQuantifier::Implicit,
                         },
-                        zone: ZoneKind::Ex,
+                        zone,
                         view: SelectionView::Current {},
                         binding: Binding::new(self.allocator.id(path)?, self.scope),
                         predicate: Box::new(Expr::Literal(Bool(true))),
@@ -275,7 +279,7 @@ impl BodyContext<'_> {
                 right: Expr::Literal(PlayerRef::Active {}),
             },
             ast::Condition::MyTurn(false) => return Err(unsupported(path)),
-            ast::Condition::InZone(location) => self.source_in_ex(location, path)?,
+            ast::Condition::InZone(location) => self.source_in_play_zone(location, path)?,
             ast::Condition::Is(condition) => {
                 let ast::AttackTargetReference::AttackTarget = condition.reference;
                 let ast::FollowerKind::Follower = condition.kind;
@@ -343,13 +347,7 @@ impl BodyContext<'_> {
             },
             ast::Condition::Cmp(value) => return self.comparison_condition(value, path),
             ast::Condition::Did(name) => return self.move_success(name, path),
-            ast::Condition::Paid(paid) => {
-                return Ok(Expr::Frozen(Box::new(
-                    super::super::BoolFrozen::PaymentComplete {
-                        receipt: self.payment_reference(&paid.receipt, path)?,
-                    },
-                )));
-            }
+            ast::Condition::Paid(paid) => return self.paid_condition(paid, path),
         })))
     }
 
@@ -380,6 +378,7 @@ impl BodyContext<'_> {
             || !matches!(count.zone, ast::CountZone::EvolveDeck)
             || count.face_up != Some(true)
             || count.name.as_ref().is_none_or(String::is_empty)
+            || !count.names.is_empty()
             || count.kind.is_some()
             || count.class.is_some()
             || count.not_class.is_some()
@@ -512,8 +511,21 @@ impl BodyContext<'_> {
         condition: &ast::PlayedFromCondition,
         path: &str,
     ) -> Result<Predicate, LoweringError> {
+        let zone = match condition.from {
+            ast::PlayedZone::Hand => ZoneKind::Hand,
+            ast::PlayedZone::Ex => ZoneKind::Ex,
+        };
+        if self.spell.is_some() {
+            return Ok(Predicate::And {
+                predicates: vec![Expr::Live(Box::new(
+                    super::super::BoolRead::CardPlayOrigin {
+                        zone,
+                        execution: super::super::ExecutionRef::Current {},
+                    },
+                ))],
+            });
+        }
         let event = self.entry_event.ok_or_else(|| unsupported(path))?;
-        let ast::PlayedZone::Ex = condition.from;
         let method = Predicate::Equal {
             operands: Box::new(super::super::ValueEquality::EntryMethod {
                 left: Expr::Frozen(Box::new(
@@ -527,7 +539,7 @@ impl BodyContext<'_> {
                 left: Expr::Frozen(Box::new(super::super::EntryOriginFields::EnterFieldFrom {
                     event,
                 })),
-                right: Expr::Literal(super::super::EntryOrigin::Zone { zone: ZoneKind::Ex }),
+                right: Expr::Literal(super::super::EntryOrigin::Zone { zone }),
             }),
         };
         Ok(Predicate::And {
@@ -769,24 +781,53 @@ impl BodyContext<'_> {
         Ok(subject_query(kind, id, self.scope, &filter))
     }
 
+    fn followed_exists(
+        &mut self,
+        query: &ast::FollowedQuery,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
+        let output = self
+            .field_outputs
+            .get(&query.r#in.follow)
+            .ok_or_else(|| unsupported(path))?;
+        let objects = if query
+            .keyword
+            .is_some_and(|keyword| keyword.0 == super::super::KeywordId::Ward)
+            && query.kind.is_none()
+            && query.r#trait.is_none()
+        {
+            super::super::follow_keyword::selector(output.receipt.clone(), binding)
+        } else {
+            Selector::Filter {
+                input: Box::new(Selector::MoveAfter {
+                    receipt: output.receipt.clone(),
+                    permission: super::super::FollowPermission::SameEffectExplicitReference {},
+                }),
+                binding,
+                predicate: Box::new(super::selection::field_filter(
+                    &super::selection::ObjectFilter {
+                        kind: query.kind.as_ref().map(super::search::card_kind),
+                        trait_id: query.r#trait.as_deref(),
+                        keyword: query.keyword.map(|keyword| keyword.0),
+                        ..super::selection::ObjectFilter::default()
+                    },
+                    binding,
+                )),
+            }
+        };
+        Ok(Expr::Compute(Box::new(Predicate::Exists { objects })))
+    }
+
     fn public_exists(
         &mut self,
         query: &ast::ExistsQuery,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
-        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
-        if let ast::ExistsQuery::FollowedKeyword(query) = query {
-            if query.keyword.0 != super::super::KeywordId::Ward {
-                return Err(unsupported(path));
-            }
-            let output = self
-                .field_outputs
-                .get(&query.r#in.follow)
-                .ok_or_else(|| unsupported(path))?;
-            return Ok(Expr::Compute(Box::new(Predicate::Exists {
-                objects: super::super::follow_keyword::selector(output.receipt.clone(), binding),
-            })));
+        if let ast::ExistsQuery::Followed(followed) = query {
+            return self.followed_exists(followed, path);
         }
+        let binding = Binding::new(self.allocator.id(path)?, self.card_allocator.scope(path)?);
         let ast::ExistsQuery::Public(query) = query else {
             let ast::ExistsQuery::Selected(query) = query else {
                 return Err(unsupported(path));
@@ -815,15 +856,7 @@ impl BodyContext<'_> {
                 },
             })));
         };
-        let mut objects = super::costs::named_public_query(query, binding, path)?;
-        if query.other {
-            objects = Selector::Difference {
-                input: Box::new(objects),
-                except: Box::new(Selector::Objects {
-                    objects: vec![super::super::ObjectOperand::SourceHolder {}],
-                }),
-            };
-        }
+        let objects = super::costs::named_public_query(query, binding, path)?;
         Ok(Expr::Compute(Box::new(Predicate::Exists { objects })))
     }
 
@@ -837,6 +870,7 @@ impl BodyContext<'_> {
                 &ast::This::This,
                 Some(Stat::Life),
                 CharacteristicView::Effective,
+                self.source_stats,
             )),
             ast::BodyStatReference::AttackTarget => {
                 Ok(Expr::Compute(Box::new(IntOperation::Sum {
@@ -845,6 +879,18 @@ impl BodyContext<'_> {
                 })))
             }
         }
+    }
+
+    pub(super) fn paid_condition(
+        &self,
+        paid: &ast::PaidReceipt,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        Ok(Expr::Frozen(Box::new(
+            super::super::BoolFrozen::PaymentComplete {
+                receipt: self.payment_reference(&paid.receipt, path)?,
+            },
+        )))
     }
 
     fn payment_reference(
@@ -885,9 +931,28 @@ impl BodyContext<'_> {
 
     fn history_sum_number(
         &mut self,
-        history_sum: &ast::LifeHistorySum,
+        history_sum: &ast::HistorySum,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
+        let history_sum = match history_sum {
+            ast::HistorySum::Life(life) => life,
+            ast::HistorySum::Payment(payment) => {
+                let ast::PaymentHistoryEvent::Payment = payment.event;
+                let ast::ThisTurn::ThisTurn = payment.window;
+                let ast::EarthRiteKind::EarthRite = payment.r#where.cost_kind;
+                let ast::PaymentHistoryField::RemovedStack = payment.field;
+                // Printed cards only read their controller's own Earth Rite total.
+                if !matches!(payment.who, ast::LeaderSide::Controller) {
+                    return Err(unsupported(path));
+                }
+                return Ok(Expr::Live(Box::new(IntRead::HistorySum {
+                    query: super::super::history_turn::earth_rite_stack_query(
+                        Binding::new(self.allocator.id(path)?, self.scope),
+                        Binding::new(self.allocator.id(path)?, self.scope),
+                    ),
+                })));
+            }
+        };
         if !matches!(history_sum.r#where.direction, ast::LifeDirection::Up) {
             return Err(unsupported(path));
         }
@@ -904,7 +969,7 @@ impl BodyContext<'_> {
                 own_turn: None,
             },
         );
-        let super::super::EventPattern::LifeChange { predicate, .. } = query.pattern else {
+        let EventPattern::LifeChange { predicate, .. } = query.pattern else {
             return Err(unsupported(path));
         };
         Ok(Expr::Live(Box::new(IntRead::HistorySum {
@@ -934,6 +999,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     Some(Stat::Attack),
                     CharacteristicView::Effective,
+                    self.source_stats,
                 )),
                 ast::Observation::Before { objects_of, .. } => self.paid_material_number(
                     objects_of,
@@ -960,6 +1026,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     None,
                     CharacteristicView::Effective,
+                    self.source_stats,
                 )),
                 ast::Observation::Before { objects_of, .. } => {
                     if self.receipt_reads.paid_materials.contains_key(objects_of) {
@@ -979,6 +1046,7 @@ impl BodyContext<'_> {
                     &ast::This::This,
                     None,
                     CharacteristicView::Original,
+                    self.source_stats,
                 )),
                 // 「選んだフォロワーの元のコスト」: printed, so it survives the target leaving.
                 ast::Observation::Binding(name) if self.single_targets.contains(name) => {
@@ -1149,6 +1217,16 @@ impl BodyContext<'_> {
                 })
                 .ok_or_else(|| unsupported(path));
         }
+        if let Some(trigger) = &self.event_trigger
+            && let TriggerCondition::Event {
+                pattern: EventPattern::Move { binding, predicate },
+            } = &trigger.on
+            && ExDepartureFilter::parse(*binding, predicate).is_some()
+        {
+            return Ok(Expr::Frozen(Box::new(IntFrozen::MoveBatchCount {
+                event: *binding,
+            })));
+        }
         self.damage_event
             .map(|event| Expr::Frozen(Box::new(IntFrozen::DamageAmount { event })))
             .ok_or_else(|| unsupported(path))
@@ -1201,6 +1279,7 @@ impl BodyContext<'_> {
             || count.r#trait.is_some()
             || count.traits_any.is_some()
             || count.name.is_some()
+            || !count.names.is_empty()
             || count.name_contains.is_some()
             || count.orig_cost_eq.is_some()
             || count.orig_cost_ge.is_some()
@@ -1279,9 +1358,20 @@ fn this_number(
     reference: &ast::This,
     property: Option<Stat>,
     view: CharacteristicView,
+    source_stats: super::SourceStats,
 ) -> Expr<Int> {
     let ast::This::This = reference;
-    let object = ObjectView::SourceInformation {};
+    // A persistent provider reads its current public stats without an occurrence snapshot.
+    let object = if matches!(source_stats, super::SourceStats::Current)
+        && property.is_some()
+        && view == CharacteristicView::Effective
+    {
+        ObjectView::Current {
+            object: Box::new(super::super::ObjectOperand::SourceHolder {}),
+        }
+    } else {
+        ObjectView::SourceInformation {}
+    };
     let information = match property {
         Some(property) => NumberRead::Stats {
             object,

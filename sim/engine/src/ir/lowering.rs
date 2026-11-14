@@ -51,6 +51,7 @@ mod reveal_until;
 mod stack;
 mod static_declarations;
 mod static_keywords;
+mod trigger_multiplicity;
 mod trigger_restrictions;
 mod victory;
 mod x_pp;
@@ -346,7 +347,7 @@ fn lower_play_costs(
                 additional = Some(lowered);
             }
             let source = source_span(coordinates, entry_path, ability)?;
-            if let Some(lowered) = exchange::lower(play, &source, allocator)? {
+            if let Some(lowered) = exchange::lower(ability, play, &source, allocator)? {
                 if exchange.is_some() {
                     return Err(unsupported(entry_path));
                 }
@@ -533,7 +534,8 @@ impl Allocator {
                 Some(
                     ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
-                    | ast::StaticEffect::BanishInstead(_),
+                    | ast::StaticEffect::BanishInstead(_)
+                    | ast::StaticEffect::ExtraTrigger(_),
                 )
                 | None => {
                     return Err(unsupported(path));
@@ -845,10 +847,13 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
             && !hand_discard
             && (!matches!(zones.as_slice(), [ZoneKind::Field | ZoneKind::Ex])
                 || (zones == [ZoneKind::Ex]
-                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_))
+                    && !matches!(auto.on, ast::PhaseSubscription::Phase(_) | ast::PhaseSubscription::Evolved(_))
                     // 「EXエリアにこれが置かれたとき」 observes only its own arrival in EX.
                     && !matches!(&auto.on, ast::PhaseSubscription::PlacedEx(placed)
                         if placed.reference.is_some())
+                    // 「自分の場に…が出たとき」 from EX watches other cards; it never sees itself enter.
+                    && !matches!(&auto.on, ast::PhaseSubscription::EnterField(subscription)
+                        if subscription.reference.is_none())
                     && !matches!(&auto.on, ast::PhaseSubscription::Fused(_) | ast::PhaseSubscription::AnyOf(_))))
         {
             return Err(unsupported(path));
@@ -1012,7 +1017,9 @@ fn lowered_trigger(
             active_zones: active_zones(entry, path)?,
             view: if matches!(
                 pattern,
-                EventPattern::Play { .. } | EventPattern::UbActivated { .. }
+                EventPattern::Play { .. }
+                    | EventPattern::UbActivated { .. }
+                    | EventPattern::AnyOf { .. }
             ) || super::events::fusion::combined(&pattern)
             {
                 EventSnapshotPolicy::AtReveal
@@ -1022,6 +1029,7 @@ fn lowered_trigger(
                     | EventPattern::LeaveField { .. }
                     | EventPattern::Destroy { .. }
                     | EventPattern::Discard { .. }
+                    | EventPattern::Banish { .. }
                     | EventPattern::Move { .. }
             ) {
                 EventSnapshotPolicy::BeforeExit
@@ -1112,7 +1120,20 @@ fn lowered_subscription(
         ast::PhaseSubscription::Discarded(event) => {
             discard::subscription(event, event_id, subject_id, scope, path)
         }
-        ast::PhaseSubscription::Banished(_) => Err(unsupported(path)),
+        ast::PhaseSubscription::Banished(ast::BanishedSubscription::Zone(zone)) => {
+            let event = Binding::new(event_id, scope);
+            Ok(EventPattern::Banish {
+                binding: event,
+                predicate: super::events::banish::zone_predicate(
+                    event,
+                    matches!(zone.who, ast::EntryPlayer::Controller),
+                    zone.during.is_some(),
+                ),
+            })
+        }
+        ast::PhaseSubscription::Banished(ast::BanishedSubscription::Hand(_)) => {
+            Err(unsupported(path))
+        }
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
             let card = Binding::new(subject_id, scope);
@@ -1406,9 +1427,22 @@ enum FieldOutputKind {
     Other,
 }
 
+#[derive(Clone, Copy)]
+enum SourceStats {
+    Current,
+    Occurrence,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ChoiceContext {
+    Ability,
+    Mode,
+}
+
 struct BodyContext<'definitions> {
     x: Option<x_pp::Parameter>,
     static_zone: Option<ZoneKind>,
+    source_stats: SourceStats,
     /// Only an activation printed in the hand may move its own card to EX as a cost.
     activation_zone: Option<ZoneKind>,
     subject_event: Option<SubjectFields>,
@@ -1471,6 +1505,8 @@ struct BodyContext<'definitions> {
     event_captures: Vec<super::Capture>,
     event_trigger: Option<TriggerSpec>,
     formal_play: bool,
+    spell: Option<&'definitions ast::Body>,
+    choice_context: ChoiceContext,
     auto: Option<&'definitions ast::Auto>,
     mode_targets: BTreeMap<u64, Vec<ast::Target>>,
 }
@@ -1484,6 +1520,12 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             x: None,
+            spell: entry.spell.as_ref(),
+            source_stats: if entry.r#static.is_some() {
+                SourceStats::Current
+            } else {
+                SourceStats::Occurrence
+            },
             static_zone: entry
                 .r#static
                 .as_ref()
@@ -1555,6 +1597,7 @@ impl<'definitions> BodyContext<'definitions> {
             event_trigger: None,
             mode_targets: BTreeMap::new(),
             auto: entry.auto.as_ref(),
+            choice_context: ChoiceContext::Ability,
             formal_play: entry.activate.is_some()
                 || entry.spell.is_some()
                 || body.optional_cost.is_some()

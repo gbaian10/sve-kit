@@ -594,22 +594,22 @@ impl BodyContext<'_> {
         let ast::InstalledEffect::CostMod(modifier) = &installation.effect else {
             return Err(unsupported(path));
         };
-        let ast::Objects::Follow { follow } = &installation.on else {
-            return Err(unsupported(path));
-        };
-        let objects = self
-            .ex_outputs
-            .get(follow)
-            .cloned()
-            .ok_or_else(|| unsupported(path))?;
+        let objects = self.objects(&installation.on, path)?;
         let ast::Playing::Affected(filter) = &modifier.when_playing else {
             return Err(unsupported(path));
         };
         let ast::Affected::Affected = filter.subjects;
-        let change = match (modifier.delta, modifier.set) {
-            (Some(delta), None) if delta <= 0 => CostChange::Delta {
-                amount: Expr::Literal(Int(delta)),
-            },
+        let affected = Binding::new(1, self.card_allocator.scope(path)?);
+        let change = match (modifier.delta.as_ref(), modifier.set) {
+            (Some(delta), None) => {
+                let number = super::decode(delta.clone(), path)?;
+                // Installed values introduce local query bindings inside the affected-set scope.
+                let previous = self.scope;
+                self.scope = affected.key().0;
+                let amount = self.number(&number, path, &mut super::BTreeSet::new());
+                self.scope = previous;
+                CostChange::Delta { amount: amount? }
+            }
             (None, Some(set)) if set >= 0 => CostChange::Set {
                 amount: Expr::Literal(Int(set)),
             },
@@ -620,7 +620,6 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let affected = Binding::new(1, self.card_allocator.scope(path)?);
         let duration = numeric::duration(installation.until.as_ref(), path)?;
         Ok(Action::InstallEffect {
             subjects: InstallationSubjects::Objects { objects, affected },

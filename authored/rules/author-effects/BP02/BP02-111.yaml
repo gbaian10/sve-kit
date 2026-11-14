@@ -1,0 +1,32 @@
+cards:
+  BP02-111:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          do:
+            - pp:
+                delta:
+                  count:
+                    face_up: true
+                    kind: evolve_follower
+                    who: self
+                    zone: evolve_deck
+                who: self
+            - flip_down:
+                ref:
+                  face_up: true
+                  kind: evolve_follower
+                  who: self
+                  zone: evolve_deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+format: 2
+kind: author_effect_set

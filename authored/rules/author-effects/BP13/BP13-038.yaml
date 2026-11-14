@@ -1,0 +1,50 @@
+cards:
+  BP13-038:
+    abilities:
+      - evolve_time:
+          do:
+            - move:
+                ref: spells
+                result: moved
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: moved
+                until: turn
+            - counter:
+                delta:
+                  minus:
+                    - 0
+                    - counter:
+                        name: 魔力カウンター
+                        on: this
+                name: 魔力カウンター
+                on: this
+          targets:
+            - bind: spells
+              distinct_by: name
+              from:
+                kind: spell
+                orig_cost_le: 3
+                trait: 魔法使い
+                who: self
+                zone: cemetery
+              upto:
+                counter:
+                  name: 魔力カウンター
+                  on: this
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

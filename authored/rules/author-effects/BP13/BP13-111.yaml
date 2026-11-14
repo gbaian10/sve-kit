@@ -1,0 +1,49 @@
+cards:
+  BP13-111:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        play:
+          cost_delta:
+            delta: -3
+            if:
+              exists:
+                kind: follower
+                trait: 魔王
+                who: self
+                zone: field
+      - line: 3
+        spell:
+          do:
+            - damage:
+                n: 5
+                to:
+                  role:
+                    name: primary
+                    of: enemies
+            - act:
+                role:
+                  name: rest
+                  of: enemies
+          targets:
+            - bind: enemies
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 2
+              roles:
+                primary:
+                  if_nonempty: 1
+                rest: remaining
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

@@ -241,7 +241,8 @@ fn number(
     binding: Binding<ObjectRef>,
     policy: Policy,
 ) -> Option<NumberProperty> {
-    if policy == Policy::Search
+    // Counters are public on public-zone candidates and readable to the searching player.
+    if matches!(policy, Policy::Search | Policy::Selection)
         && super::counters::candidate_read(read, binding)
         && let IntOperation::FromNat {
             value: Expr::Live(value),

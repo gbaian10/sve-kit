@@ -1,0 +1,28 @@
+cards:
+  CP04-072:
+    abilities:
+      - fanfare:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - draw:
+                        n: 1
+                        who: p
+        line: 1
+      - lastword:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leaders: opponents
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

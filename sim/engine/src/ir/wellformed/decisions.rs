@@ -1,4 +1,5 @@
 use super::{BindingKind, Checked, Checker, TypeId, WellFormedReason};
+use crate::ir::TurnOperation;
 use crate::ir::observation_selection::{private_look_choice, revealed_choice};
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::ride;
@@ -232,7 +233,7 @@ impl Checker {
                     return Err(self.error(WellFormedReason::DecisionCardinality));
                 }
                 self.constraint(constraint, formal_targets)?;
-                self.define(*binding, BindingKind::Value)?;
+                self.define_selection(*binding, constraint.cardinality.maximum)?;
                 if let Some(roles) = target_roles {
                     self.roles(roles, constraint.cardinality, positioned)?;
                 }
@@ -804,6 +805,7 @@ impl Checker {
                         }
                         let valid = matches!(&step.instruction.action,
                             Action::Discard { .. }
+                            | Action::ScheduleTurn { player: PlayerRef::Controller {}, operation: TurnOperation::SkipNext {}, .. }
                             | Action::Fusion { .. }
                             | Action::MealRace { operation: MealRaceOperation::Meal, .. }
                             | Action::Counter { operation: CounterOperation::Remove {}, .. }
@@ -814,12 +816,7 @@ impl Checker {
                             || matches!(&step.instruction.action, Action::Resource { operation: ResourceOperation::Pay, amount: Expr::Literal(Int(value)), .. } if *value >= 0)
                             || matches!(&step.instruction.action, Action::Resource { player: PlayerRef::Controller {}, resource: Resource::PpCurrent, operation: ResourceOperation::Pay, amount } if x_pp::amount(amount).is_some())
                             || matches!(&step.instruction.action, Action::Life { change: NumericChange::Add { amount: Expr::Literal(Int(value)) }, .. } if *value <= 0);
-                        let source_move = matches!(&step.instruction.action,
-                            Action::Move { objects: Selector::Objects { objects }, movement, reason: MoveReason::Put }
-                            if objects == &[ObjectOperand::SourceHolder {}]
-                                && movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })
-                                && movement.position.is_none() && movement.order.is_none()
-                                && movement.initial_posture.is_none() && movement.entry_effects.is_empty())
+                        let source_move = source_put(&step.instruction.action)
                             || matches!(&step.instruction.action,
                                 Action::Banish { objects: Selector::Objects { objects } }
                                     if objects == &[ObjectOperand::SourceHolder {}])
@@ -863,6 +860,21 @@ impl Checker {
         }
         Ok(())
     }
+}
+
+/// 「これを墓場に置く」 or 「これをデッキの下に置く」: the source puts itself as a cost.
+fn source_put(action: &Action) -> bool {
+    matches!(action,
+        Action::Move { objects: Selector::Objects { objects }, movement, reason: MoveReason::Put }
+        if objects == &[ObjectOperand::SourceHolder {}]
+            && matches!(
+                (&movement.to, &movement.position),
+                (MoveDestination::Owners { zone: OwnerZone::Cemetery }, None)
+                    | (MoveDestination::Owners { zone: OwnerZone::Deck }, Some(Position::Bottom {}))
+            )
+            && movement.order.is_none()
+            && movement.initial_posture.is_none()
+            && movement.entry_effects.is_empty())
 }
 
 /// 「手札のこれをEXエリアに置く」: the activating hand card moves to its controller's EX.

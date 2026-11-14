@@ -69,7 +69,7 @@ pub(super) fn check(entry: &ast::Ability, path: &str) -> Result<bool, LoweringEr
     let banished = events
         .iter()
         .filter(|on| {
-            matches!(on, ast::PhaseSubscription::Banished(event)
+            matches!(on, ast::PhaseSubscription::Banished(ast::BanishedSubscription::Hand(event))
         if matches!(event.reference, ast::This::This))
         })
         .count();

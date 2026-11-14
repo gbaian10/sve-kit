@@ -1,0 +1,46 @@
+cards:
+  CP01-080:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - shuffle:
+                who: self
+            - reveal:
+                bind: seen
+                top:
+                  n: 6
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  any_of:
+                    - in: seen
+                      kind: follower
+                      trait: ウマ娘
+                    - in: seen
+                      kind: amulet
+                      trait: ウマ娘
+                may: true
+                upto: 6
+            - move:
+                ref: picked
+                result: entered
+                to: field
+            - move:
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: seen
+                to: hand
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

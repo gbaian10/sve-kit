@@ -1,0 +1,55 @@
+cards:
+  BP08-024:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - buff:
+                        on: ally1
+                        power: 1
+                  - - buff:
+                        hp: 1
+                        on: ally2
+                  - - apply:
+                        effect:
+                          damage_cap:
+                            set: 3
+                            threshold: 4
+                        on: ally3
+                        until: this_and_next_opp_turn
+          targets:
+            - bind: ally1
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 1
+            - bind: ally2
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 2
+            - bind: ally3
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
+              option: 3
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

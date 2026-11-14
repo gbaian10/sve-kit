@@ -111,12 +111,15 @@ impl SubjectFields {
                 EventContext::EnterField { event },
                 EventSnapshotPolicy::AfterEntry,
             ),
+            Self::Evolve(event) => (
+                EventContext::Evolve { event },
+                EventSnapshotPolicy::AfterEntry,
+            ),
             Self::Attack(_)
             | Self::Posture(_)
             | Self::DamageSource(_)
             | Self::Played { .. }
             | Self::Destroy(_)
-            | Self::Evolve(_)
             | Self::Cemetery(_)
             | Self::Hand(_)
             | Self::Ex(_)
@@ -610,6 +613,22 @@ pub(crate) struct SubjectFilter {
     pub(crate) not_class: Option<ClassId>,
     pub(crate) own_turn: bool,
     pub(crate) token: Option<bool>,
+    /// 「これと同名を除く」 on an entering subject (BP22-003): compared with the observer's names.
+    pub(crate) not_same_name: bool,
+}
+
+/// The entering subject shares no name with the observing card as it currently is.
+fn holder_name_exclusion(fields: SubjectFields) -> Expr<Bool> {
+    Expr::Compute(Box::new(Predicate::Not {
+        predicate: Expr::Compute(Box::new(Predicate::NamesIntersect {
+            left: fields.names(),
+            right: Expr::Live(Box::new(NamesRead::Names {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::SourceHolder {}),
+                },
+            })),
+        })),
+    }))
 }
 
 pub(crate) fn has_keyword_filter(expression: &Expr<Bool>) -> bool {
@@ -692,6 +711,9 @@ impl SubjectFilter {
         }
         if let Some(fragment) = &self.name_contains {
             predicates.push(fields.name_contains(fragment));
+        }
+        if self.not_same_name {
+            predicates.push(holder_name_exclusion(fields));
         }
         if !self.name_contains_any.is_empty() {
             predicates.push(Expr::Compute(Box::new(Predicate::Or {
@@ -817,10 +839,13 @@ impl SubjectFilter {
                 plan.characteristic(fields, part)?;
             }
         }
-        (plan.closed_characteristics(fields) && plan.predicate(fields) == *expression)
-            .then_some(plan)
+        (plan.closed_characteristics() && plan.predicate(fields) == *expression).then_some(plan)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Each closed characteristic predicate shape is recognised in one place."
+    )]
     fn characteristic(&mut self, fields: SubjectFields, part: &Expr<Bool>) -> Option<()> {
         let Expr::Compute(predicate) = part else {
             return None;
@@ -828,6 +853,10 @@ impl SubjectFilter {
         if (matches!(fields, SubjectFields::Entry(_)) && *part == fields.known_class())
             || fields.known_original_cost().as_ref() == Some(part)
         {
+            return Some(());
+        }
+        if matches!(fields, SubjectFields::Entry(_)) && *part == holder_name_exclusion(fields) {
+            self.not_same_name = true;
             return Some(());
         }
         if let Predicate::Not {
@@ -984,7 +1013,7 @@ impl SubjectFilter {
         Some(())
     }
 
-    fn closed_characteristics(&self, fields: SubjectFields) -> bool {
+    fn closed_characteristics(&self) -> bool {
         if !self.name_contains_any.is_empty() && self.name_contains.is_some() {
             return false;
         }
@@ -994,16 +1023,6 @@ impl SubjectFilter {
                     own: Some(true),
                     kind: Some(CardKind::Follower),
                     keyword: Some(KeywordId::Ward),
-                    ..Self::default()
-                });
-        }
-        if matches!(fields, SubjectFields::Entry(_)) && self.original_cost.is_some() {
-            return *self
-                == (Self {
-                    own: Some(true),
-                    itself: Some(false),
-                    kind: Some(CardKind::Follower),
-                    original_cost: self.original_cost,
                     ..Self::default()
                 });
         }

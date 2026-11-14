@@ -102,10 +102,12 @@ The play golden's target/distribution and ChoiceKeyword bodies are synthetic
 replacements of that fragment, not transcriptions of 知恵の光. Target selectors
 currently preserve only unfiltered public field sets; D1 additionally rejects a
 position containing any non-follower target candidate. Kind filters are rejected,
-not erased. Distribution uses one preceding target group, a constant total and a
-minimum of one per recipient. ChoiceKeyword accepts a sole top-level choice with
+not erased. Each Distribution uses its matching preceding target group, a constant
+total and a minimum of one per recipient; other target groups may coexist.
+Mode-local Distribution, including paid modes, uses the same declaration bindings.
+ChoiceKeyword accepts a sole top-level choice with
 constant exact count and independent modes, including 1-based `option` targets
-visible only inside their mode. Nested choices, mode-local Distribution, mixing
+visible only inside their mode. Nested choices (including inside mode payments), mixing
 mode and unconditional targets, and exclusion histories remain unsupported.
 The extra mode E2E uses a synthetic body with one target-requiring mode and one
 draw mode; selecting the latter does not ask for the former's unavailable target.

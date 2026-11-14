@@ -64,16 +64,6 @@ known:
     status: unsupported
     error: "unadmitted BP02-SL17 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP02-SL17/0, query complete card names: current ability definitions unavailable"
-  - question: "card-BP03-011"
-    scenario: "A 自己的主要階段來臨 → 茨の森自毀 → 之後攻擊沒有附加傷害"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP03-011"
-    scenario: "B 打出當回合：攻撃時 2 傷害打死體力 2 的目標 → 不交戰、攻擊者體力不減"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP03-109"
     scenario: "A 奪走出走中的ハルウララ → 仍有突進 → 攻擊アクト狀態的ファイター → 互相受傷"
     status: unsupported
@@ -164,16 +154,6 @@ known:
     status: unsupported
     error: "typed-gap: anonymous deck members (#2008)"
     reason: "internal D1 does not support anonymous deck members"
-  - question: "card-BP08-011"
-    scenario: "A EX 的 2 張操り人形 → 消滅（消去）→ EX 出現ロイド與ヴィクトリア各 1"
-    status: unsupported
-    error: "unadmitted BP08-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP08-011"
-    scenario: "B 只有 1 張操り人形 → 不能打出"
-    status: unsupported
-    error: "unadmitted BP08-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-011/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP08-028"
     scenario: "B 選 5 體：4 傷害無法每體 ≥1 → 不能打出"
     status: fail
@@ -612,13 +592,13 @@ known:
   - question: "card-BP19-SL22"
     scenario: "A 一張エルラーデ → 結束階段的能力待機 2 次 → 一次選【1】4 傷害、一次選【3】抽 1"
     status: unsupported
-    error: "unadmitted BP19-SL22 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL22/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending {"line":2,"source":"a1"} matches 2 occurrences'
   - question: "card-BP19-SL22"
     scenario: "B 兩張エルラーデ → 每個能力誘發 3 次、每次可選 2 個 → 全選【3】共抽 6 張"
     status: unsupported
-    error: "unadmitted BP19-SL22 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP19-SL22/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending {"line":2,"source":"a1"} matches 3 occurrences'
   - question: "card-BP19-SL26"
     scenario: "可看 1 張"
     status: unsupported
@@ -635,25 +615,15 @@ known:
     error: "unadmitted BP19-SL26 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP20-020"
-    scenario: "X=1 選擇素材=1"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP20-020"
-    scenario: "X=2 選擇素材=2"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP20-020"
     scenario: "X=2 選擇素材=1"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "interface: typed fusion has no separate X declaration; X is the chosen material count (#2090)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient assert P1.hand; after-decision-1 omniscient forbidden_events"
   - question: "card-BP20-020"
     scenario: "X=3 選擇素材=2"
-    status: unsupported
-    error: "unadmitted BP20-020 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-020/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "interface: typed fusion has no separate X declaration; X is the chosen material count (#2090)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient assert P1.hand; after-decision-1 omniscient forbidden_events"
   - question: "card-BP20-P12"
     scenario: "[astra] 沒付追加費用"
     status: fail
@@ -681,9 +651,9 @@ known:
     reason: "after-decision-2 omniscient assert P1.deck; after-decision-2 omniscient assert P1.hand; after-decision-2 omniscient forbidden_events"
   - question: "card-BP20-R13"
     scenario: "A 以跳過下一回合為費用進化 → 進化時 PP 最大值 +1、+3、抽 1 → 對手回合 → 自己回合被跳過 → 對手再一個回合"
-    status: unsupported
-    error: "unadmitted BP20-R13 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP20-R13/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: pending card stamp and healing trace projection (#2008)"
+    reason: "after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
   - question: "card-BP20-SL17"
     scenario: "A ファンファーレ 全體 1 傷害 → 3 個誘發（含致命的崇拝者）→ 大佐被破壞 → ラストワード 打アジュラ → アジュラ 再誘發"
     status: fail
@@ -746,14 +716,9 @@ known:
     reason: "internal D1 does not support unloaded whole card CP04-088/0, holder h1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-CP04-103"
     scenario: "找到=True"
-    status: unsupported
-    error: "unadmitted CP04-P56 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-P56/0, holder d generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-CP04-103"
-    scenario: "找到=False"
-    status: unsupported
-    error: "unadmitted CP04-P56 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-P56/0, holder d generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "d is not a card candidate"
   - question: "card-CP04-104"
     scenario: "zero"
     status: unsupported
@@ -807,18 +772,18 @@ known:
   - question: "card-ECP01-019"
     scenario: "A 選表向きの n2 翻回裏向き → 用它食事 a2 → a2 出走時自傷致死 → n2 表向き回エボルヴデッキ"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder a2 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: current holder carries unadmitted resource links (#2008)"
+    reason: "internal D1 does not support current holder carries unadmitted resource links"
   - question: "card-ECP01-019"
     scenario: "B エボルヴデッキ沒有表向きにんじん；出走領域的 n1 不算 → 待機取消"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder a2 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: current holder carries unadmitted resource links (#2008)"
+    reason: "internal D1 does not support current holder carries unadmitted resource links"
   - question: "card-ECP01-019"
     scenario: "C 墓場ウマ娘只有 9 張 → 選了 n2 但不翻面"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder a2 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: current holder carries unadmitted resource links (#2008)"
+    reason: "internal D1 does not support current holder carries unadmitted resource links"
   - question: "card-ECP01-053"
     scenario: "B 主要階段來臨 → 不付費 → 維持アクト、PP 不變"
     status: fail
@@ -909,16 +874,6 @@ known:
     status: unsupported
     error: "unadmitted BP15-SL13 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-attack-reference-r3-01"
-    scenario: "攻擊有オーラ的從者"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder m generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-attack-reference-r3-01"
-    scenario: "攻擊主戰者條件不成立"
-    status: unsupported
-    error: "unadmitted BP03-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP03-011/0, holder m generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-equipment-capacity-r3-01"
     scenario: "PP=2"
     status: unsupported
@@ -991,9 +946,9 @@ known:
     reason: "internal D1 does not support unloaded whole card BP19-SL26/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-visibility-01"
     scenario: "A 搜尋加入手牌：對手識別那張，不識別其餘手牌"
-    status: unsupported
-    error: "unadmitted CP04-072 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-072/0, holder a4 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "a4 is not a card candidate"
   - question: "rule-1.3.2-01"
     scenario: "C ギンネ【1】對已アクト的從者：アクト不做、不發事件；「次のスタートフェイズにスタンドしない」仍適用"
     status: fail
@@ -1321,14 +1276,9 @@ known:
     reason: "no authored program: BP19-009"
   - question: "rule-13.5.1.3.2-01"
     scenario: "選項數 NC10：墓場 9 嘗試兩模式"
-    status: unsupported
-    error: "unadmitted ETD02-015 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ETD02-015/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-13.5.1.3.2-01"
-    scenario: "選項數 NC10：墓場 10 嘗試兩模式"
-    status: unsupported
-    error: "unadmitted ETD02-015 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ETD02-015/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "play answer rejected"
   - question: "rule-13.5.1.3.2-01"
     scenario: "解決 NC20 固定：起始 19，先移走魂の一刀"
     status: unsupported
@@ -1342,23 +1292,13 @@ known:
   - question: "rule-14.2-01"
     scenario: "A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-14.2-01"
-    scenario: "B 只有 1 張にんじん → 2 回食事付不出 → cannot-activate；1 回食事可以"
-    status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "interface: runner translation / interface (#2008)"
+    reason: 'typed runner: pending event {"n":1,"raced":"a1"} cannot be checked'
   - question: "rule-14.2-01"
     scenario: "C 出走後：再食事不行（已關聯にんじん）；同回合進化另一隻也不行（食事是進化相当）"
     status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-14.2-01"
-    scenario: "D 食事的 PP 1 改用 EP 支付（14.2.2.4）"
-    status: unsupported
-    error: "unadmitted ECP01-014 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP01-014/0, holder d1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: anonymous deck members (#2008)"
+    reason: "internal D1 does not support anonymous deck members"
   - question: "rule-14.2.3-01"
     scenario: "同一從者出走兩次；先解第 2 次，再解第 1 次"
     status: unsupported

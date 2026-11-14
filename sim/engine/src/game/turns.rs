@@ -129,6 +129,14 @@ impl Game {
         self.state.schedule.check_size()
     }
 
+    pub(super) fn skip_next_turn(&mut self, player: String) -> Result<()> {
+        self.state
+            .schedule
+            .skipped
+            .push(TurnDirective { player, count: 1 });
+        self.state.schedule.check_size()
+    }
+
     pub(super) fn schedule_turns(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let count = u32::try_from(self.number(&node["count"], frame)?.max(0)).map_err(invalid)?;
         frame.performed = 0;

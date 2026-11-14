@@ -138,7 +138,8 @@ impl BodyContext<'_> {
                         | ast::CostOperation::BanishSelf(_)
                         | ast::CostOperation::ActSelf(_)
                         | ast::CostOperation::SelfToCemetery(_)
-                        | ast::CostOperation::SelfToEx(_) => None,
+                        | ast::CostOperation::SelfToEx(_)
+                        | ast::CostOperation::SkipTurn(_) => None,
                     },
                     ast::Cost::Ordered { .. } => None,
                 },

@@ -6,6 +6,7 @@ use super::{
     AbilitySource, Action, BodyContext, Cardinality, Expr, Instruction, InstructionContext,
     InstructionId, Int, LoweringError, PlayerRef, ReceiptId, ast, numeric, unsupported,
 };
+use crate::ir::{Binding, TurnOperation};
 use core::slice::from_ref;
 
 pub(super) fn activated(
@@ -139,6 +140,14 @@ fn lower_operations(
         let keyword = matches!(operation, ast::CostOperation::EarthRite(_))
             .then_some(super::KeywordId::EarthRite);
         let action = match operation {
+            ast::CostOperation::SkipTurn(value) => {
+                let ast::SelfPlayer::Controller = value.who;
+                Action::ScheduleTurn {
+                    player: PlayerRef::Controller {},
+                    operation: TurnOperation::SkipNext {},
+                    occurrence: Binding::new(context.allocator.id(path)?, context.scope),
+                }
+            }
             ast::CostOperation::EarthRite(amount) => {
                 let (action, decision) = super::earth::cost(context, *amount, path)?;
                 parameters.extend(decision);
@@ -263,9 +272,10 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::Discard(ast::DiscardCost::Reference { r#ref: name })
-                if name == "this" =>
-            {
+            ast::CostOperation::Discard(ast::DiscardCost::Reference { r#ref, .. }) => {
+                if r#ref != "this" {
+                    return Err(unsupported(path));
+                }
                 Action::Discard {
                     player: PlayerRef::Controller {},
                     mode: super::super::DiscardMode::All {
@@ -314,6 +324,24 @@ fn lower_operations(
                 },
                 reason: MoveReason::Put,
             },
+            // 「これをデッキの下に置く」 names the source itself, not a revealed binding.
+            ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(material))
+                if material.sel.r#in == "this" && material.n == 1 =>
+            {
+                Action::Move {
+                    objects: numeric::holder(),
+                    movement: MoveSpec {
+                        to: MoveDestination::Owners {
+                            zone: OwnerZone::Deck,
+                        },
+                        position: Some(Position::Bottom {}),
+                        order: None,
+                        initial_posture: None,
+                        entry_effects: vec![],
+                    },
+                    reason: MoveReason::Put,
+                }
+            }
             ast::CostOperation::SelfToEx(true)
                 if context.activation_zone == Some(ZoneKind::Hand) =>
             {
@@ -336,8 +364,7 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::Discard(ast::DiscardCost::Reference { .. })
-            | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
+            ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)
             | ast::CostOperation::SelfToCemetery(false)
@@ -354,6 +381,21 @@ fn lower_operations(
                 name,
                 ReceiptId(id),
                 super::hand_payment::cardinality(material, path)?,
+                path,
+            )?;
+        }
+        if let ast::CostOperation::Discard(ast::DiscardCost::Reference {
+            result: Some(name), ..
+        }) = operation
+        {
+            record_discard(
+                context,
+                name,
+                ReceiptId(id),
+                Cardinality {
+                    minimum: super::Nat(1),
+                    maximum: Some(super::Nat(1)),
+                },
                 path,
             )?;
         }
@@ -409,7 +451,8 @@ fn material_operation(
         | ast::CostOperation::ToDeckBottom(_)
         | ast::CostOperation::ActSelf(_)
         | ast::CostOperation::SelfToCemetery(_)
-        | ast::CostOperation::SelfToEx(_) => Err(unsupported(path)),
+        | ast::CostOperation::SelfToEx(_)
+        | ast::CostOperation::SkipTurn(_) => Err(unsupported(path)),
     }
 }
 

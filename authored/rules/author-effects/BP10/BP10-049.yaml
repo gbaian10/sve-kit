@@ -1,0 +1,50 @@
+cards:
+  BP10-049:
+    abilities:
+      - evolve_time:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - pay:
+                        cost:
+                          discard:
+                            n: 1
+                            sel:
+                              class: ウィッチ
+                              who: self
+                              zone: hand
+                        do:
+                          - life:
+                              delta: 5
+                              who: self
+                  - - pay:
+                        cost:
+                          discard:
+                            n: 1
+                            sel:
+                              not_class: ウィッチ
+                              who: self
+                              zone: hand
+                        do:
+                          - damage:
+                              n: 5
+                              to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+              option: 2
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-12"
+format: 2
+kind: author_effect_set

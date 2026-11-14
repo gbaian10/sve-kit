@@ -110,13 +110,17 @@ fn event_union_narrows_each_predicate_without_exporting_a_branch_payload() {
     };
     accept_card(event_card(
         pattern.clone(),
-        EventSnapshotPolicy::BeforeExit,
+        EventSnapshotPolicy::AtReveal,
         vec![branch(cause(EventContext::Trigger {}))],
     ));
     reject_card(
+        event_card(pattern.clone(), EventSnapshotPolicy::BeforeExit, vec![]),
+        WellFormedReason::InvalidEntry,
+    );
+    reject_card(
         event_card(
             pattern.clone(),
-            EventSnapshotPolicy::BeforeExit,
+            EventSnapshotPolicy::AtReveal,
             vec![branch(cause(EventContext::LeaveField {
                 event: Binding::new(1, ScopeId(1)),
             }))],
@@ -132,13 +136,13 @@ fn event_union_narrows_each_predicate_without_exporting_a_branch_payload() {
         });
     }
     reject_card(
-        event_card(sibling, EventSnapshotPolicy::BeforeExit, vec![]),
+        event_card(sibling, EventSnapshotPolicy::AtReveal, vec![]),
         WellFormedReason::UnavailableBinding,
     );
     reject_card(
         event_card(
             EventPattern::AnyOf { patterns: vec![] },
-            EventSnapshotPolicy::BeforeExit,
+            EventSnapshotPolicy::AtReveal,
             vec![],
         ),
         WellFormedReason::UnsupportedShape,

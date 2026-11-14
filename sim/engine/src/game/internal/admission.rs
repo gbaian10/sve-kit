@@ -91,16 +91,17 @@ pub(super) fn check_card_with_x(
     )
 }
 
-pub(super) fn check_play(program: &Program, source: &SourceSpan) -> Result<()> {
+pub(super) fn check_play(program: &Program, source: &SourceSpan, source_bound: bool) -> Result<()> {
     let located = Located {
         node: program.clone(),
         source: source.clone(),
     };
-    // Play-time reads precede the body's source producer; a Spell is still in Hand or EX here.
-    if Requirements::derive_program(&located)
-        .required
-        .iter()
-        .any(|requirement| requirement.capability.code == "reference.source-information")
+    // Native card costs precede source binding; ability declarations already bind their source.
+    if !source_bound
+        && Requirements::derive_program(&located)
+            .required
+            .iter()
+            .any(|requirement| requirement.capability.code == "reference.source-information")
     {
         return Err(unsupported("play-time source information"));
     }
@@ -388,7 +389,8 @@ fn check_requirements(
         node: program.clone(),
         source: source.clone(),
     };
-    let requirements = parent_requirements(&located, card);
+    let mut requirements = parent_requirements(&located, card);
+    super::movement::mask_entry_effects(&mut requirements);
     let token_paths = super::tokens::paths(program, x);
     let kind_paths = super::by_kind::paths(program);
     let mut attack_targets = BTreeSet::new();
@@ -492,6 +494,10 @@ fn play_requirement(code: &str) -> bool {
     matches!(
         code,
         "shape.Control.EachObject"
+            | "shape.Predicate.PostureEquals"
+            | "shape.PostureRead.Posture"
+            | "read.state.posture"
+            | "predicate.posture-equals"
             | "shape.ActionPattern.PlayAbility"
             | "internal.AbilityKind.Activated"
             | "control.each-object"
@@ -843,6 +849,7 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
                     matches!(
                         other.capability.code,
                         "shape.NatFrozen.DiceValue"
+                            | "shape.IntFrozen.MoveBatchCount"
                             | "shape.EntryMethodFields.EnterFieldMethod"
                             | "shape.EntryOriginFields.EnterFieldFrom"
                     ) && other
@@ -861,7 +868,8 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.Action.Dice"
+        "shape.IntFrozen.MoveBatchCount"
+            | "shape.Action.Dice"
             | "action.dice"
             | "shape.DiceOperation.Roll"
             | "shape.Control.Repeat"
@@ -939,6 +947,7 @@ fn supported(code: &str) -> bool {
             | "internal.Role.Owner"
             | "internal.Role.Controller"
             | "player.require-one"
+            | "shape.TurnOperation.SkipNext"
             | "internal.InstructionContext.Effect"
             | "shape.Action.Draw"
             | "shape.Action.RemoveAbility"
@@ -1043,6 +1052,8 @@ fn supported(code: &str) -> bool {
             | "shape.Action.Transform"
             | "action.transform"
             | "shape.TokenAllocation.Single"
+            | "shape.TokenAllocation.EachExactlyOnce"
+            | "transform.token-allocation"
             | "shape.Action.Banish"
             | "action.banish"
             | "shape.Action.Posture"
@@ -1213,6 +1224,9 @@ fn supported(code: &str) -> bool {
             | "read.history.sum"
             | "shape.NumericHistoryQuery.LifeDelta"
             | "history.sum.life-delta"
+            | "shape.NumericHistoryQuery.EarthRiteRemovedStack"
+            | "history.sum.earth-rite-stack"
+            | "event.payment.earth-rite"
             | "shape.EventPattern.Play"
             | "event.match.Play"
             | "shape.HistoryRange.CurrentTurn"
@@ -1255,6 +1269,8 @@ fn supported(code: &str) -> bool {
             | "shape.NatOperation.Conditional"
             | "shape.NatRead.ZoneCount"
             | "read.zone-count"
+            | "shape.NatRead.OtherHandCount"
+            | "read.other-hand-count"
             | "shape.NatRead.TurnOrdinal"
             | "read.turn.ordinal"
             | "shape.Predicate.And"
@@ -1490,6 +1506,13 @@ fn mask_delayed(program: &mut Program) -> Result<()> {
                     | Control::May { body, .. }
                     | Control::Pay { on_paid: body, .. },
             } => mask_delayed(body)?,
+            Node::Control {
+                control: Control::Mode { modes, .. },
+            } => {
+                for mode in modes {
+                    mask_delayed(&mut mode.body)?;
+                }
+            }
             _ => {}
         }
     }

@@ -1,0 +1,82 @@
+{
+  "abilities": [
+    {
+      "body": {
+        "op": "destroy",
+        "subjects": "self"
+      },
+      "event": "main_start",
+      "kind": "trigger",
+      "line": 1
+    },
+    {
+      "body": {
+        "abilities": [
+          {
+            "body": {
+              "condition": {
+                "read": "event.target_is_follower"
+              },
+              "op": "if",
+              "then": {
+                "amount": 2,
+                "op": "damage",
+                "subjects": "event.target"
+              }
+            },
+            "event": "attack",
+            "kind": "trigger",
+            "line": 2,
+            "subject": "self"
+          }
+        ],
+        "op": "aura",
+        "subjects": {
+          "side": "self",
+          "type": "follower",
+          "zone": "field"
+        }
+      },
+      "kind": "static",
+      "line": 2
+    },
+    {
+      "body": {
+        "op": "seq",
+        "steps": [
+          {
+            "bind": "created",
+            "count": 1,
+            "name": "フェアリー",
+            "op": "create",
+            "to": "field"
+          },
+          {
+            "condition": {
+              "args": [
+                {
+                  "read": "self.combo"
+                },
+                3
+              ],
+              "fn": "ge"
+            },
+            "op": "if",
+            "then": {
+              "keywords": [
+                "rush"
+              ],
+              "op": "modify",
+              "subjects": "created"
+            }
+          }
+        ]
+      },
+      "event": "enter",
+      "kind": "trigger",
+      "line": 3,
+      "subject": "self"
+    }
+  ],
+  "status": "complete"
+}

@@ -1064,4 +1064,40 @@ fn single_transform_checks_bindings_and_keeps_allocated_variants_closed() {
     );
 }
 
+#[test]
+fn allocated_transform_owns_its_decision_and_bounds_the_selection() {
+    let allocated = |objects: usize, decision: u64| Action::Transform {
+        objects: Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}; objects],
+        },
+        into: TokenAllocation::EachExactlyOnce {
+            templates: vec![
+                TokenTemplateId("first".into()),
+                TokenTemplateId("second".into()),
+            ],
+            total: Expr::Literal(Nat(2)),
+            counts: Binding::new(99, ScopeId(1)),
+            actor: PlayerRef::Controller {},
+            decision: DecisionId(decision),
+        },
+        entry_effects: vec![],
+    };
+    accept(body(1, vec![instruction(allocated(1, 1), 1, "synthetic")]));
+    reject(
+        body(
+            1,
+            vec![
+                instruction(allocated(1, 1), 1, "synthetic"),
+                instruction(allocated(1, 1), 2, "synthetic"),
+            ],
+        ),
+        WellFormedReason::DuplicateDecision,
+    );
+    // Three objects can never each receive a different one of two templates.
+    reject(
+        body(1, vec![instruction(allocated(3, 1), 1, "synthetic")]),
+        WellFormedReason::UnsupportedShape,
+    );
+}
+
 mod history_plans;

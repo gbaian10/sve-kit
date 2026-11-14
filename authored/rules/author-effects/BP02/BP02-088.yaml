@@ -1,0 +1,46 @@
+cards:
+  BP02-088:
+    abilities:
+      - covers:
+          - 1
+          - 2
+        line: 1
+        spell:
+          do:
+            - choice:
+                instead:
+                  - if:
+                      necro: 10
+                    upto: 2
+                n: 1
+                options:
+                  - - move:
+                        ref: chosen
+                        result: revived
+                        to: field
+                  - - create:
+                        n: 2
+                        to: field
+                        token: ゴースト
+          targets:
+            - bind: chosen
+              from:
+                cost_le: 2
+                kind: follower
+                who: self
+                zone: cemetery
+              n: 1
+              option: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-13"
+    token_sources:
+      - card: BP02-T17
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set

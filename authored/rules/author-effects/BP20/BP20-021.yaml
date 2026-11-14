@@ -1,0 +1,48 @@
+cards:
+  BP20-021:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - damage_mod:
+                delta:
+                  times:
+                    - counter:
+                        name: 融合カウンター
+                        on: this
+                    - 2
+                kind: ability
+                source: this
+      - evolve_time:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - line: 3
+        super_evolve_time:
+          do:
+            - damage:
+                n: 1
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - kind: follower
+                      who: opp
+                      zone: field
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

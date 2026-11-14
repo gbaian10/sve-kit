@@ -436,29 +436,6 @@ fn a_canonical_ward_departure_header_does_not_grant_a_keyword_history_query() {
 }
 
 #[test]
-fn original_cost_entry_keeps_the_own_other_follower_shape_and_one_bound() {
-    for case in 0_u8..8 {
-        let mut head = entry_observer();
-        let entry = &mut head["auto"]["on"]["enter_field"];
-        match case {
-            0 => entry["who"] = json!("opp"),
-            1 => {
-                entry.as_object_mut().unwrap().remove("who");
-            }
-            2 => {
-                entry["sel"].as_object_mut().unwrap().remove("other");
-            }
-            3 => entry["sel"]["kind"] = json!("amulet"),
-            4 => entry["sel"]["orig_cost_le"] = json!(2),
-            5 => entry["sel"]["orig_cost_eq"] = json!(u64::MAX),
-            6 => entry["sel"]["trait"] = json!("妖精"),
-            _ => entry["during"] = json!({"turn":"self"}),
-        }
-        lowerer().lower(&tree(&head)).unwrap_err();
-    }
-}
-
-#[test]
 fn damage_subject_keywords_remain_rejected_after_movement_keyword_admission() {
     let mut head = json!({"auto":{
         "on":{"dealt_damage":{"who":"self","zone":"field","sel":{"trait":"妖精"},"recipient":{"who":"opp","zone":"field","kind":"follower"},"during":{"turn":"self"}}},
@@ -1036,6 +1013,40 @@ fn new_departure_cost_comparisons_do_not_extend_history_read_authority() {
             WellFormedCardProgram::check(program).is_ok(),
             accepted,
             "{bound}={cost}"
+        );
+    }
+}
+
+#[test]
+fn entry_original_cost_bounds_compose_with_turn_and_subject_filters() {
+    for (bound, cost, expected) in [
+        ("orig_cost_le", 1_u64, true),
+        ("orig_cost_le", 2, true),
+        ("orig_cost_le", 3, false),
+        ("orig_cost_ge", 1, false),
+        ("orig_cost_ge", 2, true),
+        ("orig_cost_ge", 3, true),
+    ] {
+        let mut filter = json!({"kind":"follower"});
+        filter[bound] = json!(2);
+        let observer = json!({"auto":{"on":{"enter_field":{"who":"self","sel":filter,"during":{"turn":"self"}}},"do":[{"damage":{"to":{"leaders":"opponents"},"n":1}}]}});
+        let mut state = initial();
+        state["players"]["P1"]["zones"]["field"] = json!([{"id":"observer","card":"unit-amulet"}]);
+        state["players"]["P1"]["zones"]["hand"] = json!([{"id":"incoming","card":"unit-follower"}]);
+        let mut game = fixture(
+            &[("unit-amulet", vec![observer]), ("unit-follower", vec![])],
+            &state,
+            cost,
+        );
+        assert!(matches!(
+            game.play_internal_card("incoming", PlayerId { seat: 1 })
+                .unwrap(),
+            CardPlay::Entered(_)
+        ));
+        assert_eq!(drain(&mut game), u8::from(expected));
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+            20 - u8::from(expected)
         );
     }
 }

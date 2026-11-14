@@ -4,14 +4,16 @@ use crate::game::Frame;
 use crate::game::internal::SubjectHistoryEvent;
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::conditions::subject as subject_condition;
+use crate::game::internal::cost::printed_cost;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{Ability, AbilityOrigin, KeywordId};
 use crate::ir::{
     Characteristics, EventPattern, EventPayload, EvolutionState, EvolveEvent, ExecutionId,
-    TriggerCondition,
+    TriggerCondition, ZoneKind,
 };
 
+use crate::ir::events::subscriptions;
 pub(super) fn observer_filter(ability: &Ability) -> Option<SubjectFilter> {
     if !matches!(ability.source.origin, AbilityOrigin::Printed { .. }) {
         return None;
@@ -25,8 +27,18 @@ pub(super) fn observer_filter(ability: &Ability) -> Option<SubjectFilter> {
     SubjectFilter::parse(SubjectFields::Evolve(*binding), predicate)
 }
 
+pub(in crate::game::internal) fn ex_evolution(ability: &Ability) -> bool {
+    ability.active_zones == [ZoneKind::Ex]
+        && observer_filter(ability).is_some()
+        && ability
+            .trigger
+            .as_ref()
+            .is_some_and(|trigger| trigger.active_zones == [ZoneKind::Ex])
+}
+
 pub(in crate::game) struct EvolutionPlan {
     before: Characteristics,
+    original_cost: Option<i64>,
     at: SnapshotId,
 }
 
@@ -38,17 +50,25 @@ impl Game {
     fn evolution_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         self.field_ids()
             .into_iter()
+            .chain(self.zone_ids("P1", "ex"))
+            .chain(self.zone_ids("P2", "ex"))
             .map(|id| {
+                let zone = if self.object(&id)?.zone == "ex" {
+                    ZoneKind::Ex
+                } else {
+                    ZoneKind::Field
+                };
                 let abilities = self
                     .internal_printed_abilities(&id)?
                     .into_iter()
                     .filter(|ability| {
-                        matches!(
-                            ability.node.trigger.as_ref().map(|trigger| &trigger.on),
-                            Some(TriggerCondition::Event {
-                                pattern: EventPattern::Evolve { .. }
-                            })
-                        )
+                        ability.node.active_zones == [zone]
+                            && matches!(
+                                ability.node.trigger.as_ref().map(|trigger| &trigger.on),
+                                Some(TriggerCondition::Event {
+                                    pattern: EventPattern::Evolve { .. }
+                                })
+                            )
                     })
                     .collect();
                 Ok((id, abilities))
@@ -68,24 +88,59 @@ impl Game {
                 && super::printed_origin(&a.node.source.origin).is_ok_and(|(printed,_)| self.printed_face_ordinal(&form.card, printed).is_ok_and(|ordinal| ordinal==face))
         }));
         let external = self.card_runtime.definitions.cards.values().any(|program| {
-            program
+            if program
                 .card()
                 .abilities
                 .iter()
-                .any(|ability| observer_filter(&ability.node).is_some())
+                .any(|ability| subscriptions::compound(&ability.node))
+            {
+                return true;
+            }
+            program.card().abilities.iter().any(|ability| {
+                observer_filter(&ability.node).is_some() || subscriptions::compound(&ability.node)
+            })
         });
         let interested = interested
             || (external
                 && self.evolution_observers()?.iter().any(|(_, abilities)| {
-                    abilities
-                        .iter()
-                        .any(|ability| observer_filter(&ability.node).is_some())
+                    abilities.iter().any(|ability| {
+                        observer_filter(&ability.node).is_some()
+                            || subscriptions::compound(&ability.node)
+                    })
                 }));
         if !interested {
             return Ok(None);
         }
+        let reads_original_cost = self.evolution_observers()?.iter().any(|(_, abilities)| {
+            abilities.iter().any(|ability| {
+                observer_filter(&ability.node).is_some_and(|filter| filter.original_cost.is_some())
+            })
+        });
+        let form_reads_original_cost = self
+            .card_runtime
+            .definitions
+            .cards
+            .get(&form.card)
+            .is_some_and(|program| {
+                program.card().abilities.iter().any(|ability| {
+                    observer_filter(&ability.node)
+                        .is_some_and(|filter| filter.original_cost.is_some())
+                        && super::printed_origin(&ability.node.source.origin).is_ok_and(
+                            |(printed, _)| {
+                                self.printed_face_ordinal(&form.card, printed)
+                                    .is_ok_and(|ordinal| ordinal == face)
+                            },
+                        )
+                })
+            });
+        let original_cost = if reads_original_cost || form_reads_original_cost {
+            Some(printed_cost(&self.internal_cost_print(holder)?["cost"])?)
+        } else {
+            None
+        };
         Ok(Some(EvolutionPlan {
             before: self.internal_characteristics(holder)?,
+            original_cost,
             at: SnapshotId(self.state.ir_epoch),
         }))
     }
@@ -139,7 +194,7 @@ impl Game {
                 let eligible = if let Some(filter) = observer_filter(&ability.node) {
                     subject_condition::matches(
                         &filter,
-                        &SubjectInformation::from_characters(&event.after, None),
+                        &SubjectInformation::from_characters(&event.after, plan.original_cost),
                         observer == holder,
                         controller,
                         subject_controller,

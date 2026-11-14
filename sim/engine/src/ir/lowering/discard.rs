@@ -197,6 +197,7 @@ fn discarded_card(
         token: None,
         not_token: None,
         other: None,
+        not_same_name_as_this: None,
     } = sel
     else {
         return Err(unsupported(path));
@@ -231,6 +232,11 @@ pub(super) fn aggregation(
             })
         }
         Some(ast::AutoAggregation::Batch) if matches!(&auto.on, ast::PhaseSubscription::Dealt(event) if super::combat::batch_dealt(event, subject_id, scope, path)) => {
+            Ok(TriggerAggregation::PerBatch {
+                key: BatchPolicy::Instruction {},
+            })
+        }
+        Some(ast::AutoAggregation::Batch) if matches!(&auto.on, ast::PhaseSubscription::Moved(event) if matches!(&event.from, ast::MoveOrigin::Owned {zone:ast::MoveZone::Ex,..})) => {
             Ok(TriggerAggregation::PerBatch {
                 key: BatchPolicy::Instruction {},
             })

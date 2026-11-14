@@ -18,6 +18,7 @@ use super::{
     RuntimeAbilitySource, ZoneKind, invalid, printed_origin, unsupported,
 };
 use crate::game::{Frame, Object};
+use crate::ir::events::subscriptions;
 use crate::ir::{
     BatchId, Cause, DecisionId, EventHeader, EventId, EventPattern, EventPayload,
     EventSnapshotPolicy, ExecutionId, GameTime, KeywordId, LeaveFieldEvent, ObjectRef,
@@ -37,14 +38,18 @@ mod drive;
 mod equipment;
 mod fusion;
 pub(in crate::game::internal) use banish::hand_header as hand_banish;
+pub(in crate::game::internal) use discard::cemetery_header as cemetery_discard;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
 pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
+pub(in crate::game::internal) use entry::ex_header as ex_entry;
 pub(in crate::game::internal) use equipment::check_header as equipment_header;
 mod entry;
 pub(in crate::game::internal) mod event_operand;
 mod evolution;
+mod ex_departure;
 mod mill;
 mod movement;
+pub(in crate::game::internal) use evolution::ex_evolution;
 pub(in crate::game::internal) use movement::ex_self_entry;
 mod played;
 mod quota;
@@ -100,12 +105,12 @@ struct PendingSourceDeparture {
     generation: u64,
 }
 
-pub(in crate::game::internal) fn ex_phase(ability: &Ability) -> bool {
+pub(in crate::game::internal) fn phase_in_zone(ability: &Ability, zone: ZoneKind) -> bool {
     ability.kind == AbilityKind::Triggered
         && matches!(ability.source.origin, AbilityOrigin::Printed { .. })
-        && ability.active_zones == [ZoneKind::Ex]
+        && ability.active_zones == [zone]
         && ability.trigger.as_ref().is_some_and(|trigger| {
-            trigger.active_zones == [ZoneKind::Ex]
+            trigger.active_zones == [zone]
                 && matches!(
                     trigger.on,
                     TriggerCondition::Event {
@@ -116,6 +121,12 @@ pub(in crate::game::internal) fn ex_phase(ability: &Ability) -> bool {
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
+    if subscriptions::compound(ability) {
+        for branch in subscriptions::alternatives(ability) {
+            check_header(&branch)?;
+        }
+        return Ok(());
+    }
     if matches!(
         ability.source.origin,
         AbilityOrigin::Keyword {
@@ -134,6 +145,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || dice::check_header(ability)?
         || equipment::check_header(ability)?
         || mill::check_header(ability)?
+        || ex_departure::check_header(ability)?
         || change::check_header(ability)?
         || movement::check_header(ability)?
         || entry::check_header(ability)?

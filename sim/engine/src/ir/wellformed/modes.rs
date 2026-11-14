@@ -3,8 +3,8 @@ use crate::ir::optional_payment;
 use crate::ir::public_numbers;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Binding, BoolRead, BooleanState, Comparison, Int, IntOperation, IntRead, NamesRead, ObjectRef,
-    PlayerResource,
+    Binding, BoolFrozen, BoolRead, BooleanState, Comparison, Int, IntOperation, IntRead, NamesRead,
+    ObjectRef, PaymentReference, PlayerResource,
 };
 use crate::ir::{
     Bool, Cardinality, ChoiceDomain, Control, CostSpec, Decision, DecisionKind, EntryOrigin,
@@ -13,8 +13,7 @@ use crate::ir::{
     Visibility, ZoneKind,
 };
 use crate::ir::{
-    CharacteristicView, NatRead, ObjectOperand, ObjectView, PlayerRelation, SelectionView,
-    Selector, TextQuantifier, TraitsRead,
+    NatRead, ObjectOperand, ObjectView, PlayerRelation, SelectionView, Selector, TextQuantifier,
 };
 use alloc::collections::BTreeSet;
 
@@ -215,8 +214,7 @@ impl Checker {
                     players,
                     zone: ZoneKind::Field,
                     view: SelectionView::Current {},
-                    binding,
-                    predicate,
+                    ..
                 } = selector
                 else {
                     return self.reject();
@@ -232,22 +230,9 @@ impl Checker {
                 {
                     return self.reject();
                 }
-                let Expr::Compute(condition) = predicate.as_ref() else {
-                    return self.reject();
-                };
-                let Predicate::And { predicates } = condition.as_ref() else {
-                    return self.reject();
-                };
-                let [Expr::Compute(trait_check)] = predicates.as_slice() else {
-                    return self.reject();
-                };
-                if !matches!(trait_check.as_ref(), Predicate::HasTrait {
-                    traits: Expr::Live(traits), ..
-                } if matches!(traits.as_ref(), TraitsRead::Traits {
-                    object: ObjectView::Current { object },
-                    view: CharacteristicView::Effective,
-                } if **object == (ObjectOperand::Bound { binding: *binding })))
-                {
+                if !public_numbers::check(&Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: count.clone(),
+                }))) {
                     return self.reject();
                 }
                 Ok(())
@@ -360,6 +345,17 @@ impl Checker {
                 | Predicate::All { .. }
                 | Predicate::Any { .. } => self.reject(),
             },
+            // The spell's own play declaration, fixed before its modes are chosen.
+            Expr::Frozen(read)
+                if matches!(
+                    read.as_ref(),
+                    BoolFrozen::PaymentComplete {
+                        receipt: PaymentReference::CardPlay { .. }
+                    }
+                ) =>
+            {
+                self.boolean(condition)
+            }
             Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => self.reject(),
         }
     }
@@ -517,6 +513,9 @@ fn public_mode_count(value: &Expr<Int>) -> bool {
         return false;
     };
     match read.as_ref() {
+        NatRead::ZoneCount {
+            selector: Selector::Difference { .. },
+        } => public_numbers::check(value),
         NatRead::ZoneCount {
             selector:
                 Selector::Zone {

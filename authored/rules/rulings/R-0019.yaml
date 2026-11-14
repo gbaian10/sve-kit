@@ -1,0 +1,29 @@
+format: 2
+kind: ruling
+id: R-0019
+revision: 1
+question: 熱血の竜教師・ジョー的起動能力「…10個以上なら、…5ダメージ。これは{体力}+6する。」中，體力+6 是否也受 10 個條件限制？
+decision: 本專案解讀為：條件只涵蓋同一句的 5 傷害；「これは{体力}+6する」是下一句，起動時無論 counter 數量都會執行。
+evidence:
+  - ref: BP21-057
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP21-057
+    note: 條件句以句點結束後另起一句；本卡 Q2736～Q2740 沒有回答體力+6 的條件範圍。
+  - ref: BP21-060
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP21-060
+    note: 同包同機制的卡要讓體力+6 受條件限制時，會在同一句重寫「10個以上なら、これは{体力}+6する」；BP21-061、063、065、069 亦同。
+  - ref: project
+    kind: project
+    date: "2026-11-14"
+    reason: 依句讀把條件範圍限定在同一句；實作者與審核者都未找到相反的官方依據。沒有本卡直接官方裁定，保留向官方詢問並可局部修正。
+strength: inferred
+decided_on: "2026-11-14"
+applies_to: [K.if]
+hint:
+  zh-TW: 本專案解讀：起動後不論情熱カウンター多少，這張卡都體力+6；只有 5 點傷害需要 10 個以上。此範圍尚無直接官方裁定。
+  ja: 本プロジェクトの解釈：情熱カウンターの数にかかわらず、このカードは体力+6します。10個以上が必要なのは5ダメージだけです。この範囲について直接の公式回答はありません。
+  en: "Project interpretation: this card gets +6 defense whenever the ability resolves;
+    only the 5 damage needs 10 or more Passion counters. There is no direct official
+    ruling on this scope."
+note: 只處理體力+6 的條件範圍，強度維持 inferred。若官方回答不同，只需把 buff 移進條件的 then。

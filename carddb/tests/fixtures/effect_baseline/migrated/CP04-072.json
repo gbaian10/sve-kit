@@ -1,0 +1,27 @@
+{
+  "status": "complete",
+  "abilities": [
+    {
+      "line": 1,
+      "kind": "trigger",
+      "body": {
+        "op": "draw",
+        "side": "both",
+        "count": 1
+      },
+      "event": "enter",
+      "subject": "self"
+    },
+    {
+      "line": 2,
+      "kind": "trigger",
+      "body": {
+        "op": "damage",
+        "subjects": "opponent.leader",
+        "amount": 1
+      },
+      "event": "field_to_cemetery",
+      "subject": "self"
+    }
+  ]
+}

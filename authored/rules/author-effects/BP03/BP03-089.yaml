@@ -1,0 +1,33 @@
+cards:
+  BP03-089:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - damage:
+                n: 1
+                to:
+                  leader: self
+            - delayed:
+                do:
+                  - buff:
+                      hp: 1
+                      on: it
+                      power: 1
+                next_only: true
+                on:
+                  enter_field:
+                    entered_by: play
+                    sel:
+                      kind: follower
+                    who: self
+                until: turn
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: claude-opus-5-5
+            who: Claude
+          date: "2026-11-14"
+format: 2
+kind: author_effect_set

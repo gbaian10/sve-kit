@@ -159,6 +159,14 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         let query = match value {
+            ast::Objects::Role { role } => {
+                return self
+                    .target_roles
+                    .get(&(role.of.clone(), role.name.clone()))
+                    .copied()
+                    .map(|reference| Selector::Bound { reference })
+                    .ok_or_else(|| unsupported(path));
+            }
             ast::Objects::This(_) => return Ok(holder()),
             ast::Objects::EventHolder {
                 event: ast::HolderEvent::Holder,
@@ -264,6 +272,7 @@ impl BodyContext<'_> {
                 who: ast::Side::Opponent,
                 zone: ast::Zone::Field,
                 kind: Some(ast::FieldKind::Follower),
+                keyword: None,
                 r#trait: None,
                 class: None,
                 not_class: None,
@@ -278,6 +287,7 @@ impl BodyContext<'_> {
                 name_contains: None,
                 acted: None,
                 except: None,
+                not_same_name_as_this: false,
                 other: false,
             } = &**query
             else {
@@ -303,12 +313,23 @@ impl BodyContext<'_> {
             || query.except.is_some()
             || query.hp_le.is_some()
             || query.not_trait.is_some())
-            && (query.alias.is_some() || query.r#where.is_some())
+            && (query.alias.is_some()
+                || matches!(
+                    query.r#where,
+                    Some(ast::ObjectQueryWhere::Extremum(_) | ast::ObjectQueryWhere::Damaged(_))
+                ))
         {
             return Err(unsupported(path));
         }
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
         let kind = query.kind.map(ast::FieldKind::search);
+        let power = match &query.r#where {
+            Some(ast::ObjectQueryWhere::Power(condition)) => {
+                Some((condition.cmp.op, condition.cmp.right))
+            }
+            _ => None,
+        };
+        let (power_at_least, power_at_most) = super::selection::power_bounds(power);
         let (relation, relative_to) = self.side_set(&query.who, path)?;
         let objects = Selector::Zone {
             players: PlayerSet {
@@ -330,6 +351,9 @@ impl BodyContext<'_> {
             predicate: Box::new(super::selection::field_filter(
                 &super::selection::ObjectFilter {
                     kind: kind.as_ref().map(super::search::card_kind),
+                    keyword: query.keyword.map(|keyword| keyword.0),
+                    power_at_most,
+                    power_at_least,
                     trait_id: query.r#trait.as_deref(),
                     class: query.class.as_deref(),
                     not_class: query.not_class.as_deref(),
@@ -342,6 +366,7 @@ impl BodyContext<'_> {
                     name: query.name.as_deref(),
                     contains: query.name_contains.as_deref(),
                     acted: query.acted,
+                    not_same_name_as_this: query.not_same_name_as_this,
                     ..super::selection::ObjectFilter::default()
                 },
                 binding,
@@ -446,7 +471,8 @@ impl BodyContext<'_> {
                     self.zone_objects(query, ZoneKind::Ex, path)?
                 }
                 ast::Objects::Follow { follow } => self.followed(follow, path)?,
-                ast::Objects::This(_)
+                ast::Objects::Role { .. }
+                | ast::Objects::This(_)
                 | ast::Objects::Bound(_)
                 | ast::Objects::Zone(_)
                 | ast::Objects::EventHolder { .. } => self.objects(objects, path)?,
@@ -478,6 +504,10 @@ impl BodyContext<'_> {
         Ok(Selector::Union { sets })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Every continuous installed effect is dispatched from one closed match."
+    )]
     pub(super) fn continuous(
         &mut self,
         installation: &ast::Apply,
@@ -534,7 +564,8 @@ impl BodyContext<'_> {
                 ast::Cannot::Player(_) | ast::Cannot::Removal(_) | ast::Cannot::DealDamage(_),
             )
             | ast::InstalledEffect::Prevent(_)
-            | ast::InstalledEffect::DamageMod(_) => {
+            | ast::InstalledEffect::DamageMod(_)
+            | ast::InstalledEffect::DamageCap(_) => {
                 return self.prevent_apply(installation, source, path);
             }
             ast::InstalledEffect::EvolveCostMod(_) => {

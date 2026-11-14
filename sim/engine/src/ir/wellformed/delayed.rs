@@ -52,6 +52,10 @@ impl Checker {
         };
         if let EventPattern::LeaveField { binding, .. } = pattern {
             self.env.trigger_subject = Some(SubjectFields::Cemetery(*binding).object());
+        } else if let EventPattern::EnterField { binding, .. } = pattern {
+            self.env.trigger_subject = Some(SubjectFields::Entry(*binding).object());
+        } else {
+            // Other installed events do not expose a subject to the callback body.
         }
         self.event_pattern(pattern, Some(trigger.view), true)?;
         let result = self.program(body);

@@ -55,9 +55,10 @@ pub(super) fn lower(
             })),
         ),
         ast::PlayRestriction::Named(ast::NamedPlayRestriction::InZone(zone))
-            if zone.r#ref == "this" && zone.zone == "ex" =>
+            if zone.r#ref == "this" =>
         {
-            (vec![ZoneKind::Ex], Expr::Literal(Bool(true)))
+            let zone = source_zone(&zone.zone).ok_or_else(|| unsupported(path))?;
+            (vec![zone], Expr::Literal(Bool(true)))
         }
         ast::PlayRestriction::Condition(condition) => {
             let empty = ast::Body::default();
@@ -108,5 +109,15 @@ impl BodyContext<'_> {
         Ok(play_restrictions::banish_play_installation(
             affected, candidate,
         ))
+    }
+}
+
+pub(super) fn source_zone(zone: &str) -> Option<ZoneKind> {
+    match zone {
+        "hand" => Some(ZoneKind::Hand),
+        "ex" => Some(ZoneKind::Ex),
+        "cemetery" => Some(ZoneKind::Cemetery),
+        "banish" => Some(ZoneKind::Banish),
+        _ => None,
     }
 }

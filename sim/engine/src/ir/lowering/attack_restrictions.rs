@@ -122,6 +122,7 @@ fn permission(
             )
         }
         ast::StaticEffect::BanishInstead(_)
+        | ast::StaticEffect::ExtraTrigger(_)
         | ast::StaticEffect::Reroll(_)
         | ast::StaticEffect::UnlimitedEvolve(_)
         | ast::StaticEffect::ChoiceAny(_)
@@ -160,7 +161,12 @@ impl BodyContext<'_> {
         let ast::InstalledEffect::Cannot(ast::Cannot::Attack(shape)) = &installation.effect else {
             return Err(unsupported(path));
         };
-        let objects = self.objects(&installation.on, path)?;
+        // A field entry's result names its successful members, as for numeric modifications.
+        let objects = if let ast::Objects::Follow { follow } = &installation.on {
+            self.followed(follow, path)?
+        } else {
+            self.objects(&installation.on, path)?
+        };
         let affected = Binding::new(1, self.card_allocator.scope(path)?);
         let targets = Selector::Bound {
             reference: affected,

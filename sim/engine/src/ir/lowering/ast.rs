@@ -270,6 +270,7 @@ pub(super) enum CostOperation {
     Lesson(u64),
     Counter(CounterCost),
     EarthRite(u64),
+    SkipTurn(SkipTurnCost),
     LeaderLife(u64),
     ToCemetery(Material),
     ReturnToHand(Material),
@@ -284,6 +285,12 @@ pub(super) enum CostOperation {
     SelfToCemetery(bool),
     /// 「手札のこれをEXエリアに置く」; only a hand activation pays it.
     SelfToEx(bool),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SkipTurnCost {
+    pub who: SelfPlayer,
 }
 
 #[derive(Deserialize)]
@@ -333,7 +340,10 @@ pub(super) struct RevealedSelection {
 pub(super) enum DiscardCost {
     Material(Box<HandMaterial>),
     Groups(Box<HandMaterialGroups>),
-    Reference { r#ref: String },
+    Reference {
+        r#ref: String,
+        result: Option<String>,
+    },
 }
 
 #[derive(Deserialize)]
@@ -500,7 +510,23 @@ pub(super) enum AbilityPlayCost {
 pub(super) struct Transform {
     #[serde(rename = "ref")]
     pub reference: Objects,
-    pub into: String,
+    pub into: TransformInto,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum TransformInto {
+    Single(String),
+    Allocated { allocate: TransformAllocation },
+}
+
+/// 「それはそれぞれ『A』と『B』に変身する」: each template once, assigned by successful count.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TransformAllocation {
+    pub among: Vec<String>,
+    #[serde(rename = "each_exactly_once")]
+    pub _each_exactly_once: True,
 }
 
 #[derive(Deserialize)]
@@ -912,6 +938,34 @@ pub(super) struct Move {
     #[serde(rename = "by")]
     /// The performing player; a deck-edge placement's chooser is `position.by`.
     pub by: Option<SelfPlayer>,
+    pub entry_effects: Option<Vec<EntryEffect>>,
+}
+
+/// 「それの{ファンファーレ}能力を使えない」 on the cards a field entry puts.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryEffect {
+    #[serde(rename = "cannot")]
+    pub _cannot: EntryCannot,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryCannot {
+    #[serde(rename = "what")]
+    pub _what: PlayAbilityAction,
+    #[serde(rename = "ability")]
+    pub _ability: EntryAbility,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryAbility {
+    #[serde(rename = "keyword")]
+    pub _keyword: FanfareKeyword,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum FanfareKeyword {
+    Fanfare,
 }
 
 #[derive(Deserialize)]
@@ -920,6 +974,7 @@ pub(super) enum MoveObjects {
     Whole(WholeDeckReturn),
     Observed(Observed),
     Field(Objects),
+    Public(Box<PublicQuery>),
 }
 
 #[derive(Deserialize)]
@@ -1096,6 +1151,7 @@ pub(super) enum StandPlayer {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Objects {
+    Role { role: RoleReference },
     This(This),
     Bound(String),
     Zone(Box<ObjectQuery>),
@@ -1118,6 +1174,7 @@ pub(super) struct ObjectQuery {
     pub who: Side,
     pub zone: Zone,
     pub kind: Option<FieldKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,
@@ -1133,6 +1190,8 @@ pub(super) struct ObjectQuery {
     pub acted: Option<bool>,
     pub except: Option<Box<BoundExcept>>,
     #[serde(default)]
+    pub not_same_name_as_this: bool,
+    #[serde(default)]
     pub other: bool,
 }
 
@@ -1141,6 +1200,7 @@ pub(super) struct ObjectQuery {
 pub(super) enum ObjectQueryWhere {
     Extremum(Box<QueryExtremumWhere>),
     Damaged(DamagedThisTurnWhere),
+    Power(PublicPowerWhere),
 }
 
 #[derive(Clone, Deserialize)]
@@ -1256,6 +1316,7 @@ pub(super) enum InstalledEffect {
     EvolveCostMod(EvolutionCostModifier),
     Cannot(Cannot),
     Prevent(Prevent),
+    DamageCap(DamageCap),
 }
 
 #[derive(Deserialize)]
@@ -1311,7 +1372,7 @@ pub(super) struct EvolutionCostModifier {
 #[serde(deny_unknown_fields)]
 pub(super) struct CostModifier {
     pub when_playing: Playing,
-    pub delta: Option<i64>,
+    pub delta: Option<Value>,
     pub set: Option<i64>,
     pub next_only: Option<bool>,
 }
@@ -1939,7 +2000,7 @@ pub(super) struct Choice {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum ModeCap {
     Fixed(u64),
-    Count { count: CountQuery },
+    Count { count: Box<CountQuery> },
     // Structured counts retain their narrower admission before the numeric fallback.
     Number(Box<Value>),
 }
@@ -1998,7 +2059,7 @@ pub(super) enum Number {
         history_count: HistoryQuery,
     },
     HistorySum {
-        history_sum: LifeHistorySum,
+        history_sum: HistorySum,
     },
     LeaderLife {
         leader_life: LeaderSide,
@@ -2119,6 +2180,51 @@ pub(super) struct LifeHistoryFilter {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum HistorySum {
+    Life(LifeHistorySum),
+    Payment(PaymentHistorySum),
+}
+
+/// 「このターン中に自分の【土の秘術】によって…【スタック】を取っていた」 totals.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PaymentHistorySum {
+    pub event: PaymentHistoryEvent,
+    pub window: ThisTurn,
+    pub who: LeaderSide,
+    pub r#where: PaymentHistoryFilter,
+    pub field: PaymentHistoryField,
+    #[serde(rename = "distinct")]
+    pub _distinct: Option<FactsOnly>,
+}
+#[derive(Deserialize)]
+pub(super) enum PaymentHistoryEvent {
+    #[serde(rename = "payment")]
+    Payment,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PaymentHistoryFilter {
+    pub cost_kind: EarthRiteKind,
+}
+#[derive(Deserialize)]
+pub(super) enum EarthRiteKind {
+    #[serde(rename = "earth_rite")]
+    EarthRite,
+}
+#[derive(Deserialize)]
+pub(super) enum PaymentHistoryField {
+    #[serde(rename = "removed_stack")]
+    RemovedStack,
+}
+#[derive(Deserialize)]
+pub(super) enum FactsOnly {
+    #[serde(rename = "facts")]
+    Facts,
+}
+
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct LifeHistorySum {
     pub event: LifeHistoryEvent,
@@ -2227,7 +2333,7 @@ impl CountKind {
     }
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CountQuery {
     pub face_up: Option<bool>,
@@ -2243,6 +2349,8 @@ pub(super) struct CountQuery {
     /// 「AやBの…」: a public count of cards having either trait (BP09-117).
     pub traits_any: Option<TraitUnion>,
     pub name: Option<String>,
+    #[serde(default)]
+    pub names: Vec<String>,
     pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,
@@ -2250,7 +2358,7 @@ pub(super) struct CountQuery {
     pub not_token: Option<bool>,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CountZone {
     EvolveDeck,
@@ -2335,7 +2443,7 @@ pub(super) enum PhaseSubscription {
     #[serde(rename = "discarded")]
     Discarded(DiscardSubscription),
     #[serde(rename = "banished")]
-    Banished(HandBanishSubscription),
+    Banished(BanishedSubscription),
     #[serde(rename = "evolved")]
     Evolved(EvolvedSubscription),
     #[serde(rename = "played")]
@@ -2545,6 +2653,21 @@ pub(super) struct DiscardSubscription {
 }
 
 #[derive(Deserialize)]
+#[serde(untagged)]
+pub(super) enum BanishedSubscription {
+    Hand(HandBanishSubscription),
+    Zone(BanishZoneSubscription),
+}
+
+/// 「(自分のターン中、)自分の消滅領域にカードが置かれたとき」: any card, from any zone.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BanishZoneSubscription {
+    pub who: EntryPlayer,
+    pub during: Option<During>,
+}
+
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct HandBanishSubscription {
     #[serde(rename = "ref")]
@@ -2692,9 +2815,16 @@ pub(super) enum Comparison {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PublicNumber {
     Literal(i64),
-    Count { count: PublicQuery },
+    Count { count: PublicCountQuery },
     DistinctNames { distinct_names: PublicQuery },
     DistinctOriginalCosts { distinct_orig_costs: PublicQuery },
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PublicCountQuery {
+    Public(PublicQuery),
+    Numeric(CountQuery),
 }
 
 #[derive(Clone, Deserialize, PartialEq, Eq)]
@@ -2729,10 +2859,24 @@ pub(super) struct PublicQuery {
     pub cost_le: Option<u64>,
     pub cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
-    pub r#where: Option<PublicPowerWhere>,
+    pub r#where: Option<PublicCandidateWhere>,
 }
 
-/// `where: {cmp: {left: {power_of: item}, op: ge|le, right: N}}` on each public candidate.
+/// `where: {cmp: {left: {power_of: item} | {counter: {on: item, name}}, op: ge|le|eq, right: N}}`
+/// on each public candidate.
+#[derive(Clone, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicCandidateWhere {
+    pub cmp: PublicCandidateComparison,
+}
+#[derive(Clone, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublicCandidateComparison {
+    pub left: PublicCandidateNumber,
+    pub op: PowerBound,
+    pub right: u64,
+}
+/// `where: {cmp: {left: {power_of: item}, op: ge|le|eq, right: N}}` on each field object source.
 #[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
 pub(super) struct PublicPowerWhere {
@@ -2744,6 +2888,19 @@ pub(super) struct PublicPowerComparison {
     pub left: ItemPower,
     pub op: PowerBound,
     pub right: u64,
+}
+#[derive(Clone, Deserialize, PartialEq, Eq)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PublicCandidateNumber {
+    Power(ItemPower),
+    Counter { counter: ItemCounter },
+}
+#[derive(Clone, Deserialize, PartialEq, Eq)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ItemCounter {
+    #[serde(rename = "on")]
+    pub _on: Item,
+    pub name: String,
 }
 #[derive(Clone, Copy, Deserialize, PartialEq, Eq)]
 #[serde(deny_unknown_fields)]
@@ -2761,21 +2918,24 @@ pub(super) enum Item {
 pub(super) enum PowerBound {
     Ge,
     Le,
+    Eq,
 }
 
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum ExistsQuery {
-    Public(PublicQuery),
+    Public(Box<PublicQuery>),
     Selected(SelectedQuery),
-    FollowedKeyword(FollowedKeywordQuery),
+    Followed(FollowedQuery),
 }
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct FollowedKeywordQuery {
+pub(super) struct FollowedQuery {
     pub r#in: FollowName,
-    pub keyword: FilterKeyword,
+    pub keyword: Option<FilterKeyword>,
+    pub kind: Option<SearchKind>,
+    pub r#trait: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -2861,6 +3021,7 @@ pub(super) struct ChoiceInstead {
 #[serde(rename_all = "snake_case")]
 pub(super) enum ModeCondition {
     Cmp(Box<BodyComparison>),
+    Paid(PaidReceipt),
     History(HistoryQuery),
     Spellchain(u64),
     Necro(u64),
@@ -2872,6 +3033,7 @@ pub(super) enum ModeCondition {
 #[serde(deny_unknown_fields)]
 pub(super) struct OptionalCost {
     pub pp: Option<u64>,
+    pub earth_rite: Option<u64>,
     pub one_of: Option<Vec<Self>>,
     pub discard: Option<HandMaterial>,
     pub to_cemetery: Option<Material>,
@@ -2983,6 +3145,7 @@ pub(super) struct PlayedFromCondition {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum PlayedZone {
+    Hand,
     Ex,
 }
 #[derive(Deserialize)]
@@ -3132,11 +3295,14 @@ pub(super) enum PlayedSubject {
     Union { any_of: Box<[MovementSubject; 2]> },
 }
 impl Auto {
-    /// 「自分の場に…が出たとき」 or a Play observed by a card in its owner's cemetery.
+    /// Cemetery subscriptions share the same source-movement boundary across event kinds.
     pub(super) const fn cemetery_observer(&self) -> bool {
         matches!(
             self.on,
-            PhaseSubscription::Played(_) | PhaseSubscription::EnterField(_)
+            PhaseSubscription::Played(_)
+                | PhaseSubscription::EnterField(_)
+                | PhaseSubscription::Phase(_)
+                | PhaseSubscription::Discarded(_)
         ) && match &self.zone {
             Some(ActivationZones::One(ActivationZone::Cemetery)) => true,
             Some(ActivationZones::Many(zones)) => {
@@ -3151,7 +3317,7 @@ impl Auto {
 #[serde(deny_unknown_fields)]
 pub(super) struct MoveSubscription {
     pub from: MoveOrigin,
-    pub to: DepartureDestination,
+    pub to: Option<DepartureDestination>,
     #[serde(rename = "ref")]
     pub reference: Option<This>,
     pub sel: Option<MovementSubject>,
@@ -3167,6 +3333,7 @@ pub(super) enum MoveOrigin {
 #[serde(rename_all = "snake_case")]
 pub(super) enum MoveZone {
     Field,
+    Ex,
     /// Only a public deck-to-cemetery move; the deck owner must be named.
     Deck,
 }
@@ -3203,6 +3370,7 @@ pub(super) struct MovementSubject {
     pub token: Option<bool>,
     pub not_token: Option<bool>,
     pub other: Option<bool>,
+    pub not_same_name_as_this: Option<bool>,
 }
 
 #[derive(Clone, Deserialize)]
@@ -3281,6 +3449,7 @@ pub(super) struct Static {
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
     BanishInstead(BanishReplacement),
+    ExtraTrigger(ExtraTriggers),
     UnlimitedEvolve(StaticPlayerRule),
     ChoiceAny(StaticPlayerRule),
     Reroll(Reroll),
@@ -3303,6 +3472,21 @@ pub(super) struct BanishReplacement {
     pub on: Option<Objects>,
     pub from: String,
     pub to: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ExtraTriggers {
+    pub phase: TriggerPhase,
+    pub who: LeaderSide,
+    pub n: u64,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum TriggerPhase {
+    Main,
+    End,
 }
 
 #[derive(Deserialize)]
@@ -3582,8 +3766,17 @@ pub(super) struct DamageModifier {
     pub on: Option<Recipients>,
     pub source: Option<PreventionSource>,
     pub kind: Option<PreventionKind>,
-    pub delta: i64,
+    pub delta: Number,
     pub next_only: Option<bool>,
+}
+impl DamageModifier {
+    pub(super) const fn literal_delta(&self) -> Option<i64> {
+        if let Number::Literal(delta) = self.delta {
+            Some(delta)
+        } else {
+            None
+        }
+    }
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -3938,9 +4131,26 @@ pub(super) struct Delayed {
     pub next_only: bool,
 }
 #[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DelayedOn {
+    Moved {
+        moved: DelayedMove,
+    },
+    EnterField {
+        enter_field: DelayedEntry,
+    },
+    /// 「このターン、自分のリーダーの体力が減少したとき」 after installation.
+    LifeChanged {
+        life_changed: LifeSubscription,
+    },
+}
+/// 「このターン、次に自分の場にフォロワーが出たとき」: entries of other cards after installation.
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct DelayedOn {
-    pub moved: DelayedMove,
+pub(super) struct DelayedEntry {
+    pub who: Option<EntryPlayer>,
+    pub sel: Option<MovementSubject>,
+    pub entered_by: Option<EntryMethod>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
