@@ -266,17 +266,6 @@ fn include_passive_current_tokens(
     ));
 }
 
-/// Raw current prototype documents (no frozen restore), so load-time rejection findings
-/// keep the original YAML line numbers.
-#[allow(
-    dead_code,
-    reason = "Included by several test crates; only the rejection test needs it."
-)]
-pub(crate) fn current_prototype_catalog() -> Arc<Catalog> {
-    // Rule resources can migrate while prototype rejection diagnostics keep their original lines.
-    Arc::clone(&repository::selection_with_rules().prototypes)
-}
-
 pub(crate) fn historical_regression_catalog() -> Arc<Catalog> {
     static CATALOG: OnceLock<Arc<Catalog>> = OnceLock::new();
     Arc::clone(CATALOG.get_or_init(|| {

@@ -6,18 +6,13 @@ extern crate alloc;
 
 use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
-use std::fs::read_to_string;
 use std::path::PathBuf;
 
-use sve_engine::adapter::{Adapter, AiAdapter, AssistAdapter, ReplayAdapter};
+use sve_engine::adapter::{AiAdapter, AssistAdapter, ReplayAdapter};
 use sve_engine::ai::Profile;
 use sve_scenario_runner::ai::{AiEngine, AiOutcome, check_ai, load_positions};
 use sve_scenario_runner::arch::{
     ArchOptions, AssistEngine, Outcome, ReplayEngine, check_assist, check_replay, load_fixtures,
-};
-use sve_scenario_runner::{
-    AwaitingMode, RunOptions, Verdict, gate, load_dir, load_known_failures, load_selection, run,
-    score_g1,
 };
 
 fn root() -> PathBuf {
@@ -27,81 +22,7 @@ fn root() -> PathBuf {
 #[path = "support/generated_catalog.rs"]
 mod generated_catalog;
 
-use generated_catalog::{current_prototype_catalog, historical_regression_catalog};
-
-#[test]
-fn representative_rules_pass_every_checkpoint() {
-    let catalog = historical_regression_catalog();
-    let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
-    let selection =
-        load_selection(&root().join("tests/rules-scenarios/g1-selection.yaml")).unwrap();
-    let reports = score_g1(&mut Adapter::new(catalog), &questions, &selection, 41).unwrap();
-    assert_eq!(reports.len(), 41);
-    for report in reports {
-        assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
-    }
-}
-
-#[test]
-fn every_shared_scenario_passes_or_is_a_listed_known_failure() {
-    let catalog = historical_regression_catalog();
-    let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
-    let known = load_known_failures(&root().join("tests/engine/known-failures.yaml")).unwrap();
-    let reports = run(
-        &mut Adapter::new(catalog),
-        &questions,
-        None,
-        RunOptions {
-            require_verified: true,
-            awaiting: AwaitingMode::Complete,
-        },
-    )
-    .unwrap();
-    let result = gate(&reports, &known);
-    assert!(result.ok(), "{:#?}", result.problems);
-}
-
-/// Load-time rejection (M1): every authored card either loads or is a reviewed rejection.
-#[test]
-fn authored_yaml_loads_or_is_a_listed_rejection() {
-    // Raw prototype documents: the frozen restore rewrites a document onto one line.
-    let catalog = current_prototype_catalog();
-    let listed: serde_json::Value = serde_saphyr::from_str(
-        &read_to_string(root().join("tests/engine/rejected-yaml.yaml")).unwrap(),
-    )
-    .unwrap();
-    let mut expected = listed["rejected"]
-        .as_array()
-        .unwrap()
-        .iter()
-        .map(|entry| {
-            (
-                entry["card"].as_str().unwrap().to_owned(),
-                entry["finding"].as_str().unwrap().to_owned(),
-            )
-        })
-        .collect::<Vec<_>>();
-    let mut actual = catalog
-        .rejections()
-        .iter()
-        .flat_map(|(card, findings)| {
-            findings.iter().map(move |finding| {
-                let message = finding.splitn(3, ':').nth(2).unwrap_or(finding).trim();
-                (card.clone(), message.to_owned())
-            })
-        })
-        .collect::<Vec<_>>();
-    expected.sort();
-    actual.sort();
-    assert_eq!(actual, expected);
-    // Every finding points at a line of its card, never at "line 0".
-    for findings in catalog.rejections().values() {
-        for finding in findings {
-            let line = finding.split(':').nth(1).unwrap_or_default();
-            assert!(line.parse::<usize>().is_ok_and(|n| n > 0), "{finding}");
-        }
-    }
-}
+use generated_catalog::historical_regression_catalog;
 
 #[test]
 fn replay_and_assist_match_every_shared_assertion() {

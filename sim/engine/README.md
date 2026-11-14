@@ -11,11 +11,10 @@ effect paths sharing one `Game` and authority state:
   whole cards. See [the author contract](../../docs/dsl/author-contract-1.0.md).
 - The frozen prototype reads `authored/rules/effects/`, validated against
   `dsl/effects.schema.json` before and after macro expansion. The old runner
-  adapters (`Adapter`, `ReplayAdapter`, `AssistAdapter`, `AiAdapter`), the old
-  player packet, AI, `Replay` and `Assist` still use this path. Its shared
-  scenario gate does not establish typed-path coverage.
+  adapters (`ReplayAdapter`, `AssistAdapter`, `AiAdapter`), the old player packet,
+  AI, `Replay` and `Assist` still use this path.
 
-The shared rule exam also runs on the typed path: `TypedAdapter` plays both seats
+The shared rule exam runs on the typed path: `TypedAdapter` plays both seats
 through the player interface only, and `sim/engine/tests/typed_exam.rs` compares the
 result with [tests/engine/typed-known-results.yaml](../../tests/engine/typed-known-results.yaml).
 See [engine status](../../docs/sim/engine-status.md#驗證方式) for the list rules.
@@ -28,12 +27,6 @@ maintained. The first typed AI uses a basic policy through the player interface;
 search is a separate follow-up. Scope and progress are tracked in
 [#1971](https://github.com/gbaian10/sve-kit/issues/1971); enduring boundaries are in
 [engine status](../../docs/sim/engine-status.md).
-
-The `sve-prototype` binary evaluated the frozen prototype. It loads the catalogue
-with `Catalog::load`, which refuses the current author inventory, so every mode now
-stops before running. It is not maintained and is scheduled for removal with the
-other prototype exits ([#2009](https://github.com/gbaian10/sve-kit/issues/2009)).
-The shared suites below run through the test wrapper instead.
 
 Tests use synthetic cards for boundaries and a fresh projection of the pinned JP
 batch for the shared suites. The wrapper generates that input, replaces any inherited
@@ -49,15 +42,10 @@ python3 .github/ci/rust_tests.py
 
 Mutation tests use the same wrapper through the manual `cargo-mutants` hook.
 
-The G1 regression checks its selected scenarios at every checkpoint; the
-selection is `tests/rules-scenarios/g1-selection.yaml` and its expected count is
-asserted by `sim/engine/tests/shared.rs`. The full gate count is the
-`expected_scenarios` field in `tests/engine/known-failures.yaml`; every discovered
-scenario must pass or exactly match a `known` entry. These are prototype scenario
-counts, separate from typed integration tests and their results. Pending choices include
-each legal parameter combination, and resolution events follow effect completion
-and removal from the resolution zone. Remaining engine errors and open questions
-are tracked in [the engine tracking issue](https://github.com/gbaian10/sve-kit/issues/478).
+Pending choices include each legal parameter combination, and resolution events
+follow effect completion and removal from the resolution zone. Remaining engine
+errors and open questions are tracked in
+[the engine tracking issue](https://github.com/gbaian10/sve-kit/issues/478).
 
 Effect documents use `format: 1, kind: effect_set`; keywords use
 `format: 1, kind: keyword_registry`, selecting the astra/1 prototype grammar.

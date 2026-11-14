@@ -47,17 +47,13 @@ typed 的 current selection 保存永久身分、整卡及來源閉包；Rust lo
 不得回退到原型卡片程式。整卡可執行仍須逐卡對局測試及語義審查。
 
 舊 `Catalog` 載入原型 YAML 時，除 Schema 外，還以 `catalog/semantics.rs` 比對
-opcode、誘發事件、讀值路徑、選擇器及期間。詳細範圍見[原型載入期拒絕的 YAML](rejected-yaml.md)；
-該清單不代表 typed backend 的接受集合。
+opcode、誘發事件、讀值路徑、選擇器及期間；載入期拒絕結果不代表 typed backend 的接受集合。
 
 ## 驗證方式
 
 測試數量與結果由當次輸入與測試輸出決定，不在文字文件保存固定總數。
 
-- 舊原型共同題本位於 `tests/rules-scenarios/`；`tests/engine/known-failures.yaml` 的
-  `expected_scenarios` 是 gate 的總數契約，`known` 明列允許的未通過結果。
-  原型 YAML 載入拒絕結果須與 `tests/engine/rejected-yaml.yaml` 相符。
-- 同一份題本也在 typed 玩家入口實跑（`sim/engine/tests/typed_exam.rs`，可信 runner `TypedAdapter`）：
+- 共同題本位於 `tests/rules-scenarios/`，在 typed 玩家入口實跑（`sim/engine/tests/typed_exam.rs`，可信 runner `TypedAdapter`）：
   雙方只用玩家介面出手，裁判保留標籤解析、建局、狀態查詢與原始事件紀錄。
   `tests/engine/typed-known-results.yaml` 逐條列出尚未通過的局面、原因類別（未准入卡、舊語意狀態、typed 缺口、介面差異）
   與確切原因 `reason`（引擎回報的原因，或每個不符的 checkpoint、視角與比對項）；
@@ -65,9 +61,8 @@ opcode、誘發事件、讀值路徑、選擇器及期間。詳細範圍見[原�
   typed 對宣告參數逐題提問，所以 awaiting 以 `AwaitingMode::FirstStage` 比對：題本的複合選項只比第一題決定的欄位。
 - typed 的 lowering、raw IR、准入及執行測試位於 `sim/engine/src/ir/tests/`、
   `sim/engine/tests/internal_ir/` 與 `sim/engine/tests/current_repository/` 等；
-  共同原型題本通過不表示這些路徑已被驗收。
-- 執行方式與公開測試輸入依 [sim/engine/README.md](../../sim/engine/README.md)；
-  舊原型的 `sve-prototype` CLI 在目前的作者庫下已無法執行，題本以上述測試為準。
+  共同題本通過不表示這些路徑已被驗收。
+- 執行方式與公開測試輸入依 [sim/engine/README.md](../../sim/engine/README.md)。
 
 題本通過只表示受測局面正確，不能推論任意卡片或組合都正確。
 規則族正反例與推定強度依 [DSL 驗收規格](../dsl/validation.md)。
