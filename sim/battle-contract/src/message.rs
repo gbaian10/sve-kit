@@ -1,11 +1,17 @@
 //! Messages between the host and one seat's client.
 
 use crate::common::{ContentRef, Format, RequestId, Seat};
+use crate::event::{EventDelivery, ResultReason};
+use crate::number::Nat;
+use crate::observation::BattleObservation;
+use crate::presentation::{Notice, PresentationOp};
+use crate::question::{PublicWaiting, Question};
+use alloc::borrow::Cow;
 use core::error::Error;
-use core::fmt;
-use schemars::JsonSchema;
+use core::{fmt, iter};
+use schemars::{JsonSchema, Schema, SchemaGenerator, json_schema};
 use serde::de::{self, Deserializer};
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 
 /// Card text region of the pinned snapshot.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
@@ -202,6 +208,98 @@ struct ReceiptFields {
     rejection: Option<Rejection>,
 }
 
+/// What a seat must do next.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum BattleInput {
+    /// This seat must answer.
+    Question {
+        /// The question.
+        question: Box<Question>,
+    },
+    /// Another seat is answering.
+    Waiting {
+        /// That seat.
+        actor: Seat,
+        /// What this seat may know meanwhile.
+        context: Box<PublicWaiting>,
+    },
+    /// The rules ended the game.
+    Finished {
+        /// Winner; absent for a draw.
+        winner: Option<Seat>,
+        /// Why it ended.
+        reason: ResultReason,
+    },
+    /// Rules execution faulted; this is never a rules result.
+    EngineFault {
+        /// Whether the authority still accepts a concession.
+        can_concede: bool,
+    },
+}
+
+/// The advice list of an update, fixed to `[]` until assisted play is defined.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct NoAdvice;
+
+impl Serialize for NoAdvice {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.collect_seq(iter::empty::<()>())
+    }
+}
+
+impl<'de> Deserialize<'de> for NoAdvice {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        <[(); 0]>::deserialize(deserializer).map(|[]| Self)
+    }
+}
+
+impl JsonSchema for NoAdvice {
+    fn inline_schema() -> bool {
+        true
+    }
+
+    fn schema_name() -> Cow<'static, str> {
+        Cow::Borrowed("NoAdvice")
+    }
+
+    fn json_schema(_generator: &mut SchemaGenerator) -> Schema {
+        json_schema!({ "type": "array", "maxItems": 0_u8 })
+    }
+}
+
+/// One consistent update for one seat, taken at a single stable stop.
+///
+/// The first update is the complete baseline and plays no earlier history.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct BattleUpdate {
+    /// Wire format.
+    pub format: Format,
+    /// Seat this update is authorized for.
+    pub viewer: Seat,
+    /// Counts only changes visible to this seat.
+    pub update_seq: Nat,
+    /// Complete board for this seat.
+    pub observation: BattleObservation,
+    /// What this seat must do next.
+    pub input: BattleInput,
+    /// Committed events not delivered before.
+    pub events: EventDelivery,
+    /// Provisional presentation steps, in order.
+    pub presentation: Vec<PresentationOp>,
+    /// Looks and momentary reveals for this seat.
+    pub notices: Vec<Notice>,
+    /// Advice slot.
+    pub advice: NoAdvice,
+}
+
 /// Everything the host sends to a client.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(tag = "kind", rename_all = "snake_case")]
@@ -209,6 +307,9 @@ pub enum HostMessage {
     /// A game was created for this channel.
     #[schemars(title = "Ready")]
     Ready(Ready),
+    /// A consistent update.
+    #[schemars(title = "BattleUpdate")]
+    Update(Box<BattleUpdate>),
     /// Outcome of a submission.
     #[schemars(title = "Receipt")]
     Receipt(Receipt),

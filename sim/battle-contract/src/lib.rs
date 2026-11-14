@@ -9,9 +9,11 @@ extern crate alloc;
 mod answer;
 mod codec;
 mod common;
+pub mod event;
 mod message;
 mod number;
 pub mod observation;
+pub mod presentation;
 pub mod question;
 mod schema;
 
@@ -20,12 +22,13 @@ pub use answer::{
 };
 pub use codec::{decode, encode};
 pub use common::{
-    CardRef, ContentRef, Format, ObjectHandle, OptionId, QuestionId, RequestId, RuleRef,
-    RuleSource, RuleStrength, Seat, SourceRef, Subject, TextRef, Zone,
+    BatchId, CardRef, CauseId, ContentRef, EventId, Format, NoticeId, ObjectHandle, OptionId,
+    PresentationBatchId, PresentationId, QuestionId, RequestId, RuleRef, RuleSource, RuleStrength,
+    ScopeId, Seat, SourceRef, Subject, TextRef, Zone,
 };
 pub use message::{
-    HostError, HostErrorReason, HostMessage, Identity, Ready, Receipt, ReceiptResult, Region,
-    Rejection,
+    BattleInput, BattleUpdate, HostError, HostErrorReason, HostMessage, Identity, NoAdvice, Ready,
+    Receipt, ReceiptResult, Region, Rejection,
 };
 pub use number::{Int, MAX_SAFE_INTEGER, Nat};
 pub use schema::schema;
