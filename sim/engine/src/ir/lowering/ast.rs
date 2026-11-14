@@ -3955,9 +3955,18 @@ pub(super) struct Delayed {
     pub next_only: bool,
 }
 #[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DelayedOn {
+    Moved { moved: DelayedMove },
+    EnterField { enter_field: DelayedEntry },
+}
+/// 「このターン、次に自分の場にフォロワーが出たとき」: entries of other cards after installation.
+#[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct DelayedOn {
-    pub moved: DelayedMove,
+pub(super) struct DelayedEntry {
+    pub who: Option<EntryPlayer>,
+    pub sel: Option<MovementSubject>,
+    pub entered_by: Option<EntryMethod>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
