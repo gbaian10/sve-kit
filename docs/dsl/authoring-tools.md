@@ -1253,3 +1253,5 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 已宣告正式目標的角色也可作姿態指示的對象，例如 `act: {role: {of: enemies, name: rest}}`。它與傷害角色共用同一份已選取集合，不再詢問第二次選取；`n: 2` 搭配一體 primary 與 remaining 可表示兩個相異從者的不同指示。
 
 Token 建立的數量可使用已准入的公開人口計數，例如 `create: {token: エンシェントアーティファクト, n: {count: {who: opp, zone: field, kind: follower}}, to: field}`。數值在該指示解算時讀取，建立數量仍受目的區容量限制；計數不授予選取私有物件的權限。
+
+打出費用條件中的 `count` 可沿用一般數值入口所支援的計數，包括 `zone: evolve_deck`、`face_up: true` 與 `kind: evolve_follower`。因此表向的 Advance、非進化從者及裏向卡不納入此篩選；費用計算與本文使用相同的公開區域讀取邊界。
