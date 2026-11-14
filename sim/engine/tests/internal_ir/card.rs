@@ -1022,3 +1022,6 @@ mod source_posture;
 
 #[path = "card/spell_origin.rs"]
 mod spell_origin;
+
+#[path = "card/source_counter_quantity.rs"]
+mod source_counter_quantity;

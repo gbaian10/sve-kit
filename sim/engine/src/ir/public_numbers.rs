@@ -4,10 +4,10 @@
     reason = "Unlisted reads must stay outside the closed public declaration grammar."
 )]
 use super::{
-    Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Info, Int, IntOperation,
-    IntRead, KindRead, NamesRead, NatOperation, NatRead, NumberRead, ObjectOperand, ObjectProperty,
-    ObjectRef, ObjectView, PlayerRef, PlayerRelation, PlayerResource, Predicate, SelectionView,
-    Selector, TraitsRead, ZoneKind,
+    Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Holder, Info, Int,
+    IntOperation, IntRead, KindRead, NamesRead, NatFrozen, NatOperation, NatRead, NumberRead,
+    ObjectOperand, ObjectProperty, ObjectRef, ObjectView, PlayerRef, PlayerRelation,
+    PlayerResource, Predicate, SelectionView, Selector, SnapshotFields, TraitsRead, ZoneKind,
 };
 pub(crate) fn check(value: &Expr<Int>) -> bool {
     match value {
@@ -33,7 +33,32 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
                 value: Expr::Live(read),
             } => {
                 matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector) || hand_count(selector))
+                    || matches!(
+                        read.as_ref(),
+                        NatRead::Counter {
+                            holder: Holder::Object {
+                                object: ObjectOperand::SourceHolder {}
+                            },
+                            ..
+                        }
+                    )
             }
+            IntOperation::FromNat {
+                value: Expr::Frozen(read),
+            } => {
+                matches!(read.as_ref(), NatFrozen::SnapshotCounter {object: Expr::Frozen(source), ..}
+                if matches!(source.as_ref(), SnapshotFields::SourceInformation {}))
+            }
+            IntOperation::InformationOrZero { information } => matches!(
+                information,
+                NumberRead::Stats {
+                    object: ObjectView::SourceInformation {},
+                    ..
+                } | NumberRead::Cost {
+                    object: ObjectView::SourceInformation {},
+                    ..
+                }
+            ),
             IntOperation::FromNat {
                 value: Expr::Bound(_),
             } => true,
