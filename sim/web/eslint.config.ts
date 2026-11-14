@@ -144,6 +144,8 @@ export default defineConfig(
     ".playwright-mcp/",
     // Generated from sim/battle-contract; never edited or committed.
     "src/battle/contract/generated/",
+    // wasm-bindgen output from `build:engine`; never edited or committed.
+    "src/battle/engine/generated/",
   ]),
 
   js.configs.recommended,

@@ -9,7 +9,10 @@
     reason = "The engine's dependencies already pull two syn and getrandom generations."
 )]
 
+pub mod load;
 pub mod session;
+#[cfg(target_arch = "wasm32")]
+pub mod wasm;
 pub mod wire;
 
 pub use session::{Delivery, LocalSession, SeatControl};

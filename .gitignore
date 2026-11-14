@@ -204,6 +204,8 @@ mutants.out*
 node_modules/
 # Battle contract types and validator, generated from sim/battle-contract (`bun run generate:contract`).
 /sim/web/src/battle/contract/generated/
+# Engine WebAssembly and glue from `bun run build:engine`.
+/sim/web/src/battle/engine/generated/
 
 ### mise ###
 # Machine-local env such as SVE_DATA_DIR and SVE_TEST_SNAPSHOT.

@@ -1,63 +1,64 @@
-//! Temporary channel messages until the generated battle contract replaces them.
+//! Channel messages between the local host and its seats.
 //!
-//! Only the routing, receipt and rejection semantics are final; payloads are deliberately
-//! minimal and use format 0 so no consumer mistakes them for the contract's format 1.
+//! Seats, ids, numbers, receipts and host errors are the battle contract's
+//! (`sve-battle-contract`); the update and submit payloads stay temporary (format 0) until the
+//! contract's question, answer and update types replace them.
 
 use serde::{Deserialize, Serialize};
+pub use sve_battle_contract::{
+    HostError, HostErrorReason, Nat, QuestionId, Receipt, ReceiptResult, Rejection, RequestId, Seat,
+};
 use sve_engine::game::player::{QuestionPurpose, QuestionShape, Viewer};
 
-/// Format number of these temporary messages; the contract starts at 1.
+/// Format number of the temporary update; the contract's own messages use format 1.
 pub const TEMPORARY_FORMAT: u8 = 0;
 
-/// Largest integer that survives a JavaScript number unchanged (2^53 - 1).
-pub const MAX_SAFE_INTEGER: u64 = 0x001F_FFFF_FFFF_FFFF;
-
-/// A seat on the wire.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Seat {
-    /// First seat.
-    P1,
-    /// Second seat.
-    P2,
-}
-
-impl From<Viewer> for Seat {
-    fn from(viewer: Viewer) -> Self {
-        match viewer {
-            Viewer::P1 => Self::P1,
-            Viewer::P2 => Self::P2,
-        }
+/// The seat named on the wire, if any.
+#[must_use]
+pub fn seat_named(name: &str) -> Option<Seat> {
+    match name {
+        "p1" => Some(Seat::P1),
+        "p2" => Some(Seat::P2),
+        _ => None,
     }
 }
 
-impl From<Seat> for Viewer {
-    fn from(seat: Seat) -> Self {
-        match seat {
-            Seat::P1 => Self::P1,
-            Seat::P2 => Self::P2,
-        }
+/// The wire seat of a native viewer.
+#[must_use]
+pub const fn seat_of(viewer: Viewer) -> Seat {
+    match viewer {
+        Viewer::P1 => Seat::P1,
+        Viewer::P2 => Seat::P2,
+    }
+}
+
+/// The native viewer of a wire seat.
+#[must_use]
+pub const fn viewer_of(seat: Seat) -> Viewer {
+    match seat {
+        Seat::P1 => Viewer::P1,
+        Seat::P2 => Viewer::P2,
     }
 }
 
 /// One command from a seat's channel.
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Submit {
     /// Pairs the receipt with this command inside one local session.
-    pub request_id: String,
+    pub request_id: RequestId,
     /// The rules command.
     pub command: SubmitCommand,
 }
 
 /// Rules commands a seat may send.
-#[derive(Clone, Debug, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum SubmitCommand {
     /// Answer the question the host issued to this seat.
     Answer {
         /// Host-issued question id.
-        question_id: String,
+        question_id: QuestionId,
         /// Temporary answer payload.
         answer: TemporaryAnswer,
     },
@@ -67,7 +68,7 @@ pub enum SubmitCommand {
 
 /// Until the contract's typed answers exist, a seat can only delegate the current
 /// question to the basic policy; the host still validates the question binding.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
 pub enum TemporaryAnswer {
     /// The basic policy answers on behalf of this seat.
@@ -94,7 +95,7 @@ pub struct Update {
     /// Seat this update belongs to.
     pub viewer: Seat,
     /// Counts only this seat's visible changes.
-    pub update_seq: u64,
+    pub update_seq: Nat,
     /// A full baseline replaces all previous seat state on the receiver.
     pub baseline: bool,
     /// Current input state.
@@ -108,7 +109,7 @@ pub enum InputState {
     /// This seat must answer.
     Question {
         /// Host-issued id, valid until this question is accepted, rolled back or replaced.
-        id: String,
+        id: QuestionId,
         /// Rules purpose.
         purpose: Purpose,
         /// Coarse shape family; the contract carries the full typed question.
@@ -185,62 +186,4 @@ impl From<&QuestionShape> for ShapeFamily {
             QuestionShape::ActionWindow(_) => Self::ActionWindow,
         }
     }
-}
-
-/// Result of one command.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize)]
-pub struct Receipt {
-    /// The command's request id.
-    pub request_id: String,
-    /// Native or host classification.
-    pub result: ReceiptResult,
-    /// Present exactly when the command was rejected.
-    pub rejection: Option<Rejection>,
-}
-
-/// Receipt classification; native outcomes stay distinct.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum ReceiptResult {
-    /// Accepted and applied.
-    Applied,
-    /// Not executed; the original question stays answerable.
-    Rejected,
-    /// An illegal play returned to its origin.
-    Reverted,
-    /// The rules cancelled a pending occurrence.
-    Cancelled,
-    /// Native rules execution faulted.
-    EngineFault,
-}
-
-/// Every invalid seat, question, option or answer has the same public reason.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum Rejection {
-    /// Wrong seat, stale, unknown or repeated question, or an invalid answer.
-    InvalidSubmission,
-}
-
-/// Host failure; it never carries the raw payload, secrets or diagnostics.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-pub struct HostError {
-    /// Always [`TEMPORARY_FORMAT`].
-    pub format: u8,
-    /// Failure class.
-    pub reason: HostErrorReason,
-}
-
-/// Host failure classes.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
-#[serde(rename_all = "snake_case")]
-pub enum HostErrorReason {
-    /// A malformed message or format mismatch.
-    Format,
-    /// A number outside the safe integer range.
-    Range,
-    /// Required state or a question could not be projected.
-    Projection,
-    /// A command or search budget ran out.
-    Budget,
 }
