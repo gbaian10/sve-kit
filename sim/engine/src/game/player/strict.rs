@@ -1,7 +1,7 @@
 //! Whole-card admission and dependency closure before any player opening is published.
 
 use super::{DeckConstruction, PlayerDeck, Viewer};
-use crate::catalog::SelectedEffects;
+use crate::catalog::{Catalog, SelectedEffects};
 use crate::game::Game;
 use crate::ir::walk::{NodeRef, Traversal, Visitor};
 use crate::ir::{Action, TokenAllocation, TokenTemplate};
@@ -20,8 +20,6 @@ pub enum AdmissionGapReason {
     MissingProgram,
     /// The author reader reported an unresolved source ruling.
     UnresolvedRuling,
-    /// The selected source and snapshot faces cannot be matched.
-    SourceMismatch,
     /// Whole-card compilation rejected a required runtime feature or shape.
     UnsupportedRuntime,
     /// A referenced token name has no complete, unambiguous template.
@@ -86,6 +84,54 @@ struct Dependencies {
     dynamic: bool,
 }
 
+#[derive(Default)]
+struct DeckClosure {
+    cards: BTreeSet<String>,
+    gaps: BTreeSet<AdmissionGap>,
+    dependencies: BTreeMap<String, BTreeSet<String>>,
+}
+
+impl DeckClosure {
+    fn require_template(
+        &mut self,
+        catalog: &Catalog,
+        name: &str,
+        source: &str,
+        required: &mut BTreeSet<String>,
+    ) -> Result<()> {
+        match catalog.token_print(name) {
+            Ok(printing) => {
+                required.insert(printing);
+            }
+            Err(EngineFailure::Unsupported(_private)) => {
+                self.gaps.insert(AdmissionGap {
+                    card_no: source.into(),
+                    reason: AdmissionGapReason::MissingTokenTemplate,
+                });
+            }
+            Err(error) => return Err(error),
+        }
+        Ok(())
+    }
+
+    fn explains_runtime_rejection(&self, number: &str) -> bool {
+        let mut pending = vec![number];
+        let mut visited = BTreeSet::new();
+        while let Some(card) = pending.pop() {
+            if !visited.insert(card) {
+                continue;
+            }
+            if self.gaps.iter().any(|gap| gap.card_no == card) {
+                return true;
+            }
+            if let Some(dependencies) = self.dependencies.get(card) {
+                pending.extend(dependencies.iter().map(String::as_str));
+            }
+        }
+        false
+    }
+}
+
 impl Visitor for Dependencies {
     fn enter(&mut self, node: NodeRef<'_>, _path: &str) -> Traversal {
         match node {
@@ -121,10 +167,7 @@ impl Visitor for Dependencies {
     }
 }
 
-fn closure(
-    selected: &SelectedEffects,
-    deck: &PlayerDeck,
-) -> Result<(BTreeSet<String>, BTreeSet<AdmissionGap>)> {
+fn closure(selected: &SelectedEffects, deck: &PlayerDeck) -> Result<DeckClosure> {
     let catalog = &selected.prototypes;
     let mut pending = deck
         .main
@@ -139,10 +182,9 @@ fn closure(
     {
         pending.push(catalog.rule_bindings.template("lesson_item")?.card_no);
     }
-    let mut visited = BTreeSet::new();
-    let mut gaps = BTreeSet::new();
+    let mut closure = DeckClosure::default();
     while let Some(number) = pending.pop() {
-        if !visited.insert(number.clone()) {
+        if !closure.cards.insert(number.clone()) {
             continue;
         }
         let reason = if !catalog.cards.contains_key(&number) {
@@ -159,7 +201,7 @@ fn closure(
             None
         };
         if let Some(reason) = reason {
-            gaps.insert(AdmissionGap {
+            closure.gaps.insert(AdmissionGap {
                 card_no: number,
                 reason,
             });
@@ -169,19 +211,12 @@ fn closure(
             continue;
         };
         let mut dependencies = Dependencies::default();
+        let mut required = BTreeSet::new();
         for ability in &candidate.program.card().abilities {
             crate::ir::walk::ability(ability, &mut dependencies);
         }
         for name in dependencies.templates {
-            match catalog.token_print(&name) {
-                Ok(printing) => pending.push(printing),
-                Err(_private) => {
-                    gaps.insert(AdmissionGap {
-                        card_no: number.clone(),
-                        reason: AdmissionGapReason::MissingTokenTemplate,
-                    });
-                }
-            }
+            closure.require_template(catalog, &name, &number, &mut required)?;
         }
         if dependencies.dynamic {
             // A runtime name can come from either player's cards; every selectable template is required.
@@ -189,27 +224,21 @@ fn closure(
                 if token.alias_of.is_some() {
                     continue;
                 }
-                match catalog.token_print(&token.name) {
-                    Ok(template) => pending.push(template),
-                    Err(_private) => {
-                        gaps.insert(AdmissionGap {
-                            card_no: printing.clone(),
-                            reason: AdmissionGapReason::MissingTokenTemplate,
-                        });
-                    }
-                }
+                closure.require_template(catalog, &token.name, printing, &mut required)?;
             }
         }
         let authored = &candidate.expanded["cards"][&candidate.card_no];
-        pending.extend(
+        required.extend(
             authored["token_sources"]
                 .as_array()
                 .into_iter()
                 .flatten()
                 .filter_map(|link| link["card_no"].as_str().map(str::to_owned)),
         );
+        pending.extend(required.iter().cloned());
+        closure.dependencies.insert(number, required);
     }
-    Ok((visited, gaps))
+    Ok(closure)
 }
 
 #[expect(
@@ -221,7 +250,7 @@ impl Game {
     /// No game, opening candidate or opponent card list is published.
     ///
     /// # Errors
-    /// Rejects damaged selection provenance or invalid rule bindings as authority load failures.
+    /// Rejects damaged selection provenance, source mismatches or authority admission failures.
     pub fn check_player_decks(
         selected: &SelectedEffects,
         decks: &[PlayerDeck; 2],
@@ -237,7 +266,7 @@ impl Game {
         let closures = [closure(selected, &decks[0])?, closure(selected, &decks[1])?];
         let required = closures
             .iter()
-            .flat_map(|(cards, _)| cards.iter().cloned())
+            .flat_map(|closure| closure.cards.iter().cloned())
             .collect();
         let mut probe = Self::unopened(
             Arc::clone(&selected.prototypes),
@@ -246,18 +275,18 @@ impl Game {
             &Value::Null,
             "strict-admission",
         )?;
-        let failures: BTreeMap<_, _> = probe.prepare_strict_cards(selected, &required);
+        let failures = probe.prepare_strict_cards(selected, &required)?;
         let mut report = StrictAdmission::default();
-        for ((cards, mut gaps), result) in closures.into_iter().zip(&mut report.gaps) {
-            gaps.extend(
-                failures
-                    .iter()
-                    .filter(|(number, _)| cards.contains(*number))
-                    .map(|(number, reason)| AdmissionGap {
+        for (closure, result) in closures.into_iter().zip(&mut report.gaps) {
+            let mut gaps = closure.gaps.clone();
+            for (number, reason) in &failures {
+                if closure.cards.contains(number) && !closure.explains_runtime_rejection(number) {
+                    gaps.insert(AdmissionGap {
                         card_no: number.clone(),
                         reason: *reason,
-                    }),
-            );
+                    });
+                }
+            }
             result.extend(gaps);
         }
         Ok((probe, report))

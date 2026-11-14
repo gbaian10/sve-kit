@@ -35,8 +35,7 @@ fn decks() -> [PlayerDeck; 2] {
     reason = "An initialization failure is not a deck rejection."
 )]
 fn rejected(selected: SelectedEffects, decks: [PlayerDeck; 2]) -> StrictAdmission {
-    let error =
-        Game::start_strict_player_game(selected, decks, Viewer::P1, "strict-test").unwrap_err();
+    let error = Game::start_player_game(selected, decks, Viewer::P1, "strict-test").unwrap_err();
     let StrictStartError::Admission(report) = error else {
         panic!("expected a deck admission rejection");
     };
@@ -60,8 +59,7 @@ fn strict_complete_decks_and_generated_ex_tokens_can_start() {
             .unwrap()
             .is_admitted()
     );
-    let game =
-        Game::start_strict_player_game(selected, decks(), Viewer::P2, "strict-start").unwrap();
+    let game = Game::start_player_game(selected, decks(), Viewer::P2, "strict-start").unwrap();
     assert!(matches!(game.input(Viewer::P2), Input::Question(_)));
     assert!(matches!(game.input(Viewer::P1), Input::Waiting(_)));
 }
@@ -136,10 +134,9 @@ fn strict_rejects_prototype_only_token_dependencies() {
     let mut decks = decks();
     decks[1].main = vec!["plain".into(); 8];
     let report = rejected(selected(&snapshot, &keywords, &input), decks);
-    assert!(
-        report
-            .gaps(Viewer::P1)
-            .contains(&gap("token", AdmissionGapReason::MissingProgram))
+    assert_eq!(
+        report.gaps(Viewer::P1),
+        [gap("token", AdmissionGapReason::MissingProgram)]
     );
     assert!(report.gaps(Viewer::P2).is_empty());
 }
@@ -169,10 +166,9 @@ fn strict_transitive_token_dependencies_are_checked_for_each_owner() {
     ]]);
     let report = rejected(selected(&snapshot, &keywords, &input), decks());
     for owner in [Viewer::P1, Viewer::P2] {
-        assert!(
-            report
-                .gaps(owner)
-                .contains(&gap("nested", AdmissionGapReason::MissingProgram))
+        assert_eq!(
+            report.gaps(owner),
+            [gap("nested", AdmissionGapReason::MissingProgram)]
         );
     }
 }
@@ -201,7 +197,7 @@ fn strict_ignores_unsupported_cards_outside_both_deck_closures() {
     );
     snapshot.push_str(&unused.to_string());
     input["authors"].as_array_mut().unwrap().push(source);
-    let game = Game::start_strict_player_game(
+    let game = Game::start_player_game(
         selected(&snapshot, &keywords, &input),
         decks(),
         Viewer::P1,
@@ -235,7 +231,7 @@ fn strict_unresolved_rulings_are_reported_only_to_the_affected_owner() {
 }
 
 #[test]
-fn strict_existing_player_startup_also_rejects_missing_admission() {
+fn strict_startup_error_display_does_not_disclose_missing_card_numbers() {
     let (snapshot, keywords, input) = selection(1);
     let mut decks = decks();
     decks[0].evolve.push("not-selected".into());
@@ -298,8 +294,8 @@ fn strict_rule_generated_opening_ex_resources_require_current_admission() {
         .unwrap()
     };
     let mut input = json!({"documents":[],"authors":[source,resource_source]});
-    let game = Game::start_strict_player_game(load(&input), decks.clone(), Viewer::P1, "strict-ex")
-        .unwrap();
+    let game =
+        Game::start_player_game(load(&input), decks.clone(), Viewer::P1, "strict-ex").unwrap();
     let observed = game.observe(Viewer::P2).unwrap();
     let owner = observed
         .players
@@ -337,10 +333,47 @@ fn strict_snapshot_face_closure_must_match_current_sources() {
         })
         .collect::<Vec<_>>()
         .join("\n");
-    let report = rejected(selected(&snapshot, &keywords, &input), decks());
-    assert!(
-        report
-            .gaps(Viewer::P1)
-            .contains(&gap("token", AdmissionGapReason::SourceMismatch))
+    let selected = selected(&snapshot, &keywords, &input);
+    assert!(matches!(
+        Game::check_player_decks(&selected, &decks()),
+        Err(sve_engine::EngineFailure::Invalid(_))
+    ));
+    assert!(matches!(
+        Game::start_player_game(selected, decks(), Viewer::P1, "strict-source"),
+        Err(StrictStartError::Initialization(
+            sve_engine::EngineFailure::Invalid(_)
+        ))
+    ));
+}
+
+#[test]
+fn strict_dependency_gaps_do_not_hide_an_unrelated_unsupported_card() {
+    let (mut snapshot, keywords, mut input) = selection(1);
+    input["authors"].as_array_mut().unwrap().truncate(1);
+    input["documents"] = json!([[
+        "synthetic",
+        "format: 1\nkind: effect_set\ncards:\n  token:\n    status: complete\n    abilities: []\n"
+    ]]);
+    let (unsupported, source) = author(
+        "unsupported",
+        "33333333333333333333333333333333",
+        "アミュレット",
+        vec![],
+    );
+    snapshot.push_str(&unsupported.to_string());
+    input["authors"].as_array_mut().unwrap().push(source);
+    let mut decks = decks();
+    decks[0].main.push("unsupported".into());
+    let report = rejected(selected(&snapshot, &keywords, &input), decks);
+    assert_eq!(
+        report.gaps(Viewer::P1),
+        [
+            gap("token", AdmissionGapReason::MissingProgram),
+            gap("unsupported", AdmissionGapReason::UnsupportedRuntime),
+        ]
+    );
+    assert_eq!(
+        report.gaps(Viewer::P2),
+        [gap("token", AdmissionGapReason::MissingProgram)]
     );
 }

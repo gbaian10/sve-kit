@@ -396,7 +396,7 @@ impl Game {
         &mut self,
         selected: &SelectedEffects,
         required: &BTreeSet<String>,
-    ) -> BTreeMap<String, crate::game::player::AdmissionGapReason> {
+    ) -> Result<BTreeMap<String, crate::game::player::AdmissionGapReason>> {
         use crate::game::player::AdmissionGapReason;
         let mut definitions = RuntimeCards::default();
         let mut failures = BTreeMap::new();
@@ -404,34 +404,24 @@ impl Game {
             let Some(candidate) = selected.current.get(number) else {
                 continue;
             };
-            match self
-                .catalog
-                .resolve_current(Arc::clone(candidate))
-                .and_then(|card| {
-                    self.catalog.check_current_printing(number, &card)?;
-                    Ok(card)
-                }) {
-                Ok(card) => {
-                    definitions.current.insert(number.clone(), Arc::new(card));
-                }
-                Err(_private) => {
-                    failures.insert(number.clone(), AdmissionGapReason::SourceMismatch);
-                }
-            }
+            let card = self.catalog.resolve_current(Arc::clone(candidate))?;
+            self.catalog.check_current_printing(number, &card)?;
+            definitions.current.insert(number.clone(), Arc::new(card));
         }
         self.card_runtime.selected = true;
         self.card_runtime.definitions = Arc::new(definitions);
         for number in required {
-            if failures.contains_key(number) {
-                continue;
-            }
-            if let Some(candidate) = selected.current.get(number)
-                && self.load_internal_card(number, &candidate.program).is_err()
-            {
-                failures.insert(number.clone(), AdmissionGapReason::UnsupportedRuntime);
+            if let Some(candidate) = selected.current.get(number) {
+                match self.load_internal_card(number, &candidate.program) {
+                    Ok(()) => {}
+                    Err(crate::EngineFailure::Unsupported(_private)) => {
+                        failures.insert(number.clone(), AdmissionGapReason::UnsupportedRuntime);
+                    }
+                    Err(error) => return Err(error),
+                }
             }
         }
-        failures
+        Ok(failures)
     }
 
     fn printed_face_ordinal(&self, card: &str, face: &FaceId) -> Result<usize> {

@@ -65,27 +65,9 @@ impl Game {
     /// No arbitrary position, anonymous cards, physical identities or prototype programs enter.
     ///
     /// # Errors
-    /// Rejects invalid selection provenance, missing typed cards or failed opening initialization.
-    /// These load failures are distinct from a later submission's `EngineFault` result.
-    pub fn start_player_game(
-        selected: SelectedEffects,
-        decks: [PlayerDeck; 2],
-        first_chooser: Viewer,
-        seed: &str,
-    ) -> Result<Self> {
-        Self::start_strict_player_game(selected, decks, first_chooser, seed).map_err(|error| {
-            match error {
-                super::StrictStartError::Admission(_) => invalid("strict deck admission failed"),
-                super::StrictStartError::Initialization(error) => error,
-            }
-        })
-    }
-
-    /// Start strict play, returning admission gaps only through their owner's report.
-    ///
-    /// # Errors
     /// Returns owner-scoped admission gaps or an authority-only initialization failure.
-    pub fn start_strict_player_game(
+    /// These startup failures are distinct from a later submission's `EngineFault` result.
+    pub fn start_player_game(
         selected: SelectedEffects,
         decks: [PlayerDeck; 2],
         first_chooser: Viewer,
