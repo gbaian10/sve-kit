@@ -135,7 +135,7 @@ def generate(format_version: str = MEDIA) -> bytes:
             )
     _patterns(source)
     definitions = object_value(source["definitions"])
-    if format_version == PROGRAMS:
+    if selected.version == PROGRAMS:
         extra = program_definitions()
         definitions.update(extra)
         source["order"] = [*array(source["order"]), *sorted(extra)]

@@ -300,6 +300,7 @@ def support(
             if reasons:
                 blocks.append({"region": code, "reasons": json_list(sorted(reasons))})
         selected = documents.get(string(card["id"]))
+        # Shared programs require JP build support until EN-only cards are supported.
         state = states.get((string(card["id"]), "jp"))
         if selected is not None and (
             state is None

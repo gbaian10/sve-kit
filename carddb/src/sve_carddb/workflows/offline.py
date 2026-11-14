@@ -901,6 +901,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             ),
             digital_assets=False,
         ).with_text_views(views.wording, views.observed)
+        mark("views + decisions")
         if author_inputs is not None and author_inputs.index.records:
             assert expander is not None
             if translation is None:
@@ -919,7 +920,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     author_inputs,
                     expander,
                 )
-        mark("views + decisions")
+            mark("db: admitted author programs")
         projection = project(
             db,
             regions=("en", "jp"),

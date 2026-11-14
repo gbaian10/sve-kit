@@ -446,12 +446,8 @@ def _program_closure(
     view: View, files: dict[str, Row], payloads: Mapping[str, bytes]
 ) -> None:
     program_file = next(file for file in files.values() if file["role"] == "programs")
-    entries = [
-        object_value(entry)
-        for entry in array(
-            object_value(parse(payloads[string(program_file["key"])]))["entries"]
-        )
-    ]
+    programs = object_value(parse(payloads[string(program_file["key"])]))
+    entries = [object_value(entry) for entry in array(programs["entries"])]
     _ordered([entry["id"] for entry in entries])
     by_id = {string(entry["id"]): entry for entry in entries}
     faces = {string(row["id"]): row["card_id"] for row in view["face"]}
@@ -475,14 +471,7 @@ def _program_closure(
             reference = support["program_ref"]
             if reference is None:
                 continue
-            if (
-                string(
-                    object_value(parse(payloads[string(program_file["key"])]))[
-                        "format_version"
-                    ]
-                )
-                == MEDIA
-            ):
+            if programs["format_version"] == MEDIA:
                 raise ValueError("No programs supported in this profile")
             ref = object_value(reference)
             entry = by_id.get(string(ref["entry_id"]))
