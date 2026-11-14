@@ -1241,3 +1241,5 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 `distinct_orig_costs: {in: {objects_of: milled, view: before}}` 沿既有種類數聚合，僅讀同一本文先前由自己牌庫頂固定正張數送到墓場的實際成功成員。
 `== 1` 同時表示成員非空且原費全部相同；不以指示要求的張數或墓場目前全部卡片代替。回條不存在、來自其他來源／目的地、After 投影或附加篩選皆拒絕；原費讀不可變本體印刷，不套用目前費用修正。
 ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-0017.yaml) 採 `strength: inferred`：只成功一張仍抽牌，零張不抽。這是本專案解讀，沒有直接官方邊界裁定；三語助理提示登錄在裁定檔，卡片 `meta.rulings` 引用它。
+
+`auto.on.moved: {from: {who: self, zone: ex}, during: your_turn}` 搭配 `aggregation: batch`，每次實際移區指示只產生一次待機。本文的 `{event: amount}` 讀取該批符合玩家及目的地的成功離開數，包含離開後消去的 token，不包含未移動或其他區域的卡；該值在移區提交時保存，不受後續 EX 內容影響。省略 `to` 觀察所有目的地，正式打出從 EX 到解決區也會觸發。

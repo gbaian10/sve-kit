@@ -635,6 +635,7 @@ variants!(IntFrozen {
     CounterChangeDelta { event: Binding<CounterChangeEvent> } => ["read.event-field"],
     ReceiptRequested { receipt: MeasuredReceipt } => ["read.receipt.requested"],
     DamageAmount { event: Binding<DamageEvent> } => ["read.event-field"],
+    MoveBatchCount { event: Binding<MoveEvent> } => ["read.event-field"],
     StatDelta { event: Binding<StatDelta> } => ["read.event-field"]
 });
 variants!(NatFrozen {

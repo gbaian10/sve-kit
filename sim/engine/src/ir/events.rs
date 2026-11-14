@@ -7,6 +7,7 @@ pub(crate) mod discard;
 pub(crate) mod draw;
 pub(crate) mod drive;
 pub(crate) mod equipment;
+pub(crate) mod ex_departure;
 pub(crate) mod fusion;
 pub(crate) mod life;
 pub(crate) mod mill;

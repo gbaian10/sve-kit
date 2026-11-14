@@ -1017,3 +1017,6 @@ mod player_choices;
 
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
+
+#[path = "card/ex_departure_batch.rs"]
+mod ex_departure_batch;

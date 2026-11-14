@@ -565,6 +565,38 @@ impl Execution {
         Ok(())
     }
 
+    fn frozen_integer(&self, frozen: &IntFrozen) -> Result<Int> {
+        match frozen {
+            IntFrozen::MoveBatchCount { event } => {
+                let count = self
+                    .event_reads
+                    .move_batch_count(*event)
+                    .ok_or_else(|| invalid("missing committed EX batch authority"))?;
+                Ok(Int(i64::try_from(count).map_err(invalid)?))
+            }
+            IntFrozen::DamageAmount { event } => {
+                let hit = self
+                    .event_reads
+                    .damage(*event)
+                    .ok_or_else(|| invalid("missing damage event authority"))?;
+                Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
+            }
+            IntFrozen::PaidMaterialActs { receipt } => {
+                super::receipt_members::paid_material_acts(self, receipt)
+            }
+            IntFrozen::PaidMaterialNumber { receipt, property } => {
+                super::receipt_members::paid_material_number(self, receipt, *property)
+            }
+            IntFrozen::ReceiptRequested { receipt } => {
+                self.quantity(receipt).map(|(requested, _)| requested)
+            }
+            IntFrozen::DiscardedCost { receipt } => {
+                super::receipt_members::discarded_cost(self, receipt)
+            }
+            _ => Err(unsupported("signed projection")),
+        }
+    }
+
     pub(super) fn integer(&self, game: &Game, expr: &Expr<Int>) -> Result<Int> {
         match expr {
             Expr::Literal(value) => Ok(*value),
@@ -592,28 +624,7 @@ impl Execution {
                     super::history_turn::sum(self, game, &plan)
                 }
             },
-            Expr::Frozen(frozen) => match frozen.as_ref() {
-                IntFrozen::DamageAmount { event } => {
-                    let hit = self
-                        .event_reads
-                        .damage(*event)
-                        .ok_or_else(|| invalid("missing damage event authority"))?;
-                    Ok(Int(i64::try_from(hit.amount.0.get()).map_err(invalid)?))
-                }
-                IntFrozen::PaidMaterialActs { receipt } => {
-                    super::receipt_members::paid_material_acts(self, receipt)
-                }
-                IntFrozen::PaidMaterialNumber { receipt, property } => {
-                    super::receipt_members::paid_material_number(self, receipt, *property)
-                }
-                IntFrozen::ReceiptRequested { receipt } => {
-                    self.quantity(receipt).map(|(requested, _)| requested)
-                }
-                IntFrozen::DiscardedCost { receipt } => {
-                    super::receipt_members::discarded_cost(self, receipt)
-                }
-                _ => Err(unsupported("signed projection")),
-            },
+            Expr::Frozen(frozen) => self.frozen_integer(frozen),
             Expr::Compute(operation) => match operation.as_ref() {
                 IntOperation::InformationOrZero { information } => {
                     self.number_information(game, information).map(Int)

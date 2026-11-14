@@ -801,6 +801,7 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
                     matches!(
                         other.capability.code,
                         "shape.NatFrozen.DiceValue"
+                            | "shape.IntFrozen.MoveBatchCount"
                             | "shape.EntryMethodFields.EnterFieldMethod"
                             | "shape.EntryOriginFields.EnterFieldFrom"
                     ) && other
@@ -819,7 +820,8 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.Action.Dice"
+        "shape.IntFrozen.MoveBatchCount"
+            | "shape.Action.Dice"
             | "action.dice"
             | "shape.DiceOperation.Roll"
             | "shape.Control.Repeat"

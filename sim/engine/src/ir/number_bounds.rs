@@ -1,6 +1,6 @@
 //! Conservative bounds describe successful checked results, never runtime clamping.
 
-use super::{Arithmetic, Expr, Int, IntOperation};
+use super::{Arithmetic, Expr, Int, IntFrozen, IntOperation};
 
 #[derive(Clone, Copy)]
 pub(crate) struct Bounds {
@@ -74,6 +74,10 @@ pub(crate) fn integer(expression: &Expr<Int>) -> Bounds {
     };
     match expression {
         Expr::Literal(Int(value)) => Bounds::point(*value),
+        Expr::Frozen(read) if matches!(read.as_ref(), IntFrozen::MoveBatchCount { .. }) => Bounds {
+            lower: 0,
+            upper: i64::MAX,
+        },
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value } => {
                 if let Expr::Literal(value) = value

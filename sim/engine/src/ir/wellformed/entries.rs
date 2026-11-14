@@ -3,6 +3,7 @@ use crate::ir::events::banish as banish_header;
 use crate::ir::events::damage::DamageFilter;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::discard::DiscardFilter;
+use crate::ir::events::ex_departure::ExDepartureFilter;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::timing::second_header;
 use crate::ir::events::{drive, equipment};
@@ -63,6 +64,23 @@ fn batch_discard(trigger: &TriggerSpec) -> bool {
         && trigger.view == EventSnapshotPolicy::BeforeExit
         && DiscardFilter::parse(*binding, predicate)
             .is_some_and(|plan| plan.own == Some(true) && plan.own_turn && !plan.itself)
+}
+
+// EX batches retain one MoveEvent carrying the committed member count.
+fn batch_ex_departure(trigger: &TriggerSpec) -> bool {
+    let TriggerCondition::Event {
+        pattern: EventPattern::Move { binding, predicate },
+    } = &trigger.on
+    else {
+        return false;
+    };
+    trigger.aggregation
+        == (TriggerAggregation::PerBatch {
+            key: BatchPolicy::Instruction {},
+        })
+        && trigger.active_zones == [ZoneKind::Field]
+        && trigger.view == EventSnapshotPolicy::BeforeExit
+        && ExDepartureFilter::parse(*binding, predicate).is_some()
 }
 
 fn batch_damage(trigger: &TriggerSpec) -> bool {
@@ -623,7 +641,8 @@ impl Checker {
         }
         if (trigger.aggregation != (TriggerAggregation::PerFact {})
             && !batch_discard(trigger)
-            && !batch_damage(trigger))
+            && !batch_damage(trigger)
+            && !batch_ex_departure(trigger))
             || trigger
                 .limit
                 .is_some_and(|limit| !LimitSpec::is_triggered(limit))

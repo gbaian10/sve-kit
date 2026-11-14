@@ -1,13 +1,14 @@
 use super::super::{
-    CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, IntFrozen, IntRead,
-    LifeChangeEvent, NatFrozen, NumberRead, ObjectView, PlayerResource, Precondition,
-    PreconditionKind, PreconditionReason, SnapshotFields, Stat,
+    CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, EventPattern, IntFrozen,
+    IntRead, LifeChangeEvent, NatFrozen, NumberRead, ObjectView, PlayerResource, Precondition,
+    PreconditionKind, PreconditionReason, SnapshotFields, Stat, TriggerCondition,
 };
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, Int,
     IntOperation, LoweringError, Nat, NatRead, PlayerRef, PlayerRelation, PlayerSet, Predicate,
     SelectionView, Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
+use crate::ir::events::ex_departure::ExDepartureFilter;
 use core::slice::from_ref;
 
 pub(super) fn discarded_history(
@@ -894,7 +895,7 @@ impl BodyContext<'_> {
                 own_turn: None,
             },
         );
-        let super::super::EventPattern::LifeChange { predicate, .. } = query.pattern else {
+        let EventPattern::LifeChange { predicate, .. } = query.pattern else {
             return Err(unsupported(path));
         };
         Ok(Expr::Live(Box::new(IntRead::HistorySum {
@@ -1121,6 +1122,16 @@ impl BodyContext<'_> {
                     }))
                 })
                 .ok_or_else(|| unsupported(path));
+        }
+        if let Some(trigger) = &self.event_trigger
+            && let TriggerCondition::Event {
+                pattern: EventPattern::Move { binding, predicate },
+            } = &trigger.on
+            && ExDepartureFilter::parse(*binding, predicate).is_some()
+        {
+            return Ok(Expr::Frozen(Box::new(IntFrozen::MoveBatchCount {
+                event: *binding,
+            })));
         }
         self.damage_event
             .map(|event| Expr::Frozen(Box::new(IntFrozen::DamageAmount { event })))
