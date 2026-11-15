@@ -7,6 +7,9 @@ use sve_battle_contract::{
 use sve_engine::battle::BattleReferences;
 use sve_engine::game::player::{EvolutionAnswer, EvolutionForm, EvolutionQuestion};
 
+#[path = "evolution_form/privacy.rs"]
+mod privacy;
+
 fn make_form(catalog: &Arc<Catalog>, actor: Viewer, secret: &str) -> Game {
     evolution_payment::at_form(
         catalog,

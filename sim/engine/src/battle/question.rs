@@ -316,6 +316,7 @@ fn evolution_form(
             return Err(ProjectionError::Unavailable);
         }
         let option_id = option(id, index);
+        // The destination CardRef lets clients read its name from the pinned snapshot.
         choices.push(wire::ChoiceOption {
             id: option_id.clone(),
             value: wire::ChoiceValue::EvolutionForm {
