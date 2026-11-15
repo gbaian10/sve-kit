@@ -1,0 +1,45 @@
+cards:
+  BP02-093:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n:
+                  cost_of: it
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                kind: amulet
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - evolve_time:
+          do:
+            - create:
+                n: 1
+                to: field
+                token: うたかたの月
+            - life:
+                delta: 3
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+    token_sources:
+      - card: BP02-T08
+        line: 1
+        section: 1
+format: 2
+kind: author_effect_set
