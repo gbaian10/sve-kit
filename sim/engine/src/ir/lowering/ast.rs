@@ -2487,6 +2487,8 @@ pub(super) enum PhaseSubscription {
     Moved(MoveSubscription),
     #[serde(rename = "placed_ex")]
     PlacedEx(ExSubscription),
+    #[serde(rename = "raced")]
+    Raced(RaceSubscription),
     #[serde(rename = "damaged")]
     Damage(DamageSubscription),
     #[serde(rename = "attacked")]
@@ -2810,6 +2812,7 @@ pub(super) struct ObjectLocation {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostCondition {
+    Chosen(CostChosen),
     Spellchain(u64),
     Necro(u64),
     Awakened(bool),
@@ -2822,6 +2825,21 @@ pub(super) enum CostCondition {
     Cmp(CostComparison),
     Exists(PublicQuery),
     History(Box<HistoryQuery>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CostChosen {
+    #[serde(rename = "ref")]
+    pub reference: String,
+    pub r#where: Option<CostChosenName>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CostChosenName {
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -4363,4 +4381,13 @@ pub(super) struct Declare {
 #[serde(rename_all = "snake_case")]
 pub(super) enum DeclareNumber {
     Number,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RaceSubscription {
+    pub who: Option<EntryPlayer>,
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub sel: Option<MovementSubject>,
 }

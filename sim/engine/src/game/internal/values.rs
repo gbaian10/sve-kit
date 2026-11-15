@@ -1318,6 +1318,7 @@ impl Execution {
                     .ok_or_else(|| invalid("missing card play origin"))?
                     == *zone,
             )),
+            BoolRead::CardPlayTarget { .. } => self.play_target_match(game, read).map(Bool),
             BoolRead::Crimson { player } => {
                 let seat = seat_name(self.player(game, player)?)?;
                 Ok(Bool(

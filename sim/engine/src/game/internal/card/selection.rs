@@ -1,3 +1,4 @@
+use super::super::play_target_cost::SelectedNames;
 use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait};
 use super::{Execution, Game, Nat, ObjectRef, PlayerId, Result, invalid, player_id, unsupported};
 use crate::game::Object;
@@ -22,6 +23,7 @@ use crate::ir::{
     AggregateBound, NumericProperty, RoleCardinality, TargetRoleAnswer, TargetRoleSpec,
 };
 use crate::ir::{Bool, Expr, MemberProjection, ObjectFrozen, SelectionView, Visibility, ZoneKind};
+use crate::ir::{CardName, ExecutionId};
 use crate::ir::{Position, ReceiptLocation, hand_position};
 use crate::ir::{advance_entry, effect_evolution};
 use crate::ir::{follow_keyword, public_evolve, public_numbers};
@@ -234,6 +236,27 @@ impl TargetWait {
             }
         }
         Ok(())
+    }
+
+    pub(in crate::game::internal) fn quote_names(
+        &self,
+        execution: ExecutionId,
+        members: &[ObjectRef],
+    ) -> Option<SelectedNames> {
+        let [member] = members else { return None };
+        if !self.public_board_single() || !self.members.contains(member) {
+            return None;
+        }
+        let saved = self
+            .characteristics
+            .iter()
+            .find(|(candidate, _)| candidate == member)?;
+        Some(SelectedNames {
+            execution,
+            decision: self.decision.id,
+            member: *member,
+            names: saved.1.names.iter().cloned().map(CardName).collect(),
+        })
     }
 
     /// Every candidate stood on a field or in an EX area when this public pick of one was made.
@@ -1557,6 +1580,44 @@ impl Game {
         self.internal_feasible_targets(execution, &execution.slots, &targets)
     }
 
+    pub(super) fn internal_quote_target_probes(
+        &self,
+        execution: &Execution,
+        parameters: &VecDeque<Decision>,
+    ) -> Result<Vec<Execution>> {
+        let mut probes = vec![execution.clone()];
+        for decision in parameters {
+            if !self.has_target_cost(execution, Some(decision.id))? {
+                continue;
+            }
+            let mut next = Vec::new();
+            for probe in probes {
+                let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
+                    return Err(invalid("quote dependency is not an object target"));
+                };
+                if probe.selected_target_names.contains_key(&binding.key()) {
+                    next.push(probe);
+                    continue;
+                }
+                let (wait, _) = self.target_domain(&probe, decision)?;
+                for member in &wait.members {
+                    let members = vec![*member];
+                    if !wait.compatible(&members)?
+                        || wait.priority_score(&members) != wait.required_score
+                    {
+                        continue;
+                    }
+                    let mut filled = probe.clone();
+                    filled.bind_targets(&wait, members);
+                    filled.captures(self, &decision.captures)?;
+                    next.push(filled);
+                }
+            }
+            probes = next;
+        }
+        Ok(probes)
+    }
+
     pub(super) fn internal_feasible_targets(
         &self,
         execution: &Execution,
@@ -2021,6 +2082,11 @@ impl Execution {
         wait: &TargetWait,
         members: Vec<ObjectRef>,
     ) {
+        if let Some(names) = wait.quote_names(self.id, &members) {
+            self.selected_target_names.insert(wait.binding.key(), names);
+        } else {
+            self.selected_target_names.remove(&wait.binding.key());
+        }
         self.targets.insert(wait.binding.key(), wait.clone());
         self.slots.insert(
             wait.binding.key(),
