@@ -7,7 +7,7 @@ use sve_battle_contract::observation::{EvolutionState, Facing, Posture};
 use sve_battle_contract::{Int as WireInt, Nat as WireNat, Seat, Subject, Zone};
 use sve_engine::battle::{ProjectedEvent, project_batch};
 use sve_engine::game::internal::InputDomain;
-use sve_engine::game::player::observation::ObservedZone;
+use sve_engine::game::player::observation::{CardObservation, ObservedZone};
 use sve_engine::game::player::{SubmissionKind, Viewer};
 
 /// Every committed batch of this viewer as the wire states it.
@@ -31,8 +31,20 @@ fn fielded(game: &Game, viewer: Viewer, owner: Viewer) -> Subject {
 
 /// The wire subject of the first card `owner` has in `zone`, as `viewer` identifies it now.
 fn placed(game: &Game, viewer: Viewer, owner: Viewer, zone: ObservedZone) -> Subject {
+    known(game, viewer, owner, zone, |_| true).remove(0)
+}
+
+/// The wire subjects of the cards `owner` has in `zone` that `wanted` accepts, in zone
+/// order, as `viewer` identifies them now.
+fn known(
+    game: &Game,
+    viewer: Viewer,
+    owner: Viewer,
+    zone: ObservedZone,
+    wanted: impl Fn(&CardObservation) -> bool,
+) -> Vec<Subject> {
     let observation = game.observe(viewer).unwrap();
-    let card = observation
+    observation
         .players
         .iter()
         .find(|player| player.player == owner)
@@ -42,20 +54,19 @@ fn placed(game: &Game, viewer: Viewer, owner: Viewer, zone: ObservedZone) -> Sub
         .find(|entry| entry.kind == zone)
         .unwrap()
         .cards
-        .first()
-        .unwrap()
-        .card
-        .clone();
-    Subject::Card {
-        card: sve_battle_contract::CardRef {
-            printing_id: card.properties.card,
-            face: WireNat::try_from(card.properties.face).unwrap(),
-        },
-        object: Some(sve_battle_contract::ObjectHandle::new(format!(
-            "{}@0",
-            card.handle.as_str()
-        ))),
-    }
+        .iter()
+        .filter(|member| wanted(&member.card))
+        .map(|member| Subject::Card {
+            card: sve_battle_contract::CardRef {
+                printing_id: member.card.properties.card.clone(),
+                face: WireNat::try_from(member.card.properties.face).unwrap(),
+            },
+            object: Some(sve_battle_contract::ObjectHandle::new(format!(
+                "{}@0",
+                member.card.handle.as_str()
+            ))),
+        })
+        .collect()
 }
 
 #[test]
@@ -649,6 +660,15 @@ fn a_fusion_states_its_subject_and_materials_before_the_ability_it_qualifies() {
 fn a_flip_down_names_the_card_by_the_object_it_was_while_face_up() {
     let mut game = flip_down::board(&flip_down::program(false));
     game.advance_player_input();
+    // Both face-up evolve cards are the same printing: only the object tells them apart.
+    let face_up = |game: &Game| {
+        [Viewer::P1, Viewer::P2].map(|viewer| {
+            known(game, viewer, Viewer::P1, ObservedZone::EvolveDeck, |card| {
+                card.face_up
+            })
+        })
+    };
+    let before = face_up(&game);
     let CardPlay::Awaiting(question) = game
         .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
         .unwrap()
@@ -670,25 +690,29 @@ fn a_flip_down_names_the_card_by_the_object_it_was_while_face_up() {
         "the ability resolves"
     );
     game.advance_player_input();
-    for viewer in [Viewer::P1, Viewer::P2] {
-        let bodies = bodies(&game, viewer);
-        let flips = bodies
+    let after = face_up(&game);
+    for ((viewer, before), after) in [Viewer::P1, Viewer::P2].into_iter().zip(before).zip(after) {
+        let turned = before
             .iter()
+            .filter(|card| !after.contains(card))
+            .collect::<Vec<_>>();
+        assert_eq!(
+            (before.len(), turned.len()),
+            (2, 1),
+            "{viewer:?}: one of the two face-up evolve cards is no longer face up"
+        );
+        let flips = bodies(&game, viewer)
+            .into_iter()
             .filter(|body| matches!(body, EventBody::FacingChanged { .. }))
             .collect::<Vec<_>>();
-        assert!(
-            matches!(
-                flips.as_slice(),
-                [EventBody::FacingChanged {
-                    subject: Some(Subject::Card {
-                        card,
-                        object: Some(_),
-                    }),
-                    facing: Facing::Down,
-                }] if card.printing_id == "form"
-            ),
-            "{viewer:?}: one public evolve card turns face down, named as it was known: \
-             {bodies:?}"
+        assert_eq!(
+            flips,
+            vec![EventBody::FacingChanged {
+                subject: Some(turned[0].clone()),
+                facing: Facing::Down,
+            }],
+            "{viewer:?}: the only flip names the chosen card by the face and object it had \
+             while face up, not the other card of the same printing"
         );
     }
 }
