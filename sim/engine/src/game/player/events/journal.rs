@@ -372,16 +372,10 @@ impl Journal {
             .filter(move |event| event.id.index > offset))
     }
 
-    /// One handoff to this viewer: when `ready`, record every complete batch it has not been
-    /// shown yet, in order, up to the first one it cannot identify; then remember `live`,
-    /// the handles it holds now, for the next handoff.
-    ///
-    /// When not `ready`, nothing is shown, but the board handed now already contains the
-    /// complete batches up to the first one this viewer cannot identify. Those are not new
-    /// to it when they commit, unless they belong to a play's declaration and payment, which
-    /// keep their first presentation; `unplayed` is where a play that has not been played
-    /// yet began. The batch it cannot identify, and everything after it, are left alone, so
-    /// that batch still holds back every later one at the next handoff.
+    /// One handoff to this viewer. When `ready`, every complete batch it has not been shown
+    /// is recorded in order; otherwise the ordinary ones are noted as already on the board it
+    /// is handed, where `unplayed` marks a play that is still declaring. Then `live`, the
+    /// handles it holds now, is remembered for the next handoff.
     pub(super) fn present(
         &mut self,
         viewer: Viewer,
@@ -397,9 +391,7 @@ impl Journal {
         if log.fault {
             return Err(EventError::ProjectionGap);
         }
-        // In rules order, up to the first batch this viewer cannot identify: that batch and
-        // everything after it wait for commitment, neither shown early nor taken as already
-        // on its board.
+        // A batch this viewer cannot identify must keep holding back every later one.
         for batch in sealed_batches(&self.pending, perspective, unplayed) {
             let reached = if ready {
                 log.presentation

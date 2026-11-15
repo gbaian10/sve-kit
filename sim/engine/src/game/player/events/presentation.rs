@@ -275,10 +275,8 @@ impl Presentation {
             .is_some()
     }
 
-    /// At a handoff that shows nothing: the board handed now contains this batch, so unless
-    /// it is a play's declaration and payment it will not be new to this viewer when it
-    /// commits. `false` means this viewer cannot identify the batch: it is not on its board,
-    /// and it holds back everything after it exactly as it does at a qualifying stop.
+    /// The board handed now contains this batch: unless it is a play's declaration and
+    /// payment, it is not new when it commits. `false`: the viewer cannot identify it.
     pub(super) fn cover(
         &mut self,
         live: &BTreeSet<ObjectHandle>,
