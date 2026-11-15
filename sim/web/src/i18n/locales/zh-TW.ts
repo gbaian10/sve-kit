@@ -52,6 +52,7 @@ const zhTW = {
   rules: {
     sections: "規則分頁",
     comprehensive: "綜合規則",
+    toc: "目錄",
     officialLink: "官方網站規則頁",
     loading: "正在載入綜合規則…",
     loadFailed: "綜合規則載入失敗，請重新整理頁面。",

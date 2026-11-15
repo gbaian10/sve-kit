@@ -65,6 +65,7 @@ export default {
   rules: {
     sections: "Rules sections",
     comprehensive: "Comprehensive rules",
+    toc: "Contents",
     officialLink: "Official rules page",
     loading: "Loading the comprehensive rules…",
     loadFailed: "The comprehensive rules could not be loaded. Please reload the page.",

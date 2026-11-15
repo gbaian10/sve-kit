@@ -56,6 +56,7 @@ export default {
   rules: {
     sections: "ルールのタブ",
     comprehensive: "総合ルール",
+    toc: "目次",
     officialLink: "公式サイトのルールページ",
     loading: "総合ルールを読み込み中…",
     loadFailed: "総合ルールを読み込めませんでした。ページを再読み込みしてください。",

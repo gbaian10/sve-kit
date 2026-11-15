@@ -95,7 +95,7 @@ it("shows the version facts and the Japanese original while no translation exist
     "https://example.invalid/rules.pdf",
   )
   expect(screen.getByText("繁中譯文準備中，目前先顯示日文原文。")).toBeInTheDocument()
-  const chapter = screen.getByRole("heading", { level: 2 })
+  const chapter = within(screen.getByRole("article")).getByRole("heading", { level: 2 })
   expect(chapter).toHaveTextContent("1章一")
   expect(within(chapter).getByText("章一").closest("[lang]")).toHaveAttribute("lang", "ja")
   // No per-node tags while nothing at all is translated.
@@ -112,12 +112,15 @@ it("renders icons, unknown markers, bullets, examples and resolved references", 
   expect(within(first).getByRole("img", { name: "起動" })).toBeInTheDocument()
   expect(within(first).getByText("PP")).toBeInTheDocument()
   expect(within(first).getByText("例：例一")).toBeInTheDocument()
-  expect(within(first).getByRole("link", { name: "1.1.2" })).toHaveAttribute("href", "#r-1.1.2")
+  expect(within(first).getByRole("link", { name: "1.1.2" })).toHaveAttribute(
+    "href",
+    "/rules#r-1.1.2",
+  )
   expect(within(rule("1.1.2") as HTMLElement).getAllByRole("listitem")).toHaveLength(2)
   // Inside appendix B-1 a citation means the appendix's own restated clause first.
   expect(
     within(rule("B-1:1.1.2") as HTMLElement).getByRole("link", { name: "1.1.2" }),
-  ).toHaveAttribute("href", "#r-B-1-1.1.2")
+  ).toHaveAttribute("href", "/rules#r-B-1-1.1.2")
 })
 
 it("uses translations where present and tags the pieces still in Japanese", async () => {
@@ -131,7 +134,7 @@ it("uses translations where present and tags the pieces still in Japanese", asyn
   expect(
     await screen.findByText("譯文準備中：已翻譯 2／6 條，其餘先顯示日文原文。"),
   ).toBeInTheDocument()
-  const chapter = screen.getByRole("heading", { level: 2 })
+  const chapter = within(screen.getByRole("article")).getByRole("heading", { level: 2 })
   expect(within(chapter).getByText("第一章").closest("span[lang]")).toBeNull()
   const translated = rule("1.1.1") as HTMLElement
   expect(within(translated).getByRole("link", { name: "1.1.2" })).toBeInTheDocument()
@@ -189,4 +192,78 @@ it("copies a clause link from its number and moves the hash there", async () => 
   })
   expect(await screen.findByText("已複製 1.1.1 的連結")).toBeInTheDocument()
   expect(await navigator.clipboard.readText()).toBe("http://localhost:3000/rules#r-1.1.1")
+})
+
+it("lists chapters and sections in the table of contents and jumps from it", async () => {
+  const { router } = await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const toc = await screen.findByRole("navigation", { name: "目錄" })
+  const links = within(toc).getAllByRole("link")
+  expect(links.map((link) => link.textContent)).toEqual(["1章一", "1.1節一", "B-1：附錄"])
+  fireEvent.click(within(toc).getByRole("link", { name: /節一/u }))
+  await waitFor(() => {
+    expect(router.state.location.hash).toBe("#r-1.1")
+  })
+})
+
+it("marks the section the reader has scrolled to", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const toc = await screen.findByRole("navigation", { name: "目錄" })
+  const tops = new Map([
+    ["r-1", -400],
+    ["r-1.1", 300],
+    ["r-B-1", 900],
+  ])
+  const rect = vi.spyOn(Element.prototype, "getBoundingClientRect").mockImplementation(function (
+    this: Element,
+  ) {
+    return { top: tops.get(this.id) ?? 0 } as DOMRect
+  })
+  try {
+    fireEvent.scroll(window)
+    await waitFor(() => {
+      expect(within(toc).getByRole("link", { name: /章一/u })).toHaveAttribute(
+        "aria-current",
+        "location",
+      )
+    })
+    tops.set("r-1.1", 40)
+    fireEvent.scroll(window)
+    await waitFor(() => {
+      expect(within(toc).getByRole("link", { name: /節一/u })).toHaveAttribute(
+        "aria-current",
+        "location",
+      )
+    })
+  } finally {
+    rect.mockRestore()
+  }
+})
+
+it("opens the contents as a sheet on small screens and jumps after closing it", async () => {
+  const { router } = await renderRoutes(routes, { initialEntries: ["/rules"] })
+  fireEvent.click(await screen.findByRole("button", { name: "目錄" }))
+  const sheet = await screen.findByRole("dialog", { name: "目錄" })
+  fireEvent.click(within(sheet).getByRole("link", { name: /B-1：附錄/u }))
+  await waitFor(() => {
+    expect(router.state.location.hash).toBe("#r-B-1")
+  })
+  expect(screen.queryByRole("dialog", { name: "目錄" })).not.toBeInTheDocument()
+})
+
+it("previews a cited clause on hover and focus", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  await waitFor(() => {
+    expect(rule("1.1.1")).not.toBeNull()
+  })
+  const link = within(rule("1.1.1") as HTMLElement).getByRole("link", { name: "1.1.2" })
+  fireEvent.mouseEnter(link)
+  const tip = await screen.findByRole("tooltip")
+  expect(tip).toHaveTextContent("1.1.2本文二。")
+  // Text inside the preview never links further.
+  expect(within(tip).queryByRole("link")).not.toBeInTheDocument()
+  expect(link).toHaveAttribute("aria-describedby", tip.id)
+  fireEvent.mouseLeave(link)
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  fireEvent.focus(link)
+  expect(await screen.findByRole("tooltip")).toBeInTheDocument()
 })

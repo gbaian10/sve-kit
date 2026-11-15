@@ -2,6 +2,8 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router"
 
+import { ruleAnchor, RuleKeysContext } from "../../components/rules/rule-keys"
+import { RuleText } from "../../components/rules/RuleText"
 import { cn } from "../../components/ui/cn"
 import { useToast } from "../../components/ui/toast-context"
 import {
@@ -13,8 +15,8 @@ import {
 } from "../../data"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
-import { ruleAnchor, RuleKeysContext } from "./rule-keys"
-import { RuleText } from "./RuleText"
+import { RulesToc, type TocEntry } from "./RulesToc"
+import { useActiveSection } from "./use-active-section"
 
 type Load =
   | { readonly state: "loading" }
@@ -40,6 +42,31 @@ function useRules(): Load {
 }
 
 const FLASH_MS = 1500
+
+/** Chapters (body and appendices) with their sections, and appendix B's two formats. */
+function tableOfContents(views: readonly LocalizedNode[], original: boolean): TocEntry[] {
+  const entries: { entry: TocEntry; children: TocEntry[] }[] = []
+  for (const view of views) {
+    const { node } = view
+    const top = node.kind === "chapter"
+    const child =
+      (node.context === "main" && node.kind === "section") ||
+      (node.kind === "section" && node.key === node.context)
+    if (!top && !child) continue
+    const children: TocEntry[] = []
+    const entry: TocEntry = {
+      key: node.key,
+      number: node.number,
+      title: view.title?.text ?? "",
+      context: node.context,
+      original: original || !(view.title?.translated ?? true),
+      children,
+    }
+    if (top) entries.push({ entry, children })
+    else entries.at(-1)?.children.push(entry)
+  }
+  return entries.map(({ entry }) => entry)
+}
 
 /** Scrolls to the hash target once it exists and marks it briefly (`data-flash`). */
 function useHashTarget(ready: boolean) {
@@ -275,6 +302,15 @@ export function ComprehensiveRulesPage() {
     [mode, rules],
   )
   const keys = useMemo(() => new Set(rules?.byKey.keys()), [rules])
+  const toc = useMemo(() => tableOfContents(views, mode === "original"), [views, mode])
+  const tocIds = useMemo(
+    () =>
+      mode === "none"
+        ? []
+        : toc.flatMap((entry) => [entry, ...entry.children]).map((entry) => ruleAnchor(entry.key)),
+    [toc, mode],
+  )
+  const active = useActiveSection(tocIds)
   const translatedCount = rules
     ? rules.nodes.filter((node) => rules.translations.has(node.key)).length
     : 0
@@ -344,17 +380,20 @@ export function ComprehensiveRulesPage() {
       )}
       {mode !== "none" && (
         <RuleKeysContext.Provider value={{ keys }}>
-          <article className="mt-4">
-            {views.map((view) => (
-              <RuleNodeView
-                key={view.node.key}
-                view={view}
-                original={mode === "original"}
-                showPendingTag={mode === "translated" && translatedCount > 0}
-                onCopy={copy}
-              />
-            ))}
-          </article>
+          <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start lg:gap-10">
+            <article className="min-w-0">
+              {views.map((view) => (
+                <RuleNodeView
+                  key={view.node.key}
+                  view={view}
+                  original={mode === "original"}
+                  showPendingTag={mode === "translated" && translatedCount > 0}
+                  onCopy={copy}
+                />
+              ))}
+            </article>
+            <RulesToc entries={toc} active={active} />
+          </div>
         </RuleKeysContext.Provider>
       )}
     </div>
