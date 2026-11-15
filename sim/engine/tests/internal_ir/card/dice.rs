@@ -3,6 +3,8 @@
     reason = "Dice scenarios pick their own facts out of the full progress."
 )]
 use super::*;
+use sve_battle_contract::observation as wire;
+use sve_engine::battle::project_history;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::Viewer;
@@ -106,6 +108,12 @@ fn rerolls_replace_the_result_and_fixed_repeats_reset_the_permission() {
         Some(q1.clone()),
         "the visible die result is public"
     );
+    assert_eq!(
+        project_history(&game.observe(Viewer::P1).unwrap())
+            .unwrap()
+            .dice,
+        Vec::<wire::DiceHistory>::new()
+    );
     game.answer_internal_card(PlayerId { seat: 2 }, q1.token, Answer::Integer(Nat(1)))
         .unwrap_err();
     assert_eq!(game.internal_decision(View::P1), Some(q1.clone()));
@@ -149,6 +157,17 @@ fn rerolls_replace_the_result_and_fixed_repeats_reset_the_permission() {
         [2, 5]
     );
     assert_eq!(history, game.observe(Viewer::P2).unwrap().history);
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let projected = project_history(&game.observe(viewer).unwrap()).unwrap();
+        assert_eq!(
+            projected
+                .dice
+                .iter()
+                .map(|roll| roll.value.get())
+                .collect::<Vec<_>>(),
+            [2, 5]
+        );
+    }
 }
 
 #[test]

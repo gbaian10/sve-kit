@@ -4,10 +4,13 @@
 //! authenticated seat and current question before submitting the decoded answer.
 
 mod costs;
+mod history;
+mod objects;
 mod references;
 mod selection;
 
 pub use costs::project_costs;
+pub use history::project_history;
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use selection::{CandidateDetails, SelectionProjection};
 

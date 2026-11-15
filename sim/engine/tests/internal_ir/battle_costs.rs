@@ -3,7 +3,7 @@ use sve_battle_contract::{MAX_SAFE_INTEGER, observation as wire};
 use sve_engine::battle::{ProjectionError, project_costs};
 use sve_engine::game::player::{ObjectHandle, Viewer, observation as native};
 
-fn board(viewer: Viewer, secret: &str) -> Game {
+pub(super) fn board(viewer: Viewer, secret: &str) -> Game {
     let mut initial = setup(viewer.player().seat, json!([]));
     let (actor, opponent) = if viewer == Viewer::P1 {
         ("P1", "P2")
@@ -37,7 +37,7 @@ fn board(viewer: Viewer, secret: &str) -> Game {
     game
 }
 
-fn object(
+pub(super) fn object(
     observation: &native::Observation,
     seat: Viewer,
     zone: native::ObservedZone,

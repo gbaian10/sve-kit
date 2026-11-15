@@ -1,4 +1,6 @@
 use super::*;
+use sve_battle_contract::observation as wire;
+use sve_engine::battle::project_history;
 use sve_engine::game::internal::ResumeStage;
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::{CardState, HistoryEvent, ObservedZone};
@@ -47,6 +49,27 @@ fn board(hidden: &str) -> Game {
     game
 }
 
+fn assert_wire_attack_links(game: &Game, current: bool) {
+    let before = exact_authority(game);
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let history = project_history(&game.observe(viewer).unwrap()).unwrap();
+        let attacks: Vec<_> = history
+            .subjects
+            .iter()
+            .filter(|fact| fact.event == wire::HistoryEvent::Attack)
+            .collect();
+        assert!(
+            !attacks.is_empty(),
+            "Committed attacks remain in public history"
+        );
+        assert!(
+            attacks.iter().all(|fact| fact.current.is_some() == current),
+            "Retired attack links must not reconnect to a later generation"
+        );
+    }
+    assert_eq!(exact_authority(game), before, "Wire history is read-only");
+}
+
 #[test]
 fn public_history_is_read_only_and_does_not_depend_on_hidden_cards() {
     let mut game = board("unit-spell");
@@ -77,6 +100,13 @@ fn public_history_is_read_only_and_does_not_depend_on_hidden_cards() {
         .unwrap();
     assert!(attack.current.is_some());
     assert_eq!(attack.controller, Viewer::P1);
+    assert_wire_attack_links(&game, true);
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            project_history(&game.observe(viewer).unwrap()).unwrap(),
+            project_history(&other.observe(viewer).unwrap()).unwrap()
+        );
+    }
     let banish = checked(vec![instruction(
         1,
         Action::Banish {
@@ -87,6 +117,7 @@ fn public_history_is_read_only_and_does_not_depend_on_hidden_cards() {
     )]);
     game.execute_internal(&banish, &source("synthetic"), context(1))
         .unwrap();
+    assert_wire_attack_links(&game, false);
     assert!(
         game.observe(Viewer::P1)
             .unwrap()
@@ -122,6 +153,7 @@ fn public_history_is_read_only_and_does_not_depend_on_hidden_cards() {
     game.execute_internal(&restore, &source("synthetic"), returned)
         .unwrap();
     let after = game.observe(Viewer::P1).unwrap();
+    assert_wire_attack_links(&game, false);
     assert!(
         after
             .history

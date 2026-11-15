@@ -1,10 +1,10 @@
 //! Cost quotes preserve uncertainty and never stand in for payment legality.
 
-use super::ProjectionError;
-use crate::game::player::{self, Viewer, observation as native};
+use super::{ProjectionError, objects::ObjectScope};
+use crate::game::player::observation as native;
 use alloc::collections::BTreeSet;
 use core::result;
-use sve_battle_contract::{Int, Nat, ObjectHandle, observation as wire};
+use sve_battle_contract::{Int, Nat, observation as wire};
 
 type Result<T> = result::Result<T, ProjectionError>;
 
@@ -17,21 +17,19 @@ type Result<T> = result::Result<T, ProjectionError>;
 /// Refuses unknown, duplicate or cross-zone quote subjects, inconsistent object
 /// scopes, and numbers outside the wire's exact integer range.
 pub fn project_costs(observation: &native::Observation) -> Result<wire::CostObservation> {
-    let objects = CostObjects::new(observation)?;
+    let objects = ObjectScope::new(observation)?;
     let mut quoted = BTreeSet::new();
     let cards = observation
         .costs
         .cards
         .iter()
         .map(|quote| {
-            if !objects.quotable.contains(&quote.card)
-                || !quoted.insert(&quote.card)
-                || quote.cost.basis != native::QuoteBasis::CurrentContext
+            if !quoted.insert(&quote.card) || quote.cost.basis != native::QuoteBasis::CurrentContext
             {
                 return Err(ProjectionError::Unavailable);
             }
             Ok(wire::CardCostQuote {
-                object: objects.handle(&quote.card)?,
+                object: objects.quote(&quote.card)?,
                 cost: summary(&quote.cost)?,
             })
         })
@@ -58,55 +56,6 @@ pub fn project_costs(observation: &native::Observation) -> Result<wire::CostObse
         cards,
         current_play,
     })
-}
-
-struct CostObjects<'observation> {
-    known: BTreeSet<&'observation player::ObjectHandle>,
-    quotable: BTreeSet<&'observation player::ObjectHandle>,
-}
-
-impl<'observation> CostObjects<'observation> {
-    fn new(observation: &'observation native::Observation) -> Result<Self> {
-        if observation
-            .players
-            .iter()
-            .map(|player| player.player)
-            .ne([Viewer::P1, Viewer::P2])
-        {
-            return Err(ProjectionError::Unavailable);
-        }
-        let mut objects = Self {
-            known: BTreeSet::new(),
-            quotable: BTreeSet::new(),
-        };
-        for player in &observation.players {
-            for zone in &player.zones {
-                for member in &zone.cards {
-                    let handle = &member.card.handle;
-                    if !objects.known.insert(handle) {
-                        return Err(ProjectionError::Unavailable);
-                    }
-                    if player.player == observation.viewer
-                        && member.card.properties.controller == observation.viewer
-                        && matches!(
-                            zone.kind,
-                            native::ObservedZone::Hand | native::ObservedZone::Ex
-                        )
-                    {
-                        objects.quotable.insert(handle);
-                    }
-                }
-            }
-        }
-        Ok(objects)
-    }
-
-    fn handle(&self, handle: &player::ObjectHandle) -> Result<ObjectHandle> {
-        if !self.known.contains(handle) {
-            return Err(ProjectionError::Unavailable);
-        }
-        Ok(ObjectHandle::new(handle.as_str().into()))
-    }
 }
 
 fn summary(cost: &native::CostSummary) -> Result<wire::CostSummary> {
