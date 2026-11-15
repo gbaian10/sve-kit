@@ -1,0 +1,62 @@
+cards:
+  CP04-004:
+    abilities:
+      - fanfare:
+          do:
+            - damage:
+                n: 4
+                to: enemy
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - line: 1
+        section: 1
+        static:
+          effects:
+            - cost_mod:
+                delta: -1
+                when_playing:
+                  kind: follower
+                  orig_cost_eq: 1
+                  trait: プリコネ
+                  who: self
+                  zone: ex
+      - auto:
+          do:
+            - move:
+                to: ex
+                top:
+                  n: 1
+                  who: self
+          on:
+            ub_activated:
+              holder:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              who: self
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
