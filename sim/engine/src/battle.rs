@@ -16,7 +16,9 @@ mod turn;
 
 pub use costs::project_costs;
 pub use effects::{project_card_effects, project_player_effects};
-pub use events::{EventFeed, EventObjects, FeedUpdate, ProjectedEvent, project_batch};
+pub use events::{
+    EventFeed, EventObjects, EventReferences, FeedUpdate, ProjectedEvent, project_batch,
+};
 pub use history::project_history;
 pub use objects::ObjectTable;
 pub(crate) use objects::build_objects;

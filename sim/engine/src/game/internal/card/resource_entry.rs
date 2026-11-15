@@ -514,6 +514,7 @@ impl Game {
         let paid = self.internal_pay_pp(
             execution.context.controller,
             Int(entry.pp_amount(chosen.ep)),
+            &execution.frame().cause,
         )?;
         self.pay_entry_ep(execution, chosen.ep)?;
         let ids = chosen

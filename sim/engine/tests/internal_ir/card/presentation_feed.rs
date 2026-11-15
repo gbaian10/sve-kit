@@ -153,7 +153,7 @@ fn handed_the_stop(game: &mut Game, board: &Board) -> ([EventFeed; 2], [FeedUpda
         );
     }
     ask_for_the_follower(game);
-    let early = feeds.each_mut().map(|feed| feed.deliver(game, board));
+    let early = feeds.each_mut().map(|feed| feed.deliver_with(game, board));
     (feeds, early)
 }
 
@@ -190,7 +190,7 @@ fn a_shown_batch_commits_with_the_body_it_was_shown_and_is_not_played_again() {
         "the chosen follower is damaged and the ability resolves"
     );
     for (feed, before) in feeds.iter_mut().zip(&early) {
-        let update = feed.deliver(&mut game, &board);
+        let update = feed.deliver_with(&mut game, &board);
         assert_eq!(
             promoted(&update),
             scopes(before),
@@ -252,7 +252,7 @@ fn a_shown_batch_commits_with_the_body_it_was_shown_and_is_not_played_again() {
             "only the batches that were never shown are played now"
         );
         assert_eq!(
-            feed.deliver(&mut game, &board),
+            feed.deliver_with(&mut game, &board),
             quiet(),
             "nothing is delivered twice"
         );
@@ -270,7 +270,7 @@ fn delivered_identities_are_unique_and_parents_point_at_delivered_events() {
         "the ability resolves"
     );
     for feed in &mut feeds {
-        let (batches, _animate) = committed(&feed.deliver(&mut game, &board));
+        let (batches, _animate) = committed(&feed.deliver_with(&mut game, &board));
         let events = batches
             .iter()
             .flat_map(|batch| &batch.events)
@@ -314,7 +314,7 @@ fn a_fault_withdraws_exactly_the_shown_scopes_and_delivers_no_history() {
         "the oversized draw is an internal fault"
     );
     for (feed, before) in feeds.iter_mut().zip(&early) {
-        let update = feed.deliver(&mut game, &board);
+        let update = feed.deliver_with(&mut game, &board);
         assert!(
             !scopes(before).is_empty(),
             "each seat had been shown something before the fault"
@@ -334,7 +334,7 @@ fn a_fault_withdraws_exactly_the_shown_scopes_and_delivers_no_history() {
             "the faulted play left no history"
         );
         assert_eq!(
-            feed.deliver(&mut game, &board),
+            feed.deliver_with(&mut game, &board),
             quiet(),
             "a withdrawal is reported once"
         );
@@ -358,8 +358,8 @@ fn a_client_rebuilt_at_the_stop_receives_the_shown_batches_as_plain_history() {
         SubmissionKind::Applied,
         "the ability resolves"
     );
-    let linked = kept.deliver(&mut game, &board);
-    let plain = rebuilt.deliver(&mut game, &board);
+    let linked = kept.deliver_with(&mut game, &board);
+    let plain = rebuilt.deliver_with(&mut game, &board);
     assert!(
         !promoted(&linked).is_empty() && plain.presentation.is_empty(),
         "no step is reported for a scope this client never held"
@@ -401,17 +401,17 @@ fn a_failed_projection_stops_one_viewers_events_for_good_without_stopping_the_ga
     let [first, second] = &mut feeds;
     board.broken.set(true);
     assert_eq!(
-        first.deliver(&mut game, &board),
+        first.deliver_with(&mut game, &board),
         unavailable(),
         "a body that cannot be projected safely stops the events, with no partial delivery"
     );
     board.broken.set(false);
     assert!(
-        !shown(&second.deliver(&mut game, &board)).is_empty(),
+        !shown(&second.deliver_with(&mut game, &board)).is_empty(),
         "the other viewer's events are unaffected"
     );
     assert_eq!(
-        first.deliver(&mut game, &board),
+        first.deliver_with(&mut game, &board),
         unavailable(),
         "stopped events do not resume when lookups work again"
     );
@@ -426,7 +426,7 @@ fn a_failed_projection_stops_one_viewers_events_for_good_without_stopping_the_ga
         "the board and the question keep working"
     );
     assert!(
-        !promoted(&second.deliver(&mut game, &board)).is_empty(),
+        !promoted(&second.deliver_with(&mut game, &board)).is_empty(),
         "the other viewer's shown scopes are still promoted"
     );
 }
@@ -475,7 +475,7 @@ fn a_result_already_on_a_handed_board_is_history_when_it_commits() {
     let [acting, rebuilt] = &mut feeds;
     // One seat is handed the stop by an ordinary delivery, the other by a new baseline.
     assert_eq!(
-        acting.deliver(&mut game, &board),
+        acting.deliver_with(&mut game, &board),
         quiet(),
         "the spell can still be undone by rules, so nothing is shown and nothing committed"
     );
@@ -490,7 +490,7 @@ fn a_result_already_on_a_handed_board_is_history_when_it_commits() {
         "the spell and then the parent resolve completely"
     );
     for feed in &mut feeds {
-        let update = feed.deliver(&mut game, &board);
+        let update = feed.deliver_with(&mut game, &board);
         assert!(
             update.presentation.is_empty(),
             "nothing was shown early, so there is nothing to promote"
@@ -537,7 +537,7 @@ fn a_seat_that_was_not_handed_the_stop_plays_every_batch() {
     let mut game = child_is_declaring(&mut feeds);
     let [acting, waiting] = &mut feeds;
     assert_eq!(
-        acting.deliver(&mut game, &board),
+        acting.deliver_with(&mut game, &board),
         quiet(),
         "only the acting seat is handed the spell's private target question"
     );
@@ -546,7 +546,7 @@ fn a_seat_that_was_not_handed_the_stop_plays_every_batch() {
         SubmissionKind::Applied,
         "the spell and then the parent resolve completely"
     );
-    let update = waiting.deliver(&mut game, &board);
+    let update = waiting.deliver_with(&mut game, &board);
     let (batches, animate) = committed(&update);
     assert_eq!(
         animate,

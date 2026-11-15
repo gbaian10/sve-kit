@@ -176,12 +176,14 @@ fn presentation_shows_each_completed_batch_once_before_the_next_question() {
     for (viewer, batches) in SEATS.into_iter().zip(present(&mut game, &mut cursors)) {
         let kinds = kinds(&batches);
         let resolution = position_of(&kinds, enters_resolution);
+        let paid = position_of(&kinds, |kind| is_action(kind, ActionKind::Resource));
         let played = position_of(&kinds, |kind| is_action(kind, ActionKind::Play));
         assert!(
-            resolution < played && kinds.len() == 2,
-            "the first qualifying stop shows the declaration and the play in rules order: {kinds:?}"
+            resolution < paid && paid < played && kinds.len() == 3,
+            "the first qualifying stop shows the declaration, the PP payment and the play in \
+             rules order: {kinds:?}"
         );
-        assert_eq!(batches.len(), 2, "sequential results are separate batches");
+        assert_eq!(batches.len(), 3, "sequential results are separate batches");
         assert_ne!(
             batches[0].scope, batches[1].scope,
             "every complete batch opens its own scope"
@@ -241,7 +243,7 @@ fn presentation_shows_each_completed_batch_once_before_the_next_question() {
     for viewer in SEATS {
         assert_eq!(
             recorded(&game, viewer, None).0.len(),
-            4,
+            5,
             "the record keeps every delivered step in order"
         );
     }

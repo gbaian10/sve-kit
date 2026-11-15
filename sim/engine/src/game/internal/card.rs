@@ -779,8 +779,14 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn internal_pay_pp(&mut self, actor: PlayerId, amount: Int) -> Result<Quantity> {
-        let player = self.player_mut(seat_name(actor)?)?;
+    pub(super) fn internal_pay_pp(
+        &mut self,
+        actor: PlayerId,
+        amount: Int,
+        cause: &serde_json::Value,
+    ) -> Result<Quantity> {
+        let seat = seat_name(actor)?;
+        let player = self.player_mut(seat)?;
         let current = int(&player.pp["current"]);
         if current < amount.0 {
             return Err(crate::EngineFailure::IllegalPlay(
@@ -791,6 +797,7 @@ impl Game {
             .checked_sub(amount.0)
             .ok_or_else(|| invalid("PP payment overflow"))?;
         player.pp["current"] = json!(remaining);
+        self.record_player_resource(seat, "pp", current, remaining, cause);
         Ok(Quantity {
             amount,
             unit: QuantityUnit::Pp,
@@ -937,7 +944,11 @@ impl Game {
                     let payer = execution.player(self, player)?;
                     let amount = execution.integer(self, amount)?;
                     let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
-                    (self.internal_pay_pp(payer, amount)?, Vec::new(), Vec::new())
+                    (
+                        self.internal_pay_pp(payer, amount, &execution.frame().cause)?,
+                        Vec::new(),
+                        Vec::new(),
+                    )
                 }
                 Action::FlipUp { objects, .. }
                 | Action::FlipDown { objects }

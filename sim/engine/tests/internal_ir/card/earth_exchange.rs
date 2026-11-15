@@ -50,7 +50,7 @@ fn stack_selection(snapshot: &str, document: &str) -> SelectedEffects {
     .unwrap()
 }
 
-fn board(stack: u8, pp: u8) -> Game {
+pub(super) fn board(stack: u8, pp: u8) -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["pp"] = json!({"current":pp,"max":10_u8});
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);

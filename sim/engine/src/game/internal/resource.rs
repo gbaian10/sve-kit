@@ -105,7 +105,7 @@ impl Game {
         if actual > 0 {
             let group = self.group();
             let event = if resource == Resource::PpCurrent {
-                json!({"kind":"回復","player":seat,"amount":actual})
+                json!({"kind":"回復","player":seat,"amount":actual,"before":before,"after":after})
             } else {
                 json!({"kind":"PP最大値変化","player":seat,"source":execution.frame().source,
                     "delta":actual,"before":before,"after":after})
