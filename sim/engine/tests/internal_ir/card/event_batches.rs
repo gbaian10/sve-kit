@@ -37,7 +37,7 @@ fn actions(batch: &PlayerEventBatch, kind: ActionKind) -> bool {
         .all(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == kind))
 }
 
-pub(super) fn aoe_targets(scope: u64) -> RecipientSet {
+fn aoe_targets(scope: u64) -> RecipientSet {
     RecipientSet::Union {
         sets: vec![
             RecipientSet::Leaders {
@@ -56,7 +56,7 @@ pub(super) fn aoe_targets(scope: u64) -> RecipientSet {
     }
 }
 
-pub(super) fn aoe() -> Game {
+fn aoe() -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P2"]["zones"]["field"] = json!([
         {"id":"f","card":"unit-follower"},
