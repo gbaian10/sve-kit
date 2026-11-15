@@ -66,9 +66,9 @@ pub struct EventLocation {
 /// Physical movement method, including rule and ordinary play procedures.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MovementMethod {
-    /// A typed instruction's original rules method.
+    /// An effect instruction's original rules method, including an effect's draw.
     Effect(MoveMethod),
-    /// A successful draw, including a rule draw.
+    /// A successful draw made by a rule, such as the draw at the start of a turn.
     Draw,
     /// An actual discard.
     Discard,

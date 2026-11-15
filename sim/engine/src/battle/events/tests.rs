@@ -187,6 +187,10 @@ fn a_movement_keeps_its_method_whether_an_effect_moved_it_and_each_end_as_author
             MovementMethod::Effect(MoveMethod::Banish),
             (wire::MovementMethod::Banish, true),
         ),
+        (
+            MovementMethod::Effect(MoveMethod::Draw),
+            (wire::MovementMethod::Draw, true),
+        ),
     ] {
         let projected = one(&moved(native, false)).unwrap();
         assert!(
@@ -423,6 +427,45 @@ fn a_result_names_the_winner_and_distinguishes_concession_defeat_and_a_shared_de
         reason(&one(&won).unwrap()),
         (Some(Seat::P1), None, wire::ResultReason::Effect),
         "an effect victory names only its winner"
+    );
+}
+
+#[test]
+fn a_shared_effect_win_names_no_winner_and_a_mixed_ending_is_refused() {
+    let won = |winner| EventKind::Result {
+        winner: Some(winner),
+        loser: None,
+        rule: None,
+    };
+    let bodies = project_batch(&[won(Viewer::P1), won(Viewer::P2)], &Board)
+        .unwrap()
+        .into_iter()
+        .map(|event| event.body)
+        .collect::<Vec<_>>();
+    let drawn = EventBody::Result {
+        winner: None,
+        loser: None,
+        reason: wire::ResultReason::Effect,
+        rule: None,
+    };
+    assert_eq!(
+        bodies,
+        vec![drawn.clone(), drawn],
+        "two players made to win in one batch drew: neither is named the winner"
+    );
+
+    let mixed = [
+        won(Viewer::P1),
+        EventKind::Result {
+            winner: None,
+            loser: Some(Viewer::P1),
+            rule: Some("rule-11.2.1".to_owned()),
+        },
+    ];
+    assert_eq!(
+        project_batch(&mixed, &Board),
+        Err(ProjectionError::Unavailable),
+        "a win and a defeat in one batch could name different winners"
     );
 }
 

@@ -75,6 +75,8 @@ facts 不再產生事件。反覆讀取累積的 `Progress` 不會重發歷史�
 Banish／Return、規則破壞與一般程序。規則破壞由該次規則清理 producer 明確補為
 `RuleDestroy`；堆疊歸零等其他移區不因此變成破壞。抽牌和棄牌的宣告 trace 由各自
 primitive 明確補到同一次移動；typed Movement 的方法由該次 mutator 的來源範圍補入。
+抽牌 primitive 的呼叫端指明來源：規則抽牌記為 `Draw`，效果指令的抽牌記為
+`Effect(Draw)`，事後無法由移動本身分辨。
 傷害、姿態、擲骰、裝備與正式卡片打出／解決，由共用 primitive 記錄同一結果；
 typed facts 保留在權威 Progress。傷害分類透過實際 emit 回傳的 Step ID 補入。
 效果進化也以該 primitive 回傳的明確 Step ID 補為 `EffectEvolve`，保留其規則角色。
@@ -83,6 +85,7 @@ typed facts 保留在權威 Progress。傷害分類透過實際 emit 回傳的 S
 完整同時事件批次由 producer 在全部結果凍結後，以 `player_event_mark`／
 `seal_player_event_batch` 封口，不能由共同 cause 或 group 推論。未封口的結果各自形成
 單件批次；多物件 producer 必須明確封口，後續規則動作若屬另一時點，須另批封口。
+同一次檢查的兩席敗北、同一效果的兩席勝利各封成一批：單筆結果不說明另一席是否同敗或同勝。
 
 | 來源 | 公開事件 |
 | --- | --- |

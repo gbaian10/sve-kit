@@ -124,6 +124,11 @@ fn player_closing_expires_turn_effects_refreshes_and_draws_before_main_input() {
         stand < draw && draw < events.len() - 1,
         "Start phase stands and draws before Main begins"
     );
+    assert_eq!(
+        player_events::drawn_by_effect(&events[draw].kind),
+        Some(false),
+        "the start-of-turn draw is a rule's, not an effect instruction's"
+    );
 
     assert_eq!(
         game.submit_player(Viewer::P2, old).kind,

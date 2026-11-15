@@ -1,16 +1,153 @@
 use super::player_pipeline::{answer, question};
 use super::*;
+use sve_battle_contract::event::{self as wire, EventBody, ResultReason};
+use sve_battle_contract::observation::TurnView;
+use sve_battle_contract::{Seat, SourceRef};
+use sve_engine::battle::{EventObjects, ProjectedEvent, ProjectionError, project_batch};
 use sve_engine::game::internal::SearchAnswer;
 use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::events::EventSubject;
 use sve_engine::game::player::events::{
-    ActionKind, EventError, EventKind, MovementMethod, PlayerEvent,
+    ActionKind, EventCard, EventError, EventKind, MovementMethod, PlayerEvent,
 };
-use sve_engine::game::player::observation::ObservedZone;
+use sve_engine::game::player::observation::{EffectSource, ObservedZone, TurnObservation};
 use sve_engine::game::player::{Command, Input, QuestionShape, SubmissionKind, Viewer};
 
 fn history(game: &Game, viewer: Viewer) -> Vec<PlayerEvent> {
     game.events(viewer, None).unwrap().cloned().collect()
+}
+
+/// For results that name no card, source or turn: the projection must not need any lookup.
+struct NoLookups;
+
+impl EventObjects for NoLookups {
+    fn card(&self, _card: &EventCard) -> Result<wire::EventCard, ProjectionError> {
+        Err(ProjectionError::Unavailable)
+    }
+
+    fn source(&self, _source: &EffectSource) -> Result<SourceRef, ProjectionError> {
+        Err(ProjectionError::Unavailable)
+    }
+
+    fn turn(&self, _turn: &TurnObservation) -> Result<TurnView, ProjectionError> {
+        Err(ProjectionError::Unavailable)
+    }
+}
+
+/// Whether the wire says an effect instruction made this real draw; `None` when the result
+/// is not projected as exactly one draw.
+pub(super) fn drawn_by_effect(kind: &EventKind) -> Option<bool> {
+    let projected = project_batch([kind], &NoLookups).ok()?;
+    if let [
+        ProjectedEvent {
+            body:
+                EventBody::Movement {
+                    method: wire::MovementMethod::Draw,
+                    by_effect,
+                    ..
+                },
+            ..
+        },
+    ] = projected.as_slice()
+    {
+        Some(*by_effect)
+    } else {
+        None
+    }
+}
+
+/// What the last committed batch of each viewer says on the wire, exactly as the producer
+/// sealed it.
+fn wire_ending(game: &Game) -> [Vec<EventBody>; 2] {
+    [Viewer::P1, Viewer::P2].map(|viewer| {
+        let batches = game
+            .event_batches(viewer, None)
+            .unwrap()
+            .collect::<Vec<_>>();
+        let last = batches.last().unwrap();
+        project_batch(last.events.iter().map(|event| &event.kind), &NoLookups)
+            .unwrap()
+            .into_iter()
+            .map(|event| event.body)
+            .collect()
+    })
+}
+
+const fn ended(winner: Option<Seat>, loser: Option<Seat>, reason: ResultReason) -> EventBody {
+    EventBody::Result {
+        winner,
+        loser,
+        reason,
+        rule: None,
+    }
+}
+
+/// A resolved effect that deals lethal damage to the leaders of `recipients`.
+fn lethal(recipients: PlayerRelation) -> Game {
+    let mut game = game(1, 1);
+    game.advance_player_input();
+    game.execute_internal(
+        &checked(vec![damage(
+            1,
+            RecipientSet::Leaders {
+                players: players(recipients),
+            },
+            20,
+        )]),
+        &source("synthetic"),
+        context(1),
+    )
+    .unwrap();
+    game.advance_player_input();
+    game
+}
+
+#[test]
+fn player_events_seal_a_shared_defeat_so_its_wire_results_name_no_winner() {
+    let both = lethal(PlayerRelation::All);
+    assert_eq!(
+        both.input(Viewer::P1),
+        Input::Finished { winner: None },
+        "both leaders reached zero at the same check"
+    );
+    for ending in wire_ending(&both) {
+        assert_eq!(
+            ending,
+            vec![
+                ended(None, Some(Seat::P1), ResultReason::SimultaneousDefeat),
+                ended(None, Some(Seat::P2), ResultReason::SimultaneousDefeat),
+            ],
+            "the two defeats are one sealed batch: nobody is named the winner"
+        );
+    }
+
+    let one = lethal(PlayerRelation::Opponents);
+    for ending in wire_ending(&one) {
+        assert_eq!(
+            ending,
+            vec![ended(Some(Seat::P1), Some(Seat::P2), ResultReason::Defeat)],
+            "a single defeat still makes the other player win"
+        );
+    }
+
+    let mut conceded = game(1, 1);
+    conceded.advance_player_input();
+    assert_eq!(
+        conceded.submit_player(Viewer::P2, Command::Concede).kind,
+        SubmissionKind::Applied,
+        "a seat may concede at any stop"
+    );
+    for ending in wire_ending(&conceded) {
+        assert_eq!(
+            ending,
+            vec![ended(
+                Some(Seat::P1),
+                Some(Seat::P2),
+                ResultReason::Concession
+            )],
+            "a concession keeps its own reason"
+        );
+    }
 }
 
 fn life(id: u64, amount: i64) -> Located<Node> {
@@ -223,8 +360,14 @@ fn player_events_unite_step_moves_and_typed_life_without_duplicate_draws() {
     );
     for event in &opponent[1..] {
         assert!(
-            matches!(&event.kind, EventKind::Movement { method: MovementMethod::Draw, before, after }
-            if before.card.is_none() && after.card.is_none() && after.position.is_none())
+            matches!(&event.kind, EventKind::Movement { method: MovementMethod::Effect(MoveMethod::Draw), before, after }
+            if before.card.is_none() && after.card.is_none() && after.position.is_none()),
+            "an instruction's draw records that an effect drew"
+        );
+        assert_eq!(
+            drawn_by_effect(&event.kind),
+            Some(true),
+            "the wire says an effect instruction drew"
         );
     }
     for event in &owner[1..] {

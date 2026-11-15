@@ -52,8 +52,10 @@ pub struct ProjectedEvent {
 
 /// Project every result of one complete batch, in order.
 ///
-/// A batch is projected as a whole because simultaneous defeat is a property of the batch:
-/// each loser's own result does not say that the other player lost too.
+/// A batch is projected as a whole because a shared ending is a property of the batch: one
+/// player's own result does not say that the other player lost or won with them. The caller
+/// must pass a batch exactly as its producer sealed it; a shared cause or group proves
+/// nothing.
 ///
 /// # Errors
 /// A result needs a fact the native producer did not provide, or a number exceeds the wire
@@ -66,11 +68,26 @@ where
     K: IntoIterator<Item = &'kinds EventKind> + Clone,
     O: EventObjects,
 {
-    let losers = kinds
-        .clone()
-        .into_iter()
-        .filter(|kind| matches!(kind, EventKind::Result { loser: Some(_), .. }))
-        .count();
+    let ending = Ending {
+        winners: kinds
+            .clone()
+            .into_iter()
+            .filter(|kind| {
+                matches!(
+                    kind,
+                    EventKind::Result {
+                        winner: Some(_),
+                        ..
+                    }
+                )
+            })
+            .count(),
+        losers: kinds
+            .clone()
+            .into_iter()
+            .filter(|kind| matches!(kind, EventKind::Result { loser: Some(_), .. }))
+            .count(),
+    };
     kinds
         .into_iter()
         .map(|kind| {
@@ -78,13 +95,20 @@ where
                 objects,
                 about: Vec::new(),
             };
-            let body = projection.body(kind, losers > 1)?;
+            let body = projection.body(kind, ending)?;
             Ok(ProjectedEvent {
                 body,
                 about: projection.about,
             })
         })
         .collect()
+}
+
+/// How many players the results of one batch name as winning and as losing.
+#[derive(Clone, Copy)]
+struct Ending {
+    winners: usize,
+    losers: usize,
 }
 
 const fn seat(viewer: Viewer) -> Seat {
@@ -120,7 +144,8 @@ const fn zone(zone: ObservedZone) -> Zone {
 }
 
 /// The wire method and whether an effect instruction, rather than a rule or procedure,
-/// performed the move.
+/// performed the move. The native producer states which: an effect's draw is recorded as
+/// `Effect(Draw)`, so a bare `Draw` is always a rule's.
 const fn method(method: MovementMethod) -> (wire::MovementMethod, bool) {
     match method {
         MovementMethod::Effect(MoveMethod::Put) => (wire::MovementMethod::Put, true),
@@ -274,7 +299,7 @@ impl<O: EventObjects> Projection<'_, O> {
             .transpose()
     }
 
-    fn body(&mut self, kind: &EventKind, simultaneous: bool) -> Result<EventBody, ProjectionError> {
+    fn body(&mut self, kind: &EventKind, ending: Ending) -> Result<EventBody, ProjectionError> {
         match kind {
             EventKind::Movement {
                 method: moved,
@@ -297,7 +322,7 @@ impl<O: EventObjects> Projection<'_, O> {
                 winner,
                 loser,
                 rule,
-            } => result(*winner, *loser, rule.as_deref(), simultaneous),
+            } => result(*winner, *loser, rule.as_deref(), ending),
         }
     }
 
@@ -649,17 +674,24 @@ fn payment(action: &ActionEvent) -> Result<EventBody, ProjectionError> {
     })
 }
 
-/// A native result names either the player an effect made win or one player who lost.
+/// A native result names either one player an effect made win or one player who lost; the
+/// other results of its batch say whether that player won or lost alone.
 fn result(
     winner: Option<Viewer>,
     loser: Option<Viewer>,
     rule: Option<&str>,
-    simultaneous: bool,
+    ending: Ending,
 ) -> Result<EventBody, ProjectionError> {
+    // No producer ends a game with a win and a defeat at once; their winners could disagree.
+    if ending.winners > 0 && ending.losers > 0 {
+        return Err(ProjectionError::Unavailable);
+    }
     let (winner, reason) = match (winner, loser) {
-        (Some(won), None) => (Some(won), wire::ResultReason::Effect),
+        (Some(won), None) if ending.winners == 1 => (Some(won), wire::ResultReason::Effect),
+        // An effect made both players win together: the game is drawn.
+        (Some(_), None) => (None, wire::ResultReason::Effect),
         // Both players lost together: nobody won.
-        (None, Some(_)) if simultaneous => (None, wire::ResultReason::SimultaneousDefeat),
+        (None, Some(_)) if ending.losers > 1 => (None, wire::ResultReason::SimultaneousDefeat),
         (None, Some(lost)) if rule == Some("rule-1.2.3") => {
             (Some(opponent(lost)), wire::ResultReason::Concession)
         }
