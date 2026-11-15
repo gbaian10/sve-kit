@@ -18,16 +18,17 @@ pub use costs::{
 mod effects;
 pub use effects::{
     EffectExpiry, EffectInterval, EffectSource, GrantedDefinition, InstalledChange,
-    InstalledEffect, NumberChange,
+    InstalledEffect, NumberChange, WordingField, WordingSource,
 };
 
 use super::{ObjectHandle, Viewer};
-use crate::battle::{BattleReferences, ObjectTable, ProjectionError, build_objects};
+use crate::battle::{BattleReferences, ObjectTable, ProjectionError, build_objects, project_turn};
 use crate::game::internal::zone_capacity;
 use crate::game::{Game, Object, int};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
 use core::result;
+use sve_battle_contract::observation::TurnView;
 
 /// Player-visible zones, including attached evolution cards.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -69,7 +70,7 @@ pub struct TurnObservation {
     pub first_player: Option<Viewer>,
     /// Rules phase; absent during pregame.
     pub phase: Option<Phase>,
-    /// Completed turn counts in seat order; absent neutral-position counts are zero.
+    /// Turns begun in seat order; absent neutral-position counts are zero.
     pub elapsed_turns: [u64; 2],
 }
 
@@ -322,6 +323,20 @@ impl Game {
         build_objects(&self.catalog, references, &observation)
     }
 
+    /// Project this viewer's current public turn without advancing the authority.
+    ///
+    /// The host binds the authenticated viewer to this stop. Event-time turn facts
+    /// must not be reconstructed from this current view.
+    ///
+    /// # Errors
+    /// Refuses unavailable authority facts and turn counts outside the wire range.
+    pub fn battle_turn(&self, perspective: Viewer) -> result::Result<TurnView, ProjectionError> {
+        let observation = self
+            .observe(perspective)
+            .map_err(|_authority_error| ProjectionError::Unavailable)?;
+        project_turn(&observation.turn)
+    }
+
     fn player_observation(&self, perspective: Viewer) -> Result<Observation> {
         if !self.state.continuous.is_empty() {
             return Err(invalid(
@@ -329,24 +344,56 @@ impl Game {
             ));
         }
         let turn = &self.state.turn;
+        if !turn.is_object() {
+            return Err(invalid("invalid turn state"));
+        }
         let phase = match turn["phase"].as_str() {
             Some("start") => Some(Phase::Start),
             Some("main") => Some(Phase::Main),
             Some("end") => Some(Phase::End),
-            Some("pregame") | None => None,
-            Some(_) => return Err(invalid("unknown turn phase")),
+            Some("pregame") => None,
+            None if turn["phase"].is_null() => None,
+            Some(_) | None => return Err(invalid("unknown turn phase")),
         };
-        let optional_seat = |key| turn[key].as_str().map(viewer).transpose();
+        let optional_seat = |key: &str| {
+            turn.get(key)
+                .filter(|value| !value.is_null())
+                .map(|value| {
+                    value
+                        .as_str()
+                        .ok_or_else(|| invalid("invalid turn seat"))
+                        .and_then(viewer)
+                })
+                .transpose()
+        };
+        let elapsed_turns = |player: &str| {
+            let Some(counts) = turn.get("elapsed_turns") else {
+                return Ok(0);
+            };
+            let counts = counts
+                .as_object()
+                .ok_or_else(|| invalid("invalid elapsed turn counts"))?;
+            counts.get(player).map_or(Ok(0), |count| {
+                count
+                    .as_u64()
+                    .ok_or_else(|| invalid("invalid elapsed turn count"))
+            })
+        };
+        let first_player = optional_seat("first_player")?;
+        let active = optional_seat("active")?;
+        // Opening keeps an authority-only placeholder before the first-player choice.
+        let active = if turn["phase"] == "pregame" && first_player.is_none() {
+            None
+        } else {
+            active
+        };
         Ok(Observation {
             viewer: perspective,
             turn: TurnObservation {
-                active: optional_seat("active")?,
-                first_player: optional_seat("first_player")?,
+                active,
+                first_player,
                 phase,
-                elapsed_turns: [
-                    turn["elapsed_turns"]["P1"].as_u64().unwrap_or_default(),
-                    turn["elapsed_turns"]["P2"].as_u64().unwrap_or_default(),
-                ],
+                elapsed_turns: [elapsed_turns("P1")?, elapsed_turns("P2")?],
             },
             attack: self.observed_attack(perspective)?,
             players: [

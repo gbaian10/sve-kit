@@ -124,6 +124,10 @@ BattleObservation 完整保留[玩家輸入](player-input.md)的觀察語義，�
 同一 printing_id 的不同實體不合併；CardRef 由釘住的快照查原文及素材，不另造卡表。
 缺資料用明示未知，不能用印刷值冒充當前攻擊力、生命、成本或合法性。
 
+TurnView 在開局尚未選定先攻時，active／first_player 皆為 null，不輸出引擎內部的暫存席位。選定後保留已建立席位，phase 在開局程序完成前仍為 null；逐席回合數依權威席序保留，不因額外回合或跳過回合推算交替。
+計數在回合開始時計入，包含目前回合；被跳過的回合不計入。
+中立局面省略的逐席回合數視為 0；已提供但不是自然整數的計數、錯型席位或階段必須拒絕觀測，不以 0 或 null 掩飾損壞的權威資料。
+
 ```typescript
 interface TextRef {
   card: CardRef;

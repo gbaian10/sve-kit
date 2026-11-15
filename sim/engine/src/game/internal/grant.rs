@@ -535,6 +535,7 @@ impl Game {
                 face: self.effect_source_face(&card, Some(&face.0))?,
                 card,
                 line: Some(line.0),
+                wording: super::observation::wording_source(&ability.definition.located().source),
                 holder: known.and_then(|knowledge| knowledge.handle(holder)),
             }));
         };
@@ -565,6 +566,7 @@ impl Game {
             card: provider.card.clone(),
             face: self.effect_source_face(&provider.card, Some(&provider.span.face))?,
             line: Some(u64::from(provider.span.line)),
+            wording: super::observation::wording_source(&provider.span),
             holder: Some(handle),
         }))
     }

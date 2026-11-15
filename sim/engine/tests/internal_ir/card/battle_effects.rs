@@ -484,6 +484,7 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
         card: "unit-follower".into(),
         face: Some(0),
         line: Some(2),
+        wording: None,
         holder: Some(holder.clone()),
     });
     observed.players[0].effects = vec![layer.clone()];
@@ -546,6 +547,7 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
             card: card.into(),
             face,
             line,
+            wording: None,
             holder: None,
         });
         assert_eq!(project(&observed), Err(expected));
@@ -573,6 +575,7 @@ fn wire_installed_effects_retire_links_without_erasing_printing_and_refuse_dupli
         card: "unit-follower".into(),
         face: None,
         line: Some(2),
+        wording: None,
         holder: Some(holder.clone()),
     });
     observed.players[0].effects = vec![layer];

@@ -12,6 +12,7 @@ mod pending;
 mod references;
 mod selection;
 mod sources;
+mod turn;
 
 pub use costs::project_costs;
 pub use effects::{project_card_effects, project_player_effects};
@@ -22,6 +23,7 @@ pub(crate) use objects::build_objects;
 pub use pending::project_pending;
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use selection::{CandidateDetails, SelectionProjection};
+pub(crate) use turn::project_turn;
 
 use sve_battle_contract::{HostError, HostErrorReason};
 

@@ -5,6 +5,10 @@ mod battle_effects;
 mod battle_objects;
 #[path = "card/battle_pending.rs"]
 mod battle_pending;
+#[path = "card/battle_quotas.rs"]
+mod battle_quotas;
+#[path = "card/battle_turn.rs"]
+mod battle_turn;
 #[path = "card/board_relationships.rs"]
 mod board_relationships;
 #[path = "card/by_kind.rs"]

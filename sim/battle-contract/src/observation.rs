@@ -254,7 +254,7 @@ pub struct TurnView {
     pub first_player: Option<Seat>,
     /// Current phase.
     pub phase: Option<Phase>,
-    /// Completed turns in seat order.
+    /// Turns begun in seat order, including the current turn.
     pub elapsed_turns: [Nat; 2],
 }
 
