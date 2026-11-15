@@ -2,11 +2,13 @@ use super::player_evolution::{form, start};
 use super::*;
 use crate::player_pipeline::question;
 use core::error::Error;
-use sve_battle_contract::{CardRef, Nat as WireNat, Seat, observation as wire};
+use sve_battle_contract::{CardRef, Nat as WireNat, Seat, Subject, observation as wire};
 use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 use sve_engine::catalog::EngineIdentityInput;
+use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
-    Command, EvolutionAnswer, EvolutionQuestion, QuestionShape, SubmissionKind, Viewer,
+    Command, EvolutionAnswer, EvolutionQuestion, MainActionAnswer, MainIntentKind, QuestionShape,
+    SubmissionKind, Viewer,
 };
 
 fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
@@ -94,6 +96,24 @@ fn declaring(
 ) -> Option<wire::BattleObservation> {
     let before = exact_authority(game);
     let board = game.battle_observation(viewer, references).ok()?;
+    let actor_seat = if actor == Viewer::P1 {
+        Seat::P1
+    } else {
+        Seat::P2
+    };
+    let own = board
+        .players
+        .iter()
+        .find(|player| player.seat == actor_seat)?;
+    let subject = own.zones.field.cards.first()?.object.clone();
+    assert_eq!(
+        board.objects.get(&subject)?.effective_face,
+        CardRef {
+            printing_id: "printing-base".into(),
+            face: WireNat::ZERO,
+        },
+        "the declaration identifies the public base, never its private evolution form"
+    );
     assert_eq!(
         board.processing,
         vec![wire::ProcessingContext {
@@ -104,7 +124,13 @@ fn declaring(
                 Seat::P2
             }),
             source: None,
-            subject: None,
+            subject: Some(Subject::Card {
+                card: CardRef {
+                    printing_id: "printing-base".into(),
+                    face: WireNat::ZERO,
+                },
+                object: Some(subject),
+            }),
             rule: None,
             procedure: None,
             declared: vec![],
@@ -116,15 +142,6 @@ fn declaring(
         exact_authority(game) == before,
         "reading an evolution declaration cannot advance it"
     );
-    let actor_seat = if actor == Viewer::P1 {
-        Seat::P1
-    } else {
-        Seat::P2
-    };
-    let own = board
-        .players
-        .iter()
-        .find(|player| player.seat == actor_seat)?;
     assert_eq!(own.pp.get(), 2, "declaration has not paid PP");
     assert_eq!(
         own.zones.hand.count.get(),
@@ -156,9 +173,13 @@ fn declaring(
 }
 
 fn all_declaring(game: &Game, actor: Viewer, references: &BattleReferences) -> Option<()> {
-    for viewer in [Viewer::P1, Viewer::P2] {
-        declaring(game, actor, viewer, references)?;
-    }
+    let first = declaring(game, actor, Viewer::P1, references)?;
+    let second = declaring(game, actor, Viewer::P2, references)?;
+    assert_ne!(
+        first.processing.first()?.subject,
+        second.processing.first()?.subject,
+        "the same public base uses each viewer's own handle"
+    );
     Some(())
 }
 
@@ -257,8 +278,10 @@ fn wire_board_keeps_normal_evolution_form_and_payment_in_declaration_without_pri
                 .expect("the face choice is a supported declaration stop");
         }
         assert_eq!(
-            declaring(&first, actor, opponent, &references),
+            declaring(&first, actor, opponent, &references)
+                .expect("the opponent declaration is available"),
             declaring(&second, actor, opponent, &references)
+                .expect("the opponent declaration is available")
         );
         for (ordinal, game) in [&mut first, &mut second].into_iter().enumerate() {
             assert_eq!(
@@ -273,8 +296,10 @@ fn wire_board_keeps_normal_evolution_form_and_payment_in_declaration_without_pri
                 .expect("the payment choice remains an unspent declaration");
         }
         assert_eq!(
-            declaring(&first, actor, opponent, &references),
-            declaring(&second, actor, opponent, &references),
+            declaring(&first, actor, opponent, &references)
+                .expect("the opponent declaration is available"),
+            declaring(&second, actor, opponent, &references)
+                .expect("the opponent declaration is available"),
             "another private face choice and another same-sized hand do not change the opponent's board"
         );
         pay(&mut first, actor, 1).expect("the real evolution payment commits");
@@ -311,13 +336,24 @@ fn wire_board_keeps_evolution_materials_and_hand_discard_in_the_same_declaration
             form(game, actor);
             all_declaring(game, actor, &references)
                 .expect("the real material selection is a declaration");
+        }
+        assert_eq!(
+            declaring(&first, actor, opponent, &references)
+                .expect("the first material declaration is available"),
+            declaring(&second, actor, opponent, &references)
+                .expect("the second material declaration is available"),
+            "private material parameters do not change the opponent's complete board"
+        );
+        for game in [&mut first, &mut second] {
             choose_material(game, actor).expect("the real material answer");
             all_declaring(game, actor, &references)
                 .expect("the private discard choice is a declaration");
         }
         assert_eq!(
-            declaring(&first, actor, opponent, &references),
-            declaring(&second, actor, opponent, &references),
+            declaring(&first, actor, opponent, &references)
+                .expect("the opponent declaration is available"),
+            declaring(&second, actor, opponent, &references)
+                .expect("the opponent declaration is available"),
             "private discard candidates never become an opponent processing parameter"
         );
         for game in [&mut first, &mut second] {
@@ -330,8 +366,94 @@ fn wire_board_keeps_evolution_materials_and_hand_discard_in_the_same_declaration
                 .expect("choosing a discard has not paid it yet");
         }
         assert_eq!(
-            declaring(&first, actor, opponent, &references),
+            declaring(&first, actor, opponent, &references)
+                .expect("the opponent declaration is available"),
             declaring(&second, actor, opponent, &references)
+                .expect("the opponent declaration is available")
         );
+    }
+}
+
+#[test]
+fn wire_board_evolution_subject_selects_the_later_public_twin_for_each_viewer() {
+    let (catalog, references) = fixture(&["unit-follower"]).unwrap();
+    let (base, _) = evolution::programs();
+    for actor in [Viewer::P1, Viewer::P2] {
+        let mut game = position(Arc::clone(&catalog), actor, "unit-spell", base);
+        game.advance_player_input();
+        let actor_seat = if actor == Viewer::P1 {
+            Seat::P1
+        } else {
+            Seat::P2
+        };
+        let observation = game.observe(actor).unwrap();
+        let own = observation
+            .players
+            .iter()
+            .find(|player| player.player == actor)
+            .unwrap();
+        let field = own
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap();
+        let selected = &field.cards[1].card.handle;
+        let main = question(&game, actor);
+        let QuestionShape::ActionWindow(actions) = main.shape else {
+            panic!("the real main window supplies evolution intents");
+        };
+        let intent = actions.intents.iter().find(|intent| {
+            matches!(&intent.kind, MainIntentKind::Evolve { holder, .. } if &holder.handle == selected)
+        }).unwrap();
+        assert_eq!(
+            game.submit_player(
+                actor,
+                Command::MainAction {
+                    token: main.token,
+                    intent: intent.id.clone(),
+                    answer: MainActionAnswer::None,
+                }
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+        for stage in 0..2 {
+            let before = exact_authority(&game);
+            let mut handles = Vec::new();
+            for viewer in [Viewer::P1, Viewer::P2] {
+                let board = game.battle_observation(viewer, &references).unwrap();
+                let own = board
+                    .players
+                    .iter()
+                    .find(|player| player.seat == actor_seat)
+                    .unwrap();
+                let first = &own.zones.field.cards[0].object;
+                let second = &own.zones.field.cards[1].object;
+                assert_eq!(
+                    board.objects[first].effective_face, board.objects[second].effective_face,
+                    "two public twins cannot be distinguished by printing"
+                );
+                assert_eq!(
+                    board.processing[0].subject,
+                    Some(Subject::Card {
+                        card: board.objects[second].effective_face.clone(),
+                        object: Some(second.clone()),
+                    }),
+                    "the subject follows the selected physical base rather than the first matching printing"
+                );
+                handles.push(second.clone());
+            }
+            assert_ne!(
+                handles[0], handles[1],
+                "each viewer owns its subject handle"
+            );
+            assert!(
+                exact_authority(&game) == before,
+                "reading the public subject is read-only"
+            );
+            if stage == 0 {
+                choose_form(&mut game, actor, 0).expect("the real form answer reaches payment");
+            }
+        }
     }
 }

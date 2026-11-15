@@ -37,7 +37,7 @@ mod turn;
 #[cfg(all(test, feature = "runner"))]
 mod tests;
 
-pub(crate) use board::build_observation;
+pub(crate) use board::{RuleProcessing, build_observation};
 pub use events::{
     EventFeed, EventObjects, EventReferences, FeedUpdate, ProjectedEvent, project_batch,
 };

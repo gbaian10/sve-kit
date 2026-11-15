@@ -6,7 +6,7 @@ use crate::game::internal::{Context, Execution, Game, InputDomain, Result, Wait}
 use crate::game::player::observation::{CardObservation, seat};
 use crate::game::player::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
-    QuestionToken, Viewer,
+    ObjectHandle, QuestionToken, Viewer,
 };
 use crate::ir::{
     Ability, AbilityId, Action, CostSpec, Generation, ObjectRef, PlaySpec, Resource,
@@ -249,6 +249,16 @@ impl Game {
         self.player_evolution
             .as_ref()
             .map(|declaration| declaration.actor)
+    }
+
+    pub(in crate::game) fn evolution_subject(&self, viewer: Viewer) -> Result<ObjectHandle> {
+        let declaration = self
+            .player_evolution
+            .as_ref()
+            .ok_or_else(|| invalid("missing evolution declaration"))?;
+        declaration.validate_source(self)?;
+        // Each viewer owns a different identity period for the same public base.
+        self.observed_object_handle(viewer, &declaration.source.source)
     }
 
     pub(in crate::game) fn evolution_view(

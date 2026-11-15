@@ -25,7 +25,8 @@ use super::{
     DecisionShape, EvolutionQuestion, Input, ObjectHandle, OpeningQuestion, QuestionShape, Viewer,
 };
 use crate::battle::{
-    BattleReferences, ObjectTable, ProjectionError, build_objects, build_observation, project_turn,
+    BattleReferences, ObjectTable, ProjectionError, RuleProcessing, build_objects,
+    build_observation, project_turn,
 };
 use crate::game::internal::zone_capacity;
 use crate::game::{Game, Object};
@@ -390,7 +391,7 @@ impl Game {
     fn battle_rule_processing(
         &self,
         observation: &Observation,
-    ) -> result::Result<Vec<wire::ProcessingContext>, ProjectionError> {
+    ) -> result::Result<Vec<RuleProcessing>, ProjectionError> {
         // Effect executions need their frozen source, parent stack and declarations.
         if self.typed.is_some() {
             return Err(ProjectionError::Unavailable);
@@ -446,15 +447,15 @@ impl Game {
             actor: actor_seat,
             round: None,
         });
-        Ok(vec![wire::ProcessingContext {
+        let subject = matches!(&question.shape, QuestionShape::Evolution(_))
+            .then(|| self.evolution_subject(observation.viewer))
+            .transpose()
+            .map_err(|_authority_error| ProjectionError::Unavailable)?;
+        Ok(vec![RuleProcessing {
             stage,
             controller,
-            source: None,
-            subject: None,
-            rule: None,
+            subject,
             procedure,
-            declared: vec![],
-            payment: None,
         }])
     }
 
