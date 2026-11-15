@@ -18,6 +18,13 @@ pub struct ScopeId {
     serial: u64,
 }
 
+impl ScopeId {
+    /// Number among the scopes issued to its viewer.
+    pub(crate) const fn sequence(&self) -> u64 {
+        self.serial
+    }
+}
+
 impl PartialEq for ScopeId {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.stream, &other.stream) && self.serial == other.serial
@@ -37,6 +44,18 @@ impl fmt::Debug for ScopeId {
 pub struct PresentationId {
     scope: ScopeId,
     index: u64,
+}
+
+impl PresentationId {
+    /// The scope this occurrence belongs to.
+    pub(crate) const fn scope(&self) -> &ScopeId {
+        &self.scope
+    }
+
+    /// Position among the occurrences of its scope.
+    pub(crate) const fn position(&self) -> u64 {
+        self.index
+    }
 }
 
 /// An occurrence shown before it commits, with the permissions frozen when it happened.
@@ -114,6 +133,11 @@ pub(super) struct Presentation {
     open: Vec<Shown>,
     /// Scopes whose batch a restoration discarded, until the submission's result says why.
     discarded: Vec<ScopeId>,
+    /// Source batches that a board handed to this viewer already contained without a scope.
+    /// They are never shown early afterwards and commit as history. Only batches before the
+    /// first one this viewer could not identify are recorded, so that batch keeps holding
+    /// back everything after it.
+    covered: Vec<u64>,
     /// Handles of the objects on the board this viewer was handed last.
     held: Arc<BTreeSet<ObjectHandle>>,
     record: Arc<[Arc<PresentationEntry>]>,
@@ -188,7 +212,7 @@ impl Presentation {
         batch: u64,
         events: Vec<EventKind>,
     ) -> Option<bool> {
-        if events.is_empty() || self.open.iter().any(|shown| shown.batch == batch) {
+        if events.is_empty() || self.settled_before(batch) {
             return Some(true);
         }
         if !self.identifiable(live, &events) {
@@ -251,6 +275,39 @@ impl Presentation {
             .is_some()
     }
 
+    /// The board handed now contains this batch: unless it is a play's declaration and
+    /// payment, it is not new when it commits. `false`: the viewer cannot identify it.
+    pub(super) fn cover(
+        &mut self,
+        live: &BTreeSet<ObjectHandle>,
+        batch: u64,
+        events: &[EventKind],
+        ordinary: bool,
+    ) -> bool {
+        if events.is_empty() || self.settled_before(batch) {
+            return true;
+        }
+        if !self.identifiable(live, events) {
+            return false;
+        }
+        if ordinary {
+            self.covered.push(batch);
+        }
+        true
+    }
+
+    /// Whether this viewer already has the batch, as a scope or on a board it was handed.
+    fn settled_before(&self, batch: u64) -> bool {
+        self.covered.contains(&batch) || self.open.iter().any(|shown| shown.batch == batch)
+    }
+
+    /// Whether the batch committing now was already on a board this viewer was handed.
+    pub(super) fn uncover(&mut self, batch: u64) -> bool {
+        let before = self.covered.len();
+        self.covered.retain(|covered| *covered != batch);
+        self.covered.len() != before
+    }
+
     /// Whether every shown scope has reached the end of its life.
     pub(super) const fn settled(&self) -> bool {
         self.open.is_empty()
@@ -265,6 +322,7 @@ impl Presentation {
         self.open = open;
         self.discarded
             .extend(gone.into_iter().map(|shown: Shown| shown.scope));
+        self.covered.retain(|batch| kept(*batch));
     }
 
     /// Give the discarded scopes their end. Only a fault withdraws a shown scope; `false`
@@ -331,7 +389,8 @@ impl Game {
     pub fn present_player_events(&mut self, viewer: Viewer) -> Result<(), EventError> {
         let live = self.observable_handles(viewer);
         let ready = self.provisional_stop();
-        self.player_events.present(viewer, ready, live)
+        let unplayed = self.unplayed_since();
+        self.player_events.present(viewer, ready, live, unplayed)
     }
 
     /// Read this viewer's recorded presentation steps after a cursor, without changing rules,

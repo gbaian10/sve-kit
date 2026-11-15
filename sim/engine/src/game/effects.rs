@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use crate::ir::SnapshotId;
+use crate::ir::{MoveMethod, SnapshotId};
 use alloc::collections::BTreeMap;
 use core::slice::from_ref;
 use serde_json::{Value, json};
@@ -331,7 +331,11 @@ impl Game {
                     let before = self.zone_ids(&seat, "hand");
                     let count = self.zone_count(&seat, "hand");
                     for _ in 0..self.number(&node["count"], frame)?.max(0) {
-                        drop(self.draw(&seat, frame)?);
+                        drop(self.draw(
+                            &seat,
+                            frame,
+                            super::player::events::MovementMethod::Effect(MoveMethod::Draw),
+                        )?);
                     }
                     frame.performed = frame
                         .performed
@@ -987,7 +991,14 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn draw(&mut self, seat: &str, frame: &Frame) -> Result<Option<String>> {
+    /// `method` states whether a rule or an effect instruction draws: the move itself looks
+    /// the same, and nothing recorded later can tell the two apart.
+    pub(super) fn draw(
+        &mut self,
+        seat: &str,
+        frame: &Frame,
+        method: super::player::events::MovementMethod,
+    ) -> Result<Option<String>> {
         // "カードを引けない": the draw does not happen; it is not a failed draw either.
         if self.restricted(&format!("{seat}.leader"), "draw")? {
             return Ok(None);
@@ -1008,11 +1019,7 @@ impl Game {
         if actual.generation == generation || actual.zone != "hand" || actual.controller != seat {
             return Ok(None);
         }
-        self.player_movement_method(
-            player_mark,
-            from_ref(&id),
-            super::player::events::MovementMethod::Draw,
-        );
+        self.player_movement_method(player_mark, from_ref(&id), method);
         let group = self.group();
         self.emit(
             json!({"kind":"引く","player":seat,"object":id}),

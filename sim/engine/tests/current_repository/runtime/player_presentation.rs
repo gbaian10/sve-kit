@@ -141,7 +141,7 @@ const fn is_draw(kind: &EventKind) -> bool {
     matches!(
         kind,
         EventKind::Movement {
-            method: MovementMethod::Draw,
+            method: MovementMethod::Effect(MoveMethod::Draw),
             ..
         }
     )

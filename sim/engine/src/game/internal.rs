@@ -20,7 +20,7 @@ use crate::ir::{
     DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, ExecutionId,
     Expr, FlipOutcome, FusedEvent, Generation, InstallationSubjects, Instruction,
     InstructionContext, Int, IntFrozen, IntOperation, IntRead, LifeChangeEvent, Located,
-    LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveOutcome, Nat, NatFrozen,
+    LookOutcome, MeasuredReceipt, ModeChoiceKind, ModeId, MoveMethod, MoveOutcome, Nat, NatFrozen,
     NatOperation, NatRead, Node, ObjectFrozen, ObjectId, ObjectOperand, ObjectRef, OrderOutcome,
     PlayerId, PlayerRef, PlayerRelation, PlayerResource, PlayerSet, PostureEvent, Predicate,
     Program, Quantity, ReceiptId, ReceiptLocation, RecipientSet, Requirements, ResolvedRecipients,
@@ -645,6 +645,8 @@ pub(super) struct Execution {
     cost_override: Option<CostOverride>,
     play_origin_player: Option<PlayerId>,
     procedures: Vec<player_stages::ProcedureLocals>,
+    /// Player-event journal position when this execution was created.
+    began: u64,
 }
 
 #[expect(
@@ -829,6 +831,7 @@ impl Game {
                 nested: None,
                 cost_override: None,
                 play_origin_player: None,
+                began: self.player_event_serial(),
             };
             self.internal_run(&mut execution, &published)?;
             let progress = execution.progress();
@@ -1905,7 +1908,12 @@ impl Game {
             return Err(invalid("draw generation exhausted"));
         }
         let player_mark = self.player_event_mark();
-        let Some(id) = self.draw(seat, &execution.frame())? else {
+        let Some(id) = self.draw(
+            seat,
+            &execution.frame(),
+            super::player::events::MovementMethod::Effect(MoveMethod::Draw),
+        )?
+        else {
             return Ok(None);
         };
         // Historical identity may remain known; it must not locate the new private slot.

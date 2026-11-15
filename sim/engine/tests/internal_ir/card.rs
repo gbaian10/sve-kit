@@ -61,6 +61,8 @@ mod player_policy;
 mod presentation_erased;
 #[path = "card/presentation_fault.rs"]
 mod presentation_fault;
+#[path = "card/presentation_feed.rs"]
+mod presentation_feed;
 #[path = "card/presentation_nested.rs"]
 mod presentation_nested;
 #[path = "card/prevent_controller.rs"]

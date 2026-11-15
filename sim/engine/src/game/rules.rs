@@ -913,7 +913,7 @@ impl Game {
             ..Frame::default()
         };
         if !prevent_draw {
-            drop(self.draw(&seat, &frame)?);
+            drop(self.draw(&seat, &frame, super::player::events::MovementMethod::Draw)?);
         }
         let elapsed = int(&self.state.turn["elapsed_turns"][&seat]);
         self.state.continuous.retain(|entry| {
@@ -940,6 +940,8 @@ impl Game {
         if !winners.is_empty() {
             self.state.game = json!({"ended":true,"winner":if winners.len()==1 {winners.first()} else {None},"by":"1.2.4"});
             let group = self.group();
+            // Players made to win together are one result: no single one of them won.
+            let player_batch = self.player_event_mark();
             for seat in winners {
                 self.emit(
                     json!({"kind":"勝利","player":seat,"ability":frame.reference}),
@@ -947,6 +949,7 @@ impl Game {
                     group,
                 );
             }
+            self.seal_player_event_batch(player_batch);
         }
         Ok(())
     }
@@ -981,6 +984,9 @@ impl Game {
             };
             self.state.game = json!({"ended":true,"winner":if losers.len()==2 {None} else {losers.first().map(|(seat,_)|other(seat))},"by":ending_rule});
             let group = self.group();
+            // Players defeated at the same check lose together: neither result alone says
+            // that the other player did not win.
+            let player_batch = self.player_event_mark();
             for (seat, rule) in losers {
                 self.emit(
                     json!({"kind":"敗北","player":seat,"by":format!("rule-{rule}")}),
@@ -988,6 +994,7 @@ impl Game {
                     group,
                 );
             }
+            self.seal_player_event_batch(player_batch);
             self.internal_terminal_cleanup();
             return Ok(());
         }
