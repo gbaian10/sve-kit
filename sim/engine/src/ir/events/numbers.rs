@@ -1,22 +1,26 @@
-//! Numeric event views read the exact committed subject, independently of its later liveness.
+//! Event identity stays frozen; references to an entering card read its current or last field values.
 use super::subject::SubjectFields;
 use crate::ir::{
-    CharacteristicView, EventContext, EventSnapshotPolicy, Expr, Int, IntOperation, NumberRead,
-    ObjectOperand, ObjectRef, ObjectView, Stat,
+    CharacteristicView, EventContext, EventSnapshotPolicy, Expr, Int, IntOperation, LkiReason,
+    NumberRead, ObjectFrozen, ObjectOperand, ObjectRef, ObjectView, ScopeId, Stat,
 };
 
 pub(crate) fn view(fields: SubjectFields) -> Option<ObjectView> {
-    let (event, policy) = match fields {
-        SubjectFields::Entry(event) => (
-            EventContext::EnterField { event },
-            EventSnapshotPolicy::AfterEntry,
-        ),
+    let object = Box::new(ObjectOperand::FromExpression {
+        value: Box::new(fields.object()),
+    });
+    match fields {
+        SubjectFields::Entry(_) => Some(ObjectView::LastKnown {
+            object,
+            reason: LkiReason::ZoneExit,
+        }),
         SubjectFields::Leave(event)
         | SubjectFields::Cemetery(event)
-        | SubjectFields::Hand(event) => (
-            EventContext::LeaveField { event },
-            EventSnapshotPolicy::BeforeExit,
-        ),
+        | SubjectFields::Hand(event) => Some(ObjectView::EventSnapshot {
+            object,
+            event: EventContext::LeaveField { event },
+            policy: EventSnapshotPolicy::BeforeExit,
+        }),
         SubjectFields::Attack(_)
         | SubjectFields::Posture(_)
         | SubjectFields::DamageSource(_)
@@ -24,29 +28,51 @@ pub(crate) fn view(fields: SubjectFields) -> Option<ObjectView> {
         | SubjectFields::Destroy(_)
         | SubjectFields::Evolve(_)
         | SubjectFields::Ex(_)
-        | SubjectFields::Ub(_) => return None,
-    };
-    Some(ObjectView::EventSnapshot {
-        object: Box::new(ObjectOperand::FromExpression {
-            value: Box::new(fields.object()),
-        }),
-        event,
-        policy,
-    })
+        | SubjectFields::Ub(_) => None,
+    }
 }
 
-pub(crate) fn subject(object: &ObjectView) -> Option<Expr<ObjectRef>> {
-    let ObjectView::EventSnapshot { event, .. } = object else {
-        return None;
-    };
-    let fields = if let EventContext::EnterField { event } = event {
+fn fields(object: &ObjectView) -> Option<SubjectFields> {
+    let fields = if let ObjectView::LastKnown {
+        object,
+        reason: LkiReason::ZoneExit,
+    } = object
+    {
+        let ObjectOperand::FromExpression { value } = object.as_ref() else {
+            return None;
+        };
+        let Expr::Frozen(value) = value.as_ref() else {
+            return None;
+        };
+        let ObjectFrozen::EnterFieldObject { event } = value.as_ref() else {
+            return None;
+        };
         SubjectFields::Entry(*event)
-    } else if let EventContext::LeaveField { event } = event {
+    } else if let ObjectView::EventSnapshot {
+        event: EventContext::LeaveField { event },
+        ..
+    } = object
+    {
         SubjectFields::Leave(*event)
     } else {
         return None;
     };
-    (view(fields).as_ref() == Some(object)).then(|| fields.object())
+    (view(fields).as_ref() == Some(object)).then_some(fields)
+}
+
+pub(crate) fn subject(object: &ObjectView) -> Option<Expr<ObjectRef>> {
+    fields(object).map(SubjectFields::object)
+}
+
+pub(crate) fn key(object: &ObjectView) -> Option<(ScopeId, u64)> {
+    let fields = fields(object)?;
+    if let SubjectFields::Entry(event) = fields {
+        Some(event.key())
+    } else if let SubjectFields::Leave(event) = fields {
+        Some(event.key())
+    } else {
+        None
+    }
 }
 
 pub(crate) fn number(
@@ -60,17 +86,14 @@ pub(crate) fn number(
     } else {
         CharacteristicView::Effective
     };
-    let information = property.map_or_else(
-        || NumberRead::Cost {
-            object: object.clone(),
-            view,
-        },
-        |property| NumberRead::Stats {
-            object: object.clone(),
+    let information = match property {
+        Some(property) => NumberRead::Stats {
+            object,
             property,
             view,
         },
-    );
+        None => NumberRead::Cost { object, view },
+    };
     Some(Expr::Compute(Box::new(IntOperation::InformationOrZero {
         information,
     })))

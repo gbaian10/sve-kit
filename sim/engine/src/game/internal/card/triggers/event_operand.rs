@@ -204,6 +204,7 @@ fn number_subjects(
                 "/object",
                 "/object/event",
                 "/object/policy",
+                "/object/reason",
                 "/object/object",
                 "/object/object/value/frozen",
             ] {

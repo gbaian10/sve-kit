@@ -103,6 +103,7 @@ struct PendingSourceDeparture {
     information: SourceSnapshot,
     departing: String,
     generation: u64,
+    subject: bool,
 }
 
 pub(in crate::game::internal) fn phase_in_zone(ability: &Ability, zone: ZoneKind) -> bool {
@@ -396,6 +397,26 @@ impl Game {
     ) -> Result<Vec<PendingSourceDeparture>> {
         let mut updates = Vec::new();
         for pending in &self.card_runtime.pending {
+            if let Some(EventPayload::EnterField { event }) = &pending.timing
+                && pending.subject_information.is_some()
+            {
+                for id in ids {
+                    let object = self.object(id)?;
+                    if object.zone == "field"
+                        && object.generation == event.object.generation.0
+                        && self.state.ir_objects.get(id) == Some(&event.object.id.0)
+                        && destinations.get(id).is_some_and(|to| to != "field")
+                    {
+                        updates.push(PendingSourceDeparture {
+                            pending: pending.id,
+                            information: self.information_snapshot(event.object)?,
+                            departing: id.clone(),
+                            generation: object.generation,
+                            subject: true,
+                        });
+                    }
+                }
+            }
             if pending.installed {
                 continue;
             }
@@ -419,6 +440,7 @@ impl Game {
                     information: pending.information.snapshot(self, pending.source)?,
                     departing: departing.id.clone(),
                     generation: departing.generation,
+                    subject: false,
                 });
             }
         }
@@ -544,18 +566,23 @@ impl Game {
             .ok_or_else(|| invalid("IR epoch exhausted"))?;
         let after = SnapshotId(self.state.ir_epoch);
         for update in plan.updates {
-            if self
-                .state
-                .objects
-                .get(&update.departing)
-                .is_some_and(|current| current.generation != update.generation)
+            if ((update.subject && !self.state.objects.contains_key(&update.departing))
+                || self
+                    .state
+                    .objects
+                    .get(&update.departing)
+                    .is_some_and(|current| current.generation != update.generation))
                 && let Some(pending) = self
                     .card_runtime
                     .pending
                     .iter_mut()
                     .find(|pending| pending.id == update.pending)
             {
-                pending.information.seal(Some(update.information));
+                if update.subject {
+                    pending.subject_information = Some(update.information);
+                } else {
+                    pending.information.seal(Some(update.information));
+                }
             }
         }
         let mut admitted = Vec::new();
@@ -904,7 +931,7 @@ impl PendingOccurrence {
         if !requirements.required.iter().any(|required| {
             matches!(
                 required.capability.code,
-                "value.unique-name" | "value.event-snapshot"
+                "value.unique-name" | "value.event-snapshot" | "reference.lki"
             )
         }) {
             return Ok(());

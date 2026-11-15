@@ -86,7 +86,12 @@ fn base_program(requested: &str) -> &'static WellFormedCardProgram {
 
 pub(super) fn production(mut actions: Vec<Action>) -> WellFormedCardProgram {
     for (index, action) in actions.iter_mut().enumerate() {
-        let (Action::Move { objects, .. } | Action::Destroy { objects }) = action else {
+        let (Action::Move { objects, .. }
+        | Action::Destroy { objects }
+        | Action::Modify {
+            subjects: objects, ..
+        }) = action
+        else {
             panic!("named movement fixture");
         };
         let Selector::Zone {

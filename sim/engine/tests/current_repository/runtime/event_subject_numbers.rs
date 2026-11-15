@@ -189,31 +189,64 @@ fn dragon_canyon_plays_its_top_deck_follower_and_uses_that_entrys_power() {
 }
 
 #[test]
-fn dragon_canyon_keeps_the_entry_power_when_the_follower_leaves_before_resolution() {
+fn dragon_canyon_reads_last_field_power_without_following_a_reentered_generation() {
     use super::event_cemetery::move_named;
-    use super::event_subject_capture::{enter, prepared};
+    use super::event_subject_capture::{enter, prepared, resolve};
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP22-073"}]);
     initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"dragon","card":"BP01-080"}]);
     initial["players"]["P2"]["zones"]["field"] =
-        json!([{"id":"enemy","card":"BP01-171","state":{"hp":20_u8,"max_hp":20_u8}}]);
+        json!([{"id":"enemy","card":"BP01-171","state":{"hp":30_u8,"max_hp":30_u8}}]);
+    let Action::Move { objects, .. } =
+        move_named(ZoneKind::Field, OwnerZone::Cemetery, "ジェネシスドラゴン")
+    else {
+        panic!("named modifier subject")
+    };
+    let modifier = Action::Modify {
+        subjects: objects,
+        patch: CharacteristicPatch::Numeric {
+            stat: Stat::Attack,
+            change: NumericChange::Add {
+                amount: Expr::Literal(Int(2)),
+            },
+        },
+        expires: Duration {
+            end: DurationEnd::NoTemporalExpiry {},
+            anchor: TimeAnchor::Installation {},
+            usage: None,
+            intervals: vec![],
+        },
+        source: EffectReference::CurrentInstallation {},
+    };
     let mut game = prepared(
         &initial,
         vec![
             enter(ZoneKind::Ex, "ジェネシスドラゴン"),
+            modifier,
             move_named(ZoneKind::Field, OwnerZone::Cemetery, "ジェネシスドラゴン"),
+            enter(ZoneKind::Cemetery, "ジェネシスドラゴン"),
         ],
     );
     activate(&mut game, "P1");
     finish_checks(&mut game);
-    resolve_number(&mut game, "BP22-073", 1);
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["cemetery"], json!(["dragon"]));
-    assert_eq!(state["objects"]["enemy"]["hp"], 10_u8);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["dragon"]["power"],
+        10_u8
+    );
+    resolve(&mut game, "BP22-073", 2, Some("Ex"));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["enemy"]["hp"],
+        18_u8
+    );
+    resolve(&mut game, "BP22-073", 1, Some("Cemetery"));
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["enemy"]["hp"],
+        8_u8
+    );
 }
 
 #[test]
-fn numeric_event_views_require_their_exact_subject_binding_and_snapshot_policy() {
+fn numeric_event_views_require_their_exact_subject_binding_and_lki_reason() {
     let mut tree = expanded::tree().clone();
     let mut card = tree["cards"]["BP01-041"].clone();
     let mut ability = card["abilities"][0].clone();
@@ -254,19 +287,20 @@ fn numeric_event_views_require_their_exact_subject_binding_and_snapshot_policy()
         else {
             panic!("unexpected numeric event fixture shape")
         };
-        let ObjectView::EventSnapshot {
-            object,
-            event,
-            policy,
-        } = object
-        else {
+        let ObjectView::LastKnown { object, reason } = object else {
             panic!("unexpected numeric event fixture shape")
         };
         match change {
             0 => **object = ObjectOperand::SourceHolder {},
-            1 => *policy = EventSnapshotPolicy::BeforeExit,
+            1 => *reason = LkiReason::SourceDeparted,
             _ => {
-                let EventContext::EnterField { event: binding } = event else {
+                let ObjectOperand::FromExpression { value } = object.as_mut() else {
+                    panic!("event object expression")
+                };
+                let Expr::Frozen(value) = value.as_mut() else {
+                    panic!("event object projection")
+                };
+                let ObjectFrozen::EnterFieldObject { event: binding } = value.as_mut() else {
                     panic!("unexpected numeric event fixture shape")
                 };
                 *binding = Binding::new(999, scope);
@@ -317,4 +351,59 @@ fn kaguya_may_leave_a_matching_amulet_in_its_private_hand() {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["hand"], json!(["amulet"]));
     assert_eq!(state["P1"]["field"], json!(["source"]));
+}
+
+#[test]
+fn dragon_canyon_reads_the_current_attack_after_the_entering_followers_fanfare() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP22-073"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"warrior","card":"BP09-063"}]);
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"enemy","card":"BP01-171","state":{"hp":10_u8,"max_hp":10_u8}}]);
+    let mut game = game(&initial);
+    assert!(matches!(
+        game.play_internal_card("warrior", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Entered(_)
+    ));
+    resolve_number(&mut game, "BP09-063", 2);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["warrior"]["power"],
+        3_u8
+    );
+    resolve_number(&mut game, "BP22-073", 1);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["enemy"]["hp"],
+        7_u8
+    );
+}
+
+#[test]
+fn an_executing_entry_ability_keeps_its_subjects_last_field_value_after_moving_it() {
+    let mut tree = expanded::tree().clone();
+    let mut card = tree["cards"]["BP01-041"].clone();
+    let mut ability = card["abilities"][0].clone();
+    ability.as_object_mut().unwrap().remove("activate");
+    ability["auto"] = json!({"on":{"enter_field":{"who":"self","sel":{"kind":"follower"}}},"do":[
+        {"buff":{"on":"it","power":2_u8}},
+        {"move":{"ref":"it","to":"cemetery"}},
+        {"damage":{"to":{"leaders":"opponents"},"n":{"power_of":"it"}}}
+    ]});
+    card["abilities"] = json!([ability]);
+    tree["cards"] = json!({"producer":card});
+    let program = lowerer().lower(&tree).unwrap().remove("producer").unwrap();
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"dragon","card":"BP01-080"}]);
+    let mut game = event_subject_capture::prepared_program(&initial, &program);
+    assert!(matches!(
+        game.play_internal_card("dragon", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Entered(_)
+    ));
+    event_subject_capture::resolve(&mut game, "producer", 1, None);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["cemetery"], json!(["dragon"]));
+    assert_eq!(state["P2"]["leader"]["life"], 8_u8);
+    assert_eq!(state["P1"]["field"], json!(["producer"]));
 }
