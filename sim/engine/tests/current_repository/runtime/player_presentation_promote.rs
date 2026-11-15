@@ -102,8 +102,8 @@ fn promotion_links_each_shown_batch_once_and_leaves_later_batches_unlinked() {
     for ((viewer, scopes), cursor) in SEATS.into_iter().zip(&seen).zip(&cursors) {
         assert_eq!(
             scopes.len(),
-            4,
-            "declaration, play, damage and draw were shown"
+            5,
+            "declaration, payment, play, damage and draw were shown"
         );
         let batches = committed(&game, viewer);
         assert_linked(&batches, scopes);
@@ -242,7 +242,7 @@ fn concession_commits_the_executed_prefix_promotes_it_and_adds_one_result() {
         );
         assert_eq!(
             kinds(&seen[0]).len(),
-            if stops[1] { 4 } else { 2 },
+            if stops[1] { 5 } else { 3 },
             "the scenario showed the intended stops"
         );
     }

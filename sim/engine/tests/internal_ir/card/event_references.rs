@@ -139,6 +139,7 @@ fn a_delivery_names_each_card_by_its_adopted_face_and_its_object_on_that_viewers
             .map(|event| event.body.clone())
             .collect::<Vec<_>>();
         let [
+            EventBody::ResourceChanged { .. },
             played,
             EventBody::Movement { after: first, .. },
             damage,
@@ -146,7 +147,7 @@ fn a_delivery_names_each_card_by_its_adopted_face_and_its_object_on_that_viewers
             resolved,
         ] = bodies.as_slice()
         else {
-            panic!("play, draw, damage, draw, resolution: {bodies:?}");
+            panic!("payment, play, draw, damage, draw, resolution: {bodies:?}");
         };
         assert_eq!(
             (played, resolved),
@@ -220,8 +221,8 @@ fn a_promoted_event_states_exactly_what_its_viewer_was_shown() {
             .collect::<Vec<_>>();
         assert_eq!(
             shown.len(),
-            2,
-            "{viewer:?}: the play and the first draw were shown early"
+            3,
+            "{viewer:?}: the payment, the play and the first draw were shown early"
         );
         for provisional in shown {
             let promoted = events

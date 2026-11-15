@@ -1,4 +1,5 @@
 use super::event_batches::{attack_the_follower, combat_ready};
+use super::presentation_fault::{ask_for_the_follower, prepared};
 use super::presentation_feed::Board;
 use super::*;
 use sve_battle_contract::event::{self as wire, DamageClass, EventBody};
@@ -174,6 +175,7 @@ fn an_evolution_names_the_follower_its_new_form_and_each_stage() {
     for super_payment in [0_u8, 1] {
         let mut game = evolution::position(1, base, form);
         game.advance_player_input();
+        let pp = game.observe(Viewer::P1).unwrap().players[0].resources.pp;
         game.internal_rule_action(&json!({
             "do":"evolve","source":"s","evolve_card":"e",
             "pay":{"pp":1,"ep":0,"sep":super_payment}
@@ -189,6 +191,18 @@ fn an_evolution_names_the_follower_its_new_form_and_each_stage() {
                     |card| card.card.printing_id == "unit-form" && card.object.is_some()
                 ),
                 "the evolution card is placed in the evolution zone: {bodies:?}"
+            );
+            assert_eq!(
+                bodies
+                    .iter()
+                    .filter(|body| matches!(body, EventBody::ResourceChanged { .. }))
+                    .collect::<Vec<_>>(),
+                vec![&EventBody::ResourceChanged {
+                    player: Seat::P1,
+                    resource: wire::Resource::Pp,
+                    change: changed(pp, pp.saturating_sub(1)),
+                }],
+                "the evolution's PP payment is the only resource result"
             );
             let mut expected = vec![EventBody::Evolved {
                 subject: follower.clone(),
@@ -231,6 +245,16 @@ fn a_turn_change_stands_the_new_players_cards_and_draws_by_rule_before_its_main_
         let [
             EventBody::PhaseStarted { turn: ending },
             EventBody::PhaseStarted { turn: starting },
+            EventBody::ResourceChanged {
+                player: Seat::P2,
+                resource: wire::Resource::MaxPp,
+                change: raised,
+            },
+            EventBody::ResourceChanged {
+                player: Seat::P2,
+                resource: wire::Resource::Pp,
+                change: refilled,
+            },
             EventBody::PostureChanged {
                 subject,
                 posture: Posture::Standing,
@@ -244,8 +268,15 @@ fn a_turn_change_stands_the_new_players_cards_and_draws_by_rule_before_its_main_
             EventBody::PhaseStarted { turn: main },
         ] = bodies.as_slice()
         else {
-            panic!("end phase, start phase, stand, rule draw, main phase: {bodies:?}");
+            panic!(
+                "end phase, start phase, maximum PP, PP, stand, rule draw, main phase: {bodies:?}"
+            );
         };
+        assert_eq!(
+            (raised, refilled),
+            (&changed(2, 3), &changed(0, 3)),
+            "the new turn player's maximum PP rises by one and its PP is refilled to it"
+        );
         assert_eq!(
             (ending.active, starting.active, main.active),
             (Some(Seat::P1), Some(Seat::P2), Some(Seat::P2)),
@@ -266,6 +297,37 @@ fn a_turn_change_stands_the_new_players_cards_and_draws_by_rule_before_its_main_
             (false, viewer == Viewer::P2),
             "only the drawing player is told which card it drew"
         );
+    }
+}
+
+#[test]
+fn a_turn_start_reports_only_the_pp_values_that_changed() {
+    // The maximum cannot rise past 10; PP that is already full is not refilled.
+    for (current, refilled) in [(4, Some(changed(4, 10))), (10, None)] {
+        let mut game = player_closing::board_with_pp(true, current, 10);
+        player_closing::end(&mut game);
+        assert_eq!(
+            player_pipeline::answer(&mut game, Viewer::P2, Answer::Quick(None)).kind,
+            SubmissionKind::Applied,
+            "passing the end-phase Quick window starts the next turn"
+        );
+        for viewer in [Viewer::P1, Viewer::P2] {
+            assert_eq!(
+                bodies(&game, viewer)
+                    .into_iter()
+                    .filter(|body| matches!(body, EventBody::ResourceChanged { .. }))
+                    .collect::<Vec<_>>(),
+                refilled
+                    .iter()
+                    .map(|change| EventBody::ResourceChanged {
+                        player: Seat::P2,
+                        resource: wire::Resource::Pp,
+                        change: *change,
+                    })
+                    .collect::<Vec<_>>(),
+                "{viewer:?}: starting with {current} of 10 PP"
+            );
+        }
     }
 }
 
@@ -348,6 +410,54 @@ fn an_effects_resource_and_life_changes_state_the_value_before_and_after() {
                 },
             ],
             "each change names its player and resource and freezes the value it left"
+        );
+    }
+}
+
+#[test]
+fn a_pp_payment_states_the_value_before_and_after_ahead_of_what_it_pays_for() {
+    // The follower's ability costs 1 PP and its controller has 2.
+    let mut game = prepared(false);
+    ask_for_the_follower(&mut game);
+    assert_eq!(
+        player_pipeline::answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied,
+        "the chosen follower is damaged and the ability resolves"
+    );
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let bodies = bodies(&game, viewer);
+        assert!(
+            matches!(
+                bodies.as_slice(),
+                [
+                    EventBody::ResourceChanged {
+                        player: Seat::P1,
+                        resource: wire::Resource::Pp,
+                        change,
+                    },
+                    EventBody::AbilityPlayed { .. },
+                    ..
+                ] if *change == changed(2, 1)
+            ),
+            "{viewer:?}: the payment comes first, then the play it paid for: {bodies:?}"
+        );
+        assert_eq!(
+            bodies
+                .iter()
+                .filter(|body| matches!(body, EventBody::ResourceChanged { .. }))
+                .count(),
+            1,
+            "{viewer:?}: PP is paid once"
+        );
+        let causes = game
+            .events(viewer, None)
+            .unwrap()
+            .take(2)
+            .map(|event| event.cause)
+            .collect::<Vec<_>>();
+        assert_eq!(
+            causes[0], causes[1],
+            "{viewer:?}: the payment has the cause of the play it paid for"
         );
     }
 }
