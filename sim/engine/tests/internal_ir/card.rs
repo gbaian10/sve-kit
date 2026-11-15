@@ -9,6 +9,8 @@ mod battle_objects;
 mod battle_observation;
 #[path = "card/battle_pending.rs"]
 mod battle_pending;
+#[path = "card/battle_question.rs"]
+mod battle_question;
 #[path = "card/battle_quotas.rs"]
 mod battle_quotas;
 #[path = "card/battle_turn.rs"]

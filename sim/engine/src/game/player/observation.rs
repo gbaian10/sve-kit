@@ -25,8 +25,8 @@ use super::{
     DecisionShape, EvolutionQuestion, Input, ObjectHandle, OpeningQuestion, QuestionShape, Viewer,
 };
 use crate::battle::{
-    BattleReferences, ObjectTable, ProjectionError, RuleProcessing, build_objects,
-    build_observation, project_turn,
+    BattleReferences, ObjectTable, ProjectionError, QuestionProjection, RuleProcessing,
+    build_objects, build_observation, project_turn,
 };
 use crate::game::internal::zone_capacity;
 use crate::game::{Game, Object};
@@ -35,7 +35,7 @@ use crate::{Result, invalid};
 use core::result;
 use serde_json::Value;
 use sve_battle_contract::{
-    Seat,
+    QuestionId, Seat,
     observation::{self as wire, TurnView},
 };
 
@@ -386,6 +386,34 @@ impl Game {
             .map_err(|_authority_error| ProjectionError::Unavailable)?;
         let processing = self.battle_rule_processing(&observation)?;
         build_observation(&self.catalog, references, &observation, processing)
+    }
+
+    /// Bind this seat's current question and complete board to a host-issued ID.
+    ///
+    /// The host authenticates the viewer, issues a fresh ID per occurrence in this
+    /// battle, and submits decoded commands to this same Game. Waiting and finished
+    /// seats have no question; this method does not replace their public input summary.
+    /// Currently only first-player choice and whole-hand mulligan are supported.
+    /// The host must preflight the full program closure before interactive use.
+    ///
+    /// # Errors
+    /// Refuses a fault, unsupported active shape, unavailable board or inconsistent
+    /// hand membership. No partial question or guessed rules reference is returned.
+    pub fn battle_question(
+        &self,
+        perspective: Viewer,
+        id: &QuestionId,
+        references: &BattleReferences,
+    ) -> result::Result<Option<QuestionProjection>, ProjectionError> {
+        references.validate_catalog(&self.catalog)?;
+        match self.input(perspective) {
+            Input::Question(question) => {
+                let observation = self.battle_observation(perspective, references)?;
+                QuestionProjection::project(id, *question, observation).map(Some)
+            }
+            Input::Waiting(_) | Input::Finished { .. } => Ok(None),
+            Input::EngineFault => Err(ProjectionError::Unavailable),
+        }
     }
 
     fn battle_rule_processing(
