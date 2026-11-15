@@ -2,7 +2,7 @@ use super::super::battle_costs::object;
 use super::super::player_events::reveal_hand;
 use super::super::player_pipeline::answer;
 use super::battle_pending::{catalog_for, fixture};
-use super::presentation_fault::{ask_for_the_follower, prepared_on};
+use super::presentation_fault::{ask_for_the_follower, prepared_drawing, prepared_on};
 use super::*;
 use sve_battle_contract::event::{self as wire, BattleEvent, EventBody, EventDelivery, EventGap};
 use sve_battle_contract::observation::{Phase as WirePhase, TurnView};
@@ -153,8 +153,14 @@ fn foreign_references() -> BattleReferences {
 /// Both seats are handed the stop where P1's ability asks for a follower and then its
 /// resolution: what each was shown early, and what then committed.
 fn resolved() -> (Game, [FeedUpdate; 2], [Vec<BattleEvent>; 2]) {
+    let (game, early, late) = delivered("unit-spell");
+    (game, early, late.map(|update| committed(&update)))
+}
+
+/// [`resolved`] with whole updates, where every card P1's ability draws is `drawn`.
+fn delivered(drawn: &str) -> (Game, [FeedUpdate; 2], [FeedUpdate; 2]) {
     let references = &fixture().references;
-    let mut game = prepared_on(Arc::clone(&fixture().catalog), false);
+    let mut game = prepared_drawing(Arc::clone(&fixture().catalog), false, drawn);
     let mut feeds = SEATS.map(EventFeed::new);
     for feed in &mut feeds {
         feed.baseline(&mut game);
@@ -170,7 +176,7 @@ fn resolved() -> (Game, [FeedUpdate; 2], [Vec<BattleEvent>; 2]) {
     );
     let late = feeds
         .each_mut()
-        .map(|feed| committed(&feed.deliver(&mut game, references)));
+        .map(|feed| feed.deliver(&mut game, references));
     (game, early, late)
 }
 
@@ -298,6 +304,24 @@ fn a_promoted_event_states_exactly_what_its_viewer_was_shown() {
             );
         }
     }
+}
+
+#[test]
+fn what_a_seat_is_delivered_does_not_depend_on_cards_only_the_other_seat_knows() {
+    // The two games differ only in the cards P1 draws, which P2 never sees.
+    let [(_, early_spell, late_spell), (_, early_amulet, late_amulet)] =
+        ["unit-spell", "unit-amulet"].map(delivered);
+    assert_eq!(
+        (&early_spell[1], &late_spell[1]),
+        (&early_amulet[1], &late_amulet[1]),
+        "P2 is delivered the same events, batches, identifiers and presentation steps \
+         whatever P1 drew"
+    );
+    assert_ne!(
+        (&early_spell[0], &late_spell[0]),
+        (&early_amulet[0], &late_amulet[0]),
+        "P1 is told which cards it drew, so the two games do differ"
+    );
 }
 
 #[test]
