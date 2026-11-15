@@ -989,6 +989,8 @@ mod follow_keyword;
 
 #[path = "card/transfer.rs"]
 mod transfer;
+#[path = "card/wire_event_values.rs"]
+mod wire_event_values;
 
 #[path = "card/grant_enter_ex.rs"]
 mod grant_enter_ex;

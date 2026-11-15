@@ -37,7 +37,7 @@ fn actions(batch: &PlayerEventBatch, kind: ActionKind) -> bool {
         .all(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == kind))
 }
 
-fn aoe_targets(scope: u64) -> RecipientSet {
+pub(super) fn aoe_targets(scope: u64) -> RecipientSet {
     RecipientSet::Union {
         sets: vec![
             RecipientSet::Leaders {
@@ -56,7 +56,7 @@ fn aoe_targets(scope: u64) -> RecipientSet {
     }
 }
 
-fn aoe() -> Game {
+pub(super) fn aoe() -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P2"]["zones"]["field"] = json!([
         {"id":"f","card":"unit-follower"},
@@ -150,8 +150,9 @@ fn event_batches_aoe_and_consecutive_damage_freeze_each_hits_life_then_destroy_t
     }
 }
 
-#[test]
-fn event_batches_combat_seals_both_sides_before_simultaneous_deaths() {
+/// P1's follower can attack P2's acted follower; both have power 3 and life 3. With
+/// `observed`, the followers also have an ability that watches damage.
+pub(super) fn combat_ready(observed: bool) -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([
@@ -166,14 +167,27 @@ fn event_batches_combat_seals_both_sides_before_simultaneous_deaths() {
         "combat-batches",
     )
     .unwrap();
-    game.load_internal_card("unit-follower", &card(vec![]))
+    let abilities = if observed {
+        vec![damaged_observer()]
+    } else {
+        vec![]
+    };
+    game.load_internal_card("unit-follower", &card(abilities))
         .unwrap();
     game.advance_player_input();
-    let main = question(&game, Viewer::P1);
-    let QuestionShape::ActionWindow(window) = &main.shape else {
-        panic!("main");
+    game
+}
+
+/// P1 attacks the follower and P2 passes its Quick window, so the battle resolves.
+pub(super) fn attack_the_follower(game: &mut Game) {
+    let main = question(game, Viewer::P1);
+    let window = if let QuestionShape::ActionWindow(window) = &main.shape {
+        Some(window)
+    } else {
+        None
     };
     let (intent, target) = window
+        .unwrap()
         .intents
         .iter()
         .find_map(|intent| {
@@ -196,16 +210,27 @@ fn event_batches_combat_seals_both_sides_before_simultaneous_deaths() {
             }
         )
         .kind,
-        SubmissionKind::Applied
+        SubmissionKind::Applied,
+        "the attack on the follower is declared"
     );
-    assert!(matches!(
-        question(&game, Viewer::P2).shape,
-        QuestionShape::Decision(DecisionShape::Quick { .. })
-    ));
+    assert!(
+        matches!(
+            question(game, Viewer::P2).shape,
+            QuestionShape::Decision(DecisionShape::Quick { .. })
+        ),
+        "the defender gets a Quick window before the battle"
+    );
     assert_eq!(
-        answer(&mut game, Viewer::P2, Answer::Quick(None)).kind,
-        SubmissionKind::Applied
+        answer(game, Viewer::P2, Answer::Quick(None)).kind,
+        SubmissionKind::Applied,
+        "passing the Quick window resolves the battle"
     );
+}
+
+#[test]
+fn event_batches_combat_seals_both_sides_before_simultaneous_deaths() {
+    let mut game = combat_ready(false);
+    attack_the_follower(&mut game);
     for viewer in [Viewer::P1, Viewer::P2] {
         let history = batches(&game, viewer);
         let damage = history
