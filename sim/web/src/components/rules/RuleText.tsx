@@ -109,6 +109,11 @@ export function RuleRef({
   const [anchor, setAnchor] = useState<DOMRect | null>(null)
   const [rules, setRules] = useState<RulesBundle | null>(null)
   const leaving = useRef(0)
+  // The pointer is on the reference or its preview. An Escape while it is there stays in force
+  // until the pointer really leaves the reference: a clamped preview can cover the reference, and
+  // removing it sends the reference a fresh mouseenter that must not reopen it.
+  const hovering = useRef(false)
+  const dismissed = useRef(false)
   const open = anchor !== null
   // A scroll would leave the fixed preview floating away from its reference; Escape dismisses it.
   useEffect(() => {
@@ -117,7 +122,9 @@ export function RuleRef({
       setAnchor(null)
     }
     const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") hide()
+      if (event.key !== "Escape") return
+      dismissed.current = hovering.current
+      hide()
     }
     window.addEventListener("scroll", hide, { passive: true })
     window.addEventListener("keydown", escape)
@@ -149,13 +156,35 @@ export function RuleRef({
     stay()
     leaving.current = window.setTimeout(hide, LEAVE_DELAY_MS)
   }
-  const hovering = { onMouseEnter: show, onMouseLeave: hideSoon, onFocus: show, onBlur: hide }
+  const handlers = {
+    onMouseEnter: (event: { currentTarget: Element }) => {
+      hovering.current = true
+      if (!dismissed.current) show(event)
+    },
+    onMouseLeave: () => {
+      hovering.current = false
+      dismissed.current = false
+      hideSoon()
+    },
+    onFocus: show,
+    onBlur: hide,
+  }
+  const previewHover = {
+    onMouseEnter: () => {
+      hovering.current = true
+      stay()
+    },
+    onMouseLeave: () => {
+      hovering.current = false
+      hideSoon()
+    },
+  }
   return (
     <>
       <Link
         to={{ pathname: "/rules", hash: `#${ruleAnchor(ruleKey)}` }}
         aria-describedby={anchor && rules ? id : undefined}
-        {...hovering}
+        {...handlers}
         className="text-accent-text underline decoration-dotted underline-offset-4 hover:decoration-solid"
       >
         {children}
@@ -169,7 +198,7 @@ export function RuleRef({
             rules={rules}
             ruleKey={ruleKey}
             anchor={anchor}
-            hover={{ onMouseEnter: stay, onMouseLeave: hideSoon }}
+            hover={previewHover}
           />,
           document.body,
         )}

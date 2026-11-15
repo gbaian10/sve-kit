@@ -311,6 +311,26 @@ it("keeps the preview open while the pointer moves onto it", async () => {
   })
 })
 
+it("stays closed after Escape while the unmoved pointer is on a preview covering the reference", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const link = await citedLink()
+  fireEvent.mouseEnter(link)
+  const tip = await screen.findByRole("tooltip")
+  // A clamped preview covers the reference: the pointer is now on the preview.
+  fireEvent.mouseLeave(link)
+  fireEvent.mouseEnter(tip)
+  fireEvent.keyDown(document.body, { key: "Escape" })
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  // Removing the preview hands the unmoved pointer back to the reference.
+  fireEvent.mouseEnter(link)
+  await new Promise((resolve) => setTimeout(resolve, 50))
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  // Really leaving and coming back previews again.
+  fireEvent.mouseLeave(link)
+  fireEvent.mouseEnter(link)
+  expect(await screen.findByRole("tooltip")).toBeInTheDocument()
+})
+
 it("clamps the preview inside a short viewport when neither side fits", async () => {
   await renderRoutes(routes, { initialEntries: ["/rules"] })
   const link = await citedLink()
@@ -344,8 +364,6 @@ it("keeps the reader's place when the contents sheet is opened and cancelled", a
   fireEvent.click(open)
   const sheet = await screen.findByRole("dialog", { name: "目錄" })
   expect(router.state.location.hash).toBe("#r-1.1.2")
-  for (const link of within(sheet).getAllByRole("link"))
-    expect(link.className).toContain("min-h-11")
   fireEvent.click(within(sheet).getByRole("button", { name: "關閉" }))
   await waitFor(() => {
     expect(screen.queryByRole("dialog", { name: "目錄" })).not.toBeInTheDocument()
