@@ -6,15 +6,15 @@
 //! Cost, pending and installed-effect components stay private so hosts cannot replace
 //! the authority's observation, even when the runner feature is enabled.
 //!
-//! ```compile_fail
+//! ```compile_fail,E0432
 //! use sve_engine::battle::project_pending;
 //! ```
 //!
-//! ```compile_fail
+//! ```compile_fail,E0432
 //! use sve_engine::battle::project_card_effects;
 //! ```
 //!
-//! ```compile_fail
+//! ```compile_fail,E0432
 //! use sve_engine::battle::project_player_effects;
 //! ```
 //!
