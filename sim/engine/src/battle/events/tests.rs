@@ -263,6 +263,7 @@ fn plays_and_resolutions_require_the_seat_the_producer_recorded() {
         card: "holder".to_owned(),
         face: None,
         line: Some(2),
+        wording: None,
         holder: None,
     });
     ability.details = Some(ActionDetails::Ability(AbilityQualification::UnionBurst));

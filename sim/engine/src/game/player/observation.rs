@@ -18,7 +18,7 @@ pub use costs::{
 mod effects;
 pub use effects::{
     EffectExpiry, EffectInterval, EffectSource, GrantedDefinition, InstalledChange,
-    InstalledEffect, NumberChange,
+    InstalledEffect, NumberChange, WordingField, WordingSource,
 };
 
 use super::{ObjectHandle, Viewer};
