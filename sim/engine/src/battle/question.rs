@@ -2,13 +2,13 @@
 
 use super::ProjectionError;
 use crate::game::player::{
-    self, ClosingAnswer, ClosingQuestion, ObjectHandle as NativeHandle, OpeningAnswer,
-    OpeningQuestion, QuestionToken, Viewer,
+    self, ClosingAnswer, ClosingQuestion, EvolutionAnswer, EvolutionQuestion,
+    ObjectHandle as NativeHandle, OpeningAnswer, OpeningQuestion, QuestionToken, Viewer,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt, result};
 use sve_battle_contract::{
-    Answer, Nat, OptionId, QuestionId, Seat, Subject, Zone,
+    Answer, Int, Nat, OptionId, QuestionId, Seat, Subject, Zone,
     observation::{BattleObservation, ProcessingStage, ZoneView},
     question as wire,
 };
@@ -26,7 +26,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Currently supports opening and turn-closing rule questions.
+/// Supports opening, closing, and normal evolution payment questions.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -47,6 +47,7 @@ enum Binding {
     Mulligan(BTreeMap<OptionId, NativeHandle>),
     StartAmulet(BTreeMap<OptionId, NativeHandle>),
     EndGuard(BTreeMap<OptionId, NativeHandle>),
+    EvolutionPayment(Vec<wire::EvolutionPayment>),
     HandLimit {
         cards: BTreeMap<OptionId, NativeHandle>,
         count: usize,
@@ -65,17 +66,32 @@ impl QuestionProjection {
         native: player::Question,
         observation: BattleObservation,
     ) -> Result<Self> {
-        if native.purpose != player::QuestionPurpose::RuleChoice
+        let (native_purpose, purpose, expected_stage) = match &native.shape {
+            player::QuestionShape::Opening(_) => (
+                player::QuestionPurpose::RuleChoice,
+                wire::QuestionPurpose::RuleChoice,
+                ProcessingStage::Opening,
+            ),
+            player::QuestionShape::Closing(_) => (
+                player::QuestionPurpose::RuleChoice,
+                wire::QuestionPurpose::RuleChoice,
+                ProcessingStage::Closing,
+            ),
+            player::QuestionShape::Evolution(_) => (
+                player::QuestionPurpose::PlayParameter,
+                wire::QuestionPurpose::PlayParameter,
+                ProcessingStage::Declare,
+            ),
+            player::QuestionShape::Decision(_) | player::QuestionShape::ActionWindow(_) => {
+                return Err(ProjectionError::Unavailable);
+            }
+        };
+        if native.purpose != native_purpose
             || observation.viewer != seat(native.actor)
             || observation.processing.len() != 1
         {
             return Err(ProjectionError::Unavailable);
         }
-        let expected_stage = if matches!(&native.shape, player::QuestionShape::Closing(_)) {
-            ProcessingStage::Closing
-        } else {
-            ProcessingStage::Opening
-        };
         let processing = observation
             .processing
             .first()
@@ -96,14 +112,21 @@ impl QuestionProjection {
             player::QuestionShape::Closing(ClosingQuestion::GuardAct(cards)) => {
                 end_guard(id, native.actor, &cards, &observation)?
             }
-            player::QuestionShape::Evolution(_)
+            player::QuestionShape::Evolution(EvolutionQuestion::Payment(quote)) => {
+                evolution_payment(quote)?
+            }
+            player::QuestionShape::Evolution(
+                EvolutionQuestion::Form(_)
+                | EvolutionQuestion::Materials(_)
+                | EvolutionQuestion::Discard(_),
+            )
             | player::QuestionShape::Decision(_)
             | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
         };
         let question = wire::Question {
             id: id.clone(),
             actor: seat(native.actor),
-            purpose: wire::QuestionPurpose::RuleChoice,
+            purpose,
             usage,
             processing,
             shape,
@@ -149,6 +172,10 @@ impl QuestionProjection {
             return Err(AnswerError);
         }
         let command = match &self.binding {
+            Binding::EvolutionPayment(payments) => player::Command::Evolution {
+                token: self.token,
+                answer: evolution_payment_answer(payments, answer)?,
+            },
             Binding::HandLimit { cards, count } => player::Command::Closing {
                 token: self.token,
                 answer: ClosingAnswer::Discard(selected_cards(cards, Some(*count), answer)?),
@@ -216,6 +243,75 @@ impl QuestionProjection {
         };
         Ok(command)
     }
+}
+
+fn evolution_payment(
+    quote: player::EvolutionPayment,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    if quote.total_pp < 0 || quote.available_pp < 0 {
+        return Err(ProjectionError::Unavailable);
+    }
+    let mut payments = Vec::new();
+    for use_ep in [false, true] {
+        if use_ep && !quote.ep_allowed {
+            continue;
+        }
+        let pp = quote
+            .total_pp
+            .checked_sub(i64::from(use_ep))
+            .ok_or(ProjectionError::Unavailable)?;
+        if pp < 0 || pp > quote.available_pp {
+            continue;
+        }
+        let pp = Int::try_from(pp)?;
+        for super_evolution in [false, true] {
+            if super_evolution && !quote.super_allowed {
+                continue;
+            }
+            payments.push(wire::EvolutionPayment {
+                pp,
+                use_ep,
+                super_evolution,
+            });
+        }
+    }
+    if payments.is_empty() {
+        return Err(ProjectionError::Unavailable);
+    }
+    Ok((
+        wire::QuestionUse::EvolutionPayment,
+        wire::QuestionShape::EvolutionPayment {
+            payments: payments.clone(),
+        },
+        Binding::EvolutionPayment(payments),
+    ))
+}
+
+fn evolution_payment_answer(
+    payments: &[wire::EvolutionPayment],
+    answer: &Answer,
+) -> result::Result<EvolutionAnswer, AnswerError> {
+    let Answer::EvolutionPayment {
+        pp,
+        use_ep,
+        super_evolution,
+    } = answer
+    else {
+        return Err(AnswerError);
+    };
+    let chosen = wire::EvolutionPayment {
+        pp: *pp,
+        use_ep: *use_ep,
+        super_evolution: *super_evolution,
+    };
+    if !payments.contains(&chosen) {
+        return Err(AnswerError);
+    }
+    Ok(EvolutionAnswer::Payment {
+        pp: pp.get(),
+        ep: *use_ep,
+        super_evolution: *super_evolution,
+    })
 }
 
 fn first_player(id: &QuestionId) -> (wire::QuestionUse, wire::QuestionShape, Binding) {

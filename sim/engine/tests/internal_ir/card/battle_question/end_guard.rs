@@ -259,6 +259,20 @@ fn assert_postures(game: &Game, actor: Viewer, references: &BattleReferences, co
         ],
         "only the selected eligible guards act; prior posture and the non-guard are preserved"
     );
+    let other = &board
+        .players
+        .iter()
+        .find(|player| player.seat == seat(opposite(actor)))
+        .unwrap()
+        .zones
+        .field;
+    assert_eq!(other.cards.len(), 1, "the fixture has one opposing guard");
+    let guard = &board.objects[&other.cards.first().unwrap().object];
+    assert_eq!(
+        guard.state.as_ref().unwrap().posture,
+        Posture::Standing,
+        "acting the chosen own guards cannot act the opponent's guard"
+    );
 }
 
 #[test]

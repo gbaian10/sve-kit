@@ -11,7 +11,7 @@ use sve_engine::game::player::{
     SubmissionKind, Viewer,
 };
 
-fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
+pub(super) fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
     let (input, registry, document) = evolution::documents_for_forms(names);
     let mut rows = Vec::new();
     for line in input.lines() {
