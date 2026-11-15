@@ -1,4 +1,6 @@
 use super::*;
+#[path = "card/board_relationships.rs"]
+mod board_relationships;
 #[path = "card/by_kind.rs"]
 mod by_kind;
 #[path = "card/condition_inputs.rs"]

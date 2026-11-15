@@ -1,6 +1,9 @@
 use super::*;
+use sve_battle_contract::observation as wire;
+use sve_engine::battle::project_costs;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::DecisionShape;
+use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::{CostGroupKind, PendingCost};
 
 fn tree() -> Value {
@@ -12,6 +15,34 @@ fn tree() -> Value {
     let meta = tree["cards"]["BP08-038"]["meta"].clone();
     tree["cards"] = json!({"unit-follower":{"meta":meta,"abilities":[entry]}});
     tree
+}
+
+fn assert_wire_optional(game: &Game, accepted: Option<bool>) {
+    let projected = project_costs(&game.observe(Viewer::P1).unwrap())
+        .unwrap()
+        .current_play
+        .unwrap()
+        .cost;
+    assert_eq!(
+        projected.total_pp.map(sve_battle_contract::Int::get),
+        accepted.map(|accept| if accept { 2 } else { 0 }),
+        "A declaration changes the quote before any optional payment commits"
+    );
+    if accepted.is_none() {
+        assert_eq!(
+            projected.pending,
+            [wire::PendingCost::Optional],
+            "Unanswered acceptance remains explicitly pending"
+        );
+    }
+    assert!(
+        projected.groups.iter().any(|group| group.role
+            == wire::CostGroupRole::Optional {
+                required: false,
+                accepted,
+            }),
+        "The wire quote preserves optional declaration status"
+    );
 }
 
 #[test]
@@ -44,6 +75,7 @@ fn optional_trigger_declaration_precedes_targets_and_payment_is_atomic() {
         };
         assert_eq!(declare.domain, InputDomain::OptionalCost);
         let quote = cost_observation::active(&game);
+        assert_wire_optional(&game, None);
         assert_eq!(quote.total_pp, None);
         assert_eq!(quote.pending, [PendingCost::Optional]);
         assert_eq!(
@@ -68,6 +100,7 @@ fn optional_trigger_declaration_precedes_targets_and_payment_is_atomic() {
             panic!("target before payment");
         };
         let quote = cost_observation::active(&game);
+        assert_wire_optional(&game, Some(accept));
         assert_eq!(quote.total_pp, Some(if accept { 2 } else { 0 }));
         assert_eq!(
             cost_observation::optional(&quote),

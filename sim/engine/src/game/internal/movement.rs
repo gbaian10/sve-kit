@@ -44,6 +44,14 @@ pub(super) use capacity::{ArrivalMember, CapacityWait};
 const FIELD_CAPACITY: i64 = 5;
 const EX_CAPACITY: i64 = 5;
 
+pub(in crate::game) fn zone_capacity(zone: &str) -> Option<i64> {
+    match zone {
+        "field" => Some(FIELD_CAPACITY),
+        "ex" => Some(EX_CAPACITY),
+        _ => None,
+    }
+}
+
 struct PlannedMove {
     result_index: usize,
     id: String,

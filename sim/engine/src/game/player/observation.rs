@@ -6,6 +6,9 @@ pub use context::{
     PreventionChange, StatGainHistory, SubjectHistory, TriggerTiming, TurnHistory,
 };
 
+mod board;
+pub use board::{AttackObservation, Relationship, RelationshipKind};
+
 mod costs;
 pub use costs::{
     CardCostQuote, CostGroup, CostGroupKind, CostLine, CostObservation, CostSummary, PendingCost,
@@ -19,6 +22,7 @@ pub use effects::{
 };
 
 use super::{ObjectHandle, Viewer};
+use crate::game::internal::zone_capacity;
 use crate::game::{Game, Object, int};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
@@ -182,6 +186,8 @@ pub struct ZoneObservation {
     pub kind: ObservedZone,
     /// Full size, including anonymous members.
     pub count: u64,
+    /// Rules capacity, absent for zones without a fixed limit.
+    pub capacity: Option<u64>,
     /// Only the currently authorized members.
     pub cards: Vec<ZoneCard>,
 }
@@ -217,8 +223,12 @@ pub struct Observation {
     pub viewer: Viewer,
     /// Current public turn state.
     pub turn: TurnObservation,
+    /// Current attack, absent once its frozen participants are no longer valid.
+    pub attack: Option<AttackObservation>,
     /// Both players in seat order.
     pub players: [PlayerObservation; 2],
+    /// Current attachments whose two endpoints are identifiable to this viewer.
+    pub relationships: Vec<Relationship>,
     /// Historical memory independent of current location knowledge.
     pub remembered: Vec<CardMemory>,
     /// Viewer-authorized estimates and unresolved play costs.
@@ -317,10 +327,12 @@ impl Game {
                     turn["elapsed_turns"]["P2"].as_u64().unwrap_or_default(),
                 ],
             },
+            attack: self.observed_attack(perspective)?,
             players: [
                 self.observed_player(perspective, Viewer::P1)?,
                 self.observed_player(perspective, Viewer::P2)?,
             ],
+            relationships: self.observed_relationships(perspective)?,
             remembered: self.card_memory(perspective)?,
             costs: self.observed_costs(perspective)?,
             pending: self.observed_pending(perspective)?,
@@ -364,6 +376,9 @@ impl Game {
             zones.push(ZoneObservation {
                 kind: zone(name)?,
                 count: offset,
+                capacity: zone_capacity(name)
+                    .map(|limit| u64::try_from(limit).map_err(invalid))
+                    .transpose()?,
                 cards,
             });
         }
@@ -414,13 +429,7 @@ impl Game {
         perspective: Viewer,
         id: &str,
     ) -> Result<CardObservation> {
-        let handle = self
-            .state
-            .knowledge
-            .get(seat(perspective))
-            .and_then(|knowledge| knowledge.handle(id))
-            .ok_or_else(|| invalid("card is not identifiable"))?;
-        self.resolve_player_object(perspective, &handle)?;
+        let handle = self.observed_object_handle(perspective, id)?;
         let object = self.object(id)?;
         let face_up = face_up(object)?;
         Ok(CardObservation {
@@ -430,6 +439,21 @@ impl Game {
             face_up,
             properties: self.observed_card_properties(perspective, id)?,
         })
+    }
+
+    pub(in crate::game) fn observed_object_handle(
+        &self,
+        perspective: Viewer,
+        id: &str,
+    ) -> Result<ObjectHandle> {
+        let handle = self
+            .state
+            .knowledge
+            .get(seat(perspective))
+            .and_then(|knowledge| knowledge.handle(id))
+            .ok_or_else(|| invalid("card is not identifiable"))?;
+        self.resolve_player_object(perspective, &handle)?;
+        Ok(handle)
     }
 
     pub(in crate::game) fn physical_card_face(&self, id: &str) -> Result<CardFace> {

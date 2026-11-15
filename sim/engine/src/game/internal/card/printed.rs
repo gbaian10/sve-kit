@@ -49,7 +49,14 @@ impl Game {
         let object = self.object(holder)?;
         let printed = object.state["evolved_with"].as_str().unwrap_or(holder);
         let (card, face) = self.internal_effective_print(holder)?;
-        if self.card_runtime.is_loaded(&card) || self.internal_evolution_resource(printed)? {
+        // A reverse face is selected before reveal while the resource is still in the deck.
+        // Resting-face validation belongs to the input boundary, not these availability probes.
+        let deck_resource = self.card_runtime.resources.get(printed) == Some(&card)
+            && self.object(printed)?.zone == "evolve_deck";
+        if self.card_runtime.is_loaded(&card)
+            || deck_resource
+            || self.internal_evolution_resource(printed)?
+        {
             return Ok(());
         }
         Err(unavailable(&card, face, holder, object.generation, query))

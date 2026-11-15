@@ -4,6 +4,8 @@
 )]
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_battle_contract::observation as wire;
+use sve_engine::battle::project_costs;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::{CostLine, PendingCost, PpQuote};
@@ -69,6 +71,19 @@ fn x_pp_counts_repeated_payments_and_fixed_fees_and_uses_one_immutable_answer() 
     let question = start(&mut game, &program);
     bounds(&question, 2);
     let cost = cost_observation::active(&game);
+    let projected = project_costs(&game.observe(Viewer::P1).unwrap()).unwrap();
+    let quoted = projected.current_play.unwrap().cost;
+    assert_eq!(quoted.total_pp, None);
+    assert_eq!(quoted.pending, [wire::PendingCost::X]);
+    assert!(quoted.groups[0].lines.iter().any(|line| matches!(line,
+        wire::CostLine::Pp { quote: wire::PpQuote::Variable { fixed, copies, x:None } }
+        if fixed.get() == 2 && copies.get() == 2)));
+    assert!(
+        project_costs(&game.observe(Viewer::P2).unwrap())
+            .unwrap()
+            .current_play
+            .is_none()
+    );
     assert_eq!(cost.total_pp, None);
     assert_eq!(cost.pending, [PendingCost::X]);
     assert!(

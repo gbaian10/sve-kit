@@ -144,6 +144,21 @@ fn name_contains_rejects_matching_evolution_amulets_before_reveal_and_payment() 
 
 #[test]
 fn unadmitted_reverse_faces_keep_the_printed_ability_boundary_after_real_evolution() {
+    let mut invalid = position("BP09-004", "BP09-005");
+    invalid["players"]["P1"]["zones"]["evolve_deck"][0]["state"] = json!({"face":1_u8});
+    let rejected = Game::from_selected_effects(
+        boundary_selection().clone(),
+        &invalid,
+        &Value::Null,
+        &Value::Null,
+        "invalid-resource-face",
+    )
+    .and_then(|mut game| game.internal_rule_action(&json!({"do":"end-phase"})));
+    assert!(
+        matches!(rejected, Err(EngineFailure::Invalid(reason))
+        if reason == "evolution resource identity or face changed"),
+        "An unselected reverse face still fails the authority's resource guard"
+    );
     for (base, form, definition, pp) in [
         ("BP09-004", "BP09-005", 0, 1),
         ("BP09-018", "BP09-019", 1, 4),
