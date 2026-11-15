@@ -16,11 +16,15 @@
     "scripts/engine/*.ts",
     // `fixture` builds test snapshots and is not shipped.
     "scripts/fixture/main.ts",
+    // `rules:stamp` fills comprehensive-rules translation hashes; a package-script CLI.
+    "scripts/rules/stamp.ts",
     // `screenshots` is a development-only CLI invoked by package scripts.
     "scripts/screenshots/main.ts",
   ],
   "ignoreDependencies": ["@fontsource/ibm-plex-sans"],
   "entry": [
+    // The rules page (#2227 S3) renders through this; the data tests already use it.
+    "src/data/rules/localize.ts!",
     "bench/driver.ts",
     // The battle Worker and screens (#2127, #2132) import the contract from here; nothing ships yet.
     "src/battle/contract/index.ts!",
