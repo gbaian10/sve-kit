@@ -594,16 +594,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-4 omniscient events"
-  - question: "card-BP21-P38"
-    scenario: "放入 EX 1 張"
-    status: unsupported
-    error: "unadmitted BP21-P38 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP21-P38/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP21-P38"
-    scenario: "放入 EX 2 張"
-    status: unsupported
-    error: "unadmitted BP21-P38 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP21-P38/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP21-P56"
     scenario: "A 第一次 +2 抽 1 張；同回合第二次不抽"
     status: fail

@@ -220,3 +220,32 @@ fn hidden_memory_shared_scenarios_match_their_reviewed_results() {
     let result = gate(&reports, &known);
     assert!(result.ok(), "{:#?}\nreports: {reports:#?}", result.problems);
 }
+
+#[test]
+fn tempest_dragon_shared_scenarios_match_their_reviewed_results() {
+    let mut questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
+    questions.retain(|question| question.id == "card-BP21-P38");
+    let reports = run(
+        &mut TypedAdapter::new(repository::selection_with_rules().clone()),
+        &questions,
+        None,
+        RunOptions {
+            require_verified: true,
+            awaiting: AwaitingMode::FirstStage,
+        },
+    )
+    .unwrap();
+    assert_eq!(reports.len(), 2);
+    let mut known =
+        load_known_failures(&root().join("tests/engine/typed-known-results.yaml")).unwrap();
+    known
+        .known
+        .retain(|entry| entry.question == "card-BP21-P38");
+    known.expected_scenarios = 2;
+    let result = gate(&reports, &known);
+    assert!(
+        result.ok(),
+        "update EX class exam results: {:#?}",
+        result.problems
+    );
+}

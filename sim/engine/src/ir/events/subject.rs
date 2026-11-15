@@ -849,7 +849,8 @@ impl SubjectFilter {
         let Expr::Compute(predicate) = part else {
             return None;
         };
-        if (matches!(fields, SubjectFields::Entry(_)) && *part == fields.known_class())
+        if (matches!(fields, SubjectFields::Entry(_) | SubjectFields::Ex(_))
+            && *part == fields.known_class())
             || fields.known_original_cost().as_ref() == Some(part)
         {
             return Some(());
@@ -874,7 +875,7 @@ impl SubjectFilter {
                 right: Expr::Literal(Info::Present(class)),
             } = inner.as_ref()
         {
-            if !matches!(fields, SubjectFields::Entry(_))
+            if !matches!(fields, SubjectFields::Entry(_) | SubjectFields::Ex(_))
                 || *left != fields.class()
                 || class.0.is_empty()
             {

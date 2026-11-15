@@ -16,6 +16,7 @@ pub(super) enum FilterSupport {
     Basic,
     OriginalCost,
     EntryCost,
+    ExClass,
     CemeteryWard,
     /// A current-turn history query compares saved subject names with the holder (BP10-009).
     History,
@@ -50,7 +51,7 @@ pub(super) fn subscription(
                     entry.sel.as_ref(),
                     entry.during.is_some(),
                     path,
-                    FilterSupport::Basic,
+                    FilterSupport::ExClass,
                 )?
                 .predicate(SubjectFields::Ex(event)),
             })
@@ -310,7 +311,9 @@ pub(super) fn movement_filter(
     }
     if subject.is_some_and(|sel| {
         sel.not_class.as_ref().is_some_and(|class| {
-            class.is_empty() || sel.class.is_some() || !matches!(support, FilterSupport::EntryCost)
+            class.is_empty()
+                || sel.class.is_some()
+                || !matches!(support, FilterSupport::EntryCost | FilterSupport::ExClass)
         })
     }) {
         return Err(unsupported(path));
