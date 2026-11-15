@@ -959,6 +959,9 @@ mod ward_bypass;
 #[path = "card/layer3_attack_aura.rs"]
 mod layer3_attack_aura;
 
+#[path = "card/layer3_conditional_quick.rs"]
+mod layer3_conditional_quick;
+
 #[path = "card/exchange_pp_guard.rs"]
 mod exchange_pp_guard;
 

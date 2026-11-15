@@ -562,7 +562,7 @@ impl Game {
                 continue;
             }
             if card_permission(ability) {
-                quick::check_spell_face(self, card_no, card.card(), ordinal, base_print)?;
+                quick::check_spell_face(self, card_no, card.card(), ordinal, base_print, located)?;
                 continue;
             }
             if play_restrictions::check(located, ordinal)? {

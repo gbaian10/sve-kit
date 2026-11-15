@@ -8,7 +8,8 @@ use crate::game::internal::observation::ObjectLink;
 use crate::game::player::QuickChoice;
 use crate::game::player::Viewer;
 use crate::game::player::observation::zone;
-use crate::ir::quick::{card_permission, is_printed_quick};
+use crate::ir::quick::{card_condition, card_permission, is_printed_quick};
+use crate::ir::{Ability, Control, Located, Node, Program};
 use crate::ir::{AbilityId, Cardinality, Nat, TextQuantifier, ZoneKind};
 use crate::ir::{
     CardProgram, ChoiceDomain, Decision, DecisionId, DecisionKind, ExecutionId, PlayerRef,
@@ -53,6 +54,7 @@ pub(super) fn check_spell_face(
     card: &CardProgram,
     ordinal: usize,
     printed: &Value,
+    permission: &Located<Ability>,
 ) -> Result<()> {
     if ordinal != 0
         || !matches!(
@@ -77,7 +79,25 @@ pub(super) fn check_spell_face(
             "Quick requires one Spell on the same base face",
         ));
     }
-    Ok(())
+    let condition =
+        card_condition(&permission.node).ok_or_else(|| unsupported("Quick condition"))?;
+    let program = Program {
+        scope: permission.node.scope,
+        steps: vec![Located {
+            source: permission.source.clone(),
+            node: Node::Control {
+                control: Control::If {
+                    condition: condition.clone(),
+                    then_body: Program {
+                        scope: permission.node.scope,
+                        steps: vec![],
+                    },
+                    else_body: None,
+                },
+            },
+        }],
+    };
+    super::super::admission::check_card(&program, &permission.source, &permission.node.source, None)
 }
 
 fn procedure(window: QuickWindow) -> Result<WellFormedProcedure> {
@@ -157,18 +177,15 @@ impl Game {
 
     pub(in crate::game::internal) fn internal_quick_spell(&self, holder: &str) -> Result<bool> {
         self.require_internal_abilities(holder, "Quick permission")?;
-        let object = self.object(holder)?;
-        Ok(self
-            .card_runtime
-            .definitions
-            .cards
-            .get(&object.card)
-            .is_some_and(|card| {
-                card.card()
-                    .abilities
-                    .iter()
-                    .any(|a| card_permission(&a.node))
-            }))
+        let execution = self.provider_execution(holder, None)?;
+        for ability in self.internal_printed_abilities(holder)? {
+            if let Some(condition) = card_condition(&ability.node)
+                && execution.boolean(self, condition)?.0
+            {
+                return Ok(true);
+            }
+        }
+        Ok(false)
     }
 
     /// Ask the non-turn player after all checks and pending abilities have completed.

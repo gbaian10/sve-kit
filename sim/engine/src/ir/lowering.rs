@@ -511,6 +511,16 @@ impl Allocator {
         abilities: &mut Vec<Located<Ability>>,
     ) -> Result<bool, LoweringError> {
         if let Some(declaration) = &entry.r#static {
+            if quick::supports(declaration) {
+                abilities.push(quick::lower_static(
+                    self,
+                    key,
+                    path,
+                    entry,
+                    entry_scope(index, path)?,
+                )?);
+                return Ok(true);
+            }
             if static_declarations::supports(declaration) {
                 abilities.push(static_declarations::lower(
                     self,

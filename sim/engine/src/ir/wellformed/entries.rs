@@ -471,9 +471,13 @@ impl Checker {
                 continue;
             }
             // Complete printed declarations bypass only the generic permission gate.
-            if super::super::quick::card_permission(ability)
-                || super::super::printed_keywords::card_declaration(ability).is_some()
-            {
+            if let Some(condition) = super::super::quick::card_condition(ability) {
+                self.at(&format!("declarations/{index}/condition"), |checker| {
+                    checker.boolean(condition)
+                })?;
+                continue;
+            }
+            if super::super::printed_keywords::card_declaration(ability).is_some() {
                 continue;
             }
             self.at(&format!("declarations/{index}"), |checker| {

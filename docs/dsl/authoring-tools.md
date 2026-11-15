@@ -860,6 +860,8 @@ BP13-106 以此條件接 `move: {ref: {follow: moved}, to: field, acted: true}`�
 
 打出限制的 `play.cannot_if` 保留 `in_zone: {ref: this, zone: ex}` 與 `my_turn: true`，並可使用已准入的公開條件及其布林組合。例如 BP12-111 以 `cmp` 檢查自己場上的ゴブリン從者數不大於 2；一般打出與 Quick 候選都在扣費、移區或選擇前依當前狀態檢查，拒絕時不更動狀態。條件不能依賴稍後的選擇、結算捕捉或隱藏區域的卡片特徵。這些限制不阻止能力直接移動或將卡置入場，也不提供額外打出區域的許可。
 
+法術可用 `static: {zone: [hand, ex], while: {awakened: true}, effects: [{grant: {on: this, keywords: [quick]}}]}` 表示條件成立時取得 Quick（BP12-058）。Quick 候選與正式打出共用當前條件，覺醒讀取該卡控制者的 PP 最大值；手牌與 EX 均適用。條件未成立時，自己的主階段仍可正常打出該法術。條件沿用公開條件的結構與執行檢查，不能讀取未宣告的綁定。
+
 `play.cannot_if` 可用 `{not: {in_zone: {ref: this, zone: hand}}}` 表達只能從手牌打出。來源區域依目前世代檢查；其他效果授予消滅區打出許可時，仍須遵守卡片本身的禁止條件。
 
 起動能力的 `usable_if` 與 `per_turn` 共用既有宣告前條件及每實例每回合次數限制；PP 為 0 也會消耗成功宣告的次數。BP16-021 的墓場計數可用 `class: ロイヤル` 與 `kind: follower` 限定自己的公開素材，ECP02-003 則用場上的 `trait: クール`；條件不符時不扣費、不開啟目標選擇，也不消耗次數。
