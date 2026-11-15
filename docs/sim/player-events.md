@@ -109,6 +109,7 @@ typed facts 保留在權威 Progress。傷害分類透過實際 emit 回傳的 S
 | typed Fused、Raced、DriveGained、DriveTrigger、DriveChecked | 必要的完成結果，排除執行與關聯 ID |
 | typed Payment、Shuffled、AbilityPlayed、AbilityResolved | 費用、洗牌與能力打出／解決結果 |
 | 回復、PP最大値変化、EP変化、体力増加、カウンター | 公開資源／計數器結果 |
+| PP 的支付（打出、起動、進化）；回合開始的最大 PP +1（7.2.1）與 PP 補滿（7.2.2） | 各一筆公開資源結果，帶前後值；由改動 PP 的地方直接記錄，不經 Step；值沒有改變就不發 |
 | 公開、表向き／裏向き、攻撃 | 依發生時授權的揭露、翻面與攻擊宣告 |
 | 破壊、消滅、取代、消去 | 嘗試、替代及消去；不把未成功的破壞當成移動 |
 | 勝利、敗北 | 普通敗北、同時敗北、效果終局與投降 |
