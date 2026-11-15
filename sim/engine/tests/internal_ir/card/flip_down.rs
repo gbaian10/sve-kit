@@ -204,7 +204,7 @@ fn flip_down_raw_ir_cannot_turn_a_selected_field_card_face_down() {
     assert!(
         error
             .to_string()
-            .contains("flip-down requires the controller's evolve deck")
+            .contains("flip requires the controller's evolve deck")
     );
     let after = views.map(|view| game.projection(view).unwrap());
     assert!(
