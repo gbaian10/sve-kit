@@ -10,10 +10,10 @@ use sve_engine::game::player::{Command, Input, SubmissionKind, Viewer};
 
 const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
 
-/// An activated ability that pays, draws, asks for a follower and damages it, and then cannot
-/// continue: its last draw requests more cards than any draw may, which is an internal fault
-/// rather than a rules result.
-fn stopped_before_the_fault() -> Game {
+/// A follower whose activated ability pays, draws, asks for a follower, damages it and draws
+/// again. With `fault`, the last draw requests more cards than any draw may, which is an
+/// internal fault rather than a rules result.
+pub(super) fn prepared(fault: bool) -> Game {
     let mut tree = fanfare::expanded::tree().clone();
     let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
     entry.as_object_mut().unwrap().remove("fanfare");
@@ -43,7 +43,9 @@ fn stopped_before_the_fault() -> Game {
     let Action::Draw { count, .. } = &mut instruction.action else {
         panic!("final draw action");
     };
-    *count = Expr::Literal(Int(10_001));
+    if fault {
+        *count = Expr::Literal(Int(10_001));
+    }
 
     let deck = (0..3)
         .map(|index| json!({"id":format!("d{index}"),"card":"unit-spell"}))
@@ -60,6 +62,11 @@ fn stopped_before_the_fault() -> Game {
     game.load_internal_card("unit-spell", &card(vec![]))
         .unwrap();
     game.advance_player_input();
+    game
+}
+
+/// Activate the ability up to its question for a follower.
+pub(super) fn ask_for_the_follower(game: &mut Game) {
     let play = game
         .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
         .unwrap();
@@ -68,6 +75,11 @@ fn stopped_before_the_fault() -> Game {
         "the follower is chosen after the ability was played and drew once"
     );
     game.advance_player_input();
+}
+
+fn stopped_before_the_fault() -> Game {
+    let mut game = prepared(true);
+    ask_for_the_follower(&mut game);
     game
 }
 

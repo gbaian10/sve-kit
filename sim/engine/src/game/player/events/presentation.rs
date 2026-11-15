@@ -18,6 +18,13 @@ pub struct ScopeId {
     serial: u64,
 }
 
+impl ScopeId {
+    /// Number among the scopes issued to its viewer.
+    pub(crate) const fn sequence(&self) -> u64 {
+        self.serial
+    }
+}
+
 impl PartialEq for ScopeId {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.stream, &other.stream) && self.serial == other.serial
@@ -37,6 +44,18 @@ impl fmt::Debug for ScopeId {
 pub struct PresentationId {
     scope: ScopeId,
     index: u64,
+}
+
+impl PresentationId {
+    /// The scope this occurrence belongs to.
+    pub(crate) const fn scope(&self) -> &ScopeId {
+        &self.scope
+    }
+
+    /// Position among the occurrences of its scope.
+    pub(crate) const fn position(&self) -> u64 {
+        self.index
+    }
 }
 
 /// An occurrence shown before it commits, with the permissions frozen when it happened.

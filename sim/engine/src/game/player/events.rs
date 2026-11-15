@@ -27,6 +27,13 @@ pub struct EventId {
     index: u64,
 }
 
+impl EventId {
+    /// Position in its viewer's own stream; hidden sources never advance it.
+    pub(crate) const fn sequence(&self) -> u64 {
+        self.index
+    }
+}
+
 impl PartialEq for EventId {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.stream, &other.stream) && self.index == other.index

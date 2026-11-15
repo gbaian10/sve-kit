@@ -13,7 +13,7 @@ mod selection;
 mod sources;
 
 pub use costs::project_costs;
-pub use events::{EventObjects, ProjectedEvent, project_batch};
+pub use events::{EventFeed, EventObjects, FeedUpdate, ProjectedEvent, project_batch};
 pub use history::project_history;
 pub use pending::project_pending;
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};

@@ -3,6 +3,10 @@
 //! Committed history and provisional presentation project the same native result through
 //! this one function, so a promoted event carries exactly the body its scope showed.
 
+mod feed;
+
+pub use feed::{EventFeed, FeedUpdate};
+
 use super::ProjectionError;
 use crate::game::player::Viewer;
 use crate::game::player::events::{
