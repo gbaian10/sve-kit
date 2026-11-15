@@ -3,7 +3,7 @@ import { NavLink, Outlet, useMatch } from "react-router"
 
 import { cn } from "../../components/ui/cn"
 
-export const OFFICIAL_RULES_URL = "https://shadowverse-evolve.com/rules/"
+const OFFICIAL_RULES_URL = "https://shadowverse-evolve.com/rules/"
 
 // The two sections are separate URLs so each can be shared and the old /errata link can land on
 // its own tab; plain links with aria-current keep that history behaviour honest (not ARIA tabs).
