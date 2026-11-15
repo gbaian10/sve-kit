@@ -1,0 +1,36 @@
+cards:
+  BP03-091:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - must_target:
+                by: opp
+                on: this
+      - fanfare:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - grant:
+                        keywords:
+                          - storm
+                        on: this
+                  - - grant:
+                        keywords:
+                          - ward
+                        on: this
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

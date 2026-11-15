@@ -1000,6 +1000,9 @@ impl BodyContext<'_> {
         match value {
             ast::Number::Counter { counter } => Ok(counter_number(counter, self.counter_read_view)),
             ast::Number::Power { power_of } => match power_of {
+                ast::Observation::Binding(name) if name == "it" => {
+                    self.subject_number(Some(Stat::Attack), false, path)
+                }
                 ast::Observation::Binding(name) if name == "this" => Ok(this_number(
                     &ast::This::This,
                     Some(Stat::Attack),
@@ -1027,6 +1030,9 @@ impl BodyContext<'_> {
             },
             ast::Number::Life { hp_of } => self.body_life(hp_of, path),
             ast::Number::Cost { cost_of } => match cost_of {
+                ast::Observation::Binding(name) if name == "it" => {
+                    self.subject_number(None, false, path)
+                }
                 ast::Observation::Binding(name) if name == "this" => Ok(this_number(
                     &ast::This::This,
                     None,
@@ -1047,6 +1053,9 @@ impl BodyContext<'_> {
                 ast::Observation::Binding(_) => Err(unsupported(path)),
             },
             ast::Number::OriginalCost { orig_cost_of } => match orig_cost_of {
+                ast::Observation::Binding(name) if name == "it" => {
+                    self.subject_number(None, true, path)
+                }
                 ast::Observation::Binding(name) if name == "this" => Ok(this_number(
                     &ast::This::This,
                     None,

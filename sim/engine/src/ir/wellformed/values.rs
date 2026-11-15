@@ -6,6 +6,7 @@ use super::{
 };
 use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
+use crate::ir::events::numbers;
 use crate::ir::history_turn::HistoryPlan;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::public_numbers;
@@ -632,6 +633,18 @@ impl Checker {
             } else {
                 self.reject()
             }
+        } else if let Some(key) =
+            numbers::key(view).filter(|_| !self.event_capture() && self.env.chooser.is_none())
+        {
+            if !self.env.trigger_events.contains(&key) {
+                return self.reject();
+            }
+            let (ObjectView::LastKnown { object, .. } | ObjectView::EventSnapshot { object, .. }) =
+                view
+            else {
+                return self.reject();
+            };
+            self.object(object)
         } else {
             self.view(view)
         }

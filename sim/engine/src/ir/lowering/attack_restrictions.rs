@@ -122,6 +122,8 @@ fn permission(
             )
         }
         ast::StaticEffect::BanishInstead(_)
+        | ast::StaticEffect::MustTarget(_)
+        | ast::StaticEffect::EntersActed(_)
         | ast::StaticEffect::ExtraTrigger(_)
         | ast::StaticEffect::Reroll(_)
         | ast::StaticEffect::UnlimitedEvolve(_)

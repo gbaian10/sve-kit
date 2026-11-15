@@ -4,6 +4,7 @@ use super::{
 };
 use crate::ir::ObjectProperty;
 use crate::ir::PlayerRelation;
+use crate::ir::events::numbers;
 use crate::ir::events::timing;
 use crate::ir::{
     Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, Comparison,
@@ -16,6 +17,17 @@ use crate::ir::{
     reason = "Selection captures share the target parameter environment."
 )]
 impl BodyContext<'_> {
+    pub(super) fn subject_number(
+        &self,
+        property: Option<Stat>,
+        original: bool,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        self.subject_event
+            .and_then(|fields| numbers::number(fields, property, original))
+            .ok_or_else(|| unsupported(path))
+    }
+
     pub(super) fn selected_parameter(
         &self,
         name: &str,

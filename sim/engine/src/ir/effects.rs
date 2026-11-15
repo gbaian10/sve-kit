@@ -53,6 +53,7 @@ tags!(CostKind { Play, Evolution });
 variants!(CostChange { Delta { amount: Expr<Int> } => ["effect.cost-delta"], Set { amount: Expr<Int> } => ["effect.cost-set"] });
 tags!(ReplacementScope { SelfOnly, General });
 variants!(ProposedEventPattern {
+    EnterField { objects: Selector } => [],
     LeavesZone { objects: Selector, from: ZoneKind } => [],
     Damage { recipient: Option<RecipientPredicate>, source: Option<SourcePredicate>, kind: DamageKind } => [],
     Move { objects: Selector, from: ZoneKind, to: ZoneKind } => [],

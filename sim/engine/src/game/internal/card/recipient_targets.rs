@@ -21,6 +21,8 @@ pub(in crate::game::internal) struct RecipientWait {
     pub(in crate::game::internal) binding: Binding<Vec<DamageRecipient>>,
     members: Vec<RuntimeDamageRecipient>,
     bounds: Cardinality,
+    requirements: Vec<(ObjectRef, usize)>,
+    required_score: usize,
     pub(in crate::game::internal) characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
 }
 
@@ -74,6 +76,12 @@ impl RecipientWait {
                 );
             }
         }
+        super::target_priority::expose(
+            &mut question,
+            &references,
+            &self.requirements,
+            self.required_score,
+        )?;
         Ok(question)
     }
 
@@ -88,7 +96,7 @@ impl RecipientWait {
             return Err(invalid("target cardinality"));
         }
         let mut unique = BTreeSet::new();
-        handles
+        let selected = handles
             .iter()
             .map(|handle| {
                 if !unique.insert(*handle) {
@@ -99,7 +107,21 @@ impl RecipientWait {
                     .copied()
                     .ok_or_else(|| invalid("foreign target handle"))
             })
-            .collect()
+            .collect::<Result<Vec<_>>>()?;
+        if self.priority_score(&selected) != self.required_score {
+            return Err(invalid("required target priority"));
+        }
+        Ok(selected)
+    }
+
+    fn priority_score(&self, members: &[RuntimeDamageRecipient]) -> usize {
+        self.requirements
+            .iter()
+            .filter(|(object, _)| {
+                members.contains(&RuntimeDamageRecipient::Object { object: *object })
+            })
+            .map(|(_, count)| *count)
+            .sum()
     }
 
     pub(in crate::game::internal) fn selections(&self) -> Result<Vec<Vec<RuntimeDamageRecipient>>> {
@@ -120,8 +142,9 @@ impl RecipientWait {
             if super::super::contains(
                 self.bounds,
                 Nat(u64::try_from(handles.len()).map_err(invalid)?),
-            ) {
-                selections.push(self.validate(&handles)?);
+            ) && let Ok(selected) = self.validate(&handles)
+            {
+                selections.push(selected);
             }
         }
         Ok(selections)
@@ -149,6 +172,27 @@ impl Game {
         check(candidates, *cardinality)?;
         let mut members = vec![];
         self.recipient_candidates(execution, candidates, &mut members)?;
+        let objects = members
+            .iter()
+            .filter_map(|member| match member {
+                RuntimeDamageRecipient::Object { object } => Some(*object),
+                RuntimeDamageRecipient::Leader { .. } => None,
+            })
+            .collect::<Vec<_>>();
+        let requirements = self.target_requirements(
+            execution,
+            execution.player(self, &decision.actor)?,
+            &objects,
+        )?;
+        let mut scores = requirements
+            .iter()
+            .map(|(_, count)| *count)
+            .collect::<Vec<_>>();
+        scores.sort_unstable_by(|left, right| right.cmp(left));
+        let maximum = cardinality.maximum.map_or(members.len(), |n| {
+            usize::try_from(n.0).unwrap_or(usize::MAX)
+        });
+        let required_score = scores.into_iter().take(maximum).sum();
         let saved = members
             .iter()
             .filter_map(|member| {
@@ -204,6 +248,8 @@ impl Game {
                 binding: *binding,
                 members,
                 bounds: *cardinality,
+                requirements,
+                required_score,
                 characteristics: saved,
             },
             TargetDomain {

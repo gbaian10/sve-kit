@@ -316,6 +316,7 @@ impl Game {
                 pending.timing = Some(EventPayload::EnterField {
                     event: event.clone(),
                 });
+                pending.capture_subject_information(self)?;
                 candidates.push(pending);
             }
         }

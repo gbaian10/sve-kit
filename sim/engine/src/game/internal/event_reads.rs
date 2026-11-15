@@ -136,6 +136,26 @@ impl EventReads {
         }
     }
 
+    pub(super) const fn entry_subject(&self) -> Option<&EventObject> {
+        if let Context::Entry { subject, .. } = &self.0 {
+            Some(subject)
+        } else {
+            None
+        }
+    }
+
+    pub(super) fn seal_entry_subject(
+        &mut self,
+        reference: ObjectRef,
+        information: &SourceSnapshot,
+    ) {
+        if let Context::Entry { subject, .. } = &mut self.0
+            && subject.reference == reference
+        {
+            subject.information = Some(information.clone());
+        }
+    }
+
     pub(super) fn move_batch_count(&self, binding: Binding<MoveEvent>) -> Option<u64> {
         match &self.0 {
             Context::Move(saved, event) if *saved == binding => Some(event.batch_size.0),

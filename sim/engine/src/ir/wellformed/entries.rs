@@ -13,6 +13,7 @@ use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::target_priority;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
     Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, Decision,
@@ -31,7 +32,7 @@ use crate::ir::{
     Selector,
 };
 use crate::ir::{CostChange, CostKind, Int, LimitSpec};
-use crate::ir::{move_replacement, optional_payment};
+use crate::ir::{entry_posture, move_replacement, optional_payment};
 use crate::ir::{trigger_restrictions, victory};
 use alloc::collections::BTreeSet;
 
@@ -683,19 +684,22 @@ impl Checker {
         }
     }
 
-    fn move_replacement(
+    fn movement_replacement(
         &mut self,
         effect: &Effect,
         id: EffectDefinitionId,
         source: &AbilitySource,
         zones: &[ZoneKind],
     ) -> Checked {
-        let shape = move_replacement::projection(effect)
-            .ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
         if zones != [ZoneKind::Field] || !self.effect_ids.insert(id) {
             return self.reject();
         }
         self.ability_source(source)?;
+        if entry_posture::projection(effect).is_some() {
+            return Ok(());
+        }
+        let shape = move_replacement::projection(effect)
+            .ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
         self.selector(shape.objects)?;
         self.boolean(shape.condition)
     }
@@ -737,9 +741,10 @@ impl Checker {
                 self.duration(duration)
             }
             Effect::Replacement { id, source, .. }
-                if move_replacement::projection(effect).is_some() =>
+                if entry_posture::projection(effect).is_some()
+                    || move_replacement::projection(effect).is_some() =>
             {
-                self.move_replacement(effect, *id, source, ability_zones)
+                self.movement_replacement(effect, *id, source, ability_zones)
             }
             Effect::Replacement { .. } if prevention::projection(effect).is_some() => {
                 self.prevention(effect, ability_zones)
@@ -803,7 +808,8 @@ impl Checker {
 
     fn permission_declaration(&mut self, effect: &Effect, ability_zones: &[ZoneKind]) -> Checked {
         if ability_zones == [ZoneKind::Field]
-            && (trigger_restrictions::keyword(effect).is_some()
+            && (target_priority::is_requirement(effect)
+                || trigger_restrictions::keyword(effect).is_some()
                 || victory::permission(effect).is_some())
         {
             return Ok(());

@@ -1,0 +1,50 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-092:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6-sol
+          date: "2026-11-15"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        auto:
+          "on":
+            enter_field:
+              who: self
+              sel:
+                kind: amulet
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  cost_of: it
+      - line: 3
+        fanfare:
+          do:
+            - choose:
+                bind: amulet
+                from:
+                  who: self
+                  zone: hand
+                  kind: amulet
+                  orig_cost_le: 3
+                upto: 1
+            - move:
+                ref: amulet
+                to: field
+                result: entered
