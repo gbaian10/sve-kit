@@ -80,10 +80,7 @@ fn wording_source_current_lastword_keeps_its_revision_after_the_holder_departs()
     }
 }
 
-#[test]
-fn wording_source_current_grant_keeps_provider_revision_after_a_shuffle() {
-    const PROVIDER: &str = "BP03-083";
-    let expected = expected(PROVIDER);
+fn grant_game(own: &str, other: &str, provider: &str) -> Game {
     // The fixture moves the departed provider without replacing its accepted program.
     let producer = producer_steps(vec![
         Action::Move {
@@ -105,21 +102,28 @@ fn wording_source_current_grant_keeps_provider_revision_after_a_shuffle() {
             randomness: RandomnessPolicy::FreshRequest,
         },
     ]);
+    let mut initial = draw_position();
+    initial["turn"]["active"] = json!(own);
+    initial["players"][own]["zones"]["hand"] = json!([{"id":"spell","card":provider}]);
+    initial["players"][own]["zones"]["field"] = json!([
+        {"id":"ally","card":"BP01-037","state":{"power":2_i64}},
+        {"id":"other","card":"BP01-037"}
+    ]);
+    initial["players"][other]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+    with_selected_producer_program(&initial, &producer, producer_selection())
+}
+
+#[test]
+fn wording_source_current_grant_keeps_provider_revision_after_a_shuffle() {
+    const PROVIDER: &str = "BP03-083";
+    let expected = expected(PROVIDER);
     for actor in [Viewer::P1, Viewer::P2] {
         let (own, other) = if actor == Viewer::P1 {
             ("P1", "P2")
         } else {
             ("P2", "P1")
         };
-        let mut initial = draw_position();
-        initial["turn"]["active"] = json!(own);
-        initial["players"][own]["zones"]["hand"] = json!([{"id":"spell","card":PROVIDER}]);
-        initial["players"][own]["zones"]["field"] = json!([
-            {"id":"ally","card":"BP01-037","state":{"power":2_i64}},
-            {"id":"other","card":"BP01-037"}
-        ]);
-        initial["players"][other]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
-        let mut game = with_selected_producer_program(&initial, &producer, producer_selection());
+        let mut game = grant_game(own, other, PROVIDER);
         let CardPlay::Awaiting(question) =
             game.play_internal_card("spell", actor.player()).unwrap()
         else {
