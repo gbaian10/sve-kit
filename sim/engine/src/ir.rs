@@ -262,3 +262,4 @@ pub(crate) mod flip_cost;
 pub(crate) mod repeated_moves;
 
 pub(crate) mod kind_change;
+pub(crate) mod stat_presence;

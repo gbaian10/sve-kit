@@ -1217,6 +1217,9 @@ impl Execution {
                     .into_iter()
                     .any(identity),
                 Predicate::Not { predicate } => !self.boolean(game, predicate)?.0,
+                Predicate::HasInfo { information } => {
+                    self.stat_information_present(game, information)?
+                }
                 Predicate::CompareInt {
                     left,
                     comparison,

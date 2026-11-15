@@ -443,8 +443,17 @@ impl BodyContext<'_> {
                 });
             }
         }
-        Ok(Expr::Compute(Box::new(Predicate::CompareInt {
-            left: self.number(&value.left, path, &mut BTreeSet::new())?,
+        let left = self.number(&value.left, path, &mut BTreeSet::new())?;
+        let right = self.number(&value.right, path, &mut BTreeSet::new())?;
+        let mut predicates = [
+            self.stat_guard(&value.left, &left),
+            self.stat_guard(&value.right, &right),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
+        let comparison = Expr::Compute(Box::new(Predicate::CompareInt {
+            left,
             comparison: match value.op {
                 ast::Comparison::Eq => Comparison::Equal,
                 ast::Comparison::Ne => Comparison::NotEqual,
@@ -453,8 +462,13 @@ impl BodyContext<'_> {
                 ast::Comparison::Gt => Comparison::Greater,
                 ast::Comparison::Ge => Comparison::GreaterEqual,
             },
-            right: self.number(&value.right, path, &mut BTreeSet::new())?,
-        })))
+            right,
+        }));
+        if predicates.is_empty() {
+            return Ok(comparison);
+        }
+        predicates.push(comparison);
+        Ok(Expr::Compute(Box::new(Predicate::And { predicates })))
     }
 
     pub(super) fn entered_from(

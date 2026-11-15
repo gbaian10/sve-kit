@@ -8,7 +8,7 @@ use crate::ir::{
     NameOperation, Node, ObjectOperand, ObjectRef, ObjectView, Program, RecipientSet, Selector,
     TokenTemplate,
 };
-use crate::ir::{Int, IntOperation, Predicate};
+use crate::ir::{Int, IntOperation, NumberRead, Predicate};
 use alloc::collections::BTreeSet;
 
 fn subjects(
@@ -81,6 +81,16 @@ fn condition_subjects(
             event,
             allowed,
         ),
+        Predicate::CompareInt { left, right, .. } => {
+            number_subjects(left, &format!("{path}/compute/left"), event, allowed);
+            number_subjects(right, &format!("{path}/compute/right"), event, allowed);
+        }
+        Predicate::HasInfo { information } => information_subjects(
+            information,
+            &format!("{path}/compute/information"),
+            event,
+            allowed,
+        ),
         Predicate::Not { predicate } => {
             condition_subjects(
                 predicate,
@@ -137,6 +147,9 @@ fn direct_action_paths(
                 );
             }
         }
+        Action::Draw { count, .. } => {
+            number_subjects(count, &format!("{path}/action/count"), event, allowed);
+        }
         Action::Modify {
             subjects: objects, ..
         }
@@ -182,34 +195,46 @@ fn direct_action_paths(
     }
 }
 
+fn information_subjects(
+    information: &NumberRead,
+    root: &str,
+    event: &Expr<ObjectRef>,
+    allowed: &mut BTreeSet<String>,
+) {
+    let (NumberRead::Cost { object, .. } | NumberRead::Stats { object, .. }) = information;
+    if numbers::subject(object).as_ref() != Some(event) {
+        return;
+    }
+    for suffix in [
+        "/view",
+        "/object",
+        "/object/event",
+        "/object/policy",
+        "/object/reason",
+        "/object/object",
+        "/object/object/value/frozen",
+    ] {
+        allowed.insert(format!("{root}{suffix}"));
+    }
+}
+
 fn number_subjects(
     value: &Expr<Int>,
     path: &str,
     event: &Expr<ObjectRef>,
     allowed: &mut BTreeSet<String>,
 ) {
-    use crate::ir::NumberRead;
     let Expr::Compute(operation) = value else {
         return;
     };
     match operation.as_ref() {
         IntOperation::InformationOrZero { information } => {
-            let (NumberRead::Cost { object, .. } | NumberRead::Stats { object, .. }) = information;
-            if numbers::subject(object).as_ref() != Some(event) {
-                return;
-            }
-            let root = format!("{path}/compute/information");
-            for suffix in [
-                "/view",
-                "/object",
-                "/object/event",
-                "/object/policy",
-                "/object/reason",
-                "/object/object",
-                "/object/object/value/frozen",
-            ] {
-                allowed.insert(format!("{root}{suffix}"));
-            }
+            information_subjects(
+                information,
+                &format!("{path}/compute/information"),
+                event,
+                allowed,
+            );
         }
         IntOperation::Arithmetic { arguments, .. } => {
             for (index, argument) in arguments.iter().enumerate() {

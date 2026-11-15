@@ -314,6 +314,14 @@ impl Execution {
                 NumberRead::Stats { .. } if !game.object_type(id)?.contains("フォロワー") => {
                     Ok(0)
                 }
+                NumberRead::Stats { property, .. } if game.object(id)?.zone == "ex" => {
+                    game.object(id)?.state[match property {
+                        Stat::Attack => "power",
+                        Stat::Life => "hp",
+                    }]
+                    .as_i64()
+                    .ok_or_else(|| invalid("public EX follower stat"))
+                }
                 NumberRead::Stats { property, .. } => game.internal_numeric_stat(id, *property),
             };
         }
@@ -335,7 +343,11 @@ impl Execution {
             .ok_or_else(|| invalid("missing numeric characteristic"))
     }
 
-    fn event_number_information(&self, game: &Game, object: &ObjectView) -> Result<SourceSnapshot> {
+    pub(super) fn event_number_information(
+        &self,
+        game: &Game,
+        object: &ObjectView,
+    ) -> Result<SourceSnapshot> {
         let expression =
             numbers::subject(object).ok_or_else(|| unsupported("numeric event subject view"))?;
         let subject = self

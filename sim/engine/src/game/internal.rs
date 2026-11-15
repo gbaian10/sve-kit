@@ -100,6 +100,7 @@ mod reveal_until;
 mod scheduled_turn;
 mod search;
 mod shuffle;
+mod stat_presence;
 mod terminal;
 mod tokens;
 mod transform;

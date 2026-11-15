@@ -54,6 +54,7 @@ mod resource_entry;
 mod reveal_cost;
 mod reveal_until;
 mod stack;
+mod stat_presence;
 mod static_declarations;
 mod static_keywords;
 mod target_priority;

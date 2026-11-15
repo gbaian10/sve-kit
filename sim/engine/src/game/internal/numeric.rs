@@ -662,12 +662,14 @@ impl Game {
                 continue;
             }
             // EX followers keep their modifications when they later enter the field (CR 4.8.3.3).
-            if !matches!(object.zone.as_str(), "field" | "ex")
-                || !self.object_type(id)?.contains("フォロワー")
-            {
+            if !matches!(object.zone.as_str(), "field" | "ex") {
                 return Err(unsupported(
                     "numeric subjects must be field or EX followers",
                 ));
+            }
+            // R-0020: absent stats cannot receive a new modifier, even when old values survive.
+            if !self.object_type(id)?.contains("フォロワー") {
+                continue;
             }
             if self.state.continuous.iter().any(|entry| {
                 entry["effect"]["op"] == "pilot"
