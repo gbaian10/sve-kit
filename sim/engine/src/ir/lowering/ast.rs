@@ -3426,14 +3426,47 @@ pub(super) struct MovementSubject {
     pub not_same_name_as_this: Option<bool>,
 }
 
-/// A departure header's `where`: a committed damage link, or a public zone count read before the
-/// departing batch moves.
+/// Header guards keep their event's decision point instead of becoming body conditions.
 #[derive(Clone, Deserialize)]
 #[serde(untagged)]
 pub(super) enum MovementCondition {
+    PlayedOrdinal(Box<PlayedOrdinalCondition>),
     Link(SourceLinkCondition),
     ZoneCount(ZoneCountCondition),
 }
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedOrdinalCondition {
+    pub cmp: PlayedOrdinalComparison,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedOrdinalComparison {
+    pub left: PlayedOrdinalRead,
+    pub op: Comparison,
+    pub right: u64,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedOrdinalRead {
+    pub history_count: PlayedOrdinalHistory,
+}
+#[derive(Clone, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PlayedOrdinalHistory {
+    #[serde(rename = "event")]
+    pub _event: PlayedOrdinalEvent,
+    #[serde(rename = "window")]
+    pub _window: ThisTurn,
+    pub who: LeaderSide,
+    pub sel: MovementSubject,
+}
+#[derive(Clone, Deserialize)]
+pub(super) enum PlayedOrdinalEvent {
+    #[serde(rename = "played")]
+    Played,
+}
+
 #[derive(Clone, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct ZoneCountCondition {

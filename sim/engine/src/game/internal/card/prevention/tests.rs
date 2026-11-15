@@ -34,6 +34,12 @@ fn catalog() -> Arc<Catalog> {
 }
 
 fn board(filtered: bool) -> Game {
+    board_with_source(
+        filtered.then(|| prevention::opponent_controller(Binding::new(1, ScopeId(3)))),
+    )
+}
+
+fn board_with_source(source_filter: Option<SourcePredicate>) -> Game {
     let catalog = catalog();
     let initial = json!({"history":"explicit","turn":{"active":"P1","first_player":"P1","phase":"main","elapsed_turns":{"P1":3_u8,"P2":2_u8}},"players":{"P1":{"leader":{"class":"ニュートラル","life":20_u8},"pp":{"current":2_u8,"max":2_u8},"ep":0_u8,"sep":0_u8,"zones":{"hand":[{"id":"s","card":"source"}]}},"P2":{"leader":{"class":"ニュートラル","life":20_u8},"pp":{"current":2_u8,"max":2_u8},"ep":0_u8,"sep":0_u8,"zones":{"field":[{"id":"f","card":"shield"}]}}}});
     let mut board = Game::new(
@@ -78,7 +84,7 @@ fn board(filtered: bool) -> Game {
                     },
                 })),
             }),
-            source: filtered.then(|| prevention::opponent_controller(Binding::new(1, ScopeId(3)))),
+            source: source_filter,
             kind: DamageKind::Ability,
         },
         condition: Expr::Literal(Bool(true)),
@@ -181,4 +187,29 @@ fn missing_proposed_controller_is_rejected_only_by_filtered_ability_prevention()
             assert_eq!(references, Vec::<Value>::new());
         }
     }
+}
+
+#[test]
+fn prototype_without_a_damage_source_snapshot_is_unsupported() {
+    let trait_id = TraitId("academy".into());
+    let source = prevention::source_filter::Filter {
+        own: false,
+        kind: CardKind::Spell,
+        trait_id: &trait_id,
+    }
+    .predicate(Binding::new(1, ScopeId(3)));
+    let mut board = board_with_source(Some(source));
+    let mut frame = board.frame_for("s").unwrap();
+    let error = board
+        .execute(
+            &json!({"op":"damage","subjects":"f","amount":2_u8}),
+            &mut frame,
+        )
+        .and_then(|()| board.run_frame(frame))
+        .unwrap_err();
+    assert!(matches!(error, crate::EngineFailure::Unsupported(_)));
+    assert_eq!(
+        board.projection(View::Referee).unwrap()["objects"]["f"]["damage"],
+        0_u8
+    );
 }

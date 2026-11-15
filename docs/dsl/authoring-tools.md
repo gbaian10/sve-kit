@@ -347,6 +347,8 @@ Look 的私有選取可寫 `choose.from: {any_of: [{in: seen, kind: follower, tr
 
 費用修正條件可讀本回合 `event: played` 的 `history_count`，沿用一般打出歷史的玩家、卡種、類型與 token 篩選；第一張符合的卡正式打出後，後續費用立即依已提交歷史重算。
 
+`auto.on.played.sel.where` 可用 `cmp` 將本回合自己的 `history_count`（`event: played`）與正整數序數作 `eq` 比較。歷史篩選沿用卡種、類型、token 與卡名的交集，於當張卡正式打出、計入歷史後判定是否進待機；提供者進場前的打出也計入，後續打出不改變已建立的待機。正式目標仍在能力打出時選擇。CP01-029 以第三張法術觸發疾走，第一張ウマ娘法術的持續減費則使用 `static.while` 的同類歷史計數等於零；兩者使用各自的篩選。
+
 「本回合下一張」使用 `player_effect: {who: self, effect: {cost_mod: {when_playing: {who: self, trait: 武闘竜人}, delta: -3, next_only: true}}, until: turn}`。此安裝保存玩家與打出篩選，涵蓋稍後才取得的卡片，不捕捉隱藏手牌。整組共用一次額度，僅在符合篩選的卡適正打出且全部付款成功時消耗；預覽、非符合卡及失敗宣告均不消耗。安裝者離場不提早失效，未用額度在本回合結束時移除。`delta` 與非負整數 `set` 二擇一；各費用層的增減合計後才以零為下限。
 
 整卡 DSL 在索引中以永久 CardId 登錄一個代表卡號。current 選用依身分登錄展開同 CardId 的所有官方 JP 印刷卡號，共用代表卡的程式及來源定位；卡面仍讀各印刷的快照資料。不從卡號字串推測別名，也不為別名另登索引或保留原型程式。未解決的裁定同時阻擋這些別名。

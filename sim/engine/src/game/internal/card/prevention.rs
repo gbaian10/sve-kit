@@ -57,7 +57,7 @@ fn damage_source_matches(
         }
         Some(DamageSource::Characteristics(filter)) => {
             let snapshot =
-                snapshot.ok_or_else(|| crate::invalid("missing damage source information"))?;
+                snapshot.ok_or_else(|| unsupported("missing damage source information"))?;
             let own = !opposing_damage_controller(hit, execution.context.controller)?;
             Ok(own == filter.own
                 && snapshot.subject.kind == Some(filter.kind)

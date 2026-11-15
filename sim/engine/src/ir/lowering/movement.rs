@@ -3,6 +3,7 @@ use super::{Binding, EventPattern, LoweringError, ScopeId, ast, unsupported};
 use crate::ir::events::ex_departure::ExDepartureFilter;
 use crate::ir::events::mill::MillFilter;
 use crate::ir::events::played::PlayedFilter;
+use crate::ir::events::played::ordinal::Ordinal;
 use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::events::zone_gate::{DepartureGate, ZoneCountGate};
 use crate::ir::history_turn::source_link::SourceLink;
@@ -180,6 +181,7 @@ fn moved(
     let link = match condition.map(|condition| *condition) {
         None => None,
         Some(ast::MovementCondition::Link(link)) => Some(link),
+        Some(ast::MovementCondition::PlayedOrdinal(_)) => return Err(unsupported(path)),
         Some(ast::MovementCondition::ZoneCount(condition)) => {
             return Ok(EventPattern::LeaveField {
                 binding: event,
@@ -405,6 +407,7 @@ pub(super) fn played(
     event: Binding<PlayEvent>,
     card: Binding<ObjectRef>,
     path: &str,
+    allocator: &mut super::Allocator,
 ) -> Result<EventPattern, LoweringError> {
     let (mut subject, alternate) = match &entry.sel {
         None => (None, None),
@@ -414,6 +417,11 @@ pub(super) fn played(
             (Some(first.clone()), Some(second))
         }
     };
+    let ordinal = subject
+        .as_mut()
+        .and_then(|subject| subject.r#where.take())
+        .map(|condition| played_ordinal(&condition, event.key().0, allocator, path))
+        .transpose()?;
     let mut original = None;
     let mut traits_any = Vec::new();
     if let Some(q) = subject.as_mut() {
@@ -459,6 +467,7 @@ pub(super) fn played(
         card,
         original,
         traits_any,
+        ordinal,
         alternate: alternate
             .map(|branch| {
                 movement_filter(
@@ -479,6 +488,37 @@ pub(super) fn played(
         binding: event,
         predicate: plan.predicate(event),
     })
+}
+
+fn played_ordinal(
+    condition: &ast::MovementCondition,
+    scope: ScopeId,
+    allocator: &mut super::Allocator,
+    path: &str,
+) -> Result<Ordinal, LoweringError> {
+    use crate::ir::history_turn::PlayedHistoryFilter;
+    let ast::MovementCondition::PlayedOrdinal(condition) = condition else {
+        return Err(unsupported(path));
+    };
+    let history = &condition.cmp.left.history_count;
+    if !matches!(condition.cmp.op, ast::Comparison::Eq)
+        || !matches!(history.who, ast::LeaderSide::Controller)
+    {
+        return Err(unsupported(path));
+    }
+    let filter = movement_filter(
+        Some(true),
+        false,
+        Some(&history.sel),
+        false,
+        path,
+        FilterSupport::Basic,
+    )?;
+    let filter = PlayedHistoryFilter::from_subject(&filter).ok_or_else(|| unsupported(path))?;
+    let event = Binding::new(allocator.id(path)?, scope);
+    let card = Binding::new(allocator.id(path)?, scope);
+    Ordinal::new(filter.query(event, card), Nat(condition.cmp.right))
+        .ok_or_else(|| unsupported(path))
 }
 
 pub(super) fn entry_union(

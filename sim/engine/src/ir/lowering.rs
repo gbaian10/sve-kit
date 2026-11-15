@@ -1168,7 +1168,7 @@ fn lowered_subscription(
         ast::PhaseSubscription::Played(played) => {
             let event = Binding::new(event_id, scope);
             let card = Binding::new(subject_id, scope);
-            movement::played(played, event, card, path)
+            movement::played(played, event, card, path, allocator)
         }
         ast::PhaseSubscription::Raced(subscription) => {
             let event = Binding::new(event_id, scope);

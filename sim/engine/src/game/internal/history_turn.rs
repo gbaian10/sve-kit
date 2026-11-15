@@ -289,8 +289,11 @@ pub(super) fn combo(
     played_count(execution, game, player, true)
 }
 
-fn filtered_played(execution: &Execution, game: &Game, plan: &PlayedHistoryFilter) -> Result<Nat> {
-    let controller = execution.context.controller;
+pub(super) fn filtered_played_at(
+    game: &Game,
+    controller: PlayerId,
+    plan: &PlayedHistoryFilter,
+) -> Result<Nat> {
     let all = game
         .state
         .ir_subject_history
@@ -472,7 +475,7 @@ pub(super) fn count(
             if count != HistoryCount::Facts {
                 return Err(unsupported("played history subject count"));
             }
-            filtered_played(execution, game, filter)
+            filtered_played_at(game, execution.context.controller, filter)
         }
         HistoryPlan::Played(by) => {
             if count != HistoryCount::Facts {
