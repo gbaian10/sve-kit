@@ -122,6 +122,18 @@ vi.mock("../../data/rules/bundle-jp", () => ({
     return current.value
   },
 }))
+// Holds the English edition back while set, to let a test switch languages mid-load.
+const gate = vi.hoisted((): { english?: Promise<void> } => ({}))
+vi.mock("../../data/rules/load", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../../data/rules/load")>()
+  return {
+    ...actual,
+    loadComprehensiveRules: async (region: "jp" | "en") => {
+      if (region === "en") await gate.english
+      return actual.loadComprehensiveRules(region)
+    },
+  }
+})
 vi.mock("../../data/rules/bundle-en", () => ({
   get RULES() {
     return englishBundle
@@ -509,4 +521,65 @@ it("ignores a malformed hash instead of failing the page", async () => {
   })
   expect(screen.getByRole("article")).toBeInTheDocument()
   expect(scrollIntoView).not.toHaveBeenCalled()
+})
+
+it("shows the edition of the latest UI language when it changes while loading", async () => {
+  let release: () => void = () => undefined
+  gate.english = new Promise((resolve) => {
+    release = resolve
+  })
+  try {
+    prefsStore.set({ uiLanguage: "en" })
+    await renderRoutes(routes, { initialEntries: ["/rules"], language: "en" })
+    act(() => {
+      prefsStore.set({ uiLanguage: "ja" })
+    })
+    expect(await screen.findByText("ver. 9.9.9")).toBeInTheDocument()
+    // The English edition arrives late: it must not replace the Japanese one now shown.
+    await act(async () => {
+      release()
+      await new Promise((resolve) => setTimeout(resolve, 20))
+    })
+    expect(screen.queryByText("ver. 8.8.8")).not.toBeInTheDocument()
+    expect(rule("1.1.2")).not.toBeNull()
+  } finally {
+    release()
+    delete gate.english
+  }
+  // Switching back shows the English edition again.
+  act(() => {
+    prefsStore.set({ uiLanguage: "en" })
+  })
+  expect(await screen.findByText("ver. 8.8.8")).toBeInTheDocument()
+  expect(rule("1.1.2")).toBeNull()
+})
+
+it("keeps every printed paragraph of a table cell as its own paragraph, marked once", async () => {
+  const table: RuleNode = {
+    key: "A:1",
+    context: "A",
+    kind: "block",
+    depth: 2,
+    title: "表名",
+    text: "",
+    table: { header: ["名", "文"], rows: [["甲", "【疾走】\n自分のエンドフェイズに消滅する。"]] },
+  }
+  const all = nodes.map((node) => (node.key === "A:1" ? table : node))
+  current.value = {
+    ...bundle(new Map([["1", { title: "第一章" }]])),
+    nodes: all,
+    byKey: new Map(all.map((node) => [node.key, node])),
+  }
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const block = await waitFor(() => {
+    const element = rule("A:1")
+    expect(element).not.toBeNull()
+    return element as HTMLElement
+  })
+  const cell = within(within(block).getByRole("table")).getByText("【疾走】").closest("td")
+  const paragraphs = [...(cell as HTMLElement).querySelectorAll("p")].map((p) => p.textContent)
+  expect(paragraphs).toEqual(["【疾走】", "自分のエンドフェイズに消滅する。"])
+  // The untranslated cell carries one mark, after its last paragraph.
+  expect(within(cell as HTMLElement).getAllByText("原文")).toHaveLength(1)
+  expect((cell as HTMLElement).lastElementChild).toHaveTextContent("原文")
 })
