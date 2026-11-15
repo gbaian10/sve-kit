@@ -1,0 +1,58 @@
+cards:
+  BP16-093:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - make_type:
+                on: this
+                type: follower
+          while:
+            cmp:
+              left:
+                counter:
+                  name: 祈りカウンター
+                  on: this
+              op: ge
+              right: 4
+      - auto:
+          do:
+            - choose:
+                any: true
+                bind: chosen
+                from:
+                  other: true
+                  who: self
+                  zone: field
+            - counter:
+                delta: 1
+                name: 祈りカウンター
+                on: chosen
+            - counter:
+                delta: 1
+                name: 祈りカウンター
+                on: this
+          on:
+            phase:
+              which: main
+              whose: self
+        line: 2
+      - attack_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: 封じられし熾天使
+                  who: self
+                  zone: deck
+                to: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set
