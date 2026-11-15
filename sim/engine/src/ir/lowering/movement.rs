@@ -99,7 +99,8 @@ pub(super) fn subscription(
                 .predicate(SubjectFields::Destroy(event)),
             })
         }
-        ast::PhaseSubscription::Fused(_)
+        ast::PhaseSubscription::Raced(_)
+        | ast::PhaseSubscription::Fused(_)
         | ast::PhaseSubscription::FusedAsMaterial(_)
         | ast::PhaseSubscription::AnyOf(_)
         | ast::PhaseSubscription::Acted(_)

@@ -7,8 +7,8 @@ use crate::ir::{
     EventPayload, EventSnapshotPolicy, EvolveEvent, Expr, Info, Int, IntOperation, KindFrozen,
     KindRead, LeaveFieldEvent, NamesFrozen, NamesRead, NumberRead, ObjectFrozen, ObjectOperand,
     ObjectRef, ObjectView, PlayEvent, PlayerFrozen, PlayerId, PlayerRead, PlayerRef, PostureEvent,
-    Predicate, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead, UbActivatedEvent,
-    ValueEquality, ZoneFrozen, ZoneKind, ZoneOperation,
+    Predicate, RaceEvent, Role, SnapshotFields, TraitId, TraitsFrozen, TraitsRead,
+    UbActivatedEvent, ValueEquality, ZoneFrozen, ZoneKind, ZoneOperation,
 };
 
 #[derive(Clone, Copy)]
@@ -28,6 +28,7 @@ pub(crate) enum SubjectFields {
     Leave(Binding<LeaveFieldEvent>),
     Ex(Binding<EnterExEvent>),
     Ub(Binding<UbActivatedEvent>),
+    Race(Binding<RaceEvent>),
 }
 
 pub(super) fn played_view(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> ObjectView {
@@ -64,9 +65,21 @@ pub(super) fn attack_view(event: Binding<AttackEvent>) -> ObjectView {
     }
 }
 
+fn race_view(event: Binding<RaceEvent>) -> ObjectView {
+    ObjectView::EventSnapshot {
+        object: Box::new(ObjectOperand::FromExpression {
+            value: Box::new(Expr::Frozen(Box::new(ObjectFrozen::RaceSubject { event }))),
+        }),
+        event: EventContext::Race { event },
+        policy: EventSnapshotPolicy::AfterEntry,
+    }
+}
+
 impl SubjectFields {
     pub(crate) const fn from_pattern(pattern: &EventPattern) -> Option<Self> {
-        if let EventPattern::UbActivated { binding, .. } = pattern {
+        if let EventPattern::Race { binding, .. } = pattern {
+            Some(Self::Race(*binding))
+        } else if let EventPattern::UbActivated { binding, .. } = pattern {
             Some(Self::Ub(*binding))
         } else if let EventPattern::EnterField { binding, .. } = pattern {
             Some(Self::Entry(*binding))
@@ -87,6 +100,7 @@ impl SubjectFields {
 
     pub(crate) fn payload_object(self, payload: &EventPayload) -> Option<ObjectRef> {
         Some(match (self, payload) {
+            (Self::Race(_), EventPayload::Race { event }) => event.subject,
             (Self::Ub(_), EventPayload::UbActivated { event }) => event.holder,
             (Self::Entry(_), EventPayload::EnterField { event }) => event.object,
             (Self::Ex(_), EventPayload::EnterEx { event }) => event.object,
@@ -122,7 +136,8 @@ impl SubjectFields {
             | Self::Played { .. }
             | Self::Destroy(_)
             | Self::Ex(_)
-            | Self::Ub(_) => return None,
+            | Self::Ub(_)
+            | Self::Race(_) => return None,
         };
         Some(Expr::Compute(Box::new(IntOperation::InformationOrZero {
             information: NumberRead::Cost {
@@ -228,10 +243,12 @@ impl SubjectFields {
             Self::Evolve(event) => ObjectFrozen::EvolveSubject { event },
             Self::Ex(event) => ObjectFrozen::EnterExObject { event },
             Self::Ub(event) => ObjectFrozen::UbActivatedHolder { event },
+            Self::Race(event) => ObjectFrozen::RaceSubject { event },
         }))
     }
     fn controller(self) -> Expr<PlayerRef> {
         match self {
+            Self::Race(event) => Expr::Frozen(Box::new(PlayerFrozen::RaceController { event })),
             Self::Ub(event) => {
                 Expr::Frozen(Box::new(PlayerFrozen::UbActivatedController { event }))
             }
@@ -265,6 +282,12 @@ impl SubjectFields {
     }
     fn kind(self) -> Expr<CardKind> {
         Expr::Frozen(Box::new(match self {
+            Self::Race(event) => {
+                return Expr::Live(Box::new(KindRead::Kind {
+                    object: race_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Ub(event) => {
                 return Expr::Live(Box::new(KindRead::Kind {
                     object: ub_view(event),
@@ -323,6 +346,12 @@ impl SubjectFields {
     }
     fn traits(self) -> Expr<Vec<TraitId>> {
         Expr::Frozen(Box::new(match self {
+            Self::Race(event) => {
+                return Expr::Live(Box::new(TraitsRead::Traits {
+                    object: race_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Ub(event) => {
                 return Expr::Live(Box::new(TraitsRead::Traits {
                     object: ub_view(event),
@@ -381,6 +410,11 @@ impl SubjectFields {
     }
     fn names(self) -> Expr<Vec<CardName>> {
         Expr::Frozen(Box::new(match self {
+            Self::Race(event) => {
+                return Expr::Live(Box::new(NamesRead::Names {
+                    object: race_view(event),
+                }));
+            }
             Self::Ub(event) => {
                 return Expr::Live(Box::new(NamesRead::Names {
                     object: ub_view(event),
@@ -435,6 +469,12 @@ impl SubjectFields {
     }
     fn class(self) -> Expr<Info<ClassId>> {
         let field = match self {
+            Self::Race(event) => {
+                return Expr::Live(Box::new(ClassRead::Class {
+                    object: race_view(event),
+                    view: CharacteristicView::Effective,
+                }));
+            }
             Self::Ub(event) => {
                 return Expr::Live(Box::new(ClassRead::Class {
                     object: ub_view(event),
@@ -514,7 +554,7 @@ impl SubjectFields {
                     value: Box::new(self.object()),
                 }),
             },
-            Self::Destroy(_) | Self::Evolve(_) | Self::Ex(_) => return None,
+            Self::Destroy(_) | Self::Evolve(_) | Self::Ex(_) | Self::Race(_) => return None,
         };
         Some(Expr::Live(Box::new(BoolRead::State {
             object,
@@ -532,7 +572,8 @@ impl SubjectFields {
             | Self::DamageSource(_)
             | Self::Entry(_)
             | Self::Evolve(_)
-            | Self::Ex(_) => EventSnapshotPolicy::AfterEntry,
+            | Self::Ex(_)
+            | Self::Race(_) => EventSnapshotPolicy::AfterEntry,
         }
     }
     fn destination(self) -> Option<Expr<Bool>> {
@@ -548,7 +589,8 @@ impl SubjectFields {
             | Self::Destroy(_)
             | Self::Evolve(_)
             | Self::Leave(_)
-            | Self::Ex(_) => return None,
+            | Self::Ex(_)
+            | Self::Race(_) => return None,
         };
         Some(Expr::Compute(Box::new(Predicate::ZoneEquals {
             left: Expr::Frozen(Box::new(ZoneFrozen::LeaveFieldTo { event })),
@@ -790,7 +832,9 @@ impl SubjectFilter {
             left: fields.object(),
             right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
         }));
-        if matches!(fields, SubjectFields::Entry(_)) && *expression == itself {
+        if matches!(fields, SubjectFields::Entry(_) | SubjectFields::Race(_))
+            && *expression == itself
+        {
             return Some(Self {
                 itself: Some(true),
                 ..Self::default()

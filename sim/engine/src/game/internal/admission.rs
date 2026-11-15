@@ -453,6 +453,7 @@ fn check_requirements(
                                     | "shape.AbilityOrigin.Keyword"
                                     | "shape.ObjectFrozen.EnterFieldObject"
                                     | "shape.ObjectFrozen.EnterExObject"
+                                    | "shape.ObjectFrozen.RaceSubject"
                                     | "shape.ObjectFrozen.UbActivatedHolder"
                                     | "shape.ObjectFrozen.EquipHolder"
                                     | "shape.ObjectFrozen.DriveCheckedHolder"

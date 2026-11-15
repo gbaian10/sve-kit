@@ -1172,6 +1172,29 @@ fn lowered_subscription(
             let card = Binding::new(subject_id, scope);
             movement::played(played, event, card, path)
         }
+        ast::PhaseSubscription::Raced(subscription) => {
+            let event = Binding::new(event_id, scope);
+            let fields = SubjectFields::Race(event);
+            let predicate = movement::movement_filter(
+                subscription
+                    .who
+                    .as_ref()
+                    .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+                subscription.reference.is_some(),
+                subscription.sel.as_ref(),
+                false,
+                path,
+                movement::FilterSupport::Basic,
+            )?
+            .predicate(fields);
+            if SubjectFilter::parse(fields, &predicate).is_none() {
+                return Err(unsupported(path));
+            }
+            Ok(EventPattern::Race {
+                binding: event,
+                predicate,
+            })
+        }
         ast::PhaseSubscription::Phase(phase) => {
             Ok(phase_subscription(phase, Binding::new(event_id, scope)))
         }
@@ -1303,7 +1326,8 @@ fn lowered_change(
                 .predicate(event),
             })
         }
-        ast::PhaseSubscription::Fused(_)
+        ast::PhaseSubscription::Raced(_)
+        | ast::PhaseSubscription::Fused(_)
         | ast::PhaseSubscription::FusedAsMaterial(_)
         | ast::PhaseSubscription::AnyOf(_)
         | ast::PhaseSubscription::Evolved(_)

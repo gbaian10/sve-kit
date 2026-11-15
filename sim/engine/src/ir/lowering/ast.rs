@@ -2487,6 +2487,8 @@ pub(super) enum PhaseSubscription {
     Moved(MoveSubscription),
     #[serde(rename = "placed_ex")]
     PlacedEx(ExSubscription),
+    #[serde(rename = "raced")]
+    Raced(RaceSubscription),
     #[serde(rename = "damaged")]
     Damage(DamageSubscription),
     #[serde(rename = "attacked")]
@@ -4379,4 +4381,13 @@ pub(super) struct Declare {
 #[serde(rename_all = "snake_case")]
 pub(super) enum DeclareNumber {
     Number,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RaceSubscription {
+    pub who: Option<EntryPlayer>,
+    #[serde(rename = "ref")]
+    pub reference: Option<This>,
+    pub sel: Option<MovementSubject>,
 }

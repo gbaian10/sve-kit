@@ -13,6 +13,7 @@ pub(crate) mod life;
 pub(crate) mod mill;
 pub(crate) mod numbers;
 pub(crate) mod played;
+pub(crate) mod race;
 pub(crate) mod subject;
 pub(crate) mod subscriptions;
 pub(crate) mod timing;
