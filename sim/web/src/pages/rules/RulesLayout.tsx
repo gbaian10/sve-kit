@@ -44,7 +44,7 @@ export function RulesLayout() {
               end={section.end}
               className={({ isActive }) =>
                 cn(
-                  "-mb-px flex h-10 items-center border-b-2 px-3 text-14 font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                  "-mb-px flex min-h-11 items-center border-b-2 px-3 text-14 font-semibold",
                   isActive
                     ? "border-text-1 text-text-1"
                     : "border-transparent text-text-2 hover:text-text-1",
