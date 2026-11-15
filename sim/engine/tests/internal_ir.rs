@@ -16,14 +16,14 @@ use sve_engine::game::internal::{Answer, Context, Fact, InstructionOutcome, Prog
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
+#[path = "support/board_fixtures.rs"]
+mod board_fixtures;
+
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
 
 #[path = "internal_ir/battle_costs.rs"]
 mod battle_costs;
-
-#[path = "internal_ir/battle_history.rs"]
-mod battle_history;
 
 #[path = "internal_ir/allocation.rs"]
 mod allocation;
@@ -225,38 +225,16 @@ fn damage(id: u64, recipients: RecipientSet, amount: i64) -> Located<Node> {
     )
 }
 fn setup(seat: u32, deck: Value) -> Value {
-    let mut value = json!({"history":"explicit","turn":{"active":"P1","first_player":"P1","phase":"main","elapsed_turns":{"P1":3,"P2":2}},"players":{
-        "P1":{"leader":{"class":"ニュートラル","life":20},"pp":{"current":2,"max":2},"ep":0,"sep":0,"construction":"class","zones":{"deck":[]}},
-        "P2":{"leader":{"class":"ニュートラル","life":20},"pp":{"current":2,"max":2},"ep":0,"sep":0,"construction":"class","zones":{"deck":[]}}
-    }});
-    let actor = if seat == 1 { "P1" } else { "P2" };
-    let opponent = if seat == 1 { "P2" } else { "P1" };
-    value["players"][actor]["zones"]["hand"] = json!([{"id":"s","card":"unit-spell"}]);
-    value["players"][actor]["zones"]["deck"] = deck;
-    value["players"][opponent]["zones"]["field"] = json!([{"id":"f","card":"unit-follower"}]);
-    value
+    board_fixtures::setup(seat, deck)
 }
 fn catalog() -> Arc<Catalog> {
-    catalog_with_cost(&json!("1"))
+    board_fixtures::catalog().unwrap()
 }
 fn catalog_documents(cost: &Value) -> (String, String, String) {
-    let snapshot = [("unit-spell", "スペル"), ("unit-follower", "フォロワー"), ("unit-amulet", "アミュレット")].iter().map(|(number, kind)| {
-        json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if *kind=="アミュレット" {"-"}else{"2"},"hp":if *kind=="アミュレット" {"-"}else{"3"},"traits":[],"text":null,"sections":[]}]}).to_string()
-    }).collect::<Vec<_>>().join("\n");
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-spell":{"status":"complete","review":"synthetic","abilities":[]},
-        "unit-follower":{"status":"complete","review":"synthetic","abilities":[]},
-        "unit-amulet":{"status":"complete","review":"synthetic","abilities":[]}
-    }})
-    .to_string();
-    (snapshot, registry, document)
+    board_fixtures::catalog_documents(cost)
 }
 fn catalog_with_cost(cost: &Value) -> Arc<Catalog> {
-    let (snapshot, registry, document) = catalog_documents(cost);
-    Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
-    )
+    board_fixtures::catalog_with_cost(cost).unwrap()
 }
 fn game(seat: u32, count: usize) -> Game {
     let deck = (0..count)
@@ -282,7 +260,7 @@ fn cards(outcome: &Progress, id: u64, requested: i64, actual: u64) {
     );
 }
 fn exact_authority(game: &Game) -> String {
-    format!("{game:?}")
+    board_fixtures::exact_authority(game)
 }
 fn capture_int(slot: u64, value: Expr<Int>) -> Located<Node> {
     node(Node::Capture {

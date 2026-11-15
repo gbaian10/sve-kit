@@ -1,4 +1,3 @@
-use super::battle_costs::{board, object};
 use super::*;
 use sve_battle_contract::{MAX_SAFE_INTEGER, observation as wire};
 use sve_engine::battle::{ProjectionError, project_history};
@@ -21,9 +20,60 @@ fn subject(current: Option<ObjectHandle>) -> native::SubjectHistory {
 }
 
 #[test]
+fn wire_history_refuses_private_hand_links_even_when_the_viewer_knows_them() {
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let mut observed = board(viewer, "unit-spell")
+            .unwrap()
+            .observe(viewer)
+            .unwrap();
+        let private = object(&observed, viewer, native::ObservedZone::Hand).unwrap();
+        for history in [
+            native::TurnHistory {
+                subjects: vec![subject(Some(private.clone()))],
+                ..native::TurnHistory::default()
+            },
+            native::TurnHistory {
+                damage: vec![native::DamageHistory {
+                    recipient: Some(private.clone()),
+                    source: None,
+                    controller: viewer,
+                }],
+                ..native::TurnHistory::default()
+            },
+            native::TurnHistory {
+                damage: vec![native::DamageHistory {
+                    recipient: None,
+                    source: Some(private.clone()),
+                    controller: viewer,
+                }],
+                ..native::TurnHistory::default()
+            },
+            native::TurnHistory {
+                stat_gains: vec![native::StatGainHistory {
+                    current: Some(private.clone()),
+                    attack: true,
+                    life: false,
+                }],
+                ..native::TurnHistory::default()
+            },
+        ] {
+            observed.history = history;
+            assert_eq!(
+                project_history(&observed),
+                Err(ProjectionError::Unavailable),
+                "a known private hand member is not a public history link"
+            );
+        }
+    }
+}
+
+#[test]
 fn wire_history_preserves_public_facts_when_current_links_are_absent() {
-    let mut observed = board(Viewer::P1, "unit-spell").observe(Viewer::P1).unwrap();
-    let holder = object(&observed, Viewer::P1, native::ObservedZone::Field);
+    let mut observed = board(Viewer::P1, "unit-spell")
+        .unwrap()
+        .observe(Viewer::P1)
+        .unwrap();
+    let holder = object(&observed, Viewer::P1, native::ObservedZone::Field).unwrap();
     observed.history = native::TurnHistory {
         subjects: vec![subject(None)],
         damage: vec![native::DamageHistory {
@@ -54,8 +104,8 @@ fn wire_history_preserves_public_facts_when_current_links_are_absent() {
             }],
             "damage":[{"recipient":holder.as_str(), "source":null,"controller":"p2"}],
             "stat_gains":[{"current":null,"attack":true,"life":false}],
-            "dice":[{"player":"p2","value":6}],
-            "played":[0, MAX_SAFE_INTEGER],"union_bursts":[2,3]
+            "dice":[{"player":"p2","value":6_i32}],
+            "played":[0_i32, MAX_SAFE_INTEGER],"union_bursts":[2_i32,3_i32]
         })
     );
     observed.history.subjects[0].class = None;
@@ -74,8 +124,11 @@ fn wire_history_preserves_public_facts_when_current_links_are_absent() {
 
 #[test]
 fn wire_history_covers_every_recorded_event_kind_and_destination() {
-    let mut observed = board(Viewer::P2, "unit-spell").observe(Viewer::P2).unwrap();
-    let holder = object(&observed, Viewer::P2, native::ObservedZone::Field);
+    let mut observed = board(Viewer::P2, "unit-spell")
+        .unwrap()
+        .observe(Viewer::P2)
+        .unwrap();
+    let holder = object(&observed, Viewer::P2, native::ObservedZone::Field).unwrap();
     for (event, kind) in [
         (native::HistoryEvent::Play, CardKind::Crest),
         (native::HistoryEvent::Attack, CardKind::EvolveFollower),
@@ -128,9 +181,9 @@ fn wire_history_covers_every_recorded_event_kind_and_destination() {
         destination: None,
         ..subject(None)
     });
-    let projected = serde_json::to_value(project_history(&observed).unwrap()).unwrap();
+    let destinations = serde_json::to_value(project_history(&observed).unwrap()).unwrap();
     assert_eq!(
-        projected["subjects"]
+        destinations["subjects"]
             .as_array()
             .unwrap()
             .iter()
@@ -157,13 +210,14 @@ fn wire_history_covers_every_recorded_event_kind_and_destination() {
 
 #[test]
 fn wire_history_refuses_each_out_of_scope_link_and_duplicate_object_tables() {
-    let game = board(Viewer::P1, "unit-spell");
+    let game = board(Viewer::P1, "unit-spell").unwrap();
     let observed = game.observe(Viewer::P1).unwrap();
     let foreign = object(
         &game.observe(Viewer::P2).unwrap(),
         Viewer::P2,
         native::ObservedZone::Hand,
-    );
+    )
+    .unwrap();
     for history in [
         native::TurnHistory {
             subjects: vec![subject(Some(foreign.clone()))],
@@ -223,7 +277,10 @@ fn wire_history_refuses_each_out_of_scope_link_and_duplicate_object_tables() {
 
 #[test]
 fn wire_history_checks_dice_and_both_seats_counters_without_clamping() {
-    let observed = board(Viewer::P1, "unit-spell").observe(Viewer::P1).unwrap();
+    let observed = board(Viewer::P1, "unit-spell")
+        .unwrap()
+        .observe(Viewer::P1)
+        .unwrap();
     let too_large = MAX_SAFE_INTEGER.checked_add(1).unwrap();
     for history in [
         native::TurnHistory {

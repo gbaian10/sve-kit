@@ -15,6 +15,9 @@ mod selection;
 mod sources;
 mod turn;
 
+#[cfg(all(test, feature = "runner"))]
+mod tests;
+
 pub(crate) use board::build_observation;
 #[cfg(feature = "runner")]
 pub use costs::project_costs;

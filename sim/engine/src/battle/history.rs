@@ -38,8 +38,8 @@ pub(super) fn scoped(
             .iter()
             .map(|fact| {
                 Ok(wire::DamageHistory {
-                    recipient: objects.optional(fact.recipient.as_ref())?,
-                    source: objects.optional(fact.source.as_ref())?,
+                    recipient: objects.history_link(fact.recipient.as_ref())?,
+                    source: objects.history_link(fact.source.as_ref())?,
                     controller: seat(fact.controller),
                 })
             })
@@ -49,7 +49,7 @@ pub(super) fn scoped(
             .iter()
             .map(|fact| {
                 Ok(wire::StatGainHistory {
-                    current: objects.optional(fact.current.as_ref())?,
+                    current: objects.history_link(fact.current.as_ref())?,
                     attack: fact.attack,
                     life: fact.life,
                 })
@@ -81,7 +81,7 @@ fn subject(
             native::HistoryEvent::Evolve => wire::HistoryEvent::Evolve,
             native::HistoryEvent::Leave => wire::HistoryEvent::Leave,
         },
-        current: objects.optional(fact.current.as_ref())?,
+        current: objects.history_link(fact.current.as_ref())?,
         controller: seat(fact.controller),
         active: seat(fact.active),
         card_kind: match fact.kind {

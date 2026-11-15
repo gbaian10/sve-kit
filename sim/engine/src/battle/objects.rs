@@ -172,6 +172,7 @@ const fn seat(viewer: Viewer) -> Seat {
 pub(super) struct ObjectScope<'observation> {
     known: BTreeSet<&'observation player::ObjectHandle>,
     quotable: BTreeSet<&'observation player::ObjectHandle>,
+    history: BTreeSet<&'observation player::ObjectHandle>,
 }
 
 impl<'observation> ObjectScope<'observation> {
@@ -187,13 +188,23 @@ impl<'observation> ObjectScope<'observation> {
         let mut objects = Self {
             known: BTreeSet::new(),
             quotable: BTreeSet::new(),
+            history: BTreeSet::new(),
         };
         for player in &observation.players {
             for zone in &player.zones {
+                if player.player == observation.viewer
+                    && zone.kind == native::ObservedZone::Hand
+                    && u64::try_from(zone.cards.len()).ok() != Some(zone.count)
+                {
+                    return Err(ProjectionError::Unavailable);
+                }
                 for member in &zone.cards {
                     let handle = &member.card.handle;
                     if !objects.known.insert(handle) {
                         return Err(ProjectionError::Unavailable);
+                    }
+                    if zone.kind.supports_public_history_link() {
+                        objects.history.insert(handle);
                     }
                     if player.player == observation.viewer
                         && member.card.properties.controller == observation.viewer
@@ -229,5 +240,19 @@ impl<'observation> ObjectScope<'observation> {
         handle: Option<&player::ObjectHandle>,
     ) -> Result<Option<ObjectHandle>> {
         handle.map(|handle| self.handle(handle)).transpose()
+    }
+
+    pub(super) fn history_link(
+        &self,
+        handle: Option<&player::ObjectHandle>,
+    ) -> Result<Option<ObjectHandle>> {
+        handle
+            .map(|handle| {
+                if !self.history.contains(handle) {
+                    return Err(ProjectionError::Unavailable);
+                }
+                self.handle(handle)
+            })
+            .transpose()
     }
 }

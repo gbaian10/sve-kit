@@ -67,6 +67,24 @@ pub enum ObservedZone {
     Equipment,
 }
 
+impl ObservedZone {
+    pub(crate) const fn supports_public_history_link(self) -> bool {
+        match self {
+            Self::Deck | Self::EvolveDeck | Self::Hand => false,
+            Self::Field
+            | Self::Ex
+            | Self::Cemetery
+            | Self::Banish
+            | Self::Resolution
+            | Self::Evolution
+            | Self::Race
+            | Self::Drive
+            | Self::Trigger
+            | Self::Equipment => true,
+        }
+    }
+}
+
 /// Public turn information; pregame has no rules phase yet.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct TurnObservation {
