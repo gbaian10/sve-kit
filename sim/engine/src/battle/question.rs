@@ -8,11 +8,12 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt, result};
 use sve_battle_contract::{
     Answer, Nat, OptionId, QuestionId, Seat, Subject, Zone,
-    observation::{BattleObservation, ProcessingStage},
+    observation::{BattleObservation, ProcessingStage, ZoneView},
     question as wire,
 };
 
 type Result<T> = result::Result<T, ProjectionError>;
+type CardCandidates = (Vec<wire::Candidate>, BTreeMap<OptionId, NativeHandle>);
 
 /// A rejected answer binding, separate from an unavailable board or question.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
@@ -24,7 +25,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Currently supports first-player choice and whole-hand mulligan only.
+/// Currently supports the three opening questions only.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -43,6 +44,7 @@ pub struct QuestionProjection {
 enum Binding {
     FirstPlayer(BTreeMap<OptionId, Viewer>),
     Mulligan(BTreeMap<OptionId, NativeHandle>),
+    StartAmulet(BTreeMap<OptionId, NativeHandle>),
 }
 
 impl fmt::Debug for QuestionProjection {
@@ -74,8 +76,10 @@ impl QuestionProjection {
             player::QuestionShape::Opening(OpeningQuestion::Mulligan(cards)) => {
                 mulligan(id, native.actor, &cards, &observation)?
             }
-            player::QuestionShape::Opening(OpeningQuestion::StartAmulet(_))
-            | player::QuestionShape::Evolution(_)
+            player::QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) => {
+                start_amulet(id, native.actor, &cards, &observation)?
+            }
+            player::QuestionShape::Evolution(_)
             | player::QuestionShape::Closing(_)
             | player::QuestionShape::Decision(_)
             | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
@@ -89,6 +93,7 @@ impl QuestionProjection {
             shape,
             auto_answer: wire::AutoAnswer::Unknown,
             assistance: wire::NoAssistance,
+            // Development-only until real RuleRefs resolve the known-empty/unknown gap.
             rules: vec![],
         };
         Ok(Self {
@@ -153,6 +158,26 @@ impl QuestionProjection {
                 };
                 mulligan_answer(cards, *redraw, bottom_order)?
             }
+            Binding::StartAmulet(cards) => {
+                let Answer::Select {
+                    selected,
+                    groups,
+                    roles,
+                } = answer
+                else {
+                    return Err(AnswerError);
+                };
+                if selected.len() != 1 || groups.is_some() || !roles.is_empty() {
+                    return Err(AnswerError);
+                }
+                OpeningAnswer::StartAmulet(
+                    selected
+                        .first()
+                        .and_then(|choice| cards.get(choice))
+                        .cloned()
+                        .ok_or(AnswerError)?,
+                )
+            }
         };
         Ok(player::Command::Opening {
             token: self.token,
@@ -210,6 +235,66 @@ fn mulligan(
     {
         return Err(ProjectionError::Unavailable);
     }
+    let (candidates, coordinates) =
+        card_candidates(id, actor, cards, observation, Zone::Hand, hand)?;
+    Ok((
+        wire::QuestionUse::Mulligan,
+        wire::QuestionShape::Mulligan { hand: candidates },
+        Binding::Mulligan(coordinates),
+    ))
+}
+
+fn start_amulet(
+    id: &QuestionId,
+    actor: Viewer,
+    cards: &[player::observation::CardObservation],
+    observation: &BattleObservation,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    if cards.is_empty() {
+        return Err(ProjectionError::Unavailable);
+    }
+    let deck = &observation
+        .players
+        .iter()
+        .find(|player| player.seat == seat(actor))
+        .ok_or(ProjectionError::Unavailable)?
+        .zones
+        .deck;
+    let (candidates, coordinates) =
+        card_candidates(id, actor, cards, observation, Zone::Deck, deck)?;
+    Ok((
+        wire::QuestionUse::StartAmulet,
+        wire::QuestionShape::Select {
+            selection: wire::Selection {
+                candidates,
+                shown: vec![],
+                bounds: wire::Bounds {
+                    min: Nat::from(1_u32),
+                    max: Some(Nat::from(1_u32)),
+                },
+                groups: vec![],
+                group_assignment: wire::GroupAssignment::Existence,
+                roles: vec![],
+                distinct: vec![],
+                original_cost_total: wire::CostTotal {
+                    min: None,
+                    max: None,
+                },
+                capacity: None,
+            },
+        },
+        Binding::StartAmulet(coordinates),
+    ))
+}
+
+fn card_candidates(
+    id: &QuestionId,
+    actor: Viewer,
+    cards: &[player::observation::CardObservation],
+    observation: &BattleObservation,
+    zone: Zone,
+    members: &ZoneView,
+) -> Result<CardCandidates> {
     let mut coordinates = BTreeMap::new();
     let mut seen = BTreeSet::new();
     let mut candidates = Vec::new();
@@ -217,7 +302,7 @@ fn mulligan(
         if !seen.insert(&card.handle) {
             return Err(ProjectionError::Unavailable);
         }
-        let member = hand
+        let member = members
             .cards
             .iter()
             .find(|member| member.object.as_str() == card.handle.as_str())
@@ -233,10 +318,10 @@ fn mulligan(
                 card: object.effective_face.clone(),
                 object: Some(member.object.clone()),
             }),
-            controller: Some(seat(card.properties.controller)),
+            controller: Some(object.controller),
             origin: Some(wire::Origin {
                 player: seat(actor),
-                zone: Zone::Hand,
+                zone,
                 position: member.position,
             }),
             rules_names: None,
@@ -245,11 +330,7 @@ fn mulligan(
         });
         coordinates.insert(option_id, card.handle.clone());
     }
-    Ok((
-        wire::QuestionUse::Mulligan,
-        wire::QuestionShape::Mulligan { hand: candidates },
-        Binding::Mulligan(coordinates),
-    ))
+    Ok((candidates, coordinates))
 }
 
 fn mulligan_answer(

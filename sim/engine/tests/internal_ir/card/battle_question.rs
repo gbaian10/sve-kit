@@ -9,6 +9,9 @@ use sve_engine::game::player::{
     Command, Input, OpeningAnswer, OpeningQuestion, QuestionShape, SubmissionKind, Viewer,
 };
 
+#[path = "battle_question/start_amulet.rs"]
+mod start_amulet;
+
 fn opposite(viewer: Viewer) -> Viewer {
     if viewer == Viewer::P1 {
         Viewer::P2
@@ -101,6 +104,18 @@ fn assert_hand_candidates(
     actor: Viewer,
 ) -> Option<()> {
     let candidates = hand(projection)?;
+    assert_eq!(
+        candidates.len(),
+        cards.len(),
+        "native and wire hand lengths agree"
+    );
+    let hand = &projection
+        .observation()
+        .players
+        .iter()
+        .find(|player| player.seat == seat(actor))?
+        .zones
+        .hand;
     for (candidate, card) in candidates.iter().zip(cards.iter()) {
         let Some(Subject::Card {
             object: Some(handle),
@@ -120,6 +135,11 @@ fn assert_hand_candidates(
             "the subject uses this board object table's effective face"
         );
         let origin = candidate.origin?;
+        let member = hand.cards.iter().find(|member| &member.object == handle)?;
+        assert_eq!(
+            origin.position, member.position,
+            "the origin preserves this board hand member's position"
+        );
         assert_eq!(
             origin.zone,
             Zone::Hand,
@@ -132,8 +152,8 @@ fn assert_hand_candidates(
         );
         assert_eq!(
             candidate.controller,
-            Some(seat(actor)),
-            "the controller is frozen from the authorized card"
+            Some(projection.observation().objects.get(handle)?.controller),
+            "the controller is frozen from this board object table"
         );
     }
     Some(())
