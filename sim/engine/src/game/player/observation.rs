@@ -21,7 +21,9 @@ pub use effects::{
     InstalledEffect, NumberChange, WordingField, WordingSource,
 };
 
-use super::{DecisionShape, Input, ObjectHandle, OpeningQuestion, QuestionShape, Viewer};
+use super::{
+    DecisionShape, EvolutionQuestion, Input, ObjectHandle, OpeningQuestion, QuestionShape, Viewer,
+};
 use crate::battle::{
     BattleReferences, ObjectTable, ProjectionError, build_objects, build_observation, project_turn,
 };
@@ -327,7 +329,13 @@ const fn rule_stage(
         QuestionShape::Opening(_) => wire::ProcessingStage::Opening,
         QuestionShape::Closing(_) => wire::ProcessingStage::Closing,
         QuestionShape::ActionWindow(_) => return Ok(None),
-        QuestionShape::Evolution(_) => return Err(ProjectionError::Unavailable),
+        // These choices declare unpaid parameters; private cost shapes do not change the stage.
+        QuestionShape::Evolution(
+            EvolutionQuestion::Form(_)
+            | EvolutionQuestion::Materials(_)
+            | EvolutionQuestion::Discard(_)
+            | EvolutionQuestion::Payment(_),
+        ) => wire::ProcessingStage::Declare,
         QuestionShape::Decision(shape) => {
             if matches!(shape, DecisionShape::Quick { .. }) {
                 wire::ProcessingStage::Quick
@@ -427,7 +435,8 @@ impl Game {
             Viewer::P1 => Seat::P1,
             Viewer::P2 => Seat::P2,
         };
-        let controller = occurrences.then_some(actor_seat);
+        let controller = (occurrences || matches!(&question.shape, QuestionShape::Evolution(_)))
+            .then_some(actor_seat);
         let procedure = matches!(
             &question.shape,
             QuestionShape::Opening(OpeningQuestion::Mulligan(_))
