@@ -29,8 +29,8 @@ fn nephi_nera_discounts_only_original_one_cost_ex_followers_and_observes_other_u
             .unwrap(),
         CardPlay::Entered(_)
     ));
-    let fanfare = pending(&mut game, "CP04-004");
-    ub(&resolved(finish(&mut game, fanfare)));
+    let own_fanfare = pending(&mut game, "CP04-004");
+    ub(&resolved(finish(&mut game, own_fanfare)));
     finish_checks(&mut game);
     let after_entry = game.projection(View::Referee).unwrap();
     assert_eq!(after_entry["objects"]["enemy"]["hp"], 6_u8);
@@ -52,8 +52,8 @@ fn nephi_nera_discounts_only_original_one_cost_ex_followers_and_observes_other_u
         .play_internal_card("first", PlayerId { seat: 1 })
         .unwrap();
     assert!(matches!(finish(&mut game, entry), CardPlay::Entered(_)));
-    let fanfare = pending(&mut game, "CP04-089");
-    ub(&resolved(finish(&mut game, fanfare)));
+    let other_fanfare = pending(&mut game, "CP04-089");
+    ub(&resolved(finish(&mut game, other_fanfare)));
     finish_checks(&mut game);
     let observer = pending(&mut game, "CP04-004");
     resolved(finish(&mut game, observer));
