@@ -1,0 +1,41 @@
+cards:
+  CP01-082:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - auto:
+          do:
+            - buff:
+                hp: 1
+                on: it
+                power: 1
+          on:
+            raced:
+              sel:
+                kind: follower
+              who: self
+        line: 2
+      - fanfare:
+          do:
+            - flip_down: carrot
+            - draw:
+                n: 1
+          targets:
+            - bind: carrot
+              from:
+                face_up: true
+                name: にんじん
+                who: self
+                zone: evolve_deck
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set
