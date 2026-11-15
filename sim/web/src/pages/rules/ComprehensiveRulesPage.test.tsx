@@ -272,9 +272,96 @@ it("previews a cited clause on hover and focus", async () => {
   expect(within(tip).queryByRole("link")).not.toBeInTheDocument()
   expect(link).toHaveAttribute("aria-describedby", tip.id)
   fireEvent.mouseLeave(link)
-  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  await waitFor(() => {
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  })
   fireEvent.focus(link)
   expect(await screen.findByRole("tooltip")).toBeInTheDocument()
+})
+
+async function citedLink() {
+  await waitFor(() => {
+    expect(rule("1.1.1")).not.toBeNull()
+  })
+  return within(rule("1.1.1") as HTMLElement).getByRole("link", { name: "1.1.2" })
+}
+
+it("dismisses the preview with Escape and keeps focus on the reference", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const link = await citedLink()
+  link.focus()
+  expect(await screen.findByRole("tooltip")).toBeInTheDocument()
+  fireEvent.keyDown(link, { key: "Escape" })
+  expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  expect(link).toHaveFocus()
+})
+
+it("keeps the preview open while the pointer moves onto it", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const link = await citedLink()
+  fireEvent.mouseEnter(link)
+  const tip = await screen.findByRole("tooltip")
+  fireEvent.mouseLeave(link)
+  fireEvent.mouseEnter(tip)
+  await new Promise((resolve) => setTimeout(resolve, 250))
+  expect(screen.getByRole("tooltip")).toBeInTheDocument()
+  fireEvent.mouseLeave(tip)
+  await waitFor(() => {
+    expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
+  })
+})
+
+it("clamps the preview inside a short viewport when neither side fits", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const link = await citedLink()
+  const height = vi.spyOn(HTMLElement.prototype, "offsetHeight", "get").mockReturnValue(169)
+  const rect = vi
+    .spyOn(link, "getBoundingClientRect")
+    .mockReturnValue({ left: 10, top: 165, bottom: 184, right: 40 } as DOMRect)
+  vi.stubGlobal("innerHeight", 320)
+  try {
+    fireEvent.focus(link)
+    const tip = await screen.findByRole("tooltip")
+    // Below would end at 359 and above would start at -10: clamp to 320 - 169 - 8.
+    await waitFor(() => {
+      expect(tip.style.top).toBe("143px")
+    })
+  } finally {
+    height.mockRestore()
+    rect.mockRestore()
+  }
+})
+
+it("keeps the reader's place when the contents sheet is opened and cancelled", async () => {
+  const { router } = await renderRoutes(routes, { initialEntries: ["/rules#r-1.1.2"] })
+  // Only scrolls of the clause itself move the page; the sheet also scrolls its own list.
+  const pageScrolls = () =>
+    scrollIntoView.mock.contexts.filter((element) => element === rule("1.1.2")).length
+  await waitFor(() => {
+    expect(pageScrolls()).toBe(1)
+  })
+  const open = screen.getByRole("button", { name: "目錄" })
+  fireEvent.click(open)
+  const sheet = await screen.findByRole("dialog", { name: "目錄" })
+  expect(router.state.location.hash).toBe("#r-1.1.2")
+  for (const link of within(sheet).getAllByRole("link"))
+    expect(link.className).toContain("min-h-11")
+  fireEvent.click(within(sheet).getByRole("button", { name: "關閉" }))
+  await waitFor(() => {
+    expect(screen.queryByRole("dialog", { name: "目錄" })).not.toBeInTheDocument()
+  })
+  expect(pageScrolls()).toBe(1)
+  // Browser back closes it the same way.
+  fireEvent.click(open)
+  await screen.findByRole("dialog", { name: "目錄" })
+  await act(async () => {
+    await router.navigate(-1)
+  })
+  await waitFor(() => {
+    expect(screen.queryByRole("dialog", { name: "目錄" })).not.toBeInTheDocument()
+  })
+  expect(router.state.location.hash).toBe("#r-1.1.2")
+  expect(pageScrolls()).toBe(1)
 })
 
 it("gives untranslated section bodies lang=ja in the Chinese and English views", async () => {

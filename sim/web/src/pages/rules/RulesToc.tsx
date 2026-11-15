@@ -24,10 +24,13 @@ function TocList({
   entries,
   active,
   onJump,
+  touch = false,
 }: {
   readonly entries: readonly TocEntry[]
   readonly active: string | undefined
   readonly onJump: (key: string) => void
+  /** The phone sheet: every row is a full 44px touch target; the desktop list stays compact. */
+  readonly touch?: boolean
 }) {
   const item = (entry: TocEntry, nested: boolean) => {
     const id = ruleAnchor(entry.key)
@@ -42,7 +45,8 @@ function TocList({
           onJump(entry.key)
         }}
         className={cn(
-          "flex min-h-8 items-baseline gap-2 rounded-button px-2 py-1 leading-snug hover:bg-surface-2 hover:text-text-1",
+          "flex items-baseline gap-2 rounded-button px-2 leading-snug hover:bg-surface-2 hover:text-text-1",
+          touch ? "min-h-11 py-2.5" : "min-h-8 py-1",
           current ? "bg-accent-soft font-semibold text-accent-text" : "text-text-2",
         )}
       >
@@ -152,6 +156,7 @@ export function RulesToc({
           <TocList
             entries={entries}
             active={active}
+            touch
             onJump={(key) => {
               pending.current = key
               close()

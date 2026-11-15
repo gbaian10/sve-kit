@@ -30,29 +30,39 @@ const UNKNOWN_MARKER = /\{([^{}]+)\}/gu
 const GAP = 6
 const MARGIN = 8
 
+// Leaving the reference for the preview crosses a small gap; closing waits this long for it.
+const LEAVE_DELAY_MS = 150
+
 function RulePreview({
   id,
   rules,
   ruleKey,
   anchor,
+  hover,
 }: {
   readonly id: string
   readonly rules: RulesBundle
   readonly ruleKey: string
   readonly anchor: DOMRect
+  /** Keeps the preview open while the pointer is on it, so it can be read in place. */
+  readonly hover: { readonly onMouseEnter: () => void; readonly onMouseLeave: () => void }
 }) {
   const prefs = usePrefs()
   const ref = useRef<HTMLDivElement>(null)
   const [spot, setSpot] = useState({ left: anchor.left, top: anchor.bottom + GAP })
-  // Fixed to the viewport and kept inside it: below the reference, or above when it would not fit.
+  // Fixed to the viewport and always inside it: below the reference, above when only that fits,
+  // otherwise clamped to the viewport (its height is capped there too).
   useLayoutEffect(() => {
     const node = ref.current
     if (!node) return
     const height = node.offsetHeight
-    const above = anchor.bottom + GAP + height > window.innerHeight && anchor.top - GAP - height > 0
+    const below = anchor.bottom + GAP
+    const above = anchor.top - GAP - height
+    const fitsBelow = below + height <= window.innerHeight - MARGIN
+    const top = fitsBelow ? below : above >= MARGIN ? above : below
     setSpot({
       left: Math.max(MARGIN, Math.min(anchor.left, window.innerWidth - node.offsetWidth - MARGIN)),
-      top: above ? anchor.top - GAP - height : anchor.bottom + GAP,
+      top: Math.max(MARGIN, Math.min(top, window.innerHeight - height - MARGIN)),
     })
   }, [anchor])
   const node = rules.byKey.get(ruleKey)
@@ -68,10 +78,11 @@ function RulePreview({
       id={id}
       role="tooltip"
       style={{ left: spot.left, top: spot.top }}
-      className="pointer-events-none fixed z-50 w-max max-w-[min(24rem,calc(100vw-1rem))] rounded-block border border-border bg-surface-1 px-3 py-2 text-13 leading-relaxed text-text-1 shadow-lg"
+      {...hover}
+      className="fixed z-50 max-h-[calc(100dvh-1rem)] w-max max-w-[min(24rem,calc(100vw-1rem))] overflow-hidden rounded-block border border-border bg-surface-1 px-3 py-2 text-13 leading-relaxed text-text-1 shadow-lg"
     >
       <span className="font-mono text-12 text-accent-text">{node.number ?? node.key}</span>
-      {/* No links inside a tooltip: it can be neither focused nor clicked. */}
+      {/* Plain text only: nothing inside a tooltip can take focus. */}
       <RuleKeysContext.Provider value={{ keys: new Set() }}>
         <div lang={piece.translated && prefs.uiLanguage !== "ja" ? undefined : "ja"}>
           <RuleText text={piece.text} context={node.context} className="mt-0.5 line-clamp-6" />
@@ -83,7 +94,8 @@ function RulePreview({
 
 /**
  * A citation of a comprehensive-rules clause: hovering or focusing previews the clause, clicking
- * goes to it on the rules page. Shared site-wide (rules text now; card pages and Q&A later).
+ * goes to it on the rules page. Escape dismisses the preview without moving focus, and the pointer
+ * can move onto the preview to read it. Shared site-wide (rules text now; card pages and Q&A later).
  * @public 待接：卡片頁與 Q&A 提到條號時直接使用（#2227 交付共用元件，接線在後續 issue）。
  */
 export function RuleRef({
@@ -96,26 +108,48 @@ export function RuleRef({
   const id = useId()
   const [anchor, setAnchor] = useState<DOMRect | null>(null)
   const [rules, setRules] = useState<RulesBundle | null>(null)
-  // A scroll would leave the fixed preview floating away from its reference.
+  const leaving = useRef(0)
+  const open = anchor !== null
+  // A scroll would leave the fixed preview floating away from its reference; Escape dismisses it.
   useEffect(() => {
-    if (!anchor) return
+    if (!open) return
     const hide = () => {
       setAnchor(null)
     }
+    const escape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") hide()
+    }
     window.addEventListener("scroll", hide, { passive: true })
+    window.addEventListener("keydown", escape)
     return () => {
       window.removeEventListener("scroll", hide)
+      window.removeEventListener("keydown", escape)
     }
-  }, [anchor])
+  }, [open])
+  useEffect(
+    () => () => {
+      window.clearTimeout(leaving.current)
+    },
+    [],
+  )
+  const stay = () => {
+    window.clearTimeout(leaving.current)
+  }
   const show = (event: { currentTarget: Element }) => {
+    stay()
     setAnchor(event.currentTarget.getBoundingClientRect())
     // The rules chunk loads on first interest; without it the reference is still a plain link.
     if (!rules) loadComprehensiveRules().then(setRules, () => undefined)
   }
   const hide = () => {
+    stay()
     setAnchor(null)
   }
-  const hovering = { onMouseEnter: show, onMouseLeave: hide, onFocus: show, onBlur: hide }
+  const hideSoon = () => {
+    stay()
+    leaving.current = window.setTimeout(hide, LEAVE_DELAY_MS)
+  }
+  const hovering = { onMouseEnter: show, onMouseLeave: hideSoon, onFocus: show, onBlur: hide }
   return (
     <>
       <Link
@@ -130,7 +164,13 @@ export function RuleRef({
       {anchor &&
         rules &&
         createPortal(
-          <RulePreview id={id} rules={rules} ruleKey={ruleKey} anchor={anchor} />,
+          <RulePreview
+            id={id}
+            rules={rules}
+            ruleKey={ruleKey}
+            anchor={anchor}
+            hover={{ onMouseEnter: stay, onMouseLeave: hideSoon }}
+          />,
           document.body,
         )}
     </>
