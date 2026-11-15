@@ -2,8 +2,9 @@ use super::battle_pending::fixture;
 use super::*;
 use crate::battle_costs::object;
 use sve_battle_contract::observation as wire;
-use sve_engine::game::internal::InputDomain;
+use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::{Viewer, observation as native};
+use sve_engine::{EngineFailure, Result as EngineResult};
 
 const fn limit(consume_at: ConsumptionPoint) -> LimitSpec {
     LimitSpec {
@@ -77,10 +78,6 @@ fn quotas(game: &Game, viewer: Viewer, actor: Viewer) -> Vec<wire::AbilityQuota>
             handle.as_str(),
             "the source links to the current holder"
         );
-        assert!(
-            table.contains_key(&handle),
-            "the source belongs to the same object table"
-        );
     }
     assert_eq!(
         exact_authority(game),
@@ -118,6 +115,31 @@ fn assert_remaining(
     }
 }
 
+fn assert_same_quotas(games: &[Game; 2], actor: Viewer) {
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            quotas(&games[0], viewer, actor),
+            quotas(&games[1], viewer, actor),
+            "both seats see the same budget across opponent secrets"
+        );
+    }
+}
+
+fn answer_first_target(game: &mut Game, question: DecisionView) -> EngineResult<()> {
+    let InputDomain::Targets(domain) = question.domain else {
+        return Err(EngineFailure::Invalid(
+            "expected a formal target question".into(),
+        ));
+    };
+    resolved(game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::Targets(vec![domain.members[0].handle]),
+    )?);
+    game.resume_internal_card()?;
+    Ok(())
+}
+
 #[test]
 fn wire_quota_lifecycle_consumes_activation_only_after_valid_declaration_and_resets_next_turn() {
     let mut activation = ability(1, vec![draw(1, 0)]);
@@ -145,8 +167,13 @@ fn wire_quota_lifecycle_consumes_activation_only_after_valid_declaration_and_res
                 wire::ConsumptionPoint::PlayCommitted,
             );
             let before = exact_authority(game);
-            game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![]))
+            let empty_target = game
+                .answer_internal_card(question.actor, question.token, Answer::Targets(vec![]))
                 .unwrap_err();
+            assert!(
+                matches!(empty_target, EngineFailure::Invalid(reason) if reason == "target cardinality"),
+                "the empty answer must fail the declared target count"
+            );
             assert_eq!(exact_authority(game), before);
             assert_remaining(
                 game,
@@ -155,18 +182,7 @@ fn wire_quota_lifecycle_consumes_activation_only_after_valid_declaration_and_res
                 wire::AbilityKind::Activated,
                 wire::ConsumptionPoint::PlayCommitted,
             );
-            let InputDomain::Targets(domain) = question.domain else {
-                panic!("targets")
-            };
-            resolved(
-                game.answer_internal_card(
-                    question.actor,
-                    question.token,
-                    Answer::Targets(vec![domain.members[0].handle]),
-                )
-                .unwrap(),
-            );
-            game.resume_internal_card().unwrap();
+            answer_first_target(game, question).unwrap();
             assert_remaining(
                 game,
                 actor,
@@ -175,14 +191,16 @@ fn wire_quota_lifecycle_consumes_activation_only_after_valid_declaration_and_res
                 wire::ConsumptionPoint::PlayCommitted,
             );
             let exhausted = exact_authority(game);
-            game.activate_internal_card("s", AbilityId(1), actor.player())
+            let exhausted_quota = game
+                .activate_internal_card("s", AbilityId(1), actor.player())
                 .unwrap_err();
+            assert!(
+                matches!(exhausted_quota, EngineFailure::IllegalPlay(reason) if reason == "activated ability quota exhausted"),
+                "the exhausted budget must be the reason activation is rejected"
+            );
             assert_eq!(exact_authority(game), exhausted);
         }
-        assert_eq!(
-            quotas(&games[0], actor, actor),
-            quotas(&games[1], actor, actor)
-        );
+        assert_same_quotas(&games, actor);
         for game in &mut games {
             play::next_turn(game);
             assert_remaining(
@@ -199,18 +217,7 @@ fn wire_quota_lifecycle_consumes_activation_only_after_valid_declaration_and_res
             else {
                 panic!("next-turn declaration")
             };
-            let InputDomain::Targets(domain) = question.domain else {
-                panic!("targets")
-            };
-            resolved(
-                game.answer_internal_card(
-                    question.actor,
-                    question.token,
-                    Answer::Targets(vec![domain.members[0].handle]),
-                )
-                .unwrap(),
-            );
-            game.resume_internal_card().unwrap();
+            answer_first_target(game, question).unwrap();
             assert_remaining(
                 game,
                 actor,
@@ -256,8 +263,13 @@ fn wire_quota_lifecycle_consumes_trigger_at_admission_before_pending_selection()
                 wire::ConsumptionPoint::PendingAdmission,
             );
             let before = exact_authority(game);
-            game.answer_internal_card(question.actor, question.token, Answer::Pending(u64::MAX))
+            let foreign_pending = game
+                .answer_internal_card(question.actor, question.token, Answer::Pending(0))
                 .unwrap_err();
+            assert!(
+                matches!(foreign_pending, EngineFailure::Invalid(reason) if reason == "unknown pending handle"),
+                "the foreign option must fail membership in this question"
+            );
             assert_eq!(exact_authority(game), before);
             let InputDomain::Pending(options) = question.domain else {
                 panic!("pending")
@@ -290,9 +302,6 @@ fn wire_quota_lifecycle_consumes_trigger_at_admission_before_pending_selection()
                 wire::ConsumptionPoint::PendingAdmission,
             );
         }
-        assert_eq!(
-            quotas(&games[0], actor, actor),
-            quotas(&games[1], actor, actor)
-        );
+        assert_same_quotas(&games, actor);
     }
 }

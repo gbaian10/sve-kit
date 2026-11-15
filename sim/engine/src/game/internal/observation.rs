@@ -10,6 +10,8 @@ use crate::game::player::observation::{EffectSource, WordingField, WordingSource
 use crate::ir::{AbilityOrigin, AbilitySource};
 use serde::{Deserialize, Serialize};
 
+/// Accepts only spans already verified by Current/direct admission.
+/// Shape checks cannot establish a revision's face or printing ownership.
 pub(super) fn wording_source(source: &SourceSpan) -> Option<Box<WordingSource>> {
     let owner: serde_json::Value = serde_json::from_str(&source.owner).ok()?;
     let face = source.face.strip_prefix("f:")?;
