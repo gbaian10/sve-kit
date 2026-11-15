@@ -27,6 +27,9 @@ pub(super) fn lower(
         }
         return Ok(None);
     };
+    if !single_kind(optional) {
+        return Err(unsupported(&path));
+    }
     if let Some(pp) = optional.pp {
         return pp_increase(pp, optional, play, source, allocator, &path).map(Some);
     }
@@ -153,6 +156,28 @@ fn pp_increase(
 }
 
 fn lower_material(
+    optional: &ast::OptionalCost,
+    binding: Binding<Selector>,
+    allocator: &mut Allocator,
+    path: &str,
+    multiple: bool,
+) -> Result<(Decision, Action), LoweringError> {
+    if !single_kind(optional) {
+        return Err(unsupported(path));
+    }
+    if let Some((material, up)) = optional
+        .flip_up
+        .as_ref()
+        .map(|shape| (shape, true))
+        .or_else(|| optional.flip_down.as_ref().map(|shape| (shape, false)))
+    {
+        let (action, decision) = super::flip_cost::lower(allocator, binding, material, up, path)?;
+        return Ok((decision, action));
+    }
+    lower_public_material(optional, binding, allocator, path, multiple)
+}
+
+fn lower_public_material(
     optional: &ast::OptionalCost,
     binding: Binding<Selector>,
     allocator: &mut Allocator,
@@ -425,4 +450,22 @@ fn earth_rite(
             receipt: ReceiptId(context.card_allocator.id(path)?),
         },
     })
+}
+
+fn single_kind(value: &ast::OptionalCost) -> bool {
+    [
+        value.pp.is_some(),
+        value.earth_rite.is_some(),
+        value.one_of.is_some(),
+        value.discard.is_some(),
+        value.to_cemetery.is_some(),
+        value.banish.is_some(),
+        value.act.is_some(),
+        value.flip_up.is_some(),
+        value.flip_down.is_some(),
+    ]
+    .into_iter()
+    .filter(|present| *present)
+    .count()
+        == 1
 }

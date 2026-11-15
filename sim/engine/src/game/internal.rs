@@ -1725,6 +1725,9 @@ impl Game {
                 self.internal_reveal(execution, &instruction, objects)?;
             }
             Action::Dice { .. } => self.internal_dice(execution, &instruction)?,
+            Action::FlipUp { objects, .. } => {
+                self.internal_flip_up(execution, &instruction, objects)?;
+            }
             Action::FlipDown { objects } => {
                 self.internal_flip_down(execution, &instruction, objects)?;
             }

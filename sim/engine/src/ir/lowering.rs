@@ -60,6 +60,7 @@ mod victory;
 mod x_pp;
 
 mod flip;
+mod flip_cost;
 mod fusion;
 mod posture;
 mod quick;

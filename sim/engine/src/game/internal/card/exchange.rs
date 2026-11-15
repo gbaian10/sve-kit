@@ -14,6 +14,7 @@ use crate::game::player::SelectionQuestion;
 use crate::game::player::Viewer;
 use crate::game::player::observation::PendingCost;
 use crate::ir::exchange as exchange_shape;
+use crate::ir::flip_cost;
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, CostSpec, Decision, DiscardOutcome, FaceId, Int, MoveMethod,
     MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange, Posture, PostureEvent, Quantity,
@@ -280,6 +281,34 @@ impl Game {
     }
 
     fn exchange_candidates(
+        &self,
+        execution: &Execution,
+        exchange: &PlayCostExchange,
+        index: usize,
+    ) -> Result<Vec<MaterialCandidate>> {
+        let decision = exchange
+            .materials
+            .get(index)
+            .ok_or_else(|| unsupported("exchange material route"))?;
+        if flip_cost::payment(&route_step(exchange, index)?.action, decision) {
+            let (selector, _) = flip_cost::material(decision)
+                .ok_or_else(|| unsupported("flip exchange selector"))?;
+            return self
+                .flip_cost_candidates(execution, selector)
+                .map(|members| {
+                    members
+                        .into_iter()
+                        .map(|reference| MaterialCandidate {
+                            reference,
+                            original_cost: None,
+                        })
+                        .collect()
+                });
+        }
+        self.public_exchange_candidates(execution, exchange, index)
+    }
+
+    fn public_exchange_candidates(
         &self,
         execution: &Execution,
         exchange: &PlayCostExchange,
@@ -682,6 +711,26 @@ impl Game {
         Ok(())
     }
     fn pay_exchange_materials(
+        &mut self,
+        execution: &mut Execution,
+        exchange: &ExchangeState,
+    ) -> Result<()> {
+        let instruction = step(exchange)?;
+        if let Some(up) = flip_cost::bound_action(&instruction.action) {
+            let members = exchange
+                .selected
+                .as_ref()
+                .ok_or_else(|| invalid("missing flip materials"))?;
+            let outcome = self.internal_flip_members(execution, members, up, true)?;
+            execution
+                .receipts
+                .insert(instruction.receipt, InstructionOutcome::Flip(outcome));
+            return Ok(());
+        }
+        self.pay_public_exchange_materials(execution, exchange)
+    }
+
+    fn pay_public_exchange_materials(
         &mut self,
         execution: &mut Execution,
         exchange: &ExchangeState,

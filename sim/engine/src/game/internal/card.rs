@@ -59,6 +59,7 @@ pub(in crate::game) use evolution::EvolutionDeclaration;
 pub(super) use evolution::resource_association;
 pub(super) mod exchange;
 mod fanfare;
+mod flip_cost;
 mod fusion;
 pub(super) mod hand_payment;
 mod keywords;
@@ -935,7 +936,9 @@ impl Game {
                     let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
                     (self.internal_pay_pp(payer, amount)?, Vec::new(), Vec::new())
                 }
-                Action::Posture { objects, .. }
+                Action::FlipUp { objects, .. }
+                | Action::FlipDown { objects }
+                | Action::Posture { objects, .. }
                 | Action::Banish { objects }
                 | Action::Move {
                     objects: objects @ Selector::Bound { .. },
@@ -1562,6 +1565,7 @@ fn check_instruction(
             | Action::Transform { .. }
             | Action::Posture { .. }
             | Action::Transfer { .. }
+            | Action::FlipUp { .. }
             | Action::FlipDown { .. }
             | Action::Modify { .. }
             | Action::Delay { .. }

@@ -1078,6 +1078,8 @@ fn supported(code: &str) -> bool {
             | "shape.Action.Transfer"
             | "action.transfer"
             | "action.posture"
+            | "shape.Action.FlipUp"
+            | "action.flip-up"
             | "shape.Action.FlipDown"
             | "action.flip-down"
             | "internal.Posture.Acted"

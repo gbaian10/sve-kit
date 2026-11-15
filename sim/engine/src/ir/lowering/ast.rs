@@ -253,6 +253,8 @@ pub(super) enum PpVariable {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostOperation {
+    FlipUp(FlipMaterial),
+    FlipDown(FlipMaterial),
     Pp(PpAmount),
     Lesson(u64),
     Counter(CounterCost),
@@ -3027,6 +3029,8 @@ pub(super) enum ModeCondition {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct OptionalCost {
+    pub flip_up: Option<FlipMaterial>,
+    pub flip_down: Option<FlipMaterial>,
     pub pp: Option<u64>,
     pub earth_rite: Option<u64>,
     pub one_of: Option<Vec<Self>>,
@@ -4263,4 +4267,30 @@ impl<'de> Deserialize<'de> for GiveRecipient {
 pub(super) struct MustTarget {
     pub on: Objects,
     pub by: LeaderSide,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FlipMaterial {
+    pub sel: FlipFilter,
+    pub n: u64,
+    pub result: Option<String>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FlipFilter {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: FlipZone,
+    pub kind: SearchKind,
+    pub face_up: Option<bool>,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
+    pub r#trait: Option<String>,
+}
+#[derive(Deserialize)]
+pub(super) enum FlipZone {
+    #[serde(rename = "evolve_deck")]
+    Evolve,
 }
