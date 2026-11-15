@@ -832,3 +832,64 @@ fn other_hand_cost_count_keeps_plain_private_zone_counts_closed() {
         }
     }
 }
+
+#[test]
+fn static_exact_original_cost_keeps_quote_zone_stacking_and_ability_loss_distinct() {
+    let tree = equipment_played::tree(
+        &json!({"static":{"effects":[{"cost_mod":{
+            "when_playing":{"who":"self","zone":"ex","kind":"follower","orig_cost_eq":1},
+            "delta":-1
+        }}]}}),
+        "unit-follower",
+    );
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    for (original, quoted, zone, copies, silenced, expected) in [
+        (0_u8, 4_u8, "ex", 1_u8, false, 4_u8),
+        (1, 4, "ex", 1, false, 3),
+        (2, 1, "ex", 1, false, 1),
+        (1, 4, "hand", 1, false, 4),
+        (1, 4, "ex", 1, true, 4),
+        (1, 4, "ex", 2, false, 2),
+    ] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["pp"] = json!({"current":10,"max":10});
+        initial["players"]["P1"]["zones"] = json!({});
+        initial["players"]["P1"]["zones"]["field"] = json!(
+            (0..copies).map(|i| json!({"id":format!("provider-{i}"),"card":"unit-follower","state":{"silenced":silenced}})).collect::<Vec<_>>()
+        );
+        initial["players"]["P1"]["zones"][zone] = json!([
+            {"id":"candidate","card":"unit-follower"}
+        ]);
+        let mut candidate_program = program.card().clone();
+        candidate_program.card_play_costs = own_costs(vec![CostChange::Delta {
+            amount: Expr::Literal(Int(i64::from(quoted) - i64::from(original))),
+        }])
+        .card()
+        .card_play_costs
+        .clone();
+        let candidate_program = WellFormedCardProgram::check(candidate_program).unwrap();
+        let mut game = Game::new(
+            catalog_with_cost(&json!(original.to_string())),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "exact-original-cost",
+        )
+        .unwrap();
+        game.load_internal_card("unit-follower", &candidate_program)
+            .unwrap();
+        assert!(matches!(
+            game.play_internal_card("candidate", PlayerId { seat: 1 })
+                .unwrap(),
+            CardPlay::Entered(_)
+        ));
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
+            10 - expected
+        );
+    }
+}

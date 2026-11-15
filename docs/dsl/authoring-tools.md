@@ -510,6 +510,8 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 
 `static: {effects: [{ignore_ward: {on: this}}]}` 讓持有者攻擊時略過守護的目標限制（BP10-055、BP04-006、BP09-056 的第二面）。沿用既有 `IgnoreWard` 權限及攻擊合法性檢查；休息、入場當回合、站立目標、對象種類與禁止攻擊仍照常判斷。能力失效或失去能力後不再略過守護。可搭配既有 `static.while` 的公開條件，每次判斷攻擊時重新讀取；只接受印刷場上常駐能力的 `on: this`，不開放對他者授予、私有區或本文 `apply` 安裝。
 
+`static.effects[].cannot: {what: attack, on: {who: all, zone: field, kind: follower, orig_cost_le: 3}}` 依每次宣告攻擊時的場上集合，限制雙方符合印刷原費條件的從者（BP09-040，Q1173、Q1174）。領袖與從者對象均受禁止；來源失去能力或離場後停止提供限制。
+
 `keywords: [single_drive]` 與 `keywords: [twin_drive]` 展開為自身攻擊時的完整 Drive check；Twin Drive 先完成第一張的圖示處理與去向，再取第二張牌頂。非作品構築不讀圖示、直接放回牌底；作品構築從權威端既有 card facts 讀取已驗證的 `trigger_icon`，缺資料時拒絕，不從提醒文推算。接受圖示後依一般抽牌、生命、數值與姿態規則處理並送墓，拒絕或無圖示則回牌底；Critical 只增加攻擊力 2，Stand 的領袖攻擊限制持續至本回合結束。
 
 `keywords: [start_amulet]` 只能寫在アミュレット的印刷關鍵字行。作品構築的開局（CR 14.4.3）直接從牌組中已准入卡片的印刷特徵讀取，不經由場上關鍵字；篩選、授予與觸發條件都不能指名它。牌組只能放一種起始護符屬於構築規則，不在對局中檢查。CSD03a／b 卡上的開局說明 section 標 `ignored: reminder`。
@@ -1403,6 +1405,8 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 `play.optional_cost: {earth_rite: N}` 可搭配 `optional_cost_set` 或 `optional_cost_delta`，在同一次出牌報價中選擇是否支付土之秘術。材料保留 Stack 關鍵字及實付 counter 的付款事件；支付後剩餘 Stack 為零時依既有規則送墓。拒絕付款時沿用原本出牌費用，不消耗 Stack。
 
 玩家出牌費用修正可用 `until: {during_next_turn: {who: self | opp}}` 指定只在下一個實際開始的指定玩家回合生效；安裝當下尚未生效。額外回合、跳過回合沿用回合排程，該回合結束後清除修正。修正的對象篩選仍相對於原效果控制者。
+
+`cost_mod.when_playing.orig_cost_eq` 依印刷原費精確篩選，可與來源區域、卡種及種族條件交集；例如 CP04-004 只降低自己 EX 中原費 1 的プリコネ從者費用。它不比較目前費用或實付 PP，多個有效來源的減費照常相加；來源失去能力後停止提供修正。
 
 出牌費用條件的 `count: {who: self, zone: hand, other: true}` 在當次報價時讀手牌張數，排除正在打出的來源本身。來源原在 EX 時不扣除任何手牌；讀值只計張數，不開放手牌內容或對手手牌篩選。
 

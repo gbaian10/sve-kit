@@ -65,7 +65,7 @@ fn query(
                         all_traits: &value.traits_all,
                         class: value.class.as_deref(),
                         name: value.name.as_deref(),
-                        original_cost: [None, value.orig_cost_le, None],
+                        original_cost: [value.orig_cost_eq, value.orig_cost_le, None],
                         token: value.token,
                         ..Default::default()
                     },
