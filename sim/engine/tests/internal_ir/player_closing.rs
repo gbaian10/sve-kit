@@ -6,7 +6,12 @@ use sve_engine::game::player::{
     Command, Input, QuestionPurpose, QuestionShape, SubmissionKind, Viewer,
 };
 
-fn board(next_deck: bool) -> Game {
+pub(super) fn board(next_deck: bool) -> Game {
+    board_with_pp(next_deck, 0, 2)
+}
+
+/// [`board`] where P2, who takes the next turn, has `current` of `maximum` PP.
+pub(super) fn board_with_pp(next_deck: bool, current: i64, maximum: i64) -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P2"]["zones"]["deck"] = if next_deck {
         json!([{"id":"next-0","card":"unit-follower"},{"id":"next-1","card":"unit-follower"}])
@@ -14,7 +19,7 @@ fn board(next_deck: bool) -> Game {
         json!([])
     };
     initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
-    initial["players"]["P2"]["pp"] = json!({"current":0,"max":2});
+    initial["players"]["P2"]["pp"] = json!({"current":current,"max":maximum});
     let mut game = Game::new(
         catalog(),
         &initial,
@@ -35,7 +40,7 @@ fn board(next_deck: bool) -> Game {
     game
 }
 
-fn end(game: &mut Game) -> Command {
+pub(super) fn end(game: &mut Game) -> Command {
     let current = question(game, Viewer::P1);
     let token = current.token;
     let command = end_command(&current);

@@ -9,6 +9,7 @@ use crate::ir::events::timing::second_header;
 use crate::ir::events::{drive, equipment};
 use crate::ir::history_turn::{evolution_capture_query, evolution_trigger};
 use crate::ir::material_sets;
+use crate::ir::play_target_cost;
 use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::quick::is_printed_quick;
@@ -136,6 +137,7 @@ impl WellFormedCardProgram {
                     }
                     let mut has_set = false;
                     for (modifier_index, modifier) in face.modifiers.iter().enumerate() {
+                        let modifier_source = &modifier.source;
                         checker.at(&format!("modifiers/{modifier_index}"), |checker| {
                             checker.located(modifier, |checker, modifier| {
                                 match &modifier.change {
@@ -152,8 +154,17 @@ impl WellFormedCardProgram {
                                     }
                                 }
                                 if let Some(condition) = &modifier.condition {
+                                    let mut masked_condition = condition.clone();
+                                    if !play_target_cost::mask(
+                                        &mut masked_condition,
+                                        &card,
+                                        modifier_source,
+                                    ) {
+                                        return checker.reject();
+                                    }
                                     checker.at("condition", |checker| {
-                                        checker.isolated(|checker| checker.boolean(condition))
+                                        checker
+                                            .isolated(|checker| checker.boolean(&masked_condition))
                                     })?;
                                 }
                                 Ok(())
@@ -975,6 +986,9 @@ impl Checker {
                 }
                 Ok(())
             }
+            CharacteristicPatch::SetKind {
+                kind: super::super::CardKind::Follower | super::super::CardKind::Amulet,
+            } if layer == ContinuousLayer::NonNumeric => Ok(()),
             CharacteristicPatch::GrantAbility { .. }
             | CharacteristicPatch::SuppressAbility { .. }
             | CharacteristicPatch::SetKind { .. }

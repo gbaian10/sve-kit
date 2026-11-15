@@ -1,4 +1,5 @@
 //! Cost materials use their own strict selection, without target permissions.
+use crate::ir::flip_cost;
 
 use crate::game::player::{SelectionQuestion, Viewer};
 
@@ -265,6 +266,20 @@ pub(super) fn uses_parameter(action: &Action, play: &PlaySpec) -> bool {
 }
 
 fn zones(selector: &Selector) -> Result<Vec<ZoneKind>> {
+    if flip_cost::selector(selector).is_some() {
+        let Selector::Zone {
+            predicate, binding, ..
+        } = selector
+        else {
+            return Err(unsupported("flip selector"));
+        };
+        super::super::conditions::ConditionPlan::compile(
+            predicate,
+            *binding,
+            super::super::conditions::Policy::Selection,
+        )?;
+        return Ok(vec![ZoneKind::Evolve]);
+    }
     match selector {
         Selector::Zone {
             players,
@@ -353,7 +368,10 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
     };
     if !decision.captures.is_empty()
         || decision.actor != (PlayerRef::Controller {})
-        || decision.visibility != (Visibility::Public {})
+        || (decision.visibility != (Visibility::Public {})
+            && !flip_cost::material(decision).is_some_and(|(selector, before)| {
+                matches!(selector, Selector::Zone { players, .. } if !before && decision.visibility == (Visibility::Only { players: players.clone() }))
+            }))
         || decision.kind
             != (DecisionKind::PlayParameter {
                 slot: PlaySlot::CostMaterials,
@@ -389,7 +407,9 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
 
 pub(super) const fn cost_objects(action: &Action) -> Option<&Selector> {
     match action {
-        Action::Banish { objects }
+        Action::FlipDown { objects }
+        | Action::FlipUp { objects, .. }
+        | Action::Banish { objects }
         | Action::Posture {
             objects,
             posture: Posture::Acted,
@@ -423,6 +443,11 @@ pub(super) const fn cost_objects(action: &Action) -> Option<&Selector> {
 }
 
 pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
+    if matches!(action, Action::FlipDown { .. } | Action::FlipUp { .. }) {
+        return play.parameters.iter().any(|decision| {
+            check_parameter(decision).is_ok() && flip_cost::payment(action, decision)
+        });
+    }
     if matches!(action, Action::Banish { .. }) && super::super::movement::deck_top(action).is_some()
     {
         return true;
@@ -595,6 +620,9 @@ impl Game {
         selector: &Selector,
         standing: bool,
     ) -> Result<Vec<ObjectRef>> {
+        if flip_cost::selector(selector).is_some() {
+            return self.flip_cost_candidates(execution, selector);
+        }
         if let Selector::Union { sets } = selector {
             let mut members = Vec::new();
             for set in sets {
@@ -933,6 +961,21 @@ impl Game {
                 _ => return Err(unsupported("bound or source materials")),
             }
         };
+        if matches!(
+            instruction.action,
+            Action::FlipDown { .. } | Action::FlipUp { .. }
+        ) {
+            let up = matches!(instruction.action, Action::FlipUp { .. });
+            self.internal_flip_members(execution, &members, up, true)?;
+            return Ok((
+                Quantity {
+                    amount: Int(i64::try_from(members.len()).map_err(invalid)?),
+                    unit: QuantityUnit::Cards,
+                },
+                members,
+                vec![],
+            ));
+        }
         for member in &members {
             let id = execution.object_id(*member)?;
             let object = self.object(id)?;
@@ -1139,6 +1182,9 @@ pub(super) fn check_quick_parameter(decision: &Decision) -> Result<()> {
         Selector::Difference { input, .. } => input.as_ref(),
         selector => selector,
     };
+    if flip_cost::material(decision).is_some() {
+        return Ok(());
+    }
     if constraint.cardinality.minimum == Nat(0)
         || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
         || !matches!(selector, Selector::Zone { players, zone: ZoneKind::Field | ZoneKind::Ex, .. }

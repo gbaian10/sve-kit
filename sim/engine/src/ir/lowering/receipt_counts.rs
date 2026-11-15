@@ -1,8 +1,8 @@
 use super::{Binding, BodyContext, Bool, Expr, Int, LoweringError, ast, unsupported};
 use crate::ir::{
-    Cardinality, IntFrozen, IntOperation, MemberProjection, MovementReceipt, Nat, NatOperation,
-    ObjectProperty, ObjectReceipt, ObjectView, Predicate, ReceiptLocation, RuntimeObjectView,
-    Selector,
+    Cardinality, CharacteristicView, Comparison, IntFrozen, IntOperation, MemberProjection,
+    MovementReceipt, Nat, NatOperation, NumberRead, ObjectProperty, ObjectReceipt, ObjectView,
+    Predicate, ReceiptLocation, RuntimeObjectView, Selector,
 };
 
 #[expect(
@@ -91,13 +91,39 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let (member, predicate) = self.receipt_filter(
+        let (member, mut predicate) = self.receipt_filter(
             &super::selection::ObjectFilter {
-                trait_id: Some(&query.filter.r#trait),
+                trait_id: query.filter.r#trait.as_deref(),
                 ..super::selection::ObjectFilter::default()
             },
             path,
         )?;
+        if let Some(number) = &query.filter.orig_cost_eq {
+            let cost = Expr::Compute(Box::new(IntOperation::InformationOrZero {
+                information: NumberRead::Cost {
+                    object: ObjectView::Snapshot {
+                        value: Box::new(Expr::Bound(member)),
+                    },
+                    view: CharacteristicView::Original,
+                },
+            }));
+            let comparison = if let Some(right) = self.declared_natural(number) {
+                Predicate::CompareNat {
+                    left: Expr::Compute(Box::new(NatOperation::CheckedInt { value: cost })),
+                    comparison: Comparison::Equal,
+                    right,
+                }
+            } else {
+                Predicate::CompareInt {
+                    left: cost,
+                    comparison: Comparison::Equal,
+                    right: self.number(number, path, &mut super::BTreeSet::new())?,
+                }
+            };
+            predicate = Expr::Compute(Box::new(Predicate::And {
+                predicates: vec![predicate, Expr::Compute(Box::new(comparison))],
+            }));
+        }
         Ok(Expr::Compute(Box::new(IntOperation::FromNat {
             value: Expr::Compute(Box::new(NatOperation::ReceiptCount {
                 receipt,

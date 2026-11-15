@@ -1,0 +1,30 @@
+format: 2
+kind: ruling
+id: R-0020
+revision: 1
+question: 仍保留自身數值強化能力的卡已是護符時，新的攻擊力／體力修正是否執行，並在日後恢復從者時生效？
+decision: 本專案推論為不執行數值修正，也不保存為日後補用的隱藏數值層。能力後續不依賴該數值修正的指示仍照常執行；先前已存在的數值與修正繼續保留。
+evidence:
+  - ref: CR1.3.2
+    kind: supporting
+    note: 要求執行不能進行的事項時不執行；此處將其適用到已無攻擊力／體力資訊的護符。
+  - ref: Q660
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP05-001
+    note: 改為護符後保留原數值，但視為不具有攻擊力與體力，不能參照該數值。沒有直接回答新的加減修正。
+  - ref: Q2130
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP16-093
+    note: 拉碧絲的指示物未達四枚時，攻擊力與體力亦視為不具有；Q2133 另確認先前修正在恢復從者後保留。
+  - ref: project
+    kind: project
+    date: "2026-11-15"
+    reason: 依不能執行的指示略過，以及護符數值資訊缺席作出的可逆推論；待向裁判確認 BP06-021 的自身強化情境，不以測試通過視為官方裁定。
+strength: inferred
+decided_on: "2026-11-15"
+applies_to: [I.modify]
+hint:
+  zh-TW: 本專案推論：護符期間新的攻體修正不執行，恢復從者時不補回；已有修正與後續授予能力不因此移除。
+  ja: 本プロジェクトの推定：アミュレットの間に新たな攻撃力・体力の変更は行わず、後でフォロワーに戻っても適用しません。以前の修正や後続の能力付与は失われません。
+  en: "Project inference: new attack and defense changes do not occur while this card is an amulet and are not saved for later. Earlier modifiers and subsequent ability grants remain intact."
+note: 以 BP06-021 ペインレスサムライ為提問種子。尚無直接官方裁定；裁判回答不同時只需局部修改數值安裝的缺席處理。

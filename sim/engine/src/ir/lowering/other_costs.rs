@@ -104,7 +104,9 @@ fn selector(
                 .map(|member| query(member, allocator, path))
                 .collect::<Result<_, _>>()?,
         }),
-        ast::Playing::Union { .. } | ast::Playing::Affected(_) => Err(unsupported(path)),
+        ast::Playing::Union { .. } | ast::Playing::Affected(_) | ast::Playing::Follow { .. } => {
+            Err(unsupported(path))
+        }
     }
 }
 
@@ -224,7 +226,12 @@ impl BodyContext<'_> {
         let ast::InstalledEffect::CostMod(modifier) = &value.effect else {
             return Err(unsupported(path));
         };
-        let subjects = selector(&modifier.when_playing, self.card_allocator, path)?;
+        let subjects = match &modifier.when_playing {
+            ast::Playing::Follow { r#in } => self.followed(&r#in.follow, path)?,
+            other @ (ast::Playing::Affected(_)
+            | ast::Playing::Union { .. }
+            | ast::Playing::Query(_)) => selector(other, self.card_allocator, path)?,
+        };
         let mut duration =
             if let Some(ast::Until::DuringNextTurn { during_next_turn }) = &value.until {
                 let player = match during_next_turn.who {

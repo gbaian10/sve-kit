@@ -1,0 +1,35 @@
+cards:
+  BP17-030:
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            delta: -2
+            if:
+              chosen:
+                ref: picked
+                where:
+                  name_contains: リオード
+      - line: 2
+        spell:
+          do:
+            - move:
+                ref: picked
+                to: ex
+          targets:
+            - bind: picked
+              from:
+                kind: follower
+                trait: 暗殺者
+                who: self
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

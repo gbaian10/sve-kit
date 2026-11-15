@@ -15,7 +15,7 @@ fn query() -> Value {
     json!({"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true})
 }
 
-fn program(upto: bool) -> WellFormedCardProgram {
+pub(super) fn program(upto: bool) -> WellFormedCardProgram {
     lowerer()
         .lower(&tree(&query(), upto))
         .unwrap()
@@ -23,7 +23,7 @@ fn program(upto: bool) -> WellFormedCardProgram {
         .unwrap()
 }
 
-fn board(program: &WellFormedCardProgram) -> Game {
+pub(super) fn board(program: &WellFormedCardProgram) -> Game {
     board_with_maximum(program, 2)
 }
 
@@ -204,7 +204,7 @@ fn flip_down_raw_ir_cannot_turn_a_selected_field_card_face_down() {
     assert!(
         error
             .to_string()
-            .contains("flip-down requires the controller's evolve deck")
+            .contains("flip requires the controller's evolve deck")
     );
     let after = views.map(|view| game.projection(view).unwrap());
     assert!(

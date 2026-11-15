@@ -655,12 +655,23 @@ fn not_class_program(targeted: bool) -> WellFormedCardProgram {
 }
 
 #[test]
-fn author_not_class_stays_in_the_entry_subject_family() {
+fn author_not_class_stays_in_known_entry_and_ex_subject_families() {
     not_class_program(false);
+    for event in ["enter_field", "placed_ex"] {
+        let head = json!({"auto":{"on":{event:{"who":"self","sel":{"kind":"follower","not_class":"ドラゴン"}}},"do":[{"life":{"who":"self","delta":1}}]}});
+        lowerer().lower(&tree(&head)).unwrap();
+        for excluded in ["", "ドラゴン"] {
+            let mut changed = head.clone();
+            changed["auto"]["on"][event]["sel"]["not_class"] = json!(excluded);
+            if !excluded.is_empty() {
+                changed["auto"]["on"][event]["sel"]["class"] = json!("ニュートラル");
+            }
+            lowerer().lower(&tree(&changed)).unwrap_err();
+        }
+    }
     for on in [
         json!({"left_field":{"who":"self","sel":{"kind":"follower","class":"ドラゴン"}}}),
         json!({"destroyed":{"who":"self","sel":{"kind":"follower","class":"ドラゴン"}}}),
-        json!({"placed_ex":{"who":"self","sel":{"kind":"follower","class":"ドラゴン"}}}),
         json!({"discarded":{"who":"self","sel":{"kind":"follower","class":"ドラゴン"}}}),
     ] {
         let mut head = json!({"auto":{"on":on,"do":[{"life":{"who":"self","delta":1}}]}});
@@ -675,13 +686,6 @@ fn author_not_class_stays_in_the_entry_subject_family() {
         event["sel"]["not_class"] = json!("ドラゴン");
         let error = lowerer().lower(&tree(&head)).unwrap_err();
         assert_eq!(error.code, "unsupported_construct");
-    }
-    for excluded in ["", "ドラゴン"] {
-        let mut head = json!({"auto":{"on":{"enter_field":{"who":"self","sel":{"kind":"follower","not_class":excluded}}},"do":[{"life":{"who":"self","delta":1}}]}});
-        if !excluded.is_empty() {
-            head["auto"]["on"]["enter_field"]["sel"]["class"] = json!("ニュートラル");
-        }
-        lowerer().lower(&tree(&head)).unwrap_err();
     }
 }
 

@@ -338,9 +338,17 @@ impl Game {
             ));
         }
         let resources = self.player_mut(&frame.controller)?;
-        resources.pp["current"] = json!(int(&resources.pp["current"]).saturating_sub(pp));
+        let before = int(&resources.pp["current"]);
+        resources.pp["current"] = json!(before.saturating_sub(pp));
         resources.ep = resources.ep.saturating_sub(ep);
         resources.sep = resources.sep.saturating_sub(sep);
+        self.record_player_resource(
+            &frame.controller,
+            "pp",
+            before,
+            before.saturating_sub(pp),
+            &frame.cause,
+        );
         self.bump(&format!("{}.evolve_played", frame.controller), 1);
         self.apply_evolution(source, evolve, face, sep, &mut frame)?;
         Ok(true)

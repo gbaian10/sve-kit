@@ -5,7 +5,7 @@
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
 
-fn position(up_to: bool, full_ex: bool) -> (Game, AbilityId) {
+pub(super) fn position(up_to: bool, full_ex: bool) -> (Game, AbilityId) {
     let mut fusion =
         json!({"sel":{"who":"self","zone":["hand","ex"],"kind":"spell","orig_cost_ge":1}});
     fusion[if up_to { "upto" } else { "n" }] = json!(if up_to { 2_u8 } else { 1_u8 });

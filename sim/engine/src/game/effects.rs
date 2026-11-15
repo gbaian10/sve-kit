@@ -666,7 +666,7 @@ impl Game {
                 let group = self.group();
                 self.emit(json!({"kind":"取代","object":id,"original":"場を離れる（墓場に置く）","replacement":"スタックカウンターを1個取り除き、場に残る"}),&frame.cause,group);
                 self.emit(
-                    json!({"kind":"カウンター","object":id,"name":self.catalog.counter_name("stack_counter"),"delta":-1_i64}),
+                    json!({"kind":"カウンター","object":id,"name":self.catalog.counter_name("stack_counter"),"delta":-1_i64,"before":count,"after":count.saturating_sub(1)}),
                     &frame.cause,
                     group,
                 );

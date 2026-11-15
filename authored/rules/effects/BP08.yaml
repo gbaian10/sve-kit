@@ -60,45 +60,5 @@ cards:
         line: 1
         subject: self
     status: complete
-  BP08-SL19:
-    abilities:
-      - body:
-          op: evolve
-          subjects: self
-        costs:
-          - amount: 2
-            op: pp
-        kind: evolve
-        line: 1
-      - body:
-          op: seq
-          steps:
-            - bind: declared
-              op: declare_number
-            - bind: milled
-              op: move
-              subjects:
-                side: self
-                top: 5
-                zone: deck
-              to: cemetery
-            - amount:
-                count:
-                  from: milled
-                  where:
-                    args:
-                      - read: item.cost
-                      - read: declared
-                    fn: eq
-              op: damage
-              subjects:
-                side: opponent
-                type: follower
-                zone: field
-        event: enter
-        kind: trigger
-        line: 2
-        subject: self
-    status: complete
 format: 1
 kind: effect_set

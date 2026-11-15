@@ -139,6 +139,8 @@ impl BodyContext<'_> {
                         | ast::CostOperation::ActSelf(_)
                         | ast::CostOperation::SelfToCemetery(_)
                         | ast::CostOperation::SelfToEx(_)
+                        | ast::CostOperation::FlipUp(_)
+                        | ast::CostOperation::FlipDown(_)
                         | ast::CostOperation::SkipTurn(_) => None,
                     },
                     ast::Cost::Ordered { .. } => None,

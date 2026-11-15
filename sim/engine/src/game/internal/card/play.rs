@@ -4,9 +4,11 @@ use super::{
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
     admission, int, invalid, seat_name, unsupported,
 };
+use crate::game::internal::repeated_moves;
 use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
+use crate::ir::flip_cost as flip_payment;
 use crate::ir::material_sets;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
@@ -186,6 +188,14 @@ impl PlayState {
     }
 
     fn freeze_selection(&mut self, game: &Game, execution: &Execution) -> Result<()> {
+        if self.snapshot.is_none()
+            && game.has_target_cost(execution, None)?
+            && !game.internal_play_affordable(execution, self)?
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "no affordable formal target plan".into(),
+            ));
+        }
         if self.snapshot.is_none() {
             for group in &self.groups {
                 let chosen = self
@@ -782,7 +792,25 @@ impl Game {
             }
         }
         execution.captures(&probe, &play.captures)?;
-        let available = if material {
+        let available = if spell && probe.has_target_cost(&execution, None)? {
+            let mut payment_game = self.clone();
+            let payment = payment_game.spell_execution(holder, actor, ability)?;
+            let parameters = play.parameters.iter().cloned().collect();
+            let mut affordable = false;
+            for mut trial in
+                payment_game.internal_public_cost_probes(&payment, &parameters, |decision| {
+                    super::material::posture_parameter(&play.costs, decision)
+                })?
+            {
+                let mut game = payment_game.clone();
+                game.card_runtime.active_source = trial.ability;
+                if game.internal_payment_probe(&mut trial, &play.costs, true)? {
+                    affordable = true;
+                    break;
+                }
+            }
+            affordable
+        } else if material {
             probe.internal_quick_material_costs_available(&execution, play)?
         } else {
             self.quick_costs_available(holder, ability, &execution, actor, spell)?
@@ -958,6 +986,29 @@ impl Game {
         let Some((_, payment)) = self.internal_additional(execution)?.as_deref().cloned() else {
             return Ok(true);
         };
+        if !payment.play.parameters.is_empty()
+            && payment
+                .play
+                .parameters
+                .iter()
+                .all(|decision| flip_payment::material(decision).is_some())
+        {
+            let mut probe = self.clone();
+            let mut selection = probe.spell_execution(holder, actor, ability)?;
+            probe.card_runtime.active_source = selection.ability;
+            let play = ability
+                .play
+                .as_ref()
+                .ok_or_else(|| invalid("missing Quick play"))?;
+            if !probe.internal_payment_probe(&mut selection, &play.costs, true)? {
+                return Ok(false);
+            }
+            return probe.flip_payment_available(
+                &selection,
+                &payment.play,
+                &payment.play.parameters,
+            );
+        }
         if !super::hand_payment::single_additional(&payment.play.costs) {
             return Err(unsupported("Quick additional hand cost"));
         }
@@ -1131,6 +1182,7 @@ impl Game {
         };
         let mut execution = self.new_card_execution(old_context)?;
         execution.play_origin = Some(spell_origin(&object.zone)?);
+        execution.play_origin_object = Some(execution.reference(self, holder)?);
         execution.play_origin_player = Some(player_id(&object.controller)?);
         let play = ability
             .play
@@ -1285,6 +1337,7 @@ impl Game {
             todo: VecDeque::new(),
             slots: BTreeMap::new(),
             procedures: Vec::new(),
+            repeats: repeated_moves::State::default(),
             receipts: BTreeMap::new(),
             cost_materials: BTreeMap::new(),
             hand_cost_groups: BTreeMap::new(),
@@ -1304,10 +1357,12 @@ impl Game {
             source_information: None,
             event_reads: super::super::event_reads::EventReads::default(),
             targets: BTreeMap::new(),
+            selected_target_names: BTreeMap::new(),
             play: None,
             spell: false,
             field_entry: false,
             play_origin,
+            play_origin_object: None,
             card_payment: None,
             trigger_occurrence: None,
             play_counts: self.internal_play_counts()?,
@@ -1946,18 +2001,26 @@ impl Game {
         execution: &Execution,
         play: &PlayState,
     ) -> Result<Vec<Execution>> {
-        let mut probes = vec![execution.clone()];
-        for decision in &play.parameters {
+        self.internal_public_cost_probes(execution, &play.parameters, |decision| {
+            play.material_posture(decision)
+        })
+    }
+
+    fn internal_public_cost_probes(
+        &self,
+        execution: &Execution,
+        parameters: &VecDeque<Decision>,
+        posture: impl Fn(&Decision) -> bool,
+    ) -> Result<Vec<Execution>> {
+        let mut probes = self.internal_quote_target_probes(execution, parameters)?;
+        for decision in parameters {
             if !super::material::is_parameter(decision)
                 || decision.visibility != (Visibility::Public {})
             {
                 continue;
             }
-            let choices = self.internal_public_material_choices(
-                execution,
-                decision,
-                play.material_posture(decision),
-            )?;
+            let choices =
+                self.internal_public_material_choices(execution, decision, posture(decision))?;
             let mut next = Vec::new();
             for probe in &probes {
                 for (key, slot) in &choices {
@@ -2037,6 +2100,7 @@ impl Game {
         // Feasibility was proven against this same snapshot before the first target question.
         execution.slots.clone_from(&restart.slots);
         execution.targets.clear();
+        execution.selected_target_names.clear();
         execution.allocations.clear();
         play.parameters.clone_from(&restart.parameters);
         play.distribution_captures = None;

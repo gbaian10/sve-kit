@@ -587,6 +587,7 @@ pub(super) fn lower_at_source(
             | ast::StaticEffect::MustTarget(_)
             | ast::StaticEffect::EntersActed(_)
             | ast::StaticEffect::ExtraTrigger(_)
+            | ast::StaticEffect::MakeType(_)
             | ast::StaticEffect::Reroll(_)
             | ast::StaticEffect::ChoiceAny(_)
             | ast::StaticEffect::UnlimitedEvolve(_)

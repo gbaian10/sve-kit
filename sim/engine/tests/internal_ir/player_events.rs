@@ -162,7 +162,7 @@ fn life(id: u64, amount: i64) -> Located<Node> {
     )
 }
 
-fn reveal_hand() -> WellFormedProgram {
+pub(super) fn reveal_hand() -> WellFormedProgram {
     checked(vec![instruction(
         1,
         Action::Reveal {

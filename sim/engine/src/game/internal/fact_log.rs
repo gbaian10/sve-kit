@@ -111,6 +111,7 @@ impl Execution {
                 .map_err(|_authority_error| EventError::ProjectionGap)?,
             card: provider.card,
             line: Some(u64::from(provider.span.line)),
+            wording: super::observation::wording_source(&provider.span),
             holder: None,
         }))
     }

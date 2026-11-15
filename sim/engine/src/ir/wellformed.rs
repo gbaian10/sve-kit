@@ -799,6 +799,7 @@ impl Checker {
                 }
                 self.natural(amount)
             }
+            Action::FlipUp { objects, faces } if faces.is_empty() => self.selector(objects),
             Action::Destroy { objects }
             | Action::Banish { objects }
             | Action::Reveal { objects }
@@ -1209,7 +1210,7 @@ const fn outcome(action: &Action) -> TypeId {
         Action::RevealUntil { .. } => TypeId::of::<super::RevealUntilOutcome>(),
         Action::Reveal { .. } => TypeId::of::<super::RevealOutcome>(),
         Action::Counter { .. } => TypeId::of::<CounterQuantityOutcome>(),
-        Action::FlipDown { .. } => TypeId::of::<FlipOutcome>(),
+        Action::FlipDown { .. } | Action::FlipUp { .. } => TypeId::of::<FlipOutcome>(),
         Action::Damage { .. } => TypeId::of::<super::DamageQuantityOutcome>(),
         Action::Token { .. } => TypeId::of::<super::TokenOutcome>(),
         Action::Move { .. } => TypeId::of::<super::MoveOutcome>(),
@@ -1223,7 +1224,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::Transfer { .. }
         | Action::Life { .. }
         | Action::Shuffle { .. }
-        | Action::FlipUp { .. }
         | Action::Posture { .. }
         | Action::Resource { .. }
         | Action::Modify { .. }

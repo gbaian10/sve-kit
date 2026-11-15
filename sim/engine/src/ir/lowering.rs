@@ -16,6 +16,7 @@ mod costs;
 mod counters;
 mod current;
 mod deck_rules;
+mod declaration;
 mod delayed;
 mod dice;
 mod discard;
@@ -30,6 +31,7 @@ mod hand_exit;
 mod hand_payment;
 mod hand_position;
 mod keywords;
+mod kind_change;
 mod material;
 mod material_values;
 mod move_replacement;
@@ -43,14 +45,17 @@ mod other_costs;
 mod payment;
 mod play;
 mod play_restrictions;
+mod play_target_cost;
 mod prevention;
 mod public_reveal;
 mod receipt_counts;
 mod recipient_union;
+mod repeated_moves;
 mod resource_entry;
 mod reveal_cost;
 mod reveal_until;
 mod stack;
+mod stat_presence;
 mod static_declarations;
 mod static_keywords;
 mod target_priority;
@@ -60,6 +65,7 @@ mod victory;
 mod x_pp;
 
 mod flip;
+mod flip_cost;
 mod fusion;
 mod posture;
 mod quick;
@@ -232,28 +238,29 @@ impl ExpandedLowerer {
                     .ok()
                     .and_then(|count| count.checked_mul(3))
                     .ok_or_else(|| unsupported(&path))?,
+                ..Allocator::default()
             };
             let mut abilities = Vec::new();
             let LoweredPlayCosts {
-                modifiers,
+                mut modifiers,
                 exchange,
                 additional,
                 payment_result,
             } = lower_play_costs(&coordinates, &entries, &mut allocator, &path)?;
-            let play_faces = play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
+            let initial_play_faces = play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
                 .ok_or_else(|| unsupported(&path))?;
-            for (index, (entry_path, ability)) in entries.into_iter().enumerate() {
+            for (index, (entry_path, ability)) in entries.iter().enumerate() {
                 if allocator.declarations(
                     &coordinates,
-                    &entry_path,
-                    &ability,
+                    entry_path,
+                    ability,
                     index,
                     &mut abilities,
                 )? {
                     continue;
                 }
-                optional_payment::check_entry(&ability, exchange.is_some(), &entry_path)?;
-                let branches = if hand_exit::check(&ability, &entry_path)? {
+                optional_payment::check_entry(ability, exchange.is_some(), entry_path)?;
+                let branches = if hand_exit::check(ability, entry_path)? {
                     vec![
                         Some(hand_exit::Branch::Discard),
                         Some(hand_exit::Branch::Banish),
@@ -263,31 +270,34 @@ impl ExpandedLowerer {
                 };
                 for (alternative, branch) in branches.into_iter().enumerate() {
                     let scope = if alternative == 0 {
-                        entry_scope(index, &entry_path)?
+                        entry_scope(index, entry_path)?
                     } else {
-                        allocator.granted_scope(&entry_path)?
+                        allocator.granted_scope(entry_path)?
                     };
                     abilities.push(allocator.ability(
                         &coordinates,
-                        &entry_path,
+                        entry_path,
                         hand_exit::AbilityInput {
-                            entry: &ability,
+                            entry: ability,
                             branch,
                         },
                         scope,
                         match identity {
                             Some(identity) => {
-                                identity.printed_cost(&ability.sources[0].json(), &entry_path)?
+                                identity.printed_cost(&ability.sources[0].json(), entry_path)?
                             }
                             None => printed_costs.get(&key).copied(),
                         },
                         payment_result.clone().filter(|_| {
-                            source_span(&coordinates, &entry_path, &ability)
-                                .is_ok_and(|source| play_faces.contains(&source.face))
+                            source_span(&coordinates, entry_path, ability)
+                                .is_ok_and(|source| initial_play_faces.contains(&source.face))
                         }),
                     )?);
                 }
             }
+            costs::lower_selected(&coordinates, &entries, &mut allocator, &mut modifiers)?;
+            play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
+                .ok_or_else(|| unsupported(&path))?;
             let checked = check_card(
                 CardProgram {
                     abilities,
@@ -489,6 +499,7 @@ pub(super) fn validator(profile: &str) -> Result<jsonschema::Validator, Lowering
 struct Allocator {
     next: u64,
     next_scope: u64,
+    formal_spell_targets: Vec<play_target_cost::ResolvedTarget>,
 }
 impl Allocator {
     fn declarations(
@@ -536,7 +547,8 @@ impl Allocator {
                     attack_restrictions::lower
                 }
                 Some(
-                    ast::StaticEffect::If(_)
+                    ast::StaticEffect::MakeType(_)
+                    | ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
                     | ast::StaticEffect::BanishInstead(_)
                     | ast::StaticEffect::MustTarget(_)
@@ -645,6 +657,10 @@ impl Allocator {
         self.executable_ability(input, scope, printed_cost, payment_result, source, path)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The complete ability and its formal target dependency share one lowering scope."
+    )]
     fn executable_ability(
         &mut self,
         input: hand_exit::AbilityInput<'_>,
@@ -678,6 +694,9 @@ impl Allocator {
             path,
             entry.activate.is_none() && entry.spell.is_none(),
         )?;
+        if entry.spell.is_some() {
+            play_target_cost::record(&mut context, body, &source);
+        }
         let triggered_play = play::trigger_play_spec(entry, body, trigger_choice);
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
@@ -1153,6 +1172,29 @@ fn lowered_subscription(
             let card = Binding::new(subject_id, scope);
             movement::played(played, event, card, path)
         }
+        ast::PhaseSubscription::Raced(subscription) => {
+            let event = Binding::new(event_id, scope);
+            let fields = SubjectFields::Race(event);
+            let predicate = movement::movement_filter(
+                subscription
+                    .who
+                    .as_ref()
+                    .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+                subscription.reference.is_some(),
+                subscription.sel.as_ref(),
+                false,
+                path,
+                movement::FilterSupport::Basic,
+            )?
+            .predicate(fields);
+            if SubjectFilter::parse(fields, &predicate).is_none() {
+                return Err(unsupported(path));
+            }
+            Ok(EventPattern::Race {
+                binding: event,
+                predicate,
+            })
+        }
         ast::PhaseSubscription::Phase(phase) => {
             Ok(phase_subscription(phase, Binding::new(event_id, scope)))
         }
@@ -1284,7 +1326,8 @@ fn lowered_change(
                 .predicate(event),
             })
         }
-        ast::PhaseSubscription::Fused(_)
+        ast::PhaseSubscription::Raced(_)
+        | ast::PhaseSubscription::Fused(_)
         | ast::PhaseSubscription::FusedAsMaterial(_)
         | ast::PhaseSubscription::AnyOf(_)
         | ast::PhaseSubscription::Evolved(_)
@@ -1331,6 +1374,7 @@ struct FieldEntryGuard {
 /// Names a nested body (an optional or a player procedure) may bind; the enclosing body sees
 /// none of them once the nested body ends.
 struct LocalBindings {
+    declared_numbers: BTreeMap<String, declaration::DeclaredBinding>,
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     observations: BTreeMap<String, super::ObjectReceipt>,
@@ -1463,6 +1507,7 @@ struct BodyContext<'definitions> {
     damage_event: Option<Binding<super::DamageEvent>>,
     dice_event: Option<Binding<super::DiceEvent>>,
     dice_results: BTreeMap<String, Binding<Nat>>,
+    declared_numbers: BTreeMap<String, declaration::DeclaredBinding>,
     equip_event: Option<Binding<super::EquipEvent>>,
     drive_checked_event: Option<Binding<super::DriveCheckedEvent>>,
     source_use: &'definitions ast::SourceUse,
@@ -1557,6 +1602,7 @@ impl<'definitions> BodyContext<'definitions> {
             damage_event: None,
             dice_event: None,
             dice_results: BTreeMap::new(),
+            declared_numbers: BTreeMap::new(),
             equip_event: None,
             drive_checked_event: None,
             source_use: &entry.sources[0],
@@ -1839,6 +1885,7 @@ impl<'definitions> BodyContext<'definitions> {
 
     fn local_bindings(&self) -> LocalBindings {
         LocalBindings {
+            declared_numbers: self.declared_numbers.clone(),
             targets: self.targets.clone(),
             recipient_targets: self.recipient_targets.clone(),
             observations: self.observations.clone(),
@@ -1861,6 +1908,7 @@ impl<'definitions> BodyContext<'definitions> {
     }
 
     fn restore_bindings(&mut self, saved: LocalBindings) {
+        self.declared_numbers = saved.declared_numbers;
         self.targets = saved.targets;
         self.recipient_targets = saved.recipient_targets;
         self.observations = saved.observations;
@@ -1890,8 +1938,10 @@ impl<'definitions> BodyContext<'definitions> {
         ability_source: &AbilitySource,
     ) -> Result<Program, LoweringError> {
         let payments = self.local_payments.clone();
+        let declared_numbers = self.declared_numbers.clone();
         let program = self.step_list(author_steps, path, source, ability_source);
         self.local_payments = payments;
+        self.declared_numbers = declared_numbers;
         program
     }
 
@@ -2173,7 +2223,9 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::MakeType(value) => self.make_type(value, path),
             ast::Step::Delayed(value) => self.delayed(value, path, source, span),
+            ast::Step::Declare(value) => self.declare(value, path),
             ast::Step::Dice(value) => self.dice(value, path),
             ast::Step::Win(_) => Ok(effect_victory(source)),
             ast::Step::PlayCard(value) => self.nested_card_play(value, path),
@@ -2371,7 +2423,10 @@ const fn extra_turn(occurrence: Binding<super::ScheduleToken>) -> Action {
 }
 
 fn action_actor(action: &Action) -> PlayerRef {
-    if let Action::Discard { player, .. } | Action::Draw { player, .. } = action {
+    if let Action::Discard { player, .. }
+    | Action::Draw { player, .. }
+    | Action::Declare { actor: player, .. } = action
+    {
         player.clone()
     } else {
         PlayerRef::Controller {}

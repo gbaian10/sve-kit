@@ -763,6 +763,9 @@ impl Game {
         )
     }
     fn object_type(&self, id: &str) -> Result<&str> {
+        if let Some(kind) = self.internal_effective_kind(id)? {
+            return Ok(kind);
+        }
         let object = self.object(id)?;
         Ok(object.state["card_type"]
             .as_str()

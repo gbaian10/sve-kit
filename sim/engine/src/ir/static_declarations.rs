@@ -4,6 +4,7 @@ use super::{Ability, AbilityKind, AbilityOrigin, CharacteristicPatch, Continuous
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum Family {
     Grant,
+    Kind,
     Prevention,
     Cost,
     MoveReplacement,
@@ -14,6 +15,9 @@ pub(crate) enum Family {
 
 pub(crate) fn family(effect: &Effect) -> Option<Family> {
     match effect {
+        Effect::Continuous { .. } if super::kind_change::projection(effect).is_some() => {
+            Some(Family::Kind)
+        }
         Effect::Permission { .. } if super::target_priority::is_requirement(effect) => {
             Some(Family::TargetPriority)
         }

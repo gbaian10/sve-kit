@@ -28,7 +28,8 @@ pub(crate) fn view(fields: SubjectFields) -> Option<ObjectView> {
         | SubjectFields::Destroy(_)
         | SubjectFields::Evolve(_)
         | SubjectFields::Ex(_)
-        | SubjectFields::Ub(_) => None,
+        | SubjectFields::Ub(_)
+        | SubjectFields::Race(_) => None,
     }
 }
 

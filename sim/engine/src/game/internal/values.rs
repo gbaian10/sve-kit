@@ -17,6 +17,7 @@ use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
     ExecutionRef, HistoryCount, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
 };
+use crate::ir::{CapacityProperty, CapacityZone, MovementReceiptList};
 use crate::ir::{
     FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
     ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView, SnapshotFields,
@@ -371,6 +372,11 @@ impl Execution {
                 receipt,
                 permission: FollowPermission::SameEffectExplicitReference {},
             } => self.followed_members(receipt)?,
+            Selector::MoveAfterAll {
+                receipts: MovementReceiptList::Move { receipts },
+                permission: FollowPermission::SameEffectExplicitReference {},
+                ..
+            } => self.repeats.followed(receipts.key())?,
             Selector::Difference { input, except } => self.difference(game, input, except)?,
             Selector::Intersection { sets } => self.intersection(game, sets)?,
             _ => return Err(unsupported("selector")),
@@ -917,8 +923,35 @@ impl Execution {
                 self.objects(game, selector)?.len(),
             )
             .map_err(invalid)?)),
-            NatRead::ZoneCapacity { .. } => Err(unsupported("natural read")),
+            NatRead::ZoneCapacity {
+                player,
+                zone,
+                property,
+            } => self.zone_capacity(game, player, *zone, *property),
         }
+    }
+
+    fn zone_capacity(
+        &self,
+        game: &Game,
+        player: &PlayerRef,
+        zone: CapacityZone,
+        property: CapacityProperty,
+    ) -> Result<Nat> {
+        let player = seat_name(self.player(game, player)?)?;
+        let zone = match zone {
+            CapacityZone::Field => "field",
+            CapacityZone::Ex => "ex",
+        };
+        let capacity = u64::try_from(
+            super::movement::zone_capacity(zone).ok_or_else(|| invalid("zone capacity"))?,
+        )
+        .map_err(invalid)?;
+        Ok(Nat(match property {
+            CapacityProperty::Capacity => capacity,
+            CapacityProperty::Free => capacity
+                .saturating_sub(u64::try_from(game.zone_ids(player, zone).len()).map_err(invalid)?),
+        }))
     }
 
     #[expect(
@@ -1184,6 +1217,9 @@ impl Execution {
                     .into_iter()
                     .any(identity),
                 Predicate::Not { predicate } => !self.boolean(game, predicate)?.0,
+                Predicate::HasInfo { information } => {
+                    self.stat_information_present(game, information)?
+                }
                 Predicate::CompareInt {
                     left,
                     comparison,
@@ -1282,6 +1318,7 @@ impl Execution {
                     .ok_or_else(|| invalid("missing card play origin"))?
                     == *zone,
             )),
+            BoolRead::CardPlayTarget { .. } => self.play_target_match(game, read).map(Bool),
             BoolRead::Crimson { player } => {
                 let seat = seat_name(self.player(game, player)?)?;
                 Ok(Bool(

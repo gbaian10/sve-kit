@@ -554,12 +554,18 @@ variants!(BoolRead {
     FieldEntryOrigin { object: ObjectOperand, zone: ZoneKind } => ["read.field-entry-origin"],
     FieldEntryMethod { object: ObjectOperand, method: EntryMethod } => ["read.field-entry-method"],
     CardPlayOrigin { zone: ZoneKind, execution: ExecutionRef } => ["read.card-play-origin"],
+    CardPlayTarget { execution: ExecutionRef, decision: DecisionId, selection: Binding<Selector>, predicate: PlayTargetMatch } => ["read.card-play-target"],
     Awakening { player: PlayerRef } => ["read.awakening"],
     Crimson { player: PlayerRef } => ["read.crimson"],
     State { object: ObjectView, property: BooleanState } => ["read.state"],
     HistoryExists { query: HistoryQuery } => ["read.history.exists"],
     OwnTurn { player: PlayerRef } => ["read.turn.own"],
     LegalAttack { attacker: ObjectOperand, ignore_querying_clause: EffectDefinitionId } => ["read.legal-attack"]
+});
+variants!(PlayTargetMatch {
+    Present {} => [],
+    NameEquals { name: CardName } => [],
+    NameContains { fragment: CardName } => []
 });
 tags!(BooleanState {
     TokenStatus,

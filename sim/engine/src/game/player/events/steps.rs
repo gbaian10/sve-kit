@@ -293,6 +293,36 @@ impl Game {
         self.player_events.pending.len()
     }
 
+    /// A rule step or a payment changed a public resource of `seat`: both viewers learn the
+    /// same values, and an unchanged resource is no result.
+    pub(in crate::game) fn record_player_resource(
+        &mut self,
+        seat: &str,
+        name: &str,
+        before: i64,
+        after: i64,
+        cause: &Value,
+    ) {
+        if !self.player_events.active() || before == after {
+            return;
+        }
+        let view = viewer(seat)
+            .map(|player| {
+                let mut result = action(ActionKind::Resource);
+                result.player = Some(player);
+                result.name = Some(name.into());
+                result.numbers.push(NumberFacet {
+                    stat: None,
+                    before: Some(before),
+                    after: Some(after),
+                    amount: after.saturating_sub(before),
+                });
+                Some(EventKind::Action(result))
+            })
+            .map_err(|_authority_error| EventError::ProjectionGap);
+        self.record_player_fact_views([view.clone(), view], cause, None);
+    }
+
     pub(in crate::game) fn player_event_memory(
         &self,
         perspective: Viewer,

@@ -34,7 +34,10 @@ fn submit(game: &mut Game, command: Command) -> SubmissionKind {
 
 /// Attack through the player interface and answer everything before the Drive check (Quick
 /// passes, the pending attack trigger), handing both seats a presentation at every stop.
-fn reach_the_drive_question(game: &mut Game, cursors: &mut [Option<PresentationCursor>; 2]) {
+pub(super) fn reach_the_drive_question(
+    game: &mut Game,
+    cursors: &mut [Option<PresentationCursor>; 2],
+) {
     assert_eq!(
         present(game, cursors),
         [vec![], vec![]],

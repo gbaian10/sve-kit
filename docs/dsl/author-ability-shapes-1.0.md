@@ -177,3 +177,20 @@ BP01-056 無期限一次；BP03-089 turn＋next_only:true；SP01-026 批次；BP
 逐頭與融合數量變體、限次安全整數、錯上下文／型別／互斥、深層遞迴、列表保序與重數，由 JSON Schema 及 Python decoder 雙邊檢查並比較 roundtrip。所有具名定義有結構漂移對照；突變覆蓋 required、ref、enum、union、minItems、未知鍵與單鍵限制。Action／Step 的共用 payload 與 GrantedAbilityHead 的子集合引用另有結構保護。合成組合只證明 C0 形狀，不等於正式卡片或執行能力。
 
 矩陣中的卡號是凍結卡文的設計證據，不全是已轉寫的驗證片段；實際驗證片段以 `author_ability_cases.py` 的清單與 partial／fragment 標記為準。未轉寫的交叉格仍由 C1 全卡工作補齊。
+
+### 同次 Spell play 的正式目標費用條件
+
+`play.cost_delta.if.chosen`（以及 `cost_set` 的同形條件）可依同一張卡、同一個 face 的唯一
+`spell` 頭，在這次 play 正式選定的單張公開目標決定費用。`chosen.ref` 必須指向該頭根層
+`targets` 的實際 binding；支援存在判定，以及 `where.name`／`where.name_contains` 名稱條件。
+例如 BP17-030 先選自己的暗殺者從者，只有本次選定的那張名稱含「リオード」才減費。
+場上另有符合名稱的卡，不會替其他選定目標減費。
+
+這是卡片 play 費用與唯一 Spell 正式目標的既定依賴。lowering 在建立該目標的 decision 與
+binding 後才連結條件；WF 與 Native 都驗證精確 decision、binding、同卡同 face、單張公開
+Field／EX 選擇及本次 execution。名稱保存於正式選擇的快照；支付讀取實際答案，不能靠名稱
+字串在一般能力之間尋找 scope。多個候選 Spell 頭、私有目標、多張目標、其他能力或其他次
+play 的答案不在此依賴內。這不產生或冒充來源 binding ID／face revision。
+
+可支付性探測逐一代入合法的正式答案並檢查費用；尚未選牌的預覽不把某個候選答案當成最終
+費用。正式支付仍依實際答案重新計算，費用不足時沿 play 的原子回復程序取消整次嘗試。

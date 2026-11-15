@@ -1,0 +1,55 @@
+cards:
+  CP01-032:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - auto:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 4
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  any_of:
+                    - in: seen
+                      kind: spell
+                    - in: seen
+                      kind: amulet
+                may: true
+                n: 1
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+          on:
+            raced:
+              sel:
+                kind: follower
+                other: true
+              who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

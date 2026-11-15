@@ -1,4 +1,5 @@
 use super::tokens::PaidX;
+use crate::ir::repeated_moves as ir_repeated_moves;
 use crate::ir::{AbilityId, InstructionId, ScopeId, WellFormedCardProgram};
 mod plan;
 pub(crate) use plan::{AdmittedCard, CandidateAdmission};
@@ -452,6 +453,7 @@ fn check_requirements(
                                     | "shape.AbilityOrigin.Keyword"
                                     | "shape.ObjectFrozen.EnterFieldObject"
                                     | "shape.ObjectFrozen.EnterExObject"
+                                    | "shape.ObjectFrozen.RaceSubject"
                                     | "shape.ObjectFrozen.UbActivatedHolder"
                                     | "shape.ObjectFrozen.EquipHolder"
                                     | "shape.ObjectFrozen.DriveCheckedHolder"
@@ -607,6 +609,7 @@ fn check_action(
     x: Option<PaidX>,
 ) -> Result<()> {
     super::dice::check_action(action)?;
+    super::declaration::check(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
     if let Action::InstallEffect { effect, .. } = action
@@ -731,7 +734,13 @@ fn check_program(
             Node::Control {
                 control: control @ Control::Repeat { .. },
             } => {
-                let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("repeat"))?;
+                let body = if let Some((body, _)) = ir_dice::repeat(control) {
+                    body
+                } else {
+                    ir_repeated_moves::projection(control)
+                        .ok_or_else(|| unsupported("repeat"))?
+                        .body
+                };
                 check_program(body, source, origin, reads, x)?;
             }
             Node::Control {
@@ -886,14 +895,36 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.IntFrozen.MoveBatchCount"
+        "shape.Predicate.HasInfo"
+            | "predicate.has-info"
+            | "shape.CharacteristicPatch.SetKind"
+            | "shape.IntFrozen.MoveBatchCount"
             | "shape.Action.Dice"
             | "action.dice"
+            | "shape.Action.Declare"
+            | "action.declare"
+            | "shape.Declaration.NonnegativeInteger"
+            | "shape.Declaration.BoundedInteger"
             | "shape.DiceOperation.Roll"
             | "shape.Control.Repeat"
             | "control.repeat"
             | "shape.RepeatBody.Program"
             | "shape.Termination.Count"
+            | "shape.Termination.Until"
+            | "shape.Termination.While"
+            | "internal.IterationCheck.AfterIteration"
+            | "shape.ReceiptExport.Move"
+            | "control.repeat.export"
+            | "shape.NatRead.ZoneCapacity"
+            | "read.zone-capacity"
+            | "internal.CapacityZone.Ex"
+            | "internal.CapacityZone.Field"
+            | "internal.CapacityProperty.Free"
+            | "internal.CapacityProperty.Capacity"
+            | "shape.Selector.MoveAfterAll"
+            | "receipt.move-after-all"
+            | "shape.MovementReceiptList.Move"
+            | "internal.GenerationDeduplication.ByObjectAndGeneration"
             | "internal.IterationCheck.BeforeIteration"
             | "shape.IntFrozen.PaidMaterialActs"
             | "read.receipt.paid-material-acts"
@@ -1078,6 +1109,8 @@ fn supported(code: &str) -> bool {
             | "shape.Action.Transfer"
             | "action.transfer"
             | "action.posture"
+            | "shape.Action.FlipUp"
+            | "action.flip-up"
             | "shape.Action.FlipDown"
             | "action.flip-down"
             | "internal.Posture.Acted"

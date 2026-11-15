@@ -6,9 +6,118 @@ use crate::game::player::observation::InstalledEffect;
 use crate::ir::SourceSpan;
 
 use super::{Execution, Game, Result};
-use crate::game::player::observation::{EffectSource, seat};
+use crate::game::player::observation::{EffectSource, WordingField, WordingSource, seat};
 use crate::ir::{AbilityOrigin, AbilitySource};
 use serde::{Deserialize, Serialize};
+
+pub(super) fn wording_source(source: &SourceSpan) -> Option<Box<WordingSource>> {
+    let owner: serde_json::Value = serde_json::from_str(&source.owner).ok()?;
+    let face = source.face.strip_prefix("f:")?;
+    if owner["kind"] != "face_revision"
+        || face.len() != 32
+        || !face.bytes().all(|byte| byte.is_ascii_hexdigit())
+        || source.line == 0
+    {
+        return None;
+    }
+    let revision = owner["revision_id"].as_str().filter(|id| !id.is_empty())?;
+    let field = match (source.field.as_str(), source.section.as_deref()) {
+        ("effect", None) => WordingField::Effect,
+        ("section", Some(section)) => {
+            let ordinal = section.parse::<u64>().ok()?;
+            if ordinal.to_string() != section {
+                return None;
+            }
+            WordingField::Section { ordinal }
+        }
+        _ => return None,
+    };
+    Some(Box::new(WordingSource {
+        face_id: source.face.clone(),
+        revision_id: revision.into(),
+        field,
+    }))
+}
+
+#[cfg(test)]
+mod wording_tests {
+    use super::*;
+    use serde_json::json;
+
+    fn span() -> SourceSpan {
+        SourceSpan {
+            card_id: "synthetic".into(),
+            card_no: "synthetic-printing".into(),
+            face: "f:0123456789abcdef0123456789abcdef".into(),
+            owner: json!({"kind":"face_revision","revision_id":"revision-synthetic"}).to_string(),
+            field: "effect".into(),
+            section: None,
+            line: 1,
+            scope: "private-scope".into(),
+            fragment: Some("private-fragment".into()),
+            author_path: "/private-author-coordinate".into(),
+        }
+    }
+
+    #[test]
+    fn wording_source_keeps_the_checked_owner_and_printed_field() {
+        let mut source = span();
+        let mut expected = Box::new(WordingSource {
+            face_id: source.face.clone(),
+            revision_id: "revision-synthetic".into(),
+            field: WordingField::Effect,
+        });
+        assert_eq!(wording_source(&source), Some(expected.clone()));
+        for ordinal in [0, 2, u64::MAX] {
+            source.field = "section".into();
+            source.section = Some(ordinal.to_string());
+            expected.field = WordingField::Section { ordinal };
+            assert_eq!(wording_source(&source), Some(expected.clone()));
+        }
+    }
+
+    #[test]
+    fn wording_source_never_guesses_legacy_or_incomplete_coordinates() {
+        for (field, value) in [
+            ("owner", "card"),
+            ("owner", r#"{"kind":"face_revision"}"#),
+            ("owner", r#"{"kind":"face_revision","revision_id":""}"#),
+            (
+                "owner",
+                r#"{"kind":"printing_face","revision_id":"revision-synthetic"}"#,
+            ),
+            ("face", "front"),
+            ("face", "f:incomplete"),
+            ("field", "text"),
+            ("line", "0"),
+        ] {
+            let mut source = span();
+            match field {
+                "owner" => source.owner = value.into(),
+                "face" => source.face = value.into(),
+                "field" => source.field = value.into(),
+                "line" => source.line = 0,
+                _ => panic!("unsupported synthetic source field"),
+            }
+            assert_eq!(wording_source(&source), None);
+        }
+        for section in [
+            None,
+            Some("-1"),
+            Some("00"),
+            Some("+1"),
+            Some("18446744073709551616"),
+        ] {
+            let mut source = span();
+            source.field = "section".into();
+            source.section = section.map(String::from);
+            assert_eq!(wording_source(&source), None);
+        }
+        let mut source = span();
+        source.section = Some("0".into());
+        assert_eq!(wording_source(&source), None);
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub(super) struct ObjectLink {
@@ -89,6 +198,8 @@ pub(super) struct EffectOrigin {
     card: String,
     face: Option<u64>,
     line: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    wording: Option<Box<WordingSource>>,
     publicly_identified: bool,
 }
 
@@ -103,12 +214,14 @@ impl EffectOrigin {
         source: &AbilitySource,
     ) -> Result<Self> {
         let holder = execution.context.source.clone();
-        let (card, face, line) = if execution.ability.is_some() {
+        let (card, face, line, wording) = if execution.ability.is_some() {
             let provider = game.installed_effect_provider(execution)?;
+            let wording = wording_source(&provider.span);
             (
                 provider.card,
                 Some(provider.span.face),
                 Some(u64::from(provider.span.line)),
+                wording,
             )
         } else {
             let line = match source.origin {
@@ -119,13 +232,19 @@ impl EffectOrigin {
                 AbilityOrigin::Printed { face, .. } => Some(face.0.clone()),
                 _ => None,
             };
-            (game.information_source(&holder)?.card.clone(), face, line)
+            (
+                game.information_source(&holder)?.card.clone(),
+                face,
+                line,
+                None,
+            )
         };
         Ok(Self {
             link: ObjectLink::capture(game, &holder, execution.context.generation.0),
             face: game.effect_source_face(&card, face.as_deref())?,
             card,
             line,
+            wording,
             publicly_identified: execution
                 .source_information
                 .as_ref()
@@ -146,6 +265,7 @@ impl EffectOrigin {
             card: card.into(),
             face: game.effect_source_face(card, Some(&source.face))?,
             line: Some(u64::from(source.line)),
+            wording: wording_source(source),
             publicly_identified,
         })
     }
@@ -158,6 +278,7 @@ impl EffectOrigin {
             card: self.card.clone(),
             face: self.face,
             line: self.line,
+            wording: self.wording.clone(),
             holder: self.link.observed(game, perspective),
         })
     }

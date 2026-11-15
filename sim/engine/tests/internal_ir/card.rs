@@ -5,6 +5,10 @@ mod battle_effects;
 mod battle_objects;
 #[path = "card/battle_pending.rs"]
 mod battle_pending;
+#[path = "card/battle_quotas.rs"]
+mod battle_quotas;
+#[path = "card/battle_turn.rs"]
+mod battle_turn;
 #[path = "card/board_relationships.rs"]
 mod board_relationships;
 #[path = "card/by_kind.rs"]
@@ -27,6 +31,8 @@ mod event_operand_admission;
 mod event_paid_consumer;
 #[path = "card/event_paid_damage.rs"]
 mod event_paid_damage;
+#[path = "card/event_references.rs"]
+mod event_references;
 #[path = "card/event_subject_condition.rs"]
 mod event_subject_condition;
 #[path = "card/evolution_ordinal.rs"]

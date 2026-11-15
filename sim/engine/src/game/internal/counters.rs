@@ -196,7 +196,8 @@ impl Game {
         self.object_mut(&id)?.state["counters"][&change.kind.0] = json!(change.after.0);
         let name = self.catalog.counter_name(&change.kind.0);
         self.emit(
-            json!({"kind":"カウンター","object":id,"name":name,"delta":change.delta.0}),
+            json!({"kind":"カウンター","object":id,"name":name,"delta":change.delta.0,
+                "before":change.before.0,"after":change.after.0}),
             &execution.frame().cause,
             group,
         );
@@ -320,7 +321,8 @@ impl Game {
             let group = self.group();
             let name = self.catalog.counter_name(&key);
             self.emit(
-                json!({"kind":"カウンター","object":id,"name":name,"delta":delta}),
+                json!({"kind":"カウンター","object":id,"name":name,"delta":delta,
+                    "before":before.0,"after":after}),
                 &execution.frame().cause,
                 group,
             );

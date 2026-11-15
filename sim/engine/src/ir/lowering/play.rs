@@ -1260,6 +1260,7 @@ impl BodyContext<'_> {
             let mode_id = u64::try_from(mode_id).map_err(|_error| unsupported(path))?;
             let scope = self.card_allocator.scope(path)?;
             let mut context = BodyContext {
+                declared_numbers: self.declared_numbers.clone(),
                 x: None,
                 discard_event: self.discard_event,
                 banish_event: self.banish_event,
@@ -1640,6 +1641,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
             contains_choice(&by_kind.leader) || contains_choice(&by_kind.follower)
         }
         ast::Step::Dice(_)
+        | ast::Step::Declare(_)
         | ast::Step::Shuffle(_)
         | ast::Step::PlayCard(_)
         | ast::Step::PlayAbility(_)
@@ -1666,6 +1668,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Steal(_)
         | ast::Step::Give(_)
         | ast::Step::FlipDown(_)
+        | ast::Step::MakeType(_)
         | ast::Step::Buff(_)
         | ast::Step::Grant(_)
         | ast::Step::SetStat(_)

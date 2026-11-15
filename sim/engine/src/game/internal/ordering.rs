@@ -29,7 +29,7 @@ use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
     ObjectProperty,
 };
-use crate::ir::{InstructionContext, NumericProperty};
+use crate::ir::{InstructionContext, NumericProperty, Stat};
 use alloc::collections::BTreeSet;
 use serde_json::json;
 
@@ -219,6 +219,7 @@ pub(super) fn check_node_with_x(
     mask_entry_origin(&mut inspected)?;
     mask_public_selectors(&mut inspected)?;
     super::tokens::mask_operands(&mut inspected, x);
+    mask_kind_patch(&mut inspected)?;
     mask_granted_definitions(&mut inspected);
     if let Node::Instruction { instruction } = &mut inspected
         && instruction.context == InstructionContext::Effect
@@ -344,6 +345,30 @@ fn mask_player_cost_filter(inspected: &mut Node) -> Result<()> {
         {
             // This checked filter reads only the played card, never enumerates a private zone.
             *subjects = Selector::Objects { objects: vec![] };
+        }
+    }
+    Ok(())
+}
+
+fn mask_kind_patch(inspected: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = inspected
+        && matches!(
+            instruction.action,
+            Action::Modify {
+                patch: CharacteristicPatch::SetKind { .. },
+                ..
+            }
+        )
+    {
+        super::kind_change::check_action(&instruction.action)?;
+        if let Action::Modify { patch, .. } = &mut instruction.action {
+            // A fixed public patch is not a selector that enumerates private amulets.
+            *patch = CharacteristicPatch::Numeric {
+                stat: Stat::Attack,
+                change: NumericChange::Add {
+                    amount: Expr::Literal(Int(0)),
+                },
+            };
         }
     }
     Ok(())

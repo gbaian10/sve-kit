@@ -891,10 +891,17 @@ impl Game {
         let prevent_gain = self.restricted(&format!("{seat}.leader"), "normal_max_pp_gain")?;
         let prevent_draw = self.restricted(&format!("{seat}.leader"), "normal_draw")?;
         let player = self.player_mut(&seat)?;
-        let max = int(&player.pp["max"])
-            .saturating_add(i64::from(!prevent_gain))
-            .min(10);
+        let (before_max, before) = (int(&player.pp["max"]), int(&player.pp["current"]));
+        let max = before_max.saturating_add(i64::from(!prevent_gain)).min(10);
         player.pp = json!({"current":max,"max":max});
+        self.record_player_resource(
+            &seat,
+            "maximum_pp",
+            before_max,
+            max,
+            &json!({"rule":"7.2.1"}),
+        );
+        self.record_player_resource(&seat, "pp", before, max, &json!({"rule":"7.2.2"}));
         let mut standing = Vec::new();
         for id in self.zone_ids(&seat, "field") {
             if !self.restricted(&id, "normal_stand")? && !self.internal_rule_stand_blocked(&id)? {
