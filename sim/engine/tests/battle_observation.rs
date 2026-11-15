@@ -336,6 +336,30 @@ fn board_attack_never_relinks_to_a_new_generation_of_either_participant() {
 }
 
 #[test]
+fn board_attack_requires_field_zones_even_when_the_frozen_generations_still_match() {
+    for attacker_left in [true, false] {
+        let mut saved = attacking_game(if attacker_left {
+            "P2.leader"
+        } else {
+            "own-hand"
+        });
+        let generation = saved["state"]["objects"]["own-hand"]["generation"].clone();
+        if attacker_left {
+            saved["state"]["flow"]["attacker"] = json!("own-hand");
+            saved["state"]["flow"]["attacker_generation"] = generation;
+        } else {
+            saved["state"]["flow"]["target_generation"] = generation;
+        }
+        let outside_field: Game = serde_json::from_value(saved).unwrap();
+        let before = outside_field.digest().unwrap();
+        for viewer in [Viewer::P1, Viewer::P2] {
+            assert!(outside_field.observe(viewer).unwrap().attack.is_none());
+        }
+        assert_eq!(outside_field.digest().unwrap(), before);
+    }
+}
+
+#[test]
 fn board_attack_requires_current_viewer_authority_for_each_card_endpoint() {
     let mut saved = attacking_game("physical-base");
     saved["state"]["knowledge"]["P2"]["located"]
