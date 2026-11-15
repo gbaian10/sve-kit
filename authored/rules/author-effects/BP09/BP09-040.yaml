@@ -1,0 +1,28 @@
+cards:
+  BP09-040:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                on:
+                  kind: follower
+                  orig_cost_le: 3
+                  who: all
+                  zone: field
+                what: attack
+      - lastword:
+          do:
+            - life:
+                delta: 3
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+format: 2
+kind: author_effect_set
