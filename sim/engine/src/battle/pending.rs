@@ -47,7 +47,7 @@ pub fn project_pending(
         .collect()
 }
 
-const fn timing(value: native::TriggerTiming) -> wire::TriggerTiming {
+pub(super) const fn timing(value: native::TriggerTiming) -> wire::TriggerTiming {
     match value {
         native::TriggerTiming::EnterField => wire::TriggerTiming::EnterField,
         native::TriggerTiming::Targeted => wire::TriggerTiming::Targeted,

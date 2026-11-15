@@ -1,4 +1,6 @@
 use super::*;
+#[path = "card/battle_effects.rs"]
+mod battle_effects;
 #[path = "card/battle_pending.rs"]
 mod battle_pending;
 #[path = "card/board_relationships.rs"]

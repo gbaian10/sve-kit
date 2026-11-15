@@ -219,6 +219,7 @@ fn board_attack_observation_tracks_committed_main_intent_for_both_viewers() {
 
 #[test]
 fn board_attack_disappears_when_an_on_attack_trigger_destroys_either_participant() {
+    // Destruction also retires the generation; the saved-state case protects the zone guard alone.
     for destroyed in [None, Some(Viewer::P1), Some(Viewer::P2)] {
         let steps = destroyed.map_or_else(
             || vec![draw(1, 0)],
