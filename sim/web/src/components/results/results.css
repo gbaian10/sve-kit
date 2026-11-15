@@ -24,10 +24,11 @@
 }
 
 [data-view="grid"] > li {
-  /* Estimate the portrait and name line; auto remembers measured multilingual heights. */
+  /* Estimate the portrait, the 6px gap, the name line and the rarity line (38px together); auto
+     remembers measured heights, such as a cell without a rarity or with a translated name. */
   contain-intrinsic-block-size: auto
     calc(
-      (100cqw - (var(--result-columns) - 1) * 0.75rem) / var(--result-columns) * 88 / 63 + 1.5rem
+      (100cqw - (var(--result-columns) - 1) * 0.75rem) / var(--result-columns) * 88 / 63 + 2.375rem
     );
 }
 

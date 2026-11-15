@@ -48,6 +48,80 @@ describe("visible wording label in card results", () => {
   })
 })
 
+describe("caption under the card image", () => {
+  const restriction = (maxCopies: number | null) => ({
+    id: "r:synthetic",
+    formatCode: "standard" as const,
+    maxCopies,
+    effectiveFrom: "2026-01-01",
+    sourceUrl: null,
+    asOf: "2026-01-01",
+  })
+  /** Where each text starts in the card link, in reading order; -1 when the link does not show it. */
+  const positions = (...texts: readonly string[]) => {
+    const shown = screen.getByRole("link").textContent
+    return texts.map((text) => shown.indexOf(text))
+  }
+
+  it("shows the name and the card number, and no copy limit, for a card with neither a rarity nor a limit", async () => {
+    await renderInRouter(<CardGrid cells={[cell(false)]} images={undefined} onOpen={vi.fn()} />)
+    expect(screen.getByText("Synthetic name")).toBeVisible()
+    expect(screen.getByText("BP-SYNTHETIC")).toBeVisible()
+    expect(screen.queryByText("禁止")).not.toBeInTheDocument()
+    expect(screen.queryByText(/^限\d/)).not.toBeInTheDocument()
+  })
+
+  it("shows the rarity and the copy limit after the names", async () => {
+    const value = cell(false)
+    const rated: GridCell = {
+      ...value,
+      name: {
+        ...value.name,
+        secondary: { lang: "zh-Hant", text: "Synthetic translation" },
+      },
+      summary: {
+        ...value.summary,
+        rarity: { original: { lang: "ja", text: "LG" }, translations: {} },
+        restrictions: [restriction(1)],
+      },
+    }
+    await renderInRouter(<CardGrid cells={[rated]} images={undefined} onOpen={vi.fn()} />)
+    const [name, translation, rarity, limit] = positions(
+      "Synthetic name",
+      "Synthetic translation",
+      "LG",
+      "限1",
+    )
+    expect(name).toBeGreaterThanOrEqual(0)
+    expect(translation).toBeGreaterThan(name ?? 0)
+    expect(rarity).toBeGreaterThan(translation ?? 0)
+    expect(limit).toBeGreaterThan(rarity ?? 0)
+  })
+
+  it("shows a ban after the name of a card without a rarity", async () => {
+    const value = cell(false)
+    const banned: GridCell = {
+      ...value,
+      summary: { ...value.summary, restrictions: [restriction(0)] },
+    }
+    await renderInRouter(<CardGrid cells={[banned]} images={undefined} onOpen={vi.fn()} />)
+    const [name, ban] = positions("Synthetic name", "禁止")
+    expect(name).toBeGreaterThanOrEqual(0)
+    expect(ban).toBeGreaterThan(name ?? 0)
+  })
+
+  it("shows no copy limit for a restriction that sets none", async () => {
+    const value = cell(false)
+    const unlimited: GridCell = {
+      ...value,
+      summary: { ...value.summary, restrictions: [restriction(null)] },
+    }
+    await renderInRouter(<CardGrid cells={[unlimited]} images={undefined} onOpen={vi.fn()} />)
+    expect(screen.queryByText("禁止")).not.toBeInTheDocument()
+    expect(screen.queryByText(/^限\d/)).not.toBeInTheDocument()
+  })
+})
+
 it("shows each grid card from its card_l file without a srcset", async () => {
   const files: ImageIndex = {
     asset: () => ({ availability: "available", publication_state: "approved" }),
