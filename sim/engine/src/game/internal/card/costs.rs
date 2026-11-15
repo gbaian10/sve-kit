@@ -1,5 +1,6 @@
 use super::super::number_plan::{CostAmountPlan, CostConditionPlan};
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
+use crate::ir::flip_cost as flip_payment;
 use crate::ir::quick::card_permission;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{AbilityKind, CostOverride, FaceId, Located, PlayCostPayment};
@@ -136,7 +137,14 @@ fn check_additional(
     let hand = quick
         && super::hand_payment::single_additional(&payment.node.play.costs)
         && payment.node.play.parameters.is_empty();
-    if quick && !hand {
+    let flips = !payment.node.play.parameters.is_empty()
+        && payment
+            .node
+            .play
+            .parameters
+            .iter()
+            .all(|decision| flip_payment::material(decision).is_some());
+    if quick && !hand && !flips {
         return Err(unsupported("additional Quick payment preflight"));
     }
     if reveal_payment::payment(&payment.node.play) {

@@ -246,6 +246,7 @@ impl BodyContext<'_> {
             | ast::Step::Steal(_)
             | ast::Step::Give(_)
             | ast::Step::FlipDown(_)
+            | ast::Step::MakeType(_)
             | ast::Step::Buff(_)
             | ast::Step::Grant(_)
             | ast::Step::SetStat(_)
@@ -256,7 +257,8 @@ impl BodyContext<'_> {
             | ast::Step::Equip(_)
             | ast::Step::Pilot(_)
             | ast::Step::Delayed(_)
-            | ast::Step::Boxed(_) => None,
+            | ast::Step::Boxed(_)
+            | ast::Step::Declare(_) => None,
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)
@@ -629,6 +631,16 @@ impl BodyContext<'_> {
                             event: MovementEvent::LeaveField { event },
                         }],
                     }
+                }
+                ast::BanishAction::Objects(objects)
+                    if let ast::ObjectAction::Short(ast::Objects::Zone(query))
+                    | ast::ObjectAction::Long {
+                        r#ref: ast::Objects::Zone(query),
+                        result: None,
+                    } = objects.as_ref()
+                        && matches!(query.zone, ast::Zone::Ex) =>
+                {
+                    self.zone_objects(query, ZoneKind::Ex, path)?
                 }
                 ast::BanishAction::Objects(objects) => self.action_objects(objects, path)?,
             },

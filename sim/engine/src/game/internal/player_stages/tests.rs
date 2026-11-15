@@ -1,5 +1,6 @@
 use super::*;
 use crate::catalog::Catalog;
+use crate::game::internal::repeated_moves;
 use crate::game::internal::{Context, RuntimeAbilitySource};
 use crate::ir::*;
 use alloc::collections::{BTreeMap, VecDeque};
@@ -41,6 +42,7 @@ pub(in crate::game::internal) fn execution(game: &mut Game) -> Execution {
         ids: game.internal_identities().unwrap(),
         todo: VecDeque::new(),
         procedures: Vec::new(),
+        repeats: repeated_moves::State::default(),
         slots: BTreeMap::new(),
         receipts: BTreeMap::new(),
         cost_materials: BTreeMap::new(),
@@ -74,6 +76,7 @@ pub(in crate::game::internal) fn execution(game: &mut Game) -> Execution {
         spell: false,
         field_entry: false,
         play_origin: None,
+        play_origin_object: None,
         card_payment: None,
         play_counts: BTreeMap::new(),
         ward_entries: Vec::new(),

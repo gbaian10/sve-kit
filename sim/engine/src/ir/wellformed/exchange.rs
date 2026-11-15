@@ -1,12 +1,14 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::exchange as exchange_shape;
+use crate::ir::flip_cost;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     Action, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, CounterOperation, Decision,
     DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, Holder, InputMode,
     InstructionContext, Int, KeywordId, MoveDestination, MoveReason, Nat, ObjectOperand,
     ObjectProperty, OwnerZone, PlayCostExchange, PlayCostPayment, PlaySlot, PlayerRef,
-    PlayerRelation, Posture, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
+    PlayerRelation, PlayerSet, Posture, SelectionSnapshot, SelectionView, Selector, Visibility,
+    ZoneKind,
 };
 
 #[expect(
@@ -122,7 +124,11 @@ impl Checker {
             || players.relation != PlayerRelation::SelfPlayer
             || !matches!(
                 zone,
-                ZoneKind::Field | ZoneKind::Cemetery | ZoneKind::Hand | ZoneKind::Ex
+                ZoneKind::Field
+                    | ZoneKind::Cemetery
+                    | ZoneKind::Hand
+                    | ZoneKind::Ex
+                    | ZoneKind::Evolve
             )
             || constraint.cardinality.minimum.0 == 0
             || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
@@ -135,14 +141,7 @@ impl Checker {
             || !constraint.aggregate_bounds.is_empty()
             || !decision.captures.is_empty()
             || decision.actor != (PlayerRef::Controller {})
-            || decision.visibility
-                != if *zone == ZoneKind::Hand {
-                    Visibility::Only {
-                        players: players.clone(),
-                    }
-                } else {
-                    Visibility::Public {}
-                }
+            || decision.visibility != material_visibility(decision, *zone, players)
             || decision.kind
                 != (DecisionKind::PlayParameter {
                     slot: PlaySlot::CostMaterials,
@@ -166,7 +165,8 @@ impl Checker {
                 if *selection == *binding && kind.0 == "stack_counter" && *amount > 0
                     && *zone == ZoneKind::Field && constraint.cardinality.minimum == Nat(1)
                     && step.keyword == Some(KeywordId::EarthRite));
-        let valid = earth_rite
+        let valid = flip_cost::payment(&step.instruction.action, decision)
+            || earth_rite
             || matches!(&step.instruction.action,
             Action::Move { objects, movement, reason: MoveReason::Put }
                 if *zone == ZoneKind::Field && *objects == selected
@@ -192,5 +192,17 @@ impl Checker {
         checker.at("cost", |checker| {
             checker.instruction_in(&step.instruction, InstructionContext::Cost, false)
         })
+    }
+}
+
+fn material_visibility(decision: &Decision, zone: ZoneKind, players: &PlayerSet) -> Visibility {
+    if zone == ZoneKind::Hand
+        || flip_cost::material(decision).is_some_and(|(_, before_up)| !before_up)
+    {
+        Visibility::Only {
+            players: players.clone(),
+        }
+    } else {
+        Visibility::Public {}
     }
 }

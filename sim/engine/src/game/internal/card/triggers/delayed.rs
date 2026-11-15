@@ -15,6 +15,7 @@ use crate::ir::{
     AbilityId, AbilityInstanceId, AbilityKind, AbilityQualification, Action, CostSpec, Instruction,
     PlaySpec, SnapshotId,
 };
+use crate::ir::{DelayedLifetime, Phase, PhaseEvent, PlayerRef};
 use crate::ir::{EnterFieldEvent, EntryMethod, EventPattern, LifeChangeEvent, TriggerCondition};
 use crate::ir::{RuntimeZoneRef, ZoneKind};
 
@@ -30,6 +31,8 @@ pub(super) struct DelayedEntry {
 pub(in crate::game::internal) struct Installed {
     origin: super::EffectOrigin,
     turn: u64,
+    once: bool,
+    fired: bool,
     holder: String,
     source: RuntimeAbilitySource,
     /// The installing ability, which provides the effects its callback creates.
@@ -58,17 +61,24 @@ impl Game {
             .delayed
             .iter()
             .filter(|record| {
-                record.source.controller == player.player()
+                !record.fired
+                    && record.source.controller == player.player()
                     && (perspective == player || record.information.publicly_identified())
             })
             .map(|record| InstalledEffect {
                 source: record.origin.observed(self, perspective),
-                expires: EffectExpiry::TurnEnd,
+                expires: if record.once {
+                    EffectExpiry::NoTemporalExpiry
+                } else {
+                    EffectExpiry::TurnEnd
+                },
                 main_live: true,
                 intervals: vec![],
                 active: true,
                 change: InstalledChange::Delayed {
-                    timing: if record.entry_plan().is_some() {
+                    timing: if record.phase().is_some() {
+                        TriggerTiming::Phase
+                    } else if record.entry_plan().is_some() {
                         TriggerTiming::EnterField
                     } else if record.life_filter().is_some() {
                         TriggerTiming::LifeChange
@@ -88,7 +98,10 @@ impl Game {
         if !delayed_ir::valid(&instruction.action) {
             return Err(unsupported("delayed installation"));
         }
-        let Action::Delay { captures, .. } = &instruction.action else {
+        let Action::Delay {
+            captures, lifetime, ..
+        } = &instruction.action
+        else {
             return Err(unsupported("delayed action"));
         };
         let original = execution.ability.ok_or_else(|| invalid("delayed source"))?;
@@ -140,6 +153,8 @@ impl Game {
         self.card_runtime.delayed.push(Installed {
             origin: super::EffectOrigin::capture(self, execution, &instruction.source)?,
             turn: self.state.schedule.current()?,
+            once: matches!(lifetime, DelayedLifetime::Once {}),
+            fired: false,
             holder,
             source,
             parent: original,
@@ -351,14 +366,68 @@ impl Game {
             .collect()
     }
 
-    pub(in crate::game) fn internal_delayed_end_turn(&mut self, turn: u64) {
+    pub(super) fn has_delayed_phase(&self, phase: Phase, actor: PlayerId) -> bool {
         self.card_runtime
             .delayed
-            .retain(|record| record.turn != turn);
+            .iter()
+            .any(|record| record.phase_matches(phase, actor))
+    }
+
+    pub(super) fn delayed_phase_pending(
+        &mut self,
+        event: PhaseEvent,
+        header: &EventHeader,
+    ) -> Result<Vec<PendingOccurrence>> {
+        let records: Vec<_> = self
+            .card_runtime
+            .delayed
+            .iter()
+            .filter(|record| record.phase_matches(event.phase, event.player))
+            .cloned()
+            .collect();
+        for record in &mut self.card_runtime.delayed {
+            if records
+                .iter()
+                .any(|matched| matched.source.instance == record.source.instance)
+            {
+                record.fired = true;
+            }
+        }
+        records
+            .iter()
+            .map(|record| {
+                self.installed_pending(record, header, None, Some(EventPayload::Phase { event }))
+            })
+            .collect()
+    }
+
+    pub(in crate::game) fn internal_delayed_end_turn(&mut self, turn: u64) {
+        self.card_runtime.delayed.retain(|record| {
+            if record.once {
+                !record.fired
+            } else {
+                record.turn != turn
+            }
+        });
     }
 }
 
 impl Installed {
+    fn phase(&self) -> Option<(Phase, PlayerRef)> {
+        delayed_ir::phase(self.ability.node.trigger.as_ref()?)
+    }
+    fn phase_matches(&self, phase: Phase, actor: PlayerId) -> bool {
+        self.once
+            && !self.fired
+            && self.phase().is_some_and(|(expected, player)| {
+                expected == phase
+                    && match player {
+                        PlayerRef::Controller {} => actor == self.source.controller,
+                        _ => actor != self.source.controller,
+                    }
+            })
+    }
+
     fn life_filter(&self) -> Option<LifeFilter> {
         let Some(TriggerCondition::Event {
             pattern: EventPattern::LifeChange { binding, predicate },

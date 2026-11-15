@@ -18,7 +18,7 @@ use crate::ir::{
 use crate::ir::{AggregateBound, CostStep, KeywordId, PreconditionKind, PreconditionReason};
 use crate::ir::{Expr, Int, NumericChange, ObjectReceipt, ObjectReceiptList, ResourceOperation};
 use crate::ir::{Resource, x_pp};
-use crate::ir::{fusion, shuffle};
+use crate::ir::{flip_cost, fusion, shuffle};
 use crate::ir::{hand_position, printed_keywords};
 use crate::ir::{public_evolve, public_numbers};
 use alloc::collections::BTreeSet;
@@ -328,7 +328,7 @@ impl Checker {
         };
         self.play_input(play_scope, input, &decision.actor, controller)?;
         if *decision == ride::parameter(self.env.scope) {
-            // Only the fixed DrivePoint cost may inspect the controller's hidden evolve deck.
+            // DrivePoint has a fixed selector rather than an ordinary material-choice proof.
             let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
                 return self.reject();
             };
@@ -337,7 +337,8 @@ impl Checker {
             self.answer_access(&decision.domain, &decision.visibility);
             return Ok(());
         }
-        if decision.visibility != (Visibility::Public {}) {
+        if decision.visibility != (Visibility::Public {}) && !flip_cost::private_material(decision)
+        {
             return self.reject();
         }
         match (slot, &decision.domain) {
@@ -586,10 +587,11 @@ impl Checker {
             {
                 self.reject()
             }
-            Selector::Zone {
-                zone: ZoneKind::Evolve,
-                ..
-            } if public_evolve::selector(selector) => Ok(()),
+            Selector::Zone { players, zone: ZoneKind::Evolve, .. }
+                if public_evolve::selector(selector)
+                    || (self.env.private_choice
+                        && super::super::observation_selection::held_by(players, actor)
+                        && flip_cost::selector(selector) == Some(false)) => Ok(()),
             Selector::Zone {
                 zone: ZoneKind::Deck | ZoneKind::Evolve,
                 ..
@@ -803,7 +805,8 @@ impl Checker {
                         if step.instruction.precondition.is_some() {
                             return Err(checker.error(WellFormedReason::PreconditionTiming));
                         }
-                        let valid = matches!(&step.instruction.action,
+                        let valid = flip_cost::bound_action(&step.instruction.action).is_some()
+                            || matches!(&step.instruction.action,
                             Action::Discard { .. }
                             | Action::ScheduleTurn { player: PlayerRef::Controller {}, operation: TurnOperation::SkipNext {}, .. }
                             | Action::Fusion { .. }

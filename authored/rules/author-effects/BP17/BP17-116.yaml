@@ -1,0 +1,37 @@
+cards:
+  BP17-116:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - line: 2
+        play:
+          additional_cost:
+            flip_up:
+              n: 1
+              sel:
+                kind: evolve_follower
+                who: self
+                zone: evolve_deck
+      - line: 3
+        spell:
+          do:
+            - damage:
+                n: 3
+                to: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

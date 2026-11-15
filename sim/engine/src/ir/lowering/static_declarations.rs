@@ -20,6 +20,7 @@ fn provider(effect: &ast::StaticEffect) -> Option<Lower> {
         return Some(static_keywords::lower_at_source);
     }
     match effect {
+        ast::StaticEffect::MakeType(_) => Some(super::kind_change::lower_at_source),
         ast::StaticEffect::MustTarget(_) => Some(target_priority::lower_at_source),
         ast::StaticEffect::EntersActed(_) => Some(entry_posture::lower_at_source),
         ast::StaticEffect::BanishInstead(_) => Some(move_replacement::lower_at_source),

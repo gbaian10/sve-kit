@@ -899,7 +899,7 @@ impl Game {
                 }
             }
         }
-        if candidates.is_empty() {
+        if candidates.is_empty() && !self.has_delayed_phase(phase, actor) {
             return Ok(());
         }
         let event = PhaseEvent {
@@ -914,7 +914,7 @@ impl Game {
             Phase::Start => return Err(unsupported("start phase event")),
         })?;
         let header = self.pending_header(actor, Cause::Rule { rule }, None, before)?;
-        let mut pending = Vec::new();
+        let mut pending = self.delayed_phase_pending(event, &header)?;
         for (holder, ability) in candidates {
             let source = self.internal_effective_source(&holder, &ability)?;
             let additional = self.additional_phase_triggers(phase, source.controller)?;

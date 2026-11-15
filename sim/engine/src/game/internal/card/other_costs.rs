@@ -13,6 +13,7 @@ use crate::ir::{
     Instruction, Int, Interval, Nat, ObjectOperand, PlayerId, PlayerRef, PlayerRelation,
     SelectionView, Selector, TimeAnchor, UsageScope, ZoneKind,
 };
+use crate::ir::{MovementReceiptList, ObjectRef};
 use core::slice::from_ref;
 
 #[derive(Clone, Debug)]
@@ -22,6 +23,7 @@ pub(in crate::game::internal) struct InstalledCost {
     controller: PlayerId,
     players: Vec<PlayerId>,
     subjects: Selector,
+    members: Option<Vec<ObjectRef>>,
     change: CostChange,
     end: EffectEnd,
     intervals: Vec<TurnInterval>,
@@ -57,6 +59,11 @@ fn check_subjects(subjects: &Selector) -> Result<()> {
         } if players.relative_to == (PlayerRef::Controller {}) => {
             super::selection::check_predicate(predicate, *binding, false)
         }
+        Selector::MoveAfter { .. }
+        | Selector::MoveAfterAll {
+            receipts: MovementReceiptList::Move { .. },
+            ..
+        } => Ok(()),
         _ => Err(unsupported("player cost filter")),
     }
 }
@@ -325,12 +332,21 @@ impl Game {
         self.state.next_ir_effect = id
             .checked_add(1)
             .ok_or_else(|| invalid("cost identities exhausted"))?;
+        let members = if matches!(
+            subjects,
+            Selector::MoveAfter { .. } | Selector::MoveAfterAll { .. }
+        ) {
+            Some(execution.objects(self, subjects)?)
+        } else {
+            None
+        };
         self.card_runtime.other_costs.push(InstalledCost {
             origin: EffectOrigin::capture(self, execution, &instruction.source)?,
             id,
             controller: execution.context.controller,
             players,
             subjects: subjects.clone(),
+            members,
             change: change.clone(),
             end,
             intervals,
@@ -360,7 +376,15 @@ impl Game {
             }
             let mut provider = execution.clone();
             provider.context.controller = cost.controller;
-            if matches(self, &provider, &cost.subjects, holder, origin)? {
+            let matched = if let Some(members) = &cost.members {
+                let source = execution
+                    .play_origin_object
+                    .map_or_else(|| execution.reference(self, holder), Ok)?;
+                members.contains(&source)
+            } else {
+                matches(self, &provider, &cost.subjects, holder, origin)?
+            };
+            if matched {
                 ids.push(cost.id);
             }
         }

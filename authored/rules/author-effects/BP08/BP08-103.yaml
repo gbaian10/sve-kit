@@ -1,0 +1,39 @@
+cards:
+  BP08-103:
+    abilities:
+      - evolve:
+          cost:
+            pp: 2
+        line: 1
+      - fanfare:
+          do:
+            - declare:
+                bind: chosen
+                kind: number
+            - move:
+                result: milled
+                to: cemetery
+                top:
+                  n: 5
+                  who: self
+            - damage:
+                n:
+                  count_of:
+                    receipt: milled
+                    view: before
+                    where:
+                      orig_cost_eq: chosen
+                to:
+                  kind: follower
+                  who: opp
+                  zone: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

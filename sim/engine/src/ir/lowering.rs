@@ -16,6 +16,7 @@ mod costs;
 mod counters;
 mod current;
 mod deck_rules;
+mod declaration;
 mod delayed;
 mod dice;
 mod discard;
@@ -30,6 +31,7 @@ mod hand_exit;
 mod hand_payment;
 mod hand_position;
 mod keywords;
+mod kind_change;
 mod material;
 mod material_values;
 mod move_replacement;
@@ -47,10 +49,12 @@ mod prevention;
 mod public_reveal;
 mod receipt_counts;
 mod recipient_union;
+mod repeated_moves;
 mod resource_entry;
 mod reveal_cost;
 mod reveal_until;
 mod stack;
+mod stat_presence;
 mod static_declarations;
 mod static_keywords;
 mod target_priority;
@@ -60,6 +64,7 @@ mod victory;
 mod x_pp;
 
 mod flip;
+mod flip_cost;
 mod fusion;
 mod posture;
 mod quick;
@@ -536,7 +541,8 @@ impl Allocator {
                     attack_restrictions::lower
                 }
                 Some(
-                    ast::StaticEffect::If(_)
+                    ast::StaticEffect::MakeType(_)
+                    | ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
                     | ast::StaticEffect::BanishInstead(_)
                     | ast::StaticEffect::MustTarget(_)
@@ -1331,6 +1337,7 @@ struct FieldEntryGuard {
 /// Names a nested body (an optional or a player procedure) may bind; the enclosing body sees
 /// none of them once the nested body ends.
 struct LocalBindings {
+    declared_numbers: BTreeMap<String, declaration::DeclaredBinding>,
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
     observations: BTreeMap<String, super::ObjectReceipt>,
@@ -1463,6 +1470,7 @@ struct BodyContext<'definitions> {
     damage_event: Option<Binding<super::DamageEvent>>,
     dice_event: Option<Binding<super::DiceEvent>>,
     dice_results: BTreeMap<String, Binding<Nat>>,
+    declared_numbers: BTreeMap<String, declaration::DeclaredBinding>,
     equip_event: Option<Binding<super::EquipEvent>>,
     drive_checked_event: Option<Binding<super::DriveCheckedEvent>>,
     source_use: &'definitions ast::SourceUse,
@@ -1557,6 +1565,7 @@ impl<'definitions> BodyContext<'definitions> {
             damage_event: None,
             dice_event: None,
             dice_results: BTreeMap::new(),
+            declared_numbers: BTreeMap::new(),
             equip_event: None,
             drive_checked_event: None,
             source_use: &entry.sources[0],
@@ -1839,6 +1848,7 @@ impl<'definitions> BodyContext<'definitions> {
 
     fn local_bindings(&self) -> LocalBindings {
         LocalBindings {
+            declared_numbers: self.declared_numbers.clone(),
             targets: self.targets.clone(),
             recipient_targets: self.recipient_targets.clone(),
             observations: self.observations.clone(),
@@ -1861,6 +1871,7 @@ impl<'definitions> BodyContext<'definitions> {
     }
 
     fn restore_bindings(&mut self, saved: LocalBindings) {
+        self.declared_numbers = saved.declared_numbers;
         self.targets = saved.targets;
         self.recipient_targets = saved.recipient_targets;
         self.observations = saved.observations;
@@ -1890,8 +1901,10 @@ impl<'definitions> BodyContext<'definitions> {
         ability_source: &AbilitySource,
     ) -> Result<Program, LoweringError> {
         let payments = self.local_payments.clone();
+        let declared_numbers = self.declared_numbers.clone();
         let program = self.step_list(author_steps, path, source, ability_source);
         self.local_payments = payments;
+        self.declared_numbers = declared_numbers;
         program
     }
 
@@ -2173,7 +2186,9 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::MakeType(value) => self.make_type(value, path),
             ast::Step::Delayed(value) => self.delayed(value, path, source, span),
+            ast::Step::Declare(value) => self.declare(value, path),
             ast::Step::Dice(value) => self.dice(value, path),
             ast::Step::Win(_) => Ok(effect_victory(source)),
             ast::Step::PlayCard(value) => self.nested_card_play(value, path),
@@ -2371,7 +2386,10 @@ const fn extra_turn(occurrence: Binding<super::ScheduleToken>) -> Action {
 }
 
 fn action_actor(action: &Action) -> PlayerRef {
-    if let Action::Discard { player, .. } | Action::Draw { player, .. } = action {
+    if let Action::Discard { player, .. }
+    | Action::Draw { player, .. }
+    | Action::Declare { actor: player, .. } = action
+    {
         player.clone()
     } else {
         PlayerRef::Controller {}

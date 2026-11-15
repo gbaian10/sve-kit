@@ -406,6 +406,23 @@ impl BodyContext<'_> {
         value: &ast::BodyComparison,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
+        if let (Some(left), Some(right)) = (
+            self.declared_natural(&value.left),
+            self.declared_natural(&value.right),
+        ) {
+            return Ok(Expr::Compute(Box::new(Predicate::CompareNat {
+                left,
+                comparison: match value.op {
+                    ast::Comparison::Eq => Comparison::Equal,
+                    ast::Comparison::Ne => Comparison::NotEqual,
+                    ast::Comparison::Lt => Comparison::Less,
+                    ast::Comparison::Le => Comparison::LessEqual,
+                    ast::Comparison::Gt => Comparison::Greater,
+                    ast::Comparison::Ge => Comparison::GreaterEqual,
+                },
+                right,
+            })));
+        }
         if let (ast::Number::ReceiptCount { count }, ast::Number::Literal(threshold)) =
             (&value.left, &value.right)
         {
@@ -426,8 +443,17 @@ impl BodyContext<'_> {
                 });
             }
         }
-        Ok(Expr::Compute(Box::new(Predicate::CompareInt {
-            left: self.number(&value.left, path, &mut BTreeSet::new())?,
+        let left = self.number(&value.left, path, &mut BTreeSet::new())?;
+        let right = self.number(&value.right, path, &mut BTreeSet::new())?;
+        let mut predicates = [
+            self.stat_guard(&value.left, &left),
+            self.stat_guard(&value.right, &right),
+        ]
+        .into_iter()
+        .flatten()
+        .collect::<Vec<_>>();
+        let comparison = Expr::Compute(Box::new(Predicate::CompareInt {
+            left,
             comparison: match value.op {
                 ast::Comparison::Eq => Comparison::Equal,
                 ast::Comparison::Ne => Comparison::NotEqual,
@@ -436,8 +462,13 @@ impl BodyContext<'_> {
                 ast::Comparison::Gt => Comparison::Greater,
                 ast::Comparison::Ge => Comparison::GreaterEqual,
             },
-            right: self.number(&value.right, path, &mut BTreeSet::new())?,
-        })))
+            right,
+        }));
+        if predicates.is_empty() {
+            return Ok(comparison);
+        }
+        predicates.push(comparison);
+        Ok(Expr::Compute(Box::new(Predicate::And { predicates })))
     }
 
     pub(super) fn entered_from(
@@ -998,6 +1029,19 @@ impl BodyContext<'_> {
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
+            ast::Number::ZoneFree { zone_free } => {
+                let ast::SelfPlayer::Controller = zone_free.who;
+                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::ZoneCapacity {
+                        player: PlayerRef::Controller {},
+                        zone: match zone_free.zone {
+                            ast::CapacityZone::Field => super::super::CapacityZone::Field,
+                            ast::CapacityZone::Ex => super::super::CapacityZone::Ex,
+                        },
+                        property: super::super::CapacityProperty::Free,
+                    })),
+                })))
+            }
             ast::Number::Counter { counter } => Ok(counter_number(counter, self.counter_read_view)),
             ast::Number::Power { power_of } => match power_of {
                 ast::Observation::Binding(name) if name == "it" => {
@@ -1106,6 +1150,9 @@ impl BodyContext<'_> {
                 Ok(player_resource(*leader_life, PlayerResource::Life))
             }
             ast::Number::Alias(name) => {
+                if let Some(binding) = self.declared_numbers.get(name) {
+                    return Ok(binding.integer());
+                }
                 if name == "x"
                     && let Some(parameter) = self.x
                 {

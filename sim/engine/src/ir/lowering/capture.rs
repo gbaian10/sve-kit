@@ -318,6 +318,7 @@ impl BodyContext<'_> {
             | ast::Number::DistinctOriginalCosts {
                 distinct_orig_costs: ast::DistinctQuery::Receipt { .. },
             }
+            | ast::Number::ZoneFree { .. }
             | ast::Number::Dice { .. }
             | ast::Number::Counter { .. }
             | ast::Number::Power { .. }

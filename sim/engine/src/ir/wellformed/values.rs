@@ -4,7 +4,6 @@ use super::{
     NatOperation, NatRead, ObjectOperand, ObjectReceipt, ObjectReceiptList, ObjectRef, ObjectView,
     PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView, Selector, WellFormedReason,
 };
-use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
 use crate::ir::events::numbers;
 use crate::ir::history_turn::HistoryPlan;
@@ -20,6 +19,7 @@ use crate::ir::{
     MovementReceipt, NameOperation, NamesRead, ObjectFrozen, ReceiptLocation, RuntimeObjectView,
     TraitId, TraitsRead, Visibility,
 };
+use crate::ir::{ObjectRelation, stat_presence};
 
 use core::any::TypeId;
 
@@ -341,6 +341,7 @@ impl Checker {
                 Ok(())
             }
             Predicate::Not { predicate } => self.boolean(predicate),
+            Predicate::HasInfo { information } => self.stat_presence_condition(information),
             Predicate::CompareInt { left, right, .. } => {
                 self.integer(left)?;
                 self.integer(right)
@@ -428,6 +429,22 @@ impl Checker {
             | Predicate::ObjectEquals { .. } => self.event_predicate(expression),
             _ => self.reject(),
         }
+    }
+
+    fn stat_presence_condition(&self, information: &NumberRead) -> Checked {
+        if !stat_presence::supported(information) {
+            return self.reject();
+        }
+        let NumberRead::Stats { object, .. } = information else {
+            return self.reject();
+        };
+        if let ObjectView::Current { object } = object
+            && let ObjectOperand::Selected { selection } = object.as_ref()
+            && !self.env.public_board_singles.contains(&selection.key())
+        {
+            return self.reject();
+        }
+        self.information_view(object)
     }
 
     fn class_predicate(&self, read: &ClassRead) -> Checked {

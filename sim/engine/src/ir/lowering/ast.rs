@@ -253,6 +253,8 @@ pub(super) enum PpVariable {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostOperation {
+    FlipUp(FlipMaterial),
+    FlipDown(FlipMaterial),
     Pp(PpAmount),
     Lesson(u64),
     Counter(CounterCost),
@@ -403,6 +405,7 @@ pub(super) enum Step {
     Race(Race),
     GainDrive(EffectEvolution),
     Dice(Dice),
+    Declare(Declare),
     Repeat(Repeat),
     Evolve(NamedEffectEvolution),
     If(Conditional),
@@ -429,6 +432,7 @@ pub(super) enum Step {
     Steal(Steal),
     Give(Give),
     FlipDown(FlipDown),
+    MakeType(MakeType),
     Buff(Modify),
     Grant(Grant),
     SetStat(Modify),
@@ -1285,6 +1289,22 @@ pub(super) enum Zone {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
+pub(super) struct TypeEffect {
+    pub on: Option<Objects>,
+    #[serde(rename = "type")]
+    pub kind: FieldKind,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct MakeType {
+    pub on: Objects,
+    #[serde(rename = "type")]
+    pub kind: FieldKind,
+    pub until: Option<Until>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
 pub(super) struct Apply {
     pub on: Objects,
     pub effect: InstalledEffect,
@@ -1367,6 +1387,7 @@ pub(super) struct CostModifier {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Playing {
+    Follow { r#in: FollowName },
     Affected(AffectedCondition),
     Union { any_of: Vec<PlayingQuery> },
     Query(PlayingQuery),
@@ -2018,8 +2039,24 @@ pub(super) enum LeaderSide {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CapacityQuery {
+    pub who: SelfPlayer,
+    pub zone: CapacityZone,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CapacityZone {
+    Field,
+    Ex,
+}
+
+#[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Number {
+    ZoneFree {
+        zone_free: CapacityQuery,
+    },
     Dice {
         dice: String,
     },
@@ -3027,6 +3064,8 @@ pub(super) enum ModeCondition {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct OptionalCost {
+    pub flip_up: Option<FlipMaterial>,
+    pub flip_down: Option<FlipMaterial>,
     pub pp: Option<u64>,
     pub earth_rite: Option<u64>,
     pub one_of: Option<Vec<Self>>,
@@ -3482,6 +3521,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    MakeType(TypeEffect),
     MustTarget(MustTarget),
     EntersActed(EntryPosture),
     BanishInstead(BanishReplacement),
@@ -4040,14 +4080,15 @@ pub(super) enum CountOf {
 pub(super) struct FilteredCountOf {
     pub receipt: String,
     #[serde(rename = "where")]
-    pub filter: ReceiptTraitFilter,
+    pub filter: ReceiptMaterialFilter,
     #[serde(rename = "view")]
     pub _view: Before,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct ReceiptTraitFilter {
-    pub r#trait: String,
+pub(super) struct ReceiptMaterialFilter {
+    pub r#trait: Option<String>,
+    pub orig_cost_eq: Option<Box<Number>>,
 }
 
 #[derive(Deserialize)]
@@ -4098,9 +4139,24 @@ pub(super) struct Dice {
 #[serde(deny_unknown_fields)]
 pub(super) struct Repeat {
     #[serde(rename = "n")]
-    pub times: u64,
+    pub times: Option<u64>,
+    pub until: Option<Condition>,
+    pub r#while: Option<Condition>,
+    pub check: Option<RepeatCheck>,
+    pub collect: Option<RepeatCollect>,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RepeatCheck {
+    Before,
+    After,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RepeatCollect {
+    pub receipts: String,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -4168,13 +4224,16 @@ pub(super) struct Delayed {
     pub on: DelayedOn,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
-    pub until: Until,
+    pub until: Option<Until>,
     #[serde(default)]
     pub next_only: bool,
 }
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum DelayedOn {
+    Phase {
+        phase: PhaseSubscriptionPayload,
+    },
     Moved {
         moved: DelayedMove,
     },
@@ -4263,4 +4322,45 @@ impl<'de> Deserialize<'de> for GiveRecipient {
 pub(super) struct MustTarget {
     pub on: Objects,
     pub by: LeaderSide,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FlipMaterial {
+    pub sel: FlipFilter,
+    pub n: u64,
+    pub result: Option<String>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FlipFilter {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: FlipZone,
+    pub kind: SearchKind,
+    pub face_up: Option<bool>,
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
+    pub r#trait: Option<String>,
+}
+#[derive(Deserialize)]
+pub(super) enum FlipZone {
+    #[serde(rename = "evolve_deck")]
+    Evolve,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Declare {
+    pub bind: String,
+    pub kind: DeclareNumber,
+    pub min: Option<u64>,
+    pub max: Option<u64>,
+    pub who: Option<Participant>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DeclareNumber {
+    Number,
 }

@@ -59,12 +59,14 @@ mod by_kind;
 mod card;
 mod cost;
 mod counters;
+mod declaration;
 mod dice;
 mod discard;
 mod drive;
 mod duration;
 mod earth;
 mod event_reads;
+mod repeated_moves;
 pub(in crate::game) use card::ability_restrictions::AbilityLock;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
@@ -84,6 +86,7 @@ pub(in crate::game) use field_entry::FieldEntry;
 mod life;
 mod movement;
 pub(in crate::game) use movement::zone_capacity;
+mod kind_change;
 mod number_plan;
 mod numeric;
 mod observation;
@@ -97,6 +100,7 @@ mod reveal_until;
 mod scheduled_turn;
 mod search;
 mod shuffle;
+mod stat_presence;
 mod terminal;
 mod tokens;
 mod transform;
@@ -338,6 +342,8 @@ pub enum InstructionOutcome {
     Batch(BatchOutcome),
     /// One distinct occurrence inserted before the previously scheduled next turn.
     ScheduledTurn(ScheduleToken),
+    /// The public number fixed by one declaring instruction.
+    Declared(Nat),
     /// A completed shuffle, with no projectable object or position result.
     Shuffled,
     /// Same field generations whose controller actually changed.
@@ -419,7 +425,7 @@ pub enum InstructionOutcome {
     Order(OrderOutcome),
     /// Complete checks in printed order, after each icon and final movement.
     DriveChecks(Vec<DriveCheckedEvent>),
-    /// Frozen generations receiving one numeric effect instance.
+    /// Frozen generations receiving one characteristic effect instance.
     Modified {
         /// Allocated only when at least one current subject receives the effect.
         effect: Option<EffectId>,
@@ -598,9 +604,10 @@ enum Wait {
     SearchPartition(search::PartitionWait),
     SearchReplacement(search::ReplacementWait),
     Integer {
-        binding: Binding<Nat>,
+        binding: declaration::NumberBinding,
         bounds: Cardinality,
         purpose: super::player::QuestionPurpose,
+        declaration: Option<ReceiptId>,
     },
     Draw {
         instruction: Box<Instruction>,
@@ -645,6 +652,7 @@ pub(super) struct Execution {
     spell: bool,
     field_entry: bool,
     play_origin: Option<ZoneKind>,
+    play_origin_object: Option<ObjectRef>,
     card_payment: Option<(FaceId, ReceiptId)>,
     play_counts: BTreeMap<u32, (Nat, Nat)>,
     ward_entries: Vec<(ObjectRef, bool)>,
@@ -655,6 +663,7 @@ pub(super) struct Execution {
     procedures: Vec<player_stages::ProcedureLocals>,
     /// Player-event journal position when this execution was created.
     began: u64,
+    repeats: repeated_moves::State,
 }
 
 #[expect(
@@ -808,6 +817,7 @@ impl Game {
                     .collect(),
                 slots: BTreeMap::new(),
                 procedures: Vec::new(),
+                repeats: repeated_moves::State::default(),
                 receipts: BTreeMap::new(),
                 cost_materials: BTreeMap::new(),
                 hand_cost_groups: BTreeMap::new(),
@@ -832,6 +842,7 @@ impl Game {
                 spell: false,
                 field_entry: false,
                 play_origin: None,
+                play_origin_object: None,
                 card_payment: None,
                 play_counts: BTreeMap::new(),
                 ward_entries: Vec::new(),
@@ -1125,12 +1136,27 @@ impl Game {
                 }
                 (
                     Wait::Integer {
-                        binding, bounds, ..
+                        binding,
+                        bounds,
+                        declaration,
+                        ..
                     },
                     Answer::Integer(number),
                 ) if contains(bounds, number) => {
                     rollback = execution.answer_origin(validated);
-                    execution.slots.insert(binding.key(), Slot::Natural(number));
+                    binding.assign(&mut execution, number)?;
+                    if let Some(receipt) = declaration {
+                        execution
+                            .receipts
+                            .insert(receipt, InstructionOutcome::Declared(number));
+                        execution.record_fact(
+                            self,
+                            Fact::Declared {
+                                player: actor,
+                                value: number,
+                            },
+                        );
+                    }
                 }
                 (
                     Wait::Draw {
@@ -1448,7 +1474,7 @@ impl Game {
                 } => self.internal_player_stage(execution, &control)?,
                 Node::Control {
                     control: control @ Control::Repeat { .. },
-                } => Self::internal_repeat(execution, control)?,
+                } => self.internal_repeat_control(execution, control)?,
                 Node::Control {
                     control: Control::Sequence { body },
                 } => execution.prepend(body),
@@ -1587,9 +1613,10 @@ impl Game {
                     actor,
                     InputDomain::Integer(*cardinality),
                     Wait::Integer {
-                        binding: *binding,
+                        binding: declaration::NumberBinding::Natural(*binding),
                         bounds: *cardinality,
                         purpose: player::purpose(&decision.kind),
+                        declaration: None,
                     },
                 )
             }
@@ -1725,6 +1752,10 @@ impl Game {
                 self.internal_reveal(execution, &instruction, objects)?;
             }
             Action::Dice { .. } => self.internal_dice(execution, &instruction)?,
+            Action::FlipUp { objects, .. } => {
+                self.internal_flip_up(execution, &instruction, objects)?;
+            }
+            Action::Declare { .. } => self.internal_declare(execution, &instruction)?,
             Action::FlipDown { objects } => {
                 self.internal_flip_down(execution, &instruction, objects)?;
             }

@@ -948,32 +948,6 @@ fn trait_target_position() -> Game {
 fn stable_trait_target_retains_selection_after_paid_departure_and_runs_independent_draw() {
     let a = trait_target_ability();
     let mut game = trait_target_position();
-    let origin = exact_authority(&game);
-    let mut flipping = a.clone();
-    flipping.node.body.as_mut().unwrap().steps.push(instruction(
-        5,
-        Action::Modify {
-            subjects: zone(ZoneKind::Field, 990),
-            patch: CharacteristicPatch::SetKind {
-                kind: CardKind::Amulet,
-            },
-            expires: Duration {
-                end: DurationEnd::NoTemporalExpiry {},
-                anchor: TimeAnchor::Installation {},
-                intervals: vec![],
-                usage: None,
-            },
-            source: EffectReference::CurrentInstallation {},
-        },
-    ));
-    locate_steps(
-        &mut flipping.node.body.as_mut().unwrap().steps,
-        &flipping.source,
-        &flipping.node.source,
-    );
-    game.load_internal_card("unit-follower", &card(vec![flipping]))
-        .unwrap_err();
-    assert_eq!(origin, exact_authority(&game));
     game.load_internal_card("unit-follower", &card(vec![a]))
         .unwrap();
     game.load_internal_card("other", &card(vec![])).unwrap();

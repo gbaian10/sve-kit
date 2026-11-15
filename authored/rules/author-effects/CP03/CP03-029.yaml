@@ -1,0 +1,26 @@
+cards:
+  CP03-029:
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            flip_down:
+              n: 1
+              sel:
+                kind: evolve_follower
+                name_contains: ブラスター
+                who: self
+                zone: evolve_deck
+          optional_cost_delta: -3
+      - keywords:
+          - rush
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

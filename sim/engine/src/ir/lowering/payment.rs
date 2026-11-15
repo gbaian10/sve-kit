@@ -140,6 +140,18 @@ fn lower_operations(
         let keyword = matches!(operation, ast::CostOperation::EarthRite(_))
             .then_some(super::KeywordId::EarthRite);
         let action = match operation {
+            ast::CostOperation::FlipUp(material) | ast::CostOperation::FlipDown(material) => {
+                let selected = Binding::new(context.allocator.id(path)?, context.scope);
+                let (action, decision) = super::flip_cost::lower(
+                    context.card_allocator,
+                    selected,
+                    material,
+                    matches!(operation, ast::CostOperation::FlipUp(_)),
+                    path,
+                )?;
+                parameters.push(decision);
+                action
+            }
             ast::CostOperation::SkipTurn(value) => {
                 let ast::SelfPlayer::Controller = value.who;
                 Action::ScheduleTurn {
@@ -452,6 +464,8 @@ fn material_operation(
         | ast::CostOperation::ActSelf(_)
         | ast::CostOperation::SelfToCemetery(_)
         | ast::CostOperation::SelfToEx(_)
+        | ast::CostOperation::FlipUp(_)
+        | ast::CostOperation::FlipDown(_)
         | ast::CostOperation::SkipTurn(_) => Err(unsupported(path)),
     }
 }

@@ -207,7 +207,7 @@ CR 10.11.1 要求效果引用已離開原區域的卡時取最後資訊；10.6.2
 真正 AbsentByRules 的對照是 [BP05-001 不殺の絶傑・エズディア](https://shadowverse-evolve.com/cardlist/?cardno=BP05-001)
 Q660：同世代變為護符後保存原數值但依法不能參照 Attack／Life（CR 5.25.2.1）。
 直接資訊取得按 1.3.6.3 轉 0；比較條件依 1.3.6.2 為 false，不先轉 0 再比較。
-這不准入 SetKind executor，只確定與無法解析物件的差別。
+目前 SetKind executor 的准入範圍見[內部執行](internal-execution.md)；資訊缺席不等同無法解析物件。
 
 ### 4.2 Continuous 與 SetKind 的准入邊界
 
@@ -222,7 +222,7 @@ Q660：同世代變為護符後保存原數值但依法不能參照 Attack／Lif
 SetKind 必須先於 Numeric，保留其他資訊、能力與物件世代；不隱含 RemoveAbility 或
 Grant。BP05-001 的 Q658–669 與 CR 5.25 支持此邊界。所有合法性、讀值、傷害接受者、
 規則致死與 view 必須一起改用有效種類後才能准入；不能只讓畫面顯示護符。
-Grant 依賴未實作前，BP05-001 整能力仍拒絕。
+SetKind 與授予能力的現行執行子集見[卡種的獨立非數值層](internal-execution.md#卡種的獨立非數值層)。
 
 ## 5. 可執行局面驗收清單
 
@@ -249,7 +249,7 @@ closed Program，真實卡只借指定片段；兩席互換再跑。共同斷言
 | T-G | CurrentTurnEnd 到期後 hp≤0：先下一實際回合的 start 程序，再 7.2.5 破壞 | 不得在 7.4.8 插 check；next start／turn trigger 的待機與解算分開驗 |
 | T-H | 安裝時 P2 為 target controller，之後轉交 P1，仍等待所捕捉的 P2 occurrence | 不得用 owner 或每次 live controller；缺排程能力整棵拒絕 |
 | R-A | 合法已捕捉值來源離場，修正仍在；Current SourceHolder live read 需 LKI | LKI 未接整棵拒絕，不能 InformationOrZero=0、追新世代或取印刷值 |
-| R-B | 合法同世代護符的 Attack／Life 為 AbsentByRules，直接取值 0、比較 false | 不是缺來源回 0；SetKind／Grant 未准入時先拒絕整能力 |
+| R-B | 合法同世代護符的 Attack／Life 為 AbsentByRules，直接取值 0、比較 false | 不是缺來源回 0；只沿已驗證的來源、公開單張目標或事件證據判斷資訊存在 |
 
 負 Set、Modify usage、未定義的來源實例／EffectId producer、RuleCarry、Grant／RemoveAbility
 與跨層 Continuous 仍依既有界線拒絕；不能以新增期限契約繞過整棵預檢。

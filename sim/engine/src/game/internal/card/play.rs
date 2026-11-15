@@ -4,9 +4,11 @@ use super::{
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
     admission, int, invalid, seat_name, unsupported,
 };
+use crate::game::internal::repeated_moves;
 use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
+use crate::ir::flip_cost as flip_payment;
 use crate::ir::material_sets;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
@@ -958,6 +960,29 @@ impl Game {
         let Some((_, payment)) = self.internal_additional(execution)?.as_deref().cloned() else {
             return Ok(true);
         };
+        if !payment.play.parameters.is_empty()
+            && payment
+                .play
+                .parameters
+                .iter()
+                .all(|decision| flip_payment::material(decision).is_some())
+        {
+            let mut probe = self.clone();
+            let mut selection = probe.spell_execution(holder, actor, ability)?;
+            probe.card_runtime.active_source = selection.ability;
+            let play = ability
+                .play
+                .as_ref()
+                .ok_or_else(|| invalid("missing Quick play"))?;
+            if !probe.internal_payment_probe(&mut selection, &play.costs, true)? {
+                return Ok(false);
+            }
+            return probe.flip_payment_available(
+                &selection,
+                &payment.play,
+                &payment.play.parameters,
+            );
+        }
         if !super::hand_payment::single_additional(&payment.play.costs) {
             return Err(unsupported("Quick additional hand cost"));
         }
@@ -1131,6 +1156,7 @@ impl Game {
         };
         let mut execution = self.new_card_execution(old_context)?;
         execution.play_origin = Some(spell_origin(&object.zone)?);
+        execution.play_origin_object = Some(execution.reference(self, holder)?);
         execution.play_origin_player = Some(player_id(&object.controller)?);
         let play = ability
             .play
@@ -1285,6 +1311,7 @@ impl Game {
             todo: VecDeque::new(),
             slots: BTreeMap::new(),
             procedures: Vec::new(),
+            repeats: repeated_moves::State::default(),
             receipts: BTreeMap::new(),
             cost_materials: BTreeMap::new(),
             hand_cost_groups: BTreeMap::new(),
@@ -1308,6 +1335,7 @@ impl Game {
             spell: false,
             field_entry: false,
             play_origin,
+            play_origin_object: None,
             card_payment: None,
             trigger_occurrence: None,
             play_counts: self.internal_play_counts()?,

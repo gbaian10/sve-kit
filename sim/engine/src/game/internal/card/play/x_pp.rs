@@ -114,9 +114,10 @@ impl Game {
             execution.context.controller,
             InputDomain::Integer(bounds),
             Wait::Integer {
-                binding,
+                binding: super::super::super::declaration::NumberBinding::Natural(binding),
                 bounds,
                 purpose: super::super::super::player::purpose(&decision.kind),
+                declaration: None,
             },
         )?;
         Ok(true)

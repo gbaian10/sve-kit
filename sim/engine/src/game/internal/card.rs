@@ -14,18 +14,20 @@ use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
 use crate::ir::events::played::filter;
 use crate::ir::history_turn::evolution_capture_header;
+use crate::ir::kind_change as kind_patch;
 use crate::ir::mixed_ex;
 use crate::ir::names;
 use crate::ir::play_restrictions::card_play_rule;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
+use crate::ir::repeated_moves as ir_repeated_moves;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::trigger_restrictions as trigger_permission;
 use crate::ir::{
     Ability, AbilityCostPolicy, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin,
-    AbilityQualification, AbilitySource, Action, AssociationId, CharacteristicPatch, Control,
-    CostSpec, DamageAmount, DiscardMode, Effect, ExecutionId, Expr, FaceId, Generation,
+    AbilityQualification, AbilitySource, Action, AssociationId, CardKind, CharacteristicPatch,
+    Control, CostSpec, DamageAmount, DiscardMode, Effect, ExecutionId, Expr, FaceId, Generation,
     GrantedAbility, Instruction, InstructionContext, Int, KeywordId, Located, MealRaceOperation,
     MoveReason, MoveSpec, Nat, Node, NumericChange, ObjectOperand, ObjectRef, PlayerId, PlayerRef,
     Posture, Quantity, QuantityUnit, Requirements, Resource, ResourceOperation, RideDriveOperation,
@@ -59,6 +61,7 @@ pub(in crate::game) use evolution::EvolutionDeclaration;
 pub(super) use evolution::resource_association;
 pub(super) mod exchange;
 mod fanfare;
+mod flip_cost;
 mod fusion;
 pub(super) mod hand_payment;
 mod keywords;
@@ -125,6 +128,7 @@ pub struct Activation {
 #[derive(Clone, Debug, Default)]
 pub(in crate::game) struct CardRuntime {
     selected: bool,
+    pub(in crate::game::internal) kind_changes: Vec<super::kind_change::Installed>,
     pub(in crate::game::internal) definitions: Arc<RuntimeCards>,
     resources: BTreeMap<String, String>,
     unadmitted: BTreeSet<String>,
@@ -510,7 +514,7 @@ impl Game {
         }
         let base_print = self.catalog.face(card_no, 0)?;
         let base_face = self.printed_face_id(card_no, 0)?;
-        check_base_face(base_print, pilot_face(card, &base_face.0))?;
+        check_base_face(base_print, follower_capable_face(card, &base_face.0))?;
         costs::check(self, card_no, card)?;
         optional::check_card(card)?;
         material::check_card(card)?;
@@ -547,7 +551,7 @@ impl Game {
             let declaration = printed_keywords::card_declaration(ability);
             keywords::check_card_coordinate(&mut origins, ordinal, &card.card().abilities, index)?;
             let printed = self.catalog.face(card_no, ordinal)?;
-            let pilot = pilot_face(card, &face.0);
+            let pilot = follower_capable_face(card, &face.0);
             check_ability_face(ability, printed, pilot)?;
             if ability.kind == AbilityKind::Spell {
                 play::check_spell(ability, printed)?;
@@ -935,7 +939,9 @@ impl Game {
                     let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
                     (self.internal_pay_pp(payer, amount)?, Vec::new(), Vec::new())
                 }
-                Action::Posture { objects, .. }
+                Action::FlipUp { objects, .. }
+                | Action::FlipDown { objects }
+                | Action::Posture { objects, .. }
                 | Action::Banish { objects }
                 | Action::Move {
                     objects: objects @ Selector::Bound { .. },
@@ -991,15 +997,18 @@ impl Game {
     }
 }
 
-fn pilot_face(card: &WellFormedCardProgram, face: &str) -> bool {
+fn follower_capable_face(card: &WellFormedCardProgram, face: &str) -> bool {
     card.card().abilities.iter().any(|located| {
         let ability = &located.node;
         matches!(&ability.source.origin, AbilityOrigin::Printed { face: origin, .. } if origin.0 == face)
-            && ability.body.as_ref().is_some_and(|body| body.steps.iter().any(|step| {
+            && (ability.declarations.iter().any(|effect| matches!(
+                kind_patch::projection(effect),
+                Some((CardKind::Follower, _))
+            )) || ability.body.as_ref().is_some_and(|body| body.steps.iter().any(|step| {
                 matches!(&step.node, Node::Instruction { instruction }
                     if matches!(instruction.action, Action::BoxPilot { .. })
                         && super::numeric::pilot::check_action(&instruction.action).is_ok())
-            }))
+            })))
     })
 }
 
@@ -1120,6 +1129,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
         for effect in &ability.declarations {
             let declaration = from_ref(effect);
             match static_declarations::family(effect) {
+                Some(Family::Kind) => super::kind_change::check_static(located, declaration)?,
                 Some(Family::Grant) => static_keywords::check(located, declaration)?,
                 Some(Family::Prevention) => prevention::check(located, declaration)?,
                 Some(Family::Cost) => other_costs::check(located, declaration)?,
@@ -1465,7 +1475,13 @@ fn check_nested_nodes(
             }
         }
         Control::Repeat { .. } => {
-            let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("fixed repeat"))?;
+            let body = if let Some((body, _)) = ir_dice::repeat(control) {
+                body
+            } else {
+                ir_repeated_moves::projection(control)
+                    .ok_or_else(|| unsupported("repeat"))?
+                    .body
+            };
             check_nodes_with_x(game, &body.steps, source, origin, x)?;
         }
         control @ Control::Simultaneous { batch, .. } => {
@@ -1552,6 +1568,7 @@ fn check_instruction(
             | Action::GameResult { .. }
             | Action::ScheduleTurn { .. }
             | Action::Dice { .. }
+            | Action::Declare { .. }
             | Action::Reveal { .. }
             | Action::PlayCard { .. }
             | Action::PlayAbility { .. }
@@ -1562,6 +1579,7 @@ fn check_instruction(
             | Action::Transform { .. }
             | Action::Posture { .. }
             | Action::Transfer { .. }
+            | Action::FlipUp { .. }
             | Action::FlipDown { .. }
             | Action::Modify { .. }
             | Action::Delay { .. }

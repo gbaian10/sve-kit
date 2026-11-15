@@ -975,6 +975,9 @@ impl Checker {
                 }
                 Ok(())
             }
+            CharacteristicPatch::SetKind {
+                kind: super::super::CardKind::Follower | super::super::CardKind::Amulet,
+            } if layer == ContinuousLayer::NonNumeric => Ok(()),
             CharacteristicPatch::GrantAbility { .. }
             | CharacteristicPatch::SuppressAbility { .. }
             | CharacteristicPatch::SetKind { .. }
