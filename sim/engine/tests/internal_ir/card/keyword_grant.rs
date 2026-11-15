@@ -455,7 +455,7 @@ fn an_effect_keeps_its_public_text_origin_after_the_installer_returns_to_hand() 
     assert_eq!(state.stats.as_ref().unwrap().attack, 4);
     let origin = state.effects[0].source.as_ref().unwrap();
     assert_eq!(origin.card, "unit-follower");
-    assert_eq!(origin.face.as_deref(), Some("0"));
+    assert_eq!(origin.face, Some(0));
     assert_eq!(origin.line, Some(1));
     assert!(origin.holder.is_none());
 }

@@ -9,8 +9,8 @@ use crate::ir::{AbilityKind, CostKind, DamageKind};
 pub struct EffectSource {
     /// Catalog card supplying the text.
     pub card: String,
-    /// Printed face coordinate within the source card, when known.
-    pub face: Option<String>,
+    /// Face ordinal in the authoritative catalog, when known.
+    pub face: Option<u64>,
     /// Printed line, when the effect comes from an ability.
     pub line: Option<u64>,
     /// Currently identifiable producing holder; absent after identification is lost.

@@ -271,9 +271,10 @@ impl Game {
             self,
             holder,
             source.holder.generation.0,
+            &self.runtime_source_printing(source)?,
             &ability.located().source,
             information.publicly_identified(),
-        );
+        )?;
         let mut pending = PendingOccurrence {
             origin,
             id: self.card_runtime.next_pending,

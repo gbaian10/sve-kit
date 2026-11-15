@@ -106,8 +106,10 @@ impl Execution {
             .installed_effect_provider(self)
             .map_err(|_authority_error| EventError::ProjectionGap)?;
         Ok(Some(EffectSource {
+            face: game
+                .effect_source_face(&provider.card, Some(&provider.span.face))
+                .map_err(|_authority_error| EventError::ProjectionGap)?,
             card: provider.card,
-            face: Some(provider.span.face),
             line: Some(u64::from(provider.span.line)),
             holder: None,
         }))

@@ -87,7 +87,7 @@ impl ObjectLink {
 pub(super) struct EffectOrigin {
     link: ObjectLink,
     card: String,
-    face: Option<String>,
+    face: Option<u64>,
     line: Option<u64>,
     publicly_identified: bool,
 }
@@ -123,8 +123,8 @@ impl EffectOrigin {
         };
         Ok(Self {
             link: ObjectLink::capture(game, &holder, execution.context.generation.0),
+            face: game.effect_source_face(&card, face.as_deref())?,
             card,
-            face,
             line,
             publicly_identified: execution
                 .source_information
@@ -137,16 +137,17 @@ impl EffectOrigin {
         game: &Game,
         holder: &str,
         generation: u64,
+        card: &str,
         source: &SourceSpan,
         publicly_identified: bool,
-    ) -> Self {
-        Self {
+    ) -> Result<Self> {
+        Ok(Self {
             link: ObjectLink::capture(game, holder, generation),
-            card: source.card_no.clone(),
-            face: Some(source.face.clone()),
+            card: card.into(),
+            face: game.effect_source_face(card, Some(&source.face))?,
             line: Some(u64::from(source.line)),
             publicly_identified,
-        }
+        })
     }
 
     pub(super) fn observed(&self, game: &Game, perspective: Viewer) -> Option<EffectSource> {
@@ -155,7 +156,7 @@ impl EffectOrigin {
         }
         Some(EffectSource {
             card: self.card.clone(),
-            face: self.face.clone(),
+            face: self.face,
             line: self.line,
             holder: self.link.observed(game, perspective),
         })

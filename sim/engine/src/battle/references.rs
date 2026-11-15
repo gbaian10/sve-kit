@@ -53,8 +53,8 @@ impl BattleReferences {
     /// Bind trusted snapshot identities without creating another card database.
     ///
     /// Legacy JP backgrounds are allowed because permanent IDs are supplied,
-    /// never inferred from legacy numbers. Explicit face mappings also support a
-    /// legacy projection whose face order differs from the published printing layout.
+    /// never inferred from legacy numbers. Legacy native faces keep source order;
+    /// adopted `source_face_map` entries can point to different permanent face ordinals.
     ///
     /// # Errors
     /// Refuses unbound or mismatched backgrounds, missing faces, aliases,
@@ -98,6 +98,15 @@ impl BattleReferences {
             .get(&face.card)
             .and_then(|faces| faces.get(&face.face))
             .cloned()
+            .ok_or(ProjectionError::Unavailable)
+    }
+
+    pub(super) fn printing(&self, catalog: &Catalog, number: &str) -> Result<&str> {
+        self.validate_catalog(catalog)?;
+        self.faces
+            .get(number)
+            .and_then(|faces| faces.values().next())
+            .map(|card| card.printing_id.as_str())
             .ok_or(ProjectionError::Unavailable)
     }
 

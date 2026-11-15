@@ -1,5 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_engine::battle::project_history;
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::SubjectHistory;
 use sve_engine::ir::lowering::ExpandedLowerer;
@@ -83,6 +84,26 @@ fn spell() -> WellFormedCardProgram {
         },
     ];
     card(vec![ability])
+}
+
+fn assert_wire_counts(game: &Game, slot: usize, played: u64, union_bursts: u64) {
+    let mut expected_plays = [0, 0];
+    let mut expected_bursts = [0, 0];
+    expected_plays[slot] = played;
+    expected_bursts[slot] = union_bursts;
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let history = project_history(&game.observe(viewer).unwrap()).unwrap();
+        assert_eq!(
+            history.played.map(sve_battle_contract::Nat::get),
+            expected_plays,
+            "Committed play counts keep seat order"
+        );
+        assert_eq!(
+            history.union_bursts.map(sve_battle_contract::Nat::get),
+            expected_bursts,
+            "Committed Union Burst counts keep seat order"
+        );
+    }
 }
 
 #[test]
@@ -273,11 +294,13 @@ fn an_extra_turn_resets_committed_and_initial_history_even_for_the_same_active_p
             game.observe(Viewer::P1).unwrap().history.union_bursts[slot],
             2
         );
+        assert_wire_counts(&game, slot, 3, 2);
         resolved(game.play_internal_card("first", PlayerId { seat }).unwrap());
         game.resume_internal_card().unwrap();
         let before = game.observe(Viewer::P1).unwrap();
         assert_eq!(before.history.played[slot], 4);
         assert_eq!(before.history.subjects.len(), 1);
+        assert_wire_counts(&game, slot, 4, 2);
         game.internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap();
         quick::pass(&mut game);
@@ -293,12 +316,14 @@ fn an_extra_turn_resets_committed_and_initial_history_even_for_the_same_active_p
         assert_eq!(extra.history.played, [0, 0]);
         assert_eq!(extra.history.union_bursts, [0, 0]);
         assert_eq!(extra.history.subjects, Vec::<SubjectHistory>::new());
+        assert_wire_counts(&game, slot, 0, 0);
         resolved(
             game.play_internal_card("second", PlayerId { seat })
                 .unwrap(),
         );
         game.resume_internal_card().unwrap();
         assert_eq!(game.observe(Viewer::P1).unwrap().history.played[slot], 1);
+        assert_wire_counts(&game, slot, 1, 0);
         game.internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap();
         quick::pass(&mut game);

@@ -22,6 +22,9 @@ mod rule_fixtures;
 #[path = "internal_ir/battle_costs.rs"]
 mod battle_costs;
 
+#[path = "internal_ir/battle_history.rs"]
+mod battle_history;
+
 #[path = "internal_ir/allocation.rs"]
 mod allocation;
 #[path = "internal_ir/basic_actions.rs"]
