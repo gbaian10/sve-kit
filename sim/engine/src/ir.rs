@@ -157,6 +157,7 @@ pub(crate) mod delayed;
 pub(crate) mod dice;
 pub(crate) mod effect_evolution;
 mod effects;
+pub(crate) mod entry_posture;
 pub(crate) mod events;
 pub(crate) mod evolution_destination;
 pub(crate) mod evolution_limits;

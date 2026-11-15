@@ -20,6 +20,7 @@ mod delayed;
 mod dice;
 mod discard;
 mod earth;
+mod entry_posture;
 mod evolution;
 mod exchange;
 mod grant;
@@ -537,6 +538,7 @@ impl Allocator {
                     ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
                     | ast::StaticEffect::BanishInstead(_)
+                    | ast::StaticEffect::EntersActed(_)
                     | ast::StaticEffect::ExtraTrigger(_),
                 )
                 | None => {

@@ -713,10 +713,11 @@ impl Game {
             let id = &previous.id;
             let destination = plan.destination.as_str();
             let owner = &plan.controller;
-            let printed = self
-                .catalog
-                .face(&previous.card, Self::movement_face(previous, destination)?)?
-                .clone();
+            let face = Self::movement_face(previous, destination)?;
+            let initial_acted = destination == "field"
+                && previous.zone != "field"
+                && self.internal_entry_acted(&previous.card, face)?;
+            let printed = self.catalog.face(&previous.card, face)?.clone();
             let object = self.object_mut(id)?;
             object.zone = destination.into();
             object.controller.clone_from(owner);
@@ -726,7 +727,7 @@ impl Game {
             }
             let from = format!("{}.{}", previous.controller, previous.zone);
             if destination == "field" {
-                if frame.values.get("field_entry_acted") == Some(&json!(true)) {
+                if initial_acted || frame.values.get("field_entry_acted") == Some(&json!(true)) {
                     object.state["acted"] = json!(true);
                 }
                 object.state["entered_this_turn"] = json!(true);

@@ -37,6 +37,7 @@ use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::ir::{advance_entry, victory, x_pp};
 use crate::ir::{choice_rules, evolution_limits};
+mod entry_posture;
 mod move_replacement;
 mod trigger_multiplicity;
 use crate::{Result, invalid};
@@ -1122,6 +1123,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
                 Some(Family::Prevention) => prevention::check(located, declaration)?,
                 Some(Family::Cost) => other_costs::check(located, declaration)?,
                 Some(Family::MoveReplacement) => move_replacement::check(located, declaration)?,
+                Some(Family::EntryPosture) => entry_posture::check(located, declaration)?,
                 Some(Family::TriggerMultiplicity) => {
                     trigger_multiplicity::check(located, declaration)?;
                 }

@@ -31,7 +31,7 @@ use crate::ir::{
     Selector,
 };
 use crate::ir::{CostChange, CostKind, Int, LimitSpec};
-use crate::ir::{move_replacement, optional_payment};
+use crate::ir::{entry_posture, move_replacement, optional_payment};
 use crate::ir::{trigger_restrictions, victory};
 use alloc::collections::BTreeSet;
 
@@ -683,19 +683,22 @@ impl Checker {
         }
     }
 
-    fn move_replacement(
+    fn movement_replacement(
         &mut self,
         effect: &Effect,
         id: EffectDefinitionId,
         source: &AbilitySource,
         zones: &[ZoneKind],
     ) -> Checked {
-        let shape = move_replacement::projection(effect)
-            .ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
         if zones != [ZoneKind::Field] || !self.effect_ids.insert(id) {
             return self.reject();
         }
         self.ability_source(source)?;
+        if entry_posture::projection(effect).is_some() {
+            return Ok(());
+        }
+        let shape = move_replacement::projection(effect)
+            .ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
         self.selector(shape.objects)?;
         self.boolean(shape.condition)
     }
@@ -737,9 +740,10 @@ impl Checker {
                 self.duration(duration)
             }
             Effect::Replacement { id, source, .. }
-                if move_replacement::projection(effect).is_some() =>
+                if entry_posture::projection(effect).is_some()
+                    || move_replacement::projection(effect).is_some() =>
             {
-                self.move_replacement(effect, *id, source, ability_zones)
+                self.movement_replacement(effect, *id, source, ability_zones)
             }
             Effect::Replacement { .. } if prevention::projection(effect).is_some() => {
                 self.prevention(effect, ability_zones)
