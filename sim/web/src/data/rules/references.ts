@@ -13,10 +13,7 @@ export interface RuleReference {
 const NUMBER = /(?<![\d.])\d+(?:\.\d+)+(?![\d]|\.\d)/gu
 const VERSION_BEFORE = /ver\.?\s*$/iu
 
-/**
- * Clause numbers cited anywhere in the text, in text order.
- * @public 待接：#2227 S4 的 RuleRef 以此切出引用；本片先供資料測試驗證每個引用都解析得到。
- */
+/** Clause numbers cited anywhere in the text, in text order. */
 export function findRuleReferences(text: string): RuleReference[] {
   const found: RuleReference[] = []
   for (const number of text.matchAll(NUMBER)) {
@@ -29,7 +26,6 @@ export function findRuleReferences(text: string): RuleReference[] {
 /**
  * The node key a citation means: inside appendix B-n its own restated clause first, otherwise
  * the rules body. Undefined when neither exists, so the caller leaves the text unlinked.
- * @public 待接：#2227 S4 的 RuleRef 以此決定跳轉目標。
  */
 export function resolveRuleReference(
   number: string,

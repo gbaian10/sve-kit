@@ -1,7 +1,7 @@
 import type { RuleNode, TranslationEntry } from "./model"
 
 /** One displayed piece: the translation when there is one, otherwise the Japanese original. */
-export interface LocalizedText {
+interface LocalizedText {
   readonly text: string
   readonly translated: boolean
 }
@@ -29,7 +29,6 @@ function pick(original: string, translation: string | null | undefined): Localiz
 
 /**
  * Falls back per piece, down to a single example or table cell, so a partial entry still shows.
- * @public 待接：#2227 S3 的規則頁本文以此套用譯文；本片先定介面供譯文工人與測試使用。
  */
 export function localizeNode(node: RuleNode, entry: TranslationEntry | undefined): LocalizedNode {
   const title = node.title === undefined ? undefined : pick(node.title, entry?.title)
@@ -61,7 +60,6 @@ export function localizeNode(node: RuleNode, entry: TranslationEntry | undefined
 
 /**
  * The original only: what the Japanese view, and the English view's original toggle, render.
- * @public 待接：#2227 S3 的日文／英文介面顯示原文時使用。
  */
 export function originalNode(node: RuleNode): LocalizedNode {
   return localizeNode(node, undefined)

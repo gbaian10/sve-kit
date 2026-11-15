@@ -66,8 +66,23 @@ export default {
     sections: "Rules sections",
     comprehensive: "Comprehensive rules",
     officialLink: "Official rules page",
-    comprehensivePending:
-      "The comprehensive rules are coming soon. Please refer to the rulebook on the official site.",
+    loading: "Loading the comprehensive rules…",
+    loadFailed: "The comprehensive rules could not be loaded. Please reload the page.",
+    version: "ver. {{version}}",
+    lastUpdated: "Last updated officially: {{date}}",
+    officialPdf: "Official rules PDF",
+    translationNone:
+      "The Traditional Chinese translation is in preparation; showing the Japanese original.",
+    translationPartial:
+      "Translation in progress: {{done}} of {{total}} items translated; the rest show the Japanese original.",
+    originalTag: "Original",
+    englishUnavailable: "The English comprehensive rules are not available yet.",
+    showJapanese: "Show the Japanese original",
+    hideJapanese: "Hide the Japanese original",
+    copyLink: "Copy the link to {{number}}",
+    linkCopied: "Copied the link to {{number}}",
+    linkCopyFailed: "Could not copy the link",
+    figure: "See page {{page}} of the official rules PDF for this figure.",
   },
   nav: {
     rules: "Rules",
