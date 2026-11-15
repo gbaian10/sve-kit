@@ -77,9 +77,6 @@ export default {
     translationPartial:
       "Translation in progress: {{done}} of {{total}} items translated; the rest show the Japanese original.",
     originalTag: "Original",
-    englishUnavailable: "The English comprehensive rules are not available yet.",
-    showJapanese: "Show the Japanese original",
-    hideJapanese: "Hide the Japanese original",
     copyLink: "Copy the link to {{number}}",
     linkCopied: "Copied the link to {{number}}",
     linkCopyFailed: "Could not copy the link",

@@ -15,8 +15,8 @@ export interface TocEntry {
   readonly number?: string | undefined
   readonly title: string
   readonly context: RuleContext
-  /** The title is shown in Japanese (untranslated, or the UI shows originals). */
-  readonly original: boolean
+  /** The language of an original title (untranslated, or the UI shows originals). */
+  readonly lang: string | undefined
   readonly children: readonly TocEntry[]
 }
 
@@ -53,7 +53,7 @@ function TocList({
         {entry.number && (
           <span className="shrink-0 font-mono text-11 tabular-nums">{entry.number}</span>
         )}
-        <span lang={entry.original ? "ja" : undefined} className="min-w-0">
+        <span lang={entry.lang} className="min-w-0">
           <RuleText text={entry.title} context={entry.context} className="inline [&>p]:inline" />
         </span>
       </a>

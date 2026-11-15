@@ -1,5 +1,10 @@
 import { createContext } from "react"
 
+import type { RulesRegion } from "../../data"
+
+/** The `lang` of an edition's original text. */
+export const RULES_LANG: Readonly<Record<RulesRegion, string>> = { jp: "ja", en: "en" }
+
 /** Anchor id of a node: the key with `:` made URL-friendly (`B-1:6.1.1.1` → `r-B-1-6.1.1.1`). */
 export const ruleAnchor = (key: string) => `r-${key.replace(":", "-")}`
 

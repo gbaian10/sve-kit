@@ -41,12 +41,15 @@ export interface RulesFile {
   readonly nodes: readonly RuleNode[]
 }
 
+/** The official edition: Japanese and English rules are separate documents with own versions. */
+export type RulesRegion = "jp" | "en"
+
 /** `index.json`: version facts for the page header and the file list in reading order. */
 export interface RulesIndex {
   readonly format: 1
   readonly kind: "comprehensive-rules-index"
   readonly version: string
-  readonly region: "jp"
+  readonly region: RulesRegion
   readonly last_updated: string
   readonly page_url: string
   readonly source_url: string

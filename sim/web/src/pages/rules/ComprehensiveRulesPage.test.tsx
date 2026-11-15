@@ -74,10 +74,57 @@ const bundle = (translations: RulesBundle["translations"] = new Map()): RulesBun
   byKey: new Map(nodes.map((node) => [node.key, node])),
   translations,
 })
+// The English edition: its own version and clauses; 1.1.2 exists only in the Japanese one.
+const englishNodes: RuleNode[] = [
+  {
+    key: "1",
+    context: "main",
+    number: "1",
+    kind: "chapter",
+    depth: 1,
+    title: "Chapter one",
+    text: "",
+  },
+  {
+    key: "1.1",
+    context: "main",
+    number: "1.1",
+    kind: "section",
+    depth: 2,
+    title: "Section one",
+    text: "",
+  },
+  {
+    key: "1.1.1",
+    context: "main",
+    number: "1.1.1",
+    kind: "rule",
+    depth: 3,
+    text: "Rule one (1.1.3) and (1.1.2).",
+  },
+  { key: "1.1.3", context: "main", number: "1.1.3", kind: "rule", depth: 3, text: "Rule three." },
+]
+const englishBundle: RulesBundle = {
+  index: {
+    ...bundle().index,
+    version: "8.8.8",
+    region: "en",
+    last_updated: "2098-03-04",
+    source_url: "https://example.invalid/en-rules.pdf",
+  },
+  nodes: englishNodes,
+  byKey: new Map(englishNodes.map((node) => [node.key, node])),
+  translations: new Map(),
+}
 const current = vi.hoisted((): { value: unknown } => ({ value: undefined }))
-vi.mock("../../data/rules/bundle", () => ({
+vi.mock("../../data/rules/bundle-jp", () => ({
   get RULES() {
     return current.value
+  },
+}))
+vi.mock("../../data/rules/bundle-en", () => ({
+  get RULES() {
+    return englishBundle
   },
 }))
 
@@ -153,26 +200,53 @@ it("uses translations where present and tags the pieces still in Japanese", asyn
   expect(within(rule("1.1.2") as HTMLElement).getByText("原文")).toBeInTheDocument()
 })
 
-it("shows the original in the Japanese UI and offers it on request in the English UI", async () => {
+it("shows the Japanese original in the Japanese UI", async () => {
   prefsStore.set({ uiLanguage: "ja" })
-  const first = await renderRoutes(routes, { initialEntries: ["/rules"], language: "ja" })
+  await renderRoutes(routes, { initialEntries: ["/rules"], language: "ja" })
   expect(await screen.findByText("ver. 9.9.9")).toBeInTheDocument()
   expect(screen.queryByText(/準備中/u)).not.toBeInTheDocument()
   expect(rule("1.1.1")).not.toBeNull()
-  first.unmount()
-
-  prefsStore.set({ uiLanguage: "en" })
-  await renderRoutes(routes, { initialEntries: ["/rules"], language: "en" })
-  expect(
-    await screen.findByText("The English comprehensive rules are not available yet."),
-  ).toBeInTheDocument()
-  expect(rule("1.1.1")).toBeNull()
-  fireEvent.click(screen.getByRole("button", { name: "Show the Japanese original" }))
-  expect(rule("1.1.1")).not.toBeNull()
-  expect(screen.getByRole("button", { name: "Hide the Japanese original" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
+  expect(screen.getByRole("link", { name: "公式サイトのルールページ" })).toHaveAttribute(
+    "href",
+    "https://shadowverse-evolve.com/rules/",
   )
+})
+
+it("shows the English edition with its own version and links in the English UI", async () => {
+  prefsStore.set({ uiLanguage: "en" })
+  await renderRoutes(routes, { initialEntries: ["/rules#r-1.1.3"], language: "en" })
+  expect(await screen.findByText("ver. 8.8.8")).toBeInTheDocument()
+  expect(screen.getByText("Last updated officially: 2098-03-04")).toBeInTheDocument()
+  expect(screen.getByRole("link", { name: "Official rules PDF" })).toHaveAttribute(
+    "href",
+    "https://example.invalid/en-rules.pdf",
+  )
+  expect(screen.getByRole("link", { name: "Official rules page" })).toHaveAttribute(
+    "href",
+    "https://en.shadowverse-evolve.com/rules/",
+  )
+  const first = rule("1.1.1") as HTMLElement
+  expect(
+    within(first)
+      .getByText(/Rule one/u)
+      .closest("[lang]"),
+  ).toHaveAttribute("lang", "en")
+  // Shared clause numbers share anchors; a clause only the Japanese edition has gets none.
+  await waitFor(() => {
+    expect(rule("1.1.3")).toHaveAttribute("data-flash")
+  })
+  expect(within(first).getByRole("link", { name: "1.1.3" })).toHaveAttribute(
+    "href",
+    "/rules#r-1.1.3",
+  )
+  expect(within(first).queryByRole("link", { name: "1.1.2" })).not.toBeInTheDocument()
+  expect(rule("1.1.2")).toBeNull()
+  expect(screen.queryByText("本文二。")).not.toBeInTheDocument()
+  // The preview shows the English clause.
+  fireEvent.mouseEnter(within(first).getByRole("link", { name: "1.1.3" }))
+  const tip = await screen.findByRole("tooltip")
+  expect(tip).toHaveTextContent("1.1.3Rule three.")
+  expect(within(tip).getByText("Rule three.").closest("[lang]")).toHaveAttribute("lang", "en")
 })
 
 it("scrolls to the hash target on entry and marks it briefly", async () => {
@@ -383,7 +457,7 @@ it("keeps the reader's place when the contents sheet is opened and cancelled", a
   expect(pageScrolls()).toBe(1)
 })
 
-it("gives untranslated section bodies lang=ja in the Chinese and English views", async () => {
+it("gives untranslated section bodies lang=ja in the Chinese view", async () => {
   await renderRoutes(routes, { initialEntries: ["/rules"] })
   const section = await waitFor(() => {
     const element = rule("B-1")

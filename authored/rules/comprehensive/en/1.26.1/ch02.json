@@ -1,0 +1,467 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "2",
+      "context": "main",
+      "number": "2",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Card Information",
+      "text": "",
+      "figure": {
+        "page": 2,
+        "caption": "Follower / Evolved Follower / ① Card Name / ② Class / ③ Card Type / ④ Trait / ⑤ Cost / ⑥ Card Text / ⑦ Attack / ⑧ Defense / ⑨ Token Information / ⑩ Card Art / ⑪ Rarity / ⑫ Miscellaneous / ⑬ Alternate Name / ⑭ Universe / Collaboration Follower / Universe Card / Spell / Amulet / Leader / Crest"
+      }
+    },
+    {
+      "key": "2.1",
+      "context": "main",
+      "number": "2.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Card Name",
+      "text": ""
+    },
+    {
+      "key": "2.1.1",
+      "context": "main",
+      "number": "2.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This is the card's unique name."
+    },
+    {
+      "key": "2.1.2",
+      "context": "main",
+      "number": "2.1.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Whenever a rule or card text contains \"[card name]\" (a name written in bold and italics), it refers to any card with the same name or, depending on the context, any card whose name contains that name. In reminder text or other contexts where the surrounding text is italicized, the card name may be unitalicized as a result of reverse-italicization."
+    },
+    {
+      "key": "2.1.2.1",
+      "context": "main",
+      "number": "2.1.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "An alternate name (2.13) cannot be referred to in this way unless referred to in its entirety."
+    },
+    {
+      "key": "2.2",
+      "context": "main",
+      "number": "2.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Class",
+      "text": ""
+    },
+    {
+      "key": "2.2.1",
+      "context": "main",
+      "number": "2.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This indicates the class to which the card belongs."
+    },
+    {
+      "key": "2.2.2",
+      "context": "main",
+      "number": "2.2.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Classes are represented by icons:\n{icon_neutral|[neutral]} Neutral\n{icon_elf|[forestcraft]} Forestcraft\n{icon_royal|[swordcraft]} Swordcraft\n{icon_witch|[runecraft]} Runecraft\n{icon_dragon|[dragoncraft]} Dragoncraft\n{icon_nightmare|[abysscraft]} Abysscraft\n{icon_bishop|[havencraft]} Havencraft"
+    },
+    {
+      "key": "2.2.3",
+      "context": "main",
+      "number": "2.2.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Class information affects deck construction and is referred to by some card abilities."
+    },
+    {
+      "key": "2.3",
+      "context": "main",
+      "number": "2.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "Card Type",
+      "text": ""
+    },
+    {
+      "key": "2.3.1",
+      "context": "main",
+      "number": "2.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This indicates the card's type."
+    },
+    {
+      "key": "2.3.2",
+      "context": "main",
+      "number": "2.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The primary card types are \"leader,\" \"follower,\" \"amulet,\" \"spell,\" and \"crest.\"",
+      "changed": true
+    },
+    {
+      "key": "2.3.3",
+      "context": "main",
+      "number": "2.3.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Some cards have a special type."
+    },
+    {
+      "key": "2.3.3.1",
+      "context": "main",
+      "number": "2.3.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Special types include \"evolved\" cards and \"advanced\" cards."
+    },
+    {
+      "key": "2.3.4",
+      "context": "main",
+      "number": "2.3.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Whenever a rule, ability, or effect refers to only a card type, it refers to all cards of that type."
+    },
+    {
+      "key": "2.4",
+      "context": "main",
+      "number": "2.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "Trait",
+      "text": ""
+    },
+    {
+      "key": "2.4.1",
+      "context": "main",
+      "number": "2.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This indicates the card's traits."
+    },
+    {
+      "key": "2.4.2",
+      "context": "main",
+      "number": "2.4.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Traits don't have any significance in regard to the rules, but other cards may refer to them."
+    },
+    {
+      "key": "2.5",
+      "context": "main",
+      "number": "2.5",
+      "kind": "section",
+      "depth": 2,
+      "title": "Cost",
+      "text": ""
+    },
+    {
+      "key": "2.5.1",
+      "context": "main",
+      "number": "2.5.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This indicates the amount of play points that the player must pay to play the card (10.4.3). Whenever a card refers to a \"cost,\" it is referring to this displayed number."
+    },
+    {
+      "key": "2.6",
+      "context": "main",
+      "number": "2.6",
+      "kind": "section",
+      "depth": 2,
+      "title": "Card Text",
+      "text": ""
+    },
+    {
+      "key": "2.6.1",
+      "context": "main",
+      "number": "2.6.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This indicates the card's unique abilities, effects, and other information."
+    },
+    {
+      "key": "2.6.2",
+      "context": "main",
+      "number": "2.6.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Sentences that are enclosed in parentheses are called \"explanatory text\" or \"reminder text.\" Although these are a part of a card's text, their only purpose is to clarify how an ability works; they serve no other game function."
+    },
+    {
+      "key": "2.7",
+      "context": "main",
+      "number": "2.7",
+      "kind": "section",
+      "depth": 2,
+      "title": "Attack",
+      "text": ""
+    },
+    {
+      "key": "2.7.1",
+      "context": "main",
+      "number": "2.7.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This signifies the base amount of damage the card deals when it attacks."
+    },
+    {
+      "key": "2.7.1.1",
+      "context": "main",
+      "number": "2.7.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Attack is represented by the {icon_power|[attack]} icon in card text."
+    },
+    {
+      "key": "2.8",
+      "context": "main",
+      "number": "2.8",
+      "kind": "section",
+      "depth": 2,
+      "title": "Defense",
+      "text": ""
+    },
+    {
+      "key": "2.8.1",
+      "context": "main",
+      "number": "2.8.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This signifies the amount of damage the card must take before it is destroyed."
+    },
+    {
+      "key": "2.8.1.1",
+      "context": "main",
+      "number": "2.8.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Defense is represented by the {icon_hp|[defense]} icon in card text."
+    },
+    {
+      "key": "2.8.2",
+      "context": "main",
+      "number": "2.8.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Whenever a follower or leader takes damage, that card's defense is reduced by the same amount of damage (5.14.1)."
+    },
+    {
+      "key": "2.8.3",
+      "context": "main",
+      "number": "2.8.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Although not indicated on leader cards, leaders also have defense."
+    },
+    {
+      "key": "2.8.3.1",
+      "context": "main",
+      "number": "2.8.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Unless otherwise indicated, a leader's defense is 20."
+    },
+    {
+      "key": "2.9",
+      "context": "main",
+      "number": "2.9",
+      "kind": "section",
+      "depth": 2,
+      "title": "Token Information",
+      "text": ""
+    },
+    {
+      "key": "2.9.1",
+      "context": "main",
+      "number": "2.9.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This provides information about tokens referred to by the card's effect(s)."
+    },
+    {
+      "key": "2.9.2",
+      "context": "main",
+      "number": "2.9.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This information is provided for players' reference; it does not have any significance in regard to the rules."
+    },
+    {
+      "key": "2.10",
+      "context": "main",
+      "number": "2.10",
+      "kind": "section",
+      "depth": 2,
+      "title": "Card Art",
+      "text": ""
+    },
+    {
+      "key": "2.10.1",
+      "context": "main",
+      "number": "2.10.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This is the card's illustration."
+    },
+    {
+      "key": "2.10.2",
+      "context": "main",
+      "number": "2.10.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Card art has no bearing on gameplay."
+    },
+    {
+      "key": "2.11",
+      "context": "main",
+      "number": "2.11",
+      "kind": "section",
+      "depth": 2,
+      "title": "Rarity",
+      "text": ""
+    },
+    {
+      "key": "2.11.1",
+      "context": "main",
+      "number": "2.11.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This indicates the card's rarity."
+    },
+    {
+      "key": "2.11.2",
+      "context": "main",
+      "number": "2.11.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Rarity has no bearing on gameplay."
+    },
+    {
+      "key": "2.12",
+      "context": "main",
+      "number": "2.12",
+      "kind": "section",
+      "depth": 2,
+      "title": "Miscellaneous",
+      "text": ""
+    },
+    {
+      "key": "2.12.1",
+      "context": "main",
+      "number": "2.12.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This part of the card contains miscellaneous information such as collector numbers and copyright information, as well as universe information."
+    },
+    {
+      "key": "2.12.2",
+      "context": "main",
+      "number": "2.12.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Aside from the following exceptions, this information has no bearing on gameplay."
+    },
+    {
+      "key": "2.12.2.1",
+      "context": "main",
+      "number": "2.12.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Universe information can affect deck construction."
+    },
+    {
+      "key": "2.12.2.2",
+      "context": "main",
+      "number": "2.12.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Collector numbers are used to distinguish between the front and back face of a double-faced card (2.14)."
+    },
+    {
+      "key": "2.13",
+      "context": "main",
+      "number": "2.13",
+      "kind": "section",
+      "depth": 2,
+      "title": "Alternate Name",
+      "text": ""
+    },
+    {
+      "key": "2.13.1",
+      "context": "main",
+      "number": "2.13.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Some cards have an alternate name in addition to their regular card name."
+    },
+    {
+      "key": "2.13.2",
+      "context": "main",
+      "number": "2.13.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Whenever an ability or effect refers to a card's alternate name in its entirety, it refers to the card name of the card with that alternate name."
+    },
+    {
+      "key": "2.14",
+      "context": "main",
+      "number": "2.14",
+      "kind": "section",
+      "depth": 2,
+      "title": "Double-Faced Cards",
+      "text": ""
+    },
+    {
+      "key": "2.14.1",
+      "context": "main",
+      "number": "2.14.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A double-faced card is a card that has information on both sides."
+    },
+    {
+      "key": "2.14.2",
+      "context": "main",
+      "number": "2.14.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The \"front face\" of a double-faced card is the side with its collector number, while the other side is the \"back face.\""
+    },
+    {
+      "key": "2.14.2.1",
+      "context": "main",
+      "number": "2.14.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When in a zone other than the field, evolve zone, or evolve deck area, a double-faced card is treated as having the information of its front face."
+    },
+    {
+      "key": "2.14.3",
+      "context": "main",
+      "number": "2.14.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When put onto the field or into the evolve zone, a double-faced card should be placed so that the appropriate face, as specified by rules or effects, is visible to all players."
+    },
+    {
+      "key": "2.14.3.1",
+      "context": "main",
+      "number": "2.14.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When referencing the information of a double-faced card on the field or in the evolve zone, reference the information of the visible face."
+    }
+  ]
+}

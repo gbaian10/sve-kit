@@ -1,0 +1,216 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "9",
+      "context": "main",
+      "number": "9",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Handling Special Card Types",
+      "text": ""
+    },
+    {
+      "key": "9.1",
+      "context": "main",
+      "number": "9.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Tokens",
+      "text": ""
+    },
+    {
+      "key": "9.1.1",
+      "context": "main",
+      "number": "9.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Tokens\" may be created during the game and are treated as cards."
+    },
+    {
+      "key": "9.1.1.1",
+      "context": "main",
+      "number": "9.1.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Although tokens are not cards, they are treated as if they were regular cards: they are included when counting the cards in the zone they are in, and any effects that would apply to cards also apply to them."
+    },
+    {
+      "key": "9.1.2",
+      "context": "main",
+      "number": "9.1.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"create\" a token in a given zone means to put the specified token into play in that zone."
+    },
+    {
+      "key": "9.1.2.1",
+      "context": "main",
+      "number": "9.1.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The owner and controller of a created token is the player to whom the zone where the token was created belongs."
+    },
+    {
+      "key": "9.1.2.2",
+      "context": "main",
+      "number": "9.1.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When a token is created in a zone, that token is considered to have been put into that zone."
+    },
+    {
+      "key": "9.1.2.3",
+      "context": "main",
+      "number": "9.1.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A token's card information is determined by its card name. Please see the appendix attached at the end of this document for detailed information."
+    },
+    {
+      "key": "9.1.3",
+      "context": "main",
+      "number": "9.1.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"eliminate\" a token means to remove it from its current zone and treat it as if it no longer exists."
+    },
+    {
+      "key": "9.1.3.1",
+      "context": "main",
+      "number": "9.1.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a token is eliminated from a zone, it is considered to have left that zone."
+    },
+    {
+      "key": "9.1.4",
+      "context": "main",
+      "number": "9.1.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Tokens may only exist in certain zones."
+    },
+    {
+      "key": "9.1.4.1",
+      "context": "main",
+      "number": "9.1.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a token is a follower or amulet, it may exist only in the EX area, the field, or the resolution zone."
+    },
+    {
+      "key": "9.1.4.2",
+      "context": "main",
+      "number": "9.1.4.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a token is a crest, it may exist only in the EX area.",
+      "changed": true
+    },
+    {
+      "key": "9.1.4.3",
+      "context": "main",
+      "number": "9.1.4.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a token is a spell, it may exist only in the EX area or the resolution zone."
+    },
+    {
+      "key": "9.1.4.4",
+      "context": "main",
+      "number": "9.1.4.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a token is moved to a zone where it may not exist, it is eliminated from that zone immediately after it gets moved, and does not entail Confirmation Timing. If the movement takes place in the middle of an effect, the token is eliminated before the rest of the effect is executed."
+    },
+    {
+      "key": "9.1.5",
+      "context": "main",
+      "number": "9.1.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Crest tokens obey the following rules.",
+      "changed": true
+    },
+    {
+      "key": "9.1.5.1",
+      "context": "main",
+      "number": "9.1.5.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Only one crest with the same name may exist in a given player's EX area.",
+      "changed": true
+    },
+    {
+      "key": "9.1.5.1.1",
+      "context": "main",
+      "number": "9.1.5.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If a crest is to be created in an EX area which already has a crest with the same name, it is not created.",
+      "changed": true
+    },
+    {
+      "key": "9.1.5.1.2",
+      "context": "main",
+      "number": "9.1.5.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If multiple crests with the same name are to be created simultaneously in the same EX area, only one of them is created.",
+      "changed": true
+    },
+    {
+      "key": "9.1.5.1.3",
+      "context": "main",
+      "number": "9.1.5.1.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If a crest is to be moved to an EX area which already has a crest with the same name, it is not moved.",
+      "changed": true
+    },
+    {
+      "key": "9.1.6",
+      "context": "main",
+      "number": "9.1.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When using tokens during a game, players may use any card-like object to represent a token as long as that object is approved and explicitly understood by both players, and is distinguishable from regular cards."
+    },
+    {
+      "key": "9.2",
+      "context": "main",
+      "number": "9.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Advanced Cards",
+      "text": ""
+    },
+    {
+      "key": "9.2.1",
+      "context": "main",
+      "number": "9.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Cards with the special type \"advanced\" obey the following rules when moving between zones."
+    },
+    {
+      "key": "9.2.1.1",
+      "context": "main",
+      "number": "9.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A card with the special type \"advanced\" is called an \"advanced card.\""
+    },
+    {
+      "key": "9.2.2",
+      "context": "main",
+      "number": "9.2.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If, during the execution of some process, an advanced card is moved to a zone other than the field, EX area, resolution zone, or evolve deck area, it is placed in the evolve deck faceup immediately after movement and before the rest of the process is performed."
+    }
+  ]
+}

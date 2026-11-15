@@ -2,8 +2,15 @@ import { useTranslation } from "react-i18next"
 import { NavLink, Outlet, useMatch } from "react-router"
 
 import { cn } from "../../components/ui/cn"
+import { type RulesRegion, rulesRegionFor } from "../../data"
+import { currentUiLanguage } from "../../i18n"
+import { usePrefs } from "../../settings"
 
-const OFFICIAL_RULES_URL = "https://shadowverse-evolve.com/rules/"
+// The official page of the edition the reader sees (the Chinese view translates the Japanese one).
+const OFFICIAL_RULES_URL: Record<RulesRegion, string> = {
+  jp: "https://shadowverse-evolve.com/rules/",
+  en: "https://en.shadowverse-evolve.com/rules/",
+}
 
 // The two sections are separate URLs so each can be shared and the old /errata link can land on
 // its own tab; plain links with aria-current keep that history behaviour honest (not ARIA tabs).
@@ -14,6 +21,8 @@ const SECTIONS = [
 
 export function RulesLayout() {
   const { t } = useTranslation()
+  const prefs = usePrefs()
+  const region = rulesRegionFor(currentUiLanguage(prefs.uiLanguage))
   const onErrata = useMatch("/rules/errata") !== null
   return (
     <section className="mx-auto max-w-6xl py-8 lg:py-12" aria-labelledby="rules-heading">
@@ -27,7 +36,7 @@ export function RulesLayout() {
         {!onErrata && (
           <p className="mt-2 text-13 text-text-2">
             <a
-              href={OFFICIAL_RULES_URL}
+              href={OFFICIAL_RULES_URL[region]}
               target="_blank"
               rel="noreferrer"
               className="text-accent-text underline-offset-2 hover:underline"

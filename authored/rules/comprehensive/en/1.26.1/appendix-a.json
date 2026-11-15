@@ -1,0 +1,973 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "A",
+      "context": "A",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Appendix A: Token List",
+      "text": ""
+    },
+    {
+      "key": "A:1",
+      "context": "A",
+      "kind": "block",
+      "depth": 2,
+      "title": "Follower Tokens",
+      "text": "",
+      "table": {
+        "header": ["Card Name", "Class", "Trait", "Cost", "Atk", "Def", "Card Text"],
+        "rows": [
+          ["Fairy Wisp", "Forestcraft", "Pixie", "0", "1", "1", ""],
+          ["Fairy", "Forestcraft", "Pixie", "1", "1", "1", ""],
+          ["Otohime's Bodyguard", "Swordcraft", "Officer", "1", "1", "2", "Ward."],
+          ["Knight", "Swordcraft", "Officer", "1", "1", "1", ""],
+          ["Viking", "Swordcraft", "Thief", "3", "3", "2", "Storm."],
+          ["Steelclad Knight", "Swordcraft", "Officer", "2", "2", "2", ""],
+          ["Strikeform Golem", "Runecraft", "Golem", "2", "3", "2", "Rush."],
+          ["Guardform Golem", "Runecraft", "Golem", "2", "2", "3", "Ward."],
+          ["Dragon", "Dragoncraft", "Wyrmkin", "4", "5", "5", ""],
+          [
+            "Ghost",
+            "Abysscraft",
+            "Departed",
+            "1",
+            "1",
+            "1",
+            "Storm.\nAt the start of your end phase, banish this."
+          ],
+          ["Forest Bat", "Abysscraft", "Vampire", "1", "1", "1", ""],
+          ["Holy Falcon", "Havencraft", "Avian", "3", "2", "2", "Storm."],
+          ["Holy Tiger", "Havencraft", "Beast", "4", "4", "4", "Rush."],
+          ["Crystalia Eve", "Forestcraft", "Crystalian", "4", "4", "4", ""],
+          ["Shield Guardian", "Swordcraft", "Officer", "1", "1", "1", "Ward."],
+          ["Magical Pawn", "Runecraft", "Chess", "1", "2", "1", ""],
+          ["Megalorca", "Dragoncraft", "Marine", "2", "2", "2", ""],
+          ["Hellflame Dragon", "Dragoncraft", "Wyrmkin", "2", "4", "3", "Rush."],
+          [
+            "Gargantuan Ghost",
+            "Abysscraft",
+            "Departed",
+            "1",
+            "3",
+            "3",
+            "Ward.\nAt the start of your main phase, banish this."
+          ],
+          ["Serpent", "Abysscraft", "Demon", "1", "0", "1", "Bane."],
+          [
+            "Goblin King",
+            "Neutral",
+            "Goblinoid",
+            "4",
+            "6",
+            "6",
+            "Ward.\n{icon_fanfare|[fanfare]} Give each other Goblinoid follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+          ],
+          ["Puppet", "Neutral", "Puppetry", "1", "1", "1", "Rush."],
+          ["Ancient Artifact", "Neutral", "Supreme", "1", "3", "1", "Rush."],
+          [
+            "Mystic Artifact",
+            "Neutral",
+            "Supreme",
+            "3",
+            "2",
+            "3",
+            "Ward.\n{icon_fanfare|[fanfare]} Draw a card."
+          ],
+          ["Celestial Shikigami", "Runecraft", "Shikigami", "4", "4", "5", "Aura."],
+          [
+            "Paper Shikigami",
+            "Runecraft",
+            "Shikigami",
+            "2",
+            "2",
+            "2",
+            "{icon_lastword|[lastwords]} Draw a card. Discard a card."
+          ],
+          ["One-Tailed Fox", "Abysscraft", "Yokai", "2", "1", "3", "Rush. Ward."],
+          [
+            "Assembly Droid",
+            "Neutral",
+            "Machina",
+            "1",
+            "1",
+            "1",
+            "{icon_act|[act]} {icon_stand|[engage]}, bury 3 Machina followers: Select an enemy follower on the field and deal it 5 damage."
+          ],
+          [
+            "Lloyd",
+            "Forestcraft",
+            "Puppetry",
+            "0",
+            "2",
+            "4",
+            "Ward.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+2.\nWhile this is on the field, its name is also Puppet."
+          ],
+          [
+            "Victoria",
+            "Forestcraft",
+            "Puppetry / Cutthroat",
+            "0",
+            "4",
+            "1",
+            "Rush. Assail.\n{icon_fanfare|[fanfare]} Draw a card.\nWhile this is on the field, its name is also Puppet."
+          ],
+          ["Otohime's Vanguard", "Dragoncraft", "Marine", "1", "2", "1", "Rush."],
+          [
+            "Exterminus Weapon",
+            "Swordcraft",
+            "Machina / Officer",
+            "2",
+            "6",
+            "6",
+            "{icon_fanfare|[fanfare]} Select an enemy card on the field and destroy it.\n{icon_lastword|[lastwords]} Deal 4 damage to each enemy leader."
+          ],
+          [
+            "Devoted Dragon",
+            "Dragoncraft",
+            "Wyrmkin",
+            "5",
+            "6",
+            "6",
+            "Ward.\nWhile an Aiela, Devoted Knight is on your field, this doesn't take ability damage."
+          ],
+          [
+            "Armored Tentacle",
+            "Runecraft",
+            "Machina / Supreme",
+            "3",
+            "2",
+            "4",
+            "Ward.\n{icon_lastword|[lastwords]} Give your leader {icon_hp|[defense]}+4."
+          ],
+          [
+            "Assault Tentacle",
+            "Runecraft",
+            "Machina / Supreme",
+            "3",
+            "4",
+            "2",
+            "Storm.\n{icon_lastword|[lastwords]} Select an enemy follower on the field and deal it 4 damage."
+          ],
+          [
+            "Medusiana",
+            "Abysscraft",
+            "Demon / Gorgon",
+            "3",
+            "1",
+            "5",
+            "Rush. Assail. Bane.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+X, where X equals the number of Demon followers on your field.\n{icon_lastword|[lastwords]} Each opponent buries a follower."
+          ],
+          [
+            "Anne's Summoning",
+            "Runecraft",
+            "Golem / Arcanaform / Academic",
+            "2",
+            "4",
+            "4",
+            "Rush. Ward.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+2.\nAt the start of your main phase, banish this."
+          ],
+          ["Keenedge Artifact", "Neutral", "Supreme", "5", "3", "4", "Rush. Drain."],
+          [
+            "Sootspawn",
+            "Swordcraft",
+            "Festive",
+            "2",
+            "2",
+            "2",
+            "Ward.\n{icon_lastword|[lastwords]} Select an enemy follower on the field and deal it 2 damage."
+          ],
+          [
+            "Fox of Invitation",
+            "Havencraft",
+            "Festive / Zealot / Beast",
+            "1",
+            "0",
+            "1",
+            "Ward.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+1."
+          ],
+          [
+            "Rulenye, Echoing Scream",
+            "Abysscraft",
+            "Omen / Necromancer",
+            "2",
+            "2",
+            "1",
+            "Rush. Assail."
+          ],
+          [
+            "Guardian Golem",
+            "Runecraft",
+            "Golem",
+            "3",
+            "3",
+            "5",
+            "Ward.\n{icon_lastword|[lastwords]} Give your leader {icon_hp|[defense]}+2."
+          ],
+          ["Fire Drake Whelp", "Dragoncraft", "Wyrmkin", "1", "1", "1", "Intimidate."],
+          [
+            "Mimi, Right Paw Hellhound",
+            "Abysscraft",
+            "Demon",
+            "1",
+            "1",
+            "1",
+            "{icon_lastword|[lastwords]} Select an enemy follower on the field. Deal it 2 damage and bury the top card of your deck."
+          ],
+          [
+            "Coco, Left Paw Hellhound",
+            "Abysscraft",
+            "Demon",
+            "1",
+            "2",
+            "2",
+            "{icon_lastword|[lastwords]} Give your leader {icon_hp|[defense]}+2. Bury the top card of your deck."
+          ],
+          ["Silent Rider", "Neutral", "Archfiend", "1", "5", "5", "Storm."],
+          ["Servant of Cocytus", "Neutral", "Archfiend", "1", "8", "8", ""],
+          [
+            "Demon of Purgatory",
+            "Neutral",
+            "Archfiend",
+            "1",
+            "6",
+            "4",
+            "Ward.\n{icon_fanfare|[fanfare]} Select an enemy follower on the field and deal it 6 damage."
+          ],
+          [
+            "Lococo's Teddy Bear",
+            "Forestcraft",
+            "Puppetry",
+            "2",
+            "2",
+            "2",
+            "{icon_lastword|[lastwords]} Deal 1 damage to your leader."
+          ],
+          [
+            "Eschamali Adviser",
+            "Havencraft",
+            "Faith",
+            "2",
+            "2",
+            "2",
+            "Ward.\n{icon_fanfare|[fanfare]} Draw a card."
+          ],
+          [
+            "Eschamali Constable",
+            "Havencraft",
+            "Faith",
+            "2",
+            "2",
+            "2",
+            "Rush.\n{icon_fanfare|[fanfare]} Give your leader {icon_hp|[defense]}+2."
+          ],
+          [
+            "Adelle, Jealous Dragon",
+            "Dragoncraft",
+            "Wyrmkin",
+            "4",
+            "4",
+            "4",
+            "Whenever an Ian, Dragon Buster is put from your field into the cemetery, deal 5 damage to each enemy leader."
+          ],
+          [
+            "Bansai Suzuki, Clone Technique",
+            "Neutral",
+            "Togh Keyoh / Ward Office",
+            "6",
+            "5",
+            "5",
+            "Rush. Assail. Ward.\nAt the start of your end phase, summon a Bansai Suzuki, Clone Technique token."
+          ],
+          [
+            "Mirror Image Neneka",
+            "Runecraft",
+            "PriConne / Seven Crowns",
+            "2",
+            "0",
+            "1",
+            "Ward.\n{icon_act|[act]} {icon_stand|[engage]}: Select an enemy follower on the field and deal it 1 damage."
+          ],
+          [
+            "Skullfather",
+            "Abysscraft",
+            "PriConne / Diabolos",
+            "1",
+            "2",
+            "1",
+            "Rush.\n{icon_lastword|[lastwords]} Select up to 2 Diabolos followers on your field and give them {icon_power|[attack]}+1."
+          ],
+          [
+            "Chimera Test Subject",
+            "Runecraft",
+            "Condemned / Arcanaform / Forbidden",
+            "2",
+            "2",
+            "2",
+            "{icon_fanfare|[fanfare]} If there are at least 5 Condemned followers in your cemetery, give this {icon_power|[attack]}+2/{icon_hp|[defense]}+2 and Rush. If there are at least 10, give it Assail and Bane.\n{icon_lastword|[lastwords]} Draw a card."
+          ]
+        ]
+      },
+      "changed": true
+    },
+    {
+      "key": "A:2",
+      "context": "A",
+      "kind": "block",
+      "depth": 2,
+      "title": "Amulet Tokens",
+      "text": "",
+      "table": {
+        "header": ["Card Name", "Class", "Trait", "Cost", "Atk", "Def", "Card Text"],
+        "rows": [
+          ["Magic Sediment", "Runecraft", "Earth Sigil", "1", "", "", "Stack."],
+          [
+            "Leonidas's Resolve",
+            "Swordcraft",
+            "Commander",
+            "8",
+            "",
+            "",
+            "Whenever a {icon_royal|[swordcraft]} follower is put onto your field, give it {icon_power|[attack]}+3/{icon_hp|[defense]}+3 and Rush."
+          ],
+          [
+            "Draconic Weapon",
+            "Dragoncraft",
+            "Armed",
+            "1",
+            "",
+            "",
+            "{icon_act|[act]} {icon_stand|[engage]}, bury this: Select a {icon_dragon|[dragoncraft]} follower on your field and give it {icon_hp|[defense]}+1 and the Armed trait."
+          ],
+          [
+            "Ephemeral Moon",
+            "Havencraft",
+            "Faith",
+            "3",
+            "",
+            "",
+            "During your turn, each Kaguya on your field doesn't take damage.\nAt the start of your main phase, banish this."
+          ],
+          [
+            "Destruction in White",
+            "Runecraft",
+            "Omen / Idolatry",
+            "1",
+            "",
+            "",
+            "At the start of your main phase, give your leader {icon_hp|[defense]}+2."
+          ],
+          [
+            "Destruction in Black",
+            "Runecraft",
+            "Omen / Idolatry",
+            "2",
+            "",
+            "",
+            "At the start of your main phase, deal 2 damage to each enemy leader."
+          ],
+          [
+            "Naterran Great Tree",
+            "Neutral",
+            "Natura",
+            "1",
+            "",
+            "",
+            "When this leaves the field, draw a card, then discard a card.\n{icon_act|[act]} {icon_cost01|[cost01]}: Bury this."
+          ],
+          [
+            "Aftershock",
+            "Dragoncraft",
+            "Dragonewt / Draconic Duelist",
+            "3",
+            "",
+            "",
+            "Whenever a Draconic Duelist follower is put onto your field, place a lightning counter on this.\n{icon_act|[act]} {icon_stand|[engage]}: Select a {icon_dragon|[dragoncraft]} follower on your field and give it {icon_power|[attack]}+2. Activate only if this has at least 5 lightning counters.\n{icon_act|[act]} {icon_stand|[engage]}: Select an enemy follower on the field. Destroy it and deal 3 damage to its leader. Activate only if this has at least 10 lightning counters."
+          ],
+          [
+            "Val, Trusty Getaway Car",
+            "Swordcraft",
+            "Wasteland / Mount",
+            "2",
+            "3",
+            "3",
+            "{icon_act|[act]} {icon_stand|[engage]} a Bunny & Baron, Specter Duo on your field: Maneuver this.\n{icon_act|[act]} {icon_cost01|[cost01]} {icon_stand|[engage]} 2 followers on your field: Maneuver this.\nStorm.\nStrike - If there is another Wasteland follower on your field, draw a card."
+          ],
+          [
+            "Magitrain",
+            "Abysscraft",
+            "Wasteland / Mount",
+            "5",
+            "4",
+            "5",
+            "{icon_act|[act]} {icon_cost01|[cost01]} {icon_stand|[engage]} any number of followers on your field that cost a total of 5 or more: Maneuver this.\nRush.\nStrike - Select an engaged enemy follower on the field. Destroy it and give your leader {icon_hp|[defense]}+2."
+          ],
+          [
+            "Dutiful Steed",
+            "Neutral",
+            "Wasteland / Mount / Beast",
+            "1",
+            "",
+            "",
+            "{icon_act|[act]} bury this: Select a follower on your field, if it's a Wasteland follower, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+          ],
+          [
+            "Bullet Bike",
+            "Neutral",
+            "Wasteland / Mount",
+            "1",
+            "",
+            "",
+            "{icon_act|[act]} bury this: Select a follower on your field. Give it Rush and, if it’s a Wasteland follower, {icon_power|[attack]}+1."
+          ],
+          [
+            "Arcane Personnel Carrier",
+            "Neutral",
+            "Wasteland / Mount",
+            "1",
+            "",
+            "",
+            "{icon_act|[act]} bury this: Select a follower on your field. Give it Ward and, if it’s a Wasteland follower, {icon_hp|[defense]}+1."
+          ],
+          [
+            "Flame General's Regalia",
+            "Swordcraft",
+            "Commander / Celestial",
+            "3",
+            "",
+            "",
+            "Whenever a follower on your field evolves, select an enemy follower on the field and deal it 2 damage.\n{icon_act|[act]} {icon_cost01|[cost01]}, {icon_stand|[engage]}, bury this: Select a Commander follower on your field and give it \"Strike - Deal 2 damage to each enemy leader.\""
+          ],
+          [
+            "Luna's Doll",
+            "Abysscraft",
+            "Necromancer / Puppetry",
+            "1",
+            "",
+            "",
+            "{icon_fanfare|[fanfare]} Bury the top 2 cards of your deck.\n{icon_act|[act]} {icon_stand|[engage]}, bury this: Draw a card. Activate only if there are at least 10 cards in your cemetery."
+          ],
+          [
+            "Totem of Madness",
+            "Havencraft",
+            "Zealot / Eidolon",
+            "4",
+            "",
+            "",
+            "At the start of your end phase, place a curse counter on this. Then, if this has 1 curse counter, deal 1 damage to your leader. If it has 2, discard a card. If it has 3, discard a card, deal 3 damage to your leader, and bury this."
+          ],
+          [
+            "White Psalm, New Revelation",
+            "Runecraft",
+            "Omen / Idolatry",
+            "1",
+            "",
+            "",
+            "{icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this.\n{icon_lastword|[lastwords]} Summon a Black Psalm, New Revelation token. Give your leader {icon_hp|[defense]}+1."
+          ],
+          [
+            "Black Psalm, New Revelation",
+            "Runecraft",
+            "Omen / Idolatry",
+            "1",
+            "",
+            "",
+            "{icon_act|[act]} {icon_stand|[engage]} 3 Idolatry cards on your field: Bury this.\n{icon_lastword|[lastwords]} Summon a White Psalm, New Revelation token. Deal 1 damage to each enemy leader."
+          ]
+        ]
+      },
+      "changed": true
+    },
+    {
+      "key": "A:3",
+      "context": "A",
+      "kind": "block",
+      "depth": 2,
+      "title": "Spell Tokens",
+      "text": "",
+      "table": {
+        "header": ["Card Name", "Class", "Trait", "Cost", "Card Text"],
+        "rows": [
+          [
+            "Thorn Burst",
+            "Forestcraft",
+            "Verdant",
+            "2",
+            "Select an enemy leader or enemy follower on the field. Deal it 3 damage and draw a card."
+          ],
+          [
+            "Mimi, Infernal Right Paw",
+            "Abysscraft",
+            "Demon",
+            "0",
+            "Select an enemy follower on the field and deal it 2 damage."
+          ],
+          [
+            "Coco, Infernal Left Paw",
+            "Abysscraft",
+            "Demon",
+            "0",
+            "Select a follower on your field and give it {icon_power|[attack]}+2."
+          ],
+          [
+            "Magical Item",
+            "Neutral",
+            "iM@S CG",
+            "4",
+            "Give your leader {icon_hp|[defense]}+1. Draw a card."
+          ],
+          [
+            "Repair Mode",
+            "Neutral",
+            "Machina",
+            "1",
+            "{icon_quick|[quick]}\nGive your leader {icon_hp|[defense]}+1."
+          ],
+          [
+            "Instant Poison",
+            "Runecraft",
+            "Alchemist / Forbidden",
+            "2",
+            "Select an enemy follower on the field. Deal 4 damage to it and 2 damage to its leader."
+          ],
+          [
+            "Eternal Potion",
+            "Runecraft",
+            "Alchemist / Forbidden",
+            "2",
+            "Select a {icon_witch|[runecraft]} follower in your cemetery that costs 3 or less and summon it. Give it Rush and \"At the start of your end phase, destroy this card.\""
+          ],
+          [
+            "Mysterian Missile",
+            "Runecraft",
+            "Mage / Academic",
+            "2",
+            "Select an enemy follower on the field. Deal 3 damage to it and, if there are at least 10 Academic cards in your cemetery, 2 damage to that follower's leader."
+          ],
+          [
+            "Carbuncle's Sparkle",
+            "Forestcraft",
+            "Fae-Touched / Beast",
+            "2",
+            "Choose 1. (1) Select a follower on the field and return it to its owner’s hand. (2) Give your leader {icon_hp|[defense]}+4. (3) Draw 2 cards."
+          ],
+          [
+            "Twilight Blade",
+            "Swordcraft",
+            "Commander / Officer",
+            "5",
+            "As an additional cost to play this card, engage a Lecia, Sky Saber and a Nano, the Dawnblade on your field.\n----------\nDeal 10 damage to each enemy leader and enemy follower on the field."
+          ],
+          [
+            "Resentful Blaze",
+            "Runecraft",
+            "Mage / Academic / Princess / Cutthroat",
+            "1",
+            "Choose 1. (1) Select an enemy follower on the field and deal it 4 damage. (2) Select 2 enemy followers on the field. If there are at least 15 Academic cards in your cemetery, deal them 4 damage."
+          ],
+          [
+            "Blood Arts",
+            "Abysscraft",
+            "Wasteland / Vampire",
+            "1",
+            "Deal 1 damage to your leader and each enemy follower. Give each Aluzard, Timeworn Vampire on your field {icon_power|[attack]}+1 and Drain, then give them {icon_power|[attack]}+3/{icon_hp|[defense]}+3 if there are 3 faceup followers named Aluzard, Timeworn Vampire in your evolve deck."
+          ],
+          [
+            "Darkest Desire",
+            "Abysscraft",
+            "Departed / Cutthroat",
+            "1",
+            "As an additional cost to play this card, bury 2 followers.\n----------\nDeal 2 damage to each enemy leader. Give your leader {icon_hp|[defense]}+2."
+          ],
+          [
+            "Glittering Gold",
+            "Swordcraft",
+            "Festive / Thief / Loot",
+            "0",
+            "{icon_act|[act]} {icon_cost01|[cost01]}, banish this and 2 other cards named Glittering Gold from your EX area: Give your leader {icon_hp|[defense]}+1. Draw a card."
+          ],
+          [
+            "Tidal Tyranny",
+            "Dragoncraft",
+            "Festive / Dragonewt",
+            "2",
+            "Select an enemy follower on the field and deal it 4 damage. If Overflow is active for you, deal 6 damage instead."
+          ],
+          [
+            "Wolfling's Struggle",
+            "Abysscraft",
+            "Festive / Demon / Beast",
+            "0",
+            "Select an enemy follower on the field. Deal it 1 damage, and you may discard a card. If you do, bury the top card of your deck."
+          ],
+          [
+            "Mercurial Might",
+            "Havencraft",
+            "Faith / Supreme",
+            "1",
+            "{icon_quick|[quick]}\nIf your leader would take damage this turn, it takes that much minus 1 instead. Draw a card."
+          ],
+          [
+            "Annihilating Onslaught",
+            "Forestcraft",
+            "Omen / Hunter",
+            "3",
+            "If there are at least 6 Hunter cards in your cemetery, deal 6 damage to each enemy leader."
+          ],
+          [
+            "Remnant of Hollowness",
+            "Swordcraft",
+            "Omen / Thief / Loot",
+            "2",
+            "Choose 1. If there are at least 10 cards in opponents' cemeteries, choose up to 2 instead. (1) Select an enemy follower on the field and deal it 3 damage. If there are at least 10 cards in opponents' cemeteries, deal 8 damage instead. (2) Look at the top 3 cards of your deck. You may reveal a Thief card from among them and add it to your hand. Put the rest on the bottom of your deck in any order."
+          ],
+          [
+            "Gilded Blade",
+            "Swordcraft",
+            "Loot",
+            "2",
+            "Select an enemy follower on the field. Deal it 2 damage and, if there are at least 10 cards in opponents' cemeteries, deal 2 damage to its leader."
+          ],
+          [
+            "Gilded Goblet",
+            "Swordcraft",
+            "Loot",
+            "2",
+            "Give your leader {icon_hp|[defense]}+1. If there are at least 10 cards in opponents' cemeteries, give {icon_hp|[defense]}+2 instead."
+          ],
+          [
+            "Gilded Boots",
+            "Swordcraft",
+            "Loot",
+            "2",
+            "Select a Thief follower on your field and give it Rush. If there are at least 10 cards in opponents' cemeteries, give Storm instead."
+          ],
+          [
+            "Ersatz Elimination",
+            "Runecraft",
+            "Omen / Mage",
+            "1",
+            "Select an Omen–Mage follower in your cemetery that costs 3 or less and summon it."
+          ],
+          [
+            "Melodious Monody",
+            "Runecraft",
+            "Omen / Idolatry",
+            "0",
+            "As an additional cost to play this, you may engage any number of Idolatry cards on your field.\n----------\nSelect an enemy follower on the field and deal it damage equal to 2 times the number of Idolatry cards you engaged as the additional cost to play this."
+          ],
+          [
+            "Fangs of Ardent Destruction",
+            "Dragoncraft",
+            "Omen / Wyrmkin",
+            "1",
+            "Deal 1 damage to each follower on the field. If Overflow is active for you, give each Galmieux, Ardent Disdain on your field Storm."
+          ],
+          [
+            "Wings of Desire",
+            "Abysscraft",
+            "Omen / Demon",
+            "1",
+            "Select a follower on your field. Give it \"Strike - Deal each enemy follower on the field damage equal to the number of times your leader has lost defense this turn\" and deal 1 damage to your leader."
+          ],
+          [
+            "Scream Diffusion",
+            "Abysscraft",
+            "Omen / Necromancer",
+            "2",
+            "Summon a Rulenye, Echoing Scream token for every 5 cards in your cemetery."
+          ],
+          [
+            "Torrent of Despair",
+            "Havencraft",
+            "Omen / Zealot",
+            "0",
+            "Select an enemy follower on the field and banish it."
+          ],
+          [
+            "Great Testimony",
+            "Neutral",
+            "Omen",
+            "0",
+            "Select an enemy follower on the field. Destroy it and, if there's a Mjerrabaine, Great One on your field, deal 2 damage to its leader."
+          ],
+          [
+            "Ravenous Sweetness",
+            "Neutral",
+            "Omen",
+            "5",
+            "Deal 2 damage to each enemy leader. Give your leader {icon_hp|[defense]}+2. Draw 2 cards. Each opponent discards 2 random cards."
+          ],
+          [
+            "Looking Smart!",
+            "Runecraft",
+            "Mage / Academic",
+            "0",
+            "Select an enemy follower on the field. Deal it 2 damage, draw a card, then discard a card."
+          ],
+          [
+            "Astaroth's Reckoning",
+            "Neutral",
+            "Archfiend",
+            "10",
+            "Change each enemy leader's defense to 1."
+          ],
+          [
+            "Gale Arrow",
+            "Forestcraft",
+            "Elf",
+            "1",
+            "Select an enemy follower on the field. Combo (3) - Deal it 2 damage."
+          ],
+          [
+            "Storm Arrow",
+            "Forestcraft",
+            "Elf",
+            "1",
+            "Combo (5) - Deal 2 damage to each enemy leader."
+          ],
+          [
+            "Quadra Magic",
+            "Runecraft",
+            "Mage",
+            "2",
+            "Spellchain (5) - This costs 1 less to play.\n----------\nSelect up to 2 enemy followers on the field and deal them 2 damage. Put an Elements of Creation token into your EX area."
+          ],
+          [
+            "Elements of Creation",
+            "Runecraft",
+            "Mage",
+            "5",
+            "Spellchain (10) - Deal 7 damage to each enemy leader. Give your leader {icon_hp|[defense]}+7."
+          ],
+          [
+            "Curse of the Black Dragon",
+            "Dragoncraft",
+            "Wyrmkin / Cutthroat / Draconic Duelist",
+            "0",
+            "This can't be played unless Overflow is active for you.\nAt the start of your end phase, if this is in your EX area and Overflow isn't active for you, deal 1 damage to your leader.\n----------\nSelect a Rowen, Dragon Lance on your field and give it \"If this would deal damage, it deals that much plus 1 instead\" for the rest of this turn."
+          ],
+          [
+            "A Horrible Night",
+            "Abysscraft",
+            "Vampire",
+            "1",
+            "This can't be played if you've played another A Horrible Night this turn.\n----------\nFor the rest of this turn, whenever your leader loses defense, deal 1 damage to each enemy leader and give your leader {icon_hp|[defense]}+1."
+          ],
+          [
+            "Seeds of Salvation",
+            "Forestcraft",
+            "Togh Keyoh / Verdant",
+            "1",
+            "Draw a card. You may turn any number of faceup evolved followers in your evolve deck facedown. Gain 1 Evolution Point."
+          ],
+          [
+            "All-Access Search",
+            "Swordcraft",
+            "Togh Keyoh / Detective",
+            "1",
+            "Place 3 gigabyte counters on each Gigabyte Blade on your field. Draw 2 cards."
+          ],
+          [
+            "Adorn with Jewels",
+            "Runecraft",
+            "Togh Keyoh / Alchemist / Merchant",
+            "1",
+            "For the rest of this turn, you may play cards from your banished zone."
+          ],
+          [
+            "Ginger's Curse",
+            "Runecraft",
+            "Mage",
+            "1",
+            "Select an enemy follower on the field. It loses all abilities. Change its attack and defense to 1."
+          ],
+          [
+            "Youthful Strike",
+            "Dragoncraft",
+            "Togh Keyoh / Dragonewt / Draconic Duelist",
+            "2",
+            "Select an enemy follower on the field and a Togh Keyoh follower on your field. Destroy the first follower and give the second Storm."
+          ],
+          [
+            "Diurnal Slumber",
+            "Abysscraft",
+            "Togh Keyoh / Demon",
+            "1",
+            "Select up to 3 Togh Keyoh cards in your cemetery with different names that cost 2 or less and add them to your hand."
+          ],
+          [
+            "Righteous Conviction",
+            "Havencraft",
+            "Togh Keyoh / Faith",
+            "1",
+            "Deal damage to each enemy leader equal to the number of Togh Keyoh followers on your field. Give your leader {icon_hp|[defense]}+1."
+          ],
+          [
+            "Dread Pirate's Flag",
+            "Swordcraft",
+            "Condemned / Thief / Loot",
+            "1",
+            "Select a Thief follower on your field. Give it {icon_power|[attack]}+1 and, if's a Condemned–Thief follower, deal 1 damage to each enemy leader."
+          ]
+        ]
+      },
+      "changed": true
+    },
+    {
+      "key": "A:4",
+      "context": "A",
+      "kind": "block",
+      "depth": 2,
+      "title": "Equipment Tokens",
+      "text": "",
+      "table": {
+        "header": ["Card Name", "Class", "Trait", "Cost", "Card Text"],
+        "rows": [
+          [
+            "Ameth Amulet",
+            "Forestcraft",
+            "PriConne / Gourmet Guild",
+            "2",
+            "The equipped follower has \"{icon_act|[act]} {icon_stand|[engage]}: Give each follower on your field {icon_power|[attack]}+1/{icon_hp|[defense]}+1.\""
+          ],
+          [
+            "Princess Sword",
+            "Swordcraft",
+            "PriConne / Gourmet Guild",
+            "2",
+            "If the equipped follower would deal damage, it deals that much +2 instead.\nIf the equipped follower would take damage, it takes that much -2 instead."
+          ],
+          [
+            "Sanctum Blade Avalon",
+            "Swordcraft",
+            "PriConne / Nightmare / Seven Crowns",
+            "2",
+            "The equipped follower has \"Strike - Refresh this. Draw a card. Perform only once per turn.\""
+          ],
+          [
+            "Queen's Console",
+            "Swordcraft",
+            "PriConne / Labyrinth / Seven Crowns",
+            "2",
+            "The equipped follower has \"{icon_UB|[UB]}{icon_act|[act]} {icon_cost01|[cost01]}, {icon_stand|[engage]}: Give each 1-cost follower on your field {icon_power|[attack]}+1.\""
+          ],
+          [
+            "Chaos Grimoire",
+            "Runecraft",
+            "PriConne / Gourmet Guild",
+            "2",
+            "The equipped follower has \"2 times per turn, when you play a spell, deal each enemy leader damage equal to half this follower’s attack (rounded up).\""
+          ],
+          [
+            "Mirage Wand",
+            "Runecraft",
+            "PriConne / Seven Crowns",
+            "2",
+            "The equipped follower has \"If this or a Mirror Image Neneka on your field would deal ability damage, it deals that much +1 instead.\""
+          ],
+          [
+            "Eisdrache",
+            "Dragoncraft",
+            "PriConne / Gourmet Guild",
+            "2",
+            "When a follower equips this, select an enemy follower on the field. Engage it and give the equipped follower {icon_power|[attack]}+2/{icon_hp|[defense]}+2."
+          ],
+          [
+            "Precious Memento",
+            "Dragoncraft",
+            "PriConne",
+            "2",
+            "The equipped follower has Storm and \"Strike - Select up to 2 enemy followers on the field and deal them 3 damage.\""
+          ],
+          [
+            "Dark Axe Nachtfang",
+            "Abysscraft",
+            "PriConne / Diabolos",
+            "2",
+            "The equipped follower has \"Whenever this deals ability damage to 1 or more enemy followers on the field, deal 3 damage to each enemy leader.\""
+          ],
+          [
+            "Glorious Feather",
+            "Havencraft",
+            "PriConne / Sarendia Orphanage",
+            "2",
+            "The equipped follower has \"At the start of your end phase, give your leader {icon_hp|[defense]}+3.\"\nIf the equipped follower would deal damage, it deals that much +1 instead."
+          ]
+        ]
+      },
+      "changed": true
+    },
+    {
+      "key": "A:5",
+      "context": "A",
+      "kind": "block",
+      "depth": 2,
+      "title": "Crest Tokens",
+      "text": "",
+      "table": {
+        "header": ["Card Name", "Class", "Trait", "Card Text"],
+        "rows": [
+          [
+            "Crest: Krulle, Heir to Unkilling",
+            "Forestcraft",
+            "Omen / Heir / Hunter",
+            "{icon_act|[act]} {icon_cost00|[cost00]}: Select an enemy follower on the field and change its defense to 1. Activate only once per turn."
+          ],
+          [
+            "Crest: Octrice, Hollowness Manifest",
+            "Swordcraft",
+            "Omen / Thief",
+            "At the start of your main phase or whenever you play or fuse a Loot card, place a reversal counter on this. Then, if this has at least 8 reversal counters, banish it, search your deck for a Thief card, reveal it, add it to your hand, then shuffle."
+          ],
+          [
+            "Crest: Galmieux, Ardor Manifest",
+            "Dragoncraft",
+            "Omen / Wyrmkin",
+            "{icon_act|[act]} {icon_cost00|[cost00]}: Select an Omen follower on your field and deal it 1 damage. Activate only once per turn."
+          ],
+          [
+            "Crest: Sham-Nacha, Heir to Entwining",
+            "Abysscraft",
+            "Omen / Heir / Encroacher",
+            "If you would choose 1 or more options, choose any number instead."
+          ],
+          [
+            "Crest: Marwynn, Despair Manifest",
+            "Havencraft",
+            "Omen / Zealot",
+            "At the start of your end phase, select an enemy leader or enemy follower on the field and deal it 1 damage. If there are at least 3 crests in your EX area, deal 2 damage instead. If there are 5, deal 4 damage instead."
+          ],
+          [
+            "Crest: Himeka, Heir to Repose",
+            "Havencraft",
+            "Omen / Heir / Zealot",
+            "At the start of your end phase, select an enemy follower on the field and, if there are at least 3 crests in your EX area, give it {icon_power|[attack]}-2/{icon_hp|[defense]}-2. If there are 5, give {icon_power|[attack]}-4/{icon_hp|[defense]}-4 instead."
+          ],
+          [
+            "Crest: Congregant of Repose",
+            "Havencraft",
+            "Omen / Zealot",
+            "At the start of your end phase, select an Omen follower on your field and, if there are at least 3 crests in your EX area, give it {icon_power|[attack]}+1/{icon_hp|[defense]}+1."
+          ],
+          [
+            "Crest: Supplicant of Repose",
+            "Havencraft",
+            "Omen / Zealot",
+            "At the start of your end phase, if there are at least 3 crests in your EX area, give your leader {icon_hp|[defense]}+1."
+          ],
+          [
+            "Crest: Mjerrabaine, Great Manifest",
+            "Neutral",
+            "Omen",
+            "At the start of your end phase, if there’s 1 card or less in your hand, draw a card."
+          ]
+        ]
+      },
+      "changed": true
+    }
+  ]
+}

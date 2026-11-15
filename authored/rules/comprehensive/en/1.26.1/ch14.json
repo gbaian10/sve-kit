@@ -1,0 +1,761 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "14",
+      "context": "main",
+      "number": "14",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Universe-Specific Information and Keywords",
+      "text": ""
+    },
+    {
+      "key": "14.1",
+      "context": "main",
+      "number": "14.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Overview",
+      "text": ""
+    },
+    {
+      "key": "14.1.1",
+      "context": "main",
+      "number": "14.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Players may possess certain additional information depending on their deck's universe. Furthermore, some universes have cards with unique notations or keywords. This section will detail those notations and keywords."
+    },
+    {
+      "key": "14.2",
+      "context": "main",
+      "number": "14.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Umamusume: Pretty Derby",
+      "text": ""
+    },
+    {
+      "key": "14.2.1",
+      "context": "main",
+      "number": "14.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Serve (Notation)"
+    },
+    {
+      "key": "14.2.1.1",
+      "context": "main",
+      "number": "14.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to serve a card X times, and that card is not linked to any cards in the race zone, its controller puts X Carrot cards from their evolve deck into their race zone and links them to the card."
+    },
+    {
+      "key": "14.2.1.1.1",
+      "context": "main",
+      "number": "14.2.1.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If X isn't specified, treat X as 1."
+    },
+    {
+      "key": "14.2.1.2",
+      "context": "main",
+      "number": "14.2.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the card to be served is already linked to a card in the race zone, nothing happens as part of the serving process."
+    },
+    {
+      "key": "14.2.1.2.1",
+      "context": "main",
+      "number": "14.2.1.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "In such a case, the serving process can't be executed as part of a cost."
+    },
+    {
+      "key": "14.2.1.3",
+      "context": "main",
+      "number": "14.2.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a card on the field is moved to a zone other than the field, the link between that card and any cards in the race zone is lost immediately after movement."
+    },
+    {
+      "key": "14.2.2",
+      "context": "main",
+      "number": "14.2.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Serve (Keyword Ability)"
+    },
+    {
+      "key": "14.2.2.1",
+      "context": "main",
+      "number": "14.2.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Serve\" is an activated ability involving the payment of a certain cost."
+    },
+    {
+      "key": "14.2.2.2",
+      "context": "main",
+      "number": "14.2.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Serve abilities are denoted by the {icon_carrot|[feed]} icon."
+    },
+    {
+      "key": "14.2.2.3",
+      "context": "main",
+      "number": "14.2.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"[X {icon_carrot|[feed]} icons] [cost]: [effect]\" means \"{icon_stand|[engage]} Serve this follower X times, [cost]: [effect].\""
+    },
+    {
+      "key": "14.2.2.4",
+      "context": "main",
+      "number": "14.2.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When playing a serve ability, if the cost includes play points, the player may use 1 evolution point in lieu of 1 play point."
+    },
+    {
+      "key": "14.2.2.5",
+      "context": "main",
+      "number": "14.2.2.5",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Serve abilities are equivalent to evolve abilities (8.3.2)."
+    },
+    {
+      "key": "14.2.3",
+      "context": "main",
+      "number": "14.2.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Race"
+    },
+    {
+      "key": "14.2.3.1",
+      "context": "main",
+      "number": "14.2.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to race a card X times, as long as it is linked to a card in the race zone, that card has Rush and is considered to have \"raced\" X times."
+    },
+    {
+      "key": "14.2.3.1.1",
+      "context": "main",
+      "number": "14.2.3.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If X isn't specified, treat X as 1."
+    },
+    {
+      "key": "14.2.4",
+      "context": "main",
+      "number": "14.2.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "On Race"
+    },
+    {
+      "key": "14.2.4.1",
+      "context": "main",
+      "number": "14.2.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "On Race is an automatic ability that triggers when the card with On Race races."
+    },
+    {
+      "key": "14.2.4.2",
+      "context": "main",
+      "number": "14.2.4.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"On Race: [text]\" means \"When this card races, [text].\""
+    },
+    {
+      "key": "14.3",
+      "context": "main",
+      "number": "14.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "THE IDOLM@STER CINDERELLA GIRLS",
+      "text": ""
+    },
+    {
+      "key": "14.3.1",
+      "context": "main",
+      "number": "14.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Magical Item"
+    },
+    {
+      "key": "14.3.1.1",
+      "context": "main",
+      "number": "14.3.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Magical Item tokens have alternate names (2.13)."
+    },
+    {
+      "key": "14.3.1.2",
+      "context": "main",
+      "number": "14.3.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "During game preparation, before the first player is decided (6.2.1.6), any player whose deck is based on the THE IDOLM@STER CINDERELLA GIRLS universe (6.1.1.5.2) puts five Magical Item tokens into their EX area."
+    },
+    {
+      "key": "14.3.2",
+      "context": "main",
+      "number": "14.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Lesson"
+    },
+    {
+      "key": "14.3.2.1",
+      "context": "main",
+      "number": "14.3.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Lesson (X)\" means \"Banish X cards named Magical Item from your EX area.\""
+    },
+    {
+      "key": "14.4",
+      "context": "main",
+      "number": "14.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "Cardfight!! Vanguard",
+      "text": ""
+    },
+    {
+      "key": "14.4.1",
+      "context": "main",
+      "number": "14.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Trigger Icon"
+    },
+    {
+      "key": "14.4.1.1",
+      "context": "main",
+      "number": "14.4.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Cards based on this universe may have one of the following Trigger icons written on the top right corner.\n{Critical Trigger} Critical Trigger\n{Draw Trigger} Draw Trigger\n{Stand Trigger} Stand Trigger\n{Heal Trigger} Heal Trigger"
+    },
+    {
+      "key": "14.4.2",
+      "context": "main",
+      "number": "14.4.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Deck Construction"
+    },
+    {
+      "key": "14.4.2.1",
+      "context": "main",
+      "number": "14.4.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A deck based on this universe is subjected to the following."
+    },
+    {
+      "key": "14.4.2.1.1",
+      "context": "main",
+      "number": "14.4.2.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "It must contain at least one Starting Amulet card."
+    },
+    {
+      "key": "14.4.2.1.2",
+      "context": "main",
+      "number": "14.4.2.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If it contains a card with Trigger (14.4.1), that card must be from the leader's class."
+    },
+    {
+      "key": "14.4.3",
+      "context": "main",
+      "number": "14.4.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Starting a Game"
+    },
+    {
+      "key": "14.4.3.1",
+      "context": "main",
+      "number": "14.4.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "At the start of a game (6.2), if a player's deck is based on this universe, they must put a Starting Amulet card from their deck onto their field facedown before each player puts their main deck in their deck zone (6.2.1.4)."
+    },
+    {
+      "key": "14.4.3.2",
+      "context": "main",
+      "number": "14.4.3.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "After players have redrawn their hands, each player with facedown Starting Amulet cards on their field turns them faceup."
+    },
+    {
+      "key": "14.4.4",
+      "context": "main",
+      "number": "14.4.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Starting Amulet"
+    },
+    {
+      "key": "14.4.4.1",
+      "context": "main",
+      "number": "14.4.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Starting Amulet is a passive ability that affects deck construction."
+    },
+    {
+      "key": "14.4.4.1.1",
+      "context": "main",
+      "number": "14.4.4.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Starting Amulet means \"all Starting Amulet cards used in your main deck and evolve deck must share the same name.\""
+    },
+    {
+      "key": "14.4.5",
+      "context": "main",
+      "number": "14.4.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Drive Check"
+    },
+    {
+      "key": "14.4.5.1",
+      "context": "main",
+      "number": "14.4.5.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to perform a drive check, do the following."
+    },
+    {
+      "key": "14.4.5.1.1",
+      "context": "main",
+      "number": "14.4.5.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "The player moves the top card of their deck into their Trigger zone."
+    },
+    {
+      "key": "14.4.5.1.2",
+      "context": "main",
+      "number": "14.4.5.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If their deck is not based on this universe, the player moves the card from their Trigger zone to the bottom of their deck and resolves the drive check."
+    },
+    {
+      "key": "14.4.5.1.3",
+      "context": "main",
+      "number": "14.4.5.1.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the card has Trigger, that player resolves one of the following abilities according to the Trigger icon on the card."
+    },
+    {
+      "key": "14.4.5.1.3.1",
+      "context": "main",
+      "number": "14.4.5.1.3.1",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If it is a Critical Trigger icon ({Critical Trigger}), the player gives a follower on their field +2 attack."
+    },
+    {
+      "key": "14.4.5.1.3.2",
+      "context": "main",
+      "number": "14.4.5.1.3.2",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If it is a Draw Trigger icon ({Draw Trigger}), the player draws a card."
+    },
+    {
+      "key": "14.4.5.1.3.3",
+      "context": "main",
+      "number": "14.4.5.1.3.3",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If it is a Stand Trigger icon ({Stand Trigger}), the player refreshes a follower on their field. For the rest of the turn, that follower cannot attack an enemy leader."
+    },
+    {
+      "key": "14.4.5.1.3.4",
+      "context": "main",
+      "number": "14.4.5.1.3.4",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If it is a Heal Trigger icon ({Heal Trigger}), the player increases their leader's defense by 3."
+    },
+    {
+      "key": "14.4.5.1.4",
+      "context": "main",
+      "number": "14.4.5.1.4",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Once a player resolves an ability according to 14.4.5.1.3, their \"when you drive check a Trigger\" condition is satisfied at this point."
+    },
+    {
+      "key": "14.4.5.1.5",
+      "context": "main",
+      "number": "14.4.5.1.5",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If a player resolves a card with Trigger in their Trigger zone in the above manner, they put the card into their cemetery. If the card does not have Trigger, or if the player chooses not to resolve it, the player puts it at the bottom of their deck."
+    },
+    {
+      "key": "14.4.6",
+      "context": "main",
+      "number": "14.4.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Single Drive/Twin Drive"
+    },
+    {
+      "key": "14.4.6.1",
+      "context": "main",
+      "number": "14.4.6.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Single Drive and Twin Drive are automatic abilities that perform drive checks when the card with Single Drive or Twin Drive attacks."
+    },
+    {
+      "key": "14.4.6.2",
+      "context": "main",
+      "number": "14.4.6.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Single Drive means \"Strike - Perform a drive check.\""
+    },
+    {
+      "key": "14.4.6.3",
+      "context": "main",
+      "number": "14.4.6.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Twin Drive means \"Strike - Perform 2 drive checks.\""
+    },
+    {
+      "key": "14.4.7",
+      "context": "main",
+      "number": "14.4.7",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Drive"
+    },
+    {
+      "key": "14.4.7.1",
+      "context": "main",
+      "number": "14.4.7.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Drive is a passive ability that is given to a follower by resolving certain abilities."
+    },
+    {
+      "key": "14.4.7.2",
+      "context": "main",
+      "number": "14.4.7.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Drive does not have any effect on its own."
+    },
+    {
+      "key": "14.4.7.3",
+      "context": "main",
+      "number": "14.4.7.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to give a follower Drive, do the following."
+    },
+    {
+      "key": "14.4.7.3.1",
+      "context": "main",
+      "number": "14.4.7.3.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the follower has previously been given Drive, even if it has lost Drive for any reason, do nothing and end the action sequence."
+    },
+    {
+      "key": "14.4.7.3.2",
+      "context": "main",
+      "number": "14.4.7.3.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Give the follower Drive, Single Drive (14.4.6.2), and Rush (12.10)."
+    },
+    {
+      "key": "14.4.8",
+      "context": "main",
+      "number": "14.4.8",
+      "kind": "rule",
+      "depth": 3,
+      "text": "On Drive"
+    },
+    {
+      "key": "14.4.8.1",
+      "context": "main",
+      "number": "14.4.8.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "On Drive is an automatic ability that triggers when the card with On Drive is given Drive."
+    },
+    {
+      "key": "14.4.8.2",
+      "context": "main",
+      "number": "14.4.8.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"On Drive - [text]\" means \"when this card is given Drive, [text].\""
+    },
+    {
+      "key": "14.4.9",
+      "context": "main",
+      "number": "14.4.9",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Ride"
+    },
+    {
+      "key": "14.4.9.1",
+      "context": "main",
+      "number": "14.4.9.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Ride is an activated ability that gives Drive to the follower with Ride."
+    },
+    {
+      "key": "14.4.9.2",
+      "context": "main",
+      "number": "14.4.9.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Ride [cost]: [text]\" means \"{icon_stand|[engage]} [cost] Put a Drive Point card from your evolve deck into your drive zone: You may use 1 evolution point in lieu of 1 play point. The Drive Point card put into the drive zone by this ability is linked to this card. This ability can only be activated if this ability has not been activated for this card this game. [text].\""
+    },
+    {
+      "key": "14.4.9.3",
+      "context": "main",
+      "number": "14.4.9.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Ride is indicated on a card by ({icon_ride|[ride]})."
+    },
+    {
+      "key": "14.4.9.4",
+      "context": "main",
+      "number": "14.4.9.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a card on the field is moved to a zone other than the field, the link between that card and any Drive Point cards in the drive zone is lost immediately after movement."
+    },
+    {
+      "key": "14.4.9.5",
+      "context": "main",
+      "number": "14.4.9.5",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Ride abilities are equivalent to evolve abilities (8.3.2.1)."
+    },
+    {
+      "key": "14.5",
+      "context": "main",
+      "number": "14.5",
+      "kind": "section",
+      "depth": 2,
+      "title": "Princess Connect! Re: Dive",
+      "text": "",
+      "changed": true
+    },
+    {
+      "key": "14.5.1",
+      "context": "main",
+      "number": "14.5.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Union Burst",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.1",
+      "context": "main",
+      "number": "14.5.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Some abilities have the Union Burst keyword.",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.1.1",
+      "context": "main",
+      "number": "14.5.1.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Such abilities are written in the form \"Union Burst [ability]\" and are called Union Burst abilities.",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.1.2",
+      "context": "main",
+      "number": "14.5.1.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If [ability] is a simplification of multiple abilities (12.1.2), all of them are Union Burst abilities.",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.1.3",
+      "context": "main",
+      "number": "14.5.1.1.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Union Burst is indicated on a card by {icon_UB|[UB]}.",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.2",
+      "context": "main",
+      "number": "14.5.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a deck is based on a class (6.1.1.5.1) or a universe (6.1.1.5.2) other than Princess Connect! Re: Dive, all Union Burst abilities in it are invalid (10.3.2) at all times and in all zones.",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.3",
+      "context": "main",
+      "number": "14.5.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A Union Burst ability is considered to have \"executed\" if it is played (10.6.2.7) and resolved (10.6.2.8).",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.4",
+      "context": "main",
+      "number": "14.5.1.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to execute a Union Burst ability \"without paying its cost,\" the player plays the ability (10.6.2) as if its original cost (5.24) did not exist.",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.4.1",
+      "context": "main",
+      "number": "14.5.1.4.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the ability is an automatic ability, ignore its trigger condition (10.1.1.2.1.1).",
+      "changed": true
+    },
+    {
+      "key": "14.5.1.5",
+      "context": "main",
+      "number": "14.5.1.5",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the ability contains an X (5.2) in its original cost and effect whose value would normally be determined by the player (5.2.1.2), play the ability as if X were equal to zero.",
+      "changed": true
+    },
+    {
+      "key": "14.5.2",
+      "context": "main",
+      "number": "14.5.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Equipment",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.1",
+      "context": "main",
+      "number": "14.5.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Tokens of the \"equipment\" card type may be created during the game by rules and effects.",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.1.1",
+      "context": "main",
+      "number": "14.5.2.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If a token is equipment, it may exist only in the equipment zone (4.16).",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.1.2",
+      "context": "main",
+      "number": "14.5.2.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Abilities of equipment tokens are valid only in the equipment zone.",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.2",
+      "context": "main",
+      "number": "14.5.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to equip a follower with a [name], do the following.",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.2.1",
+      "context": "main",
+      "number": "14.5.2.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Create a token with the card name [name] in the equipment zone.",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.2.2",
+      "context": "main",
+      "number": "14.5.2.2.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Link the token to the follower. Upon being linked, the token's \"when a follower equips this\" condition is satisfied, and the follower is considered the token's \"equipped follower.\"",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.3",
+      "context": "main",
+      "number": "14.5.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A follower may equip multiple tokens at the same time.",
+      "changed": true
+    },
+    {
+      "key": "14.5.2.4",
+      "context": "main",
+      "number": "14.5.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a follower on the field is moved to a zone other than the field, the link between that follower and any tokens it has equipped is lost.",
+      "changed": true
+    }
+  ]
+}

@@ -64,14 +64,14 @@ export {
   useSnapshotStatus,
 } from "./roots"
 export type { RulesBundle } from "./rules/bundle"
-export { loadComprehensiveRules } from "./rules/load"
+export { loadComprehensiveRules, rulesRegionFor } from "./rules/load"
 export {
   type LocalizedNode,
   type LocalizedText,
   localizeNode,
   originalNode,
 } from "./rules/localize"
-export type { RuleContext } from "./rules/model"
+export type { RuleContext, RulesRegion } from "./rules/model"
 export { findRuleReferences, resolveRuleReference } from "./rules/references"
 export { appScanModels, loadScanCardImage, scanCardImage } from "./scan"
 export {

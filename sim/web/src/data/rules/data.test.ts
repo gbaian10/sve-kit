@@ -5,17 +5,17 @@ import type { RuleNode, RulesFile, RulesIndex, RulesTranslationFile } from "./mo
 import { findRuleReferences, resolveRuleReference } from "./references"
 import { translationProblems } from "./source-hash"
 
-// The committed comprehensive rules (authored/rules/comprehensive/) and every translation of them.
-// Reports keys and numbers only, never rules wording.
+// The committed comprehensive rules of every edition (authored/rules/comprehensive/<region>/) and
+// every translation of them. Reports keys and numbers only, never rules wording.
 const originals = import.meta.glob<RulesFile | RulesIndex>(
-  "../../../../../authored/rules/comprehensive/jp/*/*.json",
+  "../../../../../authored/rules/comprehensive/*/*/*.json",
   { import: "default", eager: true },
 )
 const translations = import.meta.glob<RulesTranslationFile>(
   "../../../../../authored/translations/comprehensive-rules/*/*/*.json",
   { import: "default", eager: true },
 )
-const raw = import.meta.glob<string>("../../../../../authored/rules/comprehensive/jp/*/*.json", {
+const raw = import.meta.glob<string>("../../../../../authored/rules/comprehensive/*/*/*.json", {
   query: "?raw",
   import: "default",
   eager: true,
@@ -27,16 +27,18 @@ interface Version {
   readonly nodes: readonly RuleNode[]
 }
 
+/** Keyed `<region>/<version>`: the Japanese and English editions number their versions apart. */
 function versions(): Map<string, Version> {
   const byVersion = new Map<string, { index?: RulesIndex; files: Map<string, RulesFile> }>()
   for (const [path, data] of Object.entries(originals)) {
-    const [version = "", file = ""] = path.split("/").slice(-2)
-    const entry: { index?: RulesIndex; files: Map<string, RulesFile> } = byVersion.get(version) ?? {
+    const [region = "", version = "", file = ""] = path.split("/").slice(-3)
+    const id = `${region}/${version}`
+    const entry: { index?: RulesIndex; files: Map<string, RulesFile> } = byVersion.get(id) ?? {
       files: new Map(),
     }
     if (data.kind === "comprehensive-rules-index") entry.index = data
     else entry.files.set(file, data)
-    byVersion.set(version, entry)
+    byVersion.set(id, entry)
   }
   const result = new Map<string, Version>()
   for (const [version, { index, files }] of byVersion) {
@@ -57,17 +59,19 @@ const compare = (a: readonly number[], b: readonly number[]) => {
   return 0
 }
 
-it("has at least the 1.28.0 rules", () => {
-  expect([...VERSIONS.keys()]).toContain("1.28.0")
+it("has at least the Japanese 1.28.0 and English 1.26.1 rules", () => {
+  expect([...VERSIONS.keys()]).toEqual(expect.arrayContaining(["jp/1.28.0", "en/1.26.1"]))
 })
 
-describe.each([...VERSIONS])("comprehensive rules %s", (version, { index, files, nodes }) => {
-  it("lists exactly its files, each declaring this version, under 1 MiB", () => {
+describe.each([...VERSIONS])("comprehensive rules %s", (id, { index, files, nodes }) => {
+  const [region, version] = id.split("/")
+  it("lists exactly its files, each declaring this edition and version, under 1 MiB", () => {
     expect(new Set(index.contents.map((item) => item.file))).toEqual(new Set(files.keys()))
     expect(index.version).toBe(version)
+    expect(index.region).toBe(region)
     for (const [file, data] of files) {
       expect(data, file).toMatchObject({ format: 1, kind: "comprehensive-rules", version })
-      const text = raw[`../../../../../authored/rules/comprehensive/jp/${version}/${file}`] ?? ""
+      const text = raw[`../../../../../authored/rules/comprehensive/${id}/${file}`] ?? ""
       expect(new TextEncoder().encode(text).length, file).toBeLessThan(1024 * 1024)
     }
   })
@@ -162,7 +166,8 @@ it("matches every translation file to its original", () => {
   for (const [path, file] of Object.entries(translations)) {
     const [language = "", version = "", name = ""] = path.split("/").slice(-3)
     const where = `${language}/${version}/${name}`
-    const original = VERSIONS.get(version)?.files.get(name)
+    // Translations translate the Japanese edition.
+    const original = VERSIONS.get(`jp/${version}`)?.files.get(name)
     if (!original) {
       problems.push(`${where}: no original`)
       continue

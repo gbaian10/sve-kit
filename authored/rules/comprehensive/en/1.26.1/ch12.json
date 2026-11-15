@@ -1,0 +1,722 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "12",
+      "context": "main",
+      "number": "12",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Keywords and Keyword Abilities",
+      "text": ""
+    },
+    {
+      "key": "12.1",
+      "context": "main",
+      "number": "12.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Overview",
+      "text": ""
+    },
+    {
+      "key": "12.1.1",
+      "context": "main",
+      "number": "12.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A \"keyword\" is a term used to simplify ability descriptions. An ability indicated by a keyword is called a \"keyword ability.\""
+    },
+    {
+      "key": "12.1.2",
+      "context": "main",
+      "number": "12.1.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When a card has multiple automatic ability keywords that have the same process, the card text may be simplified to consecutive icons or keywords followed by the process written once.",
+      "examples": [
+        "Example: Card text written in the form \"{icon_fanfare|[fanfare]} {icon_lastword|[lastwords]} [process]\" denotes two separate abilities, \"{icon_fanfare|[fanfare]} [process]\" and \"{icon_lastword|[lastwords]} [process].\""
+      ]
+    },
+    {
+      "key": "12.1.2.1",
+      "context": "main",
+      "number": "12.1.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "To simplify card text, icons and keywords may also be separated by a forward slash (/)."
+    },
+    {
+      "key": "12.2",
+      "context": "main",
+      "number": "12.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Evolve",
+      "text": ""
+    },
+    {
+      "key": "12.2.1",
+      "context": "main",
+      "number": "12.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Evolve is an activated ability that allows cards to evolve."
+    },
+    {
+      "key": "12.2.1.1",
+      "context": "main",
+      "number": "12.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "In card text, \"{icon_stand|[engage]} Evolve\" is denoted by the {icon_evolve|[evolve]} icon."
+    },
+    {
+      "key": "12.2.2",
+      "context": "main",
+      "number": "12.2.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When playing an evolve ability, as part of the cost, the controller of the card with the ability must reveal a corresponding card (5.16.1.1.1) from their evolve deck area."
+    },
+    {
+      "key": "12.2.3",
+      "context": "main",
+      "number": "12.2.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When playing an evolve ability, if the cost includes play points, the player may use 1 evolution point in lieu of 1 play point."
+    },
+    {
+      "key": "12.2.4",
+      "context": "main",
+      "number": "12.2.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When playing an evolve ability, if the player's turns passed (3.3) is at least 7 (if they went first) or 6 (if they went second), they may additionally pay 1 super-evolution point (3.2.6). If they do, the following happens in addition to the regular evolve process (5.16)."
+    },
+    {
+      "key": "12.2.4.1",
+      "context": "main",
+      "number": "12.2.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "After the card with the evolve ability is linked to a card in the evolve zone (5.16.1), give the follower +1 attack and defense."
+    },
+    {
+      "key": "12.2.4.2",
+      "context": "main",
+      "number": "12.2.4.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The card is considered to have \"super-evolved\" as well as \"evolved\" (5.16.1.3)."
+    },
+    {
+      "key": "12.2.5",
+      "context": "main",
+      "number": "12.2.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Evolve abilities of cards with the special type \"evolved\" cannot be played.",
+      "changed": true
+    },
+    {
+      "key": "12.3",
+      "context": "main",
+      "number": "12.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "Quick",
+      "text": ""
+    },
+    {
+      "key": "12.3.1",
+      "context": "main",
+      "number": "12.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Cards or activated abilities may have the Quick keyword."
+    },
+    {
+      "key": "12.3.2",
+      "context": "main",
+      "number": "12.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card has a standalone Quick keyword (i.e., it is not part of an ability), that means it has a passive ability that could be written, \"This card may be played at certain times during an opponent's turn, as specified by the rules.\""
+    },
+    {
+      "key": "12.3.2.1",
+      "context": "main",
+      "number": "12.3.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "This type of Quick is denoted by the {icon_quick|[quick]} icon."
+    },
+    {
+      "key": "12.3.3",
+      "context": "main",
+      "number": "12.3.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If an activated ability has an accompanying Quick keyword in front of it, the ability may be played at certain times during the opponent's turn, as specified by the rules."
+    },
+    {
+      "key": "12.3.3.1",
+      "context": "main",
+      "number": "12.3.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "This type of Quick is denoted by the {icon_q|[q]} icon."
+    },
+    {
+      "key": "12.3.4",
+      "context": "main",
+      "number": "12.3.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Cards and activated abilities with Quick can be played after an opponent's follower has \"attacked\" (8.4.7) or at the end of an opponent's turn (7.4.5)."
+    },
+    {
+      "key": "12.3.5",
+      "context": "main",
+      "number": "12.3.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Cards and activated abilities with Quick can also be played during the player's main phase."
+    },
+    {
+      "key": "12.3.6",
+      "context": "main",
+      "number": "12.3.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Passive abilities that cards and activated abilities \"have\" under certain circumstances are valid in the zones they can be played (10.3.4)."
+    },
+    {
+      "key": "12.4",
+      "context": "main",
+      "number": "12.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "Fanfare",
+      "text": ""
+    },
+    {
+      "key": "12.4.1",
+      "context": "main",
+      "number": "12.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Fanfare is an automatic ability that triggers when the card with Fanfare is put onto the field."
+    },
+    {
+      "key": "12.4.2",
+      "context": "main",
+      "number": "12.4.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, Fanfare abilities are denoted by the {icon_fanfare|[fanfare]} icon."
+    },
+    {
+      "key": "12.4.3",
+      "context": "main",
+      "number": "12.4.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"{icon_fanfare|[fanfare]} [text]\" means \"When this card is put onto the field from a zone other than the field, [text].\""
+    },
+    {
+      "key": "12.5",
+      "context": "main",
+      "number": "12.5",
+      "kind": "section",
+      "depth": 2,
+      "title": "Last Words",
+      "text": ""
+    },
+    {
+      "key": "12.5.1",
+      "context": "main",
+      "number": "12.5.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Last Words is an automatic ability that triggers when the card with Last Words is put into the cemetery from the field."
+    },
+    {
+      "key": "12.5.2",
+      "context": "main",
+      "number": "12.5.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, Last Words abilities are denoted by the {icon_lastword|[lastwords]} icon."
+    },
+    {
+      "key": "12.5.3",
+      "context": "main",
+      "number": "12.5.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"{icon_lastword|[lastwords]} [text]\" means \"When this card is put into the cemetery from the field, [text].\""
+    },
+    {
+      "key": "12.6",
+      "context": "main",
+      "number": "12.6",
+      "kind": "section",
+      "depth": 2,
+      "title": "On Evolve",
+      "text": ""
+    },
+    {
+      "key": "12.6.1",
+      "context": "main",
+      "number": "12.6.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "On Evolve is an automatic ability that triggers when the card with On Evolve evolves."
+    },
+    {
+      "key": "12.6.2",
+      "context": "main",
+      "number": "12.6.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "“On Evolve - [text]\" means \"When this card evolves, [text].\" \"On Evolve - [cost]: [text]\" means \"When this card evolves, [cost]: [text].\""
+    },
+    {
+      "key": "12.7",
+      "context": "main",
+      "number": "12.7",
+      "kind": "section",
+      "depth": 2,
+      "title": "Strike",
+      "text": ""
+    },
+    {
+      "key": "12.7.1",
+      "context": "main",
+      "number": "12.7.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Strike is an automatic ability that triggers when the follower with Strike attacks."
+    },
+    {
+      "key": "12.7.2",
+      "context": "main",
+      "number": "12.7.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Strike - [text]\" means \"When this attacks, [text].\" \"Strike - [cost]: [text]\" means \"When this attacks, [cost]: [text].\"",
+      "changed": true
+    },
+    {
+      "key": "12.7.2.1",
+      "context": "main",
+      "number": "12.7.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Follower Strike - [text]\" means \"Strike - If the attack target is a follower, [text].\" \"Follower Strike - [cost]: [text]\" means \"Strike - If the attack target is a follower, [cost]: [text].\"",
+      "changed": true
+    },
+    {
+      "key": "12.7.2.2",
+      "context": "main",
+      "number": "12.7.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Leader Strike - [text]\" means \"Strike - If the attack target is a leader, [text].\" \"Leader Strike - [cost]: [text]\" means \"Strike - If the attack target is a leader, [cost]: [text].\"",
+      "changed": true
+    },
+    {
+      "key": "12.8",
+      "context": "main",
+      "number": "12.8",
+      "kind": "section",
+      "depth": 2,
+      "title": "Ward",
+      "text": ""
+    },
+    {
+      "key": "12.8.1",
+      "context": "main",
+      "number": "12.8.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Ward is a passive ability that restricts the attacks of an opponent's followers."
+    },
+    {
+      "key": "12.8.2",
+      "context": "main",
+      "number": "12.8.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Ward\" has three meanings: (i) \"When you would put this follower onto the field reserved, you may instead put it onto the field reserved and then engage it\"; (ii) \"You may engage this follower during your end phase\" (7.4.3); and (iii) \"If this card is a follower, when your opponent selects an attack target, they must select an engaged follower with Ward that you control if possible\" (8.4.3)."
+    },
+    {
+      "key": "12.9",
+      "context": "main",
+      "number": "12.9",
+      "kind": "section",
+      "depth": 2,
+      "title": "Storm",
+      "text": ""
+    },
+    {
+      "key": "12.9.1",
+      "context": "main",
+      "number": "12.9.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Storm is a passive ability that allows the follower to attack on the same turn it is put onto its controller's field."
+    },
+    {
+      "key": "12.9.2",
+      "context": "main",
+      "number": "12.9.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "“Storm\" means \"This follower may be selected as an attacking follower even if it was put onto its controller's field this turn.\""
+    },
+    {
+      "key": "12.10",
+      "context": "main",
+      "number": "12.10",
+      "kind": "section",
+      "depth": 2,
+      "title": "Rush",
+      "text": ""
+    },
+    {
+      "key": "12.10.1",
+      "context": "main",
+      "number": "12.10.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Rush is a passive ability that allows the follower to attack another follower on the same turn it is put onto its controller's field."
+    },
+    {
+      "key": "12.10.2",
+      "context": "main",
+      "number": "12.10.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "“Rush\" means \"This follower may be selected as an attacking follower even if it was put onto its controller's field this turn, but only if an engaged follower is selected as its attack target.\""
+    },
+    {
+      "key": "12.11",
+      "context": "main",
+      "number": "12.11",
+      "kind": "section",
+      "depth": 2,
+      "title": "Assail",
+      "text": ""
+    },
+    {
+      "key": "12.11.1",
+      "context": "main",
+      "number": "12.11.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Assail is a passive ability that allows the follower to attack reserved followers."
+    },
+    {
+      "key": "12.11.2",
+      "context": "main",
+      "number": "12.11.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Assail\" means \"This follower may select reserved enemy followers as attack targets as if they were engaged.\""
+    },
+    {
+      "key": "12.12",
+      "context": "main",
+      "number": "12.12",
+      "kind": "section",
+      "depth": 2,
+      "title": "Intimidate",
+      "text": ""
+    },
+    {
+      "key": "12.12.1",
+      "context": "main",
+      "number": "12.12.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Intimidate is a passive ability that prevents the follower from being selected as an opponent's attack target."
+    },
+    {
+      "key": "12.12.2",
+      "context": "main",
+      "number": "12.12.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Intimidate\" means \"Your opponent may not select this follower as an attack target.\""
+    },
+    {
+      "key": "12.12.2.1",
+      "context": "main",
+      "number": "12.12.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Intimidate only prohibits opponents from selecting the follower with Intimidate as an attack target. Opponents may still select the follower when playing abilities or cards."
+    },
+    {
+      "key": "12.13",
+      "context": "main",
+      "number": "12.13",
+      "kind": "section",
+      "depth": 2,
+      "title": "Drain",
+      "text": ""
+    },
+    {
+      "key": "12.13.1",
+      "context": "main",
+      "number": "12.13.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Drain is an automatic ability that increases the follower's leader's defense whenever the follower deals attack damage."
+    },
+    {
+      "key": "12.13.2",
+      "context": "main",
+      "number": "12.13.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Drain\" means \"Whenever this follower deals attack damage, increase your leader's defense by a value equal to the amount of damage it dealt.\""
+    },
+    {
+      "key": "12.13.2.1",
+      "context": "main",
+      "number": "12.13.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "“Attack damage\" refers to the damage dealt by an attacking follower to its attack target as described in 8.4.9."
+    },
+    {
+      "key": "12.13.2.2",
+      "context": "main",
+      "number": "12.13.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If an attack target with Drain deals damage to an attacking follower, or if a follower with Drain deals damage using an ability, Drain does not trigger."
+    },
+    {
+      "key": "12.13.3",
+      "context": "main",
+      "number": "12.13.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card should ever have more than one instance of Drain, it is treated as having only one instance."
+    },
+    {
+      "key": "12.14",
+      "context": "main",
+      "number": "12.14",
+      "kind": "section",
+      "depth": 2,
+      "title": "Bane",
+      "text": ""
+    },
+    {
+      "key": "12.14.1",
+      "context": "main",
+      "number": "12.14.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Bane is a passive ability that destroys the opposing follower after two followers have fought (8.4.9.2)."
+    },
+    {
+      "key": "12.14.2",
+      "context": "main",
+      "number": "12.14.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Bane\" means \"Any follower that fought with this follower is destroyed during the next instance of rules handling.\""
+    },
+    {
+      "key": "12.14.2.1",
+      "context": "main",
+      "number": "12.14.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The trigger condition only requires that the followers have fought, so the opposing follower will be destroyed even if it doesn't take any damage (e.g., because the attacking follower has 0 attack)."
+    },
+    {
+      "key": "12.15",
+      "context": "main",
+      "number": "12.15",
+      "kind": "section",
+      "depth": 2,
+      "title": "Aura",
+      "text": ""
+    },
+    {
+      "key": "12.15.1",
+      "context": "main",
+      "number": "12.15.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Aura is a passive ability that prevents the follower from being selected by spells and abilities controlled by an opponent."
+    },
+    {
+      "key": "12.15.2",
+      "context": "main",
+      "number": "12.15.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Aura\" means \"This card cannot be selected by an opponent's cards or abilities.\""
+    },
+    {
+      "key": "12.15.2.1",
+      "context": "main",
+      "number": "12.15.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Aura only prohibits opponents from selecting the follower with Aura when playing a card or ability. Opponents may still select the follower as an attack target."
+    },
+    {
+      "key": "12.16",
+      "context": "main",
+      "number": "12.16",
+      "kind": "section",
+      "depth": 2,
+      "title": "Advanced Activated Abilities",
+      "text": ""
+    },
+    {
+      "key": "12.16.1",
+      "context": "main",
+      "number": "12.16.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Advanced activated abilities are a special type of activated ability."
+    },
+    {
+      "key": "12.16.2",
+      "context": "main",
+      "number": "12.16.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, advanced activated abilities are denoted by the {icon_adv|[adv]} icon."
+    },
+    {
+      "key": "12.16.3",
+      "context": "main",
+      "number": "12.16.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"{icon_adv|[adv]} [text]\" means \"{icon_stand|[engage]} [text]. When paying the cost of this ability, you may use 1 evolution point in lieu of 1 play point. This ability is equivalent to an evolve ability\" (8.3.2.1)."
+    },
+    {
+      "key": "12.17",
+      "context": "main",
+      "number": "12.17",
+      "kind": "section",
+      "depth": 2,
+      "title": "On Super-Evolve",
+      "text": ""
+    },
+    {
+      "key": "12.17.1",
+      "context": "main",
+      "number": "12.17.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "On Super-Evolve is an automatic ability that triggers when the card with On Super-Evolve super-evolves (12.2.4)."
+    },
+    {
+      "key": "12.17.2",
+      "context": "main",
+      "number": "12.17.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"On Super-Evolve - [text]\" means \"When this card super-evolves, [text].\" \"On Super-Evolve - [cost]: [text]\" means \"When this card super-evolves, [cost]: [text].\""
+    },
+    {
+      "key": "12.18",
+      "context": "main",
+      "number": "12.18",
+      "kind": "section",
+      "depth": 2,
+      "title": "Fuse",
+      "text": "",
+      "changed": true
+    },
+    {
+      "key": "12.18.1",
+      "context": "main",
+      "number": "12.18.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "An activated ability with the Fuse keyword allows the player to put the card from their hand into their EX area in a strengthened state by discarding or burying from their EX area the specified card(s).",
+      "changed": true
+    },
+    {
+      "key": "12.18.2",
+      "context": "main",
+      "number": "12.18.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"() Fuse [specified cards]: [text]\" means \"() Discard or bury from your EX area [specified cards] other than this, put this from your hand into your EX area: [text].\"",
+      "changed": true
+    },
+    {
+      "key": "12.18.2.1",
+      "context": "main",
+      "number": "12.18.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If there are multiple [specified cards], they do not have to either all be discarded or all be buried from the EX area.",
+      "changed": true
+    },
+    {
+      "key": "12.18.2.2",
+      "context": "main",
+      "number": "12.18.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the player can select the number of [specified cards], they must select a number greater than zero if possible.",
+      "changed": true
+    },
+    {
+      "key": "12.18.2.2.1",
+      "context": "main",
+      "number": "12.18.2.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the number of cards is to be determined by an X value selected by the player (10.6.2.2.4) etc., the player must select the value of X so that the specified number of cards becomes 1 or more if possible.",
+      "changed": true
+    },
+    {
+      "key": "12.18.3",
+      "context": "main",
+      "number": "12.18.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If, for any reason, there are no cards to be discarded or buried from the EX area as part of the ability's cost, [text] does not happen.",
+      "changed": true
+    },
+    {
+      "key": "12.18.4",
+      "context": "main",
+      "number": "12.18.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card is put into the EX area as a result of its own Fuse ability, it is considered to have undergone \"fusion.\"",
+      "changed": true
+    },
+    {
+      "key": "12.18.4.1",
+      "context": "main",
+      "number": "12.18.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When a card undergoes fusion, the cards discarded or buried in the process are considered to have been \"fused.\"",
+      "changed": true
+    }
+  ]
+}

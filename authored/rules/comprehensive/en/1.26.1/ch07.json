@@ -1,0 +1,232 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "7",
+      "context": "main",
+      "number": "7",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Game Progression",
+      "text": ""
+    },
+    {
+      "key": "7.1",
+      "context": "main",
+      "number": "7.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Overview",
+      "text": ""
+    },
+    {
+      "key": "7.1.1",
+      "context": "main",
+      "number": "7.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The game progresses by repeating steps, or \"turns,\" taken by each player alternately. During a player's turn, that player is considered the \"active player,\" and the other player is considered the \"non-active player.\""
+    },
+    {
+      "key": "7.1.2",
+      "context": "main",
+      "number": "7.1.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player proceeds through each of the phases described in 7.2–7.4 in order."
+    },
+    {
+      "key": "7.2",
+      "context": "main",
+      "number": "7.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Start Phase",
+      "text": ""
+    },
+    {
+      "key": "7.2.1",
+      "context": "main",
+      "number": "7.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player increases their maximum play points by 1 unless their current maximum is 10."
+    },
+    {
+      "key": "7.2.2",
+      "context": "main",
+      "number": "7.2.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player sets their play points to the same value as their maximum play points."
+    },
+    {
+      "key": "7.2.3",
+      "context": "main",
+      "number": "7.2.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player refreshes all cards on their field."
+    },
+    {
+      "key": "7.2.4",
+      "context": "main",
+      "number": "7.2.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player draws a card."
+    },
+    {
+      "key": "7.2.4.1",
+      "context": "main",
+      "number": "7.2.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The player who goes first does not draw a card on their first turn."
+    },
+    {
+      "key": "7.2.5",
+      "context": "main",
+      "number": "7.2.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Confirmation Timing occurs. Once all necessary processes have been carried out, the active player proceeds to the main phase."
+    },
+    {
+      "key": "7.3",
+      "context": "main",
+      "number": "7.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "Main Phase",
+      "text": ""
+    },
+    {
+      "key": "7.3.1",
+      "context": "main",
+      "number": "7.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Any conditions that say \"at the start of your (next) main phase\" or \"at the start of each player's main phase\" are triggered."
+    },
+    {
+      "key": "7.3.2",
+      "context": "main",
+      "number": "7.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Confirmation Timing occurs."
+    },
+    {
+      "key": "7.3.3",
+      "context": "main",
+      "number": "7.3.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player performs one of the following actions:\n* Play a card from their hand or EX area (8.2).\n* Play an activated ability of a card they control (8.3).\n* Attack with a follower they control (8.4).\n* End their main phase."
+    },
+    {
+      "key": "7.3.3.1",
+      "context": "main",
+      "number": "7.3.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The active player cannot choose to end their main phase if an effect is forcing them to satisfy a certain condition during their main phase which they have yet to satisfy.",
+      "examples": [
+        "Example: The effect \"This must attack once per turn if able\" is applied to a follower controlled by the active player, and the follower has yet to attack even though it is able to."
+      ],
+      "changed": true
+    },
+    {
+      "key": "7.3.4",
+      "context": "main",
+      "number": "7.3.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If the active player chose to end their main phase as described in 7.3.3, they proceed to the end phase. If another choice was made, Confirmation Timing occurs, and 7.3.3 is repeated."
+    },
+    {
+      "key": "7.4",
+      "context": "main",
+      "number": "7.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "End Phase",
+      "text": ""
+    },
+    {
+      "key": "7.4.1",
+      "context": "main",
+      "number": "7.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Any conditions that say \"at the start of your (next) end phase\" or \"at the start of each player's end phase\" are triggered."
+    },
+    {
+      "key": "7.4.2",
+      "context": "main",
+      "number": "7.4.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Confirmation Timing occurs."
+    },
+    {
+      "key": "7.4.3",
+      "context": "main",
+      "number": "7.4.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player may select and engage any number of followers with Ward on their field."
+    },
+    {
+      "key": "7.4.4",
+      "context": "main",
+      "number": "7.4.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Confirmation Timing occurs."
+    },
+    {
+      "key": "7.4.5",
+      "context": "main",
+      "number": "7.4.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The non-active player performs one of the following actions:\n* Play a card with Quick from their hand or EX area (10.6).\n* Play an activated ability with Quick.\n* Do nothing."
+    },
+    {
+      "key": "7.4.6",
+      "context": "main",
+      "number": "7.4.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card or ability was played as part of 7.4.5, Confirmation Timing occurs, and 7.4.5 is repeated."
+    },
+    {
+      "key": "7.4.7",
+      "context": "main",
+      "number": "7.4.7",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If the active player's hand has more cards than the current limit, they must discard down to the limit. If cards were discarded this way, Confirmation Timing occurs, and 7.4.7 is repeated."
+    },
+    {
+      "key": "7.4.8",
+      "context": "main",
+      "number": "7.4.8",
+      "kind": "rule",
+      "depth": 3,
+      "text": "All \"until the end of the turn,\" \"during this turn,\" and \"during your turn\" effects are removed."
+    },
+    {
+      "key": "7.4.9",
+      "context": "main",
+      "number": "7.4.9",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The turn concludes. The non-active player becomes the active player and a new turn begins."
+    }
+  ]
+}
