@@ -256,7 +256,8 @@ impl BodyContext<'_> {
             | ast::Step::Equip(_)
             | ast::Step::Pilot(_)
             | ast::Step::Delayed(_)
-            | ast::Step::Boxed(_) => None,
+            | ast::Step::Boxed(_)
+            | ast::Step::Declare(_) => None,
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)

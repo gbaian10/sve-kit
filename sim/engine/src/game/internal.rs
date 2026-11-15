@@ -59,6 +59,7 @@ mod by_kind;
 mod card;
 mod cost;
 mod counters;
+mod declaration;
 mod dice;
 mod discard;
 mod drive;
@@ -339,6 +340,8 @@ pub enum InstructionOutcome {
     Batch(BatchOutcome),
     /// One distinct occurrence inserted before the previously scheduled next turn.
     ScheduledTurn(ScheduleToken),
+    /// The public number fixed by one declaring instruction.
+    Declared(Nat),
     /// A completed shuffle, with no projectable object or position result.
     Shuffled,
     /// Same field generations whose controller actually changed.
@@ -599,9 +602,10 @@ enum Wait {
     SearchPartition(search::PartitionWait),
     SearchReplacement(search::ReplacementWait),
     Integer {
-        binding: Binding<Nat>,
+        binding: declaration::NumberBinding,
         bounds: Cardinality,
         purpose: super::player::QuestionPurpose,
+        declaration: Option<ReceiptId>,
     },
     Draw {
         instruction: Box<Instruction>,
@@ -1130,12 +1134,27 @@ impl Game {
                 }
                 (
                     Wait::Integer {
-                        binding, bounds, ..
+                        binding,
+                        bounds,
+                        declaration,
+                        ..
                     },
                     Answer::Integer(number),
                 ) if contains(bounds, number) => {
                     rollback = execution.answer_origin(validated);
-                    execution.slots.insert(binding.key(), Slot::Natural(number));
+                    binding.assign(&mut execution, number)?;
+                    if let Some(receipt) = declaration {
+                        execution
+                            .receipts
+                            .insert(receipt, InstructionOutcome::Declared(number));
+                        execution.record_fact(
+                            self,
+                            Fact::Declared {
+                                player: actor,
+                                value: number,
+                            },
+                        );
+                    }
                 }
                 (
                     Wait::Draw {
@@ -1592,9 +1611,10 @@ impl Game {
                     actor,
                     InputDomain::Integer(*cardinality),
                     Wait::Integer {
-                        binding: *binding,
+                        binding: declaration::NumberBinding::Natural(*binding),
                         bounds: *cardinality,
                         purpose: player::purpose(&decision.kind),
+                        declaration: None,
                     },
                 )
             }
@@ -1733,6 +1753,7 @@ impl Game {
             Action::FlipUp { objects, .. } => {
                 self.internal_flip_up(execution, &instruction, objects)?;
             }
+            Action::Declare { .. } => self.internal_declare(execution, &instruction)?,
             Action::FlipDown { objects } => {
                 self.internal_flip_down(execution, &instruction, objects)?;
             }

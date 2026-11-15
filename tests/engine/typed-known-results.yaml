@@ -174,21 +174,6 @@ known:
     status: unsupported
     error: "unadmitted BP08-SL15 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP08-SL15/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP08-SL19"
-    scenario: "A 宣告 2 → 5 張中 3 張元のコスト 2 → 對手全體 3 傷害"
-    status: unsupported
-    error: "unadmitted BP08-SL19 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-SL19/0, holder h1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP08-SL19"
-    scenario: "B 宣告 7 → 沒有符合的卡 → X＝0 → 沒有傷害"
-    status: unsupported
-    error: "unadmitted BP08-SL19 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-SL19/0, holder h1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP08-SL19"
-    scenario: "C 宣告 5 → 1 張 → 1 傷害"
-    status: unsupported
-    error: "unadmitted BP08-SL19 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-SL19/0, holder h1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP09-004"
     scenario: "A 選『真紅の絆・ポーラ』（face 1）：進化時把場上其他 2 張放到 EX"
     status: fail

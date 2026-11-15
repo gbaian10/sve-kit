@@ -370,9 +370,8 @@ fn check_count(
         ObjectReceipt::Movement {
             receipt: MovementReceipt::Move { .. }
         }
-    ) || !matches!(predicate, Expr::Compute(outer) if matches!(outer.as_ref(), Predicate::And { predicates } if matches!(predicates.as_slice(), [Expr::Compute(inner)] if matches!(inner.as_ref(), Predicate::HasTrait { .. }))))
-    {
-        return Err(unsupported("filtered deck movement trait count"));
+    ) {
+        return Err(unsupported("filtered deck movement count"));
     }
     check_shape(receipt, projection, member, predicate)
 }
@@ -434,14 +433,8 @@ fn matches(
         Predicate::Not { predicate } => {
             matches(predicate, member, characters, original).map(|value| !value)
         }
-        Predicate::CompareInt {
-            left: Expr::Compute(operation),
-            comparison,
-            right: Expr::Literal(Int(threshold)),
-        } if *threshold >= 0
-            && matches!(comparison, Comparison::Equal | Comparison::GreaterEqual) =>
-        {
-            original_cost_matches(operation, member, *comparison, *threshold, original)
+        value @ (Predicate::CompareInt { .. } | Predicate::CompareNat { .. }) => {
+            cost_comparison(value, member, original)
         }
         Predicate::KindEquals {
             left: Expr::Live(read),
@@ -496,6 +489,67 @@ fn matches(
             }))
         }
         _ => Err(unsupported("receipt member predicate shape")),
+    }
+}
+
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Receipt costs use a closed original-cost comparison grammar."
+)]
+fn cost_comparison(
+    predicate: &Predicate,
+    member: Binding<RuntimeObjectView>,
+    original: Option<(&Game, &Execution, &MemberView)>,
+) -> Result<bool> {
+    match predicate {
+        Predicate::CompareInt {
+            left: Expr::Compute(operation),
+            comparison,
+            right: Expr::Literal(Int(threshold)),
+        } if *threshold >= 0
+            && matches!(comparison, Comparison::Equal | Comparison::GreaterEqual) =>
+        {
+            original_cost_matches(operation, member, *comparison, *threshold, original)
+        }
+        Predicate::CompareInt {
+            left: Expr::Compute(operation),
+            comparison,
+            right: right @ Expr::Bound(_),
+        } if matches!(comparison, Comparison::Equal | Comparison::GreaterEqual) => {
+            original_cost_matches(operation, member, *comparison, 0, None)?;
+            let Some((game, execution, view)) = original else {
+                return Ok(false);
+            };
+            Ok(super::values::compare(
+                view.original_cost(game, execution)?,
+                *comparison,
+                execution.integer(game, right)?.0,
+            ))
+        }
+        Predicate::CompareNat {
+            left: Expr::Compute(operation),
+            comparison,
+            right: right @ (Expr::Bound(_) | Expr::Literal(_)),
+        } if matches!(comparison, Comparison::Equal | Comparison::GreaterEqual) => {
+            let NatOperation::CheckedInt {
+                value: Expr::Compute(cost),
+            } = operation.as_ref()
+            else {
+                return Err(unsupported("receipt natural original cost"));
+            };
+            original_cost_matches(cost, member, *comparison, 0, None)?;
+            let Some((game, execution, view)) = original else {
+                return Ok(false);
+            };
+            let printed_cost =
+                u64::try_from(view.original_cost(game, execution)?).map_err(invalid)?;
+            Ok(super::values::compare(
+                printed_cost,
+                *comparison,
+                execution.natural(game, right)?.0,
+            ))
+        }
+        _ => Err(unsupported("receipt member cost comparison")),
     }
 }
 

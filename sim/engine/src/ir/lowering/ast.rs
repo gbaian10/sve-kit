@@ -405,6 +405,7 @@ pub(super) enum Step {
     Race(Race),
     GainDrive(EffectEvolution),
     Dice(Dice),
+    Declare(Declare),
     Repeat(Repeat),
     Evolve(NamedEffectEvolution),
     If(Conditional),
@@ -4061,14 +4062,15 @@ pub(super) enum CountOf {
 pub(super) struct FilteredCountOf {
     pub receipt: String,
     #[serde(rename = "where")]
-    pub filter: ReceiptTraitFilter,
+    pub filter: ReceiptMaterialFilter,
     #[serde(rename = "view")]
     pub _view: Before,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct ReceiptTraitFilter {
-    pub r#trait: String,
+pub(super) struct ReceiptMaterialFilter {
+    pub r#trait: Option<String>,
+    pub orig_cost_eq: Option<Box<Number>>,
 }
 
 #[derive(Deserialize)]
@@ -4328,4 +4330,19 @@ pub(super) struct FlipFilter {
 pub(super) enum FlipZone {
     #[serde(rename = "evolve_deck")]
     Evolve,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct Declare {
+    pub bind: String,
+    pub kind: DeclareNumber,
+    pub min: Option<u64>,
+    pub max: Option<u64>,
+    pub who: Option<Participant>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DeclareNumber {
+    Number,
 }

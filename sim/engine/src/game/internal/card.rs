@@ -1562,6 +1562,7 @@ fn check_instruction(
             | Action::GameResult { .. }
             | Action::ScheduleTurn { .. }
             | Action::Dice { .. }
+            | Action::Declare { .. }
             | Action::Reveal { .. }
             | Action::PlayCard { .. }
             | Action::PlayAbility { .. }

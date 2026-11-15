@@ -608,6 +608,7 @@ fn check_action(
     x: Option<PaidX>,
 ) -> Result<()> {
     super::dice::check_action(action)?;
+    super::declaration::check(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
     if let Action::InstallEffect { effect, .. } = action
@@ -896,6 +897,10 @@ fn supported(code: &str) -> bool {
         "shape.IntFrozen.MoveBatchCount"
             | "shape.Action.Dice"
             | "action.dice"
+            | "shape.Action.Declare"
+            | "action.declare"
+            | "shape.Declaration.NonnegativeInteger"
+            | "shape.Declaration.BoundedInteger"
             | "shape.DiceOperation.Roll"
             | "shape.Control.Repeat"
             | "control.repeat"

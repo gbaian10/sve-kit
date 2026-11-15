@@ -166,3 +166,32 @@ fn a_named_pending_event_is_never_accepted_unchecked() {
         "pending": {"ability": {"source": "a1", "line": 1_u8}}});
     adapter.decide(&unnamed).unwrap();
 }
+
+#[test]
+fn otherworld_ruler_shared_scenarios_match_their_reviewed_results() {
+    let mut questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
+    questions.retain(|question| question.id == "card-BP08-SL19");
+    let reports = run(
+        &mut TypedAdapter::new(repository::selection_with_rules().clone()),
+        &questions,
+        None,
+        RunOptions {
+            require_verified: true,
+            awaiting: AwaitingMode::FirstStage,
+        },
+    )
+    .unwrap();
+    assert_eq!(reports.len(), 3);
+    let mut known =
+        load_known_failures(&root().join("tests/engine/typed-known-results.yaml")).unwrap();
+    known
+        .known
+        .retain(|entry| entry.question == "card-BP08-SL19");
+    known.expected_scenarios = 3;
+    let result = gate(&reports, &known);
+    assert!(
+        result.ok(),
+        "update declaration exam results: {:#?}",
+        result.problems
+    );
+}

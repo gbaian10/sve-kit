@@ -406,6 +406,23 @@ impl BodyContext<'_> {
         value: &ast::BodyComparison,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
+        if let (Some(left), Some(right)) = (
+            self.declared_natural(&value.left),
+            self.declared_natural(&value.right),
+        ) {
+            return Ok(Expr::Compute(Box::new(Predicate::CompareNat {
+                left,
+                comparison: match value.op {
+                    ast::Comparison::Eq => Comparison::Equal,
+                    ast::Comparison::Ne => Comparison::NotEqual,
+                    ast::Comparison::Lt => Comparison::Less,
+                    ast::Comparison::Le => Comparison::LessEqual,
+                    ast::Comparison::Gt => Comparison::Greater,
+                    ast::Comparison::Ge => Comparison::GreaterEqual,
+                },
+                right,
+            })));
+        }
         if let (ast::Number::ReceiptCount { count }, ast::Number::Literal(threshold)) =
             (&value.left, &value.right)
         {
@@ -1119,6 +1136,9 @@ impl BodyContext<'_> {
                 Ok(player_resource(*leader_life, PlayerResource::Life))
             }
             ast::Number::Alias(name) => {
+                if let Some(binding) = self.declared_numbers.get(name) {
+                    return Ok(binding.integer());
+                }
                 if name == "x"
                     && let Some(parameter) = self.x
                 {
