@@ -11,6 +11,10 @@ pub(crate) fn is_printed_quick(ability: &Ability) -> bool {
 }
 
 pub(crate) fn card_permission(ability: &Ability) -> bool {
+    card_condition(ability).is_some()
+}
+
+pub(crate) fn card_condition(ability: &Ability) -> Option<&Expr<Bool>> {
     if !is_printed_quick(ability)
         || ability.kind != AbilityKind::Static
         || ability.qualification != AbilityQualification::Ordinary
@@ -24,28 +28,29 @@ pub(crate) fn card_permission(ability: &Ability) -> bool {
         || ability.body.is_some()
         || !ability.event_captures.is_empty()
     {
-        return false;
+        return None;
     }
     let [
         Effect::Permission {
             subject: PermissionSubject::Objects { objects: subject },
             action: ActionPattern::PlayCard { objects },
             polarity: Polarity::Allow,
-            condition: Expr::Literal(Bool(true)),
+            condition,
             duration,
             ..
         },
     ] = ability.declarations.as_slice()
     else {
-        return false;
+        return None;
     };
     let holder = Selector::Objects {
         objects: vec![ObjectOperand::SourceHolder {}],
     };
-    *subject == holder
+    (*subject == holder
         && *objects == holder
         && duration.end == (DurationEnd::NoTemporalExpiry {})
         && duration.anchor == (TimeAnchor::Installation {})
         && duration.usage.is_none()
-        && duration.intervals.is_empty()
+        && duration.intervals.is_empty())
+    .then_some(condition)
 }
