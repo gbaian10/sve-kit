@@ -959,11 +959,12 @@ impl Game {
         let Some((_, payment)) = self.internal_additional(execution)?.as_deref().cloned() else {
             return Ok(true);
         };
-        if payment
-            .play
-            .parameters
-            .iter()
-            .all(|decision| flip_payment::material(decision).is_some())
+        if !payment.play.parameters.is_empty()
+            && payment
+                .play
+                .parameters
+                .iter()
+                .all(|decision| flip_payment::material(decision).is_some())
         {
             let mut probe = self.clone();
             let mut selection = probe.spell_execution(holder, actor, ability)?;

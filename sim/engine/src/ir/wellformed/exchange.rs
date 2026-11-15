@@ -196,7 +196,9 @@ impl Checker {
 }
 
 fn material_visibility(decision: &Decision, zone: ZoneKind, players: &PlayerSet) -> Visibility {
-    if zone == ZoneKind::Hand || flip_cost::material(decision).is_some_and(|(_, up)| !up) {
+    if zone == ZoneKind::Hand
+        || flip_cost::material(decision).is_some_and(|(_, before_up)| !before_up)
+    {
         Visibility::Only {
             players: players.clone(),
         }

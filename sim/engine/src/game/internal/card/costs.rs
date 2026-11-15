@@ -137,12 +137,13 @@ fn check_additional(
     let hand = quick
         && super::hand_payment::single_additional(&payment.node.play.costs)
         && payment.node.play.parameters.is_empty();
-    let flips = payment
-        .node
-        .play
-        .parameters
-        .iter()
-        .all(|decision| flip_payment::material(decision).is_some());
+    let flips = !payment.node.play.parameters.is_empty()
+        && payment
+            .node
+            .play
+            .parameters
+            .iter()
+            .all(|decision| flip_payment::material(decision).is_some());
     if quick && !hand && !flips {
         return Err(unsupported("additional Quick payment preflight"));
     }
