@@ -5,7 +5,7 @@ use super::{
     PlayerRelation, Polarity, RuleId, Selector, TextQuantifier, TimeAnchor,
 };
 
-/// 「それの{ファンファーレ}能力を使えない」: the only entry effect a field entry accepts.
+/// 「それの{ファンファーレ}能力を使えない」 retains its play prohibition in the IR.
 /// A Fanfare can only trigger on its holder's own entry, so the restriction is consumed by that
 /// entry's occurrence check and never installed; the resolution end states exactly that.
 pub(crate) fn entry_without_fanfare() -> Vec<Effect> {
@@ -34,8 +34,25 @@ pub(crate) fn entry_without_fanfare() -> Vec<Effect> {
     }]
 }
 
+/// The new-generation entry subject is consumed before pending creation, without a lasting aura.
+pub(crate) fn entry_no_fanfare() -> Vec<Effect> {
+    let mut effects = entry_without_fanfare();
+    if let Some(Effect::Permission { action, .. }) = effects.first_mut() {
+        *action = ActionPattern::TriggerAdmission {
+            predicate: AbilityPredicate {
+                kind: Some(AbilityKind::Triggered),
+                keyword: Some(KeywordId::Fanfare),
+                except: vec![],
+                holder: None,
+                origin: None,
+            },
+        };
+    }
+    effects
+}
+
 pub(crate) fn suppresses_fanfare(effects: &[Effect]) -> bool {
-    effects == entry_without_fanfare().as_slice()
+    effects == entry_without_fanfare().as_slice() || effects == entry_no_fanfare().as_slice()
 }
 
 pub(crate) fn keyword(effect: &Effect) -> Option<KeywordId> {

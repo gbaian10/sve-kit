@@ -667,7 +667,7 @@ impl BodyContext<'_> {
             return Ok(action);
         };
         movement.initial_posture = value.acted.as_ref().map(|_| Posture::Acted);
-        movement.entry_effects = entry_effects(value, path)?;
+        movement.entry_effects = entry_effects(value.entry_effects.as_deref(), path)?;
         Ok(action)
     }
 
@@ -1165,12 +1165,18 @@ fn deck_position(position: Option<&ast::Placement>, path: &str) -> Result<Positi
     }
 }
 
-/// 「それの{ファンファーレ}能力を使えない」 is the only entry effect a field entry carries;
-/// the AST already admits nothing else.
-fn entry_effects(value: &ast::Move, path: &str) -> Result<Vec<Effect>, LoweringError> {
-    match value.entry_effects.as_deref() {
+pub(super) fn entry_effects(
+    effects: Option<&[ast::EntryEffect]>,
+    path: &str,
+) -> Result<Vec<Effect>, LoweringError> {
+    match effects {
         None => Ok(vec![]),
-        Some([_]) => Ok(trigger_restrictions::entry_without_fanfare()),
+        Some([ast::EntryEffect::Cannot { .. }]) => {
+            Ok(trigger_restrictions::entry_without_fanfare())
+        }
+        Some([ast::EntryEffect::NoTrigger { no_trigger }]) if no_trigger.kinds.len() == 1 => {
+            Ok(trigger_restrictions::entry_no_fanfare())
+        }
         Some(_) => Err(unsupported(path)),
     }
 }

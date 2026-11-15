@@ -1141,3 +1141,6 @@ mod layer3_source_damage;
 
 #[path = "card/layer3_play_ordinal.rs"]
 mod layer3_play_ordinal;
+
+#[path = "card/layer3_entry_suppression.rs"]
+mod layer3_entry_suppression;

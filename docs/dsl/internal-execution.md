@@ -896,8 +896,9 @@ found 不變，after／actual_to 為空。手牌新 slot 不提供對手持續�
 
 目的地限 Owners(Hand／Cemetery) 與搜尋者自己的 Shared(Field／Ex)。找到後的正數部分容量
 沿用既有 SearchPartition 分配題，選精確剩餘格數；零空位可記零成功移動。スペル置於場的結果尚未准入：張數限定搜尋進場在開始前整棵拒絕，
-條件搜尋的回答若選到スペル即拒絕並維持待答。position／order、entry_effects、
-成功投影與減費安裝仍拒絕。整卡本文可承載本節 Search；公開 capability 沒有擴充。
+條件搜尋的回答若選到スペル即拒絕並維持待答。position／order 仍拒絕。單一 Field 目的地的 entry_effects
+限入場曲的 PlayAbility／TriggerAdmission 禁止：只在成功進場的新世代建立待機前消耗，
+容量分配仍攜帶同一限制，其他入場觀察者照常執行；不安裝持續權限效果。整卡本文可承載本節 Search；公開 capability 沒有擴充。
 
 Partition 僅准入 Owners(Hand)→Owners(Cemetery) 兩段，且搜尋有明示 maximum，兩段
 minimum 足以涵蓋該上限，以保證所有回答都會分配完 found；可能留下未分配成員的形狀

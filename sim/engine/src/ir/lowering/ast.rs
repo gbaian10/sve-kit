@@ -932,12 +932,28 @@ pub(super) struct Move {
     pub entry_effects: Option<Vec<EntryEffect>>,
 }
 
-/// 「それの{ファンファーレ}能力を使えない」 on the cards a field entry puts.
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum EntryEffect {
+    Cannot {
+        #[serde(rename = "cannot")]
+        _cannot: EntryCannot,
+    },
+    NoTrigger {
+        no_trigger: EntryNoTrigger,
+    },
+}
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct EntryEffect {
-    #[serde(rename = "cannot")]
-    pub _cannot: EntryCannot,
+pub(super) struct EntryNoTrigger {
+    #[serde(rename = "on")]
+    pub _on: Entering,
+    pub kinds: Vec<FanfareKeyword>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum Entering {
+    Entering,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -1456,6 +1472,7 @@ pub(super) struct Search {
     pub result: Option<String>,
     pub distinct_by: Option<Names>,
     pub cost_sum_le: Option<u64>,
+    pub entry_effects: Option<Vec<EntryEffect>>,
 }
 
 #[derive(Clone, Deserialize)]

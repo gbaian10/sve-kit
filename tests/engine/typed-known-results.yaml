@@ -631,14 +631,9 @@ known:
     reason: "internal D1 does not support unloaded whole card CP04-012/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-CP04-088"
     scenario: "A 找出スズナ 與ミサキ 上場 → 兩者的ファンファーレ 被抑制、不待機"
-    status: unsupported
-    error: "unadmitted CP04-088 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-088/0, holder h1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-CP04-088"
-    scenario: "B 一張都不找"
-    status: unsupported
-    error: "unadmitted CP04-088 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-088/0, holder h1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "s1 is not a card candidate"
   - question: "card-CP04-103"
     scenario: "找到=True"
     status: adapter-error

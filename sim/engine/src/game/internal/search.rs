@@ -8,15 +8,17 @@ use crate::game::player::{SearchQuestion, SelectionGroup};
 use super::card::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, within_original_cost_cap,
 };
+use super::movement::FieldArrival;
 use super::{
     Execution, Fact, Game, InputDomain, InstructionOutcome, OrderCard, Result, Wait, contains,
     invalid, seat_name, unsupported,
 };
 use crate::ir::observation_selection::{CardTotals, card_totals};
 use crate::ir::printed_keywords;
+use crate::ir::trigger_restrictions::suppresses_fanfare;
 use crate::ir::{
     AbilityOrigin, Action, Binding, Bool, Cardinality, CharacteristicView, DecisionId, Expr,
-    Instruction, KeywordId, MoveDestination, MoveMethod, MoveResult, MoveSpec, Nat, ObjectOperand,
+    Instruction, KeywordId, MoveDestination, MoveResult, MoveSpec, Nat, ObjectOperand,
     ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Posture, Predicate,
     Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome,
     SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector,
@@ -77,7 +79,7 @@ struct PartitionContinuation {
     destinations: VecDeque<SearchPartition>,
     next_handle: u64,
     capacity_remainder: Option<MoveDestination>,
-    entry_posture: Option<Posture>,
+    arrival: FieldArrival,
 }
 
 #[derive(Clone, Debug)]
@@ -238,7 +240,9 @@ fn check_movement(movement: &MoveSpec) -> Result<()> {
     if movement.position.is_some()
         || movement.order.is_some()
         || !posture_allowed
-        || !movement.entry_effects.is_empty()
+        || !(movement.entry_effects.is_empty()
+            || (suppresses_fanfare(&movement.entry_effects)
+                && matches!(&movement.to, MoveDestination::Shared {zone} if zone.kind == ZoneKind::Field)))
     {
         return Err(unsupported("search movement"));
     }
@@ -765,16 +769,22 @@ impl Game {
                             destinations: VecDeque::from([partition]),
                             next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
                             capacity_remainder: Some(movement.to.clone()),
-                            entry_posture: movement.initial_posture,
+                            arrival: FieldArrival {
+                                posture: movement.initial_posture,
+                                without_fanfare: suppresses_fanfare(&movement.entry_effects),
+                            },
                         },
                     );
                 }
-                let moved = self.internal_search_move(
+                let moved = self.internal_search_move_with_arrival(
                     execution,
                     &found,
                     &movement.to,
                     wait.player,
-                    movement.initial_posture,
+                    FieldArrival {
+                        posture: movement.initial_posture,
+                        without_fanfare: suppresses_fanfare(&movement.entry_effects),
+                    },
                 )?;
                 self.internal_search_finish(
                     execution,
@@ -797,7 +807,7 @@ impl Game {
                     destinations: destinations.clone().into(),
                     next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
                     capacity_remainder: None,
-                    entry_posture: None,
+                    arrival: FieldArrival::default(),
                 },
             ),
             Action::Search {
@@ -1012,13 +1022,16 @@ impl Game {
         continuation
             .remaining
             .retain(|object| !cards.contains(object));
-        continuation.outcome.moved.extend(self.internal_search_move(
-            execution,
-            cards,
-            &wait.partition.zone,
-            continuation.player,
-            continuation.entry_posture,
-        )?);
+        continuation
+            .outcome
+            .moved
+            .extend(self.internal_search_move_with_arrival(
+                execution,
+                cards,
+                &wait.partition.zone,
+                continuation.player,
+                continuation.arrival,
+            )?);
         self.internal_search_partition(execution, continuation)
     }
 
@@ -1074,6 +1087,26 @@ impl Game {
         player: PlayerId,
         initial_posture: Option<Posture>,
     ) -> Result<Vec<MoveResult>> {
+        self.internal_search_move_with_arrival(
+            execution,
+            found,
+            to,
+            player,
+            FieldArrival {
+                posture: initial_posture,
+                without_fanfare: false,
+            },
+        )
+    }
+
+    fn internal_search_move_with_arrival(
+        &mut self,
+        execution: &mut Execution,
+        found: &[ObjectRef],
+        to: &MoveDestination,
+        player: PlayerId,
+        arrival: FieldArrival,
+    ) -> Result<Vec<MoveResult>> {
         let (zone, kind) = self.internal_search_destination(execution, to, player)?;
         let seat = seat_name(player)?;
         if matches!(kind, ZoneKind::Ex | ZoneKind::Field)
@@ -1091,16 +1124,7 @@ impl Game {
                 }
             }
         }
-        let (moved, _) = self.internal_move_members(
-            execution,
-            found,
-            zone,
-            kind,
-            MoveMethod::Put,
-            false,
-            None,
-            initial_posture,
-        )?;
+        let moved = self.internal_put_with_arrival(execution, found, zone, kind, arrival)?;
         if kind == ZoneKind::Hand {
             for movement in &moved {
                 let id = execution.object_id(movement.before)?;
