@@ -85,6 +85,8 @@ pub(in crate::game::internal) struct TargetWait {
     distinct_names: bool,
     cost_cap: Option<CostCap>,
     on_field_at_capture: bool,
+    requirements: Vec<(ObjectRef, usize)>,
+    required_score: usize,
 }
 
 /// A printed total original cost cap with each candidate's original cost.
@@ -162,6 +164,12 @@ impl TargetWait {
                 })
             })
             .collect::<Result<_>>()?;
+        super::target_priority::expose(
+            &mut question,
+            &references,
+            &self.requirements,
+            self.required_score,
+        )?;
         for (member, reference) in question.members.iter_mut().zip(&self.members) {
             member.rules_names = Some(
                 self.characteristics
@@ -312,10 +320,39 @@ impl TargetWait {
                 .copied()
                 .ok_or_else(|| invalid("foreign target handle"))
         })?;
-        if !self.compatible(&members)? {
+        if !self.compatible(&members)? || self.priority_score(&members) != self.required_score {
             return Err(invalid("target selection constraints"));
         }
         Ok(members)
+    }
+
+    fn priority_score(&self, members: &[ObjectRef]) -> usize {
+        self.requirements
+            .iter()
+            .filter(|(candidate, _)| members.contains(candidate))
+            .map(|(_, count)| *count)
+            .sum()
+    }
+
+    fn maximize_requirements(&mut self, resolution: bool) -> Result<()> {
+        if self.requirements.is_empty() {
+            return Ok(());
+        }
+        let mut bounds = self.bounds;
+        if resolution {
+            bounds.minimum = Nat(bounds.minimum.0.min(self.capacity()?));
+        }
+        let ceiling: usize = self.requirements.iter().map(|(_, count)| *count).sum();
+        for members in sized_selections(&self.members, bounds) {
+            let score = self.priority_score(&members);
+            if score > self.required_score && self.compatible(&members)? {
+                self.required_score = score;
+                if score == ceiling {
+                    break;
+                }
+            }
+        }
+        Ok(())
     }
 
     fn compatible(&self, members: &[ObjectRef]) -> Result<bool> {
@@ -1331,27 +1368,36 @@ impl Game {
         let on_field_at_capture = characteristics
             .iter()
             .all(|(_, saved)| saved.zone == "field");
-        Ok((
-            TargetWait {
-                links: CandidateLinks::for_selectors(
-                    self,
-                    execution,
-                    members.iter().copied(),
-                    constraint.groups.iter().map(|group| &group.selector),
-                )?,
-                decision: decision.clone(),
-                binding: *binding,
-                cost_cap: self.target_cost_cap(execution, &constraint, &members)?,
-                members,
-                bounds,
-                groups: GroupConstraints {
-                    members: group_members,
-                    bounds: group_bounds,
-                },
-                characteristics,
-                distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
-                on_field_at_capture,
+        let requirements = self.target_requirements(
+            execution,
+            execution.player(self, &decision.actor)?,
+            &members,
+        )?;
+        let mut wait = TargetWait {
+            links: CandidateLinks::for_selectors(
+                self,
+                execution,
+                members.iter().copied(),
+                constraint.groups.iter().map(|group| &group.selector),
+            )?,
+            decision: decision.clone(),
+            binding: *binding,
+            cost_cap: self.target_cost_cap(execution, &constraint, &members)?,
+            members,
+            bounds,
+            groups: GroupConstraints {
+                members: group_members,
+                bounds: group_bounds,
             },
+            characteristics,
+            distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
+            on_field_at_capture,
+            requirements,
+            required_score: 0,
+        };
+        wait.maximize_requirements(allow_resolution_zones)?;
+        Ok((
+            wait,
             TargetDomain {
                 members: public,
                 cardinality: bounds,
@@ -1575,7 +1621,7 @@ impl Game {
         }
         let mut attempts = 0_u32;
         for members in sized_selections(&wait.members, wait.bounds) {
-            if !wait.compatible(&members)? {
+            if !wait.compatible(&members)? || wait.priority_score(&members) != wait.required_score {
                 continue;
             }
             attempts = attempts.saturating_add(1);

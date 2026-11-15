@@ -13,6 +13,7 @@ use crate::ir::prevention;
 use crate::ir::public_numbers;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::target_priority;
 use crate::ir::{
     Ability, AbilityKind, AbilityQualification, Action, BatchPolicy, Capture, CardProgram,
     Cardinality, CharacteristicPatch, ChoiceDomain, ContinuousLayer, CostSpec, Decision,
@@ -807,7 +808,8 @@ impl Checker {
 
     fn permission_declaration(&mut self, effect: &Effect, ability_zones: &[ZoneKind]) -> Checked {
         if ability_zones == [ZoneKind::Field]
-            && (trigger_restrictions::keyword(effect).is_some()
+            && (target_priority::is_requirement(effect)
+                || trigger_restrictions::keyword(effect).is_some()
                 || victory::permission(effect).is_some())
         {
             return Ok(());

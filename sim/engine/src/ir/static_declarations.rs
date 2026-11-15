@@ -8,11 +8,15 @@ pub(crate) enum Family {
     Cost,
     MoveReplacement,
     EntryPosture,
+    TargetPriority,
     TriggerMultiplicity,
 }
 
 pub(crate) fn family(effect: &Effect) -> Option<Family> {
     match effect {
+        Effect::Permission { .. } if super::target_priority::is_requirement(effect) => {
+            Some(Family::TargetPriority)
+        }
         Effect::Replacement { .. } if super::entry_posture::projection(effect).is_some() => {
             Some(Family::EntryPosture)
         }

@@ -53,6 +53,7 @@ mod reveal_until;
 mod stack;
 mod static_declarations;
 mod static_keywords;
+mod target_priority;
 mod trigger_multiplicity;
 mod trigger_restrictions;
 mod victory;
@@ -538,6 +539,7 @@ impl Allocator {
                     ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
                     | ast::StaticEffect::BanishInstead(_)
+                    | ast::StaticEffect::MustTarget(_)
                     | ast::StaticEffect::EntersActed(_)
                     | ast::StaticEffect::ExtraTrigger(_),
                 )

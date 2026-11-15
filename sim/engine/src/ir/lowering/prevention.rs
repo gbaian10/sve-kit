@@ -584,6 +584,7 @@ pub(super) fn lower_at_source(
                 damage_cap(shape, path)?,
             ),
             ast::StaticEffect::BanishInstead(_)
+            | ast::StaticEffect::MustTarget(_)
             | ast::StaticEffect::EntersActed(_)
             | ast::StaticEffect::ExtraTrigger(_)
             | ast::StaticEffect::Reroll(_)
