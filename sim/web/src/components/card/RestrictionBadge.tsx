@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next"
 
 import type { CardRestriction } from "../../data"
 import { Badge } from "../ui/Badge"
+import { copyLimit } from "./copyLimit"
 
 export function RestrictionBadge({
   restrictions,
@@ -11,11 +12,8 @@ export function RestrictionBadge({
   readonly className?: string
 }) {
   const { t } = useTranslation()
-  const limits = (restrictions ?? []).flatMap((entry) =>
-    entry.maxCopies === null ? [] : [entry.maxCopies],
-  )
-  if (!limits.length) return null
-  const count = Math.min(...limits)
+  const count = copyLimit(restrictions)
+  if (count === undefined) return null
   return (
     <span
       className={className}

@@ -48,6 +48,75 @@ describe("visible wording label in card results", () => {
   })
 })
 
+describe("caption under the card image", () => {
+  const caption = () => {
+    const element = screen.getByRole("link").lastElementChild
+    if (!element) throw new Error("the cell has no caption")
+    return element
+  }
+  const restriction = (maxCopies: number | null) => ({
+    id: "r:synthetic",
+    formatCode: "standard" as const,
+    maxCopies,
+    effectiveFrom: "2026-01-01",
+    sourceUrl: null,
+    asOf: "2026-01-01",
+  })
+
+  it("starts with the name and has no rarity row for a card with neither a rarity nor a copy limit", async () => {
+    await renderInRouter(<CardGrid cells={[cell(false)]} images={undefined} onOpen={vi.fn()} />)
+    expect(caption().children).toHaveLength(1)
+    expect(caption().firstElementChild).toHaveTextContent("Synthetic name")
+    expect(caption().firstElementChild).toHaveTextContent("BP-SYNTHETIC")
+  })
+
+  it("puts the rarity and the copy limit after the names", async () => {
+    const value = cell(false)
+    const rated: GridCell = {
+      ...value,
+      name: {
+        ...value.name,
+        secondary: { lang: "zh-Hant", text: "Synthetic translation" },
+      },
+      summary: {
+        ...value.summary,
+        rarity: { original: { lang: "ja", text: "LG" }, translations: {} },
+        restrictions: [restriction(1)],
+      },
+    }
+    await renderInRouter(<CardGrid cells={[rated]} images={undefined} onOpen={vi.fn()} />)
+    const [name, translation, meta, ...rest] = caption().children
+    expect(name).toHaveTextContent("Synthetic name")
+    expect(translation).toHaveTextContent("Synthetic translation")
+    expect(meta).toHaveAttribute("data-cell-meta")
+    expect(meta).toHaveTextContent("LG")
+    expect(meta).toHaveTextContent("限1")
+    expect(rest).toHaveLength(0)
+  })
+
+  it("keeps the row for a copy limit without a rarity", async () => {
+    const value = cell(false)
+    const banned: GridCell = {
+      ...value,
+      summary: { ...value.summary, restrictions: [restriction(0)] },
+    }
+    await renderInRouter(<CardGrid cells={[banned]} images={undefined} onOpen={vi.fn()} />)
+    expect(caption().children).toHaveLength(2)
+    expect(caption().lastElementChild).toHaveAttribute("data-cell-meta")
+    expect(caption().lastElementChild).toHaveTextContent("禁止")
+  })
+
+  it("has no row for a restriction that sets no copy limit", async () => {
+    const value = cell(false)
+    const unlimited: GridCell = {
+      ...value,
+      summary: { ...value.summary, restrictions: [restriction(null)] },
+    }
+    await renderInRouter(<CardGrid cells={[unlimited]} images={undefined} onOpen={vi.fn()} />)
+    expect(caption().children).toHaveLength(1)
+  })
+})
+
 it("shows each grid card from its card_l file without a srcset", async () => {
   const files: ImageIndex = {
     asset: () => ({ availability: "available", publication_state: "approved" }),

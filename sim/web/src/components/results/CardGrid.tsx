@@ -6,6 +6,7 @@ import { useHref, useNavigate } from "react-router"
 import type { CardSummary, ImageIndex } from "../../data"
 import type { DisplayedName } from "../../domain/nameDisplay"
 import { CardImage } from "../card/CardImage"
+import { copyLimit } from "../card/copyLimit"
 import { listedCardNo } from "../card/listedCardNo"
 import { RestrictionBadge } from "../card/RestrictionBadge"
 import { UnlistedBadge } from "../card/UnlistedBadge"
@@ -37,8 +38,10 @@ export interface CardGridProps {
   readonly renderOverlay?: (cell: GridCell) => ReactNode
 }
 
-// Design: 2 columns under 600 (gap 14×12), 4 up to 999, 5–6 on desktop; each cell is the image
-// plus one truncated 13px name line ("both" adds the translation in small type).
+// Design: 2 columns under 600, 4 up to 999, 5–6 on desktop. Each cell is the image, then one
+// truncated 13px name line 6px under it ("both" adds the translation in small type), then the rarity
+// and copy limit in small type. Rows sit 24px apart, four times that distance, so a caption reads
+// as belonging to the image above it rather than to the next row's.
 
 const CardCell = memo(function CardCell({
   cell,
@@ -66,6 +69,7 @@ const CardCell = memo(function CardCell({
     Object.entries(rarity?.translations ?? {}).find(([lang]) => lang === labels.language)?.[1] ??
     rarity?.original.text ??
     ""
+  const restricted = copyLimit(cell.summary.restrictions) !== undefined
   const overlay = renderOverlay?.(cell)
   const action = renderAction?.(cell)
   const link = (
@@ -95,10 +99,7 @@ const CardCell = memo(function CardCell({
         {overlay}
       </span>
       <span className="flex min-w-0 flex-col leading-tight">
-        <span className="flex h-5.5 items-center justify-between gap-1 text-11 font-semibold text-text-3">
-          <span className="truncate">{rarityLabel}</span>
-          <RestrictionBadge restrictions={cell.summary.restrictions} />
-        </span>
+        {/* The name comes first so it reads as the caption of its own image, not of the next row's. */}
         <span className="flex items-baseline gap-2">
           <span
             lang={cell.name.primary.lang}
@@ -115,6 +116,16 @@ const CardCell = memo(function CardCell({
             {cell.name.secondary.text}
           </span>
         )}
+        {/* Leaders and tokens have neither a rarity nor a limit: no row, so no gap under the name. */}
+        {(rarityLabel !== "" || restricted) && (
+          <span
+            data-cell-meta=""
+            className="mt-0.5 flex items-center justify-between gap-1 text-11 font-semibold text-text-3"
+          >
+            <span className="truncate">{rarityLabel}</span>
+            <RestrictionBadge restrictions={cell.summary.restrictions} />
+          </span>
+        )}
         {cell.summary.unlisted && <UnlistedBadge className="mt-1 self-start" />}
         {cell.summary.wordingPending && (
           <Badge className="mt-1 self-start">{labels.wordingPending}</Badge>
@@ -123,8 +134,9 @@ const CardCell = memo(function CardCell({
     </a>
   )
   // The control is a sibling of the link, never inside it: buttons must not nest in an anchor.
+  // Captions in one row differ in height, so the controls line up along the bottom of the row.
   return action ? (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex h-full flex-col justify-between gap-1.5">
       {link}
       {action}
     </div>
@@ -150,7 +162,7 @@ export function CardGrid({
     <div className="@container">
       <ul
         data-view="grid"
-        className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-3.5 [--result-columns:2] @min-[520px]:[--result-columns:4] @min-[840px]:[--result-columns:5] @min-[1100px]:[--result-columns:6] @min-[1350px]:[--result-columns:7] @min-[1600px]:[--result-columns:8]"
+        className="grid grid-cols-[repeat(var(--result-columns),minmax(0,1fr))] gap-x-3 gap-y-6 [--result-columns:2] @min-[520px]:[--result-columns:4] @min-[840px]:[--result-columns:5] @min-[1100px]:[--result-columns:6] @min-[1350px]:[--result-columns:7] @min-[1600px]:[--result-columns:8]"
       >
         {cells.map((cell) => (
           <li key={cell.key} className="min-w-0">
