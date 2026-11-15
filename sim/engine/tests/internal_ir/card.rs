@@ -1138,3 +1138,6 @@ mod layer3_damage_increase;
 
 #[path = "card/layer3_source_damage.rs"]
 mod layer3_source_damage;
+
+#[path = "card/layer3_play_ordinal.rs"]
+mod layer3_play_ordinal;

@@ -205,6 +205,15 @@ impl Game {
                         active,
                         info.token,
                     )? {
+                        if let Some(ordinal) = &plan.ordinal
+                            && super::super::super::history_turn::filtered_played_at(
+                                self,
+                                controller,
+                                ordinal.filter(),
+                            )? != ordinal.number()
+                        {
+                            continue;
+                        }
                         matched.push((holder.clone(), ability));
                     }
                 }

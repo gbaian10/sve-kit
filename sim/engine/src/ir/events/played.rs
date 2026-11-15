@@ -1,4 +1,6 @@
 //! Played subscriptions narrow the committed card through one closed subject plan.
+pub(crate) mod ordinal;
+
 use super::subject::{SubjectFields, SubjectFilter, played_view};
 use crate::ir::{
     Ability, AbilityOrigin, Binding, Bool, CardKind, CharacteristicView, Comparison, EventPattern,
@@ -13,6 +15,7 @@ pub(crate) struct PlayedFilter {
     pub(crate) original: Option<(Comparison, i64)>,
     pub(crate) traits_any: Vec<TraitId>,
     pub(crate) alternate: Option<SubjectFilter>,
+    pub(crate) ordinal: Option<ordinal::Ordinal>,
 }
 
 fn cost(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> NumberRead {
@@ -24,35 +27,37 @@ fn cost(event: Binding<PlayEvent>, card: Binding<ObjectRef>) -> NumberRead {
 
 impl PlayedFilter {
     pub(crate) fn valid(&self) -> bool {
-        self.alternate.as_ref().is_none_or(|alternate| {
-            self.original.is_none()
-                && !self.subject.own_turn
-                && self.traits_any.is_empty()
-                && self.subject.own == Some(true)
-                && self
-                    .subject
-                    .trait_id
-                    .as_ref()
-                    .is_some_and(|id| !id.0.is_empty())
-                && alternate
-                    .trait_id
-                    .as_ref()
-                    .is_some_and(|id| !id.0.is_empty())
-                && self.subject.trait_id != alternate.trait_id
-                && self.subject
-                    == (SubjectFilter {
-                        own: Some(true),
-                        own_turn: self.subject.own_turn,
-                        trait_id: self.subject.trait_id.clone(),
-                        ..SubjectFilter::default()
-                    })
-                && *alternate
-                    == (SubjectFilter {
-                        kind: Some(CardKind::Spell),
-                        trait_id: alternate.trait_id.clone(),
-                        ..self.subject.clone()
-                    })
-        }) && self.subject.original_cost.is_none()
+        (self.ordinal.is_none() || self.alternate.is_none())
+            && self.alternate.as_ref().is_none_or(|alternate| {
+                self.original.is_none()
+                    && !self.subject.own_turn
+                    && self.traits_any.is_empty()
+                    && self.subject.own == Some(true)
+                    && self
+                        .subject
+                        .trait_id
+                        .as_ref()
+                        .is_some_and(|id| !id.0.is_empty())
+                    && alternate
+                        .trait_id
+                        .as_ref()
+                        .is_some_and(|id| !id.0.is_empty())
+                    && self.subject.trait_id != alternate.trait_id
+                    && self.subject
+                        == (SubjectFilter {
+                            own: Some(true),
+                            own_turn: self.subject.own_turn,
+                            trait_id: self.subject.trait_id.clone(),
+                            ..SubjectFilter::default()
+                        })
+                    && *alternate
+                        == (SubjectFilter {
+                            kind: Some(CardKind::Spell),
+                            trait_id: alternate.trait_id.clone(),
+                            ..self.subject.clone()
+                        })
+            })
+            && self.subject.original_cost.is_none()
             && self
                 .subject
                 .class
@@ -133,15 +138,31 @@ impl PlayedFilter {
                 }))
             },
         );
-        Expr::Compute(Box::new(Predicate::PlayedCard {
+        let played = Expr::Compute(Box::new(Predicate::PlayedCard {
             subject: Expr::Frozen(Box::new(PlaySubjectFields::PlaySubject { event })),
             card: self.card,
             predicate,
-        }))
+        }));
+        match &self.ordinal {
+            None => played,
+            Some(ordinal) => Expr::Compute(Box::new(Predicate::And {
+                predicates: vec![played, ordinal.predicate()],
+            })),
+        }
     }
 
     pub(crate) fn parse(event: Binding<PlayEvent>, expression: &Expr<Bool>) -> Option<Self> {
-        let Expr::Compute(predicate) = expression else {
+        let (base, ordinal) = if let Expr::Compute(operation) = expression
+            && let Predicate::And { predicates } = operation.as_ref()
+        {
+            let [base, guard] = predicates.as_slice() else {
+                return None;
+            };
+            (base, Some(ordinal::Ordinal::parse(guard)?))
+        } else {
+            (expression, None)
+        };
+        let Expr::Compute(predicate) = base else {
             return None;
         };
         let Predicate::PlayedCard {
@@ -192,6 +213,7 @@ impl PlayedFilter {
             original,
             traits_any,
             alternate,
+            ordinal,
         };
         (plan.valid() && *expression == plan.predicate(event)).then_some(plan)
     }

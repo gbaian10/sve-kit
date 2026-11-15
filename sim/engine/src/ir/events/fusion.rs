@@ -85,6 +85,7 @@ pub(crate) fn combined(pattern: &EventPattern) -> bool {
                 original: None,
                 traits_any: vec![],
                 alternate: None,
+                ordinal: None,
             };
             if *predicate != expected.predicate(*binding) {
                 return false;
