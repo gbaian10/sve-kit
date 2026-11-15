@@ -3,7 +3,7 @@
 //! Native coordinates stay in the projector. Hosts bind each projection to its
 //! authenticated seat and current question before submitting the decoded answer.
 //!
-//! Pending and installed-effect components stay private so hosts cannot replace
+//! Cost, pending and installed-effect components stay private so hosts cannot replace
 //! the authority's observation, even when the runner feature is enabled.
 //!
 //! ```compile_fail
@@ -16,6 +16,10 @@
 //!
 //! ```compile_fail
 //! use sve_engine::battle::project_player_effects;
+//! ```
+//!
+//! ```compile_fail
+//! use sve_engine::battle::project_costs;
 //! ```
 
 mod board;
@@ -34,8 +38,6 @@ mod turn;
 mod tests;
 
 pub(crate) use board::build_observation;
-#[cfg(feature = "runner")]
-pub use costs::project_costs;
 pub use events::{
     EventFeed, EventObjects, EventReferences, FeedUpdate, ProjectedEvent, project_batch,
 };

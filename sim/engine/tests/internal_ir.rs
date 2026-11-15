@@ -22,6 +22,9 @@ mod board_fixture;
 #[path = "support/board_fixtures.rs"]
 mod board_fixtures;
 
+#[path = "support/payment_fixtures.rs"]
+mod payment_fixtures;
+
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
 

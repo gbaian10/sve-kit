@@ -265,3 +265,7 @@ pub(crate) mod kind_change;
 pub(crate) mod stat_presence;
 
 pub(crate) mod play_target_cost;
+
+// Both lib test areas share the existing C0 cache instead of running another fixture producer.
+#[cfg(all(test, feature = "runner"))]
+pub(crate) use tests::payment_expanded_tree;

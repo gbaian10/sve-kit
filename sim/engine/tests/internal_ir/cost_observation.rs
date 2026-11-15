@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::{
-    CardCostQuote, CostGroupKind, CostLine, CostSummary, PendingCost, PpQuote, QuoteBasis,
+    CardCostQuote, CostLine, CostSummary, PendingCost, PpQuote, QuoteBasis,
 };
 
 pub(super) fn preview(game: &Game, viewer: Viewer) -> CardCostQuote {
@@ -132,13 +132,4 @@ fn an_unquotable_card_does_not_prevent_the_rest_of_the_observation() {
     assert_eq!(cost.total_pp, None);
     assert_eq!(cost.pending, [PendingCost::Unavailable]);
     assert_eq!(cost.groups[0].lines, [CostLine::Pp(PpQuote::Unavailable)]);
-}
-
-pub(super) fn optional(cost: &CostSummary) -> &CostGroupKind {
-    &cost
-        .groups
-        .iter()
-        .find(|group| matches!(group.kind, CostGroupKind::Optional { .. }))
-        .unwrap()
-        .kind
 }

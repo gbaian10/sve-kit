@@ -543,3 +543,6 @@ mod walk;
 mod wellformed;
 
 mod lowering;
+
+#[cfg(feature = "runner")]
+pub(crate) use lowering::payment_expanded_tree;
