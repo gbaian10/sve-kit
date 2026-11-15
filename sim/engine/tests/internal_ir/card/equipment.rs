@@ -3,7 +3,7 @@ use sve_engine::game::player::Viewer;
 use sve_engine::game::player::events::{ActionKind, EventKind};
 use sve_engine::game::player::observation::{ObservedZone, Relationship, RelationshipKind};
 
-fn equip_action() -> Action {
+pub(super) fn equip_action() -> Action {
     Action::Equip {
         holder: ObjectOperand::SourceHolder {},
         template: TokenTemplateId("unit-spell".into()),
@@ -29,7 +29,7 @@ pub(super) fn equipment_catalog(kind: &str) -> Arc<Catalog> {
     )
 }
 
-fn board(kind: &str) -> Game {
+pub(super) fn board(kind: &str) -> Game {
     board_with_token(kind, true)
 }
 

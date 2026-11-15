@@ -6,7 +6,7 @@ use sve_engine::game::player::{
     Command, Input, QuestionPurpose, QuestionShape, SubmissionKind, Viewer,
 };
 
-fn board(next_deck: bool) -> Game {
+pub(super) fn board(next_deck: bool) -> Game {
     let mut initial = setup(1, json!([]));
     initial["players"]["P2"]["zones"]["deck"] = if next_deck {
         json!([{"id":"next-0","card":"unit-follower"},{"id":"next-1","card":"unit-follower"}])
@@ -35,7 +35,7 @@ fn board(next_deck: bool) -> Game {
     game
 }
 
-fn end(game: &mut Game) -> Command {
+pub(super) fn end(game: &mut Game) -> Command {
     let current = question(game, Viewer::P1);
     let token = current.token;
     let command = end_command(&current);
