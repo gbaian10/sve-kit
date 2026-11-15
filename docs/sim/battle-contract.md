@@ -152,6 +152,8 @@ strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表
 
 卡片與玩家的 effects 保留已安裝的凍結運算，不從目前攻防或費用倒推。來源失去目前物件連結時不重接；未授權的來源保持 null。expires、main_live、intervals 與 active 分別保留主效期、主效期是否仍存續、重複區間及目前是否生效，不以單一布林值替代。
 
+授予定義 definitions 的 line 依同一 effect 的 source 印刷與卡面定位；source 未授權或缺少卡面時，line 只是未定位提示，不能推定面 0 或當成精確 TextRef。
+
 傷害替換描述的 Cap 保留 threshold 與 replacement：每次涵蓋傷害至少達 threshold 時，改成 replacement；兩者皆為 checked Nat，不近似成固定加減量。recipients／sources 的 null 代表沒有該項限制，空陣列則代表目前沒有可授權連結，不可互換；保留已授權向量的順序及重複項。
 
 ## 4. 題目、合法行動與答案

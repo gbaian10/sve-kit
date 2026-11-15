@@ -613,14 +613,31 @@ fn wire_installed_effects_retire_links_without_erasing_printing_and_refuse_dupli
     );
 }
 
+pub(super) fn cap_program() -> WellFormedCardProgram {
+    let payload = json!({
+        "cost":{"pp":0},
+        "do":[{
+            "apply":{
+                "on":"this",
+                "effect":{"damage_cap":{"threshold":4,"set":3}},
+                "until":"turn"
+            }
+        }]
+    });
+    lowerer()
+        .lower(&next_damage::tree(payload))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+}
+
 #[test]
 fn wire_installed_effects_project_actual_cap_installation_for_both_seats_without_secret_dependence()
 {
-    let programs=lowerer().lower(&next_damage::tree(json!({"cost":{"pp":0},"do":[{"apply":{"on":"this","effect":{"damage_cap":{"threshold":4,"set":3}},"until":"turn"}}]}))).unwrap();
-    let program = &programs["unit-follower"];
+    let program = cap_program();
     for actor in [Viewer::P1, Viewer::P2] {
-        let mut first = board_with_program(actor, "unit-spell", program);
-        let mut second = board_with_program(actor, "unit-amulet", program);
+        let mut first = board_with_program(actor, "unit-spell", &program);
+        let mut second = board_with_program(actor, "unit-amulet", &program);
         for game in [&mut first, &mut second] {
             resolved(
                 game.activate_internal_card(

@@ -22,10 +22,12 @@ pub use effects::{
 };
 
 use super::{ObjectHandle, Viewer};
+use crate::battle::{BattleReferences, ObjectTable, ProjectionError, build_objects};
 use crate::game::internal::zone_capacity;
 use crate::game::{Game, Object, int};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
+use core::result;
 
 /// Player-visible zones, including attached evolution cards.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -299,6 +301,25 @@ impl Game {
     pub fn observe(&self, perspective: Viewer) -> Result<Observation> {
         self.player_observation(perspective)
             .map_err(|_authority_error| invalid("player observation unavailable"))
+    }
+
+    /// Project this viewer's current wire object table from one authority read.
+    ///
+    /// The host authenticates the viewer and binds the returned table to this stop.
+    /// Event-time faces must not be reconstructed from the current table.
+    ///
+    /// # Errors
+    /// Refuses unavailable authority facts, mismatched snapshot references,
+    /// unresolved faces or rule names, and inexact wire numbers.
+    pub fn battle_objects(
+        &self,
+        perspective: Viewer,
+        references: &BattleReferences,
+    ) -> result::Result<ObjectTable, ProjectionError> {
+        let observation = self
+            .observe(perspective)
+            .map_err(|_authority_error| ProjectionError::Unavailable)?;
+        build_objects(&self.catalog, references, &observation)
     }
 
     fn player_observation(&self, perspective: Viewer) -> Result<Observation> {

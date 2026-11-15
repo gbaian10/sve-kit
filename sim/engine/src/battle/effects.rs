@@ -64,7 +64,7 @@ pub fn project_player_effects(
     installed(catalog, references, &objects, &player.effects)
 }
 
-fn installed(
+pub(super) fn installed(
     catalog: &Catalog,
     references: &BattleReferences,
     objects: &ObjectScope<'_>,
@@ -233,7 +233,7 @@ fn natural(value: u64) -> Result<Nat> {
     Nat::try_from(value).map_err(ProjectionError::from)
 }
 
-const fn ability_kind(value: AbilityKind) -> wire::AbilityKind {
+pub(super) const fn ability_kind(value: AbilityKind) -> wire::AbilityKind {
     match value {
         AbilityKind::Spell => wire::AbilityKind::Spell,
         AbilityKind::Activated => wire::AbilityKind::Activated,
