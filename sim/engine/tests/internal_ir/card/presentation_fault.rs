@@ -14,6 +14,11 @@ const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
 /// again. With `fault`, the last draw requests more cards than any draw may, which is an
 /// internal fault rather than a rules result.
 pub(super) fn prepared(fault: bool) -> Game {
+    prepared_on(catalog(), fault)
+}
+
+/// [`prepared`] on a catalogue of the same three synthetic cards.
+pub(super) fn prepared_on(catalog: Arc<Catalog>, fault: bool) -> Game {
     let mut tree = fanfare::expanded::tree().clone();
     let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
     entry.as_object_mut().unwrap().remove("fanfare");
@@ -53,7 +58,7 @@ pub(super) fn prepared(fault: bool) -> Game {
     let mut initial = setup(1, json!(deck));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
-    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "card-seed").unwrap();
+    let mut game = Game::new(catalog, &initial, &Value::Null, &Value::Null, "card-seed").unwrap();
     game.load_internal_card(
         "unit-follower",
         &WellFormedCardProgram::check(program).unwrap(),

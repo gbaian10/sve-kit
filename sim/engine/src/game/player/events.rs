@@ -13,6 +13,7 @@ pub use presentation::{
 
 use super::observation::{CardProperties, EffectSource, ObservedZone, TurnObservation};
 use super::{ObjectHandle, Viewer};
+use crate::catalog::Catalog;
 use crate::game::Game;
 use crate::ir::{
     AbilityQualification, DamageFlags, EvolutionState, MoveMethod, PaymentTime, Stat, TriggerIcon,
@@ -321,6 +322,12 @@ pub enum EventError {
     reason = "Events share the game authority without changing its readers."
 )]
 impl Game {
+    /// The catalogue this game is pinned to, shared so a projection can hold it across an
+    /// exclusive use of the game.
+    pub(crate) fn shared_catalog(&self) -> Arc<Catalog> {
+        Arc::clone(&self.catalog)
+    }
+
     /// Read whole committed batches after a cursor at the end of a batch.
     ///
     /// # Errors

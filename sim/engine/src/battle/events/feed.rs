@@ -3,8 +3,8 @@
 //! The feed keeps the native cursors and the bodies its viewer was shown early, so a
 //! committed event that promotes a shown one carries exactly the body that was shown.
 
-use super::{EventObjects, ProjectedEvent, project_batch};
-use crate::battle::ProjectionError;
+use super::{EventObjects, EventReferences, ProjectedEvent, project_batch};
+use crate::battle::{BattleReferences, ProjectionError};
 use crate::game::Game;
 use crate::game::player::Viewer;
 use crate::game::player::events::{
@@ -119,11 +119,23 @@ impl EventFeed {
         }
     }
 
-    /// Everything that happened for this viewer since its previous delivery.
+    /// Everything that happened for this viewer since its previous delivery, naming each
+    /// card as its event froze it under the game's own catalogue.
     ///
-    /// A failure stops this viewer's events for good and reports them unavailable; the
-    /// board and the question are unaffected.
-    pub fn deliver<O>(&mut self, game: &mut Game, objects: &O) -> FeedUpdate
+    /// A failure, including references bound to another catalogue, stops this viewer's
+    /// events for good and reports them unavailable; the board and the question are
+    /// unaffected.
+    pub fn deliver(&mut self, game: &mut Game, references: &BattleReferences) -> FeedUpdate {
+        // Sharing the catalogue lets the lookups outlive the exclusive use of the game.
+        let catalog = game.shared_catalog();
+        match EventReferences::new(&catalog, references) {
+            Ok(objects) => self.deliver_with(game, &objects),
+            Err(ProjectionError::Unavailable | ProjectionError::Range) => self.stop(),
+        }
+    }
+
+    /// [`Self::deliver`] with identities supplied by the caller.
+    pub fn deliver_with<O>(&mut self, game: &mut Game, objects: &O) -> FeedUpdate
     where
         O: EventObjects,
     {

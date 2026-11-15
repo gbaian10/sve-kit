@@ -4,8 +4,10 @@
 //! this one function, so a promoted event carries exactly the body its scope showed.
 
 mod feed;
+mod references;
 
 pub use feed::{EventFeed, FeedUpdate};
+pub use references::EventReferences;
 
 use super::ProjectionError;
 use crate::game::player::Viewer;
@@ -22,8 +24,8 @@ use sve_battle_contract::observation::{self, Facing, Posture, TurnView};
 use sve_battle_contract::question;
 use sve_battle_contract::{Int, Nat, Seat, SourceRef, Subject, Zone};
 
-/// Identities and text that the board projection of the same viewer supplies, so that an
-/// event names a card exactly as that viewer's board does.
+/// How the identities an event froze are written on the wire, so that an event names a
+/// card exactly as the board its viewer held at the time did.
 pub trait EventObjects {
     /// The wire card for a card as an event saw it: its authorized face and, only while the
     /// viewer could identify it, its object.
