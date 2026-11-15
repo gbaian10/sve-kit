@@ -15,7 +15,7 @@ fn query() -> Value {
     json!({"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true})
 }
 
-fn program(upto: bool) -> WellFormedCardProgram {
+pub(super) fn program(upto: bool) -> WellFormedCardProgram {
     lowerer()
         .lower(&tree(&query(), upto))
         .unwrap()
@@ -23,7 +23,7 @@ fn program(upto: bool) -> WellFormedCardProgram {
         .unwrap()
 }
 
-fn board(program: &WellFormedCardProgram) -> Game {
+pub(super) fn board(program: &WellFormedCardProgram) -> Game {
     board_with_maximum(program, 2)
 }
 

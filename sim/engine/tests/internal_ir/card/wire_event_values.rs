@@ -3,7 +3,7 @@ use super::presentation_fault::{ask_for_the_follower, prepared};
 use super::presentation_feed::Board;
 use super::*;
 use sve_battle_contract::event::{self as wire, DamageClass, EventBody};
-use sve_battle_contract::observation::{EvolutionState, Posture};
+use sve_battle_contract::observation::{EvolutionState, Facing, Posture};
 use sve_battle_contract::{Int as WireInt, Nat as WireNat, Seat, Subject, Zone};
 use sve_engine::battle::{ProjectedEvent, project_batch};
 use sve_engine::game::internal::InputDomain;
@@ -26,6 +26,11 @@ fn wire(game: &Game, viewer: Viewer) -> Vec<Vec<ProjectedEvent>> {
 
 /// The wire subject of the only card `owner` has on the field, as `viewer` identifies it now.
 fn fielded(game: &Game, viewer: Viewer, owner: Viewer) -> Subject {
+    placed(game, viewer, owner, ObservedZone::Field)
+}
+
+/// The wire subject of the first card `owner` has in `zone`, as `viewer` identifies it now.
+fn placed(game: &Game, viewer: Viewer, owner: Viewer, zone: ObservedZone) -> Subject {
     let observation = game.observe(viewer).unwrap();
     let card = observation
         .players
@@ -34,7 +39,7 @@ fn fielded(game: &Game, viewer: Viewer, owner: Viewer) -> Subject {
         .unwrap()
         .zones
         .iter()
-        .find(|zone| zone.kind == ObservedZone::Field)
+        .find(|entry| entry.kind == zone)
         .unwrap()
         .cards
         .first()
@@ -536,6 +541,154 @@ fn an_earth_rite_payment_states_the_stacks_removed_and_the_count_before_and_afte
         assert!(
             payment < played,
             "{viewer:?}: the payment completes before the card is played: {bodies:?}"
+        );
+    }
+}
+
+#[test]
+fn a_fusion_states_its_subject_and_materials_before_the_ability_it_qualifies() {
+    // One spell from the hand and one from EX are the materials; the follower goes to EX.
+    let (mut game, ability) = fusion::position(true, false);
+    game.advance_player_input();
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("source", ability, PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("the materials are asked first");
+    };
+    let InputDomain::CostMaterials(domain) = &question.domain else {
+        panic!("a material question: {:?}", question.domain);
+    };
+    let materials = domain.members.iter().map(|member| member.handle).collect();
+    let play = game
+        .answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::CostMaterials(materials),
+        )
+        .unwrap();
+    assert!(
+        matches!(play, CardPlay::Resolved(_)),
+        "the ability resolves"
+    );
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let bodies = bodies(&game, viewer);
+        let moves = bodies
+            .iter()
+            .filter_map(|body| {
+                if let EventBody::Movement {
+                    method,
+                    before,
+                    after,
+                    ..
+                } = body
+                {
+                    Some((*method, before.zone, after.zone, before.card.is_some()))
+                } else {
+                    None
+                }
+            })
+            .collect::<Vec<_>>();
+        let own = viewer == Viewer::P1;
+        assert_eq!(
+            moves,
+            vec![
+                (
+                    wire::MovementMethod::Discard,
+                    Some(Zone::Hand),
+                    Some(Zone::Cemetery),
+                    own
+                ),
+                (
+                    wire::MovementMethod::Put,
+                    Some(Zone::Ex),
+                    Some(Zone::Cemetery),
+                    true
+                ),
+                (
+                    wire::MovementMethod::Put,
+                    Some(Zone::Hand),
+                    Some(Zone::Ex),
+                    own
+                ),
+            ],
+            "{viewer:?}: the hand material is discarded, the EX material is put away and the \
+             follower enters EX; cards leaving the hand are known only to their player"
+        );
+        let fused = bodies
+            .iter()
+            .position(|body| {
+                *body
+                    == EventBody::Fusion {
+                        player: Seat::P1,
+                        subject: Some(placed(&game, viewer, Viewer::P1, ObservedZone::Ex)),
+                        materials: WireNat::try_from(2_u64).unwrap(),
+                        material_traits: Vec::new(),
+                    }
+            })
+            .unwrap_or_else(|| panic!("{viewer:?}: a fusion of two materials: {bodies:?}"));
+        let played = bodies.iter().position(|body| {
+            matches!(
+                body,
+                EventBody::AbilityPlayed {
+                    qualification: wire::AbilityQualification::Fusion,
+                    ..
+                }
+            )
+        });
+        assert!(
+            Some(fused) < played,
+            "{viewer:?}: the fusion completes before the ability it qualifies is played: \
+             {bodies:?}"
+        );
+    }
+}
+
+#[test]
+fn a_flip_down_names_the_card_by_the_object_it_was_while_face_up() {
+    let mut game = flip_down::board(&flip_down::program(false));
+    game.advance_player_input();
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("the evolve card to flip is asked");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("a target question: {:?}", question.domain);
+    };
+    let play = game
+        .answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap();
+    assert!(
+        matches!(play, CardPlay::Resolved(_)),
+        "the ability resolves"
+    );
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let bodies = bodies(&game, viewer);
+        let flips = bodies
+            .iter()
+            .filter(|body| matches!(body, EventBody::FacingChanged { .. }))
+            .collect::<Vec<_>>();
+        assert!(
+            matches!(
+                flips.as_slice(),
+                [EventBody::FacingChanged {
+                    subject: Some(Subject::Card {
+                        card,
+                        object: Some(_),
+                    }),
+                    facing: Facing::Down,
+                }] if card.printing_id == "form"
+            ),
+            "{viewer:?}: one public evolve card turns face down, named as it was known: \
+             {bodies:?}"
         );
     }
 }
