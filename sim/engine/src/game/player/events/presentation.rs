@@ -134,7 +134,9 @@ pub(super) struct Presentation {
     /// Scopes whose batch a restoration discarded, until the submission's result says why.
     discarded: Vec<ScopeId>,
     /// Source batches that a board handed to this viewer already contained without a scope.
-    /// They are never shown early afterwards and commit as history.
+    /// They are never shown early afterwards and commit as history. Only batches before the
+    /// first one this viewer could not identify are recorded, so that batch keeps holding
+    /// back everything after it.
     covered: Vec<u64>,
     /// Handles of the objects on the board this viewer was handed last.
     held: Arc<BTreeSet<ObjectHandle>>,
@@ -210,10 +212,7 @@ impl Presentation {
         batch: u64,
         events: Vec<EventKind>,
     ) -> Option<bool> {
-        if events.is_empty()
-            || self.covered.contains(&batch)
-            || self.open.iter().any(|shown| shown.batch == batch)
-        {
+        if events.is_empty() || self.settled_before(batch) {
             return Some(true);
         }
         if !self.identifiable(live, &events) {
@@ -276,12 +275,32 @@ impl Presentation {
             .is_some()
     }
 
-    /// The board handed now contains this batch and no scope shows it: when it commits it
-    /// will not be new to this viewer.
-    pub(super) fn cover(&mut self, batch: u64) {
-        if !self.covered.contains(&batch) && !self.open.iter().any(|shown| shown.batch == batch) {
+    /// At a handoff that shows nothing: the board handed now contains this batch, so unless
+    /// it is a play's declaration and payment it will not be new to this viewer when it
+    /// commits. `false` means this viewer cannot identify the batch: it is not on its board,
+    /// and it holds back everything after it exactly as it does at a qualifying stop.
+    pub(super) fn cover(
+        &mut self,
+        live: &BTreeSet<ObjectHandle>,
+        batch: u64,
+        events: &[EventKind],
+        ordinary: bool,
+    ) -> bool {
+        if events.is_empty() || self.settled_before(batch) {
+            return true;
+        }
+        if !self.identifiable(live, events) {
+            return false;
+        }
+        if ordinary {
             self.covered.push(batch);
         }
+        true
+    }
+
+    /// Whether this viewer already has the batch, as a scope or on a board it was handed.
+    fn settled_before(&self, batch: u64) -> bool {
+        self.covered.contains(&batch) || self.open.iter().any(|shown| shown.batch == batch)
     }
 
     /// Whether the batch committing now was already on a board this viewer was handed.

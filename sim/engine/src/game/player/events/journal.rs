@@ -376,10 +376,12 @@ impl Journal {
     /// shown yet, in order, up to the first one it cannot identify; then remember `live`,
     /// the handles it holds now, for the next handoff.
     ///
-    /// The board handed now already contains every complete batch. One that gets no scope
-    /// here is therefore not new to this viewer when it commits, unless it belongs to a
-    /// play's declaration and payment, which keep their first presentation; `unplayed` is
-    /// where a play that has not been played yet began.
+    /// When not `ready`, nothing is shown, but the board handed now already contains the
+    /// complete batches up to the first one this viewer cannot identify. Those are not new
+    /// to it when they commit, unless they belong to a play's declaration and payment, which
+    /// keep their first presentation; `unplayed` is where a play that has not been played
+    /// yet began. The batch it cannot identify, and everything after it, are left alone, so
+    /// that batch still holds back every later one at the next handoff.
     pub(super) fn present(
         &mut self,
         viewer: Viewer,
@@ -395,25 +397,26 @@ impl Journal {
         if log.fault {
             return Err(EventError::ProjectionGap);
         }
-        let sealed = sealed_batches(&self.pending, perspective, unplayed);
-        if ready {
-            for batch in &sealed {
-                match log
-                    .presentation
-                    .show(&log.stream, &live, batch.batch, batch.events.clone())
-                {
-                    Some(true) => {}
-                    Some(false) => break,
-                    None => {
-                        log.fault = true;
-                        return Err(EventError::ProjectionGap);
-                    }
+        // In rules order, up to the first batch this viewer cannot identify: that batch and
+        // everything after it wait for commitment, neither shown early nor taken as already
+        // on its board.
+        for batch in sealed_batches(&self.pending, perspective, unplayed) {
+            let reached = if ready {
+                log.presentation
+                    .show(&log.stream, &live, batch.batch, batch.events)
+            } else {
+                Some(
+                    log.presentation
+                        .cover(&live, batch.batch, &batch.events, batch.ordinary),
+                )
+            };
+            match reached {
+                Some(true) => {}
+                Some(false) => break,
+                None => {
+                    log.fault = true;
+                    return Err(EventError::ProjectionGap);
                 }
-            }
-        }
-        for batch in sealed {
-            if batch.ordinary && !batch.events.is_empty() {
-                log.presentation.cover(batch.batch);
             }
         }
         log.presentation.hold(live);

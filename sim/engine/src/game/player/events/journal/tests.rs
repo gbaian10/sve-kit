@@ -398,6 +398,78 @@ fn a_card_seen_only_inside_the_uncommitted_window_stops_early_presentation_there
         vec![true, false, false],
         "the waiting batches commit as ordinary history"
     );
+    assert_eq!(
+        covered(&journal, Viewer::P1),
+        vec![false, false, false],
+        "nothing at or after the hidden card's batch is taken as already on a handed board"
+    );
+}
+
+#[test]
+fn a_batch_the_viewer_cannot_identify_keeps_holding_back_what_is_recorded_after_it() {
+    let mut journal = revealed_and_hidden();
+    journal
+        .present(Viewer::P1, true, handles(&["board"]), None)
+        .unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P1).len(),
+        1,
+        "early presentation stops at the card that was revealed and hidden again"
+    );
+    // The procedure goes on and completes a result that names only a card on the board.
+    journal.push(
+        [Ok(Some(reveal("board"))), Ok(Some(reveal("board")))],
+        None,
+        &json!({"rule":"later"}),
+        "unit/later".into(),
+        None,
+        true,
+    );
+    journal
+        .present(Viewer::P1, true, handles(&["board"]), None)
+        .unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P1).len(),
+        1,
+        "without new evidence for the hidden card, nothing recorded after its batch is shown \
+         early, however identifiable the new result is"
+    );
+    journal.commit();
+    assert_eq!(
+        (linked(&journal, Viewer::P1), covered(&journal, Viewer::P1)),
+        (
+            vec![true, false, false, false],
+            vec![false, false, false, false]
+        ),
+        "only the first batch was shown; the hidden card's batch and everything after it \
+         commit as ordinary new history"
+    );
+}
+
+#[test]
+fn a_handoff_that_shows_nothing_covers_only_what_precedes_an_unidentifiable_batch() {
+    let mut journal = journal(&["before"]);
+    reveal_and_hide(&mut journal);
+    journal
+        .present(Viewer::P1, false, handles(&["board"]), None)
+        .unwrap();
+    // The procedure goes on; a later qualifying stop must still be held back.
+    record(&mut journal, "later");
+    journal
+        .present(Viewer::P1, true, handles(&["board"]), None)
+        .unwrap();
+    assert_eq!(
+        batches(&journal, Viewer::P1).len(),
+        0,
+        "the card revealed and hidden again still holds back every later batch"
+    );
+    journal.commit();
+    assert_eq!(
+        covered(&journal, Viewer::P1),
+        vec![true, true, false, false, false],
+        "the board contained the first result and the card that is still on it; the hidden \
+         card's batch and everything after it are new when they commit"
+    );
 }
 
 #[test]
