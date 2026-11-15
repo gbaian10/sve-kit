@@ -35,6 +35,8 @@
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.
     "src/app/overflow-audit.ts",
+    // Translation source hashes: used by `rules:stamp` and the rules data test, never shipped.
+    "src/data/rules/source-hash.ts",
     // Test setup and fixtures are dev entries: analyze them in knip:dev, exclude them in knip:prod.
     "src/test-utils.tsx",
     "src/test-utils/**",

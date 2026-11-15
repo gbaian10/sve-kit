@@ -71,7 +71,7 @@ export {
   localizeNode,
   originalNode,
 } from "./rules/localize"
-export type { RuleContext, RuleNode } from "./rules/model"
+export type { RuleContext } from "./rules/model"
 export { findRuleReferences, resolveRuleReference } from "./rules/references"
 export { appScanModels, loadScanCardImage, scanCardImage } from "./scan"
 export {
