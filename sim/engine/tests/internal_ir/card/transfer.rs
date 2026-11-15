@@ -3,9 +3,15 @@
     clippy::wildcard_enum_match_arm,
     reason = "Synthetic questions must retain their declared target and payment kinds."
 )]
+use super::presentation_feed::Board;
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_battle_contract::event::EventBody;
+use sve_battle_contract::{Seat, Subject};
+use sve_engine::battle::project_batch;
 use sve_engine::game::internal::{DecisionView, InputDomain, InstructionOutcome};
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::events::{ActionDetails, ActionKind, EventKind, EventSubject};
 
 fn tree() -> Value {
     let mut document = evolution_linked_movement::tree(&[
@@ -460,6 +466,82 @@ fn transfer_keeps_evolution_and_equipment_but_previous_evolution_does_not_allow_
         assert_eq!(after["objects"]["victim"]["evolved_with"], "form");
     }
 }
+/// P1 steals P2's follower; the equipment it carries follows it. `owner` owns the equipment.
+fn stolen_with_equipment(owner: &str) -> Game {
+    let programs = programs();
+    let mut initial = initial(1, false);
+    initial["players"]["P2"]["zones"]["equipment"] = json!([
+        {"id":"gear","card":"unit-gear","owner":owner,"state":{"equipped_to":"victim"}}
+    ]);
+    let mut game = model_loaded(&initial, &programs, "");
+    game.advance_player_input();
+    steal(&mut game, &programs, 1);
+    finish(&mut game);
+    game.advance_player_input();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["equipment"],
+        json!(["gear"]),
+        "the equipment followed the stolen follower to its new controller"
+    );
+    game
+}
+
+#[test]
+fn stolen_equipment_changes_controller_as_one_public_result_naming_owner_and_both_controllers() {
+    // The owner is once the previous controller and once the new one, so neither can stand in for it.
+    for (owner, owning, seat) in [("P2", Viewer::P2, Seat::P2), ("P1", Viewer::P1, Seat::P1)] {
+        let game = stolen_with_equipment(owner);
+        for viewer in [Viewer::P1, Viewer::P2] {
+            let batches = game
+                .event_batches(viewer, None)
+                .unwrap()
+                .collect::<Vec<_>>();
+            let changed = batches
+                .iter()
+                .filter(|batch| {
+                    batch.events.iter().any(|event| {
+                        matches!(&event.kind, EventKind::Action(action)
+                            if action.kind == ActionKind::Control)
+                    })
+                })
+                .collect::<Vec<_>>();
+            let [batch] = changed.as_slice() else {
+                panic!("one batch records the control change: {batches:?}");
+            };
+            assert!(
+                matches!(batch.events.as_slice(), [event]
+                    if matches!(&event.kind, EventKind::Action(action)
+                        if action.details
+                            == Some(ActionDetails::Control {
+                                owner: owning,
+                                before: Viewer::P2,
+                                after: Viewer::P1,
+                            })
+                            && matches!(action.subjects.as_slice(), [Some(EventSubject::Card(card))]
+                                if card.properties.card == "unit-gear"))),
+                "the change names the equipment, its unchanged owner {owner} and both \
+                 controllers: {batch:?}"
+            );
+            let projected = project_batch(
+                batch.events.iter().map(|event| &event.kind),
+                &Board::default(),
+            )
+            .unwrap();
+            assert!(
+                matches!(projected.as_slice(), [event]
+                    if event.about.len() == 1
+                        && matches!(&event.body, EventBody::ControlChanged {
+                            subject: Some(Subject::Card { card, object: Some(_) }),
+                            owner: owned,
+                            before: Seat::P2,
+                            after: Seat::P1,
+                        } if card.printing_id == "unit-gear" && *owned == seat)),
+                "on the wire it is a control change of that equipment: {projected:?}"
+            );
+        }
+    }
+}
+
 #[test]
 fn transfer_base_uses_the_thiefs_evolution_resource_and_returns_each_to_its_owner() {
     let mut document = tree();

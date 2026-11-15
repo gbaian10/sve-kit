@@ -371,8 +371,7 @@ impl<O: EventObjects> Projection<'_, O> {
             ActionKind::Declare => declared(action),
             ActionKind::Shuffle => shuffled(action),
             ActionKind::TurnSkipped => turn_skipped(action),
-            // The native trace keeps neither the owner nor the two controllers.
-            ActionKind::Control => Err(ProjectionError::Unavailable),
+            ActionKind::Control => self.control(action),
         }
     }
 
@@ -567,6 +566,23 @@ impl<O: EventObjects> Projection<'_, O> {
                 player: seat(*owner),
                 zone: zone(*destination),
             },
+        })
+    }
+
+    fn control(&mut self, action: &ActionEvent) -> Result<EventBody, ProjectionError> {
+        let Some(ActionDetails::Control {
+            owner,
+            before,
+            after,
+        }) = &action.details
+        else {
+            return Err(ProjectionError::Unavailable);
+        };
+        Ok(EventBody::ControlChanged {
+            subject: self.subject(slot(action, 0))?,
+            owner: seat(*owner),
+            before: seat(*before),
+            after: seat(*after),
         })
     }
 
