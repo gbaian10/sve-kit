@@ -145,13 +145,11 @@ impl QuestionProjection {
         if viewer != self.actor || id != &self.question.id {
             return Err(AnswerError);
         }
-        let answer = match &self.binding {
-            Binding::HandLimit { cards, count } => {
-                return Ok(player::Command::Closing {
-                    token: self.token,
-                    answer: hand_limit_answer(cards, *count, answer)?,
-                });
-            }
+        let command = match &self.binding {
+            Binding::HandLimit { cards, count } => player::Command::Closing {
+                token: self.token,
+                answer: hand_limit_answer(cards, *count, answer)?,
+            },
             Binding::FirstPlayer(choices) => {
                 let Answer::Choose { chosen } = answer else {
                     return Err(AnswerError);
@@ -159,13 +157,17 @@ impl QuestionProjection {
                 if chosen.len() != 1 {
                     return Err(AnswerError);
                 }
-                OpeningAnswer::FirstPlayer(
+                let decoded = OpeningAnswer::FirstPlayer(
                     chosen
                         .first()
                         .and_then(|choice| choices.get(choice))
                         .copied()
                         .ok_or(AnswerError)?,
-                )
+                );
+                player::Command::Opening {
+                    token: self.token,
+                    answer: decoded,
+                }
             }
             Binding::Mulligan(cards) => {
                 let Answer::Mulligan {
@@ -175,7 +177,10 @@ impl QuestionProjection {
                 else {
                     return Err(AnswerError);
                 };
-                mulligan_answer(cards, *redraw, bottom_order)?
+                player::Command::Opening {
+                    token: self.token,
+                    answer: mulligan_answer(cards, *redraw, bottom_order)?,
+                }
             }
             Binding::StartAmulet(cards) => {
                 let Answer::Select {
@@ -189,19 +194,20 @@ impl QuestionProjection {
                 if selected.len() != 1 || groups.is_some() || !roles.is_empty() {
                     return Err(AnswerError);
                 }
-                OpeningAnswer::StartAmulet(
+                let decoded = OpeningAnswer::StartAmulet(
                     selected
                         .first()
                         .and_then(|choice| cards.get(choice))
                         .cloned()
                         .ok_or(AnswerError)?,
-                )
+                );
+                player::Command::Opening {
+                    token: self.token,
+                    answer: decoded,
+                }
             }
         };
-        Ok(player::Command::Opening {
-            token: self.token,
-            answer,
-        })
+        Ok(command)
     }
 }
 

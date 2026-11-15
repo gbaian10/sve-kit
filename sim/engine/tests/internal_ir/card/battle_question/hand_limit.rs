@@ -1,9 +1,21 @@
 use super::*;
 use crate::{board_fixtures, player_pipeline};
 use sve_battle_contract::{Nat, RoleChoice, observation::ProcessingStage};
+use sve_engine::game::player::events::{EventKind, MovementMethod};
 use sve_engine::game::player::{ClosingAnswer, ClosingQuestion, DecisionShape, QuestionPurpose};
 
+#[path = "hand_limit/order.rs"]
+mod order;
+
 fn make_closing(actor: Viewer, hand_size: u32, secret: &str) -> Game {
+    make_closing_with_hand(
+        actor,
+        &vec!["unit-amulet"; usize::try_from(hand_size).unwrap()],
+        secret,
+    )
+}
+
+fn make_closing_with_hand(actor: Viewer, hand: &[&str], secret: &str) -> Game {
     let mut initial = board_fixtures::setup(actor.player().seat, json!([]));
     let (own, other) = if actor == Viewer::P1 {
         ("P1", "P2")
@@ -12,8 +24,9 @@ fn make_closing(actor: Viewer, hand_size: u32, secret: &str) -> Game {
     };
     initial["turn"]["active"] = json!(own);
     initial["players"][own]["zones"]["hand"] = json!(
-        (0_u32..hand_size)
-            .map(|index| json!({"id":format!("physical-hand-{index}"),"card":"unit-amulet"}))
+        hand.iter()
+            .enumerate()
+            .map(|(index, number)| json!({"id":format!("physical-hand-{index}"),"card":number}))
             .collect::<Vec<_>>()
     );
     initial["players"][other]["zones"]["hand"] = json!([{"id":"physical-secret","card":secret}]);
