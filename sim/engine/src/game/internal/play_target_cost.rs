@@ -103,6 +103,11 @@ impl Game {
         execution: &Execution,
         decision: Option<DecisionId>,
     ) -> Result<bool> {
+        // This dependency is specific to Spell plays; an evolved ability can resolve
+        // from a definition other than its holder's base card.
+        if !execution.spell {
+            return Ok(false);
+        }
         let object = self.object(&execution.context.source)?;
         let card = self
             .card_runtime
