@@ -292,7 +292,9 @@ impl Checker {
                 BoolRead::FieldEntryOrigin { object, .. }
                 | BoolRead::FieldEntryMethod { object, .. } => self.object(object),
                 BoolRead::HistoryExists { query } => self.history(query),
-                BoolRead::CardPlayOrigin { .. } | BoolRead::LegalAttack { .. } => self.reject(),
+                BoolRead::CardPlayOrigin { .. }
+                | BoolRead::CardPlayTarget { .. }
+                | BoolRead::LegalAttack { .. } => self.reject(),
             },
             Expr::Frozen(read) => match read.as_ref() {
                 BoolFrozen::EvolutionSucceeded { receipt } => self.receipt(receipt),

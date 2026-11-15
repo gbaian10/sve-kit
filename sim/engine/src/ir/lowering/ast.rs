@@ -2810,6 +2810,7 @@ pub(super) struct ObjectLocation {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum CostCondition {
+    Chosen(CostChosen),
     Spellchain(u64),
     Necro(u64),
     Awakened(bool),
@@ -2822,6 +2823,21 @@ pub(super) enum CostCondition {
     Cmp(CostComparison),
     Exists(PublicQuery),
     History(Box<HistoryQuery>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CostChosen {
+    #[serde(rename = "ref")]
+    pub reference: String,
+    pub r#where: Option<CostChosenName>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CostChosenName {
+    pub name: Option<String>,
+    pub name_contains: Option<String>,
 }
 
 #[derive(Deserialize)]

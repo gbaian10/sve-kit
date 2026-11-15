@@ -195,3 +195,28 @@ fn otherworld_ruler_shared_scenarios_match_their_reviewed_results() {
         result.problems
     );
 }
+
+#[test]
+fn hidden_memory_shared_scenarios_match_their_reviewed_results() {
+    let mut questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
+    questions.retain(|question| question.id == "card-BP17-030");
+    assert_eq!(questions.len(), 1);
+    let mut known =
+        load_known_failures(&root().join("tests/engine/typed-known-results.yaml")).unwrap();
+    let reports = run(
+        &mut TypedAdapter::new(repository::selection_with_rules().clone()),
+        &questions,
+        None,
+        RunOptions {
+            require_verified: true,
+            awaiting: AwaitingMode::FirstStage,
+        },
+    )
+    .unwrap();
+    known
+        .known
+        .retain(|entry| entry.question == "card-BP17-030");
+    known.expected_scenarios = 6;
+    let result = gate(&reports, &known);
+    assert!(result.ok(), "{:#?}\nreports: {reports:#?}", result.problems);
+}

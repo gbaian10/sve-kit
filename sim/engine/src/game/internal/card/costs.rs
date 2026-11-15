@@ -1,9 +1,10 @@
 use super::super::number_plan::{CostAmountPlan, CostConditionPlan};
 use super::{Execution, Game, Result, WellFormedCardProgram, invalid, unsupported};
 use crate::ir::flip_cost as flip_payment;
+use crate::ir::play_target_cost;
 use crate::ir::quick::card_permission;
 use crate::ir::reveal_cost as reveal_payment;
-use crate::ir::{AbilityKind, CostOverride, FaceId, Located, PlayCostPayment};
+use crate::ir::{AbilityKind, Bool, CostOverride, FaceId, Located, PlayCostPayment};
 use crate::ir::{AbilityOrigin, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{CostChange, Expr, Int, Nat, PlayerRef, Selector, SourceSpan};
 use alloc::collections::BTreeSet;
@@ -101,13 +102,26 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                     }
                 }
                 if let Some(condition) = &modifier.node.condition {
-                    CostConditionPlan::compile(condition, true)?;
+                    check_target_condition(condition, card, &modifier.source)?;
                 }
                 Ok(())
             };
             check_modifier().map_err(|error| at_source(error, &modifier.source))?;
         }
     }
+    Ok(())
+}
+
+fn check_target_condition(
+    condition: &Expr<Bool>,
+    card: &WellFormedCardProgram,
+    source: &SourceSpan,
+) -> Result<()> {
+    let mut inspected = condition.clone();
+    if !play_target_cost::mask(&mut inspected, card.card(), source) {
+        return Err(unsupported("foreign play target cost dependency"));
+    }
+    CostConditionPlan::compile(condition, true)?;
     Ok(())
 }
 

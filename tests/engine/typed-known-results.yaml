@@ -365,35 +365,10 @@ known:
     error: "typed-gap: after-decision-1 outcome (#2008)"
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient events"
   - question: "card-BP17-030"
-    scenario: "[astra] BP21-PR05 EX滿=False"
-    status: unsupported
-    error: "unadmitted BP17-030 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP17-030/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP17-030"
-    scenario: "[astra] BP04-P07 EX滿=False"
-    status: unsupported
-    error: "unadmitted BP17-030 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP17-030/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP17-030"
     scenario: "[astra] BP21-PR05 EX滿=True"
-    status: unsupported
-    error: "unadmitted BP17-030 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP17-030/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP17-030"
-    scenario: "[fable] A PP 0：選リオード → 費用 0 → 打出，リオード進 EX"
-    status: unsupported
-    error: "unadmitted BP17-030 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP17-030/0, holder a3 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP17-030"
-    scenario: "[fable] B PP 0：選エリカ → 費用 2 → 不能打出"
-    status: unsupported
-    error: "unadmitted BP17-030 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP17-030/0, holder a3 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP17-030"
-    scenario: "[fable] B2 PP 2：選エリカ → 付 2 → エリカ進 EX"
-    status: unsupported
-    error: "unadmitted BP17-030 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP17-030/0, holder a3 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: full EX empty movement decision (#2008)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.resolution; after-decision-1 omniscient awaiting"
   - question: "card-BP17-044"
     scenario: "A 場上 4 張、付 +2、不找到：遮断出場（5 張）→ 蹂躙不出"
     status: fail

@@ -3,10 +3,51 @@ use super::{
     PlayerRelation, PlayerSet, Predicate, ScopeId, SelectionView, Selector, TextQuantifier,
     ZoneKind, ast, decode, source_span, unsupported,
 };
+use crate::ir::SourceSpan;
 use crate::ir::{
     BoolRead, Comparison, CostChange, HistoryCount, IntOperation, IntRead, NatRead, ObjectOperand,
     ObjectRef, PlayCostModifier, PlayerResource,
 };
+
+pub(super) fn lower_selected(
+    key: &super::CardCoordinates<'_>,
+    entries: &[(String, ast::Ability)],
+    allocator: &mut Allocator,
+    modifiers: &mut Vec<Located<PlayCostModifier>>,
+) -> Result<(), LoweringError> {
+    for (path, entry) in entries {
+        if let Some(play) = &entry.play {
+            lower_inner(key, path, entry, play, allocator, modifiers, true)?;
+        }
+    }
+    let mut order = super::BTreeMap::new();
+    for (path, entry) in entries {
+        if let Some(play) = &entry.play {
+            for (field, value) in [
+                ("cost_delta", &play.cost_delta),
+                ("cost_set", &play.cost_set),
+            ] {
+                if let Some(value) = value {
+                    if let Some(items) = value.as_array() {
+                        for index in 0..items.len() {
+                            order.insert(format!("{path}/play/{field}/{index}"), order.len());
+                        }
+                    } else {
+                        order.insert(format!("{path}/play/{field}"), order.len());
+                    }
+                }
+            }
+        }
+    }
+    if modifiers
+        .iter()
+        .any(|modifier| !order.contains_key(&modifier.source.author_path))
+    {
+        return Err(unsupported("play modifier order"));
+    }
+    modifiers.sort_by_key(|modifier| order.get(&modifier.source.author_path).copied());
+    Ok(())
+}
 
 pub(super) fn lower(
     key: &super::CardCoordinates<'_>,
@@ -15,6 +56,18 @@ pub(super) fn lower(
     play: &ast::PlayCosts,
     allocator: &mut Allocator,
     modifiers: &mut Vec<Located<PlayCostModifier>>,
+) -> Result<(), LoweringError> {
+    lower_inner(key, path, entry, play, allocator, modifiers, false)
+}
+
+fn lower_inner(
+    key: &super::CardCoordinates<'_>,
+    path: &str,
+    entry: &ast::Ability,
+    play: &ast::PlayCosts,
+    allocator: &mut Allocator,
+    modifiers: &mut Vec<Located<PlayCostModifier>>,
+    selected: bool,
 ) -> Result<(), LoweringError> {
     if entry.imports.is_some() {
         return Err(unsupported(path));
@@ -38,6 +91,9 @@ pub(super) fn lower(
             };
             let (amount, condition) = if value.get("if").is_some() {
                 let change: ast::ConditionalChange = decode(value.clone(), &path)?;
+                if super::play_target_cost::uses_chosen(&change.r#if) != selected {
+                    continue;
+                }
                 let ((false, Some(amount), None) | (true, None, Some(amount))) =
                     (set, change.delta, change.set)
                 else {
@@ -45,9 +101,12 @@ pub(super) fn lower(
                 };
                 (
                     amount,
-                    Some(condition(&change.r#if, entry, allocator, &path)?),
+                    Some(condition(&change.r#if, entry, allocator, &source, &path)?),
                 )
             } else {
+                if selected {
+                    continue;
+                }
                 (decode::<ast::Number>(value.clone(), &path)?, None)
             };
             if set && !matches!(amount, ast::Number::Literal(amount) if amount >= 0) {
@@ -116,9 +175,13 @@ fn condition(
     value: &ast::CostCondition,
     entry: &ast::Ability,
     allocator: &mut Allocator,
+    source: &SourceSpan,
     path: &str,
 ) -> Result<Expr<Bool>, LoweringError> {
     Ok(Expr::Compute(Box::new(match value {
+        ast::CostCondition::Chosen(chosen) => {
+            return super::play_target_cost::condition(chosen, source, allocator, path);
+        }
         ast::CostCondition::Spellchain(threshold) | ast::CostCondition::Necro(threshold) => {
             Predicate::CompareInt {
                 left: population(
@@ -167,7 +230,7 @@ fn condition(
         ast::CostCondition::All(items) | ast::CostCondition::Any(items) => {
             let predicates = items
                 .iter()
-                .map(|item| condition(item, entry, allocator, path))
+                .map(|item| condition(item, entry, allocator, source, path))
                 .collect::<Result<Vec<_>, _>>()?;
             if matches!(value, ast::CostCondition::All(_)) {
                 Predicate::And { predicates }
@@ -176,7 +239,7 @@ fn condition(
             }
         }
         ast::CostCondition::Not(value) => Predicate::Not {
-            predicate: condition(value, entry, allocator, path)?,
+            predicate: condition(value, entry, allocator, source, path)?,
         },
         ast::CostCondition::Exists(value) => Predicate::Exists {
             objects: query(value, allocator, path)?,
