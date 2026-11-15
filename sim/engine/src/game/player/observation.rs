@@ -393,7 +393,7 @@ impl Game {
     /// The host authenticates the viewer, issues a fresh ID per occurrence in this
     /// battle, and submits decoded commands to this same Game. Waiting and finished
     /// seats have no question; this method does not replace their public input summary.
-    /// Currently opening and hand-limit discard questions are supported.
+    /// Currently opening and turn-closing rule questions are supported.
     /// The host must preflight the full program closure before interactive use.
     ///
     /// # Errors

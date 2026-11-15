@@ -26,7 +26,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Currently supports opening and hand-limit discard questions.
+/// Currently supports opening and turn-closing rule questions.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -46,6 +46,7 @@ enum Binding {
     FirstPlayer(BTreeMap<OptionId, Viewer>),
     Mulligan(BTreeMap<OptionId, NativeHandle>),
     StartAmulet(BTreeMap<OptionId, NativeHandle>),
+    EndGuard(BTreeMap<OptionId, NativeHandle>),
     HandLimit {
         cards: BTreeMap<OptionId, NativeHandle>,
         count: usize,
@@ -92,8 +93,10 @@ impl QuestionProjection {
             player::QuestionShape::Closing(ClosingQuestion::Discard { cards, count }) => {
                 hand_limit(id, native.actor, &cards, count, &observation)?
             }
+            player::QuestionShape::Closing(ClosingQuestion::GuardAct(cards)) => {
+                end_guard(id, native.actor, &cards, &observation)?
+            }
             player::QuestionShape::Evolution(_)
-            | player::QuestionShape::Closing(ClosingQuestion::GuardAct(_))
             | player::QuestionShape::Decision(_)
             | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
         };
@@ -148,7 +151,11 @@ impl QuestionProjection {
         let command = match &self.binding {
             Binding::HandLimit { cards, count } => player::Command::Closing {
                 token: self.token,
-                answer: hand_limit_answer(cards, *count, answer)?,
+                answer: ClosingAnswer::Discard(selected_cards(cards, Some(*count), answer)?),
+            },
+            Binding::EndGuard(cards) => player::Command::Closing {
+                token: self.token,
+                answer: ClosingAnswer::GuardAct(selected_cards(cards, None, answer)?),
             },
             Binding::FirstPlayer(choices) => {
                 let Answer::Choose { chosen } = answer else {
@@ -307,6 +314,38 @@ fn hand_limit(
     ))
 }
 
+fn end_guard(
+    id: &QuestionId,
+    actor: Viewer,
+    cards: &[player::observation::CardObservation],
+    observation: &BattleObservation,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    // Native closing skips this question without standing guards; an empty domain is inconsistent.
+    if cards.is_empty() {
+        return Err(ProjectionError::Unavailable);
+    }
+    let field = &observation
+        .players
+        .iter()
+        .find(|player| player.seat == seat(actor))
+        .ok_or(ProjectionError::Unavailable)?
+        .zones
+        .field;
+    let (candidates, coordinates) =
+        card_candidates(id, actor, cards, observation, Zone::Field, field)?;
+    Ok((
+        wire::QuestionUse::EndGuard,
+        plain_selection(
+            candidates,
+            wire::Bounds {
+                min: Nat::from(0_u32),
+                max: Some(Nat::try_from(cards.len())?),
+            },
+        ),
+        Binding::EndGuard(coordinates),
+    ))
+}
+
 fn start_amulet(
     id: &QuestionId,
     actor: Viewer,
@@ -435,11 +474,11 @@ fn mulligan_answer(
     Ok(OpeningAnswer::Mulligan(order))
 }
 
-fn hand_limit_answer(
+fn selected_cards(
     cards: &BTreeMap<OptionId, NativeHandle>,
-    count: usize,
+    exact: Option<usize>,
     answer: &Answer,
-) -> result::Result<ClosingAnswer, AnswerError> {
+) -> result::Result<Vec<NativeHandle>, AnswerError> {
     let Answer::Select {
         selected,
         groups,
@@ -448,7 +487,10 @@ fn hand_limit_answer(
     else {
         return Err(AnswerError);
     };
-    if selected.len() != count || groups.is_some() || !roles.is_empty() {
+    if exact.is_some_and(|required| selected.len() != required)
+        || groups.is_some()
+        || !roles.is_empty()
+    {
         return Err(AnswerError);
     }
     let mut seen = BTreeSet::new();
@@ -461,7 +503,7 @@ fn hand_limit_answer(
             cards.get(choice).cloned().ok_or(AnswerError)
         })
         .collect::<result::Result<Vec<_>, _>>()?;
-    Ok(ClosingAnswer::Discard(handles))
+    Ok(handles)
 }
 
 fn option(question: &QuestionId, index: usize) -> OptionId {
