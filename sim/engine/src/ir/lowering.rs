@@ -45,6 +45,7 @@ mod other_costs;
 mod payment;
 mod play;
 mod play_restrictions;
+mod play_target_cost;
 mod prevention;
 mod public_reveal;
 mod receipt_counts;
@@ -237,28 +238,29 @@ impl ExpandedLowerer {
                     .ok()
                     .and_then(|count| count.checked_mul(3))
                     .ok_or_else(|| unsupported(&path))?,
+                ..Allocator::default()
             };
             let mut abilities = Vec::new();
             let LoweredPlayCosts {
-                modifiers,
+                mut modifiers,
                 exchange,
                 additional,
                 payment_result,
             } = lower_play_costs(&coordinates, &entries, &mut allocator, &path)?;
-            let play_faces = play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
+            let initial_play_faces = play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
                 .ok_or_else(|| unsupported(&path))?;
-            for (index, (entry_path, ability)) in entries.into_iter().enumerate() {
+            for (index, (entry_path, ability)) in entries.iter().enumerate() {
                 if allocator.declarations(
                     &coordinates,
-                    &entry_path,
-                    &ability,
+                    entry_path,
+                    ability,
                     index,
                     &mut abilities,
                 )? {
                     continue;
                 }
-                optional_payment::check_entry(&ability, exchange.is_some(), &entry_path)?;
-                let branches = if hand_exit::check(&ability, &entry_path)? {
+                optional_payment::check_entry(ability, exchange.is_some(), entry_path)?;
+                let branches = if hand_exit::check(ability, entry_path)? {
                     vec![
                         Some(hand_exit::Branch::Discard),
                         Some(hand_exit::Branch::Banish),
@@ -268,31 +270,34 @@ impl ExpandedLowerer {
                 };
                 for (alternative, branch) in branches.into_iter().enumerate() {
                     let scope = if alternative == 0 {
-                        entry_scope(index, &entry_path)?
+                        entry_scope(index, entry_path)?
                     } else {
-                        allocator.granted_scope(&entry_path)?
+                        allocator.granted_scope(entry_path)?
                     };
                     abilities.push(allocator.ability(
                         &coordinates,
-                        &entry_path,
+                        entry_path,
                         hand_exit::AbilityInput {
-                            entry: &ability,
+                            entry: ability,
                             branch,
                         },
                         scope,
                         match identity {
                             Some(identity) => {
-                                identity.printed_cost(&ability.sources[0].json(), &entry_path)?
+                                identity.printed_cost(&ability.sources[0].json(), entry_path)?
                             }
                             None => printed_costs.get(&key).copied(),
                         },
                         payment_result.clone().filter(|_| {
-                            source_span(&coordinates, &entry_path, &ability)
-                                .is_ok_and(|source| play_faces.contains(&source.face))
+                            source_span(&coordinates, entry_path, ability)
+                                .is_ok_and(|source| initial_play_faces.contains(&source.face))
                         }),
                     )?);
                 }
             }
+            costs::lower_selected(&coordinates, &entries, &mut allocator, &mut modifiers)?;
+            play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
+                .ok_or_else(|| unsupported(&path))?;
             let checked = check_card(
                 CardProgram {
                     abilities,
@@ -494,6 +499,7 @@ pub(super) fn validator(profile: &str) -> Result<jsonschema::Validator, Lowering
 struct Allocator {
     next: u64,
     next_scope: u64,
+    formal_spell_targets: Vec<play_target_cost::ResolvedTarget>,
 }
 impl Allocator {
     fn declarations(
@@ -651,6 +657,10 @@ impl Allocator {
         self.executable_ability(input, scope, printed_cost, payment_result, source, path)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The complete ability and its formal target dependency share one lowering scope."
+    )]
     fn executable_ability(
         &mut self,
         input: hand_exit::AbilityInput<'_>,
@@ -684,6 +694,9 @@ impl Allocator {
             path,
             entry.activate.is_none() && entry.spell.is_none(),
         )?;
+        if entry.spell.is_some() {
+            play_target_cost::record(&mut context, body, &source);
+        }
         let triggered_play = play::trigger_play_spec(entry, body, trigger_choice);
         let optional =
             context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
@@ -1159,6 +1172,29 @@ fn lowered_subscription(
             let card = Binding::new(subject_id, scope);
             movement::played(played, event, card, path)
         }
+        ast::PhaseSubscription::Raced(subscription) => {
+            let event = Binding::new(event_id, scope);
+            let fields = SubjectFields::Race(event);
+            let predicate = movement::movement_filter(
+                subscription
+                    .who
+                    .as_ref()
+                    .map(|who| matches!(who, ast::EntryPlayer::Controller)),
+                subscription.reference.is_some(),
+                subscription.sel.as_ref(),
+                false,
+                path,
+                movement::FilterSupport::Basic,
+            )?
+            .predicate(fields);
+            if SubjectFilter::parse(fields, &predicate).is_none() {
+                return Err(unsupported(path));
+            }
+            Ok(EventPattern::Race {
+                binding: event,
+                predicate,
+            })
+        }
         ast::PhaseSubscription::Phase(phase) => {
             Ok(phase_subscription(phase, Binding::new(event_id, scope)))
         }
@@ -1290,7 +1326,8 @@ fn lowered_change(
                 .predicate(event),
             })
         }
-        ast::PhaseSubscription::Fused(_)
+        ast::PhaseSubscription::Raced(_)
+        | ast::PhaseSubscription::Fused(_)
         | ast::PhaseSubscription::FusedAsMaterial(_)
         | ast::PhaseSubscription::AnyOf(_)
         | ast::PhaseSubscription::Evolved(_)

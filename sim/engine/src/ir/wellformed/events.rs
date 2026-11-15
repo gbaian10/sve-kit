@@ -535,6 +535,13 @@ impl Checker {
                 view,
                 triggering,
             ),
+            EventPattern::Race { binding, predicate } => self.subject_header(
+                *binding,
+                SubjectFields::Race(*binding),
+                predicate,
+                view,
+                triggering,
+            ),
             EventPattern::UbActivated { binding, predicate } => self.subject_header(
                 *binding,
                 SubjectFields::Ub(*binding),
@@ -622,7 +629,6 @@ impl Checker {
             | EventPattern::Posture { .. }
             | EventPattern::CounterChange { .. }
             | EventPattern::Phase { .. }
-            | EventPattern::Race { .. }
             | EventPattern::DriveGained { .. }
             | EventPattern::DriveTrigger { .. }
             | EventPattern::Fused { .. }

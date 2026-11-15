@@ -72,6 +72,7 @@ pub(in crate::game::internal) fn execution(game: &mut Game) -> Execution {
         trigger_occurrence: None,
         event_reads: super::super::event_reads::EventReads::default(),
         targets: BTreeMap::new(),
+        selected_target_names: BTreeMap::new(),
         play: None,
         spell: false,
         field_entry: false,

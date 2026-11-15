@@ -91,6 +91,7 @@ mod number_plan;
 mod numeric;
 mod observation;
 mod ordering;
+mod play_target_cost;
 mod player;
 mod player_stages;
 mod posture;
@@ -648,6 +649,7 @@ pub(super) struct Execution {
     trigger_occurrence: Option<u64>,
     event_reads: event_reads::EventReads,
     targets: BTreeMap<(ScopeId, u64), card::selection::TargetWait>,
+    selected_target_names: BTreeMap<(ScopeId, u64), play_target_cost::SelectedNames>,
     play: Option<PlayState>,
     spell: bool,
     field_entry: bool,
@@ -838,6 +840,7 @@ impl Game {
                 trigger_occurrence: None,
                 event_reads: event_reads::EventReads::default(),
                 targets: BTreeMap::new(),
+                selected_target_names: BTreeMap::new(),
                 play: None,
                 spell: false,
                 field_entry: false,

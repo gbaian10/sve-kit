@@ -152,6 +152,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || entry::check_header(ability)?
         || timing::check_header(ability)?
         || played::check_header(ability)?
+        || race::check_header(ability)?
     {
         return Ok(());
     }

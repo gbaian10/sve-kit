@@ -87,6 +87,9 @@ pub(super) fn admits_boolean(value: &Expr<Bool>, play_origin: bool) -> bool {
                     BoolRead::CardPlayOrigin {
                         execution: ExecutionRef::Current {},
                         zone: ZoneKind::Hand | ZoneKind::Ex
+                    } | BoolRead::CardPlayTarget {
+                        execution: ExecutionRef::Current {},
+                        ..
                     }
                 ))
         }
