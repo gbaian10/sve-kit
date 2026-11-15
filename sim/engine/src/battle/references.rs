@@ -101,6 +101,15 @@ impl BattleReferences {
             .ok_or(ProjectionError::Unavailable)
     }
 
+    pub(super) fn printing(&self, catalog: &Catalog, number: &str) -> Result<&str> {
+        self.validate_catalog(catalog)?;
+        self.faces
+            .get(number)
+            .and_then(|faces| faces.values().next())
+            .map(|card| card.printing_id.as_str())
+            .ok_or(ProjectionError::Unavailable)
+    }
+
     pub(crate) fn validate_catalog(&self, catalog: &Catalog) -> Result<()> {
         let Some((region, snapshot_sha256)) = catalog.rule_bindings.snapshot_background() else {
             return Err(ProjectionError::Unavailable);
