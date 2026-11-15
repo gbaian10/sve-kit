@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next"
 
 import type { CardRestriction } from "../../data"
+import { copyLimit } from "../../domain/copyLimit"
 import { Badge } from "../ui/Badge"
-import { copyLimit } from "./copyLimit"
 
 export function RestrictionBadge({
   restrictions,

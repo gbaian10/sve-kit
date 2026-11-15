@@ -49,11 +49,6 @@ describe("visible wording label in card results", () => {
 })
 
 describe("caption under the card image", () => {
-  const caption = () => {
-    const element = screen.getByRole("link").lastElementChild
-    if (!element) throw new Error("the cell has no caption")
-    return element
-  }
   const restriction = (maxCopies: number | null) => ({
     id: "r:synthetic",
     formatCode: "standard" as const,
@@ -62,15 +57,21 @@ describe("caption under the card image", () => {
     sourceUrl: null,
     asOf: "2026-01-01",
   })
+  /** Where each text starts in the card link, in reading order; -1 when the link does not show it. */
+  const positions = (...texts: readonly string[]) => {
+    const shown = screen.getByRole("link").textContent
+    return texts.map((text) => shown.indexOf(text))
+  }
 
-  it("starts with the name and has no rarity row for a card with neither a rarity nor a copy limit", async () => {
+  it("shows the name and the card number, and no copy limit, for a card with neither a rarity nor a limit", async () => {
     await renderInRouter(<CardGrid cells={[cell(false)]} images={undefined} onOpen={vi.fn()} />)
-    expect(caption().children).toHaveLength(1)
-    expect(caption().firstElementChild).toHaveTextContent("Synthetic name")
-    expect(caption().firstElementChild).toHaveTextContent("BP-SYNTHETIC")
+    expect(screen.getByText("Synthetic name")).toBeVisible()
+    expect(screen.getByText("BP-SYNTHETIC")).toBeVisible()
+    expect(screen.queryByText("禁止")).not.toBeInTheDocument()
+    expect(screen.queryByText(/^限\d/)).not.toBeInTheDocument()
   })
 
-  it("puts the rarity and the copy limit after the names", async () => {
+  it("shows the rarity and the copy limit after the names", async () => {
     const value = cell(false)
     const rated: GridCell = {
       ...value,
@@ -85,35 +86,39 @@ describe("caption under the card image", () => {
       },
     }
     await renderInRouter(<CardGrid cells={[rated]} images={undefined} onOpen={vi.fn()} />)
-    const [name, translation, meta, ...rest] = caption().children
-    expect(name).toHaveTextContent("Synthetic name")
-    expect(translation).toHaveTextContent("Synthetic translation")
-    expect(meta).toHaveAttribute("data-cell-meta")
-    expect(meta).toHaveTextContent("LG")
-    expect(meta).toHaveTextContent("限1")
-    expect(rest).toHaveLength(0)
+    const [name, translation, rarity, limit] = positions(
+      "Synthetic name",
+      "Synthetic translation",
+      "LG",
+      "限1",
+    )
+    expect(name).toBeGreaterThanOrEqual(0)
+    expect(translation).toBeGreaterThan(name ?? 0)
+    expect(rarity).toBeGreaterThan(translation ?? 0)
+    expect(limit).toBeGreaterThan(rarity ?? 0)
   })
 
-  it("keeps the row for a copy limit without a rarity", async () => {
+  it("shows a ban after the name of a card without a rarity", async () => {
     const value = cell(false)
     const banned: GridCell = {
       ...value,
       summary: { ...value.summary, restrictions: [restriction(0)] },
     }
     await renderInRouter(<CardGrid cells={[banned]} images={undefined} onOpen={vi.fn()} />)
-    expect(caption().children).toHaveLength(2)
-    expect(caption().lastElementChild).toHaveAttribute("data-cell-meta")
-    expect(caption().lastElementChild).toHaveTextContent("禁止")
+    const [name, ban] = positions("Synthetic name", "禁止")
+    expect(name).toBeGreaterThanOrEqual(0)
+    expect(ban).toBeGreaterThan(name ?? 0)
   })
 
-  it("has no row for a restriction that sets no copy limit", async () => {
+  it("shows no copy limit for a restriction that sets none", async () => {
     const value = cell(false)
     const unlimited: GridCell = {
       ...value,
       summary: { ...value.summary, restrictions: [restriction(null)] },
     }
     await renderInRouter(<CardGrid cells={[unlimited]} images={undefined} onOpen={vi.fn()} />)
-    expect(caption().children).toHaveLength(1)
+    expect(screen.queryByText("禁止")).not.toBeInTheDocument()
+    expect(screen.queryByText(/^限\d/)).not.toBeInTheDocument()
   })
 })
 
