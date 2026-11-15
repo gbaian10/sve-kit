@@ -1,5 +1,7 @@
 //! Direct action subjects may consume only this pending occurrence's exact subject.
+use crate::ir::DamageAmount;
 use crate::ir::events::attack::target_plan;
+use crate::ir::events::numbers;
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
     Action, Binding, Bool, Control, EnterFieldEvent, Expr, InstallationSubjects, LkiReason,
@@ -117,12 +119,24 @@ fn direct_action_paths(
     allowed: &mut BTreeSet<String>,
 ) {
     match action {
-        Action::Damage { recipients, .. } => recipient_subjects(
-            recipients,
-            &format!("{path}/action/recipients"),
-            event,
-            allowed,
-        ),
+        Action::Damage {
+            recipients, amount, ..
+        } => {
+            recipient_subjects(
+                recipients,
+                &format!("{path}/action/recipients"),
+                event,
+                allowed,
+            );
+            if let DamageAmount::Uniform { amount } = amount {
+                number_subjects(
+                    amount,
+                    &format!("{path}/action/amount/amount"),
+                    event,
+                    allowed,
+                );
+            }
+        }
         Action::Modify {
             subjects: objects, ..
         }
@@ -164,6 +178,48 @@ fn direct_action_paths(
             event,
             allowed,
         ),
+        _ => {}
+    }
+}
+
+fn number_subjects(
+    value: &Expr<Int>,
+    path: &str,
+    event: &Expr<ObjectRef>,
+    allowed: &mut BTreeSet<String>,
+) {
+    use crate::ir::NumberRead;
+    let Expr::Compute(operation) = value else {
+        return;
+    };
+    match operation.as_ref() {
+        IntOperation::InformationOrZero { information } => {
+            let (NumberRead::Cost { object, .. } | NumberRead::Stats { object, .. }) = information;
+            if numbers::subject(object).as_ref() != Some(event) {
+                return;
+            }
+            let root = format!("{path}/compute/information");
+            for suffix in [
+                "/view",
+                "/object",
+                "/object/event",
+                "/object/policy",
+                "/object/object",
+                "/object/object/value/frozen",
+            ] {
+                allowed.insert(format!("{root}{suffix}"));
+            }
+        }
+        IntOperation::Arithmetic { arguments, .. } => {
+            for (index, argument) in arguments.iter().enumerate() {
+                number_subjects(
+                    argument,
+                    &format!("{path}/compute/arguments/{index}"),
+                    event,
+                    allowed,
+                );
+            }
+        }
         _ => {}
     }
 }

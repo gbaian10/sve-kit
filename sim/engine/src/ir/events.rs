@@ -11,6 +11,7 @@ pub(crate) mod ex_departure;
 pub(crate) mod fusion;
 pub(crate) mod life;
 pub(crate) mod mill;
+pub(crate) mod numbers;
 pub(crate) mod played;
 pub(crate) mod subject;
 pub(crate) mod subscriptions;

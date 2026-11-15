@@ -3,6 +3,7 @@
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::game::Object;
 use crate::game::player::Viewer;
+use crate::ir::events::numbers;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
     Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
@@ -290,6 +291,21 @@ impl Execution {
         }
         let snapshot = match object {
             ObjectView::SourceInformation {} => self.source_snapshot(game)?,
+            ObjectView::EventSnapshot { .. } => {
+                let expression = numbers::subject(object)
+                    .ok_or_else(|| unsupported("numeric event subject view"))?;
+                let subject = self
+                    .event_reads
+                    .object()
+                    .filter(|subject| subject.expression == expression)
+                    .ok_or_else(|| invalid("numeric read belongs to another event"))?;
+                subject
+                    .information
+                    .as_ref()
+                    .filter(|information| information.view.object == subject.reference)
+                    .ok_or_else(|| invalid("missing numeric event snapshot"))?
+                    .clone()
+            }
             _ => return Err(unsupported("number information view")),
         };
         let values = match view {

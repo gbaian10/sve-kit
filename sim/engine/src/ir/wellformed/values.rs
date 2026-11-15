@@ -4,8 +4,10 @@ use super::{
     NatOperation, NatRead, ObjectOperand, ObjectReceipt, ObjectReceiptList, ObjectRef, ObjectView,
     PlayerRef, PlayerRelation, PlayerSet, Predicate, SelectionView, Selector, WellFormedReason,
 };
+use crate::ir::EventContext;
 use crate::ir::ObjectRelation;
 use crate::ir::events::attack::target_plan;
+use crate::ir::events::numbers;
 use crate::ir::history_turn::HistoryPlan;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::public_numbers;
@@ -632,6 +634,24 @@ impl Checker {
             } else {
                 self.reject()
             }
+        } else if numbers::subject(view).is_some()
+            && !self.event_capture()
+            && self.env.chooser.is_none()
+        {
+            let ObjectView::EventSnapshot { object, event, .. } = view else {
+                return self.reject();
+            };
+            let key = if let EventContext::EnterField { event } = event {
+                event.key()
+            } else if let EventContext::LeaveField { event } = event {
+                event.key()
+            } else {
+                return self.reject();
+            };
+            if !self.env.trigger_events.contains(&key) {
+                return self.reject();
+            }
+            self.object(object)
         } else {
             self.view(view)
         }

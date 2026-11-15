@@ -901,22 +901,23 @@ impl PendingOccurrence {
             node: body.clone(),
             source: self.ability.source.clone(),
         });
-        if !requirements
-            .required
-            .iter()
-            .any(|required| required.capability.code == "value.unique-name")
-        {
+        if !requirements.required.iter().any(|required| {
+            matches!(
+                required.capability.code,
+                "value.unique-name" | "value.event-snapshot"
+            )
+        }) {
             return Ok(());
         }
-        let event = match (&self.timing, self.leave) {
-            (Some(EventPayload::LeaveField { event }), _) => *event,
-            (_, Some(event)) => event,
-            _ => return Err(unsupported("copied triggering name requires a departure")),
-        };
-        self.subject_information = Some(
-            game.information_snapshot(event.object_before)?
+        self.subject_information = Some(match (&self.timing, self.leave.as_ref()) {
+            (Some(EventPayload::EnterField { event }), _) => {
+                game.information_snapshot(event.object)?
+            }
+            (Some(EventPayload::LeaveField { event }), _) | (_, Some(event)) => game
+                .information_snapshot(event.object_before)?
                 .at(event.lki.snapshot),
-        );
+            _ => return Err(unsupported("numeric or copied-name event snapshot")),
+        });
         Ok(())
     }
 
