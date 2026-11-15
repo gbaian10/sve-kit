@@ -148,6 +148,21 @@ pub(crate) fn lasting_object_cap(shape: &Prevention<'_>) -> bool {
         )
 }
 
+/// Received-damage increases are effects, unlike caps granted as target abilities.
+pub(crate) fn lasting_object_increase(shape: &Prevention<'_>) -> bool {
+    shape.usage.is_none()
+        && shape.kind == DamageKind::Any
+        && shape.damage_source.is_none()
+        && matches!(
+            shape.rewrite,
+            EventRewrite::AddDamage {
+                amount: Expr::Literal(super::Int(1..))
+            }
+        )
+        && shape.duration.end == (super::DurationEnd::CurrentTurnEnd {})
+        && shape.duration.intervals.is_empty()
+}
+
 /// 「これの…カウンター1個につき+N」: the provider's own live counter times a positive step.
 pub(crate) fn holder_counter_step(amount: &Expr<super::Int>) -> Option<(&super::CounterKind, i64)> {
     let Expr::Compute(operation) = amount else {

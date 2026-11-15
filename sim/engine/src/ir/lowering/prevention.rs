@@ -420,8 +420,39 @@ impl BodyContext<'_> {
                 }
                 effect
             }
-            ast::InstalledEffect::DamageMod(_)
-            | ast::InstalledEffect::DamageCap(_)
+            ast::InstalledEffect::DamageMod(shape) => {
+                let Some(delta @ 1..) = shape.literal_delta() else {
+                    return Err(unsupported(path));
+                };
+                if shape.on.is_some()
+                    || shape.source.is_some()
+                    || !matches!(shape.kind, None | Some(ast::PreventionKind::Any))
+                    || shape.next_only == Some(true)
+                    || duration.end != (DurationEnd::CurrentTurnEnd {})
+                    || !duration.intervals.is_empty()
+                {
+                    return Err(unsupported(path));
+                }
+                let recipient = self.prevention_recipients(None, fallback, path)?;
+                let mut effect = self.damage_prevention(
+                    ProposedEventPattern::Damage {
+                        recipient: Some(recipient),
+                        source: None,
+                        kind: DamageKind::Any,
+                    },
+                    source,
+                    condition,
+                    duration.clone(),
+                    path,
+                )?;
+                if let Effect::Replacement { rewrite, .. } = &mut effect {
+                    *rewrite = EventRewrite::AddDamage {
+                        amount: Expr::Literal(Int(delta)),
+                    };
+                }
+                effect
+            }
+            ast::InstalledEffect::DamageCap(_)
             | ast::InstalledEffect::PlayPermission(_)
             | ast::InstalledEffect::LoseAbilities(_)
             | ast::InstalledEffect::AddTrait(_)

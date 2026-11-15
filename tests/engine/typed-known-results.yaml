@@ -661,9 +661,9 @@ known:
     reason: "internal D1 does not support unloaded whole card CP04-104/0, query complete card names: current ability definitions unavailable"
   - question: "card-CP04-P18"
     scenario: "A 搜到ペコリーヌ放 EX → 本回合 0 費打出（ファンファーレ付不出取消）→ UB +2 → エンジェルバレッジ 1 → 3"
-    status: unsupported
-    error: "unadmitted CP04-P18 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-P18/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: adapter-error
+    error: "interface: runner translation / interface (#2008)"
+    reason: "d2 is not a card candidate"
   - question: "card-CP04-SL09"
     scenario: "只餘一格，選 x"
     status: unsupported

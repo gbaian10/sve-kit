@@ -1132,3 +1132,6 @@ mod evolution_original_cost;
 
 #[path = "card/ex_departure_batch.rs"]
 mod ex_departure_batch;
+
+#[path = "card/layer3_damage_increase.rs"]
+mod layer3_damage_increase;

@@ -177,12 +177,12 @@ impl Game {
 
     pub(in crate::game::internal) fn internal_quick_spell(&self, holder: &str) -> Result<bool> {
         self.require_internal_abilities(holder, "Quick permission")?;
-        let execution = self.provider_execution(holder, None)?;
         for ability in self.internal_printed_abilities(holder)? {
-            if let Some(condition) = card_condition(&ability.node)
-                && execution.boolean(self, condition)?.0
-            {
-                return Ok(true);
+            if let Some(condition) = card_condition(&ability.node) {
+                let execution = self.provider_execution(holder, None)?;
+                if execution.boolean(self, condition)?.0 {
+                    return Ok(true);
+                }
             }
         }
         Ok(false)
