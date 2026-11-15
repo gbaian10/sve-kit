@@ -1402,3 +1402,9 @@ collect 的保序 `ReceiptList<MoveOutcome>` 在迴圈後才公開；MoveAfterAl
 直接數值參照的比較先加 `HasInfo`；只沿既有來源資訊、公開單張目標或已綁定事件的數值讀取證據。
 護符攻／體依法缺席時比較為 false，算術取值才為零；已捕捉的數值與聚合結果仍是有值的 scalar。
 未知來源、未綁定事件、錯世代及缺 LKI 不當作缺席，也不授權讀取任意私人選取或一般 Cost 的 `HasInfo`。
+
+## EX 入區的職業排除
+
+`EnterEx` 使用與進場事件相同的已知職業與否定職業封閉條件，兩者必須指向同一個已綁定事件。
+Native 讀取移區成功後保存的 `EnterExEvent.characters`，在產生 pending 與 quota 准入之前篩選；
+不讀原區域的舊世代、不把未知職業當成否定命中，也不藉此開放其他事件的任意否定條件。
