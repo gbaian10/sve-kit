@@ -346,6 +346,7 @@ fn event_references_convert_only_what_the_event_froze() {
             face: None,
             line: None,
             holder: Some(holder.clone()),
+            wording: None,
         }),
         Ok(SourceRef::Card {
             printing_id: "printing-spell".into(),

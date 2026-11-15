@@ -1,14 +1,13 @@
 //! Wire identities read from what an event froze and the game's pinned catalogue.
 
-use super::{EventObjects, seat};
-use crate::battle::{BattleReferences, ProjectionError};
+use super::EventObjects;
+use crate::battle::{BattleReferences, ProjectionError, project_turn};
 use crate::catalog::Catalog;
 use crate::game::player;
 use crate::game::player::events::EventCard;
 use crate::game::player::observation::{CardFace, EffectSource, TurnObservation};
-use crate::ir::Phase;
 use sve_battle_contract::event as wire;
-use sve_battle_contract::observation::{self, TurnView};
+use sve_battle_contract::observation::TurnView;
 use sve_battle_contract::{Nat, ObjectHandle, SourceRef};
 
 /// The identities each event froze when it happened, as the wire names them.
@@ -76,16 +75,6 @@ impl EventObjects for EventReferences<'_> {
     }
 
     fn turn(&self, turn: &TurnObservation) -> Result<TurnView, ProjectionError> {
-        let [first, second] = turn.elapsed_turns;
-        Ok(TurnView {
-            active: turn.active.map(seat),
-            first_player: turn.first_player.map(seat),
-            phase: turn.phase.map(|phase| match phase {
-                Phase::Start => observation::Phase::Start,
-                Phase::Main => observation::Phase::Main,
-                Phase::End => observation::Phase::End,
-            }),
-            elapsed_turns: [Nat::try_from(first)?, Nat::try_from(second)?],
-        })
+        project_turn(turn)
     }
 }
