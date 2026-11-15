@@ -68,7 +68,7 @@ describe.each([...VERSIONS])("comprehensive rules %s", (version, { index, files,
     for (const [file, data] of files) {
       expect(data, file).toMatchObject({ format: 1, kind: "comprehensive-rules", version })
       const text = raw[`../../../../../authored/rules/comprehensive/jp/${version}/${file}`] ?? ""
-      expect(text.length, file).toBeLessThan(1024 * 1024)
+      expect(new TextEncoder().encode(text).length, file).toBeLessThan(1024 * 1024)
     }
   })
 
@@ -179,15 +179,20 @@ it("matches every translation file to its original", () => {
 })
 
 describe("findRuleReferences", () => {
-  it("finds each number in a parenthesized list and skips non-clause parentheses", () => {
-    const text = "ア（10.5.1）イ（3.2.2、5.14.1）ウ（11章）エ（計6枚）"
+  it("finds cited numbers in parentheses, in sentences and at both ends of ranges", () => {
+    const text =
+      "ア（10.5.1）イ（3.2.2、5.14.1）ウ（5.16.1.2を適用した後）詳しくは10.5.2を参照。7.2から7.4、10.9.1.2-10.9.1.4。"
     expect(
       findRuleReferences(text).map((ref) => [ref.number, text.slice(ref.start, ref.end)]),
-    ).toEqual([
-      ["10.5.1", "10.5.1"],
-      ["3.2.2", "3.2.2"],
-      ["5.14.1", "5.14.1"],
-    ])
+    ).toEqual(
+      ["10.5.1", "3.2.2", "5.14.1", "5.16.1.2", "10.5.2", "7.2", "7.4", "10.9.1.2", "10.9.1.4"].map(
+        (number) => [number, number],
+      ),
+    )
+  })
+
+  it("skips numbers without a dot, decimals inside longer numbers and version labels", () => {
+    expect(findRuleReferences("（11章）（計6枚）2026年9月28日 ver 1.28.0、ver.1.27.0")).toEqual([])
   })
 
   it("resolves inside appendix B to the restated clause first, then the body", () => {

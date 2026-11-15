@@ -7,26 +7,21 @@ export interface RuleReference {
   readonly number: string
 }
 
-// A clause number has at least one dot, so "（11章）" or "（計6枚）" never match; a list such as
-// "（10.5.1、10.5.2）" yields one reference per number.
-const GROUP = /（(\d+(?:\.\d+)+(?:[、・～,]\s*\d+(?:\.\d+)+)*)）/gu
-const NUMBER = /\d+(?:\.\d+)+/gu
+// Any dotted number standing alone: "（10.5.1）", "（5.16.1.2を適用した後）", "詳しくは10.5.2を参照",
+// both ends of "7.2から7.4" or "10.9.1.2-10.9.1.4". At least one dot, so "（11章）" or "（計6枚）" never
+// match; a version label ("ver 1.28.0") is not a clause. Callers link only numbers that resolve.
+const NUMBER = /(?<![\d.])\d+(?:\.\d+)+(?![\d]|\.\d)/gu
+const VERSION_BEFORE = /ver\.?\s*$/iu
 
 /**
- * Clause numbers cited in full-width parentheses, in text order.
+ * Clause numbers cited anywhere in the text, in text order.
  * @public 待接：#2227 S4 的 RuleRef 以此切出引用；本片先供資料測試驗證每個引用都解析得到。
  */
 export function findRuleReferences(text: string): RuleReference[] {
   const found: RuleReference[] = []
-  for (const group of text.matchAll(GROUP)) {
-    const inner = group[1] ?? ""
-    const base = group.index + 1
-    for (const number of inner.matchAll(NUMBER))
-      found.push({
-        start: base + number.index,
-        end: base + number.index + number[0].length,
-        number: number[0],
-      })
+  for (const number of text.matchAll(NUMBER)) {
+    if (VERSION_BEFORE.test(text.slice(Math.max(0, number.index - 5), number.index))) continue
+    found.push({ start: number.index, end: number.index + number[0].length, number: number[0] })
   }
   return found
 }
