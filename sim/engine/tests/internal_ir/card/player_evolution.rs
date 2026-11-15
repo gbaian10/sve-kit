@@ -12,7 +12,7 @@ use sve_engine::game::player::{
     QuestionShape, SubmissionKind, Viewer,
 };
 
-fn start(game: &mut Game, actor: Viewer) {
+pub(super) fn start(game: &mut Game, actor: Viewer) {
     game.advance_player_input();
     let main = question(game, actor);
     let QuestionShape::ActionWindow(actions) = main.shape else {
@@ -38,7 +38,7 @@ fn start(game: &mut Game, actor: Viewer) {
     );
 }
 
-fn form(game: &mut Game, actor: Viewer) {
+pub(super) fn form(game: &mut Game, actor: Viewer) {
     let first = question(game, actor);
     let QuestionShape::Evolution(EvolutionQuestion::Form(forms)) = first.shape else {
         panic!("evolution forms");
@@ -426,8 +426,7 @@ fn player_evolution_wrong_actor_shape_payment_and_stale_token_preserve_questions
     }
 }
 
-#[test]
-fn player_evolution_material_binding_precedes_the_existing_hand_discard_domain() {
+pub(super) fn material_program() -> WellFormedCardProgram {
     let mut tree = fanfare::expanded::tree().clone();
     let mut base = tree["cards"]["synthetic-evolution"].clone();
     base["abilities"][0]["evolve"]["cost"] = json!({"steps":[
@@ -435,11 +434,16 @@ fn player_evolution_material_binding_precedes_the_existing_hand_discard_domain()
         {"discard":{"sel":{"who":"self","zone":"hand"},"n":1}}
     ]});
     tree["cards"] = json!({"unit-follower":base});
-    let program = lowerer()
+    lowerer()
         .lower(&tree)
         .unwrap()
         .remove("unit-follower")
-        .unwrap();
+        .unwrap()
+}
+
+#[test]
+fn player_evolution_material_binding_precedes_the_existing_hand_discard_domain() {
+    let program = material_program();
     let zones = json!({"P1":{"hand":[{"id":"fee","card":"unit-spell"}],"cemetery":[{"id":"material","card":"unit-spell"}]}});
     let mut game = evolution::position_with_zones(1, &program, &card(vec![]), false, &zones);
     let mut native = game.clone();

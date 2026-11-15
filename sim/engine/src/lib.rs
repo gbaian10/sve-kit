@@ -6,6 +6,8 @@
 )]
 
 extern crate alloc;
+#[cfg(test)]
+extern crate self as sve_engine;
 
 use core::fmt::Display;
 use core::result;

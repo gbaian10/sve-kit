@@ -6,7 +6,7 @@ use crate::game::player::observation::InstalledEffect;
 use crate::ir::SourceSpan;
 
 use super::{Execution, Game, Result};
-use crate::game::player::observation::{EffectSource, WordingField, WordingSource, seat};
+use crate::game::player::observation::{EffectSource, WordingField, WordingSource, seat, zone};
 use crate::ir::{AbilityOrigin, AbilitySource};
 use serde::{Deserialize, Serialize};
 
@@ -174,19 +174,7 @@ impl ObjectLink {
 
     pub(super) fn observed_public(&self, game: &Game, perspective: Viewer) -> Option<ObjectHandle> {
         let object = game.state.objects.get(&self.holder)?;
-        if !matches!(
-            object.zone.as_str(),
-            "field"
-                | "ex"
-                | "cemetery"
-                | "banish"
-                | "resolution"
-                | "evolution"
-                | "equipment"
-                | "race"
-                | "drive"
-                | "trigger"
-        ) {
+        if !zone(&object.zone).ok()?.supports_public_history_link() {
             return None;
         }
         // Origin rollback can restore generation while published knowledge keeps a new period.

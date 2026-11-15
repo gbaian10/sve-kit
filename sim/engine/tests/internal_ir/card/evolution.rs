@@ -107,14 +107,7 @@ pub(super) fn position_with_form_faces(
     named_position(seat, base, form, false, &Value::Null, names)
 }
 
-fn named_position(
-    seat: u32,
-    base: &WellFormedCardProgram,
-    form: &WellFormedCardProgram,
-    turn_decks: bool,
-    zones: &Value,
-    form_names: &[&str],
-) -> Game {
+pub(super) fn documents_for_forms(form_names: &[&str]) -> (String, String, String) {
     let snapshot = [("unit-follower","フォロワー","1","2","3"),("unit-form","フォロワー・エボルヴ","-","4","5"),("unit-spell","スペル","1","-","-"),("unit-amulet","アミュレット","1","-","-"),("unit-other","スペル","2","-","-")]
         .iter().map(|(number,kind,cost,power,hp)| {
             let names = if *number == "unit-form" { form_names } else { slice::from_ref(number) };
@@ -125,10 +118,33 @@ fn named_position(
     let document=json!({"format":1,"kind":"effect_set","cards":{
         "unit-follower":{"status":"complete","abilities":[]},"unit-form":{"status":"complete","abilities":[]},"unit-spell":{"status":"complete","abilities":[]},"unit-amulet":{"status":"complete","abilities":[]},"unit-other":{"status":"complete","abilities":[]}
     }}).to_string();
+    (snapshot, registry, document)
+}
+
+fn named_position(
+    seat: u32,
+    base: &WellFormedCardProgram,
+    form: &WellFormedCardProgram,
+    turn_decks: bool,
+    zones: &Value,
+    form_names: &[&str],
+) -> Game {
+    let (snapshot, registry, document) = documents_for_forms(form_names);
     let catalog = Arc::new(
         Catalog::from_documents(&snapshot, &registry, &[("evolution.yaml".into(), document)])
             .unwrap(),
     );
+    position_with_catalog(catalog, seat, base, form, turn_decks, zones)
+}
+
+pub(super) fn position_with_catalog(
+    catalog: Arc<Catalog>,
+    seat: u32,
+    base: &WellFormedCardProgram,
+    form: &WellFormedCardProgram,
+    turn_decks: bool,
+    zones: &Value,
+) -> Game {
     let actor = if seat == 1 { "P1" } else { "P2" };
     let mut initial = setup(
         seat,
