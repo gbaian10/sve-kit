@@ -11,7 +11,7 @@ export function sourceProjection(node: RuleNode): JsonValue {
   return {
     title: node.title ?? "",
     text: node.text,
-    examples: [...node.examples],
+    examples: [...(node.examples ?? [])],
     table: node.table
       ? { header: [...node.table.header], rows: node.table.rows.map((row) => [...row]) }
       : null,
@@ -31,8 +31,9 @@ export type TranslationProblem =
 
 function shapeProblem(node: RuleNode, entry: TranslationEntry): string | undefined {
   if (entry.title !== undefined && node.title === undefined) return "title has no original"
-  if (entry.examples && entry.examples.length !== node.examples.length)
-    return `examples ${String(entry.examples.length)} != ${String(node.examples.length)}`
+  const examples = node.examples?.length ?? 0
+  if (entry.examples && entry.examples.length !== examples)
+    return `examples ${String(entry.examples.length)} != ${String(examples)}`
   if (entry.table) {
     if (!node.table) return "table has no original"
     if (entry.table.header.length !== node.table.header.length) return "table header width"

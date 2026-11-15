@@ -23,7 +23,8 @@ export interface RuleNode {
   readonly depth: number
   readonly title?: string
   readonly text: string
-  readonly examples: readonly string[]
+  /** Omitted when the rule has no examples; the source hash treats that as `[]`. */
+  readonly examples?: readonly string[]
   readonly table?: RuleTable
   readonly figure?: RuleFigure
   /** Printed in red: the official marker for text updated in this version. */

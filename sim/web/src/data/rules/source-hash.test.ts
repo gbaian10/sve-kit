@@ -60,6 +60,9 @@ describe("sourceHash", () => {
     })
     expect(sourceHash(rule)).toMatch(/^[0-9a-f]{64}$/u)
     expect(sourceHash({ ...rule, title: "" })).toBe(sourceHash(rule))
+    const { examples: _omitted, ...bare } = heading
+    expect(sourceProjection(bare)).toMatchObject({ examples: [] })
+    expect(sourceHash(bare)).toBe(sourceHash(heading))
   })
 
   it("is the same for the same projection whatever the key or numbering", () => {
