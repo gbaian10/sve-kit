@@ -1,10 +1,11 @@
 //! Only authority-owned questions can bind a wire domain to native capabilities.
 
-use super::ProjectionError;
+use super::{BattleReferences, ProjectionError};
 use crate::game::player::{
     self, ClosingAnswer, ClosingQuestion, EvolutionAnswer, EvolutionQuestion,
     ObjectHandle as NativeHandle, OpeningAnswer, OpeningQuestion, QuestionToken, Viewer,
 };
+use crate::{catalog::Catalog, game::player::observation::CardFace};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt, result};
 use sve_battle_contract::{
@@ -17,7 +18,6 @@ type Result<T> = result::Result<T, ProjectionError>;
 type CardCandidates = (Vec<wire::Candidate>, BTreeMap<OptionId, NativeHandle>);
 
 #[cfg(test)]
-#[path = "tests/evolution_payment.rs"]
 mod tests;
 
 /// A rejected answer binding, separate from an unavailable board or question.
@@ -30,7 +30,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Supports opening, closing, and normal evolution payment questions.
+/// Supports opening, closing, and normal evolution form and payment questions.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -52,6 +52,7 @@ enum Binding {
     StartAmulet(BTreeMap<OptionId, NativeHandle>),
     EndGuard(BTreeMap<OptionId, NativeHandle>),
     EvolutionPayment(Vec<wire::EvolutionPayment>),
+    EvolutionForm(BTreeMap<OptionId, player::EvolutionFormId>),
     HandLimit {
         cards: BTreeMap<OptionId, NativeHandle>,
         count: usize,
@@ -69,6 +70,8 @@ impl QuestionProjection {
         id: &QuestionId,
         native: player::Question,
         observation: BattleObservation,
+        catalog: &Catalog,
+        references: &BattleReferences,
     ) -> Result<Self> {
         let (native_purpose, purpose, expected_stage) = match &native.shape {
             player::QuestionShape::Opening(_) => (
@@ -119,10 +122,11 @@ impl QuestionProjection {
             player::QuestionShape::Evolution(EvolutionQuestion::Payment(quote)) => {
                 evolution_payment(quote)?
             }
+            player::QuestionShape::Evolution(EvolutionQuestion::Form(forms)) => {
+                evolution_form(id, native.actor, &forms, &observation, catalog, references)?
+            }
             player::QuestionShape::Evolution(
-                EvolutionQuestion::Form(_)
-                | EvolutionQuestion::Materials(_)
-                | EvolutionQuestion::Discard(_),
+                EvolutionQuestion::Materials(_) | EvolutionQuestion::Discard(_),
             )
             | player::QuestionShape::Decision(_)
             | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
@@ -176,6 +180,23 @@ impl QuestionProjection {
             return Err(AnswerError);
         }
         let command = match &self.binding {
+            Binding::EvolutionForm(forms) => {
+                let Answer::Choose { chosen } = answer else {
+                    return Err(AnswerError);
+                };
+                if chosen.len() != 1 {
+                    return Err(AnswerError);
+                }
+                let form = chosen
+                    .first()
+                    .and_then(|choice| forms.get(choice))
+                    .copied()
+                    .ok_or(AnswerError)?;
+                player::Command::Evolution {
+                    token: self.token,
+                    answer: EvolutionAnswer::Form(form),
+                }
+            }
             Binding::EvolutionPayment(payments) => player::Command::Evolution {
                 token: self.token,
                 answer: evolution_payment_answer(payments, answer)?,
@@ -249,6 +270,78 @@ impl QuestionProjection {
     }
 }
 
+fn evolution_form(
+    id: &QuestionId,
+    actor: Viewer,
+    forms: &[player::EvolutionForm],
+    observation: &BattleObservation,
+    catalog: &Catalog,
+    references: &BattleReferences,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    if forms.is_empty() {
+        return Err(ProjectionError::Unavailable);
+    }
+    let deck = &observation
+        .players
+        .iter()
+        .find(|player| player.seat == seat(actor))
+        .ok_or(ProjectionError::Unavailable)?
+        .zones
+        .evolve_deck;
+    let mut seen = BTreeSet::new();
+    let mut choices = Vec::new();
+    let mut coordinates = BTreeMap::new();
+    for (index, form) in forms.iter().enumerate() {
+        if !seen.insert((&form.card.handle, form.face)) {
+            return Err(ProjectionError::Unavailable);
+        }
+        let member = deck
+            .cards
+            .iter()
+            .find(|member| member.object.as_str() == form.card.handle.as_str())
+            .ok_or(ProjectionError::Unavailable)?;
+        let object = observation
+            .objects
+            .get(&member.object)
+            .ok_or(ProjectionError::Unavailable)?;
+        // The native form authorizes a destination, which may differ from its observed current face.
+        let destination = references.resolve(
+            catalog,
+            &CardFace {
+                card: form.card.properties.card.clone(),
+                face: form.face,
+            },
+        )?;
+        if destination.printing_id != object.card.printing_id {
+            return Err(ProjectionError::Unavailable);
+        }
+        let option_id = option(id, index);
+        choices.push(wire::ChoiceOption {
+            id: option_id.clone(),
+            value: wire::ChoiceValue::EvolutionForm {
+                object: member.object.clone(),
+                face: destination,
+            },
+            cost: None,
+        });
+        coordinates.insert(option_id, form.id);
+    }
+    Ok((
+        wire::QuestionUse::EvolutionForm,
+        wire::QuestionShape::Choose {
+            options: choices,
+            bounds: wire::Bounds {
+                min: Nat::from(1_u32),
+                max: Some(Nat::from(1_u32)),
+            },
+            count: None,
+            earlier: vec![],
+            capacity: None,
+        },
+        Binding::EvolutionForm(coordinates),
+    ))
+}
+
 fn evolution_payment(
     quote: player::EvolutionPayment,
 ) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
@@ -256,6 +349,7 @@ fn evolution_payment(
         return Err(ProjectionError::Unavailable);
     }
     let mut payments = Vec::new();
+    // One optional EP replaces exactly one PP; changing that rule also changes this candidate template.
     for use_ep in [false, true] {
         let pp = quote
             .total_pp

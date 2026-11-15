@@ -7,6 +7,24 @@ use sve_engine::game::player::{EvolutionAnswer, EvolutionQuestion, QuestionPurpo
 type Resources = (i64, i64, i64);
 
 fn make_payment(catalog: &Arc<Catalog>, actor: Viewer, resources: Resources, secret: &str) -> Game {
+    let mut game = at_form(
+        catalog,
+        actor,
+        resources,
+        secret,
+        json!([{"id":"physical-form","card":"unit-form"}]),
+    );
+    player_evolution::form(&mut game, actor);
+    game
+}
+
+pub(super) fn at_form(
+    catalog: &Arc<Catalog>,
+    actor: Viewer,
+    resources: Resources,
+    secret: &str,
+    evolve_deck: Value,
+) -> Game {
     let (own, other) = if actor == Viewer::P1 {
         ("P1", "P2")
     } else {
@@ -21,8 +39,7 @@ fn make_payment(catalog: &Arc<Catalog>, actor: Viewer, resources: Resources, sec
     initial["players"][own]["zones"]["hand"] = json!([]);
     initial["players"][own]["zones"]["field"] =
         json!([{"id":"physical-base","card":"unit-follower"}]);
-    initial["players"][own]["zones"]["evolve_deck"] =
-        json!([{"id":"physical-form","card":"unit-form"}]);
+    initial["players"][own]["zones"]["evolve_deck"] = evolve_deck;
     initial["players"][other]["zones"]["field"] = json!([]);
     initial["players"][other]["zones"]["hand"] = json!([{"id":"physical-secret","card":secret}]);
     let mut game = Game::new(
@@ -39,7 +56,6 @@ fn make_payment(catalog: &Arc<Catalog>, actor: Viewer, resources: Resources, sec
         game.load_internal_card(number, &card(vec![])).unwrap();
     }
     player_evolution::start(&mut game, actor);
-    player_evolution::form(&mut game, actor);
     game
 }
 

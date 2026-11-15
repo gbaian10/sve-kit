@@ -393,7 +393,7 @@ impl Game {
     /// The host authenticates the viewer, issues a fresh ID per occurrence in this
     /// battle, and submits decoded commands to this same Game. Waiting and finished
     /// seats have no question; this method does not replace their public input summary.
-    /// Supports opening, closing, and normal evolution payment questions.
+    /// Supports opening, closing, and normal evolution form and payment questions.
     /// The host must preflight the full program closure before interactive use.
     ///
     /// # Errors
@@ -409,7 +409,8 @@ impl Game {
         match self.input(perspective) {
             Input::Question(question) => {
                 let observation = self.battle_observation(perspective, references)?;
-                QuestionProjection::project(id, *question, observation).map(Some)
+                QuestionProjection::project(id, *question, observation, &self.catalog, references)
+                    .map(Some)
             }
             Input::Waiting(_) | Input::Finished { .. } => Ok(None),
             Input::EngineFault => Err(ProjectionError::Unavailable),

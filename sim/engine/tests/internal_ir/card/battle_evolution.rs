@@ -12,6 +12,17 @@ use sve_engine::game::player::{
 };
 
 pub(super) fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
+    let identity = (0..u64::try_from(names.len())?).collect::<Vec<_>>();
+    fixture_with_face_map(names, &identity)
+}
+
+pub(super) fn fixture_with_face_map(
+    names: &[&str],
+    face_map: &[u64],
+) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
+    if face_map.len() != names.len() {
+        return Err("fixture face map length".into());
+    }
     let (input, registry, document) = evolution::documents_for_forms(names);
     let mut rows = Vec::new();
     for line in input.lines() {
@@ -45,12 +56,19 @@ pub(super) fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences)
         ("unit-other", "printing-other", 1),
     ] {
         for native_face in 0..count {
+            let face = if number == "unit-form" {
+                *face_map
+                    .get(usize::try_from(native_face)?)
+                    .ok_or("fixture face map entry")?
+            } else {
+                native_face
+            };
             faces.push(PrintingFaceIdentity {
                 card_no: number.into(),
                 native_face,
                 card: CardRef {
                     printing_id: printing.into(),
-                    face: WireNat::try_from(native_face)?,
+                    face: WireNat::try_from(face)?,
                 },
             });
         }
