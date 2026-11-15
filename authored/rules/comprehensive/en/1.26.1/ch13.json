@@ -1,0 +1,325 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "13",
+      "context": "main",
+      "number": "13",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Class-Specific Information and Keywords",
+      "text": ""
+    },
+    {
+      "key": "13.1",
+      "context": "main",
+      "number": "13.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Overview",
+      "text": ""
+    },
+    {
+      "key": "13.1.1",
+      "context": "main",
+      "number": "13.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Players may possess certain additional information depending on their leader's class. Furthermore, some classes have cards with unique notations or keywords. This section will detail those notations and keywords."
+    },
+    {
+      "key": "13.2",
+      "context": "main",
+      "number": "13.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Forestcraft",
+      "text": ""
+    },
+    {
+      "key": "13.2.1",
+      "context": "main",
+      "number": "13.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Combo"
+    },
+    {
+      "key": "13.2.1.1",
+      "context": "main",
+      "number": "13.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Combo denotes a condition that counts the number of cards played that turn."
+    },
+    {
+      "key": "13.2.1.2",
+      "context": "main",
+      "number": "13.2.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Combo (X) - [text]\" means \"If you've played at least X cards this turn, including this card, [text].\""
+    },
+    {
+      "key": "13.2.1.3",
+      "context": "main",
+      "number": "13.2.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Cards and tokens played from any zone count towards this condition."
+    },
+    {
+      "key": "13.3",
+      "context": "main",
+      "number": "13.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "Runecraft",
+      "text": ""
+    },
+    {
+      "key": "13.3.1",
+      "context": "main",
+      "number": "13.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Spellchain"
+    },
+    {
+      "key": "13.3.1.1",
+      "context": "main",
+      "number": "13.3.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Spellchain denotes a condition that counts the number of spell cards in the player's cemetery."
+    },
+    {
+      "key": "13.3.1.2",
+      "context": "main",
+      "number": "13.3.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Spellchain (X) - [text]\" or \"SC (X) - [text]\" means \"If you have at least X spells in your cemetery, [text].\""
+    },
+    {
+      "key": "13.3.1.3",
+      "context": "main",
+      "number": "13.3.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "While a card with Spellchain is being resolved, it is in the resolution zone, and therefore does not count itself toward the total number of spells in the cemetery."
+    },
+    {
+      "key": "13.3.1.4",
+      "context": "main",
+      "number": "13.3.1.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "In general, the total number of spells referenced by Spellchain becomes fixed the moment the effect containing the Spellchain begins to be resolved. The number cannot change or be changed while the effect is being resolved."
+    },
+    {
+      "key": "13.3.1.4.1",
+      "context": "main",
+      "number": "13.3.1.4.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "When referencing the number of spells in a cemetery for the purpose of determining the number of options to be selected for a \"choose\" action (5.18.3.1), refer to the number of spells present when the ability is initially played."
+    },
+    {
+      "key": "13.3.2",
+      "context": "main",
+      "number": "13.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Stack"
+    },
+    {
+      "key": "13.3.2.1",
+      "context": "main",
+      "number": "13.3.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Stack is both a passive ability and an activated ability that some amulets have."
+    },
+    {
+      "key": "13.3.2.2",
+      "context": "main",
+      "number": "13.3.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Stack\" denotes the following three abilities:\n* When this card is put onto the field, it is put onto the field with one Stack counter placed on top of it.\n* When this card would leave the field, if it has any Stack counters on it, remove one instead, and this card remains on the field.\n* {icon_stand|[engage]} {icon_act|[act]}: Select another amulet with Stack on your field and transfer all this card's Stack counters to that card."
+    },
+    {
+      "key": "13.3.2.3",
+      "context": "main",
+      "number": "13.3.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a card with Stack has no Stack counters, it is moved to its owner's cemetery under rules handling (11.7)."
+    },
+    {
+      "key": "13.3.2.4",
+      "context": "main",
+      "number": "13.3.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Card text written in the form \"add X to a Stack on your field\" means \"put X Stack counters on a card with Stack on your field.\""
+    },
+    {
+      "key": "13.3.3",
+      "context": "main",
+      "number": "13.3.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Earth Rite"
+    },
+    {
+      "key": "13.3.3.1",
+      "context": "main",
+      "number": "13.3.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Earth Rite is a passive ability that produces an effect by removing Stack counters."
+    },
+    {
+      "key": "13.3.3.2",
+      "context": "main",
+      "number": "13.3.3.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Earth Rite (X): [text]\" means \"When you play this card or ability, as an additional cost, you may remove X Stack counters from an amulet with Stack on your field. If that amulet's last Stack counter was removed as a result, put the amulet into its owner's cemetery. If you paid this additional cost, [text].\""
+    },
+    {
+      "key": "13.3.3.2.1",
+      "context": "main",
+      "number": "13.3.3.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If X isn't specified, treat X as 1."
+    },
+    {
+      "key": "13.4",
+      "context": "main",
+      "number": "13.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "Dragoncraft",
+      "text": ""
+    },
+    {
+      "key": "13.4.1",
+      "context": "main",
+      "number": "13.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Overflow"
+    },
+    {
+      "key": "13.4.1.1",
+      "context": "main",
+      "number": "13.4.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Overflow denotes a condition that references the player's maximum number of play points."
+    },
+    {
+      "key": "13.4.1.2",
+      "context": "main",
+      "number": "13.4.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"If Overflow is active for you\" means \"if your maximum number of play points is at least 7.\""
+    },
+    {
+      "key": "13.5",
+      "context": "main",
+      "number": "13.5",
+      "kind": "section",
+      "depth": 2,
+      "title": "Abysscraft",
+      "text": ""
+    },
+    {
+      "key": "13.5.1",
+      "context": "main",
+      "number": "13.5.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Necrocharge"
+    },
+    {
+      "key": "13.5.1.1",
+      "context": "main",
+      "number": "13.5.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Necrocharge denotes a condition that counts the number of cards in the player's cemetery."
+    },
+    {
+      "key": "13.5.1.2",
+      "context": "main",
+      "number": "13.5.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Necrocharge (X) - [text]\" or \"NC (X) - [text]\" means \"If you have at least X cards in your cemetery, [text].\""
+    },
+    {
+      "key": "13.5.1.3",
+      "context": "main",
+      "number": "13.5.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The following rules apply when resolving cards and abilities involving Necrocharge."
+    },
+    {
+      "key": "13.5.1.3.1",
+      "context": "main",
+      "number": "13.5.1.3.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "While a card with Necrocharge is being resolved, it is in the resolution zone, and therefore does not count itself toward the total number of cards in the cemetery."
+    },
+    {
+      "key": "13.5.1.3.2",
+      "context": "main",
+      "number": "13.5.1.3.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "In general, the total number of cards referenced by Necrocharge becomes fixed the moment the effect containing the Necrocharge begins to be resolved. The number cannot change or be changed while the effect is being resolved."
+    },
+    {
+      "key": "13.5.1.3.2.1",
+      "context": "main",
+      "number": "13.5.1.3.2.1",
+      "kind": "rule",
+      "depth": 6,
+      "text": "When referencing the number of cards in a cemetery for the purpose of determining the number of options to be selected for a \"choose\" action (5.18.3.1), refer to the number of cards present when the ability is initially played."
+    },
+    {
+      "key": "13.5.2",
+      "context": "main",
+      "number": "13.5.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Sanguine"
+    },
+    {
+      "key": "13.5.2.1",
+      "context": "main",
+      "number": "13.5.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Sanguine denotes a condition that checks whether the player's leader has lost defense during their turn."
+    },
+    {
+      "key": "13.5.2.2",
+      "context": "main",
+      "number": "13.5.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"If Sanguine is active for you\" means \"if this is your turn, and your leader has lost defense this turn.\""
+    }
+  ]
+}

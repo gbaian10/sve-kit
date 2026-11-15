@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate } from "react-router"
 
-import { ruleAnchor, RuleKeysContext } from "../../components/rules/rule-keys"
+import { ruleAnchor, RuleKeysContext, RULES_LANG } from "../../components/rules/rule-keys"
 import { RuleText } from "../../components/rules/RuleText"
 import { cn } from "../../components/ui/cn"
 import { useToast } from "../../components/ui/toast-context"
@@ -13,6 +13,8 @@ import {
   localizeNode,
   originalNode,
   type RulesBundle,
+  type RulesRegion,
+  rulesRegionFor,
 } from "../../data"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
@@ -24,28 +26,33 @@ type Load =
   | { readonly state: "failed" }
   | { readonly state: "ready"; readonly rules: RulesBundle }
 
-function useRules(): Load {
-  const [load, setLoad] = useState<Load>({ state: "loading" })
+function useRules(region: RulesRegion): Load {
+  // Tagged with its edition, so switching the UI language shows loading until the other arrives.
+  const [load, setLoad] = useState<{ readonly region: RulesRegion; readonly load: Load }>()
   useEffect(() => {
     let active = true
-    loadComprehensiveRules()
+    loadComprehensiveRules(region)
       .then((rules) => {
-        if (active) setLoad({ state: "ready", rules })
+        if (active) setLoad({ region, load: { state: "ready", rules } })
       })
       .catch(() => {
-        if (active) setLoad({ state: "failed" })
+        if (active) setLoad({ region, load: { state: "failed" } })
       })
     return () => {
       active = false
     }
-  }, [])
-  return load
+  }, [region])
+  return load?.region === region ? load.load : { state: "loading" }
 }
 
 const FLASH_MS = 1500
 
 /** Chapters (body and appendices) with their sections, and appendix B's two formats. */
-function tableOfContents(views: readonly LocalizedNode[], original: boolean): TocEntry[] {
+function tableOfContents(
+  views: readonly LocalizedNode[],
+  original: boolean,
+  originalLang: string,
+): TocEntry[] {
   const entries: { entry: TocEntry; children: TocEntry[] }[] = []
   for (const view of views) {
     const { node } = view
@@ -60,7 +67,7 @@ function tableOfContents(views: readonly LocalizedNode[], original: boolean): To
       number: node.number,
       title: view.title?.text ?? "",
       context: node.context,
-      original: original || !(view.title?.translated ?? true),
+      lang: original || !(view.title?.translated ?? true) ? originalLang : undefined,
       children,
     }
     if (top) entries.push({ entry, children })
@@ -99,19 +106,21 @@ function useHashTarget(ready: boolean) {
 function RuleNodeView({
   view,
   original,
+  originalLang,
   showPendingTag,
   onCopy,
 }: {
   readonly view: LocalizedNode
-  /** The view shows the Japanese original as a whole (ja UI, or the en UI's original toggle). */
+  /** The view shows the original edition as a whole (the ja and en UIs). */
   readonly original: boolean
+  readonly originalLang: string
   readonly showPendingTag: boolean
   readonly onCopy: (key: string, number: string) => void
 }) {
   const { t } = useTranslation()
   const { node } = view
   const id = ruleAnchor(node.key)
-  const lang = (translated: boolean) => (original || !translated ? "ja" : undefined)
+  const lang = (translated: boolean) => (original || !translated ? originalLang : undefined)
   const number = node.number
   const numberButton = number && (
     <button
@@ -231,7 +240,13 @@ function RuleTable({
       <>
         <span lang={lang(cell.translated)}>
           {rich ? (
-            <RuleText text={cell.text} context={context} className="inline [&>p]:inline" />
+            // A token's later abilities start on their own line, as printed; a one-line cell
+            // stays inline so its pending mark follows it.
+            <RuleText
+              text={cell.text}
+              context={context}
+              className="inline [&>p]:inline [&>p+p]:block"
+            />
           ) : (
             cell.text
           )}
@@ -301,20 +316,16 @@ export function ComprehensiveRulesPage() {
   const { t } = useTranslation()
   const prefs = usePrefs()
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
-  const load = useRules()
+  const region = rulesRegionFor(uiLanguage)
+  const originalLang = RULES_LANG[region]
+  const load = useRules(region)
   const navigate = useNavigate()
   const location = useLocation()
   const toast = useToast()
-  const [showJapanese, setShowJapanese] = useState(false)
   const rules = load.state === "ready" ? load.rules : undefined
-  // English has no rules text yet; its readers opt in to the Japanese original.
-  const mode =
-    uiLanguage === "zh-TW"
-      ? "translated"
-      : uiLanguage === "ja" || showJapanese
-        ? "original"
-        : "none"
-  useHashTarget(load.state === "ready" && mode !== "none")
+  // Chinese translates the Japanese rules; Japanese and English show their own edition.
+  const mode = uiLanguage === "zh-TW" ? "translated" : "original"
+  useHashTarget(load.state === "ready")
   const views = useMemo(
     () =>
       rules?.nodes.map((node) =>
@@ -325,13 +336,13 @@ export function ComprehensiveRulesPage() {
     [mode, rules],
   )
   const keys = useMemo(() => new Set(rules?.byKey.keys()), [rules])
-  const toc = useMemo(() => tableOfContents(views, mode === "original"), [views, mode])
+  const toc = useMemo(
+    () => tableOfContents(views, mode === "original", originalLang),
+    [views, mode, originalLang],
+  )
   const tocIds = useMemo(
-    () =>
-      mode === "none"
-        ? []
-        : toc.flatMap((entry) => [entry, ...entry.children]).map((entry) => ruleAnchor(entry.key)),
-    [toc, mode],
+    () => toc.flatMap((entry) => [entry, ...entry.children]).map((entry) => ruleAnchor(entry.key)),
+    [toc],
   )
   const active = useActiveSection(tocIds)
   const translatedCount = rules
@@ -386,39 +397,23 @@ export function ComprehensiveRulesPage() {
             : t("rules.translationPartial", { done: translatedCount, total: rules.nodes.length })}
         </p>
       )}
-      {uiLanguage === "en" && (
-        <div className="mt-4 flex flex-wrap items-center gap-3 rounded-card border border-dashed border-border bg-surface-1 px-4 py-3 text-13 text-text-2">
-          <span>{t("rules.englishUnavailable")}</span>
-          <button
-            type="button"
-            aria-pressed={showJapanese}
-            onClick={() => {
-              setShowJapanese((value) => !value)
-            }}
-            className="min-h-11 rounded-button border border-border bg-surface-2 px-3 font-semibold text-text-1 hover:border-accent/50"
-          >
-            {showJapanese ? t("rules.hideJapanese") : t("rules.showJapanese")}
-          </button>
+      <RuleKeysContext.Provider value={{ keys }}>
+        <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start lg:gap-10">
+          <article className="min-w-0">
+            {views.map((view) => (
+              <RuleNodeView
+                key={view.node.key}
+                view={view}
+                original={mode === "original"}
+                originalLang={originalLang}
+                showPendingTag={mode === "translated" && translatedCount > 0}
+                onCopy={copy}
+              />
+            ))}
+          </article>
+          <RulesToc entries={toc} active={active} />
         </div>
-      )}
-      {mode !== "none" && (
-        <RuleKeysContext.Provider value={{ keys }}>
-          <div className="mt-4 lg:grid lg:grid-cols-[minmax(0,1fr)_15rem] lg:items-start lg:gap-10">
-            <article className="min-w-0">
-              {views.map((view) => (
-                <RuleNodeView
-                  key={view.node.key}
-                  view={view}
-                  original={mode === "original"}
-                  showPendingTag={mode === "translated" && translatedCount > 0}
-                  onCopy={copy}
-                />
-              ))}
-            </article>
-            <RulesToc entries={toc} active={active} />
-          </div>
-        </RuleKeysContext.Provider>
-      )}
+      </RuleKeysContext.Provider>
     </div>
   )
 }

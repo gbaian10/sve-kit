@@ -1,0 +1,1223 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "10",
+      "context": "main",
+      "number": "10",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Playing and Resolving Cards and Abilities",
+      "text": ""
+    },
+    {
+      "key": "10.1",
+      "context": "main",
+      "number": "10.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Types of Abilities",
+      "text": ""
+    },
+    {
+      "key": "10.1.1",
+      "context": "main",
+      "number": "10.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Abilities are divided into four types: activated abilities, automatic abilities, passive abilities, and spell abilities."
+    },
+    {
+      "key": "10.1.1.1",
+      "context": "main",
+      "number": "10.1.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "An activated ability is an ability that a player may actively play at certain times during a turn by paying its cost."
+    },
+    {
+      "key": "10.1.1.1.1",
+      "context": "main",
+      "number": "10.1.1.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "In card text, activated abilities are written in the form \"{icon_stand|[engage]} [cost]: [effect].\" The \"cost\" represents what must be paid to play the ability. The \"effect\" represents the effect produced when the activated ability is resolved."
+    },
+    {
+      "key": "10.1.1.2",
+      "context": "main",
+      "number": "10.1.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "An automatic ability is an ability that is played automatically when the indicated event occurs during the game."
+    },
+    {
+      "key": "10.1.1.2.1",
+      "context": "main",
+      "number": "10.1.1.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "In card text, automatic abilities are generally written in the form \"when(ever) [event], [effect]\" or \"at the start of [event], [effect].\""
+    },
+    {
+      "key": "10.1.1.2.1.1",
+      "context": "main",
+      "number": "10.1.1.2.1.1",
+      "kind": "rule",
+      "depth": 6,
+      "text": "The condition in this case is called a \"trigger condition.\" When an automatic ability's trigger condition is satisfied, it is said to have been \"triggered.\""
+    },
+    {
+      "key": "10.1.1.2.2",
+      "context": "main",
+      "number": "10.1.1.2.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Some automatic abilities are written in the form \"when(ever) [event], [cost]: [effect]\" or \"at the start of [event], [cost]: [effect].\" In this case, the indicated cost must be paid in order to play the automatic ability."
+    },
+    {
+      "key": "10.1.1.3",
+      "context": "main",
+      "number": "10.1.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A passive ability is an ability that produces an effect as long as the ability is valid."
+    },
+    {
+      "key": "10.1.1.3.1",
+      "context": "main",
+      "number": "10.1.1.3.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "An ability that isn't written in the form of an activated ability or automatic ability is generally a passive ability."
+    },
+    {
+      "key": "10.1.1.4",
+      "context": "main",
+      "number": "10.1.1.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A spell ability is the text on a spell card."
+    },
+    {
+      "key": "10.2",
+      "context": "main",
+      "number": "10.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Types of Effects",
+      "text": ""
+    },
+    {
+      "key": "10.2.1",
+      "context": "main",
+      "number": "10.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Effects are divided into three types: one-shot effects, persistent effects, and replacement effects."
+    },
+    {
+      "key": "10.2.1.1",
+      "context": "main",
+      "number": "10.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A one-shot effect is an effect that ends after all the indicated actions have been performed during its resolution."
+    },
+    {
+      "key": "10.2.1.2",
+      "context": "main",
+      "number": "10.2.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A persistent effect is an effect that remains valid for a fixed duration (this includes unspecified durations that could be written as \"for the rest of the game\")."
+    },
+    {
+      "key": "10.2.1.3",
+      "context": "main",
+      "number": "10.2.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A replacement effect is an effect that replaces an event that would normally happen during the game with another event."
+    },
+    {
+      "key": "10.2.1.3.1",
+      "context": "main",
+      "number": "10.2.1.3.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If an ability is written in the form \"instead, [action],\" \"[action] instead,\" \"[action B] instead of [action A],\" or \"instead of [action A], [action B],\" then the effect produced by that ability is a replacement effect."
+    },
+    {
+      "key": "10.2.1.3.2",
+      "context": "main",
+      "number": "10.2.1.3.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "An effect that increases or decreases the amount of damage dealt or received is a replacement effect."
+    },
+    {
+      "key": "10.2.1.3.3",
+      "context": "main",
+      "number": "10.2.1.3.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "An effect that changes how a card or ability is handled when played is a replacement effect. This includes effects written in the form \"[card] costs [play-point cost] to play.\""
+    },
+    {
+      "key": "10.3",
+      "context": "main",
+      "number": "10.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "Valid and Invalid Abilities",
+      "text": ""
+    },
+    {
+      "key": "10.3.1",
+      "context": "main",
+      "number": "10.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "An effect may be rendered \"valid\" or \"invalid\" by another effect. If this happens, do the following."
+    },
+    {
+      "key": "10.3.2",
+      "context": "main",
+      "number": "10.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card's text states that part or all of an effect is invalid under a certain condition, then that part of the effect will not produce an effect while under that condition, but it will still exist as an ability. If that effect would normally require a player to make a selection, that selection is not made."
+    },
+    {
+      "key": "10.3.3",
+      "context": "main",
+      "number": "10.3.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card's text states that part or all of an effect is valid under a certain condition, then that part of the effect is invalid as long as those conditions are not met."
+    },
+    {
+      "key": "10.3.4",
+      "context": "main",
+      "number": "10.3.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "An effect that is clearly handled in a certain zone is only valid in that zone."
+    },
+    {
+      "key": "10.3.5",
+      "context": "main",
+      "number": "10.3.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Abilities of follower and amulet cards are valid only on the field unless indicated otherwise."
+    },
+    {
+      "key": "10.3.6",
+      "context": "main",
+      "number": "10.3.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Abilities of crest tokens are valid only in the EX area.",
+      "changed": true
+    },
+    {
+      "key": "10.4",
+      "context": "main",
+      "number": "10.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "Costs and Payment",
+      "text": ""
+    },
+    {
+      "key": "10.4.1",
+      "context": "main",
+      "number": "10.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Players may be instructed to perform certain actions as part of the cost of a card or ability."
+    },
+    {
+      "key": "10.4.2",
+      "context": "main",
+      "number": "10.4.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"pay a cost\" means to perform any actions indicated by that cost."
+    },
+    {
+      "key": "10.4.2.1",
+      "context": "main",
+      "number": "10.4.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a cost includes multiple actions, they should be performed in the listed order."
+    },
+    {
+      "key": "10.4.2.2",
+      "context": "main",
+      "number": "10.4.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the player is unable to pay the full cost, they cannot and do not pay that cost at all."
+    },
+    {
+      "key": "10.4.3",
+      "context": "main",
+      "number": "10.4.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a cost specifies a zone, card, or other player-specific game element (such as play points) without specifying which player, that player is assumed to be the controller of the card or ability that requires the cost."
+    },
+    {
+      "key": "10.4.4",
+      "context": "main",
+      "number": "10.4.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When a cost includes a play-point icon (5.2), it means \"if you have at least [number] remaining play points, subtract [number] from them.\""
+    },
+    {
+      "key": "10.4.4.1",
+      "context": "main",
+      "number": "10.4.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Effects that change a card's cost value when played do not actually change the card's information, but rather change the number of play points subtracted as part of the cost to play that card."
+    },
+    {
+      "key": "10.4.5",
+      "context": "main",
+      "number": "10.4.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When a cost includes increasing or reducing a certain value (but not a card's cost) by a specified amount, that value must be equal to or greater than the specified amount."
+    },
+    {
+      "key": "10.4.5.1",
+      "context": "main",
+      "number": "10.4.5.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If executing this increase or reduction would cause that value to be greater than its upper limit as defined in the rules, smaller than its lower limit as defined in the rules, or less than zero, then that process cannot be executed as a cost."
+    },
+    {
+      "key": "10.4.6",
+      "context": "main",
+      "number": "10.4.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When a cost includes the {icon_act|[act]} icon without specifying a card, it means \"if this card is on the field reserved, engage it.\" If a card is specified, it means to engage that reserved card on the field."
+    },
+    {
+      "key": "10.4.6.1",
+      "context": "main",
+      "number": "10.4.6.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "This cost can be paid on the same turn the card with the cost is put onto the field."
+    },
+    {
+      "key": "10.4.7",
+      "context": "main",
+      "number": "10.4.7",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Abilities other than activated abilities may also have a cost. As a general rule, card text written in the form \"[cost]: [effect]\" denotes an optional cost that can be paid when playing or resolving the ability, and the resulting effect if that cost is paid."
+    },
+    {
+      "key": "10.4.7.1",
+      "context": "main",
+      "number": "10.4.7.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Some abilities are written in a similar form: \"[keyword]: [effect].\" With the exception of Earth Rite, these keywords do not themselves constitute a cost. They may, however, be accompanied by a cost, in which case they are written in the form \"[keyword], [cost]: [effect].\""
+    },
+    {
+      "key": "10.4.7.2",
+      "context": "main",
+      "number": "10.4.7.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The effects applied as a result of paying the cost include everything up to the end of the paragraph or the end of the option in a \"choose\" ability (5.18.1.1)."
+    },
+    {
+      "key": "10.4.7.3",
+      "context": "main",
+      "number": "10.4.7.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Card text written in the form \"when playing [card/ability], [process]: [effect]\" means the player has the option (10.6.2.2) to apply the indicated effect by executing the indicated process when playing that card or ability."
+    },
+    {
+      "key": "10.4.7.4",
+      "context": "main",
+      "number": "10.4.7.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When an automatic ability is written in the form \"when(ever) [event], [process]: [effect]\" or \"at the start of [event], [process]: [effect],\" the ability's controller has the option to apply the indicated effect by executing the indicated process when resolving the automatic ability."
+    },
+    {
+      "key": "10.4.7.5",
+      "context": "main",
+      "number": "10.4.7.5",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If card text not covered above is written in the form \"[process]: [effect],\" the ability's controller has the option to apply the indicated effect by executing the indicated process when resolving the card or ability."
+    },
+    {
+      "key": "10.5",
+      "context": "main",
+      "number": "10.5",
+      "kind": "section",
+      "depth": 2,
+      "title": "Confirmation Timing",
+      "text": ""
+    },
+    {
+      "key": "10.5.1",
+      "context": "main",
+      "number": "10.5.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Confirmation Timing refers to a point during the game where rules handling occurs (11.1.2) and automatic abilities are played."
+    },
+    {
+      "key": "10.5.1.1",
+      "context": "main",
+      "number": "10.5.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "During Confirmation Timing, all currently applicable rules handling processes are resolved first. Once those have been resolved, automatic abilities whose trigger conditions have been met are played and resolved. For more information, see 10.5.2."
+    },
+    {
+      "key": "10.5.2",
+      "context": "main",
+      "number": "10.5.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If Confirmation Timing occurs, the game proceeds as follows:"
+    },
+    {
+      "key": "10.5.2.1",
+      "context": "main",
+      "number": "10.5.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "All rules handling processes applicable at this time are executed simultaneously. If this results in more instances of rules handling, repeat this step until no rules handling processes remain."
+    },
+    {
+      "key": "10.5.2.2",
+      "context": "main",
+      "number": "10.5.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the active player controls any pending automatic abilities, the player selects one of them and plays and resolves it, and the game returns to 10.5.2.1."
+    },
+    {
+      "key": "10.5.2.3",
+      "context": "main",
+      "number": "10.5.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the non-active player controls any pending automatic abilities, the player selects one of them and plays and resolves it, and the game returns to 10.5.2.1."
+    },
+    {
+      "key": "10.5.2.4",
+      "context": "main",
+      "number": "10.5.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Confirmation Timing ends."
+    },
+    {
+      "key": "10.6",
+      "context": "main",
+      "number": "10.6",
+      "kind": "section",
+      "depth": 2,
+      "title": "Playing and Resolving",
+      "text": ""
+    },
+    {
+      "key": "10.6.1",
+      "context": "main",
+      "number": "10.6.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Activated abilities and automatic abilities, as well as all cards, are resolved by being played, whereupon they produce an effect. Passive abilities are not played; they are constantly producing an effect."
+    },
+    {
+      "key": "10.6.2",
+      "context": "main",
+      "number": "10.6.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To play a card or ability, the player does the following:"
+    },
+    {
+      "key": "10.6.2.1",
+      "context": "main",
+      "number": "10.6.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The player specifies the card or ability to be played. If it's a card, they reveal it and move it to the resolution zone."
+    },
+    {
+      "key": "10.6.2.1.1",
+      "context": "main",
+      "number": "10.6.2.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If it is an ability that belongs to a card in a non-public zone, the player reveals the card to each other player. This card remains revealed until the effects are resolved."
+    },
+    {
+      "key": "10.6.2.1.2",
+      "context": "main",
+      "number": "10.6.2.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the card or ability cannot be played—due to an issue with target selection (10.6.2.3) or cost payment (10.6.2.5), for example—then it cannot be specified."
+    },
+    {
+      "key": "10.6.2.1.3",
+      "context": "main",
+      "number": "10.6.2.1.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If a card in the EX area is to be played, and it has any effects or counters applied to it, those effects and counters apply to it even after it moves to the resolution zone.",
+      "changed": true
+    },
+    {
+      "key": "10.6.2.2",
+      "context": "main",
+      "number": "10.6.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If any selections must be made as a prerequisite to play the card or ability, the player makes those selections."
+    },
+    {
+      "key": "10.6.2.2.1",
+      "context": "main",
+      "number": "10.6.2.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If determining an optional additional cost (10.6.2.2.2) or the number of options to be selected as part of a \"choose\" action (10.6.2.2.3) requires a value represented by \"X\" to be determined, then that value is determined (5.2)."
+    },
+    {
+      "key": "10.6.2.2.2",
+      "context": "main",
+      "number": "10.6.2.2.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "This includes whether or not to pay optional additional costs."
+    },
+    {
+      "key": "10.6.2.2.3",
+      "context": "main",
+      "number": "10.6.2.2.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the card or ability requires a player to determine the number of options to be selected as part of a \"choose\" action, or select the options to be employed, then the player determines the number and makes their selections (5.18)."
+    },
+    {
+      "key": "10.6.2.2.4",
+      "context": "main",
+      "number": "10.6.2.2.4",
+      "kind": "rule",
+      "depth": 5,
+      "text": "At this point, if a value represented by \"X\" still needs to be determined, then that value is determined (5.2)."
+    },
+    {
+      "key": "10.6.2.3",
+      "context": "main",
+      "number": "10.6.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the card or ability requires the player to select something other than a card in a non-public zone (henceforth \"target\"), they make that selection."
+    },
+    {
+      "key": "10.6.2.3.1",
+      "context": "main",
+      "number": "10.6.2.3.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the number of targets to be selected is specified, the player must select as many targets as they can to reach that number. They cannot choose to not select a target when there are targets that can be selected."
+    },
+    {
+      "key": "10.6.2.3.2",
+      "context": "main",
+      "number": "10.6.2.3.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the number of targets to be selected is written in the form \"up to [number],\" the player specifies any number between 0 and the specified number (inclusive). If the number of targets is written as \"any number,\" the player specifies any number equal to or greater than 0."
+    },
+    {
+      "key": "10.6.2.3.3",
+      "context": "main",
+      "number": "10.6.2.3.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the number of targets to be selected is specified as one or more, but it is not possible to select that many targets, the playing of the card or ability is considered illegal, so it cannot be played. The playing of the card or ability is canceled, and the game returns to the point before the player chose to play the card or ability."
+    },
+    {
+      "key": "10.6.2.4",
+      "context": "main",
+      "number": "10.6.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the card or ability requires the player to divide and allocate a numeric value, they determine how that value is to be divided and allocated."
+    },
+    {
+      "key": "10.6.2.4.1",
+      "context": "main",
+      "number": "10.6.2.4.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If no targets have been selected, or for any reason there is nothing among which to allocate the value, division and allocation does not happen, and the process which requires it is not executed."
+    },
+    {
+      "key": "10.6.2.4.2",
+      "context": "main",
+      "number": "10.6.2.4.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "When determining the division and allocation of the value, if targets have been selected as described in 10.6.2.3.1 for the purpose of allocating that value, each target must be allocated at least one unit. If this cannot be done, the target selection is deemed illegal, and the game returns to the point before targets were selected."
+    },
+    {
+      "key": "10.6.2.4.2.1",
+      "context": "main",
+      "number": "10.6.2.4.2.1",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If targets cannot be appropriately selected as a result of this for any reason, then the playing of the card or ability is deemed illegal, and the game returns to the point before the playing of the card or ability."
+    },
+    {
+      "key": "10.6.2.4.3",
+      "context": "main",
+      "number": "10.6.2.4.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "At this point, if targets have been appropriately selected, the player resolves the division and allocation of the value."
+    },
+    {
+      "key": "10.6.2.5",
+      "context": "main",
+      "number": "10.6.2.5",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the card or ability requires a cost to play, the player determines the cost and then pays it in its entirety."
+    },
+    {
+      "key": "10.6.2.5.1",
+      "context": "main",
+      "number": "10.6.2.5.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "A cost is determined as follows:"
+    },
+    {
+      "key": "10.6.2.5.1.1",
+      "context": "main",
+      "number": "10.6.2.5.1.1",
+      "kind": "rule",
+      "depth": 6,
+      "text": "The cost is based on the processes determined by the card or ability (10.4)."
+    },
+    {
+      "key": "10.6.2.5.1.2",
+      "context": "main",
+      "number": "10.6.2.5.1.2",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If an alternate cost action may be performed and the player chooses to do so, the alternate cost action replaces the original cost action."
+    },
+    {
+      "key": "10.6.2.5.1.3",
+      "context": "main",
+      "number": "10.6.2.5.1.3",
+      "kind": "rule",
+      "depth": 6,
+      "text": "Effects that change the cost to a specific value are applied (10.4.4.1)."
+    },
+    {
+      "key": "10.6.2.5.1.4",
+      "context": "main",
+      "number": "10.6.2.5.1.4",
+      "kind": "rule",
+      "depth": 6,
+      "text": "Any actions which are to be added on to the cost are added."
+    },
+    {
+      "key": "10.6.2.5.2",
+      "context": "main",
+      "number": "10.6.2.5.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Even if part of a process that is executed as part of a cost is altered by a replacement effect, the original process is considered to have been executed."
+    },
+    {
+      "key": "10.6.2.5.3",
+      "context": "main",
+      "number": "10.6.2.5.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If part of a cost would be executed based on a value of zero (1.3.2.2), that process is not executed, but is considered to have been executed."
+    },
+    {
+      "key": "10.6.2.5.4",
+      "context": "main",
+      "number": "10.6.2.5.4",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the cost cannot be paid at this point for any reason, the playing of the card or ability is canceled, and the game returns to the point before the player chose to play the card or ability."
+    },
+    {
+      "key": "10.6.2.6",
+      "context": "main",
+      "number": "10.6.2.6",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the card to be played is a follower or amulet, check whether the current number of cards on their field (not including the one to be played) is at or over the limit. If equal to or greater than the limit, the follower or amulet cannot be played, and the game returns to the point before the playing of the card."
+    },
+    {
+      "key": "10.6.2.7",
+      "context": "main",
+      "number": "10.6.2.7",
+      "kind": "rule",
+      "depth": 4,
+      "text": "At this point, the card or ability is considered to have been \"played.\""
+    },
+    {
+      "key": "10.6.2.8",
+      "context": "main",
+      "number": "10.6.2.8",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Resolve the card or ability."
+    },
+    {
+      "key": "10.6.2.8.1",
+      "context": "main",
+      "number": "10.6.2.8.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the played card is a follower or amulet, and the number of cards on the player's field is under the limit, they move it to their field."
+    },
+    {
+      "key": "10.6.2.8.1.1",
+      "context": "main",
+      "number": "10.6.2.8.1.1",
+      "kind": "rule",
+      "depth": 6,
+      "text": "Any effects or counters that were applied to the card in the resolution zone also apply to the card after it is put onto the field.",
+      "changed": true
+    },
+    {
+      "key": "10.6.2.8.2",
+      "context": "main",
+      "number": "10.6.2.8.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If a spell, activated ability, or automatic ability was played, the effects indicated by the text or ability are performed in the written order."
+    },
+    {
+      "key": "10.6.2.8.2.1",
+      "context": "main",
+      "number": "10.6.2.8.2.1",
+      "kind": "rule",
+      "depth": 6,
+      "text": "Even if the card with the activated ability or automatic ability is no longer in its original zone for some reason, the ability is resolved."
+    },
+    {
+      "key": "10.6.2.8.2.2",
+      "context": "main",
+      "number": "10.6.2.8.2.2",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If multiple options were selected for a \"choose\" action (5.18), the options are executed in the order they are listed."
+    },
+    {
+      "key": "10.6.2.8.2.3",
+      "context": "main",
+      "number": "10.6.2.8.2.3",
+      "kind": "rule",
+      "depth": 6,
+      "text": "If any cards or abilities remain in the resolution zone at this point, they are moved to their owner's cemetery if they are cards, or removed from the resolution zone if they are abilities."
+    },
+    {
+      "key": "10.7",
+      "context": "main",
+      "number": "10.7",
+      "kind": "section",
+      "depth": 2,
+      "title": "Handling Automatic Abilities",
+      "text": ""
+    },
+    {
+      "key": "10.7.1",
+      "context": "main",
+      "number": "10.7.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "An automatic ability is an ability that is played in the next Confirmation Timing after its trigger condition is met."
+    },
+    {
+      "key": "10.7.2",
+      "context": "main",
+      "number": "10.7.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When the trigger condition of an automatic ability is met, the automatic ability becomes pending."
+    },
+    {
+      "key": "10.7.2.1",
+      "context": "main",
+      "number": "10.7.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the automatic ability's trigger condition is met multiple times, the automatic ability becomes pending the same number of times."
+    },
+    {
+      "key": "10.7.2.2",
+      "context": "main",
+      "number": "10.7.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When the trigger condition of an automatic ability in the form of \"[number of times] per/each turn\" is met, the automatic ability becomes pending up to a maximum of X times, where X equals the specified number minus the number of times the automatic ability has already become pending that turn. In this case, the controller determines which of the met trigger conditions become pending."
+    },
+    {
+      "key": "10.7.3",
+      "context": "main",
+      "number": "10.7.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When Confirmation Timing occurs, the controller of the pending automatic abilities selects one and plays it. After the played ability is resolved, one instance of its pending status is removed."
+    },
+    {
+      "key": "10.7.3.1",
+      "context": "main",
+      "number": "10.7.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A pending automatic ability must be played; a player cannot choose not to play to it. However, if a player controls multiple pending automatic abilities, they may select which to play first."
+    },
+    {
+      "key": "10.7.3.2",
+      "context": "main",
+      "number": "10.7.3.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the selected pending automatic ability cannot be played for any reason, one instance of its pending status is removed."
+    },
+    {
+      "key": "10.7.4",
+      "context": "main",
+      "number": "10.7.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Some automatic abilities are triggered when a card moves from one zone to another. These are called \"zone-shift triggers.\""
+    },
+    {
+      "key": "10.7.4.1",
+      "context": "main",
+      "number": "10.7.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "An automatic ability triggered by a zone shift may require the player to check whether the automatic ability is valid, the information or state of the card that triggered the ability, and/or the current game state. In such cases, information is checked as follows."
+    },
+    {
+      "key": "10.7.4.1.1",
+      "context": "main",
+      "number": "10.7.4.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "When an automatic ability triggered by a card moving from a public zone to a non-public zone or vice versa requires the card's information, use the information from the card while it's in the public zone."
+    },
+    {
+      "key": "10.7.4.1.2",
+      "context": "main",
+      "number": "10.7.4.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "When an automatic ability triggered by a card moving from the field to another zone requires the card's information, use the information from the card while it's on the field."
+    },
+    {
+      "key": "10.7.4.1.3",
+      "context": "main",
+      "number": "10.7.4.1.3",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Aside from cases covered in 10.7.4.1.2, when an automatic ability triggered by a card moving from a public zone to another public zone requires the card's information, use the information from the card after it moves to the new zone."
+    },
+    {
+      "key": "10.7.4.2",
+      "context": "main",
+      "number": "10.7.4.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a card with a zone-shift trigger ability enters or leaves a zone where the ability is valid, and at the same time another card changes zones in a way that satisfies that ability's trigger condition, that condition is considered to have been triggered."
+    },
+    {
+      "key": "10.7.4.3",
+      "context": "main",
+      "number": "10.7.4.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A card that moves from one player's field to another is not treated as having \"entered\" or been \"put onto\" that field, and therefore does not satisfy trigger conditions that involve a card being put on the field."
+    },
+    {
+      "key": "10.7.5",
+      "context": "main",
+      "number": "10.7.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Some effects may create an automatic ability that triggers at a certain later point in time. This is called a \"delayed trigger.\""
+    },
+    {
+      "key": "10.7.5.1",
+      "context": "main",
+      "number": "10.7.5.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A delayed trigger condition may only trigger once unless a time frame is specified."
+    },
+    {
+      "key": "10.7.6",
+      "context": "main",
+      "number": "10.7.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Some automatic abilities are triggered not by the occurrence of an event, but by the fulfillment of a certain condition (e.g., \"When there are no cards in your hand\"). This is called a \"state trigger.\""
+    },
+    {
+      "key": "10.7.6.1",
+      "context": "main",
+      "number": "10.7.6.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "State triggers become pending only once when that state is achieved. After the automatic ability is resolved, if the trigger condition for that automatic ability is met again, the ability becomes pending again."
+    },
+    {
+      "key": "10.7.7",
+      "context": "main",
+      "number": "10.7.7",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When playing a pending automatic ability, even if the card with the automatic ability has changed zones, the automatic ability must still be played."
+    },
+    {
+      "key": "10.8",
+      "context": "main",
+      "number": "10.8",
+      "kind": "section",
+      "depth": 2,
+      "title": "Handling One-Shot Effects",
+      "text": ""
+    },
+    {
+      "key": "10.8.1",
+      "context": "main",
+      "number": "10.8.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a player is required to perform a one-shot effect, they perform the indicated action only once."
+    },
+    {
+      "key": "10.9",
+      "context": "main",
+      "number": "10.9",
+      "kind": "section",
+      "depth": 2,
+      "title": "Handling Persistent Effects",
+      "text": ""
+    },
+    {
+      "key": "10.9.1",
+      "context": "main",
+      "number": "10.9.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card's information is referenced while one or more persistent effects are in place, the persistent effects are applied to the card's information in the following order:"
+    },
+    {
+      "key": "10.9.1.1",
+      "context": "main",
+      "number": "10.9.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The information written on the card itself is always the base value."
+    },
+    {
+      "key": "10.9.1.1.1",
+      "context": "main",
+      "number": "10.9.1.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the card is on the field and is linked to a card in the evolve zone, treat that card as having the card information of the card in the evolve zone, excluding the cost (5.16.1.2)."
+    },
+    {
+      "key": "10.9.1.2",
+      "context": "main",
+      "number": "10.9.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Next, apply effects that give, remove, validate, or invalidate abilities."
+    },
+    {
+      "key": "10.9.1.3",
+      "context": "main",
+      "number": "10.9.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Next, apply any persistent effects that do not change the numerical values in the information."
+    },
+    {
+      "key": "10.9.1.4",
+      "context": "main",
+      "number": "10.9.1.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Next, apply any persistent effects that change the numerical values in the information."
+    },
+    {
+      "key": "10.9.1.5",
+      "context": "main",
+      "number": "10.9.1.5",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the application order of two persistent effects—effect A and effect B—cannot be determined by 10.9.1.2– 10.9.1.4, and applying A first would change what B applies to or how B would be applied, then B is considered dependent on A. Dependent effects are always processed after the effects they depend on."
+    },
+    {
+      "key": "10.9.1.6",
+      "context": "main",
+      "number": "10.9.1.6",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If there are multiple persistent effects whose application order cannot be determined by 10.9.1.2–10.9.1.5, apply them in the order in which they were produced."
+    },
+    {
+      "key": "10.9.1.6.1",
+      "context": "main",
+      "number": "10.9.1.6.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If the source of a persistent effect is a passive ability, its application order is based on when the card with the ability was put into its current zone."
+    },
+    {
+      "key": "10.9.1.6.2",
+      "context": "main",
+      "number": "10.9.1.6.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "For all other ability types, order is based on when they were played."
+    },
+    {
+      "key": "10.9.2",
+      "context": "main",
+      "number": "10.9.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A persistent effect that isn't produced by a passive ability doesn't apply to cards that change zones after the corresponding ability is played, unless they move from one field to another."
+    },
+    {
+      "key": "10.9.3",
+      "context": "main",
+      "number": "10.9.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A persistent effect that changes card information in a certain zone is applied at the same time an applicable card enters that zone."
+    },
+    {
+      "key": "10.9.3.1",
+      "context": "main",
+      "number": "10.9.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "An automatic ability whose trigger condition requires a card with certain information to enter a zone refers to the card's information after any persistent effects that are applicable in that zone have been applied."
+    },
+    {
+      "key": "10.10",
+      "context": "main",
+      "number": "10.10",
+      "kind": "section",
+      "depth": 2,
+      "title": "Handling Replacement Effects",
+      "text": ""
+    },
+    {
+      "key": "10.10.1",
+      "context": "main",
+      "number": "10.10.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "While a replacement effect is in place, if the target event (the event being replaced) would occur, it does not occur, and instead the event indicated by the replacement effect occurs."
+    },
+    {
+      "key": "10.10.1.1",
+      "context": "main",
+      "number": "10.10.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The original event that was replaced is considered to have not occurred at all."
+    },
+    {
+      "key": "10.10.2",
+      "context": "main",
+      "number": "10.10.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If there are multiple replacement effects for the same event, the affected player determines the order in which they are applied."
+    },
+    {
+      "key": "10.10.2.1",
+      "context": "main",
+      "number": "10.10.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the affected event is a card or ability, its controller determines the order instead."
+    },
+    {
+      "key": "10.10.2.2",
+      "context": "main",
+      "number": "10.10.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the affected event is a game action, the order is determined by the player performing the action or the controller of the card to which the action applies."
+    },
+    {
+      "key": "10.10.2.3",
+      "context": "main",
+      "number": "10.10.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Each replacement effect is applied once at most to any single event."
+    },
+    {
+      "key": "10.10.2.4",
+      "context": "main",
+      "number": "10.10.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "For replacement effects that change the cost of playing a card or ability (10.2.1.3.3), effects that change the cost to a specific value are applied before effects that increase or decrease the cost."
+    },
+    {
+      "key": "10.10.2.5",
+      "context": "main",
+      "number": "10.10.2.5",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A replacement effect which, when resolving a card or ability, replaces part of a process contained within the card or ability itself is called a “self-replacement effect.”"
+    },
+    {
+      "key": "10.10.2.5.1",
+      "context": "main",
+      "number": "10.10.2.5.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Self-replacement effects are applied before other replacement effects."
+    },
+    {
+      "key": "10.10.3",
+      "context": "main",
+      "number": "10.10.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "For cards that are moved to the field or EX area, replacement effects are applied to them with reference to their card information after any persistent effects that apply to them on the field or in the EX area have been applied (10.9.3)."
+    },
+    {
+      "key": "10.11",
+      "context": "main",
+      "number": "10.11",
+      "kind": "section",
+      "depth": 2,
+      "title": "Final Card Information",
+      "text": ""
+    },
+    {
+      "key": "10.11.1",
+      "context": "main",
+      "number": "10.11.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If an effect refers to a certain card's information or placement state in a certain zone, and the card has changed zones (excluding movement from one field to another) by the time the effect is executed, the effect refers to the information or placement state of the card when it was last in that zone."
+    },
+    {
+      "key": "10.12",
+      "context": "main",
+      "number": "10.12",
+      "kind": "section",
+      "depth": 2,
+      "title": "Source",
+      "text": ""
+    },
+    {
+      "key": "10.12.1",
+      "context": "main",
+      "number": "10.12.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The source of an effect is the object from which the effect originates and is defined as follows."
+    },
+    {
+      "key": "10.12.1.1",
+      "context": "main",
+      "number": "10.12.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The source of an effect produced by a card's ability is that card."
+    },
+    {
+      "key": "10.12.1.2",
+      "context": "main",
+      "number": "10.12.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "An instance of rules handling (section 11) is not an effect and therefore has no source."
+    },
+    {
+      "key": "10.12.1.3",
+      "context": "main",
+      "number": "10.12.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The source of an effect produced by a delayed trigger (10.7.5) is the source of the effect which created the delayed trigger."
+    },
+    {
+      "key": "10.12.2",
+      "context": "main",
+      "number": "10.12.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The source of an instance of damage is the object which dealt the damage and is defined as follows."
+    },
+    {
+      "key": "10.12.2.1",
+      "context": "main",
+      "number": "10.12.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When a follower attacks (8.4), the source of damage it deals in accordance with rule 8.4.9 is that follower itself."
+    },
+    {
+      "key": "10.12.2.2",
+      "context": "main",
+      "number": "10.12.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The source of damage dealt by an effect produced by a card's ability is the source of that effect, unless the effect specifies the damage source otherwise."
+    },
+    {
+      "key": "10.12.2.3",
+      "context": "main",
+      "number": "10.12.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If an effect modifies damage that an object deals, it means that it modifies damage whose source is that object."
+    }
+  ]
+}

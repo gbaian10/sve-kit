@@ -1,0 +1,114 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "15",
+      "context": "main",
+      "number": "15",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Miscellaneous",
+      "text": ""
+    },
+    {
+      "key": "15.1",
+      "context": "main",
+      "number": "15.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Counters",
+      "text": ""
+    },
+    {
+      "key": "15.1.1",
+      "context": "main",
+      "number": "15.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "During the game, certain counters may be placed on or removed from cards."
+    },
+    {
+      "key": "15.1.2",
+      "context": "main",
+      "number": "15.1.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Different types of counters have different names."
+    },
+    {
+      "key": "15.1.2.1",
+      "context": "main",
+      "number": "15.1.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Names are written in the form \"[qualifier] counter.\""
+    },
+    {
+      "key": "15.1.2.2",
+      "context": "main",
+      "number": "15.1.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Counters with the same name are considered identical, regardless of how or why they were placed."
+    },
+    {
+      "key": "15.1.3",
+      "context": "main",
+      "number": "15.1.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To put a counter on a card, place a clearly identifiable item on top of that card."
+    },
+    {
+      "key": "15.1.4",
+      "context": "main",
+      "number": "15.1.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To remove a counter from a card, take the specified counter off that card."
+    },
+    {
+      "key": "15.2",
+      "context": "main",
+      "number": "15.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Perpetual Cycles",
+      "text": ""
+    },
+    {
+      "key": "15.2.1",
+      "context": "main",
+      "number": "15.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When executing a process, it may be possible for a sequence of actions to be repeated an infinite number of times. This is called a \"perpetual cycle,\" and is handled as follows:"
+    },
+    {
+      "key": "15.2.1.1",
+      "context": "main",
+      "number": "15.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When a perpetual cycle occurs, the active player declares the sequence of actions they wish to perform and then specifies the number of times they wish to perform that sequence. Next, the non-active player can either allow the proposed sequence to be performed the specified number of times, or have it performed a lesser number of times by declaring that an action or actions not included in the sequence will be executed at a specific point in the perpetual cycle. The active player then performs the actions according to the decision of the non-active player."
+    },
+    {
+      "key": "15.2.1.2",
+      "context": "main",
+      "number": "15.2.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the active player performs an action that results in the game state remaining completely identical to before the action was performed, the active player may not perform that action again."
+    },
+    {
+      "key": "15.2.1.3",
+      "context": "main",
+      "number": "15.2.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If neither player is able to stop the perpetual cycle, the game ends in a draw."
+    }
+  ]
+}

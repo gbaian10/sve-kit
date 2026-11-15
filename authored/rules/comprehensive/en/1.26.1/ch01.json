@@ -1,0 +1,256 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "1",
+      "context": "main",
+      "number": "1",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Game Overview",
+      "text": ""
+    },
+    {
+      "key": "1.1",
+      "context": "main",
+      "number": "1.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Number of Players",
+      "text": ""
+    },
+    {
+      "key": "1.1.1",
+      "context": "main",
+      "number": "1.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A standard game is played by two players. The Comprehensive Rules do not currently support games played by more than two players."
+    },
+    {
+      "key": "1.2",
+      "context": "main",
+      "number": "1.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Game Outcomes",
+      "text": ""
+    },
+    {
+      "key": "1.2.1",
+      "context": "main",
+      "number": "1.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The game concludes when a player loses. The player who didn’t lose is considered the winner."
+    },
+    {
+      "key": "1.2.1.1",
+      "context": "main",
+      "number": "1.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a player’s leader’s defense is 0 or less, that player is considered to have fulfilled a loss condition."
+    },
+    {
+      "key": "1.2.1.2",
+      "context": "main",
+      "number": "1.2.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a player must draw a card when there are no cards remaining in their deck, that player is considered to have fulfilled a loss condition."
+    },
+    {
+      "key": "1.2.2",
+      "context": "main",
+      "number": "1.2.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If all players lose simultaneously, the game ends in a draw."
+    },
+    {
+      "key": "1.2.3",
+      "context": "main",
+      "number": "1.2.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Players may concede at any point during the game. When a player concedes, they lose the game immediately, and the game concludes; Confirmation Timing (10.5) does not occur."
+    },
+    {
+      "key": "1.2.3.1",
+      "context": "main",
+      "number": "1.2.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The act of conceding is not affected by any card. A card effect cannot force a player to concede, nor can a replacement effect replace a loss resulting from concession."
+    },
+    {
+      "key": "1.2.4",
+      "context": "main",
+      "number": "1.2.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A card may produce an effect that causes a player to win or lose the game. In such cases, the player wins or loses immediately when the effect is processed, and the game concludes; Confirmation Timing (10.5) does not occur."
+    },
+    {
+      "key": "1.3",
+      "context": "main",
+      "number": "1.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "General Rules",
+      "text": ""
+    },
+    {
+      "key": "1.3.1",
+      "context": "main",
+      "number": "1.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If card text should ever be contradicted by the Comprehensive Rules, the card text takes precedence."
+    },
+    {
+      "key": "1.3.2",
+      "context": "main",
+      "number": "1.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a player is required to perform an impossible action for any reason, the action is not performed. Similarly, if an effect requires a player to perform multiple actions, part of which cannot be performed, the player performs as many actions as possible."
+    },
+    {
+      "key": "1.3.2.1",
+      "context": "main",
+      "number": "1.3.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If required to put something into a state that it is already in, that action is not performed."
+    },
+    {
+      "key": "1.3.2.2",
+      "context": "main",
+      "number": "1.3.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If, for any reason, an action is to be performed zero or a negative number of times, or if an action would be based on zero or a negative value (aside from adding, subtracting, or comparing), the action is not performed at all. A negative value never indicates an opposite action.",
+      "examples": [
+        "Example: If instructed to deal 0 damage, that instance of damage does not happen at all. (Damage is not considered to have been dealt.)"
+      ]
+    },
+    {
+      "key": "1.3.2.2.1",
+      "context": "main",
+      "number": "1.3.2.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If it becomes necessary to perform an action that would be based on a negative value (aside from adding, subtracting), treat the value as zero.",
+      "examples": [
+        "Example: An effect has reduced the cost of a card to a negative value. That card would be played for zero play points."
+      ]
+    },
+    {
+      "key": "1.3.2.3",
+      "context": "main",
+      "number": "1.3.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If multiple effects that require a player to perform a certain action are produced simultaneously, and it is not possible to perform all of them, the player is required to select and perform as many of the actions as possible."
+    },
+    {
+      "key": "1.3.2.4",
+      "context": "main",
+      "number": "1.3.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Numeric information possessed by players or cards can be zero or a negative value, unless an upper or lower limit is specified."
+    },
+    {
+      "key": "1.3.2.4.1",
+      "context": "main",
+      "number": "1.3.2.4.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "When a certain value would rise above or fall below an upper or lower limit, it instead becomes the value specified by the limit."
+    },
+    {
+      "key": "1.3.3",
+      "context": "main",
+      "number": "1.3.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card’s effect instructs a player to perform an action that is prohibited by another active effect, the prohibiting effect takes precedence."
+    },
+    {
+      "key": "1.3.4",
+      "context": "main",
+      "number": "1.3.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In the case that multiple players are required to make a selection simultaneously while processing effects, if it is before the game, players make their selections in turn order. If it is during the game, the active player selects first. The non-active player makes their selection after the active player makes their selection known to them."
+    },
+    {
+      "key": "1.3.4.1",
+      "context": "main",
+      "number": "1.3.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a certain effect applies to multiple players, and that effect requires executing multiple processes, each process that does not involve selection is executed simultaneously, while each process that does involve selection is executed starting with the active player.",
+      "examples": [
+        "Example: An effect reads, “Each player draws a card. Each player may put a follower from their hand onto the field.” This effect is handled in the following order: (1) Both players draw a card. (2) The active player may put a follower from their hand onto the field. (3) The non-active player may put a follower from their hand onto the field."
+      ]
+    },
+    {
+      "key": "1.3.5",
+      "context": "main",
+      "number": "1.3.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When a player is required by a card or a rule to select a number, the player must select an integer equal to or greater than zero, unless indicated otherwise. Fractions less than one and negative numbers may not be selected."
+    },
+    {
+      "key": "1.3.5.1",
+      "context": "main",
+      "number": "1.3.5.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a card or rule specifies a numerical limit (e.g., “up to X”), the player may choose zero as long as a minimum value isn’t specified."
+    },
+    {
+      "key": "1.3.6",
+      "context": "main",
+      "number": "1.3.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If reference is made to information that a card does not possess, the following rules apply.",
+      "changed": true
+    },
+    {
+      "key": "1.3.6.1",
+      "context": "main",
+      "number": "1.3.6.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When counting the number of cards in a group which possess that information or different values of that information, the card in question does not count.",
+      "changed": true
+    },
+    {
+      "key": "1.3.6.2",
+      "context": "main",
+      "number": "1.3.6.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A condition which depends on the comparison of that information to some other information is never satisfied.",
+      "changed": true
+    },
+    {
+      "key": "1.3.6.3",
+      "context": "main",
+      "number": "1.3.6.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the value of that information itself is required, it will be referenced as if equal to 0 in the case of numeric information or an empty character string otherwise.",
+      "changed": true
+    }
+  ]
+}

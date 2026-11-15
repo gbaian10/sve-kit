@@ -67,9 +67,6 @@ export default {
     translationPartial:
       "翻訳準備中：{{total}} 項目中 {{done}} 項目を翻訳済み。残りは原文を表示しています。",
     originalTag: "原文",
-    englishUnavailable: "英語版の総合ルールはまだ提供していません。",
-    showJapanese: "日本語の原文を表示",
-    hideJapanese: "日本語の原文を隠す",
     copyLink: "{{number}} のリンクをコピー",
     linkCopied: "{{number}} のリンクをコピーしました",
     linkCopyFailed: "リンクをコピーできませんでした",

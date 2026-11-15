@@ -58,9 +58,7 @@ export function localizeNode(node: RuleNode, entry: TranslationEntry | undefined
   }
 }
 
-/**
- * The original only: what the Japanese view, and the English view's original toggle, render.
- */
+/** The original only: what the Japanese and English views render, each from its own edition. */
 export function originalNode(node: RuleNode): LocalizedNode {
   return localizeNode(node, undefined)
 }

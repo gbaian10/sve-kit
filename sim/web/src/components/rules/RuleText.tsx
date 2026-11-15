@@ -19,12 +19,13 @@ import {
   resolveRuleReference,
   type RuleContext,
   type RulesBundle,
+  rulesRegionFor,
 } from "../../data"
 import { currentUiLanguage } from "../../i18n"
 import { usePrefs } from "../../settings"
 import { SymbolIcon } from "../card/InlineText"
 import { inlinePieces } from "../card/textSymbols"
-import { ruleAnchor, RuleKeysContext } from "./rule-keys"
+import { ruleAnchor, RuleKeysContext, RULES_LANG } from "./rule-keys"
 
 const UNKNOWN_MARKER = /\{([^{}]+)\}/gu
 const GAP = 6
@@ -67,10 +68,9 @@ function RulePreview({
   }, [anchor])
   const node = rules.byKey.get(ruleKey)
   if (!node) return null
+  const language = currentUiLanguage(prefs.uiLanguage)
   const view =
-    currentUiLanguage(prefs.uiLanguage) === "zh-TW"
-      ? localizeNode(node, rules.translations.get(ruleKey))
-      : originalNode(node)
+    language === "zh-TW" ? localizeNode(node, rules.translations.get(ruleKey)) : originalNode(node)
   const piece = view.text.text ? view.text : (view.title ?? view.text)
   return (
     <div
@@ -84,7 +84,7 @@ function RulePreview({
       <span className="font-mono text-12 text-accent-text">{node.number ?? node.key}</span>
       {/* Plain text only: nothing inside a tooltip can take focus. */}
       <RuleKeysContext.Provider value={{ keys: new Set() }}>
-        <div lang={piece.translated && prefs.uiLanguage !== "ja" ? undefined : "ja"}>
+        <div lang={piece.translated ? undefined : RULES_LANG[rules.index.region]}>
           <RuleText text={piece.text} context={node.context} className="mt-0.5 line-clamp-6" />
         </div>
       </RuleKeysContext.Provider>
@@ -107,7 +107,11 @@ export function RuleRef({
 }) {
   const id = useId()
   const [anchor, setAnchor] = useState<DOMRect | null>(null)
-  const [rules, setRules] = useState<RulesBundle | null>(null)
+  const prefs = usePrefs()
+  const region = rulesRegionFor(currentUiLanguage(prefs.uiLanguage))
+  const [loaded, setRules] = useState<RulesBundle | null>(null)
+  // A bundle of the other edition (the UI language changed) counts as not loaded.
+  const rules = loaded?.index.region === region ? loaded : null
   const leaving = useRef(0)
   // The pointer is on the reference or its preview. An Escape while it is there stays in force
   // until the pointer really leaves the reference: a clamped preview can cover the reference, and
@@ -146,7 +150,7 @@ export function RuleRef({
     stay()
     setAnchor(event.currentTarget.getBoundingClientRect())
     // The rules chunk loads on first interest; without it the reference is still a plain link.
-    if (!rules) loadComprehensiveRules().then(setRules, () => undefined)
+    if (!rules) loadComprehensiveRules(region).then(setRules, () => undefined)
   }
   const hide = () => {
     stay()

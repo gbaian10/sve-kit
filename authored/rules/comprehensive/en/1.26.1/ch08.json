@@ -1,0 +1,252 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "8",
+      "context": "main",
+      "number": "8",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Main Phase Processes",
+      "text": ""
+    },
+    {
+      "key": "8.1",
+      "context": "main",
+      "number": "8.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Overview",
+      "text": ""
+    },
+    {
+      "key": "8.1.1",
+      "context": "main",
+      "number": "8.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "This section provides further details about the actions the active player may perform during their main phase."
+    },
+    {
+      "key": "8.1.2",
+      "context": "main",
+      "number": "8.1.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "As a general rule, if part of an action cannot be performed, then that action cannot be selected."
+    },
+    {
+      "key": "8.2",
+      "context": "main",
+      "number": "8.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "Playing Cards from the Hand or EX Area",
+      "text": ""
+    },
+    {
+      "key": "8.2.1",
+      "context": "main",
+      "number": "8.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player may specify a card from their hand or their EX area and play it by paying play points equal to its cost (10.6)."
+    },
+    {
+      "key": "8.3",
+      "context": "main",
+      "number": "8.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "Playing Activated Abilities",
+      "text": ""
+    },
+    {
+      "key": "8.3.1",
+      "context": "main",
+      "number": "8.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player may specify an activated ability of a card they control and play it (10.6)."
+    },
+    {
+      "key": "8.3.2",
+      "context": "main",
+      "number": "8.3.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Some activated abilities are considered equivalent to evolve abilities by certain rules."
+    },
+    {
+      "key": "8.3.2.1",
+      "context": "main",
+      "number": "8.3.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The active player cannot specify an evolve or equivalent ability if they have already played either type of ability that turn."
+    },
+    {
+      "key": "8.3.2.2",
+      "context": "main",
+      "number": "8.3.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The above does not apply if the evolve or equivalent ability has an effect applied to it that allows it to be played any number of times per turn."
+    },
+    {
+      "key": "8.4",
+      "context": "main",
+      "number": "8.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "Attacking with a Follower",
+      "text": ""
+    },
+    {
+      "key": "8.4.1",
+      "context": "main",
+      "number": "8.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The active player may use a follower they control to attack an enemy leader or enemy follower. If they choose to do so, they do the following in order."
+    },
+    {
+      "key": "8.4.2",
+      "context": "main",
+      "number": "8.4.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The player selects a reserved follower they control as the attacking follower."
+    },
+    {
+      "key": "8.4.2.1",
+      "context": "main",
+      "number": "8.4.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The follower must meet one of the following conditions to be selected:\n* It has remained on the player's field (under their control) since the start of the turn (including if it evolved that turn).\n* It evolved that turn."
+    },
+    {
+      "key": "8.4.3",
+      "context": "main",
+      "number": "8.4.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The player selects an attack target."
+    },
+    {
+      "key": "8.4.3.1",
+      "context": "main",
+      "number": "8.4.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The target must meet one of the following conditions to be selected:\n* It is an engaged follower controlled by the non-active player.\n* It is the non-active player's leader, but only if the attacking follower has remained on the active player's field (under their control) since the start of the turn."
+    },
+    {
+      "key": "8.4.3.2",
+      "context": "main",
+      "number": "8.4.3.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If an attack target cannot be selected for any reason, the follower's attack is rendered illegal, and the game returns to the point before the player chose to attack with the follower."
+    },
+    {
+      "key": "8.4.3.2.1",
+      "context": "main",
+      "number": "8.4.3.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If, due to an effect, the attacking follower \"can't attack enemies,\" an attack target cannot be selected."
+    },
+    {
+      "key": "8.4.4",
+      "context": "main",
+      "number": "8.4.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The player engages the attacking follower."
+    },
+    {
+      "key": "8.4.5",
+      "context": "main",
+      "number": "8.4.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The attacking follower is now considered to have \"attacked.\""
+    },
+    {
+      "key": "8.4.5.1",
+      "context": "main",
+      "number": "8.4.5.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the attack target is a follower, the attacking follower and attack target are now considered to be in \"combat\" as long as they both remain on the field."
+    },
+    {
+      "key": "8.4.6",
+      "context": "main",
+      "number": "8.4.6",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Confirmation Timing occurs."
+    },
+    {
+      "key": "8.4.7",
+      "context": "main",
+      "number": "8.4.7",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The non-active player performs one of the following actions:\n* Play a card with Quick from their hand or EX area (10.6).\n* Play an activated ability with Quick.\n* Do nothing."
+    },
+    {
+      "key": "8.4.8",
+      "context": "main",
+      "number": "8.4.8",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card or ability was played as part of 8.4.7, Confirmation timing occurs, and 8.4.7 is repeated."
+    },
+    {
+      "key": "8.4.9",
+      "context": "main",
+      "number": "8.4.9",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If the attacking follower is still on the field at this point, it deals damage equal to its attack value to its attack target."
+    },
+    {
+      "key": "8.4.9.1",
+      "context": "main",
+      "number": "8.4.9.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the attack target is a follower, when the attacking follower deals damage according to 8.4.9, the attack target simultaneously deals damage equal to its attack value to the attacking follower."
+    },
+    {
+      "key": "8.4.9.2",
+      "context": "main",
+      "number": "8.4.9.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the attacking follower and attack target are still in combat at this point, they are considered to have \"fought\" with each other."
+    },
+    {
+      "key": "8.4.10",
+      "context": "main",
+      "number": "8.4.10",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Confirmation Timing occurs."
+    },
+    {
+      "key": "8.4.11",
+      "context": "main",
+      "number": "8.4.11",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The attack ends, and if the attacking follower and attack target are in combat, they leave combat."
+    }
+  ]
+}

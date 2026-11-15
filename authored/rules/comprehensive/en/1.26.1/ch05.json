@@ -1,0 +1,1251 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules",
+  "version": "1.26.1",
+  "nodes": [
+    {
+      "key": "5",
+      "context": "main",
+      "number": "5",
+      "kind": "chapter",
+      "depth": 1,
+      "title": "Key Notations",
+      "text": ""
+    },
+    {
+      "key": "5.1",
+      "context": "main",
+      "number": "5.1",
+      "kind": "section",
+      "depth": 2,
+      "title": "Overview",
+      "text": ""
+    },
+    {
+      "key": "5.1.1",
+      "context": "main",
+      "number": "5.1.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Key notations are terms or icons used in the game that hold special meaning or express a certain action, direction, or state."
+    },
+    {
+      "key": "5.2",
+      "context": "main",
+      "number": "5.2",
+      "kind": "section",
+      "depth": 2,
+      "title": "X",
+      "text": ""
+    },
+    {
+      "key": "5.2.1",
+      "context": "main",
+      "number": "5.2.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When a certain value in card text is specified as \"X,\" its value is determined as follows."
+    },
+    {
+      "key": "5.2.1.1",
+      "context": "main",
+      "number": "5.2.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the value of X can be determined by the card text without the player's input, that is the value of X."
+    },
+    {
+      "key": "5.2.1.2",
+      "context": "main",
+      "number": "5.2.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the value of X cannot be determined without the player's input, the value of X is determined at the time the card or ability is played (10.6.2.2.3)."
+    },
+    {
+      "key": "5.3",
+      "context": "main",
+      "number": "5.3",
+      "kind": "section",
+      "depth": 2,
+      "title": "Play Points",
+      "text": ""
+    },
+    {
+      "key": "5.3.1",
+      "context": "main",
+      "number": "5.3.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, an item encased by a green circle {PP} represents the notated value of play points (3.2.2)."
+    },
+    {
+      "key": "5.3.1.1",
+      "context": "main",
+      "number": "5.3.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the notation is a numerical value, that numerical value represents the number of play points."
+    },
+    {
+      "key": "5.3.1.2",
+      "context": "main",
+      "number": "5.3.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the notation is an \"X,\" it means the value of X is defined within the card text (5.2)."
+    },
+    {
+      "key": "5.3.1.2.1",
+      "context": "main",
+      "number": "5.3.1.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If multiple X play points icons are shown, such as ({COST X|[costX]} {COST X|[costX]}), the value of X is the determined value and the number for each play point icon."
+    },
+    {
+      "key": "5.4",
+      "context": "main",
+      "number": "5.4",
+      "kind": "section",
+      "depth": 2,
+      "title": "Refresh/Engage",
+      "text": ""
+    },
+    {
+      "key": "5.4.1",
+      "context": "main",
+      "number": "5.4.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"refresh\" or \"engage\" a card means to turn the card so it is in the \"reserved\" or \"engaged\" state respectively."
+    },
+    {
+      "key": "5.5",
+      "context": "main",
+      "number": "5.5",
+      "kind": "section",
+      "depth": 2,
+      "title": "Put/Summon",
+      "text": ""
+    },
+    {
+      "key": "5.5.1",
+      "context": "main",
+      "number": "5.5.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"put\" a card into a specified zone means to move the card into that zone. To \"summon\" a card means to put it onto the player's field."
+    },
+    {
+      "key": "5.5.2",
+      "context": "main",
+      "number": "5.5.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Put [number] [token name] tokens into/onto [zone]\" means to create (9.1.2) that number of token cards with the specified name in the specified zone."
+    },
+    {
+      "key": "5.5.2.1",
+      "context": "main",
+      "number": "5.5.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "\"Summon [number] [token name] tokens\" means \"Put [number] token cards named [token name] onto your field.\""
+    },
+    {
+      "key": "5.5.2.2",
+      "context": "main",
+      "number": "5.5.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to put a card with a specific name, and that name is the same as a token's name, it means to put a token with that name."
+    },
+    {
+      "key": "5.5.3",
+      "context": "main",
+      "number": "5.5.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card is \"put onto the field from [zone],\" it means one of two things: (i) the card is moved directly from that zone onto the field, or (ii) after the card is played from that zone, it is moved to the resolution zone and then put onto the field after being resolved. Likewise, if a card is \"put onto the field from somewhere other than [zone],\" it means one of two things: (i) the card is moved directly from a zone that is neither the specified zone nor the resolution zone onto the field, or (ii) after the card is played from a zone other than the specified zone, it is moved to the resolution zone and then put onto the field after being resolved."
+    },
+    {
+      "key": "5.6",
+      "context": "main",
+      "number": "5.6",
+      "kind": "section",
+      "depth": 2,
+      "title": "Destroy",
+      "text": ""
+    },
+    {
+      "key": "5.6.1",
+      "context": "main",
+      "number": "5.6.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"destroy\" a card on the field means to move it to its owner's cemetery."
+    },
+    {
+      "key": "5.7",
+      "context": "main",
+      "number": "5.7",
+      "kind": "section",
+      "depth": 2,
+      "title": "Banish",
+      "text": ""
+    },
+    {
+      "key": "5.7.1",
+      "context": "main",
+      "number": "5.7.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"banish\" a card means to move it to its owner's banished zone."
+    },
+    {
+      "key": "5.8",
+      "context": "main",
+      "number": "5.8",
+      "kind": "section",
+      "depth": 2,
+      "title": "Search",
+      "text": ""
+    },
+    {
+      "key": "5.8.1",
+      "context": "main",
+      "number": "5.8.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"search\" a deck for cards that meet certain conditions means to look through the deck and find any applicable cards. Only the searching player may look through the deck."
+    },
+    {
+      "key": "5.8.1.1",
+      "context": "main",
+      "number": "5.8.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the conditions only specify a certain number of cards, the player must find that number of cards."
+    },
+    {
+      "key": "5.8.1.2",
+      "context": "main",
+      "number": "5.8.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If there are any conditions other than the number of cards, after finding the card(s), the player must reveal the card(s) to their opponents to show that they meet the conditions."
+    },
+    {
+      "key": "5.8.2",
+      "context": "main",
+      "number": "5.8.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "After searching a deck for cards and either moving the found cards into the specified zone, electing to not move the found cards into the specified zone, or being unable to find applicable cards, the player must shuffle the deck."
+    },
+    {
+      "key": "5.9",
+      "context": "main",
+      "number": "5.9",
+      "kind": "section",
+      "depth": 2,
+      "title": "Shuffle",
+      "text": ""
+    },
+    {
+      "key": "5.9.1",
+      "context": "main",
+      "number": "5.9.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"shuffle\" a deck means the player to whom the deck area belongs randomly rearranges the order of the cards in that deck area."
+    },
+    {
+      "key": "5.9.1.1",
+      "context": "main",
+      "number": "5.9.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If one card or less remains in a deck area and a player is instructed to shuffle that deck, the order of cards in that area does not change, but the deck is still considered to have been shuffled."
+    },
+    {
+      "key": "5.10",
+      "context": "main",
+      "number": "5.10",
+      "kind": "section",
+      "depth": 2,
+      "title": "Draw",
+      "text": ""
+    },
+    {
+      "key": "5.10.1",
+      "context": "main",
+      "number": "5.10.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"draw a card,\" the player moves the topmost card in their deck area to their hand."
+    },
+    {
+      "key": "5.10.1.1",
+      "context": "main",
+      "number": "5.10.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When performing this action, if the player has no cards remaining in their deck area, that player loses the game the next time rules handling occurs (11.2.2)."
+    },
+    {
+      "key": "5.10.2",
+      "context": "main",
+      "number": "5.10.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"draw X cards\" means to draw a card X times in succession."
+    },
+    {
+      "key": "5.10.3",
+      "context": "main",
+      "number": "5.10.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"draw up to X cards,\" the player does the following:"
+    },
+    {
+      "key": "5.10.3.1",
+      "context": "main",
+      "number": "5.10.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The player may choose to end this action sequence."
+    },
+    {
+      "key": "5.10.3.2",
+      "context": "main",
+      "number": "5.10.3.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The player draws a card."
+    },
+    {
+      "key": "5.10.3.3",
+      "context": "main",
+      "number": "5.10.3.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the action in 5.10.3.2 has been performed exactly X times, this action sequence ends. If not, return to 5.10.3.1."
+    },
+    {
+      "key": "5.11",
+      "context": "main",
+      "number": "5.11",
+      "kind": "section",
+      "depth": 2,
+      "title": "Look at the Top Card(s)",
+      "text": ""
+    },
+    {
+      "key": "5.11.1",
+      "context": "main",
+      "number": "5.11.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"look at the top card of your deck\" or \"look at the top X cards of your deck,\" the player looks at the topmost card or X topmost cards in their deck area."
+    },
+    {
+      "key": "5.11.2",
+      "context": "main",
+      "number": "5.11.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"look at up to X of the top cards of your deck,\" the player does the following:"
+    },
+    {
+      "key": "5.11.2.1",
+      "context": "main",
+      "number": "5.11.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Specify '1' as the number of cards (n)."
+    },
+    {
+      "key": "5.11.2.2",
+      "context": "main",
+      "number": "5.11.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The player may choose to end this action sequence."
+    },
+    {
+      "key": "5.11.2.3",
+      "context": "main",
+      "number": "5.11.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The player may look at the nth card from the top of their deck area."
+    },
+    {
+      "key": "5.11.2.4",
+      "context": "main",
+      "number": "5.11.2.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the action in 5.11.2.3 has been performed exactly X times, this action sequence ends. If not, return to 5.11.2.2 and increase n by 1."
+    },
+    {
+      "key": "5.12",
+      "context": "main",
+      "number": "5.12",
+      "kind": "section",
+      "depth": 2,
+      "title": "Discard",
+      "text": ""
+    },
+    {
+      "key": "5.12.1",
+      "context": "main",
+      "number": "5.12.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"discard\" a card or cards, the player selects the specified number of cards from their hand and moves them to their cemetery."
+    },
+    {
+      "key": "5.13",
+      "context": "main",
+      "number": "5.13",
+      "kind": "section",
+      "depth": 2,
+      "title": "Swap",
+      "text": ""
+    },
+    {
+      "key": "5.13.1",
+      "context": "main",
+      "number": "5.13.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"swap\" one card for another means to simultaneously move the first card into the second card's zone and move the second card into the first card's zone."
+    },
+    {
+      "key": "5.13.2",
+      "context": "main",
+      "number": "5.13.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If one of the specified cards cannot be moved to the other zone for any reason, the action does not happen."
+    },
+    {
+      "key": "5.14",
+      "context": "main",
+      "number": "5.14",
+      "kind": "section",
+      "depth": 2,
+      "title": "Damage",
+      "text": ""
+    },
+    {
+      "key": "5.14.1",
+      "context": "main",
+      "number": "5.14.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"deal [number] damage\" to a follower or leader means to reduce that follower or leader's defense by [number]."
+    },
+    {
+      "key": "5.14.1.1",
+      "context": "main",
+      "number": "5.14.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "This may cause defense to become a negative number."
+    },
+    {
+      "key": "5.14.1.2",
+      "context": "main",
+      "number": "5.14.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to deal damage to a non-follower or non-leader card, no damage is dealt."
+    },
+    {
+      "key": "5.14.2",
+      "context": "main",
+      "number": "5.14.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Effects that modify damage, such as \"[card] deals [number] more damage,\" are applied as replacement effects where the indicated number is added to or subtracted from the original damage value."
+    },
+    {
+      "key": "5.14.3",
+      "context": "main",
+      "number": "5.14.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Damage\" may refer to different things depending on its notation."
+    },
+    {
+      "key": "5.14.3.1",
+      "context": "main",
+      "number": "5.14.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "In card text, \"attack damage\" refers to the damage dealt by an attacking follower (8.4.9) to its attack target."
+    },
+    {
+      "key": "5.14.3.2",
+      "context": "main",
+      "number": "5.14.3.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "In card text, \"combat damage\" refers to the damage dealt to each other by an attacking follower (8.4.9) and its attack target while in combat (8.4.5.1)."
+    },
+    {
+      "key": "5.14.3.3",
+      "context": "main",
+      "number": "5.14.3.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "In card text, \"ability damage\" or \"damage from abilities\" refers to all damage except for damage dealt as described in 8.4.9."
+    },
+    {
+      "key": "5.14.3.4",
+      "context": "main",
+      "number": "5.14.3.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "In card text, if the type of damage is unspecified, \"damage\" refers to all types of damage: attack damage, combat damage, and ability damage."
+    },
+    {
+      "key": "5.15",
+      "context": "main",
+      "number": "5.15",
+      "kind": "section",
+      "depth": 2,
+      "title": "Recover (Play Points)",
+      "text": ""
+    },
+    {
+      "key": "5.15.1",
+      "context": "main",
+      "number": "5.15.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"recover\" a certain number of play points, the player adds that number to their current play points."
+    },
+    {
+      "key": "5.15.1.1",
+      "context": "main",
+      "number": "5.15.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If this would cause the player's current play points to exceed their maximum play points, the player makes their current play point value equal to their maximum play points instead."
+    },
+    {
+      "key": "5.16",
+      "context": "main",
+      "number": "5.16",
+      "kind": "section",
+      "depth": 2,
+      "title": "Evolve",
+      "text": ""
+    },
+    {
+      "key": "5.16.1",
+      "context": "main",
+      "number": "5.16.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"evolve\" a card on the field that does not have the special type \"evolved,\" its controller specifies a card from their evolve deck area, puts that card into their evolve zone, and links it to the card on the field.",
+      "changed": true
+    },
+    {
+      "key": "5.16.1.1",
+      "context": "main",
+      "number": "5.16.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If this \"evolve\" process happens as part of an evolve ability (12.2), treat the card that is revealed as part of the cost as if it were the specified card. If not, the player selects a corresponding facedown card from their evolve deck area with the same name as the evolving card, reveals it, and specifies it."
+    },
+    {
+      "key": "5.16.1.1.1",
+      "context": "main",
+      "number": "5.16.1.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "Unless specified otherwise, a \"corresponding\" card means a card with the same card name as the evolving card."
+    },
+    {
+      "key": "5.16.1.2",
+      "context": "main",
+      "number": "5.16.1.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Following this, so long as the card on the field is linked to a card in the evolve zone, treat that card as having the card information of the card in the evolve zone, excluding the cost (10.9.1.1.1)."
+    },
+    {
+      "key": "5.16.1.2.1",
+      "context": "main",
+      "number": "5.16.1.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "If a card's type differs before and after evolving, it becomes the type printed on its evolved version (10.9.1.1), unless an effect has changed the card's type (5.24)."
+    },
+    {
+      "key": "5.16.1.3",
+      "context": "main",
+      "number": "5.16.1.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "By executing this process, the card is considered to have \"evolved.\""
+    },
+    {
+      "key": "5.16.1.4",
+      "context": "main",
+      "number": "5.16.1.4",
+      "kind": "rule",
+      "depth": 4,
+      "text": "The link between the two cards is signified by stacking the evolve zone card on top of the original card."
+    },
+    {
+      "key": "5.16.2",
+      "context": "main",
+      "number": "5.16.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Even if a card evolves, it is considered the same card as before. The card's engaged/reserved state does not change, and any effects applied to it before it evolved continue to apply."
+    },
+    {
+      "key": "5.16.2.1",
+      "context": "main",
+      "number": "5.16.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a card had lost or gained attack/defense prior to evolution, the same amount of attack/defense continues to be lost or gained after it evolves."
+    },
+    {
+      "key": "5.16.2.2",
+      "context": "main",
+      "number": "5.16.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When a card evolves, it is considered to have lost all abilities printed on its unevolved version, and gained all abilities printed on its evolved version."
+    },
+    {
+      "key": "5.16.2.2.1",
+      "context": "main",
+      "number": "5.16.2.2.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "This applies even for abilities which share the exact same wording across the unevolved and evolved versions."
+    },
+    {
+      "key": "5.16.3",
+      "context": "main",
+      "number": "5.16.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a card on the field is moved to a zone other than the field, the link between that card and any cards in the evolve zone is lost immediately after movement."
+    },
+    {
+      "key": "5.16.4",
+      "context": "main",
+      "number": "5.16.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"evolve\" a card on the field that has the special type \"evolved,\" do nothing.",
+      "changed": true
+    },
+    {
+      "key": "5.17",
+      "context": "main",
+      "number": "5.17",
+      "kind": "section",
+      "depth": 2,
+      "title": "Transform",
+      "text": ""
+    },
+    {
+      "key": "5.17.1",
+      "context": "main",
+      "number": "5.17.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"transform [target] into [token name] tokens\" means to banish the target cards and create a token with the specified name in that zone for each card banished this way."
+    },
+    {
+      "key": "5.18",
+      "context": "main",
+      "number": "5.18",
+      "kind": "section",
+      "depth": 2,
+      "title": "Choose",
+      "text": ""
+    },
+    {
+      "key": "5.18.1",
+      "context": "main",
+      "number": "5.18.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, to \"choose\" means to select the specified number of options from among those listed after the \"choose\" clause and perform the actions indicated."
+    },
+    {
+      "key": "5.18.1.1",
+      "context": "main",
+      "number": "5.18.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Each option is written in the form \"([number]) [text],\" and includes everything up to the next list number, or, if it is the last option, everything up to the end of that ability's text."
+    },
+    {
+      "key": "5.18.2",
+      "context": "main",
+      "number": "5.18.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Depending on the specified number, the following rules apply."
+    },
+    {
+      "key": "5.18.2.1",
+      "context": "main",
+      "number": "5.18.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to \"choose up to [number],\" select a number between 1 and the specified number (inclusive), select that many options, and perform the actions indicated."
+    },
+    {
+      "key": "5.18.2.2",
+      "context": "main",
+      "number": "5.18.2.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the specified number is 0, do nothing and end the sequence."
+    },
+    {
+      "key": "5.18.2.3",
+      "context": "main",
+      "number": "5.18.2.3",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If the specified number exceeds the total number of listed options, the specified number is considered equal to the total number of listed options."
+    },
+    {
+      "key": "5.18.3",
+      "context": "main",
+      "number": "5.18.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "The process of deciding which option(s) to employ by \"choosing\" is a prerequisite to play the card or ability (10.6.2.2). The player must therefore make their \"choose\" selection(s) when playing the card or ability (and not after)."
+    },
+    {
+      "key": "5.18.3.1",
+      "context": "main",
+      "number": "5.18.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "When some condition is referenced to determine the number of options to be employed through the \"choose\" action, refer to values or conditions when the card or ability is initially played."
+    },
+    {
+      "key": "5.18.3.1.1",
+      "context": "main",
+      "number": "5.18.3.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "When referring to values that would normally be determined at the time of effect resolution—such as Spellchain (13.3.1) and Necrocharge (13.5.1)—for the purpose of determining the number of options to be selected for a \"choose\" action, refer instead to the values when the card or ability is initially played."
+    },
+    {
+      "key": "5.18.3.1.2",
+      "context": "main",
+      "number": "5.18.3.1.2",
+      "kind": "rule",
+      "depth": 5,
+      "text": "The player is required to select performable options. If an option cannot be performed for any reason, it cannot be selected for a \"choose\" action."
+    },
+    {
+      "key": "5.18.4",
+      "context": "main",
+      "number": "5.18.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When playing a card or ability, after selecting the option(s) to be employed through a \"choose\" action, the remaining options are treated as if they didn't exist."
+    },
+    {
+      "key": "5.18.4.1",
+      "context": "main",
+      "number": "5.18.4.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Targets need not be selected for options that are treated as if they didn't exist, and a card or ability that contains such an option can still be played even if an appropriate target does not exist."
+    },
+    {
+      "key": "5.19",
+      "context": "main",
+      "number": "5.19",
+      "kind": "section",
+      "depth": 2,
+      "title": "Random",
+      "text": ""
+    },
+    {
+      "key": "5.19.1",
+      "context": "main",
+      "number": "5.19.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, \"[number] random [card type]\" or \"randomly [action] [number] [card type]\" refers to a number of cards, each randomly selected from among all the cards in the specified zone."
+    },
+    {
+      "key": "5.20",
+      "context": "main",
+      "number": "5.20",
+      "kind": "section",
+      "depth": 2,
+      "title": "Roll a Die/Reroll",
+      "text": ""
+    },
+    {
+      "key": "5.20.1",
+      "context": "main",
+      "number": "5.20.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, to \"roll a die\" means to roll a standard six-sided die. The result of that roll determines what happens next."
+    },
+    {
+      "key": "5.20.2",
+      "context": "main",
+      "number": "5.20.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In card text, to \"reroll\" a die means to disregard the result of the most recent dice roll and instead roll the die again and use the new result to determine what happens next."
+    },
+    {
+      "key": "5.21",
+      "context": "main",
+      "number": "5.21",
+      "kind": "section",
+      "depth": 2,
+      "title": "Reveal",
+      "text": ""
+    },
+    {
+      "key": "5.21.1",
+      "context": "main",
+      "number": "5.21.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"reveal\" a card means to allow all players to view its information. The card does not change zones in this process."
+    },
+    {
+      "key": "5.21.1.1",
+      "context": "main",
+      "number": "5.21.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If a card revealed this way is in a non-public zone, when it is moved to a different position in that zone or to a different non-public zone, or when the effect that caused the card to be revealed is resolved, it returns to being unrevealed."
+    },
+    {
+      "key": "5.22",
+      "context": "main",
+      "number": "5.22",
+      "kind": "section",
+      "depth": 2,
+      "title": "Steal/Give Control",
+      "text": ""
+    },
+    {
+      "key": "5.22.1",
+      "context": "main",
+      "number": "5.22.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"steal\" a card on an opponent's field, the player moves it to their field. If a card is moved this way, the player becomes its controller."
+    },
+    {
+      "key": "5.22.2",
+      "context": "main",
+      "number": "5.22.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"give control\" of a card means to move it to an opponent's field. If a card is moved to an opponent's field this way, they become its controller."
+    },
+    {
+      "key": "5.22.3",
+      "context": "main",
+      "number": "5.22.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Even if a card's controller changes, its owner doesn't change."
+    },
+    {
+      "key": "5.22.4",
+      "context": "main",
+      "number": "5.22.4",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A stolen or given card is not treated as a card newly put onto the field, and it retains all the information and states it had before."
+    },
+    {
+      "key": "5.22.5",
+      "context": "main",
+      "number": "5.22.5",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a stolen or given card is moved to a zone other than the field, it is moved to its owner's corresponding zone."
+    },
+    {
+      "key": "5.23",
+      "context": "main",
+      "number": "5.23",
+      "kind": "section",
+      "depth": 2,
+      "title": "Win/Lose the Game",
+      "text": ""
+    },
+    {
+      "key": "5.23.1",
+      "context": "main",
+      "number": "5.23.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a player is specified to \"win the game\" by an effect, all other players lose the current game."
+    },
+    {
+      "key": "5.24",
+      "context": "main",
+      "number": "5.24",
+      "kind": "section",
+      "depth": 2,
+      "title": "Originally",
+      "text": ""
+    },
+    {
+      "key": "5.24.1",
+      "context": "main",
+      "number": "5.24.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When something refers to a card's \"original\" or \"base\" card information (or what it \"originally\" was), it refers to the information printed on the card itself.",
+      "changed": true
+    },
+    {
+      "key": "5.25",
+      "context": "main",
+      "number": "5.25",
+      "kind": "section",
+      "depth": 2,
+      "title": "Change (Card Types)",
+      "text": ""
+    },
+    {
+      "key": "5.25.1",
+      "context": "main",
+      "number": "5.25.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"change [target] into [card type],\" the target card loses all other card types and becomes the indicated card type."
+    },
+    {
+      "key": "5.25.2",
+      "context": "main",
+      "number": "5.25.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When a card's type is changed, it retains all other information, but if an attempt is made to reference the information that the card type doesn't typically possess, that information is not referenced."
+    },
+    {
+      "key": "5.25.2.1",
+      "context": "main",
+      "number": "5.25.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Reference cannot be made to a non-follower card's attack or defense."
+    },
+    {
+      "key": "5.25.3",
+      "context": "main",
+      "number": "5.25.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Even if a card's type is changed, its abilities are not."
+    },
+    {
+      "key": "5.25.3.1",
+      "context": "main",
+      "number": "5.25.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "In general, if a card's ability states \"this [card type],\" and the card is not currently the specified type, then that effect is not applied."
+    },
+    {
+      "key": "5.25.3.1.1",
+      "context": "main",
+      "number": "5.25.3.1.1",
+      "kind": "rule",
+      "depth": 5,
+      "text": "This is not the case, however, with \"evolve this follower.\""
+    },
+    {
+      "key": "5.25.3.2",
+      "context": "main",
+      "number": "5.25.3.2",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Cards other than followers can also evolve (5.16)."
+    },
+    {
+      "key": "5.26",
+      "context": "main",
+      "number": "5.26",
+      "kind": "section",
+      "depth": 2,
+      "title": "Skip a Turn",
+      "text": ""
+    },
+    {
+      "key": "5.26.1",
+      "context": "main",
+      "number": "5.26.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"skip [specified turn],\" when the specified turn would begin, it does not begin, and the next turn begins instead."
+    },
+    {
+      "key": "5.26.2",
+      "context": "main",
+      "number": "5.26.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If instructed to \"skip [player's] next turn,\" when that player's next turn would begin, it is skipped once instead."
+    },
+    {
+      "key": "5.26.2.1",
+      "context": "main",
+      "number": "5.26.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to \"skip [player's] next turn\" multiple times, skipping it once is considered the execution of only the most recent instruction."
+    },
+    {
+      "key": "5.27",
+      "context": "main",
+      "number": "5.27",
+      "kind": "section",
+      "depth": 2,
+      "title": "Give +/-[Number]",
+      "text": ""
+    },
+    {
+      "key": "5.27.1",
+      "context": "main",
+      "number": "5.27.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"give +[number]\" to certain information means to increase the value of that information by the specified amount; the information is consequently considered to have been \"increased.\" Likewise, to \"give - [number]\" to a card's information means to decrease the value of that information by the specified amount; the information is consequently considered to have been \"decreased\" or \"reduced.\""
+    },
+    {
+      "key": "5.27.2",
+      "context": "main",
+      "number": "5.27.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If certain information is changed by specifying a particular value, if the new value is greater than the previous value, it is treated as having been \"increased.\" If the new value is lesser than the previous value, it is treated as having been \"decreased\" or \"reduced.\""
+    },
+    {
+      "key": "5.28",
+      "context": "main",
+      "number": "5.28",
+      "kind": "section",
+      "depth": 2,
+      "title": "Take Another Turn",
+      "text": ""
+    },
+    {
+      "key": "5.28.1",
+      "context": "main",
+      "number": "5.28.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "If a player is instructed to \"take another turn\" at a specified timing, they take one turn directly before the turn that would've originally been taken at that timing."
+    },
+    {
+      "key": "5.28.1.1",
+      "context": "main",
+      "number": "5.28.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to \"take another turn\" multiple times, execute the most recent instruction. Repeat until all such instructions have been executed, all directly before the turn that would've originally been taken."
+    },
+    {
+      "key": "5.29",
+      "context": "main",
+      "number": "5.29",
+      "kind": "section",
+      "depth": 2,
+      "title": "For Every",
+      "text": ""
+    },
+    {
+      "key": "5.29.1",
+      "context": "main",
+      "number": "5.29.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "In a certain process, if an action is described as \"for every [unit]...[number],\" that process is executed only once based on the determined total value. The process is not executed multiple times using the specified numbers.",
+      "examples": [
+        "Example: There are twelve cards in a player's cemetery. They execute the process \"for every 5 cards in your cemetery, deal 1 damage to the enemy leader.\" This results in 2 damage being dealt once, not 1 damage being dealt twice. Additionally, the remaining two cards in the cemetery are not counted during the execution of this process."
+      ]
+    },
+    {
+      "key": "5.30",
+      "context": "main",
+      "number": "5.30",
+      "kind": "section",
+      "depth": 2,
+      "title": "Half",
+      "text": ""
+    },
+    {
+      "key": "5.30.1",
+      "context": "main",
+      "number": "5.30.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When referencing \"half\" of an odd number, the resulting value is to be rounded up to the nearest whole number."
+    },
+    {
+      "key": "5.30.2",
+      "context": "main",
+      "number": "5.30.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "\"Half\" of a zone refers to X cards in that zone, where X equals half of the total number of cards in the zone.\n* The \"top half\" or \"bottom half\" of that zone refers to the first X cards in it, when counted from the top or bottom card, respectively."
+    },
+    {
+      "key": "5.31",
+      "context": "main",
+      "number": "5.31",
+      "kind": "section",
+      "depth": 2,
+      "title": "Boxed",
+      "text": ""
+    },
+    {
+      "key": "5.31.1",
+      "context": "main",
+      "number": "5.31.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "Cards can be \"Boxed.\""
+    },
+    {
+      "key": "5.31.2",
+      "context": "main",
+      "number": "5.31.2",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A card that is Boxed loses all abilities it had prior to being Boxed."
+    },
+    {
+      "key": "5.31.2.1",
+      "context": "main",
+      "number": "5.31.2.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If it receives an ability after being Boxed, it will retain that ability."
+    },
+    {
+      "key": "5.31.3",
+      "context": "main",
+      "number": "5.31.3",
+      "kind": "rule",
+      "depth": 3,
+      "text": "A card that is Boxed does not refresh during its controller's start phase (7.2.3)."
+    },
+    {
+      "key": "5.31.3.1",
+      "context": "main",
+      "number": "5.31.3.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "A card that is Boxed can be refreshed by any effects, even during the start phase."
+    },
+    {
+      "key": "5.32",
+      "context": "main",
+      "number": "5.32",
+      "kind": "section",
+      "depth": 2,
+      "title": "Maneuver",
+      "text": ""
+    },
+    {
+      "key": "5.32.1",
+      "context": "main",
+      "number": "5.32.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When instructed to \"maneuver\" an amulet, if it has both attack and defense values, it becomes a follower with those values for the rest of the turn."
+    },
+    {
+      "key": "5.32.1.1",
+      "context": "main",
+      "number": "5.32.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If it doesn't have attack or defense values, do nothing and end the action sequence."
+    },
+    {
+      "key": "5.33",
+      "context": "main",
+      "number": "5.33",
+      "kind": "section",
+      "depth": 2,
+      "title": "Declare",
+      "text": ""
+    },
+    {
+      "key": "5.33.1",
+      "context": "main",
+      "number": "5.33.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "When instructed to \"declare a card name,\" the player must declare the name of a card or token that exists in Shadowverse: Evolve."
+    },
+    {
+      "key": "5.33.1.1",
+      "context": "main",
+      "number": "5.33.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "Alternative names (2.13) cannot be declared."
+    },
+    {
+      "key": "5.34",
+      "context": "main",
+      "number": "5.34",
+      "kind": "section",
+      "depth": 2,
+      "title": "Bury",
+      "text": ""
+    },
+    {
+      "key": "5.34.1",
+      "context": "main",
+      "number": "5.34.1",
+      "kind": "rule",
+      "depth": 3,
+      "text": "To \"bury\" a card means to put it into its owner's cemetery. Players can only bury cards they control. Burying a card does not destroy it."
+    },
+    {
+      "key": "5.34.1.1",
+      "context": "main",
+      "number": "5.34.1.1",
+      "kind": "rule",
+      "depth": 4,
+      "text": "If instructed to bury a card, and the zone is not specified, the player must bury a card on their field.",
+      "examples": [
+        "Example: \"Bury 2 followers\" means \"Put 2 followers from your field into their owners' cemeteries.\""
+      ]
+    }
+  ]
+}
