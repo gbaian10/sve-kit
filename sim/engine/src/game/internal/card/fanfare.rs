@@ -99,6 +99,7 @@ impl Game {
             group,
         );
         self.player_step_actor(&event, seat);
+        self.player_play_prefix(execution.began);
         frame.cause = json!({"event":event});
         if execution.nested.is_some() {
             self.move_effect_playing_card(&holder, seat, "field", &frame)?;

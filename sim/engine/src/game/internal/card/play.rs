@@ -1316,6 +1316,7 @@ impl Game {
             nested: None,
             cost_override: None,
             play_origin_player: None,
+            began: self.player_event_serial(),
         })
     }
 
@@ -1774,6 +1775,7 @@ impl Game {
                 }
             },
         );
+        self.player_play_prefix(execution.began);
         if !execution.spell && play.qualification == AbilityQualification::UnionBurst {
             self.internal_commit_union_burst(execution.id, source.controller)?;
         }

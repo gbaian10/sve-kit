@@ -5,21 +5,23 @@ use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind, Vie
 
 const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
 
-/// An amulet ability that destroys a chosen enemy token and then asks a resolution choice.
-/// The destroyed token is erased at once: it stays in the authority with its handle, but it
-/// is on nobody's board when the choice is asked.
-fn destroys_a_token_then_asks(baseline: bool) -> Game {
+/// An amulet ability on a board whose followers are all tokens, stopped at the resolution
+/// choice that follows `removal`. A token that leaves the field is erased at once: it stays
+/// in the authority with its handle, but it is on nobody's board when the choice is asked.
+fn stopped_after(removal: &[Value], victim: bool, baseline: bool) -> Game {
     let mut tree = fanfare::expanded::tree().clone();
     let mut template = tree["cards"]["BP01-041"].clone();
-    template["abilities"][0]["activate"] = json!({
-        "cost":{"pp":1},
-        "targets":[{"bind":"victim","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
-        "do":[
-            {"destroy":"victim"},
-            {"choose":{"bind":"other","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}},
-            {"damage":{"to":"other","n":1}}
-        ]
-    });
+    let mut steps = removal.to_vec();
+    steps.extend([
+        json!({"choose":{"bind":"other","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}}),
+        json!({"damage":{"to":"other","n":1}}),
+    ]);
+    template["abilities"][0]["activate"] = json!({"cost":{"pp":1},"do":steps});
+    if victim {
+        template["abilities"][0]["activate"]["targets"] = json!([
+            {"bind":"victim","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}
+        ]);
+    }
     tree["cards"] = json!({"unit-amulet":template});
     let programs = lowerer().lower(&tree).unwrap();
 
@@ -53,14 +55,15 @@ fn destroys_a_token_then_asks(baseline: bool) -> Game {
         "erased-token",
     )
     .unwrap();
-    game.load_internal_card("unit-amulet", &programs["unit-amulet"])
-        .unwrap();
+    // A created token must already be an admitted card when its creator is loaded.
     for number in ["unit-follower", "unit-spell"] {
         game.load_internal_card(number, &card(vec![])).unwrap();
     }
+    game.load_internal_card("unit-amulet", &programs["unit-amulet"])
+        .unwrap();
     game.advance_player_input();
     if baseline {
-        // Each seat is handed its starting board, which shows both tokens.
+        // Each seat is handed its starting board, which shows both enemy tokens.
         for viewer in SEATS {
             game.present_player_events(viewer).unwrap();
         }
@@ -72,19 +75,26 @@ fn destroys_a_token_then_asks(baseline: bool) -> Game {
     )
     .unwrap();
     game.advance_player_input();
-    assert_eq!(
-        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
-        SubmissionKind::Applied,
-        "the first enemy token is a legal target"
-    );
+    if victim {
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+            SubmissionKind::Applied,
+            "the first enemy token is a legal target"
+        );
+    }
     assert!(
         matches!(
             question(&game, Viewer::P1).shape,
             QuestionShape::Decision(DecisionShape::Targets(_))
         ),
-        "the resolution choice is asked after the destroyed token was erased"
+        "the resolution choice is asked after the removed token was erased"
     );
     game
+}
+
+/// Destroys a chosen enemy token that was on the board from the start.
+fn destroys_a_token_then_asks(baseline: bool) -> Game {
+    stopped_after(&[json!({"destroy":"victim"})], true, baseline)
 }
 
 /// Everything this viewer has been shown early, in order.
@@ -177,6 +187,49 @@ fn an_erased_token_from_the_previously_handed_board_is_still_shown() {
             committed(&game, viewer, ActionKind::Erase),
             vec![true],
             "the shown erasure is promoted"
+        );
+    }
+}
+
+#[test]
+fn a_token_created_and_erased_before_the_stop_is_not_shown_early() {
+    // The ability creates a token and then destroys every follower its controller has, which
+    // is only that token. Both seats were handed the starting board, but the token never
+    // appeared on any handed board.
+    let mut game = stopped_after(
+        &[
+            json!({"create":{"token":"unit-follower","to":"field","n":1}}),
+            json!({"destroy":{"ref":{"who":"self","zone":"field","kind":"follower"}}}),
+        ],
+        false,
+        true,
+    );
+    for viewer in SEATS {
+        let kinds = shown(&mut game, viewer);
+        assert!(
+            acts(&kinds, ActionKind::AbilityPlay),
+            "the played ability is shown: {kinds:?}"
+        );
+        assert!(
+            !destroys(&kinds)
+                && !acts(&kinds, ActionKind::Erase)
+                && !kinds
+                    .iter()
+                    .any(|kind| matches!(kind, EventKind::Movement { .. })),
+            "nothing about the token that came and went inside this resolution is shown \
+             before it commits: {kinds:?}"
+        );
+    }
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied,
+        "an enemy token is chosen and the ability resolves"
+    );
+    for viewer in SEATS {
+        assert_eq!(
+            committed(&game, viewer, ActionKind::Erase),
+            vec![false],
+            "the token's erasure commits as ordinary history"
         );
     }
 }

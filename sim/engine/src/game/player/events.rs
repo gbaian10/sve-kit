@@ -27,6 +27,13 @@ pub struct EventId {
     index: u64,
 }
 
+impl EventId {
+    /// Position in its viewer's own stream; hidden sources never advance it.
+    pub(crate) const fn sequence(&self) -> u64 {
+        self.index
+    }
+}
+
 impl PartialEq for EventId {
     fn eq(&self, other: &Self) -> bool {
         Arc::ptr_eq(&self.stream, &other.stream) && self.index == other.index
@@ -66,9 +73,9 @@ pub struct EventLocation {
 /// Physical movement method, including rule and ordinary play procedures.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum MovementMethod {
-    /// A typed instruction's original rules method.
+    /// An effect instruction's original rules method, including an effect's draw.
     Effect(MoveMethod),
-    /// A successful draw, including a rule draw.
+    /// A successful draw made by a rule, such as the draw at the start of a turn.
     Draw,
     /// An actual discard.
     Discard,
@@ -283,6 +290,10 @@ pub struct PlayerEvent {
 pub struct PlayerEventBatch {
     /// All occurrences authorized for this viewer; never empty.
     pub events: Vec<PlayerEvent>,
+    /// This viewer was handed a board that already contained this batch while it was neither
+    /// committed nor shown early, and it is not a play's own declaration and payment. It is
+    /// history for this viewer, not something to play.
+    pub covered: bool,
 }
 
 /// Event history is unavailable; this does not stop input or observation.
