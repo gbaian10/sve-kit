@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the real spell scenario."
-)]
 use super::*;
 
 #[test]

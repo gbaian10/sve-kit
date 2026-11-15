@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the conditional Quick scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 
