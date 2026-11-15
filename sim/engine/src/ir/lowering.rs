@@ -511,62 +511,50 @@ impl Allocator {
         abilities: &mut Vec<Located<Ability>>,
     ) -> Result<bool, LoweringError> {
         if let Some(declaration) = &entry.r#static {
-            if quick::supports(declaration) {
-                abilities.push(quick::lower_static(
-                    self,
-                    key,
-                    path,
-                    entry,
-                    entry_scope(index, path)?,
-                )?);
-                return Ok(true);
-            }
-            if static_declarations::supports(declaration) {
-                abilities.push(static_declarations::lower(
-                    self,
-                    key,
-                    path,
-                    entry,
-                    entry_scope(index, path)?,
-                )?);
-                return Ok(true);
-            }
-            let lower = match declaration.effects.first() {
-                Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
-                Some(ast::StaticEffect::ChoiceAny(_)) => choice_rules::lower,
-                Some(ast::StaticEffect::Reroll(_)) => dice::reroll,
-                Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
-                Some(effect) if static_keywords::grant(effect).is_some() => static_keywords::lower,
-                Some(ast::StaticEffect::AlsoNamed(_)) => name_aliases::lower,
-                Some(ast::StaticEffect::CostMod(_) | ast::StaticEffect::EvolveCostMod(_)) => {
-                    other_costs::lower
-                }
-                Some(
-                    ast::StaticEffect::Prevent(_)
-                    | ast::StaticEffect::DamageMod(_)
-                    | ast::StaticEffect::DamageCap(_),
-                ) => prevention::lower,
-                Some(ast::StaticEffect::If(_))
-                    if declaration.effects.iter().any(|effect| {
-                        matches!(effect, ast::StaticEffect::Cannot(ast::Cannot::Removal(_)))
-                    }) =>
-                {
-                    prevention::lower
-                }
-                Some(ast::StaticEffect::Cannot(_) | ast::StaticEffect::IgnoreWard(_)) => {
-                    attack_restrictions::lower
-                }
-                Some(
-                    ast::StaticEffect::MakeType(_)
-                    | ast::StaticEffect::If(_)
-                    | ast::StaticEffect::Grant(_)
-                    | ast::StaticEffect::BanishInstead(_)
-                    | ast::StaticEffect::MustTarget(_)
-                    | ast::StaticEffect::EntersActed(_)
-                    | ast::StaticEffect::ExtraTrigger(_),
-                )
-                | None => {
-                    return Err(unsupported(path));
+            let lower = if quick::supports(declaration) {
+                quick::lower_static
+            } else if static_declarations::supports(declaration) {
+                static_declarations::lower
+            } else {
+                match declaration.effects.first() {
+                    Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
+                    Some(ast::StaticEffect::ChoiceAny(_)) => choice_rules::lower,
+                    Some(ast::StaticEffect::Reroll(_)) => dice::reroll,
+                    Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
+                    Some(effect) if static_keywords::grant(effect).is_some() => {
+                        static_keywords::lower
+                    }
+                    Some(ast::StaticEffect::AlsoNamed(_)) => name_aliases::lower,
+                    Some(ast::StaticEffect::CostMod(_) | ast::StaticEffect::EvolveCostMod(_)) => {
+                        other_costs::lower
+                    }
+                    Some(
+                        ast::StaticEffect::Prevent(_)
+                        | ast::StaticEffect::DamageMod(_)
+                        | ast::StaticEffect::DamageCap(_),
+                    ) => prevention::lower,
+                    Some(ast::StaticEffect::If(_))
+                        if declaration.effects.iter().any(|effect| {
+                            matches!(effect, ast::StaticEffect::Cannot(ast::Cannot::Removal(_)))
+                        }) =>
+                    {
+                        prevention::lower
+                    }
+                    Some(ast::StaticEffect::Cannot(_) | ast::StaticEffect::IgnoreWard(_)) => {
+                        attack_restrictions::lower
+                    }
+                    Some(
+                        ast::StaticEffect::MakeType(_)
+                        | ast::StaticEffect::If(_)
+                        | ast::StaticEffect::Grant(_)
+                        | ast::StaticEffect::BanishInstead(_)
+                        | ast::StaticEffect::MustTarget(_)
+                        | ast::StaticEffect::EntersActed(_)
+                        | ast::StaticEffect::ExtraTrigger(_),
+                    )
+                    | None => {
+                        return Err(unsupported(path));
+                    }
                 }
             };
             abilities.push(lower(self, key, path, entry, entry_scope(index, path)?)?);
