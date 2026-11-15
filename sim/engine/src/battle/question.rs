@@ -16,6 +16,10 @@ use sve_battle_contract::{
 type Result<T> = result::Result<T, ProjectionError>;
 type CardCandidates = (Vec<wire::Candidate>, BTreeMap<OptionId, NativeHandle>);
 
+#[cfg(test)]
+#[path = "tests/evolution_payment.rs"]
+mod tests;
+
 /// A rejected answer binding, separate from an unavailable board or question.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, thiserror::Error)]
 #[error("answer does not match the projected question")]
@@ -253,23 +257,16 @@ fn evolution_payment(
     }
     let mut payments = Vec::new();
     for use_ep in [false, true] {
-        if use_ep && !quote.ep_allowed {
-            continue;
-        }
         let pp = quote
             .total_pp
             .checked_sub(i64::from(use_ep))
             .ok_or(ProjectionError::Unavailable)?;
-        if pp < 0 || pp > quote.available_pp {
-            continue;
-        }
-        let pp = Int::try_from(pp)?;
         for super_evolution in [false, true] {
-            if super_evolution && !quote.super_allowed {
+            if !quote.is_valid(pp, use_ep, super_evolution) {
                 continue;
             }
             payments.push(wire::EvolutionPayment {
-                pp,
+                pp: Int::try_from(pp)?,
                 use_ep,
                 super_evolution,
             });
