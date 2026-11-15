@@ -1,14 +1,14 @@
 //! Wire identities read from what an event froze and the game's pinned catalogue.
 
 use super::EventObjects;
-use crate::battle::{BattleReferences, ProjectionError, project_turn};
+use crate::battle::{BattleReferences, ProjectionError, project_turn, sources};
 use crate::catalog::Catalog;
 use crate::game::player;
 use crate::game::player::events::EventCard;
 use crate::game::player::observation::{CardFace, EffectSource, TurnObservation};
 use sve_battle_contract::event as wire;
 use sve_battle_contract::observation::TurnView;
-use sve_battle_contract::{Nat, ObjectHandle, SourceRef};
+use sve_battle_contract::{ObjectHandle, SourceRef};
 
 /// The identities each event froze when it happened, as the wire names them.
 ///
@@ -62,16 +62,13 @@ impl EventObjects for EventReferences<'_> {
     }
 
     fn source(&self, source: &EffectSource) -> Result<SourceRef, ProjectionError> {
-        Ok(SourceRef::Card {
-            printing_id: self.references.printing(self.catalog, &source.card)?.into(),
-            face: source
-                .face
-                .map(|face| self.face(&source.card, face).map(|card| card.face))
-                .transpose()?,
-            line: source.line.map(Nat::try_from).transpose()?,
+        sources::source_ref(
+            self.catalog,
+            self.references,
+            source,
             // Kept as the event froze it: by now the holder may have left the board.
-            holder: source.holder.as_ref().map(object),
-        })
+            source.holder.as_ref().map(object),
+        )
     }
 
     fn turn(&self, turn: &TurnObservation) -> Result<TurnView, ProjectionError> {
