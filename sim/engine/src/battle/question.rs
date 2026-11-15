@@ -2,7 +2,8 @@
 
 use super::ProjectionError;
 use crate::game::player::{
-    self, ObjectHandle as NativeHandle, OpeningAnswer, OpeningQuestion, QuestionToken, Viewer,
+    self, ClosingAnswer, ClosingQuestion, ObjectHandle as NativeHandle, OpeningAnswer,
+    OpeningQuestion, QuestionToken, Viewer,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt, result};
@@ -25,7 +26,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Currently supports the three opening questions only.
+/// Currently supports opening and hand-limit discard questions.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -45,6 +46,10 @@ enum Binding {
     FirstPlayer(BTreeMap<OptionId, Viewer>),
     Mulligan(BTreeMap<OptionId, NativeHandle>),
     StartAmulet(BTreeMap<OptionId, NativeHandle>),
+    HandLimit {
+        cards: BTreeMap<OptionId, NativeHandle>,
+        count: usize,
+    },
 }
 
 impl fmt::Debug for QuestionProjection {
@@ -65,10 +70,15 @@ impl QuestionProjection {
         {
             return Err(ProjectionError::Unavailable);
         }
+        let expected_stage = if matches!(&native.shape, player::QuestionShape::Closing(_)) {
+            ProcessingStage::Closing
+        } else {
+            ProcessingStage::Opening
+        };
         let processing = observation
             .processing
             .first()
-            .filter(|context| context.stage == ProcessingStage::Opening)
+            .filter(|context| context.stage == expected_stage)
             .cloned()
             .ok_or(ProjectionError::Unavailable)?;
         let (usage, shape, binding) = match native.shape {
@@ -79,8 +89,11 @@ impl QuestionProjection {
             player::QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) => {
                 start_amulet(id, native.actor, &cards, &observation)?
             }
+            player::QuestionShape::Closing(ClosingQuestion::Discard { cards, count }) => {
+                hand_limit(id, native.actor, &cards, count, &observation)?
+            }
             player::QuestionShape::Evolution(_)
-            | player::QuestionShape::Closing(_)
+            | player::QuestionShape::Closing(ClosingQuestion::GuardAct(_))
             | player::QuestionShape::Decision(_)
             | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
         };
@@ -133,6 +146,12 @@ impl QuestionProjection {
             return Err(AnswerError);
         }
         let answer = match &self.binding {
+            Binding::HandLimit { cards, count } => {
+                return Ok(player::Command::Closing {
+                    token: self.token,
+                    answer: hand_limit_answer(cards, *count, answer)?,
+                });
+            }
             Binding::FirstPlayer(choices) => {
                 let Answer::Choose { chosen } = answer else {
                     return Err(AnswerError);
@@ -224,6 +243,20 @@ fn mulligan(
     cards: &[player::observation::CardObservation],
     observation: &BattleObservation,
 ) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    let (candidates, coordinates) = hand_candidates(id, actor, cards, observation)?;
+    Ok((
+        wire::QuestionUse::Mulligan,
+        wire::QuestionShape::Mulligan { hand: candidates },
+        Binding::Mulligan(coordinates),
+    ))
+}
+
+fn hand_candidates(
+    id: &QuestionId,
+    actor: Viewer,
+    cards: &[player::observation::CardObservation],
+    observation: &BattleObservation,
+) -> Result<CardCandidates> {
     let hand = &observation
         .players
         .iter()
@@ -235,12 +268,36 @@ fn mulligan(
     {
         return Err(ProjectionError::Unavailable);
     }
-    let (candidates, coordinates) =
-        card_candidates(id, actor, cards, observation, Zone::Hand, hand)?;
+    card_candidates(id, actor, cards, observation, Zone::Hand, hand)
+}
+
+fn hand_limit(
+    id: &QuestionId,
+    actor: Viewer,
+    cards: &[player::observation::CardObservation],
+    count: u64,
+    observation: &BattleObservation,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    // Native closing skips a hand within its limit; zero or counts beyond the hand are inconsistent.
+    let required = usize::try_from(count)
+        .ok()
+        .filter(|required| *required > 0 && *required <= cards.len())
+        .ok_or(ProjectionError::Unavailable)?;
+    let count = Nat::try_from(count)?;
+    let (candidates, coordinates) = hand_candidates(id, actor, cards, observation)?;
     Ok((
-        wire::QuestionUse::Mulligan,
-        wire::QuestionShape::Mulligan { hand: candidates },
-        Binding::Mulligan(coordinates),
+        wire::QuestionUse::HandLimitDiscard,
+        plain_selection(
+            candidates,
+            wire::Bounds {
+                min: count,
+                max: Some(count),
+            },
+        ),
+        Binding::HandLimit {
+            cards: coordinates,
+            count: required,
+        },
     ))
 }
 
@@ -250,6 +307,7 @@ fn start_amulet(
     cards: &[player::observation::CardObservation],
     observation: &BattleObservation,
 ) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    // Native opening skips this question without eligible cards; an empty domain is inconsistent.
     if cards.is_empty() {
         return Err(ProjectionError::Unavailable);
     }
@@ -264,27 +322,37 @@ fn start_amulet(
         card_candidates(id, actor, cards, observation, Zone::Deck, deck)?;
     Ok((
         wire::QuestionUse::StartAmulet,
-        wire::QuestionShape::Select {
-            selection: wire::Selection {
-                candidates,
-                shown: vec![],
-                bounds: wire::Bounds {
-                    min: Nat::from(1_u32),
-                    max: Some(Nat::from(1_u32)),
-                },
-                groups: vec![],
-                group_assignment: wire::GroupAssignment::Existence,
-                roles: vec![],
-                distinct: vec![],
-                original_cost_total: wire::CostTotal {
-                    min: None,
-                    max: None,
-                },
-                capacity: None,
+        plain_selection(
+            candidates,
+            wire::Bounds {
+                min: Nat::from(1_u32),
+                max: Some(Nat::from(1_u32)),
             },
-        },
+        ),
         Binding::StartAmulet(coordinates),
     ))
+}
+
+const fn plain_selection(
+    candidates: Vec<wire::Candidate>,
+    bounds: wire::Bounds,
+) -> wire::QuestionShape {
+    wire::QuestionShape::Select {
+        selection: wire::Selection {
+            candidates,
+            shown: vec![],
+            bounds,
+            groups: vec![],
+            group_assignment: wire::GroupAssignment::Existence,
+            roles: vec![],
+            distinct: vec![],
+            original_cost_total: wire::CostTotal {
+                min: None,
+                max: None,
+            },
+            capacity: None,
+        },
+    }
 }
 
 fn card_candidates(
@@ -359,6 +427,35 @@ fn mulligan_answer(
         })
         .collect::<result::Result<Vec<_>, _>>()?;
     Ok(OpeningAnswer::Mulligan(order))
+}
+
+fn hand_limit_answer(
+    cards: &BTreeMap<OptionId, NativeHandle>,
+    count: usize,
+    answer: &Answer,
+) -> result::Result<ClosingAnswer, AnswerError> {
+    let Answer::Select {
+        selected,
+        groups,
+        roles,
+    } = answer
+    else {
+        return Err(AnswerError);
+    };
+    if selected.len() != count || groups.is_some() || !roles.is_empty() {
+        return Err(AnswerError);
+    }
+    let mut seen = BTreeSet::new();
+    let handles = selected
+        .iter()
+        .map(|choice| {
+            if !seen.insert(choice) {
+                return Err(AnswerError);
+            }
+            cards.get(choice).cloned().ok_or(AnswerError)
+        })
+        .collect::<result::Result<Vec<_>, _>>()?;
+    Ok(ClosingAnswer::Discard(handles))
 }
 
 fn option(question: &QuestionId, index: usize) -> OptionId {

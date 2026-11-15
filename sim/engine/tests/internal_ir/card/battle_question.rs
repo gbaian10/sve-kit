@@ -9,6 +9,8 @@ use sve_engine::game::player::{
     Command, Input, OpeningAnswer, OpeningQuestion, QuestionShape, SubmissionKind, Viewer,
 };
 
+#[path = "battle_question/hand_limit.rs"]
+mod hand_limit;
 #[path = "battle_question/start_amulet.rs"]
 mod start_amulet;
 
