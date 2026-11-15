@@ -607,3 +607,59 @@ fn increase_game(initial: &Value, program: &WellFormedCardProgram) -> Game {
     game.load_internal_card("producer", program).unwrap();
     game
 }
+
+#[test]
+fn a_counter_transfer_states_both_counts_before_and_after() {
+    use sve_engine::game::player::Viewer;
+    use sve_engine::game::player::events::{ActionKind, EventKind, NumberFacet};
+
+    let mut value = initial("BP01-074", true, false);
+    value["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"BP01-074","state":{"counters":{"stack_counter":3_u8}}},
+        {"id":"recipient","card":"BP03-T02","state":{"acted":true,"counters":{"stack_counter":2_u8}}}
+    ]);
+    let mut game = game(&value);
+    game.advance_player_input();
+    let CardPlay::Awaiting(question) = game
+        .activate_internal_card("source", stack_id("BP01-074"), PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("Stack recipient target");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("Stack uses the ordinary target decision");
+    };
+    drop(resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    ));
+    settle(&mut game);
+    game.advance_player_input();
+    let moved = |before, after: i64| NumberFacet {
+        stat: None,
+        before: Some(before),
+        after: Some(after),
+        amount: after.saturating_sub(before),
+    };
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let changes = game
+            .events(viewer, None)
+            .unwrap()
+            .filter_map(|event| match &event.kind {
+                EventKind::Action(action) if action.kind == ActionKind::Counter => {
+                    Some(action.numbers.clone())
+                }
+                _ => None,
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            changes,
+            vec![vec![moved(3, 0)], vec![moved(2, 5)]],
+            "{viewer:?}: the source gives up its three stacks and the recipient holds five"
+        );
+    }
+}

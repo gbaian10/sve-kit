@@ -6,6 +6,7 @@ use sve_battle_contract::event::{self as wire, DamageClass, EventBody};
 use sve_battle_contract::observation::{EvolutionState, Posture};
 use sve_battle_contract::{Int as WireInt, Nat as WireNat, Seat, Subject, Zone};
 use sve_engine::battle::{ProjectedEvent, project_batch};
+use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{SubmissionKind, Viewer};
 
@@ -458,6 +459,83 @@ fn a_pp_payment_states_the_value_before_and_after_ahead_of_what_it_pays_for() {
         assert_eq!(
             causes[0], causes[1],
             "{viewer:?}: the payment has the cause of the play it paid for"
+        );
+    }
+}
+
+#[test]
+fn an_earth_rite_payment_states_the_stacks_removed_and_the_count_before_and_after() {
+    // The amulet holds 3 stacks; the optional Earth Rite cost removes 2 of them.
+    let mut game = earth_exchange::board(3, 1);
+    game.advance_player_input();
+    let CardPlay::Awaiting(question) = game.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
+    else {
+        panic!("the optional cost is asked first");
+    };
+    let CardPlay::Awaiting(material) = game
+        .answer_internal_card(question.actor, question.token, Answer::OptionalCost(true))
+        .unwrap()
+    else {
+        panic!("the amulet to remove stacks from is asked next");
+    };
+    let InputDomain::CostMaterials(domain) = &material.domain else {
+        panic!("a material question: {:?}", material.domain);
+    };
+    let entered = game
+        .answer_internal_card(
+            material.actor,
+            material.token,
+            Answer::CostMaterials(vec![domain.members[0].handle]),
+        )
+        .unwrap();
+    assert!(
+        matches!(entered, CardPlay::Entered(_)),
+        "the follower is played"
+    );
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let bodies = bodies(&game, viewer);
+        let paid = bodies
+            .iter()
+            .filter(|body| {
+                matches!(
+                    body,
+                    EventBody::CounterChanged { .. } | EventBody::Payment { .. }
+                )
+            })
+            .collect::<Vec<_>>();
+        assert_eq!(
+            paid,
+            vec![
+                &EventBody::CounterChanged {
+                    subject: Some(fielded(&game, viewer, Viewer::P1)),
+                    name: "スタックカウンター".into(),
+                    change: changed(3, 1),
+                },
+                &EventBody::Payment {
+                    player: Seat::P1,
+                    time: wire::PaymentTime::PlayParameter,
+                    complete: true,
+                    zero: false,
+                    replaced: false,
+                    component: wire::PaymentComponent::EarthRite {
+                        keyword: "土の秘術".into(),
+                        stacks: WireNat::try_from(2_u64).unwrap(),
+                    },
+                },
+            ],
+            "{viewer:?}: the stacks leave the amulet, then the payment states its keyword and \
+             how many were removed"
+        );
+        let payment = bodies
+            .iter()
+            .position(|body| matches!(body, EventBody::Payment { .. }));
+        let played = bodies
+            .iter()
+            .position(|body| matches!(body, EventBody::CardPlayed { .. }));
+        assert!(
+            payment < played,
+            "{viewer:?}: the payment completes before the card is played: {bodies:?}"
         );
     }
 }

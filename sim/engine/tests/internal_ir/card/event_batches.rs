@@ -1,7 +1,7 @@
 use super::*;
 use crate::player_pipeline::{answer, question};
 use sve_engine::game::player::events::{
-    ActionKind, EventError, EventKind, MovementMethod, PlayerEventBatch,
+    ActionKind, EventError, EventKind, MovementMethod, NumberFacet, PlayerEventBatch,
 };
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
@@ -545,6 +545,38 @@ fn counter_names(game: &Game, viewer: Viewer) -> Vec<Option<String>> {
             | EventKind::Result { .. } => None,
         })
         .collect()
+}
+
+#[test]
+fn a_stack_removed_instead_of_leaving_states_the_count_before_and_after() {
+    let unnamed = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let game = stacked_departure(&unnamed);
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let changes = batches(&game, viewer)
+            .iter()
+            .flat_map(|batch| &batch.events)
+            .filter_map(|event| match &event.kind {
+                EventKind::Action(action) if action.kind == ActionKind::Counter => {
+                    Some(action.numbers.clone())
+                }
+                EventKind::Action(_)
+                | EventKind::Movement { .. }
+                | EventKind::Phase(_)
+                | EventKind::Result { .. } => None,
+            })
+            .collect::<Vec<_>>();
+        let removed = NumberFacet {
+            stat: None,
+            before: Some(2),
+            after: Some(1),
+            amount: -1,
+        };
+        assert_eq!(
+            changes,
+            vec![vec![removed]; 2],
+            "each amulet that stays says how many stacks it had and has"
+        );
+    }
 }
 
 #[test]

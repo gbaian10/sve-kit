@@ -347,7 +347,7 @@ impl Game {
                     count.min(previous),
                 );
                 let group = self.group();
-                self.emit(json!({"kind":"カウンター","object":id,"name":self.catalog.counter_name("stack_counter"),"delta":count.saturating_neg()}),&frame.cause,group);
+                self.emit(json!({"kind":"カウンター","object":id,"name":self.catalog.counter_name("stack_counter"),"delta":count.saturating_neg(),"before":previous,"after":previous.saturating_sub(count)}),&frame.cause,group);
                 if previous == count {
                     self.move_objects(&[id.into()], "cemetery", None, None, frame)?;
                 }
