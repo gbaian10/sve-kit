@@ -1,6 +1,6 @@
 import { House, Layers, ScrollText, Search } from "lucide-react"
 
-type NavItemKey = "home" | "cards" | "decks" | "errata"
+type NavItemKey = "home" | "cards" | "decks" | "rules"
 
 export interface NavItem {
   readonly key: NavItemKey
@@ -15,5 +15,5 @@ export const NAV_ITEMS: readonly NavItem[] = [
   { key: "home", to: "/", Icon: House, end: true },
   { key: "cards", to: "/cards", Icon: Search, end: false },
   { key: "decks", to: "/decks", Icon: Layers, end: false },
-  { key: "errata", to: "/errata", Icon: ScrollText, end: true },
+  { key: "rules", to: "/rules", Icon: ScrollText, end: false },
 ]

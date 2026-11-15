@@ -49,11 +49,17 @@ const zhTW = {
   app: {
     title: "sve-kit",
   },
+  rules: {
+    sections: "規則分頁",
+    comprehensive: "綜合規則",
+    officialLink: "官方網站規則頁",
+    comprehensivePending: "綜合規則內容準備中，請先參考官方網站的規則書。",
+  },
   nav: {
     home: "首頁",
     cards: "查卡",
     decks: "牌組",
-    errata: "勘誤",
+    rules: "規則",
     account: "帳號與設定",
     primary: "主要導覽",
     skipToContent: "跳到主內容",

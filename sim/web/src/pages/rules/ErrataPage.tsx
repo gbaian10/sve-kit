@@ -85,16 +85,8 @@ export function ErrataPage() {
     [listView],
   )
   return (
-    <section className="mx-auto max-w-6xl py-8 lg:py-12" aria-labelledby="errata-heading">
-      <header className="mb-7 border-b border-border pb-6">
-        <p className="mb-2 text-12 font-semibold tracking-[0.16em] text-accent-text uppercase">
-          {t("nav.errata")}
-        </p>
-        <h1 id="errata-heading" className="text-24 font-bold tracking-tight text-text-1">
-          {t("errata.listTitle")}
-        </h1>
-        <p className="mt-2 max-w-2xl text-14 text-text-2">{t("errata.listDescription")}</p>
-      </header>
+    <div>
+      <p className="mb-6 max-w-2xl text-14 text-text-2">{t("errata.listDescription")}</p>
       {rows.length > 0 ? (
         <div ref={imageRoot}>
           <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -156,6 +148,6 @@ export function ErrataPage() {
           {ready && !viewLoading ? t("errata.listEmpty") : t("errata.listLoading")}
         </p>
       )}
-    </section>
+    </div>
   )
 }

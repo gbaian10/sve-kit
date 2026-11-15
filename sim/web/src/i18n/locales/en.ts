@@ -62,8 +62,15 @@ export default {
   app: {
     title: "sve-kit",
   },
+  rules: {
+    sections: "Rules sections",
+    comprehensive: "Comprehensive rules",
+    officialLink: "Official rules page",
+    comprehensivePending:
+      "The comprehensive rules are coming soon. Please refer to the rulebook on the official site.",
+  },
   nav: {
-    errata: "Errata",
+    rules: "Rules",
     home: "Home",
     cards: "Cards",
     decks: "Decks",

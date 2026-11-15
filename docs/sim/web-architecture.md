@@ -51,6 +51,8 @@ sim/web/
 | `/decks`                     | 牌組 | 存在瀏覽器的牌組列表：新增、複製、改名、刪除                |
 | `/decks/import`              | 匯入 | 貼上牌組文字或分享碼，或由分享連結 `?d=` 進入；先預覽再建立 |
 | `/decks/:deckId`             | 組牌 | 牌組欄、卡池（與查卡頁共用）、篩選；`ed` 是牌組的版本       |
+| `/rules`                     | 規則 | 綜合規則分頁；`/rules/errata` 是勘誤分頁（官方勘誤卡一覽）  |
+| `/errata`                    | 轉址 | 舊連結轉到 `/rules/errata`，保留查詢條件與 hash             |
 | `*`                          | 404  | 含搜尋框                                                    |
 
 保留、不實作：`/cards/unimplemented`、`/play`。

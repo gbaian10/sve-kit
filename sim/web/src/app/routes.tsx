@@ -6,9 +6,12 @@ import { CardsPage } from "../pages/cards/CardsPage"
 import { DeckBuilderPage } from "../pages/decks/DeckBuilderPage"
 import { DeckImportPage } from "../pages/decks/DeckImportPage"
 import { DecksPage } from "../pages/decks/DecksPage"
-import { ErrataPage } from "../pages/errata/ErrataPage"
 import { HomePage } from "../pages/home/HomePage"
 import { NotFoundPage } from "../pages/not-found/NotFoundPage"
+import { ComprehensiveRulesPage } from "../pages/rules/ComprehensiveRulesPage"
+import { ErrataPage } from "../pages/rules/ErrataPage"
+import { ErrataRedirect } from "../pages/rules/ErrataRedirect"
+import { RulesLayout } from "../pages/rules/RulesLayout"
 import { DeckScanPage } from "../pages/scan/DeckScanPage"
 import { ScanModelsPage } from "../pages/scan/ScanModelsPage"
 import { ScanPage } from "../pages/scan/ScanPage"
@@ -43,7 +46,15 @@ export const routes: RouteObject[] = [
       { path: "decks", Component: DecksPage },
       { path: "decks/import", Component: DeckImportPage },
       { path: "decks/:deckId", Component: DeckBuilderPage },
-      { path: "errata", Component: ErrataPage },
+      {
+        path: "rules",
+        Component: RulesLayout,
+        children: [
+          { index: true, Component: ComprehensiveRulesPage },
+          { path: "errata", Component: ErrataPage },
+        ],
+      },
+      { path: "errata", Component: ErrataRedirect },
       { path: "*", Component: NotFoundPage },
     ],
   },

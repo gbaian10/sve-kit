@@ -53,8 +53,14 @@ export default {
   app: {
     title: "sve-kit",
   },
+  rules: {
+    sections: "ルールのタブ",
+    comprehensive: "総合ルール",
+    officialLink: "公式サイトのルールページ",
+    comprehensivePending: "総合ルールは準備中です。公式サイトのルールブックをご覧ください。",
+  },
   nav: {
-    errata: "エラッタ",
+    rules: "ルール",
     home: "ホーム",
     cards: "カード検索",
     decks: "デッキ",
