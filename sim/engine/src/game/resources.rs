@@ -95,11 +95,12 @@ impl Game {
             if recovered == 0 {
                 continue;
             }
-            player.pp["current"] = json!(old.saturating_add(recovered));
+            let new = old.saturating_add(recovered);
+            player.pp["current"] = json!(new);
             frame.performed = frame.performed.saturating_add(recovered);
             let group = self.group();
             self.emit(
-                json!({"kind":"回復","player":seat,"amount":recovered}),
+                json!({"kind":"回復","player":seat,"amount":recovered,"before":old,"after":new}),
                 &frame.cause,
                 group,
             );

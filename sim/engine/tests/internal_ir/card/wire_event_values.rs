@@ -268,3 +268,86 @@ fn a_turn_change_stands_the_new_players_cards_and_draws_by_rule_before_its_main_
         );
     }
 }
+
+/// A wire value change from `before` to `after`.
+fn changed(before: i64, after: i64) -> wire::ValueChange {
+    wire::ValueChange {
+        before: WireInt::try_from(before).ok(),
+        after: WireInt::try_from(after).ok(),
+        delta: WireInt::try_from(after.saturating_sub(before)).unwrap(),
+    }
+}
+
+#[test]
+fn an_effects_resource_and_life_changes_state_the_value_before_and_after() {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":3,"max":5});
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "wire-resources",
+    )
+    .unwrap();
+    game.advance_player_input();
+    let resource = |id, resource, amount| {
+        instruction(
+            id,
+            Action::Resource {
+                player: PlayerRef::Controller {},
+                resource,
+                operation: ResourceOperation::Add,
+                amount: Expr::Literal(Int(amount)),
+            },
+        )
+    };
+    game.execute_internal(
+        &checked(vec![
+            // Only 2 of the 3 requested PP fit under the maximum of 5.
+            resource(1, Resource::PpCurrent, 3),
+            resource(2, Resource::PpMaximum, 1),
+            resource(3, Resource::Ep, 2),
+            instruction(
+                4,
+                Action::Life {
+                    player: PlayerRef::Controller {},
+                    change: NumericChange::Add {
+                        amount: Expr::Literal(Int(-4)),
+                    },
+                },
+            ),
+        ]),
+        &source("synthetic"),
+        context(1),
+    )
+    .unwrap();
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            bodies(&game, viewer),
+            vec![
+                EventBody::ResourceChanged {
+                    player: Seat::P1,
+                    resource: wire::Resource::Pp,
+                    change: changed(3, 5),
+                },
+                EventBody::ResourceChanged {
+                    player: Seat::P1,
+                    resource: wire::Resource::MaxPp,
+                    change: changed(5, 6),
+                },
+                EventBody::ResourceChanged {
+                    player: Seat::P1,
+                    resource: wire::Resource::Ep,
+                    change: changed(0, 2),
+                },
+                EventBody::LifeChanged {
+                    player: Seat::P1,
+                    change: changed(20, 16),
+                },
+            ],
+            "each change names its player and resource and freezes the value it left"
+        );
+    }
+}
