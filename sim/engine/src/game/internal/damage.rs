@@ -250,7 +250,7 @@ impl Game {
             let replacements = if let Some(chosen) = selected.take() {
                 chosen
             } else {
-                self.damage_replacements(&hit, &run.consumed)?
+                self.damage_replacements_with_source(&hit, &run.consumed, Some(&run.source))?
             };
             if replacements
                 .iter()

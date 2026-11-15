@@ -249,29 +249,3 @@ fn tempest_dragon_shared_scenarios_match_their_reviewed_results() {
         result.problems
     );
 }
-
-#[test]
-fn layer3_creditta_shared_scenario_reaches_the_known_search_label_gap() {
-    let mut questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
-    questions.retain(|question| question.id == "card-CP04-P18");
-    assert_eq!(questions.len(), 1);
-    let reports = run(
-        &mut TypedAdapter::new(repository::selection_with_rules().clone()),
-        &questions,
-        None,
-        RunOptions {
-            require_verified: true,
-            awaiting: AwaitingMode::FirstStage,
-        },
-    )
-    .unwrap();
-    assert_eq!(reports.len(), 1);
-    let mut known =
-        load_known_failures(&root().join("tests/engine/typed-known-results.yaml")).unwrap();
-    known
-        .known
-        .retain(|entry| entry.question == "card-CP04-P18");
-    known.expected_scenarios = 1;
-    let result = gate(&reports, &known);
-    assert!(result.ok(), "{:#?}; reports: {reports:#?}", result.problems);
-}

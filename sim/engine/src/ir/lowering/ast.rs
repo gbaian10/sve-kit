@@ -3731,7 +3731,16 @@ pub(super) enum DealDamageAction {
 #[serde(untagged)]
 pub(super) enum PreventionSource {
     Objects(Box<Objects>),
+    Characteristics(Box<DamageSourceCharacteristics>),
     Controller(Box<PreventionController>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DamageSourceCharacteristics {
+    pub who: LeaderSide,
+    pub kind: SearchKind,
+    pub r#trait: String,
 }
 
 #[derive(Deserialize)]

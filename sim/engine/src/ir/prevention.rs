@@ -1,3 +1,5 @@
+pub(crate) mod source_filter;
+
 use super::{
     AbilitySource, Binding, Bool, CardKind, Cardinality, CharacteristicView, DamageKind,
     DamageRecipient, Duration, Effect, EffectReference, EventRewrite, Expr, KindRead, Nat,
@@ -15,6 +17,7 @@ pub(crate) enum Recipients<'effect> {
 pub(crate) enum DamageSource<'effect> {
     Objects(&'effect Selector),
     OpponentController,
+    Characteristics(source_filter::Filter<'effect>),
 }
 
 pub(crate) fn opponent_controller(binding: Binding<ObjectRef>) -> SourcePredicate {
@@ -104,6 +107,9 @@ fn recipient_filter(predicate: &RecipientPredicate) -> Option<Recipients<'_>> {
 }
 
 fn source_filter(predicate: &SourcePredicate) -> Option<DamageSource<'_>> {
+    if let Some(filter) = source_filter::parse(predicate) {
+        return Some(DamageSource::Characteristics(filter));
+    }
     if *predicate == opponent_controller(predicate.binding) {
         return Some(DamageSource::OpponentController);
     }
@@ -266,6 +272,11 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
         Some(predicate) => Some(source_filter(predicate)?),
         None => None,
     };
+    if matches!(damage_source, Some(DamageSource::Characteristics(_)))
+        && *kind != DamageKind::Ability
+    {
+        return None;
+    }
     if matches!(damage_source, Some(DamageSource::OpponentController))
         && (*kind != DamageKind::Ability
             || !controller_recipients(recipients.as_ref())

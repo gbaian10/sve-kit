@@ -1,0 +1,42 @@
+cards:
+  DSD01a-003:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - damage_mod:
+                delta: 1
+                kind: ability
+                source:
+                  kind: spell
+                  trait: 学院
+                  who: self
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  name: グレアの炎熱
+                  who: self
+                  zone: deck
+                to: ex
+            - player_effect:
+                effect:
+                  cost_mod:
+                    delta: -1
+                    next_only: true
+                    when_playing:
+                      name: グレアの炎熱
+                      who: self
+                until: turn
+                who: self
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+format: 2
+kind: author_effect_set

@@ -1470,6 +1470,14 @@ counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `dama
 這是場上的觀察；這張卡自己從場上被放入消滅領域時仍會誘發（Q2816），token 放入後立即消去也照樣誘發（Q2814）。
 沒有 `sel`，不篩選放入的卡。
 
+## 依傷害來源的卡種與種族修正
+
+`static.effects` 可寫 `damage_mod: {source: {who: self, kind: spell, trait: 学院}, kind: ability, delta: 1}`
+（DSD01a-003）。不帶 `zone` 的來源條件同時要求能力控制者、卡種與種族符合；`who` 接受 `self`／`opp`。
+這個來源篩選只用於能力傷害，卡種與種族讀該次傷害的有效來源資訊；來源離場後仍保留離場前的特徵與世代，
+不查找目前手牌或其他牌區的新物件。省略 `on` 時，符合來源的能力對從者及領袖造成的每次傷害都套用加值；
+多個提供者的加值會疊加。進化時搜尋及下一次同名牌的減費仍沿用獨立的 `player_effect.cost_mod`，不綁定搜尋結果。
+
 ## 安裝本回合受到傷害的加值
 
 `apply: {on: …, effect: {damage_mod: {delta: N}}, until: turn}`（N 為正整數）

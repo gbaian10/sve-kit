@@ -109,6 +109,7 @@ mod victory;
 pub use terminal::Terminal;
 
 mod source;
+pub(in crate::game) use source::SourceSnapshot;
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};

@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing and constructed write maps."
 )]
-use super::internal::DamageOccurrence;
+use super::internal::{DamageOccurrence, SourceSnapshot};
 use super::legal::permutations;
 use super::player::events::ActionDetails;
 use super::{BTreeMap, Frame, Game, int, list, string};
@@ -267,9 +267,10 @@ impl Game {
         &self,
         hit: &Value,
         consumed: &BTreeMap<DamageUse, i64>,
+        source_snapshot: Option<&SourceSnapshot>,
     ) -> Result<Vec<DamageReplacement>> {
         Ok(self
-            .internal_prevention_references(hit)?
+            .internal_prevention_references(hit, source_snapshot)?
             .into_iter()
             .map(|reference| DamageReplacement {
                 reference: reference["reference"].clone(),
@@ -305,7 +306,16 @@ impl Game {
         hit: &Value,
         consumed: &BTreeMap<DamageUse, i64>,
     ) -> Result<Vec<DamageReplacement>> {
-        let mut result = self.installed_damage_replacements(hit, consumed)?;
+        self.damage_replacements_with_source(hit, consumed, None)
+    }
+
+    pub(super) fn damage_replacements_with_source(
+        &self,
+        hit: &Value,
+        consumed: &BTreeMap<DamageUse, i64>,
+        source_snapshot: Option<&SourceSnapshot>,
+    ) -> Result<Vec<DamageReplacement>> {
+        let mut result = self.installed_damage_replacements(hit, consumed, source_snapshot)?;
         for source in self.ability_sources("damage replacement")? {
             for ability in self.abilities(&source)? {
                 let body = &ability["body"];

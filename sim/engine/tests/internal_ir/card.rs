@@ -1135,3 +1135,6 @@ mod ex_departure_batch;
 
 #[path = "card/layer3_damage_increase.rs"]
 mod layer3_damage_increase;
+
+#[path = "card/layer3_source_damage.rs"]
+mod layer3_source_damage;
