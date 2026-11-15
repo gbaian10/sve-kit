@@ -1,0 +1,81 @@
+cards:
+  CP01-029:
+    abilities:
+      - line: 1
+        use: meal_entry.v1
+      - line: 2
+        static:
+          effects:
+            - cost_mod:
+                delta: -1
+                when_playing:
+                  kind: spell
+                  trait: ウマ娘
+                  who: self
+          while:
+            cmp:
+              left:
+                history_count:
+                  event: played
+                  sel:
+                    kind: spell
+                    trait: ウマ娘
+                  who: self
+                  window: this_turn
+              op: eq
+              right: 0
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: runner
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          on:
+            played:
+              sel:
+                kind: spell
+                where:
+                  cmp:
+                    left:
+                      history_count:
+                        event: played
+                        sel:
+                          kind: spell
+                        who: self
+                        window: this_turn
+                    op: eq
+                    right: 3
+              who: self
+          targets:
+            - bind: runner
+              from:
+                kind: follower
+                trait: ウマ娘
+                who: self
+                zone: field
+              n: 1
+        line: 3
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: spell
+                  trait: ウマ娘
+                  who: self
+                  zone: deck
+                to: hand
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+format: 2
+kind: author_effect_set
