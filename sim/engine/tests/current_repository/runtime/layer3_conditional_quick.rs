@@ -41,3 +41,22 @@ fn awakened_dragonic_rage_can_be_played_in_quick_and_creates_its_real_tree() {
     let tree = field[0].as_str().unwrap();
     assert_eq!(after["objects"][tree]["card"], "BP07-T03");
 }
+
+#[test]
+fn q1672_awakened_dragonic_rage_without_an_opposing_follower_is_not_a_quick_option() {
+    let mut initial = draw_position();
+    initial["players"]["P2"]["pp"] = json!({"current":2_u8,"max":7_u8});
+    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"spell","card":"BP12-058"}]);
+    let mut game = game(&initial);
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    let quick = game.internal_quick_choice().unwrap().unwrap();
+    let InputDomain::Quick { options, .. } = &quick.domain else {
+        panic!("Quick window");
+    };
+    assert_eq!(options.as_slice(), []);
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P2"]["pp"]["current"], 2_u8);
+    assert_eq!(after["P2"]["hand"], json!(["spell"]));
+    assert_eq!(after["P2"]["field"], json!([]));
+}

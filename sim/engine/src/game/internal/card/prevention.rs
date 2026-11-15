@@ -9,8 +9,8 @@ use crate::game::player::observation::InstalledEffect;
 use crate::game::player::observation::seat;
 use crate::ir::ObjectRelation;
 use crate::ir::prevention::{
-    DamageSource, Prevention, Recipients, holder_counter_step, lasting_object_cap, own_leader,
-    projection, whole_turn_leader_reduction,
+    DamageSource, Prevention, Recipients, holder_counter_step, lasting_object_cap,
+    lasting_object_increase, own_leader, projection, whole_turn_leader_reduction,
 };
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::static_declarations::{self, Family};
@@ -320,16 +320,22 @@ pub(in crate::game::internal) fn check_install(
         && whole_turn_leader_reduction(&shape);
     let object_cap =
         matches!(subjects, InstallationSubjects::Objects { .. }) && lasting_object_cap(&shape);
+    let object_increase =
+        matches!(subjects, InstallationSubjects::Objects { .. }) && lasting_object_increase(&shape);
     if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
         && shape.usage.is_none()
         && !leader_reduction
         && !object_cap
+        && !object_increase
     {
         return Err(unsupported("installed numeric damage replacement"));
     }
     let captured = match subjects {
         InstallationSubjects::Objects { objects, affected } => {
-            if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. }) && !object_cap {
+            if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
+                && !object_cap
+                && !object_increase
+            {
                 return Err(unsupported("object damage prevention rewrite"));
             }
             if shape.usage.is_some()

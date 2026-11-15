@@ -1,0 +1,55 @@
+cards:
+  CP04-026:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - apply:
+                effect:
+                  damage_mod:
+                    delta: 2
+                on: enemy
+                until: turn
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          ub: true
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                n: 1
+                result: searched
+                sel:
+                  kind: follower
+                  name_contains: ペコリーヌ
+                  who: self
+                  zone: deck
+                to: ex
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -3
+                    when_playing:
+                      in: affected
+                on:
+                  follow: searched
+                until: turn
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set
