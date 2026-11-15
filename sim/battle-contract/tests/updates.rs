@@ -193,6 +193,9 @@ fn events_keep_the_public_facts_that_tell_similar_occurrences_apart() {
     assert!(differ_only_at(&one_check, &other_check, "/card"));
     assert_eq!(hidden_check.get("card"), Some(&Value::Null));
 
+    let [the_x, free_number] = exactly("choice_declared");
+    assert!(differ_only_at(&the_x, &free_number, "/declared/role"));
+
     let [general, one_stack, two_stacks] = exactly("payment");
     assert_eq!(general.pointer("/component/kind").unwrap(), "general");
     assert!(differ_only_at(&one_stack, &two_stacks, "/component/stacks"));

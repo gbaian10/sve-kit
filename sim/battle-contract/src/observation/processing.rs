@@ -72,6 +72,8 @@ pub struct DeclaredMode {
 pub enum DeclaredNumber {
     /// The X of a cost or effect.
     X,
+    /// A number an effect has its player declare, for later text to compare or count with.
+    Free,
 }
 
 /// A declaration already public or known to this seat; never a payment receipt.

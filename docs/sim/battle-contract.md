@@ -143,7 +143,7 @@ interface RuleRef {
 ```
 
 step 只有精確卡文對應才填；不公開 instruction path。能力授予者與持有者分開，失知後 holder=null。
-Declared 保留已公開或本席可知的模式、X、目標、可選費用及卡名；未付費的宣告不是付款回條。
+Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
 strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表示任意答案合法，也不表示官方核可。
 
@@ -264,7 +264,7 @@ body 的 CardRef／位置／原因／數量及事件存在性都須授權；不�
 | fusion／race／drive_gained／drive_trigger／drive_checked | 公開材料／數量、主體、icon、是否接受、目的地；不公開私有 receipt |
 | payment／dice／shuffled | 已完成付款及公開成分／最終接受骰值／區域；不帶排列或 seed |
 | control_changed／phase_started／turn_started／turn_skipped／result | 控制權與 owner 分開、公開階段及回合、正常勝負／平手／投降原因 |
-| game_started／mulligan、choice_declared／targets_declared、trigger_pending／pending_cancelled | 公開先攻／換牌張數、已公開宣告、待機來源與有限取消原因；須有 producer，不能用盤面 diff 補造 |
+| game_started／mulligan、choice_declared／targets_declared、trigger_pending／pending_cancelled | 公開先攻／換牌張數、已公開宣告（效果要求宣告的數值是 number／free，與 X 分開）、待機來源與有限取消原因；須有 producer，不能用盤面 diff 補造 |
 
 當步 after 值由 producer 完成動作時凍結，不用最後盤面回填。晉升不得新增當時未授權的資訊。
 歷史卡面不連回新 handle；中途曾公開又失知者，若缺獨立觀看證據不得提前披露未提交歷史。

@@ -541,6 +541,27 @@
         ]
       },
       {
+        "id": "b13b",
+        "events": [
+          {
+            "id": "e14b",
+            "cause": "k13b",
+            "parent": null,
+            "body": {
+              "kind": "choice_declared",
+              "player": "p1",
+              "declared": {
+                "kind": "number",
+                "role": "free",
+                "value": 2
+              }
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
         "id": "b14",
         "events": [
           {
@@ -1842,6 +1863,7 @@
       "b11",
       "b12",
       "b13",
+      "b13b",
       "b14",
       "b15",
       "b16",
