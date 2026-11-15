@@ -194,12 +194,7 @@ impl Game {
         }
         let id = execution.object_id(object)?.to_owned();
         self.object_mut(&id)?.state["counters"][&change.kind.0] = json!(change.after.0);
-        let translated = self.catalog.keyword_name(&change.kind.0);
-        let name = if translated.is_empty() {
-            change.kind.0.as_str()
-        } else {
-            translated
-        };
+        let name = self.catalog.counter_name(&change.kind.0);
         self.emit(
             json!({"kind":"カウンター","object":id,"name":name,"delta":change.delta.0}),
             &execution.frame().cause,
@@ -323,8 +318,7 @@ impl Game {
         if delta != 0 {
             self.object_mut(&id)?.state["counters"][&key] = json!(after);
             let group = self.group();
-            let name = self.catalog.keyword_name(&key);
-            let name = if name.is_empty() { key.as_str() } else { name };
+            let name = self.catalog.counter_name(&key);
             self.emit(
                 json!({"kind":"カウンター","object":id,"name":name,"delta":delta}),
                 &execution.frame().cause,

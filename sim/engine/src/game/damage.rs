@@ -117,6 +117,15 @@ impl Game {
         self.apply_damage(&actual, frame, None)
     }
 
+    /// The generation of a battle hit's source: both fighters stay on the field while battle
+    /// damage is dealt, so the generation it has now is the one that fought.
+    fn battle_source_generation(&self, hit: &Value) -> Option<u64> {
+        (hit["battle"] == true)
+            .then(|| self.object(string(&hit["source"])).ok())
+            .flatten()
+            .map(|object| object.generation)
+    }
+
     pub(super) fn apply_damage(
         &mut self,
         actual: &[Value],
@@ -169,7 +178,8 @@ impl Game {
                     (source == frame.source)
                         .then_some(frame.source_generation)
                         .flatten()
-                });
+                })
+                .or_else(|| self.battle_source_generation(hit));
             let player_source = self.player_source_before(source, source_generation);
             let player_step = self.emit(
                 json!({"kind":"ダメージ","source":source,"target":id,"amount":amount,"before":before,"after":after}),

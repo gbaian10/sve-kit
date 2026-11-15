@@ -704,6 +704,22 @@ fn single_subject_state_changes_map_to_their_own_bodies() {
                 subject: Some(named()),
             },
         ),
+        (
+            with(by_first(ActionKind::Control), &|event| {
+                event.player = None;
+                event.details = Some(ActionDetails::Control {
+                    owner: Viewer::P2,
+                    before: Viewer::P2,
+                    after: Viewer::P1,
+                });
+            }),
+            EventBody::ControlChanged {
+                subject: Some(named()),
+                owner: Seat::P2,
+                before: Seat::P2,
+                after: Seat::P1,
+            },
+        ),
     ]);
 }
 

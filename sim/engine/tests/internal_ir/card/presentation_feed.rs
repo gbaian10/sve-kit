@@ -22,7 +22,7 @@ const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
 /// Stands in for the board projection. Every object code carries `era`, so a test can make
 /// later lookups answer differently from earlier ones; `broken` makes every card lookup fail.
 #[derive(Default)]
-struct Board {
+pub(super) struct Board {
     era: Cell<u64>,
     broken: Cell<bool>,
 }

@@ -192,6 +192,15 @@ pub enum ActionDetails {
         /// Whether this was an additional turn.
         extra: bool,
     },
+    /// A card that changed controller without changing owner.
+    Control {
+        /// Its owner, who is unchanged.
+        owner: Viewer,
+        /// Its controller before.
+        before: Viewer,
+        /// Its controller after.
+        after: Viewer,
+    },
 }
 
 /// An authorized participant; hidden cards have no placeholder identity.

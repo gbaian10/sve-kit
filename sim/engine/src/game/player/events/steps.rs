@@ -534,6 +534,24 @@ impl Game {
         }
     }
 
+    /// The unchanged owner and both controllers of a control change, as its producer
+    /// recorded them.
+    fn control_details(&self, event: &Value) -> Result<ActionDetails, EventError> {
+        let seat_at = |name: Option<&str>| {
+            name.and_then(|seat| viewer(seat).ok())
+                .ok_or(EventError::ProjectionGap)
+        };
+        let owner = event["object"]
+            .as_str()
+            .and_then(|id| self.object(id).ok())
+            .map(|object| object.owner.as_str());
+        Ok(ActionDetails::Control {
+            owner: seat_at(owner)?,
+            before: seat_at(event["from"].as_str())?,
+            after: seat_at(event["to"].as_str())?,
+        })
+    }
+
     fn project_player_step(&self, perspective: Viewer, event: &Value) -> Projected {
         let tag = event["kind"].as_str().ok_or(EventError::ProjectionGap)?;
         if matches!(tag, "勝利" | "敗北") {
@@ -620,6 +638,9 @@ impl Game {
             result.details = Some(ActionDetails::TurnSkipped {
                 extra: event["extra"].as_bool().ok_or(EventError::ProjectionGap)?,
             });
+        }
+        if kind == ActionKind::Control {
+            result.details = Some(self.control_details(event)?);
         }
         result.face_up = event["face_up"].as_bool();
         Ok(Some(EventKind::Action(result)))
