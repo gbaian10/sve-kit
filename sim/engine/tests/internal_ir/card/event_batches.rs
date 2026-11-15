@@ -467,8 +467,9 @@ fn event_batches_simultaneous_token_deaths_erase_together_after_moving() {
     }
 }
 
-#[test]
-fn event_batches_stack_replacements_counters_and_successful_movement_stay_together() {
+/// A spell moves the opponent's field to the cemetery: two Stack amulets stay by removing
+/// a counter each and one follower leaves. `registry` supplies the keyword names.
+fn stacked_departure(registry: &str) -> Game {
     let (snapshot, _, document) = catalog_documents(&json!("1"));
     let mut document: Value = serde_json::from_str(&document).unwrap();
     document["cards"]["unit-spell"]["abilities"] = json!([{
@@ -478,10 +479,7 @@ fn event_batches_stack_replacements_counters_and_successful_movement_stay_togeth
     let catalog = Arc::new(
         Catalog::from_documents(
             &snapshot,
-            include_str!(concat!(
-                env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
-            )),
+            registry,
             &[("unit.yaml".into(), document.to_string())],
         )
         .unwrap(),
@@ -504,7 +502,52 @@ fn event_batches_stack_replacements_counters_and_successful_movement_stay_togeth
     game.decide(&json!({"do":"play","card":"s"}), "stack-move")
         .unwrap();
     game.advance_player_input();
+    game
+}
+
+/// The names recorded for this viewer's committed counter changes.
+fn counter_names(game: &Game, viewer: Viewer) -> Vec<Option<String>> {
+    batches(game, viewer)
+        .iter()
+        .flat_map(|batch| &batch.events)
+        .filter_map(|event| match &event.kind {
+            EventKind::Action(action) if action.kind == ActionKind::Counter => {
+                Some(action.name.clone())
+            }
+            EventKind::Action(_)
+            | EventKind::Movement { .. }
+            | EventKind::Phase(_)
+            | EventKind::Result { .. } => None,
+        })
+        .collect()
+}
+
+#[test]
+fn a_counter_the_registry_does_not_name_is_recorded_under_its_identifier() {
+    let unnamed = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let game = stacked_departure(&unnamed);
     for viewer in [Viewer::P1, Viewer::P2] {
+        assert_eq!(
+            counter_names(&game, viewer),
+            vec![Some("stack_counter".to_owned()); 2],
+            "without a registered name the change still says which counter it was"
+        );
+    }
+}
+
+#[test]
+fn event_batches_stack_replacements_counters_and_successful_movement_stay_together() {
+    let game = stacked_departure(include_str!(concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../authored/rules/keywords.yaml"
+    )));
+    for viewer in [Viewer::P1, Viewer::P2] {
+        assert!(
+            counter_names(&game, viewer).iter().all(|name| name
+                .as_deref()
+                .is_some_and(|name| name != "stack_counter" && !name.is_empty())),
+            "a registered counter is recorded under its rules name"
+        );
         let history = batches(&game, viewer);
         let replaced = history
             .iter()

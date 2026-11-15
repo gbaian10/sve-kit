@@ -364,6 +364,13 @@ impl Catalog {
             .unwrap_or("")
     }
 
+    /// The name a counter change is recorded under: its registered name, or its identifier
+    /// when the registry has none, so that no change is ever recorded under an empty name.
+    pub(crate) fn counter_name<'name>(&'name self, id: &'name str) -> &'name str {
+        let name = self.keyword_name(id);
+        if name.is_empty() { id } else { name }
+    }
+
     fn validate_token_templates(&self) -> Result<()> {
         let mut names: BTreeMap<&str, Vec<&TokenDefinition>> = BTreeMap::new();
         for definition in self

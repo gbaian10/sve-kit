@@ -26,7 +26,7 @@ impl Game {
             self.object_mut(&id)?.state["counters"][name] = json!(after);
             frame.performed = frame.performed.saturating_add(delta.saturating_abs());
             self.emit(
-                json!({"kind":"カウンター","object":id,"name":self.catalog.keyword_name(name),"delta":delta}),
+                json!({"kind":"カウンター","object":id,"name":self.catalog.counter_name(name),"delta":delta}),
                 &frame.cause,
                 group,
             );
