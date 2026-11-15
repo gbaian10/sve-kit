@@ -498,6 +498,21 @@ impl Game {
             })
     }
 
+    pub(in crate::game) fn internal_battle_damage_events(
+        &mut self,
+        hits: &[Value],
+        before: SnapshotId,
+    ) -> Result<Vec<DamageEvent>> {
+        hits.iter()
+            .map(|hit| {
+                if hit["battle"] != true {
+                    return Err(unsupported("unadmitted damage producer"));
+                }
+                self.combat_damage_event(hit, before)
+            })
+            .collect()
+    }
+
     pub(in crate::game) fn internal_combat_damage_occurrences(
         &mut self,
         hits: &[Value],
@@ -506,12 +521,9 @@ impl Game {
         if self.no_damage_observers() {
             return Ok(None);
         }
-        hits.iter()
-            .map(|hit| {
-                if hit["battle"] != true {
-                    return Err(unsupported("unadmitted damage producer"));
-                }
-                let event = self.combat_damage_event(hit, before)?;
+        self.internal_battle_damage_events(hits, before)?
+            .into_iter()
+            .map(|event| {
                 let source = self.information_snapshot(event.source.object)?.at(before);
                 Ok(DamageOccurrence { event, source })
             })
@@ -533,7 +545,6 @@ impl Game {
         if hits.len() != facts.len() {
             return Err(invalid("damage occurrence count mismatch"));
         }
-        self.internal_record_damage_history(facts);
         let active = player_id(self.active())?;
         let mut pending = Vec::new();
         for (hit, damage) in hits.iter().zip(facts) {

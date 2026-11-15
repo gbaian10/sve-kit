@@ -2,7 +2,9 @@
 
 use super::{BattleReferences, ProjectionError, objects::ObjectScope, pending, sources};
 use crate::catalog::Catalog;
-use crate::game::player::{ObjectHandle, Viewer, observation as native};
+#[cfg(feature = "runner")]
+use crate::game::player::ObjectHandle;
+use crate::game::player::{Viewer, observation as native};
 use crate::ir::{AbilityKind, CostKind, DamageKind};
 use core::result;
 use sve_battle_contract::{Int, Nat, Seat, observation as wire};
@@ -12,11 +14,12 @@ type Result<T> = result::Result<T, ProjectionError>;
 /// Project installed changes on one currently authorized card.
 ///
 /// Unknown current state stays absent; known empty effects stay an empty vector.
-/// Hosts keep the whole observation bound to its authenticated viewer and stop.
+/// Runner fixtures supply observations directly; hosts use `Game::battle_observation`.
 ///
 /// # Errors
 /// Refuses mismatched catalogs, unavailable card handles or source coordinates,
 /// links outside this observation and numbers outside the exact wire range.
+#[cfg(feature = "runner")]
 pub fn project_card_effects(
     catalog: &Catalog,
     references: &BattleReferences,
@@ -43,11 +46,12 @@ pub fn project_card_effects(
 
 /// Project the disclosed installed changes affecting one player.
 ///
-/// The complete board entry must share one object scope across its components.
+/// Runner fixtures supply observations directly; hosts use `Game::battle_observation`.
 ///
 /// # Errors
 /// Refuses a mismatched catalog, invalid object scope, unavailable origins or
 /// links, and numbers outside the exact wire range.
+#[cfg(feature = "runner")]
 pub fn project_player_effects(
     catalog: &Catalog,
     references: &BattleReferences,

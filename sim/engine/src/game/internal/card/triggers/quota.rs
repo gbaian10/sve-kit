@@ -49,6 +49,25 @@ struct QuotaGroup {
     reason = "Quota selection and pending admission share one transaction."
 )]
 impl Game {
+    pub(in crate::game) fn observed_admission_group(&self, perspective: Viewer) -> Result<bool> {
+        let Some(group) = self
+            .card_runtime
+            .admission
+            .as_ref()
+            .and_then(|plan| plan.groups.front())
+        else {
+            return Ok(false);
+        };
+        // An unrelated public pending must not disclose a hidden quota group.
+        for pending in &group.candidates {
+            if let Some(observed) = pending.observed(self, perspective, Some(group.remaining)) {
+                observed?;
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
     pub(in crate::game::internal) fn player_quota_question(
         &self,
         actor: Viewer,

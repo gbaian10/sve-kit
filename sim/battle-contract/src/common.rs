@@ -309,7 +309,7 @@ pub enum SourceRef {
         printing_id: String,
         /// Face within that printing, when known.
         face: Option<Nat>,
-        /// Printed line, when known; without a face it is an unlocated hint.
+        /// Printed line, when its face is known; the engine refuses a line without a face.
         line: Option<Nat>,
         /// Current holder; absent once the viewer can no longer identify it.
         /// Granted text can come from a different printing than this holder.

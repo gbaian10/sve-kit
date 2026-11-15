@@ -147,7 +147,7 @@ interface RuleRef {
 ```
 
 step 只有精確卡文對應才填；不公開 instruction path。能力授予者與持有者分開，失知後 holder=null。
-沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。face=null 時的 line 只是未定位資訊，不能當成精確文字索引或推定面 0。
+沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
 strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表示任意答案合法，也不表示官方核可。
@@ -156,7 +156,7 @@ strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表
 
 卡片與玩家的 effects 保留已安裝的凍結運算，不從目前攻防或費用倒推。來源失去目前物件連結時不重接；未授權的來源保持 null。expires、main_live、intervals 與 active 分別保留主效期、主效期是否仍存續、重複區間及目前是否生效，不以單一布林值替代。
 
-授予定義 definitions 的 line 依同一 effect 的 source 印刷與卡面定位；source 未授權或缺少卡面時，line 只是未定位提示，不能推定面 0 或當成精確 TextRef。
+授予定義 definitions 的 line 是定義清單的提示，依同一 effect 的 source 印刷與卡面定位；source 未授權或缺少卡面時，該提示不能定位卡文、推定面 0 或當成精確 TextRef。這與 SourceRef::Card 自身的座標分開，後者不得有 line 卻沒有 face。
 
 傷害替換描述的 Cap 保留 threshold 與 replacement：每次涵蓋傷害至少達 threshold 時，改成 replacement；兩者皆為 checked Nat，不近似成固定加減量。recipients／sources 的 null 代表沒有該項限制，空陣列則代表目前沒有可授權連結，不可互換；保留已授權向量的順序及重複項。
 

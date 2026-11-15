@@ -3,6 +3,8 @@ use super::*;
 mod battle_effects;
 #[path = "card/battle_objects.rs"]
 mod battle_objects;
+#[path = "card/battle_observation.rs"]
+mod battle_observation;
 #[path = "card/battle_pending.rs"]
 mod battle_pending;
 #[path = "card/battle_quotas.rs"]
@@ -41,6 +43,8 @@ mod evolution_ordinal;
 mod exchange_routes;
 #[path = "card/formal_target_groups.rs"]
 mod formal_target_groups;
+#[path = "card/granted_delayed.rs"]
+mod granted_delayed;
 #[path = "card/granted_played.rs"]
 mod granted_played;
 #[path = "card/hand_banish.rs"]

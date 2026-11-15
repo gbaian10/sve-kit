@@ -10,20 +10,28 @@ type Result<T> = result::Result<T, ProjectionError>;
 
 /// Project committed public facts from one authority-produced observation.
 ///
-/// Hosts bind this input to the authenticated viewer and stable stop, just as
-/// for the other board components. Retired links remain absent.
+/// Runner fixtures supply observations directly; hosts use `Game::battle_observation`.
+/// Retired links remain absent.
 ///
 /// # Errors
 /// Refuses inconsistent object scopes, references outside the current scope,
 /// and integers outside the wire's exact range.
+#[cfg(feature = "runner")]
 pub fn project_history(observation: &native::Observation) -> Result<wire::TurnHistory> {
     let objects = ObjectScope::new(observation)?;
+    scoped(observation, &objects)
+}
+
+pub(super) fn scoped(
+    observation: &native::Observation,
+    objects: &ObjectScope<'_>,
+) -> Result<wire::TurnHistory> {
     let history = &observation.history;
     Ok(wire::TurnHistory {
         subjects: history
             .subjects
             .iter()
-            .map(|fact| subject(fact, &objects))
+            .map(|fact| subject(fact, objects))
             .collect::<Result<Vec<_>>>()?,
         damage: history
             .damage

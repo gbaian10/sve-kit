@@ -741,11 +741,13 @@ impl Game {
         let source = execution
             .ability
             .ok_or_else(|| invalid("effect without ability source"))?;
+        // A callback keeps the text authority of the ability that installed it.
+        let authority = self.delayed_parent(source.instance).unwrap_or(source);
         if let Some(((_, _, origin, _), _)) = self
             .card_runtime
             .keyword_instances
             .iter()
-            .find(|(_, instance)| **instance == source.instance)
+            .find(|(_, instance)| **instance == authority.instance)
         {
             return Ok(origin.provider().clone());
         }
@@ -756,15 +758,15 @@ impl Game {
         &self,
         source: RuntimeAbilitySource,
     ) -> Result<String> {
+        let authority = self.delayed_parent(source.instance).unwrap_or(source);
         if let Some(((_, _, origin, _), _)) = self
             .card_runtime
             .keyword_instances
             .iter()
-            .find(|(_, instance)| **instance == source.instance)
+            .find(|(_, instance)| **instance == authority.instance)
         {
             return Ok(origin.provider().card.clone());
         }
-        let authority = self.delayed_parent(source.instance).unwrap_or(source);
         self.card_runtime
             .instances
             .iter()

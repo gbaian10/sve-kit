@@ -164,9 +164,11 @@ fn wire_pending_preserves_repeated_occurrences_and_adopted_face_mapping() {
     };
     assert_eq!(face.unwrap().get(), 1);
     observed.pending[0].source.face = None;
-    let unknown_face = serde_json::to_value(project(&observed).unwrap()).unwrap();
-    assert_eq!(unknown_face[0]["source"]["face"], Value::Null);
-    assert_eq!(unknown_face[0]["source"]["line"], 3);
+    assert_eq!(
+        project(&observed),
+        Err(ProjectionError::Unavailable),
+        "a printed line cannot be located without its face"
+    );
     observed.pending[0].source.line = None;
     observed.pending[0].source.holder = None;
     let SourceRef::Card {

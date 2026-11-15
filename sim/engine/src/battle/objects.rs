@@ -23,6 +23,15 @@ pub(crate) fn build_objects(
 ) -> Result<ObjectTable> {
     references.validate_catalog(catalog)?;
     let scope = ObjectScope::new(observation)?;
+    build_scoped(catalog, references, observation, &scope)
+}
+
+pub(super) fn build_scoped(
+    catalog: &Catalog,
+    references: &BattleReferences,
+    observation: &native::Observation,
+    scope: &ObjectScope<'_>,
+) -> Result<ObjectTable> {
     observation
         .players
         .iter()
@@ -65,7 +74,7 @@ pub(crate) fn build_objects(
                     state: properties
                         .state
                         .as_ref()
-                        .map(|state| card_state(catalog, references, &scope, state))
+                        .map(|state| card_state(catalog, references, scope, state))
                         .transpose()?,
                 },
             ))

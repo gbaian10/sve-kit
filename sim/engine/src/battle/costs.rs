@@ -10,14 +10,22 @@ type Result<T> = result::Result<T, ProjectionError>;
 
 /// Project the costs in one authority-produced, viewer-authorized observation.
 ///
-/// Hosts keep this input bound to its authenticated viewer and stable stop.
-/// The complete board projection must use the same current object handles.
+/// Runner fixtures supply observations directly; hosts use `Game::battle_observation`
+/// so all board components share one authority read and object scope.
 ///
 /// # Errors
 /// Refuses unknown, duplicate or cross-zone quote subjects, inconsistent object
 /// scopes, and numbers outside the wire's exact integer range.
+#[cfg(feature = "runner")]
 pub fn project_costs(observation: &native::Observation) -> Result<wire::CostObservation> {
     let objects = ObjectScope::new(observation)?;
+    scoped(observation, &objects)
+}
+
+pub(super) fn scoped(
+    observation: &native::Observation,
+    objects: &ObjectScope<'_>,
+) -> Result<wire::CostObservation> {
     let mut quoted = BTreeSet::new();
     let cards = observation
         .costs

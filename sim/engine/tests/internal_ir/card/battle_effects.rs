@@ -538,7 +538,7 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
         ),
         (
             "unit-follower",
-            None,
+            Some(0),
             Some(MAX_SAFE_INTEGER + 1),
             ProjectionError::Range,
         ),
@@ -573,7 +573,7 @@ fn wire_installed_effects_retire_links_without_erasing_printing_and_refuse_dupli
     let mut layer = effect(native::InstalledChange::Pilot);
     layer.source = Some(native::EffectSource {
         card: "unit-follower".into(),
-        face: None,
+        face: Some(0),
         line: Some(2),
         wording: None,
         holder: Some(holder.clone()),
@@ -594,7 +594,7 @@ fn wire_installed_effects_retire_links_without_erasing_printing_and_refuse_dupli
     assert_eq!(
         serde_json::to_value(project(&retired).unwrap()).unwrap()[0]["source"],
         json!({
-            "kind":"card","printing_id":"printing-follower","face":null,"line":2,"holder":null
+            "kind":"card","printing_id":"printing-follower","face":1,"line":2,"holder":null
         })
     );
     let field = observed.players[0]

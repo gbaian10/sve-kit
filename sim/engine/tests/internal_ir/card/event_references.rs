@@ -8,7 +8,7 @@ use sve_battle_contract::event::{self as wire, BattleEvent, EventBody, EventDeli
 use sve_battle_contract::observation::{Phase as WirePhase, TurnView};
 use sve_battle_contract::presentation::PresentationOp;
 use sve_battle_contract::{
-    CardRef, Nat as WireNat, ObjectHandle as WireHandle, Seat, SourceRef, Subject,
+    CardRef, MAX_SAFE_INTEGER, Nat as WireNat, ObjectHandle as WireHandle, Seat, SourceRef, Subject,
 };
 use sve_engine::battle::{
     BattleReferences, EventFeed, EventObjects as _, EventReferences, FeedUpdate,
@@ -21,6 +21,68 @@ use sve_engine::game::player::observation::{
 use sve_engine::game::player::{ObjectHandle, SubmissionKind, Viewer};
 
 const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
+
+#[test]
+fn event_source_coordinates_require_a_face_for_every_known_line() {
+    let fixture = fixture();
+    let objects = EventReferences::new(&fixture.catalog, &fixture.references).unwrap();
+    let mut source = EffectSource {
+        card: "unit-follower".into(),
+        face: None,
+        line: None,
+        holder: None,
+        wording: None,
+    };
+    assert_eq!(
+        objects.source(&source),
+        Ok(SourceRef::Card {
+            printing_id: "printing-follower".into(),
+            face: None,
+            line: None,
+            holder: None,
+        }),
+        "unknown coordinates remain unknown together"
+    );
+    source.face = Some(0);
+    assert_eq!(
+        objects.source(&source),
+        Ok(SourceRef::Card {
+            printing_id: "printing-follower".into(),
+            face: Some(WireNat::from(1_u32)),
+            line: None,
+            holder: None,
+        }),
+        "knowing the face does not invent a printed line"
+    );
+    source.face = None;
+    for line in [0, 3, MAX_SAFE_INTEGER] {
+        source.line = Some(line);
+        assert_eq!(
+            objects.source(&source),
+            Err(ProjectionError::Unavailable),
+            "no line is locatable without a face, including zero"
+        );
+        source.face = Some(0);
+        assert_eq!(
+            objects.source(&source),
+            Ok(SourceRef::Card {
+                printing_id: "printing-follower".into(),
+                face: Some(WireNat::from(1_u32)),
+                line: Some(WireNat::try_from(line).unwrap()),
+                holder: None,
+            }),
+            "a located source keeps the adopted face and exact line"
+        );
+        source.face = None;
+    }
+    source.face = Some(0);
+    source.line = Some(MAX_SAFE_INTEGER + 1);
+    assert_eq!(
+        objects.source(&source),
+        Err(ProjectionError::Range),
+        "located lines still use checked conversion"
+    );
+}
 
 fn face(printing: &str, face: u32) -> CardRef {
     CardRef {

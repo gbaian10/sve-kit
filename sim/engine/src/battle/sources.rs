@@ -4,7 +4,7 @@ use super::{BattleReferences, ProjectionError, objects::ObjectScope};
 use crate::catalog::Catalog;
 use crate::game::player::observation::{CardFace, EffectSource};
 use core::result;
-use sve_battle_contract::{Nat, SourceRef};
+use sve_battle_contract::{Nat, ObjectHandle, SourceRef};
 
 type Result<T> = result::Result<T, ProjectionError>;
 
@@ -14,6 +14,23 @@ pub(super) fn source(
     objects: &ObjectScope<'_>,
     origin: &EffectSource,
 ) -> Result<SourceRef> {
+    source_ref(
+        catalog,
+        references,
+        origin,
+        objects.optional(origin.holder.as_ref())?,
+    )
+}
+
+pub(super) fn source_ref(
+    catalog: &Catalog,
+    references: &BattleReferences,
+    origin: &EffectSource,
+    holder: Option<ObjectHandle>,
+) -> Result<SourceRef> {
+    if origin.face.is_none() && origin.line.is_some() {
+        return Err(ProjectionError::Unavailable);
+    }
     let printing_id = references.printing(catalog, &origin.card)?.into();
     let face = origin
         .face
@@ -37,6 +54,6 @@ pub(super) fn source(
             .map(Nat::try_from)
             .transpose()
             .map_err(ProjectionError::from)?,
-        holder: objects.optional(origin.holder.as_ref())?,
+        holder,
     })
 }
