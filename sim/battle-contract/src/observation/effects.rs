@@ -181,6 +181,13 @@ pub enum PreventionChange {
         /// Signed amount.
         amount: Int,
     },
+    /// Each covered damage at least `threshold` becomes `replacement`.
+    Cap {
+        /// Inclusive lower bound of damage that is replaced.
+        threshold: Nat,
+        /// Damage dealt instead.
+        replacement: Nat,
+    },
 }
 
 /// A currently identifiable recipient of an effect.

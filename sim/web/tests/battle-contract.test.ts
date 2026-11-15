@@ -102,3 +102,30 @@ it("narrows a validated message by its kind", () => {
     else expect(message.format).toBe(1)
   }
 })
+
+it("preserves both safe integer operands of a conditional damage replacement", () => {
+  const baseline = fixtures("observation").find(([name]) => name.endsWith("full.json"))?.[1]
+  if (!validateBattleObservation(baseline)) throw new Error("the full fixture is invalid")
+  const changed = (threshold: number, replacement: number): unknown => {
+    const copy = structuredClone(baseline)
+    for (const effect of copy.objects["o1"]?.state?.effects ?? []) {
+      if (effect.change.kind === "prevention" && effect.change.change.kind === "cap") {
+        effect.change.change.threshold = threshold
+        effect.change.change.replacement = replacement
+        return copy
+      }
+    }
+    throw new Error("the full fixture has no conditional replacement")
+  }
+  for (const [threshold, replacement] of [
+    [6, 5],
+    [0, Number.MAX_SAFE_INTEGER],
+    [Number.MAX_SAFE_INTEGER, 0],
+  ] as const) {
+    expect(validateBattleObservation(changed(threshold, replacement))).toBe(true)
+  }
+  for (const bad of [Number.MAX_SAFE_INTEGER + 1, -1, 0.5, Number.NaN, Number.POSITIVE_INFINITY]) {
+    expect(validateBattleObservation(changed(bad, 5)), String(bad)).toBe(false)
+    expect(validateBattleObservation(changed(6, bad)), String(bad)).toBe(false)
+  }
+})

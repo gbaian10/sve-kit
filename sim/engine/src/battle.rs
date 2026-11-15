@@ -4,6 +4,7 @@
 //! authenticated seat and current question before submitting the decoded answer.
 
 mod costs;
+mod effects;
 mod events;
 mod history;
 mod objects;
@@ -13,8 +14,11 @@ mod selection;
 mod sources;
 
 pub use costs::project_costs;
+pub use effects::{project_card_effects, project_player_effects};
 pub use events::{EventFeed, EventObjects, FeedUpdate, ProjectedEvent, project_batch};
 pub use history::project_history;
+pub use objects::ObjectTable;
+pub(crate) use objects::build_objects;
 pub use pending::project_pending;
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use selection::{CandidateDetails, SelectionProjection};

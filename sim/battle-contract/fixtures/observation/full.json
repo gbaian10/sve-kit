@@ -414,6 +414,27 @@
               "recipients": null,
               "sources": null
             }
+          },
+          {
+            "source": null,
+            "expires": {
+              "kind": "no_temporal_expiry"
+            },
+            "main_live": true,
+            "intervals": [],
+            "active": true,
+            "change": {
+              "kind": "prevention",
+              "damage": "ability",
+              "change": {
+                "kind": "cap",
+                "threshold": 6,
+                "replacement": 5
+              },
+              "remaining": null,
+              "recipients": null,
+              "sources": null
+            }
           }
         ],
         "quotas": [

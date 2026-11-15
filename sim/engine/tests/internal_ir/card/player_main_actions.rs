@@ -218,6 +218,95 @@ fn board_attack_observation_tracks_committed_main_intent_for_both_viewers() {
 }
 
 #[test]
+fn board_attack_disappears_when_an_on_attack_trigger_destroys_either_participant() {
+    // Destruction also retires the generation; the saved-state case protects the zone guard alone.
+    for destroyed in [None, Some(Viewer::P1), Some(Viewer::P2)] {
+        let steps = destroyed.map_or_else(
+            || vec![draw(1, 0)],
+            |owner| {
+                let objects = if owner == Viewer::P1 {
+                    Selector::Objects {
+                        objects: vec![ObjectOperand::SourceHolder {}],
+                    }
+                } else {
+                    let mut objects = zone(ZoneKind::Field, 91);
+                    let Selector::Zone {
+                        players: selected, ..
+                    } = &mut objects
+                    else {
+                        panic!("field selector")
+                    };
+                    *selected = players(PlayerRelation::Opponents);
+                    objects
+                };
+                vec![instruction(1, Action::Destroy { objects })]
+            },
+        );
+        let mut initial = initial();
+        initial["players"]["P2"]["zones"]["field"] = json!([
+            {"id":"enemy-z","card":"unit-follower","state":{"acted":true}}
+        ]);
+        let mut game = board(&initial, vec![timing::on_attack(ability(1, steps))]);
+        let main = question(&game, Viewer::P1);
+        let selected = attack(&main);
+        let target = AttackTarget::Card(handle(&game, Viewer::P2, 0));
+        assert_eq!(
+            game.submit_player(Viewer::P1, command(&main, selected, target))
+                .kind,
+            SubmissionKind::Applied
+        );
+        for viewer in [Viewer::P1, Viewer::P2] {
+            assert!(game.observe(viewer).unwrap().attack.is_some());
+        }
+        let pending = question(&game, Viewer::P1);
+        let QuestionShape::Decision(DecisionShape::Pending(options)) = pending.shape else {
+            panic!("on-attack occurrence")
+        };
+        assert_eq!(options.len(), 1);
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::Pending(options[0].handle)).kind,
+            SubmissionKind::Applied
+        );
+        let quick = question(&game, Viewer::P2);
+        assert!(matches!(
+            quick.shape,
+            QuestionShape::Decision(DecisionShape::Quick { .. })
+        ));
+        let before = exact_authority(&game);
+        for viewer in [Viewer::P1, Viewer::P2] {
+            let observed = game.observe(viewer).unwrap();
+            assert_eq!(observed.attack.is_none(), destroyed.is_some());
+            for owner in [Viewer::P1, Viewer::P2] {
+                let player = observed
+                    .players
+                    .iter()
+                    .find(|player| player.player == owner)
+                    .unwrap();
+                let cemetery = player
+                    .zones
+                    .iter()
+                    .find(|zone| zone.kind == ObservedZone::Cemetery)
+                    .unwrap();
+                assert_eq!(cemetery.count, u64::from(destroyed == Some(owner)));
+                if destroyed == Some(Viewer::P1) && owner == Viewer::P1 {
+                    let field = player
+                        .zones
+                        .iter()
+                        .find(|zone| zone.kind == ObservedZone::Field)
+                        .unwrap();
+                    assert_eq!(
+                        field.cards.len(),
+                        1,
+                        "the spare copy cannot inherit the old attack"
+                    );
+                }
+            }
+        }
+        assert_eq!(exact_authority(&game), before);
+    }
+}
+
+#[test]
 fn player_main_actions_reject_wrong_seat_target_payload_and_retired_intent() {
     let mut game = board(&initial(), vec![]);
     let first = question(&game, Viewer::P1);

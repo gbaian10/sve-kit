@@ -10,13 +10,13 @@ use sve_engine::battle::{
 use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::player::{ObjectHandle, Viewer, observation as native};
 
-struct Fixture {
-    catalog: Arc<Catalog>,
-    references: BattleReferences,
-    snapshot: String,
+pub(super) struct Fixture {
+    pub(super) catalog: Arc<Catalog>,
+    pub(super) references: BattleReferences,
+    pub(super) snapshot: String,
 }
 
-fn catalog_for(snapshot: &str) -> Catalog {
+pub(super) fn catalog_for(snapshot: &str) -> Catalog {
     let (_, keywords, document) = catalog_documents(&json!("1"));
     let rules = rule_fixtures::rules(
         snapshot,
@@ -37,7 +37,7 @@ fn catalog_for(snapshot: &str) -> Catalog {
     .unwrap()
 }
 
-fn fixture() -> &'static Fixture {
+pub(super) fn fixture() -> &'static Fixture {
     static FIXTURE: OnceLock<Fixture> = OnceLock::new();
     FIXTURE.get_or_init(|| {
         let (snapshot, _, _) = catalog_documents(&json!("1"));
@@ -90,11 +90,15 @@ fn fixture() -> &'static Fixture {
     })
 }
 
-fn board(actor: Viewer, secret: &str) -> Game {
+pub(super) fn board(actor: Viewer, secret: &str) -> Game {
     board_with_program(actor, secret, &card(vec![]))
 }
 
-fn board_with_program(actor: Viewer, secret: &str, follower: &WellFormedCardProgram) -> Game {
+pub(super) fn board_with_program(
+    actor: Viewer,
+    secret: &str,
+    follower: &WellFormedCardProgram,
+) -> Game {
     let mut initial = setup(actor.player().seat, json!([]));
     let (own, opponent) = if actor == Viewer::P1 {
         ("P1", "P2")

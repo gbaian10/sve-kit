@@ -1,6 +1,6 @@
 use super::*;
 
-fn tree(payload: Value) -> Value {
+pub(super) fn tree(payload: Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
     let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
     entry.as_object_mut().unwrap().remove("fanfare");
