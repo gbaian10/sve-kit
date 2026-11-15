@@ -10,12 +10,13 @@ type Result<T> = result::Result<T, ProjectionError>;
 
 /// Project disclosed pending occurrences from one authority-produced observation.
 ///
-/// Hosts supply the catalog and authenticated observation from the same game.
-/// The complete board entry must share one object scope across its components.
+/// Runner fixtures supply observations directly; hosts use `Game::battle_observation`
+/// so all board components share one authority read and object scope.
 ///
 /// # Errors
 /// Refuses mismatched catalogs, unknown printing or face coordinates, foreign
 /// current handles, cross-viewer admission budgets and inexact wire integers.
+#[cfg(feature = "runner")]
 pub fn project_pending(
     catalog: &Catalog,
     references: &BattleReferences,
@@ -23,6 +24,15 @@ pub fn project_pending(
 ) -> Result<Vec<wire::PendingTrigger>> {
     references.validate_catalog(catalog)?;
     let objects = ObjectScope::new(observation)?;
+    scoped(catalog, references, observation, &objects)
+}
+
+pub(super) fn scoped(
+    catalog: &Catalog,
+    references: &BattleReferences,
+    observation: &native::Observation,
+    objects: &ObjectScope<'_>,
+) -> Result<Vec<wire::PendingTrigger>> {
     observation
         .pending
         .iter()
@@ -31,7 +41,7 @@ pub fn project_pending(
                 return Err(ProjectionError::Unavailable);
             }
             Ok(wire::PendingTrigger {
-                source: sources::source(catalog, references, &objects, &pending.source)?,
+                source: sources::source(catalog, references, objects, &pending.source)?,
                 controller: match pending.controller {
                     Viewer::P1 => Seat::P1,
                     Viewer::P2 => Seat::P2,

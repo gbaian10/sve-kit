@@ -6,12 +6,13 @@ use super::{
 };
 use crate::game::Object;
 use crate::game::internal::{DamageOccurrence, player_id};
+use crate::game::string;
 use crate::ir::{
-    CardKind, CardName, EventPayload, ExecutionId, PlayerId, RuntimeDamageRecipient, RuntimeHolder,
-    Stat,
+    CardKind, CardName, DamageEvent, EventPayload, ExecutionId, PlayerId, RuntimeDamageRecipient,
+    RuntimeHolder, Stat,
 };
 use core::iter::once;
-use serde_json::json;
+use serde_json::{Value, json};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -91,32 +92,60 @@ impl Game {
         Ok(())
     }
 
-    pub(in crate::game::internal) fn internal_record_damage_history(
+    pub(in crate::game) fn internal_capture_damage_history(
+        &self,
+        hits: &[Value],
+        facts: Option<&[DamageOccurrence]>,
+        battle_events: Option<&[DamageEvent]>,
+    ) -> Result<Vec<(DamageEvent, Vec<String>)>> {
+        if let Some(facts) = facts {
+            return Ok(facts
+                .iter()
+                .map(|fact| {
+                    (
+                        fact.event,
+                        fact.source
+                            .subject
+                            .traits
+                            .iter()
+                            .map(|id| id.0.clone())
+                            .collect(),
+                    )
+                })
+                .collect());
+        }
+        battle_events
+            .into_iter()
+            .flatten()
+            .zip(hits)
+            .map(|(event, hit)| {
+                // Freeze traits before damage can change the source's characteristics.
+                let traits = self
+                    .card_traits(string(&hit["source"]))?
+                    .into_iter()
+                    .collect();
+                Ok((*event, traits))
+            })
+            .collect()
+    }
+
+    pub(in crate::game) fn internal_record_damage_history(
         &mut self,
-        facts: &[DamageOccurrence],
+        events: impl IntoIterator<Item = (DamageEvent, Vec<String>)>,
     ) {
-        for fact in facts {
-            if let RuntimeDamageRecipient::Object { object } = fact.event.recipient {
+        for (event, traits) in events {
+            if let RuntimeDamageRecipient::Object { object } = event.recipient {
                 self.state.ir_damage_history.push(DamageHistoryFact {
                     recipient_link: ObjectLink::reference(self, object.id.0, object.generation.0),
                     source_link: ObjectLink::reference(
                         self,
-                        fact.event.source.object.id.0,
-                        fact.event.source.object.generation.0,
+                        event.source.object.id.0,
+                        event.source.object.generation.0,
                     ),
                     recipient: (object.id.0, object.generation.0),
-                    source: (
-                        fact.event.source.object.id.0,
-                        fact.event.source.object.generation.0,
-                    ),
-                    controller: fact.event.controller.seat,
-                    traits: fact
-                        .source
-                        .subject
-                        .traits
-                        .iter()
-                        .map(|id| id.0.clone())
-                        .collect(),
+                    source: (event.source.object.id.0, event.source.object.generation.0),
+                    controller: event.controller.seat,
+                    traits,
                 });
             }
         }

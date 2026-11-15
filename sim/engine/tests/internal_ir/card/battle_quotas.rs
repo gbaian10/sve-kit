@@ -263,6 +263,7 @@ fn wire_quota_lifecycle_consumes_trigger_at_admission_before_pending_selection()
                 wire::ConsumptionPoint::PendingAdmission,
             );
             let before = exact_authority(game);
+            // Zero is foreign on every target; u64::MAX can fail usize conversion first.
             let foreign_pending = game
                 .answer_internal_card(question.actor, question.token, Answer::Pending(0))
                 .unwrap_err();

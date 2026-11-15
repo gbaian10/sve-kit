@@ -21,14 +21,20 @@ pub use effects::{
     InstalledEffect, NumberChange, WordingField, WordingSource,
 };
 
-use super::{ObjectHandle, Viewer};
-use crate::battle::{BattleReferences, ObjectTable, ProjectionError, build_objects, project_turn};
+use super::{DecisionShape, Input, ObjectHandle, OpeningQuestion, QuestionShape, Viewer};
+use crate::battle::{
+    BattleReferences, ObjectTable, ProjectionError, build_objects, build_observation, project_turn,
+};
 use crate::game::internal::zone_capacity;
-use crate::game::{Game, Object, int};
+use crate::game::{Game, Object};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
 use core::result;
-use sve_battle_contract::observation::TurnView;
+use serde_json::Value;
+use sve_battle_contract::{
+    Seat,
+    observation::{self as wire, TurnView},
+};
 
 /// Player-visible zones, including attached evolution cards.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -290,6 +296,35 @@ pub(in crate::game) fn zone(value: &str) -> Result<ObservedZone> {
     }
 }
 
+fn public_resource(value: &Value) -> Result<i64> {
+    value
+        .as_i64()
+        .ok_or_else(|| invalid("invalid public resource"))
+}
+
+const fn rule_stage(
+    shape: &QuestionShape,
+) -> result::Result<Option<wire::ProcessingStage>, ProjectionError> {
+    let stage = match shape {
+        QuestionShape::Opening(_) => wire::ProcessingStage::Opening,
+        QuestionShape::Closing(_) => wire::ProcessingStage::Closing,
+        QuestionShape::ActionWindow(_) => return Ok(None),
+        QuestionShape::Evolution(_) => return Err(ProjectionError::Unavailable),
+        QuestionShape::Decision(shape) => {
+            if matches!(shape, DecisionShape::Quick { .. }) {
+                wire::ProcessingStage::Quick
+            } else if matches!(shape, DecisionShape::Pending(_)) {
+                wire::ProcessingStage::PendingOrder
+            } else if matches!(shape, DecisionShape::TriggerQuota(_)) {
+                wire::ProcessingStage::TriggerAdmission
+            } else {
+                return Err(ProjectionError::Unavailable);
+            }
+        }
+    };
+    Ok(Some(stage))
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Player observations share authoritative readers."
@@ -302,6 +337,98 @@ impl Game {
     pub fn observe(&self, perspective: Viewer) -> Result<Observation> {
         self.player_observation(perspective)
             .map_err(|_authority_error| invalid("player observation unavailable"))
+    }
+
+    /// Project all authorized board components from one read and object scope.
+    ///
+    /// The host authenticates the viewer and binds this value to the same stop as
+    /// its question. Unsupported active processing refuses the entire observation.
+    /// Hosts must preflight the full program closure before interactive use:
+    /// a private branch must not decide whether a required stop is supported.
+    ///
+    /// # Errors
+    /// Refuses unavailable facts, unsupported processing, mismatched references,
+    /// invalid object links and numbers outside the exact wire range.
+    pub fn battle_observation(
+        &self,
+        perspective: Viewer,
+        references: &BattleReferences,
+    ) -> result::Result<wire::BattleObservation, ProjectionError> {
+        let observation = self
+            .observe(perspective)
+            .map_err(|_authority_error| ProjectionError::Unavailable)?;
+        let processing = self.battle_rule_processing(&observation)?;
+        build_observation(&self.catalog, references, &observation, processing)
+    }
+
+    fn battle_rule_processing(
+        &self,
+        observation: &Observation,
+    ) -> result::Result<Vec<wire::ProcessingContext>, ProjectionError> {
+        // Effect executions need their frozen source, parent stack and declarations.
+        if self.typed.is_some() {
+            return Err(ProjectionError::Unavailable);
+        }
+        let question = match self.input(observation.viewer) {
+            Input::Question(question) => question,
+            Input::Waiting(waiting) => {
+                let Input::Question(question) = self.input(waiting.actor) else {
+                    return Err(ProjectionError::Unavailable);
+                };
+                if question.actor != waiting.actor {
+                    return Err(ProjectionError::Unavailable);
+                }
+                question
+            }
+            Input::Finished { .. } => return Ok(vec![]),
+            Input::EngineFault => return Err(ProjectionError::Unavailable),
+        };
+        let Some(stage) = rule_stage(&question.shape)? else {
+            return Ok(vec![]);
+        };
+        let occurrences = matches!(
+            stage,
+            wire::ProcessingStage::PendingOrder | wire::ProcessingStage::TriggerAdmission
+        );
+        // A hidden admission/order leaves no context slot for the other seat.
+        if occurrences && observation.viewer != question.actor {
+            let visible = if stage == wire::ProcessingStage::TriggerAdmission {
+                self.observed_admission_group(observation.viewer)
+                    .map_err(|_authority_error| ProjectionError::Unavailable)?
+            } else {
+                observation
+                    .pending
+                    .iter()
+                    .any(|pending| pending.controller == question.actor)
+            };
+            if !visible {
+                return Ok(vec![]);
+            }
+        }
+        let actor_seat = match question.actor {
+            Viewer::P1 => Seat::P1,
+            Viewer::P2 => Seat::P2,
+        };
+        let controller = occurrences.then_some(actor_seat);
+        let procedure = matches!(
+            &question.shape,
+            QuestionShape::Opening(OpeningQuestion::Mulligan(_))
+        )
+        .then_some(wire::Procedure {
+            kind: wire::ProcedureKind::EachPlayer,
+            actor: actor_seat,
+            round: None,
+        });
+        Ok(vec![wire::ProcessingContext {
+            stage,
+            controller,
+            source: None,
+            subject: None,
+            rule: None,
+            procedure,
+            declared: vec![],
+            payment: None,
+        }])
     }
 
     /// Project this viewer's current wire object table from one authority read.
@@ -453,9 +580,9 @@ impl Game {
         Ok(PlayerObservation {
             player,
             resources: Resources {
-                life: int(&data.leader["life"]),
-                pp: int(&data.pp["current"]),
-                maximum_pp: int(&data.pp["max"]),
+                life: public_resource(&data.leader["life"])?,
+                pp: public_resource(&data.pp["current"])?,
+                maximum_pp: public_resource(&data.pp["max"])?,
                 ep: data.ep,
                 sep: data.sep,
             },

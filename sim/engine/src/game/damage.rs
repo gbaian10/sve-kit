@@ -4,8 +4,9 @@
 )]
 use super::internal::DamageOccurrence;
 use super::legal::permutations;
+use super::player::events::ActionDetails;
 use super::{BTreeMap, Frame, Game, int, list, string};
-use crate::ir::{DamageFlags, SnapshotId};
+use crate::ir::{DamageEvent, DamageFlags, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
@@ -139,6 +140,14 @@ impl Game {
             None
         };
         let facts = facts.or(combat.as_deref());
+        // Public history needs the battle fact, not an ability's full source snapshot.
+        let battle_events = if facts.is_none() && actual.iter().all(|hit| hit["battle"] == true) {
+            Some(self.internal_battle_damage_events(actual, at)?)
+        } else {
+            None
+        };
+        let history =
+            self.internal_capture_damage_history(actual, facts, battle_events.as_deref())?;
         let mut pending = self.drain_triggers(actual, &frame.cause)?;
         let player_batch = self.player_event_mark();
         let group = self.group();
@@ -187,24 +196,11 @@ impl Game {
                 group,
             );
             self.player_source_after(&player_step, player_source);
-            if let Some(fact) = facts.and_then(|facts| facts.get(hit_index)) {
-                self.player_step_actor(&player_step, &format!("P{}", fact.event.controller.seat));
-            }
-            let flags = facts.and_then(|facts| facts.get(hit_index)).map_or_else(
-                || match (hit["battle"] == true, hit["attack"] == true) {
-                    (true, true) => DamageFlags::AttackCombat,
-                    (true, false) => DamageFlags::Combat,
-                    (false, true) => DamageFlags::Attack,
-                    (false, false) => DamageFlags::Ability,
-                },
-                |fact| fact.event.flags,
-            );
-            self.enrich_player_step(
-                &player_step,
-                None,
-                &super::player::events::ActionDetails::Damage(flags),
-                &[],
-            );
+            let event = facts
+                .and_then(|facts| facts.get(hit_index))
+                .map(|fact| &fact.event)
+                .or_else(|| battle_events.as_ref()?.get(hit_index));
+            self.player_damage_details(&player_step, hit, event);
         }
         self.seal_player_event_batch(player_batch);
         pending.extend(self.collect_subject_event(
@@ -223,6 +219,7 @@ impl Game {
             });
             pending.extend(self.collect_subject_event("deal_damage", &[subject], &frame.cause, &json!({"target":target,"amount":hit["amount"],"battle":hit["battle"],"to_opposing_leader":to_opposing_leader}))?);
         }
+        self.internal_record_damage_history(history);
         self.internal_damage_events(actual, facts, frame, at)?;
         self.enqueue(pending);
         self.life_change_triggers(
@@ -232,6 +229,22 @@ impl Game {
             at,
         )?;
         Ok(())
+    }
+
+    fn player_damage_details(&mut self, step: &str, hit: &Value, event: Option<&DamageEvent>) {
+        if let Some(event) = event {
+            self.player_step_actor(step, &format!("P{}", event.controller.seat));
+        }
+        let flags = event.map_or_else(
+            || match (hit["battle"] == true, hit["attack"] == true) {
+                (true, true) => DamageFlags::AttackCombat,
+                (true, false) => DamageFlags::Combat,
+                (false, true) => DamageFlags::Attack,
+                (false, false) => DamageFlags::Ability,
+            },
+            |event| event.flags,
+        );
+        self.enrich_player_step(step, None, &ActionDetails::Damage(flags), &[]);
     }
 
     fn damage_receipt(actual: &[Value], bind: Option<&str>, frame: &mut Frame) {
