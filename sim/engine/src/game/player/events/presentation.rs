@@ -133,6 +133,9 @@ pub(super) struct Presentation {
     open: Vec<Shown>,
     /// Scopes whose batch a restoration discarded, until the submission's result says why.
     discarded: Vec<ScopeId>,
+    /// Source batches that a board handed to this viewer already contained without a scope.
+    /// They are never shown early afterwards and commit as history.
+    covered: Vec<u64>,
     /// Handles of the objects on the board this viewer was handed last.
     held: Arc<BTreeSet<ObjectHandle>>,
     record: Arc<[Arc<PresentationEntry>]>,
@@ -207,7 +210,10 @@ impl Presentation {
         batch: u64,
         events: Vec<EventKind>,
     ) -> Option<bool> {
-        if events.is_empty() || self.open.iter().any(|shown| shown.batch == batch) {
+        if events.is_empty()
+            || self.covered.contains(&batch)
+            || self.open.iter().any(|shown| shown.batch == batch)
+        {
             return Some(true);
         }
         if !self.identifiable(live, &events) {
@@ -270,6 +276,21 @@ impl Presentation {
             .is_some()
     }
 
+    /// The board handed now contains this batch and no scope shows it: when it commits it
+    /// will not be new to this viewer.
+    pub(super) fn cover(&mut self, batch: u64) {
+        if !self.covered.contains(&batch) && !self.open.iter().any(|shown| shown.batch == batch) {
+            self.covered.push(batch);
+        }
+    }
+
+    /// Whether the batch committing now was already on a board this viewer was handed.
+    pub(super) fn uncover(&mut self, batch: u64) -> bool {
+        let before = self.covered.len();
+        self.covered.retain(|covered| *covered != batch);
+        self.covered.len() != before
+    }
+
     /// Whether every shown scope has reached the end of its life.
     pub(super) const fn settled(&self) -> bool {
         self.open.is_empty()
@@ -284,6 +305,7 @@ impl Presentation {
         self.open = open;
         self.discarded
             .extend(gone.into_iter().map(|shown: Shown| shown.scope));
+        self.covered.retain(|batch| kept(*batch));
     }
 
     /// Give the discarded scopes their end. Only a fault withdraws a shown scope; `false`
@@ -350,7 +372,8 @@ impl Game {
     pub fn present_player_events(&mut self, viewer: Viewer) -> Result<(), EventError> {
         let live = self.observable_handles(viewer);
         let ready = self.provisional_stop();
-        self.player_events.present(viewer, ready, live)
+        let unplayed = self.unplayed_since();
+        self.player_events.present(viewer, ready, live, unplayed)
     }
 
     /// Read this viewer's recorded presentation steps after a cursor, without changing rules,

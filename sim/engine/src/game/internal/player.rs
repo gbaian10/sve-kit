@@ -65,19 +65,25 @@ impl Execution {
         self.origin.take()
     }
 
-    /// Whether this play and every play enclosing it have been played (step 7).
-    /// Before that, payment, capacity or a declined head cost can still undo a layer by rules.
-    fn established(&self) -> bool {
+    /// Whether this play itself has been played (step 7).
+    fn played(&self) -> bool {
         self.facts.iter().any(|fact| {
             matches!(
                 fact,
                 Fact::CardPlayed { execution, .. } | Fact::AbilityPlayed { execution, .. }
                     if *execution == self.id
             )
-        }) && self
-            .nested
-            .as_ref()
-            .is_none_or(|nested| nested.parent.established())
+        })
+    }
+
+    /// Whether this play and every play enclosing it have been played (step 7).
+    /// Before that, payment, capacity or a declined head cost can still undo a layer by rules.
+    fn established(&self) -> bool {
+        self.played()
+            && self
+                .nested
+                .as_ref()
+                .is_none_or(|nested| nested.parent.established())
     }
 }
 
@@ -95,6 +101,18 @@ impl Game {
             && self.typed.as_ref().is_some_and(|execution| {
                 execution.waiting.is_some() && execution.origin.is_some() && execution.established()
             })
+    }
+
+    /// The journal position at which the suspended card or ability play began, while it has
+    /// not been played yet: what it recorded since is its declaration and payment so far,
+    /// not a result. A procedure that is not a play never has one.
+    pub(in crate::game) fn unplayed_since(&self) -> Option<u64> {
+        self.typed
+            .as_ref()
+            .filter(|execution| {
+                (execution.ability.is_some() || execution.field_entry) && !execution.played()
+            })
+            .map(|execution| execution.began)
     }
 
     pub(in crate::game) fn player_decision(&self) -> Option<(DecisionView, QuestionPurpose)> {

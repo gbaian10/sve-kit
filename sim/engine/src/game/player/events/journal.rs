@@ -47,12 +47,13 @@ impl ViewerLog {
         mut events: Vec<PlayerEvent>,
         batches: &mut Vec<Arc<PlayerEventBatch>>,
     ) -> bool {
+        let covered = self.presentation.uncover(serial);
         if !self.presentation.promote(&self.stream, serial, &mut events) {
             self.fault = true;
             return false;
         }
         if !events.is_empty() {
-            batches.push(Arc::new(PlayerEventBatch { events }));
+            batches.push(Arc::new(PlayerEventBatch { events, covered }));
         }
         true
     }
@@ -70,6 +71,8 @@ pub(super) struct Pending {
     pub(super) generation: Option<u64>,
     pub(super) before_generation: Option<u64>,
     pub(super) sealed: bool,
+    /// Part of a play's declaration and payment, up to and including being played.
+    prefix: bool,
     ordering: BatchOrder,
     pub(super) views: [Result<Option<EventKind>, EventError>; 2],
 }
@@ -132,10 +135,19 @@ fn ordered(pending: &[Pending], perspective: usize) -> Vec<&Pending> {
     ordered
 }
 
+/// One leading batch that is final and projectable for a perspective.
+struct Sealed {
+    batch: u64,
+    /// Authorized members; a batch without one opens no scope.
+    events: Vec<EventKind>,
+    /// No member is part of a play's declaration and payment, whether that play has been
+    /// played or is still declaring since `unplayed`.
+    ordinary: bool,
+}
+
 /// Leading batches whose every member is final and projectable for this perspective.
-/// A batch without an authorized member is listed empty; it opens no scope.
-fn sealed_batches(pending: &[Pending], perspective: usize) -> Vec<(u64, Vec<EventKind>)> {
-    let mut batches: Vec<(u64, Vec<EventKind>)> = Vec::new();
+fn sealed_batches(pending: &[Pending], perspective: usize, unplayed: Option<u64>) -> Vec<Sealed> {
+    let mut batches: Vec<Sealed> = Vec::new();
     for entry in ordered(pending, perspective) {
         let view = match entry.views.get(perspective) {
             Some(Ok(view)) if entry.sealed => view,
@@ -143,7 +155,7 @@ fn sealed_batches(pending: &[Pending], perspective: usize) -> Vec<(u64, Vec<Even
                 // The batch this member belongs to is not complete for this perspective.
                 if batches
                     .last()
-                    .is_some_and(|(batch, _)| *batch == entry.batch)
+                    .is_some_and(|sealed| sealed.batch == entry.batch)
                 {
                     batches.pop();
                 }
@@ -152,12 +164,19 @@ fn sealed_batches(pending: &[Pending], perspective: usize) -> Vec<(u64, Vec<Even
         };
         if batches
             .last()
-            .is_none_or(|(batch, _)| *batch != entry.batch)
+            .is_none_or(|sealed| sealed.batch != entry.batch)
         {
-            batches.push((entry.batch, Vec::new()));
+            batches.push(Sealed {
+                batch: entry.batch,
+                events: Vec::new(),
+                ordinary: true,
+            });
         }
-        if let (Some(kind), Some((_, events))) = (view, batches.last_mut()) {
-            events.push(kind.clone());
+        if let Some(sealed) = batches.last_mut() {
+            sealed.ordinary &= !entry.prefix && unplayed.is_none_or(|began| entry.serial <= began);
+            if let Some(kind) = view {
+                sealed.events.push(kind.clone());
+            }
         }
     }
     batches
@@ -236,6 +255,7 @@ impl Journal {
             generation: None,
             before_generation: None,
             sealed,
+            prefix: false,
             ordering,
             views,
         });
@@ -355,11 +375,17 @@ impl Journal {
     /// One handoff to this viewer: when `ready`, record every complete batch it has not been
     /// shown yet, in order, up to the first one it cannot identify; then remember `live`,
     /// the handles it holds now, for the next handoff.
+    ///
+    /// The board handed now already contains every complete batch. One that gets no scope
+    /// here is therefore not new to this viewer when it commits, unless it belongs to a
+    /// play's declaration and payment, which keep their first presentation; `unplayed` is
+    /// where a play that has not been played yet began.
     pub(super) fn present(
         &mut self,
         viewer: Viewer,
         ready: bool,
         live: BTreeSet<ObjectHandle>,
+        unplayed: Option<u64>,
     ) -> Result<(), EventError> {
         let perspective = index(viewer);
         let log = self
@@ -369,9 +395,13 @@ impl Journal {
         if log.fault {
             return Err(EventError::ProjectionGap);
         }
+        let sealed = sealed_batches(&self.pending, perspective, unplayed);
         if ready {
-            for (batch, events) in sealed_batches(&self.pending, perspective) {
-                match log.presentation.show(&log.stream, &live, batch, events) {
+            for batch in &sealed {
+                match log
+                    .presentation
+                    .show(&log.stream, &live, batch.batch, batch.events.clone())
+                {
                     Some(true) => {}
                     Some(false) => break,
                     None => {
@@ -381,8 +411,21 @@ impl Journal {
                 }
             }
         }
+        for batch in sealed {
+            if batch.ordinary && !batch.events.is_empty() {
+                log.presentation.cover(batch.batch);
+            }
+        }
         log.presentation.hold(live);
         Ok(())
+    }
+
+    fn play_prefix(&mut self, began: u64) {
+        for entry in &mut self.pending {
+            if entry.serial > began {
+                entry.prefix = true;
+            }
+        }
     }
 
     pub(super) fn read_presentation(
@@ -426,6 +469,17 @@ impl Journal {
     reason = "Journal publication follows the player authority boundary."
 )]
 impl Game {
+    /// The journal position after the last recorded result.
+    pub(in crate::game) const fn player_event_serial(&self) -> u64 {
+        self.player_events.serial
+    }
+
+    /// A play that began at `began` has just been played: what it recorded since then is its
+    /// declaration and payment, whose first presentation an earlier board does not replace.
+    pub(in crate::game) fn player_play_prefix(&mut self, began: u64) {
+        self.player_events.play_prefix(began);
+    }
+
     // Completion belongs to the mutator, not to shared cause or group numbers.
     pub(in crate::game) fn seal_player_event_batch(&mut self, start: usize) {
         let Some(first) = self.player_events.pending.get(start) else {

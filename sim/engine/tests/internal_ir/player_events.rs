@@ -503,6 +503,12 @@ fn player_events_never_present_a_procedure_that_is_not_a_play() {
             0,
             "Committing never creates a scope after the fact"
         );
+        assert!(
+            game.event_batches(viewer, None)
+                .unwrap()
+                .all(|batch| batch.covered),
+            "Both seats were handed the board at the stop, so neither result is new to them"
+        );
     }
 }
 

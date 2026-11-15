@@ -35,7 +35,9 @@ fn journal(rules: &[&str]) -> Journal {
 #[test]
 fn a_batch_changed_after_it_was_shown_stops_that_viewers_history_only() {
     let mut journal = journal(&["first", "second"]);
-    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
     assert_eq!(
         journal.read_presentation(Viewer::P1, None).unwrap().count(),
         2,
@@ -73,7 +75,9 @@ fn a_batch_changed_after_it_was_shown_stops_that_viewers_history_only() {
 #[test]
 fn a_shown_member_that_disappears_before_commit_is_not_promoted() {
     let mut journal = journal(&["only"]);
-    journal.present(Viewer::P2, true, BTreeSet::new()).unwrap();
+    journal
+        .present(Viewer::P2, true, BTreeSet::new(), None)
+        .unwrap();
     journal.pending[0].views = [Ok(Some(result("only"))), Ok(None)];
     journal.commit();
     assert!(
@@ -93,7 +97,9 @@ fn a_shown_member_that_disappears_before_commit_is_not_promoted() {
 #[test]
 fn an_unchanged_batch_is_promoted_with_matching_identities() {
     let mut journal = journal(&["first", "second"]);
-    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
     journal.commit();
     let steps = journal
         .read_presentation(Viewer::P1, None)
@@ -163,7 +169,9 @@ fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
             true,
         );
     }
-    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
     roll_back(&mut journal, &origin);
     journal.settle_presentation(true);
     let withdrawn = steps(&journal, Viewer::P1);
@@ -200,7 +208,9 @@ fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
         None,
         true,
     );
-    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
     journal.settle_presentation(true);
     journal.commit();
     let after = steps(&journal, Viewer::P1);
@@ -225,7 +235,9 @@ fn a_fault_withdraws_exactly_the_discarded_scopes_and_never_reissues_them() {
 #[test]
 fn a_restoration_that_keeps_a_shown_batch_withdraws_and_promotes_nothing() {
     let mut journal = journal(&["kept"]);
-    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
     let stop = journal.clone();
     journal.push(
         [Ok(Some(result("lost"))), Ok(Some(result("lost")))],
@@ -269,7 +281,9 @@ fn a_rules_rollback_of_a_shown_batch_stops_that_viewers_history() {
         None,
         true,
     );
-    journal.present(Viewer::P1, true, BTreeSet::new()).unwrap();
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
     roll_back(&mut journal, &origin);
     journal.settle_presentation(false);
     assert!(
@@ -331,8 +345,7 @@ fn batches(journal: &Journal, viewer: Viewer) -> Vec<ProvisionalBatch> {
 
 /// Three sequential batches: a card still on the board, a card that was revealed and
 /// hidden again, and a result that names no card.
-fn revealed_and_hidden() -> Journal {
-    let mut journal = journal(&[]);
+fn reveal_and_hide(journal: &mut Journal) {
     for (name, kind) in [
         ("on-board", reveal("board")),
         ("hidden-again", reveal("hidden")),
@@ -347,6 +360,11 @@ fn revealed_and_hidden() -> Journal {
             true,
         );
     }
+}
+
+fn revealed_and_hidden() -> Journal {
+    let mut journal = journal(&[]);
+    reveal_and_hide(&mut journal);
     journal
 }
 
@@ -354,7 +372,7 @@ fn revealed_and_hidden() -> Journal {
 fn a_card_seen_only_inside_the_uncommitted_window_stops_early_presentation_there() {
     let mut journal = revealed_and_hidden();
     journal
-        .present(Viewer::P1, true, handles(&["board"]))
+        .present(Viewer::P1, true, handles(&["board"]), None)
         .unwrap();
     assert_eq!(
         batches(&journal, Viewer::P1).len(),
@@ -363,7 +381,7 @@ fn a_card_seen_only_inside_the_uncommitted_window_stops_early_presentation_there
          its batch and everything after it wait for commitment"
     );
     journal
-        .present(Viewer::P1, true, handles(&["board"]))
+        .present(Viewer::P1, true, handles(&["board"]), None)
         .unwrap();
     assert_eq!(
         batches(&journal, Viewer::P1).len(),
@@ -384,26 +402,175 @@ fn a_card_seen_only_inside_the_uncommitted_window_stops_early_presentation_there
 
 #[test]
 fn a_card_on_the_previously_handed_board_stays_identifiable_after_it_leaves() {
-    let mut journal = revealed_and_hidden();
-    // An earlier handoff, before any result could be shown, already included this card.
+    let mut journal = journal(&[]);
+    // An earlier handoff, before any of these results existed, already included this card.
     journal
-        .present(Viewer::P1, false, handles(&["board", "hidden"]))
+        .present(Viewer::P1, false, handles(&["board", "hidden"]), None)
         .unwrap();
+    reveal_and_hide(&mut journal);
     assert_eq!(
         batches(&journal, Viewer::P1).len(),
         0,
         "nothing is shown outside a qualifying stop"
     );
-    journal.present(Viewer::P1, true, handles(&[])).unwrap();
+    journal
+        .present(Viewer::P1, true, handles(&[]), None)
+        .unwrap();
     assert_eq!(
         batches(&journal, Viewer::P1).len(),
         3,
         "cards the viewer held at its previous handoff are evidence enough"
     );
-    journal.present(Viewer::P2, true, handles(&[])).unwrap();
+    journal
+        .present(Viewer::P2, true, handles(&[]), None)
+        .unwrap();
     assert_eq!(
         batches(&journal, Viewer::P2).len(),
         0,
         "what one viewer held says nothing about the other"
+    );
+}
+
+fn record(journal: &mut Journal, rule: &str) {
+    journal.push(
+        [Ok(Some(result(rule))), Ok(Some(result(rule)))],
+        None,
+        &json!({"rule":rule}),
+        format!("unit/{rule}"),
+        None,
+        true,
+    );
+}
+
+/// Whether each committed batch of this viewer was already on a board it had been handed.
+fn covered(journal: &Journal, viewer: Viewer) -> Vec<bool> {
+    journal
+        .read_batches(viewer, None)
+        .unwrap()
+        .map(|batch| batch.covered)
+        .collect()
+}
+
+/// Whether each committed event of this viewer promotes something it was shown early.
+fn linked(journal: &Journal, viewer: Viewer) -> Vec<bool> {
+    journal
+        .read(viewer, None)
+        .unwrap()
+        .map(|event| event.presentation.is_some())
+        .collect()
+}
+
+#[test]
+fn a_batch_on_a_handed_board_without_a_scope_is_history_for_that_viewer_only() {
+    let mut journal = journal(&["first", "second"]);
+    journal
+        .present(Viewer::P1, false, BTreeSet::new(), None)
+        .unwrap();
+    record(&mut journal, "later");
+    journal.commit();
+    assert_eq!(
+        covered(&journal, Viewer::P1),
+        vec![true, true, false],
+        "what the handed board contained is not new when it commits; what came later is"
+    );
+    assert_eq!(
+        covered(&journal, Viewer::P2),
+        vec![false, false, false],
+        "a viewer that was handed nothing sees every batch for the first time"
+    );
+    assert_eq!(
+        steps(&journal, Viewer::P1),
+        vec![],
+        "covering a batch is not a presentation step"
+    );
+}
+
+#[test]
+fn a_covered_batch_is_not_shown_at_a_later_qualifying_stop() {
+    let mut journal = journal(&["on-board"]);
+    journal
+        .present(Viewer::P1, false, BTreeSet::new(), None)
+        .unwrap();
+    record(&mut journal, "new");
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
+    let shown = batches(&journal, Viewer::P1);
+    assert!(
+        matches!(shown.as_slice(), [batch]
+            if batch.events.iter().map(|event| &event.kind).eq([&result("new")])),
+        "only the result the earlier board did not contain is shown: {shown:?}"
+    );
+    journal.commit();
+    assert_eq!(
+        (covered(&journal, Viewer::P1), linked(&journal, Viewer::P1)),
+        (vec![true, false], vec![false, true]),
+        "the covered batch is plain history and the shown one is promoted"
+    );
+}
+
+#[test]
+fn a_plays_declaration_and_payment_keep_their_first_presentation() {
+    let mut journal = journal(&["cost", "played"]);
+    // The play that began before both results has now been played.
+    journal.play_prefix(0);
+    record(&mut journal, "result");
+    journal
+        .present(Viewer::P1, false, BTreeSet::new(), None)
+        .unwrap();
+    journal
+        .present(Viewer::P1, true, BTreeSet::new(), None)
+        .unwrap();
+    let shown = batches(&journal, Viewer::P1);
+    assert!(
+        shown
+            .iter()
+            .flat_map(|batch| &batch.events)
+            .map(|event| &event.kind)
+            .eq([&result("cost"), &result("played")]),
+        "an earlier board does not use up the first presentation of the cost and the play: \
+         {shown:?}"
+    );
+    journal.commit();
+    assert_eq!(
+        (covered(&journal, Viewer::P1), linked(&journal, Viewer::P1)),
+        (vec![false, false, true], vec![true, true, false]),
+        "only the ordinary result the earlier board contained is plain history"
+    );
+}
+
+#[test]
+fn a_play_that_is_still_declaring_is_not_covered() {
+    let mut journal = journal(&["before"]);
+    let began = journal.serial;
+    record(&mut journal, "declared");
+    journal
+        .present(Viewer::P1, false, BTreeSet::new(), Some(began))
+        .unwrap();
+    journal.commit();
+    assert_eq!(
+        covered(&journal, Viewer::P1),
+        vec![true, false],
+        "what an unplayed play has declared so far still waits for its first presentation"
+    );
+}
+
+#[test]
+fn a_restoration_forgets_what_the_discarded_board_covered() {
+    let mut journal = journal(&[]);
+    let origin = journal.clone();
+    record(&mut journal, "undone");
+    journal
+        .present(Viewer::P1, false, BTreeSet::new(), None)
+        .unwrap();
+    roll_back(&mut journal, &origin);
+    journal.settle_presentation(false);
+    // The rolled-back journal issues the same batch number again for a different result.
+    record(&mut journal, "retry");
+    journal.commit();
+    assert_eq!(
+        covered(&journal, Viewer::P1),
+        vec![false],
+        "the retried result was never on a board this viewer was handed"
     );
 }

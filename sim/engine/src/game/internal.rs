@@ -645,6 +645,8 @@ pub(super) struct Execution {
     cost_override: Option<CostOverride>,
     play_origin_player: Option<PlayerId>,
     procedures: Vec<player_stages::ProcedureLocals>,
+    /// Player-event journal position when this execution was created.
+    began: u64,
 }
 
 #[expect(
@@ -829,6 +831,7 @@ impl Game {
                 nested: None,
                 cost_override: None,
                 play_origin_player: None,
+                began: self.player_event_serial(),
             };
             self.internal_run(&mut execution, &published)?;
             let progress = execution.progress();

@@ -81,6 +81,7 @@ fn execution(game: &mut Game) -> Execution {
         nested: None,
         cost_override: None,
         play_origin_player: None,
+        began: 0,
     }
 }
 

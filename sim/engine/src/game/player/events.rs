@@ -290,6 +290,10 @@ pub struct PlayerEvent {
 pub struct PlayerEventBatch {
     /// All occurrences authorized for this viewer; never empty.
     pub events: Vec<PlayerEvent>,
+    /// This viewer was handed a board that already contained this batch while it was neither
+    /// committed nor shown early, and it is not a play's own declaration and payment. It is
+    /// history for this viewer, not something to play.
+    pub covered: bool,
 }
 
 /// Event history is unavailable; this does not stop input or observation.

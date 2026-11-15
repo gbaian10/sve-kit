@@ -53,7 +53,8 @@ enum Seen {
         scope: u64,
         bodies: Vec<ProjectedEvent>,
     },
-    /// Shown early before this viewer's last baseline, whose board already contains it.
+    /// Already contained in a board this viewer holds or held: shown early before its last
+    /// baseline, or handed uncommitted without a scope.
     Covered,
     /// Never shown: this delivery is the first time it can be played.
     New,
@@ -186,11 +187,16 @@ impl EventFeed {
         {
             let last = batch.events.last().ok_or(ProjectionError::Unavailable)?;
             let id = BatchId::new(format!("b{}", last.id.sequence()));
+            let unseen = if batch.covered {
+                Seen::Covered
+            } else {
+                Seen::New
+            };
             let seen = batch
                 .events
                 .first()
                 .and_then(|event| event.presentation.as_ref())
-                .map_or(Seen::New, |first| {
+                .map_or(unseen, |first| {
                     let scope = first.scope().sequence();
                     promoted
                         .remove(&scope)

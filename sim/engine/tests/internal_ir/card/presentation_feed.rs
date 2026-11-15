@@ -1,5 +1,7 @@
 use super::super::player_pipeline::answer;
+use super::nested_play::Scenario;
 use super::presentation_fault::{ask_for_the_follower, prepared};
+use super::presentation_nested::started;
 use super::*;
 use alloc::collections::BTreeSet;
 use core::cell::Cell;
@@ -7,8 +9,8 @@ use sve_battle_contract::event::{self as wire, EventBatch, EventDelivery, EventG
 use sve_battle_contract::observation::TurnView;
 use sve_battle_contract::presentation::{CancelReason, PresentationBatch, PresentationOp};
 use sve_battle_contract::{
-    BatchId, CardRef, Nat as WireNat, ObjectHandle as WireHandle, ScopeId as WireScope, Seat,
-    SourceRef,
+    BatchId, CardRef, Int as WireInt, Nat as WireNat, ObjectHandle as WireHandle,
+    ScopeId as WireScope, Seat, SourceRef,
 };
 use sve_engine::battle::{EventFeed, EventObjects, FeedUpdate, ProjectionError};
 use sve_engine::game::player::events::EventCard;
@@ -426,5 +428,137 @@ fn a_failed_projection_stops_one_viewers_events_for_good_without_stopping_the_ga
     assert!(
         !promoted(&second.deliver(&mut game, &board)).is_empty(),
         "the other viewer's shown scopes are still promoted"
+    );
+}
+
+/// The committed batches of `update` that change a life total by `delta`.
+fn life_changes(update: &FeedUpdate, delta: i64) -> Vec<BatchId> {
+    let wanted = WireInt::try_from(delta).ok();
+    committed(update)
+        .0
+        .into_iter()
+        .filter(|batch| {
+            batch.events.iter().any(|event| {
+                matches!(&event.body, wire::EventBody::LifeChanged { change, .. }
+                    if Some(change.delta) == wanted)
+            })
+        })
+        .map(|batch| batch.id)
+        .collect()
+}
+
+/// A parent ability gains 1 life and then plays a spell from the cemetery. At the spell's
+/// target question the spell has not been played, so nothing can be shown early; the board
+/// handed there already shows the life gain. Returns the game at that question.
+fn child_is_declaring(feeds: &mut [EventFeed; 2]) -> Game {
+    let mut game = started("unit-spell", true, Scenario::Plain);
+    for feed in feeds.iter_mut() {
+        assert_eq!(
+            feed.baseline(&mut game),
+            quiet(),
+            "both seats observe the parent's target question first"
+        );
+    }
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied,
+        "the parent is played, gains 1 life and starts playing the spell"
+    );
+    game
+}
+
+#[test]
+fn a_result_already_on_a_handed_board_is_history_when_it_commits() {
+    let board = Board::default();
+    let mut feeds = SEATS.map(EventFeed::new);
+    let mut game = child_is_declaring(&mut feeds);
+    let [acting, rebuilt] = &mut feeds;
+    // One seat is handed the stop by an ordinary delivery, the other by a new baseline.
+    assert_eq!(
+        acting.deliver(&mut game, &board),
+        quiet(),
+        "the spell can still be undone by rules, so nothing is shown and nothing committed"
+    );
+    assert_eq!(
+        rebuilt.baseline(&mut game),
+        quiet(),
+        "a baseline at the same stop plays nothing either"
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied,
+        "the spell and then the parent resolve completely"
+    );
+    for feed in &mut feeds {
+        let update = feed.deliver(&mut game, &board);
+        assert!(
+            update.presentation.is_empty(),
+            "nothing was shown early, so there is nothing to promote"
+        );
+        let (batches, animate) = committed(&update);
+        let first_gain = life_changes(&update, 1);
+        let [old] = first_gain.as_slice() else {
+            panic!("the parent's first life gain is one committed batch: {batches:?}");
+        };
+        assert!(
+            !animate.contains(old),
+            "the board handed at the stop already showed that gain; it is history only"
+        );
+        assert_eq!(
+            animate,
+            batches
+                .iter()
+                .map(|batch| batch.id.clone())
+                .filter(|id| id != old)
+                .collect::<Vec<_>>(),
+            "everything else plays now, in order: both plays with their costs, which keep \
+             their first presentation, and every result completed after the stop"
+        );
+        assert!(
+            life_changes(&update, 2)
+                .iter()
+                .chain(&life_changes(&update, 10))
+                .all(|later| animate.contains(later))
+                && batches.iter().any(|batch| {
+                    animate.contains(&batch.id)
+                        && batch.events.iter().any(|event| {
+                            matches!(event.body, wire::EventBody::AbilityPlayed { .. })
+                        })
+                }),
+            "the later life gains and the parent's own play are among what plays"
+        );
+    }
+}
+
+#[test]
+fn a_seat_that_was_not_handed_the_stop_plays_every_batch() {
+    let board = Board::default();
+    let mut feeds = SEATS.map(EventFeed::new);
+    let mut game = child_is_declaring(&mut feeds);
+    let [acting, waiting] = &mut feeds;
+    assert_eq!(
+        acting.deliver(&mut game, &board),
+        quiet(),
+        "only the acting seat is handed the spell's private target question"
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied,
+        "the spell and then the parent resolve completely"
+    );
+    let update = waiting.deliver(&mut game, &board);
+    let (batches, animate) = committed(&update);
+    assert_eq!(
+        animate,
+        batches
+            .iter()
+            .map(|batch| batch.id.clone())
+            .collect::<Vec<_>>(),
+        "a seat whose board never showed the first life gain sees all of it for the first time"
+    );
+    assert_eq!(
+        life_changes(&update, 1).len(),
+        1,
+        "including the parent's first life gain"
     );
 }

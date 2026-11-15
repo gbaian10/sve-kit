@@ -1,15 +1,17 @@
 use super::super::player_pipeline::{answer, question};
 use super::nested_play::{Scenario, build};
 use super::*;
+use alloc::collections::BTreeMap;
 use sve_engine::game::player::events::{
     ActionKind, EventKind, PlayerEvent, PresentationOp, ProvisionalBatch,
 };
+use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{DecisionShape, Input, QuestionShape, SubmissionKind, Viewer};
 
 const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
 
 /// Start the parent ability whose resolution plays a card from a cemetery.
-fn started(child: &str, enemy: bool, scenario: Scenario) -> Game {
+pub(super) fn started(child: &str, enemy: bool, scenario: Scenario) -> Game {
     let (mut game, definition) = build("self", child, enemy, scenario);
     game.advance_player_input();
     game.activate_internal_card("parent", definition, PlayerId { seat: 1 })
@@ -64,6 +66,21 @@ fn plays(kinds: &[&EventKind]) -> Vec<ActionKind> {
             | EventKind::Movement { .. }
             | EventKind::Phase(_)
             | EventKind::Result { .. } => None,
+        })
+        .collect()
+}
+
+/// The committed batches that a board handed to this viewer had already contained.
+fn covered(game: &Game, viewer: Viewer) -> Vec<Vec<EventKind>> {
+    game.event_batches(viewer, None)
+        .unwrap()
+        .filter(|batch| batch.covered)
+        .map(|batch| {
+            batch
+                .events
+                .iter()
+                .map(|event| event.kind.clone())
+                .collect()
         })
         .collect()
 }
@@ -126,6 +143,13 @@ fn a_nested_play_is_shown_only_after_the_child_and_its_parent_are_both_played() 
                 .any(|kind| matches!(kind, EventKind::Action(action) if action.kind == ActionKind::Damage)),
             "the child's completed damage follows its play: {kinds:?}"
         );
+        assert!(
+            !kinds.iter().any(
+                |kind| matches!(kind, EventKind::Action(action) if action.kind == ActionKind::Life)
+            ),
+            "the parent's life gain was already on the boards handed at the earlier stops, \
+             so it is not shown now: {kinds:?}"
+        );
     }
     assert_eq!(
         answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
@@ -151,6 +175,15 @@ fn a_nested_play_is_shown_only_after_the_child_and_its_parent_are_both_played() 
             linked,
             seen.iter().map(|batch| batch.events.len()).sum::<usize>(),
             "committed events refer to exactly the shown occurrences"
+        );
+        let covered = covered(&game, viewer);
+        assert!(
+            matches!(covered.as_slice(), [events]
+                if matches!(events.as_slice(), [EventKind::Action(action)]
+                    if action.kind == ActionKind::Life
+                        && action.numbers.first().is_some_and(|number| number.amount == 1))),
+            "only the parent's first life gain commits as something an earlier board already \
+             contained; costs and plays keep their first presentation: {covered:?}"
         );
     }
 }
@@ -258,6 +291,113 @@ fn a_rules_cancellation_of_the_child_never_withdraws_what_the_parent_already_sho
             plays(&kinds),
             vec![ActionKind::AbilityPlay],
             "the undone child entry left no history: {kinds:?}"
+        );
+    }
+}
+
+/// A parent ability that plays a follower and then a spell from the cemetery. The spell asks
+/// for its target before it is played, after the follower's whole play has completed.
+fn parent_playing_a_follower_then_a_spell() -> Game {
+    let mut tree = fanfare::expanded::tree().clone();
+    let mut template = tree["cards"]["BP01-041"].clone();
+    let entry = template["abilities"][0].clone();
+    let mut parent = entry.clone();
+    parent["activate"] = json!({
+        "cost":{"pp":1},
+        "targets":[
+            {"bind":"first","from":{"who":"self","zone":"cemetery","name":"unit-follower"},"n":1},
+            {"bind":"second","from":{"who":"self","zone":"cemetery","name":"unit-spell"},"n":1}
+        ],
+        "do":[
+            {"play_card":{"ref":"first","cost":0}},
+            {"play_card":{"ref":"second","cost":0}}
+        ]
+    });
+    template["abilities"] = json!([parent]);
+    let mut follower = template.clone();
+    follower["abilities"] = json!([]);
+    let mut spell = template.clone();
+    let mut cast = entry;
+    cast.as_object_mut().unwrap().remove("activate");
+    cast["spell"] = json!({
+        "targets":[{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
+        "do":[{"damage":{"to":"enemy","n":1}},{"life":{"who":"self","delta":2}}]
+    });
+    spell["abilities"] = json!([cast]);
+    tree["cards"] = json!({"unit-amulet":template,"unit-spell":spell,"unit-follower":follower});
+    let programs = lowerer()
+        .lower_with_printed_costs(&tree, &BTreeMap::from([("unit-spell".into(), Nat(1))]))
+        .unwrap();
+
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"parent","card":"unit-amulet"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"child","card":"unit-follower"},
+        {"id":"leaf","card":"unit-spell"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"unit-follower"}]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "nested-card",
+    )
+    .unwrap();
+    for (number, program) in &programs {
+        game.load_internal_card(number, program).unwrap();
+    }
+    game.advance_player_input();
+    game.activate_internal_card(
+        "parent",
+        programs["unit-amulet"].card().abilities[0].node.id,
+        PlayerId { seat: 1 },
+    )
+    .unwrap();
+    game.advance_player_input();
+    game
+}
+
+#[test]
+fn a_nested_followers_own_play_keeps_its_first_presentation_and_only_its_entry_is_history() {
+    let mut game = parent_playing_a_follower_then_a_spell();
+    for chosen in ["follower", "spell"] {
+        assert_eq!(
+            answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+            SubmissionKind::Applied,
+            "the {chosen} in the cemetery is a legal target of the parent"
+        );
+    }
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["field"],
+        json!(["parent", "child"]),
+        "the follower's whole play has completed before the spell asks for its target"
+    );
+    assert_eq!(
+        shown(&mut game),
+        [vec![], vec![]],
+        "the spell can still be undone by rules, so nothing is shown at its question"
+    );
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied,
+        "the spell and then the parent resolve completely"
+    );
+    for viewer in SEATS {
+        let covered = covered(&game, viewer);
+        let [entered, resolved] = covered.as_slice() else {
+            panic!("two batches were already on the board handed at the stop: {covered:?}");
+        };
+        assert!(
+            matches!(entered.as_slice(), [EventKind::Movement { after, .. }]
+                if after.zone == Some(ObservedZone::Field))
+                && matches!(resolved.as_slice(), [EventKind::Action(action)]
+                    if action.kind == ActionKind::Resolve),
+            "only the follower's entry and resolution are history that the handed board \
+             already contained; its move to the resolution zone and its play, like the \
+             parent's play, keep their first presentation: {covered:?}"
         );
     }
 }
