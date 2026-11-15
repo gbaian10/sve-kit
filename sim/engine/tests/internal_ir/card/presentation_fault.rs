@@ -19,6 +19,11 @@ pub(super) fn prepared(fault: bool) -> Game {
 
 /// [`prepared`] on a catalogue of the same three synthetic cards.
 pub(super) fn prepared_on(catalog: Arc<Catalog>, fault: bool) -> Game {
+    prepared_drawing(catalog, fault, "unit-spell")
+}
+
+/// [`prepared_on`] where every card the ability can draw is `drawn`.
+pub(super) fn prepared_drawing(catalog: Arc<Catalog>, fault: bool, drawn: &str) -> Game {
     let mut tree = fanfare::expanded::tree().clone();
     let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
     entry.as_object_mut().unwrap().remove("fanfare");
@@ -53,7 +58,7 @@ pub(super) fn prepared_on(catalog: Arc<Catalog>, fault: bool) -> Game {
     }
 
     let deck = (0..3)
-        .map(|index| json!({"id":format!("d{index}"),"card":"unit-spell"}))
+        .map(|index| json!({"id":format!("d{index}"),"card":drawn}))
         .collect::<Vec<_>>();
     let mut initial = setup(1, json!(deck));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -64,8 +69,7 @@ pub(super) fn prepared_on(catalog: Arc<Catalog>, fault: bool) -> Game {
         &WellFormedCardProgram::check(program).unwrap(),
     )
     .unwrap();
-    game.load_internal_card("unit-spell", &card(vec![]))
-        .unwrap();
+    game.load_internal_card(drawn, &card(vec![])).unwrap();
     game.advance_player_input();
     game
 }

@@ -402,3 +402,65 @@ fn zero_races_do_not_require_a_meal_link_or_grant_rush() {
         json!([])
     );
 }
+
+#[test]
+fn a_race_names_the_racing_follower_and_its_ordinal_after_its_resource_arrives() {
+    use super::player_wire_drive::bodies;
+    use sve_battle_contract::event::{self as wire, EventBody};
+    use sve_battle_contract::{Seat, Subject, Zone};
+    use sve_engine::game::player::Viewer;
+
+    // CP01-022 feeds on one carrot from its controller's evolve deck for 1 PP.
+    let mut game = from_position(&position("CP01-022", 1));
+    game.advance_player_input();
+    drop(feed(&mut game, "CP01-022", 0, false));
+    settle(&mut game);
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let bodies = bodies(&game, viewer);
+        let [
+            EventBody::ResourceChanged { .. },
+            EventBody::Movement {
+                method: wire::MovementMethod::Procedure,
+                by_effect: false,
+                before,
+                after,
+            },
+            EventBody::AbilityPlayed { holder, .. },
+            EventBody::Race {
+                player: Seat::P1,
+                subject,
+                ordinal,
+            },
+            EventBody::AbilityResolved { .. },
+        ] = bodies.as_slice()
+        else {
+            panic!("payment, resource entry, play, race, resolution: {bodies:?}");
+        };
+        assert_eq!(
+            (before.zone, after.zone),
+            (Some(Zone::EvolveDeck), Some(Zone::Race)),
+            "{viewer:?}: the carrot enters the race zone from the evolve deck"
+        );
+        assert_eq!(
+            (
+                before.card.is_some(),
+                after
+                    .card
+                    .as_ref()
+                    .map(|card| card.card.printing_id.as_str())
+            ),
+            (viewer == Viewer::P1, Some("CSD01-032")),
+            "{viewer:?}: the opponent learns the carrot only once it is in the race zone"
+        );
+        assert!(
+            matches!(
+                subject,
+                Some(Subject::Card { card, object: Some(_) }) if card.printing_id == "CP01-022"
+            ) && subject == holder
+                && ordinal.get() == 1,
+            "{viewer:?}: the first race of the turn names the follower that holds the ability: \
+             {bodies:?}"
+        );
+    }
+}
