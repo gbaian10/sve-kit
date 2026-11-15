@@ -119,7 +119,7 @@ fn twin_drive_resolved(accept: bool) -> Game {
 }
 
 /// Every committed wire body of this viewer, in order.
-fn bodies(game: &Game, viewer: Viewer) -> Vec<EventBody> {
+pub(super) fn bodies(game: &Game, viewer: Viewer) -> Vec<EventBody> {
     game.event_batches(viewer, None)
         .unwrap()
         .flat_map(|batch| {
