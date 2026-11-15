@@ -32,7 +32,7 @@ known:
   - question: "card-BP01-056"
     scenario: "原 EX 5"
     status: fail
-    error: "interface: full EX resolves without an empty material question (#2008)"
+    error: "typed-gap: after-decision-2 awaiting (#2008)"
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.resolution; after-decision-1 omniscient awaiting"
   - question: "card-BP01-170"
     scenario: "[fable] A 結束階段捨光の道筋 → 抽 1 → 再捨 1"
@@ -1082,7 +1082,7 @@ known:
   - question: "rule-10.7-01"
     scenario: "B 神秘の獲得 在對手回合以クイック打出：對手的結束階段不誘發，自己的下一個結束階段誘發並消滅整個 EX 區"
     status: fail
-    error: "interface: delayed resolution referee events differ from the exam (#2008)"
+    error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-7 omniscient events"
   - question: "rule-10.7.2.1-01"
     scenario: "同能力待機 1 次"
