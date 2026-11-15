@@ -1,7 +1,10 @@
 /** Comprehensive rules data under authored/rules/comprehensive/ and its translations. */
 
-/** `main` is the rules body; appendix B sections restate body numbers, so each is its own context. */
-type RuleContext = "main" | "A" | "B-1" | "B-2" | "C"
+/**
+ * `main` is the rules body. Appendix B-1 and B-2 restate body numbers, so each is its own context;
+ * `B` holds only the appendix heading.
+ */
+export type RuleContext = "main" | "A" | "B" | "B-1" | "B-2" | "C"
 
 interface RuleTable {
   readonly header: readonly string[]
@@ -36,6 +39,24 @@ export interface RulesFile {
   readonly kind: "comprehensive-rules"
   readonly version: string
   readonly nodes: readonly RuleNode[]
+}
+
+/** `index.json`: version facts for the page header and the file list in reading order. */
+export interface RulesIndex {
+  readonly format: 1
+  readonly kind: "comprehensive-rules-index"
+  readonly version: string
+  readonly region: "jp"
+  readonly last_updated: string
+  readonly page_url: string
+  readonly source_url: string
+  readonly raw_sha256: string
+  readonly pages: number
+  readonly contents: readonly {
+    readonly file: string
+    readonly key: string
+    readonly title: string
+  }[]
 }
 
 interface TranslatedTable {
