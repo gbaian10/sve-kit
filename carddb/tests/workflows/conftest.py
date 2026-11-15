@@ -128,7 +128,13 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
         ("BP01", ("BP01-001", "BP01-013")),
         ("BP10", ("BP10-020",)),
     ):
-        prototype = read_tree(REPO / f"authored/rules/effects/{owner}.yaml")
+        source = REPO / f"authored/rules/effects/{owner}.yaml"
+        # Fully admitted packs no longer retain an empty prototype shard.
+        prototype: dict[str, JsonValue] = (
+            read_tree(source)
+            if source.is_file()
+            else {"format": 1, "kind": "effect_set", "cards": {}}
+        )
         current_cards = object_value(prototype["cards"])
         # Admitted cards left the prototype set; a minimal program keeps the sibling.
         prototype["cards"] = {
