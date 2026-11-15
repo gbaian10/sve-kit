@@ -212,6 +212,9 @@ fn cemetery_threshold_and_once_limit_check_eligibility_before_spending_or_consum
         assert_eq!(quota.len(), 1);
         assert_eq!(quota[0].maximum, 1);
         assert_eq!(quota[0].remaining, 1);
+        assert_eq!(quota[0].source.card, "unit-follower");
+        assert_eq!(quota[0].source.face, Some(0));
+        assert_eq!(quota[0].source.line, Some(3));
         assert_eq!(before_observe, exact_authority(&board));
         if count == 5 {
             resolved(

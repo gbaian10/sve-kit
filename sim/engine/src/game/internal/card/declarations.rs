@@ -183,7 +183,7 @@ impl Game {
                 candidate.source.as_ref().map(|source| {
                     (
                         source.card.clone(),
-                        source.face.clone(),
+                        source.face,
                         source.line,
                         source.holder.clone(),
                     )

@@ -80,6 +80,7 @@ fn numeric_effects_explain_effective_values_and_expire_with_the_authority() {
     );
     let origin = effect.source.as_ref().unwrap();
     assert_eq!(origin.card, "unit-follower");
+    assert_eq!(origin.face, Some(0));
     assert_eq!(origin.line, Some(1));
     assert_eq!(
         origin.holder.as_ref(),
@@ -163,6 +164,7 @@ fn effect_source_memory_does_not_relink_after_the_holder_changes_generation() {
         .as_ref()
         .unwrap();
     assert_eq!(source.card, "unit-follower");
+    assert_eq!(source.face, Some(0));
     assert!(source.holder.is_none());
     let own = game.observe(Viewer::P1).unwrap();
     assert!(
@@ -244,4 +246,81 @@ fn an_expired_reveal_does_not_relink_an_effect_source_after_reidentification() {
         .effects[0];
     assert_eq!(effect.source.as_ref().unwrap().card, "unit-spell");
     assert!(effect.source.as_ref().unwrap().holder.is_none());
+}
+
+#[test]
+fn effect_sources_resolve_legacy_faces_and_refuse_invalid_coordinates_atomically() {
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut card: Value = serde_json::from_str(line).unwrap();
+            let second = card["faces"][0].clone();
+            card["faces"].as_array_mut().unwrap().push(second);
+            card.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    let catalog = Arc::new(
+        Catalog::from_documents(&snapshot, &registry, &[("synthetic".into(), document)]).unwrap(),
+    );
+    for (face, expected) in [
+        ("base", Some(0)),
+        ("0", Some(0)),
+        ("1", Some(1)),
+        ("01", None),
+        ("2", None),
+        ("unknown", None),
+    ] {
+        let mut initial = setup(1, json!([]));
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+        let mut game = Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "source-face",
+        )
+        .unwrap();
+        let mut step = numeric::buff(1, 2, 0);
+        let Node::Instruction { instruction } = &mut step.node else {
+            panic!("numeric instruction")
+        };
+        instruction.source.origin = AbilityOrigin::Printed {
+            face: FaceId(face.into()),
+            line: Nat(1),
+        };
+        let before = format!("{game:?}");
+        let moved = movement::put(
+            2,
+            Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            },
+            OwnerZone::Hand,
+        );
+        let result = game.execute_internal(
+            &checked(vec![step, moved]),
+            &source("synthetic"),
+            context(1),
+        );
+        if let Some(ordinal) = expected {
+            assert!(result.unwrap().complete);
+            for viewer in [Viewer::P1, Viewer::P2] {
+                let observation = game.observe(viewer).unwrap();
+                let effect = &observed_card(&observation, Viewer::P2, ObservedZone::Field)
+                    .properties
+                    .state
+                    .as_ref()
+                    .unwrap()
+                    .effects[0];
+                let source = effect.source.as_ref().unwrap();
+                assert_eq!(source.face, Some(ordinal));
+                assert!(source.holder.is_none());
+            }
+        } else {
+            result.unwrap_err();
+            assert_eq!(format!("{game:?}"), before);
+        }
+    }
 }

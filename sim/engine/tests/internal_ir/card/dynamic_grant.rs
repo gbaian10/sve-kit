@@ -132,6 +132,13 @@ fn general_granted_ability_uses_the_opposing_recipient_controller() {
     assert_eq!(q.actor, PlayerId { seat: 2 });
     assert_eq!(options.len(), 1);
     assert_eq!(options[0].card, "unit-amulet");
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let observation = game.observe(viewer).unwrap();
+        let origin = &observation.pending.first().unwrap().source;
+        assert_eq!(origin.card, "unit-amulet");
+        assert_eq!(origin.face, Some(0));
+        assert_eq!(origin.line, Some(1));
+    }
     let activation = resolved(
         game.answer_internal_card(q.actor, q.token, Answer::Pending(options[0].handle))
             .unwrap(),

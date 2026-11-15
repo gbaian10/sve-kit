@@ -54,7 +54,7 @@ impl BattleReferences {
     ///
     /// Legacy JP backgrounds are allowed because permanent IDs are supplied,
     /// never inferred from legacy numbers. Legacy native faces keep source order;
-    /// adopted source_face_map entries can point to different permanent face ordinals.
+    /// adopted `source_face_map` entries can point to different permanent face ordinals.
     ///
     /// # Errors
     /// Refuses unbound or mismatched backgrounds, missing faces, aliases,

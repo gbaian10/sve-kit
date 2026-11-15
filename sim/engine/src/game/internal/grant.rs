@@ -293,17 +293,14 @@ impl Game {
         perspective: Viewer,
         holder: &str,
         origin: &GrantOrigin,
-    ) -> Option<EffectSource> {
+    ) -> Result<Option<EffectSource>> {
         match origin {
-            GrantOrigin::Installed { .. } => self
+            GrantOrigin::Installed { .. } => Ok(self
                 .state
                 .ir_keywords
-                .get(holder)?
-                .grants
-                .iter()
-                .find(|grant| &grant.origin == origin)?
-                .origin_record
-                .observed(self, perspective),
+                .get(holder)
+                .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
+                .and_then(|grant| grant.origin_record.observed(self, perspective))),
             GrantOrigin::Continuous {
                 provider,
                 through: Some(through),
@@ -313,14 +310,15 @@ impl Game {
                 provider,
                 through: None,
                 ..
-            } => super::observation::EffectOrigin::definition(
+            } => Ok(super::observation::EffectOrigin::definition(
                 self,
                 &provider.holder,
                 provider.generation,
+                &provider.card,
                 &provider.span,
                 false,
-            )
-            .observed(self, perspective),
+            )?
+            .observed(self, perspective)),
         }
     }
 
@@ -532,9 +530,10 @@ impl Game {
         let known = self.state.knowledge.get(seat(perspective));
         let Some(origin) = &ability.grant else {
             let (face, line) = super::card::printed_origin(&ability.node.source.origin)?;
+            let card = self.internal_effective_print(holder)?.0;
             return Ok(Some(EffectSource {
-                card: self.internal_effective_print(holder)?.0,
-                face: Some(face.0.clone()),
+                face: self.effect_source_face(&card, Some(&face.0))?,
+                card,
                 line: Some(line.0),
                 holder: known.and_then(|knowledge| knowledge.handle(holder)),
             }));
@@ -559,9 +558,12 @@ impl Game {
                         .get(&provider.holder)
                         .is_some_and(|object| object.generation == provider.generation)
             });
-        Ok(link.map(|handle| EffectSource {
+        let Some(handle) = link else {
+            return Ok(None);
+        };
+        Ok(Some(EffectSource {
             card: provider.card.clone(),
-            face: Some(provider.span.face.clone()),
+            face: self.effect_source_face(&provider.card, Some(&provider.span.face))?,
             line: Some(u64::from(provider.span.line)),
             holder: Some(handle),
         }))
@@ -748,19 +750,34 @@ impl Game {
         self.installed_keyword_provider(execution)
     }
 
-    fn installed_keyword_provider(&self, execution: &Execution) -> Result<KeywordProvider> {
-        let callback = execution
-            .ability
-            .ok_or_else(|| invalid("keyword grant without ability source"))?;
-        let authority = self.delayed_parent(callback.instance).unwrap_or(callback);
-        let provider_card = self
+    pub(in crate::game::internal) fn runtime_source_printing(
+        &self,
+        source: RuntimeAbilitySource,
+    ) -> Result<String> {
+        if let Some(((_, _, origin, _), _)) = self
             .card_runtime
+            .keyword_instances
+            .iter()
+            .find(|(_, instance)| **instance == source.instance)
+        {
+            return Ok(origin.provider().card.clone());
+        }
+        let authority = self.delayed_parent(source.instance).unwrap_or(source);
+        self.card_runtime
             .instances
             .iter()
             .find_map(|((_, _, card, _, _), instance)| {
                 (*instance == authority.instance).then_some(card.clone())
             })
-            .ok_or_else(|| invalid("keyword grant provider instance"))?;
+            .ok_or_else(|| invalid("ability source printing unavailable"))
+    }
+
+    fn installed_keyword_provider(&self, execution: &Execution) -> Result<KeywordProvider> {
+        let callback = execution
+            .ability
+            .ok_or_else(|| invalid("keyword grant without ability source"))?;
+        let authority = self.delayed_parent(callback.instance).unwrap_or(callback);
+        let provider_card = self.runtime_source_printing(callback)?;
         self.keyword_provider_at(
             &execution.context.source,
             authority.holder.generation.0,

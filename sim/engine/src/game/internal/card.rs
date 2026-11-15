@@ -299,15 +299,16 @@ impl Game {
         for (ability, limit) in abilities {
             let source = probe.internal_effective_source(holder, &ability)?;
             let source_text = if let Some(origin) = &ability.grant {
-                self.observed_grant_source(perspective, holder, origin)
+                self.observed_grant_source(perspective, holder, origin)?
             } else {
                 EffectOrigin::definition(
                     self,
                     holder,
                     object.generation,
+                    &self.internal_effective_print(holder)?.0,
                     &ability.definition.located().source,
                     false,
-                )
+                )?
                 .observed(self, perspective)
             }
             .ok_or_else(|| invalid("unavailable quota provenance"))?;
@@ -421,6 +422,21 @@ impl Game {
             }
         }
         Ok(failures)
+    }
+
+    pub(in crate::game) fn effect_source_face(
+        &self,
+        card: &str,
+        face: Option<&str>,
+    ) -> Result<Option<u64>> {
+        let Some(face) = face else {
+            return Ok(None);
+        };
+        let ordinal = self.printed_face_ordinal(card, &FaceId(face.into()))?;
+        self.catalog.face(card, ordinal)?;
+        Ok(Some(
+            u64::try_from(ordinal).map_err(|_overflow| invalid("source face overflow"))?,
+        ))
     }
 
     fn printed_face_ordinal(&self, card: &str, face: &FaceId) -> Result<usize> {
