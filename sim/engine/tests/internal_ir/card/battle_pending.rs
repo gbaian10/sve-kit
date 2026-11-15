@@ -131,6 +131,7 @@ fn occurrence(holder: Option<ObjectHandle>) -> native::PendingTrigger {
             card: "unit-follower".into(),
             face: Some(1),
             line: Some(3),
+            wording: None,
             holder,
         },
         controller: Viewer::P1,
@@ -215,12 +216,14 @@ fn wire_pending_refuses_unknown_printings_faces_handles_and_mismatched_catalogs(
             card: "missing".into(),
             face: None,
             line: None,
+            wording: None,
             holder: None,
         },
         native::EffectSource {
             card: "unit-follower".into(),
             face: Some(2),
             line: None,
+            wording: None,
             holder: None,
         },
     ] {

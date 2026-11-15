@@ -3,6 +3,30 @@
 use super::super::{ObjectHandle, Viewer};
 use super::{EffectRecipient, PreventionChange, TriggerTiming};
 use crate::ir::{AbilityKind, CostKind, DamageKind};
+use serde::{Deserialize, Serialize};
+
+/// A checked wording owner, retained independently of the current holder.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub struct WordingSource {
+    /// Permanent face identity from the admitted source, not a native face alias.
+    pub face_id: String,
+    /// Exact wording revision from that source's owner.
+    pub revision_id: String,
+    /// Printed field containing the source line.
+    pub field: WordingField,
+}
+
+/// Printed fields used by admitted ability sources.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+pub enum WordingField {
+    /// Main effect text.
+    Effect,
+    /// A separate printed section in its authoritative order.
+    Section {
+        /// Section ordinal, without guessing a label from the ability kind.
+        ordinal: u64,
+    },
+}
 
 /// Public text origin, with a link only during uninterrupted identification.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -13,6 +37,8 @@ pub struct EffectSource {
     pub face: Option<u64>,
     /// Printed line, when the effect comes from an ability.
     pub line: Option<u64>,
+    /// Exact admitted wording owner; absent for unlocated or legacy text.
+    pub wording: Option<Box<WordingSource>>,
     /// Currently identifiable producing holder; absent after identification is lost.
     pub holder: Option<ObjectHandle>,
 }
