@@ -16,8 +16,8 @@ type Result<T> = result::Result<T, ProjectionError>;
 /// # Errors
 /// Refuses mismatched catalogs, unknown printing or face coordinates, foreign
 /// current handles, cross-viewer admission budgets and inexact wire integers.
-#[cfg(feature = "runner")]
-pub fn project_pending(
+#[cfg(all(test, feature = "runner"))]
+pub(super) fn project_pending(
     catalog: &Catalog,
     references: &BattleReferences,
     observation: &native::Observation,

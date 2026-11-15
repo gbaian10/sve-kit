@@ -12,3 +12,11 @@ mod cost_fixture;
 
 mod costs;
 mod history;
+
+#[path = "../../tests/support/board_fixture.rs"]
+mod board_fixture;
+#[path = "../../tests/support/rule_fixtures.rs"]
+mod rule_fixtures;
+
+mod effects;
+mod pending;

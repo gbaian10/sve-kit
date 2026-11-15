@@ -1,4 +1,5 @@
 //! Synthetic board facts shared by private unit and authority integration tests.
+//! Lib unit tests also include this file via `#[path]`; use APIs visible to both test contexts.
 
 use alloc::sync::Arc;
 use serde_json::{Value, json};

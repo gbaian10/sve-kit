@@ -16,6 +16,9 @@ use sve_engine::game::internal::{Answer, Context, Fact, InstructionOutcome, Prog
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
+#[path = "support/board_fixture.rs"]
+mod board_fixture;
+
 #[path = "support/board_fixtures.rs"]
 mod board_fixtures;
 

@@ -2,7 +2,7 @@
 
 use super::{BattleReferences, ProjectionError, objects::ObjectScope, pending, sources};
 use crate::catalog::Catalog;
-#[cfg(feature = "runner")]
+#[cfg(all(test, feature = "runner"))]
 use crate::game::player::ObjectHandle;
 use crate::game::player::{Viewer, observation as native};
 use crate::ir::{AbilityKind, CostKind, DamageKind};
@@ -19,8 +19,8 @@ type Result<T> = result::Result<T, ProjectionError>;
 /// # Errors
 /// Refuses mismatched catalogs, unavailable card handles or source coordinates,
 /// links outside this observation and numbers outside the exact wire range.
-#[cfg(feature = "runner")]
-pub fn project_card_effects(
+#[cfg(all(test, feature = "runner"))]
+pub(super) fn project_card_effects(
     catalog: &Catalog,
     references: &BattleReferences,
     observation: &native::Observation,
@@ -51,8 +51,8 @@ pub fn project_card_effects(
 /// # Errors
 /// Refuses a mismatched catalog, invalid object scope, unavailable origins or
 /// links, and numbers outside the exact wire range.
-#[cfg(feature = "runner")]
-pub fn project_player_effects(
+#[cfg(all(test, feature = "runner"))]
+pub(super) fn project_player_effects(
     catalog: &Catalog,
     references: &BattleReferences,
     observation: &native::Observation,

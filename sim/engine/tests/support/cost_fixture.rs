@@ -1,4 +1,5 @@
 //! Cost positions use the shared synthetic board facts.
+//! Lib unit tests also include this file via `#[path]`; use APIs visible to both test contexts.
 
 use super::board_fixtures;
 use serde_json::{Value, json};
