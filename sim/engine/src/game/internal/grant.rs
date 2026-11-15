@@ -734,6 +734,12 @@ impl Game {
         Ok(source)
     }
 
+    fn ability_text_authority(&self, source: RuntimeAbilitySource) -> RuntimeAbilitySource {
+        // Callback admission rejects nested Delay actions, so one parent reaches the text authority.
+        // Widening that boundary requires retaining the root across callback lifetimes first.
+        self.delayed_parent(source.instance).unwrap_or(source)
+    }
+
     pub(super) fn installed_effect_provider(
         &self,
         execution: &Execution,
@@ -741,8 +747,7 @@ impl Game {
         let source = execution
             .ability
             .ok_or_else(|| invalid("effect without ability source"))?;
-        // A callback keeps the text authority of the ability that installed it.
-        let authority = self.delayed_parent(source.instance).unwrap_or(source);
+        let authority = self.ability_text_authority(source);
         if let Some(((_, _, origin, _), _)) = self
             .card_runtime
             .keyword_instances
@@ -758,7 +763,7 @@ impl Game {
         &self,
         source: RuntimeAbilitySource,
     ) -> Result<String> {
-        let authority = self.delayed_parent(source.instance).unwrap_or(source);
+        let authority = self.ability_text_authority(source);
         if let Some(((_, _, origin, _), _)) = self
             .card_runtime
             .keyword_instances
@@ -780,8 +785,8 @@ impl Game {
         let callback = execution
             .ability
             .ok_or_else(|| invalid("keyword grant without ability source"))?;
-        let authority = self.delayed_parent(callback.instance).unwrap_or(callback);
-        let provider_card = self.runtime_source_printing(callback)?;
+        let authority = self.ability_text_authority(callback);
+        let provider_card = self.runtime_source_printing(authority)?;
         self.keyword_provider_at(
             &execution.context.source,
             authority.holder.generation.0,

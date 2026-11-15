@@ -4,6 +4,14 @@ use sve_engine::game::player::Viewer;
 use sve_engine::game::player::observation::{InstalledChange, NumberChange, ObservedZone};
 
 fn program(depart: bool) -> WellFormedCardProgram {
+    lowerer()
+        .lower(&document(depart))
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap()
+}
+
+fn document(depart: bool) -> Value {
     let mut document = equipment_played::tree(
         &json!({"line":1_u8,"activate":{
             "cost":{"pp":0},"do":[{"grant":{
@@ -31,11 +39,21 @@ fn program(depart: bool) -> WellFormedCardProgram {
         .as_array_mut()
         .unwrap()
         .push(trigger["cards"]["unit-amulet"]["abilities"][0].clone());
-    lowerer()
-        .lower(&document)
-        .unwrap()
-        .remove("unit-amulet")
-        .unwrap()
+    document
+}
+
+#[test]
+fn granted_delayed_callbacks_refuse_nested_installation_at_the_closed_boundary() {
+    let mut nested = document(false);
+    let path = "/cards/unit-amulet/abilities/0/activate/do/0/grant/abilities/0/activate/do/0";
+    let callback = nested.pointer(path).unwrap().clone();
+    *nested.pointer_mut(&format!("{path}/delayed/do")).unwrap() = json!([callback]);
+    let error = lowerer().lower(&nested).unwrap_err();
+    assert_eq!(error.code, "unsupported_construct");
+    assert_eq!(
+        error.path,
+        "/cards/unit-amulet/abilities/0/activate/do/0/abilities/0/activate/do/0"
+    );
 }
 
 fn position(actor: Viewer, depart: bool) -> (Game, [AbilityId; 2]) {
