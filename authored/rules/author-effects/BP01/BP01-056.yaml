@@ -1,0 +1,47 @@
+cards:
+  BP01-056:
+    abilities:
+      - keywords:
+          - quick
+        line: 1
+      - covers:
+          - 2
+          - 3
+        line: 3
+        spell:
+          do:
+            - repeat:
+                check: after
+                do:
+                  - move:
+                      to: ex
+                      top:
+                        n: 1
+                        who: self
+                until:
+                  cmp:
+                    left:
+                      zone_free:
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 0
+            - delayed:
+                do:
+                  - banish:
+                      ref:
+                        who: self
+                        zone: ex
+                on:
+                  phase:
+                    which: end
+                    whose: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

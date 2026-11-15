@@ -1,0 +1,43 @@
+cards:
+  BP14-046:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - repeat:
+                check: after
+                collect:
+                  receipts: moved_all
+                do:
+                  - move:
+                      to: ex
+                      top:
+                        n: 1
+                        who: self
+                until:
+                  cmp:
+                    left:
+                      zone_free:
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 0
+            - player_effect:
+                effect:
+                  cost_mod:
+                    next_only: true
+                    set: 0
+                    when_playing:
+                      in:
+                        follow: moved_all
+                until: turn
+                who: self
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set
