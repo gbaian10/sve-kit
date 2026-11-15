@@ -10,14 +10,14 @@ type Result<T> = result::Result<T, ProjectionError>;
 
 /// Project committed public facts from one authority-produced observation.
 ///
-/// Runner fixtures supply observations directly; hosts use `Game::battle_observation`.
+/// Crate tests supply observations directly; hosts use `Game::battle_observation`.
 /// Retired links remain absent.
 ///
 /// # Errors
 /// Refuses inconsistent object scopes, references outside the current scope,
 /// and integers outside the wire's exact range.
-#[cfg(feature = "runner")]
-pub fn project_history(observation: &native::Observation) -> Result<wire::TurnHistory> {
+#[cfg(all(test, feature = "runner"))]
+pub(super) fn project_history(observation: &native::Observation) -> Result<wire::TurnHistory> {
     let objects = ObjectScope::new(observation)?;
     scoped(observation, &objects)
 }

@@ -283,86 +283,15 @@ mod ride;
 mod amulet;
 
 fn locate_steps(steps: &mut [Located<Node>], span: &SourceSpan, origin: &AbilitySource) {
-    for step in steps {
-        step.source = span.clone();
-        match &mut step.node {
-            Node::Instruction { instruction } => instruction.source = origin.clone(),
-            Node::Control {
-                control:
-                    Control::Sequence { body }
-                    | Control::EachObject { body, .. }
-                    | Control::Repeat {
-                        body: RepeatBody::Program { body },
-                        ..
-                    },
-            } => locate_steps(&mut body.steps, span, origin),
-            Node::Control {
-                control:
-                    Control::If {
-                        then_body,
-                        else_body,
-                        ..
-                    },
-            } => {
-                locate_steps(&mut then_body.steps, span, origin);
-                if let Some(body) = else_body {
-                    locate_steps(&mut body.steps, span, origin);
-                }
-            }
-            Node::Control {
-                control: Control::Mode { modes, .. },
-            } => {
-                for mode in modes {
-                    locate_steps(&mut mode.body.steps, span, origin);
-                }
-            }
-            Node::Control { .. } | Node::Capture { .. } | Node::Decision { .. } => {}
-        }
-    }
+    history_fixture::locate_steps(steps, span, origin);
 }
 
-fn ability(id: u64, mut steps: Vec<Located<Node>>) -> Located<Ability> {
-    let mut span = source("unit-follower");
-    span.fragment = None;
-    span.line = u32::try_from(id).unwrap();
-    let origin = AbilitySource {
-        holder: ObjectOperand::SourceHolder {},
-        origin: AbilityOrigin::Printed {
-            face: FaceId("0".into()),
-            line: Nat(id),
-        },
-        controller: PlayerRef::Controller {},
-    };
-    locate_steps(&mut steps, &span, &origin);
-    Located {
-        source: span,
-        node: Ability {
-            id: AbilityId(id),
-            scope: ScopeId(id),
-            source: origin,
-            kind: AbilityKind::Activated,
-            qualification: AbilityQualification::Ordinary,
-            active_zones: vec![ZoneKind::Field],
-            event_captures: vec![],
-            play: Some(PlaySpec {
-                limit: None,
-                captures: vec![],
-                parameters: vec![],
-                costs: CostSpec::Ordered { steps: vec![] },
-            }),
-            trigger: None,
-            body: Some(body(id, steps)),
-            declarations: vec![],
-        },
-    }
+fn ability(id: u64, steps: Vec<Located<Node>>) -> Located<Ability> {
+    history_fixture::ability(id, steps).unwrap()
 }
 
 fn card(abilities: Vec<Located<Ability>>) -> WellFormedCardProgram {
-    WellFormedCardProgram::check(CardProgram {
-        abilities,
-        card_play_costs: vec![],
-    })
-    .unwrap()
+    history_fixture::card(abilities).unwrap()
 }
 
 fn position(seat: u32, steps: Vec<Located<Node>>) -> Game {
@@ -374,17 +303,7 @@ fn position_with_card(seat: u32, program: &WellFormedCardProgram) -> Game {
 }
 
 fn position_with_state(seat: u32, program: &WellFormedCardProgram, state: &Value) -> Game {
-    let actor = if seat == 1 { "P1" } else { "P2" };
-    let mut initial = setup(seat, json!([{"id":"d","card":"unit-spell"}]));
-    initial["turn"]["active"] = json!(actor);
-    initial["players"][actor]["zones"]["hand"] = json!([]);
-    initial["players"][actor]["zones"]["field"] =
-        json!([{"id":"s","card":"unit-follower","state":state}]);
-    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "card-seed").unwrap();
-    game.load_internal_card("unit-follower", program).unwrap();
-    game.load_internal_card("unit-spell", &card(vec![]))
-        .unwrap();
-    game
+    history_fixture::position_with_state(seat, program, state).unwrap()
 }
 
 fn activate(game: &mut Game, seat: u32) -> Activation {

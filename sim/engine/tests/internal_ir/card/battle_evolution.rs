@@ -429,6 +429,13 @@ fn wire_board_evolution_subject_selects_the_later_public_twin_for_each_viewer() 
                     .unwrap();
                 let first = &own.zones.field.cards[0].object;
                 let second = &own.zones.field.cards[1].object;
+                if viewer == actor {
+                    assert_eq!(
+                        second.as_str(),
+                        selected.as_str(),
+                        "the wire subject is the selected native handle"
+                    );
+                }
                 assert_eq!(
                     board.objects[first].effective_face, board.objects[second].effective_face,
                     "two public twins cannot be distinguished by printing"

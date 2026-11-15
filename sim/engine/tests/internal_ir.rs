@@ -9,6 +9,9 @@
 )]
 
 extern crate alloc;
+
+#[path = "support/history_fixture.rs"]
+mod history_fixture;
 use alloc::sync::Arc;
 use serde_json::{Value, json};
 use sve_engine::catalog::Catalog;
@@ -89,60 +92,22 @@ mod player_closing;
 mod search;
 
 fn source(card: &str) -> SourceSpan {
-    SourceSpan {
-        card_id: card.into(),
-        card_no: card.into(),
-        scope: "fragment".into(),
-        owner: "card".into(),
-        face: "0".into(),
-        field: "text".into(),
-        section: None,
-        line: 1,
-        fragment: Some("D1".into()),
-        author_path: "/body".into(),
-    }
+    history_fixture::source(card)
 }
 fn node(node: Node) -> Located<Node> {
-    Located {
-        node,
-        source: source("synthetic"),
-    }
+    history_fixture::node(node)
 }
 const fn body(scope: u64, steps: Vec<Located<Node>>) -> Program {
-    Program {
-        scope: ScopeId(scope),
-        steps,
-    }
+    history_fixture::body(scope, steps)
 }
 fn checked(steps: Vec<Located<Node>>) -> WellFormedProgram {
     WellFormedProgram::check(body(1, steps)).unwrap()
 }
 fn context(seat: u32) -> Context {
-    Context {
-        source: "s".into(),
-        generation: Generation(0),
-        controller: PlayerId { seat },
-    }
+    history_fixture::context(seat)
 }
 fn instruction(id: u64, action: Action) -> Located<Node> {
-    node(Node::Instruction {
-        instruction: Box::new(Instruction {
-            id: InstructionId(id),
-            actor: PlayerRef::Controller {},
-            source: AbilitySource {
-                holder: ObjectOperand::SourceHolder {},
-                origin: AbilityOrigin::Printed {
-                    face: FaceId("0".into()),
-                    line: Nat(1),
-                },
-                controller: PlayerRef::Controller {},
-            },
-            precondition: None,
-            context: InstructionContext::Effect,
-            receipt: ReceiptId(id),
-            action,
-        }),
-    })
+    history_fixture::instruction(id, action)
 }
 fn draw(id: u64, count: i64) -> Located<Node> {
     draw_value(id, Expr::Literal(Int(count)))

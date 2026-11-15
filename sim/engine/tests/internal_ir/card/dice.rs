@@ -3,73 +3,20 @@
     reason = "Dice scenarios pick their own facts out of the full progress."
 )]
 use super::*;
-use sve_battle_contract::observation as wire;
-use sve_engine::battle::project_history;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::DecisionShape;
 use sve_engine::game::player::Viewer;
 
 fn reroll() -> Located<Ability> {
-    let mut entry = ability(2, vec![]);
-    entry.node.kind = AbilityKind::Static;
-    entry.node.play = None;
-    entry.node.body = None;
-    entry.node.declarations = vec![Effect::Permission {
-        subject: PermissionSubject::Players {
-            players: PlayerSet {
-                relative_to: PlayerRef::Controller {},
-                relation: PlayerRelation::SelfPlayer,
-                cardinality: Cardinality {
-                    minimum: Nat(1),
-                    maximum: Some(Nat(1)),
-                },
-                text_quantifier: TextQuantifier::Implicit,
-            },
-        },
-        action: ActionPattern::Reroll {
-            player: PlayerRef::Controller {},
-            times: Nat(1),
-        },
-        polarity: Polarity::Allow,
-        condition: Expr::Literal(Bool(true)),
-        duration: Duration {
-            end: DurationEnd::NoTemporalExpiry {},
-            anchor: TimeAnchor::Installation {},
-            usage: None,
-            intervals: vec![],
-        },
-        rule: RuleId(1),
-    }];
-    entry
+    history_fixture::reroll().unwrap()
 }
 
 fn roll(scope: u64) -> Located<Node> {
-    instruction(
-        10,
-        Action::Dice {
-            operation: DiceOperation::Roll {},
-            result: Binding::new(20, ScopeId(scope)),
-        },
-    )
+    history_fixture::roll(scope)
 }
 
 fn repeated() -> Located<Ability> {
-    ability(
-        1,
-        vec![node(Node::Control {
-            control: Control::Repeat {
-                body: RepeatBody::Program {
-                    body: body(10, vec![roll(10)]),
-                },
-                termination: Termination::Count {
-                    count: Expr::Literal(Nat(2)),
-                },
-                check: IterationCheck::BeforeIteration,
-                scope: ScopeId(9),
-                receipts: vec![],
-            },
-        })],
-    )
+    history_fixture::repeated().unwrap()
 }
 
 #[expect(
@@ -86,88 +33,6 @@ fn waiting(play: CardPlay) -> DecisionView {
 fn answer(game: &mut Game, question: &DecisionView, value: u64) -> CardPlay {
     game.answer_internal_card(question.actor, question.token, Answer::Integer(Nat(value)))
         .unwrap()
-}
-
-#[test]
-fn rerolls_replace_the_result_and_fixed_repeats_reset_the_permission() {
-    let program = card(vec![repeated(), reroll()]);
-    let mut game = position_with_card(1, &program);
-    let q1 = waiting(
-        game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
-            .unwrap(),
-    );
-    assert!(matches!(
-        q1.domain,
-        InputDomain::DiceReroll {
-            remaining: Nat(1),
-            ..
-        }
-    ));
-    assert_eq!(
-        game.internal_decision(View::P2),
-        Some(q1.clone()),
-        "the visible die result is public"
-    );
-    assert_eq!(
-        project_history(&game.observe(Viewer::P1).unwrap())
-            .unwrap()
-            .dice,
-        Vec::<wire::DiceHistory>::new()
-    );
-    game.answer_internal_card(PlayerId { seat: 2 }, q1.token, Answer::Integer(Nat(1)))
-        .unwrap_err();
-    assert_eq!(game.internal_decision(View::P1), Some(q1.clone()));
-    let q2 = waiting(answer(&mut game, &q1, 1));
-    assert!(matches!(
-        q2.domain,
-        InputDomain::DiceReroll {
-            remaining: Nat(1),
-            ..
-        }
-    ));
-    game.answer_internal_card(q1.actor, q1.token, Answer::Integer(Nat(0)))
-        .unwrap_err();
-    assert_eq!(game.internal_decision(View::P1), Some(q2.clone()));
-    let done = resolved(answer(&mut game, &q2, 0));
-    let dice = done
-        .progress
-        .facts
-        .iter()
-        .filter_map(|fact| match fact {
-            Fact::Dice(event) => Some(event),
-            _ => None,
-        })
-        .collect::<Vec<_>>();
-    assert_eq!(dice.len(), 2, "two rolls rather than three attempts");
-    assert_eq!(dice[0].attempts.len(), 2);
-    assert_eq!(dice[0].accepted_attempt, Nat(1));
-    assert_eq!(dice[0].attempts.last(), Some(&dice[0].value));
-    assert_eq!(dice[1].attempts.len(), 1);
-    assert_ne!(dice[0].roll, dice[1].roll);
-    assert_eq!(dice[0].attempts, vec![DieFace::One, DieFace::Two]);
-    assert_eq!(dice[0].value, DieFace::Two);
-    assert_eq!(dice[1].value, DieFace::Five);
-    let history = game.observe(Viewer::P1).unwrap().history;
-    assert_eq!(
-        history
-            .dice
-            .iter()
-            .map(|roll| roll.value)
-            .collect::<Vec<_>>(),
-        [2, 5]
-    );
-    assert_eq!(history, game.observe(Viewer::P2).unwrap().history);
-    for viewer in [Viewer::P1, Viewer::P2] {
-        let projected = project_history(&game.observe(viewer).unwrap()).unwrap();
-        assert_eq!(
-            projected
-                .dice
-                .iter()
-                .map(|roll| roll.value.get())
-                .collect::<Vec<_>>(),
-            [2, 5]
-        );
-    }
 }
 
 #[test]

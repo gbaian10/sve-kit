@@ -44,7 +44,8 @@ pub(crate) fn build_observation(
                     .transpose()?,
                 rule: None,
                 procedure: context.procedure,
-                // Evolution parameters have no Declared variant and are not payment receipts.
+                // These rule stops have no public declarations; evolution parameters have
+                // no Declared variant and cannot serve as payment receipts.
                 declared: vec![],
                 payment: None,
             })

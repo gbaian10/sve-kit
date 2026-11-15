@@ -1,4 +1,5 @@
 //! Shared payment positions use the same C0 input in lib unit and integration tests.
+//! Lib unit tests include this via `#[path]`, so only APIs visible in both contexts are used.
 
 use super::board_fixtures;
 use serde_json::{Value, json};
