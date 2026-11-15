@@ -9,7 +9,7 @@ fn credited_position() -> Game {
     initial["players"]["P1"]["title_code"] = json!("princess_connect_re_dive");
     initial["players"]["P1"]["zones"]["hand"] = json!([
         {"id":"source","card":"CP04-026"},
-        {"id":"spell","card":"BP01-071"}
+        {"id":"spell","card":"BP01-125"}
     ]);
     initial["players"]["P1"]["zones"]["deck"] = json!([
         {"id":"peco","card":"CP04-019"}, {"id":"other","card":"BP01-037"}
@@ -80,13 +80,30 @@ fn creditta_searches_discounted_pecorine_and_increases_ability_and_combat_damage
     let spell_play = game
         .play_internal_card("spell", PlayerId { seat: 1 })
         .unwrap();
-    resolved(finish(&mut game, spell_play));
+    let target = question(spell_play);
+    let InputDomain::Targets(targets) = &target.domain else {
+        panic!("spell target");
+    };
+    let follower = targets
+        .members
+        .iter()
+        .find(|member| member.card.is_some())
+        .unwrap()
+        .handle;
+    resolved(
+        game.answer_internal_card(target.actor, target.token, Answer::Targets(vec![follower]))
+            .unwrap(),
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
+        18_u8
+    );
     assert_eq!(
         game.projection(View::Referee).unwrap()["objects"]["enemy"]["hp"],
-        16_u8
+        15_u8
     );
     finish_checks(&mut game);
-    for (attacker, hp) in [("zero", 16_u8), ("attacker", 13_u8)] {
+    for (attacker, hp) in [("zero", 15_u8), ("attacker", 12_u8)] {
         assert_eq!(
             game.internal_rule_action(&json!({"do":"attack","attacker":attacker,"target":"enemy"}))
                 .unwrap()

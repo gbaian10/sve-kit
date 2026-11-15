@@ -23,7 +23,7 @@ pub(super) struct SourceInformation {
 }
 
 #[derive(Clone, Debug)]
-pub(super) struct SourceSnapshot {
+pub(in crate::game) struct SourceSnapshot {
     view: RuntimeObjectView,
     original: [i64; 3],
     effective: [i64; 3],

@@ -1,5 +1,6 @@
 use super::super::grant::{EffectiveAbility, GrantOrigin};
 use super::super::observation::{EffectOrigin, ObjectLink};
+use super::super::source::SourceSnapshot;
 use super::super::{Execution, InstructionOutcome, Slot, admission, player_id, seat_name};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::game::internal::duration::{EffectEnd, TurnInterval};
@@ -40,6 +41,7 @@ fn damage_source_matches(
     game: &Game,
     source: &str,
     hit: &Value,
+    snapshot: Option<&SourceSnapshot>,
 ) -> Result<bool> {
     match filter {
         None => Ok(true),
@@ -52,6 +54,14 @@ fn damage_source_matches(
         ),
         Some(DamageSource::OpponentController) => {
             opposing_damage_controller(hit, execution.context.controller)
+        }
+        Some(DamageSource::Characteristics(filter)) => {
+            let snapshot =
+                snapshot.ok_or_else(|| crate::invalid("missing damage source information"))?;
+            let own = !opposing_damage_controller(hit, execution.context.controller)?;
+            Ok(own == filter.own
+                && snapshot.subject.kind == Some(filter.kind)
+                && snapshot.subject.traits.contains(filter.trait_id))
         }
     }
 }
@@ -152,6 +162,29 @@ pub(super) fn is_static(ability: &Ability) -> bool {
             .declarations
             .iter()
             .all(|effect| projection(effect).is_some())
+}
+
+fn recipient_matches(
+    recipients: Option<&Recipients<'_>>,
+    execution: &Execution,
+    game: &Game,
+    target: &str,
+) -> Result<bool> {
+    Ok(match recipients {
+        None => true,
+        Some(Recipients::Objects(objects)) => {
+            !target.ends_with(".leader")
+                && execution
+                    .objects(game, objects)?
+                    .contains(&execution.reference(game, target)?)
+        }
+        Some(Recipients::Leaders(players)) => match target.strip_suffix(".leader") {
+            Some(seat) => execution
+                .players(game, players)?
+                .contains(&player_id(seat)?),
+            None => false,
+        },
+    })
 }
 
 fn check_equipment(shape: &Prevention<'_>) -> Result<()> {
@@ -700,6 +733,7 @@ impl Game {
     pub(in crate::game) fn internal_prevention_references(
         &self,
         hit: &Value,
+        snapshot: Option<&SourceSnapshot>,
     ) -> Result<Vec<Value>> {
         let target = hit["target"]
             .as_str()
@@ -760,7 +794,7 @@ impl Game {
                 references.push(reference);
             }
         }
-        self.static_prevention_references(hit, &mut references)?;
+        self.static_prevention_references(hit, snapshot, &mut references)?;
         Ok(references)
     }
 
@@ -774,7 +808,12 @@ impl Game {
         )
     }
 
-    fn static_prevention_references(&self, hit: &Value, references: &mut Vec<Value>) -> Result<()> {
+    fn static_prevention_references(
+        &self,
+        hit: &Value,
+        snapshot: Option<&SourceSnapshot>,
+        references: &mut Vec<Value>,
+    ) -> Result<()> {
         let target = hit["target"]
             .as_str()
             .ok_or_else(|| crate::invalid("damage target"))?;
@@ -821,27 +860,19 @@ impl Game {
                     {
                         continue;
                     }
-                    let target_matches = match shape.recipients {
-                        None => true,
-                        Some(Recipients::Objects(objects)) => {
-                            !target.ends_with(".leader")
-                                && execution
-                                    .objects(self, objects)?
-                                    .contains(&execution.reference(self, target)?)
-                        }
-                        Some(Recipients::Leaders(players)) => {
-                            match target.strip_suffix(".leader") {
-                                Some(seat) => execution
-                                    .players(self, players)?
-                                    .contains(&player_id(seat)?),
-                                None => false,
-                            }
-                        }
-                    };
+                    let target_matches =
+                        recipient_matches(shape.recipients.as_ref(), &execution, self, target)?;
                     if !target_matches {
                         continue;
                     }
-                    if !damage_source_matches(shape.damage_source, &execution, self, source, hit)? {
+                    if !damage_source_matches(
+                        shape.damage_source,
+                        &execution,
+                        self,
+                        source,
+                        hit,
+                        snapshot,
+                    )? {
                         continue;
                     }
                     let Effect::Replacement { id, .. } = effect else {

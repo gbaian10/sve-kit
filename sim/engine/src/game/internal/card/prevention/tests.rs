@@ -169,14 +169,14 @@ fn missing_proposed_controller_is_rejected_only_by_filtered_ability_prevention()
             }
             assert_eq!(
                 board
-                    .static_prevention_references(&hit, &mut vec![])
+                    .static_prevention_references(&hit, None, &mut vec![])
                     .is_err(),
                 filtered
             );
             hit["battle"] = json!(true);
             let mut references = vec![];
             board
-                .static_prevention_references(&hit, &mut references)
+                .static_prevention_references(&hit, None, &mut references)
                 .unwrap();
             assert_eq!(references, Vec::<Value>::new());
         }

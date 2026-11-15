@@ -119,6 +119,18 @@ impl BodyContext<'_> {
                 let objects = self.objects(objects, path)?;
                 self.prevention_source(objects, path)
             }
+            ast::PreventionSource::Characteristics(shape) => {
+                let trait_id = super::super::TraitId(shape.r#trait.clone());
+                if trait_id.0.is_empty() {
+                    return Err(unsupported(path));
+                }
+                Ok(super::super::prevention::source_filter::Filter {
+                    own: matches!(shape.who, ast::LeaderSide::Controller),
+                    kind: super::search::card_kind(&shape.kind),
+                    trait_id: &trait_id,
+                }
+                .predicate(Binding::new(1, self.card_allocator.scope(path)?)))
+            }
             ast::PreventionSource::Controller(shape)
                 if matches!(shape.who, ast::LeaderSide::Opponent) =>
             {
@@ -632,12 +644,15 @@ pub(super) fn lower_at_source(
                 return Err(unsupported(path));
             }
         };
-        let recipient =
-            if on.is_none() && matches!(damage_source, Some(ast::PreventionSource::Objects(_))) {
-                None
-            } else {
-                Some(context.prevention_recipients(on, numeric::holder(), path)?)
-            };
+        let recipient = if on.is_none()
+            && matches!(
+                damage_source,
+                Some(ast::PreventionSource::Objects(_) | ast::PreventionSource::Characteristics(_))
+            ) {
+            None
+        } else {
+            Some(context.prevention_recipients(on, numeric::holder(), path)?)
+        };
         let damage_source = damage_source
             .map(|filter| context.prevention_filter(filter, path))
             .transpose()?;
