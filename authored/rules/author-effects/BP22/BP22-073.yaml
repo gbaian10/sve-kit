@@ -1,0 +1,62 @@
+cards:
+  BP22-073:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n:
+                  power_of: it
+                to: enemy
+          on:
+            enter_field:
+              sel:
+                class: ドラゴン
+                kind: follower
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: chosen
+                from:
+                  class: ドラゴン
+                  in: seen
+                  kind: follower
+                may: true
+                n: 1
+            - move:
+                ref: chosen
+                result: entered
+                to: field
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: entered
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,31 @@
+cards:
+  CP04-087:
+    abilities:
+      - activate:
+          cost:
+            act_self: true
+          do:
+            - grant:
+                keywords:
+                  - ward
+                on: this
+          ub: true
+        line: 1
+      - line: 1
+        section: 1
+        static:
+          effects:
+            - must_target:
+                by: opp
+                on: this
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

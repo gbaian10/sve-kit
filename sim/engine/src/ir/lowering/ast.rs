@@ -3482,6 +3482,8 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    MustTarget(MustTarget),
+    EntersActed(EntryPosture),
     BanishInstead(BanishReplacement),
     ExtraTrigger(ExtraTriggers),
     UnlimitedEvolve(StaticPlayerRule),
@@ -3532,6 +3534,12 @@ pub(super) struct StaticPlayerRule {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct IgnoreWard {
+    pub on: Objects,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryPosture {
     pub on: Objects,
 }
 
@@ -4248,4 +4256,11 @@ impl<'de> Deserialize<'de> for GiveRecipient {
             Self::Player(Side::named(&name))
         })
     }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct MustTarget {
+    pub on: Objects,
+    pub by: LeaderSide,
 }

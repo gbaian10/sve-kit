@@ -1,0 +1,40 @@
+cards:
+  BP03-092:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - must_target:
+                by: opp
+                on: this
+      - evolve_time:
+          do:
+            - move:
+                ref: revived
+                result: entered
+                to: field
+          targets:
+            - bind: revived
+              from:
+                any_of:
+                  - keyword: storm
+                    kind: follower
+                    orig_cost_le: 3
+                    who: self
+                    zone: cemetery
+                  - keyword: ward
+                    kind: follower
+                    orig_cost_le: 3
+                    who: self
+                    zone: cemetery
+              n: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set

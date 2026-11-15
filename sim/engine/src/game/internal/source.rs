@@ -3,6 +3,7 @@
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::game::Object;
 use crate::game::player::Viewer;
+use crate::ir::events::numbers;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
     Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
@@ -208,6 +209,25 @@ impl Execution {
                 snapshots.push((self.id, self.source_snapshot(game)?, departing));
             }
         }
+        if let Some(subject) = self
+            .event_reads
+            .entry_subject()
+            .filter(|subject| subject.information.is_some())
+            && let Some((id, _)) = game
+                .state
+                .ir_objects
+                .iter()
+                .find(|(_, id)| **id == subject.reference.id.0)
+            && ids.contains(id)
+            && game.object(id)?.zone == "field"
+            && game.object(id)?.generation == subject.reference.generation.0
+        {
+            snapshots.push((
+                self.id,
+                game.information_snapshot(subject.reference)?,
+                subject.reference,
+            ));
+        }
         // A child can move a suspended parent's source before that parent resumes.
         if let Some(nested) = &self.nested {
             snapshots.extend(nested.parent.source_before_move(game, ids)?);
@@ -223,9 +243,15 @@ impl Execution {
             information.seal(
                 snapshots
                     .iter()
-                    .find(|(id, _, _)| *id == self.id)
+                    .find(|(id, snapshot, _)| {
+                        *id == self.id && snapshot.view.object == information.holder
+                    })
                     .map(|(_, snapshot, _)| snapshot.clone()),
             );
+        }
+        for (_, snapshot, _) in snapshots.iter().filter(|(id, _, _)| *id == self.id) {
+            self.event_reads
+                .seal_entry_subject(snapshot.view.object, snapshot);
         }
         if let Some(nested) = &mut self.nested {
             nested.parent.seal_source_departure(snapshots);
@@ -290,6 +316,9 @@ impl Execution {
         }
         let snapshot = match object {
             ObjectView::SourceInformation {} => self.source_snapshot(game)?,
+            ObjectView::EventSnapshot { .. } | ObjectView::LastKnown { .. } => {
+                self.event_number_information(game, object)?
+            }
             _ => return Err(unsupported("number information view")),
         };
         let values = match view {
@@ -301,6 +330,34 @@ impl Execution {
             .get(index)
             .copied()
             .ok_or_else(|| invalid("missing numeric characteristic"))
+    }
+
+    fn event_number_information(&self, game: &Game, object: &ObjectView) -> Result<SourceSnapshot> {
+        let expression =
+            numbers::subject(object).ok_or_else(|| unsupported("numeric event subject view"))?;
+        let subject = self
+            .event_reads
+            .object()
+            .filter(|subject| subject.expression == expression)
+            .ok_or_else(|| invalid("numeric read belongs to another event"))?;
+        if matches!(object, ObjectView::LastKnown { .. })
+            && let Some((id, _)) = game
+                .state
+                .ir_objects
+                .iter()
+                .find(|(_, id)| **id == subject.reference.id.0)
+            && game.state.objects.get(id).is_some_and(|current| {
+                current.zone == "field" && current.generation == subject.reference.generation.0
+            })
+        {
+            return game.information_snapshot(subject.reference);
+        }
+        subject
+            .information
+            .as_ref()
+            .filter(|information| information.view.object == subject.reference)
+            .cloned()
+            .ok_or_else(|| invalid("missing numeric event information"))
     }
 
     pub(super) fn damage_source(&self, game: &Game, view: &ObjectView) -> Result<SourceSnapshot> {

@@ -1,0 +1,35 @@
+cards:
+  BP22-025:
+    abilities:
+      - keywords:
+          - rush
+          - assail
+          - bane
+        line: 1
+      - auto:
+          do:
+            - damage:
+                n:
+                  power_of: it
+                to:
+                  leaders: opponents
+          on:
+            moved:
+              during:
+                turn: self
+              from:
+                who: opp
+                zone: field
+              sel:
+                kind: follower
+              to: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-15"
+format: 2
+kind: author_effect_set
