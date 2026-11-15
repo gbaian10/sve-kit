@@ -1404,6 +1404,7 @@ pub(super) struct PlayingQuery {
     pub traits_all: Vec<String>,
     pub class: Option<String>,
     pub name: Option<String>,
+    pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
     pub token: Option<bool>,
 }
