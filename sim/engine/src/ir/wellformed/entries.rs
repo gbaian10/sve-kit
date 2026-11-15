@@ -920,7 +920,11 @@ impl Checker {
             ActionPattern::IgnoreWard { attacker } => self.selector(attacker),
             ActionPattern::Reroll { player, .. } => self.player(player),
             ActionPattern::Attack { attacker, target } => {
-                self.selector(attacker)?;
+                // Rechecking the same selector would define its local candidate twice.
+                if !matches!(subject, PermissionSubject::Objects { objects } if objects == attacker)
+                {
+                    self.selector(attacker)?;
+                }
                 if let Some(target) = target {
                     self.recipients(target)?;
                 }

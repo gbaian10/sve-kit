@@ -510,6 +510,8 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 
 `static: {effects: [{ignore_ward: {on: this}}]}` 讓持有者攻擊時略過守護的目標限制（BP10-055、BP04-006、BP09-056 的第二面）。沿用既有 `IgnoreWard` 權限及攻擊合法性檢查；休息、入場當回合、站立目標、對象種類與禁止攻擊仍照常判斷。能力失效或失去能力後不再略過守護。可搭配既有 `static.while` 的公開條件，每次判斷攻擊時重新讀取；只接受印刷場上常駐能力的 `on: this`，不開放對他者授予、私有區或本文 `apply` 安裝。
 
+`static.effects[].cannot: {what: attack, on: {who: all, zone: field, kind: follower, orig_cost_le: 3}}` 依每次宣告攻擊時的場上集合，限制雙方符合印刷原費條件的從者（BP09-040，Q1173、Q1174）。領袖與從者對象均受禁止；來源失去能力或離場後停止提供限制。
+
 `keywords: [single_drive]` 與 `keywords: [twin_drive]` 展開為自身攻擊時的完整 Drive check；Twin Drive 先完成第一張的圖示處理與去向，再取第二張牌頂。非作品構築不讀圖示、直接放回牌底；作品構築從權威端既有 card facts 讀取已驗證的 `trigger_icon`，缺資料時拒絕，不從提醒文推算。接受圖示後依一般抽牌、生命、數值與姿態規則處理並送墓，拒絕或無圖示則回牌底；Critical 只增加攻擊力 2，Stand 的領袖攻擊限制持續至本回合結束。
 
 `keywords: [start_amulet]` 只能寫在アミュレット的印刷關鍵字行。作品構築的開局（CR 14.4.3）直接從牌組中已准入卡片的印刷特徵讀取，不經由場上關鍵字；篩選、授予與觸發條件都不能指名它。牌組只能放一種起始護符屬於構築規則，不在對局中檢查。CSD03a／b 卡上的開局說明 section 標 `ignored: reminder`。
