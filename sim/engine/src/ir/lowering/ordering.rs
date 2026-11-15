@@ -246,6 +246,7 @@ impl BodyContext<'_> {
             | ast::Step::Steal(_)
             | ast::Step::Give(_)
             | ast::Step::FlipDown(_)
+            | ast::Step::MakeType(_)
             | ast::Step::Buff(_)
             | ast::Step::Grant(_)
             | ast::Step::SetStat(_)

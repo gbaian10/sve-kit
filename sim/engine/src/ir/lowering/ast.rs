@@ -432,6 +432,7 @@ pub(super) enum Step {
     Steal(Steal),
     Give(Give),
     FlipDown(FlipDown),
+    MakeType(MakeType),
     Buff(Modify),
     Grant(Grant),
     SetStat(Modify),
@@ -1284,6 +1285,22 @@ impl<'de> Deserialize<'de> for Side {
 pub(super) enum Zone {
     Field,
     Ex,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TypeEffect {
+    pub on: Option<Objects>,
+    #[serde(rename = "type")]
+    pub kind: FieldKind,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct MakeType {
+    pub on: Objects,
+    #[serde(rename = "type")]
+    pub kind: FieldKind,
+    pub until: Option<Until>,
 }
 
 #[derive(Deserialize)]
@@ -3504,6 +3521,7 @@ pub(super) struct Static {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum StaticEffect {
+    MakeType(TypeEffect),
     MustTarget(MustTarget),
     EntersActed(EntryPosture),
     BanishInstead(BanishReplacement),

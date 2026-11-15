@@ -894,7 +894,8 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
 fn supported(code: &str) -> bool {
     matches!(
         code,
-        "shape.IntFrozen.MoveBatchCount"
+        "shape.CharacteristicPatch.SetKind"
+            | "shape.IntFrozen.MoveBatchCount"
             | "shape.Action.Dice"
             | "action.dice"
             | "shape.Action.Declare"

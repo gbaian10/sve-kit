@@ -311,6 +311,9 @@ impl Execution {
             }
             return match read {
                 NumberRead::Cost { .. } => game.internal_effective_cost(id),
+                NumberRead::Stats { .. } if !game.object_type(id)?.contains("フォロワー") => {
+                    Ok(0)
+                }
                 NumberRead::Stats { property, .. } => game.internal_numeric_stat(id, *property),
             };
         }

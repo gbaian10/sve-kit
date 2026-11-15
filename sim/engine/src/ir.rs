@@ -260,3 +260,5 @@ pub(crate) mod target_priority;
 pub(crate) mod flip_cost;
 
 pub(crate) mod repeated_moves;
+
+pub(crate) mod kind_change;

@@ -766,9 +766,9 @@ known:
     reason: "after-decision-3 omniscient events"
   - question: "card-ECP02-SL28"
     scenario: "A 超進化 → 兩個能力待機；超進化時把守護從者變護符 → 攻擊リーダー不被擋；全體傷害不打護符"
-    status: unsupported
-    error: "unadmitted ECP02-SL29 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ECP02-SL29/0, query complete card names: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: pending choices and leader life increase referee events (#2008)"
+    reason: "after-decision-1 omniscient awaiting; after-decision-3 omniscient events"
   - question: "card-ECP02-SL33"
     scenario: "A EX 已滿 5 張 → 一張アイテム都不放（select 空），仍 +4 與抽 2；非デレマス從者全破壞"
     status: fail

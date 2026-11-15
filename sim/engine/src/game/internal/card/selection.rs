@@ -126,6 +126,16 @@ pub(in crate::game::internal) fn characteristics(
 }
 
 impl TargetWait {
+    pub(in crate::game::internal) fn accept_kind_change(&mut self, subject: ObjectRef, kind: &str) {
+        if let Some((_, saved)) = self
+            .characteristics
+            .iter_mut()
+            .find(|(reference, _)| *reference == subject)
+        {
+            kind.clone_into(&mut saved.kind);
+        }
+    }
+
     pub(in crate::game::internal) fn player_question(
         &self,
         game: &Game,

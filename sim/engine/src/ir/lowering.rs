@@ -31,6 +31,7 @@ mod hand_exit;
 mod hand_payment;
 mod hand_position;
 mod keywords;
+mod kind_change;
 mod material;
 mod material_values;
 mod move_replacement;
@@ -539,7 +540,8 @@ impl Allocator {
                     attack_restrictions::lower
                 }
                 Some(
-                    ast::StaticEffect::If(_)
+                    ast::StaticEffect::MakeType(_)
+                    | ast::StaticEffect::If(_)
                     | ast::StaticEffect::Grant(_)
                     | ast::StaticEffect::BanishInstead(_)
                     | ast::StaticEffect::MustTarget(_)
@@ -2183,6 +2185,7 @@ impl<'definitions> BodyContext<'definitions> {
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
         match step {
+            ast::Step::MakeType(value) => self.make_type(value, path),
             ast::Step::Delayed(value) => self.delayed(value, path, source, span),
             ast::Step::Declare(value) => self.declare(value, path),
             ast::Step::Dice(value) => self.dice(value, path),

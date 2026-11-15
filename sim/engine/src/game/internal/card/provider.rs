@@ -7,7 +7,7 @@ use crate::ir::{Generation, ObjectId};
     reason = "Live providers share a read-only execution without installing an effect."
 )]
 impl Game {
-    pub(super) fn provider_execution(
+    pub(in crate::game::internal) fn provider_execution(
         &self,
         source: &str,
         caller: Option<&Execution>,

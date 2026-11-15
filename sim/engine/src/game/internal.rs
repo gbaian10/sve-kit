@@ -86,6 +86,7 @@ pub(in crate::game) use field_entry::FieldEntry;
 mod life;
 mod movement;
 pub(in crate::game) use movement::zone_capacity;
+mod kind_change;
 mod number_plan;
 mod numeric;
 mod observation;
@@ -423,7 +424,7 @@ pub enum InstructionOutcome {
     Order(OrderOutcome),
     /// Complete checks in printed order, after each icon and final movement.
     DriveChecks(Vec<DriveCheckedEvent>),
-    /// Frozen generations receiving one numeric effect instance.
+    /// Frozen generations receiving one characteristic effect instance.
     Modified {
         /// Allocated only when at least one current subject receives the effect.
         effect: Option<EffectId>,

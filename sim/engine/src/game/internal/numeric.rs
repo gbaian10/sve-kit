@@ -148,7 +148,8 @@ fn collect_patches<'program>(
         match &step.node {
             Node::Instruction { instruction } => match &instruction.action {
                 Action::Modify {
-                    patch: CharacteristicPatch::AddTrait { .. },
+                    patch:
+                        CharacteristicPatch::AddTrait { .. } | CharacteristicPatch::SetKind { .. },
                     ..
                 } => {}
                 Action::Modify { patch, .. } => patches.push(patch),
@@ -259,6 +260,15 @@ fn merge(left: Option<Change>, right: Option<Change>) -> Result<Option<Change>> 
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
+    if matches!(
+        action,
+        Action::Modify {
+            patch: CharacteristicPatch::SetKind { .. },
+            ..
+        }
+    ) {
+        return super::kind_change::check_action(action);
+    }
     if matches!(
         action,
         Action::Modify {
@@ -529,6 +539,15 @@ impl Game {
         if matches!(
             instruction.action,
             Action::Modify {
+                patch: CharacteristicPatch::SetKind { .. },
+                ..
+            }
+        ) {
+            return self.internal_modify_kind(execution, instruction);
+        }
+        if matches!(
+            instruction.action,
+            Action::Modify {
                 patch: CharacteristicPatch::AddTrait { .. },
                 ..
             }
@@ -781,6 +800,7 @@ impl Game {
     /// Layers belong to one generation; a moved target never carries them into a new one.
     pub(in crate::game) fn internal_numeric_cleanup(&mut self) -> Result<()> {
         self.internal_cost_cleanup();
+        self.internal_kind_cleanup();
         let objects = &self.state.objects;
         self.state.ir_numeric.retain(|id, state| {
             objects
@@ -807,6 +827,7 @@ impl Game {
 
     pub(in crate::game) fn internal_numeric_end_turn(&mut self, turn: u64) -> Result<()> {
         self.internal_cost_end_turn(turn);
+        self.internal_kind_end_turn(turn);
         self.internal_numeric_cleanup()?;
         self.internal_pilot_end_turn(turn)?;
         self.internal_numeric_expire(|effect| effect.end == EffectEnd::Turn(turn), Some(turn))

@@ -125,6 +125,7 @@ fn permission(
         | ast::StaticEffect::MustTarget(_)
         | ast::StaticEffect::EntersActed(_)
         | ast::StaticEffect::ExtraTrigger(_)
+        | ast::StaticEffect::MakeType(_)
         | ast::StaticEffect::Reroll(_)
         | ast::StaticEffect::UnlimitedEvolve(_)
         | ast::StaticEffect::ChoiceAny(_)
