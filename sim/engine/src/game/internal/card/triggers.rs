@@ -928,11 +928,15 @@ impl PendingOccurrence {
             node: body.clone(),
             source: self.ability.source.clone(),
         });
+        let object_event = matches!(
+            self.timing,
+            Some(EventPayload::EnterField { .. } | EventPayload::LeaveField { .. })
+        ) || self.leave.is_some();
         if !requirements.required.iter().any(|required| {
             matches!(
                 required.capability.code,
-                "value.unique-name" | "value.event-snapshot" | "reference.lki"
-            )
+                "value.unique-name" | "value.event-snapshot"
+            ) || (object_event && required.capability.code == "reference.lki")
         }) {
             return Ok(());
         }
