@@ -368,6 +368,7 @@ impl<O: EventObjects> Projection<'_, O> {
             ActionKind::DriveChecked => self.drive_checked(action),
             ActionKind::Payment => payment(action),
             ActionKind::Dice => dice(action),
+            ActionKind::Declare => declared(action),
             ActionKind::Shuffle => shuffled(action),
             ActionKind::TurnSkipped => turn_skipped(action),
             // The native trace keeps neither the owner nor the two controllers.
@@ -625,6 +626,17 @@ fn dice(action: &ActionEvent) -> Result<EventBody, ProjectionError> {
     Ok(EventBody::Dice {
         player: player(action)?,
         value: nat(number(action)?.amount)?,
+    })
+}
+
+/// The number an effect had its player declare; it is not the X of a cost.
+fn declared(action: &ActionEvent) -> Result<EventBody, ProjectionError> {
+    Ok(EventBody::ChoiceDeclared {
+        player: player(action)?,
+        declared: observation::Declared::Number {
+            role: observation::DeclaredNumber::Free,
+            value: int(number(action)?.amount)?,
+        },
     })
 }
 

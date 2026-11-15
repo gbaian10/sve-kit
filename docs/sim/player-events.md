@@ -101,6 +101,7 @@ typed facts 保留在權威 Progress。傷害分類透過實際 emit 回傳的 S
 | ダメージ；typed Damage | 一筆實際傷害，保留 Ability／Attack／Combat 分類 |
 | アクト、スタンド；typed Posture | 一筆姿態結果 |
 | サイコロ；typed Dice | 一筆最終接受的值，中間重擲不另發 |
+| typed Declared | 效果要求宣告的數值：一筆公開宣告，帶宣告席與數值；由宣告指令在數值確定時記錄，不是 X、擲骰或資源 |
 | プレイ、解決；typed CardPlayed／CardResolved | 一筆對應的卡片打出／解決 |
 | 装備；typed Equipped | 一筆裝備關聯結果，與建立裝備的物理移動分開 |
 | 進化、超進化；typed Evolved | 進化結果；效果進化保留獨立角色 |

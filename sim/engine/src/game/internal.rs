@@ -516,6 +516,14 @@ pub enum Fact {
     Damage(DamageEvent),
     /// One roll with its accepted value; reroll attempts are not separate facts.
     Dice(DiceEvent),
+    /// A number an effect had this player declare, public from the moment it is fixed.
+    /// The declaring instruction records it once, before any later text reads the number.
+    Declared {
+        /// The player who declared.
+        player: PlayerId,
+        /// The declared number.
+        value: Nat,
+    },
     /// One physical movement, including its action method and causal execution.
     Movement(Box<MovementFact>),
     /// One explicit numeric instruction's nonzero facets for one subject.

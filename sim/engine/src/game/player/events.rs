@@ -88,6 +88,8 @@ pub enum MovementMethod {
 /// Closed action vocabulary shared by the Step adapter and typed result adapter.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ActionKind {
+    /// A number an effect had its player declare publicly.
+    Declare,
     /// Proper card play.
     Play,
     /// Completion of a card's resolution.

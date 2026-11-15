@@ -6,7 +6,7 @@ use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
 use serde_json::{Value, json};
 
-fn fixture() -> Game {
+pub(in crate::game::internal) fn fixture() -> Game {
     let snapshot = json!({"number":"unit","faces":[{"name":"unit","card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string();
     let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
     let document = json!({"format":1_u8,"kind":"effect_set","cards":{"unit":{"status":"complete","review":"synthetic","abilities":[]}}}).to_string();
@@ -27,7 +27,7 @@ fn fixture() -> Game {
     .unwrap()
 }
 
-fn execution(game: &mut Game) -> Execution {
+pub(in crate::game::internal) fn execution(game: &mut Game) -> Execution {
     Execution {
         plan: None,
         terminated: false,
