@@ -932,11 +932,14 @@ impl PendingOccurrence {
             self.timing,
             Some(EventPayload::EnterField { .. } | EventPayload::LeaveField { .. })
         ) || self.leave.is_some();
+        if !object_event {
+            return Ok(());
+        }
         if !requirements.required.iter().any(|required| {
             matches!(
                 required.capability.code,
-                "value.unique-name" | "value.event-snapshot"
-            ) || (object_event && required.capability.code == "reference.lki")
+                "value.unique-name" | "value.event-snapshot" | "reference.lki"
+            )
         }) {
             return Ok(());
         }

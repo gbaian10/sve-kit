@@ -407,3 +407,19 @@ fn an_executing_entry_ability_keeps_its_subjects_last_field_value_after_moving_i
     assert_eq!(state["P2"]["leader"]["life"], 8_u8);
     assert_eq!(state["P1"]["field"], json!(["producer"]));
 }
+
+#[test]
+fn end_phase_history_capture_does_not_request_an_entry_or_departure_subject() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"source","card":"BP13-037"}]);
+    let mut game = Game::from_selected_effects(
+        selection_with_rules().clone(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "non-object-event-snapshot",
+    )
+    .unwrap();
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+}
