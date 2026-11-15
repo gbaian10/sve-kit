@@ -11,7 +11,7 @@ use crate::ir::{
 use alloc::collections::{BTreeMap, BTreeSet};
 
 #[cfg(test)]
-mod tests;
+pub(super) mod tests;
 use crate::ir::player_stages::{procedure, returned_share};
 use crate::ir::{RuntimeZoneRef, shuffle};
 use core::slice::from_ref;

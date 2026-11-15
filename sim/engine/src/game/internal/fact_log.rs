@@ -179,6 +179,13 @@ impl Execution {
                 action.kind = ActionKind::Shuffle;
                 action.player = viewer(*player);
             }
+            Fact::Declared { player, value } => {
+                action.kind = ActionKind::Declare;
+                action.player = viewer(*player);
+                action.numbers.push(number(
+                    i64::try_from(value.0).map_err(|_authority_error| EventError::ProjectionGap)?,
+                ));
+            }
             Fact::Fused(event) => {
                 action.kind = ActionKind::Fusion;
                 action.details = Some(ActionDetails::Fusion(
@@ -285,3 +292,6 @@ impl Execution {
         Ok(Some(EventKind::Action(action)))
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -148,6 +148,7 @@ fn success_projections_preserve_old_and_new_generations_without_chasing_later_mo
                 | Fact::Posture(_)
                 | Fact::DriveTrigger(_)
                 | Fact::DriveChecked(_)
+                | Fact::Declared { .. }
                 | Fact::StatChange(_) => None,
             })
             .collect::<Vec<_>>();

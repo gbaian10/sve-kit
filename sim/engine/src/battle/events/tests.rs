@@ -771,7 +771,7 @@ fn fusion_race_and_drive_keep_their_numbers_and_details() {
 }
 
 #[test]
-fn payments_dice_shuffles_and_skipped_turns_name_their_seat() {
+fn payments_dice_declarations_shuffles_and_skipped_turns_name_their_seat() {
     assert_bodies(vec![
         (
             with(action(ActionKind::Payment), &|event| {
@@ -824,6 +824,19 @@ fn payments_dice_shuffles_and_skipped_turns_name_their_seat() {
             EventBody::Dice {
                 player: Seat::P2,
                 value: number(5),
+            },
+        ),
+        (
+            with(action(ActionKind::Declare), &|event| {
+                event.player = Some(Viewer::P2);
+                event.numbers = vec![facet(4, None, None)];
+            }),
+            EventBody::ChoiceDeclared {
+                player: Seat::P2,
+                declared: observation::Declared::Number {
+                    role: observation::DeclaredNumber::Free,
+                    value: signed(4),
+                },
             },
         ),
         (
