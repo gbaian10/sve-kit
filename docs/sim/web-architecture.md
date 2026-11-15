@@ -53,9 +53,10 @@ sim/web/
 | `/decks/:deckId`             | 組牌 | 牌組欄、卡池（與查卡頁共用）、篩選；`ed` 是牌組的版本       |
 | `/rules`                     | 規則 | 綜合規則分頁；`/rules/errata` 是勘誤分頁（官方勘誤卡一覽）  |
 | `/errata`                    | 轉址 | 舊連結轉到 `/rules/errata`，保留查詢條件與 hash             |
+| `/play`                      | 對戰 | 只在 dev 建置；全螢幕、不在 AppShell 內（README）           |
 | `*`                          | 404  | 含搜尋框                                                    |
 
-保留、不實作：`/cards/unimplemented`、`/play`。
+保留、不實作：`/cards/unimplemented`。
 
 牌組的文字格式是 `# 名稱`，再以 `## 主戰者／主牌組／進化牌組／候補` 分段，每行「張數 卡號 卡名」；讀回時只看張數與卡號，
 卡片放哪一區由卡片本身決定，只有候補區依標題。分享碼是 `SVEK-` 加 base64url，內容依序為格式版本、日版／英版、

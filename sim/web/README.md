@@ -54,6 +54,54 @@ root, and nothing in the UI switches roots any more; restart the dev server with
 variables to change them. Only two derived flags reach browser code
 (`SVE_PREVIEW_CONFIGURED`, `SVE_CDN_IS_FIXTURE`); paths stay in the Vite server.
 
+### Battle screen (dev builds only)
+
+`/play` is the battle screen ([battle contract](../../docs/sim/battle-contract.md)). It exists only
+in builds made with `VITE_DEV_ONLY_PLAY=1`, which `dev`, `dev:lan` and `deploy:dev` set; a build
+without the variable contains none of its code. `src/app/routes.tsx` reads the variable in place:
+through another module the bundler still emits the page as an unreferenced chunk.
+
+Until the local engine supplies contract updates, the page plays fixture scenes
+(`src/battle/fixtures/`): each scene describes one table and is turned into the complete update each
+seat would receive, validated by the generated contract validator in the tests. Nothing in the
+fixtures computes rules.
+
+- `?scene=preset|opening|mid|full` picks the scene; the chip on the board's top-left corner does
+  the same.
+- `?dual=1` (or the button beside the gear) shows both seats side by side: the viewer's screen on
+  the left, the other seat's on the right. Each has its own source and its own playback state, so
+  the two can be compared for what a seat must not be told.
+- The gear opens the battle settings: one mat per player, or one shared mat across both halves
+  of the board. The mat is drawn in SVG (`table/mats.tsx`), no artwork; the page's background (the
+  two leaders' art) is not part of the mat and does not change with it.
+
+The card back is the official one, published like the card images and never committed:
+`cardBackUrl()` in `src/data/card-back.ts` is the one place that names it
+(`<snapshot root>/images/card_back.webp`). A root without the file answers 404 and every back on
+screen falls back to a back drawn by the app. For a local preview put the file at that path under
+the preview root.
+
+The contract does not carry yet how many evolve points a seat started with or when its super
+evolution opens. Until it does, a scene supplies them beside its messages (`ProvisionalPoints`),
+and `points()` in `src/battle/view/table.ts` is the only place that reads them.
+
+A screen reads everything through `BattleSource` (`src/battle/source.ts`), one per seat. The
+table (`src/pages/play/table/`) draws the model from `src/battle/view/table.ts` and knows nothing
+about questions, so another renderer can replace it. Card names and images come from the snapshot,
+so use a real preview root (above) to look at it.
+
+How the screen is put together:
+
+- `layout.ts` works out, from the window size, where the board, the hands and the panels go and
+  how large one board unit is; the parts are placed with those numbers. `table/geometry.ts` holds
+  the rectangles of a mat in board units. A phone held upright gets the stacked arrangement: the
+  piles sit in a strip under the rows so the cards in play can be wider.
+- `battle.css` is the look. Its parts are `bp-*` classes and their states `is-*` (ESLint lets
+  these through for `src/pages/play/` only). Colours are the `--bp-*` tokens in
+  `src/styles/tokens.css`, the same in every theme; the side panels use the site's theme tokens.
+- `dice/` draws the attack, defense, keyword and cost markers; its `README.md` says where the art
+  comes from.
+
 ## Scripts
 
 | Script                      | What it does                                                                                         |

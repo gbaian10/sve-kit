@@ -58,4 +58,14 @@ export const routes: RouteObject[] = [
       { path: "*", Component: NotFoundPage },
     ],
   },
+  // The battle screen fills the window: it is not a page inside the shell. It exists in dev builds
+  // only; the variable is read here, in place, so that a build without it drops the page's code.
+  ...(import.meta.env.VITE_DEV_ONLY_PLAY === "1"
+    ? [
+        {
+          path: "/play",
+          lazy: async () => ({ Component: (await import("../pages/play/PlayPage")).PlayPage }),
+        },
+      ]
+    : []),
 ]

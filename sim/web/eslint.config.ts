@@ -232,6 +232,18 @@ export default defineConfig(
     },
   },
 
+  // The battle screen has a stylesheet of its own (battle.css): its parts are `bp-*` classes and
+  // their states `is-*`, `plates-*` and `hand-*`. Tailwind classes there are still checked.
+  {
+    files: ["src/pages/play/**/*.tsx"],
+    rules: {
+      "better-tailwindcss/no-unknown-classes": [
+        "error",
+        { ignore: ["^bp-.+", "^is-.+", "^plates-.+", "^hand-.+"] },
+      ],
+    },
+  },
+
   {
     files: ["src/**/*.{ts,tsx}"],
     rules: {
