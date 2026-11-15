@@ -47,6 +47,7 @@ mod prevention;
 mod public_reveal;
 mod receipt_counts;
 mod recipient_union;
+mod repeated_moves;
 mod resource_entry;
 mod reveal_cost;
 mod reveal_until;

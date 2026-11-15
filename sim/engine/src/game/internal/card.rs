@@ -19,6 +19,7 @@ use crate::ir::names;
 use crate::ir::play_restrictions::card_play_rule;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
+use crate::ir::repeated_moves as ir_repeated_moves;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::trigger_restrictions as trigger_permission;
@@ -1468,7 +1469,13 @@ fn check_nested_nodes(
             }
         }
         Control::Repeat { .. } => {
-            let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("fixed repeat"))?;
+            let body = if let Some((body, _)) = ir_dice::repeat(control) {
+                body
+            } else {
+                ir_repeated_moves::projection(control)
+                    .ok_or_else(|| unsupported("repeat"))?
+                    .body
+            };
             check_nodes_with_x(game, &body.steps, source, origin, x)?;
         }
         control @ Control::Simultaneous { batch, .. } => {

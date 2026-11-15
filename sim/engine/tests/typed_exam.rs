@@ -52,6 +52,49 @@ fn every_shared_scenario_passes_on_the_typed_entry_or_is_listed() {
 }
 
 #[test]
+fn mystic_acquisition_shared_scenarios_match_their_reviewed_results() {
+    let mut questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
+    questions.retain(|question| {
+        matches!(
+            question.id.as_str(),
+            "card-BP01-056" | "rule-10.7-01" | "rule-10.7.5-01"
+        )
+    });
+    for question in &mut questions {
+        if question.id == "rule-10.7-01" {
+            question
+                .scenarios
+                .retain(|scenario| scenario.name.contains("神秘の獲得"));
+        }
+    }
+    let reports = run(
+        &mut TypedAdapter::new(repository::selection_with_rules().clone()),
+        &questions,
+        None,
+        RunOptions {
+            require_verified: true,
+            awaiting: AwaitingMode::FirstStage,
+        },
+    )
+    .unwrap();
+    assert_eq!(reports.len(), 7);
+    let mut known =
+        load_known_failures(&root().join("tests/engine/typed-known-results.yaml")).unwrap();
+    known.known.retain(|entry| {
+        questions.iter().any(|question| {
+            question.id == entry.question
+                && question
+                    .scenarios
+                    .iter()
+                    .any(|scenario| scenario.name == entry.scenario)
+        })
+    });
+    known.expected_scenarios = 7;
+    let result = gate(&reports, &known);
+    assert!(result.ok(), "{:#?}", result.problems);
+}
+
+#[test]
 fn a_reverted_play_leaves_no_referee_events_behind() {
     let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
     let question = questions

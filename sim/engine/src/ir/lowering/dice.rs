@@ -33,18 +33,27 @@ impl BodyContext<'_> {
         source: &SourceSpan,
         origin: &AbilitySource,
     ) -> Result<Node, LoweringError> {
+        if value.until.is_some() || value.r#while.is_some() || value.collect.is_some() {
+            return self.repeated_move(value, path, source, origin);
+        }
+        if value.check.is_some() {
+            return Err(unsupported(path));
+        }
+        let count = value.times.ok_or_else(|| unsupported(path))?;
         let parent = self.scope;
         let scope = self.card_allocator.scope(path)?;
         self.scope = self.card_allocator.scope(path)?;
+        let saved = self.local_bindings();
         let previous = self.dice_results.clone();
-        let body = self.steps(&value.steps, &format!("{path}/repeat/do"), source, origin)?;
+        let body = self.steps(&value.steps, &format!("{path}/repeat/do"), source, origin);
+        self.restore_bindings(saved);
         self.dice_results = previous;
         self.scope = parent;
         Ok(Node::Control {
             control: super::super::Control::Repeat {
-                body: RepeatBody::Program { body },
+                body: RepeatBody::Program { body: body? },
                 termination: Termination::Count {
-                    count: Expr::Literal(Nat(value.times)),
+                    count: Expr::Literal(Nat(count)),
                 },
                 check: IterationCheck::BeforeIteration,
                 scope,

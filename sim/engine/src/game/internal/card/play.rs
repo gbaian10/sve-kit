@@ -4,6 +4,7 @@ use super::{
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
     admission, int, invalid, seat_name, unsupported,
 };
+use crate::game::internal::repeated_moves;
 use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
@@ -1155,6 +1156,7 @@ impl Game {
         };
         let mut execution = self.new_card_execution(old_context)?;
         execution.play_origin = Some(spell_origin(&object.zone)?);
+        execution.play_origin_object = Some(execution.reference(self, holder)?);
         execution.play_origin_player = Some(player_id(&object.controller)?);
         let play = ability
             .play
@@ -1309,6 +1311,7 @@ impl Game {
             todo: VecDeque::new(),
             slots: BTreeMap::new(),
             procedures: Vec::new(),
+            repeats: repeated_moves::State::default(),
             receipts: BTreeMap::new(),
             cost_materials: BTreeMap::new(),
             hand_cost_groups: BTreeMap::new(),
@@ -1332,6 +1335,7 @@ impl Game {
             spell: false,
             field_entry: false,
             play_origin,
+            play_origin_object: None,
             card_payment: None,
             trigger_occurrence: None,
             play_counts: self.internal_play_counts()?,

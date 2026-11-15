@@ -998,6 +998,19 @@ impl BodyContext<'_> {
         active: &mut BTreeSet<String>,
     ) -> Result<Expr<Int>, LoweringError> {
         match value {
+            ast::Number::ZoneFree { zone_free } => {
+                let ast::SelfPlayer::Controller = zone_free.who;
+                Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                    value: Expr::Live(Box::new(NatRead::ZoneCapacity {
+                        player: PlayerRef::Controller {},
+                        zone: match zone_free.zone {
+                            ast::CapacityZone::Field => super::super::CapacityZone::Field,
+                            ast::CapacityZone::Ex => super::super::CapacityZone::Ex,
+                        },
+                        property: super::super::CapacityProperty::Free,
+                    })),
+                })))
+            }
             ast::Number::Counter { counter } => Ok(counter_number(counter, self.counter_read_view)),
             ast::Number::Power { power_of } => match power_of {
                 ast::Observation::Binding(name) if name == "it" => {

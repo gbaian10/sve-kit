@@ -1,12 +1,14 @@
 use super::{BodyContext, LoweringError, ast, unsupported};
 use crate::ir::delayed as delayed_ir;
 use crate::ir::events::subject::SubjectFields;
+use crate::ir::events::timing::{opponent, phase_predicate};
 use crate::ir::{AbilitySource, SourceSpan};
 use crate::ir::{
     Action, Binding, Capture, CaptureRef, DelayedLifetime, EntryMethod, EventPattern,
     EventSnapshotPolicy, Expr, Predicate, Selector, TriggerAggregation, TriggerCondition,
     TriggerSpec,
 };
+use crate::ir::{Phase, PlayerRef};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -20,20 +22,76 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         span: &SourceSpan,
     ) -> Result<Action, LoweringError> {
-        if !matches!(value.until, ast::Until::Turn) {
+        if let ast::DelayedOn::Phase { phase } = &value.on {
+            return self.delayed_phase(value, phase, path, source, span);
+        }
+        if !matches!(value.until, Some(ast::Until::Turn)) {
             return Err(unsupported(path));
         }
         let action = match &value.on {
             ast::DelayedOn::Moved { moved } if !value.next_only => {
                 self.delayed_departure(value, moved, path, source, span)?
             }
-            ast::DelayedOn::Moved { .. } => return Err(unsupported(path)),
+            ast::DelayedOn::Moved { .. } | ast::DelayedOn::Phase { .. } => {
+                return Err(unsupported(path));
+            }
             ast::DelayedOn::EnterField { enter_field } => {
                 self.delayed_entry(value, enter_field, path, source, span)?
             }
             ast::DelayedOn::LifeChanged { life_changed } => {
                 self.delayed_life(value, life_changed, path, source, span)?
             }
+        };
+        if !delayed_ir::valid(&action) {
+            return Err(unsupported(path));
+        }
+        Ok(action)
+    }
+
+    fn delayed_phase(
+        &mut self,
+        value: &ast::Delayed,
+        phase: &ast::PhaseSubscriptionPayload,
+        path: &str,
+        source: &AbilitySource,
+        span: &SourceSpan,
+    ) -> Result<Action, LoweringError> {
+        if value.until.is_some() {
+            return Err(unsupported(path));
+        }
+        let player = match phase.whose {
+            ast::PhasePlayer::Controller => PlayerRef::Controller {},
+            ast::PhasePlayer::Opponent => opponent(),
+            ast::PhasePlayer::Each | ast::PhasePlayer::Turn => return Err(unsupported(path)),
+        };
+        let phase = match phase.which {
+            ast::SubscribedPhase::Main => Phase::Main,
+            ast::SubscribedPhase::End => Phase::End,
+        };
+        let parent = self.scope;
+        let saved = self.local_bindings();
+        self.scope = self.card_allocator.scope(path)?;
+        let binding = Binding::new(self.allocator.id(path)?, self.scope);
+        let body = self.steps(&value.steps, &format!("{path}/delayed/do"), span, source);
+        self.scope = parent;
+        self.restore_bindings(saved);
+        let action = Action::Delay {
+            trigger: TriggerSpec {
+                active_zones: vec![],
+                on: TriggerCondition::Event {
+                    pattern: EventPattern::Phase {
+                        binding,
+                        predicate: phase_predicate(binding, phase, Some(player)),
+                    },
+                },
+                view: EventSnapshotPolicy::AfterEntry,
+                aggregation: TriggerAggregation::PerFact {},
+                limit: None,
+            },
+            body: body?,
+            captures: vec![],
+            lifetime: DelayedLifetime::Once {},
+            source: source.clone(),
         };
         if !delayed_ir::valid(&action) {
             return Err(unsupported(path));
@@ -91,7 +149,7 @@ impl BodyContext<'_> {
             body: body?,
             captures,
             lifetime: DelayedLifetime::Until {
-                duration: Box::new(super::numeric::duration(Some(&value.until), path)?),
+                duration: Box::new(super::numeric::duration(value.until.as_ref(), path)?),
             },
             source: source.clone(),
         })
@@ -123,7 +181,7 @@ impl BodyContext<'_> {
             body: body?,
             captures: vec![],
             lifetime: DelayedLifetime::Until {
-                duration: Box::new(super::numeric::duration(Some(&value.until), path)?),
+                duration: Box::new(super::numeric::duration(value.until.as_ref(), path)?),
             },
             source: source.clone(),
         })
@@ -200,7 +258,7 @@ impl BodyContext<'_> {
             body: body?,
             captures: vec![],
             lifetime: DelayedLifetime::Until {
-                duration: Box::new(super::numeric::duration(Some(&value.until), path)?),
+                duration: Box::new(super::numeric::duration(value.until.as_ref(), path)?),
             },
             source: source.clone(),
         })

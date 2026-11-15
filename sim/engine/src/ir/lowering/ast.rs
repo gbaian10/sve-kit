@@ -1369,6 +1369,7 @@ pub(super) struct CostModifier {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Playing {
+    Follow { r#in: FollowName },
     Affected(AffectedCondition),
     Union { any_of: Vec<PlayingQuery> },
     Query(PlayingQuery),
@@ -2020,8 +2021,24 @@ pub(super) enum LeaderSide {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CapacityQuery {
+    pub who: SelfPlayer,
+    pub zone: CapacityZone,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CapacityZone {
+    Field,
+    Ex,
+}
+
+#[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Number {
+    ZoneFree {
+        zone_free: CapacityQuery,
+    },
     Dice {
         dice: String,
     },
@@ -4102,9 +4119,24 @@ pub(super) struct Dice {
 #[serde(deny_unknown_fields)]
 pub(super) struct Repeat {
     #[serde(rename = "n")]
-    pub times: u64,
+    pub times: Option<u64>,
+    pub until: Option<Condition>,
+    pub r#while: Option<Condition>,
+    pub check: Option<RepeatCheck>,
+    pub collect: Option<RepeatCollect>,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RepeatCheck {
+    Before,
+    After,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RepeatCollect {
+    pub receipts: String,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -4172,13 +4204,16 @@ pub(super) struct Delayed {
     pub on: DelayedOn,
     #[serde(rename = "do")]
     pub steps: Vec<Step>,
-    pub until: Until,
+    pub until: Option<Until>,
     #[serde(default)]
     pub next_only: bool,
 }
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum DelayedOn {
+    Phase {
+        phase: PhaseSubscriptionPayload,
+    },
     Moved {
         moved: DelayedMove,
     },

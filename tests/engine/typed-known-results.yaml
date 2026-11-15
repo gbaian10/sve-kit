@@ -30,20 +30,10 @@ known:
     error: "legacy-state (#2008)"
     reason: "no authored program: BP01-001"
   - question: "card-BP01-056"
-    scenario: "原 EX 0"
-    status: unsupported
-    error: "unadmitted BP01-056 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-056/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP01-056"
-    scenario: "原 EX 3"
-    status: unsupported
-    error: "unadmitted BP01-056 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-056/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP01-056"
     scenario: "原 EX 5"
-    status: unsupported
-    error: "unadmitted BP01-056 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-056/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "interface: full EX resolves without an empty material question (#2008)"
+    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.resolution; after-decision-1 omniscient awaiting"
   - question: "card-BP01-170"
     scenario: "[fable] A 結束階段捨光の道筋 → 抽 1 → 再捨 1"
     status: fail
@@ -1091,9 +1081,9 @@ known:
     reason: "typed runner: choose-pending at TriggerQuota"
   - question: "rule-10.7-01"
     scenario: "B 神秘の獲得 在對手回合以クイック打出：對手的結束階段不誘發，自己的下一個結束階段誘發並消滅整個 EX 區"
-    status: unsupported
-    error: "unadmitted BP01-056 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-056/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "interface: delayed resolution referee events differ from the exam (#2008)"
+    reason: "after-decision-7 omniscient events"
   - question: "rule-10.7.2.1-01"
     scenario: "同能力待機 1 次"
     status: unsupported
@@ -1149,21 +1139,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-2 assert semantic_state.pending_triggers (#2008)"
     reason: "after-decision-2 omniscient assert semantic_state.pending_triggers"
-  - question: "rule-10.7.5-01"
-    scenario: "原有金幣 0"
-    status: unsupported
-    error: "unadmitted BP01-056 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-056/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-10.7.5-01"
-    scenario: "原有金幣 1"
-    status: unsupported
-    error: "unadmitted BP01-056 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-056/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-10.7.5-01"
-    scenario: "原有金幣 2"
-    status: unsupported
-    error: "unadmitted BP01-056 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP01-056/0, holder s generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "rule-10.9-01"
     scenario: "A 先「+2」後「1にする」→ 1/1"
     status: unsupported

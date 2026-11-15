@@ -1,4 +1,5 @@
 use super::tokens::PaidX;
+use crate::ir::repeated_moves as ir_repeated_moves;
 use crate::ir::{AbilityId, InstructionId, ScopeId, WellFormedCardProgram};
 mod plan;
 pub(crate) use plan::{AdmittedCard, CandidateAdmission};
@@ -731,7 +732,13 @@ fn check_program(
             Node::Control {
                 control: control @ Control::Repeat { .. },
             } => {
-                let (body, _) = ir_dice::repeat(control).ok_or_else(|| unsupported("repeat"))?;
+                let body = if let Some((body, _)) = ir_dice::repeat(control) {
+                    body
+                } else {
+                    ir_repeated_moves::projection(control)
+                        .ok_or_else(|| unsupported("repeat"))?
+                        .body
+                };
                 check_program(body, source, origin, reads, x)?;
             }
             Node::Control {
@@ -894,6 +901,21 @@ fn supported(code: &str) -> bool {
             | "control.repeat"
             | "shape.RepeatBody.Program"
             | "shape.Termination.Count"
+            | "shape.Termination.Until"
+            | "shape.Termination.While"
+            | "internal.IterationCheck.AfterIteration"
+            | "shape.ReceiptExport.Move"
+            | "control.repeat.export"
+            | "shape.NatRead.ZoneCapacity"
+            | "read.zone-capacity"
+            | "internal.CapacityZone.Ex"
+            | "internal.CapacityZone.Field"
+            | "internal.CapacityProperty.Free"
+            | "internal.CapacityProperty.Capacity"
+            | "shape.Selector.MoveAfterAll"
+            | "receipt.move-after-all"
+            | "shape.MovementReceiptList.Move"
+            | "internal.GenerationDeduplication.ByObjectAndGeneration"
             | "internal.IterationCheck.BeforeIteration"
             | "shape.IntFrozen.PaidMaterialActs"
             | "read.receipt.paid-material-acts"

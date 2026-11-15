@@ -65,6 +65,7 @@ mod drive;
 mod duration;
 mod earth;
 mod event_reads;
+mod repeated_moves;
 pub(in crate::game) use card::ability_restrictions::AbilityLock;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
@@ -645,6 +646,7 @@ pub(super) struct Execution {
     spell: bool,
     field_entry: bool,
     play_origin: Option<ZoneKind>,
+    play_origin_object: Option<ObjectRef>,
     card_payment: Option<(FaceId, ReceiptId)>,
     play_counts: BTreeMap<u32, (Nat, Nat)>,
     ward_entries: Vec<(ObjectRef, bool)>,
@@ -655,6 +657,7 @@ pub(super) struct Execution {
     procedures: Vec<player_stages::ProcedureLocals>,
     /// Player-event journal position when this execution was created.
     began: u64,
+    repeats: repeated_moves::State,
 }
 
 #[expect(
@@ -808,6 +811,7 @@ impl Game {
                     .collect(),
                 slots: BTreeMap::new(),
                 procedures: Vec::new(),
+                repeats: repeated_moves::State::default(),
                 receipts: BTreeMap::new(),
                 cost_materials: BTreeMap::new(),
                 hand_cost_groups: BTreeMap::new(),
@@ -832,6 +836,7 @@ impl Game {
                 spell: false,
                 field_entry: false,
                 play_origin: None,
+                play_origin_object: None,
                 card_payment: None,
                 play_counts: BTreeMap::new(),
                 ward_entries: Vec::new(),
@@ -1448,7 +1453,7 @@ impl Game {
                 } => self.internal_player_stage(execution, &control)?,
                 Node::Control {
                     control: control @ Control::Repeat { .. },
-                } => Self::internal_repeat(execution, control)?,
+                } => self.internal_repeat_control(execution, control)?,
                 Node::Control {
                     control: Control::Sequence { body },
                 } => execution.prepend(body),

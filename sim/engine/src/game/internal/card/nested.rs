@@ -108,6 +108,7 @@ impl Game {
             _ => return Err(unsupported("card play origin")),
         });
         execution.play_origin_player = Some(player_id(&object.controller)?);
+        execution.play_origin_object = Some(execution.reference(self, holder)?);
         execution.cost_override = nested
             .as_ref()
             .and_then(|entry| entry.cost_override.clone());

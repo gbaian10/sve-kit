@@ -90,6 +90,25 @@ pub(crate) fn transfer(
     }
 }
 
+pub(crate) fn phase(trigger: &super::TriggerSpec) -> Option<(super::Phase, PlayerRef)> {
+    let TriggerCondition::Event {
+        pattern: EventPattern::Phase { binding, predicate },
+    } = &trigger.on
+    else {
+        return None;
+    };
+    for phase in [super::Phase::Main, super::Phase::End] {
+        for player in [PlayerRef::Controller {}, super::events::timing::opponent()] {
+            if *predicate
+                == super::events::timing::phase_predicate(*binding, phase, Some(player.clone()))
+            {
+                return Some((phase, player));
+            }
+        }
+    }
+    None
+}
+
 pub(crate) fn valid(action: &Action) -> bool {
     let Action::Delay {
         trigger,
@@ -101,7 +120,9 @@ pub(crate) fn valid(action: &Action) -> bool {
     else {
         return false;
     };
-    let lifetime_ok = matches!(lifetime, DelayedLifetime::Until { duration }
+    let phase_once = phase(trigger).is_some() && matches!(lifetime, DelayedLifetime::Once {});
+    let lifetime_ok = phase_once
+        || matches!(lifetime, DelayedLifetime::Until { duration }
         if **duration == Duration { end: DurationEnd::CurrentTurnEnd {}, anchor: TimeAnchor::Installation {}, usage: None, intervals: vec![] });
     if !lifetime_ok
         || !trigger.active_zones.is_empty()
@@ -111,6 +132,17 @@ pub(crate) fn valid(action: &Action) -> bool {
         return false;
     }
     let general_body = match (&trigger.on, captures.as_slice()) {
+        (
+            TriggerCondition::Event {
+                pattern: EventPattern::Phase { .. },
+            },
+            [],
+        ) if phase_once
+            && trigger.view == EventSnapshotPolicy::AfterEntry
+            && trigger.limit.is_none() =>
+        {
+            true
+        }
         (
             TriggerCondition::Event {
                 pattern: EventPattern::LeaveField { binding, predicate },

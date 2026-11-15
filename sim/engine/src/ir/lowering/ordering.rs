@@ -630,6 +630,16 @@ impl BodyContext<'_> {
                         }],
                     }
                 }
+                ast::BanishAction::Objects(objects)
+                    if let ast::ObjectAction::Short(ast::Objects::Zone(query))
+                    | ast::ObjectAction::Long {
+                        r#ref: ast::Objects::Zone(query),
+                        result: None,
+                    } = objects.as_ref()
+                        && matches!(query.zone, ast::Zone::Ex) =>
+                {
+                    self.zone_objects(query, ZoneKind::Ex, path)?
+                }
                 ast::BanishAction::Objects(objects) => self.action_objects(objects, path)?,
             },
         })
