@@ -9,6 +9,7 @@ import { useToast } from "../../components/ui/toast-context"
 import {
   loadComprehensiveRules,
   type LocalizedNode,
+  type LocalizedText,
   localizeNode,
   originalNode,
   type RulesBundle,
@@ -73,7 +74,14 @@ function useHashTarget(ready: boolean) {
   const { hash } = useLocation()
   useEffect(() => {
     if (!ready || !hash) return
-    const element = document.getElementById(decodeURIComponent(hash.slice(1)))
+    let id: string
+    try {
+      id = decodeURIComponent(hash.slice(1))
+    } catch {
+      // A malformed escape ("#%") names no clause; leave the page as it is.
+      return
+    }
+    const element = document.getElementById(id)
     if (!element) return
     const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     element.scrollIntoView({ block: "start", behavior: reduce ? "auto" : "smooth" })
@@ -151,13 +159,15 @@ function RuleNodeView({
           </p>
         )}
         {view.text.text && (
-          <RuleText
-            text={view.text.text}
-            context={node.context}
-            className="mt-2 max-w-[66ch] text-15 text-text-1"
-          />
+          <div lang={lang(view.text.translated)}>
+            <RuleText
+              text={view.text.text}
+              context={node.context}
+              className="mt-2 max-w-[66ch] text-15 text-text-1"
+            />
+          </div>
         )}
-        {view.table && <RuleTable view={view} lang={lang} />}
+        {view.table && <RuleTable view={view} lang={lang} markPending={showPendingTag} />}
       </div>
     )
   }
@@ -191,16 +201,44 @@ function RuleNodeView({
   )
 }
 
+/** Marks one untranslated piece while some of the rules are translated. */
+function PendingMark() {
+  const { t } = useTranslation()
+  return (
+    <span className="ml-1.5 rounded-sm bg-surface-2 px-1 align-[0.1em] text-11 font-normal whitespace-nowrap text-text-3">
+      {t("rules.originalTag")}
+    </span>
+  )
+}
+
 function RuleTable({
   view,
   lang,
+  markPending,
 }: {
   readonly view: LocalizedNode
   readonly lang: (translated: boolean) => string | undefined
+  /** Partial translation: every untranslated header or cell carries its own mark. */
+  readonly markPending: boolean
 }) {
   if (!view.table) return null
   const { header, rows } = view.table
   const last = header.length - 1
+  const context = view.node.context
+  // The mark stays outside the lang="ja" span: it is UI text, not part of the original.
+  const piece = (cell: LocalizedText | undefined, rich = false) =>
+    cell?.text ? (
+      <>
+        <span lang={lang(cell.translated)}>
+          {rich ? (
+            <RuleText text={cell.text} context={context} className="inline [&>p]:inline" />
+          ) : (
+            cell.text
+          )}
+        </span>
+        {markPending && !cell.translated && <PendingMark />}
+      </>
+    ) : null
   return (
     <>
       {/* Phones get one card per row: name first, the short columns inline, the text below. */}
@@ -210,28 +248,18 @@ function RuleTable({
             key={rowIndex}
             className="rounded-card border border-border bg-surface-1 px-3 py-2 text-13"
           >
-            <p lang={lang(row[0]?.translated ?? true)} className="font-semibold text-text-1">
-              {row[0]?.text}
-            </p>
+            <p className="font-semibold text-text-1">{piece(row[0])}</p>
             <dl className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-text-2">
               {row.slice(1, last).map((cell, index) =>
                 cell.text ? (
                   <div key={index} className="flex gap-1">
-                    <dt lang={lang(header[index + 1]?.translated ?? true)}>
-                      {header[index + 1]?.text}
-                    </dt>
-                    <dd lang={lang(cell.translated)} className="text-text-1">
-                      {cell.text}
-                    </dd>
+                    <dt>{piece(header[index + 1])}</dt>
+                    <dd className="text-text-1">{piece(cell)}</dd>
                   </div>
                 ) : null,
               )}
             </dl>
-            {row[last]?.text && (
-              <div lang={lang(row[last].translated)} className="mt-1 text-text-1">
-                <RuleText text={row[last].text} context={view.node.context} />
-              </div>
-            )}
+            {row[last]?.text && <div className="mt-1 text-text-1">{piece(row[last], true)}</div>}
           </li>
         ))}
       </ul>
@@ -240,12 +268,8 @@ function RuleTable({
           <thead className="bg-surface-2 text-left text-text-2">
             <tr>
               {header.map((cell, index) => (
-                <th
-                  key={index}
-                  lang={lang(cell.translated)}
-                  className="px-2 py-1.5 font-semibold whitespace-nowrap"
-                >
-                  {cell.text}
+                <th key={index} className="px-2 py-1.5 font-semibold whitespace-nowrap">
+                  {piece(cell)}
                 </th>
               ))}
             </tr>
@@ -256,13 +280,12 @@ function RuleTable({
                 {row.map((cell, index) => (
                   <td
                     key={index}
-                    lang={lang(cell.translated)}
                     className={cn(
                       "px-2 py-1.5",
                       index === row.length - 1 ? "min-w-64" : "whitespace-nowrap",
                     )}
                   >
-                    <RuleText text={cell.text} context={view.node.context} />
+                    {piece(cell, true)}
                   </td>
                 ))}
               </tr>

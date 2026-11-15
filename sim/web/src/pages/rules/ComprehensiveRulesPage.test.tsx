@@ -37,7 +37,7 @@ const nodes: RuleNode[] = [
     depth: 3,
     text: "本文二。\n* 項目甲\n* 項目乙",
   },
-  { key: "B-1", context: "B-1", kind: "section", depth: 2, title: "B-1：附錄", text: "" },
+  { key: "B-1", context: "B-1", kind: "section", depth: 2, title: "B-1：附錄", text: "附錄說明。" },
   {
     key: "B-1:1.1.2",
     context: "B-1",
@@ -45,6 +45,15 @@ const nodes: RuleNode[] = [
     kind: "rule",
     depth: 5,
     text: "附錄本文（1.1.2）。",
+  },
+  {
+    key: "A:1",
+    context: "A",
+    kind: "block",
+    depth: 2,
+    title: "表名",
+    text: "",
+    table: { header: ["名", "職"], rows: [["甲", "乙"]] },
   },
 ]
 const bundle = (translations: RulesBundle["translations"] = new Map()): RulesBundle => ({
@@ -132,7 +141,7 @@ it("uses translations where present and tags the pieces still in Japanese", asyn
   )
   await renderRoutes(routes, { initialEntries: ["/rules"] })
   expect(
-    await screen.findByText("譯文準備中：已翻譯 2／6 條，其餘先顯示日文原文。"),
+    await screen.findByText("譯文準備中：已翻譯 2／7 條，其餘先顯示日文原文。"),
   ).toBeInTheDocument()
   const chapter = within(screen.getByRole("article")).getByRole("heading", { level: 2 })
   expect(within(chapter).getByText("第一章").closest("span[lang]")).toBeNull()
@@ -266,4 +275,58 @@ it("previews a cited clause on hover and focus", async () => {
   expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
   fireEvent.focus(link)
   expect(await screen.findByRole("tooltip")).toBeInTheDocument()
+})
+
+it("gives untranslated section bodies lang=ja in the Chinese and English views", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const section = await waitFor(() => {
+    const element = rule("B-1")
+    expect(element).not.toBeNull()
+    return element as HTMLElement
+  })
+  expect(within(section).getByText("附錄說明。").closest("[lang]")).toHaveAttribute("lang", "ja")
+})
+
+it("marks each untranslated table cell only while the rules are partly translated", async () => {
+  current.value = bundle(
+    new Map([["A:1", { title: "表", table: { header: ["名稱", null], rows: [["甲譯", null]] } }]]),
+  )
+  const view = await renderRoutes(routes, { initialEntries: ["/rules"] })
+  const table = await waitFor(() => {
+    const element = rule("A:1")
+    expect(element).not.toBeNull()
+    return element as HTMLElement
+  })
+  const desktop = within(table).getByRole("table")
+  const cell = within(desktop).getByText("乙").closest("td") as HTMLElement
+  expect(within(cell).getByText("原文")).toBeInTheDocument()
+  expect(within(cell).getByText("乙").closest("[lang]")).toHaveAttribute("lang", "ja")
+  expect(
+    within(within(desktop).getByText("職").closest("th") as HTMLElement).getByText("原文"),
+  ).toBeInTheDocument()
+  expect(
+    within(within(desktop).getByText("甲譯").closest("td") as HTMLElement).queryByText("原文"),
+  ).toBeNull()
+  // The phone card shows the text column without its header, so only the cell is marked.
+  const card = within(table).getByRole("listitem")
+  expect(within(card).getAllByText("原文")).toHaveLength(1)
+  view.unmount()
+
+  prefsStore.set({ uiLanguage: "ja" })
+  await renderRoutes(routes, { initialEntries: ["/rules"], language: "ja" })
+  const original = await waitFor(() => {
+    const element = rule("A:1")
+    expect(element).not.toBeNull()
+    return element as HTMLElement
+  })
+  expect(within(original).queryByText("原文")).toBeNull()
+})
+
+it("ignores a malformed hash instead of failing the page", async () => {
+  await renderRoutes(routes, { initialEntries: ["/rules#%"] })
+  await waitFor(() => {
+    expect(rule("1.1.1")).not.toBeNull()
+  })
+  expect(screen.getByRole("article")).toBeInTheDocument()
+  expect(scrollIntoView).not.toHaveBeenCalled()
 })

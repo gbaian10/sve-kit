@@ -1,7 +1,7 @@
 import type { RuleNode, TranslationEntry } from "./model"
 
 /** One displayed piece: the translation when there is one, otherwise the Japanese original. */
-interface LocalizedText {
+export interface LocalizedText {
   readonly text: string
   readonly translated: boolean
 }
