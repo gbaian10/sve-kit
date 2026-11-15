@@ -143,6 +143,8 @@ interface RuleRef {
 ```
 
 step 只有精確卡文對應才填；不公開 instruction path。能力授予者與持有者分開，失知後 holder=null。
+沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。face=null 時的 line 只是未定位資訊，不能當成精確文字索引或推定面 0。
+傷害替換描述的 Cap 保留 threshold 與 replacement：每次涵蓋傷害至少達 threshold 時，改成 replacement；兩者皆為 checked Nat，不近似成固定加減量。
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
 strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表示任意答案合法，也不表示官方核可。

@@ -103,6 +103,7 @@ impl BattleReferences {
 
     pub(super) fn printing(&self, catalog: &Catalog, number: &str) -> Result<&str> {
         self.validate_catalog(catalog)?;
+        // bind_face guarantees that every face of a native card shares one printing.
         self.faces
             .get(number)
             .and_then(|faces| faces.values().next())
