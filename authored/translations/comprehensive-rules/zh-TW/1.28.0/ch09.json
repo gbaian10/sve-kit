@@ -1,0 +1,108 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules-translation",
+  "version": "1.28.0",
+  "language": "zh-TW",
+  "entries": {
+    "9": {
+      "title": "特殊卡片類的相關處理",
+      "source_sha256": "836c017d392c4075568612acebb87e1619eeaa8c3dfba745dada048238cce8c4"
+    },
+    "9.1": {
+      "title": "Token",
+      "source_sha256": "8a74d713a4f99d3ae4596cfed6d5304dd3432e527ba8b789b8f3e1e88e25fad7"
+    },
+    "9.1.1": {
+      "text": "遊戲中，有時會在某個區域建立視同卡片處理的「Token」。",
+      "source_sha256": "62400e2b3951038cc21832f12ad01c5279230cb526968c4fd6796477de0e72e5"
+    },
+    "9.1.1.1": {
+      "text": "Token不是卡片，但視同卡片處理，計入其所在區域的卡片張數，並受到適用於卡片的效果的適用。",
+      "source_sha256": "a5bd4cba81bb460891015e38dca6440c4ec01a0c4b5ff873ec286afb28483f2f"
+    },
+    "9.1.2": {
+      "text": "在某個區域「建立」Token，是指使該區域處於存在所指定的Token的狀態。",
+      "source_sha256": "4d72b0b59f273c8846237e21196046efa9dd195e7e431e16482a85b3b8c18a0a"
+    },
+    "9.1.2.1": {
+      "text": "所建立的Token的所有者與操控者，是建立該Token的區域所屬的玩家。",
+      "source_sha256": "2d0f4f6fe1b96e908ddf8c452389d067487c3585b960a9478c4d321ece43059f"
+    },
+    "9.1.2.2": {
+      "text": "在某個區域建立Token時，該Token視為被放置到該區域。",
+      "source_sha256": "ccb77e6e38034b29a4f7e32c79c337852461233cd3fe3330ce5b24a26352e590"
+    },
+    "9.1.2.3": {
+      "text": "該Token具有何種資訊，由該Token的卡片名稱決定。資訊的詳細內容請參照卷末的附錄。",
+      "source_sha256": "c7c47134160263bf08f2d4f07f481fc554ddb2395e37a7591aa991bd9d2cb768"
+    },
+    "9.1.3": {
+      "text": "「消除」某個Token，是指將該Token從目前所在的區域移除，使其處於不存在於該處的狀態。",
+      "source_sha256": "43f2e9f76828fcffefbb09d79c69ded84930387de36d237d5357fb477d7ed0eb"
+    },
+    "9.1.3.1": {
+      "text": "Token在某個區域被消除時，視為離開了該區域。",
+      "source_sha256": "cea2b30ba26a8c146c1e6fb08a65d305db7979d2d64d96d2a7830e152e557771"
+    },
+    "9.1.4": {
+      "text": "Token可以存在的區域有所限制。",
+      "source_sha256": "0e851a9cf5ce563f3cc0ce9a4527b6f36f8889a5af47640db44742c15f074cce"
+    },
+    "9.1.4.1": {
+      "text": "種類為從者或護符的Token，只能存在於EX區、戰場或結算區。",
+      "source_sha256": "c73855c509e4bc8611a8eb0ef1d00a879b6f45b78928b403b19c3621d4580ce3"
+    },
+    "9.1.4.2": {
+      "text": "種類為紋章的Token，只能存在於EX區。",
+      "source_sha256": "fb7110602d08bb08f7b4ac850bfea71c18216bc6eb53293dbf525f9f43c0de59"
+    },
+    "9.1.4.3": {
+      "text": "種類為法術的Token，只能存在於EX區或結算區。",
+      "source_sha256": "d4f16d36fea573d9cb35a96bd1149d9b8d76d4449fd1670a0db7044a87832f70"
+    },
+    "9.1.4.4": {
+      "text": "某個Token移動到其可以存在的區域以外的區域時，在進行該移動之後，立即在該區域被消除。此處理不等待檢查時點；若是在某個效果的途中進行移動，則在繼續進行該移動的後續之前執行。",
+      "source_sha256": "32ecd4a69f69ed9690c9e3a042b03ca04d9c7fd11b4dad24819964f0f41a7cab"
+    },
+    "9.1.5": {
+      "text": "種類為紋章的Token遵循下列規則。",
+      "source_sha256": "a629da4e47ed490701593935d8bfd1d45e503b0a2dd9c2a2f3d0ea63ae8c16bc"
+    },
+    "9.1.5.1": {
+      "text": "某名玩家的EX區中，同名的紋章最多只能存在1張。",
+      "source_sha256": "3055d7894ae894b96b74c5ddc2a5f7c5094ca5599b4396cfb00571a3128492c8"
+    },
+    "9.1.5.1.1": {
+      "text": "要在某個EX區建立與該處已有的紋章同名的紋章時，不執行該建立。",
+      "source_sha256": "788080e7e4958f65f2f9eb11c7566e8a9b4b9e7852987e4f812c41a2b4762e53"
+    },
+    "9.1.5.1.2": {
+      "text": "要在同一個EX區同時建立多個同名的紋章時，只建立其中1個，其餘不進行建立。",
+      "source_sha256": "79f0c973ebd1755c0cbf8ea1bd9d99d94018febd99fb231c6626caf6f85a9596"
+    },
+    "9.1.5.1.3": {
+      "text": "要從其他EX區將與某個EX區中已有的紋章同名的紋章移動到該EX區時，其不會移動。",
+      "source_sha256": "fb87c63190ae22cf314a0292052a158c75a47cc768a827db0bb8ad51c1926cf1"
+    },
+    "9.1.6": {
+      "text": "遊戲中用到Token時，請經雙方玩家同意，使用雙方玩家都能明確理解、且能與其他通常的卡片區分的卡片狀物品。",
+      "source_sha256": "2ea33864aac8d0f67239701f8a9344f40b6e612c0eded6bc5021035d2aab24de"
+    },
+    "9.2": {
+      "title": "進階卡",
+      "source_sha256": "2eaa958b25f6f48b9c8481bedf666d35a4496aa1387dc71f24aa2cb204970a88"
+    },
+    "9.2.1": {
+      "text": "特殊種類為「進階」的卡片，在區域移動方面遵循下列規則。",
+      "source_sha256": "a344f263145165c19ad7f8d90a9ae49c7330a299a9b1c91f65db19c5712b2e73"
+    },
+    "9.2.1.1": {
+      "text": "以下將特殊種類為「進階」的卡片稱為「進階卡」。",
+      "source_sha256": "f63c3f35a3063f273b381e004be423aa590c5b9f28e4a18ff8999dad19e9c81c"
+    },
+    "9.2.2": {
+      "text": "進行某個處理時，進階卡移動到進化牌堆放置區、戰場、EX區、結算區以外的區域時，在該移動之後、繼續進行該處理的後續之前，立即將該進階卡從移動目的地的區域以正面朝上放置到進化牌堆。",
+      "source_sha256": "52c6b6bbf87d3da0bd838025e8dd3a6d7a7b351935f578bdb31e72442865ae6a"
+    }
+  }
+}

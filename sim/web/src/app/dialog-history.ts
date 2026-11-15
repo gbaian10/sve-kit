@@ -59,11 +59,22 @@ export function useDialogHistory(id: string, open: boolean, onClose: () => void)
         typeof location.state === "object" && location.state !== null
           ? (location.state as Record<string, unknown>)
           : {}
-      void navigate(location.pathname + location.search, {
+      // Same URL including the fragment: opening a dialog must not move a page that reacts to its hash.
+      void navigate(location.pathname + location.search + location.hash, {
         state: { ...base, dialog: id, dialogs: [...openIds, id] },
       })
     }
-  }, [open, shown, openIds, id, navigate, location.pathname, location.search, location.state])
+  }, [
+    open,
+    shown,
+    openIds,
+    id,
+    navigate,
+    location.pathname,
+    location.search,
+    location.hash,
+    location.state,
+  ])
 
   // Close from the UI: drop the pushed entry too, so history does not keep a dead "dialog open" state.
   return () => {

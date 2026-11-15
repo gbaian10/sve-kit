@@ -1,0 +1,264 @@
+{
+  "format": 1,
+  "kind": "comprehensive-rules-translation",
+  "version": "1.28.0",
+  "language": "zh-TW",
+  "entries": {
+    "2": {
+      "title": "卡片資訊",
+      "source_sha256": "83d11e6ec7682be413dabd5e9ca17ed2dc880abe167ef562f101f83ee21fabcf"
+    },
+    "2.1": {
+      "title": "卡片名稱",
+      "source_sha256": "e31a0441550b455bc74b2159151107ec368655fec8824a81d5953c56ae632b21"
+    },
+    "2.1.1": {
+      "text": "該卡片具有的固有名稱。",
+      "source_sha256": "5f3e1ccfe9653442381577b5411fd41601a16b5e524bb0f74c3bf5f4b7aaf15f"
+    },
+    "2.1.2": {
+      "text": "規則或卡文中有「『（名稱）』」這樣的記載時，依文脈，其意為卡片名稱是該（名稱）的卡片，或卡片名稱的一部分含有該（名稱）的卡片。",
+      "source_sha256": "b0bf860ed7cb60565551a64a22774b8f2513fd52182db62911ab3498bb75dbec"
+    },
+    "2.1.2.1": {
+      "text": "依此參照卡片名稱的一部分時，不會參照到合作名稱（2.14）的一部分。",
+      "source_sha256": "4132587d8966572aefcc1cd1c0e1ba33a6a8fef6ca902a366a0328f13f0db52d"
+    },
+    "2.2": {
+      "title": "職業",
+      "source_sha256": "e0ecfc94d6e20959555376a7dfb8dfe53322e0ded80271b64cc5704b45b85c62"
+    },
+    "2.2.1": {
+      "text": "該卡片所屬的職業。",
+      "source_sha256": "b6bda266aecf525de410c3fda560faa6fa89dc3661e9854932e40f505aeb98bb"
+    },
+    "2.2.2": {
+      "text": "職業以圖示記載。\n{中立}中立\n{精靈}精靈\n{皇家護衛}皇家護衛\n{巫師}巫師\n{龍族}龍族\n{夜魔}夜魔\n{主教}主教",
+      "source_sha256": "7245b12f647676b31b566c0255c64d4166d9aac28f4261192578c7d6c323ab5e"
+    },
+    "2.2.3": {
+      "text": "職業有時會被牌堆構築或卡片參照。",
+      "source_sha256": "a9c3a256cbbc12b36db771f2d16fc09570aa2a997ac7100da872ed9a55486035"
+    },
+    "2.3": {
+      "title": "種類",
+      "source_sha256": "6d007394fa48e73174b30172bce20edc5ca480d7b1bff9bf11fc363962c8f734"
+    },
+    "2.3.1": {
+      "text": "表示該卡片種類的資訊。",
+      "source_sha256": "a19ea7109d8d132771b23f9352a22ca4ff8dbb5fa9f41d82b86b91190b3a9a82"
+    },
+    "2.3.2": {
+      "text": "種類為「主戰者」「從者」「護符」「法術」「紋章」其中之一。",
+      "source_sha256": "a8944e78430547ce0c959886f6dc395d54ce169b9d303cf77e760b2a68ef644c"
+    },
+    "2.3.2.1": {
+      "text": "主戰者在卡片上記載為「Leader」。",
+      "source_sha256": "cbbb4e8212ee63b2827bd7e0b43edcf95aa599bd6189f24a276978915780aa56"
+    },
+    "2.3.2.2": {
+      "text": "從者在卡片上記載為「Follower」。",
+      "source_sha256": "8cb3bdf29f2638bf11f1cbe9185a24d23d1df19157a145a6937347e136851916"
+    },
+    "2.3.2.3": {
+      "text": "護符在卡片上記載為「Amulet」。",
+      "source_sha256": "fb3b3c3a6f20287cd0ddee85dbcf6ccb6705148a8945e5210a1b1c3065f4e5be"
+    },
+    "2.3.2.4": {
+      "text": "法術在卡片上記載為「Spell」。",
+      "source_sha256": "adbef00c8e94c5d63ba7ca4aa121c5676aa7902c412ee6c79bf976b8e74874fc"
+    },
+    "2.3.2.5": {
+      "text": "紋章在卡片上記載為「Crest」。",
+      "source_sha256": "403dcd5345b9ddfc8959ebb41469391286e7c61a1f7a1c48b6b12bf4ab24d6e3"
+    },
+    "2.3.3": {
+      "text": "部分卡片具有特殊種類。",
+      "source_sha256": "6b2c990b9f83b2dd3df69cdc206607b907e91b889c58bb7fb18f7dd37866e607"
+    },
+    "2.3.3.1": {
+      "text": "特殊種類「進化」在卡片上記載為「EVOLVE」。",
+      "source_sha256": "d51c0749f0f18828495c9ba269f4db4254d2ffd4799ad6792a9da9cfa2f88f20"
+    },
+    "2.3.3.2": {
+      "text": "特殊種類「進階」在卡片上記載為「ADVANCE」。",
+      "source_sha256": "b87fffda1abb973c65e783eccf783d2855954c64529fffc2c9e9767f144cf945"
+    },
+    "2.3.4": {
+      "text": "規則、能力或效果僅參照種類的名稱時，是參照具有該種類的卡片。",
+      "source_sha256": "a289351f661fa241d0382992c91f6a29184241d26b7a779d6b6cd0241dc93b67"
+    },
+    "2.4": {
+      "title": "類型",
+      "source_sha256": "5b522261e71a027ec50a7de13756a6ea340a7062a3a5d927e79e6a0d4e729049"
+    },
+    "2.4.1": {
+      "text": "表示該卡片所具特徵的詞語。",
+      "source_sha256": "09013a4f915627ac5aa826203cabd1ff252cc68df3eeda6a816069383ff9de88"
+    },
+    "2.4.2": {
+      "text": "類型在規則上沒有意義，但有時會被其他卡片參照。",
+      "source_sha256": "0a91cc757e66bff1ae235bf6cd9518efe5249beae19a0d15e7239dfb12574333"
+    },
+    "2.5": {
+      "title": "消費",
+      "source_sha256": "dedcdd027dd686417fcfc19a7c4be8c5b8d1f6f913841c32c31ceb5aed829954"
+    },
+    "2.5.1": {
+      "text": "使用該卡片時必須支付的PP數量（10.4.3）。",
+      "source_sha256": "26289a4fb1a2c78f1fe57810c34c287971241d1bde76ad4b01ab9cb51598cd5f"
+    },
+    "2.6": {
+      "title": "卡文",
+      "source_sha256": "23e9c726d01bf2772c65c698dbc2061a48ba377d03767cdaf3247dde0135d261"
+    },
+    "2.6.1": {
+      "text": "表示該卡片所具固有處理的資訊。",
+      "source_sha256": "90cc71f34d97dbde1966f71589145cf6b52c816d72d8a0a6925439391a9e1cdc"
+    },
+    "2.6.2": {
+      "text": "卡文中有時會有以（）（圓括號）括起、詳細說明能力的文字。這稱為提示文。提示文是卡文的一部分，但僅具有解說能力的作用，不影響遊戲。",
+      "source_sha256": "512b3592359c5a0a1e32f68821a4f6684efb56cda7de4c537af6835e77fb77da"
+    },
+    "2.7": {
+      "title": "攻擊力",
+      "source_sha256": "bb56579b6ab9a58d4ff3a8bfb7121c1d8634ffd7f54e36b67c0b7f3f23ec0668"
+    },
+    "2.7.1": {
+      "text": "該卡片攻擊時，作為其給予的傷害之基準的值。",
+      "source_sha256": "32a3a1b2923b272e82e666e0324d4553f325ddc67ec1778af4a2a33cacebb9cd"
+    },
+    "2.7.1.1": {
+      "text": "在卡文中，「攻擊力」有時以{攻擊力}圖示表示。",
+      "source_sha256": "8b473e154700ea57d9780116f194ba0c44fe96817d12b08aa877d68e9ac05239"
+    },
+    "2.8": {
+      "title": "生命值",
+      "source_sha256": "662d28fb7b9051c5810bf0fff899cf01d9734d3fdae225eadd6a91649563c2c3"
+    },
+    "2.8.1": {
+      "text": "要以傷害破壞該卡片時，必須給予的傷害量。",
+      "source_sha256": "8ac5c3bdc673417bb2d4fafce64de202882362be2709bd6e9cb7d7dc71806d3e"
+    },
+    "2.8.1.1": {
+      "text": "在卡文中，「生命值」有時以{生命值}圖示表示。",
+      "source_sha256": "aef1c3bb7957f2a6e0ddd0029e01f294c0c95e87a5b2c0338f9674f5546249d1"
+    },
+    "2.8.2": {
+      "text": "從者或主戰者受到傷害時，該卡片的生命值的值會減少（5.14.1）。",
+      "source_sha256": "7781fe45fafa08da5ff10aa9cd735a0660554bb3eb470ee1361d7d4b96236112"
+    },
+    "2.8.3": {
+      "text": "主戰者上沒有記載，但主戰者也具有生命值。",
+      "source_sha256": "17ab92467aecada9a5478856f25a2ff7860598a29a05add209c1a07e48ee4b1b"
+    },
+    "2.8.3.1": {
+      "text": "除非另有記載，主戰者的生命值為20。",
+      "source_sha256": "b03e9eca94ccc574b5c03f3a5a5256bacb1d37e134c8a035b124615ae964ad7c"
+    },
+    "2.9": {
+      "title": "Token資訊",
+      "source_sha256": "1b0b42c7669f6bf61c2aeed78d3ad9967e9d6ed57c13495ab0e2bd59488fcb84"
+    },
+    "2.9.1": {
+      "text": "該卡片的效果所參照的Token的資訊。",
+      "source_sha256": "416e029d3b9400c517204426696319bc1eeb4dcf7723736fd0fc1c452751e7a3"
+    },
+    "2.9.2": {
+      "text": "這是為了讓玩家參照Token的資訊而記載的，在規則上沒有意義。",
+      "source_sha256": "a86179b2fb3accf754c04e8525a8b129a25d1f1f930261670f6a99fb9bbf3e32"
+    },
+    "2.10": {
+      "title": "插畫",
+      "source_sha256": "1db1ada21baed41e47d33f62199dc5376645f520f735f9d54a736484dfc21940"
+    },
+    "2.10.1": {
+      "text": "表現該卡片內容意象的插畫。",
+      "source_sha256": "af238d5d840288b8a259dd7c1a0ecbb2c6d8da817794a5dd153303dc7afebaef"
+    },
+    "2.10.2": {
+      "text": "插畫在遊戲上沒有特別的意義。",
+      "source_sha256": "cd89c0fa54ffedfa5ab097186d61a704d63e78433938fa84451c73f357115f9d"
+    },
+    "2.11": {
+      "title": "風味文字",
+      "source_sha256": "6a07f1a44e2ba193fb0b020efb04a37d242b87750ec3e0c2832f97e4491a7040"
+    },
+    "2.11.1": {
+      "text": "表現該卡片內容意象的文章。風味文字記載在卡片名稱上方以線條隔開的部分。",
+      "source_sha256": "5299cd4beab01bae195d9259bd1b44848b94f80fedb386c19285be955761ddf6"
+    },
+    "2.11.2": {
+      "text": "風味文字在遊戲上沒有特別的意義。",
+      "source_sha256": "d643f355015ebf7747b7a94873ab32bc18261cbb881b4977ddde8fa4dd88bd15"
+    },
+    "2.12": {
+      "title": "稀有度",
+      "source_sha256": "9ab53d302d37df9c34f1f75bde553c7349e57da02ae50857f47e28f33bd416ba"
+    },
+    "2.12.1": {
+      "text": "表示該卡片的稀有程度。",
+      "source_sha256": "3a2a7766508bd891be66bbfb85e854cbd6c92f0afbfe2e8d5da4a6a43e723d8d"
+    },
+    "2.12.2": {
+      "text": "稀有度在遊戲上沒有特別的意義。",
+      "source_sha256": "86a498667e531b7e0761fdcb5ba75be378a37f601b7f5638c99cce2f729ead89"
+    },
+    "2.13": {
+      "title": "附帶事項",
+      "source_sha256": "13552135b59645e5e7f22ed62beebcc43f07a7e9b6f6114273b68ff914ee18c7"
+    },
+    "2.13.1": {
+      "text": "該卡片的卡號、作品名、卡片的著作權標示等，上述內容以外的記載統稱為「附帶事項」。",
+      "source_sha256": "aa069acdd044814e685cb4c8bd28638a3a77d9bd593410cf5112e7b599818b8e"
+    },
+    "2.13.2": {
+      "text": "附帶資訊除下列例外以外，在遊戲上沒有特別的意義。",
+      "source_sha256": "bf72c5bca1834ef5aca609804b33fa85bbfeab5c42f105d8455e6358c6fe2293"
+    },
+    "2.13.2.1": {
+      "text": "作品名有時會在牌堆構築時被參照。",
+      "source_sha256": "2858c2fe1250e43b608006b14483d49e38e9cc9259305bd9cac7ced4755493ad"
+    },
+    "2.13.2.2": {
+      "text": "卡號有時會在區分雙面卡（2.15）的第1面與第2面時被參照。",
+      "source_sha256": "eb952ee670160bb69bf7a423481f6b43db672a0058973933f2ff6141198ac9c7"
+    },
+    "2.14": {
+      "title": "合作名稱",
+      "source_sha256": "d098531d1cb36274866735643ff88507fc2679aedee7a051f9b8a161fc3e3a99"
+    },
+    "2.14.1": {
+      "text": "部分卡片除了通常的卡片名稱以外，還具有作為別名的合作名稱。",
+      "source_sha256": "5bb48e3affb37e4bfdedee4707518ed7c4b944e639f9d0a527e83cef5c82dc5a"
+    },
+    "2.14.2": {
+      "text": "能力或效果以完整的卡片名稱參照某張卡片的合作名稱時，其參照的是具有該合作名稱的卡片的卡片名稱。",
+      "source_sha256": "9d42faa138e05cb091b5c2bb218a64470aeebe05090dbb8b417307444d692ea4"
+    },
+    "2.15": {
+      "title": "雙面卡",
+      "source_sha256": "2b16b2e9f4443b1cac6cd29ddd78802ccdacee8b885633e73be64de9854b5f19"
+    },
+    "2.15.1": {
+      "text": "部分卡片在卡片的兩面都具有資訊。這樣的卡片稱為「雙面卡」。",
+      "source_sha256": "f80f97395e0c01ca3e2523229474025cf6bf8c4aec8470d9ac4fe4f15a1fa7b7"
+    },
+    "2.15.2": {
+      "text": "雙面卡的各面中，有卡號的一面稱為第1面，另一面稱為第2面。",
+      "source_sha256": "77c9d8c1fab7df71df29c3101291f1ee2b18fae7d6cd35ea7d649f4ae2a9fc0f"
+    },
+    "2.15.2.1": {
+      "text": "位於戰場（4.4）、進化區（4.12）、進化牌堆放置區（4.6）以外的區域的雙面卡，視為具有其第1面的資訊。",
+      "source_sha256": "13b7f20643aa327d0916b2537d62a2210ad01be1bec613b858d373ff6d53cdbb"
+    },
+    "2.15.3": {
+      "text": "將雙面卡（2.15）放置到戰場或進化區時，以玩家看得見規則或效果所指定的那一面的方式放置。",
+      "source_sha256": "4fbbbe57855f1a79e7e6d59d88029e13180a5c7964588a73a182f95334311f5e"
+    },
+    "2.15.3.1": {
+      "text": "參照戰場或進化區的雙面卡的資訊時，參照玩家實際看得見的那一面的資訊。",
+      "source_sha256": "b4fa68a17ab716475aebf36a2ab80adca0de46a0087d883b3b7452f68d4329dc"
+    }
+  }
+}

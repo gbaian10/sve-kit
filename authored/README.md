@@ -10,6 +10,7 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `registry/source-correction/` — confirmed corrections and separately marked review candidates; raw observations remain unchanged
 - `rules/effects/` — effect data in the DSL defined by `../dsl/`
 - `rules/rulings/` — evidence-backed interpretations; see `../docs/adr/0009-rulings-evidence.md`
+- `rules/comprehensive/<region>/<version>/` — the official comprehensive rules parsed for the website's rules page, keyed by clause number; translations live in `translations/comprehensive-rules/`
 - `translations/glossary/<filing_key>/*.yaml` — current glossary concepts and editable current translations
 - `translations/flavor/<hash digit>.yaml` — whole-paragraph flavor translations keyed by the source text's SHA-256; see [flavor translation](../docs/schema/domains/flavor-translation.md)
 - `translations/errata/<filing_key>.yaml` — Japanese errata before/after translations paired by source URL, date and wording hash; see [errata translations](../docs/schema/domains/errata-translations.md)

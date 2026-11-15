@@ -16,6 +16,8 @@
     "scripts/engine/*.ts",
     // `fixture` builds test snapshots and is not shipped.
     "scripts/fixture/main.ts",
+    // `rules:stamp` fills comprehensive-rules translation hashes; a package-script CLI.
+    "scripts/rules/stamp.ts",
     // `screenshots` is a development-only CLI invoked by package scripts.
     "scripts/screenshots/main.ts",
   ],
@@ -33,6 +35,8 @@
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.
     "src/app/overflow-audit.ts",
+    // Translation source hashes: used by `rules:stamp` and the rules data test, never shipped.
+    "src/data/rules/source-hash.ts",
     // Test setup and fixtures are dev entries: analyze them in knip:dev, exclude them in knip:prod.
     "src/test-utils.tsx",
     "src/test-utils/**",

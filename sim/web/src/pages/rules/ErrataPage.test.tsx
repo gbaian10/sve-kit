@@ -16,7 +16,7 @@ afterEach(() => prefsStore.set(DEFAULT_PREFS))
 afterAll(() => vi.unstubAllGlobals())
 
 it("shows each errata card once using its basic printing", async () => {
-  await renderRoutes(routes, { initialEntries: ["/errata"] })
+  await renderRoutes(routes, { initialEntries: ["/rules/errata"] })
   await waitFor(
     () => {
       expect(screen.getAllByRole("article")).toHaveLength(2)
@@ -34,7 +34,7 @@ it("shows each errata card once using its basic printing", async () => {
 
 it("does not carry Japanese errata into the English edition", async () => {
   prefsStore.set({ cardEdition: "en" })
-  await renderRoutes(routes, { initialEntries: ["/errata"] })
+  await renderRoutes(routes, { initialEntries: ["/rules/errata"] })
   await screen.findByText("目前快照沒有勘誤卡。", {}, { timeout: 4000 })
   expect(screen.queryByRole("article")).not.toBeInTheDocument()
 })

@@ -29,6 +29,8 @@ describe("route table", () => {
     ["/sets/BP01", "查卡"],
     ["/settings", "帳號與設定"],
     ["/decks", "牌組"],
+    ["/rules", "綜合規則"],
+    ["/rules/errata", "官方勘誤卡一覽"],
     ["/nope/nothing", "找不到這一頁"],
   ])("%s renders the %s page inside the shell", async (path, heading) => {
     await renderRoutes(routes, { initialEntries: [path] })
@@ -49,6 +51,26 @@ describe("route table", () => {
       expect(router.state.location.search).toBe(search)
     })
     expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("查卡")
+  })
+
+  it.each([
+    ["/errata", "", ""],
+    ["/errata?ed=en#BP01-021", "?ed=en", "#BP01-021"],
+  ])("redirects the old errata URL %s to the rules errata tab", async (path, search, hash) => {
+    const { router } = await renderRoutes(routes, { initialEntries: [path] })
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/rules/errata")
+    })
+    expect(router.state.location.search).toBe(search)
+    expect(router.state.location.hash).toBe(hash)
+    expect(await screen.findByRole("heading", { level: 1 })).toHaveTextContent("官方勘誤卡一覽")
+    expect(screen.getByRole("link", { name: "勘誤" })).toHaveAttribute("aria-current", "page")
+  })
+
+  it("lights the rules tab in the primary navigation on both rules sections", async () => {
+    await renderRoutes(routes, { initialEntries: ["/rules/errata"] })
+    const current = await screen.findAllByRole("link", { name: "規則" })
+    expect(current.some((link) => link.getAttribute("aria-current") === "page")).toBe(true)
   })
 
   it("shows the card number and the provisional id on the card page", async () => {
