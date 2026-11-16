@@ -16,6 +16,8 @@ pub struct AbilityChoice {
     pub source_section: Option<String>,
     /// Current Observation capability of the effective holder.
     pub holder: Option<ObjectHandle>,
+    /// The captured provider must not be replaced by a later holder or grant.
+    pub source: Option<EffectSource>,
 }
 
 /// A rule-owned Quick action; Pass remains a separate None answer.
@@ -83,4 +85,6 @@ pub struct ReplacementChoice {
     pub line: Option<u64>,
     /// Current Observation capability of the captured provider.
     pub object: Option<ObjectHandle>,
+    /// Captured text provenance, observed without reconnecting a later provider.
+    pub source: Option<EffectSource>,
 }

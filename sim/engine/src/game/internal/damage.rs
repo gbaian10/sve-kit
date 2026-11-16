@@ -52,6 +52,7 @@ pub(super) struct DamageRun {
     facts: Vec<DamageOccurrence>,
     choices: Vec<DamageReplacement>,
     choice_links: BTreeMap<u64, super::observation::ObjectLink>,
+    choice_origins: Vec<Option<super::observation::EffectOrigin>>,
 }
 
 impl DamageRun {
@@ -61,12 +62,13 @@ impl DamageRun {
         actor: Viewer,
         options: &[ReplacementOption],
     ) -> Result<Vec<ReplacementChoice>> {
-        if options.len() != self.choices.len() {
+        if options.len() != self.choices.len() || options.len() != self.choice_origins.len() {
             return Err(invalid("inconsistent replacement choices"));
         }
         Ok(options
             .iter()
-            .map(|option| ReplacementChoice {
+            .zip(&self.choice_origins)
+            .map(|(option, origin)| ReplacementChoice {
                 handle: option.handle,
                 card: option.card.clone(),
                 name: option.name.clone(),
@@ -75,6 +77,9 @@ impl DamageRun {
                     .choice_links
                     .get(&option.handle)
                     .and_then(|link| link.observed(game, actor)),
+                source: origin
+                    .as_ref()
+                    .and_then(|origin| origin.observed(game, actor)),
             })
             .collect())
     }
@@ -203,6 +208,7 @@ impl Game {
                 facts: vec![],
                 choices: vec![],
                 choice_links: BTreeMap::new(),
+                choice_origins: vec![],
             },
             None,
         )
@@ -267,6 +273,10 @@ impl Game {
                 };
                 let options = self.damage_replacement_options(&replacements)?;
                 run.remaining.push((recipient, hit));
+                run.choice_origins = replacements
+                    .iter()
+                    .map(|choice| self.player_replacement_origin(&choice.reference))
+                    .collect::<Result<_>>()?;
                 run.choice_links = replacements
                     .iter()
                     .zip(0_u64..)

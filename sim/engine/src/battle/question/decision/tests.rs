@@ -85,3 +85,9 @@ mod partition;
 
 #[cfg(feature = "runner")]
 mod capacity;
+
+#[cfg(feature = "runner")]
+mod ability;
+
+#[cfg(feature = "runner")]
+mod replacement;

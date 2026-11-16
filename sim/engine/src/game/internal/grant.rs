@@ -614,6 +614,16 @@ impl Game {
         ability: &EffectiveAbility,
         perspective: Viewer,
     ) -> Result<Option<EffectSource>> {
+        Ok(self
+            .activation_text_origin(holder, ability)?
+            .observed(self, perspective))
+    }
+
+    pub(in crate::game::internal) fn activation_text_origin(
+        &self,
+        holder: &str,
+        ability: &EffectiveAbility,
+    ) -> Result<super::observation::EffectOrigin> {
         use super::observation::{EffectOrigin, SourceIdentity};
         let origin = if let Some(origin) = &ability.grant {
             self.granted_text_origin(holder, origin)?
@@ -630,12 +640,11 @@ impl Game {
             SourceIdentity::holder(self, holder, generation)
                 .and_then(|identity| record.printed(identity))
         };
-        Ok(origin
+        origin
             .ok_or_else(|| {
                 crate::EngineFailure::Invariant("effective ability has no text origin".into())
             })?
-            .require_owner()?
-            .observed(self, perspective))
+            .require_owner()
     }
 
     pub(in crate::game) fn internal_granted_keywords(

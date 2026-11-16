@@ -122,16 +122,27 @@ impl Candidates {
     }
 
     pub(super) fn lookup(&self, ids: &[OptionId]) -> result::Result<Vec<u64>, AnswerError> {
-        let mut seen = BTreeSet::new();
-        ids.iter()
-            .map(|id| {
-                if !seen.insert(id) {
-                    return Err(AnswerError);
-                }
-                self.coordinates.get(id).copied().ok_or(AnswerError)
-            })
-            .collect()
+        lookup(&self.coordinates, ids)
     }
+
+    pub(super) fn into_coordinates(self) -> BTreeMap<OptionId, u64> {
+        self.coordinates
+    }
+}
+
+pub(super) fn lookup(
+    coordinates: &BTreeMap<OptionId, u64>,
+    ids: &[OptionId],
+) -> result::Result<Vec<u64>, AnswerError> {
+    let mut seen = BTreeSet::new();
+    ids.iter()
+        .map(|id| {
+            if !seen.insert(id) {
+                return Err(AnswerError);
+            }
+            coordinates.get(id).copied().ok_or(AnswerError)
+        })
+        .collect()
 }
 
 pub(in crate::battle::question) fn details(
