@@ -70,6 +70,7 @@ export interface QueryState {
   readonly unlistedOnly: boolean
   /** Every printing across both regions belongs to the PR family and has a card number. */
   readonly prOnly: boolean
+  /** Card-level: no same_card digital link (matched by card name). */
   readonly sveOnly: boolean
   readonly errataOnly: boolean
   readonly restrictionsOnly: boolean
