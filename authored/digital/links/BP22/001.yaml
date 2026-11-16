@@ -227,51 +227,6 @@ records:
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。坐姿假翼女子兩面同圖；artifact 供給保留，職業改為巫師不影響改編身分。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
   - subject:
-      card_id: c:0f962864e66f55b6a93b11432e6f7213
-      face_id:
-      game: sv1
-      official_id: "810821100"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:99bd0476c0a8519c812ba1013eef5841
-          face_id: f:f27fac1ddbb45e7492799a0bf5c1a166
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:63ce32e4b31ead3388c14428c07ffbb00d298b0fd62d98bef7d5d88f8111ca7a
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:b6fe1287e8182eced0bd5da964fea0733eccf801812a2bffd178a3b43ddfb84f
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2407/card_name
-            text_hash: sha256:715740b3dc06f62e0035598801426f9124a91dac48993c1f8b6ab8afc63a0c44
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2407/card_name
-            text_hash: sha256:b6fe1287e8182eced0bd5da964fea0733eccf801812a2bffd178a3b43ddfb84f
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2407/card_name
-            text_hash: sha256:3e6b29d3b04999deac98754a505335b4cc122b713cd04cfa94723c69aa28a7df
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。坐姿假翼女子兩面同圖；artifact 供給保留，職業改為巫師不影響改編身分。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
       card_id: c:14e94ef3e1385937a2ea7d8925b8a5fd
       face_id:
       game: sv1
@@ -676,96 +631,6 @@ records:
             text_hash: sha256:ef38e45dc9497087a0c295a90f5f65853163da964f4ea826c19c2bd3beb33750
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。白髮王冠哥布林同圖；哥布林展開支援保留，810 缺圖但 API 明示同本體。只供瀏覽，不供名。
-  - subject:
-      card_id: c:23fca30e974f58c9b02ce602a79a004a
-      face_id:
-      game: sv1
-      official_id: "810031040"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:a2de19744ee25a23a058f1c8f38caee1
-          face_id: f:5aa173a56efb51de87ae3741a7838757
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:975e1e0899bbc332bc8ccc27478c280503b8c954297fc5e1df770e25e2862b3c
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:18b43814d12a964b475c20bd6b8672259295bbdc70b89316cb60903489cea951
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2495/card_name
-            text_hash: sha256:9b977cac6fb793e14eb046b896bfa2dedf63a484130f15a00c5484270d1c5d7a
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2495/card_name
-            text_hash: sha256:18b43814d12a964b475c20bd6b8672259295bbdc70b89316cb60903489cea951
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2495/card_name
-            text_hash: sha256:ef38e45dc9497087a0c295a90f5f65853163da964f4ea826c19c2bd3beb33750
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。白髮王冠哥布林同圖；哥布林展開支援保留，810 缺圖但 API 明示同本體。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:23fca30e974f58c9b02ce602a79a004a
-      face_id:
-      game: sv1
-      official_id: "810031050"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:a2de19744ee25a23a058f1c8f38caee1
-          face_id: f:5aa173a56efb51de87ae3741a7838757
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:975e1e0899bbc332bc8ccc27478c280503b8c954297fc5e1df770e25e2862b3c
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:18b43814d12a964b475c20bd6b8672259295bbdc70b89316cb60903489cea951
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2496/card_name
-            text_hash: sha256:9b977cac6fb793e14eb046b896bfa2dedf63a484130f15a00c5484270d1c5d7a
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2496/card_name
-            text_hash: sha256:18b43814d12a964b475c20bd6b8672259295bbdc70b89316cb60903489cea951
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2496/card_name
-            text_hash: sha256:ef38e45dc9497087a0c295a90f5f65853163da964f4ea826c19c2bd3beb33750
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。白髮王冠哥布林同圖；哥布林展開支援保留，810 缺圖但 API 明示同本體。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
   - subject:
       card_id: c:27c7fa14298b54cfa690fdd3f15da283
       face_id:
@@ -2120,51 +1985,6 @@ records:
       card_id: c:5f834c23e6fe587b9eaf6789e1d60ce7
       face_id:
       game: sv1
-      official_id: "810421030"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:da7656ef589c5f56b9d7761e9224c478
-          face_id: f:06780e0def715154af800c53a1231d33
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:3c186a1888b3dd593f77df11d4ba53c787037ea71c9347076e4a8c3aa14dd132
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:ad4e203f9467a4a073efe00d3126afeef0a5d55d0015697149be84208f467830
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/3017/card_name
-            text_hash: sha256:4d1c13f575563760c26e2a91a9cc01e7267ce0386d902a834af61371b4e711af
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/3017/card_name
-            text_hash: sha256:ad4e203f9467a4a073efe00d3126afeef0a5d55d0015697149be84208f467830
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/3017/card_name
-            text_hash: sha256:38df4c1df11c163666d151ca4a34c5cc2c2bc2882fc46fad6d490b32e900ed78
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。盤繞帶刺龍蛇同圖；三二突進與複製自身核心保留，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:5f834c23e6fe587b9eaf6789e1d60ce7
-      face_id:
-      game: sv1
       official_id: "810421080"
       digital_phase:
     value:
@@ -2203,51 +2023,6 @@ records:
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
             locator: /data/cards/3793/card_name
-            text_hash: sha256:38df4c1df11c163666d151ca4a34c5cc2c2bc2882fc46fad6d490b32e900ed78
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。盤繞帶刺龍蛇同圖；三二突進與複製自身核心保留，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:5f834c23e6fe587b9eaf6789e1d60ce7
-      face_id:
-      game: sv1
-      official_id: "810421090"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:da7656ef589c5f56b9d7761e9224c478
-          face_id: f:06780e0def715154af800c53a1231d33
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:3c186a1888b3dd593f77df11d4ba53c787037ea71c9347076e4a8c3aa14dd132
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:ad4e203f9467a4a073efe00d3126afeef0a5d55d0015697149be84208f467830
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/3002/card_name
-            text_hash: sha256:4d1c13f575563760c26e2a91a9cc01e7267ce0386d902a834af61371b4e711af
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/3002/card_name
-            text_hash: sha256:ad4e203f9467a4a073efe00d3126afeef0a5d55d0015697149be84208f467830
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/3002/card_name
             text_hash: sha256:38df4c1df11c163666d151ca4a34c5cc2c2bc2882fc46fad6d490b32e900ed78
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。盤繞帶刺龍蛇同圖；三二突進與複製自身核心保留，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
@@ -2705,51 +2480,6 @@ records:
       card_id: c:70f8c4bad1af5b989062d8d61219ab08
       face_id:
       game: sv1
-      official_id: "810441050"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:bb959ecf51285731aa6c11f01adc6664
-          face_id: f:7d06ad63a5765cfb90db0f18da10b464
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:c59a221165da131fa4023db4e2121c4de373a1da591d19c23328a4925b17fbfc
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/4486/card_name
-            text_hash: sha256:6d74575db5ca2d4a39e5df5ae629921bc82281c486174861e17b063d5ca30d44
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/4486/card_name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/4486/card_name
-            text_hash: sha256:041bb192948debe036886ccc142409493c6390e3e95f935a48036ba879e655e3
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。黑白雙龍人兩面同圖；普通本體與生成一一型態須分開，守護與效果免疫保留。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:70f8c4bad1af5b989062d8d61219ab08
-      face_id:
-      game: sv1
       official_id: "810441060"
       digital_phase:
     value:
@@ -2833,51 +2563,6 @@ records:
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
             locator: /data/cards/4468/card_name
-            text_hash: sha256:041bb192948debe036886ccc142409493c6390e3e95f935a48036ba879e655e3
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。黑白雙龍人兩面同圖；普通本體與生成一一型態須分開，守護與效果免疫保留。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:70f8c4bad1af5b989062d8d61219ab08
-      face_id:
-      game: sv1
-      official_id: "810441290"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:bb959ecf51285731aa6c11f01adc6664
-          face_id: f:7d06ad63a5765cfb90db0f18da10b464
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:c59a221165da131fa4023db4e2121c4de373a1da591d19c23328a4925b17fbfc
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/4469/card_name
-            text_hash: sha256:6d74575db5ca2d4a39e5df5ae629921bc82281c486174861e17b063d5ca30d44
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/4469/card_name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/4469/card_name
             text_hash: sha256:041bb192948debe036886ccc142409493c6390e3e95f935a48036ba879e655e3
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。黑白雙龍人兩面同圖；普通本體與生成一一型態須分開，守護與效果免疫保留。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
@@ -3875,51 +3560,6 @@ records:
       card_id: c:95c1be9bc34f5cd9b2b2a89db7eccea4
       face_id:
       game: sv1
-      official_id: "810011010"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:adad8a8fd8eb5d9fbe6cfec4fdbded32
-          face_id: f:5666f7210ce45df4aac51365bc1284ef
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:5dfffb352e7eb5dc5550e17ada347d03b2b44a4613272a13581368bf3c35c685
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:2efb263a22a597adf7ddc632682bbfb6e9f955ae1ebe7055228f7b0c28aa57ac
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2536/card_name
-            text_hash: sha256:fa119dc5613d00990bd9902a1fd404780ad8c861f76aa1aff309c78220032156
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2536/card_name
-            text_hash: sha256:2efb263a22a597adf7ddc632682bbfb6e9f955ae1ebe7055228f7b0c28aa57ac
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2536/card_name
-            text_hash: sha256:88b606f3c5bdb5dad51dc5c0016c3e0574b57cbdbf4573c19f42cc59f2e3bcb7
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。綠帽哥布林法師同圖；低費從者檢索改哥布林檢索，810 資源引用對回本體。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:95c1be9bc34f5cd9b2b2a89db7eccea4
-      face_id:
-      game: sv1
       official_id: "810011040"
       digital_phase:
     value:
@@ -3958,51 +3598,6 @@ records:
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
             locator: /data/cards/2477/card_name
-            text_hash: sha256:88b606f3c5bdb5dad51dc5c0016c3e0574b57cbdbf4573c19f42cc59f2e3bcb7
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。綠帽哥布林法師同圖；低費從者檢索改哥布林檢索，810 資源引用對回本體。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:95c1be9bc34f5cd9b2b2a89db7eccea4
-      face_id:
-      game: sv1
-      official_id: "810011050"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:adad8a8fd8eb5d9fbe6cfec4fdbded32
-          face_id: f:5666f7210ce45df4aac51365bc1284ef
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:5dfffb352e7eb5dc5550e17ada347d03b2b44a4613272a13581368bf3c35c685
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:2efb263a22a597adf7ddc632682bbfb6e9f955ae1ebe7055228f7b0c28aa57ac
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2478/card_name
-            text_hash: sha256:fa119dc5613d00990bd9902a1fd404780ad8c861f76aa1aff309c78220032156
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2478/card_name
-            text_hash: sha256:2efb263a22a597adf7ddc632682bbfb6e9f955ae1ebe7055228f7b0c28aa57ac
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2478/card_name
             text_hash: sha256:88b606f3c5bdb5dad51dc5c0016c3e0574b57cbdbf4573c19f42cc59f2e3bcb7
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。綠帽哥布林法師同圖；低費從者檢索改哥布林檢索，810 資源引用對回本體。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
@@ -4093,51 +3688,6 @@ records:
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
             locator: /data/cards/2406/card_name
-            text_hash: sha256:3e6b29d3b04999deac98754a505335b4cc122b713cd04cfa94723c69aa28a7df
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。坐姿假翼女子兩面同圖；artifact 供給保留，職業改為巫師不影響改編身分。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:95da041352da596abdb171355b69fcb0
-      face_id:
-      game: sv1
-      official_id: "810821100"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:57f254f455ba5f9ab25f40686680a824
-          face_id: f:569b2495b3e05bce86f1d47431c90513
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:68eb3f1cba3732e43abb80270c341c6a6884e4090edad0227ca1130dafb42f04
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:b6fe1287e8182eced0bd5da964fea0733eccf801812a2bffd178a3b43ddfb84f
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2407/card_name
-            text_hash: sha256:715740b3dc06f62e0035598801426f9124a91dac48993c1f8b6ab8afc63a0c44
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2407/card_name
-            text_hash: sha256:b6fe1287e8182eced0bd5da964fea0733eccf801812a2bffd178a3b43ddfb84f
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2407/card_name
             text_hash: sha256:3e6b29d3b04999deac98754a505335b4cc122b713cd04cfa94723c69aa28a7df
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。坐姿假翼女子兩面同圖；artifact 供給保留，職業改為巫師不影響改編身分。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
@@ -4505,51 +4055,6 @@ records:
       card_id: c:a178507a46605e35b6d81d3644bc30a3
       face_id:
       game: sv1
-      official_id: "810011030"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:6ec1180583a8579ebff5c0b19aabb649
-          face_id: f:1beec20475be589eb122f1d36b277b72
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:ede5fd9cfda120be212b16255b89fb02eec31dc421237731385c263230851db9
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2537/card_name
-            text_hash: sha256:0abc991ea02733895dd0985c9fda1c13317aea5d805e35ad56c1943337041500
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2537/card_name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2537/card_name
-            text_hash: sha256:a0133de38fe17adc5b14020564028808c273f15e03a2fb88280ef0681ba828ce
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。橘髮哥布林首領兩面同圖；持續支援與展開哥布林，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:a178507a46605e35b6d81d3644bc30a3
-      face_id:
-      game: sv1
       official_id: "810011070"
       digital_phase:
     value:
@@ -4588,51 +4093,6 @@ records:
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
             locator: /data/cards/3472/card_name
-            text_hash: sha256:a0133de38fe17adc5b14020564028808c273f15e03a2fb88280ef0681ba828ce
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。橘髮哥布林首領兩面同圖；持續支援與展開哥布林，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:a178507a46605e35b6d81d3644bc30a3
-      face_id:
-      game: sv1
-      official_id: "810011080"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:6ec1180583a8579ebff5c0b19aabb649
-          face_id: f:1beec20475be589eb122f1d36b277b72
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:ede5fd9cfda120be212b16255b89fb02eec31dc421237731385c263230851db9
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2487/card_name
-            text_hash: sha256:0abc991ea02733895dd0985c9fda1c13317aea5d805e35ad56c1943337041500
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2487/card_name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2487/card_name
             text_hash: sha256:a0133de38fe17adc5b14020564028808c273f15e03a2fb88280ef0681ba828ce
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。橘髮哥布林首領兩面同圖；持續支援與展開哥布林，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
@@ -5045,51 +4505,6 @@ records:
       card_id: c:af05e8aa00185631bab28e76738bbcda
       face_id:
       game: sv1
-      official_id: "810441050"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:69610cd306b15c71806bb32f7b2e8ffe
-          face_id: f:29d7675ddee351eea33b7c9529f23108
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:03a991d27336a3ef058d39af6afe431c09c3a76473e6cb2024eb50cfc1946409
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/4486/card_name
-            text_hash: sha256:6d74575db5ca2d4a39e5df5ae629921bc82281c486174861e17b063d5ca30d44
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/4486/card_name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/4486/card_name
-            text_hash: sha256:041bb192948debe036886ccc142409493c6390e3e95f935a48036ba879e655e3
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。黑白雙龍人兩面同圖；普通本體與生成一一型態須分開，守護與效果免疫保留。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:af05e8aa00185631bab28e76738bbcda
-      face_id:
-      game: sv1
       official_id: "810441060"
       digital_phase:
     value:
@@ -5173,51 +4588,6 @@ records:
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
             locator: /data/cards/4468/card_name
-            text_hash: sha256:041bb192948debe036886ccc142409493c6390e3e95f935a48036ba879e655e3
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。黑白雙龍人兩面同圖；普通本體與生成一一型態須分開，守護與效果免疫保留。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:af05e8aa00185631bab28e76738bbcda
-      face_id:
-      game: sv1
-      official_id: "810441290"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:69610cd306b15c71806bb32f7b2e8ffe
-          face_id: f:29d7675ddee351eea33b7c9529f23108
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:03a991d27336a3ef058d39af6afe431c09c3a76473e6cb2024eb50cfc1946409
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/4469/card_name
-            text_hash: sha256:6d74575db5ca2d4a39e5df5ae629921bc82281c486174861e17b063d5ca30d44
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/4469/card_name
-            text_hash: sha256:61cadac0bf58782b1519c6641ec5b985e492c4545ee64c4af1b61ab1337c5fdc
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/4469/card_name
             text_hash: sha256:041bb192948debe036886ccc142409493c6390e3e95f935a48036ba879e655e3
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。黑白雙龍人兩面同圖；普通本體與生成一一型態須分開，守護與效果免疫保留。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
@@ -5402,96 +4772,6 @@ records:
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。綠髮高帽魔術師同圖；土印堆疊主題保留，810 為本體 API 變體且缺圖。只供瀏覽，不供名。
   - subject:
-      card_id: c:b0165078103155e1a023248d314148a2
-      face_id:
-      game: sv1
-      official_id: "810331050"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:6765c808791d5a30bd902ece09e3de77
-          face_id: f:deaf2019145d5e679bfcdbade6a6cb89
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:060280ab2287bb74559dfd3fe14335c3622efa51db057189680333819d590d57
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:e698460641b2615b83e6003fca19faa08b7acb9bf7a62c38ca4dd2ea94180d2d
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/4927/card_name
-            text_hash: sha256:535fa3b409c0d6aabc6e226f4168e1aec137bf2dde4bdf391828e2283929f89b
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/4927/card_name
-            text_hash: sha256:e698460641b2615b83e6003fca19faa08b7acb9bf7a62c38ca4dd2ea94180d2d
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/4927/card_name
-            text_hash: sha256:f1e14a735e0025abd076c3001e7a1a0fda0052e68bb11675e38d7cbbd29ae643
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。綠髮高帽魔術師同圖；土印堆疊主題保留，810 為本體 API 變體且缺圖。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:b0165078103155e1a023248d314148a2
-      face_id:
-      game: sv1
-      official_id: "810331060"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:6765c808791d5a30bd902ece09e3de77
-          face_id: f:deaf2019145d5e679bfcdbade6a6cb89
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:060280ab2287bb74559dfd3fe14335c3622efa51db057189680333819d590d57
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:e698460641b2615b83e6003fca19faa08b7acb9bf7a62c38ca4dd2ea94180d2d
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/4928/card_name
-            text_hash: sha256:535fa3b409c0d6aabc6e226f4168e1aec137bf2dde4bdf391828e2283929f89b
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/4928/card_name
-            text_hash: sha256:e698460641b2615b83e6003fca19faa08b7acb9bf7a62c38ca4dd2ea94180d2d
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/4928/card_name
-            text_hash: sha256:f1e14a735e0025abd076c3001e7a1a0fda0052e68bb11675e38d7cbbd29ae643
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。綠髮高帽魔術師同圖；土印堆疊主題保留，810 為本體 API 變體且缺圖。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
       card_id: c:b02496083b245d64ad67a35648870bda
       face_id:
       game: sv1
@@ -5585,51 +4865,6 @@ records:
       card_id: c:b0c030f8d06058b19d24ecd4ff19a1f9
       face_id:
       game: sv1
-      official_id: "810011030"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:1ac0154452f85390845770514d8e8c8a
-          face_id: f:8738b384ff38510e99e425390b35a005
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:c89c041fd841bcbb3d1a8237ae6239cb123f4268e19842db5f4b6cb2a6eacde8
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2537/card_name
-            text_hash: sha256:0abc991ea02733895dd0985c9fda1c13317aea5d805e35ad56c1943337041500
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2537/card_name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2537/card_name
-            text_hash: sha256:a0133de38fe17adc5b14020564028808c273f15e03a2fb88280ef0681ba828ce
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。橘髮哥布林首領兩面同圖；持續支援與展開哥布林，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:b0c030f8d06058b19d24ecd4ff19a1f9
-      face_id:
-      game: sv1
       official_id: "810011070"
       digital_phase:
     value:
@@ -5668,51 +4903,6 @@ records:
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
             locator: /data/cards/3472/card_name
-            text_hash: sha256:a0133de38fe17adc5b14020564028808c273f15e03a2fb88280ef0681ba828ce
-    review_level: model_reviewed
-    reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。橘髮哥布林首領兩面同圖；持續支援與展開哥布林，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
-  - subject:
-      card_id: c:b0c030f8d06058b19d24ecd4ff19a1f9
-      face_id:
-      game: sv1
-      official_id: "810011080"
-      digital_phase:
-    value:
-      relation: same_card
-      effect_similarity:
-      sve_names:
-        - printing_id: p:1ac0154452f85390845770514d8e8c8a
-          face_id: f:8738b384ff38510e99e425390b35a005
-          name_ref:
-            batch_id: sha256:139be07a281797f06baeb00b6aa8da56265ccd22ba4b42246630ba3d283e9ac3
-            source_version_id: src:v1:c89c041fd841bcbb3d1a8237ae6239cb123f4268e19842db5f4b6cb2a6eacde8
-            parser: translation-jp-v1
-            locator: /faces/0/name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-      digital_names:
-        - phase: normal
-          lang: en
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:4c183f0e6c27155d37d8aef43e7a743b0b291f7a2aec8387f484ebad7ca9cdd8
-            parser: translation-sv1-v1
-            locator: /data/cards/2487/card_name
-            text_hash: sha256:0abc991ea02733895dd0985c9fda1c13317aea5d805e35ad56c1943337041500
-        - phase: normal
-          lang: ja
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/2487/card_name
-            text_hash: sha256:d02ced8293fccb96f0e97f07502056ed8a5165917a42bce60d6d1645f8069e19
-        - phase: normal
-          lang: zh-Hant
-          name_ref:
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/2487/card_name
             text_hash: sha256:a0133de38fe17adc5b14020564028808c273f15e03a2fb88280ef0681ba828ce
     review_level: model_reviewed
     reason: 兩個不同廠商模型各自逐組核對卡名、卡文與本體插畫，判斷一致。橘髮哥布林首領兩面同圖；持續支援與展開哥布林，810 資源／本體引用對回原卡。此數位變體缺本機圖，關係另以 API 的 resource_card_id／base_card_id 與完整卡文核對，不宣稱已看過變體插畫。只供瀏覽，不供名。
