@@ -583,7 +583,11 @@ fn player_events_private_look_and_order_do_not_change_the_opponents_sequence() {
         else {
             panic!("order");
         };
-        let mut handles = cards.iter().map(|card| card.handle).collect::<Vec<_>>();
+        let mut handles = cards
+            .cards
+            .iter()
+            .map(|card| card.handle)
+            .collect::<Vec<_>>();
         if reverse {
             handles.reverse();
         }

@@ -1,8 +1,9 @@
 //! Private observations and one frozen, same-owner deck permutation.
 
 use crate::game::internal::player::CandidateLinks;
-use crate::game::player::CardOption;
 use crate::game::player::Viewer;
+use crate::game::player::observation::{ObservedZone, viewer};
+use crate::game::player::{OrderDirection, OrderQuestion, SelectionDestination};
 use crate::ir::play_restrictions;
 
 use super::{
@@ -1113,18 +1114,42 @@ impl Execution {
 }
 
 impl OrderWait {
-    pub(in crate::game::internal) fn player_cards(
+    pub(in crate::game::internal) fn player_question(
         &self,
         game: &Game,
         actor: Viewer,
         cards: &[OrderCard],
-    ) -> Result<Vec<CardOption>> {
-        game.player_cards(
-            actor,
-            cards,
-            &self.cards.iter().copied().map(Some).collect::<Vec<_>>(),
-            &self.links,
-        )
+    ) -> Result<OrderQuestion> {
+        let Action::Order { destinations, .. } = &self.instruction.action else {
+            return Err(invalid("missing frozen order placement"));
+        };
+        let [placement] = destinations.as_slice() else {
+            return Err(invalid("incomplete frozen order placement"));
+        };
+        // Preparation already guarantees this placement; reaching this defense means a broken Wait.
+        if placement.zone
+            != (MoveDestination::Owners {
+                zone: OwnerZone::Deck,
+            })
+        {
+            return Err(unsupported("non-deck order placement"));
+        }
+        Ok(OrderQuestion {
+            cards: game.player_cards(
+                actor,
+                cards,
+                &self.cards.iter().copied().map(Some).collect::<Vec<_>>(),
+                &self.links,
+            )?,
+            // The native reorder procedure reads both top and bottom segments from top to bottom.
+            direction: OrderDirection::TopDown,
+            // Preparation checked every card owner against this exact receiving deck.
+            destination: SelectionDestination {
+                player: viewer(seat_name(self.player)?)?,
+                zone: ObservedZone::Deck,
+            },
+            position: placement.position,
+        })
     }
 
     pub(super) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {

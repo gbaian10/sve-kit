@@ -259,7 +259,7 @@ impl Turn<'_> {
                 let Some(order) = params.order.take() else {
                     return Ok(None);
                 };
-                Answer::Order(self.cards(cards, &order)?)
+                Answer::Order(self.cards(&cards.cards, &order)?)
             }
             DecisionShape::DriveTrigger { targets, .. } => {
                 let accept = params.choice.take().unwrap_or(true);

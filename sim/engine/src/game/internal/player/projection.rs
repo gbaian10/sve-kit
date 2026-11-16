@@ -57,7 +57,7 @@ fn collection(
 ) -> Result<DecisionShape> {
     match (wait, domain) {
         (Wait::Order(wait), InputDomain::Order(cards)) => Ok(DecisionShape::Order(
-            wait.player_cards(game, actor, &cards)?,
+            wait.player_question(game, actor, &cards)?,
         )),
         (Wait::Drive(wait), InputDomain::DriveTrigger { icon, targets }) => {
             Ok(DecisionShape::DriveTrigger {

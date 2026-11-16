@@ -2,8 +2,11 @@
 
 use super::observation::ObservedZone;
 use super::{AbilityChoice, PendingChoice, QuickChoice, QuotaQuestion, ReplacementChoice};
-use super::{DistributionQuestion, ObjectHandle, SelectionGroup, SelectionQuestion, Viewer};
-use crate::ir::{Cardinality, ModeId, Nat, QuickWindow, TriggerIcon};
+use super::{
+    DistributionQuestion, ObjectHandle, SelectionDestination, SelectionGroup, SelectionQuestion,
+    Viewer,
+};
+use crate::ir::{Cardinality, ModeId, Nat, Position, QuickWindow, TriggerIcon};
 
 /// One printed choice addressed only within the current question.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -20,6 +23,26 @@ pub struct CardOption {
     pub rules_names: Option<Vec<String>>,
     /// Original cost when a total or distinct-cost constraint requires it.
     pub original_cost: Option<i64>,
+}
+
+/// Direction supplied by the native ordering procedure, never inferred by a client.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum OrderDirection {
+    /// The first item is above every later item within the ordered segment.
+    TopDown,
+}
+
+/// Placement stays tied to the same frozen native permutation as its candidates.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct OrderQuestion {
+    /// Every frozen candidate must appear exactly once in the answer.
+    pub cards: Vec<CardOption>,
+    /// Native interpretation of the answer's sequence.
+    pub direction: OrderDirection,
+    /// The procedure's receiving player and zone, independent of projection context.
+    pub destination: SelectionDestination,
+    /// The procedure's receiving edge.
+    pub position: Position,
 }
 
 /// Search bounds and printed groups, retaining the original answer coordinates.
@@ -165,7 +188,7 @@ pub enum DecisionShape {
         source: IntegerSource,
     },
     /// Frozen permutation; answer `Order` with every handle once.
-    Order(Vec<CardOption>),
+    Order(OrderQuestion),
     /// Replacement order; answer `Order`.
     DamageReplacements(Vec<ReplacementChoice>),
     /// Public icon and optional target; answer `DriveTrigger`.
