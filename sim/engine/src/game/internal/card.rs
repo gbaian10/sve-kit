@@ -9,6 +9,7 @@ use crate::game::knowledge::PublishedKnowledge;
 use crate::game::player::observation::AbilityQuota;
 use crate::game::player::{AdmissionGapReason, Viewer};
 use crate::ir::TurnOperation;
+use crate::ir::attack_restrictions::is_required_static;
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -1776,6 +1777,8 @@ fn check_granted_static(located: &Located<Ability>) -> Result<()> {
         static_keywords::check(located, &located.node.declarations)
     } else if super::grant::static_cost(&located.node) {
         Ok(())
+    } else if is_required_static(&located.node) {
+        attack_restrictions::check(located)
     } else {
         Err(unsupported("granted static definition"))
     }

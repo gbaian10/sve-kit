@@ -1,6 +1,6 @@
 use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
-    ability_source, ast, numeric, source_span, unsupported,
+    SourceSpan, ability_source, ast, numeric, source_span, unsupported,
 };
 use crate::ir::{
     AbilityKind, AbilityQualification, Action, ActionPattern, Bool, Duration, DurationEnd, Effect,
@@ -32,6 +32,34 @@ pub(super) fn lower(
         return super::prevention::lower(allocator, key, path, entry, scope);
     }
     let source = source_span(key, path, entry)?;
+    lower_at_source(
+        allocator,
+        path,
+        entry,
+        scope,
+        source,
+        &head.effects,
+        &mut Allocator::default(),
+    )
+}
+
+pub(super) fn lower_at_source(
+    allocator: &mut Allocator,
+    path: &str,
+    entry: &ast::Ability,
+    scope: ScopeId,
+    source: SourceSpan,
+    effects: &[ast::StaticEffect],
+    _bindings: &mut Allocator,
+) -> Result<Located<Ability>, LoweringError> {
+    let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
+    if head
+        .zone
+        .as_ref()
+        .is_some_and(|zones| zones.single() != Some(ZoneKind::Field))
+    {
+        return Err(unsupported(path));
+    }
     let origin = ability_source(&source, None);
     let empty: ast::Body = super::decode(serde_json::json!({"do":[]}), path)?;
     let mut context = BodyContext::new(entry, scope, &empty, None, allocator);
@@ -42,7 +70,7 @@ pub(super) fn lower(
         .transpose()?
         .unwrap_or(Expr::Literal(Bool(true)));
     let mut declarations = Vec::new();
-    for effect in &head.effects {
+    for effect in effects {
         if let ast::StaticEffect::Cannot(ast::Cannot::Removal(shape)) = effect {
             if head.r#while.is_some() {
                 return Err(unsupported(path));
@@ -91,6 +119,18 @@ fn permission(
     path: &str,
 ) -> Result<Effect, LoweringError> {
     let (attacker, action, polarity, rule) = match effect {
+        ast::StaticEffect::MustAttack(shape) => {
+            let attacker = context.objects(&shape.on, path)?;
+            (
+                attacker.clone(),
+                ActionPattern::Attack {
+                    attacker,
+                    target: None,
+                },
+                Polarity::Require,
+                RuleId(133),
+            )
+        }
         ast::StaticEffect::IgnoreWard(shape) => {
             if !matches!(shape.on, ast::Objects::This(_)) {
                 return Err(unsupported(path));

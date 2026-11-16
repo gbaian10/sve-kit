@@ -1079,3 +1079,6 @@ mod layer3_player_discard;
 
 #[path = "card/layer3_draw_restriction.rs"]
 mod layer3_draw_restriction;
+
+#[path = "card/layer3_must_attack.rs"]
+mod layer3_must_attack;
