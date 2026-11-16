@@ -1,6 +1,7 @@
 use super::{BodyContext, LoweringError, SourceSpan, ast, keywords, numeric, unsupported};
 use crate::ir::{
-    Action, FaceId, GrantedAbility, ObjectOperand, ObjectView, Selector, TextProvider, ZoneKind,
+    Action, Duration, DurationEnd, FaceId, GrantedAbility, Interval, ObjectOperand, ObjectView,
+    Selector, TextProvider, TimeAnchor, ZoneKind,
 };
 use serde_json::{Value, json};
 #[expect(
@@ -17,16 +18,31 @@ impl BodyContext<'_> {
         if (value.keywords.is_empty() && value.abilities.is_empty())
             || !matches!(
                 value.until,
-                None | Some(ast::Until::Game | ast::Until::Turn)
+                None | Some(
+                    ast::Until::Game | ast::Until::Turn | ast::Until::DuringNextTurn { .. }
+                )
             )
         {
             return Err(unsupported(path));
         }
         let abilities = self.granted_abilities(&value.keywords, &value.abilities, source, path)?;
+        let duration = if let Some(ast::Until::DuringNextTurn { during_next_turn }) = &value.until {
+            let player = super::posture::player(during_next_turn.who);
+            Duration {
+                end: DurationEnd::NextTurnEnd {
+                    player: player.clone(),
+                },
+                anchor: TimeAnchor::Installation {},
+                usage: None,
+                intervals: vec![Interval::DuringNextTurn { player }],
+            }
+        } else {
+            numeric::duration(value.until.as_ref(), path)?
+        };
         Ok(Action::Grant {
             subjects: self.grant_subjects(&value.on, path)?,
             abilities,
-            duration: numeric::duration(value.until.as_ref(), path)?,
+            duration,
             provider: TextProvider {
                 provider: ObjectView::Current {
                     object: Box::new(ObjectOperand::SourceHolder {}),
@@ -91,6 +107,9 @@ impl BodyContext<'_> {
                         | ast::StaticEffect::DamageMod(_)
                         | ast::StaticEffect::DamageCap(_),
                     ) => super::prevention::lower_at_source,
+                    Some(ast::StaticEffect::MustAttack(_)) => {
+                        super::attack_restrictions::lower_at_source
+                    }
                     _ => return Err(unsupported(&nested_path)),
                 };
                 lower(

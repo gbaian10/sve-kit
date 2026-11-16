@@ -614,21 +614,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-9 events (#2008)"
     reason: "after-decision-9 omniscient events"
-  - question: "card-CP04-012"
-    scenario: "title 已橫置=False"
-    status: unsupported
-    error: "unadmitted CP04-012 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-012/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-CP04-012"
-    scenario: "class 已橫置=False"
-    status: unsupported
-    error: "unadmitted CP04-012 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-012/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-CP04-012"
-    scenario: "title 已橫置=True"
-    status: unsupported
-    error: "unadmitted CP04-012 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-012/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-CP04-088"
     scenario: "A 找出スズナ 與ミサキ 上場 → 兩者的ファンファーレ 被抑制、不待機"
     status: adapter-error

@@ -1,7 +1,7 @@
 use super::{Checked, Checker};
 use crate::ir::{
-    Duration, DurationEnd, GrantedAbility, KeywordId, ObjectOperand, ObjectView, Selector,
-    TextProvider, TimeAnchor,
+    Duration, DurationEnd, GrantedAbility, Interval, KeywordId, ObjectOperand, ObjectView,
+    Selector, TextProvider, TimeAnchor,
 };
 #[expect(
     clippy::multiple_inherent_impl,
@@ -15,14 +15,21 @@ impl Checker {
         duration: &Duration,
         provider: &TextProvider,
     ) -> Checked {
+        let valid_duration = match duration.intervals.as_slice() {
+            [] => matches!(
+                duration.end,
+                DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
+            ),
+            [Interval::DuringNextTurn { player }] => {
+                self.player(player)?;
+                matches!(&duration.end, DurationEnd::NextTurnEnd { player: end } if player == end)
+            }
+            _ => false,
+        };
         if abilities.is_empty()
             || duration.anchor != (TimeAnchor::Installation {})
             || duration.usage.is_some()
-            || !duration.intervals.is_empty()
-            || !matches!(
-                duration.end,
-                DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
-            )
+            || !valid_duration
             || !self.ability_ids.contains(&provider.ability)
             || provider.face.0.is_empty()
             || !matches!(&provider.provider, ObjectView::Current { object } if object.as_ref() == &ObjectOperand::SourceHolder {})

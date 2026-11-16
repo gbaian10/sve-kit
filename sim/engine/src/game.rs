@@ -129,6 +129,7 @@ impl Player {
 }
 
 fn sep_unlock_turn(first_player: &str, seat: &str) -> u64 {
+    // CR 12.2.4 fixes the own-turn threshold shared by allocation and native payment checks.
     if first_player == seat { 7 } else { 6 }
 }
 
@@ -510,6 +511,9 @@ impl Game {
                     .ok_or_else(|| invalid("invalid EP capacity"))?,
                 None => ep,
             };
+            if !(0..=ep_capacity).contains(&ep) {
+                return Err(invalid("EP must fit its nonnegative capacity"));
+            }
             let sep = int(&entry["sep"]);
             let sep_available_from = match entry.get("sep_available_from") {
                 Some(Value::Null) => None,
@@ -517,6 +521,9 @@ impl Game {
                 None => (sep > 0)
                     .then(|| sep_unlock_turn(string(&position["turn"]["first_player"]), seat)),
             };
+            if sep > 0 && sep_available_from.is_none() {
+                return Err(invalid("allocated SEP requires an unlock turn"));
+            }
             players.insert(
                 seat.into(),
                 Player {
