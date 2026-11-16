@@ -82,7 +82,10 @@ impl Candidates {
     }
 }
 
-pub(super) fn details(member: &SelectionMember, context: Context<'_>) -> Result<CandidateDetails> {
+pub(in crate::battle::question) fn details(
+    member: &SelectionMember,
+    context: Context<'_>,
+) -> Result<CandidateDetails> {
     if member.card.is_none() {
         if member.name.is_some() || member.object.is_some() {
             return Err(ProjectionError::Unavailable);

@@ -15,6 +15,8 @@ mod end_guard;
 mod evolution_discard;
 #[path = "battle_question/evolution_form.rs"]
 mod evolution_form;
+#[path = "battle_question/evolution_materials.rs"]
+mod evolution_materials;
 #[path = "battle_question/evolution_payment.rs"]
 mod evolution_payment;
 #[path = "battle_question/hand_limit.rs"]

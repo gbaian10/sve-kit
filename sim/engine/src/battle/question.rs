@@ -38,7 +38,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Supports opening, closing, and normal evolution form, discard and payment questions.
+/// Supports opening, closing, and normal evolution form, material, discard and payment questions.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -63,6 +63,7 @@ enum Binding {
     EvolutionPayment(Vec<wire::EvolutionPayment>),
     EvolutionForm(BTreeMap<OptionId, player::EvolutionFormId>),
     EvolutionDiscard(SelectionProjection),
+    EvolutionMaterials(SelectionProjection),
     HandLimit {
         cards: BTreeMap<OptionId, NativeHandle>,
         count: usize,
@@ -120,6 +121,12 @@ impl QuestionProjection {
             .filter(|context| context.stage == expected_stage)
             .cloned()
             .ok_or(ProjectionError::Unavailable)?;
+        let context = decision::Context {
+            id,
+            actor: native.actor,
+            purpose: native.purpose,
+            observation: &observation,
+        };
         let (usage, shape, binding) = match native.shape {
             player::QuestionShape::Opening(OpeningQuestion::FirstPlayer) => first_player(id),
             player::QuestionShape::Opening(OpeningQuestion::Mulligan(cards)) => {
@@ -140,6 +147,9 @@ impl QuestionProjection {
             player::QuestionShape::Evolution(EvolutionQuestion::Form(forms)) => {
                 evolution_form(id, native.actor, &forms, &observation, catalog, references)?
             }
+            player::QuestionShape::Evolution(EvolutionQuestion::Materials(domain)) => {
+                evolution::materials(&domain, context)?
+            }
             player::QuestionShape::Evolution(EvolutionQuestion::Discard(domain)) => {
                 evolution::discard(id, native.actor, &domain, &observation)?
             }
@@ -149,19 +159,10 @@ impl QuestionProjection {
                 | player::DecisionShape::TriggerQuota(_),
             ) => flow::project()?,
             player::QuestionShape::Decision(domain) => {
-                let (usage, shape, binding) = decision::project(
-                    &domain,
-                    Some(decision::Context {
-                        id,
-                        actor: native.actor,
-                        purpose: native.purpose,
-                        observation: &observation,
-                    }),
-                )?;
+                let (usage, shape, binding) = decision::project(&domain, Some(context))?;
                 (usage, shape, Binding::Decision(binding))
             }
-            player::QuestionShape::Evolution(EvolutionQuestion::Materials(_))
-            | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
+            player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
         };
         let question = wire::Question {
             id: id.clone(),
@@ -216,6 +217,10 @@ impl QuestionProjection {
             Binding::EvolutionDiscard(projection) => player::Command::Evolution {
                 token: self.token,
                 answer: evolution::discard_answer(projection, answer)?,
+            },
+            Binding::EvolutionMaterials(projection) => player::Command::Evolution {
+                token: self.token,
+                answer: evolution::materials_answer(projection, answer)?,
             },
             Binding::EvolutionForm(forms) => {
                 let Answer::Choose { chosen } = answer else {

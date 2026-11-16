@@ -14,6 +14,7 @@ mod drive;
 mod number;
 mod resource;
 mod select;
+pub(super) use candidates::details;
 
 #[derive(Clone, Copy)]
 pub(super) struct Context<'projection> {
