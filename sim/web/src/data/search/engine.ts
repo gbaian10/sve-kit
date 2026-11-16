@@ -202,6 +202,7 @@ export class SearchEngine {
               request.query.state.stampOnly ||
               request.query.state.serialOnly ||
               request.query.state.unlistedOnly ||
+              request.query.state.prOnly ||
               // A merged cell's representative needs every printing's rarity and art (#781).
               request.query.state.unit !== "printing")
           )
@@ -857,13 +858,16 @@ export class SearchEngine {
       const backgroundBlobs = new SearchBlobs(request.base, this.backgroundFetch, this.storage)
       const backgroundFiles = [...files.values()].filter(
         (file) =>
-          (["print", "product"].includes(stringValue(file["purpose"])) ||
+          (file["purpose"] === "catalog" &&
+            file["region"] !== null &&
+            file["region"] !== request.edition) ||
+          ((["print", "product"].includes(stringValue(file["purpose"])) ||
             arrayValue(file["row_counts"]).some((count) =>
               ["mechanic_projection", "card_mechanic_coverage", "card_engine_support"].includes(
                 stringValue(arrayValue(count)[0]),
               ),
             )) &&
-          (file["region"] === null || file["region"] === request.edition),
+            (file["region"] === null || file["region"] === request.edition)),
       )
       let completed = false
       try {
@@ -872,8 +876,8 @@ export class SearchEngine {
             backgroundFiles
               .filter((file) =>
                 purpose === "printings"
-                  ? ["print", "product"].includes(stringValue(file["purpose"]))
-                  : !["print", "product"].includes(stringValue(file["purpose"])),
+                  ? ["catalog", "print", "product"].includes(stringValue(file["purpose"]))
+                  : !["catalog", "print", "product"].includes(stringValue(file["purpose"])),
               )
               .map(async (file) =>
                 decodeMessage({
@@ -889,7 +893,32 @@ export class SearchEngine {
           for (const part of parts)
             if (part.kind === "fragments")
               catalogWork("background:ingest", () => {
-                background.ingest(part.fragments)
+                // Other-region catalogs supply the complete printing identity closure for PR-only cards.
+                background.ingest(
+                  part.fragments.flatMap((fragment) => {
+                    if (
+                      fragment.value["purpose"] !== "catalog" ||
+                      fragment.value["region"] === null ||
+                      fragment.value["region"] === request.edition
+                    )
+                      return [fragment]
+                    if (fragment.table === "card_locator") return [fragment]
+                    if (fragment.table !== "printing") return []
+                    return [
+                      {
+                        ...fragment,
+                        table: "card_locator",
+                        rows: fragment.rows.map((row) => ({
+                          id: row["id"] ?? null,
+                          card_id: row["card_id"] ?? null,
+                          card_no: row["card_no"] ?? null,
+                          region: row["region"] ?? null,
+                          home_set_id: objectValue(fragment.value["owner"])["id"] ?? null,
+                        })),
+                      },
+                    ]
+                  }),
+                )
               })
           catalogWork("background:seal", () => {
             background.seal()

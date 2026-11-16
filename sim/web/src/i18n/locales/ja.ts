@@ -294,6 +294,8 @@ export default {
     serialOnly: "シリアルナンバー入りカード",
     serialOnlyHint: "カードにシリアルナンバーが印字されている",
     unlistedOnly: "公式未収録",
+    prOnly: "PR限定",
+    prOnlyHint: "PRカード番号でのみ発行されたカード",
     unlistedOnlyHint: "公式カードリストにないEP／SEPなど",
     specialPrintings: "特殊版",
     specialPrintingsAll: "すべて",

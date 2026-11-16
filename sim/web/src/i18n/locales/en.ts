@@ -303,6 +303,8 @@ export default {
     serialOnly: "Numbered cards",
     serialOnlyHint: "Printed with a serial-number plate",
     unlistedOnly: "Not in official database",
+    prOnly: "PR only",
+    prOnlyHint: "Cards issued only with PR card numbers",
     unlistedOnlyHint: "EP/SEP and similar cards missing from the official card list",
     specialPrintings: "Special printings",
     specialPrintingsAll: "All",

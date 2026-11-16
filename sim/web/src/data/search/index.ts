@@ -173,6 +173,7 @@ const CARD_COLUMNS = [
   "printedMechanisms",
   "errata",
   "restricted",
+  "prOnly",
 ] as const
 const PRINTING_COLUMNS = [
   "id",
@@ -206,7 +207,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 34
+export const INDEX_IMAGE_FORMAT = 35
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -568,6 +569,28 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
   }
 }
 
+function prOnlyCards(index: CardIndex): ReadonlySet<string> {
+  const families = new Set(
+    index.families
+      .filter((row) => row["public_code"] === "PR")
+      .map((row) => stringValue(row["id"])),
+  )
+  return new Set(
+    index.cards.flatMap((card) => {
+      const id = stringValue(card["id"])
+      const printings = index.printingsOf(id)
+      return printings.length > 0 &&
+        printings.every(
+          (row) =>
+            families.has(stringValue(row["home_set_id"])) &&
+            stringValue(row["card_no"]).trim().length > 0,
+        )
+        ? [id]
+        : []
+    }),
+  )
+}
+
 function build(
   bootstrap: BootstrapColumns,
   edition: Region,
@@ -577,6 +600,7 @@ function build(
   const pool = new StringPool()
   const summaryColumns = new Columns(pool)
   const index = bootstrap.index()
+  const prOnly = prOnlyCards(index)
   const sets = new Set(index.families.map((family) => stringValue(family["code"])))
   const familyCodes = new Map(
     index.families.flatMap(
@@ -617,6 +641,7 @@ function build(
     cards.printedMechanisms.push(pool.encode([]))
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
+    cards.prOnly.push(Number(prOnly.has(entry.cardId)))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
     cards.restricted.push(restrictions?.cards.has(entry.cardId) ? 1 : 0)
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
@@ -928,6 +953,7 @@ export class SearchIndex {
   /** Locators already enumerate the printing IDs; completion replaces their metadata only. */
   completePrintings(bootstrap: BootstrapColumns): void {
     const index = bootstrap.index()
+    const prOnly = prOnlyCards(index)
     const slots = new Map(
       Array.from(this.printings.id, (id, ordinal) => [this.pool.get(id), ordinal]),
     )
@@ -939,6 +965,7 @@ export class SearchIndex {
     const preferredIds: (JsonValue | undefined)[] = []
     for (let card = 0; card < this.cards.id.length; card++) {
       const id = this.pool.get(this.cards.id[card] ?? 0)
+      this.cards.prOnly[card] = Number(prOnly.has(id))
       const rows = index.printingsOf(id).filter((row) => row["region"] === this.edition)
       if (
         rows.length !==
@@ -1298,6 +1325,7 @@ export class SearchIndex {
       (!state.stampOnly || this.printings.stamp[printing] === 1) &&
       (!state.serialOnly || this.printings.serial[printing] === 1) &&
       (!state.unlistedOnly || this.printings.unlisted[printing] === 1) &&
+      (!state.prOnly || this.cards.prOnly[this.printings.card[printing] ?? 0] === 1) &&
       // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
       (state.reprints === "all" ||
         state.unit === "card" ||

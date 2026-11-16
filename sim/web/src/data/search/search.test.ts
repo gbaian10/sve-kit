@@ -3729,3 +3729,45 @@ it("sorts home sets by regional release, groups undated products and PR, and app
     }
   }
 })
+
+it("waits for the other edition's catalog before answering PR-only queries and restores the completed result", async () => {
+  const otherCatalog = (built.manifest["files"] as JsonObject[]).find(
+    (file) =>
+      file["purpose"] === "catalog" &&
+      file["region"] === "en" &&
+      (file["row_counts"] as JsonValue[][]).some((row) => row[0] === "printing"),
+  )
+  if (!otherCatalog) throw new Error("missing other-region catalog")
+  const cache = memoryCache()
+  for (let pass = 0; pass < 2; pass++) {
+    const served = origin()
+    const h = harness(served, cache)
+    const release = served.hold(stringValue(otherCatalog["path"]))
+    h.session.load(base, "jp", "preview")
+    h.channel.search({
+      ...query,
+      state: { ...DEFAULT_QUERY, prOnly: true, sort: "no", secondarySort: null },
+    })
+    try {
+      await expect.poll(() => h.status().phase, POLL).toBe("ready")
+      if (pass === 0) {
+        for (let i = 0; i < 5; i++) await h.queried()
+        expect(h.status().result.phase).toBe("pending")
+      }
+      release()
+      await h.settled()
+      await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+      const result = h.status().result
+      if (result.phase !== "complete") throw new Error("missing result")
+      expect(result.page.items.map((item) => item.summary?.cardId)).toEqual(["c:pr-001"])
+      if (pass === 0) expect(served.requests).toContain(stringValue(otherCatalog["path"]))
+      else
+        expect(h.events.some((event) => event.kind === "ready" && event.metrics.restored)).toBe(
+          true,
+        )
+    } finally {
+      release()
+      h.session.dispose()
+    }
+  }
+})
