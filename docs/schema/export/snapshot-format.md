@@ -550,4 +550,4 @@ checked 集合內才能判為 absent，其他情況是 unknown。兩欄不屬 ke
 
 `printing.manual_type_code` 為人工採納的 ep／sep 種類或 null，僅 unlisted 版次可填；official 必為 null。缺少官方 `type_code` 時，前端以它提供人工版次的種類標示、種類計數與牌組位置篩選；已有官方種類一律優先，不產生 revision 或 current。
 
-人工版次的發放日期 `manual_available_on`／`manual_date_precision` 必須配對：day 為真實曆日 `YYYY-MM-DD`，month 只存 `YYYY-MM`，unknown 的日期為 null；不接受 month 配完整日期或 unknown 配非空日期。official 兩欄均為 null。日期欄同時出現在 printing bootstrap，供單卡頁與卡包／發行日排序使用；unknown 不顯示並在日期排序置後，不把月份補成 1 號。這個欄位只描述人工版次的發放，不改寫官方商品／收錄日期或地區發行狀態。
+人工版次的發放日期 `manual_available_on`／`manual_date_precision` 必須配對：day 為真實曆日 `YYYY-MM-DD`，month 只存 `YYYY-MM`，unknown 的日期為 null；不接受 month 配完整日期或 unknown 配非空日期。official 兩欄均為 null。日期欄同時出現在 printing bootstrap，只供單卡頁顯示；unknown 不顯示，不把月份補成 1 號。列表的「卡包」主排序依版次所屬商品家族（family）分組，無商品發售日的 family 置於有日期卡包之後，無日期組中 PR 最後；同 family 交給次排序，「卡號」次排序對無卡號版次依 `int_id` 比較。這個欄位只描述人工版次的發放，不改寫官方商品／收錄日期或地區發行狀態。
