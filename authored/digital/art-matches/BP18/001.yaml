@@ -743,6 +743,17 @@ records:
           - 463
         inliers: 4
       - official_id: "113741020"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_113741020.png
+        image_sha256: sha256:1b8a4421d44eee8e8ddf59edf0e6804774bbf19020ad1e4268d84ca5eb4900d4
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+      - official_id: "113741020"
         phase: normal
         style_key: base
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_113741020.png
@@ -753,6 +764,17 @@ records:
           - 479
           - 463
         inliers: 482
+      - official_id: "113741020"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_113741020.png
+        image_sha256: sha256:db39a70565ca84a822a325cb13259a769a2cef80a8807cb5e7e0a9984110bbfd
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 459
       - official_id: "714741010"
         phase: evolved
         style_key: base
@@ -765,10 +787,32 @@ records:
           - 463
         inliers: 5
       - official_id: "714741010"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_714741010.png
+        image_sha256: sha256:9e848863e1e49c69b5ff8a87f3339de41193761ba3f56e9324dee787ec4cdae9
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "714741010"
         phase: normal
         style_key: base
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_714741010.png
         image_sha256: sha256:7be93507b0bbc4093d986a5136a907ff08aad721ed6595c486bb6fdac7514ff3
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "714741010"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_714741010.png
+        image_sha256: sha256:b5d1e4dd4995c55cfa3811c22b23849a7aacb99e580f25447c4a92d94e1d7426
         crop:
           - 75
           - 160
@@ -938,6 +982,17 @@ records:
           - 463
         inliers: 4
       - official_id: "104521030"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_104521030.png
+        image_sha256: sha256:cf9380f1e0639801d8a26d56b04d7ecc5d462c38b26f2d59091517903e537263
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "104521030"
         phase: normal
         style_key: base
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_104521030.png
@@ -948,6 +1003,17 @@ records:
           - 479
           - 463
         inliers: 482
+      - official_id: "104521030"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_104521030.png
+        image_sha256: sha256:f0adbacbc6a3bfe473b0671da2854a5c88af8e521400f95b22c03f29fe1b4a9c
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 468
     complete: true
     review_level: model_reviewed
     reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。

@@ -1072,6 +1072,17 @@ records:
           - 463
         inliers: 5
       - official_id: "108641020"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_108641020.png
+        image_sha256: sha256:407693b115e2b7fa771b94a8e1eb698cfaa798d45b447cf61f556cd03c89755e
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "108641020"
         phase: normal
         style_key: base
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_108641020.png
@@ -1082,6 +1093,17 @@ records:
           - 479
           - 463
         inliers: 371
+      - official_id: "108641020"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_108641020.png
+        image_sha256: sha256:3fbb38c29d4715bf87d47aaf44e8da49d23cff3b9731afd3a9d8c49280b55f77
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 370
     complete: true
     review_level: model_reviewed
     reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
@@ -1439,6 +1461,17 @@ records:
           - 479
           - 463
         inliers: 458
+      - official_id: "108732010"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_108732010.png
+        image_sha256: sha256:44e1a18d21a39a3cfe9125f4267a958f1b06a52507a18355eec39e84680bffeb
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 445
     complete: true
     review_level: model_reviewed
     reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。

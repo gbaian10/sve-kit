@@ -780,6 +780,17 @@ records:
       - official_id: "123641030"
         phase: evolved
         style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_123641030.png
+        image_sha256: sha256:8d391ea2de7767c0325ed8163bb3ef982986957f133803e6c2748c0af634d641
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 26
+      - official_id: "123641030"
+        phase: evolved
+        style_key: ts-rotation
         image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_123641030.png
         image_sha256: sha256:cf4fc1a05fe8e4dd99de96ca8f267feac92f58702c819e070ac3f0c69820a890
         crop:
@@ -799,6 +810,17 @@ records:
           - 479
           - 463
         inliers: 315
+      - official_id: "123641030"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_123641030.png
+        image_sha256: sha256:954c87b6d7397688b8ffdbd069473faf8ce691c848c786edd37630348e7d9e6e
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 314
     complete: true
     review_level: model_reviewed
     reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
@@ -865,8 +887,30 @@ records:
           - 463
         inliers: 387
       - official_id: "123641030"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_123641030.png
+        image_sha256: sha256:cf4fc1a05fe8e4dd99de96ca8f267feac92f58702c819e070ac3f0c69820a890
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 380
+      - official_id: "123641030"
         phase: normal
         style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_123641030.png
+        image_sha256: sha256:931729524f1c8831311965ca09cecf2b73bfc60c1e98148a7e50c4c3ecbe32b0
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 19
+      - official_id: "123641030"
+        phase: normal
+        style_key: ts-rotation
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_123641030.png
         image_sha256: sha256:954c87b6d7397688b8ffdbd069473faf8ce691c848c786edd37630348e7d9e6e
         crop:

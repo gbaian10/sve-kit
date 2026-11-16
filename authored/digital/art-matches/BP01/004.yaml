@@ -31,6 +31,17 @@ records:
           - 479
           - 463
         inliers: 412
+      - official_id: "101134030"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_101134030.png
+        image_sha256: sha256:5f03f304f0af2f5083ee33ab20c017a6c3a79067a3bc5cc40618fcdad70f6302
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 412
     complete: true
     review_level: model_reviewed
     reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
@@ -982,10 +993,32 @@ records:
           - 463
         inliers: 0
       - official_id: "101611040"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_101611040.png
+        image_sha256: sha256:18b864ad595743dda810381af303021a92aa4342be1c6a8b753db80e3d4001f0
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "101611040"
         phase: normal
         style_key: base
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_101611040.png
         image_sha256: sha256:920a555658f7601f5c5fae89c7cb7300fbf5f8fb83728b496ef136bb34e9c21d
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 284
+      - official_id: "101611040"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_101611040.png
+        image_sha256: sha256:bf4e1e49d14856e2b21378a121afc29abf722241be6393cbe74712a0950b1189
         crop:
           - 75
           - 160

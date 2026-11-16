@@ -356,6 +356,17 @@ records:
           - 463
         inliers: 6
       - official_id: "105011030"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_105011030.png
+        image_sha256: sha256:15ca95e81b7eed94ecb008003c105607b72eef158df804a4ebdba02aeacfa9ff
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "105011030"
         phase: normal
         style_key: base
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_105011030.png
@@ -366,6 +377,17 @@ records:
           - 479
           - 463
         inliers: 268
+      - official_id: "105011030"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_105011030.png
+        image_sha256: sha256:cf4eff0e4be157a6b14af42446aa1866169f5c124095e6b794ccf74f20c48ff0
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 247
     complete: true
     review_level: model_reviewed
     reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。

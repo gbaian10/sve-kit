@@ -1237,8 +1237,30 @@ records:
           - 463
         inliers: 0
       - official_id: "107821060"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_107821060.png
+        image_sha256: sha256:f1b45d97feabf8ce1d4cc08adfffea66ab2f55080bfae883bda46a04e5a3fac1
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "107821060"
         phase: normal
         style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_107821060.png
+        image_sha256: sha256:95dbd573f51905e7195dd69c0074e63cefa433aae1261b40f7f979168ec05426
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 454
+      - official_id: "107821060"
+        phase: normal
+        style_key: ts-rotation
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_107821060.png
         image_sha256: sha256:9fdf8dfbea32c0e3903f7e1437fe8e16c624b75fd730a36ff6c9f52448ac9651
         crop:
@@ -1700,6 +1722,17 @@ records:
           - 463
         inliers: 250
       - official_id: "110041010"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_110041010.png
+        image_sha256: sha256:1c1ddb4019773c26f7e894936c7c67ab7c3b43e952f827aa6e9698a5e2d76262
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 219
+      - official_id: "110041010"
         phase: normal
         style_key: base
         image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_110041010.png
@@ -1710,6 +1743,17 @@ records:
           - 479
           - 463
         inliers: 8
+      - official_id: "110041010"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_110041010.png
+        image_sha256: sha256:1979de02eb52394650ce33321ab7db2f1f7f721e65ffe8ec6c5e691e0ab6cba4
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 7
     complete: true
     review_level: model_reviewed
     reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
