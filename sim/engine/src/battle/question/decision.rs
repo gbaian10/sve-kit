@@ -12,6 +12,7 @@ mod confirm;
 mod distribution;
 mod drive;
 mod number;
+mod order;
 mod resource;
 mod select;
 
@@ -31,6 +32,7 @@ pub(super) enum Binding {
     Number(number::Binding),
     Resource(Box<resource::Binding>),
     Select(Box<select::Binding>),
+    Order(order::Binding),
 }
 
 pub(super) fn project(
@@ -85,6 +87,9 @@ pub(super) fn project(
         DecisionShape::DriveTrigger { icon, targets } => {
             drive::project(*icon, targets, context.ok_or(ProjectionError::Unavailable)?)
         }
+        DecisionShape::Order(domain) => {
+            order::project(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Abilities(_)
         | DecisionShape::WardEntry { .. }
         | DecisionShape::Quick { .. }
@@ -92,7 +97,6 @@ pub(super) fn project(
         | DecisionShape::BeforeDraw
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
-        | DecisionShape::Order(_)
         | DecisionShape::DamageReplacements(_)
         | DecisionShape::Search(_)
         | DecisionShape::SearchPartition(_)
@@ -124,6 +128,7 @@ impl Binding {
             Self::Number(binding) => binding.answer(answer),
             Self::Resource(binding) => binding.answer(answer),
             Self::Select(binding) => binding.answer(answer),
+            Self::Order(binding) => binding.answer(answer),
         }
     }
 }

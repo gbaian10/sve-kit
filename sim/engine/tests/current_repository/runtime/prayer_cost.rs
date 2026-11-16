@@ -171,7 +171,7 @@ fn resolve_look(game: &mut Game) {
     let QuestionShape::Decision(DecisionShape::Order(cards)) = order.shape else {
         panic!("printed bottom order")
     };
-    assert_eq!(cards.len(), 2, "the two unselected cards need ordering");
+    assert_eq!(cards.cards.len(), 2, "the two unselected cards need ordering");
     let known = game.projection(View::P2).unwrap();
     for id in ["trait", "named"] {
         assert!(
@@ -195,7 +195,7 @@ fn resolve_look(game: &mut Game) {
     }
     answer(
         game,
-        Answer::Order(cards.iter().rev().map(|m| m.handle).collect()),
+        Answer::Order(cards.cards.iter().rev().map(|m| m.handle).collect()),
     );
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["deck"],

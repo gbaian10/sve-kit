@@ -493,12 +493,12 @@ fn player_question_new_private_look_links_only_to_the_choosers_observation() {
     let QuestionShape::Decision(DecisionShape::Order(cards)) = &order.shape else {
         panic!("Look remainder");
     };
-    assert!(cards.iter().all(|card| card.object.is_some()));
+    assert!(cards.cards.iter().all(|card| card.object.is_some()));
     assert_eq!(
         answer(
             &mut game,
             Viewer::P1,
-            Answer::Order(cards.iter().map(|card| card.handle).collect())
+            Answer::Order(cards.cards.iter().map(|card| card.handle).collect())
         )
         .kind,
         SubmissionKind::Applied

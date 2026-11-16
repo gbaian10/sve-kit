@@ -11,10 +11,10 @@ use sve_engine::game::player::{
     AbilityChoice, Answer, CardOption, ClosingAnswer, ClosingQuestion, Command, DecisionShape,
     DiscardKind, DistributionQuestion, EarlierQuotaChoice, EvolutionAnswer, EvolutionPayment,
     EvolutionQuestion, IntegerSource, MainIntentKind, MovementCapacityQuestion, OpeningAnswer,
-    OpeningQuestion, PartitionQuestion, PendingChoice, QuestionShape, QuestionToken, QuotaQuestion,
-    ReplacementChoice, SearchAnswer, SearchQuestion, SelectionGroup, SelectionMember,
-    SelectionQuestion, SelectionRole, SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion,
-    Viewer,
+    OpeningQuestion, OrderDirection, OrderQuestion, PartitionQuestion, PendingChoice,
+    QuestionShape, QuestionToken, QuotaQuestion, ReplacementChoice, SearchAnswer, SearchQuestion,
+    SelectionDestination, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole,
+    SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion, Viewer,
 };
 use sve_engine::policy::{BasicPolicy, Choice, PolicyFailure};
 
@@ -78,6 +78,18 @@ fn option(handle: u64) -> CardOption {
         rules_names: None,
         original_cost: None,
     }
+}
+
+const fn ordering(cards: Vec<CardOption>) -> DecisionShape {
+    DecisionShape::Order(OrderQuestion {
+        cards,
+        direction: OrderDirection::TopDown,
+        destination: SelectionDestination {
+            player: Viewer::P1,
+            zone: ObservedZone::Deck,
+        },
+        position: Position::Top {},
+    })
 }
 
 fn selection() -> SelectionQuestion {
@@ -249,7 +261,7 @@ fn policy_occurrences_use_current_coordinates_and_orders_are_complete() {
         Answer::TriggerQuota(42)
     );
     assert_eq!(
-        answer(DecisionShape::Order(vec![option(99), option(4)])).unwrap(),
+        answer(ordering(vec![option(99), option(4)])).unwrap(),
         Answer::Order(vec![99, 4])
     );
     let replacements = [7, 2]
@@ -267,7 +279,7 @@ fn policy_occurrences_use_current_coordinates_and_orders_are_complete() {
         Answer::Order(vec![7, 2])
     );
     assert_eq!(
-        answer(DecisionShape::Order(vec![option(1), option(1)])),
+        answer(ordering(vec![option(1), option(1)])),
         Err(PolicyFailure::InvalidQuestion)
     );
     for shape in [

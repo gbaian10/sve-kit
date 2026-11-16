@@ -108,7 +108,7 @@ mod resource;
 
 mod drive;
 
-fn submit_exact(game: &mut Game, native: &Question, binding: &Binding, answer: &Answer) {
+pub(super) fn submit_exact(game: &mut Game, native: &Question, binding: &Binding, answer: &Answer) {
     let other = if native.actor == Viewer::P1 {
         Viewer::P2
     } else {

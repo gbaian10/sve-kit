@@ -115,7 +115,7 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
             Answer::Integer(bounds.minimum)
         }
         DecisionShape::Order(cards) => {
-            Answer::Order(ordered(cards.iter().map(|card| card.handle))?)
+            Answer::Order(ordered(cards.cards.iter().map(|card| card.handle))?)
         }
         DecisionShape::DamageReplacements(options) => {
             Answer::Order(ordered(options.iter().map(|option| option.handle))?)
