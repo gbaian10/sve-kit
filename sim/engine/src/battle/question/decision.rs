@@ -146,17 +146,27 @@ pub(super) fn project(
         DecisionShape::TokenCapacity(domain) => {
             capacity::tokens(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
-        DecisionShape::Abilities(choices) => {
-            ability::project(choices, context.ok_or(ProjectionError::Unavailable)?)
-        }
-        DecisionShape::DamageReplacements(choices) => {
-            replacement::project(choices, context.ok_or(ProjectionError::Unavailable)?)
+        DecisionShape::Abilities(_) | DecisionShape::DamageReplacements(_) => {
+            source_question(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
         DecisionShape::Quick { .. }
         | DecisionShape::ExchangeRoutes(_)
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
         | DecisionShape::SearchReplacement => Err(ProjectionError::Unavailable),
+    }
+}
+
+fn source_question(
+    domain: &DecisionShape,
+    context: Context<'_>,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    if let DecisionShape::Abilities(choices) = domain {
+        ability::project(choices, context)
+    } else if let DecisionShape::DamageReplacements(choices) = domain {
+        replacement::project(choices, context)
+    } else {
+        Err(ProjectionError::Unavailable)
     }
 }
 
