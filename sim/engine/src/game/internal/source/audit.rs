@@ -29,7 +29,7 @@ fn source_position(empty: &Value, number: &str, face: u64, kind: &str) -> Value 
         {"id":"audit-source","card":number,"state":{"face":face}}
     ]);
     if kind.contains("エボルヴ") {
-        // An evolved source reads its cost through its actual base/form association.
+        // This synthetic base/form association supplies cost information, not legal evolution.
         initial["players"]["P1"]["zones"]["field"] = json!([
             {"id":"audit-source","card":number,"state":{"face":0_u64,"evolved_with":"audit-form"}}
         ]);
