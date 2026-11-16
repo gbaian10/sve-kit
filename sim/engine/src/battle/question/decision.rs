@@ -7,8 +7,12 @@ use alloc::boxed::Box;
 use core::result;
 use sve_battle_contract::{Answer, QuestionId, observation::BattleObservation, question as wire};
 
+mod candidates;
 mod confirm;
+mod distribution;
+mod drive;
 mod number;
+mod resource;
 mod select;
 
 #[derive(Clone, Copy)]
@@ -22,7 +26,10 @@ pub(super) struct Context<'projection> {
 #[derive(Clone)]
 pub(super) enum Binding {
     Confirm(confirm::Binding),
+    Distribution(distribution::Binding),
+    Drive(drive::Binding),
     Number(number::Binding),
+    Resource(Box<resource::Binding>),
     Select(Box<select::Binding>),
 }
 
@@ -38,6 +45,9 @@ pub(super) fn project(
         DecisionShape::May => Ok(confirm::project(confirm::Binding::May)),
         DecisionShape::Integer { bounds, source } => number::integer(*bounds, *source),
         DecisionShape::DiceReroll { value, remaining } => number::dice(*value, *remaining),
+        DecisionShape::Distribution(domain) => {
+            distribution::project(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Targets(domain) => select::project(
             domain,
             select::Kind::Targets,
@@ -64,8 +74,18 @@ pub(super) fn project(
             select::Kind::CostMaterial,
             context.ok_or(ProjectionError::Unavailable)?,
         ),
+        DecisionShape::ResourceEntryPayment {
+            materials,
+            ep_allowed,
+        } => resource::project(
+            materials,
+            *ep_allowed,
+            context.ok_or(ProjectionError::Unavailable)?,
+        ),
+        DecisionShape::DriveTrigger { icon, targets } => {
+            drive::project(*icon, targets, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Abilities(_)
-        | DecisionShape::ResourceEntryPayment { .. }
         | DecisionShape::WardEntry { .. }
         | DecisionShape::Quick { .. }
         | DecisionShape::ExchangeRoutes(_)
@@ -74,11 +94,9 @@ pub(super) fn project(
         | DecisionShape::TriggerQuota(_)
         | DecisionShape::Order(_)
         | DecisionShape::DamageReplacements(_)
-        | DecisionShape::DriveTrigger { .. }
         | DecisionShape::Search(_)
         | DecisionShape::SearchPartition(_)
         | DecisionShape::MovementCapacity(_)
-        | DecisionShape::Distribution(_)
         | DecisionShape::SearchReplacement
         | DecisionShape::TokenCapacity(_)
         | DecisionShape::Modes { .. }
@@ -101,7 +119,10 @@ impl Binding {
     fn decode(&self, answer: &Answer) -> result::Result<player::Answer, AnswerError> {
         match self {
             Self::Confirm(binding) => binding.answer(answer),
+            Self::Distribution(binding) => binding.answer(answer),
+            Self::Drive(binding) => binding.answer(answer),
             Self::Number(binding) => binding.answer(answer),
+            Self::Resource(binding) => binding.answer(answer),
             Self::Select(binding) => binding.answer(answer),
         }
     }

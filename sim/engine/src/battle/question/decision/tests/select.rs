@@ -13,7 +13,7 @@ mod privacy;
 mod roles;
 mod validation;
 
-fn program(body: Value) -> WellFormedCardProgram {
+pub(super) fn program(body: Value) -> WellFormedCardProgram {
     let document = payment_fixtures::x_document(payment_expanded_tree(), "activate", body).unwrap();
     ExpandedLowerer::new()
         .unwrap()
@@ -23,7 +23,7 @@ fn program(body: Value) -> WellFormedCardProgram {
         .unwrap()
 }
 
-fn board(actor: Viewer, program: &WellFormedCardProgram) -> Game {
+pub(super) fn board(actor: Viewer, program: &WellFormedCardProgram) -> Game {
     board_with(
         actor,
         program,
@@ -42,7 +42,7 @@ fn hand(cards: &[&str], prefix: &str) -> Value {
     )
 }
 
-fn board_with(
+pub(super) fn board_with(
     actor: Viewer,
     program: &WellFormedCardProgram,
     own_hand: &[&str],
@@ -91,21 +91,21 @@ fn board_with(
     game
 }
 
-const fn seats(actor: Viewer) -> (&'static str, &'static str) {
+pub(super) const fn seats(actor: Viewer) -> (&'static str, &'static str) {
     match actor {
         Viewer::P1 => ("P1", "P2"),
         Viewer::P2 => ("P2", "P1"),
     }
 }
 
-fn question(game: &Game, actor: Viewer) -> Option<Question> {
+pub(super) fn question(game: &Game, actor: Viewer) -> Option<Question> {
     let Input::Question(question) = game.input(actor) else {
         return None;
     };
     Some(*question)
 }
 
-fn domain(question: &Question) -> Option<&DecisionShape> {
+pub(super) fn domain(question: &Question) -> Option<&DecisionShape> {
     let QuestionShape::Decision(domain) = &question.shape else {
         return None;
     };
@@ -120,7 +120,7 @@ const fn selection(shape: &wire::QuestionShape) -> Option<&wire::Selection> {
     }
 }
 
-fn components(game: &Game, actor: Viewer) -> BattleObservation {
+pub(super) fn components(game: &Game, actor: Viewer) -> BattleObservation {
     let fixture = board_fixture::fixture().unwrap();
     // Only board components are tested here; the public processing gate stays closed.
     build_observation(
@@ -132,7 +132,7 @@ fn components(game: &Game, actor: Viewer) -> BattleObservation {
     .unwrap()
 }
 
-fn project_question(
+pub(super) fn project_question(
     native: &Question,
     observation: &BattleObservation,
     id: &QuestionId,
