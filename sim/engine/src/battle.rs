@@ -33,6 +33,7 @@ mod events;
 mod history;
 mod objects;
 mod pending;
+mod question;
 mod references;
 mod selection;
 mod sources;
@@ -47,6 +48,7 @@ pub use events::{
 };
 pub use objects::ObjectTable;
 pub(crate) use objects::build_objects;
+pub use question::{AnswerError, QuestionProjection};
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use selection::{CandidateDetails, SelectionProjection};
 pub(crate) use turn::project_turn;
