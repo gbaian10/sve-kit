@@ -103,6 +103,24 @@ it("narrows a validated message by its kind", () => {
   }
 })
 
+it("keeps unprovided rules distinct from known empty and supplied references", () => {
+  const baseline = fixtures("question").find(([name]) => name.endsWith("first-player.json"))?.[1]
+  for (const rules of [
+    null,
+    [],
+    [{ kind: "cr", id: "0.0.1", revision: "synthetic", strength: "inferred" }],
+  ]) {
+    const value: unknown = { ...(baseline as object), rules }
+    expect(validateQuestion(value)).toBe(true)
+    if (!validateQuestion(value)) throw new Error("the rule availability fixture is invalid")
+    expect(value.rules).toEqual(rules)
+  }
+  const missing = Object.fromEntries(
+    Object.entries(baseline as object).filter(([key]) => key !== "rules"),
+  )
+  expect(validateQuestion(missing)).toBe(false)
+})
+
 it("preserves both safe integer operands of a conditional damage replacement", () => {
   const baseline = fixtures("observation").find(([name]) => name.endsWith("full.json"))?.[1]
   if (!validateBattleObservation(baseline)) throw new Error("the full fixture is invalid")
