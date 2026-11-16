@@ -1235,7 +1235,14 @@ impl Game {
         result
     }
 
-    /// Inspect the authority's `EachPlayer` cursor; player delivery requires separate authorization.
+    /// Innermost `EachPlayer` actor, or `None` before that layer first switches seats.
+    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_each_player_actor;
+    /// ```
+    #[cfg(feature = "runner")]
     #[must_use]
     pub fn internal_each_player_actor(&self) -> Option<PlayerId> {
         self.typed.as_ref()?.procedure_actor()

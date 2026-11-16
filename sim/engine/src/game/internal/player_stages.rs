@@ -312,6 +312,8 @@ impl Execution {
         Ok(())
     }
 
+    /// An unstarted inner procedure does not fall back to its outer actor.
+    #[cfg(feature = "runner")]
     pub(super) fn procedure_actor(&self) -> Option<PlayerId> {
         self.procedures.last()?.actor
     }
@@ -335,6 +337,8 @@ impl Execution {
         else {
             return;
         };
+        // Normal queues end inner procedures before an outer capture. Unexpected inner
+        // markers remain invariant errors, so inconsistent ordering cannot resume silently.
         self.procedures.truncate(index.saturating_add(1));
         let Some(mut procedure) = self.procedures.pop() else {
             return;
