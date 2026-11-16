@@ -3,7 +3,7 @@ import { expect, it } from "vitest"
 
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import type { Region } from "../../domain/search"
-import type { JsonObject } from "../format-v3/json"
+import { type JsonObject, stringValue } from "../format-v3/json"
 import type { Fragment } from "../format-v3/reader"
 import { BootstrapColumns } from "./bootstrap"
 import { SearchIndex } from "./index"
@@ -212,5 +212,33 @@ it.each(["jp", "en"] as const)(
       }
       expect(search({ prOnly: false }).total).toBeGreaterThan(search().total)
     }
+  },
+)
+
+it.each(["jp", "en"] as const)(
+  "disqualifies local PR candidates lazily and persists the %s completion flag",
+  (edition) => {
+    const local = columns(edition)
+    const index = new SearchIndex(local, edition)
+    const restoredLocal = new SearchIndex(index.encode(), edition)
+    expect(restoredLocal.prOnlyReady).toBe(false)
+    const full = columns()
+    const fullIndex = full.index()
+    restoredLocal.completePrOnly(
+      fullIndex.cards
+        .flatMap((card) => fullIndex.printingsOf(stringValue(card["id"])))
+        .filter((printing) => printing["region"] !== edition),
+    )
+    expect(restoredLocal.prOnlyReady).toBe(true)
+    const restored = new SearchIndex(restoredLocal.encode(), edition)
+    expect(restored.prOnlyReady).toBe(true)
+    const request = {
+      edition,
+      state: { ...DEFAULT_QUERY, prOnly: true, unit: "card" as const },
+      limit: 100,
+    }
+    expect(restored.search(request)).toEqual(new SearchIndex(full, edition).search(request))
+    restored.completePrintings(local)
+    expect(restored.search(request)).toEqual(new SearchIndex(full, edition).search(request))
   },
 )

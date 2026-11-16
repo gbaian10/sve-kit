@@ -207,7 +207,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 35
+export const INDEX_IMAGE_FORMAT = 36
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -285,6 +285,8 @@ function countPrinting(
 }
 
 interface Parts {
+  readonly prFamilies: ReadonlySet<string>
+  readonly prOnlyReady: boolean
   readonly pool: StringPool
   readonly summaries: Columns
   readonly cards: Record<(typeof CARD_COLUMNS)[number], Uint32Array>
@@ -760,6 +762,12 @@ function build(
   cards.traitStart.push(traits.length)
   pool.seal()
   return {
+    prFamilies: new Set(
+      index.families
+        .filter((row) => row["public_code"] === "PR")
+        .map((row) => stringValue(row["id"])),
+    ),
+    prOnlyReady: false,
     pool,
     summaries: summaryColumns,
     cards: seal(cards),
@@ -860,6 +868,8 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
   const releases = image["releases"] as unknown as SetRelease[]
   if (next !== arrays.length) throw new Error("index image has unread arrays")
   return {
+    prFamilies: new Set(arrayValue(image["prFamilies"]).map((value) => stringValue(value))),
+    prOnlyReady: image["prOnlyReady"] === true,
     pool,
     summaries,
     cards,
@@ -880,6 +890,8 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
 
 /** Matching reads scalar columns; summaries are decoded only for the requested page. */
 export class SearchIndex {
+  private readonly prFamilies: ReadonlySet<string>
+  private prOnlyReadyValue: boolean
   private readonly pool: StringPool
   private summaries: Columns
   private readonly cards: Record<(typeof CARD_COLUMNS)[number], Uint32Array>
@@ -910,6 +922,8 @@ export class SearchIndex {
     const parts = ArrayBuffer.isView(source)
       ? restore(source, edition)
       : build(source, edition, errataCards, restrictions)
+    this.prFamilies = parts.prFamilies
+    this.prOnlyReadyValue = parts.prOnlyReady
     this.pool = parts.pool
     this.summaries = parts.summaries
     this.cards = parts.cards
@@ -926,6 +940,25 @@ export class SearchIndex {
     this.releasesValue = parts.releases
     this.targets = parts.targets
     this.indexTargets()
+  }
+
+  get prOnlyReady(): boolean {
+    return this.prOnlyReadyValue
+  }
+
+  completePrOnly(otherPrintings: readonly JsonObject[]): void {
+    if (this.prOnlyReadyValue) return
+    const cards = new Map(Array.from(this.cards.id, (id, ordinal) => [this.pool.get(id), ordinal]))
+    for (const printing of otherPrintings) {
+      const card = cards.get(stringValue(printing["card_id"]))
+      if (
+        card !== undefined &&
+        (!this.prFamilies.has(stringValue(printing["home_set_id"])) ||
+          stringValue(printing["card_no"]).trim().length === 0)
+      )
+        this.cards.prOnly[card] = 0
+    }
+    this.prOnlyReadyValue = true
   }
 
   get options(): SearchOptions {
@@ -965,7 +998,7 @@ export class SearchIndex {
     const preferredIds: (JsonValue | undefined)[] = []
     for (let card = 0; card < this.cards.id.length; card++) {
       const id = this.pool.get(this.cards.id[card] ?? 0)
-      this.cards.prOnly[card] = Number(prOnly.has(id))
+      if (!this.prOnlyReadyValue) this.cards.prOnly[card] = Number(prOnly.has(id))
       const rows = index.printingsOf(id).filter((row) => row["region"] === this.edition)
       if (
         rows.length !==
@@ -1229,6 +1262,8 @@ export class SearchIndex {
     return pack(
       {
         edition: this.edition,
+        prFamilies: [...this.prFamilies],
+        prOnlyReady: this.prOnlyReady,
         sets: [...this.sets],
         options: this.options as unknown as JsonObject,
         releases: this.releases as unknown as JsonObject[],

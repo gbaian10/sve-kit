@@ -76,6 +76,9 @@ export class SearchEngine {
   private active:
     | {
         generation: number
+        crossRegion?: Promise<void>
+        indexWrite?: Promise<void>
+        filesCount: number
         effects?: Promise<EffectIndex>
         printings?: Promise<void>
         mechanics?: Promise<void>
@@ -129,6 +132,7 @@ export class SearchEngine {
   handle(request: SearchRequest): Promise<void> {
     if (request.kind === "cancel") {
       if (this.staging?.generation === request.generation) this.staging.abort.abort()
+      if (this.active?.generation === request.generation) this.active.controller.abort()
       return Promise.resolve()
     }
     if (request.kind === "close-channel") {
@@ -187,6 +191,8 @@ export class SearchEngine {
           return
         }
         try {
+          if ("query" in request && request.query.state.prOnly && active.index)
+            await this.completeCrossRegion(active)
           if (
             (request.kind === "search" ||
               request.kind === "view" ||
@@ -411,6 +417,100 @@ export class SearchEngine {
     )
   }
 
+  private async saveIndex(active: NonNullable<SearchEngine["active"]>): Promise<void> {
+    const stored = new VerifiedCache(
+      active.request.base,
+      "search-index",
+      INDEX_IMAGE_FORMAT,
+      this.plan === defaultPlan ? this.storage : undefined,
+      this.buildId,
+    )
+    const write = (active.indexWrite ?? Promise.resolve()).then(async () => {
+      active.signal.throwIfAborted()
+      if (!active.index || this.active !== active) return
+      await stored.write(
+        active.request.edition,
+        active.hash,
+        pack(
+          {
+            dataVersion: active.dataVersion,
+            manifestFields: active.manifestFields,
+            files: active.filesCount,
+            mediaFiles: [...active.files.values()],
+            version: active.version,
+          },
+          [active.index.encode()],
+        ),
+      )
+    })
+    active.indexWrite = write
+    await write
+  }
+
+  private async completeCrossRegion(active: NonNullable<SearchEngine["active"]>): Promise<void> {
+    if (!active.index || active.index.prOnlyReady) return
+    active.crossRegion ??= (async () => {
+      const files = [...active.files.values()].filter(
+        (file) =>
+          file["purpose"] === "catalog" &&
+          file["region"] !== null &&
+          file["region"] !== active.request.edition,
+      )
+      let done = 0
+      const progress = () => {
+        for (const [channelId, { request }] of this.queries) {
+          if (
+            this.active === active &&
+            request.generation === active.generation &&
+            "query" in request &&
+            request.query.state.prOnly
+          )
+            this.emit({
+              kind: "query-progress",
+              generation: request.generation,
+              channelId,
+              queryId: request.queryId,
+              done,
+              total: files.length,
+            })
+        }
+      }
+      progress()
+      const blobs = new SearchBlobs(active.request.base, this.fetcher, this.storage)
+      const identities: JsonObject[] = []
+      await blobs.readAll(files, active.signal, (file, bytes) => {
+        const part = decodeMessage({ kind: "file", file, version: active.version, bytes })
+        if (part.kind === "fragments")
+          for (const fragment of part.fragments) {
+            if (!["printing", "card_locator"].includes(fragment.table)) continue
+            for (const row of fragment.rows)
+              identities.push({
+                card_id: row["card_id"] ?? null,
+                card_no: row["card_no"] ?? null,
+                home_set_id:
+                  fragment.table === "card_locator"
+                    ? (row["home_set_id"] ?? null)
+                    : (objectValue(fragment.value["owner"])["id"] ?? null),
+              })
+          }
+        done++
+        progress()
+      })
+      // Local candidates must include every selected-region printing before disqualification.
+      await active.printings
+      active.signal.throwIfAborted()
+      if (this.active !== active || !active.index) return
+      active.index.completePrOnly(identities)
+      if (active.mechanics) {
+        // A PR query can finish while unrelated mechanics are still downloading.
+        void active.mechanics.then(() => this.saveIndex(active)).catch(() => undefined)
+      } else await this.saveIndex(active)
+    })().finally(() => {
+      delete active.crossRegion
+    })
+    await active.crossRegion
+  }
+
   private async resolve(request: LoadRequest, signal: AbortSignal): Promise<JsonObject> {
     const pointer = objectValue(
       parseJson(
@@ -565,6 +665,7 @@ export class SearchEngine {
           dataVersion: "",
           manifestFields: {} as JsonObject,
           files: new Map<string, JsonObject>(),
+          filesCount: 0,
           version: "",
           blobs,
           views,
@@ -599,6 +700,7 @@ export class SearchEngine {
           dataVersion: record.dataVersion,
           manifestFields: record.manifestFields,
           files: record.mediaFiles,
+          filesCount: record.files,
           version: record.version,
         })
         this.ready(
@@ -654,6 +756,8 @@ export class SearchEngine {
         this.active?.index &&
         !this.active.printings &&
         !this.active.mechanics &&
+        !this.active.crossRegion &&
+        !this.active.signal.aborted &&
         sameSource() &&
         this.active.hash === stringValue(entry["manifest_sha256"])
       ) {
@@ -823,6 +927,7 @@ export class SearchEngine {
         dataVersion,
         manifestFields,
         files,
+        filesCount: keys.length,
         version,
         blobs,
         views,
@@ -858,16 +963,13 @@ export class SearchEngine {
       const backgroundBlobs = new SearchBlobs(request.base, this.backgroundFetch, this.storage)
       const backgroundFiles = [...files.values()].filter(
         (file) =>
-          (file["purpose"] === "catalog" &&
-            file["region"] !== null &&
-            file["region"] !== request.edition) ||
-          ((["print", "product"].includes(stringValue(file["purpose"])) ||
+          (["print", "product"].includes(stringValue(file["purpose"])) ||
             arrayValue(file["row_counts"]).some((count) =>
               ["mechanic_projection", "card_mechanic_coverage", "card_engine_support"].includes(
                 stringValue(arrayValue(count)[0]),
               ),
             )) &&
-            (file["region"] === null || file["region"] === request.edition)),
+          (file["region"] === null || file["region"] === request.edition),
       )
       let completed = false
       try {
@@ -876,8 +978,8 @@ export class SearchEngine {
             backgroundFiles
               .filter((file) =>
                 purpose === "printings"
-                  ? ["catalog", "print", "product"].includes(stringValue(file["purpose"]))
-                  : !["catalog", "print", "product"].includes(stringValue(file["purpose"])),
+                  ? ["print", "product"].includes(stringValue(file["purpose"]))
+                  : !["print", "product"].includes(stringValue(file["purpose"])),
               )
               .map(async (file) =>
                 decodeMessage({
@@ -893,32 +995,7 @@ export class SearchEngine {
           for (const part of parts)
             if (part.kind === "fragments")
               catalogWork("background:ingest", () => {
-                // Other-region catalogs supply the complete printing identity closure for PR-only cards.
-                background.ingest(
-                  part.fragments.flatMap((fragment) => {
-                    if (
-                      fragment.value["purpose"] !== "catalog" ||
-                      fragment.value["region"] === null ||
-                      fragment.value["region"] === request.edition
-                    )
-                      return [fragment]
-                    if (fragment.table === "card_locator") return [fragment]
-                    if (fragment.table !== "printing") return []
-                    return [
-                      {
-                        ...fragment,
-                        table: "card_locator",
-                        rows: fragment.rows.map((row) => ({
-                          id: row["id"] ?? null,
-                          card_id: row["card_id"] ?? null,
-                          card_no: row["card_no"] ?? null,
-                          region: row["region"] ?? null,
-                          home_set_id: objectValue(fragment.value["owner"])["id"] ?? null,
-                        })),
-                      },
-                    ]
-                  }),
-                )
+                background.ingest(part.fragments)
               })
           catalogWork("background:seal", () => {
             background.seal()
@@ -948,20 +1025,7 @@ export class SearchEngine {
       if (!completed) return
       await blobs.retainPlan(files, manifestHash)
       // Written only now: every file passed its checks and this generation is already published.
-      await stored.write(
-        request.edition,
-        manifestHash,
-        pack(
-          {
-            dataVersion,
-            manifestFields,
-            files: keys.length,
-            mediaFiles: [...files.values()],
-            version,
-          },
-          [index.encode()],
-        ),
-      )
+      await this.saveIndex(active)
       signal.throwIfAborted()
       if (this.active?.generation === request.generation)
         await selection.write(
