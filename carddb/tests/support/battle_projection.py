@@ -3,6 +3,7 @@
 from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from typing import TYPE_CHECKING
 
 from sve_carddb.build import create_database
 from sve_carddb.core.json import digest
@@ -11,12 +12,59 @@ from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.project import project
 from sve_carddb.export.read_api import load_battle_inputs
 from sve_carddb.export.transport import Batch, Ownership, Snapshot, export_snapshot
+from tests.support.build_db_fixtures import rows as core_rows
 from tests.support.snapshot_project_fixtures import (
     SETTINGS,
+    TEXT,
     decisions,
     populate,
     schema,
 )
+
+if TYPE_CHECKING:
+    from sve_carddb.build import Database
+
+
+def _amulet(db: Database) -> None:
+    replacements = {
+        "card": "card-amulet",
+        "face": "face-amulet",
+        "printing": "printing-amulet",
+        "revision": "revision-amulet",
+        "text": TEXT,
+    }
+    rows = core_rows()
+    for table in [
+        "card",
+        "face",
+        "printing",
+        "face_revision",
+        "printing_face",
+        "face_current",
+        "printing_face_observation",
+    ]:
+        row = {
+            key: replacements.get(value, value) if isinstance(value, str) else value
+            for key, value in rows[table].items()
+        }
+        if table == "printing":
+            row["card_no"] = "TEST-002"
+        elif table == "face_revision":
+            row.update(
+                {
+                    "type_code": "amulet",
+                    "class_code": "synthetic",
+                    "cost": 1,
+                    "attack": None,
+                    "defense": None,
+                }
+            )
+        db.insert(table, row)
+    db.insert("card_int_id", {"int_id": 20002, "printing_id": "printing-amulet"})
+    db.insert(
+        "vocabulary",
+        {"kind": "type", "code": "amulet", "label_unit_id": TEXT, "active": True},
+    )
 
 
 def snapshot() -> Snapshot:
@@ -24,6 +72,7 @@ def snapshot() -> Snapshot:
     with create_database(schema()) as db:
         with db.transaction():
             populate(db)
+            _amulet(db)
             db.delete(
                 "face_special_kind",
                 {"revision_id": "revision", "special_kind_code": "synthetic"},
@@ -36,6 +85,7 @@ def snapshot() -> Snapshot:
             for text, kind, code in [
                 ("ニュートラル", "class", "synthetic"),
                 ("フォロワー", "type", "follower"),
+                ("アミュレット", "type", "amulet"),
             ]:
                 identifier = "t:ja:" + digest(text.encode())[7:23]
                 db.insert(

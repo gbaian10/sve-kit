@@ -187,14 +187,24 @@ def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
     result = load_battle_inputs(roots.preview, "jp")
-    row = object_value(parse(result.snapshot.strip()))
+    rows = [object_value(parse(line)) for line in result.snapshot.splitlines()]
+    assert len(rows) == 2
+    row = rows[0]
     assert row["number"] == "TEST-001Ⓢa"
+    amulet = object_value(array(rows[1]["faces"])[0])
+    assert amulet["card_type"] == "アミュレット"
+    assert (amulet["power"], amulet["hp"]) == ("-", "-")
     assert result.references["faces"] == [
         {
             "card_no": "TEST-001Ⓢa",
             "native_face": 0,
             "card": {"printing_id": "printing", "face": 0},
-        }
+        },
+        {
+            "card_no": "TEST-002",
+            "native_face": 0,
+            "card": {"printing_id": "printing-amulet", "face": 0},
+        },
     ]
     assert object_value(result.references["wording"])["manifest_sha256"] == digest(
         canonical(snapshot.manifest)
