@@ -35,6 +35,9 @@
     "src/battle/presentation/queue.ts!",
     // What a main-phase question lets a seat do; the battle screen answers through `act` next (#2130).
     "src/battle/view/actions.ts!",
+    // Readers of the selecting questions; the battle screen's next slices answer through them (#2130).
+    "src/battle/view/choices.ts!",
+    "src/battle/view/select.ts!",
     // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.

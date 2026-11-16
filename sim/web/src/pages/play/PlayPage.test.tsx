@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import type { HostMessage, Seat } from "../../battle/contract"
 import { cardRef } from "../../battle/fixtures/cards"
+import { SCENES } from "../../battle/fixtures/scenes"
 import type { BattleSource } from "../../battle/source"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
@@ -213,6 +214,13 @@ describe("PlayPage", () => {
     await renderRoutes(strict, { initialEntries: ["/play?dual=1"] })
     const pane = await screen.findByRole("region", { name: "對手看到的畫面（只能看）" })
     expect(await within(pane).findByRole("region", { name: "對戰桌" })).toBeInTheDocument()
+  })
+
+  it.each(SCENES.map((scene) => scene.id))("opens the %s scene", async (id) => {
+    await renderRoutes(ROUTES, { initialEntries: [`/play?scene=${id}`] })
+    // Whatever the scene asks, the table stands; only a host error replaces it with a notice.
+    if (id === "halted") expect(await screen.findByRole("alert")).toBeInTheDocument()
+    else expect(await table()).toBeInTheDocument()
   })
 
   it("switches scene from the picker and keeps it in the address", async () => {

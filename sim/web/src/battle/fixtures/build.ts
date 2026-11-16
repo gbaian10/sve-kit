@@ -16,6 +16,7 @@ import type {
   Ready,
   Relationship,
   Seat,
+  Subject,
   TurnView,
   ZoneMember,
   ZoneView,
@@ -101,6 +102,8 @@ export interface SeatSpec {
 export interface TableSpec {
   readonly turn: TurnView
   readonly seats: readonly [SeatSpec, SeatSpec]
+  /** An attack that has been declared and not yet resolved: a keyed field card, at a leader or another. */
+  readonly attack?: { readonly attacker: Keyed; readonly target: Seat | Keyed }
 }
 
 const SEATS: readonly [Seat, Seat] = ["p1", "p2"]
@@ -284,6 +287,11 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
     }
   }
 
+  const subject = (named: Seat | Keyed): Subject =>
+    typeof named === "string"
+      ? { kind: "leader", player: named }
+      : { kind: "card", card: cardRef(named.no), object: `${prefix}:${named.key}` }
+
   const players: [PlayerView, PlayerView] = [
     player(SEATS[0], table.seats[0]),
     player(SEATS[1], table.seats[1]),
@@ -292,7 +300,10 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
     viewer,
     objects,
     turn: table.turn,
-    attack: null,
+    attack:
+      table.attack === undefined
+        ? null
+        : { attacker: subject(table.attack.attacker), target: subject(table.attack.target) },
     players,
     relationships,
     processing: [],
@@ -325,6 +336,13 @@ export function ready(viewer: Seat): Ready {
       region: "jp",
     },
   }
+}
+
+/** Where a scene stands once an answer is applied. */
+export interface Step {
+  readonly table: TableSpec
+  /** What happens next, when it is not the main-phase question of the seat whose turn it is. */
+  readonly input?: BattleInput
 }
 
 /**
@@ -411,7 +429,8 @@ function mainQuestion(
 /**
  * A complete update for one seat: the whole table, nothing to play back, and what happens next.
  * With a question id the seat whose main phase it is gets the main-phase question and the other
- * seat waits for it; `next` can also be any other input, the same for both seats.
+ * seat waits for it. `next` can also be any other input: a question goes to the seat it is put to
+ * while the other waits, anything else is the same for both seats.
  */
 export function update(
   table: TableSpec,
@@ -421,12 +440,21 @@ export function update(
 ): BattleUpdate {
   const observation = observe(table, viewer)
   const active = table.turn.active ?? "p1"
+  const waiting = (actor: Seat): BattleInput => ({
+    kind: "waiting",
+    actor,
+    context: { processing: null, dice: null },
+  })
   const input: BattleInput =
-    typeof next === "string" && viewer === active && table.turn.phase === "main"
-      ? { kind: "question", question: mainQuestion(observation, table, viewer, next) }
-      : next !== null && typeof next !== "string"
-        ? next
-        : { kind: "waiting", actor: active, context: { processing: null, dice: null } }
+    next === null
+      ? waiting(active)
+      : typeof next === "string"
+        ? viewer === active && table.turn.phase === "main"
+          ? { kind: "question", question: mainQuestion(observation, table, viewer, next) }
+          : waiting(active)
+        : next.kind === "question" && next.question.actor !== viewer
+          ? waiting(next.question.actor)
+          : next
   return {
     kind: "update",
     format: 1,

@@ -1,18 +1,40 @@
 // Fixture scenes: a described table per scene and what each seat is sent for it. Numbers, postures
 // and keywords are arranged to exercise the screen, not to record a position a game reached.
-import type { BattleInput, CardRef, HostError, HostMessage, OptionId, Seat } from "../contract"
+import type {
+  Answer,
+  BattleInput,
+  CardRef,
+  HostError,
+  HostMessage,
+  Question,
+  Seat,
+} from "../contract"
 import type { SlotArrangement } from "../view/table"
-import { type FieldSpec, ready, type SeatSpec, type TableSpec, update } from "./build"
+import { ASKED_SCENES, type AskedSceneId } from "./asked"
+import { type FieldSpec, ready, type SeatSpec, type Step, type TableSpec, update } from "./build"
 import { type CardNo, cardRef } from "./cards"
+import {
+  DRAGON_EVOLVE,
+  DRAGON_LEADER,
+  ROYAL_EVOLVE,
+  ROYAL_LEADER,
+  SEP_FROM,
+  WITCH_EVOLVE,
+  WITCH_LEADER,
+} from "./decks"
 
 type SceneId =
-  "preset" | "opening" | "mid" | "full" | "stack" | "turn" | "finished" | "fault" | "halted"
-
-/** One answer applied in a scene: the intent taken and, for an attack, its recipient. */
-export interface Choice {
-  readonly intent: OptionId
-  readonly target: OptionId | null
-}
+  | "preset"
+  | "opening"
+  | "mid"
+  | "full"
+  | "stack"
+  | "turn"
+  | "quick"
+  | "finished"
+  | "fault"
+  | "halted"
+  | AskedSceneId
 
 export interface Scene {
   readonly id: SceneId
@@ -23,49 +45,12 @@ export interface Scene {
   /** Everything each seat receives when it starts, in order. */
   readonly script: Readonly<Record<Seat, readonly HostMessage[]>>
   /**
-   * How the scene goes on: the table once these answers have been applied, in order, or null when
-   * the script has no such course and the last answer is refused. A scene that only shows a table
-   * refuses every answer.
+   * How the scene goes on: where it stands once these answers have been applied, in order, or null
+   * when the script has no such course and the last answer is refused. A scene that only shows a
+   * table refuses every answer.
    */
-  readonly after: (choices: readonly Choice[]) => TableSpec | null
+  readonly after: (answers: readonly Answer[]) => Step | null
 }
-
-const DRAGON_LEADER: CardNo = "BP10-LD05"
-const ROYAL_LEADER: CardNo = "BP05-LD02"
-const WITCH_LEADER: CardNo = "BP01-LD05"
-
-const DRAGON_EVOLVE: readonly CardNo[] = [
-  "BP05-053",
-  "BP05-053",
-  "BP05-053",
-  "BP20-065",
-  "BP20-065",
-  "BP15-114",
-  "BP15-114",
-  "BP15-067",
-  "BP20-058",
-  "BP05-056",
-]
-const WITCH_EVOLVE: readonly CardNo[] = [
-  "BP01-053",
-  "BP01-053",
-  "BP01-055",
-  "BP01-055",
-  "BP01-069",
-  "BP01-069",
-]
-const ROYAL_EVOLVE: readonly CardNo[] = [
-  "BP16-032",
-  "BP16-032",
-  "BP16-032",
-  "BP13-027",
-  "BP13-027",
-  "BP13-027",
-  "BP13-031",
-  "BP13-031",
-  "BP13-031",
-  "BP13-020",
-]
 
 /** The evolve deck with these cards taken out of it, one copy each. */
 function without(deck: readonly CardNo[], taken: readonly CardNo[]): CardNo[] {
@@ -76,9 +61,6 @@ function without(deck: readonly CardNo[], taken: readonly CardNo[]): CardNo[] {
   }
   return rest
 }
-
-// When each seat may first super evolve, counted in its own turns, as the authority hands it out.
-const SEP_FROM = { first: 7, second: 6 }
 
 function scene(
   id: SceneId,
@@ -142,8 +124,9 @@ interface TurnCourse {
 const TURN_START: TurnCourse = { played: false, unifier: "ready", priest: "ready", ended: false }
 
 /** The course after one more answer, its options named as the first seat's question names them. */
-function turnStep(course: TurnCourse, { intent, target }: Choice): TurnCourse | null {
-  if (course.ended) return null
+function turnStep(course: TurnCourse, answer: Answer): TurnCourse | null {
+  if (course.ended || answer.kind !== "action_window") return null
+  const { intent, target } = answer
   if (intent === "play:a:fanatic") return { ...course, played: true }
   if (intent === "attack:a:unifier")
     return { ...course, unifier: target === "attack:a:unifier>leader" ? "leader" : "fighter" }
@@ -253,6 +236,103 @@ function turnTable(course: TurnCourse): TableSpec {
       },
     ],
   }
+}
+
+// The Quick spell of this scene looks at the deck's top cards and may take a spell from them. The
+// script lets it find none, so playing it asks nothing further; the attack then lands either way.
+function quickTable(used: boolean | null): TableSpec {
+  const attacker = { no: "BP16-021", key: "attacker" } as const
+  return {
+    turn: { active: "p2", first_player: "p1", phase: "main", elapsed_turns: [4, 4] },
+    ...(used === null ? { attack: { attacker, target: "p1" } } : {}),
+    seats: [
+      {
+        life: used === null ? 18 : 14,
+        pp: used === true ? 0 : 2,
+        maxPp: 4,
+        ep: 0,
+        sep: 1,
+        epCapacity: 0,
+        sepAvailableFrom: SEP_FROM.first,
+        deck: 27,
+        hand: [
+          ...(used === true ? [] : [{ no: "BP01-072", key: "quick" } as const]),
+          "BP01-071",
+          "BP01-054",
+        ],
+        field: [
+          { no: "BP01-T10", slot: 0, counters: [["スタックカウンター", 3]] },
+          { no: "BP01-067", slot: 1, acted: true },
+        ],
+        ex: [],
+        cemetery: [
+          "BP01-071",
+          "BP01-068",
+          ...(used === true ? [{ no: "BP01-072", key: "quick" } as const] : []),
+        ],
+        banish: [],
+        evolveDeck: { faceDown: WITCH_EVOLVE, faceUp: [] },
+      },
+      {
+        life: 17,
+        pp: 1,
+        maxPp: 4,
+        ep: 3,
+        sep: 1,
+        epCapacity: 3,
+        sepAvailableFrom: SEP_FROM.second,
+        deck: 29,
+        hand: ["BP13-026", "BP13-035", "BP16-026"],
+        field: [
+          { ...attacker, slot: 1, acted: true },
+          { no: "BP13-026", slot: 3 },
+        ],
+        ex: ["BP16-026"],
+        cemetery: ["SD07-012"],
+        banish: [],
+        evolveDeck: { faceDown: ROYAL_EVOLVE, faceUp: [] },
+      },
+    ],
+  }
+}
+
+/** What the first seat is asked while the attack stands, worded like the contract's own sample. */
+const QUICK_QUESTION: Question = {
+  id: "quick",
+  actor: "p1",
+  purpose: "quick_window",
+  use: "quick",
+  processing: {
+    stage: "quick",
+    controller: "p1",
+    source: null,
+    subject: null,
+    rule: null,
+    procedure: null,
+    declared: [],
+    payment: null,
+  },
+  shape: {
+    kind: "quick",
+    window: "attack",
+    options: [
+      {
+        id: "quick:a:quick",
+        action: "play",
+        source: {
+          kind: "card",
+          printing_id: cardRef("BP01-072").printing_id,
+          face: 0,
+          line: null,
+          holder: "a:quick",
+        },
+        origin: { player: "p1", zone: "hand", position: 0 },
+      },
+    ],
+  },
+  rules: null,
+  auto_answer: { kind: "not_unique" },
+  assistance: null,
 }
 
 /** The table with the second seat's leader out of life. */
@@ -512,14 +592,23 @@ export const SCENES = [
     [WITCH_LEADER, ROYAL_LEADER],
   ),
   scene("turn", turnTable(TURN_START), [DRAGON_LEADER, ROYAL_LEADER], {
-    after: (choices) => {
+    after: (answers) => {
       let course: TurnCourse | null = TURN_START
-      for (const choice of choices) {
-        course = turnStep(course, choice)
+      for (const answer of answers) {
+        course = turnStep(course, answer)
         if (course === null) return null
       }
-      return turnTable(course)
+      return { table: turnTable(course) }
     },
+  }),
+  // The other seat attacks the leader, and the first seat is asked whether to play its Quick spell
+  // before the attack lands; either answer is taken once, then the turn goes on.
+  scene("quick", quickTable(null), [WITCH_LEADER, ROYAL_LEADER], {
+    input: { kind: "question", question: QUICK_QUESTION },
+    after: ([answer, ...more]) =>
+      answer?.kind !== "quick" || more.length > 0
+        ? null
+        : { table: quickTable(answer.option !== null) },
   }),
   // The game is over: nothing is asked of anybody.
   scene(
@@ -539,4 +628,7 @@ export const SCENES = [
   scene("halted", turnTable(TURN_START), [DRAGON_LEADER, ROYAL_LEADER], {
     stop: { kind: "host_error", format: 1, reason: "projection" },
   }),
+  ...ASKED_SCENES.map(({ id, table, leaders, input, after }) =>
+    scene(id, table, leaders, { input, after }),
+  ),
 ] as const satisfies readonly Scene[]
