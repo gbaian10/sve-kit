@@ -985,8 +985,16 @@ pub(super) enum FanfareKeyword {
 pub(super) enum MoveObjects {
     Whole(WholeDeckReturn),
     Observed(Observed),
+    FilteredObserved(FilteredObserved),
     Field(Objects),
     Public(Box<PublicQuery>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FilteredObserved {
+    pub r#in: String,
+    pub kind: FieldKind,
 }
 
 #[derive(Deserialize)]
@@ -3281,6 +3289,13 @@ pub(super) struct Reveal {
     pub r#ref: Option<RevealRef>,
     pub top: Option<DeckTop>,
     pub bind: String,
+    pub random: Option<RandomSample>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RandomSample {
+    pub n: u64,
 }
 
 #[derive(Deserialize)]

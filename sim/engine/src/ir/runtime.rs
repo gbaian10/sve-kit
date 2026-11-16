@@ -404,6 +404,7 @@ runtime_record!(FlipOutcome { successful: Vec<ResultMember> });
 runtime_record!(LookOutcome { looked: Vec<RuntimeObjectView> });
 // A public reveal shows every member to all players; members stay readable only while unmoved.
 runtime_record!(RevealOutcome { revealed: Vec<ObjectRef> });
+runtime_record!(RandomOutcome { sampled: Vec<ObjectRef> });
 runtime_record!(RevealUntilOutcome { revealed: Vec<RuntimeObjectView>, matched: Vec<RuntimeObjectView>, exhausted: Bool });
 /// A fact requiring at least one facet cannot be represented by an empty list.
 #[derive(Clone, Debug, PartialEq, Eq)]

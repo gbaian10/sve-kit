@@ -1,8 +1,9 @@
 use super::{Action, BodyContext, LoweringError, ast, unsupported};
 use crate::ir::{
-    AbilitySource, Expr, Instruction, InstructionContext, InstructionId, Located, MemberProjection,
-    Nat, Node, ObjectReceipt, OwnerZone, PlayerRef, ReceiptId, ReceiptLocation, ReceiptReference,
-    Selector, SourceSpan, StepwiseMode, ZoneKind, ZoneRef,
+    AbilitySource, CardKind, Cardinality, Expr, Instruction, InstructionContext, InstructionId,
+    Located, MemberProjection, Nat, Node, ObjectReceipt, OwnerZone, PlayerRef, PlayerRelation,
+    PlayerSet, RandomnessPolicy, ReceiptId, ReceiptLocation, ReceiptReference, Selector,
+    SourceSpan, StepwiseMode, TextQuantifier, Visibility, ZoneKind, ZoneRef,
 };
 
 #[expect(
@@ -10,6 +11,95 @@ use crate::ir::{
     reason = "Public observations share the body's existing Look receipts."
 )]
 impl BodyContext<'_> {
+    pub(super) fn random_reveal(
+        &mut self,
+        step: &ast::Step,
+        path: &str,
+        source: &SourceSpan,
+        origin: &AbilitySource,
+    ) -> Result<Vec<Located<Node>>, LoweringError> {
+        let ast::Step::Reveal(value) = step else {
+            return Err(unsupported(path));
+        };
+        let (Some(ast::RevealRef::WholeHand(hand)), Some(random)) = (&value.r#ref, &value.random)
+        else {
+            return Err(unsupported(path));
+        };
+        if value.top.is_some() || matches!(hand.who, ast::Side::All) {
+            return Err(unsupported(path));
+        }
+        let (relation, relative_to) = self.side_set(&hand.who, path)?;
+        let population = Selector::Zone {
+            players: PlayerSet {
+                relation,
+                relative_to,
+                cardinality: Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                },
+                text_quantifier: TextQuantifier::Implicit,
+            },
+            zone: ZoneKind::Hand,
+            view: super::super::SelectionView::Current {},
+            binding: super::Binding::new(self.allocator.id(path)?, self.scope),
+            predicate: Box::new(Expr::Literal(super::super::Bool(true))),
+        };
+        let sample = ReceiptId(self.card_allocator.id(path)?);
+        let reveal = ReceiptId(self.card_allocator.id(path)?);
+        let action = Action::Reveal {
+            objects: Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Random {
+                    receipt: ReceiptReference::new(sample),
+                },
+                projection: MemberProjection::Before,
+            },
+        };
+        self.remember(step, reveal, &action, path)?;
+        let visibility = Visibility::Only {
+            players: PlayerSet {
+                relation: PlayerRelation::SelfPlayer,
+                relative_to: PlayerRef::Controller {},
+                cardinality: Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                },
+                text_quantifier: TextQuantifier::Implicit,
+            },
+        };
+        Ok([
+            (
+                sample,
+                Action::Random {
+                    population,
+                    count: Nat(random.n),
+                    rng: RandomnessPolicy::FreshRequest,
+                    visibility,
+                },
+            ),
+            (reveal, action),
+        ]
+        .into_iter()
+        .map(|(receipt, action)| {
+            let mut located = source.clone();
+            path.clone_into(&mut located.author_path);
+            Located {
+                source: located,
+                node: Node::Instruction {
+                    instruction: Box::new(Instruction {
+                        id: InstructionId(receipt.0),
+                        receipt,
+                        actor: PlayerRef::Controller {},
+                        source: origin.clone(),
+                        precondition: None,
+                        context: InstructionContext::Effect,
+                        action,
+                    }),
+                },
+            }
+        })
+        .collect())
+    }
+
     pub(super) fn public_observation(
         &self,
         name: &str,
@@ -40,6 +130,7 @@ impl BodyContext<'_> {
         let top = value.top.as_ref().ok_or_else(|| unsupported(path))?;
         if self.scope != self.resolution_scope
             || value.r#ref.is_some()
+            || value.random.is_some()
             || top.n == 0
             || value.bind.is_empty()
             || !matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller))
@@ -97,10 +188,47 @@ impl BodyContext<'_> {
     }
 
     pub(super) fn public_reveal_move(
-        &self,
+        &mut self,
         value: &ast::Move,
         path: &str,
     ) -> Result<Option<Action>, LoweringError> {
+        if let Some(ast::MoveObjects::FilteredObserved(observed)) = &value.r#ref {
+            let Some(receipt @ ObjectReceipt::Reveal { .. }) =
+                self.observations.get(&observed.r#in)
+            else {
+                return Err(unsupported(path));
+            };
+            if !matches!(value.to, ast::Destination::Field)
+                || value.top.is_some()
+                || value.position.is_some()
+                || value.order.is_some()
+                || value.acted.is_some()
+                || value.entry_effects.is_some()
+                || value.result.as_ref().is_none_or(String::is_empty)
+            {
+                return Err(unsupported(path));
+            }
+            let input = Selector::ReceiptMembers {
+                receipt: receipt.clone(),
+                projection: MemberProjection::Before,
+            };
+            let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
+            let filter = super::selection::ObjectFilter {
+                kind: Some(match observed.kind {
+                    ast::FieldKind::Follower => CardKind::Follower,
+                    ast::FieldKind::Amulet => CardKind::Amulet,
+                }),
+                ..super::selection::ObjectFilter::default()
+            };
+            return Ok(Some(super::ordering::shared_put(
+                Selector::Filter {
+                    input: Box::new(input),
+                    binding,
+                    predicate: Box::new(super::selection::field_filter(&filter, binding)),
+                },
+                ZoneKind::Field,
+            )));
+        }
         let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref else {
             return Ok(None);
         };

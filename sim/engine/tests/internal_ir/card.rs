@@ -1085,3 +1085,9 @@ mod layer3_must_attack;
 
 #[path = "card/layer3_arena_attack.rs"]
 mod layer3_arena_attack;
+
+#[path = "card/layer3_random_reveal.rs"]
+mod layer3_random_reveal;
+
+#[path = "card/layer3_revealed_entry.rs"]
+mod layer3_revealed_entry;
