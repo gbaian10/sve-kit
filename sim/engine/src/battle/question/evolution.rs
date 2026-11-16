@@ -1,11 +1,149 @@
-use super::{AnswerError, Binding, Result, seat};
-use crate::battle::{CandidateDetails, ProjectionError, SelectionProjection};
-use crate::game::player::{self, EvolutionAnswer, Viewer};
-use alloc::collections::BTreeMap;
+use super::common::{option, seat};
+use super::{AnswerError, Binding, Result};
+use crate::battle::{BattleReferences, CandidateDetails, ProjectionError, SelectionProjection};
+use crate::catalog::Catalog;
+use crate::game::player::{self, EvolutionAnswer, Viewer, observation::CardFace};
+use alloc::collections::{BTreeMap, BTreeSet};
 use core::result;
 use sve_battle_contract::{
-    Answer, QuestionId, Subject, Zone, observation::BattleObservation, question as wire,
+    Answer, Int, Nat, QuestionId, Subject, Zone, observation::BattleObservation, question as wire,
 };
+
+pub(super) fn evolution_form(
+    id: &QuestionId,
+    actor: Viewer,
+    forms: &[player::EvolutionForm],
+    observation: &BattleObservation,
+    catalog: &Catalog,
+    references: &BattleReferences,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    if forms.is_empty() {
+        return Err(ProjectionError::Unavailable);
+    }
+    let deck = &observation
+        .players
+        .iter()
+        .find(|player| player.seat == seat(actor))
+        .ok_or(ProjectionError::Unavailable)?
+        .zones
+        .evolve_deck;
+    let mut seen = BTreeSet::new();
+    let mut choices = Vec::new();
+    let mut coordinates = BTreeMap::new();
+    for (index, form) in forms.iter().enumerate() {
+        if !seen.insert((&form.card.handle, form.face)) {
+            return Err(ProjectionError::Unavailable);
+        }
+        let member = deck
+            .cards
+            .iter()
+            .find(|member| member.object.as_str() == form.card.handle.as_str())
+            .ok_or(ProjectionError::Unavailable)?;
+        let object = observation
+            .objects
+            .get(&member.object)
+            .ok_or(ProjectionError::Unavailable)?;
+        // The native form authorizes a destination, which may differ from its observed current face.
+        let destination = references.resolve(
+            catalog,
+            &CardFace {
+                card: form.card.properties.card.clone(),
+                face: form.face,
+            },
+        )?;
+        if destination.printing_id != object.card.printing_id {
+            return Err(ProjectionError::Unavailable);
+        }
+        let option_id = option(id, index);
+        // The destination CardRef lets clients read its name from the pinned snapshot.
+        choices.push(wire::ChoiceOption {
+            id: option_id.clone(),
+            value: wire::ChoiceValue::EvolutionForm {
+                object: member.object.clone(),
+                face: destination,
+            },
+            cost: None,
+        });
+        coordinates.insert(option_id, form.id);
+    }
+    Ok((
+        wire::QuestionUse::EvolutionForm,
+        wire::QuestionShape::Choose {
+            options: choices,
+            bounds: wire::Bounds {
+                min: Nat::from(1_u32),
+                max: Some(Nat::from(1_u32)),
+            },
+            count: None,
+            earlier: vec![],
+            capacity: None,
+        },
+        Binding::EvolutionForm(coordinates),
+    ))
+}
+
+pub(super) fn evolution_payment(
+    quote: player::EvolutionPayment,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    if quote.total_pp < 0 || quote.available_pp < 0 {
+        return Err(ProjectionError::Unavailable);
+    }
+    let mut payments = Vec::new();
+    // One optional EP replaces exactly one PP; changing that rule also changes this candidate template.
+    for use_ep in [false, true] {
+        let pp = quote
+            .total_pp
+            .checked_sub(i64::from(use_ep))
+            .ok_or(ProjectionError::Unavailable)?;
+        for super_evolution in [false, true] {
+            if !quote.is_valid(pp, use_ep, super_evolution) {
+                continue;
+            }
+            payments.push(wire::EvolutionPayment {
+                pp: Int::try_from(pp)?,
+                use_ep,
+                super_evolution,
+            });
+        }
+    }
+    if payments.is_empty() {
+        return Err(ProjectionError::Unavailable);
+    }
+    Ok((
+        wire::QuestionUse::EvolutionPayment,
+        wire::QuestionShape::EvolutionPayment {
+            payments: payments.clone(),
+        },
+        Binding::EvolutionPayment(payments),
+    ))
+}
+
+pub(super) fn evolution_payment_answer(
+    payments: &[wire::EvolutionPayment],
+    answer: &Answer,
+) -> result::Result<EvolutionAnswer, AnswerError> {
+    let Answer::EvolutionPayment {
+        pp,
+        use_ep,
+        super_evolution,
+    } = answer
+    else {
+        return Err(AnswerError);
+    };
+    let chosen = wire::EvolutionPayment {
+        pp: *pp,
+        use_ep: *use_ep,
+        super_evolution: *super_evolution,
+    };
+    if !payments.contains(&chosen) {
+        return Err(AnswerError);
+    }
+    Ok(EvolutionAnswer::Payment {
+        pp: pp.get(),
+        ep: *use_ep,
+        super_evolution: *super_evolution,
+    })
+}
 
 pub(super) fn discard(
     id: &QuestionId,
@@ -88,3 +226,6 @@ pub(super) fn discard_answer(
     };
     Ok(EvolutionAnswer::Discard(handles))
 }
+
+#[cfg(test)]
+mod tests;
