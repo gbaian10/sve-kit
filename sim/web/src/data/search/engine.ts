@@ -78,6 +78,8 @@ export class SearchEngine {
         generation: number
         crossRegion?: Promise<void>
         crossRegionController?: AbortController
+        sveOnly?: Promise<void>
+        sveOnlyController?: AbortController
         indexWrite?: Promise<void>
         filesCount: number
         effects?: Promise<EffectIndex>
@@ -133,7 +135,10 @@ export class SearchEngine {
   handle(request: SearchRequest): Promise<void> {
     if (request.kind === "cancel") {
       if (this.staging?.generation === request.generation) this.staging.abort.abort()
-      if (this.active?.generation === request.generation) this.active.crossRegionController?.abort()
+      if (this.active?.generation === request.generation) {
+        this.active.crossRegionController?.abort()
+        this.active.sveOnlyController?.abort()
+      }
       return Promise.resolve()
     }
     if (request.kind === "close-channel") {
@@ -194,6 +199,8 @@ export class SearchEngine {
         try {
           if ("query" in request && request.query.state.prOnly && active.index)
             await this.completeCrossRegion(active)
+          if ("query" in request && request.query.state.sveOnly && active.index)
+            await this.completeSveOnly(active)
           if (
             (request.kind === "search" ||
               request.kind === "view" ||
@@ -216,9 +223,8 @@ export class SearchEngine {
             await active.printings
           if (
             "query" in request &&
-            (request.query.state.sveOnly ||
-              ("mechanics" in request.query.state &&
-                Object.keys(request.query.state.mechanics).length) ||
+            (("mechanics" in request.query.state &&
+              Object.keys(request.query.state.mechanics).length) ||
               ("abilityTypes" in request.query.state && request.query.state.abilityTypes.length) ||
               ("classMechanisms" in request.query.state &&
                 request.query.state.classMechanisms.length) ||
@@ -517,6 +523,64 @@ export class SearchEngine {
     await active.crossRegion
   }
 
+  private async completeSveOnly(active: NonNullable<SearchEngine["active"]>): Promise<void> {
+    if (!active.index || active.index.sveOnlyReady) return
+    active.sveOnly ??= (async () => {
+      const controller = new AbortController()
+      active.sveOnlyController = controller
+      const signal = AbortSignal.any([active.signal, controller.signal])
+      // Let background writes finish so shared shards can be read from the verified cache.
+      await Promise.all([active.printings, active.mechanics])
+      signal.throwIfAborted()
+      const tables = new Set(["digital_link", "digital_card", "digital_art_coverage"])
+      const files = [...active.files.values()].filter((file) =>
+        arrayValue(file["row_counts"]).some((count) =>
+          tables.has(stringValue(arrayValue(count)[0])),
+        ),
+      )
+      let done = 0
+      const progress = () => {
+        for (const [channelId, { request }] of this.queries) {
+          if (
+            this.active === active &&
+            request.generation === active.generation &&
+            "query" in request &&
+            request.query.state.sveOnly
+          )
+            this.emit({
+              kind: "query-progress",
+              generation: request.generation,
+              channelId,
+              queryId: request.queryId,
+              done,
+              total: files.length,
+            })
+        }
+      }
+      progress()
+      const bootstrap = new BootstrapColumns()
+      const blobs = new SearchBlobs(active.request.base, this.fetcher, this.storage)
+      await blobs.readAll(files, signal, (file, bytes) => {
+        const part = decodeMessage({ kind: "file", file, version: active.version, bytes })
+        if (part.kind === "fragments")
+          bootstrap.ingest(part.fragments.filter((fragment) => tables.has(fragment.table)))
+        done++
+        progress()
+      })
+      signal.throwIfAborted()
+      if (this.active !== active || !active.index) return
+      bootstrap.seal()
+      active.index.completeSveOnly(bootstrap)
+      active.memory.clear()
+      active.building.clear()
+      await this.saveIndex(active)
+    })().finally(() => {
+      delete active.sveOnly
+      delete active.sveOnlyController
+    })
+    await active.sveOnly
+  }
+
   private async resolve(request: LoadRequest, signal: AbortSignal): Promise<JsonObject> {
     const pointer = objectValue(
       parseJson(
@@ -763,6 +827,7 @@ export class SearchEngine {
         !this.active.printings &&
         !this.active.mechanics &&
         !this.active.crossRegion &&
+        !this.active.sveOnly &&
         !this.active.signal.aborted &&
         sameSource() &&
         this.active.hash === stringValue(entry["manifest_sha256"])

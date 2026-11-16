@@ -3985,6 +3985,7 @@ it.each(["jp", "en"] as const)(
     const completed = new SearchIndex(local, edition)
     completed.completePrintings(full)
     completed.completeMechanics(full)
+    completed.completeSveOnly(full)
     const created = new SearchIndex(full, edition)
     const excluded = new Set(["c:bp01-001", "c:bp01-003", "c:bp01-010", "c:bp01-021"])
     for (const index of [
@@ -4110,5 +4111,167 @@ it("waits for a digital-link-only engine shard and restores SVE-exclusive result
   } finally {
     release()
     h.session.dispose()
+  }
+})
+
+function sveArtOrigin() {
+  const served = origin()
+  const manifest = structuredClone(built.manifest)
+  const added = [
+    {
+      table: "digital_link",
+      purpose: "engine",
+      rows: [
+        {
+          card_id: "c:bp01-002",
+          digital_card_id: "d:art-test",
+          relation: "same_card",
+          review_level: "model_reviewed",
+        },
+      ],
+    },
+    {
+      table: "digital_card",
+      purpose: "engine",
+      rows: [{ id: "d:art-test", game: "sv1", official_id: "synthetic" }],
+    },
+    {
+      table: "digital_art_coverage",
+      purpose: "print",
+      rows: [
+        { art_id: "art:bp01-002:0", game: "sv1", state: "unknown", as_of: "2026-11-17" },
+        { art_id: "art:bp01-002-alt:0", game: "sv1", state: "not_found", as_of: "2026-11-17" },
+      ],
+    },
+  ].map(({ table, purpose, rows }) => {
+    const fields = columns(rowType(table, "detail"))
+    const segment = "family-set:bp01:band-0"
+    const bytes = canonical({
+      format_version: "4.0.0",
+      types: {},
+      tables: {
+        [table]: [
+          [
+            ["home_set", "set:bp01"],
+            "detail",
+            segment,
+            null,
+            rows.map((row) => fields.map((field) => (row as JsonObject)[field] ?? null)),
+          ],
+        ],
+      },
+    })
+    const file: JsonObject = {
+      key: `${purpose}/shared/sve-${table}`,
+      role: "text",
+      purpose,
+      region: null,
+      segment,
+      path: `snapshots/blobs/${digest(bytes).slice(7)}.json`,
+      bytes: bytes.length,
+      sha256: digest(bytes),
+      row_counts: [[table, "home_set", "set:bp01", "detail", segment, rows.length]],
+      dependencies: [],
+      source_refs: [],
+    }
+    served.files.set(stringValue(file["path"]), bytes)
+    return file
+  })
+  manifest["files"] = [...arrayValue(manifest["files"]), ...added]
+  served.replaceManifest(manifest)
+  const digitalCards = added.find((file) => stringValue(file["key"]).endsWith("digital_card"))
+  if (!digitalCards) throw new Error("missing digital cards file")
+  return { ...served, digitalPath: stringValue(digitalCards["path"]) }
+}
+
+it("loads extra digital-art data only on SVE queries and reuses completed results across reloads", async () => {
+  const served = sveArtOrigin()
+  const storage = memoryCache()
+  const h = harness(served, storage)
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  h.channel.search(query)
+  await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+  expect(served.requests).not.toContain(served.digitalPath)
+  const ordinaryRestore = harness(served, storage)
+  ordinaryRestore.session.load(base, "jp", "preview")
+  await ordinaryRestore.settled()
+  expect(served.requests).not.toContain(served.digitalPath)
+  ordinaryRestore.session.dispose()
+  const release = served.hold(served.digitalPath)
+  h.channel.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing", sveOnly: true } })
+  try {
+    await expect.poll(() => served.requests.includes(served.digitalPath), POLL).toBe(true)
+    expect(h.status().result.phase).toBe("pending")
+    const ordinary = h.session.createChannel()
+    ordinary.search(query)
+    await expect.poll(() => ordinary.getStatus().result.phase, POLL).toBe("complete")
+    release()
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("missing SVE result")
+    const linked = result.page.items.filter((item) => item.summary?.cardId === "c:bp01-002")
+    expect(linked.map((item) => item.summary?.printingId)).toEqual(["p:bp01-002-alt"])
+    const requests = served.requests.length
+    h.channel.search({ ...query, state: { ...DEFAULT_QUERY, unit: "printing", sveOnly: true } })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    expect(served.requests).toHaveLength(requests)
+    const restored = harness(served, storage)
+    served.requests.length = 0
+    restored.session.load(base, "jp", "preview")
+    await restored.settled()
+    restored.channel.search({
+      ...query,
+      state: { ...DEFAULT_QUERY, unit: "printing", sveOnly: true },
+    })
+    await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
+    const next = restored.status().result
+    if (next.phase !== "complete") throw new Error("missing restored SVE result")
+    expect(next.page).toEqual(result.page)
+    expect(served.requests).toEqual(["snapshots/preview/current.json"])
+    restored.session.dispose()
+  } finally {
+    release()
+    h.session.dispose()
+  }
+})
+
+it("can cancel and retry an SVE-art load without blocking ordinary queries", async () => {
+  const served = sveArtOrigin()
+  const events: SearchEvent[] = []
+  const engine = new SearchEngine((event) => events.push(event), {
+    fetch: served.fetcher,
+    cacheStorage: memoryCache(),
+  })
+  await engine.handle({ kind: "load", generation: 1, base, edition: "jp", entry: "preview" })
+  const release = served.hold(served.digitalPath)
+  const request = {
+    kind: "search" as const,
+    generation: 1,
+    channelId: 1,
+    queryId: 1,
+    query: { ...query, state: { ...DEFAULT_QUERY, sveOnly: true } },
+  }
+  const pending = engine.handle(request)
+  try {
+    await expect.poll(() => served.requests.includes(served.digitalPath), POLL).toBe(true)
+    await engine.handle({ kind: "cancel", generation: 1 })
+    release()
+    await pending
+    expect(events.some((event) => event.kind === "query-error" && event.queryId === 1)).toBe(true)
+    await engine.handle({ ...request, queryId: 2, query })
+    expect(
+      events.some(
+        (event) => event.kind === "result" && event.queryId === 2 && event.page.total > 0,
+      ),
+    ).toBe(true)
+    await engine.handle({ ...request, queryId: 3 })
+    const retried = events.find((event) => event.kind === "result" && event.queryId === 3)
+    expect(
+      retried?.kind === "result" &&
+        retried.page.items.some((item) => item.summary?.printingId === "p:bp01-002-alt"),
+    ).toBe(true)
+  } finally {
+    release()
   }
 })
