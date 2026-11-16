@@ -1,4 +1,4 @@
-use super::board_fixture::{catalog_for, empty_board as board, fixture};
+use super::board_fixture::{Fixture, catalog_for, empty_board as board, fixture};
 use super::board_fixtures::object;
 use crate::battle::ProjectionError;
 use crate::battle::pending::project_pending;
@@ -6,8 +6,10 @@ use serde_json::json;
 use sve_battle_contract::{MAX_SAFE_INTEGER, SourceRef, observation as wire};
 use sve_engine::game::player::{ObjectHandle, Viewer, observation as native};
 
-fn project(observed: &native::Observation) -> Result<Vec<wire::PendingTrigger>, ProjectionError> {
-    let binding = fixture().map_err(|_fixture_error| ProjectionError::Unavailable)?;
+fn project(
+    binding: &Fixture,
+    observed: &native::Observation,
+) -> Result<Vec<wire::PendingTrigger>, ProjectionError> {
     project_pending(&binding.catalog, &binding.references, observed)
 }
 
@@ -35,7 +37,7 @@ fn wire_pending_preserves_repeated_occurrences_and_adopted_face_mapping() {
     let holder = object(&observed, Viewer::P1, native::ObservedZone::Field).unwrap();
     let pending = occurrence(Some(holder.clone()));
     observed.pending = vec![pending.clone(), pending];
-    let result = project(&observed).unwrap();
+    let result = project(fixture().unwrap(), &observed).unwrap();
     assert_eq!(
         serde_json::to_value(&result).unwrap(),
         json!([
@@ -46,14 +48,17 @@ fn wire_pending_preserves_repeated_occurrences_and_adopted_face_mapping() {
     observed.pending[0].source.face = Some(0);
     let SourceRef::Card {
         face: adopted_face, ..
-    } = project(&observed).unwrap().remove(0).source
+    } = project(fixture().unwrap(), &observed)
+        .unwrap()
+        .remove(0)
+        .source
     else {
         panic!("card source")
     };
     assert_eq!(adopted_face.unwrap().get(), 1);
     observed.pending[0].source.face = None;
     assert_eq!(
-        project(&observed),
+        project(fixture().unwrap(), &observed),
         Err(ProjectionError::Unavailable),
         "a printed line cannot be located without its face"
     );
@@ -64,7 +69,10 @@ fn wire_pending_preserves_repeated_occurrences_and_adopted_face_mapping() {
         face: unknown_face,
         line,
         holder: retired_holder,
-    } = project(&observed).unwrap().remove(0).source
+    } = project(fixture().unwrap(), &observed)
+        .unwrap()
+        .remove(0)
+        .source
     else {
         panic!("card source")
     };
@@ -81,7 +89,7 @@ fn wire_pending_refuses_unknown_printings_faces_handles_and_mismatched_catalogs(
         .observe(Viewer::P1)
         .unwrap();
     assert_eq!(
-        project(&observed).unwrap(),
+        project(fixture().unwrap(), &observed).unwrap(),
         Vec::<wire::PendingTrigger>::new()
     );
     let holder = object(&observed, Viewer::P1, native::ObservedZone::Field).unwrap();
@@ -103,7 +111,10 @@ fn wire_pending_refuses_unknown_printings_faces_handles_and_mismatched_catalogs(
         }
     }
     retired.pending = vec![occurrence(Some(holder.clone()))];
-    assert_eq!(project(&retired), Err(ProjectionError::Unavailable));
+    assert_eq!(
+        project(fixture().unwrap(), &retired),
+        Err(ProjectionError::Unavailable)
+    );
     for broken in [
         native::EffectSource {
             card: "missing".into(),
@@ -123,7 +134,10 @@ fn wire_pending_refuses_unknown_printings_faces_handles_and_mismatched_catalogs(
         let mut pending = occurrence(None);
         pending.source = broken;
         observed.pending = vec![pending];
-        assert_eq!(project(&observed), Err(ProjectionError::Unavailable));
+        assert_eq!(
+            project(fixture().unwrap(), &observed),
+            Err(ProjectionError::Unavailable)
+        );
     }
     observed.pending = vec![occurrence(Some(holder))];
     let duplicate = observed.players[0]
@@ -140,7 +154,10 @@ fn wire_pending_refuses_unknown_printings_faces_handles_and_mismatched_catalogs(
         .unwrap()
         .cards
         .push(duplicate);
-    assert_eq!(project(&observed), Err(ProjectionError::Unavailable));
+    assert_eq!(
+        project(fixture().unwrap(), &observed),
+        Err(ProjectionError::Unavailable)
+    );
 }
 
 #[test]
@@ -155,7 +172,7 @@ fn wire_pending_checks_numeric_bounds_and_controller_only_budgets() {
         pending.source.line = Some(MAX_SAFE_INTEGER);
         pending.admission_remaining = Some(MAX_SAFE_INTEGER);
         observed.pending = vec![pending];
-        let result = project(&observed).unwrap();
+        let result = project(fixture().unwrap(), &observed).unwrap();
         assert_eq!(
             result[0].admission_remaining.unwrap().get(),
             MAX_SAFE_INTEGER
@@ -165,19 +182,28 @@ fn wire_pending_checks_numeric_bounds_and_controller_only_budgets() {
         };
         assert_eq!(line.unwrap().get(), MAX_SAFE_INTEGER);
         observed.pending[0].source.line = Some(MAX_SAFE_INTEGER + 1);
-        assert_eq!(project(&observed), Err(ProjectionError::Range));
+        assert_eq!(
+            project(fixture().unwrap(), &observed),
+            Err(ProjectionError::Range)
+        );
         observed.pending[0].source.line = Some(0);
         observed.pending[0].admission_remaining = Some(MAX_SAFE_INTEGER + 1);
-        assert_eq!(project(&observed), Err(ProjectionError::Range));
+        assert_eq!(
+            project(fixture().unwrap(), &observed),
+            Err(ProjectionError::Range)
+        );
         observed.pending[0].admission_remaining = Some(0);
         observed.pending[0].controller = if viewer == Viewer::P1 {
             Viewer::P2
         } else {
             Viewer::P1
         };
-        assert_eq!(project(&observed), Err(ProjectionError::Unavailable));
+        assert_eq!(
+            project(fixture().unwrap(), &observed),
+            Err(ProjectionError::Unavailable)
+        );
         observed.pending[0].admission_remaining = None;
-        let public_budget = project(&observed).unwrap();
+        let public_budget = project(fixture().unwrap(), &observed).unwrap();
         assert_eq!(public_budget[0].admission_remaining, None);
         let SourceRef::Card {
             line: public_line, ..
@@ -228,7 +254,7 @@ fn wire_pending_preserves_each_trigger_timing() {
     ] {
         observed.pending[0].timing = timing;
         assert_eq!(
-            serde_json::to_value(project(&observed).unwrap()).unwrap()[0]["timing"],
+            serde_json::to_value(project(fixture().unwrap(), &observed).unwrap()).unwrap()[0]["timing"],
             expected
         );
     }

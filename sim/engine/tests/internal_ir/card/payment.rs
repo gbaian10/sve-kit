@@ -37,30 +37,7 @@ pub(super) fn self_to_cemetery() -> Action {
 }
 
 pub(super) fn paid_ability(actions: Vec<Action>, body: Vec<Located<Node>>) -> Located<Ability> {
-    let mut a = ability(1, body);
-    a.node.play.as_mut().unwrap().costs = CostSpec::Ordered {
-        steps: actions
-            .into_iter()
-            .enumerate()
-            .map(|(index, action)| {
-                let id = u64::try_from(index).unwrap().checked_add(100).unwrap();
-                CostStep {
-                    keyword: None,
-                    instruction: Box::new(Instruction {
-                        id: InstructionId(id),
-                        actor: PlayerRef::Controller {},
-                        source: a.node.source.clone(),
-                        precondition: None,
-                        context: InstructionContext::Cost,
-                        receipt: ReceiptId(id),
-                        action,
-                    }),
-                    materials: None,
-                }
-            })
-            .collect(),
-    };
-    a
+    history_fixture::paid_ability(actions, body).unwrap()
 }
 
 fn resource_draw(id: u64) -> Located<Node> {

@@ -492,7 +492,7 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.rust == 'true' }}
     runs-on: ubuntu-latest
-    # fmt, clippy, deny and machete; the tests run in rust-tests.
+    # fmt, clippy, deny, machete and doctests; unit/integration tests run in rust-tests.
     timeout-minutes: 30
     env:
       MISE_EXEC_AUTO_INSTALL: "false" # the cargo hooks go through `mise exec`; Rust itself comes from rustup
@@ -538,6 +538,9 @@ jobs:
             uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
+      # llvm-cov covers unit/integration tests, but does not run stable compile-fail doctests.
+      - name: Engine public API boundaries (doctests)
+        run: cargo test --locked -p sve-engine --doc
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:

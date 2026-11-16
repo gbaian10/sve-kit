@@ -1,6 +1,7 @@
 use super::*;
+use crate::battle::ProjectionError;
+use crate::battle::costs::project_costs;
 use sve_battle_contract::{MAX_SAFE_INTEGER, observation as wire};
-use sve_engine::battle::{ProjectionError, project_costs};
 use sve_engine::game::player::{Viewer, observation as native};
 
 fn summary(lines: Vec<native::CostLine>) -> native::CostSummary {

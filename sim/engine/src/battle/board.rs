@@ -13,15 +13,44 @@ use sve_battle_contract::{CardRef, Int, Nat, Seat, Subject, observation as wire}
 
 type Result<T> = result::Result<T, ProjectionError>;
 
+pub(crate) struct RuleProcessing {
+    pub(crate) stage: wire::ProcessingStage,
+    pub(crate) controller: Option<Seat>,
+    pub(crate) subject: Option<NativeHandle>,
+    pub(crate) procedure: Option<wire::Procedure>,
+}
+
 pub(crate) fn build_observation(
     catalog: &Catalog,
     references: &BattleReferences,
     observation: &native::Observation,
-    processing: Vec<wire::ProcessingContext>,
+    processing: Vec<RuleProcessing>,
 ) -> Result<wire::BattleObservation> {
     references.validate_catalog(catalog)?;
     let scope = ObjectScope::new(observation)?;
     let objects = objects::build_scoped(catalog, references, observation, &scope)?;
+    // Rule subjects share the board's scope and effective faces, just like attack subjects.
+    let processing = processing
+        .into_iter()
+        .map(|context| {
+            Ok(wire::ProcessingContext {
+                stage: context.stage,
+                controller: context.controller,
+                source: None,
+                subject: context
+                    .subject
+                    .as_ref()
+                    .map(|subject| card_subject(&scope, &objects, subject))
+                    .transpose()?,
+                rule: None,
+                procedure: context.procedure,
+                // These rule stops have no public declarations; evolution parameters have
+                // no Declared variant and cannot serve as payment receipts.
+                declared: vec![],
+                payment: None,
+            })
+        })
+        .collect::<Result<Vec<_>>>()?;
     let attack = observation
         .attack
         .as_ref()

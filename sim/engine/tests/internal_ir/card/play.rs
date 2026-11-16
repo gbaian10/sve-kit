@@ -4,17 +4,7 @@ use sve_engine::game::internal::{DamageShare, DecisionView, InputDomain};
 use sve_engine::game::player::DecisionShape;
 
 pub(super) fn spell(steps: Vec<Located<Node>>) -> Located<Ability> {
-    let mut ability = payment::paid_ability(vec![payment::pp(1)], steps);
-    ability.source = source("unit-spell");
-    ability.source.fragment = None;
-    ability.node.kind = AbilityKind::Spell;
-    ability.node.active_zones = vec![ZoneKind::Resolution];
-    locate_steps(
-        &mut ability.node.body.as_mut().unwrap().steps,
-        &ability.source,
-        &ability.node.source,
-    );
-    ability
+    history_fixture::spell(steps).unwrap()
 }
 
 pub(super) fn position(program: &WellFormedCardProgram, zone: &str, followers: usize) -> Game {
