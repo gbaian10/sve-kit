@@ -87,6 +87,7 @@ pub(in crate::game::internal) struct TargetWait {
     groups: GroupConstraints,
     characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
     distinct_names: bool,
+    distinct_classes: Option<Vec<(ObjectRef, String)>>,
     cost_cap: Option<CostCap>,
     on_field_at_capture: bool,
     requirements: Vec<(ObjectRef, usize)>,
@@ -183,6 +184,30 @@ impl TargetWait {
                 })
             })
             .collect::<Result<_>>()?;
+        if let Some(classes) = &self.distinct_classes
+            && !classes.is_empty()
+        {
+            // Disjoint class groups express the constraint without new public question fields.
+            let mut groups: BTreeMap<&str, Vec<u64>> = BTreeMap::new();
+            for (member, reference) in domain.members.iter().zip(&self.members) {
+                let class = classes
+                    .iter()
+                    .find(|(candidate, _)| candidate == reference)
+                    .map(|(_, class)| class.as_str())
+                    .ok_or_else(|| invalid("missing captured target class"))?;
+                groups.entry(class).or_default().push(member.handle);
+            }
+            question.groups = groups
+                .into_values()
+                .map(|handles| player::SelectionGroup {
+                    handles,
+                    cardinality: Cardinality {
+                        minimum: Nat(0),
+                        maximum: Some(Nat(1)),
+                    },
+                })
+                .collect();
+        }
         super::target_priority::expose(
             &mut question,
             &references,
@@ -424,6 +449,19 @@ impl TargetWait {
                 }
             }
         }
+        if let Some(classes) = &self.distinct_classes {
+            let mut seen = BTreeSet::new();
+            for member in members {
+                let class = classes
+                    .iter()
+                    .find(|(candidate, _)| candidate == member)
+                    .map(|(_, class)| class.as_str())
+                    .ok_or_else(|| invalid("missing captured target class"))?;
+                if !seen.insert(class) {
+                    return Ok(false);
+                }
+            }
+        }
         // A single group is already bounded by `TargetWait::bounds`, whose minimum may be
         // lowered when a resolution has fewer available candidates than requested.
         if self.groups.members.len() == 1 {
@@ -433,10 +471,11 @@ impl TargetWait {
     }
 
     fn capacity(&self) -> Result<u64> {
-        if self.groups.members.len() > 1 && !self.distinct_names && self.cost_cap.is_none() {
+        let distinct = self.distinct_names || self.distinct_classes.is_some();
+        if self.groups.members.len() > 1 && !distinct && self.cost_cap.is_none() {
             return self.groups.capacity();
         }
-        if !self.distinct_names && self.groups.members.len() <= 1 {
+        if !distinct && self.groups.members.len() <= 1 {
             let Some(CostCap { limit, costs }) = &self.cost_cap else {
                 return u64::try_from(self.members.len()).map_err(invalid);
             };
@@ -562,12 +601,14 @@ fn target_group(constraint: &SelectionConstraint) -> Result<&SelectionGroup> {
     let [group] = constraint.groups.as_slice() else {
         return Err(unsupported("one selector group per target decision"));
     };
-    if !matches!(constraint.distinct_by, None | Some(ObjectProperty::Names))
-        || !(count_bounds(constraint)
-            || matches!(
-                card_totals(&constraint.aggregate_bounds),
-                CardTotals::OriginalCostAtMost(_)
-            ))
+    if !matches!(
+        constraint.distinct_by,
+        None | Some(ObjectProperty::Names | ObjectProperty::Class)
+    ) || !(count_bounds(constraint)
+        || matches!(
+            card_totals(&constraint.aggregate_bounds),
+            CardTotals::OriginalCostAtMost(_)
+        ))
         || constraint.disjoint != Disjointness::Disjoint
     {
         return Err(unsupported("target properties or aggregate constraints"));
@@ -1437,6 +1478,20 @@ impl Game {
             execution.player(self, &decision.actor)?,
             &members,
         )?;
+        let distinct_classes = (constraint.distinct_by == Some(ObjectProperty::Class))
+            .then(|| {
+                members
+                    .iter()
+                    .map(|reference| {
+                        let class = self.face(execution.object_id(*reference)?)?["card_class"]
+                            .as_str()
+                            .ok_or_else(|| invalid("missing target class"))?
+                            .to_owned();
+                        Ok((*reference, class))
+                    })
+                    .collect::<Result<_>>()
+            })
+            .transpose()?;
         let mut wait = TargetWait {
             links: CandidateLinks::for_selectors(
                 self,
@@ -1456,6 +1511,7 @@ impl Game {
             },
             characteristics,
             distinct_names: constraint.distinct_by == Some(ObjectProperty::Names),
+            distinct_classes,
             on_field_at_capture,
             requirements,
             required_score: 0,

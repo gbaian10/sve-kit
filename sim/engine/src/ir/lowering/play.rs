@@ -400,7 +400,7 @@ impl BodyContext<'_> {
                         cardinality,
                     }],
                     cardinality,
-                    distinct_by: target.distinct_by.as_ref().map(|_| ObjectProperty::Names),
+                    distinct_by: target.distinct_by.as_ref().map(distinct_property),
                     disjoint: Disjointness::Disjoint,
                     aggregate_bounds: if dynamic_count {
                         vec![self.dynamic_target_count(target, path)?]
@@ -882,10 +882,7 @@ impl BodyContext<'_> {
                         cardinality,
                     }],
                     cardinality,
-                    distinct_by: target
-                        .distinct_by
-                        .as_ref()
-                        .map(|ast::Names::Name| ObjectProperty::Names),
+                    distinct_by: target.distinct_by.as_ref().map(distinct_property),
                     disjoint: Disjointness::Disjoint,
                     aggregate_bounds: original_cost_cap(target, path)?.into_iter().collect(),
                 },
@@ -1988,6 +1985,13 @@ fn observed_predicate(
         return None;
     }
     Some(Expr::Compute(Box::new(Predicate::Or { predicates })))
+}
+
+const fn distinct_property(by: &ast::ChoiceDistinct) -> ObjectProperty {
+    match by {
+        ast::ChoiceDistinct::Name => ObjectProperty::Names,
+        ast::ChoiceDistinct::Class => ObjectProperty::Class,
+    }
 }
 
 fn ability_holder_target(target: &ast::Target, cardinality: Cardinality) -> bool {
