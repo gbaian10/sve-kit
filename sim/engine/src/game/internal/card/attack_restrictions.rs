@@ -3,13 +3,14 @@ use super::super::observation::EffectOrigin;
 use super::super::{Execution, InstructionOutcome, Slot};
 use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
+use crate::game::{int, other};
 use crate::ir::PlayerId;
 use crate::ir::{
     Bool, DurationEnd, InstallationSubjects, InstallationTime, Interval, Selector, TimeAnchor,
 };
 use serde::{Deserialize, Serialize};
 
-use super::super::{Context, admission, player_id};
+use super::super::{Context, admission, invalid, player_id};
 use super::{Ability, Game, Located, Result, unsupported};
 use crate::ir::attack_restrictions::{self, AttackPermission, projection, ward_projection};
 use crate::ir::{
@@ -20,7 +21,9 @@ use crate::ir::{
 };
 
 pub(super) fn is_static(ability: &Ability) -> bool {
-    attack_restrictions::is_static(ability) || attack_restrictions::is_ward_static(ability)
+    attack_restrictions::is_static(ability)
+        || attack_restrictions::is_ward_static(ability)
+        || attack_restrictions::is_required_static(ability)
 }
 
 pub(super) fn check(located: &Located<Ability>) -> Result<()> {
@@ -40,6 +43,7 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     for effect in &ability.declarations {
         let shape = projection(effect)
             .or_else(|| ward_projection(effect))
+            .or_else(|| attack_restrictions::require_projection(effect))
             .ok_or_else(|| unsupported("attack permission shape"))?;
         let mut sets = vec![RecipientSet::Objects {
             objects: shape.attacker.clone(),
@@ -80,7 +84,11 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
                 source: located.source.clone(),
                 node: Node::Control {
                     control: Control::If {
-                        condition: shape.condition.clone(),
+                        condition: if attack_restrictions::is_required_static(ability) {
+                            super::super::source::mask_holder_posture(shape.condition)
+                        } else {
+                            shape.condition.clone()
+                        },
                         then_body: body,
                         else_body: None,
                     },
@@ -139,6 +147,68 @@ impl Game {
                 })
             })
             .collect()
+    }
+
+    pub(in crate::game) fn internal_attack_required(&self) -> Result<bool> {
+        let mut targets = self.zone_ids(other(self.active()), "field");
+        targets.push(format!("{}.leader", other(self.active())));
+        for provider in self.field_ids() {
+            let (card, _) = self.internal_effective_print(&provider)?;
+            if !self.card_runtime.is_loaded(&card) {
+                continue;
+            }
+            let abilities = self
+                .internal_effective_abilities(&provider)?
+                .into_iter()
+                .filter(|ability| attack_restrictions::is_required_static(&ability.node))
+                .collect::<Vec<_>>();
+            if abilities.is_empty() {
+                continue;
+            }
+            let object = self.object(&provider)?;
+            let ids = self
+                .state
+                .objects
+                .keys()
+                .cloned()
+                .zip(1_u64..)
+                .map(|(id, number)| (ObjectId(number), id))
+                .collect();
+            let execution = self.card_execution(
+                Context {
+                    source: provider,
+                    generation: Generation(object.generation),
+                    controller: player_id(&object.controller)?,
+                },
+                ids,
+            )?;
+            for ability in abilities {
+                for effect in &ability.node.declarations {
+                    let shape = attack_restrictions::require_projection(effect)
+                        .ok_or_else(|| invalid("attack requirement"))?;
+                    if !execution.boolean(self, shape.condition)?.0 {
+                        continue;
+                    }
+                    for reference in execution.objects(self, shape.attacker)? {
+                        let id = execution.object_id(reference)?;
+                        let attacker = self.object(id)?;
+                        if attacker.zone != "field"
+                            || attacker.generation != reference.generation.0
+                            || attacker.controller != self.active()
+                            || int(&attacker.state["attacks_this_turn"]) >= 1
+                        {
+                            continue;
+                        }
+                        for target in &targets {
+                            if self.can_attack(id, target)? {
+                                return Ok(true);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        Ok(false)
     }
 
     pub(in crate::game) fn internal_attack_restricted(

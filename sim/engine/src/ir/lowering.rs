@@ -546,9 +546,11 @@ impl Allocator {
                     Some(ast::StaticEffect::Cannot(ast::Cannot::Draw(_))) => {
                         draw_restrictions::lower
                     }
-                    Some(ast::StaticEffect::Cannot(_) | ast::StaticEffect::IgnoreWard(_)) => {
-                        attack_restrictions::lower
-                    }
+                    Some(
+                        ast::StaticEffect::Cannot(_)
+                        | ast::StaticEffect::IgnoreWard(_)
+                        | ast::StaticEffect::MustAttack(_),
+                    ) => attack_restrictions::lower,
                     Some(
                         ast::StaticEffect::MakeType(_)
                         | ast::StaticEffect::If(_)

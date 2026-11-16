@@ -30,6 +30,33 @@ pub(crate) fn projection(effect: &Effect) -> Option<AttackPermission<'_>> {
     })
 }
 
+pub(crate) fn require_projection(effect: &Effect) -> Option<AttackPermission<'_>> {
+    let Effect::Permission {
+        subject: PermissionSubject::Objects { objects },
+        action: ActionPattern::Attack {
+            attacker,
+            target: None,
+        },
+        polarity: Polarity::Require,
+        condition,
+        duration,
+        ..
+    } = effect
+    else {
+        return None;
+    };
+    (objects == attacker).then_some(AttackPermission {
+        attacker,
+        target: None,
+        condition,
+        duration,
+    })
+}
+
+pub(crate) fn is_required_static(ability: &Ability) -> bool {
+    static_shape(ability, require_projection)
+}
+
 pub(crate) fn ward_projection(effect: &Effect) -> Option<AttackPermission<'_>> {
     let Effect::Permission {
         subject: PermissionSubject::Objects { objects },
