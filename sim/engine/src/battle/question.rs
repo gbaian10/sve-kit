@@ -126,6 +126,8 @@ impl QuestionProjection {
             actor: native.actor,
             purpose: native.purpose,
             observation: &observation,
+            catalog,
+            references,
         };
         let (usage, shape, binding) = match native.shape {
             player::QuestionShape::Opening(OpeningQuestion::FirstPlayer) => first_player(id),
