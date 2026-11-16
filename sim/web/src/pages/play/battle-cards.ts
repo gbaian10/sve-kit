@@ -7,6 +7,7 @@ import {
   type CardSummary,
   catalogOf,
   type ImageIndex,
+  type SnapshotClient,
   snapshotClient,
   useSnapshotRoot,
   useSnapshotStatus,
@@ -23,15 +24,19 @@ export interface KnownCard {
   /** The reader asked for translated names and this card has none. */
   readonly untranslated: boolean
   readonly classLabel: string | null
+  /** The wording in force for this face, for reading its text; undefined when the snapshot has none. */
+  readonly wording: string | undefined
 }
 
 export interface BattleCards {
   /** Undefined while the snapshot loads, and for a face the snapshot does not have. */
   readonly find: (card: CardRef) => KnownCard | undefined
   readonly images: ImageIndex | undefined
+  /** Where card text is read from, once the snapshot is ready. */
+  readonly text: { readonly client: SnapshotClient; readonly edition: Region } | undefined
 }
 
-const NONE: BattleCards = { find: () => undefined, images: undefined }
+const NONE: BattleCards = { find: () => undefined, images: undefined, text: undefined }
 
 export const BattleCardsContext = createContext<BattleCards>(NONE)
 
@@ -63,6 +68,7 @@ export function useBattleCards(region: Region | undefined): BattleCards {
     const catalog = catalogOf(snapshot)
     return {
       images,
+      text: region === undefined ? undefined : { client, edition: region },
       find: (card) => {
         // Only front faces resolve until the screen needs the other face of a double-faced card.
         const summary = card.face === 0 ? catalog.summary(card.printing_id) : undefined
@@ -78,8 +84,16 @@ export function useBattleCards(region: Region | undefined): BattleCards {
             summary.classCode === null
               ? null
               : catalog.classLabel(summary.classCode, UI_TEXT_LANG[uiLanguage]),
+          wording: revisionId(
+            catalog.index.displayRevision(summary.faceId, summary.region, summary.printingId),
+          ),
         }
       },
     }
-  }, [snapshot, images, uiLanguage, nameDisplay])
+  }, [snapshot, images, uiLanguage, nameDisplay, client, region])
+}
+
+function revisionId(row: Readonly<Record<string, unknown>> | undefined): string | undefined {
+  const id = row?.["id"]
+  return typeof id === "string" ? id : undefined
 }

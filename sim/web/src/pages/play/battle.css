@@ -1428,6 +1428,7 @@
   padding: 0;
   border: 0;
   background: none;
+  cursor: zoom-in;
 }
 
 .bp-detail-sub {
@@ -1540,6 +1541,11 @@
 
 .bp-under .bp-name-tag {
   display: none;
+}
+
+.bp-browser-grid .bp-name-tag {
+  bottom: 8%;
+  font-size: 11px;
 }
 
 .hand-column .bp-hand-card .bp-name-tag {
@@ -2101,6 +2107,35 @@
   font-size: 11.5px;
 }
 
+.bp-zoom-info > button {
+  padding: 8px 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 10px;
+  background: var(--surface-2);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.bp-browser-grid button {
+  padding: 0;
+  border: 0;
+  border-radius: 6px;
+  background: none;
+  position: relative;
+  aspect-ratio: 100 / 140;
+}
+
+.bp-selbar button {
+  display: grid;
+  flex: none;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--surface-2);
+}
+
 .bp-sidebar header button {
   display: grid;
   place-items: center;
@@ -2125,6 +2160,16 @@
 
 .bp-log header > button {
   flex: none;
+}
+
+.bp-browser header button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--surface-2);
 }
 
 .bp-sidebar header button:hover {
@@ -2184,6 +2229,18 @@
   color: var(--bp-white);
   font-family: Georgia, "Times New Roman", serif;
   text-shadow: 0 1px 2px --alpha(var(--bp-black) / 80%);
+}
+
+.bp-selbar-body b {
+  overflow: hidden;
+  font-family: var(--font-ja);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bp-stat-chip b {
+  font-size: 13px;
 }
 
 .bp-opp-hand .bp-opp-count b {
@@ -2293,6 +2350,11 @@
   height: 12px;
 }
 
+.bp-selbar button svg {
+  width: 16px;
+  height: 16px;
+}
+
 .bp-log header button svg {
   width: 15px;
   height: 15px;
@@ -2346,6 +2408,19 @@
   height: 100%;
 }
 
+.bp-zoom > img {
+  height: min(78dvh, 640px);
+  border-radius: 14px;
+  box-shadow: 0 20px 60px --alpha(var(--bp-black) / 70%);
+  object-fit: contain;
+  max-width: min(70vw, 900px);
+}
+
+.bp-selbar img {
+  width: 34px;
+  border-radius: 4px;
+}
+
 .bp-plate-who .bp-plate-cls img {
   width: 15px;
   height: 15px;
@@ -2388,6 +2463,16 @@
   width: 100%;
 }
 
+.bp-selbar-body span {
+  color: var(--text-2);
+}
+
+.bp-stat-group > span {
+  width: 44px;
+  color: var(--text-3);
+  font-size: 12px;
+}
+
 .bp-log header > span {
   white-space: nowrap;
 }
@@ -2420,6 +2505,14 @@
   margin-left: 4px;
   color: var(--text-3);
   font-size: 11px;
+}
+
+.bp-selbar-body small {
+  overflow: hidden;
+  color: var(--text-3);
+  font-family: var(--font-ja);
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .is-narrow .bp-plate-stats small {
@@ -2478,6 +2571,12 @@
 
 .bp-detail-text p {
   margin: 0;
+}
+
+.bp-zoom-info > p {
+  margin: 0 0 8px;
+  color: var(--text-2);
+  font-size: 14px;
 }
 
 .bp-detail-text p + p {
@@ -2763,4 +2862,296 @@
 
 .is-stacked .bp-life b {
   font-size: calc(var(--u) * 20);
+}
+
+/* Looking at cards: what is picked, the large view, an open pile and the selection bar. */
+
+/* The dimming layer is the native dialog: its own frame, size limits and backdrop give way. */
+.bp-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  width: auto;
+  max-width: none;
+  height: auto;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: --alpha(var(--bp-black) / 72%);
+  color: inherit;
+}
+
+.bp-scrim::backdrop {
+  background: transparent;
+}
+
+.bp-zoom {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  max-width: 94vw;
+  max-height: 94dvh;
+  min-height: 0;
+}
+
+.bp-zoom-info {
+  width: 260px;
+  padding: 16px;
+  border-radius: 14px;
+  background: var(--surface-1);
+  max-height: min(94dvh, 640px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
+}
+
+.bp-zoom-no {
+  color: var(--text-3);
+  font-size: 12px;
+}
+
+.bp-browser {
+  width: min(720px, 92vw);
+  max-height: 86dvh;
+  overflow: auto;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--surface-1);
+}
+
+.bp-browser-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.bp-empty {
+  color: var(--text-3);
+}
+
+.is-selected .bp-card-inner,
+.bp-hand-card.is-selected {
+  outline: max(2px, calc(var(--u) * 3)) solid var(--bp-hover-gold);
+  outline-offset: max(1px, calc(var(--u) * 2));
+}
+
+.bp-hand-card.is-selected {
+  outline-width: 3px;
+}
+
+/* Centred by its margins: `left: 50%` would cap the bar's width at half the screen. */
+.bp-selbar {
+  position: absolute;
+  top: calc(var(--top-h) + 6px);
+  right: 0;
+  left: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: fit-content;
+  max-width: min(560px, calc(100vw - 16px));
+  margin-inline: auto;
+  padding: 5px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: --alpha(var(--surface-1) / 94%);
+  box-shadow: 0 8px 24px --alpha(var(--bp-black) / 40%);
+}
+
+.hand-column .bp-selbar {
+  right: auto;
+  left: 50%;
+  max-width: calc(100vw - 340px);
+  margin-inline: 0;
+}
+
+.bp-selbar-body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.bp-zoom-info .bp-detail-wording {
+  margin-bottom: 10px;
+}
+
+.bp-detail-preview {
+  color: var(--accent-text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.bp-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--surface-2);
+}
+
+.bp-stat-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.bp-stat-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-1);
+  font-size: 13px;
+}
+
+.bp-stat-chip.is-on {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-text);
+}
+
+.bp-browser-sec + .bp-browser-sec {
+  margin-top: 14px;
+}
+
+.bp-browser-grid button .bp-face {
+  position: absolute;
+  inset: 0;
+}
+
+.bp-browser-grid button.is-secret {
+  outline: 2px dashed var(--accent);
+  outline-offset: 2px;
+}
+
+.bp-scrim.bp-zoom-scrim {
+  z-index: 220;
+}
+
+.bp-root.is-dual .bp-scrim {
+  right: 50%;
+}
+
+/* A pile is picked through one control laid over it; what is inside stays as it was. */
+.bp-pile-hit {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  padding: 0;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  cursor: pointer;
+}
+
+.bp-pile-hit.is-selected {
+  outline: max(2px, calc(var(--u) * 3)) solid var(--bp-hover-gold);
+  outline-offset: max(1px, calc(var(--u) * 2));
+}
+
+/* Only what can be picked says so: the other seat's half of the dual view is just shown. */
+.bp-card[role="button"],
+.bp-hand-card[role="button"] {
+  cursor: pointer;
+}
+
+.bp-zoom-info > h2 {
+  margin: 4px 0 8px;
+  font-size: 20px;
+}
+
+.bp-browser header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.bp-browser h2 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.bp-browser-sec h3 {
+  margin: 0 0 8px;
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+@media (height <= 520px) {
+  .bp-zoom > img {
+    height: 86dvh;
+  }
+
+  .bp-zoom-info {
+    width: 200px;
+  }
+}
+
+@media (orientation: portrait) {
+  .bp-zoom {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .bp-zoom > img {
+    width: min(80vw, 420px);
+    height: auto;
+  }
+}
+
+@media (orientation: landscape) and (height <= 520px) {
+  .bp-zoom > img {
+    height: calc(100dvh - 24px);
+  }
+
+  .bp-zoom-info {
+    max-height: calc(100dvh - 24px);
+  }
+}
+
+@media (orientation: portrait) and (width <= 700px) {
+  .bp-zoom {
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    max-height: calc(100dvh - 16px);
+  }
+
+  .bp-zoom > img {
+    width: min(70vw, 300px);
+    height: auto;
+  }
+
+  .bp-zoom-info {
+    width: min(92vw, 360px);
+    max-height: calc(100dvh - min(70vw, 300px) * 1.4 - 40px);
+  }
+}
+
+@media (hover: hover) {
+  .bp-hand-row .bp-hand-card[role="button"]:hover,
+  .bp-hand-col .bp-hand-card[role="button"]:hover {
+    transform: scale(1.05);
+    transform-origin: 50% 100%;
+    box-shadow:
+      0 0 0 2px var(--bp-hover-gold),
+      0 8px 20px --alpha(var(--bp-black) / 55%);
+  }
+
+  /* Overlapping cards do not grow, so the next card's cost stays in view; the info column shows it large. */
+  .bp-hand-track.is-overlap .bp-hand-card[role="button"]:hover {
+    transform: none;
+  }
 }

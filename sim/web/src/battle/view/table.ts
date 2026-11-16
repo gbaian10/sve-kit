@@ -81,28 +81,33 @@ export interface TableModel {
   readonly opponent: SeatTable
 }
 
+/** One identifiable object as the table draws it; null for a handle this seat cannot identify. */
+export function tableCard(observation: BattleObservation, handle: ObjectHandle): TableCard | null {
+  const view = observation.objects[handle]
+  if (view === undefined) return null
+  const quote = observation.costs.cards.find((entry) => entry.object === handle)
+  return {
+    handle,
+    card: view.card,
+    face: view.effective_face,
+    faceDown: view.facing === "down",
+    acted: view.state?.posture === "acted",
+    evolution: view.state?.evolution ?? "base",
+    stats: view.state?.stats ?? null,
+    keywords: view.state?.keywords ?? [],
+    counters: view.state?.counters ?? [],
+    cost: quote?.cost.total_pp ?? null,
+  }
+}
+
 function cards(
   observation: BattleObservation,
   zone: ZoneView,
 ): (TableCard & { at: number | null })[] {
   return zone.cards.flatMap((member) => {
-    const view = observation.objects[member.object]
     // A member without an object is not identifiable after all; it stays an anonymous card.
-    if (view === undefined) return []
-    const quote = observation.costs.cards.find((entry) => entry.object === member.object)
-    return {
-      at: member.position,
-      handle: member.object,
-      card: view.card,
-      face: view.effective_face,
-      faceDown: view.facing === "down",
-      acted: view.state?.posture === "acted",
-      evolution: view.state?.evolution ?? "base",
-      stats: view.state?.stats ?? null,
-      keywords: view.state?.keywords ?? [],
-      counters: view.state?.counters ?? [],
-      cost: quote?.cost.total_pp ?? null,
-    }
+    const card = tableCard(observation, member.object)
+    return card === null ? [] : { at: member.position, ...card }
   })
 }
 

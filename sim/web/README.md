@@ -106,6 +106,13 @@ How the screen is put together:
   `src/styles/tokens.css`, the same in every theme; the side panels use the site's theme tokens.
 - `dice/` draws the attack, defense, keyword and cost markers from the art in
   `src/assets/card-labels/dice/`; that directory's README says where the art comes from.
+- Looking at cards (`inspector.ts`): a click, a tap or Enter picks a card or a leader, and the mouse
+  resting on one previews it. What is picked shows in the info column (`hud/Sidebar.tsx`), or in a
+  bar over the board where no column fits (`hud/SelectionBar.tsx`); from either, `hud/Zoom.tsx`
+  shows the card large. `hud/PileBrowser.tsx` opens a cemetery, a banish zone or an evolve deck; a
+  deck cannot be opened. The current numbers come from `src/battle/view/inspect.ts`, the printed
+  ones and the card text (the card page's own text block) from the snapshot. The other seat's
+  half of the dual view is only shown: nothing on it can be picked.
 
 ## Scripts
 

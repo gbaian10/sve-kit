@@ -16,6 +16,7 @@ beforeEach(() => {
 /** A snapshot that knows the card: printed cost 5, a 4/6 follower. */
 const CARDS: BattleCards = {
   images: undefined,
+  text: undefined,
   find: () => ({
     summary: {
       printingId: "p:test",
@@ -30,6 +31,7 @@ const CARDS: BattleCards = {
     original: undefined,
     untranslated: false,
     classLabel: null,
+    wording: undefined,
   }),
 }
 

@@ -1,5 +1,5 @@
 import { Ban, ChevronsUp, Heart, Layers, type LucideIcon, Skull } from "lucide-react"
-import type { CSSProperties, ReactNode } from "react"
+import { type CSSProperties, type ReactNode, use } from "react"
 import { useTranslation } from "react-i18next"
 
 import sepIcon from "../../../assets/card-labels/dice/sep.svg"
@@ -11,6 +11,7 @@ import type { BattleMat } from "../../../settings"
 import { useCards } from "../battle-cards"
 import { CounterBadge, KeywordDie } from "../dice/Dice"
 import { isDieKeyword, isNamedKeyword } from "../dice/keywords"
+import { InspectorContext, usePick } from "../inspector"
 import type { Layout } from "../layout"
 import { CardBack } from "./CardBack"
 import { CardFace } from "./Cards"
@@ -46,6 +47,7 @@ function FieldCardView({
   const superEvolved = card.evolution === "super_evolved"
   // The follower that evolved stays on the table under its evolve card.
   const under = evolved && card.card.printing_id !== card.face.printing_id
+  const pick = usePick({ kind: "object", handle: card.handle })
   return (
     <div
       className={cn(
@@ -53,9 +55,11 @@ function FieldCardView({
         card.acted && "is-engaged",
         evolved && "is-evolved",
         superEvolved && "is-super",
+        pick.selected && "is-selected",
       )}
       style={px(mat.onBoard(mat.slotCard("field", slot, opp), opp), u)}
       data-hit-area=""
+      {...pick.props}
     >
       <div className="bp-card-inner">
         {under ? (
@@ -126,11 +130,13 @@ function ExCard({
   readonly u: number
   readonly mat: MatGeometry
 }) {
+  const pick = usePick({ kind: "object", handle: card.handle })
   return (
     <div
-      className="bp-card"
+      className={cn("bp-card", pick.selected && "is-selected")}
       style={px(mat.onBoard(mat.slotCard("ex", slot, opp), opp), u)}
       data-hit-area=""
+      {...pick.props}
     >
       <div className="bp-card-inner">
         <CardFace card={card.face} tag />
@@ -150,12 +156,48 @@ function TopCard({ pile, banished }: { readonly pile: Pile; readonly banished: b
   )
 }
 
+/** The whole pile as one control: a leader is picked like a card, an open pile is browsed. */
+function PileHit({
+  pile,
+  seat,
+  label,
+}: {
+  readonly pile: PileName
+  readonly seat: SeatTable
+  readonly label: string
+}) {
+  const { t } = useTranslation()
+  const inspector = use(InspectorContext)
+  const leader = usePick(pile === "leader" ? { kind: "leader", seat: seat.seat } : null)
+  // Nobody may look through a deck.
+  if (inspector === null || pile === "deck") return null
+  if (pile === "leader")
+    return (
+      <div
+        className={cn("bp-pile-hit", leader.selected && "is-selected")}
+        aria-label={label}
+        {...leader.props}
+      />
+    )
+  return (
+    <button
+      type="button"
+      className="bp-pile-hit"
+      aria-label={t("play.pile.open", { zone: label })}
+      onClick={() => {
+        inspector.browse(seat.seat, pile === "evolve" ? "evolveDeck" : pile)
+      }}
+    />
+  )
+}
+
 function PileView({ pile, seat, leader, opp, u, mat }: MatProps & { readonly pile: PileName }) {
   const { t } = useTranslation()
   let body: ReactNode
   let label: string
   let count: number | undefined
   let extra: string | undefined
+  let hint: string | undefined
   let Icon: LucideIcon | undefined
   if (pile === "leader") {
     label = t("play.zone.leader")
@@ -173,6 +215,7 @@ function PileView({ pile, seat, leader, opp, u, mat }: MatProps & { readonly pil
     label = t("play.zone.deck")
     Icon = Layers
     count = seat.deck.count
+    hint = t(`play.pile.deckHidden.${opp ? "opponent" : "self"}`, { n: count })
     // A layer for every five cards: the stack thins as the deck runs down.
     body = (
       <div className="bp-stack">
@@ -216,8 +259,10 @@ function PileView({ pile, seat, leader, opp, u, mat }: MatProps & { readonly pil
       data-hit-area=""
       role="group"
       aria-label={label}
+      title={hint}
     >
       <div className="bp-card-inner">{body}</div>
+      <PileHit pile={pile} seat={seat} label={label} />
       {count !== undefined ? (
         <span className="bp-pile-tag">
           {/* A small pile has no room for its name: an icon stands in, as on the player plates. */}
