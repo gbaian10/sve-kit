@@ -51,6 +51,7 @@ mod mill;
 mod movement;
 pub(in crate::game::internal) use evolution::ex_evolution;
 pub(in crate::game::internal) use movement::ex_self_entry;
+mod occurrence;
 mod played;
 mod quota;
 mod race;
@@ -960,6 +961,7 @@ impl PendingOccurrence {
             card: option.card.clone(),
             line: option.line,
             event: option.event.clone(),
+            occurrence: occurrence::player_event_context(self),
             source: self.origin.observed(game, actor),
         }
     }

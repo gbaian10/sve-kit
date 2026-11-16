@@ -105,7 +105,7 @@ impl QuestionProjection {
                 player::DecisionShape::Quick { .. }
                 | player::DecisionShape::Pending(_)
                 | player::DecisionShape::TriggerQuota(_),
-            ) => flow::context(native.purpose)?,
+            ) => flow::context(native.purpose, &observation)?,
             player::QuestionShape::Decision(_) | player::QuestionShape::ActionWindow(_) => {
                 return Err(ProjectionError::Unavailable);
             }

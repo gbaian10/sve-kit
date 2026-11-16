@@ -141,6 +141,7 @@ fn occurrence(handle: u64) -> PendingChoice {
         card: "public".into(),
         line: 1,
         event: "enter".into(),
+        occurrence: None,
         source: None,
     }
 }

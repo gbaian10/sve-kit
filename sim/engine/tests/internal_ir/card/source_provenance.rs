@@ -3,7 +3,7 @@ use sve_engine::EngineFailure;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::{Input, Viewer, observation as native};
 
-fn granting(number: &str, hidden: bool) -> WellFormedCardProgram {
+pub(super) fn granting(number: &str, hidden: bool) -> WellFormedCardProgram {
     let mut nested = ability(
         99,
         vec![instruction(
