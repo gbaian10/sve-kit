@@ -2179,7 +2179,9 @@ impl<'definitions> BodyContext<'definitions> {
                     instruction: Box::new(Instruction {
                         id: InstructionId(instruction_id),
                         receipt: ReceiptId(instruction_id),
-                        actor: action_actor(&action),
+                        actor: self
+                            .look_remainder_actor(step)
+                            .unwrap_or_else(|| action_actor(&action)),
                         source: ability_source.clone(),
                         precondition: None,
                         context: InstructionContext::Effect,

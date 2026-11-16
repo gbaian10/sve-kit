@@ -3,6 +3,7 @@ use super::{
 };
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::perspective::performer;
+use crate::ir::player_stages;
 use crate::ir::{
     AbilitySource, CardKind, Cardinality, Control, LkiReason, MemberProjection, MovementReceipt,
     NameOperation, NatOperation, Node, ObjectOperand, ObjectReceipt, ObjectRef, ObjectView,
@@ -248,8 +249,8 @@ impl BodyContext<'_> {
             _ => false,
         };
         let procedure = Self::player_procedure(each);
-        // Other per-player bodies run as a choice procedure: one player finishes a stage before
-        // the next player starts it, turn player first.
+        // A choice stage finishes one player's body before the next player's; private Look
+        // remainders without a choice retain their simultaneous instruction boundary.
         let choices = !legacy
             && !procedure
             && !each.stages.is_empty()
@@ -288,14 +289,12 @@ impl BodyContext<'_> {
                         }
                     }
                 }
-                stages.push(PlayerStage {
-                    body,
-                    mode: if choices {
-                        StageMode::ChoiceProcedure {}
-                    } else {
-                        StageMode::NonChoiceSimultaneous {}
-                    },
-                });
+                let mode = if choices && player_stages::look_remainder(&body, player).is_none() {
+                    StageMode::ChoiceProcedure {}
+                } else {
+                    StageMode::NonChoiceSimultaneous {}
+                };
+                stages.push(PlayerStage { body, mode });
             }
             Ok(())
         })();

@@ -10,6 +10,8 @@ use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::events::EventKind;
+use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{Input, Viewer};
 
 fn programs() -> BTreeMap<String, WellFormedCardProgram> {
@@ -243,6 +245,7 @@ fn activated(steps: &Value, rival_field: &Value) -> (Game, Result<CardPlay, Engi
         game.load_internal_card(number, &card(vec![])).unwrap();
     }
     let id = programs["unit-amulet"].card().abilities[0].node.id;
+    game.advance_player_input();
     let play = game.activate_internal_card("garden", id, PlayerId { seat: 1 });
     (game, play)
 }
@@ -284,6 +287,64 @@ fn each_player_chooses_from_its_own_look_in_a_later_stage() {
     resolved(play);
     assert!(ids(&game, "P1", "field").contains(&"P1-f".to_owned()));
     assert!(ids(&game, "P2", "field").contains(&"P2-f".to_owned()));
+}
+
+#[test]
+fn each_player_sends_its_own_look_remainder_after_both_entries() {
+    let (mut game, play) = activated(
+        &json!([{"each_player":{"as":"p","stages":[
+            [{"look":{"top":{"who":"p","n":3},"bind":"seen","by":"p"}}],
+            [{"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"upto":1,"by":"p"}},
+             {"move":{"ref":"picked","to":"field","result":"entered"}}],
+            [{"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"entered","view":"before"}}},"to":"cemetery","result":"milled"}}],
+            [{"life":{"who":"p","delta":{"count_of":"milled"}}}]
+        ]}}]),
+        &json!([]),
+    );
+    let mut play = play.unwrap();
+    for seat in [1_u32, 2] {
+        let CardPlay::Awaiting(q) = play else {
+            panic!("each player chooses");
+        };
+        assert_eq!(q.actor, PlayerId { seat });
+        for side in ["P1", "P2"] {
+            assert_eq!(ids(&game, side, "cemetery"), Vec::<String>::new());
+        }
+        play = game
+            .answer_internal_card(q.actor, q.token, Answer::Targets(members(&q)))
+            .unwrap();
+    }
+    resolved(play);
+    for side in ["P1", "P2"] {
+        assert!(ids(&game, side, "field").contains(&format!("{side}-f")));
+        assert_eq!(ids(&game, side, "cemetery"), [format!("{side}-y")]);
+        assert_eq!(ids(&game, side, "deck"), Vec::<String>::new());
+        assert_eq!(
+            game.projection(View::Referee).unwrap()[side]["leader"]["life"],
+            21,
+            "a later stage counts only that player's own successful remainder"
+        );
+    }
+    game.advance_player_input();
+    for viewer in [Viewer::P1, Viewer::P2] {
+        let remainders: Vec<_> = game
+            .event_batches(viewer, None)
+            .unwrap()
+            .filter(|batch| {
+                batch.events.iter().any(|event| {
+                    matches!(&event.kind,
+                EventKind::Movement {after, ..}
+                if after.zone == Some(ObservedZone::Cemetery))
+                })
+            })
+            .collect();
+        assert_eq!(
+            remainders.len(),
+            1,
+            "both nonchoice remainders move in one batch"
+        );
+        assert_eq!(remainders[0].events.len(), 2);
+    }
 }
 
 #[test]

@@ -776,6 +776,20 @@ Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: ch
       - - draw: {who: p, n: 5}
 ```
 
+逐玩家私有 Look 可分成三個階段：雙方先看自己的牌庫頂牌，按回合玩家優先各自可選從者進場，最後將雙方剩餘牌同批送墓（BP06-113，Q872）。`look.top.who`、`look.by` 與 `choose.by` 明寫同一個玩家綁定；`self` 仍是能力控制者，非回合玩家控制能力時也不改變選擇順序。單一 Look 剩餘牌送墓指示形成非選擇階段：先檢查雙方私有權限，再一次提交雙方移動，後續階段仍各自讀自己的成功回條。每位玩家保存自己的 Look 與成功移動回條；剩餘牌送墓的操作者沿用該次 Look 的玩家，只能移動仍受該玩家觀察且世代相符的自身牌庫成員。差集使用實際成功進場前的成員，滿場或放棄時全部送墓。能力全部完成後才處理新入場者的 Fanfare，回合玩家先結算；已離場者的待機能力仍可結算（Q873）。
+
+```yaml
+- each_player:
+    as: p
+    stages:
+      - - look: {top: {who: p, n: 3}, by: p, bind: seen}
+      - - choose: {bind: picked, from: {in: seen, kind: follower}, upto: 1, by: p}
+        - move: {ref: picked, to: field, result: entered}
+      - - move:
+            ref: {in: seen, except: {in: {objects_of: entered, view: before}}}
+            to: cemetery
+```
+
 `banish: {ref: {any_of: [{who: all, zone: field}, {who: all, zone: ex}]}}` 將所有玩家的場與 EX 作為同一集合、一批消滅（BP13-107、[Q1794](https://shadowverse-evolve.com/cardlist/?cardno=BP13-107&faq=)）；不以先場後 EX 兩次動作替代。這個入口只接受上述兩種公開區的完整聯集，不接受私有區或額外篩選。
 
 效果本文可用 `choose: {bind: selected, from: {who: self, zone: hand}, n: 1}` 在結算中選取自己的手牌；可加既有種類、職業、特徵及費用篩選，或以 `upto: 1` 表示可選零張。候選只提供給操作者，以本次問題的 handle 回答，不公開其他手牌，也不能放進正式 `targets`。選取綁定可接 `banish`、`reveal`、移到 EX／牌庫指定位置或一般從者／護符入場；這些移動不產生棄牌事件。公開只持續至本次結算結束；移到公開區域者依共用移動規則顯示。移到 EX 的成功回條可沿用 `follow` 安裝該物件的打出費用修正。一般多張移動、入場容量與同批順序仍依共用准入邊界，不因手牌入口額外放寬。
