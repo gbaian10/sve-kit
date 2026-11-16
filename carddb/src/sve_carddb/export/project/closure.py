@@ -81,9 +81,8 @@ def prune(view: dict[str, list[Record]]) -> None:
             face = object_value(raw)
             if face["art_id"] not in art_ids:
                 face["art_id"] = None
-    view["digital_art_link"] = [
-        row for row in view["digital_art_link"] if row["art_id"] in art_ids
-    ]
+    for table in ("digital_art_link", "digital_art_coverage"):
+        view[table] = [row for row in view[table] if row["art_id"] in art_ids]
     scoped: dict[str, set[str]] = {}
     for rows in view.values():
         for row in rows:

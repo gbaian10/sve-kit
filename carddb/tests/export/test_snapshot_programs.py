@@ -99,7 +99,7 @@ def test_programs_require_the_new_minor_profile_and_preserve_manual_support(
     packed: Snapshot, admitted: tuple[Projection, Ownership]
 ) -> None:
     assert packed.manifest["format_version"] == "4.1.0"
-    assert packed.manifest["min_reader_version"] == "4.1.0"
+    assert packed.manifest["min_reader_version"] == "4.1.1"
     assert "dsl-programs-v1" in array(packed.manifest["required_capabilities"])
     packed.verify(admitted[0])
     payload = object_value(parse(packed.payloads["programs"].raw))

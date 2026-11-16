@@ -41,7 +41,15 @@ CATALOG = frozenset(
     }
 )
 PRINT = frozenset(
-    {"printing", "printing_product", "art", "artist", "stamp", "digital_art_link"}
+    {
+        "printing",
+        "printing_product",
+        "art",
+        "artist",
+        "stamp",
+        "digital_art_link",
+        "digital_art_coverage",
+    }
 )
 ENGINE = frozenset(
     {

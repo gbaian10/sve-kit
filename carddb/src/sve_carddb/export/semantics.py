@@ -36,7 +36,7 @@ _CARD_TABLES = {
     "card_voice",
 }
 _PRINT_TABLES = {"printing", "printing_product", "printing_image"}
-_ART_TABLES = {"art", "digital_art_link"}
+_ART_TABLES = {"art", "digital_art_link", "digital_art_coverage"}
 
 
 def row_key(value: JsonValue) -> tuple[int, int | str | bytes]:
@@ -190,7 +190,7 @@ def _owner_card(
         return row["id"]
     if table == "face_revision":
         return faces[string(row["face_id"])]["card_id"]
-    if table == "digital_art_link":
+    if table in {"digital_art_link", "digital_art_coverage"}:
         return arts[string(row["art_id"])]["card_id"]
     return row.get("card_id", row.get("from_card_id"))
 
@@ -1024,7 +1024,15 @@ def _placement_purpose(
         else "images"
         if table in {"image_asset", "image_variant", "printing_image"}
         else "print"
-        if table in {"printing_product", "art", "artist", "stamp", "digital_art_link"}
+        if table
+        in {
+            "printing_product",
+            "art",
+            "artist",
+            "stamp",
+            "digital_art_link",
+            "digital_art_coverage",
+        }
         else "engine"
         if table
         in {

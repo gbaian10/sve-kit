@@ -93,6 +93,13 @@ def extras() -> dict[str, dict[str, Value]]:
             "as_of": "2026-09-29",
             "decision_id": "decision",
         },
+        "digital_art_coverage": {
+            "art_id": "art",
+            "game": "sv1",
+            "state": "matched",
+            "as_of": "2026-09-29",
+            "decision_id": "decision",
+        },
         "voice": {
             "id": "voice",
             "digital_card_id": "digital",

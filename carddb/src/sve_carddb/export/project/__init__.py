@@ -142,6 +142,25 @@ def _rulings(view: dict[str, list[Record]], decisions: Decisions) -> None:
             row["hints"] = []
 
 
+def _digital(view: dict[str, list[Record]], decisions: Decisions) -> None:
+    if any(
+        type(flag) is not bool
+        for flag in (decisions.digital_assets, decisions.digital_art_assets)
+    ):
+        raise ValueError("Digital asset projection flag must be boolean")
+    if decisions.digital_links is not None:
+        view["digital_link"] = [
+            row for row in view["digital_link"] if row["id"] in decisions.digital_links
+        ]
+    if decisions.digital_assets:
+        return
+    for table in ("voice", "card_voice"):
+        view[table] = []
+    if not decisions.digital_art_assets:
+        for table in ("digital_art", "digital_art_link", "digital_art_coverage"):
+            view[table] = []
+
+
 def project(
     db: Database,
     *,
@@ -157,8 +176,6 @@ def project(
         or not set(regions) <= {"jp", "en"}
     ):
         raise ValueError("Explicit sorted nonempty regions required")
-    if type(decisions.digital_assets) is not bool:
-        raise ValueError("Digital asset projection flag must be boolean")
     source = Source(db)
     view = initial(source)
     if publication_printings is not None:
@@ -174,18 +191,7 @@ def project(
     ancillary_records(source, view)
     art_records(source, view)
     digital_records(source, view)
-    if decisions.digital_links is not None:
-        view["digital_link"] = [
-            row for row in view["digital_link"] if row["id"] in decisions.digital_links
-        ]
-    if not decisions.digital_assets:
-        for table in (
-            "digital_art",
-            "digital_art_link",
-            "voice",
-            "card_voice",
-        ):
-            view[table] = []
+    _digital(view, decisions)
     ruling_records(source, view)
     _rulings(view, decisions)
     _related(view, regions, decisions)
@@ -215,6 +221,8 @@ def project(
         not decisions.digital_assets
         and not view["digital_link"]
         and not view["digital_link_coverage"]
+        and not view["digital_art_coverage"]
+        and not view["digital_art_link"]
     ):
         config["digital_endpoints"] = []
     public_cards = {card["id"] for card in view["card"]}

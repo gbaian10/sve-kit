@@ -37,7 +37,7 @@ CARD_TABLES = frozenset(
     }
 )
 PRINT_TABLES = frozenset({"printing", "printing_product", "printing_image"})
-ART_TABLES = frozenset({"art", "digital_art_link"})
+ART_TABLES = frozenset({"art", "digital_art_link", "digital_art_coverage"})
 IMAGE_TABLES = frozenset({"image_asset", "printing_image", "image_variant"})
 
 

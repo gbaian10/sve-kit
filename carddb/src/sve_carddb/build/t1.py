@@ -1,6 +1,7 @@
 """Implemented T1 DDL groups; none yet claim a complete import/validation pipeline."""
 
 from sve_carddb.build import (
+    digital_art,
     dsl,
     four_layer,
     mechanics,
@@ -21,9 +22,10 @@ from sve_carddb.build.model import Capability
 from sve_carddb.build.registry import Registry
 from sve_carddb.build.t0_json import schemas
 
-SCHEMA_VERSION = 19
+SCHEMA_VERSION = 20
 MINIMUM_CAPABILITIES = ("t0", "cr", "errata", "correction", "qa", "related")
 TABLES = (
+    *digital_art.TABLES,
     *dsl.TABLES,
     *t1_cr.TABLES,
     *t1_errata.TABLES,
@@ -41,6 +43,11 @@ TABLES = (
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
     capabilities=(
+        Capability(
+            "digital_art",
+            tuple(table.name for table in digital_art.TABLES),
+            requires=("art", "translation_evidence"),
+        ),
         Capability("dsl", tuple(table.name for table in dsl.TABLES)),
         Capability("dsl_validation", ("dsl_load",), implemented=False),
         Capability("t0", tuple(table.name for table in t0.TABLES)),

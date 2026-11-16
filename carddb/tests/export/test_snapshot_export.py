@@ -59,7 +59,7 @@ def exported(logical: tuple[Projection, Ownership]) -> Snapshot:
 def test_join_equals_public_projection(
     exported: Snapshot, logical: tuple[Projection, Ownership]
 ) -> None:
-    assert exported.manifest["min_reader_version"] == "4.0.2"
+    assert exported.manifest["min_reader_version"] == "4.0.3"
     exported.verify(logical[0])
     # SHA-256(canonical(["qa_v"])) mod 64 = 33: shared detail now uses band 8.
     qa_file = next(

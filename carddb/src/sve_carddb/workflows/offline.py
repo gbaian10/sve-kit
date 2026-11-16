@@ -670,6 +670,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             *MINIMUM_CAPABILITIES,
             "en",
             "translation_evidence",
+            "digital_art",
             "translation_names",
             "translation_templates",
             "rulings",
@@ -738,6 +739,17 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
             )
             mark("db: name links")
+            art_result = (
+                None
+                if names is None
+                else names.populate_art(
+                    db,
+                    revision=inputs.revision,
+                    links=link_result,
+                    sources=translation_sources,
+                )
+            )
+            mark("db: digital art")
             adopted = _populate_adoptions(
                 db,
                 adoptions,
@@ -900,6 +912,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 for record in records
             ),
             digital_assets=False,
+            digital_art_assets=True,
         ).with_text_views(views.wording, views.observed)
         mark("views + decisions")
         if author_inputs is not None and author_inputs.index.records:
@@ -1031,6 +1044,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     for identifier, reason in link_result.stale
                 ],
             }
+        if art_result is not None:
+            report["digital_art"] = dict[str, JsonValue](art_result)
         report["registry_reviews"] = {
             "registry_review_inputs": identity.review_input_pin,
             "uncovered_jp_card_numbers": list[JsonValue](

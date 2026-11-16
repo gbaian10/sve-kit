@@ -113,6 +113,7 @@
     "digital_link",
     "digital_art_link",
     "digital_link_coverage",
+    "digital_art_coverage",
     "voice",
     "card_voice",
     "keyword",
@@ -207,7 +208,9 @@
     "digital_art_link_detail",
     "digital_art_link_detail_fragment",
     "digital_link_coverage_detail",
+    "digital_art_coverage_detail",
     "digital_link_coverage_detail_fragment",
+    "digital_art_coverage_detail_fragment",
     "voice_detail",
     "voice_detail_fragment",
     "card_voice_detail",
@@ -1038,6 +1041,16 @@
                   }
                 ]
               }
+            },
+            "digital_art_coverage": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/digital_art_coverage_detail_fragment"
+                  }
+                ]
+              }
             }
           },
           "additionalProperties": false
@@ -1249,6 +1262,9 @@
         },
         "card_mentioned_by": {
           "detail": "card_mentioned_by_detail"
+        },
+        "digital_art_coverage": {
+          "detail": "digital_art_coverage_detail"
         }
       },
       "x-tables": [
@@ -1282,6 +1298,7 @@
         "digital_link",
         "digital_art_link",
         "digital_link_coverage",
+        "digital_art_coverage",
         "voice",
         "card_voice",
         "keyword",
@@ -1412,6 +1429,7 @@
                   "digital_link",
                   "digital_art_link",
                   "digital_link_coverage",
+                  "digital_art_coverage",
                   "voice",
                   "card_voice",
                   "keyword",
@@ -1855,7 +1873,8 @@
           "enum": [
             "4.0.0",
             "4.0.1",
-            "4.0.2"
+            "4.0.2",
+            "4.0.3"
           ]
         },
         "required_capabilities": {
@@ -13180,6 +13199,84 @@
         }
       },
       "constraints": {}
+    },
+    "digital_art_coverage": {
+      "fields": {
+        "art_id": {
+          "schema": {
+            "$ref": "#/$defs/ID"
+          },
+          "descriptor": {
+            "scalar": "ID"
+          }
+        },
+        "game": {
+          "schema": {
+            "enum": [
+              "sv1",
+              "svwb"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "sv1",
+              "svwb"
+            ]
+          }
+        },
+        "state": {
+          "schema": {
+            "enum": [
+              "matched",
+              "not_found",
+              "unknown"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "matched",
+              "not_found",
+              "unknown"
+            ]
+          }
+        },
+        "as_of": {
+          "schema": {
+            "$ref": "#/$defs/Date"
+          },
+          "descriptor": {
+            "scalar": "Date"
+          }
+        }
+      },
+      "constraints": {
+        "x-primary-key": [
+          "art_id",
+          "game"
+        ]
+      }
+    },
+    "digital_art_coverage_detail": {
+      "fields": {
+        "art_id": {
+          "from": "digital_art_coverage"
+        },
+        "game": {
+          "from": "digital_art_coverage"
+        },
+        "state": {
+          "from": "digital_art_coverage"
+        },
+        "as_of": {
+          "from": "digital_art_coverage"
+        }
+      },
+      "constraints": {
+        "x-primary-key": [
+          "art_id",
+          "game"
+        ]
+      }
     }
   },
   "nested": [
@@ -13370,6 +13467,9 @@
     },
     "card_mentioned_by": {
       "detail": "card_mentioned_by_detail"
+    },
+    "digital_art_coverage": {
+      "detail": "digital_art_coverage_detail"
     }
   }
 }

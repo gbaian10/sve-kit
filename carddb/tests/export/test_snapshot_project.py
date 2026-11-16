@@ -83,7 +83,7 @@ def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
 ) -> None:
     result = projected(db)
     assert set(result.tables) == set(tables())
-    assert len(result.tables) == 47
+    assert len(result.tables) == 48
     assert all(
         rows
         for table, rows in result.tables.items()
@@ -2180,6 +2180,35 @@ def test_browse_projection_retains_only_linked_digital_ids(db: Database) -> None
             "preview-20261002T010203Z-0001",
             "2026-10-02T01:02:03Z",
             "2026-10-02",
+            ("jp",),
+        ),
+    )
+    exported.verify(public)
+
+
+def test_art_intake_does_not_enable_voice_assets(db: Database) -> None:
+    result = projected(
+        db,
+        replace(decisions(), digital_assets=False, digital_art_assets=True),
+    )
+    assert one(result, "digital_art_coverage") == {
+        "art_id": "art",
+        "game": "sv1",
+        "state": "matched",
+        "as_of": "2026-09-29",
+    }
+    assert result.tables["digital_art_link"]
+    assert result.tables["digital_art"]
+    assert result.tables["voice"] == []
+    assert result.tables["card_voice"] == []
+    public = replace(result, config=offline_configuration(result.config))
+    exported = export_snapshot(
+        public,
+        Ownership.from_database(db, result),
+        Batch(
+            "preview-20261116T000000Z-0001",
+            "2026-11-16T00:00:00Z",
+            "2026-11-16",
             ("jp",),
         ),
     )
