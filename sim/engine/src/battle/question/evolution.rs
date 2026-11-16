@@ -55,7 +55,8 @@ pub(super) fn discard(
                 zone: Zone::Hand,
                 position: located.position,
             }),
-            classes: object.characteristics.classes.clone(),
+            // This domain has neither a class-distinct constraint nor captured class facts.
+            classes: None,
         })
     })?;
     Ok((

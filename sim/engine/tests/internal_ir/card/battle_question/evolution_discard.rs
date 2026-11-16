@@ -8,6 +8,9 @@ use sve_battle_contract::{
 use sve_engine::battle::BattleReferences;
 use sve_engine::game::player::{EvolutionAnswer, EvolutionQuestion, SelectionQuestion};
 
+#[path = "evolution_discard/privacy.rs"]
+mod privacy;
+
 fn program() -> WellFormedCardProgram {
     let mut tree = fanfare::expanded::tree().clone();
     let mut base = tree["cards"]["synthetic-evolution"].clone();
@@ -190,6 +193,10 @@ fn assert_domain(
             .cards
             .iter()
             .find(|card| card.object.as_str() == object.as_str())?;
+        assert_eq!(
+            candidate.classes, None,
+            "the native domain supplies no captured class constraint facts"
+        );
         assert_eq!(
             candidate.subject,
             Some(Subject::Card {
