@@ -10,14 +10,28 @@ use sve_engine::game::player::observation::{CardFace, Observation, ObservedZone}
 use sve_engine::game::player::{
     AbilityChoice, Answer, CardOption, ClosingAnswer, ClosingQuestion, Command, DecisionShape,
     DiscardKind, DistributionQuestion, EarlierQuotaChoice, EvolutionAnswer, EvolutionPayment,
-    EvolutionQuestion, IntegerSource, MainIntentKind, MovementCapacityQuestion, OpeningAnswer,
-    OpeningQuestion, OrderDirection, OrderQuestion, PartitionQuestion, PendingChoice,
-    QuestionShape, QuestionToken, QuotaQuestion, ReplacementChoice, SearchAnswer,
-    SearchPartitionQuestion, SearchQuestion, SelectionDestination, SelectionGroup, SelectionMember,
+    EvolutionQuestion, ExchangeRouteChoice, IntegerSource, MainIntentKind,
+    MovementCapacityQuestion, OpeningAnswer, OpeningQuestion, OrderDirection, OrderQuestion,
+    PartitionQuestion, PendingChoice, QuestionShape, QuestionToken, QuotaQuestion,
+    ReplacementChoice, SearchAnswer, SearchPartitionQuestion, SearchQuestion,
+    SearchReplacementQuestion, SelectionDestination, SelectionGroup, SelectionMember,
     SelectionQuestion, SelectionRole, SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion,
     Viewer,
 };
 use sve_engine::policy::{BasicPolicy, Choice, PolicyFailure};
+
+fn unquoted_route(index: u64) -> ExchangeRouteChoice {
+    use sve_engine::game::player::observation::{CostSummary, PendingCost, QuoteBasis};
+    ExchangeRouteChoice {
+        index: Nat(index),
+        cost: CostSummary {
+            basis: QuoteBasis::BeforePayment,
+            total_pp: None,
+            groups: vec![],
+            pending: vec![PendingCost::Unavailable],
+        },
+    }
+}
 
 fn board(hidden: &str) -> Game {
     let mut initial = setup(1, json!([]));
@@ -185,7 +199,7 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
             Answer::Integer(Nat(u64::MAX)),
         ),
         (
-            DecisionShape::ExchangeRoutes(vec![Nat(8), Nat(21)]),
+            DecisionShape::ExchangeRoutes(vec![unquoted_route(8), unquoted_route(21)]),
             Answer::Integer(Nat(8)),
         ),
         (DecisionShape::May, Answer::Integer(Nat(1))),
@@ -203,7 +217,10 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
             Answer::Quick(None),
         ),
         (
-            DecisionShape::SearchReplacement,
+            DecisionShape::SearchReplacement(SearchReplacementQuestion {
+                original: None,
+                replacement: None,
+            }),
             Answer::SearchReplacement(SearchReplacementAnswer::Original),
         ),
         (

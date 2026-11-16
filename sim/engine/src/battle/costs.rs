@@ -66,7 +66,7 @@ pub(super) fn scoped(
     })
 }
 
-fn summary(cost: &native::CostSummary) -> Result<wire::CostSummary> {
+pub(in crate::battle) fn summary(cost: &native::CostSummary) -> Result<wire::CostSummary> {
     Ok(wire::CostSummary {
         basis: match cost.basis {
             native::QuoteBasis::CurrentContext => wire::QuoteBasis::CurrentContext,

@@ -1,7 +1,7 @@
 //! Player questions describe the operation without exposing authority continuations.
 
-use super::observation::CardFace;
 use super::observation::ObservedZone;
+use super::observation::{CardFace, CostSummary};
 use super::{AbilityChoice, PendingChoice, QuickChoice, QuotaQuestion, ReplacementChoice};
 use super::{
     DistributionQuestion, ObjectHandle, SelectionDestination, SelectionGroup, SelectionQuestion,
@@ -9,6 +9,24 @@ use super::{
 };
 use crate::ir::{Cardinality, ModeId, Nat, Position, QuickWindow, TriggerIcon};
 use alloc::collections::BTreeMap;
+
+/// One affordable exchange route with its conditional pre-payment quotation.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct ExchangeRouteChoice {
+    /// Original route coordinate, including gaps.
+    pub index: Nat,
+    /// This route is fixed for the quote; its materials remain unselected.
+    pub cost: CostSummary,
+}
+
+/// Destinations proved by the native previews before asking for a route.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SearchReplacementQuestion {
+    /// Absent when one destination cannot describe every found card.
+    pub original: Option<SelectionDestination>,
+    /// Absent when one destination cannot describe every found card.
+    pub replacement: Option<SelectionDestination>,
+}
 
 /// One printed choice addressed only within the current question.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -231,7 +249,7 @@ pub enum DecisionShape {
         cards: SelectionQuestion,
     },
     /// Genuine affordable route indices, without filling gaps; answer `Integer(route)`.
-    ExchangeRoutes(Vec<Nat>),
+    ExchangeRoutes(Vec<ExchangeRouteChoice>),
     /// Optional resolution body; answer `Integer(0)` to decline or `Integer(1)` to accept.
     May,
     /// Optional draw continuation; answer `Stepwise`.
@@ -267,7 +285,7 @@ pub enum DecisionShape {
     /// Frozen recipients and totals; answer `Distribution`.
     Distribution(DistributionQuestion),
     /// Hand-movement replacement; answer `SearchReplacement`.
-    SearchReplacement,
+    SearchReplacement(SearchReplacementQuestion),
     /// Declared or resolution targets; answer `Targets` or `TargetsWithRoles`.
     Targets(SelectionQuestion),
     /// Token-name combinations constrained by destination capacity.

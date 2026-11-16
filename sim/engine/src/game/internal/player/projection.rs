@@ -3,8 +3,8 @@
 use super::super::{Execution, Game, InputDomain, PlayerId, Result, Wait, invalid};
 use crate::game::player::observation::ObservedZone;
 use crate::game::player::{
-    DecisionShape, DiscardKind, MovementCapacityQuestion, SelectionQuestion, TokenCapacityQuestion,
-    Viewer,
+    DecisionShape, DiscardKind, ExchangeRouteChoice, MovementCapacityQuestion, SelectionQuestion,
+    TokenCapacityQuestion, Viewer,
 };
 use crate::ir::{Cardinality, Nat, ZoneKind};
 
@@ -38,14 +38,21 @@ fn capacity(details: (PlayerId, ZoneKind, usize)) -> Result<(Viewer, ObservedZon
     ))
 }
 
-fn routes(affordable: &[usize]) -> Result<Vec<Nat>> {
+fn routes(
+    affordable: &[usize],
+    quotes: &[ExchangeRouteChoice],
+) -> Result<Vec<ExchangeRouteChoice>> {
     if affordable.is_empty() {
         return Err(invalid("empty exchange route question"));
     }
-    affordable
+    let expected = affordable
         .iter()
         .map(|route| u64::try_from(*route).map(Nat).map_err(invalid))
-        .collect()
+        .collect::<Result<Vec<_>>>()?;
+    if !quotes.iter().map(|quote| quote.index).eq(expected) {
+        return Err(invalid("inconsistent frozen exchange quotes"));
+    }
+    Ok(quotes.to_vec())
 }
 
 fn collection(
@@ -153,8 +160,8 @@ fn typed(
         Wait::ResolutionPayment { .. } => {
             domain!(domain, InputDomain::OptionalCost => DecisionShape::ResolutionPayment)
         }
-        Wait::ExchangeRoute { affordable } => {
-            domain!(domain, InputDomain::Integer(_) => DecisionShape::ExchangeRoutes(routes(affordable)?))
+        Wait::ExchangeRoute { affordable, quotes } => {
+            domain!(domain, InputDomain::Integer(_) => DecisionShape::ExchangeRoutes(routes(affordable,quotes)?))
         }
         Wait::TriggerQuota { .. } => {
             domain!(domain, InputDomain::TriggerQuota(quota) => DecisionShape::TriggerQuota(game.player_quota_question(actor, &quota)?))
@@ -190,8 +197,8 @@ fn typed(
         Wait::DamageReplacements(wait) => {
             domain!(domain, InputDomain::DamageReplacements(options) => DecisionShape::DamageReplacements(wait.player_options(game, actor, &options)?))
         }
-        Wait::SearchReplacement(_) => {
-            domain!(domain, InputDomain::SearchReplacement => DecisionShape::SearchReplacement)
+        Wait::SearchReplacement(wait) => {
+            domain!(domain, InputDomain::SearchReplacement => DecisionShape::SearchReplacement(wait.player_question()))
         }
         Wait::Integer { source, .. } => {
             domain!(domain, InputDomain::Integer(bounds) => DecisionShape::Integer { bounds, source: *source })

@@ -8,6 +8,7 @@
 use self::card::play::PlayState;
 use super::knowledge::PublishedKnowledge;
 use super::{Frame, Game, View, int, string};
+use crate::game::player::ExchangeRouteChoice;
 use crate::game::player::observation::CardFace;
 use crate::ir::BatchOutcome;
 use crate::ir::ScheduleToken;
@@ -589,6 +590,7 @@ enum Wait {
     CostMaterials(card::exchange::MaterialWait),
     ExchangeRoute {
         affordable: Vec<usize>,
+        quotes: Vec<ExchangeRouteChoice>,
     },
     MaterialParameter(card::material::MaterialWait),
     TriggerQuota {
@@ -1006,7 +1008,7 @@ impl Game {
                     rollback = execution.answer_origin(validated);
                     wait.bind(&mut execution, members);
                 }
-                (Wait::ExchangeRoute { affordable }, Answer::Integer(route)) => {
+                (Wait::ExchangeRoute { affordable, .. }, Answer::Integer(route)) => {
                     let index = usize::try_from(route.0).map_err(invalid)?;
                     if !affordable.contains(&index) {
                         return Err(invalid("unavailable exchange route"));

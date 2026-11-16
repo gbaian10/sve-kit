@@ -59,8 +59,11 @@ fn confirms_keep_distinct_uses_and_native_answer_channels() {
 #[test]
 fn unsupported_decisions_do_not_fall_back_to_confirm() {
     for domain in [
-        DecisionShape::SearchReplacement,
-        DecisionShape::ExchangeRoutes(vec![Nat(0), Nat(2)]),
+        DecisionShape::SearchReplacement(player::SearchReplacementQuestion {
+            original: None,
+            replacement: None,
+        }),
+        DecisionShape::ExchangeRoutes(vec![]),
         DecisionShape::Quick {
             window: QuickWindow::EndPhase,
             options: vec![],
@@ -91,3 +94,6 @@ mod ability;
 
 #[cfg(feature = "runner")]
 mod replacement;
+
+#[cfg(feature = "runner")]
+mod routes;

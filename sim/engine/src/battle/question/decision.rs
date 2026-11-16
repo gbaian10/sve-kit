@@ -21,6 +21,7 @@ mod order;
 mod partition;
 mod replacement;
 mod resource;
+mod routes;
 mod search;
 mod select;
 mod text;
@@ -51,6 +52,7 @@ pub(super) enum Binding {
     Entry(entry::Binding),
     Modes(modes::Binding),
     Ability(ability::Binding),
+    Routes(routes::Binding),
 }
 
 pub(super) fn project(
@@ -149,11 +151,12 @@ pub(super) fn project(
         DecisionShape::Abilities(_) | DecisionShape::DamageReplacements(_) => {
             source_question(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
+        DecisionShape::SearchReplacement(_) | DecisionShape::ExchangeRoutes(_) => {
+            routes::project(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Quick { .. }
-        | DecisionShape::ExchangeRoutes(_)
         | DecisionShape::Pending(_)
-        | DecisionShape::TriggerQuota(_)
-        | DecisionShape::SearchReplacement => Err(ProjectionError::Unavailable),
+        | DecisionShape::TriggerQuota(_) => Err(ProjectionError::Unavailable),
     }
 }
 
@@ -197,6 +200,7 @@ impl Binding {
             Self::Entry(binding) => binding.answer(answer),
             Self::Modes(binding) => binding.answer(answer),
             Self::Ability(binding) => binding.answer(answer),
+            Self::Routes(binding) => binding.answer(answer),
         }
     }
 }

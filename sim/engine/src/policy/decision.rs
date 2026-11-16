@@ -93,7 +93,7 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
             cards,
         } => Answer::Targets(materials(cards)?),
         DecisionShape::ExchangeRoutes(routes) => {
-            Answer::Integer(*routes.first().ok_or(PolicyFailure::NoSolution)?)
+            Answer::Integer(routes.first().ok_or(PolicyFailure::NoSolution)?.index)
         }
         DecisionShape::Pending(options) => {
             Answer::Pending(options.first().ok_or(PolicyFailure::NoSolution)?.handle)
@@ -139,7 +139,7 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
             question.selection.cardinality,
         )?),
         DecisionShape::Distribution(question) => Answer::Distribution(distribute(question)?),
-        DecisionShape::SearchReplacement => {
+        DecisionShape::SearchReplacement(_) => {
             Answer::SearchReplacement(SearchReplacementAnswer::Original)
         }
         DecisionShape::Targets(question) => {

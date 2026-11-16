@@ -344,6 +344,54 @@ fn play_cost(play: &PlayState, game: &Game, execution: &Execution) -> CostSummar
     summary(basis, groups, pending)
 }
 
+pub(in crate::game::internal::card) fn exchange_route(
+    play: &PlayState,
+    game: &Game,
+    execution: &Execution,
+    fee: &CostSpec,
+    materials: Option<u64>,
+) -> CostSummary {
+    let mut quote = play_cost(play, game, execution);
+    let mut material_group = group(
+        game,
+        execution,
+        fee,
+        CostGroupKind::Original,
+        false,
+        QuoteBasis::BeforePayment,
+    );
+    for line in &mut material_group.lines {
+        match line {
+            CostLine::Posture { cards }
+            | CostLine::Move { cards }
+            | CostLine::Banish { cards }
+            | CostLine::Reveal { cards }
+            | CostLine::Discard { cards, .. }
+            | CostLine::Fusion { cards, .. }
+                if cards.is_none() =>
+            {
+                // Fixed bounds reveal a count without revealing particular cards.
+                *cards = materials;
+            }
+            _ => {}
+        }
+    }
+    if let Some(original) = quote
+        .groups
+        .iter_mut()
+        .find(|group| group.kind == CostGroupKind::Original)
+    {
+        original.lines.extend(material_group.lines);
+    } else {
+        quote.groups.push(material_group);
+    }
+    summary(
+        quote.basis,
+        quote.groups,
+        quote.pending.into_iter().collect(),
+    )
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Cost observations read the same card context and play state as payment."

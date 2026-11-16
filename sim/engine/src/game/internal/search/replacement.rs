@@ -3,9 +3,12 @@
 use super::{
     Action, Binding, Bool, CharacteristicView, Execution, Expr, Game, InputDomain, Instruction,
     MoveDestination, ObjectRef, OwnerZone, PlayerId, Predicate, Result, SearchDestination,
-    SearchOutcome, SnapshotId, Wait, candidate_view, invalid, seat_name, unsupported,
+    SearchOutcome, SnapshotId, Wait, candidate_view, invalid, seat_name, unsupported, viewer,
 };
+use crate::game::player::observation::ObservedZone;
+use crate::game::player::{SearchReplacementQuestion, SelectionDestination};
 use crate::ir::{Comparison, Int, IntOperation, NumberRead, SearchFound, SearchReplacementAnswer};
+use crate::ir::{MoveResult, ZoneKind};
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct ReplacementWait {
@@ -14,6 +17,28 @@ pub(in crate::game::internal) struct ReplacementWait {
     outcome: SearchOutcome,
     deck: Vec<String>,
     snapshot: SnapshotId,
+    destinations: SearchReplacementQuestion,
+}
+
+impl ReplacementWait {
+    pub(in crate::game::internal) const fn player_question(&self) -> SearchReplacementQuestion {
+        self.destinations
+    }
+}
+
+fn single_destination(results: &[MoveResult]) -> Option<SelectionDestination> {
+    let first = results.first()?.actual_to?;
+    if results.iter().any(|result| result.actual_to != Some(first)) {
+        return None;
+    }
+    let player = viewer(seat_name(first.player).ok()?).ok()?;
+    let zone = match first.kind {
+        ZoneKind::Hand => ObservedZone::Hand,
+        ZoneKind::Field => ObservedZone::Field,
+        ZoneKind::Ex => ObservedZone::Ex,
+        _ => return None,
+    };
+    Some(SelectionDestination { player, zone })
 }
 
 pub(super) fn check_predicate(value: &Expr<Bool>, binding: Binding<SearchFound>) -> Result<()> {
@@ -117,11 +142,18 @@ impl Game {
             return self.internal_search_finish(execution, instruction, player, outcome);
         }
         // Both alternatives must be executable before asking; previews cannot mutate the authority.
-        for destination in [
-            &MoveDestination::Owners {
-                zone: OwnerZone::Hand,
-            },
-            &movement.to,
+        let mut destinations = SearchReplacementQuestion {
+            original: None,
+            replacement: None,
+        };
+        for (destination, frozen) in [
+            (
+                &MoveDestination::Owners {
+                    zone: OwnerZone::Hand,
+                },
+                &mut destinations.original,
+            ),
+            (&movement.to, &mut destinations.replacement),
         ] {
             let mut preview = self.clone();
             let results = preview.internal_search_move(
@@ -136,6 +168,7 @@ impl Game {
                     "search optional replacement needs two executable destinations",
                 ));
             }
+            *frozen = single_destination(&results);
         }
         let wait = ReplacementWait {
             instruction: Box::new(instruction.clone()),
@@ -143,6 +176,7 @@ impl Game {
             outcome,
             deck: self.internal_known_deck(seat_name(player)?)?,
             snapshot: SnapshotId(self.state.ir_epoch),
+            destinations,
         };
         self.internal_wait(
             execution,

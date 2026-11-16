@@ -188,9 +188,12 @@ fn player_question_exchange_preserves_the_only_affordable_route_index() {
         SubmissionKind::Applied
     );
     let route = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::ExchangeRoutes(routes)) = &route.shape else {
+        panic!("exchange routes")
+    };
     assert_eq!(
-        route.shape,
-        QuestionShape::Decision(DecisionShape::ExchangeRoutes(vec![Nat(1)]))
+        routes.iter().map(|choice| choice.index).collect::<Vec<_>>(),
+        vec![Nat(1)]
     );
     let before = exact_authority(&game);
     assert_eq!(

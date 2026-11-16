@@ -1,6 +1,7 @@
 use super::*;
 use crate::catalog::Catalog;
 use crate::game::internal::{Context, DecisionToken, DecisionView, OrderCard};
+use crate::game::player::observation as native_cost;
 use crate::game::player::{CardOption, Command, Input, SubmissionKind};
 use crate::ir::{Binding, DecisionId, ExecutionId, Generation, Program, ReceiptId, ScopeId};
 use alloc::sync::Arc;
@@ -92,6 +93,18 @@ fn assert_persistent_fault(mut game: Game) {
 fn player_projection_sparse_route_indices_are_not_renumbered_or_filled() {
     let mut game = game();
     let execution = execution(&mut game);
+    let quotes = [0_u64, 2]
+        .into_iter()
+        .map(|index| ExchangeRouteChoice {
+            index: Nat(index),
+            cost: native_cost::CostSummary {
+                basis: native_cost::QuoteBasis::BeforePayment,
+                total_pp: None,
+                groups: vec![],
+                pending: vec![native_cost::PendingCost::Unavailable],
+            },
+        })
+        .collect::<Vec<_>>();
     let shape = typed(
         &game,
         &execution,
@@ -102,12 +115,13 @@ fn player_projection_sparse_route_indices_are_not_renumbered_or_filled() {
         }),
         &Wait::ExchangeRoute {
             affordable: vec![0, 2],
+            quotes: quotes.clone(),
         },
     )
     .unwrap();
     assert_eq!(
         shape,
-        DecisionShape::ExchangeRoutes(vec![Nat(0), Nat(2)]),
+        DecisionShape::ExchangeRoutes(quotes),
         "Route handles are the native affordable indices, including their gaps"
     );
 }
