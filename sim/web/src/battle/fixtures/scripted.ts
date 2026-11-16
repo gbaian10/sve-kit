@@ -104,10 +104,10 @@ function compound(question: Question, answer: Answer): boolean {
   if (answer.kind === "distribute" && shape.kind === "distribute") {
     const asked = distribution(question, seat)
     if (asked === null) return false
-    // Every recipient once, with a whole amount.
+    // Every recipient once; the amounts, and whether an answer is taken at all with nobody to
+    // deal to, are the reader's to say.
     const shares = new Map(answer.shares.map((share) => [share.option, share.amount]))
     return (
-      answer.shares.every((share) => Number.isInteger(share.amount)) &&
       shares.size === answer.shares.length &&
       answer.shares.length === shape.recipients.length &&
       shape.recipients.every((recipient) => shares.has(recipient.id)) &&

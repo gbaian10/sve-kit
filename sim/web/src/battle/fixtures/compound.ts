@@ -2,7 +2,8 @@
 // trigger. One is a real card's own: a follower evolves, the evolution is paid for, and what the
 // evolved side does on evolving is answered. The rest are synthetic: no card of the fixture decks
 // asks them, so each follows the contract's own sample of its kind and names no card as its
-// source. Every outcome is written out by hand.
+// source. A scene states the table that follows its answers itself. The one thing worked out is
+// what its own example needs, damage taken off a printed life: an illustration, not the rules.
 import type { Answer, BattleInput } from "../contract"
 import { ask, type AskedScene, candidate, card, FOES, OWN, targetsTable } from "./asked"
 import type { FieldSpec, SeatSpec, Step, TableSpec } from "./build"

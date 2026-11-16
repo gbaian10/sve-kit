@@ -149,11 +149,31 @@ describe("distribution", () => {
     ])
   })
 
-  it("lets the total go undealt with nobody to deal to, only where the question allows", () => {
+  it("takes the empty answer with nobody to deal to, or no answer at all, as the question says", () => {
     const nobody = { ...asked, recipients: [] }
+    // The total goes undealt where the question allows it.
     expect(shareProblems(nobody, new Map())).toEqual([])
-    expect(shareProblems({ ...nobody, empty: "reject" }, new Map())).toEqual([
-      { kind: "total", have: 0, want: 3 },
+    // Where it does not, nothing is an answer, whatever the total: not even a total of nothing.
+    for (const total of [3, 0])
+      expect(shareProblems({ ...nobody, total, empty: "reject" }, new Map())).toEqual([
+        { kind: "nobody" },
+      ])
+    // With somebody to deal to, a total of nothing is reached by dealing nothing.
+    expect(shareProblems({ ...asked, total: 0, empty: "reject" }, new Map())).toEqual([])
+  })
+
+  it("takes only amounts that are counts", () => {
+    expect(
+      shareProblems(
+        asked,
+        new Map([
+          ["c1", 1.5],
+          ["c2", 1.5],
+        ]),
+      ),
+    ).toEqual([
+      { kind: "share", option: "c1", have: 1.5, bounds: { min: 0, max: null } },
+      { kind: "share", option: "c2", have: 1.5, bounds: { min: 0, max: null } },
     ])
   })
 
@@ -191,5 +211,16 @@ describe("integer", () => {
     expect(command).toMatchObject({ answer: { kind: "integer", value: 4 } })
     expect(valid(command)).toBe(true)
     expect(integer(question, "p2")).toBeNull()
+  })
+
+  it("stops a range without an upper end at the largest number the contract carries", () => {
+    const open = { ...asked, bounds: { min: 0, max: null } }
+    const largest = Number.MAX_SAFE_INTEGER
+    expect(inRange(open, largest)).toBe(true)
+    expect(valid(integerAnswer(open, largest))).toBe(true)
+    // One more is a whole number to JavaScript and no message of the contract.
+    expect(Number.isInteger(largest + 1)).toBe(true)
+    expect(inRange(open, largest + 1)).toBe(false)
+    expect(valid(integerAnswer(open, largest + 1))).toBe(false)
   })
 })

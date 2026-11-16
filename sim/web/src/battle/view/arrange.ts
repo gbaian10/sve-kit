@@ -157,9 +157,11 @@ export type Shares = ReadonlyMap<OptionId, number>
 
 /** Something the question's own numbers say about the amounts as they stand. */
 export type ShareProblem =
+  /** There is nobody to deal to, and the question takes no answer then. */
+  | { readonly kind: "nobody" }
   /** The amounts do not add up to what has to be dealt out. */
   | { readonly kind: "total"; readonly have: number; readonly want: number }
-  /** One recipient gets less or more than a recipient may. */
+  /** One recipient gets less or more than a recipient may, or an amount that is no count. */
   | {
       readonly kind: "share"
       readonly option: OptionId
@@ -168,14 +170,15 @@ export type ShareProblem =
     }
 
 export function shareProblems(asked: Distribution, shares: Shares): ShareProblem[] {
+  // With nobody to deal to, the total does not matter: the question says whether the empty
+  // answer is taken, and takes none at all when it is not.
+  if (asked.recipients.length === 0) return asked.empty === "reject" ? [{ kind: "nobody" }] : []
   const amounts = asked.recipients.map((each) => ({ id: each.id, have: shares.get(each.id) ?? 0 }))
   const have = amounts.reduce((sum, each) => sum + each.have, 0)
-  // With nobody to deal to, the question may let the total go undealt.
-  const owed = asked.recipients.length > 0 || asked.empty === "reject"
   return [
-    ...(owed && have !== asked.total ? [{ kind: "total" as const, have, want: asked.total }] : []),
+    ...(have === asked.total ? [] : [{ kind: "total" as const, have, want: asked.total }]),
     ...amounts.flatMap((each): ShareProblem[] =>
-      outside(each.have, asked.share)
+      !Number.isSafeInteger(each.have) || outside(each.have, asked.share)
         ? [{ kind: "share", option: each.id, have: each.have, bounds: asked.share }]
         : [],
     ),
@@ -210,9 +213,12 @@ export function integer(question: Question | null, viewer: Seat): Integer | null
   return { question: question.id, bounds, unit, source }
 }
 
-/** Whether a number is a whole one within the range the question takes. */
+/**
+ * Whether a number is one the question takes: within its range, and a whole number the contract
+ * can carry. A range without an upper end still stops at the largest such number.
+ */
 export function inRange(asked: Integer, value: number): boolean {
-  return Number.isInteger(value) && !outside(value, asked.bounds)
+  return Number.isSafeInteger(value) && !outside(value, asked.bounds)
 }
 
 export function integerAnswer(asked: Integer, value: number): Command {

@@ -6,6 +6,7 @@ import {
   type Command,
   type HostMessage,
   type Question,
+  type QuestionShape,
   type Receipt,
   validateHostMessage,
 } from "../contract"
@@ -707,6 +708,28 @@ describe("scriptedTable", () => {
     expect(await send(seats.p2, confirmAnswer(held, true))).toMatchObject({ result: "rejected" })
   })
 
+  /** A scene whose opening question, put to the first seat, has its shape changed. */
+  function reshaped<K extends QuestionShape["kind"]>(
+    id: Scene["id"],
+    kind: K,
+    change: (shape: Extract<QuestionShape, { kind: K }>) => QuestionShape,
+  ): Scene {
+    const original = scene(id)
+    const [ready, first] = original.script.p1
+    if (ready === undefined || first?.kind !== "update" || first.input.kind !== "question")
+      throw new Error("the scene asks its first seat")
+    const { question } = first.input
+    if (question.shape.kind !== kind) throw new Error(`the scene does not ask a ${kind}`)
+    const shape = change(question.shape as Extract<QuestionShape, { kind: K }>)
+    return {
+      ...original,
+      script: {
+        ...original.script,
+        p1: [ready, { ...first, input: { kind: "question", question: { ...question, shape } } }],
+      },
+    }
+  }
+
   /** What the first seat's screen needs of its own side after an answer. */
   const side = (update: BattleUpdate) => {
     const [self] = update.observation.players
@@ -821,6 +844,49 @@ describe("scriptedTable", () => {
     expect(valid()).toBe(true)
   })
 
+  it.each([
+    ["reject", 3],
+    ["reject", 0],
+  ] as const)(
+    "takes no answer with nobody to deal to where the question says %s (total %i)",
+    async (empty, total) => {
+      const seats = scriptedTable(
+        reshaped("distribute", "distribute", (shape) => ({
+          ...shape,
+          recipients: [],
+          total,
+          empty,
+        })),
+      )
+      const own = follow(seats.p1)
+      const asked = need(distribution(own.question(), "p1"))
+      expect(await send(seats.p1, distributeAnswer(asked, new Map()))).toMatchObject(rejected)
+      expect(seqs(own.messages)).toEqual([0])
+    },
+  )
+
+  it("takes the empty answer with nobody to deal to where the question allows it", async () => {
+    const seats = scriptedTable(
+      reshaped("distribute", "distribute", (shape) => ({ ...shape, recipients: [] })),
+    )
+    const own = follow(seats.p1)
+    const asked = need(distribution(own.question(), "p1"))
+    expect(asked).toMatchObject({ total: 3, empty: "allow_without_total" })
+    expect(await send(seats.p1, distributeAnswer(asked, new Map()))).toMatchObject(applied)
+    expect(own.question()?.shape.kind).toBe("action_window")
+  })
+
+  it("takes no number the contract cannot carry, even in a range without an upper end", async () => {
+    const seats = scriptedTable(
+      reshaped("integer", "integer", (shape) => ({ ...shape, bounds: { min: 0, max: null } })),
+    )
+    const own = follow(seats.p1)
+    const asked = need(integer(own.question(), "p1"))
+    for (const value of [Number.MAX_SAFE_INTEGER + 1, 1.5])
+      expect(await send(seats.p1, integerAnswer(asked, value))).toMatchObject(rejected)
+    expect(await send(seats.p1, integerAnswer(asked, 3))).toMatchObject(applied)
+  })
+
   it("takes a number within the question's range", async () => {
     const { seats, own, valid } = asking("integer")
     const asked = need(integer(own.question(), "p1"))
@@ -926,28 +992,10 @@ describe("scriptedTable", () => {
   })
 
   it("refuses an evolve point in place of a play point where the question does not allow it", async () => {
-    const resource = scene("resource")
-    const [ready, first] = resource.script.p1
-    if (ready === undefined || first?.kind !== "update" || first.input.kind !== "question")
-      throw new Error("the scene asks its first seat")
-    const { question } = first.input
-    if (question.shape.kind !== "resource_payment") throw new Error("a resource payment")
-    const strict: Scene = {
-      ...resource,
-      script: {
-        ...resource.script,
-        p1: [
-          ready,
-          {
-            ...first,
-            input: {
-              kind: "question",
-              question: { ...question, shape: { ...question.shape, ep_allowed: false } },
-            },
-          },
-        ],
-      },
-    }
+    const strict = reshaped("resource", "resource_payment", (shape) => ({
+      ...shape,
+      ep_allowed: false,
+    }))
     const seats = scriptedTable(strict)
     const own = follow(seats.p1)
     const asked = need(resourcePayment(own.question(), "p1"))
