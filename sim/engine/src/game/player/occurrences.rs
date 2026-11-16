@@ -3,6 +3,9 @@
 use super::observation::{EffectSource, ObservedZone};
 use super::{ObjectHandle, Viewer};
 
+mod event;
+pub use event::{PendingEvent, PendingEventContext};
+
 /// One effective ability instance, retaining its printed definition coordinates.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct AbilityChoice {
@@ -50,6 +53,8 @@ pub struct PendingChoice {
     pub line: u64,
     /// Existing public event description.
     pub event: String,
+    /// Frozen typed event facts, absent when their public meaning is unavailable.
+    pub occurrence: Option<PendingEventContext>,
     /// Captured text source and a holder link only during its original identification period.
     pub source: Option<EffectSource>,
 }

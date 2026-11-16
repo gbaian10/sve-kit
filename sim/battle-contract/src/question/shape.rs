@@ -256,7 +256,8 @@ pub enum ChoiceValue {
         controller: Seat,
         /// The completed event that produced it, with its public details.
         event: TriggerEvent,
-        /// Slot of the source when that event completed, when the event records one.
+        /// Slot of the source when that event completed, counted from zero.
+        /// Absent when the event records no source slot.
         position: Option<Nat>,
     },
     /// A destination for found cards.

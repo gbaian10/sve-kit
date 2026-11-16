@@ -21,6 +21,8 @@ mod evolution_materials;
 mod evolution_payment;
 #[path = "battle_question/hand_limit.rs"]
 mod hand_limit;
+#[path = "battle_question/pending.rs"]
+mod pending;
 #[path = "battle_question/quick.rs"]
 mod quick;
 #[path = "battle_question/start_amulet.rs"]

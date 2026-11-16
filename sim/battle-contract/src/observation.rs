@@ -130,7 +130,7 @@ pub struct CardState {
     pub posture: Posture,
     /// Current evolution state.
     pub evolution: EvolutionState,
-    /// Effective numbers of a field follower; absent for anything else.
+    /// Effective numbers of a field or EX follower; absent for anything else.
     pub stats: Option<Stats>,
     /// Effective keywords.
     pub keywords: Vec<String>,
