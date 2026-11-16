@@ -457,6 +457,14 @@ impl Checker {
     }
 
     fn ability_declarations(&mut self, ability: &Ability) -> Checked {
+        if let Some((objects, condition)) = super::super::battle_damage_basis::projection(ability) {
+            self.at("declarations/0/modifier/objects", |checker| {
+                checker.selector(objects)
+            })?;
+            return self.at("declarations/0/condition", |checker| {
+                checker.boolean(condition)
+            });
+        }
         // The closed printed shape proves its whole lifetime and player boundary together.
         if super::super::evolution_limits::is_static(ability)
             || super::super::choice_rules::is_static(ability)

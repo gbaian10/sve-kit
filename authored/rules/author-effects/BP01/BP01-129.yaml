@@ -1,0 +1,28 @@
+cards:
+  BP01-129:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - rule_override:
+                basis: hp
+                on:
+                  kind: follower
+                  who: self
+                  zone: field
+                rule: battle_damage_basis
+    admission: light
+    meta:
+      rulings:
+        - R-0021
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

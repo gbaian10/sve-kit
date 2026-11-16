@@ -1,0 +1,34 @@
+cards:
+  BP01-130:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - rule_override:
+                basis: hp
+                on:
+                  kind: follower
+                  who: self
+                  zone: field
+                rule: battle_damage_basis
+      - auto:
+          do:
+            - buff:
+                hp: 2
+                on: this
+          on:
+            phase:
+              which: end
+              whose: self
+        line: 2
+    admission: light
+    meta:
+      rulings:
+        - R-0021
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set
