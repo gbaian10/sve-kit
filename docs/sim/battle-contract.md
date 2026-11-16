@@ -155,6 +155,10 @@ interface RuleRef {
 ```
 
 step 只有精確卡文對應才填；不公開 instruction path。能力授予者與持有者分開，失知後 holder=null。
+引用輸入由 `sve_carddb.export.read_api.load_battle_inputs` 讀取同一份已驗證的公開匯出閉包產生：native JSONL 的精確 bytes 與 `ReferenceInput` 一起回傳，後者包含地區、native bytes 的 SHA-256、完整印刷／面映射，以及綁定公開 manifest 的永久卡面／卡文版本／原文欄位身分。目錄不依牌組或已降低的作者縮減，可到達 token 與未選用面仍須保留；人工 EP／SEP 資源版次不成為 native 卡片。
+
+native 卡文讀該版次唯一可用的來源觀測，不拿共享 current 或印刷原文補缺。無法表示完整目錄、來源模糊或關係不完整時拒絕整批；原文缺失保持 null，不當成空文字。wording 輸入未提供時，印刷引用仍可用，但不能成立精確卡文引用。`BattleReferences` 檢查同一 native 背景、完整面閉包與卡文身分的一致性；公開 manifest／原文欄位存在性的信任邊界仍是既有驗證 reader，不是任意宿主 JSON。確認 owner 與 field 只代表位置存在，不自行證明 line、step、授予者或觀看者授權。
+
 沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
