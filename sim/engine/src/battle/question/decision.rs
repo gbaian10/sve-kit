@@ -13,6 +13,7 @@ mod confirm;
 mod distribution;
 mod drive;
 mod entry;
+mod modes;
 mod number;
 mod order;
 mod partition;
@@ -43,6 +44,7 @@ pub(super) enum Binding {
     Search(Box<search::Binding>),
     Partition(partition::Binding),
     Entry(entry::Binding),
+    Modes(modes::Binding),
 }
 
 pub(super) fn project(
@@ -110,6 +112,28 @@ pub(super) fn project(
         DecisionShape::WardEntry { .. } => {
             entry::ward(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
+        DecisionShape::Modes {
+            modes,
+            cardinality,
+            count,
+        } => modes::project(
+            modes,
+            *cardinality,
+            *count,
+            wire::QuestionUse::Modes,
+            context.ok_or(ProjectionError::Unavailable)?,
+        ),
+        DecisionShape::ResolutionAlternative {
+            modes,
+            cardinality,
+            count,
+        } => modes::project(
+            modes,
+            *cardinality,
+            *count,
+            wire::QuestionUse::ResolutionAlternative,
+            context.ok_or(ProjectionError::Unavailable)?,
+        ),
         DecisionShape::Abilities(_)
         | DecisionShape::Quick { .. }
         | DecisionShape::ExchangeRoutes(_)
@@ -118,9 +142,7 @@ pub(super) fn project(
         | DecisionShape::DamageReplacements(_)
         | DecisionShape::MovementCapacity(_)
         | DecisionShape::SearchReplacement
-        | DecisionShape::TokenCapacity(_)
-        | DecisionShape::Modes { .. }
-        | DecisionShape::ResolutionAlternative { .. } => Err(ProjectionError::Unavailable),
+        | DecisionShape::TokenCapacity(_) => Err(ProjectionError::Unavailable),
     }
 }
 
@@ -148,6 +170,7 @@ impl Binding {
             Self::Search(binding) => binding.answer(answer),
             Self::Partition(binding) => binding.answer(answer),
             Self::Entry(binding) => binding.answer(answer),
+            Self::Modes(binding) => binding.answer(answer),
         }
     }
 }
