@@ -362,6 +362,7 @@ fn policy_material_and_target_channels_preserve_roles_and_discard_purpose() {
 #[test]
 fn policy_search_partition_movement_and_distribution_return_complete_answers() {
     let search = SearchQuestion {
+        facts: None,
         cards: vec![option(7), option(2)],
         cardinality: bounds(1, 1),
         groups: None,

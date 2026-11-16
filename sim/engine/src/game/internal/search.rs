@@ -3,7 +3,8 @@
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::PartitionQuestion;
 use crate::game::player::Viewer;
-use crate::game::player::{SearchQuestion, SelectionGroup};
+use crate::game::player::observation::{ObservedZone, viewer};
+use crate::game::player::{SearchFacts, SearchQuestion, SelectionDestination, SelectionGroup};
 
 use super::card::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, within_original_cost_cap,
@@ -100,6 +101,7 @@ pub(super) struct SearchWait {
     members: Vec<ObjectRef>,
     group_members: Option<Vec<Vec<ObjectRef>>>,
     domain: SearchDomain,
+    facts: SearchFacts,
     snapshot: SnapshotId,
     conditional: bool,
     distinct_names: bool,
@@ -556,6 +558,23 @@ impl Game {
         } else {
             vec![]
         };
+        let facts = SearchFacts {
+            origin: SelectionDestination {
+                player: viewer(seat)?,
+                zone: ObservedZone::Deck,
+            },
+            faces: domain
+                .cards
+                .iter()
+                .zip(&members)
+                .map(|(card, member)| {
+                    Ok((
+                        card.handle,
+                        self.physical_card_face(execution.object_id(*member)?)?,
+                    ))
+                })
+                .collect::<Result<_>>()?,
+        };
         let wait = SearchWait {
             links: CandidateLinks::capture(self, execution, members.iter().copied())?,
             instruction,
@@ -564,6 +583,7 @@ impl Game {
             members,
             group_members,
             domain: domain.clone(),
+            facts,
             snapshot: SnapshotId(self.state.ir_epoch),
             conditional,
             distinct_names,
@@ -1172,6 +1192,7 @@ impl SearchWait {
         }
         Ok(SearchQuestion {
             cards,
+            facts: Some(self.facts.clone()),
             cardinality: domain.cardinality,
             groups: domain.groups.as_ref().map(|groups| {
                 groups

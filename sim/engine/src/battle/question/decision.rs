@@ -1,7 +1,8 @@
 //! Effect domains retain their original native answer channels.
 
 use super::{AnswerError, Result};
-use crate::battle::ProjectionError;
+use crate::battle::{BattleReferences, ProjectionError};
+use crate::catalog::Catalog;
 use crate::game::player::{self, DecisionShape, QuestionToken, Viewer};
 use alloc::boxed::Box;
 use core::result;
@@ -14,6 +15,7 @@ mod drive;
 mod number;
 mod order;
 mod resource;
+mod search;
 mod select;
 pub(super) use candidates::details;
 
@@ -23,6 +25,8 @@ pub(super) struct Context<'projection> {
     pub(super) actor: Viewer,
     pub(super) purpose: player::QuestionPurpose,
     pub(super) observation: &'projection BattleObservation,
+    pub(super) catalog: &'projection Catalog,
+    pub(super) references: &'projection BattleReferences,
 }
 
 #[derive(Clone)]
@@ -34,6 +38,7 @@ pub(super) enum Binding {
     Resource(Box<resource::Binding>),
     Select(Box<select::Binding>),
     Order(order::Binding),
+    Search(Box<search::Binding>),
 }
 
 pub(super) fn project(
@@ -91,6 +96,9 @@ pub(super) fn project(
         DecisionShape::Order(domain) => {
             order::project(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
+        DecisionShape::Search(domain) => {
+            search::project(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Abilities(_)
         | DecisionShape::WardEntry { .. }
         | DecisionShape::Quick { .. }
@@ -99,7 +107,6 @@ pub(super) fn project(
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
         | DecisionShape::DamageReplacements(_)
-        | DecisionShape::Search(_)
         | DecisionShape::SearchPartition(_)
         | DecisionShape::MovementCapacity(_)
         | DecisionShape::SearchReplacement
@@ -130,6 +137,7 @@ impl Binding {
             Self::Resource(binding) => binding.answer(answer),
             Self::Select(binding) => binding.answer(answer),
             Self::Order(binding) => binding.answer(answer),
+            Self::Search(binding) => binding.answer(answer),
         }
     }
 }

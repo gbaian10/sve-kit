@@ -1,5 +1,6 @@
 //! Player questions describe the operation without exposing authority continuations.
 
+use super::observation::CardFace;
 use super::observation::ObservedZone;
 use super::{AbilityChoice, PendingChoice, QuickChoice, QuotaQuestion, ReplacementChoice};
 use super::{
@@ -7,6 +8,7 @@ use super::{
     Viewer,
 };
 use crate::ir::{Cardinality, ModeId, Nat, Position, QuickWindow, TriggerIcon};
+use alloc::collections::BTreeMap;
 
 /// One printed choice addressed only within the current question.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -50,6 +52,8 @@ pub struct OrderQuestion {
 pub struct SearchQuestion {
     /// Only the searching actor receives these printed choices.
     pub cards: Vec<CardOption>,
+    /// Frozen authorized provenance; absent when the producer did not capture it.
+    pub facts: Option<SearchFacts>,
     /// Effective total bounds.
     pub cardinality: Cardinality,
     /// Every printed group, including empty entries.
@@ -58,6 +62,15 @@ pub struct SearchQuestion {
     pub distinct_names: bool,
     /// Upper bound across every selected group together.
     pub maximum_original_cost: Option<i64>,
+}
+
+/// Search identifies printings without granting knowledge of their hidden deck slots.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SearchFacts {
+    /// Receiving the question does not change the candidates' actual source player.
+    pub origin: SelectionDestination,
+    /// Exact physical faces, indexed by this question's native answer coordinates.
+    pub faces: BTreeMap<u64, CardFace>,
 }
 
 /// A selection from the frozen remaining search or movement candidates.

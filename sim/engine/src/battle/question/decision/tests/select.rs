@@ -137,6 +137,7 @@ pub(super) fn project_question(
     observation: &BattleObservation,
     id: &QuestionId,
 ) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    let fixture = board_fixture::fixture().map_err(|_fixture| ProjectionError::Unavailable)?;
     project(
         domain(native).ok_or(ProjectionError::Unavailable)?,
         Some(Context {
@@ -144,6 +145,8 @@ pub(super) fn project_question(
             actor: native.actor,
             purpose: native.purpose,
             observation,
+            catalog: &fixture.catalog,
+            references: &fixture.references,
         }),
     )
 }
@@ -337,6 +340,8 @@ fn formal_targets_keep_their_subjects_and_submit_to_the_native_stop_both_seats()
                 actor,
                 purpose: native.purpose,
                 observation: &observation,
+                catalog: &board_fixture::fixture().unwrap().catalog,
+                references: &board_fixture::fixture().unwrap().references,
             }),
         )
         .unwrap();
