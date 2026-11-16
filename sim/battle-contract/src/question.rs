@@ -133,6 +133,8 @@ pub enum QuestionUse {
     TriggerQuota,
     /// Declare X.
     DeclareX,
+    /// Declare a number during effect resolution.
+    DeclareNumber,
     /// Keep or reroll a die.
     DiceReroll,
     /// Order cards.
@@ -199,7 +201,7 @@ impl QuestionUse {
             Self::WardEntry | Self::OptionalCost | Self::ResolutionPayment | Self::MayEffect => {
                 ShapeKind::Confirm
             }
-            Self::DeclareX => ShapeKind::Integer,
+            Self::DeclareX | Self::DeclareNumber => ShapeKind::Integer,
             Self::DiceReroll => ShapeKind::DiceReroll,
             Self::OrderCards | Self::DamageReplacementOrder => ShapeKind::Order,
             Self::DriveTrigger => ShapeKind::DriveTrigger,

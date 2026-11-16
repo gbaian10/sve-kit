@@ -20,8 +20,8 @@ mod strict;
 pub use closing::{ClosingAnswer, ClosingQuestion};
 pub use construction::check_card_deck_rules;
 pub use decision::{
-    CardOption, DecisionShape, DiscardKind, MovementCapacityQuestion, PartitionQuestion,
-    SearchQuestion, TokenCapacityQuestion,
+    CardOption, DecisionShape, DiscardKind, IntegerSource, MovementCapacityQuestion,
+    PartitionQuestion, SearchQuestion, TokenCapacityQuestion,
 };
 pub use evolution::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,

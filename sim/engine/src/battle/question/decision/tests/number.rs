@@ -1,4 +1,5 @@
 use super::super::*;
+use crate::game::player::IntegerSource;
 use crate::ir::{Cardinality, Nat};
 use sve_battle_contract::Nat as WireNat;
 
@@ -6,11 +7,28 @@ use sve_battle_contract::Nat as WireNat;
 mod native;
 
 #[test]
+fn another_native_integer_source_does_not_guess_a_wire_use() {
+    assert!(matches!(
+        project(&DecisionShape::Integer {
+            bounds: Cardinality {
+                minimum: Nat(0),
+                maximum: Some(Nat(3)),
+            },
+            source: IntegerSource::Other,
+        }),
+        Err(ProjectionError::Unavailable)
+    ));
+}
+
+#[test]
 fn integer_domain_keeps_bounds_and_rejects_answers_outside_them() {
-    let (usage, shape, binding) = project(&DecisionShape::Integer(Cardinality {
-        minimum: Nat(2),
-        maximum: Some(Nat(5)),
-    }))
+    let (usage, shape, binding) = project(&DecisionShape::Integer {
+        bounds: Cardinality {
+            minimum: Nat(2),
+            maximum: Some(Nat(5)),
+        },
+        source: IntegerSource::XCost,
+    })
     .unwrap();
     assert_eq!(usage, wire::QuestionUse::DeclareX);
     assert_eq!(
@@ -48,10 +66,13 @@ fn integer_domain_keeps_bounds_and_rejects_answers_outside_them() {
 
 #[test]
 fn integer_keeps_an_unbounded_maximum_and_exact_wire_limit() {
-    let (_, shape, binding) = project(&DecisionShape::Integer(Cardinality {
-        minimum: Nat(WireNat::MAX.get()),
-        maximum: None,
-    }))
+    let (_, shape, binding) = project(&DecisionShape::Integer {
+        bounds: Cardinality {
+            minimum: Nat(WireNat::MAX.get()),
+            maximum: None,
+        },
+        source: IntegerSource::XCost,
+    })
     .unwrap();
     assert!(matches!(shape, wire::QuestionShape::Integer { bounds, .. }
         if bounds.min == WireNat::MAX && bounds.max.is_none()));
@@ -96,7 +117,7 @@ fn integer_refuses_invalid_or_unencodable_bounds_without_clamping() {
         ),
     ] {
         assert!(
-            matches!(project(&DecisionShape::Integer(bounds)), Err(actual) if actual == expected)
+            matches!(project(&DecisionShape::Integer { bounds, source: IntegerSource::XCost }), Err(actual) if actual == expected)
         );
     }
 }

@@ -24,7 +24,7 @@ pub(super) fn project(
             Ok(confirm::project(confirm::Binding::ResolutionPayment))
         }
         DecisionShape::May => Ok(confirm::project(confirm::Binding::May)),
-        DecisionShape::Integer(domain) => number::integer(*domain),
+        DecisionShape::Integer { bounds, source } => number::integer(*bounds, *source),
         DecisionShape::DiceReroll { value, remaining } => number::dice(*value, *remaining),
         DecisionShape::Abilities(_)
         | DecisionShape::ResourceEntryPayment { .. }

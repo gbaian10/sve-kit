@@ -302,7 +302,7 @@ pub(super) fn selected_answer(shape: &QuestionShape, selected: &[u64], accept: b
                 .copied()
                 .unwrap_or(quota.candidates[0].handle),
         ),
-        DecisionShape::Integer(bounds) => {
+        DecisionShape::Integer { bounds, .. } => {
             Answer::Integer(selected.first().map_or(bounds.minimum, |value| Nat(*value)))
         }
         DecisionShape::Order(_) | DecisionShape::DamageReplacements(_) => {

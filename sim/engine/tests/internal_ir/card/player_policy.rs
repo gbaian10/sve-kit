@@ -10,8 +10,8 @@ use sve_engine::game::player::observation::{Observation, ObservedZone};
 use sve_engine::game::player::{
     AbilityChoice, Answer, CardOption, ClosingAnswer, ClosingQuestion, Command, DecisionShape,
     DiscardKind, DistributionQuestion, EarlierQuotaChoice, EvolutionAnswer, EvolutionPayment,
-    EvolutionQuestion, MainIntentKind, MovementCapacityQuestion, OpeningAnswer, OpeningQuestion,
-    PartitionQuestion, PendingChoice, QuestionShape, QuestionToken, QuotaQuestion,
+    EvolutionQuestion, IntegerSource, MainIntentKind, MovementCapacityQuestion, OpeningAnswer,
+    OpeningQuestion, PartitionQuestion, PendingChoice, QuestionShape, QuestionToken, QuotaQuestion,
     ReplacementChoice, SearchAnswer, SearchQuestion, SelectionGroup, SelectionMember,
     SelectionQuestion, SelectionRole, SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion,
     Viewer,
@@ -155,14 +155,20 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
             Answer::Integer(Nat(0)),
         ),
         (
-            DecisionShape::Integer(bounds(7, 9)),
+            DecisionShape::Integer {
+                bounds: bounds(7, 9),
+                source: IntegerSource::Other,
+            },
             Answer::Integer(Nat(7)),
         ),
         (
-            DecisionShape::Integer(Cardinality {
-                minimum: Nat(u64::MAX),
-                maximum: None,
-            }),
+            DecisionShape::Integer {
+                bounds: Cardinality {
+                    minimum: Nat(u64::MAX),
+                    maximum: None,
+                },
+                source: IntegerSource::Other,
+            },
             Answer::Integer(Nat(u64::MAX)),
         ),
         (
@@ -202,7 +208,10 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
         assert_eq!(answer(shape).unwrap(), expected);
     }
     assert_eq!(
-        answer(DecisionShape::Integer(bounds(9, 7))),
+        answer(DecisionShape::Integer {
+            bounds: bounds(9, 7),
+            source: IntegerSource::Other
+        }),
         Err(PolicyFailure::InvalidQuestion)
     );
     assert_eq!(

@@ -2,6 +2,7 @@ use super::{
     Execution, Game, InputDomain, PlayState, Result, Slot, Wait, int, invalid, seat_name,
     unsupported,
 };
+use crate::game::player::IntegerSource;
 use crate::ir::x_pp;
 use crate::ir::{
     Action, Binding, Cardinality, CostSpec, Expr, Int, Nat, PlayerRef, Resource, ResourceOperation,
@@ -161,6 +162,7 @@ impl Game {
             Wait::Integer {
                 binding: super::super::super::declaration::NumberBinding::Natural(binding),
                 bounds,
+                source: IntegerSource::XCost,
                 purpose: super::super::super::player::purpose(&decision.kind),
                 declaration: None,
             },
