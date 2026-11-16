@@ -69,6 +69,7 @@ impl Binding {
     pub(super) const fn new(coordinates: BTreeMap<OptionId, u64>) -> Self {
         Self { coordinates }
     }
+
     pub(super) fn answer(&self, answer: &Answer) -> result::Result<player::Answer, AnswerError> {
         let Answer::Order { order } = answer else {
             return Err(AnswerError);

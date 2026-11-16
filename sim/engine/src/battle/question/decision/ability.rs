@@ -52,6 +52,7 @@ pub(super) fn project(
         super::Binding::Ability(Binding { coordinates }),
     ))
 }
+
 impl Binding {
     pub(super) fn answer(&self, answer: &Answer) -> result::Result<player::Answer, AnswerError> {
         let Answer::Choose { chosen } = answer else {

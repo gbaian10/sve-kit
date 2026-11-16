@@ -1067,6 +1067,7 @@ impl Game {
                 .map(|effect| effect.origin.clone()));
         }
         if reference["kind"].as_str() != Some("ir-damage-prevention") {
+            // Legacy replacements can resolve without admitted typed text provenance.
             return Ok(None);
         }
         let holder = reference["source"]
@@ -1078,10 +1079,10 @@ impl Game {
         let definition = reference["definition"]
             .as_u64()
             .ok_or_else(|| crate::invalid("replacement definition"))?;
-        let ability = self
+        let mut matches = self
             .internal_effective_abilities(holder)?
             .into_iter()
-            .find(|ability| {
+            .filter(|ability| {
                 ability
                     .grant
                     .as_ref()
@@ -1091,8 +1092,14 @@ impl Game {
                         matches!(effect,
                     Effect::Replacement {id,..} if id.0 == definition)
                     })
-            })
+            });
+        let ability = matches
+            .next()
             .ok_or_else(|| crate::invalid("replacement text origin"))?;
+        // Ambiguous evidence must not silently select an unrelated text provider.
+        if matches.next().is_some() {
+            return Err(crate::invalid("ambiguous replacement text origin"));
+        }
         self.activation_text_origin(holder, &ability).map(Some)
     }
 
