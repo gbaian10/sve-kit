@@ -38,7 +38,10 @@ export interface SeatSpec {
   readonly maxPp: number
   readonly ep: number
   readonly sep: number
-  /** Not in the contract yet: see `ProvisionalPoints`. */
+  /**
+   * The screen still takes these three beside the observation (`ProvisionalPoints`). The contract's
+   * own fields are filled from the same numbers, so the two cannot disagree.
+   */
   readonly epMax: number
   readonly sepMax: number
   readonly sepOpensIn: number
@@ -129,7 +132,7 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
     cards: cards.map((no, position) => ({ position, object: add(owner, no, "public") })),
   })
 
-  const player = (seat: Seat, spec: SeatSpec): PlayerView => {
+  const player = (seat: Seat, spec: SeatSpec, turnsBegun: number): PlayerView => {
     const own = seat === viewer
     const hand: ZoneMember[] = own
       ? spec.hand.map((no, position) => {
@@ -178,7 +181,10 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
       pp: spec.pp,
       max_pp: spec.maxPp,
       ep: spec.ep,
+      ep_capacity: spec.epMax,
+      ep_used: spec.epMax - spec.ep,
       sep: spec.sep,
+      sep_available_from: spec.sepMax === 0 ? null : turnsBegun + spec.sepOpensIn,
       effects: [],
       zones: {
         deck: { count: spec.deck, capacity: null, cards: [] },
@@ -203,8 +209,8 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
   }
 
   const players: [PlayerView, PlayerView] = [
-    player(SEATS[0], table.seats[0]),
-    player(SEATS[1], table.seats[1]),
+    player(SEATS[0], table.seats[0], table.turn.elapsed_turns[0]),
+    player(SEATS[1], table.seats[1], table.turn.elapsed_turns[1]),
   ]
   return {
     viewer,

@@ -76,6 +76,16 @@ describe("fixture scenes", () => {
     }
   })
 
+  it.each(SCENES)("$id keeps each seat's evolve points consistent", ({ script }) => {
+    // The schema cannot say this either; the authority refuses to send a board that breaks it.
+    for (const seat of SEATS) {
+      for (const player of baselineOf(script[seat]).players) {
+        expect(player.ep + player.ep_used).toBe(player.ep_capacity)
+        if (player.sep > 0) expect(player.sep_available_from).not.toBeNull()
+      }
+    }
+  })
+
   it.each(SCENES)("$id arranges a slot for each field card", ({ script, slots }) => {
     const [first, second] = baselineOf(script.p1).players
     expect(slots.p1?.field).toHaveLength(first.zones.field.count)
