@@ -556,6 +556,8 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 
 `entered_from`、`entered_by`、`played_from` 的 `ref: this` 在入場曲與 `auto.on.enter_field: {ref: this}` 讀取自身入場事件。監看他者入場時，可用 `entered_from: {ref: it, from: cemetery}` 讀取該次事件主體的來源；不把能力持有者當成事件主體，其他事件不提供此讀值。進化能力的 `usable_if` 另可用 `entered_from: {ref: this, from: cemetery}` 查詢持有者本次場上世代的入場來源；離場再回場即重新記錄，普通進化不改變來源，進化資格目前限查詢墓場來源。入場事件接受手牌、牌庫及墓場，`not` 可表示非手牌；不由入場方式推斷來源區域。入場來源條件亦可控制唯一的チョイス群組是否出現；`choice.instead` 另接受墓場來源條件以改變可選模式數，仍在宣告時選模式，並沿用同一事件的凍結來源。自身回場及離場後移 EX 需要該次離場確定落在墓場，目前只有謝幕符合；一般 `left_field` 不開放這兩種動作。
 
+入場事件中的 `entered_by: {ref: this, by: ability, source: {trait: ウマ娘}}` 讀取造成本次進場的能力來源，在進場當時凍結的有效特徵；不讀入場者自己的特徵，也不因來源之後離場或改變而重算。來源先離場再由該能力入場時沿用權威 LKI。`source` 只接受單一 `trait`，且僅能搭配 `by: ability`；省略時保留原來的進場方式判斷。這個條件也可放進 `choice.instead`，例如ゼファー以 `n: 1` 配合符合條件時 `upto: 2`；一般打出仍只選一個模式。來源證據缺失的原型執行回報 unsupported，不以物件初始旗標或目前場上的其他卡補造來源。
+
 監看他者從場上進墓場的 `auto.on.moved: {from: {who: self, zone: field}, to: cemetery, ...}`，本文可寫 `move: {ref: it, to: field}` 把該次離場的主體放回擁有者的場上（BP19-074「それを場に出す」）；觀察的是對手的卡時，放回的是對手的場，不是觀察者的場。標頭限定送墓，所以 `it` 跟隨這次離場在墓場產生的世代；結算前該卡已被其他效果移出墓場就不追取。可加 `entry_effects: [{cannot: {what: play_ability, ability: {keyword: fanfare}}}]` 讓回場的卡不誘發入場曲，與 BP04-038 的放場相同。
 
 同一標頭的 `sel.where` 可寫公開區域張數門檻，例如 `where: {cmp: {left: {count: {who: self, zone: cemetery}}, op: ge, right: 10}}`（「自分の墓場が10枚以上で…場から墓場に置かれたとき」）。門檻在整批移動之前讀取：墓場 9 張時送墓的那張不算進去，不誘發（Q2590）；與觀察者同時送墓仍會誘發（Q2620）。不成立時不產生待機，因此不消耗 `per_turn`。張數只讀自己或對手的場、EX、墓場，不接受篩選，代表多張的 filler 照張數計入；離場主體的 `orig_cost_le` 等原費篩選讀離場前的印刷原費。

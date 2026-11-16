@@ -476,6 +476,8 @@ R-0004 revision 2 納入維護者 2026-10-19 對三組舊新版次共用 DSL 的
 
 `E.enter-field.entry_method = Play | AbilityPut | RulePut`，cause 保留直接 Effect／Rule／PlayerAction 與 parent_execution。I.play-card 即使由效果發起，成功打出入場仍為 Play；普通 I.move/I.token 由能力放場為 AbilityPut。`entered_by` 以 entry_method 投影，不靠是否有 cause.execution 猜。entry.from 依 CR 5.5.3 保留原區域；與 R-0009 本文判條件兼容。BP21-027／023；CR 5.5.3、10.6.2.8.1。
 
+`E.enter-field.ability_source_traits` 保存能力放場時的來源有效特徵，來源身分沿同一事件 header 的 source。進場當時來源世代仍有效就讀其有效特徵，已離開參照區域者沿用該執行的權威 LKI；成為事件事實後不再查目前來源。`TraitsFrozen::EnterFieldAbilitySourceTraits` 可供 `HasTrait` 與模式數條件讀取；非能力放場讀空集合，能力放場但缺來源證據則為 unsupported。執行到共用移區／token 進場邊界的型別化中繼不接受序列化 Frame 提供，避免初始旗標偽造來源。
+
 ### GAP-S-008
 
 `E.stat-change {subject,facets:NonEmptyList<StatDelta>,reason,commit:StateCommitId,instruction?:InstructionId}`；`StatDelta {property:Attack|Life,before:Int,after:Int,delta:Int,operation:Add|Set}`。事件來源按 subject 分型：從者 `Instruction | RuleStep(12.2.4.1)`；領袖 `Instruction | Damage | Recovery | Payment`。不得只因提交前後 Chars 有差異就造事件：先確認有被允許的數值處理，再讀該處理的實際增減，零差不生 facet。
