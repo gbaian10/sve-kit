@@ -520,6 +520,7 @@ class CannotAttackFields(TypedDict):
     what: Literal["attack"]
     on: NotRequired[EffectObject]
     target: NotRequired[RecipientSel]
+    if_can_attack: NotRequired[Literal["follower"]]
 
 
 type CannotAttack = CannotAttackFields

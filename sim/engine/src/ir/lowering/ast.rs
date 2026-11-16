@@ -4082,6 +4082,13 @@ pub(super) struct CannotAttack {
     pub what: AttackAction,
     pub on: Option<Objects>,
     pub target: Option<Recipients>,
+    pub if_can_attack: Option<AttackableKind>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AttackableKind {
+    Follower,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]

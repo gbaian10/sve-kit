@@ -3,8 +3,9 @@ use super::{
     SourceSpan, ability_source, ast, numeric, source_span, unsupported,
 };
 use crate::ir::{
-    AbilityKind, AbilityQualification, Action, ActionPattern, Bool, Duration, DurationEnd, Effect,
-    Expr, Interval, PermissionSubject, Polarity, RuleId, ScopeId, TimeAnchor, ZoneKind,
+    AbilityKind, AbilityQualification, Action, ActionPattern, Binding, Bool, BoolRead, Duration,
+    DurationEnd, Effect, EffectDefinitionId, Expr, Interval, ObjectOperand, PermissionSubject,
+    Polarity, RecipientSet, RuleId, ScopeId, Selector, TimeAnchor, ZoneKind,
 };
 
 pub(super) fn lower(
@@ -145,7 +146,7 @@ fn permission(
         }
         ast::StaticEffect::Cannot(ast::Cannot::Attack(shape)) => {
             let ast::AttackAction::Attack = shape.what;
-            let attacker = shape
+            let mut attacker = shape
                 .on
                 .as_ref()
                 .map_or_else(|| Ok(numeric::holder()), |on| context.objects(on, path))?;
@@ -154,6 +155,9 @@ fn permission(
                 .as_ref()
                 .map(|target| context.recipients(target, path))
                 .transpose()?;
+            if shape.if_can_attack.is_some() {
+                attacker = conditional_attacker(context, attacker, target.as_ref(), path)?;
+            }
             (
                 attacker.clone(),
                 ActionPattern::Attack { attacker, target },
@@ -191,6 +195,26 @@ fn permission(
     })
 }
 
+fn conditional_attacker(
+    context: &mut BodyContext<'_>,
+    attacker: Selector,
+    target: Option<&RecipientSet>,
+    path: &str,
+) -> Result<Selector, LoweringError> {
+    if !matches!(target, Some(RecipientSet::Leaders { .. })) {
+        return Err(unsupported(path));
+    }
+    let binding = Binding::new(context.allocator.id(path)?, context.scope);
+    Ok(Selector::Filter {
+        input: Box::new(attacker),
+        binding,
+        predicate: Box::new(Expr::Live(Box::new(BoolRead::LegalAttack {
+            attacker: ObjectOperand::Bound { binding },
+            ignore_querying_clause: EffectDefinitionId(context.card_allocator.id(path)?),
+        }))),
+    })
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Attack permission installation shares body bindings."
@@ -205,6 +229,9 @@ impl BodyContext<'_> {
         let ast::InstalledEffect::Cannot(ast::Cannot::Attack(shape)) = &installation.effect else {
             return Err(unsupported(path));
         };
+        if shape.if_can_attack.is_some() {
+            return Err(unsupported(path));
+        }
         // A field entry's result names its successful members, as for numeric modifications.
         let objects = if let ast::Objects::Follow { follow } = &installation.on {
             self.followed(follow, path)?

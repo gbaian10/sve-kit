@@ -1,6 +1,7 @@
 use super::{
-    Ability, AbilityKind, AbilityOrigin, ActionPattern, Bool, Duration, DurationEnd, Effect, Expr,
-    ObjectOperand, PermissionSubject, Polarity, RecipientSet, Selector, TimeAnchor,
+    Ability, AbilityKind, AbilityOrigin, ActionPattern, Bool, BoolRead, Duration, DurationEnd,
+    Effect, EffectDefinitionId, Expr, ObjectOperand, PermissionSubject, Polarity, RecipientSet,
+    Selector, TimeAnchor,
 };
 
 pub(crate) struct AttackPermission<'effect> {
@@ -8,6 +9,7 @@ pub(crate) struct AttackPermission<'effect> {
     pub target: Option<&'effect RecipientSet>,
     pub condition: &'effect Expr<Bool>,
     pub duration: &'effect Duration,
+    pub query: Option<EffectDefinitionId>,
 }
 
 pub(crate) fn projection(effect: &Effect) -> Option<AttackPermission<'_>> {
@@ -22,11 +24,34 @@ pub(crate) fn projection(effect: &Effect) -> Option<AttackPermission<'_>> {
     else {
         return None;
     };
-    (objects == attacker).then_some(AttackPermission {
+    if objects != attacker {
+        return None;
+    }
+    let (attacker, query) = if let Selector::Filter {
+        input,
+        binding,
+        predicate,
+    } = attacker
+        && let Expr::Live(read) = predicate.as_ref()
+        && let BoolRead::LegalAttack {
+            attacker: ObjectOperand::Bound { binding: queried },
+            ignore_querying_clause,
+        } = read.as_ref()
+        && binding == queried
+    {
+        if !matches!(target, Some(RecipientSet::Leaders { .. })) {
+            return None;
+        }
+        (input.as_ref(), Some(*ignore_querying_clause))
+    } else {
+        (attacker, None)
+    };
+    Some(AttackPermission {
         attacker,
         target: target.as_ref(),
         condition,
         duration,
+        query,
     })
 }
 
@@ -50,6 +75,7 @@ pub(crate) fn require_projection(effect: &Effect) -> Option<AttackPermission<'_>
         target: None,
         condition,
         duration,
+        query: None,
     })
 }
 
@@ -79,6 +105,7 @@ pub(crate) fn ward_projection(effect: &Effect) -> Option<AttackPermission<'_>> {
         target: None,
         condition,
         duration,
+        query: None,
     })
 }
 
