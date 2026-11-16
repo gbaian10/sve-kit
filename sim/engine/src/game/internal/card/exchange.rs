@@ -201,7 +201,8 @@ fn route_quotes(
             let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
                 return Err(unsupported("exchange quote material domain"));
             };
-            let count = constraint.cardinality.minimum.0;
+            let count = (constraint.cardinality.maximum == Some(constraint.cardinality.minimum))
+                .then_some(constraint.cardinality.minimum.0);
             let fee = CostSpec::Ordered {
                 steps: vec![payment.clone()],
             };

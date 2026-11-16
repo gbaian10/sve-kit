@@ -3,10 +3,10 @@
 use super::{
     Action, Binding, Bool, CharacteristicView, Execution, Expr, Game, InputDomain, Instruction,
     MoveDestination, ObjectRef, OwnerZone, PlayerId, Predicate, Result, SearchDestination,
-    SearchOutcome, SnapshotId, Wait, candidate_view, invalid, seat_name, unsupported,
+    SearchOutcome, SnapshotId, Wait, candidate_view, invalid, seat_name, unsupported, viewer,
 };
 use crate::game::player::observation::ObservedZone;
-use crate::game::player::{SearchReplacementQuestion, SelectionDestination, Viewer};
+use crate::game::player::{SearchReplacementQuestion, SelectionDestination};
 use crate::ir::{Comparison, Int, IntOperation, NumberRead, SearchFound, SearchReplacementAnswer};
 use crate::ir::{MoveResult, ZoneKind};
 
@@ -31,11 +31,7 @@ fn single_destination(results: &[MoveResult]) -> Option<SelectionDestination> {
     if results.iter().any(|result| result.actual_to != Some(first)) {
         return None;
     }
-    let player = match first.player.seat {
-        1 => Viewer::P1,
-        2 => Viewer::P2,
-        _ => return None,
-    };
+    let player = viewer(seat_name(first.player).ok()?).ok()?;
     let zone = match first.kind {
         ZoneKind::Hand => ObservedZone::Hand,
         ZoneKind::Field => ObservedZone::Field,

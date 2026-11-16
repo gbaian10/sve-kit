@@ -349,7 +349,7 @@ pub(in crate::game::internal::card) fn exchange_route(
     game: &Game,
     execution: &Execution,
     fee: &CostSpec,
-    materials: u64,
+    materials: Option<u64>,
 ) -> CostSummary {
     let mut quote = play_cost(play, game, execution);
     let mut material_group = group(
@@ -370,8 +370,8 @@ pub(in crate::game::internal::card) fn exchange_route(
             | CostLine::Fusion { cards, .. }
                 if cards.is_none() =>
             {
-                // The native material wait fixes this count, without fixing particular cards.
-                *cards = Some(materials);
+                // Fixed bounds reveal a count without revealing particular cards.
+                *cards = materials;
             }
             _ => {}
         }

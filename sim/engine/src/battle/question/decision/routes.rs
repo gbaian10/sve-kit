@@ -1,6 +1,6 @@
 use super::{AnswerError, Context, Result};
 use crate::battle::question::common::{option, seat};
-use crate::battle::{ProjectionError, costs};
+use crate::battle::{ProjectionError, costs, selection};
 use crate::game::player::observation::ObservedZone;
 use crate::game::player::observation::QuoteBasis;
 use crate::game::player::{
@@ -9,7 +9,7 @@ use crate::game::player::{
 use crate::ir::SearchReplacementAnswer;
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::result;
-use sve_battle_contract::{Answer, Nat, OptionId, Zone, question as wire};
+use sve_battle_contract::{Answer, Nat, OptionId, question as wire};
 
 #[derive(Clone)]
 pub(in crate::battle::question) struct Binding {
@@ -124,9 +124,9 @@ fn finish(
 
 const fn wire_destination(destination: SelectionDestination) -> Result<wire::Destination> {
     let zone = match destination.zone {
-        ObservedZone::Hand => Zone::Hand,
-        ObservedZone::Field => Zone::Field,
-        ObservedZone::Ex => Zone::Ex,
+        ObservedZone::Hand | ObservedZone::Field | ObservedZone::Ex => {
+            selection::zone(destination.zone)
+        }
         ObservedZone::Deck
         | ObservedZone::EvolveDeck
         | ObservedZone::Cemetery
