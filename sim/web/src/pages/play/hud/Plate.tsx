@@ -1,13 +1,13 @@
 import { Ban, Hand as HandIcon, Heart, Layers, Skull } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
+import sepIcon from "../../../assets/card-labels/dice/sep.svg"
 import epIcon from "../../../assets/card-labels/ep.svg"
 import type { CardRef } from "../../../battle/contract"
 import type { SeatTable } from "../../../battle/view/table"
 import { CLASS_ICON } from "../../../components/card/classIcons"
 import { classStyle } from "../../../domain/classes"
 import { useCards } from "../battle-cards"
-import sepIcon from "../dice/sep.svg"
 import { ArtCrop } from "../table/Cards"
 
 /** One player's numbers beside the table; nothing here is hidden information. */

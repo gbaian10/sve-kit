@@ -99,8 +99,8 @@ How the screen is put together:
 - `battle.css` is the look. Its parts are `bp-*` classes and their states `is-*` (ESLint lets
   these through for `src/pages/play/` only). Colours are the `--bp-*` tokens in
   `src/styles/tokens.css`, the same in every theme; the side panels use the site's theme tokens.
-- `dice/` draws the attack, defense, keyword and cost markers; its `README.md` says where the art
-  comes from.
+- `dice/` draws the attack, defense, keyword and cost markers from the art in
+  `src/assets/card-labels/dice/`; that directory's README says where the art comes from.
 
 ## Scripts
 

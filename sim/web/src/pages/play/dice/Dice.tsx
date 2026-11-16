@@ -1,18 +1,19 @@
 // Markers that sit on the cards like the dice of a physical table: attack (blue spear), defense
-// (red shield), the keyword dice and the cost crystal. See README.md for where the art comes from.
+// (red shield), the keyword dice and the cost crystal. The art is in assets/card-labels/, whose
+// README says where it comes from.
 import { useTranslation } from "react-i18next"
 
 import costBlank from "../../../assets/card-labels/cost-blank.svg"
-import atkBlank from "./counter-atk-blank.svg"
-import hpBlank from "./counter-hp-blank.svg"
+import atkBlank from "../../../assets/card-labels/dice/counter-atk-blank.svg"
+import hpBlank from "../../../assets/card-labels/dice/counter-hp-blank.svg"
+import kwAssail from "../../../assets/card-labels/dice/kw-assail.svg"
+import kwAura from "../../../assets/card-labels/dice/kw-aura.svg"
+import kwBane from "../../../assets/card-labels/dice/kw-bane.svg"
+import kwDrain from "../../../assets/card-labels/dice/kw-drain.svg"
+import kwGuard from "../../../assets/card-labels/dice/kw-guard.svg"
+import kwIntimidate from "../../../assets/card-labels/dice/kw-intimidate.svg"
+import NUMERALS from "../../../assets/card-labels/dice/numerals.json"
 import type { DieKeyword } from "./keywords"
-import kwAssail from "./kw-assail.svg"
-import kwAura from "./kw-aura.svg"
-import kwBane from "./kw-bane.svg"
-import kwDrain from "./kw-drain.svg"
-import kwGuard from "./kw-guard.svg"
-import kwIntimidate from "./kw-intimidate.svg"
-import NUMERALS from "./numerals.json"
 
 interface Glyph {
   readonly d: string
