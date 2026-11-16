@@ -18,7 +18,7 @@ import type {
 } from "../contract"
 import { type CardNo, cardRef, cardTypeOf, fixtureCard } from "./cards"
 
-interface FieldSpec {
+export interface FieldSpec {
   readonly no: CardNo
   /** Where the screen lays it. Not part of what a seat is told: the contract only orders the zone. */
   readonly slot: number
@@ -29,6 +29,13 @@ interface FieldSpec {
   /** Current numbers, when they are not the ones printed on the face in effect. */
   readonly stats?: readonly [attack: number, life: number]
   readonly keywords?: readonly string[]
+  /**
+   * What the card may attack right now: the opposing leader, and opposing field cards by their
+   * place in that seat's list. Not part of the observation: the authority says it in the question
+   * it puts to the seat, and a scene hands it to the screen beside its messages.
+   */
+  readonly attack?: { readonly leader?: true; readonly followers?: readonly number[] }
+  /** Counters by the rules name the authority reports, such as スタックカウンター. */
   readonly counters?: readonly (readonly [name: string, amount: number])[]
 }
 
@@ -38,18 +45,21 @@ export interface SeatSpec {
   readonly maxPp: number
   readonly ep: number
   readonly sep: number
-  /**
-   * The screen still takes these three beside the observation (`ProvisionalPoints`). The contract's
-   * own fields are filled from the same numbers, so the two cannot disagree.
-   */
-  readonly epMax: number
-  readonly sepMax: number
-  readonly sepOpensIn: number
+  /** Evolve point slots: the ones left and the ones spent. */
+  readonly epCapacity: number
+  /** The seat's own turn from which it may super evolve; null before the points are handed out. */
+  readonly sepAvailableFrom: number | null
   /** Nobody knows the deck's cards; only its size is part of the table. */
   readonly deck: number
   readonly hand: readonly CardNo[]
   readonly field: readonly FieldSpec[]
-  readonly ex: readonly CardNo[]
+  /**
+   * A card with numbers is a follower whose current attack and life the seat is told: the
+   * authority reports them for followers in the EX area as it does on the field.
+   */
+  readonly ex: readonly (
+    CardNo | { readonly no: CardNo; readonly stats: readonly [number, number] }
+  )[]
   readonly cemetery: readonly CardNo[]
   readonly banish: readonly CardNo[]
   readonly evolveDeck: {
@@ -132,7 +142,7 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
     cards: cards.map((no, position) => ({ position, object: add(owner, no, "public") })),
   })
 
-  const player = (seat: Seat, spec: SeatSpec, turnsBegun: number): PlayerView => {
+  const player = (seat: Seat, spec: SeatSpec): PlayerView => {
     const own = seat === viewer
     const hand: ZoneMember[] = own
       ? spec.hand.map((no, position) => {
@@ -181,10 +191,10 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
       pp: spec.pp,
       max_pp: spec.maxPp,
       ep: spec.ep,
-      ep_capacity: spec.epMax,
-      ep_used: spec.epMax - spec.ep,
+      ep_capacity: spec.epCapacity,
+      ep_used: spec.epCapacity - spec.ep,
       sep: spec.sep,
-      sep_available_from: spec.sepMax === 0 ? null : turnsBegun + spec.sepOpensIn,
+      sep_available_from: spec.sepAvailableFrom,
       effects: [],
       zones: {
         deck: { count: spec.deck, capacity: null, cards: [] },
@@ -195,7 +205,22 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
         },
         hand: { count: spec.hand.length, capacity: null, cards: hand },
         field: { count: field.length, capacity: ZONE_CAPACITY, cards: field },
-        ex: listed(seat, spec.ex, ZONE_CAPACITY),
+        ex: {
+          count: spec.ex.length,
+          capacity: ZONE_CAPACITY,
+          cards: spec.ex.map((card, position) => ({
+            position,
+            object:
+              typeof card === "string"
+                ? add(seat, card, "public")
+                : add(
+                    seat,
+                    card.no,
+                    "public",
+                    fieldState({ no: card.no, slot: 0, stats: card.stats }),
+                  ),
+          })),
+        },
         cemetery: listed(seat, spec.cemetery, null),
         banish: listed(seat, spec.banish, null),
         resolution: EMPTY,
@@ -209,8 +234,8 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
   }
 
   const players: [PlayerView, PlayerView] = [
-    player(SEATS[0], table.seats[0], table.turn.elapsed_turns[0]),
-    player(SEATS[1], table.seats[1], table.turn.elapsed_turns[1]),
+    player(SEATS[0], table.seats[0]),
+    player(SEATS[1], table.seats[1]),
   ]
   return {
     viewer,

@@ -1,4 +1,4 @@
-import { act, screen, waitFor, within } from "@testing-library/react"
+import { act, fireEvent, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { StrictMode } from "react"
 import type { RouteObject } from "react-router"
@@ -55,9 +55,9 @@ describe("PlayPage", () => {
     expect(screen.getByText("第 5 回合")).toBeInTheDocument()
     // Nothing on the table can be answered yet.
     expect(screen.getByRole("button", { name: "回合結束" })).toBeDisabled()
-    // Super evolution is still four of the seat's own turns away: greyed, with the count on it.
+    // Super evolution opens on the seat's next turn: greyed, with the count on it.
     const ownMat = within(await table()).getByRole("region", { name: "你的遊戲墊" })
-    expect(within(ownMat).getByRole("img", { name: "超進化還有 4 回合" })).toHaveClass("is-locked")
+    expect(within(ownMat).getByRole("img", { name: "超進化還有 1 回合" })).toHaveClass("is-locked")
     expect(region(container, "你")).toHaveTextContent("2/3")
     expect(region(container, "你").querySelector(".bp-hud-sep")).toHaveClass("is-locked")
     expect(region(container, "對手").querySelector(".bp-hud-ep")).toHaveClass("is-none")
@@ -74,19 +74,101 @@ describe("PlayPage", () => {
     expect(within(own).getByRole("group", { name: "主戰者" })).toHaveTextContent("16")
     // The first player has no evolve points; the other seat has used one of its three.
     expect(within(own).getByRole("img", { name: "EP 0/0" })).toHaveTextContent("無（先攻）")
-    expect(within(own).getByRole("img", { name: "SEP 1/1" })).toBeInTheDocument()
+    expect(within(own).getByRole("img", { name: "超進化還有 2 回合" })).toHaveClass("is-locked")
     const other = within(await table()).getByRole("region", { name: "對手的遊戲墊" })
     const spent = within(other).getByRole("img", { name: "EP 2/3" })
     expect(spent.querySelectorAll(".bp-ep-icon")).toHaveLength(3)
     expect(spent.querySelectorAll(".bp-ep-icon.is-used")).toHaveLength(1)
-    expect(
-      within(other).getByRole("img", { name: "SEP 0/1" }).querySelector(".is-used"),
-    ).not.toBeNull()
     // Each PP column is lit from 0 up to its value: six of the maximum, two of what is left.
     const pp = within(own).getByRole("img", { name: "PP 剩 1，上限 5" })
     expect(pp.querySelectorAll(".bp-pp-dot.is-max.is-on")).toHaveLength(6)
     expect(pp.querySelectorAll(".bp-pp-dot.is-left.is-on")).toHaveLength(2)
     expect(pp.querySelector(".bp-pp-dot.is-left.is-mark")).toHaveTextContent("1")
+  })
+
+  it("lays a counter on its card as a chip with the number, named in the reader's language", async () => {
+    await renderRoutes(ROUTES, { initialEntries: ["/play?scene=stack"] })
+    const own = within(await table()).getByRole("region", { name: "你的遊戲墊" })
+    const chip = within(own).getByRole("img", { name: "指示物：蓄積 ×3" })
+    expect(chip).toHaveAttribute("title", "蓄積 ×3")
+    // The chip carries the number only: no kind is printed on it, in any language.
+    expect(chip).toHaveTextContent(/^3$/)
+    expect(chip.querySelector("img")).toHaveAttribute("src", expect.stringMatching(/chip_b\.webp$/))
+    // An engaged card carries its chip too.
+    const engaged = within(own).getByRole("img", { name: "指示物：蓄積 ×1" })
+    expect(engaged.closest(".bp-card")).toHaveClass("is-engaged")
+    prefsStore.set({ uiLanguage: "en" })
+    expect(await within(own).findByRole("img", { name: "Counter: Stack ×3" })).toBeInTheDocument()
+  })
+
+  it("stacks a card's keyword markers, standing and engaged", async () => {
+    await renderRoutes(ROUTES, { initialEntries: ["/play?scene=stack"] })
+    const own = within(await table()).getByRole("region", { name: "你的遊戲墊" })
+    const rows = Array.from(own.querySelectorAll(".bp-status-row")).filter(
+      (row) => row.querySelectorAll(".bp-kwdie").length === 3,
+    )
+    expect(rows).toHaveLength(2)
+    expect(rows.map((row) => row.closest(".bp-card")?.classList.contains("is-engaged"))).toEqual([
+      false,
+      true,
+    ])
+    expect(rows[0]).toHaveTextContent("守護威懾必殺")
+  })
+
+  it("shows the current numbers of a follower waiting in the EX area", async () => {
+    await renderRoutes(ROUTES, { initialEntries: ["/play?scene=stack"] })
+    const own = within(await table()).getByRole("region", { name: "你的遊戲墊" })
+    // Nothing on the field shows these numbers: they are the EX follower's, given like a field one's.
+    expect(within(own).getByRole("img", { name: /^攻擊 4/ })).toBeInTheDocument()
+    expect(within(own).getByRole("img", { name: /^體力 5/ })).toBeInTheDocument()
+  })
+
+  it("lights the cards that may attack: green for the leader, yellow for followers only", async () => {
+    const { container } = await renderRoutes(ROUTES, { initialEntries: ["/play"] })
+    const own = within(await table()).getByRole("region", { name: "你的遊戲墊" })
+    expect(own.querySelectorAll(".bp-card.is-attack-leader")).toHaveLength(1)
+    expect(own.querySelectorAll(".bp-card.is-attack-followers")).toHaveLength(1)
+    // The engaged card may not attack, and nothing is said about the other seat's cards.
+    expect(own.querySelector(".bp-card.is-engaged")).not.toHaveClass("is-attack-leader")
+    const other = within(await table()).getByRole("region", { name: "對手的遊戲墊" })
+    expect(other.querySelector(".is-attack-leader, .is-attack-followers")).toBeNull()
+    // Storm and rush have no marker of their own on a card.
+    expect(container.querySelector(".bp-status")).toBeNull()
+  })
+
+  it("lights what the picked card may attack, as the scene says and for as long as it is picked", async () => {
+    await renderRoutes(ROUTES, { initialEntries: ["/play"] })
+    const own = within(await table()).getByRole("region", { name: "你的遊戲墊" })
+    const other = within(await table()).getByRole("region", { name: "對手的遊戲墊" })
+    expect(other.querySelector(".is-target")).toBeNull()
+    const [green] = own.querySelectorAll(".bp-card.is-attack-leader")
+    const [yellow] = own.querySelectorAll(".bp-card.is-attack-followers")
+    if (green === undefined || yellow === undefined) throw new Error("no attackers")
+    // The one that reaches the leader: the leader and the one follower the scene names.
+    fireEvent.click(green)
+    expect(other.querySelectorAll(".bp-card.is-target")).toHaveLength(1)
+    expect(other.querySelector(".bp-card.is-target")).toHaveClass("is-engaged")
+    expect(other.querySelectorAll(".bp-pile-hit.is-target")).toHaveLength(1)
+    // The one that reaches followers only: the leader goes dark.
+    fireEvent.click(yellow)
+    expect(other.querySelectorAll(".bp-card.is-target")).toHaveLength(1)
+    expect(other.querySelector(".bp-pile-hit.is-target")).toBeNull()
+    // A card that may not attack lights nothing.
+    const engaged = own.querySelector(".bp-card.is-engaged")
+    if (engaged === null) throw new Error("no engaged card")
+    fireEvent.click(engaged)
+    expect(other.querySelector(".is-target")).toBeNull()
+  })
+
+  it("keeps a spent super evolution point on the mat as a faded marker", async () => {
+    await renderRoutes(ROUTES, { initialEntries: ["/play?scene=full"] })
+    const own = within(await table()).getByRole("region", { name: "你的遊戲墊" })
+    const spent = within(own).getByRole("img", { name: "SEP 0/1" })
+    expect(spent).not.toHaveClass("is-locked")
+    expect(spent.querySelectorAll(".bp-sep-icon.is-used")).toHaveLength(1)
+    const other = within(await table()).getByRole("region", { name: "對手的遊戲墊" })
+    const held = within(other).getByRole("img", { name: "SEP 1/1" })
+    expect(held.querySelectorAll(".bp-sep-icon.is-used")).toHaveLength(0)
   })
 
   it("draws what the authority reports for the cards in play", async () => {
@@ -98,10 +180,9 @@ describe("PlayPage", () => {
     expect(within(own).getByText("進化")).toBeInTheDocument()
     expect(own.querySelector(".bp-kwdie.is-on")).toHaveTextContent("守護")
     expect(own.querySelectorAll(".bp-card.is-engaged")).toHaveLength(2)
-    expect(within(own).getByText("スタック 2")).toBeInTheDocument()
     expect(within(other).getByText("超進化")).toBeInTheDocument()
-    // A keyword without a die of its own is written out.
-    expect(within(other).getByText("疾馳")).toHaveClass("bp-status")
+    // Storm has no marker on the card: what it allows shows as the frame when the card may attack.
+    expect(within(other).queryByText("疾馳")).toBeNull()
     expect(within(own).getAllByRole("img", { name: /^攻擊 \d+/ }).length).toBeGreaterThan(0)
   })
 
@@ -164,20 +245,86 @@ describe("PlayPage", () => {
     expect(router.state.location.search).toBe("?scene=full")
   })
 
-  it("draws one shared mat or one per player, as the battle setting says", async () => {
+  it("lays one picture under both mats: across the whole table, or on the board only", async () => {
     const user = userEvent.setup()
     const { container } = await renderRoutes(ROUTES, { initialEntries: ["/play"] })
     await table()
     const count = (selector: string) => container.querySelectorAll(selector).length
-    // One picture per mat; then one picture under both sides, which keep only their zone frames.
-    expect([count(".bp-mat"), count(".bp-mat-art"), count(".bp-mat.is-frames")]).toEqual([2, 2, 0])
+    const art = () => {
+      const found = container.querySelector<HTMLElement>(".bp-mat-art")
+      if (found === null) throw new Error("no mat picture")
+      return found
+    }
+    // One picture for the table; the two mats carry their printing only.
+    expect([count(".bp-mat-art"), count(".bp-mat"), count(".bp-frames")]).toEqual([1, 2, 2])
+    expect(art()).not.toHaveClass("is-framed")
+    const across = Number.parseFloat(art().style.width)
     await user.click(screen.getByRole("button", { name: "對戰設定" }))
-    await user.click(screen.getByRole("radio", { name: "共用一張" }))
-    expect(prefsStore.get().battleMat).toBe("shared")
-    expect([count(".bp-mat"), count(".bp-mat-art"), count(".bp-mat.is-frames")]).toEqual([3, 1, 2])
-    expect(count(".bp-frames")).toBe(2)
-    // The page's background is not the mat: it stays as it was.
-    expect(count(".bp-leader-art")).toBe(1)
+    await user.click(screen.getByRole("radio", { name: "盤面" }))
+    expect(prefsStore.get().battleMatReach).toBe("board")
+    // Still one picture, now framed like a mat and no wider than the board.
+    expect(count(".bp-mat-art")).toBe(1)
+    expect(art()).toHaveClass("is-framed")
+    expect(Number.parseFloat(art().style.width)).toBeLessThan(across)
+  })
+
+  it("changes the mat's picture from the battle settings, keeping the printing", async () => {
+    const user = userEvent.setup()
+    const { container } = await renderRoutes(ROUTES, { initialEntries: ["/play"] })
+    await table()
+    expect(container.querySelectorAll(".bp-night-rune")).toHaveLength(1)
+    await user.click(screen.getByRole("button", { name: "對戰設定" }))
+    await user.selectOptions(screen.getByRole("combobox", { name: "遊戲墊圖案" }), "羊皮紙")
+    expect(prefsStore.get().battleMatLook).toBe("parchment")
+    expect(container.querySelectorAll(".bp-parchment-ring")).toHaveLength(1)
+    expect(container.querySelector(".bp-night-rune")).toBeNull()
+    // A light mat prints in a dark ink; the printing itself is the same.
+    expect(container.querySelectorAll(".bp-mat.is-light")).toHaveLength(2)
+    expect(container.querySelectorAll(".bp-zone-base")).toHaveLength(10)
+  })
+
+  it("shows a card's art on the mat, blurred and darkened as the sliders say", async () => {
+    const user = userEvent.setup()
+    const { container } = await renderRoutes(ROUTES, { initialEntries: ["/play"] })
+    await table()
+    await user.click(screen.getByRole("button", { name: "對戰設定" }))
+    // The sliders belong to a photo: a drawn mat has none.
+    expect(screen.queryByRole("slider", { name: "模糊" })).toBeNull()
+    await user.selectOptions(screen.getByRole("combobox", { name: "遊戲墊圖案" }), "卡面")
+    const photo = () => {
+      const found = container.querySelector<HTMLElement>(".bp-mat-art .bp-mat-photo")
+      if (found === null) throw new Error("no photo on the mat")
+      return found
+    }
+    // Until a card is picked the art is the player's own leader's.
+    expect(prefsStore.get().battleMatCard).toBeNull()
+    expect(photo().querySelector(".bp-art")).not.toBeNull()
+    // As it starts: no blur at all (the art as it is, nothing overhanging its box), and darkened.
+    expect([photo().style.filter, photo().style.inset]).toEqual(["", "0px"])
+    expect(screen.getByText("不模糊")).toBeInTheDocument()
+    expect(container.querySelector<HTMLElement>(".bp-mat-veil")?.style.opacity).toBe("0.6")
+    const blur = screen.getByRole("slider", { name: "模糊" })
+    // A little blur is all there is: more only smears the picture.
+    expect(blur).toHaveAttribute("max", "5")
+    fireEvent.change(blur, { target: { value: "3" } })
+    expect(prefsStore.get().battleMatBlur).toBe(3)
+    expect([photo().style.filter, photo().style.inset]).toEqual(["blur(3px)", "-6px"])
+    fireEvent.change(screen.getByRole("slider", { name: "暗化" }), { target: { value: "20" } })
+    expect(container.querySelector<HTMLElement>(".bp-mat-veil")?.style.opacity).toBe("0.2")
+  })
+
+  it("falls back to the plain mat while the player has uploaded no picture", async () => {
+    prefsStore.set({ battleMatLook: "upload" })
+    const user = userEvent.setup()
+    const { container } = await renderRoutes(ROUTES, { initialEntries: ["/play"] })
+    await table()
+    expect(container.querySelector(".bp-mat-art .bp-mat-plain")).not.toBeNull()
+    expect(container.querySelector(".bp-mat-photo")).toBeNull()
+    await user.click(screen.getByRole("button", { name: "對戰設定" }))
+    expect(screen.getByText("還沒有圖片")).toBeInTheDocument()
+    expect(screen.getByRole("button", { name: "選擇圖片" })).toBeInTheDocument()
+    // Nothing of this is shared: the settings say so.
+    expect(screen.getByText("這些只存在這台裝置，對手看不到你的遊戲墊。")).toBeInTheDocument()
   })
 
   it("moves the piles into a strip on a phone held upright", async () => {
@@ -218,17 +365,10 @@ function source(seat: Seat, messages: readonly HostMessage[]): BattleSource {
 
 describe("BattleScreen", () => {
   const leaders = { p1: cardRef("BP10-LD05"), p2: cardRef("BP05-LD02") }
-  const none = { epMax: 0, sepMax: 0, sepOpensIn: 0 }
   const routes = (messages: readonly HostMessage[]): RouteObject[] => [
     {
       path: "*",
-      element: (
-        <BattleScreen
-          source={source("p1", messages)}
-          leaders={leaders}
-          points={{ p1: none, p2: none }}
-        />
-      ),
+      element: <BattleScreen source={source("p1", messages)} leaders={leaders} />,
     },
   ]
 

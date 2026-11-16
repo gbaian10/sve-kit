@@ -21,29 +21,42 @@ export interface TableCard {
   readonly faceDown: boolean
   readonly acted: boolean
   readonly evolution: EvolutionState
-  /** Current attack and life of a field follower; absent for anything else. */
+  /** Current attack and life, for a follower the authority gives them for; absent otherwise. */
   readonly stats: { readonly attack: number; readonly life: number } | null
   readonly keywords: readonly string[]
   readonly counters: readonly { readonly name: string; readonly amount: number }[]
   /** Play points the authority currently quotes for this card; null without a settled quote. */
   readonly cost: number | null
+  /** What the card may attack right now; null when it may not attack. */
+  readonly attack: AttackOptions | null
 }
+
+/** The targets the authority offers one attacker. */
+interface AttackOptions {
+  /** The opposing leader is among them. */
+  readonly leader: boolean
+  /** The opposing field cards among them. */
+  readonly targets: readonly ObjectHandle[]
+}
+
+/** One attacker's targets as a scene names them: opposing field cards by their place in that zone's order. */
+interface AttackHint {
+  readonly leader: boolean
+  readonly followers: readonly number[]
+}
+
+/**
+ * What each of a seat's field cards may attack now, by their place in the zone's order. PROVISIONAL:
+ * this is what the authority's open question says (the targets it offers each attacker), never
+ * something the screen works out from keywords or postures. Until the screen reads questions a
+ * scene supplies it beside its messages; then the question decides and this goes away.
+ */
+export type AttackHints = Readonly<Partial<Record<Seat, readonly (AttackHint | null)[]>>>
 
 /** A zone as a size plus the members this seat can identify, in zone order. */
 export interface Pile {
   readonly count: number
   readonly cards: readonly TableCard[]
-}
-
-/**
- * What the table draws about evolve points that the contract does not carry yet. PROVISIONAL: once
- * the contract's player view has these, `points` below reads them from there and this goes away.
- */
-export interface ProvisionalPoints {
-  readonly epMax: number
-  readonly sepMax: number
-  /** The seat's own turns left before super evolution opens; 0 once it is open. */
-  readonly sepOpensIn: number
 }
 
 /**
@@ -92,28 +105,34 @@ export interface TableModel {
   readonly opponent: SeatTable
 }
 
+/** One identifiable object as the table draws it; null for a handle this seat cannot identify. */
+export function tableCard(observation: BattleObservation, handle: ObjectHandle): TableCard | null {
+  const view = observation.objects[handle]
+  if (view === undefined) return null
+  const quote = observation.costs.cards.find((entry) => entry.object === handle)
+  return {
+    handle,
+    card: view.card,
+    face: view.effective_face,
+    faceDown: view.facing === "down",
+    acted: view.state?.posture === "acted",
+    evolution: view.state?.evolution ?? "base",
+    stats: view.state?.stats ?? null,
+    keywords: view.state?.keywords ?? [],
+    counters: view.state?.counters ?? [],
+    cost: quote?.cost.total_pp ?? null,
+    attack: null,
+  }
+}
+
 function cards(
   observation: BattleObservation,
   zone: ZoneView,
 ): (TableCard & { at: number | null })[] {
   return zone.cards.flatMap((member) => {
-    const view = observation.objects[member.object]
     // A member without an object is not identifiable after all; it stays an anonymous card.
-    if (view === undefined) return []
-    const quote = observation.costs.cards.find((entry) => entry.object === member.object)
-    return {
-      at: member.position,
-      handle: member.object,
-      card: view.card,
-      face: view.effective_face,
-      faceDown: view.facing === "down",
-      acted: view.state?.posture === "acted",
-      evolution: view.state?.evolution ?? "base",
-      stats: view.state?.stats ?? null,
-      keywords: view.state?.keywords ?? [],
-      counters: view.state?.counters ?? [],
-      cost: quote?.cost.total_pp ?? null,
-    }
+    const card = tableCard(observation, member.object)
+    return card === null ? [] : { at: member.position, ...card }
   })
 }
 
@@ -129,8 +148,12 @@ function slots(
   observation: BattleObservation,
   zone: ZoneView,
   arranged: readonly number[] | undefined,
+  attack?: (at: number) => AttackOptions | null,
 ): (TableCard | null)[] {
-  const known = cards(observation, zone)
+  const known = cards(observation, zone).map((card) => ({
+    ...card,
+    attack: card.at === null ? null : (attack?.(card.at) ?? null),
+  }))
   const row: (TableCard | null)[] = Array.from(
     { length: Math.max(zone.capacity ?? 0, zone.count) },
     () => null,
@@ -151,13 +174,19 @@ function slots(
 }
 
 /**
- * The one place that knows where the maximum of each point and the super-evolution wait come from.
- * Nothing here works them out: they are given, like every other number on the table.
+ * Evolve points as the authority reports them; which seat gets how many, and from which turn, is
+ * never worked out here. The contract says whether super evolution points were handed out, not how
+ * many, so a seat that has spent all of its own keeps a single faded marker.
  */
-function points(player: PlayerView, provisional: ProvisionalPoints): Pick<SeatTable, "ep" | "sep"> {
+function points(player: PlayerView, turnsBegun: number): Pick<SeatTable, "ep" | "sep"> {
+  const from = player.sep_available_from
   return {
-    ep: { current: player.ep, max: provisional.epMax },
-    sep: { current: player.sep, max: provisional.sepMax, opensIn: provisional.sepOpensIn },
+    ep: { current: player.ep, max: player.ep_capacity },
+    sep: {
+      current: player.sep,
+      max: Math.max(player.sep, from === null ? 0 : 1),
+      opensIn: from === null ? 0 : Math.max(0, from - turnsBegun),
+    },
   }
 }
 
@@ -165,20 +194,33 @@ function seatTable(
   observation: BattleObservation,
   player: PlayerView,
   index: number,
-  provisional: ProvisionalPoints,
   arranged: SlotArrangement[Seat],
+  hints: readonly (AttackHint | null)[] | undefined,
 ): SeatTable {
   const { turn } = observation
+  const turns = turn.elapsed_turns[index] ?? 0
+  const opposing = observation.players.find((other) => other.seat !== player.seat)?.zones.field
+  const attack = (at: number): AttackOptions | null => {
+    const hint = hints?.[at] ?? null
+    if (hint === null) return null
+    return {
+      leader: hint.leader,
+      // A place nothing lies in names no target.
+      targets: hint.followers.flatMap(
+        (place) => opposing?.cards.find((member) => member.position === place)?.object ?? [],
+      ),
+    }
+  }
   return {
     seat: player.seat,
     life: player.life,
     pp: player.pp,
     maxPp: player.max_pp,
-    ...points(player, provisional),
+    ...points(player, turns),
     first: turn.first_player === null ? null : turn.first_player === player.seat,
     active: turn.active === player.seat,
-    turns: turn.elapsed_turns[index] ?? 0,
-    field: slots(observation, player.zones.field, arranged?.field),
+    turns,
+    field: slots(observation, player.zones.field, arranged?.field, attack),
     ex: slots(observation, player.zones.ex, arranged?.ex),
     hand: pile(observation, player.zones.hand),
     deck: pile(observation, player.zones.deck),
@@ -190,11 +232,18 @@ function seatTable(
 
 export function tableModel(
   observation: BattleObservation,
-  provisional: Readonly<Record<Seat, ProvisionalPoints>>,
   arrangement: SlotArrangement = {},
+  attackers: AttackHints = {},
 ): TableModel {
   const [first, second] = observation.players.map((player, index) =>
-    seatTable(observation, player, index, provisional[player.seat], arrangement[player.seat]),
+    seatTable(
+      observation,
+      player,
+      index,
+      arrangement[player.seat],
+      // A seat is only told what its own cards may do.
+      player.seat === observation.viewer ? attackers[player.seat] : undefined,
+    ),
   ) as [SeatTable, SeatTable]
   const selfFirst = first.seat === observation.viewer
   return {

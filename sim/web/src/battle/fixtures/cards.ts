@@ -1,6 +1,7 @@
 // Real JP printings the fixture scenes are built from: two decks (a Dragon list around the Garmille
-// leader and a Royal Levion list). Only identities and the facts a contract message carries live
-// here; names shown on screen, card text and images come from the pinned snapshot.
+// leader and a Royal Levion list) and a handful of Witch cards for the amulets that hold counters.
+// Only identities and the facts a contract message carries live here; names shown on screen, card
+// text and images come from the pinned snapshot.
 import type { CardRef } from "../contract"
 
 type FixtureKind = "follower" | "evolved" | "spell" | "amulet" | "token" | "leader"
@@ -225,6 +226,51 @@ const CARDS = {
     [4, 6],
   ),
   "BP05-LD02": card("p:7c1a697f0ea4559483093bc83434df41", "雷迅卿・アルベール", "leader", null),
+  // Witch: amulets with Stack, which is what a stack counter may lie on, and cards around them
+  "BP01-T10": card("p:1fefc1c1795b5bbe936a69d7ab9e85ff", "大地の魔片", "amulet", 1),
+  "BP01-074": card("p:d3ad8b31518e53ea9e40e239ddcc2c7d", "錬金工房", "amulet", 2),
+  "BP01-075": card("p:f5ee4e88969e58ffa46c3048f3681f8a", "雄大なる教え", "amulet", 1),
+  "BP01-067": card(
+    "p:ac184f8431d757c095edfe8216769454",
+    "ルーンガーディアン",
+    "follower",
+    3,
+    [3, 4],
+  ),
+  "BP01-T09": card("p:606cd3a7faff531c8c1824efdb26a8bf", "防御型ゴーレム", "follower", 2, [2, 3]),
+  "BP01-054": card(
+    "p:517500d4e8bb5a2e8feac3ba8305fd30",
+    "エンシェントアルケミスト",
+    "follower",
+    3,
+    [2, 5],
+  ),
+  "BP01-055": card(
+    "p:73634530fce053b39772b4458343f14c",
+    "エンシェントアルケミスト",
+    "evolved",
+    null,
+    [3, 6],
+  ),
+  "BP01-052": card("p:9a356810ffc55e6b9d5a02dae82ad754", "マーリン", "follower", 3, [3, 2]),
+  "BP01-053": card("p:909f025deabf5ba6960d0d685aeeefdc", "マーリン", "evolved", null, [4, 3]),
+  "BP01-068": card(
+    "p:3baa5a882ad45d97a70a8aed323016cb",
+    "クラフトウォーロック",
+    "follower",
+    2,
+    [2, 2],
+  ),
+  "BP01-069": card(
+    "p:0e41d415b659548d8b93f66561eae4d9",
+    "クラフトウォーロック",
+    "evolved",
+    null,
+    [3, 3],
+  ),
+  "BP01-072": card("p:fa64f65e8e9750f78c2e0b1ff7672377", "魔力の蓄積", "spell", 2),
+  "BP01-071": card("p:1545fb838c49582b8485b7297226822b", "ウィンドブラスト", "spell", 1),
+  "BP01-LD05": card("p:a95b9d05884b578eb0e70d89041fecf4", "イザベル", "leader", null),
 } as const satisfies Record<string, FixtureCard>
 
 export type CardNo = keyof typeof CARDS

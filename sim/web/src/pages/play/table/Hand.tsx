@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next"
 import type { Pile, TableCard } from "../../../battle/view/table"
 import { useCards } from "../battle-cards"
 import { CostBadge, CounterBadge } from "../dice/Dice"
+import { usePick } from "../inspector"
 import type { Layout } from "../layout"
 import { CardBack } from "./CardBack"
 import { CardFace } from "./Cards"
@@ -18,8 +19,13 @@ import { CARD_H, CARD_W } from "./geometry"
 function HandCard({ card, style }: { readonly card: TableCard; readonly style: CSSProperties }) {
   const { t } = useTranslation()
   const printed = useCards().find(card.face)?.summary
+  const pick = usePick({ kind: "object", handle: card.handle })
   return (
-    <div className="bp-hand-card" style={style}>
+    <div
+      className={pick.selected ? "bp-hand-card is-selected" : "bp-hand-card"}
+      style={style}
+      {...pick.props}
+    >
       <CardFace card={card.face} tag />
       <CostBadge value={card.cost} />
       {printed?.attack != null && printed.defense != null ? (
@@ -87,7 +93,10 @@ export function Hand({ hand, layout }: { readonly hand: Pile; readonly layout: L
       aria-label={t("play.hand.self")}
     >
       <div className="bp-hand-scroll">
-        <div className="bp-hand-track" style={{ width: total, height: h }}>
+        <div
+          className={overlap ? "bp-hand-track is-overlap" : "bp-hand-track"}
+          style={{ width: total, height: h }}
+        >
           {cards.map((card, i) => (
             <HandCard
               key={card.handle}

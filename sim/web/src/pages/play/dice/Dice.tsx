@@ -75,7 +75,11 @@ function Numeral({ kind, label }: { readonly kind: "atk" | "hp"; readonly label:
   )
 }
 
-/** Attack (blue spear) or defense (red shield) showing the current value, like the dice. */
+/**
+ * Attack (blue spear) or defense (red shield) showing the current value, like the dice: the number
+ * on the die is all there is to see. The printed value it moved away from is said on hover and
+ * read out, and stands in the info column.
+ */
 export function CounterBadge({
   kind,
   value,
@@ -91,25 +95,15 @@ export function CounterBadge({
   /** The printed value, when the card is on the table and its value may have moved away from it. */
   readonly printed?: number | null | undefined
 }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const [x0, y0, x1, y1] = SHAPES[kind].box
   const viewBox = [x0 - 10, y0 - 10, x1 - x0 + 20, y1 - y0 + 20]
   const changed = printed != null && printed !== value
-  // The difference from the printed value, signed, in the reader's own number format.
-  const difference = changed
-    ? new Intl.NumberFormat(i18n.language, { signDisplay: "always" }).format(value - printed)
-    : null
   const spoken = changed
     ? t("play.stat.changed", { label, now: value, printed })
     : t("play.stat.value", { label, now: value })
   return (
-    <span
-      className={cn("bp-counter", className, changed && (value < printed ? "is-down" : "is-up"))}
-      title={spoken}
-      // The difference tag sits beside the die, outside its box; the overflow audit skips boxes
-      // marked `data-hit-area`.
-      data-hit-area={changed ? "" : undefined}
-    >
+    <span className={cn("bp-counter", className)} title={spoken}>
       <svg viewBox={viewBox.join(" ")} role="img" aria-label={spoken}>
         <image
           href={SHAPES[kind].src}
@@ -120,12 +114,6 @@ export function CounterBadge({
         />
         <Numeral kind={kind} label={String(Math.max(0, value))} />
       </svg>
-      {/* The ring's colour says which way the value moved; the tag says by how much. */}
-      {difference !== null ? (
-        <i className="bp-counter-diff" aria-hidden="true">
-          {difference}
-        </i>
-      ) : null}
     </span>
   )
 }

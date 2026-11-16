@@ -74,4 +74,35 @@ describe("the stacked arrangement", () => {
     expect(mat.pile("deck", false).w).toBeLessThan(mat.slotCard("field", 0, false).w)
     expect(mat.stacked).toBe(true)
   })
+
+  it("centres the slot rows on the mat, each slot mirroring another across its middle", () => {
+    for (const matW of [boardSize(false).matWMin, 1400, boardSize(false).matWMax]) {
+      const mat = matGeometry(matW, false)
+      for (const row of ["field", "ex"] as const) {
+        for (const slot of [0, 1, 2]) {
+          const near = mat.slotFrame(row, slot, false)
+          const far = mat.slotFrame(row, 4 - slot, false)
+          // As far from the left edge as its mirror is from the right one.
+          expect(near.x, `${row} ${String(slot)} at ${String(matW)}`).toBeCloseTo(
+            matW - far.x - far.w,
+            6,
+          )
+        }
+        // The same on the opponent's mat, which is this mat turned around.
+        const own = mat.slotFrame(row, 0, true)
+        const mirror = mat.slotFrame(row, 4, true)
+        expect(own.x).toBeCloseTo(matW - mirror.x - mirror.w, 6)
+      }
+      // Even at its narrowest a slot holds an engaged card without touching the next one.
+      expect(
+        mat.slotFrame("field", 1, false).x - mat.slotFrame("field", 0, false).x,
+      ).toBeGreaterThan(140)
+    }
+    // A phone's rows take the whole width, and are centred too.
+    const phone = matGeometry(640, true)
+    expect(phone.slotFrame("field", 0, false).x).toBeCloseTo(
+      640 - phone.slotFrame("field", 4, false).x - phone.slotFrame("field", 4, false).w,
+      6,
+    )
+  })
 })

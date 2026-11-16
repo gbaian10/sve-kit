@@ -1,6 +1,7 @@
 // Board geometry in board units. One player's mat follows the official playmat arrangement:
 // right column leader / deck / cemetery, left column evolve deck / banish, five field slots in the
-// upper middle and five EX-area slots in the lower middle, a divider between them. The opponent's
+// upper middle and five EX-area slots in the lower middle, a divider between them. The slot rows
+// are centred on the mat, each slot mirroring another across its middle. The opponent's
 // mat is the same mat turned 180°, so both leaders sit next to the centre line.
 //
 // The mat height is fixed; its width stretches with the window (piles stay at the edges, the
@@ -41,7 +42,8 @@ const SMALL_H = 84
 export const boardSize = (stacked: boolean): BoardSize =>
   stacked
     ? { matWMin: 620, matWMax: 760, boardH: STACKED_MAT_H * 2 + GAP }
-    : { matWMin: 1080, matWMax: 1600, boardH: MAT_H * 2 + GAP }
+    : // At its narrowest a slot is still wider than an engaged card.
+      { matWMin: 1160, matWMax: 1600, boardH: MAT_H * 2 + GAP }
 
 export interface MatGeometry {
   readonly matW: number
@@ -71,6 +73,11 @@ export function matGeometry(matW: number, stacked: boolean): MatGeometry {
   const card = (x: number, y: number): Rect => ({ x, y, w: CARD_W, h: CARD_H })
   const small = (x: number): Rect => ({ x, y: 364, w: SMALL_W, h: SMALL_H })
   const right = matW - 12 - PP_W - 10 - CARD_W
+  // The slot rows are centred on the mat, so that the slots mirror each other across its middle:
+  // the wider side column (leader, deck, cemetery and the PP column) sets the margin on both
+  // sides. The narrower column on the left stands in the middle of its margin.
+  const margin = stacked ? 12 : matW - right + 20
+  const left = (margin - 20 - CARD_W) / 2
   const piles: Record<PileName, Rect> = stacked
     ? {
         leader: small(matW - 66),
@@ -83,12 +90,12 @@ export function matGeometry(matW: number, stacked: boolean): MatGeometry {
         leader: card(right, 6),
         deck: card(right, 158),
         cemetery: card(right, 310),
-        evolve: card(16, 158),
-        banish: card(16, 310),
+        evolve: card(left, 158),
+        banish: card(left, 310),
       }
   const rowY: Record<Row, number> = stacked ? { field: 28, ex: 208 } : { field: 76, ex: 310 }
-  const rowX0 = stacked ? 12 : 136
-  const pitch = stacked ? (matW - 24) / 5 : (right - 20 - rowX0) / 5
+  const rowX0 = margin
+  const pitch = (matW - 2 * margin) / 5
   const slotFrame = (row: Row, slot: number, opp: boolean): Rect => {
     const w = Math.min(pitch - 4, CARD_H + 14)
     return turn({ x: rowX0 + slot * pitch + (pitch - w) / 2, y: rowY[row], w, h: CARD_H }, opp)
@@ -108,7 +115,7 @@ export function matGeometry(matW: number, stacked: boolean): MatGeometry {
       turn({ x: rowX0 - 6, y: rowY[row] - 22, w: pitch * 5 + 12, h: CARD_H + 28 }, opp),
     points: (opp) =>
       turn(
-        stacked ? { x: 6, y: 364, w: 100, h: SMALL_H } : { x: 16, y: 50, w: CARD_W, h: 88 },
+        stacked ? { x: 6, y: 364, w: 100, h: SMALL_H } : { x: left, y: 50, w: CARD_W, h: 88 },
         opp,
       ),
     pp: (opp) =>

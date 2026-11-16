@@ -1,7 +1,7 @@
 import { useTranslation } from "react-i18next"
 
 import { cardBackUrl, useSnapshotRoot } from "../../../data"
-import { markCardBackFailed, useCardBackFailed } from "./card-backs"
+import { markArtFailed, useArtFailed } from "./published-art"
 
 /** The drawn back: a compass star inside two rings on a night-blue field, gold lines. */
 function Star() {
@@ -34,7 +34,7 @@ function Star() {
 export function CardBack() {
   const { t } = useTranslation()
   const url = cardBackUrl(useSnapshotRoot())
-  const failed = useCardBackFailed(url)
+  const failed = useArtFailed(url)
   if (failed)
     return (
       <svg
@@ -54,7 +54,7 @@ export function CardBack() {
       alt={t("play.card.back")}
       draggable={false}
       onError={() => {
-        markCardBackFailed(url)
+        markArtFailed(url)
       }}
     />
   )

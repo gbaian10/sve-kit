@@ -9,7 +9,6 @@ export {
 } from "./annotated-text"
 export { artCredits, type FaceArtist } from "./artists"
 export { appBackgroundDownloads } from "./background-downloads"
-export { cardBackUrl } from "./card-back"
 export { type CardRouteInput, locateCard, type LocatedCard } from "./card-route"
 export {
   type CardSummary,
@@ -98,3 +97,4 @@ export { type CompleteView, type ViewFace, viewImages } from "./search/view"
 export { clearManagedCaches, estimateStorage, type StorageEstimate } from "./storage"
 export { textDiff, type TextRange } from "./text-diff"
 export { textRuns } from "./text-runs"
+export { cardBackUrl, counterChipUrl } from "./ui-art"

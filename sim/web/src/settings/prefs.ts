@@ -40,9 +40,47 @@ export type CardOpenMode = (typeof CARD_OPEN_MODES)[number]
 export const CARDS_LAYOUTS = ["cardLeft", "filterLeft"] as const
 export type CardsLayout = (typeof CARDS_LAYOUTS)[number]
 
-/** One mat under both players, or a mat of its own for each. */
-export const BATTLE_MATS = ["separate", "shared"] as const
-export type BattleMat = (typeof BATTLE_MATS)[number]
+/** How far the mat's picture reaches: the two mats only, or the whole table between the side panels. */
+export const BATTLE_MAT_REACHES = ["board", "table"] as const
+export type BattleMatReach = (typeof BATTLE_MAT_REACHES)[number]
+
+/**
+ * The picture on the playing surface; the zones' printing lies on any of them. It is the player's
+ * own choice, kept on this device and never sent to the other player. `card` is a card's art from
+ * the snapshot and `upload` a picture of the player's own, kept on the device.
+ */
+export const BATTLE_MAT_LOOKS = [
+  "night",
+  "blue",
+  "forest",
+  "parchment",
+  "plain",
+  "card",
+  "upload",
+] as const
+
+/**
+ * How the player framed a picture for the mat: the frame's centre and width as shares of the
+ * picture, the frame's shape (width over height), and the reach whose box had that shape then.
+ */
+export interface BattleMatFraming {
+  readonly cx: number
+  readonly cy: number
+  readonly span: number
+  readonly aspect: number
+  readonly reach: BattleMatReach
+}
+
+/** A picture's size in its own pixels. */
+export interface BattleMatSize {
+  readonly w: number
+  readonly h: number
+}
+
+/** How far a card's art or an uploaded picture may be blurred (px) and darkened (percent). */
+export const BATTLE_MAT_BLUR_MAX = 5
+export const BATTLE_MAT_DIM_MAX = 80
+export type BattleMatLook = (typeof BATTLE_MAT_LOOKS)[number]
 
 export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */
@@ -75,7 +113,17 @@ export interface Prefs {
   readonly listMobileWidths: ListWidths
   readonly listVisibility: ListVisibility
   readonly listOrder: readonly ListColumn[]
-  readonly battleMat: BattleMat
+  readonly battleMatLook: BattleMatLook
+  readonly battleMatReach: BattleMatReach
+  /** The printing whose art the `card` look shows; null = the player's own leader. */
+  readonly battleMatCard: string | null
+  /** Where the player framed that card's art; null = the art as it comes, centred. */
+  readonly battleMatCardFraming: BattleMatFraming | null
+  /** 0 shows the picture as it is. */
+  readonly battleMatBlur: number
+  readonly battleMatDim: number
+  /** The battle screen's info column keeps its card: resting on another card does not replace it. */
+  readonly battleInfoPinned: boolean
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -105,7 +153,13 @@ export const DEFAULT_PREFS: Prefs = {
   listMobileWidths: {},
   listVisibility: DEFAULT_LIST_VISIBILITY,
   listOrder: LIST_COLUMNS,
-  battleMat: "separate",
+  battleMatLook: "night",
+  battleMatReach: "table",
+  battleMatCard: null,
+  battleMatCardFraming: null,
+  battleMatBlur: 0,
+  battleMatDim: 60,
+  battleInfoPinned: false,
 }
 
 function oneOf<T extends string | number>(values: readonly T[]): (value: unknown) => value is T {
@@ -119,7 +173,33 @@ const isGridDensity = oneOf(GRID_DENSITIES)
 const isViewMode = oneOf(VIEW_MODES)
 const isCardOpenMode = oneOf(CARD_OPEN_MODES)
 const isCardsLayout = oneOf(CARDS_LAYOUTS)
-const isBattleMat = oneOf(BATTLE_MATS)
+const isBattleMatLook = oneOf(BATTLE_MAT_LOOKS)
+const isBattleMatReach = oneOf(BATTLE_MAT_REACHES)
+const isBattleMatCard = (value: unknown): value is string | null =>
+  value === null || (typeof value === "string" && value.length > 0 && value.length <= 200)
+const isShare = (value: unknown): value is number =>
+  typeof value === "number" && value >= 0 && value <= 1
+
+/** A framing read back whole: anything else is no framing. */
+export function isBattleMatFraming(value: unknown): value is BattleMatFraming {
+  if (typeof value !== "object" || value === null) return false
+  const { cx, cy, span, aspect, reach } = value as Partial<Record<keyof BattleMatFraming, unknown>>
+  return (
+    isShare(cx) &&
+    isShare(cy) &&
+    isShare(span) &&
+    span > 0 &&
+    typeof aspect === "number" &&
+    Number.isFinite(aspect) &&
+    aspect > 0 &&
+    isBattleMatReach(reach)
+  )
+}
+
+const isWholeUpTo =
+  (max: number) =>
+  (value: unknown): value is number =>
+    Number.isInteger(value) && (value as number) >= 0 && (value as number) <= max
 const isDrawerWidth = (value: unknown): value is number | null =>
   value === null ||
   (Number.isInteger(value) && (value as number) >= 600 && (value as number) <= 1200)
@@ -166,7 +246,17 @@ const sanitizers: Sanitizers = {
   listMobileWidths: withDefault(isListWidths, DEFAULT_PREFS.listMobileWidths),
   listVisibility: sanitizeListVisibility,
   listOrder: sanitizeListOrder,
-  battleMat: withDefault(isBattleMat, DEFAULT_PREFS.battleMat),
+  battleMatLook: withDefault(isBattleMatLook, DEFAULT_PREFS.battleMatLook),
+  battleMatCard: withDefault(isBattleMatCard, DEFAULT_PREFS.battleMatCard),
+  battleMatCardFraming: withDefault(
+    (value: unknown): value is BattleMatFraming | null =>
+      value === null || isBattleMatFraming(value),
+    DEFAULT_PREFS.battleMatCardFraming,
+  ),
+  battleMatBlur: withDefault(isWholeUpTo(BATTLE_MAT_BLUR_MAX), DEFAULT_PREFS.battleMatBlur),
+  battleMatDim: withDefault(isWholeUpTo(BATTLE_MAT_DIM_MAX), DEFAULT_PREFS.battleMatDim),
+  battleMatReach: withDefault(isBattleMatReach, DEFAULT_PREFS.battleMatReach),
+  battleInfoPinned: withDefault(isBoolean, DEFAULT_PREFS.battleInfoPinned),
 }
 
 export function sanitize(raw: unknown): Prefs {

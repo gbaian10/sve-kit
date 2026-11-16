@@ -1,3 +1,8 @@
+export {
+  clearBattleMatPicture,
+  saveBattleMatPicture,
+  useBattleMatPicture,
+} from "./battle-mat-picture"
 export { getCacheClearResult, requestColdStart, runRequestedColdStart } from "./clear-local"
 export { decksStore, useDecks } from "./decks"
 export {
@@ -7,8 +12,14 @@ export {
   moveListColumn,
 } from "./list-columns"
 export {
-  BATTLE_MATS,
-  type BattleMat,
+  BATTLE_MAT_BLUR_MAX,
+  BATTLE_MAT_DIM_MAX,
+  BATTLE_MAT_LOOKS,
+  BATTLE_MAT_REACHES,
+  type BattleMatFraming,
+  type BattleMatLook,
+  type BattleMatReach,
+  type BattleMatSize,
   CARD_EDITIONS,
   CARD_OPEN_MODES,
   type CardOpenMode,
