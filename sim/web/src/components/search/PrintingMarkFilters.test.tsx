@@ -92,7 +92,7 @@ it.each(
       serial: "編號卡",
       unlisted: "官方未收錄",
       pr: "PR 限定",
-      prHint: "只以 PR 卡號發行的卡",
+      prHint: "僅由 PR 發行，且沒有內文等同的非 PR 卡（不含 Token／EP）",
       sve: "SVE 專屬",
       sveHint: "線上版沒有這張圖的版次（含線上版沒有的卡）",
       premium: "碎閃",
@@ -109,7 +109,8 @@ it.each(
       serial: "シリアルナンバー入りカード",
       unlisted: "公式未収録",
       pr: "PR限定",
-      prHint: "PRカード番号でのみ発行されたカード",
+      prHint:
+        "PRのみで発行され、同じ能力・数値を持つPR以外のカードがないカード（トークン・EPを除く）",
       sve: "SVE限定",
       sveHint: "デジタル版に同じイラストがない版（デジタル版にないカードも含む）",
       premium: "プレミアム",
@@ -126,7 +127,8 @@ it.each(
       serial: "Numbered cards",
       unlisted: "Not in official database",
       pr: "PR only",
-      prHint: "Cards issued only with PR card numbers",
+      prHint:
+        "Cards issued only as PR with no non-PR card having equivalent rules and stats (excluding tokens and EP)",
       sve: "SVE exclusive",
       sveHint:
         "Printings with no matching digital artwork, including cards absent from the digital games",

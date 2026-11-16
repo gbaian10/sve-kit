@@ -87,6 +87,7 @@ const cases = [
     prints: [printing("token:jp", "jp", "PR-155")],
   },
   { id: "ep", type: "ep", prints: [printing("ep:jp", "jp", "PR-417")] },
+  { id: "sep", type: "sep", prints: [printing("sep:jp", "jp", "PR-600")] },
 ]
 function columns(edition?: Region) {
   const columns = new BootstrapColumns()
@@ -194,8 +195,7 @@ it.each(["jp", "en"] as const)(
     ]) {
       const search = (change: Partial<typeof DEFAULT_QUERY> = {}) =>
         index.search({ edition, state: { ...DEFAULT_QUERY, prOnly: true, ...change }, limit: 100 })
-      const expected =
-        edition === "jp" ? ["all-pr", "bilingual", "leader", "token", "ep"] : ["bilingual"]
+      const expected = edition === "jp" ? ["all-pr", "bilingual", "leader"] : ["bilingual"]
       for (const unit of ["printing", "art", "card"] as const) {
         expect(
           [...new Set(search({ unit }).items.map((item) => item.summary?.cardId))].sort(),
@@ -228,6 +228,7 @@ it.each(["jp", "en"] as const)(
       fullIndex.cards
         .flatMap((card) => fullIndex.printingsOf(stringValue(card["id"])))
         .filter((printing) => printing["region"] !== edition),
+      new Set(),
     )
     expect(restoredLocal.prOnlyReady).toBe(true)
     const restored = new SearchIndex(restoredLocal.encode(), edition)

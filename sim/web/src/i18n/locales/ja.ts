@@ -297,7 +297,8 @@ export default {
     unlistedOnly: "公式未収録",
     unlistedOnlyHint: "公式カードリストにないEP／SEPなど",
     prOnly: "PR限定",
-    prOnlyHint: "PRカード番号でのみ発行されたカード",
+    prOnlyHint:
+      "PRのみで発行され、同じ能力・数値を持つPR以外のカードがないカード（トークン・EPを除く）",
     sveOnly: "SVE限定",
     sveOnlyHint: "デジタル版に同じイラストがない版（デジタル版にないカードも含む）",
     specialPrintings: "特殊版",

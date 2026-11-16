@@ -208,7 +208,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 38
+export const INDEX_IMAGE_FORMAT = 39
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -981,7 +981,7 @@ export class SearchIndex {
     return this.prOnlyReadyValue
   }
 
-  completePrOnly(otherPrintings: readonly JsonObject[]): void {
+  completePrOnly(otherPrintings: readonly JsonObject[], equivalent: ReadonlySet<string>): void {
     if (this.prOnlyReadyValue) return
     const cards = new Map(Array.from(this.cards.id, (id, ordinal) => [this.pool.get(id), ordinal]))
     for (const printing of otherPrintings) {
@@ -993,6 +993,7 @@ export class SearchIndex {
       )
         this.cards.prOnly[card] = 0
     }
+    for (const [id, card] of cards) if (equivalent.has(id)) this.cards.prOnly[card] = 0
     this.prOnlyReadyValue = true
   }
 
@@ -1414,7 +1415,11 @@ export class SearchIndex {
       (!state.stampOnly || this.printings.stamp[printing] === 1) &&
       (!state.serialOnly || this.printings.serial[printing] === 1) &&
       (!state.unlistedOnly || this.printings.unlisted[printing] === 1) &&
-      (!state.prOnly || this.cards.prOnly[this.printings.card[printing] ?? 0] === 1) &&
+      // PrOnlyRules also excludes these kinds when comparing card-level rules across regions.
+      (!state.prOnly ||
+        (this.cards.prOnly[this.printings.card[printing] ?? 0] === 1 &&
+          this.printings.token[printing] !== 1 &&
+          !["ep", "sep"].includes(this.pool.get(this.printings.type[printing] ?? 0)))) &&
       (!state.sveOnly || this.printings.sveOnly[printing] === 1) &&
       // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
       (state.reprints === "all" ||
