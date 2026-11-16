@@ -67,6 +67,36 @@ fn generation_is_reproducible() {
 }
 
 #[test]
+fn question_rules_are_required_even_when_unprovided() {
+    let validator = validator("Question");
+    let (_, text) = support::fixtures("question").swap_remove(0);
+    let mut question: Value = serde_json::from_str(&text).unwrap();
+    for rules in [
+        Value::Null,
+        json!([]),
+        json!([{
+            "kind": "cr", "id": "0.0.1", "revision": "synthetic",
+            "strength": "inferred"
+        }]),
+    ] {
+        question
+            .as_object_mut()
+            .unwrap()
+            .insert("rules".into(), rules);
+        assert!(validator.is_valid(&question));
+    }
+    for invalid in [json!({}), json!([null]), json!([{"kind": "cr"}])] {
+        question
+            .as_object_mut()
+            .unwrap()
+            .insert("rules".into(), invalid);
+        assert!(!validator.is_valid(&question));
+    }
+    question.as_object_mut().unwrap().remove("rules");
+    assert!(!validator.is_valid(&question));
+}
+
+#[test]
 fn evolution_resource_slots_and_unlock_turn_are_required_exact_facts() {
     let document = support::fixtures("observation")
         .into_iter()

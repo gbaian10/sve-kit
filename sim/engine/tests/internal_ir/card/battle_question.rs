@@ -200,7 +200,10 @@ fn wire_opening_questions_round_trip_first_player_for_both_seats() {
                 serde_json::to_value(question).unwrap()["assistance"],
                 Value::Null
             );
-            assert_eq!(question.rules, vec![]);
+            assert_eq!(
+                serde_json::to_value(question).unwrap()["rules"],
+                Value::Null
+            );
             assert!(
                 game.battle_question(
                     opposite(chooser),

@@ -283,8 +283,8 @@ pub struct Question {
     pub auto_answer: AutoAnswer,
     /// Assistance slot.
     pub assistance: NoAssistance,
-    /// Rules the question rests on.
-    pub rules: Vec<RuleRef>,
+    /// Complete verified rule references; null is unprovided, an empty list is known empty.
+    pub rules: Option<Vec<RuleRef>>,
 }
 
 impl Question {
