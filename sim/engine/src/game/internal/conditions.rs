@@ -343,6 +343,7 @@ fn boolean_atom(
         && matches!(
             property,
             BooleanState::TokenStatus
+                | BooleanState::HasTrigger
                 | BooleanState::FaceUp
                 | BooleanState::Racing
                 | BooleanState::EnteredThisTurn

@@ -299,6 +299,7 @@ pub(crate) fn selection(decision: &Decision) -> Option<AdvanceSelection> {
         BooleanState::AdvanceFollower => AdvanceKind::Follower,
         BooleanState::AdvanceSpell if matches!(name, AdvanceName::Exact(_)) => AdvanceKind::Spell,
         BooleanState::TokenStatus
+        | BooleanState::HasTrigger
         | BooleanState::FaceUp
         | BooleanState::Boxed
         | BooleanState::Racing

@@ -569,6 +569,7 @@ variants!(PlayTargetMatch {
 });
 tags!(BooleanState {
     TokenStatus,
+    HasTrigger,
     FaceUp,
     Boxed,
     Racing,

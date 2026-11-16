@@ -1,0 +1,45 @@
+cards:
+  CP03-054:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - look:
+                bind: seen
+                top:
+                  n: 2
+                  who: self
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                n: 1
+            - move:
+                ref: kept
+                result: taken
+                to: hand
+            - choose:
+                bind: remaining
+                from:
+                  in: seen
+                n: 1
+            - banish:
+                ref: remaining
+                result: banished
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

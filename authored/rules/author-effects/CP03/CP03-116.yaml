@@ -1,0 +1,68 @@
+cards:
+  CP03-116:
+    abilities:
+      - line: 1
+        ride:
+          cost:
+            pp: 1
+      - drive_time:
+          do:
+            - buff:
+                hp: 1
+                on: this
+                power: 1
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - choose:
+                bind: taken
+                from:
+                  in: seen
+                  kind: follower
+                  trait: オラクルシンクタンク
+                may: true
+                n: 1
+            - reveal:
+                bind: shown
+                ref: taken
+            - move:
+                ref: taken
+                result: taken_cards
+                to: hand
+            - choose:
+                bind: kept
+                from:
+                  in: seen
+                upto: 3
+            - move:
+                order: chooser
+                position: top
+                ref: kept
+                result: placed
+                to: deck
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    any_of:
+                      - in:
+                          objects_of: taken_cards
+                          view: before
+                      - in:
+                          objects_of: placed
+                          view: before
+                  in: seen
+                to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

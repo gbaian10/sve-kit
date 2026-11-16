@@ -1,0 +1,63 @@
+cards:
+  CP03-123:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - look:
+                        bind: seen
+                        top:
+                          n: 3
+                          who: self
+                    - choose:
+                        bind: kept
+                        from:
+                          in: seen
+                        upto: 3
+                    - move:
+                        order: chooser
+                        position: top
+                        ref: kept
+                        result: placed
+                        to: deck
+                    - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: placed
+                              view: before
+                          in: seen
+                        to: deck
+                  - - move:
+                        ref: recycled
+                        to: deck
+                    - shuffle:
+                        who: self
+                    - draw:
+                        n: 1
+                    - pp:
+                        delta: 1
+                        who: self
+          targets:
+            - bind: recycled
+              from:
+                has_trigger: true
+                kind: follower
+                who: self
+                zone: cemetery
+              n: 5
+              option: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

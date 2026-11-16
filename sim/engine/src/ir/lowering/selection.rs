@@ -471,6 +471,7 @@ pub(super) struct ObjectFilter<'query> {
     pub counter: Option<(&'query str, ast::PowerBound, u64)>,
     pub keyword: Option<super::super::KeywordId>,
     pub has_evolve: bool,
+    pub has_trigger: Option<&'query ast::True>,
     /// これと同名を除く: the candidate shares no name with the ability holder.
     pub not_same_name_as_this: bool,
 }
@@ -518,6 +519,7 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
             kind: query.kind.as_ref().map(super::search::card_kind),
             keyword: query.keyword.map(|keyword| keyword.0),
             has_evolve: query.has_evolve.is_some(),
+            has_trigger: query.has_trigger.as_ref(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,
             any_traits: query
@@ -862,6 +864,10 @@ fn state_filters(
     let mut predicates = Vec::new();
     for (expected, property) in [
         (filter.token, super::super::BooleanState::TokenStatus),
+        (
+            filter.has_trigger.map(|_| true),
+            super::super::BooleanState::HasTrigger,
+        ),
         (filter.face_up, super::super::BooleanState::FaceUp),
         (filter.boxed, super::super::BooleanState::Boxed),
         (filter.racing, super::super::BooleanState::Racing),

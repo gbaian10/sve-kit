@@ -1878,6 +1878,7 @@ pub(super) struct ChooseGroup {
 #[derive(Clone, Default, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct TargetQuery {
+    pub has_trigger: Option<True>,
     pub except: Option<ObservedNameExcept>,
     #[serde(rename = "as")]
     pub alias: Option<String>,
