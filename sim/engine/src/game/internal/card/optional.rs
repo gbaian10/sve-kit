@@ -1,7 +1,9 @@
 //! Optional declaration is separate from its all-or-nothing payment.
 use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
-use crate::game::internal::{Answer, DecisionToken, InputDomain, InstructionOutcome, Wait};
+use crate::game::internal::{
+    Answer, DecisionToken, InputDomain, InstructionOutcome, QuestionStage, Wait,
+};
 use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::x_pp;
@@ -518,7 +520,9 @@ impl Game {
                 on_paid,
                 receipt,
             },
-        )
+        )?;
+        execution.question_stage = Some(QuestionStage::Pay);
+        Ok(())
     }
 
     pub(in crate::game::internal) fn resolve_internal_payment(
