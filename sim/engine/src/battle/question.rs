@@ -38,7 +38,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Supports opening, closing, and normal evolution form, material, discard and payment questions.
+/// Supports opening, closing, rule-owned Quick, and normal evolution questions.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -56,6 +56,7 @@ pub struct QuestionProjection {
 #[derive(Clone)]
 enum Binding {
     Decision(decision::Binding),
+    Flow(flow::Binding),
     FirstPlayer(BTreeMap<OptionId, Viewer>),
     Mulligan(BTreeMap<OptionId, NativeHandle>),
     StartAmulet(BTreeMap<OptionId, NativeHandle>),
@@ -104,7 +105,7 @@ impl QuestionProjection {
                 player::DecisionShape::Quick { .. }
                 | player::DecisionShape::Pending(_)
                 | player::DecisionShape::TriggerQuota(_),
-            ) => flow::context()?,
+            ) => flow::context(native.purpose)?,
             player::QuestionShape::Decision(_) | player::QuestionShape::ActionWindow(_) => {
                 return Err(ProjectionError::Unavailable);
             }
@@ -154,10 +155,10 @@ impl QuestionProjection {
                 evolution::discard(id, native.actor, &domain, &observation)?
             }
             player::QuestionShape::Decision(
-                player::DecisionShape::Quick { .. }
+                domain @ (player::DecisionShape::Quick { .. }
                 | player::DecisionShape::Pending(_)
-                | player::DecisionShape::TriggerQuota(_),
-            ) => flow::project()?,
+                | player::DecisionShape::TriggerQuota(_)),
+            ) => flow::project(&domain, context, catalog, references)?,
             player::QuestionShape::Decision(domain) => {
                 let (usage, shape, binding) = decision::project(&domain, Some(context))?;
                 (usage, shape, Binding::Decision(binding))
@@ -212,8 +213,9 @@ impl QuestionProjection {
         if viewer != self.actor || id != &self.question.id {
             return Err(AnswerError);
         }
-        let command = match &self.binding {
+        Ok(match &self.binding {
             Binding::Decision(binding) => binding.answer(self.token, answer)?,
+            Binding::Flow(binding) => binding.answer(self.token, answer)?,
             Binding::EvolutionDiscard(projection) => player::Command::Evolution {
                 token: self.token,
                 answer: evolution::discard_answer(projection, answer)?,
@@ -307,7 +309,6 @@ impl QuestionProjection {
                     answer: decoded,
                 }
             }
-        };
-        Ok(command)
+        })
     }
 }

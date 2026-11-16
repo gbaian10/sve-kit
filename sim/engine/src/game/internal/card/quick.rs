@@ -10,11 +10,11 @@ use crate::game::player::Viewer;
 use crate::game::player::observation::zone;
 use crate::ir::quick::{card_condition, card_permission, is_printed_quick};
 use crate::ir::{Ability, Control, Located, Node, Program};
-use crate::ir::{AbilityId, Cardinality, Nat, TextQuantifier, ZoneKind};
 use crate::ir::{
     CardProgram, ChoiceDomain, Decision, DecisionId, DecisionKind, ExecutionId, PlayerRef,
     PlayerRelation, PlayerSet, Procedure, QuickWindow, Visibility, WellFormedProcedure,
 };
+use crate::ir::{Cardinality, Nat, TextQuantifier, ZoneKind};
 use serde_json::{Value, json};
 
 /// A private action description addressed only by its question-local handle.
@@ -37,7 +37,7 @@ struct Candidate {
     link: ObjectLink,
     holder: String,
     generation: Generation,
-    ability: Option<AbilityId>,
+    ability: Option<super::super::admission::PlannedAbility>,
 }
 
 #[derive(Clone, Debug)]
@@ -290,7 +290,7 @@ impl Game {
                     link: ObjectLink::capture(self, holder, object.generation),
                     holder: holder.clone(),
                     generation: Generation(object.generation),
-                    ability: if spell { None } else { Some(ability.id) },
+                    ability: if spell { None } else { Some(located) },
                 });
             }
         }
@@ -378,7 +378,7 @@ impl Game {
             if let Some(ability) = action.ability {
                 self.activate_loaded_card(
                     &action.holder,
-                    &super::ActivationKey::Definition(ability),
+                    &super::ActivationKey::Definition(ability.node.id),
                     actor,
                     &before.published_knowledge(),
                     &mut false,
@@ -428,6 +428,18 @@ impl Question {
                     zone: zone(&option.zone)?,
                     position: option.position,
                     object: candidate.link.observed(game, actor),
+                    source: candidate
+                        .ability
+                        .as_ref()
+                        .map(|definition| {
+                            game.activation_text_source(
+                                &candidate.holder,
+                                &definition.clone().into(),
+                                actor,
+                            )
+                        })
+                        .transpose()?
+                        .flatten(),
                 })
             })
             .collect()
