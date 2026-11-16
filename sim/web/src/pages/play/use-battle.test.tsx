@@ -1,8 +1,10 @@
 import { act, renderHook } from "@testing-library/react"
 import { expect, it } from "vitest"
 
+import type { Command } from "../../battle/contract"
 import { SCENES } from "../../battle/fixtures/scenes"
 import { scriptedTable } from "../../battle/fixtures/scripted"
+import type { BattleSource } from "../../battle/source"
 import { act as answer, type Actions, actions } from "../../battle/view/actions"
 import { useBattle } from "./use-battle"
 
@@ -10,6 +12,13 @@ const need = <T,>(value: T | null | undefined): T => {
   if (value === null || value === undefined) throw new Error("the question does not offer this")
   return value
 }
+
+/** One command sent and everything it changed delivered: that comes in a later task than the receipt. */
+const send = (source: BattleSource, command: Command) =>
+  act(async () => {
+    await source.submit(command)
+    await new Promise((resolve) => setTimeout(resolve, 0))
+  })
 
 it("follows the open question, what happens next and where the cards lie", async () => {
   const scene = need(SCENES.find((entry) => entry.id === "turn"))
@@ -30,7 +39,7 @@ it("follows the open question, what happens next and where the cards lie", async
 
   // The follower with rush and the engaged follower both fall: what stays does not move.
   const rush = need([...acts().attack.values()].find((attack) => attack.leader === null))
-  await act(() => seats.p1.submit(answer(acts(), rush.option, need([...rush.cards.values()][0]))))
+  await send(seats.p1, answer(acts(), rush.option, need([...rush.cards.values()][0])))
   expect(result.current.placement.p1.field).toEqual([unifier, null, null, null, null])
   expect(result.current.placement.p2.field.map((handle) => handle !== null)).toEqual([
     true,
@@ -42,11 +51,11 @@ it("follows the open question, what happens next and where the cards lie", async
 
   // The card played arrives in the first free slot, which the fallen follower left.
   const [card, plays] = need([...acts().play][0])
-  await act(() => seats.p1.submit(answer(acts(), need(plays[0]).option)))
+  await send(seats.p1, answer(acts(), need(plays[0]).option))
   expect(result.current.placement.p1.field).toEqual([unifier, card, null, null, null])
   expect(result.current.board?.players[0].pp).toBe(1)
 
-  await act(() => seats.p1.submit(answer(acts(), need(acts().endPhase))))
+  await send(seats.p1, answer(acts(), need(acts().endPhase)))
   expect(result.current.question).toBeNull()
   expect(result.current.input).toMatchObject({ kind: "waiting", actor: "p2" })
   expect(result.current.stopped).toBeNull()

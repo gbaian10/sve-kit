@@ -68,6 +68,8 @@ fixtures computes rules. The seat whose main phase it is also gets the main-phas
 table describes: which hand cards may be played and what may attack what. `scriptedTable` plays
 one scene for both seats; it takes an answer only when the open question offers it, and the
 scene's script says which table follows. A scene that only shows a table refuses every answer.
+Like the Worker it answers in a later task, the receipt before the update the command caused,
+and takes one command of a seat at a time.
 
 - `?scene=preset|opening|mid|full|stack|turn|finished|fault|halted` picks the scene; the chip on
   the board's top-left corner does the same. `turn` is a turn that can be played to its end, its

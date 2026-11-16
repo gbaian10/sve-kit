@@ -11,8 +11,9 @@ export interface BattleSource {
   listen(listener: (message: HostMessage) => void): () => void
   /**
    * Sends one command and resolves with the host's receipt for it. What the command changed, if
-   * anything, arrives as updates through `listen`; a refused command changes nothing. Rejects when
-   * no receipt will come: the source is closed or stopped, or another command is still out.
+   * anything, arrives after the receipt as updates through `listen`; a refused command changes
+   * nothing. Rejects when no receipt will come: the source is closed or stopped, or another
+   * command of this seat is still out.
    */
   submit(command: Command): Promise<Receipt>
   close(): void
