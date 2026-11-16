@@ -70,6 +70,7 @@ pub(super) fn ward(
     }
     let source = context.references.resolve(context.catalog, face)?;
     if zone == "void" {
+        // The native sentinel is 1 before a token has any source zone membership.
         if object.is_some() || *position != 1 {
             return Err(ProjectionError::Unavailable);
         }
@@ -116,6 +117,7 @@ pub(super) fn ward(
         "equipment" => Zone::Equipment,
         _ => return Err(ProjectionError::Unavailable),
     };
+    // Changed effective faces need an explicit entry display policy before projection.
     if facts.controller != Some(seat(context.actor))
         || origin.zone != expected_zone
         || origin.position
