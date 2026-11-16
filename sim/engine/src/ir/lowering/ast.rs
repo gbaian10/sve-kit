@@ -3642,7 +3642,7 @@ pub(super) enum StaticEffect {
     ExtraTrigger(ExtraTriggers),
     UnlimitedEvolve(StaticPlayerRule),
     ChoiceAny(StaticPlayerRule),
-    RuleOverride(CounterCap),
+    RuleOverride(RuleOverride),
     Reroll(Reroll),
     AlsoNamed(AlsoNamed),
     If(Box<StaticConditional>),
@@ -3672,6 +3672,35 @@ pub(super) struct CounterCap {
 #[serde(rename_all = "snake_case")]
 pub(super) enum CounterCapRule {
     CounterCap,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum RuleOverride {
+    CounterCap(CounterCap),
+    BattleDamageBasis(BattleDamageRule),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BattleDamageRule {
+    #[serde(rename = "rule")]
+    pub _rule: BattleDamageBasisRule,
+    pub on: Objects,
+    #[serde(rename = "basis")]
+    pub _basis: HealthBasis,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum BattleDamageBasisRule {
+    BattleDamageBasis,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum HealthBasis {
+    Hp,
 }
 
 #[derive(Deserialize)]

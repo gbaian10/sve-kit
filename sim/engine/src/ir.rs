@@ -151,6 +151,7 @@ mod actions;
 pub(crate) mod advance_entry;
 mod answers;
 pub(crate) mod attack_restrictions;
+pub(crate) mod battle_damage_basis;
 mod capabilities;
 pub(crate) mod choice_rules;
 pub(crate) mod counter_caps;

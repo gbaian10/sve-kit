@@ -1,6 +1,8 @@
 //! Candidate-only lowering of C0's expanded tree, without source or runtime admission.
 use crate::ir::ride;
 use ast::PpAmount;
+use ast::RuleOverride::{BattleDamageBasis, CounterCap};
+use battle_damage_basis::lower as lower_battle;
 
 mod ability_restrictions;
 mod additional;
@@ -8,6 +10,7 @@ mod advance_entry;
 mod aggregates;
 mod ast;
 mod attack_restrictions;
+mod battle_damage_basis;
 mod capture;
 mod choice_rules;
 mod combat;
@@ -521,7 +524,8 @@ impl Allocator {
                 match declaration.effects.first() {
                     Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
                     Some(ast::StaticEffect::ChoiceAny(_)) => choice_rules::lower,
-                    Some(ast::StaticEffect::RuleOverride(_)) => counter_caps::lower,
+                    Some(ast::StaticEffect::RuleOverride(BattleDamageBasis(_))) => lower_battle,
+                    Some(ast::StaticEffect::RuleOverride(CounterCap(_))) => counter_caps::lower,
                     Some(ast::StaticEffect::Reroll(_)) => dice::reroll,
                     Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
                     Some(effect) if static_keywords::grant(effect).is_some() => {

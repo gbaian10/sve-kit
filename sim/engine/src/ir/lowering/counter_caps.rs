@@ -12,7 +12,9 @@ pub(super) fn lower(
     scope: ScopeId,
 ) -> Result<Located<Ability>, LoweringError> {
     let head = entry.r#static.as_ref().ok_or_else(|| unsupported(path))?;
-    let [ast::StaticEffect::RuleOverride(cap)] = head.effects.as_slice() else {
+    let [ast::StaticEffect::RuleOverride(ast::RuleOverride::CounterCap(cap))] =
+        head.effects.as_slice()
+    else {
         return Err(unsupported(path));
     };
     if head.r#while.is_some()
