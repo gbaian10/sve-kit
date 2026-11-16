@@ -1,7 +1,7 @@
 // Fixture scenes: a described table per scene and what each seat is sent for it. Numbers, postures
 // and keywords are arranged to exercise the screen, not to record a position a game reached.
 import type { CardRef, HostMessage, Seat } from "../contract"
-import type { ProvisionalPoints } from "../view/table"
+import type { ProvisionalPoints, SlotArrangement } from "../view/table"
 import { baseline, ready, type SeatSpec, type TableSpec } from "./build"
 import { type CardNo, cardRef } from "./cards"
 
@@ -13,6 +13,8 @@ export interface Scene {
   readonly leaders: readonly [CardRef, CardRef]
   /** What the contract does not carry yet about each seat's evolve points. */
   readonly points: Readonly<Record<Seat, ProvisionalPoints>>
+  /** Which slots the field cards lie in on screen; the messages only give their order. */
+  readonly slots: SlotArrangement
   /** Everything each seat receives, in order. */
   readonly script: Readonly<Record<Seat, readonly HostMessage[]>>
 }
@@ -66,6 +68,10 @@ function scene(id: SceneId, table: TableSpec): Scene {
     id,
     leaders: [cardRef(DRAGON_LEADER), cardRef(ROYAL_LEADER)],
     points: { p1: provisional(table.seats[0]), p2: provisional(table.seats[1]) },
+    slots: {
+      p1: { field: table.seats[0].field.map((card) => card.slot) },
+      p2: { field: table.seats[1].field.map((card) => card.slot) },
+    },
     script: {
       p1: [ready("p1"), baseline(table, "p1")],
       p2: [ready("p2"), baseline(table, "p2")],

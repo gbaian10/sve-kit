@@ -59,7 +59,13 @@ const TABLE: TableSpec = {
   ],
 }
 
-const tableModel = (observation: BattleObservation) => model(observation, pointsOf(TABLE))
+/** The slots the scene lays its field cards in; the observation itself only orders them. */
+const ARRANGED = {
+  p1: { field: TABLE.seats[0].field.map((card) => card.slot) },
+  p2: { field: TABLE.seats[1].field.map((card) => card.slot) },
+}
+
+const tableModel = (observation: BattleObservation) => model(observation, pointsOf(TABLE), ARRANGED)
 
 describe("tableModel", () => {
   it("puts the viewer's seat on its own side whichever seat it is", () => {
@@ -82,7 +88,27 @@ describe("tableModel", () => {
     expect(opponent.sep).toEqual({ current: 1, max: 1, opensIn: 2 })
   })
 
-  it("keeps field cards in their slots and leaves the other slots empty", () => {
+  it("lays a field card in the slot numbered like its place when nothing is arranged", () => {
+    const { self } = model(observe(TABLE, "p1"), pointsOf(TABLE))
+    expect(self.field.map((card) => card?.face ?? null)).toEqual([
+      cardRef("BP20-065"),
+      cardRef("BP20-067"),
+      null,
+      null,
+      null,
+    ])
+  })
+
+  it("takes the next free slot when the arranged one is taken or off the row", () => {
+    const observation = observe(TABLE, "p1")
+    const shared = model(observation, pointsOf(TABLE), { p1: { field: [3, 3] } }).self.field
+    expect(shared.map((card) => card !== null)).toEqual([true, false, false, true, false])
+    expect(shared[3]?.face).toEqual(cardRef("BP20-065"))
+    const outside = model(observation, pointsOf(TABLE), { p1: { field: [9, 2] } }).self.field
+    expect(outside.map((card) => card !== null)).toEqual([true, false, true, false, false])
+  })
+
+  it("keeps field cards in their arranged slots and leaves the other slots empty", () => {
     const { self } = tableModel(observe(TABLE, "p1"))
     expect(self.field).toHaveLength(5)
     expect(self.field.map((card) => card !== null)).toEqual([true, false, false, true, false])
@@ -115,6 +141,21 @@ describe("tableModel", () => {
     expect(first.self.hand.cards.map((card) => card.cost)).toEqual([1, 3])
     expect(first.opponent.hand).toEqual({ count: 3, cards: [] })
     expect(first.opponent.ex[0]?.face).toEqual(cardRef("BP16-031"))
+  })
+
+  it("has no cost for a hand card without a settled quote", () => {
+    const observation = observe(TABLE, "p1")
+    const [first, second] = observation.costs.cards
+    if (first === undefined || second === undefined) throw new Error("two quotes expected")
+    // The first quote still has something pending, so its total is left open; the second is gone.
+    const { self } = tableModel({
+      ...observation,
+      costs: {
+        ...observation.costs,
+        cards: [{ ...first, cost: { ...first.cost, total_pp: null } }],
+      },
+    })
+    expect(self.hand.cards.map((card) => card.cost)).toEqual([null, null])
   })
 
   it("counts the whole evolve deck and names only what the seat may know", () => {

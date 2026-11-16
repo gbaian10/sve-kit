@@ -10,15 +10,18 @@ import { CardBack } from "./CardBack"
 import { CardFace } from "./Cards"
 import { CARD_H, CARD_W } from "./geometry"
 
-/** A card of the viewer's own hand: its face, the cost currently quoted and its printed numbers. */
+/**
+ * A card of the viewer's own hand: its face, the cost the authority currently quotes, and the
+ * attack and defense printed on it. A cost that is not quoted (or not settled yet) is shown as
+ * unknown: the printed cost is not what the card costs now.
+ */
 function HandCard({ card, style }: { readonly card: TableCard; readonly style: CSSProperties }) {
   const { t } = useTranslation()
   const printed = useCards().find(card.face)?.summary
-  const cost = card.cost ?? printed?.cost ?? null
   return (
     <div className="bp-hand-card" style={style}>
       <CardFace card={card.face} tag />
-      {cost !== null ? <CostBadge value={cost} /> : null}
+      <CostBadge value={card.cost} />
       {printed?.attack != null && printed.defense != null ? (
         <>
           <CounterBadge

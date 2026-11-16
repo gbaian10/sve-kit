@@ -25,7 +25,7 @@ export interface TableCard {
   readonly stats: { readonly attack: number; readonly life: number } | null
   readonly keywords: readonly string[]
   readonly counters: readonly { readonly name: string; readonly amount: number }[]
-  /** Play points the authority currently quotes for this card, when it quotes any. */
+  /** Play points the authority currently quotes for this card; null without a settled quote. */
   readonly cost: number | null
 }
 
@@ -45,6 +45,15 @@ export interface ProvisionalPoints {
   /** The seat's own turns left before super evolution opens; 0 once it is open. */
   readonly sepOpensIn: number
 }
+
+/**
+ * Which slot each card of the field and the EX area lies in, by its place in the zone's order.
+ * The contract orders a zone and does not place its cards in slots, so where a card lies is the
+ * screen's own arrangement; a card without one lies in the slot numbered like its place.
+ */
+export type SlotArrangement = Readonly<
+  Partial<Record<Seat, { readonly field?: readonly number[]; readonly ex?: readonly number[] }>>
+>
 
 /** Evolve points as markers on the table: how many there were and how many are left. */
 interface Points {
@@ -116,19 +125,23 @@ function pile(observation: BattleObservation, zone: ZoneView): Pile {
   return { count: zone.count, cards: [...placed, ...loose].map(({ at: _, ...card }) => card) }
 }
 
-function slots(observation: BattleObservation, zone: ZoneView): (TableCard | null)[] {
+function slots(
+  observation: BattleObservation,
+  zone: ZoneView,
+  arranged: readonly number[] | undefined,
+): (TableCard | null)[] {
   const known = cards(observation, zone)
-  const furthest = Math.max(-1, ...known.map((card) => card.at ?? -1))
   const row: (TableCard | null)[] = Array.from(
-    { length: Math.max(zone.capacity ?? 0, zone.count, furthest + 1) },
+    { length: Math.max(zone.capacity ?? 0, zone.count) },
     () => null,
   )
   const unplaced: TableCard[] = []
   for (const { at, ...card } of known) {
-    if (at !== null && row[at] === null) row[at] = card
+    const slot = at === null ? undefined : (arranged?.[at] ?? at)
+    if (slot !== undefined && slot < row.length && row[slot] === null) row[slot] = card
     else unplaced.push(card)
   }
-  // A card without its own slot (or sharing one) takes the first free slot instead of vanishing.
+  // A card without a slot of its own (or sharing one) takes the first free slot instead of vanishing.
   for (const card of unplaced) {
     const free = row.indexOf(null)
     if (free === -1) row.push(card)
@@ -153,6 +166,7 @@ function seatTable(
   player: PlayerView,
   index: number,
   provisional: ProvisionalPoints,
+  arranged: SlotArrangement[Seat],
 ): SeatTable {
   const { turn } = observation
   return {
@@ -164,8 +178,8 @@ function seatTable(
     first: turn.first_player === null ? null : turn.first_player === player.seat,
     active: turn.active === player.seat,
     turns: turn.elapsed_turns[index] ?? 0,
-    field: slots(observation, player.zones.field),
-    ex: slots(observation, player.zones.ex),
+    field: slots(observation, player.zones.field, arranged?.field),
+    ex: slots(observation, player.zones.ex, arranged?.ex),
     hand: pile(observation, player.zones.hand),
     deck: pile(observation, player.zones.deck),
     evolveDeck: pile(observation, player.zones.evolve_deck),
@@ -177,9 +191,10 @@ function seatTable(
 export function tableModel(
   observation: BattleObservation,
   provisional: Readonly<Record<Seat, ProvisionalPoints>>,
+  arrangement: SlotArrangement = {},
 ): TableModel {
   const [first, second] = observation.players.map((player, index) =>
-    seatTable(observation, player, index, provisional[player.seat]),
+    seatTable(observation, player, index, provisional[player.seat], arrangement[player.seat]),
   ) as [SeatTable, SeatTable]
   const selfFirst = first.seat === observation.viewer
   return {

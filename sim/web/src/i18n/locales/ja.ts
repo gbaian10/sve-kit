@@ -1078,6 +1078,7 @@ export default {
       attack: "攻撃力",
       defense: "体力",
       cost: "コスト",
+      costUnknown: "コスト未定",
       none: "なし",
       noneFirst: "なし（先攻）",
       epNoneFirst: "EP（先攻は EP なし）",

@@ -1031,6 +1031,7 @@ const zhTW = {
       attack: "攻擊",
       defense: "體力",
       cost: "費用",
+      costUnknown: "費用未定",
       none: "無",
       noneFirst: "無（先攻）",
       epNoneFirst: "EP（先攻沒有 EP）",

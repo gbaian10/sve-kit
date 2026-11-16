@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 
 import type { CardRef, Seat } from "../../battle/contract"
 import type { BattleSource } from "../../battle/source"
-import { type ProvisionalPoints, tableModel } from "../../battle/view/table"
+import { type ProvisionalPoints, type SlotArrangement, tableModel } from "../../battle/view/table"
 import { type BattleMat, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
 import { Plate } from "./hud/Plate"
@@ -28,20 +28,22 @@ function OppositePane({
   source,
   leaders,
   points,
+  slots,
   layout,
   mat,
 }: {
   readonly source: BattleSource
   readonly leaders: Leaders
   readonly points: SeatPoints
+  readonly slots: SlotArrangement | undefined
   readonly layout: Layout
   readonly mat: BattleMat
 }) {
   const { t } = useTranslation()
   const battle = useBattle(source)
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, points)),
-    [battle.board, points],
+    () => (battle.board === null ? null : tableModel(battle.board, points, slots)),
+    [battle.board, points, slots],
   )
   return (
     <section
@@ -73,6 +75,7 @@ export function BattleScreen({
   opposite,
   leaders,
   points,
+  slots,
   corner,
   onDual,
 }: {
@@ -82,6 +85,8 @@ export function BattleScreen({
   /** Each seat's leader card, from the match setup. */
   readonly leaders: Leaders
   readonly points: SeatPoints
+  /** Where the field cards lie on this screen, when something other than their order decides it. */
+  readonly slots?: SlotArrangement | undefined
   /** Page controls for the chip on the board's top-left corner. */
   readonly corner?: ReactNode
   /** Switches the dual view on or off, where the page offers it. */
@@ -107,8 +112,8 @@ export function BattleScreen({
     [vw, vh, dual, floats, sidebarOpen, floatOpen],
   )
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, points)),
-    [battle.board, points],
+    () => (battle.board === null ? null : tableModel(battle.board, points, slots)),
+    [battle.board, points, slots],
   )
   const rootClass = [
     "bp-root",
@@ -315,6 +320,7 @@ export function BattleScreen({
               source={opposite}
               leaders={leaders}
               points={points}
+              slots={slots}
               layout={layout}
               mat={prefs.battleMat}
             />

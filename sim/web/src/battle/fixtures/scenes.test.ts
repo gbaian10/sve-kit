@@ -7,6 +7,7 @@ import {
   type HostMessage,
   type Seat,
   validateHostMessage,
+  type ZoneView,
 } from "../contract"
 import { SCENES } from "./scenes"
 import { scriptedSource } from "./scripted"
@@ -59,6 +60,26 @@ describe("fixture scenes", () => {
     // A handle means something to one seat only.
     const shared = Object.keys(first.objects).filter((handle) => handle in second.objects)
     expect(shared).toEqual([])
+  })
+
+  it.each(SCENES)("$id gives every listed member a place inside its zone, once", ({ script }) => {
+    // The schema allows any number; the authority only ever sends an offset below the zone's size.
+    for (const seat of SEATS) {
+      for (const player of baselineOf(script[seat]).players) {
+        const zones: Record<string, ZoneView> = { ...player.zones }
+        for (const zone of Object.values(zones)) {
+          const places = zone.cards.flatMap(({ position }) => (position === null ? [] : [position]))
+          expect(Math.max(-1, ...places)).toBeLessThan(zone.count)
+          expect(new Set(places).size).toBe(places.length)
+        }
+      }
+    }
+  })
+
+  it.each(SCENES)("$id arranges a slot for each field card", ({ script, slots }) => {
+    const [first, second] = baselineOf(script.p1).players
+    expect(slots.p1?.field).toHaveLength(first.zones.field.count)
+    expect(slots.p2?.field).toHaveLength(second.zones.field.count)
   })
 
   it("replays the seat's script to every listener until the source is closed", () => {

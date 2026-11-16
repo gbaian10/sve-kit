@@ -165,9 +165,20 @@ export function KeywordDie({
   )
 }
 
-/** Cost: our own blank crystal with the number on top (no official icon). */
-export function CostBadge({ value }: { readonly value: number }) {
+/**
+ * Cost: our own blank crystal with the number on top (no official icon). Without a quoted number
+ * the crystal says so with a question mark.
+ */
+export function CostBadge({ value }: { readonly value: number | null }) {
   const { t } = useTranslation()
+  if (value === null)
+    return (
+      <span className="bp-cost is-unknown" title={t("play.stat.costUnknown")}>
+        <img src={costBlank} alt="" aria-hidden="true" />
+        <span className="sr-only">{t("play.stat.costUnknown")}</span>
+        <b aria-hidden="true">?</b>
+      </span>
+    )
   return (
     <span className="bp-cost">
       <img src={costBlank} alt="" aria-hidden="true" />

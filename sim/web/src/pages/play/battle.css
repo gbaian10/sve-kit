@@ -1009,6 +1009,11 @@
 }
 
 /* The hands. */
+
+/*
+ * No `touch-action` here: a hand that does not fit scrolls, and a finger put down on a card has to
+ * be able to start that scroll.
+ */
 .bp-hand-card {
   position: absolute;
   left: 0;
@@ -1018,7 +1023,6 @@
   transition:
     transform 0.18s ease,
     opacity 0.15s;
-  touch-action: none;
   box-shadow: 0 6px 16px --alpha(var(--bp-black) / 55%);
   bottom: 0;
   transform-style: preserve-3d;

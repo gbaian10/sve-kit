@@ -20,6 +20,7 @@ import { type CardNo, cardRef, cardTypeOf, fixtureCard } from "./cards"
 
 interface FieldSpec {
   readonly no: CardNo
+  /** Where the screen lays it. Not part of what a seat is told: the contract only orders the zone. */
   readonly slot: number
   readonly acted?: boolean
   /** The evolve card lying on top. */
@@ -153,14 +154,14 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
         })
       : []
     const evolution: ZoneMember[] = []
-    const field: ZoneMember[] = spec.field.map((card) => {
+    const field: ZoneMember[] = spec.field.map((card, position) => {
       const object = add(seat, card.no, "public", fieldState(card), card.evolved ?? card.no)
       if (card.evolved !== undefined) {
         const top = add(seat, card.evolved, "public")
         evolution.push({ position: null, object: top })
         relationships.push({ kind: "evolution", from: top, to: object })
       }
-      return { position: card.slot, object }
+      return { position, object }
     })
     const evolveDeck: ZoneMember[] = [
       ...spec.evolveDeck.faceUp.map((no) => ({ position: null, object: add(seat, no, "public") })),

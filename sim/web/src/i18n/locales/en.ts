@@ -1091,6 +1091,7 @@ export default {
       attack: "Attack",
       defense: "Defense",
       cost: "Cost",
+      costUnknown: "Cost not settled",
       none: "None",
       noneFirst: "None (first)",
       epNoneFirst: "EP (the first player has none)",
