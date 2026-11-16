@@ -204,6 +204,7 @@ fn target_roles_roundtrip_and_reject_foreign_or_overlapping_assignments() {
 #[test]
 fn search_preserves_empty_groups_and_printed_order() {
     let question = SearchQuestion {
+        facts: None,
         cards: vec![CardOption {
             handle: 931,
             card: "native-card-key".into(),
@@ -456,6 +457,7 @@ fn selection_decoders_refuse_the_other_native_answer_channel() {
         ProjectionError::Unavailable
     );
     let search = SearchQuestion {
+        facts: None,
         cards: vec![],
         cardinality: bounds(0, Some(0)),
         groups: Some(vec![SelectionGroup {
