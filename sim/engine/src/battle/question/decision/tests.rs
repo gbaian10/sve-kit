@@ -6,6 +6,8 @@ mod entry;
 #[cfg(feature = "runner")]
 mod joint;
 #[cfg(feature = "runner")]
+mod modes;
+#[cfg(feature = "runner")]
 mod native;
 mod number;
 #[cfg(feature = "runner")]
