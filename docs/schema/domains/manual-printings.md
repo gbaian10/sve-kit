@@ -152,7 +152,7 @@ DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlis
 本批 3 筆未知發放日追蹤於 [#1902](https://github.com/gbaian10/sve-kit/issues/1902)，不以推測日期補齊。基本卡依維護者指定的首次發售日。
 快照的日期欄只限 unlisted；official 兩欄必為 null，既有商品／收錄日期不變。
 前端單卡版次資訊共用「發行日」一行與 ISO 日期格式，月精度只顯示 `YYYY-MM`，unknown 不顯示。
-列表的卡包／發行日排序對人工版次使用本欄（unknown 置後），官方仍用既有地區卡包發售日；月精度直接比較 `YYYY-MM`，不補成月初曆日。
+列表的「卡包」主排序依版次所屬商品家族（family）分組：無商品發售日的 family 一律置於有日期卡包之後，無日期組中 PR 最後；同 family 交給次排序，「卡號」次排序對無卡號版次依 `int_id` 比較，人工發放日只供單卡頁顯示。
 
 ## 8. 尚未實作：限量序號卡與序號補充
 

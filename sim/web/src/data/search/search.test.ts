@@ -3508,7 +3508,7 @@ it.each(["ep", "sep"])("names and locates a textless unlisted %s printing", asyn
   }
 })
 
-it("sorts numberless printings by explicit int_id across category gaps and keeps official order", async () => {
+it("groups numberless unlisted printings by home set before comparing int_id", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
   const initial = client.snapshot()
@@ -3529,7 +3529,7 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
     .slice(0, 3)
   expect(targets).toHaveLength(3)
   const ids = targets.map((row) => stringValue(row["id"]))
-  const intIds = [55200, 55001, 55103]
+  const intIds = [55306, 55307, 55000]
   const text = { id: "t:sort-manual", lang: "ja", text: "合成EP" }
   // Real unlisted EP/SEP have no stats, so cost ties must fall back to the int_id order.
   const faces = new Set(
@@ -3557,8 +3557,10 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
               card_no: "",
               card_no_state: "none",
               catalog_state: "unlisted",
-              manual_available_on: ordinal === 0 ? "2025-07-03" : ordinal === 1 ? "2025-09" : null,
-              manual_date_precision: ordinal === 0 ? "day" : ordinal === 1 ? "month" : "unknown",
+              printed_code: ordinal === 0 ? "2025京都-A" : ordinal === 1 ? "2025京都-B" : null,
+              manual_available_on:
+                ordinal === 0 ? "2025-01-25" : ordinal === 1 ? "2025-01-26" : null,
+              manual_date_precision: ordinal < 2 ? "day" : "unknown",
               int_id: integerValue(intIds[ordinal]),
               manual_name_unit_id: text.id,
               manual_type_code: "ep",
@@ -3583,7 +3585,7 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
   originalColumns.ingest(snapshot.bootstrap)
   originalColumns.seal()
   const original = new SearchIndex(originalColumns, "jp")
-  const expected = [ids[1], ids[2], ids[0]]
+  const expected = [ids[2], ids[0], ids[1]]
   for (const index of [
     created,
     new SearchIndex(created.encode(), "jp"),
@@ -3600,19 +3602,22 @@ it("sorts numberless printings by explicit int_id across category gaps and keeps
         [...expected].reverse(),
       )
       expect(search({ unlistedOnly: true, sort: "cost" })).toEqual(expected)
-      expect(search({ unlistedOnly: true, sort: "set" })).toEqual([ids[0], ids[1], ids[2]])
-      expect(search({ unlistedOnly: true, sort: "set", order: "desc" })).toEqual([
-        ids[1],
-        ids[0],
-        ids[2],
-      ])
+      expect(search({ unlistedOnly: true, sort: "set" })).toEqual(expected)
+      expect(search({ unlistedOnly: true, sort: "set", order: "desc" })).toEqual(expected)
+      expect(
+        search({ unlistedOnly: true, sort: "set", order: "desc", secondaryOrder: "desc" }),
+      ).toEqual([...expected].reverse())
+      expect(
+        search({ unlistedOnly: true, sort: "set", order: "desc", secondarySort: null }),
+      ).toEqual(expected)
+      expect(search({ unlistedOnly: true, text: "2025京都" })).toEqual([ids[0], ids[1]])
     }
     const official = (value: SearchIndex) =>
       value
         .search({
           ...query,
           limit: 10000,
-          state: { ...DEFAULT_QUERY, unit: "printing", sort: "no" },
+          state: { ...DEFAULT_QUERY, unit: "printing" },
         })
         .items.map((item) => item.printingId)
         .filter((id) => !ids.includes(id))
