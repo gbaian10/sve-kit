@@ -290,12 +290,16 @@ fn missing_material_and_late_pp_failure_restore_the_play_without_revealing() {
 
 #[test]
 fn revelation_costs_reject_foreign_hands_variable_counts_and_unrelated_bottom_choices() {
+    let named = json!({"reveal":{"sel":{"who":"self","zone":"hand"},"n":1_u8,"result":"unused"}});
+    assert!(
+        lower(&tree(&named, &json!([{"draw":{"n":1_u8}}]))).is_ok(),
+        "a mandatory reveal may name its result without requiring a following move"
+    );
     for bad in [
         json!({"reveal":{"sel":{"who":"opp","zone":"hand"},"n":1_u8}}),
         cost(0, false),
         cost(3, false),
         cost(2, true),
-        json!({"reveal":{"sel":{"who":"self","zone":"hand"},"n":1_u8,"result":"unused"}}),
         json!({"to_deck_bottom":{"sel":{"in":"shown"},"n":1_u8}}),
         json!({"steps":[{"reveal":{"sel":{"who":"self","zone":"hand"},"n":1_u8}},{"pp":1_u8}]}),
         json!({"steps":[{"reveal":{"sel":{"who":"self","zone":"hand"},"n":1_u8,"result":"shown"}},{"to_deck_bottom":{"sel":{"in":"shown"},"n":2_u8}}]}),

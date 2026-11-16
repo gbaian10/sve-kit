@@ -333,13 +333,15 @@ fn public_field_ex_and_cemetery_banish_fees_keep_their_original_payment_route() 
 }
 
 #[test]
-fn hand_banish_fees_reject_other_players_counts_results_and_spell_additional_costs() {
+fn hand_banish_fees_reject_other_players_invalid_counts_and_spell_additional_costs() {
+    assert!(lowerer().lower(&evolution_linked_movement::tree(&[("fanfare", json!({
+        "cost":{"banish":{"sel":{"who":"self","zone":"hand"},"n":1_u8,"result":"paid"}},"do":[]
+    }))])).is_ok(), "a fixed own-hand payment can retain a named before-result");
     for material in [
         json!({"sel":{"who":"opp","zone":"hand"},"n":1}),
         json!({"sel":{"who":"self","zone":"hand"},"n":2}),
         json!({"sel":{"who":"self","zone":"hand"},"upto":1}),
         json!({"sel":{"who":"self","zone":"hand"},"any":true}),
-        json!({"sel":{"who":"self","zone":"hand"},"n":1,"result":"paid"}),
     ] {
         lowerer()
             .lower(&evolution_linked_movement::tree(&[(
