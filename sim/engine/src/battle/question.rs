@@ -23,7 +23,9 @@ type Result<T> = result::Result<T, ProjectionError>;
 
 mod closing;
 mod common;
+mod decision;
 mod evolution;
+mod flow;
 mod opening;
 
 /// A rejected answer binding, separate from an unavailable board or question.
@@ -53,6 +55,7 @@ pub struct QuestionProjection {
 
 #[derive(Clone)]
 enum Binding {
+    Decision(decision::Binding),
     FirstPlayer(BTreeMap<OptionId, Viewer>),
     Mulligan(BTreeMap<OptionId, NativeHandle>),
     StartAmulet(BTreeMap<OptionId, NativeHandle>),
@@ -96,6 +99,11 @@ impl QuestionProjection {
                 wire::QuestionPurpose::PlayParameter,
                 ProcessingStage::Declare,
             ),
+            player::QuestionShape::Decision(
+                player::DecisionShape::Quick { .. }
+                | player::DecisionShape::Pending(_)
+                | player::DecisionShape::TriggerQuota(_),
+            ) => flow::context()?,
             player::QuestionShape::Decision(_) | player::QuestionShape::ActionWindow(_) => {
                 return Err(ProjectionError::Unavailable);
             }
@@ -135,8 +143,16 @@ impl QuestionProjection {
             player::QuestionShape::Evolution(EvolutionQuestion::Discard(domain)) => {
                 evolution::discard(id, native.actor, &domain, &observation)?
             }
+            player::QuestionShape::Decision(
+                player::DecisionShape::Quick { .. }
+                | player::DecisionShape::Pending(_)
+                | player::DecisionShape::TriggerQuota(_),
+            ) => flow::project()?,
+            player::QuestionShape::Decision(domain) => {
+                let (usage, shape, binding) = decision::project(&domain)?;
+                (usage, shape, Binding::Decision(binding))
+            }
             player::QuestionShape::Evolution(EvolutionQuestion::Materials(_))
-            | player::QuestionShape::Decision(_)
             | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
         };
         let question = wire::Question {
@@ -188,6 +204,7 @@ impl QuestionProjection {
             return Err(AnswerError);
         }
         let command = match &self.binding {
+            Binding::Decision(binding) => binding.answer(self.token, answer)?,
             Binding::EvolutionDiscard(projection) => player::Command::Evolution {
                 token: self.token,
                 answer: evolution::discard_answer(projection, answer)?,
