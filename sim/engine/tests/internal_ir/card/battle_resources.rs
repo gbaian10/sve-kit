@@ -92,6 +92,31 @@ fn evolution_resource_initial_states_reject_positive_sep_without_unlock() {
 }
 
 #[test]
+fn evolution_resource_initial_states_reject_negative_sep() {
+    for seat in ["P1", "P2"] {
+        for amount in [-1_i64, i64::MIN] {
+            for unlock in [None, Some(Value::Null), Some(json!(9_u64))] {
+                let mut initial = position(1);
+                let player = initial["players"][seat].as_object_mut().unwrap();
+                player.insert("sep".into(), json!(amount));
+                if let Some(unlock) = unlock {
+                    player.insert("sep_available_from".into(), unlock);
+                } else {
+                    player.remove("sep_available_from");
+                }
+                assert!(
+                    matches!(
+                        try_game(&initial),
+                        Err(sve_engine::EngineFailure::Invalid(_))
+                    ),
+                    "CR 3.2.6.1 excludes negative SEP before any native command runs"
+                );
+            }
+        }
+    }
+}
+
+#[test]
 fn evolution_resource_initial_states_preserve_valid_explicit_pools() {
     for actor in [Viewer::P1, Viewer::P2] {
         let seat = if actor == Viewer::P1 { "P1" } else { "P2" };

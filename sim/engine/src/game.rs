@@ -515,6 +515,9 @@ impl Game {
                 return Err(invalid("EP must fit its nonnegative capacity"));
             }
             let sep = int(&entry["sep"]);
+            if sep < 0 {
+                return Err(invalid("SEP cannot be negative"));
+            }
             let sep_available_from = match entry.get("sep_available_from") {
                 Some(Value::Null) => None,
                 Some(value) => Some(value.as_u64().ok_or_else(|| invalid("invalid SEP turn"))?),
