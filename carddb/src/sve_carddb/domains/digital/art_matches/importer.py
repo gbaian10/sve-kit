@@ -7,7 +7,6 @@ from sve_carddb.core.json import array, canonical, digest, integer, object_value
 from sve_carddb.core.provenance import SourceUse
 from sve_carddb.domains.digital.links.evidence import configured_refs
 from sve_carddb.domains.translations.digital import import_digital
-from sve_carddb.images.art_matching import REVIEW_MAX
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -197,9 +196,7 @@ def _fresh(
 
 
 def _matches(db: Database, record: Record, decision: str, source: str) -> None:
-    for candidate in record.candidates:
-        if candidate.inliers < REVIEW_MAX:
-            continue
+    for candidate in record.matches():
         card = f"digital:{record.game}:{candidate.official_id}"
         identifier = f"digital-art:{record.game}:{candidate.official_id}:{candidate.phase}:{candidate.style_key}"
         values: dict[str, Value] = {
@@ -248,8 +245,7 @@ def populate(
                 (record.game, candidate.official_id)
                 for record, state in fresh
                 if state == "matched"
-                for candidate in record.candidates
-                if candidate.inliers >= REVIEW_MAX
+                for candidate in record.matches()
             }
         )
     )
