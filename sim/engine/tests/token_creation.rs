@@ -11,6 +11,7 @@ use alloc::sync::Arc;
 use serde_json::{Value, json};
 use sve_engine::catalog::{Catalog, SelectedEffects};
 use sve_engine::game::internal::{Answer, CardPlay, InputDomain, InstructionOutcome};
+use sve_engine::game::player::{DecisionShape, Input, QuestionShape, Viewer};
 use sve_engine::game::{Game, View};
 use sve_engine::ir::PlayerId;
 
@@ -394,6 +395,19 @@ fn field_creation_ward_choices_resume_the_same_objects_once() {
             panic!("Ward entry choice")
         };
         assert!(matches!(question.domain, InputDomain::WardEntry { .. }));
+        let viewer = if question.actor.seat == 1 {
+            Viewer::P1
+        } else {
+            Viewer::P2
+        };
+        let Input::Question(native) = game.input(viewer) else {
+            panic!("Ward token question")
+        };
+        assert!(
+            matches!(&native.shape, QuestionShape::Decision(DecisionShape::WardEntry {
+            face, object: None, zone, ..
+        }) if face.card == "token" && face.face == 0 && zone == "void")
+        );
         play = game
             .answer_internal_card(question.actor, question.token, Answer::WardEntry(acted))
             .unwrap();

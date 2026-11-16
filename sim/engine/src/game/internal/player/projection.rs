@@ -140,8 +140,12 @@ fn typed(
         | Wait::Targets(_)
         | Wait::ResolutionTargets(_)
         | Wait::RecipientTargets(_) => selection(game, actor, domain, wait),
-        Wait::WardEntry { reference, links } => {
-            domain!(domain, InputDomain::WardEntry { card, name, zone, position } => DecisionShape::WardEntry { card, name, zone, position, object: links.observed(game, actor, Some(*reference))? })
+        Wait::WardEntry {
+            reference,
+            links,
+            face,
+        } => {
+            domain!(domain, InputDomain::WardEntry { card, name, zone, position } => DecisionShape::WardEntry { card, name, zone, position, face: face.clone(), object: links.observed(game, actor, Some(*reference))? })
         }
         Wait::OptionalCost => {
             domain!(domain, InputDomain::OptionalCost => DecisionShape::OptionalCost)

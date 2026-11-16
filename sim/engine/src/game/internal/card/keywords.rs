@@ -133,6 +133,7 @@ impl Game {
                 position,
             },
             Wait::WardEntry {
+                face: self.physical_card_face(holder)?,
                 reference,
                 links: CandidateLinks::capture(self, execution, [reference])?,
             },
