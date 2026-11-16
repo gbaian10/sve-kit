@@ -4,10 +4,9 @@ use super::{
 };
 use crate::game::internal::{Execution, InputDomain, Wait};
 use crate::game::player::EarlierQuotaChoice;
-use crate::game::player::PendingChoice;
 use crate::game::player::QuotaQuestion;
 use crate::game::player::Viewer;
-use crate::game::player::observation::PendingTrigger;
+use crate::game::player::observation::{PendingTrigger, viewer};
 use crate::ir::{
     AbilityCostPolicy, AbilityInstanceId, BatchPolicy, DecisionId, LimitSpec, TriggerAggregation,
 };
@@ -35,7 +34,13 @@ pub struct QuotaDomain {
 pub(in crate::game::internal) struct Admission {
     ready: Vec<PendingOccurrence>,
     groups: VecDeque<QuotaGroup>,
-    earlier: Vec<QuotaSelection>,
+    earlier: Vec<EarlierSelection>,
+}
+
+#[derive(Clone, Debug)]
+struct EarlierSelection {
+    selection: QuotaSelection,
+    pending: u64,
 }
 
 #[derive(Clone, Debug)]
@@ -73,13 +78,18 @@ impl Game {
         actor: Viewer,
         domain: &QuotaDomain,
     ) -> Result<QuotaQuestion> {
-        let group = self
+        let plan = self
             .card_runtime
             .admission
             .as_ref()
-            .and_then(|plan| plan.groups.front())
+            .ok_or_else(|| invalid("missing frozen quota admission"))?;
+        let group = plan
+            .groups
+            .front()
             .ok_or_else(|| invalid("missing frozen quota group"))?;
-        if group.candidates.len() != domain.candidates.len() {
+        if group.candidates.len() != domain.candidates.len()
+            || plan.earlier.len() != domain.earlier.len()
+        {
             return Err(invalid("inconsistent quota coordinates"));
         }
         let candidates = domain
@@ -91,21 +101,19 @@ impl Game {
         let earlier = domain
             .earlier
             .iter()
-            .map(|selection| {
+            .zip(&plan.earlier)
+            .map(|(selection, frozen)| {
+                if selection != &frozen.selection {
+                    return Err(invalid("inconsistent earlier quota coordinates"));
+                }
+                let pending = plan
+                    .ready
+                    .iter()
+                    .find(|pending| pending.id == frozen.pending)
+                    .ok_or_else(|| invalid("missing frozen earlier quota occurrence"))?;
                 Ok(EarlierQuotaChoice {
-                    actor: match selection.actor.seat {
-                        1 => Viewer::P1,
-                        2 => Viewer::P2,
-                        _ => return Err(invalid("invalid earlier quota actor")),
-                    },
-                    occurrence: PendingChoice {
-                        handle: selection.occurrence.handle,
-                        card: selection.occurrence.card.clone(),
-                        line: selection.occurrence.line,
-                        event: selection.occurrence.event.clone(),
-                        occurrence: None,
-                        source: None,
-                    },
+                    actor: viewer(super::super::seat_name(selection.actor)?)?,
+                    occurrence: pending.player_option(self, actor, &selection.occurrence),
                 })
             })
             .collect::<Result<_>>()?;
@@ -266,7 +274,11 @@ impl Game {
             actor,
             QuotaDomain {
                 candidates,
-                earlier: plan.earlier.clone(),
+                earlier: plan
+                    .earlier
+                    .iter()
+                    .map(|earlier| earlier.selection.clone())
+                    .collect(),
             },
         )))
     }
@@ -309,9 +321,12 @@ impl Game {
             return Err(invalid("unknown quota handle"));
         }
         let chosen = group.candidates.remove(index);
-        plan.earlier.push(QuotaSelection {
-            actor: chosen.source.controller,
-            occurrence: chosen.public_option(handle)?,
+        plan.earlier.push(EarlierSelection {
+            pending: chosen.id,
+            selection: QuotaSelection {
+                actor: chosen.source.controller,
+                occurrence: chosen.public_option(handle)?,
+            },
         });
         plan.ready.push(chosen);
         group.remaining = group

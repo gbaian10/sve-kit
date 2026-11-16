@@ -27,6 +27,8 @@ mod pending;
 mod quick;
 #[path = "battle_question/start_amulet.rs"]
 mod start_amulet;
+#[path = "battle_question/trigger_quota.rs"]
+mod trigger_quota;
 
 fn opposite(viewer: Viewer) -> Viewer {
     if viewer == Viewer::P1 {
