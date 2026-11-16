@@ -192,6 +192,7 @@ def test_frozen_style_match_and_explicit_absence(
             if r.values["id"] == coverage[0].values["decision_id"]
         )
         assert decision["state"] == "model_reviewed"
+        assert any(use.usage == "digital_art_candidate_scope" for use in sources.uses)
         db.verify()
 
 
@@ -232,6 +233,26 @@ def test_unpinned_entry_fails_before_materialization(
                 sources=baseline.sources(),
             )
         assert not db.rows("digital_art_coverage")
+
+
+def test_removed_link_entry_does_not_reuse_old_absence(
+    baseline: Fixture, tmp_path: Path
+) -> None:
+    adopted = entry(tmp_path, (art_record(baseline, "not_found"),))
+    context = baseline.changed(adopted.configuration())
+    sources = Sources({"test-store": baseline.store}, baseline.root, context)
+    with template(("digital_art",)).copy() as db:
+        publish_art(db, baseline)
+        with db.transaction():
+            result = populate(
+                db,
+                adopted,
+                revision=baseline.authored,
+                links=None,
+                sources=sources,
+            )
+        assert result == {"matched": 0, "not_found": 0, "unknown": 1}
+        assert not db.rows("digital_art_link")
 
 
 def test_duplicate_subject_and_unindexed_file_fail(

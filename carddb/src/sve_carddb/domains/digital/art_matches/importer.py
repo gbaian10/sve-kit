@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.build.rows import insert_exact
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, parse
+from sve_carddb.core.provenance import SourceUse
 from sve_carddb.domains.digital.links.evidence import configured_refs
 from sve_carddb.domains.translations.digital import import_digital
 from sve_carddb.images.art_matching import REVIEW_MAX
@@ -21,9 +22,14 @@ if TYPE_CHECKING:
 def _catalogue(sources: Sources) -> dict[tuple[str, str], dict[str, JsonValue]]:
     result = {}
     for ref in configured_refs(sources):
-        lang, document, _source = sources.document(ref)
+        lang, document, source = sources.document(ref)
         if lang != "ja":
             continue
+        sources.uses.append(
+            SourceUse(
+                source=source, usage="digital_art_candidate_scope", locator="/data"
+            )
+        )
         game = ref.parser.removeprefix("translation-").removesuffix("-v1")
         data = object_value(object_value(document)["data"])
         entries = (
@@ -153,7 +159,7 @@ def _fresh(
     sources: Sources,
 ) -> list[tuple[Record, str]]:
     art = {str(r.values["id"]): r.values for r in db.rows("art")}
-    catalogue = _catalogue(sources)
+    catalogue = {} if links is None else _catalogue(sources)
     uses = {
         (r.values["printing_id"], r.values["face_id"]): r.values["art_id"]
         for r in db.rows("printing_face")

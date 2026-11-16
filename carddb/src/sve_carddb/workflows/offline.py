@@ -750,6 +750,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 )
             )
             mark("db: digital art")
+            art_uses = () if art_result is None else tuple(translation_sources.uses)
             adopted = _populate_adoptions(
                 db,
                 adoptions,
@@ -863,6 +864,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     *added.uses,
                     *adopted.uses,
                     *link_uses,
+                    *art_uses,
                     *name_uses,
                     *name_sources.uses,
                     *(
