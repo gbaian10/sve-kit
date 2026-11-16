@@ -1064,6 +1064,7 @@ pub(super) enum BanishAction {
     Top {
         top: DeckTop,
     },
+    // The `in` shape reserves observation authority for private Look sets.
     Observed {
         r#ref: Observed,
         result: Option<String>,
