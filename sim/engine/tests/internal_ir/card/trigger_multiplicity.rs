@@ -2,6 +2,10 @@ use super::*;
 use sve_engine::game::internal::{Answer, InputDomain, ResumeStage};
 
 fn program(depart: bool, phase: &str) -> WellFormedCardProgram {
+    program_at(depart, phase, "self")
+}
+
+pub(super) fn program_at(depart: bool, phase: &str, whose: &str) -> WellFormedCardProgram {
     let mut tree = equipment_played::tree(
         &json!({"line":1,"static":{"effects":[
             {"extra_trigger":{"phase":phase,"who":"self","n":1}}
@@ -11,7 +15,7 @@ fn program(depart: bool, phase: &str) -> WellFormedCardProgram {
     let mut observer = tree["cards"]["unit-follower"]["abilities"][0].clone();
     observer.as_object_mut().unwrap().remove("static");
     observer["line"] = json!(2);
-    observer["auto"] = json!({"on":{"phase":{"whose":"self","which":"end"}},
+    observer["auto"] = json!({"on":{"phase":{"whose":whose,"which":"end"}},
         "do":[{"life":{"who":"self","delta":1}}]});
     if depart {
         observer["auto"]["do"]
