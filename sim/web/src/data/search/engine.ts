@@ -77,6 +77,7 @@ export class SearchEngine {
     | {
         generation: number
         crossRegion?: Promise<void>
+        crossRegionController?: AbortController
         indexWrite?: Promise<void>
         filesCount: number
         effects?: Promise<EffectIndex>
@@ -132,7 +133,7 @@ export class SearchEngine {
   handle(request: SearchRequest): Promise<void> {
     if (request.kind === "cancel") {
       if (this.staging?.generation === request.generation) this.staging.abort.abort()
-      if (this.active?.generation === request.generation) this.active.controller.abort()
+      if (this.active?.generation === request.generation) this.active.crossRegionController?.abort()
       return Promise.resolve()
     }
     if (request.kind === "close-channel") {
@@ -450,6 +451,9 @@ export class SearchEngine {
   private async completeCrossRegion(active: NonNullable<SearchEngine["active"]>): Promise<void> {
     if (!active.index || active.index.prOnlyReady) return
     active.crossRegion ??= (async () => {
+      const controller = new AbortController()
+      active.crossRegionController = controller
+      const signal = AbortSignal.any([active.signal, controller.signal])
       const files = [...active.files.values()].filter(
         (file) =>
           file["purpose"] === "catalog" &&
@@ -478,7 +482,7 @@ export class SearchEngine {
       progress()
       const blobs = new SearchBlobs(active.request.base, this.fetcher, this.storage)
       const identities: JsonObject[] = []
-      await blobs.readAll(files, active.signal, (file, bytes) => {
+      await blobs.readAll(files, signal, (file, bytes) => {
         const part = decodeMessage({ kind: "file", file, version: active.version, bytes })
         if (part.kind === "fragments")
           for (const fragment of part.fragments) {
@@ -498,7 +502,7 @@ export class SearchEngine {
       })
       // Local candidates must include every selected-region printing before disqualification.
       await active.printings
-      active.signal.throwIfAborted()
+      signal.throwIfAborted()
       if (this.active !== active || !active.index) return
       active.index.completePrOnly(identities)
       if (active.mechanics) {
@@ -507,6 +511,7 @@ export class SearchEngine {
       } else await this.saveIndex(active)
     })().finally(() => {
       delete active.crossRegion
+      delete active.crossRegionController
     })
     await active.crossRegion
   }

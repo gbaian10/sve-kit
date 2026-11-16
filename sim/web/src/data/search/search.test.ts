@@ -3871,3 +3871,60 @@ it("finishes a startup PR-only query while unrelated mechanics are pending", asy
     h.session.dispose()
   }
 })
+
+it("cancels a cross-region transfer without aborting the completed local index", async () => {
+  const served = origin()
+  const events: SearchEvent[] = []
+  const engine = new SearchEngine((event) => events.push(event), {
+    fetch: served.fetcher,
+    cacheStorage: memoryCache(),
+  })
+  await engine.handle({ kind: "load", generation: 1, base, edition: "jp", entry: "preview" })
+  const file = otherCatalogs("jp")[0]
+  if (!file) throw new Error("missing other-region catalog")
+  const path = stringValue(file["path"])
+  const release = served.hold(path)
+  const pending = engine.handle({
+    kind: "search",
+    generation: 1,
+    channelId: 1,
+    queryId: 1,
+    query: prQuery("jp"),
+  })
+  try {
+    await expect.poll(() => served.requests.includes(path), POLL).toBe(true)
+    await engine.handle({ kind: "cancel", generation: 1 })
+    release()
+    await pending
+    expect(events.some((event) => event.kind === "query-error" && event.queryId === 1)).toBe(true)
+    const requests = served.requests.length
+    await engine.handle({
+      kind: "search",
+      generation: 1,
+      channelId: 1,
+      queryId: 2,
+      query: { ...query, state: DEFAULT_QUERY },
+    })
+    expect(
+      events.some(
+        (event) => event.kind === "result" && event.queryId === 2 && event.page.total > 0,
+      ),
+    ).toBe(true)
+    expect(served.requests).toHaveLength(requests)
+    await engine.handle({
+      kind: "search",
+      generation: 1,
+      channelId: 1,
+      queryId: 3,
+      query: prQuery("jp"),
+    })
+    const retried = events.find((event) => event.kind === "result" && event.queryId === 3)
+    expect(
+      retried?.kind === "result"
+        ? retried.page.items.map((item) => item.summary?.cardId)
+        : undefined,
+    ).toEqual(["c:pr-001"])
+  } finally {
+    release()
+  }
+})
