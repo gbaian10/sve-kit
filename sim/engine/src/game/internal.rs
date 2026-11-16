@@ -8,6 +8,7 @@
 use self::card::play::PlayState;
 use super::knowledge::PublishedKnowledge;
 use super::{Frame, Game, View, int, string};
+use crate::game::player::observation::CardFace;
 use crate::ir::BatchOutcome;
 use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
@@ -575,6 +576,7 @@ enum Wait {
     Discard(discard::HandWait),
     CostDiscard(discard::HandWait),
     WardEntry {
+        face: CardFace,
         reference: ObjectRef,
         links: player::CandidateLinks,
     },

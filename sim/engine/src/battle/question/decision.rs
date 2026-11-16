@@ -12,6 +12,7 @@ mod candidates;
 mod confirm;
 mod distribution;
 mod drive;
+mod entry;
 mod number;
 mod order;
 mod partition;
@@ -41,6 +42,7 @@ pub(super) enum Binding {
     Order(order::Binding),
     Search(Box<search::Binding>),
     Partition(partition::Binding),
+    Entry(entry::Binding),
 }
 
 pub(super) fn project(
@@ -104,11 +106,13 @@ pub(super) fn project(
         DecisionShape::SearchPartition(domain) => {
             partition::project(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
+        DecisionShape::BeforeDraw => entry::draw(context.ok_or(ProjectionError::Unavailable)?),
+        DecisionShape::WardEntry { .. } => {
+            entry::ward(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Abilities(_)
-        | DecisionShape::WardEntry { .. }
         | DecisionShape::Quick { .. }
         | DecisionShape::ExchangeRoutes(_)
-        | DecisionShape::BeforeDraw
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
         | DecisionShape::DamageReplacements(_)
@@ -143,6 +147,7 @@ impl Binding {
             Self::Order(binding) => binding.answer(answer),
             Self::Search(binding) => binding.answer(answer),
             Self::Partition(binding) => binding.answer(answer),
+            Self::Entry(binding) => binding.answer(answer),
         }
     }
 }

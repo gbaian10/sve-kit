@@ -6,7 +6,7 @@
 use super::*;
 use crate::player_pipeline::question;
 use std::sync::OnceLock;
-use sve_engine::game::player::observation::{Observation, ObservedZone};
+use sve_engine::game::player::observation::{CardFace, Observation, ObservedZone};
 use sve_engine::game::player::{
     AbilityChoice, Answer, CardOption, ClosingAnswer, ClosingQuestion, Command, DecisionShape,
     DiscardKind, DistributionQuestion, EarlierQuotaChoice, EvolutionAnswer, EvolutionPayment,
@@ -208,6 +208,10 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
         ),
         (
             DecisionShape::WardEntry {
+                face: CardFace {
+                    card: "public".into(),
+                    face: 0,
+                },
                 card: "public".into(),
                 name: "name".into(),
                 zone: "hand".into(),

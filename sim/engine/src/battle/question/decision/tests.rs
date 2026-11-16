@@ -2,6 +2,8 @@ use super::*;
 use crate::ir::{Nat, QuickWindow};
 
 #[cfg(feature = "runner")]
+mod entry;
+#[cfg(feature = "runner")]
 mod joint;
 #[cfg(feature = "runner")]
 mod native;
@@ -55,7 +57,6 @@ fn confirms_keep_distinct_uses_and_native_answer_channels() {
 #[test]
 fn unsupported_decisions_do_not_fall_back_to_confirm() {
     for domain in [
-        DecisionShape::BeforeDraw,
         DecisionShape::SearchReplacement,
         DecisionShape::ExchangeRoutes(vec![Nat(0), Nat(2)]),
         DecisionShape::Quick {
