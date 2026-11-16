@@ -1651,6 +1651,8 @@ CP01-032 的「其他從者」排除自己；CP01-082 沒有這項排除。兩�
 
 場上常在的 `static.effects` 可寫單一 `rule_override: {rule: counter_cap, on: this, name: …, max: N}`。這是同種類 counter 的持續上限：每次放置只接受剩餘容量，其他種類不受影響；既有超額數量不會自動移除。能力失效後不再限制，重新有效時也只限制後續放置。此入口只收自身、場上及常值上限，不開放附加條件或其他 holder。
 
+`static.effects` 也可使用既有 `rule_override: {rule: battle_damage_basis, on: {who: self, zone: field, kind: follower}, basis: hp}`（BP01-129／130）。提供者在場且能力有效時，符合篩選的從者以交戰結算前的目前體力計算攻擊與反擊傷害，包括攻擊主戰者；不修改攻擊力特徵或能力傷害。交戰雙方先取得同一時點的傷害數值，再一起處理傷害，因此反擊不會改讀被本次交戰打傷後的體力。提供者在 Quick 期間離場或失去能力時，結算恢復攻擊力基準；多個相同提供者不累加。
+
 自身的 counter 費用可用 `n: x` 與既有 `x: {}` 宣告同一個 X；同一成本的 `pp: x` 共用這次宣告。`counter: {on: this, name: …, any: true, result: removed}` 則獨立宣告可支付的任意數量，包含零。本文可用 `{x_paid: removed}` 讀該步實付 counter，例如 +X/+X。`result` 與其他局部名稱不能重複，來源以外的所選 counter 材料仍只接受固定數量，`upto` 與 `x.from_payment` 不在本入口開放。
 
 CP04-115 的 PP X、バッテリーカウンター X 與搜尋原費上限共用 X；BP03-001 的童話カウンター `any` 以付款結果供本文使用。counter 費用不足會拒絕整次付款並回滾，不能以效果端移除至零的方式代付。
