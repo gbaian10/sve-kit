@@ -285,9 +285,9 @@ impl Labels<'_> {
                     "select",
                 ),
                 DecisionShape::SearchPartition(partition) => Self::selects(
-                    &self.card_labels(&partition.cards),
-                    partition.cardinality.minimum.0,
-                    partition.cardinality.maximum,
+                    &self.card_labels(&partition.selection.cards),
+                    partition.selection.cardinality.minimum.0,
+                    partition.selection.cardinality.maximum,
                     "resolve-choice",
                     "select",
                 ),

@@ -4,7 +4,10 @@ use crate::game::internal::player::CandidateLinks;
 use crate::game::player::PartitionQuestion;
 use crate::game::player::Viewer;
 use crate::game::player::observation::{ObservedZone, viewer};
-use crate::game::player::{SearchFacts, SearchQuestion, SelectionDestination, SelectionGroup};
+use crate::game::player::{
+    SearchFacts, SearchPartitionFacts, SearchPartitionQuestion, SearchQuestion,
+    SelectionDestination, SelectionGroup,
+};
 
 use super::card::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, within_original_cost_cap,
@@ -90,6 +93,7 @@ pub(super) struct PartitionWait {
     domain: SearchPartitionDomain,
     deck: Vec<String>,
     snapshot: SnapshotId,
+    facts: SearchPartitionFacts,
 }
 
 #[derive(Clone, Debug)]
@@ -558,23 +562,7 @@ impl Game {
         } else {
             vec![]
         };
-        let facts = SearchFacts {
-            origin: SelectionDestination {
-                player: viewer(seat)?,
-                zone: ObservedZone::Deck,
-            },
-            faces: domain
-                .cards
-                .iter()
-                .zip(&members)
-                .map(|(card, member)| {
-                    Ok((
-                        card.handle,
-                        self.physical_card_face(execution.object_id(*member)?)?,
-                    ))
-                })
-                .collect::<Result<_>>()?,
-        };
+        let facts = capture_facts(self, execution, &domain.cards, &members, player)?;
         let wait = SearchWait {
             links: CandidateLinks::capture(self, execution, members.iter().copied())?,
             instruction,
@@ -947,12 +935,37 @@ impl Game {
             };
             let player = continuation.player;
             let decision = partition.decision;
+            let facts = SearchPartitionFacts {
+                candidates: capture_facts(
+                    self,
+                    execution,
+                    &domain.cards,
+                    &continuation.remaining,
+                    player,
+                )?,
+                destination: SelectionDestination {
+                    player: viewer(seat_name(player)?)?,
+                    zone: match kind {
+                        ZoneKind::Hand => ObservedZone::Hand,
+                        ZoneKind::Cemetery => ObservedZone::Cemetery,
+                        ZoneKind::Ex => ObservedZone::Ex,
+                        ZoneKind::Field => ObservedZone::Field,
+                        _ => return Err(unsupported("search allocation destination")),
+                    },
+                },
+                position: None,
+                // Validation canonicalizes the set; the answer does not choose a placement sequence.
+                ordered: false,
+                // Unselected members stay in the deck until the next continuation.
+                remainder_destination: None,
+            };
             let wait = PartitionWait {
                 continuation,
                 partition,
                 domain: domain.clone(),
                 deck: self.internal_known_deck(seat_name(player)?)?,
                 snapshot: SnapshotId(self.state.ir_epoch),
+                facts,
             };
             return self.internal_wait(
                 execution,
@@ -1215,7 +1228,7 @@ impl PartitionWait {
         game: &Game,
         actor: Viewer,
         domain: &SearchPartitionDomain,
-    ) -> Result<PartitionQuestion> {
+    ) -> Result<SearchPartitionQuestion> {
         let references = self
             .continuation
             .remaining
@@ -1223,18 +1236,49 @@ impl PartitionWait {
             .copied()
             .map(Some)
             .collect::<Vec<_>>();
-        Ok(PartitionQuestion {
-            cards: game.player_cards(
-                actor,
-                &domain.cards,
-                &references,
-                &self.continuation.links,
-            )?,
-            cardinality: domain.cardinality,
+        Ok(SearchPartitionQuestion {
+            selection: PartitionQuestion {
+                cards: game.player_cards(
+                    actor,
+                    &domain.cards,
+                    &references,
+                    &self.continuation.links,
+                )?,
+                cardinality: domain.cardinality,
+            },
+            facts: Some(self.facts.clone()),
         })
     }
 }
 
 fn search_original_cost(game: &Game, execution: &Execution, reference: ObjectRef) -> Result<i64> {
     super::cost::printed_cost(&game.internal_cost_print(execution.object_id(reference)?)?["cost"])
+}
+
+fn capture_facts(
+    game: &Game,
+    execution: &Execution,
+    cards: &[OrderCard],
+    members: &[ObjectRef],
+    player: PlayerId,
+) -> Result<SearchFacts> {
+    if cards.len() != members.len() {
+        return Err(invalid("incomplete search candidate facts"));
+    }
+    Ok(SearchFacts {
+        origin: SelectionDestination {
+            player: viewer(seat_name(player)?)?,
+            zone: ObservedZone::Deck,
+        },
+        faces: cards
+            .iter()
+            .zip(members)
+            .map(|(card, member)| {
+                Ok((
+                    card.handle,
+                    game.physical_card_face(execution.object_id(*member)?)?,
+                ))
+            })
+            .collect::<Result<_>>()?,
+    })
 }

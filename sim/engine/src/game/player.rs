@@ -21,8 +21,8 @@ pub use closing::{ClosingAnswer, ClosingQuestion};
 pub use construction::check_card_deck_rules;
 pub use decision::{
     CardOption, DecisionShape, DiscardKind, IntegerSource, MovementCapacityQuestion,
-    OrderDirection, OrderQuestion, PartitionQuestion, SearchFacts, SearchQuestion,
-    TokenCapacityQuestion,
+    OrderDirection, OrderQuestion, PartitionQuestion, SearchFacts, SearchPartitionFacts,
+    SearchPartitionQuestion, SearchQuestion, TokenCapacityQuestion,
 };
 pub use evolution::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,

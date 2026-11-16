@@ -2,7 +2,7 @@ use super::{AnswerError, Context, Result};
 use crate::battle::question::common::seat;
 use crate::battle::{CandidateDetails, ProjectionError, SelectionProjection};
 use crate::game::player::observation::ObservedZone;
-use crate::game::player::{self, SearchFacts, SearchQuestion, SelectionMember};
+use crate::game::player::{self, CardOption, SearchFacts, SearchQuestion, SelectionMember};
 use alloc::boxed::Box;
 use core::result;
 use sve_battle_contract::{Answer, Subject, Zone, question as wire};
@@ -29,7 +29,12 @@ pub(super) fn project(
         return Err(ProjectionError::Unavailable);
     }
     let projection = SelectionProjection::search(context.id, domain, |coordinate| {
-        details(domain, facts, coordinate, context)
+        let option = domain
+            .cards
+            .iter()
+            .find(|card| card.handle == coordinate)
+            .ok_or(ProjectionError::Unavailable)?;
+        details(option, facts, context)
     })?;
     Ok((
         wire::QuestionUse::Search,
@@ -40,26 +45,20 @@ pub(super) fn project(
     ))
 }
 
-fn details(
-    domain: &SearchQuestion,
+pub(super) fn details(
+    option: &CardOption,
     facts: &SearchFacts,
-    coordinate: u64,
     context: Context<'_>,
 ) -> Result<CandidateDetails> {
-    let option = domain
-        .cards
-        .iter()
-        .find(|card| card.handle == coordinate)
-        .ok_or(ProjectionError::Unavailable)?;
     let face = facts
         .faces
-        .get(&coordinate)
+        .get(&option.handle)
         .filter(|face| face.card == option.card)
         .ok_or(ProjectionError::Unavailable)?;
     let card = context.references.resolve(context.catalog, face)?;
     let object = if let Some(handle) = &option.object {
         let member = SelectionMember {
-            handle: coordinate,
+            handle: option.handle,
             player: facts.origin.player,
             card: Some(option.card.clone()),
             name: Some(option.name.clone()),

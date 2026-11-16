@@ -76,3 +76,6 @@ mod order;
 
 #[cfg(feature = "runner")]
 mod search;
+
+#[cfg(feature = "runner")]
+mod partition;
