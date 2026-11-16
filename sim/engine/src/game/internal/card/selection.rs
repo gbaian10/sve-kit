@@ -187,6 +187,7 @@ impl TargetWait {
         if let Some(classes) = &self.distinct_classes
             && !classes.is_empty()
         {
+            // Admission guarantees one selector group, so these partitions preserve its constraints.
             // Disjoint class groups express the constraint without new public question fields.
             let mut groups: BTreeMap<&str, Vec<u64>> = BTreeMap::new();
             for (member, reference) in domain.members.iter().zip(&self.members) {
@@ -1483,6 +1484,7 @@ impl Game {
                 members
                     .iter()
                     .map(|reference| {
+                        // Classes are currently immutable, so the question freezes the printed value.
                         let class = self.face(execution.object_id(*reference)?)?["card_class"]
                             .as_str()
                             .ok_or_else(|| invalid("missing target class"))?
