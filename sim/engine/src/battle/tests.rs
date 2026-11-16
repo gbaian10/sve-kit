@@ -28,3 +28,5 @@ pub(super) mod payment_fixtures;
 #[path = "../../tests/support/history_fixture.rs"]
 pub(super) mod history_fixture;
 mod history_flow;
+
+mod sources;

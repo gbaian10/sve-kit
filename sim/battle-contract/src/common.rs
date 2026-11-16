@@ -183,13 +183,15 @@ pub struct TextRef {
     pub card: CardRef,
     /// Revision of that wording in the pinned snapshot.
     pub wording_revision: String,
-    /// Printed section containing the line.
+    /// `effect` or `section:<ordinal>`, with a canonical nonnegative decimal ordinal.
+    /// Section ordinals belong to the exact wording revision and are never renumbered.
     pub section: String,
-    /// Line within the section.
+    /// Positive line from the admitted source span within this exact original field.
     pub line: Nat,
     /// Step within the line; only for an exact correspondence to the wording.
     pub step: Option<Nat>,
-    /// Card that granted this text, when it is not printed on its holder.
+    /// Direct giver at the authoritative capture point, including self grants.
+    /// Absent only for a verified printed ability, never as a fallback for an unknown giver.
     pub granted_by: Option<CardRef>,
     /// Current holder; absent once the viewer can no longer identify it.
     pub holder: Option<ObjectHandle>,
@@ -227,11 +229,12 @@ pub enum RuleStrength {
 pub struct RuleRef {
     /// Kind of source.
     pub kind: RuleSource,
-    /// Identifier within that source.
+    /// Published `cr_clause.number`, `qa.id`, or `ruling_id` for the selected kind.
     pub id: String,
-    /// Revision of the source.
+    /// Exact public `cr_version.id`, `qa_version.id`, or `ruling_revision.id`.
+    /// Human version labels, QA official numbers and internal `RuleId` values are not locators.
     pub revision: String,
-    /// Strength of the support.
+    /// Explicit strength at this use; a ruling must match its revision's recorded strength.
     pub strength: RuleStrength,
 }
 
