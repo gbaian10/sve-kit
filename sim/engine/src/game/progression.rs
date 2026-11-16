@@ -252,12 +252,13 @@ impl Game {
     }
 
     pub(in crate::game) fn can_super_evolve(&self, seat: &str) -> bool {
-        int(&self.state.turn["elapsed_turns"][seat])
-            >= if self.state.turn["first_player"] == seat {
-                7
-            } else {
-                6
-            }
+        self.player(seat)
+            .ok()
+            .and_then(|player| player.sep_available_from)
+            .is_some_and(|turn| {
+                u64::try_from(int(&self.state.turn["elapsed_turns"][seat]))
+                    .is_ok_and(|elapsed| elapsed >= turn)
+            })
     }
 
     pub(super) fn evolve_action(&mut self, decision: &Value) -> Result<bool> {
@@ -340,7 +341,7 @@ impl Game {
         let resources = self.player_mut(&frame.controller)?;
         let before = int(&resources.pp["current"]);
         resources.pp["current"] = json!(before.saturating_sub(pp));
-        resources.ep = resources.ep.saturating_sub(ep);
+        resources.set_ep(resources.ep.saturating_sub(ep));
         resources.sep = resources.sep.saturating_sub(sep);
         self.record_player_resource(
             &frame.controller,

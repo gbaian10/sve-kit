@@ -136,7 +136,7 @@ impl Game {
                 player.pp["max"] = json!(after);
                 player.pp["current"] = json!(int(&player.pp["current"]).clamp(0, after));
             } else {
-                player.ep = after;
+                player.set_ep(after);
             }
             let delta = after.saturating_sub(before);
             if delta != 0 {
@@ -379,7 +379,8 @@ impl Game {
         {
             return Ok(false);
         }
-        self.player_mut(&seat)?.ep = self.player(&seat)?.ep.saturating_sub(ep);
+        let after_ep = self.player(&seat)?.ep.saturating_sub(ep);
+        self.player_mut(&seat)?.set_ep(after_ep);
         self.pay_costs(&paid_code, &mut frame)?;
         self.bump(&format!("{seat}.evolve_played"), 1);
         if code["kind"] == "ride" {

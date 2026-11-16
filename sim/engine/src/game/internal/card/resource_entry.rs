@@ -601,11 +601,12 @@ impl Game {
     fn pay_entry_ep(&mut self, execution: &Execution, use_ep: bool) -> Result<()> {
         let seat = seat_name(execution.context.controller)?;
         let player = self.player_mut(seat)?;
-        player.ep = player
+        let after = player
             .ep
             .checked_sub(i64::from(use_ep))
             .filter(|ep| *ep >= 0)
             .ok_or_else(|| invalid("entry EP changed"))?;
+        player.set_ep(after);
         Ok(())
     }
 

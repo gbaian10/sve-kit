@@ -141,7 +141,7 @@ impl Game {
         let after = before.checked_add(requested.0).ok_or_else(|| {
             EngineFailure::Invariant("EP increase exceeds the integer representation".into())
         })?;
-        self.player_mut(seat)?.ep = after;
+        self.player_mut(seat)?.set_ep(after);
         if requested.0 > 0 {
             let group = self.group();
             self.emit(

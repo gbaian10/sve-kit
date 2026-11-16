@@ -236,8 +236,15 @@ pub struct PlayerView {
     pub max_pp: Int,
     /// Available evolution points.
     pub ep: Int,
+    /// EP display slots retained across spending and expanded by larger resource pools.
+    pub ep_capacity: Nat,
+    /// Depleted slots: capacity minus remaining EP; recovery reduces this count.
+    pub ep_used: Nat,
     /// Available super evolution points.
     pub sep: Int,
+    /// Owner's elapsed-turn number from which allocated SEP is usable, even after it is spent.
+    /// Null means no SEP has been allocated in the current state.
+    pub sep_available_from: Option<Nat>,
     /// Disclosed installed effects on this player.
     pub effects: Vec<InstalledEffect>,
     /// Zone sizes and authorized members.

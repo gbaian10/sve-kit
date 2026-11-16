@@ -254,7 +254,9 @@ impl Game {
             let player = self.player_mut(seat)?;
             player.pp = json!({"current":i64::from(seat==first),"max":i64::from(seat==first)});
             player.ep = if seat == first { 0 } else { 3 };
+            player.ep_capacity = player.ep;
             player.sep = 1;
+            player.sep_available_from = Some(super::sep_unlock_turn(&first, seat));
             player.leader["life"] = json!(20_i64);
             let public = self.zone_ids(seat, "field");
             for id in &public {
