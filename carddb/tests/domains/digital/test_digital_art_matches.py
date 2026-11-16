@@ -278,3 +278,20 @@ def test_gray_score_is_neither_adopted_match_nor_absence(
     record["state"] = "matched"
     with pytest.raises(ValueError, match="decisive"):
         Record.model_validate_json(canonical(record))
+
+
+def test_one_style_cannot_reference_two_images(
+    baseline: Fixture, tmp_path: Path
+) -> None:
+    first = art_record(baseline)
+    changed = first.candidates[0].model_copy(
+        update={"image_sha256": "sha256:" + "b" * 64}
+    )
+    second = first.model_copy(
+        update={
+            "art_id": "a:" + "6" * 32,
+            "candidates": (changed, *first.candidates[1:]),
+        }
+    )
+    with pytest.raises(ValueError, match="conflicting image evidence"):
+        entry(tmp_path, (first, second))

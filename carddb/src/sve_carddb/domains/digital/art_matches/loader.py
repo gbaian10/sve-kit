@@ -48,6 +48,17 @@ def _model[T: RecordData](model: type[T], value: JsonValue) -> T:
         raise ValueError("Invalid art match fields") from None
 
 
+def _images(
+    shard: Shard, known: dict[tuple[str, str, str, str], tuple[str, str]]
+) -> None:
+    for record in shard.records:
+        for image in record.candidates:
+            key = record.game, image.official_id, image.phase, image.style_key
+            source = image.image_url, image.image_sha256
+            if known.setdefault(key, source) != source:
+                raise ValueError("Digital art style has conflicting image evidence")
+
+
 def load(root: Path) -> Snapshot | None:
     """An absent entry is unknown; a malformed or incomplete entry fails closed."""
     directory = root / "digital/art-matches"
@@ -68,6 +79,7 @@ def load(root: Path) -> Snapshot | None:
         raise ValueError("Art match indexed file closure differs from disk")
     shards = []
     subjects = set()
+    images: dict[tuple[str, str, str, str], tuple[str, str]] = {}
     for path, expected in sorted(index.includes.items()):
         if (
             re.fullmatch(r"digital/art-matches/[A-Za-z0-9_-]+/[0-9]{3,}\.yaml", path)
@@ -81,6 +93,7 @@ def load(root: Path) -> Snapshot | None:
         if digest(canonical(value)) != expected:
             raise ValueError("Art match shard hash mismatch")
         shard = _model(Shard, value)
+        _images(shard, images)
         for record in shard.records:
             key = record.art_id, record.game
             if key in subjects:
