@@ -146,7 +146,7 @@ impl Labels<'_> {
                 | DecisionShape::ExchangeRoutes(_)
                 | DecisionShape::BeforeDraw
                 | DecisionShape::TriggerQuota(_)
-                | DecisionShape::Integer(_)
+                | DecisionShape::Integer { .. }
                 | DecisionShape::DamageReplacements(_)
                 | DecisionShape::Distribution(_)
                 | DecisionShape::SearchReplacement
@@ -375,7 +375,7 @@ impl Labels<'_> {
                 | DecisionShape::ExchangeRoutes(_)
                 | DecisionShape::BeforeDraw
                 | DecisionShape::TriggerQuota(_)
-                | DecisionShape::Integer(_)
+                | DecisionShape::Integer { .. }
                 | DecisionShape::MovementCapacity(_)
                 | DecisionShape::Distribution(_)
                 | DecisionShape::SearchReplacement

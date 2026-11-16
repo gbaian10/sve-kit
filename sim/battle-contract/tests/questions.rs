@@ -130,6 +130,7 @@ fn shapes_that_split_by_purpose_keep_one_answer_meaning() {
         (QuestionUse::Targets, QuestionUse::ResolutionSelection),
         (QuestionUse::Modes, QuestionUse::ResolutionAlternative),
         (QuestionUse::OptionalCost, QuestionUse::MayEffect),
+        (QuestionUse::DeclareX, QuestionUse::DeclareNumber),
     ] {
         assert_eq!(first.shape(), second.shape());
     }

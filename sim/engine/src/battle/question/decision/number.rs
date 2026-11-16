@@ -1,6 +1,8 @@
 use super::{AnswerError, Result};
+use crate::battle::ProjectionError;
 use crate::battle::selection::bounds;
 use crate::game::player;
+use crate::game::player::IntegerSource;
 use crate::ir::{Cardinality, Nat};
 use core::result;
 use sve_battle_contract::Nat as WireNat;
@@ -34,10 +36,16 @@ pub(super) fn dice(
 
 pub(super) fn integer(
     domain: Cardinality,
+    source: IntegerSource,
 ) -> Result<(wire::QuestionUse, wire::QuestionShape, super::Binding)> {
+    let usage = match source {
+        IntegerSource::XCost => wire::QuestionUse::DeclareX,
+        IntegerSource::NumberDeclaration => wire::QuestionUse::DeclareNumber,
+        IntegerSource::Other => return Err(ProjectionError::Unavailable),
+    };
     let bounds = bounds(domain)?;
     Ok((
-        wire::QuestionUse::DeclareX,
+        usage,
         wire::QuestionShape::Integer {
             bounds,
             // Numeric bounds carry neither a unit nor an exact text coordinate.
