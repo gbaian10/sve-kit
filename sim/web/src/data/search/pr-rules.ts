@@ -22,6 +22,7 @@ function normalize(text: string, names: readonly string[]): string {
     const normalized = name.normalize("NFKC").toLowerCase()
     if (!normalized) continue
     const escaped = normalized.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&").replace(/\s+/gu, "\\s*")
+    // Keep word boundaries even for Japanese particles to avoid replacing part of another card's name.
     const self = new RegExp(`(?<![\\p{L}\\p{N}_])${escaped}(?![\\p{L}\\p{N}_])`, "gu")
     value = value.replace(self, "\0self\0")
   }
@@ -149,15 +150,11 @@ export class PrOnlyRules {
           continue
         }
         const names = rows.map((row) => texts.get(stringValue(row["name_unit_id"])) ?? "")
-        const aliases = names.flatMap((name) => [
-          name,
-          name.normalize("NFKC").replace(/\s*\(EVOLVE\)\s*$/iu, ""),
-        ])
         projections.push({
           card,
           region,
           revisions: rows,
-          names: aliases,
+          names,
           stats: canonicalText(
             rows.map((row) => [
               row["type_code"] ?? null,

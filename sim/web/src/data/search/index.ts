@@ -1415,6 +1415,7 @@ export class SearchIndex {
       (!state.stampOnly || this.printings.stamp[printing] === 1) &&
       (!state.serialOnly || this.printings.serial[printing] === 1) &&
       (!state.unlistedOnly || this.printings.unlisted[printing] === 1) &&
+      // PrOnlyRules also excludes these kinds when comparing card-level rules across regions.
       (!state.prOnly ||
         (this.cards.prOnly[this.printings.card[printing] ?? 0] === 1 &&
           this.printings.token[printing] !== 1 &&
