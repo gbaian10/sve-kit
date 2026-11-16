@@ -127,10 +127,10 @@ def _cache_access(cache: Path) -> Generator[None]:
 
 
 def reuse(cache: Path, digest: str, folder: Path) -> bool:
-    """Copy a complete cached inputs into the private temporary folder."""
+    """Copy the complete cached inputs into the private temporary folder."""
     if not cache.is_dir():
         return False
-    # A publisher must not prune these inputs between its two copies.
+    # A publisher must not prune these inputs between file copies.
     with _cache_access(cache):
         entry = cache / digest
         if not all((entry / name).is_file() for name in OUTPUTS):
@@ -142,7 +142,7 @@ def reuse(cache: Path, digest: str, folder: Path) -> bool:
 
 
 def keep(cache: Path, digest: str, folder: Path) -> None:
-    """Publish a generated inputs atomically and keep only the newest entries."""
+    """Publish the generated inputs atomically and keep only the newest entries."""
     cache.mkdir(parents=True, exist_ok=True)
     entry = cache / digest
     staging = Path(tempfile.mkdtemp(prefix=f".{digest}-", dir=cache))
