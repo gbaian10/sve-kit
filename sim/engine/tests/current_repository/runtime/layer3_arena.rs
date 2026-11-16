@@ -67,21 +67,7 @@ fn arena_both_players_look_then_enter_then_mill_before_their_fanfares() {
         finish_checks(&mut board);
         let first = question(pending(&mut board, number));
         assert_eq!(first.actor, PlayerId { seat });
-        for (side, foreign, view) in [("P1", "P2", View::P1), ("P2", "P1", View::P2)] {
-            let private = board.projection(view).unwrap().to_string();
-            assert!(
-                private.contains(&format!("\"{side}-spell\"")),
-                "both players already looked before the first choice"
-            );
-            assert!(
-                !private.contains(&format!("\"{foreign}-dragon\"")),
-                "Look does not publish the other deck"
-            );
-            assert!(
-                !private.contains(&format!("\"{side}-bottom\"")),
-                "the fourth card was not looked at"
-            );
-        }
+        assert_look_privacy(&board, None);
         let before_wrong_actor = board.projection(View::Referee).unwrap();
         board
             .answer_internal_card(
@@ -93,6 +79,7 @@ fn arena_both_players_look_then_enter_then_mill_before_their_fanfares() {
         assert_eq!(board.projection(View::Referee).unwrap(), before_wrong_actor);
         let second = question(choose_first(&mut board, &first));
         assert_eq!(second.actor.seat, 3 - seat);
+        assert_look_privacy(&board, Some(active));
         let after_first_entry = board.projection(View::Referee).unwrap();
         assert_eq!(
             after_first_entry[active]["field"],
@@ -151,6 +138,29 @@ fn arena_both_players_look_then_enter_then_mill_before_their_fanfares() {
             board.projection(View::Referee).unwrap()[active]["field"],
             json!(["arena"])
         );
+    }
+}
+
+fn assert_look_privacy(board: &Game, entered: Option<&str>) {
+    for (side, foreign, view) in [("P1", "P2", View::P1), ("P2", "P1", View::P2)] {
+        let private = board.projection(view).unwrap().to_string();
+        for member in ["dragon", "spell", "follower"] {
+            assert!(
+                private.contains(&format!("\"{side}-{member}\"")),
+                "both players retain their own looked cards"
+            );
+            assert_eq!(
+                private.contains(&format!("\"{foreign}-{member}\"")),
+                entered == Some(foreign) && member == "dragon",
+                "only the entered card becomes public, including before the second choice"
+            );
+        }
+        for owner in [side, foreign] {
+            assert!(
+                !private.contains(&format!("\"{owner}-bottom\"")),
+                "the fourth card remains unobserved"
+            );
+        }
     }
 }
 
