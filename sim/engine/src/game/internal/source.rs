@@ -690,3 +690,6 @@ pub(super) fn mask_holder_posture(condition: &Expr<Bool>) -> Expr<Bool> {
         _ => condition.clone(),
     }
 }
+
+#[cfg(all(test, feature = "runner"))]
+mod audit;

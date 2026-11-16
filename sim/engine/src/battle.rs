@@ -41,7 +41,7 @@ mod turn;
 mod wording;
 
 #[cfg(all(test, feature = "runner"))]
-mod tests;
+pub(crate) mod tests;
 
 pub(crate) use board::{RuleProcessing, build_observation};
 pub use events::{
