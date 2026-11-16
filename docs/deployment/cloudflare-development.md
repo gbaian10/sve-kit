@@ -94,7 +94,8 @@ Brotli 由鎖定的 Python 套件在行程內處理，不啟動外部壓縮子�
    並在 handler／靜態路徑都驗收；僅 custom domain 的 Access 不能當作別名安全證明。
 4. 關閉或全面保護的設定、既有部署別名是否仍可取用，未驗證，需維護者實測。
    無法證明保護時，使用受審的全路由 host gate，讓別名回 403／404；未通過前不部署真實資料。
-5. handler 只接受 GET／HEAD，固定剝除 `/cdn-preview/`，只讀核准 snapshots／images／scan key，
+5. handler 只接受 GET／HEAD，固定剝除 `/cdn-preview/`，只讀核准 snapshots／images／scan key
+   與 `ui/card_back.webp` 這一個固定 key（`ui/` 其餘路徑不開放），
    不列桶、不提供任意 pathname、private／reports／PNG；缺物件回 404，不能回 SPA HTML。
 
 參考 [Access HTTP applications](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/)。

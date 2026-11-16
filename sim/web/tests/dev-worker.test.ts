@@ -14,6 +14,7 @@ const HASH = "a".repeat(64)
 const BLOB = `snapshots/blobs/${HASH}.json`
 const INDEX = "snapshots/versions/index.json"
 const SCAN_MANIFEST = "scan/manifest.json"
+const CARD_BACK = "ui/card_back.webp"
 const SCAN_FILES = [
   `scan/models/${HASH}.onnx`,
   `scan/index/${HASH}.i8`,
@@ -161,23 +162,26 @@ describe("development Worker", () => {
     }
   })
 
-  it.each([INDEX, SCAN_MANIFEST, "images/card_l/20001.webp", "images/art_s/20001-f1.webp"])(
-    "reads updated %s from R2 even with a version query",
-    async (key) => {
-      const f = fixture()
-      f.get
-        .mockResolvedValueOnce(f.object)
-        .mockResolvedValueOnce(fixture(new TextEncoder().encode("updated")).object)
-      const first = await worker.fetch(request(`/cdn-preview/${key}?v=1`), f.env, f.ctx)
-      expect(await first.text()).toBe('{"synthetic":true}')
-      await f.flush()
-      const second = await worker.fetch(request(`/cdn-preview/${key}?v=1`), f.env, f.ctx)
-      expect(await second.text()).toBe("updated")
-      expect(f.get).toHaveBeenCalledTimes(2)
-      expect(edgeCache.match).not.toHaveBeenCalled()
-      expect(edgeCache.put).not.toHaveBeenCalled()
-    },
-  )
+  it.each([
+    INDEX,
+    SCAN_MANIFEST,
+    CARD_BACK,
+    "images/card_l/20001.webp",
+    "images/art_s/20001-f1.webp",
+  ])("reads updated %s from R2 even with a version query", async (key) => {
+    const f = fixture()
+    f.get
+      .mockResolvedValueOnce(f.object)
+      .mockResolvedValueOnce(fixture(new TextEncoder().encode("updated")).object)
+    const first = await worker.fetch(request(`/cdn-preview/${key}?v=1`), f.env, f.ctx)
+    expect(await first.text()).toBe('{"synthetic":true}')
+    await f.flush()
+    const second = await worker.fetch(request(`/cdn-preview/${key}?v=1`), f.env, f.ctx)
+    expect(await second.text()).toBe("updated")
+    expect(f.get).toHaveBeenCalledTimes(2)
+    expect(edgeCache.match).not.toHaveBeenCalled()
+    expect(edgeCache.put).not.toHaveBeenCalled()
+  })
 
   it.each(["GET", "HEAD"])(
     "preserves conditions and compressed representations on cache hits (%s)",
@@ -320,6 +324,7 @@ describe("development Worker", () => {
     "images/art_s/9007199254740991.webp",
     SCAN_MANIFEST,
     ...SCAN_FILES,
+    CARD_BACK,
   ])("reads only the public key %s", async (key) => {
     const f = fixture()
     const response = await worker.fetch(request(`/cdn-preview/${key}?v=3`), f.env, f.ctx)
@@ -351,6 +356,15 @@ describe("development Worker", () => {
     "/cdn-preview/images/sha256/aa/example.webp",
     "/cdn-preview/images/card_x/20001.webp",
     "/cdn-preview/images/card_m/20001.webp",
+    "/cdn-preview/images/card_back.webp",
+    "/cdn-preview/ui/",
+    "/cdn-preview/ui/card_back.png",
+    "/cdn-preview/ui/card_back.webp.br",
+    "/cdn-preview/ui/card_back.webp/private",
+    "/cdn-preview/ui/logo.webp",
+    "/cdn-preview/ui/backs/card_back.webp",
+    "/cdn-preview/ui/../ui/card_back.webp",
+    "/cdn-preview/ui%2fcard_back.webp",
     "/cdn-preview/images/card_l/20001.png",
     "/cdn-preview/images/card_l/0.webp",
     "/cdn-preview/images/card_l/020001.webp",

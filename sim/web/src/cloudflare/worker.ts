@@ -39,6 +39,8 @@ const IMAGE_KEY = /^images\/(?:card_[sl]|art_s)\/([1-9][0-9]*)(?:-f([1-9][0-9]*)
 const SCAN_MANIFEST = "scan/manifest.json"
 const SCAN_FILE =
   /^scan\/(?:models\/[0-9a-f]{64}\.onnx|index\/[0-9a-f]{64}\.(?:i8|scale|hub|json))$/
+// The one interface image read from the bucket. Only this key: the rest of `ui/` stays closed.
+const CARD_BACK = "ui/card_back.webp"
 const BROWSER_CACHE_CONTROL = "X-Sve-Browser-Cache-Control"
 const EDGE_CACHE_CONTROL = "public, max-age=31536000, immutable"
 // Vite names its build output by content hash, so a reload need not revalidate these files.
@@ -54,7 +56,13 @@ function positiveInteger(value: string | null): boolean {
 function allowedKey(key: string): boolean {
   // Public 2.0 keys need no decoding; rejecting escapes also rejects encoded separators and traversal.
   if (/[^a-z0-9_./-]/.test(key)) return false
-  if (key === INDEX || key === SCAN_MANIFEST || JSON_KEY.test(key) || SCAN_FILE.test(key))
+  if (
+    key === INDEX ||
+    key === SCAN_MANIFEST ||
+    key === CARD_BACK ||
+    JSON_KEY.test(key) ||
+    SCAN_FILE.test(key)
+  )
     return true
   const image = IMAGE_KEY.exec(key)
   return (
