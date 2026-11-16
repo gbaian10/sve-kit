@@ -148,6 +148,7 @@ impl QuestionProjection {
             shape,
             auto_answer: wire::AutoAnswer::Unknown,
             assistance: wire::NoAssistance,
+            // Without a verified RuleRef closure, [] would falsely assert known-empty.
             rules: None,
         };
         Ok(Self {
