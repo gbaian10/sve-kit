@@ -299,7 +299,7 @@ export default {
     prOnly: "PR限定",
     prOnlyHint: "PRカード番号でのみ発行されたカード",
     sveOnly: "SVE限定",
-    sveOnlyHint: "カード名でデジタル版と照合し、同じカードのリンクがないカード",
+    sveOnlyHint: "デジタル版に同じイラストがない版（デジタル版にないカードも含む）",
     specialPrintings: "特殊版",
     specialPrintingsAll: "すべて",
     specialPrintingsHint: "複数選ぶと、すべてに当てはまるカードだけを表示",

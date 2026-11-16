@@ -174,7 +174,6 @@ const CARD_COLUMNS = [
   "errata",
   "restricted",
   "prOnly",
-  "sveOnly",
 ] as const
 const PRINTING_COLUMNS = [
   "id",
@@ -199,6 +198,7 @@ const PRINTING_COLUMNS = [
   "art",
   "alt",
   "artists",
+  "sveOnly",
 ] as const
 const uintColumns = <T extends string>(names: readonly T[]) =>
   Object.fromEntries(names.map((name) => [name, [] as number[]])) as Record<T, number[]>
@@ -208,7 +208,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 37
+export const INDEX_IMAGE_FORMAT = 38
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -288,6 +288,7 @@ function countPrinting(
 interface Parts {
   readonly prFamilies: ReadonlySet<string>
   readonly prOnlyReady: boolean
+  readonly sveOnlyReady: boolean
   readonly pool: StringPool
   readonly summaries: Columns
   readonly cards: Record<(typeof CARD_COLUMNS)[number], Uint32Array>
@@ -572,13 +573,31 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
   }
 }
 
-function sameDigitalCards(bootstrap: BootstrapColumns): ReadonlySet<string> {
-  return new Set(
-    bootstrap
-      .rows("digital_link")
-      .filter((row) => row["relation"] === "same_card")
-      .map((row) => stringValue(row["card_id"])),
+function sveExclusive(bootstrap: BootstrapColumns): (cardId: string, artId: string) => boolean {
+  const digitalGames = new Map(
+    bootstrap.rows("digital_card").map((row) => [stringValue(row["id"]), stringValue(row["game"])]),
   )
+  const games = new Map<string, Set<string>>()
+  for (const link of bootstrap.rows("digital_link")) {
+    if (link["relation"] !== "same_card") continue
+    const card = stringValue(link["card_id"])
+    const required = games.get(card) ?? new Set<string>()
+    // An unresolved target must stay unknown, rather than making a partial negative complete.
+    required.add(digitalGames.get(stringValue(link["digital_card_id"])) ?? "")
+    games.set(card, required)
+  }
+  const coverage = new Map(
+    bootstrap
+      .rows("digital_art_coverage")
+      .map((row) => [`${stringValue(row["art_id"])}/${stringValue(row["game"])}`, row["state"]]),
+  )
+  return (card, art) => {
+    const required = games.get(card)
+    return (
+      !required ||
+      [...required].every((game) => game !== "" && coverage.get(`${art}/${game}`) === "not_found")
+    )
+  }
 }
 
 function prOnlyCards(index: CardIndex): ReadonlySet<string> {
@@ -613,7 +632,7 @@ function build(
   const summaryColumns = new Columns(pool)
   const index = bootstrap.index()
   const prOnly = prOnlyCards(index)
-  const digital = sameDigitalCards(bootstrap)
+  const exclusive = sveExclusive(bootstrap)
   const sets = new Set(index.families.map((family) => stringValue(family["code"])))
   const familyCodes = new Map(
     index.families.flatMap(
@@ -655,7 +674,6 @@ function build(
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.prOnly.push(Number(prOnly.has(entry.cardId)))
-    cards.sveOnly.push(Number(!digital.has(entry.cardId)))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
     cards.restricted.push(restrictions?.cards.has(entry.cardId) ? 1 : 0)
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
@@ -711,6 +729,7 @@ function build(
         intern(fullPrinting ? (badgeOf(fullPrinting)?.style ?? "unknown") : "unknown"),
       )
       printings.art.push(intern(art || printing.id))
+      printings.sveOnly.push(Number(exclusive(entry.cardId, art)))
       const credited = [
         ...new Set(artsOf(fullPrinting).flatMap((value) => artistsByArt.get(value) ?? [])),
       ].sort()
@@ -780,6 +799,7 @@ function build(
         .map((row) => stringValue(row["id"])),
     ),
     prOnlyReady: false,
+    sveOnlyReady: false,
     pool,
     summaries: summaryColumns,
     cards: seal(cards),
@@ -882,6 +902,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
   return {
     prFamilies: new Set(arrayValue(image["prFamilies"]).map((value) => stringValue(value))),
     prOnlyReady: image["prOnlyReady"] === true,
+    sveOnlyReady: image["sveOnlyReady"] === true,
     pool,
     summaries,
     cards,
@@ -904,6 +925,7 @@ function restore(bytes: Uint8Array, edition: Region): Parts {
 export class SearchIndex {
   private readonly prFamilies: ReadonlySet<string>
   private prOnlyReadyValue: boolean
+  private sveOnlyReadyValue: boolean
   private readonly pool: StringPool
   private summaries: Columns
   private readonly cards: Record<(typeof CARD_COLUMNS)[number], Uint32Array>
@@ -936,6 +958,7 @@ export class SearchIndex {
       : build(source, edition, errataCards, restrictions)
     this.prFamilies = parts.prFamilies
     this.prOnlyReadyValue = parts.prOnlyReady
+    this.sveOnlyReadyValue = parts.sveOnlyReady
     this.pool = parts.pool
     this.summaries = parts.summaries
     this.cards = parts.cards
@@ -971,6 +994,24 @@ export class SearchIndex {
         this.cards.prOnly[card] = 0
     }
     this.prOnlyReadyValue = true
+  }
+
+  get sveOnlyReady(): boolean {
+    return this.sveOnlyReadyValue
+  }
+
+  completeSveOnly(bootstrap: BootstrapColumns): void {
+    const exclusive = sveExclusive(bootstrap)
+    for (let printing = 0; printing < this.printings.id.length; printing++) {
+      const card = this.printings.card[printing] ?? 0
+      this.printings.sveOnly[printing] = Number(
+        exclusive(
+          this.pool.get(this.cards.id[card] ?? 0),
+          this.pool.get(this.printings.art[printing] ?? 0),
+        ),
+      )
+    }
+    this.sveOnlyReadyValue = true
   }
 
   get options(): SearchOptions {
@@ -1201,7 +1242,6 @@ export class SearchIndex {
     this.pool.reopen()
     try {
       const membership = mechanicMembership(bootstrap, this.edition)
-      const digital = sameDigitalCards(bootstrap)
       let known = false
       let unknown = 0
       let abilityUnknown = 0
@@ -1225,7 +1265,6 @@ export class SearchIndex {
       for (let card = 0; card < this.cards.id.length; card++) {
         const id = this.pool.get(this.cards.id[card] ?? 0)
         const states = membership(id)
-        this.cards.sveOnly[card] = Number(!digital.has(id))
         this.cards.present[card] = this.pool.encode(states.present)
         this.cards.absent[card] = this.pool.encode(states.absent)
         known ||= states.annotated
@@ -1278,6 +1317,7 @@ export class SearchIndex {
         edition: this.edition,
         prFamilies: [...this.prFamilies],
         prOnlyReady: this.prOnlyReady,
+        sveOnlyReady: this.sveOnlyReady,
         sets: [...this.sets],
         options: this.options as unknown as JsonObject,
         releases: this.releases as unknown as JsonObject[],
@@ -1375,7 +1415,7 @@ export class SearchIndex {
       (!state.serialOnly || this.printings.serial[printing] === 1) &&
       (!state.unlistedOnly || this.printings.unlisted[printing] === 1) &&
       (!state.prOnly || this.cards.prOnly[this.printings.card[printing] ?? 0] === 1) &&
-      (!state.sveOnly || this.cards.sveOnly[this.printings.card[printing] ?? 0] === 1) &&
+      (!state.sveOnly || this.printings.sveOnly[printing] === 1) &&
       // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
       (state.reprints === "all" ||
         state.unit === "card" ||

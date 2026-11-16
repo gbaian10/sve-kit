@@ -285,7 +285,7 @@ const zhTW = {
     prOnly: "PR 限定",
     prOnlyHint: "只以 PR 卡號發行的卡",
     sveOnly: "SVE 專屬",
-    sveOnlyHint: "依卡名比對線上版，沒有同卡連結的卡",
+    sveOnlyHint: "線上版沒有這張圖的版次（含線上版沒有的卡）",
     specialPrintings: "特殊版次",
     specialPrintingsAll: "全部",
     specialPrintingsHint: "勾選多項時只顯示同時符合的卡",
