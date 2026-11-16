@@ -1,5 +1,5 @@
 use super::{AnswerError, Context, Result};
-use crate::battle::question::common::seat;
+use crate::battle::question::common::{option, seat};
 use crate::battle::selection::zone;
 use crate::battle::{CandidateDetails, ProjectionError, SelectionProjection};
 use crate::game::player::observation::{CardFace, ObservedZone};
@@ -66,7 +66,7 @@ pub(super) fn tokens(
                 })
             })
             .collect::<Result<_>>()?;
-        let id = OptionId::new(format!("{}:t{index}", context.id.as_str()));
+        let id = option(context.id, index);
         coordinates.insert(
             id.clone(),
             u64::try_from(index).map_err(|_range| ProjectionError::Range)?,
@@ -204,15 +204,8 @@ fn details(
 
 fn created_card(face: &CardFace, context: Context<'_>) -> Result<CardRef> {
     let card = context.references.resolve(context.catalog, face)?;
-    let ordinal = usize::try_from(face.face).map_err(|_range| ProjectionError::Range)?;
-    let printing = context
-        .catalog
-        .face(&face.card, ordinal)
-        .map_err(|_catalog| ProjectionError::Unavailable)?;
-    if printing["card_type"]
-        .as_str()
-        .is_none_or(|kind| !kind.contains("トークン"))
-    {
+    // The catalog classifies this exact printing; its display label is not a lookup key.
+    if !context.catalog.token_definitions.contains_key(&face.card) {
         return Err(ProjectionError::Unavailable);
     }
     Ok(card)
