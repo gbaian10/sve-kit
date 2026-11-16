@@ -30,6 +30,7 @@ pub(super) fn project(
     let count = WireNat::try_from(count.0)?;
     let available = WireNat::try_from(modes.len())?;
     let cap = count.min(available);
+    // Native any-mode questions pair a zero minimum with count equal to all available modes.
     if context.observation.viewer != seat(context.actor)
         || count == WireNat::ZERO
         || (effective.min == WireNat::ZERO && cap != available)
