@@ -10,6 +10,7 @@ import type {
   Seat,
   ZoneView,
 } from "../contract"
+import type { Actions } from "./actions"
 
 export interface TableCard {
   readonly handle: ObjectHandle
@@ -31,27 +32,13 @@ export interface TableCard {
   readonly attack: AttackOptions | null
 }
 
-/** The targets the authority offers one attacker. */
+/** The recipients the authority offers one attacker, in the open question. */
 interface AttackOptions {
   /** The opposing leader is among them. */
   readonly leader: boolean
   /** The opposing field cards among them. */
   readonly targets: readonly ObjectHandle[]
 }
-
-/** One attacker's targets as a scene names them: opposing field cards by their place in that zone's order. */
-interface AttackHint {
-  readonly leader: boolean
-  readonly followers: readonly number[]
-}
-
-/**
- * What each of a seat's field cards may attack now, by their place in the zone's order. PROVISIONAL:
- * this is what the authority's open question says (the targets it offers each attacker), never
- * something the screen works out from keywords or postures. Until the screen reads questions a
- * scene supplies it beside its messages; then the question decides and this goes away.
- */
-export type AttackHints = Readonly<Partial<Record<Seat, readonly (AttackHint | null)[]>>>
 
 /** A zone as a size plus the members this seat can identify, in zone order. */
 export interface Pile {
@@ -60,13 +47,22 @@ export interface Pile {
 }
 
 /**
- * Which slot each card of the field and the EX area lies in, by its place in the zone's order.
- * The contract orders a zone and does not place its cards in slots, so where a card lies is the
- * screen's own arrangement; a card without one lies in the slot numbered like its place.
+ * Where the cards of the field and the EX area are first laid: the slot of each, by its place in
+ * the zone's order. Only a table that starts with cards on it has one.
  */
 export type SlotArrangement = Readonly<
   Partial<Record<Seat, { readonly field?: readonly number[]; readonly ex?: readonly number[] }>>
 >
+
+type Row = readonly (ObjectHandle | null)[]
+
+/**
+ * What lies in each slot of the field and the EX area. The contract orders a zone and does not
+ * place its cards in slots, so where a card lies is the screen's own memory.
+ */
+export type Placement = Readonly<Record<Seat, { readonly field: Row; readonly ex: Row }>>
+
+export const UNPLACED: Placement = { p1: { field: [], ex: [] }, p2: { field: [], ex: [] } }
 
 /** Evolve points as markers on the table: how many there were and how many are left. */
 interface Points {
@@ -144,33 +140,72 @@ function pile(observation: BattleObservation, zone: ZoneView): Pile {
   return { count: zone.count, cards: [...placed, ...loose].map(({ at: _, ...card }) => card) }
 }
 
+function row(
+  observation: BattleObservation,
+  laid: Row,
+  zone: ZoneView,
+  first: readonly number[] | undefined,
+): Row {
+  // A member the seat cannot identify after all is drawn nowhere, so it takes no slot. Arrivals
+  // are laid in the zone's order, whatever order the members were delivered in.
+  const members = zone.cards
+    .filter((member) => observation.objects[member.object] !== undefined)
+    .toSorted((a, b) => (a.position ?? Infinity) - (b.position ?? Infinity))
+  const present = new Set(members.map((member) => member.object))
+  const next = Array.from(
+    { length: Math.max(zone.capacity ?? 0, zone.count) },
+    (_, slot): ObjectHandle | null => {
+      const held = laid[slot] ?? null
+      return held !== null && present.has(held) ? held : null
+    },
+  )
+  const kept = new Set(next)
+  for (const { object, position } of members) {
+    if (kept.has(object)) continue
+    const wanted = position === null ? undefined : first?.[position]
+    // A card without a slot of its own (or whose slot is taken) takes the first free slot
+    // instead of vanishing.
+    const slot =
+      wanted !== undefined && wanted < next.length && next[wanted] === null
+        ? wanted
+        : next.indexOf(null)
+    if (slot === -1) next.push(object)
+    else next[slot] = object
+  }
+  return next
+}
+
+/**
+ * The placement once `observation` is on screen. A card keeps its slot for as long as it stays in
+ * its zone, whatever arrives or leaves beside it; a card that arrives takes the first free slot.
+ * `first` lays the cards of a table that starts with some on it.
+ */
+export function place(
+  laid: Placement,
+  observation: BattleObservation,
+  first: SlotArrangement = {},
+): Placement {
+  const next = { ...laid }
+  for (const { seat, zones } of observation.players)
+    next[seat] = {
+      field: row(observation, laid[seat].field, zones.field, first[seat]?.field),
+      ex: row(observation, laid[seat].ex, zones.ex, first[seat]?.ex),
+    }
+  return next
+}
+
 function slots(
   observation: BattleObservation,
-  zone: ZoneView,
-  arranged: readonly number[] | undefined,
-  attack?: (at: number) => AttackOptions | null,
+  laid: Row,
+  acts: Actions | null = null,
 ): (TableCard | null)[] {
-  const known = cards(observation, zone).map((card) => ({
-    ...card,
-    attack: card.at === null ? null : (attack?.(card.at) ?? null),
-  }))
-  const row: (TableCard | null)[] = Array.from(
-    { length: Math.max(zone.capacity ?? 0, zone.count) },
-    () => null,
-  )
-  const unplaced: TableCard[] = []
-  for (const { at, ...card } of known) {
-    const slot = at === null ? undefined : (arranged?.[at] ?? at)
-    if (slot !== undefined && slot < row.length && row[slot] === null) row[slot] = card
-    else unplaced.push(card)
-  }
-  // A card without a slot of its own (or sharing one) takes the first free slot instead of vanishing.
-  for (const card of unplaced) {
-    const free = row.indexOf(null)
-    if (free === -1) row.push(card)
-    else row[free] = card
-  }
-  return row
+  return laid.map((handle) => {
+    const card = handle === null ? null : tableCard(observation, handle)
+    const attack = card === null ? undefined : acts?.attack.get(card.handle)
+    return card === null || attack === undefined
+      ? card
+      : { ...card, attack: { leader: attack.leader !== null, targets: [...attack.cards.keys()] } }
+  })
 }
 
 /**
@@ -194,23 +229,11 @@ function seatTable(
   observation: BattleObservation,
   player: PlayerView,
   index: number,
-  arranged: SlotArrangement[Seat],
-  hints: readonly (AttackHint | null)[] | undefined,
+  laid: Placement[Seat],
+  acts: Actions | null,
 ): SeatTable {
   const { turn } = observation
   const turns = turn.elapsed_turns[index] ?? 0
-  const opposing = observation.players.find((other) => other.seat !== player.seat)?.zones.field
-  const attack = (at: number): AttackOptions | null => {
-    const hint = hints?.[at] ?? null
-    if (hint === null) return null
-    return {
-      leader: hint.leader,
-      // A place nothing lies in names no target.
-      targets: hint.followers.flatMap(
-        (place) => opposing?.cards.find((member) => member.position === place)?.object ?? [],
-      ),
-    }
-  }
   return {
     seat: player.seat,
     life: player.life,
@@ -220,8 +243,8 @@ function seatTable(
     first: turn.first_player === null ? null : turn.first_player === player.seat,
     active: turn.active === player.seat,
     turns,
-    field: slots(observation, player.zones.field, arranged?.field, attack),
-    ex: slots(observation, player.zones.ex, arranged?.ex),
+    field: slots(observation, laid.field, acts),
+    ex: slots(observation, laid.ex),
     hand: pile(observation, player.zones.hand),
     deck: pile(observation, player.zones.deck),
     evolveDeck: pile(observation, player.zones.evolve_deck),
@@ -230,19 +253,26 @@ function seatTable(
   }
 }
 
+/**
+ * `laid` is where this screen has its field and EX cards; it is brought up to `observation` here
+ * too, so a placement that has not seen the observation never loses a card. `acts` are the actions
+ * of the question open to the viewer, if there is one: they say which of the viewer's cards may
+ * attack, and what.
+ */
 export function tableModel(
   observation: BattleObservation,
-  arrangement: SlotArrangement = {},
-  attackers: AttackHints = {},
+  laid: Placement = UNPLACED,
+  acts: Actions | null = null,
 ): TableModel {
+  const rows = place(laid, observation)
   const [first, second] = observation.players.map((player, index) =>
     seatTable(
       observation,
       player,
       index,
-      arrangement[player.seat],
-      // A seat is only told what its own cards may do.
-      player.seat === observation.viewer ? attackers[player.seat] : undefined,
+      rows[player.seat],
+      // A question is put to one seat about its own cards.
+      player.seat === observation.viewer ? acts : null,
     ),
   ) as [SeatTable, SeatTable]
   const selfFirst = first.seat === observation.viewer

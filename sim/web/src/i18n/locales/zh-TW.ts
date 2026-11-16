@@ -1179,7 +1179,17 @@ const zhTW = {
     portrait: { hint: "建議把裝置轉成橫向", dismiss: "知道了" },
     dev: {
       scene: "場景",
-      scenes: { preset: "預設盤面", opening: "開局", mid: "中盤", full: "滿場", stack: "指示物" },
+      scenes: {
+        preset: "預設盤面",
+        opening: "開局",
+        mid: "中盤",
+        full: "滿場",
+        stack: "指示物",
+        turn: "一回合",
+        finished: "終局",
+        fault: "引擎故障",
+        halted: "宿主錯誤",
+      },
       dual: "雙視角",
       dualHint: "左邊是你的畫面，右邊同步顯示對手看到的畫面",
       exitDual: "離開雙視角",

@@ -6,7 +6,7 @@ import { Link, useSearchParams } from "react-router"
 import { useUiLanguageSync } from "../../app/language"
 import { useThemeAttributes } from "../../app/theme-attributes"
 import { type Scene, SCENES } from "../../battle/fixtures/scenes"
-import { scriptedSource } from "../../battle/fixtures/scripted"
+import { scriptedTable } from "../../battle/fixtures/scripted"
 import { BattleScreen } from "./BattleScreen"
 
 /**
@@ -21,15 +21,10 @@ export function PlayPage() {
   const [params, setParams] = useSearchParams()
   const scene: Scene = SCENES.find((entry) => entry.id === params.get("scene")) ?? SCENES[0]
   const dual = params.get("dual") === "1"
-  // A scripted source holds nothing to release, so the page makes one per seat and lets it go;
-  // closing one in an effect cleanup would hand a closed source back when React re-runs effects.
-  const sources = useMemo(
-    () => ({
-      own: scriptedSource(scene, "p1"),
-      opposite: dual ? scriptedSource(scene, "p2") : undefined,
-    }),
-    [scene, dual],
-  )
+  // One playing of the scene, shared by both seats so the other seat's screen follows what this
+  // one answers. The sources hold nothing to release, so the page lets them go; closing one in an
+  // effect cleanup would hand a closed source back when React re-runs effects.
+  const seats = useMemo(() => scriptedTable(scene), [scene])
   const update = (change: (next: URLSearchParams) => void) => {
     const next = new URLSearchParams(params)
     change(next)
@@ -40,11 +35,10 @@ export function PlayPage() {
       <h1 className="sr-only">{t("play.title")}</h1>
       <BattleScreen
         key={scene.id}
-        source={sources.own}
-        opposite={sources.opposite}
+        source={seats.p1}
+        opposite={dual ? seats.p2 : undefined}
         leaders={{ p1: scene.leaders[0], p2: scene.leaders[1] }}
         slots={scene.slots}
-        attackers={scene.attackers}
         onDual={(next) => {
           update((query) => {
             if (next) query.set("dual", "1")
