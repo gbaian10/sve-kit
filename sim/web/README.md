@@ -79,7 +79,12 @@ and takes one command of a seat at a time.
   each an effect of a real card of the fixture decks or a step of the opening: `targets` (one
   follower of each side), `sisters` (an optional extra cost, then a deck search whose shape
   depends on the answer), `discard` (down to the hand limit, in the order named), `modes`,
-  `firstPlayer` and `mulligan`. `stack` is a Witch's table: a counter lies only on a card that may hold it, so
+  `firstPlayer` and `mulligan`. Eight more put the remaining kinds of question: `evolve` is a real
+  card's own (the follower evolves, the evolution is paid for with a play point or an evolve
+  point, and its evolved side picks what it damages); `order`, `partition`, `distribute`,
+  `integer`, `dice`, `resource` and `drive` are synthetic, since no card of the fixture decks asks
+  them: each follows the contract's own sample of its kind and names no card as its source.
+  `stack` is a Witch's table: a counter lies only on a card that may hold it, so
   stack counters are shown on amulets with Stack. Its followers are arranged to show how markers
   share a card (several keywords, standing and engaged; a chip beside a keyword), and its EX
   follower carries current numbers, as the authority reports them for the EX area too.

@@ -19,16 +19,17 @@ import { DRAGON_EVOLVE, DRAGON_LEADER, ROYAL_EVOLVE, ROYAL_LEADER, SEP_FROM } fr
 
 export type AskedSceneId = "targets" | "sisters" | "discard" | "modes" | "firstPlayer" | "mulligan"
 
-export interface AskedScene {
-  readonly id: AskedSceneId
+export interface AskedScene<Id extends string = AskedSceneId> {
+  readonly id: Id
   readonly table: TableSpec
   readonly leaders: readonly [CardNo, CardNo]
-  readonly input: BattleInput
+  /** What the scene opens with; without one, the main-phase question its table describes. */
+  readonly input?: BattleInput
   readonly after: (answers: readonly Answer[]) => Step | null
 }
 
 /** One question put to the first seat, worded like the contract's own samples. */
-function ask(
+export function ask(
   id: string,
   use: Question["use"],
   purpose: Question["purpose"],
@@ -63,14 +64,14 @@ function ask(
 /** The first seat's handle of a keyed card. */
 const handle = (key: string): string => `a:${key}`
 
-const card = (no: CardNo, key: string | null): Subject => ({
+export const card = (no: CardNo, key: string | null): Subject => ({
   kind: "card",
   card: cardRef(no),
   object: key === null ? null : handle(key),
 })
 
 /** A card as a candidate: where it is, and the name the question tells apart by. */
-function candidate(
+export function candidate(
   id: string,
   no: CardNo,
   key: string | null,
@@ -98,18 +99,20 @@ const picked = (answer: Answer | undefined): readonly string[] | null =>
 // ---- A spell that needs one follower of each side: 1 damage to the seat's own, 3 to the other's.
 
 const CLAW = { no: "BP05-058", key: "claw" } as const
-const OWN = [
+export const OWN = [
   { id: "own:unifier", no: "BP20-062", key: "unifier", hurt: [3, 3] },
   { id: "own:priest", no: "BP20-064", key: "priest", hurt: [2, 1] },
 ] as const
 // Each of these has three life or less: whichever is chosen falls.
-const FOES = [
+export const FOES = [
   { id: "foe:maimu", no: "BP13-030", key: "maimu", acted: false },
   { id: "foe:meimu", no: "BP13-033", key: "meimu", acted: true },
   { id: "foe:archer", no: "BP21-034", key: "archer", acted: false },
 ] as const
 
-function targetsTable(hit: { readonly own: string; readonly foe: string } | null): TableSpec {
+export function targetsTable(
+  hit: { readonly own: string; readonly foe: string } | null,
+): TableSpec {
   return {
     turn: { ...MAIN, active: "p1", elapsed_turns: [5, 5] },
     seats: [

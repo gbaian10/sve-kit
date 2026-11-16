@@ -13,6 +13,7 @@ import type { SlotArrangement } from "../view/table"
 import { ASKED_SCENES, type AskedSceneId } from "./asked"
 import { type FieldSpec, ready, type SeatSpec, type Step, type TableSpec, update } from "./build"
 import { type CardNo, cardRef } from "./cards"
+import { COMPOUND_SCENES, type CompoundSceneId } from "./compound"
 import {
   DRAGON_EVOLVE,
   DRAGON_LEADER,
@@ -35,6 +36,7 @@ type SceneId =
   | "fault"
   | "halted"
   | AskedSceneId
+  | CompoundSceneId
 
 export interface Scene {
   readonly id: SceneId
@@ -628,7 +630,7 @@ export const SCENES = [
   scene("halted", turnTable(TURN_START), [DRAGON_LEADER, ROYAL_LEADER], {
     stop: { kind: "host_error", format: 1, reason: "projection" },
   }),
-  ...ASKED_SCENES.map(({ id, table, leaders, input, after }) =>
-    scene(id, table, leaders, { input, after }),
+  ...[...ASKED_SCENES, ...COMPOUND_SCENES].map(({ id, table, leaders, input, after }) =>
+    scene(id, table, leaders, { ...(input === undefined ? {} : { input }), after }),
   ),
 ] as const satisfies readonly Scene[]

@@ -6,11 +6,24 @@ import {
   type Command,
   type HostMessage,
   type Question,
+  type QuestionShape,
   type Receipt,
   validateHostMessage,
 } from "../contract"
 import type { BattleSource } from "../source"
 import { act, type Actions, actions, actQuick, quick } from "../view/actions"
+import {
+  distributeAnswer,
+  distribution,
+  integer,
+  integerAnswer,
+  NO_PILES,
+  orderAnswer,
+  ordering,
+  partition,
+  partitionAnswer,
+  put,
+} from "../view/arrange"
 import {
   choice,
   chooseAnswer,
@@ -19,6 +32,16 @@ import {
   mulligan,
   mulliganAnswer,
 } from "../view/choices"
+import {
+  dice,
+  diceAnswer,
+  driveTrigger,
+  driveTriggerAnswer,
+  evolutionPayment,
+  evolutionPaymentAnswer,
+  resourcePayment,
+  resourcePaymentAnswer,
+} from "../view/payments"
 import { NO_PICKS, selectAnswer, selection, toggle } from "../view/select"
 import { type Scene, SCENES } from "./scenes"
 import { scriptedTable } from "./scripted"
@@ -683,5 +706,336 @@ describe("scriptedTable", () => {
     // Answered, it is over: what the seat is asked next carries another id.
     expect(other.question()?.id).toBe("theirs-2")
     expect(await send(seats.p2, confirmAnswer(held, true))).toMatchObject({ result: "rejected" })
+  })
+
+  /** A scene whose opening question, put to the first seat, has its shape changed. */
+  function reshaped<K extends QuestionShape["kind"]>(
+    id: Scene["id"],
+    kind: K,
+    change: (shape: Extract<QuestionShape, { kind: K }>) => QuestionShape,
+  ): Scene {
+    const original = scene(id)
+    const [ready, first] = original.script.p1
+    if (ready === undefined || first?.kind !== "update" || first.input.kind !== "question")
+      throw new Error("the scene asks its first seat")
+    const { question } = first.input
+    if (question.shape.kind !== kind) throw new Error(`the scene does not ask a ${kind}`)
+    const shape = change(question.shape as Extract<QuestionShape, { kind: K }>)
+    return {
+      ...original,
+      script: {
+        ...original.script,
+        p1: [ready, { ...first, input: { kind: "question", question: { ...question, shape } } }],
+      },
+    }
+  }
+
+  /** What the first seat's screen needs of its own side after an answer. */
+  const side = (update: BattleUpdate) => {
+    const [self] = update.observation.players
+    return {
+      pp: self.pp,
+      ep: self.ep,
+      hand: self.zones.hand.count,
+      deck: self.zones.deck.count,
+    }
+  }
+  const stats = (update: BattleUpdate, handle: string) =>
+    update.observation.objects[handle]?.state?.stats ?? null
+
+  it("takes an order that names every item once", async () => {
+    const { seats, own, other, valid } = asking("order")
+    const asked = need(ordering(own.question(), "p1"))
+    expect(other.last().input).toMatchObject({ kind: "waiting", actor: "p1" })
+    const before = side(own.last())
+    for (const order of [
+      ["top:2", "top:1"],
+      ["top:1", "top:1", "top:2"],
+      ["top:1", "top:2", "x"],
+    ])
+      expect(await send(seats.p1, orderAnswer(asked, order))).toMatchObject(rejected)
+    expect(await send(seats.p1, orderAnswer(asked, ["top:3", "top:1", "top:2"]))).toMatchObject(
+      applied,
+    )
+    // The cards went under the deck: the table reads as before, and the turn goes on.
+    expect(side(own.last())).toEqual(before)
+    expect(own.question()?.shape.kind).toBe("action_window")
+    expect(await send(seats.p1, orderAnswer(asked, ["top:3", "top:1", "top:2"]))).toMatchObject(
+      rejected,
+    )
+    expect(valid()).toBe(true)
+  })
+
+  it("takes piles that hold every item once, each pile within its size", async () => {
+    const { seats, own, valid } = asking("partition")
+    const asked = need(partition(own.question(), "p1"))
+    const piled = (...placed: (readonly [string, number])[]) =>
+      placed.reduce((piles, [item, bucket]) => put(asked, piles, item, bucket), NO_PILES)
+    const before = side(own.last())
+    // Two for the hand, which takes one; and an item left on no pile.
+    for (const piles of [
+      piled(["top:1", 0], ["top:2", 0], ["top:3", 1]),
+      piled(["top:1", 0], ["top:2", 1]),
+    ])
+      expect(await send(seats.p1, partitionAnswer(asked, piles))).toMatchObject(rejected)
+    // What the readers would never build: an item on two piles, a pile left out, a pile twice.
+    const answering = (buckets: { bucket: number; items: string[] }[]): Command => ({
+      kind: "answer",
+      question_id: asked.question,
+      answer: { kind: "partition", buckets },
+    })
+    for (const buckets of [
+      [
+        { bucket: 0, items: ["top:1"] },
+        { bucket: 1, items: ["top:1", "top:2", "top:3"] },
+      ],
+      [{ bucket: 1, items: ["top:2", "top:3"] }],
+      [
+        { bucket: 0, items: ["top:1"] },
+        { bucket: 0, items: ["top:2", "top:3"] },
+      ],
+    ])
+      expect(await send(seats.p1, answering(buckets))).toMatchObject(rejected)
+    const piles = piled(["top:3", 1], ["top:2", 0], ["top:1", 1])
+    expect(await send(seats.p1, partitionAnswer(asked, piles))).toMatchObject(applied)
+    // The one kept is in the hand; the deck is one card shorter, the other two back under it.
+    expect(side(own.last())).toEqual({ ...before, hand: before.hand + 1, deck: before.deck - 1 })
+    expect(own.last().observation.players[0].zones.hand.cards.at(-1)?.object).toBe("a:looked-2")
+    expect(valid()).toBe(true)
+  })
+
+  it("takes amounts that add up to the total, one for every recipient", async () => {
+    const { seats, own, valid } = asking("distribute")
+    const asked = need(distribution(own.question(), "p1"))
+    const dealing = (...shares: (readonly [string, number])[]) =>
+      distributeAnswer(asked, new Map(shares))
+    expect(await send(seats.p1, dealing(["foe:maimu", 2]))).toMatchObject(rejected)
+    expect(await send(seats.p1, dealing(["foe:maimu", 2], ["foe:meimu", 2]))).toMatchObject(
+      rejected,
+    )
+    // A recipient left out, and one named twice: the answer names each once.
+    const answering = (shares: { option: string; amount: number }[]): Command => ({
+      kind: "answer",
+      question_id: asked.question,
+      answer: { kind: "distribute", shares },
+    })
+    for (const shares of [
+      [
+        { option: "foe:maimu", amount: 3 },
+        { option: "foe:meimu", amount: 0 },
+      ],
+      [
+        { option: "foe:maimu", amount: 1 },
+        { option: "foe:maimu", amount: 2 },
+        { option: "foe:archer", amount: 0 },
+      ],
+    ])
+      expect(await send(seats.p1, answering(shares))).toMatchObject(rejected)
+    expect(await send(seats.p1, dealing(["foe:maimu", 2], ["foe:meimu", 1]))).toMatchObject(applied)
+    const [, opposing] = own.last().observation.players
+    // Two damage fells the first, one left the second with one life, the third was not touched.
+    expect(opposing.zones.field.cards.map((member) => member.object)).toEqual([
+      "a:meimu",
+      "a:archer",
+    ])
+    expect(opposing.zones.cemetery.cards.at(-1)?.object).toBe("a:maimu")
+    expect(stats(own.last(), "a:meimu")).toEqual({ attack: 3, life: 1 })
+    expect(stats(own.last(), "a:archer")).toEqual({ attack: 2, life: 2 })
+    expect(valid()).toBe(true)
+  })
+
+  it.each([
+    ["reject", 3],
+    ["reject", 0],
+  ] as const)(
+    "takes no answer with nobody to deal to where the question says %s (total %i)",
+    async (empty, total) => {
+      const seats = scriptedTable(
+        reshaped("distribute", "distribute", (shape) => ({
+          ...shape,
+          recipients: [],
+          total,
+          empty,
+        })),
+      )
+      const own = follow(seats.p1)
+      const asked = need(distribution(own.question(), "p1"))
+      expect(await send(seats.p1, distributeAnswer(asked, new Map()))).toMatchObject(rejected)
+      expect(seqs(own.messages)).toEqual([0])
+    },
+  )
+
+  it("takes the empty answer with nobody to deal to where the question allows it", async () => {
+    const seats = scriptedTable(
+      reshaped("distribute", "distribute", (shape) => ({ ...shape, recipients: [] })),
+    )
+    const own = follow(seats.p1)
+    const asked = need(distribution(own.question(), "p1"))
+    expect(asked).toMatchObject({ total: 3, empty: "allow_without_total" })
+    expect(await send(seats.p1, distributeAnswer(asked, new Map()))).toMatchObject(applied)
+    expect(own.question()?.shape.kind).toBe("action_window")
+  })
+
+  it("takes no number the contract cannot carry, even in a range without an upper end", async () => {
+    const seats = scriptedTable(
+      reshaped("integer", "integer", (shape) => ({ ...shape, bounds: { min: 0, max: null } })),
+    )
+    const own = follow(seats.p1)
+    const asked = need(integer(own.question(), "p1"))
+    for (const value of [Number.MAX_SAFE_INTEGER + 1, 1.5])
+      expect(await send(seats.p1, integerAnswer(asked, value))).toMatchObject(rejected)
+    expect(await send(seats.p1, integerAnswer(asked, 3))).toMatchObject(applied)
+  })
+
+  it("takes a number within the question's range", async () => {
+    const { seats, own, valid } = asking("integer")
+    const asked = need(integer(own.question(), "p1"))
+    const before = side(own.last())
+    for (const value of [0, 4])
+      expect(await send(seats.p1, integerAnswer(asked, value))).toMatchObject(rejected)
+    expect(await send(seats.p1, integerAnswer(asked, 2))).toMatchObject(applied)
+    expect(side(own.last())).toEqual({ ...before, hand: before.hand + 2, deck: before.deck - 2 })
+    expect(valid()).toBe(true)
+  })
+
+  it("keeps a roll, or rolls again and has to keep what comes", async () => {
+    const kept = asking("dice")
+    expect(
+      await send(kept.seats.p1, diceAnswer(need(dice(kept.own.question(), "p1")), "keep")),
+    ).toMatchObject(applied)
+    expect(kept.own.question()?.shape.kind).toBe("action_window")
+
+    const { seats, own, other, valid } = asking("dice")
+    const first = need(dice(own.question(), "p1"))
+    expect(first).toMatchObject({ value: 3, remaining: 1 })
+    expect(await send(seats.p1, diceAnswer(first, "reroll"))).toMatchObject(applied)
+    // Nothing on the table moved: the other seat is sent nothing for the roll.
+    expect(seqs(other.messages)).toEqual([0])
+    const again = need(dice(own.question(), "p1"))
+    expect(again).toMatchObject({ value: 5, remaining: 0, allowed: ["keep"] })
+    expect(again.question).not.toBe(first.question)
+    // No reroll is left, and the first roll's question is over.
+    expect(await send(seats.p1, diceAnswer(again, "reroll"))).toMatchObject(rejected)
+    expect(await send(seats.p1, diceAnswer(first, "keep"))).toMatchObject({ result: "rejected" })
+    expect(await send(seats.p1, diceAnswer(again, "keep"))).toMatchObject(applied)
+    expect(own.question()?.shape.kind).toBe("action_window")
+    expect(valid()).toBe(true)
+  })
+
+  it.each([
+    [false, { pp: 2, ep: 2 }],
+    [true, { pp: 3, ep: 1 }],
+  ] as const)(
+    "evolves a follower: the payment (evolve point: %s), then what its evolved side does",
+    async (useEp, points) => {
+      const { seats, own, other, picking, valid } = asking("evolve")
+      // The main-phase question offers the evolution of one follower.
+      const acts = own.acts()
+      expect([...acts.evolve.keys()]).toEqual(["a:priest"])
+      const [evolution] = acts.evolve.get("a:priest") ?? []
+      expect(await send(seats.p1, act(acts, need(evolution)))).toMatchObject(applied)
+      const asked = need(evolutionPayment(own.question(), "p1"))
+      expect(asked.payments).toEqual([
+        { pp: 1, use_ep: false, super_evolution: false },
+        { pp: 0, use_ep: true, super_evolution: false },
+      ])
+      // A payment the question does not list, though the seat could afford it.
+      expect(
+        await send(
+          seats.p1,
+          evolutionPaymentAnswer(asked, { pp: 1, use_ep: false, super_evolution: true }),
+        ),
+      ).toMatchObject(rejected)
+      const payment = need(asked.payments.find((each) => each.use_ep === useEp))
+      expect(await send(seats.p1, evolutionPaymentAnswer(asked, payment))).toMatchObject(applied)
+      // Paid for and evolved: both seats see the evolve card on its follower.
+      expect(side(own.last())).toMatchObject(points)
+      expect(own.last().observation.objects["a:priest"]?.state).toMatchObject({
+        evolution: "evolved",
+        stats: { attack: 3, life: 3 },
+      })
+      expect(other.last().observation.players[0].zones.evolve_deck.count).toBe(9)
+      // Its evolved side deals two damage to one of the other seat's followers.
+      expect(need(selection(own.question(), "p1")).selection.bounds).toEqual({ min: 1, max: 1 })
+      expect(await send(seats.p1, picking("own:unifier"))).toMatchObject(rejected)
+      expect(await send(seats.p1, picking("foe:archer"))).toMatchObject(applied)
+      const [, opposing] = own.last().observation.players
+      expect(opposing.zones.field.cards.map((member) => member.object)).toEqual([
+        "a:maimu",
+        "a:meimu",
+      ])
+      expect(opposing.zones.cemetery.cards.at(-1)?.object).toBe("a:archer")
+      expect(side(own.last())).toMatchObject(points)
+      expect(own.question()?.shape.kind).toBe("action_window")
+      expect(valid()).toBe(true)
+    },
+  )
+
+  it("pays with the resources picked, an evolve point for a play point where that is allowed", async () => {
+    const { seats, own, valid } = asking("resource")
+    const asked = need(resourcePayment(own.question(), "p1"))
+    const picks = (...ids: string[]) =>
+      ids.reduce((made, id) => toggle(asked.materials, made, id), NO_PICKS)
+    const before = side(own.last())
+    // A resource the question does not list, and one named twice.
+    for (const selected of [["foe:maimu"], ["own:priest", "own:priest"]])
+      expect(
+        await send(seats.p1, resourcePaymentAnswer(asked, { ...NO_PICKS, selected }, false)),
+      ).toMatchObject(rejected)
+    expect(
+      await send(seats.p1, resourcePaymentAnswer(asked, picks("own:priest"), true)),
+    ).toMatchObject(applied)
+    expect(side(own.last())).toEqual({ ...before, ep: before.ep - 1 })
+    expect(own.last().observation.objects["a:priest"]?.state?.posture).toBe("acted")
+    expect(own.last().observation.objects["a:unifier"]?.state?.posture).toBe("standing")
+    expect(valid()).toBe(true)
+  })
+
+  it("refuses an evolve point in place of a play point where the question does not allow it", async () => {
+    const strict = reshaped("resource", "resource_payment", (shape) => ({
+      ...shape,
+      ep_allowed: false,
+    }))
+    const seats = scriptedTable(strict)
+    const own = follow(seats.p1)
+    const asked = need(resourcePayment(own.question(), "p1"))
+    expect(asked.epAllowed).toBe(false)
+    expect(await send(seats.p1, resourcePaymentAnswer(asked, NO_PICKS, true))).toMatchObject(
+      rejected,
+    )
+    expect(await send(seats.p1, resourcePaymentAnswer(asked, NO_PICKS, false))).toMatchObject(
+      applied,
+    )
+  })
+
+  it("accepts a drive trigger for one follower the question lists, or declines it", async () => {
+    const declined = asking("drive")
+    const offered = need(driveTrigger(declined.own.question(), "p1"))
+    expect(await send(declined.seats.p1, driveTriggerAnswer(offered, false, null))).toMatchObject(
+      applied,
+    )
+    expect(stats(declined.own.last(), "a:priest")).toEqual({ attack: 2, life: 2 })
+
+    const { seats, own, valid } = asking("drive")
+    const asked = need(driveTrigger(own.question(), "p1"))
+    // Accepted without the follower it has to name, and for one the question does not list.
+    expect(await send(seats.p1, driveTriggerAnswer(asked, true, null))).toMatchObject(rejected)
+    expect(await send(seats.p1, driveTriggerAnswer(asked, true, "foe:maimu"))).toMatchObject(
+      rejected,
+    )
+    // Declined, it names nobody.
+    expect(
+      await send(seats.p1, {
+        kind: "answer",
+        question_id: asked.question,
+        answer: { kind: "drive_trigger", accept: false, target: "own:priest" },
+      }),
+    ).toMatchObject(rejected)
+    expect(await send(seats.p1, driveTriggerAnswer(asked, true, "own:priest"))).toMatchObject(
+      applied,
+    )
+    expect(stats(own.last(), "a:priest")).toEqual({ attack: 3, life: 2 })
+    expect(stats(own.last(), "a:unifier")).toEqual({ attack: 3, life: 4 })
+    expect(valid()).toBe(true)
   })
 })
