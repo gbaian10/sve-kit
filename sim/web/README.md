@@ -75,11 +75,12 @@ fixtures computes rules.
   of the board. The mat is drawn in SVG (`table/mats.tsx`), no artwork; the page's background (the
   two leaders' art) is not part of the mat and does not change with it.
 
-The card back is the official one, published like the card images and never committed:
-`cardBackUrl()` in `src/data/card-back.ts` is the one place that names it
-(`<snapshot root>/images/card_back.webp`). A root without the file answers 404 and every back on
-screen falls back to a back drawn by the app. For a local preview put the file at that path under
-the preview root.
+The card back is the official one, published beside the snapshot root like the card images and
+never committed: `cardBackUrl()` in `src/data/card-back.ts` is the one place that names it
+(`<snapshot root>/ui/card_back.webp`; not under `images/`, where publishing may remove any file the
+card image index does not list). A root without the file answers 404 and every back on screen falls
+back to a back drawn by the app. For a local preview put the file at that path under the preview
+root.
 
 The contract does not carry yet how many evolve points a seat started with or when its super
 evolution opens. Until it does, a scene supplies them beside its messages (`ProvisionalPoints`),

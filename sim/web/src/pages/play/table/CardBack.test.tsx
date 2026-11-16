@@ -25,7 +25,7 @@ describe("CardBack", () => {
     const published = await screen.findAllByRole("img", { name: "卡背" })
     expect(published.map((back) => back.tagName)).toEqual(["IMG", "IMG"])
     // The file sits beside the card images of the snapshot root; nothing of it is in the app.
-    expect(published[0]).toHaveAttribute("src", expect.stringMatching(/\/images\/card_back\.webp$/))
+    expect(published[0]).toHaveAttribute("src", expect.stringMatching(/\/ui\/card_back\.webp$/))
     const [first] = published
     if (first === undefined) throw new Error("no card back")
     fireEvent.error(first)
