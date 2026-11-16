@@ -4266,6 +4266,15 @@ it("can cancel and retry an SVE-art load without blocking ordinary queries", asy
       ),
     ).toBe(true)
     await engine.handle({ ...request, queryId: 3 })
+    const progress = events.filter(
+      (event) => event.kind === "query-progress" && event.queryId === 3,
+    )
+    expect(progress[0]).toMatchObject({ done: 0 })
+    expect(
+      progress.some(
+        (event) => event.kind === "query-progress" && event.done > 0 && event.done === event.total,
+      ),
+    ).toBe(true)
     const retried = events.find((event) => event.kind === "result" && event.queryId === 3)
     expect(
       retried?.kind === "result" &&

@@ -539,7 +539,12 @@ export class SearchEngine {
         ),
       )
       let done = 0
+      let reportedAt = Number.NEGATIVE_INFINITY
       const progress = () => {
+        const now = performance.now()
+        // Cached shards finish in bursts; per-file messages repeatedly rerender the filters.
+        if (done !== 0 && done !== files.length && now - reportedAt < 100) return
+        reportedAt = now
         for (const [channelId, { request }] of this.queries) {
           if (
             this.active === active &&
