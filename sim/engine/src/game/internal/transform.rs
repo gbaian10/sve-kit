@@ -2,6 +2,7 @@ use super::tokens::TokenSelection;
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
+use crate::game::player::observation::CardFace;
 use crate::game::tokens::prints_for_names;
 use crate::ir::{
     Action, DecisionId, Instruction, MoveMethod, MoveResult, PlayerId, PlayerRef,
@@ -123,6 +124,16 @@ pub(super) struct TemplateWait {
 }
 
 impl TemplateWait {
+    pub(super) fn player_faces(
+        &self,
+        game: &Game,
+        choices: &[Vec<String>],
+    ) -> Result<Vec<Vec<CardFace>>> {
+        if choices != self.choices {
+            return Err(invalid("template choices differ from their frozen wait"));
+        }
+        game.internal_token_choice_faces(choices.len(), |handle| self.validate(handle))
+    }
     pub(super) const fn player_details(&self) -> (PlayerId, ZoneKind, usize) {
         (self.destination, ZoneKind::Ex, self.available)
     }

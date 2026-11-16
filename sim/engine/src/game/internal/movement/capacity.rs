@@ -1,6 +1,7 @@
 //! Capacity choices use the same planned arrivals and movement receipts as the commit.
 
-use crate::game::player::{PartitionQuestion, Viewer};
+use crate::game::player::observation::viewer;
+use crate::game::player::{CapacityCard, PartitionQuestion, Viewer};
 
 use super::super::{
     Execution, Game, InputDomain, OrderCard, Result, SearchPartitionDomain, Wait, invalid,
@@ -24,6 +25,7 @@ pub(in crate::game::internal) struct CapacityWait {
     members: Vec<ArrivalMember>,
     domain: SearchPartitionDomain,
     available: usize,
+    facts: BTreeMap<u64, CapacityCard>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -33,6 +35,9 @@ pub(in crate::game::internal) enum ArrivalMember {
 }
 
 impl CapacityWait {
+    pub(in crate::game::internal) fn player_facts(&self) -> BTreeMap<u64, CapacityCard> {
+        self.facts.clone()
+    }
     pub(in crate::game::internal) fn player_question(
         &self,
         game: &Game,
@@ -135,6 +140,43 @@ fn capacity_zone(zone: ZoneKind) -> Result<(&'static str, i64)> {
     reason = "Capacity questions suspend the existing atomic movement transaction."
 )]
 impl Game {
+    fn movement_capacity_facts(
+        &self,
+        execution: &Execution,
+        members: &[ArrivalMember],
+        domain: &SearchPartitionDomain,
+        links: &CandidateLinks,
+    ) -> Result<BTreeMap<u64, CapacityCard>> {
+        if members.len() != domain.cards.len() {
+            return Err(invalid("incomplete capacity candidate facts"));
+        }
+        let actor = viewer(seat_name(execution.context.controller)?)?;
+        members
+            .iter()
+            .zip(&domain.cards)
+            .map(|(member, card)| {
+                let facts = match member {
+                    ArrivalMember::Object(reference) => {
+                        let id = execution.object_id(*reference)?;
+                        let controller = if links.observed(self, actor, Some(*reference))?.is_some()
+                        {
+                            Some(viewer(&self.object(id)?.controller)?)
+                        } else {
+                            None
+                        };
+                        CapacityCard::Existing {
+                            face: self.physical_card_face(id)?,
+                            controller,
+                        }
+                    }
+                    ArrivalMember::Token(print) => CapacityCard::Token {
+                        face: self.internal_creation_face(print)?,
+                    },
+                };
+                Ok((card.handle, facts))
+            })
+            .collect()
+    }
     pub(in crate::game::internal) fn movement_free_spaces(
         &self,
         player: PlayerId,
@@ -309,19 +351,21 @@ impl Game {
             } else {
                 None
             };
+            let links = CandidateLinks::for_selectors(
+                self,
+                execution,
+                members.iter().filter_map(|member| {
+                    if let ArrivalMember::Object(reference) = member {
+                        Some(*reference)
+                    } else {
+                        None
+                    }
+                }),
+                selectors,
+            )?;
+            let facts = self.movement_capacity_facts(execution, &members, &domain, &links)?;
             let wait = CapacityWait {
-                links: CandidateLinks::for_selectors(
-                    self,
-                    execution,
-                    members.iter().filter_map(|member| {
-                        if let ArrivalMember::Object(reference) = member {
-                            Some(*reference)
-                        } else {
-                            None
-                        }
-                    }),
-                    selectors,
-                )?,
+                links,
                 instruction: Box::new(instruction.clone()),
                 resume,
                 destination,
@@ -329,6 +373,7 @@ impl Game {
                 members,
                 domain: domain.clone(),
                 available,
+                facts,
             };
             self.internal_wait(
                 execution,

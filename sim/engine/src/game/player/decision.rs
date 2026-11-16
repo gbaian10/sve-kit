@@ -137,6 +137,25 @@ pub struct MovementCapacityQuestion {
     pub available: Nat,
     /// Existing cards and prospective token printings, before creation or entry.
     pub selection: PartitionQuestion,
+    /// Frozen identities; absent when the producer did not capture its candidate facts.
+    pub facts: Option<BTreeMap<u64, CapacityCard>>,
+}
+
+/// Existing cards and prospective tokens must never share an invented current capability.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum CapacityCard {
+    /// A physical card whose printing is authorized by the frozen native domain.
+    Existing {
+        /// Physical face, independent of its effective characteristics.
+        face: CardFace,
+        /// Controller only while the candidate was already identifiable to the chooser.
+        controller: Option<Viewer>,
+    },
+    /// A printing selected by the native creation procedure, before an object exists.
+    Token {
+        /// Face the shared native creation procedure will actually create.
+        face: CardFace,
+    },
 }
 
 /// Token creation capacity, answered with `Answer::TokenCapacity`.
@@ -150,6 +169,8 @@ pub struct TokenCapacityQuestion {
     pub available: Nat,
     /// Original answer indices and their complete legal token-name combinations.
     pub choices: Vec<Vec<String>>,
+    /// Exact creation faces for each original combination, when provided by its frozen native wait.
+    pub faces: Option<Vec<Vec<CardFace>>>,
 }
 
 /// Closed, actor-authorized decision shapes, separate from the native execution domain.

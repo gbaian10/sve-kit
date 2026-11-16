@@ -1,4 +1,5 @@
 use super::super::{Execution, Game, InputDomain, Result, Wait, invalid, seat_name};
+use crate::game::player::observation::CardFace;
 use crate::game::tokens::prints_for_names;
 use crate::ir::{DecisionId, Instruction, Node, PlayerId, ZoneKind};
 
@@ -14,6 +15,16 @@ pub(in crate::game::internal) struct CapacityWait {
 }
 
 impl CapacityWait {
+    pub(in crate::game::internal) fn player_faces(
+        &self,
+        game: &Game,
+        choices: &[Vec<String>],
+    ) -> Result<Vec<Vec<CardFace>>> {
+        if choices != self.choices {
+            return Err(invalid("token choices differ from their frozen wait"));
+        }
+        game.internal_token_choice_faces(choices.len(), |handle| self.validate(handle))
+    }
     pub(in crate::game::internal) const fn player_details(&self) -> (PlayerId, ZoneKind, usize) {
         (self.actor, self.zone, self.available)
     }
@@ -32,6 +43,31 @@ impl CapacityWait {
     reason = "Token capacity shares the existing creation transaction and Ward continuation."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_token_choice_faces<F>(
+        &self,
+        count: usize,
+        mut resolve: F,
+    ) -> Result<Vec<Vec<CardFace>>>
+    where
+        F: FnMut(u64) -> Result<Vec<String>>,
+    {
+        (0..count)
+            .map(|index| {
+                resolve(u64::try_from(index).map_err(invalid)?)?
+                    .iter()
+                    .map(|card| self.internal_creation_face(card))
+                    .collect()
+            })
+            .collect()
+    }
+    pub(in crate::game::internal) fn internal_creation_face(&self, card: &str) -> Result<CardFace> {
+        // Named token creation selects the native front here; previews and creation share this rule.
+        self.catalog.face(card, 0)?;
+        Ok(CardFace {
+            card: card.into(),
+            face: 0,
+        })
+    }
     pub(in crate::game::internal::tokens) fn internal_token_capacity_wait(
         &mut self,
         execution: &mut Execution,
@@ -91,7 +127,14 @@ impl Game {
     ) -> Result<Vec<String>> {
         prints
             .iter()
-            .map(|card| self.new_token_object(card, 0, seat))
+            .map(|card| {
+                let face = self.internal_creation_face(card)?;
+                self.new_token_object(
+                    &face.card,
+                    usize::try_from(face.face).map_err(invalid)?,
+                    seat,
+                )
+            })
             .collect()
     }
 }

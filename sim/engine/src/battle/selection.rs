@@ -1,14 +1,15 @@
 use super::ProjectionError;
 use crate::game::player::observation::ObservedZone;
 use crate::game::player::{
-    self, SearchAnswer, SearchQuestion, SelectionQuestion, TargetRoleAssignment, Viewer,
+    self, MovementCapacityQuestion, SearchAnswer, SearchQuestion, SelectionQuestion,
+    TargetRoleAssignment, Viewer,
 };
 use crate::ir::{self, Cardinality, Position, RoleCardinality};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt, result};
 use sve_battle_contract::question::{
-    Bounds, Candidate, CostTotal, Destination, Distinct, Edge, GroupAssignment, Origin, RoleSize,
-    Selection, SelectionGroup, SelectionRole,
+    Bounds, Candidate, Capacity, CostTotal, Destination, Distinct, Edge, GroupAssignment, Origin,
+    RoleSize, Selection, SelectionGroup, SelectionRole,
 };
 use sve_battle_contract::{Answer, Int, Nat, OptionId, QuestionId, Seat, Subject, Zone};
 
@@ -39,6 +40,7 @@ pub struct SelectionProjection {
 enum SelectionChannel {
     Targets,
     Search,
+    MovementCapacity,
 }
 
 impl fmt::Debug for SelectionProjection {
@@ -49,6 +51,67 @@ impl fmt::Debug for SelectionProjection {
 }
 
 impl SelectionProjection {
+    pub(crate) fn capacity<F>(
+        id: &QuestionId,
+        question: &MovementCapacityQuestion,
+        mut resolve: F,
+    ) -> Result<Self>
+    where
+        F: FnMut(u64) -> Result<CandidateDetails>,
+    {
+        let available = Nat::try_from(question.available.0)?;
+        if question.selection.cardinality.minimum != question.available
+            || question.selection.cardinality.maximum != Some(question.available)
+            || available == Nat::ZERO
+            || u64::try_from(question.selection.cards.len())
+                .ok()
+                .is_none_or(|count| count <= question.available.0)
+            || !matches!(question.zone, ObservedZone::Field | ObservedZone::Ex)
+        {
+            return Err(ProjectionError::Unavailable);
+        }
+        let mut projection = Self::empty(
+            question.selection.cardinality,
+            SelectionChannel::MovementCapacity,
+        )?;
+        for card in &question.selection.cards {
+            projection.push(
+                id,
+                card.handle,
+                resolve(card.handle)?,
+                card.rules_names.clone(),
+                card.original_cost,
+            )?;
+        }
+        projection.selection.capacity = Some(Capacity {
+            destination: Destination {
+                player: seat(question.destination),
+                zone: zone(question.zone),
+                position: None,
+            },
+            available,
+        });
+        Ok(projection)
+    }
+
+    pub(crate) fn capacity_answer(&self, answer: &Answer) -> Result<player::Answer> {
+        if self.channel != SelectionChannel::MovementCapacity {
+            return Err(ProjectionError::Unavailable);
+        }
+        let Answer::Select {
+            selected,
+            groups,
+            roles,
+        } = answer
+        else {
+            return Err(ProjectionError::Unavailable);
+        };
+        let count = u64::try_from(selected.len()).map_err(|_range| ProjectionError::Range)?;
+        if groups.is_some() || !roles.is_empty() || count != self.selection.bounds.min.get() {
+            return Err(ProjectionError::Unavailable);
+        }
+        self.decode(selected).map(player::Answer::SearchPartition)
+    }
     /// Project a complete native selection. The resolver receives only actor-authorized members.
     /// Role destinations come from the native procedure, never from a guessed deck edge.
     ///

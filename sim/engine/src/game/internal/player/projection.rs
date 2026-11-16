@@ -170,16 +170,16 @@ fn typed(
         }
         Wait::TokenCapacity(wait) => {
             let (destination, zone, available) = capacity(wait.player_details())?;
-            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, choices }))
+            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, faces: Some(wait.player_faces(game, &choices)?), choices }))
         }
         // Same template-combination handles, addressed to the decider for the destination's EX.
         Wait::TransformTemplates(wait) => {
             let (destination, zone, available) = capacity(wait.player_details())?;
-            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, choices }))
+            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, faces: Some(wait.player_faces(game, &choices)?), choices }))
         }
         Wait::MovementCapacity(wait) => {
             let (destination, zone, available) = capacity(wait.player_details())?;
-            domain!(domain, InputDomain::SearchPartition(selection) => DecisionShape::MovementCapacity(MovementCapacityQuestion { destination, zone, available, selection: wait.player_question(game, actor, &selection)? }))
+            domain!(domain, InputDomain::SearchPartition(selection) => DecisionShape::MovementCapacity(MovementCapacityQuestion { destination, zone, available, selection: wait.player_question(game, actor, &selection)?, facts: Some(wait.player_facts()) }))
         }
         Wait::Distribution(wait) => {
             domain!(domain, InputDomain::Distribution(distribution) => DecisionShape::Distribution(wait.player_question(game, actor, &distribution)?))

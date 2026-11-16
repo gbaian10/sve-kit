@@ -391,6 +391,7 @@ fn policy_search_partition_movement_and_distribution_return_complete_answers() {
         Answer::SearchPartition(vec![7, 2])
     );
     let movement = MovementCapacityQuestion {
+        facts: None,
         destination: Viewer::P2,
         zone: ObservedZone::Ex,
         available: Nat(2),
@@ -469,6 +470,7 @@ fn policy_drive_and_token_capacity_use_only_advertised_choices() {
         }
     );
     let tokens = TokenCapacityQuestion {
+        faces: None,
         destination: Viewer::P1,
         zone: ObservedZone::Field,
         available: Nat(1),
