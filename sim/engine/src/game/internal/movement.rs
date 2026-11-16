@@ -1443,7 +1443,7 @@ impl Game {
             .collect::<Vec<_>>();
         let banished = self.internal_prepare_banish_events(&ids, execution, method)?;
         let departing_source = execution.source_before_move(self, &ids)?;
-        let mut frame = execution.frame();
+        let mut frame = execution.entry_frame(self, kind)?;
         if method == MoveMethod::Destroy {
             frame.values.insert("destroyed_subjects".into(), json!(ids));
         }

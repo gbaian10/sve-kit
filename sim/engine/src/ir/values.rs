@@ -879,6 +879,7 @@ variants!(KindFrozen {
 });
 
 variants!(TraitsFrozen {
+    EnterFieldAbilitySourceTraits { event: Binding<EnterFieldEvent> } => ["read.event-field"],
     FusedMaterialTraits { event: Binding<FusedEvent> } => ["read.event-field"],
     Snapshot { object: Expr<RuntimeObjectView> } => ["read.snapshot-characteristics"],
     Characters { characters: Expr<Characteristics> } => ["read.event-characteristics"]

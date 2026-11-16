@@ -66,6 +66,34 @@ def _check(name: str, value: JsonValue, *, accepted: bool) -> None:
             adapter.validate_json(json.dumps(value))
 
 
+def test_entry_ability_source_accepts_only_a_trait_and_preserves_plain_methods() -> (
+    None
+):
+    for method in ("ability", "play"):
+        _check(C, {"entered_by": {"ref": "this", "by": method}}, accepted=True)
+    _check(
+        C,
+        {"entered_by": {"ref": "this", "by": "ability", "source": {"trait": "ウマ娘"}}},
+        accepted=True,
+    )
+    invalid_sources: tuple[JsonValue, ...] = (
+        {},
+        {"trait": ""},
+        {"trait": "ウマ娘", "kind": "follower"},
+    )
+    for source in invalid_sources:
+        _check(
+            C,
+            {"entered_by": {"ref": "this", "by": "ability", "source": source}},
+            accepted=False,
+        )
+    _check(
+        C,
+        {"entered_by": {"ref": "this", "by": "play", "source": {"trait": "ウマ娘"}}},
+        accepted=False,
+    )
+
+
 @pytest.mark.parametrize("field", ATTRIBUTES)
 @pytest.mark.parametrize("name", [OBJECTS, COUNTED, COLLECTION])
 def test_new_filters_preserve_query_contexts(name: str, field: str) -> None:

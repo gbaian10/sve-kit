@@ -102,6 +102,9 @@ impl Projected for TraitsFrozen {
             Self::Snapshot { object } => checker.projection(object),
             Self::Characters { characters } => checker.projection(characters),
             Self::FusedMaterialTraits { event } => checker.reference(*event, BindingKind::Value),
+            Self::EnterFieldAbilitySourceTraits { event } => {
+                checker.reference(*event, BindingKind::Value)
+            }
         }
     }
 }

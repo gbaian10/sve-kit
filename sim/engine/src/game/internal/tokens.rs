@@ -651,7 +651,7 @@ impl Game {
             ZoneKind::Equipment => "equipment",
             _ => return Err(unsupported("token destination")),
         };
-        let mut frame = execution.frame();
+        let mut frame = execution.entry_frame(self, destination)?;
         if let Some(amount) = stack {
             frame.values.insert(
                 "stack_entry_counts".into(),

@@ -159,6 +159,9 @@ struct Frame {
     source: String,
     #[serde(default)]
     source_generation: Option<u64>,
+    // Serialized legacy frames cannot provide the typed ability-source evidence.
+    #[serde(skip)]
+    entry_source: Option<internal::EntrySource>,
     controller: String,
     #[serde(default)]
     event: Value,

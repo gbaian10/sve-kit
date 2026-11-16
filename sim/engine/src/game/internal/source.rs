@@ -2,15 +2,15 @@
 
 use super::observation::{EffectOrigin, SourceIdentity};
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
-use crate::game::Object;
 use crate::game::player::Viewer;
+use crate::game::{Frame, Object};
 use crate::ir::events::numbers;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
     Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
     LkiReason, NameOperation, Nat, NumberRead, ObjectOperand, ObjectRef, ObjectView, PostureRead,
     Predicate, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView, SnapshotId,
-    Stat, TraitId,
+    Stat, TraitId, ZoneKind,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
@@ -24,6 +24,13 @@ pub(super) struct SourceInformation {
     publicly_identified: bool,
     departed: Option<SourceSnapshot>,
     origin: Box<EffectOrigin>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(in crate::game) struct EntrySource {
+    pub(super) source: RuntimeAbilitySource,
+    pub(super) execution: ExecutionId,
+    pub(super) traits: Vec<TraitId>,
 }
 
 #[derive(Clone, Debug)]
@@ -112,6 +119,28 @@ pub(super) fn count_zone(requirements: &Requirements, requirement: &Requirement)
     reason = "Source reads share the execution's private authority proof."
 )]
 impl Execution {
+    pub(super) fn entry_frame(&self, game: &Game, destination: ZoneKind) -> Result<Frame> {
+        let mut frame = self.frame();
+        if destination == ZoneKind::Field {
+            frame.entry_source = self.entry_source(game)?;
+        }
+        Ok(frame)
+    }
+
+    fn entry_source(&self, game: &Game) -> Result<Option<EntrySource>> {
+        let Some(source) = self.ability else {
+            return Ok(None);
+        };
+        if self.source_information.is_none() {
+            return Ok(None);
+        }
+        Ok(Some(EntrySource {
+            source,
+            execution: self.id,
+            traits: self.source_traits(game)?,
+        }))
+    }
+
     /// Binds the authority-derived ability source and its reference zone at body start.
     pub(super) fn bind_source(&mut self, game: &Game, source: RuntimeAbilitySource) -> Result<()> {
         let information = SourceInformation::current(game, source)?;
