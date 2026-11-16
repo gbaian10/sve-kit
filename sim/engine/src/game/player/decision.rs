@@ -179,7 +179,7 @@ pub enum DecisionShape {
         /// Printing known to its entering controller.
         card: String,
         /// Frozen physical source face, including a not-yet-entered token.
-        face: super::observation::CardFace,
+        face: CardFace,
         /// Authorized printed name.
         name: String,
         /// Current source zone.
