@@ -269,14 +269,7 @@ impl Game {
             .checked_add(1)
             .ok_or_else(|| invalid("pending identities exhausted"))?;
         let (card, _) = self.internal_effective_print(holder)?;
-        let origin = EffectOrigin::definition(
-            self,
-            holder,
-            source.holder.generation.0,
-            &self.runtime_source_printing(source)?,
-            &ability.located().source,
-            information.publicly_identified(),
-        )?;
+        let origin = information.origin().clone();
         let mut pending = PendingOccurrence {
             origin,
             id: self.card_runtime.next_pending,

@@ -2,7 +2,6 @@
 use super::material::MaterialWait;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
-use crate::game::internal::source::SourceInformation;
 use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, Fact, InputDomain, Wait, contains, search,
 };
@@ -304,11 +303,13 @@ impl Game {
             crate::EngineFailure::IllegalPlay("Fusion source did not enter EX".into())
         })?;
         execution.context.generation = after.generation;
-        let mut followed = execution
+        let original = execution
             .ability
             .ok_or_else(|| invalid("Fusion source ability"))?;
-        followed.holder = after;
-        execution.source_information = Some(SourceInformation::current(self, followed)?);
+        let information = execution.source_information.as_mut().ok_or_else(|| {
+            crate::EngineFailure::Invariant("Fusion source has no information binding".into())
+        })?;
+        information.follow(self, original, after)?;
         Ok(after)
     }
 }

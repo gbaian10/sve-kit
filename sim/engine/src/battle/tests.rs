@@ -16,7 +16,7 @@ mod history;
 #[path = "../../tests/support/board_fixture.rs"]
 pub(super) mod board_fixture;
 #[path = "../../tests/support/rule_fixtures.rs"]
-mod rule_fixtures;
+pub(crate) mod rule_fixtures;
 
 mod effects;
 mod pending;

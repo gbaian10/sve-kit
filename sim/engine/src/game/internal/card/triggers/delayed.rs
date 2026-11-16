@@ -110,6 +110,7 @@ impl Game {
             .clone()
             .ok_or_else(|| invalid("delayed information"))?;
         information.seal(Some(information.snapshot(self, original)?));
+        let original = information.callback_source(original)?;
         let mut copied = Vec::new();
         for capture in captures {
             let (_, from, into) =

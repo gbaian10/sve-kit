@@ -1,6 +1,6 @@
 use super::*;
 use crate::game::player::ObjectHandle;
-use crate::game::player::observation::CardProperties;
+use crate::game::player::observation::{CardProperties, TextProvenance};
 use sve_battle_contract::CardRef;
 
 /// Stands in for the board projection: a native card number is its printing, and a native
@@ -260,6 +260,7 @@ fn plays_and_resolutions_require_the_seat_the_producer_recorded() {
     ability.player = Some(Viewer::P1);
     ability.subjects = vec![Some(subject("holder", Some("h2")))];
     ability.source = Some(EffectSource {
+        provenance: TextProvenance::Unknown,
         card: "holder".to_owned(),
         face: None,
         line: Some(2),

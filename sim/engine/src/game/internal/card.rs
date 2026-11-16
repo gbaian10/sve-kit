@@ -273,7 +273,6 @@ impl Game {
         perspective: Viewer,
         holder: &str,
     ) -> Result<Vec<AbilityQuota>> {
-        use super::observation::EffectOrigin;
         use crate::game::player::observation::AbilityQuota;
         let object = self.object(holder)?;
         let turn = self.state.schedule.current()?;
@@ -305,20 +304,9 @@ impl Game {
         let mut result = vec![];
         for (ability, limit) in abilities {
             let source = probe.internal_effective_source(holder, &ability)?;
-            let source_text = if let Some(origin) = &ability.grant {
-                self.observed_grant_source(perspective, holder, origin)?
-            } else {
-                EffectOrigin::definition(
-                    self,
-                    holder,
-                    object.generation,
-                    &self.internal_effective_print(holder)?.0,
-                    &ability.definition.located().source,
-                    false,
-                )?
-                .observed(self, perspective)
-            }
-            .ok_or_else(|| invalid("unavailable quota provenance"))?;
+            let source_text = self
+                .activation_text_source(holder, &ability, perspective)?
+                .ok_or_else(|| invalid("unavailable quota provenance"))?;
             result.push(AbilityQuota {
                 source: source_text,
                 kind: ability.node.kind,

@@ -1094,3 +1094,12 @@ mod layer3_revealed_entry;
 
 #[path = "card/public_projection.rs"]
 mod public_projection;
+
+#[path = "card/source_provenance.rs"]
+mod source_provenance;
+
+#[path = "card/source_provenance_delay.rs"]
+mod source_provenance_delay;
+
+#[path = "card/source_provenance_continuous.rs"]
+mod source_provenance_continuous;
