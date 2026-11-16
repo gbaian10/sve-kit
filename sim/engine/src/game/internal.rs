@@ -1637,6 +1637,8 @@ impl Game {
                     Wait::Integer {
                         binding: declaration::NumberBinding::Natural(*binding),
                         bounds: *cardinality,
+                        // Generic effect integers stay unprojected until their wire use is defined.
+                        // NumberDeclaration is reserved for explicit declaration instructions.
                         source: super::player::IntegerSource::Other,
                         purpose: player::purpose(&decision.kind),
                         declaration: None,
