@@ -376,7 +376,8 @@ def _ancillary(db: Database, values: dict[str, dict[str, Value]]) -> None:
 
 def _future(db: Database) -> None:
     for name, row in extras().items():
-        db.insert(name, row)
+        if name != "digital_art_coverage":
+            db.insert(name, row)
     db.insert(
         "ruling_revision",
         extras()["ruling_revision"]

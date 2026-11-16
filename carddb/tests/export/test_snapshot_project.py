@@ -89,6 +89,7 @@ def test_text_collections_have_synthetic_rows_and_media_awaits_image_index(
         for table, rows in result.tables.items()
         if table
         not in {
+            "digital_art_coverage",
             "card_mentioned_by",
             "annotation_set",
             "annotation_concept",
@@ -2187,6 +2188,17 @@ def test_browse_projection_retains_only_linked_digital_ids(db: Database) -> None
 
 
 def test_art_intake_does_not_enable_voice_assets(db: Database) -> None:
+    with db.transaction():
+        db.insert(
+            "digital_art_coverage",
+            {
+                "art_id": "art",
+                "game": "sv1",
+                "state": "matched",
+                "as_of": "2026-09-29",
+                "decision_id": "decision",
+            },
+        )
     result = projected(
         db,
         replace(decisions(), digital_assets=False, digital_art_assets=True),
