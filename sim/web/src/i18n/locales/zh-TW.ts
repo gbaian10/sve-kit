@@ -283,7 +283,7 @@ const zhTW = {
     unlistedOnly: "官方未收錄",
     unlistedOnlyHint: "官方卡表沒有的 EP／SEP 等",
     prOnly: "PR 限定",
-    prOnlyHint: "只以 PR 卡號發行的卡",
+    prOnlyHint: "僅由 PR 發行，且沒有內文等同的非 PR 卡（不含 Token／EP）",
     sveOnly: "SVE 專屬",
     sveOnlyHint: "線上版沒有這張圖的版次（含線上版沒有的卡）",
     specialPrintings: "特殊版次",

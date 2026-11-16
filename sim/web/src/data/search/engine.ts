@@ -13,7 +13,7 @@ import {
   parseJson,
   stringValue,
 } from "../format-v3/json"
-import { catalogKeys, isCompatible } from "../format-v3/reader"
+import { catalogKeys, type Fragment, isCompatible } from "../format-v3/reader"
 import { checkEntry, entryFields, indexEntries } from "../index-entry"
 import { transferDigest } from "../integrity"
 import { RESTRICTION_TABLES, restrictionKeys, selectRestrictions } from "../restrictions"
@@ -31,6 +31,7 @@ import type {
   SearchMetrics,
   SearchRequest,
 } from "./messages"
+import { PrOnlyRules } from "./pr-rules"
 import { PreviewReader } from "./preview"
 import { completeImages, type CompleteView, completeView, ViewCache, viewSlot } from "./view"
 
@@ -461,14 +462,14 @@ export class SearchEngine {
       const controller = new AbortController()
       active.crossRegionController = controller
       const signal = AbortSignal.any([active.signal, controller.signal])
-      const files = [...active.files.values()].filter(
-        (file) =>
-          file["purpose"] === "catalog" &&
-          file["region"] !== null &&
-          file["region"] !== active.request.edition,
-      )
+      const files = [...active.files.values()].filter((file) => file["purpose"] === "catalog")
+      let total = files.length
       let done = 0
+      let reportedAt = Number.NEGATIVE_INFINITY
       const progress = () => {
+        const now = performance.now()
+        if (done !== 0 && done !== total && now - reportedAt < 100) return
+        reportedAt = now
         for (const [channelId, { request }] of this.queries) {
           if (
             this.active === active &&
@@ -482,28 +483,27 @@ export class SearchEngine {
               channelId,
               queryId: request.queryId,
               done,
-              total: files.length,
+              total,
             })
         }
       }
       progress()
       const blobs = new SearchBlobs(active.request.base, this.fetcher, this.storage)
-      const identities: JsonObject[] = []
+      const catalog: Fragment[] = []
       await blobs.readAll(files, signal, (file, bytes) => {
         const part = decodeMessage({ kind: "file", file, version: active.version, bytes })
-        if (part.kind === "fragments")
-          for (const fragment of part.fragments) {
-            if (!["printing", "card_locator"].includes(fragment.table)) continue
-            for (const row of fragment.rows)
-              identities.push({
-                card_id: row["card_id"] ?? null,
-                card_no: row["card_no"] ?? null,
-                home_set_id:
-                  fragment.table === "card_locator"
-                    ? (row["home_set_id"] ?? null)
-                    : (objectValue(fragment.value["owner"])["id"] ?? null),
-              })
-          }
+        if (part.kind === "fragments") catalog.push(...part.fragments)
+        done++
+        progress()
+      })
+      const rules = new PrOnlyRules(catalog)
+      const details = rules.details(active.files)
+      total += details.length
+      progress()
+      const fragments: Fragment[] = []
+      await blobs.readAll(details, signal, (file, bytes) => {
+        const part = decodeMessage({ kind: "file", file, version: active.version, bytes })
+        if (part.kind === "fragments") fragments.push(...part.fragments)
         done++
         progress()
       })
@@ -511,7 +511,7 @@ export class SearchEngine {
       await active.printings
       signal.throwIfAborted()
       if (this.active !== active || !active.index) return
-      active.index.completePrOnly(identities)
+      active.index.completePrOnly(rules.printings, rules.excluded(fragments))
       if (active.mechanics) {
         // A PR query can finish while unrelated mechanics are still downloading.
         void active.mechanics.then(() => this.saveIndex(active)).catch(() => undefined)

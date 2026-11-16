@@ -306,7 +306,8 @@ export default {
     unlistedOnly: "Not in official database",
     unlistedOnlyHint: "EP/SEP and similar cards missing from the official card list",
     prOnly: "PR only",
-    prOnlyHint: "Cards issued only with PR card numbers",
+    prOnlyHint:
+      "Cards issued only as PR with no non-PR card having equivalent rules and stats (excluding tokens and EP)",
     sveOnly: "SVE exclusive",
     sveOnlyHint:
       "Printings with no matching digital artwork, including cards absent from the digital games",

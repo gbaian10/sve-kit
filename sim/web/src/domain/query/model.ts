@@ -68,7 +68,7 @@ export interface QueryState {
   readonly serialOnly: boolean
   /** Only printings the official card database does not list. */
   readonly unlistedOnly: boolean
-  /** Every printing across both regions belongs to the PR family and has a card number. */
+  /** Only PR printings across regions, with no equivalent non-PR rules; excludes tokens and EP. */
   readonly prOnly: boolean
   /** Printings with no same-card digital target, or art absent from every linked game. */
   readonly sveOnly: boolean
