@@ -1,5 +1,6 @@
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::events::EventKind;
 use sve_engine::game::player::{Viewer, observation as native};
 
 fn program() -> WellFormedCardProgram {
@@ -92,6 +93,7 @@ fn position(seat: u32) -> Game {
     for number in ["unit-middle", "middle-form", "unit-follower", "unit-spell"] {
         game.load_internal_card(number, &card(vec![])).unwrap();
     }
+    game.advance_player_input();
     resolved(start(&mut game, seat, 0));
     game.resume_internal_card().unwrap();
     game
@@ -189,12 +191,26 @@ fn source_provenance_continuous_reevaluates_the_giver_without_rewriting_history(
         );
         game.resume_internal_card().unwrap();
         assert!(game.internal_pending_choice().unwrap().is_none());
+        game.advance_player_input();
         let history = [Viewer::P1, Viewer::P2].map(|viewer| {
             game.events(viewer, None)
                 .unwrap()
                 .cloned()
                 .collect::<Vec<_>>()
         });
+        for events in &history {
+            assert!(
+                events.iter().any(|event| matches!(&event.kind,
+                    EventKind::Action(action)
+                        if action.source.as_ref().is_some_and(|source|
+                            source.provenance == native::TextProvenance::Granted {
+                                by: native::CardFace { card:"unit-middle".into(), face:0 }
+                            }
+                        )
+                )),
+                "a real committed event freezes the original giver"
+            );
+        }
         evolve(&mut game, seat);
         drain(&mut game, seat, "second");
         let before = exact_authority(&game);

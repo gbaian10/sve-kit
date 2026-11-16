@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::InputDomain;
-use sve_engine::game::player::{Viewer, observation as native};
+use sve_engine::game::player::{Input, Viewer, observation as native};
 
 fn granting(number: &str, hidden: bool) -> WellFormedCardProgram {
     let mut nested = ability(
@@ -97,6 +97,7 @@ fn prepared(seat: u32, number: &str, hidden: bool) -> Game {
         };
         game.load_internal_card(key, &program).unwrap();
     }
+    game.advance_player_input();
     resolved(
         game.activate_internal_card("giver", AbilityId(1), PlayerId { seat })
             .unwrap(),
@@ -190,15 +191,21 @@ fn source_provenance_public_same_printing_recipient_cannot_authorize_a_hidden_ow
                 )
                 .unwrap(),
             );
+            game.advance_player_input();
             let after = exact_authority(&game);
             assert_eq!(game.observe(actor).unwrap().pending.len(), 0);
             boards.push((observed, game.observe(waiting).unwrap()));
-            histories.push(
-                game.events(waiting, None)
-                    .unwrap()
-                    .cloned()
-                    .collect::<Vec<_>>(),
+            let events = game
+                .events(waiting, None)
+                .unwrap()
+                .cloned()
+                .collect::<Vec<_>>();
+            assert_ne!(
+                events.len(),
+                0,
+                "the real committed journal participates in the differential"
             );
+            histories.push(format!("{events:?}"));
             assert_eq!(exact_authority(&game), after);
         }
         assert_eq!(
@@ -509,4 +516,138 @@ fn source_provenance_unbound_fragment_cannot_claim_printed_or_a_giver() {
         }
         assert_eq!(exact_authority(&game), before);
     }
+}
+
+#[test]
+fn source_provenance_fusion_follows_its_bound_information_without_losing_pending_or_events() {
+    use sve_engine::game::player::events::{ActionKind, EventKind};
+    for seat in [1, 2] {
+        let (mut game, ability) = fusion_position(seat);
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card("giver", ability, PlayerId { seat })
+            .unwrap()
+        else {
+            panic!("Fusion payment")
+        };
+        let InputDomain::CostMaterials(domain) = &question.domain else {
+            panic!("Fusion material domain")
+        };
+        assert_eq!(domain.members.len(), 1);
+        let before = exact_authority(&game);
+        let observed = [Viewer::P1, Viewer::P2].map(|viewer| game.observe(viewer).unwrap());
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::CostMaterials(vec![u64::MAX]),
+        )
+        .unwrap_err();
+        assert_eq!(exact_authority(&game), before);
+        assert_eq!(
+            [Viewer::P1, Viewer::P2].map(|viewer| game.observe(viewer).unwrap()),
+            observed
+        );
+        resolved(
+            game.answer_internal_card(
+                question.actor,
+                question.token,
+                Answer::CostMaterials(vec![domain.members[0].handle]),
+            )
+            .unwrap(),
+        );
+        game.resume_internal_card().unwrap();
+        let callback = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = callback.domain else {
+            panic!("life callback")
+        };
+        for viewer in [Viewer::P1, Viewer::P2] {
+            let observed = game.observe(viewer).unwrap();
+            assert_eq!(
+                observed.pending.len(),
+                1,
+                "the actual printed giver was publicly carried into EX"
+            );
+            assert_eq!(observed.pending[0].source.card, "unit-follower");
+            assert_eq!(
+                observed.pending[0].source.provenance,
+                native::TextProvenance::Printed
+            );
+        }
+        let actor = if seat == 1 { Viewer::P1 } else { Viewer::P2 };
+        let observed = game.observe(actor).unwrap();
+        assert_eq!(
+            observed
+                .players
+                .iter()
+                .find(|player| player.player == actor)
+                .unwrap()
+                .zones
+                .iter()
+                .find(|zone| zone.kind == native::ObservedZone::Ex)
+                .unwrap()
+                .cards
+                .len(),
+            1
+        );
+        resolved(
+            game.answer_internal_card(
+                callback.actor,
+                callback.token,
+                Answer::Pending(options[0].handle),
+            )
+            .unwrap(),
+        );
+        game.advance_player_input();
+        let after = exact_authority(&game);
+        for viewer in [Viewer::P1, Viewer::P2] {
+            assert_eq!(game.events(viewer, None).unwrap().filter(|event|
+                matches!(&event.kind, EventKind::Action(action) if action.kind == ActionKind::Life)
+            ).count(), 2);
+        }
+        assert_eq!(exact_authority(&game), after);
+    }
+}
+
+fn fusion_position(seat: u32) -> (Game, AbilityId) {
+    let document = evolution_linked_movement::tree(&[(
+        "activate",
+        json!({
+            "fusion":{"sel":{"who":"self","zone":["hand","ex"],"kind":"spell"},"n":1},
+            "do":[
+                {"delayed":{"on":{"life_changed":{"who":"self","direction":"down"}},
+                    "until":"turn","next_only":true,"do":[{"life":{"who":"self","delta":1}}]}},
+                {"life":{"who":"self","delta":-1}}
+            ]
+        }),
+    )]);
+    let program = lowerer()
+        .lower(&document)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let own = format!("P{seat}");
+    let mut initial = setup(seat, json!([]));
+    initial["turn"]["active"] = json!(own);
+    initial["players"][&own]["zones"]["field"] = json!([]);
+    initial["players"][&own]["zones"]["hand"] = json!([
+        {"id":"giver","card":"unit-follower"},{"id":"material","card":"unit-spell"}
+    ]);
+    let mut game = Game::new(
+        catalog(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "followed-origin",
+    )
+    .unwrap();
+    game.load_internal_card("unit-follower", &program).unwrap();
+    for number in ["unit-spell", "unit-amulet"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    game.advance_player_input();
+    let actor = if seat == 1 { Viewer::P1 } else { Viewer::P2 };
+    assert!(
+        matches!(game.input(actor), Input::Question(_)),
+        "the initial real player window must be available before any IR source allocation"
+    );
+    (game, program.card().abilities[0].node.id)
 }
