@@ -1,0 +1,53 @@
+cards:
+  BP02-035:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - line: 2
+        static:
+          effects:
+            - rule_override:
+                of:
+                  any_of:
+                    - kind: spell
+                      who: self
+                      zone: cemetery
+                    - class: ウィッチ
+                      kind: follower
+                      who: self
+                      zone: cemetery
+                rule: spellchain_population
+                who: self
+      - fanfare:
+          do:
+            - discard:
+                all: true
+                who: self
+            - repeat:
+                check: after
+                do:
+                  - move:
+                      to: ex
+                      top:
+                        n: 1
+                        who: self
+                until:
+                  cmp:
+                    left:
+                      zone_free:
+                        who: self
+                        zone: ex
+                    op: eq
+                    right: 0
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set
