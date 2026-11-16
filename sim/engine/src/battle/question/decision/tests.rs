@@ -2,6 +2,8 @@ use super::*;
 use crate::ir::{Nat, QuickWindow};
 
 #[cfg(feature = "runner")]
+mod joint;
+#[cfg(feature = "runner")]
 mod native;
 mod number;
 #[cfg(feature = "runner")]

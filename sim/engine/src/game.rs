@@ -288,6 +288,11 @@ Runner diagnostics bypass viewer authorization and are absent from host builds.
 use sve_engine::game::Game;
 let _ = Game::internal_each_player_actor;
 ```
+
+```compile_fail,E0599
+use sve_engine::game::Game;
+let _ = Game::internal_question_stage;
+```
 "
 )]
 #[derive(Clone, Serialize, Deserialize)]

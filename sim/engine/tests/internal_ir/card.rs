@@ -998,6 +998,9 @@ mod player_shares;
 #[path = "card/player_choices.rs"]
 mod player_choices;
 
+#[path = "card/processing_stage.rs"]
+mod processing_stage;
+
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
 #[path = "card/source_posture.rs"]

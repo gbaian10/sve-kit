@@ -1350,6 +1350,7 @@ impl Game {
             effect_evolution_destinations: BTreeMap::new(),
             facts: super::super::fact_log::Facts::default(),
             waiting: None,
+            question_stage: None,
             destroy_guards: Vec::new(),
             look_viewers: BTreeMap::new(),
             player_receipt_links: BTreeMap::new(),
