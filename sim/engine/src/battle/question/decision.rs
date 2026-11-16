@@ -9,6 +9,7 @@ use core::result;
 use sve_battle_contract::{Answer, QuestionId, observation::BattleObservation, question as wire};
 
 mod candidates;
+mod capacity;
 mod confirm;
 mod distribution;
 mod drive;
@@ -43,6 +44,7 @@ pub(super) enum Binding {
     Order(order::Binding),
     Search(Box<search::Binding>),
     Partition(partition::Binding),
+    Capacity(capacity::Binding),
     Entry(entry::Binding),
     Modes(modes::Binding),
 }
@@ -134,15 +136,19 @@ pub(super) fn project(
             wire::QuestionUse::ResolutionAlternative,
             context.ok_or(ProjectionError::Unavailable)?,
         ),
+        DecisionShape::MovementCapacity(domain) => {
+            capacity::movement(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
+        DecisionShape::TokenCapacity(domain) => {
+            capacity::tokens(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Abilities(_)
         | DecisionShape::Quick { .. }
         | DecisionShape::ExchangeRoutes(_)
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
         | DecisionShape::DamageReplacements(_)
-        | DecisionShape::MovementCapacity(_)
-        | DecisionShape::SearchReplacement
-        | DecisionShape::TokenCapacity(_) => Err(ProjectionError::Unavailable),
+        | DecisionShape::SearchReplacement => Err(ProjectionError::Unavailable),
     }
 }
 
@@ -169,6 +175,7 @@ impl Binding {
             Self::Order(binding) => binding.answer(answer),
             Self::Search(binding) => binding.answer(answer),
             Self::Partition(binding) => binding.answer(answer),
+            Self::Capacity(binding) => binding.answer(answer),
             Self::Entry(binding) => binding.answer(answer),
             Self::Modes(binding) => binding.answer(answer),
         }

@@ -82,3 +82,6 @@ mod search;
 
 #[cfg(feature = "runner")]
 mod partition;
+
+#[cfg(feature = "runner")]
+mod capacity;
