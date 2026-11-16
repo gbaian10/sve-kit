@@ -1,0 +1,63 @@
+cards:
+  BP02-036:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - rule_override:
+                of:
+                  any_of:
+                    - kind: spell
+                      who: self
+                      zone: cemetery
+                    - class: ウィッチ
+                      kind: follower
+                      who: self
+                      zone: cemetery
+                rule: spellchain_population
+                who: self
+      - evolve_time:
+          do:
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -5
+                    when_playing:
+                      in: affected
+                on: picked
+                until: turn
+          targets:
+            - bind: picked
+              from:
+                kind: follower
+                who: self
+                zone: ex
+              n: 1
+        line: 2
+      - evolve_time:
+          do:
+            - apply:
+                effect:
+                  cost_mod:
+                    delta: -5
+                    when_playing:
+                      in: affected
+                on: picked
+                until: turn
+          targets:
+            - bind: picked
+              from:
+                kind: spell
+                who: self
+                zone: ex
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

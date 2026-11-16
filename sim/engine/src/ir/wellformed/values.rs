@@ -187,10 +187,11 @@ impl Checker {
                     execution,
                     at,
                 } => {
-                    if self.play_entry.is_none()
-                        || *execution != (ExecutionRef::Current {})
-                        || self.count_time != Some(*at)
-                    {
+                    let resolution = matches!(read.as_ref(), NatFrozen::SpellChain { .. })
+                        && *at == SpellCountTime::AtResolution
+                        && matches!(self.capture_time, Some(CaptureTime::AtResolution { .. }));
+                    let play = self.play_entry.is_some() && self.count_time == Some(*at);
+                    if *execution != (ExecutionRef::Current {}) || !(resolution || play) {
                         return Err(self.error(WellFormedReason::CaptureTiming));
                     }
                     self.player(player)
@@ -270,6 +271,12 @@ impl Checker {
     }
 
     pub(super) fn boolean(&mut self, expression: &Expr<Bool>) -> Checked {
+        if let Some(read) = super::super::paid_names::comparison(expression)
+            && !super::super::paid_names::receipt_id(read.receipt)
+                .is_some_and(|id| self.env.name_payments.contains(&id))
+        {
+            return Err(self.error(WellFormedReason::UnavailableReceipt));
+        }
         if self.event_capture() && matches!(expression, Expr::Live(_)) {
             return self.reject();
         }

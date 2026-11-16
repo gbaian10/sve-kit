@@ -7,7 +7,8 @@ use super::{
 use crate::game::internal::{Execution, Game, Result, invalid, unsupported};
 use crate::game::list;
 use crate::ir::{
-    BooleanState, CardName, CharacteristicView, EvolutionState, Expr, Int, Posture, Stat,
+    BooleanState, CardName, CharacteristicView, EvolutionState, Expr, Int, ObjectReceipt, Posture,
+    Stat,
 };
 use serde_json::Value;
 
@@ -31,6 +32,10 @@ impl Resolver for Operands<'_> {
                 .card_names(&self.execution.context.source)
                 .map(|names| names.into_iter().map(CardName).collect()),
         }
+    }
+
+    fn payment_names(&self, receipt: &ObjectReceipt) -> Result<Vec<CardName>> {
+        super::super::receipt_members::paid_names(self.execution, receipt)
     }
 }
 

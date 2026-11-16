@@ -5,8 +5,8 @@ use super::{
 };
 use crate::ir::{
     ChoiceDomain, CostSpec, CostStep, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
-    MoveDestination, MoveReason, MoveSpec, OwnerZone, PlaySlot, PlaySpec, Position,
-    SelectionSnapshot, Visibility, ZoneKind, ZoneRef,
+    MoveDestination, MoveReason, MoveSpec, ObjectReceipt, OwnerZone, PlaySlot, PlaySpec, Position,
+    ReceiptReference, SelectionSnapshot, Visibility, ZoneKind, ZoneRef,
 };
 
 pub(super) fn lower(
@@ -23,7 +23,7 @@ pub(super) fn lower(
         return Err(unsupported(path));
     }
     let move_bottom = match rest {
-        [] if material.result.is_none() => false,
+        [] => false,
         [ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(next))]
             if next.n == 1
                 && count.minimum.0 == 1
@@ -65,6 +65,17 @@ pub(super) fn lower(
     let mut steps = vec![];
     for action in actions {
         let id = context.card_allocator.id(path)?;
+        if matches!(action, Action::Reveal { .. })
+            && let Some(name) = &material.result
+        {
+            context.record_paid_name(
+                name,
+                ObjectReceipt::Reveal {
+                    receipt: ReceiptReference::new(ReceiptId(id)),
+                },
+                path,
+            )?;
+        }
         steps.push(CostStep {
             keyword: None,
             materials: None,
@@ -129,8 +140,7 @@ pub(super) fn field(
     material: &ast::HandMaterial,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    if material.n.is_none() || material.upto.is_some() || material.any || material.result.is_some()
-    {
+    if material.n.is_none() || material.upto.is_some() || material.any {
         return Err(unsupported(path));
     }
     let decision = choice(context, material, path)?;
@@ -203,7 +213,10 @@ pub(super) fn banish(
     material: &ast::HandMaterial,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    let decision = single_choice(context, material, path)?;
+    if material.n != Some(1) || material.upto.is_some() || material.any {
+        return Err(unsupported(path));
+    }
+    let decision = choice(context, material, path)?;
     let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
         return Err(unsupported(path));
     };

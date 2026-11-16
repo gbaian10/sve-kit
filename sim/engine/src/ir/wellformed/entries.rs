@@ -457,6 +457,17 @@ impl Checker {
     }
 
     fn ability_declarations(&mut self, ability: &Ability) -> Checked {
+        if let Some((player, population, condition)) =
+            super::super::spell_chain::projection(ability)
+        {
+            self.player(player)?;
+            self.at("declarations/0/modifier/population", |checker| {
+                checker.selector(population)
+            })?;
+            return self.at("declarations/0/condition", |checker| {
+                checker.boolean(condition)
+            });
+        }
         if let Some((objects, condition)) = super::super::battle_damage_basis::projection(ability) {
             self.at("declarations/0/modifier/objects", |checker| {
                 checker.selector(objects)

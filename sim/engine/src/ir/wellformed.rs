@@ -243,6 +243,7 @@ struct Environment {
     single_material_moves: BTreeSet<ReceiptId>,
     single_discards: BTreeSet<ReceiptId>,
     paid_counters: BTreeSet<ReceiptId>,
+    name_payments: BTreeSet<ReceiptId>,
 }
 impl Environment {
     fn inherit_values(&mut self, other: &Self) {
@@ -261,6 +262,8 @@ impl Environment {
             .extend(other.single_discards.iter().copied());
         self.paid_counters
             .extend(other.paid_counters.iter().copied());
+        self.name_payments
+            .extend(other.name_payments.iter().copied());
         self.access.extend(other.access.clone());
         self.public_board_singles
             .extend(other.public_board_singles.iter().copied());
@@ -338,6 +341,7 @@ impl Checker {
             single_material_moves: BTreeSet::new(),
             single_discards: BTreeSet::new(),
             paid_counters: BTreeSet::new(),
+            name_payments: BTreeSet::new(),
         };
         Self {
             resolution_entry: env.clone(),
@@ -1216,7 +1220,9 @@ impl Checker {
             CaptureTime::AtResolution { .. } => {
                 let current = self.env.clone();
                 self.env = self.resolution_entry.clone();
+                self.capture_time = Some(at);
                 let result = check(self);
+                self.capture_time = None;
                 self.env = current;
                 result
             }

@@ -286,6 +286,11 @@ fn reveal_materials_do_not_authorize_other_hand_costs_or_public_formal_targets()
 
 #[test]
 fn reveal_cost_lowering_rejects_unrequested_material_shapes() {
+    let named = json!({"reveal":{"sel":{"who":"self","zone":"hand"},"n":1_u8,"result":"paid"}});
+    assert!(
+        lowerer().lower(&tree(&named, &json!([]))).is_ok(),
+        "an exact own-hand reveal supports a named payment result"
+    );
     let mut mixed = cost(1, false);
     mixed["steps"].as_array_mut().unwrap().push(json!({
         "discard":{"sel":{"who":"self","zone":"hand"},"n":1}
@@ -315,7 +320,6 @@ fn reveal_cost_lowering_rejects_unrequested_material_shapes() {
         json!({"sel":{"who":"self","zone":"hand"},"upto":1}),
         json!({"sel":{"who":"self","zone":"hand"},"any":true}),
         json!({"sel":{"who":"self","zone":"hand","name_contains":""},"n":1}),
-        json!({"sel":{"who":"self","zone":"hand"},"n":1,"result":"paid"}),
     ] {
         lowerer()
             .lower(&tree(&json!({"reveal":material}), &json!([])))

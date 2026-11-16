@@ -103,7 +103,17 @@ fn query_filter(
         }
         _ => return Err(unsupported(path)),
     };
-    let predicate = super::selection::field_filter(&filter, candidate);
+    let mut predicate = super::selection::field_filter(&filter, candidate);
+    if let Some(ast::SearchName::SameAs { same_as }) = &query.name {
+        let names = context.paid_name_filter(same_as, candidate, path)?;
+        predicate = if predicate == Expr::Literal(Bool(true)) {
+            names
+        } else {
+            Expr::Compute(Box::new(Predicate::And {
+                predicates: vec![predicate, names],
+            }))
+        };
+    }
     let predicate = context.dynamic_limits(
         predicate,
         candidate,

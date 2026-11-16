@@ -1,0 +1,41 @@
+cards:
+  BP10-111:
+    abilities:
+      - evolve:
+          cost:
+            pp: 3
+        line: 1
+      - keywords:
+          - ward
+        line: 2
+      - fanfare:
+          cost:
+            reveal:
+              n: 1
+              result: payment
+              sel:
+                kind: follower
+                who: self
+                zone: hand
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  name:
+                    same_as:
+                      objects_of: payment
+                      view: before
+                  who: self
+                  zone: deck
+                to: ex
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

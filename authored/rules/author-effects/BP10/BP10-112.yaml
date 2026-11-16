@@ -1,0 +1,37 @@
+cards:
+  BP10-112:
+    abilities:
+      - keywords:
+          - ward
+        line: 1
+      - evolve_time:
+          cost:
+            banish:
+              n: 1
+              result: payment
+              sel:
+                kind: follower
+                who: self
+                zone: cemetery
+          do:
+            - search:
+                sel:
+                  kind: follower
+                  name:
+                    same_as:
+                      objects_of: payment
+                      view: before
+                  who: self
+                  zone: deck
+                to: ex
+                upto: 2
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

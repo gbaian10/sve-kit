@@ -253,7 +253,7 @@ impl Game {
         &mut self,
         holder: &str,
     ) -> Result<Characteristics> {
-        let printed_only = self.object(holder)?.zone == "ex";
+        let printed_only = self.object(holder)?.zone != "field";
         self.event_characteristics(holder, printed_only)
     }
 
@@ -316,7 +316,7 @@ impl Game {
             });
         }
         let (attack, life) = if kind == CardKind::Follower && printed_only {
-            // Hand and EX stat patches are not admitted; snapshots retain printed values.
+            // Non-field stat patches are not admitted; payment snapshots retain printed values.
             (
                 Info::Present(Int(text(&printed["power"])?.parse().map_err(invalid)?)),
                 Info::Present(Int(text(&printed["hp"])?.parse().map_err(invalid)?)),

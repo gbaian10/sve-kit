@@ -26,14 +26,15 @@ impl Game {
             },
             |execution| execution.ids.clone(),
         );
-        // Read characteristics only when requested; eager keyword projection could reenter a provider.
-        self.card_execution(
+        // Provider reads cannot recursively capture play counts or inherit private caller slots.
+        // Well-formedness excludes AtPlay and AtResolution reads from provider conditions.
+        Ok(self.provider_card_execution(
             Context {
                 source: source.into(),
                 generation: Generation(object.generation),
                 controller: player_id(&object.controller)?,
             },
             ids,
-        )
+        ))
     }
 }

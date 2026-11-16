@@ -246,6 +246,7 @@ pub(super) fn record_result(
         || context.receipt_reads.paid_counters.contains_key(name)
         || context.receipt_reads.paid_materials.contains_key(name)
         || context.receipt_reads.paid_material_acts.contains_key(name)
+        || context.receipt_reads.paid_names.contains_key(name)
         || context.observations.contains_key(name)
         || context.targets.contains_key(name)
         || context.recipient_targets.contains_key(name)

@@ -1534,7 +1534,7 @@ pub(super) struct SearchQuery {
     pub r#trait: Option<String>,
     #[serde(default)]
     pub traits_all: Vec<String>,
-    pub name: Option<String>,
+    pub name: Option<SearchName>,
     pub class: Option<String>,
     pub name_contains: Option<String>,
     #[serde(default)]
@@ -1556,6 +1556,22 @@ pub(super) struct SearchQuery {
 #[serde(deny_unknown_fields)]
 pub(super) struct SearchWhere {
     pub cmp: SearchPowerComparison,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum SearchName {
+    Literal(String),
+    SameAs { same_as: BeforeObjects },
+}
+
+impl SearchName {
+    pub(super) fn literal(&self) -> Option<&str> {
+        match self {
+            Self::Literal(value) => Some(value),
+            Self::SameAs { .. } => None,
+        }
+    }
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -3679,6 +3695,29 @@ pub(super) enum CounterCapRule {
 pub(super) enum RuleOverride {
     CounterCap(CounterCap),
     BattleDamageBasis(BattleDamageRule),
+    SpellChainPopulation(SpellChainRule),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SpellChainRule {
+    #[serde(rename = "rule")]
+    pub _rule: SpellChainRuleKind,
+    pub who: SelfPlayer,
+    pub of: Population,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SpellChainRuleKind {
+    SpellchainPopulation,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Population {
+    Query(Box<PublicQuery>),
+    Union { any_of: Vec<PublicQuery> },
 }
 
 #[derive(Deserialize)]

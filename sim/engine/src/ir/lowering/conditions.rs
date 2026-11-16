@@ -147,6 +147,9 @@ impl BodyContext<'_> {
         spells: bool,
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
+        if spells {
+            return self.spell_chain_condition(threshold, path);
+        }
         let count = ast::Number::Count {
             count: ast::CountQuery {
                 face_up: None,

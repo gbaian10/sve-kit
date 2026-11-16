@@ -71,6 +71,7 @@ mod duration;
 mod earth;
 mod event_reads;
 mod repeated_moves;
+mod spell_chain;
 pub(in crate::game) use card::ability_restrictions::AbilityLock;
 pub(in crate::game) use card::attack_restrictions::AttackLock;
 mod receipt_counts;
