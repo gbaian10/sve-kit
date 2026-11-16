@@ -1,6 +1,7 @@
 use super::*;
+use crate::battle::ProjectionError;
+use crate::battle::history::project_history;
 use sve_battle_contract::{MAX_SAFE_INTEGER, observation as wire};
-use sve_engine::battle::{ProjectionError, project_history};
 use sve_engine::game::player::{ObjectHandle, Viewer, observation as native};
 
 fn subject(current: Option<ObjectHandle>) -> native::SubjectHistory {

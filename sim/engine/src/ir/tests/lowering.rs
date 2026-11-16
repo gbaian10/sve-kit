@@ -6,6 +6,11 @@ use serde_json::{Value, json};
 #[path = "../../../tests/support/expanded.rs"]
 mod expanded;
 
+#[cfg(feature = "runner")]
+pub(crate) fn payment_expanded_tree() -> &'static Value {
+    expanded::tree()
+}
+
 #[path = "current_keywords.rs"]
 mod current_keywords;
 

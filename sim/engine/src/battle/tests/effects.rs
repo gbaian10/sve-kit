@@ -1,4 +1,4 @@
-use super::board_fixture::{catalog_for, empty_board as board, fixture};
+use super::board_fixture::{Fixture, catalog_for, empty_board as board, fixture};
 use super::board_fixtures::object;
 use crate::battle::ProjectionError;
 use crate::battle::effects::{project_card_effects, project_player_effects};
@@ -8,8 +8,10 @@ use serde_json::json;
 use sve_battle_contract::{MAX_SAFE_INTEGER, SourceRef, observation as wire};
 use sve_engine::game::player::{Viewer, observation as native};
 
-fn project(observed: &native::Observation) -> Result<Vec<wire::InstalledEffect>, ProjectionError> {
-    let binding = fixture().map_err(|_fixture_error| ProjectionError::Unavailable)?;
+fn project(
+    binding: &Fixture,
+    observed: &native::Observation,
+) -> Result<Vec<wire::InstalledEffect>, ProjectionError> {
     project_player_effects(&binding.catalog, &binding.references, observed, Viewer::P1)
 }
 
@@ -100,7 +102,7 @@ fn assert_changes(cases: Vec<(native::InstalledChange, Value)>) -> Option<()> {
     observed.players.get_mut(1)?.effects = vec![effect(native::InstalledChange::BanishPlay)];
     for (change, expected) in cases {
         observed.players.get_mut(0)?.effects = vec![effect(change.clone()), effect(change)];
-        let projected = project(&observed).ok()?;
+        let projected = project(binding, &observed).ok()?;
         assert_eq!(projected.len(), 2, "both installed layers must be retained");
         let first = projected.first()?;
         assert_eq!(first, projected.get(1)?, "repeated layers must survive");
@@ -115,7 +117,7 @@ fn assert_changes(cases: Vec<(native::InstalledChange, Value)>) -> Option<()> {
             .get_mut(0)?
             .effects
             .insert(1, effect(native::InstalledChange::Pilot));
-        let reordered = project(&reversed).ok()?;
+        let reordered = project(binding, &reversed).ok()?;
         assert_eq!(
             reordered.first(),
             reordered.get(2),
@@ -265,7 +267,7 @@ fn wire_installed_effects_preserve_lifetime_and_interval_independently() {
             ];
             observed.players[0].effects = vec![layer];
             assert_eq!(
-                serde_json::to_value(project(&observed).unwrap()).unwrap(),
+                serde_json::to_value(project(fixture().unwrap(), &observed).unwrap()).unwrap(),
                 json!([{
                     "source":null,"expires":expected,"main_live":main_live,"active":active,
                     "intervals":[{"kind":"next_turn","player":"p2"},{"kind":"current_turn"},{"kind":"next_turn","player":"p1"},{"kind":"current_turn"}],
@@ -307,7 +309,8 @@ fn wire_installed_effects_keep_empty_restrictions_and_validate_every_current_lin
                 sources: Some(vec![holder.clone(), holder.clone()]),
             })];
             assert_eq!(
-                serde_json::to_value(&project(&observed).unwrap()[0].change).unwrap(),
+                serde_json::to_value(&project(fixture().unwrap(), &observed).unwrap()[0].change)
+                    .unwrap(),
                 json!({
                     "kind":"prevention","damage":name,"change":description,"remaining":0_i32,
                     "recipients":[{"kind":"card","object":holder.as_str()},{"kind":"leader","player":"p2"},{"kind":"card","object":holder.as_str()}],
@@ -328,7 +331,7 @@ fn wire_installed_effects_keep_empty_restrictions_and_validate_every_current_lin
     *empty_recipients = Some(vec![]);
     *empty_sources = Some(vec![]);
     observed.players[0].effects = vec![layer];
-    let result = serde_json::to_value(project(&observed).unwrap()).unwrap();
+    let result = serde_json::to_value(project(fixture().unwrap(), &observed).unwrap()).unwrap();
     assert_eq!(result[0]["change"]["recipients"], json!([]));
     assert_eq!(result[0]["change"]["sources"], json!([]));
     for bad_source in [false, true] {
@@ -351,7 +354,10 @@ fn wire_installed_effects_keep_empty_restrictions_and_validate_every_current_lin
                 zone.cards.retain(|member| member.card.handle != holder);
             }
         }
-        assert_eq!(project(&retired), Err(ProjectionError::Unavailable));
+        assert_eq!(
+            project(fixture().unwrap(), &retired),
+            Err(ProjectionError::Unavailable)
+        );
     }
 }
 
@@ -368,7 +374,7 @@ fn wire_installed_effects_refuse_inexact_numbers_without_clamping_or_truncating(
             attack: Some(Number::Add(amount)),
             life: Some(Number::Set(amount)),
         })];
-        let result = serde_json::to_value(project(&observed).unwrap()).unwrap();
+        let result = serde_json::to_value(project(fixture().unwrap(), &observed).unwrap()).unwrap();
         assert_eq!(result[0]["change"]["attack"]["amount"], json!(amount));
         assert_eq!(result[0]["change"]["life"]["amount"], json!(amount));
     }
@@ -399,7 +405,10 @@ fn wire_installed_effects_refuse_inexact_numbers_without_clamping_or_truncating(
             },
         ] {
             observed.players[0].effects = vec![effect(change)];
-            assert_eq!(project(&observed), Err(ProjectionError::Range));
+            assert_eq!(
+                project(fixture().unwrap(), &observed),
+                Err(ProjectionError::Range)
+            );
         }
     }
     for amount in [0, MAX_SAFE_INTEGER, MAX_SAFE_INTEGER + 1, u64::MAX] {
@@ -430,9 +439,13 @@ fn wire_installed_effects_refuse_inexact_numbers_without_clamping_or_truncating(
         ] {
             observed.players[0].effects = vec![effect(change)];
             if amount > MAX_SAFE_INTEGER {
-                assert_eq!(project(&observed), Err(ProjectionError::Range));
+                assert_eq!(
+                    project(fixture().unwrap(), &observed),
+                    Err(ProjectionError::Range)
+                );
             } else {
-                let result = serde_json::to_value(project(&observed).unwrap()).unwrap();
+                let result =
+                    serde_json::to_value(project(fixture().unwrap(), &observed).unwrap()).unwrap();
                 assert_eq!(result[0].pointer(pointer), Some(&json!(amount)));
             }
         }
@@ -464,7 +477,10 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
         face: adopted_face,
         holder: link,
         ..
-    } = &project(&observed).unwrap()[0].source.clone().unwrap()
+    } = &project(fixture().unwrap(), &observed).unwrap()[0]
+        .source
+        .clone()
+        .unwrap()
     else {
         panic!("card origin")
     };
@@ -481,7 +497,7 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
     }
     assert_eq!(
         project_card(&observed).unwrap().unwrap(),
-        project(&observed).unwrap()
+        project(fixture().unwrap(), &observed).unwrap()
     );
     for player in &mut observed.players {
         for zone in &mut player.zones {
@@ -524,7 +540,7 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
             wording: None,
             holder: None,
         });
-        assert_eq!(project(&observed), Err(expected));
+        assert_eq!(project(fixture().unwrap(), &observed), Err(expected));
     }
     let mut empty = observed.clone();
     empty.players[0].effects.clear();
@@ -562,14 +578,17 @@ fn wire_installed_effects_retire_links_without_erasing_printing_and_refuse_dupli
             zone.cards.retain(|member| member.card.handle != holder);
         }
     }
-    assert_eq!(project(&retired), Err(ProjectionError::Unavailable));
+    assert_eq!(
+        project(fixture().unwrap(), &retired),
+        Err(ProjectionError::Unavailable)
+    );
     retired.players[0].effects[0]
         .source
         .as_mut()
         .unwrap()
         .holder = None;
     assert_eq!(
-        serde_json::to_value(project(&retired).unwrap()).unwrap()[0]["source"],
+        serde_json::to_value(project(fixture().unwrap(), &retired).unwrap()).unwrap()[0]["source"],
         json!({
             "kind":"card","printing_id":"printing-follower","face":1_i32,"line":2_i32,"holder":null
         })
@@ -581,7 +600,10 @@ fn wire_installed_effects_retire_links_without_erasing_printing_and_refuse_dupli
         .unwrap();
     let duplicate = field.cards[0].clone();
     field.cards.push(duplicate);
-    assert_eq!(project(&observed), Err(ProjectionError::Unavailable));
+    assert_eq!(
+        project(fixture().unwrap(), &observed),
+        Err(ProjectionError::Unavailable)
+    );
     assert_eq!(
         project_card_effects(
             &fixture().unwrap().catalog,

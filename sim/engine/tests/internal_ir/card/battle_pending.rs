@@ -52,17 +52,20 @@ fn wire_pending_uses_authoritative_lastwords_without_relinking_after_departure()
         }
         let before = exact_authority(&first);
         for viewer in [Viewer::P1, Viewer::P2] {
-            let projected = first
+            let board = first
                 .battle_observation(viewer, &fixture().references)
-                .unwrap()
-                .pending;
-            assert_eq!(
-                projected,
-                second
-                    .battle_observation(viewer, &fixture().references)
-                    .unwrap()
-                    .pending
-            );
+                .unwrap();
+            let other = second
+                .battle_observation(viewer, &fixture().references)
+                .unwrap();
+            if viewer == actor {
+                assert_eq!(
+                    board, other,
+                    "the actor's entire public stop is independent of the other private hand"
+                );
+            }
+            let projected = board.pending;
+            assert_eq!(projected, other.pending);
             assert_eq!(projected.len(), 1);
             let SourceRef::Card {
                 printing_id,

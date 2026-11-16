@@ -3,21 +3,14 @@
     reason = "Unexpected decisions invalidate the X payment scenarios."
 )]
 use super::*;
+use crate::payment_fixtures;
 use alloc::collections::BTreeMap;
-use sve_battle_contract::observation as wire;
-use sve_engine::battle::project_costs;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::Viewer;
-use sve_engine::game::player::observation::{CostLine, PendingCost, PpQuote};
+use sve_engine::game::player::observation::PendingCost;
 
 fn tree(head: &str, body: Value) -> Value {
-    let mut tree = fanfare::expanded::tree().clone();
-    let prototype = tree["cards"]["BP01-041"].clone();
-    let mut entry = prototype["abilities"][0].clone();
-    entry.as_object_mut().unwrap().remove("activate");
-    entry[head] = body;
-    tree["cards"] = json!({"unit-follower":{"meta":prototype["meta"],"abilities":[entry]}});
-    tree
+    payment_fixtures::x_document(fanfare::expanded::tree(), head, body).unwrap()
 }
 fn program(body: Value) -> WellFormedCardProgram {
     lowerer()
@@ -27,13 +20,7 @@ fn program(body: Value) -> WellFormedCardProgram {
         .unwrap()
 }
 fn board(program: &WellFormedCardProgram, pp: u8) -> Game {
-    let mut initial = setup(1, json!([]));
-    initial["players"]["P1"]["pp"] = json!({"current":pp,"max":pp});
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
-    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "X-PP").unwrap();
-    game.load_internal_card("unit-follower", program).unwrap();
-    game
+    payment_fixtures::x_board(program, pp).unwrap()
 }
 fn awaiting(play: CardPlay) -> DecisionView {
     let CardPlay::Awaiting(question) = play else {
@@ -60,73 +47,6 @@ fn bounds(question: &DecisionView, maximum: u64) {
         }),
         "X is capped by the complete PP payment, before targets"
     );
-}
-
-#[test]
-fn x_pp_counts_repeated_payments_and_fixed_fees_and_uses_one_immutable_answer() {
-    let program = program(
-        json!({"x":{},"cost":{"steps":[{"pp":2},{"pp":"x"},{"pp":"x"},{"act_self":true}]},"do":[{"buff":{"on":"this","power":"x","hp":"x"}}]}),
-    );
-    let mut game = board(&program, 7);
-    let question = start(&mut game, &program);
-    bounds(&question, 2);
-    let cost = cost_observation::active(&game);
-    let projected = project_costs(&game.observe(Viewer::P1).unwrap()).unwrap();
-    let quoted = projected.current_play.unwrap().cost;
-    assert_eq!(quoted.total_pp, None);
-    assert_eq!(quoted.pending, [wire::PendingCost::X]);
-    assert!(quoted.groups[0].lines.iter().any(|line| matches!(line,
-        wire::CostLine::Pp { quote: wire::PpQuote::Variable { fixed, copies, x:None } }
-        if fixed.get() == 2 && copies.get() == 2)));
-    assert!(
-        project_costs(&game.observe(Viewer::P2).unwrap())
-            .unwrap()
-            .current_play
-            .is_none()
-    );
-    assert_eq!(cost.total_pp, None);
-    assert_eq!(cost.pending, [PendingCost::X]);
-    assert!(
-        cost.groups[0]
-            .lines
-            .contains(&CostLine::Pp(PpQuote::Variable {
-                fixed: 2,
-                copies: 2,
-                x: None
-            })),
-        "the quote explains fixed PP and the repeated X payments"
-    );
-    let before = exact_authority(&game);
-    for (actor, value) in [
-        (PlayerId { seat: 2 }, 1),
-        (question.actor, 3),
-        (question.actor, u64::MAX),
-    ] {
-        game.answer_internal_card(actor, question.token, Answer::Integer(Nat(value)))
-            .unwrap_err();
-        assert_eq!(
-            exact_authority(&game),
-            before,
-            "invalid X keeps the original question and unspent resources"
-        );
-    }
-    let mut stale = question.token;
-    stale.epoch = stale.epoch.saturating_add(1);
-    game.answer_internal_card(question.actor, stale, Answer::Integer(Nat(1)))
-        .unwrap_err();
-    assert_eq!(exact_authority(&game), before);
-    resolved(
-        game.answer_internal_card(question.actor, question.token, Answer::Integer(Nat(1)))
-            .unwrap(),
-    );
-    let view = game.projection(View::Referee).unwrap();
-    assert_eq!(
-        view["P1"]["pp"]["current"], 3_u8,
-        "two fixed PP and two copies of the same X are paid"
-    );
-    assert_eq!(view["objects"]["s"]["power"], 3_u8);
-    assert_eq!(view["objects"]["s"]["hp"], 4_u8);
-    assert_eq!(view["objects"]["s"]["acted"], true);
 }
 
 #[test]

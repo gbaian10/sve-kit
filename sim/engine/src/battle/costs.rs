@@ -16,8 +16,8 @@ type Result<T> = result::Result<T, ProjectionError>;
 /// # Errors
 /// Refuses unknown, duplicate or cross-zone quote subjects, inconsistent object
 /// scopes, and numbers outside the wire's exact integer range.
-#[cfg(feature = "runner")]
-pub fn project_costs(observation: &native::Observation) -> Result<wire::CostObservation> {
+#[cfg(all(test, feature = "runner"))]
+pub(super) fn project_costs(observation: &native::Observation) -> Result<wire::CostObservation> {
     let objects = ObjectScope::new(observation)?;
     scoped(observation, &objects)
 }

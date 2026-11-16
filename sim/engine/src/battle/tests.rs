@@ -20,3 +20,11 @@ mod rule_fixtures;
 
 mod effects;
 mod pending;
+
+mod cost_flow;
+#[path = "../../tests/support/payment_fixtures.rs"]
+mod payment_fixtures;
+
+#[path = "../../tests/support/history_fixture.rs"]
+mod history_fixture;
+mod history_flow;
