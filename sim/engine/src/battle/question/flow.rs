@@ -1,4 +1,5 @@
 //! Rule-owned decisions are separate from effect answer domains.
+//! F02A owns this family; F02B/F02D keep effect shapes in Decision.
 
 use super::{AnswerError, Binding as QuestionBinding, Result, decision::Context};
 use crate::battle::{BattleReferences, ProjectionError};
