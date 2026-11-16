@@ -41,6 +41,7 @@ use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::ir::{advance_entry, victory, x_pp};
 use crate::ir::{
     battle_damage_basis, choice_rules, counter_caps, draw_restrictions, evolution_limits,
+    spell_chain,
 };
 mod entry_posture;
 mod move_replacement;
@@ -1118,6 +1119,11 @@ pub(super) fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
+    if let Some((_player, population, condition)) = spell_chain::projection(ability) {
+        super::spell_chain::check_population(population)?;
+        super::ordering::check_condition(condition, &located.source)?;
+        return Ok(true);
+    }
     if let Some((objects, condition)) = battle_damage_basis::projection(ability) {
         selection::field_selector(objects)?;
         super::ordering::check_condition(condition, &located.source)?;
@@ -1196,6 +1202,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
     if battle_damage_basis::projection(ability).is_some()
+        || spell_chain::projection(ability).is_some()
         || ir_dice::rerolls(ability).is_some()
         || names::name(ability).is_some()
         || evolution_limits::is_static(ability)

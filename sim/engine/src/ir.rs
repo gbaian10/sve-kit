@@ -192,6 +192,7 @@ pub(crate) mod reveal_until;
 pub(crate) mod ride;
 mod runtime;
 pub(crate) mod shuffle;
+pub(crate) mod spell_chain;
 pub(crate) mod stand_restrictions;
 pub(crate) mod static_declarations;
 pub(crate) mod trigger_multiplicity;

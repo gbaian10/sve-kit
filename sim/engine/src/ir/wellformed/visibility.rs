@@ -63,6 +63,7 @@ impl Checker {
         let mut probe = self.clone();
         if matches!(at, CaptureTime::AtResolution { .. }) {
             probe.env = self.resolution_entry.clone();
+            probe.capture_time = Some(at);
         }
         probe.infer_access(check)
     }

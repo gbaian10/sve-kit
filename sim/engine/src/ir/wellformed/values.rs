@@ -187,10 +187,11 @@ impl Checker {
                     execution,
                     at,
                 } => {
-                    if self.play_entry.is_none()
-                        || *execution != (ExecutionRef::Current {})
-                        || self.count_time != Some(*at)
-                    {
+                    let resolution = matches!(read.as_ref(), NatFrozen::SpellChain { .. })
+                        && *at == SpellCountTime::AtResolution
+                        && matches!(self.capture_time, Some(CaptureTime::AtResolution { .. }));
+                    let play = self.play_entry.is_some() && self.count_time == Some(*at);
+                    if *execution != (ExecutionRef::Current {}) || !(resolution || play) {
                         return Err(self.error(WellFormedReason::CaptureTiming));
                     }
                     self.player(player)

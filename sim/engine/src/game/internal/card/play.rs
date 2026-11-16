@@ -1277,20 +1277,10 @@ impl Game {
         let mut counts = BTreeMap::new();
         for seat in [1, 2] {
             let cards = self.zone_ids(seat_name(PlayerId { seat })?, "cemetery");
-            let mut spells = 0_u64;
-            for id in &cards {
-                if self.object_type(id)? == "スペル" {
-                    spells = spells
-                        .checked_add(1)
-                        .ok_or_else(|| invalid("SpellChain count overflow"))?;
-                }
-            }
+            let spells = self.internal_spell_chain(PlayerId { seat })?;
             counts.insert(
                 seat,
-                (
-                    Nat(spells),
-                    Nat(u64::try_from(cards.len()).map_err(invalid)?),
-                ),
+                (spells, Nat(u64::try_from(cards.len()).map_err(invalid)?)),
             );
         }
         Ok(counts)
@@ -1321,6 +1311,16 @@ impl Game {
         context: Context,
         ids: BTreeMap<ObjectId, String>,
     ) -> Result<Execution> {
+        let mut execution = self.provider_card_execution(context, ids);
+        execution.play_counts = self.internal_play_counts()?;
+        Ok(execution)
+    }
+
+    pub(in crate::game::internal) fn provider_card_execution(
+        &self,
+        context: Context,
+        ids: BTreeMap<ObjectId, String>,
+    ) -> Execution {
         let play_origin =
             self.state
                 .objects
@@ -1330,7 +1330,7 @@ impl Game {
                     "ex" => Some(ZoneKind::Ex),
                     _ => None,
                 });
-        Ok(Execution {
+        Execution {
             plan: None,
             terminated: false,
             context,
@@ -1369,14 +1369,14 @@ impl Game {
             play_origin_object: None,
             card_payment: None,
             trigger_occurrence: None,
-            play_counts: self.internal_play_counts()?,
+            play_counts: BTreeMap::new(),
             ward_entries: Vec::new(),
             creating: None,
             nested: None,
             cost_override: None,
             play_origin_player: None,
             began: self.player_event_serial(),
-        })
+        }
     }
 
     pub(super) fn run_card_play(

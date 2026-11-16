@@ -3695,6 +3695,29 @@ pub(super) enum CounterCapRule {
 pub(super) enum RuleOverride {
     CounterCap(CounterCap),
     BattleDamageBasis(BattleDamageRule),
+    SpellChainPopulation(SpellChainRule),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SpellChainRule {
+    #[serde(rename = "rule")]
+    pub _rule: SpellChainRuleKind,
+    pub who: SelfPlayer,
+    pub of: Population,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SpellChainRuleKind {
+    SpellchainPopulation,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum Population {
+    Query(Box<PublicQuery>),
+    Union { any_of: Vec<PublicQuery> },
 }
 
 #[derive(Deserialize)]

@@ -978,6 +978,11 @@ impl Execution {
                 NatFrozen::SpellChain {
                     player,
                     execution: ExecutionRef::Current {},
+                    at: SpellCountTime::AtResolution,
+                } => game.internal_spell_chain(self.player(game, player)?),
+                NatFrozen::SpellChain {
+                    player,
+                    execution: ExecutionRef::Current {},
                     at: SpellCountTime::AtPlay,
                 } => {
                     let seat = self.player(game, player)?.seat;

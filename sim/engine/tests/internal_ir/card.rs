@@ -1113,3 +1113,6 @@ mod source_provenance_continuous;
 
 #[path = "card/layer3_entry_source.rs"]
 mod layer3_entry_source;
+
+#[path = "card/spell_chain.rs"]
+mod spell_chain;

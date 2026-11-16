@@ -556,6 +556,7 @@ fn play_requirement(code: &str) -> bool {
             | "shape.NatFrozen.NecroCharge"
             | "read.necro-charge"
             | "internal.SpellCountTime.AtPlay"
+            | "internal.SpellCountTime.AtResolution"
             | "shape.CaptureTime.AtPlay"
             | "shape.CaptureTime.AtSelection"
             | "shape.ExecutionRef.Current"

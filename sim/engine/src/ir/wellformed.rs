@@ -1220,7 +1220,9 @@ impl Checker {
             CaptureTime::AtResolution { .. } => {
                 let current = self.env.clone();
                 self.env = self.resolution_entry.clone();
+                self.capture_time = Some(at);
                 let result = check(self);
+                self.capture_time = None;
                 self.env = current;
                 result
             }
