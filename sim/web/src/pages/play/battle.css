@@ -1306,6 +1306,17 @@
   transition: transform 0.2s;
 }
 
+/* Put away, the hand leaves only its toggle above the edge. */
+.bp-hand-row.is-collapsed {
+  transform: translateY(calc(100% - 26px));
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bp-hand-row {
+    transition: none;
+  }
+}
+
 .bp-hand-scroll {
   max-width: 100%;
   overflow: auto hidden;
