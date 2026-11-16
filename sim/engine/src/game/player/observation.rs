@@ -112,8 +112,14 @@ pub struct Resources {
     pub maximum_pp: i64,
     /// Available evolution points.
     pub ep: i64,
+    /// Retained EP slots, expanded by increases beyond the existing pool.
+    pub ep_capacity: i64,
+    /// Depleted EP slots; recovering EP reduces this value.
+    pub ep_used: i64,
     /// Available super evolution points.
     pub sep: i64,
+    /// Owner's turn on which allocated SEP unlocks; retained after spending.
+    pub sep_available_from: Option<u64>,
 }
 
 /// Effective follower stats from the existing numeric reader.
@@ -641,7 +647,13 @@ impl Game {
                 pp: public_resource(&data.pp["current"])?,
                 maximum_pp: public_resource(&data.pp["max"])?,
                 ep: data.ep,
+                ep_capacity: data.ep_capacity,
+                ep_used: data
+                    .ep_capacity
+                    .checked_sub(data.ep)
+                    .ok_or_else(|| invalid("EP capacity difference overflow"))?,
                 sep: data.sep,
+                sep_available_from: data.sep_available_from,
             },
             effects: self.observed_player_effects(perspective, player)?,
             zones,

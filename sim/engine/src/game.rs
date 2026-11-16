@@ -108,12 +108,28 @@ struct Player {
     leader: Value,
     pp: Value,
     ep: i64,
+    ep_capacity: i64,
     sep: i64,
+    sep_available_from: Option<u64>,
     construction: String,
     title: String,
     title_code: String,
     deck_list: Value,
     zones: BTreeMap<String, Vec<Value>>,
+}
+
+impl Player {
+    const fn set_ep(&mut self, amount: i64) {
+        self.ep = amount;
+        // Recoveries reuse spent slots; increases beyond the existing pool add slots.
+        if amount > self.ep_capacity {
+            self.ep_capacity = amount;
+        }
+    }
+}
+
+fn sep_unlock_turn(first_player: &str, seat: &str) -> u64 {
+    if first_player == seat { 7 } else { 6 }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -487,13 +503,29 @@ impl Game {
                 }
                 zones.insert(zone.into(), ids);
             }
+            let ep = int(&entry["ep"]);
+            let ep_capacity = match entry.get("ep_capacity") {
+                Some(value) => value
+                    .as_i64()
+                    .ok_or_else(|| invalid("invalid EP capacity"))?,
+                None => ep,
+            };
+            let sep = int(&entry["sep"]);
+            let sep_available_from = match entry.get("sep_available_from") {
+                Some(Value::Null) => None,
+                Some(value) => Some(value.as_u64().ok_or_else(|| invalid("invalid SEP turn"))?),
+                None => (sep > 0)
+                    .then(|| sep_unlock_turn(string(&position["turn"]["first_player"]), seat)),
+            };
             players.insert(
                 seat.into(),
                 Player {
                     leader: entry["leader"].clone(),
                     pp: entry["pp"].clone(),
-                    ep: int(&entry["ep"]),
-                    sep: int(&entry["sep"]),
+                    ep,
+                    ep_capacity,
+                    sep,
+                    sep_available_from,
                     construction: string(&entry["construction"]).into(),
                     title: string(&entry["title"]).into(),
                     title_code: title_code.unwrap_or_default(),
