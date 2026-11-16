@@ -302,14 +302,19 @@ impl Game {
         // keeps that player bound when the procedure resumes.
         for stage in stages.iter().rev() {
             if stage.mode == (StageMode::NonChoiceSimultaneous {}) {
-                execution.todo.push_front(Node::Control {
-                    control: Control::EachPlayer {
-                        players: players.clone(),
-                        player: binding,
-                        stages: vec![stage.clone()],
-                        choice_order: PlayerOrder::TurnPlayerFirst,
-                    },
-                });
+                // The remainder dispatch reuses this procedure's locals; only the outer
+                // begin_procedure owns its EndProcedure marker.
+                execution.todo.push_front(
+                    Node::Control {
+                        control: Control::EachPlayer {
+                            players: players.clone(),
+                            player: binding,
+                            stages: vec![stage.clone()],
+                            choice_order: PlayerOrder::TurnPlayerFirst,
+                        },
+                    }
+                    .into(),
+                );
                 continue;
             }
             for member in order.iter().rev() {

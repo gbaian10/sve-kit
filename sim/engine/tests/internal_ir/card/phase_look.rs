@@ -297,8 +297,9 @@ fn each_player_sends_its_own_look_remainder_after_both_entries() {
             [{"choose":{"bind":"picked","from":{"in":"seen","kind":"follower"},"upto":1,"by":"p"}},
              {"move":{"ref":"picked","to":"field","result":"entered"}}],
             [{"move":{"ref":{"in":"seen","except":{"in":{"objects_of":"entered","view":"before"}}},"to":"cemetery","result":"milled"}}],
-            [{"life":{"who":"p","delta":{"count_of":"milled"}}}]
-        ]}}]),
+            [{"life":{"who":"p","delta":{"count_of":"milled"}}},
+             {"choose":{"bind":"after","from":{"who":"p","zone":"field","kind":"follower"},"n":1,"by":"p"}}]
+        ]}}, {"optional":{"do":[{"life":{"who":"self","delta":1}}]}}]),
         &json!([]),
     );
     let mut play = play.unwrap();
@@ -307,6 +308,7 @@ fn each_player_sends_its_own_look_remainder_after_both_entries() {
             panic!("each player chooses");
         };
         assert_eq!(q.actor, PlayerId { seat });
+        assert_eq!(game.internal_each_player_actor(), Some(PlayerId { seat }));
         for side in ["P1", "P2"] {
             assert_eq!(ids(&game, side, "cemetery"), Vec::<String>::new());
         }
@@ -314,7 +316,25 @@ fn each_player_sends_its_own_look_remainder_after_both_entries() {
             .answer_internal_card(q.actor, q.token, Answer::Targets(members(&q)))
             .unwrap();
     }
-    resolved(play);
+    for seat in [1_u32, 2] {
+        let CardPlay::Awaiting(q) = play else {
+            panic!("the next choice stage keeps the original procedure alive");
+        };
+        assert_eq!(q.actor, PlayerId { seat });
+        assert_eq!(game.internal_each_player_actor(), Some(PlayerId { seat }));
+        play = game
+            .answer_internal_card(q.actor, q.token, Answer::Targets(members(&q)))
+            .unwrap();
+    }
+    let CardPlay::Awaiting(tail) = play else {
+        panic!("an unrelated question follows the procedure");
+    };
+    assert_eq!(game.internal_each_player_actor(), None);
+    resolved(
+        game.answer_internal_card(tail.actor, tail.token, Answer::Integer(Nat(0)))
+            .unwrap(),
+    );
+    assert_eq!(game.internal_each_player_actor(), None);
     for side in ["P1", "P2"] {
         assert!(ids(&game, side, "field").contains(&format!("{side}-f")));
         assert_eq!(ids(&game, side, "cemetery"), [format!("{side}-y")]);
