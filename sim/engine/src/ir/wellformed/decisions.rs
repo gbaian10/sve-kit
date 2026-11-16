@@ -617,6 +617,7 @@ impl Checker {
                 receipt,
                 projection,
             } => match receipt {
+                ObjectReceipt::Random { receipt } => self.visible_receipt(receipt),
                 ObjectReceipt::Look { receipt } => self.visible_receipt(receipt),
                 ObjectReceipt::RevealUntil { receipt, .. } => self.visible_receipt(receipt),
                 // Every player saw the publicly revealed members.

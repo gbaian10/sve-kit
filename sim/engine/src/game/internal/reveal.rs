@@ -21,7 +21,10 @@ pub(super) struct PublicReveal {
 }
 
 pub(super) fn check_objects(objects: &Selector) -> Result<()> {
-    if matches!(objects, Selector::Bound { .. }) || look_receipt(objects).is_some() {
+    if matches!(objects, Selector::Bound { .. })
+        || look_receipt(objects).is_some()
+        || super::random_sample::receipt(objects).is_some()
+    {
         return Ok(());
     }
     let Selector::Zone {
@@ -97,6 +100,21 @@ impl Game {
         objects: &Selector,
     ) -> Result<()> {
         check_objects(objects)?;
+        if let Some(id) = super::random_sample::receipt(objects) {
+            let Some(InstructionOutcome::Sampled(members)) = execution.receipts.get(&id) else {
+                return Err(invalid("missing hand sample receipt"));
+            };
+            let members = members.clone();
+            for member in &members {
+                let object = self.object(execution.object_id(*member)?)?;
+                if object.generation != member.generation.0 || object.zone != "hand" {
+                    return Err(unsupported(
+                        "sample revelation requires the same hand generation",
+                    ));
+                }
+            }
+            return self.internal_reveal_members(execution, instruction, &members, None);
+        }
         let (members, selected) = match objects {
             Selector::Zone { players, .. } => {
                 let mut members = Vec::new();

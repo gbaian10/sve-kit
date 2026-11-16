@@ -1586,6 +1586,7 @@ fn check_instruction(
             | Action::Dice { .. }
             | Action::Declare { .. }
             | Action::Reveal { .. }
+            | Action::Random { .. }
             | Action::PlayCard { .. }
             | Action::PlayAbility { .. }
             | Action::Move { .. }

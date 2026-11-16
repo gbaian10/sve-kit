@@ -98,6 +98,7 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
+mod random_sample;
 mod resource;
 mod reveal;
 mod reveal_until;
@@ -422,6 +423,8 @@ pub enum InstructionOutcome {
     Granted(Vec<ObjectRef>),
     /// Publicly revealed generations; no subsequent private selector authority.
     Revealed(Vec<ObjectRef>),
+    /// Private generations sampled without movement or publication.
+    Sampled(Vec<ObjectRef>),
     /// Objects observed without movement or a generation change.
     Look(LookOutcome),
     /// The publicly revealed prefix, its matching subset and whether the cursor reached the end.
@@ -1784,6 +1787,7 @@ impl Game {
             Action::FlipDown { objects } => {
                 self.internal_flip_down(execution, &instruction, objects)?;
             }
+            Action::Random { .. } => self.internal_random_sample(execution, &instruction)?,
             Action::Shuffle { .. } => self.internal_shuffle(execution, &instruction)?,
             Action::Move { .. } if shuffle_shape::placement(&instruction.action).is_some() => {
                 self.internal_shuffle_placement(execution, &instruction)?;
@@ -1921,7 +1925,7 @@ impl Game {
                     .receipts
                     .insert(instruction.receipt, InstructionOutcome::Installed(objects));
             }
-            _ => return Err(unsupported("instruction")),
+            Action::Fusion { .. } => return Err(unsupported("instruction")),
         }
         Ok(())
     }

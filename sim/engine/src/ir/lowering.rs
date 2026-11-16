@@ -2163,6 +2163,12 @@ impl<'definitions> BodyContext<'definitions> {
                 continue;
             }
             if let ast::Step::Reveal(value) = step
+                && value.random.is_some()
+            {
+                steps.extend(self.random_reveal(step, &step_path, source, ability_source)?);
+                continue;
+            }
+            if let ast::Step::Reveal(value) = step
                 && value.top.is_some()
             {
                 steps.extend(self.reveal_top(value, &step_path, source, ability_source)?);

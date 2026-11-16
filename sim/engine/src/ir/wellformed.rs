@@ -782,6 +782,14 @@ impl Checker {
                 self.player(player)?;
                 self.integer(count)
             }
+            Action::Random {
+                population,
+                visibility,
+                ..
+            } => {
+                self.selector(population)?;
+                self.visibility(visibility)
+            }
             Action::RevealUntil {
                 deck,
                 candidate,
@@ -1229,6 +1237,7 @@ const fn outcome(action: &Action) -> TypeId {
         Action::Look { .. } => TypeId::of::<LookOutcome>(),
         Action::RevealUntil { .. } => TypeId::of::<super::RevealUntilOutcome>(),
         Action::Reveal { .. } => TypeId::of::<super::RevealOutcome>(),
+        Action::Random { .. } => TypeId::of::<super::RandomOutcome>(),
         Action::Counter { .. } => TypeId::of::<CounterQuantityOutcome>(),
         Action::FlipDown { .. } | Action::FlipUp { .. } => TypeId::of::<FlipOutcome>(),
         Action::Damage { .. } => TypeId::of::<super::DamageQuantityOutcome>(),
@@ -1256,7 +1265,6 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::RideDrive { .. }
         | Action::DriveCheck { .. }
         | Action::Equip { .. }
-        | Action::Random { .. }
         | Action::Dice { .. }
         | Action::Declare { .. }
         | Action::ScheduleTurn { .. }

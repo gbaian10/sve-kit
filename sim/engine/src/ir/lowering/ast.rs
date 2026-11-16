@@ -3281,6 +3281,13 @@ pub(super) struct Reveal {
     pub r#ref: Option<RevealRef>,
     pub top: Option<DeckTop>,
     pub bind: String,
+    pub random: Option<RandomSample>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RandomSample {
+    pub n: u64,
 }
 
 #[derive(Deserialize)]

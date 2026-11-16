@@ -1001,7 +1001,7 @@ impl BodyContext<'_> {
         value: &ast::Reveal,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        if value.top.is_some() {
+        if value.top.is_some() || value.random.is_some() {
             return Err(unsupported(path));
         }
         match value.r#ref.as_ref().ok_or_else(|| unsupported(path))? {
