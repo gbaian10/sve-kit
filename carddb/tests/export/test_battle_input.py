@@ -8,8 +8,7 @@ from sve_carddb.core.json import array, canonical, digest, object_value, parse, 
 from sve_carddb.export.battle_input import build_battle_inputs
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import ExportError, Snapshot, load_battle_inputs
-
-from .test_name_annotations import name_snapshot
+from tests.support.battle_projection import snapshot as compatible_snapshot
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -184,7 +183,7 @@ def test_battle_input_keeps_observed_wording_and_all_historical_owners() -> None
 
 
 def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None:
-    _projection, snapshot, _plan = name_snapshot()
+    snapshot = compatible_snapshot()
     roots = Roots(tmp_path / "public", tmp_path / "private")
     write_preview(snapshot, roots, {})
     result = load_battle_inputs(roots.preview, "jp")
@@ -400,3 +399,34 @@ def test_en_catalogue_preserves_its_own_region_without_normalizing_card_numbers(
     assert {
         object_value(row)["card_no"] for row in array(result.references["faces"])
     } == {"SYNⓈaEN"}
+
+
+@pytest.mark.parametrize(
+    "scenario", ["missing_class", "empty_class", "noncontiguous_faces"]
+)
+def test_native_characteristic_and_face_coordinates_must_be_representable(
+    scenario: str,
+) -> None:
+    snapshot = source()
+    if scenario == "missing_class":
+        snapshot.tables["face_revision"][0]["class_code"] = None
+    elif scenario == "empty_class":
+        next(
+            row for row in snapshot.tables["text_unit"] if row["id"] == "label-neutral"
+        )["text"] = ""
+    else:
+        snapshot.tables["face"][1]["ordinal"] = 2
+    with pytest.raises(ValueError, match="Battle snapshot projection is unavailable"):
+        build_battle_inputs(snapshot, "jp")
+
+
+def test_native_absent_numeric_characteristics_use_the_existing_sentinel() -> None:
+    snapshot = source()
+    snapshot.tables["face_revision"][0].update(
+        {"cost": None, "attack": None, "defense": None}
+    )
+    result = build_battle_inputs(snapshot, "jp")
+    first = object_value(
+        array(object_value(parse(result.snapshot.strip()))["faces"])[0]
+    )
+    assert [first[field] for field in ("cost", "power", "hp")] == ["-", "-", "-"]

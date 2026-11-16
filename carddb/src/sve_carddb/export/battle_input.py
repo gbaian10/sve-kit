@@ -101,11 +101,14 @@ class _Projection:
         sections = self.sections(revision)
         if [row["ordinal"] for row in sections] != list(range(len(sections))):
             raise ValueError("Native sections require a complete ordinal sequence")
+        if revision["class_code"] is None:
+            raise ValueError("Native class requires a nonempty label")
+        card_class = self.labels["class", string(revision["class_code"])]
+        if not card_class:
+            raise ValueError("Native class requires a nonempty label")
         result: Row = {
             "name": self.text(revision, "name"),
-            "card_class": None
-            if revision["class_code"] is None
-            else self.labels["class", string(revision["class_code"])],
+            "card_class": card_class,
             "card_type": "・".join(
                 [
                     self.labels["type", string(revision["type_code"])],
@@ -129,7 +132,7 @@ class _Projection:
         }
         for target, field in [("cost", "cost"), ("power", "attack"), ("hp", "defense")]:
             result[target] = (
-                None if revision[field] is None else str(integer(revision[field]))
+                "-" if revision[field] is None else str(integer(revision[field]))
             )
         if titles:
             result["title"] = self.labels["title", string(titles[0])]
@@ -158,6 +161,11 @@ class _Projection:
         expected = array(self.cards[string(printing["card_id"])]["faces"])
         if [row["face_id"] for row in faces] != expected or not faces:
             raise ValueError("Battle printing face closure is incomplete")
+        if any(
+            self.faces[string(row["face_id"])]["ordinal"] != ordinal
+            for ordinal, row in enumerate(faces)
+        ):
+            raise ValueError("Native faces require a complete ordinal sequence")
         return faces
 
 
