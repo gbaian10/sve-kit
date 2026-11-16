@@ -6,6 +6,7 @@ import sepIcon from "../../../assets/card-labels/dice/sep.svg"
 import epIcon from "../../../assets/card-labels/ep.svg"
 import type { CardRef, Seat } from "../../../battle/contract"
 import type { Pile, SeatTable, TableCard, TableModel } from "../../../battle/view/table"
+import { cn } from "../../../components/ui/cn"
 import type { BattleMat } from "../../../settings"
 import { useCards } from "../battle-cards"
 import { CounterBadge, KeywordDie } from "../dice/Dice"
@@ -15,8 +16,6 @@ import { CardBack } from "./CardBack"
 import { CardFace } from "./Cards"
 import { GAP, type MatGeometry, matGeometry, type PileName, px } from "./geometry"
 import { MatPicture, SharedMatPicture, ZoneFrames } from "./mats"
-
-const classes = (...names: (string | false)[]): string => names.filter(Boolean).join(" ")
 
 const PILES: readonly PileName[] = ["leader", "deck", "cemetery", "evolve", "banish"]
 
@@ -49,9 +48,8 @@ function FieldCardView({
   const under = evolved && card.card.printing_id !== card.face.printing_id
   return (
     <div
-      className={classes(
-        "bp-card bp-onfield",
-        opp && "is-opp-side",
+      className={cn(
+        "bp-card",
         card.acted && "is-engaged",
         evolved && "is-evolved",
         superEvolved && "is-super",
@@ -130,7 +128,7 @@ function ExCard({
 }) {
   return (
     <div
-      className={classes("bp-card bp-onfield", opp && "is-opp-side")}
+      className="bp-card"
       style={px(mat.onBoard(mat.slotCard("ex", slot, opp), opp), u)}
       data-hit-area=""
     >
@@ -213,7 +211,7 @@ function PileView({ pile, seat, leader, opp, u, mat }: MatProps & { readonly pil
   }
   return (
     <div
-      className={classes("bp-pile", `bp-pile-${pile}`, opp && "is-opp-side")}
+      className="bp-pile"
       style={px(mat.onBoard(mat.pile(pile, opp), opp), u)}
       data-hit-area=""
       role="group"
@@ -328,7 +326,7 @@ function PpColumn({ seat, opp, u, mat }: Omit<MatProps, "leader">) {
       {rows.map((n) => (
         <div key={n} className="bp-pp-row" style={{ height: rowH * u }}>
           <span
-            className={classes(
+            className={cn(
               "bp-pp-dot is-max",
               n <= seat.maxPp && "is-on",
               n === seat.maxPp && "is-mark",
@@ -337,11 +335,7 @@ function PpColumn({ seat, opp, u, mat }: Omit<MatProps, "leader">) {
             {n}
           </span>
           <span
-            className={classes(
-              "bp-pp-dot is-left",
-              n <= seat.pp && "is-on",
-              n === seat.pp && "is-mark",
-            )}
+            className={cn("bp-pp-dot is-left", n <= seat.pp && "is-on", n === seat.pp && "is-mark")}
           >
             {n}
           </span>
@@ -368,7 +362,7 @@ function PpBar({ seat, opp, u, mat }: Omit<MatProps, "leader">) {
         {Array.from({ length: 10 }, (_, i) => (
           <i
             key={i}
-            className={classes("bp-pp-pip", i < seat.pp ? "is-left" : i < seat.maxPp && "is-max")}
+            className={cn("bp-pp-pip", i < seat.pp ? "is-left" : i < seat.maxPp && "is-max")}
           />
         ))}
       </span>

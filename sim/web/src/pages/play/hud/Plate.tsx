@@ -6,6 +6,7 @@ import epIcon from "../../../assets/card-labels/ep.svg"
 import type { CardRef } from "../../../battle/contract"
 import type { SeatTable } from "../../../battle/view/table"
 import { CLASS_ICON } from "../../../components/card/classIcons"
+import { cn } from "../../../components/ui/cn"
 import { classStyle } from "../../../domain/classes"
 import { useCards } from "../battle-cards"
 import { ArtCrop } from "../table/Cards"
@@ -28,14 +29,12 @@ export function Plate({
   const locked = sep.opensIn > 0
   return (
     <section
-      className={[
+      className={cn(
         "bp-plate",
         self ? "is-self" : "is-opp",
         seat.active && "is-active",
         compact && "is-compact",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      )}
       aria-label={self ? t("play.side.self") : t("play.side.opponent")}
     >
       {/* The art is cut to a circle; the overflow audit skips boxes marked `data-hit-area`. */}

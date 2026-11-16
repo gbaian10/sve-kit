@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next"
 import type { CardRef, Seat } from "../../battle/contract"
 import type { BattleSource } from "../../battle/source"
 import { type ProvisionalPoints, type SlotArrangement, tableModel } from "../../battle/view/table"
+import { cn } from "../../components/ui/cn"
 import { type BattleMat, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
 import { Plate } from "./hud/Plate"
@@ -115,17 +116,14 @@ export function BattleScreen({
     () => (battle.board === null ? null : tableModel(battle.board, points, slots)),
     [battle.board, points, slots],
   )
-  const rootClass = [
+  const rootClass = cn(
     "bp-root",
-    `plates-${layout.plates}`,
-    `hand-${layout.hand}`,
+    layout.plates === "top" && "plates-top",
+    layout.hand === "column" && "hand-column",
     layout.compact && "is-compact",
     layout.narrow && "is-narrow",
     layout.stacked && "is-stacked",
-    dual && "is-dual",
-  ]
-    .filter(Boolean)
-    .join(" ")
+  )
   const rootStyle = {
     "--hand-h": `${String(layout.handH)}px`,
     "--hand-reserve": `${String(layout.handReserve)}px`,

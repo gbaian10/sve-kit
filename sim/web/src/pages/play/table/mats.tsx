@@ -4,6 +4,7 @@
 // image replaces the picture; the frames stay as they are.
 import { useTranslation } from "react-i18next"
 
+import { cn } from "../../../components/ui/cn"
 import { CARD_H, type MatGeometry, type PileName } from "./geometry"
 
 /** A night sky: a deep blue field, a faint honeycomb, a rune circle on the divider and stars. */
@@ -182,7 +183,16 @@ export function ZoneFrames({ opp, mat }: { readonly opp: boolean; readonly mat: 
         const cx = r.x + r.w / 2
         const cy = r.y + r.h / 2 - 8
         return (
-          <g key={pile} className={`bp-frame-pile-${pile}`}>
+          <g
+            key={pile}
+            className={cn({
+              "bp-frame-pile-leader": pile === "leader",
+              "bp-frame-pile-deck": pile === "deck",
+              "bp-frame-pile-cemetery": pile === "cemetery",
+              "bp-frame-pile-evolve": pile === "evolve",
+              "bp-frame-pile-banish": pile === "banish",
+            })}
+          >
             <rect x={r.x} y={r.y} width={r.w} height={r.h} rx="9" className="bp-frame-pile" />
             <rect
               x={r.x + 5}

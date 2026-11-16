@@ -13,6 +13,7 @@ import kwDrain from "../../../assets/card-labels/dice/kw-drain.svg"
 import kwGuard from "../../../assets/card-labels/dice/kw-guard.svg"
 import kwIntimidate from "../../../assets/card-labels/dice/kw-intimidate.svg"
 import NUMERALS from "../../../assets/card-labels/dice/numerals.json"
+import { cn } from "../../../components/ui/cn"
 import type { DieKeyword } from "./keywords"
 
 interface Glyph {
@@ -103,14 +104,7 @@ export function CounterBadge({
     : t("play.stat.value", { label, now: value })
   return (
     <span
-      className={[
-        "bp-counter",
-        `is-${kind}`,
-        className,
-        changed && (value < printed ? "is-down" : "is-up"),
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      className={cn("bp-counter", className, changed && (value < printed ? "is-down" : "is-up"))}
       title={spoken}
       // The difference tag sits beside the die, outside its box; the overflow audit skips boxes
       // marked `data-hit-area`.

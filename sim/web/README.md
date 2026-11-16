@@ -100,7 +100,9 @@ How the screen is put together:
 - `battle.css` is the look. Its parts are `bp-*` classes and their states `is-*`. Under
   `src/pages/play/` ESLint knows exactly the classes this file defines: `battle.lint.css`, the
   Tailwind entry point it uses there and nothing else loads, reads the file as component classes,
-  so a misspelt or undefined class name is an error. Colours are the `--bp-*` tokens in
+  so a misspelt or undefined class name is an error. The check reads `className` and `cn()`:
+  write class lists with those and spell every name out, because a name put together at run time
+  is not checked. Colours are the `--bp-*` tokens in
   `src/styles/tokens.css`, the same in every theme; the side panels use the site's theme tokens.
 - `dice/` draws the attack, defense, keyword and cost markers from the art in
   `src/assets/card-labels/dice/`; that directory's README says where the art comes from.
