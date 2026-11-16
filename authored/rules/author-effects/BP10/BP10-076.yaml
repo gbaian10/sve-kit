@@ -1,0 +1,36 @@
+cards:
+  BP10-076:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - damage_mod:
+                delta: -1
+                on:
+                  leader: self
+      - line: 2
+        static:
+          effects:
+            - cannot:
+                during:
+                  not_phase: start
+                what: draw
+                who: opp
+      - fanfare:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - discard:
+                        down_to: 2
+                        who: p
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+format: 2
+kind: author_effect_set

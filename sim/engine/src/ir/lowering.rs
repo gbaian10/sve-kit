@@ -21,6 +21,7 @@ mod declaration;
 mod delayed;
 mod dice;
 mod discard;
+mod draw_restrictions;
 mod earth;
 mod entry_posture;
 mod evolution;
@@ -541,6 +542,9 @@ impl Allocator {
                         }) =>
                     {
                         prevention::lower
+                    }
+                    Some(ast::StaticEffect::Cannot(ast::Cannot::Draw(_))) => {
+                        draw_restrictions::lower
                     }
                     Some(ast::StaticEffect::Cannot(_) | ast::StaticEffect::IgnoreWard(_)) => {
                         attack_restrictions::lower

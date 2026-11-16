@@ -792,8 +792,9 @@ pub(super) struct Discard {
     #[serde(rename = "ref")]
     pub reference: Option<String>,
     pub n: Option<DiscardCount>,
+    pub down_to: Option<u64>,
     pub all: Option<bool>,
-    pub who: Option<LeaderSide>,
+    pub who: Option<Side>,
     pub random: Option<bool>,
     pub any: Option<True>,
     pub result: Option<String>,
@@ -3707,12 +3708,32 @@ pub(super) struct StaticGrant {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum Cannot {
+    Draw(CannotDraw),
     Player(CannotPlayer),
     PlayAbility(CannotPlayAbility),
     Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotDraw {
+    #[serde(rename = "what")]
+    pub _what: DrawAction,
+    pub who: EntryPlayer,
+    pub during: DrawRestrictionDuring,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DrawAction {
+    Draw,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DrawRestrictionDuring {
+    pub not_phase: StartPhase,
 }
 
 #[derive(Deserialize)]

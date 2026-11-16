@@ -472,7 +472,8 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(
-                ast::Cannot::Player(_)
+                ast::Cannot::Draw(_)
+                | ast::Cannot::Player(_)
                 | ast::Cannot::Stand(_)
                 | ast::Cannot::Attack(_)
                 | ast::Cannot::Removal(_)

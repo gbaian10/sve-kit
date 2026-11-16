@@ -461,6 +461,7 @@ impl Checker {
         if super::super::evolution_limits::is_static(ability)
             || super::super::choice_rules::is_static(ability)
             || super::super::counter_caps::projection(ability).is_some()
+            || super::super::draw_restrictions::projection(ability).is_some()
         {
             return Ok(());
         }

@@ -1073,3 +1073,9 @@ mod layer3_counter_cap;
 
 #[path = "card/layer3_counter_cost.rs"]
 mod layer3_counter_cost;
+
+#[path = "card/layer3_player_discard.rs"]
+mod layer3_player_discard;
+
+#[path = "card/layer3_draw_restriction.rs"]
+mod layer3_draw_restriction;

@@ -33,6 +33,29 @@ impl BodyContext<'_> {
         })
     }
 
+    fn discard_down_to(
+        &mut self,
+        player: PlayerRef,
+        limit: u64,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let population = self.whole_hand(&player, path)?;
+        let hand = self.whole_hand(&player, path)?;
+        let count = Expr::Compute(Box::new(super::IntOperation::Arithmetic {
+            operation: super::Arithmetic::Subtract,
+            arguments: vec![
+                super::numeric::aggregate_count(hand, None),
+                Expr::Literal(Int(
+                    i64::try_from(limit).map_err(|_overflow| unsupported(path))?
+                )),
+            ],
+        }));
+        Ok(Action::Discard {
+            player,
+            mode: DiscardMode::ChosenCount { population, count },
+        })
+    }
+
     pub(super) fn discard(
         &mut self,
         value: &ast::Discard,
@@ -42,7 +65,7 @@ impl BodyContext<'_> {
             && (value.n.is_some()
                 || value.all.is_some()
                 || value.random.is_some()
-                || matches!(value.who, Some(ast::LeaderSide::Opponent)))
+                || matches!(value.who, Some(ast::Side::Opponent)))
         {
             return Err(unsupported(path));
         }
@@ -54,10 +77,23 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let player = match value.who {
-            Some(ast::LeaderSide::Opponent) => super::super::events::timing::opponent(),
-            Some(ast::LeaderSide::Controller) | None => PlayerRef::Controller {},
+        let player = match &value.who {
+            Some(ast::Side::Opponent) => super::super::events::timing::opponent(),
+            Some(ast::Side::Controller) | None => PlayerRef::Controller {},
+            Some(ast::Side::Bound(name)) => self.named_player(name, path)?,
+            Some(ast::Side::All) => return Err(unsupported(path)),
         };
+        if let Some(limit) = value.down_to {
+            if value.n.is_some()
+                || value.all.is_some()
+                || value.any.is_some()
+                || value.reference.is_some()
+                || value.random.is_some()
+            {
+                return Err(unsupported(path));
+            }
+            return self.discard_down_to(player, limit, path);
+        }
         if let Some(ast::DiscardCount::Number(number)) = &value.n {
             // `all`, `any` and `ref` are separate discard shapes, never a count.
             if value.all.is_some() || value.any.is_some() || value.reference.is_some() {
