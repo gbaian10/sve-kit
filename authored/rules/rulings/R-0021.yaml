@@ -1,0 +1,31 @@
+format: 2
+kind: ruling
+id: R-0021
+revision: 1
+question: レリア的交戰體力傷害基準是否也適用於其控制者的從者被攻擊時造成的反擊傷害？
+decision: 本專案解讀為雙向適用：受到規則影響的從者，在攻擊或防守的同一次交戰中，都按交戰傷害處理前的目前體力取代攻擊力。能力傷害不受影響。
+evidence:
+  - ref: BP01-129
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP01-129
+    note: 日文卡文修改己方從者造成傷害時使用的數值，沒有把適用者限定為攻擊方；BP01-130 有相同常在能力。
+  - ref: Q226
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP01-129
+    note: 日文 Q226 與 Q227 明確排除 Jeanne 的能力傷害，但未直接問答防守方的交戰傷害。
+  - ref: Q226-EN
+    kind: supporting
+    url: https://en.shadowverse-evolve.com/cards/?cardno=BP01-129EN
+    note: 英文問答以 when attacking 與能力傷害作對比，可能被讀成僅限攻擊方；沒有防守反擊的直接官方確認。
+  - ref: project
+    kind: project
+    date: "2026-11-17"
+    reason: 依卡文把規則套用到己方從者在交戰中使用的傷害基準，而非新增攻擊方資格；雙方都先取處理傷害前的數值。保留日英問答的語意差異，不把測試通過或其他遊戲同名卡當成官方裁定。
+strength: inferred
+decided_on: "2026-11-17"
+applies_to: [L.rule-modifier]
+hint:
+  zh-TW: 本專案解讀：レリア也讓己方防守從者按交戰前體力反擊；防守方的適用範圍尚無直接官方問答確認，能力傷害維持原數值。
+  ja: 本プロジェクトの解釈：レリアは自分の防御側フォロワーにも適用され、交戦前の体力でダメージを与えます。防御側への適用は直接の公式回答がなく、能力ダメージは変更しません。
+  en: "Project interpretation: Lelia also makes your defending followers deal combat damage using their health before combat damage is applied. There is no direct official answer about defenders; ability damage is unchanged."
+note: 依據為已審查的日英 BP01-129／130 卡文及 Q226／Q227。若官方日後明確限定攻擊方，需局部修改反擊的基準查詢並更新本裁定與對局驗收。
