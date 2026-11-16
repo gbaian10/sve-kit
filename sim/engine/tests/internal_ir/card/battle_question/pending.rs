@@ -89,7 +89,7 @@ fn pending_order_uses_the_completed_attack_and_native_answer_in_both_seats() {
                 ordinal: sve_battle_contract::Nat::from(1_u32)
             }
         );
-        assert_eq!(position.unwrap().get(), 1);
+        assert_eq!(position.unwrap().get(), 0);
         assert!(matches!(source, SourceRef::Card {
             printing_id, face: Some(face), line: Some(line), holder: Some(_),
         } if printing_id == "printing-follower" && face.get() == 1 && line.get() == 2));

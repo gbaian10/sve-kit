@@ -36,6 +36,7 @@ pub(super) fn context(
         player::QuestionPurpose::QuickWindow => wire::QuestionPurpose::QuickWindow,
         player::QuestionPurpose::MainAction => wire::QuestionPurpose::MainAction,
     };
+    // The board owns stage facts; this check only admits supported purpose/stage pairs.
     let stage = observation
         .processing
         .first()

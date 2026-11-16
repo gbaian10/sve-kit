@@ -74,6 +74,7 @@ pub(super) fn shape(
     }
 }
 
+// Earlier quota choices may belong to a different controller than this question's actor.
 pub(super) fn value(
     choice: &PendingChoice,
     controller: player::Viewer,
@@ -99,8 +100,13 @@ pub(super) fn value(
         source: sources::source_ref(context.catalog, context.references, source, holder)?,
         controller: common::seat(controller),
         event: event::project(&occurrence.event)?,
-        position: occurrence.position.map(Nat::try_from).transpose()?,
+        position: occurrence.position.map(position).transpose()?,
     })
+}
+
+fn position(native: u64) -> Result<Nat> {
+    let offset = native.checked_sub(1).ok_or(ProjectionError::Unavailable)?;
+    Nat::try_from(offset).map_err(|_range| ProjectionError::Unavailable)
 }
 
 impl Binding {
@@ -118,3 +124,6 @@ impl Binding {
         Ok(player::Answer::Pending(self.chosen(answer)?))
     }
 }
+
+#[cfg(test)]
+mod tests;

@@ -1,15 +1,12 @@
 //! Frozen event payloads supply typed choice details, independently of display labels.
 
 use super::PendingOccurrence;
+use crate::game::player::observation::viewer;
 use crate::game::player::{PendingEvent, PendingEventContext, Viewer};
 use crate::ir::{EntryOrigin, EventPayload, PlayerId, dice, events::fusion::material_filter};
 
-const fn viewer(player: PlayerId) -> Option<Viewer> {
-    match player.seat {
-        1 => Some(Viewer::P1),
-        2 => Some(Viewer::P2),
-        _ => None,
-    }
+fn event_viewer(player: PlayerId) -> Option<Viewer> {
+    viewer(super::super::seat_name(player).ok()?).ok()
 }
 
 pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<PendingEventContext> {
@@ -65,7 +62,7 @@ pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<Pendin
         Some(EventPayload::Equip { .. }) => (PendingEvent::Equip, true),
         Some(EventPayload::Move { event }) => (
             PendingEvent::Move {
-                player: viewer(event.from.player)?,
+                player: event_viewer(event.from.player)?,
                 from: event.from.kind,
                 to: event.to.kind,
             },
@@ -81,7 +78,7 @@ pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<Pendin
             PendingEvent::Phase {
                 phase: event.phase,
                 turn: event.turn.0,
-                player: viewer(event.player)?,
+                player: event_viewer(event.player)?,
             },
             false,
         ),
@@ -89,7 +86,7 @@ pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<Pendin
         Some(EventPayload::LifeChange { event }) => (
             PendingEvent::LifeChange {
                 delta: event.delta.0,
-                player: viewer(event.subject)?,
+                player: event_viewer(event.subject)?,
             },
             true,
         ),
