@@ -3359,13 +3359,42 @@
             "play"
           ],
           "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "trait": {
+              "$ref": "#/$defs/Concept"
+            }
+          },
+          "required": [
+            "trait"
+          ],
+          "additionalProperties": false,
+          "description": "造成本次進場的能力來源，讀取事件當時凍結的有效特徵；僅限 by: ability。"
         }
       },
       "required": [
         "ref",
         "by"
       ],
-      "type": "object"
+      "type": "object",
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "by": {
+                "const": "ability"
+              }
+            }
+          }
+        }
+      ]
     },
     "A.cond.is-payload": {
       "additionalProperties": false,
