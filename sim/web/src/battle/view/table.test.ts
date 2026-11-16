@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import type { BattleObservation, Seat } from "../contract"
 import { baseline, type SeatSpec, type TableSpec } from "../fixtures/build"
 import { cardRef } from "../fixtures/cards"
-import { type ProvisionalPoints, tableModel as model } from "./table"
+import { tableModel as model } from "./table"
 
 const seat = (spec: Partial<SeatSpec>): SeatSpec => ({
   life: 20,
@@ -12,9 +12,8 @@ const seat = (spec: Partial<SeatSpec>): SeatSpec => ({
   maxPp: 0,
   ep: 0,
   sep: 0,
-  epMax: 0,
-  sepMax: 1,
-  sepOpensIn: 0,
+  epCapacity: 0,
+  sepAvailableFrom: null,
   deck: 30,
   hand: [],
   field: [],
@@ -28,11 +27,6 @@ const seat = (spec: Partial<SeatSpec>): SeatSpec => ({
 const observe = (table: TableSpec, viewer: Seat): BattleObservation =>
   baseline(table, viewer).observation
 
-const pointsOf = (table: TableSpec): Record<Seat, ProvisionalPoints> => {
-  const [first, second] = table.seats
-  return { p1: first, p2: second }
-}
-
 const TABLE: TableSpec = {
   turn: { active: "p2", first_player: "p1", phase: "main", elapsed_turns: [3, 2] },
   seats: [
@@ -40,6 +34,7 @@ const TABLE: TableSpec = {
       life: 17,
       pp: 1,
       maxPp: 3,
+      sepAvailableFrom: 2,
       hand: ["BP05-058", "BP20-062"],
       field: [
         { no: "BP20-064", slot: 3, evolved: "BP20-065", acted: true, keywords: ["guard"] },
@@ -51,8 +46,8 @@ const TABLE: TableSpec = {
     seat({
       ep: 2,
       sep: 1,
-      epMax: 3,
-      sepOpensIn: 2,
+      epCapacity: 3,
+      sepAvailableFrom: 4,
       hand: ["BP13-026", "BP16-026", "BP13-035"],
       ex: ["BP16-031"],
     }),
@@ -65,7 +60,7 @@ const ARRANGED = {
   p2: { field: TABLE.seats[1].field.map((card) => card.slot) },
 }
 
-const tableModel = (observation: BattleObservation) => model(observation, pointsOf(TABLE), ARRANGED)
+const tableModel = (observation: BattleObservation) => model(observation, ARRANGED)
 
 describe("tableModel", () => {
   it("puts the viewer's seat on its own side whichever seat it is", () => {
@@ -78,18 +73,28 @@ describe("tableModel", () => {
     expect(first.phase).toBe("main")
   })
 
-  it("draws evolve points as how many there were and how many are left", () => {
+  it("draws evolve points as how many slots there are and how many are left", () => {
     const { self, opponent } = tableModel(observe(TABLE, "p1"))
-    // The seat without evolve points has none to show; its super evolution is open.
+    // No evolve point slots. Its super evolution point is spent and has been open since its
+    // second turn: the spent one stays as a marker.
     expect(self.ep).toEqual({ current: 0, max: 0 })
     expect(self.sep).toEqual({ current: 0, max: 1, opensIn: 0 })
-    // One of three used, and two of the seat's own turns before a super evolution.
+    // One of three used. It has begun two turns and may super evolve from its fourth.
     expect(opponent.ep).toEqual({ current: 2, max: 3 })
     expect(opponent.sep).toEqual({ current: 1, max: 1, opensIn: 2 })
   })
 
+  it("shows no super evolution marker before any is handed out", () => {
+    const before: TableSpec = {
+      turn: { active: null, first_player: null, phase: null, elapsed_turns: [0, 0] },
+      seats: [seat({}), seat({})],
+    }
+    const { self } = model(observe(before, "p1"))
+    expect(self.sep).toEqual({ current: 0, max: 0, opensIn: 0 })
+  })
+
   it("lays a field card in the slot numbered like its place when nothing is arranged", () => {
-    const { self } = model(observe(TABLE, "p1"), pointsOf(TABLE))
+    const { self } = model(observe(TABLE, "p1"))
     expect(self.field.map((card) => card?.face ?? null)).toEqual([
       cardRef("BP20-065"),
       cardRef("BP20-067"),
@@ -101,10 +106,10 @@ describe("tableModel", () => {
 
   it("takes the next free slot when the arranged one is taken or off the row", () => {
     const observation = observe(TABLE, "p1")
-    const shared = model(observation, pointsOf(TABLE), { p1: { field: [3, 3] } }).self.field
+    const shared = model(observation, { p1: { field: [3, 3] } }).self.field
     expect(shared.map((card) => card !== null)).toEqual([true, false, false, true, false])
     expect(shared[3]?.face).toEqual(cardRef("BP20-065"))
-    const outside = model(observation, pointsOf(TABLE), { p1: { field: [9, 2] } }).self.field
+    const outside = model(observation, { p1: { field: [9, 2] } }).self.field
     expect(outside.map((card) => card !== null)).toEqual([true, false, true, false, false])
   })
 

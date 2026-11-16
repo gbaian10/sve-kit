@@ -43,7 +43,6 @@ export function PlayPage() {
         source={sources.own}
         opposite={sources.opposite}
         leaders={{ p1: scene.leaders[0], p2: scene.leaders[1] }}
-        points={scene.points}
         slots={scene.slots}
         onDual={(next) => {
           update((query) => {

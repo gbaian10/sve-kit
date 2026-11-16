@@ -38,13 +38,10 @@ export interface SeatSpec {
   readonly maxPp: number
   readonly ep: number
   readonly sep: number
-  /**
-   * The screen still takes these three beside the observation (`ProvisionalPoints`). The contract's
-   * own fields are filled from the same numbers, so the two cannot disagree.
-   */
-  readonly epMax: number
-  readonly sepMax: number
-  readonly sepOpensIn: number
+  /** Evolve point slots: the ones left and the ones spent. */
+  readonly epCapacity: number
+  /** The seat's own turn from which it may super evolve; null before the points are handed out. */
+  readonly sepAvailableFrom: number | null
   /** Nobody knows the deck's cards; only its size is part of the table. */
   readonly deck: number
   readonly hand: readonly CardNo[]
@@ -132,7 +129,7 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
     cards: cards.map((no, position) => ({ position, object: add(owner, no, "public") })),
   })
 
-  const player = (seat: Seat, spec: SeatSpec, turnsBegun: number): PlayerView => {
+  const player = (seat: Seat, spec: SeatSpec): PlayerView => {
     const own = seat === viewer
     const hand: ZoneMember[] = own
       ? spec.hand.map((no, position) => {
@@ -181,10 +178,10 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
       pp: spec.pp,
       max_pp: spec.maxPp,
       ep: spec.ep,
-      ep_capacity: spec.epMax,
-      ep_used: spec.epMax - spec.ep,
+      ep_capacity: spec.epCapacity,
+      ep_used: spec.epCapacity - spec.ep,
       sep: spec.sep,
-      sep_available_from: spec.sepMax === 0 ? null : turnsBegun + spec.sepOpensIn,
+      sep_available_from: spec.sepAvailableFrom,
       effects: [],
       zones: {
         deck: { count: spec.deck, capacity: null, cards: [] },
@@ -209,8 +206,8 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
   }
 
   const players: [PlayerView, PlayerView] = [
-    player(SEATS[0], table.seats[0], table.turn.elapsed_turns[0]),
-    player(SEATS[1], table.seats[1], table.turn.elapsed_turns[1]),
+    player(SEATS[0], table.seats[0]),
+    player(SEATS[1], table.seats[1]),
   ]
   return {
     viewer,

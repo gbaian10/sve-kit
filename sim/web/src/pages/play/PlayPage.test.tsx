@@ -55,9 +55,9 @@ describe("PlayPage", () => {
     expect(screen.getByText("第 5 回合")).toBeInTheDocument()
     // Nothing on the table can be answered yet.
     expect(screen.getByRole("button", { name: "回合結束" })).toBeDisabled()
-    // Super evolution is still four of the seat's own turns away: greyed, with the count on it.
+    // Super evolution opens on the seat's next turn: greyed, with the count on it.
     const ownMat = within(await table()).getByRole("region", { name: "你的遊戲墊" })
-    expect(within(ownMat).getByRole("img", { name: "超進化還有 4 回合" })).toHaveClass("is-locked")
+    expect(within(ownMat).getByRole("img", { name: "超進化還有 1 回合" })).toHaveClass("is-locked")
     expect(region(container, "你")).toHaveTextContent("2/3")
     expect(region(container, "你").querySelector(".bp-hud-sep")).toHaveClass("is-locked")
     expect(region(container, "對手").querySelector(".bp-hud-ep")).toHaveClass("is-none")
@@ -74,19 +74,27 @@ describe("PlayPage", () => {
     expect(within(own).getByRole("group", { name: "主戰者" })).toHaveTextContent("16")
     // The first player has no evolve points; the other seat has used one of its three.
     expect(within(own).getByRole("img", { name: "EP 0/0" })).toHaveTextContent("無（先攻）")
-    expect(within(own).getByRole("img", { name: "SEP 1/1" })).toBeInTheDocument()
+    expect(within(own).getByRole("img", { name: "超進化還有 2 回合" })).toHaveClass("is-locked")
     const other = within(await table()).getByRole("region", { name: "對手的遊戲墊" })
     const spent = within(other).getByRole("img", { name: "EP 2/3" })
     expect(spent.querySelectorAll(".bp-ep-icon")).toHaveLength(3)
     expect(spent.querySelectorAll(".bp-ep-icon.is-used")).toHaveLength(1)
-    expect(
-      within(other).getByRole("img", { name: "SEP 0/1" }).querySelector(".is-used"),
-    ).not.toBeNull()
     // Each PP column is lit from 0 up to its value: six of the maximum, two of what is left.
     const pp = within(own).getByRole("img", { name: "PP 剩 1，上限 5" })
     expect(pp.querySelectorAll(".bp-pp-dot.is-max.is-on")).toHaveLength(6)
     expect(pp.querySelectorAll(".bp-pp-dot.is-left.is-on")).toHaveLength(2)
     expect(pp.querySelector(".bp-pp-dot.is-left.is-mark")).toHaveTextContent("1")
+  })
+
+  it("keeps a spent super evolution point on the mat as a faded marker", async () => {
+    await renderRoutes(ROUTES, { initialEntries: ["/play?scene=full"] })
+    const own = within(await table()).getByRole("region", { name: "你的遊戲墊" })
+    const spent = within(own).getByRole("img", { name: "SEP 0/1" })
+    expect(spent).not.toHaveClass("is-locked")
+    expect(spent.querySelectorAll(".bp-sep-icon.is-used")).toHaveLength(1)
+    const other = within(await table()).getByRole("region", { name: "對手的遊戲墊" })
+    const held = within(other).getByRole("img", { name: "SEP 1/1" })
+    expect(held.querySelectorAll(".bp-sep-icon.is-used")).toHaveLength(0)
   })
 
   it("draws what the authority reports for the cards in play", async () => {
@@ -218,17 +226,10 @@ function source(seat: Seat, messages: readonly HostMessage[]): BattleSource {
 
 describe("BattleScreen", () => {
   const leaders = { p1: cardRef("BP10-LD05"), p2: cardRef("BP05-LD02") }
-  const none = { epMax: 0, sepMax: 0, sepOpensIn: 0 }
   const routes = (messages: readonly HostMessage[]): RouteObject[] => [
     {
       path: "*",
-      element: (
-        <BattleScreen
-          source={source("p1", messages)}
-          leaders={leaders}
-          points={{ p1: none, p2: none }}
-        />
-      ),
+      element: <BattleScreen source={source("p1", messages)} leaders={leaders} />,
     },
   ]
 

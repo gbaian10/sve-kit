@@ -1,7 +1,7 @@
 // Fixture scenes: a described table per scene and what each seat is sent for it. Numbers, postures
 // and keywords are arranged to exercise the screen, not to record a position a game reached.
 import type { CardRef, HostMessage, Seat } from "../contract"
-import type { ProvisionalPoints, SlotArrangement } from "../view/table"
+import type { SlotArrangement } from "../view/table"
 import { baseline, ready, type SeatSpec, type TableSpec } from "./build"
 import { type CardNo, cardRef } from "./cards"
 
@@ -11,8 +11,6 @@ export interface Scene {
   readonly id: SceneId
   /** The contract carries no leader card (a leader is a seat's look); match setup supplies it. */
   readonly leaders: readonly [CardRef, CardRef]
-  /** What the contract does not carry yet about each seat's evolve points. */
-  readonly points: Readonly<Record<Seat, ProvisionalPoints>>
   /** Which slots the field cards lie in on screen; the messages only give their order. */
   readonly slots: SlotArrangement
   /** Everything each seat receives, in order. */
@@ -57,17 +55,13 @@ function without(deck: readonly CardNo[], taken: readonly CardNo[]): CardNo[] {
   return rest
 }
 
-const provisional = ({ epMax, sepMax, sepOpensIn }: SeatSpec): ProvisionalPoints => ({
-  epMax,
-  sepMax,
-  sepOpensIn,
-})
+// When each seat may first super evolve, counted in its own turns, as the authority hands it out.
+const SEP_FROM = { first: 7, second: 6 }
 
 function scene(id: SceneId, table: TableSpec): Scene {
   return {
     id,
     leaders: [cardRef(DRAGON_LEADER), cardRef(ROYAL_LEADER)],
-    points: { p1: provisional(table.seats[0]), p2: provisional(table.seats[1]) },
     slots: {
       p1: { field: table.seats[0].field.map((card) => card.slot) },
       p2: { field: table.seats[1].field.map((card) => card.slot) },
@@ -85,9 +79,8 @@ const opening = (hand: readonly CardNo[], evolve: readonly CardNo[]): SeatSpec =
   maxPp: 0,
   ep: 0,
   sep: 0,
-  epMax: 0,
-  sepMax: 0,
-  sepOpensIn: 0,
+  epCapacity: 0,
+  sepAvailableFrom: null,
   deck: 36,
   hand,
   field: [],
@@ -108,9 +101,8 @@ export const SCENES = [
         maxPp: 5,
         ep: 2,
         sep: 1,
-        epMax: 3,
-        sepMax: 1,
-        sepOpensIn: 4,
+        epCapacity: 3,
+        sepAvailableFrom: SEP_FROM.second,
         deck: 23,
         hand: ["BP05-052", "BP15-057", "BP20-063", "BP05-058", "BP15-064", "BP20-067"],
         field: [
@@ -130,9 +122,8 @@ export const SCENES = [
         maxPp: 5,
         ep: 0,
         sep: 1,
-        epMax: 0,
-        sepMax: 1,
-        sepOpensIn: 4,
+        epCapacity: 0,
+        sepAvailableFrom: SEP_FROM.first,
         deck: 23,
         hand: ["BP13-026", "BP16-021", "BP13-035", "BP16-026", "BP13-028"],
         field: [
@@ -165,9 +156,8 @@ export const SCENES = [
         maxPp: 5,
         ep: 0,
         sep: 1,
-        epMax: 0,
-        sepMax: 1,
-        sepOpensIn: 0,
+        epCapacity: 0,
+        sepAvailableFrom: SEP_FROM.first,
         deck: 22,
         hand: ["BP05-052", "BP15-057", "BP20-063", "BP05-058", "BP15-064", "BP20-067"],
         field: [
@@ -190,10 +180,9 @@ export const SCENES = [
         pp: 5,
         maxPp: 5,
         ep: 2,
-        sep: 0,
-        epMax: 3,
-        sepMax: 1,
-        sepOpensIn: 0,
+        sep: 1,
+        epCapacity: 3,
+        sepAvailableFrom: SEP_FROM.second,
         deck: 22,
         hand: ["BP13-026", "BP16-021", "BP13-035", "BP16-026", "BP13-028", "BP21-022"],
         field: [
@@ -222,9 +211,8 @@ export const SCENES = [
         maxPp: 9,
         ep: 0,
         sep: 0,
-        epMax: 0,
-        sepMax: 1,
-        sepOpensIn: 0,
+        epCapacity: 0,
+        sepAvailableFrom: SEP_FROM.first,
         deck: 14,
         hand: [
           "BP05-052",
@@ -258,9 +246,8 @@ export const SCENES = [
         maxPp: 8,
         ep: 0,
         sep: 1,
-        epMax: 3,
-        sepMax: 1,
-        sepOpensIn: 0,
+        epCapacity: 3,
+        sepAvailableFrom: SEP_FROM.second,
         deck: 12,
         hand: [
           "BP13-026",

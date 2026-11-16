@@ -82,9 +82,9 @@ card image index does not list). A root without the file answers 404 and every b
 back to a back drawn by the app. For a local preview put the file at that path under the preview
 root.
 
-The contract does not carry yet how many evolve points a seat started with or when its super
-evolution opens. Until it does, a scene supplies them beside its messages (`ProvisionalPoints`),
-and `points()` in `src/battle/view/table.ts` is the only place that reads them.
+Evolve points are drawn from the contract alone: the slots and the ones left for EP, and for SEP
+how many are left and the seat's own turn from which it may super evolve. The contract does not
+say how many SEP a seat was given, so a seat that has spent all of them keeps one faded marker.
 
 A screen reads everything through `BattleSource` (`src/battle/source.ts`), one per seat. The
 table (`src/pages/play/table/`) draws the model from `src/battle/view/table.ts` and knows nothing

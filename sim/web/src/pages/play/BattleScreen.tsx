@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next"
 
 import type { CardRef, Seat } from "../../battle/contract"
 import type { BattleSource } from "../../battle/source"
-import { type ProvisionalPoints, type SlotArrangement, tableModel } from "../../battle/view/table"
+import { type SlotArrangement, tableModel } from "../../battle/view/table"
 import { cn } from "../../components/ui/cn"
 import { type BattleMat, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
@@ -21,21 +21,17 @@ import { DualHand, Hand, OppHand } from "./table/Hand"
 import { useBattle } from "./use-battle"
 
 type Leaders = Readonly<Record<Seat, CardRef>>
-/** Until the contract carries them: each seat's evolve-point maximums and super-evolution wait. */
-type SeatPoints = Readonly<Record<Seat, ProvisionalPoints>>
 
 /** The other seat's screen in the dual view: its own table and hands, fed by its own source. */
 function OppositePane({
   source,
   leaders,
-  points,
   slots,
   layout,
   mat,
 }: {
   readonly source: BattleSource
   readonly leaders: Leaders
-  readonly points: SeatPoints
   readonly slots: SlotArrangement | undefined
   readonly layout: Layout
   readonly mat: BattleMat
@@ -43,8 +39,8 @@ function OppositePane({
   const { t } = useTranslation()
   const battle = useBattle(source)
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, points, slots)),
-    [battle.board, points, slots],
+    () => (battle.board === null ? null : tableModel(battle.board, slots)),
+    [battle.board, slots],
   )
   return (
     <section
@@ -75,7 +71,6 @@ export function BattleScreen({
   source,
   opposite,
   leaders,
-  points,
   slots,
   corner,
   onDual,
@@ -85,7 +80,6 @@ export function BattleScreen({
   readonly opposite?: BattleSource | undefined
   /** Each seat's leader card, from the match setup. */
   readonly leaders: Leaders
-  readonly points: SeatPoints
   /** Where the field cards lie on this screen, when something other than their order decides it. */
   readonly slots?: SlotArrangement | undefined
   /** Page controls for the chip on the board's top-left corner. */
@@ -113,8 +107,8 @@ export function BattleScreen({
     [vw, vh, dual, floats, sidebarOpen, floatOpen],
   )
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, points, slots)),
-    [battle.board, points, slots],
+    () => (battle.board === null ? null : tableModel(battle.board, slots)),
+    [battle.board, slots],
   )
   const rootClass = cn(
     "bp-root",
@@ -317,7 +311,6 @@ export function BattleScreen({
             <OppositePane
               source={opposite}
               leaders={leaders}
-              points={points}
               slots={slots}
               layout={layout}
               mat={prefs.battleMat}

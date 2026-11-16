@@ -36,17 +36,6 @@ export interface Pile {
 }
 
 /**
- * What the table draws about evolve points that the contract does not carry yet. PROVISIONAL: once
- * the contract's player view has these, `points` below reads them from there and this goes away.
- */
-export interface ProvisionalPoints {
-  readonly epMax: number
-  readonly sepMax: number
-  /** The seat's own turns left before super evolution opens; 0 once it is open. */
-  readonly sepOpensIn: number
-}
-
-/**
  * Which slot each card of the field and the EX area lies in, by its place in the zone's order.
  * The contract orders a zone and does not place its cards in slots, so where a card lies is the
  * screen's own arrangement; a card without one lies in the slot numbered like its place.
@@ -151,13 +140,19 @@ function slots(
 }
 
 /**
- * The one place that knows where the maximum of each point and the super-evolution wait come from.
- * Nothing here works them out: they are given, like every other number on the table.
+ * Evolve points as the authority reports them; which seat gets how many, and from which turn, is
+ * never worked out here. The contract says whether super evolution points were handed out, not how
+ * many, so a seat that has spent all of its own keeps a single faded marker.
  */
-function points(player: PlayerView, provisional: ProvisionalPoints): Pick<SeatTable, "ep" | "sep"> {
+function points(player: PlayerView, turnsBegun: number): Pick<SeatTable, "ep" | "sep"> {
+  const from = player.sep_available_from
   return {
-    ep: { current: player.ep, max: provisional.epMax },
-    sep: { current: player.sep, max: provisional.sepMax, opensIn: provisional.sepOpensIn },
+    ep: { current: player.ep, max: player.ep_capacity },
+    sep: {
+      current: player.sep,
+      max: Math.max(player.sep, from === null ? 0 : 1),
+      opensIn: from === null ? 0 : Math.max(0, from - turnsBegun),
+    },
   }
 }
 
@@ -165,19 +160,19 @@ function seatTable(
   observation: BattleObservation,
   player: PlayerView,
   index: number,
-  provisional: ProvisionalPoints,
   arranged: SlotArrangement[Seat],
 ): SeatTable {
   const { turn } = observation
+  const turns = turn.elapsed_turns[index] ?? 0
   return {
     seat: player.seat,
     life: player.life,
     pp: player.pp,
     maxPp: player.max_pp,
-    ...points(player, provisional),
+    ...points(player, turns),
     first: turn.first_player === null ? null : turn.first_player === player.seat,
     active: turn.active === player.seat,
-    turns: turn.elapsed_turns[index] ?? 0,
+    turns,
     field: slots(observation, player.zones.field, arranged?.field),
     ex: slots(observation, player.zones.ex, arranged?.ex),
     hand: pile(observation, player.zones.hand),
@@ -190,11 +185,10 @@ function seatTable(
 
 export function tableModel(
   observation: BattleObservation,
-  provisional: Readonly<Record<Seat, ProvisionalPoints>>,
   arrangement: SlotArrangement = {},
 ): TableModel {
   const [first, second] = observation.players.map((player, index) =>
-    seatTable(observation, player, index, provisional[player.seat], arrangement[player.seat]),
+    seatTable(observation, player, index, arrangement[player.seat]),
   ) as [SeatTable, SeatTable]
   const selfFirst = first.seat === observation.viewer
   return {
