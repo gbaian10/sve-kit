@@ -5,7 +5,7 @@
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 use sve_engine::game::player::Viewer;
-use sve_engine::game::player::observation::ObservedZone;
+use sve_engine::game::player::observation::{CardFace, ObservedZone, TextProvenance};
 
 fn followers(scope: u64) -> Selector {
     let binding = Binding::new(50, ScopeId(scope));
@@ -1138,14 +1138,24 @@ fn player_declarations_granted_instances_are_distinct_and_keep_separate_quotas_a
         "Only the other holder retains its two instance quotas"
     );
     for offer in offers {
-        let MainIntentKind::Activate { source, .. } = &offer.kind else {
+        let MainIntentKind::Activate { source, holder, .. } = &offer.kind else {
             panic!("activation");
         };
         let source = source.as_ref().unwrap();
         assert_eq!(source.card, "unit-amulet");
-        assert!(
-            source.holder.is_none(),
-            "The old grant origin cannot link to the provider's new hand period"
+        assert_eq!(
+            source.holder.as_ref(),
+            Some(&holder.handle),
+            "The current recipient link is independent of the departed giver"
+        );
+        assert_eq!(
+            source.provenance,
+            TextProvenance::Granted {
+                by: CardFace {
+                    card: "unit-amulet".into(),
+                    face: 0
+                }
+            }
         );
     }
     for _ in 0..2 {
@@ -1364,7 +1374,7 @@ fn generic_activation_grants_reject_qualified_entries_and_field_auras() {
 }
 
 #[test]
-fn a_granted_quota_keeps_its_provider_memory_and_loses_only_the_departed_provider_link() {
+fn a_granted_quota_keeps_provider_memory_and_the_current_recipient_link_after_provider_departure() {
     let mut grant = definition_grant(DurationEnd::NoTemporalExpiry {});
     let Node::Instruction { instruction } = &mut grant.node else {
         panic!("grant instruction");
@@ -1398,7 +1408,7 @@ fn a_granted_quota_keeps_its_provider_memory_and_loses_only_the_departed_provide
     let mut game = position(&program);
     activate_grant(&mut game);
     let observation = game.observe(Viewer::P1).unwrap();
-    let provider = observation
+    let field = &observation
         .players
         .iter()
         .find(|player| player.player == Viewer::P1)
@@ -1407,17 +1417,24 @@ fn a_granted_quota_keeps_its_provider_memory_and_loses_only_the_departed_provide
         .iter()
         .find(|zone| zone.kind == ObservedZone::Field)
         .unwrap()
-        .cards[0]
-        .card
-        .handle
-        .clone();
+        .cards;
+    let provider = &field[0].card.handle;
+    let recipient = &field[1].card.handle;
+    assert_ne!(provider, recipient);
+    let provenance = TextProvenance::Granted {
+        by: CardFace {
+            card: "unit-amulet".into(),
+            face: 0,
+        },
+    };
     let quota = rule_observation::field(&game, Viewer::P1, 1)
         .quotas
         .unwrap();
     assert_eq!(quota.len(), 1);
     assert_eq!(quota[0].remaining, 1);
     assert_eq!(quota[0].source.card, "unit-amulet");
-    assert_eq!(quota[0].source.holder.as_ref(), Some(&provider));
+    assert_eq!(quota[0].source.holder.as_ref(), Some(recipient));
+    assert_eq!(quota[0].source.provenance, provenance);
     resolved(
         game.activate_internal_card("s", AbilityId(2), PlayerId { seat: 1 })
             .unwrap(),
@@ -1427,6 +1444,7 @@ fn a_granted_quota_keeps_its_provider_memory_and_loses_only_the_departed_provide
         .quotas
         .unwrap();
     assert_eq!(quota[0].source.card, "unit-amulet");
-    assert_eq!(quota[0].source.holder, None);
+    assert_eq!(quota[0].source.holder.as_ref(), Some(recipient));
+    assert_eq!(quota[0].source.provenance, provenance);
     assert_eq!(quota[0].remaining, 1);
 }
