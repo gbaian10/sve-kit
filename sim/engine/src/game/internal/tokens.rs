@@ -19,9 +19,10 @@ use crate::game::tokens::{prints_for_names, token_combinations};
 use crate::ir::events::timing::opponent;
 use crate::ir::{
     Ability, Action, Binding, CardKind, CardName, Control, CostSpec, Expr, Instruction, LkiReason,
-    Located, NameOperation, Nat, Node, ObjectFrozen, ObjectOperand, ObjectView, PlayerRef, Posture,
-    Program, ReceiptId, Requirement, Resource, ResourceOperation, SourceSpan, TokenDestination,
-    TokenInitialState, TokenOutcome, TokenSpec, TokenTemplate, ZoneKind, ZoneRef,
+    Located, NameOperation, Nat, Node, ObjectFrozen, ObjectOperand, ObjectView, PlayerOrder,
+    PlayerRef, Posture, Program, ReceiptId, Requirement, Resource, ResourceOperation, SourceSpan,
+    StageMode, TokenDestination, TokenInitialState, TokenOutcome, TokenSpec, TokenTemplate,
+    ZoneKind, ZoneRef,
 };
 
 #[derive(Clone, Debug)]
@@ -300,6 +301,22 @@ impl Game {
         // Each body follows a capture of its player, so a decision waiting inside a body
         // keeps that player bound when the procedure resumes.
         for stage in stages.iter().rev() {
+            if stage.mode == (StageMode::NonChoiceSimultaneous {}) {
+                // The remainder dispatch reuses this procedure's locals; only the outer
+                // begin_procedure owns its EndProcedure marker.
+                execution.todo.push_front(
+                    Node::Control {
+                        control: Control::EachPlayer {
+                            players: players.clone(),
+                            player: binding,
+                            stages: vec![stage.clone()],
+                            choice_order: PlayerOrder::TurnPlayerFirst,
+                        },
+                    }
+                    .into(),
+                );
+                continue;
+            }
             for member in order.iter().rev() {
                 let player = if *member == active {
                     PlayerRef::Active {}
@@ -317,15 +334,18 @@ impl Game {
                     }
                 };
                 execution.prepend(stage.body.clone());
-                execution.todo.push_front(Node::Capture {
-                    capture: Capture::Player {
-                        at: CaptureTime::AtResolution {
-                            scope: stage.body.scope,
+                execution.todo.push_front(
+                    Node::Capture {
+                        capture: Capture::Player {
+                            at: CaptureTime::AtResolution {
+                                scope: stage.body.scope,
+                            },
+                            value: Expr::Literal(player),
+                            into: CaptureRef { binding },
                         },
-                        value: Expr::Literal(player),
-                        into: CaptureRef { binding },
-                    },
-                });
+                    }
+                    .into(),
+                );
             }
         }
         Ok(())
@@ -338,6 +358,12 @@ impl Game {
     ) -> Result<()> {
         if player_stages::procedure(control).is_some() {
             return self.internal_nonchoice_player_stages(execution, control);
+        }
+        if let Some((_, binding, [stage])) = player_stages::choice_procedure(control)
+            && stage.mode == (StageMode::NonChoiceSimultaneous {})
+            && player_stages::look_remainder(&stage.body, binding).is_some()
+        {
+            return self.internal_look_remainders(execution, control);
         }
         if player_stages::choice_procedure(control).is_some() {
             return self.internal_choice_procedure(execution, control);
@@ -569,7 +595,7 @@ impl Game {
                         receipt: instruction.receipt,
                         ids,
                     });
-                    execution.todo.push_front(retry);
+                    execution.todo.push_front(retry.into());
                     return Ok(());
                 }
             }
@@ -625,7 +651,7 @@ impl Game {
             ZoneKind::Equipment => "equipment",
             _ => return Err(unsupported("token destination")),
         };
-        let mut frame = execution.frame();
+        let mut frame = execution.entry_frame(self, destination)?;
         if let Some(amount) = stack {
             frame.values.insert(
                 "stack_entry_counts".into(),

@@ -62,6 +62,7 @@ mod counters;
 mod declaration;
 mod dice;
 mod discard;
+mod draw_restrictions;
 mod drive;
 mod duration;
 mod earth;
@@ -95,6 +96,10 @@ mod play_target_cost;
 mod player;
 mod player_stages;
 mod posture;
+mod processing;
+pub use processing::QuestionStage;
+use processing::Queued;
+mod random_sample;
 mod resource;
 mod reveal;
 mod reveal_until;
@@ -109,7 +114,7 @@ mod victory;
 pub use terminal::Terminal;
 
 mod source;
-pub(in crate::game) use source::SourceSnapshot;
+pub(in crate::game) use source::{EntrySource, SourceSnapshot};
 mod values;
 
 pub use allocation::{DamageShare, DistributionDomain, DistributionMember};
@@ -419,6 +424,8 @@ pub enum InstructionOutcome {
     Granted(Vec<ObjectRef>),
     /// Publicly revealed generations; no subsequent private selector authority.
     Revealed(Vec<ObjectRef>),
+    /// Private generations sampled without movement or publication.
+    Sampled(Vec<ObjectRef>),
     /// Objects observed without movement or a generation change.
     Look(LookOutcome),
     /// The publicly revealed prefix, its matching subset and whether the cursor reached the end.
@@ -608,6 +615,7 @@ enum Wait {
     Integer {
         binding: declaration::NumberBinding,
         bounds: Cardinality,
+        source: super::player::IntegerSource,
         purpose: super::player::QuestionPurpose,
         declaration: Option<ReceiptId>,
     },
@@ -628,7 +636,7 @@ pub(super) struct Execution {
     id: ExecutionId,
     timestamp: u64,
     ids: BTreeMap<ObjectId, String>,
-    todo: VecDeque<Node>,
+    todo: VecDeque<Queued>,
     slots: BTreeMap<(ScopeId, u64), Slot>,
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
     cost_materials: BTreeMap<ReceiptId, Vec<ObjectRef>>,
@@ -639,6 +647,7 @@ pub(super) struct Execution {
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
     facts: fact_log::Facts,
     waiting: Option<(DecisionView, Wait)>,
+    question_stage: Option<QuestionStage>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -816,7 +825,7 @@ impl Game {
                     .program()
                     .steps
                     .iter()
-                    .map(|step| step.node.clone())
+                    .map(|step| step.node.clone().into())
                     .collect(),
                 slots: BTreeMap::new(),
                 procedures: Vec::new(),
@@ -830,6 +839,7 @@ impl Game {
                 effect_evolution_destinations: BTreeMap::new(),
                 facts: fact_log::Facts::default(),
                 waiting: None,
+                question_stage: None,
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -915,6 +925,8 @@ impl Game {
             if view.actor != actor || view.token != token {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
+            // Transaction rollback restores the phase if the answer type is rejected.
+            execution.question_stage = None;
             match (wait, answer) {
                 (Wait::Ability(wait), Answer::Ability(handle)) => {
                     let source = wait.validate(self, &execution, handle)?;
@@ -1232,6 +1244,34 @@ impl Game {
         result
     }
 
+    /// Innermost `EachPlayer` actor, or `None` before that layer first switches seats.
+    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_each_player_actor;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_each_player_actor(&self) -> Option<PlayerId> {
+        self.typed.as_ref()?.procedure_actor()
+    }
+
+    /// Producer-recorded phase of the active typed question; `None` also means unknown.
+    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_question_stage;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_question_stage(&self) -> Option<QuestionStage> {
+        let execution = self.typed.as_ref()?;
+        execution.waiting.as_ref()?;
+        execution.question_stage
+    }
+
     /// Inspect the actor's question; dice reroll results are public to both players.
     #[must_use]
     pub fn internal_decision(&self, view: View) -> Option<DecisionView> {
@@ -1429,6 +1469,8 @@ impl Game {
             if self.state.game["ended"] == true {
                 execution.terminated = true;
                 execution.todo.clear();
+                execution.procedures.clear();
+                execution.question_stage = None;
                 self.internal_terminal_cleanup();
                 return Ok(());
             }
@@ -1442,7 +1484,7 @@ impl Game {
             if self.internal_quota_wait(execution)? {
                 break;
             }
-            let Some(node) = execution.todo.pop_front() else {
+            let Some(node) = processing::next_node(execution)? else {
                 if self.finish_internal_execution(execution)? {
                     continue;
                 }
@@ -1619,6 +1661,9 @@ impl Game {
                     Wait::Integer {
                         binding: declaration::NumberBinding::Natural(*binding),
                         bounds: *cardinality,
+                        // Generic effect integers stay unprojected until their wire use is defined.
+                        // NumberDeclaration is reserved for explicit declaration instructions.
+                        source: super::player::IntegerSource::Other,
                         purpose: player::purpose(&decision.kind),
                         declaration: None,
                     },
@@ -1646,6 +1691,8 @@ impl Game {
             decision,
             epoch: self.state.ir_epoch,
         };
+        // Unrecorded producers must not inherit a preceding question's phase.
+        execution.question_stage = None;
         execution.waiting = Some((
             DecisionView {
                 token,
@@ -1763,6 +1810,7 @@ impl Game {
             Action::FlipDown { objects } => {
                 self.internal_flip_down(execution, &instruction, objects)?;
             }
+            Action::Random { .. } => self.internal_random_sample(execution, &instruction)?,
             Action::Shuffle { .. } => self.internal_shuffle(execution, &instruction)?,
             Action::Move { .. } if shuffle_shape::placement(&instruction.action).is_some() => {
                 self.internal_shuffle_placement(execution, &instruction)?;
@@ -1900,7 +1948,7 @@ impl Game {
                     .receipts
                     .insert(instruction.receipt, InstructionOutcome::Installed(objects));
             }
-            _ => return Err(unsupported("instruction")),
+            Action::Fusion { .. } => return Err(unsupported("instruction")),
         }
         Ok(())
     }
@@ -1998,7 +2046,7 @@ impl Execution {
     }
     fn prepend(&mut self, program: Program) {
         for step in program.steps.into_iter().rev() {
-            self.todo.push_front(step.node);
+            self.todo.push_front(step.node.into());
         }
     }
     fn frame(&self) -> Frame {

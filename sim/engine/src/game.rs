@@ -108,12 +108,29 @@ struct Player {
     leader: Value,
     pp: Value,
     ep: i64,
+    ep_capacity: i64,
     sep: i64,
+    sep_available_from: Option<u64>,
     construction: String,
     title: String,
     title_code: String,
     deck_list: Value,
     zones: BTreeMap<String, Vec<Value>>,
+}
+
+impl Player {
+    const fn set_ep(&mut self, amount: i64) {
+        self.ep = amount;
+        // Recoveries reuse spent slots; increases beyond the existing pool add slots.
+        if amount > self.ep_capacity {
+            self.ep_capacity = amount;
+        }
+    }
+}
+
+fn sep_unlock_turn(first_player: &str, seat: &str) -> u64 {
+    // CR 12.2.4 fixes the own-turn threshold shared by allocation and native payment checks.
+    if first_player == seat { 7 } else { 6 }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -142,6 +159,9 @@ struct Frame {
     source: String,
     #[serde(default)]
     source_generation: Option<u64>,
+    // Serialized legacy frames cannot provide the typed ability-source evidence.
+    #[serde(skip)]
+    entry_source: Option<internal::EntrySource>,
     controller: String,
     #[serde(default)]
     event: Value,
@@ -259,6 +279,22 @@ struct State {
 }
 
 /// A cloneable game. Only this type resolves effects, creates prompts and hides private state.
+#[cfg_attr(
+    not(feature = "runner"),
+    doc = "
+Runner diagnostics bypass viewer authorization and are absent from host builds.
+
+```compile_fail,E0599
+use sve_engine::game::Game;
+let _ = Game::internal_each_player_actor;
+```
+
+```compile_fail,E0599
+use sve_engine::game::Game;
+let _ = Game::internal_question_stage;
+```
+"
+)]
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Game {
     catalog: Arc<Catalog>,
@@ -487,13 +523,38 @@ impl Game {
                 }
                 zones.insert(zone.into(), ids);
             }
+            let ep = int(&entry["ep"]);
+            let ep_capacity = match entry.get("ep_capacity") {
+                Some(value) => value
+                    .as_i64()
+                    .ok_or_else(|| invalid("invalid EP capacity"))?,
+                None => ep,
+            };
+            if !(0..=ep_capacity).contains(&ep) {
+                return Err(invalid("EP must fit its nonnegative capacity"));
+            }
+            let sep = int(&entry["sep"]);
+            if sep < 0 {
+                return Err(invalid("SEP cannot be negative"));
+            }
+            let sep_available_from = match entry.get("sep_available_from") {
+                Some(Value::Null) => None,
+                Some(value) => Some(value.as_u64().ok_or_else(|| invalid("invalid SEP turn"))?),
+                None => (sep > 0)
+                    .then(|| sep_unlock_turn(string(&position["turn"]["first_player"]), seat)),
+            };
+            if sep > 0 && sep_available_from.is_none() {
+                return Err(invalid("allocated SEP requires an unlock turn"));
+            }
             players.insert(
                 seat.into(),
                 Player {
                     leader: entry["leader"].clone(),
                     pp: entry["pp"].clone(),
-                    ep: int(&entry["ep"]),
-                    sep: int(&entry["sep"]),
+                    ep,
+                    ep_capacity,
+                    sep,
+                    sep_available_from,
                     construction: string(&entry["construction"]).into(),
                     title: string(&entry["title"]).into(),
                     title_code: title_code.unwrap_or_default(),

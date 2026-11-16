@@ -876,6 +876,7 @@ impl Game {
         self.state.turn["active"] = json!(seat);
         self.state.schedule.begin()?;
         self.internal_numeric_begin_turn()?;
+        self.internal_keywords_begin_turn()?;
         self.internal_suppressions_begin_turn()?;
         self.internal_preventions_begin_turn()?;
         self.internal_player_cost_begin_turn()?;

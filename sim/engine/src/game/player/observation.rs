@@ -18,15 +18,15 @@ pub use costs::{
 mod effects;
 pub use effects::{
     EffectExpiry, EffectInterval, EffectSource, GrantedDefinition, InstalledChange,
-    InstalledEffect, NumberChange, WordingField, WordingSource,
+    InstalledEffect, NumberChange, TextProvenance, WordingField, WordingSource,
 };
 
 use super::{
     DecisionShape, EvolutionQuestion, Input, ObjectHandle, OpeningQuestion, QuestionShape, Viewer,
 };
 use crate::battle::{
-    BattleReferences, ObjectTable, ProjectionError, RuleProcessing, build_objects,
-    build_observation, project_turn,
+    BattleReferences, ObjectTable, ProjectionError, QuestionProjection, RuleProcessing,
+    build_objects, build_observation, project_turn,
 };
 use crate::game::internal::zone_capacity;
 use crate::game::{Game, Object};
@@ -35,7 +35,7 @@ use crate::{Result, invalid};
 use core::result;
 use serde_json::Value;
 use sve_battle_contract::{
-    Seat,
+    QuestionId, Seat,
     observation::{self as wire, TurnView},
 };
 
@@ -112,8 +112,14 @@ pub struct Resources {
     pub maximum_pp: i64,
     /// Available evolution points.
     pub ep: i64,
+    /// Retained EP slots, expanded by increases beyond the existing pool.
+    pub ep_capacity: i64,
+    /// Depleted EP slots; recovering EP reduces this value.
+    pub ep_used: i64,
     /// Available super evolution points.
     pub sep: i64,
+    /// Owner's turn on which allocated SEP unlocks; retained after spending.
+    pub sep_available_from: Option<u64>,
 }
 
 /// Effective follower stats from the existing numeric reader.
@@ -388,6 +394,35 @@ impl Game {
         build_observation(&self.catalog, references, &observation, processing)
     }
 
+    /// Bind this seat's current question and complete board to a host-issued ID.
+    ///
+    /// The host authenticates the viewer, issues a fresh ID per occurrence in this
+    /// battle, and submits decoded commands to this same Game. Waiting and finished
+    /// seats have no question; this method does not replace their public input summary.
+    /// Supports opening, closing, and normal evolution form, material, discard and payment questions.
+    /// The host must preflight the full program closure before interactive use.
+    ///
+    /// # Errors
+    /// Refuses a fault, unsupported active shape, unavailable board or inconsistent
+    /// candidate membership. No partial question or guessed rules reference is returned.
+    pub fn battle_question(
+        &self,
+        perspective: Viewer,
+        id: &QuestionId,
+        references: &BattleReferences,
+    ) -> result::Result<Option<QuestionProjection>, ProjectionError> {
+        references.validate_catalog(&self.catalog)?;
+        match self.input(perspective) {
+            Input::Question(question) => {
+                let observation = self.battle_observation(perspective, references)?;
+                QuestionProjection::project(id, *question, observation, &self.catalog, references)
+                    .map(Some)
+            }
+            Input::Waiting(_) | Input::Finished { .. } => Ok(None),
+            Input::EngineFault => Err(ProjectionError::Unavailable),
+        }
+    }
+
     fn battle_rule_processing(
         &self,
         observation: &Observation,
@@ -612,7 +647,13 @@ impl Game {
                 pp: public_resource(&data.pp["current"])?,
                 maximum_pp: public_resource(&data.pp["max"])?,
                 ep: data.ep,
+                ep_capacity: data.ep_capacity,
+                ep_used: data
+                    .ep_capacity
+                    .checked_sub(data.ep)
+                    .ok_or_else(|| invalid("EP capacity difference overflow"))?,
                 sep: data.sep,
+                sep_available_from: data.sep_available_from,
             },
             effects: self.observed_player_effects(perspective, player)?,
             zones,

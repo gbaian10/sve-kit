@@ -1,10 +1,10 @@
-use super::ProjectionError;
+use super::{ProjectionError, RuleInput, WordingInput, rules::Rules, wording::Wordings};
 use crate::catalog::Catalog;
-use crate::game::player::observation::CardFace;
+use crate::game::player::observation::{CardFace, WordingSource};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt, result};
 use serde::{Deserialize, Serialize};
-use sve_battle_contract::CardRef;
+use sve_battle_contract::{CardRef, RuleRef};
 
 type Result<T> = result::Result<T, ProjectionError>;
 
@@ -21,6 +21,10 @@ pub struct ReferenceInput {
     pub snapshot_sha256: String,
     /// The full native face closure prevents partial or guessed references.
     pub faces: Vec<PrintingFaceIdentity>,
+    /// Exact wording ownership from the same public reader; absent when not provided.
+    pub wording: Option<WordingInput>,
+    /// Identity-only rule locations; absence does not mean a known empty dependency set.
+    pub rules: Option<RuleInput>,
 }
 
 /// Explicit coordinates avoid deriving a permanent printing from a native number.
@@ -41,6 +45,8 @@ pub struct BattleReferences {
     region: String,
     snapshot_sha256: String,
     faces: BTreeMap<String, BTreeMap<u64, CardRef>>,
+    wording: Option<Wordings>,
+    rules: Option<Rules>,
 }
 
 impl fmt::Debug for BattleReferences {
@@ -64,15 +70,20 @@ impl BattleReferences {
             region,
             snapshot_sha256,
             faces: identities,
+            wording,
+            rules,
         } = input;
         let mut references = Self {
             region,
             snapshot_sha256,
             faces: BTreeMap::new(),
+            wording: None,
+            rules: None,
         };
         references.validate_catalog(catalog)?;
         let mut printings = BTreeMap::new();
         let mut targets = BTreeSet::new();
+        let face_count = identities.len();
         for identity in identities {
             references.bind_face(catalog, identity, &mut printings, &mut targets)?;
         }
@@ -83,6 +94,15 @@ impl BattleReferences {
                     .get(number)
                     .is_none_or(|faces| faces.len() != card.faces.len())
         }) {
+            return Err(ProjectionError::Unavailable);
+        }
+        references.wording = wording
+            .map(|wording_input| Wordings::new(catalog, &references, wording_input, face_count))
+            .transpose()?;
+        references.rules = rules.map(Rules::new).transpose()?;
+        if let (Some(bound_wording), Some(bound_rules)) = (&references.wording, &references.rules)
+            && bound_wording.manifest_sha256 != bound_rules.manifest_sha256
+        {
             return Err(ProjectionError::Unavailable);
         }
         Ok(references)
@@ -99,6 +119,54 @@ impl BattleReferences {
             .and_then(|faces| faces.get(&face.face))
             .cloned()
             .ok_or(ProjectionError::Unavailable)
+    }
+
+    /// Public manifest supplying the provided wording or rule identity closure.
+    #[must_use]
+    pub fn manifest_sha256(&self) -> Option<&str> {
+        self.wording
+            .as_ref()
+            .map(|wording| wording.manifest_sha256.as_str())
+            .or_else(|| {
+                self.rules
+                    .as_ref()
+                    .map(|rules| rules.manifest_sha256.as_str())
+            })
+    }
+
+    /// Validate a wording owner and field without claiming a line, step or grant origin.
+    ///
+    /// # Errors
+    /// Refuses missing wording evidence, a foreign catalogue, face, revision or field.
+    pub fn validate_wording(
+        &self,
+        catalog: &Catalog,
+        face: &CardFace,
+        source: &WordingSource,
+    ) -> Result<CardRef> {
+        let card = self.resolve(catalog, face)?;
+        self.wording
+            .as_ref()
+            .ok_or(ProjectionError::Unavailable)?
+            .validate(face, source)?;
+        Ok(card)
+    }
+
+    /// Validate a rule location using the caller's explicit strength, without inferring its use.
+    ///
+    /// # Errors
+    /// Refuses an unprovided closure, foreign catalogue, missing identity or ruling strength mismatch.
+    pub fn validate_rule(&self, catalog: &Catalog, reference: &RuleRef) -> Result<RuleRef> {
+        self.validate_catalog(catalog)?;
+        self.rules
+            .as_ref()
+            .ok_or(ProjectionError::Unavailable)?
+            .validate(reference)?;
+        Ok(reference.clone())
+    }
+
+    pub(super) const fn has_wording(&self) -> bool {
+        self.wording.is_some()
     }
 
     pub(super) fn printing(&self, catalog: &Catalog, number: &str) -> Result<&str> {
@@ -165,4 +233,13 @@ impl BattleReferences {
         }
         Ok(())
     }
+}
+
+pub(super) fn valid_manifest_hash(value: &str) -> bool {
+    value.strip_prefix("sha256:").is_some_and(|hash| {
+        hash.len() == 64
+            && hash
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    })
 }

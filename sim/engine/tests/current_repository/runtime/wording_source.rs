@@ -71,6 +71,10 @@ fn wording_source_current_lastword_keeps_its_revision_after_the_holder_departs()
             assert_eq!(pending.len(), 1);
             assert_eq!(pending[0].source.card, NUMBER);
             assert_eq!(pending[0].source.wording.as_deref(), Some(&expected));
+            assert_eq!(
+                pending[0].source.provenance,
+                native::TextProvenance::Printed
+            );
             assert_eq!(pending[0].source.holder, None);
         }
         assert!(
@@ -196,6 +200,15 @@ fn wording_source_current_grant_keeps_provider_revision_after_a_shuffle() {
             assert_eq!(pending.len(), 1);
             assert_eq!(pending[0].source.card, PROVIDER);
             assert_eq!(pending[0].source.wording.as_deref(), Some(&expected));
+            assert_eq!(
+                pending[0].source.provenance,
+                native::TextProvenance::Granted {
+                    by: native::CardFace {
+                        card: PROVIDER.into(),
+                        face: 0
+                    }
+                }
+            );
             // The trigger occurrence belongs to the recipient's current generation.
             assert_eq!(
                 pending[0].source.holder,

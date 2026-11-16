@@ -1,5 +1,6 @@
 //! Frozen selection data, without authority references or bindings.
 
+use super::observation::ObservedZone;
 use super::{ObjectHandle, Viewer};
 use crate::ir::{Cardinality, Nat, Position, RoleCardinality};
 use alloc::collections::BTreeMap;
@@ -32,11 +33,22 @@ pub struct SelectionGroup {
     pub cardinality: Cardinality,
 }
 
+/// Frozen destination supplied by the native movement procedure.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct SelectionDestination {
+    /// Player receiving the assigned cards.
+    pub player: Viewer,
+    /// Native destination zone, independent of the chooser's current location.
+    pub zone: ObservedZone,
+}
+
 /// One role in the complete disjoint target partition.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub struct SelectionRole {
     /// Authorized destination edge for private-card roles.
     pub position: Option<Position>,
+    /// Absent when the native procedure cannot supply one complete destination.
+    pub destination: Option<SelectionDestination>,
     /// Original role coordinate.
     pub role: Nat,
     /// Printed rule for the assigned subset's size.

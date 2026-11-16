@@ -58,14 +58,6 @@ fn illegal(message: &str) -> EngineFailure {
     EngineFailure::IllegalPlay(message.into())
 }
 
-fn payment_valid(domain: &EvolutionPayment, pp: i64, ep: bool, super_evolution: bool) -> bool {
-    pp >= 0
-        && pp <= domain.available_pp
-        && pp.checked_add(i64::from(ep)) == Some(domain.total_pp)
-        && (!ep || domain.ep_allowed)
-        && (!super_evolution || domain.super_allowed)
-}
-
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Normal evolution keeps its native rule authority."
@@ -337,7 +329,7 @@ impl Game {
                     super_evolution,
                 },
             ) => {
-                if !payment_valid(payment, pp, ep, super_evolution) {
+                if !payment.is_valid(pp, ep, super_evolution) {
                     return Err(invalid("evolution payment answer"));
                 }
                 *validated = true;

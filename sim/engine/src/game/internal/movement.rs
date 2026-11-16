@@ -835,6 +835,12 @@ impl Game {
                 && object.controller == seat
                 && execution.is_private_hand_target(objects, member)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
+            let revealed_hand = object.zone == "hand"
+                && super::reveal::entry_receipt(objects).is_some_and(|receipt| {
+                    matches!(execution.receipts.get(&receipt), Some(InstructionOutcome::Revealed(shown)) if shown.contains(&member))
+                })
+                && self.publicly_located(&object.id)
+                && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             // The receiving player must be the one who looked at the card (BP01-083).
             let private_look = (self.looked_by(execution, objects, member, seat)?
                 || (object.zone == "deck"
@@ -866,7 +872,12 @@ impl Game {
                                 ..
                             }
                         ) || execution.is_private_advance_target(objects, member))));
-            if !(ordinary || advance || private_look || private_hand || revealed_match)
+            if !(ordinary
+                || advance
+                || private_look
+                || private_hand
+                || revealed_hand
+                || revealed_match)
                 || object.owner != seat
                 || object.controller != seat
                 || object.state["face"] != 0_i64
@@ -928,6 +939,8 @@ impl Game {
             .iter()
             .map(|id| execution.reference(self, id))
             .collect::<Result<Vec<_>>>()
+        } else if super::reveal::entry_receipt(objects).is_some() {
+            execution.public_target_objects(self, objects, true)
         } else {
             execution.objects(self, objects)
         }
@@ -975,9 +988,12 @@ impl Game {
                 && self.object(&id)?.generation == member.generation.0
                 && self.internal_ward_entry_choice(execution, &id)?
             {
-                execution.todo.push_front(Node::Instruction {
-                    instruction: Box::new(instruction.clone()),
-                });
+                execution.todo.push_front(
+                    Node::Instruction {
+                        instruction: Box::new(instruction.clone()),
+                    }
+                    .into(),
+                );
                 return Ok(());
             }
         }
@@ -1058,27 +1074,8 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<()> {
-        let player = execution.context.controller;
-        let members = execution.observed_objects(self, objects, player, Consumer::ObservedMove)?;
+        let (player, members) = self.observed_move_members(execution, instruction, objects)?;
         let seat = super::seat_name(player)?;
-        for &member in &members {
-            let id = execution.object_id(member)?;
-            let current = self.object(id)?;
-            if current.generation != member.generation.0
-                || current.zone != "deck"
-                || current.owner != seat
-                || current.controller != seat
-                || !self
-                    .state
-                    .knowledge
-                    .get(seat)
-                    .is_some_and(|knowledge| knowledge.knows_location(id))
-            {
-                return Err(unsupported(
-                    "observed move requires current own-deck evidence",
-                ));
-            }
-        }
         let Action::Move { movement: spec, .. } = &instruction.action else {
             return Err(unsupported("observed move action"));
         };
@@ -1116,6 +1113,36 @@ impl Game {
             InstructionOutcome::Move(MoveOutcome { moved }),
         );
         Ok(())
+    }
+
+    pub(super) fn observed_move_members(
+        &self,
+        execution: &Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+    ) -> Result<(PlayerId, Vec<ObjectRef>)> {
+        let player = execution.player(self, &instruction.actor)?;
+        let members = execution.observed_objects(self, objects, player, Consumer::ObservedMove)?;
+        let seat = super::seat_name(player)?;
+        for &member in &members {
+            let id = execution.object_id(member)?;
+            let current = self.object(id)?;
+            if current.generation != member.generation.0
+                || current.zone != "deck"
+                || current.owner != seat
+                || current.controller != seat
+                || !self
+                    .state
+                    .knowledge
+                    .get(seat)
+                    .is_some_and(|knowledge| knowledge.knows_location(id))
+            {
+                return Err(unsupported(
+                    "observed move requires current own-deck evidence",
+                ));
+            }
+        }
+        Ok((player, members))
     }
 
     #[expect(
@@ -1416,7 +1443,7 @@ impl Game {
             .collect::<Vec<_>>();
         let banished = self.internal_prepare_banish_events(&ids, execution, method)?;
         let departing_source = execution.source_before_move(self, &ids)?;
-        let mut frame = execution.frame();
+        let mut frame = execution.entry_frame(self, kind)?;
         if method == MoveMethod::Destroy {
             frame.values.insert("destroyed_subjects".into(), json!(ids));
         }

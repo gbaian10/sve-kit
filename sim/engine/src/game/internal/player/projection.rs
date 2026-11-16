@@ -57,7 +57,7 @@ fn collection(
 ) -> Result<DecisionShape> {
     match (wait, domain) {
         (Wait::Order(wait), InputDomain::Order(cards)) => Ok(DecisionShape::Order(
-            wait.player_cards(game, actor, &cards)?,
+            wait.player_question(game, actor, &cards)?,
         )),
         (Wait::Drive(wait), InputDomain::DriveTrigger { icon, targets }) => {
             Ok(DecisionShape::DriveTrigger {
@@ -189,8 +189,8 @@ fn typed(
         Wait::SearchReplacement(_) => {
             domain!(domain, InputDomain::SearchReplacement => DecisionShape::SearchReplacement)
         }
-        Wait::Integer { .. } => {
-            domain!(domain, InputDomain::Integer(bounds) => DecisionShape::Integer(bounds))
+        Wait::Integer { source, .. } => {
+            domain!(domain, InputDomain::Integer(bounds) => DecisionShape::Integer { bounds, source: *source })
         }
         Wait::Draw { .. } => domain!(domain, InputDomain::BeforeDraw => DecisionShape::BeforeDraw),
     }

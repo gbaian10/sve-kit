@@ -1,6 +1,6 @@
 //! Declared numbers use the ordinary public integer question and a dedicated public fact.
 use super::{Execution, Game, InputDomain, Result, Slot, Wait, invalid, unsupported};
-use crate::game::player::QuestionPurpose;
+use crate::game::player::{IntegerSource, QuestionPurpose};
 use crate::ir::{Action, Binding, Cardinality, DecisionId, Declaration, Instruction, Int, Nat};
 
 #[derive(Clone, Copy, Debug)]
@@ -87,6 +87,7 @@ impl Game {
             Wait::Integer {
                 binding,
                 bounds,
+                source: IntegerSource::NumberDeclaration,
                 purpose: QuestionPurpose::ResolutionChoice,
                 declaration: Some(instruction.receipt),
             },

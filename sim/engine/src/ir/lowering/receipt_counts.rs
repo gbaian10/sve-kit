@@ -224,6 +224,7 @@ impl BodyContext<'_> {
                 matches!(receipt.location(), ReceiptLocation::Local { id } if self.receipt_reads.published_looks.contains(id))
             }
             ObjectReceipt::Movement { .. }
+            | ObjectReceipt::Random { .. }
             | ObjectReceipt::Batch { .. }
             | ObjectReceipt::TransformBanished { .. }
             | ObjectReceipt::TransformCreated { .. }

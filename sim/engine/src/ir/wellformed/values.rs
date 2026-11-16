@@ -292,9 +292,16 @@ impl Checker {
                 BoolRead::FieldEntryOrigin { object, .. }
                 | BoolRead::FieldEntryMethod { object, .. } => self.object(object),
                 BoolRead::HistoryExists { query } => self.history(query),
-                BoolRead::CardPlayOrigin { .. }
-                | BoolRead::CardPlayTarget { .. }
-                | BoolRead::LegalAttack { .. } => self.reject(),
+                BoolRead::LegalAttack {
+                    attacker,
+                    ignore_querying_clause,
+                } => {
+                    if !self.effect_ids.insert(*ignore_querying_clause) {
+                        return self.reject();
+                    }
+                    self.object(attacker)
+                }
+                BoolRead::CardPlayOrigin { .. } | BoolRead::CardPlayTarget { .. } => self.reject(),
             },
             Expr::Frozen(read) => match read.as_ref() {
                 BoolFrozen::EvolutionSucceeded { receipt } => self.receipt(receipt),
@@ -881,6 +888,14 @@ impl Checker {
     fn selector_receipt(&self, receipt: &ObjectReceipt, projection: MemberProjection) -> Checked {
         match receipt {
             ObjectReceipt::Look { receipt } => self.receipt(receipt),
+            ObjectReceipt::Random { receipt } => {
+                if projection != MemberProjection::Before
+                    || !matches!(receipt.location(), ReceiptLocation::Local { .. })
+                {
+                    return self.reject();
+                }
+                self.receipt(receipt)
+            }
             ObjectReceipt::Reveal { receipt } => {
                 if projection != MemberProjection::Before
                     || !matches!(receipt.location(), ReceiptLocation::Local { .. })

@@ -9,6 +9,7 @@ use crate::game::knowledge::PublishedKnowledge;
 use crate::game::player::observation::AbilityQuota;
 use crate::game::player::{AdmissionGapReason, Viewer};
 use crate::ir::TurnOperation;
+use crate::ir::attack_restrictions::is_required_static;
 use crate::ir::dice as ir_dice;
 use crate::ir::effect_evolution::projection;
 use crate::ir::events::fusion as fusion_events;
@@ -38,7 +39,7 @@ use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReas
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::ir::{advance_entry, victory, x_pp};
-use crate::ir::{choice_rules, counter_caps, evolution_limits};
+use crate::ir::{choice_rules, counter_caps, draw_restrictions, evolution_limits};
 mod entry_posture;
 mod move_replacement;
 mod target_priority;
@@ -272,7 +273,6 @@ impl Game {
         perspective: Viewer,
         holder: &str,
     ) -> Result<Vec<AbilityQuota>> {
-        use super::observation::EffectOrigin;
         use crate::game::player::observation::AbilityQuota;
         let object = self.object(holder)?;
         let turn = self.state.schedule.current()?;
@@ -304,20 +304,9 @@ impl Game {
         let mut result = vec![];
         for (ability, limit) in abilities {
             let source = probe.internal_effective_source(holder, &ability)?;
-            let source_text = if let Some(origin) = &ability.grant {
-                self.observed_grant_source(perspective, holder, origin)?
-            } else {
-                EffectOrigin::definition(
-                    self,
-                    holder,
-                    object.generation,
-                    &self.internal_effective_print(holder)?.0,
-                    &ability.definition.located().source,
-                    false,
-                )?
-                .observed(self, perspective)
-            }
-            .ok_or_else(|| invalid("unavailable quota provenance"))?;
+            let source_text = self
+                .activation_text_source(holder, &ability, perspective)?
+                .ok_or_else(|| invalid("unavailable quota provenance"))?;
             result.push(AbilityQuota {
                 source: source_text,
                 kind: ability.node.kind,
@@ -1131,6 +1120,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
         || evolution_limits::is_static(ability)
         || choice_rules::is_static(ability)
         || counter_caps::projection(ability).is_some()
+        || draw_restrictions::projection(ability).is_some()
     {
         return Ok(true);
     }
@@ -1203,6 +1193,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || evolution_limits::is_static(ability)
         || choice_rules::is_static(ability)
         || counter_caps::projection(ability).is_some()
+        || draw_restrictions::projection(ability).is_some()
         || holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
         || static_declarations::is_static(ability)
@@ -1583,6 +1574,7 @@ fn check_instruction(
             | Action::Dice { .. }
             | Action::Declare { .. }
             | Action::Reveal { .. }
+            | Action::Random { .. }
             | Action::PlayCard { .. }
             | Action::PlayAbility { .. }
             | Action::Move { .. }
@@ -1774,6 +1766,8 @@ fn check_granted_static(located: &Located<Ability>) -> Result<()> {
         static_keywords::check(located, &located.node.declarations)
     } else if super::grant::static_cost(&located.node) {
         Ok(())
+    } else if is_required_static(&located.node) {
+        attack_restrictions::check(located)
     } else {
         Err(unsupported("granted static definition"))
     }

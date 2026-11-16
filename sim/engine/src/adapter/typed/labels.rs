@@ -146,7 +146,7 @@ impl Labels<'_> {
                 | DecisionShape::ExchangeRoutes(_)
                 | DecisionShape::BeforeDraw
                 | DecisionShape::TriggerQuota(_)
-                | DecisionShape::Integer(_)
+                | DecisionShape::Integer { .. }
                 | DecisionShape::DamageReplacements(_)
                 | DecisionShape::Distribution(_)
                 | DecisionShape::SearchReplacement
@@ -359,7 +359,7 @@ impl Labels<'_> {
                 }
                 DecisionShape::Order(cards) => {
                     let items: Vec<Value> = self
-                        .card_labels(cards)
+                        .card_labels(&cards.cards)
                         .into_iter()
                         .map(Value::String)
                         .collect();
@@ -375,7 +375,7 @@ impl Labels<'_> {
                 | DecisionShape::ExchangeRoutes(_)
                 | DecisionShape::BeforeDraw
                 | DecisionShape::TriggerQuota(_)
-                | DecisionShape::Integer(_)
+                | DecisionShape::Integer { .. }
                 | DecisionShape::MovementCapacity(_)
                 | DecisionShape::Distribution(_)
                 | DecisionShape::SearchReplacement

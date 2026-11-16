@@ -125,3 +125,11 @@ it("removes each printing mark independently and clears both with all conditions
   await userEvent.click(screen.getByRole("button", { name: "清除" }))
   expect(url()).toBe("")
 })
+
+it("removes only the PR-only condition from its chip", async () => {
+  await renderInRouter(<Harness initial="pr=1&stamp=1" />)
+  expect(chips()).toEqual(["標誌卡", "PR 限定"])
+  await userEvent.click(screen.getByRole("button", { name: "移除條件：PR 限定" }))
+  expect(chips()).toEqual(["標誌卡"])
+  expect(url()).toBe("stamp=1")
+})

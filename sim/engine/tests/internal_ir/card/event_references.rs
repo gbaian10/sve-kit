@@ -16,7 +16,7 @@ use sve_engine::battle::{
 };
 use sve_engine::game::player::events::EventCard;
 use sve_engine::game::player::observation::{
-    CardProperties, EffectSource, ObservedZone, TurnObservation,
+    CardProperties, EffectSource, ObservedZone, TextProvenance, TurnObservation,
 };
 use sve_engine::game::player::{ObjectHandle, SubmissionKind, Viewer};
 
@@ -27,6 +27,7 @@ fn event_source_coordinates_require_a_face_for_every_known_line() {
     let fixture = fixture();
     let objects = EventReferences::new(&fixture.catalog, &fixture.references).unwrap();
     let mut source = EffectSource {
+        provenance: TextProvenance::Unknown,
         card: "unit-follower".into(),
         face: None,
         line: None,
@@ -142,6 +143,8 @@ fn foreign_references() -> BattleReferences {
     BattleReferences::new(
         &catalog_for(&snapshot),
         ReferenceInput {
+            rules: None,
+            wording: None,
             region: "jp".into(),
             snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
             faces,
@@ -428,6 +431,7 @@ fn event_references_convert_only_what_the_event_froze() {
     );
     assert_eq!(
         objects.source(&EffectSource {
+            provenance: TextProvenance::Unknown,
             card: "unit-spell".into(),
             face: None,
             line: None,

@@ -110,13 +110,21 @@ BattleObservation 完整保留[玩家輸入](player-input.md)的觀察語義，�
 | 資料 | 必須保留 |
 | --- | --- |
 | objects | ObjectHandle → 已知 CardRef、有效卡面、owner／controller、public／private 知識、正背面、有效特徵與狀態 |
-| players | 每席生命、PP／最大 PP、EP／SEP、公開效果、區域總數、已授權成員、容量；主戰者只是席位外觀，沒有假物件代號 |
+| players | 每席生命、PP／最大 PP、剩餘 EP／SEP、EP 容量／已用格、SEP 開放回合、公開效果、區域總數、已授權成員、容量；主戰者只是席位外觀，沒有假物件代號 |
 | zones | deck、evolve_deck、hand、field、ex、cemetery、banish、resolution、evolution、race、drive、trigger、equipment |
 | turn／attack | 活動席、先攻席、階段、逐席回合數、公開攻擊者與目標；重畫盤面即可保留攻擊箭頭 |
 | relationships | 裝備、Ride、出走／Drive 等有型別關係；兩端可辨識才帶 handle |
 | processing | 外層至內層的已授權處理脈絡、stage、controller、來源、主語、程序席位、宣告與付款摘要 |
 | costs／pending／history | 現行成本的已知／未決部分、公開待處理、已提交的回合歷史；不包含續體、capture 或暫態歷史 |
 | remembered | 曾看過的卡面與 owner；沒有現位置、實體副本數或可追蹤暗牌標記 |
+
+玩家資源皆由引擎狀態提供，畫面不硬編先後手的配置或開放時機：
+
+- `ep`／`sep` 是目前剩餘量。`ep_capacity: Nat` 是本局 EP 顯示槽容量：初始配置保留為容量，付款不縮小它，回復重用已耗用槽，合法增加超過既有容量時擴充槽數。引擎原有 EP 增加沒有固定硬上限，此欄不新增遊戲限制。
+- `ep_used: Nat` 是目前已耗用槽數，滿足 `ep + ep_used = ep_capacity`；EP 回復會減少此值，它不是累計付款次數。
+- `sep_available_from: Nat | null` 是本席自己的第幾回合起可用 SEP；配置後即使 SEP 用完也保留該回合。`null` 表示目前尚未配置 SEP，例如開局配置前的狀態；`sep = 0` 且回合非 null 則是已配置但耗盡。開放時機與原生合法性判斷讀同一份引擎狀態。
+
+三個新欄位皆必填（SEP 時機可明示 null），不得省略、補假零或由客戶端推規則；數字使用 checked Nat，無法投影則拒絕整份盤面。
 
 不存在的區域以 0／[] 表示。未知區域可畫通用容器，但未支援的必要規則語義須停止互動，不能猜操作。
 對手未知手牌只給數量，不給固定 placeholder ID、私有張序或牌組清單；count 與已知成員的差可畫匿名卡背。
@@ -146,8 +154,20 @@ interface RuleRef {
 }
 ```
 
-step 只有精確卡文對應才填；不公開 instruction path。能力授予者與持有者分開，失知後 holder=null。
-沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
+section 固定為 `effect`（該版主要效果原文）或 `section:<ordinal>`（具名區段的原始 ordinal，例如 `section:0`）；ordinal 是無前置零的非負十進位整數，歷史欄位不可重編。line 沿用該原文已准入 SourceSpan 的正整數；step 只有精確逐步對應才填，未提供對應時為 null，不公開 instruction path。
+
+只有明確 Printed／Granted 證據才能輸出 TextRef：印刷能力的 granted_by=null；授予能力填權威凍結點的直接 giver 有效 CardRef，與文字 owner、目前 holder 分開。同印刷與自授仍屬 Granted。giver 對該席不可知或缺來源證據時保留 Card 提示，不改寫為印刷；holder 依既有識別連結，失知後為 null，不重接新 generation。
+
+RuleRef 使用公開來源的穩定身分：CR 的 id=cr_clause.number、revision=cr_version.id；QA 的 id=qa.id、revision=qa_version.id；裁定的 id=ruling_id、revision=ruling_revision.id。人可讀版本標籤、QA 官網號及內部 RuleId 都不是 wire 定位值。resolver 只驗可定位，呼叫端必須明示逐使用點 strength，裁定須符合該 revision 的登錄，不預設 official。
+引用輸入由 `sve_carddb.export.read_api.load_battle_inputs` 讀取同一份已驗證的公開匯出閉包產生：native JSONL 的精確 bytes 與 `ReferenceInput` 一起回傳，後者包含地區、native bytes 的 SHA-256、完整印刷／面映射，以及綁定公開 manifest 的永久卡面／卡文版本／原文欄位和規則來源身分。目錄不依牌組或已降低的作者縮減，可到達 token 與未選用面仍須保留；人工 EP／SEP 資源版次不成為 native 卡片。
+
+native 卡文讀該版次唯一可用的來源觀測，不拿共享 current 或印刷原文補缺。無法表示完整目錄、來源模糊或關係不完整時拒絕整批；原文缺失保持 null，不當成空文字。wording 輸入未提供時，印刷引用仍可用，但不能成立精確卡文引用。`BattleReferences` 檢查同一 native 背景、完整面閉包與卡文身分的一致性；公開 manifest／原文欄位存在性的信任邊界仍是既有驗證 reader，不是任意宿主 JSON。確認 owner 與 field 只代表位置存在，不自行證明 line、step、授予者或觀看者授權。
+
+規則身分閉包保留已發布的歷史版本，CR／QA 依地區篩選；沒有地區欄位的裁定僅列為可定位身分，不推論適用範圍。wording 與 rules 同時提供時須來自同一公開 manifest；兩者都只提供身分，來源存在不等於本題的完整依據。非 null Question.rules 仍須有可信 producer 提供逐使用點 strength 與經驗證的完整依據集合，不能由身分閉包或空目錄推定。
+
+只有 rules、沒有 wording 時，manifest 一致性由宿主核對：`BattleReferences::manifest_sha256()` 必須符合建局使用的已驗證 `Snapshot.manifest_sha256`。Rust resolver 的身分檢查不能代替公開 reader 對來源與閉包的驗證。
+
+已證明 Printed／Granted 且帶有 wording 座標的來源，若提供精確 wording 閉包卻無法核對 owner、revision 或 field，則拒絕投影，不以其他版本替代。沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
 strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表示任意答案合法，也不表示官方核可。
@@ -174,11 +194,12 @@ interface Question {
   auto_answer: { kind: "unique"; answer: Answer; public: boolean }
     | { kind: "not_unique" } | { kind: "unknown" };
   assistance: null;
-  rules: RuleRef[];
+  rules: RuleRef[] | null;
 }
 ```
 
 purpose 是規則用途、use 是具體細目、shape.kind 是嚴格答案語義；各種合法組合由 native 程序決定。
+rules 必填：null 表示沒有經完整驗證的規則依據（未提供），[] 表示明確已知沒有規則引用，非空陣列表示經可信來源驗證的完整依據；不完整的單條不得當作完整集合。null 不代表已確認合法，也不解除其他 strict／preflight 互動阻擋；引用的 strength 不預設為 official。
 ProcessingContext 至少保留 stage、controller、已授權 TextRef／subject、規則依據、逐席程序與 Declared；actor 不一定是 controller。
 等待席只取得公開脈絡及骰值／剩餘次數，不取得候選、唯一性、私有題數或隱藏執行堆疊。
 UI 可共用 actions、confirm、options、select、order、partition、distribute、number、declare_name 九種元件分類；declare_name 只預留，不表示首片增加卡名宣告規則。
@@ -200,13 +221,14 @@ Answer 用表中的語義 tag；use 可以區分同形狀的規則目的，不�
 | E.Payment | evolution_payment | pp、use_ep、super_evolution；權威列完整合法 tuple，UI 選一整組 |
 | D.ResourceEntryPayment | resource_entry_payment | resource_payment：材料＋use_ep；保留 EP 替代許可 |
 | D.WardEntry | ward_entry | confirm：來源卡面、區域、accept 合法域 |
-| C.GuardAct／C.Discard | end_guard／hand_limit_discard | select 守護子集／確切超額張數；提交後可再出棄牌題 |
+| C.GuardAct／C.Discard | end_guard／hand_limit_discard | select 守護子集／確切超額張數；都進 actor 自己墓場時依 selected 順序放入；提交後可再出棄牌題 |
 | D.OptionalCost／D.ResolutionPayment／D.May | optional_cost／resolution_payment／may_effect | confirm：明列合法布林；宣告付款、結算付款及可選效果不混義 |
 | D.BeforeDraw | draw_continue | choose continue／stop，映回 Stepwise |
 | D.CostMaterials／D.Discard | cost_material／cost_discard／effect_discard | select 完整集合；按 purpose 回原付款或棄牌答案 |
 | D.ExchangeRoutes | exchange_route | choose 真實路線，保留索引缺口及成本摘要 |
 | D.Pending／D.TriggerQuota | pending_order／trigger_quota | choose 一個 occurrence；後者附 earlier 歷史，不能回答 earlier |
-| D.Integer | declare_x | integer：有效界限／單位／來源，不擴充成任意宣告數值 |
+| D.Integer（原生 X 費用宣言） | declare_x | integer：有效界限／單位／來源，依 native Wait 的來源識別 X，不由形狀推斷 |
+| D.Integer（原生結算數值宣言） | declare_number | integer：結算時宣告數值，保留有效界限／單位／來源；對應 NonnegativeInteger／BoundedInteger，依 native Wait 的來源識別 |
 | D.DiceReroll | dice_reroll | keep／reroll；公開 value、remaining 及 allowed，映回 Integer 0／1 |
 | D.Order／D.DamageReplacements | order_cards／damage_replacement_order | order：完整排列、方向、目的地；替代項逐個 TextRef |
 | D.DriveTrigger | drive_trigger | accept＋必要 target；公開 icon，拒絕時 target=null |
@@ -225,6 +247,12 @@ Attack 的 target 是該 intent 題內選項，不能借另一攻擊者的候選
 進化可帶 nullable 的超進化／EP 可能性提示，未知為 null，不用提示跳過付款題。
 
 ### 4.2 選取與複合限制
+
+`hand_limit_discard` 的棄牌都進 actor 自己墓場時，`selected` 同時指定完整棄牌集合及玩家選定的墓場放入順序，解碼不得依候選順序重排。
+依[日文綜合規則 1.28.0](../../authored/rules/comprehensive/jp/1.28.0/ch04.json)與[英文綜合規則 1.26.1](../../authored/rules/comprehensive/en/1.26.1/ch04.json) §4.1.5，同時放入同一區域的順序由該區域所屬玩家決定；§4.9.2 則明定墓場不管理卡片順序。
+若有跨擁有者的手牌進其他玩家墓場，不能由 actor 代替其他區域所屬玩家指定順序；該 producer 需另行處理各區域玩家的選擇，不能直接套用本題的單一 actor 順序。
+因此這裡指定的是這次放入的順序，不是持續追蹤的墓場遊戲順序；盤面的陣列位置也不代表墓場有頂／底或不能重排。這些牌仍然同時棄置，不因 `selected` 的先後而拆成逐張結算。
+此順序語義只適用本 use，不將所有 `select` 或 `roles` 解讀為排序題。
 
 | 形狀 | 必須保留的限制 |
 | --- | --- |

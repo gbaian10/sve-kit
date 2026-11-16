@@ -24,6 +24,22 @@ enum ObservationUse {
     reason = "Observation receipts are only exposed to the private movement spine."
 )]
 impl BodyContext<'_> {
+    pub(super) fn look_remainder_actor(&self, step: &ast::Step) -> Option<PlayerRef> {
+        let ast::Step::Move(ast::Move {
+            r#ref: Some(ast::MoveObjects::Observed(observed)),
+            to: ast::Destination::Cemetery,
+            ..
+        }) = step
+        else {
+            return None;
+        };
+        let ast::Observation::Binding(name) = &observed.r#in else {
+            return None;
+        };
+        // The viewer retains authority over its own Look remainder across player stages.
+        self.look_viewers.get(name).cloned()
+    }
+
     #[expect(
         clippy::too_many_lines,
         reason = "The exhaustive author-step match keeps observation receipts closed."
@@ -41,7 +57,7 @@ impl BodyContext<'_> {
         if let ast::Step::Discard(value) = step
             && let Some(name) = &value.result
         {
-            if !matches!(value.who, None | Some(ast::LeaderSide::Controller))
+            if !matches!(value.who, None | Some(ast::Side::Controller))
                 || value.all.is_some()
                 || value.random == Some(true)
             {
@@ -985,7 +1001,7 @@ impl BodyContext<'_> {
         value: &ast::Reveal,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        if value.top.is_some() {
+        if value.top.is_some() || value.random.is_some() {
             return Err(unsupported(path));
         }
         match value.r#ref.as_ref().ok_or_else(|| unsupported(path))? {

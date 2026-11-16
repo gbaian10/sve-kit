@@ -878,6 +878,7 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
                         "shape.NatFrozen.DiceValue"
                             | "shape.IntFrozen.MoveBatchCount"
                             | "shape.EntryMethodFields.EnterFieldMethod"
+                            | "shape.TraitsFrozen.EnterFieldAbilitySourceTraits"
                             | "shape.EntryOriginFields.EnterFieldFrom"
                     ) && other
                         .locations
@@ -1043,6 +1044,9 @@ fn supported(code: &str) -> bool {
             | "shape.DiscardMode.ChosenCount"
             | "discard.chosen-count"
             | "internal.ZoneKind.Hand"
+            | "shape.Action.Random"
+            | "action.random"
+            | "shape.ObjectReceipt.Random"
             | "shape.Action.Reveal"
             | "action.reveal"
             | "shape.Action.Shuffle"
@@ -1342,6 +1346,7 @@ fn supported(code: &str) -> bool {
             | "shape.EntryOriginFields.EnterFieldFrom"
             | "shape.NatFrozen.DiceValue"
             | "shape.EntryMethodFields.EnterFieldMethod"
+            | "shape.TraitsFrozen.EnterFieldAbilitySourceTraits"
             | "internal.EntryMethod.Play"
             | "internal.EntryMethod.AbilityPut"
             | "internal.EntryMethod.RulePut"

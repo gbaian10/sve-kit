@@ -1,0 +1,70 @@
+cards:
+  BP11-112:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - enters_acted:
+                on: this
+      - fanfare:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 5
+                  who: self
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  orig_cost_ge: 7
+                may: true
+                upto: 5
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                order: chooser
+                position: bottom
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
+                to: deck
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - reveal:
+                bind: shown
+                random:
+                  n: 2
+                ref:
+                  who: self
+                  zone: hand
+            - move:
+                ref:
+                  in: shown
+                  kind: follower
+                result: entered
+                to: field
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+format: 2
+kind: author_effect_set

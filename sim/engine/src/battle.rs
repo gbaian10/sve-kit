@@ -33,13 +33,16 @@ mod events;
 mod history;
 mod objects;
 mod pending;
+mod question;
 mod references;
+mod rules;
 mod selection;
 mod sources;
 mod turn;
+mod wording;
 
 #[cfg(all(test, feature = "runner"))]
-mod tests;
+pub(crate) mod tests;
 
 pub(crate) use board::{RuleProcessing, build_observation};
 pub use events::{
@@ -47,9 +50,14 @@ pub use events::{
 };
 pub use objects::ObjectTable;
 pub(crate) use objects::build_objects;
+pub use question::{AnswerError, QuestionProjection};
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
+pub use rules::{RuleIdentity, RuleInput};
 pub use selection::{CandidateDetails, SelectionProjection};
 pub(crate) use turn::project_turn;
+pub use wording::{
+    WordingFaceIdentity, WordingFieldIdentity, WordingInput, WordingRevisionIdentity,
+};
 
 use sve_battle_contract::{HostError, HostErrorReason};
 

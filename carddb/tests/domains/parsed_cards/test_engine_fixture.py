@@ -127,9 +127,12 @@ def test_combined_inputs_fail_before_writing_when_data_is_missing(
     monkeypatch.setattr(repository_current, "REPOSITORY", repository)
     cards, selection = tmp_path / "cards.jsonl", tmp_path / "selection.json"
     with pytest.raises(FileNotFoundError):
-        repository_current.generate(cards, selection)
+        repository_current.generate(
+            cards, selection, tmp_path / "battle-projection.jsonl"
+        )
     assert not cards.exists()
     assert not selection.exists()
+    assert not (tmp_path / "battle-projection.jsonl").exists()
 
 
 def test_combined_inputs_reject_an_unavailable_pin_before_writing(
@@ -147,6 +150,9 @@ def test_combined_inputs_reject_an_unavailable_pin_before_writing(
     monkeypatch.setattr(repository_current, "REPOSITORY", repository)
     cards, selection = tmp_path / "cards.jsonl", tmp_path / "selection.json"
     with pytest.raises(ValueError, match="requested batch"):
-        repository_current.generate(cards, selection)
+        repository_current.generate(
+            cards, selection, tmp_path / "battle-projection.jsonl"
+        )
     assert not cards.exists()
     assert not selection.exists()
+    assert not (tmp_path / "battle-projection.jsonl").exists()

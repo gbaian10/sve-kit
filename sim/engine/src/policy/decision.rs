@@ -105,7 +105,7 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
                 .ok_or(PolicyFailure::NoSolution)?
                 .handle,
         ),
-        DecisionShape::Integer(bounds) => {
+        DecisionShape::Integer { bounds, .. } => {
             if bounds
                 .maximum
                 .is_some_and(|maximum| maximum.0 < bounds.minimum.0)
@@ -115,7 +115,7 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
             Answer::Integer(bounds.minimum)
         }
         DecisionShape::Order(cards) => {
-            Answer::Order(ordered(cards.iter().map(|card| card.handle))?)
+            Answer::Order(ordered(cards.cards.iter().map(|card| card.handle))?)
         }
         DecisionShape::DamageReplacements(options) => {
             Answer::Order(ordered(options.iter().map(|option| option.handle))?)

@@ -6,8 +6,8 @@ use super::{
     EvolutionState, ExecutionRef, Expr, FaceId, FlipOutcome, FusionOutcome, Info, InstructionId,
     Int, KeywordId, LimitSpec, LookOutcome, ModeId, MoveOutcome, MoveResult, MovementEvent, Nat,
     ObjectOperand, ObjectRef, ObjectView, OrderOutcome, PaymentReceipt, PaymentResult, Phase,
-    PlayerRef, PlayerSet, Posture, ReceiptId, ReceiptList, RecipientSet, RevealOutcome,
-    RevealUntilOutcome, RuleId, RuntimeAbilityReference, ScopeId, SearchOutcome,
+    PlayerRef, PlayerSet, Posture, RandomOutcome, ReceiptId, ReceiptList, RecipientSet,
+    RevealOutcome, RevealUntilOutcome, RuleId, RuntimeAbilityReference, ScopeId, SearchOutcome,
     SelectionConstraint, SelectionSnapshot, Selector, TitleId, TokenOutcome, TraitId,
     TransformOutcome, TriggerSpec, TurnId, Visitor, Walk, ZoneKind, ZoneRef,
 };
@@ -451,7 +451,7 @@ variants!(#[derive(Copy)] RoleCardinality {
     Remainder {} => ["decision.role-remainder"]
 });
 tags!(RevealUntilMembers { Revealed, Matched });
-variants!(ObjectReceipt { Fusion { receipt: ReceiptReference<FusionOutcome> } => [], RevealUntil { receipt: ReceiptReference<RevealUntilOutcome>, members: RevealUntilMembers } => [], Batch { receipt: ReceiptReference<BatchOutcome> } => [], TransformBanished { receipt: ReceiptReference<TransformOutcome> } => [], TransformCreated { receipt: ReceiptReference<TransformOutcome> } => [], Movement { receipt: MovementReceipt } => [], Token { receipt: ReceiptReference<TokenOutcome> } => [], Flip { receipt: ReceiptReference<FlipOutcome> } => [], Look { receipt: ReceiptReference<LookOutcome> } => [], Reveal { receipt: ReceiptReference<RevealOutcome> } => [] });
+variants!(ObjectReceipt { Random { receipt: ReceiptReference<RandomOutcome> } => [], Fusion { receipt: ReceiptReference<FusionOutcome> } => [], RevealUntil { receipt: ReceiptReference<RevealUntilOutcome>, members: RevealUntilMembers } => [], Batch { receipt: ReceiptReference<BatchOutcome> } => [], TransformBanished { receipt: ReceiptReference<TransformOutcome> } => [], TransformCreated { receipt: ReceiptReference<TransformOutcome> } => [], Movement { receipt: MovementReceipt } => [], Token { receipt: ReceiptReference<TokenOutcome> } => [], Flip { receipt: ReceiptReference<FlipOutcome> } => [], Look { receipt: ReceiptReference<LookOutcome> } => [], Reveal { receipt: ReceiptReference<RevealOutcome> } => [] });
 
 tags!(PaymentOptionality { Required, Optional });
 tags!(Declinable {

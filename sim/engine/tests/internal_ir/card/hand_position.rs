@@ -381,3 +381,85 @@ fn hand_position_direct_ir_cannot_change_the_role_sources_or_movement_destinatio
         );
     }
 }
+
+#[test]
+fn positioned_roles_admit_only_owners_deck_for_both_movement_edges() {
+    let public = lowerer()
+        .lower(&tree(&json!([{"move":{
+            "ref":{"who":"opp","zone":"field","kind":"follower"},
+            "to":"deck","position":{"one_of":["top","bottom"],"by":"self"}
+        }}])))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let destinations = [
+        (
+            MoveDestination::Owners {
+                zone: OwnerZone::Deck,
+            },
+            true,
+        ),
+        (
+            MoveDestination::Owners {
+                zone: OwnerZone::Hand,
+            },
+            false,
+        ),
+        (
+            MoveDestination::Owners {
+                zone: OwnerZone::Cemetery,
+            },
+            false,
+        ),
+        (
+            MoveDestination::Owners {
+                zone: OwnerZone::Banish,
+            },
+            false,
+        ),
+        (
+            MoveDestination::Owners {
+                zone: OwnerZone::Ex,
+            },
+            false,
+        ),
+        (
+            MoveDestination::Shared {
+                zone: ZoneRef {
+                    player: PlayerRef::Controller {},
+                    kind: ZoneKind::Deck,
+                },
+            },
+            false,
+        ),
+        (
+            MoveDestination::Shared {
+                zone: ZoneRef {
+                    player: PlayerRef::Controller {},
+                    kind: ZoneKind::Field,
+                },
+            },
+            false,
+        ),
+    ];
+    for original in [program(), public] {
+        for edge in [1_usize, 2] {
+            for (destination, admitted) in &destinations {
+                let mut raw = original.card().clone();
+                let body = raw.abilities[0].node.body.as_mut().unwrap();
+                let Node::Instruction { instruction } = &mut body.steps[edge].node else {
+                    panic!("a positioned role has its adjacent movement");
+                };
+                let Action::Move { movement, .. } = &mut instruction.action else {
+                    panic!("a positioned role is consumed by a movement");
+                };
+                movement.to = destination.clone();
+                assert_eq!(
+                    WellFormedCardProgram::check(raw).is_ok(),
+                    *admitted,
+                    "native role destinations may assume Owners/Deck only while admission preserves it"
+                );
+            }
+        }
+    }
+}

@@ -1,6 +1,6 @@
 //! Grants retain the text provider and receiving physical generation.
 
-use super::duration::EffectEnd;
+use super::duration::{EffectEnd, TurnInterval};
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::game::player::Viewer;
 use crate::game::player::observation::{EffectSource, InstalledChange, InstalledEffect};
@@ -8,9 +8,9 @@ use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
     Action, CharacteristicPatch, Duration, DurationEnd, Effect, EffectId, EffectReference,
-    EventPattern, GrantedAbility, Instruction, InstructionId, KeywordId, Located, ObjectOperand,
-    ObjectRef, ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector, SourceSpan,
-    TimeAnchor, TriggerCondition, ZoneKind, granted_cost,
+    EventPattern, GrantedAbility, Instruction, InstructionId, Interval, KeywordId, Located,
+    ObjectOperand, ObjectRef, ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector,
+    SourceSpan, TimeAnchor, TriggerCondition, ZoneKind, granted_cost,
 };
 use crate::ir::{RideDriveOperation, TextProvider, UsageReference};
 use alloc::collections::BTreeSet;
@@ -27,6 +27,7 @@ pub(in crate::game) struct KeywordState {
 struct KeywordGrant {
     origin_record: super::observation::EffectOrigin,
     end: EffectEnd,
+    interval: Option<TurnInterval>,
     keywords: BTreeSet<String>,
     traits: BTreeSet<String>,
     origin: GrantOrigin,
@@ -200,13 +201,19 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         });
     let current_provider = matches!(&provider.provider, ObjectView::Current { object }
         if object.as_ref() == &ObjectOperand::SourceHolder {});
-    let fixed_duration = duration.anchor == (TimeAnchor::Installation {})
-        && duration.usage.is_none()
-        && duration.intervals.is_empty()
-        && matches!(
+    let valid_interval = match duration.intervals.as_slice() {
+        [] => matches!(
             duration.end,
             DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
-        );
+        ),
+        [Interval::DuringNextTurn { player }] => {
+            matches!(&duration.end, DurationEnd::NextTurnEnd { player: end } if player == end)
+        }
+        _ => false,
+    };
+    let fixed_duration = duration.anchor == (TimeAnchor::Installation {})
+        && duration.usage.is_none()
+        && valid_interval;
     if !supported_keywords {
         return Err(unsupported("granted definition event or keyword"));
     }
@@ -288,38 +295,119 @@ pub(super) fn static_cost(ability: &Ability) -> bool {
     reason = "Keyword installation and expiry share generation-bound authority."
 )]
 impl Game {
-    pub(in crate::game::internal) fn observed_grant_source(
+    pub(super) fn granted_text_origin(
         &self,
-        perspective: Viewer,
         holder: &str,
         origin: &GrantOrigin,
-    ) -> Result<Option<EffectSource>> {
-        match origin {
-            GrantOrigin::Installed { .. } => Ok(self
-                .state
-                .ir_keywords
-                .get(holder)
-                .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
-                .and_then(|grant| grant.origin_record.observed(self, perspective))),
+    ) -> Result<Option<super::observation::EffectOrigin>> {
+        use super::observation::{EffectOrigin, SourceIdentity};
+        let generation = self.object(holder)?.generation;
+        let (record, giver) = match origin {
+            GrantOrigin::Installed { .. } => {
+                let Some(grant) = self
+                    .state
+                    .ir_keywords
+                    .get(holder)
+                    .filter(|state| state.generation == generation)
+                    .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
+                else {
+                    return Ok(None);
+                };
+                (
+                    grant.origin_record.clone(),
+                    grant.origin_record.giver().cloned(),
+                )
+            }
             GrantOrigin::Continuous {
-                provider,
-                through: Some(through),
-                ..
-            } => self.observed_grant_source(perspective, &provider.holder, through),
-            GrantOrigin::Continuous {
-                provider,
-                through: None,
-                ..
-            } => Ok(super::observation::EffectOrigin::definition(
-                self,
-                &provider.holder,
-                provider.generation,
-                &provider.card,
-                &provider.span,
-                false,
-            )?
-            .observed(self, perspective)),
+                provider, through, ..
+            } => {
+                let giver = SourceIdentity::holder(self, &provider.holder, provider.generation);
+                let record = if let Some(through) = through {
+                    let Some(record) = self.granted_text_origin(&provider.holder, through)? else {
+                        return Ok(None);
+                    };
+                    record
+                } else {
+                    let record = EffectOrigin::definition(
+                        self,
+                        &provider.holder,
+                        provider.generation,
+                        &provider.card,
+                        &provider.span,
+                    )?;
+                    let Some(record) = giver.clone().and_then(|identity| record.printed(identity))
+                    else {
+                        return Ok(None);
+                    };
+                    record
+                };
+                (record, giver)
+            }
+        };
+        Ok(Some(
+            record.granted(giver).for_holder(self, holder, generation),
+        ))
+    }
+
+    pub(super) fn runtime_text_origin(
+        &self,
+        source: RuntimeAbilitySource,
+        snapshot: &super::source::SourceSnapshot,
+    ) -> Result<Option<super::observation::EffectOrigin>> {
+        if let Some(((holder, _, origin, _), _)) = self.card_runtime.keyword_instances.iter().find(
+            |((holder, generation, _, definition), instance)| {
+                **instance == source.instance
+                    && *generation == source.holder.generation.0
+                    && *definition == source.definition
+                    && self.state.ir_objects.get(holder) == Some(&source.holder.id.0)
+            },
+        ) {
+            return Ok(self
+                .granted_text_origin(holder, origin)?
+                .map(|origin| origin.with_emitter(snapshot.identity().cloned())));
         }
+        // Only the registered printed instance can prove Printed; missing grants cannot.
+        let Some(((holder, generation, card, face, definition), _)) =
+            self.card_runtime.instances.iter().find(
+                |((holder, generation, _, _, definition), instance)| {
+                    **instance == source.instance
+                        && *generation == source.holder.generation.0
+                        && *definition == source.definition
+                        && self.state.ir_objects.get(holder) == Some(&source.holder.id.0)
+                },
+            )
+        else {
+            return Ok(None);
+        };
+        let Some(identity) = snapshot
+            .identity()
+            .filter(|identity| u64::try_from(*face).is_ok_and(|face| identity.matches(card, face)))
+        else {
+            return Ok(None);
+        };
+        let Some(ability) = self
+            .card_runtime
+            .definitions
+            .cards
+            .get(card)
+            .and_then(|program| {
+                program
+                    .card()
+                    .abilities
+                    .iter()
+                    .find(|ability| ability.node.id == *definition)
+            })
+        else {
+            return Ok(None);
+        };
+        Ok(super::observation::EffectOrigin::definition(
+            self,
+            holder,
+            *generation,
+            card,
+            &ability.source,
+        )?
+        .printed(identity.clone()))
     }
 
     pub(in crate::game) fn card_traits(&self, holder: &str) -> Result<BTreeSet<String>> {
@@ -352,6 +440,7 @@ impl Game {
                 state
                     .grants
                     .iter()
+                    .filter(|grant| grant.active())
                     .flat_map(|grant| grant.traits.iter().cloned()),
             );
         }
@@ -402,7 +491,7 @@ impl Game {
             .get(holder)
             .filter(|state| state.generation == object.generation)
         {
-            for grant in &state.grants {
+            for grant in state.grants.iter().filter(|grant| grant.active()) {
                 if self.internal_suppresses_grant(holder, &grant.origin) {
                     continue;
                 }
@@ -525,50 +614,28 @@ impl Game {
         ability: &EffectiveAbility,
         perspective: Viewer,
     ) -> Result<Option<EffectSource>> {
-        use crate::game::player::observation::seat;
-        let generation = self.object(holder)?.generation;
-        let known = self.state.knowledge.get(seat(perspective));
-        let Some(origin) = &ability.grant else {
-            let (face, line) = super::card::printed_origin(&ability.node.source.origin)?;
-            let card = self.internal_effective_print(holder)?.0;
-            return Ok(Some(EffectSource {
-                face: self.effect_source_face(&card, Some(&face.0))?,
-                card,
-                line: Some(line.0),
-                wording: super::observation::wording_source(&ability.definition.located().source),
-                holder: known.and_then(|knowledge| knowledge.handle(holder)),
-            }));
+        use super::observation::{EffectOrigin, SourceIdentity};
+        let origin = if let Some(origin) = &ability.grant {
+            self.granted_text_origin(holder, origin)?
+        } else {
+            let generation = self.object(holder)?.generation;
+            let (card, _) = self.internal_effective_print(holder)?;
+            let record = EffectOrigin::definition(
+                self,
+                holder,
+                generation,
+                &card,
+                &ability.definition.located().source,
+            )?;
+            SourceIdentity::holder(self, holder, generation)
+                .and_then(|identity| record.printed(identity))
         };
-        if let Some(grant) = self
-            .state
-            .ir_keywords
-            .get(holder)
-            .filter(|state| state.generation == generation)
-            .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
-        {
-            return Ok(grant.origin_record.observed(self, perspective));
-        }
-        let provider = origin.provider();
-        let link = known
-            .and_then(|knowledge| knowledge.handle(&provider.holder))
-            .filter(|_| {
-                self.player_knows_object(perspective, &provider.holder)
-                    && self
-                        .state
-                        .objects
-                        .get(&provider.holder)
-                        .is_some_and(|object| object.generation == provider.generation)
-            });
-        let Some(handle) = link else {
-            return Ok(None);
-        };
-        Ok(Some(EffectSource {
-            card: provider.card.clone(),
-            face: self.effect_source_face(&provider.card, Some(&provider.span.face))?,
-            line: Some(u64::from(provider.span.line)),
-            wording: super::observation::wording_source(&provider.span),
-            holder: Some(handle),
-        }))
+        Ok(origin
+            .ok_or_else(|| {
+                crate::EngineFailure::Invariant("effective ability has no text origin".into())
+            })?
+            .require_owner()?
+            .observed(self, perspective))
     }
 
     pub(in crate::game) fn internal_granted_keywords(
@@ -583,7 +650,9 @@ impl Game {
             .filter(|state| object.zone == "field" && state.generation == object.generation)
             .into_iter()
             .flat_map(|state| &state.grants)
-            .filter(|grant| !self.internal_suppresses_grant(holder, &grant.origin))
+            .filter(|grant| {
+                grant.active() && !self.internal_suppresses_grant(holder, &grant.origin)
+            })
             .flat_map(|grant| grant.keywords.iter().cloned())
             .collect())
     }
@@ -630,7 +699,7 @@ impl Game {
 
     pub(in crate::game::internal) fn internal_payment_dependent_grants(&self) -> Result<bool> {
         for state in self.state.ir_keywords.values() {
-            for grant in &state.grants {
+            for grant in state.grants.iter().filter(|grant| grant.active()) {
                 for id in &grant.definitions {
                     let provider = grant.origin.provider();
                     let definition = self
@@ -678,7 +747,8 @@ impl Game {
             .filter(|state| state.generation == object.generation)
             .and_then(|state| {
                 state.grants.iter().find(|grant| {
-                    grant.keywords.contains("drain")
+                    grant.active()
+                        && grant.keywords.contains("drain")
                         && !self.internal_suppresses_grant(holder, &grant.origin)
                 })
             })
@@ -875,6 +945,11 @@ impl Game {
             _ => return Err(unsupported("grant instruction")),
         };
         let end = EffectEnd::at(self, execution, &duration.end)?;
+        let interval = duration
+            .intervals
+            .first()
+            .map(|interval| TurnInterval::at(self, execution, interval))
+            .transpose()?;
         let provider = self.installed_keyword_provider(execution)?;
         let origin = GrantOrigin::Installed {
             provider,
@@ -894,26 +969,8 @@ impl Game {
                 )
             })
             .collect::<Result<BTreeSet<_>>>()?;
-        let mut definitions = vec![];
-        for ability in abilities {
-            if let GrantedAbility::Definition { ability } = ability {
-                definitions.push(ability.id.0);
-                self.card_runtime.granted_definitions.insert(
-                    (origin.provider().card.clone(), ability.id),
-                    execution
-                        .plan
-                        .as_ref()
-                        .ok_or_else(|| invalid("grant execution has no admitted plan"))?
-                        .granted(
-                            Some(instruction),
-                            &Located {
-                                node: *ability.clone(),
-                                source: origin.provider().span.clone(),
-                            },
-                        )?,
-                );
-            }
-        }
+        let definitions =
+            self.install_granted_definitions(execution, instruction, abilities, &origin)?;
         let trait_grant = !traits.is_empty();
         let grant = KeywordGrant {
             origin_record: super::observation::EffectOrigin::capture(
@@ -922,6 +979,7 @@ impl Game {
                 &instruction.source,
             )?,
             end,
+            interval,
             keywords,
             traits,
             origin,
@@ -954,6 +1012,36 @@ impl Game {
         };
         execution.receipts.insert(instruction.receipt, outcome);
         Ok(())
+    }
+
+    fn install_granted_definitions(
+        &mut self,
+        execution: &Execution,
+        instruction: &Instruction,
+        abilities: &[GrantedAbility],
+        origin: &GrantOrigin,
+    ) -> Result<Vec<u64>> {
+        let mut definitions = vec![];
+        for ability in abilities {
+            if let GrantedAbility::Definition { ability } = ability {
+                definitions.push(ability.id.0);
+                self.card_runtime.granted_definitions.insert(
+                    (origin.provider().card.clone(), ability.id),
+                    execution
+                        .plan
+                        .as_ref()
+                        .ok_or_else(|| invalid("grant execution has no admitted plan"))?
+                        .granted(
+                            Some(instruction),
+                            &Located {
+                                node: *ability.clone(),
+                                source: origin.provider().span.clone(),
+                            },
+                        )?,
+                );
+            }
+        }
+        Ok(definitions)
     }
 
     fn install_grant(
@@ -1060,14 +1148,21 @@ impl Game {
                     state.generation == object.generation
                         && matches!(object.zone.as_str(), "ex" | "resolution")
                 })
-                && state.grants.iter().any(|grant| {
-                    grant.definitions.iter().any(|definition| {
-                        self.card_runtime
-                            .granted_definitions
-                            .get(&(grant.origin.provider().card.clone(), AbilityId(*definition)))
-                            .is_some_and(|ability| static_cost(&ability.node))
+                && state
+                    .grants
+                    .iter()
+                    .filter(|grant| grant.active())
+                    .any(|grant| {
+                        grant.definitions.iter().any(|definition| {
+                            self.card_runtime
+                                .granted_definitions
+                                .get(&(
+                                    grant.origin.provider().card.clone(),
+                                    AbilityId(*definition),
+                                ))
+                                .is_some_and(|ability| static_cost(&ability.node))
+                        })
                     })
-                })
         })
     }
 
@@ -1086,7 +1181,7 @@ impl Game {
             .get(holder)
             .filter(|state| state.generation == object.generation)
         {
-            for grant in &state.grants {
+            for grant in state.grants.iter().filter(|grant| grant.active()) {
                 for id in &grant.definitions {
                     let ability = self
                         .card_runtime
@@ -1109,11 +1204,29 @@ impl Game {
         Ok(delta)
     }
 
+    pub(in crate::game) fn internal_keywords_begin_turn(&mut self) -> Result<()> {
+        let turn = self.state.schedule.current()?;
+        let player = super::player_id(self.active())?.seat;
+        for state in self.state.ir_keywords.values_mut() {
+            for grant in &mut state.grants {
+                grant.end.begin(turn, player);
+                if let Some(interval) = grant.interval.as_mut() {
+                    interval.begin(turn, player);
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub(in crate::game) fn internal_keywords_end_turn(&mut self, turn: u64) {
         self.state.ir_keywords.retain(|_, state| {
-            state
-                .grants
-                .retain(|grant| grant.end != EffectEnd::Turn(turn));
+            state.grants.retain_mut(|grant| {
+                if let Some(interval) = grant.interval.as_mut() {
+                    interval.finish(turn);
+                }
+                grant.end != EffectEnd::Turn(turn)
+                    && grant.interval.is_none_or(TurnInterval::pending)
+            });
             !state.grants.is_empty()
         });
     }
@@ -1136,6 +1249,7 @@ impl Game {
             .filter(|state| state.generation == object.generation)
             .into_iter()
             .flat_map(|state| &state.grants)
+            .filter(|grant| grant.active())
             .map(|grant| grant.origin.clone())
             .collect::<BTreeSet<_>>();
         origins.extend(
@@ -1261,6 +1375,10 @@ impl Game {
 }
 
 impl KeywordGrant {
+    fn active(&self) -> bool {
+        self.interval.is_none_or(TurnInterval::active)
+    }
+
     fn observed(
         &self,
         game: &Game,
@@ -1271,9 +1389,15 @@ impl KeywordGrant {
         Ok(InstalledEffect {
             source: self.origin_record.observed(game, perspective),
             expires: self.end.observed()?,
-            main_live: true,
-            intervals: vec![],
-            active,
+            main_live: self.interval.is_none(),
+            intervals: self
+                .interval
+                .map(TurnInterval::observed)
+                .transpose()?
+                .flatten()
+                .into_iter()
+                .collect(),
+            active: active && self.active(),
             change,
         })
     }

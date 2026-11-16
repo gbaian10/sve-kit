@@ -187,6 +187,14 @@ impl Checker {
                     self.env.receipt_access.insert(*id, Visibility::Public {});
                 }
             }
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Random { receipt },
+                ..
+            } => {
+                if let ReceiptLocation::Local { id } = receipt.location() {
+                    self.env.receipt_access.insert(*id, Visibility::Public {});
+                }
+            }
             Selector::CollectedMembers { .. }
             | Selector::MoveAfterAll { .. }
             | Selector::Created { .. }
@@ -230,6 +238,11 @@ impl Checker {
                 self.env
                     .receipt_access
                     .insert(instruction.receipt, only(viewer.clone()));
+            }
+            Action::Random { visibility, .. } if instruction.precondition.is_none() => {
+                self.env
+                    .receipt_access
+                    .insert(instruction.receipt, visibility.clone());
             }
             Action::Reveal { objects } if instruction.precondition.is_none() => {
                 self.reveal_access(objects);

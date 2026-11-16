@@ -9,8 +9,12 @@ mod battle_objects;
 mod battle_observation;
 #[path = "card/battle_pending.rs"]
 mod battle_pending;
+#[path = "card/battle_question.rs"]
+mod battle_question;
 #[path = "card/battle_quotas.rs"]
 mod battle_quotas;
+#[path = "card/battle_resources.rs"]
+mod battle_resources;
 #[path = "card/battle_turn.rs"]
 mod battle_turn;
 #[path = "card/board_relationships.rs"]
@@ -994,6 +998,9 @@ mod player_shares;
 #[path = "card/player_choices.rs"]
 mod player_choices;
 
+#[path = "card/processing_stage.rs"]
+mod processing_stage;
+
 #[path = "card/field_banish_replacement.rs"]
 mod field_banish_replacement;
 #[path = "card/source_posture.rs"]
@@ -1069,3 +1076,36 @@ mod layer3_counter_cap;
 
 #[path = "card/layer3_counter_cost.rs"]
 mod layer3_counter_cost;
+
+#[path = "card/layer3_player_discard.rs"]
+mod layer3_player_discard;
+
+#[path = "card/layer3_draw_restriction.rs"]
+mod layer3_draw_restriction;
+
+#[path = "card/layer3_must_attack.rs"]
+mod layer3_must_attack;
+
+#[path = "card/layer3_arena_attack.rs"]
+mod layer3_arena_attack;
+
+#[path = "card/layer3_random_reveal.rs"]
+mod layer3_random_reveal;
+
+#[path = "card/layer3_revealed_entry.rs"]
+mod layer3_revealed_entry;
+
+#[path = "card/public_projection.rs"]
+mod public_projection;
+
+#[path = "card/source_provenance.rs"]
+mod source_provenance;
+
+#[path = "card/source_provenance_delay.rs"]
+mod source_provenance_delay;
+
+#[path = "card/source_provenance_continuous.rs"]
+mod source_provenance_continuous;
+
+#[path = "card/layer3_entry_source.rs"]
+mod layer3_entry_source;

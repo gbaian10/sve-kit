@@ -103,7 +103,7 @@ runtime_record!(
 
 runtime_record!(DiceEvent { roller: PlayerId, roll: RollId, value: DieFace, attempts: Vec<DieFace>, accepted_attempt: Nat });
 
-runtime_record!(EnterFieldEvent { object: ObjectRef, from: EntryOrigin, controller: PlayerId, characters: Characteristics, method: EntryMethod, play_receipt: Option<RuntimeReceiptId> });
+runtime_record!(EnterFieldEvent { object: ObjectRef, from: EntryOrigin, controller: PlayerId, characters: Characteristics, method: EntryMethod, play_receipt: Option<RuntimeReceiptId>, ability_source_traits: Option<Vec<TraitId>> });
 
 runtime_record!(Receipt { id: RuntimeReceiptId, action: InstructionId, requested: Quantity, actual: Quantity, status: ReceiptStatus, successful: Vec<ResultMember>, moves: Vec<MoveResult>, payment: Option<PaymentResult>, reason: Option<ReceiptReason> });
 
@@ -404,6 +404,7 @@ runtime_record!(FlipOutcome { successful: Vec<ResultMember> });
 runtime_record!(LookOutcome { looked: Vec<RuntimeObjectView> });
 // A public reveal shows every member to all players; members stay readable only while unmoved.
 runtime_record!(RevealOutcome { revealed: Vec<ObjectRef> });
+runtime_record!(RandomOutcome { sampled: Vec<ObjectRef> });
 runtime_record!(RevealUntilOutcome { revealed: Vec<RuntimeObjectView>, matched: Vec<RuntimeObjectView>, exhausted: Bool });
 /// A fact requiring at least one facet cannot be represented by an empty list.
 #[derive(Clone, Debug, PartialEq, Eq)]

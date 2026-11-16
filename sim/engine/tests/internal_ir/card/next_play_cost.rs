@@ -168,7 +168,7 @@ fn grant(game: &mut Game) -> Command {
         panic!("remainder order")
     };
     assert_eq!(
-        order.len(),
+        order.cards.len(),
         2,
         "only the two unselected cards need ordering"
     );
@@ -176,7 +176,7 @@ fn grant(game: &mut Game) -> Command {
         answer(
             game,
             Viewer::P1,
-            Answer::Order(order.iter().rev().map(|m| m.handle).collect())
+            Answer::Order(order.cards.iter().rev().map(|m| m.handle).collect())
         )
         .kind,
         SubmissionKind::Applied,

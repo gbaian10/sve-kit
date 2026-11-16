@@ -1,30 +1,42 @@
 //! Source information belongs to the checked ability execution, never to a caller's snapshot.
 
+use super::observation::{EffectOrigin, SourceIdentity};
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
-use crate::game::Object;
 use crate::game::player::Viewer;
+use crate::game::{Frame, Object};
 use crate::ir::events::numbers;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
     Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
     LkiReason, NameOperation, Nat, NumberRead, ObjectOperand, ObjectRef, ObjectView, PostureRead,
     Predicate, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView, SnapshotId,
-    Stat, TraitId,
+    Stat, TraitId, ZoneKind,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
 
 #[derive(Clone, Debug)]
 pub(super) struct SourceInformation {
+    // Formal completion still compares the starting source after Fusion moves it.
+    binding: ObjectRef,
     holder: ObjectRef,
     zone: String,
     publicly_identified: bool,
     departed: Option<SourceSnapshot>,
+    origin: Box<EffectOrigin>,
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(in crate::game) struct EntrySource {
+    pub(super) source: RuntimeAbilitySource,
+    pub(super) execution: ExecutionId,
+    pub(super) traits: Vec<TraitId>,
 }
 
 #[derive(Clone, Debug)]
 pub(in crate::game) struct SourceSnapshot {
     view: RuntimeObjectView,
+    identity: Option<SourceIdentity>,
     original: [i64; 3],
     effective: [i64; 3],
     pub(super) zone: String,
@@ -107,10 +119,33 @@ pub(super) fn count_zone(requirements: &Requirements, requirement: &Requirement)
     reason = "Source reads share the execution's private authority proof."
 )]
 impl Execution {
+    pub(super) fn entry_frame(&self, game: &Game, destination: ZoneKind) -> Result<Frame> {
+        let mut frame = self.frame();
+        if destination == ZoneKind::Field {
+            frame.entry_source = self.entry_source(game)?;
+        }
+        Ok(frame)
+    }
+
+    fn entry_source(&self, game: &Game) -> Result<Option<EntrySource>> {
+        let Some(source) = self.ability else {
+            return Ok(None);
+        };
+        if self.source_information.is_none() {
+            return Ok(None);
+        }
+        Ok(Some(EntrySource {
+            source,
+            execution: self.id,
+            traits: self.source_traits(game)?,
+        }))
+    }
+
     /// Binds the authority-derived ability source and its reference zone at body start.
     pub(super) fn bind_source(&mut self, game: &Game, source: RuntimeAbilitySource) -> Result<()> {
+        let information = SourceInformation::current(game, source)?;
         self.ability = Some(source);
-        self.source_information = Some(SourceInformation::current(game, source)?);
+        self.source_information = Some(information);
         Ok(())
     }
 
@@ -391,6 +426,10 @@ impl Execution {
 }
 
 impl SourceInformation {
+    pub(super) fn origin(&self) -> &EffectOrigin {
+        &self.origin
+    }
+
     pub(super) const fn publicly_identified(&self) -> bool {
         self.publicly_identified
     }
@@ -428,11 +467,71 @@ impl SourceInformation {
             return Err(invalid("foreign source snapshot"));
         }
         Ok(Self {
+            binding: source.holder,
             holder: source.holder,
             zone: game.object(id)?.zone.clone(),
             publicly_identified: game.player_knows_object(Viewer::P1, id)
                 && game.player_knows_object(Viewer::P2, id),
             departed: None,
+            origin: Box::new(
+                game.runtime_text_origin(source, &snapshot)?
+                    .ok_or_else(|| {
+                        crate::EngineFailure::Invariant(
+                            "typed source has no bound text origin".into(),
+                        )
+                    })?
+                    .require_owner()?,
+            ),
+        })
+    }
+
+    pub(super) fn follow(
+        &mut self,
+        game: &Game,
+        source: RuntimeAbilitySource,
+        after: ObjectRef,
+    ) -> Result<()> {
+        if source.holder != self.binding || after.id != self.holder.id {
+            return Err(crate::EngineFailure::Invariant(
+                "source follow lost its original binding".into(),
+            ));
+        }
+        game.information_snapshot(after)?;
+        let id = game
+            .state
+            .ir_objects
+            .iter()
+            .find(|(_, number)| **number == after.id.0)
+            .map(|(id, _)| id.as_str())
+            .ok_or_else(|| invalid("missing followed source identity"))?;
+        self.holder = after;
+        self.zone.clone_from(&game.object(id)?.zone);
+        self.publicly_identified =
+            game.player_knows_object(Viewer::P1, id) && game.player_knows_object(Viewer::P2, id);
+        self.departed = None;
+        // Fusion follows this same physical source; it never rebinds text through a recipient.
+        *self.origin =
+            self.origin
+                .as_ref()
+                .clone()
+                .for_followed_source(game, id, after.generation.0);
+        Ok(())
+    }
+
+    pub(super) fn callback_source(
+        &mut self,
+        source: RuntimeAbilitySource,
+    ) -> Result<RuntimeAbilitySource> {
+        if source.holder != self.binding {
+            return Err(crate::EngineFailure::Invariant(
+                "callback lost its original source binding".into(),
+            ));
+        }
+        // A new callback belongs to the physical generation at its own creation.
+        self.binding = self.holder;
+        Ok(RuntimeAbilitySource {
+            holder: self.holder,
+            ..source
         })
     }
 
@@ -441,7 +540,7 @@ impl SourceInformation {
         game: &Game,
         source: RuntimeAbilitySource,
     ) -> Result<SourceSnapshot> {
-        if source.holder != self.holder {
+        if source.holder != self.binding {
             return Err(invalid("source information belongs to another ability"));
         }
         if let Some(departed) = &self.departed {
@@ -473,6 +572,10 @@ impl SourceInformation {
 }
 
 impl SourceSnapshot {
+    pub(super) const fn identity(&self) -> Option<&SourceIdentity> {
+        self.identity.as_ref()
+    }
+
     pub(super) const fn original_cost(&self) -> i64 {
         self.original[0]
     }
@@ -561,6 +664,7 @@ impl Game {
         let original = [cost, original_attack, original_life];
         let effective = [self.internal_effective_cost(id)?, attack, life];
         Ok(SourceSnapshot {
+            identity: SourceIdentity::capture(self, reference),
             view: RuntimeObjectView {
                 object: reference,
                 snapshot: SnapshotId(self.state.ir_epoch),
@@ -615,3 +719,6 @@ pub(super) fn mask_holder_posture(condition: &Expr<Bool>) -> Expr<Bool> {
         _ => condition.clone(),
     }
 }
+
+#[cfg(all(test, feature = "runner"))]
+mod audit;

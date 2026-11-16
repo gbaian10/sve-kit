@@ -7,13 +7,14 @@ from sve_carddb.core.json import canonical, object_value, parse, string
 from sve_carddb.domains.parsed_cards.engine_fixture import project
 from sve_carddb.domains.parsed_cards.reader import read
 from sve_carddb.workflows import authoring
+from tests.support.battle_projection import generate as generate_battle_projection
 
 REPOSITORY = Path(__file__).resolve().parents[3]
 
 
-def generate(cards: Path, selection: Path) -> None:
+def generate(cards: Path, selection: Path, battle_projection: Path) -> None:
     """Share admitted source data for both outputs; every call reads fresh inputs."""
-    if not cards.is_absolute() or not selection.is_absolute():
+    if not all(path.is_absolute() for path in (cards, selection, battle_projection)):
         raise ValueError("Repository inputs require absolute output paths")
     batch = string(
         object_value(parse((REPOSITORY / "tests/engine/card-input.json").read_bytes()))[
@@ -34,10 +35,16 @@ def generate(cards: Path, selection: Path) -> None:
         output.write(card_input)
     with selection.open("xb") as output:
         output.write(selected)
+    with battle_projection.open("xb") as output:
+        output.write(generate_battle_projection())
 
 
 if __name__ == "__main__":
     try:
-        generate(Path(sys.argv[1]), Path(sys.argv[2]))
+        generate(
+            Path(sys.argv[1]),
+            Path(sys.argv[2]),
+            Path(sys.argv[3]),
+        )
     except OSError, ValueError:
         raise SystemExit("Engine test input generation failed.") from None

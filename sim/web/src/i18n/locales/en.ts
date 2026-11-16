@@ -305,6 +305,8 @@ export default {
     serialOnlyHint: "Printed with a serial-number plate",
     unlistedOnly: "Not in official database",
     unlistedOnlyHint: "EP/SEP and similar cards missing from the official card list",
+    prOnly: "PR only",
+    prOnlyHint: "Cards issued only with PR card numbers",
     specialPrintings: "Special printings",
     specialPrintingsAll: "All",
     specialPrintingsHint: "Selecting several shows only cards that match all of them",

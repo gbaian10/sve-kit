@@ -1,4 +1,5 @@
 use super::ProjectionError;
+use crate::game::player::observation::ObservedZone;
 use crate::game::player::{
     self, SearchAnswer, SearchQuestion, SelectionQuestion, TargetRoleAssignment, Viewer,
 };
@@ -9,7 +10,7 @@ use sve_battle_contract::question::{
     Bounds, Candidate, CostTotal, Destination, Distinct, Edge, GroupAssignment, Origin, RoleSize,
     Selection, SelectionGroup, SelectionRole,
 };
-use sve_battle_contract::{Answer, Int, Nat, OptionId, QuestionId, Seat, Subject};
+use sve_battle_contract::{Answer, Int, Nat, OptionId, QuestionId, Seat, Subject, Zone};
 
 type Result<T> = result::Result<T, ProjectionError>;
 
@@ -95,6 +96,13 @@ impl SelectionProjection {
                 return Err(ProjectionError::Unavailable);
             }
             let destination = destinations.get(&role.role.0).copied();
+            if role.destination.is_some_and(|native| {
+                destination.is_none_or(|supplied| {
+                    supplied.player != seat(native.player) || supplied.zone != zone(native.zone)
+                })
+            }) {
+                return Err(ProjectionError::Unavailable);
+            }
             if role.position.is_none() && destination.is_some_and(|value| value.position.is_some())
             {
                 return Err(ProjectionError::Unavailable);
@@ -105,7 +113,9 @@ impl SelectionProjection {
                     Position::Bottom {} => Edge::Bottom,
                     Position::Index { .. } => return Err(ProjectionError::Unavailable),
                 };
-                if destination.is_none_or(|destination| destination.position != Some(edge)) {
+                if destination.is_none_or(|destination| {
+                    destination.position != Some(edge) || destination.zone != Zone::Deck
+                }) {
                     return Err(ProjectionError::Unavailable);
                 }
             }
@@ -409,7 +419,7 @@ impl SelectionProjection {
     }
 }
 
-fn bounds(value: Cardinality) -> Result<Bounds> {
+pub(super) fn bounds(value: Cardinality) -> Result<Bounds> {
     if value.maximum.is_some_and(|max| max.0 < value.minimum.0) {
         return Err(ProjectionError::Unavailable);
     }
@@ -426,5 +436,23 @@ const fn seat(viewer: Viewer) -> Seat {
     match viewer {
         Viewer::P1 => Seat::P1,
         Viewer::P2 => Seat::P2,
+    }
+}
+
+pub(super) const fn zone(value: ObservedZone) -> Zone {
+    match value {
+        ObservedZone::Deck => Zone::Deck,
+        ObservedZone::EvolveDeck => Zone::EvolveDeck,
+        ObservedZone::Hand => Zone::Hand,
+        ObservedZone::Field => Zone::Field,
+        ObservedZone::Ex => Zone::Ex,
+        ObservedZone::Cemetery => Zone::Cemetery,
+        ObservedZone::Banish => Zone::Banish,
+        ObservedZone::Resolution => Zone::Resolution,
+        ObservedZone::Evolution => Zone::Evolution,
+        ObservedZone::Race => Zone::Race,
+        ObservedZone::Drive => Zone::Drive,
+        ObservedZone::Trigger => Zone::Trigger,
+        ObservedZone::Equipment => Zone::Equipment,
     }
 }

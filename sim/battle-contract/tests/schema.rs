@@ -65,3 +65,79 @@ fn generation_is_reproducible() {
     let first = serde_json::to_string(&schema()).unwrap();
     assert_eq!(serde_json::to_string(&schema()).unwrap(), first);
 }
+
+#[test]
+fn question_rules_are_required_even_when_unprovided() {
+    let validator = validator("Question");
+    let (_, text) = support::fixtures("question").swap_remove(0);
+    let mut question: Value = serde_json::from_str(&text).unwrap();
+    for rules in [
+        Value::Null,
+        json!([]),
+        json!([{
+            "kind": "cr", "id": "0.0.1", "revision": "synthetic",
+            "strength": "inferred"
+        }]),
+    ] {
+        question
+            .as_object_mut()
+            .unwrap()
+            .insert("rules".into(), rules);
+        assert!(validator.is_valid(&question));
+    }
+    for invalid in [json!({}), json!([null]), json!([{"kind": "cr"}])] {
+        question
+            .as_object_mut()
+            .unwrap()
+            .insert("rules".into(), invalid);
+        assert!(!validator.is_valid(&question));
+    }
+    question.as_object_mut().unwrap().remove("rules");
+    assert!(!validator.is_valid(&question));
+}
+
+#[test]
+fn evolution_resource_slots_and_unlock_turn_are_required_exact_facts() {
+    let document = support::fixtures("observation")
+        .into_iter()
+        .find(|(name, _)| name.ends_with("baseline.json"))
+        .unwrap()
+        .1;
+    let board: Value = serde_json::from_str(&document).unwrap();
+    let player = board.get("players").unwrap().get(0).unwrap().clone();
+    let validator = validator("PlayerView");
+    assert!(validator.is_valid(&player));
+    for field in ["ep_capacity", "ep_used", "sep_available_from"] {
+        let mut missing = player.clone();
+        missing.as_object_mut().unwrap().remove(field);
+        assert!(
+            !validator.is_valid(&missing),
+            "{field} is an explicit resource fact"
+        );
+        for value in [
+            json!(-1_i32),
+            json!(0.5_f64),
+            json!(MAX_SAFE_INTEGER.checked_add(1).unwrap()),
+        ] {
+            let mut invalid = player.clone();
+            invalid.as_object_mut().unwrap().insert(field.into(), value);
+            assert!(
+                !validator.is_valid(&invalid),
+                "{field} requires an exact natural number"
+            );
+        }
+    }
+    let mut spent = player.clone();
+    spent
+        .as_object_mut()
+        .unwrap()
+        .insert("sep_available_from".into(), json!(7_u32));
+    assert!(
+        validator.is_valid(&spent),
+        "exhausted SEP retains its schedule"
+    );
+    assert!(
+        validator.is_valid(&player),
+        "a null schedule represents unallocated SEP"
+    );
+}

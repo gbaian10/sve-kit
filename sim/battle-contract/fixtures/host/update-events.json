@@ -20,7 +20,10 @@
         "pp": 0,
         "max_pp": 0,
         "ep": 0,
+        "ep_capacity": 0,
+        "ep_used": 0,
         "sep": 0,
+        "sep_available_from": null,
         "effects": [],
         "zones": {
           "deck": {
@@ -96,7 +99,10 @@
         "pp": 0,
         "max_pp": 0,
         "ep": 0,
+        "ep_capacity": 0,
+        "ep_used": 0,
         "sep": 0,
+        "sep_available_from": null,
         "effects": [],
         "zones": {
           "deck": {
@@ -200,7 +206,7 @@
             "face": 0
           },
           "wording_revision": "r1",
-          "section": "main",
+          "section": "effect",
           "line": 2,
           "step": null,
           "granted_by": null,
@@ -222,7 +228,7 @@
         "kind": "not_unique"
       },
       "assistance": null,
-      "rules": []
+      "rules": null
     }
   },
   "events": {
@@ -579,7 +585,7 @@
                     "face": 0
                   },
                   "wording_revision": "r1",
-                  "section": "main",
+                  "section": "effect",
                   "line": 1,
                   "step": null,
                   "granted_by": null,
@@ -687,7 +693,7 @@
                     "face": 0
                   },
                   "wording_revision": "r1",
-                  "section": "main",
+                  "section": "effect",
                   "line": 2,
                   "step": null,
                   "granted_by": null,
@@ -1066,7 +1072,7 @@
                     "face": 0
                   },
                   "wording_revision": "r1",
-                  "section": "main",
+                  "section": "effect",
                   "line": 1,
                   "step": null,
                   "granted_by": null,
@@ -1648,7 +1654,7 @@
                     "face": 0
                   },
                   "wording_revision": "r1",
-                  "section": "main",
+                  "section": "effect",
                   "line": 3,
                   "step": null,
                   "granted_by": null,
@@ -1765,7 +1771,7 @@
                     "face": 0
                   },
                   "wording_revision": "r1",
-                  "section": "main",
+                  "section": "effect",
                   "line": 2,
                   "step": null,
                   "granted_by": null,
@@ -1997,7 +2003,7 @@
           "face": 0
         },
         "wording_revision": "r1",
-        "section": "main",
+        "section": "effect",
         "line": 2,
         "step": null,
         "granted_by": null,

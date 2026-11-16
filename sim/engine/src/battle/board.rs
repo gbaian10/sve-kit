@@ -119,13 +119,27 @@ fn player(
     player: &native::PlayerObservation,
 ) -> Result<wire::PlayerView> {
     let resources = &player.resources;
+    if resources.ep < 0 || resources.sep < 0 {
+        return Err(ProjectionError::Range);
+    }
+    if resources.ep.checked_add(resources.ep_used) != Some(resources.ep_capacity)
+        || (resources.sep > 0 && resources.sep_available_from.is_none())
+    {
+        return Err(ProjectionError::Unavailable);
+    }
     Ok(wire::PlayerView {
         seat: seat(player.player),
         life: Int::try_from(resources.life)?,
         pp: Int::try_from(resources.pp)?,
         max_pp: Int::try_from(resources.maximum_pp)?,
         ep: Int::try_from(resources.ep)?,
+        ep_capacity: Nat::try_from(resources.ep_capacity)?,
+        ep_used: Nat::try_from(resources.ep_used)?,
         sep: Int::try_from(resources.sep)?,
+        sep_available_from: resources
+            .sep_available_from
+            .map(Nat::try_from)
+            .transpose()?,
         effects: effects::installed(catalog, references, scope, &player.effects)?,
         zones: zones(scope, &player.zones)?,
     })

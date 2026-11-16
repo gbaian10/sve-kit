@@ -9,7 +9,7 @@ use crate::ir::events::equipment as equipment_event;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::{
     AttackEvent, Binding, DamageEvent, DiceEvent, EnterFieldEvent, EntryMethod, EntryOrigin,
-    EventPattern, EventPayload, LeaveFieldEvent, MoveEvent, MovementEvent, ObjectRef,
+    EventPattern, EventPayload, LeaveFieldEvent, MoveEvent, MovementEvent, ObjectRef, TraitId,
     TriggerCondition, TriggerSpec,
 };
 
@@ -26,6 +26,7 @@ enum Context {
         binding: Binding<EnterFieldEvent>,
         method: EntryMethod,
         origin: EntryOrigin,
+        source_traits: Option<Vec<TraitId>>,
     },
     Attack {
         subject: EventObject,
@@ -96,6 +97,7 @@ impl Context {
                     binding: *binding,
                     method: event.method,
                     origin: event.from,
+                    source_traits: event.ability_source_traits.clone(),
                 },
                 _ => Self::Subject(subject),
             });
@@ -223,6 +225,22 @@ impl EventReads {
                 method,
                 ..
             } if *saved == binding => Some(*method),
+            _ => None,
+        }
+    }
+
+    pub(super) fn entry_source_traits(
+        &self,
+        binding: Binding<EnterFieldEvent>,
+    ) -> Option<&[TraitId]> {
+        match &self.0 {
+            Context::Entry {
+                binding: saved,
+                method: EntryMethod::AbilityPut,
+                source_traits,
+                ..
+            } if *saved == binding => source_traits.as_deref(),
+            Context::Entry { binding: saved, .. } if *saved == binding => Some(&[]),
             _ => None,
         }
     }

@@ -10,11 +10,11 @@ use sve_engine::game::player::observation::{Observation, ObservedZone};
 use sve_engine::game::player::{
     AbilityChoice, Answer, CardOption, ClosingAnswer, ClosingQuestion, Command, DecisionShape,
     DiscardKind, DistributionQuestion, EarlierQuotaChoice, EvolutionAnswer, EvolutionPayment,
-    EvolutionQuestion, MainIntentKind, MovementCapacityQuestion, OpeningAnswer, OpeningQuestion,
-    PartitionQuestion, PendingChoice, QuestionShape, QuestionToken, QuotaQuestion,
-    ReplacementChoice, SearchAnswer, SearchQuestion, SelectionGroup, SelectionMember,
-    SelectionQuestion, SelectionRole, SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion,
-    Viewer,
+    EvolutionQuestion, IntegerSource, MainIntentKind, MovementCapacityQuestion, OpeningAnswer,
+    OpeningQuestion, OrderDirection, OrderQuestion, PartitionQuestion, PendingChoice,
+    QuestionShape, QuestionToken, QuotaQuestion, ReplacementChoice, SearchAnswer, SearchQuestion,
+    SelectionDestination, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole,
+    SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion, Viewer,
 };
 use sve_engine::policy::{BasicPolicy, Choice, PolicyFailure};
 
@@ -78,6 +78,18 @@ fn option(handle: u64) -> CardOption {
         rules_names: None,
         original_cost: None,
     }
+}
+
+const fn ordering(cards: Vec<CardOption>) -> DecisionShape {
+    DecisionShape::Order(OrderQuestion {
+        cards,
+        direction: OrderDirection::TopDown,
+        destination: SelectionDestination {
+            player: Viewer::P1,
+            zone: ObservedZone::Deck,
+        },
+        position: Position::Top {},
+    })
 }
 
 fn selection() -> SelectionQuestion {
@@ -155,14 +167,20 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
             Answer::Integer(Nat(0)),
         ),
         (
-            DecisionShape::Integer(bounds(7, 9)),
+            DecisionShape::Integer {
+                bounds: bounds(7, 9),
+                source: IntegerSource::Other,
+            },
             Answer::Integer(Nat(7)),
         ),
         (
-            DecisionShape::Integer(Cardinality {
-                minimum: Nat(u64::MAX),
-                maximum: None,
-            }),
+            DecisionShape::Integer {
+                bounds: Cardinality {
+                    minimum: Nat(u64::MAX),
+                    maximum: None,
+                },
+                source: IntegerSource::Other,
+            },
             Answer::Integer(Nat(u64::MAX)),
         ),
         (
@@ -202,7 +220,10 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
         assert_eq!(answer(shape).unwrap(), expected);
     }
     assert_eq!(
-        answer(DecisionShape::Integer(bounds(9, 7))),
+        answer(DecisionShape::Integer {
+            bounds: bounds(9, 7),
+            source: IntegerSource::Other
+        }),
         Err(PolicyFailure::InvalidQuestion)
     );
     assert_eq!(
@@ -240,7 +261,7 @@ fn policy_occurrences_use_current_coordinates_and_orders_are_complete() {
         Answer::TriggerQuota(42)
     );
     assert_eq!(
-        answer(DecisionShape::Order(vec![option(99), option(4)])).unwrap(),
+        answer(ordering(vec![option(99), option(4)])).unwrap(),
         Answer::Order(vec![99, 4])
     );
     let replacements = [7, 2]
@@ -258,7 +279,7 @@ fn policy_occurrences_use_current_coordinates_and_orders_are_complete() {
         Answer::Order(vec![7, 2])
     );
     assert_eq!(
-        answer(DecisionShape::Order(vec![option(1), option(1)])),
+        answer(ordering(vec![option(1), option(1)])),
         Err(PolicyFailure::InvalidQuestion)
     );
     for shape in [
@@ -306,6 +327,7 @@ fn policy_material_and_target_channels_preserve_roles_and_discard_purpose() {
     );
     let mut roles = selection();
     roles.roles.push(SelectionRole {
+        destination: None,
         role: Nat(8),
         position: None,
         cardinality: RoleCardinality::Fixed {

@@ -3359,13 +3359,42 @@
             "play"
           ],
           "type": "string"
+        },
+        "source": {
+          "type": "object",
+          "properties": {
+            "trait": {
+              "$ref": "#/$defs/Concept"
+            }
+          },
+          "required": [
+            "trait"
+          ],
+          "additionalProperties": false,
+          "description": "造成本次進場的能力來源，讀取事件當時凍結的有效特徵；僅限 by: ability。"
         }
       },
       "required": [
         "ref",
         "by"
       ],
-      "type": "object"
+      "type": "object",
+      "allOf": [
+        {
+          "if": {
+            "required": [
+              "source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "by": {
+                "const": "ability"
+              }
+            }
+          }
+        }
+      ]
     },
     "A.cond.is-payload": {
       "additionalProperties": false,
@@ -13890,6 +13919,11 @@
         },
         "target": {
           "$ref": "#/$defs/A.sel.recipient"
+        },
+        "if_can_attack": {
+          "const": "follower",
+          "type": "string",
+          "description": "逐攻擊者以正式攻擊合法性判定是否能攻擊從者；求值時排除本條領袖攻擊禁令，其他攻擊規則照常適用。"
         }
       },
       "required": [

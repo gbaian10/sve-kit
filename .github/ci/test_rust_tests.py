@@ -41,7 +41,7 @@ NAMES = [
 
 
 class FakeTools:
-    """Record every tool call; the generator writes both inputs when waited for."""
+    """Record every tool call; the generator writes all inputs when waited for."""
 
     def __init__(
         self,
@@ -63,9 +63,9 @@ class FakeTools:
         self.generated_folders: set[Path] = set()
 
     def popen(self, argv: list[str], **_: object) -> subprocess.Popen[bytes]:
-        """Start a fake generator that writes its two outputs on wait."""
+        """Start a fake generator that writes its outputs on wait."""
         assert argv[0] == "uv"
-        outputs = [Path(filename) for filename in argv[-2:]]
+        outputs = [Path(filename) for filename in argv[-3:]]
         assert all(output.is_absolute() and not output.exists() for output in outputs)
         tools = self
 
@@ -87,7 +87,7 @@ class FakeTools:
     def run(
         self, argv: list[str], **kwargs: object
     ) -> subprocess.CompletedProcess[str]:
-        """Answer one Cargo call; tests may only run once both inputs exist."""
+        """Answer one Cargo call; tests may only run once all inputs exist."""
         assert argv[:4] == ["mise", "exec", "--", "cargo"]
         arguments = argv[4:]
         self.cargo.append(arguments)
@@ -108,9 +108,10 @@ class FakeTools:
         inputs = [
             Path(environment["SVE_TEST_SNAPSHOT"]),
             Path(environment["SVE_TEST_CURRENT_SELECTION"]),
+            Path(environment["SVE_TEST_BATTLE_PROJECTION"]),
         ]
         if self.generated:
-            assert inputs == self.generated[-2:]
+            assert inputs == self.generated[-3:]
         assert inputs[0].parent == inputs[1].parent
         self.inputs = [path.read_text(encoding="utf-8") for path in inputs]
         self.generated_folders.add(inputs[0].parent)
@@ -144,6 +145,7 @@ def run(
             {
                 "SVE_TEST_SNAPSHOT": "/unused/inherited-snapshot",
                 "SVE_TEST_CURRENT_SELECTION": "/unused/inherited-selection",
+                "SVE_TEST_BATTLE_PROJECTION": "/unused/inherited-projection",
                 "CI": "true" if cache is None else "",
                 "XDG_CACHE_HOME": (
                     os.environ.get("XDG_CACHE_HOME", "")
@@ -280,29 +282,29 @@ class InputReuse(unittest.TestCase):
         return run([], tools, root=self.root, cache=cache or self.cache_home)
 
     def test_identical_tree_reuses_without_generating(self) -> None:
-        """A second run on unchanged inputs copies the kept pair instead of generating."""
+        """A second run on unchanged inputs copies the kept inputs instead of generating."""
         first = FakeTools()
         assert self.run_tests(first) == 0
-        assert len(first.generated) == 2
+        assert len(first.generated) == 3
         kept = [path for path in self.cache.iterdir() if not path.name.startswith(".")]
         assert len(kept) == 1
         second = FakeTools()
         assert self.run_tests(second) == 0
         assert second.generated == []
-        assert second.inputs == ["synthetic", "synthetic"]
-        # The private copy is still removed; the kept pair stays.
+        assert second.inputs == ["synthetic", "synthetic", "synthetic"]
+        # The private copy is still removed; the kept inputs stays.
         assert not any(folder.exists() for folder in second.generated_folders)
         assert (kept[0] / "cards.jsonl").is_file()
 
     def test_changed_input_regenerates(self) -> None:
-        """Any edited input file, including nested ones, misses the kept pair."""
+        """Any edited input file, including nested ones, misses the kept inputs."""
         assert self.run_tests(FakeTools()) == 0
         (self.root / "authored" / "nested" / "data.txt").write_text(
             "edited", encoding="utf-8"
         )
         tools = FakeTools()
         assert self.run_tests(tools) == 0
-        assert len(tools.generated) == 2
+        assert len(tools.generated) == 3
 
     def test_empty_directory_change_regenerates(self) -> None:
         """Directory topology checked by the generator is part of the input."""
@@ -310,10 +312,10 @@ class InputReuse(unittest.TestCase):
         (self.root / "authored/products/unexpected").mkdir(parents=True)
         tools = FakeTools()
         assert self.run_tests(tools) == 0
-        assert len(tools.generated) == 2
+        assert len(tools.generated) == 3
 
     def test_symlink_with_identical_content_cannot_reuse(self) -> None:
-        """A cached pair cannot bypass the data readers' symlink rejection."""
+        """A cached inputs cannot bypass the data readers' symlink rejection."""
         assert self.run_tests(FakeTools()) == 0
         target = self.root / "card-data/nested/data.txt"
         external = self.root.parent / "external.txt"
@@ -340,14 +342,14 @@ class InputReuse(unittest.TestCase):
             during_generation=lambda: version.write_text("v1", encoding="utf-8")
         )
         assert self.run_tests(first) == 0
-        assert len(first.generated) == 2
+        assert len(first.generated) == 3
         version.write_text("v2", encoding="utf-8")
         second = FakeTools()
         assert self.run_tests(second) == 0
         assert second.generated == []
 
     def test_missing_input_fails_before_cargo(self) -> None:
-        """A missing input never falls back to generation or a kept pair."""
+        """A missing input never falls back to generation or a kept inputs."""
         (self.root / "tests/engine/card-input.json").unlink()
         tools = FakeTools()
         with self.assertRaises(FileNotFoundError):
@@ -381,7 +383,7 @@ class InputReuse(unittest.TestCase):
         (kept / "selection.json").unlink()
         tools = FakeTools()
         assert self.run_tests(tools) == 0
-        assert len(tools.generated) == 2
+        assert len(tools.generated) == 3
 
     def test_cleanup_during_reuse_does_not_break_tests(self) -> None:
         """Another publisher may prune old entries while a test copies its pair."""
@@ -390,7 +392,7 @@ class InputReuse(unittest.TestCase):
         entry = self.cache / digest
         source = self.root.parent / "pair"
         source.mkdir()
-        for name in ("cards.jsonl", "selection.json"):
+        for name in rust_tests.OUTPUTS:
             (source / name).write_text("synthetic", encoding="utf-8")
         os.utime(entry, (1, 1))
         for index in range(7):
@@ -416,7 +418,7 @@ class InputReuse(unittest.TestCase):
             assert pruning is not None
             pruning.result(timeout=5)
         assert tools.generated == []
-        assert tools.inputs == ["synthetic", "synthetic"]
+        assert tools.inputs == ["synthetic", "synthetic", "synthetic"]
 
     def test_simultaneous_publishers_keep_one_complete_pair(self) -> None:
         """Two worktrees with identical inputs can both publish successfully."""
@@ -424,6 +426,7 @@ class InputReuse(unittest.TestCase):
         source.mkdir()
         (source / "cards.jsonl").write_text("cards", encoding="utf-8")
         (source / "selection.json").write_text("selection", encoding="utf-8")
+        (source / "battle-projection.jsonl").write_text("projection", encoding="utf-8")
         digest = rust_tests.input_digest(self.root)
         with ThreadPoolExecutor(max_workers=2) as executor:
             first = executor.submit(rust_tests.keep, self.cache, digest, source)
@@ -439,7 +442,7 @@ class InputReuse(unittest.TestCase):
         ) == "selection"
 
     def test_only_the_newest_pairs_are_kept(self) -> None:
-        """Old working trees do not accumulate kept pairs."""
+        """Old working trees do not accumulate kept inputss."""
         for index in range(rust_tests.KEPT_INPUTS + 2):
             (self.root / "dsl" / "nested" / "data.txt").write_text(
                 str(index), encoding="utf-8"
@@ -462,4 +465,4 @@ class InputReuse(unittest.TestCase):
         tools = FakeTools()
         with patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.cache_home)}):
             assert run([], tools, root=self.root) == 0
-        assert len(tools.generated) == 2
+        assert len(tools.generated) == 3

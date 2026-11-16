@@ -16,6 +16,7 @@ fn project(
 fn occurrence(holder: Option<ObjectHandle>) -> native::PendingTrigger {
     native::PendingTrigger {
         source: native::EffectSource {
+            provenance: native::TextProvenance::Unknown,
             card: "unit-follower".into(),
             face: Some(1),
             line: Some(3),
@@ -117,6 +118,7 @@ fn wire_pending_refuses_unknown_printings_faces_handles_and_mismatched_catalogs(
     );
     for broken in [
         native::EffectSource {
+            provenance: native::TextProvenance::Unknown,
             card: "missing".into(),
             face: None,
             line: None,
@@ -124,6 +126,7 @@ fn wire_pending_refuses_unknown_printings_faces_handles_and_mismatched_catalogs(
             holder: None,
         },
         native::EffectSource {
+            provenance: native::TextProvenance::Unknown,
             card: "unit-follower".into(),
             face: Some(2),
             line: None,

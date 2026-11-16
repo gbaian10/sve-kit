@@ -472,7 +472,8 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::CostMod(_)
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(
-                ast::Cannot::Player(_)
+                ast::Cannot::Draw(_)
+                | ast::Cannot::Player(_)
                 | ast::Cannot::Stand(_)
                 | ast::Cannot::Attack(_)
                 | ast::Cannot::Removal(_)
@@ -641,7 +642,8 @@ pub(super) fn lower_at_source(
             | ast::StaticEffect::Cannot(_)
             | ast::StaticEffect::CostMod(_)
             | ast::StaticEffect::EvolveCostMod(_)
-            | ast::StaticEffect::IgnoreWard(_) => {
+            | ast::StaticEffect::IgnoreWard(_)
+            | ast::StaticEffect::MustAttack(_) => {
                 return Err(unsupported(path));
             }
         };

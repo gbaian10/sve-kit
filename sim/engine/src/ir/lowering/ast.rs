@@ -792,8 +792,9 @@ pub(super) struct Discard {
     #[serde(rename = "ref")]
     pub reference: Option<String>,
     pub n: Option<DiscardCount>,
+    pub down_to: Option<u64>,
     pub all: Option<bool>,
-    pub who: Option<LeaderSide>,
+    pub who: Option<Side>,
     pub random: Option<bool>,
     pub any: Option<True>,
     pub result: Option<String>,
@@ -984,8 +985,16 @@ pub(super) enum FanfareKeyword {
 pub(super) enum MoveObjects {
     Whole(WholeDeckReturn),
     Observed(Observed),
+    FilteredObserved(FilteredObserved),
     Field(Objects),
     Public(Box<PublicQuery>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FilteredObserved {
+    pub r#in: String,
+    pub kind: FieldKind,
 }
 
 #[derive(Deserialize)]
@@ -3098,6 +3107,7 @@ pub(super) enum ModeCondition {
     Spellchain(u64),
     Necro(u64),
     EnteredFrom(EntryOriginCondition),
+    EnteredBy(EntryCondition),
     LeaderLife(PlayerThreshold),
 }
 
@@ -3202,6 +3212,13 @@ pub(super) struct EntryCondition {
     #[serde(rename = "ref")]
     pub _reference: This,
     pub by: EntryMethod,
+    pub source: Option<EntryAbilitySource>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryAbilitySource {
+    pub r#trait: String,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -3280,6 +3297,13 @@ pub(super) struct Reveal {
     pub r#ref: Option<RevealRef>,
     pub top: Option<DeckTop>,
     pub bind: String,
+    pub random: Option<RandomSample>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RandomSample {
+    pub n: u64,
 }
 
 #[derive(Deserialize)]
@@ -3613,7 +3637,8 @@ pub(super) enum StaticEffect {
     DamageMod(DamageModifier),
     DamageCap(DamageCap),
     NoTrigger(NoTrigger),
-    IgnoreWard(IgnoreWard),
+    IgnoreWard(ObjectEffect),
+    MustAttack(ObjectEffect),
 }
 
 #[derive(Deserialize)]
@@ -3663,7 +3688,7 @@ pub(super) struct StaticPlayerRule {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct IgnoreWard {
+pub(super) struct ObjectEffect {
     pub on: Objects,
 }
 
@@ -3707,12 +3732,32 @@ pub(super) struct StaticGrant {
 #[derive(Deserialize)]
 #[serde(untagged)]
 pub(super) enum Cannot {
+    Draw(CannotDraw),
     Player(CannotPlayer),
     PlayAbility(CannotPlayAbility),
     Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotDraw {
+    #[serde(rename = "what")]
+    pub _what: DrawAction,
+    pub who: EntryPlayer,
+    pub during: DrawRestrictionDuring,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum DrawAction {
+    Draw,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct DrawRestrictionDuring {
+    pub not_phase: StartPhase,
 }
 
 #[derive(Deserialize)]
@@ -4060,6 +4105,13 @@ pub(super) struct CannotAttack {
     pub what: AttackAction,
     pub on: Option<Objects>,
     pub target: Option<Recipients>,
+    pub if_can_attack: Option<AttackableKind>,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AttackableKind {
+    Follower,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]

@@ -98,3 +98,17 @@ def test_no_trigger_uses_one_explicit_scope_and_trigger_kinds() -> None:
     )
     for kinds in _values([], ["activated"], ["evolution"], ["storm"], [{"param": "k"}]):
         _check({"no_trigger": {"on": "this", "kinds": kinds}}, accepted=False)
+
+
+@pytest.mark.parametrize(
+    ("condition", "accepted"),
+    [("follower", True), ("leader", False), (True, False), (None, False)],
+)
+def test_attack_prohibition_can_depend_only_on_a_legal_follower_attack(
+    condition: JsonValue, *, accepted: bool
+) -> None:
+    _check(
+        {"what": "attack", "target": {"leaders": "all"}, "if_can_attack": condition},
+        name="A.effect.cannot.attack",
+        accepted=accepted,
+    )
