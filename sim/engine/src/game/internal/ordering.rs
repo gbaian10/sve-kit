@@ -157,7 +157,7 @@ pub(super) fn check_node_with_x(
     x: Option<super::tokens::PaidX>,
 ) -> Result<()> {
     let private_spine = matches!(node, Node::Instruction { instruction }
-        if matches!(instruction.action, Action::Order { .. }) || super::movement::observed_move(&instruction.action) || super::movement::revealed_move(&instruction.action)
+        if matches!(instruction.action, Action::Order { .. }) || super::movement::observed_move(&instruction.action) || super::movement::revealed_move(&instruction.action) || super::movement::observed_banish(&instruction.action)
             || shuffle_shape::placement(&instruction.action) == Some(shuffle_shape::Placement::Bottom));
     // Control bodies are checked individually; their guards still need the same restriction.
     if let Node::Control { control } = node {
@@ -169,7 +169,9 @@ pub(super) fn check_node_with_x(
     if let Node::Instruction { instruction } = node {
         let cards = match &instruction.action {
             Action::Order { cards, .. } => Some(cards),
-            Action::Move { objects, .. } if private_spine => Some(objects),
+            Action::Move { objects, .. } | Action::Banish { objects } if private_spine => {
+                Some(objects)
+            }
             _ => None,
         };
         // Private selectors are admitted only on the spine evaluated with observation authority.
@@ -264,6 +266,7 @@ pub(super) fn check_node_with_x(
     if let Node::Instruction { instruction } = &mut inspected
         && (super::movement::cemetery_ex_move(&instruction.action)
             || super::movement::observed_move(&instruction.action)
+            || super::movement::observed_banish(&instruction.action)
             || super::movement::revealed_move(&instruction.action)
             || matches!(&instruction.action, Action::Move { movement, .. } if super::movement::field_move(movement) || movement.to == (MoveDestination::Owners { zone: OwnerZone::Hand })))
     {

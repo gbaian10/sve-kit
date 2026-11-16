@@ -366,6 +366,11 @@ pub(super) fn observed_move(action: &Action) -> bool {
                 && observation::visit(objects, Consumer::ObservedMove, &mut |_| {})))
 }
 
+pub(super) fn observed_banish(action: &Action) -> bool {
+    matches!(action, Action::Banish { objects }
+        if observation::visit(objects, Consumer::ObservedMove, &mut |_| {}))
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Movement shares the authoritative Game and its mutation primitive."
@@ -557,7 +562,10 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<()> {
-        let members = if let Some((player, count)) = deck_top(&instruction.action) {
+        let members = if observed_banish(&instruction.action) {
+            self.observed_move_members(execution, instruction, objects)?
+                .1
+        } else if let Some((player, count)) = deck_top(&instruction.action) {
             self.deck_top_members(execution, player, count)?
         } else {
             let members =

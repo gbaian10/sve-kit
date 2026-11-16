@@ -54,7 +54,7 @@ fn observed_constraint(decision: &Decision) -> Option<&SelectionConstraint> {
         && group_bounds(constraint, may)
         && match constraint.distinct_by {
             None => true,
-            Some(ObjectProperty::Names) => {
+            Some(ObjectProperty::Names | ObjectProperty::Class) => {
                 constraint.groups.len() == 1 && constraint.aggregate_bounds.is_empty()
             }
             _ => false,

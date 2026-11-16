@@ -1061,8 +1061,17 @@ pub(super) enum DeckEdge {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishAction {
-    Top { top: DeckTop },
-    Union { r#ref: PublicBanishUnion },
+    Top {
+        top: DeckTop,
+    },
+    // The `in` shape reserves observation authority for private Look sets.
+    Observed {
+        r#ref: Observed,
+        result: Option<String>,
+    },
+    Union {
+        r#ref: PublicBanishUnion,
+    },
     Objects(Box<ObjectAction>),
 }
 
@@ -1494,6 +1503,13 @@ pub(super) enum Names {
     Name,
 }
 
+#[derive(Clone, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum ChoiceDistinct {
+    Name,
+    Class,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct SearchGroup {
@@ -1708,7 +1724,7 @@ pub(super) struct Target {
     /// 「AかB」 branches of one candidate set; a card matching several is still one choice.
     pub any_of: Option<Vec<TargetQuery>>,
     pub groups: Option<Vec<FormalTargetGroup>>,
-    pub distinct_by: Option<Names>,
+    pub distinct_by: Option<ChoiceDistinct>,
     pub cost_sum_le: Option<u64>,
     pub roles: Option<BTreeMap<String, TargetRole>>,
     pub n: Option<NumericArgument>,
@@ -1724,7 +1740,7 @@ pub(super) struct RawTarget {
     bind: String,
     from: TargetFrom,
     groups: Option<Vec<FormalTargetGroup>>,
-    distinct_by: Option<Names>,
+    distinct_by: Option<ChoiceDistinct>,
     cost_sum_le: Option<u64>,
     roles: Option<BTreeMap<String, TargetRole>>,
     n: Option<NumericArgument>,
@@ -1822,7 +1838,7 @@ pub(super) struct Choose {
     pub bind: String,
     pub from: ChooseFrom,
     pub groups: Option<Vec<ChooseGroup>>,
-    pub distinct_by: Option<Names>,
+    pub distinct_by: Option<ChoiceDistinct>,
     pub cost_sum_le: Option<u64>,
     pub n: Option<u64>,
     pub upto: Option<u64>,

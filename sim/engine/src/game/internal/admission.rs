@@ -1319,6 +1319,7 @@ fn supported(code: &str) -> bool {
             | "shape.NatOperation.DistinctCount"
             | "value.aggregate.distinct-count"
             | "internal.ObjectProperty.Names"
+            | "internal.ObjectProperty.Class"
             | "internal.ObjectProperty.Cost"
             | "shape.NatOperation.CheckedInt"
             | "value.checked-nat"

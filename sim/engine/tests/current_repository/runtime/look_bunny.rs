@@ -4,8 +4,10 @@
 )]
 use super::*;
 
-fn finish(game: &mut Game, mut play: CardPlay) -> Activation {
+fn finish(game: &mut Game, mut play: CardPlay) -> (Activation, u8) {
+    let mut choices = 0_u8;
     while let CardPlay::Awaiting(question) = play {
+        choices = choices.checked_add(1).unwrap();
         assert!(
             game.internal_decision(View::P2).is_none(),
             "only the Look viewer chooses the hand card and remaining member"
@@ -24,10 +26,10 @@ fn finish(game: &mut Game, mut play: CardPlay) -> Activation {
             .answer_internal_card(question.actor, question.token, Answer::Targets(handles))
             .unwrap();
     }
-    resolved(play)
+    (resolved(play), choices)
 }
 
-fn ride(game: &mut Game) -> Activation {
+fn ride(game: &mut Game) -> (Activation, u8) {
     let ability = selection_with_rules().current["CP03-054"]
         .program
         .card()
@@ -104,7 +106,7 @@ fn midnight_bunny_takes_one_privately_and_banishes_only_the_other_looked_card() 
             "look-bunny",
         )
         .unwrap();
-        let result = ride(&mut game);
+        let (result, choices) = ride(&mut game);
         let view = game.projection(View::Referee).unwrap();
         assert_eq!(view["P1"]["pp"]["current"], 9_u8);
         assert_eq!(view["objects"]["source"]["power"], 3_u8);
@@ -136,6 +138,10 @@ fn midnight_bunny_takes_one_privately_and_banishes_only_the_other_looked_card() 
         assert_eq!(view["P1"]["cemetery"], json!([]));
         assert_ne!(view["game"]["ended"], true);
         if count > 1 {
+            assert_eq!(
+                choices, 1,
+                "only the hand card is chosen; the other is banished directly"
+            );
             assert!(result.progress.facts.iter().any(|fact| matches!(fact,
                 Fact::Movement(movement) if movement.from.kind == ZoneKind::Deck && movement.movement.actual_to.is_some_and(|to| to.kind == ZoneKind::Banish)
             )), "the remaining card moves directly from the deck to banish");
