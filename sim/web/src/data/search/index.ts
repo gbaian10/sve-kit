@@ -1534,14 +1534,8 @@ export class SearchIndex {
       if (sort === "set") {
         const first = this.pool.get(this.printings.owner[a] ?? 0)
         const second = this.pool.get(this.printings.owner[b] ?? 0)
-        const firstRelease =
-          this.printings.unlisted[a] === 1
-            ? (summary(a).availableOn ?? undefined)
-            : releases.get(first)
-        const secondRelease =
-          this.printings.unlisted[b] === 1
-            ? (summary(b).availableOn ?? undefined)
-            : releases.get(second)
+        const firstRelease = releases.get(first)
+        const secondRelease = releases.get(second)
         // Missing release dates stay last in either direction, and PR stays last within that group.
         if (firstRelease === undefined || secondRelease === undefined) {
           if (firstRelease === undefined && secondRelease !== undefined) return 1
