@@ -306,6 +306,8 @@ export default {
     unlistedOnlyHint: "EP/SEP and similar cards missing from the official card list",
     prOnly: "PR only",
     prOnlyHint: "Cards issued only with PR card numbers",
+    sveOnly: "SVE exclusive",
+    sveOnlyHint: "Cards with no matching digital card, compared by card name",
     specialPrintings: "Special printings",
     specialPrintingsAll: "All",
     specialPrintingsHint: "Selecting several shows only cards that match all of them",

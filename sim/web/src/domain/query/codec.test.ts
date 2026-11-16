@@ -35,6 +35,7 @@ describe("query codec", () => {
       serialOnly: false,
       unlistedOnly: false,
       prOnly: false,
+      sveOnly: false,
       errataOnly: false,
       restrictionsOnly: false,
       reprints: "only",
@@ -300,4 +301,16 @@ it("round trips the PR-only flag independently", () => {
   expect(querySearch(state)).toBe("?pr=1")
   expect(parseQuery(formatQuery(state))).toEqual(state)
   expect(activeFilterCount(state)).toBe(1)
+})
+
+it("round trips SVE-exclusive independently and intersects it with the other special filters", () => {
+  const state = { ...DEFAULT_QUERY, sveOnly: true }
+  expect(querySearch(state)).toBe("?sve=1")
+  expect(parseQuery(formatQuery(state))).toEqual(state)
+  expect(activeFilterCount(state)).toBe(1)
+  const both = { ...state, prOnly: true }
+  expect(querySearch(both)).toBe("?pr=1&sve=1")
+  expect(parseQuery(formatQuery(both))).toEqual(both)
+  expect(activeFilterCount(both)).toBe(2)
+  expect(parseQuery(new URLSearchParams("sve=yes"))).toEqual(DEFAULT_QUERY)
 })

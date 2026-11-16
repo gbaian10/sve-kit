@@ -216,8 +216,9 @@ export class SearchEngine {
             await active.printings
           if (
             "query" in request &&
-            (("mechanics" in request.query.state &&
-              Object.keys(request.query.state.mechanics).length) ||
+            (request.query.state.sveOnly ||
+              ("mechanics" in request.query.state &&
+                Object.keys(request.query.state.mechanics).length) ||
               ("abilityTypes" in request.query.state && request.query.state.abilityTypes.length) ||
               ("classMechanisms" in request.query.state &&
                 request.query.state.classMechanisms.length) ||
@@ -970,9 +971,12 @@ export class SearchEngine {
         (file) =>
           (["print", "product"].includes(stringValue(file["purpose"])) ||
             arrayValue(file["row_counts"]).some((count) =>
-              ["mechanic_projection", "card_mechanic_coverage", "card_engine_support"].includes(
-                stringValue(arrayValue(count)[0]),
-              ),
+              [
+                "mechanic_projection",
+                "card_mechanic_coverage",
+                "card_engine_support",
+                "digital_link",
+              ].includes(stringValue(arrayValue(count)[0])),
             )) &&
           (file["region"] === null || file["region"] === request.edition),
       )
