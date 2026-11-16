@@ -26,5 +26,5 @@ mod cost_flow;
 pub(super) mod payment_fixtures;
 
 #[path = "../../tests/support/history_fixture.rs"]
-mod history_fixture;
+pub(super) mod history_fixture;
 mod history_flow;

@@ -409,7 +409,7 @@ impl SelectionProjection {
     }
 }
 
-fn bounds(value: Cardinality) -> Result<Bounds> {
+pub(super) fn bounds(value: Cardinality) -> Result<Bounds> {
     if value.maximum.is_some_and(|max| max.0 < value.minimum.0) {
         return Err(ProjectionError::Unavailable);
     }
