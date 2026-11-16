@@ -549,6 +549,40 @@
         "cost": null
       },
       "state": null
+    },
+    "o5": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "effective_face": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "owner": "p2",
+      "controller": "p2",
+      "knowledge": "public",
+      "facing": "up",
+      "characteristics": {
+        "rules_names": ["合成フォロワー乙", "別名"],
+        "card_type": "フォロワー",
+        "traits": [],
+        "classes": null,
+        "cost": null
+      },
+      "state": {
+        "posture": "standing",
+        "evolution": "base",
+        "stats": {
+          "attack": 10,
+          "life": 6
+        },
+        "keywords": [],
+        "counters": [],
+        "boxed": false,
+        "effects": [],
+        "quotas": []
+      }
     }
   },
   "turn": {
@@ -789,9 +823,14 @@
           ]
         },
         "ex": {
-          "count": 0,
+          "count": 1,
           "capacity": null,
-          "cards": []
+          "cards": [
+            {
+              "position": 0,
+              "object": "o5"
+            }
+          ]
         },
         "cemetery": {
           "count": 0,

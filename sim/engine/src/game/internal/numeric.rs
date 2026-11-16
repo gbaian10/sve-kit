@@ -506,8 +506,10 @@ impl Game {
 
     pub(in crate::game) fn internal_numeric_stat(&self, id: &str, stat: Stat) -> Result<i64> {
         let object = self.object(id)?;
-        if object.zone != "field" || !self.object_type(id)?.contains("フォロワー") {
-            return Err(unsupported("numeric reads require field followers"));
+        if !matches!(object.zone.as_str(), "field" | "ex")
+            || !self.object_type(id)?.contains("フォロワー")
+        {
+            return Err(unsupported("numeric reads require field or EX followers"));
         }
         let attack = number(&object.state, "power")?;
         let life = number(&object.state, "hp")?;

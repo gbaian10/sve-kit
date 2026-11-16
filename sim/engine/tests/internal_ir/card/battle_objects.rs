@@ -1,3 +1,6 @@
+#[path = "battle_objects/ex_stats.rs"]
+mod ex_stats;
+
 use super::battle_pending::{board, board_with_program, catalog_for, fixture};
 use super::*;
 use crate::battle_costs::object;

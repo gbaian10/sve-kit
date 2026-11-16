@@ -147,7 +147,7 @@ pub struct CardState {
     pub posture: Posture,
     /// Current evolution state.
     pub evolution: EvolutionState,
-    /// Effective field follower stats, if applicable.
+    /// Effective field or EX follower stats, if applicable.
     pub stats: Option<Stats>,
     /// Effective rules keywords.
     pub keywords: Vec<String>,
@@ -787,7 +787,9 @@ impl Game {
                 });
             }
         }
-        let stats = if object.zone == "field" && self.object_type(id)?.contains("フォロワー") {
+        let stats = if matches!(object.zone.as_str(), "field" | "ex")
+            && self.object_type(id)?.contains("フォロワー")
+        {
             Some(Stats {
                 attack: self.internal_numeric_stat(id, Stat::Attack)?,
                 life: self.internal_numeric_stat(id, Stat::Life)?,
