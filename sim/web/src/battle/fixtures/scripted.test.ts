@@ -579,4 +579,109 @@ describe("scriptedTable", () => {
     )
     expect(redrawn.valid()).toBe(true)
   })
+
+  it("ends a question for good once its answer is taken, even when the next one reads the same", async () => {
+    // The scene asks its first question a second time: the same table, the same words, another id.
+    const sisters = scene("sisters")
+    const first = sisters.script.p1.find((message) => message.kind === "update")?.input
+    if (first?.kind !== "question") throw new Error("the scene asks its first seat")
+    const again: Scene = {
+      ...sisters,
+      after: (answers) => {
+        const [, ...rest] = answers
+        const same = sisters.after(answers.slice(0, 1))
+        if (same === null) return null
+        return rest.length === 0
+          ? {
+              table: same.table,
+              input: { kind: "question", question: { ...first.question, id: "successor" } },
+            }
+          : sisters.after(rest)
+      },
+    }
+    const seats = scriptedTable(again)
+    const own = follow(seats.p1)
+    const other = follow(seats.p2)
+    const before = [...other.messages]
+    const old = need(confirmation(own.question(), "p1"))
+    expect(await send(seats.p1, confirmAnswer(old, true))).toMatchObject({ result: "applied" })
+    // The seat that answered is told: the question it now has is a new one.
+    expect(seqs(own.messages)).toEqual([0, 1])
+    const next = need(confirmation(own.question(), "p1"))
+    expect(next.question).toBe("successor")
+    expect({ ...next, question: "" }).toEqual({ ...old, question: "" })
+    // The other seat saw nothing of it.
+    expect(other.messages).toEqual(before)
+    // The answered question does not come back to life, however alike the new one is.
+    expect(await send(seats.p1, confirmAnswer(old, true))).toMatchObject({
+      result: "rejected",
+      rejection: "invalid_submission",
+    })
+    expect(seqs(own.messages)).toEqual([0, 1])
+    // The new question is the one that can be answered.
+    expect(await send(seats.p1, confirmAnswer(next, false))).toMatchObject({ result: "applied" })
+    expect(seqs(own.messages)).toEqual([0, 1, 2])
+    expect(own.question()?.id).toBe("search")
+    expect(other.messages).toEqual(before)
+  })
+
+  it("leaves the other seat's open question as it is when that seat is told of a change", async () => {
+    // Both seats have a question open. The first answers its own, which changes the table for
+    // both; the script then hands the second seat the question it already has, under another id.
+    const sisters = scene("sisters")
+    const [ready, first] = sisters.script.p1
+    if (ready === undefined || first?.kind !== "update" || first.input.kind !== "question")
+      throw new Error("the scene asks its first seat")
+    const theirs: Question = {
+      ...first.input.question,
+      id: "theirs",
+      actor: "p2",
+      shape: { kind: "confirm", allowed: [true, false], subject: null, origin: null },
+    }
+    const [otherReady, otherFirst] = sisters.script.p2
+    if (otherReady === undefined || otherFirst?.kind !== "update") throw new Error("two seats")
+    const both: Scene = {
+      ...sisters,
+      script: {
+        p1: sisters.script.p1,
+        p2: [otherReady, { ...otherFirst, input: { kind: "question", question: theirs } }],
+      },
+      after: (answers) => {
+        const same = sisters.after(answers.slice(0, 1))
+        if (same === null || answers.length > 2) return null
+        const [self, opposing] = same.table.seats
+        return {
+          table: {
+            ...same.table,
+            seats: [{ ...self, life: self.life - answers.length }, opposing],
+          },
+          input: {
+            kind: "question",
+            question: { ...theirs, id: `theirs-${String(answers.length)}` },
+          },
+        }
+      },
+    }
+    const seats = scriptedTable(both)
+    const own = follow(seats.p1)
+    const other = follow(seats.p2)
+    expect(other.question()?.id).toBe("theirs")
+    await send(seats.p1, confirmAnswer(need(confirmation(own.question(), "p1")), true))
+    // The second seat is told of the change, under its own next number, and is still asked the
+    // question it had: the first seat's answer ended nothing of the second's.
+    expect(seqs(other.messages)).toEqual([0, 1])
+    expect(other.last().observation.players[0].life).toBe(16)
+    expect(other.question()).toEqual(theirs)
+    // The first seat is asked nothing now and waits for the second.
+    expect(own.last().input).toMatchObject({ kind: "waiting", actor: "p2" })
+    // The id the script made up is no question of this game; the one the seat holds is.
+    const held = need(confirmation(other.question(), "p2"))
+    expect(
+      await send(seats.p2, confirmAnswer({ ...held, question: "theirs-1" }, true)),
+    ).toMatchObject({ result: "rejected" })
+    expect(await send(seats.p2, confirmAnswer(held, true))).toMatchObject({ result: "applied" })
+    // Answered, it is over: what the seat is asked next carries another id.
+    expect(other.question()?.id).toBe("theirs-2")
+    expect(await send(seats.p2, confirmAnswer(held, true))).toMatchObject({ result: "rejected" })
+  })
 })

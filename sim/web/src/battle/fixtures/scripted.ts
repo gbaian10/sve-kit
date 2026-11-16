@@ -121,19 +121,11 @@ function selected(selection: Selection, answer: Extract<Answer, { kind: "select"
   )
 }
 
-/**
- * What an update tells its seat, without the two names that change even when nothing else does:
- * its number and the id of the question it carries.
- */
-const bare = (message: BattleUpdate): string =>
-  JSON.stringify({
-    ...message,
-    update_seq: 0,
-    input:
-      message.input.kind === "question"
-        ? { ...message.input, question: { ...message.input.question, id: "" } }
-        : message.input,
-  })
+/** What an update tells its seat, apart from its number. */
+const bare = (message: BattleUpdate): string => JSON.stringify({ ...message, update_seq: 0 })
+
+/** What a question asks, apart from the id it is asked under. */
+const asks = (question: Question): string => JSON.stringify({ ...question, id: "" })
 
 /** A later task, as each message from a Worker arrives in a task of its own. */
 const later = (run: () => void): void => {
@@ -226,13 +218,31 @@ export function scriptedTable(scene: Scene): Readonly<Record<Seat, BattleSource>
             return
           }
           applied.push(chosen)
+          const answered = asked[seat]?.id
           const updates = SEATS.flatMap((each) => {
             const number = told[each] + 1
-            const next = update(step.table, each, number, step.input ?? `q${String(number)}`)
-            // A step that shows a seat nothing new sends it nothing, not even a number: a seat's
-            // sequence counts what that seat was told, and another seat's private answer leaves
-            // no trace in it. The question the seat has open stays as it is.
-            if (bare(next) === known[each]) return []
+            const built = update(step.table, each, number, step.input ?? `q${String(number)}`)
+            const open = asked[each]
+            let next = built
+            if (each === seat) {
+              // The answer was taken, so its question is over for good: whatever the seat is
+              // asked next is another question under another id, even when it reads the same.
+              if (built.input.kind === "question" && built.input.question.id === answered)
+                throw new Error("the scene asks again under the id of a question already answered")
+            } else {
+              // An answer that was not its own ends no question of this seat: asked the same
+              // thing still, the seat keeps the question it has, under the id it has.
+              if (
+                built.input.kind === "question" &&
+                open !== null &&
+                asks(built.input.question) === asks(open)
+              )
+                next = { ...built, input: { kind: "question", question: open } }
+              // A step that shows the seat nothing new sends it nothing, not even a number: a
+              // seat's sequence counts what that seat was told, and another seat's private
+              // answer leaves no trace in it.
+              if (bare(next) === known[each]) return []
+            }
             told[each] = number
             known[each] = bare(next)
             return [[each, next] as const]
