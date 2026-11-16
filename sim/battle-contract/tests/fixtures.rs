@@ -59,6 +59,29 @@ fn questions_round_trip() {
 }
 
 #[test]
+fn question_rules_preserve_unprovided_known_empty_and_complete_references() {
+    let (_, text) = fixtures("question").swap_remove(0);
+    let mut value: Value = serde_json::from_str(&text).unwrap();
+    for rules in [
+        Value::Null,
+        serde_json::json!([]),
+        serde_json::json!([{
+            "kind": "cr", "id": "0.0.1", "revision": "synthetic",
+            "strength": "inferred"
+        }]),
+    ] {
+        value.as_object_mut().unwrap().insert("rules".into(), rules);
+        let question: Question = decode(&value.to_string()).unwrap();
+        assert_eq!(serde_json::to_value(&question).unwrap(), value);
+    }
+    value.as_object_mut().unwrap().remove("rules");
+    assert_eq!(
+        decode::<Question>(&value.to_string()).err(),
+        Some(HostError::FORMAT)
+    );
+}
+
+#[test]
 fn another_wire_format_is_a_format_error() {
     for format in ["0", "2", "\"1\"", "null"] {
         let text = format!(r#"{{"kind":"host_error","format":{format},"reason":"range"}}"#);

@@ -182,11 +182,12 @@ interface Question {
   auto_answer: { kind: "unique"; answer: Answer; public: boolean }
     | { kind: "not_unique" } | { kind: "unknown" };
   assistance: null;
-  rules: RuleRef[];
+  rules: RuleRef[] | null;
 }
 ```
 
 purpose 是規則用途、use 是具體細目、shape.kind 是嚴格答案語義；各種合法組合由 native 程序決定。
+rules 必填：null 表示沒有經完整驗證的規則依據（未提供），[] 表示明確已知沒有規則引用，非空陣列表示經可信來源驗證的完整依據；不完整的單條不得當作完整集合。null 不代表已確認合法，也不解除其他 strict／preflight 互動阻擋；引用的 strength 不預設為 official。
 ProcessingContext 至少保留 stage、controller、已授權 TextRef／subject、規則依據、逐席程序與 Declared；actor 不一定是 controller。
 等待席只取得公開脈絡及骰值／剩餘次數，不取得候選、唯一性、私有題數或隱藏執行堆疊。
 UI 可共用 actions、confirm、options、select、order、partition、distribute、number、declare_name 九種元件分類；declare_name 只預留，不表示首片增加卡名宣告規則。
