@@ -1,5 +1,5 @@
 import { Settings as SettingsIcon } from "lucide-react"
-import { useEffect, useRef, useState } from "react"
+import { useCallback, useEffect, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { CardRef } from "../../../battle/contract"
@@ -12,11 +12,13 @@ import {
   BATTLE_MAT_DIM_MAX,
   BATTLE_MAT_LOOKS,
   BATTLE_MAT_REACHES,
+  clearBattleMatPicture,
   prefsStore,
+  saveBattleMatPicture,
+  useBattleMatPicture,
   usePrefs,
 } from "../../../settings"
 import { type KnownCard, useCards } from "../battle-cards"
-import { clearMatUpload, saveMatUpload, useMatUpload } from "../mat-upload"
 import { CardFace } from "../table/Cards"
 import type { Framing } from "./mat-crop"
 import { MatCropper } from "./MatCropper"
@@ -137,24 +139,49 @@ function MatCardPicker({
  * The player's own picture: chosen from the device or pasted, framed for the mat, kept whole on the
  * device. `onFrame` starts framing a picture, with the frame it had when it was framed before.
  */
-function MatUpload({ onFrame }: { readonly onFrame: (file: Blob, initial?: Framing) => void }) {
+function MatUpload({
+  onFrame,
+  watch,
+}: {
+  readonly onFrame: (file: Blob, initial?: Framing) => void
+  /**
+   * Starts watching the settings: the function it returns says whether they are still open as
+   * they were. Reading the clipboard takes time, and the settings may be closed meanwhile.
+   */
+  readonly watch: () => () => boolean
+}) {
   const { t } = useTranslation()
-  const kept = useMatUpload()
+  const kept = useBattleMatPicture()
   const input = useRef<HTMLInputElement>(null)
   const [clipboard, setClipboard] = useState<"empty" | "denied" | null>(null)
+  const shown = useRef(true)
+  useEffect(() => {
+    shown.current = true
+    return () => {
+      shown.current = false
+    }
+  }, [])
   const paste = async () => {
+    const open = watch()
+    // What comes back after the settings were closed, or after another picture source was chosen,
+    // answers a request nobody is waiting for any more: it is dropped.
+    const wanted = () => open() && shown.current
     try {
-      for (const item of await navigator.clipboard.read()) {
+      const items = await navigator.clipboard.read()
+      if (!wanted()) return
+      for (const item of items) {
         const type = item.types.find((entry) => entry.startsWith("image/"))
         if (type === undefined) continue
+        const picture = await item.getType(type)
+        if (!wanted()) return
         setClipboard(null)
-        onFrame(await item.getType(type))
+        onFrame(picture)
         return
       }
       setClipboard("empty")
     } catch {
       // No permission, or a browser that cannot read pictures from the clipboard.
-      setClipboard("denied")
+      if (wanted()) setClipboard("denied")
     }
   }
   return (
@@ -205,7 +232,7 @@ function MatUpload({ onFrame }: { readonly onFrame: (file: Blob, initial?: Frami
               variant="ghost"
               size="sm"
               onClick={() => {
-                void clearMatUpload()
+                void clearBattleMatPicture()
               }}
             >
               {t("play.settings.upload.remove")}
@@ -274,6 +301,20 @@ function PhotoSliders() {
   )
 }
 
+/** What is being framed: a picture of the player's own, with an address an image can show, or a card's art. */
+type Cropping =
+  | {
+      readonly kind: "file"
+      readonly file: Blob
+      readonly url: string
+      readonly initial?: Framing | undefined
+    }
+  | {
+      readonly kind: "card"
+      readonly printing: string | null
+      readonly initial?: Framing | undefined
+    }
+
 /** The gear and the battle settings it opens: the player's own mat, kept on this device. */
 export function SettingsButton({
   leader,
@@ -289,29 +330,43 @@ export function SettingsButton({
   const [open, setOpen] = useState(false)
   // What is being framed: a picture of the player's own (with an address an image can show for as
   // long as that lasts), or a card's art.
-  const [cropping, setCropping] = useState<
-    | {
-        readonly kind: "file"
-        readonly file: Blob
-        readonly url: string
-        readonly initial?: Framing | undefined
-      }
-    | {
-        readonly kind: "card"
-        readonly printing: string | null
-        readonly initial?: Framing | undefined
-      }
-    | null
-  >(null)
+  const [cropping, setCropping] = useState<Cropping | null>(null)
+  // The address made for the picture being framed. It is given back when the framing ends, when
+  // another picture takes its place, and when the settings go away.
+  const address = useRef<string | null>(null)
+  // Each opening of the settings is one cycle: a slower step that comes back after they were
+  // closed belongs to a cycle that is over.
+  const cycle = useRef(0)
+  const crop = useCallback((next: Cropping | null) => {
+    const url = next?.kind === "file" ? next.url : null
+    if (address.current !== null && address.current !== url) URL.revokeObjectURL(address.current)
+    address.current = url
+    setCropping(next)
+  }, [])
+  useEffect(
+    () => () => {
+      cycle.current += 1
+      if (address.current !== null) URL.revokeObjectURL(address.current)
+    },
+    [],
+  )
   const [failed, setFailed] = useState(false)
   const look = prefs.battleMatLook
   const endCrop = () => {
-    if (cropping?.kind === "file") URL.revokeObjectURL(cropping.url)
-    setCropping(null)
+    crop(null)
   }
   const frame = (file: Blob, initial?: Framing) => {
     setFailed(false)
-    setCropping({ kind: "file", file, url: URL.createObjectURL(file), initial })
+    crop({ kind: "file", file, url: URL.createObjectURL(file), initial })
+  }
+  const close = () => {
+    cycle.current += 1
+    setOpen(false)
+    crop(null)
+  }
+  const watch = () => {
+    const opened = cycle.current
+    return () => cycle.current === opened
   }
   // A picture pasted while the settings are open is taken as the player's own.
   useEffect(() => {
@@ -326,13 +381,13 @@ export function SettingsButton({
       event.preventDefault()
       prefsStore.set({ battleMatLook: "upload" })
       setFailed(false)
-      setCropping({ kind: "file", file, url: URL.createObjectURL(file) })
+      crop({ kind: "file", file, url: URL.createObjectURL(file) })
     }
     document.addEventListener("paste", onPaste)
     return () => {
       document.removeEventListener("paste", onPaste)
     }
-  }, [open])
+  }, [open, crop])
   return (
     <>
       <button
@@ -348,10 +403,7 @@ export function SettingsButton({
       </button>
       <Dialog
         open={open}
-        onClose={() => {
-          setOpen(false)
-          endCrop()
-        }}
+        onClose={close}
         title={cropping === null ? t("play.settings.title") : t("play.settings.upload.cropTitle")}
         variant="center"
       >
@@ -383,7 +435,7 @@ export function SettingsButton({
                   return
                 }
                 if (kept === null) return
-                void saveMatUpload(kept.picture, kept.size, framing).then((stored) => {
+                void saveBattleMatPicture(kept.picture, kept.size, framing).then((stored) => {
                   setFailed(!stored)
                 })
               }}
@@ -429,13 +481,13 @@ export function SettingsButton({
               <MatCardPicker
                 leader={leader}
                 onFrame={(printing, initial) => {
-                  setCropping({ kind: "card", printing, initial })
+                  crop({ kind: "card", printing, initial })
                 }}
               />
             ) : null}
             {look === "upload" ? (
               <>
-                <MatUpload onFrame={frame} />
+                <MatUpload onFrame={frame} watch={watch} />
                 {failed ? (
                   <p role="alert" className="bp-set-note is-warning">
                     {t("play.settings.upload.failed")}

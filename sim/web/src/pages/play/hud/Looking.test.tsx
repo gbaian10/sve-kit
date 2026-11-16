@@ -35,10 +35,10 @@ const CARDS: BattleCards = {
       faceId: "f:test",
       cardNo: card.printing_id === "p:base" ? "T-001" : "T-002",
       cost: 5,
-      attack: 4,
-      defense: 6,
+      attack: card.printing_id === "p:amulet" ? null : 4,
+      defense: card.printing_id === "p:amulet" ? null : 6,
       classCode: null,
-      typeCode: "follower",
+      typeCode: card.printing_id === "p:amulet" ? "amulet" : "follower",
     } as CardSummary,
     name: { text: card.printing_id === "p:base" ? "測試從者" : "測試進化", lang: "zh-Hant" },
     original: undefined,
@@ -66,6 +66,7 @@ const STATE: Inspection = {
   seat: "p1",
   zone: "field",
   under: UNDER,
+  type: "フォロワー・エボルヴ",
   traits: [],
 }
 
@@ -94,6 +95,8 @@ describe("the info column", () => {
     expect(panel).toHaveTextContent("測試進化")
     expect(panel).toHaveTextContent("從者 · 已進化 · 橫置中")
     // Attack is what the card prints; its defense is down from 6 to 2.
+    // On the field nothing quotes a cost: the 5 is what the card prints, and says so.
+    expect(panel).toHaveTextContent("費用 5印刷值")
     expect(panel).toHaveTextContent("攻擊 4印刷 4")
     expect(panel).toHaveTextContent("體力 2印刷 6")
     expect(panel).toHaveTextContent("進化前：測試從者（T-001）")
@@ -121,7 +124,9 @@ describe("the info column", () => {
       />,
     )
     const panel = screen.getByRole("complementary", { name: "卡片資訊" })
-    expect(panel).not.toHaveTextContent("印刷")
+    // Nothing printed beside the numbers; only the cost, which the field does not quote.
+    expect(panel).toHaveTextContent("攻擊 4體力 6")
+    expect(panel).not.toHaveTextContent("印刷 ")
     expect(panel).not.toHaveTextContent("橫置中")
     expect(panel).toHaveTextContent("預覽（滑鼠移開後回到選取的卡）")
   })
@@ -196,14 +201,10 @@ describe("the info column", () => {
     expect(panel).not.toHaveTextContent("スタック")
   })
 
-  it("shows a quoted cost that differs from the printed one", async () => {
-    const quoted: Shown = {
-      ...SHOWN,
-      state: { ...STATE, card: { ...STATE.card, cost: 3 }, zone: "hand" },
-    }
-    await show(
+  const sidebar = (shown: Shown) =>
+    show(
       <Sidebar
-        shown={quoted}
+        shown={shown}
         width={340}
         overlay={false}
         pinned={false}
@@ -212,8 +213,70 @@ describe("the info column", () => {
         onClose={vi.fn()}
       />,
     )
-    expect(screen.getByRole("complementary", { name: "卡片資訊" })).toHaveTextContent(
-      "費用 5現在 3",
+  const HAND: Inspection = {
+    ...STATE,
+    zone: "hand",
+    under: null,
+    card: { ...STATE.card, stats: null, acted: false, evolution: "base" },
+  }
+
+  it("shows what the authority quotes for a card in hand, with the printed cost beside it", async () => {
+    await sidebar({ ...SHOWN, state: { ...HAND, card: { ...HAND.card, cost: 3 } } })
+    const panel = screen.getByRole("complementary", { name: "卡片資訊" })
+    // The chip is the quote; the printed 5 is said to be printed.
+    expect(panel).toHaveTextContent("費用 3印刷 5")
+    // In hand the authority reports no numbers: the card's own are said to be printed.
+    expect(panel).toHaveTextContent("攻擊 4體力 6印刷值")
+  })
+
+  it("says nothing beside a quote that is the printed cost", async () => {
+    await sidebar({ ...SHOWN, state: { ...HAND, card: { ...HAND.card, cost: 5 } } })
+    const panel = screen.getByRole("complementary", { name: "卡片資訊" })
+    expect(panel).toHaveTextContent("費用 5攻擊")
+  })
+
+  it("says a cost is unknown where the authority quotes none, never the printed one in its place", async () => {
+    await sidebar({ ...SHOWN, state: HAND })
+    const panel = screen.getByRole("complementary", { name: "卡片資訊" })
+    expect(panel).toHaveTextContent("費用 ?費用未定印刷 5")
+  })
+
+  it("shows the kind a card has now: a follower that became an amulet has no numbers of its own", async () => {
+    await sidebar({
+      ...SHOWN,
+      state: { ...STATE, type: "アミュレット", card: { ...STATE.card, stats: null } },
+    })
+    const panel = screen.getByRole("complementary", { name: "卡片資訊" })
+    expect(panel).toHaveTextContent("護符（印刷：從者） · 已進化")
+    // No current numbers: the 4 and 6 are what the card prints, and say so.
+    expect(panel).toHaveTextContent("攻擊 4體力 6印刷值")
+    expect(panel).not.toHaveTextContent("印刷 4")
+  })
+
+  it("shows the numbers of a card that became a follower, though it prints none", async () => {
+    await sidebar({
+      card: { printing_id: "p:amulet", face: 0 },
+      where: "你的場上",
+      preview: false,
+      state: {
+        ...STATE,
+        under: null,
+        type: "フォロワー",
+        card: { ...STATE.card, evolution: "base", acted: false, stats: { attack: 2, life: 3 } },
+      },
+    })
+    const panel = screen.getByRole("complementary", { name: "卡片資訊" })
+    expect(panel).toHaveTextContent("從者（印刷：護符）")
+    expect(panel).toHaveTextContent("攻擊 2體力 3")
+    expect(panel).not.toHaveTextContent("體力 3印刷")
+  })
+
+  it("writes a type it has no word for as the authority names it", async () => {
+    await sidebar({ ...SHOWN, state: { ...STATE, type: "トークン" } })
+    const named = screen.getByText("トークン")
+    expect(named).toHaveAttribute("lang", "ja")
+    expect(screen.getByRole("complementary", { name: "卡片資訊" })).not.toHaveTextContent(
+      "（印刷：",
     )
   })
 })
@@ -224,7 +287,8 @@ describe("the large view", () => {
     await show(<Zoom zoomed={{ face: FACE, under: UNDER }} onClose={onClose} />)
     const dialog = screen.getByRole("dialog", { name: "測試進化" })
     expect(dialog).toHaveTextContent("T-002")
-    expect(dialog).toHaveTextContent("從者 · 費用 5 · 4/6")
+    // The large view shows a face, not a card in play: everything it says is what the face prints.
+    expect(dialog).toHaveTextContent("從者 · 印刷費用 5 · 印刷 4/6")
     expect(dialog).toHaveTextContent("進化前：測試從者（T-001）")
     await userEvent.setup().click(screen.getByRole("button", { name: "關閉" }))
     expect(onClose).toHaveBeenCalledOnce()
@@ -239,12 +303,46 @@ describe("the selection bar", () => {
     const onClose = vi.fn()
     await show(<SelectionBar shown={SHOWN} onZoom={onZoom} onClose={onClose} />)
     const bar = screen.getByRole("region", { name: "選取的卡片" })
-    // The numbers are the current ones: 4/2, not the printed 4/6.
-    expect(bar).toHaveTextContent("測試進化從者 · 費用 5 · 4/2T-002 · 你的場上")
+    // The numbers are the current ones: 4/2, not the printed 4/6. The field quotes no cost.
+    expect(bar).toHaveTextContent("測試進化從者 · 印刷費用 5 · 4/2T-002 · 你的場上")
     const user = userEvent.setup()
     await user.click(screen.getByRole("button", { name: "查看大圖" }))
     await user.click(screen.getByRole("button", { name: "關閉" }))
     expect(onZoom).toHaveBeenCalledOnce()
     expect(onClose).toHaveBeenCalledOnce()
+  })
+
+  const HAND: Inspection = {
+    ...STATE,
+    zone: "hand",
+    under: null,
+    type: "フォロワー",
+    card: { ...STATE.card, stats: null, acted: false, evolution: "base" },
+  }
+  const bar = async (state: Inspection) => {
+    await show(
+      <SelectionBar
+        shown={{ ...SHOWN, where: "你的手牌", state }}
+        onZoom={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+    return screen.getByRole("region", { name: "選取的卡片" })
+  }
+
+  it("shows the quoted cost of a card in hand, and the printed one as printed", async () => {
+    expect(await bar({ ...HAND, card: { ...HAND.card, cost: 3 } })).toHaveTextContent(
+      "從者 · 費用 3（印刷 5） · 印刷 4/6",
+    )
+  })
+
+  it("says a cost is unknown where the authority quotes none", async () => {
+    expect(await bar(HAND)).toHaveTextContent("從者 · 費用未定（印刷 5） · 印刷 4/6")
+  })
+
+  it("names the kind a card has now", async () => {
+    expect(
+      await bar({ ...STATE, type: "アミュレット", card: { ...STATE.card, stats: null } }),
+    ).toHaveTextContent("護符（印刷：從者） · 印刷費用 5 · 印刷 4/6")
   })
 })

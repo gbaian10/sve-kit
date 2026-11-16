@@ -12,6 +12,8 @@ export interface Inspection {
   readonly zone: ZoneName
   /** The follower under an evolve card; null when the card shows its own face. */
   readonly under: CardRef | null
+  /** The card's current type, as the rules term of the card text; not always the printed one. */
+  readonly type: string
   /** Effective traits, as the rules terms of the card text. */
   readonly traits: readonly string[]
 }
@@ -32,6 +34,7 @@ export function inspect(observation: BattleObservation, handle: ObjectHandle): I
         seat: player.seat,
         zone: zone as ZoneName,
         under: sameFace(card.card, card.face) ? null : card.card,
+        type: view.characteristics.card_type,
         traits: view.characteristics.traits,
       }
     }

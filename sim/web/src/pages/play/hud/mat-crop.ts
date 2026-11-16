@@ -2,12 +2,9 @@
 // frame on it; the table then looks at the picture through whichever box the mat's picture fills.
 // Switching between the board and the whole table therefore never cuts the picture again: the
 // picture stays where it is on screen and the larger box simply shows more of it.
-import type { BattleMatFraming, BattleMatReach } from "../../../settings"
+import type { BattleMatFraming, BattleMatReach, BattleMatSize } from "../../../settings"
 
-export interface Size {
-  readonly w: number
-  readonly h: number
-}
+export type Size = BattleMatSize
 
 /** Where the frame lies in the picture's free room, each from 0 (left, top) to 1. */
 export interface Pan {

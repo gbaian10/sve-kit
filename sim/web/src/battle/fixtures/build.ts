@@ -54,9 +54,8 @@ export interface SeatSpec {
   readonly hand: readonly CardNo[]
   readonly field: readonly FieldSpec[]
   /**
-   * A card with numbers is a follower whose current attack and life the seat is told. The
-   * contract's wording gives those to field followers only; this is what it would send once it
-   * also gives them for the EX area, where abilities can change them too.
+   * A card with numbers is a follower whose current attack and life the seat is told: the
+   * authority reports them for followers in the EX area as it does on the field.
    */
   readonly ex: readonly (
     CardNo | { readonly no: CardNo; readonly stats: readonly [number, number] }

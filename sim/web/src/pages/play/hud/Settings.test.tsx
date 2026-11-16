@@ -1,6 +1,6 @@
 import "fake-indexeddb/auto"
 
-import { fireEvent, screen } from "@testing-library/react"
+import { act, fireEvent, screen } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
@@ -18,6 +18,7 @@ afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
   document.documentElement.removeAttribute("lang")
   vi.unstubAllGlobals()
+  vi.restoreAllMocks()
 })
 
 const known = (printingId: string, cardNo: string, name: string): KnownCard => ({
@@ -43,6 +44,11 @@ const CARDS: BattleCards = {
     ALL.filter(
       (entry) => entry.name.text.includes(text) || entry.summary.cardNo.includes(text),
     ).slice(0, limit),
+}
+
+/** Closes the settings the way Escape does: jsdom does not turn the key into the dialog's cancel. */
+const dismiss = () => {
+  fireEvent(screen.getByRole("dialog"), new Event("cancel", { cancelable: true }))
 }
 
 const open = async (aspect = 2) => {
@@ -227,5 +233,96 @@ describe("the battle settings", () => {
     )
     await user.click(button)
     expect(await screen.findByRole("dialog", { name: "選擇取景" })).toBeInTheDocument()
+  })
+
+  it("drops what the clipboard brings back after the settings were closed", async () => {
+    prefsStore.set({ battleMatLook: "upload" })
+    const made = vi.spyOn(URL, "createObjectURL")
+    const user = await open(2)
+    // The clipboard answers late: only after the settings are closed.
+    let answer: (items: ClipboardItems) => void = () => undefined
+    Object.defineProperty(navigator, "clipboard", {
+      value: { read: () => new Promise<ClipboardItems>((resolve) => (answer = resolve)) },
+      configurable: true,
+    })
+    await user.click(screen.getByRole("button", { name: "從剪貼簿貼上" }))
+    dismiss()
+    expect(screen.queryByRole("dialog")).toBeNull()
+    await act(async () => {
+      answer([
+        {
+          types: ["image/png"],
+          getType: () => Promise.resolve(new Blob(["late"], { type: "image/png" })),
+        },
+      ] as unknown as ClipboardItems)
+      await Promise.resolve()
+    })
+    // Nothing was made of the late picture, and opening the settings again shows the settings.
+    expect(made).not.toHaveBeenCalled()
+    await user.click(screen.getByRole("button", { name: "對戰設定" }))
+    expect(screen.getByRole("dialog", { name: "對戰設定" })).toBeInTheDocument()
+    expect(document.querySelector(".bp-crop")).toBeNull()
+  })
+
+  it("drops a late picture when the settings closed between reading the clipboard and its picture", async () => {
+    prefsStore.set({ battleMatLook: "upload" })
+    const made = vi.spyOn(URL, "createObjectURL")
+    const user = await open(2)
+    let deliver: (picture: Blob) => void = () => undefined
+    Object.defineProperty(navigator, "clipboard", {
+      value: {
+        read: () =>
+          Promise.resolve([
+            {
+              types: ["image/png"],
+              getType: () => new Promise<Blob>((resolve) => (deliver = resolve)),
+            },
+          ] as unknown as ClipboardItems),
+      },
+      configurable: true,
+    })
+    await user.click(screen.getByRole("button", { name: "從剪貼簿貼上" }))
+    dismiss()
+    await act(async () => {
+      deliver(new Blob(["late"], { type: "image/png" }))
+      await Promise.resolve()
+    })
+    expect(made).not.toHaveBeenCalled()
+    // A new opening is a new cycle: the same button works again.
+    await user.click(screen.getByRole("button", { name: "對戰設定" }))
+    expect(screen.getByRole("dialog", { name: "對戰設定" })).toBeInTheDocument()
+  })
+
+  it("gives the framed picture's address back when the settings close or go away", async () => {
+    prefsStore.set({ battleMatLook: "upload" })
+    let made = 0
+    vi.spyOn(URL, "createObjectURL").mockImplementation(() => `blob:framing-${String(++made)}`)
+    const freed = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => undefined)
+    const user = userEvent.setup()
+    const { unmount } = await renderRoutes([
+      {
+        path: "*",
+        element: (
+          <BattleCardsContext value={CARDS}>
+            <SettingsButton leader={{ printing_id: "p:leader", face: 0 }} matAspect={2} />
+          </BattleCardsContext>
+        ),
+      },
+    ])
+    const choose = async () => {
+      await user.click(screen.getByRole("button", { name: "對戰設定" }))
+      await user.upload(
+        screen.getByLabelText("選擇圖片", { selector: "input" }),
+        new File(["picture"], "mat.png", { type: "image/png" }),
+      )
+    }
+    await choose()
+    dismiss()
+    expect(freed).toHaveBeenCalledWith("blob:framing-1")
+    // Still framing when the screen goes away.
+    await choose()
+    expect(freed).not.toHaveBeenCalledWith("blob:framing-2")
+    unmount()
+    expect(freed).toHaveBeenCalledWith("blob:framing-2")
   })
 })

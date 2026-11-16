@@ -8,16 +8,35 @@ import { type KnownCard, useCards } from "../battle-cards"
 import { isNamedKeyword } from "../dice/keywords"
 import { PIN_KEY } from "../inspector"
 import { useCounterText } from "../table/counters"
+import { costLine, type Kind, kindOfCode, kindOfTerm, statsLine } from "./reading"
 
-/** The card's kind in words, for the kinds the snapshot names. */
-export function CardKind({ known }: { readonly known: KnownCard }) {
+/**
+ * The card's kind in words. With the card's state it is the kind the card has now, as the
+ * authority reports it, with the printed kind beside it when that is another; without one (a
+ * leader, the large view of a face) it is the printed kind.
+ */
+export function CardKind({
+  known,
+  state = null,
+}: {
+  readonly known: KnownCard
+  readonly state?: Inspection | null
+}) {
   const { t } = useTranslation()
-  const code = known.summary.typeCode
-  if (code === "leader") return t("play.zone.leader")
-  if (code === "follower") return t("play.info.kind.follower")
-  if (code === "spell") return t("play.info.kind.spell")
-  if (code === "amulet") return t("play.info.kind.amulet")
-  return "—"
+  const word = (kind: Kind) =>
+    kind === "leader" ? t("play.zone.leader") : t(`play.info.kind.${kind}`)
+  const printed = kindOfCode(known.summary.typeCode)
+  if (state === null) return printed === null ? "—" : word(printed)
+  const now = kindOfTerm(state.type)
+  return (
+    <>
+      {/* A type the screen has no word for is written as the authority names it. */}
+      {now === null ? <span lang="ja">{state.type}</span> : word(now)}
+      {now !== null && printed !== null && now !== printed
+        ? t("play.info.printedKind", { kind: word(printed) })
+        : null}
+    </>
+  )
 }
 
 /** The wording in force for a card, as the card page's own text block. */
@@ -58,9 +77,17 @@ function CardDetail({ shown, onZoom }: { readonly shown: Shown; readonly onZoom:
   const source = cards.images?.cardImage(known.summary.printingId, known.summary.faceId)?.src
   const { cost, attack, defense } = known.summary
   const state = shown.state
-  const stats = state?.card.stats ?? null
-  const changed =
-    stats !== null && attack !== null && (stats.attack !== attack || stats.life !== defense)
+  const leader = known.summary.typeCode === "leader"
+  const costing = leader ? null : costLine(state, cost)
+  const stats = leader ? null : statsLine(state, attack, defense)
+  // The printed numbers show beside current ones that differ from them.
+  const beside =
+    stats !== null &&
+    stats.kind === "current" &&
+    stats.printed !== null &&
+    (stats.printed.attack !== stats.attack || stats.printed.defense !== stats.defense)
+      ? stats.printed
+      : null
   const under = state?.under == null ? undefined : cards.find(state.under)
   return (
     <div className="bp-detail">
@@ -91,7 +118,7 @@ function CardDetail({ shown, onZoom }: { readonly shown: Shown; readonly onZoom:
         <dd>{known.classLabel ?? "—"}</dd>
         <dt>{t("play.info.kindLabel")}</dt>
         <dd>
-          <CardKind known={known} />
+          <CardKind known={known} state={state} />
           {state?.card.evolution === "super_evolved"
             ? t("play.info.state.superEvolved")
             : state?.card.evolution === "evolved"
@@ -134,26 +161,42 @@ function CardDetail({ shown, onZoom }: { readonly shown: Shown; readonly onZoom:
           </>
         ) : null}
       </dl>
-      {known.summary.typeCode !== "leader" && (cost !== null || attack !== null) ? (
+      {costing !== null || stats !== null ? (
         <div className="bp-detail-stats">
-          {cost !== null ? (
+          {costing !== null ? (
             <span>
-              {t("play.stat.cost")} <b className="bp-chip is-cost">{cost}</b>
-              {state !== null && state.card.cost !== null && state.card.cost !== cost ? (
-                <small>{t("play.info.costNow", { n: state.card.cost })}</small>
+              {t("play.stat.cost")}{" "}
+              <b className="bp-chip is-cost">
+                {costing.kind === "quoted"
+                  ? costing.now
+                  : costing.kind === "unknown"
+                    ? "?"
+                    : costing.printed}
+              </b>
+              {costing.kind === "unknown" ? <small>{t("play.stat.costUnknown")}</small> : null}
+              {costing.kind === "printed" ? (
+                <small>{t("play.info.printedValue")}</small>
+              ) : costing.printed !== null &&
+                (costing.kind === "unknown" || costing.printed !== costing.now) ? (
+                <small>{t("play.info.printed", { n: costing.printed })}</small>
               ) : null}
             </span>
           ) : null}
-          {attack !== null && defense !== null ? (
+          {stats !== null ? (
             <>
               <span>
-                {t("play.stat.attack")} <b className="bp-chip is-atk">{stats?.attack ?? attack}</b>
-                {changed ? <small>{t("play.info.printed", { n: attack })}</small> : null}
+                {t("play.stat.attack")} <b className="bp-chip is-atk">{stats.attack}</b>
+                {beside !== null ? (
+                  <small>{t("play.info.printed", { n: beside.attack })}</small>
+                ) : null}
               </span>
               <span>
-                {t("play.stat.defense")} <b className="bp-chip is-def">{stats?.life ?? defense}</b>
-                {changed ? <small>{t("play.info.printed", { n: defense })}</small> : null}
+                {t("play.stat.defense")} <b className="bp-chip is-def">{stats.defense}</b>
+                {beside !== null ? (
+                  <small>{t("play.info.printed", { n: beside.defense })}</small>
+                ) : null}
               </span>
+              {stats.kind === "printed" ? <small>{t("play.info.printedValue")}</small> : null}
             </>
           ) : null}
         </div>

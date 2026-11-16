@@ -71,6 +71,12 @@ export interface BattleMatFraming {
   readonly reach: BattleMatReach
 }
 
+/** A picture's size in its own pixels. */
+export interface BattleMatSize {
+  readonly w: number
+  readonly h: number
+}
+
 /** How far a card's art or an uploaded picture may be blurred (px) and darkened (percent). */
 export const BATTLE_MAT_BLUR_MAX = 5
 export const BATTLE_MAT_DIM_MAX = 80

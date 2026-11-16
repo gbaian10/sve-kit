@@ -9,7 +9,7 @@ import type { BattleSource } from "../../battle/source"
 import { inspect, type ZoneName } from "../../battle/view/inspect"
 import { type AttackHints, type SlotArrangement, tableModel } from "../../battle/view/table"
 import { cn } from "../../components/ui/cn"
-import { prefsStore, usePrefs } from "../../settings"
+import { prefsStore, useBattleMatPicture, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
 import { CARD_FRAMING } from "./hud/mat-crop"
 import { PileBrowser } from "./hud/PileBrowser"
@@ -31,7 +31,6 @@ import {
   type Zoomed,
 } from "./inspector"
 import { computeLayout, type Layout, matBox, sidebarFloats, useViewport } from "./layout"
-import { useMatUpload } from "./mat-upload"
 import { Board } from "./table/Board"
 import { DualHand, Hand, OppHand } from "./table/Hand"
 import { MatArt, type MatPhoto } from "./table/mats"
@@ -58,7 +57,7 @@ const ZONE_LABEL: Partial<
  */
 function MatSurface({ layout, leader }: { readonly layout: Layout; readonly leader: CardRef }) {
   const prefs = usePrefs()
-  const upload = useMatUpload()
+  const upload = useBattleMatPicture()
   const box = matBox(layout, prefs.battleMatReach)
   const cardFraming = prefs.battleMatCardFraming ?? CARD_FRAMING
   // A picture stays where it was framed, whichever box looks at it now.

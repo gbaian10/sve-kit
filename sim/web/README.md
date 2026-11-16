@@ -70,7 +70,7 @@ fixtures computes rules.
   does the same. `stack` is a Witch's table: a counter lies only on a card that may hold it, so
   stack counters are shown on amulets with Stack. Its followers are arranged to show how markers
   share a card (several keywords, standing and engaged; a chip beside a keyword), and its EX
-  follower carries current numbers, which the authority does not send for the EX area yet.
+  follower carries current numbers, as the authority reports them for the EX area too.
 - `?dual=1` (or the button beside the gear) shows both seats side by side: the viewer's screen on
   the left, the other seat's on the right. Each has its own source and its own playback state, so
   the two can be compared for what a seat must not be told.
@@ -84,7 +84,9 @@ fixtures computes rules.
   card page's search index (`search` in `battle-cards.ts`) and starts as the player's leader; a
   picture of their own is chosen from the device or pasted (a button reads the clipboard, and
   Ctrl+V works while the settings are open) and is kept in the browser's IndexedDB
-  (`mat-upload.ts`), never uploaded. Where that storage refuses, the mat is the plain one.
+  (`src/settings/battle-mat-picture.ts`, like every stored personal setting), never uploaded. A
+  picture that cannot be read back is no picture, and the mat is then the plain one; one that
+  cannot be written leaves the picture kept before as it was.
 - A card's art or the player's picture is kept whole, with the frame the player put on it
   (`hud/MatCropper.tsx`: the whole picture shows, the frame has the mat's shape and is dragged
   over it, what it leaves out is grey). `placePicture` in `hud/mat-crop.ts` then lays the picture
@@ -148,6 +150,12 @@ How the screen is put together:
   `table/counters.ts` maps that name to the wording of each interface language, shown on hover and
   in the info column, and a test fails when the registry lists a counter the screen has no name
   for.
+- What the info column, the selection bar and the large view say about a card (`hud/reading.ts`):
+  the kind is the one the card has now, as the authority reports it, with the printed kind beside
+  it when that is another; the cost is the authority's quote where cards are played from (hand,
+  EX area), unknown where it quotes none, and otherwise the printed cost said to be printed; attack
+  and defense are the current ones where the authority reports them, and otherwise the printed
+  ones said to be printed. A printed value never stands in for a current one.
 - Looking at cards (`inspector.ts`): a click, a tap or Enter picks a card or a leader, and the mouse
   resting on one previews it; the pin in the info column's header (or F1) keeps the picked card
   there whatever the pointer rests on, and is remembered. What is picked shows in the info column (`hud/Sidebar.tsx`), or in a

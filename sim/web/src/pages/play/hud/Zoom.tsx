@@ -34,9 +34,10 @@ export function Zoom({
           <h2 lang={known.name.lang}>{known.name.text}</h2>
           <p>
             <CardKind known={known} />
-            {cost !== null ? t("play.info.zoomCost", { n: cost }) : null}
+            {/* The large view shows a face, not a card in play: what it says is what the face prints. */}
+            {cost !== null ? t("play.info.zoomCostPrinted", { n: cost }) : null}
             {attack !== null && defense !== null
-              ? t("play.info.zoomStats", { attack, defense })
+              ? t("play.info.zoomStatsPrinted", { attack, defense })
               : null}
           </p>
           {known.summary.typeCode !== "leader" ? <CardWordingText known={known} /> : null}

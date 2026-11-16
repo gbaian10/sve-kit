@@ -1,3 +1,8 @@
+export {
+  clearBattleMatPicture,
+  saveBattleMatPicture,
+  useBattleMatPicture,
+} from "./battle-mat-picture"
 export { getCacheClearResult, requestColdStart, runRequestedColdStart } from "./clear-local"
 export { decksStore, useDecks } from "./decks"
 export {
@@ -14,6 +19,7 @@ export {
   type BattleMatFraming,
   type BattleMatLook,
   type BattleMatReach,
+  type BattleMatSize,
   CARD_EDITIONS,
   CARD_OPEN_MODES,
   type CardOpenMode,
@@ -24,7 +30,6 @@ export {
   DEFAULT_PREFS,
   FIELD_DISPLAYS,
   type FieldDisplay,
-  isBattleMatFraming,
   prefsStore,
   showsOtherEdition,
   TEXT_DISPLAYS,

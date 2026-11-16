@@ -50,6 +50,8 @@ describe("inspect", () => {
     expect(state?.card).toMatchObject({ acted: true, stats: { attack: 4, life: 1 } })
     // An evolved follower shows its evolve card; the follower itself lies underneath.
     expect(state?.card.face).toEqual(cardRef("BP20-065"))
+    // The type is the one the card has now: the evolve card's, not the follower's under it.
+    expect(state?.type).toBe("フォロワー・エボルヴ")
     expect(state?.under).toEqual(cardRef("BP20-064"))
 
     const inEx = opponent.ex[0]

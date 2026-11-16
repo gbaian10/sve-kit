@@ -1,11 +1,11 @@
-// The player's own mat picture: one image, kept whole with the frame the player put on it, in this
-// browser's IndexedDB and never sent anywhere. It lives in a database of its own, which clearing the local data removes with the
-// other caches. Storage that is missing or refuses (private windows, blocked site data) is not an
-// error for the table: there is then no picture, and the mat falls back to a drawn one.
+// The player's own picture for the battle mat: one image, kept whole with the frame the player put
+// on it, in this browser's IndexedDB and never sent anywhere. It lives in a database of its own,
+// which clearing the local data removes with the other caches. Storage that is missing or refuses
+// (private windows, blocked site data) is not an error for the table: a picture that could not be
+// read back is no picture, and one that could not be written leaves what was there before.
 import { useSyncExternalStore } from "react"
 
-import { isBattleMatFraming } from "../../settings"
-import type { Framing, Size } from "./hud/mat-crop"
+import { type BattleMatFraming, type BattleMatSize, isBattleMatFraming } from "./prefs"
 
 const DB_NAME = "sve-kit-battle-mat"
 const STORE = "picture"
@@ -61,16 +61,16 @@ async function transact<T>(
 /** The picture as it is kept: the whole of it, its size, and where the player framed it. */
 interface Kept {
   readonly picture: Blob
-  readonly size: Size
-  readonly framing: Framing
+  readonly size: BattleMatSize
+  readonly framing: BattleMatFraming
 }
 
 /** The kept picture as the table shows it: `url` is an address an image element can load. */
-export interface MatUpload {
+export interface BattleMatPicture {
   readonly url: string
   readonly picture: Blob
-  readonly size: Size
-  readonly framing: Framing
+  readonly size: BattleMatSize
+  readonly framing: BattleMatFraming
 }
 
 const positive = (value: unknown): value is number =>
@@ -81,13 +81,13 @@ function parse(stored: unknown): Kept | null {
   if (typeof stored !== "object" || stored === null) return null
   const { picture, size, framing } = stored as Partial<Record<keyof Kept, unknown>>
   if (!(picture instanceof Blob) || typeof size !== "object" || size === null) return null
-  const { w, h } = size as Partial<Record<keyof Size, unknown>>
+  const { w, h } = size as Partial<Record<keyof BattleMatSize, unknown>>
   if (!positive(w) || !positive(h) || !isBattleMatFraming(framing)) return null
   return { picture, size: { w, h }, framing }
 }
 
 // What the table shows, or null when there is no picture.
-let shown: MatUpload | null = null
+let shown: BattleMatPicture | null = null
 let loaded = false
 const listeners = new Set<() => void>()
 
@@ -124,12 +124,19 @@ function subscribe(listener: () => void): () => void {
 }
 
 /** The player's kept picture; null while it loads and when there is none. */
-export function useMatUpload(): MatUpload | null {
+export function useBattleMatPicture(): BattleMatPicture | null {
   return useSyncExternalStore(subscribe, () => shown)
 }
 
-/** Keeps the picture; false when this browser would not store it (the table then shows none). */
-export async function saveMatUpload(picture: Blob, size: Size, framing: Framing): Promise<boolean> {
+/**
+ * Keeps the picture; false when this browser would not store it. A picture kept before stays as it
+ * was then; with none before, the table goes on without one.
+ */
+export async function saveBattleMatPicture(
+  picture: Blob,
+  size: BattleMatSize,
+  framing: BattleMatFraming,
+): Promise<boolean> {
   const kept: Kept = { picture, size, framing }
   try {
     await transact("readwrite", (store) => store.put(kept, KEY))
@@ -141,7 +148,7 @@ export async function saveMatUpload(picture: Blob, size: Size, framing: Framing)
   return true
 }
 
-export async function clearMatUpload(): Promise<void> {
+export async function clearBattleMatPicture(): Promise<void> {
   try {
     await transact("readwrite", (store) => store.delete(KEY))
   } catch {
