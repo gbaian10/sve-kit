@@ -1,0 +1,132 @@
+format: 1
+kind: digital_art_match_shard
+records:
+  - art_id: a:21f3379cf8b75c9593757d0765389325
+    card_id: c:dbe63f1999f35868ac0210d2aa48a372
+    face_id: f:d1aa70cdbb6f5de3a2db7decead5410a
+    game: svwb
+    state: not_found
+    same_card_targets:
+      - "10174110"
+    witness:
+      printing_id: p:e8878265aeba5a6d85622fe0ac37d57c
+      face_id: f:d1aa70cdbb6f5de3a2db7decead5410a
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/PCS02/pcs02-003.png
+      image_sha256: sha256:c7db061bb1fc3eebf5688432da7598eecfe10f540995f5afeb2a714980f8a572
+      crop:
+        - 59
+        - 145
+        - 683
+        - 613
+    candidates:
+      - official_id: "10174110"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-wb.com/uploads/card_image/jpn/card/11c40f5ef60c4efb9ddb0005649f081d.png
+        image_sha256: sha256:6cbde35d4bfecee6766d5e15f81a9fb3d259185ddf6efec3cc1058b3608a9ab4
+        crop:
+          - 63
+          - 151
+          - 495
+          - 475
+        inliers: 7
+      - official_id: "10174110"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-wb.com/uploads/card_image/jpn/card/2dd473f055524c65b30b1ffd46bc7059.png
+        image_sha256: sha256:9bb801a39d4b8feba63de5e09455a11bc6357177debaeda8ba465ed8efb8451d
+        crop:
+          - 63
+          - 151
+          - 495
+          - 475
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 已列同卡連結的正常、進化與異畫候選全部低於 10 inliers；機械採納，僅表示此來源範圍未找到同圖。
+  - art_id: a:853ad111f8255887b7de8a6a2f5a5834
+    card_id: c:c41a6d3b42485e77ac0c8e2889b2727c
+    face_id: f:1245a7b4b1d65161b0ba22c66549fc7b
+    game: sv1
+    state: not_found
+    same_card_targets:
+      - "113341010"
+    witness:
+      printing_id: p:9d2ef2222df75914b2e1be2fb42d90b4
+      face_id: f:1245a7b4b1d65161b0ba22c66549fc7b
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/PCS02/pcs02-002.png
+      image_sha256: sha256:7af4a5b8d567c2a97df542e3be5afcb12860866c7b97176e282ddc0f361a3e23
+      crop:
+        - 59
+        - 145
+        - 683
+        - 613
+    candidates:
+      - official_id: "113341010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_113341010.png
+        image_sha256: sha256:a42ce65d2f8e10a3d75db90d32e0820ca63e4be5661a0e5c557c09ec1c59ea65
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+      - official_id: "113341010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_113341010.png
+        image_sha256: sha256:24482296fcb914adfa41d87c6da4b97213c130a85139a9fd6133899932092eb4
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 已列同卡連結的正常、進化與異畫候選全部低於 10 inliers；機械採納，僅表示此來源範圍未找到同圖。
+  - art_id: a:c683a7bc755d52dbbc68f51edd492fa0
+    card_id: c:5ff546e9284a54e38e3ee79ce6ca00fe
+    face_id: f:2e78d628603f53cbb86f939815ce18af
+    game: svwb
+    state: not_found
+    same_card_targets:
+      - "10234110"
+    witness:
+      printing_id: p:ff0c3d5df3275c7ca57a0b08ab1237be
+      face_id: f:2e78d628603f53cbb86f939815ce18af
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/PCS02/pcs02-001.png
+      image_sha256: sha256:87029bf864786443e03cdccce90d491a5e9200f3516320dd98224242ba02dce8
+      crop:
+        - 59
+        - 145
+        - 683
+        - 613
+    candidates:
+      - official_id: "10234110"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-wb.com/uploads/card_image/jpn/card/6353c702ef6d42e8bf4d8872b4edb37f.png
+        image_sha256: sha256:abb4652a68119c9acbd171bc85b066244e3cd85ba273ff4a74e6b42f812eb823
+        crop:
+          - 63
+          - 151
+          - 495
+          - 475
+        inliers: 5
+      - official_id: "10234110"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-wb.com/uploads/card_image/jpn/card/18e5e660787d4c70a6251fc43123f900.png
+        image_sha256: sha256:981738787b25b6fcecd310c1a58549858c54dbeee027c043080da22d00c2fa29
+        crop:
+          - 63
+          - 151
+          - 495
+          - 475
+        inliers: 6
+    complete: true
+    review_level: model_reviewed
+    reason: 已列同卡連結的正常、進化與異畫候選全部低於 10 inliers；機械採納，僅表示此來源範圍未找到同圖。

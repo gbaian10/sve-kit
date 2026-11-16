@@ -1,0 +1,69 @@
+format: 1
+kind: digital_art_match_shard
+records:
+  - art_id: a:02c43788e7da51a9813a67bad1dedd98
+    card_id: c:1a8a5d1716f75697856abf132807ae76
+    face_id: f:ad384d25af7b5da38a6fd23184b59770
+    game: sv1
+    state: not_found
+    same_card_targets:
+      - "103041010"
+      - "810041100"
+    witness:
+      printing_id: p:9eb7d15d753e55b18bf6d5401e066194
+      face_id: f:ad384d25af7b5da38a6fd23184b59770
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/PR/pr-049.png
+      image_sha256: sha256:4c51c84ef2f3b888adf04606b525016b4b5e82e300ceac73859dbe82c3405828
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103041010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103041010.png
+        image_sha256: sha256:374e312d689110ea6ffc82fa67abbb961e7320b7302a35e769cf25d6b30b2ecd
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "103041010"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_103041010.png
+        image_sha256: sha256:c864ff06df183e6cf1f348417b9962f909e3283880b8b2f8fe6d2bd5983698b6
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "103041010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103041010.png
+        image_sha256: sha256:1c82abfb7ea06fd45efc7b29a62768b137d361380dbe333bb2c00ee6f94d29ac
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+      - official_id: "103041010"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_103041010.png
+        image_sha256: sha256:340c7953628230edacff5aa1a48eb7e76aa23aec3fb51afd54f8475842b1f551
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+    complete: true
+    review_level: model_reviewed
+    reason: 已列同卡連結的正常、進化與異畫候選全部低於 10 inliers；機械採納，僅表示此來源範圍未找到同圖。

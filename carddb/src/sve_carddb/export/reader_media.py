@@ -116,6 +116,23 @@ def validate_digital(view: View, config: Row) -> None:
         raise ValueError("Digital endpoint refresh policy differs from game")
     if any(string(c["game"]) not in games for c in view["digital_card"]):
         raise ValueError("Digital card requires its game endpoint")
+    cards = {string(r["id"]): r for r in view["digital_card"]}
+    arts = {string(r["id"]): r for r in view["digital_art"]}
+    matches = {
+        (
+            string(r["art_id"]),
+            string(
+                cards[string(arts[string(r["digital_art_id"])]["digital_card_id"])][
+                    "game"
+                ]
+            ),
+        )
+        for r in view["digital_art_link"]
+    }
+    for row in view["digital_art_coverage"]:
+        key = string(row["art_id"]), string(row["game"])
+        if (row["state"] == "matched") != (key in matches):
+            raise ValueError("Digital art coverage contradicts its matches")
     rules = [r for r in view["digital_link"] if r["relation"] == "same_name"]
     pairs = [(string(r["card_id"]), string(r["digital_card_id"])) for r in rules]
     human = {

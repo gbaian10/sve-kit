@@ -7,6 +7,8 @@ from pydantic import JsonValue
 
 from sve_carddb.core.authored import authored_root
 from sve_carddb.core.json import canonical, object_value, parse
+from sve_carddb.domains.digital.art_matches.importer import populate as populate_art
+from sve_carddb.domains.digital.art_matches.loader import load as load_art
 from sve_carddb.domains.digital.links.importer import Inputs as LinkInputs
 from sve_carddb.domains.digital.links.importer import populate_links
 from sve_carddb.domains.digital.name_policies.application import Inputs as NameInputs
@@ -21,6 +23,7 @@ if TYPE_CHECKING:
     from sve_carddb.build import Database
     from sve_carddb.core.provenance import BuildContext
     from sve_carddb.domains.catalog.adoption_models import SourceRef
+    from sve_carddb.domains.digital.art_matches.loader import Snapshot as ArtSnapshot
     from sve_carddb.domains.digital.links.importer import Result as LinkResult
     from sve_carddb.domains.digital.name_policies.results import Result as NameResult
     from sve_carddb.domains.text_observations.plan import TextPlan
@@ -33,6 +36,7 @@ if TYPE_CHECKING:
 class Composer:
     inputs: NameInputs | None
     links: LinkInputs | None
+    art: ArtSnapshot | None = None
 
     def configuration(self, recipe: Inputs) -> dict[str, JsonValue]:
         """Declare current registry and frozen source scopes separately from policy pins."""
@@ -53,6 +57,8 @@ class Composer:
                 "present": self.links is not None,
             },
         }
+        if self.art is not None:
+            config |= self.art.configuration()
         if self.links is not None:
             snapshot = self.links.load()
             references = sorted(
@@ -79,8 +85,20 @@ class Composer:
             targets = tuple(
                 sorted(
                     {
-                        (r.subject.game, r.subject.official_id)
-                        for r in snapshot.records()
+                        *(
+                            (r.subject.game, r.subject.official_id)
+                            for r in snapshot.records()
+                        ),
+                        *(
+                            ()
+                            if self.art is None
+                            else (
+                                (record.game, candidate.official_id)
+                                for record in self.art.records()
+                                if record.state == "matched"
+                                for candidate in record.candidates
+                            )
+                        ),
                     }
                 )
             )
@@ -90,6 +108,23 @@ class Composer:
             for value in sorted({canonical(b) for b in batches})
         ]
         return config
+
+    def populate_art(
+        self,
+        db: Database,
+        *,
+        revision: str,
+        links: LinkResult | None,
+        sources: Sources,
+    ) -> dict[str, int] | None:
+        """Apply image assertions without loading models or private image caches."""
+        return (
+            None
+            if self.art is None
+            else populate_art(
+                db, self.art, revision=revision, links=links, sources=sources
+            )
+        )
 
     def populate_links(
         self,
@@ -134,7 +169,8 @@ def composer(recipe: Inputs) -> Composer | None:
         if entry.exists() or entry.is_symlink()
         else None
     )
-    if recipe.name_policy is None and links is None:
+    art = load_art(authored_root(recipe.repo))
+    if recipe.name_policy is None and links is None and art is None:
         return None
     return Composer(
         None
@@ -146,4 +182,5 @@ def composer(recipe: Inputs) -> Composer | None:
             recipe.published_at,
         ),
         links,
+        art,
     )

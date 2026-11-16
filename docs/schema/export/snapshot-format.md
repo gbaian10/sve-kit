@@ -15,7 +15,7 @@
 四層翻譯的來源政策已改依[翻譯契約 §1／§7.2](../domains/translation-contract.md#1-來源與顯示原則)：
 有效且已確認同卡同面的 JP 可供繁中，divergence 不構成此顯示門檻。
 本文的 basis、annotation 與改動欄序依 [4.0.0 公開 annotation 契約](public-annotation.md)。
-文字欄序使用 4.0.0 profile；有作者程式時 producer 選用 4.1.0，增加 `dsl-programs-v1` 必要能力及最低 reader 4.1.0，程式封套見傳輸 §3.4。已接線四層建置、annotation、每包每區基本目錄及固定背景帶。詳情字典按檔局部化，JP 來源正文譯文固定共用，來源呈現按一跳載入；容量與記憶體效能依 [size-budget](size-budget.md) 分別驗收。
+文字欄序使用 4.0.0 profile；有作者程式時 producer 選用 4.1.0，增加 `dsl-programs-v1` 必要能力及最低 reader 4.1.1，程式封套見傳輸 §3.4。已接線四層建置、annotation、每包每區基本目錄及固定背景帶。詳情字典按檔局部化，JP 來源正文譯文固定共用，來源呈現按一跳載入；容量與記憶體效能依 [size-budget](size-budget.md) 分別驗收。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -69,6 +69,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | `digital_art` | `id, digital_card_id, phase, style_key` | 數位進化面/styles/異畫對照 |
 | `digital_link` | `card_id, face_id?, digital_card_id, digital_phase?, relation, effect_similarity?, review_level` | 複合 `PK(全部欄)`；區分 `same_card/same_character/name_only/same_name`；`same_name` 待能力實作，本批不產生；`model_reviewed` 只供瀏覽、不供名 |
 | `digital_art_link` | `art_id, digital_art_id, relation, review_level` | 複合 `PK(art_id,digital_art_id)`；實體圖對數位圖 |
+| `digital_art_coverage` | `art_id, game, state, as_of` | 複合 `PK(art_id,game)`；matched/not_found/unknown，缺列為未知；not_found 僅限已審同卡候選範圍 |
 | `digital_link_coverage` | `card_id, game, state, as_of` | 複合 `PK(card_id,game)`；尚未核對與核對無結果分開 |
 | `voice` | `id, digital_card_id, digital_phase?, lang, kind_code, variant?, interaction_target_id?, label_raw?, source_url, asset_path?, mime?, bytes?, duration_ms?, availability` | 語音瀏覽與來源切換；不預載音檔 |
 | `card_voice` | `card_id, voice_id, usage` | 複合 `PK(card_id,voice_id,usage)`；可播放的已採納對照/場景 |
@@ -84,9 +85,9 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 
 `card_related` 與 `digital_link` 不公開建置端的內容雜湊列 ID；建置 schema 仍保留 ID 供來源、審核與採納核對，投影完成後才移除。兩集合以全部公開欄位為值集合主鍵，僅完整相同的列去重；`suggested_count`、`applicable_regions`、數位面／關係／相似度／審核層級任一不同都保留。沒有其他公開集合引用這兩種列 ID；路由與牌組仍使用既有卡片／印刷身分。變更任一公開值視為舊列移除與新列加入，changes 的 key 不含建置 ID。
 
-數位瀏覽採用既有 `model_reviewed` 值；不改欄序、公開 enum、格式版號或必要能力。真人 `sampled`／`confirmed` 的語義不變。模型連結的逐筆或抽樣查核方法保存在 authored reason，不作官方名稱證據。離線匯出只公開 fresh `same_card`／`same_character` 連結與其 `digital_card` 引用閉包，不公開數位卡文、面、圖或語音。本入口不採納 `name_only`；coverage 未實作時維持 `[]`，無候選仍是「尚未核對」，不能推導 `reviewed_none`。入口與來源重驗見[數位對應採納](../domains/digital-link-adoption.md)。
+數位瀏覽採用既有 `model_reviewed` 值；不改欄序、公開 enum、格式版號或必要能力。真人 `sampled`／`confirmed` 的語義不變。模型連結的逐筆或抽樣查核方法保存在 authored reason，不作官方名稱證據。離線匯出公開 fresh `same_card`／`same_character` 連結與已採納的 digital_art／digital_art_link／digital_art_coverage 閉包；不公開數位卡文、原圖或語音。圖級採納見[線上版卡圖採納](../domains/digital-art-matches.md)。本入口不採納 `name_only`；卡級 digital_link_coverage 未實作時維持 `[]`，無候選仍是「尚未核對」，不能推導 `reviewed_none`。入口與來源重驗見[數位對應採納](../domains/digital-link-adoption.md)。
 
-上述共 43 個公開文字陣列；這是物件投影的集合數量，不是建置表數。config 是單一設定物件，精確型別見 [傳輸契約 §3](snapshot-transport.md#3-config-與巢狀-tuple-型別)：languages（`code/fallback_order/display_name`）、`digital_endpoints`（`game/card_url_template/language_map/status/refresh_policy`）、`shop_links`（`id/url_template/parameters/feature_key/enabled_dev/enabled_prod`）、`image_sizes`（key/purpose/max_width/max_height）、search（`grammar_version/normalizer_version`），另含 `catalog_feedback_url`、`third_party_image_policy`（固定 `mirror_reviewed`）、`deck_eligibility_policy`（固定 `regional_decklog`）；v1 producer/reader 必須實施這兩項已決政策。不含作者/hash/審核流程。僅 `image_sizes` 在影像清單中也會被引用；避免兩份獨立設定，快照清單指向同一 config 檔。
+上述共 44 個公開文字陣列；這是物件投影的集合數量，不是建置表數。config 是單一設定物件，精確型別見 [傳輸契約 §3](snapshot-transport.md#3-config-與巢狀-tuple-型別)：languages（`code/fallback_order/display_name`）、`digital_endpoints`（`game/card_url_template/language_map/status/refresh_policy`）、`shop_links`（`id/url_template/parameters/feature_key/enabled_dev/enabled_prod`）、`image_sizes`（key/purpose/max_width/max_height）、search（`grammar_version/normalizer_version`），另含 `catalog_feedback_url`、`third_party_image_policy`（固定 `mirror_reviewed`）、`deck_eligibility_policy`（固定 `regional_decklog`）；v1 producer/reader 必須實施這兩項已決政策。不含作者/hash/審核流程。僅 `image_sizes` 在影像清單中也會被引用；避免兩份獨立設定，快照清單指向同一 config 檔。
 
 | 巢狀型別 | 完整欄位與語意 |
 | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.build.rows import insert_exact
 from sve_carddb.build.source_rows import insert_raw_sources
 from sve_carddb.core.json import array, canonical, digest, object_value, parse
 from sve_carddb.core.provenance import SourceUse
@@ -123,8 +124,14 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
         token = common.get("is_token") if game == "svwb" else None
         if token is not None and type(token) is not bool:
             raise ValueError("Invalid digital token flag")
+        resource = common.get(
+            "resource_card_id" if game == "sv1" else "card_resource_id"
+        )
+        if resource is not None and type(resource) is not int:
+            raise ValueError("Invalid digital resource ID")
         identifier = f"digital:{game}:{official}"
-        db.insert(
+        insert_exact(
+            db,
             "digital_card",
             {
                 "id": identifier,
@@ -136,24 +143,19 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
                 "original_card_id": f"digital:{game}:{common['original_card_id']}"
                 if common.get("original_card_id")
                 else None,
-                "resource_id": str(
-                    common.get(
-                        "resource_card_id" if game == "sv1" else "card_resource_id"
-                    )
-                )
-                if common.get(
-                    "resource_card_id" if game == "sv1" else "card_resource_id"
-                )
-                is not None
-                else None,
+                "resource_id": None
+                if resource is None or (game == "sv1" and resource == 0)
+                else str(resource),
                 "is_token": token,
                 "source_id": source.id,
             },
+            ("id",),
         )
         phases = _phases(game, common, item)
         for phase in phases:
             face = identifier + ":" + phase
-            db.insert(
+            insert_exact(
+                db,
                 "digital_face",
                 {
                     "id": face,
@@ -161,6 +163,7 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
                     "phase": phase,
                     "source_id": source.id,
                 },
+                ("id",),
             )
             for lang in ("ja", "en", "zh-Hant"):
                 entry = cards.get((game, official, lang))
@@ -186,7 +189,8 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
                         locator=f"/digital/{game}/{official}/{phase}",
                     )
                 )
-                db.insert(
+                insert_exact(
+                    db,
                     "digital_text",
                     {
                         "digital_face_id": face,
@@ -195,6 +199,7 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
                             LocalizedText(lang=lang, text=name)
                         ),
                     },
+                    ("digital_face_id", "lang"),
                 )
 
 

@@ -1,0 +1,1749 @@
+format: 1
+kind: digital_art_match_shard
+records:
+  - art_id: a:02644aa4f77b56eaa81cbd511251aeb3
+    card_id: c:1c3e8b045d5158d294d95aefbb1f2c2f
+    face_id: f:0899dcd6a9465bec99fe19a982246f36
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103424010"
+    witness:
+      printing_id: p:81e8c4b98d2551a7b3837cb278f622bc
+      face_id: f:0899dcd6a9465bec99fe19a982246f36
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_057.png
+      image_sha256: sha256:c0650b276abc433eb9f5c2000381afd6fec22a0c1d672b3a27c7ce6d17ad9aeb
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103424010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103424010.png
+        image_sha256: sha256:b660480f3caa6c5cf0ef812d2942fb36566ad8792c5e9a78101869e15ac77f21
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 450
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:02b97e644ce55145b480dd434445be59
+    card_id: c:a261ffafdbeb59b79dc12795456ae45f
+    face_id: f:078332aae6f35e7b97b64955e9de6fc7
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103621020"
+    witness:
+      printing_id: p:e2ffda2acd165b138f16f7d8412ab4aa
+      face_id: f:078332aae6f35e7b97b64955e9de6fc7
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_078.png
+      image_sha256: sha256:92a7bf9eb5e6426ff3f6d2c64cfc8cf6ae377ed1b606dac3ba9a4af155c82f86
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103621020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103621020.png
+        image_sha256: sha256:275339a57a42f3f3c17c5b58da47ab5fff5a0bc1d39051437d6fd88e71622e05
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 7
+      - official_id: "103621020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103621020.png
+        image_sha256: sha256:a3b72da17e3c145e8abbf4fb8d869c833195f93d7057c6ebf4c32f8514e184fa
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 408
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:0787a0f0bc315c0882c394a3ce3c357f
+    card_id: c:0c0ffa2238e95729b16ca6ae86c9cc8b
+    face_id: f:e9ba83646fba5a749fb260111b3f7cad
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "126514010"
+      - "717514020"
+    witness:
+      printing_id: p:96c0afbb4bcb516c885bd240a4676897
+      face_id: f:e9ba83646fba5a749fb260111b3f7cad
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_088.png
+      image_sha256: sha256:7358e3041b5fbcaa54285bd7d789de8803de81e7577a1cb6d04aee63dcd1805d
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "126514010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_126514010.png
+        image_sha256: sha256:19e3ed225daa935907a1a51359e43a4d4d83c75a5dfa1f094a0934e9906e0132
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 304
+      - official_id: "717514020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_717514020.png
+        image_sha256: sha256:37f1590afb3b146baf89feb3e08853181193c68d19639b261872973cd83e74b7
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:08a6f44fdf99508c89e4a8033cd8559d
+    card_id: c:4d7840a7624e54d2bd91dee72b254a3f
+    face_id: f:6c923dbe6686551fa917c3ace36695d4
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102312050"
+    witness:
+      printing_id: p:364d84c95a7b5726849aa663a04e027b
+      face_id: f:6c923dbe6686551fa917c3ace36695d4
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_051.png
+      image_sha256: sha256:50d00bd9cf90371231c457d9e78246bfe9922efd04a9531aceab30736b21b756
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102312050"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102312050.png
+        image_sha256: sha256:d87860ab5b31e314ef051e7186f69c542ac2ed83685c0eff6e038c2956452293
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 439
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:09fdb12ec0b55d00a094523acf987f58
+    card_id: c:b4f09d413a5e5806a8d56600f3aa0fa4
+    face_id: f:7f64eb3703285be7a69fcb16c5d1dd29
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103441010"
+    witness:
+      printing_id: p:429c76f6deeb59f9902bfb681802f67d
+      face_id: f:7f64eb3703285be7a69fcb16c5d1dd29
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_052.png
+      image_sha256: sha256:de59ab166d9943656bd34715122784d6c4a1b7e51825689b3be0829d8f5345be
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103441010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103441010.png
+        image_sha256: sha256:99302abc453b4f9a9c6d7ef402ab4ba34415d5a78872eccbcde44622483ceb0b
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 5
+      - official_id: "103441010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103441010.png
+        image_sha256: sha256:05ea0f3410ed221864b814b65a346d0e1500f5167fa15ff71692db8221f2cd88
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 345
+      - official_id: "704441010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_704441010.png
+        image_sha256: sha256:aea1a8fde9acef62380848c9dec8be17bfde57e3b9e3b10b937eff8cd0cbd371
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "704441010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_704441010.png
+        image_sha256: sha256:baa6301f9e141be852335c059aa3233aa6e4ff92dd1d10b760ba2ca476ba314d
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:0aff0ee860065fc881d70fdf6169eee8
+    card_id: c:39e9b3c4b7105d08b9ff6279491a0bc6
+    face_id: f:13b2d59547325e6796bc29592104db8b
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "900211070"
+    witness:
+      printing_id: p:2785f8d4b2f15c6d833a0a58fcef0485
+      face_id: f:13b2d59547325e6796bc29592104db8b
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_t02.png
+      image_sha256: sha256:84173b2d081292d554c447c0f150a6a0dbee3162716b11b85ee089af6a4c947c
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "900211070"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_900211070.png
+        image_sha256: sha256:6a2edb7d273c64d2f0f7785aefffe62432de850b25d5aa248bd7b93336b9e178
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 5
+      - official_id: "900211070"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_900211070.png
+        image_sha256: sha256:3166032cf1a89dcec81db847e76396453a39a920b92ef2321007d2296474373c
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 462
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:0d632000dfd957ebabb4b68893bf77ed
+    card_id: c:225bf00a9be95a8ebda59c2ed2f13097
+    face_id: f:947a76d4ba375a8a934f9576e97c0e1b
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103341010"
+      - "704341010"
+    witness:
+      printing_id: p:442833628e115ae88c6d564e763138ba
+      face_id: f:947a76d4ba375a8a934f9576e97c0e1b
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_035.png
+      image_sha256: sha256:e83727df5d42a9abfd38520b440d6b9476913563c3146e1a4f62b422e3522e84
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103341010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103341010.png
+        image_sha256: sha256:44f104ae7e4dec05693139d3264c122761c05239737610c662b909735d9bc320
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "103341010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103341010.png
+        image_sha256: sha256:d9fe8442935bf4df96bfc11a5167f1a2b42f408448110ece4eaa7b0ba200c90a
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 399
+      - official_id: "704341010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_704341010.png
+        image_sha256: sha256:5868112ec58756a22b14a38122f49253903302c062f5b14b65bf22c519a1f8dd
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+      - official_id: "704341010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_704341010.png
+        image_sha256: sha256:ae7da3442f854f7e5496bdbe9f5642f7ff9a5cae048a0a3fcd99715ffae413c5
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:11b3a22ab562578b896d9ffa97b812ec
+    card_id: c:d33e1b5a0ad556d8a90fbb9f490f6f31
+    face_id: f:9768cb9838fc555b9c0f659e92898154
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102021020"
+    witness:
+      printing_id: p:256d7b737c9558b7b3c71f25ffa45885
+      face_id: f:9768cb9838fc555b9c0f659e92898154
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_114.png
+      image_sha256: sha256:b1806f18b4cbf254bcdcde92e27f1bafb59f2925a641ad2750ac3aed9047b9f4
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102021020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102021020.png
+        image_sha256: sha256:420892702bc001675a565547814d4b8b509d2eace8e02eef8b78bdf351f1c169
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 447
+      - official_id: "102021020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102021020.png
+        image_sha256: sha256:9fa2e6634ed103999c875a1d554cb727b02b402e987284d670656a1db77c3aac
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:12703395e3f1525fae9e69d339216d40
+    card_id: c:030cd6006891587f81126354298c0fdd
+    face_id: f:96cc23e1ff0d5841bfa1983e7633f41b
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102731010"
+      - "810731060"
+    witness:
+      printing_id: p:49748c95711c50cc8f490df048f8f8eb
+      face_id: f:96cc23e1ff0d5841bfa1983e7633f41b
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_093.png
+      image_sha256: sha256:127248581e3098e2f23c7dcc7efe0612236823af60c5a8c03ab84cbaafe7f189
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102731010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102731010.png
+        image_sha256: sha256:2062f776f22f18dfb824c232b73107b7a7cb9f0c8f76f90907cb553f71267b74
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 398
+      - official_id: "102731010"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_102731010.png
+        image_sha256: sha256:3bbc1bec27bd31877361a506f49bf989836ec1a12db6e3d0c783971b0cf16f68
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 398
+      - official_id: "102731010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102731010.png
+        image_sha256: sha256:6db8da0cee1b45501e031a028948a8db9d1184d35904bba0fd10f99c4e5a534e
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 8
+      - official_id: "102731010"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_102731010.png
+        image_sha256: sha256:1a7cc9d0d6638d625f4609c9d51f11dcbb68c08254c9a89813cf73c1c475b5f9
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 8
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:127cf6d7bca65844a61ce1880ac09606
+    card_id: c:86c24d8717da5095b020069b3ac44252
+    face_id: f:c6d030a304925752af7ca94d6b12bd6d
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103011060"
+    witness:
+      printing_id: p:ed165c7eb8c5544cabbe0377ae1affe4
+      face_id: f:c6d030a304925752af7ca94d6b12bd6d
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_117.png
+      image_sha256: sha256:1abf1a5588d3067920bfb5c885fc3e7ff124419d6d4461c024408e99051946ad
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103011060"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103011060.png
+        image_sha256: sha256:feaa57b26195fb8bd7515fe444c5bef9f5b93e797949995eeb2d9309bb514cd3
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+      - official_id: "103011060"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103011060.png
+        image_sha256: sha256:55333cff0c43cf63acfd0169ed793d015fcea61618e25f6c8044a3887e2e3a8b
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 151
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:13b0345773045db78ad245c4a686d017
+    card_id: c:634c44dac187593a97f226e8a534718b
+    face_id: f:49c5978cbc955ddf89e6b99a97502b36
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102421010"
+    witness:
+      printing_id: p:9d7c8c92b1b559c38ff01b882477e1f8
+      face_id: f:49c5978cbc955ddf89e6b99a97502b36
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_061.png
+      image_sha256: sha256:81cbf8457441d4f4cd22c4740bc9a9879764a15e4801f96a8916056e5752c36a
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102421010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102421010.png
+        image_sha256: sha256:32d65b114cfc62ca93307ff5b990e2abea77f23ceecf18aac0a8a366199ce4c9
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+      - official_id: "102421010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102421010.png
+        image_sha256: sha256:0e3ebade6e1d8db960bbe77ea681e4b1b9dbb67aab366aa773c0587b8ce3a6fa
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 416
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:179459a16aa15326bc948538a5d0875e
+    card_id: c:51e7167d7fec514d96a5acc6f9c1cf41
+    face_id: f:e88433d0c6ff5dd4a871f1216eba6c03
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102014030"
+    witness:
+      printing_id: p:1e02bb36970c5a919cc03ff0023bdfb9
+      face_id: f:e88433d0c6ff5dd4a871f1216eba6c03
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_120.png
+      image_sha256: sha256:9541b6f4b2517585512faa553aa9717c8ddf64e73dc22b7be573849b61c963f4
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102014030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102014030.png
+        image_sha256: sha256:e3e2a8e73dec5c5ba342ad9c9ea04c9e93db2534b3064859000d3240a1b1ff9e
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 438
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:1857026bd94a537caaca3c1b52c40ad9
+    card_id: c:a80eef8ccb7756d4a909d12ab7521b42
+    face_id: f:19a3663301b55d59a66a47af26846ad8
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102321020"
+    witness:
+      printing_id: p:3aa64d6aa3305bcdafd7da979e005402
+      face_id: f:19a3663301b55d59a66a47af26846ad8
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_044.png
+      image_sha256: sha256:02c3b42040d122a8633025713ba8193606da9b33dfdcbacf9b21eed195fa4537
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102321020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102321020.png
+        image_sha256: sha256:39116c91e0c5723610b52a8212bb4a8809bdb3e538aa81523afae02d1a5ae14b
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102321020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102321020.png
+        image_sha256: sha256:c4bb327eae0e6d316a7451c8b90378a7e6281efcf3b9d953ac5c49b7bd209ff0
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 453
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:1aa97f41ccc85f22817eb183ed4702b9
+    card_id: c:241bca3523f05cfaba4688a154a2f3ab
+    face_id: f:1fb733ba6c9952989b71afee5baa32b1
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102624030"
+    witness:
+      printing_id: p:4e2e1904918b5897a238058f3af2796b
+      face_id: f:1fb733ba6c9952989b71afee5baa32b1
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_081.png
+      image_sha256: sha256:aa56dff5c39d2af3a185f6882ee1bdabb7a09dd5167b1e11243d9fefb1e4e42f
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102624030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102624030.png
+        image_sha256: sha256:1b77c07f0419af1ff46029688ce16c2b7e7edc6047a200e99ab0d0a2d68d95f2
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 426
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:2166e470df1e5039adb8650a8c7c418d
+    card_id: c:97cb948874c15e2289f6b081e2698740
+    face_id: f:d4ee7bbaa7445fb886b74178408d84fb
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103141010"
+    witness:
+      printing_id: p:3d1502c724e4571f96eb5ec45af70d1d
+      face_id: f:d4ee7bbaa7445fb886b74178408d84fb
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_003.png
+      image_sha256: sha256:fba8fdf4c6c70a3ac081e4b37bc7b5d25d15d281e698b930601dd5bc60e56d9a
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103141010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103141010.png
+        image_sha256: sha256:641199e7521d5939cbdaed108c2f165bb2f9e0ae941cb12b7b2e35b84227f4f1
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 7
+      - official_id: "103141010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103141010.png
+        image_sha256: sha256:f674c178af2a8e3ec04f2c73c95c2e73e0c5d47c03393f6219570ff9ef30402c
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 290
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:2232304131bc5b198d5f361211b59d15
+    card_id: c:9daa8e4a1cbd5569b87bc2dae811287a
+    face_id: f:0f28aad00dc8518e9dc46bfc1d7e683c
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "101411040"
+    witness:
+      printing_id: p:d2a4aee921d659d9a5ac640b57296ee1
+      face_id: f:0f28aad00dc8518e9dc46bfc1d7e683c
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_067.png
+      image_sha256: sha256:7cf714a3457b918f909b4e3e76ac126e0208973da7d5f4c141a3284085db8770
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "101411040"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_101411040.png
+        image_sha256: sha256:80af96b1fc75037219cfbfa3a039668e183d56d6fe41fdba8ab876232ce723ec
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "101411040"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_101411040.png
+        image_sha256: sha256:70b1b482c021acea814c6532873e4c9eeadf7607561ee1d9e310dabe2da90a42
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 420
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:2324b50671815585a656a9f966764f3d
+    card_id: c:a738f029ce94581298c5c89680a3948d
+    face_id: f:d81440c1890d5da7ab9637582b0806b4
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102732020"
+    witness:
+      printing_id: p:d03c7a1245f35e43b5b47c0dfe0e2622
+      face_id: f:d81440c1890d5da7ab9637582b0806b4
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_095.png
+      image_sha256: sha256:550659df923a0d20b07b93a0821f4abf4fb0c26349543a27af394da2db144a76
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102732020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102732020.png
+        image_sha256: sha256:e5b151ad2ce5e1cd0f5308e1b4d30e3175a3ba136a4d9e461bc66633f6abc0f1
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 471
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:232d6e5b92565b58b861953b148324a2
+    card_id: c:486eb5b81f645649b8c68b315405ac93
+    face_id: f:7e45953cfdce5f4f856afb73e74eb5e5
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103331020"
+    witness:
+      printing_id: p:049650044e4c5ca580ba463c29da925d
+      face_id: f:7e45953cfdce5f4f856afb73e74eb5e5
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_039.png
+      image_sha256: sha256:e463f239102fbec63877d7ac5d02297037caf3dadca661cd8f52d4a69b862bf1
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103331020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103331020.png
+        image_sha256: sha256:81d27431352c8721621ddab6667598664e19d339a192e1cc8324515f8f31a524
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 424
+      - official_id: "103331020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103331020.png
+        image_sha256: sha256:e76ad4144357ebb305513961fc8e77fc5101d9693a9f683ef8e8c4c4e3fcf643
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:23b3b7df610853a4a47eb9d2d717fbcb
+    card_id: c:098fbde9fea451cb9010670ccda50529
+    face_id: f:da3f36caf0325cf5b8304500a5c3e7d1
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102721030"
+    witness:
+      printing_id: p:8921c298f4cc50aa8a1acd20782007b7
+      face_id: f:da3f36caf0325cf5b8304500a5c3e7d1
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_097.png
+      image_sha256: sha256:2f1752060a52c3627a5c1296f42350c10566c141f5dde4efde70901a3200bc69
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102721030"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102721030.png
+        image_sha256: sha256:21b5c72c6fbf93bbb2abe1e0c8c838309c66139c5e423e7d100c94eb50cca2cc
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 435
+      - official_id: "102721030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102721030.png
+        image_sha256: sha256:4f4504d597cb44e09bc49041019cbb3ac37a753e6d26cdecfe2eadcc96ae3e7a
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:23ba0bd9735e5b568cf8a76a418b75d4
+    card_id: c:ac8a8f4d3c7f51c09f304838b41bc000
+    face_id: f:1767f23b976c5199bd62fa8c5d265d74
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "900311110"
+    witness:
+      printing_id: p:ae75a5c32bf3558191722c210d8406ba
+      face_id: f:1767f23b976c5199bd62fa8c5d265d74
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_t04.png
+      image_sha256: sha256:b1a815d5e6c7d1e0df08588cd1d21e4f4256cc8ea2affe7ba09717c2de03ba9c
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "900311110"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_900311110.png
+        image_sha256: sha256:5d457a33d8458ec64dd249c2dfc84d789c82544aa1caba819d2c28976cc9c899
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "900311110"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_900311110.png
+        image_sha256: sha256:bf914503e0bfc82b5870105aa001063f24a754ae9e67d08a24265df8d7ca3b64
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 190
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:240ff3fbcd705b6c9b9ca91362c0e9b7
+    card_id: c:8f6eb03a2a05598983d792b61a31eaa3
+    face_id: f:b9a38999ec7f55f19ba95ba6683aa08c
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103121030"
+    witness:
+      printing_id: p:93890b0e4c065c7380498d93a0839e14
+      face_id: f:b9a38999ec7f55f19ba95ba6683aa08c
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_009.png
+      image_sha256: sha256:009498278e73921d773f7a1305758ed0f505bd742f7f92db51ff0744de7a1b4b
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103121030"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103121030.png
+        image_sha256: sha256:2c41bd3a7dfdc84f9261e99bc95e52281cdef02d653b5b97ce2de7ec43703d86
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 412
+      - official_id: "103121030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103121030.png
+        image_sha256: sha256:1df3f25a91ab9dd8490fb11e2bdbb4850c68592578a0929e4876412b401f0f19
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 7
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:24be20f43d4e5fc1b2078601e9167049
+    card_id: c:6411bfc1b8395099876aa13912eee72a
+    face_id: f:495b30ff173c50f3a4981cdd1c984739
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103521040"
+    witness:
+      printing_id: p:1090d959a22d5c43b049dff74e1626c8
+      face_id: f:495b30ff173c50f3a4981cdd1c984739
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_073.png
+      image_sha256: sha256:15961a1852cd1550adbef4c66e0bfcd0a825262bbad969416c3bdc8739e32fa8
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103521040"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103521040.png
+        image_sha256: sha256:4fe702bdde055f373563b5987449285525d675ab6513a815779f3a806c9908be
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "103521040"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103521040.png
+        image_sha256: sha256:1eb6cec7a28402be0866455b92b936d9be2be2d4634fe42ff5498b37a5c08a28
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 424
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:25565abcf1ad5616b398cfbb442ed8cc
+    card_id: c:2941efdcf96850868b523769118c85e0
+    face_id: f:c2187dc56ddb557990b818168804e14d
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103221040"
+    witness:
+      printing_id: p:d9a0584241325bb88da6f617b54f8574
+      face_id: f:c2187dc56ddb557990b818168804e14d
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_025.png
+      image_sha256: sha256:a253cec7641945125c58abb785c241289edd2bf38a320f7f6f5986b518f35484
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103221040"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103221040.png
+        image_sha256: sha256:ad0525317aa12fba27eb604f7154fa9acc5e71cf80a59619394b0544109d3e17
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "103221040"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103221040.png
+        image_sha256: sha256:8de4d8ed52e2f43e27cf2dcf5591856eb8adf884d3fa1dec974f4b601ea712fe
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 446
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:2a7aa797b6e15258be5d8b2e2c4375a1
+    card_id: c:4add48f84dc957f1b3472caf03fef0b0
+    face_id: f:b53d8c17ca825c8abadfb1f09670c7f6
+    game: sv1
+    state: not_found
+    same_card_targets:
+      - "103231020"
+    witness:
+      printing_id: p:8b69614f93b05798b9d26200f57b8793
+      face_id: f:b53d8c17ca825c8abadfb1f09670c7f6
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_u02.png
+      image_sha256: sha256:6a79cae082a97425f8583e87db2ced77e6c57de4d76be80f9dcf7b01788eea0f
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103231020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103231020.png
+        image_sha256: sha256:0ea0f299fb4d9636acf17dca9b7f9da04ca3be57c17266a795f2cfeafe66c4d2
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "103231020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103231020.png
+        image_sha256: sha256:b3262f6aab01fe389d5b8e6a39d4759467501a7cb356ef5facb6e9172bc9631c
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 已列同卡連結的正常、進化與異畫候選全部低於 10 inliers；機械採納，僅表示此來源範圍未找到同圖。
+  - art_id: a:31b46eecd70b5c908256b872af312c52
+    card_id: c:64961fa6d1ea589dbc7dfc8e1312dc9b
+    face_id: f:f4c01e9e963558eda5a908ac5f3723e4
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "126721010"
+    witness:
+      printing_id: p:fd88b8383f6652a3968712929b66e52d
+      face_id: f:f4c01e9e963558eda5a908ac5f3723e4
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_098.png
+      image_sha256: sha256:6b017c964591abbdd11972752571cca6d231883678c6fc3d4a3ddbabe570c992
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "126721010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_126721010.png
+        image_sha256: sha256:c47df2346fc00450f2894ace9f1825dcfe2552ecb2bda9a13f32fc81b6d9d7d3
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 8
+      - official_id: "126721010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_126721010.png
+        image_sha256: sha256:4d8f33786956694086c2f7e97acb5347b371ed81c0cb911bbf1ae595966a8722
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 338
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3413a2def5c45ff0b511dc4ce5b37397
+    card_id: c:db25dcb07405546c8eaf3655552a79d7
+    face_id: f:c36f3dcb69895d12954904a773d0b82d
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103621020"
+    witness:
+      printing_id: p:6bfbb5100baf52f79666fcc015b3e923
+      face_id: f:c36f3dcb69895d12954904a773d0b82d
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_079.png
+      image_sha256: sha256:91b00201aa97da58907bb078319244905a590d39e850c354c14d14cfa2d2ad4e
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103621020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103621020.png
+        image_sha256: sha256:275339a57a42f3f3c17c5b58da47ab5fff5a0bc1d39051437d6fd88e71622e05
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 429
+      - official_id: "103621020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103621020.png
+        image_sha256: sha256:a3b72da17e3c145e8abbf4fb8d869c833195f93d7057c6ebf4c32f8514e184fa
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:342e417ae55f5368993d1ae9d320c4ef
+    card_id: c:030cd6006891587f81126354298c0fdd
+    face_id: f:96cc23e1ff0d5841bfa1983e7633f41b
+    game: sv1
+    state: not_found
+    same_card_targets:
+      - "102731010"
+      - "810731060"
+    witness:
+      printing_id: p:41566742dc9e5713ac09c17d8ae02986
+      face_id: f:96cc23e1ff0d5841bfa1983e7633f41b
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_u06.png
+      image_sha256: sha256:15c7d52c9978313c65e4462a905cf47f96e473da5f4cf6b4845bc47c7a600597
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102731010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102731010.png
+        image_sha256: sha256:2062f776f22f18dfb824c232b73107b7a7cb9f0c8f76f90907cb553f71267b74
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102731010"
+        phase: evolved
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/ts_rotation/E_102731010.png
+        image_sha256: sha256:3bbc1bec27bd31877361a506f49bf989836ec1a12db6e3d0c783971b0cf16f68
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102731010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102731010.png
+        image_sha256: sha256:6db8da0cee1b45501e031a028948a8db9d1184d35904bba0fd10f99c4e5a534e
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102731010"
+        phase: normal
+        style_key: ts-rotation
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/ts_rotation/C_102731010.png
+        image_sha256: sha256:1a7cc9d0d6638d625f4609c9d51f11dcbb68c08254c9a89813cf73c1c475b5f9
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 已列同卡連結的正常、進化與異畫候選全部低於 10 inliers；機械採納，僅表示此來源範圍未找到同圖。
+  - art_id: a:3568b247d50a508b8450fb25c81ceac3
+    card_id: c:5aa13578f9f95507a9324b59718cd47b
+    face_id: f:790e2cf3c123576b92efd7eab8a0aea5
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102631010"
+    witness:
+      printing_id: p:45669b53ea4b594d9b954da266de30a9
+      face_id: f:790e2cf3c123576b92efd7eab8a0aea5
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_074.png
+      image_sha256: sha256:c1f5692d6237adb7516d73e3d398f32d6685ad39f338b9bee1e97c175c992276
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102631010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102631010.png
+        image_sha256: sha256:2072788c891ffff3a8c0e42c3c93bba1992a77465ff63eb4905d7a9958b989b6
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102631010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102631010.png
+        image_sha256: sha256:7cbe2c6e2c1212b751d33da412f73427c0a774ce5854c033e1810adb7b55b760
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 390
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:36b01eb5cb535973bb556a773ce099fb
+    card_id: c:131e0374443a5135af0543e0f611bcd6
+    face_id: f:0ea04df9fdf4584e820720db5edea687
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102231030"
+    witness:
+      printing_id: p:f7392f0f6f325517a721c3576e5aa7da
+      face_id: f:0ea04df9fdf4584e820720db5edea687
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_022.png
+      image_sha256: sha256:d3ac5767183244317a285e86be8ec49bca671513d4a2d63eade70c3d1f6fe955
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102231030"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102231030.png
+        image_sha256: sha256:78f99ecce5183bc2238e265240798de539c1377cd4cb2e85b0381e2b033643ca
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102231030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102231030.png
+        image_sha256: sha256:8c513c11047c50e3a05cfb7513914d21f80f2120cb1e3821232a36a0b4a0fa4d
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 343
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:37c2640c0c035ce786f5a4bb74a3d1c7
+    card_id: c:ce9aec6222665c6d93747995b93129f7
+    face_id: f:499921d1ca9f5694afb36639756e9032
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "900141010"
+    witness:
+      printing_id: p:49d29fcb5bba51f4886cdc05f63ce523
+      face_id: f:499921d1ca9f5694afb36639756e9032
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_t01.png
+      image_sha256: sha256:9488c0ecd215f22a17c392cf778860830aa5174b6cbdb66c3e1efd3be4a60fdc
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "900141010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_900141010.png
+        image_sha256: sha256:f3d0e2190a6c48b4025d9d397caae12b02ec4d9109c72cfd300a2fe1d71d6b13
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 5
+      - official_id: "900141010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_900141010.png
+        image_sha256: sha256:81b0e067ec2ff5a58cba1da2be5e162090cfd3de0e567fadea57a187440d26ef
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 355
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3817d0b554215e37b1f38a6582528fa7
+    card_id: c:29192b19348353449b6031dc5cb0ac7e
+    face_id: f:17e2538d360e5129847aa8d9d3fb8d14
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102231010"
+    witness:
+      printing_id: p:b7ff66b6b4135affab58121dc041ae73
+      face_id: f:17e2538d360e5129847aa8d9d3fb8d14
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_024.png
+      image_sha256: sha256:eeb0e171c470b77573a07a815f827bccdcd46379c233faf09c6ab9b880b1b58e
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102231010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102231010.png
+        image_sha256: sha256:99ba5d3cf310967da35a542718677f3332e81e81f44b49e4ef751281d8ab763d
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102231010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102231010.png
+        image_sha256: sha256:6844ceb0a7cca99c99b6e3e62ec103f5b38499a87362091f18bbc5f5886eb4c8
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 447
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3a29dffd661452b1b2439f2f8313cdaa
+    card_id: c:303a928d013b5736b2dac605b6034108
+    face_id: f:69352ab2095e54789b7ef043a131fc89
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103211050"
+    witness:
+      printing_id: p:30f6a95feb4056c08c82b9af18b5cb69
+      face_id: f:69352ab2095e54789b7ef043a131fc89
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_030.png
+      image_sha256: sha256:7d2613b318437f7378b3bce099f6895ff821715b058296e9ebeb2e67c5d8b5c7
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103211050"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103211050.png
+        image_sha256: sha256:58cc689aaaab550d03f32673d93a9607ffc6f89f9ffa5d227fd58f8a05cdf5df
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "103211050"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103211050.png
+        image_sha256: sha256:2ad2b442e6430e3d3622585a5307776eb69af1aa9786f05ebf783735dbe01cf3
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 217
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3ac7108e979e5447bc9b2f90ba209ee8
+    card_id: c:f6d516214f19598f94dcc0b1b85d20ee
+    face_id: f:5ff80b35821055f8969a401dc2928246
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102031020"
+    witness:
+      printing_id: p:30de5212ca9856529d3cfda4cdf5bbdf
+      face_id: f:5ff80b35821055f8969a401dc2928246
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_111.png
+      image_sha256: sha256:a51447256edd9bd54f62aae8382dfa5bc5898a27705e44a4be901fefe9ef91fb
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102031020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102031020.png
+        image_sha256: sha256:c365bb5542ec67b94db3baa6b53ee7b788a71910538df022d24d575e1f02884b
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 460
+      - official_id: "102031020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102031020.png
+        image_sha256: sha256:a8917910243b2cb41824796df67909439c445807f16adb9ef1cd773d11d00f57
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 4
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3b0816887b0e505290c57878437bb819
+    card_id: c:3ae77a5084015d94a8bf80c297827e86
+    face_id: f:4f71129cdc015c59ba67882fc202256d
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102721030"
+    witness:
+      printing_id: p:667a1553f741510ab7ff54357192946e
+      face_id: f:4f71129cdc015c59ba67882fc202256d
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_096.png
+      image_sha256: sha256:4d197741bdedafdcf5e368b0439e970206d1c23d36791ddd8feceac36bb84c80
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102721030"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102721030.png
+        image_sha256: sha256:21b5c72c6fbf93bbb2abe1e0c8c838309c66139c5e423e7d100c94eb50cca2cc
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "102721030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102721030.png
+        image_sha256: sha256:4f4504d597cb44e09bc49041019cbb3ac37a753e6d26cdecfe2eadcc96ae3e7a
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 438
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3bfc375966675a05bda88c06d80ded1d
+    card_id: c:ec3d0df6b79e576cab534e150286fca8
+    face_id: f:8207a967f4a150098a60cee30aceceb9
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103611040"
+    witness:
+      printing_id: p:7bf0450a5f945e2baffadca9cdcb1406
+      face_id: f:8207a967f4a150098a60cee30aceceb9
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_084.png
+      image_sha256: sha256:e9dedc52bb69ac0e401f2e97a4860f63cb3f28a9ef0f45ce4017077a1ab24b28
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103611040"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103611040.png
+        image_sha256: sha256:865dd953b5ace725720fb4b647effe5295bca5462ad614ca5176e13016a31687
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 5
+      - official_id: "103611040"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103611040.png
+        image_sha256: sha256:e33c99e4b1c4ea84f0d333dc392b19d2cf72d859ba542d4b1e7db93f7766fb5b
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 403
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3d42ea0152485336bd3a53edf1b3f3a9
+    card_id: c:6ecafebf29f953308f2fa9e2ec9860ad
+    face_id: f:f253262994d555ccb6944f9d4d765c80
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102631010"
+    witness:
+      printing_id: p:936b2c1bc3b85086933cd93602890cbe
+      face_id: f:f253262994d555ccb6944f9d4d765c80
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_075.png
+      image_sha256: sha256:7c7a716be7c806250ab0a0a9cc50781c053bb031281f8bd03685132c18b8cda3
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102631010"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_102631010.png
+        image_sha256: sha256:2072788c891ffff3a8c0e42c3c93bba1992a77465ff63eb4905d7a9958b989b6
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 433
+      - official_id: "102631010"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102631010.png
+        image_sha256: sha256:7cbe2c6e2c1212b751d33da412f73427c0a774ce5854c033e1810adb7b55b760
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3e460611b116597bac6264d7bf484730
+    card_id: c:d2c933fcacb2540c9631c98d2b63392f
+    face_id: f:a141ef170e73595dbb630f2b036e8244
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "102324030"
+    witness:
+      printing_id: p:c97c128eee6c533ba4e5a796244d7cc8
+      face_id: f:a141ef170e73595dbb630f2b036e8244
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_045.png
+      image_sha256: sha256:dcc695ab93eb13a0dd5c2a7b29a8d82fc679aa881f6f1f104db7122521ca69c5
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "102324030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_102324030.png
+        image_sha256: sha256:579eb54a3db75e6388b5b850785ef677a1603f5c746d4a42e846d481d92d3143
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 403
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:3efac51855c054798fcd9b5157b0d00d
+    card_id: c:a3fb9419352956c48a24c9c5d0e4f5a9
+    face_id: f:d690caca923e5b91b9efba09af6d4c89
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "900411030"
+    witness:
+      printing_id: p:e1569d4d05e454e890a6aeac6e31cf3d
+      face_id: f:d690caca923e5b91b9efba09af6d4c89
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_t05.png
+      image_sha256: sha256:c323655bd9b17c8c0c96df3de0f931a2770c7c37855c62ae0493e472417cab52
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "900411030"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_900411030.png
+        image_sha256: sha256:992062a1e40ce8e7ca20133b8513a1cd9955afdee97fe242b905b9f327f0fc57
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+      - official_id: "900411030"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_900411030.png
+        image_sha256: sha256:034a04aaf3729fcd28a055668e70c3e92ca0cbcae6d175eadf9d2e0a0b33d95f
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 393
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:41e9b65f00c15705a84c23bdcf9d66e1
+    card_id: c:237996c04100502cb1ba34cfd00f09e4
+    face_id: f:9d00925689a55302b1f32b185fb639cc
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "101641020"
+    witness:
+      printing_id: p:b0526d18b106558198c929466102cdaf
+      face_id: f:9d00925689a55302b1f32b185fb639cc
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_072.png
+      image_sha256: sha256:908740ffebeaf3cfcc7404152b2f706e42e5c44c8adcd38110660aebc215d265
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "101641020"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_101641020.png
+        image_sha256: sha256:3ba4d2916d27f55fcb7fc4fc0df239f78eda76efa06e6ea55af53b909631d956
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 385
+      - official_id: "101641020"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_101641020.png
+        image_sha256: sha256:d23e4f795d39ab4c9dc8835c663f9e081d0627372920b2d5178e4694f80ed9e5
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 6
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。
+  - art_id: a:43cfe61706965179968113c1a3508cf2
+    card_id: c:f11aa1f86087598fa8e5200740823b9d
+    face_id: f:47f83daeff1252c2b49832b0241ba10e
+    game: sv1
+    state: matched
+    same_card_targets:
+      - "103221040"
+    witness:
+      printing_id: p:9debdb920d8654f68970dec82eeabe66
+      face_id: f:47f83daeff1252c2b49832b0241ba10e
+      image_url: https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_026.png
+      image_sha256: sha256:458d42b15f7287a389c2bfb71fca781d205f3ae53afef25fa90d6603f3066176
+      crop:
+        - 36
+        - 89
+        - 420
+        - 377
+    candidates:
+      - official_id: "103221040"
+        phase: evolved
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/E/E_103221040.png
+        image_sha256: sha256:ad0525317aa12fba27eb604f7154fa9acc5e71cf80a59619394b0544109d3e17
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 441
+      - official_id: "103221040"
+        phase: normal
+        style_key: base
+        image_url: https://shadowverse-portal.com/image/card/phase2/common/C/C_103221040.png
+        image_sha256: sha256:8de4d8ed52e2f43e27cf2dcf5591856eb8adf884d3fa1dec974f4b601ea712fe
+        crop:
+          - 75
+          - 160
+          - 479
+          - 463
+        inliers: 0
+    complete: true
+    review_level: model_reviewed
+    reason: 沿既有 SIFT recipe，至少一張同卡線上版卡圖達 100 inliers；機械採納，未宣稱真人逐筆核可。

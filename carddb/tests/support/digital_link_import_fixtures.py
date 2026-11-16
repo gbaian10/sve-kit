@@ -147,10 +147,11 @@ class Fixture:
                 )
 
 
-def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many-locals] -- one reusable sealed baseline avoids expensive per-test setup
+def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many-locals,too-many-branches] -- one reusable sealed baseline avoids expensive per-test setup
     root: Path,
     *,
     dual: bool = False,
+    art: bool = False,
 ) -> Fixture:
     repository = Path(__file__).resolve().parents[3]
     for name in RUNTIME:
@@ -188,6 +189,14 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
                 },
             }
         )
+        if art:
+            document = object_value(parse(raw))
+            details = object_value(object_value(document["data"])["card_details"])
+            item = object_value(details["22345678"])
+            object_value(item["common"])["card_image_hash"] = "a" * 32
+            object_value(item["evo"])["card_image_hash"] = "b" * 32
+            item["style_card_list"] = [{"hash": "c" * 32, "evo_hash": "d" * 32}]
+            raw = canonical(document)
         if dual:
             document = object_value(parse(raw))
             data = object_value(document["data"])

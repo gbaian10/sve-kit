@@ -86,9 +86,9 @@ def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
 
 
 @cache
-def template() -> DatabaseTemplate:
+def template(extra_capabilities: tuple[str, ...] = ()) -> DatabaseTemplate:
     # Immutable bytes; `copy()` hands each caller its own connection.
-    schema = compile_build(("t0", "translation_evidence"))
+    schema = compile_build(("t0", "translation_evidence", *extra_capabilities))
     with create_database(schema) as db:
         with db.transaction():
             db.insert(

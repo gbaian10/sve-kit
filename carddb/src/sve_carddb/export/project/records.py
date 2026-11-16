@@ -40,6 +40,7 @@ SCALARS = {
     "digital_art": "id,style_key",
     "digital_link": "id,card_id,face_id,digital_card_id,relation,effect_similarity",
     "digital_art_link": "art_id,digital_art_id,relation",
+    "digital_art_coverage": "art_id,game,state,as_of",
     "digital_link_coverage": "card_id,game,state,as_of",
     "voice": "id,digital_card_id,lang,kind_code,variant,interaction_target_id,label_raw,source_url,asset_path,mime,bytes,duration_ms,availability",
     "card_voice": "card_id,voice_id,usage",

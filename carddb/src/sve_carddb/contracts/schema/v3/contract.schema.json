@@ -6577,6 +6577,64 @@
         "game"
       ]
     },
+    "digital_art_coverage": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "enum": [
+            "sv1",
+            "svwb"
+          ]
+        },
+        {
+          "enum": [
+            "matched",
+            "not_found",
+            "unknown"
+          ]
+        },
+        {
+          "$ref": "#/$defs/Date"
+        }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4,
+      "x-columns": [
+        "art_id",
+        "game",
+        "state",
+        "as_of"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "sv1",
+            "svwb"
+          ]
+        },
+        {
+          "enum": [
+            "matched",
+            "not_found",
+            "unknown"
+          ]
+        },
+        {
+          "scalar": "Date"
+        }
+      ],
+      "x-primary-key": [
+        "art_id",
+        "game"
+      ]
+    },
     "voice": {
       "type": "array",
       "prefixItems": [
@@ -13440,6 +13498,64 @@
         }
       ]
     },
+    "digital_art_coverage_detail": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "enum": [
+            "sv1",
+            "svwb"
+          ]
+        },
+        {
+          "enum": [
+            "matched",
+            "not_found",
+            "unknown"
+          ]
+        },
+        {
+          "$ref": "#/$defs/Date"
+        }
+      ],
+      "items": false,
+      "minItems": 4,
+      "maxItems": 4,
+      "x-columns": [
+        "art_id",
+        "game",
+        "state",
+        "as_of"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "sv1",
+            "svwb"
+          ]
+        },
+        {
+          "enum": [
+            "matched",
+            "not_found",
+            "unknown"
+          ]
+        },
+        {
+          "scalar": "Date"
+        }
+      ],
+      "x-primary-key": [
+        "art_id",
+        "game"
+      ]
+    },
     "digital_link_coverage_detail_fragment": {
       "type": "array",
       "prefixItems": [
@@ -13459,6 +13575,32 @@
           "type": "array",
           "items": {
             "$ref": "#/$defs/digital_link_coverage_detail"
+          }
+        }
+      ],
+      "minItems": 5,
+      "maxItems": 5,
+      "items": false
+    },
+    "digital_art_coverage_detail_fragment": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/FragmentOwner"
+        },
+        {
+          "const": "detail"
+        },
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "type": "null"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/digital_art_coverage_detail"
           }
         }
       ],
@@ -17389,6 +17531,16 @@
                   }
                 ]
               }
+            },
+            "digital_art_coverage": {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/digital_art_coverage_detail_fragment"
+                  }
+                ]
+              }
             }
           },
           "additionalProperties": false
@@ -17600,6 +17752,9 @@
         },
         "card_mentioned_by": {
           "detail": "card_mentioned_by_detail"
+        },
+        "digital_art_coverage": {
+          "detail": "digital_art_coverage_detail"
         }
       },
       "x-tables": [
@@ -17633,6 +17788,7 @@
         "digital_link",
         "digital_art_link",
         "digital_link_coverage",
+        "digital_art_coverage",
         "voice",
         "card_voice",
         "keyword",
@@ -17763,6 +17919,7 @@
                   "digital_link",
                   "digital_art_link",
                   "digital_link_coverage",
+                  "digital_art_coverage",
                   "voice",
                   "card_voice",
                   "keyword",
@@ -18206,7 +18363,8 @@
           "enum": [
             "4.0.0",
             "4.0.1",
-            "4.0.2"
+            "4.0.2",
+            "4.0.3"
           ]
         },
         "required_capabilities": {
@@ -20898,6 +21056,55 @@
                   "reason"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "const": "digital_art_coverage"
+                  },
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "art_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "game": {
+                        "enum": [
+                          "sv1",
+                          "svwb"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "art_id",
+                      "game"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "changed_fields": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "art_id",
+                        "game",
+                        "state",
+                        "as_of"
+                      ]
+                    },
+                    "maxItems": 0
+                  },
+                  "reason": {
+                    "$ref": "#/$defs/Text"
+                  }
+                },
+                "required": [
+                  "entity",
+                  "key",
+                  "changed_fields",
+                  "reason"
+                ],
+                "additionalProperties": false
               }
             ]
           }
@@ -23283,6 +23490,56 @@
                   "reason"
                 ],
                 "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "const": "digital_art_coverage"
+                  },
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "art_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "game": {
+                        "enum": [
+                          "sv1",
+                          "svwb"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "art_id",
+                      "game"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "changed_fields": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "art_id",
+                        "game",
+                        "state",
+                        "as_of"
+                      ]
+                    },
+                    "minItems": 1,
+                    "uniqueItems": true
+                  },
+                  "reason": {
+                    "$ref": "#/$defs/Text"
+                  }
+                },
+                "required": [
+                  "entity",
+                  "key",
+                  "changed_fields",
+                  "reason"
+                ],
+                "additionalProperties": false
               }
             ]
           }
@@ -25606,6 +25863,55 @@
                         "card_id",
                         "region",
                         "from_card_id"
+                      ]
+                    },
+                    "maxItems": 0
+                  },
+                  "reason": {
+                    "$ref": "#/$defs/Text"
+                  }
+                },
+                "required": [
+                  "entity",
+                  "key",
+                  "changed_fields",
+                  "reason"
+                ],
+                "additionalProperties": false
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "entity": {
+                    "const": "digital_art_coverage"
+                  },
+                  "key": {
+                    "type": "object",
+                    "properties": {
+                      "art_id": {
+                        "$ref": "#/$defs/ID"
+                      },
+                      "game": {
+                        "enum": [
+                          "sv1",
+                          "svwb"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "art_id",
+                      "game"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "changed_fields": {
+                    "type": "array",
+                    "items": {
+                      "enum": [
+                        "art_id",
+                        "game",
+                        "state",
+                        "as_of"
                       ]
                     },
                     "maxItems": 0

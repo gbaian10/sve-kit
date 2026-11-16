@@ -308,6 +308,10 @@ F1 configuration 與診斷只記實際已驗的 pin（含固定 filename、targe
 
 ## 5. 插畫/數位/標誌匯入順序
 
+數位卡圖的 current 入口、機械 recipe、灰區與圖級 coverage 見
+[線上版卡圖採納](digital-art-matches.md)。同卡同圖分身在 digital/links 資料層去重，
+真正異畫保留；普通建置不讀本機數位圖快取。
+
 來源頁`→identity/face→art_group` 採納`→printing_face.art_id→digital_art_link`。svwb-art 的 printing+face 候選原樣保留 staging；art 沒採納前不 materialize 正式 link，也不配假 art。批次原樣高 confidence 不自動 sampled。
 
 每個 face 的 base art 明示；alternate 需有 base 和不同圖證據。signed 留面級 Bool?；序號分母在 `printing.serial_total`。

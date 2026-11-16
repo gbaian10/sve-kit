@@ -1366,7 +1366,14 @@ function familyFragments(input: Iterable<Fragment>): {
                 ? defaults.has(row["id"])
                   ? "catalog"
                   : "print"
-                : ["printing_product", "art", "artist", "stamp", "digital_art_link"].includes(table)
+                : [
+                      "printing_product",
+                      "art",
+                      "artist",
+                      "stamp",
+                      "digital_art_link",
+                      "digital_art_coverage",
+                    ].includes(table)
                   ? "print"
                   : table === "product"
                     ? "product"
@@ -2112,7 +2119,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     data_as_of: options.dataAsOf ?? AS_OF,
     regions,
     languages,
-    min_reader_version: "4.0.2",
+    min_reader_version: "4.0.3",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",
@@ -2192,7 +2199,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     data_version: dataVersion,
     published_at: publishedAt,
     format_version: FORMAT,
-    min_reader_version: "4.0.2",
+    min_reader_version: "4.0.3",
     required_capabilities: [
       "column-partition-v1",
       "digital-same-name-links-v1",
