@@ -52,6 +52,7 @@ fn question() -> SelectionQuestion {
         groups: vec![],
         roles: vec![
             SelectionRole {
+                destination: None,
                 position: None,
                 role: ir::Nat(7),
                 cardinality: RoleCardinality::Fixed {
@@ -59,11 +60,13 @@ fn question() -> SelectionQuestion {
                 },
             },
             SelectionRole {
+                destination: None,
                 position: None,
                 role: ir::Nat(9),
                 cardinality: RoleCardinality::IfNonempty { count: ir::Nat(1) },
             },
             SelectionRole {
+                destination: None,
                 position: None,
                 role: ir::Nat(12),
                 cardinality: RoleCardinality::Remainder {},

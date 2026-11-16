@@ -169,7 +169,7 @@ fn confirm_commands_keep_native_tokens_and_submit_to_the_producing_game() {
                     }
                 );
                 let before = board_fixtures::exact_authority(&game);
-                let (_, _, binding) = project(&domain).unwrap();
+                let (_, _, binding) = project(&domain, None).unwrap();
                 game.observe(actor).unwrap();
                 game.observe(other).unwrap();
                 assert!(

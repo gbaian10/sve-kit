@@ -35,7 +35,8 @@ pub use occurrences::{
 };
 pub use opening::{DeckConstruction, OpeningAnswer, OpeningQuestion, PlayerDeck};
 pub use selection::{
-    DistributionQuestion, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole,
+    DistributionQuestion, SelectionDestination, SelectionGroup, SelectionMember, SelectionQuestion,
+    SelectionRole,
 };
 pub use strict::{AdmissionGap, AdmissionGapReason, StrictAdmission, StrictStartError};
 

@@ -32,7 +32,7 @@ fn resolution_declarations_keep_their_numeric_use_and_native_binding() {
             let native = question(&game, actor).unwrap();
             assert_eq!(native.purpose, player::QuestionPurpose::ResolutionChoice);
             let before = board_fixtures::exact_authority(&game);
-            let (usage, shape, binding) = project(domain(&native).unwrap()).unwrap();
+            let (usage, shape, binding) = project(domain(&native).unwrap(), None).unwrap();
             assert_eq!(usage, wire::QuestionUse::DeclareNumber);
             assert_eq!(
                 shape,

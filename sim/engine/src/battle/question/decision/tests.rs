@@ -4,6 +4,8 @@ use crate::ir::{Nat, QuickWindow};
 #[cfg(feature = "runner")]
 mod native;
 mod number;
+#[cfg(feature = "runner")]
+mod select;
 
 #[test]
 fn confirms_keep_distinct_uses_and_native_answer_channels() {
@@ -27,7 +29,7 @@ fn confirms_keep_distinct_uses_and_native_answer_channels() {
             player::Answer::Integer(Nat(1)),
         ),
     ] {
-        let (actual_use, shape, binding) = project(&domain).unwrap();
+        let (actual_use, shape, binding) = project(&domain, None).unwrap();
         assert_eq!(actual_use, usage);
         assert_eq!(
             shape,
@@ -61,7 +63,7 @@ fn unsupported_decisions_do_not_fall_back_to_confirm() {
         DecisionShape::Pending(vec![]),
     ] {
         assert!(matches!(
-            project(&domain),
+            project(&domain, None),
             Err(ProjectionError::Unavailable)
         ));
     }
