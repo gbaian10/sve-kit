@@ -1612,7 +1612,7 @@ BP01-056 把逐張填滿 EX 與 `delayed` 放在同一個法術本文，以 `cov
 並將來源錨定在第 3 行的延遲條款，讓之後的待機保留該印刷行號。
 回呼 `banish: {ref: {who: self, zone: ex}}` 消滅當時全部 EX，包含原有牌及 token（Q189、Q190），
 只在下次自己的結束階段發生（Q191）；原本 EX 已滿仍可打出，放零張（Q188）。
-BP02-035／036 另需 SpellChain 計數人口改寫，本入口不代替該規則。
+BP02-035／036 同時使用下文的 SpellChain 計數母體；逐次補滿與計數規則各自獨立。
 
 ## 自由與有界數值宣告
 
@@ -1659,6 +1659,20 @@ CP01-032 的「其他從者」排除自己；CP01-082 沒有這項排除。兩�
 食事、資源關聯與出走計數仍由同一個正式出走程序產生；觀察器不另造事件。
 
 ## Counter 持續上限與可變成本
+
+場上常在的 `static.effects` 可使用既有 `rule_override` 改寫 SpellChain 的計數母體（BP02-035／036）：
+
+```yaml
+rule_override:
+  rule: spellchain_population
+  who: self
+  of:
+    any_of:
+      - { who: self, zone: cemetery, kind: spell }
+      - { who: self, zone: cemetery, kind: follower, class: ウィッチ }
+```
+
+`of` 的公開查詢沿用一般種類、職業等篩選，也接受單一查詢；同一實體同時符合多個分支仍只算一張。提供者只在場上且能力有效時供應母體，兩張同型提供者不把張數加倍；離場或失能後恢復墓場法術張數。這只影響 SpellChain，不改墓場整體張數、NecroCharge 或「消滅墓場法術」等成本材料條件。決定選擇模式數時沿用打出時快照；本文條件則在結算入口保存計數，本文中捨牌、移動或提供者離場不回寫已保存的值。提供者讀取文脈不另建立打出時計數，避免取得計數時再次讀取同一批提供者。
 
 場上常在的 `static.effects` 可寫單一 `rule_override: {rule: counter_cap, on: this, name: …, max: N}`。這是同種類 counter 的持續上限：每次放置只接受剩餘容量，其他種類不受影響；既有超額數量不會自動移除。能力失效後不再限制，重新有效時也只限制後續放置。此入口只收自身、場上及常值上限，不開放附加條件或其他 holder。
 
