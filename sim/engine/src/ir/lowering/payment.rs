@@ -385,6 +385,30 @@ fn lower_operations(
             }
         };
         let id = context.card_allocator.id(path)?;
+        let named = if let ast::CostOperation::Reveal(material) = operation {
+            material.result.as_ref()
+        } else if let ast::CostOperation::Banish(ast::BanishMaterial::Hand(material)) = operation {
+            material.result.as_ref()
+        } else if let ast::CostOperation::Banish(ast::BanishMaterial::Public(material)) = operation
+        {
+            material.result.as_ref()
+        } else {
+            None
+        };
+        if let Some(name) = named {
+            let receipt = if matches!(action, Action::Reveal { .. }) {
+                super::super::ObjectReceipt::Reveal {
+                    receipt: super::super::ReceiptReference::new(ReceiptId(id)),
+                }
+            } else {
+                super::super::ObjectReceipt::Movement {
+                    receipt: super::super::MovementReceipt::Banish {
+                        receipt: super::super::ReceiptReference::new(ReceiptId(id)),
+                    },
+                }
+            };
+            context.record_paid_name(name, receipt, path)?;
+        }
         if let ast::CostOperation::Discard(ast::DiscardCost::Material(material)) = operation
             && let Some(name) = &material.result
         {

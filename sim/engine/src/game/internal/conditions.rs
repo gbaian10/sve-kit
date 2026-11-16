@@ -6,8 +6,8 @@ use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, Binding, Bool, BoolRead, BooleanState,
     CardKind, CardName, CharacteristicView, ClassRead, Comparison, CounterKind, EvolutionRead,
     EvolutionState, Expr, Info, Int, IntOperation, KeywordId, KindRead, NamesRead, NatRead,
-    NumberRead, ObjectOperand, ObjectRef, ObjectView, PlayerId, Posture, PostureRead, Predicate,
-    Stat, TraitsRead,
+    NumberRead, ObjectOperand, ObjectReceipt, ObjectRef, ObjectView, PlayerId, Posture,
+    PostureRead, Predicate, Stat, TraitsRead, paid_names,
 };
 
 pub(super) mod candidate;
@@ -74,6 +74,11 @@ pub(super) enum SourceNames {
 pub(super) trait Resolver {
     fn number(&self, expression: &Expr<Int>) -> Result<i64>;
     fn names(&self, source: SourceNames) -> Result<Vec<CardName>>;
+    fn payment_names(&self, _receipt: &ObjectReceipt) -> Result<Vec<CardName>> {
+        Err(unsupported(
+            "payment names unavailable to this candidate adapter",
+        ))
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -89,6 +94,7 @@ enum Tree<A> {
 enum Names {
     Literal(Vec<String>),
     Source(SourceNames),
+    Payment(ObjectReceipt),
 }
 
 #[derive(Clone, Debug)]
@@ -383,6 +389,14 @@ fn boolean_atom(
 }
 
 fn atomic(expression: &Expr<Bool>, binding: Binding<ObjectRef>, policy: Policy) -> Result<Atom> {
+    if let Some(read) = paid_names::comparison(expression)
+        && read.candidate == binding
+    {
+        return Ok(Atom::Labels(
+            LabelsProperty::Names,
+            Names::Payment(read.receipt.clone()),
+        ));
+    }
     if let Some(property) = boolean_atom(expression, binding, policy) {
         return Ok(Atom::Boolean(property));
     }
@@ -487,6 +501,16 @@ impl Tree<Atom> {
                             Some(resolver) => Operand::Value(
                                 resolver
                                     .names(*source)?
+                                    .into_iter()
+                                    .map(|name| name.0)
+                                    .collect(),
+                            ),
+                            None => Operand::Unavailable,
+                        },
+                        Names::Payment(receipt) => match resolver {
+                            Some(resolver) => Operand::Value(
+                                resolver
+                                    .payment_names(receipt)?
                                     .into_iter()
                                     .map(|name| name.0)
                                     .collect(),

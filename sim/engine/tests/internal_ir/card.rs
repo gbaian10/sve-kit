@@ -1075,6 +1075,8 @@ mod layer3_entry_suppression;
 mod battle_damage_basis;
 #[path = "card/layer3_counter_cap.rs"]
 mod layer3_counter_cap;
+#[path = "card/paid_names.rs"]
+mod paid_names;
 
 #[path = "card/layer3_counter_cost.rs"]
 mod layer3_counter_cost;

@@ -270,6 +270,12 @@ impl Checker {
     }
 
     pub(super) fn boolean(&mut self, expression: &Expr<Bool>) -> Checked {
+        if let Some(read) = super::super::paid_names::comparison(expression)
+            && !super::super::paid_names::receipt_id(read.receipt)
+                .is_some_and(|id| self.env.name_payments.contains(&id))
+        {
+            return Err(self.error(WellFormedReason::UnavailableReceipt));
+        }
         if self.event_capture() && matches!(expression, Expr::Live(_)) {
             return self.reject();
         }

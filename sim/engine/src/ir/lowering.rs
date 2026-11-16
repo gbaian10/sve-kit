@@ -47,6 +47,7 @@ mod numeric;
 mod optional_payment;
 mod ordering;
 mod other_costs;
+mod paid_names;
 mod payment;
 mod play;
 mod play_restrictions;
@@ -1468,6 +1469,7 @@ fn nested_targets(steps: &[ast::Step]) -> BTreeSet<String> {
 /// Receipts whose members' card information a body condition may read.
 #[derive(Clone, Default)]
 struct ReceiptReads {
+    paid_names: BTreeMap<String, super::ObjectReceipt>,
     published_looks: BTreeSet<ReceiptId>,
     evolutions: BTreeMap<String, ReceiptId>,
     paid_materials: BTreeMap<String, ReceiptId>,

@@ -1,6 +1,7 @@
 //! Receipt adapters expose only information retained by their checked producer.
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
+use crate::ir::paid_names as ir_paid_names;
 use crate::ir::{
     CardKind, CardName, Characteristics, ClassId, DestroyOutcome, DiscardOutcome, Info, Int,
     MaterialActOutcome, MemberProjection, MoveMethod, MoveOutcome, MoveResult, MovementReceipt,
@@ -90,6 +91,23 @@ struct PaidMembers<'execution> {
     quantity: &'execution Quantity,
     subjects: &'execution [ObjectRef],
     characters: &'execution [Characteristics],
+}
+
+pub(super) fn paid_names(execution: &Execution, receipt: &ObjectReceipt) -> Result<Vec<CardName>> {
+    let id =
+        ir_paid_names::receipt_id(receipt).ok_or_else(|| unsupported("payment name receipt"))?;
+    let saved = PaidMembers::load(execution, id, "missing named payment snapshot")?;
+    if saved.quantity.unit != QuantityUnit::Cards
+        || usize::try_from(saved.quantity.amount.0).map_err(invalid)? != saved.subjects.len()
+        || saved.subjects.len() != saved.characters.len()
+    {
+        return Err(invalid("incomplete named payment snapshot"));
+    }
+    Ok(saved
+        .characters
+        .iter()
+        .flat_map(|characters| characters.names.clone())
+        .collect())
 }
 
 impl<'execution> PaidMembers<'execution> {

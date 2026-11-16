@@ -95,6 +95,10 @@ impl Game {
                 ));
             }
         }
+        let characters = members
+            .iter()
+            .map(|member| self.internal_characteristics(execution.object_id(*member)?))
+            .collect::<Result<Vec<_>>>()?;
         match &instruction.action {
             Action::Reveal { .. } => {
                 self.internal_reveal_members(execution, instruction, &members, Some(objects))?;
@@ -127,7 +131,7 @@ impl Game {
                 unit: QuantityUnit::Cards,
             },
             members,
-            vec![],
+            characters,
         ))
     }
     fn internal_hand_banish_payment(

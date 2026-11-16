@@ -78,6 +78,16 @@ impl Checker {
         if context != InstructionContext::Cost || instruction.precondition.is_some() {
             return;
         }
+        if matches!(
+            &instruction.action,
+            Action::Reveal {
+                objects: Selector::Bound { .. }
+            } | Action::Banish {
+                objects: Selector::Bound { .. }
+            }
+        ) {
+            self.env.name_payments.insert(instruction.receipt);
+        }
         if let Action::Move {
             objects: Selector::Bound { reference },
             movement,

@@ -177,6 +177,7 @@ pub(crate) mod number_bounds;
 pub(crate) mod observation;
 pub(crate) mod observation_selection;
 pub(crate) mod optional_payment;
+pub(crate) mod paid_names;
 pub(crate) mod perspective;
 pub(crate) mod play_restrictions;
 pub(crate) mod player_stages;

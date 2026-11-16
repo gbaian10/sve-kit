@@ -997,7 +997,17 @@ impl Game {
                 ));
             }
         }
-        let characters = if let [member] = members.as_slice()
+        let characters = if matches!(
+            instruction.action,
+            Action::Banish {
+                objects: Selector::Bound { .. }
+            }
+        ) {
+            members
+                .iter()
+                .map(|member| self.internal_characteristics(execution.object_id(*member)?))
+                .collect::<Result<Vec<_>>>()?
+        } else if let [member] = members.as_slice()
             && matches!(objects, Selector::Bound { .. })
             && matches!(&instruction.action, Action::Move { movement, reason: MoveReason::Put, .. }
                 if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))

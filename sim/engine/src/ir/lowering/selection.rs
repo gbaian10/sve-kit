@@ -661,7 +661,7 @@ impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
             all_traits: &query.traits_all,
             class: query.class.as_deref(),
             contains: query.name_contains.as_deref(),
-            name: query.name.as_deref(),
+            name: query.name.as_ref().and_then(ast::SearchName::literal),
             cost: [
                 query.cost_eq,
                 query

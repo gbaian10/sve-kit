@@ -22,11 +22,21 @@ impl BodyContext<'_> {
             ast::Step::Look(value) => Some(value.bind.as_str()),
             ast::Step::Choose(value) => Some(value.bind.as_str()),
             ast::Step::Either(value) => value.bind.as_deref(),
-            ast::Step::Destroy(ast::ObjectAction::Long { result, .. }) => result.as_deref(),
+            ast::Step::Destroy(ast::ObjectAction::Long { result, .. })
+            | ast::Step::Banish(ast::BanishAction::Observed { result, .. }) => result.as_deref(),
+            ast::Step::Reveal(value) => Some(value.bind.as_str()),
+            ast::Step::Banish(ast::BanishAction::Objects(objects)) => {
+                if let ast::ObjectAction::Long { result, .. } = objects.as_ref() {
+                    result.as_deref()
+                } else {
+                    None
+                }
+            }
             _ => None,
         };
         if name.is_some_and(|name| {
-            self.receipt_reads.paid_counters.contains_key(name)
+            self.receipt_reads.paid_names.contains_key(name)
+                || self.receipt_reads.paid_counters.contains_key(name)
                 || self.receipt_reads.paid_materials.contains_key(name)
                 || self.receipt_reads.paid_material_acts.contains_key(name)
         }) {
@@ -53,6 +63,7 @@ impl BodyContext<'_> {
             return Ok(());
         }
         if name.is_empty()
+            || self.receipt_reads.paid_names.contains_key(name)
             || self.receipt_reads.paid_material_acts.contains_key(name)
             || self.receipt_reads.paid_counters.contains_key(name)
             || self.receipt_reads.paid_materials.contains_key(name)
@@ -86,6 +97,7 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         if name.is_empty()
+            || self.receipt_reads.paid_names.contains_key(name)
             || self.receipt_reads.paid_material_acts.contains_key(name)
             || self.receipt_reads.paid_counters.contains_key(name)
             || self.receipt_reads.paid_materials.contains_key(name)

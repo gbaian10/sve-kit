@@ -742,6 +742,7 @@ impl Checker {
                 .single_material_moves
                 .extend(paid.single_material_moves);
             self.env.single_discards.extend(paid.single_discards);
+            self.env.name_payments.extend(paid.name_payments);
             self.env.receipt_access.extend(paid.receipt_access);
             self.env
                 .movement_before_access
