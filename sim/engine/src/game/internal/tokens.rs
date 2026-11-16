@@ -317,15 +317,18 @@ impl Game {
                     }
                 };
                 execution.prepend(stage.body.clone());
-                execution.todo.push_front(Node::Capture {
-                    capture: Capture::Player {
-                        at: CaptureTime::AtResolution {
-                            scope: stage.body.scope,
+                execution.todo.push_front(
+                    Node::Capture {
+                        capture: Capture::Player {
+                            at: CaptureTime::AtResolution {
+                                scope: stage.body.scope,
+                            },
+                            value: Expr::Literal(player),
+                            into: CaptureRef { binding },
                         },
-                        value: Expr::Literal(player),
-                        into: CaptureRef { binding },
-                    },
-                });
+                    }
+                    .into(),
+                );
             }
         }
         Ok(())
@@ -569,7 +572,7 @@ impl Game {
                         receipt: instruction.receipt,
                         ids,
                     });
-                    execution.todo.push_front(retry);
+                    execution.todo.push_front(retry.into());
                     return Ok(());
                 }
             }

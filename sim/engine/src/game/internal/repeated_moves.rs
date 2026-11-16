@@ -104,7 +104,7 @@ impl Game {
             return Ok(());
         }
         let body = plan.body.clone();
-        execution.todo.push_front(Node::Control { control });
+        execution.todo.push_front(Node::Control { control }.into());
         execution.prepend(body);
         Ok(())
     }

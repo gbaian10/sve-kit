@@ -1,6 +1,6 @@
 //! Whole-zone returns and exact draws share the ordinary movement and draw commits.
 use super::{
-    Execution, Fact, Game, InstructionOutcome, Result, Slot, invalid, player_id, seat_name,
+    Execution, Fact, Game, InstructionOutcome, Queued, Result, Slot, invalid, player_id, seat_name,
     unsupported,
 };
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
@@ -209,6 +209,7 @@ impl Game {
 #[derive(Clone, Debug)]
 pub(super) struct ProcedureLocals {
     player: (ScopeId, u64),
+    actor: Option<PlayerId>,
     scopes: BTreeSet<ScopeId>,
     receipts: BTreeSet<ReceiptId>,
     saved: BTreeMap<u32, Locals>,
@@ -268,6 +269,7 @@ impl ProcedureLocals {
         }
         Self {
             player,
+            actor: None,
             scopes: names.scopes,
             receipts: names.receipts,
             saved: BTreeMap::new(),
@@ -296,10 +298,24 @@ where
 )]
 impl Execution {
     pub(super) fn begin_procedure(&mut self, locals: ProcedureLocals) {
+        self.todo.push_front(Queued::EndProcedure(locals.player));
         self.procedures.push(locals);
     }
 
-    /// Switching an outer procedure's player ends every procedure nested inside it.
+    pub(super) fn end_procedure(&mut self, player: (ScopeId, u64)) -> Result<()> {
+        let Some(procedure) = self.procedures.pop() else {
+            return Err(invalid("procedure end without an active procedure"));
+        };
+        if procedure.player != player {
+            return Err(invalid("procedure end does not match the active procedure"));
+        }
+        Ok(())
+    }
+
+    pub(super) fn procedure_actor(&self) -> Option<PlayerId> {
+        self.procedures.last()?.actor
+    }
+
     /// Revoking a look also reaches the looks saved for procedure players not acting now, so
     /// a later look cannot revive one that a shuffle or deck change ended.
     pub(super) fn retain_look_viewers(&mut self, keep: impl Fn(PlayerId) -> bool) {
@@ -333,7 +349,7 @@ impl Execution {
                 procedure.receipts.contains(id)
             }),
         };
-        if let Some(Slot::Player(previous)) = self.slots.get(&key) {
+        if let Some(previous) = procedure.actor {
             procedure.saved.insert(previous.seat, current);
         }
         let own = procedure.saved.remove(&next.seat).unwrap_or_default();
@@ -342,6 +358,7 @@ impl Execution {
         self.receipts.extend(own.receipts);
         self.look_viewers.extend(own.look_viewers);
         self.player_receipt_links.extend(own.receipt_links);
+        procedure.actor = Some(next);
         self.procedures.push(procedure);
     }
 }

@@ -96,6 +96,8 @@ mod play_target_cost;
 mod player;
 mod player_stages;
 mod posture;
+mod processing;
+use processing::Queued;
 mod resource;
 mod reveal;
 mod reveal_until;
@@ -629,7 +631,7 @@ pub(super) struct Execution {
     id: ExecutionId,
     timestamp: u64,
     ids: BTreeMap<ObjectId, String>,
-    todo: VecDeque<Node>,
+    todo: VecDeque<Queued>,
     slots: BTreeMap<(ScopeId, u64), Slot>,
     receipts: BTreeMap<ReceiptId, InstructionOutcome>,
     cost_materials: BTreeMap<ReceiptId, Vec<ObjectRef>>,
@@ -817,7 +819,7 @@ impl Game {
                     .program()
                     .steps
                     .iter()
-                    .map(|step| step.node.clone())
+                    .map(|step| step.node.clone().into())
                     .collect(),
                 slots: BTreeMap::new(),
                 procedures: Vec::new(),
@@ -1233,6 +1235,12 @@ impl Game {
         result
     }
 
+    /// Inspect the authority's `EachPlayer` cursor; player delivery requires separate authorization.
+    #[must_use]
+    pub fn internal_each_player_actor(&self) -> Option<PlayerId> {
+        self.typed.as_ref()?.procedure_actor()
+    }
+
     /// Inspect the actor's question; dice reroll results are public to both players.
     #[must_use]
     pub fn internal_decision(&self, view: View) -> Option<DecisionView> {
@@ -1430,6 +1438,7 @@ impl Game {
             if self.state.game["ended"] == true {
                 execution.terminated = true;
                 execution.todo.clear();
+                execution.procedures.clear();
                 self.internal_terminal_cleanup();
                 return Ok(());
             }
@@ -1443,7 +1452,7 @@ impl Game {
             if self.internal_quota_wait(execution)? {
                 break;
             }
-            let Some(node) = execution.todo.pop_front() else {
+            let Some(node) = processing::next_node(execution)? else {
                 if self.finish_internal_execution(execution)? {
                     continue;
                 }
@@ -1999,7 +2008,7 @@ impl Execution {
     }
     fn prepend(&mut self, program: Program) {
         for step in program.steps.into_iter().rev() {
-            self.todo.push_front(step.node);
+            self.todo.push_front(step.node.into());
         }
     }
     fn frame(&self) -> Frame {

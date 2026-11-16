@@ -363,7 +363,7 @@ impl Game {
         execution
             .movement_capacity
             .insert((wait.instruction.receipt, wait.destination.seat), chosen);
-        execution.todo.push_front(wait.resume.clone());
+        execution.todo.push_front(wait.resume.clone().into());
         Ok(())
     }
 }

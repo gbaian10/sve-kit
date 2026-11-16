@@ -2,6 +2,9 @@
     clippy::panic,
     reason = "A missing decision invalidates the player choice scenarios."
 )]
+#[path = "player_choices/procedure_position.rs"]
+mod procedure_position;
+
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 
@@ -191,24 +194,39 @@ fn play(
     fields: (usize, usize),
     hands: (Value, Value),
 ) -> (Game, Option<DecisionView>) {
+    play_as(1, steps, fields, hands)
+}
+
+fn play_as(
+    seat: u32,
+    steps: &Value,
+    fields: (usize, usize),
+    hands: (Value, Value),
+) -> (Game, Option<DecisionView>) {
     let programs = lowerer()
         .lower(&tree("unit-follower", &json!({"fanfare":{"do":steps}})))
         .unwrap();
-    let mut initial = setup(1, json!([]));
+    let (me, them) = if seat == 1 {
+        ("P1", "P2")
+    } else {
+        ("P2", "P1")
+    };
+    let mut initial = setup(seat, json!([]));
+    initial["turn"]["active"] = json!(me);
     let mut mine = vec![json!({"id":"s","card":"unit-follower"})];
     mine.extend(hands.0.as_array().unwrap().iter().cloned());
-    initial["players"]["P1"]["zones"]["hand"] = Value::Array(mine);
-    initial["players"]["P1"]["pp"] = json!({"current":5,"max":5});
-    initial["players"]["P1"]["zones"]["field"] = cards("m", fields.0, "unit-follower");
-    initial["players"]["P2"]["zones"]["field"] = cards("t", fields.1, "unit-follower");
-    initial["players"]["P2"]["zones"]["hand"] = hands.1;
+    initial["players"][me]["zones"]["hand"] = Value::Array(mine);
+    initial["players"][me]["pp"] = json!({"current":5,"max":5});
+    initial["players"][me]["zones"]["field"] = cards("m", fields.0, "unit-follower");
+    initial["players"][them]["zones"]["field"] = cards("t", fields.1, "unit-follower");
+    initial["players"][them]["zones"]["hand"] = hands.1;
     let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "procedure").unwrap();
     game.load_internal_card("unit-follower", &programs["unit-follower"])
         .unwrap();
     for number in ["unit-spell", "unit-amulet"] {
         game.load_internal_card(number, &card(vec![])).unwrap();
     }
-    game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
+    game.play_internal_card("s", PlayerId { seat }).unwrap();
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
     }
