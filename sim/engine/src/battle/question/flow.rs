@@ -14,11 +14,13 @@ use sve_battle_contract::{
 
 mod pending;
 mod quick;
+mod trigger_quota;
 
 #[derive(Clone)]
 pub(super) enum Binding {
     Quick(quick::Binding),
     Pending(pending::Binding),
+    TriggerQuota(trigger_quota::Binding),
 }
 
 pub(super) fn context(
@@ -44,9 +46,10 @@ pub(super) fn context(
         .stage;
     match (purpose, stage) {
         (player::QuestionPurpose::QuickWindow, ProcessingStage::Quick)
-        | (player::QuestionPurpose::RuleChoice, ProcessingStage::PendingOrder) => {
-            Ok((purpose, wire_purpose, stage))
-        }
+        | (
+            player::QuestionPurpose::RuleChoice,
+            ProcessingStage::PendingOrder | ProcessingStage::TriggerAdmission,
+        ) => Ok((purpose, wire_purpose, stage)),
         _ => Err(ProjectionError::Unavailable),
     }
 }
@@ -67,6 +70,13 @@ pub(super) fn project(
             shape,
             Binding::Pending(binding),
         )
+    } else if let DecisionShape::TriggerQuota(domain) = domain {
+        let (shape, binding) = trigger_quota::project(domain, context)?;
+        (
+            wire::QuestionUse::TriggerQuota,
+            shape,
+            Binding::TriggerQuota(binding),
+        )
     } else {
         return Err(ProjectionError::Unavailable);
     };
@@ -82,6 +92,7 @@ impl Binding {
         let decoded = match self {
             Self::Quick(binding) => binding.answer(answer)?,
             Self::Pending(binding) => binding.answer(answer)?,
+            Self::TriggerQuota(binding) => binding.answer(answer)?,
         };
         Ok(player::Command::Answer {
             token,
