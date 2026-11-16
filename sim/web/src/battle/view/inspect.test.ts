@@ -2,7 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import type { BattleObservation, Seat } from "../contract"
-import { baseline, type SeatSpec, type TableSpec } from "../fixtures/build"
+import { type SeatSpec, type TableSpec, update } from "../fixtures/build"
 import { cardRef } from "../fixtures/cards"
 import { inspect } from "./inspect"
 import { tableModel } from "./table"
@@ -37,7 +37,7 @@ const TABLE: TableSpec = {
   ],
 }
 
-const observe = (viewer: Seat): BattleObservation => baseline(TABLE, viewer).observation
+const observe = (viewer: Seat): BattleObservation => update(TABLE, viewer, 0).observation
 
 describe("inspect", () => {
   it("says whose zone a card lies in and its current state", () => {

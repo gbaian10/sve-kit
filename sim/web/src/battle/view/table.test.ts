@@ -2,9 +2,10 @@
 import { describe, expect, it } from "vitest"
 
 import type { BattleObservation, Seat } from "../contract"
-import { baseline, type SeatSpec, type TableSpec } from "../fixtures/build"
+import { type SeatSpec, type TableSpec, update } from "../fixtures/build"
 import { cardRef } from "../fixtures/cards"
-import { tableModel as model } from "./table"
+import { actions } from "./actions"
+import { place, type SlotArrangement, tableModel as model, UNPLACED } from "./table"
 
 const seat = (spec: Partial<SeatSpec>): SeatSpec => ({
   life: 20,
@@ -25,7 +26,7 @@ const seat = (spec: Partial<SeatSpec>): SeatSpec => ({
 })
 
 const observe = (table: TableSpec, viewer: Seat): BattleObservation =>
-  baseline(table, viewer).observation
+  update(table, viewer, 0).observation
 
 const TABLE: TableSpec = {
   turn: { active: "p2", first_player: "p1", phase: "main", elapsed_turns: [3, 2] },
@@ -60,7 +61,10 @@ const ARRANGED = {
   p2: { field: TABLE.seats[1].field.map((card) => card.slot) },
 }
 
-const tableModel = (observation: BattleObservation) => model(observation, ARRANGED)
+const laid = (observation: BattleObservation, first: SlotArrangement = ARRANGED) =>
+  place(UNPLACED, observation, first)
+
+const tableModel = (observation: BattleObservation) => model(observation, laid(observation))
 
 describe("tableModel", () => {
   it("puts the viewer's seat on its own side whichever seat it is", () => {
@@ -93,22 +97,27 @@ describe("tableModel", () => {
     expect(self.sep).toEqual({ current: 0, max: 0, opensIn: 0 })
   })
 
-  it("gives the viewer's own field cards the targets it is told they may attack", () => {
+  it("gives the viewer's field cards what its open question says they may attack", () => {
     const [first, second] = TABLE.seats
-    const table: TableSpec = {
-      ...TABLE,
-      seats: [first, { ...second, field: [{ no: "BP13-030", slot: 2 }] }],
-    }
+    const [evolved, amulet] = first.field
+    if (evolved === undefined || amulet === undefined) throw new Error("two field cards expected")
     // By zone order: the first card may attack the leader, the second one opposing card only.
-    // Place 7 of the opposing field is empty, so it names nothing.
-    const hints = {
-      p1: [
-        { leader: true, followers: [] },
-        { leader: false, followers: [0, 7] },
+    const table: TableSpec = {
+      turn: { ...TABLE.turn, active: "p1" },
+      seats: [
+        {
+          ...first,
+          field: [
+            { ...evolved, attack: { leader: true } },
+            { ...amulet, attack: { followers: [0] } },
+          ],
+        },
+        { ...second, field: [{ no: "BP13-030", slot: 2, attack: { leader: true } }] },
       ],
-      p2: [{ leader: true, followers: [0] }],
     }
-    const own = model(observe(table, "p1"), ARRANGED, hints)
+    const { observation, input } = update(table, "p1", 0, "q0")
+    if (input.kind !== "question") throw new Error("the active seat is asked")
+    const own = model(observation, laid(observation), actions(input.question, "p1"))
     const target = own.opponent.field.find((card) => card !== null)?.handle
     expect(own.self.field.flatMap((card) => (card === null ? [] : [card.attack]))).toEqual([
       { leader: false, targets: [target] },
@@ -116,12 +125,15 @@ describe("tableModel", () => {
     ])
     // A seat is told nothing about what the other seat's cards may do.
     expect(own.opponent.field.every((card) => card === null || card.attack === null)).toBe(true)
-    // Nothing is assumed without being told: no hints, no attackers.
-    const untold = model(observe(table, "p1"), ARRANGED)
+    // Nothing is assumed without being told: no question, no attackers.
+    const untold = model(observation, laid(observation))
     expect(untold.self.field.every((card) => card === null || card.attack === null)).toBe(true)
+    // The seat that waits is asked nothing, whatever the other seat's cards may do.
+    const waiting = update(table, "p2", 0, "q0")
+    expect(waiting.input).toMatchObject({ kind: "waiting", actor: "p1" })
   })
 
-  it("lays a field card in the slot numbered like its place when nothing is arranged", () => {
+  it("lays arriving cards in the first free slots, in zone order, when nothing is arranged", () => {
     const { self } = model(observe(TABLE, "p1"))
     expect(self.field.map((card) => card?.face ?? null)).toEqual([
       cardRef("BP20-065"),
@@ -134,10 +146,10 @@ describe("tableModel", () => {
 
   it("takes the next free slot when the arranged one is taken or off the row", () => {
     const observation = observe(TABLE, "p1")
-    const shared = model(observation, { p1: { field: [3, 3] } }).self.field
+    const shared = model(observation, laid(observation, { p1: { field: [3, 3] } })).self.field
     expect(shared.map((card) => card !== null)).toEqual([true, false, false, true, false])
     expect(shared[3]?.face).toEqual(cardRef("BP20-065"))
-    const outside = model(observation, { p1: { field: [9, 2] } }).self.field
+    const outside = model(observation, laid(observation, { p1: { field: [9, 2] } })).self.field
     expect(outside.map((card) => card !== null)).toEqual([true, false, true, false, false])
   })
 
@@ -232,6 +244,32 @@ describe("tableModel", () => {
     })
     expect(self.field.filter((card) => card !== null)).toHaveLength(2)
     expect(self.field).toHaveLength(5)
+  })
+
+  it("keeps a card in its slot while others leave and arrive beside it", () => {
+    const [first, second] = TABLE.seats
+    const [evolved, amulet] = first.field
+    if (evolved === undefined || amulet === undefined) throw new Error("two field cards expected")
+    const fields = (field: SeatSpec["field"]): BattleObservation =>
+      observe({ ...TABLE, seats: [{ ...first, field }, second] }, "p1")
+    const faces = (observation: BattleObservation, before = laid(observation)) => {
+      const next = place(before, observation)
+      return { next, faces: model(observation, next).self.field.map((card) => card?.face ?? null) }
+    }
+    // Laid as arranged: the evolved follower in slot 3, the amulet in slot 0.
+    const start = faces(fields([evolved, amulet]))
+    expect(start.faces).toEqual([cardRef("BP01-T10"), null, null, cardRef("BP20-065"), null])
+    // The amulet leaves and a follower arrives: the one that stayed does not move, and the
+    // arrival takes the first free slot whatever its place in the zone's order.
+    const arrived = faces(fields([{ no: "BP20-062", slot: 4 }, evolved]), start.next)
+    expect(arrived.faces).toEqual([cardRef("BP20-062"), null, null, cardRef("BP20-065"), null])
+    // Bringing a placement up to the same observation again changes nothing.
+    expect(place(arrived.next, fields([{ no: "BP20-062", slot: 4 }, evolved]))).toEqual(
+      arrived.next,
+    )
+    // A placement that never saw the observation still loses no card.
+    const stale = model(fields([evolved, amulet, { no: "BP20-062", slot: 4 }]), arrived.next)
+    expect(stale.self.field.filter((card) => card !== null)).toHaveLength(3)
   })
 
   it("ignores a zone member that has no object behind it", () => {

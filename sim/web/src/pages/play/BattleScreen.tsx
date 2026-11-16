@@ -6,8 +6,9 @@ import { useTranslation } from "react-i18next"
 
 import type { CardRef, Seat } from "../../battle/contract"
 import type { BattleSource } from "../../battle/source"
+import { actions } from "../../battle/view/actions"
 import { inspect, type ZoneName } from "../../battle/view/inspect"
-import { type AttackHints, type SlotArrangement, tableModel } from "../../battle/view/table"
+import { type SlotArrangement, tableModel } from "../../battle/view/table"
 import { cn } from "../../components/ui/cn"
 import { prefsStore, useBattleMatPicture, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
@@ -100,22 +101,23 @@ function OppositePane({
   source,
   leaders,
   slots,
-  attackers,
   layout,
   light,
 }: {
   readonly source: BattleSource
   readonly leaders: Leaders
   readonly slots: SlotArrangement | undefined
-  readonly attackers: AttackHints | undefined
   readonly layout: Layout
   readonly light: boolean
 }) {
   const { t } = useTranslation()
-  const battle = useBattle(source)
+  const battle = useBattle(source, slots)
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, slots, attackers)),
-    [battle.board, slots, attackers],
+    () =>
+      battle.board === null
+        ? null
+        : tableModel(battle.board, battle.placement, actions(battle.question, battle.board.viewer)),
+    [battle.board, battle.placement, battle.question],
   )
   return (
     <section
@@ -149,7 +151,6 @@ export function BattleScreen({
   opposite,
   leaders,
   slots,
-  attackers,
   corner,
   onDual,
 }: {
@@ -160,8 +161,6 @@ export function BattleScreen({
   readonly leaders: Leaders
   /** Where the field cards lie on this screen, when something other than their order decides it. */
   readonly slots?: SlotArrangement | undefined
-  /** Which field cards may attack now; see `AttackHints`. */
-  readonly attackers?: AttackHints | undefined
   /** Page controls for the chip on the board's top-left corner. */
   readonly corner?: ReactNode
   /** Switches the dual view on or off, where the page offers it. */
@@ -169,7 +168,7 @@ export function BattleScreen({
 }) {
   const { t } = useTranslation()
   const { vw, vh } = useViewport()
-  const battle = useBattle(source)
+  const battle = useBattle(source, slots)
   const cards = useBattleCards(battle.ready?.identity.region)
   const prefs = usePrefs()
   const dual = opposite !== undefined
@@ -193,8 +192,11 @@ export function BattleScreen({
     [vw, vh, dual, floats, sidebarOpen, floatOpen],
   )
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, slots, attackers)),
-    [battle.board, slots, attackers],
+    () =>
+      battle.board === null
+        ? null
+        : tableModel(battle.board, battle.placement, actions(battle.question, battle.board.viewer)),
+    [battle.board, battle.placement, battle.question],
   )
   const pinned = prefs.battleInfoPinned
   // Parchment is the one light picture: the mats print on it in a dark ink.
@@ -505,7 +507,6 @@ export function BattleScreen({
                 source={opposite}
                 leaders={leaders}
                 slots={slots}
-                attackers={attackers}
                 layout={layout}
                 light={light}
               />

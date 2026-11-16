@@ -359,6 +359,7 @@ function source(seat: Seat, messages: readonly HostMessage[]): BattleSource {
       for (const message of messages) listener(message)
       return () => undefined
     },
+    submit: () => Promise.reject(new Error("nothing is answered here")),
     close: () => undefined,
   }
 }
