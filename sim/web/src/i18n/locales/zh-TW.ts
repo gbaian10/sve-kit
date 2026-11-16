@@ -281,6 +281,8 @@ const zhTW = {
     serialOnlyHint: "卡面印有序號牌",
     unlistedOnly: "官方未收錄",
     unlistedOnlyHint: "官方卡表沒有的 EP／SEP 等",
+    prOnly: "PR 限定",
+    prOnlyHint: "只以 PR 卡號發行的卡",
     specialPrintings: "特殊版次",
     specialPrintingsAll: "全部",
     specialPrintingsHint: "勾選多項時只顯示同時符合的卡",
