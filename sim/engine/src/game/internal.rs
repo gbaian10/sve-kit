@@ -97,6 +97,7 @@ mod player;
 mod player_stages;
 mod posture;
 mod processing;
+pub use processing::QuestionStage;
 use processing::Queued;
 mod random_sample;
 mod resource;
@@ -646,6 +647,7 @@ pub(super) struct Execution {
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
     facts: fact_log::Facts,
     waiting: Option<(DecisionView, Wait)>,
+    question_stage: Option<QuestionStage>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -837,6 +839,7 @@ impl Game {
                 effect_evolution_destinations: BTreeMap::new(),
                 facts: fact_log::Facts::default(),
                 waiting: None,
+                question_stage: None,
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -922,6 +925,8 @@ impl Game {
             if view.actor != actor || view.token != token {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
+            // Transaction rollback restores the phase if the answer type is rejected.
+            execution.question_stage = None;
             match (wait, answer) {
                 (Wait::Ability(wait), Answer::Ability(handle)) => {
                     let source = wait.validate(self, &execution, handle)?;
@@ -1252,6 +1257,21 @@ impl Game {
         self.typed.as_ref()?.procedure_actor()
     }
 
+    /// Producer-recorded phase of the active typed question; `None` also means unknown.
+    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_question_stage;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_question_stage(&self) -> Option<QuestionStage> {
+        let execution = self.typed.as_ref()?;
+        execution.waiting.as_ref()?;
+        execution.question_stage
+    }
+
     /// Inspect the actor's question; dice reroll results are public to both players.
     #[must_use]
     pub fn internal_decision(&self, view: View) -> Option<DecisionView> {
@@ -1450,6 +1470,7 @@ impl Game {
                 execution.terminated = true;
                 execution.todo.clear();
                 execution.procedures.clear();
+                execution.question_stage = None;
                 self.internal_terminal_cleanup();
                 return Ok(());
             }
@@ -1670,6 +1691,8 @@ impl Game {
             decision,
             epoch: self.state.ir_epoch,
         };
+        // Unrecorded producers must not inherit a preceding question's phase.
+        execution.question_stage = None;
         execution.waiting = Some((
             DecisionView {
                 token,

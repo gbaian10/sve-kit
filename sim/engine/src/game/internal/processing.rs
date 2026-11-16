@@ -3,6 +3,15 @@
 use super::{Execution, Result};
 use crate::ir::{Node, ScopeId};
 
+/// A typed question's producer-recorded phase, separate from its purpose and answer domain.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum QuestionStage {
+    /// An effect is offering its resolution payment.
+    Pay,
+    /// An effect is offering its optional resolution body.
+    Resolve,
+}
+
 #[derive(Clone, Debug)]
 pub(super) enum Queued {
     Node(Box<Node>),
