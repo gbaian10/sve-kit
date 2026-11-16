@@ -20,6 +20,12 @@ witness, candidates, complete, review_level, reason`。art 沿有效 registry �
 同組 PR、UR、閃卡與跨區版次共用結果；不按卡號／稀有度猜圖。
 `same_card_targets` 是當時該卡、該遊戲的同卡目標 ID，排序去重；不是名字搜尋結果。
 
+人工裁決另記可省略的 `manual_review`：`source, reviewed_on, matched_candidates`。
+只有 `review_level: confirmed` 的明確結論可使用，source 不得空白；
+matched_candidates 以 `official_id, phase, style_key` 唯一指向現有候選。
+matched 必須明示至少一個同圖候選，not_found 必須明示空清單且候選完整。
+原始分數、圖 hash 與裁框均保留，不能為符合門檻而改寫；沒有人工裁決時仍沿機械門檻。
+
 `witness` 為 `printing_id, face_id, image_url, image_sha256, crop`，不可得時為 null。
 candidate 為 `official_id, phase, style_key, image_url, image_sha256, crop, inliers`；
 phase 為 normal/evolved，crop 是原生像素的半開整數框 `[left,top,right,bottom]`。
@@ -37,13 +43,15 @@ SV1 框為 left=14%w、top=23%h、width=76%w；SVWB 為 12%w、22%h、82%w，
 
 | state | 條件與意義 |
 | --- | --- |
-| matched | 至少一張候選 >=100 inliers；不要求其他候選已齊全 |
-| not_found | 完整候選全部 <10；只表示此 as_of、此同卡候選範圍未找到同圖 |
+| matched | 至少一張候選 >=100 inliers，或人工明示同圖候選；不要求其他候選已齊全 |
+| not_found | 完整候選全部 <10，或人工確認完整候選全不同；只表示此 as_of、此同卡候選範圍未找到同圖 |
 | unknown | 缺資料、灰區或尚未核對；缺列同樣為 unknown |
 
 既有工具 >=40 可合組，但 10～99 同時仍是 review；本入口不將這段直接採為 matched。
 首批機械結果保持 `model_reviewed`，不冒稱真人 sampled/confirmed；灰區留 unknown。
 not_found 不能因缺 link、低 cosine、PR／UR 標籤或讀圖失敗而產生。
+周年 logo 等加印也可能使同圖落在 80～99；新增卡遇到時沿現有 10～99 清單交人工，
+不因此降低門檻。人工日期記於 reviewed_on，影像比較範圍的 as_of 不因此改寫。
 
 SV1 非零 `resource_card_id` 先解析為圖片資源 ID，0 回自身 card_id；base_card_id
 只作家族，不代表同圖。正常與進化面各有明示身分。SVWB `card_resource_id`
@@ -57,7 +65,8 @@ SV1 非零 `resource_card_id` 先解析為圖片資源 ID，0 回自身 card_id�
 composer 將入口的 exact index/shard hash、recipe、OpenCV 版加入 BuildContext。
 intake 驗 art/face 與 witness 的現行歸屬、fresh 同卡目標集合、數位 API 圖片 metadata；
 負面另外驗全部目標的面與 styles 仍被候選涵蓋。任一範圍改變退 unknown，
-不能繼續發布舊負面。正面取 >=100 的候選建立 `digital_art`／`digital_art_link`；
+不能繼續發布舊負面。機械正面取 >=100 的候選；人工正面只取明示的 matched_candidates，
+建立 `digital_art`／`digital_art_link`，不擴及其他灰區候選；
 `digital_art_coverage` 以 `(art_id,game)` 保存 state/as_of。
 數位卡／面與名稱最小閉包重用 `import_digital`，重複插入須逐欄相同，衝突失敗。
 

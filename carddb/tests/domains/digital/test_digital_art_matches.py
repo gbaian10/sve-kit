@@ -196,8 +196,23 @@ def test_frozen_style_match_and_explicit_absence(
         db.verify()
 
 
-def test_missing_style_cannot_become_absence(baseline: Fixture, tmp_path: Path) -> None:
+@pytest.mark.parametrize("human", [False, True])
+def test_missing_style_cannot_become_absence(
+    baseline: Fixture, tmp_path: Path, human: bool
+) -> None:
     record = art_record(baseline, "not_found")
+    if human:
+        raw = art_record(baseline, "unknown").model_dump(mode="json")
+        raw.update(
+            state="not_found",
+            review_level="confirmed",
+            manual_review={
+                "source": "Synthetic visual review",
+                "reviewed_on": "2026-11-17",
+                "matched_candidates": [],
+            },
+        )
+        record = Record.model_validate_json(canonical(raw))
     record = record.model_copy(update={"candidates": record.candidates[:2]})
     adopted = entry(tmp_path, (record,))
     config = object_value(parse(baseline.build.configuration.encode()))
@@ -295,3 +310,124 @@ def test_one_style_cannot_reference_two_images(
     )
     with pytest.raises(ValueError, match="conflicting image evidence"):
         entry(tmp_path, (first, second))
+
+
+@pytest.mark.parametrize("state", ["matched", "not_found"])
+def test_confirmed_gray_verdict_materializes_exactly_selected_images(
+    baseline: Fixture,
+    tmp_path: Path,
+    state: Literal["matched", "not_found"],
+) -> None:
+    raw = art_record(baseline, "unknown").model_dump(mode="json")
+    raw.update(
+        state=state,
+        review_level="confirmed",
+        reason="Synthetic human verdict with source; scores remain unchanged.",
+        manual_review={
+            "source": "Synthetic maintainer visual review",
+            "reviewed_on": "2026-11-17",
+            "matched_candidates": [
+                {
+                    "official_id": "22345678",
+                    "phase": "normal",
+                    "style_key": "alternate-one",
+                }
+            ]
+            if state == "matched"
+            else [],
+        },
+    )
+    record = Record.model_validate_json(canonical(raw))
+    adopted = entry(tmp_path, (record,))
+    config = object_value(parse(baseline.build.configuration.encode()))
+    context = baseline.changed(config | adopted.configuration())
+    sources = Sources({"test-store": baseline.store}, baseline.root, context)
+    with template(("digital_art",)).copy() as db:
+        publish_art(db, baseline)
+        with db.transaction():
+            links = populate_links(
+                db,
+                baseline.inputs(),
+                build=context,
+                stores={"test-store": baseline.store},
+                sources=sources,
+            )
+            result = populate(
+                db, adopted, revision=baseline.authored, links=links, sources=sources
+            )
+        assert result == {
+            "matched": int(state == "matched"),
+            "not_found": int(state == "not_found"),
+            "unknown": 0,
+        }
+        assert [r.values["digital_art_id"] for r in db.rows("digital_art_link")] == (
+            ["digital-art:svwb:22345678:normal:alternate-one"]
+            if state == "matched"
+            else []
+        )
+        coverage = db.rows("digital_art_coverage")[0].values
+        assert coverage["state"] == state
+        decision = next(
+            r for r in db.rows("decision") if r.values["id"] == coverage["decision_id"]
+        )
+        assert decision.values["state"] == "confirmed"
+        assert record.candidates[2].inliers == 25
+        db.verify()
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "source",
+        "review_level",
+        "unknown",
+        "missing_candidate",
+        "duplicate_candidate",
+        "no_positive",
+        "negative_with_positive",
+        "incomplete_negative",
+    ],
+)
+def test_manual_verdict_cannot_bypass_its_evidence_contract(
+    baseline: Fixture, change: str
+) -> None:
+    raw = art_record(baseline, "unknown").model_dump(mode="json")
+    key = {"official_id": "22345678", "phase": "normal", "style_key": "alternate-one"}
+    review = {
+        "source": "Synthetic visual review",
+        "reviewed_on": "2026-11-17",
+        "matched_candidates": [key],
+    }
+    raw.update(state="matched", review_level="confirmed", manual_review=review)
+    if change == "source":
+        review["source"] = " "
+    elif change == "review_level":
+        raw["review_level"] = "model_reviewed"
+    elif change == "unknown":
+        raw["state"] = "unknown"
+    elif change == "missing_candidate":
+        key["style_key"] = "missing"
+    elif change == "duplicate_candidate":
+        review["matched_candidates"] = [key, key]
+    elif change == "no_positive":
+        review["matched_candidates"] = []
+    elif change == "negative_with_positive":
+        raw["state"] = "not_found"
+    else:
+        raw.update(state="not_found", complete=False)
+        review["matched_candidates"] = []
+    with pytest.raises(ValueError, match=r"Manual art review|Art absence"):
+        Record.model_validate_json(canonical(raw))
+
+
+@pytest.mark.parametrize("state", ["matched", "not_found"])
+@pytest.mark.parametrize("explicit_null", [False, True])
+def test_confirmed_level_alone_cannot_adopt_a_gray_conclusion(
+    baseline: Fixture, state: Literal["matched", "not_found"], explicit_null: bool
+) -> None:
+    raw = art_record(baseline, "unknown").model_dump(mode="json")
+    raw.update(state=state, review_level="confirmed")
+    if explicit_null:
+        raw["manual_review"] = None
+    with pytest.raises(ValueError, match=r"Art match requires|Art absence requires"):
+        Record.model_validate_json(canonical(raw))
