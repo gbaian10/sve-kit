@@ -1,4 +1,5 @@
 use super::common::{option, seat};
+use super::decision;
 use super::{AnswerError, Binding, Result};
 use crate::battle::{BattleReferences, CandidateDetails, ProjectionError, SelectionProjection};
 use crate::catalog::Catalog;
@@ -145,6 +146,37 @@ pub(super) fn evolution_payment_answer(
     })
 }
 
+pub(super) fn materials(
+    domain: &player::SelectionQuestion,
+    context: decision::Context<'_>,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
+    // The native material answer has no role channel and cannot name leaders.
+    if !domain.roles.is_empty()
+        || domain.members.iter().any(|member| member.card.is_none())
+        || u64::try_from(domain.members.len())
+            .ok()
+            .is_none_or(|count| domain.cardinality.minimum.0 > count)
+    {
+        return Err(ProjectionError::Unavailable);
+    }
+    let projection =
+        SelectionProjection::new(context.id, domain, &BTreeMap::new(), |coordinate| {
+            let member = domain
+                .members
+                .iter()
+                .find(|member| member.handle == coordinate)
+                .ok_or(ProjectionError::Unavailable)?;
+            decision::details(member, context)
+        })?;
+    Ok((
+        wire::QuestionUse::EvolutionMaterial,
+        wire::QuestionShape::Select {
+            selection: projection.selection().clone(),
+        },
+        Binding::EvolutionMaterials(projection),
+    ))
+}
+
 pub(super) fn discard(
     id: &QuestionId,
     actor: Viewer,
@@ -210,6 +242,20 @@ pub(super) fn discard_answer(
     projection: &SelectionProjection,
     answer: &Answer,
 ) -> result::Result<EvolutionAnswer, AnswerError> {
+    selection_answer(projection, answer).map(EvolutionAnswer::Discard)
+}
+
+pub(super) fn materials_answer(
+    projection: &SelectionProjection,
+    answer: &Answer,
+) -> result::Result<EvolutionAnswer, AnswerError> {
+    selection_answer(projection, answer).map(EvolutionAnswer::Materials)
+}
+
+fn selection_answer(
+    projection: &SelectionProjection,
+    answer: &Answer,
+) -> result::Result<Vec<u64>, AnswerError> {
     let Answer::Select { selected, .. } = answer else {
         return Err(AnswerError);
     };
@@ -224,7 +270,7 @@ pub(super) fn discard_answer(
     else {
         return Err(AnswerError);
     };
-    Ok(EvolutionAnswer::Discard(handles))
+    Ok(handles)
 }
 
 #[cfg(test)]
