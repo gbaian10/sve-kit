@@ -38,6 +38,7 @@ mod references;
 mod selection;
 mod sources;
 mod turn;
+mod wording;
 
 #[cfg(all(test, feature = "runner"))]
 mod tests;
@@ -52,6 +53,9 @@ pub use question::{AnswerError, QuestionProjection};
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use selection::{CandidateDetails, SelectionProjection};
 pub(crate) use turn::project_turn;
+pub use wording::{
+    WordingFaceIdentity, WordingFieldIdentity, WordingInput, WordingRevisionIdentity,
+};
 
 use sve_battle_contract::{HostError, HostErrorReason};
 
