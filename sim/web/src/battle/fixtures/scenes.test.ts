@@ -2,6 +2,7 @@
 import { describe, expect, it } from "vitest"
 
 import {
+  type Answer,
   type BattleObservation,
   type BattleUpdate,
   type HostMessage,
@@ -10,7 +11,7 @@ import {
   type ZoneView,
 } from "../contract"
 import { update } from "./build"
-import { type Choice, SCENES } from "./scenes"
+import { SCENES } from "./scenes"
 
 const SEATS: readonly Seat[] = ["p1", "p2"]
 
@@ -93,37 +94,49 @@ describe("fixture scenes", () => {
     expect(slots.p2?.field).toHaveLength(second.zones.field.count)
   })
 
-  it.each(SCENES)("$id asks only the seat whose main phase it is", ({ script }) => {
+  it.each(SCENES)("$id asks a seat only what is put to it", ({ script }) => {
     for (const seat of SEATS) {
       const first = script[seat].find((message) => message.kind === "update")
       if (first === undefined) throw new Error("the script has no update")
       const { turn } = first.observation
       if (first.input.kind === "question") {
-        expect(first.input.question.actor).toBe(seat)
-        expect(turn).toMatchObject({ active: seat, phase: "main" })
+        const { question } = first.input
+        expect(question.actor).toBe(seat)
+        // What to do in a main phase is asked of the seat whose main phase it is.
+        if (question.shape.kind === "action_window")
+          expect(turn).toMatchObject({ active: seat, phase: "main" })
       }
       // The seat that waits is told for whom, and nothing of what that seat is asked.
-      if (first.input.kind === "waiting") expect(first.input.actor).toBe(turn.active ?? "p1")
+      if (first.input.kind === "waiting") {
+        const other = script[seat === "p1" ? "p2" : "p1"].find(
+          (message) => message.kind === "update",
+        )
+        expect(first.input.actor).toBe(
+          other?.input.kind === "question" ? other.input.question.actor : (turn.active ?? "p1"),
+        )
+      }
     }
   })
 
   it("sends valid messages along every course of the played turn", () => {
     const turn = SCENES.find((entry) => entry.id === "turn")
     if (turn === undefined) throw new Error("no played turn")
-    const courses: Choice[][] = [[]]
+    const courses: Answer[][] = [[]]
     let ended = 0
     for (let at = 0; at < courses.length; at += 1) {
       const choices = courses[at] ?? []
-      const table = turn.after(choices)
-      if (table === null) throw new Error("an offered answer led nowhere")
-      const [own, other] = SEATS.map((seat) => update(table, seat, choices.length, "q"))
+      const step = turn.after(choices)
+      if (step === null) throw new Error("an offered answer led nowhere")
+      const [own, other] = SEATS.map((seat) => update(step.table, seat, choices.length, "q"))
       if (own === undefined || other === undefined) throw new Error("a seat is missing")
       expect(validateHostMessage(own)).toBe(true)
       expect(validateHostMessage(other)).toBe(true)
       if (own.input.kind !== "question" || own.input.question.shape.kind !== "action_window") {
         // The turn is over: the first seat waits and the script takes nothing more.
         expect(own.input).toMatchObject({ kind: "waiting", actor: "p2" })
-        expect(turn.after([...choices, { intent: "end", target: null }])).toBeNull()
+        expect(
+          turn.after([...choices, { kind: "action_window", intent: "end", target: null }]),
+        ).toBeNull()
         ended += 1
         continue
       }
@@ -131,11 +144,11 @@ describe("fixture scenes", () => {
       for (const intent of own.input.question.shape.intents)
         if (intent.kind === "attack")
           for (const { id } of intent.targets)
-            courses.push([...choices, { intent: intent.id, target: id }])
-        else courses.push([...choices, { intent: intent.id, target: null }])
+            courses.push([...choices, { kind: "action_window", intent: intent.id, target: id }])
+        else courses.push([...choices, { kind: "action_window", intent: intent.id, target: null }])
     }
     // Three actions in any order, one of them with two recipients, and an end after any of them.
     expect(ended).toBeGreaterThan(10)
-    expect(turn.after([{ intent: "nothing", target: null }])).toBeNull()
+    expect(turn.after([{ kind: "action_window", intent: "nothing", target: null }])).toBeNull()
   })
 })

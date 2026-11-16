@@ -10,7 +10,16 @@ import {
   validateHostMessage,
 } from "../contract"
 import type { BattleSource } from "../source"
-import { act, type Actions, actions } from "../view/actions"
+import { act, type Actions, actions, actQuick, quick } from "../view/actions"
+import {
+  choice,
+  chooseAnswer,
+  confirmAnswer,
+  confirmation,
+  mulligan,
+  mulliganAnswer,
+} from "../view/choices"
+import { NO_PICKS, selectAnswer, selection, toggle } from "../view/select"
 import { type Scene, SCENES } from "./scenes"
 import { scriptedTable } from "./scripted"
 
@@ -322,5 +331,357 @@ describe("scriptedTable", () => {
     await arrive()
     // It never reached the host: the other seat's table stands as it was.
     expect(seqs(other.messages)).toEqual([0])
+  })
+
+  it.each([
+    ["passed", null, { life: 14, pp: 2, hand: 3 }],
+    ["played", "quick:a:quick", { life: 14, pp: 0, hand: 2 }],
+  ] as const)(
+    "takes a Quick window %s, once, and lets the attack land",
+    async (_, option, after) => {
+      const seats = scriptedTable(scene("quick"))
+      const own = follow(seats.p1)
+      const other = follow(seats.p2)
+      // The seat that is asked sees the question; the other only that it is waited for.
+      const window = need(quick(own.question(), "p1"))
+      expect(other.last().input).toMatchObject({ kind: "waiting", actor: "p1" })
+      expect(own.last().observation.attack).toMatchObject({
+        target: { kind: "leader", player: "p1" },
+      })
+      expect(await send(seats.p1, actQuick(window, "quick:nothing"))).toMatchObject({
+        result: "rejected",
+      })
+      expect(await send(seats.p1, actQuick(window, option))).toMatchObject({ result: "applied" })
+      const self = own.last().observation.players[0]
+      expect({ life: self.life, pp: self.pp, hand: self.zones.hand.count }).toEqual(after)
+      expect(own.last().observation.attack).toBeNull()
+      // The turn goes on: the other seat is asked what to do in its main phase.
+      expect(own.last().input).toMatchObject({ kind: "waiting", actor: "p2" })
+      expect(other.question()).toMatchObject({ actor: "p2", shape: { kind: "action_window" } })
+      expect(await send(seats.p1, actQuick(window, option))).toMatchObject({ result: "rejected" })
+      for (const message of [...own.messages, ...other.messages])
+        expect(validateHostMessage(message)).toBe(true)
+    },
+  )
+
+  /** A scene's first seat, what it is asked now, and the selection its picks would answer with. */
+  function asking(id: Scene["id"]) {
+    const seats = scriptedTable(scene(id))
+    const own = follow(seats.p1)
+    const other = follow(seats.p2)
+    const picking = (...ids: string[]): Command => {
+      const asked = need(selection(own.question(), "p1"))
+      return selectAnswer(
+        asked,
+        ids.reduce((picks, id) => toggle(asked, picks, id), NO_PICKS),
+      )
+    }
+    const valid = (): boolean =>
+      [...own.messages, ...other.messages].every((message) => validateHostMessage(message))
+    return { seats, own, other, picking, valid }
+  }
+  const applied = { result: "applied" }
+  const rejected = { result: "rejected", rejection: "invalid_submission" }
+
+  it("takes one follower of each side for the spell that needs both", async () => {
+    const { seats, own, other, picking, valid } = asking("targets")
+    expect(other.last().input).toMatchObject({ kind: "waiting", actor: "p1" })
+    // One pick short, and two of the same side: neither is the selection the spell asks for.
+    expect(await send(seats.p1, picking("own:priest"))).toMatchObject(rejected)
+    expect(await send(seats.p1, picking("own:priest", "own:unifier"))).toMatchObject(rejected)
+    expect(await send(seats.p1, picking("foe:meimu", "own:priest"))).toMatchObject(applied)
+    const [self, opposing] = own.last().observation.players
+    // The seat's own follower took one damage; the other fell and lies on its owner's cemetery.
+    expect(own.last().observation.objects["a:priest"]?.state?.stats).toEqual({ attack: 2, life: 1 })
+    expect(opposing.zones.field.cards.map((member) => member.object)).not.toContain("a:meimu")
+    expect(opposing.zones.cemetery.cards.at(-1)?.object).toBe("a:meimu")
+    expect({ pp: self.pp, hand: self.zones.hand.count }).toEqual({ pp: 2, hand: 2 })
+    // The turn goes on with the main-phase question.
+    expect(own.question()?.shape.kind).toBe("action_window")
+    expect(valid()).toBe(true)
+  })
+
+  it.each([
+    [true, ["deck:maimu-1", "deck:miimu"], { pp: 1, field: 4, hand: 2, deck: 22 }],
+    [false, ["deck:miimu"], { pp: 5, field: 2, hand: 3, deck: 23 }],
+  ] as const)(
+    "asks whether to pay the extra cost (%s), then for the search that follows",
+    async (paid, found, after) => {
+      const { seats, own, other, picking, valid } = asking("sisters")
+      const extra = need(confirmation(own.question(), "p1"))
+      const before = [...other.messages]
+      expect(await send(seats.p1, confirmAnswer(extra, paid))).toMatchObject(applied)
+      // The answer changed nothing the other seat can see: that seat is sent nothing, and its
+      // sequence does not move. Only the seat that answered has a new update.
+      expect(other.messages).toEqual(before)
+      expect(seqs(other.messages)).toEqual([0])
+      expect(seqs(own.messages)).toEqual([0, 1])
+      // The same table, and the next question of the same effect.
+      const search = need(selection(own.question(), "p1")).selection
+      expect(search.candidates.map((candidate) => candidate.subject?.kind)).toEqual([
+        "card",
+        "card",
+        "card",
+      ])
+      expect(search.group_assignment).toBe(paid ? "explicit" : "existence")
+      expect(search.bounds.max).toBe(paid ? 3 : 1)
+      // Two of one name: one group too full where groups are named, one pick too many elsewhere.
+      const both: Command = {
+        kind: "answer",
+        question_id: "search",
+        answer: {
+          kind: "select",
+          selected: ["deck:maimu-1", "deck:maimu-2"],
+          groups: paid
+            ? [
+                { group: 0, selected: ["deck:maimu-1", "deck:maimu-2"] },
+                { group: 1, selected: [] },
+                { group: 2, selected: [] },
+              ]
+            : null,
+          roles: [],
+        },
+      }
+      expect(await send(seats.p1, both)).toMatchObject(rejected)
+      if (paid) {
+        // The groups have to be named, every one of them, the empty one too.
+        const unnamed = picking(...found)
+        if (unnamed.kind !== "answer" || unnamed.answer.kind !== "select") throw new Error("select")
+        for (const groups of [null, unnamed.answer.groups?.slice(0, 2) ?? null])
+          expect(
+            await send(seats.p1, { ...unnamed, answer: { ...unnamed.answer, groups } }),
+          ).toMatchObject(rejected)
+      }
+      // The search changes the table for both seats: each is told under its own next number,
+      // the seat that answered after its receipt.
+      const order: string[] = []
+      seats.p1.listen((message) => {
+        if (message.kind === "update" && message.update_seq > 1)
+          order.push(`p1 update ${String(message.update_seq)}`)
+      })
+      seats.p2.listen((message) => {
+        if (message.kind === "update" && message.update_seq > 0)
+          order.push(`p2 update ${String(message.update_seq)}`)
+      })
+      await seats.p1.submit(picking(...found)).then((receipt) => order.push(receipt.result))
+      await arrive()
+      expect(order).toEqual(["applied", "p1 update 2", "p2 update 1"])
+      const [self] = own.last().observation.players
+      expect({
+        pp: self.pp,
+        field: self.zones.field.count,
+        hand: self.zones.hand.count,
+        deck: self.zones.deck.count,
+      }).toEqual(after)
+      // Both seats see the same public table again.
+      const [theirs] = other.last().observation.players
+      expect({
+        pp: theirs.pp,
+        field: theirs.zones.field.count,
+        hand: theirs.zones.hand.count,
+      }).toEqual({ pp: after.pp, field: after.field, hand: after.hand })
+      expect(own.question()?.shape.kind).toBe("action_window")
+      expect(valid()).toBe(true)
+    },
+  )
+
+  it("lets the search find nothing", async () => {
+    const { seats, own, picking } = asking("sisters")
+    await send(seats.p1, confirmAnswer(need(confirmation(own.question(), "p1")), true))
+    expect(await send(seats.p1, picking())).toMatchObject(applied)
+    const [self] = own.last().observation.players
+    expect({ field: self.zones.field.count, deck: self.zones.deck.count }).toEqual({
+      field: 2,
+      deck: 24,
+    })
+  })
+
+  it("discards down to the hand limit in the order the cards are named", async () => {
+    const { seats, own, other, picking, valid } = asking("discard")
+    expect(await send(seats.p1, picking("held-3"))).toMatchObject(rejected)
+    expect(await send(seats.p1, picking("held-3", "held-0"))).toMatchObject(applied)
+    const [self] = own.last().observation.players
+    expect(self.zones.hand.count).toBe(7)
+    expect(self.zones.cemetery.cards.slice(-2).map((member) => member.object)).toEqual([
+      "a:held-3",
+      "a:held-0",
+    ])
+    // The turn is over: the other seat is asked, this one waits.
+    expect(own.last().input).toMatchObject({ kind: "waiting", actor: "p2" })
+    expect(other.question()).toMatchObject({ actor: "p2" })
+    expect(valid()).toBe(true)
+  })
+
+  it.each([
+    ["mode:1", { maxPp: 6, hand: 2, deck: 23 }],
+    ["mode:2", { maxPp: 5, hand: 3, deck: 22 }],
+  ] as const)("takes one mode of the spell (%s)", async (mode, after) => {
+    const { seats, own, valid } = asking("modes")
+    const asked = need(choice(own.question(), "p1"))
+    expect(await send(seats.p1, chooseAnswer(asked, ["mode:1", "mode:2"]))).toMatchObject(rejected)
+    expect(await send(seats.p1, chooseAnswer(asked, []))).toMatchObject(rejected)
+    expect(await send(seats.p1, chooseAnswer(asked, [mode]))).toMatchObject(applied)
+    const [self] = own.last().observation.players
+    expect({
+      maxPp: self.max_pp,
+      hand: self.zones.hand.count,
+      deck: self.zones.deck.count,
+    }).toEqual(after)
+    expect(self.pp).toBe(3)
+    expect(valid()).toBe(true)
+  })
+
+  it("takes who plays first, and the opening hand kept or returned whole", async () => {
+    const first = asking("firstPlayer")
+    const seat = need(choice(first.own.question(), "p1"))
+    // Nobody is the active seat before the first player is chosen.
+    const undecided = { active: null, first_player: null, phase: null }
+    expect(first.own.last().observation.turn).toMatchObject(undecided)
+    expect(first.other.last().observation.turn).toMatchObject(undecided)
+    expect(await send(first.seats.p1, chooseAnswer(seat, ["seat:p2"]))).toMatchObject(applied)
+    // Chosen, that seat is the active one; the opening goes on, so there is no phase yet.
+    const decided = { active: "p2", first_player: "p2", phase: null }
+    expect(first.own.last().observation.turn).toMatchObject(decided)
+    expect(first.other.last().observation.turn).toMatchObject(decided)
+    expect(first.own.last().input).toMatchObject({ kind: "waiting", actor: "p2" })
+    expect(first.valid()).toBe(true)
+
+    const kept = asking("mulligan")
+    const hand = need(mulligan(kept.own.question(), "p1"))
+    const opening = { active: "p1", first_player: "p1", phase: null }
+    expect(kept.own.last().observation.turn).toMatchObject(opening)
+    const before = kept.own.last().observation.players[0].zones.hand.cards
+    // Part of the hand cannot be returned.
+    expect(
+      await send(
+        kept.seats.p1,
+        mulliganAnswer(
+          hand,
+          hand.hand.slice(1).map((card) => card.id),
+        ),
+      ),
+    ).toMatchObject(rejected)
+    expect(await send(kept.seats.p1, mulliganAnswer(hand, null))).toMatchObject(applied)
+    expect(kept.own.last().observation.players[0].zones.hand.cards).toEqual(before)
+    expect(kept.own.last().observation.turn).toMatchObject(opening)
+
+    const redrawn = asking("mulligan")
+    const order = need(mulligan(redrawn.own.question(), "p1")).hand.map((card) => card.id)
+    expect(await send(redrawn.seats.p1, mulliganAnswer(hand, [...order].reverse()))).toMatchObject(
+      applied,
+    )
+    const after = redrawn.own.last().observation.players[0].zones.hand
+    expect(redrawn.own.last().observation.turn).toMatchObject(opening)
+    expect(after.count).toBe(4)
+    // Four other cards under handles of their own.
+    expect(after.cards.some((member) => before.some((old) => old.object === member.object))).toBe(
+      false,
+    )
+    expect(redrawn.valid()).toBe(true)
+  })
+
+  it("ends a question for good once its answer is taken, even when the next one reads the same", async () => {
+    // The scene asks its first question a second time: the same table, the same words, another id.
+    const sisters = scene("sisters")
+    const first = sisters.script.p1.find((message) => message.kind === "update")?.input
+    if (first?.kind !== "question") throw new Error("the scene asks its first seat")
+    const again: Scene = {
+      ...sisters,
+      after: (answers) => {
+        const [, ...rest] = answers
+        const same = sisters.after(answers.slice(0, 1))
+        if (same === null) return null
+        return rest.length === 0
+          ? {
+              table: same.table,
+              input: { kind: "question", question: { ...first.question, id: "successor" } },
+            }
+          : sisters.after(rest)
+      },
+    }
+    const seats = scriptedTable(again)
+    const own = follow(seats.p1)
+    const other = follow(seats.p2)
+    const before = [...other.messages]
+    const old = need(confirmation(own.question(), "p1"))
+    expect(await send(seats.p1, confirmAnswer(old, true))).toMatchObject({ result: "applied" })
+    // The seat that answered is told: the question it now has is a new one.
+    expect(seqs(own.messages)).toEqual([0, 1])
+    const next = need(confirmation(own.question(), "p1"))
+    expect(next.question).toBe("successor")
+    expect({ ...next, question: "" }).toEqual({ ...old, question: "" })
+    // The other seat saw nothing of it.
+    expect(other.messages).toEqual(before)
+    // The answered question does not come back to life, however alike the new one is.
+    expect(await send(seats.p1, confirmAnswer(old, true))).toMatchObject({
+      result: "rejected",
+      rejection: "invalid_submission",
+    })
+    expect(seqs(own.messages)).toEqual([0, 1])
+    // The new question is the one that can be answered.
+    expect(await send(seats.p1, confirmAnswer(next, false))).toMatchObject({ result: "applied" })
+    expect(seqs(own.messages)).toEqual([0, 1, 2])
+    expect(own.question()?.id).toBe("search")
+    expect(other.messages).toEqual(before)
+  })
+
+  it("leaves the other seat's open question as it is when that seat is told of a change", async () => {
+    // Both seats have a question open. The first answers its own, which changes the table for
+    // both; the script then hands the second seat the question it already has, under another id.
+    const sisters = scene("sisters")
+    const [ready, first] = sisters.script.p1
+    if (ready === undefined || first?.kind !== "update" || first.input.kind !== "question")
+      throw new Error("the scene asks its first seat")
+    const theirs: Question = {
+      ...first.input.question,
+      id: "theirs",
+      actor: "p2",
+      shape: { kind: "confirm", allowed: [true, false], subject: null, origin: null },
+    }
+    const [otherReady, otherFirst] = sisters.script.p2
+    if (otherReady === undefined || otherFirst?.kind !== "update") throw new Error("two seats")
+    const both: Scene = {
+      ...sisters,
+      script: {
+        p1: sisters.script.p1,
+        p2: [otherReady, { ...otherFirst, input: { kind: "question", question: theirs } }],
+      },
+      after: (answers) => {
+        const same = sisters.after(answers.slice(0, 1))
+        if (same === null || answers.length > 2) return null
+        const [self, opposing] = same.table.seats
+        return {
+          table: {
+            ...same.table,
+            seats: [{ ...self, life: self.life - answers.length }, opposing],
+          },
+          input: {
+            kind: "question",
+            question: { ...theirs, id: `theirs-${String(answers.length)}` },
+          },
+        }
+      },
+    }
+    const seats = scriptedTable(both)
+    const own = follow(seats.p1)
+    const other = follow(seats.p2)
+    expect(other.question()?.id).toBe("theirs")
+    await send(seats.p1, confirmAnswer(need(confirmation(own.question(), "p1")), true))
+    // The second seat is told of the change, under its own next number, and is still asked the
+    // question it had: the first seat's answer ended nothing of the second's.
+    expect(seqs(other.messages)).toEqual([0, 1])
+    expect(other.last().observation.players[0].life).toBe(16)
+    expect(other.question()).toEqual(theirs)
+    // The first seat is asked nothing now and waits for the second.
+    expect(own.last().input).toMatchObject({ kind: "waiting", actor: "p2" })
+    // The id the script made up is no question of this game; the one the seat holds is.
+    const held = need(confirmation(other.question(), "p2"))
+    expect(
+      await send(seats.p2, confirmAnswer({ ...held, question: "theirs-1" }, true)),
+    ).toMatchObject({ result: "rejected" })
+    expect(await send(seats.p2, confirmAnswer(held, true))).toMatchObject({ result: "applied" })
+    // Answered, it is over: what the seat is asked next carries another id.
+    expect(other.question()?.id).toBe("theirs-2")
+    expect(await send(seats.p2, confirmAnswer(held, true))).toMatchObject({ result: "rejected" })
   })
 })

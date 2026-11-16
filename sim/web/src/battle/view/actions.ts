@@ -1,7 +1,16 @@
 // What the open question lets a seat do in its main phase, read straight from the question. Like
 // the table model, nothing here works out a rule: which cards may be played, what may attack and
 // what each attacker may attack are exactly the intents the authority listed.
-import type { Command, ObjectHandle, OptionId, Question, QuestionId, Seat } from "../contract"
+import type {
+  Command,
+  ObjectHandle,
+  OptionId,
+  Question,
+  QuestionId,
+  QuickOption,
+  QuickWindow,
+  Seat,
+} from "../contract"
 
 interface PlayAction {
   readonly option: OptionId
@@ -71,4 +80,26 @@ export function act(acts: Actions, intent: OptionId, target: OptionId | null = n
     question_id: acts.question,
     answer: { kind: "action_window", intent, target },
   }
+}
+
+/** A Quick window put to a seat: what may be played or used in it, possibly nothing. */
+export interface Quick {
+  readonly question: QuestionId
+  readonly window: QuickWindow
+  readonly options: readonly QuickOption[]
+}
+
+/** The Quick window open to `viewer`; null for anything else. */
+export function quick(question: Question | null, viewer: Seat): Quick | null {
+  if (question?.actor !== viewer || question.shape.kind !== "quick") return null
+  return { question: question.id, window: question.shape.window, options: question.shape.options }
+}
+
+/** The card an option would play or use, where this seat can point at it. */
+export const quickHolder = (option: QuickOption): ObjectHandle | null =>
+  option.source.kind === "text" ? option.source.text.holder : option.source.holder
+
+/** The command that takes one of the window's options, or passes with null. */
+export function actQuick(window: Quick, option: OptionId | null): Command {
+  return { kind: "answer", question_id: window.question, answer: { kind: "quick", option } }
 }

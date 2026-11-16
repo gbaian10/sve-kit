@@ -71,10 +71,15 @@ scene's script says which table follows. A scene that only shows a table refuses
 Like the Worker it answers in a later task, the receipt before the update the command caused,
 and takes one command of a seat at a time.
 
-- `?scene=preset|opening|mid|full|stack|turn|finished|fault|halted` picks the scene; the chip on
-  the board's top-left corner does the same. `turn` is a turn that can be played to its end, its
-  actions in any order, every outcome written out by hand; `finished`, `fault` and `halted` are a
-  game that is over, an engine fault and a host error. `stack` is a Witch's table: a counter lies only on a card that may hold it, so
+- `?scene=` picks the scene; the chip on the board's top-left corner does the same. `preset`,
+  `opening`, `mid`, `full` and `stack` only show a table. `turn` is a turn that can be played to
+  its end, its actions in any order, every outcome written out by hand; `quick` is the other
+  seat's attack with a Quick window open; `finished`, `fault` and `halted` are a game that is
+  over, an engine fault and a host error. Six scenes put a selecting question to the first seat,
+  each an effect of a real card of the fixture decks or a step of the opening: `targets` (one
+  follower of each side), `sisters` (an optional extra cost, then a deck search whose shape
+  depends on the answer), `discard` (down to the hand limit, in the order named), `modes`,
+  `firstPlayer` and `mulligan`. `stack` is a Witch's table: a counter lies only on a card that may hold it, so
   stack counters are shown on amulets with Stack. Its followers are arranged to show how markers
   share a card (several keywords, standing and engaged; a chip beside a keyword), and its EX
   follower carries current numbers, as the authority reports them for the EX area too.
@@ -147,6 +152,12 @@ How the screen is put together:
   cards may attack what is the authority's open question (`src/battle/view/actions.ts` reads
   it), never worked out from keywords or postures. Storm and rush have no marker of their own on
   a card.
+- The other questions are read the same way: `src/battle/view/select.ts` (a selection: the picks
+  made so far, the groups and roles they are given, and the answer they make) and
+  `src/battle/view/choices.ts` (a choice among typed options, the opening hand, a yes or no).
+  Their hints only hold the picks against the numbers the question itself states (how many, how
+  many per named group or role, which properties must differ); no candidate is ruled out by the
+  screen, and whether an answer is legal stays the authority's to say.
 - The contract orders the field and the EX area and places no card in a slot, so the screen
   remembers where each card lies (`place` in `src/battle/view/table.ts`): a card keeps its slot
   for as long as it stays in its zone, and a card that arrives takes the first free slot.

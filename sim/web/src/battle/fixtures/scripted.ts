@@ -3,27 +3,129 @@
 // scene goes on from it, and to which table, is the script's to say. Each seat has its own source,
 // as with the Worker's per-seat channels, and the two share one playing of the scene. A command is
 // answered the way the Worker answers one: later, the receipt first, then what it changed.
-import type { Command, HostMessage, Question, Receipt, Seat } from "../contract"
+import type {
+  Answer,
+  BattleUpdate,
+  Command,
+  HostMessage,
+  OptionId,
+  Question,
+  Receipt,
+  Seat,
+  Selection,
+} from "../contract"
 import type { BattleSource } from "../source"
+import { costTotal, problems } from "../view/select"
 import { update } from "./build"
-import type { Choice, Scene } from "./scenes"
+import type { Scene } from "./scenes"
 
 const SEATS: readonly Seat[] = ["p1", "p2"]
 
-/** The answer as one of the question's own options; null when the question does not offer it. */
-function choice(question: Question | null, command: Command): Choice | null {
+/** The command's answer when the question offers it; null for anything the question does not list. */
+function offered(question: Question | null, command: Command): Answer | null {
   if (question === null || command.kind !== "answer" || command.question_id !== question.id)
     return null
   const { answer } = command
-  if (answer.kind !== "action_window" || question.shape.kind !== "action_window") return null
-  const intent = question.shape.intents.find((offered) => offered.id === answer.intent)
-  if (intent === undefined) return null
-  const named =
-    intent.kind === "attack"
-      ? intent.targets.some((offered) => offered.id === answer.target)
-      : answer.target === null
-  return named ? { intent: answer.intent, target: answer.target } : null
+  const { shape } = question
+  if (answer.kind === "action_window" && shape.kind === "action_window") {
+    const intent = shape.intents.find((listed) => listed.id === answer.intent)
+    if (intent === undefined) return null
+    const named =
+      intent.kind === "attack"
+        ? intent.targets.some((listed) => listed.id === answer.target)
+        : answer.target === null
+    return named ? answer : null
+  }
+  // Passing is always an answer to a Quick window.
+  if (answer.kind === "quick" && shape.kind === "quick")
+    return answer.option === null || shape.options.some((listed) => listed.id === answer.option)
+      ? answer
+      : null
+  if (answer.kind === "select" && shape.kind === "select")
+    return selected(shape.selection, answer) ? answer : null
+  if (answer.kind === "choose" && shape.kind === "choose") {
+    const { chosen } = answer
+    const listed = chosen.every((id) => shape.options.some((option) => option.id === id))
+    const within =
+      chosen.length >= shape.bounds.min &&
+      (shape.bounds.max === null || chosen.length <= shape.bounds.max)
+    return listed && within && new Set(chosen).size === chosen.length ? answer : null
+  }
+  if (answer.kind === "mulligan" && shape.kind === "mulligan") {
+    const order = answer.bottom_order
+    // Keeping returns nothing; redrawing returns the whole hand, each card once.
+    const whole =
+      order.length === shape.hand.length &&
+      shape.hand.every((card) => order.filter((id) => id === card.id).length === 1)
+    return (answer.redraw ? whole : order.length === 0) ? answer : null
+  }
+  if (answer.kind === "confirm" && shape.kind === "confirm")
+    return shape.allowed.includes(answer.accept) ? answer : null
+  return null
 }
+
+/**
+ * Whether a selection's answer is one the question's own statement allows: its candidates, each
+ * once, with every group and role the question lists, within the stated counts. Which candidates
+ * the rules would allow is not asked: the question listed them.
+ */
+function selected(selection: Selection, answer: Extract<Answer, { kind: "select" }>): boolean {
+  const picks = answer.selected
+  if (new Set(picks).size !== picks.length) return false
+  if (!picks.every((id) => selection.candidates.some((candidate) => candidate.id === id)))
+    return false
+  // Named groups come with every group of the question, each pick in exactly one of them.
+  const explicit = selection.group_assignment === "explicit"
+  if (explicit !== (answer.groups !== null)) return false
+  const groups = new Map<OptionId, number>()
+  for (const given of answer.groups ?? [])
+    for (const id of given.selected) {
+      if (groups.has(id) || !picks.includes(id)) return false
+      groups.set(id, given.group)
+    }
+  // Each listed name once, and no other.
+  const named = (listed: readonly number[], given: readonly number[]): boolean =>
+    given.length === listed.length &&
+    listed.every((name) => given.filter((other) => other === name).length === 1)
+  if (
+    explicit &&
+    !named(
+      selection.groups.map((each) => each.group),
+      (answer.groups ?? []).map((each) => each.group),
+    )
+  )
+    return false
+  // The roles split the selection completely: every pick in exactly one.
+  const roles = new Map<OptionId, number>()
+  for (const given of answer.roles)
+    for (const id of given.selected) {
+      if (roles.has(id) || !picks.includes(id)) return false
+      roles.set(id, given.role)
+    }
+  if (
+    !named(
+      selection.roles.map((each) => each.role),
+      answer.roles.map((each) => each.role),
+    )
+  )
+    return false
+  if (selection.roles.length > 0 && roles.size !== picks.length) return false
+  const asked = { question: "", selection }
+  const made = { selected: picks, groups, roles }
+  if (problems(asked, made).length > 0) return false
+  const total = costTotal(asked, made)
+  return (
+    total.sum === null ||
+    ((total.min === null || total.sum >= total.min) &&
+      (total.max === null || total.sum <= total.max))
+  )
+}
+
+/** What an update tells its seat, apart from its number. */
+const bare = (message: BattleUpdate): string => JSON.stringify({ ...message, update_seq: 0 })
+
+/** What a question asks, apart from the id it is asked under. */
+const asks = (question: Question): string => JSON.stringify({ ...question, id: "" })
 
 /** A later task, as each message from a Worker arrives in a task of its own. */
 const later = (run: () => void): void => {
@@ -48,7 +150,10 @@ export function scriptedTable(scene: Scene): Readonly<Record<Seat, BattleSource>
    */
   const out: Record<Seat, ((reason: Error) => void) | null> = { p1: null, p2: null }
   const sent: Record<Seat, number> = { p1: 0, p2: 0 }
-  const applied: Choice[] = []
+  /** The number of the last update each seat was sent, and that update without what only names it. */
+  const told: Record<Seat, number> = { p1: 0, p2: 0 }
+  const known: Record<Seat, string> = { p1: "", p2: "" }
+  const applied: Answer[] = []
 
   const produce = (seat: Seat, message: HostMessage): void => {
     if (message.kind === "update")
@@ -70,6 +175,10 @@ export function scriptedTable(scene: Scene): Readonly<Record<Seat, BattleSource>
   }
   for (const seat of SEATS)
     for (const message of scene.script[seat]) {
+      if (message.kind === "update") {
+        told[seat] = message.update_seq
+        known[seat] = bare(message)
+      }
       produce(seat, message)
       deliver(seat, message)
     }
@@ -101,18 +210,43 @@ export function scriptedTable(scene: Scene): Readonly<Record<Seat, BattleSource>
         later(() => {
           // Closed in the meantime: `close` has failed the command already.
           if (out[seat] !== reject) return
-          const chosen = choice(asked[seat], command)
-          const table = chosen === null ? null : scene.after([...applied, chosen])
-          if (chosen === null || table === null) {
+          const chosen = offered(asked[seat], command)
+          const step = chosen === null ? null : scene.after([...applied, chosen])
+          if (chosen === null || step === null) {
             out[seat] = null
             resolve(receipt("rejected"))
             return
           }
           applied.push(chosen)
-          const seq = applied.length
-          const updates = SEATS.map(
-            (each) => [each, update(table, each, seq, `q${String(seq)}`)] as const,
-          )
+          const answered = asked[seat]?.id
+          const updates = SEATS.flatMap((each) => {
+            const number = told[each] + 1
+            const built = update(step.table, each, number, step.input ?? `q${String(number)}`)
+            const open = asked[each]
+            let next = built
+            if (each === seat) {
+              // The answer was taken, so its question is over for good: whatever the seat is
+              // asked next is another question under another id, even when it reads the same.
+              if (built.input.kind === "question" && built.input.question.id === answered)
+                throw new Error("the scene asks again under the id of a question already answered")
+            } else {
+              // An answer that was not its own ends no question of this seat: asked the same
+              // thing still, the seat keeps the question it has, under the id it has.
+              if (
+                built.input.kind === "question" &&
+                open !== null &&
+                asks(built.input.question) === asks(open)
+              )
+                next = { ...built, input: { kind: "question", question: open } }
+              // A step that shows the seat nothing new sends it nothing, not even a number: a
+              // seat's sequence counts what that seat was told, and another seat's private
+              // answer leaves no trace in it.
+              if (bare(next) === known[each]) return []
+            }
+            told[each] = number
+            known[each] = bare(next)
+            return [[each, next] as const]
+          })
           for (const [each, message] of updates) produce(each, message)
           resolve(receipt("applied"))
           // The receipt comes before the update it caused: the updates go out in a later task,

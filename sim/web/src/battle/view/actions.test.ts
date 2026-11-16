@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { type MainIntent, type Question, type SourceRef, validateClientMessage } from "../contract"
 import { update } from "../fixtures/build"
 import { SCENES } from "../fixtures/scenes"
-import { act, actions } from "./actions"
+import { act, actions, actQuick, quick, quickHolder } from "./actions"
 
 const ABILITY: SourceRef = {
   kind: "card",
@@ -175,5 +175,35 @@ describe("actions", () => {
     expect(attack?.leader).not.toBeNull()
     expect(attack?.cards.size).toBe(1)
     expect(acts?.endPhase).not.toBeNull()
+  })
+
+  it("reads a Quick window put to this seat, and answers it or passes", () => {
+    const { input } =
+      SCENES.find((scene) => scene.id === "quick")?.script.p1.find(
+        (message) => message.kind === "update",
+      ) ?? {}
+    if (input?.kind !== "question") throw new Error("the Quick scene asks its first seat")
+    const window = quick(input.question, "p1")
+    expect(window).toMatchObject({ question: "quick", window: "attack" })
+    const [option] = window?.options ?? []
+    if (window === null || option === undefined) throw new Error("one option expected")
+    // The card it would play is one the seat can point at.
+    expect(quickHolder(option)).toBe("a:quick")
+    expect(
+      quickHolder({
+        ...option,
+        source: { kind: "card", printing_id: "p", face: 0, line: null, holder: null },
+      }),
+    ).toBeNull()
+    for (const answer of [actQuick(window, option.id), actQuick(window, null)])
+      expect(validateClientMessage({ kind: "submit", request_id: "r1", command: answer })).toBe(
+        true,
+      )
+    expect(actQuick(window, null)).toMatchObject({ answer: { kind: "quick", option: null } })
+    // It is nothing to another seat, and no main-phase question.
+    expect(quick(input.question, "p2")).toBeNull()
+    expect(actions(input.question, "p1")).toBeNull()
+    expect(quick(question(), "p1")).toBeNull()
+    expect(quick(null, "p1")).toBeNull()
   })
 })
