@@ -39,7 +39,9 @@ use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReas
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::ir::{advance_entry, victory, x_pp};
-use crate::ir::{choice_rules, counter_caps, draw_restrictions, evolution_limits};
+use crate::ir::{
+    battle_damage_basis, choice_rules, counter_caps, draw_restrictions, evolution_limits,
+};
 mod entry_posture;
 mod move_replacement;
 mod target_priority;
@@ -1116,6 +1118,11 @@ pub(super) fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
 
 fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     let ability = &located.node;
+    if let Some((objects, condition)) = battle_damage_basis::projection(ability) {
+        selection::field_selector(objects)?;
+        super::ordering::check_condition(condition, &located.source)?;
+        return Ok(true);
+    }
     if ir_dice::rerolls(ability).is_some()
         || evolution_limits::is_static(ability)
         || choice_rules::is_static(ability)
@@ -1188,7 +1195,8 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
 }
 
 pub(super) fn check_header(ability: &Ability) -> Result<()> {
-    if ir_dice::rerolls(ability).is_some()
+    if battle_damage_basis::projection(ability).is_some()
+        || ir_dice::rerolls(ability).is_some()
         || names::name(ability).is_some()
         || evolution_limits::is_static(ability)
         || choice_rules::is_static(ability)

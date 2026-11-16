@@ -57,6 +57,7 @@ mod damage;
 pub(in crate::game) use damage::DamageOccurrence;
 pub use damage::ReplacementOption;
 mod alternatives;
+mod battle_damage_basis;
 mod by_kind;
 mod card;
 mod cost;

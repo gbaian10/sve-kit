@@ -761,10 +761,10 @@ impl Game {
                 let mut frame = self.start_frame(source, Value::Null, &flow["decision"])?;
                 frame.cause = flow["cause"].clone();
                 let mut hits = vec![
-                    json!({"source":source,"source_generation":self.object(source)?.generation,"target":target,"amount":self.object(source)?.state["power"],"battle":true,"attack":true}),
+                    json!({"source":source,"source_generation":self.object(source)?.generation,"target":target,"amount":self.internal_combat_damage(source)?,"battle":true,"attack":true}),
                 ];
                 if !target.ends_with(".leader") {
-                    hits.push(json!({"source":target,"source_generation":self.object(target)?.generation,"target":source,"amount":self.object(target)?.state["power"],"battle":true}));
+                    hits.push(json!({"source":target,"source_generation":self.object(target)?.generation,"target":source,"amount":self.internal_combat_damage(target)?,"battle":true}));
                     if self.keywords(source)?.contains("bane") {
                         self.object_mut(target)?.state["bane_damaged"] = json!(true);
                     }
