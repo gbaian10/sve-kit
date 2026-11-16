@@ -57,8 +57,8 @@ INPUTS = (
 # hatch-vcs writes this during uv installs; the package exposes the version,
 # but repository_current's outputs do not consume it.
 BUILD_OUTPUTS = frozenset({"carddb/src/sve_carddb/_version.py"})
-GENERATOR = b"repository_current cards.jsonl selection.json v2"
-OUTPUTS = ("cards.jsonl", "selection.json")
+GENERATOR = b"repository_current cards.jsonl selection.json battle-projection.jsonl v3"
+OUTPUTS = ("cards.jsonl", "selection.json", "battle-projection.jsonl")
 KEPT_INPUTS = 8
 
 
@@ -127,10 +127,10 @@ def _cache_access(cache: Path) -> Generator[None]:
 
 
 def reuse(cache: Path, digest: str, folder: Path) -> bool:
-    """Copy a complete cached pair into the private temporary folder."""
+    """Copy a complete cached inputs into the private temporary folder."""
     if not cache.is_dir():
         return False
-    # A publisher must not prune this pair between its two copies.
+    # A publisher must not prune these inputs between its two copies.
     with _cache_access(cache):
         entry = cache / digest
         if not all((entry / name).is_file() for name in OUTPUTS):
@@ -142,7 +142,7 @@ def reuse(cache: Path, digest: str, folder: Path) -> bool:
 
 
 def keep(cache: Path, digest: str, folder: Path) -> None:
-    """Publish a generated pair atomically and keep only the newest entries."""
+    """Publish a generated inputs atomically and keep only the newest entries."""
     cache.mkdir(parents=True, exist_ok=True)
     entry = cache / digest
     staging = Path(tempfile.mkdtemp(prefix=f".{digest}-", dir=cache))
@@ -170,7 +170,9 @@ def keep(cache: Path, digest: str, folder: Path) -> None:
         shutil.rmtree(staging, ignore_errors=True)
 
 
-def generate(output: Path, selection: Path) -> subprocess.Popen[bytes]:
+def generate(
+    output: Path, selection: Path, battle_projection: Path
+) -> subprocess.Popen[bytes]:
     """Start writing the public card inputs; Cargo can build meanwhile."""
     return subprocess.Popen(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed local test adapter
         [
@@ -185,6 +187,7 @@ def generate(output: Path, selection: Path) -> subprocess.Popen[bytes]:
             "tests.support.repository_current",
             str(output),
             str(selection),
+            str(battle_projection),
         ]
     )
 
@@ -321,7 +324,7 @@ def main(arguments: list[str]) -> int:
         generation = (
             None
             if cache is not None and digest is not None and reuse(cache, digest, folder)
-            else generate(output, selection)
+            else generate(output, selection, folder / OUTPUTS[2])
         )
         try:
             names = list_tests() if shard is not None else []
@@ -334,13 +337,14 @@ def main(arguments: list[str]) -> int:
                 raise subprocess.CalledProcessError(
                     generation.returncode, generation.args
                 )
-            # Inputs edited during generation would make the pair stale for this digest.
+            # Inputs edited during generation would make the inputs stale for this digest.
             if cache is not None and digest == input_digest(ROOT):
                 keep(cache, digest, folder)
         environment = {
             **os.environ,
             "SVE_TEST_SNAPSHOT": str(output),
             "SVE_TEST_CURRENT_SELECTION": str(selection),
+            "SVE_TEST_BATTLE_PROJECTION": str(folder / OUTPUTS[2]),
         }
         if shard is None:
             return cargo(arguments or DEFAULT, env=environment).returncode
