@@ -1,4 +1,4 @@
-use super::{Execution, Game, InputDomain, Result, Wait, invalid, unsupported};
+use super::{Execution, Game, InputDomain, QuestionStage, Result, Wait, invalid, unsupported};
 use crate::ir::events::timing;
 use crate::ir::{
     Cardinality, ChoiceDomain, Control, Expr, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind,
@@ -96,7 +96,9 @@ impl Game {
                 binding,
                 receipt,
             },
-        )
+        )?;
+        execution.question_stage = Some(QuestionStage::Resolve);
+        Ok(())
     }
 
     pub(super) fn internal_alternative(
