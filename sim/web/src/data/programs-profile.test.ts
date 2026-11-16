@@ -11,7 +11,7 @@ describe("DSL program snapshot profile", () => {
     const current = {
       ...previous,
       format_version: "4.1.0",
-      min_reader_version: "4.1.0",
+      min_reader_version: "4.1.1",
       required_capabilities: [
         ...arrayValue(previous["required_capabilities"] ?? null),
         "dsl-programs-v1",
@@ -23,7 +23,7 @@ describe("DSL program snapshot profile", () => {
     expect(
       isCompatible({ ...current, required_capabilities: previous["required_capabilities"] ?? [] }),
     ).toBe(false)
-    expect(isCompatible({ ...current, min_reader_version: "4.1.1" })).toBe(false)
+    expect(isCompatible({ ...current, min_reader_version: "4.1.2" })).toBe(false)
     expect(isCompatible({ ...current, format_version: "4.2.0" })).toBe(false)
   })
 })
