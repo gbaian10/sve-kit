@@ -61,6 +61,17 @@ pub struct EvolutionPayment {
     pub super_allowed: bool,
 }
 
+impl EvolutionPayment {
+    // Projection and native submission must agree on this frozen payment domain.
+    pub(crate) fn is_valid(&self, pp: i64, ep: bool, super_evolution: bool) -> bool {
+        pp >= 0
+            && pp <= self.available_pp
+            && pp.checked_add(i64::from(ep)) == Some(self.total_pp)
+            && (!ep || self.ep_allowed)
+            && (!super_evolution || self.super_allowed)
+    }
+}
+
 /// One stage of a normal evolution declaration, always a play parameter.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum EvolutionQuestion {

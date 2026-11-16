@@ -11,8 +11,25 @@ use sve_engine::game::player::{
     SubmissionKind, Viewer,
 };
 
-fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
-    let (input, registry, document) = evolution::documents_for_forms(names);
+pub(super) fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
+    let identity = (0..u64::try_from(names.len())?).collect::<Vec<_>>();
+    fixture_with_face_map(names, &identity)
+}
+
+pub(super) fn fixture_with_face_map(
+    names: &[&str],
+    face_map: &[u64],
+) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
+    if face_map.len() != names.len() {
+        return Err("fixture face map length".into());
+    }
+    fixture_from_documents(evolution::documents_for_forms(names), face_map)
+}
+
+pub(super) fn fixture_from_documents(
+    (input, registry, document): (String, String, String),
+    face_map: &[u64],
+) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn Error>> {
     let mut rows = Vec::new();
     for line in input.lines() {
         let mut row: Value = serde_json::from_str(line)?;
@@ -39,18 +56,25 @@ fn fixture(names: &[&str]) -> Result<(Arc<Catalog>, BattleReferences), Box<dyn E
     let mut faces = Vec::new();
     for (number, printing, count) in [
         ("unit-follower", "printing-base", 1_u64),
-        ("unit-form", "printing-form", u64::try_from(names.len())?),
+        ("unit-form", "printing-form", u64::try_from(face_map.len())?),
         ("unit-spell", "printing-spell", 1),
         ("unit-amulet", "printing-amulet", 1),
         ("unit-other", "printing-other", 1),
     ] {
         for native_face in 0..count {
+            let face = if number == "unit-form" {
+                *face_map
+                    .get(usize::try_from(native_face)?)
+                    .ok_or("fixture face map entry")?
+            } else {
+                native_face
+            };
             faces.push(PrintingFaceIdentity {
                 card_no: number.into(),
                 native_face,
                 card: CardRef {
                     printing_id: printing.into(),
-                    face: WireNat::try_from(native_face)?,
+                    face: WireNat::try_from(face)?,
                 },
             });
         }
