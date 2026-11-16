@@ -8,6 +8,7 @@ use crate::ir::battle_damage_basis;
 impl Game {
     pub(in crate::game) fn internal_combat_damage(&self, source: &str) -> Result<i64> {
         let health = self.health_combat_basis(source)?;
+        // Numeric layers already synchronize state before combat; reuse that authoritative value.
         self.object(source)?.state[if health { "hp" } else { "power" }]
             .as_i64()
             .ok_or_else(|| invalid("invalid combat damage characteristic"))
