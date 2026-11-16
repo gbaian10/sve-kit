@@ -1,23 +1,70 @@
 //! Rule-owned decisions are separate from effect answer domains.
-//!
-//! F02A owns this family. Wiring mirrors `Decision` with one central `Binding::Flow`
-//! variant and one answer forwarding arm, keeping future flow shapes in this module.
+//! F02A owns this family; F02B/F02D keep effect shapes in Decision.
 
-use super::{Binding, Result};
-use crate::battle::ProjectionError;
-use crate::game::player;
-use sve_battle_contract::{observation::ProcessingStage, question as wire};
+use super::{AnswerError, Binding as QuestionBinding, Result, decision::Context};
+use crate::battle::{BattleReferences, ProjectionError};
+use crate::catalog::Catalog;
+use crate::game::player::{self, DecisionShape, QuestionToken};
+use core::result;
+use sve_battle_contract::{Answer, observation::ProcessingStage, question as wire};
 
-pub(super) const fn context() -> Result<(
+mod quick;
+
+#[derive(Clone)]
+pub(super) enum Binding {
+    Quick(quick::Binding),
+}
+
+pub(super) const fn context(
+    purpose: player::QuestionPurpose,
+) -> Result<(
     player::QuestionPurpose,
     wire::QuestionPurpose,
     ProcessingStage,
 )> {
-    // A flow stop needs its authoritative rules purpose and processing context together.
-    Err(ProjectionError::Unavailable)
+    match purpose {
+        player::QuestionPurpose::QuickWindow => Ok((
+            purpose,
+            wire::QuestionPurpose::QuickWindow,
+            ProcessingStage::Quick,
+        )),
+        // Other rule stops still lack their complete occurrence context.
+        player::QuestionPurpose::PlayParameter
+        | player::QuestionPurpose::ResolutionChoice
+        | player::QuestionPurpose::RuleChoice
+        | player::QuestionPurpose::MainAction => Err(ProjectionError::Unavailable),
+    }
 }
 
-pub(super) const fn project() -> Result<(wire::QuestionUse, wire::QuestionShape, Binding)> {
-    // Native flow contexts and occurrence sources must exist before these stops can be answered.
-    Err(ProjectionError::Unavailable)
+pub(super) fn project(
+    domain: &DecisionShape,
+    context: Context<'_>,
+    catalog: &Catalog,
+    references: &BattleReferences,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, QuestionBinding)> {
+    let DecisionShape::Quick { window, options } = domain else {
+        return Err(ProjectionError::Unavailable);
+    };
+    let (shape, binding) = quick::project(*window, options, context, catalog, references)?;
+    Ok((
+        wire::QuestionUse::Quick,
+        shape,
+        QuestionBinding::Flow(Binding::Quick(binding)),
+    ))
+}
+
+impl Binding {
+    pub(super) fn answer(
+        &self,
+        token: QuestionToken,
+        answer: &Answer,
+    ) -> result::Result<player::Command, AnswerError> {
+        let decoded = match self {
+            Self::Quick(binding) => binding.answer(answer)?,
+        };
+        Ok(player::Command::Answer {
+            token,
+            answer: decoded,
+        })
+    }
 }

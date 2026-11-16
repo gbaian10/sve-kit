@@ -33,6 +33,8 @@ pub struct QuickChoice {
     pub position: u64,
     /// Current Observation capability, never a physical identity.
     pub object: Option<ObjectHandle>,
+    /// Authorized printed ability source; absent for card play or unknown text.
+    pub source: Option<EffectSource>,
 }
 
 /// One pending occurrence, preserving its captured public text context.
