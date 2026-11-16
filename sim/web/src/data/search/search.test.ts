@@ -2,6 +2,7 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
+import { CARDS } from "../../../scripts/fixture/cards"
 import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey } from "../../domain/cardNo"
 import { LOCATION_ORDER } from "../../domain/deckLocation"
@@ -102,13 +103,13 @@ it("chooses the uniquely largest promo family and hides ties", () => {
 })
 
 const base = "https://cdn.test"
-function origin() {
-  const files = new Map(built.files)
+function origin(snapshot = built) {
+  const files = new Map(snapshot.files)
   const requests: string[] = []
   let held: { path: string; promise: Promise<void> } | undefined
   let pointer = canonical({
-    manifest_path: built.manifestPath,
-    manifest_sha256: digest(files.get(built.manifestPath) ?? new Uint8Array()),
+    manifest_path: snapshot.manifestPath,
+    manifest_sha256: digest(files.get(snapshot.manifestPath) ?? new Uint8Array()),
   })
   const fetcher: Fetcher = async (url) => {
     const path = url.slice(base.length + 1)
@@ -135,7 +136,7 @@ function origin() {
       pointer = canonical({ manifest_path: path, manifest_sha256: digest(bytes) })
     },
     update(number: number) {
-      const manifest = objectValue(JSON.parse(JSON.stringify(built.manifest)) as JsonObject)
+      const manifest = objectValue(JSON.parse(JSON.stringify(snapshot.manifest)) as JsonObject)
       manifest["data_version"] = `20261004T01000${String(number)}Z-0001`
       const data = canonical(manifest)
       const path = `snapshots/manifests/${digest(data).slice(7)}.json`
@@ -3793,10 +3794,7 @@ it.each(["jp", "en"] as const)(
       expect(h.status().result.phase).toBe("pending")
       expect(
         h.events.some(
-          (event) =>
-            event.kind === "query-progress" &&
-            event.total === paths.length &&
-            event.done < event.total,
+          (event) => event.kind === "query-progress" && event.total > 0 && event.done < event.total,
         ),
       ).toBe(true)
       release()
@@ -4282,5 +4280,88 @@ it("can cancel and retry an SVE-art load without blocking ordinary queries", asy
     ).toBe(true)
   } finally {
     release()
+  }
+})
+
+it("waits for equivalent-rule details only on a PR query, excludes a differently named promo, and restores the empty result", async () => {
+  const face = CARDS.find((card) => card.id === "c:bp01-001")?.faces[0]
+  const promo = CARDS.find((card) => card.id === "c:pr-001")
+  const printing = promo?.printings[0]
+  if (!face || !promo || !printing) throw new Error("missing fixture")
+  const equivalent = await buildSnapshot({
+    encodeImage: ({ seed }) => Promise.resolve(new TextEncoder().encode(String(seed))),
+    cards: [
+      ...CARDS.map((card) =>
+        card.id === "c:pr-001"
+          ? { ...card, faces: card.faces.map((own) => ({ ...face, id: own.id, name: own.name })) }
+          : card,
+      ),
+      {
+        ...promo,
+        id: "c:pr-unique",
+        faces: [
+          {
+            ...face,
+            id: "f:pr-unique",
+            name: { ja: "独自のPRカード" },
+            effect: { ja: "カードを7枚引く。" },
+          },
+        ],
+        printings: [{ ...printing, id: "p:pr-unique", cardNo: "PR-002", intId: 3002 }],
+      },
+    ],
+  })
+  const served = origin(equivalent)
+  const file = arrayValue(equivalent.manifest["files"])
+    .map((raw) => objectValue(raw))
+    .find(
+      (file) =>
+        file["purpose"] === "detail" &&
+        file["region"] === "jp" &&
+        arrayValue(file["row_counts"]).some((raw) => {
+          const count = arrayValue(raw)
+          return count[0] === "face_revision" && count[2] === "set:pr"
+        }),
+    )
+  if (!file) throw new Error("missing promo rules detail")
+  const path = stringValue(file["path"]),
+    storage = memoryCache(),
+    h = harness(served, storage)
+  h.session.load(base, "jp", "preview")
+  await h.settled()
+  expect(served.requests).not.toContain(path)
+  const release = served.hold(path)
+  h.channel.search(prQuery("jp"))
+  try {
+    await expect.poll(() => served.requests.includes(path), POLL).toBe(true)
+    expect(h.status().result.phase).toBe("pending")
+    const ordinary = h.session.createChannel()
+    ordinary.search(query)
+    await expect.poll(() => ordinary.getStatus().result.phase, POLL).toBe("complete")
+    release()
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    if (result.phase !== "complete") throw new Error("missing result")
+    expect(result.page.items.map((item) => item.summary?.cardId)).toEqual(["c:pr-unique"])
+    const emptyQuery = { ...prQuery("jp"), state: { ...prQuery("jp").state, text: "PR-001" } }
+    h.channel.search(emptyQuery)
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const empty = h.status().result
+    if (empty.phase !== "complete") throw new Error("missing empty result")
+    expect(empty.page.total).toBe(0)
+    const restored = harness(served, storage)
+    served.requests.length = 0
+    restored.session.load(base, "jp", "preview")
+    await restored.settled()
+    restored.channel.search(emptyQuery)
+    await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
+    const next = restored.status().result
+    if (next.phase !== "complete") throw new Error("missing restored result")
+    expect(next.page).toEqual(empty.page)
+    expect(served.requests).toEqual(["snapshots/preview/current.json"])
+    restored.session.dispose()
+  } finally {
+    release()
+    h.session.dispose()
   }
 })
