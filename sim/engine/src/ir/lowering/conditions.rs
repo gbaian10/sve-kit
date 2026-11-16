@@ -950,6 +950,16 @@ impl BodyContext<'_> {
     }
 
     fn paid_amount(&self, name: &str, path: &str) -> Result<Expr<Int>, LoweringError> {
+        if let Some(receipt) = self.receipt_reads.paid_counters.get(name) {
+            return Ok(Expr::Compute(Box::new(IntOperation::FromNat {
+                value: Expr::Frozen(Box::new(NatFrozen::ReceiptActual {
+                    receipt: super::super::MeasuredReceipt::Counters {
+                        receipt: super::super::ReceiptReference::new(*receipt),
+                    },
+                })),
+            })));
+        }
+
         if let Some(receipt) = self.receipt_reads.paid_material_acts.get(name) {
             return Ok(Expr::Frozen(Box::new(IntFrozen::PaidMaterialActs {
                 receipt: super::super::ReceiptReference::new(*receipt),

@@ -1362,6 +1362,7 @@ fn supported(code: &str) -> bool {
             | "shape.MeasuredReceipt.Cards"
             | "shape.MeasuredReceipt.Damage"
             | "shape.MeasuredReceipt.Payment"
+            | "shape.MeasuredReceipt.Counters"
             | "internal.QuantityUnit.Cards"
             | "receipt.local"
             | "decision.input"

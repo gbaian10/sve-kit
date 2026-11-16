@@ -633,6 +633,7 @@ pub(super) fn lower_at_source(
             | ast::StaticEffect::MakeType(_)
             | ast::StaticEffect::Reroll(_)
             | ast::StaticEffect::ChoiceAny(_)
+            | ast::StaticEffect::RuleOverride(_)
             | ast::StaticEffect::UnlimitedEvolve(_)
             | ast::StaticEffect::AlsoNamed(_)
             | ast::StaticEffect::Grant(_)

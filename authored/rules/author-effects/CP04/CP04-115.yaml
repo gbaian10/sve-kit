@@ -1,0 +1,57 @@
+cards:
+  CP04-115:
+    abilities:
+      - fanfare:
+          do:
+            - counter:
+                delta:
+                  resource:
+                    kind: pp_max
+                    who: self
+                name: バッテリーカウンター
+                on: this
+          ub: true
+        line: 1
+      - line: 1
+        section: 1
+        static:
+          effects:
+            - rule_override:
+                max: 7
+                name: バッテリーカウンター
+                on: this
+                rule: counter_cap
+      - activate:
+          cost:
+            steps:
+              - pp: x
+              - act_self: true
+              - counter:
+                  n: x
+                  name: バッテリーカウンター
+                  on: this
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  not_same_name_as_this: true
+                  orig_cost_le: x
+                  trait: 〈ジオ・テオゴニア〉
+                  who: self
+                  zone: deck
+                to: field
+          x: {}
+        line: 2
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

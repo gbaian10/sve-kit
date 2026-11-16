@@ -31,6 +31,7 @@ use crate::ir::{
 
 pub(super) mod ability_cost;
 mod cost_observation;
+mod counter_budget;
 mod x_pp;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::slice::from_ref;
@@ -503,13 +504,15 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut distribution = false;
     let mut material = false;
     let mut targets = BTreeSet::new();
-    for (index, decision) in parameters.iter().enumerate() {
+    let mut declarations = true;
+    for decision in parameters {
         if x_payment::parameter(decision).is_some() {
-            if index != 0 {
+            if !declarations {
                 return Err(unsupported("X must precede targets and materials"));
             }
             continue;
         }
+        declarations = false;
         if super::material::is_parameter(decision) {
             super::material::check_parameter(decision)?;
             material = true;
@@ -1411,7 +1414,7 @@ impl Game {
         } else {
             None
         };
-        let mut parameters: VecDeque<Decision> = additional
+        let declared_parameters = additional
             .as_deref()
             .into_iter()
             .flat_map(|(_, payment)| payment.play.parameters.clone())
@@ -1419,18 +1422,11 @@ impl Game {
                 vec![]
             } else {
                 play.parameters
-            })
-            .collect();
+            });
         // CR 10.6.2.2.4 fixes X before determining additional hand materials.
-        if let Some(index) = parameters
-            .iter()
-            .position(|decision| x_payment::parameter(decision).is_some())
-        {
-            let x = parameters
-                .remove(index)
-                .ok_or_else(|| invalid("missing X declaration"))?;
-            parameters.push_front(x);
-        }
+        let (mut parameters, following): (VecDeque<_>, VecDeque<_>) =
+            declared_parameters.partition(|decision| x_payment::parameter(decision).is_some());
+        parameters.extend(following);
         execution.play = Some(PlayState {
             cost_policy,
             qualification: ability.qualification,

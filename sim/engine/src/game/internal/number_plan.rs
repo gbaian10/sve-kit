@@ -4,7 +4,8 @@ use super::tokens::dynamic;
 use super::{Execution, Game, Result, invalid, receipt_members, unsupported, values};
 use crate::ir::{
     Arithmetic, Binding, Bool, Comparison, DestroyOutcome, Expr, Int, IntFrozen, IntOperation, Nat,
-    NatOperation, NatRead, PlayerRef, Predicate, ReceiptReference, number_bounds::Bounds,
+    NatOperation, NatRead, PlayerRef, Predicate, ReceiptReference,
+    number_bounds::{self, Bounds},
 };
 use core::convert::identity;
 
@@ -361,10 +362,7 @@ fn integer(expression: &Expr<Int>, policy: Policy) -> Result<CheckedInteger> {
         },
         _ if policy.opaque_leaves() => Ok(CheckedInteger {
             plan: Integer::Effect(Box::new(expression.clone())),
-            bounds: Bounds {
-                lower: i64::MIN,
-                upper: i64::MAX,
-            },
+            bounds: number_bounds::integer(expression),
             constant: None,
         }),
         _ => Err(unsupported("token integer count reader")),

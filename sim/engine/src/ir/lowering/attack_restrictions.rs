@@ -129,6 +129,7 @@ fn permission(
         | ast::StaticEffect::Reroll(_)
         | ast::StaticEffect::UnlimitedEvolve(_)
         | ast::StaticEffect::ChoiceAny(_)
+        | ast::StaticEffect::RuleOverride(_)
         | ast::StaticEffect::AlsoNamed(_)
         | ast::StaticEffect::If(_)
         | ast::StaticEffect::EvolveCostMod(_)

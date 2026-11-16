@@ -38,7 +38,7 @@ use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReas
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::ir::{advance_entry, victory, x_pp};
-use crate::ir::{choice_rules, evolution_limits};
+use crate::ir::{choice_rules, counter_caps, evolution_limits};
 mod entry_posture;
 mod move_replacement;
 mod target_priority;
@@ -1130,6 +1130,7 @@ fn check_static(game: &Game, located: &Located<Ability>) -> Result<bool> {
     if ir_dice::rerolls(ability).is_some()
         || evolution_limits::is_static(ability)
         || choice_rules::is_static(ability)
+        || counter_caps::projection(ability).is_some()
     {
         return Ok(true);
     }
@@ -1201,6 +1202,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || names::name(ability).is_some()
         || evolution_limits::is_static(ability)
         || choice_rules::is_static(ability)
+        || counter_caps::projection(ability).is_some()
         || holder_removal::is_static(ability)
         || holder_removal::is_mixed_static(ability)
         || static_declarations::is_static(ability)

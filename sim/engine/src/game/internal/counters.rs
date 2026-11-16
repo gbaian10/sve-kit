@@ -13,6 +13,7 @@ use crate::ir::{
     ObjectRef, PlaySpec, PlayerRef, PlayerRelation, Quantity, QuantityUnit, RuntimeHolder,
     Selector, ZoneKind,
 };
+use crate::ir::{counter_caps, x_pp};
 use serde_json::json;
 
 const fn object_holder(holder: &Holder) -> bool {
@@ -56,18 +57,13 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
 }
 
 pub(super) fn is_cost(action: &Action) -> bool {
-    matches!(
-        action,
-        Action::Counter {
-            operation: CounterOperation::Remove {},
-            holder: Holder::Object {
-                object: ObjectOperand::SourceHolder {} | ObjectOperand::Selected { .. }
-            },
-            amount: Expr::Literal(Nat(n)),
-            ..
-        }
-        if i64::try_from(*n).is_ok()
-    ) && check_action(action).is_ok()
+    matches!(action, Action::Counter {
+        operation:CounterOperation::Remove {},
+        holder:Holder::Object {object}, amount,..
+    } if matches!((object,amount),
+        (ObjectOperand::SourceHolder {} | ObjectOperand::Selected {..},Expr::Literal(Nat(n))) if i64::try_from(*n).is_ok())
+        || matches!((object,amount),(ObjectOperand::SourceHolder {},Expr::Bound(_))))
+        && check_action(action).is_ok()
 }
 
 #[expect(
@@ -123,6 +119,22 @@ impl Game {
     reason = "Counter costs and effects mutate the authoritative object counter map."
 )]
 impl Game {
+    fn counter_headroom(&self, id: &str, kind: &CounterKind, before: Nat) -> Result<Option<u64>> {
+        if self.object(id)?.zone != "field" {
+            return Ok(None);
+        }
+        let key = self.catalog.keyword_id(&kind.0);
+        let mut limit: Option<u64> = None;
+        for ability in self.internal_effective_abilities(id)? {
+            if let Some((capped, cap)) = counter_caps::projection(&ability.node)
+                && self.catalog.keyword_id(&capped.0) == key
+            {
+                limit = Some(limit.map_or(cap.0, |previous| previous.min(cap.0)));
+            }
+        }
+        Ok(limit.map(|cap| cap.saturating_sub(before.0)))
+    }
+
     fn internal_counter_move(
         &mut self,
         execution: &mut Execution,
@@ -155,6 +167,9 @@ impl Game {
         } else {
             execution.natural(self, amount)?.0.min(before.0)
         };
+        let moved = self
+            .counter_headroom(execution.object_id(to)?, kind, recipient_before)?
+            .map_or(moved, |room| moved.min(room));
         let recipient_after = recipient_before
             .0
             .checked_add(moved)
@@ -227,10 +242,7 @@ impl Game {
             return self.internal_counter_move(execution, instruction, holder, kind, to, amount);
         }
         let amount = if payment {
-            let Expr::Literal(amount) = amount else {
-                return Err(unsupported("fixed counter amount"));
-            };
-            *amount
+            execution.natural(self, amount)?
         } else {
             Nat(NaturalAmountPlan::compile(amount)?.evaluate(execution, self)?)
         };
@@ -305,7 +317,10 @@ impl Game {
         let after = match operation {
             CounterOperation::Add {} => before
                 .0
-                .checked_add(amount.0)
+                .checked_add(
+                    self.counter_headroom(&id, kind, before)?
+                        .map_or(amount.0, |room| amount.0.min(room)),
+                )
                 .filter(|value| i64::try_from(*value).is_ok())
                 .ok_or_else(|| invalid("counter overflow"))?,
             CounterOperation::Remove {} => before.0.saturating_sub(amount.0),
@@ -485,6 +500,17 @@ pub(super) fn selected_cost(action: &Action) -> Option<Binding<Selector>> {
 
 pub(super) fn check_cost(action: &Action, play: &PlaySpec) -> bool {
     if !is_cost(action) {
+        return false;
+    }
+    if let Action::Counter {
+        amount: Expr::Bound(binding),
+        ..
+    } = action
+        && !play
+            .parameters
+            .iter()
+            .any(|parameter| x_pp::parameter(parameter) == Some(*binding))
+    {
         return false;
     }
     let Some(selected) = selected_cost(action) else {

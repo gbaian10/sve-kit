@@ -26,7 +26,8 @@ impl BodyContext<'_> {
             _ => None,
         };
         if name.is_some_and(|name| {
-            self.receipt_reads.paid_materials.contains_key(name)
+            self.receipt_reads.paid_counters.contains_key(name)
+                || self.receipt_reads.paid_materials.contains_key(name)
                 || self.receipt_reads.paid_material_acts.contains_key(name)
         }) {
             return Err(unsupported(path));
@@ -53,6 +54,7 @@ impl BodyContext<'_> {
         }
         if name.is_empty()
             || self.receipt_reads.paid_material_acts.contains_key(name)
+            || self.receipt_reads.paid_counters.contains_key(name)
             || self.receipt_reads.paid_materials.contains_key(name)
             || self.observations.contains_key(name)
             || self.targets.contains_key(name)
@@ -85,6 +87,7 @@ impl BodyContext<'_> {
         }
         if name.is_empty()
             || self.receipt_reads.paid_material_acts.contains_key(name)
+            || self.receipt_reads.paid_counters.contains_key(name)
             || self.receipt_reads.paid_materials.contains_key(name)
             || self.observations.contains_key(name)
             || self.targets.contains_key(name)
