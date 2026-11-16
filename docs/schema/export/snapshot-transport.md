@@ -25,7 +25,7 @@
 - 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配，只能進開發桶的版本索引，不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
 - `required_capabilities` 是排序、唯一的非空 Code 陣列，4.0 的固定集合依 §5.4，4.1 的 DSL 增量依 §3.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。已發布格式新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本；尚未發布的 4.0.0 可同步原地替換，不留雙格式 parser，也不另增 capability。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
-- 未凍結期間，舊 reader 會讀錯的原地變更須提高 reader 契約的 patch，並同步 producer 的最低 reader 版本。4.0 新產出固定寫 min_reader_version=4.0.2，4.1 固定寫 4.1.0；Python 與 Web reader 按 profile 准入這兩個最低版本，版本索引略過 4.0.0／4.0.1 的舊 preview，沒有相容入口就回報不支援。舊 preview 須以新 data_version 重建，不以新配置解讀舊 band，也不加舊配置 fallback。Schema 保留舊 minimum 以辨識索引與留存封套；發布器仍可核對舊 manifest 封套與 JSON 保留閉包，但不能把它當成可讀快照或用來重算圖片閉包。
+- 未凍結期間，舊 reader 會讀錯的原地變更須提高 reader 契約的 patch，並同步 producer 的最低 reader 版本。4.0 新產出固定寫 min_reader_version=4.0.3，4.1 固定寫 4.1.1；Python 與 Web reader 按 profile 准入這兩個最低版本，版本索引略過 4.0.0／4.0.1／4.0.2 與 4.1.0 minimum 的舊 preview，沒有相容入口就回報不支援。舊 preview 須以新 data_version 重建，不以新配置解讀舊 band，也不加舊配置 fallback。Schema 保留舊 minimum 以辨識索引與留存封套；發布器仍可核對舊 manifest 封套與 JSON 保留閉包，但不能把它當成可讀快照或用來重算圖片閉包。
 - 分片 bucket 的算法與數目由每個 format 版本的配置釘死；已發布配置調整至少升 minor；尚未發布的 4.0.0 依前項同步替換，不能只更換 data_version。`search.grammar_version/normalizer_version` 是搜尋契約的獨立 Code，不宣稱特定搜尋實作已完成；reader 必須明示支援這一對值，未知值停用搜尋並告知，不能用舊 normalizer 建錯索引。
 
 例如 reader 可以讀兩個 data_version 不同的 `4.0.0` 快照，但仍須驗證固定能力集合。
@@ -214,7 +214,7 @@ format_version=`4.0.0` 的支援 DSL 版本集合固定為空：唯一可接受�
 
 此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（`{"format_version":"4.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。下載文字分片不依賴此附件；驗完整快照時另外取得。
 
-format_version=`4.1.0` 啟用 DSL `1.0`，最低 reader 版本為 `4.1.0`，必要能力在 4.0 的集合上新增 `dsl-programs-v1`。`4.0.0` 的空集合規則不變。producer 有程式時預設選用 4.1，明示選用 4.0 且程式非空即拒絕，不能丟棄程式降級。未知 DSL 版本仍拒絕整包。
+format_version=`4.1.0` 啟用 DSL `1.0`，最低 reader 版本為 `4.1.1`，必要能力在 4.0 的集合上新增 `dsl-programs-v1`。`4.0.0` 的空集合規則不變。producer 有程式時預設選用 4.1，明示選用 4.0 且程式非空即拒絕，不能丟棄程式降級。未知 DSL 版本仍拒絕整包。
 
 DSL 1.0 的公開 AST 由 `dsl/program.schema.json` 定義，重用 `dsl/author-nodes.schema.json` 的執行節點；snapshot Schema 產生器將必要閉包編入 wheel 的本地 `$defs`，reader 不依賴 repo checkout 或遠端 Schema。公開 AST 恰保留 `card_id,scope` 及存在的 `abilities,faces,deck_rule,token`；scope 目前只允許 shared，faces 以永久 face ID 為鍵。能力保留執行節點、ports、imports 及 line／section，移除 sources；作者、審核、來源證據、ignored、note 與具名本體的 use／registration 都不出貨。所有具名本體必須先展開，參數與 generated 節點一律拒絕。
 
@@ -358,7 +358,7 @@ card、face、face_revision、support、卡片關係跟 card.home_set_id；print
 
 ### 5.1 固定配置
 
-4.0 固定內部 N=64、min_reader_version=4.0.2，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶（width=64），BP01／CP04 固定兩帶（width=32）。global 預設八帶（width=8）；僅 purpose=detail、region=null、global family 固定十六帶（width=4），JP／EN 的 global detail 仍為八帶。region 是固定配置判定的一部分；局部字典跟隨其 File，不另依字典的 global owner 重分。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
+4.0 固定內部 N=64、min_reader_version=4.0.3，能力依 §5.4。bucket 僅用 sha256-mod-v1 作穩定背景 band 分配，不是 fragment 身分或 row_index 座標。一般家族一帶（width=64），BP01／CP04 固定兩帶（width=32）。global 預設八帶（width=8）；僅 purpose=detail、region=null、global family 固定十六帶（width=4），JP／EN 的 global detail 仍為八帶。region 是固定配置判定的一部分；局部字典跟隨其 File，不另依字典的 global owner 重分。images 保留原 physical 成員：global width=1、home_set width=32，同檔只合併 fragment、base=null。
 
 catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 `:band-<n>`。File key 為 `<purpose>/<region-or-shared>/<family-or-shared>/<band>`，家族 ID 按 UTF-8 percent encode（只保留 unreserved），catalog band 固定 0。config、programs 各一檔，key 同用途，region=null、segment=shared。
 
@@ -380,7 +380,7 @@ catalog 不分帶，segment=`family-<永久家族>` 或 `shared`；背景再加 
 
 ### 5.4 卡包 media 與 ID 圖片
 
-format_version 為 `4.0.0`，min_reader_version 為 `4.0.2`，完整八個 required_capabilities 依
+format_version 為 `4.0.0`，min_reader_version 為 `4.0.3`，完整八個 required_capabilities 依
 [公開 annotation §1](public-annotation.md#1-版本與驗證邊界)，空圖片、same_name 或 annotation 也不能省略。
 translation 在 bootstrap／detail 均為完整八欄；FieldTranslation 的七格欄序與 basis 依 §8。
 canonical、owner、分片鍵及裝檔規則沿前述配置，producer、Python reader、共用 golden 與 Web 解碼欄序須同步。
@@ -432,7 +432,7 @@ version 為 1..2^53−1 或 null，狀態／空陣列約束依 snapshot-format �
 
 `qa_card_ids` 從本次出貨的 qa.current_version_id 對應 qa_version.cards 聯集推導；歷史版本的已移除關聯不算現行 QA。`errata_card_ids` 按公告的 `region` 分區，從本次 errata.versions.changes.face_id 及 printings.printing_id 對應的 card 聯集推導；日版只看 `jp`、英版只看 `en`，不混用兩區聯集；包含已公布但未生效的公告，UI 另讀日期。兩者先驗引用閉包、再排序去重；有 ID 表示 present。沒 ID 只有在相應 kind／region／收錄 scope 的完整來源窗口涵蓋查詢日期時才為 absent，其餘 unknown。摘要不表示裁定適用已人工確認，也不能由一區的 absent 推另一區。
 
-`qa_card_index` 是按地區的稀疏反查表，包含每題 current_version_id 對應 cards 的完整關聯，不列空卡。每卡版本 ID 清單依 official_number 第一段十進位數字、完整編號、qa.id 排序；無數字或無編號者置後。reader 對出貨 QA 獨立重算並驗等值，拒絕遺漏、歷史版本、錯區、錯卡、重複與錯序。索引缺少時保留既有摘要與掃描路徑；欄位是未凍結 4.0.0 的可選新增，不改定位或 tuple 語意，最低 reader 維持 4.0.2。
+`qa_card_index` 是按地區的稀疏反查表，包含每題 current_version_id 對應 cards 的完整關聯，不列空卡。每卡版本 ID 清單依 official_number 第一段十進位數字、完整編號、qa.id 排序；無數字或無編號者置後。reader 對出貨 QA 獨立重算並驗等值，拒絕遺漏、歷史版本、錯區、錯卡、重複與錯序。索引缺少時保留既有摘要與掃描路徑；欄位是未凍結 4.0.0 的可選新增，不改定位或 tuple 語意，最低 reader 維持 4.0.3。
 
 卡片不在該區索引，僅在同一個 kind=qa、scope_key=region:*、state=complete 窗口涵蓋查詢日期及截至 as_of 時可判 absent；until_date 為排他上限。任一 QA partial 窗口與該完整證明期間重疊，即使是商品範圍亦視為不完整；不能拼接窗口或把空集合當完整。索引與窗口皆在 manifest，沿同一 hash 與 data_version 驗證；失敗應顯示載入錯誤。索引 raw／Brotli bytes 全數計入 manifest、基本目錄冷載與完整文字閉包預算。
 
@@ -464,7 +464,7 @@ support_changes 比較套用 override/block 後的有效狀態；同狀態但 re
 ## 8. annotation 與來源閉包
 
 [公開 annotation 契約](public-annotation.md)及其[元件 Schema](public-annotation.schema.json)定義現行欄位：
-format_version=4.0.0、min_reader_version=4.0.2，必要能力包含 jp-source-translation-v1 與 public-annotation-v1，
+format_version=4.0.0、min_reader_version=4.0.3，必要能力包含 jp-source-translation-v1 與 public-annotation-v1，
 完整集合依該契約 §1，所有封套及 index entry 一致；index_format=2 不變。
 canonical、N=64、band widths、media、base／row_index 與同名規則依前述配置；整體容量仍須重新量測。
 
@@ -507,4 +507,4 @@ File.region 固定為 null，與 `card_related`、`card_engine_support` 共用�
 
 4.0.0 尚未凍結，本次同步替換固定 Schema、producer、reader 與合成樣本，不新增 capability 或雙格式 parser。
 最低 reader 契約版本提升為 4.0.1；4.0.0 reader 在版本索引階段即略過新快照，可選相容的 previous，
-沒有相容版時回報不支援，不進入新表的解碼。此為 4.0.1 的歷史准入邊界；現行 4.0.2 的舊 preview 處理依 §1.1。
+沒有相容版時回報不支援，不進入新表的解碼。此為 4.0.1 的歷史准入邊界；現行 4.0.3 的舊 preview 處理依 §1.1。
