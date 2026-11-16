@@ -757,6 +757,23 @@ BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效�
 
 Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: chooser, result: placed}` 排回牌庫頂，餘牌寫 `{in: seen, except: {in: {objects_of: placed, view: before}}}`，再排到牌庫底或送墓（CP01-070、CP02-081）。這個 Order 收據只供餘牌差集扣除，不能當移動輸入或追蹤對象。牌庫頂直接移到 EX 的 `move: {top: {who: self, n: 1}, to: ex, result: placed}` 可接 `apply: {on: {follow: placed}, effect: {cost_mod: {when_playing: {in: affected}, delta: -2}}}`；省略 `until` 時減費綁定該物件世代持續（BP01-084）。`delta` 與非負整數 `set` 二擇一：`set: 0` 把該卡的打出費用設為 0（CP01-035「このターン、それをプレイする際、コストを0にする」、BP02-091 不限本回合），沿用同一個移動回條與費用狀態，只套用到實際移到 EX 的新世代；正數 `delta`、負數 `set` 或與 `next_only` 並用仍拒絕。
 
+同一次私有 Look 可在 `either` 結算分支中選牌，依分支移到手牌或 EX（BP20-049）。每個分支自行記錄成功移動回條並排完剩餘成員，不重新看頂牌，也不把分支內的結果綁定帶到分支外。EX 已滿而未成功移動的成員仍屬餘集，不能按選取清單直接扣掉。
+
+私有 Look 的剩餘成員也可直接消滅，不必再詢問只有一張候選的選牌題。例如先把選中的牌移入手牌並記為 `taken`，再消滅同一次 `seen` 中扣除成功移動者的集合（CP03-054）：
+
+```yaml
+- banish:
+    ref:
+      in: seen
+      except:
+        in:
+          objects_of: taken
+          view: before
+    result: banished
+```
+
+這使用既有 `banish` 與集合差語法，沿用原 Look 的觀測授權及成功移動的 Before 成員；只消滅仍在自己牌組、世代與觀測位置證據相符的成員。空集合正常完成；已移入手牌的牌不會被重新選取。消滅直接由牌組移到公開消滅區，產生一般消滅事件及成功回條，不先送墓，也不授權讀取未觀測牌或跟隨移區後的新世代。
+
 `apply.effect.cost_mod` 的 `when_playing: {in: affected}` 也可安裝在已宣告的正式目標上，例如 `on: card` 搭配 `set: 0`、`until: turn`。與成功移入 EX 的 `follow` 共用物件世代及費用修正流程；沒有選取物件時不建立修正。
 
 牌庫頂送墓（含對手牌庫）也可帶 `result`，但只供卡片條件讀取，不能當移動輸入或追蹤對象。離開牌庫的卡沒有修正，條件讀其印刷資訊：`cmp: {left: {count: {in: {objects_of: milled, view: before}, not_class: ウィッチ}}, op: ge, right: 1}` 表示「{ウィッチ}でないカードを墓場に置いたなら」（BP17-045）；`kind`、`trait`、`class`、`not_class`、`name`、`name_contains`、`orig_cost_ge` 可組合，多種卡擇一用 `any` 連接多個條件（ECP02-040 依キュート／クール／パッション分別判斷）。看牌後選取再移動的收據（`move: {ref: picked, to: hand, result: taken}`）同樣可讀，表示「〜を公開したなら」（CP02-015）。只接受「至少一張符合／沒有符合」的比較；從場上或其他公開區移動的收據可能帶有場上修正，仍拒絕。
