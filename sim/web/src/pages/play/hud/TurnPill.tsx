@@ -10,7 +10,10 @@ export function TurnPill({ model }: { readonly model: TableModel }) {
   return (
     <section className="bp-turn" aria-label={t("play.turn.label")}>
       <span className="bp-turn-no">
-        {active === null ? t("play.turn.opening") : t("play.turn.number", { n: active.turns })}
+        {/* The opening has an active seat once the first player is chosen, and no turn yet. */}
+        {active === null || model.phase === null
+          ? t("play.turn.opening")
+          : t("play.turn.number", { n: active.turns })}
       </span>
       {active !== null && model.phase !== null && (
         <span className={model.self.active ? "bp-turn-phase is-self" : "bp-turn-phase is-opp"}>

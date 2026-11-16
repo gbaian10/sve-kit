@@ -490,7 +490,9 @@ function openingTable(first: Seat | null, redrawn: boolean): TableSpec {
     evolveDeck: { faceDown: evolve, faceUp: [] },
   })
   return {
-    turn: { active: null, first_player: first, phase: null, elapsed_turns: [0, 0] },
+    // Until the first player is chosen no seat is the active one; once it is, that seat is, and
+    // the phase stays open for as long as the opening lasts.
+    turn: { active: first, first_player: first, phase: null, elapsed_turns: [0, 0] },
     seats: [
       seat(
         (redrawn ? REDRAWN : OPENING_HAND).map((no, at) => ({

@@ -5,6 +5,7 @@
 // answered the way the Worker answers one: later, the receipt first, then what it changed.
 import type {
   Answer,
+  BattleUpdate,
   Command,
   HostMessage,
   OptionId,
@@ -120,6 +121,20 @@ function selected(selection: Selection, answer: Extract<Answer, { kind: "select"
   )
 }
 
+/**
+ * What an update tells its seat, without the two names that change even when nothing else does:
+ * its number and the id of the question it carries.
+ */
+const bare = (message: BattleUpdate): string =>
+  JSON.stringify({
+    ...message,
+    update_seq: 0,
+    input:
+      message.input.kind === "question"
+        ? { ...message.input, question: { ...message.input.question, id: "" } }
+        : message.input,
+  })
+
 /** A later task, as each message from a Worker arrives in a task of its own. */
 const later = (run: () => void): void => {
   setTimeout(run, 0)
@@ -143,6 +158,9 @@ export function scriptedTable(scene: Scene): Readonly<Record<Seat, BattleSource>
    */
   const out: Record<Seat, ((reason: Error) => void) | null> = { p1: null, p2: null }
   const sent: Record<Seat, number> = { p1: 0, p2: 0 }
+  /** The number of the last update each seat was sent, and that update without what only names it. */
+  const told: Record<Seat, number> = { p1: 0, p2: 0 }
+  const known: Record<Seat, string> = { p1: "", p2: "" }
   const applied: Answer[] = []
 
   const produce = (seat: Seat, message: HostMessage): void => {
@@ -165,6 +183,10 @@ export function scriptedTable(scene: Scene): Readonly<Record<Seat, BattleSource>
   }
   for (const seat of SEATS)
     for (const message of scene.script[seat]) {
+      if (message.kind === "update") {
+        told[seat] = message.update_seq
+        known[seat] = bare(message)
+      }
       produce(seat, message)
       deliver(seat, message)
     }
@@ -204,11 +226,17 @@ export function scriptedTable(scene: Scene): Readonly<Record<Seat, BattleSource>
             return
           }
           applied.push(chosen)
-          const seq = applied.length
-          const updates = SEATS.map(
-            (each) =>
-              [each, update(step.table, each, seq, step.input ?? `q${String(seq)}`)] as const,
-          )
+          const updates = SEATS.flatMap((each) => {
+            const number = told[each] + 1
+            const next = update(step.table, each, number, step.input ?? `q${String(number)}`)
+            // A step that shows a seat nothing new sends it nothing, not even a number: a seat's
+            // sequence counts what that seat was told, and another seat's private answer leaves
+            // no trace in it. The question the seat has open stays as it is.
+            if (bare(next) === known[each]) return []
+            told[each] = number
+            known[each] = bare(next)
+            return [[each, next] as const]
+          })
           for (const [each, message] of updates) produce(each, message)
           resolve(receipt("applied"))
           // The receipt comes before the update it caused: the updates go out in a later task,

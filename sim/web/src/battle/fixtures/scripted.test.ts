@@ -407,9 +407,15 @@ describe("scriptedTable", () => {
   ] as const)(
     "asks whether to pay the extra cost (%s), then for the search that follows",
     async (paid, found, after) => {
-      const { seats, own, picking, valid } = asking("sisters")
+      const { seats, own, other, picking, valid } = asking("sisters")
       const extra = need(confirmation(own.question(), "p1"))
+      const before = [...other.messages]
       expect(await send(seats.p1, confirmAnswer(extra, paid))).toMatchObject(applied)
+      // The answer changed nothing the other seat can see: that seat is sent nothing, and its
+      // sequence does not move. Only the seat that answered has a new update.
+      expect(other.messages).toEqual(before)
+      expect(seqs(other.messages)).toEqual([0])
+      expect(seqs(own.messages)).toEqual([0, 1])
       // The same table, and the next question of the same effect.
       const search = need(selection(own.question(), "p1")).selection
       expect(search.candidates.map((candidate) => candidate.subject?.kind)).toEqual([
@@ -446,7 +452,20 @@ describe("scriptedTable", () => {
             await send(seats.p1, { ...unnamed, answer: { ...unnamed.answer, groups } }),
           ).toMatchObject(rejected)
       }
-      expect(await send(seats.p1, picking(...found))).toMatchObject(applied)
+      // The search changes the table for both seats: each is told under its own next number,
+      // the seat that answered after its receipt.
+      const order: string[] = []
+      seats.p1.listen((message) => {
+        if (message.kind === "update" && message.update_seq > 1)
+          order.push(`p1 update ${String(message.update_seq)}`)
+      })
+      seats.p2.listen((message) => {
+        if (message.kind === "update" && message.update_seq > 0)
+          order.push(`p2 update ${String(message.update_seq)}`)
+      })
+      await seats.p1.submit(picking(...found)).then((receipt) => order.push(receipt.result))
+      await arrive()
+      expect(order).toEqual(["applied", "p1 update 2", "p2 update 1"])
       const [self] = own.last().observation.players
       expect({
         pp: self.pp,
@@ -454,6 +473,13 @@ describe("scriptedTable", () => {
         hand: self.zones.hand.count,
         deck: self.zones.deck.count,
       }).toEqual(after)
+      // Both seats see the same public table again.
+      const [theirs] = other.last().observation.players
+      expect({
+        pp: theirs.pp,
+        field: theirs.zones.field.count,
+        hand: theirs.zones.hand.count,
+      }).toEqual({ pp: after.pp, field: after.field, hand: after.hand })
       expect(own.question()?.shape.kind).toBe("action_window")
       expect(valid()).toBe(true)
     },
@@ -508,13 +534,22 @@ describe("scriptedTable", () => {
   it("takes who plays first, and the opening hand kept or returned whole", async () => {
     const first = asking("firstPlayer")
     const seat = need(choice(first.own.question(), "p1"))
+    // Nobody is the active seat before the first player is chosen.
+    const undecided = { active: null, first_player: null, phase: null }
+    expect(first.own.last().observation.turn).toMatchObject(undecided)
+    expect(first.other.last().observation.turn).toMatchObject(undecided)
     expect(await send(first.seats.p1, chooseAnswer(seat, ["seat:p2"]))).toMatchObject(applied)
-    expect(first.own.last().observation.turn.first_player).toBe("p2")
+    // Chosen, that seat is the active one; the opening goes on, so there is no phase yet.
+    const decided = { active: "p2", first_player: "p2", phase: null }
+    expect(first.own.last().observation.turn).toMatchObject(decided)
+    expect(first.other.last().observation.turn).toMatchObject(decided)
     expect(first.own.last().input).toMatchObject({ kind: "waiting", actor: "p2" })
     expect(first.valid()).toBe(true)
 
     const kept = asking("mulligan")
     const hand = need(mulligan(kept.own.question(), "p1"))
+    const opening = { active: "p1", first_player: "p1", phase: null }
+    expect(kept.own.last().observation.turn).toMatchObject(opening)
     const before = kept.own.last().observation.players[0].zones.hand.cards
     // Part of the hand cannot be returned.
     expect(
@@ -528,6 +563,7 @@ describe("scriptedTable", () => {
     ).toMatchObject(rejected)
     expect(await send(kept.seats.p1, mulliganAnswer(hand, null))).toMatchObject(applied)
     expect(kept.own.last().observation.players[0].zones.hand.cards).toEqual(before)
+    expect(kept.own.last().observation.turn).toMatchObject(opening)
 
     const redrawn = asking("mulligan")
     const order = need(mulligan(redrawn.own.question(), "p1")).hand.map((card) => card.id)
@@ -535,6 +571,7 @@ describe("scriptedTable", () => {
       applied,
     )
     const after = redrawn.own.last().observation.players[0].zones.hand
+    expect(redrawn.own.last().observation.turn).toMatchObject(opening)
     expect(after.count).toBe(4)
     // Four other cards under handles of their own.
     expect(after.cards.some((member) => before.some((old) => old.object === member.object))).toBe(

@@ -223,6 +223,15 @@ describe("PlayPage", () => {
     else expect(await table()).toBeInTheDocument()
   })
 
+  it("calls the opening by its name while no turn has begun, whoever is the active seat", async () => {
+    await renderRoutes(ROUTES, { initialEntries: ["/play?scene=mulligan"] })
+    await table()
+    // The first player is chosen, so a seat is active; the opening still has no turn to number.
+    const turn = screen.getByRole("region", { name: "回合" })
+    expect(within(turn).getByText("開局")).toBeInTheDocument()
+    expect(within(turn).queryByText(/第 \d+ 回合/)).toBeNull()
+  })
+
   it("switches scene from the picker and keeps it in the address", async () => {
     const user = userEvent.setup()
     const { router, container } = await renderRoutes(ROUTES, { initialEntries: ["/play"] })
