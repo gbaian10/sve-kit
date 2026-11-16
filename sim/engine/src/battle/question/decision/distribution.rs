@@ -28,6 +28,20 @@ pub(super) fn project(
     {
         return Err(ProjectionError::Unavailable);
     }
+    let maximum = count
+        .checked_sub(1)
+        .map(|others| -> Result<WireNat> {
+            let reserved = minimum
+                .get()
+                .checked_mul(others)
+                .ok_or(ProjectionError::Unavailable)?;
+            let available = total
+                .get()
+                .checked_sub(reserved)
+                .ok_or(ProjectionError::Unavailable)?;
+            Ok(WireNat::try_from(available)?)
+        })
+        .transpose()?;
     let candidates = Candidates::members(&domain.members, context)?;
     Ok((
         wire::QuestionUse::DamageDistribution,
@@ -36,7 +50,7 @@ pub(super) fn project(
             total,
             share: wire::Bounds {
                 min: minimum,
-                max: (!domain.members.is_empty()).then_some(total),
+                max: maximum,
             },
             // Native empty allocations bypass the total and continue without damage.
             empty: wire::EmptyDistribution::AllowWithoutTotal,

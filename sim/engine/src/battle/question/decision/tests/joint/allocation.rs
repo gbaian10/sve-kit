@@ -185,3 +185,42 @@ fn distribution_meaning_does_not_replace_the_native_purpose() {
         assert_eq!(shape, expected);
     }
 }
+
+#[test]
+fn each_share_advertises_the_reachable_maximum_after_other_recipients_minima() {
+    let game = distribution(Viewer::P1);
+    let board = components(&game, Viewer::P1);
+    for (count, minimum, total, maximum) in [
+        (2_usize, 2_u64, 5_u64, Some(3_u64)),
+        (2, 2, 4, Some(2)),
+        (2, 0, 5, Some(5)),
+        (2, 0, 0, Some(0)),
+        (1, 2, 5, Some(5)),
+        (0, 2, 5, None),
+        (
+            2,
+            0x000F_FFFF_FFFF_FFFF,
+            0x001F_FFFF_FFFF_FFFF,
+            Some(0x0010_0000_0000_0000),
+        ),
+    ] {
+        let mut native = mixed(&game, Viewer::P1, minimum, total);
+        let player::QuestionShape::Decision(DecisionShape::Distribution(allocation)) =
+            &mut native.shape
+        else {
+            panic!("allocation");
+        };
+        allocation.members.truncate(count);
+        let (_, shape, _) =
+            project_question(&native, &board, &QuestionId::new("reachable".into())).unwrap();
+        let wire::QuestionShape::Distribute { share, .. } = shape else {
+            panic!("allocation");
+        };
+        assert_eq!(share.min, WireNat::try_from(minimum).unwrap());
+        assert_eq!(
+            share.max,
+            maximum.map(|value| WireNat::try_from(value).unwrap()),
+            "each upper bound leaves every other recipient its minimum"
+        );
+    }
+}

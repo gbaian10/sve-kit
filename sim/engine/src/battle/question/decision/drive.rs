@@ -40,6 +40,7 @@ pub(super) fn project(
             icon,
             allowed: vec![false, true],
             targets: candidates.values.clone(),
+            // Only acceptance uses these bounds because declining cannot designate a target.
             target_bounds: wire::Bounds {
                 min: count,
                 max: Some(count),
