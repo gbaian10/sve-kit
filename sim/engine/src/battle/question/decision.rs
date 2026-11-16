@@ -7,10 +7,12 @@ use core::result;
 use sve_battle_contract::{Answer, question as wire};
 
 mod confirm;
+mod number;
 
 #[derive(Clone)]
 pub(super) enum Binding {
     Confirm(confirm::Binding),
+    Number(number::Binding),
 }
 
 pub(super) fn project(
@@ -22,8 +24,9 @@ pub(super) fn project(
             Ok(confirm::project(confirm::Binding::ResolutionPayment))
         }
         DecisionShape::May => Ok(confirm::project(confirm::Binding::May)),
-        DecisionShape::DiceReroll { .. }
-        | DecisionShape::Abilities(_)
+        DecisionShape::Integer(domain) => number::integer(*domain),
+        DecisionShape::DiceReroll { value, remaining } => number::dice(*value, *remaining),
+        DecisionShape::Abilities(_)
         | DecisionShape::ResourceEntryPayment { .. }
         | DecisionShape::WardEntry { .. }
         | DecisionShape::Quick { .. }
@@ -33,7 +36,6 @@ pub(super) fn project(
         | DecisionShape::BeforeDraw
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
-        | DecisionShape::Integer(_)
         | DecisionShape::Order(_)
         | DecisionShape::DamageReplacements(_)
         | DecisionShape::DriveTrigger { .. }
@@ -64,6 +66,7 @@ impl Binding {
     fn decode(&self, answer: &Answer) -> result::Result<player::Answer, AnswerError> {
         match self {
             Self::Confirm(binding) => binding.answer(answer),
+            Self::Number(binding) => binding.answer(answer),
         }
     }
 }

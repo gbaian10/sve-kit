@@ -1,8 +1,9 @@
 use super::*;
-use crate::ir::{Cardinality, Nat, QuickWindow};
+use crate::ir::{Nat, QuickWindow};
 
 #[cfg(feature = "runner")]
 mod native;
+mod number;
 
 #[test]
 fn confirms_keep_distinct_uses_and_native_answer_channels() {
@@ -53,14 +54,6 @@ fn unsupported_decisions_do_not_fall_back_to_confirm() {
         DecisionShape::BeforeDraw,
         DecisionShape::SearchReplacement,
         DecisionShape::ExchangeRoutes(vec![Nat(0), Nat(2)]),
-        DecisionShape::Integer(Cardinality {
-            minimum: Nat(0),
-            maximum: Some(Nat(1)),
-        }),
-        DecisionShape::DiceReroll {
-            value: Nat(6),
-            remaining: Nat(1),
-        },
         DecisionShape::Quick {
             window: QuickWindow::EndPhase,
             options: vec![],
