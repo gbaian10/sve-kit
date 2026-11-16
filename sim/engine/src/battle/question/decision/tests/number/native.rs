@@ -116,7 +116,7 @@ fn real_x_bounds_pay_the_declared_value_and_keep_rejections_read_only() {
             );
             assert_eq!(native.purpose, player::QuestionPurpose::PlayParameter);
             let before = board_fixtures::exact_authority(&game);
-            let (usage, _, binding) = project(domain(&native).unwrap()).unwrap();
+            let (usage, _, binding) = project(domain(&native).unwrap(), None).unwrap();
             assert_eq!(usage, wire::QuestionUse::DeclareX);
             game.observe(actor).unwrap();
             game.observe(other).unwrap();
@@ -192,7 +192,7 @@ fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
             assert_eq!(remaining, Nat(1));
             assert_eq!(native.purpose, player::QuestionPurpose::ResolutionChoice);
             let before = board_fixtures::exact_authority(&game);
-            let (usage, shape, binding) = project(domain(&native).unwrap()).unwrap();
+            let (usage, shape, binding) = project(domain(&native).unwrap(), None).unwrap();
             assert_eq!(usage, wire::QuestionUse::DiceReroll);
             assert_eq!(
                 shape,

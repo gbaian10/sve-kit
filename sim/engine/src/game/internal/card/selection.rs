@@ -4,6 +4,7 @@ use super::{Execution, Game, Nat, ObjectRef, PlayerId, Result, invalid, player_i
 use crate::game::Object;
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::Viewer;
+use crate::game::player::observation::{ObservedZone, viewer};
 use crate::game::player::{self, SelectionQuestion};
 use crate::ir::events::timing::opponent;
 use crate::ir::history_turn::public::damaged_plan;
@@ -82,6 +83,7 @@ pub(in crate::game::internal) struct TargetWait {
     binding: Binding<Selector>,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
+    role_destination: Option<player::SelectionDestination>,
     groups: GroupConstraints,
     characteristics: Vec<(ObjectRef, TargetCharacteristics)>,
     distinct_names: bool,
@@ -146,6 +148,11 @@ impl TargetWait {
     ) -> Result<SelectionQuestion> {
         let references = self.members.iter().copied().map(Some).collect::<Vec<_>>();
         let mut question = game.player_selection(actor, domain, &references, &self.links)?;
+        for role in &mut question.roles {
+            if role.position.is_some() {
+                role.destination = self.role_destination;
+            }
+        }
         question.groups = self
             .groups
             .members
@@ -1154,6 +1161,30 @@ fn role_domains(decision: &Decision) -> Vec<TargetRoleDomain> {
     }
 }
 
+fn role_destination(
+    game: &Game,
+    execution: &Execution,
+    decision: &Decision,
+    members: &[ObjectRef],
+) -> Result<Option<player::SelectionDestination>> {
+    if hand_position::positioned(decision).is_none() {
+        return Ok(None);
+    }
+    // Admission fixes these roles to Owners/Deck; capture owners before any answer can move cards.
+    let mut player = None;
+    for reference in members {
+        let owner = viewer(&game.object(execution.object_id(*reference)?)?.owner)?;
+        if player.is_some_and(|previous| previous != owner) {
+            return Ok(None);
+        }
+        player = Some(owner);
+    }
+    Ok(player.map(|player| player::SelectionDestination {
+        player,
+        zone: ObservedZone::Deck,
+    }))
+}
+
 pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
     let roles = domain.roles.iter().map(|role| {
         let cardinality = match role.cardinality {
@@ -1416,6 +1447,7 @@ impl Game {
             decision: decision.clone(),
             binding: *binding,
             cost_cap: self.target_cost_cap(execution, &constraint, &members)?,
+            role_destination: role_destination(self, execution, decision, &members)?,
             members,
             bounds,
             groups: GroupConstraints {

@@ -149,7 +149,15 @@ impl QuestionProjection {
                 | player::DecisionShape::TriggerQuota(_),
             ) => flow::project()?,
             player::QuestionShape::Decision(domain) => {
-                let (usage, shape, binding) = decision::project(&domain)?;
+                let (usage, shape, binding) = decision::project(
+                    &domain,
+                    Some(decision::Context {
+                        id,
+                        actor: native.actor,
+                        purpose: native.purpose,
+                        observation: &observation,
+                    }),
+                )?;
                 (usage, shape, Binding::Decision(binding))
             }
             player::QuestionShape::Evolution(EvolutionQuestion::Materials(_))

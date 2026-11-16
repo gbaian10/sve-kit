@@ -212,6 +212,7 @@ impl Game {
                 .roles
                 .iter()
                 .map(|role| SelectionRole {
+                    destination: None,
                     position: role.position,
                     role: role.role,
                     cardinality: role.cardinality,

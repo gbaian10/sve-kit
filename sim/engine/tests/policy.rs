@@ -216,6 +216,7 @@ fn empty_search_keeps_group_shape() {
 
 const fn role(role: u64, cardinality: RoleCardinality) -> SelectionRole {
     SelectionRole {
+        destination: None,
         role: Nat(role),
         position: None,
         cardinality,

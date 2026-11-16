@@ -315,6 +315,7 @@ fn policy_material_and_target_channels_preserve_roles_and_discard_purpose() {
     );
     let mut roles = selection();
     roles.roles.push(SelectionRole {
+        destination: None,
         role: Nat(8),
         position: None,
         cardinality: RoleCardinality::Fixed {
