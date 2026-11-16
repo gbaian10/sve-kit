@@ -38,6 +38,9 @@
     // Readers of the selecting questions; the battle screen's next slices answer through them (#2130).
     "src/battle/view/choices.ts!",
     "src/battle/view/select.ts!",
+    // Readers of the remaining questions; the battle screen answers through them after that (#2130).
+    "src/battle/view/arrange.ts!",
+    "src/battle/view/payments.ts!",
     // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.

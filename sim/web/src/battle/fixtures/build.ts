@@ -59,6 +59,8 @@ export interface FieldSpec {
    * it puts to the seat.
    */
   readonly attack?: { readonly leader?: true; readonly followers?: readonly number[] }
+  /** The card may evolve right now; like `attack`, the authority says so in its question. */
+  readonly evolve?: true
   /** Counters by the rules name the authority reports, such as スタックカウンター. */
   readonly counters?: readonly (readonly [name: string, amount: number])[]
 }
@@ -373,6 +375,20 @@ function mainQuestion(
         source,
         cost: observation.costs.cards.find((quote) => quote.object === source)?.cost ?? null,
       }
+    }),
+    ...spec.field.flatMap((card, place): MainIntent[] => {
+      if (card.evolve !== true) return []
+      const holder = handle(own.zones.field, place)
+      const { printing_id, face } = cardRef(card.no)
+      return [
+        {
+          kind: "evolve",
+          id: `evolve:${holder}`,
+          holder,
+          ability: { kind: "card", printing_id, face, line: null, holder },
+          hint: null,
+        },
+      ]
     }),
     ...spec.field.flatMap((card, place): MainIntent[] => {
       if (card.attack === undefined) return []

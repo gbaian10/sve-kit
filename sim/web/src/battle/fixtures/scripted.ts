@@ -15,6 +15,17 @@ import type {
   Selection,
 } from "../contract"
 import type { BattleSource } from "../source"
+import {
+  distribution,
+  inRange,
+  integer,
+  ordering,
+  partition,
+  pileProblems,
+  shareProblems,
+  wholeOrder,
+} from "../view/arrange"
+import { designated, driveTrigger } from "../view/payments"
 import { costTotal, problems } from "../view/select"
 import { update } from "./build"
 import type { Scene } from "./scenes"
@@ -61,7 +72,82 @@ function offered(question: Question | null, command: Command): Answer | null {
   }
   if (answer.kind === "confirm" && shape.kind === "confirm")
     return shape.allowed.includes(answer.accept) ? answer : null
-  return null
+  return compound(question, answer) ? answer : null
+}
+
+/**
+ * Whether an answer to one of the arranging, amount, payment, roll or trigger questions stays
+ * within what the question states, by the same readings the screen hints with.
+ */
+function compound(question: Question, answer: Answer): boolean {
+  const { shape } = question
+  const seat = question.actor
+  if (answer.kind === "order" && shape.kind === "order") {
+    const asked = ordering(question, seat)
+    return asked !== null && wholeOrder(asked, answer.order)
+  }
+  if (answer.kind === "partition" && shape.kind === "partition") {
+    const asked = partition(question, seat)
+    if (asked === null) return false
+    // Every pile of the question once, and no item on two of them.
+    const piles = new Map(answer.buckets.map((given) => [given.bucket, given.items]))
+    const items = answer.buckets.flatMap((given) => given.items)
+    return (
+      piles.size === answer.buckets.length &&
+      answer.buckets.length === shape.buckets.length &&
+      shape.buckets.every((listed) => piles.has(listed.bucket)) &&
+      new Set(items).size === items.length &&
+      items.every((id) => shape.items.some((item) => item.id === id)) &&
+      pileProblems(asked, piles).length === 0
+    )
+  }
+  if (answer.kind === "distribute" && shape.kind === "distribute") {
+    const asked = distribution(question, seat)
+    if (asked === null) return false
+    // Every recipient once, with a whole amount.
+    const shares = new Map(answer.shares.map((share) => [share.option, share.amount]))
+    return (
+      answer.shares.every((share) => Number.isInteger(share.amount)) &&
+      shares.size === answer.shares.length &&
+      answer.shares.length === shape.recipients.length &&
+      shape.recipients.every((recipient) => shares.has(recipient.id)) &&
+      shareProblems(asked, shares).length === 0
+    )
+  }
+  if (answer.kind === "integer" && shape.kind === "integer") {
+    const asked = integer(question, seat)
+    return asked !== null && inRange(asked, answer.value)
+  }
+  if (answer.kind === "dice_reroll" && shape.kind === "dice_reroll")
+    return shape.allowed.includes(answer.choice)
+  if (answer.kind === "evolution_payment" && shape.kind === "evolution_payment")
+    return shape.payments.some(
+      (listed) =>
+        listed.pp === answer.pp &&
+        listed.use_ep === answer.use_ep &&
+        listed.super_evolution === answer.super_evolution,
+    )
+  // A payment names its resources and nothing else, so they are held to the selection as picks
+  // that are given no group and no role.
+  if (answer.kind === "resource_payment" && shape.kind === "resource_payment")
+    return (
+      (shape.ep_allowed || !answer.use_ep) &&
+      selected(shape.materials, {
+        kind: "select",
+        selected: answer.materials,
+        groups: shape.materials.group_assignment === "explicit" ? [] : null,
+        roles: [],
+      })
+    )
+  if (answer.kind === "drive_trigger" && shape.kind === "drive_trigger") {
+    const asked = driveTrigger(question, seat)
+    if (asked === null || !shape.allowed.includes(answer.accept)) return false
+    if (!answer.accept) return answer.target === null
+    const listed =
+      answer.target === null || shape.targets.some((target) => target.id === answer.target)
+    return listed && designated(asked, answer.target)
+  }
+  return false
 }
 
 /**
