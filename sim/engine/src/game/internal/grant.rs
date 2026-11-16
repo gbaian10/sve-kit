@@ -295,38 +295,119 @@ pub(super) fn static_cost(ability: &Ability) -> bool {
     reason = "Keyword installation and expiry share generation-bound authority."
 )]
 impl Game {
-    pub(in crate::game::internal) fn observed_grant_source(
+    pub(super) fn granted_text_origin(
         &self,
-        perspective: Viewer,
         holder: &str,
         origin: &GrantOrigin,
-    ) -> Result<Option<EffectSource>> {
-        match origin {
-            GrantOrigin::Installed { .. } => Ok(self
-                .state
-                .ir_keywords
-                .get(holder)
-                .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
-                .and_then(|grant| grant.origin_record.observed(self, perspective))),
+    ) -> Result<Option<super::observation::EffectOrigin>> {
+        use super::observation::{EffectOrigin, SourceIdentity};
+        let generation = self.object(holder)?.generation;
+        let (record, giver) = match origin {
+            GrantOrigin::Installed { .. } => {
+                let Some(grant) = self
+                    .state
+                    .ir_keywords
+                    .get(holder)
+                    .filter(|state| state.generation == generation)
+                    .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
+                else {
+                    return Ok(None);
+                };
+                (
+                    grant.origin_record.clone(),
+                    grant.origin_record.giver().cloned(),
+                )
+            }
             GrantOrigin::Continuous {
-                provider,
-                through: Some(through),
-                ..
-            } => self.observed_grant_source(perspective, &provider.holder, through),
-            GrantOrigin::Continuous {
-                provider,
-                through: None,
-                ..
-            } => Ok(super::observation::EffectOrigin::definition(
-                self,
-                &provider.holder,
-                provider.generation,
-                &provider.card,
-                &provider.span,
-                false,
-            )?
-            .observed(self, perspective)),
+                provider, through, ..
+            } => {
+                let giver = SourceIdentity::holder(self, &provider.holder, provider.generation);
+                let record = if let Some(through) = through {
+                    let Some(record) = self.granted_text_origin(&provider.holder, through)? else {
+                        return Ok(None);
+                    };
+                    record
+                } else {
+                    let record = EffectOrigin::definition(
+                        self,
+                        &provider.holder,
+                        provider.generation,
+                        &provider.card,
+                        &provider.span,
+                    )?;
+                    let Some(record) = giver.clone().and_then(|identity| record.printed(identity))
+                    else {
+                        return Ok(None);
+                    };
+                    record
+                };
+                (record, giver)
+            }
+        };
+        Ok(Some(
+            record.granted(giver).for_holder(self, holder, generation),
+        ))
+    }
+
+    pub(super) fn runtime_text_origin(
+        &self,
+        source: RuntimeAbilitySource,
+        snapshot: &super::source::SourceSnapshot,
+    ) -> Result<Option<super::observation::EffectOrigin>> {
+        if let Some(((holder, _, origin, _), _)) = self.card_runtime.keyword_instances.iter().find(
+            |((holder, generation, _, definition), instance)| {
+                **instance == source.instance
+                    && *generation == source.holder.generation.0
+                    && *definition == source.definition
+                    && self.state.ir_objects.get(holder) == Some(&source.holder.id.0)
+            },
+        ) {
+            return Ok(self
+                .granted_text_origin(holder, origin)?
+                .map(|origin| origin.with_emitter(snapshot.identity().cloned())));
         }
+        // Only the registered printed instance can prove Printed; missing grants cannot.
+        let Some(((holder, generation, card, face, definition), _)) =
+            self.card_runtime.instances.iter().find(
+                |((holder, generation, _, _, definition), instance)| {
+                    **instance == source.instance
+                        && *generation == source.holder.generation.0
+                        && *definition == source.definition
+                        && self.state.ir_objects.get(holder) == Some(&source.holder.id.0)
+                },
+            )
+        else {
+            return Ok(None);
+        };
+        let Some(identity) = snapshot
+            .identity()
+            .filter(|identity| u64::try_from(*face).is_ok_and(|face| identity.matches(card, face)))
+        else {
+            return Ok(None);
+        };
+        let Some(ability) = self
+            .card_runtime
+            .definitions
+            .cards
+            .get(card)
+            .and_then(|program| {
+                program
+                    .card()
+                    .abilities
+                    .iter()
+                    .find(|ability| ability.node.id == *definition)
+            })
+        else {
+            return Ok(None);
+        };
+        Ok(super::observation::EffectOrigin::definition(
+            self,
+            holder,
+            *generation,
+            card,
+            &ability.source,
+        )?
+        .printed(identity.clone()))
     }
 
     pub(in crate::game) fn card_traits(&self, holder: &str) -> Result<BTreeSet<String>> {
@@ -533,50 +614,23 @@ impl Game {
         ability: &EffectiveAbility,
         perspective: Viewer,
     ) -> Result<Option<EffectSource>> {
-        use crate::game::player::observation::seat;
-        let generation = self.object(holder)?.generation;
-        let known = self.state.knowledge.get(seat(perspective));
-        let Some(origin) = &ability.grant else {
-            let (face, line) = super::card::printed_origin(&ability.node.source.origin)?;
-            let card = self.internal_effective_print(holder)?.0;
-            return Ok(Some(EffectSource {
-                face: self.effect_source_face(&card, Some(&face.0))?,
-                card,
-                line: Some(line.0),
-                wording: super::observation::wording_source(&ability.definition.located().source),
-                holder: known.and_then(|knowledge| knowledge.handle(holder)),
-            }));
+        use super::observation::{EffectOrigin, SourceIdentity};
+        let origin = if let Some(origin) = &ability.grant {
+            self.granted_text_origin(holder, origin)?
+        } else {
+            let generation = self.object(holder)?.generation;
+            let (card, _) = self.internal_effective_print(holder)?;
+            let record = EffectOrigin::definition(
+                self,
+                holder,
+                generation,
+                &card,
+                &ability.definition.located().source,
+            )?;
+            SourceIdentity::holder(self, holder, generation)
+                .and_then(|identity| record.printed(identity))
         };
-        if let Some(grant) = self
-            .state
-            .ir_keywords
-            .get(holder)
-            .filter(|state| state.generation == generation)
-            .and_then(|state| state.grants.iter().find(|grant| &grant.origin == origin))
-        {
-            return Ok(grant.origin_record.observed(self, perspective));
-        }
-        let provider = origin.provider();
-        let link = known
-            .and_then(|knowledge| knowledge.handle(&provider.holder))
-            .filter(|_| {
-                self.player_knows_object(perspective, &provider.holder)
-                    && self
-                        .state
-                        .objects
-                        .get(&provider.holder)
-                        .is_some_and(|object| object.generation == provider.generation)
-            });
-        let Some(handle) = link else {
-            return Ok(None);
-        };
-        Ok(Some(EffectSource {
-            card: provider.card.clone(),
-            face: self.effect_source_face(&provider.card, Some(&provider.span.face))?,
-            line: Some(u64::from(provider.span.line)),
-            wording: super::observation::wording_source(&provider.span),
-            holder: Some(handle),
-        }))
+        Ok(origin.and_then(|origin| origin.observed(self, perspective)))
     }
 
     pub(in crate::game) fn internal_granted_keywords(

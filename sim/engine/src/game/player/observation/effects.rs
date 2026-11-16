@@ -1,7 +1,7 @@
 //! Installed effects expressed without authority identities or executable text.
 
 use super::super::{ObjectHandle, Viewer};
-use super::{EffectRecipient, PreventionChange, TriggerTiming};
+use super::{CardFace, EffectRecipient, PreventionChange, TriggerTiming};
 use crate::ir::{AbilityKind, CostKind, DamageKind};
 use serde::{Deserialize, Serialize};
 
@@ -28,6 +28,20 @@ pub enum WordingField {
     },
 }
 
+/// Authority-confirmed text ownership, with private grant details kept unknown.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum TextProvenance {
+    /// The authority did not provide enough authorized origin evidence.
+    Unknown,
+    /// A registered printed ability supplies this wording.
+    Printed,
+    /// A card directly granted this wording to its holder.
+    Granted {
+        /// Effective card face of the direct giver at the authoritative capture point.
+        by: CardFace,
+    },
+}
+
 /// Public text origin, with a link only during uninterrupted identification.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct EffectSource {
@@ -39,6 +53,8 @@ pub struct EffectSource {
     pub line: Option<u64>,
     /// Exact admitted wording owner; absent for unlocated or legacy text.
     pub wording: Option<Box<WordingSource>>,
+    /// Missing origin evidence never implies that wording is printed on its holder.
+    pub provenance: TextProvenance,
     /// Currently identifiable producing holder; absent after identification is lost.
     pub holder: Option<ObjectHandle>,
 }

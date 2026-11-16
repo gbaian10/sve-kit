@@ -1,5 +1,8 @@
 //! Source disclosure is captured at installation, not inferred from a later hidden location.
 
+mod origin;
+pub(super) use origin::{SourceIdentity, TextOrigin};
+
 use crate::game::player::ObjectHandle;
 use crate::game::player::Viewer;
 use crate::game::player::observation::InstalledEffect;
@@ -190,7 +193,9 @@ pub(super) struct EffectOrigin {
     line: Option<u64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     wording: Option<Box<WordingSource>>,
-    publicly_identified: bool,
+    owner: Option<SourceIdentity>,
+    text: TextOrigin,
+    giver: Option<SourceIdentity>,
 }
 
 impl EffectOrigin {
@@ -204,6 +209,19 @@ impl EffectOrigin {
         source: &AbilitySource,
     ) -> Result<Self> {
         let holder = execution.context.source.clone();
+        if let Some(mut origin) = execution
+            .source_information
+            .as_ref()
+            .and_then(super::source::SourceInformation::origin)
+            .cloned()
+        {
+            origin.link = ObjectLink::capture(game, &holder, execution.context.generation.0);
+            origin.giver = execution
+                .source_snapshot(game)
+                .ok()
+                .and_then(|snapshot| snapshot.identity().cloned());
+            return Ok(origin);
+        }
         let (card, face, line, wording) = if execution.ability.is_some() {
             let provider = game.installed_effect_provider(execution)?;
             let wording = wording_source(&provider.span);
@@ -229,16 +247,22 @@ impl EffectOrigin {
                 None,
             )
         };
+        let face = game.effect_source_face(&card, face.as_deref())?;
+        let owner = if execution.ability.is_none() {
+            SourceIdentity::holder(game, &holder, execution.context.generation.0)
+                .filter(|identity| face.is_some_and(|face| identity.matches(&card, face)))
+        } else {
+            None
+        };
         Ok(Self {
             link: ObjectLink::capture(game, &holder, execution.context.generation.0),
-            face: game.effect_source_face(&card, face.as_deref())?,
+            face,
             card,
             line,
             wording,
-            publicly_identified: execution
-                .source_information
-                .as_ref()
-                .is_some_and(super::source::SourceInformation::publicly_identified),
+            owner,
+            text: TextOrigin::Unknown,
+            giver: None,
         })
     }
 
@@ -248,23 +272,57 @@ impl EffectOrigin {
         generation: u64,
         card: &str,
         source: &SourceSpan,
-        publicly_identified: bool,
     ) -> Result<Self> {
+        let face = game.effect_source_face(card, Some(&source.face))?;
         Ok(Self {
             link: ObjectLink::capture(game, holder, generation),
             card: card.into(),
-            face: game.effect_source_face(card, Some(&source.face))?,
+            face,
             line: Some(u64::from(source.line)),
             wording: wording_source(source),
-            publicly_identified,
+            owner: None,
+            text: TextOrigin::Unknown,
+            giver: None,
         })
     }
 
-    pub(super) fn observed(&self, game: &Game, perspective: Viewer) -> Option<EffectSource> {
-        if self.link.period(perspective).is_none() && !self.publicly_identified {
+    pub(super) const fn giver(&self) -> Option<&SourceIdentity> {
+        self.giver.as_ref()
+    }
+
+    pub(super) fn granted(mut self, giver: Option<SourceIdentity>) -> Self {
+        self.text = giver.map_or(TextOrigin::Unknown, TextOrigin::Granted);
+        self.giver = None;
+        self
+    }
+
+    pub(super) fn for_holder(mut self, game: &Game, holder: &str, generation: u64) -> Self {
+        self.link = ObjectLink::capture(game, holder, generation);
+        self
+    }
+
+    pub(super) fn with_emitter(mut self, giver: Option<SourceIdentity>) -> Self {
+        self.giver = giver;
+        self
+    }
+
+    pub(super) fn printed(mut self, identity: SourceIdentity) -> Option<Self> {
+        if !self
+            .face
+            .is_some_and(|face| identity.matches(&self.card, face))
+        {
             return None;
         }
+        self.owner = Some(identity.clone());
+        self.giver = Some(identity);
+        self.text = TextOrigin::Printed;
+        Some(self)
+    }
+
+    pub(super) fn observed(&self, game: &Game, perspective: Viewer) -> Option<EffectSource> {
+        self.owner.as_ref()?.observed(perspective)?;
         Some(EffectSource {
+            provenance: self.text.observed(perspective),
             card: self.card.clone(),
             face: self.face,
             line: self.line,

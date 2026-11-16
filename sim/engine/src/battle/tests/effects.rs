@@ -466,6 +466,7 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
     assert_eq!(project_card(&observed), Ok(Some(vec![])));
     let mut layer = effect(native::InstalledChange::Pilot);
     layer.source = Some(native::EffectSource {
+        provenance: native::TextProvenance::Unknown,
         card: "unit-follower".into(),
         face: Some(0),
         line: Some(2),
@@ -518,22 +519,19 @@ fn wire_installed_effects_select_only_authorized_card_state_and_origins() {
         project_card_effects(&wrong, &binding.references, &observed, &holder),
         Err(ProjectionError::Unavailable)
     );
+    let known = "unit-follower";
     for (card, face, line, expected) in [
         ("missing", None, None, ProjectionError::Unavailable),
+        (known, Some(99), None, ProjectionError::Unavailable),
         (
-            "unit-follower",
-            Some(99),
-            None,
-            ProjectionError::Unavailable,
-        ),
-        (
-            "unit-follower",
+            known,
             Some(0),
             Some(MAX_SAFE_INTEGER + 1),
             ProjectionError::Range,
         ),
     ] {
         observed.players[0].effects[0].source = Some(native::EffectSource {
+            provenance: native::TextProvenance::Unknown,
             card: card.into(),
             face,
             line,
@@ -565,6 +563,7 @@ fn wire_installed_effects_retire_links_without_erasing_printing_and_refuse_dupli
     let holder = object(&observed, Viewer::P1, native::ObservedZone::Field).unwrap();
     let mut layer = effect(native::InstalledChange::Pilot);
     layer.source = Some(native::EffectSource {
+        provenance: native::TextProvenance::Unknown,
         card: "unit-follower".into(),
         face: Some(0),
         line: Some(2),

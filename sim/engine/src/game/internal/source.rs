@@ -1,5 +1,6 @@
 //! Source information belongs to the checked ability execution, never to a caller's snapshot.
 
+use super::observation::{EffectOrigin, SourceIdentity};
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::game::Object;
 use crate::game::player::Viewer;
@@ -20,11 +21,13 @@ pub(super) struct SourceInformation {
     zone: String,
     publicly_identified: bool,
     departed: Option<SourceSnapshot>,
+    origin: Option<Box<EffectOrigin>>,
 }
 
 #[derive(Clone, Debug)]
 pub(in crate::game) struct SourceSnapshot {
     view: RuntimeObjectView,
+    identity: Option<SourceIdentity>,
     original: [i64; 3],
     effective: [i64; 3],
     pub(super) zone: String,
@@ -391,6 +394,10 @@ impl Execution {
 }
 
 impl SourceInformation {
+    pub(super) fn origin(&self) -> Option<&EffectOrigin> {
+        self.origin.as_deref()
+    }
+
     pub(super) const fn publicly_identified(&self) -> bool {
         self.publicly_identified
     }
@@ -433,6 +440,7 @@ impl SourceInformation {
             publicly_identified: game.player_knows_object(Viewer::P1, id)
                 && game.player_knows_object(Viewer::P2, id),
             departed: None,
+            origin: game.runtime_text_origin(source, &snapshot)?.map(Box::new),
         })
     }
 
@@ -473,6 +481,10 @@ impl SourceInformation {
 }
 
 impl SourceSnapshot {
+    pub(super) const fn identity(&self) -> Option<&SourceIdentity> {
+        self.identity.as_ref()
+    }
+
     pub(super) const fn original_cost(&self) -> i64 {
         self.original[0]
     }
@@ -561,6 +573,7 @@ impl Game {
         let original = [cost, original_attack, original_life];
         let effective = [self.internal_effective_cost(id)?, attack, life];
         Ok(SourceSnapshot {
+            identity: SourceIdentity::capture(self, reference),
             view: RuntimeObjectView {
                 object: reference,
                 snapshot: SnapshotId(self.state.ir_epoch),

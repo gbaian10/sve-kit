@@ -91,29 +91,23 @@ impl Execution {
         game.player_event_subject(perspective, id)
     }
 
-    fn event_source(&self, game: &Game) -> Result<Option<EffectSource>, EventError> {
-        if self.ability.is_none() {
+    fn event_source(
+        &self,
+        game: &Game,
+        perspective: Viewer,
+    ) -> Result<Option<EffectSource>, EventError> {
+        let Some(information) = &self.source_information else {
+            return Ok(None);
+        };
+        if self.ability.is_none() || !information.publicly_identified() {
             return Ok(None);
         }
-        let public = self
-            .source_information
-            .as_ref()
-            .is_some_and(super::source::SourceInformation::publicly_identified);
-        if !public {
-            return Ok(None);
+        let origin = information.origin().ok_or(EventError::ProjectionGap)?;
+        let mut source = origin.observed(game, perspective);
+        if let Some(source) = &mut source {
+            source.holder = None;
         }
-        let provider = game
-            .installed_effect_provider(self)
-            .map_err(|_authority_error| EventError::ProjectionGap)?;
-        Ok(Some(EffectSource {
-            face: game
-                .effect_source_face(&provider.card, Some(&provider.span.face))
-                .map_err(|_authority_error| EventError::ProjectionGap)?,
-            card: provider.card,
-            line: Some(u64::from(provider.span.line)),
-            wording: super::observation::wording_source(&provider.span),
-            holder: None,
-        }))
+        Ok(source)
     }
 
     #[expect(
@@ -289,7 +283,7 @@ impl Execution {
                     .push(self.event_member(game, perspective, source.holder)?);
             }
         }
-        action.source = self.event_source(game)?;
+        action.source = self.event_source(game, perspective)?;
         Ok(Some(EventKind::Action(action)))
     }
 }
