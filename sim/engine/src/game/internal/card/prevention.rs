@@ -1054,6 +1054,55 @@ pub(in crate::game::internal) fn mask_pattern(
     reason = "Replacement choices share captured prevention providers."
 )]
 impl Game {
+    pub(in crate::game::internal) fn player_replacement_origin(
+        &self,
+        reference: &Value,
+    ) -> Result<Option<EffectOrigin>> {
+        if let Some(id) = reference["effect"].as_u64() {
+            return Ok(self
+                .state
+                .ir_preventions
+                .iter()
+                .find(|effect| effect.effect == id)
+                .map(|effect| effect.origin.clone()));
+        }
+        if reference["kind"].as_str() != Some("ir-damage-prevention") {
+            // Legacy replacements can resolve without admitted typed text provenance.
+            return Ok(None);
+        }
+        let holder = reference["source"]
+            .as_str()
+            .ok_or_else(|| crate::invalid("replacement holder"))?;
+        if reference["generation"].as_u64() != Some(self.object(holder)?.generation) {
+            return Err(crate::invalid("replacement generation"));
+        }
+        let definition = reference["definition"]
+            .as_u64()
+            .ok_or_else(|| crate::invalid("replacement definition"))?;
+        let mut matches = self
+            .internal_effective_abilities(holder)?
+            .into_iter()
+            .filter(|ability| {
+                ability
+                    .grant
+                    .as_ref()
+                    .map_or(Value::Null, GrantOrigin::public_stamp)
+                    == reference["grant"]
+                    && ability.node.declarations.iter().any(|effect| {
+                        matches!(effect,
+                    Effect::Replacement {id,..} if id.0 == definition)
+                    })
+            });
+        let ability = matches
+            .next()
+            .ok_or_else(|| crate::invalid("replacement text origin"))?;
+        // Ambiguous evidence must not silently select an unrelated text provider.
+        if matches.next().is_some() {
+            return Err(crate::invalid("ambiguous replacement text origin"));
+        }
+        self.activation_text_origin(holder, &ability).map(Some)
+    }
+
     pub(in crate::game::internal) fn player_replacement_link(
         &self,
         reference: &Value,
