@@ -50,6 +50,7 @@ fn question(members: Vec<SelectionMember>, cardinality: Cardinality) -> Selectio
 
 fn searching(selection: &SelectionQuestion, grouped: bool) -> SearchQuestion {
     SearchQuestion {
+        facts: None,
         cards: selection
             .members
             .iter()
