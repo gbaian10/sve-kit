@@ -1061,8 +1061,16 @@ pub(super) enum DeckEdge {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishAction {
-    Top { top: DeckTop },
-    Union { r#ref: PublicBanishUnion },
+    Top {
+        top: DeckTop,
+    },
+    Observed {
+        r#ref: Observed,
+        result: Option<String>,
+    },
+    Union {
+        r#ref: PublicBanishUnion,
+    },
     Objects(Box<ObjectAction>),
 }
 

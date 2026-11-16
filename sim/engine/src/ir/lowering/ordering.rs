@@ -161,6 +161,16 @@ impl BodyContext<'_> {
                     },
                 },
             )),
+            ast::Step::Banish(ast::BanishAction::Observed {
+                result: Some(name), ..
+            }) => Some((
+                name,
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Banish {
+                        receipt: ReceiptReference::new(receipt),
+                    },
+                },
+            )),
             ast::Step::Banish(ast::BanishAction::Objects(objects))
                 if let ast::ObjectAction::Long {
                     result: Some(name), ..
@@ -571,42 +581,11 @@ impl BodyContext<'_> {
                     self.deck_slice(top, path)?
                 }
                 ast::BanishAction::Top { .. } => return Err(unsupported(path)),
+                ast::BanishAction::Observed { r#ref, .. } => {
+                    self.observed(r#ref, ObservationUse::Move, path)?
+                }
                 ast::BanishAction::Union { r#ref: union } => {
-                    let [first, second] = union.any_of.as_slice() else {
-                        return Err(unsupported(path));
-                    };
-                    if !matches!((&first.who, &second.who), (ast::Side::All, ast::Side::All))
-                        || !matches!(
-                            (&first.zone, &second.zone),
-                            (ast::Zone::Field, ast::Zone::Ex) | (ast::Zone::Ex, ast::Zone::Field)
-                        )
-                    {
-                        return Err(unsupported(path));
-                    }
-                    let sets = [ZoneKind::Field, ZoneKind::Ex]
-                        .into_iter()
-                        .map(|zone| {
-                            Ok(Selector::Zone {
-                                players: PlayerSet {
-                                    relation: PlayerRelation::All,
-                                    relative_to: PlayerRef::Controller {},
-                                    cardinality: Cardinality {
-                                        minimum: Nat(0),
-                                        maximum: None,
-                                    },
-                                    text_quantifier: TextQuantifier::All,
-                                },
-                                zone,
-                                view: super::super::SelectionView::Current {},
-                                binding: super::super::Binding::new(
-                                    self.allocator.id(path)?,
-                                    self.scope,
-                                ),
-                                predicate: Box::new(super::Expr::Literal(super::super::Bool(true))),
-                            })
-                        })
-                        .collect::<Result<Vec<_>, LoweringError>>()?;
-                    Selector::Union { sets }
+                    self.public_banish_union(union, path)?
                 }
                 ast::BanishAction::Objects(objects)
                     if let ast::ObjectAction::Short(ast::Objects::Follow { follow }) =
@@ -660,6 +639,46 @@ impl BodyContext<'_> {
                 }
                 ast::BanishAction::Objects(objects) => self.action_objects(objects, path)?,
             },
+        })
+    }
+
+    fn public_banish_union(
+        &mut self,
+        union: &ast::PublicBanishUnion,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        let [first, second] = union.any_of.as_slice() else {
+            return Err(unsupported(path));
+        };
+        if !matches!((&first.who, &second.who), (ast::Side::All, ast::Side::All))
+            || !matches!(
+                (&first.zone, &second.zone),
+                (ast::Zone::Field, ast::Zone::Ex) | (ast::Zone::Ex, ast::Zone::Field)
+            )
+        {
+            return Err(unsupported(path));
+        }
+        Ok(Selector::Union {
+            sets: [ZoneKind::Field, ZoneKind::Ex]
+                .into_iter()
+                .map(|zone| {
+                    Ok(Selector::Zone {
+                        players: PlayerSet {
+                            relation: PlayerRelation::All,
+                            relative_to: PlayerRef::Controller {},
+                            cardinality: Cardinality {
+                                minimum: Nat(0),
+                                maximum: None,
+                            },
+                            text_quantifier: TextQuantifier::All,
+                        },
+                        zone,
+                        view: super::super::SelectionView::Current {},
+                        binding: super::super::Binding::new(self.allocator.id(path)?, self.scope),
+                        predicate: Box::new(super::Expr::Literal(super::super::Bool(true))),
+                    })
+                })
+                .collect::<Result<Vec<_>, LoweringError>>()?,
         })
     }
 

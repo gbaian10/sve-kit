@@ -30,6 +30,78 @@ fn steps() -> Value {
     ])
 }
 
+fn remainder_steps() -> Value {
+    json!([
+        {"look":{"bind":"seen","top":{"who":"self","n":5_u8}}},
+        {"choose":{"bind":"picked","from":{"in":"seen"},"upto":2_u8,"may":true}},
+        {"move":{"ref":"picked","to":"hand","result":"taken"}},
+        {"banish":{"ref":{"in":"seen","except":{"in":{"objects_of":"taken","view":"before"}}},"result":"banished"}}
+    ])
+}
+
+#[test]
+fn a_look_remainder_is_banished_without_a_second_choice_and_never_follows_taken_cards() {
+    for count in [0_usize, 1, 2] {
+        let (snapshot, keywords, input) = inputs(&remainder_steps());
+        let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+        let mut initial = initial(0);
+        initial["players"]["P1"]["zones"]["deck"] = json!(
+            (0..6_u8)
+                .map(|n| json!({"id":format!("d-{n}"),"card":"member"}))
+                .collect::<Vec<_>>()
+        );
+        let mut board = Game::from_selected_effects(
+            selected,
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "observed-remainder-banish",
+        )
+        .unwrap();
+        let CardPlay::Awaiting(question) = board
+            .play_internal_card("creator", PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("private hand choice");
+        };
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("private hand targets");
+        };
+        let handles = domain
+            .members
+            .iter()
+            .take(count)
+            .map(|member| member.handle)
+            .collect();
+        let play = board
+            .answer_internal_card(question.actor, question.token, Answer::Targets(handles))
+            .unwrap();
+        assert!(
+            matches!(play, CardPlay::Resolved(_)),
+            "the remaining members require no additional choice"
+        );
+        let view = board.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P1"]["hand"],
+            json!((0..count).map(|n| format!("d-{n}")).collect::<Vec<_>>())
+        );
+        assert_eq!(
+            view["P1"]["banish"],
+            json!((count..5).map(|n| format!("d-{n}")).collect::<Vec<_>>())
+        );
+        assert_eq!(view["P1"]["deck"], json!(["d-5"]));
+        assert_eq!(view["objects"]["d-5"]["generation"], 0_u8);
+        let opponent = board.projection(View::P2).unwrap();
+        let known = opponent["known_cards"].as_array().unwrap();
+        for taken in 0..count {
+            assert!(
+                !known.iter().any(|card| card["id"] == format!("d-{taken}")),
+                "the taken card remains private in hand"
+            );
+        }
+    }
+}
+
 #[test]
 fn looked_cards_are_banished_in_one_batch_and_only_actual_moves_leave_the_remainder() {
     for count in [0_usize, 1, 2] {
@@ -122,6 +194,15 @@ fn observed_banish_does_not_authorize_unobserved_decks_or_result_following() {
     let mut moved_input = steps();
     moved_input[3]["move"]["ref"] = json!({"in":{"objects_of":"banished","view":"before"}});
     variants.push(moved_input);
+    let mut direct_foreign = remainder_steps();
+    direct_foreign[0]["look"]["top"]["who"] = json!("opp");
+    variants.push(direct_foreign);
+    let mut direct_unobserved = remainder_steps();
+    direct_unobserved[3]["banish"]["ref"] = json!({"who":"self","zone":"deck"});
+    variants.push(direct_unobserved);
+    let mut direct_moved = remainder_steps();
+    direct_moved[3]["banish"]["ref"] = json!({"in":{"objects_of":"taken","view":"before"}});
+    variants.push(direct_moved);
     for (index, body) in variants.into_iter().enumerate() {
         let (snapshot, keywords, input) = inputs(&body);
         assert!(
