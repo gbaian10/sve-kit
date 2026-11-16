@@ -14,7 +14,7 @@ import {
 import { primaryKey, rowType } from "./schema"
 
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "4.1.0"
+const READER_CONTRACT_VERSION = "4.1.1"
 const CAPABILITIES: readonly string[] = [
   "column-partition-v1",
   "fragment-container-v1",
@@ -47,7 +47,7 @@ export function isCompatible(entry: JsonObject): boolean {
   )
   const version = stringValue(entry["format_version"])
   const expected = version === "4.1.0" ? [...CAPABILITIES, "dsl-programs-v1"] : CAPABILITIES
-  const reader = version === "4.1.0" ? READER_CONTRACT_VERSION : "4.0.2"
+  const reader = version === "4.1.0" ? READER_CONTRACT_VERSION : "4.0.3"
   return (
     (version === "4.0.0" || version === "4.1.0") &&
     entry["min_reader_version"] === reader &&
