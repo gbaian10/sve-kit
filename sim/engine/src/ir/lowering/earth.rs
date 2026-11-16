@@ -15,7 +15,10 @@ pub(super) fn cost(
             on: ast::CounterCostHolder::Selected(Box::new(amulets())),
             holders: Some(1),
             name: "stack_counter".into(),
-            n: amount,
+            n: Some(ast::PpAmount::Literal(amount)),
+            any: false,
+            upto: None,
+            result: None,
         },
         path,
     )

@@ -967,7 +967,15 @@ impl Checker {
             }
             MeasuredReceipt::Cards { receipt } => self.receipt(receipt),
             MeasuredReceipt::Damage { receipt } => self.receipt(receipt),
-            MeasuredReceipt::Counters { receipt } => self.receipt(receipt),
+            MeasuredReceipt::Counters { receipt } => {
+                self.receipt(receipt)?;
+                if matches!(receipt.location(), ReceiptLocation::Local {id} if self.env.paid_counters.contains(id))
+                {
+                    Ok(())
+                } else {
+                    self.reject()
+                }
+            }
         }
     }
 }

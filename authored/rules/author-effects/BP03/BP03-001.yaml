@@ -1,0 +1,51 @@
+cards:
+  BP03-001:
+    abilities:
+      - keywords:
+          - rush
+          - aura
+        line: 1
+      - fanfare:
+          do:
+            - counter:
+                delta: 1
+                name: 童話カウンター
+                on: this
+            - if:
+                cond:
+                  not:
+                    entered_from:
+                      from: hand
+                      ref: this
+                then:
+                  - grant:
+                      keywords:
+                        - storm
+                      on: this
+        line: 2
+      - activate:
+          cost:
+            steps:
+              - pp: 1
+              - counter:
+                  any: true
+                  name: 童話カウンター
+                  on: this
+                  result: removed
+          do:
+            - buff:
+                hp:
+                  x_paid: removed
+                on: this
+                power:
+                  x_paid: removed
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+format: 2
+kind: author_effect_set

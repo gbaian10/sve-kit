@@ -417,6 +417,11 @@ fn lower_operations(
         if let ast::CostOperation::Act(material) = operation {
             context.record_paid_material_acts(material, ReceiptId(id), path)?;
         }
+        if let ast::CostOperation::Counter(value) = operation
+            && let Some(name) = &value.result
+        {
+            super::counters::record_result(context, name, ReceiptId(id), path)?;
+        }
         steps.push(CostStep {
             keyword,
             materials: None,
@@ -486,6 +491,7 @@ pub(super) fn record_discard(
         || context.ex_outputs.contains_key(name)
         || context.receipt_reads.paid_material_acts.contains_key(name)
         || context.receipt_reads.paid_materials.contains_key(name)
+        || context.receipt_reads.paid_counters.contains_key(name)
     {
         return Err(unsupported(path));
     }

@@ -165,7 +165,7 @@ fn resource_author_negative_and_unknown_signed_amounts_are_rejected_at_load() {
         json!(-1),
         json!({"minus":[0,1]}),
         json!({"minus":[{"count":{"who":"self","zone":"hand"}},1]}),
-        json!({"resource":{"who":"self","kind":"pp"}}),
+        json!({"leader_life":"self"}),
     ] {
         for kind in ["pp", "pp_max", "ep"] {
             let program = program(&json!([{kind:{"who":"self","delta":delta}}]));
@@ -183,6 +183,23 @@ fn resource_author_negative_and_unknown_signed_amounts_are_rejected_at_load() {
                 Err(sve_engine::EngineFailure::Unsupported(_))
             ));
             assert_eq!(exact_authority(&board), before);
+        }
+    }
+}
+
+#[test]
+fn nonnegative_pp_reads_are_valid_resource_amounts() {
+    for seat in [1, 2] {
+        for (read, expected) in [("pp", 1), ("pp_max", 5)] {
+            for kind in ["pp", "pp_max", "ep"] {
+                let program = program(&json!([
+                    {kind:{"who":"self","delta":{"resource":{"who":"self","kind":read}}}}
+                ]));
+                let mut game = board(&program, &position(seat), catalog());
+                let receipts = activate(&mut game, &program, seat);
+                assert_eq!(receipts.len(), 1);
+                assert_eq!(receipts[0].requested, Int(expected));
+            }
         }
     }
 }

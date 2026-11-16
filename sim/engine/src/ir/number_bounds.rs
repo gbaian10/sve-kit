@@ -1,6 +1,6 @@
 //! Conservative bounds describe successful checked results, never runtime clamping.
 
-use super::{Arithmetic, Expr, Int, IntFrozen, IntOperation};
+use super::{Arithmetic, Expr, Int, IntFrozen, IntOperation, IntRead, PlayerResource};
 
 #[derive(Clone, Copy)]
 pub(crate) struct Bounds {
@@ -78,6 +78,20 @@ pub(crate) fn integer(expression: &Expr<Int>) -> Bounds {
             lower: 0,
             upper: i64::MAX,
         },
+        Expr::Live(read)
+            if matches!(
+                read.as_ref(),
+                IntRead::PlayerResource {
+                    property: PlayerResource::PpMaximum | PlayerResource::PpCurrent,
+                    ..
+                }
+            ) =>
+        {
+            Bounds {
+                lower: 0,
+                upper: i64::MAX,
+            }
+        }
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value } => {
                 if let Expr::Literal(value) = value

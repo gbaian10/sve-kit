@@ -1065,3 +1065,9 @@ mod layer3_play_ordinal;
 
 #[path = "card/layer3_entry_suppression.rs"]
 mod layer3_entry_suppression;
+
+#[path = "card/layer3_counter_cap.rs"]
+mod layer3_counter_cap;
+
+#[path = "card/layer3_counter_cost.rs"]
+mod layer3_counter_cost;

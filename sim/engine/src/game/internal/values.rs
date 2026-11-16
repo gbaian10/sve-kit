@@ -1397,6 +1397,19 @@ impl Execution {
         if let MeasuredReceipt::Payment { receipt, unit } = receipt {
             return self.paid_quantity(receipt, *unit);
         }
+        if let MeasuredReceipt::Counters { receipt } = receipt {
+            let id = local_receipt(receipt.location())?;
+            let Some(InstructionOutcome::Payment { quantity, .. }) = self.receipts.get(id) else {
+                return Err(invalid("missing counter payment amount"));
+            };
+            if quantity.unit != QuantityUnit::Counters {
+                return Err(invalid("counter payment unit"));
+            }
+            return Ok((
+                quantity.amount,
+                Nat(u64::try_from(quantity.amount.0).map_err(invalid)?),
+            ));
+        }
         let (id, damage) = match receipt {
             MeasuredReceipt::Cards { receipt } => (local_receipt(receipt.location())?, false),
             MeasuredReceipt::Damage { receipt } => (local_receipt(receipt.location())?, true),

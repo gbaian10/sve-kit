@@ -1344,9 +1344,11 @@ lowering 消耗相鄰的 choose／chosen move，產生一次決策及原有固�
 
 無指定順序、body 恰為單一 Counter 的 EachObject 形狀是集合 Counter 步驟的投影。動態 Add／Remove 先固定成員，在任何寫入前綁定各 holder 並求出數量，再依原順序寫入；即使量間接依賴 counter，也使用共同開始視圖。raw IR 對 bound holder 的讀值可得到各自的開始數量。此形狀不可用來表示未來作者 foreach 的跨步驟重讀。固定量與既有 Move 路徑保持原語義。
 
-body 的 Remove 飽和到零，Add 使用 checked 加法與既有整數表示範圍，不把 CounterCap 當既有規則上限。量的溢位、舊世代、非 Field／EX holder 或批次中途失敗仍整次回滾。零量保留零差額收據，不發生 counter 改變事件。
+body 的 Remove 飽和到零，Add 使用 checked 加法與既有整數表示範圍，場上有效的 CounterCap 宣告會先以剩餘容量限制 Add，再做 checked 加法；不刪除既有超出上限的 counter。Move 同時限制到收件 holder 的剩餘容量，兩端使用同一實際搬移數量。量的溢位、舊世代、非 Field／EX holder 或批次中途失敗仍整次回滾。零量保留零差額收據，不發生 counter 改變事件。
 
-效果量的開放不適用付款：整卡、可選及 Quick 的 counter 費用仍只接受既有固定 Remove 數量，付款時再次檢查固定量及可用餘額，不足量不得以 body 的飽和語義付款。已付 PP X／融合回條由既有捕捉與 producer 權限提供，不新增第二次數量選擇。
+Counter 付款接受既有固定 Remove，以及來源自己的自然數宣告 binding；所選材料仍只收固定量。宣告 X 取已選費用中 PP 與各類 counter 的共同可付上限，扣除固定成本、先前宣告量，並計入同一 X 重複支付的次數。付款時再次檢查 holder 的世代、控制者、Field／EX 與完整餘量，不足量不得以 body 的飽和語義付款。獨立的 any 宣告保留各自 binding；同一 PP X／counter X 則共用一次宣告。
+
+`MeasuredReceipt::Counters` 只允許讀同一能力中先前 Counter Remove 成本指示產生的本地收據；一般 counter 效果收據不取得付款讀取權限。完整付款成功後，付款收據保存實付量與 Counters 單位，本文以既有 `x_paid` 降低為此讀值，不重問數量。
 
 本節規定內部 IR consumer；作者 Counter delta 的入口與降低仍依現行作者契約，不能由此推定動態作者語法、任意整卡 Integer 決定題或整卡准入已開放。
 
