@@ -240,10 +240,14 @@ impl Game {
         if self.player(seat)?.construction != "title" {
             return Ok(None);
         }
+        self.internal_trigger_icon(id)
+    }
+
+    pub(super) fn internal_trigger_icon(&self, id: &str) -> Result<Option<TriggerIcon>> {
         let card = &self.object(id)?.card;
         let facts = &self.state.facts[card];
         if facts["verified"] != true {
-            return Err(unsupported("Drive requires verified icon facts"));
+            return Err(unsupported("Trigger icon requires verified facts"));
         }
         match facts["trigger_icon"].as_str() {
             Some("none") => Ok(None),
@@ -251,7 +255,7 @@ impl Game {
             Some("heal") => Ok(Some(TriggerIcon::Heal)),
             Some("critical") => Ok(Some(TriggerIcon::Critical)),
             Some("stand") => Ok(Some(TriggerIcon::Stand)),
-            _ => Err(unsupported("unverified Drive icon")),
+            _ => Err(unsupported("unverified Trigger icon")),
         }
     }
 

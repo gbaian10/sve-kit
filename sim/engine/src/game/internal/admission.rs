@@ -1226,6 +1226,7 @@ fn supported(code: &str) -> bool {
             | "internal.ZoneKind.Ex"
             | "internal.ZoneKind.Evolve"
             | "internal.BooleanState.FaceUp"
+            | "internal.BooleanState.HasTrigger"
             | "internal.BooleanState.Racing"
             | "internal.BooleanState.EnteredThisTurn"
             | "shape.Predicate.EvolutionEquals"

@@ -1775,6 +1775,7 @@ fn leader_or_union(target: &ast::Target) -> Option<ast::Target> {
 const fn bare_query(query: &ast::TargetQuery) -> bool {
     // Exhaustive so a new query field cannot be silently dropped from the leader branch.
     let ast::TargetQuery {
+        has_trigger: None,
         except: None,
         alias: None,
         r#where: None,

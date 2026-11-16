@@ -55,6 +55,9 @@ pub(in crate::game::internal) fn matches(
 impl Reader for Candidate<'_> {
     fn boolean(&self, property: &BooleanProperty) -> Result<bool> {
         match property {
+            BooleanProperty::State(BooleanState::HasTrigger) => {
+                Ok(self.game.internal_trigger_icon(self.id)?.is_some())
+            }
             BooleanProperty::Keyword(keyword) => {
                 super::super::search::matches_keyword(self.game, self.id, *keyword)
             }
