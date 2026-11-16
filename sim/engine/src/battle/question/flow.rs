@@ -1,4 +1,7 @@
 //! Rule-owned decisions are separate from effect answer domains.
+//!
+//! F02A owns this family. Wiring mirrors `Decision` with one central `Binding::Flow`
+//! variant and one answer forwarding arm, keeping future flow shapes in this module.
 
 use super::{Binding, Result};
 use crate::battle::ProjectionError;

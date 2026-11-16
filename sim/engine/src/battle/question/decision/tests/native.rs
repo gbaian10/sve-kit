@@ -142,10 +142,6 @@ fn assert_outcome(game: &Game, scenario: Scenario, actor: Viewer, accept: bool) 
 }
 
 #[test]
-#[expect(
-    clippy::manual_assert_eq,
-    reason = "Failures must not dump complete authority state into test logs."
-)]
 fn confirm_commands_keep_native_tokens_and_submit_to_the_producing_game() {
     let references = &board_fixture::fixture().unwrap().references;
     for scenario in [
@@ -188,7 +184,10 @@ fn confirm_commands_keep_native_tokens_and_submit_to_the_producing_game() {
                         .unwrap()
                         .is_none()
                 );
-                assert!(board_fixtures::exact_authority(&game) == before);
+                assert!(
+                    board_fixtures::exact_authority(&game) == before,
+                    "reading a confirmation preserves authority state"
+                );
                 let wire_answer = Answer::Confirm { accept };
                 let command = binding.answer(native.token, &wire_answer).unwrap();
                 assert!(
@@ -198,7 +197,10 @@ fn confirm_commands_keep_native_tokens_and_submit_to_the_producing_game() {
                     game.submit_player(other, command.clone()).kind,
                     SubmissionKind::Rejected
                 );
-                assert!(board_fixtures::exact_authority(&game) == before);
+                assert!(
+                    board_fixtures::exact_authority(&game) == before,
+                    "a wrong-seat submission preserves authority state"
+                );
                 assert_eq!(
                     game.submit_player(actor, command.clone()).kind,
                     SubmissionKind::Applied
@@ -209,7 +211,10 @@ fn confirm_commands_keep_native_tokens_and_submit_to_the_producing_game() {
                     game.submit_player(actor, command).kind,
                     SubmissionKind::Rejected
                 );
-                assert!(board_fixtures::exact_authority(&game) == after);
+                assert!(
+                    board_fixtures::exact_authority(&game) == after,
+                    "a stale submission preserves authority state"
+                );
             }
         }
     }

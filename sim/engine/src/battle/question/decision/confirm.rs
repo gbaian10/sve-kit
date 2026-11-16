@@ -21,6 +21,7 @@ pub(super) fn project(
     (
         usage,
         wire::QuestionShape::Confirm {
+            // Both booleans mirror the native input domain; submission checks affordability.
             allowed: vec![false, true],
             subject: None,
             origin: None,
