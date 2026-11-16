@@ -5,7 +5,7 @@ use std::sync::OnceLock;
 use sve_battle_contract::{CardRef, Nat};
 use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ProjectionError, ReferenceInput};
 use sve_engine::catalog::{Catalog, EngineIdentityInput, FaceIdentity};
-use sve_engine::game::player::observation::CardFace;
+use sve_engine::game::player::observation::{CardFace, WordingField, WordingSource};
 
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
@@ -55,6 +55,7 @@ fn fixture() -> &'static Fixture {
             &snapshot, &keywords, &documents, &rules.to_string(), &EngineIdentityInput::LegacyJp,
         ).unwrap();
         let input = ReferenceInput {
+wording: None,
             region: "jp".into(),
             snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
             faces: vec![
@@ -315,4 +316,226 @@ fn trusted_reference_input_serialization_is_closed() {
     let mut unknown = value.as_object().unwrap().clone();
     unknown.insert("fallback".into(), json!(true));
     serde_json::from_value::<ReferenceInput>(Value::Object(unknown)).unwrap_err();
+}
+
+#[expect(
+    clippy::unwrap_used,
+    reason = "Invalid synthetic wording inputs must fail fixture creation."
+)]
+fn wording_input() -> Value {
+    let mut input = serde_json::to_value(&fixture().input).unwrap();
+    input.as_object_mut().unwrap().insert("wording".into(), json!({
+        "manifest_sha256": format!("sha256:{}", "a".repeat(64)),
+        "faces": [
+            {"card_no":"nativeⓈ","native_face":0_u64,"face_id":"face-front","revisions":[
+                {"revision_id":"rev-old","fields":[{"kind":"effect"},{"kind":"section","ordinal":0_u64}]},
+                {"revision_id":"rev-new","fields":[{"kind":"effect"}]}
+            ]},
+            {"card_no":"nativeⓈ","native_face":1_u64,"face_id":"face-back","revisions":[
+                {"revision_id":"rev-back","fields":[{"kind":"section","ordinal":2_u64}]}
+            ]},
+            {"card_no":"nativeⓈEN","native_face":0_u64,"face_id":"face-other","revisions":[]}
+        ]
+    }));
+    input
+}
+
+#[test]
+fn wording_input_retains_the_public_manifest_and_complete_face_closure() {
+    let input = wording_input();
+    let parsed: ReferenceInput = serde_json::from_value(input.clone()).unwrap();
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), input);
+    let references = bind(parsed).unwrap();
+    assert_eq!(
+        references
+            .resolve(
+                &fixture().catalog,
+                &CardFace {
+                    card: "nativeⓈ".into(),
+                    face: 0
+                }
+            )
+            .unwrap(),
+        CardRef {
+            printing_id: "printing-y".into(),
+            face: Nat::from(1_u32)
+        }
+    );
+    let manifest = format!("sha256:{}", "a".repeat(64));
+    assert_eq!(references.manifest_sha256(), Some(manifest.as_str()));
+    assert_eq!(
+        bind(fixture().input.clone()).unwrap().manifest_sha256(),
+        None
+    );
+}
+
+#[test]
+fn wording_lookup_requires_the_exact_face_revision_and_original_field() {
+    let references = bind(serde_json::from_value(wording_input()).unwrap()).unwrap();
+    for (native_face, face_id, revision, field, permanent_face) in [
+        (0, "face-front", "rev-old", WordingField::Effect, 1_u32),
+        (
+            0,
+            "face-front",
+            "rev-old",
+            WordingField::Section { ordinal: 0 },
+            1,
+        ),
+        (0, "face-front", "rev-new", WordingField::Effect, 1),
+        (
+            1,
+            "face-back",
+            "rev-back",
+            WordingField::Section { ordinal: 2 },
+            0,
+        ),
+    ] {
+        assert_eq!(
+            references
+                .validate_wording(
+                    &fixture().catalog,
+                    &CardFace {
+                        card: "nativeⓈ".into(),
+                        face: native_face
+                    },
+                    &WordingSource {
+                        face_id: face_id.into(),
+                        revision_id: revision.into(),
+                        field
+                    }
+                )
+                .unwrap(),
+            CardRef {
+                printing_id: "printing-y".into(),
+                face: Nat::from(permanent_face)
+            }
+        );
+    }
+    for (native_face, face_id, revision, field) in [
+        (0, "face-back", "rev-old", WordingField::Effect),
+        (0, "face-front", "rev-back", WordingField::Effect),
+        (0, "face-front", "unknown", WordingField::Effect),
+        (
+            0,
+            "face-front",
+            "rev-new",
+            WordingField::Section { ordinal: 0 },
+        ),
+        (
+            0,
+            "face-front",
+            "rev-old",
+            WordingField::Section { ordinal: 1 },
+        ),
+        (1, "face-back", "rev-back", WordingField::Effect),
+        (99, "face-front", "rev-old", WordingField::Effect),
+    ] {
+        assert_eq!(
+            references
+                .validate_wording(
+                    &fixture().catalog,
+                    &CardFace {
+                        card: "nativeⓈ".into(),
+                        face: native_face
+                    },
+                    &WordingSource {
+                        face_id: face_id.into(),
+                        revision_id: revision.into(),
+                        field
+                    }
+                )
+                .unwrap_err(),
+            ProjectionError::Unavailable
+        );
+    }
+}
+
+#[test]
+fn wording_lookup_cannot_replace_missing_evidence_or_cross_catalogues() {
+    let face = CardFace {
+        card: "nativeⓈ".into(),
+        face: 0,
+    };
+    let mut source = WordingSource {
+        face_id: "face-front".into(),
+        revision_id: "rev-old".into(),
+        field: WordingField::Effect,
+    };
+    let missing = bind(fixture().input.clone()).unwrap();
+    assert_eq!(
+        missing
+            .validate_wording(&fixture().catalog, &face, &source)
+            .unwrap_err(),
+        ProjectionError::Unavailable
+    );
+    let references = bind(serde_json::from_value(wording_input()).unwrap()).unwrap();
+    let foreign = Catalog::from_documents(
+        &fixture().snapshot,
+        &fixture().keywords,
+        &fixture().documents,
+    )
+    .unwrap();
+    assert_eq!(
+        references
+            .validate_wording(&foreign, &face, &source)
+            .unwrap_err(),
+        ProjectionError::Unavailable
+    );
+    source.field = WordingField::Section { ordinal: u64::MAX };
+    assert_eq!(
+        references
+            .validate_wording(&fixture().catalog, &face, &source)
+            .unwrap_err(),
+        ProjectionError::Range
+    );
+}
+
+#[test]
+fn wording_bindings_refuse_partial_aliasing_or_contradictory_owners() {
+    for (pointer, value) in [
+        ("/wording/manifest_sha256", json!("a".repeat(64))),
+        (
+            "/wording/manifest_sha256",
+            json!(format!("sha256:{}", "A".repeat(64))),
+        ),
+        ("/wording/faces", json!([])),
+        ("/wording/faces/0/native_face", json!(99_u32)),
+        ("/wording/faces/0/face_id", json!("")),
+        ("/wording/faces/1/face_id", json!("face-front")),
+        ("/wording/faces/1/native_face", json!(0_u32)),
+        ("/wording/faces/1/revisions/0/revision_id", json!("rev-old")),
+        ("/wording/faces/0/revisions/1/revision_id", json!("rev-old")),
+        ("/wording/faces/0/revisions/0/revision_id", json!("")),
+        (
+            "/wording/faces/0/revisions/0/fields",
+            json!([{"kind":"effect"},{"kind":"effect"}]),
+        ),
+    ] {
+        let mut input = wording_input();
+        *input.pointer_mut(pointer).unwrap() = value;
+        assert_eq!(
+            bind(serde_json::from_value(input).unwrap()).unwrap_err(),
+            ProjectionError::Unavailable,
+            "{pointer}"
+        );
+    }
+}
+
+#[test]
+fn trusted_wording_input_is_closed_at_every_level() {
+    for pointer in [
+        "/wording",
+        "/wording/faces/0",
+        "/wording/faces/0/revisions/0",
+        "/wording/faces/0/revisions/0/fields/0",
+    ] {
+        let mut input = wording_input();
+        input
+            .pointer_mut(pointer)
+            .unwrap()
+            .as_object_mut()
+            .unwrap()
+            .insert("unexpected".into(), json!(true));
+        serde_json::from_value::<ReferenceInput>(input).unwrap_err();
+    }
 }

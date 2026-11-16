@@ -6,6 +6,12 @@ Run the public-input wrapper from the repository root:
 python3 .github/ci/rust_tests.py
 ```
 
+The wrapper also supplies `SVE_TEST_BATTLE_PROJECTION`: ephemeral native bytes
+from a complete synthetic public export and the verified battle input reader.
+The compatibility test loads these bytes into `Catalog` and exercises `Game`
+observation and departure characteristics. This fixture does not represent a
+real full-catalogue host start.
+
 New current-card scenarios belong under `current_repository/runtime/`. Use its
 `game(&initial)` helper so every test in the binary shares the immutable public
 inputs and accepted selection. Build a fresh initial position for each game.

@@ -20,6 +20,7 @@ from sve_carddb.core.json import (
     string,
 )
 from sve_carddb.export import construction_index
+from sve_carddb.export.battle_input import BattleInputs, build_battle_inputs
 from sve_carddb.export.image_scope import ImageScope
 from sve_carddb.export.image_upload import (
     IMAGE_KEY,
@@ -45,6 +46,7 @@ __all__ = [
     "INDEX",
     "JSON_KEY",
     "POINTER",
+    "BattleInputs",
     "Export",
     "ExportError",
     "ImageFile",
@@ -63,6 +65,7 @@ __all__ = [
     "directory",
     "image_files",
     "integer",
+    "load_battle_inputs",
     "load_export",
     "load_image_scope",
     "load_image_upload",
@@ -260,6 +263,15 @@ def load_snapshot(root: Path) -> Snapshot:
     """The same closure check as `load_export`, keeping the rows instead of the bytes."""
     _path, raw, manifest, _members, tables = _verified(root)
     return Snapshot(manifest, digest(raw), tables)
+
+
+def load_battle_inputs(root: Path, region: str) -> BattleInputs:
+    """Build native bytes and reference bindings from the same verified public closure."""
+    snapshot = load_snapshot(root)
+    try:
+        return build_battle_inputs(snapshot, region)
+    except ValueError:
+        raise ExportError("Battle snapshot projection is unavailable") from None
 
 
 def _verified(
