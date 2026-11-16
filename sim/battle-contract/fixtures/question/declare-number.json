@@ -1,0 +1,41 @@
+{
+  "id": "q-declare_number",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "declare_number",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "card": {
+        "printing_id": "SYN01-002",
+        "face": 0
+      },
+      "wording_revision": "r1",
+      "section": "main",
+      "line": 1,
+      "step": null,
+      "granted_by": null,
+      "holder": "o2"
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "payment": null
+  },
+  "shape": {
+    "kind": "integer",
+    "bounds": {
+      "min": 2,
+      "max": 5
+    },
+    "unit": null,
+    "source": null
+  },
+  "auto_answer": {
+    "kind": "unknown"
+  },
+  "assistance": null,
+  "rules": []
+}

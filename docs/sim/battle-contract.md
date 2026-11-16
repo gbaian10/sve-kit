@@ -215,7 +215,8 @@ Answer 用表中的語義 tag；use 可以區分同形狀的規則目的，不�
 | D.CostMaterials／D.Discard | cost_material／cost_discard／effect_discard | select 完整集合；按 purpose 回原付款或棄牌答案 |
 | D.ExchangeRoutes | exchange_route | choose 真實路線，保留索引缺口及成本摘要 |
 | D.Pending／D.TriggerQuota | pending_order／trigger_quota | choose 一個 occurrence；後者附 earlier 歷史，不能回答 earlier |
-| D.Integer | declare_x | integer：有效界限／單位／來源，不擴充成任意宣告數值 |
+| D.Integer（原生 X 費用宣言） | declare_x | integer：有效界限／單位／來源，依 native Wait 的來源識別 X，不由形狀推斷 |
+| D.Integer（原生結算數值宣言） | declare_number | integer：結算時宣告數值，保留有效界限／單位／來源；對應 NonnegativeInteger／BoundedInteger，依 native Wait 的來源識別 |
 | D.DiceReroll | dice_reroll | keep／reroll；公開 value、remaining 及 allowed，映回 Integer 0／1 |
 | D.Order／D.DamageReplacements | order_cards／damage_replacement_order | order：完整排列、方向、目的地；替代項逐個 TextRef |
 | D.DriveTrigger | drive_trigger | accept＋必要 target；公開 icon，拒絕時 target=null |
