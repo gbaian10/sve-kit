@@ -878,6 +878,7 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
                         "shape.NatFrozen.DiceValue"
                             | "shape.IntFrozen.MoveBatchCount"
                             | "shape.EntryMethodFields.EnterFieldMethod"
+                            | "shape.TraitsFrozen.EnterFieldAbilitySourceTraits"
                             | "shape.EntryOriginFields.EnterFieldFrom"
                     ) && other
                         .locations
@@ -1345,6 +1346,7 @@ fn supported(code: &str) -> bool {
             | "shape.EntryOriginFields.EnterFieldFrom"
             | "shape.NatFrozen.DiceValue"
             | "shape.EntryMethodFields.EnterFieldMethod"
+            | "shape.TraitsFrozen.EnterFieldAbilitySourceTraits"
             | "internal.EntryMethod.Play"
             | "internal.EntryMethod.AbilityPut"
             | "internal.EntryMethod.RulePut"

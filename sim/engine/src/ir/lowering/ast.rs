@@ -3107,6 +3107,7 @@ pub(super) enum ModeCondition {
     Spellchain(u64),
     Necro(u64),
     EnteredFrom(EntryOriginCondition),
+    EnteredBy(EntryCondition),
     LeaderLife(PlayerThreshold),
 }
 
@@ -3211,6 +3212,13 @@ pub(super) struct EntryCondition {
     #[serde(rename = "ref")]
     pub _reference: This,
     pub by: EntryMethod,
+    pub source: Option<EntryAbilitySource>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryAbilitySource {
+    pub r#trait: String,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]

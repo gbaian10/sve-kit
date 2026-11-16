@@ -15,7 +15,8 @@ use crate::ir::history_turn::{HistoryPlan, NumericHistoryPlan};
 use crate::ir::play_restrictions;
 use crate::ir::{
     BoolFrozen, BoolRead, EntryMethod, EntryMethodFields, EntryOrigin, EntryOriginFields,
-    ExecutionRef, HistoryCount, PaymentReference, QuantityUnit, SpellCountTime, ValueEquality,
+    ExecutionRef, HistoryCount, PaymentReference, QuantityUnit, SpellCountTime, TraitsFrozen,
+    ValueEquality,
 };
 use crate::ir::{CapacityProperty, CapacityZone, MovementReceiptList};
 use crate::ir::{
@@ -1204,6 +1205,22 @@ impl Execution {
             }
             Expr::Frozen(read) => self.boolean_receipt(read),
             Expr::Compute(operation) => Ok(Bool(match operation.as_ref() {
+                Predicate::HasTrait {
+                    traits: Expr::Frozen(read),
+                    trait_id,
+                } => {
+                    let TraitsFrozen::EnterFieldAbilitySourceTraits { event } = read.as_ref()
+                    else {
+                        return Err(unsupported("entry ability source trait projection"));
+                    };
+                    let traits = self
+                        .event_reads
+                        .entry_source_traits(*event)
+                        .ok_or_else(|| {
+                            unsupported("entry ability source traits require authority evidence")
+                        })?;
+                    super::conditions::subject::traits(traits, trait_id)?
+                }
                 Predicate::And { predicates } => predicates
                     .iter()
                     .map(|predicate| self.boolean(game, predicate).map(|value| value.0))

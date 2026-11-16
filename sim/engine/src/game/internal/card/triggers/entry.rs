@@ -242,8 +242,14 @@ impl Game {
                 })
             });
         let active = player_id(self.active())?;
-        let effect_source = self.card_runtime.active_source;
+        // A suspended search may resume after the instruction's active-source marker was restored.
+        let effect_source = frame
+            .entry_source
+            .as_ref()
+            .map(|source| source.source)
+            .or(self.card_runtime.active_source);
         let (cause, actor, method) = entry_cause(frame)?;
+        let ability_source_traits = self.internal_entry_source_traits(frame, method)?;
         let mut candidates = Vec::new();
         for old in previous {
             let object = self.committed_entry(old)?;
@@ -298,6 +304,7 @@ impl Game {
                 characters,
                 method,
                 play_receipt: None,
+                ability_source_traits: ability_source_traits.clone(),
             };
             let position = self.entry_position(event.controller, &old.id)?;
             candidates.extend(self.delayed_entry_pending(&installed, &event, &header, position)?);

@@ -652,6 +652,9 @@ impl Game {
             _ => return Err(unsupported("token destination")),
         };
         let mut frame = execution.frame();
+        if destination == ZoneKind::Field {
+            frame.entry_source = execution.entry_source(self)?;
+        }
         if let Some(amount) = stack {
             frame.values.insert(
                 "stack_entry_counts".into(),

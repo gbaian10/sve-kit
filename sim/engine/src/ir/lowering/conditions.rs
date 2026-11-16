@@ -1,7 +1,8 @@
 use super::super::{
     CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, EventPattern, IntFrozen,
     IntRead, LifeChangeEvent, NatFrozen, NumberRead, ObjectView, PlayerResource, Precondition,
-    PreconditionKind, PreconditionReason, SnapshotFields, Stat, TriggerCondition,
+    PreconditionKind, PreconditionReason, SnapshotFields, Stat, TraitId, TraitsFrozen,
+    TriggerCondition,
 };
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, Int,
@@ -512,7 +513,7 @@ impl BodyContext<'_> {
         )))
     }
 
-    fn entered_by(
+    pub(super) fn entered_by(
         &self,
         condition: &ast::EntryCondition,
         path: &str,
@@ -521,6 +522,18 @@ impl BodyContext<'_> {
             ast::EntryMethod::Ability => super::super::EntryMethod::AbilityPut,
             ast::EntryMethod::Play => super::super::EntryMethod::Play,
         };
+        if let Some(source) = &condition.source {
+            let event = self.entry_event.ok_or_else(|| unsupported(path))?;
+            if method != super::super::EntryMethod::AbilityPut || source.r#trait.is_empty() {
+                return Err(unsupported(path));
+            }
+            return Ok(Expr::Compute(Box::new(Predicate::HasTrait {
+                traits: Expr::Frozen(Box::new(TraitsFrozen::EnterFieldAbilitySourceTraits {
+                    event,
+                })),
+                trait_id: TraitId(source.r#trait.clone()),
+            })));
+        }
         if let Some(event) = self.entry_event {
             return Ok(Expr::Compute(Box::new(Predicate::Equal {
                 operands: Box::new(super::super::ValueEquality::EntryMethod {
@@ -691,10 +704,7 @@ impl BodyContext<'_> {
                 if left.is_empty() || right.is_empty() || left == right {
                     return Err(unsupported(path));
                 }
-                PlayedHistoryFilter::TraitsAny([
-                    super::super::TraitId(left.clone()),
-                    super::super::TraitId(right.clone()),
-                ])
+                PlayedHistoryFilter::TraitsAny([TraitId(left.clone()), TraitId(right.clone())])
             }
             ast::HistorySubject::Single(subject) => {
                 let filter = super::movement::movement_filter(

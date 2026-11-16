@@ -1103,3 +1103,6 @@ mod source_provenance_delay;
 
 #[path = "card/source_provenance_continuous.rs"]
 mod source_provenance_continuous;
+
+#[path = "card/layer3_entry_source.rs"]
+mod layer3_entry_source;

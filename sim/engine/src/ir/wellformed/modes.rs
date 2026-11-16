@@ -7,10 +7,10 @@ use crate::ir::{
     ObjectRef, PaymentReference, PlayerResource,
 };
 use crate::ir::{
-    Bool, Cardinality, ChoiceDomain, Control, CostSpec, Decision, DecisionKind, EntryOrigin,
-    EntryOriginFields, Expr, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind, Nat, NatFrozen,
-    NatOperation, Node, PlaySlot, PlayerRef, Predicate, Program, SpellCountTime, ValueEquality,
-    Visibility, ZoneKind,
+    Bool, Cardinality, ChoiceDomain, Control, CostSpec, Decision, DecisionKind, EntryMethodFields,
+    EntryOrigin, EntryOriginFields, Expr, Mode, ModeChoiceKind, ModeDecision, ModeDecisionKind,
+    Nat, NatFrozen, NatOperation, Node, PlaySlot, PlayerRef, Predicate, Program, SpellCountTime,
+    TraitsFrozen, ValueEquality, Visibility, ZoneKind,
 };
 use crate::ir::{
     NatRead, ObjectOperand, ObjectView, PlayerRelation, SelectionView, Selector, TextQuantifier,
@@ -268,6 +268,24 @@ impl Checker {
         match condition {
             Expr::Literal(_) => Ok(()),
             Expr::Compute(predicate) => match predicate.as_ref() {
+                Predicate::HasTrait {
+                    traits: Expr::Frozen(read),
+                    trait_id,
+                } if !trait_id.0.is_empty()
+                    && matches!(
+                        read.as_ref(),
+                        TraitsFrozen::EnterFieldAbilitySourceTraits { .. }
+                    ) =>
+                {
+                    self.boolean(condition)
+                }
+                Predicate::Equal { operands }
+                    if matches!(operands.as_ref(), ValueEquality::EntryMethod {
+                        left: Expr::Frozen(field), right: Expr::Literal(_),
+                    } if matches!(field.as_ref(), EntryMethodFields::EnterFieldMethod { .. })) =>
+                {
+                    self.boolean(condition)
+                }
                 Predicate::Equal { operands }
                     if matches!(operands.as_ref(), ValueEquality::EntryOrigin {
                     left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Cemetery }),

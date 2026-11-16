@@ -1,8 +1,8 @@
 //! Retained entry facts belong to the current generation, independently of turn history.
 
-use super::{Game, Result};
+use super::{Game, Result, invalid};
 use crate::game::{Frame, Object};
-use crate::ir::EntryMethod;
+use crate::ir::{EntryMethod, TraitId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -33,6 +33,39 @@ impl From<EntryMethod> for RecordedMethod {
     reason = "Movement commits entry facts alongside the new field generation."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_entry_source_traits(
+        &self,
+        frame: &Frame,
+        method: EntryMethod,
+    ) -> Result<Option<Vec<TraitId>>> {
+        if method != EntryMethod::AbilityPut {
+            return Ok(None);
+        }
+        let Some(source) = &frame.entry_source else {
+            return Ok(None);
+        };
+        if frame.cause["effect"]["execution"].as_u64() != Some(source.execution.0) {
+            return Err(invalid("entry source disagrees with the executing ability"));
+        }
+        if let Some((id, _)) = self
+            .state
+            .ir_objects
+            .iter()
+            .find(|(_, number)| **number == source.source.holder.id.0)
+            && self
+                .state
+                .objects
+                .get(id)
+                .is_some_and(|current| current.generation == source.source.holder.generation.0)
+        {
+            return Ok(Some(
+                self.card_traits(id)?.into_iter().map(TraitId).collect(),
+            ));
+        }
+        // A source leaving in this batch or an earlier instruction keeps its authority LKI.
+        Ok(Some(source.traits.clone()))
+    }
+
     pub(in crate::game) fn internal_record_field_entry_methods(
         &mut self,
         previous: &[Object],

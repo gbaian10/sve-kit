@@ -26,6 +26,13 @@ pub(super) struct SourceInformation {
     origin: Box<EffectOrigin>,
 }
 
+#[derive(Clone, Debug, PartialEq)]
+pub(in crate::game) struct EntrySource {
+    pub(super) source: RuntimeAbilitySource,
+    pub(super) execution: ExecutionId,
+    pub(super) traits: Vec<TraitId>,
+}
+
 #[derive(Clone, Debug)]
 pub(in crate::game) struct SourceSnapshot {
     view: RuntimeObjectView,
@@ -112,6 +119,20 @@ pub(super) fn count_zone(requirements: &Requirements, requirement: &Requirement)
     reason = "Source reads share the execution's private authority proof."
 )]
 impl Execution {
+    pub(super) fn entry_source(&self, game: &Game) -> Result<Option<EntrySource>> {
+        let Some(source) = self.ability else {
+            return Ok(None);
+        };
+        if self.source_information.is_none() {
+            return Ok(None);
+        }
+        Ok(Some(EntrySource {
+            source,
+            execution: self.id,
+            traits: self.source_traits(game)?,
+        }))
+    }
+
     /// Binds the authority-derived ability source and its reference zone at body start.
     pub(super) fn bind_source(&mut self, game: &Game, source: RuntimeAbilitySource) -> Result<()> {
         let information = SourceInformation::current(game, source)?;
