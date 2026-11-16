@@ -165,6 +165,8 @@ native 卡文讀該版次唯一可用的來源觀測，不拿共享 current 或�
 
 規則身分閉包保留已發布的歷史版本，CR／QA 依地區篩選；沒有地區欄位的裁定僅列為可定位身分，不推論適用範圍。wording 與 rules 同時提供時須來自同一公開 manifest；兩者都只提供身分，來源存在不等於本題的完整依據。非 null Question.rules 仍須有可信 producer 提供逐使用點 strength 與經驗證的完整依據集合，不能由身分閉包或空目錄推定。
 
+只有 rules、沒有 wording 時，manifest 一致性由宿主核對：`BattleReferences::manifest_sha256()` 必須符合建局使用的已驗證 `Snapshot.manifest_sha256`。Rust resolver 的身分檢查不能代替公開 reader 對來源與閉包的驗證。
+
 已證明 Printed／Granted 且帶有 wording 座標的來源，若提供精確 wording 閉包卻無法核對 owner、revision 或 field，則拒絕投影，不以其他版本替代。沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
