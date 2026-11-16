@@ -350,12 +350,7 @@ impl Execution {
                     Ok(0)
                 }
                 NumberRead::Stats { property, .. } if game.object(id)?.zone == "ex" => {
-                    game.object(id)?.state[match property {
-                        Stat::Attack => "power",
-                        Stat::Life => "hp",
-                    }]
-                    .as_i64()
-                    .ok_or_else(|| invalid("public EX follower stat"))
+                    game.internal_ex_follower_stat(id, *property)
                 }
                 NumberRead::Stats { property, .. } => game.internal_numeric_stat(id, *property),
             };
@@ -620,6 +615,21 @@ impl Game {
                 .map(|value| ClassId(value.into())),
             traits: self.card_traits(source)?.into_iter().map(TraitId).collect(),
         })
+    }
+
+    // EX display and Current reads share the existing state semantics; EX stat modifiers
+    // are not admitted, and SourceInformation keeps its printed snapshot policy.
+    pub(in crate::game) fn internal_ex_follower_stat(&self, id: &str, stat: Stat) -> Result<i64> {
+        let object = self.object(id)?;
+        if object.zone != "ex" || !self.object_type(id)?.contains("フォロワー") {
+            return Err(unsupported("EX stats require EX followers"));
+        }
+        object.state[match stat {
+            Stat::Attack => "power",
+            Stat::Life => "hp",
+        }]
+        .as_i64()
+        .ok_or_else(|| invalid("public EX follower stat"))
     }
 
     pub(super) fn information_snapshot(&self, reference: ObjectRef) -> Result<SourceSnapshot> {
