@@ -21,6 +21,7 @@ import {
   objectValue,
   stringValue,
 } from "../format-v3/json"
+import { columns, rowType } from "../format-v3/schema"
 import { digest } from "../format-v3/sha256"
 import {
   type QueryFailure,
@@ -126,6 +127,12 @@ function origin() {
       return () => {
         gate.resolve(undefined)
       }
+    },
+    replaceManifest(manifest: JsonObject) {
+      const bytes = canonical(manifest)
+      const path = `snapshots/manifests/${digest(bytes).slice(7)}.json`
+      files.set(path, bytes)
+      pointer = canonical({ manifest_path: path, manifest_sha256: digest(bytes) })
     },
     update(number: number) {
       const manifest = objectValue(JSON.parse(JSON.stringify(built.manifest)) as JsonObject)
@@ -3926,5 +3933,177 @@ it("cancels a cross-region transfer without aborting the completed local index",
     ).toEqual(["c:pr-001"])
   } finally {
     release()
+  }
+})
+
+it.each(["jp", "en"] as const)(
+  "filters SVE-exclusive %s cards using only same-card links, across every printing and restored index",
+  async (edition) => {
+    const client = createSnapshotClient(base, { fetch: origin().fetcher, region: edition })
+    await client.load()
+    const initial = client.snapshot()
+    if (!initial) throw new Error("missing initial snapshot")
+    await client.prefetchPrintings?.()
+    const snapshot = client.snapshot()
+    const template = snapshot?.bootstrap[0]
+    if (!snapshot || !template) throw new Error("missing snapshot")
+    const links = [
+      { card_id: "c:bp01-001", digital_card_id: "d:sv1", relation: "same_card" },
+      { card_id: "c:bp01-002", digital_card_id: "d:sv1", relation: "same_character" },
+      { card_id: "c:bp01-003", digital_card_id: "d:svwb", relation: "same_card" },
+      { card_id: "c:bp01-010", digital_card_id: "d:sv1", relation: "same_character" },
+      { card_id: "c:bp01-010", digital_card_id: "d:svwb", relation: "same_card" },
+      { card_id: "c:bp01-020", digital_card_id: "d:sv1", relation: "name_only" },
+      { card_id: "c:sd01-001", digital_card_id: "d:sv1", relation: "same_name" },
+      {
+        card_id: "c:bp01-021",
+        face_id: "f:bp01-021",
+        digital_card_id: "d:svwb",
+        relation: "same_card",
+      },
+    ]
+    const full = new BootstrapColumns()
+    full.ingest([
+      ...snapshot.bootstrap,
+      {
+        ...template,
+        table: "digital_link",
+        identity: "synthetic-digital-links",
+        value: { ...template.value, purpose: "engine" },
+        rows: links,
+      },
+    ])
+    full.seal()
+    const local = new BootstrapColumns()
+    local.ingest(initial.bootstrap)
+    local.seal()
+    const completed = new SearchIndex(local, edition)
+    completed.completePrintings(full)
+    completed.completeMechanics(full)
+    const created = new SearchIndex(full, edition)
+    const excluded = new Set(["c:bp01-001", "c:bp01-003", "c:bp01-010", "c:bp01-021"])
+    for (const index of [
+      created,
+      new SearchIndex(created.encode(), edition),
+      completed,
+      new SearchIndex(completed.encode(), edition),
+    ]) {
+      for (const unit of ["printing", "art", "card"] as const) {
+        const search = (change: Partial<typeof DEFAULT_QUERY>) =>
+          index.search({
+            ...query,
+            edition,
+            limit: 1000,
+            state: { ...DEFAULT_QUERY, unit, ...change },
+          })
+        const all = search({}).items
+        expect(all.some((item) => item.summary?.cardId === "c:bp01-001")).toBe(true)
+        expect(search({ sveOnly: true }).items).toEqual(
+          all.filter((item) => !excluded.has(item.summary?.cardId ?? "")),
+        )
+        for (const card of ["c:bp01-002", "c:bp01-020", "c:sd01-001"])
+          expect(
+            search({ sveOnly: true }).items.some((item) => item.summary?.cardId === card),
+          ).toBe(true)
+        expect(search({ sveOnly: true, types: ["follower"] }).items).toEqual(
+          search({ types: ["follower"] }).items.filter(
+            (item) => !excluded.has(item.summary?.cardId ?? ""),
+          ),
+        )
+        if (edition === "jp")
+          expect(
+            search({ sveOnly: true, prOnly: true }).items.map((item) => item.summary?.cardId),
+          ).toEqual(["c:pr-001"])
+      }
+    }
+  },
+)
+
+it("waits for a digital-link-only engine shard and restores SVE-exclusive results without more requests", async () => {
+  const served = origin()
+  const fields = columns(rowType("digital_link", "detail"))
+  const link: JsonObject = {
+    card_id: "c:bp01-001",
+    face_id: null,
+    digital_card_id: "d:synthetic",
+    digital_phase: null,
+    relation: "same_card",
+    effect_similarity: null,
+    review_level: "model_reviewed",
+  }
+  const segment = "family-set:bp01:band-0"
+  const bytes = canonical({
+    format_version: "4.0.0",
+    types: {},
+    tables: {
+      digital_link: [
+        [
+          ["home_set", "set:bp01"],
+          "detail",
+          segment,
+          null,
+          [fields.map((field) => link[field] ?? null)],
+        ],
+      ],
+    },
+  })
+  const file: JsonObject = {
+    key: "engine/shared/synthetic-digital-links",
+    role: "text",
+    purpose: "engine",
+    region: null,
+    segment,
+    path: `snapshots/blobs/${digest(bytes).slice(7)}.json`,
+    bytes: bytes.length,
+    sha256: digest(bytes),
+    row_counts: [["digital_link", "home_set", "set:bp01", "detail", segment, 1]],
+    dependencies: [],
+    source_refs: [],
+  }
+  served.files.set(stringValue(file["path"]), bytes)
+  const manifest = structuredClone(built.manifest)
+  manifest["files"] = [...arrayValue(manifest["files"]), file]
+  served.replaceManifest(manifest)
+  const storage = memoryCache()
+  const h = harness(served, storage)
+  const release = h.served.hold(stringValue(file["path"]))
+  h.session.load(base, "jp", "preview")
+  h.channel.search({
+    ...query,
+    state: { ...DEFAULT_QUERY, sveOnly: true, sort: "no", secondarySort: null },
+  })
+  try {
+    await expect.poll(() => h.status().phase, POLL).toBe("ready")
+    for (let i = 0; i < 5; i++) await h.queried()
+    expect(h.status().result.phase).toBe("pending")
+    const ordinary = h.session.createChannel()
+    ordinary.search({ ...query, state: DEFAULT_QUERY })
+    await expect.poll(() => ordinary.getStatus().result.phase, POLL).toBe("complete")
+    release()
+    await h.settled()
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const filtered = h.status().result
+    if (filtered.phase !== "complete") throw new Error("missing SVE result")
+    expect(filtered.page.items.some((item) => item.summary?.cardId === "c:bp01-001")).toBe(false)
+    const requests = h.served.requests.length
+    h.channel.search({ ...query, state: { ...DEFAULT_QUERY, sveOnly: true } })
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    expect(h.served.requests).toHaveLength(requests)
+    const restored = harness(served, storage)
+    served.requests.length = 0
+    restored.session.load(base, "jp", "preview")
+    await restored.settled()
+    restored.channel.search({ ...query, state: { ...DEFAULT_QUERY, sveOnly: true } })
+    await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
+    const current = h.status().result
+    const next = restored.status().result
+    if (current.phase !== "complete" || next.phase !== "complete")
+      throw new Error("missing SVE result")
+    expect(next.page).toEqual(current.page)
+    expect(restored.served.requests).toEqual(["snapshots/preview/current.json"])
+    restored.session.dispose()
+  } finally {
+    release()
+    h.session.dispose()
   }
 })

@@ -60,7 +60,7 @@ function Harness({ sidebar }: { readonly sidebar: boolean }) {
   )
 }
 
-it.each(["標誌卡", "編號卡", "官方未收錄", "PR 限定"])(
+it.each(["標誌卡", "編號卡", "官方未收錄", "PR 限定", "SVE 專屬"])(
   "keeps the dropdown open when the first %s condition appears and disappears",
   async (label) => {
     await renderInRouter(<Harness sidebar />)
@@ -93,6 +93,8 @@ it.each(
       unlisted: "官方未收錄",
       pr: "PR 限定",
       prHint: "只以 PR 卡號發行的卡",
+      sve: "SVE 專屬",
+      sveHint: "依卡名比對線上版，沒有同卡連結的卡",
       premium: "碎閃",
       stampHint: "只有 PR 卡有",
       serialHint: "卡面印有序號牌",
@@ -108,6 +110,8 @@ it.each(
       unlisted: "公式未収録",
       pr: "PR限定",
       prHint: "PRカード番号でのみ発行されたカード",
+      sve: "SVE限定",
+      sveHint: "カード名でデジタル版と照合し、同じカードのリンクがないカード",
       premium: "プレミアム",
       stampHint: "PRカードのみ",
       serialHint: "カードにシリアルナンバーが印字されている",
@@ -123,6 +127,8 @@ it.each(
       unlisted: "Not in official database",
       pr: "PR only",
       prHint: "Cards issued only with PR card numbers",
+      sve: "SVE exclusive",
+      sveHint: "Cards with no matching digital card, compared by card name",
       premium: "Premium",
       stampHint: "Only PR cards have stamps.",
       serialHint: "Printed with a serial-number plate",
@@ -153,6 +159,8 @@ it.each(
   const serial = panel.getByRole("checkbox", { name: copy.serial })
   const unlisted = panel.getByRole("checkbox", { name: copy.unlisted })
   const pr = panel.getByRole("checkbox", { name: copy.pr })
+  const sve = panel.getByRole("checkbox", { name: copy.sve })
+  expect(sve).toHaveAccessibleDescription(copy.sveHint)
   expect(pr).toHaveAccessibleDescription(copy.prHint)
   expect(stamp).toHaveAccessibleDescription(copy.stampHint)
   expect(serial).toHaveAccessibleDescription(copy.serialHint)
@@ -162,24 +170,31 @@ it.each(
   await user.click(serial)
   await user.click(unlisted)
   await user.click(pr)
+  await user.click(sve)
   expect(parseQuery(new URLSearchParams(screen.getByLabelText("URL").textContent))).toMatchObject({
     stampOnly: true,
     serialOnly: true,
     unlistedOnly: true,
     prOnly: true,
+    sveOnly: true,
     rarities: [],
   })
   expect(screen.getByLabelText("URL")).toHaveTextContent("unlisted=1")
-  expect(trigger).toHaveTextContent(`${copy.stamp}、${copy.serial}、${copy.unlisted}、${copy.pr}`)
+  expect(trigger).toHaveTextContent(
+    `${copy.stamp}、${copy.serial}、${copy.unlisted}、${copy.pr}、${copy.sve}`,
+  )
   await user.click(stamp)
   expect(serial).toBeChecked()
   expect(unlisted).toBeChecked()
   expect(pr).toBeChecked()
+  expect(sve).toBeChecked()
   expect(screen.getByLabelText("URL")).toHaveTextContent("serial=1")
   await user.click(serial)
   await user.click(unlisted)
   expect(screen.getByLabelText("URL")).toHaveTextContent("pr=1")
   await user.click(pr)
+  expect(screen.getByLabelText("URL")).toHaveTextContent("sve=1")
+  await user.click(sve)
   expect(screen.getByLabelText("URL").textContent).toBe("")
 })
 
@@ -187,7 +202,7 @@ it("clears every special printing choice together", async () => {
   await renderInRouter(<Harness sidebar />)
   const user = userEvent.setup()
   await user.click(screen.getByRole("button", { name: /^特殊版次:/u }))
-  for (const name of ["標誌卡", "編號卡", "官方未收錄", "PR 限定"])
+  for (const name of ["標誌卡", "編號卡", "官方未收錄", "PR 限定", "SVE 專屬"])
     await user.click(screen.getByRole("checkbox", { name }))
   const trigger = screen.getByRole("button", { name: /^特殊版次:/u })
   const popup = document.getElementById(trigger.getAttribute("aria-controls") ?? "")

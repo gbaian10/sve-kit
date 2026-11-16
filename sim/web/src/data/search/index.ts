@@ -174,6 +174,7 @@ const CARD_COLUMNS = [
   "errata",
   "restricted",
   "prOnly",
+  "sveOnly",
 ] as const
 const PRINTING_COLUMNS = [
   "id",
@@ -207,7 +208,7 @@ const seal = <T extends string>(columns: Record<T, number[]>): Record<T, Uint32A
   ) as Record<T, Uint32Array>
 
 /** Bump when the stored layout or derived data changes, so older images are rebuilt. */
-export const INDEX_IMAGE_FORMAT = 36
+export const INDEX_IMAGE_FORMAT = 37
 
 // Card-level special kinds, packed into the `kinds` column; Token stays per printing.
 const KIND_EVOLVE = 1
@@ -571,6 +572,15 @@ function mechanicMembership(bootstrap: BootstrapColumns, edition: Region) {
   }
 }
 
+function sameDigitalCards(bootstrap: BootstrapColumns): ReadonlySet<string> {
+  return new Set(
+    bootstrap
+      .rows("digital_link")
+      .filter((row) => row["relation"] === "same_card")
+      .map((row) => stringValue(row["card_id"])),
+  )
+}
+
 function prOnlyCards(index: CardIndex): ReadonlySet<string> {
   const families = new Set(
     index.families
@@ -603,6 +613,7 @@ function build(
   const summaryColumns = new Columns(pool)
   const index = bootstrap.index()
   const prOnly = prOnlyCards(index)
+  const digital = sameDigitalCards(bootstrap)
   const sets = new Set(index.families.map((family) => stringValue(family["code"])))
   const familyCodes = new Map(
     index.families.flatMap(
@@ -644,6 +655,7 @@ function build(
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.prOnly.push(Number(prOnly.has(entry.cardId)))
+    cards.sveOnly.push(Number(!digital.has(entry.cardId)))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
     cards.restricted.push(restrictions?.cards.has(entry.cardId) ? 1 : 0)
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
@@ -1185,11 +1197,11 @@ export class SearchIndex {
     }
   }
 
-  /** Completes only mechanic membership after its independent payload closure is verified. */
   completeMechanics(bootstrap: BootstrapColumns): void {
     this.pool.reopen()
     try {
       const membership = mechanicMembership(bootstrap, this.edition)
+      const digital = sameDigitalCards(bootstrap)
       let known = false
       let unknown = 0
       let abilityUnknown = 0
@@ -1211,7 +1223,9 @@ export class SearchIndex {
         },
       ]
       for (let card = 0; card < this.cards.id.length; card++) {
-        const states = membership(this.pool.get(this.cards.id[card] ?? 0))
+        const id = this.pool.get(this.cards.id[card] ?? 0)
+        const states = membership(id)
+        this.cards.sveOnly[card] = Number(!digital.has(id))
         this.cards.present[card] = this.pool.encode(states.present)
         this.cards.absent[card] = this.pool.encode(states.absent)
         known ||= states.annotated
@@ -1361,6 +1375,7 @@ export class SearchIndex {
       (!state.serialOnly || this.printings.serial[printing] === 1) &&
       (!state.unlistedOnly || this.printings.unlisted[printing] === 1) &&
       (!state.prOnly || this.cards.prOnly[this.printings.card[printing] ?? 0] === 1) &&
+      (!state.sveOnly || this.cards.sveOnly[this.printings.card[printing] ?? 0] === 1) &&
       // A merged-by-card cell stands for every printing, so hiding reprints cannot apply there.
       (state.reprints === "all" ||
         state.unit === "card" ||

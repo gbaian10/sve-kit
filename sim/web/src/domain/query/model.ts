@@ -70,6 +70,8 @@ export interface QueryState {
   readonly unlistedOnly: boolean
   /** Every printing across both regions belongs to the PR family and has a card number. */
   readonly prOnly: boolean
+  /** Card-level: no same_card digital link (matched by card name). */
+  readonly sveOnly: boolean
   readonly errataOnly: boolean
   readonly restrictionsOnly: boolean
   /** Filters on registered reprint printings; a merged-by-card list ignores it. */
@@ -111,6 +113,7 @@ export const DEFAULT_QUERY: QueryState = {
   serialOnly: false,
   unlistedOnly: false,
   prOnly: false,
+  sveOnly: false,
   errataOnly: false,
   restrictionsOnly: false,
   reprints: "all",
@@ -144,6 +147,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.serialOnly ? 1 : 0) +
     (state.unlistedOnly ? 1 : 0) +
     (state.prOnly ? 1 : 0) +
+    (state.sveOnly ? 1 : 0) +
     (state.errataOnly ? 1 : 0) +
     (state.restrictionsOnly ? 1 : 0) +
     (state.reprints !== DEFAULT_QUERY.reprints ? 1 : 0) +

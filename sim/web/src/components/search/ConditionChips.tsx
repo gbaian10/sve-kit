@@ -212,6 +212,9 @@ export function ConditionChips({
           },
         ]
       : []),
+    ...(query.sveOnly
+      ? [{ key: "sve", label: t("filters.sveOnly"), without: { ...query, sveOnly: false } }]
+      : []),
     ...(query.serialOnly
       ? [
           {

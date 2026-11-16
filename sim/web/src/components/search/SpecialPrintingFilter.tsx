@@ -19,6 +19,7 @@ export function SpecialPrintingFilter({
     { key: "serialOnly", label: t("filters.serialOnly"), hint: t("filters.serialOnlyHint") },
     { key: "unlistedOnly", label: t("filters.unlistedOnly"), hint: t("filters.unlistedOnlyHint") },
     { key: "prOnly", label: t("filters.prOnly"), hint: t("filters.prOnlyHint") },
+    { key: "sveOnly", label: t("filters.sveOnly"), hint: t("filters.sveOnlyHint") },
   ] as const
   const selected = options.filter((option) => query[option.key])
   return (
@@ -37,6 +38,7 @@ export function SpecialPrintingFilter({
           serialOnly: false,
           unlistedOnly: false,
           prOnly: false,
+          sveOnly: false,
         })
       }}
     >
