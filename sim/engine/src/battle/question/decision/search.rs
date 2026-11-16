@@ -87,6 +87,7 @@ fn details(
         }
         Some(object)
     } else {
+        // No authorized current object exists to reference for this printing-only candidate.
         None
     };
     Ok(CandidateDetails {
