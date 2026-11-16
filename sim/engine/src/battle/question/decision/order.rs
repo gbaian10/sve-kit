@@ -17,6 +17,7 @@ pub(super) fn project(
     domain: &OrderQuestion,
     context: Context<'_>,
 ) -> Result<(wire::QuestionUse, wire::QuestionShape, super::Binding)> {
+    // Admission permits only the chooser's deck; broader admission must update this projection too.
     if domain.destination.player != context.actor || domain.destination.zone != ObservedZone::Deck {
         return Err(ProjectionError::Unavailable);
     }

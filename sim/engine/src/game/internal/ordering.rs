@@ -1126,6 +1126,7 @@ impl OrderWait {
         let [placement] = destinations.as_slice() else {
             return Err(invalid("incomplete frozen order placement"));
         };
+        // Preparation already guarantees this placement; reaching this defense means a broken Wait.
         if placement.zone
             != (MoveDestination::Owners {
                 zone: OwnerZone::Deck,
