@@ -1,0 +1,74 @@
+cards:
+  BP20-049:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  n: 3
+                  who: self
+            - either:
+                options:
+                  - - choose:
+                        bind: taken
+                        from:
+                          in: seen
+                          traits_all:
+                            - 絶傑
+                            - 魔法使い
+                        may: true
+                        upto: 1
+                    - reveal:
+                        bind: shown
+                        ref: taken
+                    - move:
+                        ref: taken
+                        result: placed
+                        to: hand
+                    - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: placed
+                              view: before
+                          in: seen
+                        to: deck
+                  - - choose:
+                        bind: taken
+                        from:
+                          in: seen
+                          traits_all:
+                            - 絶傑
+                            - 魔法使い
+                        may: true
+                        upto: 1
+                    - reveal:
+                        bind: shown
+                        ref: taken
+                    - move:
+                        ref: taken
+                        result: placed
+                        to: ex
+                    - move:
+                        order: chooser
+                        position: bottom
+                        ref:
+                          except:
+                            in:
+                              objects_of: placed
+                              view: before
+                          in: seen
+                        to: deck
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-17"
+format: 2
+kind: author_effect_set

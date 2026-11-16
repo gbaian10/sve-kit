@@ -25,13 +25,13 @@ cards:
                 ref: kept
                 result: taken
                 to: hand
-            - choose:
-                bind: remaining
-                from:
-                  in: seen
-                n: 1
             - banish:
-                ref: remaining
+                ref:
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                  in: seen
                 result: banished
         line: 2
     admission: light
