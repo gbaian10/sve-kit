@@ -29,7 +29,7 @@ use serde_json::json;
 pub(super) const ENTRY_WITHOUT_FANFARE: &str = "entry_without_fanfare";
 
 /// How committed members arrive when the destination is the field.
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug, Default)]
 pub(super) struct FieldArrival {
     pub(super) posture: Option<Posture>,
     /// 「それの{ファンファーレ}能力を使えない」 for exactly the cards this movement puts.
@@ -1226,6 +1226,31 @@ impl Game {
             initial_posture,
             false,
         )
+    }
+
+    pub(super) fn internal_put_with_arrival(
+        &mut self,
+        execution: &mut Execution,
+        members: &[ObjectRef],
+        zone: &str,
+        kind: ZoneKind,
+        arrival: FieldArrival,
+    ) -> Result<Vec<MoveResult>> {
+        let plan =
+            self.plan_movements(execution, members, zone, kind, MoveMethod::Put, false, None)?;
+        let (moved, _) = self.commit_movement_plan(
+            execution,
+            plan,
+            &[],
+            zone,
+            kind,
+            MoveMethod::Put,
+            false,
+            None,
+            arrival,
+            false,
+        )?;
+        Ok(moved)
     }
 
     pub(super) fn internal_unordered_deck_return(

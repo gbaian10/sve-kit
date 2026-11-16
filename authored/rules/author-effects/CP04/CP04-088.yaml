@@ -1,0 +1,58 @@
+cards:
+  CP04-088:
+    abilities:
+      - activate:
+          cost:
+            pp: 1
+          do:
+            - choose:
+                bind: victim
+                by: opp
+                from:
+                  kind: follower
+                  who: opp
+                  zone: field
+                n: 1
+            - move:
+                ref: victim
+                to: cemetery
+          per_turn: 1
+          ub: true
+        line: 1
+      - fanfare:
+          do:
+            - search:
+                entry_effects:
+                  - no_trigger:
+                      kinds:
+                        - fanfare
+                      on: entering
+                groups:
+                  - n: 1
+                    sel:
+                      kind: follower
+                      orig_cost_le: 3
+                      trait: ルーセント学院
+                      who: self
+                      zone: deck
+                  - n: 1
+                    sel:
+                      kind: follower
+                      orig_cost_eq: 1
+                      trait: ルーセント学院
+                      who: self
+                      zone: deck
+                to: field
+        line: 1
+        section: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+    rule_sections:
+      - section: 1
+format: 2
+kind: author_effect_set

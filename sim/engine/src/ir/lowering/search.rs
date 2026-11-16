@@ -485,9 +485,21 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<SearchDestination, LoweringError> {
         let initial_posture = entry_posture(value, path)?;
+        let entry_effects = super::ordering::entry_effects(value.entry_effects.as_deref(), path)?;
+        if !entry_effects.is_empty()
+            && !matches!(
+                value.to,
+                ast::SearchDestination::Single(ast::SearchZone::Field)
+            )
+        {
+            return Err(unsupported(path));
+        }
         match &value.to {
             ast::SearchDestination::Single(zone) => Ok(SearchDestination::Single {
-                movement: movement(zone, initial_posture),
+                movement: MoveSpec {
+                    entry_effects,
+                    ..movement(zone, initial_posture)
+                },
             }),
             ast::SearchDestination::Partition {
                 order: ast::Printed::Printed,

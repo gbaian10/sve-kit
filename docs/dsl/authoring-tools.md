@@ -1433,8 +1433,10 @@ ECP01-037 及其全部日文印刷依 [R-0017](../../authored/rules/rulings/R-00
 `move` 到場上時可加 `entry_effects: [{cannot: {what: play_ability, ability: {keyword: fanfare}}}]`，
 表示「それの{ファンファーレ}能力を使えない」：這次放上場的卡，自己的入場曲不會成為待機中的能力（GAP-A-044，不改寫成 `no_trigger`）。
 入場曲只會在持有者自己進場時誘發，所以這個限制在該次進場的誘發判定時就處理完，不會留成持續效果；
-同時進場的其他卡與其他觀察進場的能力照常誘發。目前只接受這一種 `entry_effects`，其他形狀與非場上目的地都會拒絕。
+同時進場的其他卡與其他觀察進場的能力照常誘發。
 BP04-038 接著用 `apply: {on: {follow: entered}, effect: {cannot: {what: attack}}, until: turn}` 表示「このターン、それは相手を攻撃できない」。
+
+`move` 與單一場上目的地的 `search` 另接受 `entry_effects: [{no_trigger: {on: entering, kinds: [fanfare]}}]`，表示「それの{ファンファーレ}能力は誘発しない」（CP04-088、Q2465）。`entering` 指本次成功進場的新世代，只阻止它自己的入場曲建立待機，不影響其他入場觀察者，也不留下持續禁令。搜尋可以分組，兩組共用候選快照並禁止重複選同一張卡；部分容量的分配仍保留不誘發設定，未能進場的卡不取得限制，零張搜尋仍洗牌。其他種類的 entry effects、非場上目的地及分區搜尋仍未接通。
 
 ## 持續傷害加值讀來源 counter
 
