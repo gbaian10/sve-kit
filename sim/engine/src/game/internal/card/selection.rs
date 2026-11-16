@@ -1,5 +1,5 @@
 use super::super::play_target_cost::SelectedNames;
-use super::super::{DecisionToken, DecisionView, InputDomain, Slot, Wait};
+use super::super::{DecisionToken, DecisionView, InputDomain, Queued, Slot, Wait};
 use super::{Execution, Game, Nat, ObjectRef, PlayerId, Result, invalid, player_id, unsupported};
 use crate::game::Object;
 use crate::game::internal::player::CandidateLinks;
@@ -1794,7 +1794,8 @@ impl Execution {
     /// Lowering admits a private multi-card pick onto the field only as the very next step.
     /// The player whose field the very next step fills with this selection, if any.
     fn field_entry_receiver(&self, key: (ScopeId, u64)) -> Option<&PlayerRef> {
-        let Some(Node::Instruction { instruction }) = self.todo.front() else {
+        let Some(Node::Instruction { instruction }) = self.todo.iter().find_map(Queued::node)
+        else {
             return None;
         };
         match &instruction.action {

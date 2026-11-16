@@ -975,9 +975,12 @@ impl Game {
                 && self.object(&id)?.generation == member.generation.0
                 && self.internal_ward_entry_choice(execution, &id)?
             {
-                execution.todo.push_front(Node::Instruction {
-                    instruction: Box::new(instruction.clone()),
-                });
+                execution.todo.push_front(
+                    Node::Instruction {
+                        instruction: Box::new(instruction.clone()),
+                    }
+                    .into(),
+                );
                 return Ok(());
             }
         }

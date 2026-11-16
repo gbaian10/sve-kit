@@ -111,7 +111,9 @@ impl Game {
         {
             *remaining = Nat(left);
         }
-        execution.todo.push_front(Node::Control { control: next });
+        execution
+            .todo
+            .push_front(Node::Control { control: next }.into());
         execution.prepend(body);
         Ok(())
     }
