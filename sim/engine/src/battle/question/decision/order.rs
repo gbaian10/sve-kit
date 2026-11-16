@@ -5,12 +5,13 @@ use crate::battle::question::common::seat;
 use crate::game::player::observation::ObservedZone;
 use crate::game::player::{self, OrderQuestion};
 use crate::ir::Position;
+use alloc::collections::BTreeMap;
 use core::result;
-use sve_battle_contract::{Answer, Zone, question as wire};
+use sve_battle_contract::{Answer, OptionId, Zone, question as wire};
 
 #[derive(Clone)]
 pub(in crate::battle::question) struct Binding {
-    candidates: Candidates,
+    coordinates: BTreeMap<OptionId, u64>,
 }
 
 pub(super) fn project(
@@ -60,18 +61,24 @@ pub(super) fn project(
                 position: Some(edge),
             }),
         },
-        super::Binding::Order(Binding { candidates }),
+        super::Binding::Order(Binding::new(candidates.into_coordinates())),
     ))
 }
 
 impl Binding {
+    pub(super) const fn new(coordinates: BTreeMap<OptionId, u64>) -> Self {
+        Self { coordinates }
+    }
     pub(super) fn answer(&self, answer: &Answer) -> result::Result<player::Answer, AnswerError> {
         let Answer::Order { order } = answer else {
             return Err(AnswerError);
         };
-        if order.len() != self.candidates.values.len() {
+        if order.len() != self.coordinates.len() {
             return Err(AnswerError);
         }
-        Ok(player::Answer::Order(self.candidates.lookup(order)?))
+        Ok(player::Answer::Order(super::candidates::lookup(
+            &self.coordinates,
+            order,
+        )?))
     }
 }

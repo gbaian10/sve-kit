@@ -19,6 +19,7 @@ mod modes;
 mod number;
 mod order;
 mod partition;
+mod replacement;
 mod resource;
 mod search;
 mod select;
@@ -148,11 +149,13 @@ pub(super) fn project(
         DecisionShape::Abilities(choices) => {
             ability::project(choices, context.ok_or(ProjectionError::Unavailable)?)
         }
+        DecisionShape::DamageReplacements(choices) => {
+            replacement::project(choices, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Quick { .. }
         | DecisionShape::ExchangeRoutes(_)
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
-        | DecisionShape::DamageReplacements(_)
         | DecisionShape::SearchReplacement => Err(ProjectionError::Unavailable),
     }
 }

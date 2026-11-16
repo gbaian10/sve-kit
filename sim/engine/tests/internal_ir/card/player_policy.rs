@@ -278,6 +278,7 @@ fn policy_occurrences_use_current_coordinates_and_orders_are_complete() {
             name: "replacement".into(),
             line: None,
             object: None,
+            source: None,
         })
         .collect();
     assert_eq!(

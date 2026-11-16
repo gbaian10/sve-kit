@@ -85,4 +85,6 @@ pub struct ReplacementChoice {
     pub line: Option<u64>,
     /// Current Observation capability of the captured provider.
     pub object: Option<ObjectHandle>,
+    /// Captured text provenance, observed without reconnecting a later provider.
+    pub source: Option<EffectSource>,
 }

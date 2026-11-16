@@ -30,3 +30,6 @@ pub(super) mod history_fixture;
 mod history_flow;
 
 mod sources;
+
+#[path = "../../tests/support/current_fixture.rs"]
+pub(crate) mod current_fixture;
