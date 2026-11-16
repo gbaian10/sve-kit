@@ -30,6 +30,7 @@ pub(super) fn project(
         || source.origin.player != context.actor
         || source.origin.zone != ObservedZone::Deck
         || source.faces.len() != domain.selection.cards.len()
+        // Existing admission always sends searched cards to the searcher's own zones.
         || facts.destination.player != source.origin.player
         || !matches!(
             facts.destination.zone,
