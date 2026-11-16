@@ -12,6 +12,7 @@ from sve_carddb.domains.registry.transitions.models import ArtId
 from sve_carddb.images.art_matching import RECIPE, REVIEW_MAX, REVIEW_MIN
 
 type Box = tuple[UInt, UInt, UInt, UInt]
+type StyleKey = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_-]*\Z")]
 
 
 class Witness(RecordData):
@@ -22,14 +23,34 @@ class Witness(RecordData):
     crop: Box
 
 
-class Candidate(RecordData):
+class CandidateKey(RecordData):
     official_id: Text
     phase: Phase
-    style_key: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_-]*\Z")]
+    style_key: StyleKey
+
+    def key(self) -> tuple[str, Phase, str]:
+        """Identify an image style independently of its bytes."""
+        return self.official_id, self.phase, self.style_key
+
+
+class Candidate(CandidateKey):
     image_url: Text
     image_sha256: Hash
     crop: Box
     inliers: UInt
+
+
+class ManualReview(RecordData):
+    source: Text
+    reviewed_on: Date
+    matched_candidates: tuple[CandidateKey, ...]
+
+    @field_validator("source")
+    @classmethod
+    def _source(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Manual art review requires a nonblank source")
+        return value
 
 
 class Record(RecordData):
@@ -44,6 +65,30 @@ class Record(RecordData):
     complete: bool
     review_level: Literal["model_reviewed", "sampled", "confirmed"]
     reason: Text
+    manual_review: ManualReview | None = Field(
+        default=None, exclude_if=lambda value: value is None
+    )
+
+    def matches(self) -> tuple[Candidate, ...]:
+        """Return only candidates adopted by this conclusion."""
+        if self.state != "matched":
+            return ()
+        if self.manual_review is not None:
+            selected = {item.key() for item in self.manual_review.matched_candidates}
+            return tuple(c for c in self.candidates if c.key() in selected)
+        return tuple(c for c in self.candidates if c.inliers >= REVIEW_MAX)
+
+    def _validate_manual_review(self, keys: set[tuple[str, Phase, str]]) -> None:
+        manual = self.manual_review
+        if manual is None:
+            return
+        if self.review_level != "confirmed" or self.state == "unknown":
+            raise ValueError("Manual art review requires a confirmed conclusion")
+        selected = {item.key() for item in manual.matched_candidates}
+        if len(selected) != len(manual.matched_candidates) or not selected <= keys:
+            raise ValueError("Manual art review must select unique existing candidates")
+        if (self.state == "matched") != bool(selected):
+            raise ValueError("Manual art review matches must agree with its state")
 
     @model_validator(mode="after")
     def _comparison(self) -> Record:
@@ -60,17 +105,24 @@ class Record(RecordData):
             for value in identifiers
         ):
             raise ValueError("Digital art official ID width mismatch")
-        keys = {(c.official_id, c.phase, c.style_key) for c in self.candidates}
+        keys = {c.key() for c in self.candidates}
         if len(keys) != len(self.candidates):
             raise ValueError("Duplicate digital art candidate")
+        manual = self.manual_review
+        self._validate_manual_review(keys)
         if self.state != "unknown" and (self.witness is None or not self.candidates):
             raise ValueError("Art conclusions require images and a witness")
         if self.state == "not_found" and (
-            not self.complete or any(c.inliers >= REVIEW_MIN for c in self.candidates)
+            not self.complete
+            or (
+                manual is None and any(c.inliers >= REVIEW_MIN for c in self.candidates)
+            )
         ):
             raise ValueError("Art absence requires all candidates below review")
-        if self.state == "matched" and not any(
-            c.inliers >= REVIEW_MAX for c in self.candidates
+        if (
+            self.state == "matched"
+            and manual is None
+            and not any(c.inliers >= REVIEW_MAX for c in self.candidates)
         ):
             raise ValueError("Art match requires a decisive candidate")
         host = "shadowverse-portal.com" if self.game == "sv1" else "shadowverse-wb.com"

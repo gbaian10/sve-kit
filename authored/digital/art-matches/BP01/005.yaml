@@ -285,7 +285,7 @@ records:
     card_id: c:349e442b28c450309812b90ff8ff4b04
     face_id: f:a0d4a1adf483585594eb22db5ab61fe6
     game: sv1
-    state: unknown
+    state: matched
     same_card_targets:
       - "900411010"
     witness:
@@ -322,8 +322,15 @@ records:
           - 463
         inliers: 86
     complete: true
-    review_level: model_reviewed
-    reason: SIFT 分數落在 10～99 審閱區間，或缺少完整影像見證；保持未知。
+    review_level: confirmed
+    reason: 維護者目視確認同圖；SVE 的周年 logo 等加印使分數偏低，原始分數保留。
+    manual_review:
+      source: 維護者灰區目視判定（#2277）
+      reviewed_on: "2026-11-17"
+      matched_candidates:
+        - official_id: "900411010"
+          phase: normal
+          style_key: base
   - art_id: a:cc7c229d7fab5e9d9dc9ba6b11434519
     card_id: c:349e442b28c450309812b90ff8ff4b04
     face_id: f:a0d4a1adf483585594eb22db5ab61fe6
@@ -996,7 +1003,7 @@ records:
     card_id: c:0e8e5cf6e0395304a5adcf249ced500d
     face_id: f:6c3cefc7c38c5f45ad461b83c2ac5027
     game: sv1
-    state: unknown
+    state: matched
     same_card_targets:
       - "900611010"
     witness:
@@ -1033,8 +1040,15 @@ records:
           - 463
         inliers: 95
     complete: true
-    review_level: model_reviewed
-    reason: SIFT 分數落在 10～99 審閱區間，或缺少完整影像見證；保持未知。
+    review_level: confirmed
+    reason: 維護者目視確認同圖；SVE 的周年 logo 等加印使分數偏低，原始分數保留。
+    manual_review:
+      source: 維護者灰區目視判定（#2277）
+      reviewed_on: "2026-11-17"
+      matched_candidates:
+        - official_id: "900611010"
+          phase: normal
+          style_key: base
   - art_id: a:e0f1bcfe34295b0bb5b43c5c6dbbda05
     card_id: c:0e8e5cf6e0395304a5adcf249ced500d
     face_id: f:6c3cefc7c38c5f45ad461b83c2ac5027

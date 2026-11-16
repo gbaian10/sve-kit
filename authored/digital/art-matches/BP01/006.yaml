@@ -328,7 +328,7 @@ records:
     card_id: c:531fc65902fb5aa78cc684e8378909de
     face_id: f:e5693162b43d5f4c9bec1e3811be66e5
     game: sv1
-    state: unknown
+    state: matched
     same_card_targets:
       - "900711010"
     witness:
@@ -365,8 +365,15 @@ records:
           - 463
         inliers: 89
     complete: true
-    review_level: model_reviewed
-    reason: SIFT 分數落在 10～99 審閱區間，或缺少完整影像見證；保持未知。
+    review_level: confirmed
+    reason: 維護者目視確認同圖；SVE 的周年 logo 等加印使分數偏低，原始分數保留。
+    manual_review:
+      source: 維護者灰區目視判定（#2277）
+      reviewed_on: "2026-11-17"
+      matched_candidates:
+        - official_id: "900711010"
+          phase: normal
+          style_key: base
   - art_id: a:ff63ddba9b735fcda3a357a9a530a01e
     card_id: c:531fc65902fb5aa78cc684e8378909de
     face_id: f:e5693162b43d5f4c9bec1e3811be66e5
