@@ -55,6 +55,7 @@ impl Binding {
                 let Answer::Integer { value } = answer else {
                     return Err(AnswerError);
                 };
+                // Native submission still rechecks the original Cardinality after this wire guard.
                 if value.get() < bounds.min.get()
                     || bounds.max.is_some_and(|max| value.get() > max.get())
                 {

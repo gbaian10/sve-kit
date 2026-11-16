@@ -72,12 +72,11 @@ fn board(actor: Viewer, program: &WellFormedCardProgram) -> Game {
     game
 }
 
-#[expect(
-    clippy::manual_assert_eq,
-    reason = "Failures must not dump complete authority state into test logs."
-)]
 fn assert_unchanged(game: &Game, before: &str) {
-    assert!(board_fixtures::exact_authority(game) == before);
+    assert!(
+        board_fixtures::exact_authority(game) == before,
+        "reading or rejecting a numeric answer preserves authority state"
+    );
 }
 
 #[test]
