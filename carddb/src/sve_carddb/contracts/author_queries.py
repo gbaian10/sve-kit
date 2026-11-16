@@ -504,9 +504,42 @@ class CondPlayedFrom(RecordData):
     played_from: CondFromPayload
 
 
-class CondEnteredByPayload(RecordData):
+class EntryAbilitySource(RecordData):
+    trait: Text
+
+
+@with_config(
+    ConfigDict(
+        extra="forbid",
+        strict=True,
+        regex_engine="python-re",
+        json_schema_extra={
+            "allOf": [
+                {
+                    "if": {"required": ["source"]},
+                    "then": {"properties": {"by": {"const": "ability"}}},
+                }
+            ]
+        },
+    )
+)
+class CondEnteredByPayloadFields(TypedDict):
     ref: Ref
     by: Literal["ability", "play"]
+    source: NotRequired[EntryAbilitySource]
+
+
+def _entry_ability_source(
+    value: CondEnteredByPayloadFields,
+) -> CondEnteredByPayloadFields:
+    if "source" in value and value["by"] != "ability":
+        raise ValueError("Entry source requires an ability entry")
+    return value
+
+
+type CondEnteredByPayload = Annotated[
+    CondEnteredByPayloadFields, AfterValidator(_entry_ability_source)
+]
 
 
 class CondEnteredBy(RecordData):
