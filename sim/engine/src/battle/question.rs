@@ -1,6 +1,6 @@
 //! Only authority-owned questions can bind a wire domain to native capabilities.
 
-use super::{BattleReferences, ProjectionError};
+use super::{BattleReferences, ProjectionError, SelectionProjection};
 use crate::game::player::{
     self, ClosingAnswer, ClosingQuestion, EvolutionAnswer, EvolutionQuestion,
     ObjectHandle as NativeHandle, OpeningAnswer, OpeningQuestion, QuestionToken, Viewer,
@@ -17,6 +17,8 @@ use sve_battle_contract::{
 type Result<T> = result::Result<T, ProjectionError>;
 type CardCandidates = (Vec<wire::Candidate>, BTreeMap<OptionId, NativeHandle>);
 
+mod evolution;
+
 #[cfg(test)]
 mod tests;
 
@@ -30,7 +32,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Supports opening, closing, and normal evolution form and payment questions.
+/// Supports opening, closing, and normal evolution form, discard and payment questions.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -53,6 +55,7 @@ enum Binding {
     EndGuard(BTreeMap<OptionId, NativeHandle>),
     EvolutionPayment(Vec<wire::EvolutionPayment>),
     EvolutionForm(BTreeMap<OptionId, player::EvolutionFormId>),
+    EvolutionDiscard(SelectionProjection),
     HandLimit {
         cards: BTreeMap<OptionId, NativeHandle>,
         count: usize,
@@ -125,9 +128,10 @@ impl QuestionProjection {
             player::QuestionShape::Evolution(EvolutionQuestion::Form(forms)) => {
                 evolution_form(id, native.actor, &forms, &observation, catalog, references)?
             }
-            player::QuestionShape::Evolution(
-                EvolutionQuestion::Materials(_) | EvolutionQuestion::Discard(_),
-            )
+            player::QuestionShape::Evolution(EvolutionQuestion::Discard(domain)) => {
+                evolution::discard(id, native.actor, &domain, &observation)?
+            }
+            player::QuestionShape::Evolution(EvolutionQuestion::Materials(_))
             | player::QuestionShape::Decision(_)
             | player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
         };
@@ -180,6 +184,10 @@ impl QuestionProjection {
             return Err(AnswerError);
         }
         let command = match &self.binding {
+            Binding::EvolutionDiscard(projection) => player::Command::Evolution {
+                token: self.token,
+                answer: evolution::discard_answer(projection, answer)?,
+            },
             Binding::EvolutionForm(forms) => {
                 let Answer::Choose { chosen } = answer else {
                     return Err(AnswerError);

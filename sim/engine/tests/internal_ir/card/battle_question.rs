@@ -11,6 +11,8 @@ use sve_engine::game::player::{
 
 #[path = "battle_question/end_guard.rs"]
 mod end_guard;
+#[path = "battle_question/evolution_discard.rs"]
+mod evolution_discard;
 #[path = "battle_question/evolution_form.rs"]
 mod evolution_form;
 #[path = "battle_question/evolution_payment.rs"]
