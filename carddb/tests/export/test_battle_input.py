@@ -13,6 +13,8 @@ from tests.support.battle_projection import snapshot as compatible_snapshot
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from pydantic import JsonValue
+
     from sve_carddb.export.reader import Row
 
 
@@ -26,8 +28,11 @@ def source() -> Snapshot:
             "face_revision",
             "text_unit",
             "vocabulary",
+            "qa",
             "qa_version",
+            "cr_version",
             "cr_clause",
+            "ruling_revision",
             "product_family",
             "product",
             "keyword",
@@ -209,6 +214,14 @@ def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None
     assert object_value(result.references["wording"])["manifest_sha256"] == digest(
         canonical(snapshot.manifest)
     )
+    rules = object_value(result.references["rules"])
+    assert rules["manifest_sha256"] == digest(canonical(snapshot.manifest))
+    assert {
+        "kind": "ruling",
+        "id": "ruling",
+        "revision": "ruling-rev",
+        "strength": "inferred",
+    } in array(rules["entries"])
     with pytest.raises(ExportError):
         load_battle_inputs(roots.preview, "en")
     blob = object_value(array(snapshot.manifest["files"])[0])
@@ -440,3 +453,105 @@ def test_native_absent_numeric_characteristics_use_the_existing_sentinel() -> No
         array(object_value(parse(result.snapshot.strip()))["faces"])[0]
     )
     assert [first[field] for field in ("cost", "power", "hp")] == ["-", "-", "-"]
+
+
+def test_battle_rule_identity_closure_keeps_parent_ids_and_all_exact_versions() -> None:
+    snapshot = source()
+    snapshot.tables["cr_version"] = [
+        {"id": "cr-old", "region": "jp", "version": "1.0"},
+        {"id": "cr-new", "region": "jp", "version": "2.0"},
+        {"id": "cr-en", "region": "en", "version": "2.0"},
+    ]
+    snapshot.tables["cr_clause"] = [
+        {"id": "clause-1", "cr_version_id": "cr-old", "number": "1.2"},
+        {"id": "clause-2", "cr_version_id": "cr-new", "number": "1.2"},
+        {"id": "clause-3", "cr_version_id": "cr-new", "number": "3.1"},
+        {"id": "clause-en", "cr_version_id": "cr-en", "number": "1.2"},
+    ]
+    snapshot.tables["qa"] = [
+        {"id": "answer-parent", "region": "jp", "official_number": "00042"},
+        {"id": "answer-en", "region": "en", "official_number": "00042"},
+    ]
+    snapshot.tables["qa_version"] = [
+        {"id": "qa-old", "qa_id": "answer-parent", "revision": 0},
+        {"id": "qa-new", "qa_id": "answer-parent", "revision": 1},
+        {"id": "qa-en", "qa_id": "answer-en", "revision": 0},
+    ]
+    snapshot.tables["ruling_revision"] = [
+        {
+            "id": "ruling-old",
+            "ruling_id": "ruling-parent",
+            "revision": 0,
+            "strength": "generalized",
+        },
+        {
+            "id": "ruling-new",
+            "ruling_id": "ruling-parent",
+            "revision": 1,
+            "strength": "inferred",
+        },
+    ]
+    rules = object_value(build_battle_inputs(snapshot, "jp").references["rules"])
+    assert rules["manifest_sha256"] == snapshot.manifest_sha256
+    expected: list[JsonValue] = [
+        {"kind": "cr", "id": "1.2", "revision": "cr-old"},
+        {"kind": "cr", "id": "1.2", "revision": "cr-new"},
+        {"kind": "cr", "id": "3.1", "revision": "cr-new"},
+        {"kind": "qa", "id": "answer-parent", "revision": "qa-old"},
+        {"kind": "qa", "id": "answer-parent", "revision": "qa-new"},
+        {
+            "kind": "ruling",
+            "id": "ruling-parent",
+            "revision": "ruling-old",
+            "strength": "generalized",
+        },
+        {
+            "kind": "ruling",
+            "id": "ruling-parent",
+            "revision": "ruling-new",
+            "strength": "inferred",
+        },
+    ]
+    assert sorted(array(rules["entries"]), key=canonical) == sorted(
+        expected, key=canonical
+    )
+
+
+@pytest.mark.parametrize(
+    ("table", "rows"),
+    [
+        ("cr_clause", [{"id": "clause", "cr_version_id": "missing", "number": "1.2"}]),
+        (
+            "cr_clause",
+            [
+                {"id": "clause-a", "cr_version_id": "version", "number": "1.2"},
+                {"id": "clause-b", "cr_version_id": "version", "number": "1.2"},
+            ],
+        ),
+        ("qa_version", [{"id": "answer-version", "qa_id": "missing"}]),
+        (
+            "ruling_revision",
+            [{"id": "revision", "ruling_id": "ruling", "strength": "assumed-official"}],
+        ),
+        (
+            "ruling_revision",
+            [{"id": "revision", "ruling_id": "", "strength": "inferred"}],
+        ),
+        (
+            "ruling_revision",
+            [
+                {"id": "revision", "ruling_id": "ruling", "strength": "inferred"},
+                {"id": "revision", "ruling_id": "ruling", "strength": "inferred"},
+            ],
+        ),
+    ],
+)
+def test_battle_rule_identity_projection_rejects_incomplete_or_ambiguous_rows(
+    table: str, rows: list[Row]
+) -> None:
+    snapshot = source()
+    snapshot.tables["cr_version"] = [{"id": "version", "region": "jp"}]
+    snapshot.tables["qa"] = [{"id": "answer", "region": "jp"}]
+    snapshot.tables[table] = rows
+    with pytest.raises(ValueError, match="Battle snapshot projection is unavailable"):
+        build_battle_inputs(snapshot, "jp")

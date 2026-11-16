@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import array, canonical, digest, integer, object_value, string
+from sve_carddb.export.battle_rules import rule_identities
 from sve_carddb.export.text_owners import TextOwners
 
 if TYPE_CHECKING:
@@ -222,5 +223,6 @@ def _build(snapshot: Snapshot, region: str) -> BattleInputs:
             "snapshot_sha256": digest(native_snapshot).removeprefix("sha256:"),
             "faces": faces,
             "wording": {"manifest_sha256": snapshot.manifest_sha256, "faces": wording},
+            "rules": rule_identities(snapshot, region),
         },
     )
