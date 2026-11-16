@@ -64,10 +64,15 @@ through another module the bundler still emits the page as an unreferenced chunk
 Until the local engine supplies contract updates, the page plays fixture scenes
 (`src/battle/fixtures/`): each scene describes one table and is turned into the complete update each
 seat would receive, validated by the generated contract validator in the tests. Nothing in the
-fixtures computes rules.
+fixtures computes rules. The seat whose main phase it is also gets the main-phase question its
+table describes: which hand cards may be played and what may attack what. `scriptedTable` plays
+one scene for both seats; it takes an answer only when the open question offers it, and the
+scene's script says which table follows. A scene that only shows a table refuses every answer.
 
-- `?scene=preset|opening|mid|full|stack` picks the scene; the chip on the board's top-left corner
-  does the same. `stack` is a Witch's table: a counter lies only on a card that may hold it, so
+- `?scene=preset|opening|mid|full|stack|turn|finished|fault|halted` picks the scene; the chip on
+  the board's top-left corner does the same. `turn` is a turn that can be played to its end, its
+  actions in any order, every outcome written out by hand; `finished`, `fault` and `halted` are a
+  game that is over, an engine fault and a host error. `stack` is a Witch's table: a counter lies only on a card that may hold it, so
   stack counters are shown on amulets with Stack. Its followers are arranged to show how markers
   share a card (several keywords, standing and engaged; a chip beside a keyword), and its EX
   follower carries current numbers, as the authority reports them for the EX area too.
@@ -137,9 +142,12 @@ How the screen is put together:
 - Light around a card's edge says what can be done with it, in the colours of the online game:
   green for a card that may attack the leader, yellow for one that may attack followers only,
   orange for the picked card (which also lifts) and for what the picked card may attack. Which
-  cards may attack what is the authority's open question, never worked out from keywords or
-  postures; until the screen reads questions a scene supplies it (`AttackHints` in
-  `src/battle/view/table.ts`). Storm and rush have no marker of their own on a card.
+  cards may attack what is the authority's open question (`src/battle/view/actions.ts` reads
+  it), never worked out from keywords or postures. Storm and rush have no marker of their own on
+  a card.
+- The contract orders the field and the EX area and places no card in a slot, so the screen
+  remembers where each card lies (`place` in `src/battle/view/table.ts`): a card keeps its slot
+  for as long as it stays in its zone, and a card that arrives takes the first free slot.
 - Where markers lie on a card: keyword markers stack down from the upper right corner, and run
   inwards from the lower right corner of an engaged card; a counter chip lies at the middle of the
   upper edge, and at the middle of the right edge of an engaged card. A follower's dice show

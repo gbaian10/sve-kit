@@ -33,6 +33,8 @@
     "src/battle/engine/client.ts!",
     // Playback order of one seat's updates; the battle screen and its audio (#2130, #2131) consume it next.
     "src/battle/presentation/queue.ts!",
+    // What a main-phase question lets a seat do; the battle screen answers through `act` next (#2130).
+    "src/battle/view/actions.ts!",
     // Wrangler deploys this Worker for the preview host, so keep it in production analysis.
     "src/cloudflare/worker.ts!",
     // Dev-only accessibility helper for manually checking overflow across locales.

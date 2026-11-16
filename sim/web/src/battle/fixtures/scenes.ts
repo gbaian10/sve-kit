@@ -1,27 +1,33 @@
 // Fixture scenes: a described table per scene and what each seat is sent for it. Numbers, postures
 // and keywords are arranged to exercise the screen, not to record a position a game reached.
-import type { CardRef, HostMessage, Seat } from "../contract"
-import type { AttackHints, SlotArrangement } from "../view/table"
-import { baseline, type FieldSpec, ready, type SeatSpec, type TableSpec } from "./build"
+import type { BattleInput, CardRef, HostError, HostMessage, OptionId, Seat } from "../contract"
+import type { SlotArrangement } from "../view/table"
+import { type FieldSpec, ready, type SeatSpec, type TableSpec, update } from "./build"
 import { type CardNo, cardRef } from "./cards"
 
-type SceneId = "preset" | "opening" | "mid" | "full" | "stack"
+type SceneId =
+  "preset" | "opening" | "mid" | "full" | "stack" | "turn" | "finished" | "fault" | "halted"
 
-const attackHint = ({ attack }: FieldSpec) =>
-  attack === undefined
-    ? null
-    : { leader: attack.leader === true, followers: attack.followers ?? [] }
+/** One answer applied in a scene: the intent taken and, for an attack, its recipient. */
+export interface Choice {
+  readonly intent: OptionId
+  readonly target: OptionId | null
+}
 
 export interface Scene {
   readonly id: SceneId
   /** The contract carries no leader card (a leader is a seat's look); match setup supplies it. */
   readonly leaders: readonly [CardRef, CardRef]
-  /** Which slots the field cards lie in on screen; the messages only give their order. */
+  /** Which slots the field cards lie in when the scene starts; the messages only give their order. */
   readonly slots: SlotArrangement
-  /** Which field cards may attack now, by zone order: what the seat's open question would say. */
-  readonly attackers: AttackHints
-  /** Everything each seat receives, in order. */
+  /** Everything each seat receives when it starts, in order. */
   readonly script: Readonly<Record<Seat, readonly HostMessage[]>>
+  /**
+   * How the scene goes on: the table once these answers have been applied, in order, or null when
+   * the script has no such course and the last answer is refused. A scene that only shows a table
+   * refuses every answer.
+   */
+  readonly after: (choices: readonly Choice[]) => TableSpec | null
 }
 
 const DRAGON_LEADER: CardNo = "BP10-LD05"
@@ -78,7 +84,19 @@ function scene(
   id: SceneId,
   table: TableSpec,
   leaders: readonly [CardNo, CardNo] = [DRAGON_LEADER, ROYAL_LEADER],
+  course: {
+    readonly after?: Scene["after"]
+    /** What the first update says happens next, in place of the main-phase question. */
+    readonly input?: BattleInput
+    /** A host error that follows the first update. */
+    readonly stop?: HostError
+  } = {},
 ): Scene {
+  const first = (seat: Seat): HostMessage[] => [
+    ready(seat),
+    update(table, seat, 0, course.input ?? "q0"),
+    ...(course.stop === undefined ? [] : [course.stop]),
+  ]
   return {
     id,
     leaders: [cardRef(leaders[0]), cardRef(leaders[1])],
@@ -86,14 +104,8 @@ function scene(
       p1: { field: table.seats[0].field.map((card) => card.slot) },
       p2: { field: table.seats[1].field.map((card) => card.slot) },
     },
-    attackers: {
-      p1: table.seats[0].field.map(attackHint),
-      p2: table.seats[1].field.map(attackHint),
-    },
-    script: {
-      p1: [ready("p1"), baseline(table, "p1")],
-      p2: [ready("p2"), baseline(table, "p2")],
-    },
+    script: { p1: first("p1"), p2: first("p2") },
+    after: course.after ?? (() => null),
   }
 }
 
@@ -112,6 +124,141 @@ const opening = (hand: readonly CardNo[], evolve: readonly CardNo[]): SeatSpec =
   cemetery: [],
   banish: [],
   evolveDeck: { faceDown: evolve, faceUp: [] },
+})
+
+// One turn that can be played to its end, its actions in any order: play a follower, attack the
+// leader or the engaged follower, end the turn. Every outcome is written out by hand, the way a
+// player would lay the table after it; nothing here works out damage or what is legal. The cards
+// that change zone carry a key, so each keeps its handle like an object of a real game.
+interface TurnCourse {
+  readonly played: boolean
+  /** What the follower that has been on the field attacked. */
+  readonly unifier: "ready" | "leader" | "fighter"
+  /** The follower with rush arrived this turn: the engaged follower is all it may attack. */
+  readonly priest: "ready" | "fighter"
+  readonly ended: boolean
+}
+
+const TURN_START: TurnCourse = { played: false, unifier: "ready", priest: "ready", ended: false }
+
+/** The course after one more answer, its options named as the first seat's question names them. */
+function turnStep(course: TurnCourse, { intent, target }: Choice): TurnCourse | null {
+  if (course.ended) return null
+  if (intent === "play:a:fanatic") return { ...course, played: true }
+  if (intent === "attack:a:unifier")
+    return { ...course, unifier: target === "attack:a:unifier>leader" ? "leader" : "fighter" }
+  if (intent === "attack:a:priest") return { ...course, priest: "fighter" }
+  if (intent === "end") return { ...course, ended: true }
+  return null
+}
+
+function turnTable(course: TurnCourse): TableSpec {
+  // The engaged 3/2 falls to either attacker and deals its three damage back: the 3/4 is left
+  // with one life, the 2/2 falls with it.
+  const fallen = course.unifier === "fighter" || course.priest === "fighter"
+  const reach = fallen ? [] : [1]
+  const unifier: FieldSpec =
+    course.unifier === "ready"
+      ? {
+          no: "BP20-062",
+          slot: 0,
+          key: "unifier",
+          ...(course.ended ? {} : { attack: { leader: true, followers: reach } }),
+        }
+      : {
+          no: "BP20-062",
+          slot: 0,
+          key: "unifier",
+          acted: true,
+          ...(course.unifier === "fighter" ? { stats: [3, 1] } : {}),
+        }
+  const priest: FieldSpec = {
+    no: "BP20-064",
+    slot: 1,
+    key: "priest",
+    keywords: ["rush"],
+    ...(fallen || course.ended ? {} : { attack: { followers: reach } }),
+  }
+  const fanatic: FieldSpec = { no: "BP08-063", slot: 2, key: "fanatic" }
+  const fighter: FieldSpec = { no: "BP13-033", slot: 1, key: "fighter", acted: !course.ended }
+  return {
+    turn: {
+      active: course.ended ? "p2" : "p1",
+      first_player: "p2",
+      phase: "main",
+      // The other seat begins its sixth turn: one more play point, all of them back, a card drawn,
+      // and its own cards standing again.
+      elapsed_turns: course.ended ? [5, 6] : [5, 5],
+    },
+    seats: [
+      {
+        life: 16,
+        pp: course.played ? 1 : 3,
+        maxPp: 5,
+        ep: 2,
+        sep: 1,
+        epCapacity: 3,
+        sepAvailableFrom: SEP_FROM.second,
+        deck: 23,
+        hand: [
+          ...(course.played ? [] : [{ no: "BP08-063", key: "fanatic" } as const]),
+          "BP05-052",
+          "BP15-057",
+        ],
+        playable: course.played || course.ended ? [] : [0],
+        field: [
+          unifier,
+          ...(course.priest === "fighter" ? [] : [priest]),
+          ...(course.played ? [fanatic] : []),
+        ],
+        ex: ["BP20-T05"],
+        cemetery: [
+          "BP08-068",
+          "SD04-002",
+          ...(course.priest === "fighter" ? [{ no: "BP20-064", key: "priest" } as const] : []),
+        ],
+        banish: [],
+        evolveDeck: { faceDown: DRAGON_EVOLVE, faceUp: [] },
+      },
+      {
+        life: course.unifier === "leader" ? 15 : 18,
+        pp: course.ended ? 6 : 1,
+        maxPp: course.ended ? 6 : 5,
+        ep: 0,
+        sep: 1,
+        epCapacity: 0,
+        sepAvailableFrom: SEP_FROM.first,
+        deck: course.ended ? 22 : 23,
+        hand: [
+          "BP13-026",
+          "BP16-021",
+          "BP13-035",
+          "BP16-026",
+          "BP13-028",
+          ...(course.ended ? (["BP21-022"] as const) : []),
+        ],
+        field: [
+          { no: "BP13-030", slot: 0 },
+          ...(fallen ? [] : [fighter]),
+          { no: "BP21-034", slot: 2 },
+        ],
+        ex: [],
+        cemetery: [
+          "SD07-012",
+          "BP13-032",
+          ...(fallen ? [{ no: "BP13-033", key: "fighter" } as const] : []),
+        ],
+        banish: [],
+        evolveDeck: { faceDown: ROYAL_EVOLVE, faceUp: [] },
+      },
+    ],
+  }
+}
+
+/** The table with the second seat's leader out of life. */
+const lifeless = (table: TableSpec): TableSpec => ({
+  ...table,
+  seats: [table.seats[0], { ...table.seats[1], life: 0 }],
 })
 
 export const SCENES = [
@@ -364,4 +511,32 @@ export const SCENES = [
     },
     [WITCH_LEADER, ROYAL_LEADER],
   ),
+  scene("turn", turnTable(TURN_START), [DRAGON_LEADER, ROYAL_LEADER], {
+    after: (choices) => {
+      let course: TurnCourse | null = TURN_START
+      for (const choice of choices) {
+        course = turnStep(course, choice)
+        if (course === null) return null
+      }
+      return turnTable(course)
+    },
+  }),
+  // The game is over: nothing is asked of anybody.
+  scene(
+    "finished",
+    lifeless(turnTable({ played: true, unifier: "leader", priest: "fighter", ended: false })),
+    [DRAGON_LEADER, ROYAL_LEADER],
+    { input: { kind: "finished", reason: "defeat", winner: "p1" } },
+  ),
+  // The engine stopped on a fault: the table stays as it last stood.
+  scene(
+    "fault",
+    turnTable({ played: true, unifier: "fighter", priest: "ready", ended: false }),
+    [DRAGON_LEADER, ROYAL_LEADER],
+    { input: { kind: "engine_fault", can_concede: true } },
+  ),
+  // The host found its own messages inconsistent and stopped for good.
+  scene("halted", turnTable(TURN_START), [DRAGON_LEADER, ROYAL_LEADER], {
+    stop: { kind: "host_error", format: 1, reason: "projection" },
+  }),
 ] as const satisfies readonly Scene[]
