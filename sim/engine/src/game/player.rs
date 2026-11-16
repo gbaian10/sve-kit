@@ -33,7 +33,8 @@ pub use main_actions::{
     AttackTarget, MainActionAnswer, MainActions, MainIntent, MainIntentId, MainIntentKind,
 };
 pub use occurrences::{
-    AbilityChoice, EarlierQuotaChoice, PendingChoice, QuickChoice, QuotaQuestion, ReplacementChoice,
+    AbilityChoice, EarlierQuotaChoice, PendingChoice, PendingEvent, PendingEventContext,
+    QuickChoice, QuotaQuestion, ReplacementChoice,
 };
 pub use opening::{DeckConstruction, OpeningAnswer, OpeningQuestion, PlayerDeck};
 pub use selection::{

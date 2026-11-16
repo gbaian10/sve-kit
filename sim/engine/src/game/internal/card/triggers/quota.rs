@@ -103,6 +103,7 @@ impl Game {
                         card: selection.occurrence.card.clone(),
                         line: selection.occurrence.line,
                         event: selection.occurrence.event.clone(),
+                        occurrence: None,
                         source: None,
                     },
                 })
