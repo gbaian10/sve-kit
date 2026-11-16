@@ -242,12 +242,7 @@ impl Game {
                 })
             });
         let active = player_id(self.active())?;
-        // A suspended search may resume after the instruction's active-source marker was restored.
-        let effect_source = frame
-            .entry_source
-            .as_ref()
-            .map(|source| source.source)
-            .or(self.card_runtime.active_source);
+        let effect_source = self.internal_entry_effect_source(frame);
         let (cause, actor, method) = entry_cause(frame)?;
         let ability_source_traits = self.internal_entry_source_traits(frame, method)?;
         let mut candidates = Vec::new();

@@ -2,7 +2,7 @@
 
 use super::{Game, Result, invalid};
 use crate::game::{Frame, Object};
-use crate::ir::{EntryMethod, TraitId};
+use crate::ir::{EntryMethod, RuntimeAbilitySource, TraitId};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -33,6 +33,18 @@ impl From<EntryMethod> for RecordedMethod {
     reason = "Movement commits entry facts alongside the new field generation."
 )]
 impl Game {
+    pub(in crate::game::internal) fn internal_entry_effect_source(
+        &self,
+        frame: &Frame,
+    ) -> Option<RuntimeAbilitySource> {
+        // A suspended search may resume after the instruction's active-source marker was restored.
+        frame
+            .entry_source
+            .as_ref()
+            .map(|source| source.source)
+            .or(self.card_runtime.active_source)
+    }
+
     pub(in crate::game::internal) fn internal_entry_source_traits(
         &self,
         frame: &Frame,

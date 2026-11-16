@@ -105,11 +105,14 @@ fn configured(
 
 fn enter(game: &mut Game, producer: AbilityId, play: bool) -> DecisionView {
     if play {
-        assert!(matches!(
-            game.play_internal_card("incoming", PlayerId { seat: 1 })
-                .unwrap(),
-            CardPlay::Entered(_)
-        ));
+        assert!(
+            matches!(
+                game.play_internal_card("incoming", PlayerId { seat: 1 })
+                    .unwrap(),
+                CardPlay::Entered(_)
+            ),
+            "ordinary play commits the entrant before its Fanfare is selected"
+        );
     } else {
         let pick = question(
             game.activate_internal_card("source", producer, PlayerId { seat: 1 })

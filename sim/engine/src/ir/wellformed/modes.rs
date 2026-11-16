@@ -268,31 +268,7 @@ impl Checker {
         match condition {
             Expr::Literal(_) => Ok(()),
             Expr::Compute(predicate) => match predicate.as_ref() {
-                Predicate::HasTrait {
-                    traits: Expr::Frozen(read),
-                    trait_id,
-                } if !trait_id.0.is_empty()
-                    && matches!(
-                        read.as_ref(),
-                        TraitsFrozen::EnterFieldAbilitySourceTraits { .. }
-                    ) =>
-                {
-                    self.boolean(condition)
-                }
-                Predicate::Equal { operands }
-                    if matches!(operands.as_ref(), ValueEquality::EntryMethod {
-                        left: Expr::Frozen(field), right: Expr::Literal(_),
-                    } if matches!(field.as_ref(), EntryMethodFields::EnterFieldMethod { .. })) =>
-                {
-                    self.boolean(condition)
-                }
-                Predicate::Equal { operands }
-                    if matches!(operands.as_ref(), ValueEquality::EntryOrigin {
-                    left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Cemetery }),
-                } if matches!(field.as_ref(), EntryOriginFields::EnterFieldFrom { .. })) =>
-                {
-                    self.boolean(condition)
-                }
+                predicate if entry_mode_condition(predicate) => self.boolean(condition),
                 Predicate::CompareInt {
                     left,
                     comparison: Comparison::GreaterEqual,
@@ -377,6 +353,20 @@ impl Checker {
             Expr::Frozen(_) | Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) => self.reject(),
         }
     }
+}
+
+fn entry_mode_condition(predicate: &Predicate) -> bool {
+    matches!(predicate, Predicate::HasTrait {
+        traits: Expr::Frozen(read), trait_id,
+    } if !trait_id.0.is_empty()
+        && matches!(read.as_ref(), TraitsFrozen::EnterFieldAbilitySourceTraits { .. }))
+        || matches!(predicate, Predicate::Equal { operands }
+            if matches!(operands.as_ref(), ValueEquality::EntryMethod {
+                left: Expr::Frozen(field), right: Expr::Literal(_),
+            } if matches!(field.as_ref(), EntryMethodFields::EnterFieldMethod { .. }))
+            || matches!(operands.as_ref(), ValueEquality::EntryOrigin {
+                left: Expr::Frozen(field), right: Expr::Literal(EntryOrigin::Zone { zone: ZoneKind::Cemetery }),
+            } if matches!(field.as_ref(), EntryOriginFields::EnterFieldFrom { .. })))
 }
 
 /// Whether no printed mode carries its own fee; head-cost materials only sit beside such modes.

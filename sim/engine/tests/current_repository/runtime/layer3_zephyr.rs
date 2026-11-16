@@ -32,7 +32,7 @@ fn ward(board: &mut Game, play: CardPlay) -> CardPlay {
 fn search(board: &mut Game, q: &DecisionView) {
     let InputDomain::Search(domain) = &q.domain else { panic!("Zephyr's printed deck search"); };
     assert_eq!(domain.cards.len(), 1, "only the cheap Uma follower qualifies");
-    assert_eq!(domain.cards[0].card, SMALL);
+    assert_eq!(domain.cards[0].card, SMALL, "the search offers the cheap Uma follower");
     resolved(board.answer_internal_card(q.actor, q.token,
         Answer::Search(SearchAnswer::Ungrouped(vec![domain.cards[0].handle]))).unwrap());
     finish_checks(board);
@@ -69,8 +69,8 @@ fn q1818_teio_spell_source_keeps_two_modes_after_the_spell_has_left_resolution()
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-171"}]);
     let mut board = game(&initial);
     let pick = question(board.play_internal_card("teio", PlayerId { seat: 1 }).unwrap());
-    let InputDomain::Targets(domain) = &pick.domain else { panic!("Teio's private Look"); };
-    let selected = domain.members.iter().find(|member| member.card.as_deref() == Some(NUMBER)).unwrap().handle;
+    let InputDomain::Targets(look) = &pick.domain else { panic!("Teio's private Look"); };
+    let selected = look.members.iter().find(|member| member.card.as_deref() == Some(NUMBER)).unwrap().handle;
     let play = board.answer_internal_card(pick.actor, pick.token, Answer::Targets(vec![selected])).unwrap();
     let ordering = question(ward(&mut board, play));
     let InputDomain::Order(cards) = &ordering.domain else { panic!("Teio orders its six remaining cards"); };
@@ -87,9 +87,9 @@ fn q1818_teio_spell_source_keeps_two_modes_after_the_spell_has_left_resolution()
     board.answer_internal_card(modes.actor, modes.token, Answer::Modes(vec![available[0], available[0]])).unwrap_err();
     assert_eq!(board.projection(View::Referee).unwrap(), before, "Q1816: no repeated mode");
     let target = question(board.answer_internal_card(modes.actor, modes.token, Answer::Modes(available.clone())).unwrap());
-    let InputDomain::Targets(domain) = &target.domain else { panic!("the required bounce target"); };
-    assert_eq!(domain.members.len(), 1);
-    let q = question(board.answer_internal_card(target.actor, target.token, Answer::Targets(vec![domain.members[0].handle])).unwrap());
+    let InputDomain::Targets(bounce) = &target.domain else { panic!("the required bounce target"); };
+    assert_eq!(bounce.members.len(), 1);
+    let q = question(board.answer_internal_card(target.actor, target.token, Answer::Targets(vec![bounce.members[0].handle])).unwrap());
     search(&mut board, &q);
     let after = board.projection(View::Referee).unwrap();
     assert_eq!(after["P2"]["hand"], json!(["enemy"]));
