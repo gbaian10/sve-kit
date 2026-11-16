@@ -94,6 +94,7 @@ fn build() -> Result<Fixture> {
     let references = BattleReferences::new(
         &catalog,
         ReferenceInput {
+            rules: None,
             wording: None,
             region: "jp".into(),
             snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),

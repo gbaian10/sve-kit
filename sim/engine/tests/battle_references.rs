@@ -55,6 +55,7 @@ fn fixture() -> &'static Fixture {
             &snapshot, &keywords, &documents, &rules.to_string(), &EngineIdentityInput::LegacyJp,
         ).unwrap();
         let input = ReferenceInput {
+            rules: None,
 wording: None,
             region: "jp".into(),
             snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
@@ -536,6 +537,213 @@ fn trusted_wording_input_is_closed_at_every_level() {
             .as_object_mut()
             .unwrap()
             .insert("unexpected".into(), json!(true));
+        serde_json::from_value::<ReferenceInput>(input).unwrap_err();
+    }
+}
+
+#[expect(
+    clippy::unwrap_used,
+    reason = "Malformed synthetic rule inputs fail fixture creation."
+)]
+fn rule_input() -> Value {
+    let mut input = wording_input();
+    input.as_object_mut().unwrap().insert("rules".into(), json!({
+        "manifest_sha256":format!("sha256:{}","a".repeat(64)),
+        "entries":[
+            {"kind":"cr","id":"1.2","revision":"cr-version"},
+            {"kind":"cr","id":"3.1","revision":"cr-version"},
+            {"kind":"qa","id":"answer-parent","revision":"qa-old"},
+            {"kind":"qa","id":"answer-parent","revision":"qa-new"},
+            {"kind":"ruling","id":"ruling-parent","revision":"ruling-old","strength":"generalized"},
+            {"kind":"ruling","id":"ruling-parent","revision":"ruling-new","strength":"inferred"}
+        ]
+    }));
+    input
+}
+
+#[test]
+fn rule_locations_roundtrip_and_use_the_callers_explicit_strength() {
+    use sve_battle_contract::{RuleRef, RuleSource, RuleStrength};
+    let input = rule_input();
+    let parsed: ReferenceInput = serde_json::from_value(input.clone()).unwrap();
+    assert_eq!(serde_json::to_value(&parsed).unwrap(), input);
+    let references = bind(parsed).unwrap();
+    for (kind, id, revision) in [
+        (RuleSource::Cr, "1.2", "cr-version"),
+        (RuleSource::Cr, "3.1", "cr-version"),
+        (RuleSource::Qa, "answer-parent", "qa-old"),
+        (RuleSource::Qa, "answer-parent", "qa-new"),
+    ] {
+        for strength in [
+            RuleStrength::Official,
+            RuleStrength::Generalized,
+            RuleStrength::Inferred,
+            RuleStrength::Undecided,
+        ] {
+            let reference = RuleRef {
+                kind,
+                id: id.into(),
+                revision: revision.into(),
+                strength,
+            };
+            assert_eq!(
+                references.validate_rule(&fixture().catalog, &reference),
+                Ok(reference.clone())
+            );
+        }
+    }
+    for (revision, strength) in [
+        ("ruling-old", RuleStrength::Generalized),
+        ("ruling-new", RuleStrength::Inferred),
+    ] {
+        let reference = RuleRef {
+            kind: RuleSource::Ruling,
+            id: "ruling-parent".into(),
+            revision: revision.into(),
+            strength,
+        };
+        assert_eq!(
+            references.validate_rule(&fixture().catalog, &reference),
+            Ok(reference.clone())
+        );
+    }
+}
+
+#[test]
+fn rule_locations_reject_guessed_ids_versions_strengths_and_missing_closures() {
+    use sve_battle_contract::{RuleRef, RuleSource, RuleStrength};
+    let references = bind(serde_json::from_value(rule_input()).unwrap()).unwrap();
+    for (kind, id, revision, strength) in [
+        (
+            RuleSource::Cr,
+            "clause-row-id",
+            "cr-version",
+            RuleStrength::Official,
+        ),
+        (
+            RuleSource::Cr,
+            "1.2",
+            "human-version-2.0",
+            RuleStrength::Official,
+        ),
+        (RuleSource::Cr, "1.2", "qa-new", RuleStrength::Official),
+        (RuleSource::Qa, "00042", "qa-new", RuleStrength::Official),
+        (
+            RuleSource::Qa,
+            "other-answer",
+            "qa-new",
+            RuleStrength::Official,
+        ),
+        (RuleSource::Qa, "answer-parent", "1", RuleStrength::Official),
+        (
+            RuleSource::Ruling,
+            "ruling-parent",
+            "ruling-old",
+            RuleStrength::Inferred,
+        ),
+        (
+            RuleSource::Ruling,
+            "ruling-parent",
+            "ruling-new",
+            RuleStrength::Official,
+        ),
+    ] {
+        let reference = RuleRef {
+            kind,
+            id: id.into(),
+            revision: revision.into(),
+            strength,
+        };
+        assert_eq!(
+            references.validate_rule(&fixture().catalog, &reference),
+            Err(ProjectionError::Unavailable)
+        );
+    }
+    let reference = RuleRef {
+        kind: RuleSource::Cr,
+        id: "1.2".into(),
+        revision: "cr-version".into(),
+        strength: RuleStrength::Inferred,
+    };
+    assert_eq!(
+        bind(fixture().input.clone())
+            .unwrap()
+            .validate_rule(&fixture().catalog, &reference),
+        Err(ProjectionError::Unavailable)
+    );
+    let unbound = Catalog::from_documents(
+        &fixture().snapshot,
+        &fixture().keywords,
+        &fixture().documents,
+    )
+    .unwrap();
+    assert_eq!(
+        references.validate_rule(&unbound, &reference),
+        Err(ProjectionError::Unavailable)
+    );
+    let mut input = rule_input();
+    input["wording"] = Value::Null;
+    assert_eq!(
+        bind(serde_json::from_value(input).unwrap())
+            .unwrap()
+            .manifest_sha256(),
+        Some(format!("sha256:{}", "a".repeat(64)).as_str())
+    );
+}
+
+#[test]
+fn rule_identity_graph_rejects_ambiguity_and_cross_manifest_claims() {
+    for (path, value) in [
+        (
+            "/rules/manifest_sha256",
+            json!(format!("sha256:{}", "b".repeat(64))),
+        ),
+        ("/rules/manifest_sha256", json!("unbound")),
+        ("/rules/entries/0/id", json!("")),
+        ("/rules/entries/0/revision", json!("")),
+        ("/rules/entries/1/id", json!("1.2")),
+        ("/rules/entries/3/revision", json!("qa-old")),
+        ("/rules/entries/3/id", json!("other-parent")),
+        ("/rules/entries/5/id", json!("other-ruling")),
+    ] {
+        let mut input = rule_input();
+        if path.ends_with("/id") && value == json!("other-parent") {
+            input["rules"]["entries"][3]["revision"] = json!("qa-old");
+        }
+        if path.ends_with("/id") && value == json!("other-ruling") {
+            input["rules"]["entries"][5]["revision"] = json!("ruling-old");
+        }
+        *input.pointer_mut(path).unwrap() = value;
+        assert_eq!(
+            bind(serde_json::from_value(input).unwrap()).unwrap_err(),
+            ProjectionError::Unavailable
+        );
+    }
+}
+
+#[test]
+fn rule_identity_input_is_closed_and_never_supplies_a_default_strength() {
+    for (path, key, value) in [
+        ("/rules", "extra", json!(true)),
+        ("/rules/entries/0", "strength", json!("official")),
+        ("/rules/entries/2", "extra", json!(true)),
+        ("/rules/entries/4", "extra", json!(true)),
+    ] {
+        let mut input = rule_input();
+        input
+            .pointer_mut(path)
+            .unwrap()
+            .as_object_mut()
+            .unwrap()
+            .insert(key.into(), value);
+        serde_json::from_value::<ReferenceInput>(input).unwrap_err();
+    }
+    for field in ["strength", "id", "revision"] {
+        let mut input = rule_input();
+        input["rules"]["entries"][4]
+            .as_object_mut()
+            .unwrap()
+            .remove(field);
         serde_json::from_value::<ReferenceInput>(input).unwrap_err();
     }
 }

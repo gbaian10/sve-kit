@@ -1,10 +1,10 @@
-use super::{ProjectionError, WordingInput, wording::Wordings};
+use super::{ProjectionError, RuleInput, WordingInput, rules::Rules, wording::Wordings};
 use crate::catalog::Catalog;
 use crate::game::player::observation::{CardFace, WordingSource};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::{fmt, result};
 use serde::{Deserialize, Serialize};
-use sve_battle_contract::CardRef;
+use sve_battle_contract::{CardRef, RuleRef};
 
 type Result<T> = result::Result<T, ProjectionError>;
 
@@ -23,6 +23,8 @@ pub struct ReferenceInput {
     pub faces: Vec<PrintingFaceIdentity>,
     /// Exact wording ownership from the same public reader; absent when not provided.
     pub wording: Option<WordingInput>,
+    /// Identity-only rule locations; absence does not mean a known empty dependency set.
+    pub rules: Option<RuleInput>,
 }
 
 /// Explicit coordinates avoid deriving a permanent printing from a native number.
@@ -44,6 +46,7 @@ pub struct BattleReferences {
     snapshot_sha256: String,
     faces: BTreeMap<String, BTreeMap<u64, CardRef>>,
     wording: Option<Wordings>,
+    rules: Option<Rules>,
 }
 
 impl fmt::Debug for BattleReferences {
@@ -68,12 +71,14 @@ impl BattleReferences {
             snapshot_sha256,
             faces: identities,
             wording,
+            rules,
         } = input;
         let mut references = Self {
             region,
             snapshot_sha256,
             faces: BTreeMap::new(),
             wording: None,
+            rules: None,
         };
         references.validate_catalog(catalog)?;
         let mut printings = BTreeMap::new();
@@ -94,6 +99,12 @@ impl BattleReferences {
         references.wording = wording
             .map(|wording_input| Wordings::new(catalog, &references, wording_input, face_count))
             .transpose()?;
+        references.rules = rules.map(Rules::new).transpose()?;
+        if let (Some(bound_wording), Some(bound_rules)) = (&references.wording, &references.rules)
+            && bound_wording.manifest_sha256 != bound_rules.manifest_sha256
+        {
+            return Err(ProjectionError::Unavailable);
+        }
         Ok(references)
     }
 
@@ -110,12 +121,17 @@ impl BattleReferences {
             .ok_or(ProjectionError::Unavailable)
     }
 
-    /// Public manifest supplying exact wording identities, when provided.
+    /// Public manifest supplying the provided wording or rule identity closure.
     #[must_use]
     pub fn manifest_sha256(&self) -> Option<&str> {
         self.wording
             .as_ref()
             .map(|wording| wording.manifest_sha256.as_str())
+            .or_else(|| {
+                self.rules
+                    .as_ref()
+                    .map(|rules| rules.manifest_sha256.as_str())
+            })
     }
 
     /// Validate a wording owner and field without claiming a line, step or grant origin.
@@ -134,6 +150,23 @@ impl BattleReferences {
             .ok_or(ProjectionError::Unavailable)?
             .validate(face, source)?;
         Ok(card)
+    }
+
+    /// Validate a rule location using the caller's explicit strength, without inferring its use.
+    ///
+    /// # Errors
+    /// Refuses an unprovided closure, foreign catalogue, missing identity or ruling strength mismatch.
+    pub fn validate_rule(&self, catalog: &Catalog, reference: &RuleRef) -> Result<RuleRef> {
+        self.validate_catalog(catalog)?;
+        self.rules
+            .as_ref()
+            .ok_or(ProjectionError::Unavailable)?
+            .validate(reference)?;
+        Ok(reference.clone())
+    }
+
+    pub(super) const fn has_wording(&self) -> bool {
+        self.wording.is_some()
     }
 
     pub(super) fn printing(&self, catalog: &Catalog, number: &str) -> Result<&str> {
@@ -200,4 +233,13 @@ impl BattleReferences {
         }
         Ok(())
     }
+}
+
+pub(super) fn valid_manifest_hash(value: &str) -> bool {
+    value.strip_prefix("sha256:").is_some_and(|hash| {
+        hash.len() == 64
+            && hash
+                .bytes()
+                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
+    })
 }

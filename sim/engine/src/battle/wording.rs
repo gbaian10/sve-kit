@@ -1,6 +1,6 @@
 //! Wording identities belong to the same verified public manifest as native facts.
 
-use super::{BattleReferences, ProjectionError};
+use super::{BattleReferences, ProjectionError, references::valid_manifest_hash};
 use crate::catalog::Catalog;
 use crate::game::player::observation::{CardFace, WordingField, WordingSource};
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -77,14 +77,7 @@ impl Wordings {
         input: WordingInput,
         expected_faces: usize,
     ) -> Result<Self, ProjectionError> {
-        let Some(hash) = input.manifest_sha256.strip_prefix("sha256:") else {
-            return Err(ProjectionError::Unavailable);
-        };
-        if hash.len() != 64
-            || !hash
-                .bytes()
-                .all(|byte| byte.is_ascii_digit() || (b'a'..=b'f').contains(&byte))
-        {
+        if !valid_manifest_hash(&input.manifest_sha256) {
             return Err(ProjectionError::Unavailable);
         }
         let mut result = Self {

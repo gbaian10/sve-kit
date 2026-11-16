@@ -143,6 +143,7 @@ fn foreign_references() -> BattleReferences {
     BattleReferences::new(
         &catalog_for(&snapshot),
         ReferenceInput {
+            rules: None,
             wording: None,
             region: "jp".into(),
             snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
