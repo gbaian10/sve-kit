@@ -46,11 +46,15 @@ pub(super) fn cost(
     path: &str,
 ) -> Result<(Action, Option<Decision>), LoweringError> {
     use crate::ir::ChoiceDomain;
-    i64::try_from(value.n).map_err(|_private| unsupported(path))?;
+    if value.upto.is_some() {
+        return Err(unsupported(path));
+    }
+    let amount = context.counter_amount(value.n.as_ref(), value.any, path)?;
     let (holder, parameter) = match &value.on {
         ast::CounterCostHolder::This(_) if value.holders.is_none() => (holder(), None),
         ast::CounterCostHolder::Selected(query)
-            if value.holders == Some(1)
+            if matches!(amount, Expr::Literal(_))
+                && value.holders == Some(1)
                 && matches!(query.who, ast::Side::Controller)
                 && matches!(query.zone, ast::PublicZone::Field | ast::PublicZone::Ex) =>
         {
@@ -75,7 +79,10 @@ pub(super) fn cost(
             };
             let selected = *binding;
             for group in &mut constraint.groups {
-                require_counter(&mut group.selector, &value.name, value.n, path)?;
+                let Expr::Literal(Nat(required)) = amount else {
+                    return Err(unsupported(path));
+                };
+                require_counter(&mut group.selector, &value.name, required, path)?;
             }
             (
                 Holder::Object {
@@ -95,7 +102,7 @@ pub(super) fn cost(
             holder,
             kind: CounterKind(value.name.clone()),
             operation: CounterOperation::Remove {},
-            amount: Expr::Literal(Nat(value.n)),
+            amount,
         },
         parameter,
     ))
@@ -226,4 +233,32 @@ impl BodyContext<'_> {
             },
         })
     }
+}
+
+pub(super) fn record_result(
+    context: &mut BodyContext<'_>,
+    name: &str,
+    receipt: super::ReceiptId,
+    path: &str,
+) -> Result<(), LoweringError> {
+    if name.is_empty()
+        || (name == "x" && context.x.is_some())
+        || context.receipt_reads.paid_counters.contains_key(name)
+        || context.receipt_reads.paid_materials.contains_key(name)
+        || context.receipt_reads.paid_material_acts.contains_key(name)
+        || context.observations.contains_key(name)
+        || context.targets.contains_key(name)
+        || context.recipient_targets.contains_key(name)
+        || context.definitions.contains_key(name)
+        || context.searches.contains(name)
+        || context.ex_outputs.contains_key(name)
+        || context.local_payments.contains_key(name)
+    {
+        return Err(unsupported(path));
+    }
+    context
+        .receipt_reads
+        .paid_counters
+        .insert(name.to_owned(), receipt);
+    Ok(())
 }

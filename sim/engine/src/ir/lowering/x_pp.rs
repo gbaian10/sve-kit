@@ -56,6 +56,49 @@ impl BodyContext<'_> {
         Ok(())
     }
 
+    pub(super) fn counter_amount(
+        &mut self,
+        value: Option<&ast::PpAmount>,
+        any: bool,
+        path: &str,
+    ) -> Result<Expr<Nat>, LoweringError> {
+        match (value, any) {
+            (Some(ast::PpAmount::Literal(value)), false) => {
+                i64::try_from(*value).map_err(|_overflow| unsupported(path))?;
+                Ok(Expr::Literal(Nat(*value)))
+            }
+            (Some(ast::PpAmount::Variable(ast::PpVariable::X)), false) => {
+                let parameter = self.x.as_mut().ok_or_else(|| unsupported(path))?;
+                parameter.paid = true;
+                Ok(Expr::Bound(parameter.binding))
+            }
+            (None, true) if self.formal_play => {
+                let binding = Binding::new(self.allocator.id(path)?, self.scope);
+                self.parameters.push(Decision {
+                    id: DecisionId(self.card_allocator.id(path)?),
+                    actor: PlayerRef::Controller {},
+                    visibility: Visibility::Public {},
+                    captures: vec![],
+                    kind: DecisionKind::PlayParameter {
+                        slot: PlaySlot::X,
+                        selection_snapshot: SelectionSnapshot::AtDecision,
+                        play_scope: ExecutionRef::Current {},
+                        input: InputMode::Inline,
+                    },
+                    domain: ChoiceDomain::Integer {
+                        binding,
+                        cardinality: Cardinality {
+                            minimum: Nat(0),
+                            maximum: None,
+                        },
+                    },
+                });
+                Ok(Expr::Bound(binding))
+            }
+            _ => Err(unsupported(path)),
+        }
+    }
+
     pub(super) fn pp_amount(
         &mut self,
         value: &ast::PpAmount,

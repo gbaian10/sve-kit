@@ -460,6 +460,7 @@ impl Checker {
         // The closed printed shape proves its whole lifetime and player boundary together.
         if super::super::evolution_limits::is_static(ability)
             || super::super::choice_rules::is_static(ability)
+            || super::super::counter_caps::projection(ability).is_some()
         {
             return Ok(());
         }

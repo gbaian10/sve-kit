@@ -526,7 +526,11 @@ pub(super) struct CounterCost {
     pub on: CounterCostHolder,
     pub holders: Option<u64>,
     pub name: String,
-    pub n: u64,
+    pub n: Option<PpAmount>,
+    #[serde(default)]
+    pub any: bool,
+    pub upto: Option<u64>,
+    pub result: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -3597,6 +3601,7 @@ pub(super) enum StaticEffect {
     ExtraTrigger(ExtraTriggers),
     UnlimitedEvolve(StaticPlayerRule),
     ChoiceAny(StaticPlayerRule),
+    RuleOverride(CounterCap),
     Reroll(Reroll),
     AlsoNamed(AlsoNamed),
     If(Box<StaticConditional>),
@@ -3609,6 +3614,22 @@ pub(super) enum StaticEffect {
     DamageCap(DamageCap),
     NoTrigger(NoTrigger),
     IgnoreWard(IgnoreWard),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CounterCap {
+    #[serde(rename = "rule")]
+    pub _rule: CounterCapRule,
+    #[serde(rename = "on")]
+    pub _on: This,
+    pub name: String,
+    pub max: u64,
+}
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum CounterCapRule {
+    CounterCap,
 }
 
 #[derive(Deserialize)]

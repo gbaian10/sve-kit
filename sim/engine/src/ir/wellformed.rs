@@ -242,6 +242,7 @@ struct Environment {
     reveal_materials: BTreeSet<Key>,
     single_material_moves: BTreeSet<ReceiptId>,
     single_discards: BTreeSet<ReceiptId>,
+    paid_counters: BTreeSet<ReceiptId>,
 }
 impl Environment {
     fn inherit_values(&mut self, other: &Self) {
@@ -258,6 +259,8 @@ impl Environment {
             .extend(other.single_material_moves.iter().copied());
         self.single_discards
             .extend(other.single_discards.iter().copied());
+        self.paid_counters
+            .extend(other.paid_counters.iter().copied());
         self.access.extend(other.access.clone());
         self.public_board_singles
             .extend(other.public_board_singles.iter().copied());
@@ -334,6 +337,7 @@ impl Checker {
             reveal_materials: BTreeSet::new(),
             single_material_moves: BTreeSet::new(),
             single_discards: BTreeSet::new(),
+            paid_counters: BTreeSet::new(),
         };
         Self {
             resolution_entry: env.clone(),
@@ -548,6 +552,20 @@ impl Checker {
         self.instruction_in(instruction, InstructionContext::Effect, true)
     }
 
+    fn record_counter_payment(&mut self, instruction: &Instruction, context: InstructionContext) {
+        if context == InstructionContext::Cost
+            && matches!(
+                instruction.action,
+                Action::Counter {
+                    operation: CounterOperation::Remove {},
+                    ..
+                }
+            )
+        {
+            self.env.paid_counters.insert(instruction.receipt);
+        }
+    }
+
     fn instruction_in(
         &mut self,
         instruction: &Instruction,
@@ -622,6 +640,8 @@ impl Checker {
             outcome(&instruction.action)
         };
         self.produce(instruction.receipt, kind)?;
+        self.record_counter_payment(instruction, context);
+
         self.record_material_move(instruction, context);
         if let Action::Discard {
             mode: super::DiscardMode::Chosen { constraint },

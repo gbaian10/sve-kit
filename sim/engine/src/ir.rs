@@ -153,6 +153,7 @@ mod answers;
 pub(crate) mod attack_restrictions;
 mod capabilities;
 pub(crate) mod choice_rules;
+pub(crate) mod counter_caps;
 pub(crate) mod delayed;
 pub(crate) mod dice;
 pub(crate) mod effect_evolution;

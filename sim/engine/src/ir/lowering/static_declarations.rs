@@ -34,6 +34,7 @@ fn provider(effect: &ast::StaticEffect) -> Option<Lower> {
         }
         ast::StaticEffect::UnlimitedEvolve(_)
         | ast::StaticEffect::ChoiceAny(_)
+        | ast::StaticEffect::RuleOverride(_)
         | ast::StaticEffect::Reroll(_)
         | ast::StaticEffect::AlsoNamed(_)
         | ast::StaticEffect::Grant(_)

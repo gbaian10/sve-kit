@@ -13,6 +13,7 @@ mod choice_rules;
 mod combat;
 mod conditions;
 mod costs;
+mod counter_caps;
 mod counters;
 mod current;
 mod deck_rules;
@@ -519,6 +520,7 @@ impl Allocator {
                 match declaration.effects.first() {
                     Some(ast::StaticEffect::UnlimitedEvolve(_)) => evolution::unlimited,
                     Some(ast::StaticEffect::ChoiceAny(_)) => choice_rules::lower,
+                    Some(ast::StaticEffect::RuleOverride(_)) => counter_caps::lower,
                     Some(ast::StaticEffect::Reroll(_)) => dice::reroll,
                     Some(ast::StaticEffect::NoTrigger(_)) => trigger_restrictions::lower,
                     Some(effect) if static_keywords::grant(effect).is_some() => {
@@ -1460,6 +1462,7 @@ struct ReceiptReads {
     evolutions: BTreeMap<String, ReceiptId>,
     paid_materials: BTreeMap<String, ReceiptId>,
     paid_material_acts: BTreeMap<String, ReceiptId>,
+    paid_counters: BTreeMap<String, ReceiptId>,
     /// Declared bounds of named discard payments.
     discard_bounds: BTreeMap<ReceiptId, Cardinality>,
     /// Movements of cards leaving the deck, which carry no modifications.
