@@ -1061,27 +1061,8 @@ impl Game {
         instruction: &Instruction,
         objects: &Selector,
     ) -> Result<()> {
-        let player = execution.context.controller;
-        let members = execution.observed_objects(self, objects, player, Consumer::ObservedMove)?;
+        let (player, members) = self.observed_move_members(execution, instruction, objects)?;
         let seat = super::seat_name(player)?;
-        for &member in &members {
-            let id = execution.object_id(member)?;
-            let current = self.object(id)?;
-            if current.generation != member.generation.0
-                || current.zone != "deck"
-                || current.owner != seat
-                || current.controller != seat
-                || !self
-                    .state
-                    .knowledge
-                    .get(seat)
-                    .is_some_and(|knowledge| knowledge.knows_location(id))
-            {
-                return Err(unsupported(
-                    "observed move requires current own-deck evidence",
-                ));
-            }
-        }
         let Action::Move { movement: spec, .. } = &instruction.action else {
             return Err(unsupported("observed move action"));
         };
@@ -1119,6 +1100,36 @@ impl Game {
             InstructionOutcome::Move(MoveOutcome { moved }),
         );
         Ok(())
+    }
+
+    pub(super) fn observed_move_members(
+        &self,
+        execution: &Execution,
+        instruction: &Instruction,
+        objects: &Selector,
+    ) -> Result<(PlayerId, Vec<ObjectRef>)> {
+        let player = execution.player(self, &instruction.actor)?;
+        let members = execution.observed_objects(self, objects, player, Consumer::ObservedMove)?;
+        let seat = super::seat_name(player)?;
+        for &member in &members {
+            let id = execution.object_id(member)?;
+            let current = self.object(id)?;
+            if current.generation != member.generation.0
+                || current.zone != "deck"
+                || current.owner != seat
+                || current.controller != seat
+                || !self
+                    .state
+                    .knowledge
+                    .get(seat)
+                    .is_some_and(|knowledge| knowledge.knows_location(id))
+            {
+                return Err(unsupported(
+                    "observed move requires current own-deck evidence",
+                ));
+            }
+        }
+        Ok((player, members))
     }
 
     #[expect(

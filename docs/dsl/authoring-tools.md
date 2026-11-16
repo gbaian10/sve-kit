@@ -514,6 +514,8 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 自身加另外兩張同名卡時，材料使用 `sel.other: true` 排除來源；正式目標與材料都在付款前固定。
 材料不足或 PP 不足時整份付款不成立，不先扣 PP 或移動任何卡片；場上來源不能冒用 EX 起動。
 
+場上的印刷持續禁令可用 `cannot: {what: attack, on: {who: all, zone: field, kind: follower}, target: {leaders: all}, if_can_attack: follower}` 表示「能攻擊從者時不能攻擊領袖」。每個攻擊者各自用正式攻擊合法性查詢判定，求值時只排除該提供者的這條領袖禁令；其他禁攻、入場限制、守護、指定攻擊與威壓照常適用。對手有從者不代表能攻擊該從者，多個同類禁令也不會互相遞迴；來源離場或失能後停止套用。這不要求玩家一定攻擊，也不阻止結束主階段（BP06-113，Q871）。省略 `if_can_attack` 保持原有禁攻行為；目前此條件只接場上印刷能力、領袖目標，不接本文安裝型或一般 `A.cond` 合法攻擊 predicate。
+
 `static: {effects: [{ignore_ward: {on: this}}]}` 讓持有者攻擊時略過守護的目標限制（BP10-055、BP04-006、BP09-056 的第二面）。沿用既有 `IgnoreWard` 權限及攻擊合法性檢查；休息、入場當回合、站立目標、對象種類與禁止攻擊仍照常判斷。能力失效或失去能力後不再略過守護。可搭配既有 `static.while` 的公開條件，每次判斷攻擊時重新讀取；只接受印刷場上常駐能力的 `on: this`，不開放對他者授予、私有區或本文 `apply` 安裝。
 
 `static.effects[].cannot: {what: attack, on: {who: all, zone: field, kind: follower, orig_cost_le: 3}}` 依每次宣告攻擊時的場上集合，限制雙方符合印刷原費條件的從者（BP09-040，Q1173、Q1174）。領袖與從者對象均受禁止；來源失去能力或離場後停止提供限制。
@@ -772,6 +774,20 @@ Look 中所選子集可用 `move: {ref: kept, to: deck, position: top, order: ch
       - - move: {ref: {who: p, zone: [hand, cemetery]}, to: deck}
         - shuffle: {who: p}
       - - draw: {who: p, n: 5}
+```
+
+逐玩家私有 Look 可分成三個階段：雙方先看自己的牌庫頂牌，按回合玩家優先各自可選從者進場，最後將雙方剩餘牌同批送墓（BP06-113，Q872）。`look.top.who`、`look.by` 與 `choose.by` 明寫同一個玩家綁定；`self` 仍是能力控制者，非回合玩家控制能力時也不改變選擇順序。單一 Look 剩餘牌送墓指示形成非選擇階段：先檢查雙方私有權限，再一次提交雙方移動，後續階段仍各自讀自己的成功回條。每位玩家保存自己的 Look 與成功移動回條；剩餘牌送墓的操作者沿用該次 Look 的玩家，只能移動仍受該玩家觀察且世代相符的自身牌庫成員。差集使用實際成功進場前的成員，滿場或放棄時全部送墓。能力全部完成後才處理新入場者的 Fanfare，回合玩家先結算；已離場者的待機能力仍可結算（Q873）。
+
+```yaml
+- each_player:
+    as: p
+    stages:
+      - - look: {top: {who: p, n: 3}, by: p, bind: seen}
+      - - choose: {bind: picked, from: {in: seen, kind: follower}, upto: 1, by: p}
+        - move: {ref: picked, to: field, result: entered}
+      - - move:
+            ref: {in: seen, except: {in: {objects_of: entered, view: before}}}
+            to: cemetery
 ```
 
 `banish: {ref: {any_of: [{who: all, zone: field}, {who: all, zone: ex}]}}` 將所有玩家的場與 EX 作為同一集合、一批消滅（BP13-107、[Q1794](https://shadowverse-evolve.com/cardlist/?cardno=BP13-107&faq=)）；不以先場後 EX 兩次動作替代。這個入口只接受上述兩種公開區的完整聯集，不接受私有區或額外篩選。

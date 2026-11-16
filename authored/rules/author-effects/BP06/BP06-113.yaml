@@ -1,0 +1,55 @@
+cards:
+  BP06-113:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - cannot:
+                if_can_attack: follower
+                on:
+                  kind: follower
+                  who: all
+                  zone: field
+                target:
+                  leaders: all
+                what: attack
+      - fanfare:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - look:
+                        bind: seen
+                        by: p
+                        top:
+                          n: 3
+                          who: p
+                  - - choose:
+                        bind: picked
+                        by: p
+                        from:
+                          in: seen
+                          kind: follower
+                        upto: 1
+                    - move:
+                        ref: picked
+                        result: entered
+                        to: field
+                  - - move:
+                        ref:
+                          except:
+                            in:
+                              objects_of: entered
+                              view: before
+                          in: seen
+                        to: cemetery
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-16"
+format: 2
+kind: author_effect_set

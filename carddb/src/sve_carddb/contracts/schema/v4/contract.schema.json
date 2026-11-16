@@ -33484,6 +33484,11 @@
         },
         "target": {
           "$ref": "#/$defs/DSLNodes.A.sel.recipient"
+        },
+        "if_can_attack": {
+          "const": "follower",
+          "type": "string",
+          "description": "逐攻擊者以正式攻擊合法性判定是否能攻擊從者；求值時排除本條領袖攻擊禁令，其他攻擊規則照常適用。"
         }
       },
       "required": [

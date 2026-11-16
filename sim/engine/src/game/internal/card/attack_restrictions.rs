@@ -15,9 +15,9 @@ use super::{Ability, Game, Located, Result, unsupported};
 use crate::ir::attack_restrictions::{self, AttackPermission, projection, ward_projection};
 use crate::ir::{
     AbilityQualification, Action, BatchPolicy, Control, DamageAmount, DamageFlags, DamageRecipient,
-    Effect, Expr, Generation, Instruction, InstructionContext, InstructionId, Int, Node, ObjectId,
-    ObjectOperand, ObjectView, PlayerRef, Program, ReceiptId, RecipientSet, RuntimeDamageRecipient,
-    ZoneKind,
+    Effect, EffectDefinitionId, Expr, Generation, Instruction, InstructionContext, InstructionId,
+    Int, Node, ObjectId, ObjectOperand, ObjectRef, ObjectView, PlayerRef, Program, ReceiptId,
+    RecipientSet, RuntimeDamageRecipient, ZoneKind,
 };
 
 pub(super) fn is_static(ability: &Ability) -> bool {
@@ -215,15 +215,16 @@ impl Game {
         &self,
         attacker: &str,
         target: &str,
+        ignored: Option<(&str, EffectDefinitionId)>,
     ) -> Result<bool> {
         if self.installed_attack_restricted(attacker, target)? {
             return Ok(true);
         }
-        self.printed_attack_permission(attacker, Some(target), projection)
+        self.printed_attack_permission(attacker, Some(target), projection, ignored)
     }
 
     pub(in crate::game) fn internal_ignores_ward(&self, attacker: &str) -> Result<bool> {
-        self.printed_attack_permission(attacker, None, ward_projection)
+        self.printed_attack_permission(attacker, None, ward_projection, None)
     }
 
     fn printed_attack_permission(
@@ -231,6 +232,7 @@ impl Game {
         attacker: &str,
         target: Option<&str>,
         project: fn(&Effect) -> Option<AttackPermission<'_>>,
+        ignored: Option<(&str, EffectDefinitionId)>,
     ) -> Result<bool> {
         for provider in self.field_ids() {
             let (card, _) = self.internal_effective_print(&provider)?;
@@ -281,9 +283,9 @@ impl Game {
                     let Some(shape) = project(effect) else {
                         continue;
                     };
-                    if !execution.boolean(self, shape.condition)?.0
-                        || !execution.objects(self, shape.attacker)?.contains(&attacker)
-                    {
+                    if shape.query.is_some_and(|clause| {
+                        ignored == Some((execution.context.source.as_str(), clause))
+                    }) {
                         continue;
                     }
                     if let Some(allowed_targets) = shape.target {
@@ -298,8 +300,34 @@ impl Game {
                             continue;
                         }
                     }
+                    if !execution.boolean(self, shape.condition)?.0
+                        || !execution.objects(self, shape.attacker)?.contains(&attacker)
+                    {
+                        continue;
+                    }
+                    if let Some(clause) = shape.query
+                        && !self.has_follower_attack(&execution, attacker, clause)?
+                    {
+                        continue;
+                    }
                     return Ok(true);
                 }
+            }
+        }
+        Ok(false)
+    }
+
+    fn has_follower_attack(
+        &self,
+        execution: &Execution,
+        attacker: ObjectRef,
+        clause: EffectDefinitionId,
+    ) -> Result<bool> {
+        let id = execution.object_id(attacker)?;
+        let controller = &self.object(id)?.controller;
+        for target in self.zone_ids(other(controller), "field") {
+            if self.can_attack_ignoring(id, &target, Some((&execution.context.source, clause)))? {
+                return Ok(true);
             }
         }
         Ok(false)
@@ -334,7 +362,8 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
         }
         _ => false,
     };
-    if !valid_interval
+    if shape.query.is_some()
+        || !valid_interval
         || *shape.attacker
             != (Selector::Bound {
                 reference: *affected,

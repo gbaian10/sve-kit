@@ -12,7 +12,7 @@ use alloc::collections::{BTreeMap, BTreeSet};
 
 #[cfg(test)]
 pub(super) mod tests;
-use crate::ir::player_stages::{procedure, returned_share};
+use crate::ir::player_stages::{choice_procedure, look_remainder, procedure, returned_share};
 use crate::ir::{RuntimeZoneRef, shuffle};
 use core::slice::from_ref;
 
@@ -91,6 +91,61 @@ impl Execution {
     reason = "Player stages use the shared authority transaction."
 )]
 impl Game {
+    pub(super) fn internal_look_remainders(
+        &mut self,
+        execution: &mut Execution,
+        control: &Control,
+    ) -> Result<()> {
+        let (players, binding, [stage]) =
+            choice_procedure(control).ok_or_else(|| invalid("checked Look remainder stage"))?
+        else {
+            return Err(invalid("single Look remainder stage"));
+        };
+        let instruction = look_remainder(&stage.body, binding)
+            .ok_or_else(|| invalid("checked Look remainder instruction"))?;
+        let Action::Move {
+            objects, movement, ..
+        } = &instruction.action
+        else {
+            return Err(invalid("checked Look remainder movement"));
+        };
+        let mut players = execution.players(self, players)?;
+        let active = player_id(self.active())?;
+        players.sort_by_key(|player| *player != active);
+        let mut shares = Vec::new();
+        let mut all = Vec::new();
+        // Read both private receipts before either deck changes or either observer captures
+        // a movement; each share still requires its own viewer's current deck evidence.
+        for player in &players {
+            execution.switch_procedure_player(binding.key(), *player);
+            execution.slots.insert(binding.key(), Slot::Player(*player));
+            let (_, members) = self.observed_move_members(execution, instruction, objects)?;
+            all.extend(members.iter().copied());
+            shares.push((*player, members));
+        }
+        let mut moved = Vec::new();
+        self.internal_instruction_boundary(execution, |game, execution| {
+            let controller = execution.context.controller;
+            moved = game.internal_search_move(execution, &all, &movement.to, controller, None)?;
+            Ok(())
+        })?;
+        for (player, members) in shares {
+            execution.switch_procedure_player(binding.key(), player);
+            execution.slots.insert(binding.key(), Slot::Player(player));
+            execution.receipts.insert(
+                instruction.receipt,
+                InstructionOutcome::Move(MoveOutcome {
+                    moved: moved
+                        .iter()
+                        .filter(|result| members.contains(&result.before))
+                        .cloned()
+                        .collect(),
+                }),
+            );
+        }
+        Ok(())
+    }
+
     pub(super) fn internal_nonchoice_player_stages(
         &mut self,
         execution: &mut Execution,

@@ -7,6 +7,7 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use serde_json::{Value, json};
 
 use super::{AbilityUse, Frame, Game, int, list, other, string};
+use crate::ir::EffectDefinitionId;
 use crate::{EngineFailure, Result, invalid};
 
 pub(super) fn subsets(items: &[String], min: usize, max: usize) -> Vec<Vec<String>> {
@@ -370,6 +371,15 @@ impl Game {
     }
 
     pub(super) fn can_attack(&self, id: &str, target: &str) -> Result<bool> {
+        self.can_attack_ignoring(id, target, None)
+    }
+
+    pub(super) fn can_attack_ignoring(
+        &self,
+        id: &str,
+        target: &str,
+        ignored: Option<(&str, EffectDefinitionId)>,
+    ) -> Result<bool> {
         if !self.card_runtime.is_empty() {
             self.require_internal_abilities(id, "attack")?;
         }
@@ -384,7 +394,7 @@ impl Game {
         }
         let keys = self.keywords(id)?;
         let leader = target.ends_with(".leader");
-        if self.internal_attack_restricted(id, target)?
+        if self.internal_attack_restricted(id, target, ignored)?
             || self.restricted(id, "attack")?
             || (leader
                 && (self.restricted(id, "attack_leader")?

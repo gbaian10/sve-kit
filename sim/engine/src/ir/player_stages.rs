@@ -1,9 +1,10 @@
-//! Nonchoice player procedures cross every player at each instruction boundary.
+//! Player procedures preserve stage boundaries and each player's own receipts.
 use super::{
-    Action, Binding, Cardinality, Control, Expr, InstructionContext, Int, IntOperation,
-    MemberProjection, MovementReceipt, Nat, NatRead, Node, ObjectReceipt, PlayerOrder, PlayerRef,
-    PlayerRelation, PlayerSet, PlayerStage, RandomnessPolicy, ReceiptId, ReceiptLocation, Selector,
-    ShuffleScope, StageMode, StepwiseMode, TextQuantifier,
+    Action, Binding, Cardinality, Control, Expr, Instruction, InstructionContext, Int,
+    IntOperation, MemberProjection, MoveDestination, MoveReason, MovementReceipt, Nat, NatRead,
+    Node, ObjectReceipt, OwnerZone, PlayerOrder, PlayerRef, PlayerRelation, PlayerSet, PlayerStage,
+    Program, RandomnessPolicy, ReceiptId, ReceiptLocation, Selector, ShuffleScope, StageMode,
+    StepwiseMode, TextQuantifier,
 };
 
 pub(crate) fn procedure(
@@ -109,8 +110,8 @@ pub(crate) fn returned_share(count: &Expr<Int>) -> Option<ReceiptId> {
     }
 }
 
-/// Every player in turn order runs each stage body, choices included, before the next player
-/// starts that stage; the body is checked and executed by ordinary rules for that player.
+/// Choice stages let each player finish before the next starts; a closed nonchoice Look
+/// remainder stage instead commits all players' shares together.
 pub(crate) fn choice_procedure(
     control: &Control,
 ) -> Option<(&PlayerSet, Binding<PlayerRef>, &[PlayerStage])> {
@@ -133,7 +134,63 @@ pub(crate) fn choice_procedure(
         && players.text_quantifier == TextQuantifier::All
         && !stages.is_empty()
         && stages.iter().all(|stage| {
-            stage.mode == (StageMode::ChoiceProcedure {}) && !stage.body.steps.is_empty()
+            (stage.mode == (StageMode::ChoiceProcedure {}) && !stage.body.steps.is_empty())
+                || (stage.mode == (StageMode::NonChoiceSimultaneous {})
+                    && look_remainder(&stage.body, *player).is_some())
         }))
     .then_some((players, *player, stages))
+}
+
+/// A nonchoice stage may commit every player's private Look remainder together, after each
+/// player's own receipt and current deck authority have been checked.
+pub(crate) fn look_remainder(body: &Program, player: Binding<PlayerRef>) -> Option<&Instruction> {
+    let [step] = body.steps.as_slice() else {
+        return None;
+    };
+    let Node::Instruction { instruction } = &step.node else {
+        return None;
+    };
+    let Action::Move {
+        objects,
+        movement,
+        reason: MoveReason::Put,
+    } = &instruction.action
+    else {
+        return None;
+    };
+    let input = if let Selector::Difference { input, except } = objects {
+        if !matches!(
+            except.as_ref(),
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Move { .. }
+                },
+                projection: MemberProjection::Before,
+            }
+        ) {
+            return None;
+        }
+        input.as_ref()
+    } else {
+        objects
+    };
+    (instruction.actor == (PlayerRef::Bound { binding: player })
+        && instruction.context == InstructionContext::Effect
+        && instruction.precondition.is_none()
+        && movement.to
+            == (MoveDestination::Owners {
+                zone: OwnerZone::Cemetery,
+            })
+        && movement.initial_posture.is_none()
+        && movement.entry_effects.is_empty()
+        && movement.position.is_none()
+        && movement.order.is_none()
+        && matches!(
+            input,
+            Selector::ReceiptMembers {
+                receipt: ObjectReceipt::Look { .. },
+                projection: MemberProjection::Before
+            }
+        ))
+    .then_some(instruction.as_ref())
 }
