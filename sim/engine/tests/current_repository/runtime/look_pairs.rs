@@ -48,7 +48,13 @@ fn order(game: &mut Game, play: CardPlay, numbers: &[&str]) -> CardPlay {
     );
     let handles = numbers
         .iter()
-        .map(|number| cards.iter().find(|card| card.card == *number).unwrap().handle)
+        .map(|number| {
+            cards
+                .iter()
+                .find(|card| card.card == *number)
+                .unwrap()
+                .handle
+        })
         .collect();
     game.answer_internal_card(question.actor, question.token, Answer::Order(handles))
         .unwrap()
@@ -113,10 +119,8 @@ fn dark_cat(initial: &Value) -> (Game, DecisionView) {
 #[test]
 fn dark_cat_rides_takes_a_revealed_oracle_and_splits_only_the_remaining_look() {
     let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["field"] =
-        json!([{"id":"source","card":"CP03-116"}]);
-    initial["players"]["P1"]["zones"]["evolve_deck"] =
-        json!([{"id":"point","card":"CSD03a-017"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"CP03-116"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"point","card":"CSD03a-017"}]);
     initial["players"]["P1"]["zones"]["deck"] = json!([
         {"id":"top","card":"BP01-171"},
         {"id":"oracle","card":"CP03-121"},
@@ -155,8 +159,7 @@ fn dark_cat_rides_takes_a_revealed_oracle_and_splits_only_the_remaining_look() {
 #[test]
 fn luck_bird_orders_an_arbitrary_top_subset_and_the_bottom_remainder_privately() {
     let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["hand"] =
-        json!([{"id":"source","card":"CP03-123"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"CP03-123"}]);
     initial["players"]["P1"]["zones"]["deck"] = json!([
         {"id":"one","card":"BP01-171"},
         {"id":"two","card":"BP01-037"},
@@ -164,10 +167,17 @@ fn luck_bird_orders_an_arbitrary_top_subset_and_the_bottom_remainder_privately()
         {"id":"tail","card":"BP01-010"}
     ]);
     let mut game = game(&initial, &Value::Null);
-    let question = awaiting(game.play_internal_card("source", PlayerId { seat: 1 }).unwrap());
     let question = awaiting(
-        game.answer_internal_card(question.actor, question.token, Answer::Modes(vec![ModeId(1)]))
+        game.play_internal_card("source", PlayerId { seat: 1 })
             .unwrap(),
+    );
+    let question = awaiting(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(1)]),
+        )
+        .unwrap(),
     );
     let top = targets(&mut game, &question, &["BP01-171", "BP01-009"]);
     let bottom = order(&mut game, top, &["BP01-009", "BP01-171"]);
@@ -179,7 +189,9 @@ fn luck_bird_orders_an_arbitrary_top_subset_and_the_bottom_remainder_privately()
     let opponent = game.projection(View::P2).unwrap();
     let known = opponent["known_cards"].as_array().unwrap();
     assert!(
-        !known.iter().any(|card| ["one", "two", "three", "tail"].contains(&card["id"].as_str().unwrap())),
+        !known
+            .iter()
+            .any(|card| ["one", "two", "three", "tail"].contains(&card["id"].as_str().unwrap())),
         "private top and bottom orders reveal no card to the opponent"
     );
 }
@@ -187,10 +199,8 @@ fn luck_bird_orders_an_arbitrary_top_subset_and_the_bottom_remainder_privately()
 #[test]
 fn luck_bird_requires_five_trigger_followers_before_returning_drawing_and_refunding_pp() {
     let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["hand"] =
-        json!([{"id":"source","card":"CP03-123"}]);
-    initial["players"]["P1"]["zones"]["deck"] =
-        json!([{"id":"old","card":"BP01-171"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"CP03-123"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"old","card":"BP01-171"}]);
     initial["players"]["P1"]["zones"]["cemetery"] = json!([
         {"id":"a","card":"CP03-121"},{"id":"b","card":"CP03-121"},
         {"id":"c","card":"CP03-121"},{"id":"d","card":"CP03-100"},
@@ -202,10 +212,17 @@ fn luck_bird_requires_five_trigger_followers_before_returning_drawing_and_refund
         "CP03-117":{"verified":true,"trigger_icon":"none"}
     });
     let mut game = game(&initial, &facts);
-    let question = awaiting(game.play_internal_card("source", PlayerId { seat: 1 }).unwrap());
     let question = awaiting(
-        game.answer_internal_card(question.actor, question.token, Answer::Modes(vec![ModeId(2)]))
+        game.play_internal_card("source", PlayerId { seat: 1 })
             .unwrap(),
+    );
+    let question = awaiting(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(2)]),
+        )
+        .unwrap(),
     );
     let InputDomain::Targets(domain) = &question.domain else {
         panic!("formal cemetery targets")
@@ -219,12 +236,23 @@ fn luck_bird_requires_five_trigger_followers_before_returning_drawing_and_refund
     assert_eq!(view["P1"]["deck"].as_array().unwrap().len(), 5);
     assert_eq!(view["P1"]["cemetery"], json!(["wrong", "source"]));
 
-    initial["players"]["P1"]["zones"]["cemetery"].as_array_mut().unwrap().remove(0);
+    initial["players"]["P1"]["zones"]["cemetery"]
+        .as_array_mut()
+        .unwrap()
+        .remove(0);
     let mut insufficient = self::game(&initial, &facts);
-    let unavailable = awaiting(insufficient.play_internal_card("source", PlayerId { seat: 1 }).unwrap());
+    let unavailable = awaiting(
+        insufficient
+            .play_internal_card("source", PlayerId { seat: 1 })
+            .unwrap(),
+    );
     let before = insufficient.projection(View::Referee).unwrap();
     insufficient
-        .answer_internal_card(unavailable.actor, unavailable.token, Answer::Modes(vec![ModeId(2)]))
+        .answer_internal_card(
+            unavailable.actor,
+            unavailable.token,
+            Answer::Modes(vec![ModeId(2)]),
+        )
         .unwrap_err();
     assert_eq!(insufficient.projection(View::Referee).unwrap(), before);
 }
