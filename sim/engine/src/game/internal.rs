@@ -62,6 +62,7 @@ mod counters;
 mod declaration;
 mod dice;
 mod discard;
+mod draw_restrictions;
 mod drive;
 mod duration;
 mod earth;

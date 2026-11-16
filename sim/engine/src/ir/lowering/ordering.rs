@@ -41,7 +41,7 @@ impl BodyContext<'_> {
         if let ast::Step::Discard(value) = step
             && let Some(name) = &value.result
         {
-            if !matches!(value.who, None | Some(ast::LeaderSide::Controller))
+            if !matches!(value.who, None | Some(ast::Side::Controller))
                 || value.all.is_some()
                 || value.random == Some(true)
             {

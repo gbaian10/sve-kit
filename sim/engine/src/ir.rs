@@ -156,6 +156,7 @@ pub(crate) mod choice_rules;
 pub(crate) mod counter_caps;
 pub(crate) mod delayed;
 pub(crate) mod dice;
+pub(crate) mod draw_restrictions;
 pub(crate) mod effect_evolution;
 mod effects;
 pub(crate) mod entry_posture;

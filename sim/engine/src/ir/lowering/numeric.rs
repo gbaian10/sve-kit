@@ -561,7 +561,10 @@ impl BodyContext<'_> {
                 return self.no_stand(installation, path);
             }
             ast::InstalledEffect::Cannot(
-                ast::Cannot::Player(_) | ast::Cannot::Removal(_) | ast::Cannot::DealDamage(_),
+                ast::Cannot::Draw(_)
+                | ast::Cannot::Player(_)
+                | ast::Cannot::Removal(_)
+                | ast::Cannot::DealDamage(_),
             )
             | ast::InstalledEffect::Prevent(_)
             | ast::InstalledEffect::DamageMod(_)
