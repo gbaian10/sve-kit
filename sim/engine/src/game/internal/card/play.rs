@@ -30,7 +30,7 @@ use crate::ir::{
 };
 
 pub(super) mod ability_cost;
-mod cost_observation;
+pub(super) mod cost_observation;
 mod counter_budget;
 mod x_pp;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};

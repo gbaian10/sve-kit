@@ -10,6 +10,7 @@ use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
     DistributionMember, InputDomain, InstructionOutcome, Slot, Wait, search,
 };
+use crate::game::player::ExchangeRouteChoice;
 use crate::game::player::SelectionQuestion;
 use crate::game::player::Viewer;
 use crate::game::player::observation::PendingCost;
@@ -174,6 +175,48 @@ fn material(exchange: &ExchangeState) -> Result<&Decision> {
 
 fn step(exchange: &ExchangeState) -> Result<&Instruction> {
     route_step(&exchange.definition, exchange.route.unwrap_or(0))
+}
+
+fn route_quotes(
+    game: &Game,
+    execution: &Execution,
+    play: &PlayState,
+    affordable: &[usize],
+) -> Result<Vec<ExchangeRouteChoice>> {
+    affordable
+        .iter()
+        .map(|&index| {
+            // Only the route declaration changes; the quote retains every pending payment condition.
+            let mut prospective = play.clone();
+            let exchange = prospective
+                .exchange
+                .as_mut()
+                .ok_or_else(|| invalid("missing exchange quote"))?;
+            exchange.route = Some(index);
+            let (decision, payment) = exchange
+                .definition
+                .routes()
+                .and_then(|routes| routes.get(index).copied())
+                .ok_or_else(|| invalid("missing exchange route quote"))?;
+            let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
+                return Err(unsupported("exchange quote material domain"));
+            };
+            let count = constraint.cardinality.minimum.0;
+            let fee = CostSpec::Ordered {
+                steps: vec![payment.clone()],
+            };
+            Ok(ExchangeRouteChoice {
+                index: Nat(u64::try_from(index).map_err(invalid)?),
+                cost: super::play::cost_observation::exchange_route(
+                    &prospective,
+                    game,
+                    execution,
+                    &fee,
+                    count,
+                ),
+            })
+        })
+        .collect()
 }
 
 pub(in crate::game::internal) fn choose_route(
@@ -539,18 +582,20 @@ impl Game {
             let maximum = *affordable
                 .last()
                 .ok_or_else(|| invalid("empty exchange routes"))?;
+            let decision = exchange
+                .definition
+                .route
+                .ok_or_else(|| invalid("missing route decision"))?;
+            let quotes = route_quotes(self, execution, play, &affordable)?;
             self.internal_wait(
                 execution,
-                exchange
-                    .definition
-                    .route
-                    .ok_or_else(|| invalid("missing route decision"))?,
+                decision,
                 execution.context.controller,
                 InputDomain::Integer(Cardinality {
                     minimum: Nat(u64::try_from(minimum).map_err(invalid)?),
                     maximum: Some(Nat(u64::try_from(maximum).map_err(invalid)?)),
                 }),
-                Wait::ExchangeRoute { affordable },
+                Wait::ExchangeRoute { affordable, quotes },
             )?;
             return Ok(true);
         }

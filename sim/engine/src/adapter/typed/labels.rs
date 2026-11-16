@@ -149,7 +149,7 @@ impl Labels<'_> {
                 | DecisionShape::Integer { .. }
                 | DecisionShape::DamageReplacements(_)
                 | DecisionShape::Distribution(_)
-                | DecisionShape::SearchReplacement
+                | DecisionShape::SearchReplacement(_)
                 | DecisionShape::TokenCapacity(_) => json!({}),
             },
             QuestionShape::ActionWindow(_) => {
@@ -378,7 +378,7 @@ impl Labels<'_> {
                 | DecisionShape::Integer { .. }
                 | DecisionShape::MovementCapacity(_)
                 | DecisionShape::Distribution(_)
-                | DecisionShape::SearchReplacement
+                | DecisionShape::SearchReplacement(_)
                 | DecisionShape::TokenCapacity(_) => None,
             },
             QuestionShape::Closing(ClosingQuestion::GuardAct(cards)) => {

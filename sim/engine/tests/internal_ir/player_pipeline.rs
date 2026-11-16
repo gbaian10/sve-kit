@@ -285,9 +285,11 @@ pub(super) fn selected_answer(shape: &QuestionShape, selected: &[u64], accept: b
             kind: DiscardKind::Effect,
             ..
         } => Answer::Targets(selected.to_vec()),
-        DecisionShape::ExchangeRoutes(routes) => {
-            Answer::Integer(selected.first().map_or(routes[0], |value| Nat(*value)))
-        }
+        DecisionShape::ExchangeRoutes(routes) => Answer::Integer(
+            selected
+                .first()
+                .map_or(routes[0].index, |value| Nat(*value)),
+        ),
         DecisionShape::BeforeDraw => Answer::Stepwise(if accept {
             StepwiseAnswer::Continue
         } else {
@@ -338,7 +340,7 @@ pub(super) fn selected_answer(shape: &QuestionShape, selected: &[u64], accept: b
                     .collect(),
             )
         }
-        DecisionShape::SearchReplacement => Answer::SearchReplacement(if accept {
+        DecisionShape::SearchReplacement(_) => Answer::SearchReplacement(if accept {
             SearchReplacementAnswer::Replacement
         } else {
             SearchReplacementAnswer::Original

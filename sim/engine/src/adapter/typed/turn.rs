@@ -289,7 +289,7 @@ impl Turn<'_> {
             | DecisionShape::Pending(_)
             | DecisionShape::TriggerQuota(_)
             | DecisionShape::DamageReplacements(_)
-            | DecisionShape::SearchReplacement
+            | DecisionShape::SearchReplacement(_)
             | DecisionShape::TokenCapacity(_) => return Ok(None),
         };
         self.answer(question, answer).map(Some)
