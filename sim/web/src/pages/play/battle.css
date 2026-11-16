@@ -12,27 +12,12 @@
   overflow: hidden;
   color: var(--text-1);
   font-family: var(--font-ui);
-  background: radial-gradient(ellipse at 50% 45%, var(--surface-2), var(--well) 75%);
+
+  /* The site's own page colour, in either theme: pictures belong on the two mats only. */
+  background: var(--bg);
   user-select: none;
   touch-action: none;
   -webkit-touch-callout: none;
-}
-
-/* Both leaders' art, dimmed, behind everything. */
-.bp-leader-art {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-}
-
-.bp-leader-art-opp {
-  top: 0;
-  mask-image: linear-gradient(to bottom, var(--bp-black) 25%, transparent 95%);
-}
-
-.bp-leader-art-self {
-  bottom: 0;
-  mask-image: linear-gradient(to top, var(--bp-black) 25%, transparent 95%);
 }
 
 /* The board and its two mats. */
@@ -49,19 +34,12 @@
 }
 
 .bp-mat {
-  position: absolute;
-  overflow: hidden;
-  border-radius: calc(var(--u) * 18);
-  box-shadow:
-    0 0 0 1px --alpha(var(--bp-white) / 8%),
-    0 calc(var(--u) * 8) calc(var(--u) * 30) --alpha(var(--bp-black) / 40%);
-}
+  /* The inks of the mat's printing; a light picture swaps them. */
+  --print: var(--bp-print);
+  --print-accent: var(--bp-print-accent);
+  --print-line: var(--bp-print-line);
 
-/* On one shared mat each side only draws its zone frames; the mat itself lies under both. */
-.bp-mat.is-frames {
-  overflow: visible;
-  border-radius: 0;
-  box-shadow: none;
+  position: absolute;
 }
 
 .bp-mat-svg {
@@ -84,52 +62,99 @@
   height: 100%;
 }
 
-.bp-frame-row {
-  fill: --alpha(var(--bp-black) / 10%);
-  stroke: var(--bp-frame);
-  stroke-width: 1.4;
-  stroke-opacity: 0.6;
+/*
+ * The mat's printing, after the official playmat: zone names and ornaments in a pale ink, a base
+ * under every pile in the pile's own colour. A light mat prints in a dark ink instead.
+ */
+.bp-mat.is-light {
+  --print: var(--bp-parchment-ink);
+  --print-accent: var(--bp-parchment-ink);
+  --print-line: var(--bp-parchment-ink);
+  --bp-frame: var(--bp-parchment-ink);
 }
 
 .bp-frame-slot {
-  fill: --alpha(var(--bp-black) / 12%);
+  fill: --alpha(var(--bp-black) / 10%);
   stroke: var(--bp-frame);
-  stroke-width: 1.2;
-  stroke-opacity: 0.5;
+  stroke-width: 1;
+  stroke-opacity: 0.32;
   stroke-dasharray: 7 5;
 }
 
-.bp-frame-pile {
-  fill: --alpha(var(--bp-black) / 14%);
-  stroke: var(--bp-frame);
-  stroke-width: 1.4;
-  stroke-opacity: 0.7;
+.bp-print-row {
+  filter: drop-shadow(0 0 3px --alpha(var(--print-accent) / 55%));
 }
 
-[class^="bp-frame-pile-"] .bp-frame-pile {
+.bp-print-label {
+  fill: var(--print);
+}
+
+.bp-print-accent {
+  fill: var(--print-accent);
+}
+
+.bp-print-stop {
+  stop-color: var(--print-line);
+}
+
+.bp-print-stop-faded {
+  stop-color: var(--print-line);
+  stop-opacity: 0;
+}
+
+.bp-zone-base {
   fill: var(--zone-fill);
   stroke: var(--zone);
-  stroke-opacity: 0.9;
-  stroke-width: 2;
+  stroke-width: 2.2;
 }
 
-.bp-frame-divider {
-  stroke: var(--bp-frame);
-  stroke-width: 1.2;
-  stroke-opacity: 0.45;
+.bp-zone-inner {
+  fill: none;
+  stroke: var(--zone-inner);
+  stroke-width: 1.1;
 }
 
-.bp-frame-label {
-  fill: var(--bp-frame);
-  font-family: var(--font-ui);
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
+.bp-zone-art {
+  fill: var(--zone-art);
 }
 
-[class^="bp-frame-pile-"] .bp-frame-label {
-  fill: var(--zone);
-  font-size: 12px;
+.bp-zone-ink {
+  fill: var(--zone-ink);
+}
+
+.bp-zone-leader {
+  --zone: var(--bp-zone-leader);
+  --zone-fill: var(--bp-zone-leader-fill);
+  --zone-art: var(--bp-zone-leader-art);
+  --zone-ink: var(--bp-zone-leader-ink);
+}
+
+.bp-zone-deck {
+  --zone: var(--bp-zone-deck);
+  --zone-fill: var(--bp-zone-deck-fill);
+  --zone-art: var(--bp-zone-deck-art);
+  --zone-ink: var(--bp-zone-deck-ink);
+}
+
+.bp-zone-cemetery {
+  --zone: var(--bp-zone-cemetery);
+  --zone-fill: var(--bp-zone-cemetery-fill);
+  --zone-art: var(--bp-zone-cemetery-art);
+  --zone-ink: var(--bp-zone-cemetery-ink);
+  --zone-inner: var(--bp-zone-cemetery-inner);
+}
+
+.bp-zone-evolve {
+  --zone: var(--bp-zone-evolve);
+  --zone-fill: var(--bp-zone-evolve-fill);
+  --zone-art: var(--bp-zone-evolve-art);
+  --zone-ink: var(--bp-zone-evolve-ink);
+}
+
+.bp-zone-banish {
+  --zone: var(--bp-zone-banish);
+  --zone-fill: var(--bp-zone-banish-fill);
+  --zone-ink: var(--bp-zone-banish-ink);
 }
 
 .bp-centerline {
@@ -159,6 +184,10 @@
 
 /* Cards and piles on the board. */
 .bp-card {
+  /* The evolve rim, which the edge lights are drawn around. */
+  --rim: transparent;
+  --rim-width: 0px;
+
   position: absolute;
   touch-action: none;
   transition:
@@ -204,6 +233,45 @@
   box-shadow:
     0 0 0 calc(var(--u) * 2) var(--bp-super),
     0 0 calc(var(--u) * 18) --alpha(var(--bp-super) / 80%);
+}
+
+/*
+ * Light around a card's edge says what can be done with it, in the colours of the online game:
+ * green for a card that may attack the leader, yellow for one that may attack followers only,
+ * orange for the picked card and for what it may attack. The light lies outside the evolve rim,
+ * which keeps hugging the card.
+ */
+.is-evolved {
+  --rim: var(--bp-gold);
+  --rim-width: calc(var(--u) * 2);
+}
+
+.is-super {
+  --rim: var(--bp-super);
+}
+
+.is-attack-leader {
+  --edge-light: var(--bp-attack-leader);
+}
+
+.is-attack-followers {
+  --edge-light: var(--bp-attack-followers);
+}
+
+.is-target,
+.is-selected {
+  --edge-light: var(--bp-pick);
+}
+
+.is-attack-leader .bp-card-inner,
+.is-attack-followers .bp-card-inner,
+.is-target .bp-card-inner,
+.is-selected .bp-card-inner {
+  box-shadow:
+    0 0 0 var(--rim-width) var(--rim),
+    0 0 0 calc(var(--rim-width) + max(2px, var(--u) * 3)) var(--edge-light),
+    0 0 calc(var(--u) * 18) calc(var(--u) * 7) --alpha(var(--edge-light) / 85%),
+    0 calc(var(--u) * 6) calc(var(--u) * 12) --alpha(var(--bp-black) / 55%);
 }
 
 .bp-face {
@@ -278,6 +346,9 @@
 .bp-card-badges {
   position: absolute;
   inset: 0;
+
+  /* Above the attack frame, which is drawn over the card's face. */
+  z-index: 4;
   pointer-events: none;
   transition: inset 0.25s;
 }
@@ -332,8 +403,6 @@
  * the traced face on top, a lit upper edge, a thick lower edge and a shadow on the card.
  */
 .bp-fstat {
-  --die-ring: 0 0 0 0 transparent;
-
   position: absolute;
   bottom: calc(var(--u) * -13);
   width: calc(var(--u) * 36);
@@ -345,7 +414,6 @@
   box-shadow:
     inset 0 calc(var(--u) * 1.2) 0 --alpha(var(--bp-white) / 30%),
     inset 0 calc(var(--u) * -2.5) calc(var(--u) * 2.5) --alpha(var(--bp-black) / 60%),
-    var(--die-ring),
     0 0 0 max(1px, calc(var(--u) * 0.8)) --alpha(var(--bp-white) / 16%),
     0 calc(var(--u) * 3.5) 0 var(--bp-black),
     0 calc(var(--u) * 6) calc(var(--u) * 7) --alpha(var(--bp-black) / 65%);
@@ -378,57 +446,6 @@
 
 .bp-fstat.bp-def {
   right: calc(var(--u) * -12);
-}
-
-/*
- * A value away from the printed one gets a ring in its direction's colour and, beside the die, a
- * tag with the difference: along the card's lower edge, clear of the art.
- */
-.bp-fstat.is-up {
-  --die-ring: 0 0 0 calc(var(--u) * 2) var(--bp-stat-up);
-}
-
-.bp-fstat.is-down {
-  --die-ring: 0 0 0 calc(var(--u) * 2) var(--bp-stat-down);
-}
-
-.bp-counter-diff {
-  position: absolute;
-  top: calc(var(--u) * -2);
-  left: calc(100% + var(--u) * 1);
-  padding: calc(var(--u) * 1.5) calc(var(--u) * 2.5);
-  font-size: calc(var(--u) * 17);
-  font-style: normal;
-  font-weight: 800;
-  font-variant-numeric: tabular-nums;
-  line-height: 1;
-  color: var(--bp-die-edge);
-  white-space: nowrap;
-  border: max(1px, calc(var(--u) * 1)) solid var(--bp-black);
-  border-radius: calc(var(--u) * 5);
-  box-shadow: 0 calc(var(--u) * 2) calc(var(--u) * 4) --alpha(var(--bp-black) / 60%);
-}
-
-.is-up > .bp-counter-diff {
-  background: var(--bp-stat-up);
-}
-
-.is-down > .bp-counter-diff {
-  background: var(--bp-stat-down);
-}
-
-/*
- * The defense die sits on the card's right corner: its tag goes to the left of it, and lower than
- * the attack die's, so that two tags between the dice never cover each other.
- */
-.bp-def > .bp-counter-diff {
-  inset: auto calc(100% + var(--u) * 1) calc(var(--u) * -2) auto;
-}
-
-/* An engaged card carries both dice on one side: both tags point the same way. */
-.is-engaged .bp-def > .bp-counter-diff {
-  right: auto;
-  left: calc(100% + var(--u) * 1);
 }
 
 .bp-counter.bp-hstat {
@@ -1144,56 +1161,37 @@
   display: flex;
 }
 
+/*
+ * The mat's picture, under both mats and everything on them. On the board only it is framed like a
+ * mat lying on the page; across the whole table it runs from one side panel to the other.
+ */
 .bp-mat-art {
   position: absolute;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bp-mat-art.is-framed {
+  box-shadow:
+    0 0 0 1px --alpha(var(--bp-white) / 8%),
+    0 8px 26px --alpha(var(--bp-black) / 40%);
+}
+
+/* A card's art or the player's own picture: it covers the box, under a veil that darkens it. */
+.bp-mat-photo {
+  position: absolute;
+}
+
+/* The player's own picture, whole: where it lies is worked out from the frame they put on it. */
+.bp-mat-img {
+  position: absolute;
+  max-width: none;
+}
+
+.bp-mat-veil {
+  position: absolute;
   inset: 0;
-}
-
-.bp-frame-pile-leader {
-  --zone: var(--bp-zone-leader);
-  --zone-fill: var(--bp-zone-leader-fill);
-}
-
-.bp-frame-pile-deck {
-  --zone: var(--bp-zone-deck);
-  --zone-fill: var(--bp-zone-deck-fill);
-}
-
-.bp-frame-pile-cemetery {
-  --zone: var(--bp-zone-cemetery);
-  --zone-fill: var(--bp-zone-cemetery-fill);
-}
-
-.bp-frame-pile-evolve {
-  --zone: var(--bp-zone-evolve);
-  --zone-fill: var(--bp-zone-evolve-fill);
-}
-
-.bp-frame-pile-banish {
-  --zone: var(--bp-zone-banish);
-  --zone-fill: var(--bp-zone-banish-fill);
-}
-
-.bp-frame-pile-inner {
-  fill: none;
-  stroke: var(--zone);
-  stroke-opacity: 0.35;
-  stroke-width: 1;
-}
-
-.bp-frame-icon {
-  fill: var(--zone);
-  opacity: 0.75;
-}
-
-.bp-frame-icon.is-line {
-  fill: none;
-  stroke: var(--zone);
-  stroke-width: 1.6;
-}
-
-.bp-frame-icon-hole {
-  fill: --alpha(var(--bp-black) / 65%);
+  background: var(--bp-black);
 }
 
 .bp-frame-pp {
@@ -2176,18 +2174,26 @@
   background: var(--surface-2);
 }
 
-.bp-leader-art > div {
-  position: absolute;
-  left: 0;
-  right: 0;
-  height: 58%;
-  overflow: hidden;
-  opacity: 0.38;
-  filter: saturate(1.15) blur(1.5px);
+/* Several values of one fact (a card's counters, its traits), set apart by spacing. */
+.bp-detail-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 12px;
 }
 
-:root[data-theme="light"] .bp-leader-art > div {
-  opacity: 0.26;
+/* The pin: wider than the header's other buttons, for the key that works it. */
+.bp-sidebar header .bp-pin {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  width: auto;
+  margin-left: auto;
+  padding: 0 8px;
+}
+
+.bp-sidebar header .bp-pin.is-on {
+  background: var(--accent-soft);
+  color: var(--accent-text);
 }
 
 .bp-pile-tag b {
@@ -2204,11 +2210,6 @@
   margin-left: 2px;
   color: var(--text-1);
   font-size: 18px;
-}
-
-.bp-pp-head b {
-  font-size: calc(var(--u) * 13);
-  line-height: 1;
 }
 
 .bp-scene-chip b {
@@ -2255,10 +2256,10 @@
 }
 
 .bp-pp-head i {
-  font-size: calc(var(--u) * 10.5);
+  font-size: calc(var(--u) * 13);
   font-style: normal;
   font-weight: 800;
-  letter-spacing: 0;
+  letter-spacing: 0.02em;
 }
 
 .bp-plate-class i {
@@ -2338,6 +2339,11 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+}
+
+.bp-pin svg {
+  width: 15px;
+  height: 15px;
 }
 
 .bp-log header svg {
@@ -2678,13 +2684,73 @@
   font-family: ui-monospace, monospace;
   font-size: 11.5px;
   font-weight: 700;
-  color: var(--bp-gold);
+  color: var(--text-1);
   background: var(--surface-2);
   border: 1px solid var(--border-strong);
   border-radius: 999px;
 }
 
 /* The drawn night mat. */
+.bp-blue-stop-1 {
+  stop-color: var(--bp-blue-mat-1);
+}
+
+.bp-blue-stop-2 {
+  stop-color: var(--bp-blue-mat-2);
+}
+
+.bp-blue-stop-3 {
+  stop-color: var(--bp-blue-mat-3);
+}
+
+.bp-forest-stop-1 {
+  stop-color: var(--bp-forest-1);
+}
+
+.bp-forest-stop-2 {
+  stop-color: var(--bp-forest-2);
+}
+
+.bp-forest-stop-3 {
+  stop-color: var(--bp-forest-3);
+}
+
+.bp-forest-vine {
+  fill: none;
+  stroke: var(--bp-forest-vine);
+  stroke-opacity: 0.13;
+  stroke-width: 1.2;
+}
+
+.bp-forest-rim {
+  fill: none;
+  stroke: var(--bp-forest-rim);
+  stroke-opacity: 0.35;
+  stroke-width: 2;
+}
+
+.bp-parchment-stop-1 {
+  stop-color: var(--bp-parchment-1);
+}
+
+.bp-parchment-stop-2 {
+  stop-color: var(--bp-parchment-2);
+}
+
+.bp-parchment-stop-3 {
+  stop-color: var(--bp-parchment-3);
+}
+
+.bp-parchment-ring {
+  fill: none;
+  stroke: var(--bp-parchment-ink);
+  stroke-opacity: 0.22;
+}
+
+.bp-mat-plain {
+  fill: var(--bp-plain-mat);
+}
+
 .bp-night-stop-1 {
   stop-color: var(--bp-night-1);
 }
@@ -2933,14 +2999,21 @@
   color: var(--text-3);
 }
 
-.is-selected .bp-card-inner,
-.bp-hand-card.is-selected {
-  outline: max(2px, calc(var(--u) * 3)) solid var(--bp-hover-gold);
-  outline-offset: max(1px, calc(var(--u) * 2));
+/* The picked card lifts towards the viewer; its orange light is set with the other edge lights. */
+.bp-card.is-selected {
+  z-index: 5;
+  scale: 1.08;
+  translate: 0 calc(var(--u) * -5);
 }
 
-.bp-hand-card.is-selected {
-  outline-width: 3px;
+.bp-hand-row .bp-hand-card.is-selected,
+.bp-hand-col .bp-hand-card.is-selected {
+  z-index: 60;
+  transform: translateY(-6%) scale(1.06);
+  box-shadow:
+    0 0 0 max(2px, calc(var(--u) * 2.5)) var(--bp-pick),
+    0 0 14px 4px --alpha(var(--bp-pick) / 80%),
+    0 10px 22px --alpha(var(--bp-black) / 70%);
 }
 
 /* Centred by its margins: `left: 50%` would cap the bar's width at half the screen. */
@@ -3055,9 +3128,11 @@
   cursor: pointer;
 }
 
+.bp-pile-hit.is-target,
 .bp-pile-hit.is-selected {
-  outline: max(2px, calc(var(--u) * 3)) solid var(--bp-hover-gold);
-  outline-offset: max(1px, calc(var(--u) * 2));
+  box-shadow:
+    0 0 0 max(2px, calc(var(--u) * 2.5)) var(--bp-pick),
+    0 0 calc(var(--u) * 14) calc(var(--u) * 5) --alpha(var(--bp-pick) / 80%);
 }
 
 /* Only what can be picked says so: the other seat's half of the dual view is just shown. */
@@ -3146,7 +3221,7 @@
     transform: scale(1.05);
     transform-origin: 50% 100%;
     box-shadow:
-      0 0 0 2px var(--bp-hover-gold),
+      0 0 0 2px var(--bp-pick),
       0 8px 20px --alpha(var(--bp-black) / 55%);
   }
 
@@ -3154,4 +3229,307 @@
   .bp-hand-track.is-overlap .bp-hand-card[role="button"]:hover {
     transform: none;
   }
+}
+
+/*
+ * A card's counters lie on it as a chip at the middle of its upper edge; an engaged card carries
+ * the chip at the middle of its right edge instead, clear of the keyword markers in its lower
+ * right corner. A card holds one kind of counter at most today: more would lie side by side.
+ */
+.bp-tokens {
+  position: absolute;
+  top: calc(var(--u) * -16);
+  left: 50%;
+  z-index: 3;
+  display: flex;
+  gap: calc(var(--u) * 4);
+  translate: -50% 0;
+}
+
+/* The evolve tag has the middle of the upper edge: the chip of an evolved card sits under it. */
+.is-evolved .bp-tokens {
+  top: calc(var(--u) * 12);
+}
+
+.is-engaged .bp-tokens {
+  top: 46%;
+  right: calc(var(--u) * -16);
+  left: auto;
+  translate: 0 -50%;
+}
+
+.bp-token {
+  position: relative;
+  flex: none;
+  width: calc(var(--u) * 44);
+  height: calc(var(--u) * 44);
+  pointer-events: auto;
+  filter: drop-shadow(0 calc(var(--u) * 2) calc(var(--u) * 3) --alpha(var(--bp-black) / 55%));
+}
+
+/* Two kinds, then three or more: smaller chips, so the row stays on the card. */
+.bp-tokens.is-several .bp-token {
+  width: calc(var(--u) * 36);
+  height: calc(var(--u) * 36);
+}
+
+.bp-tokens.is-many .bp-token {
+  width: calc(var(--u) * 28);
+  height: calc(var(--u) * 28);
+}
+
+.bp-token-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  box-shadow: 0 0 0 calc(var(--u) * 2.5) var(--bp-white);
+}
+
+/* A pill, so that two digits fit; it hangs a little over the chip's lower right. */
+.bp-token-count {
+  position: absolute;
+  right: calc(var(--u) * -3);
+  bottom: calc(var(--u) * -4);
+  display: grid;
+  place-items: center;
+  box-sizing: border-box;
+  min-width: calc(var(--u) * 24);
+  height: calc(var(--u) * 24);
+  padding: 0 calc(var(--u) * 4);
+  border-radius: 999px;
+  background: var(--bp-white);
+  box-shadow: 0 0 0 calc(var(--u) * 2.5) var(--bp-die-edge);
+  color: var(--bp-die-edge);
+  font-size: calc(var(--u) * 17);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+}
+
+.bp-tokens.is-several .bp-token-count,
+.bp-tokens.is-many .bp-token-count {
+  min-width: calc(var(--u) * 20);
+  height: calc(var(--u) * 20);
+  font-size: calc(var(--u) * 14);
+}
+
+/* The drawn chip. */
+.bp-token-rim {
+  fill: var(--bp-die-edge);
+}
+
+.bp-token-notch {
+  fill: none;
+  stroke: var(--bp-white);
+  stroke-width: 5;
+}
+
+.bp-token-face {
+  fill: var(--bp-white);
+}
+
+.bp-token-ring {
+  fill: none;
+  stroke: var(--bp-slate);
+  stroke-width: 1.5;
+}
+
+.bp-pin kbd {
+  padding: 0 4px;
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  color: var(--text-3);
+  font-family: var(--font-ui);
+  font-size: 10px;
+}
+
+/*
+ * The battle settings: the card picker, the upload and the sliders. They sit in the site's dialog,
+ * so they use the site's theme tokens, not the table's palette.
+ */
+.bp-set-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.bp-set-note {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.bp-set-note.is-warning {
+  color: var(--danger);
+}
+
+.bp-set-current {
+  font-size: 14px;
+}
+
+.bp-set-search {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-1);
+  color: var(--text-1);
+  font-size: 14px;
+  user-select: text;
+}
+
+.bp-set-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+  touch-action: pan-y;
+}
+
+.bp-set-card {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bp-set-card.is-chosen {
+  border-color: var(--accent);
+}
+
+.bp-set-thumb {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 100 / 140;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+.bp-set-card-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.bp-set-card-no {
+  color: var(--text-2);
+  font-size: 11px;
+}
+
+.bp-set-upload {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.bp-set-preview {
+  width: 96px;
+  height: 54px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.bp-set-slider {
+  display: grid;
+  grid-template-columns: 4.5em 1fr 4.5em;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.bp-set-slider input {
+  width: 100%;
+  touch-action: pan-x;
+}
+
+.bp-set-slider output {
+  color: var(--text-2);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.bp-crop {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bp-crop-hint {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+/*
+ * The whole picture, greyed and dimmed; a full-colour copy shows through the frame, which has the
+ * mat's shape and is dragged over the picture.
+ */
+.bp-crop-stage {
+  position: relative;
+  align-self: center;
+  max-width: 100%;
+  overflow: hidden;
+  border-radius: 6px;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.bp-crop-whole {
+  display: block;
+  max-width: 100%;
+  max-height: 56svh;
+  filter: grayscale(1) brightness(0.55);
+  pointer-events: none;
+}
+
+.bp-crop-kept {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* A card's art has no size of its own to give the stage: the stage takes the width, the art its shape. */
+.bp-crop-stage.is-card {
+  width: min(100%, 70svh);
+}
+
+.bp-crop-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+}
+
+.bp-crop-art.is-left-out {
+  filter: grayscale(1) brightness(0.55);
+}
+
+.bp-crop-frame {
+  position: absolute;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 1px --alpha(var(--bp-black) / 60%);
+  pointer-events: none;
+}
+
+.bp-crop-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }

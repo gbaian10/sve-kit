@@ -7,16 +7,16 @@ import epIcon from "../../../assets/card-labels/ep.svg"
 import type { CardRef, Seat } from "../../../battle/contract"
 import type { Pile, SeatTable, TableCard, TableModel } from "../../../battle/view/table"
 import { cn } from "../../../components/ui/cn"
-import type { BattleMat } from "../../../settings"
 import { useCards } from "../battle-cards"
 import { CounterBadge, KeywordDie } from "../dice/Dice"
-import { isDieKeyword, isNamedKeyword } from "../dice/keywords"
+import { isDieKeyword, isUnmarkedKeyword } from "../dice/keywords"
 import { InspectorContext, usePick } from "../inspector"
 import type { Layout } from "../layout"
 import { CardBack } from "./CardBack"
 import { CardFace } from "./Cards"
 import { GAP, type MatGeometry, matGeometry, type PileName, px } from "./geometry"
-import { MatPicture, SharedMatPicture, ZoneFrames } from "./mats"
+import { ZoneFrames } from "./mats"
+import { CounterTokens } from "./Tokens"
 
 const PILES: readonly PileName[] = ["leader", "deck", "cemetery", "evolve", "banish"]
 
@@ -55,6 +55,9 @@ function FieldCardView({
         card.acted && "is-engaged",
         evolved && "is-evolved",
         superEvolved && "is-super",
+        card.attack?.leader === true && "is-attack-leader",
+        card.attack?.leader === false && "is-attack-followers",
+        pick.targeted && "is-target",
         pick.selected && "is-selected",
       )}
       style={px(mat.onBoard(mat.slotCard("field", slot, opp), opp), u)}
@@ -99,19 +102,15 @@ function FieldCardView({
             isDieKeyword(keyword) ? (
               // Only an engaged ward restricts attacks, so that is when its die lights up.
               <KeywordDie key={keyword} keyword={keyword} on={keyword === "guard" && card.acted} />
-            ) : (
+            ) : isUnmarkedKeyword(keyword) ? null : (
+              // A keyword the screen has no marker for is written as the authority names it.
               <span key={keyword} className="bp-status">
-                {isNamedKeyword(keyword) ? t(`play.keyword.${keyword}`) : keyword}
+                {keyword}
               </span>
             ),
           )}
-          {card.counters.map((counter) => (
-            // Counter names arrive as the rules term of the card text.
-            <span key={counter.name} className="bp-status" lang="ja">
-              {t("play.card.counter", { name: counter.name, n: counter.amount })}
-            </span>
-          ))}
         </span>
+        <CounterTokens card={card} />
       </div>
     </div>
   )
@@ -130,6 +129,8 @@ function ExCard({
   readonly u: number
   readonly mat: MatGeometry
 }) {
+  const { t } = useTranslation()
+  const printed = useCards().find(card.face)?.summary
   const pick = usePick({ kind: "object", handle: card.handle })
   return (
     <div
@@ -141,6 +142,25 @@ function ExCard({
       <div className="bp-card-inner">
         <CardFace card={card.face} tag />
       </div>
+      {/* Abilities change the numbers of a follower waiting in the EX area too. */}
+      {card.stats !== null ? (
+        <div className="bp-card-badges" data-hit-area="">
+          <CounterBadge
+            kind="atk"
+            value={card.stats.attack}
+            className="bp-fstat bp-atk"
+            label={t("play.stat.attack")}
+            printed={printed?.attack}
+          />
+          <CounterBadge
+            kind="hp"
+            value={card.stats.life}
+            className="bp-fstat bp-def"
+            label={t("play.stat.defense")}
+            printed={printed?.defense}
+          />
+        </div>
+      ) : null}
     </div>
   )
 }
@@ -174,7 +194,11 @@ function PileHit({
   if (pile === "leader")
     return (
       <div
-        className={cn("bp-pile-hit", leader.selected && "is-selected")}
+        className={cn(
+          "bp-pile-hit",
+          leader.targeted && "is-target",
+          leader.selected && "is-selected",
+        )}
         aria-label={label}
         {...leader.props}
       />
@@ -342,6 +366,10 @@ function PointTokens({ seat, opp, u, mat }: Omit<MatProps, "leader">) {
   )
 }
 
+// The lettering over the two PP columns is part of the mat's printing, as on the official mat: the
+// same in every interface language.
+const PP_HEADS = { max: "Max", left: "PP" } as const
+
 /**
  * The PP column printed on the mat: blue = this turn's maximum, green = what is left. Each column
  * is lit from 0 up to its value, so a seat with nothing left still has its 0 lit.
@@ -362,10 +390,9 @@ function PpColumn({ seat, opp, u, mat }: Omit<MatProps, "leader">) {
       aria-label={t("play.stat.ppOf", { left: seat.pp, max: seat.maxPp })}
     >
       <div className="bp-pp-head" style={{ height: head * u, order: opp ? 2 : 0 }}>
-        <b>{t("play.stat.pp")}</b>
         <span>
-          <i className="is-max">{t("play.stat.ppMax")}</i>
-          <i className="is-left">{t("play.stat.ppLeft")}</i>
+          <i className="is-max">{PP_HEADS.max}</i>
+          <i className="is-left">{PP_HEADS.left}</i>
         </span>
       </div>
       {rows.map((n) => (
@@ -415,12 +442,13 @@ function PpBar({ seat, opp, u, mat }: Omit<MatProps, "leader">) {
   )
 }
 
-function Mat({ seat, leader, opp, u, mat, shared }: MatProps & { readonly shared: boolean }) {
+/** One player's mat: its printing and what lies on it. The picture under it is the screen's. */
+function Mat({ seat, leader, opp, u, mat, light }: MatProps & { readonly light: boolean }) {
   const { t } = useTranslation()
   return (
     <section aria-label={opp ? t("play.mat.opponent") : t("play.mat.self")}>
       <div
-        className={shared ? "bp-mat is-frames" : "bp-mat"}
+        className={cn("bp-mat", light && "is-light")}
         style={{
           left: 0,
           top: (opp ? 0 : mat.matH + GAP) * u,
@@ -428,8 +456,7 @@ function Mat({ seat, leader, opp, u, mat, shared }: MatProps & { readonly shared
           height: mat.matH * u,
         }}
       >
-        {!shared ? <MatPicture opp={opp} mat={mat} /> : null}
-        <div className="bp-frames-wrap" style={{ opacity: 0.7 }}>
+        <div className="bp-frames-wrap">
           <ZoneFrames opp={opp} mat={mat} />
         </div>
       </div>
@@ -464,17 +491,17 @@ export function Board({
   model,
   leaders,
   layout,
-  mat,
+  light,
 }: {
   readonly model: TableModel
   readonly leaders: Readonly<Record<Seat, CardRef>>
   readonly layout: Layout
-  readonly mat: BattleMat
+  /** The picture under the mats is a light one: the printing turns to a dark ink. */
+  readonly light: boolean
 }) {
   const { t } = useTranslation()
   const { u } = layout
   const geometry = matGeometry(layout.matW, layout.stacked)
-  const shared = mat === "shared"
   return (
     // Dice hang off the corners of their cards and a turned card is wider than its slot, all on
     // purpose: the overflow audit leaves boxes marked `data-hit-area` alone.
@@ -493,21 +520,13 @@ export function Board({
       }
     >
       <div className="bp-board" data-hit-area="">
-        {shared ? (
-          <div
-            className="bp-mat"
-            style={{ left: 0, top: 0, width: layout.matW * u, height: layout.boardH * u }}
-          >
-            <SharedMatPicture mat={geometry} boardH={layout.boardH} />
-          </div>
-        ) : null}
         <Mat
           seat={model.opponent}
           leader={leaders[model.opponent.seat]}
           opp
           u={u}
           mat={geometry}
-          shared={shared}
+          light={light}
         />
         <Mat
           seat={model.self}
@@ -515,7 +534,7 @@ export function Board({
           opp={false}
           u={u}
           mat={geometry}
-          shared={shared}
+          light={light}
         />
         <div className="bp-centerline" style={{ top: geometry.matH * u, height: GAP * u }} />
       </div>

@@ -38,7 +38,7 @@ const TABLE: TableSpec = {
       hand: ["BP05-058", "BP20-062"],
       field: [
         { no: "BP20-064", slot: 3, evolved: "BP20-065", acted: true, keywords: ["guard"] },
-        { no: "BP20-067", slot: 0, counters: [["スタック", 2]] },
+        { no: "BP01-T10", slot: 0, counters: [["スタックカウンター", 2]] },
       ],
       cemetery: ["BP08-068", "SD04-002"],
       evolveDeck: { faceDown: ["BP05-053"], faceUp: ["BP15-114"] },
@@ -93,11 +93,39 @@ describe("tableModel", () => {
     expect(self.sep).toEqual({ current: 0, max: 0, opensIn: 0 })
   })
 
+  it("gives the viewer's own field cards the targets it is told they may attack", () => {
+    const [first, second] = TABLE.seats
+    const table: TableSpec = {
+      ...TABLE,
+      seats: [first, { ...second, field: [{ no: "BP13-030", slot: 2 }] }],
+    }
+    // By zone order: the first card may attack the leader, the second one opposing card only.
+    // Place 7 of the opposing field is empty, so it names nothing.
+    const hints = {
+      p1: [
+        { leader: true, followers: [] },
+        { leader: false, followers: [0, 7] },
+      ],
+      p2: [{ leader: true, followers: [0] }],
+    }
+    const own = model(observe(table, "p1"), ARRANGED, hints)
+    const target = own.opponent.field.find((card) => card !== null)?.handle
+    expect(own.self.field.flatMap((card) => (card === null ? [] : [card.attack]))).toEqual([
+      { leader: false, targets: [target] },
+      { leader: true, targets: [] },
+    ])
+    // A seat is told nothing about what the other seat's cards may do.
+    expect(own.opponent.field.every((card) => card === null || card.attack === null)).toBe(true)
+    // Nothing is assumed without being told: no hints, no attackers.
+    const untold = model(observe(table, "p1"), ARRANGED)
+    expect(untold.self.field.every((card) => card === null || card.attack === null)).toBe(true)
+  })
+
   it("lays a field card in the slot numbered like its place when nothing is arranged", () => {
     const { self } = model(observe(TABLE, "p1"))
     expect(self.field.map((card) => card?.face ?? null)).toEqual([
       cardRef("BP20-065"),
-      cardRef("BP20-067"),
+      cardRef("BP01-T10"),
       null,
       null,
       null,
@@ -118,10 +146,10 @@ describe("tableModel", () => {
     expect(self.field).toHaveLength(5)
     expect(self.field.map((card) => card !== null)).toEqual([true, false, false, true, false])
     expect(self.field[0]).toMatchObject({
-      face: cardRef("BP20-067"),
+      face: cardRef("BP01-T10"),
       acted: false,
       stats: null,
-      counters: [{ name: "スタック", amount: 2 }],
+      counters: [{ name: "スタックカウンター", amount: 2 }],
     })
   })
 

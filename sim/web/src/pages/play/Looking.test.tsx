@@ -1,4 +1,4 @@
-import { screen, waitFor, within } from "@testing-library/react"
+import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import type { RouteObject } from "react-router"
 import { afterEach, beforeEach, describe, expect, it } from "vitest"
@@ -13,9 +13,12 @@ beforeEach(() => {
   prefsStore.set({ uiLanguage: "zh-TW" })
 })
 
+const WINDOW = { innerWidth: window.innerWidth, innerHeight: window.innerHeight }
+
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
   document.documentElement.removeAttribute("lang")
+  Object.assign(window, WINDOW)
 })
 
 const mat = async (name: string): Promise<HTMLElement> =>
@@ -91,6 +94,27 @@ describe("looking at cards", () => {
     // Only the used card, lying face up, can be looked at.
     expect(other.querySelectorAll(".bp-browser-grid button")).toHaveLength(1)
     expect(other.querySelectorAll(".is-secret")).toHaveLength(0)
+  })
+
+  it("pins the info column from its button or with F1, and remembers it", async () => {
+    const user = userEvent.setup()
+    await renderRoutes(ROUTES, { initialEntries: ["/play?scene=mid"] })
+    await mat("你的遊戲墊")
+    // Wide enough for the info column to stand open beside the board.
+    act(() => {
+      Object.assign(window, { innerWidth: 1600, innerHeight: 900 })
+      window.dispatchEvent(new Event("resize"))
+    })
+    const pin = screen.getByRole("button", { name: "釘選（F1）" })
+    await user.click(pin)
+    expect(prefsStore.get().battleInfoPinned).toBe(true)
+    expect(screen.getByRole("button", { name: "取消釘選（F1）" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    )
+    await user.keyboard("{F1}")
+    expect(prefsStore.get().battleInfoPinned).toBe(false)
+    expect(screen.getByRole("button", { name: "釘選（F1）" })).toBeInTheDocument()
   })
 
   it("lets nothing be picked on the other seat's half of the dual view", async () => {

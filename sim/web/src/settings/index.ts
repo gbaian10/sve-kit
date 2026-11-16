@@ -7,8 +7,13 @@ export {
   moveListColumn,
 } from "./list-columns"
 export {
-  BATTLE_MATS,
-  type BattleMat,
+  BATTLE_MAT_BLUR_MAX,
+  BATTLE_MAT_DIM_MAX,
+  BATTLE_MAT_LOOKS,
+  BATTLE_MAT_REACHES,
+  type BattleMatFraming,
+  type BattleMatLook,
+  type BattleMatReach,
   CARD_EDITIONS,
   CARD_OPEN_MODES,
   type CardOpenMode,
@@ -19,6 +24,7 @@ export {
   DEFAULT_PREFS,
   FIELD_DISPLAYS,
   type FieldDisplay,
+  isBattleMatFraming,
   prefsStore,
   showsOtherEdition,
   TEXT_DISPLAYS,

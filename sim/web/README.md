@@ -66,21 +66,47 @@ Until the local engine supplies contract updates, the page plays fixture scenes
 seat would receive, validated by the generated contract validator in the tests. Nothing in the
 fixtures computes rules.
 
-- `?scene=preset|opening|mid|full` picks the scene; the chip on the board's top-left corner does
-  the same.
+- `?scene=preset|opening|mid|full|stack` picks the scene; the chip on the board's top-left corner
+  does the same. `stack` is a Witch's table: a counter lies only on a card that may hold it, so
+  stack counters are shown on amulets with Stack. Its followers are arranged to show how markers
+  share a card (several keywords, standing and engaged; a chip beside a keyword), and its EX
+  follower carries current numbers, which the authority does not send for the EX area yet.
 - `?dual=1` (or the button beside the gear) shows both seats side by side: the viewer's screen on
   the left, the other seat's on the right. Each has its own source and its own playback state, so
   the two can be compared for what a seat must not be told.
-- The gear opens the battle settings: one mat per player, or one shared mat across both halves
-  of the board. The mat is drawn in SVG (`table/mats.tsx`), no artwork; the page's background (the
-  two leaders' art) is not part of the mat and does not change with it.
+- The gear opens the battle settings, which are the player's own and stay on the device: the
+  other player never sees this player's mat. One picture lies under both mats, which carry their
+  printing only: across the whole table, from one side panel to the other and from the opponent's
+  hand to the player's own, or on the board alone. The side panels and the rest of the page keep
+  the site's own page colour, in either theme.
+- The picture is a drawn one (`table/mats.tsx`: night sky, blue, forest, parchment, plain), the
+  art of a card, or a picture of the player's own. A card is found by name or number with the
+  card page's search index (`search` in `battle-cards.ts`) and starts as the player's leader; a
+  picture of their own is chosen from the device or pasted (a button reads the clipboard, and
+  Ctrl+V works while the settings are open) and is kept in the browser's IndexedDB
+  (`mat-upload.ts`), never uploaded. Where that storage refuses, the mat is the plain one.
+- A card's art or the player's picture is kept whole, with the frame the player put on it
+  (`hud/MatCropper.tsx`: the whole picture shows, the frame has the mat's shape and is dragged
+  over it, what it leaves out is grey). `placePicture` in `hud/mat-crop.ts` then lays the picture
+  so that the frame covers the reach it was framed for; the other reach looks at the same picture
+  in the same place, so the whole table shows more of it than the board, and nothing is cut or
+  enlarged again until the picture ends before the box does. Blur (off by default) and darkening
+  are set with sliders.
+- The slot rows are centred on the mat (`table/geometry.ts`): each slot mirrors another across the
+  mat's middle, whatever the width of the side columns.
+- The mat's printing follows the official playmat (`ZoneFrames` in `table/mats.tsx`): the row
+  names between arrows, the divider with its ornament, and under every pile a base in the pile's
+  colour that shows while the pile is empty. Zone names are printed in English in every interface
+  language, as on the mat. The ornaments are outlines traced from the official downloadable mat and
+  the names are font outlines, both in `src/assets/card-labels/playmat/ornaments.json`; that
+  directory's README says where they come from. No official bitmap is in the app.
 
-The card back is the official one, published beside the snapshot root like the card images and
-never committed: `cardBackUrl()` in `src/data/card-back.ts` is the one place that names it
-(`<snapshot root>/ui/card_back.webp`; not under `images/`, where publishing may remove any file the
-card image index does not list). A root without the file answers 404 and every back on screen falls
-back to a back drawn by the app. For a local preview put the file at that path under the preview
-root.
+The card back and the counter chips are official artwork, published beside the snapshot root like
+the card images and never committed. `src/data/ui-art.ts` is the one place that names the files
+(`<snapshot root>/ui/card_back.webp`, `ui/counter_chip_a.webp`, `ui/counter_chip_b.webp`; not under
+`images/`, where publishing may remove any file the card image index does not list). A root without
+a file answers 404 and every copy on screen falls back to one drawn by the app. For a local preview
+put the files at those paths under the preview root.
 
 Evolve points are drawn from the contract alone: the slots and the ones left for EP, and for SEP
 how many are left and the seat's own turn from which it may super evolve. The contract does not
@@ -106,8 +132,25 @@ How the screen is put together:
   `src/styles/tokens.css`, the same in every theme; the side panels use the site's theme tokens.
 - `dice/` draws the attack, defense, keyword and cost markers from the art in
   `src/assets/card-labels/dice/`; that directory's README says where the art comes from.
+- Light around a card's edge says what can be done with it, in the colours of the online game:
+  green for a card that may attack the leader, yellow for one that may attack followers only,
+  orange for the picked card (which also lifts) and for what the picked card may attack. Which
+  cards may attack what is the authority's open question, never worked out from keywords or
+  postures; until the screen reads questions a scene supplies it (`AttackHints` in
+  `src/battle/view/table.ts`). Storm and rush have no marker of their own on a card.
+- Where markers lie on a card: keyword markers stack down from the upper right corner, and run
+  inwards from the lower right corner of an engaged card; a counter chip lies at the middle of the
+  upper edge, and at the middle of the right edge of an engaged card. A follower's dice show
+  wherever the authority gives its current numbers.
+- A counter on a card is a chip with its number (`table/Tokens.tsx`): one chip per kind, showing
+  the chip's back. A card holds one kind at most today; more would lie side by side. The authority
+  names a counter by its rules name (the keyword registry's, `authored/rules/keywords.yaml`);
+  `table/counters.ts` maps that name to the wording of each interface language, shown on hover and
+  in the info column, and a test fails when the registry lists a counter the screen has no name
+  for.
 - Looking at cards (`inspector.ts`): a click, a tap or Enter picks a card or a leader, and the mouse
-  resting on one previews it. What is picked shows in the info column (`hud/Sidebar.tsx`), or in a
+  resting on one previews it; the pin in the info column's header (or F1) keeps the picked card
+  there whatever the pointer rests on, and is remembered. What is picked shows in the info column (`hud/Sidebar.tsx`), or in a
   bar over the board where no column fits (`hud/SelectionBar.tsx`); from either, `hud/Zoom.tsx`
   shows the card large. `hud/PileBrowser.tsx` opens a cemetery, a banish zone or an evolve deck; a
   deck cannot be opened. The current numbers come from `src/battle/view/inspect.ts`, the printed

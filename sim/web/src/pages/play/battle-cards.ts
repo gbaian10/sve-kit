@@ -13,6 +13,7 @@ import {
   useSnapshotStatus,
 } from "../../data"
 import { type DisplayedText, displayName, UI_TEXT_LANG } from "../../domain/nameDisplay"
+import { DEFAULT_QUERY } from "../../domain/query/model"
 import { usePrefs } from "../../settings"
 
 /** What the snapshot says about one card face a contract message refers to. */
@@ -34,9 +35,16 @@ export interface BattleCards {
   readonly images: ImageIndex | undefined
   /** Where card text is read from, once the snapshot is ready. */
   readonly text: { readonly client: SnapshotClient; readonly edition: Region } | undefined
+  /** Cards of the match's edition by name or card number, best match first. */
+  readonly search: (text: string, limit: number) => readonly KnownCard[]
 }
 
-const NONE: BattleCards = { find: () => undefined, images: undefined, text: undefined }
+const NONE: BattleCards = {
+  find: () => undefined,
+  images: undefined,
+  text: undefined,
+  search: () => [],
+}
 
 export const BattleCardsContext = createContext<BattleCards>(NONE)
 
@@ -66,29 +74,37 @@ export function useBattleCards(region: Region | undefined): BattleCards {
   return useMemo(() => {
     if (!snapshot) return NONE
     const catalog = catalogOf(snapshot)
+    const known = (printingId: string): KnownCard | undefined => {
+      const summary = catalog.summary(printingId)
+      if (summary === undefined) return undefined
+      const shown = displayName(summary.name, uiLanguage, nameDisplay)
+      return {
+        summary,
+        name: shown.primary,
+        original:
+          shown.primary.lang === summary.name.original.lang ? undefined : summary.name.original,
+        untranslated: shown.missingTranslation,
+        classLabel:
+          summary.classCode === null
+            ? null
+            : catalog.classLabel(summary.classCode, UI_TEXT_LANG[uiLanguage]),
+        wording: revisionId(
+          catalog.index.displayRevision(summary.faceId, summary.region, summary.printingId),
+        ),
+      }
+    }
     return {
       images,
       text: region === undefined ? undefined : { client, edition: region },
-      find: (card) => {
-        // Only front faces resolve until the screen needs the other face of a double-faced card.
-        const summary = card.face === 0 ? catalog.summary(card.printing_id) : undefined
-        if (summary === undefined) return undefined
-        const shown = displayName(summary.name, uiLanguage, nameDisplay)
-        return {
-          summary,
-          name: shown.primary,
-          original:
-            shown.primary.lang === summary.name.original.lang ? undefined : summary.name.original,
-          untranslated: shown.missingTranslation,
-          classLabel:
-            summary.classCode === null
-              ? null
-              : catalog.classLabel(summary.classCode, UI_TEXT_LANG[uiLanguage]),
-          wording: revisionId(
-            catalog.index.displayRevision(summary.faceId, summary.region, summary.printingId),
-          ),
-        }
-      },
+      // Only front faces resolve until the screen needs the other face of a double-faced card.
+      find: (card) => (card.face === 0 ? known(card.printing_id) : undefined),
+      search: (text, limit) =>
+        region === undefined || text.trim() === ""
+          ? []
+          : catalog
+              .results({ ...DEFAULT_QUERY, text }, region)
+              .slice(0, limit)
+              .flatMap((item) => known(item.printingId) ?? []),
     }
   }, [snapshot, images, uiLanguage, nameDisplay, client, region])
 }

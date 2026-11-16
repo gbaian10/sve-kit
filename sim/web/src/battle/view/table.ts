@@ -21,13 +21,37 @@ export interface TableCard {
   readonly faceDown: boolean
   readonly acted: boolean
   readonly evolution: EvolutionState
-  /** Current attack and life of a field follower; absent for anything else. */
+  /** Current attack and life, for a follower the authority gives them for; absent otherwise. */
   readonly stats: { readonly attack: number; readonly life: number } | null
   readonly keywords: readonly string[]
   readonly counters: readonly { readonly name: string; readonly amount: number }[]
   /** Play points the authority currently quotes for this card; null without a settled quote. */
   readonly cost: number | null
+  /** What the card may attack right now; null when it may not attack. */
+  readonly attack: AttackOptions | null
 }
+
+/** The targets the authority offers one attacker. */
+interface AttackOptions {
+  /** The opposing leader is among them. */
+  readonly leader: boolean
+  /** The opposing field cards among them. */
+  readonly targets: readonly ObjectHandle[]
+}
+
+/** One attacker's targets as a scene names them: opposing field cards by their place in that zone's order. */
+interface AttackHint {
+  readonly leader: boolean
+  readonly followers: readonly number[]
+}
+
+/**
+ * What each of a seat's field cards may attack now, by their place in the zone's order. PROVISIONAL:
+ * this is what the authority's open question says (the targets it offers each attacker), never
+ * something the screen works out from keywords or postures. Until the screen reads questions a
+ * scene supplies it beside its messages; then the question decides and this goes away.
+ */
+export type AttackHints = Readonly<Partial<Record<Seat, readonly (AttackHint | null)[]>>>
 
 /** A zone as a size plus the members this seat can identify, in zone order. */
 export interface Pile {
@@ -97,6 +121,7 @@ export function tableCard(observation: BattleObservation, handle: ObjectHandle):
     keywords: view.state?.keywords ?? [],
     counters: view.state?.counters ?? [],
     cost: quote?.cost.total_pp ?? null,
+    attack: null,
   }
 }
 
@@ -123,8 +148,12 @@ function slots(
   observation: BattleObservation,
   zone: ZoneView,
   arranged: readonly number[] | undefined,
+  attack?: (at: number) => AttackOptions | null,
 ): (TableCard | null)[] {
-  const known = cards(observation, zone)
+  const known = cards(observation, zone).map((card) => ({
+    ...card,
+    attack: card.at === null ? null : (attack?.(card.at) ?? null),
+  }))
   const row: (TableCard | null)[] = Array.from(
     { length: Math.max(zone.capacity ?? 0, zone.count) },
     () => null,
@@ -166,9 +195,22 @@ function seatTable(
   player: PlayerView,
   index: number,
   arranged: SlotArrangement[Seat],
+  hints: readonly (AttackHint | null)[] | undefined,
 ): SeatTable {
   const { turn } = observation
   const turns = turn.elapsed_turns[index] ?? 0
+  const opposing = observation.players.find((other) => other.seat !== player.seat)?.zones.field
+  const attack = (at: number): AttackOptions | null => {
+    const hint = hints?.[at] ?? null
+    if (hint === null) return null
+    return {
+      leader: hint.leader,
+      // A place nothing lies in names no target.
+      targets: hint.followers.flatMap(
+        (place) => opposing?.cards.find((member) => member.position === place)?.object ?? [],
+      ),
+    }
+  }
   return {
     seat: player.seat,
     life: player.life,
@@ -178,7 +220,7 @@ function seatTable(
     first: turn.first_player === null ? null : turn.first_player === player.seat,
     active: turn.active === player.seat,
     turns,
-    field: slots(observation, player.zones.field, arranged?.field),
+    field: slots(observation, player.zones.field, arranged?.field, attack),
     ex: slots(observation, player.zones.ex, arranged?.ex),
     hand: pile(observation, player.zones.hand),
     deck: pile(observation, player.zones.deck),
@@ -191,9 +233,17 @@ function seatTable(
 export function tableModel(
   observation: BattleObservation,
   arrangement: SlotArrangement = {},
+  attackers: AttackHints = {},
 ): TableModel {
   const [first, second] = observation.players.map((player, index) =>
-    seatTable(observation, player, index, arrangement[player.seat]),
+    seatTable(
+      observation,
+      player,
+      index,
+      arrangement[player.seat],
+      // A seat is only told what its own cards may do.
+      player.seat === observation.viewer ? attackers[player.seat] : undefined,
+    ),
   ) as [SeatTable, SeatTable]
   const selfFirst = first.seat === observation.viewer
   return {

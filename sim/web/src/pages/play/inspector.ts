@@ -17,14 +17,26 @@ export interface Zoomed {
   readonly under: CardRef | null
 }
 
+/** What the picked card may attack; these light up for as long as it is picked. */
+export interface Targets {
+  readonly leader: Seat | null
+  readonly objects: readonly ObjectHandle[]
+}
+
+export const NO_TARGETS: Targets = { leader: null, objects: [] }
+
 export interface Inspector {
   readonly picked: Picked | null
+  readonly targets: Targets
   readonly select: (picked: Picked) => void
   /** What the pointer rests on; shown instead of the selection until it leaves. */
   readonly preview: (picked: Picked | null) => void
   readonly zoom: (zoomed: Zoomed) => void
   readonly browse: (seat: Seat, pile: BrowsablePile) => void
 }
+
+/** The key that pins and unpins the info column, as printed on its button. */
+export const PIN_KEY = "F1"
 
 /** Null where nothing can be picked: the other seat's screen in the dual view is only shown. */
 export const InspectorContext = createContext<Inspector | null>(null)
@@ -42,7 +54,7 @@ export const samePick = (a: Picked | null, b: Picked | null): boolean =>
  */
 export function usePick(target: Picked | null) {
   const inspector = use(InspectorContext)
-  if (inspector === null || target === null) return { selected: false, props: {} }
+  if (inspector === null || target === null) return { selected: false, targeted: false, props: {} }
   const mouse =
     (run: () => void) =>
     (event: PointerEvent): void => {
@@ -50,6 +62,10 @@ export function usePick(target: Picked | null) {
     }
   return {
     selected: samePick(inspector.picked, target),
+    targeted:
+      target.kind === "object"
+        ? inspector.targets.objects.includes(target.handle)
+        : inspector.targets.leader === target.seat,
     props: {
       role: "button",
       tabIndex: 0,

@@ -18,7 +18,7 @@ import type {
 } from "../contract"
 import { type CardNo, cardRef, cardTypeOf, fixtureCard } from "./cards"
 
-interface FieldSpec {
+export interface FieldSpec {
   readonly no: CardNo
   /** Where the screen lays it. Not part of what a seat is told: the contract only orders the zone. */
   readonly slot: number
@@ -29,6 +29,13 @@ interface FieldSpec {
   /** Current numbers, when they are not the ones printed on the face in effect. */
   readonly stats?: readonly [attack: number, life: number]
   readonly keywords?: readonly string[]
+  /**
+   * What the card may attack right now: the opposing leader, and opposing field cards by their
+   * place in that seat's list. Not part of the observation: the authority says it in the question
+   * it puts to the seat, and a scene hands it to the screen beside its messages.
+   */
+  readonly attack?: { readonly leader?: true; readonly followers?: readonly number[] }
+  /** Counters by the rules name the authority reports, such as スタックカウンター. */
   readonly counters?: readonly (readonly [name: string, amount: number])[]
 }
 
@@ -46,7 +53,14 @@ export interface SeatSpec {
   readonly deck: number
   readonly hand: readonly CardNo[]
   readonly field: readonly FieldSpec[]
-  readonly ex: readonly CardNo[]
+  /**
+   * A card with numbers is a follower whose current attack and life the seat is told. The
+   * contract's wording gives those to field followers only; this is what it would send once it
+   * also gives them for the EX area, where abilities can change them too.
+   */
+  readonly ex: readonly (
+    CardNo | { readonly no: CardNo; readonly stats: readonly [number, number] }
+  )[]
   readonly cemetery: readonly CardNo[]
   readonly banish: readonly CardNo[]
   readonly evolveDeck: {
@@ -192,7 +206,22 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
         },
         hand: { count: spec.hand.length, capacity: null, cards: hand },
         field: { count: field.length, capacity: ZONE_CAPACITY, cards: field },
-        ex: listed(seat, spec.ex, ZONE_CAPACITY),
+        ex: {
+          count: spec.ex.length,
+          capacity: ZONE_CAPACITY,
+          cards: spec.ex.map((card, position) => ({
+            position,
+            object:
+              typeof card === "string"
+                ? add(seat, card, "public")
+                : add(
+                    seat,
+                    card.no,
+                    "public",
+                    fieldState({ no: card.no, slot: 0, stats: card.stats }),
+                  ),
+          })),
+        },
         cemetery: listed(seat, spec.cemetery, null),
         banish: listed(seat, spec.banish, null),
         resolution: EMPTY,

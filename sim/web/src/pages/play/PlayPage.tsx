@@ -44,6 +44,7 @@ export function PlayPage() {
         opposite={sources.opposite}
         leaders={{ p1: scene.leaders[0], p2: scene.leaders[1] }}
         slots={scene.slots}
+        attackers={scene.attackers}
         onDual={(next) => {
           update((query) => {
             if (next) query.set("dual", "1")

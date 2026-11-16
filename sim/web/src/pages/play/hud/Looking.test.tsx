@@ -28,6 +28,7 @@ const UNDER = { printing_id: "p:base", face: 0 }
 const CARDS: BattleCards = {
   images: undefined,
   text: undefined,
+  search: () => [],
   find: (card) => ({
     summary: {
       printingId: card.printing_id,
@@ -60,6 +61,7 @@ const STATE: Inspection = {
     keywords: [],
     counters: [],
     cost: null,
+    attack: null,
   },
   seat: "p1",
   zone: "field",
@@ -78,7 +80,15 @@ describe("the info column", () => {
   it("shows a card's current numbers beside the printed ones, and where it lies", async () => {
     const onZoom = vi.fn()
     await show(
-      <Sidebar shown={SHOWN} width={340} overlay={false} onZoom={onZoom} onClose={vi.fn()} />,
+      <Sidebar
+        shown={SHOWN}
+        width={340}
+        overlay={false}
+        pinned={false}
+        onPin={vi.fn()}
+        onZoom={onZoom}
+        onClose={vi.fn()}
+      />,
     )
     const panel = screen.getByRole("complementary", { name: "卡片資訊" })
     expect(panel).toHaveTextContent("測試進化")
@@ -100,12 +110,90 @@ describe("the info column", () => {
       preview: true,
     }
     await show(
-      <Sidebar shown={whole} width={340} overlay={false} onZoom={vi.fn()} onClose={vi.fn()} />,
+      <Sidebar
+        shown={whole}
+        width={340}
+        overlay={false}
+        pinned={false}
+        onPin={vi.fn()}
+        onZoom={vi.fn()}
+        onClose={vi.fn()}
+      />,
     )
     const panel = screen.getByRole("complementary", { name: "卡片資訊" })
     expect(panel).not.toHaveTextContent("印刷")
     expect(panel).not.toHaveTextContent("橫置中")
     expect(panel).toHaveTextContent("預覽（滑鼠移開後回到選取的卡）")
+  })
+
+  it("says whether it is pinned and hands the pin's press back", async () => {
+    const onPin = vi.fn()
+    await show(
+      <Sidebar
+        shown={SHOWN}
+        width={340}
+        overlay={false}
+        pinned={false}
+        onPin={onPin}
+        onZoom={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+    const pin = screen.getByRole("button", { name: "釘選（F1）" })
+    expect(pin).toHaveAttribute("aria-pressed", "false")
+    await userEvent.setup().click(pin)
+    expect(onPin).toHaveBeenCalledOnce()
+  })
+
+  it("shows itself pinned", async () => {
+    await show(
+      <Sidebar
+        shown={SHOWN}
+        width={340}
+        overlay={false}
+        pinned
+        onPin={vi.fn()}
+        onZoom={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+    const pin = screen.getByRole("button", { name: "取消釘選（F1）" })
+    expect(pin).toHaveAttribute("aria-pressed", "true")
+    expect(pin).toHaveClass("is-on")
+  })
+
+  it("lists the counters on the card by kind", async () => {
+    const holding: Shown = {
+      ...SHOWN,
+      state: {
+        ...STATE,
+        card: {
+          ...STATE.card,
+          counters: [
+            { name: "スタックカウンター", amount: 2 },
+            { name: "融合カウンター", amount: 1 },
+          ],
+        },
+      },
+    }
+    await show(
+      <Sidebar
+        shown={holding}
+        width={340}
+        overlay={false}
+        pinned={false}
+        onPin={vi.fn()}
+        onZoom={vi.fn()}
+        onClose={vi.fn()}
+      />,
+    )
+    const panel = screen.getByRole("complementary", { name: "卡片資訊" })
+    const kinds = Array.from(
+      panel.querySelectorAll(".bp-detail-list span"),
+      (kind) => kind.textContent,
+    )
+    expect(kinds).toEqual(["蓄積 ×2", "融合 ×1"])
+    expect(panel).not.toHaveTextContent("スタック")
   })
 
   it("shows a quoted cost that differs from the printed one", async () => {
@@ -114,7 +202,15 @@ describe("the info column", () => {
       state: { ...STATE, card: { ...STATE.card, cost: 3 }, zone: "hand" },
     }
     await show(
-      <Sidebar shown={quoted} width={340} overlay={false} onZoom={vi.fn()} onClose={vi.fn()} />,
+      <Sidebar
+        shown={quoted}
+        width={340}
+        overlay={false}
+        pinned={false}
+        onPin={vi.fn()}
+        onZoom={vi.fn()}
+        onClose={vi.fn()}
+      />,
     )
     expect(screen.getByRole("complementary", { name: "卡片資訊" })).toHaveTextContent(
       "費用 5現在 3",

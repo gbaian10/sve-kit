@@ -17,6 +17,7 @@ beforeEach(() => {
 const CARDS: BattleCards = {
   images: undefined,
   text: undefined,
+  search: () => [],
   find: () => ({
     summary: {
       printingId: "p:test",
@@ -46,6 +47,7 @@ const inHand = (cost: number | null): TableCard => ({
   keywords: [],
   counters: [],
   cost,
+  attack: null,
 })
 
 const show = (cost: number | null) =>

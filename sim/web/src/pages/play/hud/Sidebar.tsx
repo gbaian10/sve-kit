@@ -1,10 +1,13 @@
-import { ChevronLeft, Maximize2 } from "lucide-react"
+import { ChevronLeft, Maximize2, Pin, PinOff } from "lucide-react"
 import { useTranslation } from "react-i18next"
 
 import type { CardRef } from "../../../battle/contract"
 import type { Inspection } from "../../../battle/view/inspect"
 import { CardText } from "../../../components/card/CardText"
 import { type KnownCard, useCards } from "../battle-cards"
+import { isNamedKeyword } from "../dice/keywords"
+import { PIN_KEY } from "../inspector"
+import { useCounterText } from "../table/counters"
 
 /** The card's kind in words, for the kinds the snapshot names. */
 export function CardKind({ known }: { readonly known: KnownCard }) {
@@ -47,7 +50,8 @@ export interface Shown {
 
 /** The large image on top, then the card's current numbers beside what it prints, then its text. */
 function CardDetail({ shown, onZoom }: { readonly shown: Shown; readonly onZoom: () => void }) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
+  const counterText = useCounterText()
   const cards = useCards()
   const known = cards.find(shown.card)
   if (known === undefined) return null
@@ -95,14 +99,37 @@ function CardDetail({ shown, onZoom }: { readonly shown: Shown; readonly onZoom:
               : null}
           {state?.card.acted === true ? t("play.info.state.acted") : null}
         </dd>
+        {state !== null && state.card.keywords.length > 0 ? (
+          <>
+            <dt>{t("play.info.keywords")}</dt>
+            <dd className="bp-detail-list">
+              {state.card.keywords.map((keyword) => (
+                <span key={keyword}>
+                  {isNamedKeyword(keyword) ? t(`play.keyword.${keyword}`) : keyword}
+                </span>
+              ))}
+            </dd>
+          </>
+        ) : null}
+        {state !== null && state.card.counters.length > 0 ? (
+          <>
+            <dt>{t("play.counter.label")}</dt>
+            {/* One entry per kind, set apart by spacing: no language's list punctuation is needed. */}
+            <dd className="bp-detail-list">
+              {state.card.counters.map((counter) => (
+                <span key={counter.name}>{counterText(counter)}</span>
+              ))}
+            </dd>
+          </>
+        ) : null}
         {state !== null && state.traits.length > 0 ? (
           <>
             <dt>{t("play.info.traits")}</dt>
             {/* Traits arrive as the rules terms of the card text. */}
-            <dd lang="ja">
-              {new Intl.ListFormat(i18n.language, { style: "narrow", type: "unit" }).format(
-                state.traits,
-              )}
+            <dd className="bp-detail-list" lang="ja">
+              {state.traits.map((trait) => (
+                <span key={trait}>{trait}</span>
+              ))}
             </dd>
           </>
         ) : null}
@@ -149,12 +176,17 @@ export function Sidebar({
   shown,
   width,
   overlay,
+  pinned,
+  onPin,
   onZoom,
   onClose,
 }: {
   readonly shown: Shown
   readonly width: number
   readonly overlay: boolean
+  /** Pinned, the column keeps the selected card while the pointer rests on others. */
+  readonly pinned: boolean
+  readonly onPin: () => void
   readonly onZoom: () => void
   readonly onClose: () => void
 }) {
@@ -168,6 +200,17 @@ export function Sidebar({
     >
       <header>
         <span>{t("play.info.title")}</span>
+        <button
+          type="button"
+          className={pinned ? "bp-pin is-on" : "bp-pin"}
+          onClick={onPin}
+          aria-pressed={pinned}
+          aria-label={pinned ? t("play.info.unpin") : t("play.info.pin")}
+          title={pinned ? t("play.info.pinnedHint") : t("play.info.pinHint")}
+        >
+          {pinned ? <Pin aria-hidden="true" /> : <PinOff aria-hidden="true" />}
+          <kbd aria-hidden="true">{PIN_KEY}</kbd>
+        </button>
         <button type="button" onClick={onClose} aria-label={t("play.info.collapse")}>
           <ChevronLeft aria-hidden="true" />
         </button>

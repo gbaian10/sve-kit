@@ -14,7 +14,7 @@ const HASH = "a".repeat(64)
 const BLOB = `snapshots/blobs/${HASH}.json`
 const INDEX = "snapshots/versions/index.json"
 const SCAN_MANIFEST = "scan/manifest.json"
-const CARD_BACK = "ui/card_back.webp"
+const UI_ART = ["ui/card_back.webp", "ui/counter_chip_a.webp", "ui/counter_chip_b.webp"]
 const SCAN_FILES = [
   `scan/models/${HASH}.onnx`,
   `scan/index/${HASH}.i8`,
@@ -165,7 +165,7 @@ describe("development Worker", () => {
   it.each([
     INDEX,
     SCAN_MANIFEST,
-    CARD_BACK,
+    ...UI_ART,
     "images/card_l/20001.webp",
     "images/art_s/20001-f1.webp",
   ])("reads updated %s from R2 even with a version query", async (key) => {
@@ -324,7 +324,7 @@ describe("development Worker", () => {
     "images/art_s/9007199254740991.webp",
     SCAN_MANIFEST,
     ...SCAN_FILES,
-    CARD_BACK,
+    ...UI_ART,
   ])("reads only the public key %s", async (key) => {
     const f = fixture()
     const response = await worker.fetch(request(`/cdn-preview/${key}?v=3`), f.env, f.ctx)
@@ -362,6 +362,9 @@ describe("development Worker", () => {
     "/cdn-preview/ui/card_back.webp.br",
     "/cdn-preview/ui/card_back.webp/private",
     "/cdn-preview/ui/logo.webp",
+    "/cdn-preview/ui/counter_chip_c.webp",
+    "/cdn-preview/ui/counter_chip_a.png",
+    "/cdn-preview/images/counter_chip_a.webp",
     "/cdn-preview/ui/backs/card_back.webp",
     "/cdn-preview/ui/../ui/card_back.webp",
     "/cdn-preview/ui%2fcard_back.webp",

@@ -3,6 +3,7 @@
 // and the parts are placed by it.
 import { useEffect, useState } from "react"
 
+import type { BattleMatReach } from "../../settings"
 import { boardSize, CARD_H, CARD_W } from "./table/geometry"
 
 type HandMode = "row" | "column"
@@ -31,6 +32,13 @@ export interface Layout {
   readonly handH: number
   readonly handReserve: number
   readonly handArea: {
+    readonly left: number
+    readonly right: number
+    readonly top: number
+    readonly bottom: number
+  }
+  /** The room between the side panels and under the top strip: what the table has to itself. */
+  readonly table: {
     readonly left: number
     readonly right: number
     readonly top: number
@@ -157,10 +165,37 @@ export function computeLayout(
             bottom: vh - 4,
           }
         : { left: 4, right: handColW, top: 4, bottom: vh - 4 },
+    table: { left: sidebarReserve, right: x1 + 8, top: topH, bottom: vh },
     plates,
     sideColW,
     topH,
     oppH,
     dual,
   }
+}
+
+/** The box the mat's picture fills: the whole table between the side panels, or the board only. */
+export function matBox(
+  layout: Layout,
+  reach: BattleMatReach,
+): {
+  readonly left: number
+  readonly top: number
+  readonly width: number
+  readonly height: number
+} {
+  const { table } = layout
+  return reach === "table"
+    ? {
+        left: table.left,
+        top: table.top,
+        width: table.right - table.left,
+        height: table.bottom - table.top,
+      }
+    : {
+        left: layout.boardLeft,
+        top: layout.boardTop,
+        width: layout.matW * layout.u,
+        height: layout.boardH * layout.u,
+      }
 }

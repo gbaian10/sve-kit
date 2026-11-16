@@ -25,6 +25,24 @@ describe("computeLayout", () => {
     expect(layout.boardTop + layout.boardH * layout.u).toBeLessThanOrEqual(layout.handArea.top)
   })
 
+  it("gives the table the room between the side panels, top to bottom", () => {
+    // A desktop: from the card-info column to the log, the whole height.
+    const wide = single(1912, 914)
+    expect(wide.table).toEqual({
+      left: wide.sidebarW,
+      right: 1912 - wide.sideColW - wide.logW,
+      top: 0,
+      bottom: 914,
+    })
+    // An upright phone has no side panels: everything under the players' strip.
+    const phone = single(390, 844)
+    expect(phone.table).toEqual({ left: 0, right: 390, top: phone.topH, bottom: 844 })
+    // The board and both hands lie inside it.
+    expect(wide.boardLeft).toBeGreaterThanOrEqual(wide.table.left)
+    expect(wide.boardLeft + wide.matW * wide.u).toBeLessThanOrEqual(wide.table.right)
+    expect(wide.handArea.left).toBeGreaterThanOrEqual(wide.table.left)
+  })
+
   it("keeps the board where it is when the sidebar of a wide screen is closed", () => {
     const open = single(1600, 900)
     const closed = single(1600, 900, false)

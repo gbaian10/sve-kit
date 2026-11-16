@@ -26,32 +26,24 @@ const show = (value: number, printed: number | null | undefined) =>
   ])
 
 describe("CounterBadge", () => {
-  it("says by how much a value is below the printed one, beside the die", async () => {
+  it("shows a moved value as the number alone, and says the printed one on hover", async () => {
     await show(2, 4)
     const die = (await screen.findByRole("img", { name: "體力 2（原本 4）" })).closest(
       ".bp-counter",
     )
-    expect(die).toHaveClass("is-down")
-    expect(die?.querySelector(".bp-counter-diff")).toHaveTextContent("-2")
-  })
-
-  it("says by how much a value is above the printed one", async () => {
-    await show(12, 2)
-    const die = (await screen.findByRole("img", { name: "體力 12（原本 2）" })).closest(
-      ".bp-counter",
-    )
-    expect(die).toHaveClass("is-up")
-    expect(die?.querySelector(".bp-counter-diff")).toHaveTextContent("+10")
+    // No tag beside the die and no ring around it: nothing but the number marks the change.
+    expect(die?.children).toHaveLength(1)
+    expect(die?.textContent).toBe("")
+    expect(die?.className).toBe("bp-counter bp-fstat bp-def")
+    expect(die).toHaveAttribute("title", "體力 2（原本 4）")
   })
 
   it.each([
     ["the printed value", 4],
     ["no printed value to compare with", undefined],
-  ])("marks nothing on a die that shows %s", async (_name, printed) => {
+  ])("names only the value on a die that shows %s", async (_name, printed) => {
     await show(4, printed)
     const die = (await screen.findByRole("img", { name: "體力 4" })).closest(".bp-counter")
-    expect(die).not.toHaveClass("is-up")
-    expect(die).not.toHaveClass("is-down")
-    expect(die?.querySelector(".bp-counter-diff")).toBeNull()
+    expect(die?.className).toBe("bp-counter bp-fstat bp-def")
   })
 })

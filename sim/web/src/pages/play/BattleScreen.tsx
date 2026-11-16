@@ -1,16 +1,17 @@
 import "./battle.css"
 
 import { ChevronRight, ScrollText } from "lucide-react"
-import { type CSSProperties, type ReactNode, useMemo, useState } from "react"
+import { type CSSProperties, type ReactNode, useEffect, useMemo, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { CardRef, Seat } from "../../battle/contract"
 import type { BattleSource } from "../../battle/source"
 import { inspect, type ZoneName } from "../../battle/view/inspect"
-import { type SlotArrangement, tableModel } from "../../battle/view/table"
+import { type AttackHints, type SlotArrangement, tableModel } from "../../battle/view/table"
 import { cn } from "../../components/ui/cn"
-import { type BattleMat, usePrefs } from "../../settings"
+import { prefsStore, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
+import { CARD_FRAMING } from "./hud/mat-crop"
 import { PileBrowser } from "./hud/PileBrowser"
 import { Plate } from "./hud/Plate"
 import { SelectionBar } from "./hud/SelectionBar"
@@ -22,14 +23,18 @@ import {
   type BrowsablePile,
   type Inspector,
   InspectorContext,
+  NO_TARGETS,
   type Picked,
+  PIN_KEY,
   samePick,
+  type Targets,
   type Zoomed,
 } from "./inspector"
-import { computeLayout, type Layout, sidebarFloats, useViewport } from "./layout"
+import { computeLayout, type Layout, matBox, sidebarFloats, useViewport } from "./layout"
+import { useMatUpload } from "./mat-upload"
 import { Board } from "./table/Board"
-import { ArtCrop } from "./table/Cards"
 import { DualHand, Hand, OppHand } from "./table/Hand"
+import { MatArt, type MatPhoto } from "./table/mats"
 import { useBattle } from "./use-battle"
 
 type Leaders = Readonly<Record<Seat, CardRef>>
@@ -47,25 +52,71 @@ const ZONE_LABEL: Partial<
   banish: "banish",
 }
 
+/**
+ * The mat's picture, as the player set it: under the whole table or the board only. It is drawn
+ * once for both mats, and is this player's own; the other player never sees it.
+ */
+function MatSurface({ layout, leader }: { readonly layout: Layout; readonly leader: CardRef }) {
+  const prefs = usePrefs()
+  const upload = useMatUpload()
+  const box = matBox(layout, prefs.battleMatReach)
+  const cardFraming = prefs.battleMatCardFraming ?? CARD_FRAMING
+  // A picture stays where it was framed, whichever box looks at it now.
+  const photo: MatPhoto | null =
+    prefs.battleMatLook === "card"
+      ? {
+          kind: "card",
+          // Until the player picks a card: their own leader's.
+          card:
+            prefs.battleMatCard === null ? leader : { printing_id: prefs.battleMatCard, face: 0 },
+          framing: cardFraming,
+          anchor: matBox(layout, cardFraming.reach),
+        }
+      : prefs.battleMatLook === "upload" && upload !== null
+        ? {
+            kind: "upload",
+            url: upload.url,
+            size: upload.size,
+            framing: upload.framing,
+            anchor: matBox(layout, upload.framing.reach),
+          }
+        : null
+  return (
+    <MatArt
+      look={prefs.battleMatLook}
+      photo={photo}
+      blur={prefs.battleMatBlur}
+      dim={prefs.battleMatDim}
+      box={box}
+      u={layout.u}
+      // The picture's centre piece sits on the line between the two mats.
+      centre={(layout.boardTop + (layout.boardH * layout.u) / 2 - box.top) / box.height}
+      framed={prefs.battleMatReach === "board"}
+    />
+  )
+}
+
 /** The other seat's screen in the dual view: its own table and hands, fed by its own source. */
 function OppositePane({
   source,
   leaders,
   slots,
+  attackers,
   layout,
-  mat,
+  light,
 }: {
   readonly source: BattleSource
   readonly leaders: Leaders
   readonly slots: SlotArrangement | undefined
+  readonly attackers: AttackHints | undefined
   readonly layout: Layout
-  readonly mat: BattleMat
+  readonly light: boolean
 }) {
   const { t } = useTranslation()
   const battle = useBattle(source)
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, slots)),
-    [battle.board, slots],
+    () => (battle.board === null ? null : tableModel(battle.board, slots, attackers)),
+    [battle.board, slots, attackers],
   )
   return (
     <section
@@ -76,7 +127,8 @@ function OppositePane({
       {model !== null && (
         // Only shown: nothing on this half can be picked.
         <InspectorContext value={null}>
-          <Board model={model} leaders={leaders} layout={layout} mat={mat} />
+          <MatSurface layout={layout} leader={leaders[model.self.seat]} />
+          <Board model={model} leaders={leaders} layout={layout} light={light} />
           <DualHand hand={model.self.hand} backs={model.opponent.hand.count} layout={layout} />
           <div className="bp-dual-tag">{t("play.dev.opposite")}</div>
           <div className="bp-dual-side">
@@ -98,6 +150,7 @@ export function BattleScreen({
   opposite,
   leaders,
   slots,
+  attackers,
   corner,
   onDual,
 }: {
@@ -108,6 +161,8 @@ export function BattleScreen({
   readonly leaders: Leaders
   /** Where the field cards lie on this screen, when something other than their order decides it. */
   readonly slots?: SlotArrangement | undefined
+  /** Which field cards may attack now; see `AttackHints`. */
+  readonly attackers?: AttackHints | undefined
   /** Page controls for the chip on the board's top-left corner. */
   readonly corner?: ReactNode
   /** Switches the dual view on or off, where the page offers it. */
@@ -139,12 +194,39 @@ export function BattleScreen({
     [vw, vh, dual, floats, sidebarOpen, floatOpen],
   )
   const model = useMemo(
-    () => (battle.board === null ? null : tableModel(battle.board, slots)),
-    [battle.board, slots],
+    () => (battle.board === null ? null : tableModel(battle.board, slots, attackers)),
+    [battle.board, slots, attackers],
   )
+  const pinned = prefs.battleInfoPinned
+  // Parchment is the one light picture: the mats print on it in a dark ink.
+  const light = prefs.battleMatLook === "parchment"
+  // The pin's key works from anywhere on the screen, except while something is being typed.
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key !== PIN_KEY) return
+      // Otherwise the browser opens its help page.
+      event.preventDefault()
+      const focused = document.activeElement
+      if (focused instanceof HTMLElement && focused.closest("input, textarea, select")) return
+      prefsStore.set({ battleInfoPinned: !prefsStore.get().battleInfoPinned })
+    }
+    window.addEventListener("keydown", onKey)
+    return () => {
+      window.removeEventListener("keydown", onKey)
+    }
+  }, [])
+  // Picking a card that may attack lights up what it may attack.
+  const targets = useMemo<Targets>(() => {
+    if (model === null || picked?.kind !== "object") return NO_TARGETS
+    const attack = model.self.field.find((card) => card?.handle === picked.handle)?.attack ?? null
+    return attack === null
+      ? NO_TARGETS
+      : { leader: attack.leader ? model.opponent.seat : null, objects: attack.targets }
+  }, [model, picked])
   const inspector = useMemo<Inspector>(
     () => ({
       picked,
+      targets,
       select: (next) => {
         setPicked(next)
         // The card shows in the info column, which opens itself; elsewhere in the selection bar.
@@ -158,7 +240,7 @@ export function BattleScreen({
         setBrowsing({ seat, pile })
       },
     }),
-    [picked],
+    [picked, targets],
   )
   const rootClass = cn(
     "bp-root",
@@ -237,9 +319,10 @@ export function BattleScreen({
     state: null,
     preview: false,
   }
-  // Resting on the selected card itself is not a preview of anything else.
+  // Resting on the selected card itself is not a preview of anything else, and a pinned column
+  // keeps its card whatever the pointer rests on.
   const previewed =
-    hovered === null || (picked !== null && samePick(hovered, picked))
+    pinned || hovered === null || (picked !== null && samePick(hovered, picked))
       ? null
       : describe(hovered, true)
   const shown = previewed ?? selection ?? ownLeader
@@ -251,21 +334,15 @@ export function BattleScreen({
   })
   const browsed =
     browsing === null ? null : browsing.seat === model.self.seat ? model.self : model.opponent
+  // The shape an uploaded picture is cut to: the box the mat's picture fills right now.
+  const picture = matBox(layout, prefs.battleMatReach)
+  const matAspect = picture.width / picture.height
   return (
     <BattleCardsContext value={cards}>
       <InspectorContext value={inspector}>
         <div className={rootClass} style={rootStyle}>
-          {/* The page's background is always the two leaders' art; the mat setting changes the board only. */}
-          <div className="bp-leader-art" aria-hidden="true" data-hit-area="">
-            <div className="bp-leader-art-opp" data-hit-area="">
-              <ArtCrop card={leaders[model.opponent.seat]} focus={30} />
-            </div>
-            <div className="bp-leader-art-self" data-hit-area="">
-              <ArtCrop card={leaders[model.self.seat]} focus={30} />
-            </div>
-          </div>
-
-          <Board model={model} leaders={leaders} layout={layout} mat={prefs.battleMat} />
+          <MatSurface layout={layout} leader={leaders[model.self.seat]} />
+          <Board model={model} leaders={leaders} layout={layout} light={light} />
           <OppHand count={model.opponent.hand.count} layout={layout} />
 
           {corner !== undefined && (
@@ -281,7 +358,7 @@ export function BattleScreen({
           {dual ? (
             <>
               <div className="bp-dual-hud" style={{ right: vw - layout.vw + 8 }}>
-                <SettingsButton />
+                <SettingsButton leader={leaders[model.self.seat]} matAspect={matAspect} />
                 {onDual !== undefined && (
                   <button
                     type="button"
@@ -305,7 +382,7 @@ export function BattleScreen({
               style={{ right: 6, width: layout.sideColW - 8, top: 8, bottom: colBottom }}
             >
               <div className="bp-col-tools">
-                <SettingsButton />
+                <SettingsButton leader={leaders[model.self.seat]} matAspect={matAspect} />
                 {onDual !== undefined && (
                   <button
                     type="button"
@@ -340,7 +417,7 @@ export function BattleScreen({
                 className="bp-gear-wrap is-hand-col"
                 style={{ left: 4, width: layout.handArea.right - 4 }}
               >
-                <SettingsButton />
+                <SettingsButton leader={leaders[model.self.seat]} matAspect={matAspect} />
               </div>
             </>
           ) : null}
@@ -350,7 +427,7 @@ export function BattleScreen({
               {turn}
               {selfPlate}
               <div className="bp-col-tools">
-                <SettingsButton />
+                <SettingsButton leader={leaders[model.self.seat]} matAspect={matAspect} />
               </div>
             </header>
           ) : null}
@@ -382,6 +459,10 @@ export function BattleScreen({
               shown={shown}
               width={layout.sidebarW}
               overlay={layout.sidebarOverlay}
+              pinned={pinned}
+              onPin={() => {
+                prefsStore.set({ battleInfoPinned: !pinned })
+              }}
               onZoom={() => {
                 setZoomed(zoomOf(shown))
               }}
@@ -425,8 +506,9 @@ export function BattleScreen({
                 source={opposite}
                 leaders={leaders}
                 slots={slots}
+                attackers={attackers}
                 layout={layout}
-                mat={prefs.battleMat}
+                light={light}
               />
               <div className="bp-dual-divider" style={{ left: layout.vw }} aria-hidden="true" />
             </>
