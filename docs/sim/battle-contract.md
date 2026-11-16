@@ -122,7 +122,7 @@ BattleObservation 完整保留[玩家輸入](player-input.md)的觀察語義，�
 
 - `ep`／`sep` 是目前剩餘量。`ep_capacity: Nat` 是本局 EP 顯示槽容量：初始配置保留為容量，付款不縮小它，回復重用已耗用槽，合法增加超過既有容量時擴充槽數。引擎原有 EP 增加沒有固定硬上限，此欄不新增遊戲限制。
 - `ep_used: Nat` 是目前已耗用槽數，滿足 `ep + ep_used = ep_capacity`；EP 回復會減少此值，它不是累計付款次數。
-- `sep_available_from: Nat | null` 是本席自己的第幾回合起可用 SEP；配置後即使 SEP 用完也保留該回合。`null` 表示目前尚未配置 SEP，可表達先攻沒有 SEP 與開局配置前的狀態；`sep = 0` 且回合非 null 則是已配置但耗盡。開放時機與原生合法性判斷讀同一份引擎狀態。
+- `sep_available_from: Nat | null` 是本席自己的第幾回合起可用 SEP；配置後即使 SEP 用完也保留該回合。`null` 表示目前尚未配置 SEP，例如開局配置前的狀態；`sep = 0` 且回合非 null 則是已配置但耗盡。開放時機與原生合法性判斷讀同一份引擎狀態。
 
 三個新欄位皆必填（SEP 時機可明示 null），不得省略、補假零或由客戶端推規則；數字使用 checked Nat，無法投影則拒絕整份盤面。
 

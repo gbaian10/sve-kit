@@ -17,15 +17,18 @@ fn position(seat: u32) -> Value {
     value
 }
 
-fn game(initial: &Value) -> Game {
-    let mut game = Game::new(
-        Arc::clone(&board_fixture::fixture().unwrap().catalog),
+fn try_game(initial: &Value) -> sve_engine::Result<Game> {
+    Game::new(
+        Arc::clone(&board_fixture::fixture()?.catalog),
         initial,
         &Value::Null,
         &Value::Null,
         "wire-resources",
     )
-    .unwrap();
+}
+
+fn game(initial: &Value) -> Game {
+    let mut game = try_game(initial).unwrap();
     for number in ["unit-follower", "unit-spell", "unit-amulet"] {
         game.load_internal_card(number, &card(vec![])).unwrap();
     }
@@ -42,6 +45,109 @@ fn players(game: &Game, viewer: Viewer) -> Value {
         "resource projection cannot mutate the authority"
     );
     serde_json::to_value(board.players).unwrap()
+}
+
+#[test]
+fn evolution_resource_initial_states_reject_inconsistent_ep_capacity() {
+    for seat in ["P1", "P2"] {
+        for (ep, capacity) in [
+            (-1_i64, Some(3_i64)),
+            (1, Some(0)),
+            (0, Some(-1)),
+            (-1, None),
+        ] {
+            let mut initial = position(1);
+            let player = initial["players"][seat].as_object_mut().unwrap();
+            player.insert("ep".into(), json!(ep));
+            if let Some(capacity) = capacity {
+                player.insert("ep_capacity".into(), json!(capacity));
+            } else {
+                player.remove("ep_capacity");
+            }
+            assert!(
+                matches!(
+                    try_game(&initial),
+                    Err(sve_engine::EngineFailure::Invalid(_))
+                ),
+                "a malformed EP pool must fail loading before any native command runs"
+            );
+        }
+    }
+}
+
+#[test]
+fn evolution_resource_initial_states_reject_positive_sep_without_unlock() {
+    for seat in ["P1", "P2"] {
+        let mut initial = position(1);
+        initial["players"][seat]["sep"] = json!(1_i32);
+        initial["players"][seat]["sep_available_from"] = Value::Null;
+        assert!(
+            matches!(
+                try_game(&initial),
+                Err(sve_engine::EngineFailure::Invalid(_))
+            ),
+            "allocated SEP must have a schedule when the authority is loaded"
+        );
+    }
+}
+
+#[test]
+fn evolution_resource_initial_states_preserve_valid_explicit_pools() {
+    for actor in [Viewer::P1, Viewer::P2] {
+        let seat = if actor == Viewer::P1 { "P1" } else { "P2" };
+        for (ep, capacity) in [(0_i64, 0_i64), (0, 3), (1, 3), (3, 3)] {
+            for (sep, unlock) in [(0_i64, None), (0, Some(9_u64)), (1, Some(9))] {
+                let mut initial = position(1);
+                initial["players"][seat]["ep"] = json!(ep);
+                initial["players"][seat]["ep_capacity"] = json!(capacity);
+                initial["players"][seat]["sep"] = json!(sep);
+                initial["players"][seat]["sep_available_from"] = json!(unlock);
+                let game = game(&initial);
+                assert_ep(
+                    &game,
+                    actor.player().seat,
+                    (ep, capacity, capacity.checked_sub(ep).unwrap()),
+                );
+                assert_sep(
+                    &game,
+                    &board_fixture::fixture().unwrap().references,
+                    actor,
+                    sep,
+                    unlock,
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn evolution_resource_initial_states_default_missing_fields_from_the_pool() {
+    for first in ["P1", "P2"] {
+        for actor in [Viewer::P1, Viewer::P2] {
+            let seat = if actor == Viewer::P1 { "P1" } else { "P2" };
+            for (sep, unlock) in [
+                (0_i64, None),
+                (1, Some(if first == seat { 7_u64 } else { 6_u64 })),
+            ] {
+                let mut initial = position(1);
+                initial["turn"]["first_player"] = json!(first);
+                let player = initial["players"][seat].as_object_mut().unwrap();
+                player.insert("ep".into(), json!(2_i32));
+                player.insert("sep".into(), json!(sep));
+                player.remove("ep_capacity");
+                player.remove("sep_available_from");
+                let game = game(&initial);
+                assert_ep(&game, actor.player().seat, (2, 2, 0));
+                assert_sep(
+                    &game,
+                    &board_fixture::fixture().unwrap().references,
+                    actor,
+                    sep,
+                    unlock,
+                );
+            }
+        }
+    }
 }
 
 #[test]
@@ -263,10 +369,8 @@ fn wire_evolution_resources_use_the_state_schedule_for_sep_legality() {
 }
 
 #[test]
-fn wire_evolution_resources_refuse_invalid_capacity_and_unlock_numbers() {
+fn wire_evolution_resources_refuse_unsafe_capacity_and_unlock_numbers() {
     for (field, value) in [
-        ("ep_capacity", json!(-1_i32)),
-        ("ep_capacity", json!(0_i32)),
         (
             "ep_capacity",
             json!(
@@ -292,13 +396,6 @@ fn wire_evolution_resources_refuse_invalid_capacity_and_unlock_numbers() {
             Err(ProjectionError::Range)
         ));
     }
-    let mut initial = position(1);
-    initial["players"]["P2"]["sep_available_from"] = Value::Null;
-    assert!(matches!(
-        game(&initial)
-            .battle_observation(Viewer::P1, &board_fixture::fixture().unwrap().references),
-        Err(ProjectionError::Unavailable)
-    ));
 }
 
 fn finish_opening(game: &mut Game, first: Viewer) -> Option<()> {
