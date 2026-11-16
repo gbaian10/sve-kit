@@ -1,6 +1,6 @@
 use super::*;
 
-fn make(actor: Viewer, private_owner: Viewer, secret: &str) -> Game {
+fn make(actor: Viewer, private_owner: Viewer, secret: &str, numbers: (i64, i64)) -> Game {
     let me = if actor == Viewer::P1 { "P1" } else { "P2" };
     let hidden = if private_owner == Viewer::P1 {
         "P1"
@@ -15,7 +15,7 @@ fn make(actor: Viewer, private_owner: Viewer, secret: &str) -> Game {
         ]);
     }
     initial["players"][hidden]["zones"]["hand"][0]["card"] = json!(secret);
-    let state = json!({"power":7,"hp":2,"max_hp":8});
+    let state = json!({"power":numbers.0,"hp":numbers.1,"max_hp":numbers.1});
     initial["players"][me]["zones"]["field"] = json!([
         {"id":"source","card":"unit-follower","state":state}
     ]);
@@ -25,32 +25,58 @@ fn make(actor: Viewer, private_owner: Viewer, secret: &str) -> Game {
         {"id":"ex-amulet","card":"unit-amulet"},
         {"id":"ex-spell","card":"unit-spell"}
     ]);
-    let program = card(vec![ability(
+    let current = ObjectView::Current {
+        object: Box::new(ObjectOperand::SourceHolder {}),
+    };
+    let mut entry = ability(
         1,
-        vec![
-            numeric::modify(
-                1,
-                zone(ZoneKind::Ex, 101),
-                numeric::pair(3, 4),
-                DurationEnd::NoTemporalExpiry {},
-            ),
-            numeric::modify(
-                2,
-                zone(ZoneKind::Field, 102),
-                numeric::pair(3, 4),
-                DurationEnd::NoTemporalExpiry {},
-            ),
-        ],
-    )]);
-    position(Arc::clone(&fixture().catalog), &initial, Some(&program))
+        [Stat::Attack, Stat::Life]
+            .into_iter()
+            .zip([1_u64, 2])
+            .map(|(stat, id)| {
+                source_information::source_hit(
+                    id,
+                    source_information::source_read(
+                        &current,
+                        CharacteristicView::Effective,
+                        Some(stat),
+                    ),
+                )
+            })
+            .collect(),
+    );
+    entry.node.active_zones = vec![ZoneKind::Ex];
+    position(
+        Arc::clone(&fixture().catalog),
+        &initial,
+        Some(&card(vec![entry])),
+    )
 }
 
-fn change_numbers(game: &mut Game, actor: Viewer) {
-    resolved(
-        game.activate_internal_card("source", AbilityId(1), actor.player())
+fn read_numbers(game: &mut Game, actor: Viewer) -> (i64, i64) {
+    let result = resolved(
+        game.activate_internal_card("ex-first", AbilityId(1), actor.player())
             .unwrap(),
     );
+    let values = result
+        .progress
+        .facts
+        .iter()
+        .filter_map(|fact| {
+            if let Fact::Damage(event) = fact {
+                assert_eq!(
+                    event.source.object, result.source.holder,
+                    "the EX holder owns each Current-based damage instruction"
+                );
+                Some(i64::try_from(event.amount.0.get()).unwrap())
+            } else {
+                None
+            }
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(values.len(), 2, "both Current stats produced actual damage");
     game.resume_internal_card().unwrap();
+    (values[0], values[1])
 }
 
 fn assert_views(game: &Game, actor: Viewer, attack: i64, life: i64) {
@@ -87,7 +113,7 @@ fn assert_views(game: &Game, actor: Viewer, attack: i64, life: i64) {
         assert_eq!(
             field.cards[0].card.properties.state.as_ref().unwrap().stats,
             Some(native::Stats { attack, life }),
-            "the field uses the same numeric state"
+            "field numbers retain their existing calculation"
         );
         let wire = game
             .battle_observation(viewer, &fixture().references)
@@ -136,7 +162,7 @@ fn assert_views(game: &Game, actor: Viewer, attack: i64, life: i64) {
                 .stats
                 .map(|s| (s.attack.get(), s.life.get())),
             Some((attack, life)),
-            "field and EX share the same effective calculation"
+            "each zone matches its authoritative Current reads"
         );
         for member in &wire.players[usize::from(viewer != Viewer::P1)]
             .zones
@@ -157,15 +183,19 @@ fn assert_views(game: &Game, actor: Viewer, attack: i64, life: i64) {
 }
 
 #[test]
-fn ex_followers_publish_current_numbers_after_real_modifiers_to_both_seats() {
+fn ex_display_matches_effect_current_reads_for_both_seats() {
     for actor in [Viewer::P1, Viewer::P2] {
-        let mut game = make(actor, actor, "unit-follower");
-        assert_views(&game, actor, 7, 2);
-        change_numbers(&mut game, actor);
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["objects"]["ex-first"]["power"], 10);
-        assert_eq!(state["objects"]["ex-first"]["hp"], 6);
-        assert_views(&game, actor, 10, 6);
+        // These seeded states have no damage or off-field numeric installations.
+        for numbers in [(2, 3), (7, 8)] {
+            let mut game = make(actor, actor, "unit-follower", numbers);
+            assert_views(&game, actor, numbers.0, numbers.1);
+            let read = read_numbers(&mut game, actor);
+            assert_eq!(
+                read, numbers,
+                "Current reads state rather than printed fallback"
+            );
+            assert_views(&game, actor, read.0, read.1);
+        }
     }
 }
 
@@ -178,10 +208,10 @@ fn opposing_hand_secrets_do_not_change_the_full_ex_board_for_either_seat() {
             } else {
                 Viewer::P1
             };
-            let mut first = make(actor, secret_owner, "unit-spell");
-            let mut second = make(actor, secret_owner, "unit-amulet");
+            let mut first = make(actor, secret_owner, "unit-spell", (7, 8));
+            let mut second = make(actor, secret_owner, "unit-amulet", (7, 8));
             for game in [&mut first, &mut second] {
-                change_numbers(game, actor);
+                assert_eq!(read_numbers(game, actor), (7, 8));
             }
             let before = exact_authority(&first);
             assert_eq!(

@@ -573,3 +573,21 @@ fn public_followed_and_revealed_sums_agree_on_original_cost() {
         }
     }
 }
+
+#[test]
+fn ex_stats_remain_unavailable_to_field_only_aggregates() {
+    let board = paused_after_ex_entry();
+    let execution = board.typed.as_ref().unwrap();
+    for (property, stat, field) in [
+        (NumericProperty::Attack, Stat::Attack, 2),
+        (NumericProperty::Life, Stat::Life, 3),
+    ] {
+        assert!(
+            aggregate_value(execution, &board, &zone_population(ZoneKind::Ex), property).is_err(),
+            "publishing EX numbers does not admit EX stat aggregates"
+        );
+        numeric_value(&board, "arrived", property).unwrap_err();
+        board.internal_numeric_stat("arrived", stat).unwrap_err();
+        assert_eq!(numeric_value(&board, "s", property).unwrap(), field);
+    }
+}
