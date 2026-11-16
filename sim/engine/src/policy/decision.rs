@@ -130,9 +130,10 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
             },
         },
         DecisionShape::Search(question) => Answer::Search(search(question)?),
-        DecisionShape::SearchPartition(question) => {
-            Answer::SearchPartition(partition(&question.cards, question.cardinality)?)
-        }
+        DecisionShape::SearchPartition(question) => Answer::SearchPartition(partition(
+            &question.selection.cards,
+            question.selection.cardinality,
+        )?),
         DecisionShape::MovementCapacity(question) => Answer::SearchPartition(partition(
             &question.selection.cards,
             question.selection.cardinality,

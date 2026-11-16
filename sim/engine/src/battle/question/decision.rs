@@ -14,6 +14,7 @@ mod distribution;
 mod drive;
 mod number;
 mod order;
+mod partition;
 mod resource;
 mod search;
 mod select;
@@ -39,6 +40,7 @@ pub(super) enum Binding {
     Select(Box<select::Binding>),
     Order(order::Binding),
     Search(Box<search::Binding>),
+    Partition(partition::Binding),
 }
 
 pub(super) fn project(
@@ -99,6 +101,9 @@ pub(super) fn project(
         DecisionShape::Search(domain) => {
             search::project(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
+        DecisionShape::SearchPartition(domain) => {
+            partition::project(domain, context.ok_or(ProjectionError::Unavailable)?)
+        }
         DecisionShape::Abilities(_)
         | DecisionShape::WardEntry { .. }
         | DecisionShape::Quick { .. }
@@ -107,7 +112,6 @@ pub(super) fn project(
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
         | DecisionShape::DamageReplacements(_)
-        | DecisionShape::SearchPartition(_)
         | DecisionShape::MovementCapacity(_)
         | DecisionShape::SearchReplacement
         | DecisionShape::TokenCapacity(_)
@@ -138,6 +142,7 @@ impl Binding {
             Self::Select(binding) => binding.answer(answer),
             Self::Order(binding) => binding.answer(answer),
             Self::Search(binding) => binding.answer(answer),
+            Self::Partition(binding) => binding.answer(answer),
         }
     }
 }

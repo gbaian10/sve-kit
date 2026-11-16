@@ -247,7 +247,7 @@ impl Turn<'_> {
                 let Some(select) = params.select.take().or_else(|| params.order.take()) else {
                     return Ok(None);
                 };
-                Answer::SearchPartition(self.cards(&partition.cards, &select)?)
+                Answer::SearchPartition(self.cards(&partition.selection.cards, &select)?)
             }
             DecisionShape::MovementCapacity(capacity) => {
                 let Some(select) = params.select.take() else {

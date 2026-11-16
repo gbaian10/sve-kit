@@ -13,6 +13,58 @@ pub(super) struct Candidates {
 }
 
 impl Candidates {
+    pub(super) fn printed<F>(
+        cards: &[CardOption],
+        context: Context<'_>,
+        mut resolve: F,
+    ) -> Result<Self>
+    where
+        F: FnMut(&CardOption) -> Result<CandidateDetails>,
+    {
+        let mut result = Self {
+            values: vec![],
+            coordinates: BTreeMap::new(),
+        };
+        for card in cards {
+            result.push(
+                card.handle,
+                resolve(card)?,
+                card.rules_names.clone(),
+                card.original_cost,
+                context,
+            )?;
+        }
+        Ok(result)
+    }
+
+    fn push(
+        &mut self,
+        handle: u64,
+        facts: CandidateDetails,
+        names: Option<Vec<String>>,
+        cost: Option<i64>,
+        context: Context<'_>,
+    ) -> Result<()> {
+        if self
+            .coordinates
+            .values()
+            .any(|coordinate| *coordinate == handle)
+        {
+            return Err(ProjectionError::Unavailable);
+        }
+        let id = OptionId::new(format!("{}:c{}", context.id.as_str(), self.values.len()));
+        self.coordinates.insert(id.clone(), handle);
+        self.values.push(wire::Candidate {
+            id,
+            subject: facts.subject,
+            controller: facts.controller,
+            origin: facts.origin,
+            rules_names: names,
+            original_cost: cost.map(Int::try_from).transpose()?,
+            classes: facts.classes,
+        });
+        Ok(())
+    }
     pub(super) fn members(members: &[SelectionMember], context: Context<'_>) -> Result<Self> {
         if context.observation.viewer != seat(context.actor) {
             return Err(ProjectionError::Unavailable);
@@ -21,26 +73,18 @@ impl Candidates {
             values: vec![],
             coordinates: BTreeMap::new(),
         };
-        let mut seen = BTreeSet::new();
         for member in members {
-            if !seen.insert(member.handle) {
-                return Err(ProjectionError::Unavailable);
-            }
             let facts = details(member, context)?;
             if facts.controller != Some(seat(member.player)) {
                 return Err(ProjectionError::Unavailable);
             }
-            let id = OptionId::new(format!("{}:c{}", context.id.as_str(), result.values.len()));
-            result.coordinates.insert(id.clone(), member.handle);
-            result.values.push(wire::Candidate {
-                id,
-                subject: facts.subject,
-                controller: facts.controller,
-                origin: facts.origin,
-                rules_names: member.rules_names.clone(),
-                original_cost: member.original_cost.map(Int::try_from).transpose()?,
-                classes: facts.classes,
-            });
+            result.push(
+                member.handle,
+                facts,
+                member.rules_names.clone(),
+                member.original_cost,
+                context,
+            )?;
         }
         Ok(result)
     }

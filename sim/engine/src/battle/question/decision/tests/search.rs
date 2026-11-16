@@ -10,7 +10,7 @@ use alloc::sync::Arc;
 use serde_json::{Value, json};
 use sve_battle_contract::{QuestionId, Subject, Zone};
 
-fn make(actor: Viewer, search: &Value, deck: &[&str], other_secret: &str) -> Game {
+pub(super) fn make(actor: Viewer, search: &Value, deck: &[&str], other_secret: &str) -> Game {
     make_with_look(actor, search, deck, other_secret, false)
 }
 
@@ -84,7 +84,10 @@ fn grouped() -> Value {
     ],"to":"hand"})
 }
 
-fn projected(game: &Game, actor: Viewer) -> (player::Question, wire::Selection, Binding) {
+pub(super) fn projected(
+    game: &Game,
+    actor: Viewer,
+) -> (player::Question, wire::Selection, Binding) {
     let native = question(game, actor).unwrap();
     assert!(
         matches!(domain(&native), Some(DecisionShape::Search(_))),

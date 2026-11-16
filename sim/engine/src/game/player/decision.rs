@@ -82,6 +82,30 @@ pub struct PartitionQuestion {
     pub cardinality: Cardinality,
 }
 
+/// One search allocation stop, distinct from a generic movement capacity selection.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SearchPartitionQuestion {
+    /// Complete remaining set and effective bounds for this stop.
+    pub selection: PartitionQuestion,
+    /// Absent when the producer did not capture the placement contract.
+    pub facts: Option<SearchPartitionFacts>,
+}
+
+/// Placement and candidate facts captured together with the native continuation.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct SearchPartitionFacts {
+    /// Authorized faces and source of the complete remaining set.
+    pub candidates: SearchFacts,
+    /// Receiving player and zone of this one allocation.
+    pub destination: SelectionDestination,
+    /// Known edge, or no edge for the admitted non-deck destinations.
+    pub position: Option<Position>,
+    /// Whether the native procedure commits the answer's item sequence.
+    pub ordered: bool,
+    /// None means unselected cards stay in their source at this stop.
+    pub remainder_destination: Option<SelectionDestination>,
+}
+
 /// The existing answer channel for one specific discard operation.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum DiscardKind {
@@ -214,7 +238,7 @@ pub enum DecisionShape {
     /// One complete search answer, including all groups; answer `Search`.
     Search(SearchQuestion),
     /// Remaining found cards for one printed destination; answer `SearchPartition`.
-    SearchPartition(PartitionQuestion),
+    SearchPartition(SearchPartitionQuestion),
     /// Arrivals competing for field or EX space; answer `SearchPartition`.
     MovementCapacity(MovementCapacityQuestion),
     /// Frozen recipients and totals; answer `Distribution`.

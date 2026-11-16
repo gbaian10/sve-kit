@@ -12,9 +12,10 @@ use sve_engine::game::player::{
     DiscardKind, DistributionQuestion, EarlierQuotaChoice, EvolutionAnswer, EvolutionPayment,
     EvolutionQuestion, IntegerSource, MainIntentKind, MovementCapacityQuestion, OpeningAnswer,
     OpeningQuestion, OrderDirection, OrderQuestion, PartitionQuestion, PendingChoice,
-    QuestionShape, QuestionToken, QuotaQuestion, ReplacementChoice, SearchAnswer, SearchQuestion,
-    SelectionDestination, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole,
-    SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion, Viewer,
+    QuestionShape, QuestionToken, QuotaQuestion, ReplacementChoice, SearchAnswer,
+    SearchPartitionQuestion, SearchQuestion, SelectionDestination, SelectionGroup, SelectionMember,
+    SelectionQuestion, SelectionRole, SubmissionKind, TargetRoleAssignment, TokenCapacityQuestion,
+    Viewer,
 };
 use sve_engine::policy::{BasicPolicy, Choice, PolicyFailure};
 
@@ -378,7 +379,11 @@ fn policy_search_partition_movement_and_distribution_return_complete_answers() {
         cardinality: bounds(2, 2),
     };
     assert_eq!(
-        answer(DecisionShape::SearchPartition(partition.clone())).unwrap(),
+        answer(DecisionShape::SearchPartition(SearchPartitionQuestion {
+            selection: partition.clone(),
+            facts: None
+        }))
+        .unwrap(),
         Answer::SearchPartition(vec![7, 2])
     );
     let movement = MovementCapacityQuestion {
