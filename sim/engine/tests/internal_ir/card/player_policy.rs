@@ -240,6 +240,7 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
 #[test]
 fn policy_occurrences_use_current_coordinates_and_orders_are_complete() {
     let abilities = vec![AbilityChoice {
+        source: None,
         handle: 17,
         source_card: "public".into(),
         source_line: 2,

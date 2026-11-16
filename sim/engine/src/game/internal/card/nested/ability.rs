@@ -2,7 +2,9 @@ use super::{Context, Continuation, Execution, Game, Generation, Result, seat_nam
 use crate::game::internal::admission::PlannedAbility;
 use crate::game::internal::card::play::ability_cost;
 use crate::game::internal::grant::EffectiveAbility;
+use crate::game::internal::observation::EffectOrigin;
 use crate::game::internal::player::CandidateLinks;
+use crate::game::internal::source::SourceInformation;
 use crate::game::internal::{AbilityOption, InputDomain, InstructionOutcome, Slot, Wait};
 use crate::game::player::AbilityChoice;
 use crate::game::player::Viewer;
@@ -20,6 +22,7 @@ pub(in crate::game::internal) struct AbilityWait {
     binding: Binding<RuntimeAbilityReference>,
     filter: AbilityChoiceKind,
     candidates: Vec<RuntimeAbilitySource>,
+    origins: Vec<EffectOrigin>,
 }
 
 impl AbilityWait {
@@ -29,19 +32,21 @@ impl AbilityWait {
         actor: Viewer,
         options: &[AbilityOption],
     ) -> Result<Vec<AbilityChoice>> {
-        if options.len() != self.candidates.len() {
+        if options.len() != self.candidates.len() || options.len() != self.origins.len() {
             return Err(invalid("inconsistent ability choices"));
         }
         options
             .iter()
             .zip(&self.candidates)
-            .map(|(option, source)| {
+            .zip(&self.origins)
+            .map(|((option, source), origin)| {
                 Ok(AbilityChoice {
                     handle: option.handle,
                     source_card: option.source_card.clone(),
                     source_line: option.source_line,
                     source_section: option.source_section.clone(),
                     holder: self.links.observed(game, actor, Some(source.holder))?,
+                    source: origin.observed(game, actor),
                 })
             })
             .collect()
@@ -199,7 +204,15 @@ impl Game {
                 })
             })
             .collect::<Result<Vec<_>>>()?;
+        let origins = candidates
+            .iter()
+            .map(|(source, _)| {
+                SourceInformation::current(self, *source)
+                    .map(|information| information.origin().clone())
+            })
+            .collect::<Result<Vec<_>>>()?;
         let wait = AbilityWait {
+            origins,
             links: CandidateLinks::capture(
                 self,
                 execution,

@@ -8,6 +8,7 @@ use alloc::boxed::Box;
 use core::result;
 use sve_battle_contract::{Answer, QuestionId, observation::BattleObservation, question as wire};
 
+mod ability;
 mod candidates;
 mod capacity;
 mod confirm;
@@ -21,6 +22,7 @@ mod partition;
 mod resource;
 mod search;
 mod select;
+mod text;
 pub(super) use candidates::details;
 
 #[derive(Clone, Copy)]
@@ -47,6 +49,7 @@ pub(super) enum Binding {
     Capacity(capacity::Binding),
     Entry(entry::Binding),
     Modes(modes::Binding),
+    Ability(ability::Binding),
 }
 
 pub(super) fn project(
@@ -142,8 +145,10 @@ pub(super) fn project(
         DecisionShape::TokenCapacity(domain) => {
             capacity::tokens(domain, context.ok_or(ProjectionError::Unavailable)?)
         }
-        DecisionShape::Abilities(_)
-        | DecisionShape::Quick { .. }
+        DecisionShape::Abilities(choices) => {
+            ability::project(choices, context.ok_or(ProjectionError::Unavailable)?)
+        }
+        DecisionShape::Quick { .. }
         | DecisionShape::ExchangeRoutes(_)
         | DecisionShape::Pending(_)
         | DecisionShape::TriggerQuota(_)
@@ -178,6 +183,7 @@ impl Binding {
             Self::Capacity(binding) => binding.answer(answer),
             Self::Entry(binding) => binding.answer(answer),
             Self::Modes(binding) => binding.answer(answer),
+            Self::Ability(binding) => binding.answer(answer),
         }
     }
 }
