@@ -24,13 +24,13 @@ cards:
                   trait: オラクルシンクタンク
                 may: true
                 n: 1
+            - reveal:
+                bind: shown
+                ref: taken
             - move:
                 ref: taken
                 result: taken_cards
                 to: hand
-            - reveal:
-                bind: shown
-                ref: taken
             - choose:
                 bind: kept
                 from:
