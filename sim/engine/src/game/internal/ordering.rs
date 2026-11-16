@@ -205,6 +205,7 @@ pub(super) fn check_node_with_x(
     mask_discard(&mut inspected)?;
     mask_player_cost_filter(&mut inspected)?;
     super::random_sample::mask(&mut inspected)?;
+    super::reveal::mask_entry(&mut inspected)?;
     if let Node::Instruction { instruction } = &mut inspected
         && let Action::Reveal { objects } = &instruction.action
     {

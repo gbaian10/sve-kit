@@ -6,10 +6,48 @@ use crate::game::player::observation::face_up;
 use crate::ir::observation::{self, Consumer, LeafKind, Position, Shape};
 use crate::ir::perspective;
 use crate::ir::{
-    Bool, Expr, Instruction, Nat, NumericProperty, ObjectRef, PlayerRelation, ReceiptId,
-    ReceiptLocation, SelectionView, Selector, ZoneKind,
+    Action, Bool, Expr, Instruction, MemberProjection, Nat, Node, NumericProperty, ObjectReceipt,
+    ObjectRef, PlayerRelation, ReceiptId, ReceiptLocation, SelectionView, Selector, ZoneKind,
 };
 use core::mem::take;
+
+pub(super) fn entry_receipt(objects: &Selector) -> Option<ReceiptId> {
+    let Selector::Filter { input, .. } = objects else {
+        return None;
+    };
+    let Selector::ReceiptMembers {
+        receipt: ObjectReceipt::Reveal { receipt },
+        projection: MemberProjection::Before,
+    } = input.as_ref()
+    else {
+        return None;
+    };
+    match receipt.location() {
+        ReceiptLocation::Local { id } => Some(*id),
+        ReceiptLocation::Iteration { .. } => None,
+    }
+}
+
+pub(super) fn mask_entry(node: &mut Node) -> Result<()> {
+    if let Node::Instruction { instruction } = node
+        && let Action::Move {
+            objects, movement, ..
+        } = &mut instruction.action
+        && super::movement::field_move(movement)
+        && entry_receipt(objects).is_some()
+    {
+        let Selector::Filter {
+            binding, predicate, ..
+        } = objects
+        else {
+            return Err(invalid("checked reveal entry filter"));
+        };
+        super::card::selection::check_predicate(predicate, *binding, true)?;
+        // Only successful public members reach the entry reader, never the sample population.
+        *objects = Selector::Objects { objects: vec![] };
+    }
+    Ok(())
+}
 
 #[derive(Clone, Debug)]
 pub(super) struct PublicReveal {

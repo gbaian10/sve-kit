@@ -1,9 +1,9 @@
 use super::{Action, BodyContext, LoweringError, ast, unsupported};
 use crate::ir::{
-    AbilitySource, Cardinality, Expr, Instruction, InstructionContext, InstructionId, Located,
-    MemberProjection, Nat, Node, ObjectReceipt, OwnerZone, PlayerRef, PlayerRelation, PlayerSet,
-    RandomnessPolicy, ReceiptId, ReceiptLocation, ReceiptReference, Selector, SourceSpan,
-    StepwiseMode, TextQuantifier, Visibility, ZoneKind, ZoneRef,
+    AbilitySource, CardKind, Cardinality, Expr, Instruction, InstructionContext, InstructionId,
+    Located, MemberProjection, Nat, Node, ObjectReceipt, OwnerZone, PlayerRef, PlayerRelation,
+    PlayerSet, RandomnessPolicy, ReceiptId, ReceiptLocation, ReceiptReference, Selector,
+    SourceSpan, StepwiseMode, TextQuantifier, Visibility, ZoneKind, ZoneRef,
 };
 
 #[expect(
@@ -188,10 +188,47 @@ impl BodyContext<'_> {
     }
 
     pub(super) fn public_reveal_move(
-        &self,
+        &mut self,
         value: &ast::Move,
         path: &str,
     ) -> Result<Option<Action>, LoweringError> {
+        if let Some(ast::MoveObjects::FilteredObserved(observed)) = &value.r#ref {
+            let Some(receipt @ ObjectReceipt::Reveal { .. }) =
+                self.observations.get(&observed.r#in)
+            else {
+                return Err(unsupported(path));
+            };
+            if !matches!(value.to, ast::Destination::Field)
+                || value.top.is_some()
+                || value.position.is_some()
+                || value.order.is_some()
+                || value.acted.is_some()
+                || value.entry_effects.is_some()
+                || value.result.as_ref().is_none_or(String::is_empty)
+            {
+                return Err(unsupported(path));
+            }
+            let input = Selector::ReceiptMembers {
+                receipt: receipt.clone(),
+                projection: MemberProjection::Before,
+            };
+            let binding = super::Binding::new(self.allocator.id(path)?, self.scope);
+            let filter = super::selection::ObjectFilter {
+                kind: Some(match observed.kind {
+                    ast::FieldKind::Follower => CardKind::Follower,
+                    ast::FieldKind::Amulet => CardKind::Amulet,
+                }),
+                ..super::selection::ObjectFilter::default()
+            };
+            return Ok(Some(super::ordering::shared_put(
+                Selector::Filter {
+                    input: Box::new(input),
+                    binding,
+                    predicate: Box::new(super::selection::field_filter(&filter, binding)),
+                },
+                ZoneKind::Field,
+            )));
+        }
         let Some(ast::MoveObjects::Observed(observed)) = &value.r#ref else {
             return Ok(None);
         };

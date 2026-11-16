@@ -985,8 +985,16 @@ pub(super) enum FanfareKeyword {
 pub(super) enum MoveObjects {
     Whole(WholeDeckReturn),
     Observed(Observed),
+    FilteredObserved(FilteredObserved),
     Field(Objects),
     Public(Box<PublicQuery>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FilteredObserved {
+    pub r#in: String,
+    pub kind: FieldKind,
 }
 
 #[derive(Deserialize)]

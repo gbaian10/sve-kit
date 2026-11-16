@@ -835,6 +835,12 @@ impl Game {
                 && object.controller == seat
                 && execution.is_private_hand_target(objects, member)
                 && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
+            let revealed_hand = object.zone == "hand"
+                && super::reveal::entry_receipt(objects).is_some_and(|receipt| {
+                    matches!(execution.receipts.get(&receipt), Some(InstructionOutcome::Revealed(shown)) if shown.contains(&member))
+                })
+                && self.publicly_located(&object.id)
+                && matches!(self.object_type(&object.id)?, "フォロワー" | "アミュレット");
             // The receiving player must be the one who looked at the card (BP01-083).
             let private_look = (self.looked_by(execution, objects, member, seat)?
                 || (object.zone == "deck"
@@ -866,7 +872,12 @@ impl Game {
                                 ..
                             }
                         ) || execution.is_private_advance_target(objects, member))));
-            if !(ordinary || advance || private_look || private_hand || revealed_match)
+            if !(ordinary
+                || advance
+                || private_look
+                || private_hand
+                || revealed_hand
+                || revealed_match)
                 || object.owner != seat
                 || object.controller != seat
                 || object.state["face"] != 0_i64
@@ -928,6 +939,8 @@ impl Game {
             .iter()
             .map(|id| execution.reference(self, id))
             .collect::<Result<Vec<_>>>()
+        } else if super::reveal::entry_receipt(objects).is_some() {
+            execution.public_target_objects(self, objects, true)
         } else {
             execution.objects(self, objects)
         }
