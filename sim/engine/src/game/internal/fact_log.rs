@@ -91,23 +91,17 @@ impl Execution {
         game.player_event_subject(perspective, id)
     }
 
-    fn event_source(
-        &self,
-        game: &Game,
-        perspective: Viewer,
-    ) -> Result<Option<EffectSource>, EventError> {
-        let Some(information) = &self.source_information else {
-            return Ok(None);
-        };
+    fn event_source(&self, game: &Game, perspective: Viewer) -> Option<EffectSource> {
+        let information = self.source_information.as_ref()?;
         if self.ability.is_none() || !information.publicly_identified() {
-            return Ok(None);
+            return None;
         }
-        let origin = information.origin().ok_or(EventError::ProjectionGap)?;
+        let origin = information.origin();
         let mut source = origin.observed(game, perspective);
         if let Some(source) = &mut source {
             source.holder = None;
         }
-        Ok(source)
+        source
     }
 
     #[expect(
@@ -283,7 +277,7 @@ impl Execution {
                     .push(self.event_member(game, perspective, source.holder)?);
             }
         }
-        action.source = self.event_source(game, perspective)?;
+        action.source = self.event_source(game, perspective);
         Ok(Some(EventKind::Action(action)))
     }
 }

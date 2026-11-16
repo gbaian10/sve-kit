@@ -17,11 +17,13 @@ use serde_json::Value;
 
 #[derive(Clone, Debug)]
 pub(super) struct SourceInformation {
+    // Formal completion still compares the starting source after Fusion moves it.
+    binding: ObjectRef,
     holder: ObjectRef,
     zone: String,
     publicly_identified: bool,
     departed: Option<SourceSnapshot>,
-    origin: Option<Box<EffectOrigin>>,
+    origin: Box<EffectOrigin>,
 }
 
 #[derive(Clone, Debug)]
@@ -112,8 +114,9 @@ pub(super) fn count_zone(requirements: &Requirements, requirement: &Requirement)
 impl Execution {
     /// Binds the authority-derived ability source and its reference zone at body start.
     pub(super) fn bind_source(&mut self, game: &Game, source: RuntimeAbilitySource) -> Result<()> {
+        let information = SourceInformation::current(game, source)?;
         self.ability = Some(source);
-        self.source_information = Some(SourceInformation::current(game, source)?);
+        self.source_information = Some(information);
         Ok(())
     }
 
@@ -394,8 +397,8 @@ impl Execution {
 }
 
 impl SourceInformation {
-    pub(super) fn origin(&self) -> Option<&EffectOrigin> {
-        self.origin.as_deref()
+    pub(super) fn origin(&self) -> &EffectOrigin {
+        &self.origin
     }
 
     pub(super) const fn publicly_identified(&self) -> bool {
@@ -435,12 +438,71 @@ impl SourceInformation {
             return Err(invalid("foreign source snapshot"));
         }
         Ok(Self {
+            binding: source.holder,
             holder: source.holder,
             zone: game.object(id)?.zone.clone(),
             publicly_identified: game.player_knows_object(Viewer::P1, id)
                 && game.player_knows_object(Viewer::P2, id),
             departed: None,
-            origin: game.runtime_text_origin(source, &snapshot)?.map(Box::new),
+            origin: Box::new(
+                game.runtime_text_origin(source, &snapshot)?
+                    .ok_or_else(|| {
+                        crate::EngineFailure::Invariant(
+                            "typed source has no bound text origin".into(),
+                        )
+                    })?
+                    .require_owner()?,
+            ),
+        })
+    }
+
+    pub(super) fn follow(
+        &mut self,
+        game: &Game,
+        source: RuntimeAbilitySource,
+        after: ObjectRef,
+    ) -> Result<()> {
+        if source.holder != self.binding || after.id != self.holder.id {
+            return Err(crate::EngineFailure::Invariant(
+                "source follow lost its original binding".into(),
+            ));
+        }
+        game.information_snapshot(after)?;
+        let id = game
+            .state
+            .ir_objects
+            .iter()
+            .find(|(_, number)| **number == after.id.0)
+            .map(|(id, _)| id.as_str())
+            .ok_or_else(|| invalid("missing followed source identity"))?;
+        self.holder = after;
+        self.zone.clone_from(&game.object(id)?.zone);
+        self.publicly_identified =
+            game.player_knows_object(Viewer::P1, id) && game.player_knows_object(Viewer::P2, id);
+        self.departed = None;
+        // Fusion follows this same physical source; it never rebinds text through a recipient.
+        *self.origin =
+            self.origin
+                .as_ref()
+                .clone()
+                .for_followed_source(game, id, after.generation.0);
+        Ok(())
+    }
+
+    pub(super) fn callback_source(
+        &mut self,
+        source: RuntimeAbilitySource,
+    ) -> Result<RuntimeAbilitySource> {
+        if source.holder != self.binding {
+            return Err(crate::EngineFailure::Invariant(
+                "callback lost its original source binding".into(),
+            ));
+        }
+        // A new callback belongs to the physical generation at its own creation.
+        self.binding = self.holder;
+        Ok(RuntimeAbilitySource {
+            holder: self.holder,
+            ..source
         })
     }
 
@@ -449,7 +511,7 @@ impl SourceInformation {
         game: &Game,
         source: RuntimeAbilitySource,
     ) -> Result<SourceSnapshot> {
-        if source.holder != self.holder {
+        if source.holder != self.binding {
             return Err(invalid("source information belongs to another ability"));
         }
         if let Some(departed) = &self.departed {

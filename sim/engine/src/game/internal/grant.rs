@@ -630,7 +630,12 @@ impl Game {
             SourceIdentity::holder(self, holder, generation)
                 .and_then(|identity| record.printed(identity))
         };
-        Ok(origin.and_then(|origin| origin.observed(self, perspective)))
+        Ok(origin
+            .ok_or_else(|| {
+                crate::EngineFailure::Invariant("effective ability has no text origin".into())
+            })?
+            .require_owner()?
+            .observed(self, perspective))
     }
 
     pub(in crate::game) fn internal_granted_keywords(

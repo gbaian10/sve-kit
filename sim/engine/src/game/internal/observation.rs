@@ -199,6 +199,15 @@ pub(super) struct EffectOrigin {
 }
 
 impl EffectOrigin {
+    pub(super) fn require_owner(self) -> Result<Self> {
+        if self.owner.is_none() {
+            return Err(crate::EngineFailure::Invariant(
+                "typed source has no bound wording owner".into(),
+            ));
+        }
+        Ok(self)
+    }
+
     pub(super) fn holder_link(&self) -> ObjectLink {
         self.link.clone()
     }
@@ -212,7 +221,7 @@ impl EffectOrigin {
         if let Some(mut origin) = execution
             .source_information
             .as_ref()
-            .and_then(super::source::SourceInformation::origin)
+            .map(super::source::SourceInformation::origin)
             .cloned()
         {
             origin.link = ObjectLink::capture(game, &holder, execution.context.generation.0);
@@ -222,38 +231,24 @@ impl EffectOrigin {
                 .and_then(|snapshot| snapshot.identity().cloned());
             return Ok(origin);
         }
-        let (card, face, line, wording) = if execution.ability.is_some() {
-            let provider = game.installed_effect_provider(execution)?;
-            let wording = wording_source(&provider.span);
-            (
-                provider.card,
-                Some(provider.span.face),
-                Some(u64::from(provider.span.line)),
-                wording,
-            )
-        } else {
-            let line = match source.origin {
-                AbilityOrigin::Printed { line, .. } => Some(line.0),
-                _ => None,
-            };
-            let face = match &source.origin {
-                AbilityOrigin::Printed { face, .. } => Some(face.0.clone()),
-                _ => None,
-            };
-            (
-                game.information_source(&holder)?.card.clone(),
-                face,
-                line,
-                None,
-            )
+        if execution.ability.is_some() {
+            return Err(crate::EngineFailure::Invariant(
+                "typed execution lost its source information".into(),
+            ));
+        }
+        let line = match source.origin {
+            AbilityOrigin::Printed { line, .. } => Some(line.0),
+            _ => None,
         };
+        let face = match &source.origin {
+            AbilityOrigin::Printed { face, .. } => Some(face.0.clone()),
+            _ => None,
+        };
+        let card = game.information_source(&holder)?.card.clone();
+        let wording = None;
         let face = game.effect_source_face(&card, face.as_deref())?;
-        let owner = if execution.ability.is_none() {
-            SourceIdentity::holder(game, &holder, execution.context.generation.0)
-                .filter(|identity| face.is_some_and(|face| identity.matches(&card, face)))
-        } else {
-            None
-        };
+        // Fragments have no separate text provider; only their actual source object grants access.
+        let owner = SourceIdentity::holder(game, &holder, execution.context.generation.0);
         Ok(Self {
             link: ObjectLink::capture(game, &holder, execution.context.generation.0),
             face,
@@ -298,6 +293,29 @@ impl EffectOrigin {
 
     pub(super) fn for_holder(mut self, game: &Game, holder: &str, generation: u64) -> Self {
         self.link = ObjectLink::capture(game, holder, generation);
+        self
+    }
+
+    pub(super) fn for_followed_source(
+        mut self,
+        game: &Game,
+        holder: &str,
+        generation: u64,
+    ) -> Self {
+        let same_source = self.link.holder == holder;
+        self = self.for_holder(game, holder, generation);
+        // Only an already verified printed owner follows its own explicit physical movement.
+        if same_source
+            && matches!(self.text, TextOrigin::Printed)
+            && let Some(identity) =
+                SourceIdentity::holder(game, holder, generation).filter(|identity| {
+                    self.face
+                        .is_some_and(|face| identity.matches(&self.card, face))
+                })
+        {
+            self.owner = Some(identity.clone());
+            self.giver = Some(identity);
+        }
         self
     }
 

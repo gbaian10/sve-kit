@@ -3,7 +3,7 @@
 use super::{Game, ObjectLink};
 use crate::game::player::Viewer;
 use crate::game::player::observation::{CardFace, TextProvenance};
-use crate::ir::{Generation, ObjectId, ObjectRef};
+use crate::ir::ObjectRef;
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -20,23 +20,9 @@ impl SourceIdentity {
         holder: &str,
         generation: u64,
     ) -> Option<Self> {
-        Self::capture(
-            game,
-            ObjectRef {
-                id: ObjectId(*game.state.ir_objects.get(holder)?),
-                generation: Generation(generation),
-            },
-        )
-    }
-
-    pub(in crate::game::internal) fn capture(game: &Game, reference: ObjectRef) -> Option<Self> {
-        let (holder, _) = game
-            .state
-            .ir_objects
-            .iter()
-            .find(|(_, id)| **id == reference.id.0)?;
+        // Read-only previews run before IR object IDs have been allocated.
         let object = game.object(holder).ok()?;
-        if object.generation != reference.generation.0 {
+        if object.generation != generation {
             return None;
         }
         let (card, face) = game.internal_effective_print(holder).ok()?;
@@ -48,6 +34,15 @@ impl SourceIdentity {
             publicly_identified: game.player_knows_object(Viewer::P1, &physical.id)
                 && game.player_knows_object(Viewer::P2, &physical.id),
         })
+    }
+
+    pub(in crate::game::internal) fn capture(game: &Game, reference: ObjectRef) -> Option<Self> {
+        let (holder, _) = game
+            .state
+            .ir_objects
+            .iter()
+            .find(|(_, id)| **id == reference.id.0)?;
+        Self::holder(game, holder, reference.generation.0)
     }
 
     pub(in crate::game::internal) fn matches(&self, card: &str, face: u64) -> bool {
