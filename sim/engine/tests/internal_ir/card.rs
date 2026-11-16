@@ -13,6 +13,8 @@ mod battle_pending;
 mod battle_question;
 #[path = "card/battle_quotas.rs"]
 mod battle_quotas;
+#[path = "card/battle_resources.rs"]
+mod battle_resources;
 #[path = "card/battle_turn.rs"]
 mod battle_turn;
 #[path = "card/board_relationships.rs"]

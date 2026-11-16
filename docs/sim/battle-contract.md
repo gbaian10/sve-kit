@@ -110,13 +110,21 @@ BattleObservation 完整保留[玩家輸入](player-input.md)的觀察語義，�
 | 資料 | 必須保留 |
 | --- | --- |
 | objects | ObjectHandle → 已知 CardRef、有效卡面、owner／controller、public／private 知識、正背面、有效特徵與狀態 |
-| players | 每席生命、PP／最大 PP、EP／SEP、公開效果、區域總數、已授權成員、容量；主戰者只是席位外觀，沒有假物件代號 |
+| players | 每席生命、PP／最大 PP、剩餘 EP／SEP、EP 容量／已用格、SEP 開放回合、公開效果、區域總數、已授權成員、容量；主戰者只是席位外觀，沒有假物件代號 |
 | zones | deck、evolve_deck、hand、field、ex、cemetery、banish、resolution、evolution、race、drive、trigger、equipment |
 | turn／attack | 活動席、先攻席、階段、逐席回合數、公開攻擊者與目標；重畫盤面即可保留攻擊箭頭 |
 | relationships | 裝備、Ride、出走／Drive 等有型別關係；兩端可辨識才帶 handle |
 | processing | 外層至內層的已授權處理脈絡、stage、controller、來源、主語、程序席位、宣告與付款摘要 |
 | costs／pending／history | 現行成本的已知／未決部分、公開待處理、已提交的回合歷史；不包含續體、capture 或暫態歷史 |
 | remembered | 曾看過的卡面與 owner；沒有現位置、實體副本數或可追蹤暗牌標記 |
+
+玩家資源皆由引擎狀態提供，畫面不硬編先後手的配置或開放時機：
+
+- `ep`／`sep` 是目前剩餘量。`ep_capacity: Nat` 是本局 EP 顯示槽容量：初始配置保留為容量，付款不縮小它，回復重用已耗用槽，合法增加超過既有容量時擴充槽數。引擎原有 EP 增加沒有固定硬上限，此欄不新增遊戲限制。
+- `ep_used: Nat` 是目前已耗用槽數，滿足 `ep + ep_used = ep_capacity`；EP 回復會減少此值，它不是累計付款次數。
+- `sep_available_from: Nat | null` 是本席自己的第幾回合起可用 SEP；配置後即使 SEP 用完也保留該回合。`null` 表示目前尚未配置 SEP，可表達先攻沒有 SEP 與開局配置前的狀態；`sep = 0` 且回合非 null 則是已配置但耗盡。開放時機與原生合法性判斷讀同一份引擎狀態。
+
+三個新欄位皆必填（SEP 時機可明示 null），不得省略、補假零或由客戶端推規則；數字使用 checked Nat，無法投影則拒絕整份盤面。
 
 不存在的區域以 0／[] 表示。未知區域可畫通用容器，但未支援的必要規則語義須停止互動，不能猜操作。
 對手未知手牌只給數量，不給固定 placeholder ID、私有張序或牌組清單；count 與已知成員的差可畫匿名卡背。
