@@ -925,6 +925,7 @@ impl Game {
             if view.actor != actor || view.token != token {
                 return Err(invalid("wrong actor or stale internal answer"));
             }
+            // Transaction rollback restores the phase if the answer type is rejected.
             execution.question_stage = None;
             match (wait, answer) {
                 (Wait::Ability(wait), Answer::Ability(handle)) => {
