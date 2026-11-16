@@ -154,12 +154,18 @@ interface RuleRef {
 }
 ```
 
-step 只有精確卡文對應才填；不公開 instruction path。能力授予者與持有者分開，失知後 holder=null。
-引用輸入由 `sve_carddb.export.read_api.load_battle_inputs` 讀取同一份已驗證的公開匯出閉包產生：native JSONL 的精確 bytes 與 `ReferenceInput` 一起回傳，後者包含地區、native bytes 的 SHA-256、完整印刷／面映射，以及綁定公開 manifest 的永久卡面／卡文版本／原文欄位身分。目錄不依牌組或已降低的作者縮減，可到達 token 與未選用面仍須保留；人工 EP／SEP 資源版次不成為 native 卡片。
+section 固定為 `effect`（該版主要效果原文）或 `section:<ordinal>`（具名區段的原始 ordinal，例如 `section:0`）；ordinal 是無前置零的非負十進位整數，歷史欄位不可重編。line 沿用該原文已准入 SourceSpan 的正整數；step 只有精確逐步對應才填，未提供對應時為 null，不公開 instruction path。
+
+只有明確 Printed／Granted 證據才能輸出 TextRef：印刷能力的 granted_by=null；授予能力填權威凍結點的直接 giver 有效 CardRef，與文字 owner、目前 holder 分開。同印刷與自授仍屬 Granted。giver 對該席不可知或缺來源證據時保留 Card 提示，不改寫為印刷；holder 依既有識別連結，失知後為 null，不重接新 generation。
+
+RuleRef 使用公開來源的穩定身分：CR 的 id=cr_clause.number、revision=cr_version.id；QA 的 id=qa.id、revision=qa_version.id；裁定的 id=ruling_id、revision=ruling_revision.id。人可讀版本標籤、QA 官網號及內部 RuleId 都不是 wire 定位值。resolver 只驗可定位，呼叫端必須明示逐使用點 strength，裁定須符合該 revision 的登錄，不預設 official。
+引用輸入由 `sve_carddb.export.read_api.load_battle_inputs` 讀取同一份已驗證的公開匯出閉包產生：native JSONL 的精確 bytes 與 `ReferenceInput` 一起回傳，後者包含地區、native bytes 的 SHA-256、完整印刷／面映射，以及綁定公開 manifest 的永久卡面／卡文版本／原文欄位和規則來源身分。目錄不依牌組或已降低的作者縮減，可到達 token 與未選用面仍須保留；人工 EP／SEP 資源版次不成為 native 卡片。
 
 native 卡文讀該版次唯一可用的來源觀測，不拿共享 current 或印刷原文補缺。無法表示完整目錄、來源模糊或關係不完整時拒絕整批；原文缺失保持 null，不當成空文字。wording 輸入未提供時，印刷引用仍可用，但不能成立精確卡文引用。`BattleReferences` 檢查同一 native 背景、完整面閉包與卡文身分的一致性；公開 manifest／原文欄位存在性的信任邊界仍是既有驗證 reader，不是任意宿主 JSON。確認 owner 與 field 只代表位置存在，不自行證明 line、step、授予者或觀看者授權。
 
-沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
+規則身分閉包保留已發布的歷史版本，CR／QA 依地區篩選；沒有地區欄位的裁定僅列為可定位身分，不推論適用範圍。wording 與 rules 同時提供時須來自同一公開 manifest；兩者都只提供身分，來源存在不等於本題的完整依據。非 null Question.rules 仍須有可信 producer 提供逐使用點 strength 與經驗證的完整依據集合，不能由身分閉包或空目錄推定。
+
+已證明 Printed／Granted 且帶有 wording 座標的來源，若提供精確 wording 閉包卻無法核對 owner、revision 或 field，則拒絕投影，不以其他版本替代。沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
 strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表示任意答案合法，也不表示官方核可。
