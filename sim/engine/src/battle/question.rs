@@ -148,8 +148,7 @@ impl QuestionProjection {
             shape,
             auto_answer: wire::AutoAnswer::Unknown,
             assistance: wire::NoAssistance,
-            // Development-only until real RuleRefs resolve the known-empty/unknown gap.
-            rules: vec![],
+            rules: None,
         };
         Ok(Self {
             observation,
