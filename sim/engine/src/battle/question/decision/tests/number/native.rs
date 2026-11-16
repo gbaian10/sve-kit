@@ -11,6 +11,8 @@ use alloc::sync::Arc;
 use serde_json::{Value, json};
 use sve_battle_contract::{Nat as WireNat, QuestionId};
 
+mod declaration;
+
 fn question(game: &Game, actor: Viewer) -> Option<Question> {
     if let Input::Question(question) = game.input(actor) {
         Some(*question)
@@ -104,14 +106,18 @@ fn real_x_bounds_pay_the_declared_value_and_keep_rejections_read_only() {
             let native = question(&game, actor).unwrap();
             assert_eq!(
                 domain(&native),
-                Some(&DecisionShape::Integer(Cardinality {
-                    minimum: Nat(0),
-                    maximum: Some(Nat(3))
-                }))
+                Some(&DecisionShape::Integer {
+                    bounds: Cardinality {
+                        minimum: Nat(0),
+                        maximum: Some(Nat(3))
+                    },
+                    source: player::IntegerSource::XCost,
+                })
             );
             assert_eq!(native.purpose, player::QuestionPurpose::PlayParameter);
             let before = board_fixtures::exact_authority(&game);
-            let (_, _, binding) = project(domain(&native).unwrap()).unwrap();
+            let (usage, _, binding) = project(domain(&native).unwrap()).unwrap();
+            assert_eq!(usage, wire::QuestionUse::DeclareX);
             game.observe(actor).unwrap();
             game.observe(other).unwrap();
             assert!(

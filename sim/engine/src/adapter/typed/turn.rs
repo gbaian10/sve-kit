@@ -225,7 +225,7 @@ impl Turn<'_> {
                     StepwiseAnswer::Stop
                 })
             }
-            DecisionShape::Integer(_) => {
+            DecisionShape::Integer { .. } => {
                 let Some(x) = params.x.take() else {
                     return Ok(None);
                 };

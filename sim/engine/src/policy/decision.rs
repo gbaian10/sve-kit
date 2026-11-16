@@ -105,7 +105,7 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
                 .ok_or(PolicyFailure::NoSolution)?
                 .handle,
         ),
-        DecisionShape::Integer(bounds) => {
+        DecisionShape::Integer { bounds, .. } => {
             if bounds
                 .maximum
                 .is_some_and(|maximum| maximum.0 < bounds.minimum.0)

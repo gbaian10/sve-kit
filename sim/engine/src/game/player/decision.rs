@@ -55,6 +55,17 @@ pub enum DiscardKind {
     Cost,
 }
 
+/// Native procedure that prepared an integer question, independent of its bounds.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum IntegerSource {
+    /// The X payment parameter prepared by the play procedure.
+    XCost,
+    /// A numeric declaration instruction during effect resolution.
+    NumberDeclaration,
+    /// Another native integer decision without a supported wire use.
+    Other,
+}
+
 /// Capacity of a movement batch, answered with `Answer::SearchPartition`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct MovementCapacityQuestion {
@@ -147,7 +158,12 @@ pub enum DecisionShape {
     /// Simultaneous limited admission; answer `TriggerQuota`.
     TriggerQuota(QuotaQuestion),
     /// A printed numeric parameter; answer `Integer` within these bounds.
-    Integer(Cardinality),
+    Integer {
+        /// Original effective bounds.
+        bounds: Cardinality,
+        /// Origin recorded by the native Wait producer, never inferred from bounds.
+        source: IntegerSource,
+    },
     /// Frozen permutation; answer `Order` with every handle once.
     Order(Vec<CardOption>),
     /// Replacement order; answer `Order`.

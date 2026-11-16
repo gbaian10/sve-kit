@@ -611,6 +611,7 @@ enum Wait {
     Integer {
         binding: declaration::NumberBinding,
         bounds: Cardinality,
+        source: super::player::IntegerSource,
         purpose: super::player::QuestionPurpose,
         declaration: Option<ReceiptId>,
     },
@@ -1636,6 +1637,7 @@ impl Game {
                     Wait::Integer {
                         binding: declaration::NumberBinding::Natural(*binding),
                         bounds: *cardinality,
+                        source: super::player::IntegerSource::Other,
                         purpose: player::purpose(&decision.kind),
                         declaration: None,
                     },
