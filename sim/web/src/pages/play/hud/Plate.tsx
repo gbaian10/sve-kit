@@ -70,10 +70,7 @@ export function Plate({
             <span className="sr-only">{t("play.stat.life")}</span>
             {seat.life}
           </span>
-          <span
-            className="bp-hud-pp"
-            title={t("play.stat.ppOf", { left: seat.pp, max: seat.maxPp })}
-          >
+          <span title={t("play.stat.ppOf", { left: seat.pp, max: seat.maxPp })}>
             <i className="bp-pp-gem" />
             <span className="sr-only">{t("play.stat.pp")}</span>
             {seat.pp}

@@ -312,7 +312,7 @@ function PpColumn({ seat, opp, u, mat }: Omit<MatProps, "leader">) {
   const rowH = (r.h - head - 4) / 11
   return (
     <div
-      className={opp ? "bp-pp bp-pp-opp" : "bp-pp"}
+      className="bp-pp"
       style={px(r, u)}
       data-hit-area=""
       role="img"

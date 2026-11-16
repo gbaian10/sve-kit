@@ -1,0 +1,8 @@
+/*
+ * Lint only; nothing imports this file. It is the Tailwind entry point ESLint uses for the battle
+ * screen: the site's styles plus battle.css read as component classes, so a class name the screen
+ * uses is known exactly when battle.css defines it. The layer exists here alone and the app keeps
+ * loading battle.css unlayered.
+ */
+@import "../../styles/index.css";
+@import "./battle.css" layer(components);

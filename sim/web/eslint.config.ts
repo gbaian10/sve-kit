@@ -232,15 +232,15 @@ export default defineConfig(
     },
   },
 
-  // The battle screen has a stylesheet of its own (battle.css): its parts are `bp-*` classes and
-  // their states `is-*`, `plates-*` and `hand-*`. Tailwind classes there are still checked.
+  // The battle screen has a stylesheet of its own. Its entry point adds battle.css as component
+  // classes, so the classes that file defines are known there and a misspelt one is still an error.
   {
     files: ["src/pages/play/**/*.tsx"],
-    rules: {
-      "better-tailwindcss/no-unknown-classes": [
-        "error",
-        { ignore: ["^bp-.+", "^is-.+", "^plates-.+", "^hand-.+"] },
-      ],
+    settings: {
+      "better-tailwindcss": {
+        entryPoint: path.join(root, "src/pages/play/battle.lint.css"),
+        detectComponentClasses: true,
+      },
     },
   },
 

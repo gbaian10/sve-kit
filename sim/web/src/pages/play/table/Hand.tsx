@@ -87,10 +87,7 @@ export function Hand({ hand, layout }: { readonly hand: Pile; readonly layout: L
       aria-label={t("play.hand.self")}
     >
       <div className="bp-hand-scroll">
-        <div
-          className={overlap ? "bp-hand-track is-overlap" : "bp-hand-track"}
-          style={{ width: total, height: h }}
-        >
+        <div className="bp-hand-track" style={{ width: total, height: h }}>
           {cards.map((card, i) => (
             <HandCard
               key={card.handle}

@@ -72,7 +72,6 @@ describe("Hand", () => {
     const { container } = await show(null)
     await screen.findByRole("region", { name: "你的手牌" })
     const cost = container.querySelector(".bp-cost")
-    expect(cost).toHaveClass("is-unknown")
     expect(cost).toHaveTextContent("費用未定?")
     expect(cost).not.toHaveTextContent("5")
   })

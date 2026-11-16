@@ -18,7 +18,7 @@ export const BattlePart = () => <div className="bp-card" />
 export const BattleState = () => <div className="is-engaged" />
 
 // case: the battle layout classes outside the battle screen -> better-tailwindcss/no-unknown-classes, better-tailwindcss/no-unknown-classes
-export const BattleLayout = () => <div className="plates-right hand-row" />
+export const BattleLayout = () => <div className="plates-top hand-column" />
 
 // case: arbitrary hex colour -> better-tailwindcss/no-restricted-classes
 export const Hex = () => <div className="bg-[#123456]" />

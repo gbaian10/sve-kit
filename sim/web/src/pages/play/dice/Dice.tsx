@@ -174,7 +174,7 @@ export function CostBadge({ value }: { readonly value: number | null }) {
   const { t } = useTranslation()
   if (value === null)
     return (
-      <span className="bp-cost is-unknown" title={t("play.stat.costUnknown")}>
+      <span className="bp-cost" title={t("play.stat.costUnknown")}>
         <img src={costBlank} alt="" aria-hidden="true" />
         <span className="sr-only">{t("play.stat.costUnknown")}</span>
         <b aria-hidden="true">?</b>
