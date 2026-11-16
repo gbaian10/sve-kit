@@ -1,7 +1,7 @@
 use super::{AnswerError, Context, Result};
 use crate::battle::question::common::seat;
 use crate::battle::{CandidateDetails, ProjectionError};
-use crate::game::player::{CardOption, SelectionMember};
+use crate::game::player::{CardOption, SelectionMember, Viewer};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::result;
 use sve_battle_contract::{Int, OptionId, Subject, Zone, question as wire};
@@ -45,12 +45,16 @@ impl Candidates {
         Ok(result)
     }
 
-    pub(super) fn drive(cards: &[CardOption], context: Context<'_>) -> Result<Self> {
+    pub(super) fn cards(
+        cards: &[CardOption],
+        player: Viewer,
+        context: Context<'_>,
+    ) -> Result<Self> {
         let members = cards
             .iter()
             .map(|card| SelectionMember {
                 handle: card.handle,
-                player: context.actor,
+                player,
                 card: Some(card.card.clone()),
                 name: Some(card.name.clone()),
                 object: card.object.clone(),
@@ -58,7 +62,11 @@ impl Candidates {
                 original_cost: card.original_cost,
             })
             .collect::<Vec<_>>();
-        let candidates = Self::members(&members, context)?;
+        Self::members(&members, context)
+    }
+
+    pub(super) fn drive(cards: &[CardOption], context: Context<'_>) -> Result<Self> {
+        let candidates = Self::cards(cards, context.actor, context)?;
         if candidates.values.iter().any(|candidate| {
             candidate.origin.is_none_or(|origin| {
                 origin.zone != Zone::Field || origin.player != seat(context.actor)

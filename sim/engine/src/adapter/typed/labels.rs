@@ -359,7 +359,7 @@ impl Labels<'_> {
                 }
                 DecisionShape::Order(cards) => {
                     let items: Vec<Value> = self
-                        .card_labels(cards)
+                        .card_labels(&cards.cards)
                         .into_iter()
                         .map(Value::String)
                         .collect();

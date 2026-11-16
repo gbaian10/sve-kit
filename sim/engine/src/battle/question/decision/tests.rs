@@ -70,3 +70,6 @@ fn unsupported_decisions_do_not_fall_back_to_confirm() {
         ));
     }
 }
+
+#[cfg(feature = "runner")]
+mod order;
