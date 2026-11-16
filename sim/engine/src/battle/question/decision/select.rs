@@ -116,6 +116,8 @@ fn details(member: &SelectionMember, context: Context<'_>) -> Result<CandidateDe
         });
     }
     let handle = member.object.as_ref().ok_or(ProjectionError::Unavailable)?;
+    // Only a unique handle in this authorized board can identify the candidate.
+    // Missing or repeated handles cannot be repaired from another source.
     let mut found = None;
     for player in &context.observation.players {
         let zones = &player.zones;
