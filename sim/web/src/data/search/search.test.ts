@@ -3729,3 +3729,202 @@ it("sorts home sets by regional release, groups undated products and PR, and app
     }
   }
 })
+
+const otherCatalogs = (edition: "jp" | "en") =>
+  (built.manifest["files"] as JsonObject[]).filter(
+    (file) =>
+      file["purpose"] === "catalog" && file["region"] !== null && file["region"] !== edition,
+  )
+const prQuery = (edition: "jp" | "en"): SearchQuery => ({
+  ...query,
+  edition,
+  state: { ...DEFAULT_QUERY, prOnly: true, sort: "no", secondarySort: null },
+})
+
+it.each(["jp", "en"] as const)(
+  "does not request the other region for ordinary %s queries",
+  async (edition) => {
+    const h = harness()
+    h.session.load(base, edition, "preview")
+    h.channel.search({ ...query, edition, state: DEFAULT_QUERY })
+    await h.settled()
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const paths = (built.manifest["files"] as JsonObject[])
+      .filter((file) => file["region"] !== null && file["region"] !== edition)
+      .map((file) => stringValue(file["path"]))
+    expect(paths.length).toBeGreaterThan(0)
+    expect(h.served.requests.filter((path) => paths.includes(path))).toEqual([])
+    expect(
+      h.events.filter((event) => event.kind === "background-ready").map((event) => event.purpose),
+    ).toEqual(["printings", "mechanics"])
+    h.session.dispose()
+  },
+)
+
+it.each(["jp", "en"] as const)(
+  "loads the other region only for a PR-only %s query and leaves other channels usable",
+  async (edition) => {
+    const h = harness()
+    h.session.load(base, edition, "preview")
+    await h.settled()
+    const paths = otherCatalogs(edition).map((file) => stringValue(file["path"]))
+    const path = paths[0]
+    if (!path) throw new Error("missing other-region catalog")
+    const release = h.served.hold(path)
+    h.channel.search(prQuery(edition))
+    try {
+      await expect.poll(() => h.served.requests.includes(path), POLL).toBe(true)
+      expect(h.status().result.phase).toBe("pending")
+      const ordinary = h.session.createChannel()
+      ordinary.search({ ...query, edition, state: DEFAULT_QUERY })
+      await expect.poll(() => ordinary.getStatus().result.phase, POLL).toBe("complete")
+      expect(h.status().result.phase).toBe("pending")
+      expect(
+        h.events.some(
+          (event) =>
+            event.kind === "query-progress" &&
+            event.total === paths.length &&
+            event.done < event.total,
+        ),
+      ).toBe(true)
+      release()
+      await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+      const result = h.status().result
+      if (result.phase !== "complete") throw new Error("missing PR result")
+      expect(result.page.items.map((item) => item.summary?.cardId)).toEqual(
+        edition === "jp" ? ["c:pr-001"] : [],
+      )
+      expect(paths.every((path) => h.served.requests.includes(path))).toBe(true)
+    } finally {
+      release()
+      h.session.dispose()
+    }
+  },
+)
+
+it.each(["jp", "en"] as const)(
+  "persists a completed PR-only %s index and restores it without other-region requests",
+  async (edition) => {
+    const storage = memoryCache()
+    const first = harness(origin(), storage)
+    first.session.load(base, edition, "preview")
+    await first.settled()
+    first.channel.search(prQuery(edition))
+    await expect.poll(() => first.status().result.phase, POLL).toBe("complete")
+    const expected = first.status().result
+    first.session.dispose()
+    const second = harness(origin(), storage)
+    second.session.load(base, edition, "preview")
+    await second.settled()
+    second.channel.search(prQuery(edition))
+    await expect.poll(() => second.status().result.phase, POLL).toBe("complete")
+    expect(second.status().result).toEqual(expected)
+    expect(second.events.some((event) => event.kind === "ready" && event.metrics.restored)).toBe(
+      true,
+    )
+    expect(second.served.requests).toEqual(["snapshots/preview/current.json"])
+    second.session.dispose()
+  },
+)
+
+it("can first select PR-only from a restored local index", async () => {
+  const storage = memoryCache()
+  const first = harness(origin(), storage)
+  first.session.load(base, "jp", "preview")
+  await first.settled()
+  first.session.dispose()
+  const restored = harness(origin(), storage)
+  restored.session.load(base, "jp", "preview")
+  await restored.settled()
+  expect(restored.served.requests).toEqual(["snapshots/preview/current.json"])
+  restored.channel.search(prQuery("jp"))
+  await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
+  const result = restored.status().result
+  if (result.phase !== "complete") throw new Error("missing PR result")
+  expect(result.page.items.map((item) => item.summary?.cardId)).toEqual(["c:pr-001"])
+  expect(
+    otherCatalogs("jp").every((file) =>
+      restored.served.requests.includes(stringValue(file["path"])),
+    ),
+  ).toBe(true)
+  restored.session.dispose()
+})
+
+it("finishes a startup PR-only query while unrelated mechanics are pending", async () => {
+  const file = (built.manifest["files"] as JsonObject[]).find((file) =>
+    arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "mechanic_projection"),
+  )
+  if (!file) throw new Error("missing mechanic fixture")
+  const h = harness()
+  const release = h.served.hold(stringValue(file["path"]))
+  h.session.load(base, "jp", "preview")
+  h.channel.search(prQuery("jp"))
+  try {
+    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    expect(
+      h.events.some((event) => event.kind === "background-ready" && event.purpose === "mechanics"),
+    ).toBe(false)
+    release()
+    await h.settled()
+  } finally {
+    release()
+    h.session.dispose()
+  }
+})
+
+it("cancels a cross-region transfer without aborting the completed local index", async () => {
+  const served = origin()
+  const events: SearchEvent[] = []
+  const engine = new SearchEngine((event) => events.push(event), {
+    fetch: served.fetcher,
+    cacheStorage: memoryCache(),
+  })
+  await engine.handle({ kind: "load", generation: 1, base, edition: "jp", entry: "preview" })
+  const file = otherCatalogs("jp")[0]
+  if (!file) throw new Error("missing other-region catalog")
+  const path = stringValue(file["path"])
+  const release = served.hold(path)
+  const pending = engine.handle({
+    kind: "search",
+    generation: 1,
+    channelId: 1,
+    queryId: 1,
+    query: prQuery("jp"),
+  })
+  try {
+    await expect.poll(() => served.requests.includes(path), POLL).toBe(true)
+    await engine.handle({ kind: "cancel", generation: 1 })
+    release()
+    await pending
+    expect(events.some((event) => event.kind === "query-error" && event.queryId === 1)).toBe(true)
+    const requests = served.requests.length
+    await engine.handle({
+      kind: "search",
+      generation: 1,
+      channelId: 1,
+      queryId: 2,
+      query: { ...query, state: DEFAULT_QUERY },
+    })
+    expect(
+      events.some(
+        (event) => event.kind === "result" && event.queryId === 2 && event.page.total > 0,
+      ),
+    ).toBe(true)
+    expect(served.requests).toHaveLength(requests)
+    await engine.handle({
+      kind: "search",
+      generation: 1,
+      channelId: 1,
+      queryId: 3,
+      query: prQuery("jp"),
+    })
+    const retried = events.find((event) => event.kind === "result" && event.queryId === 3)
+    expect(
+      retried?.kind === "result"
+        ? retried.page.items.map((item) => item.summary?.cardId)
+        : undefined,
+    ).toEqual(["c:pr-001"])
+  } finally {
+    release()
+  }
+})

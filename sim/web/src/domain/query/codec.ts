@@ -156,6 +156,7 @@ export function parseQuery(params: URLSearchParams): QueryState {
     stampOnly: params.get("stamp") === "1",
     serialOnly: params.get("serial") === "1",
     unlistedOnly: params.get("unlisted") === "1",
+    prOnly: params.get("pr") === "1",
     errataOnly: params.get("errata") === "1",
     restrictionsOnly: params.get("restricted") === "1",
     reprints: oneOf(params.get("reprint"), REPRINT_MODES) ?? DEFAULT_QUERY.reprints,
@@ -197,6 +198,7 @@ export function formatQuery(state: QueryState): URLSearchParams {
   if (state.stampOnly) params.set("stamp", "1")
   if (state.serialOnly) params.set("serial", "1")
   if (state.unlistedOnly) params.set("unlisted", "1")
+  if (state.prOnly) params.set("pr", "1")
   if (state.errataOnly) params.set("errata", "1")
   if (state.restrictionsOnly) params.set("restricted", "1")
   if (state.reprints !== DEFAULT_QUERY.reprints) params.set("reprint", state.reprints)

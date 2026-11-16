@@ -34,6 +34,7 @@ describe("query codec", () => {
       stampOnly: false,
       serialOnly: false,
       unlistedOnly: false,
+      prOnly: false,
       errataOnly: false,
       restrictionsOnly: false,
       reprints: "only",
@@ -209,16 +210,24 @@ describe("query codec", () => {
   })
 })
 
-it("round trips independent stamp, serial and unlisted filters and rejects other flag values", () => {
-  const state = { ...DEFAULT_QUERY, stampOnly: true, serialOnly: true, unlistedOnly: true }
-  expect(querySearch(state)).toBe("?stamp=1&serial=1&unlisted=1")
+it("round trips independent stamp, serial, unlisted and PR-only filters and rejects other flag values", () => {
+  const state = {
+    ...DEFAULT_QUERY,
+    stampOnly: true,
+    serialOnly: true,
+    unlistedOnly: true,
+    prOnly: true,
+  }
+  expect(querySearch(state)).toBe("?stamp=1&serial=1&unlisted=1&pr=1")
   expect(parseQuery(formatQuery(state))).toEqual(state)
-  expect(activeFilterCount(state)).toBe(3)
+  expect(activeFilterCount(state)).toBe(4)
   expect(parseQuery(new URLSearchParams("unlisted=1"))).toEqual({
     ...DEFAULT_QUERY,
     unlistedOnly: true,
   })
-  expect(parseQuery(new URLSearchParams("stamp=true&serial=0&unlisted=yes"))).toEqual(DEFAULT_QUERY)
+  expect(parseQuery(new URLSearchParams("stamp=true&serial=0&unlisted=yes&pr=true"))).toEqual(
+    DEFAULT_QUERY,
+  )
 })
 
 it("round trips independent ability and keyword matching modes and drops unknown ability names", () => {
@@ -284,4 +293,11 @@ it("defaults a missing secondary sort and preserves an explicitly disabled one",
   const duplicate = parseQuery(new URLSearchParams("sort=cost:asc,cost:desc"))
   expect(duplicate).toMatchObject({ sort: "cost", secondarySort: "no" })
   expect(duplicate).not.toHaveProperty("secondaryOrder")
+})
+
+it("round trips the PR-only flag independently", () => {
+  const state = { ...DEFAULT_QUERY, prOnly: true }
+  expect(querySearch(state)).toBe("?pr=1")
+  expect(parseQuery(formatQuery(state))).toEqual(state)
+  expect(activeFilterCount(state)).toBe(1)
 })

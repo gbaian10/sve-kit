@@ -28,6 +28,22 @@ export class SearchBlobs {
     return rawRetentionPlan([{ hash: manifestHash, files }])
   }
 
+  async readAll(
+    files: readonly JsonObject[],
+    signal: AbortSignal,
+    receive: (file: JsonObject, bytes: Uint8Array) => void,
+  ): Promise<void> {
+    await this.migration
+    // One inventory for this transfer avoids rescanning every cached file after each write.
+    await this.raw.batch(async (read) => {
+      await Promise.all(
+        files.map(async (file) => {
+          receive(file, await read(rawBlobDescriptor(file), { signal }))
+        }),
+      )
+    })
+  }
+
   async read(file: JsonObject, signal: AbortSignal): Promise<Uint8Array> {
     await this.migration
     return this.raw.read(rawBlobDescriptor(file), { signal })
