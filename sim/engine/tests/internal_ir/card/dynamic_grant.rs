@@ -1137,12 +1137,19 @@ fn player_declarations_granted_instances_are_distinct_and_keep_separate_quotas_a
         2,
         "Only the other holder retains its two instance quotas"
     );
+    let hand_provider = board_fixtures::object(
+        &game.observe(Viewer::P1).unwrap(),
+        Viewer::P1,
+        ObservedZone::Hand,
+    )
+    .unwrap();
     for offer in offers {
         let MainIntentKind::Activate { source, holder, .. } = &offer.kind else {
             panic!("activation");
         };
         let source = source.as_ref().unwrap();
         assert_eq!(source.card, "unit-amulet");
+        assert_ne!(source.holder.as_ref(), Some(&hand_provider));
         assert_eq!(
             source.holder.as_ref(),
             Some(&holder.handle),
