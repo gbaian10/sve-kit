@@ -40,7 +40,8 @@ fn provider(effect: &ast::StaticEffect) -> Option<Lower> {
         | ast::StaticEffect::Grant(_)
         | ast::StaticEffect::Cannot(_)
         | ast::StaticEffect::NoTrigger(_)
-        | ast::StaticEffect::IgnoreWard(_) => None,
+        | ast::StaticEffect::IgnoreWard(_)
+        | ast::StaticEffect::MustAttack(_) => None,
     }
 }
 

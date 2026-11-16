@@ -3614,7 +3614,8 @@ pub(super) enum StaticEffect {
     DamageMod(DamageModifier),
     DamageCap(DamageCap),
     NoTrigger(NoTrigger),
-    IgnoreWard(IgnoreWard),
+    IgnoreWard(ObjectEffect),
+    MustAttack(ObjectEffect),
 }
 
 #[derive(Deserialize)]
@@ -3664,7 +3665,7 @@ pub(super) struct StaticPlayerRule {
 
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
-pub(super) struct IgnoreWard {
+pub(super) struct ObjectEffect {
     pub on: Objects,
 }
 

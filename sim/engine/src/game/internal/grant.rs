@@ -1,6 +1,6 @@
 //! Grants retain the text provider and receiving physical generation.
 
-use super::duration::EffectEnd;
+use super::duration::{EffectEnd, TurnInterval};
 use super::{Execution, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::game::player::Viewer;
 use crate::game::player::observation::{EffectSource, InstalledChange, InstalledEffect};
@@ -8,9 +8,9 @@ use crate::ir::events::subject::{SubjectFields, SubjectFilter};
 use crate::ir::{
     Ability, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin, AbilityQualification,
     Action, CharacteristicPatch, Duration, DurationEnd, Effect, EffectId, EffectReference,
-    EventPattern, GrantedAbility, Instruction, InstructionId, KeywordId, Located, ObjectOperand,
-    ObjectRef, ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector, SourceSpan,
-    TimeAnchor, TriggerCondition, ZoneKind, granted_cost,
+    EventPattern, GrantedAbility, Instruction, InstructionId, Interval, KeywordId, Located,
+    ObjectOperand, ObjectRef, ObjectView, PlayerRef, RuntimeAbilitySource, ScopeId, Selector,
+    SourceSpan, TimeAnchor, TriggerCondition, ZoneKind, granted_cost,
 };
 use crate::ir::{RideDriveOperation, TextProvider, UsageReference};
 use alloc::collections::BTreeSet;
@@ -27,6 +27,7 @@ pub(in crate::game) struct KeywordState {
 struct KeywordGrant {
     origin_record: super::observation::EffectOrigin,
     end: EffectEnd,
+    interval: Option<TurnInterval>,
     keywords: BTreeSet<String>,
     traits: BTreeSet<String>,
     origin: GrantOrigin,
@@ -200,13 +201,19 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         });
     let current_provider = matches!(&provider.provider, ObjectView::Current { object }
         if object.as_ref() == &ObjectOperand::SourceHolder {});
-    let fixed_duration = duration.anchor == (TimeAnchor::Installation {})
-        && duration.usage.is_none()
-        && duration.intervals.is_empty()
-        && matches!(
+    let valid_interval = match duration.intervals.as_slice() {
+        [] => matches!(
             duration.end,
             DurationEnd::NoTemporalExpiry {} | DurationEnd::CurrentTurnEnd {}
-        );
+        ),
+        [Interval::DuringNextTurn { player }] => {
+            matches!(&duration.end, DurationEnd::NextTurnEnd { player: end } if player == end)
+        }
+        _ => false,
+    };
+    let fixed_duration = duration.anchor == (TimeAnchor::Installation {})
+        && duration.usage.is_none()
+        && valid_interval;
     if !supported_keywords {
         return Err(unsupported("granted definition event or keyword"));
     }
@@ -352,6 +359,7 @@ impl Game {
                 state
                     .grants
                     .iter()
+                    .filter(|grant| grant.active())
                     .flat_map(|grant| grant.traits.iter().cloned()),
             );
         }
@@ -402,7 +410,7 @@ impl Game {
             .get(holder)
             .filter(|state| state.generation == object.generation)
         {
-            for grant in &state.grants {
+            for grant in state.grants.iter().filter(|grant| grant.active()) {
                 if self.internal_suppresses_grant(holder, &grant.origin) {
                     continue;
                 }
@@ -583,7 +591,9 @@ impl Game {
             .filter(|state| object.zone == "field" && state.generation == object.generation)
             .into_iter()
             .flat_map(|state| &state.grants)
-            .filter(|grant| !self.internal_suppresses_grant(holder, &grant.origin))
+            .filter(|grant| {
+                grant.active() && !self.internal_suppresses_grant(holder, &grant.origin)
+            })
             .flat_map(|grant| grant.keywords.iter().cloned())
             .collect())
     }
@@ -630,7 +640,7 @@ impl Game {
 
     pub(in crate::game::internal) fn internal_payment_dependent_grants(&self) -> Result<bool> {
         for state in self.state.ir_keywords.values() {
-            for grant in &state.grants {
+            for grant in state.grants.iter().filter(|grant| grant.active()) {
                 for id in &grant.definitions {
                     let provider = grant.origin.provider();
                     let definition = self
@@ -678,7 +688,8 @@ impl Game {
             .filter(|state| state.generation == object.generation)
             .and_then(|state| {
                 state.grants.iter().find(|grant| {
-                    grant.keywords.contains("drain")
+                    grant.active()
+                        && grant.keywords.contains("drain")
                         && !self.internal_suppresses_grant(holder, &grant.origin)
                 })
             })
@@ -875,6 +886,11 @@ impl Game {
             _ => return Err(unsupported("grant instruction")),
         };
         let end = EffectEnd::at(self, execution, &duration.end)?;
+        let interval = duration
+            .intervals
+            .first()
+            .map(|interval| TurnInterval::at(self, execution, interval))
+            .transpose()?;
         let provider = self.installed_keyword_provider(execution)?;
         let origin = GrantOrigin::Installed {
             provider,
@@ -894,26 +910,8 @@ impl Game {
                 )
             })
             .collect::<Result<BTreeSet<_>>>()?;
-        let mut definitions = vec![];
-        for ability in abilities {
-            if let GrantedAbility::Definition { ability } = ability {
-                definitions.push(ability.id.0);
-                self.card_runtime.granted_definitions.insert(
-                    (origin.provider().card.clone(), ability.id),
-                    execution
-                        .plan
-                        .as_ref()
-                        .ok_or_else(|| invalid("grant execution has no admitted plan"))?
-                        .granted(
-                            Some(instruction),
-                            &Located {
-                                node: *ability.clone(),
-                                source: origin.provider().span.clone(),
-                            },
-                        )?,
-                );
-            }
-        }
+        let definitions =
+            self.install_granted_definitions(execution, instruction, abilities, &origin)?;
         let trait_grant = !traits.is_empty();
         let grant = KeywordGrant {
             origin_record: super::observation::EffectOrigin::capture(
@@ -922,6 +920,7 @@ impl Game {
                 &instruction.source,
             )?,
             end,
+            interval,
             keywords,
             traits,
             origin,
@@ -954,6 +953,36 @@ impl Game {
         };
         execution.receipts.insert(instruction.receipt, outcome);
         Ok(())
+    }
+
+    fn install_granted_definitions(
+        &mut self,
+        execution: &Execution,
+        instruction: &Instruction,
+        abilities: &[GrantedAbility],
+        origin: &GrantOrigin,
+    ) -> Result<Vec<u64>> {
+        let mut definitions = vec![];
+        for ability in abilities {
+            if let GrantedAbility::Definition { ability } = ability {
+                definitions.push(ability.id.0);
+                self.card_runtime.granted_definitions.insert(
+                    (origin.provider().card.clone(), ability.id),
+                    execution
+                        .plan
+                        .as_ref()
+                        .ok_or_else(|| invalid("grant execution has no admitted plan"))?
+                        .granted(
+                            Some(instruction),
+                            &Located {
+                                node: *ability.clone(),
+                                source: origin.provider().span.clone(),
+                            },
+                        )?,
+                );
+            }
+        }
+        Ok(definitions)
     }
 
     fn install_grant(
@@ -1060,14 +1089,21 @@ impl Game {
                     state.generation == object.generation
                         && matches!(object.zone.as_str(), "ex" | "resolution")
                 })
-                && state.grants.iter().any(|grant| {
-                    grant.definitions.iter().any(|definition| {
-                        self.card_runtime
-                            .granted_definitions
-                            .get(&(grant.origin.provider().card.clone(), AbilityId(*definition)))
-                            .is_some_and(|ability| static_cost(&ability.node))
+                && state
+                    .grants
+                    .iter()
+                    .filter(|grant| grant.active())
+                    .any(|grant| {
+                        grant.definitions.iter().any(|definition| {
+                            self.card_runtime
+                                .granted_definitions
+                                .get(&(
+                                    grant.origin.provider().card.clone(),
+                                    AbilityId(*definition),
+                                ))
+                                .is_some_and(|ability| static_cost(&ability.node))
+                        })
                     })
-                })
         })
     }
 
@@ -1086,7 +1122,7 @@ impl Game {
             .get(holder)
             .filter(|state| state.generation == object.generation)
         {
-            for grant in &state.grants {
+            for grant in state.grants.iter().filter(|grant| grant.active()) {
                 for id in &grant.definitions {
                     let ability = self
                         .card_runtime
@@ -1109,11 +1145,29 @@ impl Game {
         Ok(delta)
     }
 
+    pub(in crate::game) fn internal_keywords_begin_turn(&mut self) -> Result<()> {
+        let turn = self.state.schedule.current()?;
+        let player = super::player_id(self.active())?.seat;
+        for state in self.state.ir_keywords.values_mut() {
+            for grant in &mut state.grants {
+                grant.end.begin(turn, player);
+                if let Some(interval) = grant.interval.as_mut() {
+                    interval.begin(turn, player);
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub(in crate::game) fn internal_keywords_end_turn(&mut self, turn: u64) {
         self.state.ir_keywords.retain(|_, state| {
-            state
-                .grants
-                .retain(|grant| grant.end != EffectEnd::Turn(turn));
+            state.grants.retain_mut(|grant| {
+                if let Some(interval) = grant.interval.as_mut() {
+                    interval.finish(turn);
+                }
+                grant.end != EffectEnd::Turn(turn)
+                    && grant.interval.is_none_or(TurnInterval::pending)
+            });
             !state.grants.is_empty()
         });
     }
@@ -1136,6 +1190,7 @@ impl Game {
             .filter(|state| state.generation == object.generation)
             .into_iter()
             .flat_map(|state| &state.grants)
+            .filter(|grant| grant.active())
             .map(|grant| grant.origin.clone())
             .collect::<BTreeSet<_>>();
         origins.extend(
@@ -1261,6 +1316,10 @@ impl Game {
 }
 
 impl KeywordGrant {
+    fn active(&self) -> bool {
+        self.interval.is_none_or(TurnInterval::active)
+    }
+
     fn observed(
         &self,
         game: &Game,
@@ -1271,9 +1330,15 @@ impl KeywordGrant {
         Ok(InstalledEffect {
             source: self.origin_record.observed(game, perspective),
             expires: self.end.observed()?,
-            main_live: true,
-            intervals: vec![],
-            active,
+            main_live: self.interval.is_none(),
+            intervals: self
+                .interval
+                .map(TurnInterval::observed)
+                .transpose()?
+                .flatten()
+                .into_iter()
+                .collect(),
+            active: active && self.active(),
             change,
         })
     }

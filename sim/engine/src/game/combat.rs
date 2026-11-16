@@ -7,6 +7,9 @@ use crate::Result;
 
 impl Game {
     pub(super) fn attack_required(&self) -> Result<bool> {
+        if self.internal_attack_required()? {
+            return Ok(true);
+        }
         let mut targets = self.zone_ids(other(self.active()), "field");
         targets.push(format!("{}.leader", other(self.active())));
         for source in self.ability_sources("attack requirement")? {
