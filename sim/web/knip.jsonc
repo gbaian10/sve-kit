@@ -6,6 +6,8 @@
     "src/battle/engine/generated/**",
     // Vitest loads setup through its config in dev; it has no production entry.
     "tests/setup.ts",
+    // ESLint's Tailwind entry point for the battle screen (eslint.config.ts); nothing imports it.
+    "src/pages/play/battle.lint.css",
     // `battle-contract` generates the contract types and validator; package scripts invoke it.
     "scripts/battle-contract/main.ts",
     // `catalog` is a development-only CLI invoked by package scripts.

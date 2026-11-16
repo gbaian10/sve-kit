@@ -40,6 +40,10 @@ export type CardOpenMode = (typeof CARD_OPEN_MODES)[number]
 export const CARDS_LAYOUTS = ["cardLeft", "filterLeft"] as const
 export type CardsLayout = (typeof CARDS_LAYOUTS)[number]
 
+/** One mat under both players, or a mat of its own for each. */
+export const BATTLE_MATS = ["separate", "shared"] as const
+export type BattleMat = (typeof BATTLE_MATS)[number]
+
 export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */
   readonly uiLanguage: UiLanguage | null
@@ -71,6 +75,7 @@ export interface Prefs {
   readonly listMobileWidths: ListWidths
   readonly listVisibility: ListVisibility
   readonly listOrder: readonly ListColumn[]
+  readonly battleMat: BattleMat
 }
 
 export const DEFAULT_PREFS: Prefs = {
@@ -100,6 +105,7 @@ export const DEFAULT_PREFS: Prefs = {
   listMobileWidths: {},
   listVisibility: DEFAULT_LIST_VISIBILITY,
   listOrder: LIST_COLUMNS,
+  battleMat: "separate",
 }
 
 function oneOf<T extends string | number>(values: readonly T[]): (value: unknown) => value is T {
@@ -113,6 +119,7 @@ const isGridDensity = oneOf(GRID_DENSITIES)
 const isViewMode = oneOf(VIEW_MODES)
 const isCardOpenMode = oneOf(CARD_OPEN_MODES)
 const isCardsLayout = oneOf(CARDS_LAYOUTS)
+const isBattleMat = oneOf(BATTLE_MATS)
 const isDrawerWidth = (value: unknown): value is number | null =>
   value === null ||
   (Number.isInteger(value) && (value as number) >= 600 && (value as number) <= 1200)
@@ -159,6 +166,7 @@ const sanitizers: Sanitizers = {
   listMobileWidths: withDefault(isListWidths, DEFAULT_PREFS.listMobileWidths),
   listVisibility: sanitizeListVisibility,
   listOrder: sanitizeListOrder,
+  battleMat: withDefault(isBattleMat, DEFAULT_PREFS.battleMat),
 }
 
 export function sanitize(raw: unknown): Prefs {

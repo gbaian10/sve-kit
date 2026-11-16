@@ -232,6 +232,18 @@ export default defineConfig(
     },
   },
 
+  // The battle screen has a stylesheet of its own. Its entry point adds battle.css as component
+  // classes, so the classes that file defines are known there and a misspelt one is still an error.
+  {
+    files: ["src/pages/play/**/*.tsx"],
+    settings: {
+      "better-tailwindcss": {
+        entryPoint: path.join(root, "src/pages/play/battle.lint.css"),
+        detectComponentClasses: true,
+      },
+    },
+  },
+
   {
     files: ["src/**/*.{ts,tsx}"],
     rules: {

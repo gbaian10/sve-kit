@@ -7,6 +7,8 @@ export {
   moveListColumn,
 } from "./list-columns"
 export {
+  BATTLE_MATS,
+  type BattleMat,
   CARD_EDITIONS,
   CARD_OPEN_MODES,
   type CardOpenMode,

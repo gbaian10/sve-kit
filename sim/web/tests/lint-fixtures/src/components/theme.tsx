@@ -11,6 +11,15 @@ export const Palette = () => <div className="bg-gray-900" />
 // case: palette colour inside cn() -> better-tailwindcss/no-unknown-classes
 export const PaletteInCn = () => <div className={cn("p-2", "text-blue-500")} />
 
+// case: a battle part class outside the battle screen -> better-tailwindcss/no-unknown-classes
+export const BattlePart = () => <div className="bp-card" />
+
+// case: a battle state class outside the battle screen -> better-tailwindcss/no-unknown-classes
+export const BattleState = () => <div className="is-engaged" />
+
+// case: the battle layout classes outside the battle screen -> better-tailwindcss/no-unknown-classes, better-tailwindcss/no-unknown-classes
+export const BattleLayout = () => <div className="plates-top hand-column" />
+
 // case: arbitrary hex colour -> better-tailwindcss/no-restricted-classes
 export const Hex = () => <div className="bg-[#123456]" />
 
