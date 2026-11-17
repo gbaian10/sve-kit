@@ -1,0 +1,25 @@
+format: 1
+kind: registry_shard
+records:
+  - kind: source_correction
+    owner: PR
+    data:
+      id: x:37cfaa9bbed0554994babe4a66163a34
+      printing_id: p:1c6e65281784525dbdb4fe6ccd3a6571
+      face_id: f:c5c6b0388bdc585d84963282cafb86b2
+      field: name
+      expected_raw_value: 静寂のアナテマ・ギルダリア（EVOLVE）
+      corrected_value: 静寂のアナテマ・ギルダリア
+      expected_source_hash: sha256:6003ffc27a72cf9e6ac6e79446f911417b30191f9a0a8b6188b2660c64f3ea91
+      source_hash_recipe: registry-observation-v2
+      reason: The official card name has an extra （EVOLVE） suffix that the printed card does not show.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:624dd5fd0d6622bab32a886d603f33364b290fb69bbf1472f4dc3ffa988af07a
+          image_src: /wordpress/wp-content/images/cardlist/PR/PR-559.png
+          region: jp
+          locator: Card name box
