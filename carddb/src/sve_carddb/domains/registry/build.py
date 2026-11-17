@@ -15,6 +15,8 @@ from sve_carddb.domains.registry.review import Inputs, observation, validation_c
 from sve_carddb.domains.registry.storage import Entry
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from sve_carddb.domains.registry.review import Correction
 
 NAMESPACE = UUID("e304714a-f18c-5fb6-a987-222988ffbb7a")
@@ -50,6 +52,22 @@ def owner(number: str) -> str:
     return number.split("-", maxsplit=1)[0]
 
 
+class _Joins:
+    """Disjoint sets of grouping keys."""
+
+    def __init__(self, keys: Iterable[str]) -> None:
+        self.root = {key: key for key in keys}
+
+    def find(self, key: str) -> str:
+        while self.root[key] != key:
+            self.root[key] = self.root[self.root[key]]
+            key = self.root[key]
+        return key
+
+    def union(self, left: str, right: str) -> None:
+        self.root[self.find(left)] = self.find(right)
+
+
 @dataclass
 class Builder:
     inputs: Inputs
@@ -58,6 +76,8 @@ class Builder:
     parents: dict[tuple[str, str], str] = field(default_factory=dict)
     faces: dict[str, list[str]] = field(default_factory=dict)
     homes: dict[str, str] = field(default_factory=dict)
+    # Existing card ID folded into a reviewed same-card group -> the kept card ID.
+    merged: dict[str, str] = field(default_factory=dict)
 
     def add(
         self, kind: str, identifier: str, home: str, data: dict[str, JsonValue]
@@ -99,29 +119,100 @@ class Builder:
                 )
             )
             groups[key].append(("en", self.inputs.en[number]))
-        for group in groups.values():
+        for group in self._joined(groups):
             self._identity(
                 sorted(group, key=lambda item: (item[0] != "jp", item[1].number))
             )
 
+    def _existing_card(self, region: str, number: str) -> str | None:
+        entry = self.existing.get(
+            "printing:" + permanent_id("p", region + ":" + number)
+        )
+        return None if entry is None else string(entry.data, "card_id")
+
+    def _joined(
+        self, groups: dict[str, list[tuple[str, Card]]]
+    ) -> list[list[tuple[str, Card]]]:
+        """Join structure groups that already share a card or a reviewed same-card group.
+
+        A later reprint whose fingerprint matches a folded printing thus lands on the
+        kept card without a new decision.
+        """
+        joins = _Joins(groups)
+        by_card: dict[str, str] = {}
+        by_number: dict[str, str] = {}
+        for key, members in groups.items():
+            for region, card in members:
+                by_number[region + ":" + card.number] = key
+                if (existing := self._existing_card(region, card.number)) is not None:
+                    joins.union(key, by_card.setdefault(existing, key))
+        self._check_groups()
+        for keep, numbers in self.inputs.decisions.same_cards.items():
+            if keep not in by_card or any(
+                number not in by_number for number in numbers
+            ):
+                raise ValueError(f"Same-card group has unknown members: {keep}")
+            for number in numbers:
+                joins.union(by_number[number], by_card[keep])
+        joined: dict[str, list[tuple[str, Card]]] = defaultdict(list)
+        for key, members in groups.items():
+            joined[joins.find(key)].extend(members)
+        return list(joined.values())
+
+    def folded_faces(self) -> dict[str, str]:
+        """Each folded card's face -> the kept card's face with the same ordinal."""
+        result: dict[str, str] = {}
+        for entry in self.existing.values():
+            if entry.kind == "face" and (
+                keep := self.merged.get(string(entry.data, "card_id"))
+            ):
+                ordinal = entry.data["ordinal"]
+                if not isinstance(ordinal, int) or ordinal >= len(self.faces[keep]):
+                    raise ValueError("Folded card has a face the kept card lacks")
+                result[string(entry.data, "id")] = self.faces[keep][ordinal]
+        return result
+
+    def _check_groups(self) -> None:
+        """Groups stay disjoint, so a mistake is reported as such, not as a missing group."""
+        groups = self.inputs.decisions.same_cards
+        members = [number for numbers in groups.values() for number in numbers]
+        if len(members) != len(set(members)):
+            raise ValueError("A same-card member is listed twice")
+        for keep, numbers in groups.items():
+            for number in numbers:
+                existing = self._existing_card(*number.split(":", 1))
+                if existing is not None and existing != keep and existing in groups:
+                    raise ValueError(
+                        f"A same-card member belongs to another kept card: {number}"
+                    )
+
+    def _kept(self, previous: set[str]) -> str:
+        """Several existing cards may only meet through one reviewed same-card group."""
+        for keep, members in self.inputs.decisions.same_cards.items():
+            folded = {
+                card
+                for member in members
+                if (card := self._existing_card(*member.split(":", 1))) is not None
+            }
+            if keep in previous and previous - {keep} <= folded:
+                for card in previous - {keep}:
+                    self.merged[card] = keep
+                return keep
+        raise ValueError(
+            "Grouping would merge permanent card IDs; list them in same_cards"
+        )
+
     def _identity(self, group: list[tuple[str, Card]]) -> None:
         previous = {
-            string(entry.data, "card_id")
-            for region, card in group
-            if (
-                entry := self.existing.get(
-                    "printing:" + permanent_id("p", region + ":" + card.number)
-                )
-            )
-            is not None
+            existing
+            for region, item in group
+            if (existing := self._existing_card(region, item.number)) is not None
         }
-        if len(previous) > 1:
-            raise ValueError(
-                "Grouping would merge permanent card IDs; identity_change required"
-            )
         region, first = group[0]
         card_id = (
-            next(iter(previous))
+            self._kept(previous)
+            if len(previous) > 1
+            else next(iter(previous))
             if previous
             else permanent_id("c", region + ":" + first.number)
         )
@@ -240,8 +331,10 @@ class Builder:
     def curation(self) -> None:
         """Register confirmed absence, English art, reskins and source corrections."""
         only: dict[str, list[str]] = defaultdict(list)
+        with_jp = {card for (region, _), card in self.parents.items() if region == "jp"}
         for number, target in self.inputs.mapping.targets.items():
-            if target is None:
+            # An English-only printing folded into a JP card is no confirmed absence.
+            if target is None and self.parents["en", number] not in with_jp:
                 only[self.parents["en", number]].append(number)
         for card_id, numbers in sorted(only.items()):
             observations: list[JsonValue] = [
@@ -395,6 +488,25 @@ class Builder:
         )
 
 
+def _repoint(entry: Entry, cards: dict[str, str], faces: dict[str, str]) -> Entry:
+    """Move curation of a folded card onto the kept card's face of the same ordinal."""
+
+    def move(value: JsonValue) -> JsonValue:
+        if isinstance(value, str):
+            return cards.get(value, faces.get(value, value))
+        if isinstance(value, list):
+            return [move(item) for item in value]
+        if isinstance(value, dict):
+            return {key: move(item) for key, item in value.items()}
+        return value
+
+    if not cards:
+        return entry
+    data = move(entry.data)
+    assert isinstance(data, dict)
+    return entry.model_copy(update={"data": data})
+
+
 def build(inputs: Inputs, existing: dict[str, Entry]) -> list[Entry]:
     """Construct the complete candidate registry without filesystem mutations."""
     builder = Builder(inputs, existing)
@@ -402,7 +514,8 @@ def build(inputs: Inputs, existing: dict[str, Entry]) -> list[Entry]:
     builder.allocations()
     builder.curation()
     # Later curation is independent of the initialization decisions; never drop it.
+    faces = builder.folded_faces()
     for key, entry in existing.items():
         if entry.kind in {"art", "source_correction"}:
-            builder.entries.setdefault(key, entry)
+            builder.entries.setdefault(key, _repoint(entry, builder.merged, faces))
     return sorted(builder.entries.values(), key=lambda entry: entry.record_key)

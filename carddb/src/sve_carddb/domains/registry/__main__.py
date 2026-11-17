@@ -106,6 +106,7 @@ def main() -> None:
             entries,
             loaded=(index, existing),
             reviewed=reviewed,
+            fold=bool(inputs.decisions.same_cards),
         )
         if args.check and files:
             raise ValueError("Registry is incomplete; generation would append files")

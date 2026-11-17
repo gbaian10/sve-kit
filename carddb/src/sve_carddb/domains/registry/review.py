@@ -33,6 +33,10 @@ class InitDecisions(BaseModel):
     reskins: dict[str, str] = Field(default_factory=dict)
     separate_groups: dict[str, str] = Field(default_factory=dict)
     art_groups: list[list[str]] = Field(default_factory=list)
+    # Reviewed same-card groups: kept card ID -> "region:number" members. A member's
+    # existing card is folded into the kept one; its printings keep their IDs. This
+    # writes no redirect, so it is unusable once the snapshot format is frozen.
+    same_cards: dict[str, list[str]] = Field(default_factory=dict)
 
 
 class OriginalArt(BaseModel):

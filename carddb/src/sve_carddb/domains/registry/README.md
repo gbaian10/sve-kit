@@ -90,3 +90,15 @@ plan factory; generic legacy readers still fail closed on nonempty transitions.
 The allocator's `--renewal-inputs` option verifies that history before an original
 append, without extending absence approval. See the
 [operation guide](../../../../../docs/schema/domains/registry-renewal.md).
+
+## Pre-launch same-card folds
+
+The generator's decisions may list `same_cards`: a kept card ID and the
+`region:number` members confirmed to be the same card. Structure groups that
+share an existing card, or a listed group, are joined; existing cards may only
+meet inside one listed group. With `same_cards` present, `plan_files(fold=True)`
+rewrites printings (and art or corrections naming the folded card or faces) onto
+the kept card's face of the same ordinal, removes the folded card, faces, mapping
+reviews and reskin relations, and deletes shards that become empty. No identity
+change or redirect is written; this applies only before the snapshot format is
+frozen. See authored-layout's pre-launch same-card section.
