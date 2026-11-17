@@ -115,6 +115,28 @@ describe("printed names of merged printings", () => {
   })
 })
 
+describe("manual names spelled like the card's name", () => {
+  it("shows the card's name and translation instead of an untranslated generic name", () => {
+    // A manual "EP" on the EP card is no name of its own; a proper name would stay as printed.
+    const own = catalog.index.currentRevision("f:bp01-001", "jp")?.["name_unit_id"] ?? null
+    const revised = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["id"] === "p:bp01-001" && fragment.table === "printing"
+            ? { ...row, manual_name_unit_id: own }
+            : row,
+        ),
+      })),
+    }
+    const summary = catalogOf(revised).summary("p:bp01-001")
+    expect(summary?.name.original.text).toBe("試作の見習い兵")
+    expect(summary?.name.translations["zh-Hant"]).toBe("試作見習兵")
+    expect(summary?.treatedAs).toBeUndefined()
+  })
+})
+
 describe("pending display in the list", () => {
   it.each([true, false])("keeps a pending card visible with display=%s", (available) => {
     const revised = {

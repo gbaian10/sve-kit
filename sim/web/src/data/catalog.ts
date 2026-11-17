@@ -135,13 +135,19 @@ function manualNameOf(index: CardIndex, printing: Row | undefined): NameSource |
   return unitName(index, printing?.["manual_name_unit_id"])
 }
 
-/** The name a printing itself carries: its manual name, else its own printed name. */
+/**
+ * The name a printing itself carries: its manual name, else its own printed name. A name
+ * spelled exactly like the card's name in that region (a manual "EP", "Evolution Point") is
+ * no name of its own, so the card's name and its translation show instead.
+ */
 export function printingOwnName(
   index: CardIndex,
   printing: Row | undefined,
   faceId: string,
+  card: NameSource,
 ): NameSource | undefined {
-  return manualNameOf(index, printing) ?? printedNameOf(index, printing, faceId)
+  const own = manualNameOf(index, printing) ?? printedNameOf(index, printing, faceId)
+  return own && own.original.text !== card.original.text ? own : undefined
 }
 
 /** A printing's own printed name, shipped only where it differs from the card's name. */
@@ -306,7 +312,7 @@ function* catalogCardCursor(
         const own = index.displayRevision(faceId, region, stringValue(printing["id"]))
         const ownName = own ? nameOf(index, own, "name", revision ?? own) : undefined
         // A collab or event printing keeps its printed name; the card's name stays its rule name.
-        const printed = printingOwnName(index, printing, faceId)
+        const printed = printingOwnName(index, printing, faceId, name)
         const shownName = printed ?? ownName ?? name
         if (printed) {
           const key = `${printed.original.lang}\u0000${printed.original.text}`
