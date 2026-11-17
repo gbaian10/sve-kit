@@ -380,8 +380,13 @@ def plan_files(
     *,
     loaded: tuple[Index, dict[str, Entry]] | None = None,
     reviewed: RegistrySnapshot | None = None,
+    fold: bool = False,
 ) -> dict[Path, bytes]:
-    """Preserve all old entries and shards; only append newly allocated state."""
+    """Preserve all old entries and shards; only append newly allocated state.
+
+    ``fold`` admits a reviewed same-card group before launch: a folded card and its
+    faces disappear, and only records naming them may be rewritten in place.
+    """
     if reviewed is None:
         require_empty_transitions(root)
     else:
@@ -404,17 +409,9 @@ def plan_files(
             raise ValueError("Append inputs differ from verified original registry")
         loaded = original
     index, old = load(root) if loaded is None else loaded
-    new: dict[tuple[str, str], list[Entry]] = defaultdict(list)
-    for entry in entries:
-        if entry.record_key in old:
-            if entry != old[entry.record_key]:
-                raise ValueError(
-                    f"Existing registry record changed; explicit repair required: {entry.record_key}"
-                )
-        else:
-            new[_area(entry), entry.owner].append(entry)
-    if set(old) - {entry.record_key for entry in entries}:
-        raise ValueError("Input would delete existing registry records")
+    rewrites, new = _changes(
+        old, entries, _folded(old, entries) if fold else frozenset[str]()
+    )
     order = record_order(entries)
     files: dict[Path, bytes] = {}
     for (area, owner), records in sorted(new.items()):
@@ -424,9 +421,100 @@ def plan_files(
             + 1
         )
         _split(directory, sorted(records, key=order), number, files)
+    files |= _rewrite(root, rewrites)
     if not files:
         return {}
     return _finish(root, index, entries, files)
+
+
+def _changes(
+    old: dict[str, Entry], entries: list[Entry], folded: frozenset[str]
+) -> tuple[dict[str, Entry | None], dict[tuple[str, str], list[Entry]]]:
+    rewrites: dict[str, Entry | None] = {}
+    new: dict[tuple[str, str], list[Entry]] = defaultdict(list)
+    for entry in entries:
+        if entry.record_key not in old:
+            new[_area(entry), entry.owner].append(entry)
+        elif entry != old[entry.record_key]:
+            if entry.kind not in _REWRITTEN or not _names(
+                old[entry.record_key], folded
+            ):
+                raise ValueError(
+                    f"Existing registry record changed; explicit repair required: {entry.record_key}"
+                )
+            rewrites[entry.record_key] = entry
+    for key in set(old) - {entry.record_key for entry in entries}:
+        if old[key].kind not in _REMOVED or not _names(old[key], folded):
+            raise ValueError("Input would delete existing registry records")
+        rewrites[key] = None
+    return rewrites, new
+
+
+# A folded card's own records go; records that merely point at it move to the kept card.
+_REMOVED = frozenset({"card", "face", "region_mapping_review", "card_related"})
+_REWRITTEN = frozenset({"printing", "art", "source_correction"})
+
+
+def _folded(old: dict[str, Entry], entries: list[Entry]) -> frozenset[str]:
+    """Old card and face IDs a same-card fold removes; each card's printings must move."""
+    kept = {entry.record_key for entry in entries}
+    moved: dict[str, set[str]] = defaultdict(set)
+    for entry in entries:
+        if (
+            entry.kind == "printing"
+            and (before := old.get(entry.record_key)) is not None
+        ):
+            moved[_text(before.data, "card_id")].add(_text(entry.data, "card_id"))
+    cards = set()
+    for key, entry in old.items():
+        if entry.kind == "card" and key not in kept:
+            card = _text(entry.data, "id")
+            targets = moved[card] - {card}
+            if len(targets) != 1 or "card:" + next(iter(targets)) not in kept:
+                raise ValueError(f"Folded card has no single kept card: {card}")
+            cards.add(card)
+    faces = {
+        _text(entry.data, "id")
+        for entry in old.values()
+        if entry.kind == "face" and _text(entry.data, "card_id") in cards
+    }
+    return frozenset(cards | faces)
+
+
+def _names(entry: Entry, identifiers: frozenset[str]) -> bool:
+    found: list[JsonValue] = [entry.data]
+    while found:
+        value = found.pop()
+        if isinstance(value, str) and value in identifiers:
+            return True
+        if isinstance(value, list):
+            found.extend(value)
+        elif isinstance(value, dict):
+            found.extend(value.values())
+    return False
+
+
+def _rewrite(root: Path, rewrites: dict[str, Entry | None]) -> dict[Path, bytes]:
+    """Rewrite only shards holding changed records, keeping every other record's order."""
+    files: dict[Path, bytes] = {}
+    if not rewrites:
+        return files
+    for shard in read_base_files(root).shards:
+        records = shard.envelope().records
+        if not any(entry.record_key in rewrites for entry in records):
+            continue
+        kept = [
+            rewrites.get(entry.record_key, entry)
+            for entry in records
+            if rewrites.get(entry.record_key, entry) is not None
+        ]
+        # Empty bytes remove a shard the fold emptied.
+        files[root / shard.path] = (
+            encode(Shard(records=[entry for entry in kept if entry is not None]))
+            if kept
+            else b""
+        )
+    return files
 
 
 def _finish(
@@ -496,8 +584,14 @@ def _fit(records: list[Entry]) -> tuple[int, bytes]:
 
 
 def write_files(files: dict[Path, bytes]) -> None:
-    """Install shards first and the index last; an interrupted run fails closed."""
+    """Install shards first and the index last; an interrupted run fails closed.
+
+    Empty data removes a shard; only a same-card fold plans that.
+    """
     for path, data in files.items():
+        if not data:
+            path.unlink()
+            continue
         path.parent.mkdir(parents=True, exist_ok=True)
         fd, name = tempfile.mkstemp(dir=path.parent, prefix=".registry-")
         temporary = Path(name)
