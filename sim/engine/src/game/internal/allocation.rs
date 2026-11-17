@@ -4,7 +4,9 @@ use crate::game::internal::player::CandidateLinks;
 use crate::game::player::DistributionQuestion;
 use crate::game::player::Viewer;
 
-use super::{Execution, Game, InputDomain, Result, Wait, invalid, seat_name, unsupported};
+use super::{
+    Execution, Game, InputDomain, QuestionStage, Result, Wait, invalid, seat_name, unsupported,
+};
 use crate::game::player::QuestionPurpose;
 use crate::ir::{
     Binding, ChoiceDomain, DamageAllocation, DamageAmount, Decision, DecisionId, ExecutionId, Expr,
@@ -259,7 +261,9 @@ impl Game {
                 minimum: *minimum,
             }),
             Wait::Distribution(wait),
-        )
+        )?;
+        execution.question_stage = Some(QuestionStage::Allocate);
+        Ok(())
     }
 }
 

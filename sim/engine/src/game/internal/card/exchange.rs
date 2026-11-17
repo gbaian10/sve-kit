@@ -187,9 +187,10 @@ fn completed_payment(
     execution: &Execution,
     exchange: &ExchangeState,
     pp: Quantity,
+    accepted: bool,
+    pp_increase: bool,
 ) -> Result<ExchangePayment> {
-    let accepted = exchange.accepted == Some(true);
-    let material = if accepted && !exchange_shape::pp_increase(&exchange.definition) {
+    let material = if accepted && !pp_increase {
         let instruction = step(exchange)?;
         Some(ExchangeMaterialPayment {
             instruction: Box::new(instruction.clone()),
@@ -810,7 +811,7 @@ impl Game {
                 }),
             );
             execution.card_payment = Some((exchange.face.clone(), exchange.definition.receipt));
-            let payment = completed_payment(execution, exchange, quantity)?;
+            let payment = completed_payment(execution, exchange, quantity, complete, pp_increase)?;
             execution.exchange_payments.push(payment);
         }
         Ok(())

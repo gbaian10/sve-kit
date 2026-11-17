@@ -25,7 +25,7 @@ fn declaration_and_resolution_survive_rejected_answers() {
             QuestionShape::Decision(player::DecisionShape::Targets(_))
         ));
         assert_eq!(game.internal_play_phase(), Some(PlayPhase::Declare));
-        assert_eq!(game.internal_question_stage(), None);
+        assert_eq!(game.internal_question_stage(), Some(QuestionStage::Target));
         let before = exact_authority(&game);
         assert_eq!(
             submit(&mut game, actor, &declared, Answer::Integer(Nat(0))),

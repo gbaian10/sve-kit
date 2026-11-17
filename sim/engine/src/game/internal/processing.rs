@@ -24,9 +24,13 @@ use alloc::vec::Vec;
 /// A typed question's producer-recorded phase, separate from its purpose and answer domain.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum QuestionStage {
+    /// A formal play is choosing its target parameters.
+    Target,
+    /// A player is allocating amounts through an actual distribution question.
+    Allocate,
     /// An effect is offering its resolution payment.
     Pay,
-    /// An effect is offering its optional resolution body.
+    /// An effect is making a choice during resolution.
     Resolve,
 }
 

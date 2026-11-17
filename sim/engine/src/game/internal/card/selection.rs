@@ -1,5 +1,5 @@
 use super::super::play_target_cost::SelectedNames;
-use super::super::{DecisionToken, DecisionView, InputDomain, Queued, Slot, Wait};
+use super::super::{DecisionToken, DecisionView, InputDomain, QuestionStage, Queued, Slot, Wait};
 use super::{Execution, Game, Nat, ObjectRef, PlayerId, Result, invalid, player_id, unsupported};
 use crate::game::Object;
 use crate::game::internal::player::CandidateLinks;
@@ -1335,6 +1335,7 @@ impl Game {
             },
             Wait::Targets(wait),
         ));
+        execution.question_stage = Some(QuestionStage::Target);
         Ok(())
     }
 
@@ -1364,7 +1365,9 @@ impl Game {
             actor,
             InputDomain::Targets(domain),
             Wait::ResolutionTargets(wait),
-        )
+        )?;
+        execution.question_stage = Some(QuestionStage::Resolve);
+        Ok(())
     }
 
     #[expect(
