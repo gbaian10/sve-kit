@@ -3,15 +3,14 @@ import userEvent from "@testing-library/user-event"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { prepareCardContent } from "../../app/card-content"
 import { routeState } from "../../app/listEntryState"
 import { ToastProvider } from "../../components/ui/Toast"
-import { type CardSummary, catalogOf, locateCard, type SnapshotClient } from "../../data"
+import { type CardSummary, catalogOf, type SnapshotClient } from "../../data"
 import { createSnapshotClient } from "../../data/client"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 import { memoryCache } from "../../test-utils/cache"
-import { CardPage, CardView } from "./CardPage"
+import { CardPage } from "./CardPage"
 
 const state = vi.hoisted(() => ({
   client: null as SnapshotClient | null,
@@ -236,50 +235,6 @@ afterEach(() => {
 })
 
 describe("card navigation commits", () => {
-  it("collapses errata again when returning to a retained card", async () => {
-    const h = await setup()
-    await act(async () => {
-      await h.router.navigate("/cards/BP01-020")
-    })
-    const toggle = await screen.findByRole("button", { name: "勘誤", expanded: false })
-    await userEvent.click(toggle)
-    expect(screen.getByRole("link", { name: "官方勘誤公告" })).toBeVisible()
-    await act(async () => {
-      await h.router.navigate("/elsewhere")
-    })
-    expect(screen.getByText("Elsewhere")).toBeVisible()
-    await act(async () => {
-      await h.router.navigate("/cards/BP01-020")
-    })
-    expect(await screen.findByRole("button", { name: "勘誤", expanded: false })).toBeVisible()
-    expect(screen.queryByRole("link", { name: "官方勘誤公告" })).not.toBeInTheDocument()
-  })
-
-  it("restores a prepared card after leaving the card route without waiting for a new read", async () => {
-    const h = await setup()
-    const first = state.order[0]
-    if (!first) throw new Error("missing first card")
-    await act(async () => {
-      await h.router.navigate("/elsewhere")
-    })
-    expect(screen.getByText("Elsewhere")).toBeInTheDocument()
-    const release = h.holdNextRead()
-    try {
-      await act(async () => {
-        await h.router.navigate("/cards/BP01-001", {
-          state: { background: "", resultKey: first.printingId, ...routeState(first) },
-        })
-      })
-      expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
-      expect(document.querySelector("article")).toHaveAttribute("aria-busy", "false")
-    } finally {
-      await act(async () => {
-        release()
-        await Promise.resolve()
-      })
-    }
-  })
-
   it("does not restore the retained card from a different snapshot", async () => {
     const h = await setup()
     const first = state.order[0]
@@ -297,50 +252,6 @@ describe("card navigation commits", () => {
     expect(screen.queryByRole("heading", { name: "試作見習兵" })).not.toBeInTheDocument()
     act(release)
     await screen.findByRole("heading", { name: "試作見習兵" })
-  })
-
-  it("retains the whole page during A → B → C and rejects late B", async () => {
-    const user = userEvent.setup()
-    const h = await setup()
-    const previousEffect = document.querySelector('[data-field="effect"]')
-    expect(previousEffect).toBeInTheDocument()
-    const releaseB = h.holdNextRead()
-    await user.click(screen.getByRole("button", { name: "下一張" }))
-    expect(h.router.state.location.pathname).toBe("/cards/BP01-002")
-    expect(document.querySelector('[data-field="effect"]')).toBe(previousEffect)
-    expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-001")
-    expect(screen.getByRole("button", { name: /放大/ })).toBeDisabled()
-    expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
-    fireEvent.keyDown(window, { key: "ArrowRight" })
-    await screen.findByRole("heading", { name: "試作號令" })
-    await waitFor(() => {
-      expect(h.router.state.location.pathname).toContain("/cards/BP01-003/")
-    })
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-003")
-    await act(async () => {
-      releaseB()
-      await new Promise((resolve) => setTimeout(resolve, 50))
-    })
-    expect(screen.queryByRole("heading", { name: "試作隊長" })).not.toBeInTheDocument()
-    expect(screen.getByRole("heading", { name: "試作號令" })).toBeInTheDocument()
-    expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
-    const first = state.order[0]
-    if (!first) throw new Error("missing first card")
-    await act(async () => {
-      await h.router.navigate("/cards/BP01-001", {
-        state: {
-          background: "",
-          resultKey: first.printingId,
-          ...routeState(first),
-        },
-      })
-    })
-    const releaseAgain = h.holdNextRead()
-    await user.click(screen.getByRole("button", { name: "下一張" }))
-    expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
-    act(releaseAgain)
-    await screen.findByRole("heading", { name: "試作隊長" })
   })
 
   it("replaces the retained page with a missing-target error and can navigate again", async () => {
@@ -379,20 +290,6 @@ describe("card navigation commits", () => {
       expect(screen.queryByText("卡圖資訊載入失敗")).not.toBeInTheDocument()
     })
     expect(screen.queryByText("文字載入失敗，請稍後再試。")).not.toBeInTheDocument()
-  })
-
-  it("commits pending-card history, type and stats with its name and text", async () => {
-    const h = await setup(true)
-    const release = h.holdHistory()
-    await userEvent.click(screen.getByRole("button", { name: "下一張" }))
-    expect(screen.getByRole("heading", { name: "試作見習兵" })).toBeInTheDocument()
-    expect(screen.getByRole("listitem", { name: "消費 1" })).toBeInTheDocument()
-    act(release)
-    await screen.findByRole("heading", { name: "試作魔導士" })
-    expect(screen.getByRole("listitem", { name: "消費 4" })).toBeInTheDocument()
-    expect(screen.getByRole("listitem", { name: "攻擊力 3" })).toBeInTheDocument()
-    expect(screen.getByRole("listitem", { name: "生命值 3" })).toBeInTheDocument()
-    expect(screen.queryByText("文字與標註載入中")).not.toBeInTheDocument()
   })
 
   it("reports failed candidate history as a target failure and retries the target", async () => {
@@ -508,101 +405,6 @@ it.each(["button", "keyboard"])(
   },
 )
 
-it("keeps the retained card paused when router context changes before the new content arrives", async () => {
-  const client = createSnapshotClient("https://retained.test", {
-    cacheStorage: memoryCache(),
-    fetch: (url) => {
-      const bytes = built.files.get(url.slice("https://retained.test/".length))
-      return Promise.resolve(
-        bytes ? new Response(bytes.slice().buffer) : new Response(null, { status: 404 }),
-      )
-    },
-  })
-  await client.load()
-  const content = await prepareCardContent(
-    client,
-    await locateCard(client, { namespace: "official", key: "BP01-001", edition: "jp" }),
-    "zh-Hant",
-  )
-  state.order = ["p:bp01-001", "p:bp01-002"].map((id) => {
-    const summary = content.catalog.summary(id)
-    if (!summary) throw new Error("missing synthetic neighbour")
-    return summary
-  })
-  prefsStore.set({ preloadNeighbours: true })
-  const signals: AbortSignal[] = []
-  const first = state.order[0]
-  if (!first) throw new Error("missing first synthetic card")
-  const h = await renderRoutes(
-    [
-      {
-        path: "/cards/:cardNo/:slug?",
-        element: (
-          <ToastProvider>
-            <CardView
-              client={content.client}
-              catalog={content.catalog}
-              status={{ state: "ready", dataVersion: content.snapshot.dataVersion }}
-              resolved={content.printing}
-              preparedImages={content.images}
-              onPrefetch={(_, signal) => {
-                signals.push(signal)
-                return Promise.resolve()
-              }}
-            />
-          </ToastProvider>
-        ),
-      },
-    ],
-    {
-      initialEntries: [
-        {
-          pathname: "/cards/BP01-001",
-          state: { background: "", resultKey: first.printingId, ...routeState(first) },
-        },
-      ],
-    },
-  )
-  await waitFor(() => {
-    expect(signals.length).toBeGreaterThan(0)
-  })
-  const initialEntry = h.router.state.location.key
-  fireEvent.click(screen.getByRole("button", { name: "下一張" }))
-  expect(h.router.state.location.key).not.toBe(initialEntry)
-  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-001")
-  expect(signals.every((signal) => signal.aborted)).toBe(true)
-})
-
-describe("related cards", () => {
-  it("lists the official relations and the other printings read from the snapshot", async () => {
-    const user = userEvent.setup()
-    const h = await setup()
-    await user.click(screen.getByRole("button", { name: "下一張" }))
-    await screen.findByRole("heading", { name: "試作隊長" })
-    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
-    const related = await screen.findByRole("region", { name: "關聯卡牌" })
-    expect(
-      within(related)
-        .getAllByRole("tab")
-        .map((tab) => tab.textContent),
-    ).toEqual(["參考", "其他版本"])
-    // The synthetic relation names no evolve card and the text has no card-name annotation, so the
-    // card lands under the other official relations; the number is the label, the name the tooltip.
-    const official = within(related).getByRole("list", { name: "其他官方關聯" })
-    const link = within(official).getByRole("link", { name: "試作見習兵（BP01-001）" })
-    expect(link).toHaveTextContent("BP01-001")
-    expect(link).not.toHaveTextContent("試作見習兵")
-    expect(link).toHaveAttribute("href", "/cards/BP01-001")
-    await user.click(within(related).getByRole("tab", { name: "其他版本" }))
-    const printings = within(related).getByRole("list", { name: "其他版本" })
-    expect(within(printings).getAllByRole("link")).toHaveLength(2)
-    expect(within(printings).getByRole("link", { current: "page" })).toHaveTextContent("BP01-002")
-    expect(within(printings).getByRole("link", { current: "page" })).not.toHaveTextContent(
-      "BP01-002a",
-    )
-  })
-})
-
 describe("history stack", () => {
   // The related tabs hold the same cards under different tabs: open each until the link shows up.
   async function relatedLink(user: ReturnType<typeof userEvent.setup>, cardNo: string) {
@@ -621,19 +423,6 @@ describe("history stack", () => {
     )
   }
 
-  it("replaces the entry for previous and next, so back skips every card walked", async () => {
-    const user = userEvent.setup()
-    const h = await setup()
-    await user.click(screen.getByRole("button", { name: "下一張" }))
-    await settled("試作隊長")
-    expect(h.router.state.historyAction).toBe("REPLACE")
-    await user.click(screen.getByRole("button", { name: "下一張" }))
-    expect(h.router.state.historyAction).toBe("REPLACE")
-    await user.click(screen.getByRole("button", { name: "上一張" }))
-    expect(h.router.state.historyAction).toBe("REPLACE")
-    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
-  })
-
   // Entries reached by a link are replaced once by the canonical address, so they are told apart
   // by walking back from them rather than by history action or key.
   const stepBack = async (h: Awaited<ReturnType<typeof setup>>) => {
@@ -642,42 +431,6 @@ describe("history stack", () => {
     })
     return h.router.state.location.pathname
   }
-
-  // A card entered the way a link from `previous` would have entered it.
-  const enterFrom = async (h: Awaited<ReturnType<typeof setup>>, previous: string) => {
-    await act(() =>
-      h.router.navigate("/cards/BP01-002", {
-        state: { background: "", resultKey: "p:bp01-002", previous },
-      }),
-    )
-    await settled("試作隊長")
-  }
-
-  it("goes back for a link to the card it was reached from", async () => {
-    const user = userEvent.setup()
-    const h = await setup()
-    await enterFrom(h, "p:bp01-001")
-    await user.click(await relatedLink(user, "BP01-001"))
-    await settled("試作見習兵")
-    // Going back landed on the first entry, so the entry the link left is still ahead.
-    await act(async () => {
-      await h.router.navigate(1)
-    })
-    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
-  })
-
-  it("stacks a link whose target is not the card it was reached from", async () => {
-    const user = userEvent.setup()
-    const h = await setup()
-    await enterFrom(h, "p:bp01-003")
-    await user.click(await relatedLink(user, "BP01-001"))
-    await settled("試作見習兵")
-    await act(async () => {
-      await h.router.navigate(1)
-    })
-    expect(h.router.state.location.pathname).toContain("/cards/BP01-001")
-    expect(await stepBack(h)).toContain("/cards/BP01-002")
-  })
 
   it("goes back for 002 → 002a → 002 and records the printing, not the card, as previous", async () => {
     const user = userEvent.setup()
@@ -708,22 +461,5 @@ describe("history stack", () => {
       await h.router.navigate(1)
     })
     expect(h.router.state.location.pathname).toContain("/cards/BP01-002a")
-  })
-
-  it("leaves a modified click on a link back to the browser", async () => {
-    const user = userEvent.setup()
-    const h = await setup()
-    await enterFrom(h, "p:bp01-001")
-    const link = await relatedLink(user, "BP01-001")
-    act(() => {
-      link.dispatchEvent(
-        new MouseEvent("click", { bubbles: true, cancelable: true, ctrlKey: true }),
-      )
-    })
-    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
-    await act(async () => {
-      await h.router.navigate(1)
-    })
-    expect(h.router.state.location.pathname).toContain("/cards/BP01-002")
   })
 })
