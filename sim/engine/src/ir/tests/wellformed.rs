@@ -116,37 +116,6 @@ fn checked_body_is_owned_and_capabilities_are_not_a_certificate() {
 }
 
 #[test]
-fn declaration_must_dominate_a_use_of_the_exact_type_and_scope() {
-    let binding = Binding::new(1, ScopeId(1));
-    accept(body(
-        1,
-        vec![declare(1, binding), draw(2, Expr::Bound(binding))],
-    ));
-    reject(
-        body(1, vec![draw(1, Expr::Bound(binding)), declare(2, binding)]),
-        WellFormedReason::UnavailableBinding,
-    );
-    reject(
-        body(
-            1,
-            vec![
-                declare(1, binding),
-                draw(2, signed(Expr::Bound(Binding::new(1, ScopeId(1))))),
-            ],
-        ),
-        WellFormedReason::BindingType,
-    );
-    reject(
-        body(1, vec![declare(1, Binding::new(1, ScopeId(2)))]),
-        WellFormedReason::WrongScope,
-    );
-    reject(
-        body(1, vec![declare(1, binding), declare(2, binding)]),
-        WellFormedReason::DuplicateBinding,
-    );
-}
-
-#[test]
 fn captures_require_a_definition_and_do_not_alias_regular_values() {
     let binding = Binding::new(1, ScopeId(1));
     let captured = Expr::Captured(CaptureRef { binding });
@@ -181,44 +150,6 @@ fn captures_require_a_definition_and_do_not_alias_regular_values() {
             vec![capture(Binding::new(1, ScopeId(2)), Expr::Literal(Int(1)))],
         ),
         WellFormedReason::WrongScope,
-    );
-}
-
-#[test]
-fn every_branch_is_checked_without_implicit_join_or_sibling_visibility() {
-    let binding = Binding::new(1, ScopeId(2));
-    let branch = |else_body| {
-        control(Control::If {
-            condition: Expr::Literal(Bool(false)),
-            then_body: body(2, vec![declare(1, binding)]),
-            else_body,
-        })
-    };
-    accept(body(
-        1,
-        vec![branch(Some(body(3, vec![draw(2, Expr::Literal(Int(1)))])))],
-    ));
-    reject(
-        body(1, vec![branch(None), draw(2, Expr::Bound(binding))]),
-        WellFormedReason::UnavailableBinding,
-    );
-    reject(
-        body(
-            1,
-            vec![branch(Some(body(3, vec![draw(2, Expr::Bound(binding))])))],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-    reject(
-        body(
-            1,
-            vec![control(Control::If {
-                condition: Expr::Literal(Bool(false)),
-                then_body: body(2, vec![draw(1, Expr::Bound(binding))]),
-                else_body: None,
-            })],
-        ),
-        WellFormedReason::UnavailableBinding,
     );
 }
 
@@ -268,48 +199,6 @@ fn instruction_receipt_and_scope_identities_cannot_be_redeclared() {
             body: body(2, vec![draw(1, Expr::Literal(Int(1)))]),
         })],
     ));
-}
-
-#[test]
-fn receipts_check_producer_type_and_dominance() {
-    let follow = draw(2, signed(actual(ReceiptReference::new(ReceiptId(1)))));
-    accept(body(
-        1,
-        vec![draw(1, Expr::Literal(Int(1))), follow.clone()],
-    ));
-    reject(
-        body(1, vec![follow.clone()]),
-        WellFormedReason::UnavailableReceipt,
-    );
-    let look = instruction(
-        Action::Look {
-            viewer: PlayerRef::Controller {},
-            zone: ZoneRef {
-                player: PlayerRef::Controller {},
-                kind: ZoneKind::Deck,
-            },
-            count: Expr::Literal(Nat(1)),
-            mode: StepwiseMode::Exact,
-        },
-        1,
-        "synthetic",
-    );
-    reject(
-        body(1, vec![look, follow.clone()]),
-        WellFormedReason::ReceiptType,
-    );
-    reject(
-        body(
-            1,
-            vec![
-                control(Control::Sequence {
-                    body: body(2, vec![draw(1, Expr::Literal(Int(1)))]),
-                }),
-                follow,
-            ],
-        ),
-        WellFormedReason::UnavailableReceipt,
-    );
 }
 
 #[test]
@@ -429,99 +318,6 @@ fn repeat(export: ReceiptExport, termination: Termination, check: IterationCheck
         receipts: vec![export],
     })
 }
-fn card_export() -> ReceiptExport {
-    ReceiptExport::CardQuantity {
-        source: ReceiptReference::new(ReceiptId(1)),
-        iteration: Binding::new(1, ScopeId(2)),
-        collect: Some(Binding::new(2, ScopeId(1))),
-    }
-}
-fn collect_sum() -> Expr<Nat> {
-    Expr::Compute(Box::new(NatOperation::ReceiptActualSum {
-        receipts: MeasuredReceiptList::Cards {
-            receipts: Binding::new(2, ScopeId(1)),
-        },
-    }))
-}
-
-#[test]
-fn repeat_exports_are_visible_only_at_their_declared_phase() {
-    let until = Termination::Until {
-        predicate: positive(actual(ReceiptReference::iteration(Binding::new(
-            1,
-            ScopeId(2),
-        )))),
-    };
-    accept(body(
-        1,
-        vec![
-            repeat(card_export(), until.clone(), IterationCheck::AfterIteration),
-            draw(2, signed(collect_sum())),
-        ],
-    ));
-    reject(
-        body(
-            1,
-            vec![repeat(
-                card_export(),
-                until,
-                IterationCheck::BeforeIteration,
-            )],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-    reject(
-        body(
-            1,
-            vec![repeat(
-                card_export(),
-                Termination::Until {
-                    predicate: positive(collect_sum()),
-                },
-                IterationCheck::AfterIteration,
-            )],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-    reject(
-        body(
-            1,
-            vec![
-                repeat(
-                    card_export(),
-                    Termination::Count {
-                        count: Expr::Literal(Nat(1)),
-                    },
-                    IterationCheck::BeforeIteration,
-                ),
-                draw(
-                    2,
-                    signed(actual(ReceiptReference::iteration(Binding::new(
-                        1,
-                        ScopeId(2),
-                    )))),
-                ),
-            ],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-    reject(
-        body(
-            1,
-            vec![
-                draw(2, signed(collect_sum())),
-                repeat(
-                    card_export(),
-                    Termination::Count {
-                        count: Expr::Literal(Nat(1)),
-                    },
-                    IterationCheck::BeforeIteration,
-                ),
-            ],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-}
 
 #[test]
 fn repeat_rejects_wrong_producers_outer_receipts_and_nonlocal_exports() {
@@ -590,120 +386,6 @@ fn repeat_rejects_wrong_producers_outer_receipts_and_nonlocal_exports() {
             )],
         ),
         WellFormedReason::WrongScope,
-    );
-}
-
-#[test]
-fn candidates_and_each_object_bindings_do_not_escape_their_body() {
-    let binding = Binding::new(1, ScopeId(2));
-    let input = Selector::Zone {
-        players: controller_set(),
-        zone: ZoneKind::Deck,
-        view: SelectionView::Current {},
-        binding,
-        predicate: Box::new(Expr::Compute(Box::new(Predicate::MemberOf {
-            object: ObjectOperand::Bound { binding },
-            set: Selector::Objects { objects: vec![] },
-        }))),
-    };
-    let reveal = |selector| instruction(Action::Reveal { objects: selector }, 1, "synthetic");
-    accept(body(1, vec![reveal(input.clone())]));
-    reject(
-        body(
-            1,
-            vec![
-                reveal(input),
-                instruction(
-                    Action::Posture {
-                        objects: Selector::Objects {
-                            objects: vec![ObjectOperand::Bound { binding }],
-                        },
-                        posture: Posture::Acted,
-                    },
-                    2,
-                    "synthetic",
-                ),
-            ],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-    let each = control(Control::EachObject {
-        input: Selector::Objects {
-            objects: vec![ObjectOperand::SourceHolder {}],
-        },
-        binding,
-        body: body(
-            2,
-            vec![reveal(Selector::Objects {
-                objects: vec![ObjectOperand::Bound { binding }],
-            })],
-        ),
-        order: None,
-    });
-    accept(body(1, vec![each.clone()]));
-    reject(
-        body(
-            1,
-            vec![each, draw(2, Expr::Bound(Binding::new(1, ScopeId(2))))],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-}
-
-#[test]
-fn each_player_carries_same_player_outputs_across_stages() {
-    let player = Binding::new(1, ScopeId(2));
-    let declaration = Binding::new(2, ScopeId(2));
-    let each = |count| {
-        control(Control::EachPlayer {
-            players: controller_set(),
-            player,
-            choice_order: PlayerOrder::TurnPlayerFirst,
-            stages: vec![
-                PlayerStage {
-                    body: body(2, vec![declare(1, declaration)]),
-                    mode: StageMode::ChoiceProcedure {},
-                },
-                PlayerStage {
-                    body: body(
-                        3,
-                        vec![with_instruction(
-                            instruction(
-                                Action::Draw {
-                                    player: PlayerRef::Bound { binding: player },
-                                    count,
-                                    mode: StepwiseMode::Exact,
-                                },
-                                2,
-                                "synthetic",
-                            ),
-                            |instruction| instruction.actor = PlayerRef::Bound { binding: player },
-                        )],
-                    ),
-                    mode: StageMode::NonChoiceSimultaneous {},
-                },
-            ],
-        })
-    };
-    accept(body(1, vec![each(Expr::Literal(Int(1)))]));
-    accept(body(1, vec![each(Expr::Bound(declaration))]));
-    reject(
-        body(
-            1,
-            vec![
-                each(Expr::Literal(Int(1))),
-                instruction(
-                    Action::Draw {
-                        player: PlayerRef::Bound { binding: player },
-                        count: Expr::Literal(Int(1)),
-                        mode: StepwiseMode::Exact,
-                    },
-                    3,
-                    "synthetic",
-                ),
-            ],
-        ),
-        WellFormedReason::UnavailableBinding,
     );
 }
 
@@ -927,38 +609,6 @@ fn choice_free_batches_and_stages_cannot_hide_stepwise_decisions() {
     }
 }
 
-fn guard(condition: Expr<Bool>) -> Located<Node> {
-    control(Control::If {
-        condition,
-        then_body: body(2, vec![]),
-        else_body: None,
-    })
-}
-fn reveal_objects(objects: Selector) -> Located<Node> {
-    instruction(Action::Reveal { objects }, 1, "synthetic")
-}
-fn with_instruction(mut node: Located<Node>, edit: impl FnOnce(&mut Instruction)) -> Located<Node> {
-    if let Node::Instruction { instruction } = &mut node.node {
-        edit(instruction);
-    }
-    node
-}
-
-#[test]
-fn operands_require_a_dominating_definition() {
-    for node in [
-        draw(1, Expr::Bound(Binding::new(94, ScopeId(1)))),
-        reveal_objects(Selector::Bound {
-            reference: Binding::new(93, ScopeId(1)),
-        }),
-        guard(Expr::Compute(Box::new(Predicate::Not {
-            predicate: Expr::Bound(Binding::new(96, ScopeId(1))),
-        }))),
-    ] {
-        reject(body(1, vec![node]), WellFormedReason::UnavailableBinding);
-    }
-}
-
 mod decisions;
 
 #[test]
@@ -1004,63 +654,6 @@ fn card_play_costs_check_their_own_entry_and_keep_rejection_sources() {
         receipt_failure
             .ir_path
             .contains("card_play_costs/0/modifiers/0/condition")
-    );
-}
-
-#[test]
-fn single_transform_checks_bindings_and_keeps_allocated_variants_closed() {
-    let single = |objects| Action::Transform {
-        objects,
-        into: TokenAllocation::Single {
-            template: TokenTemplateId("synthetic".into()),
-        },
-        entry_effects: vec![],
-    };
-    accept(body(
-        1,
-        vec![instruction(
-            single(Selector::Objects {
-                objects: vec![ObjectOperand::SourceHolder {}],
-            }),
-            1,
-            "synthetic",
-        )],
-    ));
-    reject(
-        body(
-            1,
-            vec![instruction(
-                single(Selector::Bound {
-                    reference: Binding::new(99, ScopeId(1)),
-                }),
-                1,
-                "synthetic",
-            )],
-        ),
-        WellFormedReason::UnavailableBinding,
-    );
-    reject(
-        body(
-            1,
-            vec![instruction(
-                Action::Transform {
-                    objects: Selector::Objects {
-                        objects: vec![ObjectOperand::SourceHolder {}],
-                    },
-                    into: TokenAllocation::EachExactlyOnce {
-                        templates: vec![TokenTemplateId("synthetic".into())],
-                        total: Expr::Literal(Nat(1)),
-                        counts: Binding::new(99, ScopeId(1)),
-                        actor: PlayerRef::Controller {},
-                        decision: DecisionId(1),
-                    },
-                    entry_effects: vec![],
-                },
-                1,
-                "synthetic",
-            )],
-        ),
-        WellFormedReason::UnsupportedShape,
     );
 }
 

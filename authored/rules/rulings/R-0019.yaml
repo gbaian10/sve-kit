@@ -1,29 +1,45 @@
 format: 2
 kind: ruling
 id: R-0019
-revision: 1
+revision: 2
 question: 熱血の竜教師・ジョー的起動能力「…10個以上なら、…5ダメージ。これは{体力}+6する。」中，體力+6 是否也受 10 個條件限制？
-decision: 本專案解讀為：條件只涵蓋同一句的 5 傷害；「これは{体力}+6する」是下一句，起動時無論 counter 數量都會執行。
+decision: 本專案解讀為：條件涵蓋到段落結尾；counter 不足 10 個時，5 傷害與「これは{体力}+6する」都不執行。
 evidence:
   - ref: BP21-057
     kind: supporting
     url: https://shadowverse-evolve.com/cardlist/?cardno=BP21-057
     note: 條件句以句點結束後另起一句；本卡 Q2736～Q2740 沒有回答體力+6 的條件範圍。
   - ref: BP21-060
-    kind: supporting
+    kind: counter
     url: https://shadowverse-evolve.com/cardlist/?cardno=BP21-060
-    note: 同包同機制的卡要讓體力+6 受條件限制時，會在同一句重寫「10個以上なら、これは{体力}+6する」；BP21-061、063、065、069 亦同。
+    note: 同包同機制的卡要讓體力+6 受條件限制時，會在同一句重寫「10個以上なら、これは{体力}+6する」（BP21-061、063、065、069 亦同），可讀成本卡刻意分句；與同句型官方 Q&A 相比較弱，不採用。
+  - ref: Q1373
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP10-109
+    question: 自分の場に他のフォロワーがいる場合でも、「《ファンファーレ》相手の場のフォロワー1体を選ぶ。自分の場に他のフォロワーがいないなら、それを破壊する。1枚引く。」という能力によって、1枚引くことはできますか？
+    quote: いいえ。自分の場に他のフォロワーがいる場合、相手の場のフォロワーを選ぶことができたとしても、「自分の場に他のフォロワーがいないなら、」以降の効果は働かず、1枚引くことができません。
+    date: "2024-04-26"
+  - ref: Q1611
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=SP01-039
+    quote: いいえ。自分のリーダーの体力を+4以上していない場合、それ以降の効果は働かず、1枚引くことができません。
+    date: "2024-09-20"
+  - ref: Q1506
+    kind: supporting
+    url: https://shadowverse-evolve.com/cardlist/?cardno=BP11-028
+    quote: いいえ。自分の場に『ファントムデュオ・バニー＆バロン』と『魔導四輪車・V』がない場合、それ以降の効果は働かず、それのリーダーに2ダメージを与えることができません。
+    date: "2024-08-20"
   - ref: project
     kind: project
-    date: "2026-11-14"
-    reason: 依句讀把條件範圍限定在同一句；實作者與審核者都未找到相反的官方依據。沒有本卡直接官方裁定，保留向官方詢問並可局部修正。
+    date: "2026-11-18"
+    reason: 同句型的官方 Q1373（條件句後另起一句的「1枚引く」也不執行）、Q1611、Q1506 類推，與 R-0002、R-0007（條件管到段落結尾）一致。本卡沒有直接官方裁定。
 strength: inferred
-decided_on: "2026-11-14"
+decided_on: "2026-11-18"
 applies_to: [K.if]
 hint:
-  zh-TW: 本專案解讀：起動後不論情熱カウンター多少，這張卡都體力+6；只有 5 點傷害需要 10 個以上。此範圍尚無直接官方裁定。
-  ja: 本プロジェクトの解釈：情熱カウンターの数にかかわらず、このカードは体力+6します。10個以上が必要なのは5ダメージだけです。この範囲について直接の公式回答はありません。
-  en: "Project interpretation: this card gets +6 defense whenever the ability resolves;
-    only the 5 damage needs 10 or more Passion counters. There is no direct official
-    ruling on this scope."
-note: 只處理體力+6 的條件範圍，強度維持 inferred。若官方回答不同，只需把 buff 移進條件的 then。
+  zh-TW: 本專案解讀：情熱カウンター 10 個以上時才造成 5 點傷害並體力+6；不足時兩者都不執行（依同句型官方 Q&A 類推）。
+  ja: 本プロジェクトの解釈：情熱カウンターが10個以上の場合のみ、5ダメージを与え、このカードは体力+6します。足りない場合はどちらも行いません（同じ文型の公式Q&Aから類推）。
+  en: "Project interpretation: only with 10 or more Passion counters does the ability deal
+    5 damage and give this card +6 defense; otherwise neither happens (by analogy with
+    official Q&A on the same sentence shape)."
+note: revision 2 改正條件範圍：體力+6 也受條件限制（原先依句讀只限 5 傷害）。依同句型官方 Q&A 類推，強度維持 inferred。

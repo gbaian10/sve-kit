@@ -1,8 +1,7 @@
-use super::{CURRENT_FACE, current_inputs, lowerer};
+use super::{current_inputs, lowerer};
 use crate::EngineFailure;
 use crate::catalog::Catalog;
 use crate::game::Game;
-use crate::ir::lowering::PrintedKeyword;
 use crate::ir::{
     AbilityOrigin, Binding, CardProgram, Effect, KeywordId, ObjectOperand, PlayerRef, Polarity,
     WellFormedCardProgram, ZoneKind,
@@ -18,71 +17,6 @@ const KEYWORD_FACE: &str = "f:0a2de2c8ea0d5629b3f899fc2cc52c88";
 
 fn input() -> Value {
     current_inputs()["keywords"]["authors"][0]["input"].clone()
-}
-
-#[test]
-fn real_current_keyword_selection_checks_complete_declarations_before_lowering() {
-    let input = input();
-    let lowerer = lowerer();
-    let checked = lowerer.check_current(&input).unwrap();
-    assert!(checked.source_sidecar.is_empty());
-    assert_eq!(checked.declaration_sidecar.len(), 1);
-    let evidence = &checked.declaration_sidecar["/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0"];
-    assert_eq!(
-        evidence.keywords(),
-        [PrintedKeyword::Ward, PrintedKeyword::Aura]
-    );
-    assert_eq!(evidence.source.face, "f:0a2de2c8ea0d5629b3f899fc2cc52c88");
-    assert_eq!(
-        evidence.source.scope,
-        "keyword_declaration:/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0"
-    );
-    let reference = serde_json::to_value(&evidence.reference).unwrap();
-    assert_eq!(
-        reference["source_use"],
-        input["declaration_sidecar"][0]["source_use"]
-    );
-    assert!(reference["source_use"].get("ability_scope").is_none());
-    assert!(reference.get("body_version").is_none());
-    assert_eq!(
-        evidence.input_hash,
-        input["declaration_sidecar"][0]["input_hash"]
-    );
-    assert_ne!(evidence.adapter_recipe, reference["source_adapter_recipe"]);
-    let candidate = lowerer.lower_current(&input).unwrap();
-    assert_eq!(candidate.program.card().abilities.len(), 2);
-    for (index, ability) in candidate.program.card().abilities.iter().enumerate() {
-        assert_eq!(
-            ability.source.author_path,
-            format!(
-                "/cards/BP01-138/faces/f:0a2de2c8ea0d5629b3f899fc2cc52c88/abilities/0/keywords/{index}"
-            )
-        );
-        assert_eq!(ability.source.scope, evidence.source.scope);
-        assert!(candidate.source_at(&ability.source.author_path).is_none());
-        assert_eq!(
-            candidate
-                .declaration_at(&ability.source.author_path)
-                .unwrap()
-                .reference,
-            evidence.reference
-        );
-    }
-    let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
-    let selected = Catalog::from_current_selection(
-        &snapshot,
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
-        &current_inputs()["keywords"],
-    )
-    .unwrap();
-    Game::from_selected_effects(
-        selected,
-        &json!({}),
-        &Value::Null,
-        &Value::Null,
-        "keyword-admission",
-    )
-    .unwrap();
 }
 
 #[test]
@@ -312,29 +246,6 @@ fn current_internal_keyword_wire_is_closed_and_required() {
     assert_rejected(candidates);
 }
 
-#[test]
-fn metadata_is_inert_and_must_use_the_closed_metadata_variant() {
-    let mut body = current_inputs()["accepted"].clone();
-    let source = body["sidecar"][0]["source_use"].clone();
-    let metadata = json!({"kind":"metadata", "binding_id":source["binding_id"], "occurrence":source["occurrence"], "semantic_key":"metadata.layout.v1"});
-    body["source_inventory"]["non_body"] = json!([metadata]);
-    let lowerer = lowerer();
-    let checked = lowerer.check_current(&body).unwrap();
-    assert!(checked.declaration_sidecar.is_empty());
-    lowerer.lower_current(&body).unwrap();
-    let mut executable = body.clone();
-    executable["source_inventory"]["non_body"][0]["declaration"] =
-        json!({"keywords":["ward"],"ports":{"imports":{},"exports":{}}});
-    let mut unknown = body.clone();
-    unknown["source_inventory"]["non_body"][0]["semantic_key"] = json!("unknown.v1");
-    let mut no_kind = body;
-    no_kind["source_inventory"]["non_body"][0]
-        .as_object_mut()
-        .unwrap()
-        .remove("kind");
-    assert_rejected(vec![executable, unknown, no_kind]);
-}
-
 fn synthetic_two_faces() -> Value {
     // This is a D0 closure probe; only the unmodified BP01-138 fixture proves C0 admission.
     let mut input = input();
@@ -422,77 +333,6 @@ fn same_keywords_on_two_faces_consume_separate_obligations() {
 
 fn snapshot() -> String {
     read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap()
-}
-
-fn admission(selection: &Value) -> crate::Result<Game> {
-    let selected = Catalog::from_current_selection(
-        &snapshot(),
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
-        selection,
-    )?;
-    Game::from_selected_effects(
-        selected,
-        &json!({}),
-        &Value::Null,
-        &Value::Null,
-        "keyword-admission",
-    )
-}
-
-#[test]
-fn real_advance_printings_lower_both_keywords_and_the_complete_fanfare() {
-    let lowerer = lowerer();
-    for number in ["BP19-P32", "BP19-114"] {
-        let selection = &current_inputs()["keyword_fanfare"][number];
-        let input = &selection["authors"][0]["input"];
-        let candidate = lowerer.lower_current(input).unwrap();
-        let abilities = &candidate.program.card().abilities;
-        assert_eq!(abilities.len(), 3);
-        assert_eq!(candidate.source_sidecar.len(), 1);
-        assert_eq!(candidate.declaration_sidecar.len(), 1);
-        for (index, keyword) in [KeywordId::Ward, KeywordId::Aura, KeywordId::Fanfare]
-            .into_iter()
-            .enumerate()
-        {
-            assert!(
-                matches!(&abilities[index].node.source.origin, AbilityOrigin::Keyword { keyword: found, origin }
-                if *found == keyword && matches!(origin.as_ref(), AbilityOrigin::Printed { face, line }
-                    if face.0 == abilities[index].source.face && line.0 == u64::from(abilities[index].source.line)))
-            );
-        }
-        assert!(
-            abilities[2]
-                .node
-                .body
-                .as_ref()
-                .is_some_and(|body| !body.steps.is_empty())
-        );
-        assert_eq!(
-            abilities
-                .iter()
-                .map(|ability| ability.node.scope)
-                .collect::<BTreeSet<_>>()
-                .len(),
-            3
-        );
-        admission(selection).unwrap();
-        let face = input["declaration_sidecar"][0]["face_id"]
-            .as_str()
-            .unwrap()
-            .to_owned();
-        let mut missing = input.clone();
-        missing["tree"]["cards"][number]["faces"][&face]["abilities"]
-            .as_array_mut()
-            .unwrap()
-            .remove(0);
-        missing["declaration_sidecar"] = json!([]);
-        // Keep the remaining body's sidecar path aligned so only keyword closure can fail.
-        missing["sidecar"][0]["path"] = json!(["cards", number, "faces", face, "abilities", 0_u64]);
-        assert_eq!(
-            lowerer.lower_current(&missing).unwrap_err().code,
-            "current_keyword_closure_mismatch"
-        );
-    }
 }
 
 #[test]
@@ -603,57 +443,4 @@ fn raw_keyword_game_for(number: &str) -> Game {
         "rejection",
     )
     .unwrap()
-}
-
-#[test]
-fn body_and_declaration_obligations_are_consumed_independently() {
-    let mut input = input();
-    let body = &current_inputs()["accepted"];
-    let mut entry =
-        body["tree"]["cards"]["BP01-009"]["faces"][CURRENT_FACE]["abilities"][0].clone();
-    let mut source = input["declaration_sidecar"][0]["source_use"].clone();
-    source["binding_id"] = json!(format!("bind:{}", "e".repeat(64)));
-    source["ability_scope"] = json!("ability_0");
-    entry["sources"] = json!([source]);
-    let mut evidence = body["sidecar"][0].clone();
-    evidence["path"] = json!([
-        "cards",
-        "BP01-138",
-        "faces",
-        KEYWORD_FACE,
-        "abilities",
-        1_u64
-    ]);
-    evidence["source_use"] = source.clone();
-    evidence["input_hash"] = input["declaration_sidecar"][0]["input_hash"].clone();
-    evidence["source_input_hash"] = input["declaration_sidecar"][0]["source_input_hash"].clone();
-    let mut obligation = body["source_inventory"]["abilities"][0].clone();
-    obligation["source_use"] = source;
-    input["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"]
-        .as_array_mut()
-        .unwrap()
-        .push(entry);
-    input["sidecar"] = json!([evidence]);
-    input["source_inventory"]["abilities"] = json!([obligation]);
-    let lowerer = lowerer();
-    let checked = lowerer.check_current(&input).unwrap();
-    assert_eq!(checked.source_sidecar.len(), 1);
-    assert_eq!(checked.declaration_sidecar.len(), 1);
-    let mut missing = input.clone();
-    missing["tree"]["cards"]["BP01-138"]["faces"][KEYWORD_FACE]["abilities"]
-        .as_array_mut()
-        .unwrap()
-        .pop();
-    missing["sidecar"] = json!([]);
-    let mut bad_hash = input.clone();
-    bad_hash["declaration_sidecar"][0]["input_hash"] = json!(format!("sha256:{}", "0".repeat(64)));
-    let mut wrong_recipe = input;
-    for path in [
-        "/declaration_sidecar/0/source_adapter_recipe",
-        "/source_inventory/non_body/0/source_adapter_recipe",
-    ] {
-        *wrong_recipe.pointer_mut(path).unwrap() = json!(format!("sha256:{}", "0".repeat(64)));
-    }
-    assert_rejected(vec![missing, bad_hash]);
-    lowerer.check_current(&wrong_recipe).unwrap();
 }

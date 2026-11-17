@@ -82,9 +82,10 @@ fn finish(game: &mut Game) {
 }
 
 #[test]
-fn choice_any_accepts_zero_or_all_and_executes_in_printed_order_with_normal_payment() {
+fn choice_any_accepts_one_or_all_but_not_zero_and_executes_in_printed_order_with_normal_payment() {
+    // R-0015 (EN Q2451): "any number instead" widens the maximum; at least one mode remains.
     let programs = programs();
-    for selected in [vec![], vec![ModeId(3), ModeId(2), ModeId(1)]] {
+    for selected in [vec![ModeId(1)], vec![ModeId(3), ModeId(2), ModeId(1)]] {
         let mut game = game(&programs, &initial("own", false));
         assert_eq!(game.legal().unwrap(), Vec::<Value>::new());
         let before = game.projection(View::Referee).unwrap();
@@ -103,12 +104,12 @@ fn choice_any_accepts_zero_or_all_and_executes_in_printed_order_with_normal_paym
         assert_eq!(
             *cardinality,
             Cardinality {
-                minimum: Nat(0),
+                minimum: Nat(1),
                 maximum: Some(Nat(3))
             }
         );
         assert_eq!(*count, Nat(3));
-        for invalid in [vec![ModeId(1), ModeId(1)], vec![ModeId(4)]] {
+        for invalid in [vec![], vec![ModeId(1), ModeId(1)], vec![ModeId(4)]] {
             let before = game.projection(View::Referee).unwrap();
             game.answer_internal_card(question.actor, question.token, Answer::Modes(invalid))
                 .unwrap_err();
@@ -127,7 +128,7 @@ fn choice_any_accepts_zero_or_all_and_executes_in_printed_order_with_normal_paym
         assert_eq!(after["P1"]["pp"]["current"], 2);
         assert_eq!(
             after["P1"]["leader"]["life"],
-            if selected.is_empty() { 20 } else { 7 }
+            if selected.len() == 1 { 21 } else { 7 }
         );
     }
 }
@@ -223,19 +224,21 @@ fn choice_any_keeps_only_legal_modes_and_cannot_forge_a_banned_mode() {
     assert_eq!(
         *cardinality,
         Cardinality {
-            minimum: Nat(0),
+            minimum: Nat(1),
             maximum: Some(Nat(1))
         }
     );
-    game.answer_internal_card(
-        question.actor,
-        question.token,
-        Answer::Modes(vec![ModeId(1)]),
-    )
-    .unwrap_err();
+    for invalid in [vec![ModeId(1)], vec![]] {
+        game.answer_internal_card(question.actor, question.token, Answer::Modes(invalid))
+            .unwrap_err();
+    }
     resolved(
-        game.answer_internal_card(question.actor, question.token, Answer::Modes(vec![]))
-            .unwrap(),
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Modes(vec![ModeId(2)]),
+        )
+        .unwrap(),
     );
     finish(&mut game);
     assert_eq!(
@@ -244,7 +247,9 @@ fn choice_any_keeps_only_legal_modes_and_cannot_forge_a_banned_mode() {
     );
 }
 #[test]
-fn choice_any_quick_preflight_can_pay_for_zero_when_every_mode_lacks_a_target() {
+fn choice_any_quick_preflight_cannot_play_when_every_mode_lacks_a_target() {
+    // R-0015 keeps the one-mode minimum, and a mode is chosen only if it can be legally
+    // carried out (CR 5.18.3.1.2): with no targetable mode the spell cannot be declared.
     let mut tree = tree(&json!([{"choice":choice()}]));
     let spell = evolution_linked_movement::tree(&[(
         "spell",
@@ -268,21 +273,7 @@ fn choice_any_quick_preflight_can_pay_for_zero_when_every_mode_lacks_a_target() 
         let InputDomain::Quick { options, .. } = &question.domain else {
             panic!("Quick")
         };
-        assert_eq!(options.len(), usize::from(enabled));
-        if enabled {
-            resolved(
-                game.answer_internal_card(
-                    question.actor,
-                    question.token,
-                    Answer::Quick(Some(options[0].handle)),
-                )
-                .unwrap(),
-            );
-            finish(&mut game);
-            let after = game.projection(View::Referee).unwrap();
-            assert_eq!(after["P1"]["pp"]["current"], 2);
-            assert_eq!(after["P1"]["cemetery"], json!(["spell"]));
-        }
+        assert!(options.is_empty(), "choice_any {enabled}");
     }
 }
 #[test]

@@ -248,7 +248,8 @@ fn bp21_057_keeps_ex_counters_when_played_to_the_field() {
 
 #[test]
 fn bp21_057_reads_itself_or_an_ex_card() {
-    // (own counters, EX counters) -> damage dealt; Joe gains 6 hp either way.
+    // (own counters, EX counters) -> damage dealt and +6 hp: R-0019, the condition covers
+    // both sentences (Q1373's shape).
     for (own, stored, damage) in [
         (0_u8, &[9_u8][..], false),
         (10, &[][..], true),
@@ -267,7 +268,11 @@ fn bp21_057_reads_itself_or_an_ex_card() {
             if damage { 15_u8 } else { 20_u8 },
             "{own} {stored:?}"
         );
-        assert_eq!(hp(&view, "source"), before + 6);
+        assert_eq!(
+            hp(&view, "source"),
+            before + if damage { 6 } else { 0 },
+            "{own} {stored:?}"
+        );
     }
 }
 

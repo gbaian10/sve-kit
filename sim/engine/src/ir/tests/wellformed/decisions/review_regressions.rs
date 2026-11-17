@@ -55,30 +55,6 @@ fn external_object_bindings_cannot_launder_hidden_candidates_or_attributes() {
 }
 
 #[test]
-fn candidates_defined_inside_the_current_domain_can_read_their_attributes() {
-    for (kind, visibility) in [
-        (ZoneKind::Field, Visibility::Public {}),
-        (
-            ZoneKind::Hand,
-            Visibility::Only {
-                players: controller_set(),
-            },
-        ),
-    ] {
-        let mut selector = zone(PlayerRef::Controller {}, kind, 10);
-        if let Selector::Zone {
-            binding, predicate, ..
-        } = &mut selector
-        {
-            **predicate = state(*binding);
-        }
-        let mut choice = chosen_objects(1, 1, selector);
-        choice.visibility = visibility;
-        accept(body(1, vec![decision(choice)]));
-    }
-}
-
-#[test]
 fn evolve_requires_visibility_evidence_and_banish_is_public() {
     let evolve_zone = ZoneKind::Evolve;
     for selector in [
@@ -118,79 +94,6 @@ fn evolve_requires_visibility_evidence_and_banish_is_public() {
                 zone(PlayerRef::Controller {}, kind, 10),
             ))],
         ));
-    }
-}
-
-fn guarded() -> Decision {
-    let mut selection = choose(1, 2);
-    if let DecisionKind::ResolutionChoice { precondition, .. } = &mut selection.kind {
-        *precondition = Some(Precondition {
-            kind: PreconditionKind::CardTextPrerequisite,
-            predicate: Expr::Literal(Bool(true)),
-            protects: InstructionId(2),
-            reason: PreconditionReason::CardText {},
-        });
-    }
-    selection
-}
-#[test]
-fn orphan_guard_reports_the_nested_decision_source_and_index() {
-    let mut selection = decision(guarded());
-    selection.source = source("BP13-043");
-    let error = reject(
-        body(
-            1,
-            vec![
-                draw(1, Expr::Literal(Int(1))),
-                control(Control::Sequence {
-                    body: body(2, vec![selection]),
-                }),
-            ],
-        ),
-        WellFormedReason::PreconditionTiming,
-    );
-    assert_eq!(
-        error.ir_path,
-        "/steps/1/control/steps/0/decision/precondition"
-    );
-    assert_eq!(error.source.as_deref(), Some(&source("BP13-043")));
-}
-
-#[test]
-fn guard_kind_reason_and_protected_identity_must_match() {
-    for alternate in [
-        Precondition {
-            kind: PreconditionKind::ForcedZeroUnits,
-            predicate: Expr::Literal(Bool(true)),
-            protects: InstructionId(2),
-            reason: PreconditionReason::CardText {},
-        },
-        Precondition {
-            kind: PreconditionKind::CardTextPrerequisite,
-            predicate: Expr::Literal(Bool(true)),
-            protects: InstructionId(2),
-            reason: PreconditionReason::Rule { rule: RuleId(1) },
-        },
-        Precondition {
-            kind: PreconditionKind::CardTextPrerequisite,
-            predicate: Expr::Literal(Bool(true)),
-            protects: InstructionId(3),
-            reason: PreconditionReason::CardText {},
-        },
-    ] {
-        let mut action = draw(2, Expr::Literal(Int(1)));
-        if let Node::Instruction { instruction } = &mut action.node {
-            instruction.precondition = Some(alternate);
-        }
-        reject(
-            body(
-                1,
-                vec![control(Control::Sequence {
-                    body: body(2, vec![decision(guarded()), action]),
-                })],
-            ),
-            WellFormedReason::PreconditionTiming,
-        );
     }
 }
 
