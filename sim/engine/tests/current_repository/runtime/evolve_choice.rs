@@ -6,7 +6,7 @@ use super::*;
 use sve_engine::game::internal::DecisionView;
 
 fn begin(number: &str, available: bool) -> (Game, DecisionView) {
-    let mut game = rescan_043::form_game("evolve-choice-base", number, available);
+    let mut game = evolution_form::form_game("evolve-choice-base", number, available);
     let pending = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &pending.domain else {
         panic!("evolution trigger");
