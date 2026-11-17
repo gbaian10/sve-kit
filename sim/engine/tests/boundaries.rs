@@ -14,6 +14,10 @@ use sve_engine::game::{Game, View};
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
 
+#[path = "boundaries/fixed_errors.rs"]
+mod fixed_errors;
+#[path = "boundaries/pending_keyword.rs"]
+mod pending_keyword;
 #[path = "boundaries/player_opening.rs"]
 mod player_opening;
 

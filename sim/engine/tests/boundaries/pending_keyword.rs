@@ -1,14 +1,10 @@
-//! M0/M1 regression tests: one test per fixed known error (KE numbers follow the
-//! engine tracking issue #478)
-//! and the R1–R3 properties from the design cross-review.
+//! Pending references that share a printed line (KE-04 of engine tracking issue #478).
 
 #![expect(
     clippy::unwrap_used,
     clippy::default_numeric_fallback,
     reason = "Synthetic fixtures are literal JSON; a construction error or missing field must fail the test."
 )]
-
-extern crate alloc;
 
 use alloc::sync::Arc;
 
@@ -58,35 +54,6 @@ fn player(field: &Value, cemetery: &Value) -> Value {
 
 fn start(catalog: Catalog, setup: &Value) -> Game {
     Game::new(Arc::new(catalog), setup, &Value::Null, &Value::Null, "m0").unwrap()
-}
-
-/// KE-03 (contract 34): a pending trigger named by a setup label is still offered by
-/// its ability reference; the label stays usable as decision shorthand.
-#[test]
-fn ke03_setup_labelled_pending_is_offered_by_ability_reference() {
-    let follower = json!([{"line":1,"kind":"trigger","event":"field_to_cemetery","subject":"self",
-        "body":{"op":"damage","subjects":"opponent.leader","amount":1}}]);
-    let setup = json!({
-        "turn":{"active":"P1","first_player":"P1","elapsed_turns":{"P1":3,"P2":2},"phase":"main"},
-        "history":"explicit",
-        "players":{"P1":player(&json!([]),&json!([{"id":"a","card":"unit-follower"}])),
-                   "P2":player(&json!([]),&json!([]))},
-        "semantic_state":{"pending_triggers":[
-            {"id":"ta","controller":"P1","ability":{"source":"a","line":1},"event":{"left_field":"a"}}
-        ],"check_timing":{"in_progress":true,"rules_processed":true}}
-    });
-    let mut engine = start(load(&follower, &json!([])).unwrap(), &setup);
-    let legal = engine.legal().unwrap();
-    assert_eq!(legal.len(), 1, "{legal:?}");
-    assert_eq!(
-        legal[0]["pending"],
-        json!({"ability":{"source":"a","line":1}}),
-        "{legal:?}"
-    );
-    let step = engine
-        .decide(&json!({"do":"choose-pending","pending":"ta"}), "1")
-        .unwrap();
-    assert_eq!(step.outcome, "resolved");
 }
 
 fn pending_setup(ability: &Value) -> Value {

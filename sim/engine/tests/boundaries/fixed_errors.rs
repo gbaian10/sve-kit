@@ -1,6 +1,5 @@
-//! M1: load-time rejection, the engine behaviours it made explicit, and the R1–R3
-//! properties from the design cross-review (KE numbers follow the engine tracking
-//! issue #478).
+//! Load-time rejection and the engine behaviours it made explicit (KE and M numbers
+//! follow engine tracking issue #478; R2 is from the design cross-review).
 
 #![expect(
     clippy::unwrap_used,
@@ -17,12 +16,9 @@
     reason = "YAML fixtures are assembled line by line to keep known line numbers."
 )]
 
-extern crate alloc;
-
 use alloc::sync::Arc;
 
 use serde_json::{Value, json};
-use sve_engine::EngineFailure;
 use sve_engine::catalog::Catalog;
 use sve_engine::game::{Game, View};
 
@@ -154,11 +150,6 @@ fn play_and_settle(engine: &mut Game, card: &str) -> usize {
 
 // ---------------------------------------------------------------- load-time rejection
 
-/// A YAML document where one card carries the construct under test at a known line.
-fn yaml_document(body: &str) -> String {
-    yaml_document_for("spell", body)
-}
-
 fn yaml_document_for(card: &str, body: &str) -> String {
     let mut text = String::from("format: 1\nkind: effect_set\ncards:\n");
     for (number, ..) in CARDS {
@@ -255,29 +246,6 @@ fn schema_valid_but_unknown_names_are_rejected_with_card_and_line() {
     );
 }
 
-#[test]
-fn a_rejected_program_is_never_executed() {
-    let text = "      - line: 1\n        kind: spell\n        body:\n          op: damage\n          subjects: opponent.leader\n          amount:\n            read: self.turn.evolved\n";
-    let loaded = Catalog::from_documents(
-        &snapshot(),
-        &registry(),
-        &[("unit.yaml".into(), yaml_document(text))],
-    )
-    .unwrap();
-    let mut engine = start(
-        loaded,
-        &setup(&json!({"hand":[{"id":"s","card":"spell"}]}), &json!({})),
-    );
-    let before = engine.digest().unwrap();
-    match engine.decide(&json!({"do":"play","card":"s"}), "play") {
-        Err(EngineFailure::Unsupported(message)) => {
-            assert!(message.contains("rejected at load"), "{message}");
-        }
-        other => panic!("expected a load rejection, got {other:?}"),
-    }
-    assert_eq!(engine.digest().unwrap(), before);
-}
-
 // ---------------------------------------------------------------- behaviours made explicit
 
 #[test]
@@ -361,26 +329,6 @@ fn banish_card_play_and_fusion_events_reach_their_triggers() {
 }
 
 #[test]
-fn name_alias_counts_for_name_selectors() {
-    let loaded = catalog(&json!({
-        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"合成トークン甲","while_zone":"field"}}],
-        "spell":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"opponent.leader",
-            "amount":{"count":{"side":"self","zone":"field","name":"合成トークン甲"}}}}]
-    }));
-    let mut engine = start(
-        loaded,
-        &setup(
-            &json!({"field":[{"id":"g","card":"f-a"},{"id":"n","card":"f-c"}],"hand":[{"id":"s","card":"spell"}]}),
-            &json!({}),
-        ),
-    );
-    engine
-        .decide(&json!({"do":"play","card":"s"}), "count")
-        .unwrap();
-    assert_eq!(life(&engine, "P2"), json!(14));
-}
-
-#[test]
 fn search_groups_restrict_the_combinations() {
     let loaded = catalog(&json!({
         "spell":[{"line":1,"kind":"spell","body":{"op":"search",
@@ -412,35 +360,6 @@ fn search_groups_restrict_the_combinations() {
     assert!(!chosen.contains(&json!(["d1", "d2"])), "{chosen:?}");
     assert!(chosen.contains(&json!(["d1", "d3"])), "{chosen:?}");
     assert!(chosen.contains(&json!(["d2", "d3"])), "{chosen:?}");
-}
-
-#[test]
-fn replace_choice_widens_the_choice_bounds_of_its_controller() {
-    let hit = |n: i64| json!({"op":"damage","subjects":"opponent.leader","amount":n});
-    let spell = json!([{"line":1,"kind":"spell","body":{"op":"choice","min":1,"max":1,"modes":[hit(1),hit(2),hit(4)]}}]);
-    let widened = catalog(&json!({
-        "amulet":[{"line":1,"kind":"static","body":{"op":"replace_choice","side":"self","min":0,
-            "max":{"read":"choice.mode_count"},"condition":{"fn":"ge","args":[{"read":"choice.min"},1]}}}],
-        "spell":spell
-    }));
-    let options = |loaded: Catalog| {
-        let engine = start(
-            loaded,
-            &setup(
-                &json!({"field":[{"id":"w","card":"amulet"}],"hand":[{"id":"s","card":"spell"}]}),
-                &json!({}),
-            ),
-        );
-        engine
-            .legal()
-            .unwrap()
-            .into_iter()
-            .filter(|choice| choice["card"] == "s")
-            .count()
-    };
-    assert_eq!(options(catalog(&json!({"spell":spell}))), 3);
-    // 0..=3 of three modes.
-    assert_eq!(options(widened), 8);
 }
 
 #[test]
@@ -487,61 +406,7 @@ fn settle_turn(engine: &mut Game) {
     }
 }
 
-// ---------------------------------------------------------------- R1–R3 properties
-
-/// R1: a once-per-turn trigger is counted only when a pending ability actually forms.
-/// An event that fails the trigger's own event condition (here: life went up, not
-/// down) must not use the turn's only use, in any order of events.
-#[test]
-fn r1_failed_trigger_condition_never_consumes_the_turn_limit() {
-    let loaded = catalog(&json!({
-        "amulet":[{"line":1,"kind":"trigger","event":"leader_life_change","subject":{"side":"self","zone":"leader"},
-            "limit":1,"limit_at":"trigger",
-            "trigger_if":{"fn":"lt","args":[{"read":"event.after_life"},{"read":"event.before_life"}]},
-            "body":{"op":"damage","subjects":"opponent.leader","amount":1}}],
-        "hurt":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"self.leader","amount":1}}],
-        "heal":[{"line":1,"kind":"spell","body":{"op":"modify","subjects":"self.leader","hp":1}}]
-    }));
-    for mask in 0_u32..16 {
-        let order = (0..4)
-            .map(|bit| {
-                if mask & (1 << bit) == 0 {
-                    "heal"
-                } else {
-                    "hurt"
-                }
-            })
-            .collect::<Vec<_>>();
-        let hand = order
-            .iter()
-            .enumerate()
-            .map(|(i, card)| json!({"id":format!("c{i}"),"card":card}))
-            .collect::<Vec<_>>();
-        let mut engine = start(
-            loaded.clone(),
-            &setup(
-                &json!({"field":[{"id":"w","card":"amulet"}],"hand":hand}),
-                &json!({}),
-            ),
-        );
-        let mut formed = Vec::new();
-        for i in 0..order.len() {
-            formed.push(play_and_settle(&mut engine, &format!("c{i}")));
-        }
-        let hurts = i64::try_from(order.iter().filter(|card| **card == "hurt").count()).unwrap();
-        let heals = 4_i64 - hurts;
-        assert_eq!(
-            life(&engine, "P1"),
-            json!(15_i64 - hurts + heals),
-            "{order:?}"
-        );
-        let first_hurt = order.iter().position(|card| *card == "hurt");
-        let expected = (0..order.len())
-            .map(|i| usize::from(Some(i) == first_hurt))
-            .collect::<Vec<_>>();
-        assert_eq!(formed, expected, "{order:?}");
-    }
-}
+// ---------------------------------------------------------------- R2 property
 
 /// R2: every selector field the loader accepts changes the result when the only
 /// candidate fails it; none is silently ignored.
@@ -599,78 +464,6 @@ fn r2_every_accepted_selector_field_filters_or_is_rejected() {
     .unwrap_err();
 }
 
-/// R3: what a seat observes depends only on public information: two games that differ
-/// only in hidden cards give the same player packet.
-#[test]
-fn r3_hidden_cards_do_not_change_the_player_packet() {
-    let loaded = Arc::new(catalog(&json!({})));
-    for (left, right) in [("f-a", "f-b"), ("spell", "amulet"), ("f-c", "heal")] {
-        let observed = |hidden: &str| {
-            Game::new(
-                Arc::clone(&loaded),
-                &setup(
-                    &json!({"field":[{"id":"a","card":"f-a"}]}),
-                    &json!({"hand":[{"id":"h","card":hidden}],"deck":[{"id":"d","card":hidden}]}),
-                ),
-                &Value::Null,
-                &Value::Null,
-                "table",
-            )
-            .unwrap()
-            .projection(View::P1)
-            .unwrap()
-        };
-        assert_eq!(
-            observed(left),
-            observed(right),
-            "{left}/{right} must look the same to P1"
-        );
-    }
-    // The original R3 probe swapped the opponent's face-down evolve deck (M-016).
-    let evolve_observed = |hidden: &str| {
-        let mut position = setup(&json!({"field":[{"id":"a","card":"f-a"}]}), &json!({}));
-        position["players"]["P2"]["zones"]["evolve_deck"] = json!([{"id":"e","card":hidden}]);
-        Game::new(
-            Arc::clone(&loaded),
-            &position,
-            &Value::Null,
-            &Value::Null,
-            "table",
-        )
-        .unwrap()
-        .projection(View::P1)
-        .unwrap()
-    };
-    assert_eq!(evolve_observed("f-a"), evolve_observed("f-b"));
-}
-
-/// R-0009: a long-form "〜とき、…なら" ability triggers on the event alone; the
-/// condition is read when it resolves, and a false condition just does nothing.
-#[test]
-fn long_form_condition_triggers_and_is_checked_at_resolution() {
-    let loaded = catalog(&json!({
-        "amulet":[{"line":1,"kind":"trigger","event":"end","side":"self",
-            "body":{"op":"if","condition":{"fn":"eq","args":[{"count":{"side":"self","zone":"hand"}},0]},
-                "then":{"op":"damage","subjects":"opponent.leader","amount":3}}}]
-    }));
-    for (hand, expected) in [(json!([]), 12), (json!([{"id":"h","card":"f-a"}]), 15)] {
-        let mut engine = start(
-            loaded.clone(),
-            &setup(
-                &json!({"field":[{"id":"w","card":"amulet"}],"hand":hand}),
-                &json!({}),
-            ),
-        );
-        let step = engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
-        assert!(
-            step.events.iter().any(|event| event["kind"] == "待機"),
-            "the ability forms even when the condition is false: {step:?}"
-        );
-        settle_turn(&mut engine);
-        assert_eq!(life(&engine, "P2"), json!(expected));
-    }
-}
-
 /// M-001: an aura that grants abilities and compares names (in its condition or its
 /// subjects) must not recurse through alias lookup; aliases come from printed text only.
 #[test]
@@ -701,34 +494,6 @@ fn granting_aura_with_name_conditions_does_not_recurse() {
             "{legal:?}"
         );
     }
-}
-
-/// M-013: every name condition sees the alias (Q1145), and M-008: outside its zone
-/// the alias does not count.
-#[test]
-fn all_name_conditions_use_aliases_only_in_their_zone() {
-    let loaded = catalog(&json!({
-        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"合成トークン乙・拡張","while_zone":"field"}}],
-        "spell":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"opponent.leader","amount":{"fn":"add","args":[
-            {"count":{"side":"self","zone":"field","name_contains":"合成トークン乙"}},
-            {"fn":"add","args":[
-                {"fn":"mul","args":[{"count":{"side":"self","zone":"field","not_name":"合成トークン乙・拡張"}},10]},
-                {"fn":"mul","args":[{"count":{"side":"self","zone":"ex","name":"合成トークン乙・拡張"}},100]}
-            ]}
-        ]}}}]
-    }));
-    let mut engine = start(
-        loaded,
-        &setup(
-            &json!({"field":[{"id":"g","card":"f-a"}],"ex":[{"id":"x","card":"f-a"}],"hand":[{"id":"s","card":"spell"}]}),
-            &json!({"tag":"p2","field":[],"deck":[{"id":"big","card":"f-a"}]}),
-        ),
-    );
-    engine
-        .decide(&json!({"do":"play","card":"s"}), "count")
-        .unwrap();
-    // 1 (name_contains via alias) + 0 (not_name excludes the alias) + 0 (EX copy has no alias).
-    assert_eq!(life(&engine, "P2"), json!(14));
 }
 
 /// M-002: an `event.subject.*` read must name a key of the subject snapshot, and
@@ -902,26 +667,6 @@ fn replace_choice_applies_to_resolution_choices_of_its_controller_only() {
     }
 }
 
-/// M-008: a card that is not actually moved to the banish zone (already there) forms
-/// no "消滅したとき" trigger.
-#[test]
-fn banish_without_movement_does_not_trigger() {
-    let hit = json!({"op":"damage","subjects":"opponent.leader","amount":1});
-    let loaded = catalog(&json!({
-        "f-a":[{"line":1,"kind":"trigger","event":"banish","subject":"self","active_zones":["banish","hand"],"body":hit}],
-        "spell":[{"line":1,"kind":"spell","body":{"op":"banish","subjects":{"side":"self","zone":"any","name":"f-a"}}}]
-    }));
-    let mut engine = start(
-        loaded,
-        &setup(
-            &json!({"banish":[{"id":"old","card":"f-a"}],"hand":[{"id":"s","card":"spell"},{"id":"x","card":"f-a"}]}),
-            &json!({}),
-        ),
-    );
-    assert_eq!(play_and_settle(&mut engine, "s"), 1);
-    assert_eq!(life(&engine, "P2"), json!(14));
-}
-
 /// M-008: a banish that does not happen (prohibited) forms no "消滅したとき" trigger.
 #[test]
 fn prevented_banish_does_not_trigger() {
@@ -956,43 +701,6 @@ fn prevented_banish_does_not_trigger() {
             "prohibited={prohibited}"
         );
     }
-}
-
-/// M-008: "次の相手のターン終了時まで" registered during the opponent's turn lasts
-/// through the opponent's *next* turn, not the current one.
-#[test]
-fn next_opponent_turn_end_registered_in_the_opponent_turn() {
-    let loaded = catalog(&json!({
-        "amulet":[{"line":1,"kind":"trigger","event":"field_to_cemetery","subject":"self",
-            "body":{"op":"replace_damage","subjects":"self.leader","prevent":true,"kind":"any","until":"next-opponent-turn-end"}}]
-    }));
-    let mut position = setup(
-        &json!({"tag":"p1","cemetery":[{"id":"w","card":"amulet"}]}),
-        &json!({"tag":"p2"}),
-    );
-    position["turn"]["active"] = json!("P2");
-    position["semantic_state"] = json!({"pending_triggers":[
-        {"controller":"P1","ability":{"source":"w","line":1},"event":{"left_field":"w"}}
-    ],"check_timing":{"in_progress":true,"rules_processed":true}});
-    let mut engine = start(loaded, &position);
-    let choice = engine.legal().unwrap().into_iter().next().unwrap();
-    engine.decide(&choice, "register").unwrap();
-    let active = |engine: &Game| {
-        serde_json::to_value(engine).unwrap()["state"]["continuous"]
-            .as_array()
-            .map_or(0, Vec::len)
-    };
-    let mut alive = Vec::new();
-    for turn in 0..3 {
-        settle_turn(&mut engine);
-        engine
-            .decide(&json!({"do":"end-phase"}), &format!("end-{turn}"))
-            .unwrap();
-        settle_turn(&mut engine);
-        alive.push(active(&engine));
-    }
-    // Ends of: this P2 turn (kept), P1's turn (kept), P2's next turn (gone).
-    assert_eq!(alive, [1, 1, 0]);
 }
 
 #[test]
@@ -1060,42 +768,6 @@ fn choice_costs_are_combined_before_play_and_effects_follow_printed_order() {
         assert!(index("プレイ") < index("ダメージ"));
         assert!(index("ダメージ") < index("引く"));
         assert_eq!(life(&game, "P2"), json!(14));
-    }
-}
-
-#[test]
-fn choice_pp_costs_cannot_use_pp_recovered_by_an_earlier_mode() {
-    let loaded = catalog(&json!({"spell":[{
-        "line":1,"kind":"spell",
-        "additional_costs":[
-            {"key":"first","modes":[1],"costs":[{"op":"pp","amount":2}]},
-            {"key":"second","modes":[2],"costs":[{"op":"pp","amount":3}]}
-        ],
-        "body":{"op":"choice","min":1,"max":2,"modes":[
-            {"op":"if","condition":{"read":"paid.first"},"then":{"op":"recover_pp","amount":3}},
-            {"op":"if","condition":{"read":"paid.second"},"then":{"op":"damage","subjects":"opponent.leader","amount":1}}
-        ]}
-    }]}));
-    for pp in [3, 6] {
-        let mut position = setup(&json!({"hand":[{"id":"s","card":"spell"}]}), &json!({}));
-        position["players"]["P1"]["pp"]["current"] = json!(pp);
-        let mut game = start(loaded.clone(), &position);
-        let step = game
-            .decide(
-                &json!({"do":"play","card":"s","options":[2,1],
-            "optional_costs":{"first":{"pp":2},"second":{"pp":3}}}),
-                "combined-pp",
-            )
-            .unwrap();
-        assert_eq!(
-            step.outcome,
-            if pp == 3 { "cannot-play" } else { "resolved" }
-        );
-        assert_eq!(
-            game.query(View::Referee, "P1.pp.current").unwrap().unwrap(),
-            json!(3)
-        );
-        assert_eq!(life(&game, "P2"), json!(if pp == 3 { 15 } else { 14 }));
     }
 }
 

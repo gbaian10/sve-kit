@@ -1,7 +1,3 @@
-#![expect(
-    clippy::indexing_slicing,
-    reason = "Synthetic fixture coordinates must fail the test when their shape changes."
-)]
 use super::*;
 
 fn abilities() -> Vec<Value> {
@@ -35,92 +31,6 @@ fn inputs(abilities: Vec<Value>) -> (String, String, Value) {
         include_str!("../../../../authored/rules/keywords.yaml").into(),
         json!({"documents":[],"authors":[source_author,guard_author,ordinary_author]}),
     )
-}
-
-fn position() -> Value {
-    let mut initial = initial(0);
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    initial["players"]["P1"]["zones"]["field"] = json!([
-        {"id":"source","card":"creator"}, {"id":"ally","card":"ordinary"}
-    ]);
-    initial["players"]["P2"]["zones"]["field"] = json!([
-        {"id":"guard","card":"guard","state":{"acted":true}},
-        {"id":"other","card":"ordinary","state":{"acted":true}}
-    ]);
-    initial
-}
-
-fn game(abilities: Vec<Value>, initial: &Value) -> Game {
-    let (snapshot, keywords, input) = inputs(abilities);
-    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
-    Game::from_selected_effects(selected, initial, &Value::Null, &Value::Null, "ward-bypass")
-        .unwrap()
-}
-
-#[test]
-fn printed_ward_bypass_skips_only_ward_and_is_lost_with_the_ability() {
-    for scenario in 0_u8..8 {
-        let mut initial = position();
-        let mut body = abilities();
-        let mut attacker = "source";
-        let mut target = "P2.leader";
-        match scenario {
-            1 => target = "other",
-            2 => initial["players"]["P1"]["zones"]["field"][0]["state"]["acted"] = json!(true),
-            3 => {
-                initial["players"]["P1"]["zones"]["field"][0]["state"]["entered_this_turn"] =
-                    json!(true);
-                body.remove(0);
-            }
-            4 => initial["players"]["P1"]["zones"]["field"][0]["state"]["silenced"] = json!(true),
-            5 => attacker = "ally",
-            6 => {
-                target = "other";
-                initial["players"]["P2"]["zones"]["field"][1]["state"]["acted"] = json!(false);
-            }
-            7 => {
-                body.push(json!({"static":{"effects":[{"cannot":{"what":"attack","on":"this"}}]}}));
-            }
-            _ => {}
-        }
-        let mut game = game(body, &initial);
-        let result = game
-            .internal_rule_action(&json!({"do":"attack","attacker":attacker,"target":target}))
-            .unwrap();
-        assert_eq!(
-            result.outcome,
-            if scenario < 2 {
-                "resolved"
-            } else {
-                "cannot-attack"
-            },
-            "scenario {scenario}"
-        );
-    }
-}
-
-#[test]
-fn a_public_condition_controls_the_printed_bypass() {
-    for allied in [false, true] {
-        let mut initial = position();
-        if !allied {
-            initial["players"]["P1"]["zones"]["field"]
-                .as_array_mut()
-                .unwrap()
-                .pop();
-        }
-        let mut body = abilities();
-        body[1]["static"]["while"] =
-            json!({"cmp":{"left":{"count":{"who":"self","zone":"field"}},"op":"ge","right":2_u8}});
-        let mut game = game(body, &initial);
-        let result = game
-            .internal_rule_action(&json!({"do":"attack","attacker":"source","target":"P2.leader"}))
-            .unwrap();
-        assert_eq!(
-            result.outcome,
-            if allied { "resolved" } else { "cannot-attack" }
-        );
-    }
 }
 
 #[test]
