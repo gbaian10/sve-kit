@@ -66,7 +66,7 @@ fn declared(facts: &[Fact]) -> Vec<NumberDeclaration> {
         .collect()
 }
 
-fn declaration_actor(opponent: bool) -> PlayerRef {
+pub(super) fn declaration_actor(opponent: bool) -> PlayerRef {
     if opponent {
         PlayerRef::RequireOne {
             players: Box::new(PlayerSet {

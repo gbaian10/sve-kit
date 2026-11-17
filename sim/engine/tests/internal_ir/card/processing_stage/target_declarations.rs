@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::{TargetDeclaration, TargetRoleAssignment};
 
-fn target_program() -> WellFormedCardProgram {
+pub(super) fn target_program() -> WellFormedCardProgram {
     program(
         "activate",
         json!({"cost":{"pp":1},

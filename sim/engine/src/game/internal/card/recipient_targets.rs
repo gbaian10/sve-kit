@@ -1,5 +1,5 @@
 use super::super::{
-    DecisionToken, DecisionView, DistributionMember, InputDomain, TargetDomain, Wait,
+    DecisionToken, DecisionView, DistributionMember, InputDomain, QuestionStage, TargetDomain, Wait,
 };
 use super::selection::{TargetCharacteristics, characteristics};
 use super::{Execution, Game, Nat, Result, invalid, player_id, seat_name, unsupported};
@@ -333,7 +333,9 @@ impl Game {
             actor,
             InputDomain::Targets(domain),
             Wait::RecipientTargets(wait),
-        )
+        )?;
+        execution.question_stage = Some(QuestionStage::Resolve);
+        Ok(())
     }
 
     pub(in crate::game::internal) fn internal_recipient_target(
@@ -360,6 +362,7 @@ impl Game {
             },
             Wait::RecipientTargets(wait),
         ));
+        execution.question_stage = Some(QuestionStage::Target);
         Ok(())
     }
 }

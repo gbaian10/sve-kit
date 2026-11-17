@@ -20,7 +20,7 @@ fn prepend_resolution(raw: &mut CardProgram, mut decision: Decision) {
     body.steps.insert(0, step);
 }
 
-fn recipient_program(later: bool) -> WellFormedCardProgram {
+pub(super) fn recipient_program(later: bool) -> WellFormedCardProgram {
     let mut targets = vec![recipient()];
     if later {
         let mut second = recipient();
@@ -49,7 +49,7 @@ fn recipient_program(later: bool) -> WellFormedCardProgram {
     WellFormedCardProgram::check(raw).unwrap()
 }
 
-fn distribution_program(with_recipient: bool) -> WellFormedCardProgram {
+pub(super) fn distribution_program(with_recipient: bool) -> WellFormedCardProgram {
     let mut targets = vec![];
     if with_recipient {
         targets.push(recipient());
@@ -115,7 +115,7 @@ pub(super) fn append_distribution(program: &WellFormedCardProgram) -> WellFormed
     WellFormedCardProgram::check(raw).unwrap()
 }
 
-fn start(program: &WellFormedCardProgram, actor: Viewer, fields: usize) -> Game {
+pub(super) fn start(program: &WellFormedCardProgram, actor: Viewer, fields: usize) -> Game {
     let them = if actor == Viewer::P1 { "P2" } else { "P1" };
     let mut game = fixture_with(program, actor, |initial| {
         initial["players"][them]["zones"]["field"] = json!(

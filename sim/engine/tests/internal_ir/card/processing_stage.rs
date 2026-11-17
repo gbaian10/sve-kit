@@ -1,3 +1,6 @@
+#[path = "processing_stage/target_allocation_stage.rs"]
+mod target_allocation_stage;
+
 #[path = "processing_stage/exchange_payments.rs"]
 mod exchange_payments;
 
@@ -145,7 +148,7 @@ fn finish_may(game: &mut Game) -> Progress {
 }
 
 #[test]
-fn may_stage_is_recorded_and_not_inherited_by_an_unrecorded_target_stop() {
+fn may_and_resolving_object_choice_each_record_their_own_stage() {
     let program = program(
         "activate",
         json!({"cost":{"pp":0},"do":[{"optional":{"do":[
@@ -199,7 +202,10 @@ fn may_stage_is_recorded_and_not_inherited_by_an_unrecorded_target_stop() {
                 ),
                 SubmissionKind::Applied
             );
-            assert_eq!(game.internal_question_stage(), None);
+            assert_eq!(
+                game.internal_question_stage(),
+                accept.then_some(QuestionStage::Resolve)
+            );
             if accept {
                 let next = question(&game, actor);
                 assert!(matches!(
