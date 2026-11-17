@@ -57,6 +57,7 @@ struct Producer {
 #[derive(Clone, Debug)]
 pub(super) struct DistributionWait {
     links: CandidateLinks,
+    formal_play: bool,
     pub(super) purpose: QuestionPurpose,
     producer: Producer,
     snapshot: SnapshotId,
@@ -67,6 +68,19 @@ pub(super) struct DistributionWait {
 }
 
 impl DistributionWait {
+    pub(super) fn play_declaration(
+        &self,
+        actor: PlayerId,
+        allocations: Vec<ResolvedDamageAllocation>,
+    ) -> Option<super::PlayDeclaration> {
+        self.formal_play
+            .then_some(super::PlayDeclaration::Distribution {
+                player: actor,
+                decision: self.producer.decision,
+                allocations,
+            })
+    }
+
     pub(in crate::game::internal) fn player_question(
         &self,
         game: &Game,
@@ -141,6 +155,7 @@ impl Game {
             decision,
             &snapshot,
             SnapshotId(self.state.ir_epoch),
+            false,
         )
     }
 
@@ -150,6 +165,7 @@ impl Game {
         decision: &Decision,
         snapshot: &Self,
         snapshot_id: SnapshotId,
+        formal_play: bool,
     ) -> Result<()> {
         let ChoiceDomain::Distribution {
             recipients,
@@ -216,6 +232,7 @@ impl Game {
                     }
                 }),
             )?,
+            formal_play,
             purpose: super::player::purpose(&decision.kind),
             producer: Producer {
                 execution: execution.id,
@@ -230,7 +247,7 @@ impl Game {
             expression,
         };
         if members.is_empty() {
-            return execution.distribution_answer(&wait, &[]);
+            return execution.distribution_answer(&wait, &[]).map(|_answer| ());
         }
         self.internal_wait(
             execution,
@@ -255,7 +272,7 @@ impl Execution {
         &mut self,
         wait: &DistributionWait,
         shares: &[DamageShare],
-    ) -> Result<()> {
+    ) -> Result<Vec<ResolvedDamageAllocation>> {
         if wait.producer.execution != self.id {
             return Err(invalid("foreign distribution execution"));
         }
@@ -290,10 +307,10 @@ impl Execution {
             key,
             Allocation {
                 occurrence: wait.clone(),
-                answer,
+                answer: answer.clone(),
             },
         );
-        Ok(())
+        Ok(answer)
     }
 
     pub(super) fn damage_shares(

@@ -9,14 +9,15 @@ use crate::game::player::SelectionQuestion;
 use crate::game::player::Viewer;
 use crate::ir::ObjectRef;
 use crate::ir::{
-    Binding, Cardinality, ChoiceDomain, DamageRecipient, Decision, PlayerRef, RecipientSet,
-    RuntimeDamageRecipient,
+    Binding, Cardinality, ChoiceDomain, DamageRecipient, Decision, DecisionId, PlayerId, PlayerRef,
+    RecipientSet, RuntimeDamageRecipient,
 };
 use alloc::collections::BTreeSet;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct RecipientWait {
     links: CandidateLinks,
+    formal_parameter: Option<DecisionId>,
     pub(in crate::game::internal) purpose: QuestionPurpose,
     pub(in crate::game::internal) binding: Binding<Vec<DamageRecipient>>,
     members: Vec<RuntimeDamageRecipient>,
@@ -46,6 +47,19 @@ pub(super) fn check(candidates: &RecipientSet, bounds: Cardinality) -> Result<()
 }
 
 impl RecipientWait {
+    pub(in crate::game::internal) fn play_declaration(
+        &self,
+        actor: PlayerId,
+        members: &[RuntimeDamageRecipient],
+    ) -> Option<super::super::PlayDeclaration> {
+        self.formal_parameter
+            .map(|decision| super::super::PlayDeclaration::Recipients {
+                player: actor,
+                decision,
+                members: members.to_vec(),
+            })
+    }
+
     pub(in crate::game::internal) fn player_question(
         &self,
         game: &Game,
@@ -244,6 +258,7 @@ impl Game {
                         }
                     }),
                 )?,
+                formal_parameter: None,
                 purpose: super::super::player::purpose(&decision.kind),
                 binding: *binding,
                 members,
@@ -326,7 +341,8 @@ impl Game {
         execution: &mut Execution,
         decision: &Decision,
     ) -> Result<()> {
-        let (wait, domain) = self.recipient_target_domain(execution, decision)?;
+        let (mut wait, domain) = self.recipient_target_domain(execution, decision)?;
+        wait.formal_parameter = Some(decision.id);
         if wait.bounds.minimum.0 > u64::try_from(wait.members.len()).map_err(invalid)? {
             return Err(crate::EngineFailure::IllegalPlay(
                 "no legal play targets".into(),

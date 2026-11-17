@@ -1049,6 +1049,7 @@ impl Game {
                 (Wait::RecipientTargets(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(&handles)?;
                     rollback = execution.answer_origin(validated);
+                    let declaration = wait.play_declaration(actor, &members);
                     execution.slots.insert(
                         wait.binding.key(),
                         Slot::Recipients {
@@ -1056,6 +1057,9 @@ impl Game {
                             characteristics: wait.characteristics,
                         },
                     );
+                    if let Some(declaration) = declaration {
+                        processing::record_play_declaration(&mut execution, declaration);
+                    }
                 }
                 (Wait::Targets(wait), Answer::TargetsWithRoles { targets, roles }) => {
                     let (objects, answers) = wait.validate_roles(&targets, &roles)?;
@@ -1142,12 +1146,15 @@ impl Game {
                         .insert(wait.chosen.id, modes);
                 }
                 (Wait::Distribution(wait), Answer::Distribution(shares)) => {
-                    execution.distribution_answer(&wait, &shares)?;
+                    let allocation = execution.distribution_answer(&wait, &shares)?;
                     rollback = execution.answer_origin(validated);
                     Self::internal_play_distribution_captures(
                         &mut execution,
                         wait.producer_decision(),
                     )?;
+                    if let Some(declaration) = wait.play_declaration(actor, allocation) {
+                        processing::record_play_declaration(&mut execution, declaration);
+                    }
                 }
                 (Wait::Drive(wait), Answer::DriveTrigger { accept, target }) => {
                     let selected = wait.validate(accept, target)?;
@@ -1336,7 +1343,7 @@ impl Game {
     }
 
     /// Accepted parameters of this execution alone; this is not a payment receipt.
-    /// Runner diagnostics bypass frame authorization; hosts must use player observation.
+    /// Runner diagnostics may contain private objects and bypass frame authorization; hosts use observation.
     ///
     /// ```
     /// use sve_engine::game::Game;

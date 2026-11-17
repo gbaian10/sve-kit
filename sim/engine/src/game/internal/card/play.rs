@@ -5,7 +5,9 @@ use super::{
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
     admission, int, invalid, seat_name, unsupported,
 };
-use crate::game::internal::processing::{enter_play_phase, record_target_declaration};
+use crate::game::internal::processing::{
+    discard_selection_round, enter_play_phase, record_target_declaration,
+};
 use crate::game::internal::repeated_moves;
 use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::internal::{PlayPhase, TargetDeclaration};
@@ -1672,6 +1674,7 @@ impl Game {
                         &decision,
                         snapshot,
                         play.snapshot_id,
+                        true,
                     )?;
                     if execution.waiting.is_some() {
                         play.distribution_captures = Some(decision);
@@ -2144,7 +2147,7 @@ impl Game {
         execution.slots.clone_from(&restart.slots);
         execution.targets.clear();
         // A distribution retry invalidates the entire previous round of target answers.
-        execution.target_declarations.clear();
+        discard_selection_round(execution);
         execution.selected_target_names.clear();
         execution.allocations.clear();
         play.parameters.clone_from(&restart.parameters);
