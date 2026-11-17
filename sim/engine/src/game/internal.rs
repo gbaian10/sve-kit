@@ -105,7 +105,7 @@ mod processing;
 use processing::Queued;
 pub use processing::{
     CostPaymentPurpose, CostSpecPayment, CostStepPayment, NumberDeclaration, PlayDeclaration,
-    PlayPhase, PpPayment, QuestionStage,
+    PlayPhase, PpPayment, QuestionStage, TargetDeclaration,
 };
 mod random_sample;
 mod resource;
@@ -663,6 +663,7 @@ pub(super) struct Execution {
     play_declarations: Vec<PlayDeclaration>,
     pp_payments: Vec<PpPayment>,
     cost_spec_payments: Vec<CostSpecPayment>,
+    target_declarations: Vec<TargetDeclaration>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -860,6 +861,7 @@ impl Game {
                 play_declarations: Vec::new(),
                 pp_payments: Vec::new(),
                 cost_spec_payments: Vec::new(),
+                target_declarations: Vec::new(),
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -1059,12 +1061,18 @@ impl Game {
                     let (objects, answers) = wait.validate_roles(&targets, &roles)?;
                     rollback = execution.answer_origin(validated);
                     execution.bind_target_roles(&wait, &answers);
-                    Self::internal_target_answer(&mut execution, &wait, objects)?;
+                    Self::internal_target_answer(&mut execution, &wait, actor, objects, answers)?;
                 }
                 (Wait::Targets(wait), Answer::Targets(handles)) => {
                     let objects = wait.validate(&handles)?;
                     rollback = execution.answer_origin(validated);
-                    Self::internal_target_answer(&mut execution, &wait, objects)?;
+                    Self::internal_target_answer(
+                        &mut execution,
+                        &wait,
+                        actor,
+                        objects,
+                        Vec::new(),
+                    )?;
                 }
                 (Wait::ResolutionTargets(wait), Answer::TargetsWithRoles { targets, roles }) => {
                     let (objects, answers) = wait.validate_roles(&targets, &roles)?;
@@ -1370,6 +1378,21 @@ impl Game {
         self.typed
             .as_ref()
             .map(|execution| execution.cost_spec_payments.as_slice())
+    }
+
+    /// Accepted formal-play targets of this execution; empty does not imply no target groups.
+    /// Runner diagnostics contain private objects and bypass frame authorization; hosts use observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_target_declarations;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_target_declarations(&self) -> Option<&[TargetDeclaration]> {
+        self.typed
+            .as_ref()
+            .map(|execution| execution.target_declarations.as_slice())
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.

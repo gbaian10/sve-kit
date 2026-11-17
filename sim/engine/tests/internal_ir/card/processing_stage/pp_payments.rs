@@ -1,5 +1,5 @@
 use super::*;
-use sve_engine::game::internal::PpPayment;
+use sve_engine::game::internal::{CostPaymentPurpose, PpPayment};
 
 #[test]
 fn pp_debits_survive_recovery_without_turning_quotes_into_payments() {
@@ -171,6 +171,20 @@ fn declined_or_failed_resolution_payments_keep_only_prior_successful_debits() {
             }];
             payments(&game, &expected);
             let completed = game.internal_cost_spec_payments().unwrap().to_vec();
+            let resolution = completed
+                .iter()
+                .filter(|cost| matches!(cost.purpose, CostPaymentPurpose::Resolution { .. }))
+                .collect::<Vec<_>>();
+            assert_eq!(resolution.len(), 1);
+            assert_eq!(resolution[0].steps.len(), 1);
+            assert_eq!(resolution[0].steps[0].actor, actor.player());
+            assert_eq!(
+                resolution[0].steps[0].quantity,
+                Quantity {
+                    amount: Int(1),
+                    unit: QuantityUnit::Pp
+                }
+            );
             let second = question(&game, actor);
             assert_eq!(
                 submit(

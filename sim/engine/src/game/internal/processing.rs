@@ -1,5 +1,9 @@
 //! Procedure boundaries stay in the runtime queue, separate from authored IR.
 
+mod targets;
+pub use targets::TargetDeclaration;
+pub(super) use targets::record_target_declaration;
+
 mod payments;
 pub(super) use payments::record_cost_spec_payment;
 pub use payments::{CostPaymentPurpose, CostSpecPayment, CostStepPayment};

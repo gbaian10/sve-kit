@@ -59,6 +59,7 @@ pub(in crate::game::internal) fn execution(game: &mut Game) -> Execution {
         play_declarations: Vec::new(),
         pp_payments: Vec::new(),
         cost_spec_payments: Vec::new(),
+        target_declarations: Vec::new(),
         destroy_guards: Vec::new(),
         look_viewers: BTreeMap::new(),
         player_receipt_links: BTreeMap::new(),
