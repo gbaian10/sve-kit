@@ -42,6 +42,50 @@ fn initial(random: &Value) -> Game {
 }
 
 #[test]
+fn player_opening_fault_rolls_back_the_accepted_answer_and_stays_terminal_for_input() {
+    let random = json!({"shuffles":[{"player":"P2","zone":"deck","result":[]}]});
+    let mut game = initial(&random);
+    for (actor, expected) in [
+        (Viewer::P1, SubmissionKind::Applied),
+        (Viewer::P2, SubmissionKind::EngineFault),
+    ] {
+        let current = question(&game, actor);
+        let QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) = current.shape else {
+            panic!("amulet");
+        };
+        let before = game.observe(actor).unwrap();
+        assert_eq!(
+            game.submit_player(
+                actor,
+                Command::Opening {
+                    token: current.token,
+                    answer: OpeningAnswer::StartAmulet(cards[0].handle.clone())
+                }
+            )
+            .kind,
+            expected
+        );
+        if expected == SubmissionKind::EngineFault {
+            assert_eq!(game.observe(actor).unwrap(), before);
+            for viewer in [Viewer::P1, Viewer::P2] {
+                assert_eq!(game.input(viewer), Input::EngineFault);
+            }
+            assert_eq!(
+                game.submit_player(
+                    actor,
+                    Command::Opening {
+                        token: current.token,
+                        answer: OpeningAnswer::StartAmulet(cards[0].handle.clone())
+                    }
+                )
+                .kind,
+                SubmissionKind::EngineFault
+            );
+        }
+    }
+}
+
+#[test]
 #[expect(
     clippy::too_many_lines,
     reason = "Both seats share one sequential opening and privacy scenario."
@@ -151,50 +195,6 @@ fn player_opening_start_amulets_are_serial_and_only_revealed_after_both_mulligan
                 .find(|zone| zone.kind == ObservedZone::Field)
                 .unwrap();
             assert_eq!(field.cards.len(), 1);
-        }
-    }
-}
-
-#[test]
-fn player_opening_fault_rolls_back_the_accepted_answer_and_stays_terminal_for_input() {
-    let random = json!({"shuffles":[{"player":"P2","zone":"deck","result":[]}]});
-    let mut game = initial(&random);
-    for (actor, expected) in [
-        (Viewer::P1, SubmissionKind::Applied),
-        (Viewer::P2, SubmissionKind::EngineFault),
-    ] {
-        let current = question(&game, actor);
-        let QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) = current.shape else {
-            panic!("amulet");
-        };
-        let before = game.observe(actor).unwrap();
-        assert_eq!(
-            game.submit_player(
-                actor,
-                Command::Opening {
-                    token: current.token,
-                    answer: OpeningAnswer::StartAmulet(cards[0].handle.clone())
-                }
-            )
-            .kind,
-            expected
-        );
-        if expected == SubmissionKind::EngineFault {
-            assert_eq!(game.observe(actor).unwrap(), before);
-            for viewer in [Viewer::P1, Viewer::P2] {
-                assert_eq!(game.input(viewer), Input::EngineFault);
-            }
-            assert_eq!(
-                game.submit_player(
-                    actor,
-                    Command::Opening {
-                        token: current.token,
-                        answer: OpeningAnswer::StartAmulet(cards[0].handle.clone())
-                    }
-                )
-                .kind,
-                SubmissionKind::EngineFault
-            );
         }
     }
 }
