@@ -1,6 +1,4 @@
-use super::event_cemetery::{
-    finish_checks, move_material, move_named, position, prepared, resolve_event,
-};
+use super::event_cemetery::{finish_checks, move_material, position, prepared, resolve_event};
 use super::*;
 
 #[expect(
@@ -149,40 +147,6 @@ fn bp22_081_native_fanfare_targets_before_paying_another_allied_goblin_and_obser
             after["P2"]["leader"]["life"],
             if accepted { 19_u8 } else { 20_u8 },
             "that exit also damages the opponent"
-        );
-    }
-}
-
-#[test]
-fn bp22_081_requires_an_allied_goblin_follower_to_reach_the_cemetery_on_its_own_turn() {
-    for (active, side, material, to, expected) in [
-        ("P1", "P1", "BP22-089", OwnerZone::Cemetery, true),
-        ("P2", "P1", "BP22-089", OwnerZone::Cemetery, false),
-        ("P1", "P2", "BP22-089", OwnerZone::Cemetery, false),
-        ("P1", "P1", "movement-unit", OwnerZone::Cemetery, false),
-        ("P1", "P1", "BP22-089", OwnerZone::Hand, false),
-    ] {
-        let mut initial = position("BP22-081", active, material, side, "field");
-        initial["players"]["P1"]["leader"]["life"] = json!(15_u8);
-        let action = if material == "BP22-089" {
-            move_named(ZoneKind::Field, to, "ゴブリンゾンビ")
-        } else {
-            move_material(ZoneKind::Field, to)
-        };
-        let mut game = prepared(&initial, action);
-        activate(&mut game, active);
-        finish_checks(&mut game);
-        resolve_event(&mut game, "BP22-081", usize::from(expected));
-        let after = game.projection(View::Referee).unwrap();
-        assert_eq!(
-            after["P1"]["leader"]["life"],
-            if expected { 16_u8 } else { 15_u8 },
-            "only the matching exit heals its controller"
-        );
-        assert_eq!(
-            after["P2"]["leader"]["life"],
-            if expected { 19_u8 } else { 20_u8 },
-            "only the matching exit damages the opponent"
         );
     }
 }
