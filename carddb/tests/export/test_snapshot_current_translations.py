@@ -13,6 +13,8 @@ from sve_carddb.domains.translations.labels import apply as apply_labels
 from sve_carddb.domains.translations.names.bindings import DisplayBinding
 from sve_carddb.export.media import prepare_media
 from sve_carddb.export.project import DisplayCheck, project
+from sve_carddb.export.project.source import Source
+from sve_carddb.export.project.translations import _binding_identity
 from sve_carddb.export.reader import read_snapshot
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
 from sve_carddb.export.transport.measure import measure
@@ -578,7 +580,8 @@ def test_an_english_printing_borrows_its_paired_jp_printings_own_name(
         # The EN printing prints its own name: its revision is not the face's current.
         db.delete("face_current", {"face_id": "face", "region": "en"})
     assert display_bindings(db, names=(own,)) == ()
-    assert display_bindings(db, names=(own,), paired={"printing-en": "printing"}) == (
+    bindings = display_bindings(db, names=(own,), paired={"printing-en": "printing"})
+    assert bindings == (
         DisplayBinding(
             "use",
             ("face_revision", "revision-en"),
@@ -587,3 +590,10 @@ def test_an_english_printing_borrows_its_paired_jp_printings_own_name(
             "translation",
         ),
     )
+    # The export accepts it although the receiving revision is not the face's current.
+    fields = (
+        "id,context_id,field,ordinal,face_revision_id,printing_id,face_id,qa_version_id,"
+        "cr_clause_id,vocabulary_kind,vocabulary_code,keyword_id,product_family_id,product_id"
+    )
+    use = Source(db).index("translation_use", fields)["use"]
+    assert _binding_identity(Source(db), use, bindings[0]) == ("card", "face", "jp")

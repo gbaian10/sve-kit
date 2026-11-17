@@ -182,7 +182,7 @@ def _source_owner(source: Source, key: tuple[str, ...]) -> Record | None:
 
 
 def _current_region(
-    source: Source, key: tuple[str, ...]
+    source: Source, key: tuple[str, ...], *, current: bool = True
 ) -> tuple[str, str, str] | None:
     if key[0] == "face_revision":
         revision = source.index("face_revision", "id,face_id,region").get(key[1])
@@ -190,7 +190,7 @@ def _current_region(
             return None
         face_id, region = string(revision["face_id"]), string(revision["region"])
         face = source.index("face", "id,card_id")[face_id]
-        if not any(
+        if current and not any(
             row["region"] == region and row["revision_id"] == key[1]
             for row in source.matching(
                 "face_current", "face_id,region,revision_id", face_id=face_id
@@ -209,7 +209,10 @@ def _current_region(
 def _binding_identity(
     source: Source, use: Record, binding: DisplayBinding
 ) -> tuple[str, str, str] | None:
-    original = _current_region(source, _owner(use))
+    # A printed name lives on a printing's own, non-current revision; its JP name is
+    # borrowed revision to revision on the same face (translations jp_sources).
+    printed = binding.basis == "jp_source" and use["field"] == "name"
+    original = _current_region(source, _owner(use), current=not printed)
     if original is None:
         return None
     card_id, face_id, region = original
@@ -219,7 +222,7 @@ def _binding_identity(
         if binding.target_lang != {"jp": "en", "en": "ja"}[region]:
             raise ValueError("Official counterpart language mismatch")
     else:
-        destination = _current_region(source, binding.destination)
+        destination = _current_region(source, binding.destination, current=not printed)
         if destination is None:
             return None
         if destination[:2] != (card_id, face_id) or destination[2] == region:
