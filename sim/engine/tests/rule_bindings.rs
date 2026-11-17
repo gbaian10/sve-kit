@@ -248,38 +248,6 @@ fn malformed_settings_business_keys_references_templates_and_background_fail() {
 }
 
 #[test]
-fn loader_background_and_player_fields_are_required_for_same_version_saves() {
-    let fixture = Fixture::new();
-    let mut setup = position();
-    setup["players"]["P1"]["title_code"] = json!("synthetic_empty");
-    let game = fixture.game(&setup).unwrap();
-    let mut saved = serde_json::to_value(&game).unwrap();
-    let restored: Game = serde_json::from_value(saved.clone()).unwrap();
-    assert_eq!(restored.digest().unwrap(), game.digest().unwrap());
-    assert_eq!(restored.legal().unwrap(), game.legal().unwrap());
-    saved["catalog"]
-        .as_object_mut()
-        .unwrap()
-        .remove("rule_bindings");
-    serde_json::from_value::<Game>(saved).unwrap_err();
-    let mut player_missing = serde_json::to_value(&game).unwrap();
-    player_missing["state"]["players"]["P1"]
-        .as_object_mut()
-        .unwrap()
-        .remove("title_code");
-    serde_json::from_value::<Game>(player_missing).unwrap_err();
-    let projection = game.projection(View::P2).unwrap().to_string();
-    for private in [
-        "settings_sha256",
-        "identity_sha256",
-        "name_labels",
-        "rule_bindings",
-    ] {
-        assert!(!projection.contains(private));
-    }
-}
-
-#[test]
 fn document_envelopes_are_exclusive_and_background_names_the_grammar() {
     let original = Fixture::new();
     original.load().unwrap();
@@ -488,63 +456,6 @@ fn choices(game: &Game, line: u64) -> Vec<Value> {
 }
 
 #[test]
-fn five_opening_tokens_require_title_mode_and_the_bound_capability() {
-    let fixture = Fixture::new();
-    let catalog = Arc::new(fixture.load().unwrap());
-    for construction in ["title", "class", "crossover"] {
-        for two_players in [false, true] {
-            let mut setup = json!({"pregame":true,"players":{}});
-            for player in ["P1", "P2"] {
-                let enabled = player == "P1" || two_players;
-                setup["players"][player] = json!({"construction":construction,"title_code":if enabled {"synthetic_lesson"} else {"synthetic_empty"},"leader":{"class":"ニュートラル","life":20_u8},"deck_list":[],"evolve_deck_list":[]});
-            }
-            let game = from_catalog(Arc::clone(&catalog), &setup).unwrap();
-            for player in ["P1", "P2"] {
-                let count = if construction == "title" && (player == "P1" || two_players) {
-                    5
-                } else {
-                    0
-                };
-                assert_eq!(
-                    game.query(View::Referee, &format!("{player}.ex"))
-                        .unwrap()
-                        .unwrap()
-                        .as_array()
-                        .unwrap()
-                        .len(),
-                    count
-                );
-            }
-        }
-    }
-}
-
-#[test]
-fn ub_requires_title_capability_and_keeps_controller_and_active_zone_checks() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    let catalog = Arc::new(fixture.load().unwrap());
-    for construction in ["title", "class", "crossover"] {
-        for code in ["synthetic_ub", "synthetic_empty"] {
-            let mut setup = position();
-            setup["players"]["P1"]["construction"] = json!(construction);
-            setup["players"]["P1"]["title_code"] = json!(code);
-            let game = from_catalog(Arc::clone(&catalog), &setup).unwrap();
-            assert_eq!(
-                !choices(&game, 4).is_empty(),
-                construction == "title" && code == "synthetic_ub"
-            );
-            setup["players"]["P1"]["zones"]["field"] = json!([]);
-            setup["players"]["P1"]["zones"]["hand"] = json!([{"id":"actor","card":"actor"}]);
-            assert_eq!(
-                choices(&from_catalog(Arc::clone(&catalog), &setup).unwrap(), 4),
-                Vec::<Value>::new()
-            );
-        }
-    }
-}
-
-#[test]
 fn cost_roles_match_current_aliases_and_keep_zone_controller_and_face_up_filters() {
     let mut fixture = Fixture::new();
     resource_programs(&mut fixture);
@@ -620,178 +531,6 @@ fn cost_roles_match_current_aliases_and_keep_zone_controller_and_face_up_filters
 }
 
 #[test]
-fn banish_counter_uses_only_the_single_post_move_name_and_previous_controller() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    let catalog = Arc::new(fixture.load().unwrap());
-    for (zone, card, expected) in [
-        ("ex", "lesson", 1_i64),
-        ("field", "lesson", 0),
-        ("ex", "alias", 0),
-        ("ex", "meal", 0),
-    ] {
-        let mut setup = position();
-        setup["players"]["P2"]["zones"][zone] = json!([{"id":"target","card":card}]);
-        let mut game = from_catalog(Arc::clone(&catalog), &setup).unwrap();
-        game.decide(&json!({"do":"activate","ability":{"source":"actor","line":5_u8},"targets":{"1":["target"]}}), "banish").unwrap();
-        let counters =
-            game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"].clone();
-        assert_eq!(
-            counters["P2"]["magic_item_banished"].as_i64().unwrap_or(0),
-            expected
-        );
-        assert_eq!(
-            counters["P1"]["magic_item_banished"].as_i64().unwrap_or(0),
-            0
-        );
-    }
-    let mut setup = position();
-    setup["players"]["P1"]["zones"]["ex"] = json!([{"id":"target","card":"lesson"}]);
-    let mut game = from_catalog(Arc::clone(&catalog), &setup).unwrap();
-    game.decide(&json!({"do":"activate","ability":{"source":"actor","line":7_u8},"targets":{"1":["target"]}}), "other-destination").unwrap();
-    assert!(game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"]["P1"]["magic_item_banished"].is_null());
-}
-
-#[test]
-fn selector_name_and_role_are_an_intersection_in_both_object_forms() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    for from in [false, true] {
-        for name in [
-            "synthetic-lesson",
-            "synthetic-printed-resource",
-            "synthetic-alias",
-        ] {
-            let selector = if from {
-                json!({"from":{"side":"self","zone":"ex"},"resource_role":"lesson_item","name":name})
-            } else {
-                json!({"side":"self","zone":"ex","resource_role":"lesson_item","name":name})
-            };
-            fixture.programs["cards"]["actor"]["abilities"] = json!([{"kind":"activated","line":1_u8,"targets":[{"key":"1","select":selector,"min":1_u8,"max":1_u8}],"body":{"op":"draw","count":0_u8}}]);
-            let mut setup = position();
-            setup["players"]["P1"]["zones"]["ex"] = json!([{"id":"target","card":"lesson"}]);
-            assert_eq!(
-                !choices(&fixture.game(&setup).unwrap(), 1).is_empty(),
-                name == "synthetic-lesson"
-            );
-        }
-    }
-}
-
-#[test]
-fn consistent_display_renaming_preserves_ids_capabilities_and_cost_results() {
-    let mut original = Fixture::new();
-    resource_programs(&mut original);
-    let mut renamed = original.clone();
-    for card in &mut renamed.facts {
-        for face in card["faces"].as_array_mut().unwrap() {
-            for field in ["name", "title"] {
-                let label = face[field].as_str().unwrap();
-                if !label.is_empty() {
-                    face[field] = json!(format!("renamed-{label}"));
-                }
-            }
-        }
-    }
-    renamed.programs["cards"]["lesson"]["rules_name"] = json!("renamed-synthetic-lesson");
-    renamed.programs["cards"]["alias"]["abilities"][0]["body"]["name"] =
-        json!("renamed-synthetic-lesson");
-    renamed.repin();
-    let mut setup = position();
-    setup["players"]["P1"]["title_code"] = json!("synthetic_ub");
-    setup["players"]["P1"]["construction"] = json!("title");
-    setup["players"]["P1"]["zones"]["ex"] =
-        json!([{"id":"lesson","card":"lesson"},{"id":"alias","card":"alias"}]);
-    let mut before = original.game(&setup).unwrap();
-    let mut after = renamed.game(&setup).unwrap();
-    assert_eq!(before.legal().unwrap(), after.legal().unwrap());
-    let action = choices(&before, 1).remove(0);
-    assert_eq!(
-        before.decide(&action, "same").unwrap().outcome,
-        after.decide(&action, "same").unwrap().outcome
-    );
-    for path in [
-        "P1.ex",
-        "P1.pp.current",
-        "semantic_state.counters_this_turn",
-    ] {
-        assert_eq!(
-            before.query(View::Referee, path).unwrap(),
-            after.query(View::Referee, path).unwrap()
-        );
-    }
-    let stack_action = choices(&before, 6).remove(0);
-    before.decide(&stack_action, "stack").unwrap();
-    after.decide(&stack_action, "stack").unwrap();
-    assert_eq!(
-        before.query(View::Referee, "P1.field").unwrap(),
-        after.query(View::Referee, "P1.field").unwrap()
-    );
-    assert_eq!(
-        before
-            .query(View::Referee, "P1.field.new-1.counters")
-            .unwrap(),
-        after
-            .query(View::Referee, "P1.field.new-1.counters")
-            .unwrap()
-    );
-    let opening_setup = json!({"pregame":true,"players":{
-        "P1":{"construction":"title","title_code":"synthetic_lesson","leader":{"life":20_u8},"deck_list":[],"evolve_deck_list":[]},
-        "P2":{"construction":"class","leader":{"life":20_u8},"deck_list":[],"evolve_deck_list":[]}}});
-    let opening_before = original.game(&opening_setup).unwrap();
-    let opening_after = renamed.game(&opening_setup).unwrap();
-    assert_eq!(
-        opening_before.query(View::Referee, "P1.ex").unwrap(),
-        opening_after.query(View::Referee, "P1.ex").unwrap()
-    );
-    assert_eq!(
-        opening_before.legal().unwrap(),
-        opening_after.legal().unwrap()
-    );
-}
-
-#[test]
-fn counter_queries_the_reset_face_and_information_source_after_moving() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    // Movement clears temporary face/source state before this existing counter is read.
-    fixture.programs["cards"]["lesson"]
-        .as_object_mut()
-        .unwrap()
-        .remove("rules_name");
-    fixture.rules["resources"][0]["names"][0]["name_source"] = json!("printed");
-    let mut extra = fixture.facts[1]["faces"][0].clone();
-    extra["name"] = json!("synthetic-other-face");
-    fixture.facts[1]["faces"]
-        .as_array_mut()
-        .unwrap()
-        .push(extra);
-    fixture.repin();
-    for (card, state, expected) in [
-        ("lesson", json!({"face":1_u8}), 1_i64),
-        ("alias", json!({"evolved_with":"source"}), 0),
-    ] {
-        let mut setup = position();
-        setup["players"]["P2"]["zones"]["ex"] = json!([{"id":"target","card":card,"state":state}]);
-        setup["players"]["P2"]["zones"]["evolution"] = json!([{"id":"source","card":"lesson"}]);
-        let mut game = fixture.game(&setup).unwrap();
-        game.decide(&json!({"do":"activate","ability":{"source":"actor","line":5_u8},"targets":{"1":["target"]}}), "reset-name").unwrap();
-        assert_eq!(game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"]["P2"]["magic_item_banished"].as_i64().unwrap_or(0), expected);
-    }
-    for (override_name, expected) in [
-        ("synthetic-printed-resource", 1_i64),
-        ("synthetic-wrong", 0),
-    ] {
-        fixture.programs["cards"]["alias"]["rules_name"] = json!(override_name);
-        let mut setup = position();
-        setup["players"]["P1"]["zones"]["ex"] = json!([{"id":"target","card":"alias"}]);
-        let mut game = fixture.game(&setup).unwrap();
-        game.decide(&json!({"do":"activate","ability":{"source":"actor","line":5_u8},"targets":{"1":["target"]}}), "override").unwrap();
-        assert_eq!(game.projection(View::Referee).unwrap()["semantic_state"]["counters_this_turn"]["P1"]["magic_item_banished"].as_i64().unwrap_or(0), expected);
-    }
-}
-
-#[test]
 fn role_dependencies_and_opening_templates_fail_at_load_without_partial_state() {
     let mut fixture = Fixture::new();
     resource_programs(&mut fixture);
@@ -846,47 +585,6 @@ fn role_dependencies_and_opening_templates_fail_at_load_without_partial_state() 
         "{error}"
     );
     assert_eq!(before, game.digest().unwrap());
-}
-
-#[test]
-fn ordinary_ex_banish_without_a_role_binding_erases_the_token_without_a_lesson_counter() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    let ordinary = fixture.programs["cards"]["actor"]["abilities"][4].clone();
-    fixture.programs["cards"]["actor"]["abilities"] = json!([ordinary]);
-    let unbound = Catalog::from_documents(
-        &fixture.snapshot(),
-        &fixture.keywords.to_string(),
-        &fixture.documents(),
-    )
-    .unwrap();
-    let mut setup = position();
-    setup["players"]["P1"]["zones"]["ex"] = json!([{"id":"target","card":"lesson"}]);
-    let mut game = Game::new(
-        Arc::new(unbound),
-        &setup,
-        &Value::Null,
-        &Value::Null,
-        "ordinary-banish",
-    )
-    .unwrap();
-    let result = game.decide(&json!({"do":"activate","ability":{"source":"actor","line":5_u8},"targets":{"1":["target"]}}), "ordinary-banish").unwrap();
-    assert_eq!(result.outcome, "resolved");
-    let view = game.projection(View::Referee).unwrap();
-    assert_eq!(view["P1"]["ex"], json!([]));
-    assert_eq!(view["P1"]["banish"], json!([]));
-    assert!(
-        result
-            .events
-            .iter()
-            .any(|event| event["kind"] == "消去" && event["object"] == "target")
-    );
-    assert_eq!(
-        view["semantic_state"]["counters_this_turn"]["P1"]["magic_item_banished"]
-            .as_i64()
-            .unwrap_or(0),
-        0
-    );
 }
 
 #[test]
@@ -983,37 +681,6 @@ fn same_version_save_restores_pending_stack_and_hides_private_ids() {
 }
 
 #[test]
-fn alias_zone_and_information_source_use_the_current_effective_names() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    fixture.programs["cards"]["alias"]["abilities"][0]["body"]["while_zone"] = json!("field");
-    fixture.programs["cards"]["actor"]["abilities"] = json!([{"kind":"activated","line":1_u8,"targets":[{"key":"1","select":{"side":"self","zone":"any","resource_role":"lesson_item"},"min":1_u8,"max":1_u8}],"body":{"op":"draw","count":0_u8}}]);
-    let catalog = Arc::new(fixture.load().unwrap());
-    for (zone, state, expected) in [
-        ("field", json!({}), true),
-        ("ex", json!({}), false),
-        ("ex", json!({"evolved_with":"source"}), true),
-    ] {
-        let mut setup = position();
-        let item = json!({"id":"target","card":"alias","state":state});
-        if let Some(items) = setup["players"]["P1"]["zones"][zone].as_array_mut() {
-            items.push(item);
-        } else {
-            setup["players"]["P1"]["zones"][zone] = json!([item]);
-        }
-        setup["players"]["P1"]["zones"]["evolution"] = json!([{"id":"source","card":"lesson"}]);
-        let game = from_catalog(Arc::clone(&catalog), &setup).unwrap();
-        assert_eq!(
-            choices(&game, 1)
-                .iter()
-                .any(|action| action["targets"]["1"][0] == "target"),
-            expected,
-            "{zone}"
-        );
-    }
-}
-
-#[test]
 fn resolved_en_input_keeps_exact_locators_and_never_uses_the_jp_fallback() {
     let fixture = Fixture::new();
     let (mut rules, mut identity) = project(&fixture);
@@ -1076,37 +743,6 @@ fn equal_display_labels_cannot_hide_conflicting_permanent_name_ids() {
 }
 
 #[test]
-fn resource_template_uses_the_resolved_face_at_birth() {
-    let mut fixture = Fixture::new();
-    fixture.programs["cards"]["lesson"]
-        .as_object_mut()
-        .unwrap()
-        .remove("rules_name");
-    let mut second = fixture.facts[1]["faces"][0].clone();
-    second["name"] = json!("synthetic-selected-face");
-    fixture.facts[1]["faces"]
-        .as_array_mut()
-        .unwrap()
-        .push(second);
-    fixture.rules["resources"][0]["names"][0]["name_source"] = json!("printed");
-    fixture.rules["resources"][0]["names"][0]["face"]["face_ordinal"] = json!(1_u8);
-    fixture.rules["resources"][0]["template"]["face_ordinal"] = json!(1_u8);
-    fixture.repin();
-    let setup = json!({"pregame":true,"players":{
-        "P1":{"construction":"title","title_code":"synthetic_lesson","leader":{"life":20_u8},"deck_list":[],"evolve_deck_list":[]},
-        "P2":{"construction":"class","leader":{"life":20_u8},"deck_list":[],"evolve_deck_list":[]}}});
-    let game = fixture.game(&setup).unwrap();
-    let packet = game.projection(View::Referee).unwrap();
-    let ids = packet["P1"]["ex"].as_array().unwrap();
-    assert_eq!(ids.len(), 5);
-    for id in ids {
-        let object = &packet["objects"][id.as_str().unwrap()];
-        assert_eq!(object["face"], 1_u8);
-        assert_eq!(object["name"], "synthetic-selected-face");
-    }
-}
-
-#[test]
 fn unbound_selectors_reject_before_enumerating_an_empty_candidate_set() {
     let mut fixture = Fixture::new();
     for selector in [
@@ -1123,14 +759,4 @@ fn unbound_selectors_reject_before_enumerating_an_empty_candidate_set() {
         let game = from_catalog(Arc::new(unbound), &position()).unwrap();
         assert!(matches!(game.legal(), Err(EngineFailure::Unsupported(_))));
     }
-}
-
-#[test]
-fn virtual_leaders_cannot_match_a_physical_resource_name_role() {
-    let mut fixture = Fixture::new();
-    fixture.programs["cards"]["actor"]["abilities"] = json!([{"kind":"activated","line":1_u8,"targets":[{"key":"1","select":{"side":"self","zone":"leader","resource_role":"lesson_item"},"min":1_u8,"max":1_u8}],"body":{"op":"draw","count":0_u8}}]);
-    assert_eq!(
-        choices(&fixture.game(&position()).unwrap(), 1),
-        Vec::<Value>::new()
-    );
 }

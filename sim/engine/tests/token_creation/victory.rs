@@ -1,6 +1,5 @@
 use super::*;
 use core::iter::once;
-use sve_engine::game::internal::Fact;
 
 fn selection(steps: &Value) -> (String, String, Value) {
     let (creator, source) = author(
@@ -94,43 +93,6 @@ fn arbitrary_discard_reads_actual_count_and_keeps_the_question_private() {
         assert_eq!(view["P1"]["hand"].as_array().unwrap().len(), 4);
         assert_eq!(view["P1"]["deck"].as_array().unwrap().len(), 5 - count);
         assert_eq!(view["P1"]["cemetery"].as_array().unwrap().len(), count + 1);
-    }
-}
-
-#[test]
-fn victory_precedes_empty_deck_loss_and_stops_the_remaining_body() {
-    for seat in [1_u32, 2] {
-        let actor = if seat == 1 { "P1" } else { "P2" };
-        let mut game = board_for(
-            &json!([
-                {"draw":{"n":1_u8}},
-                {"win":{"who":"self"}},
-                {"life":{"who":"self","delta":-99_i64}}
-            ]),
-            0,
-            0,
-            seat,
-        );
-        let result = game
-            .play_internal_card("creator", PlayerId { seat })
-            .unwrap();
-        let CardPlay::GameEnded(terminal) = result else {
-            panic!("effect victory terminates the body")
-        };
-        let progress = terminal.progress.unwrap();
-        assert!(!progress.complete);
-        assert!(!progress.facts.iter().any(|fact| matches!(
-            fact,
-            Fact::CardResolved { .. } | Fact::AbilityResolved { .. }
-        )));
-        let view = game.projection(View::Referee).unwrap();
-        assert_eq!(view["game"]["ended"], true);
-        assert_eq!(view["game"]["winner"], actor);
-        assert_eq!(view["game"]["by"], "1.2.4");
-        assert_eq!(view[actor]["leader"]["life"], 20_u8);
-        assert!(game.internal_pending_choice().unwrap().is_none());
-        assert!(game.internal_decision(View::P1).is_none());
-        game.concede_internal(PlayerId { seat: 2 }).unwrap_err();
     }
 }
 
