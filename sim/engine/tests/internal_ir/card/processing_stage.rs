@@ -1,9 +1,12 @@
+#[path = "processing_stage/lifecycle.rs"]
+mod lifecycle;
+
 use super::*;
 use crate::player_pipeline::question;
 use crate::{board_fixture, payment_fixtures};
 use sve_battle_contract::QuestionId;
 use sve_engine::battle::ProjectionError;
-use sve_engine::game::internal::QuestionStage;
+use sve_engine::game::internal::{PlayPhase, QuestionStage};
 use sve_engine::game::player::{
     self, Command, Question, QuestionPurpose, QuestionShape, SubmissionKind, Viewer,
 };
@@ -179,6 +182,7 @@ fn resolution_payment_has_a_distinct_stage_with_the_same_native_purpose() {
             ));
             assert_eq!(q.purpose, QuestionPurpose::ResolutionChoice);
             assert_eq!(game.internal_question_stage(), Some(QuestionStage::Pay));
+            assert_eq!(game.internal_play_phase(), Some(PlayPhase::Resolve));
             let before = exact_authority(&game);
             closed_wire(&game, actor);
             assert_eq!(
@@ -190,11 +194,13 @@ fn resolution_payment_has_a_distinct_stage_with_the_same_native_purpose() {
                 "wrong-seat payment preserves authority"
             );
             assert_eq!(game.internal_question_stage(), Some(QuestionStage::Pay));
+            assert_eq!(game.internal_play_phase(), Some(PlayPhase::Resolve));
             assert_eq!(
                 submit(&mut game, actor, &q, Answer::OptionalCost(accept)),
                 SubmissionKind::Applied
             );
             assert_eq!(game.internal_question_stage(), None);
+            assert_eq!(game.internal_play_phase(), None);
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state[me]["pp"]["current"], if accept { 2 } else { 3 });
             assert_eq!(state[me]["leader"]["life"], if accept { 21 } else { 20 });

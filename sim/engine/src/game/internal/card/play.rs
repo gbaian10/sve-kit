@@ -4,6 +4,8 @@ use super::{
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
     admission, int, invalid, seat_name, unsupported,
 };
+use crate::game::internal::PlayPhase;
+use crate::game::internal::processing::enter_play_phase;
 use crate::game::internal::repeated_moves;
 use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::knowledge::PublishedKnowledge;
@@ -1351,6 +1353,7 @@ impl Game {
             facts: super::super::fact_log::Facts::default(),
             waiting: None,
             question_stage: None,
+            play_phase: None,
             destroy_guards: Vec::new(),
             look_viewers: BTreeMap::new(),
             player_receipt_links: BTreeMap::new(),
@@ -1452,6 +1455,7 @@ impl Game {
             restart: None,
             distribution_captures: None,
         });
+        enter_play_phase(execution, PlayPhase::Declare)?;
         Ok(())
     }
 
@@ -1736,6 +1740,7 @@ impl Game {
     }
 
     fn finish_play_payment(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
+        enter_play_phase(execution, PlayPhase::Pay)?;
         let consumed = if execution.spell || execution.field_entry {
             self.internal_matching_player_costs(execution)?
         } else {
@@ -1811,6 +1816,7 @@ impl Game {
         if let Some(nested) = execution.nested.as_mut() {
             nested.committed = true;
         }
+        enter_play_phase(execution, PlayPhase::Resolve)?;
         execution.record_fact(
             self,
             if execution.spell {
@@ -2277,6 +2283,7 @@ impl Game {
             restart: None,
             distribution_captures: None,
         });
+        enter_play_phase(execution, PlayPhase::Declare)?;
         Ok(())
     }
 }

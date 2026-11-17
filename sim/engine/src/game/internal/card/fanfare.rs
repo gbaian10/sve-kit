@@ -3,6 +3,8 @@ use super::{
     PlayerId, Result, RuntimeAbilitySource, Step, ZoneKind, invalid, json, seat_name, take,
     unsupported,
 };
+use crate::game::internal::PlayPhase;
+use crate::game::internal::processing::enter_play_phase;
 use crate::game::knowledge::PublishedKnowledge;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
@@ -82,6 +84,7 @@ impl Game {
         if let Some(nested) = execution.nested.as_mut() {
             nested.committed = true;
         }
+        enter_play_phase(execution, PlayPhase::Resolve)?;
         execution.record_fact(
             self,
             super::Fact::CardPlayed {

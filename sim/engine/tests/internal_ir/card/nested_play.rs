@@ -2,6 +2,9 @@
     clippy::panic,
     reason = "Unexpected formal choices invalidate these nested play scenarios."
 )]
+#[path = "nested_play/lifecycle.rs"]
+mod lifecycle;
+
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
@@ -45,6 +48,7 @@ fn tree(side: &str, child: &str, extra_cost: bool, stale: bool) -> Value {
 #[derive(Clone, Copy)]
 pub(super) enum Scenario {
     Plain,
+    ProcessingPause { child_fails: bool },
     AdditionalCost { material: bool },
     MandatoryReveal { material: bool },
     StaleSelection,
@@ -131,11 +135,19 @@ fn build_programs(
     let extra_cost = matches!(
         scenario,
         Scenario::AdditionalCost { .. }
+            | Scenario::ProcessingPause { child_fails: true }
             | Scenario::MandatoryReveal { .. }
             | Scenario::ReturnMaterial { .. }
     );
     let stale = matches!(scenario, Scenario::StaleSelection);
     let mut input = tree(side, child, extra_cost, stale);
+    if matches!(scenario, Scenario::ProcessingPause { .. }) {
+        input["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"optional":{"do":[{"life":{"who":"self","delta":4}}]}}));
+    }
+
     if matches!(scenario, Scenario::ReturnMaterial { .. }) {
         input["cards"]["unit-spell"]["abilities"][0]["spell"]["targets"][0]["from"]["who"] =
             json!("self");
