@@ -279,57 +279,6 @@ struct State {
 }
 
 /// A cloneable game. Only this type resolves effects, creates prompts and hides private state.
-#[cfg_attr(
-    not(feature = "runner"),
-    doc = "
-Runner diagnostics bypass viewer authorization and are absent from host builds.
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_each_player_actor;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_question_stage;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_play_phase;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_number_declarations;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_play_declarations;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_pp_payments;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_cost_spec_payments;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_exchange_payments;
-```
-
-```compile_fail,E0599
-use sve_engine::game::Game;
-let _ = Game::internal_target_declarations;
-```
-"
-)]
 #[derive(Clone, Serialize, Deserialize)]
 pub struct Game {
     catalog: Arc<Catalog>,

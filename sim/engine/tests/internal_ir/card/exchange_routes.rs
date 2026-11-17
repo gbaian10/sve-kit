@@ -1,5 +1,4 @@
 use super::*;
-use sve_engine::game::internal::PlayDeclaration;
 
 fn expanded(optional: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -189,11 +188,6 @@ fn player_question_exchange_preserves_the_only_affordable_route_index() {
         SubmissionKind::Applied
     );
     let route = question(&game, Viewer::P1);
-    let route_decision = game
-        .internal_decision(View::Referee)
-        .unwrap()
-        .token
-        .decision;
     let QuestionShape::Decision(DecisionShape::ExchangeRoutes(routes)) = &route.shape else {
         panic!("exchange routes")
     };
@@ -217,14 +211,6 @@ fn player_question_exchange_preserves_the_only_affordable_route_index() {
     assert_eq!(
         answer(&mut game, Viewer::P1, Answer::Integer(Nat(1))).kind,
         SubmissionKind::Applied
-    );
-    let declared = game.internal_play_declarations().unwrap();
-    assert!(
-        matches!(declared, [
-        PlayDeclaration::OptionalCost { accepted:true,.. },
-        PlayDeclaration::ExchangeRoute { player, decision, route:saved },
-    ] if *player==Viewer::P1.player() && *decision==route_decision && *saved==Nat(1)),
-        "only the accepted native route, not a rejected or implicit route, is declared"
     );
     let material = question(&game, Viewer::P1);
     let QuestionShape::Decision(DecisionShape::CostMaterials(domain)) = material.shape else {

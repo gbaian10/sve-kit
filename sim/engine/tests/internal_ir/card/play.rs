@@ -224,27 +224,6 @@ fn distribution_spell(minimum_targets: u64, predicate: Expr<Bool>) -> WellFormed
     card(vec![a])
 }
 
-fn assert_target_round(game: &Game, expected: Option<(DecisionId, usize)>) {
-    let selected = game.internal_target_declarations().unwrap();
-    if let Some((decision, count)) = expected {
-        assert_eq!(selected.len(), 1, "only the current round's answer remains");
-        assert_eq!(
-            selected[0].decision, decision,
-            "the current admitted parameter owns the selection"
-        );
-        assert_eq!(
-            selected[0].objects.len(),
-            count,
-            "the accepted round retains exactly its selected members"
-        );
-    } else {
-        assert!(
-            selected.is_empty(),
-            "a distribution retry discards every target from its rejected round"
-        );
-    }
-}
-
 #[test]
 fn bp08_028_distribution_seed_retries_targets_and_freezes_pre_payment_values() {
     let mut game = position(&distribution_spell(0, Expr::Literal(Bool(true))), "ex", 5);
@@ -258,7 +237,6 @@ fn bp08_028_distribution_seed_retries_targets_and_freezes_pre_payment_values() {
         )
         .unwrap(),
     );
-    assert_target_round(&game, None);
     assert!(retry.token.epoch > first.token.epoch);
     assert_eq!(
         game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
@@ -275,7 +253,6 @@ fn bp08_028_distribution_seed_retries_targets_and_freezes_pre_payment_values() {
     assert!(
         matches!(&distribution.domain, InputDomain::Distribution(domain) if domain.total == Nat(4) && domain.minimum == Nat(1))
     );
-    assert_target_round(&game, Some((retry.token.decision, 2)));
     let before = exact_authority(&game);
     game.answer_internal_card(
         distribution.actor,

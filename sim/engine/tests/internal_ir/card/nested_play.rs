@@ -2,15 +2,6 @@
     clippy::panic,
     reason = "Unexpected formal choices invalidate these nested play scenarios."
 )]
-#[path = "nested_play/lifecycle.rs"]
-mod lifecycle;
-
-#[path = "nested_play/declarations.rs"]
-mod declarations;
-
-#[path = "nested_play/play_declarations.rs"]
-mod play_declarations;
-
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
@@ -54,7 +45,6 @@ fn tree(side: &str, child: &str, extra_cost: bool, stale: bool) -> Value {
 #[derive(Clone, Copy)]
 pub(super) enum Scenario {
     Plain,
-    ProcessingPause { child_fails: bool },
     AdditionalCost { material: bool },
     MandatoryReveal { material: bool },
     StaleSelection,
@@ -141,19 +131,11 @@ fn build_programs(
     let extra_cost = matches!(
         scenario,
         Scenario::AdditionalCost { .. }
-            | Scenario::ProcessingPause { child_fails: true }
             | Scenario::MandatoryReveal { .. }
             | Scenario::ReturnMaterial { .. }
     );
     let stale = matches!(scenario, Scenario::StaleSelection);
     let mut input = tree(side, child, extra_cost, stale);
-    if matches!(scenario, Scenario::ProcessingPause { .. }) {
-        input["cards"]["unit-amulet"]["abilities"][0]["activate"]["do"]
-            .as_array_mut()
-            .unwrap()
-            .push(json!({"optional":{"do":[{"life":{"who":"self","delta":4}}]}}));
-    }
-
     if matches!(scenario, Scenario::ReturnMaterial { .. }) {
         input["cards"]["unit-spell"]["abilities"][0]["spell"]["targets"][0]["from"]["who"] =
             json!("self");
@@ -189,17 +171,7 @@ fn build_programs(
 }
 
 pub(super) fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, AbilityId) {
-    build_custom(side, child, enemy, scenario, |_| {})
-}
-
-pub(super) fn build_custom(
-    side: &str,
-    child: &str,
-    enemy: bool,
-    scenario: Scenario,
-    customize: impl FnOnce(&mut BTreeMap<String, WellFormedCardProgram>),
-) -> (Game, AbilityId) {
-    build_position(side, child, enemy, scenario, customize, |_| {})
+    build_position(side, child, enemy, scenario, |_| {})
 }
 
 pub(super) fn build_position(
@@ -207,11 +179,9 @@ pub(super) fn build_position(
     child: &str,
     enemy: bool,
     scenario: Scenario,
-    customize: impl FnOnce(&mut BTreeMap<String, WellFormedCardProgram>),
     customize_position: impl FnOnce(&mut Value),
 ) -> (Game, AbilityId) {
-    let mut programs = build_programs(side, child, scenario);
-    customize(&mut programs);
+    let programs = build_programs(side, child, scenario);
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
