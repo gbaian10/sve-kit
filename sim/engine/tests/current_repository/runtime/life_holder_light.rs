@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn finish(game: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(question) = play {
         let answer = if let InputDomain::Targets(domain) = &question.domain {

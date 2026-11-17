@@ -5,10 +5,6 @@
 
 use super::*;
 
-fn opposite(seat: &str) -> &str {
-    if seat == "P1" { "P2" } else { "P1" }
-}
-
 fn resolve_trigger(game: &mut Game, number: &str) -> Activation {
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {

@@ -138,25 +138,6 @@ fn choose(game: &mut Game, question: &DecisionView, eligible: bool) -> DecisionV
     )
 }
 
-fn order(game: &mut Game, question: &DecisionView, remaining: usize) {
-    let InputDomain::Order(cards) = &question.domain else {
-        panic!("only the looked remainder is ordered")
-    };
-    assert_eq!(
-        cards.len(),
-        remaining,
-        "the moved card and unobserved tail are excluded from the private remainder"
-    );
-    resolved(
-        game.answer_internal_card(
-            question.actor,
-            question.token,
-            Answer::Order(cards.iter().rev().map(|card| card.handle).collect()),
-        )
-        .unwrap(),
-    );
-}
-
 fn reject_spell() {
     let mut game = fixture("spell");
     let question = fanfare(&mut game);

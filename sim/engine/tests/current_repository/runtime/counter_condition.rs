@@ -140,11 +140,6 @@ fn position(number: &str, zone: &str) -> Value {
         json!([{"id":"enemy","card":"BP01-037","state":{"hp":12_u8,"max_hp":12_u8,"acted":true}}]);
     initial
 }
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
 fn finish(game: &mut Game, mut step: CardPlay) {
     while let CardPlay::Awaiting(q) = step {
         let answer = match &q.domain {

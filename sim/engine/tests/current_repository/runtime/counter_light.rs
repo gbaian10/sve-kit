@@ -124,11 +124,6 @@ fn finish(game: &mut Game, mut play: CardPlay, choose: &[&str], modes: &[u64], a
         "the printed ability completes"
     );
 }
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
 fn trigger(game: &mut Game, number: &str, line: u64, choose: Option<&str>, accept: bool) {
     let q = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &q.domain else {

@@ -69,10 +69,6 @@ fn play(game: &mut Game, id: &str) {
     drive(game, Some(step), &[]);
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 fn has_keyword(view: &Value, id: &str, keyword: &str) -> bool {
     view["objects"][id]["keywords"]
         .as_array()

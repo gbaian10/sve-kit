@@ -53,10 +53,6 @@ fn play(game: &mut Game, boost: bool, modes: &[u64]) -> Option<u64> {
     offered
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 #[test]
 fn bp21_026_without_the_extra_cost_chooses_one_mode_for_four_pp() {
     let mut game = loaded(10);

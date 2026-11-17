@@ -18,12 +18,6 @@ fn loaded(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn source(number: &str, zone: &str) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"][zone] = json!([{"id":"source","card":number}]);
-    initial
-}
-
 fn settle(game: &mut Game, mut step: Option<CardPlay>, modes: &[ModeId]) {
     for _ in 0_u8..80_u8 {
         if let Some(CardPlay::Awaiting(q)) = step.take() {
@@ -65,9 +59,6 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>, modes: &[ModeId]) {
 fn play(game: &mut Game) {
     let step = game.play_internal_card("source", PLAYER).unwrap();
     settle(game, Some(step), &[ModeId(1)]);
-}
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
 }
 
 #[test]

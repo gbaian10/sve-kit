@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn initial(card: &str) -> Value {
     let mut value = draw_position();
     value["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);

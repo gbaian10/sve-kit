@@ -6,12 +6,6 @@
 use super::*;
 use sve_engine::game::internal::DecisionView;
 
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 fn pending(game: &mut Game, printing: &str, event: Option<&str>) -> CardPlay {
     checks(game);
     let q = game.internal_pending_choice().unwrap().unwrap();

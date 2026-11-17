@@ -9,10 +9,6 @@ use serde_json::Map;
 use std::{fs::read_to_string, path::PathBuf};
 use sve_engine::catalog::EngineIdentityInput;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str, zone: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"][zone] = json!([{"id":"source","card":card}]);

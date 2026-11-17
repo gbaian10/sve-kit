@@ -48,18 +48,6 @@ fn bounds(question: &DecisionView) -> (Nat, Option<Nat>) {
     (domain.cardinality.minimum, domain.cardinality.maximum)
 }
 
-/// Rejected answers must leave the same question open.
-fn rejects(game: &mut Game, question: &DecisionView, handles: Vec<u64>) {
-    let before = format!("{game:?}");
-    game.answer_internal_card(question.actor, question.token, Answer::Targets(handles))
-        .unwrap_err();
-    assert_eq!(
-        format!("{game:?}"),
-        before,
-        "a rejected answer leaves the choice open"
-    );
-}
-
 fn look_play(card: &str, deck: Value) -> (Game, DecisionView) {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);

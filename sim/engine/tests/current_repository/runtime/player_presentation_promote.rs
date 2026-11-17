@@ -15,10 +15,6 @@ use sve_engine::game::player::{
     Command, DecisionShape, Input, QuestionShape, SubmissionKind, Viewer,
 };
 
-fn committed(game: &Game, viewer: Viewer) -> Vec<PlayerEventBatch> {
-    game.event_batches(viewer, None).unwrap().cloned().collect()
-}
-
 /// Play BP09-058 up to its discard question; `stops` says at which of the two stops the
 /// seats are handed a presentation. Returns what each seat was shown.
 fn discard_stop(

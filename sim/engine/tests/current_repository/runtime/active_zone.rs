@@ -6,10 +6,6 @@
 //! Abilities active outside the hand-and-field defaults: EX triggers and Advance activations.
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),

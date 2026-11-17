@@ -1,9 +1,5 @@
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 #[test]
 fn dragoweapon_selects_before_paying_and_adds_health_and_armament() {
     let mut initial = draw_position();

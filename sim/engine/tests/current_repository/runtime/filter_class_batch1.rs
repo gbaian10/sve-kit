@@ -137,12 +137,6 @@ fn enter(game: &mut Game, card: &str) -> CardPlay {
     );
     trigger(game, card)
 }
-fn keyword(state: &Value, id: &str, name: &str) -> bool {
-    state["objects"][id]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!(name))
-}
 #[test]
 fn bp03_113_evolution_bounces_only_another_neutral_ally() {
     let mut initial = draw_position();

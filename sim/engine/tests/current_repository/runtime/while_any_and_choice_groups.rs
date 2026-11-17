@@ -3,11 +3,6 @@
     reason = "Unexpected decisions invalidate these printed card scenarios."
 )]
 use super::*;
-use sve_engine::game::internal::SearchAnswer;
-
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
 
 fn position(card: &str) -> Value {
     let mut initial = draw_position();
@@ -24,70 +19,6 @@ fn position(card: &str) -> Value {
 
 fn finish(game: &mut Game, step: CardPlay) {
     finish_mode(game, step, ModeId(1));
-}
-
-fn finish_mode(game: &mut Game, mut step: CardPlay, mode: ModeId) {
-    while let CardPlay::Awaiting(q) = step {
-        let answer = if let InputDomain::Targets(domain) = &q.domain {
-            let mut members: Vec<_> = domain.members.iter().collect();
-            members.sort_by_key(|member| {
-                if member.card.as_deref() == Some("BP01-092") {
-                    0_u8
-                } else if member.card.as_deref() == Some("BP01-037") {
-                    2
-                } else {
-                    3
-                }
-            });
-            let limit = domain
-                .cardinality
-                .maximum
-                .map_or(members.len(), |n| usize::try_from(n.0).unwrap());
-            Answer::Targets(members.into_iter().take(limit).map(|m| m.handle).collect())
-        } else if let InputDomain::CostMaterials(domain) = &q.domain {
-            let members: Vec<_> = domain.members.iter().collect();
-            assert!(
-                members.iter().all(|member| member.player == actor()),
-                "Only the controller can supply these cost materials"
-            );
-            let limit = domain
-                .cardinality
-                .maximum
-                .map_or(members.len(), |n| usize::try_from(n.0).unwrap());
-            Answer::CostMaterials(members.into_iter().take(limit).map(|m| m.handle).collect())
-        } else if let InputDomain::Search(domain) = &q.domain {
-            let limit = usize::try_from(
-                domain
-                    .cardinality
-                    .maximum
-                    .unwrap_or(domain.cardinality.minimum)
-                    .0,
-            )
-            .unwrap();
-            Answer::Search(SearchAnswer::Ungrouped(
-                domain.cards.iter().take(limit).map(|c| c.handle).collect(),
-            ))
-        } else if let InputDomain::Order(cards) = &q.domain {
-            Answer::Order(cards.iter().rev().map(|card| card.handle).collect())
-        } else if matches!(&q.domain, InputDomain::Modes { .. }) {
-            Answer::Modes(vec![mode])
-        } else if matches!(&q.domain, InputDomain::WardEntry { .. }) {
-            Answer::WardEntry(false)
-        } else if matches!(&q.domain, InputDomain::TokenCapacity { .. }) {
-            Answer::TokenCapacity(0)
-        } else if matches!(&q.domain, InputDomain::OptionalCost) {
-            Answer::OptionalCost(true)
-        } else {
-            panic!("unexpected decision")
-        };
-        step = game.answer_internal_card(q.actor, q.token, answer).unwrap();
-    }
-}
-
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
 }
 
 fn play(game: &mut Game, id: &str) {

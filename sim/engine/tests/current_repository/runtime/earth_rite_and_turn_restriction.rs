@@ -42,11 +42,6 @@ const CONTROLS: [Companion; 3] = [
     ),
 ];
 const FORMS: [&str; 3] = ["CP02-010", "BP21-032", "BP21-086"];
-fn append(snapshot: &mut String, input: &mut Value, number: &str, face: &Value) {
-    snapshot.push_str(&json!({"number":number,"faces":[face]}).to_string());
-    snapshot.push('\n');
-    input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
-}
 fn selected() -> &'static SelectedEffects {
     static READY: OnceLock<SelectedEffects> = OnceLock::new();
     READY.get_or_init(|| {

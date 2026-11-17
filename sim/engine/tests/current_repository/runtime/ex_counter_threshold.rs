@@ -128,10 +128,6 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>) {
     panic!("scenario did not settle");
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 fn passion(view: &Value, id: &str) -> u64 {
     view["objects"][id]["counters"][PASSION]
         .as_u64()

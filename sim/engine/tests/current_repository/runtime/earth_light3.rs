@@ -7,10 +7,6 @@ use super::*;
 use alloc::collections::BTreeMap;
 use serde_json::Map;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str, field: bool, stacks: u8) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
@@ -90,35 +86,6 @@ fn finish(game: &mut Game, mut play: CardPlay, accepted: bool, leader: bool) {
 fn play(game: &mut Game, accepted: bool, leader: bool) {
     let action = game.play_internal_card("source", actor()).unwrap();
     finish(game, action, accepted, leader);
-}
-
-fn count(view: &Value, zone: &str, name: &str) -> usize {
-    view["P1"][zone]
-        .as_array()
-        .unwrap()
-        .iter()
-        .filter(|id| view["objects"][id.as_str().unwrap()]["name"] == name)
-        .count()
-}
-
-fn printed_id(card: &str) -> AbilityId {
-    selection().current[card]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|a| {
-            a.node.kind == AbilityKind::Activated
-                && matches!(a.node.source.origin, AbilityOrigin::Printed { .. })
-        })
-        .unwrap()
-        .node
-        .id
-}
-
-fn activate_printed(game: &mut Game, card: &str) -> CardPlay {
-    game.activate_internal_card("source", printed_id(card), actor())
-        .unwrap()
 }
 
 struct EvolutionFixture {
@@ -235,26 +202,6 @@ fn bp16_044_hand_and_field_activations_have_distinct_costs_and_destinations() {
     assert_eq!(field_view["P1"]["pp"]["current"], 10_u8);
     assert_eq!(field_view["P1"]["cemetery"], json!(["soil"]));
     assert_eq!(count(&field_view, "field", "ガーディアンゴーレム"), 2);
-}
-
-fn field_damage(view: &Value) {
-    assert_eq!(
-        view["objects"]["source"]["acted"], true,
-        "the source pays its act cost"
-    );
-    assert_eq!(
-        view["objects"]["enemy"]["damage"], 1_u8,
-        "each opposing follower receives one damage"
-    );
-    assert_eq!(
-        view["P2"]["leader"]["life"], 20_u8,
-        "the opposing leader is not a follower"
-    );
-    assert_eq!(
-        view["P1"]["cemetery"],
-        json!(["soil"]),
-        "two removed Stack immediately clear their holder"
-    );
 }
 
 #[test]

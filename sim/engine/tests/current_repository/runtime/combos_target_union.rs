@@ -100,10 +100,6 @@ fn evolve(game: &mut Game, super_evolution: bool, picks: &[&str]) -> Vec<Vec<Str
     drive(game, None, picks, &[])
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 fn numbers(cards: &[&str]) -> Vec<String> {
     cards.iter().map(|&card| card.to_owned()).collect()
 }

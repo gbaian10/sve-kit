@@ -30,12 +30,6 @@ fn settle(game: &mut Game) {
     }
 }
 
-fn pp(game: &Game) -> u64 {
-    game.projection(View::Referee).unwrap()["P1"]["pp"]["current"]
-        .as_u64()
-        .unwrap()
-}
-
 /// Plays BP10-007, returns the field beast as its Fanfare cost and searches サルビアパンサー.
 fn return_beast(game: &mut Game) {
     let mut entry = game.play_internal_card("tiger", PLAYER).unwrap();

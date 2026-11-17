@@ -35,13 +35,6 @@ fn evolved_position(base: &str, form: &str) -> Value {
     initial
 }
 
-fn take(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |most| usize::try_from(most.0).unwrap())
-        .min(available)
-}
-
 fn finish_with(game: &mut Game, mut play: CardPlay, mode: u64) {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {

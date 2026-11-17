@@ -21,17 +21,6 @@ fn attack(game: &mut Game, source: &str, target: &str) -> String {
         .outcome
 }
 
-fn pass_quick(game: &mut Game) {
-    for _ in 0_u8..4 {
-        let Some(q) = game.internal_quick_choice().unwrap() else {
-            return;
-        };
-        game.answer_internal_card(q.actor, q.token, Answer::Quick(None))
-            .unwrap();
-    }
-    panic!("Quick did not finish");
-}
-
 pub(super) fn end_turn(game: &mut Game) {
     let active = game.projection(View::Referee).unwrap()["turn"]["active"].clone();
     assert_eq!(

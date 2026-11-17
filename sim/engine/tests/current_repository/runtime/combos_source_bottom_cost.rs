@@ -82,10 +82,6 @@ fn ability(line: u32) -> AbilityId {
         .id
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 #[test]
 fn bp07_012_acts_and_bottoms_itself_to_count_an_ex_fairy_tale_follower() {
     let mut initial = position();

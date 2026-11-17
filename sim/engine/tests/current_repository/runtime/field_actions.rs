@@ -5,10 +5,6 @@
 
 use super::*;
 
-fn opposite(seat: &str) -> &str {
-    if seat == "P1" { "P2" } else { "P1" }
-}
-
 fn position(seat: &str, number: &str) -> Value {
     let mut initial = draw_position();
     initial["turn"]["active"] = json!(seat);

@@ -6,10 +6,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position() -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -17,12 +13,6 @@ fn position() -> Value {
     initial["players"]["P1"]["zones"]["deck"] = json!([]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
     initial
-}
-
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
 }
 
 /// Picks up to `most` handles, preferring members whose card number is in `wanted`.
@@ -38,13 +28,6 @@ fn prefer(members: &[(u64, Option<String>)], wanted: &[&str], most: usize) -> Ve
     }
     picks.truncate(most);
     picks
-}
-
-fn most(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |n| usize::try_from(n.0).unwrap())
-        .min(available)
 }
 
 /// Answers printed questions with the `wanted` cards (repeat a number to take two copies).
@@ -114,12 +97,6 @@ fn triggers(game: &mut Game, wanted: &[&str]) {
             .unwrap();
         answer(game, step, wanted);
     }
-}
-
-fn pp(game: &Game) -> u64 {
-    game.projection(View::Referee).unwrap()["P1"]["pp"]["current"]
-        .as_u64()
-        .unwrap()
 }
 
 /// Plays `id` from EX and asserts that it resolved, left EX and cost nothing.

@@ -259,10 +259,6 @@ pub(super) fn evolve(game: &mut Game) {
     );
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 #[test]
 fn bp04_109_damages_only_acted_enemies_and_heals_with_an_amulet() {
     for card in ["BP04-109", "BP04-P28"] {

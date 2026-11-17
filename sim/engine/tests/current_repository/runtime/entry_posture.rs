@@ -6,18 +6,6 @@ use sve_engine::game::internal::SearchAnswer;
 
 const CARDS: [(&str, &str); 2] = [("BP01-150", "死の宣告"), ("SD06-016", "聖獣への誓い")];
 
-fn activation(number: &str) -> AbilityId {
-    selection_with_rules().current[number]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|ability| ability.node.kind == AbilityKind::Activated)
-        .unwrap()
-        .node
-        .id
-}
-
 #[test]
 fn printed_amulets_enter_acted_from_hand_and_ex_without_a_posture_event() {
     for (number, _) in CARDS {

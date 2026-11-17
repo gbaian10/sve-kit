@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 /// P2 has `deck` hidden cards and `grave` cards already in its cemetery.
 fn position(card: &str, deck: usize, grave: usize) -> Value {
     let mut initial = draw_position();

@@ -1,8 +1,14 @@
 use super::*;
+use alloc::collections::BTreeSet;
 use core::fmt::Display;
 use serde_json::Value;
 use sve_engine::catalog::SelectedEffects;
-use sve_engine::game::internal::{Activation, Answer, CardPlay, Fact, InputDomain, ResumeStage};
+use sve_engine::game::internal::{
+    Activation, Answer, CardPlay, DecisionView, Fact, InputDomain, ResumeStage, SearchAnswer,
+    SearchDomain,
+};
+use sve_engine::game::player::Viewer;
+use sve_engine::game::player::events::{PlayerEvent, PlayerEventBatch};
 use sve_engine::game::{Game, View};
 use sve_engine::ir::*;
 
@@ -768,4 +774,754 @@ fn projected_zone_count(zone: &Value) -> u64 {
         .iter()
         .map(|card| card.get("filler").and_then(Value::as_u64).unwrap_or(1))
         .sum()
+}
+
+// Helpers shared verbatim by several runtime scenario files.
+fn ability(card: &str, index: usize) -> AbilityId {
+    selection_with_rules().current[card]
+        .program
+        .card()
+        .abilities[index]
+        .node
+        .id
+}
+
+fn accept(game: &mut Game, mut play: CardPlay) -> CardPlay {
+    while let CardPlay::Awaiting(question) = &play {
+        let answer = if matches!(question.domain, InputDomain::OptionalCost) {
+            Answer::OptionalCost(true)
+        } else if matches!(question.domain, InputDomain::WardEntry { .. }) {
+            Answer::WardEntry(false)
+        } else {
+            break;
+        };
+        play = game
+            .answer_internal_card(question.actor, question.token, answer)
+            .unwrap();
+    }
+    play
+}
+
+fn activate_printed(game: &mut Game, card: &str) -> CardPlay {
+    game.activate_internal_card("source", printed_id(card), actor())
+        .unwrap()
+}
+
+fn activated(number: &str) -> AbilityId {
+    selection().current[number]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.node.kind == AbilityKind::Activated)
+        .unwrap()
+        .node
+        .id
+}
+
+fn activation(number: &str) -> AbilityId {
+    selection_with_rules().current[number]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.node.kind == AbilityKind::Activated)
+        .unwrap()
+        .node
+        .id
+}
+
+const fn actor() -> PlayerId {
+    PlayerId { seat: 1 }
+}
+
+fn advance_entry() -> Action {
+    Action::Move {
+        objects: Selector::Zone {
+            players: PlayerSet {
+                relation: PlayerRelation::SelfPlayer,
+                relative_to: PlayerRef::Controller {},
+                text_quantifier: TextQuantifier::All,
+                cardinality: Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                },
+            },
+            zone: ZoneKind::Evolve,
+            view: SelectionView::Current {},
+            binding: Binding::new(50, ScopeId(1)),
+            predicate: Box::new(Expr::Literal(Bool(true))),
+        },
+        movement: MoveSpec {
+            to: MoveDestination::Shared {
+                zone: ZoneRef {
+                    player: PlayerRef::Controller {},
+                    kind: ZoneKind::Field,
+                },
+            },
+            initial_posture: None,
+            entry_effects: vec![],
+            position: None,
+            order: None,
+        },
+        reason: MoveReason::Put,
+    }
+}
+
+fn aliases(representative: &str) -> Vec<String> {
+    let selected = selection_with_rules();
+    let identity = &selected.current[representative].card_id;
+    selected
+        .current
+        .iter()
+        .filter(|(_, card)| &card.card_id == identity)
+        .map(|(number, _)| number.clone())
+        .collect()
+}
+
+fn all_other_followers() -> RecipientSet {
+    let mut objects = subjects();
+    if let Selector::Zone {
+        binding, predicate, ..
+    } = &mut objects
+    {
+        **predicate = Expr::Compute(Box::new(Predicate::KindEquals {
+            left: Expr::Live(Box::new(KindRead::Kind {
+                object: ObjectView::Current {
+                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
+                },
+                view: CharacteristicView::Effective,
+            })),
+            right: Expr::Literal(CardKind::Follower),
+        }));
+    }
+    RecipientSet::Objects {
+        objects: Selector::Difference {
+            input: Box::new(objects),
+            except: Box::new(Selector::Objects {
+                objects: vec![ObjectOperand::SourceHolder {}],
+            }),
+        },
+    }
+}
+
+fn append(snapshot: &mut String, input: &mut Value, number: &str, face: &Value) {
+    snapshot.push_str(&json!({"number":number,"faces":[face]}).to_string());
+    snapshot.push('\n');
+    input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn awaiting(play: CardPlay) -> DecisionView {
+    let CardPlay::Awaiting(question) = play else {
+        panic!("expected question")
+    };
+    question
+}
+
+fn cards(prefix: &str, card: &str, count: usize) -> Vec<Value> {
+    (0..count)
+        .map(|i| json!({"id":format!("{prefix}{i}"),"card":card}))
+        .collect()
+}
+
+fn checks(game: &mut Game) {
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+}
+
+fn committed(game: &Game, viewer: Viewer) -> Vec<PlayerEventBatch> {
+    game.event_batches(viewer, None).unwrap().cloned().collect()
+}
+
+fn count(view: &Value, zone: &str, name: &str) -> usize {
+    view["P1"][zone]
+        .as_array()
+        .unwrap()
+        .iter()
+        .filter(|id| view["objects"][id.as_str().unwrap()]["name"] == name)
+        .count()
+}
+
+fn create_token(name: &str) -> Action {
+    Action::Token {
+        tokens: vec![TokenSpec {
+            template: TokenTemplate::Fixed {
+                template: TokenTemplateId(name.into()),
+            },
+            count: Expr::Literal(Nat(1)),
+        }],
+        destination: TokenDestination::Single {
+            zone: Expr::Literal(ZoneRef {
+                player: PlayerRef::Controller {},
+                kind: ZoneKind::Field,
+            }),
+        },
+        output: Binding::new(50, ScopeId(1)),
+        initial_state: None,
+        initial_posture: Posture::Standing,
+        entry_effects: vec![],
+    }
+}
+
+fn damage() -> Action {
+    Action::Damage {
+        recipients: all_other_followers(),
+        amount: DamageAmount::Uniform {
+            amount: Expr::Literal(Int(4)),
+        },
+        flags: DamageFlags::Ability,
+        source: ObjectView::SourceInformation {},
+        batch: BatchPolicy::Instruction {},
+    }
+}
+
+fn damage_own() -> Action {
+    Action::Damage {
+        recipients: RecipientSet::Objects {
+            objects: own_followers(),
+        },
+        amount: DamageAmount::Uniform {
+            amount: Expr::Literal(Int(2)),
+        },
+        flags: DamageFlags::Ability,
+        source: ObjectView::SourceInformation {},
+        batch: BatchPolicy::Instruction {},
+    }
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn declare(game: &mut Game, line: u64) -> CardPlay {
+    let question = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &question.domain else {
+        panic!("pending")
+    };
+    let option = options.iter().find(|option| option.line == line).unwrap();
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::Pending(option.handle),
+    )
+    .unwrap()
+}
+
+fn definition(card: &str, kind: AbilityKind, nth: usize) -> AbilityId {
+    selection_with_rules().current[card]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .filter(|ability| ability.node.kind == kind)
+        .nth(nth)
+        .unwrap()
+        .node
+        .id
+}
+
+fn discard_all() -> WellFormedCardProgram {
+    producer(Action::Discard {
+        player: PlayerRef::Controller {},
+        mode: DiscardMode::All {
+            eligible: Selector::Zone {
+                players: PlayerSet {
+                    relation: PlayerRelation::SelfPlayer,
+                    relative_to: PlayerRef::Controller {},
+                    cardinality: Cardinality {
+                        minimum: Nat(1),
+                        maximum: Some(Nat(1)),
+                    },
+                    text_quantifier: TextQuantifier::All,
+                },
+                zone: ZoneKind::Hand,
+                view: SelectionView::Current {},
+                binding: Binding::new(400, ScopeId(1)),
+                predicate: Box::new(Expr::Literal(Bool(true))),
+            },
+        },
+    })
+}
+
+fn face(name: &str, kind: &str, cost: u64, class: &str, traits: &[&str]) -> Value {
+    let follower = kind == "フォロワー";
+    json!({"name":name,"card_type":kind,"card_class":class,"cost":cost.to_string(),
+        "power":if follower {"2"} else {"-"},"hp":if follower {"10"} else {"-"},
+        "traits":traits,"text":Value::Null,"sections":[]})
+}
+
+fn field_damage(view: &Value) {
+    assert_eq!(
+        view["objects"]["source"]["acted"], true,
+        "the source pays its act cost"
+    );
+    assert_eq!(
+        view["objects"]["enemy"]["damage"], 1_u8,
+        "each opposing follower receives one damage"
+    );
+    assert_eq!(
+        view["P2"]["leader"]["life"], 20_u8,
+        "the opposing leader is not a follower"
+    );
+    assert_eq!(
+        view["P1"]["cemetery"],
+        json!(["soil"]),
+        "two removed Stack immediately clear their holder"
+    );
+}
+
+fn finish_checks(game: &mut Game) {
+    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn finish_mode(game: &mut Game, mut step: CardPlay, mode: ModeId) {
+    while let CardPlay::Awaiting(q) = step {
+        let answer = if let InputDomain::Targets(domain) = &q.domain {
+            let mut members: Vec<_> = domain.members.iter().collect();
+            members.sort_by_key(|member| {
+                if member.card.as_deref() == Some("BP01-092") {
+                    0_u8
+                } else if member.card.as_deref() == Some("BP01-037") {
+                    2
+                } else {
+                    3
+                }
+            });
+            let limit = domain
+                .cardinality
+                .maximum
+                .map_or(members.len(), |n| usize::try_from(n.0).unwrap());
+            Answer::Targets(members.into_iter().take(limit).map(|m| m.handle).collect())
+        } else if let InputDomain::CostMaterials(domain) = &q.domain {
+            let members: Vec<_> = domain.members.iter().collect();
+            assert!(
+                members.iter().all(|member| member.player == actor()),
+                "Only the controller can supply these cost materials"
+            );
+            let limit = domain
+                .cardinality
+                .maximum
+                .map_or(members.len(), |n| usize::try_from(n.0).unwrap());
+            Answer::CostMaterials(members.into_iter().take(limit).map(|m| m.handle).collect())
+        } else if let InputDomain::Search(domain) = &q.domain {
+            let limit = usize::try_from(
+                domain
+                    .cardinality
+                    .maximum
+                    .unwrap_or(domain.cardinality.minimum)
+                    .0,
+            )
+            .unwrap();
+            Answer::Search(SearchAnswer::Ungrouped(
+                domain.cards.iter().take(limit).map(|c| c.handle).collect(),
+            ))
+        } else if let InputDomain::Order(cards) = &q.domain {
+            Answer::Order(cards.iter().rev().map(|card| card.handle).collect())
+        } else if matches!(&q.domain, InputDomain::Modes { .. }) {
+            Answer::Modes(vec![mode])
+        } else if matches!(&q.domain, InputDomain::WardEntry { .. }) {
+            Answer::WardEntry(false)
+        } else if matches!(&q.domain, InputDomain::TokenCapacity { .. }) {
+            Answer::TokenCapacity(0)
+        } else if matches!(&q.domain, InputDomain::OptionalCost) {
+            Answer::OptionalCost(true)
+        } else {
+            panic!("unexpected decision")
+        };
+        step = game.answer_internal_card(q.actor, q.token, answer).unwrap();
+    }
+}
+
+#[expect(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn finish_with(game: &mut Game, mut play: CardPlay, mode: u64) {
+    while let CardPlay::Awaiting(question) = play {
+        let answer = match &question.domain {
+            InputDomain::WardEntry { .. } => Answer::WardEntry(false),
+            InputDomain::OptionalCost => Answer::OptionalCost(true),
+            InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(mode)]),
+            InputDomain::Search(domain) => Answer::Search(domain.groups.as_ref().map_or_else(
+                || {
+                    SearchAnswer::Ungrouped(
+                        domain
+                            .cards
+                            .iter()
+                            .take(take(&domain.cardinality, domain.cards.len()))
+                            .map(|card| card.handle)
+                            .collect(),
+                    )
+                },
+                |groups| {
+                    // Each printed group greedily takes cards no earlier group used.
+                    let mut used = Vec::new();
+                    SearchAnswer::Grouped(
+                        groups
+                            .iter()
+                            .map(|group| {
+                                let picked: Vec<u64> = group
+                                    .handles
+                                    .iter()
+                                    .copied()
+                                    .filter(|handle| !used.contains(handle))
+                                    .take(take(&group.cardinality, group.handles.len()))
+                                    .collect();
+                                used.extend(picked.iter().copied());
+                                picked
+                            })
+                            .collect(),
+                    )
+                },
+            )),
+            InputDomain::Order(cards) => {
+                Answer::Order(cards.iter().map(|card| card.handle).collect())
+            }
+            InputDomain::CostMaterials(domain) => Answer::CostMaterials(
+                domain
+                    .members
+                    .iter()
+                    .take(take(&domain.cardinality, domain.members.len()))
+                    .map(|member| member.handle)
+                    .collect(),
+            ),
+            InputDomain::Targets(domain) => Answer::Targets(
+                domain
+                    .members
+                    .iter()
+                    .take(take(&domain.cardinality, domain.members.len()))
+                    .map(|member| member.handle)
+                    .collect(),
+            ),
+            InputDomain::Integer(bounds) => {
+                Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum))
+            }
+            other => panic!("unexpected decision: {other:?}"),
+        };
+        play = game
+            .answer_internal_card(question.actor, question.token, answer)
+            .unwrap();
+    }
+}
+
+fn has_keyword(state: &Value, id: &str, keyword: &str) -> bool {
+    state["objects"][id]["keywords"]
+        .as_array()
+        .unwrap()
+        .contains(&json!(keyword))
+}
+
+fn history(game: &Game, viewer: Viewer) -> Vec<PlayerEvent> {
+    game.events(viewer, None).unwrap().cloned().collect()
+}
+
+fn in_hand(card: &str) -> Value {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"first","card":"BP01-171"},{"id":"second","card":"BP01-171"},
+        {"id":"third","card":"BP01-171"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+    initial
+}
+
+fn keyword(state: &Value, id: &str, name: &str) -> bool {
+    state["objects"][id]["keywords"]
+        .as_array()
+        .unwrap()
+        .contains(&json!(name))
+}
+
+fn line(number: &str, printed: u32) -> AbilityId {
+    selection().current[number]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.source.line == printed)
+        .unwrap()
+        .node
+        .id
+}
+
+fn most(cardinality: &Cardinality, available: usize) -> usize {
+    cardinality
+        .maximum
+        .map_or(available, |n| usize::try_from(n.0).unwrap())
+        .min(available)
+}
+
+fn next_turn(game: &mut Game) {
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    if game.internal_quick_choice().unwrap().is_none() {
+        game.internal_rule_action(&json!({"do":"guard-act","select":[]}))
+            .unwrap();
+    }
+    damage_prevent::pass_quick(game);
+}
+
+fn opposite(seat: &str) -> &str {
+    if seat == "P1" { "P2" } else { "P1" }
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn order(game: &mut Game, question: &DecisionView, remaining: usize) {
+    let InputDomain::Order(cards) = &question.domain else {
+        panic!("only the looked remainder is ordered")
+    };
+    assert_eq!(
+        cards.len(),
+        remaining,
+        "the moved card and unobserved tail are excluded from the private remainder"
+    );
+    resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Order(cards.iter().rev().map(|card| card.handle).collect()),
+        )
+        .unwrap(),
+    );
+}
+
+fn own_followers() -> Selector {
+    let mut selector = subjects();
+    if let Selector::Zone { players, .. } = &mut selector {
+        players.relation = PlayerRelation::SelfPlayer;
+        players.cardinality = Cardinality {
+            minimum: Nat(1),
+            maximum: Some(Nat(1)),
+        };
+    }
+    Selector::Difference {
+        input: Box::new(selector),
+        except: Box::new(Selector::Objects {
+            objects: vec![ObjectOperand::SourceHolder {}],
+        }),
+    }
+}
+
+fn paid(view: &Value, before: &Value, n: usize, pp: i64) {
+    assert_eq!(
+        view["P1"]["ex"].as_array().unwrap().len(),
+        5_usize.checked_sub(n).unwrap(),
+        "the exact Lesson amount is consumed"
+    );
+    assert_eq!(
+        view["P1"]["pp"]["current"].as_i64().unwrap(),
+        before["P1"]["pp"]["current"]
+            .as_i64()
+            .unwrap()
+            .checked_sub(pp)
+            .unwrap(),
+        "only the additional printed PP is paid for Lesson"
+    );
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn pass_quick(game: &mut Game) {
+    for _ in 0_u8..4 {
+        let Some(q) = game.internal_quick_choice().unwrap() else {
+            return;
+        };
+        game.answer_internal_card(q.actor, q.token, Answer::Quick(None))
+            .unwrap();
+    }
+    panic!("Quick did not finish");
+}
+
+fn pp(game: &Game) -> u64 {
+    game.projection(View::Referee).unwrap()["P1"]["pp"]["current"]
+        .as_u64()
+        .unwrap()
+}
+
+/// The `index`-th printed activated ability of the card (0-based).
+fn printed_activation(card: &str, index: usize) -> AbilityId {
+    selection().current[card]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .filter(|a| {
+            a.node.kind == AbilityKind::Activated
+                && matches!(a.node.source.origin, AbilityOrigin::Printed { .. })
+        })
+        .nth(index)
+        .unwrap()
+        .node
+        .id
+}
+
+fn printed_id(card: &str) -> AbilityId {
+    selection().current[card]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|a| {
+            a.node.kind == AbilityKind::Activated
+                && matches!(a.node.source.origin, AbilityOrigin::Printed { .. })
+        })
+        .unwrap()
+        .node
+        .id
+}
+
+fn printings(number: &str) -> Vec<String> {
+    let selected = selection_with_rules();
+    let identity = &selected.current[number].card_id;
+    selected
+        .current
+        .iter()
+        .filter(|(_, card)| &card.card_id == identity)
+        .map(|(printing, _)| printing.clone())
+        .collect()
+}
+
+fn push(initial: &mut Value, player: &str, zone: &str, object: Value) {
+    let slot = &mut initial["players"][player]["zones"][zone];
+    if slot.is_null() {
+        *slot = json!([]);
+    }
+    slot.as_array_mut().unwrap().push(object);
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn question(play: CardPlay) -> DecisionView {
+    let CardPlay::Awaiting(q) = play else {
+        panic!("printed question")
+    };
+    q
+}
+
+/// Rejected answers must leave the same question open.
+fn rejects(game: &mut Game, question: &DecisionView, handles: Vec<u64>) {
+    let before = format!("{game:?}");
+    game.answer_internal_card(question.actor, question.token, Answer::Targets(handles))
+        .unwrap_err();
+    assert_eq!(
+        format!("{game:?}"),
+        before,
+        "a rejected answer leaves the choice open"
+    );
+}
+
+fn rules_game(initial: &Value) -> Game {
+    Game::from_selected_effects(
+        selection_with_rules().clone(),
+        initial,
+        &Value::Null,
+        &Value::Null,
+        "light-grants",
+    )
+    .unwrap()
+}
+
+/// Takes the first legal cards, one per printed name, group by group.
+fn search(domain: &SearchDomain) -> SearchAnswer {
+    let mut names = BTreeSet::new();
+    let mut pick = |handles: &[u64], cardinality: &Cardinality| -> Vec<u64> {
+        let limit = take(cardinality, handles.len());
+        handles
+            .iter()
+            .copied()
+            .filter(|handle| {
+                let name = &domain.cards[usize::try_from(*handle).unwrap()].name;
+                names.insert(name.clone())
+            })
+            .take(limit)
+            .collect()
+    };
+    match &domain.groups {
+        None => SearchAnswer::Ungrouped(pick(
+            &domain
+                .cards
+                .iter()
+                .map(|card| card.handle)
+                .collect::<Vec<_>>(),
+            &domain.cardinality,
+        )),
+        Some(groups) => SearchAnswer::Grouped(
+            groups
+                .iter()
+                .map(|group| pick(&group.handles, &group.cardinality))
+                .collect(),
+        ),
+    }
+}
+
+fn seeded(initial: &Value, seed: &str) -> Game {
+    Game::from_selected_effects(
+        selection_with_rules().clone(),
+        initial,
+        &Value::Null,
+        &Value::Null,
+        seed,
+    )
+    .unwrap()
+}
+
+fn source(number: &str, zone: &str) -> Value {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"][zone] = json!([{"id":"source","card":number}]);
+    initial
+}
+
+fn state(game: &Game) -> Value {
+    game.projection(View::Referee).unwrap()
+}
+
+fn strike_with_producer(game: &mut Game) -> Activation {
+    resolved(
+        game.activate_internal_card("producer", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    )
+}
+
+fn take(cardinality: &Cardinality, available: usize) -> usize {
+    cardinality
+        .maximum
+        .map_or(available, |most| usize::try_from(most.0).unwrap())
+        .min(available)
+}
+
+fn titled(mut initial: Value) -> Value {
+    initial["players"]["P1"]["construction"] = json!("title");
+    initial["players"]["P1"]["title_code"] = json!("princess_connect_re_dive");
+    initial
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn waiting(play: CardPlay) -> DecisionView {
+    let CardPlay::Awaiting(question) = play else {
+        panic!("printed choice")
+    };
+    question
 }

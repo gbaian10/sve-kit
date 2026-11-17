@@ -45,12 +45,6 @@ fn finish(game: &mut Game, mut play: CardPlay, accept: bool) {
     );
 }
 
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 pub(super) fn trigger(game: &mut Game, number: &str, line: u64, accept: bool) {
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {

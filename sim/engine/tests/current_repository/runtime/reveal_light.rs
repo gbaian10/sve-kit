@@ -15,12 +15,6 @@ fn position(initial: &Value) -> Game {
     )
     .unwrap()
 }
-fn question(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(q) = play else {
-        panic!("printed question")
-    };
-    q
-}
 fn pending(game: &mut Game, number: &str) -> CardPlay {
     if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();

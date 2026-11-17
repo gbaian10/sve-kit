@@ -35,15 +35,6 @@ fn cast(game: &mut Game) -> Activation {
     finish_checks(game);
     result
 }
-fn next_turn(game: &mut Game) {
-    game.internal_rule_action(&json!({"do":"end-phase"}))
-        .unwrap();
-    if game.internal_quick_choice().unwrap().is_none() {
-        game.internal_rule_action(&json!({"do":"guard-act","select":[]}))
-            .unwrap();
-    }
-    damage_prevent::pass_quick(game);
-}
 
 #[test]
 fn wish_fills_ex_sequentially_and_only_one_successful_new_member_is_free() {

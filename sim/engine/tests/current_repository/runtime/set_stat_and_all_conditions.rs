@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str, cemetery: Value) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
@@ -15,24 +11,6 @@ fn position(card: &str, cemetery: Value) -> Value {
     initial["players"]["P1"]["zones"]["cemetery"] = cemetery;
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
     initial
-}
-
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
-fn activated(number: &str) -> AbilityId {
-    selection().current[number]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|ability| ability.node.kind == AbilityKind::Activated)
-        .unwrap()
-        .node
-        .id
 }
 
 /// Answers every printed target question, preferring `chosen` and otherwise the first members.
@@ -58,23 +36,6 @@ fn answer(game: &mut Game, mut step: CardPlay, chosen: &str) {
             .unwrap();
     }
     finish_checks(game);
-}
-
-fn own_followers() -> Selector {
-    let mut selector = subjects();
-    if let Selector::Zone { players, .. } = &mut selector {
-        players.relation = PlayerRelation::SelfPlayer;
-        players.cardinality = Cardinality {
-            minimum: Nat(1),
-            maximum: Some(Nat(1)),
-        };
-    }
-    Selector::Difference {
-        input: Box::new(selector),
-        except: Box::new(Selector::Objects {
-            objects: vec![ObjectOperand::SourceHolder {}],
-        }),
-    }
 }
 
 /// Destroys the chosen own follower through an ability, as Lastword requires.

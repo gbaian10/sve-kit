@@ -22,12 +22,6 @@ fn play(game: &mut Game, id: &str) {
     finish_checks(game);
 }
 
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 fn trigger(game: &mut Game) -> Activation {
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {

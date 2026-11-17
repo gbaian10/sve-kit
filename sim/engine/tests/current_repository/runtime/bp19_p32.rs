@@ -23,39 +23,6 @@ fn position(seat: &str, enemies: bool) -> Value {
     initial
 }
 
-fn advance_entry() -> Action {
-    Action::Move {
-        objects: Selector::Zone {
-            players: PlayerSet {
-                relation: PlayerRelation::SelfPlayer,
-                relative_to: PlayerRef::Controller {},
-                text_quantifier: TextQuantifier::All,
-                cardinality: Cardinality {
-                    minimum: Nat(1),
-                    maximum: Some(Nat(1)),
-                },
-            },
-            zone: ZoneKind::Evolve,
-            view: SelectionView::Current {},
-            binding: Binding::new(50, ScopeId(1)),
-            predicate: Box::new(Expr::Literal(Bool(true))),
-        },
-        movement: MoveSpec {
-            to: MoveDestination::Shared {
-                zone: ZoneRef {
-                    player: PlayerRef::Controller {},
-                    kind: ZoneKind::Field,
-                },
-            },
-            initial_posture: None,
-            entry_effects: vec![],
-            position: None,
-            order: None,
-        },
-        reason: MoveReason::Put,
-    }
-}
-
 fn advance_and_resolve_fanfare(game: &mut Game, seat: &str) {
     let ward_question = match game
         .activate_internal_card(

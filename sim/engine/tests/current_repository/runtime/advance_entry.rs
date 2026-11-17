@@ -23,15 +23,6 @@ fn game(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn ability(card: &str, index: usize) -> AbilityId {
-    selection_with_rules().current[card]
-        .program
-        .card()
-        .abilities[index]
-        .node
-        .id
-}
-
 fn position(base: &str, form: &str, feast: u8, royal: u8) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["pp"] = json!({"current":3_u8,"max":4_u8});

@@ -37,27 +37,6 @@ fn material_subjects() -> Selector {
     objects
 }
 
-fn create_token(name: &str) -> Action {
-    Action::Token {
-        tokens: vec![TokenSpec {
-            template: TokenTemplate::Fixed {
-                template: TokenTemplateId(name.into()),
-            },
-            count: Expr::Literal(Nat(1)),
-        }],
-        destination: TokenDestination::Single {
-            zone: Expr::Literal(ZoneRef {
-                player: PlayerRef::Controller {},
-                kind: ZoneKind::Field,
-            }),
-        },
-        output: Binding::new(50, ScopeId(1)),
-        initial_state: None,
-        initial_posture: Posture::Standing,
-        entry_effects: vec![],
-    }
-}
-
 #[test]
 fn wolves_and_all_printings_observe_only_other_allied_follower_entries() {
     for card in ["BP01-021", "ETD03-017", "SD01-008"] {

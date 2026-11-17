@@ -6,16 +6,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 /// Answers printed questions, preferring members showing `wanted`.
 fn answer(game: &mut Game, mut step: CardPlay, wanted: &str) -> CardPlay {
     while let CardPlay::Awaiting(q) = step {

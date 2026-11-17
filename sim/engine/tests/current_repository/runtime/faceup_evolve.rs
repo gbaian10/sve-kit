@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str, count: usize) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
@@ -45,12 +41,6 @@ fn game(initial: &Value) -> Game {
         "faceup-evolve",
     )
     .unwrap()
-}
-
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
 }
 
 fn finish(game: &mut Game, mut play: CardPlay) {

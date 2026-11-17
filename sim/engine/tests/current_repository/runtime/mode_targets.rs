@@ -64,20 +64,6 @@ fn token_name(game: &Game, zone: &str, name: &str) {
     );
 }
 
-fn declare(game: &mut Game, line: u64) -> CardPlay {
-    let question = game.internal_pending_choice().unwrap().unwrap();
-    let InputDomain::Pending(options) = &question.domain else {
-        panic!("pending")
-    };
-    let option = options.iter().find(|option| option.line == line).unwrap();
-    game.answer_internal_card(
-        question.actor,
-        question.token,
-        Answer::Pending(option.handle),
-    )
-    .unwrap()
-}
-
 fn finish_bp20(game: &mut Game, mut play: CardPlay, mode: u64, offering: bool) {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {

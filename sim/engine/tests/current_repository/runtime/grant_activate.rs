@@ -5,10 +5,6 @@
 use super::event_cemetery::finish_checks;
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position() -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"BP11-011"}]);

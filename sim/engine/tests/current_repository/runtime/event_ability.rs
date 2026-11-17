@@ -1,16 +1,6 @@
 use super::union_burst_batch1::{build, enter, evolve, finish, pending, position, ub};
 use super::*;
 
-fn aliases(representative: &str) -> Vec<String> {
-    let selected = selection_with_rules();
-    let identity = &selected.current[representative].card_id;
-    selected
-        .current
-        .iter()
-        .filter(|(_, card)| &card.card_id == identity)
-        .map(|(number, _)| number.clone())
-        .collect()
-}
 fn settle(game: &mut Game) {
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();

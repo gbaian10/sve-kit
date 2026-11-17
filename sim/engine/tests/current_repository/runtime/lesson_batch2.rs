@@ -97,23 +97,6 @@ fn run(number: &str, activated: bool, hand: Value) -> (Game, Value) {
     (game, before)
 }
 
-fn paid(view: &Value, before: &Value, n: usize, pp: i64) {
-    assert_eq!(
-        view["P1"]["ex"].as_array().unwrap().len(),
-        5_usize.checked_sub(n).unwrap(),
-        "the exact Lesson amount is consumed"
-    );
-    assert_eq!(
-        view["P1"]["pp"]["current"].as_i64().unwrap(),
-        before["P1"]["pp"]["current"]
-            .as_i64()
-            .unwrap()
-            .checked_sub(pp)
-            .unwrap(),
-        "only the additional printed PP is paid for Lesson"
-    );
-}
-
 #[test]
 fn ecp02_053_lesson_behavior_and_all_printings() {
     for number in ["ECP02-053", "ECP02-P26"] {

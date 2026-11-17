@@ -151,11 +151,6 @@ fn position(number: &str, zone: &str) -> Value {
         json!([{"id":"enemy","card":"one","state":{"acted":true}}]);
     initial
 }
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
 #[derive(Clone, Copy)]
 struct Decisions {
     mode: usize,

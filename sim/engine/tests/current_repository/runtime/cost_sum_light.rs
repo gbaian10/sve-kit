@@ -33,18 +33,6 @@ fn candidates(question: &DecisionView) -> usize {
     domain.members.len()
 }
 
-/// Rejected answers must leave the same question open.
-fn rejects(game: &mut Game, question: &DecisionView, handles: Vec<u64>) {
-    let before = format!("{game:?}");
-    game.answer_internal_card(question.actor, question.token, Answer::Targets(handles))
-        .unwrap_err();
-    assert_eq!(
-        format!("{game:?}"),
-        before,
-        "a rejected answer leaves the choice open"
-    );
-}
-
 fn order_rest(game: &mut Game, mut play: CardPlay) {
     // A Ward follower put onto the field may first choose to enter acted.
     while let CardPlay::Awaiting(question) = &play

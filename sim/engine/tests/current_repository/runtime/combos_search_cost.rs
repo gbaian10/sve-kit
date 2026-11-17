@@ -67,10 +67,6 @@ fn play(game: &mut Game) -> Vec<String> {
     panic!("scenario did not settle");
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 #[test]
 fn bp12_114_searches_a_follower_costing_the_chosen_enemy_original_cost() {
     let mut initial = position();

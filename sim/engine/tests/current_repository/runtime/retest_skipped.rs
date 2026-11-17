@@ -247,10 +247,6 @@ fn evolved(initial: &mut Value, form: &str, super_evolution: bool, policy: Polic
     game
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 fn keywords(view: &Value, id: &str) -> Vec<Value> {
     view["objects"][id]["keywords"].as_array().unwrap().clone()
 }

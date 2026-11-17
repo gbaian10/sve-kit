@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
@@ -66,12 +62,6 @@ fn finish_mode(game: &mut Game, mut step: CardPlay, mode: ModeId) {
             panic!("unexpected decision")
         };
         step = game.answer_internal_card(q.actor, q.token, answer).unwrap();
-    }
-}
-
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
     }
 }
 

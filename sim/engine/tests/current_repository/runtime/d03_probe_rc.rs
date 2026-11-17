@@ -19,12 +19,6 @@ fn loaded(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn source(number: &str, zone: &str) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"][zone] = json!([{"id":"source","card":number}]);
-    initial
-}
-
 fn ability(number: &str, line: u32) -> AbilityId {
     selection().current[number]
         .program
@@ -112,9 +106,6 @@ fn activate(game: &mut Game, number: &str, line: u32) {
         .activate_internal_card("source", ability(number, line), PLAYER)
         .unwrap();
     settle(game, Some(step));
-}
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
 }
 
 #[test]

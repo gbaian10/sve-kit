@@ -106,10 +106,6 @@ fn activate(game: &mut Game, card: &str, line: u32, modes: &[ModeId]) {
     );
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 fn grown(view: &Value, id: &str, printed: &Value) -> bool {
     view["objects"][id]["power"].as_u64() == printed["power"].as_u64().and_then(|n| n.checked_add(1))
         && view["objects"][id]["hp"].as_u64() == printed["hp"].as_u64().and_then(|n| n.checked_add(1))

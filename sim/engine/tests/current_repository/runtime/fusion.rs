@@ -47,18 +47,6 @@ fn drain(board: &mut Game, mode: u64) -> usize {
     count
 }
 
-fn line(number: &str, printed: u32) -> AbilityId {
-    selection().current[number]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|ability| ability.source.line == printed)
-        .unwrap()
-        .node
-        .id
-}
-
 // The paired printings share the expensive real repository fixture and exercise all six aliases.
 #[test]
 fn bp20_026_fuses_then_plays_with_discount_and_notifies_field_and_ex_observers() {
