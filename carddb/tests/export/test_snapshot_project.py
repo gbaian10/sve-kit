@@ -2246,6 +2246,7 @@ def test_a_printing_with_its_own_name_ships_it_beside_the_shared_current() -> No
             "face_id": "f:a",
             "observations": [{"revision_id": revision}],
             "name_unit_id": None,
+            "name_translations": [],
         }
 
     view: dict[str, list[dict[str, JsonValue]]] = {
@@ -2262,12 +2263,13 @@ def test_a_printing_with_its_own_name_ships_it_beside_the_shared_current() -> No
             {"id": "p:collab", "region": "jp", "faces": [face("r:collab")]},
         ],
     }
+    name: dict[str, JsonValue] = {"field": "name", "translation_id": "tr:collab"}
+    effect: dict[str, JsonValue] = {"field": "effect", "translation_id": "tr:effect"}
     revisions: dict[str, dict[str, JsonValue]] = {
-        "r:card": {"name_unit_id": "t:card"},
-        "r:collab": {"name_unit_id": "t:collab"},
+        "r:card": {"name_unit_id": "t:card", "translations": []},
+        "r:collab": {"name_unit_id": "t:collab", "translations": [name, effect]},
     }
     printed_names(view, revisions)
-    names = [
-        object_value(array(row["faces"])[0])["name_unit_id"] for row in view["printing"]
-    ]
-    assert names == [None, "t:collab"]
+    faces = [object_value(array(row["faces"])[0]) for row in view["printing"]]
+    assert [face["name_unit_id"] for face in faces] == [None, "t:collab"]
+    assert [face["name_translations"] for face in faces] == [[], [name]]

@@ -78,7 +78,7 @@ from sve_carddb.domains.registry.preview.review_inputs import (
     ReviewInputPin,
 )
 from sve_carddb.domains.registry.rarity import populate as populate_rarities
-from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.records import EnglishPrintingData, PrintingData
 from sve_carddb.domains.registry.reprints import load_reprints, populate_reprints
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.transitions.files import read_transition_files
@@ -421,6 +421,23 @@ def _collab_names(repo: Path) -> dict[tuple[str, str], frozenset[str]]:
     return collab_hashes(
         (load_adoptions(authored_root(repo), entry="catalog/adoptions"),)
     )
+
+
+def _paired_printings(registry: RegistrySnapshot) -> dict[str, str]:
+    """Reviewed EN printings keyed to the JP printing their own name is printed from."""
+    printings = [
+        record.data
+        for record in registry.records.values()
+        if isinstance(record.data, PrintingData)
+    ]
+    jp = {data.card_no: data.id for data in printings if data.region == "jp"}
+    return {
+        data.id: jp[target]
+        for data in printings
+        if isinstance(data, EnglishPrintingData)
+        and data.cross_region_review.checked
+        and (target := data.cross_region_review.target_jp_card_no) in jp
+    }
 
 
 def _prepare_catalog(
@@ -925,7 +942,9 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             display_bindings=(
                 *(() if name_result is None else name_result.bindings),
                 *display_bindings(
-                    db, names=() if name_result is None else name_result.bindings
+                    db,
+                    names=() if name_result is None else name_result.bindings,
+                    paired=_paired_printings(identity.snapshot),
                 ),
             ),
             digital_links=frozenset(
