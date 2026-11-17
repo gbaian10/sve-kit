@@ -2,7 +2,7 @@
 
 mod visibility;
 pub(in crate::game) use visibility::observed_sources;
-pub(super) use visibility::{ProcessingDisclosure, disclose_source};
+pub(super) use visibility::{ProcessingDisclosure, disclose_played_source, disclose_source};
 
 mod selections;
 pub(super) use selections::{discard_selection_round, record_play_declaration};

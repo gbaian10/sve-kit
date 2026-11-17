@@ -4,7 +4,7 @@ use super::{EffectSource, ObservedZone};
 use crate::game::player::{ObjectHandle, Viewer};
 use crate::ir::{AbilityKind, CardKind, ConsumptionPoint};
 
-/// One formal execution's source disclosed by an actual question to this viewer.
+/// One formal execution's source disclosed by its public played writer or a real question.
 ///
 /// This is only a source subset, not a complete processing stack or progress report.
 #[derive(Clone, Debug, PartialEq, Eq)]

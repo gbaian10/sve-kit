@@ -6,7 +6,7 @@ use super::{
     admission, int, invalid, seat_name, unsupported,
 };
 use crate::game::internal::processing::{
-    discard_selection_round, enter_play_phase, record_target_declaration,
+    discard_selection_round, disclose_played_source, enter_play_phase, record_target_declaration,
 };
 use crate::game::internal::repeated_moves;
 use crate::game::internal::{InstructionOutcome, player_id};
@@ -1852,6 +1852,7 @@ impl Game {
             nested.committed = true;
         }
         enter_play_phase(execution, PlayPhase::Resolve)?;
+        disclose_played_source(self, execution);
         execution.record_fact(
             self,
             if execution.spell {

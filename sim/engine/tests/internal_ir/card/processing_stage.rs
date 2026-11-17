@@ -1,3 +1,6 @@
+#[path = "processing_stage/played_sources.rs"]
+mod played_sources;
+
 #[path = "processing_stage/frame_sources.rs"]
 mod frame_sources;
 
