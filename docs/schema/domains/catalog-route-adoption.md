@@ -61,7 +61,7 @@ vocabulary 的 `(kind,code)` 與 symbol 的 id/code 配對是永久概念身分�
 vocabulary／language 的品質欄位與 authored_source_id 指向本次讀入的 authored 檔案，不造 confirmed decision。
 DB 的 current DDL 是唯一建置 schema，FK、STRICT、來源與參數檢查保持。
 
-offline composer 接受 vocabulary／language／rules_name；其餘四種可編輯值保留 current typed loader 與各自既有功能，
+offline composer 接受 vocabulary／language／rules_name，以及 `catalog/overrides` 的 default_printing（目錄不存在即無覆寫）；其餘三種可編輯值保留 current typed loader 與各自既有功能，
 尚未接進 offline 的值必須明確拒絕，不能載入後默默略過。展示永久路由仍受 §5 限制，不能藉停用覆寫改 URL。
 
 ## 4. 詞彙、語言、別名與特殊名稱
@@ -205,6 +205,9 @@ identity-repair 的完整路由交易中提供前後件與永久入口比較；�
 未發布候選也要驗原 route 不被另一 active key／alias 劫持。
 舊 alias 的展平、merge/split/reassign、改號與 provisional corrected 不走本入口。
 預設覆寫撤回則回現行機械 selector，只改 card 區域預設，不更新 printing URL 或 owner。
+offline 建置在版次與路由寫入後套用預設覆寫，以本次建置資料庫的同卡同區全部版次為展示集合：候選集合與它不同即列 stale、改用機械 selector；
+不存在的 card 即建置失敗；
+選中版次不在自己的候選內即建置失敗。結果列在建置報告的 `default_printing_overrides`。route 覆寫仍不接進 offline。
 
 ## 6. 卡文記號與三語文案
 
