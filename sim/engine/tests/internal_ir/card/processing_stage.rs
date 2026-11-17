@@ -1,3 +1,6 @@
+#[path = "processing_stage/declarations.rs"]
+pub(super) mod declarations;
+
 #[path = "processing_stage/lifecycle.rs"]
 mod lifecycle;
 

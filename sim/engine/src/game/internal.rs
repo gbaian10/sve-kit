@@ -102,7 +102,7 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
-pub use processing::{PlayPhase, QuestionStage};
+pub use processing::{NumberDeclaration, PlayPhase, QuestionStage};
 mod random_sample;
 mod resource;
 mod reveal;
@@ -655,6 +655,7 @@ pub(super) struct Execution {
     waiting: Option<(DecisionView, Wait)>,
     question_stage: Option<QuestionStage>,
     play_phase: Option<PlayPhase>,
+    number_declarations: Vec<NumberDeclaration>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -848,6 +849,7 @@ impl Game {
                 waiting: None,
                 question_stage: None,
                 play_phase: None,
+                number_declarations: Vec::new(),
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -1173,13 +1175,7 @@ impl Game {
                         execution
                             .receipts
                             .insert(receipt, InstructionOutcome::Declared(number));
-                        execution.record_fact(
-                            self,
-                            Fact::Declared {
-                                player: actor,
-                                value: number,
-                            },
-                        );
+                        processing::record_number_declaration(self, &mut execution, actor, number);
                     }
                 }
                 (
@@ -1291,6 +1287,21 @@ impl Game {
     #[must_use]
     pub fn internal_play_phase(&self) -> Option<PlayPhase> {
         self.typed.as_ref()?.play_phase
+    }
+
+    /// Public `Action::Declare` numbers belonging to the current execution alone.
+    /// Runner diagnostics bypass frame authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_number_declarations;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_number_declarations(&self) -> Option<&[NumberDeclaration]> {
+        self.typed
+            .as_ref()
+            .map(|execution| execution.number_declarations.as_slice())
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.

@@ -94,8 +94,7 @@ fn a_raw_procedure_does_not_acquire_a_formal_play_lifecycle() {
     }
 }
 
-#[test]
-fn an_accepted_answer_whose_body_fails_rolls_back_the_play_lifecycle() {
+pub(super) fn overflowing_program() -> WellFormedCardProgram {
     let program = program(
         "activate",
         json!({"cost":{"pp":1},"do":[
@@ -124,7 +123,12 @@ fn an_accepted_answer_whose_body_fails_rolls_back_the_play_lifecycle() {
         changed,
         "the admitted optional body contains the intended failing life operation"
     );
-    let program = WellFormedCardProgram::check(raw).unwrap();
+    WellFormedCardProgram::check(raw).unwrap()
+}
+
+#[test]
+fn an_accepted_answer_whose_body_fails_rolls_back_the_play_lifecycle() {
+    let program = overflowing_program();
     for actor in [Viewer::P1, Viewer::P2] {
         let me = if actor == Viewer::P1 { "P1" } else { "P2" };
         let mut game = fixture(&program, actor);

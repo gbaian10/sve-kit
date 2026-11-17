@@ -1354,6 +1354,7 @@ impl Game {
             waiting: None,
             question_stage: None,
             play_phase: None,
+            number_declarations: Vec::new(),
             destroy_guards: Vec::new(),
             look_viewers: BTreeMap::new(),
             player_receipt_links: BTreeMap::new(),
