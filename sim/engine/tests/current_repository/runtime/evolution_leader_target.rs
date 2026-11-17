@@ -9,19 +9,18 @@ fn fixture() -> &'static SelectedEffects {
     SELECTED.get_or_init(|| {
   let (mut snapshot, keywords, mut input)=producer_inputs();
   // Minimal companions isolate printed trait filters and payments from unrelated abilities.
-  for (number, kind, traits, cost) in [
-   ("ready-passion", "フォロワー", vec!["パッション"], "3"),
-   ("ready-wrong", "フォロワー", vec![], "1"),
-   ("ready-passion-amulet", "アミュレット", vec!["パッション"], "1"),
-   ("ready-expensive", "フォロワー", vec!["パッション"], "4"),
+  for (number, kind, traits) in [
+   ("ready-cool", "フォロワー", vec!["クール"]),
+   ("ready-wrong", "フォロワー", vec![]),
+   ("ready-cool-amulet", "アミュレット", vec!["クール"]),
   ] {
-   snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":cost,"power":if kind=="フォロワー" {"3"} else {"-"},"hp":if kind=="フォロワー" {"4"} else {"-"},"traits":traits,"text":null,"sections":[]}]}).to_string());snapshot.push('\n');
+   snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":if kind=="フォロワー" {"3"} else {"-"},"hp":if kind=="フォロワー" {"4"} else {"-"},"traits":traits,"text":null,"sections":[]}]}).to_string());snapshot.push('\n');
    input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
   }
-  for form in ["CSD02c-008","CSD02c-011"] {
+  for form in ["CSD02b-006","CSD02b-008"] {
    let name=snapshot.lines().map(|line|serde_json::from_str::<Value>(line).unwrap()).find(|row|row["number"]==form).unwrap()["faces"][0]["name"].clone();
    let number=format!("ready-base-{form}");
-   snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":"フォロワー","cost":"0","power":"3","hp":"4","traits":["パッション"],"text":null,"sections":[]}]}).to_string());snapshot.push('\n');
+   snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":"フォロワー","cost":"0","power":"3","hp":"4","traits":["クール"],"text":null,"sections":[]}]}).to_string());snapshot.push('\n');
    input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
   }
   repository::selection_with_rules_from(&snapshot,&keywords,&input)
@@ -49,7 +48,7 @@ fn game(initial: &Value) -> Game {
         initial,
         &Value::Null,
         &Value::Null,
-        "ready-csd02c-1",
+        "ready-csd02b-1",
     )
     .unwrap();
     load_companions(&mut game);
@@ -70,7 +69,7 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
                 assert_eq!(
                     domain.members.len(),
                     1,
-                    "only the printed eligible cemetery follower may be offered"
+                    "only the printed eligible follower or opposing leader may be offered"
                 );
                 Answer::Targets(
                     domain
@@ -140,6 +139,7 @@ fn settle(game: &mut Game, mode: u64) {
         finish(game, step, mode);
     }
 }
+
 fn evolution_position(card: &str) -> Value {
     let mut initial = position(card);
     let base = format!("ready-base-{}", fixture().current[card].card_no);
@@ -174,78 +174,31 @@ fn load_companions(game: &mut Game) {
         card_play_costs: vec![],
     })
     .unwrap();
-    for number in [
-        "ready-passion",
-        "ready-wrong",
-        "ready-passion-amulet",
-        "ready-expensive",
-    ] {
+    for number in ["ready-cool", "ready-wrong", "ready-cool-amulet"] {
         game.load_internal_card(number, &empty).unwrap();
     }
 }
-
 #[test]
-fn csd02c_008_optional_passion_discard_draws_two_only_when_paid() {
-    for card in ["CSD02c-008", "CSD02c-P05"] {
-        for mode in 0_u8..3 {
+fn csd02b_008_evolution_can_decline_three_pp_and_cannot_pay_a_shortfall() {
+    for card in ["CSD02b-008", "CSD02b-P05"] {
+        for payment in 0_u8..3 {
             let mut initial = evolution_position(card);
-            initial["players"]["P1"]["zones"]["hand"] = if mode == 2 {
-                json!([{"id":"wrong","card":"ready-wrong"}])
-            } else {
-                json!([{"id":"material","card":"ready-passion"},{"id":"wrong","card":"ready-wrong"}])
-            };
-            let game = evolve_form(&initial, card, mode != 1);
+            if payment == 2 {
+                initial["players"]["P1"]["pp"]["current"] = json!(3_u8);
+            }
+            let game = evolve_form(&initial, card, payment != 1);
             let state = game.projection(View::Referee).unwrap();
-            let hand = state["P1"]["hand"].as_array().unwrap();
             assert_eq!(
-                hand.len(),
-                match mode {
-                    0 => 3,
-                    1 => 2,
-                    _ => 1,
+                state["P2"]["leader"]["life"],
+                if payment == 0 { 17_u8 } else { 20_u8 }
+            );
+            assert_eq!(
+                state["P1"]["pp"]["current"],
+                match payment {
+                    0 => 6_u8,
+                    1 => 9_u8,
+                    _ => 2_u8,
                 }
-            );
-            assert_eq!(
-                state["P1"]["cemetery"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!("material")),
-                mode == 0
-            );
-            assert!(
-                hand.contains(&json!("wrong")),
-                "the wrong trait must never be paid as Passion"
-            );
-            assert_eq!(
-                state["P1"]["deck"].as_array().unwrap().len(),
-                if mode == 0 { 3 } else { 5 }
-            );
-        }
-    }
-}
-#[test]
-fn csd02c_011_evolution_reanimates_only_a_low_cost_passion_follower() {
-    for card in ["CSD02c-011", "CSD02c-P08"] {
-        let mut initial = evolution_position(card);
-        initial["players"]["P2"]["zones"]["cemetery"] =
-            json!([{"id":"opposing","card":"ready-passion"}]);
-        initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"eligible","card":"ready-passion"},{"id":"wrong","card":"ready-wrong"},{"id":"amulet","card":"ready-passion-amulet"},{"id":"expensive","card":"ready-expensive"}]);
-        let game = evolve_form(&initial, card, true);
-        let state = game.projection(View::Referee).unwrap();
-        assert!(
-            state["P1"]["field"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("eligible")),
-            "the selected grave follower enters the field"
-        );
-        for rejected in ["wrong", "amulet", "expensive"] {
-            assert!(
-                state["P1"]["cemetery"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!(rejected)),
-                "wrong trait, kind and cost stay in the cemetery"
             );
         }
     }
