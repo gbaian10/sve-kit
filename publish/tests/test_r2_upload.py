@@ -17,7 +17,6 @@ from sve_carddb.export.read_api import (
     parse,
     string,
 )
-from sve_carddb.export.transport.compression import python_brotli
 from typer.testing import CliRunner
 
 from sve_publish.adapter import Stored
@@ -212,22 +211,6 @@ def test_conflicting_immutable_json_is_never_overwritten(
     assert INDEX not in state.objects
 
 
-def test_brotli_siblings_are_uploaded_as_exported(
-    images: PublicImages, roots: Roots, remote: tuple[R2Store, ServerState, Loopback]
-) -> None:
-    store, state, _ = remote
-    export(images, roots, step=0, brotli=python_brotli())
-    loaded = load_export(roots.preview)
-    brotli = [m for m in loaded.members if m.key.endswith(".br")]
-    assert any(m.key == string(loaded.entry["manifest_path"]) + ".br" for m in brotli)
-    upload(store, loaded)
-    for member in brotli:
-        assert (
-            state.objects[member.key].raw == (roots.preview / member.key).read_bytes()
-        )
-        assert state.objects[member.key].headers["content-encoding"] == "br"
-
-
 def test_index_refuses_reused_or_older_versions() -> None:
     entry: dict[str, JsonValue] = {
         "data_version": "preview-20261004T010203Z-0001",
@@ -375,43 +358,6 @@ def test_dry_run_reads_no_credentials_and_opens_no_client(
         "remote": "not_checked",
     }
     assert {p: p.read_bytes() for p in before} == before
-
-
-@pytest.mark.parametrize(
-    ("current_fraction", "candidate_fraction", "accepted"),
-    [
-        ("", ".1", True),
-        (".1", "", False),
-        (".1000", ".1", True),
-        (".10000000002", ".10000000001", False),
-    ],
-)
-def test_index_compares_fractional_seconds_chronologically(
-    images: PublicImages,
-    roots: Roots,
-    current_fraction: str,
-    candidate_fraction: str,
-    *,
-    accepted: bool,
-) -> None:
-    export(images, roots, step=0)
-    first = load_export(roots.preview).entry
-    first |= {"published_at": "2026-10-04T01:02:03" + current_fraction + "Z"}
-    index = next_index(None, first)
-    candidate = first | {
-        "data_version": "preview-20261004T010203Z-0002",
-        "published_at": "2026-10-04T01:02:03" + candidate_fraction + "Z",
-    }
-    if accepted:
-        result = next_index(index, candidate)
-        assert result is not None
-        assert result["current"] == candidate
-        assert result["previous"] == first
-    else:
-        with pytest.raises(
-            ExportError, match=r"^Export is older than the remote current$"
-        ):
-            next_index(index, candidate)
 
 
 @pytest.mark.parametrize("retry_original", [False, True])

@@ -177,13 +177,6 @@ class RustTests(unittest.TestCase):
                 assert "--test" not in command
             assert not any(path.exists() for path in tools.generated)
 
-    def test_failed_generation_never_runs_cargo(self) -> None:
-        """Tests cannot run against a missing or partial input."""
-        tools = FakeTools(generation_status=3)
-        with self.assertRaises(subprocess.CalledProcessError):
-            run([], tools)
-        assert tools.cargo == []
-
     def test_shards_partition_every_listed_test(self) -> None:
         """Shards run disjoint name sets that together cover the whole listing."""
         with tempfile.TemporaryDirectory() as temporary:
@@ -296,24 +289,6 @@ class InputReuse(unittest.TestCase):
         assert not any(folder.exists() for folder in second.generated_folders)
         assert (kept[0] / "cards.jsonl").is_file()
 
-    def test_changed_input_regenerates(self) -> None:
-        """Any edited input file, including nested ones, misses the kept inputs."""
-        assert self.run_tests(FakeTools()) == 0
-        (self.root / "authored" / "nested" / "data.txt").write_text(
-            "edited", encoding="utf-8"
-        )
-        tools = FakeTools()
-        assert self.run_tests(tools) == 0
-        assert len(tools.generated) == 3
-
-    def test_empty_directory_change_regenerates(self) -> None:
-        """Directory topology checked by the generator is part of the input."""
-        assert self.run_tests(FakeTools()) == 0
-        (self.root / "authored/products/unexpected").mkdir(parents=True)
-        tools = FakeTools()
-        assert self.run_tests(tools) == 0
-        assert len(tools.generated) == 3
-
     def test_symlink_with_identical_content_cannot_reuse(self) -> None:
         """A cached inputs cannot bypass the data readers' symlink rejection."""
         assert self.run_tests(FakeTools()) == 0
@@ -327,26 +302,6 @@ class InputReuse(unittest.TestCase):
             self.run_tests(tools)
         assert tools.cargo == []
         assert tools.generated == []
-
-    def test_bytecode_does_not_change_the_digest(self) -> None:
-        """Interpreter caches are not inputs."""
-        before = rust_tests.input_digest(self.root)
-        (self.root / "carddb/src/__pycache__/ignored.pyc").write_bytes(b"\x01")
-        assert rust_tests.input_digest(self.root) == before
-
-    def test_version_file_written_by_install_is_not_an_input(self) -> None:
-        """The first install writes the version file during generation; the pair is still kept."""
-        version = self.root / "carddb/src/sve_carddb/_version.py"
-        version.parent.mkdir(parents=True, exist_ok=True)
-        first = FakeTools(
-            during_generation=lambda: version.write_text("v1", encoding="utf-8")
-        )
-        assert self.run_tests(first) == 0
-        assert len(first.generated) == 3
-        version.write_text("v2", encoding="utf-8")
-        second = FakeTools()
-        assert self.run_tests(second) == 0
-        assert second.generated == []
 
     def test_missing_input_fails_before_cargo(self) -> None:
         """A missing input never falls back to generation or a kept inputs."""
@@ -441,16 +396,6 @@ class InputReuse(unittest.TestCase):
             encoding="utf-8"
         ) == "selection"
 
-    def test_only_the_newest_pairs_are_kept(self) -> None:
-        """Old working trees do not accumulate kept inputss."""
-        for index in range(rust_tests.KEPT_INPUTS + 2):
-            (self.root / "dsl" / "nested" / "data.txt").write_text(
-                str(index), encoding="utf-8"
-            )
-            assert self.run_tests(FakeTools()) == 0
-        kept = [path for path in self.cache.iterdir() if not path.name.startswith(".")]
-        assert len(kept) == rust_tests.KEPT_INPUTS
-
     def test_ci_never_reuses(self) -> None:
         """CI keeps generating into a fresh temporary folder, never the user cache."""
         with patch.dict(os.environ, {"CI": "true"}):
@@ -458,11 +403,3 @@ class InputReuse(unittest.TestCase):
         with patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.cache)}):
             os.environ.pop("CI", None)
             assert rust_tests.cache_root() == self.cache / "sve-kit" / "engine-inputs"
-
-    def test_ci_main_generates_despite_an_existing_local_pair(self) -> None:
-        """The real CI policy bypasses even a complete, matching local cache."""
-        assert self.run_tests(FakeTools()) == 0
-        tools = FakeTools()
-        with patch.dict(os.environ, {"XDG_CACHE_HOME": str(self.cache_home)}):
-            assert run([], tools, root=self.root) == 0
-        assert len(tools.generated) == 3

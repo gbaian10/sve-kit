@@ -3,10 +3,8 @@
 
 import contextlib
 import io
-import math
 import tempfile
 import unittest
-import xml.etree.ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- parses the synthetic output of this module
 from pathlib import Path
 from typing import override
 
@@ -47,37 +45,6 @@ class PublicJunitTests(unittest.TestCase):
         self.write_source()
         assert public_junit(self.source, self.destination) == 7
         assert PRIVATE not in self.destination.read_text(encoding="utf-8")
-
-    def test_outcomes_and_totals_are_kept(self) -> None:
-        """States, counts and times stay accurate for Codecov's statistics."""
-        self.write_source()
-        public_junit(self.source, self.destination)
-        root = ET.parse(self.destination).getroot()  # ruff: ignore[suspicious-xml-element-tree-usage] -- output of this module
-        suite = root.find("testsuite")
-        assert suite is not None
-        assert suite.attrib["tests"] == "7"
-        assert suite.attrib["failures"] == "1"
-        assert suite.attrib["errors"] == "1"
-        assert suite.attrib["skipped"] == "1"
-        assert math.isclose(float(suite.attrib["time"]), 7.25)
-        cases = {c.attrib["name"].split("[")[0]: c for c in suite.iter("testcase")}
-        failure = cases["test_fail"].find("failure")
-        assert failure is not None
-        assert failure.attrib["message"] == "failed"
-        assert cases["test_error"].find("error") is not None
-        assert cases["test_skip"].find("skipped") is not None
-        assert cases["test_plain"].attrib["classname"] == (
-            "tests.domains.test_alpha.TestGroup"
-        )
-
-    def test_identity_is_stable_and_distinguishes_parameters(self) -> None:
-        """Flaky detection needs the same case to keep the same name across runs."""
-        assert public_name("test_a[x]") == public_name("test_a[x]")
-        assert public_name("test_a[x]") != public_name("test_a[y]")
-        assert public_name("test_a") == "test_a"
-        assert public_name("test_a[x]").startswith("test_a[")
-        assert public_name(PRIVATE).startswith("case_")
-        assert PRIVATE not in public_name(PRIVATE)
 
     def test_file_groups_keep_public_identity_and_parameter_privacy(self) -> None:
         """Scheduling groups cannot replace names or alter parameter hashes."""

@@ -92,6 +92,54 @@ describe("printing catalog overlays", () => {
     expect(catalog.summary("p:bp01-002-alt")?.intId).toBe(1102)
   })
 
+  it("names a printing from the text unit its print file ships beside it", async () => {
+    const { snapshot, parts } = await fixture()
+    const owner = parts.find(
+      (part) =>
+        part.table === "printing" && part.rows.some((row) => row["id"] === "p:bp01-002-alt"),
+    )
+    if (!owner) throw new Error("fixture lacks the alt printing")
+    const text = identity({
+      ...owner,
+      table: "text_unit",
+      value: { ...owner.value, owner: { kind: "global", id: null }, partition: "detail" },
+      rows: [{ id: "t:ja:synthetic-collab", lang: "ja", text: "合成コラボ名" }],
+    })
+    const file = snapshot.files.get(owner.file)
+    if (!file) throw new Error("fixture lacks the print file")
+    const files = new Map(snapshot.files).set(owner.file, {
+      ...file,
+      row_counts: [
+        ...(file["row_counts"] as Row[string][]),
+        ["text_unit", "global", null, "detail", owner.value["segment"] ?? null, 1],
+      ],
+    })
+    const named = parts.map((part) =>
+      part !== owner
+        ? part
+        : {
+            ...part,
+            rows: part.rows.map((row) =>
+              row["id"] !== "p:bp01-002-alt"
+                ? row
+                : {
+                    ...row,
+                    faces: (row["faces"] as Row[]).map((face) => ({
+                      ...face,
+                      name_unit_id: "t:ja:synthetic-collab",
+                    })),
+                  },
+            ),
+          },
+    )
+    const { catalog } = overlay({ ...snapshot, files }, [...named, text])
+    const summary = catalog.summary("p:bp01-002-alt")
+    expect(summary?.name.original.text).toBe("合成コラボ名")
+    expect(summary?.treatedAs?.original.text).toBe(
+      catalogOf(snapshot).summary("p:bp01-002")?.name.original.text,
+    )
+  })
+
   it.each(["card_id", "region", "card_no"])(
     "rejects a completed row with a different %s",
     async (field) => {

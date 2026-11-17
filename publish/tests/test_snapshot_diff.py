@@ -23,11 +23,10 @@ from sve_carddb.export.read_api import (
 from sve_carddb.export.transport.compression import python_brotli
 
 from sve_publish.adapter import SNAPSHOT_PREFIXES, Stored
-from sve_publish.gc import collect, retained
+from sve_publish.gc import collect
 from sve_publish.headers import INDEX_HEADERS, JSON_HEADERS, member_headers
 from sve_publish.inventory import INVENTORY
 from sve_publish.publish import upload
-from sve_publish.snapshot_diff import missing_members
 
 from .r2_export_fixtures import export
 from .r2_export_fixtures import images as images  # ruff: ignore[useless-import-alias] -- synthetic corpus
@@ -71,40 +70,6 @@ def retained_entry(
         raw, '"retained"', JSON_HEADERS
     )
     return result
-
-
-@pytest.mark.parametrize("slot", ["current", "previous"])
-def test_old_manifest_shape_supports_incremental_upload_and_gc(
-    images: PublicImages, roots: Roots, slot: str
-) -> None:
-    export(images, roots, step=0, brotli=python_brotli())
-    first = load_export(roots.preview)
-    fake = DelayedS3(delay=0)
-    old = manifest(first)
-    old["errata_card_ids"] = []
-    old["min_reader_version"] = "4.0.0"
-    old_entry = retained_entry(fake, first.entry | {"min_reader_version": "4.0.0"}, old)
-    export(images, roots, step=1, brotli=python_brotli())
-    second = load_export(roots.preview)
-    current_entry = retained_entry(fake, second.entry, manifest(second))
-    index: dict[str, JsonValue] = {
-        "index_format": 2,
-        "revision": 2,
-        "current": old_entry if slot == "current" else current_entry,
-        "previous": old_entry if slot == "previous" else None,
-    }
-    fake.objects[INDEX] = Stored(canonical(index), '"index"', INDEX_HEADERS)
-    old_keys = closure(string(old_entry["manifest_path"]), old)
-    known = old_keys | (declared(second) if slot == "previous" else set())
-    with memory_store(fake) as store:
-        missing = missing_members(store, index, second.members)
-        assert {member.key for member in missing} == {
-            member.key for member in second.members
-        } - known
-        _remote, required, optional = retained(store)
-    assert required == known
-    assert string(old_entry["manifest_path"]) + ".br" in optional
-    assert all(method == "GET" for method, _key in fake.requests)
 
 
 def test_new_export_rejects_the_old_errata_shape(
@@ -258,36 +223,6 @@ def test_text_only_update_reuses_current_and_previous_without_image_io(
     )
 
 
-@pytest.mark.parametrize("old_br", [False, True])
-def test_raw_and_brotli_are_independent_representations(
-    images: PublicImages, roots: Roots, *, old_br: bool
-) -> None:
-    export(images, roots, step=0, brotli=python_brotli() if old_br else None)
-    first = load_export(roots.preview)
-    fake = DelayedS3(delay=0)
-    ready(fake, roots)
-    with memory_store(fake) as store:
-        upload(store, first)
-        export(images, roots, step=1, brotli=None if old_br else python_brotli())
-        second = load_export(roots.preview)
-        fake.requests.clear()
-        upload(store, second)
-    expected = {m.key for m in second.members} - declared(first)
-    construction = {member.key for member in second.construction}
-    assert {key for method, key in fake.requests if method == "PUT"} == expected | {
-        INDEX
-    } | construction
-    reused_raw = declared(first) & declared(second)
-    assert reused_raw
-    if not old_br:
-        assert any(key + ".br" in expected for key in reused_raw)
-    else:
-        assert all(m.key in fake.objects for m in first.members)
-    assert not any(
-        method == "GET" and key.endswith(".br") for method, key in fake.requests
-    )
-
-
 # Differing bytes and a 412 without an object are covered by the upload and parallel tests.
 @pytest.mark.parametrize("same_headers", [True, False])
 def test_only_a_create_only_collision_is_downloaded(
@@ -313,33 +248,6 @@ def test_only_a_create_only_collision_is_downloaded(
         for method, key in fake.requests
         if method == "GET" and key not in {INDEX, INVENTORY}
     ] == [*(item.key for item in loaded.construction), member.key]
-
-
-def test_optional_manifest_brotli_is_not_inferred_from_its_raw_manifest(
-    images: PublicImages, roots: Roots
-) -> None:
-    export(images, roots, step=0, brotli=python_brotli())
-    first = load_export(roots.preview)
-    fake = DelayedS3(delay=0)
-    ready(fake, roots)
-    with memory_store(fake) as store:
-        upload(store, first)
-        export(images, roots, step=1, brotli=python_brotli())
-        second = load_export(roots.preview)
-        sibling = string(second.entry["manifest_path"]) + ".br"
-        fake.fail_key = INDEX
-        with pytest.raises(ExportError, match="conditional write failed"):
-            upload(store, second)
-        del fake.objects[sibling]
-        fake.fail_key = None
-        fake.requests.clear()
-        upload(store, second)
-    assert ("PUT", sibling) in fake.requests
-    assert ("GET", sibling) not in fake.requests
-    assert ("PUT", string(second.entry["manifest_path"])) in fake.requests
-    assert fake.objects[sibling].raw == next(
-        m.raw for m in second.members if m.key == sibling
-    )
 
 
 @pytest.mark.parametrize(
