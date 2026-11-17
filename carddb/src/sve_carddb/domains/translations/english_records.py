@@ -46,7 +46,9 @@ class EnglishUse(RecordData):
     card_id: Text
     face_id: Text
     target_id: Code
-    identity: Literal["confirmed_no_jp", "unresolved"]
+    # confirmed_no_jp_printing: the card has a JP source, but this EN printing's own
+    # printed name (an EN-only collab merged into it) has none.
+    identity: Literal["confirmed_no_jp", "confirmed_no_jp_printing", "unresolved"]
     reason: Text
 
     @model_validator(mode="after")

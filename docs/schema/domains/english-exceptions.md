@@ -38,7 +38,8 @@ owner、field、ordinal、source_unit_id、source_hash 與完整 source_ref。
 source_ref.parser 固定 translation-en-v1，指向凍結頁面的整欄；持有者只可為 face_revision／printing_face，
 欄位只可為 name／effect／section／flavor，並遵守原 OwnerField 的欄位與 ordinal 規則。
 card_id 與 face_id 明示本次身分結論的卡與面，不能以另一個文字相同的持有者代替。
-identity 是 confirmed_no_jp／unresolved，reason 必須非空白，記錄目前來源的人工結論依據。
+identity 是 confirmed_no_jp／confirmed_no_jp_printing／unresolved，reason 必須非空白，記錄目前來源的人工結論依據。
+confirmed_no_jp_printing 只用於「卡有日版，但這個 EN 版次自己印的卡名沒有日版」：英版限定聯名版次併入有日版的卡後，它的名字留在版次自己的非現行 revision（#2314）。只接受 name 欄、持有者必須是 EN 版次觀測到的非現行 revision；卡的現行 EN 名稱仍走 jp_source。
 每個 printing 依自己的來源記錄選用；目前版次與印刷欄位分開，不借用彼此的來源版本。
 
 ## 選用與失敗語義
@@ -55,6 +56,7 @@ identity 是 confirmed_no_jp／unresolved，reason 必須非空白，記錄目�
 | 凍結來源、hash、語言、來源版本、locator 或持有者整欄不符／不可取得 | english_source_mismatch |
 | 明示 card／face 與來源持有者不同 | english_owner_face_mismatch |
 | 版次不是 EN 的目前版次 | english_source_not_current |
+| confirmed_no_jp_printing 的持有者是現行 revision、沒有版次觀測，或不是 name 欄 | english_source_not_printed_name |
 | 必要引用沒有可用中文選詞 | missing_english_reference_translation |
 
 只有 use 的目前人工無 JP 結論、既有永久身分與來源檢查都成立時才選用。
