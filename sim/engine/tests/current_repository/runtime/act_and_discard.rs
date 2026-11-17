@@ -12,7 +12,6 @@ const fn actor() -> PlayerId {
 fn position(card: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
-    initial["players"]["P1"]["zones"]["field"] = json!([]);
     initial["players"]["P1"]["zones"]["deck"] = json!([
         {"id":"first","card":"BP01-171"},
         {"id":"second","card":"BP01-171"},
@@ -29,8 +28,6 @@ fn finish(game: &mut Game, mut play: CardPlay) {
             Answer::WardEntry(false)
         } else if matches!(&question.domain, InputDomain::OptionalCost) {
             Answer::OptionalCost(true)
-        } else if matches!(&question.domain, InputDomain::Modes { .. }) {
-            Answer::Modes(vec![ModeId(1)])
         } else if let InputDomain::Search(domain) = &question.domain {
             Answer::Search(SearchAnswer::Ungrouped(
                 domain
@@ -91,62 +88,75 @@ fn triggers(game: &mut Game) {
     }
 }
 
-fn evolve(game: &mut Game, form: &str, cost: u8) {
-    assert_eq!(
-        game.internal_rule_action(
-            &json!({"do":"evolve","source":"source","evolve_card":form,"pay":{"pp":cost}})
-        )
-        .unwrap()
-        .outcome,
-        "resolved",
-        "the printed evolution cost permits the real form"
-    );
-    triggers(game);
+fn pass_quick(game: &mut Game) {
+    let q = game.internal_quick_choice().unwrap().unwrap();
+    let step = game
+        .answer_internal_card(q.actor, q.token, Answer::Quick(None))
+        .unwrap();
+    finish(game, step);
 }
 
 #[test]
-fn bp10_041_real_evolution_grants_newly_searched_golem_rush_and_assail() {
-    let mut initial = position("BP10-040");
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP10-041"}]);
-    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"golem","card":"BP16-042"}]);
+fn bp11_085_acts_enemy_draws_and_blocks_its_next_rule_stand() {
+    let mut initial = position("BP11-085");
+    initial["players"]["P2"]["zones"]["deck"] = json!([{ "id":"opp-draw", "card":"BP01-171" }]);
     let mut game = game(&initial);
     play(&mut game);
-    triggers(&mut game);
+    game.resume_internal_card().unwrap();
+    let before_turn = game.projection(View::Referee).unwrap();
+    assert_eq!(before_turn["objects"]["enemy"]["acted"], true);
+    assert_eq!(before_turn["P1"]["hand"], json!(["first"]));
     assert_eq!(
-        game.internal_rule_action(&json!({"do":"attack","attacker":"golem","target":"enemy"}))
-            .unwrap()
-            .outcome,
-        "cannot-attack"
-    );
-    evolve(&mut game, "form", 1);
-    assert_eq!(
-        game.internal_rule_action(&json!({"do":"attack","attacker":"golem","target":"P2.leader"}))
-            .unwrap()
-            .outcome,
-        "cannot-attack"
-    );
-    assert_eq!(
-        game.internal_rule_action(&json!({"do":"attack","attacker":"golem","target":"enemy"}))
+        game.internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap()
             .outcome,
         "resolved",
-        "Rush and Assail allow the newly entered Golem to attack a standing follower"
+        "the current player can end the turn"
     );
+    pass_quick(&mut game);
+    let after_turn = game.projection(View::Referee).unwrap();
+    assert_eq!(after_turn["turn"]["active"], "P2");
+    assert_eq!(after_turn["objects"]["enemy"]["acted"], true);
 }
+
 #[test]
-fn bp10_104_real_evolution_destroys_two_opposing_followers_and_keeps_own_field() {
-    let mut initial = position("BP10-103");
-    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"ally","card":"BP01-171"}]);
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP10-104"}]);
-    initial["players"]["P2"]["zones"]["field"] =
-        json!([{"id":"enemy","card":"BP01-037"},{"id":"second-enemy","card":"BP01-171"}]);
-    let mut game = game(&initial);
-    play(&mut game);
-    triggers(&mut game);
-    evolve(&mut game, "form", 1);
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P2"]["field"], json!([]));
-    assert_eq!(state["P2"]["cemetery"], json!(["enemy", "second-enemy"]));
-    assert_eq!(state["P1"]["field"], json!(["ally", "source"]));
-    assert_eq!(state["P1"]["pp"]["current"], 2_u8);
+fn bp11_100_fanfare_checks_amulet_and_attack_draws_before_discarding() {
+    for amulet in [false, true] {
+        let mut initial = position("BP11-100");
+        if amulet {
+            initial["players"]["P1"]["zones"]["field"] = json!([{"id":"amulet","card":"BP01-016"}]);
+        }
+        let mut played = game(&initial);
+        play(&mut played);
+        triggers(&mut played);
+        let state = played.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["objects"]["source"]["power"],
+            if amulet { 2_u8 } else { 1_u8 }
+        );
+        assert_eq!(
+            state["objects"]["source"]["hp"],
+            if amulet { 3_u8 } else { 2_u8 }
+        );
+    }
+    let mut initial = position("BP11-100");
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP11-100"}]);
+    let mut attacking = game(&initial);
+    assert_eq!(
+        attacking
+            .internal_rule_action(&json!({"do":"attack","attacker":"source","target":"P2.leader"}))
+            .unwrap()
+            .outcome,
+        "resolved",
+        "the standing follower legally attacks"
+    );
+    triggers(&mut attacking);
+    let after_attack = attacking.projection(View::Referee).unwrap();
+    assert_eq!(after_attack["P1"]["hand"], json!([]));
+    assert_eq!(after_attack["P1"]["cemetery"], json!(["first"]));
+    assert_eq!(
+        after_attack["P1"]["deck"],
+        json!(["second", "third", "fourth"])
+    );
 }
