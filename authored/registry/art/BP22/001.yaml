@@ -76,67 +76,75 @@ records:
   - kind: art
     owner: BP22
     data:
-      id: a:67cba427607d542e9622d97b8cfe35c2
       card_id: c:16ea0df6bbe8585b9342934d6fb3f349
-      face_id: f:e7601d1607be5ddaae932fdd7582a14a
       classification: unclassified
-      uses:
-        - printing_id: p:e42219081aac5b21b0e0894fb3b25b19
-          face_id: f:e7601d1607be5ddaae932fdd7582a14a
+      face_id: f:e7601d1607be5ddaae932fdd7582a14a
+      id: a:67cba427607d542e9622d97b8cfe35c2
       observation:
-        region: jp
         card_no: BP22-005
         observation_hash: sha256:c142dad59187c134f16783ebd5f1981b11f3a88ea4a995c2bda046a37ebebd9d
-        rules_hash: sha256:415f5cadd0a9aa7dac504c9cbed221b20d18b274d457dea1fa632e821b101964
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:415f5cadd0a9aa7dac504c9cbed221b20d18b274d457dea1fa632e821b101964
+      uses:
+        - face_id: f:e7601d1607be5ddaae932fdd7582a14a
+          printing_id: p:e42219081aac5b21b0e0894fb3b25b19
+        - face_id: f:e7601d1607be5ddaae932fdd7582a14a
+          printing_id: p:04903e98828f5cbf90dce86a70ecaf58
   - kind: art
     owner: BP22
     data:
-      id: a:eb8019d467c35839b9f79ab0b4fd90b2
       card_id: c:e045897964ed56278817d0a31116fae5
-      face_id: f:5e824a8398465bf683775b63bd7f85b5
       classification: unclassified
-      uses:
-        - printing_id: p:670c6fb68c2457748aae68bb6251a98f
-          face_id: f:5e824a8398465bf683775b63bd7f85b5
+      face_id: f:5e824a8398465bf683775b63bd7f85b5
+      id: a:eb8019d467c35839b9f79ab0b4fd90b2
       observation:
-        region: jp
         card_no: BP22-006
         observation_hash: sha256:a462524a348acceb1dc5d3b16539bda414d081240e54a18e44996771ec27bd9b
-        rules_hash: sha256:4ac1d22dd8354c4838831316a8daa15fbeb3cdee6954bc581e2a59b0ea3ab156
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:4ac1d22dd8354c4838831316a8daa15fbeb3cdee6954bc581e2a59b0ea3ab156
+      uses:
+        - face_id: f:5e824a8398465bf683775b63bd7f85b5
+          printing_id: p:670c6fb68c2457748aae68bb6251a98f
+        - face_id: f:5e824a8398465bf683775b63bd7f85b5
+          printing_id: p:91c24a79ba7152a9baae78ea649b6677
   - kind: art
     owner: BP22
     data:
-      id: a:0c6505e766145ac59d9644c5edbab8fb
       card_id: c:528cd09fd7e85ec1926a8897603c3306
-      face_id: f:bb9a0c3c1bb65eb3aade3e46e3e8ec71
       classification: unclassified
-      uses:
-        - printing_id: p:a028a2106e9c5bd1b92d2f02ffb174b1
-          face_id: f:bb9a0c3c1bb65eb3aade3e46e3e8ec71
+      face_id: f:bb9a0c3c1bb65eb3aade3e46e3e8ec71
+      id: a:0c6505e766145ac59d9644c5edbab8fb
       observation:
-        region: jp
         card_no: BP22-007
         observation_hash: sha256:ae23eccf71136a00cd8bec3569bf4ef805d0df1fe1359bba5854ae750651f80e
-        rules_hash: sha256:df79b767c5de4ca6b60d440c25c8ebaead8d5147d72957c2adf626cd554ec4c5
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:df79b767c5de4ca6b60d440c25c8ebaead8d5147d72957c2adf626cd554ec4c5
+      uses:
+        - face_id: f:bb9a0c3c1bb65eb3aade3e46e3e8ec71
+          printing_id: p:a028a2106e9c5bd1b92d2f02ffb174b1
+        - face_id: f:bb9a0c3c1bb65eb3aade3e46e3e8ec71
+          printing_id: p:95b881eefbbc53bfb4dc5f3c8d582a54
   - kind: art
     owner: BP22
     data:
-      id: a:8871545f0c5b55a0934ba80f89ce90cf
       card_id: c:d34c9b62c9ee51b6992aa71806cd98ce
-      face_id: f:5583bbce7b575f08b9c3d71e6f8c2e9a
       classification: unclassified
-      uses:
-        - printing_id: p:80a8f7c0574b5c379167dd8124549ff1
-          face_id: f:5583bbce7b575f08b9c3d71e6f8c2e9a
+      face_id: f:5583bbce7b575f08b9c3d71e6f8c2e9a
+      id: a:8871545f0c5b55a0934ba80f89ce90cf
       observation:
-        region: jp
         card_no: BP22-008
         observation_hash: sha256:298a02725e6f13b028cd6014457c4741e237d1d8a3d7a0277c880f191c278566
-        rules_hash: sha256:078b208c323cf4d568aec29e7215cdaade80dcf1cdc0e4389c292ba844399655
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:078b208c323cf4d568aec29e7215cdaade80dcf1cdc0e4389c292ba844399655
+      uses:
+        - face_id: f:5583bbce7b575f08b9c3d71e6f8c2e9a
+          printing_id: p:80a8f7c0574b5c379167dd8124549ff1
+        - face_id: f:5583bbce7b575f08b9c3d71e6f8c2e9a
+          printing_id: p:4eb8a3ef7b9b5e38b68f95da6573ba04
   - kind: art
     owner: BP22
     data:
@@ -176,19 +184,21 @@ records:
   - kind: art
     owner: BP22
     data:
-      id: a:5a89aa4fb9b458938dc32a5c06b23d5d
       card_id: c:9d7344da5a4b532285f7ee9cb2057166
-      face_id: f:aa38c7462da45d71a27e4ddfdeabc924
       classification: unclassified
-      uses:
-        - printing_id: p:199bb86b7556570aa5bfa5b8cb4a086a
-          face_id: f:aa38c7462da45d71a27e4ddfdeabc924
+      face_id: f:aa38c7462da45d71a27e4ddfdeabc924
+      id: a:5a89aa4fb9b458938dc32a5c06b23d5d
       observation:
-        region: jp
         card_no: BP22-011
         observation_hash: sha256:890c74d373bf7da337369759599a6b3889d6cca4dfdbbb289bd12e7a92f6cc6e
-        rules_hash: sha256:95db27fc447a27ea519d3c939ba0c4c34b771166a1f3dea51280ebeb8986cf37
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:95db27fc447a27ea519d3c939ba0c4c34b771166a1f3dea51280ebeb8986cf37
+      uses:
+        - face_id: f:aa38c7462da45d71a27e4ddfdeabc924
+          printing_id: p:199bb86b7556570aa5bfa5b8cb4a086a
+        - face_id: f:aa38c7462da45d71a27e4ddfdeabc924
+          printing_id: p:9c08874f3c6f50f4a0dc2f4fca28dd8f
   - kind: art
     owner: BP22
     data:
@@ -390,35 +400,39 @@ records:
   - kind: art
     owner: BP22
     data:
-      id: a:1bd37e20c6ed5606a59b595a6e43c593
       card_id: c:bf6e5eb61d6453188e162585c568222b
-      face_id: f:0c3dc93fece85e9f98336a3d2626d8a4
       classification: unclassified
-      uses:
-        - printing_id: p:dbb6df74e7ed5d7da64063be2ae96afe
-          face_id: f:0c3dc93fece85e9f98336a3d2626d8a4
+      face_id: f:0c3dc93fece85e9f98336a3d2626d8a4
+      id: a:1bd37e20c6ed5606a59b595a6e43c593
       observation:
-        region: jp
         card_no: BP22-023
         observation_hash: sha256:edb6fdb648e95e46b98519966bd838c3ab3ad06d005aa68925f65f78a5b26e9b
-        rules_hash: sha256:3c2a9526f7ebc3bb7649a34ee2b8945ca85f73eb9f9cd0be7a2f11298334e7aa
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:3c2a9526f7ebc3bb7649a34ee2b8945ca85f73eb9f9cd0be7a2f11298334e7aa
+      uses:
+        - face_id: f:0c3dc93fece85e9f98336a3d2626d8a4
+          printing_id: p:dbb6df74e7ed5d7da64063be2ae96afe
+        - face_id: f:0c3dc93fece85e9f98336a3d2626d8a4
+          printing_id: p:9dbb139774e357878beda539eedb85c2
   - kind: art
     owner: BP22
     data:
-      id: a:d354b3f69bb252a791b252a983077a85
       card_id: c:a5e5fbf8110a5e30b42fa3ce0eb365a1
-      face_id: f:c931ea0ae413576eb09f4368d64de2ba
       classification: unclassified
-      uses:
-        - printing_id: p:691e4daf42e253e180ddf5cea5115fe8
-          face_id: f:c931ea0ae413576eb09f4368d64de2ba
+      face_id: f:c931ea0ae413576eb09f4368d64de2ba
+      id: a:d354b3f69bb252a791b252a983077a85
       observation:
-        region: jp
         card_no: BP22-024
         observation_hash: sha256:c44413d4f6901185ee70caf1728e1df1a53398f2487449e65edf624120d2c10c
-        rules_hash: sha256:fd4f724823be9b39c69053c1c87f0c2561079e80291f1036b42e9a7225162a28
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:fd4f724823be9b39c69053c1c87f0c2561079e80291f1036b42e9a7225162a28
+      uses:
+        - face_id: f:c931ea0ae413576eb09f4368d64de2ba
+          printing_id: p:691e4daf42e253e180ddf5cea5115fe8
+        - face_id: f:c931ea0ae413576eb09f4368d64de2ba
+          printing_id: p:c9a9e1535ed65e0e94f9470a08929cce
   - kind: art
     owner: BP22
     data:
@@ -778,19 +792,21 @@ records:
   - kind: art
     owner: BP22
     data:
-      id: a:a479c7ac766a5734b4c3eb049f8a3e0d
       card_id: c:f346dabf71f754b0a29b427cb02551b8
-      face_id: f:c3d27337ffd55fe5a1f6e49570056bad
       classification: unclassified
-      uses:
-        - printing_id: p:9161936f8e6c528096122c58e85523dc
-          face_id: f:c3d27337ffd55fe5a1f6e49570056bad
+      face_id: f:c3d27337ffd55fe5a1f6e49570056bad
+      id: a:a479c7ac766a5734b4c3eb049f8a3e0d
       observation:
-        region: jp
         card_no: BP22-045
         observation_hash: sha256:908750ab3c8772ff42d4b1f56b302a3d640df53edfa7020d456550bebcfa431e
-        rules_hash: sha256:2fe2470214b934afeb3ead869dde10ba2d5028353598379905f87da3730f2ff1
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:2fe2470214b934afeb3ead869dde10ba2d5028353598379905f87da3730f2ff1
+      uses:
+        - face_id: f:c3d27337ffd55fe5a1f6e49570056bad
+          printing_id: p:9161936f8e6c528096122c58e85523dc
+        - face_id: f:c3d27337ffd55fe5a1f6e49570056bad
+          printing_id: p:0351bf72dd36560b919f2d89caae9d0a
   - kind: art
     owner: BP22
     data:
@@ -1044,35 +1060,39 @@ records:
   - kind: art
     owner: BP22
     data:
-      id: a:8ce79ce25dc853e6849a59061fb448c4
       card_id: c:af05e8aa00185631bab28e76738bbcda
-      face_id: f:29d7675ddee351eea33b7c9529f23108
       classification: unclassified
-      uses:
-        - printing_id: p:69610cd306b15c71806bb32f7b2e8ffe
-          face_id: f:29d7675ddee351eea33b7c9529f23108
+      face_id: f:29d7675ddee351eea33b7c9529f23108
+      id: a:8ce79ce25dc853e6849a59061fb448c4
       observation:
-        region: jp
         card_no: BP22-060
         observation_hash: sha256:6a7e191081afc9bffb8c9cd39b400150efe7a7e7d17bf4b193c57c7ce4577730
-        rules_hash: sha256:315c427ce04f8613b3d84804edea78d795632291223e4bd38b64479dbbb1032c
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:315c427ce04f8613b3d84804edea78d795632291223e4bd38b64479dbbb1032c
+      uses:
+        - face_id: f:29d7675ddee351eea33b7c9529f23108
+          printing_id: p:69610cd306b15c71806bb32f7b2e8ffe
+        - face_id: f:29d7675ddee351eea33b7c9529f23108
+          printing_id: p:10f44595ed085fd4a542c264190355f1
   - kind: art
     owner: BP22
     data:
-      id: a:fed04e9df5e751df9c4ada3a2ae20a4c
       card_id: c:70f8c4bad1af5b989062d8d61219ab08
-      face_id: f:7d06ad63a5765cfb90db0f18da10b464
       classification: unclassified
-      uses:
-        - printing_id: p:bb959ecf51285731aa6c11f01adc6664
-          face_id: f:7d06ad63a5765cfb90db0f18da10b464
+      face_id: f:7d06ad63a5765cfb90db0f18da10b464
+      id: a:fed04e9df5e751df9c4ada3a2ae20a4c
       observation:
-        region: jp
         card_no: BP22-061
         observation_hash: sha256:eb729f73fdc68e8fa2a5c50857114513fa05074f0a88d2c35fb6f0f8c5ebc5a3
-        rules_hash: sha256:b071eb11f5f6704d47ee9c42e9985c2f5a9ad997d968a95c4d2ae85a961725b7
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:b071eb11f5f6704d47ee9c42e9985c2f5a9ad997d968a95c4d2ae85a961725b7
+      uses:
+        - face_id: f:7d06ad63a5765cfb90db0f18da10b464
+          printing_id: p:bb959ecf51285731aa6c11f01adc6664
+        - face_id: f:7d06ad63a5765cfb90db0f18da10b464
+          printing_id: p:aa592c04b33c53a29adaba8000aa10ba
   - kind: art
     owner: BP22
     data:
@@ -1678,35 +1698,39 @@ records:
   - kind: art
     owner: BP22
     data:
-      id: a:797d0358fe7c57608c1648bfd0874951
       card_id: c:ffc68e30a35c5668a0ac596462e32cf6
-      face_id: f:0ea1700bf90c553b87a8c2aeb02a6a8b
       classification: unclassified
-      uses:
-        - printing_id: p:a9fb066313275bf3909ba7b96fbdd0dc
-          face_id: f:0ea1700bf90c553b87a8c2aeb02a6a8b
+      face_id: f:0ea1700bf90c553b87a8c2aeb02a6a8b
+      id: a:797d0358fe7c57608c1648bfd0874951
       observation:
-        region: jp
         card_no: BP22-096
         observation_hash: sha256:407bb8510b4dd3a48900dca410d44af4f0e3afe43bfd03b10c64a92ce121841d
-        rules_hash: sha256:7d51b21b896fe8cfc97b05e615cf2fa66ce898d9e1324cdb484796f48a518455
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:7d51b21b896fe8cfc97b05e615cf2fa66ce898d9e1324cdb484796f48a518455
+      uses:
+        - face_id: f:0ea1700bf90c553b87a8c2aeb02a6a8b
+          printing_id: p:a9fb066313275bf3909ba7b96fbdd0dc
+        - face_id: f:0ea1700bf90c553b87a8c2aeb02a6a8b
+          printing_id: p:14d0c8a508125b3abe465e47c627283a
   - kind: art
     owner: BP22
     data:
-      id: a:a80067f0493f51e697664d7a7aa2907b
       card_id: c:5084130a7f2a5107b07ba655d301a118
-      face_id: f:adf9c5bfec8e596fa42d8e8f9e97b6c4
       classification: unclassified
-      uses:
-        - printing_id: p:743e15a819525679a0ce57293459f5db
-          face_id: f:adf9c5bfec8e596fa42d8e8f9e97b6c4
+      face_id: f:adf9c5bfec8e596fa42d8e8f9e97b6c4
+      id: a:a80067f0493f51e697664d7a7aa2907b
       observation:
-        region: jp
         card_no: BP22-097
         observation_hash: sha256:4b36edd99f3e2660c4bfbf66f1e46d496730a94d99f41850b3c79a30f9fb4cfc
-        rules_hash: sha256:1a0f2241ee9871c767feaff6a02780ee7ad7aaacec6951c65290dd6708e4d268
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:1a0f2241ee9871c767feaff6a02780ee7ad7aaacec6951c65290dd6708e4d268
+      uses:
+        - face_id: f:adf9c5bfec8e596fa42d8e8f9e97b6c4
+          printing_id: p:743e15a819525679a0ce57293459f5db
+        - face_id: f:adf9c5bfec8e596fa42d8e8f9e97b6c4
+          printing_id: p:6a62a01ece8f5f079749ef61c72f7fa9
   - kind: art
     owner: BP22
     data:
@@ -2032,21 +2056,23 @@ records:
   - kind: art
     owner: BP22
     data:
-      id: a:fc9ad8cb5d8f54eba671e467a88aa3f6
       card_id: c:33abf4737278589fbfce5dd32f4c2ddb
-      face_id: f:8f539ef649d257c69fc8555ca1298419
       classification: unclassified
-      uses:
-        - printing_id: p:20b9e65a9aa95af7816249c76435cfd7
-          face_id: f:8f539ef649d257c69fc8555ca1298419
-        - printing_id: p:5592b821c6f95aa285e916b7b19b6dd8
-          face_id: f:8f539ef649d257c69fc8555ca1298419
+      face_id: f:8f539ef649d257c69fc8555ca1298419
+      id: a:fc9ad8cb5d8f54eba671e467a88aa3f6
       observation:
-        region: jp
         card_no: BP22-116
         observation_hash: sha256:b14887f2a5bc205395995b08e34ad743fa5babbf9bd753e38d591dcd047be36a
-        rules_hash: sha256:03118ed1ca196d03afbac433ed0fb1b39a0ed14b0cd5153b6194fffa8df5d57f
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:03118ed1ca196d03afbac433ed0fb1b39a0ed14b0cd5153b6194fffa8df5d57f
+      uses:
+        - face_id: f:8f539ef649d257c69fc8555ca1298419
+          printing_id: p:20b9e65a9aa95af7816249c76435cfd7
+        - face_id: f:8f539ef649d257c69fc8555ca1298419
+          printing_id: p:5592b821c6f95aa285e916b7b19b6dd8
+        - face_id: f:8f539ef649d257c69fc8555ca1298419
+          printing_id: p:a3897135712a58239f729c427c8b3d2a
   - kind: art
     owner: BP22
     data:

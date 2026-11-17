@@ -1768,25 +1768,27 @@ records:
   - kind: art
     owner: BP08
     data:
-      id: a:0be2ccc1dfe5577892cf074fb74e2239
       card_id: c:9c9701cb64f051929887741c5d6552fb
-      face_id: f:afe660f656315787abfe7c376f004810
       classification: unclassified
-      uses:
-        - printing_id: p:d3b9fc60bd6054238b6af811c9fbea95
-          face_id: f:afe660f656315787abfe7c376f004810
-        - printing_id: p:9711d8eadc3959bdacf420e1e067f7e1
-          face_id: f:afe660f656315787abfe7c376f004810
-        - printing_id: p:f1dee2c5ce485a3181cde9b8592e85c3
-          face_id: f:afe660f656315787abfe7c376f004810
-        - printing_id: p:0edc820404ae590da76fda3b72394ab5
-          face_id: f:afe660f656315787abfe7c376f004810
+      face_id: f:afe660f656315787abfe7c376f004810
+      id: a:0be2ccc1dfe5577892cf074fb74e2239
       observation:
-        region: en
         card_no: BP08-086EN
         observation_hash: sha256:b0ba4c345f7b6671f5689ea5662d82090898dd838545716da61c2b6ca3dad59f
-        rules_hash: sha256:02318bd98aab133b043cc9cbb921b17f2fb9abb9ce6f128817e1c88f14749b48
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:02318bd98aab133b043cc9cbb921b17f2fb9abb9ce6f128817e1c88f14749b48
+      uses:
+        - face_id: f:afe660f656315787abfe7c376f004810
+          printing_id: p:d3b9fc60bd6054238b6af811c9fbea95
+        - face_id: f:afe660f656315787abfe7c376f004810
+          printing_id: p:9711d8eadc3959bdacf420e1e067f7e1
+        - face_id: f:afe660f656315787abfe7c376f004810
+          printing_id: p:f1dee2c5ce485a3181cde9b8592e85c3
+        - face_id: f:afe660f656315787abfe7c376f004810
+          printing_id: p:0edc820404ae590da76fda3b72394ab5
+        - face_id: f:afe660f656315787abfe7c376f004810
+          printing_id: p:bb7d9e1784685ae79e9742dfcc3fb924
   - kind: art
     owner: BP08
     data:

@@ -1602,29 +1602,31 @@ records:
   - kind: art
     owner: BP03
     data:
-      id: a:8cd9d35003125f69ac095ef76b2135ba
       card_id: c:ba030611a53b546387555b2e5aee90ed
-      face_id: f:d135121cb1e65e478d7179f689153b81
       classification: unclassified
-      uses:
-        - printing_id: p:429753addca15ffeb1019d6a98aa7780
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:d9c87463eea855ae90a76265cb034d7d
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:eb570d8425fa5bfbbdddce3324aa1cbc
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:8c328a6b60d45c13b0568d1f12fa15dd
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:77e63c11c2fa5abeb2b9f923a9c868da
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:0a098a2d95835c24b11830b0f686f042
-          face_id: f:d135121cb1e65e478d7179f689153b81
+      face_id: f:d135121cb1e65e478d7179f689153b81
+      id: a:8cd9d35003125f69ac095ef76b2135ba
       observation:
-        region: en
         card_no: BP03-076EN
         observation_hash: sha256:1f206baeaaba3e768bbf8632898ab66a91e929ae2c0221ea3046405b42f9821a
-        rules_hash: sha256:f93458986863ba3505ab05b937c1d9426d01fa22fd5960bfb731a30424516741
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:f93458986863ba3505ab05b937c1d9426d01fa22fd5960bfb731a30424516741
+      uses:
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:429753addca15ffeb1019d6a98aa7780
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:d9c87463eea855ae90a76265cb034d7d
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:eb570d8425fa5bfbbdddce3324aa1cbc
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:8c328a6b60d45c13b0568d1f12fa15dd
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:77e63c11c2fa5abeb2b9f923a9c868da
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:0a098a2d95835c24b11830b0f686f042
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:a6161f7692f4543b92af3816f499200c
   - kind: art
     owner: BP03
     data:

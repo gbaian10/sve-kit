@@ -3108,33 +3108,35 @@ records:
   - kind: art
     owner: BP01
     data:
-      id: a:2239e00a0c7c57df85a6b75427378a94
       card_id: c:43b6d395fd165d39ab3879d857e58395
-      face_id: f:d1c876f4434e57ed9b0469f66f6899d9
       classification: unclassified
-      uses:
-        - printing_id: p:f5b4bd508e6b5a78a80a3be8ce9e5c83
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
-        - printing_id: p:b5bb2116304b5b84abf7e1b3f6d7be74
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
-        - printing_id: p:30078592ea70576f9a507319ee5e3cca
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
-        - printing_id: p:ad56674ec80552cbb97bf006f2ed9ced
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
-        - printing_id: p:da27eea754c95cc4a41e017bea880475
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
-        - printing_id: p:4355683a22805f4b91bf179dac2d190a
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
-        - printing_id: p:b7085ef33ad25c4ebbfefa7cab029cf9
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
-        - printing_id: p:312d2fd81587540e92ec4c4ae4b82987
-          face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+      face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+      id: a:2239e00a0c7c57df85a6b75427378a94
       observation:
-        region: en
         card_no: BP01-140EN
         observation_hash: sha256:a7529d82d5f1e8e31f42b50a0f2e6f29fd074013de746a43cb4f64899e847802
-        rules_hash: sha256:2b2f136dab554081173d51ce3a470fc29665023c9977778d9b85517740230087
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:2b2f136dab554081173d51ce3a470fc29665023c9977778d9b85517740230087
+      uses:
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:f5b4bd508e6b5a78a80a3be8ce9e5c83
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:b5bb2116304b5b84abf7e1b3f6d7be74
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:30078592ea70576f9a507319ee5e3cca
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:ad56674ec80552cbb97bf006f2ed9ced
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:da27eea754c95cc4a41e017bea880475
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:4355683a22805f4b91bf179dac2d190a
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:b7085ef33ad25c4ebbfefa7cab029cf9
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:312d2fd81587540e92ec4c4ae4b82987
+        - face_id: f:d1c876f4434e57ed9b0469f66f6899d9
+          printing_id: p:352813791225537a8464eff1cf1147fa
   - kind: art
     owner: BP01
     data:
@@ -4366,63 +4368,65 @@ records:
   - kind: art
     owner: BP01
     data:
-      id: a:99afc05299be501a842af202372ab61b
       card_id: c:01391302a9d850a3b1502877fa6276bb
-      face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
       classification: unclassified
-      uses:
-        - printing_id: p:7cf2d403ac5b5b3c944e6d3c1d358915
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:4799e917866e5583a0a5957036e9c839
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:cc1f662d193f54b6904f0f92c542fe01
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:706eedd9487258d280ca03f4da10a1d8
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:66491266ce715dc7a7eac6ef1e9c2968
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:6c984437d9a35232a0531edc50e1ee0a
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:33413f6352a358cc8c0154cbe0b47766
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:59fb3f76e63e5a0f9915c4e5930e385d
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:e3d2226d190f5e809cc3d41707e835e7
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:ce1a11c26b685c858454b9e27a404672
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:352581b0a6cc5911b2f293788e2702ca
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:42758fe701e459c2af3861d05fe7fb36
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:498489a945b45248b10ef15b65c56f84
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:eeee8f6b66405458adaa3ccc97982e28
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:3e34837c01b55ac0ae38bc66d62b0bc3
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:695df60b28ec5b0883749bbb34043a71
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:187bb9521c265163810521fd71208e96
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:3a6f9082d4385b37a99cd979e013f2cc
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:dd9f881a82b452d08c5de5f1a6e91fe6
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:8979d87ad4885685a25c88b44d036c6f
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:1c4b5693f7285223ac6b193f2c263e55
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:96e34d9d3073510b8d8d80c3d5935615
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
-        - printing_id: p:737504189ea95a1d83572e95d37c58cd
-          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+      face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+      id: a:99afc05299be501a842af202372ab61b
       observation:
-        region: en
         card_no: BP01-T02EN
         observation_hash: sha256:f7d51a9d02d6681c4d6ea3dcc39a23204b211a9ab6b88345442028a6d58691fe
-        rules_hash: sha256:c82276a2e44fbc44a481098f48a5d4ba1e31c1a8a1f227ce8821a2dbf5e3cb9d
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:c82276a2e44fbc44a481098f48a5d4ba1e31c1a8a1f227ce8821a2dbf5e3cb9d
+      uses:
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:7cf2d403ac5b5b3c944e6d3c1d358915
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:4799e917866e5583a0a5957036e9c839
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:cc1f662d193f54b6904f0f92c542fe01
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:706eedd9487258d280ca03f4da10a1d8
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:66491266ce715dc7a7eac6ef1e9c2968
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:6c984437d9a35232a0531edc50e1ee0a
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:33413f6352a358cc8c0154cbe0b47766
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:59fb3f76e63e5a0f9915c4e5930e385d
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:e3d2226d190f5e809cc3d41707e835e7
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:ce1a11c26b685c858454b9e27a404672
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:352581b0a6cc5911b2f293788e2702ca
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:42758fe701e459c2af3861d05fe7fb36
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:498489a945b45248b10ef15b65c56f84
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:eeee8f6b66405458adaa3ccc97982e28
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:3e34837c01b55ac0ae38bc66d62b0bc3
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:695df60b28ec5b0883749bbb34043a71
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:187bb9521c265163810521fd71208e96
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:3a6f9082d4385b37a99cd979e013f2cc
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:dd9f881a82b452d08c5de5f1a6e91fe6
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:8979d87ad4885685a25c88b44d036c6f
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:1c4b5693f7285223ac6b193f2c263e55
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:96e34d9d3073510b8d8d80c3d5935615
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:737504189ea95a1d83572e95d37c58cd
+        - face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+          printing_id: p:df03962e5f105b318c325c979e5198b1
   - kind: art
     owner: BP01
     data:
@@ -4552,21 +4556,23 @@ records:
   - kind: art
     owner: BP01
     data:
-      id: a:1e89c87507d95e86b18e9bbec0b47311
       card_id: c:c24f9367400b54ed9d2d2565c7f3aa27
-      face_id: f:c4c0d75573d057c3be90bc27c49b4926
       classification: unclassified
-      uses:
-        - printing_id: p:1afcf91d6dc457cdae271f44c335ae8d
-          face_id: f:c4c0d75573d057c3be90bc27c49b4926
-        - printing_id: p:d738986a1552548bb0f58e50c825aba3
-          face_id: f:c4c0d75573d057c3be90bc27c49b4926
+      face_id: f:c4c0d75573d057c3be90bc27c49b4926
+      id: a:1e89c87507d95e86b18e9bbec0b47311
       observation:
-        region: en
         card_no: BP01-T06EN
         observation_hash: sha256:f3fe2bfc4886efb00ca67477c12e26ff0a0c6a2e1dd6c331532df2b6296491d7
-        rules_hash: sha256:b5a34bfa1c7a42043c19f6e344e8579adf360e58b5aab72f7a3b4df880fe0eab
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:b5a34bfa1c7a42043c19f6e344e8579adf360e58b5aab72f7a3b4df880fe0eab
+      uses:
+        - face_id: f:c4c0d75573d057c3be90bc27c49b4926
+          printing_id: p:1afcf91d6dc457cdae271f44c335ae8d
+        - face_id: f:c4c0d75573d057c3be90bc27c49b4926
+          printing_id: p:d738986a1552548bb0f58e50c825aba3
+        - face_id: f:c4c0d75573d057c3be90bc27c49b4926
+          printing_id: p:8c8be421dbe15255913fbacdbe212adb
   - kind: art
     owner: BP01
     data:
@@ -4616,139 +4622,145 @@ records:
   - kind: art
     owner: BP01
     data:
-      id: a:e743df9c519754f293960b87b68bc2b7
       card_id: c:bc24af1bd8f15fc898178a70caa48b63
-      face_id: f:3f3f95c785145e0f91285dd01e2d85af
       classification: unclassified
-      uses:
-        - printing_id: p:7654ede269025b1e972b92aa3258f201
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:f05c28dbb1c554d4be3b87d24cd48e0f
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:79e886c6560b5e3e9a3176764a9cf576
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:151dd09c608f50c3a67ea3bd8e4607c8
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:348d957812995aa78ceeae3524e332ab
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:b6e20d1856d25eada617636cc808b950
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:6dde2227e1795729979b500ec47f736a
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:58bd1f96141a579ab790a4c6baee2dc9
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:41d0799d143b50da8c01e7bb99966ea1
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:d030e33e34d85def953fa3cf94f4ef9e
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:d0078821cfe45c73b410212f56db53c3
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:355ad694ef2d5c70ab7f46c84f9fda6b
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
-        - printing_id: p:3c3b60c450755ace97770475cfa14270
-          face_id: f:3f3f95c785145e0f91285dd01e2d85af
+      face_id: f:3f3f95c785145e0f91285dd01e2d85af
+      id: a:e743df9c519754f293960b87b68bc2b7
       observation:
-        region: en
         card_no: BP01-T08EN
         observation_hash: sha256:d32f22b961793aac0a95a9269487f65d11814851cb9d2586ac4f54338f46f1f1
-        rules_hash: sha256:4b98b51045e930cb8cc61ef343eba12a6699008d0c10e726f5cb9b2229d7573d
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:4b98b51045e930cb8cc61ef343eba12a6699008d0c10e726f5cb9b2229d7573d
+      uses:
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:7654ede269025b1e972b92aa3258f201
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:f05c28dbb1c554d4be3b87d24cd48e0f
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:79e886c6560b5e3e9a3176764a9cf576
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:151dd09c608f50c3a67ea3bd8e4607c8
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:348d957812995aa78ceeae3524e332ab
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:b6e20d1856d25eada617636cc808b950
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:6dde2227e1795729979b500ec47f736a
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:58bd1f96141a579ab790a4c6baee2dc9
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:41d0799d143b50da8c01e7bb99966ea1
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:d030e33e34d85def953fa3cf94f4ef9e
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:d0078821cfe45c73b410212f56db53c3
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:355ad694ef2d5c70ab7f46c84f9fda6b
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:3c3b60c450755ace97770475cfa14270
+        - face_id: f:3f3f95c785145e0f91285dd01e2d85af
+          printing_id: p:8b3ad0b5fa155ed4beeb769b20e7dcf6
   - kind: art
     owner: BP01
     data:
-      id: a:921d9285580850a2b1292d7a8cd8e19c
       card_id: c:eec8d778cd7759deb536f2906ab7795f
-      face_id: f:61c993973f935dd3adabce3bc9347e61
       classification: unclassified
-      uses:
-        - printing_id: p:bec64b8943b156ceb6538f29158c1a6d
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:b9a46bc90618584d805f86447ded6906
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:e9416fee76c15129942ab1bb616c9080
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:ae64982ceb875bfcb1598dec768354ee
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:8ebbb7d0204f57feb0cb990fc5605528
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:2edcbf2dded95a1a92aafccfe891dcf4
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:eb3eada8e4c15bbbace6ff8e8174c4c9
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:606cd3a7faff531c8c1824efdb26a8bf
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:c09a91eb59cf5f3683c16ff819233571
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:2ff9cb09cb6457ccb77364b07d316791
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:189c64811df95b2ba2b3876b30991588
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:872099c99fea5abfbcc37425710fa065
-          face_id: f:61c993973f935dd3adabce3bc9347e61
-        - printing_id: p:e38e26db728a5e3886cde30e1b0fcdb8
-          face_id: f:61c993973f935dd3adabce3bc9347e61
+      face_id: f:61c993973f935dd3adabce3bc9347e61
+      id: a:921d9285580850a2b1292d7a8cd8e19c
       observation:
-        region: en
         card_no: BP01-T09EN
         observation_hash: sha256:862cc7afe856bb30ea1f9d5255c7970166fbbf72f3863336df52c0dd0aac982d
-        rules_hash: sha256:fba6207beeec17c438ebd25902e2262b7570fe0d17decac2ab3918a3ed482782
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:fba6207beeec17c438ebd25902e2262b7570fe0d17decac2ab3918a3ed482782
+      uses:
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:bec64b8943b156ceb6538f29158c1a6d
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:b9a46bc90618584d805f86447ded6906
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:e9416fee76c15129942ab1bb616c9080
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:ae64982ceb875bfcb1598dec768354ee
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:8ebbb7d0204f57feb0cb990fc5605528
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:2edcbf2dded95a1a92aafccfe891dcf4
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:eb3eada8e4c15bbbace6ff8e8174c4c9
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:606cd3a7faff531c8c1824efdb26a8bf
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:c09a91eb59cf5f3683c16ff819233571
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:2ff9cb09cb6457ccb77364b07d316791
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:189c64811df95b2ba2b3876b30991588
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:872099c99fea5abfbcc37425710fa065
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:e38e26db728a5e3886cde30e1b0fcdb8
+        - face_id: f:61c993973f935dd3adabce3bc9347e61
+          printing_id: p:540f1a6423585d3681c8feed32c1f56e
   - kind: art
     owner: BP01
     data:
-      id: a:8469b4f80b02542b9b963331d7899ca1
       card_id: c:2d8f9390c6965c0283971ca22566d8a3
-      face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
       classification: unclassified
-      uses:
-        - printing_id: p:bb7e433027655bb99e1b7137fd882156
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:723c3b08b4c05d01af5754f9119ded4f
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:fe877c90b9cb588cb94b747d6b3023c9
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:dcc34acc3b4b597ebcd245426ce7e91f
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:186b97d73a435b138d10438f205946fe
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:43e15e2bc5c453c2bbcbb1351d6c5720
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:c9425d55e2145a9687c6528908192dbe
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:096af2ad958450aa89e400e02f9b0e7d
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:7cf8c7621d335b69bd3e3b6990d6b378
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:c4afae6bb88b5059a2e900de19b1cf89
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:4263771d84785a51a06d08c24ba70f50
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:1fefc1c1795b5bbe936a69d7ab9e85ff
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:3a1589dc88935cb1b784e50da40053be
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:6d69739b95255ba5bcee68c127aa221e
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:fba0d5a9225a575cadd2914e055a7105
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:8a128a462df35c8d8cadc306a7960245
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:b6123dccc7085611ab1375015fac08ea
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:59252b42959454b1ba7af2972eaa3651
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:737edc0fa0ca538791b49ed4952a1b4d
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:ea88775681c9549986596aa5e7571115
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
-        - printing_id: p:7dcb36cb249b5b9c8e5cf6c09ec96baf
-          face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+      face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+      id: a:8469b4f80b02542b9b963331d7899ca1
       observation:
-        region: en
         card_no: BP01-T10EN
         observation_hash: sha256:61c3df1c16ed9f22940620b3559c1123fbff1fb3a0c0f59c74b1d8e6437604ee
-        rules_hash: sha256:09a8f507de6f2b89e55494544a79795ee2cfa00de43d5689b442ece97b91f675
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:09a8f507de6f2b89e55494544a79795ee2cfa00de43d5689b442ece97b91f675
+      uses:
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:bb7e433027655bb99e1b7137fd882156
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:723c3b08b4c05d01af5754f9119ded4f
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:fe877c90b9cb588cb94b747d6b3023c9
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:dcc34acc3b4b597ebcd245426ce7e91f
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:186b97d73a435b138d10438f205946fe
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:43e15e2bc5c453c2bbcbb1351d6c5720
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:c9425d55e2145a9687c6528908192dbe
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:096af2ad958450aa89e400e02f9b0e7d
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:7cf8c7621d335b69bd3e3b6990d6b378
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:c4afae6bb88b5059a2e900de19b1cf89
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:4263771d84785a51a06d08c24ba70f50
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:1fefc1c1795b5bbe936a69d7ab9e85ff
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:3a1589dc88935cb1b784e50da40053be
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:6d69739b95255ba5bcee68c127aa221e
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:fba0d5a9225a575cadd2914e055a7105
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:8a128a462df35c8d8cadc306a7960245
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:b6123dccc7085611ab1375015fac08ea
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:59252b42959454b1ba7af2972eaa3651
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:737edc0fa0ca538791b49ed4952a1b4d
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:ea88775681c9549986596aa5e7571115
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:7dcb36cb249b5b9c8e5cf6c09ec96baf
+        - face_id: f:22d7711981915c3bba6d5d1d4b7afc2c
+          printing_id: p:f621f93bdd245e2087a8564b33c4dfa4
   - kind: art
     owner: BP01
     data:

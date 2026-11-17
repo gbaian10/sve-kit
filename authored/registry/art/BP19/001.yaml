@@ -1830,21 +1830,23 @@ records:
   - kind: art
     owner: BP19
     data:
-      id: a:0eebc0f582b258609963a9119b30ec43
       card_id: c:130f4b03a02d5d9eb88e2427edbb7b0b
-      face_id: f:3b1e1c7d786c570ea861017413548a40
       classification: unclassified
-      uses:
-        - printing_id: p:d6886631b2f6525ea6614534b757be40
-          face_id: f:3b1e1c7d786c570ea861017413548a40
-        - printing_id: p:d7b04df3a2c551a8832315d42bac301e
-          face_id: f:3b1e1c7d786c570ea861017413548a40
+      face_id: f:3b1e1c7d786c570ea861017413548a40
+      id: a:0eebc0f582b258609963a9119b30ec43
       observation:
-        region: en
         card_no: BP19-090EN
         observation_hash: sha256:b27d0b31e8a9e5bf2bba3d9c23e83c4d7aba6c850c53fa127e8242ab2f5d25ff
-        rules_hash: sha256:38b0aec4e7f9222d43c3e82da28176d93a2b9ab8d1bfabbaa73c1eeb75cda530
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:38b0aec4e7f9222d43c3e82da28176d93a2b9ab8d1bfabbaa73c1eeb75cda530
+      uses:
+        - face_id: f:3b1e1c7d786c570ea861017413548a40
+          printing_id: p:d6886631b2f6525ea6614534b757be40
+        - face_id: f:3b1e1c7d786c570ea861017413548a40
+          printing_id: p:d7b04df3a2c551a8832315d42bac301e
+        - face_id: f:3b1e1c7d786c570ea861017413548a40
+          printing_id: p:2f97ec60210c5e43833fa791bb71127b
   - kind: art
     owner: BP19
     data:

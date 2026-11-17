@@ -752,51 +752,55 @@ records:
   - kind: art
     owner: BP09
     data:
-      id: a:d89ad21c9b5b5b57b551b4ae659dd232
       card_id: c:d73c47f6cc9753a39b48c247c3e84f5b
-      face_id: f:8063363aac9a5b16a965d004e2698102
       classification: unclassified
-      uses:
-        - printing_id: p:0dfa729dfe4c53878c336bb41ee1d1ca
-          face_id: f:8063363aac9a5b16a965d004e2698102
-        - printing_id: p:5ef073b0428e5d3587a5304c5c6509bd
-          face_id: f:8063363aac9a5b16a965d004e2698102
-        - printing_id: p:4e013a9157af58eba3294aed9acb3e7f
-          face_id: f:8063363aac9a5b16a965d004e2698102
-        - printing_id: p:99292a3321695269a1f8e1dea5be7122
-          face_id: f:8063363aac9a5b16a965d004e2698102
-        - printing_id: p:ce52c030802b5c658ca28906082224ca
-          face_id: f:8063363aac9a5b16a965d004e2698102
+      face_id: f:8063363aac9a5b16a965d004e2698102
+      id: a:d89ad21c9b5b5b57b551b4ae659dd232
       observation:
-        region: en
         card_no: BP09-035EN
         observation_hash: sha256:8daa5b7d3154dff8bf5e084bce8b97a8a77ebb241401714236c493aa1a55bcfb
-        rules_hash: sha256:57ebf2a9d9b72e39cbcaedc8ecec74775d7c1bedb96eee55871eb21c0c39d786
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:57ebf2a9d9b72e39cbcaedc8ecec74775d7c1bedb96eee55871eb21c0c39d786
+      uses:
+        - face_id: f:8063363aac9a5b16a965d004e2698102
+          printing_id: p:0dfa729dfe4c53878c336bb41ee1d1ca
+        - face_id: f:8063363aac9a5b16a965d004e2698102
+          printing_id: p:5ef073b0428e5d3587a5304c5c6509bd
+        - face_id: f:8063363aac9a5b16a965d004e2698102
+          printing_id: p:4e013a9157af58eba3294aed9acb3e7f
+        - face_id: f:8063363aac9a5b16a965d004e2698102
+          printing_id: p:99292a3321695269a1f8e1dea5be7122
+        - face_id: f:8063363aac9a5b16a965d004e2698102
+          printing_id: p:ce52c030802b5c658ca28906082224ca
+        - face_id: f:8063363aac9a5b16a965d004e2698102
+          printing_id: p:e9e0e70d298c54d99e1ae94755433086
   - kind: art
     owner: BP09
     data:
-      id: a:d12b46a6852e540e9a4e3ef2f09d97f9
       card_id: c:6caab23bf3645984b88b77749b9f1a65
-      face_id: f:c9596f1d3af35e67a83ebac2e6145243
       classification: unclassified
-      uses:
-        - printing_id: p:24d16c4ff8dd5cf48d7a409cdf58990c
-          face_id: f:c9596f1d3af35e67a83ebac2e6145243
-        - printing_id: p:f54a9f308db653aa894547eab3b07a4d
-          face_id: f:c9596f1d3af35e67a83ebac2e6145243
-        - printing_id: p:63cb94ca147c508fbe9ba06d36258ebf
-          face_id: f:c9596f1d3af35e67a83ebac2e6145243
-        - printing_id: p:d3184f1d7f7d5df384cab9dd0f57a234
-          face_id: f:c9596f1d3af35e67a83ebac2e6145243
-        - printing_id: p:e4df12ed566f5bb998e0e00119805bb7
-          face_id: f:c9596f1d3af35e67a83ebac2e6145243
+      face_id: f:c9596f1d3af35e67a83ebac2e6145243
+      id: a:d12b46a6852e540e9a4e3ef2f09d97f9
       observation:
-        region: en
         card_no: BP09-036EN
         observation_hash: sha256:58acc9a4a9829b56acbc60006be3926674ee43d4ce70845e60acfda7927024e5
-        rules_hash: sha256:d554b06d0e3c5125666de2a2d3340adfae3b62d897580575272da8024d44666b
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:d554b06d0e3c5125666de2a2d3340adfae3b62d897580575272da8024d44666b
+      uses:
+        - face_id: f:c9596f1d3af35e67a83ebac2e6145243
+          printing_id: p:24d16c4ff8dd5cf48d7a409cdf58990c
+        - face_id: f:c9596f1d3af35e67a83ebac2e6145243
+          printing_id: p:f54a9f308db653aa894547eab3b07a4d
+        - face_id: f:c9596f1d3af35e67a83ebac2e6145243
+          printing_id: p:63cb94ca147c508fbe9ba06d36258ebf
+        - face_id: f:c9596f1d3af35e67a83ebac2e6145243
+          printing_id: p:d3184f1d7f7d5df384cab9dd0f57a234
+        - face_id: f:c9596f1d3af35e67a83ebac2e6145243
+          printing_id: p:e4df12ed566f5bb998e0e00119805bb7
+        - face_id: f:c9596f1d3af35e67a83ebac2e6145243
+          printing_id: p:885014a4608b573ebb52e2b97005c9bf
   - kind: art
     owner: BP09
     data:
@@ -2054,25 +2058,27 @@ records:
   - kind: art
     owner: BP09
     data:
-      id: a:618419ced2a15204b4103fad5a6ea7b7
       card_id: c:a2c3c719a8195e32b3d3a2fd617d23d4
-      face_id: f:0ef7748edf2953b780677c8f9363cfbf
       classification: unclassified
-      uses:
-        - printing_id: p:495ba8379beb55cca459c22b2a576670
-          face_id: f:0ef7748edf2953b780677c8f9363cfbf
-        - printing_id: p:d3824c7e943758c98f5430dd04dc0b00
-          face_id: f:0ef7748edf2953b780677c8f9363cfbf
-        - printing_id: p:a5076af3b4275b6d882c49297d9b42c6
-          face_id: f:0ef7748edf2953b780677c8f9363cfbf
-        - printing_id: p:57d142fc64f85e9ca052fd305dda7282
-          face_id: f:0ef7748edf2953b780677c8f9363cfbf
+      face_id: f:0ef7748edf2953b780677c8f9363cfbf
+      id: a:618419ced2a15204b4103fad5a6ea7b7
       observation:
-        region: en
         card_no: BP09-091EN
         observation_hash: sha256:75507f0215afe0d1a600f707bcafaa96d5741735ba6a1a4f90b32b24ba2569d5
-        rules_hash: sha256:4f83d35bffe9600ac95e6c124a12c6504e5cb1d3beeefd365c6e5c61828e487b
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:4f83d35bffe9600ac95e6c124a12c6504e5cb1d3beeefd365c6e5c61828e487b
+      uses:
+        - face_id: f:0ef7748edf2953b780677c8f9363cfbf
+          printing_id: p:495ba8379beb55cca459c22b2a576670
+        - face_id: f:0ef7748edf2953b780677c8f9363cfbf
+          printing_id: p:d3824c7e943758c98f5430dd04dc0b00
+        - face_id: f:0ef7748edf2953b780677c8f9363cfbf
+          printing_id: p:a5076af3b4275b6d882c49297d9b42c6
+        - face_id: f:0ef7748edf2953b780677c8f9363cfbf
+          printing_id: p:57d142fc64f85e9ca052fd305dda7282
+        - face_id: f:0ef7748edf2953b780677c8f9363cfbf
+          printing_id: p:003ebdb691f9531882d49b945e91ac03
   - kind: art
     owner: BP09
     data:
@@ -3008,21 +3014,23 @@ records:
   - kind: art
     owner: BP09
     data:
-      id: a:e09cc31adfba5e35a44c8ef041d70c83
       card_id: c:43cf6998ddce5ae59122a7972476cd01
-      face_id: f:9470464d0ccb586197f49d52b098070f
       classification: unclassified
-      uses:
-        - printing_id: p:b31b335f70fc53328d2226c2b5593269
-          face_id: f:9470464d0ccb586197f49d52b098070f
-        - printing_id: p:ae346b4a147951358f0662f452a6d141
-          face_id: f:9470464d0ccb586197f49d52b098070f
+      face_id: f:9470464d0ccb586197f49d52b098070f
+      id: a:e09cc31adfba5e35a44c8ef041d70c83
       observation:
-        region: en
         card_no: BP09-137EN
         observation_hash: sha256:51c0ad8f61edda88b68440f7f31ce32ab0652655ffbe1227ba77639eedc1b5ab
-        rules_hash: sha256:485bf33b7b2dc2d3da2e1aaf7eccebc538b375e7dd15c7eda1cfa589ab607b12
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:485bf33b7b2dc2d3da2e1aaf7eccebc538b375e7dd15c7eda1cfa589ab607b12
+      uses:
+        - face_id: f:9470464d0ccb586197f49d52b098070f
+          printing_id: p:b31b335f70fc53328d2226c2b5593269
+        - face_id: f:9470464d0ccb586197f49d52b098070f
+          printing_id: p:ae346b4a147951358f0662f452a6d141
+        - face_id: f:9470464d0ccb586197f49d52b098070f
+          printing_id: p:96582466b46e57e88dfcfcefd27f80d9
   - kind: art
     owner: BP09
     data:
