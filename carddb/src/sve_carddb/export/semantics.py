@@ -637,33 +637,40 @@ def _preferred_basis(
     revisions: dict[str, Row],
     units: dict[str, str],
     printings: dict[str, Row],
+    collab: frozenset[str] = frozenset(),
 ) -> str | None:
     dated = [
         item for item in candidates if dates[string(item["printing_id"])] is not None
     ]
     if not dated or any(item["revision_id"] is None for item in dated):
         return None
+    names = [
+        units[string(revisions[string(item["revision_id"])]["name_unit_id"])]
+        for item in dated
+    ]
+    # Mirror the build: a declared collab name is compared only by its absence.
+    own = {name for name in names if name not in collab}
+    shared = next(iter(own), "") if len(own) <= 1 else None
     values = []
-    for item in dated:
+    for item, name in zip(dated, names, strict=True):
         revision = revisions[string(item["revision_id"])]
+        identity: dict[str, JsonValue] = {
+            key: revision[key]
+            for key in (
+                "class_code",
+                "type_code",
+                "cost",
+                "attack",
+                "defense",
+                "traits",
+                "titles",
+                "special_kinds",
+            )
+        }
+        identity["name"] = shared if shared is not None and name in collab else name
         values.append(
             Wording(
-                identity=canonical(
-                    {
-                        key: revision[key]
-                        for key in (
-                            "name_unit_id",
-                            "class_code",
-                            "type_code",
-                            "cost",
-                            "attack",
-                            "defense",
-                            "traits",
-                            "titles",
-                            "special_kinds",
-                        )
-                    }
-                ),
+                identity=canonical(identity),
                 text=units[string(revision["effect_unit_id"])],
                 sections=tuple(
                     units[string(object_value(s)["text_unit_id"])]
@@ -672,6 +679,7 @@ def _preferred_basis(
             )
         )
     preferred, _ = preferred_wordings(tuple(values))
+    preferred = tuple(i for i in preferred if names[i] not in collab) or preferred
     latest = max(dates[string(dated[i]["printing_id"])] or "" for i in preferred)
     return min(
         (
@@ -688,6 +696,7 @@ class _WordingEvidence:
     revisions: dict[str, Row]
     units: dict[str, str]
     printings: dict[str, Row]
+    collab: dict[tuple[str, str], frozenset[str]]
 
 
 def _wording_basis(
@@ -730,7 +739,14 @@ def _wording_basis(
             )
         )
         if not fallback and identifier != _preferred_basis(
-            candidates, dates, evidence.revisions, evidence.units, evidence.printings
+            candidates,
+            dates,
+            evidence.revisions,
+            evidence.units,
+            evidence.printings,
+            evidence.collab.get(
+                (string(face["id"]), string(wording["region"])), frozenset()
+            ),
         ):
             raise ValueError(
                 "Shared wording basis must use the latest known release after wording preferences"
@@ -741,6 +757,19 @@ def _wording_basis(
         for item in array(face["current"])
     ):
         raise ValueError("Shared wording basis requires a current")
+
+
+def _collab_names(view: View) -> dict[tuple[str, str], frozenset[str]]:
+    official = {
+        string(row["id"]): string(row["official_name"]) for row in view["rules_name"]
+    }
+    grouped: dict[tuple[str, str], set[str]] = {}
+    for row in view["face_rules_name"]:
+        if row["role"] == "collab":
+            grouped.setdefault(
+                (string(row["face_id"]), string(row["region"])), set()
+            ).add(official[string(row["rules_name_id"])])
+    return {key: frozenset(names) for key, names in grouped.items()}
 
 
 def _wording(view: View) -> None:
@@ -762,6 +791,7 @@ def _wording(view: View) -> None:
         ):
             regions_by_face.setdefault(face_id, set()).add(region)
     dates = _wording_dates(view)
+    collab = _collab_names(view)
     blocks = {
         string(row["card_id"]): {
             string(object_value(item)["region"]): array(object_value(item)["reasons"])
@@ -811,7 +841,7 @@ def _wording(view: View) -> None:
                 wording,
                 dates,
                 eligible,
-                _WordingEvidence(revisions, units, printings),
+                _WordingEvidence(revisions, units, printings, collab),
             )
             if wording["common_name"] != common_name(wording, revisions):
                 raise ValueError("Pending common name differs from candidates")
