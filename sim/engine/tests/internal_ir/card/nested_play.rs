@@ -199,6 +199,17 @@ pub(super) fn build_custom(
     scenario: Scenario,
     customize: impl FnOnce(&mut BTreeMap<String, WellFormedCardProgram>),
 ) -> (Game, AbilityId) {
+    build_position(side, child, enemy, scenario, customize, |_| {})
+}
+
+pub(super) fn build_position(
+    side: &str,
+    child: &str,
+    enemy: bool,
+    scenario: Scenario,
+    customize: impl FnOnce(&mut BTreeMap<String, WellFormedCardProgram>),
+    customize_position: impl FnOnce(&mut Value),
+) -> (Game, AbilityId) {
     let mut programs = build_programs(side, child, scenario);
     customize(&mut programs);
     let mut initial = setup(1, json!([]));
@@ -259,6 +270,7 @@ pub(super) fn build_custom(
     } else {
         catalog()
     };
+    customize_position(&mut initial);
     let mut game = Game::new(catalog, &initial, &Value::Null, &Value::Null, "nested-card").unwrap();
     for (number, program) in &programs {
         game.load_internal_card(number, program).unwrap();

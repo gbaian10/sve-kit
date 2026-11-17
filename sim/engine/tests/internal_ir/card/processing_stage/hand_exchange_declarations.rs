@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::{CostPaymentPurpose, InputDomain, PlayDeclaration};
 
-fn hand_program(two_fees: bool) -> WellFormedCardProgram {
+pub(super) fn hand_program(two_fees: bool) -> WellFormedCardProgram {
     if !two_fees {
         return program(
             "activate",

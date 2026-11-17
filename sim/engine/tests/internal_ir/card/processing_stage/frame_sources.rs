@@ -6,7 +6,7 @@ use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::Input;
 use sve_engine::game::player::observation::{ObservedZone, ProcessingSource, TextProvenance};
 
-fn other(actor: Viewer) -> Viewer {
+pub(super) fn other(actor: Viewer) -> Viewer {
     if actor == Viewer::P1 {
         Viewer::P2
     } else {
@@ -14,7 +14,7 @@ fn other(actor: Viewer) -> Viewer {
     }
 }
 
-fn sources(game: &Game, viewer: Viewer) -> Vec<ProcessingSource> {
+pub(super) fn sources(game: &Game, viewer: Viewer) -> Vec<ProcessingSource> {
     let before = exact_authority(game);
     let sources = game.observe(viewer).unwrap().processing_sources;
     assert!(
@@ -28,14 +28,14 @@ fn sources(game: &Game, viewer: Viewer) -> Vec<ProcessingSource> {
     sources
 }
 
-fn empty(game: &Game, viewer: Viewer) {
+pub(super) fn empty(game: &Game, viewer: Viewer) {
     assert!(
         sources(game, viewer).is_empty(),
         "this viewer has no disclosed formal source"
     );
 }
 
-fn activate(game: &mut Game, program: &WellFormedCardProgram, actor: Viewer) {
+pub(super) fn activate(game: &mut Game, program: &WellFormedCardProgram, actor: Viewer) {
     game.activate_internal_card(
         "source",
         program.card().abilities[0].node.id,
@@ -157,7 +157,15 @@ fn a_frozen_source_does_not_follow_a_cost_movement_to_a_new_generation() {
             "source",
             "the cost really moved the holder"
         );
-        empty(&game, other(actor));
+        assert_eq!(
+            sources(&game, other(actor)).len(),
+            1,
+            "the public played writer discloses the historical source too"
+        );
+        assert!(
+            sources(&game, other(actor))[0].source.holder.is_none(),
+            "the newly disclosed waiting source cannot reconnect the departed generation"
+        );
         finish_may(&mut game);
         empty(&game, actor);
     }
@@ -182,7 +190,11 @@ fn the_question_actor_is_authorized_independently_of_the_execution_controller() 
             "the real foreign payment question establishes its audience"
         );
         assert_eq!(first[0].controller, controller);
-        empty(&game, controller);
+        assert_eq!(
+            sources(&game, controller).len(),
+            1,
+            "the public played writer independently authorizes its controller"
+        );
         apply(&mut game, payer, Answer::OptionalCost(true));
         assert!(
             sources(&game, payer) == first,
@@ -192,7 +204,7 @@ fn the_question_actor_is_authorized_independently_of_the_execution_controller() 
         assert_eq!(
             second.len(),
             1,
-            "the later actual May question discloses to its controller"
+            "the later May preserves the already public source"
         );
         assert_eq!(second[0].controller, controller);
         finish_may(&mut game);
@@ -202,7 +214,7 @@ fn the_question_actor_is_authorized_independently_of_the_execution_controller() 
 }
 
 #[test]
-fn a_child_asked_only_to_the_other_seat_does_not_change_the_disclosed_parent() {
+fn a_public_played_child_is_disclosed_even_when_only_the_other_seat_is_asked() {
     use super::super::nested_play::{self, Scenario};
     let (mut game, definition) = nested_play::build_custom(
         "self",
@@ -242,14 +254,21 @@ fn a_child_asked_only_to_the_other_seat_does_not_change_the_disclosed_parent() {
     let disclosed = sources(&game, Viewer::P2);
     assert_eq!(
         disclosed.len(),
-        1,
-        "the inner question discloses only its own source to P2"
+        2,
+        "both public played frames are disclosed to P2"
     );
-    assert_eq!(disclosed[0].source.card, "unit-spell");
-    assert_eq!(disclosed[0].controller, Viewer::P1);
+    assert_eq!(disclosed[0].source.card, "unit-amulet");
+    assert_eq!(disclosed[1].source.card, "unit-spell");
+    assert_eq!(disclosed[1].controller, Viewer::P1);
+    let actor_sources = sources(&game, Viewer::P1);
+    assert_eq!(
+        actor_sources.len(),
+        2,
+        "the child's real play authorizes its controller without asking it"
+    );
     assert!(
-        sources(&game, Viewer::P1) == parent,
-        "an undisclosed inner frame adds no slot or progress to its known parent"
+        actor_sources[0] == parent[0],
+        "the original parent source remains unchanged"
     );
     for viewer in [Viewer::P1, Viewer::P2] {
         assert!(
@@ -271,16 +290,21 @@ fn a_child_asked_only_to_the_other_seat_does_not_change_the_disclosed_parent() {
     );
     assert!(
         exact_authority(&game) == before,
-        "a wrong actor cannot acquire the inner witness"
+        "a wrong actor cannot alter either public witness"
     );
     apply(&mut game, Viewer::P2, Answer::Integer(Nat(0)));
     assert!(
         sources(&game, Viewer::P1) == parent,
         "return restores the same disclosed outer source"
     );
-    empty(&game, Viewer::P2);
+    assert_eq!(
+        sources(&game, Viewer::P2).len(),
+        1,
+        "return retires the child for both seats"
+    );
     finish_may(&mut game);
     empty(&game, Viewer::P1);
+    empty(&game, Viewer::P2);
 }
 
 #[test]
@@ -296,10 +320,16 @@ fn completed_conceded_and_faulted_executions_retire_their_witnesses_but_clones_k
             1,
             "the original has an active disclosed source"
         );
+        assert_eq!(
+            sources(&game, other(actor)).len(),
+            1,
+            "the waiting audience has a genuine public played witness before retirement"
+        );
         let mut completed = game.clone();
         let mut conceded = game.clone();
         finish_may(&mut completed);
         empty(&completed, actor);
+        empty(&completed, other(actor));
         assert!(
             sources(&game, actor) == saved,
             "completing a clone does not retire the original"
@@ -421,7 +451,12 @@ fn a_public_holder_cannot_authorize_an_unknown_private_wording_owner_even_for_it
                     q.actor, answerer,
                     "the granted ability really asks this seat"
                 );
-                empty(&game, other(answerer));
+                empty(&game, other(actor));
+                assert_eq!(
+                    sources(&game, actor).len(),
+                    1,
+                    "the real public-holder play is independently visible to its known private text owner"
+                );
                 let source = sources(&game, answerer);
                 if foreign {
                     assert!(
@@ -489,8 +524,13 @@ fn nested_sources_keep_outer_to_inner_order_and_cancelled_children_add_no_witnes
             sources(&game, Viewer::P1) == parent,
             "a completed or cancelled child leaves only the known parent"
         );
-        empty(&game, Viewer::P2);
+        assert_eq!(
+            sources(&game, Viewer::P2).len(),
+            1,
+            "a completed or cancelled child leaves its publicly played parent"
+        );
         finish_may(&mut game);
         empty(&game, Viewer::P1);
+        empty(&game, Viewer::P2);
     }
 }

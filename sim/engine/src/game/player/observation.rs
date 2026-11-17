@@ -272,7 +272,7 @@ pub struct Observation {
     pub costs: CostObservation,
     /// Disclosed pending occurrences, without question or authority identities.
     pub pending: Vec<PendingTrigger>,
-    /// Sources of formal executions actually disclosed by a question to this viewer.
+    /// Formal sources disclosed by public played writers or actual questions to this viewer.
     /// This outer-to-inner subset omits unknown or undisclosed sources; empty is not
     /// evidence of an empty processing stack and cannot authorize wire interaction.
     pub processing_sources: Vec<ProcessingSource>,
