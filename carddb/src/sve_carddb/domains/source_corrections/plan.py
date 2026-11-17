@@ -114,11 +114,20 @@ class Application:
         }
 
 
+# Registry correction fields name these observed face content attributes.
+_CONTENT = {"effect": "effect", "card_type": "type_raw", "name": "name"}
+
+
+def _value(item: FaceObservation, field: str) -> str | None:
+    value = getattr(item.content, _CONTENT[field])
+    return value if value is None else str(value)
+
+
 def _status(data: CorrectionData, item: FaceObservation) -> Status | None:
     if data.state != "active":
         return None
     return correction_status(
-        item.content.effect if data.field == "effect" else item.content.type_raw,
+        _value(item, data.field),
         item.card.observation.observation_hash,
         expected=data.expected_raw_value,
         corrected=data.corrected_value,
@@ -265,8 +274,7 @@ def corrected_observations(
             if a.observation == item and a.status == "applied"
         )
         fields: dict[str, object] = {
-            "effect" if a.data.field == "effect" else "type_raw": a.data.corrected_value
-            for a in applied
+            _CONTENT[a.data.field]: a.data.corrected_value for a in applied
         }
         for application in applied:
             if application.data.sections is not None:

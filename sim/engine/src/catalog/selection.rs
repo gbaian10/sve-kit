@@ -164,8 +164,12 @@ impl CurrentSelectionLoader {
         let mut owners = BTreeMap::new();
         let mut identities = BTreeSet::new();
         for author in handoff.authors {
-            let (candidate, printings) = match author {
-                Author::Accepted { input, printings } => (input, printings),
+            let (candidate, printings, rules_names) = match author {
+                Author::Accepted {
+                    input,
+                    printings,
+                    rules_names,
+                } => (input, printings, rules_names),
                 Author::Rejected { card_no, reason } => {
                     record_rejection(&mut prototypes, card_no, reason)?;
                     continue;
@@ -175,7 +179,7 @@ impl CurrentSelectionLoader {
                 Owner::of_input(candidate).ok_or_else(|| invalid("invalid current selection"))?;
             claim_identity(&mut identities, owner.card_id, owner.card_no, &printings)?;
             for number in printings {
-                register_printing(&mut prototypes, &number, &owner)?;
+                register_printing(&mut prototypes, &number, &owner, &rules_names)?;
                 if owners.insert(number, candidate).is_some() {
                     return Err(invalid("duplicate current printing"));
                 }
@@ -250,6 +254,8 @@ enum Author<'handoff> {
     Accepted {
         input: &'handoff Value,
         printings: Vec<String>,
+        /// The card's JP construction name per face; empty in handoffs that predate it.
+        rules_names: Vec<Option<String>>,
     },
     Rejected {
         card_no: &'handoff str,
@@ -280,13 +286,18 @@ fn read_shape(handoff: &Value) -> Option<Handoff<'_>> {
 }
 
 fn read_author(author: &Value) -> Option<Author<'_>> {
-    let fields = author.as_object().filter(|fields| fields.len() == 3)?;
+    let fields = author.as_object()?;
     match fields.get("status")?.as_str()? {
-        "accepted" => Some(Author::Accepted {
+        "accepted" if matches!(fields.len(), 3 | 4) => Some(Author::Accepted {
             input: fields.get("input")?,
             printings: Vec::deserialize(fields.get("printings")?).ok()?,
+            rules_names: match fields.get("rules_names") {
+                Some(names) => Vec::deserialize(names).ok()?,
+                None if fields.len() == 3 => Vec::new(),
+                None => return None,
+            },
         }),
-        "rejected" => Some(Author::Rejected {
+        "rejected" if fields.len() == 3 => Some(Author::Rejected {
             card_no: fields.get("card_no")?.as_str()?,
             reason: fields.get("reason")?.as_str()?,
         }),
@@ -411,8 +422,12 @@ fn select_using(
     let mut accepted = BTreeMap::new();
     let mut identities = BTreeSet::new();
     for author in handoff.authors {
-        let (input, printings) = match author {
-            Author::Accepted { input, printings } => (input, printings),
+        let (input, printings, rules_names) = match author {
+            Author::Accepted {
+                input,
+                printings,
+                rules_names,
+            } => (input, printings, rules_names),
             Author::Rejected { card_no, reason } => {
                 record_rejection(&mut prototypes, card_no, reason)?;
                 continue;
@@ -428,7 +443,7 @@ fn select_using(
         )?;
         let owner = Owner::of_program(program);
         for number in printings {
-            register_printing(&mut prototypes, &number, &owner)?;
+            register_printing(&mut prototypes, &number, &owner, &rules_names)?;
             if current
                 .insert(number.clone(), Arc::clone(program))
                 .is_some()
@@ -522,9 +537,19 @@ impl PendingSelection<'_> {
     }
 }
 
-fn register_printing(prototypes: &mut Catalog, number: &str, owner: &Owner<'_>) -> Result<()> {
+fn register_printing(
+    prototypes: &mut Catalog,
+    number: &str,
+    owner: &Owner<'_>,
+    rules_names: &[Option<String>],
+) -> Result<()> {
     if prototypes.programs.contains_key(number) || prototypes.rejected.contains_key(number) {
         return Err(invalid("current selection identity or prototype overlap"));
+    }
+    if !rules_names.is_empty() {
+        prototypes
+            .rules_names
+            .insert(number.into(), rules_names.to_vec());
     }
     let face = prototypes.face(number, 0)?;
     let is_token = face["card_type"]
@@ -537,6 +562,7 @@ fn register_printing(prototypes: &mut Catalog, number: &str, owner: &Owner<'_>) 
         let name = owner
             .token
             .and_then(|token| token["name"].as_str())
+            .or_else(|| rules_names.first()?.as_deref())
             .or_else(|| prototypes.cards.get(owner.card_no)?.faces.first()?["name"].as_str())
             .ok_or_else(|| invalid("token requires a rules name"))?
             .to_owned();

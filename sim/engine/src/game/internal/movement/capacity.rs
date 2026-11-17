@@ -222,14 +222,9 @@ impl Game {
                                 .then(|| id.to_owned()),
                         )
                     }
-                    ArrivalMember::Token(card) => (
-                        card.clone(),
-                        self.catalog.face(card, 0)?["name"]
-                            .as_str()
-                            .ok_or_else(|| invalid("token name"))?
-                            .to_owned(),
-                        None,
-                    ),
+                    ArrivalMember::Token(card) => {
+                        (card.clone(), self.catalog.rules_label(card, 0)?, None)
+                    }
                 };
                 Ok(OrderCard {
                     handle: u64::try_from(index).map_err(invalid)?,
