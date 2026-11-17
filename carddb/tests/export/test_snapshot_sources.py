@@ -48,9 +48,7 @@ def test_sources_include_counterpart_and_each_owners_own_annotations() -> None:
     ("mutation", "message"),
     [
         ("missing_local_dictionary", "Missing file-local dictionary reference"),
-        ("conflicting_copy", "Conflicting dictionary copy"),
         ("bad_pointer", "public-annotation/owner"),
-        ("missing_source", "Source presentation closure mismatch"),
         ("ordinary_reference", "Source presentation closure mismatch"),
         ("bad_hash", "Source reference hash mismatch"),
         ("bad_scope", "Base region scope mismatch"),

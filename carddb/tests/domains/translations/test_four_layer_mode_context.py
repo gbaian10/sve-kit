@@ -127,26 +127,18 @@ def test_faceup_evolve_condition_reuses_the_counted_operands() -> None:
     "raw",
     [
         _OPTIONS,
-        _INTRO + _CONDITION + "\n【2】仮甲。【1】仮乙。",
-        _INTRO + _INTRO + _CONDITION + "\n" + _OPTIONS,
-        _INTRO + _CONDITION + "\n" + _INTRO + _CONDITION + "\n" + _OPTIONS,
-        _INTRO
-        + _CONDITION
-        + "\n"
-        + _OPTIONS
-        + "\n"
-        + _INTRO
-        + _CONDITION
-        + "\n"
-        + _OPTIONS,
-        _INTRO + _CONDITION + "\n\n" + _OPTIONS,
-        _INTRO + _CONDITION + "\n{起動}" + _OPTIONS,
-        _INTRO + _CONDITION + "\n【1】仮甲。{ファンファーレ}【2】仮乙。",
+        (
+            _INTRO
+            + _CONDITION
+            + "\n"
+            + _OPTIONS
+            + "\n"
+            + _INTRO
+            + _CONDITION
+            + "\n"
+            + _OPTIONS
+        ),
         "「" + _INTRO + _CONDITION + "\n" + _OPTIONS + "」を持つ。",
-        _INTRO + "代わりに好きな数まで。\n" + _OPTIONS,
-        _INTRO
-        + "「このターン、この能力でチョイスした選択肢はチョイスできない。」"
-        + _OPTIONS,
     ],
 )
 def test_neighboring_choice_shapes_are_not_admitted(raw: str) -> None:

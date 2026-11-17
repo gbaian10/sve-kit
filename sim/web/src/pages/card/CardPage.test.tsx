@@ -104,6 +104,8 @@ const state = vi.hoisted(() => ({
     date?: string | null
     precision?: "day" | "month" | "unknown"
   } | null,
+  /** A collab printing: its own printed name, counted as the card's name. */
+  treatedAs: false,
   wording: vi.fn(),
 }))
 vi.mock("../../data", async (importOriginal) => ({
@@ -375,6 +377,18 @@ vi.mock("../../app/snapshot", () => {
                   cost: 1,
                   attack: 1,
                   defense: 1,
+                  ...(state.treatedAs
+                    ? {
+                        name: {
+                          original: { lang: "ja", text: "ラプラスの魔 ラプラス・ダークネス" },
+                          translations: {},
+                        },
+                        treatedAs: {
+                          original: { lang: "ja", text: "吸血姫・ヴァンピィ" },
+                          translations: { "zh-Hant": "合成吸血姫譯名" },
+                        },
+                      }
+                    : {}),
                 }
               : undefined,
         index: {
@@ -507,6 +521,7 @@ beforeEach(() => {
   state.suggestions = []
   state.undated = [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }]
   state.unlisted = null
+  state.treatedAs = false
   state.classification = "same_effect"
   state.untranslated = []
   state.blank = []
@@ -1003,6 +1018,21 @@ describe("plain wording on the card page", () => {
       expect(screen.getByText("Synthetic older effect")).toBeVisible()
     },
   )
+})
+
+describe("collab printing names", () => {
+  it("titles the printing by its own printed name and names the card it counts as", async () => {
+    state.summary = true
+    state.treatedAs = true
+    prefsStore.set({ uiLanguage: "zh-TW", nameDisplay: "translated" })
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    expect(
+      await screen.findByRole("heading", { level: 2, name: "ラプラスの魔 ラプラス・ダークネス" }),
+    ).toBeVisible()
+    expect(screen.getByText("視為「合成吸血姫譯名」")).toBeVisible()
+  })
 })
 
 describe("double-face headers", () => {

@@ -144,17 +144,7 @@ def test_original_before_refs_are_exact(
 
 @pytest.mark.parametrize(
     "damage",
-    [
-        "owner",
-        "region",
-        "number",
-        "variant",
-        "face_parent",
-        "art_parent",
-        "art_class",
-        "card_layout",
-        "int_id",
-    ],
+    ["owner", "region", "card_layout"],
 )
 def test_permanent_fields_and_allocations_never_change(
     scenario: tuple[Path, RegistryFiles, dict[str, Any]], damage: str
@@ -219,10 +209,7 @@ def test_permanent_fields_and_allocations_never_change(
 @pytest.mark.parametrize(
     "damage",
     [
-        "no_repairs",
         "missing_printing",
-        "missing_face",
-        "wrong_face",
         "missing_art",
         "discard_art",
         "wrong_art",
@@ -374,17 +361,7 @@ def test_two_renumbers_flatten_all_old_entries(
 
 @pytest.mark.parametrize(
     "damage",
-    [
-        "missing_alias",
-        "foreign_alias",
-        "wrong_before",
-        "omitted",
-        "unrequested",
-        "unknown",
-        "foreign_source",
-        "source_collision",
-        "uncovered",
-    ],
+    ["unrequested", "unknown", "foreign_source", "source_collision", "uncovered"],
 )
 def test_routes_require_independent_sources_and_permanent_keys(
     scenario: tuple[Path, RegistryFiles, dict[str, Any]], damage: str

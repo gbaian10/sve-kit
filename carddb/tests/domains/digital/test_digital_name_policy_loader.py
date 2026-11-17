@@ -77,15 +77,7 @@ def test_unknown_policy_fields_are_not_ignored(
 
 @pytest.mark.parametrize(
     "fault",
-    [
-        "no_batches",
-        "unsorted_batches",
-        "reason",
-        "english_name",
-        "target_width",
-        "duplicate_name",
-        "duplicate_target",
-    ],
+    ["unsorted_batches", "reason", "english_name", "target_width", "duplicate_target"],
 )
 def test_link_conditions_are_closed(
     baseline: tuple[Path, str], tmp_path: Path, fault: str

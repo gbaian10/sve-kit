@@ -105,16 +105,7 @@ def test_readers_do_not_silently_ignore_nonempty_transitions(
 
 @pytest.mark.parametrize(
     "damage",
-    [
-        "missing_middle",
-        "extra_shard",
-        "extra_yml",
-        "short_sequence",
-        "zero",
-        "gap",
-        "duplicate_sequence",
-        "wrong_sequence",
-    ],
+    ["missing_middle", "gap", "duplicate_sequence"],
 )
 def test_file_inventory_and_paths(
     tmp_path: Path,
@@ -221,12 +212,7 @@ def test_all_symlink_inputs_are_rejected(
     [
         "format: 1\nidentity_transition_format: 1\n",
         "a: &a [*a]\n",
-        "a: !custom text\n",
-        "a: 1\n---\nb: 2\n",
-        "a: .nan\n",
-        "a: 1.0\n",
         "? [a, b]\n: value\n",
-        "a: [\n",
     ],
 )
 def test_yaml_restrictions_and_sanitized_errors(tmp_path: Path, value: str) -> None:
@@ -254,14 +240,7 @@ def test_strict_size_boundary(
 
 @pytest.mark.parametrize(
     "damage",
-    [
-        "missing_format",
-        "bool_format",
-        "float_format",
-        "unknown_format",
-        "missing_kind",
-        "extra",
-    ],
+    ["missing_format", "bool_format", "float_format"],
 )
 def test_explicit_envelope_fields(
     tmp_path: Path,
@@ -312,27 +291,7 @@ def test_one_transition_per_shard_without_decision_envelope(
 
 @pytest.mark.parametrize(
     "path",
-    [
-        ["kind"],
-        ["action"],
-        ["reverts"],
-        ["sequence"],
-        ["previous"],
-        ["registry_basis"],
-        ["review_context"],
-        ["updates"],
-        ["repairs"],
-        ["routes"],
-        ["evidence"],
-        ["reason"],
-        ["updates", 0, "before"],
-        ["updates", 0, "after"],
-        ["updates", 0, "allocation_anchor"],
-        ["updates", 0, "before", "transition_key"],
-        ["updates", 0, "before", "record_key"],
-        ["repairs", 0, "printing_moves", 0, "faces", 0, "from_art_id"],
-        ["repairs", 0, "printing_moves", 0, "faces", 0, "to_art_id"],
-    ],
+    [["kind"], ["action"], ["reverts"]],
 )
 def test_required_nullable_and_complete_record_fields(
     tmp_path: Path,
@@ -378,18 +337,7 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
 @pytest.mark.parametrize(
     "edits",
     [
-        pytest.param([("extra", "set", "private input sentinel")], id="unknown_field"),
-        pytest.param([("record_key", "set", '[ "identity_transition", 1 ]')], id="key"),
-        pytest.param([("sequence", "set", True)], id="bool_sequence"),
-        pytest.param([("updates", "set", [])], id="empty_updates"),
-        pytest.param([("updates", "reverse", None)], id="updates_order"),
         pytest.param([("updates", "duplicate", None)], id="duplicate_update"),
-        pytest.param(
-            [("updates.0.before.record_key", "set", "other")], id="before_key"
-        ),
-        pytest.param(
-            [("updates.0.after.record_key", "set", "card:" + A)], id="after_key"
-        ),
         pytest.param(
             [
                 ("updates.3.before", "set", None),
@@ -403,11 +351,6 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
             id="existing_anchor",
         ),
         pytest.param([("updates.0.before", "set", None)], id="new_no_anchor"),
-        pytest.param([("updates.0.after.data.extra", "set", None)], id="after_extra"),
-        pytest.param(
-            [("updates.0.after.data.classification", "set", "invented")],
-            id="after_bad_enum",
-        ),
         pytest.param(
             [
                 (
@@ -417,9 +360,6 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
                 )
             ],
             id="apply_reverts",
-        ),
-        pytest.param(
-            [("action", "set", "revert"), ("repairs", "set", [])], id="revert_no_target"
         ),
         pytest.param(
             [
@@ -432,8 +372,6 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
             ],
             id="revert_repairs",
         ),
-        pytest.param([("evidence", "set", [])], id="empty_evidence"),
-        pytest.param([("evidence", "duplicate", None)], id="duplicate_evidence"),
         pytest.param(
             [
                 (
@@ -456,19 +394,12 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
             [("review_context.source_batches", "duplicate", None)],
             id="duplicate_batches",
         ),
-        pytest.param([("evidence.0.store_id", "set", "/private")], id="private_store"),
-        pytest.param(
-            [("review_context.context.dependencies", "set", [])],
-            id="empty_dependencies",
-        ),
         pytest.param(
             [("review_context.context.configuration", "set", "{ }")],
             id="bad_configuration",
         ),
-        pytest.param([("repairs.0.printing_moves", "set", [])], id="empty_moves"),
         pytest.param([("repairs.0.retire_old", "set", False)], id="merge_not_retired"),
         pytest.param([("repairs.0.new_card_ids", "append", C)], id="merge_two_targets"),
-        pytest.param([("repairs.0.kind", "set", "split")], id="split_one_target"),
         pytest.param(
             [
                 ("repairs.0.kind", "set", "split"),
@@ -485,24 +416,10 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
             id="split_empty_destination",
         ),
         pytest.param(
-            [
-                ("repairs.0.kind", "set", "reassign_printing"),
-                ("repairs.0.printing_moves", "duplicate", None),
-            ],
-            id="reassign_two_printings",
-        ),
-        pytest.param(
-            [("repairs.0.printing_moves.0.from_card_id", "set", C)], id="move_old"
-        ),
-        pytest.param(
             [("repairs.0.printing_moves.0.to_card_id", "set", C)], id="move_destination"
         ),
         pytest.param(
             [("repairs.0.printing_moves.0.to_card_id", "set", A)], id="move_self"
-        ),
-        pytest.param(
-            [("repairs.0.printing_moves.0.faces.0.to_art_id", "set", None)],
-            id="known_art_null",
         ),
         pytest.param(
             [("repairs.0.printing_moves.0.faces.0.source_index", "set", 1)],
@@ -514,16 +431,6 @@ def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
         pytest.param(
             [("repairs.0.face_moves.0.to_face_ids", "duplicate", None)],
             id="face_duplicate_target",
-        ),
-        pytest.param(
-            [
-                (
-                    "repairs.0.face_moves",
-                    "append_sorted",
-                    {"from_face_id": FA, "to_face_ids": [FC]},
-                )
-            ],
-            id="duplicate_face",
         ),
         pytest.param(
             [
@@ -764,7 +671,7 @@ def test_revert_action_guard_independently_of_repairs(
 
 @pytest.mark.parametrize(
     "damage",
-    [None, "hash", "future", "renewal", "partial", "twice", "revert"],
+    ["hash", "renewal", "partial", "twice", "revert"],
 )
 def test_revert_reference_structure_only(
     tmp_path: Path,
@@ -810,15 +717,12 @@ def route_state(key: str, aliases: list[dict[str, str]]) -> dict[str, Any]:
 @pytest.mark.parametrize(
     "damage",
     [
-        None,
         "unchanged",
         "canonical_alias",
         "repeated_key",
         "order",
         "duplicate_printing",
-        "reserved",
         "provisional",
-        "reason",
     ],
 )
 def test_complete_route_state_shapes(

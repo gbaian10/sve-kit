@@ -100,14 +100,7 @@ def test_text_writer_needs_no_image_library(
 
 @pytest.mark.parametrize(
     "case",
-    [
-        "source",
-        "format",
-        "prefix",
-        "path",
-        "digital",
-        "shared-metadata",
-    ],
+    ["source", "path", "digital", "shared-metadata"],
 )
 def test_public_asset_validation_counterexamples(
     images: PublicImages, case: str

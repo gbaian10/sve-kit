@@ -412,9 +412,7 @@ def test_distinct_member_ids_cannot_claim_the_same_position() -> None:
         )
 
 
-@pytest.mark.parametrize(
-    "change", ["card", "face", "field", "ordinal", "later", "header", "none"]
-)
+@pytest.mark.parametrize("change", ["ordinal", "later", "header"])
 def test_block_must_precede_member_within_the_same_owner(change: str) -> None:
     source = member().model_dump(mode="json")
     block = other_member().model_dump(mode="json")

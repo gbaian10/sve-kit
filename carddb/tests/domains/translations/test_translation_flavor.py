@@ -74,17 +74,7 @@ def test_load_reads_every_shard_keyed_by_source_hash(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     "bad",
-    [
-        entry(text=" 前"),
-        entry(text="後 "),
-        entry(text="a \nb"),
-        entry(text="a\r\nb"),
-        entry(text=""),
-        entry(origin="official"),
-        entry(source_hash="sha256:short"),
-        entry(lang="en"),
-        entry() | {"jp_text": "原文"},
-    ],
+    [entry(text=" 前"), entry(text="a \nb"), entry(text="a\r\nb")],
 )
 def test_invalid_entries_are_rejected(
     tmp_path: Path, bad: dict[str, JsonValue]

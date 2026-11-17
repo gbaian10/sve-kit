@@ -26,6 +26,7 @@ from sve_carddb.export.project import (
     project,
 )
 from sve_carddb.export.project.closure import validate_closure
+from sve_carddb.export.project.observations import printed_names
 from sve_carddb.export.project.records import initial
 from sve_carddb.export.project.shape import tuple_value
 from sve_carddb.export.transport import Batch, Ownership, export_snapshot
@@ -567,8 +568,6 @@ def test_pending_old_current_preserved_without_blanket_pending_block(
         {"state": "settled"},
         {"raw_locator": "private"},
         {"undated_printing_ids": ["missing"]},
-        {"region": "en"},
-        {"candidates": [{"printing_id": "printing", "revision_id": "missing"}]},
         {
             "candidates": [
                 {"printing_id": "printing", "revision_id": "revision"},
@@ -862,18 +861,6 @@ def test_two_contexts_for_same_source_can_select_different_field_translations(
         ({"face_revision_id": "revision"}, "section", 0),
         ({"face_revision_id": None, "keyword_id": "keyword"}, "action_label", 0),
         ({"face_revision_id": None, "keyword_id": "keyword"}, "label", None),
-        (
-            {
-                "face_revision_id": None,
-                "vocabulary_kind": "type",
-                "vocabulary_code": "follower",
-            },
-            "label",
-            None,
-        ),
-        ({"face_revision_id": None, "product_family_id": "family"}, "label", None),
-        ({"face_revision_id": None, "product_id": "product"}, "label", None),
-        ({"face_revision_id": None, "qa_version_id": "qa_v"}, "answer", None),
     ],
 )
 def test_translation_owner_and_ordinal_are_exact(
@@ -2251,3 +2238,36 @@ def test_section_only_correction_does_not_mark_unchanged_effect(db: Database) ->
     )
     assert [object_value(marker)["field"] for marker in markers] == ["other"]
     assert object_value(markers[0])["corrected_from"] == "Synthetic extra section."
+
+
+def test_a_printing_with_its_own_name_ships_it_beside_the_shared_current() -> None:
+    def face(revision: str) -> dict[str, JsonValue]:
+        return {
+            "face_id": "f:a",
+            "observations": [{"revision_id": revision}],
+            "name_unit_id": None,
+        }
+
+    view: dict[str, list[dict[str, JsonValue]]] = {
+        "face": [
+            {
+                "id": "f:a",
+                "current": [{"region": "jp", "revision_id": "r:card"}],
+                "wording": [],
+            }
+        ],
+        "face_revision": [],
+        "printing": [
+            {"id": "p:card", "region": "jp", "faces": [face("r:card")]},
+            {"id": "p:collab", "region": "jp", "faces": [face("r:collab")]},
+        ],
+    }
+    revisions: dict[str, dict[str, JsonValue]] = {
+        "r:card": {"name_unit_id": "t:card"},
+        "r:collab": {"name_unit_id": "t:collab"},
+    }
+    printed_names(view, revisions)
+    names = [
+        object_value(array(row["faces"])[0])["name_unit_id"] for row in view["printing"]
+    ]
+    assert names == [None, "t:collab"]

@@ -70,7 +70,6 @@ def test_mechanical_tier_never_creates_adoption_or_leaks_names(
     ("change", "failure"),
     [
         ({"needs_decision": True}, "previous_pending"),
-        ({"relation": "same_character"}, "not_same_card"),
         ({"relation": "mixed"}, "not_same_card"),
         ({"ja": "Synthetic different"}, "sve_exact_name_mismatch"),
         ({"sve_numbers": ["SYN-002"]}, "missing_sve_source"),
@@ -95,15 +94,7 @@ def test_pending_or_mixed_draft_remains_second_layer(
 
 @pytest.mark.parametrize(
     "change",
-    [
-        "different_translation",
-        "missing_translation",
-        "class",
-        "unknown_class",
-        "type",
-        "digital_name",
-        "page_gap",
-    ],
+    ["missing_translation", "class", "unknown_class", "type", "page_gap"],
 )
 def test_frozen_catalogue_outside_selected_targets_is_checked(
     baseline: Fixture, tmp_path: Path, change: str

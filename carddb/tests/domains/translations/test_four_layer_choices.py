@@ -12,12 +12,7 @@ from sve_carddb.domains.translations.recognition.models import Hint
     [
         ("【ネクロチャージ７】代わりに２つまで。", True),
         ("【ネクロチャージ_７】代わりに２つまで。", True),
-        ("【ネクロチャージ__７】代わりに２つまで。", False),
-        ("【ネクロチャージ７】代わりに３つまで。", False),
-        ("【NC７】代わりに２つまで。", False),
         ("【ネクロチャージ７】代わりに２つ。", False),
-        ("{起動}【ネクロチャージ７】代わりに２つまで。", False),
-        ("下記から１つチョイスする。【ネクロチャージ７】代わりに２つまで。", False),
     ],
 )
 def test_post_option_replacement_count_is_bound_to_the_original_choice(

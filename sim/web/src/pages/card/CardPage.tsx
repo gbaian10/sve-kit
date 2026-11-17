@@ -873,7 +873,9 @@ export function CardView({
                 faceCatalog && printingId
                   ? faceBasics(faceCatalog.index, faceId, region, printingId)
                   : undefined
-              const nameRevisionId = basics?.revision?.["id"]
+              // A collab or event printing shows its printed name, then the card it counts as.
+              const treatedAs = ordinal === 0 ? faceSummary?.treatedAs : undefined
+              const nameRevisionId = treatedAs ? undefined : basics?.revision?.["id"]
               const values = basics?.values
               const classCode =
                 typeof values?.["class_code"] === "string"
@@ -927,12 +929,24 @@ export function CardView({
                           ) : (
                             // A card-face name is not translated, so it never lacks a translation.
                             <PlainNameHeading
-                              name={unlisted ? { ...name, missingTranslation: false } : name}
+                              name={
+                                unlisted || treatedAs
+                                  ? { ...name, missingTranslation: false }
+                                  : name
+                              }
                             />
                           )}
                         </div>
                         {unlisted && ordinal === 0 && <UnlistedBadge />}
                       </div>
+                      {treatedAs && (
+                        <p data-card-treated-as="" className="text-13 text-text-2">
+                          {t("cardPage.treatedAs", {
+                            name: displayName(treatedAs, uiLanguage, prefs.nameDisplay).primary
+                              .text,
+                          })}
+                        </p>
+                      )}
                       <p
                         data-card-classification=""
                         className="flex flex-wrap items-center gap-x-1.5 gap-y-1 text-13 text-text-2"

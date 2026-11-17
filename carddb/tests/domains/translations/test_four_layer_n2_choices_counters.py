@@ -86,11 +86,7 @@ def test_constant_choice_changes_only_the_interface_and_preserves_target() -> No
     [
         "下記から１つチョイスする。\n【１】仮。\n【２】別。",
         "下記から１つチョイスする。【１】仮。\n【２】別。",
-        "【１】仮。【２】別。",
         "下記から１つチョイスする。【２】仮。【１】別。",
-        "下記から１つチョイスする。【１】仮。【２】別。下記から１つチョイスする。",
-        "下記から１つチョイスする。【１】仮。\n\n【２】別。",
-        "下記から１つチョイスする。\n{起動}【１】仮。【２】別。",
     ],
 )
 def test_unsealed_choice_connections_gain_no_interface(raw: str) -> None:

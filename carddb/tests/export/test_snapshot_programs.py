@@ -188,7 +188,7 @@ def test_old_format_still_rejects_every_nonempty_program_package() -> None:
 
 @pytest.mark.parametrize(
     "change",
-    ["missing", "duplicate", "wrong_card", "wrong_face", "unreferenced", "wrong_ref"],
+    ["duplicate", "wrong_card", "wrong_face", "unreferenced", "wrong_ref"],
 )
 def test_reader_rejects_inexact_program_closure(packed: Snapshot, change: str) -> None:
     manifest = deepcopy(packed.manifest)

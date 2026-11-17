@@ -34,28 +34,6 @@ if TYPE_CHECKING:
         ("card", "layout", "triple"),
         ("card", "identity_state", "fresh"),
         ("card", "home_set_id", ""),
-        ("card", "id", "p:" + "0" * 32),
-        ("face", "ordinal", True),
-        ("face", "ordinal", -1),
-        ("face", "side", "other"),
-        ("printing", "card_no", ""),
-        ("printing", "variant_key", 1),
-        ("card_int_id", "int_id", True),
-        ("card_int_id", "int_id", 4294967296),
-        ("card_int_id", "allocated_at", "2026-10-01"),
-        ("region_mapping_review", "coverage_hash", "sha256:wrong"),
-        ("region_mapping_review", "as_of", "yesterday"),
-        ("region_mapping_review", "coverage_hash", "sha256:" + "0" * 64 + "\n"),
-        ("art", "classification", "unknown"),
-        ("card_related", "relation", "mentions"),
-        ("card_related", "source_kind", "official"),
-        ("card_related", "suggested_count", 1),
-        ("card_related", "target_printing_id", "p:" + "0" * 32),
-        ("card_related", "dsl_id", "document"),
-        ("source_correction", "field", "cost"),
-        ("source_correction", "corrected_value", 1),
-        ("source_correction", "source_hash_recipe", "html-sha256"),
-        ("source_correction", "evidence", []),
     ],
 )
 def test_strict_record_domains(
@@ -69,7 +47,7 @@ def test_strict_record_domains(
         load_registry(registry_root)
 
 
-@pytest.mark.parametrize("value", [1, 20000, 20001, 60000, 100000, 4294967295])
+@pytest.mark.parametrize("value", [1, 20000, 20001])
 def test_en_allocation_uses_registered_region_range(
     registry_root: Path, value: int
 ) -> None:

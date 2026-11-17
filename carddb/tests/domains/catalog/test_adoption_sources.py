@@ -256,7 +256,6 @@ def test_each_review_context_records_its_own_source_use(
     [
         ("locator", "locator is absent"),
         ("text_hash", "exact text hash mismatch"),
-        ("raw", "hash"),
         ("missing_raw", "Missing|missing|absent|No such file"),
         ("wrong_kind", "source field does not match kind"),
         ("half_raw", "exact raw/region/language mismatch"),

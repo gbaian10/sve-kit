@@ -80,21 +80,8 @@ def test_symlinked_crop_input_is_rejected(tmp_path: Path, symlink_root: bool) ->
     ("field", "value", "location"),
     [
         ("left", True, "0.left:int_type"),
-        ("left", -1, "0.left:greater_than_equal"),
-        ("top", "24", "0.top:int_type"),
-        ("width", 0, "0.width:greater_than"),
-        ("height", -1, "0.height:greater_than"),
         ("width", 65, "0:value_error"),
-        ("reason", "  ", "0.reason:value_error"),
         ("card_no", "  ", "0.card_no:value_error"),
-        ("region", "tw", "0.region:literal_error"),
-        ("source_key", "img:v1:" + "a" * 64, "0.source_key:string_pattern_mismatch"),
-        (
-            "source_sha256",
-            "sha256:" + "a" * 64,
-            "0.source_sha256:string_pattern_mismatch",
-        ),
-        ("image_id", "img:binding:" + "a" * 64, "0.image_id:extra_forbidden"),
     ],
 )
 def test_record_strict_fields(

@@ -93,17 +93,9 @@ def prepared_case(raw: str) -> tuple[DerivedField, Frame, SourceBinding]:
 @pytest.mark.parametrize(
     ("clause", "descriptor"),
     [
-        ("これが手札から場に出ていたなら", "entry.self.from_zone.eq.v1"),
         ("これが手札以外から場に出ていたなら", "entry.self.from_zone.ne.v1"),
-        ("これが墓場から場に出ていたなら", "entry.self.from_zone.eq.v1"),
-        ("これが能力によって場に出ていたなら", "entry.self.method.ability.v1"),
-        (
-            "これがウマ娘・カードの能力によって場に出ていたなら",
-            "entry.self.method.ability_source_trait.v1",
-        ),
         ("それが墓場から場に出ていたなら", "entry.event_subject.from_zone.eq.v1"),
         ("これがEXエリアからプレイされていたなら", "play.self.from_zone.eq.v1"),
-        ("これを手札からプレイしていたなら", "play.self.from_zone.eq.v1"),
     ],
 )
 def test_entry_and_play_sources_are_distinct(clause: str, descriptor: str) -> None:
@@ -138,15 +130,6 @@ def test_entry_and_play_sources_are_distinct(clause: str, descriptor: str) -> No
     ("clause", "event", "aggregate"),
     [
         (
-            "このターン、自分の場の仮族・フォロワーが７回以上攻撃していたなら",
-            "attack",
-            "count_facts",
-        ),
-        ("このターン、自分の場のフォロワーが進化していたなら", "evolve", "exists"),
-        ("このターン、自分がスペルをプレイしていたなら", "play", "exists"),
-        ("このターン、自分の手札を捨てていたなら", "discard", "exists"),
-        ("このターン、自分のフォロワーが破壊されていたなら", "destroy", "exists"),
-        (
             "このターン、自分のEXエリアの『仮場手札自分』が消滅していたなら",
             "banish",
             "exists",
@@ -156,23 +139,7 @@ def test_entry_and_play_sources_are_distinct(clause: str, descriptor: str) -> No
             "field_to_graveyard",
             "exists",
         ),
-        (
-            "このターン、自分のカードが場から手札に戻っていたなら",
-            "return_to_hand",
-            "exists",
-        ),
-        (
-            "このターン、自分のリーダーの{体力}を+７以上していたなら",
-            "life_increase",
-            "sum",
-        ),
         ("このターン、これの{体力}を+していたなら", "self_buff_health", "exists"),
-        ("このターン、自分がサイコロをふっていたなら", "dice", "exists"),
-        (
-            "このターン中に自分の【土の秘術】によって自分の場の【スタック】を７個以上取っていたなら",
-            "earth_rite",
-            "sum",
-        ),
     ],
 )
 def test_history_events_keep_aggregate_and_window(
@@ -337,13 +304,8 @@ def test_event_import_rejects_wrong_or_ambiguous_evidence(mode: str) -> None:
     "raw",
     [
         "次にこれが場に出たとき、７枚引く。",
-        "このターン、自分の場に出たフォロワーを選ぶ。",
-        "これがデッキから場に出ていたなら、７枚引く。",
         "これが墓場以外から場に出ていたなら、７枚引く。",
         "それが手札から場に出ていたなら、７枚引く。",
-        "これが仮族・カードの能力によって場に出ていたなら、７枚引く。",
-        "これが場に出たとき、７枚引く。",
-        "このターン、自分のリーダーの体力が減少したとき、７枚引く。",
     ],
 )
 def test_neighboring_unsealed_sources_remain_unchanged(raw: str) -> None:

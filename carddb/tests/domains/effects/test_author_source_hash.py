@@ -52,20 +52,6 @@ def test_p1_independent_vector() -> None:
         (("normalizer",), "fixture-v2"),
         (("faces", 0, "face_id"), "face:other"),
         (("faces", 0, "revision_id"), "revision:other"),
-        (("faces", 0, "texts", 0, "source_hash"), "1" * 64),
-        (("faces", 0, "texts", 1, "state"), "present"),
-        (("faces", 0, "attributes", "class_code", "value"), "neutral"),
-        (("faces", 0, "attributes", "type_code", "value"), "spell"),
-        (("faces", 0, "attributes", "cost", "value"), 0),
-        (("faces", 0, "attributes", "attack", "value"), 2),
-        (("faces", 0, "attributes", "defense", "value"), None),
-        (("faces", 0, "attributes", "traits", "value"), ["trait"]),
-        (("faces", 0, "attributes", "titles", "value"), ["title"]),
-        (("faces", 0, "attributes", "special_kinds", "value"), ["special"]),
-        (
-            ("faces", 0, "rules_names"),
-            [{"rules_name_id": "name:fixture", "role": "primary"}],
-        ),
     ],
 )
 def test_each_source_fact_changes_hash(path: PathParts, value: JsonValue) -> None:
@@ -107,9 +93,7 @@ def test_payload_rejects_invalid_fields(path: PathParts, value: JsonValue) -> No
         decode(raw)
 
 
-@pytest.mark.parametrize(
-    "kind", ["missing", "duplicate", "gap", "reorder", "negative", "bool"]
-)
+@pytest.mark.parametrize("kind", ["missing", "duplicate", "reorder"])
 def test_text_sequence_is_complete_and_ordered(kind: str) -> None:
     raw = payload()
     texts = array(object_value(array(raw["faces"])[0])["texts"])

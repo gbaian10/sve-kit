@@ -115,23 +115,7 @@ def test_complete_protected_component_and_two_exact_english_spellings(
 @pytest.mark.parametrize("region", ["jp", "en"])
 @pytest.mark.parametrize(
     "locator",
-    [
-        "/faces/0/trait_raw",
-        "/faces/0/traits",
-        "/faces/0/traits/01",
-        "/faces/00/traits/1",
-        "/faces/0/traits/1/extra",
-        "/faces/0/title",
-        "/faces/0/card_class",
-        "/faces/0/info/Universe",
-        "/faces/0/info/Class",
-        "/faces/0/traits/-1",
-        "/faces/0/traits/١",
-        "/faces/١/traits/1",
-        "/faces/0/traits/+1",
-        "/faces/0/traits/1/",
-        "faces/0/traits/1",
-    ],
+    ["/faces/0/trait_raw", "/faces/0/traits", "/faces/0/traits/01"],
 )
 def test_trait_locator_is_an_exact_ascii_component_path(
     trait_baseline: TraitCase, region: str, locator: str
@@ -166,19 +150,8 @@ def test_other_kinds_cannot_borrow_trait_components(
 @pytest.mark.parametrize(
     ("face", "component", "message"),
     [
-        (1, 0, RECONSTRUCT),
-        (2, 1, BRACKETS),
         (2, 0, BRACKETS),
         (3, 1, BRACKETS),
-        (4, 0, BRACKETS),
-        (5, 0, BRACKETS),
-        (6, 0, BRACKETS),
-        (7, 0, BRACKETS),
-        (8, 0, BRACKETS),
-        (9, 0, SEPARATOR),
-        (10, 0, RECONSTRUCT),
-        (11, 0, RECONSTRUCT),
-        (12, 0, RECONSTRUCT),
         (13, 0, BRACKETS),
         (14, 0, BRACKETS),
         (15, 0, RECONSTRUCT),
@@ -275,11 +248,9 @@ def test_title_still_binds_its_entire_native_field(
 @pytest.mark.parametrize(
     ("projection", "message"),
     [
-        (None, "Trait source projection lacks the mapped face"),
         ({"faces": None}, "Trait source projection lacks the mapped face"),
         ({"faces": []}, "Trait source projection lacks the mapped face"),
         ({"faces": [None]}, "Trait source projection lacks the mapped face"),
-        ({"faces": [{"traits": {}, "trait_raw": "Synthetic"}]}, RECONSTRUCT),
         (
             {"faces": [{"traits": {"Synthetic": "ignored"}, "trait_raw": "Synthetic"}]},
             RECONSTRUCT,

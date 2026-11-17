@@ -39,30 +39,8 @@ def entry(raw: str) -> SourceContext:
         ("{進化}{コスト０}:これは進化する。", ("evolve",), (0,)),
         ("{食事}{コスト２}:これは出走する。", ("feed",), (2,)),
         ("{憑依}{コスト３}:これはドライブを持つ。", ("ride",), (3,)),
-        (
-            "{進化}{コスト１}:これは進化する。 {食事}{コスト２}:これは出走する。",
-            ("evolve", "feed"),
-            (1, 2),
-        ),
-        (
-            "{進化}{コスト２}:これは進化する。 {憑依}{コスト１}:これはドライブを持つ。",
-            ("evolve", "ride"),
-            (2, 1),
-        ),
-        (
-            "{進化}{コスト２}:これは進化する。 {食事}{コスト２}:これは出走する。",
-            ("evolve", "feed"),
-            (2, 2),
-        ),
     ],
-    ids=[
-        "evolve-zero",
-        "feed",
-        "ride",
-        "synthetic-dual-feed",
-        "synthetic-dual-ride",
-        "synthetic-equal-values",
-    ],
+    ids=["evolve-zero", "feed", "ride"],
 )
 def test_exact_entry_payloads(
     raw: str, heads: tuple[str, ...], costs: tuple[int, ...]

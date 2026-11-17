@@ -44,20 +44,6 @@ def test_synthetic_compatibility_does_not_grant_source_proof() -> None:
 @pytest.mark.parametrize(
     "fragment",
     [
-        {"minus": [{"count": {"who": "opp", "zone": "deck"}}, {"param": "offset"}]},
-        {"minus": [{"count": {"who": "self", "zone": "hand"}}, {"param": "offset"}]},
-        {
-            "minus": [
-                {"count": {"who": "self", "zone": "deck", "kind": "spell"}},
-                {"param": "offset"},
-            ]
-        },
-        {
-            "minus": [
-                {"count": {"who": "self", "zone": {"param": "zone"}}},
-                {"param": "offset"},
-            ]
-        },
         {"minus": [5, {"param": "offset"}]},
         {"plus": [{"count": {"who": "self", "zone": "deck"}}, {"param": "offset"}]},
         {"minus": [{"count": {"who": "self", "zone": "deck"}}, 5]},

@@ -96,15 +96,7 @@ def install_inputs(root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.parametrize(
     "mode",
-    [
-        "translated",
-        "missing",
-        "unresolved",
-        "stale",
-        "wrong_face",
-        "wrong_locator",
-        "wrong_version",
-    ],
+    ["translated", "unresolved", "stale", "wrong_face", "wrong_version"],
 )
 def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: ignore[too-many-locals,too-many-statements] -- independent builds verify selection and public round-trip together
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],

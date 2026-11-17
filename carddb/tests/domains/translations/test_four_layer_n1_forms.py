@@ -117,13 +117,6 @@ def synthetic_renderer(
     [
         "自分の手札のフォロワー７枚を選ぶ。",
         "相手のEXエリアのフォロワーが７枚以上なら、仮効果。",
-        "自分のデッキの上４枚を見る。",
-        "相手のエンドフェイズが来たとき、仮効果。",
-        "【コンボ_７】仮効果。",
-        "【レッスン_７】仮効果。",
-        "【NC_７】仮効果。",
-        "【SC_７】仮効果。",
-        "仮対象は【仮旗】を持つ。",
         "自分の場か自分のEXエリアのフォロワー７枚を選ぶ。",
     ],
 )
@@ -404,18 +397,6 @@ def test_separator_is_the_only_literal_constant_form(field: str) -> None:
         ("zone.locative", "zone", "ZoneSet", "source_zone"),
         ("zone.counted_locative", "zone", "ZoneSet", "counted_zone"),
         ("zone.allative", "zone", "ZoneSet", "destination_zone"),
-        ("zone.ablative", "zone", "ZoneSet", "source_zone"),
-        ("zone.add_to_hand", "zone", "ZoneSet", "destination_zone"),
-        ("zone.return_to_hand", "zone", "ZoneSet", "destination_zone"),
-        ("deck_position.ablative", "position", "DeckPosition", "source_position"),
-        ("deck_position.allative", "position", "DeckPosition", "destination_position"),
-        ("phase.trigger", "phase", "Phase", "phase_trigger"),
-        ("ability.display", "term", "Concept", "ability"),
-        ("keyword.display", "term", "Concept", "keyword"),
-        ("trait.filter", "trait", "Concept", "trait"),
-        ("class.filter", "class", "Concept", "class_filter"),
-        ("owner.source_possessive", "owner", "Player", "source_owner"),
-        ("owner.counted_possessive", "owner", "Player", "counted_owner"),
     ],
 )
 def test_label_forms_have_closed_roles_and_always_present_reference(

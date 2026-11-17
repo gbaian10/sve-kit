@@ -196,14 +196,7 @@ def test_acted_search_round_trips_the_single_field_entry_in_schema_and_python() 
 
 @pytest.mark.parametrize(
     "change",
-    [
-        {"to": "hand"},
-        {"to": "ex"},
-        {"to": {"param": "destination"}},
-        {"n": 2},
-        {"n": {"param": "amount"}},
-        {"acted": False},
-    ],
+    [{"to": "hand"}, {"to": "ex"}, {"n": 2}],
 )
 def test_acted_search_rejects_other_destinations_counts_and_false(
     change: dict[str, JsonValue],

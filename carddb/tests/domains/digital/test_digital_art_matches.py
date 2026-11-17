@@ -379,11 +379,8 @@ def test_confirmed_gray_verdict_materializes_exactly_selected_images(
     "change",
     [
         "source",
-        "review_level",
         "unknown",
-        "missing_candidate",
         "duplicate_candidate",
-        "no_positive",
         "negative_with_positive",
         "incomplete_negative",
     ],

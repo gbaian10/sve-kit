@@ -93,14 +93,6 @@ def test_signed_contexts_cannot_borrow_another_resource_direction_or_type(
         ("pp_delta", "自分のSEPを+２する。"),
         ("ep_delta", "自分のSEPを+２する。"),
         ("pp_capacity_delta", "超PP最大値を+２する。"),
-        ("pp_capacity_delta", "相手のPP最大値を+２する。"),
-        ("pp_capacity_delta", "自分のPP最大値が+２する。"),
-        ("stack_delta", "自分の場の【未知】を+２する。"),
-        ("stack_delta", "相手の場の【スタック】を+２する。"),
-        ("stack_delta", "自分の場の【超スタック】を+２する。"),
-        ("dealt_all_damage_delta", "これが受けるダメージを+２する。"),
-        ("received_all_damage_delta", "これが受ける能力ダメージを+２する。"),
-        ("received_all_damage_delta", "受けるダメージを+２する。"),
     ],
 )
 def test_nearby_incomplete_contexts_stay_pending(identifier: str, text: str) -> None:

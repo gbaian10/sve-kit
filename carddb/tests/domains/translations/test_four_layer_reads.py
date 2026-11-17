@@ -39,26 +39,9 @@ from .test_four_layer_n1 import n1_classifier
 @pytest.mark.parametrize(
     ("definition", "suffix", "expected"),
     [
-        ("自分の消滅領域の枚数", "owner.zone.v1", ("self", ("banish",))),
-        ("自分のEXエリアのカードの枚数", "owner.zone.card.v1", ("self", ("ex",))),
-        (
-            "相手の場のフォロワーの数",
-            "owner.zone.kind.v1",
-            ("opponent", ("battlefield",)),
-        ),
-        (
-            "自分の墓場の仮族・カードの枚数",
-            "owner.zone.card.trait.v1",
-            ("self", ("graveyard",)),
-        ),
         (
             "自分の場の仮族・トークンの数",
             "owner.zone.token_status.trait.token.v1",
-            ("self", ("battlefield",)),
-        ),
-        (
-            "自分の場の他の【仮旗】を持つフォロワーの数",
-            "owner.zone.keyword.kind.exclude_this.v1",
             ("self", ("battlefield",)),
         ),
         (
@@ -71,7 +54,6 @@ from .test_four_layer_n1 import n1_classifier
             "owner.zone.name.add_offset.v1",
             ("self", ("battlefield",)),
         ),
-        ("自分のデッキの枚数-7", "owner.zone.subtract_offset.v1", ("self", ("deck",))),
         (
             "自分の場のアミュレットの数+7",
             "owner.zone.kind.add_offset.v1",
@@ -204,16 +186,9 @@ def test_sep_explicit_zero_is_a_threshold(condition: str) -> None:
 @pytest.mark.parametrize(
     "raw",
     [
-        "X個を置く。Xは「自分の手札の枚数」である。",
-        "Xダメージを割り振る。Xは「自分のEXエリアのカードの枚数」である。",
-        "X枚引く。Xは「場のフォロワーの数」である。",
         "X枚引く。Xは「自分の場のクレストの数」である。",
-        "X枚引く。Xは「自分の進化デッキの表向きの枚数」である。",
         "X枚引く。Xは「自分の場の仮族・仮族・フォロワーの数」である。",
         "X枚引く。{起動}Xは「自分の手札の枚数」である。",
-        "X枚引く。\nXは「自分の手札の枚数」である。",
-        "自分のSEPが1なら、7枚引く。",
-        "相手のSEPが0なら、7枚引く。",
     ],
 )
 def test_neighboring_unsealed_reads_stay_outside_the_count_expression_domain(

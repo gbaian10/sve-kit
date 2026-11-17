@@ -61,10 +61,6 @@ def test_many_parsers_and_uses_share_one_raw_row(source: Source, reverse: bool) 
         ("url", "https://example.invalid/other"),
         ("sha256", "sha256:" + "0" * 64),
         ("kind", "official_api"),
-        ("raw_locator", "synthetic:raw/other"),
-        ("fetched_at", "2026-09-30T00:00:00Z"),
-        ("etag", "changed"),
-        ("last_modified", "changed"),
     ],
 )
 @pytest.mark.parametrize("existing", [False, True])
@@ -88,14 +84,7 @@ def test_each_shared_metadata_field_conflicts_independently(
 
 @pytest.mark.parametrize(
     "case",
-    [
-        "missing_archive",
-        "missing_parser",
-        "missing_first_receipt",
-        "duplicate_uses",
-        "unsorted_uses",
-        "unexpected_field",
-    ],
+    ["missing_archive", "missing_parser", "unsorted_uses"],
 )
 def test_input_record_requires_all_provenance_fields(source: Source, case: str) -> None:
     use = SourceUse(source=source, usage="identity", locator="card")

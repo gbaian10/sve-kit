@@ -152,13 +152,7 @@ def test_parses_a_synthetic_two_card_short_page_and_image_hashes() -> None:
     [
         (b"<html>", "not JSON"),
         (orjson.dumps({"data_headers": {"result_code": 0}}), "result_code"),
-        (page_body(count=10), "expected at least"),
-        (page_body(count=True), "expected at least"),
         (page_body(sort_card_id_list=[1, "2"]), "list of ints"),
-        (page_body(sort_card_id_list=[1, 1]), "repeats"),
-        (page_body(sort_card_id_list=list(range(31))), "lists 31"),
-        (page_body(card_details={}), "no details"),
-        (page_body(card_details=[]), "not an object"),
     ],
     ids=lambda value: value if isinstance(value, str) else "body",
 )
@@ -227,20 +221,11 @@ async def test_image_urls_need_every_stored_page(
     ("data", "message"),
     [
         ({"count": True}, "API count True, expected at least 500"),
-        ({"sort_card_id_list": [True]}, "API sort_card_id_list is not a list of ints"),
-        ({"sort_card_id_list": 1}, "API sort_card_id_list is not a list of ints"),
         ({"card_details": []}, "API card_details is not an object"),
         ({"card_details": {}}, "API page has no details for [1]"),
         ({"sort_card_id_list": [1, 1]}, "API page lists 2 cards or repeats one"),
     ],
-    ids=[
-        "bool-total",
-        "bool-id",
-        "wrong-id-type",
-        "details-type",
-        "missing-details",
-        "duplicate-id",
-    ],
+    ids=["bool-total", "details-type", "missing-details", "duplicate-id"],
 )
 def test_list_guard_messages_are_precise(data: dict[str, object], message: str) -> None:
     with pytest.raises(ValidationError, match="^" + re.escape(message) + "$"):

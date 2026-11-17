@@ -226,6 +226,30 @@ describe("catalog", () => {
   })
 })
 
+describe("printed names of merged printings", () => {
+  it("lists a printing by its own printed name and keeps the card's name as treated-as", () => {
+    const own = catalog.index.currentRevision("f:bp01-051", "jp")?.["name_unit_id"] ?? null
+    const revised = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["id"] === "p:bp01-001" && fragment.table === "printing"
+            ? {
+                ...row,
+                faces: (row["faces"] as Row[]).map((face) => ({ ...face, name_unit_id: own })),
+              }
+            : row,
+        ),
+      })),
+    }
+    const summary = catalogOf(revised).summary("p:bp01-001")
+    expect(summary?.name.original.text).toBe(catalog.summary("p:bp01-051")?.name.original.text)
+    expect(summary?.treatedAs?.original.text).toBe("試作の見習い兵")
+    expect(catalogOf(revised).summary("p:bp01-001-en")?.treatedAs).toBeUndefined()
+  })
+})
+
 describe("pending display in the list", () => {
   it.each([true, false])("keeps a pending card visible with display=%s", (available) => {
     const revised = {

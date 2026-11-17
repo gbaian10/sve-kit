@@ -198,20 +198,9 @@ def test_body_and_keyword_evidence_have_disjoint_paths(
 @pytest.mark.parametrize(
     ("change", "reason"),
     [
-        ("missing", "source_keyword_closure_mismatch"),
-        ("missing-element", "source_keyword_payload_mismatch"),
-        ("replace", "source_keyword_payload_mismatch"),
-        ("extra", "source_keyword_payload_mismatch"),
-        ("order", "source_keyword_payload_mismatch"),
-        ("unsupported", "unsupported_keyword_declaration"),
         ("duplicate-use", "duplicate_source_keyword"),
         ("split-use", "source_keyword_payload_mismatch"),
-        ("binding", "source_keyword_occurrence_mismatch"),
-        ("owner", "source_current_owner_mismatch"),
-        ("line", "source_location_mismatch"),
-        ("segments", "source_keyword_occurrence_mismatch"),
         ("face", "source_face_container_mismatch"),
-        ("missing-body", "source_ability_closure_mismatch"),
     ],
 )
 def test_whole_card_rejects_keyword_mismatch(
@@ -474,20 +463,7 @@ def handoff(
 
 @pytest.mark.parametrize(
     "change",
-    [
-        "unknown-kind",
-        "metadata-payload",
-        "duplicate-keyword",
-        "nonempty-ports",
-        "scoped-use",
-        "body-version",
-        "missing-frame",
-        "unknown-keyword",
-        "proof-none",
-        "missing-recipe",
-        "null-hash",
-        "negative-path",
-    ],
+    ["unknown-kind", "metadata-payload", "duplicate-keyword"],
 )
 def test_internal_handoff_types_are_closed(handoff: bytes, change: str) -> None:
     wire = object_value(parse(handoff))

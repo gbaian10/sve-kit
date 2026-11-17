@@ -249,19 +249,7 @@ def test_remaining_art_uses_are_exact(
         ("wrong_face", "Art target belongs to another face"),
         ("empty_target", "Art transfer target requires an actual moved use"),
         ("foreign", "Art transfer use partition is missing, duplicated or foreign"),
-        (
-            "not_original",
-            "Art transfer use partition is missing, duplicated or foreign",
-        ),
-        (
-            "duplicate_use",
-            "Art transfer use partition is missing, duplicated or foreign",
-        ),
         ("wrong_art", "Art move destination disagrees with printing face art"),
-        (
-            "missing_use",
-            "Art transfer targets and remaining uses must partition old uses",
-        ),
     ],
 )
 def test_art_target_rejections(

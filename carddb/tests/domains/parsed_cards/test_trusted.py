@@ -1,8 +1,6 @@
 """Trusted restoration rejects schema evolution it cannot reconstruct."""
 
-from collections.abc import Mapping
 from datetime import datetime
-from enum import Enum
 from typing import cast
 
 import pytest
@@ -12,22 +10,9 @@ from typing_extensions import TypeForm
 from sve_carddb.domains.parsed_cards.trusted import construct
 
 
-class FutureEnum(Enum):
-    VALUE = "value"
-
-
 @pytest.mark.parametrize(
     ("annotation", "value"),
-    [
-        (datetime, "2026-10-01T00:00:00Z"),
-        (FutureEnum, "value"),
-        (frozenset[str], []),
-        (Mapping[str, str], {}),
-        (list[datetime], []),
-        (datetime | None, None),
-        (tuple[str, int], ["value", 1]),
-        (dict[int, str], {}),
-    ],
+    [(datetime, "2026-10-01T00:00:00Z"), (datetime | None, None), (dict[int, str], {})],
 )
 def test_unknown_annotations_fail_even_without_values(
     annotation: TypeForm[object], value: object

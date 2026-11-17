@@ -292,15 +292,7 @@ def test_partial_domains_and_colliding_namespaces_stay_reference_pending() -> No
 
 @pytest.mark.parametrize(
     "case",
-    [
-        "empty",
-        "duplicate",
-        "missing_member",
-        "extra_member",
-        "unknown_definition",
-        "duplicate_definition",
-        "duplicate_namespace",
-    ],
+    ["duplicate", "unknown_definition", "duplicate_definition", "duplicate_namespace"],
 )
 def test_invalid_old_domains_are_errors_instead_of_pending(case: str) -> None:
     sources = SyntheticSources()

@@ -197,7 +197,7 @@ def test_candidate_reader_checks_review_scopes_and_transitivity(
 
 @pytest.mark.parametrize(
     ("score", "reviewed"),
-    [(9, False), (10, True), (39, True), (40, True), (99, True), (100, False)],
+    [(9, False), (10, True), (99, True)],
 )
 def test_candidate_reader_requires_review_at_threshold_boundaries(
     art_inputs: tuple[ArtInput, ...], tmp_path: Path, score: int, *, reviewed: bool

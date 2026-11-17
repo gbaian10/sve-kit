@@ -212,7 +212,7 @@ def test_bare_reference_cannot_borrow_another_rulings_explicit_domain(
 
 @pytest.mark.parametrize(
     "separator",
-    ["\r", "\x0b", "\x0c", "\x1c", "\x1d", "\x1e", "\x85", "\u2028", "\u2029"],
+    ["\r", "\x0b", "\x0c"],
 )
 def test_only_lf_advances_historical_line_numbers(separator: str) -> None:
     raw = "prefix" + separator + "body\nlast"

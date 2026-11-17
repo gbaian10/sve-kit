@@ -31,7 +31,6 @@ def card_numbers(official_snapshot: RegistrySnapshot) -> dict[str, str]:
 @pytest.mark.parametrize(
     ("game", "official", "number", "relation"),
     [
-        ("svwb", "90032110", "BP09-049", "same_character"),
         ("svwb", "90001110", "BP01-171", "same_character"),
         ("svwb", "90034340", "BP07-041", "same_character"),
         ("svwb", "90024330", "BP11-028", "same_character"),

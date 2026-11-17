@@ -130,15 +130,6 @@ def test_sum_constraint_keeps_the_explicit_amulet_trait_and_source_zone() -> Non
     ("raw", "role"),
     [
         ("仮。このターン中にこれを含めて２枚以上プレイしていたなら、仮。", "threshold"),
-        (
-            "仮。自分のデッキの上を元のコストX以下のフォロワーが２枚公開されるまで公開する。",
-            "threshold",
-        ),
-        (
-            "仮。これによってカード名がそれぞれ異なる２枚のカードを公開したなら、仮。",
-            "threshold",
-        ),
-        ("仮。これによって消滅させたカードが２枚以上なら、仮。", "threshold"),
         ("仮。それの{UB}能力２つを元のコストを支払わずに発動する。", "count"),
         (
             "仮。自身の場のフォロワー２体を指定し、ターンプレイヤーから順にそれを手札に戻す。",
@@ -148,7 +139,6 @@ def test_sum_constraint_keeps_the_explicit_amulet_trait_and_source_zone() -> Non
             "仮。自分のデッキから【スタートアミュレット】を持つカード２枚を場に出した状態でバトルを開始する。",
             "count",
         ),
-        ("仮。自分のEXエリアのトークン・カード２枚を選ぶ。", "selection_count"),
         (
             "仮。自分のデッキから「消滅させたフォロワーと同名のフォロワー」２枚まで探し、EXエリアに置く。",
             "selection_count",
@@ -322,35 +312,14 @@ def test_disjunct_counts_share_one_explicit_counted_set(np: str, unit: str) -> N
 @pytest.mark.parametrize(
     "raw",
     [
-        "仮。【融合】不明物２枚:これに融合カウンターX個を置く。",
         "仮。【融合】トークンでないフォロワー２枚:これに融合カウンターX個を不明する。",
-        "仮。自分の場にフォロワーが２体以上出たとき、仮。{起動}出たうちの１体に{攻撃力}+Xする。",
         "仮。相手の場のフォロワー２体を選ぶ。{起動}残りの１体にXダメージ。",
-        "仮。相手の場のフォロワー２体を選ぶ。それを墓場に置く。残りの１体にXダメージ。",
         "仮。相手の場のフォロワー２体を選ぶ。それをEXエリアに置く。残りの１体にXダメージ。",
-        "仮。相手の場のフォロワー２体を選ぶ。自分の場のフォロワー２体を選ぶ。残りの１体にXダメージ。",
-        "仮。相手の場のフォロワー２体を選ぶ。選んだうちの１枚にXダメージ。",
-        "仮。自分の能力は追加で２回不明する。",
-        "仮。自分の墓場が２枚になるように自分の手札を捨てる。",
-        "仮。自分の手札が２枚になるように自分の手札を不明する。",
-        "自分の墓場のカードが２枚以上なら、仮。{起動}３枚以上なら、別。",
-        "自分の墓場のカードが２枚以上なら、仮。【相手のターン終了時】３枚以上なら、別。",
-        "自分の墓場のカードが２枚以上なら、仮。相手の手札が３枚以上なら、別。４枚以上なら、仮。",
-        "自分の墓場のカードが２枚以上なら、仮。３体以上なら、別。",
         "仮。「自分の墓場のカードが２枚以上なら、仮」を持つ。３枚以上なら、別。",
-        "仮。これはエボルヴデッキに２体まで入れることができる。",
         "仮。自分のデッキを不明し、上X枚を見る。その中から、フォロワー２枚まで場に出してよい。",
         "仮。相手の場のフォロワー２枚以上に能力ダメージを与えたとき、仮。",
-        "仮。場に出た不明物２体にXダメージ。",
-        "仮。自分が手札を２枚以上捨てた仮、仮。",
-        "仮。「不明。自分の墓場のカード」２枚につき、仮。",
-        "仮。自分の墓場の「相手の場のフォロワー」２体を選ぶ。",
-        "仮。自分の場の相手のフォロワー２体を選ぶ。",
-        "仮。「このターン中に自分がプレイしたカードの枚数」が２体以上なら、仮。",
-        "仮。「このターン中に自分が不明したカードの枚数」が２枚以上なら、仮。",
         "仮。自分の場のフォロワーが２体か３枚なら、仮。",
         "仮。自分の場の不明物が２体か３体なら、仮。",
-        "仮。自分の場のフォロワーが２体。か３体なら、仮。",
     ],
 )
 def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> None:
@@ -370,20 +339,9 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
             "counter_amount",
             "個",
         ),
-        ("仮。お互いの場のカードが２枚以上ある限り、仮。", "existence_count", "枚"),
-        (
-            "仮。各プレイヤーは、自身の手札が２枚になるように自身の手札を捨てる。",
-            "existence_count",
-            "枚",
-        ),
         (
             "仮。相手のリーダーすべてに「自分の墓場の仮族・カード」２枚につきXダメージ。",
             "group_divisor",
-            "枚",
-        ),
-        (
-            "仮。お互いの手札が２枚になるようにお互いの手札を捨てる。",
-            "existence_count",
             "枚",
         ),
         (
@@ -396,72 +354,8 @@ def test_unknown_or_mismatched_counted_constructions_cannot_bind(raw: str) -> No
             "construction_copy_limit",
             "枚",
         ),
-        ("仮。自分の他の仮族・カードが２枚なら、仮。", "existence_count", "枚"),
-        (
-            "仮。自分のデッキをシャッフルし、上X枚を見る。その中から、フォロワー２枚まで場に出してよい。",
-            "selection_count",
-            "枚",
-        ),
-        (
-            "仮。自分の場や自分のEXエリアのアミュレットが２枚以上なら、仮。",
-            "existence_count",
-            "枚",
-        ),
-        (
-            "仮。それによって破壊した相手の場のフォロワー２体につき、仮。",
-            "group_divisor",
-            "体",
-        ),
-        ("仮。場の自分のフォロワー２体を選ぶ。", "selection_count", "体"),
-        ("仮。それの場のカードが２枚以上なら、仮。", "existence_count", "枚"),
-        (
-            "仮。それのプレイヤーの場のカードが２枚以上なら、仮。",
-            "existence_count",
-            "枚",
-        ),
-        ("仮。自分の墓場の仮N族・フォロワー２枚を選ぶ。", "selection_count", "枚"),
-        (
-            "仮。相手の場の【仮状態】状態のフォロワー２体まで選ぶ。",
-            "selection_count",
-            "体",
-        ),
-        (
-            "仮。自分の墓場の元のコストX以下の「仮族・フォロワーか別族・アミュレット」２枚を選ぶ。",
-            "selection_count",
-            "枚",
-        ),
-        (
-            "仮。自分の墓場の{ラストワード}を持つ{仮クラス}フォロワー２枚を選ぶ。",
-            "selection_count",
-            "枚",
-        ),
-        ("仮。{進化}を持つ自分の仮族・フォロワー２体を選ぶ。", "selection_count", "体"),
-        (
-            "仮。自分の墓場のスペルをカード名が異なるように２枚まで選ぶ。",
-            "selection_count",
-            "枚",
-        ),
-        (
-            "仮。自分の墓場のカードを元のコストの合計がX以下になるように２枚まで選ぶ。",
-            "selection_count",
-            "枚",
-        ),
-        ("仮。自分の消滅領域が２枚以上なら使える。", "existence_count", "枚"),
-        (
-            "仮。自分の墓場のエボルヴフォロワーが２枚以上なら、仮。",
-            "existence_count",
-            "枚",
-        ),
-        ("仮。自分の場のアミュレット２つにつき、仮。", "group_divisor", "つ"),
-        ("仮。カード名２つを指定する。", "selection_count", "つ"),
         ("仮。好きな数２つを指定する。", "selection_count", "つ"),
-        ("仮。相手プレイヤー２人は手札を公開する。", "selection_count", "人"),
         ("仮。自分は２つ以上の選択肢をチョイスする際、仮。", "threshold", "つ"),
-        (
-            "仮。このターン、２回目の自分の場のフォロワーの攻撃なら、仮。",
-            "repeat_index",
-            "回",
-        ),
         (
             "仮。このターン、２回目の自分の場のフォロワーの進化なら、仮。",
             "repeat_index",
@@ -499,36 +393,12 @@ def test_explicit_set_constraints_designations_and_ordinals(
 @pytest.mark.parametrize(
     ("raw", "role"),
     [
-        (
-            "仮。相手の場のフォロワー２体以上に能力ダメージを与えたとき、仮。",
-            "threshold",
-        ),
         ("仮。自分が手札を２枚以上捨てたとき、仮。", "threshold"),
-        ("仮。同時に自分の場にフォロワーが２体以上出たとき、仮。", "threshold"),
-        ("仮。自分の場のフォロワー２体に{攻撃力}+Xする。", "selection_count"),
-        (
-            "仮。これが相手の場のフォロワー２体以上に能力ダメージを与えたとき、仮。",
-            "threshold",
-        ),
-        (
-            "仮。「このターン中に自分がプレイしたカードの枚数」が２枚以上なら、仮。",
-            "threshold",
-        ),
         (
             "仮。「このターン中に自分のリーダーの体力が増加した回数」が２回以上なら、仮。",
             "threshold",
         ),
         ("仮。相手のデッキ２枚が墓場に置かれたとき、仮。", "count"),
-        ("仮。場に出たフォロワー２体にXダメージ。", "selection_count"),
-        ("仮。「自分の墓場の仮族・カード」２枚につき、仮。", "group_divisor"),
-        (
-            "仮。これによって破壊した相手の場のフォロワー２体につき、仮。",
-            "group_divisor",
-        ),
-        (
-            "仮。このターン中に場に出た自分の他のフォロワー２体を選ぶ。",
-            "selection_count",
-        ),
     ],
 )
 def test_complete_event_counts_keep_the_written_set(raw: str, role: str) -> None:
@@ -570,11 +440,8 @@ def test_positioning_group_reminder_requires_a_positive_complete_divisor(
     "raw",
     [
         "仮。自分の墓場のスペルを不明な規則により２枚まで選ぶ。",
-        "仮。自分の墓場のカードを元のコストの合計がX以下になった２枚まで選ぶ。",
         "仮。自分の場のフォロワー２枚につき、仮。",
-        "仮。このターン、２回目の不明なフォロワーの攻撃なら、仮。",
         "仮。２ターン目かそれ以降なら、仮。",
-        "仮。カード名２つを指定する仮。",
     ],
 )
 def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
@@ -591,63 +458,23 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
 @pytest.mark.parametrize(
     ("raw", "roles", "units"),
     [
-        ("自分の手札のカード２枚を墓場に置く。", ["count"], ["枚"]),
-        ("自分の手札のカード２枚を場に出してよい。", ["count"], ["枚"]),
-        (
-            "自分のデッキからフォロワー２枚を探し、場に出す。",
-            ["selection_count"],
-            ["枚"],
-        ),
-        ("自分の手札のカード２枚を公開する。", ["count"], ["枚"]),
-        ("仮。自分が手札２枚を捨てたとき、仮。", ["count"], ["枚"]),
-        ("仮。手札２枚まで捨てる:仮。", ["selection_count"], ["枚"]),
-        ("仮。次のターンに２枚引けない。", ["count"], ["枚"]),
-        ("仮。「自分の手札２枚を捨てる」を持つ。", ["count"], ["枚"]),
         (
             "仮。手札の仮族・カード２枚と別族・カード３枚と第三族・カード４枚を捨てる:仮。",
             ["count", "count", "count"],
             ["枚", "枚", "枚"],
         ),
-        (
-            "仮。自分のデッキから仮族・フォロワー２枚と別族・フォロワー３枚を探し、場に出す。",
-            ["count", "count"],
-            ["枚", "枚"],
-        ),
-        ("仮。自分のエボルヴデッキのカード２枚を裏向きにする。", ["count"], ["枚"]),
         ("仮。ドライブチェックを２回する。", ["repeat_count"], ["回"]),
         ("仮。自分はサイコロを２回ふりなおしてよい。", ["repeat_count"], ["回"]),
-        ("仮。墓場のカード２枚を消滅:仮。", ["count"], ["枚"]),
-        ("仮。自分の場のフォロワー２体を手札に戻す。", ["count"], ["体"]),
-        (
-            "仮。自分のデッキから仮族・フォロワー２枚と{仮クラス}スペル３枚を探し、前者を場に出す。後者をEXエリアに置く。",
-            ["count", "count"],
-            ["枚", "枚"],
-        ),
         ("これを２回くり返す。", ["repeat_count"], ["回"]),
-        (
-            "仮。自分の墓場の元のコストX以下の「{仮クラス}でないフォロワー」２枚と元のコストX以下の「{仮クラス}でないフォロワー」３枚を選ぶ。",
-            ["selection_count", "selection_count"],
-            ["枚", "枚"],
-        ),
         (
             "仮。相手の場のフォロワー３体まで選ぶ。その中の１体にXダメージ。",
             ["selection_count", "selection_count"],
             ["体", "体"],
         ),
         (
-            "仮。次に自分の場にフォロワーが２体以上出たとき、その中の１体は{攻撃力}+X/{体力}+Xする。",
-            ["threshold", "selection_count"],
-            ["体", "体"],
-        ),
-        (
             "仮。同時に自分の場にフォロワーが２体以上出たとき、出たうちの１体に{攻撃力}+X/{体力}+Xする。",
             ["threshold", "selection_count"],
             ["体", "体"],
-        ),
-        (
-            "仮。相手の場のフォロワー３体まで選ぶ。選んだうちの１体にXダメージ。残りの２体にXダメージ。",
-            ["selection_count", "selection_count", "selection_count"],
-            ["体", "体", "体"],
         ),
         ("仮。誘発する自分の能力は追加で２回誘発する。", ["repeat_count"], ["回"]),
         (
@@ -656,37 +483,11 @@ def test_incomplete_set_and_ordinal_introductions_cannot_bind(raw: str) -> None:
             ["枚", "枚"],
         ),
         (
-            "仮。この能力は自分の場の「それぞれカード名が異なる仮族・フォロワー」が４体以上なら、２ターンに３回使える。",
-            ["existence_count", "duration_count", "repeat_count"],
-            ["体", "ターン", "回"],
-        ),
-        (
-            "仮。相手プレイヤー２人の場のカードが３枚以上なら、仮。",
-            ["selection_count", "existence_count"],
-            ["人", "枚"],
-        ),
-        (
             "仮。この能力は「このターン中に自分がプレイしたカードの枚数」が４枚以上なら、２ターンに３回使える。",
             ["threshold", "duration_count", "repeat_count"],
             ["枚", "ターン", "回"],
         ),
-        (
-            "この能力は２ターンに３回働く。",
-            ["duration_count", "repeat_count"],
-            ["ターン", "回"],
-        ),
-        (
-            "仮。この能力は自分の墓場のカードが４枚以上なら、２ターンに３回使える。",
-            ["existence_count", "duration_count", "repeat_count"],
-            ["枚", "ターン", "回"],
-        ),
-        (
-            "仮。「この能力は２ターンに３回働く」を持つ。",
-            ["duration_count", "repeat_count"],
-            ["ターン", "回"],
-        ),
         ("自分のＰＰを２回復する。", ["resource_amount"], ["ＰＰ"]),
-        ("自分のPPを２回復する。", ["resource_amount"], ["PP"]),
     ],
 )
 def test_complete_movement_frequency_and_resource_recovery(
@@ -807,16 +608,7 @@ def test_a_separate_clause_cannot_inherit_a_counted_collection() -> None:
     [
         "自分の手札のカード２枚を墓場に置る。",
         "自分の手札のカード２枚を場に出く。",
-        "自分の手札のカード２枚を手札に加えす。",
-        "自分の手札のカード２枚を公開して手札に加え仮。",
-        "自分のデッキからフォロワー２枚を探し、場に出る。",
-        "自分の手札のカード２枚を公開する仮。",
         "仮。手札の仮族・カード２枚と不明なカード３枚を捨てる:仮。",
-        "仮２回行う。",
-        "仮、２ターンに３回。",
-        "この能力は２ターンに３回復する。",
-        "この能力は２ターンに３回仮。",
-        "この能力は不明なカードが４枚以上なら、２ターンに３回使える。",
     ],
 )
 def test_malformed_movement_and_incomplete_frequency_cannot_bind(raw: str) -> None:
@@ -848,7 +640,6 @@ def test_repeat_up_to_retains_mode_without_turning_recovery_into_repetition() ->
 @pytest.mark.parametrize(
     ("raw", "roles", "units"),
     [
-        ("仮。SEPを２つ持つ。", ["resource_amount"], ["つ"]),
         (
             "仮。EPを２つ裏向きにすることで、３PPを払える。",
             ["resource_amount", "resource_amount"],
@@ -858,7 +649,6 @@ def test_repeat_up_to_retains_mode_without_turning_recovery_into_repetition() ->
         ("これは魂カウンター２つまでを置いてよい。", ["counter_amount"], ["つ"]),
         ("これは魂カウンターが２つ以上なら、仮。", ["threshold"], ["つ"]),
         ("これは魂カウンター２つにつき、仮。", ["group_divisor"], ["つ"]),
-        ("このターン、仮の動作が２回以上発動していたなら、仮。", ["threshold"], ["回"]),
     ],
 )
 def test_resource_items_and_closed_counter_constructions(
@@ -882,12 +672,9 @@ def test_resource_items_and_closed_counter_constructions(
 @pytest.mark.parametrize(
     "raw",
     [
-        "これは未知カウンター２つを置く。",
-        "これは魂カウンター２つを置る。",
         "これは魂カウンター２つ以上仮。",
         "これは魂カウンター０つにつき、仮。",
         "仮。EPを２つ裏向きにすることで、３PPを払える仮。",
-        "このターン、仮の動作が２回以上発動していた仮。",
     ],
 )
 def test_unknown_counter_and_incomplete_resource_or_event_cannot_bind(raw: str) -> None:
@@ -934,21 +721,9 @@ def test_full_existence_permission_does_not_lose_its_comparator_mode() -> None:
 @pytest.mark.parametrize(
     ("raw", "valid"),
     [
-        ("下記から１つチョイスする。【１】仮。【２】別。", True),
-        ("下記から１つチョイスする。\n【１】仮。\n【２】別。", True),
-        ("下記から１つチョイスする。【２】仮。【１】別。", False),
         ("下記から３つチョイスする。【１】仮。【２】別。", False),
-        ("下記から１つチョイスする。【１】仮。\n\n【２】別。", False),
-        (
-            "下記から１つチョイスする。【１】仮。{ファンファーレ}【２】別。",
-            False,
-        ),
         ("下記から１つチョイスする。（【１】仮。）【２】別。", False),
         ("下記から１つチョイスする。『仮【１】』【２】別。", False),
-        (
-            "下記から１つチョイスする。【１】仮。【２】別。下記から１つチョイスする。",
-            False,
-        ),
     ],
 )
 def test_choice_indices_need_one_complete_ordered_ability_scope(

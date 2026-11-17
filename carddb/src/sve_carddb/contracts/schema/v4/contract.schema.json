@@ -1172,11 +1172,21 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 15,
-      "maxItems": 15,
+      "minItems": 16,
+      "maxItems": 16,
       "x-columns": [
         "face_id",
         "art_id",
@@ -1192,7 +1202,8 @@
         "stamps",
         "translations",
         "corrections",
-        "name_concept_id"
+        "name_concept_id",
+        "name_unit_id"
       ],
       "x-types": [
         {
@@ -1267,6 +1278,11 @@
         {
           "array": {
             "ref": "Correction"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
           }
         },
         {
@@ -2468,18 +2484,29 @@
           "items": {
             "$ref": "#/$defs/PrintingStamp"
           }
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       ],
       "items": false,
-      "minItems": 6,
-      "maxItems": 6,
+      "minItems": 7,
+      "maxItems": 7,
       "x-columns": [
         "face_id",
         "art_id",
         "frame_code",
         "signed",
         "embellishment_state",
-        "stamps"
+        "stamps",
+        "name_unit_id"
       ],
       "x-types": [
         {
@@ -2510,6 +2537,11 @@
         {
           "array": {
             "ref": "PrintingStamp"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
           }
         }
       ]
@@ -16020,7 +16052,8 @@
               "stamps",
               "translations",
               "corrections",
-              "name_concept_id"
+              "name_concept_id",
+              "name_unit_id"
             ],
             "items": [
               {
@@ -16095,6 +16128,11 @@
               {
                 "array": {
                   "ref": "Correction"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
                 }
               },
               {
@@ -16621,7 +16659,8 @@
               "frame_code",
               "signed",
               "embellishment_state",
-              "stamps"
+              "stamps",
+              "name_unit_id"
             ],
             "items": [
               {
@@ -16652,6 +16691,11 @@
               {
                 "array": {
                   "ref": "PrintingStamp"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
                 }
               }
             ]

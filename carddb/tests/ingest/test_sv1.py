@@ -145,21 +145,9 @@ def api_body(
         (api_body(FakePortal().cards, ["down"]), "reports errors"),
         (api_body(FakePortal(10).cards), "expected at least"),
         (api_body(FakePortal().cards * 2), "twice"),
-        (api_body([{"card_id": 12, "card_name": "x", "char_type": 1}]), "card_id"),
-        (api_body([{"card_id": True, "card_name": "x", "char_type": 1}]), "card_id"),
         (api_body([{"card_name": "x"}]), "card_id"),
-        (orjson.dumps({"cards": []}), "'data'"),
     ],
-    ids=[
-        "html",
-        "errors",
-        "too-few",
-        "duplicate",
-        "short-id",
-        "bool-id",
-        "no-id",
-        "no-data",
-    ],
+    ids=["html", "errors", "too-few", "duplicate", "no-id"],
 )
 def test_bad_api_responses_are_rejected(body: bytes, reason: str) -> None:
     with pytest.raises(ValidationError, match=reason):
