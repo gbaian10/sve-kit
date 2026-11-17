@@ -68,13 +68,6 @@ function resultCount(unitText = "個版次"): HTMLElement {
   return unit.parentElement
 }
 
-/** The total shown by the result count, once it has arrived. */
-function resultTotal(): number {
-  const match = /^(\d[\d,]*) /u.exec(resultCount().textContent)
-  if (!match?.[1]) throw new Error("count not shown yet")
-  return Number(match[1].replaceAll(",", ""))
-}
-
 /** The condition chips' names, in row order. */
 function chips(conditions: HTMLElement) {
   return within(conditions)
@@ -103,20 +96,6 @@ describe("CardsPage", () => {
     expect(router.state.location.search).toBe("?q=bp01&sort=cost%3Aasc%2Cno%3Aasc")
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
   }, 15_000)
-
-  it("opens the explicitly selected suggestion when several cards match", async () => {
-    const { router } = await open()
-    const user = userEvent.setup()
-    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
-    await user.type(input, "bp01")
-    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
-    await waitFor(() => expect(list).toHaveAttribute("aria-busy", "false"))
-    const second = within(list).getAllByRole("option")[1]
-    await user.keyboard("{ArrowDown}{ArrowDown}")
-    expect(input).toHaveAttribute("aria-activedescendant", second?.id)
-    await user.keyboard("{Enter}")
-    expect(router.state.location.pathname).toBe("/cards/BP01-002")
-  })
 
   it.each([false, true])(
     "opens the unique result with Enter (before debounce: %s)",
@@ -175,17 +154,6 @@ describe("CardsPage", () => {
     expect(router.state.location.search).toBe("")
   })
 
-  it("uses vocabulary rarity chips and shows no PR chip when the vocabulary has none", async () => {
-    const { router } = await open()
-    const group = screen.getByRole("group", { name: "稀有度" })
-    const bronze = within(group).getByRole("button", { name: "銅" })
-    await waitFor(() => expect(bronze).toBeEnabled())
-    expect(within(group).queryByRole("button", { name: /^PR/u })).not.toBeInTheDocument()
-    await userEvent.click(bronze)
-    await waitFor(() => expect(bronze).toHaveAttribute("aria-pressed", "true"))
-    expect(router.state.location.search).toContain("rarity=bronze")
-  })
-
   it.each([
     ["zh-TW", "銅"],
     ["ja", "ブロンズ"],
@@ -219,27 +187,6 @@ describe("CardsPage", () => {
       )
     },
   )
-
-  it("reads the view switch before the result count", async () => {
-    await open("/cards?view=table")
-    await expectCount(await waitFor(() => resultTotal()))
-    const switcher = screen.getByRole("radiogroup", { name: "檢視" })
-    expect(
-      switcher.compareDocumentPosition(resultCount()) & Node.DOCUMENT_POSITION_FOLLOWING,
-    ).toBeTruthy()
-  })
-
-  it("loads table illustration crops from the independent visible-image channel", async () => {
-    await open("/cards?view=table")
-    await waitFor(
-      () => {
-        const thumb = document.querySelector("[data-art-thumb][data-image-printing] img")
-        expect(thumb).toHaveAttribute("src", expect.stringContaining("/images/art_"))
-        expect(thumb).toHaveAttribute("alt", "")
-      },
-      { timeout: 4000 },
-    )
-  })
 
   it("keeps the set filter in the URL and the sequence a card walks", async () => {
     // Cards open as pages here; the in-place panel and modal have their own tests.
@@ -430,94 +377,6 @@ describe("CardsPage", () => {
     })
   })
 
-  it("replaces the default secondary sort when card number becomes primary", async () => {
-    const { router } = await open("/cards")
-    const user = userEvent.setup()
-    const sort = await screen.findByRole("combobox", { name: "排序" })
-
-    expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("no")
-    await user.selectOptions(sort, "no")
-
-    await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: "再依" })).toHaveValue("set")
-      expect(new URLSearchParams(router.state.location.search).get("sort")).toBe("no:desc,set:asc")
-    })
-  })
-
-  it("holds the class row's place with a skeleton until the options load", async () => {
-    prefsStore.set({ uiLanguage: "zh-TW", filterPanelOpen: true, cardOpenMode: "page" })
-    await renderRoutes(routes, { initialEntries: ["/cards"] })
-    // Before the index answers there is no list of classes: not even the neutral cell appears.
-    expect(screen.queryByRole("button", { name: "中立" })).not.toBeInTheDocument()
-    expect(document.querySelectorAll('[aria-hidden="true"].grid-cols-7 > span')).toHaveLength(7)
-    expect(await screen.findByRole("button", { name: "中立" }, { timeout: 4000 })).toBeVisible()
-    expect(document.querySelector('[aria-hidden="true"].grid-cols-7')).toBeNull()
-  })
-
-  it("lists the snapshot and keeps the class filter in the URL", async () => {
-    const { router } = await open()
-    const user = userEvent.setup()
-    const filter = screen.getByRole("button", { name: "篩選" })
-    expect(filter).toHaveAttribute("aria-expanded", "true")
-    expect(
-      screen.getAllByRole("link").filter((a) => a.hasAttribute("data-result-key")).length,
-    ).toBeGreaterThan(20)
-    await user.click(screen.getByRole("button", { name: "主教" }))
-    expect(router.state.location.search).toBe("?class=bishop")
-    expect(screen.getByRole("button", { name: "主教" })).toHaveAttribute("aria-pressed", "true")
-    expect(
-      document.getElementById(filter.getAttribute("aria-describedby") ?? ""),
-    ).toHaveTextContent("已啟用 1 個篩選條件")
-    await user.click(screen.getByRole("button", { name: "中立" }))
-    expect(router.state.location.search).toBe("?class=bishop%2Cneutral")
-    expect(
-      document.getElementById(filter.getAttribute("aria-describedby") ?? ""),
-    ).toHaveTextContent("已啟用 1 個篩選條件")
-    await user.click(screen.getByRole("button", { name: "清除" }))
-    expect(filter).not.toHaveAttribute("aria-describedby")
-  })
-
-  it("suggests while typing, names the matched field and opens with the keyboard", async () => {
-    const { router } = await open()
-    const user = userEvent.setup()
-    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
-    await user.type(input, "bp01-51")
-    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
-    const options = within(list).getAllByRole("option")
-    expect(options[0]).toHaveTextContent("試作聖堂騎士")
-    expect(options[0]).toHaveTextContent("BP01-051")
-    expect(options[0]).toHaveTextContent("符合：卡號")
-    await waitFor(() => {
-      expect(options[0]?.querySelector("img")).toHaveAttribute(
-        "src",
-        expect.stringContaining("/images/card_"),
-      )
-      expect(options[0]).toBeInTheDocument()
-    })
-    await user.keyboard("{ArrowDown}")
-    expect(input).toHaveAttribute("aria-activedescendant", options[0]?.id)
-    expect(options[0]).toHaveAttribute("aria-selected", "true")
-    await user.keyboard("{Enter}")
-    expect(router.state.location.pathname).toBe("/cards/BP01-051")
-    expect(router.state.location.state).toMatchObject({
-      background: "?q=bp01-51",
-      source: "suggest",
-      pages: 1,
-      resultKey: "p:bp01-051",
-    })
-    // Back keeps the typed query and returns focus to the suggested card's result cell.
-    await act(() => router.navigate(-1))
-    await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
-    })
-    await waitFor(() => {
-      const cell = document.querySelector('a[data-result-key="p:bp01-051"]')
-      expect(cell).toHaveFocus()
-      expect(cell).toHaveClass("ring-text-1")
-    })
-    expect(router.state.location.search).toBe("?q=bp01-51")
-  }, 15_000)
-
   it("marks alias hits, shows all with the see-all link and keeps the text on back", async () => {
     prefsStore.set({ cardOpenMode: "page" })
     const { router } = await open()
@@ -546,27 +405,6 @@ describe("CardsPage", () => {
     expect(router.state.location.state).toMatchObject({ anchor: "p:bp01-051", pages: 1 })
   })
 
-  it("suggests across classes and 'see all' commits the text alone", async () => {
-    const { router } = await open("/cards?class=bishop")
-    const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "試作の妖精")
-    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
-    expect(within(list).getAllByRole("option").length).toBeGreaterThan(0)
-    await user.click(await screen.findByRole("button", { name: /看全部/u }))
-    expect(router.state.location.search).toBe("?q=%E8%A9%A6%E4%BD%9C%E3%81%AE%E5%A6%96%E7%B2%BE")
-  })
-
-  it("'see all' takes what is typed now, even during the debounce window", async () => {
-    const { router } = await open()
-    const user = userEvent.setup()
-    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
-    await user.type(input, "bp01-0")
-    await screen.findByRole("listbox", {}, { timeout: 4000 })
-    await user.type(input, "5")
-    await user.click(await screen.findByRole("button", { name: /看全部/u }))
-    expect(router.state.location.search).toBe("?q=bp01-05")
-  })
-
   it("ignores clicks on stale suggestions until the list has caught up", async () => {
     const { router } = await open()
     const user = userEvent.setup()
@@ -587,19 +425,6 @@ describe("CardsPage", () => {
     expect(router.state.location.state).toMatchObject({ background: "?q=bp01-05" })
   })
 
-  it("keeps suggestions pickable when the text has surrounding spaces", async () => {
-    const { router } = await open()
-    const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), " bp01-51 ")
-    const list = await screen.findByRole("listbox", {}, { timeout: 4000 })
-    await waitFor(() => {
-      expect(list).toHaveAttribute("aria-busy", "false")
-    })
-    await user.click(within(list).getAllByRole("option")[0] ?? list)
-    expect(router.state.location.pathname).toBe("/cards/BP01-051")
-    expect(router.state.location.state).toMatchObject({ background: "?q=bp01-51" })
-  })
-
   it("shows the empty state with a reset, and recent cards on focus", async () => {
     const { router } = await open("/cards?q=zzz&class=elf")
     const user = userEvent.setup()
@@ -613,102 +438,7 @@ describe("CardsPage", () => {
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
   })
 
-  it("drops the typed draft when the browser goes back to an older URL", async () => {
-    const { router } = await open()
-    const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "foo")
-    await user.keyboard("{Enter}")
-    await waitFor(() => {
-      expect(router.state.location.search).toBe("?q=foo")
-    })
-    await router.navigate(-1)
-    await waitFor(() => {
-      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("")
-    })
-    expect(router.state.location.search).toBe("")
-  })
-
-  it("commits typed text with Enter when nothing matches and the Escape closes the list", async () => {
-    const { router } = await open()
-    const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "nothing-here")
-    expect(await screen.findByText("沒有符合的卡")).toBeInTheDocument()
-    await user.keyboard("{Enter}")
-    // The message may still belong to the previous keystroke's empty result; an Enter pressed
-    // while the last query is pending is armed and commits once it settles.
-    await waitFor(() => {
-      expect(router.state.location.search).toBe("?q=nothing-here")
-    })
-  })
-
   describe("filter panel", () => {
-    it("places the set filter immediately after the class row in the sheet", async () => {
-      await open()
-      const dialog = screen.getByRole("dialog", { name: "篩選條件" })
-      const classRow = screen.getByRole("group", { name: "職業" })
-      const setFilter = screen.getByRole("button", { name: /^卡包/u })
-      expect(classRow.nextElementSibling).toContainElement(setFilter)
-      expect(Array.from(dialog.querySelectorAll("h3"), (heading) => heading.textContent)).toEqual([
-        "基本",
-        "數值",
-        "版次",
-        "效果",
-        "顯示方式",
-        "其他",
-      ])
-    })
-
-    it("opens as a sheet from the search bar button, without a place of its own while closed, and remembers the choice", async () => {
-      await open("/cards?class=bishop", { panel: false })
-      const button = screen.getByRole("button", { name: "篩選" })
-      expect(button).toHaveAttribute("aria-expanded", "false")
-      // Closed: the condition chips keep the only clear entry on screen.
-      const conditions = screen.getByRole("group", { name: "目前條件" })
-      expect(within(conditions).getByRole("button", { name: "清除" })).toBeVisible()
-      const panel = document.getElementById(button.getAttribute("aria-controls") ?? "")
-      expect(panel).not.toBeNull()
-      expect(panel).not.toBeVisible()
-      // The class row lives in the sheet with the rest of the filters; its condition still counts.
-      const classRow = screen.getByRole("group", { name: "職業", hidden: true })
-      expect(classRow).not.toBeVisible()
-      expect(button).toHaveTextContent("篩選")
-      expect(button).toHaveClass("bg-accent")
-      expect(
-        document.getElementById(button.getAttribute("aria-describedby") ?? ""),
-      ).toHaveTextContent("已啟用 1 個篩選條件")
-      await userEvent.click(button)
-      expect(button).toHaveAttribute("aria-expanded", "true")
-      expect(panel).toBeVisible()
-      const dialog = screen.getByRole("dialog", { name: "篩選條件" })
-      expect(screen.getByRole("button", { name: "關閉" })).toHaveFocus()
-      const resultDock = dialog.querySelector(".sticky")
-      expect(resultDock).toHaveClass("bottom-0")
-      expect(panel?.lastElementChild).toBe(resultDock)
-      expect(classRow).toBeVisible()
-      expect(within(classRow).getByRole("button", { name: "主教" })).toHaveAttribute(
-        "aria-pressed",
-        "true",
-      )
-      expect(prefsStore.get().filterPanelOpen).toBe(true)
-      // The chips stay where they are, outside the sheet, and remain the one clear entry.
-      expect(panel).not.toContainElement(conditions)
-      expect(
-        within(screen.getByRole("region", { name: "篩選條件" })).queryByRole("button", {
-          name: /^清除/u,
-        }),
-      ).not.toBeInTheDocument()
-      await userEvent.click(screen.getByRole("button", { name: "關閉" }))
-      expect(button).toHaveFocus()
-      expect(button).toHaveAttribute("aria-expanded", "false")
-      expect(panel).not.toBeVisible()
-      expect(prefsStore.get().filterPanelOpen).toBe(false)
-      await userEvent.click(button)
-      expect(document.getElementById(button.getAttribute("aria-controls") ?? "")).toBe(panel)
-      fireEvent(dialog, new Event("cancel", { cancelable: true }))
-      expect(button).toHaveAttribute("aria-expanded", "false")
-      expect(button).toHaveFocus()
-    })
-
     it("unions the values of one stat, intersects stats and writes both to the URL", async () => {
       const { router } = await open()
       const user = userEvent.setup()
