@@ -6,6 +6,7 @@
 )]
 
 use super::*;
+use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     Command, Input, OpeningAnswer, OpeningQuestion, Question, QuestionShape, SubmissionKind, Viewer,
 };
@@ -80,6 +81,120 @@ fn player_opening_fault_rolls_back_the_accepted_answer_and_stays_terminal_for_in
                 .kind,
                 SubmissionKind::EngineFault
             );
+        }
+    }
+}
+
+#[test]
+#[expect(
+    clippy::too_many_lines,
+    reason = "Both seats share one sequential opening and privacy scenario."
+)]
+fn player_opening_start_amulets_are_serial_and_only_revealed_after_both_mulligans() {
+    let mut game = initial(&json!({"first_chooser":"P2"}));
+    let mut old = Vec::new();
+    for actor in [Viewer::P1, Viewer::P2] {
+        let question = question(&game, actor);
+        let QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) = question.shape else {
+            panic!("amulet");
+        };
+        assert_eq!(cards.len(), 2);
+        assert!(
+            cards
+                .iter()
+                .all(|card| !card.handle.as_str().contains("start"))
+        );
+        let other = if actor == Viewer::P1 {
+            Viewer::P2
+        } else {
+            Viewer::P1
+        };
+        assert!(matches!(game.input(other), Input::Waiting(wait) if wait.actor == actor));
+        assert_eq!(
+            game.submit_player(
+                other,
+                Command::Opening {
+                    token: question.token,
+                    answer: OpeningAnswer::StartAmulet(cards[0].handle.clone())
+                }
+            )
+            .kind,
+            SubmissionKind::Rejected
+        );
+        assert_eq!(
+            game.submit_player(
+                actor,
+                Command::Opening {
+                    token: question.token,
+                    answer: OpeningAnswer::StartAmulet(cards[0].handle.clone())
+                }
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+        old.push(cards[1].handle.clone());
+        let observation = game.observe(other).unwrap();
+        let field = observation
+            .players
+            .iter()
+            .find(|player| player.player == actor)
+            .unwrap()
+            .zones
+            .iter()
+            .find(|zone| zone.kind == ObservedZone::Field)
+            .unwrap();
+        assert_eq!(field.count, 1);
+        assert_eq!(field.cards.len(), 0);
+    }
+    assert_eq!(
+        question(&game, Viewer::P2).shape,
+        QuestionShape::Opening(OpeningQuestion::FirstPlayer)
+    );
+    let chooser = question(&game, Viewer::P2);
+    assert_eq!(
+        game.submit_player(
+            Viewer::P2,
+            Command::Opening {
+                token: chooser.token,
+                answer: OpeningAnswer::FirstPlayer(Viewer::P2)
+            }
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    for actor in [Viewer::P2, Viewer::P1] {
+        let current = question(&game, actor);
+        assert_eq!(
+            game.submit_player(
+                actor,
+                Command::Opening {
+                    token: current.token,
+                    answer: OpeningAnswer::Mulligan(vec![old[0].clone(); 4])
+                }
+            )
+            .kind,
+            SubmissionKind::Rejected
+        );
+        assert_eq!(
+            game.submit_player(
+                actor,
+                Command::Opening {
+                    token: current.token,
+                    answer: OpeningAnswer::Keep
+                }
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+    }
+    for actor in [Viewer::P1, Viewer::P2] {
+        for player in &game.observe(actor).unwrap().players {
+            let field = player
+                .zones
+                .iter()
+                .find(|zone| zone.kind == ObservedZone::Field)
+                .unwrap();
+            assert_eq!(field.cards.len(), 1);
         }
     }
 }
