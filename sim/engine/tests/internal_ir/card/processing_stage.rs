@@ -1,3 +1,6 @@
+#[path = "processing_stage/cost_spec_payments.rs"]
+mod cost_spec_payments;
+
 #[path = "processing_stage/pp_payments.rs"]
 mod pp_payments;
 
@@ -30,6 +33,14 @@ fn program(head: &str, body: Value) -> WellFormedCardProgram {
 }
 
 fn fixture(program: &WellFormedCardProgram, actor: Viewer) -> Game {
+    fixture_with(program, actor, |_| {})
+}
+
+fn fixture_with(
+    program: &WellFormedCardProgram,
+    actor: Viewer,
+    customize: impl FnOnce(&mut Value),
+) -> Game {
     let (seat, me, them) = if actor == Viewer::P1 {
         (1, "P1", "P2")
     } else {
@@ -42,6 +53,7 @@ fn fixture(program: &WellFormedCardProgram, actor: Viewer) -> Game {
     initial["players"][them]["zones"] = json!({"field":[
         {"id":"a","card":"unit-follower"},{"id":"b","card":"unit-follower"}
     ]});
+    customize(&mut initial);
     let fixture = board_fixture::fixture().unwrap();
     let mut game = Game::new(
         Arc::clone(&fixture.catalog),
@@ -106,6 +118,15 @@ fn end_trigger(game: &mut Game, actor: Viewer) {
         SubmissionKind::Applied,
         "choosing the pending trigger enters its play"
     );
+}
+
+fn finish_may(game: &mut Game) -> Progress {
+    let q = game.internal_decision(View::Referee).unwrap();
+    resolved(
+        game.answer_internal_card(q.actor, q.token, Answer::Integer(Nat(0)))
+            .unwrap(),
+    )
+    .progress
 }
 
 #[test]

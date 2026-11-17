@@ -50,15 +50,6 @@ pub(in crate::card) fn with_declarations(
     WellFormedCardProgram::check(raw).unwrap()
 }
 
-fn finish_may(game: &mut Game) -> Progress {
-    let q = game.internal_decision(View::Referee).unwrap();
-    resolved(
-        game.answer_internal_card(q.actor, q.token, Answer::Integer(Nat(0)))
-            .unwrap(),
-    )
-    .progress
-}
-
 fn declared(facts: &[Fact]) -> Vec<NumberDeclaration> {
     facts
         .iter()

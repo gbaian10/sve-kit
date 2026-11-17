@@ -1,5 +1,9 @@
 //! Procedure boundaries stay in the runtime queue, separate from authored IR.
 
+mod payments;
+pub(super) use payments::record_cost_spec_payment;
+pub use payments::{CostPaymentPurpose, CostSpecPayment, CostStepPayment};
+
 use super::{Execution, Fact, Game, Result, invalid};
 use crate::ir::{
     ChoiceDomain, DecisionId, Int, ModeDecision, ModeId, Nat, Node, PlayerId, ReceiptId, ScopeId,

@@ -1,3 +1,4 @@
+use super::super::CostPaymentPurpose;
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, Slot, Wait};
 use super::{
     Ability, Activation, Context, Execution, ExecutionId, Expr, Fact, Game, Generation, Int,
@@ -1357,6 +1358,7 @@ impl Game {
             number_declarations: Vec::new(),
             play_declarations: Vec::new(),
             pp_payments: Vec::new(),
+            cost_spec_payments: Vec::new(),
             destroy_guards: Vec::new(),
             look_viewers: BTreeMap::new(),
             player_receipt_links: BTreeMap::new(),
@@ -1721,7 +1723,14 @@ impl Game {
         let Some((face, payment)) = play.additional.as_deref() else {
             return Ok(());
         };
-        self.internal_card_payment(execution, &payment.play.costs, false)?;
+        self.internal_card_payment(
+            execution,
+            &payment.play.costs,
+            false,
+            Some(CostPaymentPurpose::Additional {
+                receipt: payment.receipt,
+            }),
+        )?;
         let CostSpec::Ordered { steps } = &payment.play.costs else {
             return Err(unsupported("additional costs"));
         };
@@ -1756,10 +1765,21 @@ impl Game {
         } else if play.exchange.is_some() || execution.field_entry {
             self.internal_exchange_payment(execution, &play)
         } else {
-            self.internal_card_payment(execution, &play.costs, execution.spell)
+            self.internal_card_payment(
+                execution,
+                &play.costs,
+                execution.spell,
+                Some(CostPaymentPurpose::Original),
+            )
         };
-        let payment =
-            payment.and_then(|()| self.internal_card_payment(execution, &play.mode_costs, false));
+        let payment = payment.and_then(|()| {
+            self.internal_card_payment(
+                execution,
+                &play.mode_costs,
+                false,
+                Some(CostPaymentPurpose::Modes),
+            )
+        });
         let payment = payment.and_then(|()| self.internal_additional_payment(execution, &play));
         let payment = payment.and_then(|()| self.internal_optional_payment(execution, &play));
         self.card_runtime.active_source = previous;
@@ -1989,8 +2009,9 @@ impl Game {
             probe.card_runtime.active_source = trial.ability;
             let paid = probe
                 .internal_probe_hand_costs(&mut trial, &play.costs)
-                .and_then(|()| probe.internal_card_payment(&mut trial, &play.costs, spell));
-            let paid = paid.and_then(|()| probe.internal_card_payment(&mut trial, costs, false));
+                .and_then(|()| probe.internal_card_payment(&mut trial, &play.costs, spell, None));
+            let paid =
+                paid.and_then(|()| probe.internal_card_payment(&mut trial, costs, false, None));
             match paid {
                 Ok(()) => return Ok(true),
                 Err(crate::EngineFailure::IllegalPlay(_)) => {}
@@ -2050,7 +2071,12 @@ impl Game {
             match payment_game
                 .internal_probe_hand_costs(&mut probe, &play.costs)
                 .and_then(|()| {
-                    payment_game.internal_card_payment(&mut probe, &play.costs, execution.spell)
+                    payment_game.internal_card_payment(
+                        &mut probe,
+                        &play.costs,
+                        execution.spell,
+                        None,
+                    )
                 }) {
                 Ok(()) => return Ok(true),
                 Err(crate::EngineFailure::IllegalPlay(_)) => {}

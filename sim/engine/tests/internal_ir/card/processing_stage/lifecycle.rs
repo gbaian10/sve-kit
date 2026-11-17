@@ -145,6 +145,7 @@ fn an_accepted_answer_whose_body_fails_rolls_back_the_play_lifecycle() {
         .unwrap();
         let q = question(&game, actor);
         assert_eq!(game.internal_play_phase(), Some(PlayPhase::Resolve));
+        assert_eq!(game.internal_cost_spec_payments().unwrap().len(), 2);
         assert_eq!(
             game.internal_pp_payments().unwrap(),
             &[PpPayment {
@@ -158,6 +159,7 @@ fn an_accepted_answer_whose_body_fails_rolls_back_the_play_lifecycle() {
         );
         assert_eq!(game.internal_play_phase(), None);
         assert_eq!(game.internal_pp_payments(), None);
+        assert_eq!(game.internal_cost_spec_payments(), None);
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state[me]["pp"]["current"], 3);
         assert_eq!(state[me]["leader"]["life"], 20);

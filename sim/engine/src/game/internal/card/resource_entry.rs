@@ -1,5 +1,6 @@
 //! Evolution-equivalent abilities share EP substitution and the ordinary evolution quota.
 
+use super::super::CostPaymentPurpose;
 use super::super::{DistributionMember, Execution, Fact, InputDomain, InstructionOutcome, Wait};
 use super::{
     Ability, AbilityOrigin, Action, CostSpec, Expr, Game, Int, KeywordId, Located, Nat, Node,
@@ -508,7 +509,12 @@ impl Game {
                 return Err(invalid("Advance PP action"));
             };
             *amount = Expr::Literal(Int(entry.pp_amount(chosen.ep)));
-            self.internal_card_payment(execution, &costs, false)?;
+            self.internal_card_payment(
+                execution,
+                &costs,
+                false,
+                Some(CostPaymentPurpose::ResourceEntry),
+            )?;
             return self.commit_entry_payment(execution, chosen.ep);
         }
         let paid = self.internal_pay_pp(
