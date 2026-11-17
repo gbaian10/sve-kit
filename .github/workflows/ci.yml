@@ -720,8 +720,8 @@ jobs:
     needs: changes
     if: ${{ needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
-    # The required steps keep 20 minutes; each of the three Codecov steps below has its own 5.
-    timeout-minutes: 35
+    # The required steps keep 20 minutes; each of the two Codecov upload steps below has its own 5.
+    timeout-minutes: 30
     defaults:
       run:
         working-directory: sim/web
@@ -825,13 +825,9 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-web-reports
         run: rm -rf "$REPORT_DIR"
+      # The token adds the Codecov bundle analysis plugin to this one build; the plugin only logs a failed
+      # upload (it never fails the build), so the build stays the gate without a second run.
       - name: Web build
-        run: bun run build:all
-      # Informational: the plugin is only added when CODECOV_TOKEN is set, so the build above stays the gate.
-      # The upload has no timeout of its own: failure and the 5 minutes here must not reach the job result.
-      - name: Web bundle analysis (Codecov)
-        continue-on-error: true
-        timeout-minutes: 5
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         run: bun run build:all

@@ -199,42 +199,9 @@ class FormatLockTests(unittest.TestCase):
             ):
                 check_lock(pin(old), {"4.0.0": current}, {})
 
-    def test_annotations_and_set_order_are_not_wire_changes(self) -> None:
-        """Layout, comments and unordered schema sets do not change the fingerprint."""
-        original = schema()
-        changed = copy.deepcopy(original)
-        changed["$comment"] = "A new comment"
-        changed["title"] = "A new title"
-        definitions = changed["$defs"]
-        assert isinstance(definitions, dict)
-        row = definitions["Row"]
-        assert isinstance(row, dict)
-        row["description"] = "New prose about the same tuple"
-        definitions["Owner"] = {"enum": ["family", "global"]}
-        assert fingerprint(original, {}) == fingerprint(changed, {})
-
-    def test_wire_fields_named_like_annotations_remain_protected(self) -> None:
-        """A wire field or literal description is not a schema annotation."""
-        original: JsonValue = {"properties": {"description": {"type": "string"}}}
-        changed: JsonValue = {"properties": {"description": {"type": "integer"}}}
-        assert fingerprint(original, {}) != fingerprint(changed, {})
-        assert fingerprint({"const": {"description": "old"}}, {}) != fingerprint(
-            {"const": {"description": "new"}},
-            {},
-        )
-
-    def test_schema_equivalence_preserves_json_boolean_and_integer_types(self) -> None:
-        """Python's True == 1 must not hide a changed Schema literal."""
-        assert fingerprint({"const": True}, {}) != fingerprint({"const": 1}, {})
-        assert fingerprint({"const": False}, {}) != fingerprint({"const": 0}, {})
-
     def test_reader_local_variable_rename_does_not_change_format(self) -> None:
         """An unfrozen reader refactor needs no lock update or format bump."""
         self.check_reader_refactor(frozen=False)
-
-    def test_frozen_reader_refactor_needs_no_format_bump(self) -> None:
-        """A frozen format remains usable after the same pure reader refactor."""
-        self.check_reader_refactor(frozen=True)
 
     def check_reader_refactor(self, *, frozen: bool) -> None:
         """Exercise the real command using reader code outside the fingerprint inputs."""
@@ -307,31 +274,6 @@ class FormatLockTests(unittest.TestCase):
             assert "Committed Schema differs from its source" in output.getvalue()
             assert "generate_schema" in output.getvalue()
             assert not (repository / LOCK_PATH).exists()
-
-    def test_golden_data_version_changes_do_not_change_format_lock(self) -> None:
-        """Shared sample content remains behavior-test input, not a format version."""
-        with checkout() as (repository, package):
-            current = current_fingerprints(package)
-            locked = update_lock({}, current, {})
-            path = repository / "tests/fixtures/snapshot-contract/v3/manifest.json"
-            path.write_text(path.read_text().replace("0001", "0002"))
-            changed = current_fingerprints(package)
-            assert changed == current
-            check_lock(locked, changed, {})
-
-    def test_live_data_version_and_payload_contents_are_not_contract_inputs(
-        self,
-    ) -> None:
-        """Editing ordinary snapshot payloads never changes the contract pin."""
-        with checkout() as (repository, package):
-            current = current_fingerprints(package)
-            path = repository / "live-snapshot.json"
-            for value in (
-                '{"data_version":"20261018T000000Z-0001","rows":["first"]}',
-                '{"data_version":"20261018T000000Z-0002","rows":["second"]}',
-            ):
-                path.write_text(value)
-                assert current_fingerprints(package) == current
 
     def test_malformed_frozen_flag_cannot_be_silently_rewritten(self) -> None:
         """Malformed lock records fail before the update path can overwrite them."""

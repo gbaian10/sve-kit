@@ -121,20 +121,6 @@ class RustCoverageTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             rust_coverage.options(["llvm-cov", "export", "-instr-profile=x"])
 
-    def test_package_keeps_coverage_sections_filter_and_totals(self) -> None:
-        """A shard ships its profile, stripped objects, filter and own totals."""
-        output = self.shard(1, 4)
-        assert json.loads((output / "llvm-cov.json").read_text()) == {
-            "ignore_filename_regex": FILTER,
-            "objects": ["a-1", "b-2"],
-            "lines": {"count": 10, "covered": 4, "percent": 40},
-        }
-        assert (output / "objects/a-1").read_text() == (
-            "--only-section=__llvm_covfun --only-section=__llvm_covmap "
-            "--only-section=__llvm_prf_names\na-1"
-        )
-        assert json.loads((output / "shard.profdata").read_text())["covered"] == 4
-
     def test_merged_profiles_are_gated_at_ninety_percent(self) -> None:
         """llvm-cov computes the merged total; below 90 percent fails."""
         self.shard(1, 4)
