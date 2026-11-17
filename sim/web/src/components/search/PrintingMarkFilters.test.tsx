@@ -153,7 +153,7 @@ it.each(
   const stamp = panel.getByRole("checkbox", { name: copy.stamp })
   const serial = panel.getByRole("checkbox", { name: copy.serial })
   const unlisted = panel.getByRole("checkbox", { name: copy.unlisted })
-  expect(panel.getAllByRole("checkbox")).toHaveLength(4)
+  expect(panel.getAllByRole("checkbox")).toHaveLength(5)
   const sve = panel.getByRole("checkbox", { name: copy.sve })
   expect(sve).toHaveAccessibleDescription(copy.sveHint)
   expect(stamp).toHaveAccessibleDescription(copy.stampHint)

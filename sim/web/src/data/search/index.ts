@@ -174,6 +174,7 @@ const CARD_COLUMNS = [
   "printedMechanisms",
   "errata",
   "restricted",
+  "regionOnly",
 ] as const
 const PRINTING_COLUMNS = [
   "id",
@@ -656,6 +657,9 @@ function build(
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
+    // Each edition's catalog only knows its own printings; the card lists every region it has.
+    const printed = arrayValue(index.card(entry.cardId)?.["printing_regions"] ?? [])
+    cards.regionOnly.push(Number(!printed.some((region) => region !== edition)))
     cards.restricted.push(restrictions?.cards.has(entry.cardId) ? 1 : 0)
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
     cards.printingStart.push(printings.id.length)
@@ -1414,6 +1418,7 @@ export class SearchIndex {
     const negative = Object.keys(state.mechanics).filter((id) => state.mechanics[id] === "not")
     for (let card = 0; card < this.cards.id.length; card += 1) {
       if (state.errataOnly && this.cards.errata[card] !== 1) continue
+      if (state.regionOnly && this.cards.regionOnly[card] !== 1) continue
       if (state.restrictionsOnly && this.cards.restricted[card] !== 1) continue
       const heldKeywords = arrayValue(this.pool.decode(this.cards.present[card] ?? 0))
       if (

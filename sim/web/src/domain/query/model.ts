@@ -70,6 +70,8 @@ export interface QueryState {
   readonly unlistedOnly: boolean
   /** Printings with no same-card digital target, or art absent from every linked game. */
   readonly sveOnly: boolean
+  /** Cards with no printing in the other region: JP-only in the JP edition, EN-only in EN. */
+  readonly regionOnly: boolean
   readonly errataOnly: boolean
   readonly restrictionsOnly: boolean
   /** Filters on registered reprint printings; a merged-by-card list ignores it. */
@@ -111,6 +113,7 @@ export const DEFAULT_QUERY: QueryState = {
   serialOnly: false,
   unlistedOnly: false,
   sveOnly: false,
+  regionOnly: false,
   errataOnly: false,
   restrictionsOnly: false,
   reprints: "all",
@@ -144,6 +147,7 @@ export function activeFilterCount(state: QueryState): number {
     (state.serialOnly ? 1 : 0) +
     (state.unlistedOnly ? 1 : 0) +
     (state.sveOnly ? 1 : 0) +
+    (state.regionOnly ? 1 : 0) +
     (state.errataOnly ? 1 : 0) +
     (state.restrictionsOnly ? 1 : 0) +
     (state.reprints !== DEFAULT_QUERY.reprints ? 1 : 0) +

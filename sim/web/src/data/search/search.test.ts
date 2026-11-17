@@ -2186,3 +2186,39 @@ it("lists a completed collab printing by its own name, and a card cell by the ca
   expect(cell?.name.original.text).toBe(card)
   expect(cell?.treatedAs).toBeUndefined()
 })
+
+it.each(["jp", "en"] as const)(
+  "keeps only cards with no printing in the other region in the %s edition",
+  async (edition) => {
+    const client = createSnapshotClient(base, { fetch: origin().fetcher })
+    await client.load()
+    await client.selectRegion?.(edition)
+    await client.prefetchPrintings?.()
+    const snapshot = client.snapshot()
+    if (!snapshot) throw new Error("missing snapshot")
+    const columns = new BootstrapColumns()
+    columns.ingest(snapshot.bootstrap)
+    columns.seal()
+    const index = new SearchIndex(columns, edition)
+    const cards = (regionOnly: boolean) =>
+      new Set(
+        index
+          .search({
+            ...query,
+            edition,
+            limit: 100,
+            state: { ...DEFAULT_QUERY, unit: "card", regionOnly },
+          })
+          .items.map((item) => item.key),
+      )
+    const only = cards(true)
+    expect(only.size).toBeGreaterThan(0)
+    expect(only.size).toBeLessThan(cards(false).size)
+    const other = edition === "jp" ? "en" : "jp"
+    for (const card of columns.index().cards)
+      expect(only.has(stringValue(card["id"]))).toBe(
+        cards(false).has(stringValue(card["id"])) &&
+          !arrayValue(card["printing_regions"] ?? []).includes(other),
+      )
+  },
+)

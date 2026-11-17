@@ -5339,6 +5339,19 @@
               "ref": "RegionView"
             }
           }
+        },
+        "printing_regions": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Region"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "scalar": "Region"
+            }
+          }
         }
       },
       "constraints": {
@@ -10043,6 +10056,19 @@
         },
         "regions": {
           "from": "card"
+        },
+        "printing_regions": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/Region"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "scalar": "Region"
+            }
+          }
         }
       },
       "constraints": {}
