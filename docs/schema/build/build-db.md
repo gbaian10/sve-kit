@@ -133,7 +133,7 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 `credit_raw` 留每版次每面原始繪師字串，`art_artist` 只存採納的關係；來源誤植不建立假 artist。`series_code` 是 `vocabulary(kind=stamp_series)` 的穩定英文 code（如 gcs/grandprix/championship），具固定 kind 複合 FK。kind=stamp 的 alias 指具體 stamp.code（含年份），`kind=stamp_series` 指系列；查系列按字段，不剝 code 前綴。標誌年不取版權年。`stamp/printing_stamp` 供依大賽系列標誌列卡；缺場次證據只稱「含此標誌」，不能宣稱某場獎卡全集。`event/printing_event`、`signature/printing_signature`、`artist_link/art_post` 延後，不為未知資料建空的公開表。所有衍生面級表以 `FK(printing_id,face_id)→printing_face` 約束；不必再重複 `card_id`。
 
-人工版次的獨立封套見 [manual-printings-v1](../domains/manual-printings.md)：每筆建 provisional card／face，未知原文不造 revision、current 或 rules_name；`printing_reference` 保存其公開來源 URL，`printed_code`／`manual_name_unit_id` 在 printing。official 卡號至少要有卡面號碼證據（序號卡，待實作）。官方序號補充不改原 PR 歸屬、身分或卡文（待實作）。
+人工版次的獨立封套見 [manual-printings-v1](../domains/manual-printings.md)：版次掛在 registry 既有的 EP／SEP card／face 下，未知原文不造 revision、current 或 rules_name；`printing_reference` 保存其公開來源 URL，`printed_code`／`manual_name_unit_id` 在 printing。official 卡號至少要有卡面號碼證據（序號卡，待實作）。官方序號補充不改原 PR 歸屬、身分或卡文（待實作）。
 
 **商品卡包關係（#555）**：官方商品匯入後，按已確認商品代碼／複合碼／字母尾碼子卡包，
 再以明示家族或同區版次的 `printing.home_set_id` 填 `product_family_member`。

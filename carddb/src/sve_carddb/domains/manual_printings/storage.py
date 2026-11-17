@@ -19,6 +19,7 @@ from sve_carddb.domains.manual_printings.records import (
 )
 from sve_carddb.domains.registry.allocation import unlisted_range
 from sve_carddb.domains.registry.build import permanent_id
+from sve_carddb.domains.registry.records import CardId
 from sve_carddb.domains.registry.storage import encode
 
 if TYPE_CHECKING:
@@ -28,9 +29,10 @@ if TYPE_CHECKING:
 
 
 class ManualSpec(RecordData):
-    """One printing to register; permanent IDs are derived and int_id is explicitly chosen."""
+    """One printing of an existing EP/SEP card; the printing ID is derived, int_id chosen."""
 
     slug: Slug
+    card_id: CardId
     int_id: int
     region: Region
     home_set_id: Owner
@@ -67,8 +69,6 @@ def plan_manual_files(
         if spec.int_id not in unlisted_range(spec.region) or spec.int_id in seen:
             raise ValueError("Invalid, out-of-range or reused unlisted int_id")
         seen.add(spec.int_id)
-        anchor = manual_anchor(spec.region, spec.slug)
-        card_id = permanent_id("c", anchor)
         entries.append(
             # Strict models take tuples only through JSON, as the registry does.
             ManualEntry.model_validate_json(
@@ -78,9 +78,10 @@ def plan_manual_files(
                         "owner": spec.home_set_id,
                         "data": spec.model_dump(mode="json")
                         | {
-                            "id": permanent_id("p", anchor),
-                            "card_id": card_id,
-                            "face_id": permanent_id("f", card_id + ":0"),
+                            "id": permanent_id(
+                                "p", manual_anchor(spec.region, spec.slug)
+                            ),
+                            "face_id": permanent_id("f", spec.card_id + ":0"),
                         },
                     }
                 )

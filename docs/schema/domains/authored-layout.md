@@ -417,7 +417,7 @@ route/default 純推導；authored 只寫 alias、variant `route_override`、`de
 
 `translation_context` 每次建置推導，預設 `semantic_variant=default`；只有採納的同字異義例外才能另配 variant。`translation_use` 釘具體 owner/field/ordinal，`translation_selection` 依 `context/target_lang` 選同模板同參數唯一翻法。不是每張卡任意自由翻；模板/術語更新仍沿 binding 反查。建置資料庫的上下文關係不出貨，卡表快照的 FieldTranslation 指已選 translation.id。
 
-官方資料庫未收錄的人工版次使用獨立 [manual-printings-v1](manual-printings.md) 封套：每筆建 provisional card／face，不造官方 observation／source_face_map；來源只收官網、官方 X 與官方影片的公開 URL（基本 EP／SEP 例外為空）。顯示人工名稱、卡面印字與來源，沒有卡文；人工名稱不進官方文字、rules_name 或翻譯。序號卡與官方版次的 serial_supplement 尚未實作，見該契約 §8。
+官方資料庫未收錄的人工版次使用獨立 [manual-printings-v1](manual-printings.md) 封套：版次掛在 registry 既有的 EP／SEP card／face 下，不造官方 observation／source_face_map；來源只收官網、官方 X 與官方影片的公開 URL（基本 EP／SEP 例外為空）。顯示人工名稱、卡面印字與來源，沒有卡文；人工名稱不進官方文字、rules_name 或翻譯。序號卡與官方版次的 serial_supplement 尚未實作，見該契約 §8。
 
 維護者 2026-10-03 最新更正：SNC 周年（日英、含 BP20-SNC01）歸 SNC，WB 三張歸 WB，PR-350／PR-442／PR-544 留 PR 且只補序號資料。ANV 等稀有度照卡面原樣存，不作歸檔家族。serial_total 為卡面分母；EN 一周年填 10、註記實際每種一張。無實體商品不造 product，只留 distribution 參考與註記；月年精度保留原樣，不補完整日期。圖片與額外張數／EN 查證各屬 #210／#211。
 

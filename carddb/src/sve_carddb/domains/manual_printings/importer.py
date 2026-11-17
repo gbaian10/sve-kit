@@ -21,10 +21,11 @@ def populate_manual_printings(
     authored_revision: str,
     build: BuildContext,
 ) -> InputRecord:
-    """Insert provisional cards, faces and unlisted printings inside the caller's transaction.
+    """Insert unlisted printings of registry EP/SEP cards inside the caller's transaction.
 
-    The manual name is a separate text unit on the printing; no face revision, current
-    or rules name is derived from it, so the face stays textless like an unknown source.
+    The card and face come from the registry. The manual name is a separate text unit on
+    the printing; no face revision, current or rules name is derived from it, and the
+    printing face carries no text, so the face's text stays that of its official printings.
     """
     if not re.fullmatch(r"[0-9a-f]{40}", authored_revision):
         raise ValueError("Authored revision must be a full Git commit SHA")
@@ -61,24 +62,6 @@ def populate_manual_printings(
                 "Missing product_family parent for manual printing; supply the family first"
             )
         source_id = sources[entry.record_key]
-        db.insert(
-            "card",
-            {
-                "id": data.card_id,
-                "layout": "single",
-                "identity_state": "provisional",
-                "home_set_id": data.home_set_id,
-            },
-        )
-        db.insert(
-            "face",
-            {
-                "id": data.face_id,
-                "card_id": data.card_id,
-                "ordinal": 0,
-                "side": "front",
-            },
-        )
         db.insert(
             "printing",
             {

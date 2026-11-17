@@ -144,12 +144,11 @@ class ManualPrintingData(RecordData):
     @model_validator(mode="after")
     def _consistent(self) -> ManualPrintingData:
         check_partial_date(self.available_on, self.date_precision)
-        anchor = manual_anchor(self.region, self.slug)
-        if (
-            self.id != permanent_id("p", anchor)
-            or self.card_id != permanent_id("c", anchor)
-            or self.face_id != permanent_id("f", self.card_id + ":0")
-        ):
+        # The printing is new and keyed by its slug; the card is an existing registry
+        # EP/SEP card, whose single face is its ordinal 0.
+        if self.id != permanent_id(
+            "p", manual_anchor(self.region, self.slug)
+        ) or self.face_id != permanent_id("f", self.card_id + ":0"):
             raise ValueError("Manual printing IDs disagree with the slug recipe")
         if (self.card_no is None) != (self.card_no_state == "none"):
             raise ValueError("card_no is empty exactly when card_no_state is none")
