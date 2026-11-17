@@ -120,7 +120,9 @@ export function createDeckFacts(catalog: Catalog, edition: Region): DeckFacts {
       (defaultPrintingId === undefined
         ? undefined
         : faceBasics(index, faceId, edition, defaultPrintingId).values)
-    const nameSource = summary?.name ?? (revision ? nameOf(index, revision) : undefined)
+    // Same-name rules count the card's name, never a collab printing's printed one.
+    const nameSource =
+      summary?.treatedAs ?? summary?.name ?? (revision ? nameOf(index, revision) : undefined)
     const facts: DeckCardFacts = {
       cardId,
       name: nameSource?.original.text ?? summary?.cardNo ?? cardId,
