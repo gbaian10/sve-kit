@@ -5,6 +5,9 @@
 #[path = "nested_play/lifecycle.rs"]
 mod lifecycle;
 
+#[path = "nested_play/declarations.rs"]
+mod declarations;
+
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
@@ -183,7 +186,18 @@ fn build_programs(
 }
 
 pub(super) fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) -> (Game, AbilityId) {
-    let programs = build_programs(side, child, scenario);
+    build_custom(side, child, enemy, scenario, |_| {})
+}
+
+fn build_custom(
+    side: &str,
+    child: &str,
+    enemy: bool,
+    scenario: Scenario,
+    customize: impl FnOnce(&mut BTreeMap<String, WellFormedCardProgram>),
+) -> (Game, AbilityId) {
+    let mut programs = build_programs(side, child, scenario);
+    customize(&mut programs);
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

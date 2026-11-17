@@ -298,6 +298,11 @@ let _ = Game::internal_question_stage;
 use sve_engine::game::Game;
 let _ = Game::internal_play_phase;
 ```
+
+```compile_fail,E0599
+use sve_engine::game::Game;
+let _ = Game::internal_number_declarations;
+```
 "
 )]
 #[derive(Clone, Serialize, Deserialize)]

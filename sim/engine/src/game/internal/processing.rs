@@ -1,7 +1,7 @@
 //! Procedure boundaries stay in the runtime queue, separate from authored IR.
 
-use super::{Execution, Result, invalid};
-use crate::ir::{Node, ScopeId};
+use super::{Execution, Fact, Game, Result, invalid};
+use crate::ir::{Nat, Node, PlayerId, ScopeId};
 
 /// A typed question's producer-recorded phase, separate from its purpose and answer domain.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -21,6 +21,32 @@ pub enum PlayPhase {
     Pay,
     /// The play has committed and its body is resolving.
     Resolve,
+}
+
+/// One completed public `Action::Declare` number, owned by its execution.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct NumberDeclaration {
+    /// Player who actually declared; this may differ from the effect controller.
+    pub player: PlayerId,
+    /// The accepted nonnegative value, without a wire-number conversion.
+    pub value: Nat,
+}
+
+pub(super) fn record_number_declaration(
+    game: &mut Game,
+    execution: &mut Execution,
+    player: PlayerId,
+    value: Nat,
+) {
+    let declaration = NumberDeclaration { player, value };
+    execution.number_declarations.push(declaration);
+    execution.record_fact(
+        game,
+        Fact::Declared {
+            player: declaration.player,
+            value: declaration.value,
+        },
+    );
 }
 
 pub(super) fn enter_play_phase(execution: &mut Execution, next: PlayPhase) -> Result<()> {
