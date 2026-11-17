@@ -1,4 +1,5 @@
 use super::super::{Step, list};
+use super::processing;
 use super::tokens::PaidX;
 use super::{
     CandidateAdmission, Context, Execution, Fact, Game, InstructionOutcome, Progress, admission,
@@ -775,8 +776,9 @@ impl Game {
         &mut self,
         actor: PlayerId,
         amount: Int,
-        cause: &serde_json::Value,
+        execution: &mut Execution,
     ) -> Result<Quantity> {
+        let cause = execution.frame().cause;
         let seat = seat_name(actor)?;
         let player = self.player_mut(seat)?;
         let current = int(&player.pp["current"]);
@@ -789,7 +791,8 @@ impl Game {
             .checked_sub(amount.0)
             .ok_or_else(|| invalid("PP payment overflow"))?;
         player.pp["current"] = json!(remaining);
-        self.record_player_resource(seat, "pp", current, remaining, cause);
+        self.record_player_resource(seat, "pp", current, remaining, &cause);
+        processing::record_pp_payment(execution, actor, amount);
         Ok(Quantity {
             amount,
             unit: QuantityUnit::Pp,
@@ -937,7 +940,7 @@ impl Game {
                     let amount = execution.integer(self, amount)?;
                     let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
                     (
-                        self.internal_pay_pp(payer, amount, &execution.frame().cause)?,
+                        self.internal_pay_pp(payer, amount, execution)?,
                         Vec::new(),
                         Vec::new(),
                     )

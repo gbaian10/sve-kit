@@ -155,34 +155,6 @@ fn optional_cost_acceptance_is_not_payment_and_declining_does_not_declare_implic
     }
 }
 
-fn end_trigger(game: &mut Game, actor: Viewer) {
-    game.internal_rule_action(&json!({"do":"end-phase"}))
-        .unwrap();
-    game.advance_player_input();
-    let pending = question(game, actor);
-    let choices =
-        if let QuestionShape::Decision(player::DecisionShape::Pending(choices)) = &pending.shape {
-            Some(choices)
-        } else {
-            None
-        };
-    assert!(
-        choices.is_some(),
-        "the fixture requires a pending trigger question"
-    );
-    let choices = choices.unwrap();
-    assert_eq!(
-        choices.len(),
-        1,
-        "the fixture installs one eligible end trigger"
-    );
-    assert_eq!(
-        submit(game, actor, &pending, Answer::Pending(choices[0].handle)),
-        SubmissionKind::Applied,
-        "choosing the pending trigger enters its play"
-    );
-}
-
 #[test]
 fn a_required_trigger_head_is_recorded_only_for_its_surviving_execution() {
     let program = program(

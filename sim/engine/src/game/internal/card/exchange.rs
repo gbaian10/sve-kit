@@ -695,11 +695,8 @@ impl Game {
                 ));
             }
         }
-        let quantity = self.internal_pay_pp(
-            execution.context.controller,
-            Int(pay_pp),
-            &execution.frame().cause,
-        )?;
+        let quantity =
+            self.internal_pay_pp(execution.context.controller, Int(pay_pp), execution)?;
         let intrinsic = if execution.field_entry {
             ReceiptId(0)
         } else {

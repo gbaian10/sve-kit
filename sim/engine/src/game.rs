@@ -308,6 +308,11 @@ let _ = Game::internal_number_declarations;
 use sve_engine::game::Game;
 let _ = Game::internal_play_declarations;
 ```
+
+```compile_fail,E0599
+use sve_engine::game::Game;
+let _ = Game::internal_pp_payments;
+```
 "
 )]
 #[derive(Clone, Serialize, Deserialize)]

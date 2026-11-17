@@ -131,6 +131,10 @@ fn board_relationships_follow_typed_meal_and_ride_payment_and_departure() {
                 question.domain,
                 InputDomain::ResourceEntryPayment { .. }
             ));
+            assert!(
+                game.internal_pp_payments().unwrap().is_empty(),
+                "resource selection and pricing have not paid"
+            );
             for viewer in [Viewer::P1, Viewer::P2] {
                 assert_eq!(
                     game.observe(viewer).unwrap().relationships,
@@ -151,6 +155,12 @@ fn board_relationships_follow_typed_meal_and_ride_payment_and_departure() {
             while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
                 game.resume_internal_card().unwrap();
             }
+            assert_eq!(game.internal_pp_payments(), None);
+            let me = if actor == Viewer::P1 { "P1" } else { "P2" };
+            assert_eq!(
+                game.projection(View::Referee).unwrap()[me]["pp"]["current"],
+                3
+            );
             let before = exact_authority(&game);
             for viewer in [Viewer::P1, Viewer::P2] {
                 let observed = game.observe(viewer).unwrap();

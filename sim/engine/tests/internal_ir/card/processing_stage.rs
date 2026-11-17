@@ -1,3 +1,6 @@
+#[path = "processing_stage/pp_payments.rs"]
+mod pp_payments;
+
 #[path = "processing_stage/play_declarations.rs"]
 mod play_declarations;
 
@@ -74,6 +77,34 @@ fn closed_wire(game: &Game, actor: Viewer) {
             Err(ProjectionError::Unavailable)
         ),
         "a question phase alone does not authorize wire interaction"
+    );
+}
+
+fn end_trigger(game: &mut Game, actor: Viewer) {
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    game.advance_player_input();
+    let pending = question(game, actor);
+    let choices =
+        if let QuestionShape::Decision(player::DecisionShape::Pending(choices)) = &pending.shape {
+            Some(choices)
+        } else {
+            None
+        };
+    assert!(
+        choices.is_some(),
+        "the fixture requires a pending trigger question"
+    );
+    let choices = choices.unwrap();
+    assert_eq!(
+        choices.len(),
+        1,
+        "the fixture installs one eligible end trigger"
+    );
+    assert_eq!(
+        submit(game, actor, &pending, Answer::Pending(choices[0].handle)),
+        SubmissionKind::Applied,
+        "choosing the pending trigger enters its play"
     );
 }
 
