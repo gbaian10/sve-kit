@@ -576,10 +576,8 @@ jobs:
         run: printf '[profile.dev.package."*"]\nopt-level = 2\n' >> "${CARGO_HOME:-$HOME/.cargo}/config.toml"
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
         with:
-          save-if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-      - uses: taiki-e/install-action@cfdb7ed4ccc7c7dce37759eae89dc5674b469b39 # v2.90.3
-        with:
-          tool: cargo-llvm-cov@0.9.1
+          key: nocov-trial-${{ matrix.shard }}
+          save-if: true
       - uses: jdx/mise-action@b44d12e7d0d8ee7461bb893e1b1993500433185b # v5.2.7
         with:
           install: false
@@ -608,7 +606,6 @@ jobs:
           echo "cargo llvm-cov exit status: $status (statistics in the next step; raw output stays private)"
           if [ "$status" -eq 0 ]; then
             mkdir -p "$COVERAGE_DIR"
-            cp -r "$REPORT_DIR/coverage" "$COVERAGE_DIR/shard-${SHARD%/*}"
             cp "$REPORT_DIR/shard.json" "$COVERAGE_DIR/shard-${SHARD%/*}.json"
           fi
           exit "$status"

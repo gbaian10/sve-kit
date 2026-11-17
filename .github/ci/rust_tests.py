@@ -37,6 +37,8 @@ DEFAULT = [
 ]
 # The shards run the same workspace scope as DEFAULT; the 90% gate applies to their merged coverage.
 SHARD_SCOPE = ["--locked", "--workspace"]
+# Trial: llvm-cov also skips doctests, so select the same targets.
+TARGETS = ["--lib", "--bins", "--tests"]
 SHARD = re.compile(r"--shard=([1-9][0-9]*)/([1-9][0-9]*)")
 LISTED = re.compile(r"^(.+): test$")
 # Everything tests.support.repository_current reads; renaming the generator or its
@@ -213,11 +215,8 @@ def cargo(
 
 def list_tests() -> list[str] | int:
     """Build every test binary with coverage and list its tests (or return Cargo's failure status)."""
-    cleaned = cargo(["llvm-cov", "clean", "--workspace"])
-    if cleaned.returncode:
-        return cleaned.returncode
     listing = cargo(
-        ["llvm-cov", "--no-report", *SHARD_SCOPE, "--", "--list", "--format=terse"],
+        ["test", *SHARD_SCOPE, *TARGETS, "--", "--list", "--format=terse"],
         capture=True,
     )
     if listing.returncode:
@@ -242,9 +241,9 @@ def run_shard(
     # --no-report runs never clean, so this reuses the binaries the listing built.
     tests = cargo(
         [
-            "llvm-cov",
-            "--no-report",
+            "test",
             *SHARD_SCOPE,
+            *TARGETS,
             "--",
             "--exact",
             *selected,
@@ -254,6 +253,18 @@ def run_shard(
     if tests.returncode:
         return tests.returncode
     report.mkdir(parents=True, exist_ok=True)
+    (report / "shard.json").write_text(
+        json.dumps(
+            {
+                "index": index,
+                "total": total,
+                "collected": len(names),
+                "selected": len(selected),
+            }
+        ),
+        encoding="utf-8",
+    )
+    return 0
     summary = report / "summary.json"
     # -vv prints the exact llvm-cov command, which the coverage job repeats on the merged profiles.
     exported = cargo(
