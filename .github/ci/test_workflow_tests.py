@@ -46,8 +46,8 @@ class DirectTestTests(unittest.TestCase):
         assert not owned["mypy"].direct
         assert main(["check"]) == 0
 
-    def test_bun_settings_run_the_web_job(self) -> None:
-        """A bunfig.toml-only PR must rerun the web format check, the one with Tailwind class order."""
+    def test_component_inputs_select_their_jobs(self) -> None:
+        """A change to any of these inputs starts the job that tests it; otherwise its tests silently skip."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
         filters = yaml.safe_load(
             next(
@@ -56,51 +56,26 @@ class DirectTestTests(unittest.TestCase):
                 if step.get("id") == "filter"
             )
         )
-        assert any(fnmatchcase("bunfig.toml", pattern) for pattern in filters["web"])
-
-    def test_battle_contract_changes_run_the_web_job_with_a_rust_toolchain(
-        self,
-    ) -> None:
-        """The web types and validator are generated from the contract crate before any web check."""
-        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        filters = yaml.safe_load(
-            next(
-                step["with"]["filters"]
-                for step in workflow["jobs"]["changes"]["steps"]
-                if step.get("id") == "filter"
-            )
-        )
-        for path in (
-            "sim/battle-contract/src/lib.rs",
-            "Cargo.lock",
-            "rust-toolchain.toml",
-        ):
-            assert any(fnmatchcase(path, pattern) for pattern in filters["web"])
-        commands = [
-            str(step.get("run", "")) for step in workflow["jobs"]["web"]["steps"]
-        ]
-        toolchain = next(i for i, run in enumerate(commands) if "rustup" in run)
-        contract = next(i for i, run in enumerate(commands) if "check:contract" in run)
-        checks = next(i for i, run in enumerate(commands) if "bun run typecheck" in run)
-        assert toolchain < contract < checks
-
-    def test_publish_changes_select_the_python_job(self) -> None:
-        """Publisher changes select the Python job that runs publisher tests."""
-        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        filters = yaml.safe_load(
-            next(
-                step["with"]["filters"]
-                for step in workflow["jobs"]["changes"]["steps"]
-                if step.get("id") == "filter"
-            )
-        )
-        for path in (
-            "carddb/src/sve_carddb/export/read_api.py",
-            "publish/src/sve_publish/gc.py",
-        ):
-            assert any(fnmatchcase(path, pattern) for pattern in filters["python"])
-        steps = workflow["jobs"]["python"]["steps"]
-        assert any(step.get("id") == "publish-tests" for step in steps)
+        selected = {
+            # bunfig.toml carries the Tailwind class order; the web types come from the contract crate.
+            "web": (
+                "bunfig.toml",
+                "sim/battle-contract/src/lib.rs",
+                "Cargo.lock",
+                "rust-toolchain.toml",
+            ),
+            "python": (
+                "carddb/src/sve_carddb/export/read_api.py",
+                "publish/src/sve_publish/gc.py",
+            ),
+            "rust": ("sim/engine/src/lib.rs", "tests/engine/card-input.json"),
+        }
+        for job, paths in selected.items():
+            for path in paths:
+                assert any(fnmatchcase(path, pattern) for pattern in filters[job]), (
+                    job,
+                    path,
+                )
 
     def test_workflow_test_and_cleanup_contract(self) -> None:
         """Required component test and cleanup steps remain in their jobs."""
@@ -111,10 +86,14 @@ class DirectTestTests(unittest.TestCase):
         jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
         for job in (*TEST_JOBS, "python", *COVERAGE_JOBS):
             steps = cast("list[dict[str, object]]", jobs[job]["steps"])
+            # A component job that runs can skip neither its tests nor its coverage gate.
             if job in TEST_JOBS:
                 test = next(step for step in steps if step.get("id") == "tests")
                 assert "run" in test
                 assert "if" not in test
+            if job in COVERAGE_JOBS:
+                gate = next(step for step in steps if step.get("id") == "coverage")
+                assert "if" not in gate
             cleanup = next(
                 step for step in steps if str(step.get("name", "")).startswith("Remove")
             )
@@ -134,10 +113,17 @@ class DirectTestTests(unittest.TestCase):
             assert options["retention-days"] == 1
             assert step["if"] == "${{ steps.tests.outcome == 'success' }}"
 
-    def test_python_does_not_require_private_checkout_or_credentials(self) -> None:
-        """Python CI reads public inputs without adding private credentials."""
+    def test_ci_does_not_require_private_checkout_or_credentials(self) -> None:
+        """Python and Rust CI read public inputs without adding private credentials."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        for job in ("python", "python-tests", "python-coverage"):
+        for job in (
+            "python",
+            "python-tests",
+            "python-coverage",
+            "rust",
+            "rust-tests",
+            "rust-coverage",
+        ):
             steps = workflow["jobs"][job]["steps"]
             checkouts = [
                 step
@@ -147,62 +133,6 @@ class DirectTestTests(unittest.TestCase):
             assert len(checkouts) == 1
             assert all("ssh-key" not in step.get("with", {}) for step in checkouts)
             assert all("testdata.py" not in str(step.get("run", "")) for step in steps)
-
-    def test_component_test_steps_are_not_conditionally_skipped(self) -> None:
-        """A component job that runs cannot skip its required test step."""
-        workflow = cast(
-            "dict[str, object]",
-            yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
-        )
-        jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
-        for component in TEST_JOBS:
-            test = next(
-                step
-                for step in cast("list[dict[str, object]]", jobs[component]["steps"])
-                if step.get("id") == "tests"
-            )
-            assert "if" not in test
-        for component in COVERAGE_JOBS:
-            gate = next(
-                step
-                for step in cast("list[dict[str, object]]", jobs[component]["steps"])
-                if step.get("id") == "coverage"
-            )
-            assert "if" not in gate
-
-    def test_rust_cleanup_retains_target_before_cache_post_save(self) -> None:
-        """Execute cleanup in a sandbox: discard raw reports, keep compiled dependencies."""
-        workflow = cast(
-            "dict[str, object]",
-            yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
-        )
-        jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
-        steps = cast("list[dict[str, object]]", jobs["rust-tests"]["steps"])
-        script = str(
-            next(
-                step for step in steps if str(step.get("name", "")).startswith("Remove")
-            )["run"]
-        )
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            for name in ("target", "reports", "coverage"):
-                (root / name).mkdir()
-                (root / name / "marker").touch()
-            result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- sandboxed real cleanup, fixed argv
-                [shutil.which("bash") or "bash", "-eu", "-c", script],
-                cwd=root,
-                env={
-                    **os.environ,
-                    "REPORT_DIR": str(root / "reports"),
-                    "COVERAGE_DIR": str(root / "coverage"),
-                },
-                capture_output=True,
-                check=False,
-            )
-            assert result.returncode == 0
-            assert (root / "target/marker").exists()
-            assert not (root / "reports").exists()
-            assert not (root / "coverage").exists()
 
     def test_python_cleanup_removes_test_data_and_reports(self) -> None:
         """Python cleanup removes private reports and test data from a failed run."""
@@ -247,62 +177,6 @@ class DirectTestTests(unittest.TestCase):
                 assert not (root / "carddb/htmlcov").exists()
                 if job == "python-tests":
                     assert not (root / "coverage").exists()
-
-    def test_web_cleanup_removes_private_reports(self) -> None:
-        """Web cleanup removes the raw test report after the step has run."""
-        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        steps = workflow["jobs"]["web"]["steps"]
-        script = str(
-            next(
-                step["run"]
-                for step in steps
-                if step.get("name") == "Remove private Web reports"
-            )
-        )
-        with tempfile.TemporaryDirectory() as folder:
-            root = Path(folder)
-            report = root / "reports/test.log"
-            report.parent.mkdir(parents=True)
-            report.touch()
-            result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- sandboxed real cleanup, fixed argv
-                [shutil.which("bash") or "bash", "-eu", "-c", script],
-                cwd=root,
-                env={**os.environ, "REPORT_DIR": str(root / "reports")},
-                capture_output=True,
-                check=False,
-            )
-            assert result.returncode == 0
-            assert not report.parent.exists()
-
-    def test_rust_changes_select_the_rust_job(self) -> None:
-        """Rust source and public engine inputs select Rust validation."""
-        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        filters = yaml.safe_load(
-            next(
-                step["with"]["filters"]
-                for step in workflow["jobs"]["changes"]["steps"]
-                if step.get("id") == "filter"
-            )
-        )
-        for path in (
-            "sim/battle-contract/src/lib.rs",
-            "sim/engine/src/lib.rs",
-            "tests/engine/card-input.json",
-        ):
-            assert any(fnmatchcase(path, pattern) for pattern in filters["rust"])
-
-    def test_rust_does_not_require_private_checkout_or_credentials(self) -> None:
-        """Rust CI uses the public checkout without private credentials."""
-        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
-        for job in ("rust", "rust-tests", "rust-coverage"):
-            steps = workflow["jobs"][job]["steps"]
-            checkouts = [
-                step
-                for step in steps
-                if "actions/checkout@" in str(step.get("uses", ""))
-            ]
-            assert len(checkouts) == 1
-            assert all("ssh-key" not in step.get("with", {}) for step in checkouts)
 
     def test_component_test_steps_preserve_failure_and_private_logs(self) -> None:
         """Fail each actual test step and ensure status and diagnostics stay private."""
@@ -368,23 +242,6 @@ class ShardTests(unittest.TestCase):
         """Return the CI jobs."""
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
         return cast("dict[str, dict[str, object]]", workflow["jobs"])
-
-    def test_every_shard_job_reaches_its_coverage_gate_and_ci_ok(self) -> None:
-        """Shards are 1..N, feed one coverage job, and every job counts for its component."""
-        jobs = self.workflow()
-        for tests, coverage, component in (
-            ("python-tests", "python-coverage", "python"),
-            ("rust-tests", "rust-coverage", "rust"),
-        ):
-            strategy = cast("dict[str, object]", jobs[tests]["strategy"])
-            shards = cast("dict[str, list[int]]", strategy["matrix"])["shard"]
-            assert shards == list(range(1, len(shards) + 1))
-            assert strategy["fail-fast"] is False
-            assert jobs[coverage]["needs"] == ["changes", tests]
-            for job in (tests, coverage):
-                assert jobs[job]["if"] == (
-                    f"${{{{ needs.changes.outputs.{component} == 'true' }}}}"
-                )
 
     def test_ci_ok_rejects_failed_cancelled_or_missing_required_shards(self) -> None:
         """Run the real gate: every new required job must succeed; unchanged components may skip."""

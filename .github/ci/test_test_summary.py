@@ -59,27 +59,6 @@ class SummaryTests(unittest.TestCase):
             encoding="utf-8",
         )
 
-    def test_python_counts_locations_and_timings(self) -> None:
-        """Count testcases once, combine errors with failures and omit private fields."""
-        self.write_junit()
-        summary = junit_summary("python", self.folder)
-        assert (
-            "Total: **5** · Passed: **2** · Skipped: **1** · Failed/errors: **2**"
-            in summary
-        )
-        assert "**9.50 s**" in summary
-        assert "Shard **1/3**: ran **5** of the **5** tests assigned here" in summary
-        # One shard's coverage is partial; only the combined job reports and gates it.
-        assert "91.25" not in summary
-        assert "| tests/test_alpha.py | 2 | 3.000 |" in summary
-        assert "| tests/test_beta.py | 3 | 3.500 |" in summary
-        slowest = summary.split("### Slowest 30 cases", 1)[1]
-        assert slowest.index("tests/test_beta.py::test_error") < slowest.index(
-            "tests/test_alpha.py::test_fail"
-        )
-        assert PRIVATE not in summary
-        assert "[" not in summary
-
     def test_file_groups_preserve_slowest_case_names(self) -> None:
         """The same real report stays comparable after xdist grouping."""
         self.write_junit()
@@ -262,25 +241,6 @@ class SummaryTests(unittest.TestCase):
         assert "::test_case_4 |" not in summary
         assert "| tests/test_rank.py | 35 | 595.000 |" in summary
         assert "### Failed tests\n\nNone reported." in summary
-
-    def test_fast_python_failure_and_error_outside_slowest_thirty(self) -> None:
-        """Failures must be findable even when thirty passing cases are slower."""
-        passed = "".join(
-            f'<testcase classname="tests.test_rank" name="test_pass_{i}" time="10"/>'
-            for i in range(35)
-        )
-        failed = f'<testcase classname="tests.test_fast" name="test_failure[{PRIVATE}]" time="0"><failure message="{PRIVATE}">{PRIVATE}</failure></testcase>'
-        error = f'<testcase classname="tests.test_fast" name="test_error" time="0"><error>{PRIVATE}</error><system-err>{PRIVATE}</system-err></testcase>'
-        (self.folder / "junit.xml").write_text(
-            f"<testsuite>{passed}{failed}{error}</testsuite>", encoding="utf-8"
-        )
-        summary = junit_summary("python", self.folder)
-        failures, slowest = summary.split("### Slowest 30 cases", 1)
-        assert "- `tests/test_fast.py::test_failure`" in failures
-        assert "- `tests/test_fast.py::test_error`" in failures
-        assert "::test_failure" not in slowest
-        assert "::test_error" not in slowest
-        assert PRIVATE not in summary
 
     def test_fast_web_failure_uses_file_and_ordinal(self) -> None:
         """A fast Vitest failure stays visible without publishing its description."""

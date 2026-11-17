@@ -333,7 +333,7 @@ export default defineConfig({
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),
     serveSnapshotRoot("/cdn-preview", previewDir),
-    // Only the CI bundle analysis step has a token, so local builds and deploys never write the stats file into dist/.
+    // Only the CI build has a token, so local builds and deploys never write the stats file into dist/.
     // The plugin declares Vite 4-6 only; re-check it after a Vite or plugin upgrade.
     ...(codecovToken
       ? [
