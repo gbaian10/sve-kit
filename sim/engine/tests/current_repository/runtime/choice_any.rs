@@ -24,6 +24,7 @@ fn question(game: &mut Game) -> DecisionView {
 }
 
 // Reconciliation of real sources dominates the first run; both JP crests share one selection.
+// R-0015 (EN Q&A "You must choose at least 1 option."): any number, but never none.
 #[test]
 fn sham_naqoa_crest_choice_any_all_printings_replace_the_real_oceanus_count() {
     for number in ["BP20-P65", "BP20-T06"] {
@@ -66,14 +67,20 @@ fn sham_naqoa_crest_choice_any_all_printings_replace_the_real_oceanus_count() {
             assert_eq!(
                 *cardinality,
                 Cardinality {
-                    minimum: Nat(0),
+                    minimum: Nat(1),
                     maximum: Some(Nat(2))
                 }
+            );
+            assert!(
+                game.answer_internal_card(choice.actor, choice.token, Answer::Modes(vec![]))
+                    .is_err(),
+                "choosing no mode"
             );
             let selected = if all {
                 vec![ModeId(2), ModeId(1)]
             } else {
-                vec![]
+                // The leader heal alone: one mode is enough.
+                vec![ModeId(2)]
             };
             let declared = game
                 .answer_internal_card(choice.actor, choice.token, Answer::Modes(selected))
@@ -105,10 +112,7 @@ fn sham_naqoa_crest_choice_any_all_printings_replace_the_real_oceanus_count() {
             event_cemetery::finish_checks(&mut game);
             let after = game.projection(View::Referee).unwrap();
             assert_eq!(after["P1"]["pp"]["current"], 7_u8);
-            assert_eq!(
-                after["P1"]["leader"]["life"],
-                if all { 16_u8 } else { 15_u8 }
-            );
+            assert_eq!(after["P1"]["leader"]["life"], 16_u8);
             assert_eq!(
                 after["objects"]["enemy"]["hp"].as_i64().unwrap(),
                 enemy_hp - if all { 2_i64 } else { 0_i64 }

@@ -26,10 +26,10 @@ CR 1.27.0、2026-09-26 日文卡表（含所有面與 sections／Q&A）及設計
 | R-0012 | E.stat-change 同指示同主體一個 OriginFactId，攻／體為 facets，or 條件只匹配一次                                                                                  | inferred    |
 | R-0013 | I.transform TokenAllocation 部分成功：actor 選模板子集，每模板至多一張，零張不詢問                                                                               | inferred    |
 | R-0014 | L.continuous 同 timestamp 以 D.rule-choice ContinuousTieOrder 定序：回合玩家先、同玩家自選並保存                                                                 | inferred    |
-| R-0015 | ChooseModeAny（好きな数チョイス）數域 0..可用模式數；選 0 不執行整段                                                                                             | inferred    |
+| R-0015 | ChooseModeAny（好きな数チョイス）數域 1..可用模式數；至少選 1 個（英文官方 Q2451）                                                                               | inferred    |
 | R-0016 | 效果授權的起動在 E.play 照常記入該能力使用歷史，只略過授權路徑的限次檢查；逆向順序為本專案推定                                                                   | inferred    |
 | R-0017 | ヒシミラクル送墓回條的原費種類數等於 1，要求至少一張實際成功送墓；一張成立，零張不成立                                                                           | inferred    |
-| R-0021 | L.rule-modifier 的レリア體力基準也適用防守反擊；Q226／Q227 排除能力傷害，未直接回答防守方範圍                                                                    | inferred    |
+| R-0021 | L.rule-modifier 的レリア體力基準也適用防守反擊（官方 Q233）；Q226／Q227 排除能力傷害                                                                             | inferred    |
 
 T 型別、R 引用、D 決定、C 捕捉、B 能力、I 指示、K 組合、X 表達式、S 選擇器、V 讀值、E 事件、H 歷史、L 效果；G 只是未決分類，不能執行。`Expr<T>` 純函數；`Info<T>=Present`(T)/AbsentByRules；未知欄位不是 AbsentByRules。每個 registry 定義攜帶 rule/rulings、型別、合法上下文、可見性與 source span，載入 capability 不足即拒絕。
 
@@ -437,7 +437,7 @@ Owners(Hand)，零張不問替代。Partition 按文字順序消耗剩餘 found�
 
 R-0004 revision 2 納入維護者 2026-10-19 對三組舊新版次共用 DSL 的判斷，追加四個指定模板與 Q417 選取事件旁證；一般先選後判的既有證據與 generalized 強度維持不變。
 
-正式位置是 `authored/rules/rulings/`：R-0001～R-0009 經使用者裁定；六項專案解讀登錄為 R-0010～R-0015，標 strength: inferred。不存 `decided_by` 的決定者，裁定日期以頂層 `decided_on` 保留；證據、結論與強度仍完整保留。條文更新按依賴圖反查 IR、巨集與卡片 meta 重審。`supersedes` 保存被取代範圍，effective view 僅採目前有效部分；R-0002 的結算條件及段落範圍仍有效。
+正式位置是 `authored/rules/rulings/`：R-0001～R-0009 經使用者裁定；六項專案解讀登錄為 R-0010～R-0015，標 strength: inferred（R-0015 之後依英文官方 Q2451 改正為 official）。不存 `decided_by` 的決定者，裁定日期以頂層 `decided_on` 保留；證據、結論與強度仍完整保留。條文更新按依賴圖反查 IR、巨集與卡片 meta 重審。`supersedes` 保存被取代範圍，effective view 僅採目前有效部分；R-0002 的結算條件及段落範圍仍有效。
 來源互相衝突時保留 disputed 與相反證據，不以模型投票決定官方答案。提示按具體結論標強度並提供介面語言回退；新裁定不自動提升能力為 verified。
 卡片 meta 引用裁定 ID，提示再引用對應 Q&A，不逐卡複製整份來源。參見 [ADR-0009](../adr/0009-rulings-evidence.md)。
 

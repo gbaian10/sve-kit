@@ -2253,7 +2253,7 @@ auto:
   do: [{ damage: { to: { leaders: opponents }, n: 3 } }]
 ```
 
-此能力掛在 grant.abilities 的接受者（裝備者），不是闇斧ナハトファング或裝備提供者自身。`no_trigger` 的 on:Ref/Binding 與 who:PlayerRef/PlayerSet 恰一，who 指能力控制者；`search.entry_effects` 與 move 相同，在入場掃描前作用。`extra_trigger:{phase,who,n}` 降 TriggerMultiplicity，N 是附加次數。`ignore_ward` 只略過守護目標限制。`choice_any` 是 ChooseMode 的數量自我取代：原本至少一個才適用；BP20-P65 替代後「好きな数」可為 0（依 CR 1.3.5／5.18.2.2 推論，無此卡直接 Q&A；`strength: inferred`），不套「Nつまで」的 1 下限。
+此能力掛在 grant.abilities 的接受者（裝備者），不是闇斧ナハトファング或裝備提供者自身。`no_trigger` 的 on:Ref/Binding 與 who:PlayerRef/PlayerSet 恰一，who 指能力控制者；`search.entry_effects` 與 move 相同，在入場掃描前作用。`extra_trigger:{phase,who,n}` 降 TriggerMultiplicity，N 是附加次數。`ignore_ward` 只略過守護目標限制。`choice_any` 是 ChooseMode 的數量自我取代：原本至少一個才適用；BP20-P65 替代後「好きな数」只放寬上限，仍至少選 1 個（英文官方 Q2451「You must choose at least 1 option.」；R-0015）。
 
 `A.by-kind` 為 by_kind 的 canonical ID；`A.define`、`A.either` 是新增組合／宣告 ID，其他新原子（apply、sep）依 A.act.<鍵>。v0 的 A.declare、A.order、A.distribute、A.place-acted 分類 ID 保留；A.order 分類 ID 對應 choose.order／move.order，不提供獨立 order 作者鍵，不另建立第二個 canonical A.act.order。
 
