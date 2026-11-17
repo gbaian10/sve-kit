@@ -267,7 +267,7 @@ def test_collab_hashes_read_only_current_collab_names() -> None:
         names=[{"kind": "authored", "lang": "ja", "text": "X"}],
         evidence=[{"source_ref": ref("/own/name"), "role": "rules_text"}],
     )
-    snapshot = cast(
+    snapshot: AdoptionSnapshot = cast(
         "AdoptionSnapshot",
         SimpleNamespace(current_records=lambda: (record(), primary)),
     )
