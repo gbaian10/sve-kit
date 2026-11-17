@@ -2137,3 +2137,52 @@ it("loads extra digital-art data only on SVE queries and reuses completed result
     h.session.dispose()
   }
 })
+
+it("lists a completed collab printing by its own name, and a card cell by the card's", async () => {
+  const client = createSnapshotClient(base, { fetch: origin().fetcher })
+  await client.load()
+  const initial = client.snapshot()
+  if (!initial) throw new Error("missing initial snapshot")
+  await client.prefetchPrintings?.()
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("missing snapshot")
+  const unit = { id: "t:ja:synthetic-collab", lang: "ja", text: "合成コラボ名" }
+  const textUnits = snapshot.bootstrap.find((fragment) => fragment.table === "text_unit")
+  if (!textUnits) throw new Error("no text unit fragment")
+  const full = new BootstrapColumns()
+  full.ingest([
+    ...snapshot.bootstrap.map((fragment) => ({
+      ...fragment,
+      rows: fragment.rows.map((row) =>
+        // Both JP printings print the collab name, so the card cell's representative does too.
+        fragment.table === "printing" &&
+        ["p:bp01-002", "p:bp01-002-alt"].includes(stringValue(row["id"]))
+          ? {
+              ...row,
+              faces: (row["faces"] as JsonObject[]).map((face) => ({
+                ...face,
+                name_unit_id: unit.id,
+              })),
+            }
+          : row,
+      ),
+    })),
+    { ...textUnits, identity: "synthetic-collab-name", rows: [unit] },
+  ])
+  full.seal()
+  // A catalog locator has no faces; the printed name arrives with the printing rows.
+  const locators = new BootstrapColumns()
+  locators.ingest(initial.bootstrap)
+  locators.seal()
+  const index = new SearchIndex(locators, "jp")
+  index.completePrintings(full)
+  const items = (unit: "printing" | "card") =>
+    index.search({ ...query, limit: 50, state: { ...DEFAULT_QUERY, unit, text: "BP01-002" } }).items
+  const printing = items("printing").find((item) => item.printingId === "p:bp01-002-alt")?.summary
+  expect(printing?.name.original.text).toBe("合成コラボ名")
+  const card = printing?.treatedAs?.original.text
+  expect(card).toBeTruthy()
+  const cell = items("card").find((item) => item.key === printing?.cardId)?.summary
+  expect(cell?.name.original.text).toBe(card)
+  expect(cell?.treatedAs).toBeUndefined()
+})

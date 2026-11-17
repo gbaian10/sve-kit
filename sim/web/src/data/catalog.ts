@@ -135,6 +135,15 @@ function manualNameOf(index: CardIndex, printing: Row | undefined): NameSource |
   return unitName(index, printing?.["manual_name_unit_id"])
 }
 
+/** The name a printing itself carries: its manual name, else its own printed name. */
+export function printingOwnName(
+  index: CardIndex,
+  printing: Row | undefined,
+  faceId: string,
+): NameSource | undefined {
+  return manualNameOf(index, printing) ?? printedNameOf(index, printing, faceId)
+}
+
 /** A printing's own printed name, shipped only where it differs from the card's name. */
 function printedNameOf(
   index: CardIndex,
@@ -297,7 +306,7 @@ function* catalogCardCursor(
         const own = index.displayRevision(faceId, region, stringValue(printing["id"]))
         const ownName = own ? nameOf(index, own, "name", revision ?? own) : undefined
         // A collab or event printing keeps its printed name; the card's name stays its rule name.
-        const printed = manualNameOf(index, printing) ?? printedNameOf(index, printing, faceId)
+        const printed = printingOwnName(index, printing, faceId)
         const shownName = printed ?? ownName ?? name
         if (printed) {
           const key = `${printed.original.lang}\u0000${printed.original.text}`

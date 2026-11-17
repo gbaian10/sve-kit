@@ -30,6 +30,7 @@ import {
   catalogCards,
   isUnlistedPrinting,
   nameOf,
+  printingOwnName,
   printingTypeCode,
 } from "../catalog"
 import {
@@ -301,6 +302,13 @@ interface Parts {
   readonly options: SearchOptions
   readonly releases: readonly SetRelease[]
   readonly targets: Columns
+}
+
+/** One cell per card names the card itself, even when its representative is a collab printing. */
+function asCardUnit(summary: CardSummary, unit: SearchQuery["state"]["unit"]): CardSummary {
+  if (unit !== "card" || !summary.treatedAs) return summary
+  const { treatedAs, ...rest } = summary
+  return { ...rest, name: treatedAs }
 }
 
 function optionOf(index: CardIndex, row: JsonObject, field: string): SearchOption {
@@ -1093,6 +1101,19 @@ export class SearchIndex {
             )
           }
           const intId = typeof row["int_id"] === "number" ? row["int_id"] : undefined
+          // A catalog locator has no faces, so a printing's own printed name arrives only now;
+          // the card's name it was summarised under becomes its treated-as name.
+          const own = front ? printingOwnName(index, row, stringValue(front["id"])) : undefined
+          const previous = this.summaries.row(summary - 1)
+          const card = (previous["treatedAs"] ?? previous["name"]) as JsonObject
+          const names = own
+            ? {
+                name: own as unknown as JsonValue,
+                ...(own.original.text === stringValue(objectValue(card["original"])["text"])
+                  ? {}
+                  : { treatedAs: card }),
+              }
+            : {}
           summaries.push({
             source: summary - 1,
             changes: {
@@ -1112,6 +1133,7 @@ export class SearchIndex {
               rarityBadge: badgeOf(row),
               premium: typeof row["premium"] === "boolean" ? row["premium"] : null,
               rarity: rarities.get(official),
+              ...names,
             },
           })
           printings.summary[ordinal] = ++summaryCount
@@ -1568,7 +1590,7 @@ export class SearchIndex {
       printingId: this.pool.get(this.printings.id[printing] ?? 0),
       summary: summary
         ? {
-            ...(this.summaries.row(summary - 1) as unknown as CardSummary),
+            ...asCardUnit(this.summaries.row(summary - 1) as unknown as CardSummary, state.unit),
             ...(restrictions?.length ? { restrictions } : {}),
           }
         : undefined,

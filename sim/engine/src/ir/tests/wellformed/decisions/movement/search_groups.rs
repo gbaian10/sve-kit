@@ -52,7 +52,7 @@ fn continued(revealed: bool) -> Located<Node> {
 fn cp04_filter_seeds_grouped_search_without_a_second_selection_or_deck_escape() {
     // The grouping is synthetic; CP04-060 seeds only the global search filter and destination.
     accept(body(1, vec![grouped()]));
-    for change in 0_u8..7 {
+    for change in 0_u8..8 {
         let mut step = grouped();
         if let Action::Search {
             groups: Some(groups),
@@ -66,15 +66,25 @@ fn cp04_filter_seeds_grouped_search_without_a_second_selection_or_deck_escape() 
                 3 => groups.groups[0].selector = zone(PlayerRef::Owner {}, ZoneKind::Deck, 10),
                 4 => groups.groups[0].selector = zone(PlayerRef::Controller {}, ZoneKind::Hand, 10),
                 5 => groups.groups[0].cardinality = bounds(2, Some(1)),
-                _ => groups.aggregate_bounds[0].value = Expr::Bound(Binding::new(99, ScopeId(1))),
+                6 => groups.aggregate_bounds[0].value = Expr::Bound(Binding::new(99, ScopeId(1))),
+                _ => {
+                    groups.aggregate_bounds[0].value = Expr::Compute(Box::new(IntOperation::Sum {
+                        objects: zone(PlayerRef::Controller {}, ZoneKind::Deck, 11),
+                        property: NumericProperty::Cost,
+                    }));
+                }
             }
         }
         let (reason, suffix) = match change {
             0..=2 => (WellFormedReason::UnsupportedShape, "/groups"),
             3 | 4 => (WellFormedReason::UnsupportedShape, "/groups/0"),
             5 => (WellFormedReason::InvalidCardinality, "/groups/0"),
-            _ => (
+            6 => (
                 WellFormedReason::UnavailableBinding,
+                "/groups/aggregate_bounds/0",
+            ),
+            _ => (
+                WellFormedReason::UnsupportedShape,
                 "/groups/aggregate_bounds/0",
             ),
         };
@@ -177,24 +187,4 @@ fn search_rejects_destination_order_and_position_until_shuffle_sequencing_is_def
             assert!(error.ir_path.ends_with("/destination"), "{error}");
         }
     }
-}
-
-#[test]
-fn search_group_aggregate_cannot_read_the_raw_deck() {
-    let mut step = grouped();
-    if let Action::Search {
-        groups: Some(groups),
-        ..
-    } = action(&mut step)
-    {
-        groups.aggregate_bounds[0].value = Expr::Compute(Box::new(IntOperation::Sum {
-            objects: zone(PlayerRef::Controller {}, ZoneKind::Deck, 11),
-            property: NumericProperty::Cost,
-        }));
-    }
-    let error = reject(body(1, vec![step]), WellFormedReason::UnsupportedShape);
-    assert!(
-        error.ir_path.ends_with("/groups/aggregate_bounds/0"),
-        "{error}"
-    );
 }
