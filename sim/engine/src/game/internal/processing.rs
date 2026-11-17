@@ -1,5 +1,8 @@
 //! Procedure boundaries stay in the runtime queue, separate from authored IR.
 
+mod selections;
+pub(super) use selections::{discard_selection_round, record_play_declaration};
+
 mod targets;
 pub use targets::TargetDeclaration;
 pub(super) use targets::record_target_declaration;
@@ -10,7 +13,8 @@ pub use payments::{CostPaymentPurpose, CostSpecPayment, CostStepPayment};
 
 use super::{Execution, Fact, Game, Result, invalid};
 use crate::ir::{
-    ChoiceDomain, DecisionId, Int, ModeDecision, ModeId, Nat, Node, PlayerId, ReceiptId, ScopeId,
+    ChoiceDomain, DecisionId, Int, ModeDecision, ModeId, Nat, Node, PlayerId, ReceiptId,
+    ResolvedDamageAllocation, RuntimeDamageRecipient, ScopeId,
 };
 use alloc::vec::Vec;
 
@@ -70,6 +74,24 @@ pub enum PlayDeclaration {
         decision: DecisionId,
         /// Unique selected modes in resolution order.
         modes: Vec<ModeId>,
+    },
+    /// Accepted formal targets that may include leaders, with their physical object generations.
+    Recipients {
+        /// Actual answering player.
+        player: PlayerId,
+        /// Admitted formal parameter.
+        decision: DecisionId,
+        /// Accepted members in answer order; object identities may be private.
+        members: Vec<RuntimeDamageRecipient>,
+    },
+    /// Explicitly accepted formal distribution, not actual delivered damage.
+    Distribution {
+        /// Actual answering player.
+        player: PlayerId,
+        /// Admitted formal parameter.
+        decision: DecisionId,
+        /// Resolved physical members and their assigned amounts, not question handles.
+        allocations: Vec<ResolvedDamageAllocation>,
     },
     /// A play-time cost declaration, before any payment completes.
     OptionalCost {

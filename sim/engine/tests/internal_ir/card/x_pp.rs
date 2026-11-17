@@ -140,6 +140,8 @@ fn assert_optional_cost_payment(game: &Game, accepted: bool) {
                     } => Some((*receipt, *required)),
                     PlayDeclaration::X { .. }
                     | PlayDeclaration::Modes { .. }
+                    | PlayDeclaration::Recipients { .. }
+                    | PlayDeclaration::Distribution { .. }
                     | PlayDeclaration::OptionalCost {
                         accepted: false, ..
                     } => None,
