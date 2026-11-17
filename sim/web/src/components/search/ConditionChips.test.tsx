@@ -126,18 +126,10 @@ it("removes each printing mark independently and clears both with all conditions
   expect(url()).toBe("")
 })
 
-it("removes only the PR-only condition from its chip", async () => {
-  await renderInRouter(<Harness initial="pr=1&stamp=1" />)
-  expect(chips()).toEqual(["標誌卡", "PR 限定"])
-  await userEvent.click(screen.getByRole("button", { name: "移除條件：PR 限定" }))
+it("ignores the removed PR condition and keeps remaining chips removable", async () => {
+  await renderInRouter(<Harness initial="pr=1&stamp=1&sve=1" />)
+  expect(chips()).toEqual(["標誌卡", "SVE 專屬"])
+  await userEvent.click(screen.getByRole("button", { name: "移除條件：SVE 專屬" }))
   expect(chips()).toEqual(["標誌卡"])
   expect(url()).toBe("stamp=1")
-})
-
-it("removes only the SVE-exclusive chip while retaining PR-only", async () => {
-  await renderInRouter(<Harness initial="pr=1&sve=1" />)
-  expect(chips()).toEqual(["PR 限定", "SVE 專屬"])
-  await userEvent.click(screen.getByRole("button", { name: "移除條件：SVE 專屬" }))
-  expect(chips()).toEqual(["PR 限定"])
-  expect(url()).toBe("pr=1")
 })

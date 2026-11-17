@@ -13,7 +13,7 @@ import {
   parseJson,
   stringValue,
 } from "../format-v3/json"
-import { catalogKeys, type Fragment, isCompatible } from "../format-v3/reader"
+import { catalogKeys, isCompatible } from "../format-v3/reader"
 import { checkEntry, entryFields, indexEntries } from "../index-entry"
 import { transferDigest } from "../integrity"
 import { RESTRICTION_TABLES, restrictionKeys, selectRestrictions } from "../restrictions"
@@ -31,7 +31,6 @@ import type {
   SearchMetrics,
   SearchRequest,
 } from "./messages"
-import { PrOnlyRules } from "./pr-rules"
 import { PreviewReader } from "./preview"
 import { completeImages, type CompleteView, completeView, ViewCache, viewSlot } from "./view"
 
@@ -77,8 +76,6 @@ export class SearchEngine {
   private active:
     | {
         generation: number
-        crossRegion?: Promise<void>
-        crossRegionController?: AbortController
         sveOnly?: Promise<void>
         sveOnlyController?: AbortController
         indexWrite?: Promise<void>
@@ -137,7 +134,6 @@ export class SearchEngine {
     if (request.kind === "cancel") {
       if (this.staging?.generation === request.generation) this.staging.abort.abort()
       if (this.active?.generation === request.generation) {
-        this.active.crossRegionController?.abort()
         this.active.sveOnlyController?.abort()
       }
       return Promise.resolve()
@@ -198,8 +194,6 @@ export class SearchEngine {
           return
         }
         try {
-          if ("query" in request && request.query.state.prOnly && active.index)
-            await this.completeCrossRegion(active)
           if ("query" in request && request.query.state.sveOnly && active.index)
             await this.completeSveOnly(active)
           if (
@@ -217,7 +211,6 @@ export class SearchEngine {
               request.query.state.stampOnly ||
               request.query.state.serialOnly ||
               request.query.state.unlistedOnly ||
-              request.query.state.prOnly ||
               // A merged cell's representative needs every printing's rarity and art (#781).
               request.query.state.unit !== "printing")
           )
@@ -454,73 +447,6 @@ export class SearchEngine {
     })
     active.indexWrite = write
     await write
-  }
-
-  private async completeCrossRegion(active: NonNullable<SearchEngine["active"]>): Promise<void> {
-    if (!active.index || active.index.prOnlyReady) return
-    active.crossRegion ??= (async () => {
-      const controller = new AbortController()
-      active.crossRegionController = controller
-      const signal = AbortSignal.any([active.signal, controller.signal])
-      const files = [...active.files.values()].filter((file) => file["purpose"] === "catalog")
-      let total = files.length
-      let done = 0
-      let reportedAt = Number.NEGATIVE_INFINITY
-      const progress = () => {
-        const now = performance.now()
-        if (done !== 0 && done !== total && now - reportedAt < 100) return
-        reportedAt = now
-        for (const [channelId, { request }] of this.queries) {
-          if (
-            this.active === active &&
-            request.generation === active.generation &&
-            "query" in request &&
-            request.query.state.prOnly
-          )
-            this.emit({
-              kind: "query-progress",
-              generation: request.generation,
-              channelId,
-              queryId: request.queryId,
-              done,
-              total,
-            })
-        }
-      }
-      progress()
-      const blobs = new SearchBlobs(active.request.base, this.fetcher, this.storage)
-      const catalog: Fragment[] = []
-      await blobs.readAll(files, signal, (file, bytes) => {
-        const part = decodeMessage({ kind: "file", file, version: active.version, bytes })
-        if (part.kind === "fragments") catalog.push(...part.fragments)
-        done++
-        progress()
-      })
-      const rules = new PrOnlyRules(catalog)
-      const details = rules.details(active.files)
-      total += details.length
-      progress()
-      const fragments: Fragment[] = []
-      await blobs.readAll(details, signal, (file, bytes) => {
-        const part = decodeMessage({ kind: "file", file, version: active.version, bytes })
-        if (part.kind === "fragments") fragments.push(...part.fragments)
-        done++
-        progress()
-      })
-      // Local candidates must include every selected-region printing before disqualification.
-      await active.printings
-      signal.throwIfAborted()
-      if (this.active !== active || !active.index) return
-      active.index.completePrOnly(rules.printings, rules.excluded(fragments))
-      if (active.mechanics) {
-        // A PR query can finish while unrelated mechanics are still downloading.
-        void active.mechanics.then(() => this.saveIndex(active)).catch(() => undefined)
-      } else await this.saveIndex(active)
-    })().finally(() => {
-      delete active.crossRegion
-      delete active.crossRegionController
-    })
-    await active.crossRegion
   }
 
   private async completeSveOnly(active: NonNullable<SearchEngine["active"]>): Promise<void> {
@@ -831,7 +757,6 @@ export class SearchEngine {
         this.active?.index &&
         !this.active.printings &&
         !this.active.mechanics &&
-        !this.active.crossRegion &&
         !this.active.sveOnly &&
         !this.active.signal.aborted &&
         sameSource() &&

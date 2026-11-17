@@ -68,8 +68,6 @@ export interface QueryState {
   readonly serialOnly: boolean
   /** Only printings the official card database does not list. */
   readonly unlistedOnly: boolean
-  /** Only PR printings across regions, with no equivalent non-PR rules; excludes tokens and EP. */
-  readonly prOnly: boolean
   /** Printings with no same-card digital target, or art absent from every linked game. */
   readonly sveOnly: boolean
   readonly errataOnly: boolean
@@ -112,7 +110,6 @@ export const DEFAULT_QUERY: QueryState = {
   stampOnly: false,
   serialOnly: false,
   unlistedOnly: false,
-  prOnly: false,
   sveOnly: false,
   errataOnly: false,
   restrictionsOnly: false,
@@ -146,7 +143,6 @@ export function activeFilterCount(state: QueryState): number {
     (state.stampOnly ? 1 : 0) +
     (state.serialOnly ? 1 : 0) +
     (state.unlistedOnly ? 1 : 0) +
-    (state.prOnly ? 1 : 0) +
     (state.sveOnly ? 1 : 0) +
     (state.errataOnly ? 1 : 0) +
     (state.restrictionsOnly ? 1 : 0) +

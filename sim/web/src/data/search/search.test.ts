@@ -2,10 +2,10 @@
 import { describe, expect, it, vi } from "vitest"
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
-import { CARDS } from "../../../scripts/fixture/cards"
 import { CREDITED_ARTIST, UNCREDITED_ARTIST } from "../../domain/artistFilter"
 import { cardNoKey } from "../../domain/cardNo"
 import { LOCATION_ORDER } from "../../domain/deckLocation"
+import { parseQuery } from "../../domain/query/codec"
 import { DEFAULT_QUERY } from "../../domain/query/model"
 import { apply } from "../../domain/search"
 import { memoryCache } from "../../test-utils/cache"
@@ -103,13 +103,13 @@ it("chooses the uniquely largest promo family and hides ties", () => {
 })
 
 const base = "https://cdn.test"
-function origin(snapshot = built) {
-  const files = new Map(snapshot.files)
+function origin() {
+  const files = new Map(built.files)
   const requests: string[] = []
   let held: { path: string; promise: Promise<void> } | undefined
   let pointer = canonical({
-    manifest_path: snapshot.manifestPath,
-    manifest_sha256: digest(files.get(snapshot.manifestPath) ?? new Uint8Array()),
+    manifest_path: built.manifestPath,
+    manifest_sha256: digest(files.get(built.manifestPath) ?? new Uint8Array()),
   })
   const fetcher: Fetcher = async (url) => {
     const path = url.slice(base.length + 1)
@@ -136,7 +136,7 @@ function origin(snapshot = built) {
       pointer = canonical({ manifest_path: path, manifest_sha256: digest(bytes) })
     },
     update(number: number) {
-      const manifest = objectValue(JSON.parse(JSON.stringify(snapshot.manifest)) as JsonObject)
+      const manifest = objectValue(JSON.parse(JSON.stringify(built.manifest)) as JsonObject)
       manifest["data_version"] = `20261004T01000${String(number)}Z-0001`
       const data = canonical(manifest)
       const path = `snapshots/manifests/${digest(data).slice(7)}.json`
@@ -3743,25 +3743,18 @@ it("sorts home sets by regional release, groups undated products and PR, and app
   }
 })
 
-const otherCatalogs = (edition: "jp" | "en") =>
-  (built.manifest["files"] as JsonObject[]).filter(
-    (file) =>
-      file["purpose"] === "catalog" && file["region"] !== null && file["region"] !== edition,
-  )
-const prQuery = (edition: "jp" | "en"): SearchQuery => ({
-  ...query,
-  edition,
-  state: { ...DEFAULT_QUERY, prOnly: true, sort: "no", secondarySort: null },
-})
-
 it.each(["jp", "en"] as const)(
-  "does not request the other region for ordinary %s queries",
+  "ignores a legacy PR URL and does not request the other region for %s queries",
   async (edition) => {
     const h = harness()
     h.session.load(base, edition, "preview")
-    h.channel.search({ ...query, edition, state: DEFAULT_QUERY })
+    const state = parseQuery(new URLSearchParams("pr=1"))
+    expect(state).toEqual(DEFAULT_QUERY)
+    h.channel.search({ ...query, edition, state })
     await h.settled()
     await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
+    const result = h.status().result
+    expect(result.phase === "complete" && result.page.total > 0).toBe(true)
     const paths = (built.manifest["files"] as JsonObject[])
       .filter((file) => file["region"] !== null && file["region"] !== edition)
       .map((file) => stringValue(file["path"]))
@@ -3773,171 +3766,6 @@ it.each(["jp", "en"] as const)(
     h.session.dispose()
   },
 )
-
-it.each(["jp", "en"] as const)(
-  "loads the other region only for a PR-only %s query and leaves other channels usable",
-  async (edition) => {
-    const h = harness()
-    h.session.load(base, edition, "preview")
-    await h.settled()
-    const paths = otherCatalogs(edition).map((file) => stringValue(file["path"]))
-    const path = paths[0]
-    if (!path) throw new Error("missing other-region catalog")
-    const release = h.served.hold(path)
-    h.channel.search(prQuery(edition))
-    try {
-      await expect.poll(() => h.served.requests.includes(path), POLL).toBe(true)
-      expect(h.status().result.phase).toBe("pending")
-      const ordinary = h.session.createChannel()
-      ordinary.search({ ...query, edition, state: DEFAULT_QUERY })
-      await expect.poll(() => ordinary.getStatus().result.phase, POLL).toBe("complete")
-      expect(h.status().result.phase).toBe("pending")
-      expect(
-        h.events.some(
-          (event) => event.kind === "query-progress" && event.total > 0 && event.done < event.total,
-        ),
-      ).toBe(true)
-      release()
-      await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
-      const result = h.status().result
-      if (result.phase !== "complete") throw new Error("missing PR result")
-      expect(result.page.items.map((item) => item.summary?.cardId)).toEqual(
-        edition === "jp" ? ["c:pr-001"] : [],
-      )
-      expect(paths.every((path) => h.served.requests.includes(path))).toBe(true)
-    } finally {
-      release()
-      h.session.dispose()
-    }
-  },
-)
-
-it.each(["jp", "en"] as const)(
-  "persists a completed PR-only %s index and restores it without other-region requests",
-  async (edition) => {
-    const storage = memoryCache()
-    const first = harness(origin(), storage)
-    first.session.load(base, edition, "preview")
-    await first.settled()
-    first.channel.search(prQuery(edition))
-    await expect.poll(() => first.status().result.phase, POLL).toBe("complete")
-    const expected = first.status().result
-    first.session.dispose()
-    const second = harness(origin(), storage)
-    second.session.load(base, edition, "preview")
-    await second.settled()
-    second.channel.search(prQuery(edition))
-    await expect.poll(() => second.status().result.phase, POLL).toBe("complete")
-    expect(second.status().result).toEqual(expected)
-    expect(second.events.some((event) => event.kind === "ready" && event.metrics.restored)).toBe(
-      true,
-    )
-    expect(second.served.requests).toEqual(["snapshots/preview/current.json"])
-    second.session.dispose()
-  },
-)
-
-it("can first select PR-only from a restored local index", async () => {
-  const storage = memoryCache()
-  const first = harness(origin(), storage)
-  first.session.load(base, "jp", "preview")
-  await first.settled()
-  first.session.dispose()
-  const restored = harness(origin(), storage)
-  restored.session.load(base, "jp", "preview")
-  await restored.settled()
-  expect(restored.served.requests).toEqual(["snapshots/preview/current.json"])
-  restored.channel.search(prQuery("jp"))
-  await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
-  const result = restored.status().result
-  if (result.phase !== "complete") throw new Error("missing PR result")
-  expect(result.page.items.map((item) => item.summary?.cardId)).toEqual(["c:pr-001"])
-  expect(
-    otherCatalogs("jp").every((file) =>
-      restored.served.requests.includes(stringValue(file["path"])),
-    ),
-  ).toBe(true)
-  restored.session.dispose()
-})
-
-it("finishes a startup PR-only query while unrelated mechanics are pending", async () => {
-  const file = (built.manifest["files"] as JsonObject[]).find((file) =>
-    arrayValue(file["row_counts"]).some((count) => arrayValue(count)[0] === "mechanic_projection"),
-  )
-  if (!file) throw new Error("missing mechanic fixture")
-  const h = harness()
-  const release = h.served.hold(stringValue(file["path"]))
-  h.session.load(base, "jp", "preview")
-  h.channel.search(prQuery("jp"))
-  try {
-    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
-    expect(
-      h.events.some((event) => event.kind === "background-ready" && event.purpose === "mechanics"),
-    ).toBe(false)
-    release()
-    await h.settled()
-  } finally {
-    release()
-    h.session.dispose()
-  }
-})
-
-it("cancels a cross-region transfer without aborting the completed local index", async () => {
-  const served = origin()
-  const events: SearchEvent[] = []
-  const engine = new SearchEngine((event) => events.push(event), {
-    fetch: served.fetcher,
-    cacheStorage: memoryCache(),
-  })
-  await engine.handle({ kind: "load", generation: 1, base, edition: "jp", entry: "preview" })
-  const file = otherCatalogs("jp")[0]
-  if (!file) throw new Error("missing other-region catalog")
-  const path = stringValue(file["path"])
-  const release = served.hold(path)
-  const pending = engine.handle({
-    kind: "search",
-    generation: 1,
-    channelId: 1,
-    queryId: 1,
-    query: prQuery("jp"),
-  })
-  try {
-    await expect.poll(() => served.requests.includes(path), POLL).toBe(true)
-    await engine.handle({ kind: "cancel", generation: 1 })
-    release()
-    await pending
-    expect(events.some((event) => event.kind === "query-error" && event.queryId === 1)).toBe(true)
-    const requests = served.requests.length
-    await engine.handle({
-      kind: "search",
-      generation: 1,
-      channelId: 1,
-      queryId: 2,
-      query: { ...query, state: DEFAULT_QUERY },
-    })
-    expect(
-      events.some(
-        (event) => event.kind === "result" && event.queryId === 2 && event.page.total > 0,
-      ),
-    ).toBe(true)
-    expect(served.requests).toHaveLength(requests)
-    await engine.handle({
-      kind: "search",
-      generation: 1,
-      channelId: 1,
-      queryId: 3,
-      query: prQuery("jp"),
-    })
-    const retried = events.find((event) => event.kind === "result" && event.queryId === 3)
-    expect(
-      retried?.kind === "result"
-        ? retried.page.items.map((item) => item.summary?.cardId)
-        : undefined,
-    ).toEqual(["c:pr-001"])
-  } finally {
-    release()
-  }
-})
 
 it.each(["jp", "en"] as const)(
   "filters SVE-exclusive %s cards using only same-card links, across every printing and restored index",
@@ -4014,10 +3842,6 @@ it.each(["jp", "en"] as const)(
             (item) => !excluded.has(item.summary?.cardId ?? ""),
           ),
         )
-        if (edition === "jp")
-          expect(
-            search({ sveOnly: true, prOnly: true }).items.map((item) => item.summary?.cardId),
-          ).toEqual(["c:pr-001"])
       }
     }
   },
@@ -4280,88 +4104,5 @@ it("can cancel and retry an SVE-art load without blocking ordinary queries", asy
     ).toBe(true)
   } finally {
     release()
-  }
-})
-
-it("waits for equivalent-rule details only on a PR query, excludes a differently named promo, and restores the empty result", async () => {
-  const face = CARDS.find((card) => card.id === "c:bp01-001")?.faces[0]
-  const promo = CARDS.find((card) => card.id === "c:pr-001")
-  const printing = promo?.printings[0]
-  if (!face || !promo || !printing) throw new Error("missing fixture")
-  const equivalent = await buildSnapshot({
-    encodeImage: ({ seed }) => Promise.resolve(new TextEncoder().encode(String(seed))),
-    cards: [
-      ...CARDS.map((card) =>
-        card.id === "c:pr-001"
-          ? { ...card, faces: card.faces.map((own) => ({ ...face, id: own.id, name: own.name })) }
-          : card,
-      ),
-      {
-        ...promo,
-        id: "c:pr-unique",
-        faces: [
-          {
-            ...face,
-            id: "f:pr-unique",
-            name: { ja: "独自のPRカード" },
-            effect: { ja: "カードを7枚引く。" },
-          },
-        ],
-        printings: [{ ...printing, id: "p:pr-unique", cardNo: "PR-002", intId: 3002 }],
-      },
-    ],
-  })
-  const served = origin(equivalent)
-  const file = arrayValue(equivalent.manifest["files"])
-    .map((raw) => objectValue(raw))
-    .find(
-      (file) =>
-        file["purpose"] === "detail" &&
-        file["region"] === "jp" &&
-        arrayValue(file["row_counts"]).some((raw) => {
-          const count = arrayValue(raw)
-          return count[0] === "face_revision" && count[2] === "set:pr"
-        }),
-    )
-  if (!file) throw new Error("missing promo rules detail")
-  const path = stringValue(file["path"]),
-    storage = memoryCache(),
-    h = harness(served, storage)
-  h.session.load(base, "jp", "preview")
-  await h.settled()
-  expect(served.requests).not.toContain(path)
-  const release = served.hold(path)
-  h.channel.search(prQuery("jp"))
-  try {
-    await expect.poll(() => served.requests.includes(path), POLL).toBe(true)
-    expect(h.status().result.phase).toBe("pending")
-    const ordinary = h.session.createChannel()
-    ordinary.search(query)
-    await expect.poll(() => ordinary.getStatus().result.phase, POLL).toBe("complete")
-    release()
-    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
-    const result = h.status().result
-    if (result.phase !== "complete") throw new Error("missing result")
-    expect(result.page.items.map((item) => item.summary?.cardId)).toEqual(["c:pr-unique"])
-    const emptyQuery = { ...prQuery("jp"), state: { ...prQuery("jp").state, text: "PR-001" } }
-    h.channel.search(emptyQuery)
-    await expect.poll(() => h.status().result.phase, POLL).toBe("complete")
-    const empty = h.status().result
-    if (empty.phase !== "complete") throw new Error("missing empty result")
-    expect(empty.page.total).toBe(0)
-    const restored = harness(served, storage)
-    served.requests.length = 0
-    restored.session.load(base, "jp", "preview")
-    await restored.settled()
-    restored.channel.search(emptyQuery)
-    await expect.poll(() => restored.status().result.phase, POLL).toBe("complete")
-    const next = restored.status().result
-    if (next.phase !== "complete") throw new Error("missing restored result")
-    expect(next.page).toEqual(empty.page)
-    expect(served.requests).toEqual(["snapshots/preview/current.json"])
-    restored.session.dispose()
-  } finally {
-    release()
-    h.session.dispose()
   }
 })

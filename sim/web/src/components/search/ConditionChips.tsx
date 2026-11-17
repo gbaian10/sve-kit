@@ -203,15 +203,6 @@ export function ConditionChips({
           },
         ]
       : []),
-    ...(query.prOnly
-      ? [
-          {
-            key: "pr",
-            label: t("filters.prOnly"),
-            without: { ...query, prOnly: false },
-          },
-        ]
-      : []),
     ...(query.sveOnly
       ? [{ key: "sve", label: t("filters.sveOnly"), without: { ...query, sveOnly: false } }]
       : []),
