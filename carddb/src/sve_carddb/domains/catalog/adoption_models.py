@@ -141,7 +141,7 @@ class SymbolValue(RecordData):
 class NameSubject(RecordData):
     face_id: Text
     region: Region
-    role: Literal["collab", "treated_as"]
+    role: Literal["primary", "collab", "treated_as"]
 
 
 class NameIdentity(RecordData):
@@ -156,7 +156,8 @@ class NameObservation(RecordData):
 
 
 class NameValue(RecordData):
-    names: Annotated[tuple[SourceText, ...], Field(min_length=1)]
+    # Only an explicit primary may be authored text; the loader enforces this per role.
+    names: Annotated[tuple[TextValue, ...], Field(min_length=1)]
     identity_ref: NameIdentity
     observations: Annotated[tuple[NameObservation, ...], Field(min_length=1)]
     name_basis_hash: Hash

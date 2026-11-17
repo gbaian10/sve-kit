@@ -26,6 +26,10 @@ def _text_values(application: Application, value: str) -> dict[str, Value]:
     return text_values(_unit(application, value))
 
 
+# Text fields keep exact text units; rule-data fields link only the corrected revision.
+TEXT_FIELDS = frozenset({"effect", "name"})
+
+
 def correction_values(application: Application) -> dict[str, Value]:
     """Preserve authored exact values while recording this build's upstream/conflict state."""
     data = application.data
@@ -37,7 +41,7 @@ def correction_values(application: Application) -> dict[str, Value]:
         "expected_source_unit_id": _text_values(application, data.expected_raw_value)[
             "id"
         ]
-        if data.field == "effect"
+        if data.field in TEXT_FIELDS
         else None,
         "expected_raw_value": Json(data.expected_raw_value),
         "corrected_value": Json(data.corrected_value),
@@ -94,7 +98,7 @@ def application_values(application: Application, plan: TextPlan) -> dict[str, Va
         "correction_id": data.id,
         "source_id": application.observation.card.source.id,
         "result_unit_id": _text_values(application, data.corrected_value)["id"]
-        if success and data.field == "effect"
+        if success and data.field in TEXT_FIELDS
         else None,
         "face_revision_id": revision_id(candidate) if success else None,
         "status": application.status,
@@ -105,7 +109,7 @@ def populate_corrections(db: Database, plan: TextPlan, texts: TextInterner) -> N
     """Populate inside the observation transaction; proposed records have no application."""
     verify_applications(plan.identity, plan.observations, plan.corrections)
     for application in plan.corrections:
-        if application.data.field == "effect":
+        if application.data.field in TEXT_FIELDS:
             texts.intern(_unit(application, application.data.expected_raw_value))
             if application.status in {"applied", "already_fixed"}:
                 texts.intern(_unit(application, application.data.corrected_value))

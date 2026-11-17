@@ -22,7 +22,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Database
     from sve_carddb.core.provenance import BuildContext, InputRecord, SourceUse
-    from sve_carddb.domains.catalog.models import Catalog
+    from sve_carddb.domains.catalog.models import Catalog, NameBinding
     from sve_carddb.domains.products import Language
     from sve_carddb.domains.products.loader import ProductSnapshot
     from sve_carddb.domains.products.models import LocalizedText
@@ -68,6 +68,7 @@ def populate_text_preview(  # ruff: ignore[too-many-arguments] -- one transactio
     batches: FrozenBatches | None = None,
     official: OfficialProducts | None = None,
     catalog_config: Catalog | None = None,
+    names: tuple[NameBinding, ...] = (),
 ) -> InputRecord:
     """Retain diagnostic parents for quarantined observations inside the bundle transaction."""
     plan = observations.plan
@@ -85,7 +86,7 @@ def populate_text_preview(  # ruff: ignore[too-many-arguments] -- one transactio
     texts = populate_text_observations(
         db, observations, build=build, vocabulary=vocabulary, published=published
     )
-    populate_rules_names(db)
+    populate_rules_names(db, names)
     if catalog_config is not None:
         from sve_carddb.domains.catalog.importer import populate_catalog  # ruff: ignore[import-outside-top-level] -- the optional catalog importer shares the text interner
 
@@ -106,12 +107,15 @@ class TextObservations:
         *,
         images: ImageProvider | None = None,
         wording_decisions: tuple[WordingDecision, ...] = (),
+        collab_names: Mapping[tuple[str, str], frozenset[str]] | None = None,
     ) -> None:
         object.__setattr__(
             self,
             "plan",
             replace(
-                plan_text_observations(preview, provider, images=images),
+                plan_text_observations(
+                    preview, provider, images=images, collab_names=collab_names
+                ),
                 wording_decisions=wording_decisions,
             ),
         )

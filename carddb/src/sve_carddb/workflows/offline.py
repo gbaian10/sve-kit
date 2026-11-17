@@ -28,6 +28,8 @@ from sve_carddb.domains.card_extras.reviewed_errata import (
     configuration as errata_configuration,
 )
 from sve_carddb.domains.card_extras.reviewed_errata import read as read_errata
+from sve_carddb.domains.catalog.adoption_loader import load_adoptions
+from sve_carddb.domains.catalog.rules_name_adoptions import collab_hashes, evaluate
 from sve_carddb.domains.construction.adoption import Settings as ConstructionSettings
 from sve_carddb.domains.construction.adoption import prepare as prepare_construction
 from sve_carddb.domains.construction.adoption_models import (
@@ -410,6 +412,13 @@ def _templates(inputs: AdoptionInputs) -> FrameInputs | None:
     )
 
 
+def _collab_names(repo: Path) -> dict[tuple[str, str], frozenset[str]]:
+    """Declared collab name hashes are needed before the catalog sources are verified."""
+    return collab_hashes(
+        (load_adoptions(authored_root(repo), entry="catalog/adoptions"),)
+    )
+
+
 def _prepare_catalog(
     inputs: AdoptionInputs,
     build: BuildContext,
@@ -559,6 +568,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         ),
         images=image_index,
         wording_decisions=load_decisions(authored_root(inputs.repo)),
+        collab_names=_collab_names(inputs.repo),
     )
     texts = observations.plan
     mark("text observations (parse sources)")
@@ -683,6 +693,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         adoptions, context, stores, identity.snapshot, batches=batches
     )
     mark("prepare catalog")
+    adopted_names, name_report = evaluate(prepared.names, texts)
     derived = prepared.projection
     if not {"en", "ja"} <= {language.code for language in derived.catalog.languages}:
         raise ValueError("Offline launch requires adopted EN and JA languages")
@@ -723,6 +734,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 stores=stores,
                 official=official,
                 batches=batches,
+                names=adopted_names,
             )
             mark("db: populate text preview")
             populate_manual_printings(
@@ -1070,6 +1082,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             None if template_report is None else template_report.payload()
         )
         report["ruling_references"] = ruling_report.payload()
+        report["rules_name_adoptions"] = name_report.payload()
         report["card_name_target_gaps"] = [
             {
                 "term_id": row["id"],

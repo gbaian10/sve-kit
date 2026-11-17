@@ -81,7 +81,8 @@ def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
 
 
 @pytest.mark.parametrize(
-    ("region", "field"), [("jp", "effect"), ("en", "effect"), ("en", "card_type")]
+    ("region", "field"),
+    [("jp", "effect"), ("en", "effect"), ("en", "card_type"), ("jp", "name")],
 )
 def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: ignore[too-many-statements] -- validates independent SQL, source, current and public reference boundaries in one transaction
     tmp_path: Path, inputs: Inputs, region: Region, field: str
@@ -121,7 +122,7 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
     ):
         if (original.printing_id, original.face_id) != (raw.printing_id, raw.face_id):
             assert projected == original
-    if region == "jp":
+    if region == "jp" and field == "effect":
         assert (
             next(group for group in case.plan.groups if group.region == "jp").current()
             is not None
@@ -140,7 +141,7 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
         assert len(db.rows("source_correction")) == 1
         correction = db.rows("source_correction")[0].values
         assert correction["expected_raw_value"] == Json(
-            "Rule." if field == "effect" else "Spell"
+            {"effect": "Rule.", "name": raw.content.name}.get(field, "Spell")
         )
         assert (
             correction["expected_source_hash"] == raw.card.observation.observation_hash
@@ -172,6 +173,11 @@ def test_application_keeps_raw_revision_and_only_marks_affected_uses(  # ruff: i
         assert revisions[revision_id(candidate)]["decision_id"] is None
         if field == "effect":
             assert units[result["result_unit_id"]] == "Rule. (Reminder.)"
+        elif field == "name":
+            assert units[result["result_unit_id"]] == "Corrected name"
+            assert units[revisions[revision_id(candidate)]["name_unit_id"]] == (
+                "Corrected name"
+            )
         else:
             assert result["result_unit_id"] is None
             assert revisions[revision_id(raw)]["type_code"] == "spell"

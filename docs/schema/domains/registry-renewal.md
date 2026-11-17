@@ -4,6 +4,7 @@
 `confirmed_none` 完整重審續版，以及既有 art 增加已人工確認同圖的 uses。
 不改原 registry／配號分片、不移轉永久 ID、不產生 `identity_change`。
 merge、split、reassign、revert、停用 review、來源更正及 art 重新分類仍拒絕。
+上線前的同卡合併不走 transition，見 [authored-layout〈同卡分組（上線前）〉](authored-layout.md#同卡分組上線前)。
 
 ## 執行前提
 

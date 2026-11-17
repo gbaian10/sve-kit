@@ -243,7 +243,7 @@ confirmed_none 與 same_rules_reskin 記錄不可因追加版次自動擴張。�
 
 ### 3.4 來源更正
 
-`source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類。effect 更正可在同筆記錄加入選用的 `sections: {expected_raw_value: [Text], corrected_value: [Text]}`，核對並替換整份補充段落清單；保留段落順序與原始換行，空清單代表沒有段落。本文與段落必須全部符合原值且來源 hash 相符才原子套用；全部已符合改值時才視為 upstream fixed，部分修正或任一原值不符均為 conflict，不套用其餘部分。段落更正沿用同筆記錄的卡圖證據、hash、reason 與採納狀態，不另建衝突記錄；同一 printing／face 不得有重疊的段落更正。公開 field／值型別依 [傳輸契約 §3.3](../export/snapshot-transport.md#33-公開更正值)：本文或種類保留原 field，補充段落以 `other` 的文字原值呈現，多段以空行分隔；不將清單或建置欄位送入公開 CorrectionValue。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
+`source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type、name，分別映射效果文字、種類與官網卡名（name 只改官網把卡名寫錯的單一名稱；卡面雙名的聯名名稱用構築名稱宣告，不用更正）。effect 更正可在同筆記錄加入選用的 `sections: {expected_raw_value: [Text], corrected_value: [Text]}`，核對並替換整份補充段落清單；保留段落順序與原始換行，空清單代表沒有段落。本文與段落必須全部符合原值且來源 hash 相符才原子套用；全部已符合改值時才視為 upstream fixed，部分修正或任一原值不符均為 conflict，不套用其餘部分。段落更正沿用同筆記錄的卡圖證據、hash、reason 與採納狀態，不另建衝突記錄；同一 printing／face 不得有重疊的段落更正。公開 field／值型別依 [傳輸契約 §3.3](../export/snapshot-transport.md#33-公開更正值)：本文或種類保留原 field，補充段落以 `other` 的文字原值呈現，多段以空行分隔；不將清單或建置欄位送入公開 CorrectionValue。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
 
 evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。有封存卡圖的建置匯入時以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。卡圖只在寫入或新增更正時比對；公開 authoring 與 CI 讀不到私有卡圖，直接信任已登錄的 active 更正與其卡圖 hash，仍須原值與 expected_source_hash 相符才套用，不符時同樣為 conflict，只是不寫 correction_evidence。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，不保存確認者與流程日期。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
 
@@ -257,9 +257,26 @@ CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-d
 
 工具入口為 `uv --directory <absolute-carddb> run python -m sve_carddb.domains.registry`；參數 `--jp/--en/--candidates/--confirmations/--original-art/--decisions/--images/--authored` 全為明示路徑，`--as-of` 為 JP 輸入的 ISO 日期，`--check` 要求現有輸出完全相同。全程只讀本機來源，不讀 manifest、不抓網路。
 
-decisions 是本機的初始化決定檔（`registry.review.InitDecisions`），JSON 欄位為 corrections、reskins、separate_groups、art_groups，只記人工配對決定。工具不從 confidence 產生配對決定；產生的登錄照一般 PR diff 審查。新包先產候選、核對所有面與差異、核圖實質增刪，再更新決定檔。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
+decisions 是本機的初始化決定檔（`registry.review.InitDecisions`），JSON 欄位為 corrections、reskins、separate_groups、art_groups、same_cards，只記人工配對決定。工具不從 confidence 產生配對決定；產生的登錄照一般 PR diff 審查。新包先產候選、核對所有面與差異、核圖實質增刪，再更新決定檔。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
 
-corrections 元素包含 region、card_no、face_index、field、expected_raw_value、corrected_value、image_sha256、locator、state、reason。needs_review 的 card_type 候選另須明示 `adoption_scope: identity_check_only` 與 `source_correction_status: pending_user_confirmation`，否則拒絕用於身分核對；這兩欄不會提升來源更正狀態，也不改寫原觀測或正式分片。reskins 是 EN 卡號 → JP 原卡號；separate_groups 是 `region:exact_card_no` → 明示分組鍵；art_groups 是已核對同幅插畫的 EN 卡號陣列集合，組間不得重疊、不能跨 card。未列入者各自登錄；本批 CP02-072EN／CP02-P57EN 依同圖不同簽名加工規則共用 art。決定檔不進 git，採納後的永久登錄與其精確成員決定才是維護狀態。新增 package 使用包含原觀測的完整輸入集合，不把變動的舊來源塞進追加工具；舊來源更新另走 source／identity 修復流程。
+corrections 元素包含 region、card_no、face_index、field、expected_raw_value、corrected_value、image_sha256、locator、state、reason。needs_review 的 card_type 候選另須明示 `adoption_scope: identity_check_only` 與 `source_correction_status: pending_user_confirmation`，否則拒絕用於身分核對；這兩欄不會提升來源更正狀態，也不改寫原觀測或正式分片。reskins 是 EN 卡號 → JP 原卡號；separate_groups 是 `region:exact_card_no` → 明示分組鍵；art_groups 是已核對同幅插畫的 EN 卡號陣列集合，組間不得重疊、不能跨 card。
+same_cards 是保留 card_id → `region:exact_card_no` 成員陣列，記人工確認為同一張卡、卻被拆成不同 card 的情況（卡面雙名的聯名名稱、
+全部 EP／全部 SEP 等）；見下方〈同卡分組（上線前）〉。未列入者各自登錄；本批 CP02-072EN／CP02-P57EN 依同圖不同簽名加工規則共用 art。決定檔不進 git，採納後的永久登錄與其精確成員決定才是維護狀態。新增 package 使用包含原觀測的完整輸入集合，不把變動的舊來源塞進追加工具；舊來源更新另走 source／identity 修復流程。
+
+#### 同卡分組（上線前）
+
+已確認為同一張卡、卻因官網名稱或卡文不同被登錄成不同 card 時，在決定檔的 same_cards 指定保留 card_id 與併入成員。
+這只在服務上線、快照格式凍結前使用；上線後改走[身分修復](identity-repair.md)的 merge，保留轉址與修復事件。
+
+- 分組先依結構指紋，再合併共用同一既有 card 的群組，以及 same_cards 的成員群組。保留 card 必須是既有 card；
+  多個既有 card 只能在同一 same_cards 群組內相遇，否則照舊失敗。
+- 生效時，被併入 card 的版次改指保留 card 與同 ordinal 的面，printing_id、int_id 與卡號不變；被併入的 card、face，
+  以及指向它的 region_mapping_review、card_related 直接移除；指向它的 art 與來源更正改指保留 card 的同 ordinal 面。
+  其他既有記錄若改變仍失敗；被清空的分片刪除。EN 限定版次併入有 JP 版次的 card 後，不再產生 confirmed_none 查核。
+- 不寫 identity_change、不留墓碑或舊 card_id 的轉址。既有 identity transition 會因歷史分片 bytes 改變而無法重播，
+  須刪除後以改寫後的登錄為基準，用原決策重產。
+- 之後的新卡包：再錄版次的指紋對到已併入的版次時，該版次已屬保留 card，會自然歸位，不必再列；
+  新的 EP／SEP 與新聯名卡在進卡包時加進 same_cards（看卡圖判定，不確定時問維護者），聯名名稱另補構築名稱宣告。
 
 ### 3.6 輸入保存
 
@@ -294,7 +311,7 @@ F1 configuration 與診斷只記實際已驗的 pin（含固定 filename、targe
 
 1. 取得完整日英萃取與所有候選／人工確認／插畫證據，依 §3.5 核對各面、規則差異及必要卡圖。保留原始欄位，不將候選更正寫回輸入。沒有 EN 萃取器時須先提供可審閱的完整 Card JSONL，不能省略原文或沿用 confidence 當決定。
 2. 建立全新 batch-id 目錄，複製五份輸入；以 SHA-256 比對來源與副本 exact bytes。原有卡片觀測若更新，走來源版本重審流程，不能覆寫舊批次。
-3. 人工完成核對後，建立符合 `registry.review.InitDecisions` 的 decisions.json：corrections／reskins／separate_groups／art_groups 依 §3.5 填寫；無資料則空集合，不能自行沿用上一批的決定。
+3. 人工完成核對後，建立符合 `registry.review.InitDecisions` 的 decisions.json：corrections／reskins／separate_groups／art_groups／same_cards 依 §3.5 填寫；無資料則空集合，不能自行沿用上一批的決定。
 4. 寫入 inventory.json 與涵蓋本批全部檔案的 SHA256SUMS，記錄輸入取得方式。
 5. 將 §3.5 CLI 的五個輸入與 --decisions 全部指向此持久目錄，--as-of 填 JP 輸入的日期，--images 指本機官方卡圖、--authored 指登錄目錄。先驗證輸入／計畫，完成後用相同命令加 --check 驗證零改寫。既有 EN-only／換皮卡追加需等待續版決定格式，不能透過修改決定檔繞過拒絕。
 

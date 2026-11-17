@@ -177,6 +177,22 @@ def check_selection_input(
     accepted = object_value(authors[0])
     assert accepted["status"] == "accepted"
     assert object_value(accepted["input"])["card_id"] == CARD
+    # The engine compares the construction name, never a printing's site name.
+    official = {
+        row.values["id"]: row.values["official_name"]
+        for row in source.db.rows("rules_name")
+    }
+    faces = {
+        row.values["id"]
+        for row in source.db.rows("face")
+        if row.values["card_id"] == CARD
+    }
+    assert accepted["rules_names"] == [
+        official[row.values["rules_name_id"]]
+        for row in source.db.rows("face_rules_name")
+        if row.values["face_id"] in faces
+        and (row.values["region"], row.values["role"]) == ("jp", "primary")
+    ]
     changed = deepcopy(card)
     changed["abilities"] = []
     write_inputs(root, inputs("BP01-P09", changed))

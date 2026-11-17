@@ -40,6 +40,33 @@ def comparison_text(text: str) -> str:
     return "".join(normalize("NFKC", text).translate(_PUNCTUATION).split())
 
 
+def is_collab(content: FaceContent, collab: frozenset[str]) -> bool:
+    """A declared collab name is matched by its exact UTF-8 hash, never by similarity."""
+    return digest(content.name.encode()) in collab
+
+
+def comparable(
+    contents: tuple[FaceContent, ...], collab: frozenset[str]
+) -> tuple[FaceContent, ...]:
+    """Compare a declared collab printing's name only by its absence.
+
+    Its other fields still have to agree. The shared name comes from the same group's
+    other printings rather than the construction name, which is derived after wording.
+    """
+    if not collab:
+        return contents
+    names = {content.name for content in contents if not is_collab(content, collab)}
+    if len(names) > 1:
+        return contents
+    shared = next(iter(names), "")
+    return tuple(
+        content.model_copy(update={"name": shared})
+        if is_collab(content, collab)
+        else content
+        for content in contents
+    )
+
+
 def equivalent(contents: tuple[FaceContent, ...]) -> bool:
     """Require all non-effect fields exact and all rule bodies mechanically equal."""
     if not contents or any(content.effect is None for content in contents):

@@ -55,6 +55,8 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
     expected = (
         original.text
         if field == "effect"
+        else original.name
+        if field == "name"
         else original.card_type
         if region == "jp"
         else original.info["Card Type"]
@@ -65,6 +67,8 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
         if corrected is not None
         else "Rule. (Reminder.)"
         if field == "effect"
+        else "Corrected name"
+        if field == "name"
         else "Follower"
     )
     inputs.decisions.corrections = [

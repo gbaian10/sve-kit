@@ -223,6 +223,7 @@ def test_offline_cannot_silently_discard_an_editable_alias(case: Case) -> None:
     )
     write(case.root, "catalog/adoptions/aliases/001.yaml", envelope([row]))
     with pytest.raises(
-        ValueError, match="Offline catalog supports vocabulary and language values"
+        ValueError,
+        match="Offline catalog supports vocabulary, language and construction name values",
     ):
         prepare(case.inputs().load(), case.repository, case.build(), {})

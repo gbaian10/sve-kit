@@ -16,7 +16,7 @@ class Correction(BaseModel):
     region: Literal["jp", "en"]
     card_no: str
     face_index: int = Field(default=0, ge=0, le=1)
-    field: Literal["effect", "card_type"]
+    field: Literal["effect", "card_type", "name"]
     expected_raw_value: str
     corrected_value: str
     image_sha256: str
@@ -33,6 +33,10 @@ class InitDecisions(BaseModel):
     reskins: dict[str, str] = Field(default_factory=dict)
     separate_groups: dict[str, str] = Field(default_factory=dict)
     art_groups: list[list[str]] = Field(default_factory=list)
+    # Reviewed same-card groups: kept card ID -> "region:number" members. A member's
+    # existing card is folded into the kept one; its printings keep their IDs. This
+    # writes no redirect, so it is unusable once the snapshot format is frozen.
+    same_cards: dict[str, list[str]] = Field(default_factory=dict)
 
 
 class OriginalArt(BaseModel):
@@ -86,6 +90,8 @@ def _check_correction(
     expected = (
         face.text
         if correction.field == "effect"
+        else face.name
+        if correction.field == "name"
         else face.info.get("Card Type", face.card_type)
     )
     if expected != correction.expected_raw_value:

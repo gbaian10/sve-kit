@@ -28,8 +28,10 @@ class NameBinding(RecordData):
     face_id: Text
     region: Region
     official_name: Text
-    role: Literal["collab", "treated_as"]
-    decision_id: Text
+    # An explicit primary is only accepted where no observation can derive one.
+    role: Literal["primary", "collab", "treated_as"]
+    # Current-format adoptions have no decision envelope.
+    decision_id: Text | None = None
 
 
 class Catalog(RecordData):

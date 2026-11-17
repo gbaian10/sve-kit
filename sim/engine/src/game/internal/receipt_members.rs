@@ -370,7 +370,7 @@ fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result
             .ok_or_else(|| invalid("unknown printed receipt member text"))
     };
     Ok(MemberCard {
-        names: vec![CardName(text(&printed["name"])?)],
+        names: vec![CardName(game.catalog.rules_label(card, 0)?)],
         kind,
         traits: printed["traits"]
             .as_array()

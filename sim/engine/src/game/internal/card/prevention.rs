@@ -679,10 +679,7 @@ impl Game {
             let provider = self.installed_effect_provider(execution)?;
             let ordinal =
                 self.printed_face_ordinal(&provider.card, &FaceId(provider.span.face.clone()))?;
-            let name = self.catalog.face(&provider.card, ordinal)?["name"]
-                .as_str()
-                .ok_or_else(|| crate::invalid("effect provider name"))?
-                .to_owned();
+            let name = self.catalog.rules_label(&provider.card, ordinal)?;
             return Ok(Label {
                 card: provider.card,
                 name,
@@ -695,10 +692,7 @@ impl Game {
             .objects
             .get(&execution.context.source)
             .ok_or_else(|| unsupported("public prevention provider is unavailable"))?;
-        let name = self.face(&object.id)?["name"]
-            .as_str()
-            .ok_or_else(|| crate::invalid("fragment source name"))?
-            .to_owned();
+        let name = self.card_name(&object.id)?;
         Ok(Label {
             card: object.card.clone(),
             name,
@@ -922,7 +916,7 @@ impl Game {
             let text = origin.provider();
             let face = self.printed_face_ordinal(&text.card, &FaceId(text.span.face.clone()))?;
             replacement["reference"]["card"] = json!(text.card);
-            replacement["reference"]["name"] = self.catalog.face(&text.card, face)?["name"].clone();
+            replacement["reference"]["name"] = json!(self.catalog.rules_label(&text.card, face)?);
             replacement["reference"]["grant"] = origin.public_stamp();
         }
         Ok(())

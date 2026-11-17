@@ -380,8 +380,22 @@ def plan_files(
     *,
     loaded: tuple[Index, dict[str, Entry]] | None = None,
     reviewed: RegistrySnapshot | None = None,
+    fold: bool = False,
 ) -> dict[Path, bytes]:
-    """Preserve all old entries and shards; only append newly allocated state."""
+    """Preserve all old entries and shards; only append newly allocated state.
+
+    ``fold`` admits a reviewed same-card group before launch: a folded card and its
+    faces disappear, and records naming them may only swap those IDs in place.
+    """
+    if fold:
+        # Transitions pin historical shard bytes that a fold rewrites; they are
+        # removed first and regenerated on the folded registry.
+        try:
+            require_empty_transitions(root)
+        except ValueError:
+            raise ValueError(
+                "A same-card fold needs no identity transitions; remove and regenerate them"
+            ) from None
     if reviewed is None:
         require_empty_transitions(root)
     else:
@@ -404,17 +418,7 @@ def plan_files(
             raise ValueError("Append inputs differ from verified original registry")
         loaded = original
     index, old = load(root) if loaded is None else loaded
-    new: dict[tuple[str, str], list[Entry]] = defaultdict(list)
-    for entry in entries:
-        if entry.record_key in old:
-            if entry != old[entry.record_key]:
-                raise ValueError(
-                    f"Existing registry record changed; explicit repair required: {entry.record_key}"
-                )
-        else:
-            new[_area(entry), entry.owner].append(entry)
-    if set(old) - {entry.record_key for entry in entries}:
-        raise ValueError("Input would delete existing registry records")
+    rewrites, new = _changes(old, entries, _folded(old, entries) if fold else {})
     order = record_order(entries)
     files: dict[Path, bytes] = {}
     for (area, owner), records in sorted(new.items()):
@@ -424,9 +428,109 @@ def plan_files(
             + 1
         )
         _split(directory, sorted(records, key=order), number, files)
+    files |= _rewrite(root, rewrites)
     if not files:
         return {}
     return _finish(root, index, entries, files)
+
+
+def _changes(
+    old: dict[str, Entry], entries: list[Entry], folded: dict[str, str]
+) -> tuple[dict[str, Entry | None], dict[tuple[str, str], list[Entry]]]:
+    rewrites: dict[str, Entry | None] = {}
+    new: dict[tuple[str, str], list[Entry]] = defaultdict(list)
+    for entry in entries:
+        if entry.record_key not in old:
+            new[_area(entry), entry.owner].append(entry)
+        elif entry != old[entry.record_key]:
+            # A fold may only swap folded IDs; any other drift still needs review.
+            if entry.kind not in _REWRITTEN or entry.data != _swap(
+                old[entry.record_key].data, folded
+            ):
+                raise ValueError(
+                    f"Existing registry record changed; explicit repair required: {entry.record_key}"
+                )
+            rewrites[entry.record_key] = entry
+    for key in set(old) - {entry.record_key for entry in entries}:
+        if old[key].kind not in _REMOVED or _swap(old[key].data, folded) == (
+            old[key].data
+        ):
+            raise ValueError("Input would delete existing registry records")
+        rewrites[key] = None
+    return rewrites, new
+
+
+# A folded card's own records go; records that merely point at it move to the kept card.
+_REMOVED = frozenset({"card", "face", "region_mapping_review", "card_related"})
+_REWRITTEN = frozenset({"printing", "art", "source_correction"})
+
+
+def _folded(old: dict[str, Entry], entries: list[Entry]) -> dict[str, str]:
+    """Folded card and face IDs -> the kept card and its face of the same ordinal.
+
+    Each removed card's printings must all move to one card that still exists.
+    """
+    kept = {entry.record_key for entry in entries}
+    moved: dict[str, set[str]] = defaultdict(set)
+    for entry in entries:
+        if (
+            entry.kind == "printing"
+            and (before := old.get(entry.record_key)) is not None
+        ):
+            moved[_text(before.data, "card_id")].add(_text(entry.data, "card_id"))
+    result: dict[str, str] = {}
+    for key, entry in old.items():
+        if entry.kind == "card" and key not in kept:
+            card = _text(entry.data, "id")
+            targets = moved[card] - {card}
+            if len(targets) != 1 or "card:" + next(iter(targets)) not in kept:
+                raise ValueError(f"Folded card has no single kept card: {card}")
+            result[card] = next(iter(targets))
+    faces = {
+        (_text(entry.data, "card_id"), entry.data["ordinal"]): _text(entry.data, "id")
+        for entry in (*old.values(), *entries)
+        if entry.kind == "face"
+    }
+    for entry in old.values():
+        if entry.kind == "face" and (keep := result.get(_text(entry.data, "card_id"))):
+            target = faces.get((keep, entry.data["ordinal"]))
+            if target is None:
+                raise ValueError("Folded card has a face the kept card lacks")
+            result[_text(entry.data, "id")] = target
+    return result
+
+
+def _swap(value: JsonValue, ids: dict[str, str]) -> JsonValue:
+    if isinstance(value, str):
+        return ids.get(value, value)
+    if isinstance(value, list):
+        return [_swap(item, ids) for item in value]
+    if isinstance(value, dict):
+        return {key: _swap(item, ids) for key, item in value.items()}
+    return value
+
+
+def _rewrite(root: Path, rewrites: dict[str, Entry | None]) -> dict[Path, bytes]:
+    """Rewrite only shards holding changed records, keeping every other record's order."""
+    files: dict[Path, bytes] = {}
+    if not rewrites:
+        return files
+    for shard in read_base_files(root).shards:
+        records = shard.envelope().records
+        if not any(entry.record_key in rewrites for entry in records):
+            continue
+        kept = [
+            rewrites.get(entry.record_key, entry)
+            for entry in records
+            if rewrites.get(entry.record_key, entry) is not None
+        ]
+        # Empty bytes remove a shard the fold emptied.
+        files[root / shard.path] = (
+            encode(Shard(records=[entry for entry in kept if entry is not None]))
+            if kept
+            else b""
+        )
+    return files
 
 
 def _finish(
@@ -496,8 +600,14 @@ def _fit(records: list[Entry]) -> tuple[int, bytes]:
 
 
 def write_files(files: dict[Path, bytes]) -> None:
-    """Install shards first and the index last; an interrupted run fails closed."""
+    """Install shards first and the index last; an interrupted run fails closed.
+
+    Empty data removes a shard; only a same-card fold plans that.
+    """
     for path, data in files.items():
+        if not data:
+            path.unlink()
+            continue
         path.parent.mkdir(parents=True, exist_ok=True)
         fd, name = tempfile.mkstemp(dir=path.parent, prefix=".registry-")
         temporary = Path(name)

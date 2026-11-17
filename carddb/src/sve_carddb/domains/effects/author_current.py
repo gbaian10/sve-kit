@@ -222,6 +222,37 @@ class CurrentAuthorSources:
                 raise SourceError("record_key_identity_mismatch")
         return numbers
 
+    def construction_names(self, card_id: str) -> list[JsonValue]:
+        """JP primary construction name per face ordinal; None where none is derived.
+
+        The engine compares these, so a collab printing's site name stays display text.
+        """
+        faces = {
+            row.values["ordinal"]: _text(row.values["id"])
+            for row in self.db.select(
+                "face", ("id", "ordinal"), where={"card_id": card_id}
+            )
+        }
+        names: list[JsonValue] = []
+        for ordinal in range(len(faces)):
+            primary = self.db.select(
+                "face_rules_name",
+                ("rules_name_id",),
+                where={"face_id": faces[ordinal], "region": "jp", "role": "primary"},
+            )
+            names.append(
+                _text(
+                    _one(
+                        self.db,
+                        "rules_name",
+                        {"id": _text(primary[0].values["rules_name_id"])},
+                    )["official_name"]
+                )
+                if len(primary) == 1
+                else None
+            )
+        return names
+
     def keyword_obligations(self, card_id: str) -> tuple[PrintedKeywordObligation, ...]:
         """Reconstruct complete current sources; this grants no author or D0 admission."""
         card = self.card_payload(card_id)
@@ -377,6 +408,7 @@ class CurrentAuthorSources:
                         "status": "accepted",
                         "printings": list[JsonValue](numbers),
                         "input": result.lowering_input(),
+                        "rules_names": self.construction_names(result.record.card_id),
                     }
                 )
             else:

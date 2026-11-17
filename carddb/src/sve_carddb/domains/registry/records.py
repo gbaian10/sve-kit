@@ -123,7 +123,7 @@ class CorrectionData(RecordData):
     id: Annotated[str, Field(pattern=r"^x:[0-9a-f]{32}\Z")]
     printing_id: PrintingId
     face_id: FaceId
-    field: Literal["effect", "card_type"]
+    field: Literal["effect", "card_type", "name"]
     expected_raw_value: str
     corrected_value: str
     sections: SectionCorrection | None = Field(

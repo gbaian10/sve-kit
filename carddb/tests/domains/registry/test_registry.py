@@ -906,3 +906,134 @@ def test_single_oversized_record_fails_clearly(
     monkeypatch.setattr(storage, "MAX_BYTES", 1000)
     with pytest.raises(ValueError, match="Single registry record exceeds 1 MiB"):
         plan_files(tmp_path, build(inputs, {}))
+
+
+def card_of(entries: list[Entry], region: str, number: str) -> str:
+    key = "printing:" + permanent_id("p", region + ":" + number)
+    return string(next(e for e in entries if e.record_key == key).data, "card_id")
+
+
+def test_same_card_group_folds_a_card_and_later_reprints_follow(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    inputs.decisions.corrections = [
+        Correction(
+            region="jp",
+            card_no="BP02-072",
+            field="effect",
+            expected_raw_value="Rule.",
+            corrected_value="Corrected rule.",
+            image_sha256="sha256:" + "0" * 64,
+            locator="Rules box",
+            state="active",
+            reason="Printed rules were reviewed separately.",
+        )
+    ]
+    first = build(inputs, {})
+    write_files(plan_files(tmp_path, first))
+    _, old = load(tmp_path)
+    keep, folded = card_of(first, "jp", "BP02-071"), card_of(first, "jp", "BP02-072")
+    assert keep != folded
+    inputs.decisions.same_cards = {keep: ["jp:BP02-072"]}
+    second = build(inputs, old)
+    validate(second)
+    records = {entry.record_key: entry for entry in second}
+    assert card_of(second, "jp", "BP02-072") == keep
+    assert "card:" + folded not in records
+    keep_face = permanent_id("f", keep + ":0")
+    moved = records["printing:" + permanent_id("p", "jp:BP02-072")]
+    assert moved.data["source_face_map"] == [{"source_index": 0, "face_id": keep_face}]
+    correction = next(e for e in second if e.kind == "source_correction")
+    assert correction.data["face_id"] == keep_face
+    with pytest.raises(ValueError, match="explicit repair required"):
+        plan_files(tmp_path, second)
+    files = plan_files(tmp_path, second, fold=True)
+    assert all(path.parent.name != "ids" or path.name == "index.yaml" for path in files)
+    write_files(files)
+    _, after = load(tmp_path)
+    validate(list(after.values()))
+    assert "card:" + folded not in after
+    assert int_ids(list(after.values())) == int_ids(first)
+    assert plan_files(tmp_path, build(inputs, after), fold=True) == {}
+    # A later reprint matching the folded printing joins the kept card on its own.
+    inputs.decisions.same_cards = {}
+    inputs.jp["PR-002"] = card("PR-002", "聯名")
+    assert card_of(build(inputs, after), "jp", "PR-002") == keep
+
+
+def test_english_only_member_folds_without_confirmed_absence(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    first = build(inputs, {})
+    write_files(plan_files(tmp_path, first))
+    _, old = load(tmp_path)
+    keep, folded = card_of(first, "jp", "BP02-071"), card_of(first, "en", "GF01-001EN")
+    assert "region_mapping_review:" + folded in old
+    inputs.decisions.same_cards = {keep: ["en:GF01-001EN"]}
+    second = build(inputs, old)
+    validate(second)
+    assert card_of(second, "en", "GF01-001EN") == keep
+    assert not any(entry.kind == "region_mapping_review" for entry in second)
+    write_files(plan_files(tmp_path, second, fold=True))
+    assert "region_mapping_review:" + folded not in load(tmp_path)[1]
+
+
+def test_existing_cards_meet_only_through_a_listed_group(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    first = build(inputs, {})
+    write_files(plan_files(tmp_path, first))
+    _, old = load(tmp_path)
+    keep = card_of(first, "jp", "BP02-071")
+    inputs.jp["BP02-072"] = card("BP02-072", "名前")
+    with pytest.raises(ValueError, match="list them in same_cards"):
+        build(inputs, old)
+    inputs.decisions.same_cards = {keep: ["jp:BP02-999"]}
+    with pytest.raises(ValueError, match="unknown members"):
+        build(inputs, old)
+    inputs.decisions.same_cards = {"c:" + "0" * 32: ["jp:BP02-072"]}
+    with pytest.raises(ValueError, match="unknown members"):
+        build(inputs, old)
+
+
+def test_fold_only_swaps_ids_and_needs_no_transitions(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    first = build(inputs, {})
+    write_files(plan_files(tmp_path, first))
+    _, old = load(tmp_path)
+    keep = card_of(first, "jp", "BP02-071")
+    inputs.decisions.same_cards = {keep: ["jp:BP02-072"]}
+    # A changed observation is ordinary source drift, not part of the fold.
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名", text="Changed rule.")
+    with pytest.raises(ValueError, match="explicit repair required"):
+        plan_files(tmp_path, build(inputs, old), fold=True)
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    folded = build(inputs, old)
+    transitions = tmp_path / "identity-transitions"
+    transitions.mkdir()
+    (transitions / "001.yaml").write_text("format: 1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="needs no identity transitions"):
+        plan_files(tmp_path, folded, fold=True)
+
+
+def test_same_card_groups_must_stay_disjoint(inputs: Inputs, tmp_path: Path) -> None:
+    inputs.mapping.reskins = {}
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    first = build(inputs, {})
+    write_files(plan_files(tmp_path, first))
+    _, old = load(tmp_path)
+    keep, other = card_of(first, "jp", "BP02-071"), card_of(first, "jp", "BP02-072")
+    inputs.decisions.same_cards = {keep: ["jp:BP02-072"], other: ["jp:BP02-072"]}
+    with pytest.raises(ValueError, match="listed twice"):
+        build(inputs, old)
+    inputs.decisions.same_cards = {keep: ["jp:BP02-072"], other: ["jp:PR-001"]}
+    with pytest.raises(ValueError, match="belongs to another kept card"):
+        build(inputs, old)
