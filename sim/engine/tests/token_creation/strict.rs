@@ -173,3 +173,18 @@ fn strict_unresolved_rulings_are_reported_only_to_the_affected_owner() {
     );
     assert_eq!(report.gaps(Viewer::P2), []);
 }
+
+#[test]
+fn strict_startup_error_display_does_not_disclose_missing_card_numbers() {
+    let (snapshot, keywords, input) = selection(1);
+    let mut decks = decks();
+    decks[0].evolve.push("not-selected".into());
+    let error = Game::start_player_game(
+        selected(&snapshot, &keywords, &input),
+        decks,
+        Viewer::P1,
+        "strict-existing",
+    )
+    .unwrap_err();
+    assert!(!error.to_string().contains("not-selected"));
+}

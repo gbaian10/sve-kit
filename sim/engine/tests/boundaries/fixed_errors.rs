@@ -1,5 +1,5 @@
 //! Load-time rejection and the engine behaviours it made explicit (KE and M numbers
-//! follow engine tracking issue #478; R2 is from the design cross-review).
+//! follow engine tracking issue #478; R2 and R3 are from the design cross-review).
 
 #![expect(
     clippy::unwrap_used,
@@ -406,7 +406,7 @@ fn settle_turn(engine: &mut Game) {
     }
 }
 
-// ---------------------------------------------------------------- R2 property
+// ---------------------------------------------------------------- R2–R3 properties
 
 /// R2: every selector field the loader accepts changes the result when the only
 /// candidate fails it; none is silently ignored.
@@ -462,6 +462,51 @@ fn r2_every_accepted_selector_field_filters_or_is_rejected() {
         &[("unit.yaml".into(), document.to_string())],
     )
     .unwrap_err();
+}
+
+/// R3: what a seat observes depends only on public information: two games that differ
+/// only in hidden cards give the same player packet.
+#[test]
+fn r3_hidden_cards_do_not_change_the_player_packet() {
+    let loaded = Arc::new(catalog(&json!({})));
+    for (left, right) in [("f-a", "f-b"), ("spell", "amulet"), ("f-c", "heal")] {
+        let observed = |hidden: &str| {
+            Game::new(
+                Arc::clone(&loaded),
+                &setup(
+                    &json!({"field":[{"id":"a","card":"f-a"}]}),
+                    &json!({"hand":[{"id":"h","card":hidden}],"deck":[{"id":"d","card":hidden}]}),
+                ),
+                &Value::Null,
+                &Value::Null,
+                "table",
+            )
+            .unwrap()
+            .projection(View::P1)
+            .unwrap()
+        };
+        assert_eq!(
+            observed(left),
+            observed(right),
+            "{left}/{right} must look the same to P1"
+        );
+    }
+    // The original R3 probe swapped the opponent's face-down evolve deck (M-016).
+    let evolve_observed = |hidden: &str| {
+        let mut position = setup(&json!({"field":[{"id":"a","card":"f-a"}]}), &json!({}));
+        position["players"]["P2"]["zones"]["evolve_deck"] = json!([{"id":"e","card":hidden}]);
+        Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "table",
+        )
+        .unwrap()
+        .projection(View::P1)
+        .unwrap()
+    };
+    assert_eq!(evolve_observed("f-a"), evolve_observed("f-b"));
 }
 
 /// M-001: an aura that grants abilities and compares names (in its condition or its
