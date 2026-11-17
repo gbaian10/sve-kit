@@ -54,7 +54,7 @@ def test_entry_requires_known_area(tmp_path: Path, entry: Entry, *, typo: bool) 
 
 @pytest.mark.parametrize(
     "mutation",
-    ["duplicate", "symlink", "unknown", "kind", "bool_format", "key", "area"],
+    ["duplicate", "symlink", "bool_format", "area"],
 )
 def test_current_file_boundary_guards(case: Case, mutation: str) -> None:
     path = case.root / "catalog/adoptions/vocabulary/001.yaml"

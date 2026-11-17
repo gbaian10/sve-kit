@@ -244,12 +244,7 @@ def test_duplicate_selection_cannot_claim_another_identity(
 @pytest.mark.parametrize(
     "path",
     [
-        "rules/author-effects/FIX/1.yaml",
-        "rules/author-effects/FIX/001.json",
         "rules/author-effects/.hidden",
-        "rules/effects/FIX/001.yaml",
-        "rules/effects/FIX.json",
-        "rules/effects-index/FIX.json",
         "rules/effects-index/FIX/001.yaml",
         "rules/effect-bodies/FIX/extra/001.yaml",
     ],

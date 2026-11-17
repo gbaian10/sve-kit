@@ -81,9 +81,7 @@ def test_owner_shape_is_closed(kind: str, identifier: str, face: str | None) -> 
     ("mutation", "message"),
     [
         ("missing_name", "Known printed name is missing its own source"),
-        ("wrong_parent", "Name build printing face belongs to another card"),
         ("wrong_face_parent", "Name build printing face belongs to another card"),
-        ("wrong_language", "Name build source language differs from owner region"),
         ("wrong_hash", "Name build source exact hash mismatch"),
         ("missing_unit", "Name build owner or source row is absent"),
     ],

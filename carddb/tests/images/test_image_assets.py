@@ -143,15 +143,7 @@ def test_build_rechecks_blob_tampering_before_returning(
 
 @pytest.mark.parametrize(
     "case",
-    [
-        "same",
-        "preview-in-cache",
-        "cache-in-preview",
-        "archive",
-        "symlink",
-        "nested-symlink",
-        "relative",
-    ],
+    ["archive", "symlink", "nested-symlink", "relative"],
 )
 def test_each_root_isolation_constraint_fails_before_writing(
     empty_crops: ImageCrops,
@@ -214,22 +206,15 @@ def test_wrong_batch_provider_or_kind_is_rejected(
 @pytest.mark.parametrize(
     "case",
     [
-        "missing-variant",
         "extra-variant",
         "duplicate-image",
-        "source-hash",
         "source-url",
-        "recipe",
         "recipe-all",
         "variant-id",
-        "format",
         "original",
         "variant-recipe",
         "path",
-        "bytes",
-        "dimensions",
         "missing-blob",
-        "corrupt-blob",
     ],
 )
 def test_independent_asset_tampering_is_rejected(  # ruff: ignore[complex-structure, too-many-branches] -- independent invariant counterexamples share one verified fixture

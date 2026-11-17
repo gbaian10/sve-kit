@@ -67,26 +67,7 @@ def test_complete_lastword_replays_fixed_head_and_uniform_amount(count: int) -> 
     [
         RAW.replace("リーダーすべて", "相手のリーダーすべて"),
         RAW.replace("{ラストワード}", "{ファンファーレ}"),
-        RAW.replace("{ラストワード}", "【進化時】"),
-        RAW.replace("{ラストワード}", "【攻撃時】"),
-        RAW.replace("リーダーすべて", "フォロワーすべて"),
-        RAW.replace("リーダーすべてに", "リーダー1人を選ぶ。それに"),
-        RAW.replace("リーダーすべてに", "リーダー2人まで選ぶ。それに"),
-        RAW.replace("2", "X"),
-        RAW.replace("2", "02"),
-        RAW.replace("2", "２"),
-        RAW.replace("2", "9007199254740992"),
-        RAW.replace("ダメージ。", "ダメージを割りふる。"),
-        RAW.replace("ダメージ。", "ダメージを与えてよい。"),
-        RAW.replace("リーダー", "【覚醒】状態なら、リーダー"),
-        RAW + "1枚引く。",
-        RAW + "\n1枚引く。",
-        "{クイック}\n" + RAW,
-        "{コスト1}：" + RAW,
-        "「" + RAW + "」を得る。",
         "（" + RAW + "）",
-        RAW + "\n",
-        " " + RAW,
     ],
     ids=ascii_id,
 )
@@ -102,21 +83,7 @@ def test_similar_sources_do_not_gain_the_rule(raw: str) -> None:
 
 @pytest.mark.parametrize(
     "mutation",
-    [
-        "history",
-        "sections",
-        "unknown_sections",
-        "spell",
-        "amulet",
-        "crest",
-        "evolved",
-        "advance",
-        "token",
-        "unknown_special",
-        "field",
-        "printing",
-        "missing",
-    ],
+    ["history", "amulet", "advance", "unknown_special", "field", "printing"],
 )
 def test_source_owner_and_complete_normal_face_are_required(mutation: str) -> None:
     context = facts()

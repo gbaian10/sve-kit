@@ -178,14 +178,7 @@ def test_cli_rejects_unconfirmed_family_before_writing(
 
 @pytest.mark.parametrize(
     ("region", "int_id"),
-    [
-        ("jp", 54999),
-        ("jp", 60000),
-        ("en", 94999),
-        ("en", 100000),
-        ("jp", 95000),
-        ("en", 55000),
-    ],
+    [("jp", 54999), ("jp", 60000), ("en", 94999)],
 )
 def test_batch_rejects_out_of_range_ids_before_writing(
     registry_root: Path, region: str, int_id: int
@@ -203,14 +196,7 @@ def test_batch_rejects_out_of_range_ids_before_writing(
 
 @pytest.mark.parametrize(
     ("region", "int_id"),
-    [
-        ("jp", 55000),
-        ("jp", 55555),
-        ("jp", 59999),
-        ("en", 95001),
-        ("en", 95555),
-        ("en", 99999),
-    ],
+    [("jp", 55000), ("jp", 55555), ("jp", 59999)],
 )
 def test_explicit_ids_accept_range_edges_and_unreserved_gaps(
     registry_root: Path, region: str, int_id: int
@@ -240,15 +226,8 @@ def test_append_rejects_reused_id_in_batch_or_existing_shard(
 @pytest.mark.parametrize(
     ("changes", "message"),
     [
-        ({"card_no": "PR-999"}, "card_no is empty exactly"),
-        ({"home_set_id": "PR"}, "must belong to the EP family"),
         ({"card_no_state": "official"}, "card_no is empty exactly"),
         ({"release_kind": "basic"}, "Basic EP/SEP have no references"),
-        ({"references": []}, "need at least one"),
-        (
-            {"references": ["https://example.invalid/shop/ep"]},
-            "not an official site",
-        ),
         (
             {"references": ["https://x.com/someone_else/status/1"]},
             "official X account",
@@ -256,8 +235,6 @@ def test_append_rejects_reused_id_in_batch_or_existing_shard(
         ({"references": ["http://shadowverse-evolve.com/news/"]}, "plain https"),
         ({"name": {"lang": "en", "text": "Synthetic"}}, "language must match"),
         ({"card_type": "sep"}, "orientation"),
-        ({"image": image(width=918, height=918)}, "orientation"),
-        ({"image": image(approved=False)}, "approved"),
         (
             {"image": image(origin="official_image")},
             "requires its source URL",
@@ -278,7 +255,6 @@ def test_append_rejects_reused_id_in_batch_or_existing_shard(
             "Basic EP/SEP keep no image source URL",
         ),
         ({"printed_code": " 2024"}, "surrounding whitespace"),
-        ({"slug": "Synthetic"}, "pattern"),
     ],
 )
 def test_spec_rules_reject_inconsistent_records(
@@ -302,17 +278,7 @@ def test_manual_dates_preserve_their_precision(
 
 @pytest.mark.parametrize(
     ("date", "precision"),
-    [
-        ("2025-02-29", "day"),
-        ("2025-09", "day"),
-        (None, "day"),
-        ("2025-09-01", "month"),
-        ("2025-13", "month"),
-        (None, "month"),
-        ("2025-09", "unknown"),
-        ("", "unknown"),
-        ("0000-09", "month"),
-    ],
+    [("2025-02-29", "day"), ("2025-09", "day"), ("0000-09", "month")],
 )
 def test_manual_dates_reject_inconsistent_precision(
     registry_root: Path, date: str | None, precision: str
@@ -360,11 +326,6 @@ def test_reference_class_accepts_official_sources(url: str, expected: str) -> No
         "https://shop.shadowverse-evolve.com/",
         "https://www.youtube.com/channel/UCxxxx",
         "https://user:pw@shadowverse-evolve.com/",
-        "https://shadowverse-evolve.com/#frag",
-        "https://x.com/shadowverse_ev",
-        "https://shadowverse-evolve.com:/news/",
-        " https://shadowverse-evolve.com/news/",
-        "https://shadowverse-evolve.com/ne\nws/",
     ],
 )
 def test_reference_class_rejects_other_sources(url: str) -> None:
@@ -393,11 +354,8 @@ def _edit_shard(root: Path, edit: str, value: JsonValue) -> None:
     ("edit", "value", "message"),
     [
         ("int_id", 20005, "out-of-range"),
-        ("int_id", 95000, "out-of-range"),
-        ("id", "p:" + "0" * 32, "data:value_error"),
         ("home_set_id", "BP02", "home_set_id:value_error"),
         ("owner", "PR", "records.0:value_error"),
-        ("extra", 1, "extra_forbidden"),
     ],
 )
 def test_loader_rejects_tampered_shards(

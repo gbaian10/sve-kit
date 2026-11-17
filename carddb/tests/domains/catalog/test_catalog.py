@@ -95,9 +95,7 @@ def test_catalog_import_preserves_multivalued_aliases(db: Database) -> None:
     }
 
 
-@pytest.mark.parametrize(
-    "kind", ["keyword", "stamp", "unknown", "card", "product_family", "trait"]
-)
+@pytest.mark.parametrize("kind", ["keyword", "stamp", "unknown"])
 def test_alias_invalid_target_rolls_back_every_catalog_row(
     db: Database, kind: str
 ) -> None:

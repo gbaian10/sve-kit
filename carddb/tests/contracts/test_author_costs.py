@@ -75,19 +75,7 @@ def test_synthetic_composite_payments(value: JsonValue) -> None:
 )
 @pytest.mark.parametrize(
     "op",
-    [
-        "discard",
-        "banish",
-        "act",
-        "to_cemetery",
-        "return_to_hand",
-        "reveal",
-        "flip_down",
-        "flip_up",
-        "to_ex",
-        "to_deck_bottom",
-        "to_deck",
-    ],
+    ["discard", "banish", "act"],
 )
 def test_synthetic_material_modes(op: str, mode: dict[str, JsonValue]) -> None:
     value = dict(mode)

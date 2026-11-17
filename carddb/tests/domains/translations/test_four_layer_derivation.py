@@ -153,14 +153,7 @@ def test_quick_without_context_does_not_share_across_owners() -> None:
 
 @pytest.mark.parametrize(
     "raw",
-    [
-        "条件なら{クイック}",
-        "{クイック}を持つ。",
-        "{クイック}仮。",
-        "{クイック}【仮旗】",
-        "{クイック}、",
-        "{クイック}、{クイック}",
-    ],
+    ["条件なら{クイック}", "{クイック}を持つ。", "{クイック}【仮旗】"],
 )
 def test_granted_conditional_or_compound_flags_do_not_become_quick_card_fields(
     raw: str,

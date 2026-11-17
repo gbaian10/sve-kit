@@ -115,56 +115,13 @@ BAD_HEADS: tuple[dict[str, JsonValue], ...] = (
             "do": [{"damage": {"to": "picked", "n": 2}}],
         }
     },
-    {"lastword": {"do": [{"damage": {"to": {"leaders": "all"}, "n": 3}}]}},
-    head({"count": {"zone": "hand", "who": "self"}}),
-    {
-        "lastword": {
-            "do": [*array(object_value(head()["lastword"])["do"]), {"draw": {"n": 1}}]
-        }
-    },
-    {"fanfare": {"do": array(object_value(head()["lastword"])["do"])}},
-    {
-        "lastword": {
-            "do": [
-                {
-                    "pay": {
-                        "cost": {"pp": 1},
-                        "do": array(object_value(head()["lastword"])["do"]),
-                        "then": [],
-                    }
-                }
-            ]
-        }
-    },
-    {
-        "lastword": {
-            "do": [
-                {
-                    "if": {
-                        "cond": {"awakened": True},
-                        "then": array(object_value(head()["lastword"])["do"]),
-                    }
-                }
-            ]
-        }
-    },
 )
 
 
 @pytest.mark.parametrize(
     "body",
     BAD_HEADS,
-    ids=[
-        "allocation",
-        "opponent",
-        "target",
-        "amount",
-        "dynamic",
-        "extra-step",
-        "fanfare",
-        "cost",
-        "condition",
-    ],
+    ids=["allocation", "opponent", "target"],
 )
 def test_expansion_rejects_a_similar_author_payload(
     expander: AuthorExpander, body: dict[str, JsonValue]

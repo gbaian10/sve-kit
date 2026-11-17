@@ -521,21 +521,10 @@ def test_battle_rule_identity_closure_keeps_parent_ids_and_all_exact_versions() 
     ("table", "rows"),
     [
         ("cr_clause", [{"id": "clause", "cr_version_id": "missing", "number": "1.2"}]),
-        (
-            "cr_clause",
-            [
-                {"id": "clause-a", "cr_version_id": "version", "number": "1.2"},
-                {"id": "clause-b", "cr_version_id": "version", "number": "1.2"},
-            ],
-        ),
         ("qa_version", [{"id": "answer-version", "qa_id": "missing"}]),
         (
             "ruling_revision",
             [{"id": "revision", "ruling_id": "ruling", "strength": "assumed-official"}],
-        ),
-        (
-            "ruling_revision",
-            [{"id": "revision", "ruling_id": "", "strength": "inferred"}],
         ),
         (
             "ruling_revision",

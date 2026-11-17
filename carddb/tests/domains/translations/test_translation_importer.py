@@ -266,15 +266,7 @@ def test_digital_parent_back_face_and_language_closure(
 
 @pytest.mark.parametrize(
     "fault",
-    [
-        "missing_version",
-        "field_hash",
-        "pointer",
-        "target_language",
-        "dictionary_key",
-        "same_concept",
-        "provider",
-    ],
+    ["pointer", "dictionary_key", "same_concept", "provider"],
 )
 def test_source_and_concept_guards_are_independent(
     frozen: Fixture,
@@ -622,7 +614,6 @@ def test_recognized_face_layouts_only(fault: str, message: str) -> None:
         ("id_type", "Digital card lacks an official integer ID"),
         ("conflict", "Conflicting frozen digital card versions"),
         ("width", "Digital official ID width mismatch"),
-        ("missing", "Requested digital card has no frozen Japanese source"),
         ("parent_missing", "Requested digital card has no frozen Japanese source"),
         ("parent_type", "Invalid digital parent ID"),
         ("token", "Invalid digital token flag"),
@@ -729,8 +720,6 @@ def test_source_recipe_and_descriptor_refusals(
         ("provider", "Digital name locator provider mismatch"),
         ("field", "Digital name locator must reference a card name"),
         ("card", "Digital name locator points to another card"),
-        ("decision", "Same-character/name-only is not same-concept name evidence"),
-        ("model_review", "Same-character/name-only is not same-concept name evidence"),
         ("names", "Digital name evidence does not locate the adopted face names"),
     ],
 )

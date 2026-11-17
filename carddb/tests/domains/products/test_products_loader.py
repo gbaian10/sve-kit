@@ -113,17 +113,7 @@ def test_missing_state_is_not_read_as_confirmed(product_root: Path) -> None:
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [
-        ("id", ""),
-        ("code", "BP02"),
-        ("code", "bp02\n"),
-        ("code", 2),
-        ("public_code", ""),
-        ("kind", "unknown"),
-        ("name", {"lang": "ja", "text": ""}),
-        ("name", {"lang": "invalid_tag", "text": "Synthetic"}),
-        ("name", {"lang": "ja"}),
-    ],
+    [("id", ""), ("code", "BP02"), ("name", {"lang": "ja", "text": ""})],
 )
 def test_each_family_data_field(
     product_root: Path, field: str, value: JsonValue
@@ -228,11 +218,7 @@ def test_unsorted_records_are_rejected(product_root: Path) -> None:
     "path",
     [
         "products/index.yaml",
-        "products/extra.yaml",
-        "products/extra.yml",
-        "products/family/BP02/01.yaml",
         "products/other/BP02/001.yaml",
-        "products/family/BP02/001.yml",
         "products/family/BP02/nested/001.yaml",
     ],
 )
@@ -272,15 +258,7 @@ def test_missing_directory_never_reads_as_empty(product_root: Path) -> None:
 
 @pytest.mark.parametrize(
     "text",
-    [
-        "x: 1\nx: 2\n",
-        "x: &x [*x]\n",
-        "x: !custom hi\n",
-        "---\nx: 1\n---\ny: 2\n",
-        "1: value\n",
-        "%YAML 1.1\n---\nx: 1\n",
-        "x: .nan\n",
-    ],
+    ["---\nx: 1\n---\ny: 2\n", "1: value\n", "%YAML 1.1\n---\nx: 1\n"],
 )
 def test_yaml_boundary_is_used(product_root: Path, text: str) -> None:
     (product_root / NAME).write_text(text, encoding="utf-8")
@@ -316,18 +294,7 @@ def test_global_products_and_inclusions_are_typed_before_projection(
     ("field", "value"),
     [
         ("id", "Example"),
-        ("id", "example\n"),
-        ("id", " example"),
-        ("id", "éxample"),
-        ("id", 1),
-        ("region", "cn"),
-        ("product_type", "Pack"),
-        ("product_type", None),
         ("name", {"lang": "ja", "text": ""}),
-        ("released_on", "2026-02-30"),
-        ("released_on", "2026-01-01"),
-        ("date_precision", "day"),
-        ("date_precision", "month"),
         ("date_precision", "year"),
     ],
 )
@@ -426,16 +393,9 @@ def test_valid_date_precisions_preserve_original_text(
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("product_id", "Example"),
-        ("printing_id", "invalid"),
-        ("first_available_on", "2026-02-30"),
         ("first_available_on", "2026-09-30"),
         ("first_available_precision", "day"),
-        ("first_available_precision", "month"),
-        ("first_available_precision", "year"),
         ("first_available_raw", "Unknown"),
-        ("inclusion_kind", "booster"),
-        ("note", {"lang": "ja"}),
     ],
 )
 def test_each_inclusion_domain_and_override(

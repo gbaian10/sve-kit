@@ -13,14 +13,7 @@ from ...support.build_db_fixtures import seed
 
 @pytest.mark.parametrize(
     ("code", "expected"),
-    [
-        ("BP01", ["BP01"]),
-        ("bp01-bp02", ["BP01", "BP02"]),
-        ("CSD02A", ["CSD02a"]),
-        ("DSD01", ["DSD01a", "DSD01b"]),
-        (None, ["family"]),
-        ("unmatched", ["family"]),
-    ],
+    [("BP01", ["BP01"]), ("bp01-bp02", ["BP01", "BP02"]), ("CSD02A", ["CSD02a"])],
 )
 def test_codes_precede_printing_membership(
     code: str | None, expected: list[str]

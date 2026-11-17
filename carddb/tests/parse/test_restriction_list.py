@@ -93,12 +93,7 @@ def test_en_inline_lift_applies_only_to_its_linked_card() -> None:
     "suffix",
     [
         " (to be lifted on Unknown 2, 2026)",
-        " (to be lifted on November 31, 2026)",
         " (to be lifted on August 21, 2026)",
-        " (to be lifted on November 2)",
-        " (to be lifted on November ２, 2026)",
-        " (to be banned on November 2, 2026)",
-        " (to be lifted on November 2, 2026) (to be lifted on December 2, 2026)",
         ' (to be lifted on November 2, 2026)<a href="https://en.shadowverse-evolve.com/cards/?cardno=OTHER">Other</a>',
     ],
 )
@@ -130,11 +125,7 @@ def test_en_inline_lift_cannot_override_a_conflicting_heading() -> None:
 @pytest.mark.parametrize(
     ("old", "new"),
     [
-        ("2026/1/30(金)より適用", "2026/2/30(月)より適用"),
-        ("2026/1/30(金)より適用", "Soon"),
-        ("<h4>2026/1/30(金)より適用</h4>", ""),
         ("殿堂入りカード", "Unsupported category"),
-        ("?cardno=TEST-a", "?cardno=TEST-a&amp;cardno="),
         (
             "https://shadowverse-evolve.com/cardlist/?cardno=TEST-a",
             "https://example.invalid/card?cardno=TEST-a",

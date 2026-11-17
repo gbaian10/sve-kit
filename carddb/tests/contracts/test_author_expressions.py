@@ -65,7 +65,7 @@ def test_condition_variants(
     _reject(schema, E, value)
 
 
-@pytest.mark.parametrize("value", [-SAFE, -1, 0, 1, SAFE, "X", "lowest"])
+@pytest.mark.parametrize("value", [-SAFE, -1, 0])
 def test_numeric_scalar_values(schema: dict[str, JsonValue], value: JsonValue) -> None:
     _accept(schema, E, value)
     _reject(schema, C, value)

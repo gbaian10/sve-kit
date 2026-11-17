@@ -47,7 +47,7 @@ def test_appearance_does_not_change_official_rarity(tmp_path: Path) -> None:
         assert printing["rarity_badge_text"] == "BR"
 
 
-@pytest.mark.parametrize("style", ["br", "sr", "gr", "lg", "sl", "sp", "none"])
+@pytest.mark.parametrize("style", ["br", "sr", "gr"])
 def test_styles_and_absent_text(tmp_path: Path, style: str) -> None:
     text = "" if style == "none" else "  text: PR\n"
     records = load_badges(

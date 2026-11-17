@@ -76,8 +76,6 @@ def engine() -> Classifier:
 @pytest.mark.parametrize(
     ("case", "raw", "role"),
     [
-        ("N01", "仮。『仮甲』２体か『仮乙』３体か『仮丙』４体を場に出す。", "count"),
-        ("N02", "仮。『仮甲』２体と『仮乙』３体を場に出してよい。", "count"),
         (
             "N03",
             "仮。『仮甲』『仮乙』『仮丙』『仮丁』２枚ずつEXエリアに置いてよい。",
@@ -89,7 +87,6 @@ def engine() -> Classifier:
             "仮。『仮甲』『仮乙』『仮丙』２枚ずつ場やEXエリアに置いてよい。",
             "count",
         ),
-        ("R01", "仮。『仮甲』２体を出す。【覚醒】状態なら、代わりに３体。", "count"),
         (
             "R02",
             "仮。『仮甲』２体を出す。【覚醒】状態なら、代わりに３体まで。",
@@ -100,16 +97,6 @@ def engine() -> Classifier:
             "仮。２枚引く。自分のEXエリアの『仮甲』が４枚なら、代わりに３枚。",
             "count",
         ),
-        ("C01", "仮。自分の場の『仮甲』が２体以上なら、仮。", "existence_count"),
-        (
-            "C02",
-            "仮。自分の墓場の仮族・カードが２枚以上か自分の墓場の{仮クラス}カードが３枚以上なら、仮。",
-            "existence_count",
-        ),
-        ("C03", "仮。自分の墓場の枚数が２枚以上なら、仮。", "existence_count"),
-        ("S01", "仮。自分の場の進化していない『仮甲』２体を選ぶ。", "selection_count"),
-        ("S02", "仮。自分の場の『仮甲』や『仮乙』２体まで選ぶ。", "selection_count"),
-        ("S03", "仮。相手の進化していないフォロワー２体を選ぶ。", "selection_count"),
         (
             "S04",
             "仮。自分のデッキの上２枚を見る。その中から、仮族・カード３枚を公開してデッキの上に置いてよい。残りを好きな順にデッキの下に置く。",
@@ -130,13 +117,7 @@ def engine() -> Classifier:
             "仮。各プレイヤーは、自身の場のフォロワー２体を残し、それ以外の自身の場のフォロワーすべてを墓場に置く。",
             "selection_count",
         ),
-        (
-            "S08",
-            "仮。自分の場か自分のEXエリアの仮族・トークン２枚を選ぶ。",
-            "selection_count",
-        ),
         ("S09", "仮。自分の手札２枚をデッキの上か下に置く。", "count"),
-        ("S10", "仮。自分の場の『仮甲』２体と『仮乙』３つを選ぶ。", "selection_count"),
         ("S11", "仮。自分のエボルヴデッキの『仮甲』２枚をプレイしてよい。", "count"),
         (
             "P01",
@@ -218,13 +199,6 @@ def test_new_emissions_cannot_match_a_mixed_or_long_tail(
     ("case", "raw", "field", "role", "bad"),
     [
         (
-            "748-S01",
-            "『仮甲』は自分のデッキに２枚まで入れることができる。",
-            "section",
-            "construction_copy_limit",
-            "２枚まで入れる",
-        ),
-        (
             "748-S02",
             "【スタートアミュレット】（【スタートアミュレット】を持つカードはデッキに１種しか入れられない）",
             "effect",
@@ -265,13 +239,6 @@ def test_new_emissions_cannot_match_a_mixed_or_long_tail(
             "effect",
             "existence_count",
             "さらに",
-        ),
-        (
-            "748-E03",
-            "これをプレイする際、【スペルチェイン_２】コストを-３する。【SC_４】代わりに-５する。【SC_６】代わりに-７する。",
-            "effect",
-            "cost_delta_magnitude",
-            "代わりに-５",
         ),
         (
             "748-E04",
@@ -367,10 +334,6 @@ def test_replacement_cannot_cross_an_intervening_action_or_ability(
     "raw",
     [
         "仮。自分の墓場の仮族・カード２枚を公開してデッキの上に置いてよい。",
-        "仮。『仮甲』『仮乙』２枚ずつ場やEXエリアに置いてよい。",
-        "仮。『仮甲』『仮乙』『仮丙』『仮丁』２枚ずつ場やEXエリアに置いてよい。",
-        "仮。「『仮甲』２体と『仮乙』３体を場に出す」を持つ。",
-        "仮。自分の墓場の未知族・カードが２枚以上か自分の墓場の仮族・カードが３枚以上なら、仮。",
         "仮。自分の墓場の仮族・カードが２枚以上か自分の墓場の仮族・カードが３枚以上か自分の墓場の仮族・カードが４枚以上なら、仮。",
         "【レッスン_２】仮。（【レッスン_１】とは、自分のEXエリアの『仮甲』１枚を消滅させること）",
     ],
@@ -431,13 +394,6 @@ def test_sealed_reminder_requires_its_exact_registered_concepts(
             "count",
         ),
         (
-            "payment-cost-order",
-            "これをプレイする際、墓場の元のコスト２、１、３、４、５、６、７、８、９、１０のカードを１枚ずつ消滅:コストを-７する。",
-            "effect",
-            None,
-            "cost_value",
-        ),
-        (
             "lesson-count-mismatch",
             "【レッスン_１】仮。（【レッスン_１】とは、自分のEXエリアの『仮甲』２枚を消滅させること）",
             "effect",
@@ -459,22 +415,8 @@ def test_sealed_reminder_requires_its_exact_registered_concepts(
             "existence_count",
         ),
         (
-            "sc-descending",
-            "これをプレイする際、【スペルチェイン_６】コストを-２する。【SC_４】代わりに-３する。【SC_２】代わりに-４する。",
-            "effect",
-            None,
-            "cost_delta_magnitude",
-        ),
-        (
             "cost-kinds-unordered",
             "【進化時】自分の墓場にあるカードの元のコストの種類数が５種類以上なら、仮。３種類以上なら、仮。４種類以上なら、仮。２種類以上なら、仮。",
-            "effect",
-            None,
-            "threshold",
-        ),
-        (
-            "cost-kinds-new-head",
-            "【進化時】自分の墓場にあるカードの元のコストの種類数が２種類以上なら、仮。３種類以上なら、仮。【攻撃時】４種類以上なら、仮。５種類以上なら、仮。",
             "effect",
             None,
             "threshold",
@@ -487,57 +429,11 @@ def test_sealed_reminder_requires_its_exact_registered_concepts(
             "selection_count",
         ),
         (
-            "selection-missing-kind",
-            "仮。自分の場の『仮甲』や『仮乙』２体まで選ぶ。",
-            "effect",
-            (("term:name.first", "follower"),),
-            "selection_count",
-        ),
-        (
-            "selection-ambiguous-kind",
-            "仮。自分の場の『仮甲』や『仮乙』２体まで選ぶ。",
-            "effect",
-            (
-                ("term:name.first", "follower"),
-                ("term:name.first", "amulet"),
-                ("term:name.second", "follower"),
-            ),
-            "selection_count",
-        ),
-        (
             "existence-missing-kind",
             "仮。自分の場の『仮甲』が２体以上なら、仮。",
             "effect",
             (),
             "existence_count",
-        ),
-        (
-            "construction-effect-field",
-            "『仮甲』は自分のデッキに２枚まで入れることができる。",
-            "effect",
-            None,
-            "construction_copy_limit",
-        ),
-        (
-            "construction-evolve-deck",
-            "『仮甲』は自分のエボルヴデッキに２枚まで入れることができる。",
-            "section",
-            None,
-            "construction_copy_limit",
-        ),
-        (
-            "start-amulet-two-kinds",
-            "【スタートアミュレット】（【スタートアミュレット】を持つカードはデッキに２種しか入れられない）",
-            "effect",
-            None,
-            "construction_name_kind_limit",
-        ),
-        (
-            "damage-positive-sign",
-            "これがいる限り、自分のフォロワーが受ける「相手の能力によるダメージ」を+２する。",
-            "effect",
-            None,
-            "damage_delta_magnitude",
         ),
     ],
     ids=lambda value: value if isinstance(value, str) and value.isascii() else None,

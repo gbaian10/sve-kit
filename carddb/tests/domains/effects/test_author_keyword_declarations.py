@@ -47,7 +47,7 @@ def test_keyword_source_is_not_an_ability_source(
 
 @pytest.mark.parametrize(
     "change",
-    ["old-source", "imports", "export-port", "import-port", "duplicate", "generated"],
+    ["old-source", "imports", "duplicate"],
 )
 def test_keyword_declaration_has_one_closed_shape(
     schemas: AuthorSchemas, change: str

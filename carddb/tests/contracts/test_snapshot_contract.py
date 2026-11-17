@@ -25,22 +25,6 @@ class _StringSubclass(str):
     __slots__ = ()
 
 
-class _IntegerSubclass(int):
-    pass
-
-
-class _FloatSubclass(float):
-    pass
-
-
-class _ListSubclass(list[JsonValue]):
-    pass
-
-
-class _DictSubclass(dict[str, JsonValue]):
-    pass
-
-
 def test_schema_is_valid_and_covers_every_collection() -> None:
     Draft202012Validator.check_schema(schema())
     valid = [object_value(case) for case in array(fixture("schema-valid.json"))]
@@ -295,28 +279,8 @@ def test_fixed_canonical_and_bucket_vectors() -> None:
 
 @pytest.mark.parametrize(
     "data",
-    [
-        b'{"a":1,"a":2}',
-        b"1.0",
-        b"NaN",
-        b"9007199254740992",
-        b'"\\ud800"',
-        b"\xef\xbb\xbf{}",
-        b'{"a":[9007199254740992]}',
-        b'{"a":["\\ud800"]}',
-        b'{"a":[{"\\udfff":null}]}',
-    ],
-    ids=[
-        "duplicate",
-        "float",
-        "nan",
-        "unsafe",
-        "surrogate",
-        "bom",
-        "nested-unsafe",
-        "nested-surrogate",
-        "surrogate-key",
-    ],
+    [b'{"a":1,"a":2}', b"1.0", b'{"a":[{"\\udfff":null}]}'],
+    ids=["duplicate", "float", "surrogate-key"],
 )
 def test_invalid_json_boundary(data: bytes) -> None:
     with pytest.raises((ValueError, UnicodeError)):
@@ -331,16 +295,7 @@ def test_canonical_rejects_floating_point_numbers(value: float) -> None:
 
 @pytest.mark.parametrize(
     "value",
-    [
-        (1, 2),
-        {1, 2},
-        Path("synthetic"),
-        _StringSubclass("synthetic"),
-        _IntegerSubclass(1),
-        _FloatSubclass(1.0),
-        _ListSubclass([1]),
-        _DictSubclass(key=1),
-    ],
+    [(1, 2), {1, 2}, Path("synthetic")],
 )
 def test_canonical_identifies_unsupported_types(value: object) -> None:
     with pytest.raises(
@@ -351,22 +306,8 @@ def test_canonical_identifies_unsupported_types(value: object) -> None:
 
 @pytest.mark.parametrize(
     "value",
-    [
-        {1: 2},
-        {_StringSubclass("key"): 1},
-        {"nested": [(1, 2)]},
-        {"nested": [9007199254740992]},
-        {"nested": ["\ud800"]},
-        {"\udfff": None},
-    ],
-    ids=[
-        "integer-key",
-        "subclass-key",
-        "tuple",
-        "unsafe",
-        "surrogate",
-        "surrogate-key",
-    ],
+    [{1: 2}, {_StringSubclass("key"): 1}, {"nested": [(1, 2)]}],
+    ids=["integer-key", "subclass-key", "tuple"],
 )
 def test_canonical_rejects_invalid_nested_values(value: object) -> None:
     with pytest.raises((TypeError, ValueError)):

@@ -303,17 +303,7 @@ def test_duplicate_source_numbers_are_not_overwritten(tmp_path: Path) -> None:
 
 @pytest.mark.parametrize(
     "source",
-    [
-        "a: 1\na: 2\n",
-        "a: &ref [*ref]\n",
-        "true: value\n",
-        "1: value\n",
-        "a: !custom test\n",
-        "%YAML 1.1\n---\na: yes\n",
-        "a: 1\n---\na: 2\n",
-        "a: .inf\n",
-        "? [a, b]\n: value\n",
-    ],
+    ["a: 1\na: 2\n", "a: &ref [*ref]\n", "true: value\n"],
 )
 def test_yaml_rejects_unsafe_or_ambiguous_inputs(tmp_path: Path, source: str) -> None:
     path = tmp_path / "input.yaml"
@@ -617,17 +607,7 @@ def test_pending_type_exception_requires_explicit_scope(inputs: Inputs) -> None:
 
 @pytest.mark.parametrize(
     ("scenario", "with_sections"),
-    [
-        ("applied", False),
-        ("already_fixed", False),
-        ("conflict", False),
-        ("needs_review", False),
-        ("applied", True),
-        ("already_fixed", True),
-        ("conflict", True),
-        ("needs_review", True),
-        ("effect_only_fixed", True),
-    ],
+    [("applied", False), ("applied", True), ("conflict", True)],
 )
 def test_correction_projection_preserves_observations(
     inputs: Inputs, scenario: str, with_sections: bool

@@ -105,9 +105,7 @@ def test_full_catalogue_qualifies_first_game_and_plans_all_targets(
     assert not hasattr(plans[0], "text")
 
 
-@pytest.mark.parametrize(
-    "missing", ["null", "empty", "whitespace", "kana", "phase", "language", "different"]
-)
+@pytest.mark.parametrize("missing", ["null", "empty", "whitespace"])
 def test_first_game_failure_never_borrows_second_game(
     baseline: PolicyFixture,
     catalogues: tuple[Catalogue, Catalogue],

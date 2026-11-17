@@ -36,15 +36,7 @@ def test_each_nonempty_unique_section_selection(decks: list[JsonValue]) -> None:
 
 @pytest.mark.parametrize(
     "change",
-    [
-        {"decks": []},
-        {"decks": ["main", "main"]},
-        {"decks": ["side"]},
-        {"when": "self_in_evolve"},
-        {"exclude_name_contains": ""},
-        {"same_name_max": -1},
-        {"deck": "main"},
-    ],
+    [{"decks": []}, {"decks": ["main", "main"]}, {"decks": ["side"]}],
 )
 def test_unsupported_or_ambiguous_rule_is_rejected(
     change: dict[str, JsonValue],

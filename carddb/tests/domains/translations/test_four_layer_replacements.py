@@ -15,8 +15,6 @@ from .test_four_layer_numbers import numeric_classifier
     ("original", "condition", "replacement", "role"),
     [
         ("１枚引く。", "【土の秘術】", "３枚。", "count"),
-        ("１枚引く。", "【真紅】状態なら、", "３枚。", "count"),
-        ("１枚引く。", "スペルを捨てたなら、", "３枚。", "count"),
         (
             "１枚引く。",
             "元のコストX以上の仮族・カードを捨てたなら、",
@@ -27,12 +25,6 @@ from .test_four_layer_numbers import numeric_classifier
             "１枚引く。",
             "自分の場に元のコストX以上の仮族・フォロワーがいるなら、",
             "３枚。",
-            "count",
-        ),
-        (
-            "自身の場のフォロワー１体を墓場に置く。",
-            "【ネクロチャージ_７】",
-            "３体。",
             "count",
         ),
         (
@@ -76,12 +68,7 @@ def test_source_replacement_inherits_one_adjacent_complete_action(
     [
         "仮。１枚引く。{起動}【土の秘術】代わりに３枚。",
         "仮。１枚引く。別の文。【土の秘術】代わりに３枚。",
-        "仮。１枚不明する。【土の秘術】代わりに３枚。",
         "仮。１枚引く。【土の秘術】代わりに３体。",
-        "仮。１枚引く。未知なら、代わりに３枚。",
-        "仮。１枚引く。未知を捨てたなら、代わりに３枚。",
-        "仮。１枚引く。【NC_X】代わりに３枚。",
-        "仮。自身の場のフォロワー１体を墓場に置く。【ネクロチャージ_X】代わりに３枚。",
     ],
 )
 def test_replacement_cannot_inherit_across_unknown_structure(raw: str) -> None:

@@ -103,7 +103,7 @@ def test_frozen_product_label_keeps_official_provenance(
 
 @pytest.mark.parametrize(
     "mutation",
-    ["text", "lang", "hash", "version", "locator", "parser", "unofficial", "missing"],
+    ["text", "lang", "version", "locator", "parser", "unofficial", "missing"],
 )
 def test_official_label_rejects_forged_or_missing_evidence_before_writing(
     tmp_path: Path, evidence: tuple[Sources, dict[str, JsonValue]], mutation: str

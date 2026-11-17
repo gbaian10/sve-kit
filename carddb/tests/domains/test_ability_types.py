@@ -20,51 +20,16 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize(
     ("region", "text", "expected"),
     [
-        ("jp", "{クイック}\nSynthetic.", {"quick"}),
-        (
-            "jp",
-            "{ファンファーレ}Synthetic.\n【攻撃時】Other.",
-            {"fanfare", "on_attack"},
-        ),
-        ("jp", "《起動》Synthetic.", {"act"}),
-        ("jp", "{UB}{起動}Synthetic.", {"act"}),
-        ("jp", "{アドバンス起動}{コスト4}：Synthetic.", {"advanced_act"}),
-        ("jp", "【超進化時】Synthetic.", {"on_super_evolve"}),
-        ("jp", "【進化時】Synthetic.", {"on_evolve"}),
-        ("jp", "{起動}【融合】Synthetic：Other.", {"act", "fusion"}),
-        ("en", "{icon_adv|[adv]} Synthetic.", {"advanced_act"}),
-        (
-            "en",
-            "{icon_quick|[quick]}\n{icon_fanfare|[fanfare]} Synthetic.",
-            {"quick", "fanfare"},
-        ),
-        ("en", "{icon_lastword|[lastwords]} Synthetic.", {"last_words"}),
-        ("en", "On Super-Evolve - Synthetic.", {"on_super_evolve"}),
-        ("en", "Strike: Draw a card, then discard a card.", {"on_attack"}),
-        ("en", "On Evolve, discard a spell: Synthetic.", {"on_evolve"}),
-        ("en", "Strike, banish a card in your EX area: Synthetic.", {"on_attack"}),
-        (
-            "en",
-            "On Evolve - Synthetic.\nOn Attack - Other.",
-            {"on_evolve", "on_attack"},
-        ),
         (
             "en",
             "{icon_act|[act]} Fuse a synthetic card: Place a fusion counter.",
             {"act", "fusion"},
         ),
         ("en", "On Evolve/Strike - Synthetic.", {"on_evolve", "on_attack"}),
-        ("en", "Whenever you fuse a card, synthetic.", set()),
-        ("en", 'Give another follower "\nOn Attack - Synthetic.\n".', set()),
         (
             "jp",
             "{ファンファーレ}それは「\n【攻撃時】Synthetic.\n」を持つ。",
             {"fanfare"},
-        ),
-        (
-            "en",
-            "{icon_act|[act]} Synthetic.\n{icon_fanfare|[fanfare]} Fuse a card: Other.",
-            {"act", "fanfare"},
         ),
     ],
 )

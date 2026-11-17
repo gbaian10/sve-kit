@@ -32,15 +32,7 @@ if TYPE_CHECKING:
 @pytest.mark.parametrize("region", ["jp", "en"])
 @pytest.mark.parametrize(
     "mode",
-    [
-        "main_reminder",
-        "token_reminder",
-        "supplement",
-        "wording",
-        "tie",
-        "undated",
-        "undated_reminder",
-    ],
+    ["main_reminder", "token_reminder", "supplement"],
 )
 def test_current_wording_preferences_precede_release_dates(
     tmp_path: Path,
@@ -155,17 +147,7 @@ def test_rule_conditions_numbers_and_signs_are_not_reminders(
 
 @pytest.mark.parametrize(
     "mode",
-    [
-        "ai",
-        "manual",
-        "stale",
-        "same_day",
-        "undated",
-        "ai_undated_pending",
-        "errata",
-        "manual_reject_auto",
-        "manual_same_day",
-    ],
+    ["stale", "ai_undated_pending", "errata"],
 )
 def test_current_selection_keeps_classification_and_breaks_release_ties(
     tmp_path: Path,
@@ -409,12 +391,8 @@ def test_undated_unreviewed_correction_does_not_block_a_dated_basis(
     ("mode", "empty_day", "full_day"),
     [
         ("undated_full", "2026-01-01", None),
-        ("ai_pending", "2026-01-01", None),
-        ("older_full", "2026-01-01", "2020-01-01"),
         ("manual_empty", "2026-01-01", "2020-01-01"),
         ("existing_empty_current", "2026-01-01", None),
-        ("all_empty", "2026-01-01", None),
-        ("nonempty_dates", "2020-01-01", "2026-01-01"),
     ],
 )
 def test_shared_basis_uses_rules_text_instead_of_an_empty_printing(

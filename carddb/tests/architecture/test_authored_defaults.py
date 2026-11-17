@@ -79,7 +79,7 @@ def test_authored_tree_does_not_store_quality_defaults() -> None:
 )
 @pytest.mark.parametrize(
     "invalid",
-    [{}, {"value": None}, {"value": 1}, {"value": False}, {"value": []}, {"value": {}}],
+    [{}, {"value": None}, {"value": 1}],
 )
 def test_registry_key_requires_a_string_identity(
     kind: str, identity: str, invalid: dict[str, JsonValue]

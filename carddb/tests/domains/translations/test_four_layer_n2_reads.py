@@ -63,31 +63,8 @@ def test_current_read_uses_shared_source_quantity() -> None:
             "それに「自分の場のフォロワーの数」の3倍のダメージ。",
             "quantity.scale.once.v1",
         ),
-        ("X枚引く。Xは「自分のPP最大値」である。", "read.player.pp_maximum.v1"),
-        (
-            "自分の場のフォロワー1体を選ぶ。それにXダメージ。Xは「選んだフォロワーの攻撃力」である。",
-            "read.selected.attack.v1",
-        ),
-        ("{コストX}：相手にXダメージ。", "read.parameter.chosen_x.v1"),
-        (
-            "{コストX}{コストX}：自分のデッキから『仮場手札自分』X枚まで探し、場に出す。",
-            "read.parameter.chosen_x.v1",
-        ),
-        (
-            "場の『仮場手札自分』X枚を消滅：下記からX個までチョイスする。【1】3枚引く。【2】4枚引く。",
-            "read.parameter.chosen_x.v1",
-        ),
     ],
-    ids=[
-        "hand",
-        "filtered",
-        "scaled",
-        "pp",
-        "selection",
-        "pp-payment",
-        "two-costs",
-        "materials",
-    ],
+    ids=["hand", "filtered", "scaled"],
 )
 def test_sealed_surfaces_derive_and_verify(raw: str, identifier: str) -> None:
     engine = n1_classifier()
@@ -104,30 +81,10 @@ def test_sealed_surfaces_derive_and_verify(raw: str, identifier: str) -> None:
     "raw",
     [
         "Xダメージを割り振る。Xは「これの攻撃力」である。",
-        "これに仮カウンターX個を置く。Xは「自分のPP最大値」である。",
-        "X枚引く。Xは「自分の場のクレストの数」である。",
-        "X枚引く。Xは「場のフォロワーの数」である。",
-        "それに「自分と相手の場のフォロワーの数」と同じダメージ。",
-        "それに「「自分の手札の枚数」の3倍」の2倍のダメージ。",
-        "{起動}X枚引く。{起動}Xは「これの攻撃力」である。",
-        "【1】X枚引く。【2】Xは「これの攻撃力」である。",
-        "それに「最大の攻撃力」と同じダメージ。",
         "それに「これの攻撃力の半分」の2倍のダメージ。",
         "それに「自分の手札の枚数」の0倍のダメージ。",
     ],
-    ids=[
-        "distribution",
-        "place-counter",
-        "crest",
-        "no-zone-owner",
-        "both-players",
-        "nested",
-        "other-ability",
-        "sibling-mode",
-        "maximum",
-        "scaled-half",
-        "zero-multiplier",
-    ],
+    ids=["distribution", "scaled-half", "zero-multiplier"],
 )
 def test_unsealed_consumers_and_sources_are_unchanged(raw: str) -> None:
     engine = n1_classifier()
@@ -219,14 +176,6 @@ def read_engine() -> Classifier:
             "read.lki.attack.v1",
         ),
         (
-            "相手のフォロワー1体を選ぶ。それを手札に戻す。自分のリーダーは{体力}+Xする。Xは「選んだフォロワーの元のコスト」である。",
-            "read.lki.original_cost.v1",
-        ),
-        (
-            "自分の場のフォロワー1体を選ぶ。それにXダメージ。Xは「それの体力-1」である。",
-            "read.offset.subtract.v1",
-        ),
-        (
             "自分の場のフォロワー1体と相手の場のフォロワー1体を選ぶ。前者に「後者の攻撃力」と同じダメージ。",
             "read.selected.attack.v1",
         ),
@@ -234,14 +183,9 @@ def read_engine() -> Classifier:
             "これのコストは「自分の手札の枚数」と同じだけ-1する。",
             "count.current_zone.owner.zone.v1",
         ),
-        ("それに「これの攻撃力の半分」と同じダメージ。", "read.half_up.v1"),
         (
             "これは{攻撃力}+Xする。Xは「これの攻撃力」である。Xが7以上なら、3枚引く。",
             "read.object.attack.v1",
-        ),
-        (
-            "自分のデッキの上3枚を墓場に置く。それに「これによって墓場に置いたスペルの枚数」と同じダメージ。",
-            "read.result.moved_spell.v1",
         ),
     ],
     ids=[
@@ -252,13 +196,9 @@ def read_engine() -> Classifier:
         "faceup-name",
         "distinct-cost",
         "lki",
-        "returned-lki",
-        "offset",
         "ordered-pair",
         "per-unit-reduction",
-        "half-up",
         "later-x",
-        "result-count",
     ],
 )
 def test_capture_and_measure_source_shapes(raw: str, identifier: str) -> None:

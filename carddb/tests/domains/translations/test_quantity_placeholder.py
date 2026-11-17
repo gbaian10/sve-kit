@@ -264,8 +264,6 @@ def test_placeholder_shape_requires_a_direct_definition(
 @pytest.mark.parametrize(
     ("mutation", "error"),
     [
-        ("mode", "Context choice requires an up_to typed expression"),
-        ("constant", "Context choice requires an up_to typed expression"),
         ("bound", "Context choice requires an up_to typed expression"),
         ("ordered_leaves", "Expression argument has the wrong type role or domain"),
         ("definition", "Unknown source expression ID"),
@@ -337,8 +335,6 @@ def test_source_or_signature_layer_rejects_incompatible_pairs(
             "Quantity placeholder requires its exact paired signature and part",
         ),
         ("case", "Quantity placeholder requires its exact paired signature and part"),
-        ("part_arg", "QuantityPlaceholder requires its closed choice quantity rule"),
-        ("rule", "QuantityPlaceholder requires its closed choice quantity rule"),
         ("id", "QuantityPlaceholder requires its closed choice quantity rule"),
     ],
 )

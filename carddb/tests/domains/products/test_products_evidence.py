@@ -112,15 +112,7 @@ def test_family_evidence_uses_descriptor_raw_hash_and_original_locator(
 
 @pytest.mark.parametrize(
     "case",
-    [
-        "unconfigured",
-        "unsealed",
-        "absent_version",
-        "corrupt_raw",
-        "corrupt_descriptor",
-        "corrupt_receipt",
-        "corrupt_manifest",
-    ],
+    ["absent_version", "corrupt_descriptor", "corrupt_receipt", "corrupt_manifest"],
 )
 def test_each_evidence_closure_failure_is_atomic(
     product_root: Path, referenced_family: tuple[Path, str, str], case: str

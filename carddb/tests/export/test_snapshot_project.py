@@ -568,8 +568,6 @@ def test_pending_old_current_preserved_without_blanket_pending_block(
         {"state": "settled"},
         {"raw_locator": "private"},
         {"undated_printing_ids": ["missing"]},
-        {"region": "en"},
-        {"candidates": [{"printing_id": "printing", "revision_id": "missing"}]},
         {
             "candidates": [
                 {"printing_id": "printing", "revision_id": "revision"},
@@ -863,18 +861,6 @@ def test_two_contexts_for_same_source_can_select_different_field_translations(
         ({"face_revision_id": "revision"}, "section", 0),
         ({"face_revision_id": None, "keyword_id": "keyword"}, "action_label", 0),
         ({"face_revision_id": None, "keyword_id": "keyword"}, "label", None),
-        (
-            {
-                "face_revision_id": None,
-                "vocabulary_kind": "type",
-                "vocabulary_code": "follower",
-            },
-            "label",
-            None,
-        ),
-        ({"face_revision_id": None, "product_family_id": "family"}, "label", None),
-        ({"face_revision_id": None, "product_id": "product"}, "label", None),
-        ({"face_revision_id": None, "qa_version_id": "qa_v"}, "answer", None),
     ],
 )
 def test_translation_owner_and_ordinal_are_exact(

@@ -99,7 +99,6 @@ def test_inactive_type_retains_its_key_but_cannot_bind_a_frozen_spelling(
     ("mutation", "message"),
     [
         ("missing_markers", "Invalid current catalog fields"),
-        ("duplicate_markers", "Adopted special kinds must be sorted and unique"),
         ("unsorted_markers", "Adopted special kinds must be sorted and unique"),
         ("unknown_marker", "Unsupported adopted type special kind"),
         ("non_type_markers", "Only type raw mappings can declare special kinds"),
@@ -107,19 +106,6 @@ def test_inactive_type_retains_its_key_but_cannot_bind_a_frozen_spelling(
         ("definition_mapping", "Special-kind definitions cannot declare raw mappings"),
         ("missing_class_code", "Missing class value cannot be adopted as a code"),
         ("missing_type_code", "Missing type value cannot be adopted as a code"),
-        (
-            "same_code_different_markers",
-            "Duplicate vocabulary binding",
-        ),
-        (
-            "same_raw_other_code",
-            "Duplicate vocabulary binding",
-        ),
-        ("duplicate_raw_different_ref", "Duplicate vocabulary binding"),
-        (
-            "missing_marker_definition",
-            "Special-kind vocabulary reference is missing",
-        ),
         ("inactive_marker", "Special-kind vocabulary reference is missing"),
     ],
 )

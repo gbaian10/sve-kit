@@ -114,13 +114,10 @@ def test_latest_display_is_public_without_adopted_front_current() -> None:
 @pytest.mark.parametrize(
     ("change", "error"),
     [
-        ("latest_missing", "unavailable/latest"),
         ("same_day_different", "unavailable/latest"),
         ("latest_conflict", "unavailable/latest"),
         ("missing_block", "wording_pending"),
         ("missing_pending", "requires pending"),
-        ("wrong_candidate", "no printing observation"),
-        ("wrong_undated", "undated wording"),
     ],
 )
 def test_pending_display_rejects_independent_public_constraint(

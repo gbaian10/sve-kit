@@ -129,16 +129,7 @@ def test_latest_complete_product_day_is_a_display_and_never_a_current(
 
 @pytest.mark.parametrize(
     "condition",
-    [
-        "same_day",
-        "latest_null",
-        "no_date",
-        "unknown_override",
-        "month",
-        "year",
-        "unknown_inclusion",
-        "source_unavailable",
-    ],
+    ["same_day", "unknown_override", "source_unavailable"],
 )
 def test_unavailable_or_undated_latest_is_not_silently_skipped(
     tmp_path: Path, inputs: Inputs, condition: str

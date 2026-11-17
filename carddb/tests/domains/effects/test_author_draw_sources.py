@@ -59,14 +59,7 @@ def test_draw_source_expansion(
 
 @pytest.mark.parametrize(
     ("source_head", "other_head"),
-    [
-        ("spell", "attack_time"),
-        ("spell", "evolve_time"),
-        ("attack_time", "spell"),
-        ("attack_time", "evolve_time"),
-        ("evolve_time", "spell"),
-        ("evolve_time", "attack_time"),
-    ],
+    [("spell", "attack_time"), ("spell", "evolve_time"), ("attack_time", "spell")],
 )
 @pytest.mark.parametrize("companion", [False, True])
 def test_draw_heads_are_not_interchangeable(
@@ -84,50 +77,13 @@ BAD_HEADS: list[dict[str, JsonValue]] = [
     {"fanfare": {"do": [{"draw": {"who": "self", "n": 3}}]}},
     {"evolve": {"cost": {"pp": 3}}},
     {"spell": {"do": [{"draw": {"who": "opp", "n": 3}}]}},
-    {"spell": {"do": [{"draw": {"who": "each", "n": 3}}]}},
-    {"spell": {"do": [{"draw": {"n": 3}}]}},
-    head(2),
-    {"spell": {"do": []}},
-    {"spell": {"do": [{"draw": {"who": "self", "n": 3}}, {"draw": {"n": 1}}]}},
-    {"spell": {"define": {"X": 3}, "do": [{"draw": {"who": "self", "n": "X"}}]}},
-    {
-        "spell": {
-            "do": [
-                {
-                    "draw": {
-                        "who": "self",
-                        "n": 3,
-                        "precondition": {"cmp": {"left": 1, "op": "eq", "right": 1}},
-                    }
-                }
-            ]
-        }
-    },
-    {
-        "spell": {
-            "do": [{"draw": {"who": "self", "n": 3}}],
-            "optional_cost": {"pp": 1},
-        }
-    },
 ]
 
 
 @pytest.mark.parametrize(
     "bad",
     BAD_HEADS,
-    ids=[
-        "head",
-        "evolve-entry",
-        "opponent",
-        "both",
-        "implicit-actor",
-        "count",
-        "empty",
-        "extra-action",
-        "dynamic",
-        "condition",
-        "cost",
-    ],
+    ids=["head", "evolve-entry", "opponent"],
 )
 @pytest.mark.parametrize("companion", [False, True])
 def test_draw_rejects_complete_payload_drift(

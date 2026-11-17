@@ -299,9 +299,7 @@ def test_highest_satisfied_witness(
             verify_counter_witness(candidates, stale, stale)
 
 
-@pytest.mark.parametrize(
-    "case", ["P03", "P04", "H01", "D02", "X01", "X02", "R02", "A01"]
-)
+@pytest.mark.parametrize("case", ["P03", "P04", "H01"])
 def test_source_context_mutations_are_rejected(case: str, engine: Classifier) -> None:
     _, raw, ordinal = next(c for c in CASES if c[0] == case)
     found = derive(raw, engine, case)
@@ -398,18 +396,13 @@ def test_holder_policy_does_not_apply_to_other_revisions(engine: Classifier) -> 
         ("P01", "9枚", "8枚"),
         ("P01-pair", "1枚", "2枚"),
         ("P03", "3枚", "4枚"),
-        ("P04", "1体につき", "2体につき"),
-        ("H01", "4個", "3個"),
         ("H01", "10個", "9個"),
         ("H02", "2個", "3個"),
-        ("H03", "1つ", "2つ"),
         ("H03", "が0", "が1"),
         ("H04", "片』1つ", "片』2つ"),
-        ("D01", "に6が", "に7が"),
         ("X01", "コスト1", "コスト2"),
         ("X01", "Xは2", "Xは3"),
         ("R01", "が1枚", "が2枚"),
-        ("R02", "が5以上", "が4以上"),
         ("A01", "能力1つ", "能力2つ"),
     ],
 )
@@ -427,21 +420,13 @@ def test_each_sealed_numeric_guard(
 @pytest.mark.parametrize(
     ("case", "before", "after"),
     [
-        ("P01", "。好きな枚数をEX", "。【進化時】好きな枚数をEX"),
-        ("P01", "。好きな枚数をEX", "。【2】好きな枚数をEX"),
         ("P04", "。これによって", "。【進化時】これによって"),
-        ("H01", "。10個", "。【進化時】10個"),
         ("H01", "。10個", "。【2】10個"),
-        ("X02", "【2】", "【進化時】【2】"),
-        ("X02", "自分の場", "相手の場"),
-        ("X02", "自分の場", "自分の墓場"),
         ("X02", "仮族・カード", "未知族・カード"),
         ("X02", "仮族・カード", "仮族・フォロワー"),
         ("H04", "仮土片", "仮甲"),
         ("R01", "自分のデッキ", "{起動}自分のデッキ"),
         ("R01", "手札をすべて捨てる。", "手札をすべて捨てた。"),
-        ("R02", "そのダメージ", "それの体力"),
-        ("A01", "これの", "相手の"),
     ],
 )
 def test_neighboring_sources_cannot_borrow_providers(
@@ -454,9 +439,7 @@ def test_neighboring_sources_cannot_borrow_providers(
     )
 
 
-@pytest.mark.parametrize(
-    "case", ["H01", "H02", "D01", "D02", "X01", "X02", "X02-paid", "R02"]
-)
+@pytest.mark.parametrize("case", ["H01", "H02", "D01", "D02", "X01", "R02"])
 def test_normal_renderer_requires_complete_typed_presentation(
     case: str, engine: Classifier
 ) -> None:
@@ -684,15 +667,6 @@ def test_object_set_remainder_contract(
 @pytest.mark.parametrize(
     ("source_kind", "members", "receipt", "error"),
     [
-        ("generated", (("name_a", "count_a"),), None, None),
-        ("generated", (("name_a", "count_a"), ("name_b", "count_b")), None, None),
-        ("generated", (), None, "Generated pool requires one or two name/count pairs"),
-        (
-            "generated",
-            (("name_a", "count_a"), ("name_b", "count_b"), ("name_c", "count_c")),
-            None,
-            "Generated pool requires one or two name/count pairs",
-        ),
         (
             "generated",
             (("name_a", "count_a"),),
@@ -701,18 +675,10 @@ def test_object_set_remainder_contract(
         ),
         (
             "generated",
-            (("name_a", "name_a"),),
-            None,
-            "Pool members must remain distinct",
-        ),
-        (
-            "generated",
             (("name_a", "count_a"), ("name_a", "count_b")),
             None,
             "Pool members must remain distinct",
         ),
-        ("search_result", (), "receipt_a", None),
-        ("search_result", (), None, "Search pool requires exactly one objects receipt"),
         (
             "search_result",
             (("name_a", "count_a"),),

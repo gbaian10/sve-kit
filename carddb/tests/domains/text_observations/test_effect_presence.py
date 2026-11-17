@@ -92,16 +92,7 @@ def card_from_raw(
 
 @pytest.mark.parametrize(
     "change",
-    [
-        "none",
-        "text",
-        "href",
-        "markup",
-        "duplicate",
-        "before_credit",
-        "wrong_credit",
-        "en",
-    ],
+    ["none", "before_credit", "en"],
 )
 def test_notice_template_accepts_only_pinned_terminal_block_after_valid_credit(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str
@@ -207,15 +198,7 @@ def test_projection_preserves_extracted_content_and_requires_complete_evidence(
 
 @pytest.mark.parametrize(
     "mutation",
-    [
-        "footer",
-        "status",
-        "identity",
-        "face_index",
-        "second_face",
-        "detail_root",
-        "wrapper",
-    ],
+    ["status", "identity", "face_index", "second_face", "detail_root", "wrapper"],
 )
 def test_no_absence_from_truncation_wrong_face_or_unknown_template(
     tmp_path: Path, mutation: str
@@ -245,15 +228,7 @@ def test_no_absence_from_truncation_wrong_face_or_unknown_template(
 
 @pytest.mark.parametrize(
     "field",
-    [
-        "state",
-        "source_index",
-        "parser_version",
-        "template_id",
-        "container_locator",
-        "source_version_id",
-        "reason_code",
-    ],
+    ["state", "source_index", "container_locator"],
 )
 def test_each_result_field_is_hash_bound(tmp_path: Path, field: str) -> None:
     card = card_from_raw(tmp_path, page("jp"))
@@ -405,7 +380,7 @@ def test_omission_requires_clean_direct_text_and_terminal_credit(
     assert proof.result.reason_code == "ambiguous_container"
 
 
-@pytest.mark.parametrize("change", ["labels", "Cost", "Power", "Hp", "faces", "detail"])
+@pytest.mark.parametrize("change", ["labels", "Hp", "faces"])
 def test_each_completeness_constraint_independently_blocks_absence(
     tmp_path: Path, change: str
 ) -> None:

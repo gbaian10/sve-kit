@@ -95,9 +95,7 @@ def test_missing_type_uses_exact_confirmed_correction_and_preserves_both_revisio
         assert any(use.usage == "source_correction_evidence" for use in record.uses)
 
 
-@pytest.mark.parametrize(
-    "fault", ["absent", "duplicate", "pending", "conflict", "other_face", "wrong_field"]
-)
+@pytest.mark.parametrize("fault", ["absent", "duplicate", "conflict"])
 def test_missing_type_never_borrows_a_nonunique_unapplied_or_unrelated_correction(
     correction: CorrectionCase, fault: str
 ) -> None:

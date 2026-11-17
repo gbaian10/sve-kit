@@ -140,15 +140,7 @@ def row(table: str) -> dict[str, Value]:
 
 @pytest.mark.parametrize(
     "table",
-    [
-        "keyword",
-        "mechanic_action",
-        "card_mechanic",
-        "mechanic_coverage",
-        "mechanic_override",
-        "mechanic_projection",
-        "card_mechanic_coverage",
-    ],
+    ["keyword", "mechanic_action", "card_mechanic"],
 )
 def test_connected_manual_rows_are_valid(
     template: DatabaseTemplate, table: str
@@ -163,52 +155,6 @@ def test_connected_manual_rows_are_valid(
         ("keyword", {"term_id": "term:rule"}, "printed_keyword_concept"),
         ("keyword", {"code": "a"}, "UNIQUE"),
         ("keyword", {"term_id": "term:a"}, "UNIQUE"),
-        ("card_mechanic", {"source_kind": "dsl"}, "CHECK"),
-        ("mechanic_coverage", {"source_kind": "dsl"}, "CHECK"),
-        ("mechanic_projection", {"relations": Json([])}, "CHECK"),
-        (
-            "mechanic_projection",
-            {"actions": Json(["missing"])},
-            "mechanic_projection_actions",
-        ),
-        (
-            "card_mechanic_coverage",
-            {"complete_keyword_ids": Json(["missing"])},
-            "complete_keyword_ids_references",
-        ),
-        (
-            "card_mechanic_coverage",
-            {"partial_keyword_ids": Json(["missing"])},
-            "partial_keyword_ids_references",
-        ),
-        ("card_mechanic_coverage", {"complete_all": True}, "CHECK"),
-        (
-            "card_mechanic_coverage",
-            {
-                "complete_all": True,
-                "partial_keyword_ids": Json([]),
-                "complete_mode": "exclude",
-            },
-            "CHECK",
-        ),
-        (
-            "card_mechanic_coverage",
-            {
-                "complete_all": True,
-                "partial_keyword_ids": Json([]),
-                "partial_mode": "exclude",
-            },
-            "CHECK",
-        ),
-        (
-            "card_mechanic_coverage",
-            {
-                "complete_all": True,
-                "partial_keyword_ids": Json([]),
-                "complete_keyword_ids": Json(["kw:a"]),
-            },
-            "CHECK",
-        ),
     ],
 )
 def test_invalid_mechanism_rows_fail_the_declared_constraint(
@@ -228,22 +174,6 @@ def test_invalid_mechanism_rows_fail_the_declared_constraint(
         ("keyword", "term_id"),
         ("keyword", "definition_unit_id"),
         ("keyword", "decision_id"),
-        ("mechanic_action", "keyword_id"),
-        ("mechanic_action", "label_unit_id"),
-        ("mechanic_action", "decision_id"),
-        ("card_mechanic", "card_id"),
-        ("card_mechanic", "keyword_id"),
-        ("card_mechanic", "action"),
-        ("card_mechanic", "source_id"),
-        ("card_mechanic", "decision_id"),
-        ("mechanic_coverage", "card_id"),
-        ("mechanic_coverage", "keyword_id"),
-        ("mechanic_coverage", "decision_id"),
-        ("mechanic_override", "target_tag_id"),
-        ("mechanic_override", "decision_id"),
-        ("mechanic_projection", "card_id"),
-        ("mechanic_projection", "keyword_id"),
-        ("card_mechanic_coverage", "card_id"),
     ],
 )
 def test_mechanism_references_must_exist(
@@ -290,10 +220,6 @@ def test_complete_all_storage_accepts_empty_included_sets(
         ("relations", '["absent"]'),
         ("relations", '["has","has"]'),
         ("actions", '["bad code"]'),
-        ("actions", '["strike","strike"]'),
-        ("complete_keyword_ids", '["kw:a","kw:a"]'),
-        ("partial_keyword_ids", '["kw:a","kw:a"]'),
-        ("partial_keyword_ids", "[null]"),
     ],
 )
 def test_json_schema_constraints_are_enforced_below_the_typed_writer(

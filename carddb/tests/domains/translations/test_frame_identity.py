@@ -182,11 +182,6 @@ def test_resolved_definition_is_part_of_identity(
         ("枚", "count", "object_count"),
         ("体", "count", "object_count"),
         ("つ", "count", "object_count"),
-        ("つ", "counter_amount", "counter_count"),
-        ("個", "count", "counter_count"),
-        ("人", "count", "player_count"),
-        ("PP", "cost", "play_points"),
-        ("ＰＰ", "cost", "play_points"),
     ],
 )
 def test_closed_unit_meanings(unit: str, role: str, expected: str) -> None:

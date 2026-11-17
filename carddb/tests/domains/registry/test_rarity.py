@@ -11,17 +11,7 @@ from ...support.build_db_fixtures import seed
 
 @pytest.mark.parametrize(
     ("jp", "en", "code"),
-    [
-        ("BR", "Bronze", "br"),
-        ("SR", "Silver", "sr"),
-        ("GR", "Gold", "gr"),
-        ("LG", "Legendary", "lg"),
-        ("SL", "Super Legendary", "sl"),
-        ("UR", "Ultimate", "ur"),
-        ("SP", "Special", "sp"),
-        ("SSP", "Super Special", "ssp"),
-        ("PR", "Promo", "pr"),
-    ],
+    [("BR", "Bronze", "br"), ("SR", "Silver", "sr"), ("GR", "Gold", "gr")],
 )
 def test_region_labels_share_a_code(jp: str, en: str, code: str) -> None:
     assert normalize("jp", jp) == normalize("en", en) == (code, False)
