@@ -600,6 +600,7 @@ const zhTW = {
     stats: { cost: "消費", attack: "攻擊力", defense: "生命值" },
     separator: "・",
     backFace: "背面",
+    treatedAs: "視為「{{name}}」",
     related: {
       title: "關聯卡牌",
       evolvesFrom: "進化前",

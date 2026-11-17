@@ -77,6 +77,43 @@ def observations(
         for raw in array(face["wording"]):
             wording = object_value(raw)
             wording["common_name"] = common_name(wording, revisions)
+    printed_names(view, revisions)
+
+
+def printed_names(view: dict[str, list[Record]], revisions: dict[str, Record]) -> None:
+    """Name a printing by its own text where it differs from its face's display name.
+
+    A merged card shows one current text, but a collab or other printing still prints
+    its own name; catalog lists need that name without loading printing details.
+    """
+    shown: dict[tuple[str, str], str] = {}
+    for face in view["face"]:
+        for raw in array(face["current"]):
+            item = object_value(raw)
+            shown[string(face["id"]), string(item["region"])] = string(
+                item["revision_id"]
+            )
+        for raw in array(face["wording"]):
+            wording = object_value(raw)
+            display = object_value(wording["display"])["revision_id"]
+            if display is not None:
+                shown.setdefault(
+                    (string(face["id"]), string(wording["region"])), string(display)
+                )
+    for printing in view["printing"]:
+        for raw in array(printing["faces"]):
+            face = object_value(raw)
+            own = {
+                string(item["revision_id"])
+                for item in map(object_value, array(face["observations"]))
+                if item["revision_id"] is not None
+            }
+            display = shown.get((string(face["face_id"]), string(printing["region"])))
+            if len(own) != 1 or display is None:
+                continue
+            name = revisions[own.pop()]["name_unit_id"]
+            if name != revisions[display]["name_unit_id"]:
+                face["name_unit_id"] = name
 
 
 def _candidates(
