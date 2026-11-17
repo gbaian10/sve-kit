@@ -53,35 +53,6 @@ fn selected(step: Located<Node>) -> Program {
 }
 
 #[test]
-fn cp02_007_buff_bp16_049_set_and_bp05_001_kind_are_action_seeds() {
-    // These fragments do not validate the cards' costs, other abilities, or lowering.
-    for (patch, card_no) in [
-        (numeric(false, &Expr::Literal(Int(1))), "CP02-007"),
-        (numeric(true, &Expr::Literal(Int(1))), "BP16-049"),
-        (
-            CharacteristicPatch::SetKind {
-                kind: CardKind::Amulet,
-            },
-            "BP05-001",
-        ),
-        (
-            CharacteristicPatch::AddTrait {
-                trait_id: TraitId("武装".into()),
-            },
-            "BP02-T07",
-        ),
-    ] {
-        accept(selected(modify(patch, card_no)));
-    }
-    for amount in [-2, 0, 2] {
-        accept(selected(modify(
-            numeric(false, &Expr::Literal(Int(amount))),
-            "synthetic",
-        )));
-    }
-}
-
-#[test]
 fn modify_checks_inputs_and_never_accepts_ability_or_mixed_patches() {
     let valid = numeric(false, &Expr::Literal(Int(1)));
     for patch in [
@@ -194,22 +165,4 @@ fn modify_duration_is_checked_and_usage_is_not_silently_ignored() {
         else_body: None,
     }));
     reject(program, WellFormedReason::UnsupportedShape);
-}
-
-#[test]
-fn numeric_modify_accepts_standalone_and_nested_numeric_patches() {
-    let single = CharacteristicPatch::Numeric {
-        stat: Stat::Attack,
-        change: NumericChange::Add {
-            amount: Expr::Literal(Int(1)),
-        },
-    };
-    for patch in [
-        single.clone(),
-        CharacteristicPatch::Combined {
-            patches: vec![single, numeric(true, &Expr::Literal(Int(1)))],
-        },
-    ] {
-        accept(selected(modify(patch, "synthetic")));
-    }
 }

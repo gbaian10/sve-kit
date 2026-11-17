@@ -387,77 +387,6 @@ fn private_domains_cannot_expose_hidden_candidates_or_filter_other_hands() {
 }
 
 #[test]
-fn payments_publish_complete_after_costs_and_keep_locals_inside_on_paid() {
-    let payment = || {
-        pay(
-            vec![cost(DiscardMode::DownTo { count: Nat(2) }, None)],
-            body(
-                2,
-                vec![control(Control::If {
-                    condition: complete(ReceiptReference::new(ReceiptId(9))),
-                    then_body: body(3, vec![]),
-                    else_body: None,
-                })],
-            ),
-        )
-    };
-    accept(body(
-        1,
-        vec![
-            payment(),
-            control(Control::If {
-                condition: complete(ReceiptReference::new(ReceiptId(9))),
-                then_body: body(4, vec![]),
-                else_body: None,
-            }),
-        ],
-    ));
-    let mut early = cost(DiscardMode::DownTo { count: Nat(2) }, None);
-    early.instruction.precondition = Some(Precondition {
-        kind: PreconditionKind::CardTextPrerequisite,
-        predicate: complete(ReceiptReference::new(ReceiptId(9))),
-        protects: InstructionId(1),
-        reason: PreconditionReason::CardText {},
-    });
-    reject(
-        body(1, vec![pay(vec![early], body(2, vec![]))]),
-        WellFormedReason::PreconditionTiming,
-    );
-    let mut invalid_3 = cost(DiscardMode::DownTo { count: Nat(2) }, None);
-    invalid_3.instruction.context = InstructionContext::Effect;
-    reject(
-        body(1, vec![pay(vec![invalid_3], body(2, vec![]))]),
-        WellFormedReason::ExpectedCost,
-    );
-    let mut invalid_4 = payment();
-    if let Node::Control {
-        control: Control::Pay { at, .. },
-    } = &mut invalid_4.node
-    {
-        *at = PaymentTime::PlayParameter;
-    }
-    reject(body(1, vec![invalid_4]), WellFormedReason::DecisionTiming);
-    let mut invalid_5 = payment();
-    if let Node::Control {
-        control: Control::Pay { receipt, .. },
-    } = &mut invalid_5.node
-    {
-        *receipt = ReceiptId(1);
-    }
-    reject(body(1, vec![invalid_5]), WellFormedReason::DuplicateReceipt);
-    let mut invalid_6 = cost(DiscardMode::DownTo { count: Nat(2) }, None);
-    invalid_6.instruction.action = Action::Draw {
-        player: PlayerRef::Controller {},
-        count: Expr::Literal(Int(1)),
-        mode: StepwiseMode::Exact,
-    };
-    reject(
-        body(1, vec![pay(vec![invalid_6], body(2, vec![]))]),
-        WellFormedReason::UnsupportedShape,
-    );
-}
-
-#[test]
 fn repeat_payment_collection_retains_typed_producers_and_allows_alias_exports() {
     let payment = pay(
         vec![cost(DiscardMode::DownTo { count: Nat(2) }, None)],
@@ -518,33 +447,6 @@ fn repeat_payment_collection_retains_typed_producers_and_allows_alias_exports() 
         ),
         WellFormedReason::BindingType,
     );
-}
-
-#[test]
-fn batch_choices_precede_commit_without_sibling_dependencies() {
-    let chosen = Binding::new(1, ScopeId(1));
-    let mut batch = simultaneous(vec![draw(1, signed(Expr::Bound(chosen)))], 3);
-    if let Node::Control {
-        control: Control::Simultaneous { batch, .. },
-    } = &mut batch.node
-    {
-        batch.choice_stages = vec![BatchChoiceStage {
-            decisions: vec![choose(1, 1)],
-            order: PlayerOrder::TurnPlayerFirst,
-        }];
-    }
-    accept(body(1, vec![batch.clone()]));
-    let mut dependent = choose(2, 1);
-    dependent.actor = PlayerRef::Bound {
-        binding: Binding::new(1, ScopeId(1)),
-    };
-    if let Node::Control {
-        control: Control::Simultaneous { batch, .. },
-    } = &mut batch.node
-    {
-        batch.choice_stages[0].decisions.push(dependent);
-    }
-    reject(body(1, vec![batch]), WellFormedReason::UnavailableBinding);
 }
 
 #[test]

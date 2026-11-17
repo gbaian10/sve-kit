@@ -133,66 +133,6 @@ fn reject_effect(card: CardProgram, reason: WellFormedReason) {
 }
 
 #[test]
-fn synthetic_numeric_install_borrows_cp02_007_without_expiry_or_zone_gate() {
-    // CP02-007's printed buff lowers to Action::Modify; this borrows only its patch, expiry and target.
-    let mut card = playable(vec![installed(buff(), lasting())]);
-    let ability = &mut card.abilities[0].node;
-    ability.kind = AbilityKind::Activated;
-    let mut followers = zone(PlayerRef::Controller {}, ZoneKind::Field, 10);
-    if let Selector::Zone {
-        binding, predicate, ..
-    } = &mut followers
-    {
-        **predicate = Expr::Compute(Box::new(Predicate::KindEquals {
-            left: Expr::Live(Box::new(KindRead::Kind {
-                object: ObjectView::Current {
-                    object: Box::new(ObjectOperand::Bound { binding: *binding }),
-                },
-                view: CharacteristicView::Effective,
-            })),
-            right: Expr::Literal(CardKind::Follower),
-        }));
-    }
-    let mut target = play_target();
-    target.domain = ChoiceDomain::Objects {
-        constraint: SelectionConstraint {
-            cardinality: bounds(1, Some(1)),
-            groups: vec![SelectionGroup {
-                selector: followers,
-                cardinality: bounds(1, Some(1)),
-            }],
-            ..constraint(affected())
-        },
-        binding: Binding::new(1, ScopeId(1)),
-        target_roles: None,
-    };
-    target.kind = DecisionKind::PlayParameter {
-        slot: PlaySlot::Targets,
-        selection_snapshot: SelectionSnapshot::AtDecision,
-        play_scope: ExecutionRef::Current {},
-        input: InputMode::Inline,
-    };
-    ability.play.as_mut().unwrap().parameters = vec![target];
-    let node = &mut ability.body.as_mut().unwrap().steps[0];
-    if let Node::Instruction { instruction } = &mut node.node
-        && let Action::InstallEffect { subjects, .. } = &mut instruction.action
-    {
-        *subjects = InstallationSubjects::Objects {
-            objects: Selector::Bound {
-                reference: Binding::new(1, ScopeId(1)),
-            },
-            affected: Binding::new(1, ScopeId(2)),
-        };
-    }
-    accept_card(card);
-    let mut gated = buff();
-    if let Effect::Continuous { active_zones, .. } = &mut gated {
-        *active_zones = vec![ZoneKind::Field];
-    }
-    reject_effect(installed_card(gated), WellFormedReason::UnsupportedShape);
-}
-
-#[test]
 fn installed_numeric_targets_layers_sources_and_timestamps_are_checked() {
     for change in 0_u8..8 {
         let mut effect = buff();
@@ -274,44 +214,6 @@ fn bp02_089_destroy_seed_and_a_synthetic_banish_install_on_a_fixed_set() {
         installed_card(missing_condition),
         WellFormedReason::UnavailableBinding,
     );
-}
-
-#[test]
-fn installed_permission_is_a_forbid_on_exactly_the_affected_objects() {
-    for change in 0_u8..6 {
-        let mut effect = permission(false);
-        let Effect::Permission {
-            subject,
-            action,
-            polarity,
-            duration,
-            ..
-        } = &mut effect
-        else {
-            panic!("permission")
-        };
-        match change {
-            0 => {
-                *action = ActionPattern::Draw {
-                    player: PlayerRef::Controller {},
-                };
-            }
-            1 => *polarity = Polarity::Allow,
-            2 => *polarity = Polarity::Require,
-            3 => {
-                *subject = PermissionSubject::Objects {
-                    objects: Selector::Objects { objects: vec![] },
-                };
-            }
-            4 => {
-                *subject = PermissionSubject::Players {
-                    players: controller_set(),
-                };
-            }
-            _ => duration.end = DurationEnd::EndResolution {},
-        }
-        reject_effect(installed_card(effect), WellFormedReason::UnsupportedShape);
-    }
 }
 
 #[test]

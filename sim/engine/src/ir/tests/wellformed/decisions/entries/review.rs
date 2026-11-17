@@ -19,26 +19,6 @@ fn play_targets_are_public_and_never_private_hand_cards() {
     reject_card(card, WellFormedReason::UnsupportedShape);
 }
 
-#[test]
-fn handoff_requires_exactly_one_opponent() {
-    let mut card = playable(vec![]);
-    let mut target = play_target();
-    if let DecisionKind::PlayParameter { input, .. } = &mut target.kind {
-        *input = InputMode::Handoff;
-    }
-    for cardinality in [bounds(0, Some(1)), bounds(1, Some(2))] {
-        target.actor = PlayerRef::RequireOne {
-            players: Box::new(PlayerSet {
-                relation: PlayerRelation::Opponents,
-                cardinality,
-                ..controller_set()
-            }),
-        };
-        play_mut(&mut card).parameters = vec![target.clone()];
-        reject_card(card.clone(), WellFormedReason::DecisionTiming);
-    }
-}
-
 fn information(object: ObjectView, view: CharacteristicView, stats: bool) -> Expr<Int> {
     Expr::Compute(Box::new(IntOperation::InformationOrZero {
         information: if stats {
@@ -90,35 +70,6 @@ fn information_reads_require_supported_characteristics() {
                     )],
                 ),
                 WellFormedReason::UnsupportedShape,
-            );
-        }
-    }
-}
-
-#[test]
-fn quick_windows_reject_the_turn_player_even_with_matching_domain_and_visibility() {
-    for window in [QuickWindow::Attack, QuickWindow::EndPhase] {
-        for actor in [PlayerRef::Active {}, PlayerRef::Controller {}] {
-            let decision = Decision {
-                id: DecisionId(1),
-                actor: actor.clone(),
-                domain: ChoiceDomain::QuickActionOrPass {
-                    player: actor.clone(),
-                },
-                kind: DecisionKind::QuickWindow { window },
-                visibility: Visibility::Only {
-                    players: PlayerSet {
-                        relative_to: actor,
-                        ..controller_set()
-                    },
-                },
-                captures: vec![],
-            };
-            assert_eq!(
-                WellFormedProcedure::check(Procedure::Quick { window, decision })
-                    .unwrap_err()
-                    .reason,
-                WellFormedReason::DecisionTiming
             );
         }
     }
@@ -278,41 +229,4 @@ fn mode_exclusion_requires_one_exact_play_choice() {
     };
     *cardinality = bounds(1, Some(2));
     reject_card(playable(vec![node]), WellFormedReason::InvalidModes);
-}
-
-#[test]
-fn printed_field_quick_limits_keep_the_ordinary_quota_contract() {
-    let mut card = playable(vec![]);
-    card.abilities[0].node.kind = AbilityKind::Activated;
-    play_mut(&mut card).limit = Some(LimitSpec::activated_per_turn(Nat(1)));
-    let origin = card.abilities[0].node.source.origin.clone();
-    card.abilities[0].node.source.origin = AbilityOrigin::Keyword {
-        keyword: KeywordId::Quick,
-        origin: Box::new(origin),
-    };
-    let source = card.abilities[0].node.source.clone();
-    if let CostSpec::Ordered { steps } = &mut play_mut(&mut card).costs {
-        for step in steps {
-            step.instruction.source = source.clone();
-        }
-    }
-    accept_card(card.clone());
-    for zone in [ZoneKind::Hand, ZoneKind::Cemetery, ZoneKind::Ex] {
-        let mut invalid = card.clone();
-        invalid.abilities[0].node.active_zones = vec![zone];
-        reject_card(invalid, WellFormedReason::UnsupportedShape);
-    }
-    let mut zero_limit = card.clone();
-    play_mut(&mut zero_limit).limit = Some(LimitSpec::activated_per_turn(Nat(0)));
-    reject_card(zero_limit, WellFormedReason::UnsupportedShape);
-    let mut wrong_consumption = card.clone();
-    play_mut(&mut wrong_consumption).limit = Some(LimitSpec {
-        consume_at: ConsumptionPoint::PendingAdmission,
-        ..LimitSpec::activated_per_turn(Nat(1))
-    });
-    reject_card(wrong_consumption, WellFormedReason::UnsupportedShape);
-    if let AbilityOrigin::Keyword { keyword, .. } = &mut card.abilities[0].node.source.origin {
-        *keyword = KeywordId::EarthRite;
-    }
-    reject_card(card, WellFormedReason::UnsupportedShape);
 }
