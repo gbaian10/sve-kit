@@ -104,8 +104,8 @@ mod posture;
 mod processing;
 use processing::Queued;
 pub use processing::{
-    CostPaymentPurpose, CostSpecPayment, CostStepPayment, NumberDeclaration, PlayDeclaration,
-    PlayPhase, PpPayment, QuestionStage, TargetDeclaration,
+    CostPaymentPurpose, CostSpecPayment, CostStepPayment, ExchangeMaterialPayment, ExchangePayment,
+    NumberDeclaration, PlayDeclaration, PlayPhase, PpPayment, QuestionStage, TargetDeclaration,
 };
 mod random_sample;
 mod resource;
@@ -663,6 +663,7 @@ pub(super) struct Execution {
     play_declarations: Vec<PlayDeclaration>,
     pp_payments: Vec<PpPayment>,
     cost_spec_payments: Vec<CostSpecPayment>,
+    exchange_payments: Vec<ExchangePayment>,
     target_declarations: Vec<TargetDeclaration>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
@@ -861,6 +862,7 @@ impl Game {
                 play_declarations: Vec::new(),
                 pp_payments: Vec::new(),
                 cost_spec_payments: Vec::new(),
+                exchange_payments: Vec::new(),
                 target_declarations: Vec::new(),
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
@@ -1403,6 +1405,21 @@ impl Game {
         self.typed
             .as_ref()
             .map(|execution| execution.cost_spec_payments.as_slice())
+    }
+
+    /// Completed exchange paths of this execution, separate from `CostSpec` receipts.
+    /// Runner diagnostics contain private outcomes and bypass frame authorization; hosts use observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_exchange_payments;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_exchange_payments(&self) -> Option<&[ExchangePayment]> {
+        self.typed
+            .as_ref()
+            .map(|execution| execution.exchange_payments.as_slice())
     }
 
     /// Accepted formal-play targets of this execution; empty does not imply no target groups.

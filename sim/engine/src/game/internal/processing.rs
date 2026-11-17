@@ -7,6 +7,9 @@ mod targets;
 pub use targets::TargetDeclaration;
 pub(super) use targets::record_target_declaration;
 
+mod exchanges;
+pub use exchanges::{ExchangeMaterialPayment, ExchangePayment};
+
 mod payments;
 pub(super) use payments::record_cost_spec_payment;
 pub use payments::{CostPaymentPurpose, CostSpecPayment, CostStepPayment};
@@ -133,7 +136,8 @@ pub enum PlayDeclaration {
     OptionalCost {
         /// Actual answering player.
         player: PlayerId,
-        /// The declared cost group, not evidence that it was paid.
+        /// Cost group or exchange definition; acceptance is not evidence of payment.
+        /// Exchanges have separate `ExchangePayment` records, not corresponding `CostSpec` invocations.
         receipt: ReceiptId,
         /// Whether declining cancels the play.
         required: bool,

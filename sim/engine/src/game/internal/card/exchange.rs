@@ -8,7 +8,8 @@ use super::static_keywords;
 use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
-    DistributionMember, InputDomain, InstructionOutcome, Slot, Wait, search,
+    DistributionMember, ExchangeMaterialPayment, ExchangePayment, InputDomain, InstructionOutcome,
+    Slot, Wait, search,
 };
 use crate::game::player::ExchangeRouteChoice;
 use crate::game::player::SelectionQuestion;
@@ -180,6 +181,34 @@ pub(in crate::game::internal) fn select(
     );
     exchange.selected = Some(members);
     Ok(())
+}
+
+fn completed_payment(
+    execution: &Execution,
+    exchange: &ExchangeState,
+    pp: Quantity,
+) -> Result<ExchangePayment> {
+    let accepted = exchange.accepted == Some(true);
+    let material = if accepted && !exchange_shape::pp_increase(&exchange.definition) {
+        let instruction = step(exchange)?;
+        Some(ExchangeMaterialPayment {
+            instruction: Box::new(instruction.clone()),
+            outcome: execution
+                .receipts
+                .get(&instruction.receipt)
+                .cloned()
+                .ok_or_else(|| invalid("missing successful exchange material outcome"))?,
+        })
+    } else {
+        None
+    };
+    Ok(ExchangePayment {
+        player: execution.context.controller,
+        receipt: exchange.definition.receipt,
+        accepted,
+        pp,
+        material,
+    })
 }
 
 fn route_step(exchange: &PlayCostExchange, index: usize) -> Result<&Instruction> {
@@ -615,6 +644,7 @@ impl Game {
                 .route
                 .ok_or_else(|| invalid("missing route decision"))?;
             let quotes = route_quotes(self, execution, play, &affordable)?;
+            // Declaration recording relies on this wait being exclusive to formal play exchanges.
             self.internal_wait(
                 execution,
                 decision,
@@ -654,6 +684,7 @@ impl Game {
                 })
             })
             .collect::<Result<Vec<_>>>()?;
+        // Declaration recording relies on this wait being exclusive to formal play exchanges.
         self.internal_wait(
             execution,
             decision.id,
@@ -779,6 +810,8 @@ impl Game {
                 }),
             );
             execution.card_payment = Some((exchange.face.clone(), exchange.definition.receipt));
+            let payment = completed_payment(execution, exchange, quantity)?;
+            execution.exchange_payments.push(payment);
         }
         Ok(())
     }

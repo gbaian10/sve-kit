@@ -65,7 +65,7 @@ fn hand_program(two_fees: bool) -> WellFormedCardProgram {
     WellFormedCardProgram::check(raw).unwrap()
 }
 
-fn seat(actor: Viewer) -> &'static str {
+pub(super) fn seat(actor: Viewer) -> &'static str {
     if actor == Viewer::P1 { "P1" } else { "P2" }
 }
 
@@ -89,7 +89,7 @@ fn start(program: &WellFormedCardProgram, actor: Viewer, eligible: usize) -> Gam
     game
 }
 
-fn apply(game: &mut Game, actor: Viewer, answer: Answer) {
+pub(super) fn apply(game: &mut Game, actor: Viewer, answer: Answer) {
     let q = question(game, actor);
     assert_eq!(
         submit(game, actor, &q, answer),
@@ -348,7 +348,7 @@ fn a_later_body_fault_discards_hand_declarations_and_rolls_back_payment() {
     }
 }
 
-fn spell_game(program: &WellFormedCardProgram, actor: Viewer) -> Game {
+pub(super) fn spell_game(program: &WellFormedCardProgram, actor: Viewer) -> Game {
     let mut initial = exchange::initial("unit-spell", "field", 2, 4);
     initial["players"]["P1"]["zones"]["hand"]
         .as_array_mut()
@@ -369,7 +369,7 @@ fn spell_game(program: &WellFormedCardProgram, actor: Viewer) -> Game {
     game
 }
 
-fn spell_program(header: Value) -> WellFormedCardProgram {
+pub(super) fn spell_program(header: Value) -> WellFormedCardProgram {
     let mut tree = exchange::candidate("unit-spell", header, true);
     tree["cards"]["unit-spell"]["abilities"][1]["spell"]["do"] = json!([
         {"optional":{"do":[{"life":{"who":"self","delta":1}}]}}

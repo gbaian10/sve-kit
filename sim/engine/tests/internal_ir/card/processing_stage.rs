@@ -1,3 +1,6 @@
+#[path = "processing_stage/exchange_payments.rs"]
+mod exchange_payments;
+
 #[path = "processing_stage/hand_exchange_declarations.rs"]
 mod hand_exchange_declarations;
 
