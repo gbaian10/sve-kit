@@ -53,6 +53,8 @@ export interface CardSummary {
   readonly printedCode?: string | null
   readonly classCode: string | null
   readonly name: NameSource
+  /** The card's own name when this printing prints another one (collab, event EP). */
+  readonly treatedAs?: NameSource
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
@@ -130,7 +132,20 @@ export function nameOf(
 
 /** The card-face name of an unlisted printing; official faces never have one. */
 function manualNameOf(index: CardIndex, printing: Row | undefined): NameSource | undefined {
-  const unitId = printing?.["manual_name_unit_id"]
+  return unitName(index, printing?.["manual_name_unit_id"])
+}
+
+/** A printing's own printed name, shipped only where it differs from the card's name. */
+function printedNameOf(
+  index: CardIndex,
+  printing: Row | undefined,
+  faceId: string,
+): NameSource | undefined {
+  const face = ((printing?.["faces"] ?? []) as Row[]).find((item) => item["face_id"] === faceId)
+  return unitName(index, face?.["name_unit_id"])
+}
+
+function unitName(index: CardIndex, unitId: Row[string] | undefined): NameSource | undefined {
   if (typeof unitId !== "string") return undefined
   const unit = index.textUnit(unitId)
   const lang = unit ? stringValue(unit["lang"]) : undefined
@@ -276,6 +291,16 @@ function* catalogCardCursor(
         const rarityName = rarity ? nameOf(index, rarity, "label") : undefined
         const own = index.displayRevision(faceId, region, stringValue(printing["id"]))
         const ownName = own ? nameOf(index, own, "name", revision ?? own) : undefined
+        // A collab or event printing keeps its printed name; the card's name stays its rule name.
+        const printed = manualNameOf(index, printing) ?? printedNameOf(index, printing, faceId)
+        const shownName = printed ?? ownName ?? name
+        if (printed) {
+          const key = `${printed.original.lang}\u0000${printed.original.text}`
+          if (!seen.has(key)) {
+            seen.add(key)
+            names.push(searchName(printed.original.lang, printed.original.text))
+          }
+        }
         summaries.push({
           cardId,
           ...(rarityName ? { rarity: rarityName } : {}),
@@ -303,7 +328,8 @@ function* catalogCardCursor(
               }
             : {}),
           classCode: typeof own?.["class_code"] === "string" ? own["class_code"] : null,
-          name: manualNameOf(index, printing) ?? ownName ?? name,
+          name: shownName,
+          ...(shownName.original.text !== name.original.text ? { treatedAs: name } : {}),
           cost: nullableInteger(own?.["cost"]),
           attack: nullableInteger(own?.["attack"]),
           defense: nullableInteger(own?.["defense"]),

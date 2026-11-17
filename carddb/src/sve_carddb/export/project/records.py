@@ -206,6 +206,7 @@ def printing_records(source: Source, view: dict[str, list[Record]]) -> None:
             ]
             face["translations"] = []
             face["corrections"] = []
+            face["name_unit_id"] = None
             faces.append(face)
         faces.sort(key=lambda row: ordinals[string(row["face_id"])])
         printing["faces"] = list(faces)

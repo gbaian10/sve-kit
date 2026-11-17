@@ -639,6 +639,7 @@ export default {
     stats: { cost: "Cost", attack: "Attack", defense: "Defense" },
     separator: " · ",
     backFace: "Back face",
+    treatedAs: "Treated as “{{name}}”",
     related: {
       title: "Related Cards",
       evolvesFrom: "Evolves from",

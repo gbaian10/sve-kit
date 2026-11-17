@@ -620,6 +620,7 @@ export default {
     stats: { cost: "コスト", attack: "攻撃力", defense: "体力" },
     separator: "・",
     backFace: "裏面",
+    treatedAs: "「{{name}}」として扱う",
     related: {
       title: "関連カード",
       evolvesFrom: "進化前",

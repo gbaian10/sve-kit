@@ -3910,6 +3910,23 @@
               "scalar": "ID"
             }
           }
+        },
+        "name_unit_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
         }
       },
       "constraints": {}
@@ -5047,6 +5064,23 @@
           "descriptor": {
             "array": {
               "ref": "PrintingStamp"
+            }
+          }
+        },
+        "name_unit_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
             }
           }
         }

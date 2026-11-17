@@ -896,6 +896,7 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
           printing.stamp === undefined
             ? []
             : [{ stamp_id: printing.stamp, position: null, color: null }],
+        name_unit_id: null,
       })
       // A printing carries the text it was printed with: printings an erratum lists were made
       // before it, so they show revision 1, not the current wording.
