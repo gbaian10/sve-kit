@@ -5,6 +5,7 @@ use super::{
     CandidateAdmission, Context, Execution, Fact, Game, InstructionOutcome, Progress, admission,
     int, player_id, seat_name, unsupported,
 };
+use super::{CostPaymentPurpose, CostStepPayment};
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::player::observation::AbilityQuota;
@@ -37,6 +38,7 @@ use crate::ir::{
     ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReason};
+use crate::ir::{Characteristics, CostStep};
 use crate::ir::{ConsumptionPoint, LimitSpec, ModeUse, PlaySpec};
 use crate::ir::{TurnId, printed_keywords, stand_restrictions};
 use crate::ir::{advance_entry, victory, x_pp};
@@ -778,6 +780,9 @@ impl Game {
         amount: Int,
         execution: &mut Execution,
     ) -> Result<Quantity> {
+        if amount.0 < 0 {
+            return Err(invalid("negative PP payment"));
+        }
         let cause = execution.frame().cause;
         let seat = seat_name(actor)?;
         let player = self.player_mut(seat)?;
@@ -866,7 +871,7 @@ impl Game {
         costs: &CostSpec,
         card_cost: bool,
     ) -> Result<bool> {
-        match self.internal_card_payment(execution, costs, card_cost) {
+        match self.internal_card_payment(execution, costs, card_cost, None) {
             Ok(()) => Ok(true),
             Err(crate::EngineFailure::IllegalPlay(_)) => Ok(false),
             Err(error) => Err(error),
@@ -896,98 +901,121 @@ impl Game {
         })
     }
 
+    fn internal_payment_step(
+        &mut self,
+        execution: &mut Execution,
+        step: &CostStep,
+        card_cost: bool,
+    ) -> Result<(Quantity, Vec<ObjectRef>, Vec<Characteristics>)> {
+        self.check_keyword_cost(execution, step)?;
+        self.check_payment_source_zone(execution, &step.instruction.action)?;
+        let paid = match &step.instruction.action {
+            Action::ScheduleTurn {
+                operation: TurnOperation::SkipNext {},
+                ..
+            } => (
+                self.skip_turn_payment(execution, &step.instruction)?,
+                Vec::new(),
+                Vec::new(),
+            ),
+            Action::Counter { .. } => (
+                self.internal_counter(execution, &step.instruction, true)?,
+                Vec::new(),
+                Vec::new(),
+            ),
+            Action::Fusion { .. } => self.internal_fusion_payment(execution, &step.instruction)?,
+            Action::Discard { .. } => {
+                let (quantity, subjects) =
+                    self.internal_hand_cost_payment(execution, &step.instruction)?;
+                (quantity, subjects, vec![])
+            }
+            action if reveal_cost::selected(execution, action) => {
+                self.internal_hand_material_cost_payment(execution, &step.instruction)?
+            }
+            Action::Resource { player, amount, .. } => {
+                let payer = execution.player(self, player)?;
+                let amount = execution.integer(self, amount)?;
+                let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
+                (
+                    self.internal_pay_pp(payer, amount, execution)?,
+                    Vec::new(),
+                    Vec::new(),
+                )
+            }
+            Action::FlipUp { objects, .. }
+            | Action::FlipDown { objects }
+            | Action::Posture { objects, .. }
+            | Action::Banish { objects }
+            | Action::Move {
+                objects: objects @ Selector::Bound { .. },
+                ..
+            } => self.internal_material_payment(execution, &step.instruction, objects)?,
+            Action::Move {
+                objects,
+                movement,
+                reason,
+            } => {
+                let original = self.internal_source_move_payment(
+                    execution,
+                    &step.instruction,
+                    objects,
+                    movement,
+                    *reason,
+                )?;
+                (
+                    Quantity {
+                        amount: Int(1),
+                        unit: QuantityUnit::Cards,
+                    },
+                    vec![original],
+                    vec![],
+                )
+            }
+            Action::Life {
+                player: PlayerRef::Controller {},
+                change:
+                    NumericChange::Add {
+                        amount: Expr::Literal(Int(delta)),
+                    },
+            } if *delta <= 0 => (
+                self.internal_pay_life(execution, &step.instruction, *delta)?,
+                Vec::new(),
+                Vec::new(),
+            ),
+            _ => return Err(unsupported("whole-card cost step")),
+        };
+        self.finish_keyword_payment(execution, step)?;
+        Ok(paid)
+    }
+
     pub(super) fn internal_card_payment(
         &mut self,
         execution: &mut Execution,
         costs: &CostSpec,
         card_cost: bool,
+        purpose: Option<CostPaymentPurpose>,
     ) -> Result<()> {
         let CostSpec::Ordered { steps } = costs else {
             return Err(unsupported("whole-card cost alternatives"));
         };
         self.internal_use_prerequisite(execution, costs)?;
         self.check_hand_material_cost_entry(execution, costs)?;
+        let mut captured = Vec::new();
         for step in steps {
-            self.check_keyword_cost(execution, step)?;
-            self.check_payment_source_zone(execution, &step.instruction.action)?;
-            let (quantity, subjects, characters) = match &step.instruction.action {
-                Action::ScheduleTurn {
-                    operation: TurnOperation::SkipNext {},
-                    ..
-                } => (
-                    self.skip_turn_payment(execution, &step.instruction)?,
-                    Vec::new(),
-                    Vec::new(),
-                ),
-                Action::Counter { .. } => (
-                    self.internal_counter(execution, &step.instruction, true)?,
-                    Vec::new(),
-                    Vec::new(),
-                ),
-                Action::Fusion { .. } => {
-                    self.internal_fusion_payment(execution, &step.instruction)?
-                }
-                Action::Discard { .. } => {
-                    let (quantity, subjects) =
-                        self.internal_hand_cost_payment(execution, &step.instruction)?;
-                    (quantity, subjects, vec![])
-                }
-                action if reveal_cost::selected(execution, action) => {
-                    self.internal_hand_material_cost_payment(execution, &step.instruction)?
-                }
-                Action::Resource { player, amount, .. } => {
-                    let payer = execution.player(self, player)?;
-                    let amount = execution.integer(self, amount)?;
-                    let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
-                    (
-                        self.internal_pay_pp(payer, amount, execution)?,
-                        Vec::new(),
-                        Vec::new(),
-                    )
-                }
-                Action::FlipUp { objects, .. }
-                | Action::FlipDown { objects }
-                | Action::Posture { objects, .. }
-                | Action::Banish { objects }
-                | Action::Move {
-                    objects: objects @ Selector::Bound { .. },
-                    ..
-                } => self.internal_material_payment(execution, &step.instruction, objects)?,
-                Action::Move {
-                    objects,
-                    movement,
-                    reason,
-                } => {
-                    let original = self.internal_source_move_payment(
-                        execution,
-                        &step.instruction,
-                        objects,
-                        movement,
-                        *reason,
-                    )?;
-                    (
-                        Quantity {
-                            amount: Int(1),
-                            unit: QuantityUnit::Cards,
-                        },
-                        vec![original],
-                        vec![],
-                    )
-                }
-                Action::Life {
-                    player: PlayerRef::Controller {},
-                    change:
-                        NumericChange::Add {
-                            amount: Expr::Literal(Int(delta)),
-                        },
-                } if *delta <= 0 => (
-                    self.internal_pay_life(execution, &step.instruction, *delta)?,
-                    Vec::new(),
-                    Vec::new(),
-                ),
-                _ => return Err(unsupported("whole-card cost step")),
-            };
-            self.finish_keyword_payment(execution, step)?;
+            let actor = purpose
+                .map(|_| execution.player(self, &step.instruction.actor))
+                .transpose()?;
+            let (quantity, subjects, characters) =
+                self.internal_payment_step(execution, step, card_cost)?;
+            if let Some(actor) = actor {
+                captured.push(CostStepPayment {
+                    actor,
+                    instruction: step.instruction.clone(),
+                    quantity,
+                    subjects: subjects.clone(),
+                    characters: characters.clone(),
+                });
+            }
             if !matches!(step.instruction.action, Action::Discard { .. }) {
                 execution.receipts.insert(
                     step.instruction.receipt,
@@ -998,6 +1026,9 @@ impl Game {
                     },
                 );
             }
+        }
+        if let Some(purpose) = purpose {
+            processing::record_cost_spec_payment(execution, purpose, captured);
         }
         Ok(())
     }

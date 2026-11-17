@@ -103,7 +103,10 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
-pub use processing::{NumberDeclaration, PlayDeclaration, PlayPhase, PpPayment, QuestionStage};
+pub use processing::{
+    CostPaymentPurpose, CostSpecPayment, CostStepPayment, NumberDeclaration, PlayDeclaration,
+    PlayPhase, PpPayment, QuestionStage,
+};
 mod random_sample;
 mod resource;
 mod reveal;
@@ -659,6 +662,7 @@ pub(super) struct Execution {
     number_declarations: Vec<NumberDeclaration>,
     play_declarations: Vec<PlayDeclaration>,
     pp_payments: Vec<PpPayment>,
+    cost_spec_payments: Vec<CostSpecPayment>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -855,6 +859,7 @@ impl Game {
                 number_declarations: Vec::new(),
                 play_declarations: Vec::new(),
                 pp_payments: Vec::new(),
+                cost_spec_payments: Vec::new(),
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -1350,6 +1355,21 @@ impl Game {
         self.typed
             .as_ref()
             .map(|execution| execution.pp_payments.as_slice())
+    }
+
+    /// Completed `CostSpec` invocations of this frame, not a complete play payment summary.
+    /// Runner diagnostics contain private IR and bypass frame authorization; hosts use observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_cost_spec_payments;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_cost_spec_payments(&self) -> Option<&[CostSpecPayment]> {
+        self.typed
+            .as_ref()
+            .map(|execution| execution.cost_spec_payments.as_slice())
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.

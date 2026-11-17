@@ -2,7 +2,8 @@
 use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
 use crate::game::internal::{
-    Answer, DecisionToken, InputDomain, InstructionOutcome, PlayDeclaration, QuestionStage, Wait,
+    Answer, CostPaymentPurpose, DecisionToken, InputDomain, InstructionOutcome, PlayDeclaration,
+    QuestionStage, Wait,
 };
 use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
@@ -551,7 +552,12 @@ impl Game {
             let mut candidate = execution.clone();
             let previous = probe.card_runtime.active_source;
             probe.card_runtime.active_source = execution.ability;
-            match probe.internal_card_payment(&mut candidate, costs, false) {
+            match probe.internal_card_payment(
+                &mut candidate,
+                costs,
+                false,
+                Some(CostPaymentPurpose::Resolution { receipt }),
+            ) {
                 Ok(()) => {
                     probe.card_runtime.active_source = previous;
                     *self = probe;
@@ -658,7 +664,15 @@ impl Game {
                 .ok_or_else(|| invalid("missing optional declaration"))?;
             let mut receipts = vec![];
             if complete {
-                self.internal_card_payment(execution, &payment.costs, false)?;
+                self.internal_card_payment(
+                    execution,
+                    &payment.costs,
+                    false,
+                    Some(CostPaymentPurpose::Optional {
+                        receipt: payment.receipt,
+                        required: payment.required,
+                    }),
+                )?;
                 let CostSpec::Ordered { steps } = &payment.costs else {
                     return Err(unsupported("optional costs"));
                 };

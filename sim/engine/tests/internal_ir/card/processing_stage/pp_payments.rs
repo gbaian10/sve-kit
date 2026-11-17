@@ -170,6 +170,7 @@ fn declined_or_failed_resolution_payments_keep_only_prior_successful_debits() {
                 amount: Int(1),
             }];
             payments(&game, &expected);
+            let completed = game.internal_cost_spec_payments().unwrap().to_vec();
             let second = question(&game, actor);
             assert_eq!(
                 submit(
@@ -181,6 +182,10 @@ fn declined_or_failed_resolution_payments_keep_only_prior_successful_debits() {
                 SubmissionKind::Applied
             );
             payments(&game, &expected);
+            assert_eq!(
+                game.internal_cost_spec_payments().unwrap(),
+                completed.as_slice()
+            );
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state[me]["pp"]["current"], 2);
             assert_eq!(state[me]["leader"]["life"], 21);

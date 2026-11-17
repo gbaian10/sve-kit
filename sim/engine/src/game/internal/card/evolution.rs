@@ -258,7 +258,7 @@ impl Game {
                 let members = wait.inline_members(&probe, &execution, &ids)?;
                 wait.record(&mut execution, members);
             }
-            probe.internal_card_payment(&mut execution, &play.costs, false)
+            probe.internal_card_payment(&mut execution, &play.costs, false, None)
         })();
         match attempt {
             Ok(()) => {

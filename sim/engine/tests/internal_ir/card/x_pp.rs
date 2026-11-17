@@ -171,6 +171,15 @@ fn x_pp_spell_uses_the_discounted_intrinsic_quote_and_declining_does_not_ask_for
             play
         };
         let may = awaiting(play);
+        let original = &game.internal_cost_spec_payments().unwrap()[0];
+        assert_eq!(original.steps[0].quantity.amount, Int(1));
+        assert!(matches!(
+            original.steps[0].instruction.action,
+            Action::Resource {
+                amount: Expr::Literal(Int(3)),
+                ..
+            }
+        ));
         let paid = game
             .internal_pp_payments()
             .unwrap()
