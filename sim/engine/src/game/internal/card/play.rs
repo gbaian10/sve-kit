@@ -1594,6 +1594,11 @@ impl Game {
         } else {
             self.internal_material_parameter(execution, decision, play.material_posture(decision))?;
         }
+        let Some((_, Wait::MaterialParameter(wait))) = execution.waiting.as_mut() else {
+            return Err(invalid("formal material producer lost its wait"));
+        };
+        // Shared material constructors also serve probes and inline evolution without a declaration.
+        wait.mark_formal_parameter(decision.id);
         Ok(())
     }
 
@@ -1674,7 +1679,7 @@ impl Game {
                         &decision,
                         snapshot,
                         play.snapshot_id,
-                        true,
+                        Some(decision.id),
                     )?;
                     if execution.waiting.is_some() {
                         play.distribution_captures = Some(decision);

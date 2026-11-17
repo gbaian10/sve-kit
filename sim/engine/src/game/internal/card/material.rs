@@ -17,11 +17,11 @@ use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
     AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
-    DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int, MoveDestination,
-    MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectProperty, ObjectRef, OwnerZone,
-    PlaySlot, PlaySpec, PlayerRef, PlayerRelation, Position, Posture, PostureEvent, Quantity,
-    QuantityUnit, ReceiptId, ScopeId, SelectionSnapshot, SelectionView, Selector, Visibility,
-    WellFormedCardProgram, ZoneKind, ZoneRef,
+    DecisionId, DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int,
+    MoveDestination, MoveMethod, MoveReason, MoveSpec, Nat, ObjectOperand, ObjectProperty,
+    ObjectRef, OwnerZone, PlaySlot, PlaySpec, PlayerId, PlayerRef, PlayerRelation, Position,
+    Posture, PostureEvent, Quantity, QuantityUnit, ReceiptId, ScopeId, SelectionSnapshot,
+    SelectionView, Selector, Visibility, WellFormedCardProgram, ZoneKind, ZoneRef,
 };
 use crate::ir::{
     AggregateBound, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NumericProperty,
@@ -34,6 +34,7 @@ type FrozenCosts = Vec<(ObjectRef, i64)>;
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
     links: CandidateLinks,
+    formal_parameter: Option<DecisionId>,
     destination: MaterialDestination,
     members: Vec<ObjectRef>,
     bounds: Cardinality,
@@ -89,6 +90,23 @@ fn cost_floor_bound(bounds: &[AggregateBound]) -> Result<Option<i64>> {
 }
 
 impl MaterialWait {
+    pub(in crate::game::internal) const fn mark_formal_parameter(&mut self, decision: DecisionId) {
+        self.formal_parameter = Some(decision);
+    }
+
+    pub(in crate::game::internal) fn play_declaration(
+        &self,
+        actor: PlayerId,
+        members: &[ObjectRef],
+    ) -> Option<super::super::PlayDeclaration> {
+        self.formal_parameter
+            .map(|decision| super::super::PlayDeclaration::Materials {
+                player: actor,
+                decision,
+                objects: members.to_vec(),
+            })
+    }
+
     pub(in crate::game::internal) fn player_question(
         &self,
         game: &Game,
@@ -152,6 +170,7 @@ impl MaterialWait {
     ) -> Self {
         Self {
             links,
+            formal_parameter: None,
             destination: MaterialDestination::Cost(receipt),
             members,
             bounds,
@@ -911,6 +930,7 @@ impl Game {
             },
             Wait::MaterialParameter(MaterialWait {
                 links: CandidateLinks::capture(self, execution, members.iter().copied())?,
+                formal_parameter: None,
                 destination: MaterialDestination::Binding(*binding),
                 members,
                 bounds: constraint.cardinality,

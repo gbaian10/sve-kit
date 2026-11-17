@@ -13,7 +13,7 @@ pub use payments::{CostPaymentPurpose, CostSpecPayment, CostStepPayment};
 
 use super::{Execution, Fact, Game, Result, invalid};
 use crate::ir::{
-    ChoiceDomain, DecisionId, Int, ModeDecision, ModeId, Nat, Node, PlayerId, ReceiptId,
+    ChoiceDomain, DecisionId, Int, ModeDecision, ModeId, Nat, Node, ObjectRef, PlayerId, ReceiptId,
     ResolvedDamageAllocation, RuntimeDamageRecipient, ScopeId,
 };
 use alloc::vec::Vec;
@@ -83,6 +83,15 @@ pub enum PlayDeclaration {
         decision: DecisionId,
         /// Accepted members in answer order; object identities may be private.
         members: Vec<RuntimeDamageRecipient>,
+    },
+    /// Accepted formal cost materials, before payment completes.
+    Materials {
+        /// Actual answering player.
+        player: PlayerId,
+        /// Admitted formal material parameter.
+        decision: DecisionId,
+        /// Selected physical generations; private materials still need viewer authorization.
+        objects: Vec<ObjectRef>,
     },
     /// Explicitly accepted formal distribution, not actual delivered damage.
     Distribution {

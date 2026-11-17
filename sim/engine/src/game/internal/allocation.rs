@@ -57,7 +57,7 @@ struct Producer {
 #[derive(Clone, Debug)]
 pub(super) struct DistributionWait {
     links: CandidateLinks,
-    formal_play: bool,
+    formal_parameter: Option<DecisionId>,
     pub(super) purpose: QuestionPurpose,
     producer: Producer,
     snapshot: SnapshotId,
@@ -73,10 +73,10 @@ impl DistributionWait {
         actor: PlayerId,
         allocations: Vec<ResolvedDamageAllocation>,
     ) -> Option<super::PlayDeclaration> {
-        self.formal_play
-            .then_some(super::PlayDeclaration::Distribution {
+        self.formal_parameter
+            .map(|decision| super::PlayDeclaration::Distribution {
                 player: actor,
-                decision: self.producer.decision,
+                decision,
                 allocations,
             })
     }
@@ -155,7 +155,7 @@ impl Game {
             decision,
             &snapshot,
             SnapshotId(self.state.ir_epoch),
-            false,
+            None,
         )
     }
 
@@ -165,7 +165,7 @@ impl Game {
         decision: &Decision,
         snapshot: &Self,
         snapshot_id: SnapshotId,
-        formal_play: bool,
+        formal_parameter: Option<DecisionId>,
     ) -> Result<()> {
         let ChoiceDomain::Distribution {
             recipients,
@@ -232,7 +232,7 @@ impl Game {
                     }
                 }),
             )?,
-            formal_play,
+            formal_parameter,
             purpose: super::player::purpose(&decision.kind),
             producer: Producer {
                 execution: execution.id,
