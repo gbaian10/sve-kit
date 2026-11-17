@@ -34,7 +34,7 @@ fn declare(game: &mut Game, number: &str) -> CardPlay {
 fn bp20_047_and_alias_require_a_target_before_damage_draw_and_discard() {
     for number in ["BP20-047", "BP20-P23"] {
         for available in [false, true] {
-            let mut game = rescan_043::form_game("play-targets-base", number, available);
+            let mut game = evolution_form::form_game("play-targets-base", number, available);
             let play = declare(&mut game, number);
             if !available {
                 assert_eq!(play, CardPlay::Cancelled);
