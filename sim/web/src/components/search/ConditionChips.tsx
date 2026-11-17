@@ -206,6 +206,15 @@ export function ConditionChips({
     ...(query.sveOnly
       ? [{ key: "sve", label: t("filters.sveOnly"), without: { ...query, sveOnly: false } }]
       : []),
+    ...(query.regionOnly
+      ? [
+          {
+            key: "region-only",
+            label: t(edition === "jp" ? "filters.jpOnly" : "filters.enOnly"),
+            without: { ...query, regionOnly: false },
+          },
+        ]
+      : []),
     ...(query.serialOnly
       ? [
           {

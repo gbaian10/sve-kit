@@ -35,6 +35,7 @@ describe("query codec", () => {
       serialOnly: false,
       unlistedOnly: false,
       sveOnly: false,
+      regionOnly: false,
       errataOnly: false,
       restrictionsOnly: false,
       reprints: "only",

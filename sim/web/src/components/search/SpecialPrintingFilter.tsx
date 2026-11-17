@@ -2,14 +2,17 @@ import { useId } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { QueryState } from "../../domain/query/model"
+import type { Region } from "../../domain/search"
 import { FilterDropdown } from "./FilterDropdown"
 
 /** One dropdown for the printing marks; ticking several keeps only cards that have all of them. */
 export function SpecialPrintingFilter({
   query,
+  edition,
   onChange,
 }: {
   readonly query: QueryState
+  readonly edition: Region
   readonly onChange: (next: QueryState) => void
 }) {
   const { t } = useTranslation()
@@ -19,6 +22,12 @@ export function SpecialPrintingFilter({
     { key: "serialOnly", label: t("filters.serialOnly"), hint: t("filters.serialOnlyHint") },
     { key: "unlistedOnly", label: t("filters.unlistedOnly"), hint: t("filters.unlistedOnlyHint") },
     { key: "sveOnly", label: t("filters.sveOnly"), hint: t("filters.sveOnlyHint") },
+    // One key for both editions: switching the edition turns JP-only into EN-only.
+    {
+      key: "regionOnly",
+      label: t(edition === "jp" ? "filters.jpOnly" : "filters.enOnly"),
+      hint: t(edition === "jp" ? "filters.jpOnlyHint" : "filters.enOnlyHint"),
+    },
   ] as const
   const selected = options.filter((option) => query[option.key])
   return (
@@ -37,6 +46,7 @@ export function SpecialPrintingFilter({
           serialOnly: false,
           unlistedOnly: false,
           sveOnly: false,
+          regionOnly: false,
         })
       }}
     >

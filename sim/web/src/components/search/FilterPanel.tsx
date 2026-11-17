@@ -240,7 +240,9 @@ export function FilterPanel({
       </div>
     </>
   )
-  const specialPrintings = <SpecialPrintingFilter query={query} onChange={onChange} />
+  const specialPrintings = (
+    <SpecialPrintingFilter query={query} edition={edition} onChange={onChange} />
+  )
   const errataBlock = (
     <>
       <div className="flex items-center gap-2">

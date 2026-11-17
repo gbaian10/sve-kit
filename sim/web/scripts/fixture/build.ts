@@ -1032,6 +1032,9 @@ async function addCard(ctx: CardContext): Promise<void> {
     home_set_id: card.set,
     faces: card.faces.map((face) => face.id),
     regions: sortRows(regions, ["region"]),
+    printing_regions: [...new Set(card.printings.map((printing) => printing.region))].sort(
+      compareCodePoints,
+    ),
   })
   builder.push("card_engine_support", owner, "bootstrap", {
     card_id: card.id,

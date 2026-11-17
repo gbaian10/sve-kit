@@ -33,7 +33,7 @@ const TABLES = new Set([
 ])
 
 const FIELDS: Readonly<Record<string, readonly string[]>> = {
-  card: ["id", "home_set_id", "regions"],
+  card: ["id", "home_set_id", "regions", "printing_regions"],
   keyword: ["id", "code", "kind", "name_unit_id", "translations"],
   card_engine_support: ["card_id", "region_blocks"],
   digital_link: ["card_id", "digital_card_id", "relation"],

@@ -2753,18 +2753,25 @@
           "items": {
             "$ref": "#/$defs/RegionView"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Region"
+          }
         }
       ],
       "items": false,
-      "minItems": 6,
-      "maxItems": 6,
+      "minItems": 7,
+      "maxItems": 7,
       "x-columns": [
         "id",
         "layout",
         "identity_state",
         "home_set_id",
         "faces",
-        "regions"
+        "regions",
+        "printing_regions"
       ],
       "x-types": [
         {
@@ -2794,6 +2801,11 @@
         {
           "array": {
             "ref": "RegionView"
+          }
+        },
+        {
+          "array": {
+            "scalar": "Region"
           }
         }
       ],
@@ -8851,18 +8863,25 @@
           "items": {
             "$ref": "#/$defs/RegionView"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Region"
+          }
         }
       ],
       "items": false,
-      "minItems": 6,
-      "maxItems": 6,
+      "minItems": 7,
+      "maxItems": 7,
       "x-columns": [
         "id",
         "layout",
         "identity_state",
         "home_set_id",
         "faces",
-        "regions"
+        "regions",
+        "printing_regions"
       ],
       "x-types": [
         {
@@ -8892,6 +8911,11 @@
         {
           "array": {
             "ref": "RegionView"
+          }
+        },
+        {
+          "array": {
+            "scalar": "Region"
           }
         }
       ]
@@ -18833,7 +18857,8 @@
                         "identity_state",
                         "home_set_id",
                         "faces",
-                        "regions"
+                        "regions",
+                        "printing_regions"
                       ]
                     },
                     "maxItems": 0
@@ -21220,7 +21245,8 @@
                         "identity_state",
                         "home_set_id",
                         "faces",
-                        "regions"
+                        "regions",
+                        "printing_regions"
                       ]
                     },
                     "minItems": 1,
@@ -23655,7 +23681,8 @@
                         "identity_state",
                         "home_set_id",
                         "faces",
-                        "regions"
+                        "regions",
+                        "printing_regions"
                       ]
                     },
                     "maxItems": 0

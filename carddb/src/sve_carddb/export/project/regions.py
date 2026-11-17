@@ -179,6 +179,10 @@ def region_views(
             for face in sorted(own_faces, key=lambda row: integer(row["ordinal"]))
         ]
         all_prints = by_card["printing"].get(string(card["id"]), [])
+        # Each region's catalog carries only its own RegionView; this tells it the others.
+        card["printing_regions"] = json_list(
+            sorted({string(row["region"]) for row in all_prints})
+        )
         regions: list[Record] = []
         for region in ("en", "jp"):
             prints = [row for row in all_prints if row["region"] == region]
