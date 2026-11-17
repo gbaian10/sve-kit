@@ -16,7 +16,7 @@ class Correction(BaseModel):
     region: Literal["jp", "en"]
     card_no: str
     face_index: int = Field(default=0, ge=0, le=1)
-    field: Literal["effect", "card_type"]
+    field: Literal["effect", "card_type", "name"]
     expected_raw_value: str
     corrected_value: str
     image_sha256: str
@@ -86,6 +86,8 @@ def _check_correction(
     expected = (
         face.text
         if correction.field == "effect"
+        else face.name
+        if correction.field == "name"
         else face.info.get("Card Type", face.card_type)
     )
     if expected != correction.expected_raw_value:

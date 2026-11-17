@@ -56,6 +56,10 @@ pub struct Catalog {
     /// finding as `file:line: message`. They are never executed.
     #[serde(default)]
     pub(crate) rejected: BTreeMap<String, Vec<String>>,
+    /// Current construction names per printing number and face, from the selection.
+    /// A collab printing's site name is display text, not the name rules compare.
+    #[serde(default)]
+    pub(crate) rules_names: BTreeMap<String, Vec<Option<String>>>,
 }
 
 impl Catalog {
@@ -314,6 +318,7 @@ impl Catalog {
                 let program = self.programs.get(card)?;
                 program["rules_name"].as_str()
             })
+            .or_else(|| self.rules_names.get(card)?.get(ordinal)?.as_deref())
             .or_else(|| face["name"].as_str())
             .map(str::to_owned)
             .ok_or_else(|| invalid("referenced face has no rules name"))

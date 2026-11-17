@@ -1231,3 +1231,34 @@ fn player_question_token_capacity_uses_names_and_exact_destination() {
         );
     }
 }
+
+#[test]
+fn selection_construction_names_replace_printed_collab_names() {
+    let (snapshot, keywords, mut input) = selection(1);
+    let mut collab: Value = serde_json::from_str(snapshot.lines().next().unwrap()).unwrap();
+    collab["number"] = json!("creator-collab");
+    collab["faces"][0]["name"] = json!("collab printed name");
+    let snapshot = format!("{snapshot}{collab}\n");
+    input["authors"][0]["printings"] = json!(["creator", "creator-collab"]);
+    input["authors"][0]["rules_names"] = json!(["creator rules name"]);
+    input["authors"][1]["rules_names"] = json!(["token rules name"]);
+    let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();
+    let mut state = initial(0);
+    state["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"creator","card":"creator"},
+        {"id":"collab","card":"creator-collab"}
+    ]);
+    let mut game =
+        Game::from_selected_effects(selected, &state, &Value::Null, &Value::Null, "names").unwrap();
+    assert!(matches!(
+        game.play_internal_card("creator", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Resolved(_)
+    ));
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["objects"]["collab"]["name"], "creator rules name");
+    let token = view["P1"]["ex"][0].as_str().unwrap();
+    assert_eq!(view["objects"][token]["name"], "token rules name");
+    input["authors"][0]["unexpected"] = json!(true);
+    Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
+}

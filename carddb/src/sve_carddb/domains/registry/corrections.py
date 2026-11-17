@@ -75,11 +75,13 @@ def project_corrections(
         )
         face = card.faces[index]
         field = string(data, "field")
-        if field not in {"effect", "card_type"}:
+        if field not in {"effect", "card_type", "name"}:
             raise ValueError("Unsupported correction field")
         raw = (
             face.text
             if field == "effect"
+            else face.name
+            if field == "name"
             else (face.card_type if region == "jp" else face.info["Card Type"])
         )
         section = (
