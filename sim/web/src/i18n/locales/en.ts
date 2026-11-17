@@ -308,7 +308,7 @@ export default {
     sveOnly: "SVE exclusive",
     sveOnlyHint:
       "Printings with no matching digital artwork, including cards absent from the digital games",
-    jpOnly: "Japan exclusive",
+    jpOnly: "Japanese exclusive",
     jpOnlyHint: "Cards with no English printing",
     enOnly: "English exclusive",
     enOnlyHint: "Cards with no Japanese printing",
