@@ -56,7 +56,7 @@ pub struct PpPayment {
     pub amount: Int,
 }
 
-/// Accepted formal play parameters, distinct from payment and body declarations.
+/// Accepted formal play choices, distinct from payment and body declarations.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PlayDeclaration {
     /// A player explicitly fixed X; implicit zero defaults are not answers.
@@ -83,6 +83,33 @@ pub enum PlayDeclaration {
         decision: DecisionId,
         /// Accepted members in answer order; object identities may be private.
         members: Vec<RuntimeDamageRecipient>,
+    },
+    /// An accepted chosen-hand cost, keyed by its actual cost instruction receipt.
+    HandCostMaterials {
+        /// Actual answering player.
+        player: PlayerId,
+        /// Cost instruction identity, not a play parameter decision.
+        receipt: ReceiptId,
+        /// Explicitly selected members, excluding any implicitly paid source.
+        objects: Vec<ObjectRef>,
+    },
+    /// An accepted route of a play-cost exchange.
+    ExchangeRoute {
+        /// Actual answering player.
+        player: PlayerId,
+        /// Admitted route question.
+        decision: DecisionId,
+        /// The checked zero-based route.
+        route: Nat,
+    },
+    /// Accepted materials of a play-cost exchange, before payment completes.
+    ExchangeMaterials {
+        /// Actual answering player.
+        player: PlayerId,
+        /// Admitted route material decision.
+        decision: DecisionId,
+        /// Selected physical generations.
+        objects: Vec<ObjectRef>,
     },
     /// Accepted formal cost materials, before payment completes.
     Materials {

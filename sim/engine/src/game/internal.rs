@@ -971,7 +971,11 @@ impl Game {
                 (Wait::CostDiscard(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
                     rollback = execution.answer_origin(validated);
+                    let declaration = wait.play_declaration(actor, &members);
                     wait.record(&mut execution, members);
+                    if let Some(declaration) = declaration {
+                        processing::record_play_declaration(&mut execution, declaration);
+                    }
                 }
                 (Wait::Discard(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
@@ -1000,7 +1004,7 @@ impl Game {
                     } else {
                         let handled = card::optional::accept(&mut execution, actor, accepted)?;
                         if !handled {
-                            card::exchange::accept(&mut execution, accepted)?;
+                            card::exchange::accept(&mut execution, actor, accepted)?;
                         }
                     }
                 }
@@ -1037,11 +1041,21 @@ impl Game {
                     }
                     rollback = execution.answer_origin(validated);
                     card::exchange::choose_route(&mut execution, index)?;
+                    processing::record_play_declaration(
+                        &mut execution,
+                        PlayDeclaration::ExchangeRoute {
+                            player: actor,
+                            decision: token.decision,
+                            route,
+                        },
+                    );
                 }
                 (Wait::CostMaterials(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;
                     rollback = execution.answer_origin(validated);
+                    let declaration = wait.play_declaration(actor, &members);
                     card::exchange::select(&mut execution, members)?;
+                    processing::record_play_declaration(&mut execution, declaration);
                 }
                 (Wait::TriggerQuota { count }, Answer::TriggerQuota(handle))
                     if usize::try_from(handle)

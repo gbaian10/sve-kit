@@ -901,6 +901,7 @@ impl Game {
                 })
             })
             .collect::<Result<Vec<_>>>()?;
+        // The formal-play wrapper marks this mandatory wait; auto-binding would bypass its contract.
         execution.waiting = Some((
             DecisionView {
                 token: DecisionToken {

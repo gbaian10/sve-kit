@@ -17,7 +17,10 @@ pub(in crate::game::internal) fn discard_selection_round(execution: &mut Executi
             PlayDeclaration::Recipients { .. }
             | PlayDeclaration::Materials { .. }
             | PlayDeclaration::Distribution { .. } => false,
-            PlayDeclaration::X { .. }
+            PlayDeclaration::HandCostMaterials { .. }
+            | PlayDeclaration::ExchangeRoute { .. }
+            | PlayDeclaration::ExchangeMaterials { .. }
+            | PlayDeclaration::X { .. }
             | PlayDeclaration::Modes { .. }
             | PlayDeclaration::OptionalCost { .. } => true,
         });

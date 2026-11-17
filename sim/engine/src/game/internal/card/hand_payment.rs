@@ -1,7 +1,7 @@
 //! Hand cost choices are collected before any cost is committed.
 use super::play::PlayState;
 use super::{Execution, Game, Result, invalid, seat_name, unsupported};
-use crate::game::internal::{InstructionOutcome, contains, search};
+use crate::game::internal::{InstructionOutcome, Wait, contains, search};
 
 mod choices;
 use crate::ir::{
@@ -170,7 +170,15 @@ impl Game {
         if !early_hand && self.internal_fusion_materials(execution, &play.costs)? {
             return Ok(true);
         }
-        self.internal_hand_payment_question(execution, &costs)
+        let waiting = self.internal_hand_payment_question(execution, &costs)?;
+        if waiting {
+            let Some((_, Wait::CostDiscard(wait))) = &mut execution.waiting else {
+                return Err(invalid("missing formal hand cost question"));
+            };
+            // The shared factory also serves probes and inline costs, which are not formal plays.
+            wait.mark_formal_cost();
+        }
+        Ok(waiting)
     }
 
     /// Finds a disjoint assignment before any of the ordered costs are committed.
