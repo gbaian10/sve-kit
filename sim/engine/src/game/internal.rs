@@ -658,14 +658,21 @@ pub(super) struct Execution {
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
     facts: fact_log::Facts,
     waiting: Option<(DecisionView, Wait)>,
+    // Temporarily write-only; wire processing will be its first reader after replanning.
     question_stage: Option<QuestionStage>,
     play_phase: Option<PlayPhase>,
     processing_disclosure: processing::ProcessingDisclosure,
+    // Temporarily write-only; wire processing will be its first reader after replanning.
     number_declarations: Vec<NumberDeclaration>,
+    // Temporarily write-only; wire processing will be its first reader after replanning.
     play_declarations: Vec<PlayDeclaration>,
+    // Temporarily write-only; wire processing will be its first reader after replanning.
     pp_payments: Vec<PpPayment>,
+    // Temporarily write-only; wire processing will be its first reader after replanning.
     cost_spec_payments: Vec<CostSpecPayment>,
+    // Temporarily write-only; wire processing will be its first reader after replanning.
     exchange_payments: Vec<ExchangePayment>,
+    // Temporarily write-only; wire processing will be its first reader after replanning.
     target_declarations: Vec<TargetDeclaration>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
@@ -1309,137 +1316,6 @@ impl Game {
             }
         }
         result
-    }
-
-    /// Innermost `EachPlayer` actor, or `None` before that layer first switches seats.
-    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_each_player_actor;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_each_player_actor(&self) -> Option<PlayerId> {
-        self.typed.as_ref()?.procedure_actor()
-    }
-
-    /// Producer-recorded phase of the active typed question; `None` also means unknown.
-    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_question_stage;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_question_stage(&self) -> Option<QuestionStage> {
-        let execution = self.typed.as_ref()?;
-        execution.waiting.as_ref()?;
-        execution.question_stage
-    }
-
-    /// Lifecycle of the innermost card or ability play; raw procedure executions have no phase.
-    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_play_phase;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_play_phase(&self) -> Option<PlayPhase> {
-        self.typed.as_ref()?.play_phase
-    }
-
-    /// Public `Action::Declare` numbers belonging to the current execution alone.
-    /// Runner diagnostics bypass frame authorization; hosts must use player observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_number_declarations;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_number_declarations(&self) -> Option<&[NumberDeclaration]> {
-        self.typed
-            .as_ref()
-            .map(|execution| execution.number_declarations.as_slice())
-    }
-
-    /// Accepted parameters of this execution alone; this is not a payment receipt.
-    /// Runner diagnostics may contain private objects and bypass frame authorization; hosts use observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_play_declarations;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_play_declarations(&self) -> Option<&[PlayDeclaration]> {
-        self.typed
-            .as_ref()
-            .map(|execution| execution.play_declarations.as_slice())
-    }
-
-    /// Successful PP debits of this execution alone, not a complete payment summary.
-    /// Runner diagnostics bypass frame authorization; hosts must use player observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_pp_payments;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_pp_payments(&self) -> Option<&[PpPayment]> {
-        self.typed
-            .as_ref()
-            .map(|execution| execution.pp_payments.as_slice())
-    }
-
-    /// Completed `CostSpec` invocations of this frame, not a complete play payment summary.
-    /// Runner diagnostics contain private IR and bypass frame authorization; hosts use observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_cost_spec_payments;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_cost_spec_payments(&self) -> Option<&[CostSpecPayment]> {
-        self.typed
-            .as_ref()
-            .map(|execution| execution.cost_spec_payments.as_slice())
-    }
-
-    /// Completed exchange paths of this execution, separate from `CostSpec` receipts.
-    /// Runner diagnostics contain private outcomes and bypass frame authorization; hosts use observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_exchange_payments;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_exchange_payments(&self) -> Option<&[ExchangePayment]> {
-        self.typed
-            .as_ref()
-            .map(|execution| execution.exchange_payments.as_slice())
-    }
-
-    /// Accepted formal-play targets of this execution; empty does not imply no target groups.
-    /// Runner diagnostics contain private objects and bypass frame authorization; hosts use observation.
-    ///
-    /// ```
-    /// use sve_engine::game::Game;
-    /// let _ = Game::internal_target_declarations;
-    /// ```
-    #[cfg(feature = "runner")]
-    #[must_use]
-    pub fn internal_target_declarations(&self) -> Option<&[TargetDeclaration]> {
-        self.typed
-            .as_ref()
-            .map(|execution| execution.target_declarations.as_slice())
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.

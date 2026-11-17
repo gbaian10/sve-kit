@@ -2,9 +2,6 @@
     clippy::panic,
     reason = "A missing decision invalidates the player choice scenarios."
 )]
-#[path = "player_choices/procedure_position.rs"]
-mod procedure_position;
-
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 

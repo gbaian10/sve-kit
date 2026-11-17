@@ -11,7 +11,7 @@ use crate::ir::{
 use alloc::collections::{BTreeMap, BTreeSet};
 
 #[cfg(test)]
-pub(super) mod tests;
+mod tests;
 use crate::ir::player_stages::{choice_procedure, look_remainder, procedure, returned_share};
 use crate::ir::{RuntimeZoneRef, shuffle};
 use core::slice::from_ref;
@@ -365,12 +365,6 @@ impl Execution {
             return Err(invalid("procedure end does not match the active procedure"));
         }
         Ok(())
-    }
-
-    /// An unstarted inner procedure does not fall back to its outer actor.
-    #[cfg(feature = "runner")]
-    pub(super) fn procedure_actor(&self) -> Option<PlayerId> {
-        self.procedures.last()?.actor
     }
 
     /// Revoking a look also reaches the looks saved for procedure players not acting now, so

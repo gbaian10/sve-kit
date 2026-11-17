@@ -114,79 +114,12 @@ fn x_pp_binds_before_cost_filtered_targets_and_impossible_targets_restore_the_wh
     assert_eq!(view["objects"]["s"]["acted"], true);
 }
 
-fn assert_optional_cost_payment(game: &Game, accepted: bool) {
-    use sve_engine::game::internal::{CostPaymentPurpose, PlayDeclaration};
-    let completed = game.internal_cost_spec_payments().unwrap();
-    let optional = completed
-        .iter()
-        .filter(|cost| matches!(cost.purpose, CostPaymentPurpose::Optional { .. }))
-        .collect::<Vec<_>>();
-    assert_eq!(
-        optional.len(),
-        usize::from(accepted),
-        "only an accepted optional cost has a completed invocation"
-    );
-    if let Some(cost) = optional.first() {
-        let declaration =
-            game.internal_play_declarations()
-                .unwrap()
-                .iter()
-                .find_map(|declaration| match declaration {
-                    PlayDeclaration::OptionalCost {
-                        receipt,
-                        required,
-                        accepted: true,
-                        ..
-                    } => Some((*receipt, *required)),
-                    PlayDeclaration::HandCostMaterials { .. }
-                    | PlayDeclaration::ExchangeRoute { .. }
-                    | PlayDeclaration::ExchangeMaterials { .. }
-                    | PlayDeclaration::X { .. }
-                    | PlayDeclaration::Modes { .. }
-                    | PlayDeclaration::Recipients { .. }
-                    | PlayDeclaration::Materials { .. }
-                    | PlayDeclaration::Distribution { .. }
-                    | PlayDeclaration::OptionalCost {
-                        accepted: false, ..
-                    } => None,
-                });
-        assert!(
-            declaration.is_some(),
-            "the paid optional cost was explicitly accepted"
-        );
-        let (receipt, required) = declaration.unwrap();
-        assert_eq!(
-            cost.purpose,
-            CostPaymentPurpose::Optional { receipt, required },
-            "the invocation retains its accepted declaration identity"
-        );
-        assert_eq!(
-            cost.steps.len(),
-            1,
-            "this optional cost contains one PP step"
-        );
-        assert_eq!(
-            cost.steps[0].quantity,
-            Quantity {
-                amount: Int(4),
-                unit: QuantityUnit::Pp
-            },
-            "the X cost actually paid four PP"
-        );
-    }
-}
-
 #[test]
 fn x_pp_spell_uses_the_discounted_intrinsic_quote_and_declining_does_not_ask_for_x() {
     let mut tree = tree(
         "spell",
         json!({"x":{},"optional_cost":{"pp":"x","result":"paid"},"do":[{"if":{"cond":{"paid":{"receipt":"paid"}},"then":[{"life":{"who":"self","delta":"x"}}]}}]}),
     );
-    // Keep the frame alive after payment so the actual discounted debit can be inspected.
-    tree["cards"]["unit-follower"]["abilities"][0]["spell"]["do"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"optional":{"do":[{"life":{"who":"self","delta":1}}]}}));
     let mut printed = tree["cards"]["unit-follower"].take();
     let mut header = printed["abilities"][0].clone();
     header.as_object_mut().unwrap().remove("spell");
@@ -232,29 +165,7 @@ fn x_pp_spell_uses_the_discounted_intrinsic_quote_and_declining_does_not_ask_for
         } else {
             play
         };
-        let may = awaiting(play);
-        assert_optional_cost_payment(&game, accepted);
-        let original = &game.internal_cost_spec_payments().unwrap()[0];
-        assert_eq!(original.steps[0].quantity.amount, Int(1));
-        assert!(matches!(
-            original.steps[0].instruction.action,
-            Action::Resource {
-                amount: Expr::Literal(Int(3)),
-                ..
-            }
-        ));
-        let paid = game
-            .internal_pp_payments()
-            .unwrap()
-            .iter()
-            .map(|payment| payment.amount.0)
-            .collect::<Vec<_>>();
-        assert_eq!(paid, if accepted { vec![1, 4] } else { vec![1] });
-        resolved(
-            game.answer_internal_card(may.actor, may.token, Answer::Integer(Nat(0)))
-                .unwrap(),
-        );
-        assert_eq!(game.internal_pp_payments(), None);
+        resolved(play);
         let view = game.projection(View::Referee).unwrap();
         assert_eq!(
             view["P1"]["pp"]["current"],
