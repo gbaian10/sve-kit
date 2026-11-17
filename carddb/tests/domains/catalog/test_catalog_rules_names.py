@@ -297,7 +297,12 @@ def add_observed_name(db: Database, name: str, *, current: bool = False) -> None
     revision = "revision:" + name
     db.insert(
         "face_revision",
-        original | {"id": revision, "revision": 1, "name_unit_id": text},
+        original
+        | {
+            "id": revision,
+            "revision": len(db.rows("face_revision")),
+            "name_unit_id": text,
+        },
     )
     source = dict(db.rows("source_record")[0].values)
     db.insert("source_record", source | {"id": "source:" + name})
@@ -383,3 +388,33 @@ def test_primary_is_never_registered_as_a_special_name(db: Database) -> None:
     )
     with pytest.raises(ValueError, match="derived, not registered"), db.transaction():
         register_name(db, explicit)
+
+
+def test_explicit_primary_cannot_pick_among_undecided_names(db: Database) -> None:
+    explicit = NameBinding(
+        face_id="face", region="jp", official_name="A", role="primary"
+    )
+    with (
+        pytest.raises(ValueError, match="applied collab name"),
+        db.transaction(),
+    ):
+        db.delete("face_current", {"face_id": "face", "region": "jp"})
+        set_name(db, "jp", "A")
+        add_observed_name(db, "B")
+        populate_rules_names(db, (explicit,))
+
+
+def test_explicit_primary_needs_its_collab_names_applied(db: Database) -> None:
+    explicit = NameBinding(
+        face_id="face", region="jp", official_name="Rules name", role="primary"
+    )
+    with (
+        pytest.raises(ValueError, match="applied collab name"),
+        db.transaction(),
+    ):
+        db.delete("face_current", {"face_id": "face", "region": "jp"})
+        set_name(db, "jp", "First collab")
+        add_observed_name(db, "Second collab")
+        add_observed_name(db, "Third collab")
+        # Stale declarations are not passed in, so their names still count.
+        populate_rules_names(db, (collab("First collab"), explicit))

@@ -40,11 +40,12 @@ class _Names:
 
 def _selected_names(
     db: Database, collab: dict[tuple[Value, Value], set[str]]
-) -> dict[tuple[Value, Value], str]:
-    """Current, else the unanimous observed name, both after declared collab names.
+) -> tuple[dict[tuple[Value, Value], str], frozenset[tuple[Value, Value]]]:
+    """Current, else the unanimous observed name, both after applied collab names.
 
     A current revision showing a collab name stands aside so the remaining printings
-    decide; collab names never become the primary construction name.
+    decide; collab names never become the primary construction name. The second
+    value lists every face region that still shows a non-collab name, derived or not.
     """
     lookup = _Names(db)
     name, checked = lookup.name, lookup.checked
@@ -63,7 +64,7 @@ def _selected_names(
     for key, revisions in observed.items():
         if key not in selected and len(revisions) == 1:
             selected[key] = checked(next(iter(revisions.values())))
-    return selected
+    return selected, frozenset(observed) | frozenset(selected)
 
 
 def _rules_name(
@@ -127,9 +128,14 @@ def populate_rules_names(db: Database, adopted: tuple[NameBinding, ...] = ()) ->
                 existing.values["rules_name_id"]
             )
     collab, explicit = _split(adopted)
-    selected = _selected_names(db, collab)
+    selected, named = _selected_names(db, collab)
     if explicit.keys() & selected.keys():
         raise ValueError("Explicit primary name where observations derive one")
+    # Undecided different names stay undecided; an explicit primary cannot pick one.
+    if explicit.keys() & named:
+        raise ValueError(
+            "Explicit primary needs every observed name to be an applied collab name"
+        )
     added = 0
     for (face, region), official_name in sorted({**selected, **explicit}.items()):
         identifier = _rules_name(db, names, regional, region, official_name)

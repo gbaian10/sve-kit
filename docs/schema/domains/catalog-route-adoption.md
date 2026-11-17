@@ -138,9 +138,10 @@ primary 照舊從同區官方 current 名稱推導，但 current 名稱若是本
 無 current（或 current 讓開）時，剔除有效 collab 名稱後剩下的觀測名稱 exact 相同亦可推導，仍有不同名稱則留未定。
 推導不用手填文字，也不從 collab 宣告反推 primary。
 
-明示 primary（role=primary）是窄例外：只在本面本區**全部**觀測名稱都是有效 collab 名稱、剔除後沒有任何觀測可推導時允許，
+明示 primary（role=primary）是窄例外：只在本面本區**全部**觀測名稱都是本次已套用的 collab 名稱、剔除後沒有任何觀測時允許，
 例如每張版次都印不同聯名名稱、規則卡名只出現在規則文的 token。names 恰為一個 authored TextValue，
-evidence 必填（卡文、Q&A 或卡圖引用）。有觀測可推導 primary 時建置失敗，不能藉此改選 primary。
+evidence 必填（卡文、Q&A 或卡圖引用）。剩下任何非 collab 觀測名稱（可推導，或多個名稱留未定）、
+或相關 collab 宣告 stale／無法驗證而未套用時，建置失敗，不能藉此改選 primary。
 names 每項語言必與 region 相符（jp→ja，en→en）。
 陣列按 canonical bytes 排序，重建後的 exact 名稱不得重複；它是此 face/region/role 的完整特殊名稱集合。
 
@@ -157,11 +158,13 @@ name_basis_hash=H(全部 observations 重建的 `{lang,text_hash}` 排序唯一�
 規則依據另列 evidence，不因名稱共現就認定 treated_as。
 
 建置報告的 `rules_name_adoptions` 列出套用、stale 與無法驗證的 record_key；stale 與無法驗證的記錄都不套用，
-這時該面若無法推導 primary 就留未定，不退回舊值。
+這時該面若無法推導 primary 就留未定，不退回舊值。無法驗證指本次建置缺該面該區的觀測來源；
+宣告自身引用的來源缺漏或 hash 不符則是輸入錯誤，建置失敗。
 
 **聯名版次的表記比較**：版次名稱的 exact UTF-8 hash 等於本面本區已宣告 collab 名稱時，表記等價比較不比它的 name，
 name 只在其餘版次之間比；其他欄位照舊 exact 比較。初始 current 與依據版本在符合條件的版次中優先選非聯名版次，
-讓卡片預設顯示自己的卡名；各版次原文仍顯示官網的名稱。這個比較只看宣告的 hash，不依賴本次推導出的 primary。
+讓卡片預設顯示自己的卡名；各版次原文仍顯示官網的名稱。這個比較只看宣告的 hash（含 stale、未套用的宣告），
+不依賴本次推導出的 primary，避免 primary、current 與表記互相依賴；比對限同面同區的 exact hash。
 
 各 name 重建後沿既有 `(region,official_name exact)` 產 rules_name；新增／移除名稱時直接修訂完整 names 集合。
 撤回移除該人工關聯，若同名群組仍被其他面／推導 primary 引用則保留，不刪共享物件。
