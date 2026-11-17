@@ -37,7 +37,7 @@ impl Facts {
     }
 }
 
-const fn viewer(player: PlayerId) -> Option<Viewer> {
+pub(in crate::game::internal) const fn viewer(player: PlayerId) -> Option<Viewer> {
     match player.seat {
         1 => Some(Viewer::P1),
         2 => Some(Viewer::P2),

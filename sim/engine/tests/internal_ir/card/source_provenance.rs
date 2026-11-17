@@ -64,6 +64,15 @@ pub(super) fn granting(number: &str, hidden: bool) -> WellFormedCardProgram {
 }
 
 fn prepared(seat: u32, number: &str, hidden: bool) -> Game {
+    prepared_program(seat, number, hidden, &granting(number, hidden))
+}
+
+pub(super) fn prepared_program(
+    seat: u32,
+    number: &str,
+    hidden: bool,
+    program: &WellFormedCardProgram,
+) -> Game {
     let actor = if seat == 1 { "P1" } else { "P2" };
     let mut initial = setup(seat, json!([]));
     initial["turn"]["active"] = json!(actor);
@@ -91,7 +100,7 @@ fn prepared(seat: u32, number: &str, hidden: bool) -> Game {
     .unwrap();
     for key in ["unit-follower", "unit-amulet", "unit-spell"] {
         let program = if key == number {
-            granting(number, hidden)
+            program.clone()
         } else {
             card(vec![])
         };
@@ -106,7 +115,7 @@ fn prepared(seat: u32, number: &str, hidden: bool) -> Game {
     game
 }
 
-fn attack(game: &mut Game, seat: u32, holder: &str) {
+pub(super) fn attack(game: &mut Game, seat: u32, holder: &str) {
     let other = if seat == 1 { "P2" } else { "P1" };
     assert_eq!(
         game.internal_rule_action(

@@ -55,6 +55,7 @@ pub(in crate::game::internal) fn execution(game: &mut Game) -> Execution {
         waiting: None,
         question_stage: None,
         play_phase: None,
+        processing_disclosure: super::super::processing::ProcessingDisclosure::default(),
         number_declarations: Vec::new(),
         play_declarations: Vec::new(),
         pp_payments: Vec::new(),

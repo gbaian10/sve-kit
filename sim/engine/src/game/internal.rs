@@ -103,6 +103,7 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
+pub(in crate::game) use processing::observed_sources;
 pub use processing::{
     CostPaymentPurpose, CostSpecPayment, CostStepPayment, ExchangeMaterialPayment, ExchangePayment,
     NumberDeclaration, PlayDeclaration, PlayPhase, PpPayment, QuestionStage, TargetDeclaration,
@@ -659,6 +660,7 @@ pub(super) struct Execution {
     waiting: Option<(DecisionView, Wait)>,
     question_stage: Option<QuestionStage>,
     play_phase: Option<PlayPhase>,
+    processing_disclosure: processing::ProcessingDisclosure,
     number_declarations: Vec<NumberDeclaration>,
     play_declarations: Vec<PlayDeclaration>,
     pp_payments: Vec<PpPayment>,
@@ -858,6 +860,7 @@ impl Game {
                 waiting: None,
                 question_stage: None,
                 play_phase: None,
+                processing_disclosure: processing::ProcessingDisclosure::default(),
                 number_declarations: Vec::new(),
                 play_declarations: Vec::new(),
                 pp_payments: Vec::new(),
@@ -893,6 +896,7 @@ impl Game {
             self.internal_run(&mut execution, &published)?;
             let progress = execution.progress();
             if !progress.complete && !execution.terminated {
+                processing::disclose_source(self, &mut execution);
                 self.typed = Some(execution);
             }
             Ok(progress)
@@ -1288,6 +1292,7 @@ impl Game {
             execution.origin = rollback.take();
             let progress = execution.progress();
             if !progress.complete && !execution.terminated {
+                processing::disclose_source(self, &mut execution);
                 self.typed = Some(execution);
             }
             Ok(progress)
