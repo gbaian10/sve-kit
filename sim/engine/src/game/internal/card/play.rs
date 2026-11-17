@@ -5,10 +5,10 @@ use super::{
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
     admission, int, invalid, seat_name, unsupported,
 };
-use crate::game::internal::PlayPhase;
-use crate::game::internal::processing::enter_play_phase;
+use crate::game::internal::processing::{enter_play_phase, record_target_declaration};
 use crate::game::internal::repeated_moves;
 use crate::game::internal::{InstructionOutcome, player_id};
+use crate::game::internal::{PlayPhase, TargetDeclaration};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
 use crate::ir::flip_cost as flip_payment;
@@ -24,7 +24,7 @@ use crate::ir::{
 use crate::ir::{
     AbilityKind, AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId,
     ObjectOperand, ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet,
-    SelectionSnapshot, Selector, TurnId,
+    SelectionSnapshot, Selector, TargetRoleAnswer, TurnId,
 };
 use crate::ir::{
     ChoiceDomain, Control, CostSpec, Decision, DecisionId, DecisionKind, ExecutionRef, InputMode,
@@ -1359,6 +1359,7 @@ impl Game {
             play_declarations: Vec::new(),
             pp_payments: Vec::new(),
             cost_spec_payments: Vec::new(),
+            target_declarations: Vec::new(),
             destroy_guards: Vec::new(),
             look_viewers: BTreeMap::new(),
             player_receipt_links: BTreeMap::new(),
@@ -2110,7 +2111,9 @@ impl Game {
     pub(in crate::game::internal) fn internal_target_answer(
         execution: &mut Execution,
         wait: &super::selection::TargetWait,
+        actor: PlayerId,
         objects: Vec<ObjectRef>,
+        roles: Vec<TargetRoleAnswer>,
     ) -> Result<()> {
         let play = execution
             .play
@@ -2120,8 +2123,16 @@ impl Game {
             .snapshot
             .clone()
             .ok_or_else(|| invalid("missing target snapshot"))?;
+        let declaration = TargetDeclaration {
+            player: actor,
+            decision: wait.decision.id,
+            objects: objects.clone(),
+            roles,
+        };
         execution.bind_targets(wait, objects);
-        execution.captures(&snapshot, &wait.decision.captures)
+        execution.captures(&snapshot, &wait.decision.captures)?;
+        record_target_declaration(execution, declaration);
+        Ok(())
     }
 
     fn retry_play_targets(execution: &mut Execution, play: &mut PlayState) -> Result<()> {
@@ -2132,6 +2143,8 @@ impl Game {
         // Feasibility was proven against this same snapshot before the first target question.
         execution.slots.clone_from(&restart.slots);
         execution.targets.clear();
+        // A distribution retry invalidates the entire previous round of target answers.
+        execution.target_declarations.clear();
         execution.selected_target_names.clear();
         execution.allocations.clear();
         play.parameters.clone_from(&restart.parameters);

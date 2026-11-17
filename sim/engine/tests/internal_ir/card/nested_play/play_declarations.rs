@@ -45,6 +45,10 @@ fn finish_child(
         next
     } else {
         assert!(
+            game.internal_target_declarations().unwrap().is_empty(),
+            "child does not inherit parent target declarations"
+        );
+        assert!(
             game.internal_play_declarations().unwrap().is_empty(),
             "child starts without its parent's X"
         );
@@ -129,6 +133,7 @@ fn a_nested_childs_modes_do_not_replace_or_extend_its_parents_x() {
             game.internal_pp_payments().unwrap().is_empty(),
             "the parent's targets precede its debit"
         );
+        let parent_decision = parent.token.decision;
         let next = awaiting(select(&mut game, &parent));
         let parent = finish_child(&mut game, next, outer, child_fails);
         assert_eq!(parent.token.execution, outer);
@@ -137,11 +142,16 @@ fn a_nested_childs_modes_do_not_replace_or_extend_its_parents_x() {
             expected_parent.as_slice()
         );
         assert_eq!(game.internal_pp_payments().unwrap(), parent_pp.as_slice());
+        let targets = game.internal_target_declarations().unwrap();
+        assert_eq!(targets.len(), 1);
+        assert_eq!(targets[0].decision, parent_decision);
+        assert_eq!(targets[0].objects.len(), 1);
         resolved(
             game.answer_internal_card(parent.actor, parent.token, Answer::Integer(Nat(0)))
                 .unwrap(),
         );
         assert_eq!(game.internal_play_declarations(), None);
         assert_eq!(game.internal_pp_payments(), None);
+        assert_eq!(game.internal_target_declarations(), None);
     }
 }

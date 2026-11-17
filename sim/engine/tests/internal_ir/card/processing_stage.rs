@@ -1,3 +1,6 @@
+#[path = "processing_stage/target_declarations.rs"]
+mod target_declarations;
+
 #[path = "processing_stage/cost_spec_payments.rs"]
 mod cost_spec_payments;
 
