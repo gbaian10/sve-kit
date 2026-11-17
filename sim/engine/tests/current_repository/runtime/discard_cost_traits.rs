@@ -42,7 +42,9 @@ fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::Modes { .. } => Answer::Modes(modes.iter().copied().map(ModeId).collect()),
-            InputDomain::Integer(bounds) => Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum)),
+            InputDomain::Integer(bounds) => {
+                Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum))
+            }
             InputDomain::Search(domain) => Answer::Search(SearchAnswer::Ungrouped(
                 domain
                     .cards
@@ -113,7 +115,12 @@ fn play(game: &mut Game, id: &str) {
 #[test]
 fn bp20_015_discards_a_matching_card_to_draw_two() {
     let mut initial = in_hand("BP20-015");
-    push(&mut initial, "P1", "hand", json!({"id":"fuel","card":"BP20-015"}));
+    push(
+        &mut initial,
+        "P1",
+        "hand",
+        json!({"id":"fuel","card":"BP20-015"}),
+    );
     let mut game = game(&initial);
     play(&mut game, "source");
     let state = game.projection(View::Referee).unwrap();

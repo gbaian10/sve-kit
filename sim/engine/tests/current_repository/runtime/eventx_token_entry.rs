@@ -27,7 +27,6 @@ fn selected() -> &'static SelectedEffects {
     })
 }
 
-
 fn position(number: &str, zone: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = json!([]);
@@ -123,7 +122,6 @@ fn resolve(game: &mut Game, number: &str, take: bool) {
         .unwrap();
     finish(game, play, take);
 }
-
 
 fn play(game: &mut Game, id: &str) {
     let result = game.play_internal_card(id, PlayerId { seat: 1 }).unwrap();

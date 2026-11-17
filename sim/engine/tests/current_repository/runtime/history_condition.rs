@@ -49,7 +49,9 @@ fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::Modes { .. } => Answer::Modes(modes.iter().copied().map(ModeId).collect()),
-            InputDomain::Integer(bounds) => Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum)),
+            InputDomain::Integer(bounds) => {
+                Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum))
+            }
             InputDomain::Search(domain) => Answer::Search(SearchAnswer::Ungrouped(
                 domain
                     .cards
@@ -170,9 +172,17 @@ fn cp03_077_draws_only_after_an_enemy_follower_died_this_turn() {
     let mut initial = on_field("CP03-077");
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"enemy","card":"BP01-171","state":{"acted":true}}]);
-    push(&mut initial, "P1", "field", json!({"id":"striker","card":"BP01-037"}));
+    push(
+        &mut initial,
+        "P1",
+        "field",
+        json!({"id":"striker","card":"BP01-037"}),
+    );
     let mut game = rules_game(&initial);
-    assert!(activate(&mut game, "CP03-077", 0).is_err(), "no enemy follower died yet");
+    assert!(
+        activate(&mut game, "CP03-077", 0).is_err(),
+        "no enemy follower died yet"
+    );
     attack(&mut game, "striker", "enemy");
     activate(&mut game, "CP03-077", 0).unwrap();
     let state = game.projection(View::Referee).unwrap();
