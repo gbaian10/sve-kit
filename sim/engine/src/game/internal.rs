@@ -101,8 +101,8 @@ mod player;
 mod player_stages;
 mod posture;
 mod processing;
-pub use processing::QuestionStage;
 use processing::Queued;
+pub use processing::{PlayPhase, QuestionStage};
 mod random_sample;
 mod resource;
 mod reveal;
@@ -654,6 +654,7 @@ pub(super) struct Execution {
     facts: fact_log::Facts,
     waiting: Option<(DecisionView, Wait)>,
     question_stage: Option<QuestionStage>,
+    play_phase: Option<PlayPhase>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -846,6 +847,7 @@ impl Game {
                 facts: fact_log::Facts::default(),
                 waiting: None,
                 question_stage: None,
+                play_phase: None,
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -1276,6 +1278,19 @@ impl Game {
         let execution = self.typed.as_ref()?;
         execution.waiting.as_ref()?;
         execution.question_stage
+    }
+
+    /// Lifecycle of the innermost card or ability play; raw procedure executions have no phase.
+    /// Runner diagnostics bypass viewer authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_play_phase;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_play_phase(&self) -> Option<PlayPhase> {
+        self.typed.as_ref()?.play_phase
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.

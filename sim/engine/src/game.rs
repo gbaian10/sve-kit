@@ -293,6 +293,11 @@ let _ = Game::internal_each_player_actor;
 use sve_engine::game::Game;
 let _ = Game::internal_question_stage;
 ```
+
+```compile_fail,E0599
+use sve_engine::game::Game;
+let _ = Game::internal_play_phase;
+```
 "
 )]
 #[derive(Clone, Serialize, Deserialize)]

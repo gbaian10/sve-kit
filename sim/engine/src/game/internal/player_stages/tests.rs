@@ -54,6 +54,7 @@ pub(in crate::game::internal) fn execution(game: &mut Game) -> Execution {
         fusion_material_pending: vec![],
         waiting: None,
         question_stage: None,
+        play_phase: None,
         destroy_guards: Vec::new(),
         look_viewers: BTreeMap::new(),
         player_receipt_links: BTreeMap::new(),
