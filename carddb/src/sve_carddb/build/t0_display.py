@@ -111,7 +111,9 @@ TABLES = (
             Column("card_id", Kind.ID),
             Column("region", Kind.TEXT, choices=("jp", "en")),
             Column("printing_id", Kind.ID),
-            Column("decision_id", Kind.ID),
+            # Staged decisions and current-format authored values are both accepted; exactly one is set.
+            Column("decision_id", Kind.ID, nullable=True),
+            Column("authored_source_id", Kind.ID, nullable=True),
         ),
         ("card_id", "region"),
         foreign_keys=(
@@ -123,6 +125,7 @@ TABLES = (
             ForeignKey(("card_id",), "card", ("id",)),
             ForeignKey(("printing_id",), "printing", ("id",)),
             ForeignKey(("decision_id",), "decision", ("id",)),
+            ForeignKey(("authored_source_id",), "source_record", ("id",)),
         ),
     ),
     Table(

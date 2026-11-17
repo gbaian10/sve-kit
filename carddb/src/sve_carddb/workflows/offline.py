@@ -29,6 +29,10 @@ from sve_carddb.domains.card_extras.reviewed_errata import (
 )
 from sve_carddb.domains.card_extras.reviewed_errata import read as read_errata
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
+from sve_carddb.domains.catalog.default_overrides import (
+    load_overrides,
+    populate_overrides,
+)
 from sve_carddb.domains.catalog.rules_name_adoptions import collab_hashes, evaluate
 from sve_carddb.domains.construction.adoption import Settings as ConstructionSettings
 from sve_carddb.domains.construction.adoption import prepare as prepare_construction
@@ -625,6 +629,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         include_translations=True,
     )
     errata_translations = load_errata_translations(authored_root(inputs.repo))
+    overrides = load_overrides(authored_root(inputs.repo))
     configuration = adoptions.configuration() | {
         "reviewed_errata": dict(errata_configuration(inputs.repo / "card-data")),
         "errata_translations": errata_translations.configuration(),
@@ -641,6 +646,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     }
     if construction is not None:
         configuration |= construction.configuration()
+    if overrides is not None:
+        configuration["catalog_overrides"] = [
+            [shard.path, shard.content_hash] for shard in overrides.shards
+        ]
     rulings = load_rulings(inputs.repo)
     configuration["ruling_references"] = {
         "profile": RULING_PROFILE,
@@ -742,6 +751,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             )
             # Provisional routes for the new unlisted printings extend the registry's.
             populate_routes(db)
+            override_report = populate_overrides(db, overrides, inputs.revision)
             mark("db: manual printings")
             link_result = (
                 None
@@ -1083,6 +1093,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         )
         report["ruling_references"] = ruling_report.payload()
         report["rules_name_adoptions"] = name_report.payload()
+        report["default_printing_overrides"] = override_report.payload()
         report["card_name_target_gaps"] = [
             {
                 "term_id": row["id"],

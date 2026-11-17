@@ -32,6 +32,15 @@ def _home_dates(db: Database) -> dict[tuple[str, str], str]:
     return dates
 
 
+def _approved(db: Database, override: Row) -> None:
+    """A staged override needs a confirmed decision; a current one its authored source."""
+    decision = override.values["decision_id"]
+    if (decision is None) == (override.values["authored_source_id"] is None):
+        raise ValueError("Default override needs one decision or authored source")
+    if decision is not None:
+        confirmed(db, text(override, "decision_id"))
+
+
 def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
     """Select within each card/region, placing uncoded rarity before PR."""
     ranks = {code: rank for rank, code in enumerate(RARITY_ORDER) if code != "pr"}
@@ -65,7 +74,7 @@ def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
     for key, candidates in sorted(groups.items()):
         override = overrides.get(key)
         if override is not None:
-            confirmed(db, text(override, "decision_id"))
+            _approved(db, override)
             selected = text(override, "printing_id")
             if selected not in {text(item, "id") for item in candidates}:
                 raise ValueError(

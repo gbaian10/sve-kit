@@ -6,15 +6,24 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import create_database
+from sve_carddb.domains.catalog.default_overrides import (
+    load_overrides,
+    populate_overrides,
+)
 from sve_carddb.domains.registry.rarity import populate
 from sve_carddb.domains.routes import build_index, populate_routes
 from sve_carddb.domains.routes.defaults import select_defaults
 from tests.support.schema_helpers import compile_t0
 
+from ...support.adoption_fixtures import envelope, record, write
 from ...support.build_db_fixtures import rows
 from ...support.routes_fixtures import base, printing
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pydantic import JsonValue
+
     from sve_carddb.build import Database
 
 
@@ -330,3 +339,139 @@ def test_override_cannot_cross_regions() -> None:
                 values["default_printing_override"] | {"printing_id": "en"},
             )
         assert select_defaults(db)[1].printing_id == "jp"
+
+
+def write_default(root: Path, printing_id: str, candidates: list[JsonValue]) -> None:
+    write(
+        root,
+        "catalog/overrides/defaults/001.yaml",
+        envelope(
+            [
+                record(
+                    "default_printing_adoption",
+                    {"card_id": "card", "region": "jp"},
+                    {"printing_id": printing_id, "candidates": candidates},
+                )
+            ],
+            entry="catalog/overrides",
+        ),
+    )
+
+
+def test_authored_override_applies_only_to_its_complete_candidate_set(
+    tmp_path: Path,
+) -> None:
+    assert load_overrides(tmp_path) is None
+    with create_database(compile_t0()) as empty:
+        assert populate_overrides(empty, None, "a" * 40).payload() == {
+            "applied": [],
+            "stale": [],
+        }
+    write_default(tmp_path, "sl", ["lg", "sl"])
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            printing(db, "lg", "LG", changes={"rarity_raw": "LG"})
+            printing(db, "sl", "SL", changes={"rarity_raw": "SL"})
+            populate(db)
+            db.delete("default_printing_override", {"card_id": "card", "region": "jp"})
+            report = populate_overrides(db, load_overrides(tmp_path), "a" * 40)
+        assert report.applied
+        assert not report.stale
+        result = select_defaults(db)[0]
+        assert (result.printing_id, result.method) == ("sl", "override")
+        source = db.rows("default_printing_override")[0].values["authored_source_id"]
+        assert db.select("source_record", ("id",), where={"id": source})
+        with db.transaction():
+            db.update(
+                "default_printing_override",
+                {"card_id": "card", "region": "jp"},
+                {"authored_source_id": None},
+            )
+        with pytest.raises(ValueError, match="one decision or authored source"):
+            select_defaults(db)
+
+
+def test_authored_override_with_a_changed_candidate_set_is_stale(
+    tmp_path: Path,
+) -> None:
+    write_default(tmp_path, "sl", ["sl"])
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            printing(db, "lg", "LG", changes={"rarity_raw": "LG"})
+            printing(db, "sl", "SL", changes={"rarity_raw": "SL"})
+            populate(db)
+            db.delete("default_printing_override", {"card_id": "card", "region": "jp"})
+            report = populate_overrides(db, load_overrides(tmp_path), "a" * 40)
+        assert report.stale
+        assert not report.applied
+        assert select_defaults(db)[0].printing_id == "lg"
+    write(
+        tmp_path,
+        "catalog/overrides/defaults/001.yaml",
+        envelope(
+            [
+                record(
+                    "default_printing_adoption",
+                    {"card_id": "missing", "region": "jp"},
+                    {"printing_id": "lg", "candidates": ["lg"]},
+                )
+            ],
+            entry="catalog/overrides",
+        ),
+    )
+    with create_database(compile_t0()) as db:
+        base(db)
+        with (
+            pytest.raises(ValueError, match="unknown card"),
+            db.transaction(),
+        ):
+            populate_overrides(db, load_overrides(tmp_path), "a" * 40)
+    write_default(tmp_path, "other", ["lg", "sl"])
+    with create_database(compile_t0()) as db:
+        base(db)
+        with (
+            pytest.raises(ValueError, match="outside its candidates"),
+            db.transaction(),
+        ):
+            populate_overrides(db, load_overrides(tmp_path), "a" * 40)
+
+
+def test_route_overrides_are_not_accepted_offline(tmp_path: Path) -> None:
+    write(
+        tmp_path,
+        "catalog/overrides/routes/001.yaml",
+        envelope(
+            [
+                record(
+                    "route_override_adoption",
+                    {"region": "jp", "route_key": "LG"},
+                    {
+                        "printing_id": "lg",
+                        "candidates": [
+                            {
+                                "printing_id": "lg",
+                                "card_id": "card",
+                                "region": "jp",
+                                "card_no": "LG",
+                                "card_no_state": "official",
+                                "variant_key": "standard",
+                            },
+                            {
+                                "printing_id": "sl",
+                                "card_id": "card",
+                                "region": "jp",
+                                "card_no": "LG",
+                                "card_no_state": "official",
+                                "variant_key": "foil",
+                            },
+                        ],
+                    },
+                )
+            ],
+            entry="catalog/overrides",
+        ),
+    )
+    with pytest.raises(ValueError, match="default printings only"):
+        load_overrides(tmp_path)
