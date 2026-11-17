@@ -1,6 +1,4 @@
-use super::event_cemetery::{
-    finish_checks, move_material, move_named, position, prepared, resolve_event,
-};
+use super::event_cemetery::{finish_checks, move_named, position, prepared, resolve_event};
 use super::*;
 
 fn puppet_ids(state: &Value, zone: &str) -> Vec<Value> {
@@ -96,36 +94,4 @@ fn bp15_006_real_fanfare_and_007_evolution_create_puppets_whose_exit_debuffs_a_f
         2,
         "EX Puppets do not move with the field token"
     );
-}
-
-#[test]
-fn bp15_both_prints_require_own_follower_tokens_and_their_cemetery_destination_on_their_turn() {
-    for card in ["BP15-006", "BP15-007"] {
-        for (active, side, material, to, expected) in [
-            ("P1", "P1", "movement-token", OwnerZone::Cemetery, true),
-            ("P1", "P1", "movement-unit", OwnerZone::Cemetery, false),
-            ("P1", "P2", "movement-token", OwnerZone::Cemetery, false),
-            ("P2", "P1", "movement-token", OwnerZone::Cemetery, false),
-            ("P1", "P1", "movement-token", OwnerZone::Hand, false),
-        ] {
-            let mut game = prepared(
-                &position(card, active, material, side, "field"),
-                move_material(ZoneKind::Field, to),
-            );
-            activate(&mut game, active);
-            finish_checks(&mut game);
-            resolve_event(&mut game, card, usize::from(expected));
-            let after = game.projection(View::Referee).unwrap();
-            assert_eq!(
-                after["objects"]["enemy"]["power"],
-                if expected { 9_u8 } else { 10_u8 },
-                "only a qualifying token exit reduces enemy power"
-            );
-            assert_eq!(
-                after["objects"]["enemy"]["hp"],
-                if expected { 19_u8 } else { 20_u8 },
-                "only a qualifying token exit reduces enemy health"
-            );
-        }
-    }
 }

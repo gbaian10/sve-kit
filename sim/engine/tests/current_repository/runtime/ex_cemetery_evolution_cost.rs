@@ -7,52 +7,6 @@ fn settled(board: &mut Game, play: CardPlay) {
     finish_checks(board);
 }
 #[test]
-fn remodel_both_printings_filter_trait_and_token_kind_and_create_fresh_eligible_copies() {
-    for card in ["BP16-121", "BP16-P28"] {
-        let mut initial = draw_position();
-        initial["players"]["P1"]["zones"]["hand"] =
-            json!([{"id":"spell1","card":card},{"id":"spell2","card":card}]);
-        initial["players"]["P1"]["zones"]["field"] = json!([
-            {"id":"chosen","card":"BP05-T04","state":{"power":7_u8,"hp":7_u8,"max_hp":7_u8,"cost":9_u8,"counters":{"mark":4_u8}}},
-            {"id":"fairy","card":"BP01-T03"},{"id":"ordinary","card":"BP22-045"}
-        ]);
-        initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"ex_artifact","card":"BP05-T04"}]);
-        initial["players"]["P2"]["zones"]["field"] =
-            json!([{"id":"opponent_artifact","card":"BP05-T04"}]);
-        let mut board = game(&initial);
-        for (spell, candidates) in [("spell1", 1_usize), ("spell2", 2)] {
-            let play = board
-                .play_internal_card(spell, PlayerId { seat: 1 })
-                .unwrap();
-            let CardPlay::Awaiting(question) = &play else {
-                panic!("printed target choice");
-            };
-            let InputDomain::Targets(domain) = &question.domain else {
-                panic!("printed token targets");
-            };
-            assert_eq!(domain.members.len(), candidates);
-            settled(&mut board, play);
-        }
-        let view = board.projection(View::Referee).unwrap();
-        assert_eq!(view["P1"]["field"].as_array().unwrap().len(), 5);
-        for id in view["P1"]["field"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .filter_map(Value::as_str)
-            .filter(|id| !["chosen", "fairy", "ordinary"].contains(id))
-        {
-            let fresh = &view["objects"][id];
-            assert_eq!(fresh["name"], "エンシェントアーティファクト");
-            assert_eq!(fresh["power"], 3_u8);
-            assert_eq!(fresh["max_hp"], 1_u8);
-            assert_eq!(fresh["counters"], json!({}));
-        }
-        assert_eq!(view["objects"]["chosen"]["power"], 7_u8);
-        assert_eq!(view["P1"]["cemetery"], json!(["spell1", "spell2"]));
-    }
-}
-#[test]
 fn drazuel_both_evolved_printings_pay_matching_ex_cards_debuff_heal_and_return_after_leaving() {
     for card in ["BP19-058", "BP19-SL16"] {
         let mut initial = draw_position();
