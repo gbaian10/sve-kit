@@ -34,7 +34,6 @@ describe("query codec", () => {
       stampOnly: false,
       serialOnly: false,
       unlistedOnly: false,
-      prOnly: false,
       sveOnly: false,
       errataOnly: false,
       restrictionsOnly: false,
@@ -211,17 +210,16 @@ describe("query codec", () => {
   })
 })
 
-it("round trips independent stamp, serial, unlisted and PR-only filters and rejects other flag values", () => {
+it("round trips independent stamp, serial and unlisted filters and rejects other flag values", () => {
   const state = {
     ...DEFAULT_QUERY,
     stampOnly: true,
     serialOnly: true,
     unlistedOnly: true,
-    prOnly: true,
   }
-  expect(querySearch(state)).toBe("?stamp=1&serial=1&unlisted=1&pr=1")
+  expect(querySearch(state)).toBe("?stamp=1&serial=1&unlisted=1")
   expect(parseQuery(formatQuery(state))).toEqual(state)
-  expect(activeFilterCount(state)).toBe(4)
+  expect(activeFilterCount(state)).toBe(3)
   expect(parseQuery(new URLSearchParams("unlisted=1"))).toEqual({
     ...DEFAULT_QUERY,
     unlistedOnly: true,
@@ -296,11 +294,12 @@ it("defaults a missing secondary sort and preserves an explicitly disabled one",
   expect(duplicate).not.toHaveProperty("secondaryOrder")
 })
 
-it("round trips the PR-only flag independently", () => {
-  const state = { ...DEFAULT_QUERY, prOnly: true }
-  expect(querySearch(state)).toBe("?pr=1")
-  expect(parseQuery(formatQuery(state))).toEqual(state)
-  expect(activeFilterCount(state)).toBe(1)
+it.each(["1", "0", "true", "unknown"])("ignores the removed pr=%s parameter", (value) => {
+  expect(parseQuery(new URLSearchParams({ pr: value }))).toEqual(DEFAULT_QUERY)
+  const state = parseQuery(new URLSearchParams({ pr: value, stamp: "1", sve: "1" }))
+  expect(state).toEqual({ ...DEFAULT_QUERY, stampOnly: true, sveOnly: true })
+  expect(querySearch(state)).toBe("?stamp=1&sve=1")
+  expect(activeFilterCount(state)).toBe(2)
 })
 
 it("round trips SVE-exclusive independently and intersects it with the other special filters", () => {
@@ -308,8 +307,8 @@ it("round trips SVE-exclusive independently and intersects it with the other spe
   expect(querySearch(state)).toBe("?sve=1")
   expect(parseQuery(formatQuery(state))).toEqual(state)
   expect(activeFilterCount(state)).toBe(1)
-  const both = { ...state, prOnly: true }
-  expect(querySearch(both)).toBe("?pr=1&sve=1")
+  const both = { ...state, stampOnly: true }
+  expect(querySearch(both)).toBe("?stamp=1&sve=1")
   expect(parseQuery(formatQuery(both))).toEqual(both)
   expect(activeFilterCount(both)).toBe(2)
   expect(parseQuery(new URLSearchParams("sve=yes"))).toEqual(DEFAULT_QUERY)

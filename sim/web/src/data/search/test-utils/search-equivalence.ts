@@ -71,7 +71,6 @@ export function compareSearchIndexes(actual: SearchApi, expected: SearchApi, edi
     { serialOnly: true },
     { stampOnly: true, serialOnly: true },
     { unlistedOnly: true },
-    { prOnly: true },
     { sveOnly: true },
     { errataOnly: true },
     { classes: ["synthetic-missing-class"] },
