@@ -63,9 +63,26 @@ fn distribution_program(with_recipient: bool) -> WellFormedCardProgram {
         body["x"] = json!({});
         body["cost"] = json!({"pp":"x"});
     }
-    let mut raw = program("activate", body).card().clone();
+    append_distribution(&program("activate", body))
+}
+
+pub(super) fn append_distribution(program: &WellFormedCardProgram) -> WellFormedCardProgram {
+    let mut raw = program.card().clone();
     let parameters = &mut raw.abilities[0].node.play.as_mut().unwrap().parameters;
-    let mut allocation = parameters.last().unwrap().clone();
+    let target = parameters.iter().rev().find(|decision| {
+        matches!(
+            decision.kind,
+            DecisionKind::PlayParameter {
+                slot: PlaySlot::Targets,
+                ..
+            }
+        ) && matches!(decision.domain, ChoiceDomain::Objects { .. })
+    });
+    assert!(
+        target.is_some(),
+        "the fixture has a formal object target before distribution"
+    );
+    let mut allocation = target.unwrap().clone();
     let reference = if let ChoiceDomain::Objects { binding, .. } = &allocation.domain {
         Some(*binding)
     } else {
@@ -160,7 +177,7 @@ fn declarations(game: &Game) -> Vec<PlayDeclaration> {
     result
 }
 
-fn shares() -> Answer {
+pub(super) fn shares() -> Answer {
     Answer::Distribution(vec![
         DamageShare {
             handle: 1,

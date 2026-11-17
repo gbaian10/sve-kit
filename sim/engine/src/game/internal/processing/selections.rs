@@ -14,7 +14,9 @@ pub(in crate::game::internal) fn discard_selection_round(execution: &mut Executi
     execution
         .play_declarations
         .retain(|declaration| match declaration {
-            PlayDeclaration::Recipients { .. } | PlayDeclaration::Distribution { .. } => false,
+            PlayDeclaration::Recipients { .. }
+            | PlayDeclaration::Materials { .. }
+            | PlayDeclaration::Distribution { .. } => false,
             PlayDeclaration::X { .. }
             | PlayDeclaration::Modes { .. }
             | PlayDeclaration::OptionalCost { .. } => true,

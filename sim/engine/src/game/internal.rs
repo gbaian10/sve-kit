@@ -1024,7 +1024,11 @@ impl Game {
                 (Wait::MaterialParameter(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;
                     rollback = execution.answer_origin(validated);
+                    let declaration = wait.play_declaration(actor, &members);
                     wait.bind(&mut execution, members);
+                    if let Some(declaration) = declaration {
+                        processing::record_play_declaration(&mut execution, declaration);
+                    }
                 }
                 (Wait::ExchangeRoute { affordable, .. }, Answer::Integer(route)) => {
                     let index = usize::try_from(route.0).map_err(invalid)?;

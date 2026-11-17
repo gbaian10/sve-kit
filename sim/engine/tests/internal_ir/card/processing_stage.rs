@@ -1,3 +1,6 @@
+#[path = "processing_stage/material_declarations.rs"]
+mod material_declarations;
+
 #[path = "processing_stage/recipient_declarations.rs"]
 mod recipient_declarations;
 
