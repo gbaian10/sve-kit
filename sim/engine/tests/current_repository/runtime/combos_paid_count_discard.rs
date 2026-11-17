@@ -85,10 +85,6 @@ fn drive(game: &mut Game, mut step: Option<CardPlay>, materials: &[&str], discar
     panic!("scenario did not settle");
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 fn sorted(zone: &Value) -> Vec<String> {
     let mut ids: Vec<_> = zone
         .as_array()

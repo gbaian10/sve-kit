@@ -88,10 +88,6 @@ fn activate(game: &mut Game, card: &str, line: u32, picks: &[&str]) {
     drive(game, Some(step), picks);
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 #[test]
 fn bp11_004_moves_itself_from_hand_then_grows_in_ex() {
     let mut initial = position();

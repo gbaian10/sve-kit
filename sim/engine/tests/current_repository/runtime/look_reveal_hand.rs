@@ -6,10 +6,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn deck(cards: &[(&str, &str)]) -> Value {
     Value::Array(
         cards
@@ -43,13 +39,6 @@ fn game(initial: &Value) -> Game {
         "look-reveal-hand",
     )
     .unwrap()
-}
-
-fn take(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |most| usize::try_from(most.0).unwrap())
-        .min(available)
 }
 
 fn finish(game: &mut Game, mut play: CardPlay) {

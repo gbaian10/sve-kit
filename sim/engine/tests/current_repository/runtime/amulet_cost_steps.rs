@@ -6,10 +6,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
@@ -21,13 +17,6 @@ fn position(card: &str) -> Value {
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
     initial
-}
-
-fn take(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |most| usize::try_from(most.0).unwrap())
-        .min(available)
 }
 
 fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {

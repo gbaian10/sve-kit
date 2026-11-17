@@ -121,15 +121,6 @@ fn bp13_008_both_modes_stack_before_the_damage_reads_the_attack() {
     assert_eq!(enemy_damage(&game), 7);
 }
 
-fn ability(card: &str, index: usize) -> AbilityId {
-    selection_with_rules().current[card]
-        .program
-        .card()
-        .abilities[index]
-        .node
-        .id
-}
-
 #[test]
 fn bp13_001_cemetery_activation_advances_bp13_002_which_finds_the_resolve() {
     let pairs = [

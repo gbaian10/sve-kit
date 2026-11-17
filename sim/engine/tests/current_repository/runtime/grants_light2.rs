@@ -5,32 +5,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-fn activated(number: &str) -> AbilityId {
-    selection().current[number]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|ability| ability.node.kind == AbilityKind::Activated)
-        .unwrap()
-        .node
-        .id
-}
-
-fn rules_game(initial: &Value) -> Game {
-    Game::from_selected_effects(
-        selection_with_rules().clone(),
-        initial,
-        &Value::Null,
-        &Value::Null,
-        "light-grants",
-    )
-    .unwrap()
-}
-
 fn pass_quick(game: &mut Game) {
     for _ in 0_u8..4 {
         finish_checks(game);
@@ -53,11 +27,6 @@ fn position(card: &str) -> Value {
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"enemy","card":"BP01-037","state":{"acted":true}}]);
     initial
-}
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
 }
 fn finish(game: &mut Game, mut step: CardPlay, target: Option<&str>) {
     while let CardPlay::Awaiting(q) = step {
@@ -116,35 +85,6 @@ fn keyword(view: &Value, object: &str, keyword: &str) -> bool {
         .as_array()
         .unwrap()
         .contains(&json!(keyword))
-}
-fn own_followers() -> Selector {
-    let mut selector = subjects();
-    if let Selector::Zone { players, .. } = &mut selector {
-        players.relation = PlayerRelation::SelfPlayer;
-        players.cardinality = Cardinality {
-            minimum: Nat(1),
-            maximum: Some(Nat(1)),
-        };
-    }
-    Selector::Difference {
-        input: Box::new(selector),
-        except: Box::new(Selector::Objects {
-            objects: vec![ObjectOperand::SourceHolder {}],
-        }),
-    }
-}
-fn damage_own() -> Action {
-    Action::Damage {
-        recipients: RecipientSet::Objects {
-            objects: own_followers(),
-        },
-        amount: DamageAmount::Uniform {
-            amount: Expr::Literal(Int(2)),
-        },
-        flags: DamageFlags::Ability,
-        source: ObjectView::SourceInformation {},
-        batch: BatchPolicy::Instruction {},
-    }
 }
 fn produce(game: &mut Game) {
     let step = game

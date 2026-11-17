@@ -4,7 +4,7 @@
 )]
 use super::event_cemetery::finish_checks;
 use super::*;
-use sve_engine::game::internal::{DecisionView, SearchAnswer};
+use sve_engine::game::internal::SearchAnswer;
 
 fn initial() -> Value {
     json!({"history":"explicit","turn":{"active":"P1","first_player":"P1","phase":"main","elapsed_turns":{"P1":3,"P2":3}},"players":{
@@ -13,13 +13,6 @@ fn initial() -> Value {
             "deck":[{"id":"draw","card":"BP01-171"},{"id":"padding","card":"BP01-171"}]}},
         "P2":{"leader":{"class":"ニュートラル","life":20},"pp":{"current":10,"max":10},"ep":0,"sep":0,"zones":{}}
     }})
-}
-
-fn waiting(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(question) = play else {
-        panic!("printed choice")
-    };
-    question
 }
 
 fn pending(board: &mut Game, number: &str) -> CardPlay {

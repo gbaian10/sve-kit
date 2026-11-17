@@ -94,12 +94,6 @@ const CASES: &[Case] = &[
     ),
     ("BP03-062", "activate", "フォロワー", 3, "ニュートラル", ""),
 ];
-fn face(name: &str, kind: &str, cost: u64, class: &str, traits: &[&str]) -> Value {
-    let follower = kind == "フォロワー";
-    json!({"name":name,"card_type":kind,"card_class":class,"cost":cost.to_string(),
-        "power":if follower {"2"} else {"-"},"hp":if follower {"10"} else {"-"},
-        "traits":traits,"text":Value::Null,"sections":[]})
-}
 fn prepared() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgram>) {
     static PREPARED: OnceLock<(SelectedEffects, BTreeMap<String, WellFormedCardProgram>)> =
         OnceLock::new();

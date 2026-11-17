@@ -43,10 +43,6 @@ fn declare_spell(game: &mut Game) {
     );
 }
 
-fn history(game: &Game, viewer: Viewer) -> Vec<PlayerEvent> {
-    game.events(viewer, None).unwrap().cloned().collect()
-}
-
 fn assert_completed_spell_history(events: &[PlayerEvent]) {
     for expected in [ActionKind::Play, ActionKind::Resolve] {
         assert_eq!(events.iter().filter(|event| matches!(&event.kind, EventKind::Action(action) if action.kind == expected)).count(), 1,

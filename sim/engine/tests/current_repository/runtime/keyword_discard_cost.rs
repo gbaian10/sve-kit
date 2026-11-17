@@ -6,23 +6,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
-fn most(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |n| usize::try_from(n.0).unwrap())
-        .min(available)
-}
-
 /// Answers printed questions with every offered member, up to each bound.
 fn answer(game: &mut Game, mut step: CardPlay) -> CardPlay {
     while let CardPlay::Awaiting(q) = step {

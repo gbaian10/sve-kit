@@ -5,10 +5,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn pending(game: &mut Game, card: &str) -> CardPlay {
     let q = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &q.domain else {

@@ -1,9 +1,5 @@
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 #[test]
 fn bp03_057_assail_can_attack_a_standing_follower() {
     let mut initial = draw_position();

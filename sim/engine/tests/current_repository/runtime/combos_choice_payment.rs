@@ -78,10 +78,6 @@ fn play(game: &mut Game, modes: &[u64], picks: &[&str]) {
     panic!("scenario did not settle");
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 #[test]
 fn bp22_062_pays_five_for_the_second_mode_and_grants_assail() {
     let mut initial = position();

@@ -4,12 +4,6 @@
     reason = "Unexpected decisions invalidate these game scenarios."
 )]
 use super::*;
-use alloc::collections::BTreeSet;
-use sve_engine::game::internal::{SearchAnswer, SearchDomain};
-
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
 
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
@@ -20,23 +14,6 @@ fn game(initial: &Value) -> Game {
         "unlock-batch-02",
     )
     .unwrap()
-}
-
-fn titled(mut initial: Value) -> Value {
-    initial["players"]["P1"]["construction"] = json!("title");
-    initial["players"]["P1"]["title_code"] = json!("princess_connect_re_dive");
-    initial
-}
-
-fn in_hand(card: &str) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
-    initial["players"]["P1"]["zones"]["deck"] = json!([
-        {"id":"first","card":"BP01-171"},{"id":"second","card":"BP01-171"},
-        {"id":"third","card":"BP01-171"}
-    ]);
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
-    initial
 }
 
 fn on_field(card: &str) -> Value {
@@ -50,42 +27,6 @@ fn evolving(base: &str, form: &str) -> Value {
     let mut initial = on_field(base);
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
     initial
-}
-
-fn take(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |most| usize::try_from(most.0).unwrap())
-        .min(available)
-}
-
-/// Takes the first legal cards, one per printed name, group by group.
-fn search(domain: &SearchDomain) -> SearchAnswer {
-    let mut names = BTreeSet::new();
-    let mut pick = |handles: &[u64], cardinality: &Cardinality| -> Vec<u64> {
-        let limit = take(cardinality, handles.len());
-        handles
-            .iter()
-            .copied()
-            .filter(|handle| {
-                let name = &domain.cards[usize::try_from(*handle).unwrap()].name;
-                names.insert(name.clone())
-            })
-            .take(limit)
-            .collect()
-    };
-    match &domain.groups {
-        None => SearchAnswer::Ungrouped(pick(
-            &domain.cards.iter().map(|card| card.handle).collect::<Vec<_>>(),
-            &domain.cardinality,
-        )),
-        Some(groups) => SearchAnswer::Grouped(
-            groups
-                .iter()
-                .map(|group| pick(&group.handles, &group.cardinality))
-                .collect(),
-        ),
-    }
 }
 
 fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) -> CardPlay {
@@ -153,19 +94,6 @@ fn play_with(game: &mut Game, id: &str, modes: &[u64]) {
 
 fn play(game: &mut Game) {
     play_with(game, "source", &[1]);
-}
-
-fn definition(card: &str, kind: AbilityKind, nth: usize) -> AbilityId {
-    selection_with_rules().current[card]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .filter(|ability| ability.node.kind == kind)
-        .nth(nth)
-        .unwrap()
-        .node
-        .id
 }
 
 fn evolve(game: &mut Game) {

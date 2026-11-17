@@ -75,11 +75,6 @@ const CONTROLS: [Companion; 7] = [
 ];
 // Collab printings evolve from a base named after their card's effect record printing.
 const FORMS: [&str; 4] = ["BP04-085", "BP22-079", "CP04-046", "BP21-095"];
-fn append(snapshot: &mut String, input: &mut Value, number: &str, face: &Value) {
-    snapshot.push_str(&json!({"number":number,"faces":[face]}).to_string());
-    snapshot.push('\n');
-    input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
-}
 fn selected() -> &'static SelectedEffects {
     static READY: OnceLock<SelectedEffects> = OnceLock::new();
     READY.get_or_init(|| {

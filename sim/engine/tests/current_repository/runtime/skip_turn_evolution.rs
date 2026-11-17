@@ -5,15 +5,6 @@ fn finish(game: &mut Game) {
         game.resume_internal_card().unwrap();
     }
 }
-fn next_turn(game: &mut Game) {
-    game.internal_rule_action(&json!({"do":"end-phase"}))
-        .unwrap();
-    if game.internal_quick_choice().unwrap().is_none() {
-        game.internal_rule_action(&json!({"do":"guard-act","select":[]}))
-            .unwrap();
-    }
-    damage_prevent::pass_quick(game);
-}
 #[test]
 fn bp05_086_whole_card_can_evolve_by_skipping_its_next_turn_instead_of_four_pp() {
     let mut initial = draw_position();

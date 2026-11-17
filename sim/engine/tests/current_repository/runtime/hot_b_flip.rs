@@ -46,12 +46,6 @@ fn board(initial: &Value) -> Game {
     )
     .unwrap()
 }
-fn waiting(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(question) = play else {
-        panic!("printed choice")
-    };
-    question
-}
 fn choose(board: &mut Game, question: &DecisionView, handles: Vec<u64>) -> CardPlay {
     board
         .answer_internal_card(question.actor, question.token, Answer::Targets(handles))

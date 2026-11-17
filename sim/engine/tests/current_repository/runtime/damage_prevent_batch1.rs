@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn rules_game(initial: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),
@@ -376,39 +372,6 @@ fn bp18_t10_both_real_token_printings_create_their_complete_named_clone_at_end_p
             game.internal_pending_choice().unwrap().is_none(),
             "a token arriving during end phase does not replay that phase's start"
         );
-    }
-}
-
-fn advance_entry() -> Action {
-    Action::Move {
-        objects: Selector::Zone {
-            players: PlayerSet {
-                relation: PlayerRelation::SelfPlayer,
-                relative_to: PlayerRef::Controller {},
-                text_quantifier: TextQuantifier::All,
-                cardinality: Cardinality {
-                    minimum: Nat(1),
-                    maximum: Some(Nat(1)),
-                },
-            },
-            zone: ZoneKind::Evolve,
-            view: SelectionView::Current {},
-            binding: Binding::new(50, ScopeId(1)),
-            predicate: Box::new(Expr::Literal(Bool(true))),
-        },
-        movement: MoveSpec {
-            to: MoveDestination::Shared {
-                zone: ZoneRef {
-                    player: PlayerRef::Controller {},
-                    kind: ZoneKind::Field,
-                },
-            },
-            initial_posture: None,
-            entry_effects: vec![],
-            position: None,
-            order: None,
-        },
-        reason: MoveReason::Put,
     }
 }
 

@@ -5,10 +5,6 @@
 
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn play_and_resolve_fanfare(game: &mut Game, printing: &str) {
     assert!(matches!(
         game.play_internal_card("source", actor()).unwrap(),

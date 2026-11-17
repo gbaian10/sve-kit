@@ -5,17 +5,6 @@
 )]
 use super::*;
 
-fn printings(number: &str) -> Vec<String> {
-    let selected = selection_with_rules();
-    let identity = &selected.current[number].card_id;
-    selected
-        .current
-        .iter()
-        .filter(|(_, card)| &card.card_id == identity)
-        .map(|(printing, _)| printing.clone())
-        .collect()
-}
-
 fn position() -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = json!([]);
@@ -25,17 +14,6 @@ fn position() -> Value {
         {"id":"d3","card":"BP01-171"},{"id":"d4","card":"BP01-171"}
     ]);
     initial
-}
-
-fn seeded(initial: &Value, seed: &str) -> Game {
-    Game::from_selected_effects(
-        selection_with_rules().clone(),
-        initial,
-        &Value::Null,
-        &Value::Null,
-        seed,
-    )
-    .unwrap()
 }
 
 fn finish(game: &mut Game, mut play: CardPlay, mode: usize, reroll: bool) -> Vec<DieFace> {

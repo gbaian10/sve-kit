@@ -17,12 +17,6 @@ fn position(card: &str) -> Value {
     initial
 }
 
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 fn finish(game: &mut Game, mut step: CardPlay) {
     while let CardPlay::Awaiting(question) = step {
         let answer = if let InputDomain::Targets(domain) = &question.domain {

@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn cards(prefix: &str, card: &str, count: usize) -> Vec<Value> {
     (0..count)
         .map(|n| json!({"id":format!("{prefix}{n}"),"card":card}))
@@ -123,17 +119,6 @@ fn with(initial: &mut Value, zone: &str, extra: Vec<Value>) {
         *cards = json!([]);
     }
     cards.as_array_mut().unwrap().extend(extra);
-}
-
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
-fn keyword(state: &Value, id: &str, name: &str) -> bool {
-    state["objects"][id]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!(name))
 }
 
 #[test]

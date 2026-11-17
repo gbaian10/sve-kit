@@ -6,29 +6,6 @@ use super::event_cemetery::finish_checks;
 use super::event_subject_capture::prepared_program;
 use super::*;
 
-fn discard_all() -> WellFormedCardProgram {
-    producer(Action::Discard {
-        player: PlayerRef::Controller {},
-        mode: DiscardMode::All {
-            eligible: Selector::Zone {
-                players: PlayerSet {
-                    relation: PlayerRelation::SelfPlayer,
-                    relative_to: PlayerRef::Controller {},
-                    cardinality: Cardinality {
-                        minimum: Nat(1),
-                        maximum: Some(Nat(1)),
-                    },
-                    text_quantifier: TextQuantifier::All,
-                },
-                zone: ZoneKind::Hand,
-                view: SelectionView::Current {},
-                binding: Binding::new(400, ScopeId(1)),
-                predicate: Box::new(Expr::Literal(Bool(true))),
-            },
-        },
-    })
-}
-
 fn initial(card: &str, hand: bool) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = if hand {

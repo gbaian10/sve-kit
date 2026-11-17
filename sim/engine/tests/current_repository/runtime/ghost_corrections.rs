@@ -5,21 +5,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
-fn in_hand(card: &str) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
-    initial["players"]["P1"]["zones"]["deck"] = json!([
-        {"id":"first","card":"BP01-171"},{"id":"second","card":"BP01-171"},
-        {"id":"third","card":"BP01-171"}
-    ]);
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
-    initial
-}
-
 fn on_field(card: &str) -> Value {
     let mut initial = in_hand(card);
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

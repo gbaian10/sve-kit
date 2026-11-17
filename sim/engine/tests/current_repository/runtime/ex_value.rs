@@ -6,10 +6,6 @@
 //! Numeric modifications of EX followers, carried onto the field when played (CR 4.8.3.3).
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn game(initial: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),

@@ -7,12 +7,6 @@ use super::followup_materials::{board, declare};
 use super::*;
 use sve_engine::game::internal::{DamageShare, DecisionView};
 
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 fn evolve(game: &mut Game) {
     assert_eq!(
         game.internal_rule_action(

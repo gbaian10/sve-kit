@@ -5,10 +5,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn body_game(initial: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),

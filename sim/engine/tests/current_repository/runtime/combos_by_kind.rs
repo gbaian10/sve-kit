@@ -18,10 +18,6 @@ fn loaded(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn state(game: &Game) -> Value {
-    game.projection(View::Referee).unwrap()
-}
-
 /// Answers every question; the leader-or-follower target picks `pick` (None is the leader).
 /// Returns the cards offered by that target question, the leader as None.
 fn drive(game: &mut Game, mut step: Option<CardPlay>, pick: Option<&str>) -> Vec<Option<String>> {

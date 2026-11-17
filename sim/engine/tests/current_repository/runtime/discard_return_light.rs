@@ -31,18 +31,6 @@ fn board(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn activation(number: &str) -> AbilityId {
-    selection_with_rules().current[number]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|ability| ability.node.kind == AbilityKind::Activated)
-        .unwrap()
-        .node
-        .id
-}
-
 #[expect(
     clippy::wildcard_enum_match_arm,
     reason = "These printed cards ask only payment, one material, a target, or May."

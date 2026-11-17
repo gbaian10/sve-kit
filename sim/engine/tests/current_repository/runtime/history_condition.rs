@@ -6,10 +6,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn in_hand(card: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
@@ -26,21 +22,6 @@ fn on_field(card: &str) -> Value {
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":card}]);
     initial
-}
-
-fn push(initial: &mut Value, player: &str, zone: &str, object: Value) {
-    let slot = &mut initial["players"][player]["zones"][zone];
-    if slot.is_null() {
-        *slot = json!([]);
-    }
-    slot.as_array_mut().unwrap().push(object);
-}
-
-fn take(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |most| usize::try_from(most.0).unwrap())
-        .min(available)
 }
 
 fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {

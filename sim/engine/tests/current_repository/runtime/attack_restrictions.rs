@@ -72,17 +72,6 @@ fn bp02_107_all_printings_count_opposing_followers_and_only_lock_leader_attacks(
     }
 }
 
-fn pass_quick(game: &mut Game) {
-    for _ in 0_u8..4 {
-        let Some(q) = game.internal_quick_choice().unwrap() else {
-            return;
-        };
-        game.answer_internal_card(q.actor, q.token, Answer::Quick(None))
-            .unwrap();
-    }
-    panic!("Quick did not finish");
-}
-
 fn finish_turn(game: &mut Game) {
     assert_eq!(
         game.internal_rule_action(&json!({"do":"end-phase"}))

@@ -5,10 +5,6 @@
 use super::*;
 use sve_engine::game::internal::DecisionView;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(number: &str) -> Value {
     let mut state = draw_position();
     state["players"]["P1"]["leader"]["life"] = json!(10_u8);

@@ -1,14 +1,8 @@
 #![expect(
     clippy::panic,
-    clippy::wildcard_enum_match_arm,
     reason = "Unexpected decisions invalidate these game scenarios."
 )]
 use super::*;
-use sve_engine::game::internal::SearchAnswer;
-
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
 
 fn position(card: &str) -> Value {
     let mut initial = draw_position();
@@ -21,81 +15,6 @@ fn position(card: &str) -> Value {
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
     initial
-}
-
-fn take(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |most| usize::try_from(most.0).unwrap())
-        .min(available)
-}
-
-fn finish_with(game: &mut Game, mut play: CardPlay, mode: u64) {
-    while let CardPlay::Awaiting(question) = play {
-        let answer = match &question.domain {
-            InputDomain::WardEntry { .. } => Answer::WardEntry(false),
-            InputDomain::OptionalCost => Answer::OptionalCost(true),
-            InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(mode)]),
-            InputDomain::Search(domain) => Answer::Search(domain.groups.as_ref().map_or_else(
-                || {
-                    SearchAnswer::Ungrouped(
-                        domain
-                            .cards
-                            .iter()
-                            .take(take(&domain.cardinality, domain.cards.len()))
-                            .map(|card| card.handle)
-                            .collect(),
-                    )
-                },
-                |groups| {
-                    // Each printed group greedily takes cards no earlier group used.
-                    let mut used = Vec::new();
-                    SearchAnswer::Grouped(
-                        groups
-                            .iter()
-                            .map(|group| {
-                                let picked: Vec<u64> = group
-                                    .handles
-                                    .iter()
-                                    .copied()
-                                    .filter(|handle| !used.contains(handle))
-                                    .take(take(&group.cardinality, group.handles.len()))
-                                    .collect();
-                                used.extend(picked.iter().copied());
-                                picked
-                            })
-                            .collect(),
-                    )
-                },
-            )),
-            InputDomain::Order(cards) => {
-                Answer::Order(cards.iter().map(|card| card.handle).collect())
-            }
-            InputDomain::CostMaterials(domain) => Answer::CostMaterials(
-                domain
-                    .members
-                    .iter()
-                    .take(take(&domain.cardinality, domain.members.len()))
-                    .map(|member| member.handle)
-                    .collect(),
-            ),
-            InputDomain::Targets(domain) => Answer::Targets(
-                domain
-                    .members
-                    .iter()
-                    .take(take(&domain.cardinality, domain.members.len()))
-                    .map(|member| member.handle)
-                    .collect(),
-            ),
-            InputDomain::Integer(bounds) => {
-                Answer::Integer(bounds.maximum.unwrap_or(bounds.minimum))
-            }
-            other => panic!("unexpected decision: {other:?}"),
-        };
-        play = game
-            .answer_internal_card(question.actor, question.token, answer)
-            .unwrap();
-    }
 }
 
 fn triggers_with(game: &mut Game, mode: u64) {

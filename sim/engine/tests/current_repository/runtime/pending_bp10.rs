@@ -6,21 +6,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
-fn in_hand(card: &str) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
-    initial["players"]["P1"]["zones"]["deck"] = json!([
-        {"id":"first","card":"BP01-171"},{"id":"second","card":"BP01-171"},
-        {"id":"third","card":"BP01-171"}
-    ]);
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
-    initial
-}
-
 fn on_field(card: &str) -> Value {
     let mut initial = in_hand(card);
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -35,25 +20,12 @@ fn in_cemetery(card: &str) -> Value {
     initial
 }
 
-fn cards(prefix: &str, card: &str, count: usize) -> Vec<Value> {
-    (0..count)
-        .map(|i| json!({"id":format!("{prefix}{i}"),"card":card}))
-        .collect()
-}
-
 fn push(initial: &mut Value, zone: &str, extra: Vec<Value>) {
     let slot = &mut initial["players"]["P1"]["zones"][zone];
     if slot.is_null() {
         *slot = json!([]);
     }
     slot.as_array_mut().unwrap().extend(extra);
-}
-
-fn take(cardinality: &Cardinality, available: usize) -> usize {
-    cardinality
-        .maximum
-        .map_or(available, |most| usize::try_from(most.0).unwrap())
-        .min(available)
 }
 
 fn finish_with(game: &mut Game, mut play: CardPlay, modes: &[u64]) {
@@ -142,23 +114,6 @@ fn evolve(game: &mut Game) {
     triggers_with(game, &[1]);
 }
 
-/// The `index`-th printed activated ability of the card (0-based).
-fn printed_activation(card: &str, index: usize) -> AbilityId {
-    selection().current[card]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .filter(|a| {
-            a.node.kind == AbilityKind::Activated
-                && matches!(a.node.source.origin, AbilityOrigin::Printed { .. })
-        })
-        .nth(index)
-        .unwrap()
-        .node
-        .id
-}
-
 fn activate(game: &mut Game, card: &str, index: usize) {
     let step = game
         .activate_internal_card("source", printed_activation(card, index), actor())
@@ -194,13 +149,6 @@ fn named(state: &Value, zone: &Value, name: &str) -> Vec<String> {
         .map(|id| id.as_str().unwrap().to_owned())
         .filter(|id| state["objects"][id]["name"] == name)
         .collect()
-}
-
-fn has_keyword(state: &Value, id: &str, keyword: &str) -> bool {
-    state["objects"][id]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!(keyword))
 }
 
 #[test]

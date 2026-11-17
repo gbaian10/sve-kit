@@ -5,16 +5,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 fn answer(game: &mut Game, mut step: CardPlay, chosen: &str) {
     while let CardPlay::Awaiting(q) = step {
         let response = match &q.domain {

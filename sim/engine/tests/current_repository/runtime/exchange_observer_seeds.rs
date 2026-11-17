@@ -12,12 +12,6 @@ fn question(play: CardPlay) -> DecisionView {
     question
 }
 
-fn checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
-}
-
 #[expect(
     clippy::panic,
     reason = "Pending card selection is part of the printed scenario protocol."

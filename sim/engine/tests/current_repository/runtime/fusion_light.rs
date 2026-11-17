@@ -7,18 +7,6 @@ use super::*;
 
 const PLAYER: PlayerId = PlayerId { seat: 1 };
 
-fn line(number: &str, printed: u32) -> AbilityId {
-    selection().current[number]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|ability| ability.source.line == printed)
-        .unwrap()
-        .node
-        .id
-}
-
 fn finish(board: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {

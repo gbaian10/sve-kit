@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn choose(game: &mut Game, play: CardPlay, index: usize) {
     let CardPlay::Awaiting(question) = play else {
         panic!("the token name must be chosen during resolution");

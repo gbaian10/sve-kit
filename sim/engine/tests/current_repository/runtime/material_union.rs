@@ -46,13 +46,6 @@ fn game(initial: &Value) -> Game {
     game
 }
 
-fn awaiting(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(question) = play else {
-        panic!("expected question")
-    };
-    question
-}
-
 fn material_answer(game: &mut Game, question: &DecisionView, selected: u64) -> Answer {
     let InputDomain::CostMaterials(domain) = &question.domain else {
         panic!("materials")

@@ -287,12 +287,6 @@ fn load_companions(game: &mut Game) {
     }
 }
 
-fn keyword(state: &Value, id: &str, name: &str) -> bool {
-    state["objects"][id]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!(name))
-}
 fn feed(game: &mut Game, card: &str, index: usize) -> Activation {
     let ability = fixture().current[card]
         .program

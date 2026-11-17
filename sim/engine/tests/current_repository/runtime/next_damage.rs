@@ -5,10 +5,6 @@
 use super::event_cemetery::finish_checks;
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn finish(game: &mut Game, mut play: CardPlay, mode: usize) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {

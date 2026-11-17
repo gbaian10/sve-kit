@@ -18,15 +18,6 @@ fn rules_game(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn ability(card: &str, index: usize) -> AbilityId {
-    selection_with_rules().current[card]
-        .program
-        .card()
-        .abilities[index]
-        .node
-        .id
-}
-
 /// Picks the named EX cards, declines Ward entry, and resolves entered tokens' own fanfares.
 fn finish(game: &mut Game, mut step: Option<CardPlay>, picks: &[&str]) {
     loop {

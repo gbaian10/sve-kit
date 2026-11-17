@@ -18,15 +18,6 @@ fn rules_game(initial: &Value) -> Game {
     .unwrap()
 }
 
-fn ability(card: &str, index: usize) -> AbilityId {
-    selection_with_rules().current[card]
-        .program
-        .card()
-        .abilities[index]
-        .node
-        .id
-}
-
 fn train(card: &str, crew: &Value) -> Game {
     let mut initial = draw_position();
     let mut field = vec![json!({"id":"train","card":card})];

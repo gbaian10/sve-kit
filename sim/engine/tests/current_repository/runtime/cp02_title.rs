@@ -5,11 +5,6 @@
 use super::*;
 use sve_engine::game::internal::{Answer, CardPlay, InputDomain, ResumeStage};
 use sve_engine::game::{Game, View};
-use sve_engine::ir::PlayerId;
-
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
 
 fn position(card: &str, life: u8) -> Value {
     let mut initial = setup("P1", "P1", [life, 20]);

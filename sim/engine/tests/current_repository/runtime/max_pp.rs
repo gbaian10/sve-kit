@@ -163,10 +163,6 @@ fn bp01_079_keeps_assail_against_an_active_enemy_follower() {
     assert_eq!(attack.outcome, "resolved");
 }
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);

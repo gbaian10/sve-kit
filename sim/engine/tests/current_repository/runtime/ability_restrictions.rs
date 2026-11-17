@@ -15,12 +15,6 @@ fn position(initial: &Value) -> Game {
     )
     .unwrap()
 }
-fn question(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(q) = play else {
-        panic!("printed question")
-    };
-    q
-}
 fn ability(number: &str, line: u32) -> AbilityId {
     selection_with_rules().current[number]
         .program

@@ -256,17 +256,6 @@ fn fixture(initial: &Value) -> Game {
     }
     game
 }
-fn activated(number: &str) -> AbilityId {
-    selection().current[number]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .find(|ability| ability.node.kind == AbilityKind::Activated)
-        .unwrap()
-        .node
-        .id
-}
 fn accept(game: &mut Game, mut play: CardPlay) -> CardPlay {
     while let CardPlay::Awaiting(question) = &play {
         let answer = if matches!(question.domain, InputDomain::WardEntry { .. }) {
@@ -365,12 +354,6 @@ fn evolution_position(form: &str) -> Value {
         json!([{"id":"source","card":format!("set-base-{form}")}]);
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
     initial
-}
-fn keyword(state: &Value, id: &str, name: &str) -> bool {
-    state["objects"][id]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!(name))
 }
 #[test]
 fn bp05_068_damages_both_sides_and_checks_galmieux_before_its_second_sweep() {

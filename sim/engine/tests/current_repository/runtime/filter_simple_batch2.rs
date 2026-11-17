@@ -14,21 +14,6 @@ fn awaiting(play: CardPlay) -> DecisionView {
     };
     question
 }
-fn accept(game: &mut Game, mut play: CardPlay) -> CardPlay {
-    while let CardPlay::Awaiting(question) = &play {
-        let answer = if matches!(question.domain, InputDomain::OptionalCost) {
-            Answer::OptionalCost(true)
-        } else if matches!(question.domain, InputDomain::WardEntry { .. }) {
-            Answer::WardEntry(false)
-        } else {
-            break;
-        };
-        play = game
-            .answer_internal_card(question.actor, question.token, answer)
-            .unwrap();
-    }
-    play
-}
 fn choose(game: &mut Game, play: CardPlay, card: &str) -> CardPlay {
     let question = awaiting(play);
     let (InputDomain::Targets(domain) | InputDomain::CostMaterials(domain)) = &question.domain

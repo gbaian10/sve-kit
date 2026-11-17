@@ -4,10 +4,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn cards(prefix: &str, card: &str, count: usize) -> Vec<Value> {
     (0..count)
         .map(|n| json!({"id":format!("{prefix}{n}"),"card":card}))

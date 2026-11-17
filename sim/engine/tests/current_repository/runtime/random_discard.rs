@@ -5,10 +5,6 @@
 )]
 use super::*;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn game(initial: &Value, random: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),

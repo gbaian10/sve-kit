@@ -4,7 +4,6 @@
     reason = "Unexpected questions invalidate the printed material scenarios."
 )]
 use super::*;
-use sve_engine::game::internal::DecisionView;
 
 fn prepared() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
@@ -98,12 +97,6 @@ fn cp04_036_only_acts_a_matching_follower_and_deals_distinct_damage_to_its_leade
     assert_eq!(state["P2"]["leader"]["life"], 18_u8);
 }
 
-fn awaiting(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(question) = play else {
-        panic!("expected question")
-    };
-    question
-}
 #[test]
 fn cp04_106_acts_itself_and_one_other_card_before_moving_the_target_to_its_owners_ex() {
     let mut initial = draw_position();

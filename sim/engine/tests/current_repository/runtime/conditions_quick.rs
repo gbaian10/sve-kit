@@ -1,21 +1,5 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing question fails the scenario immediately."
-)]
-
 use super::*;
-use sve_engine::game::internal::{DamageShare, DecisionView};
-
-fn opposite(seat: &str) -> &str {
-    if seat == "P1" { "P2" } else { "P1" }
-}
-
-fn awaiting(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(question) = play else {
-        panic!("expected question")
-    };
-    question
-}
+use sve_engine::game::internal::DamageShare;
 
 #[test]
 fn bp01_099_uses_maximum_pp_and_hits_both_fields_at_the_threshold() {

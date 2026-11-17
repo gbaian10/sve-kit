@@ -5,10 +5,6 @@
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn position(card: &str) -> Value {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
@@ -18,12 +14,6 @@ fn position(card: &str) -> Value {
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"enemy","card":"BP01-037","state":{"acted":true}}]);
     initial
-}
-
-fn finish_checks(game: &mut Game) {
-    while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
-        game.resume_internal_card().unwrap();
-    }
 }
 
 fn finish(game: &mut Game, mut step: CardPlay) {

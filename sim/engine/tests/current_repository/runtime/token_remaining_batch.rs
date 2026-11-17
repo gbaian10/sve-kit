@@ -6,10 +6,6 @@ use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 
-const fn actor() -> PlayerId {
-    PlayerId { seat: 1 }
-}
-
 fn batch_game(initial: &Value) -> Game {
     Game::from_selected_effects(
         selection_with_rules().clone(),

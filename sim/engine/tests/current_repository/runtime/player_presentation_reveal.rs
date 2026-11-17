@@ -6,7 +6,7 @@
 use super::player_presentation::{SEATS, answer, declare, is_action, kinds, present, question};
 use super::*;
 use sve_engine::game::player::events::{ActionKind, PlayerEvent, PresentationCursor};
-use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind, Viewer};
+use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind};
 
 const DISTINCT: [&str; 9] = [
     "BP19-P31", "BP01-176", "BP01-170", "BP01-171", "BP01-174", "BP01-177", "BP01-179", "BP19-115",
@@ -41,10 +41,6 @@ fn zerael() -> Game {
     .unwrap();
     game.advance_player_input();
     game
-}
-
-fn history(game: &Game, viewer: Viewer) -> Vec<PlayerEvent> {
-    game.events(viewer, None).unwrap().cloned().collect()
 }
 
 fn reveals(events: &[PlayerEvent]) -> usize {

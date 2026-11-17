@@ -7,9 +7,7 @@ use super::player_presentation::{
     SEATS, answer, declare, is_action, position, present, promoted, question, recorded,
 };
 use super::*;
-use sve_engine::game::player::events::{
-    ActionKind, EventKind, PlayerEventBatch, PresentationOp, ProvisionalBatch,
-};
+use sve_engine::game::player::events::{ActionKind, EventKind, PresentationOp, ProvisionalBatch};
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{DecisionShape, Input, QuestionShape, SubmissionKind, Viewer};
 
@@ -52,10 +50,6 @@ fn warden_at_its_private_choice(top: &str) -> (Game, [Vec<ProvisionalBatch>; 2])
     );
     let shown = present(&mut game, &mut cursors);
     (game, shown)
-}
-
-fn committed(game: &Game, viewer: Viewer) -> Vec<PlayerEventBatch> {
-    game.event_batches(viewer, None).unwrap().cloned().collect()
 }
 
 fn shape(batches: &[ProvisionalBatch]) -> Vec<Vec<ActionKind>> {
