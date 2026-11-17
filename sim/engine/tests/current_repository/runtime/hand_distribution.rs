@@ -15,15 +15,16 @@ const CARDS: [(&str, &str, &str); 2] = [
         "c:f8c06510ce375d5cb4aaafbd82c41870",
         "f:7d30e6920e5c5fb7ba19822d5caf9d48",
     ),
+    // BP04-002 is the collab printing of BP04-001 and shares its card and face.
     (
         "BP04-002",
-        "c:655eb853faef5798ad2ec4ab38bcc9cc",
-        "f:486cc34a04c5568f855d7ad38a4edfaa",
+        "c:f8c06510ce375d5cb4aaafbd82c41870",
+        "f:7d30e6920e5c5fb7ba19822d5caf9d48",
     ),
 ];
 
 #[test]
-fn bp04_001_and_002_keep_distinct_sources_and_every_registered_printing() {
+fn bp04_001_and_002_share_one_source_and_every_registered_printing() {
     let selected = selection_with_rules();
     let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
     for (number, card_id, face) in CARDS {
@@ -48,7 +49,8 @@ fn bp04_001_and_002_keep_distinct_sources_and_every_registered_printing() {
         assert_eq!(card.program.card().abilities.len(), 1);
         let source = card
             .source_at(&format!(
-                "/cards/{number}/faces/{face}/abilities/0/fanfare/do/0/damage/n"
+                "/cards/{}/faces/{face}/abilities/0/fanfare/do/0/damage/n",
+                CARDS[0].0
             ))
             .unwrap();
         assert_eq!(source.source.card_id, card_id);
@@ -85,7 +87,7 @@ fn answer(game: &mut Game, answer: Answer) {
 #[test]
 #[expect(
     clippy::too_many_lines,
-    reason = "Both independent permanent sources share one repository fixture and one printed scenario."
+    reason = "Both printings of the one permanent source share one repository fixture and one printed scenario."
 )]
 fn bp04_001_and_002_current_sources_distribute_hand_plus_ex_with_overkill() {
     let selected = selection_with_rules();

@@ -87,7 +87,8 @@ fn bp15_053_exiles_a_different_wizard_and_discounts_it_only_after_a_non_hand_ent
 
 #[test]
 fn pcs01_040_spares_the_chosen_target_from_the_sweep() {
-    let mut initial = position("flt-base-PCS01-040", "field");
+    // PCS01-040 is a collab printing of サレン and evolves from the CP04-092 base.
+    let mut initial = position("flt-base-CP04-092", "field");
     princess(&mut initial);
     initial["players"]["P1"]["zones"]["evolve_deck"] =
         json!([{"id":"form","card":"PCS01-040"}]);

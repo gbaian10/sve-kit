@@ -73,7 +73,8 @@ const CONTROLS: [Companion; 7] = [
         &["プリコネ"],
     ),
 ];
-const FORMS: [&str; 4] = ["BP04-085", "PR-624", "PCS01-019", "BP21-095"];
+// Collab printings evolve from a base named after their card's effect record printing.
+const FORMS: [&str; 4] = ["BP04-085", "BP22-079", "CP04-046", "BP21-095"];
 fn append(snapshot: &mut String, input: &mut Value, number: &str, face: &Value) {
     snapshot.push_str(&json!({"number":number,"faces":[face]}).to_string());
     snapshot.push('\n');
@@ -437,7 +438,8 @@ fn cp02_074_banishes_one_magic_item_and_pays_one_pp_to_deal_three() {
 }
 #[test]
 fn cp02_sp08a_searches_both_cost_groups_and_observes_both_idol_entries() {
-    for card in ["CP02-SP08a", "CP02-SP08b", "CP02-U08a", "CP02-U08b"] {
+    // CP02-055 shares this card and its single grouped search.
+    for card in ["CP02-055", "CP02-SP08a", "CP02-SP08b", "CP02-U08a", "CP02-U08b"] {
         let mut initial = position(card);
         initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"large","card":"wire-idol-three"},{"id":"small","card":"wire-idol-one"},{"id":"other","card":"wire-history-spell"}]);
         let mut game = game(&initial);

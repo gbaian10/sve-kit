@@ -7,7 +7,7 @@ fn construction_only_cards_load_without_creating_game_abilities() {
         let card = &selected.current[number];
         assert_eq!(card.program.card().abilities.len(), 0);
         assert_eq!(
-            card.expanded["cards"][number]["deck_rule"],
+            card.expanded["cards"][&card.card_no]["deck_rule"],
             json!({"deck":"evolve", "same_name_max":10_u8})
         );
         let mut initial = draw_position();
