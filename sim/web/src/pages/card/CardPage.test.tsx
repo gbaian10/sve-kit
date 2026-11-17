@@ -812,7 +812,7 @@ describe("collab printing names", () => {
     expect(
       await screen.findByRole("heading", { level: 2, name: "ラプラスの魔 ラプラス・ダークネス" }),
     ).toBeVisible()
-    expect(screen.getByText("視為「吸血姫・ヴァンピィ」（合成吸血姫譯名）")).toBeVisible()
+    expect(screen.getByText("視為「合成吸血姫譯名」")).toBeVisible()
   })
 })
 

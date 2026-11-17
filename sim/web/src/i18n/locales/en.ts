@@ -640,7 +640,6 @@ export default {
     separator: " · ",
     backFace: "Back face",
     treatedAs: "Treated as “{{name}}”",
-    treatedAsTranslated: "Treated as “{{name}}” ({{translation}})",
     related: {
       title: "Related Cards",
       evolvesFrom: "Evolves from",

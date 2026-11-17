@@ -621,7 +621,6 @@ export default {
     separator: "・",
     backFace: "裏面",
     treatedAs: "「{{name}}」として扱う",
-    treatedAsTranslated: "「{{name}}」（{{translation}}）として扱う",
     related: {
       title: "関連カード",
       evolvesFrom: "進化前",
