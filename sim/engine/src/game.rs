@@ -321,6 +321,11 @@ let _ = Game::internal_cost_spec_payments;
 
 ```compile_fail,E0599
 use sve_engine::game::Game;
+let _ = Game::internal_exchange_payments;
+```
+
+```compile_fail,E0599
+use sve_engine::game::Game;
 let _ = Game::internal_target_declarations;
 ```
 "
