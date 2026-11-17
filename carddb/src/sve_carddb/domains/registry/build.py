@@ -146,6 +146,7 @@ class Builder:
                 by_number[region + ":" + card.number] = key
                 if (existing := self._existing_card(region, card.number)) is not None:
                     joins.union(key, by_card.setdefault(existing, key))
+        self._check_groups()
         for keep, numbers in self.inputs.decisions.same_cards.items():
             if keep not in by_card or any(
                 number not in by_number for number in numbers
@@ -170,6 +171,20 @@ class Builder:
                     raise ValueError("Folded card has a face the kept card lacks")
                 result[string(entry.data, "id")] = self.faces[keep][ordinal]
         return result
+
+    def _check_groups(self) -> None:
+        """Groups stay disjoint, so a mistake is reported as such, not as a missing group."""
+        groups = self.inputs.decisions.same_cards
+        members = [number for numbers in groups.values() for number in numbers]
+        if len(members) != len(set(members)):
+            raise ValueError("A same-card member is listed twice")
+        for keep, numbers in groups.items():
+            for number in numbers:
+                existing = self._existing_card(*number.split(":", 1))
+                if existing is not None and existing != keep and existing in groups:
+                    raise ValueError(
+                        f"A same-card member belongs to another kept card: {number}"
+                    )
 
     def _kept(self, previous: set[str]) -> str:
         """Several existing cards may only meet through one reviewed same-card group."""

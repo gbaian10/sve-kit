@@ -385,8 +385,17 @@ def plan_files(
     """Preserve all old entries and shards; only append newly allocated state.
 
     ``fold`` admits a reviewed same-card group before launch: a folded card and its
-    faces disappear, and only records naming them may be rewritten in place.
+    faces disappear, and records naming them may only swap those IDs in place.
     """
+    if fold:
+        # Transitions pin historical shard bytes that a fold rewrites; they are
+        # removed first and regenerated on the folded registry.
+        try:
+            require_empty_transitions(root)
+        except ValueError:
+            raise ValueError(
+                "A same-card fold needs no identity transitions; remove and regenerate them"
+            ) from None
     if reviewed is None:
         require_empty_transitions(root)
     else:
@@ -409,9 +418,7 @@ def plan_files(
             raise ValueError("Append inputs differ from verified original registry")
         loaded = original
     index, old = load(root) if loaded is None else loaded
-    rewrites, new = _changes(
-        old, entries, _folded(old, entries) if fold else frozenset[str]()
-    )
+    rewrites, new = _changes(old, entries, _folded(old, entries) if fold else {})
     order = record_order(entries)
     files: dict[Path, bytes] = {}
     for (area, owner), records in sorted(new.items()):
@@ -428,7 +435,7 @@ def plan_files(
 
 
 def _changes(
-    old: dict[str, Entry], entries: list[Entry], folded: frozenset[str]
+    old: dict[str, Entry], entries: list[Entry], folded: dict[str, str]
 ) -> tuple[dict[str, Entry | None], dict[tuple[str, str], list[Entry]]]:
     rewrites: dict[str, Entry | None] = {}
     new: dict[tuple[str, str], list[Entry]] = defaultdict(list)
@@ -436,15 +443,18 @@ def _changes(
         if entry.record_key not in old:
             new[_area(entry), entry.owner].append(entry)
         elif entry != old[entry.record_key]:
-            if entry.kind not in _REWRITTEN or not _names(
-                old[entry.record_key], folded
+            # A fold may only swap folded IDs; any other drift still needs review.
+            if entry.kind not in _REWRITTEN or entry.data != _swap(
+                old[entry.record_key].data, folded
             ):
                 raise ValueError(
                     f"Existing registry record changed; explicit repair required: {entry.record_key}"
                 )
             rewrites[entry.record_key] = entry
     for key in set(old) - {entry.record_key for entry in entries}:
-        if old[key].kind not in _REMOVED or not _names(old[key], folded):
+        if old[key].kind not in _REMOVED or _swap(old[key].data, folded) == (
+            old[key].data
+        ):
             raise ValueError("Input would delete existing registry records")
         rewrites[key] = None
     return rewrites, new
@@ -455,8 +465,11 @@ _REMOVED = frozenset({"card", "face", "region_mapping_review", "card_related"})
 _REWRITTEN = frozenset({"printing", "art", "source_correction"})
 
 
-def _folded(old: dict[str, Entry], entries: list[Entry]) -> frozenset[str]:
-    """Old card and face IDs a same-card fold removes; each card's printings must move."""
+def _folded(old: dict[str, Entry], entries: list[Entry]) -> dict[str, str]:
+    """Folded card and face IDs -> the kept card and its face of the same ordinal.
+
+    Each removed card's printings must all move to one card that still exists.
+    """
     kept = {entry.record_key for entry in entries}
     moved: dict[str, set[str]] = defaultdict(set)
     for entry in entries:
@@ -465,33 +478,36 @@ def _folded(old: dict[str, Entry], entries: list[Entry]) -> frozenset[str]:
             and (before := old.get(entry.record_key)) is not None
         ):
             moved[_text(before.data, "card_id")].add(_text(entry.data, "card_id"))
-    cards = set()
+    result: dict[str, str] = {}
     for key, entry in old.items():
         if entry.kind == "card" and key not in kept:
             card = _text(entry.data, "id")
             targets = moved[card] - {card}
             if len(targets) != 1 or "card:" + next(iter(targets)) not in kept:
                 raise ValueError(f"Folded card has no single kept card: {card}")
-            cards.add(card)
+            result[card] = next(iter(targets))
     faces = {
-        _text(entry.data, "id")
-        for entry in old.values()
-        if entry.kind == "face" and _text(entry.data, "card_id") in cards
+        (_text(entry.data, "card_id"), entry.data["ordinal"]): _text(entry.data, "id")
+        for entry in (*old.values(), *entries)
+        if entry.kind == "face"
     }
-    return frozenset(cards | faces)
+    for entry in old.values():
+        if entry.kind == "face" and (keep := result.get(_text(entry.data, "card_id"))):
+            target = faces.get((keep, entry.data["ordinal"]))
+            if target is None:
+                raise ValueError("Folded card has a face the kept card lacks")
+            result[_text(entry.data, "id")] = target
+    return result
 
 
-def _names(entry: Entry, identifiers: frozenset[str]) -> bool:
-    found: list[JsonValue] = [entry.data]
-    while found:
-        value = found.pop()
-        if isinstance(value, str) and value in identifiers:
-            return True
-        if isinstance(value, list):
-            found.extend(value)
-        elif isinstance(value, dict):
-            found.extend(value.values())
-    return False
+def _swap(value: JsonValue, ids: dict[str, str]) -> JsonValue:
+    if isinstance(value, str):
+        return ids.get(value, value)
+    if isinstance(value, list):
+        return [_swap(item, ids) for item in value]
+    if isinstance(value, dict):
+        return {key: _swap(item, ids) for key, item in value.items()}
+    return value
 
 
 def _rewrite(root: Path, rewrites: dict[str, Entry | None]) -> dict[Path, bytes]:

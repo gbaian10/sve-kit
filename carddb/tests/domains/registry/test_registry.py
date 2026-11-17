@@ -999,3 +999,41 @@ def test_existing_cards_meet_only_through_a_listed_group(
     inputs.decisions.same_cards = {"c:" + "0" * 32: ["jp:BP02-072"]}
     with pytest.raises(ValueError, match="unknown members"):
         build(inputs, old)
+
+
+def test_fold_only_swaps_ids_and_needs_no_transitions(
+    inputs: Inputs, tmp_path: Path
+) -> None:
+    inputs.mapping.reskins = {}
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    first = build(inputs, {})
+    write_files(plan_files(tmp_path, first))
+    _, old = load(tmp_path)
+    keep = card_of(first, "jp", "BP02-071")
+    inputs.decisions.same_cards = {keep: ["jp:BP02-072"]}
+    # A changed observation is ordinary source drift, not part of the fold.
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名", text="Changed rule.")
+    with pytest.raises(ValueError, match="explicit repair required"):
+        plan_files(tmp_path, build(inputs, old), fold=True)
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    folded = build(inputs, old)
+    transitions = tmp_path / "identity-transitions"
+    transitions.mkdir()
+    (transitions / "001.yaml").write_text("format: 1\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="needs no identity transitions"):
+        plan_files(tmp_path, folded, fold=True)
+
+
+def test_same_card_groups_must_stay_disjoint(inputs: Inputs, tmp_path: Path) -> None:
+    inputs.mapping.reskins = {}
+    inputs.jp["BP02-072"] = card("BP02-072", "聯名")
+    first = build(inputs, {})
+    write_files(plan_files(tmp_path, first))
+    _, old = load(tmp_path)
+    keep, other = card_of(first, "jp", "BP02-071"), card_of(first, "jp", "BP02-072")
+    inputs.decisions.same_cards = {keep: ["jp:BP02-072"], other: ["jp:BP02-072"]}
+    with pytest.raises(ValueError, match="listed twice"):
+        build(inputs, old)
+    inputs.decisions.same_cards = {keep: ["jp:BP02-072"], other: ["jp:PR-001"]}
+    with pytest.raises(ValueError, match="belongs to another kept card"):
+        build(inputs, old)
