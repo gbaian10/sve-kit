@@ -46,12 +46,19 @@ if TYPE_CHECKING:
 
 def _identity(db: Database, record: EnglishUseRecord) -> str | None:
     use = record.data
-    if use.identity != "confirmed_no_jp":
+    if use.identity not in {"confirmed_no_jp", "confirmed_no_jp_printing"}:
         return "unresolved_english_identity"
     card = db.select("card", ("identity_state",), where={"id": use.card_id})
     if not card or card[0].values["identity_state"] != "confirmed":
         return "unconfirmed_identity"
-    if db.select("printing", ("id",), where={"card_id": use.card_id, "region": "jp"}):
+    if use.identity == "confirmed_no_jp_printing":
+        # The printed name stands apart from the card's JP name; _source checks the owner.
+        return None
+    return _without_jp(db, use.card_id)
+
+
+def _without_jp(db: Database, card_id: str) -> str | None:
+    if db.select("printing", ("id",), where={"card_id": card_id, "region": "jp"}):
         return "has_jp_source"
     if any(
         db.select(
@@ -59,13 +66,13 @@ def _identity(db: Database, record: EnglishUseRecord) -> str | None:
             ("revision_id",),
             where={"face_id": face.values["id"], "region": "jp"},
         )
-        for face in db.select("face", ("id",), where={"card_id": use.card_id})
+        for face in db.select("face", ("id",), where={"card_id": card_id})
     ):
         return "has_jp_source"
     reviews = db.select(
         "region_mapping_review",
         ("state", "as_of"),
-        where={"card_id": use.card_id, "target_region": "jp"},
+        where={"card_id": card_id, "target_region": "jp"},
     )
     latest = max(reviews, key=lambda row: str(row.values["as_of"]), default=None)
     if latest is None or latest.values["state"] != "confirmed_none":
@@ -257,15 +264,30 @@ def _source(
     if (source.card_id, source.face_id) != (use.data.card_id, use.data.face_id):
         return None, "english_owner_face_mismatch"
     owner = use.data.source.owner
-    if isinstance(owner, FaceRevisionOwner) and not db.select(
-        "face_current",
-        ("face_id",),
-        where={
-            "face_id": source.face_id,
-            "region": "en",
-            "revision_id": owner.revision_id,
-        },
-    ):
+    current = isinstance(owner, FaceRevisionOwner) and bool(
+        db.select(
+            "face_current",
+            ("face_id",),
+            where={
+                "face_id": source.face_id,
+                "region": "en",
+                "revision_id": owner.revision_id,
+            },
+        )
+    )
+    if use.data.identity == "confirmed_no_jp_printing":
+        # Only a printing's own name revision; the card's current EN name borrows JP text.
+        printed = isinstance(owner, FaceRevisionOwner) and bool(
+            db.select(
+                "printing_face_observation",
+                ("printing_id",),
+                where={"face_id": source.face_id, "revision_id": owner.revision_id},
+            )
+        )
+        if current or not printed or use.data.source.field != "name":
+            return None, "english_source_not_printed_name"
+        return source, None
+    if isinstance(owner, FaceRevisionOwner) and not current:
         return None, "english_source_not_current"
     return source, None
 

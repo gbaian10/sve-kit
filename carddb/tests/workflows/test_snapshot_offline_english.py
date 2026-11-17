@@ -96,7 +96,14 @@ def install_inputs(root: Path, monkeypatch: pytest.MonkeyPatch) -> None:
 
 @pytest.mark.parametrize(
     "mode",
-    ["translated", "unresolved", "stale", "wrong_face", "wrong_version"],
+    [
+        "translated",
+        "unresolved",
+        "stale",
+        "wrong_face",
+        "wrong_version",
+        "printing_only",
+    ],
 )
 def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: ignore[too-many-locals,too-many-statements] -- independent builds verify selection and public round-trip together
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
@@ -143,9 +150,13 @@ def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: igno
     use = object_value(object_value(values[1])["data"])
     selected_source = object_value(use["source"])
     ref = object_value(selected_source["source_ref"])
-    if mode == "unresolved":
-        use["identity"] = "unresolved"
-    elif mode == "stale":
+    # A printing-only conclusion never reaches the card's current revision.
+    identities = {
+        "unresolved": "unresolved",
+        "printing_only": "confirmed_no_jp_printing",
+    }
+    use["identity"] = identities.get(mode, use["identity"])
+    if mode == "stale":
         selected_source["source_hash"] = ref["text_hash"] = "f" * 64
         object_value(object_value(values[0])["data"])["source_hash"] = "f" * 64
     elif mode == "wrong_face":
@@ -209,13 +220,11 @@ def test_normal_build_selects_only_exact_confirmed_english_fields(  # ruff: igno
         assert english["translated"] == 0
         assert english["original"] == 1
         reasons = object_value(english["fallback_reasons"])
-        expected = (
-            "unresolved_english_identity"
-            if mode == "unresolved"
-            else "english_owner_face_mismatch"
-            if mode == "wrong_face"
-            else "english_source_mismatch"
-        )
+        expected = {
+            "unresolved": "unresolved_english_identity",
+            "printing_only": "english_source_not_printed_name",
+            "wrong_face": "english_owner_face_mismatch",
+        }.get(mode, "english_source_mismatch")
         assert reasons == {expected: 1}
     with open_database(compile_build(SCHEMA), tmp_path / "after/build.sqlite") as db:
         assert db.rows("text_template_binding") == ()

@@ -1107,17 +1107,17 @@ export class SearchIndex {
           const intId = typeof row["int_id"] === "number" ? row["int_id"] : undefined
           // A catalog locator has no faces, so a printing's own printed name arrives only now;
           // the card's name it was summarised under becomes its treated-as name.
-          const own = front ? printingOwnName(index, row, stringValue(front["id"])) : undefined
           const previous = this.summaries.row(summary - 1)
           const card = (previous["treatedAs"] ?? previous["name"]) as JsonObject
-          const names = own
-            ? {
-                name: own as unknown as JsonValue,
-                ...(own.original.text === stringValue(objectValue(card["original"])["text"])
-                  ? {}
-                  : { treatedAs: card }),
-              }
-            : {}
+          const own = front
+            ? printingOwnName(
+                index,
+                row,
+                stringValue(front["id"]),
+                card as unknown as CardSummary["name"],
+              )
+            : undefined
+          const names = own ? { name: own as unknown as JsonValue, treatedAs: card } : {}
           summaries.push({
             source: summary - 1,
             changes: {

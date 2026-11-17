@@ -5616,3 +5616,69 @@ records:
       target_id: english.flavor.74325eb04d1b82d0bd40086b
       identity: confirmed_no_jp
       reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
+  - origin: machine
+    kind: english_exception_use
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:91435c7a393169458148804bd48bbc1dec8be3d993bf02636faced93bb534a30
+        field: name
+        ordinal:
+        source_unit_id: t:en:35452d2c4d71f5a9
+        source_hash: 35452d2c4d71f5a90c20d707920ea56a93ecd426b84e3af8720afe147b08097b
+        source_ref:
+          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+          source_version_id: src:v1:e8f5a71d78ff361404a724e3be0934365c08c3ae346a1bd43219202e8eb313e1
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 35452d2c4d71f5a90c20d707920ea56a93ecd426b84e3af8720afe147b08097b
+      card_id: c:2559ecb076dd5f3ca29622c1514a8f02
+      face_id: f:da96833d2e3f5db3adc102dbe94c2baf
+      target_id: english.name.35452d2c4d71f5a90c20d707
+      identity: confirmed_no_jp_printing
+      reason: BP03-036EN、BP03-SP01EN 是英版限定聯名版次，併入有日版的卡後卡名留在版次自己的 revision；此卡名沒有日版，沿用併卡前已審的英文例外譯文。
+  - origin: machine
+    kind: english_exception_use
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:4f37f51a65ae28e21820452613ad5845bf8ee0c77cfa371275f15a51320f01a1
+        field: name
+        ordinal:
+        source_unit_id: t:en:1200bdd87db3a901
+        source_hash: 1200bdd87db3a901bfe49536cb82b1636b7fe3ca8ba50d3d06b2676194da2670
+        source_ref:
+          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+          source_version_id: src:v1:fa82e6a5bd4ed302c8a9af50a0d0bce65ac03c20519db9b6a6e7fca1db54d529
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 1200bdd87db3a901bfe49536cb82b1636b7fe3ca8ba50d3d06b2676194da2670
+      card_id: c:dd8e5f6ba3d758c0a5ae95d23135f2b0
+      face_id: f:aa85a66c6a0159bea255f4818a70ed1d
+      target_id: english.name.1200bdd87db3a901bfe49536
+      identity: confirmed_no_jp_printing
+      reason: BP03-047EN 是英版限定聯名版次，併入有日版的卡後卡名留在版次自己的 revision；此卡名沒有日版，沿用併卡前已審的英文例外譯文。
+  - origin: machine
+    kind: english_exception_use
+    data:
+      source:
+        owner:
+          kind: face_revision
+          revision_id: rev:v1:d8a72c9bb11be56a11798399d2be267f422c564b4569130fc8045ca0593a3314
+        field: name
+        ordinal:
+        source_unit_id: t:en:630eb0c517390a12
+        source_hash: 630eb0c517390a12ffb1bc339591e30de2f85d41f9d5b61aec1dc57e6f46e09e
+        source_ref:
+          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+          source_version_id: src:v1:ecf1a6c575290b498b59e79ad09555df8c36289a1bf5c2d4df4e8323bf7c6552
+          parser: translation-en-v1
+          locator: /faces/0/name
+          text_hash: 630eb0c517390a12ffb1bc339591e30de2f85d41f9d5b61aec1dc57e6f46e09e
+      card_id: c:12c388740520594b8173751437adc66e
+      face_id: f:99f2bd150de757f69f3b3a85bbed10aa
+      target_id: english.name.630eb0c517390a12ffb1bc33
+      identity: confirmed_no_jp_printing
+      reason: BP03-054EN 是英版限定聯名版次，併入有日版的卡後卡名留在版次自己的 revision；此卡名沒有日版，沿用併卡前已審的英文例外譯文。
