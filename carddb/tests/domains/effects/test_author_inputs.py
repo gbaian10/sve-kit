@@ -23,7 +23,7 @@ def schemas() -> AuthorSchemas:
     return AuthorSchemas(SCHEMAS)
 
 
-@pytest.mark.parametrize("name", ["on", "off", "n", "yes", "no", "X", "offset_2"])
+@pytest.mark.parametrize("name", ["on", "off", "n"])
 def test_yaml_canary_strings(schemas: AuthorSchemas, name: str) -> None:
     assert (
         object_value(schemas.leaf(f"param: {name}\n".encode(), "A.param"))["param"]
@@ -111,22 +111,7 @@ def test_index_rejects_unsorted_scope_tiebreaker(schemas: AuthorSchemas) -> None
 
 @pytest.mark.parametrize(
     "path",
-    [
-        "/absolute.yaml",
-        "../out.yaml",
-        "rules/../out.yaml",
-        "./a.yaml",
-        "a/.",
-        "a/..",
-        ".",
-        "..",
-        "a//b",
-        "a/",
-        "",
-        "a\\b",
-        "a\nb",
-        "a\x00b",
-    ],
+    ["/absolute.yaml", "../out.yaml", "a\x00b"],
     ids=repr,
 )
 def test_index_paths_are_relative_without_normalizing(

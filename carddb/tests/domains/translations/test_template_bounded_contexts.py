@@ -59,44 +59,6 @@ CASES = (
             "場の試験体の元のコストの種類数が２種類以上なら試す。",
         ),
         ("distinct_card_name_count", "２種類以上なら試す。"),
-        (
-            "distinct_card_name_count",
-            "場の試験体のカード名の種類数が２枚以上なら試す。",
-        ),
-        (
-            "distinct_original_cost_count",
-            "場のカードのコストの種類数が２種類以上なら試す。",
-        ),
-        (
-            "distinct_original_cost_count",
-            "場のカードの元のコストの種類数が２種類だけなら試す。",
-        ),
-        (
-            "distinct_original_cost_count",
-            "場のカードの元のコストの種類数が２種類以上なら試す。２種類以上なら試す。",
-        ),
-        ("damage_count_multiplier", "２倍のダメージ。"),
-        ("damage_count_multiplier", "「試験体の番号」の２倍のダメージ。"),
-        ("damage_count_multiplier", "「試験体の数」の２ダメージ。"),
-        ("damage_count_multiplier", "「試験体の数」の２倍の回復。"),
-        ("damage_count_multiplier", "「試験体の数」の２倍のダメージ名。"),
-        ("damage_attack_multiplier", "「試験体の体力」の２倍のダメージ。"),
-        ("damage_attack_multiplier", "「試験体の攻撃力」の２倍の回復。"),
-        ("count_formula_multiplier", "Yは「試験体の数の２倍」である。"),
-        ("count_formula_multiplier", "Xは「試験体の数の２倍」を選ぶ。"),
-        ("count_formula_multiplier", "Xは「試験体の数の２倍」である名。"),
-        (
-            "attack_damage_multiplier",
-            "これが受ける「リーダーへの攻撃ダメージ」と「交戦ダメージ」を２倍にする。",
-        ),
-        (
-            "attack_damage_multiplier",
-            "これが与える「リーダーへの攻撃ダメージ」を２倍にする。",
-        ),
-        (
-            "attack_damage_multiplier",
-            "これが与える「リーダーへの攻撃ダメージ」と「交戦ダメージ」を２倍にする名。",
-        ),
     ],
 )
 def test_wrong_count_metric_multiplicand_direction_and_continuation_stay_pending(

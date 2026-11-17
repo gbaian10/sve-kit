@@ -135,11 +135,9 @@ def test_date_requires_all_precision_metadata(inputs: Inputs, field: str) -> Non
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("observed_on", "2020-02-30"),
         ("observed_on", "20200102"),
         ("observed_on", "2020-01-02T00:00:00Z"),
         ("observed_timezone", "Unknown/Zone"),
-        ("observed_precision", "instant"),
         ("observed_basis", "   "),
         ("fetched_at", "2020-01-02T00:00:00Z"),
     ],

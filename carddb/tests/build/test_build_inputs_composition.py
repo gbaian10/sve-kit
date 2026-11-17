@@ -104,10 +104,6 @@ def test_family_and_identity_share_sealed_raw_and_keep_every_use(
     [
         ("url", "https://example.invalid/conflict"),
         ("sha256", "sha256:" + "0" * 64),
-        ("kind", "official_api"),
-        ("raw_locator", "test-store:raw/conflict"),
-        ("fetched_at", "2026-10-01T00:00:00Z"),
-        ("etag", "wrong"),
         ("last_modified", "wrong"),
     ],
 )

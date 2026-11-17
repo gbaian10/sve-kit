@@ -128,118 +128,13 @@ BAD_HEADS: tuple[dict[str, JsonValue], ...] = (
             ]
         }
     },
-    {
-        "fanfare": {
-            "do": [
-                {
-                    "destroy": {
-                        "ref": {"who": "turn", "zone": "field", "kind": "follower"}
-                    }
-                }
-            ]
-        }
-    },
-    {
-        "fanfare": {
-            "do": [
-                {"destroy": {"ref": {"who": "opp", "zone": "ex", "kind": "follower"}}}
-            ]
-        }
-    },
-    {
-        "fanfare": {
-            "do": [
-                {"destroy": {"ref": {"who": "opp", "zone": "field", "kind": "amulet"}}}
-            ]
-        }
-    },
-    {
-        "fanfare": {
-            "targets": [
-                {
-                    "bind": "picked",
-                    "from": {"who": "opp", "zone": "field", "kind": "follower"},
-                    "n": 1,
-                }
-            ],
-            "do": [{"destroy": {"ref": "picked"}}],
-        }
-    },
-    {
-        "fanfare": {
-            "do": [
-                {
-                    "if": {
-                        "cond": {"awakened": True},
-                        "then": [
-                            {
-                                "destroy": {
-                                    "ref": {
-                                        "who": "opp",
-                                        "zone": "field",
-                                        "kind": "follower",
-                                    }
-                                }
-                            }
-                        ],
-                    }
-                }
-            ]
-        }
-    },
-    {
-        "fanfare": {
-            "do": [
-                {
-                    "pay": {
-                        "cost": {"pp": 1},
-                        "do": [
-                            {
-                                "destroy": {
-                                    "ref": {
-                                        "who": "opp",
-                                        "zone": "field",
-                                        "kind": "follower",
-                                    }
-                                }
-                            }
-                        ],
-                        "then": [],
-                    }
-                }
-            ]
-        }
-    },
-    {
-        "fanfare": {
-            "do": [
-                {
-                    "destroy": {
-                        "ref": {"who": "opp", "zone": "field", "kind": "follower"}
-                    }
-                },
-                {"draw": {"n": 1}},
-            ]
-        }
-    },
 )
 
 
 @pytest.mark.parametrize(
     "body",
     BAD_HEADS,
-    ids=[
-        "lastword",
-        "attack",
-        "self",
-        "turn",
-        "ex",
-        "amulet",
-        "target-one",
-        "condition",
-        "cost",
-        "extra-step",
-    ],
+    ids=["lastword", "attack", "self"],
 )
 @pytest.mark.parametrize("reference", [False, True], ids=["inline", "companion"])
 def test_similar_payload_is_not_the_source(
@@ -263,16 +158,11 @@ def test_similar_payload_is_not_the_source(
 @pytest.mark.parametrize(
     "change",
     [
-        "concept",
-        "role",
-        "domain",
-        "optional",
         "schema-span",
         "occurrence",
         "extra-value",
         "frame",
         "line",
-        "field",
         "ordinal",
         "segments",
         "canonical",

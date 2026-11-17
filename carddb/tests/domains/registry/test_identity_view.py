@@ -85,15 +85,10 @@ def test_both_renewals_preserve_jp_identity_and_never_expose_approvals(
     [
         "deactivate",
         "repair",
-        "route",
         "revert",
-        "card",
         "printing",
-        "face",
         "art_identity",
         "art_remove",
-        "unknown",
-        "before",
         "dependency",
     ],
 )

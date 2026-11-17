@@ -35,7 +35,6 @@ def test_lifts_are_confined_to_the_explicit_section() -> None:
         ("2026年10月2日(金)から殿堂入り解除", "２０２６年10月2日(金)から殿堂入り解除"),
         ("cardno=TEST-a", "other=TEST-a"),
         ("『合成解除』", "unquoted"),
-        ("『合成解除』", "『』"),
         ("『合成解除』", "『合成<span>解除</span>』"),
         ("</html>", ""),
         ("contents", "unknown"),

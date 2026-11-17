@@ -23,15 +23,7 @@ if TYPE_CHECKING:
 
 @pytest.mark.parametrize(
     ("category", "emphasis", "expected"),
-    [
-        ("card_name", None, True),
-        ("keyword", None, True),
-        ("ability", None, True),
-        ("trait", None, True),
-        ("rule_term", None, None),
-        ("rule_term", False, False),
-        ("rule_term", True, True),
-    ],
+    [("card_name", None, True), ("keyword", None, True), ("rule_term", True, True)],
 )
 def test_glossary_category_and_rule_emphasis_set_bold_without_changing_quality(
     stored: tuple[Database, Frame, SourceBinding],

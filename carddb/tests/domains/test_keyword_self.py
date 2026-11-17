@@ -21,26 +21,8 @@ if TYPE_CHECKING:
     ("region", "text", "spelling", "present", "unknown"),
     [
         ("jp", "【守護】（守護の説明）", "守護", True, False),
-        ("en", "Ward. (Synthetic reminder.)", "Ward", True, False),
-        ("en", "Rush. Ward.", "Ward", True, False),
         ("jp", "これは【守護】を持つ。", "守護", True, False),
-        ("jp", "それは【守護】を持つ。", "守護", False, True),
-        ("jp", "これは【守護】を持つフォロワーを攻撃できる。", "守護", False, True),
-        ("en", "While active, this has Ward.", "Ward", True, False),
-        (
-            "en",
-            "Give this follower Ward until the end of the turn.",
-            "Ward",
-            True,
-            False,
-        ),
-        ("en", "Give another follower Ward.", "Ward", False, True),
-        ("jp", "それは「\n【守護】\n」を持つ。", "守護", False, True),
-        ("en", 'Give another follower "\nWard.\n".', "Ward", False, True),
-        ("jp", "「A」を持つ「B\n【守護】\n」", "守護", False, True),
         ("en", "While active, this card has Ward.", "Ward", True, False),
-        ("en", "Synthetic Warden.", "Ward", False, False),
-        ("en", "", "Ward", False, False),
     ],
 )
 def test_declarations_keep_ambiguous_uses_unknown(

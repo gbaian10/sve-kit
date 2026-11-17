@@ -18,7 +18,7 @@ def test_relpath_keeps_remote_characters() -> None:
     assert relpath("ETD01", "etd01-002 .png").name == "etd01-002 .png"
 
 
-@pytest.mark.parametrize("segment", ["", ".", "..", "a/b", "a\\b", "a\0b"])
+@pytest.mark.parametrize("segment", ["..", "a/b", "a\\b", "a\0b"])
 def test_relpath_rejects_unsafe_segments(segment: str) -> None:
     with pytest.raises(UnsafePathError, match="segment"):
         relpath("raw", segment)

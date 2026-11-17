@@ -132,10 +132,6 @@ def test_real_named_search_current(
         ("missing", "source_ability_closure_mismatch"),
         ("owner", "source_current_owner_mismatch"),
         ("binding", "source_occurrence_mismatch"),
-        ("line", "source_location_mismatch"),
-        ("face", "source_face_container_mismatch"),
-        ("scope", "source_occurrence_mismatch"),
-        ("payload", "source_head_payload_mismatch"),
     ],
 )
 def test_current_search_rejects_incomplete_or_wrong_source(

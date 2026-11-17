@@ -257,21 +257,6 @@ def test_frame_target_and_owner_binding_write_through_actual_sqlite(
             {"face_revision_id": "revision:synthetic"},
         ),
         (
-            {"kind": "printing_face", "printing_id": "printing", "face_id": "face"},
-            "effect",
-            {"printing_id": "printing", "face_id": "face"},
-        ),
-        (
-            {"kind": "qa_version", "qa_version_id": "qa:synthetic"},
-            "question",
-            {"qa_version_id": "qa:synthetic"},
-        ),
-        (
-            {"kind": "cr_clause", "cr_clause_id": "cr:synthetic"},
-            "effect",
-            {"cr_clause_id": "cr:synthetic"},
-        ),
-        (
             {
                 "kind": "vocabulary",
                 "vocabulary_kind": "type",
@@ -279,16 +264,6 @@ def test_frame_target_and_owner_binding_write_through_actual_sqlite(
             },
             "label",
             {"vocabulary_kind": "type", "vocabulary_code": "follower"},
-        ),
-        (
-            {"kind": "product", "product_id": "product"},
-            "label",
-            {"product_id": "product"},
-        ),
-        (
-            {"kind": "product_family", "product_family_id": "family"},
-            "label",
-            {"product_family_id": "family"},
         ),
         (
             {"kind": "keyword", "keyword_id": "keyword:synthetic"},

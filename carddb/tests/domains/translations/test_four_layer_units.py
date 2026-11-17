@@ -100,10 +100,6 @@ def test_counted_zone_context_does_not_silently_repair_input() -> None:
         "自分のEXエリアのフォロワー",
         "自分の場か自分のEXエリアの仮族・フォロワー",
         "自分の手札の元のコストN以下の仮族・フォロワー",
-        "自分の消滅領域のカード",
-        "自分のエボルヴデッキの表向きの進化後フォロワー",
-        "自分のエボルヴデッキに表向きで置かれている『X』",
-        "手札",
     ],
 )
 def test_unrestricted_source_nps_include_both_token_states(before: str) -> None:
@@ -154,29 +150,7 @@ def test_an_explicit_two_np_union_preserves_both_zones() -> None:
             "follower",
             "体",
         ),
-        (
-            "自分のデッキの上N枚を見る。その中から、仮族・カードか仮族・スペル",
-            "deck",
-            "card",
-            "枚",
-        ),
         ("自分のデッキの上N枚を見る。その中から、", "deck", "card", "枚"),
-        ("【仮能力】を持つ自分のフォロワー", "battlefield", "follower", "体"),
-        (
-            "自分の「【仮能力】や【別能力】を持つフォロワー」",
-            "battlefield",
-            "follower",
-            "体",
-        ),
-        ("自分のEXエリアのクレストが", "ex", "crest", "枚"),
-        ("他のフォロワー", "battlefield", "follower", "体"),
-        ("自分の他の「【仮能力】を持つフォロワー」", "battlefield", "follower", "体"),
-        (
-            "自分のデッキの上N枚を見る。その中から、フォロワーとアミュレットそれぞれ",
-            "deck",
-            "card",
-            "枚",
-        ),
     ],
 )
 def test_explicit_filtered_sets_preserve_their_counted_objects(

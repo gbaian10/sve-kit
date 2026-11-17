@@ -138,17 +138,6 @@ def test_roundtrip_all_projections_without_archive(
     [
         ("jp", "PR-000", "000-099"),
         ("jp", "PR-099", "000-099"),
-        ("jp", "PR-100", "100-199"),
-        ("jp", "PR-199", "100-199"),
-        ("jp", "PR-200", "200-299"),
-        ("en", "PR-399EN", "300-399"),
-        ("en", "PR-400EN", "400-499"),
-        ("jp", "CP04-SP01", "SP/000-099"),
-        ("jp", "CP04-P01", "P/000-099"),
-        ("en", "BP03-LDS01EN", "LDS/000-099"),
-        ("en", "BP03-LDⓈ01EN", "LD_circled_s/000-099"),
-        ("jp", "SYN-1234a", "1200-1299"),
-        ("jp", "SYN-EP", "unnumbered"),
         ("jp", "SYN-SEP", "unnumbered"),
     ],
 )

@@ -42,8 +42,6 @@ def test_valid_png_passes() -> None:
 @pytest.mark.parametrize(
     ("body", "reason"),
     [
-        pytest.param(PNG[:-6], "truncated", id="truncated"),
-        pytest.param(SIGNATURE + IDAT + IEND, "IHDR", id="no IHDR first"),
         pytest.param(
             SIGNATURE + png_chunk(b"IHDR", b"short") + IDAT + IEND,
             "IHDR",

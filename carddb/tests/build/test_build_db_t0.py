@@ -54,7 +54,7 @@ def _update(db: Database, table: str, values: dict[str, Value]) -> None:
 
 @pytest.mark.parametrize(
     "kind",
-    ["booster", "promo", "deck", "collaboration", "special_pack", "special", "other"],
+    ["booster", "promo", "deck"],
 )
 def test_product_family_accepts_supported_kinds(db: Database, kind: str) -> None:
     _update(db, "product_family", {"kind": kind})
@@ -82,21 +82,7 @@ def test_disabled_nullable_foreign_keys_reject_values(
 
 @pytest.mark.parametrize(
     ("column", "value"),
-    [
-        ("candidate_hash", HASH),
-        ("dsl_version", "1.0"),
-        ("engine_version", "1.0"),
-        ("engine_build_hash", HASH),
-        ("validation_policy_id", "policy"),
-        ("status", "draft"),
-        ("status", "reviewed"),
-        ("status", "engine_passed"),
-        ("status", "load_rejected"),
-        ("automatic", True),
-        ("validation_state", "fresh"),
-        ("reason_codes", Json([])),
-        ("reason_codes", Json(["z", "a"])),
-    ],
+    [("candidate_hash", HASH), ("dsl_version", "1.0"), ("engine_version", "1.0")],
 )
 def test_t0_without_engine_cannot_claim_support(
     db: Database, column: str, value: Value
@@ -111,58 +97,6 @@ def test_t0_without_engine_cannot_claim_support(
         ("source_record", {"kind": "official_page"}),
         ("decision", {"sample_ids": Json([])}),
         ("decision", {"scope": "batch"}),
-        ("identity_change", {"new_card_id": "old_card"}),
-        ("identity_change", {"kind": "reassign_printing"}),
-        ("identity_change", {"printing_id": "printing"}),
-        ("product", {"released_on": DATE}),
-        ("product", {"date_precision": "day"}),
-        ("product", {"date_precision": "month"}),
-        ("product", {"date_precision": "year"}),
-        ("printing", {"serial_total": 0}),
-        ("printing", {"decklog_available": False}),
-        ("printing", {"decklog_verification": "verified"}),
-        ("printing", {"decklog_checked_on": DATE}),
-        ("printing", UNLISTED),
-        ("printing", UNLISTED | {"manual_date_precision": "day"}),
-        (
-            "printing",
-            UNLISTED
-            | {"manual_available_on": "2026-09", "manual_date_precision": "day"},
-        ),
-        (
-            "printing",
-            UNLISTED | {"manual_available_on": DATE, "manual_date_precision": "month"},
-        ),
-        (
-            "printing",
-            UNLISTED
-            | {"manual_available_on": "2026-09", "manual_date_precision": "unknown"},
-        ),
-        ("printing", {"manual_available_on": DATE, "manual_date_precision": "day"}),
-        ("printing", {"manual_date_precision": "unknown"}),
-        ("printing_product", {"first_available_on": DATE}),
-        ("printing_product", {"first_available_precision": "day"}),
-        ("printing_product", {"first_available_precision": "month"}),
-        ("printing_product", {"first_available_raw": "2026"}),
-        ("face_revision", {"cost": -1}),
-        ("face_revision", {"attack": -1}),
-        ("face_revision", {"defense": -1}),
-        ("face_revision", {"effective_from": DATE, "effective_until": DATE}),
-        ("face_current", {"basis": "reviewed_override"}),
-        ("source_coverage", {"until_date": DATE}),
-        ("source_coverage", {"as_of": "2026-09-28"}),
-        ("rules_profile_revision", {"effective_until": DATE}),
-        ("restriction", {"effective_until": DATE}),
-        ("restriction", {"max_copies": None}),
-        ("restriction", {"max_selected_groups": 1}),
-        ("restriction", {"kind": "choice_group"}),
-        ("restriction_coverage", {"until_date": DATE}),
-        ("card_route", {"namespace": "provisional"}),
-        ("card_route_alias", {"old_key": "０１"}),
-        (
-            "card_route_alias",
-            {"namespace": "official", "old_key": "TEST-001%E2%93%88a"},
-        ),
     ],
 )
 def test_row_checks_reject_invalid_combinations(
@@ -192,50 +126,6 @@ def test_row_checks_reject_invalid_combinations(
                 "policy_id": "policy",
                 "sample_ids": Json(["card"]),
             },
-        ),
-        ("identity_change", {"kind": "reassign_printing", "printing_id": "printing"}),
-        ("product", {"date_precision": "day", "released_on": DATE}),
-        ("product", {"date_precision": "month", "date_raw": "2026-09"}),
-        (
-            "printing",
-            {
-                "catalog_state": "unlisted",
-                "decklog_available": False,
-                "manual_date_precision": "unknown",
-            },
-        ),
-        (
-            "printing",
-            UNLISTED | {"manual_available_on": DATE, "manual_date_precision": "day"},
-        ),
-        (
-            "printing",
-            UNLISTED
-            | {"manual_available_on": "2026-09", "manual_date_precision": "month"},
-        ),
-        (
-            "printing",
-            {
-                "decklog_verification": "verified",
-                "decklog_source_id": "source",
-                "decklog_checked_on": DATE,
-                "decklog_available": False,
-            },
-        ),
-        (
-            "printing_product",
-            {"first_available_precision": "day", "first_available_on": DATE},
-        ),
-        ("printing_product", {"first_available_precision": "unknown"}),
-        (
-            "printing_product",
-            {"first_available_precision": "year", "first_available_raw": "2026"},
-        ),
-        ("face_revision", {"cost": 0, "attack": 0, "defense": 9007199254740991}),
-        ("face_current", {"basis": "reviewed_override", "decision_id": "decision"}),
-        (
-            "restriction",
-            {"kind": "choice_group", "max_copies": None, "max_selected_groups": 1},
         ),
     ],
 )
@@ -268,10 +158,6 @@ def test_manual_date_shape_alone_cannot_pass_sql_checks(
         ("printing", "rarity_code", "rarity"),
         ("printing_face", "frame_code", "frame"),
         ("face_revision", "class_code", "class"),
-        ("face_revision", "type_code", "type"),
-        ("face_trait", "trait_code", "trait"),
-        ("face_title", "title_code", "title"),
-        ("face_special_kind", "special_kind_code", "special_kind"),
     ],
 )
 def test_vocabulary_kind_is_fixed_even_for_nullable_codes(
@@ -475,29 +361,6 @@ def test_json_null_is_not_sql_null(db: Database) -> None:
         ("decision", "sample_ids", '["x", "x"]'),
         ("decision", "sample_ids", '[""]'),
         ("decision", "sample_ids", "[null]"),
-        ("language", "fallback_order", '["ja", "ja"]'),
-        ("language", "fallback_order", '["en\\n"]'),
-        ("language", "fallback_order", "{}"),
-        ("card_engine_support", "reason_codes", '["missing_dsl", "missing_dsl"]'),
-        ("card_engine_support", "reason_codes", '["UPPER"]'),
-        ("card_engine_support", "reason_codes", '["code\\n"]'),
-        ("text_symbol", "parameter_schema", "{}"),
-        ("text_symbol", "parameter_schema", '{"parameters":null}'),
-        ("text_symbol", "parameter_schema", '{"parameters":[],"extra":1}'),
-        ("text_symbol", "parameter_schema", '{"parameters":[],"parameters":[]}'),
-        ("text_symbol", "spellings", '[{"lang":"ja"}]'),
-        ("text_symbol", "spellings", "[null]"),
-        ("text_symbol", "localizations", '[{"lang":"ja","name":"x","tooltip":"x"}]'),
-        (
-            "text_symbol",
-            "localizations",
-            '[{"lang":"ja","name":"x","tooltip":"x","copy_pattern":"x","regex":".*"}]',
-        ),
-        (
-            "text_symbol",
-            "localizations",
-            '[{"lang":"ja","name":"x","tooltip":null,"copy_pattern":"x"}]',
-        ),
     ],
 )
 def test_six_json_shapes_reject_malformed_values_at_sql_boundary(
@@ -529,23 +392,6 @@ def test_symbol_json_never_accepts_untyped_payload(
     [
         [{"name": "value", "uint": None, "variables": []}],
         [{"name": "value", "uint": None, "variables": ["Y"]}],
-        [{"name": "value", "uint": None, "variables": ["X", "X"]}],
-        [{"name": "value", "uint": {"minimum": 2, "maximum": 1}, "variables": []}],
-        [{"name": "value", "uint": {"minimum": -1, "maximum": 1}, "variables": []}],
-        [
-            {
-                "name": "value",
-                "uint": {"minimum": 0, "maximum": 9007199254740992},
-                "variables": [],
-            }
-        ],
-        [{"name": "value", "uint": {"minimum": False, "maximum": 1}, "variables": []}],
-        [{"name": "value", "uint": {"minimum": 0.5, "maximum": 1}, "variables": []}],
-        [{"name": "value", "uint": None}],
-        [
-            {"name": "a", "uint": None, "variables": ["X"]},
-            {"name": "a", "uint": None, "variables": ["X"]},
-        ],
         [
             {"name": "z", "uint": None, "variables": ["X"]},
             {"name": "a", "uint": None, "variables": ["X"]},

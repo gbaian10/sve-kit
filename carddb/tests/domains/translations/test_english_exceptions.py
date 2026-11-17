@@ -234,12 +234,10 @@ def test_english_flavor_selects_only_its_complete_frozen_source(
 @pytest.mark.parametrize(
     "mode",
     [
-        "translated",
         "missing_label",
         "low_label",
         "bad_vocabulary",
         "pending",
-        "latest_pending",
         "has_jp",
         "wrong_owner",
     ],

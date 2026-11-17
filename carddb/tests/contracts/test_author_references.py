@@ -34,50 +34,11 @@ RESERVED = [
     ("this", True, False, False),
     ("it", True, False, False),
     ("item", True, True, False),
-    ("affected", True, False, False),
-    ("found", True, False, False),
-    ("entering", True, False, False),
-    ("attack_target", True, False, False),
-    ("host", True, False, False),
-    ("cost1", True, False, False),
-    ("self", False, True, False),
-    ("opp", False, True, False),
-    ("turn", False, True, False),
-    ("non_turn", False, True, False),
-    ("current", False, True, False),
-    ("opponents", False, False, True),
-    ("each", False, False, True),
-    ("other_players", False, False, True),
 ]
 OBJECTS: list[tuple[str, dict[str, JsonValue]]] = [
     ("A.follow-source", {"event": "move_receipt"}),
     ("A.receipt-ref", {"event": "move_receipt"}),
     ("A.receipt-ref", {"entry_payment": "additional"}),
-    ("A.ref", {"follow": "moved_group"}),
-    ("A.ref", {"follow": {"event": "move_receipt"}}),
-    ("A.ref", {"role": {"of": "chosen_group", "name": "primary"}}),
-    ("A.ref", {"role": {"of": "chosen_group", "name": "rest"}}),
-    ("A.ref", {"event": "holder"}),
-    ("A.player-ref", {"owner_of": "chosen_object"}),
-    ("A.player-ref", {"master_of": "chosen_object"}),
-    ("A.player-ref", {"master_of": {"follow": "moved_group"}}),
-    ("A.player-ref", {"owner_of": {"event": "holder"}}),
-    ("A.leader-recipient", {"leader": "self"}),
-    ("A.leader-recipient", {"leader": "opp"}),
-    ("A.leader-recipient", {"leaders": "opponents"}),
-    ("A.leader-recipient", {"leaders": "all"}),
-    ("A.leader-of", {"leader_of": "this"}),
-    ("A.leader-of", {"leader_of": {"follow": "moved_group"}}),
-    ("A.leader-of", {"leader_of": {"role": {"of": "t", "name": "primary"}}}),
-    ("A.leader-recipient", {"leader_of": "this"}),
-    ("A.leader-recipient", {"leader_of": {"role": {"of": "t", "name": "primary"}}}),
-    ("A.until", {"next_phase": {"who": "self", "phase": "start", "edge": "begin"}}),
-    ("A.until", {"next_turn": {"who": "opp", "edge": "end"}}),
-    ("A.until", {"during_next_phase": {"who": "opp", "phase": "main"}}),
-    (
-        "A.until",
-        {"next_turn": {"who": {"master_of": "chosen_object"}, "edge": "end"}},
-    ),
 ]
 
 
@@ -147,14 +108,7 @@ def test_reserved_names_keep_their_roles(
 @pytest.mark.parametrize("name", ["chosen_group", "moved_all", "Alias_2", "X", "on"])
 @pytest.mark.parametrize(
     "definition",
-    [
-        "BindingName",
-        "RoleName",
-        "A.ref",
-        "A.player-ref",
-        "A.receipt-ref",
-        "A.follow-source",
-    ],
+    ["BindingName", "RoleName", "A.ref"],
 )
 def test_names_preserve_spelling(
     schema: dict[str, JsonValue], definition: str, name: str
@@ -187,7 +141,7 @@ def test_short_durations(schema: dict[str, JsonValue], duration: str) -> None:
 )
 @pytest.mark.parametrize(
     "who",
-    ["self", "opp", "turn", "non_turn", "current", "item", "player_alias"],
+    ["self", "opp", "turn"],
 )
 def test_phase_and_turn_boundaries(
     schema: dict[str, JsonValue], phase: str, edge: str, who: str

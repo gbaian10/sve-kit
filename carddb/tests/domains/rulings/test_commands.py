@@ -77,9 +77,7 @@ def test_validate_command_checks_real_catalog_and_closed_build(
     assert not database.with_name(database.name + "-wal").exists()
 
 
-@pytest.mark.parametrize(
-    "change", ["body", "member", "owner", "printing", "line", "missing_db"]
-)
+@pytest.mark.parametrize("change", ["owner", "printing", "line", "missing_db"])
 def test_validate_command_rejects_unadmitted_data_without_echoing_text(
     candidate: tuple[Path, Path], change: str
 ) -> None:

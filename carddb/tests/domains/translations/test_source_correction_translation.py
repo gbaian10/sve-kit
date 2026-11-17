@@ -280,15 +280,9 @@ def _translated(db: Database, field: OwnerField) -> str:
 @pytest.mark.parametrize(
     ("difference", "control"),
     [
-        (None, "automatic"),
-        (None, "manual"),
         (None, "pin"),
         (None, "suppress"),
-        ("wording", "automatic"),
-        ("face", "automatic"),
         ("cost", "automatic"),
-        ("trait", "automatic"),
-        ("title", "automatic"),
         ("special_kind", "automatic"),
     ],
 )

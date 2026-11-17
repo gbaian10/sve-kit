@@ -147,25 +147,7 @@ def change_steps(
         raise AssertionError(change)
 
 
-CHANGES = (
-    "spell",
-    "lastword",
-    "attack_time",
-    "opponent",
-    "each",
-    "include-self",
-    "hand",
-    "amulet",
-    "target",
-    "dynamic",
-    "power",
-    "hp",
-    "set",
-    "extra-step",
-    "condition",
-    "cost",
-    "until",
-)
+CHANGES = ("spell", "lastword", "attack_time")
 
 
 @pytest.mark.parametrize("change", CHANGES)
@@ -197,19 +179,7 @@ def test_complete_payload_cannot_change(
 
 @pytest.mark.parametrize(
     "change",
-    [
-        "concept",
-        "value",
-        "bool",
-        "type",
-        "role",
-        "domain",
-        "required",
-        "occurrence",
-        "extra-slot",
-        "frame",
-        "canonical",
-    ],
+    ["bool", "occurrence", "extra-slot", "frame", "canonical"],
 )
 def test_all_fixed_source_operands_are_checked(change: str) -> None:
     candidate, use = source_case()

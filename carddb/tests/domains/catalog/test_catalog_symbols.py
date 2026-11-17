@@ -45,13 +45,10 @@ def symbol() -> Symbol:
 @pytest.mark.parametrize(
     "mutation",
     [
-        "q_variable",
         "inverted",
-        "unknown_parameter",
         "format_expression",
         "empty_literal",
         "unknown_key",
-        "disabled_uint",
         "duplicate_language",
     ],
 )

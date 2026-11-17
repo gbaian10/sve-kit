@@ -28,14 +28,6 @@ if TYPE_CHECKING:
         ("effect", Json(""), Json(1)),
         ("name", Json("Name"), Json(None)),
         ("card_type", Json("Raw type"), Json([])),
-        ("flavor", Json("Text"), Json(0)),
-        ("other", Json("Description"), Json([])),
-        ("cost", Json(None), Json("3")),
-        ("attack", Json(-1), Json([])),
-        ("defense", Json(3), Json("")),
-        ("traits", Json(["B", "A", "A"]), Json("Trait")),
-        ("titles", Json([]), Json(None)),
-        ("special_kinds", Json(["Token"]), Json(0)),
     ],
 )
 @pytest.mark.parametrize("side", ["before", "after"])

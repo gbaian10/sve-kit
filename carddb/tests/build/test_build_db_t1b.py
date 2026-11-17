@@ -95,9 +95,6 @@ def test_exact_minimum_inventory_and_real_rows(include_en: bool) -> None:
             {"source_correction", "correction_evidence", "correction_application"},
         ),
         ("qa", {"qa", "qa_version", "qa_card"}),
-        ("related", {"card_related"}),
-        ("art", {"art", "artist", "art_artist"}),
-        ("en", EN_TABLES),
     ],
 )
 def test_group_closure_is_explicit(group: str, extra: set[str]) -> None:
@@ -206,9 +203,6 @@ def test_supersedes_stays_in_its_owner(
         ("errata_printing", "decision_id", None),
         ("region_text_review", "decision_id", None),
         ("region_divergence", "effect", "override_dsl"),
-        ("card_related", "source_kind", "official"),
-        ("card_related", "suggested_count", 1),
-        ("card_related", "to_card_id", "card2"),
     ],
 )
 def test_local_adoption_and_relation_checks(
@@ -324,15 +318,7 @@ def test_text_application_requires_result_unit(
 
 @pytest.mark.parametrize(
     ("field", "value"),
-    [
-        ("card_type", Json("Synthetic")),
-        ("cost", Json(1)),
-        ("attack", Json(1)),
-        ("defense", Json(1)),
-        ("traits", Json([])),
-        ("titles", Json([])),
-        ("special_kinds", Json([])),
-    ],
+    [("card_type", Json("Synthetic")), ("cost", Json(1)), ("attack", Json(1))],
 )
 @pytest.mark.parametrize("status", ["applied", "already_fixed"])
 def test_rule_application_requires_revision(

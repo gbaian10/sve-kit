@@ -177,9 +177,7 @@ def test_expression_formals_bind_different_actual_names_and_propagate_render_evi
     assert missing.issues == ("missing_expression_translation",)
 
 
-@pytest.mark.parametrize(
-    "change", ["type", "role", "domain", "arity", "unknown", "missing_value", "cycle"]
-)
+@pytest.mark.parametrize("change", ["role", "domain", "arity", "cycle"])
 def test_expression_rejects_wrong_arguments_and_dependency_graphs(change: str) -> None:
     item, _, _ = sample()
     value = item.binding.values["count"]

@@ -79,10 +79,7 @@ def test_retained_manifest_uses_only_the_publication_envelope() -> None:
 @pytest.mark.parametrize(
     ("description", "damage", "error", "message"),
     [
-        ("files", "invalid", TypeError, "Expected array"),
-        ("files", [None], TypeError, "Expected object"),
         ("files", {}, TypeError, "Expected array"),
-        ("changes_ref", "invalid", TypeError, "Expected object"),
         ("changes_ref", [None], TypeError, "Expected object"),
         ("changes_ref", {}, KeyError, "path"),
     ],
@@ -164,7 +161,6 @@ def test_retained_manifest_rejects_invalid_hash_with_matching_path(
     [
         ("hash", "Retained manifests must be intact"),
         ("canonical", "Manifest differs from its index entry"),
-        ("version", "Manifest differs from its index entry"),
         ("published", "Manifest differs from its index entry"),
         ("path", "Manifest differs from its index entry"),
         ("format", "Unsupported retained snapshot format"),

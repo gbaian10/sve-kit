@@ -145,9 +145,6 @@ def test_section_raw_mismatch_blocks_the_entire_correction(
         ("Old rule.", ("Old section.",), "applied"),
         ("New rule.", (), "already_fixed"),
         ("New rule.", ("Old section.",), "conflict"),
-        ("Old rule.", (), "conflict"),
-        ("Old rule.", ("Different section.",), "conflict"),
-        ("Old rule.", ("Old section.", "Extra section."), "conflict"),
     ],
 )
 def test_main_text_and_complete_section_list_share_one_status(

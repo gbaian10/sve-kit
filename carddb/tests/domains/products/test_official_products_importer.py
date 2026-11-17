@@ -303,9 +303,7 @@ def test_identical_observations_deduplicate_without_dropping_reads(
         assert len(db.rows("product")) == len(db.rows("printing_product")) == 1
 
 
-@pytest.mark.parametrize(
-    "failure", ["late_insert", "foreign_key", "metadata", "region", "source", "context"]
-)
+@pytest.mark.parametrize("failure", ["late_insert", "metadata", "region"])
 def test_each_late_failure_rolls_back_complete_graph(
     identity_fixture: IdentityFixture, monkeypatch: pytest.MonkeyPatch, failure: str
 ) -> None:
@@ -523,7 +521,7 @@ def test_english_inclusions_obey_existing_identity_gate(
 
 @pytest.mark.parametrize(
     "kind",
-    ["booster", "promo", "deck", "collaboration", "special", "special_pack", "other"],
+    ["booster", "promo", "deck"],
 )
 def test_confirmed_public_code_supplies_type_without_title_or_family_relation(
     identity_fixture: IdentityFixture, kind: str

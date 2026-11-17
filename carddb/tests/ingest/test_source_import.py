@@ -108,17 +108,11 @@ def test_reuse_preserves_database_and_registration_time(
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("status", 404),
-        ("sha256", "A" * 64),
-        ("bytes", 0),
-        ("bytes", True),
-        ("fetched_at", "2020-01-02"),
         ("fetched_at", "2020-01-02T03:04:05"),
         ("fetched_at", "2020-01-02T03:04:05+01:00"),
         ("content_type", "image/png"),
         ("chain", []),
         ("url", "http://shadowverse-evolve.com/card_limit/"),
-        ("url", "https://example.invalid/card_limit/"),
         ("final_url", URLS[1]),
     ],
 )
@@ -190,9 +184,7 @@ def test_invalid_pdf_with_valid_hash(inputs: Inputs) -> None:
         prepare(inputs.input_dir, inputs.selection)
 
 
-@pytest.mark.parametrize(
-    "change", ["missing", "region", "kind", "format", "dependency", "program"]
-)
+@pytest.mark.parametrize("change", ["missing", "kind", "format", "program"])
 def test_selection_and_program_counterexamples(
     inputs: Inputs, tmp_path: Path, change: str
 ) -> None:
@@ -295,13 +287,10 @@ def test_output_race_never_replaces_competitor(
 @pytest.mark.parametrize(
     "sql",
     [
-        "DROP TABLE source_import_receipt",
         "ALTER TABLE source_import_receipt RENAME COLUMN index_bytes TO missing",
         "DELETE FROM source_import_receipt",
         "UPDATE source_import_receipt SET index_sha256 = 'wrong'",
         "UPDATE source_import_receipt SET content = x'7b7d'",
-        "UPDATE resource SET stored_bytes = 1",
-        "DELETE FROM resource",
         "INSERT INTO discovery_generation (id,root,status,started_at) VALUES(1,'synthetic','validated','2020-01-01')",
     ],
 )

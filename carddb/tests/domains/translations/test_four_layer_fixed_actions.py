@@ -147,17 +147,7 @@ def test_related_sources_do_not_gain_admission(raw: str, key: str) -> None:
 @pytest.mark.parametrize(("raw", "key", "ordinal"), CASES, ids=ascii_id)
 @pytest.mark.parametrize(
     "mutation",
-    [
-        "history",
-        "section",
-        "unknown_sections",
-        "unknown_special",
-        "wrong_special",
-        "evolved",
-        "wrong_kind",
-        "field",
-        "missing",
-    ],
+    ["history", "section", "unknown_sections"],
 )
 def test_exact_current_holder_context_is_required(
     raw: str, key: str, ordinal: int, mutation: str

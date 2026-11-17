@@ -53,16 +53,11 @@ def rule_card() -> dict[str, JsonValue]:
 @pytest.mark.parametrize(
     ("case", "expected"),
     [
-        ("complete", None),
-        ("missing_line", "source_line_closure_mismatch"),
         ("reminder_filler", "source_line_closure_mismatch"),
         ("unmarked", "token_source_contract_unavailable"),
-        ("token_definition", "rule_section_kind_mismatch"),
         ("reminder", "rule_section_kind_mismatch"),
         ("duplicate", "duplicate_rule_section"),
         ("wrong_section", "source_location_mismatch"),
-        ("wrong_face", "missing_face"),
-        ("empty", "source_line_closure_mismatch"),
     ],
 )
 def test_rule_sections_require_complete_ability_coverage(

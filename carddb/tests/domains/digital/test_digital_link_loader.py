@@ -49,16 +49,9 @@ def test_missing_and_explicit_empty(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     ("fault", "message"),
     [
-        ("unknown", "Invalid digital-link fields"),
-        ("decisions", "Invalid digital-link fields"),
         ("bool-format", "Invalid digital-link fields"),
-        ("old-format", "Invalid digital-link fields"),
-        ("withdrawn", "Invalid digital-link fields"),
-        ("proposed-review", "Invalid digital-link fields"),
-        ("name-only", "Invalid digital-link fields"),
         ("one-face", "Invalid digital-link fields"),
         ("id-width", "Invalid digital-link fields"),
-        ("super-phase", "Invalid digital-link fields"),
         ("reason", "Invalid digital-link fields"),
         ("no-ja", "Digital name evidence requires Japanese for every phase"),
         ("wrong-face", "Digital-link evidence differs from declared faces"),

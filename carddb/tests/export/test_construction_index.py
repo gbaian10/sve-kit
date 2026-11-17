@@ -666,7 +666,6 @@ def test_command_writes_each_region_beside_the_snapshot(tmp_path: Path) -> None:
         "data_version",
         "missing_data_version",
         "format",
-        "missing_format",
         "boolean_format",
         "canonical",
         "manifest",

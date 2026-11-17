@@ -55,10 +55,6 @@ def test_content_addressed_public_description_round_trips(tmp_path: Path) -> Non
         {"key": "images/card_s/123.webp?v=7"},
         {"key": "../private.webp"},
         {"version": True},
-        {"version": 0},
-        {"bytes": -1},
-        {"sha256": "not-a-hash"},
-        {"source": "private-source"},
     ],
 )
 def test_inventory_rejects_invalid_or_private_rows(

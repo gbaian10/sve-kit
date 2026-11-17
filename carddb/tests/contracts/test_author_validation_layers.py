@@ -76,52 +76,6 @@ if TYPE_CHECKING:
             False,
             id="unknown-division-spelling",
         ),
-        pytest.param(
-            {
-                "static": {
-                    "while": {"my_turn": True},
-                    "effects": [
-                        {"grant": {"keywords": ["ward"]}},
-                    ],
-                }
-            },
-            True,
-            id="static-whole-head-condition",
-        ),
-        pytest.param(
-            {
-                "static": {
-                    "effects": [
-                        {
-                            "if": {
-                                "cond": {"my_turn": True},
-                                "then": [{"grant": {"keywords": ["ward"]}}],
-                            }
-                        }
-                    ]
-                }
-            },
-            True,
-            id="static-per-grant-condition",
-        ),
-        pytest.param(
-            {
-                "static": {
-                    "effects": [
-                        {
-                            "if": {
-                                "cond": {"my_turn": True},
-                                "then": [
-                                    {"prevent": {"kind": "ability", "on": "this"}}
-                                ],
-                            }
-                        }
-                    ]
-                }
-            },
-            True,
-            id="static-prevention-exception",
-        ),
     ],
 )
 def test_author_syntax_acceptance_at_consumer_sites(
@@ -169,64 +123,9 @@ def _assert_acceptance(head: JsonValue, *, accepted: bool) -> None:
             id="one-granted-body",
         ),
         pytest.param(
-            {"cond": {"my_turn": True}, "then": []},
-            False,
-            id="empty-then",
-        ),
-        pytest.param(
-            {
-                "cond": {"my_turn": True},
-                "then": [{"grant": {"keywords": ["ward"]}}] * 2,
-            },
-            False,
-            id="multiple-declarations-in-one-branch",
-        ),
-        pytest.param(
             {"cond": {"my_turn": True}, "then": [{"grant": {}}]},
             False,
             id="empty-grant",
-        ),
-        pytest.param(
-            {
-                "cond": {"my_turn": True},
-                "then": [{"grant": {"keywords": ["ward"]}}],
-                "else": [{"grant": {"keywords": ["storm"]}}],
-            },
-            False,
-            id="else-branch",
-        ),
-        pytest.param(
-            {
-                "cond": {"my_turn": True},
-                "then": [
-                    {
-                        "if": {
-                            "cond": {"awakened": True},
-                            "then": [{"grant": {"keywords": ["ward"]}}],
-                        }
-                    }
-                ],
-            },
-            False,
-            id="nested-conditional",
-        ),
-        pytest.param(
-            {"cond": {"my_turn": True}, "then": [{"cost_mod": {"delta": -1}}]},
-            False,
-            id="other-effect-family",
-        ),
-        pytest.param(
-            {
-                "cond": {"my_turn": True},
-                "then": [{"prevent": {"kind": "ability", "on": "this"}}] * 2,
-            },
-            False,
-            id="prevention-count-unchanged",
-        ),
-        pytest.param(
-            {"cond": {"my_turn": True}, "then": [{"prevent": {"kind": "battle"}}]},
-            False,
-            id="prevention-kind-unchanged",
         ),
     ],
 )

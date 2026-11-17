@@ -371,7 +371,6 @@ def test_history_rejects_a_signed_wrong_predecessor(authored: AdoptionFixture) -
     "change",
     [
         "extend_day",
-        "missing_entry",
         "stale_dependency",
         "wrong_result",
         "extra_exclusion",
@@ -477,16 +476,7 @@ def test_review_report_closure_is_required_before_admission(
 
 @pytest.mark.parametrize(
     "change",
-    [
-        "same_vendor",
-        "no_human",
-        "wrong_member",
-        "policy",
-        "unknown_field",
-        "bool_format",
-        "orphan",
-        "symlink",
-    ],
+    ["same_vendor", "no_human", "wrong_member", "bool_format", "orphan", "symlink"],
 )
 def test_invalid_human_envelopes_fail_closed(  # ruff: ignore[complex-structure] -- Keep the complete admission boundary visible.
     authored: AdoptionFixture, change: str

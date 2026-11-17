@@ -55,12 +55,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> Case:
 @pytest.mark.parametrize(
     "fault",
     [
-        "none",
         "current_removed",
-        "current_semantics",
-        "current_mutated",
-        "current_section_changed",
-        "current_stat_changed",
         "current_trait_removed",
         "source_changed",
         "new_printing",

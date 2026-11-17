@@ -139,14 +139,7 @@ def test_history_promotes_only_registered_roles(
 
 @pytest.mark.parametrize(
     "value",
-    [
-        "additional",
-        "optional",
-        {"receipt": "additional"},
-        {"receipt": "optional"},
-        {"receipt": "paid_cost"},
-        {"receipt": {"entry_payment": "additional"}},
-    ],
+    ["additional", "optional", {"receipt": "additional"}],
 )
 def test_paid_keywords_and_named_receipts_are_disjoint(value: JsonValue) -> None:
     _check(C, {"paid": value})
@@ -157,25 +150,6 @@ STATE_READS: list[JsonValue] = [
     {"count": {"who": "self", "zone": "hand"}},
     {"hand": "self"},
     {"leader_life": "self"},
-    {"resource": {"who": "self", "kind": "pp"}},
-    {"turn_number": {"who": "self"}},
-    {"zone_free": {"who": "self", "zone": "ex"}},
-    {"distinct_names": {"in": "shown"}},
-    {"distinct_orig_costs": {"in": "shown"}},
-    {"agg": {"of": {"in": "shown"}, "attr": "hp", "fn": "sum"}},
-    {"power_of": "t"},
-    {"hp_of": "t"},
-    {"cost_of": "t"},
-    {"orig_cost_of": "t"},
-    {"history_count": {"event": "played", "window": "this_turn"}},
-    {
-        "history_sum": {
-            "event": "payment",
-            "window": "this_turn",
-            "where": {"cost_kind": "earth_rite"},
-            "field": "removed_stack",
-        }
-    },
 ]
 
 

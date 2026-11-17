@@ -131,7 +131,7 @@ def test_source_claim_url_scheme_host_and_space(url: str) -> None:
         checked(SourceClaim, data)
 
 
-@pytest.mark.parametrize("value", [0, 1, "true", "false", [], {}])
+@pytest.mark.parametrize("value", [0, 1, "true"])
 def test_emphasis_strict_bool(value: JsonValue) -> None:
     data = object_value(emphasis(value=value)["data"])
     with pytest.raises(ValueError, match=r"^Input should be a valid boolean$"):

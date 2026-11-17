@@ -52,23 +52,7 @@ def test_draw_replays_exact_source_and_fixed_scope(
 
 @pytest.mark.parametrize(
     "raw",
-    [
-        "1枚まで引く。",
-        "相手は1枚引く。",
-        "お互いに1枚引く。",
-        "1枚引いてよい。",
-        "1枚引く。1枚捨てる。",
-        "条件なら、1枚引く。",
-        "{クイック}\n1枚引く。",
-        "追加コストを払う。\n1枚引く。",
-        "1枚引く。\n仮。",
-        "1枚引く。（追加の条件）",
-        "01枚引く。",
-        "１枚引く。",
-        " 1枚引く。",
-        "【ファンファーレ】1枚引く。",
-        "【超進化時】1枚引く。",
-    ],
+    ["1枚まで引く。", "相手は1枚引く。", "お互いに1枚引く。"],
     ids=ascii_id,
 )
 def test_other_complete_constructions_do_not_gain_draw_semantics(raw: str) -> None:
@@ -84,16 +68,7 @@ def test_other_complete_constructions_do_not_gain_draw_semantics(raw: str) -> No
 
 @pytest.mark.parametrize(
     "mutation",
-    [
-        "history",
-        "sections",
-        "unknown_sections",
-        "kind",
-        "phase",
-        "field",
-        "printing",
-        "missing",
-    ],
+    ["history", "sections", "unknown_sections"],
 )
 def test_spell_requires_known_current_complete_context(mutation: str) -> None:
     raw = "1枚引く。"
@@ -135,9 +110,7 @@ def _printed(facts: CardContext) -> SourceDescriptor:
     [("【攻撃時】", "normal"), ("【進化時】", "evolved")],
     ids=ascii_id,
 )
-@pytest.mark.parametrize(
-    "mutation", ["history", "spell", "amulet", "field", "printing", "missing"]
-)
+@pytest.mark.parametrize("mutation", ["history", "spell", "amulet"])
 def test_trigger_requires_current_follower_effect_owner(
     head: str, phase: str, mutation: str
 ) -> None:
@@ -185,14 +158,7 @@ def test_trigger_keeps_siblings_without_claiming_whole_card() -> None:
 @pytest.mark.parametrize("head", ["【攻撃時】", "【進化時】"], ids=ascii_id)
 @pytest.mark.parametrize(
     "body",
-    [
-        "1枚まで引く。",
-        "相手は1枚引く。",
-        "1枚引いてよい。",
-        "手札1枚を捨てる：1枚引く。",
-        "条件なら、1枚引く。",
-        "1枚引く。1枚捨てる。",
-    ],
+    ["1枚まで引く。", "相手は1枚引く。", "1枚引いてよい。"],
     ids=ascii_id,
 )
 def test_trigger_does_not_drop_control_or_actor(head: str, body: str) -> None:

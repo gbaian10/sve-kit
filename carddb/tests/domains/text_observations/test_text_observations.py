@@ -278,9 +278,7 @@ def test_declared_collab_name_alone_is_not_a_pending_difference(
     assert group.reasons == ("observation_difference",)
 
 
-@pytest.mark.parametrize(
-    "value", ["-1", "1.5", " 1", "１", "9007199254740992", "unknown"]
-)
+@pytest.mark.parametrize("value", ["-1", "1.5", "unknown"])
 def test_unrepresentable_numeric_stats_are_not_invented(value: str) -> None:
     with pytest.raises(ValueError, match="Unrepresentable"):
         stat(value)

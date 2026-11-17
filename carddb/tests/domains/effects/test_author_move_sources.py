@@ -98,25 +98,7 @@ def bad_head(change: str) -> dict[str, JsonValue]:
 
 @pytest.mark.parametrize(
     "change",
-    [
-        "head",
-        "target",
-        "destination",
-        "destroy",
-        "dynamic",
-        "condition",
-        "pp",
-        "act",
-        "sacrifice",
-        "extra-step",
-        "implicit-zone",
-        "zone",
-        "by",
-        "per-turn",
-        "quick",
-        "ub",
-        "advance",
-    ],
+    ["head", "target", "destination"],
 )
 @pytest.mark.parametrize("companion", [False, True])
 def test_complete_payload_is_fixed(

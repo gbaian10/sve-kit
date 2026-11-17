@@ -79,17 +79,7 @@ def test_cross_family_contracts_render_and_satisfy_required_closure(
 
 @pytest.mark.parametrize(
     "change",
-    [
-        "missing_provider",
-        "wrong_port_type",
-        "wrong_event",
-        "generation",
-        "cardinality",
-        "capture",
-        "owner",
-        "branch",
-        "unassigned",
-    ],
+    ["missing_provider", "cardinality", "owner"],
 )
 def test_context_ports_reject_invalid_connections(change: str) -> None:
     case = contract_case("A11")

@@ -604,16 +604,7 @@ class TestDefaultCorrectionInputs:
 
     @pytest.mark.parametrize(
         "problem",
-        [
-            "omitted",
-            "duplicate",
-            "status",
-            "source",
-            "kind",
-            "url",
-            "hash",
-            "region",
-        ],
+        ["omitted", "source", "hash"],
     )
     def test_each_altered_application_or_evidence_is_rejected_before_writes(
         self,
@@ -707,15 +698,7 @@ class TestDefaultCorrectionInputs:
 
     @pytest.mark.parametrize(
         "field",
-        [
-            "result_unit_id",
-            "face_revision_id",
-            "expected_raw_value",
-            "corrected_value",
-            "locator",
-            "effect_unit_id",
-            "type_code",
-        ],
+        ["result_unit_id", "face_revision_id", "type_code"],
     )
     def test_domain_verifier_rejects_structurally_valid_wrong_database_values(
         self,

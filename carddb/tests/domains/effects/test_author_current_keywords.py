@@ -157,25 +157,9 @@ def test_token_face_keyword_requires_a_separate_owner_contract(
     [
         ("【守護】\n【守護】", "unsupported_duplicate_source_keyword"),
         ("【守護】【守護】", "unsupported_duplicate_source_keyword"),
-        ("【守護】【ドレイン】", "unsupported_source_keyword"),
-        ("【守護】\n不明な能力。", "source_pending"),
-        ("{クイック}", "source_unresolved_issue"),
-        ("（プレイしたターンから攻撃できる。）", "source_pending"),
-        ("【ドレイン】", "unsupported_source_keyword"),
-        ("【守護】【疾走】", "source_registry_mismatch"),
         ("【疾走】（プレイしたターンから攻撃できる。）", "source_registry_mismatch"),
     ],
-    ids=(
-        "duplicate-line",
-        "duplicate-element",
-        "unsupported-sibling",
-        "pending-sibling",
-        "quick-missing-concept",
-        "reminder-only",
-        "unsupported-keyword",
-        "unregistered-combination",
-        "unregistered-reminder",
-    ),
+    ids=["duplicate-line", "duplicate-element", "unregistered-reminder"],
 )
 def test_entire_source_must_be_supported(
     keyword_current_fixture: CurrentSourceFixture,

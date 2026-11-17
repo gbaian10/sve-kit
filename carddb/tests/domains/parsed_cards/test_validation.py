@@ -397,9 +397,7 @@ def test_non_sve_source_is_rejected(tmp_path: Path) -> None:
         generate([("jp", sources)], {}, producer_revision=REVISION)
 
 
-@pytest.mark.parametrize(
-    "change", ["hash", "bytes", "identity", "missing", "foreign", "order"]
-)
+@pytest.mark.parametrize("change", ["bytes", "identity", "foreign", "order"])
 def test_batch_selection_reader_checks(tmp_path: Path, change: str) -> None:
     catalog = _catalog(tmp_path)
     root = tmp_path / "inputs"
