@@ -9,6 +9,7 @@ use self::card::play::PlayState;
 use super::knowledge::PublishedKnowledge;
 use super::{Frame, Game, View, int, string};
 use crate::game::player::ExchangeRouteChoice;
+use crate::game::player::IntegerSource;
 use crate::game::player::observation::CardFace;
 use crate::ir::BatchOutcome;
 use crate::ir::ScheduleToken;
@@ -102,7 +103,7 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
-pub use processing::{NumberDeclaration, PlayPhase, QuestionStage};
+pub use processing::{NumberDeclaration, PlayDeclaration, PlayPhase, QuestionStage};
 mod random_sample;
 mod resource;
 mod reveal;
@@ -621,7 +622,7 @@ enum Wait {
     Integer {
         binding: declaration::NumberBinding,
         bounds: Cardinality,
-        source: super::player::IntegerSource,
+        source: IntegerSource,
         purpose: super::player::QuestionPurpose,
         declaration: Option<ReceiptId>,
     },
@@ -656,6 +657,7 @@ pub(super) struct Execution {
     question_stage: Option<QuestionStage>,
     play_phase: Option<PlayPhase>,
     number_declarations: Vec<NumberDeclaration>,
+    play_declarations: Vec<PlayDeclaration>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -850,6 +852,7 @@ impl Game {
                 question_stage: None,
                 play_phase: None,
                 number_declarations: Vec::new(),
+                play_declarations: Vec::new(),
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -986,7 +989,7 @@ impl Game {
                     if declined_child {
                         self.cancel_nested_card(&mut execution, &published)?;
                     } else {
-                        let handled = card::optional::accept(&mut execution, accepted)?;
+                        let handled = card::optional::accept(&mut execution, actor, accepted)?;
                         if !handled {
                             card::exchange::accept(&mut execution, accepted)?;
                         }
@@ -1115,6 +1118,7 @@ impl Game {
                         return Err(invalid("invalid mode selection"));
                     }
                     rollback = execution.answer_origin(validated);
+                    processing::record_modes(&mut execution, actor, &wait.chosen, &modes)?;
                     execution
                         .play
                         .as_mut()
@@ -1165,17 +1169,32 @@ impl Game {
                         binding,
                         bounds,
                         declaration,
+                        source,
                         ..
                     },
                     Answer::Integer(number),
                 ) if contains(bounds, number) => {
                     rollback = execution.answer_origin(validated);
                     binding.assign(&mut execution, number)?;
-                    if let Some(receipt) = declaration {
-                        execution
-                            .receipts
-                            .insert(receipt, InstructionOutcome::Declared(number));
-                        processing::record_number_declaration(self, &mut execution, actor, number);
+                    match declaration {
+                        Some(receipt) => {
+                            execution
+                                .receipts
+                                .insert(receipt, InstructionOutcome::Declared(number));
+                            processing::record_number_declaration(
+                                self,
+                                &mut execution,
+                                actor,
+                                number,
+                            );
+                        }
+                        None if source == IntegerSource::XCost => {
+                            execution.play_declarations.push(PlayDeclaration::X {
+                                player: actor,
+                                value: number,
+                            });
+                        }
+                        None => {}
                     }
                 }
                 (
@@ -1302,6 +1321,21 @@ impl Game {
         self.typed
             .as_ref()
             .map(|execution| execution.number_declarations.as_slice())
+    }
+
+    /// Accepted parameters of this execution alone; this is not a payment receipt.
+    /// Runner diagnostics bypass frame authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_play_declarations;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_play_declarations(&self) -> Option<&[PlayDeclaration]> {
+        self.typed
+            .as_ref()
+            .map(|execution| execution.play_declarations.as_slice())
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.
@@ -1695,7 +1729,7 @@ impl Game {
                         bounds: *cardinality,
                         // Generic effect integers stay unprojected until their wire use is defined.
                         // NumberDeclaration is reserved for explicit declaration instructions.
-                        source: super::player::IntegerSource::Other,
+                        source: IntegerSource::Other,
                         purpose: player::purpose(&decision.kind),
                         declaration: None,
                     },

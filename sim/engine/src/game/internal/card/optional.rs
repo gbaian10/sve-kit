@@ -2,7 +2,7 @@
 use super::play::PlayState;
 use super::{AbilitySource, Execution, Game, Result, invalid, unsupported};
 use crate::game::internal::{
-    Answer, DecisionToken, InputDomain, InstructionOutcome, QuestionStage, Wait,
+    Answer, DecisionToken, InputDomain, InstructionOutcome, PlayDeclaration, QuestionStage, Wait,
 };
 use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
@@ -441,7 +441,11 @@ pub(super) fn mode_state(body: &Program) -> Option<OptionalState> {
     })
 }
 
-pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: bool) -> Result<bool> {
+pub(in crate::game::internal) fn accept(
+    execution: &mut Execution,
+    player: PlayerId,
+    accepted: bool,
+) -> Result<bool> {
     let Some(payment) = execution.play.as_mut().and_then(|play| {
         play.optional
             .iter_mut()
@@ -452,6 +456,13 @@ pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: boo
     if payment.accepted.replace(accepted).is_some() {
         return Err(invalid("repeated optional declaration"));
     }
+    let declaration = PlayDeclaration::OptionalCost {
+        player,
+        receipt: payment.receipt,
+        required: payment.required,
+        accepted,
+    };
+    execution.play_declarations.push(declaration);
     Ok(true)
 }
 

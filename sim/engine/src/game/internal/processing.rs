@@ -1,7 +1,10 @@
 //! Procedure boundaries stay in the runtime queue, separate from authored IR.
 
 use super::{Execution, Fact, Game, Result, invalid};
-use crate::ir::{Nat, Node, PlayerId, ScopeId};
+use crate::ir::{
+    ChoiceDomain, DecisionId, ModeDecision, ModeId, Nat, Node, PlayerId, ReceiptId, ScopeId,
+};
+use alloc::vec::Vec;
 
 /// A typed question's producer-recorded phase, separate from its purpose and answer domain.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -30,6 +33,61 @@ pub struct NumberDeclaration {
     pub player: PlayerId,
     /// The accepted nonnegative value, without a wire-number conversion.
     pub value: Nat,
+}
+
+/// Accepted formal play parameters, distinct from payment and body declarations.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PlayDeclaration {
+    /// A player explicitly fixed X; implicit zero defaults are not answers.
+    X {
+        /// Actual answering player.
+        player: PlayerId,
+        /// Accepted nonnegative value.
+        value: Nat,
+    },
+    /// Accepted modes, normalized to their printed order.
+    Modes {
+        /// Actual answering player.
+        player: PlayerId,
+        /// The particular printed mode group.
+        decision: DecisionId,
+        /// Unique selected modes in resolution order.
+        modes: Vec<ModeId>,
+    },
+    /// A play-time cost declaration, before any payment completes.
+    OptionalCost {
+        /// Actual answering player.
+        player: PlayerId,
+        /// The declared cost group, not evidence that it was paid.
+        receipt: ReceiptId,
+        /// Whether declining cancels the play.
+        required: bool,
+        /// Accepted or declined by the player.
+        accepted: bool,
+    },
+}
+
+pub(super) fn record_modes(
+    execution: &mut Execution,
+    player: PlayerId,
+    decision: &ModeDecision,
+    selected: &[ModeId],
+) -> Result<()> {
+    let ChoiceDomain::Modes { modes, .. } = &decision.domain else {
+        return Err(invalid("accepted mode declaration domain"));
+    };
+    // Answer order cannot change the printed order in which selected modes resolve.
+    let modes = modes
+        .iter()
+        .copied()
+        .filter(|mode| selected.contains(mode))
+        .collect();
+    execution.play_declarations.push(PlayDeclaration::Modes {
+        player,
+        decision: decision.id,
+        modes,
+    });
+    Ok(())
 }
 
 pub(super) fn record_number_declaration(
