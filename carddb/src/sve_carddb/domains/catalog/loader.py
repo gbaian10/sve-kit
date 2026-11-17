@@ -15,7 +15,17 @@ from sve_carddb.domains.catalog.adoption_models import (
 from sve_carddb.domains.catalog.adoption_sources import AdoptionSources
 from sve_carddb.domains.catalog.models import Catalog
 from sve_carddb.domains.catalog.projection import CatalogProjection
-from sve_carddb.domains.catalog.records import LanguageRecord, Shard, VocabularyRecord
+from sve_carddb.domains.catalog.records import (
+    LanguageRecord,
+    NameRecord,
+    Shard,
+    VocabularyRecord,
+)
+from sve_carddb.domains.catalog.rules_name_adoptions import (
+    NameAdoption,
+    check,
+    name_refs,
+)
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.text_observations.vocabulary import Binding, Vocabulary
 from sve_carddb.domains.translations.direct import write
@@ -36,6 +46,8 @@ class Prepared:
     records: tuple[LanguageRecord | VocabularyRecord, ...]
     sources: AdoptionSources
     projection: CatalogProjection
+    # Checked special construction names; each build still compares them with its observations.
+    names: tuple[NameAdoption, ...] = ()
 
 
 def prepare(
@@ -50,21 +62,25 @@ def prepare(
     """Validate mappings against this build's frozen sources."""
     loaded = tuple(r for snapshot in snapshots for r in snapshot.current_records())
     if any(
-        not isinstance(record, (LanguageRecord, VocabularyRecord)) for record in loaded
+        not isinstance(record, (LanguageRecord, VocabularyRecord, NameRecord))
+        for record in loaded
     ):
-        raise ValueError("Offline catalog supports vocabulary and language values")
+        raise ValueError(
+            "Offline catalog supports vocabulary, language and construction name values"
+        )
     records = tuple(
         record
         for record in loaded
         if isinstance(record, (LanguageRecord, VocabularyRecord))
     )
     sources = AdoptionSources(stores, repository, registry, batches=batches)
+    named = tuple(record for record in loaded if isinstance(record, NameRecord))
     source_batches = {
         e.source_ref.batch_id
         for r in records
         for e in r.evidence
         if isinstance(e, TextEvidence)
-    }
+    } | {ref.batch_id for record in named for ref in name_refs(record)}
     review = ReviewContext(
         context=build,
         source_batches=tuple(Batch(batch_id=b) for b in sorted(source_batches)),
@@ -102,6 +118,7 @@ def prepare(
                         )
                         for m in record.data.value.raw_mappings
                     )
+    names = _names(named, review, sources)
     vocabulary = Vocabulary(bindings=tuple(bindings), terms=tuple(terms))
     vocabulary.verify()
     catalog = Catalog(
@@ -112,7 +129,30 @@ def prepare(
         names=(),
         normalizer_version="nfkc-casefold-v1",
     )
-    return Prepared(snapshots, records, sources, CatalogProjection(catalog, vocabulary))
+    return Prepared(
+        snapshots,
+        records,
+        sources,
+        CatalogProjection(catalog, vocabulary),
+        names,
+    )
+
+
+def _names(
+    records: tuple[NameRecord, ...], review: ReviewContext, sources: AdoptionSources
+) -> tuple[NameAdoption, ...]:
+    """Verify each special name's evidence, sources and reviewed name basis."""
+    names = []
+    for record in records:
+        for evidence in record.data.evidence:
+            if isinstance(evidence, TextEvidence):
+                sources.text(evidence.source_ref, review)
+            else:
+                sources.image(evidence)
+        adoption = check(record, review, sources, sources.registry())
+        if adoption is not None:
+            names.append(adoption)
+    return tuple(names)
 
 
 def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed provenance and distinct vocabulary/language keys precede row writes

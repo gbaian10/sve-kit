@@ -87,7 +87,7 @@ vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。
 
 `int_id` 編 printing，型別 UInt32；號段依 printing.region（目前 JP 20001..59999、EN 60001..99999、1..20000 保留，定義見 [authored-layout.md](../domains/authored-layout.md) §3.2），號碼不作地區真值；所有出貨 printing（含 unlisted、暫定卡號/身分）都配 `int_id`，工具只增不改，不需 decision。**配號不等於准許進牌組**，依 §17 的 `regional_decklog`：由該版次在所屬地區的 `decklog_available` 決定；暫定卡號/身分不阻擋建牌，舊碼仍可解碼。首次 ID 可含卡號提示，之後不重算。printing.id 不得作公開 URL 或分享碼：官方 URL 用原卡號，暫定 URL 用保留命名空間的 `int_id`；分享碼用 `int_id`。目錄 ID 不得作對手隱藏手牌實例 ID。
 
-`rules_name` 預設由區域官方名稱推導，特殊 `treated_as` 才人工覆寫。雙面名稱計數依釘住的構築規則，不能把每面各算一張。`printing.card_id` 是跨區身分唯一真值；共用 face 即面對應，不另設 `region_mapping/region_face_mapping`。EN 掛入 JP card 的變更必須全筆人工確認，絕不去 EN 配號。英文尚未對照時不假裝未發售。
+`rules_name` 預設由區域官方名稱推導；聯名名稱以 `collab` 明示並排除在推導外，特殊 `treated_as` 與無法推導時的明示 primary 才人工指定（[採納契約 §4.3](../domains/catalog-route-adoption.md#43-特殊構築名稱)）。雙面名稱計數依釘住的構築規則，不能把每面各算一張。`printing.card_id` 是跨區身分唯一真值；共用 face 即面對應，不另設 `region_mapping/region_face_mapping`。EN 掛入 JP card 的變更必須全筆人工確認，絕不去 EN 配號。英文尚未對照時不假裝未發售。
 
 ### 3.2 商品與發行
 

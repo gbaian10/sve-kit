@@ -200,8 +200,9 @@ def catalogue(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(
         offline,
         "_prepare_catalog",
-        lambda *_args, **_kwargs: SimpleNamespace(projection=projection),
+        lambda *_args, **_kwargs: SimpleNamespace(projection=projection, names=()),
     )
+    monkeypatch.setattr(offline, "_collab_names", lambda _repo: {})
     monkeypatch.setattr(offline, "_populate_adoptions", populate)
 
 

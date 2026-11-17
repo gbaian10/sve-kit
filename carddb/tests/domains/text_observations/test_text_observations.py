@@ -7,6 +7,7 @@ import pytest
 
 from sve_carddb.build import Json, create_database
 from sve_carddb.build.t1 import compile_build
+from sve_carddb.core.json import digest
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.registry.review import Correction
 from sve_carddb.domains.registry.snapshot import load_registry
@@ -244,6 +245,37 @@ def test_each_current_field_difference_is_independently_pending(
     group = next(group for group in plan.groups if group.region == "jp")
     assert group.reasons == ("observation_difference",)
     assert group.current() is None
+
+
+def test_declared_collab_name_alone_is_not_a_pending_difference(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    inputs.jp["PR-001"].faces[0].text = "Rule."
+    case = make_case(tmp_path / "authored", inputs)
+    card = case.provider.cards["jp", "PR-001"]
+    content = card.faces[0].model_copy(update={"name": "Collab name"})
+    case.provider.cards["jp", "PR-001"] = card.model_copy(update={"faces": (content,)})
+    group = next(
+        group
+        for group in plan_text_observations(case.identity, case.provider).groups
+        if group.region == "jp"
+    )
+    collab = {(group.face_id, "jp"): frozenset({digest(b"Collab name")})}
+    plan = plan_text_observations(case.identity, case.provider, collab_names=collab)
+    group = next(group for group in plan.groups if group.region == "jp")
+    assert group.reasons == ()
+    current = group.current()
+    # The initial current keeps the card's own name rather than the collab one.
+    assert current is not None
+    assert current.content.name != "Collab name"
+    assert plan.configuration()["collab_names"] == [
+        [group.face_id, "jp", [digest(b"Collab name")]]
+    ]
+    changed = content.model_copy(update={"stats": ("3", "2", "1")})
+    case.provider.cards["jp", "PR-001"] = card.model_copy(update={"faces": (changed,)})
+    plan = plan_text_observations(case.identity, case.provider, collab_names=collab)
+    group = next(group for group in plan.groups if group.region == "jp")
+    assert group.reasons == ("observation_difference",)
 
 
 @pytest.mark.parametrize(

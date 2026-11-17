@@ -288,3 +288,98 @@ def test_existing_special_name_is_not_a_conflicting_primary(
         role,
         "primary",
     }
+
+
+def add_observed_name(db: Database, name: str, *, current: bool = False) -> None:
+    """Observe the face again under another exact name, optionally as its current."""
+    original = dict(db.rows("face_revision")[0].values)
+    text = TextInterner(db).intern(LocalizedText(lang="ja", text=name))
+    revision = "revision:" + name
+    db.insert(
+        "face_revision",
+        original | {"id": revision, "revision": 1, "name_unit_id": text},
+    )
+    source = dict(db.rows("source_record")[0].values)
+    db.insert("source_record", source | {"id": "source:" + name})
+    observation = dict(db.rows("printing_face_observation")[0].values)
+    db.insert(
+        "printing_face_observation",
+        observation | {"source_id": "source:" + name, "revision_id": revision},
+    )
+    if current:
+        db.update(
+            "face_current",
+            {"face_id": "face", "region": "jp"},
+            {"revision_id": revision},
+        )
+
+
+def collab(name: str) -> NameBinding:
+    return NameBinding(face_id="face", region="jp", official_name=name, role="collab")
+
+
+def names_by_role(db: Database) -> dict[str, set[object]]:
+    official = {
+        r.values["id"]: r.values["official_name"] for r in db.rows("rules_name")
+    }
+    result: dict[str, set[object]] = {}
+    for row in db.rows("face_rules_name"):
+        result.setdefault(str(row.values["role"]), set()).add(
+            official[row.values["rules_name_id"]]
+        )
+    return result
+
+
+def test_collab_current_stands_aside_for_the_remaining_printings(db: Database) -> None:
+    with db.transaction():
+        set_name(db, "jp", "Rules name")
+        add_observed_name(db, "Collab name", current=True)
+        assert populate_rules_names(db, (collab("Collab name"),)) == 1
+    assert names_by_role(db) == {"primary": {"Rules name"}, "collab": {"Collab name"}}
+    assert {r.values["decision_id"] for r in db.rows("face_rules_name")} == {None}
+
+
+def test_collab_names_leave_a_unanimous_remainder_without_current(db: Database) -> None:
+    with db.transaction():
+        db.delete("face_current", {"face_id": "face", "region": "jp"})
+        set_name(db, "jp", "Rules name")
+        add_observed_name(db, "Collab name")
+        assert populate_rules_names(db) == 0
+        assert populate_rules_names(db, (collab("Collab name"),)) == 1
+    assert names_by_role(db)["primary"] == {"Rules name"}
+
+
+def test_explicit_primary_names_a_face_whose_every_name_is_collab(db: Database) -> None:
+    explicit = NameBinding(
+        face_id="face", region="jp", official_name="Rules name", role="primary"
+    )
+    with db.transaction():
+        db.delete("face_current", {"face_id": "face", "region": "jp"})
+        set_name(db, "jp", "First collab")
+        add_observed_name(db, "Second collab")
+        bindings = (collab("First collab"), collab("Second collab"), explicit)
+        assert populate_rules_names(db, bindings) == 1
+    assert names_by_role(db) == {
+        "primary": {"Rules name"},
+        "collab": {"First collab", "Second collab"},
+    }
+
+
+def test_explicit_primary_is_refused_where_a_printing_derives_one(db: Database) -> None:
+    explicit = NameBinding(
+        face_id="face", region="jp", official_name="Chosen name", role="primary"
+    )
+    with pytest.raises(ValueError, match="observations derive one"), db.transaction():
+        populate_rules_names(db, (explicit,))
+    with pytest.raises(ValueError, match="one explicit primary"), db.transaction():
+        db.delete("face_current", {"face_id": "face", "region": "jp"})
+        set_name(db, "jp", "Only collab")
+        populate_rules_names(db, (collab("Only collab"), explicit, explicit))
+
+
+def test_primary_is_never_registered_as_a_special_name(db: Database) -> None:
+    explicit = NameBinding(
+        face_id="face", region="jp", official_name="Rules name", role="primary"
+    )
+    with pytest.raises(ValueError, match="derived, not registered"), db.transaction():
+        register_name(db, explicit)

@@ -17,8 +17,10 @@ from sve_carddb.domains.text_observations.equivalence import (
     Classification,
     Method,
     WordingDecision,
+    comparable,
     comparison_hash,
     equivalent,
+    is_collab,
 )
 from sve_carddb.domains.text_observations.models import candidate_revision_id
 
@@ -323,6 +325,7 @@ def _release_basis(
     dates: dict[str, str | None],
     empty: frozenset[str],
     group: FaceGroup | None,
+    collab: frozenset[str] = frozenset(),
 ) -> tuple[WordingDisplay, str | None]:
     eligible = _rules_candidates(view.candidates, empty)
     if decision is not None and decision.basis_printing_id is not None:
@@ -352,22 +355,26 @@ def _release_basis(
             items = tuple(
                 observations[c.printing_id, _string(c.revision_id)] for c in dated
             )
+            contents = comparable(tuple(item.content for item in items), collab)
             preferred, _ = preferred_wordings(
                 tuple(
                     Wording(
                         identity=canonical(
                             {
                                 key: value
-                                for key, value in item.content.wording_fields().items()
+                                for key, value in content.wording_fields().items()
                                 if key not in {"text", "sections"}
                             }
                         ),
-                        text=item.content.effect or "",
-                        sections=item.content.sections,
+                        text=content.effect or "",
+                        sections=content.sections,
                     )
-                    for item in items
+                    for content in contents
                 )
             )
+            # The basis shows the card's own name whenever a non-collab printing qualifies.
+            own = tuple(i for i in preferred if not is_collab(items[i].content, collab))
+            preferred = own or preferred
             latest = max(dates[items[i].printing_id] or "" for i in preferred)
             chosen = min(
                 (items[i] for i in preferred if dates[items[i].printing_id] == latest),
@@ -391,10 +398,13 @@ def _release_basis(
             and view.display.basis != "current"
             and group is not None
             and equivalent(
-                tuple(
-                    item.content
-                    for item in group.observations
-                    if candidate_revision_id(item) not in empty
+                comparable(
+                    tuple(
+                        item.content
+                        for item in group.observations
+                        if candidate_revision_id(item) not in empty
+                    ),
+                    collab,
                 )
             )
         ):
@@ -497,6 +507,7 @@ def _comparison(
     group: FaceGroup | None,
     dates: dict[str, str | None],
     empty: frozenset[str],
+    collab: frozenset[str] = frozenset(),
 ) -> _Comparison:
     observations = () if group is None else group.observations
     raw = tuple(item.content for item in observations)
@@ -512,8 +523,10 @@ def _comparison(
     compared = selected if not dated and eligible != view.candidates else dated
     return _Comparison(
         fingerprint=comparison_hash(raw),
-        all_equivalent=equivalent(raw),
-        equivalent=equivalent(tuple(item.content for item in compared)),
+        all_equivalent=equivalent(comparable(raw, collab)),
+        equivalent=equivalent(
+            comparable(tuple(item.content for item in compared), collab)
+        ),
         source_corrected=any(item.correction_keys for item in compared),
         excludes_empty=eligible != view.candidates,
         candidates=eligible,
@@ -560,10 +573,13 @@ def populate_wording_basis(db: Database, plan: TextPlan) -> None:
     for face, entries in views.items():
         for view in entries:
             group = groups.get((face, view.region))
-            comparison = _comparison(view, group, dates, empty)
+            collab = plan.collab(face, view.region)
+            comparison = _comparison(view, group, dates, empty, collab)
             decision = decisions.pop((face, view.region), None)
             classification, method, reason = _classification(comparison, decision)
-            display, printing = _release_basis(view, decision, dates, empty, group)
+            display, printing = _release_basis(
+                view, decision, dates, empty, group, collab
+            )
             if (
                 classification != "errata"
                 and view.display.basis == "current"

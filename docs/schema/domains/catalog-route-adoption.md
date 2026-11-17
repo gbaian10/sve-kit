@@ -61,7 +61,7 @@ vocabulary 的 `(kind,code)` 與 symbol 的 id/code 配對是永久概念身分�
 vocabulary／language 的品質欄位與 authored_source_id 指向本次讀入的 authored 檔案，不造 confirmed decision。
 DB 的 current DDL 是唯一建置 schema，FK、STRICT、來源與參數檢查保持。
 
-offline composer 接受 vocabulary／language；其餘五種可編輯值保留 current typed loader 與各自既有功能，
+offline composer 接受 vocabulary／language／rules_name；其餘四種可編輯值保留 current typed loader 與各自既有功能，
 尚未接進 offline 的值必須明確拒絕，不能載入後默默略過。展示永久路由仍受 §5 限制，不能藉停用覆寫改 URL。
 
 ## 4. 詞彙、語言、別名與特殊名稱
@@ -75,7 +75,7 @@ offline composer 接受 vocabulary／language；其餘五種可編輯值保留 c
 | vocabulary_adoption | `{kind,code}` | `{label,raw_mappings,active,translations?}`；label 為 TextValue，active 為 Bool |
 | language_adoption | `{code}` | `{display_name,fallback_order}`；非空 Text、排序有意義且無重複的 Lang 陣列 |
 | search_alias_adoption | `{kind,code,lang,text}` | `{normalized,normalizer}`；normalized 為非空 Text，normalizer 見下文 |
-| rules_name_adoption | `{face_id,region,role}` | `{names,identity_ref,observations,name_basis_hash}`；names 為非空來源型 TextValue 陣列，其餘見下文 |
+| rules_name_adoption | `{face_id,region,role}` | `{names,identity_ref,observations,name_basis_hash}`；names 為非空 TextValue 陣列（collab／treated_as 限來源型，primary 恰一個 authored），其餘見下文 |
 
 ### 4.1 詞彙與語言
 
@@ -132,8 +132,16 @@ loader 重算 normalized，不能信 caller 傳字串；同次查找索引只接
 
 ### 4.3 特殊構築名稱
 
-role 限 collab/treated_as；一般 primary 仍從同區官方 current 名稱推導，無 current 但所有觀測名稱 exact 相同亦可推導，
-有不同名稱則留未定，不藉特殊名稱封套偷選 primary。names 每項語言必與 region 相符（jp→ja，en→en）。
+role 為 collab/treated_as/primary。collab 記錄卡面雙名中規則上不當卡名的[聯名名稱](../../../GLOSSARY.md)；
+官網常把它當成卡名，所以要明示，避免它成為 primary。
+primary 照舊從同區官方 current 名稱推導，但 current 名稱若是本面本區有效的 collab 名稱就不用；
+無 current（或 current 讓開）時，剔除有效 collab 名稱後剩下的觀測名稱 exact 相同亦可推導，仍有不同名稱則留未定。
+推導不用手填文字，也不從 collab 宣告反推 primary。
+
+明示 primary（role=primary）是窄例外：只在本面本區**全部**觀測名稱都是有效 collab 名稱、剔除後沒有任何觀測可推導時允許，
+例如每張版次都印不同聯名名稱、規則卡名只出現在規則文的 token。names 恰為一個 authored TextValue，
+evidence 必填（卡文、Q&A 或卡圖引用）。有觀測可推導 primary 時建置失敗，不能藉此改選 primary。
+names 每項語言必與 region 相符（jp→ja，en→en）。
 陣列按 canonical bytes 排序，重建後的 exact 名稱不得重複；它是此 face/region/role 的完整特殊名稱集合。
 
 identity_ref 是 `{face_id,card_id}`，引用有效面身分的穩定鍵，本次建置驗面／卡片的實際對應。
@@ -147,6 +155,13 @@ name_basis_hash=H(全部 observations 重建的 `{lang,text_hash}` 排序唯一�
 來源名稱集合改變、面／card／region 對應改變，或已採納特殊關係的相關規則依據不再適用才使關係 stale；
 來源缺漏則列無法驗證，不能把缺資料當名稱沒變。沒有同區版次也不能保留該區的有效人工關聯。
 規則依據另列 evidence，不因名稱共現就認定 treated_as。
+
+建置報告的 `rules_name_adoptions` 列出套用、stale 與無法驗證的 record_key；stale 與無法驗證的記錄都不套用，
+這時該面若無法推導 primary 就留未定，不退回舊值。
+
+**聯名版次的表記比較**：版次名稱的 exact UTF-8 hash 等於本面本區已宣告 collab 名稱時，表記等價比較不比它的 name，
+name 只在其餘版次之間比；其他欄位照舊 exact 比較。初始 current 與依據版本在符合條件的版次中優先選非聯名版次，
+讓卡片預設顯示自己的卡名；各版次原文仍顯示官網的名稱。這個比較只看宣告的 hash，不依賴本次推導出的 primary。
 
 各 name 重建後沿既有 `(region,official_name exact)` 產 rules_name；新增／移除名稱時直接修訂完整 names 集合。
 撤回移除該人工關聯，若同名群組仍被其他面／推導 primary 引用則保留，不刪共享物件。

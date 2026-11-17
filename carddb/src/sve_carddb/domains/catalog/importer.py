@@ -133,6 +133,7 @@ def populate_catalog(
         )
     populate_rules_names(db)
     for binding in catalog.names:
-        _adopted(db, binding.decision_id)
+        if binding.decision_id is not None:
+            _adopted(db, binding.decision_id)
         register_name(db, binding)
     db.verify_alias_targets()
