@@ -517,9 +517,12 @@ export function preparePrintingOverlay(
   const base = catalogOf(previous)
   const fragments = new Map<string, Fragment[]>()
   const identities = new Set(previous.bootstrap.map((part) => part.identity))
+  // A printing's own printed name ships its text unit beside the print rows (global detail).
+  const texts = new Map<string, Row>()
   for (const part of additions) {
     const file = snapshot.files.get(part.file)
     const owner = objectValue(part.value["owner"])
+    const text = part.table === "text_unit"
     if (
       !file ||
       file["purpose"] !== "print" ||
@@ -527,10 +530,10 @@ export function preparePrintingOverlay(
       part.value["file_sha256"] !== file["sha256"] ||
       part.value["purpose"] !== "print" ||
       part.value["region"] !== file["region"] ||
-      part.value["partition"] !== "bootstrap" ||
+      part.value["partition"] !== (text ? "detail" : "bootstrap") ||
       part.value["base"] !== null ||
-      owner["kind"] !== "home_set" ||
-      !["printing", "printing_product"].includes(part.table) ||
+      owner["kind"] !== (text ? "global" : "home_set") ||
+      !["printing", "printing_product", "text_unit"].includes(part.table) ||
       identities.has(part.identity) ||
       part.identity !==
         canonicalText([
@@ -557,6 +560,7 @@ export function preparePrintingOverlay(
     )
       fail("shape", "printing overlay requires regional print bootstrap fragments")
     identities.add(part.identity)
+    if (text) for (const row of part.rows) texts.set(stringValue(row["id"]), row)
     if (part.table !== "printing") continue
     const key = stringValue(owner["id"])
     const parts = fragments.get(key)
@@ -599,6 +603,7 @@ export function preparePrintingOverlay(
   }
   const index: CardIndex = {
     ...base.index,
+    textUnit: (id) => base.index.textUnit(id) ?? texts.get(id),
     printing,
     printingsOf: (cardId) =>
       base.index.printingsOf(cardId).map((row) => printing(stringValue(row["id"])) ?? row),
