@@ -17,9 +17,9 @@ use crate::game::player::observation::PendingCost;
 use crate::ir::exchange as exchange_shape;
 use crate::ir::flip_cost;
 use crate::ir::{
-    Action, Cardinality, ChoiceDomain, CostSpec, Decision, DiscardOutcome, FaceId, Int, MoveMethod,
-    MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange, Posture, PostureEvent, Quantity,
-    QuantityUnit, Selector, ZoneKind,
+    Action, Cardinality, ChoiceDomain, CostSpec, Decision, DecisionId, DiscardOutcome, FaceId, Int,
+    MoveMethod, MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange, PlayerId, Posture,
+    PostureEvent, Quantity, QuantityUnit, Selector, ZoneKind,
 };
 use crate::ir::{BanishOutcome, Bool, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId};
 
@@ -38,6 +38,7 @@ pub(in crate::game::internal) struct MaterialWait {
     links: CandidateLinks,
     members: Vec<MaterialCandidate>,
     count: usize,
+    decision: DecisionId,
 }
 
 #[derive(Clone, Debug)]
@@ -47,6 +48,18 @@ struct MaterialCandidate {
 }
 
 impl MaterialWait {
+    pub(in crate::game::internal) fn play_declaration(
+        &self,
+        player: PlayerId,
+        objects: &[ObjectRef],
+    ) -> super::super::processing::PlayDeclaration {
+        super::super::processing::PlayDeclaration::ExchangeMaterials {
+            player,
+            decision: self.decision,
+            objects: objects.to_vec(),
+        }
+    }
+
     pub(in crate::game::internal) fn player_question(
         &self,
         game: &Game,
@@ -111,13 +124,27 @@ pub(in crate::game::internal) fn declared(
         .flatten()
 }
 
-pub(in crate::game::internal) fn accept(execution: &mut Execution, accepted: bool) -> Result<()> {
-    execution
+pub(in crate::game::internal) fn accept(
+    execution: &mut Execution,
+    player: PlayerId,
+    accepted: bool,
+) -> Result<()> {
+    let exchange = execution
         .play
         .as_mut()
         .and_then(|play| play.exchange.as_mut())
-        .ok_or_else(|| invalid("missing exchange decision"))?
-        .accepted = Some(accepted);
+        .ok_or_else(|| invalid("missing exchange decision"))?;
+    exchange.accepted = Some(accepted);
+    let receipt = exchange.definition.receipt;
+    super::super::processing::record_play_declaration(
+        execution,
+        super::super::processing::PlayDeclaration::OptionalCost {
+            player,
+            receipt,
+            required: false,
+            accepted,
+        },
+    );
     Ok(())
 }
 pub(in crate::game::internal) fn select(
@@ -600,13 +627,10 @@ impl Game {
             )?;
             return Ok(true);
         }
-        let members = self.exchange_candidates(
-            execution,
-            &exchange.definition,
-            exchange
-                .route
-                .ok_or_else(|| invalid("missing exchange route"))?,
-        )?;
+        let route = exchange
+            .route
+            .ok_or_else(|| invalid("missing exchange route"))?;
+        let members = self.exchange_candidates(execution, &exchange.definition, route)?;
         let decision = material(exchange)?;
         let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
             return Err(unsupported("exchange domain"));
@@ -650,6 +674,7 @@ impl Game {
                 cardinality: constraint.cardinality,
             }),
             Wait::CostMaterials(MaterialWait {
+                decision: decision.id,
                 links: CandidateLinks::capture(
                     self,
                     execution,

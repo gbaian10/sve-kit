@@ -1,3 +1,6 @@
+#[path = "processing_stage/hand_exchange_declarations.rs"]
+mod hand_exchange_declarations;
+
 #[path = "processing_stage/material_declarations.rs"]
 mod material_declarations;
 

@@ -11,7 +11,7 @@ use super::{
 };
 use crate::ir::{
     Action, Bool, Cardinality, Cause, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome,
-    Disjointness, Expr, Instruction, InstructionContext, Int, MoveMethod, Nat, ObjectRef,
+    Disjointness, Expr, Instruction, InstructionContext, Int, MoveMethod, Nat, ObjectRef, PlayerId,
     PlayerRelation, ReceiptId, SelectionView, Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
@@ -23,6 +23,7 @@ pub(super) struct HandWait {
     members: Vec<ObjectRef>,
     bounds: Cardinality,
     groups: GroupConstraints,
+    formal_cost: Option<ReceiptId>,
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
@@ -240,6 +241,7 @@ impl HandWait {
         bounds: Cardinality,
     ) -> Self {
         Self {
+            formal_cost: None,
             links,
             instruction,
             groups: GroupConstraints {
@@ -259,12 +261,31 @@ impl HandWait {
         groups: GroupConstraints,
     ) -> Self {
         Self {
+            formal_cost: None,
             links,
             instruction,
             members,
             bounds,
             groups,
         }
+    }
+
+    pub(super) const fn mark_formal_cost(&mut self) {
+        self.formal_cost = Some(self.receipt());
+    }
+
+    pub(super) fn play_declaration(
+        &self,
+        player: PlayerId,
+        objects: &[ObjectRef],
+    ) -> Option<super::processing::PlayDeclaration> {
+        self.formal_cost.map(
+            |receipt| super::processing::PlayDeclaration::HandCostMaterials {
+                player,
+                receipt,
+                objects: objects.to_vec(),
+            },
+        )
     }
 
     pub(super) fn record(&self, execution: &mut Execution, members: Vec<ObjectRef>) {
@@ -472,16 +493,12 @@ impl Game {
                 original_costs: None,
                 roles: vec![],
             }),
-            Wait::Discard(HandWait {
-                links: CandidateLinks::capture(self, execution, members.iter().copied())?,
+            Wait::Discard(HandWait::strict(
+                CandidateLinks::capture(self, execution, members.iter().copied())?,
                 instruction,
-                groups: GroupConstraints {
-                    members: vec![members.clone()],
-                    bounds: vec![count],
-                },
                 members,
-                bounds: count,
-            }),
+                count,
+            )),
         )
     }
 

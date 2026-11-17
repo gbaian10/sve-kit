@@ -34,7 +34,12 @@ pub(super) fn initial(card_no: &str, zone: &str, materials: usize, pp: u64) -> V
     initial["players"]["P1"]["pp"] = json!({"current":pp,"max":pp});
     initial
 }
-fn position(program: &WellFormedCardProgram, initial: &Value, cost: i64, card_no: &str) -> Game {
+pub(super) fn position(
+    program: &WellFormedCardProgram,
+    initial: &Value,
+    cost: i64,
+    card_no: &str,
+) -> Game {
     let mut game = Game::new(
         catalog_with_cost(&json!(cost.to_string())),
         initial,
