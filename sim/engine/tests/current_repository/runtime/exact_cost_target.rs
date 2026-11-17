@@ -141,5 +141,10 @@ fn bp18_085_returns_a_two_cost_tokyo_follower() {
     play(&mut game, "source");
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["field"], json!(["punk"]));
-    assert!(state["P1"]["cemetery"].as_array().unwrap().contains(&json!("clerk")));
+    assert!(
+        state["P1"]["cemetery"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("clerk"))
+    );
 }

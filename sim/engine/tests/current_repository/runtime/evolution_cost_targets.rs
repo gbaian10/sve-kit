@@ -61,7 +61,11 @@ fn finish_with(game: &mut Game, mut play: CardPlay, mode: u64) {
                 // The first target takes all but one point, the last target the remainder.
                 let last = shares.len().checked_sub(1).unwrap();
                 shares[last].amount = Nat(1);
-                shares[0].amount = Nat(domain.total.0.checked_sub(u64::try_from(last).unwrap()).unwrap());
+                shares[0].amount = Nat(domain
+                    .total
+                    .0
+                    .checked_sub(u64::try_from(last).unwrap())
+                    .unwrap());
                 for share in shares.iter_mut().take(last).skip(1) {
                     share.amount = Nat(1);
                 }

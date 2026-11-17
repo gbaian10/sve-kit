@@ -147,10 +147,12 @@ fn bp21_112_has_storm_at_zero_sep_and_discards_to_deal_five() {
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"academy","card":"BP02-046"}]);
     let mut game = game(&initial);
     let before = game.projection(View::Referee).unwrap();
-    assert!(before["objects"]["source"]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!("疾走")));
+    assert!(
+        before["objects"]["source"]["keywords"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("疾走"))
+    );
     activate(&mut game, "BP21-112");
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));

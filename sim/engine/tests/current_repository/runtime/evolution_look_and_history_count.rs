@@ -207,7 +207,12 @@ fn bp17_008_arrow_counters_set_the_bow_damage() {
     let state = game.projection(View::Referee).unwrap();
     // Two fanfare counters plus one entry counter; the second entry is past the turn limit.
     assert_eq!(state["objects"]["enemy"]["damage"], 3_u8);
-    assert!(state["P1"]["cemetery"].as_array().unwrap().contains(&json!("source")));
+    assert!(
+        state["P1"]["cemetery"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("source"))
+    );
 }
 
 #[test]
