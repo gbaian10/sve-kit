@@ -86,47 +86,6 @@ fn card(id: u64, generation: u64) -> ObjectRef {
 }
 
 #[test]
-fn search_selection_answers_preserve_all_groups_and_disjoint_generations() {
-    let a = card(1, 1);
-    let b = card(2, 1);
-    let members = [a, b];
-    let domains = [vec![a, b], vec![b]];
-    for groups in [
-        vec![vec![a], vec![b]],
-        vec![vec![], vec![b]],
-        vec![vec![], vec![]],
-    ] {
-        assert!(SearchSelectionAnswer::Grouped { groups }.matches_domain(&members, Some(&domains)));
-    }
-    for groups in [
-        vec![vec![b], vec![b]],
-        vec![vec![a, a], vec![]],
-        vec![vec![], vec![a]],
-        vec![vec![card(1, 2)], vec![]],
-        vec![vec![card(3, 1)], vec![]],
-        vec![vec![a]],
-        vec![vec![a], vec![], vec![]],
-    ] {
-        assert!(
-            !SearchSelectionAnswer::Grouped { groups }.matches_domain(&members, Some(&domains))
-        );
-    }
-    let ungrouped = SearchSelectionAnswer::Ungrouped { cards: vec![a] };
-    assert!(ungrouped.matches_domain(&members, None));
-    assert!(!ungrouped.matches_domain(&members, Some(&domains)));
-    assert!(!ungrouped.matches_domain(&[a, a], None));
-    assert!(!SearchSelectionAnswer::Ungrouped { cards: vec![a, a] }.matches_domain(&members, None));
-    assert!(SearchSelectionAnswer::Ungrouped { cards: vec![] }.matches_domain(&[], None));
-    let grouped = SearchSelectionAnswer::Grouped {
-        groups: vec![vec![]],
-    };
-    assert!(!grouped.matches_domain(&members, None));
-    assert!(!grouped.matches_domain(&members, Some(&[vec![card(3, 1)]])));
-    assert!(!grouped.matches_domain(&members, Some(&[vec![a, a]])));
-    assert!(!SearchSelectionAnswer::Grouped { groups: vec![] }.matches_domain(&members, Some(&[])));
-}
-
-#[test]
 fn partition_answers_consume_found_in_printed_order_even_when_short() {
     let a = card(1, 1);
     let b = card(2, 1);

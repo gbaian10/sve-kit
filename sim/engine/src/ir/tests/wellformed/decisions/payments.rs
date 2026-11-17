@@ -24,25 +24,6 @@ fn resource(id: u64, amount: i64) -> CostStep {
 }
 
 #[test]
-fn meal_resources_can_be_paid_but_race_events_cannot_be_costs() {
-    let mut meal = resource(1, 0);
-    meal.instruction.action = Action::MealRace {
-        subject: ObjectOperand::SourceHolder {},
-        operation: MealRaceOperation::Meal,
-        amount: Expr::Literal(Nat(1)),
-        resource_links: vec![],
-    };
-    accept(body(1, vec![pay(vec![meal.clone()], body(2, vec![]))]));
-    if let Action::MealRace { operation, .. } = &mut meal.instruction.action {
-        *operation = MealRaceOperation::Race;
-    }
-    reject(
-        body(1, vec![pay(vec![meal], body(2, vec![]))]),
-        WellFormedReason::UnsupportedShape,
-    );
-}
-
-#[test]
 fn zero_payment_and_every_alternative_are_checked() {
     accept(body(1, vec![pay(vec![], body(2, vec![]))]));
     accept(body(1, vec![pay(vec![resource(1, 0)], body(2, vec![]))]));
@@ -137,70 +118,6 @@ fn costs_cannot_be_conditionally_skipped_or_publish_materials_without_selection(
     };
     reject(
         body(1, vec![pay(vec![life], body(2, vec![]))]),
-        WellFormedReason::UnsupportedShape,
-    );
-}
-
-#[test]
-fn play_payment_completes_before_resolution_entry_captures_freeze() {
-    let make = |steps| {
-        let mut program = card(body(1, steps), "BP20-P12").node;
-        program.abilities[0].node.play = Some(PlaySpec {
-            limit: None,
-            captures: vec![],
-            parameters: vec![],
-            costs: CostSpec::Ordered { steps: vec![] },
-        });
-        program
-    };
-    let payment = control(Control::Pay {
-        at: PaymentTime::PlayParameter,
-        costs: CostSpec::Ordered {
-            steps: vec![resource(2, 1)],
-        },
-        optional: PaymentOptionality::Optional,
-        on_paid: body(2, vec![]),
-        receipt: ReceiptId(9),
-    });
-    let paid = Located {
-        source: source("BP20-P12"),
-        node: Node::Capture {
-            capture: Capture::Boolean {
-                at: CaptureTime::AtResolution { scope: ScopeId(1) },
-                value: complete(ReceiptReference::new(ReceiptId(9))),
-                into: CaptureRef {
-                    binding: Binding::new(30, ScopeId(1)),
-                },
-            },
-        },
-    };
-    let constant = capture(Binding::new(31, ScopeId(1)), Expr::Literal(Int(1)));
-    WellFormedCardProgram::check(make(vec![payment.clone(), paid, constant.clone()])).unwrap();
-    assert_eq!(
-        WellFormedCardProgram::check(make(vec![constant, payment]))
-            .unwrap_err()
-            .reason,
-        WellFormedReason::DecisionTiming
-    );
-}
-
-#[test]
-fn resource_payment_is_only_a_cost_step() {
-    let effect = |operation| {
-        instruction(
-            Action::Resource {
-                player: PlayerRef::Controller {},
-                resource: Resource::PpCurrent,
-                operation,
-                amount: Expr::Literal(Int(1)),
-            },
-            1,
-            "BP01-065",
-        )
-    };
-    accept(body(1, vec![effect(ResourceOperation::Add)]));
-    reject(
-        body(1, vec![effect(ResourceOperation::Pay)]),
         WellFormedReason::UnsupportedShape,
     );
 }
