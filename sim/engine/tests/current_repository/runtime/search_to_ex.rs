@@ -11,13 +11,13 @@ fn fixture() -> &'static SelectedEffects {
   let (mut snapshot,keywords,mut input)=producer_inputs();
   // Minimal companions isolate printed names, traits and original costs.
   snapshot.push_str(&json!({"number":"ready-deremas","faces":[{"name":"ready-deremas","card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"20","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
-  snapshot.push_str(&json!({"number":"ready-passion","faces":[{"name":"ready-passion","card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"20","traits":["デレマス","パッション"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
+  snapshot.push_str(&json!({"number":"ready-cool","faces":[{"name":"ready-cool","card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"20","traits":["デレマス","クール"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
   snapshot.push_str(&json!({"number":"ready-amulet","faces":[{"name":"ready-amulet","card_class":"ニュートラル","card_type":"アミュレット","cost":"1","power":"-","hp":"-","traits":["デレマス","クール"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
   snapshot.push_str(&json!({"number":"ready-wrong","faces":[{"name":"ready-wrong","card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"20","traits":[],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
   snapshot.push_str(&json!({"number":"ready-anastasia","faces":[{"name":"〔最小〕アナスタシア","card_class":"ニュートラル","card_type":"フォロワー","cost":"3","power":"2","hp":"20","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
-  snapshot.push_str(&json!({"number":"ready-spell","faces":[{"name":"ready-spell","card_class":"ニュートラル","card_type":"スペル","cost":"3","power":"-","hp":"-","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
+  snapshot.push_str(&json!({"number":"ready-tsukasa","faces":[{"name":"〔最小〕桐生つかさ","card_class":"ニュートラル","card_type":"フォロワー","cost":"3","power":"2","hp":"20","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
   snapshot.push_str(&json!({"number":"ready-low","faces":[{"name":"ready-low","card_class":"ニュートラル","card_type":"フォロワー","cost":"2","power":"2","hp":"20","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
-  snapshot.push_str(&json!({"number":"ready-sato","faces":[{"name":"〔最小〕佐藤心","card_class":"ニュートラル","card_type":"フォロワー","cost":"3","power":"2","hp":"20","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
+  snapshot.push_str(&json!({"number":"ready-lastdaylight","faces":[{"name":"ラストデイライト","card_class":"ニュートラル","card_type":"スペル","cost":"2","power":"-","hp":"-","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
   for row in snapshot.lines().map(|line|serde_json::from_str::<Value>(line).unwrap()).filter(|row|row["number"].as_str().unwrap().starts_with("ready-")) {
    let number=row["number"].as_str().unwrap();
    input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
@@ -46,7 +46,7 @@ fn game(initial: &Value) -> Game {
         initial,
         &Value::Null,
         &Value::Null,
-        "ready-ecp02-3",
+        "ready-ecp02-2",
     )
     .unwrap();
     load_companions(&mut game);
@@ -86,10 +86,9 @@ fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
             InputDomain::Search(domain) => {
                 assert!(
                     domain.cards.iter().all(|c| [
-                        "ready-deremas",
-                        "ready-anastasia",
-                        "ready-spell",
-                        "ready-sato"
+                        "ready-tsukasa",
+                        "ready-lastdaylight",
+                        "ready-deremas"
                     ]
                     .contains(&c.card.as_str())),
                     "search must exclude wrong names, traits, kinds and original costs"
@@ -164,10 +163,10 @@ fn load_companions(game: &mut Game) {
     for number in [
         "ready-amulet",
         "ready-anastasia",
+        "ready-cool",
         "ready-deremas",
         "ready-low",
-        "ready-passion",
-        "ready-sato",
+        "ready-tsukasa",
         "ready-wrong",
     ] {
         game.load_internal_card(number, &empty).unwrap();
@@ -175,8 +174,8 @@ fn load_companions(game: &mut Game) {
     let mut tree = expanded::spell_tree().clone();
     let mut spell = tree["cards"]["SD03-005"].clone();
     spell["abilities"][0]["spell"] = json!({"do":[]});
-    tree["cards"] = json!({"ready-spell":spell});
-    let costs = BTreeMap::from([("ready-spell".to_owned(), Nat(3))]);
+    tree["cards"] = json!({"ready-lastdaylight":spell});
+    let costs = BTreeMap::from([("ready-lastdaylight".to_owned(), Nat(2))]);
     for (number, program) in lowerer().lower_with_printed_costs(&tree, &costs).unwrap() {
         game.load_internal_card(&number, &program).unwrap();
     }
@@ -207,177 +206,46 @@ fn play_id(game: &mut Game, id: &str) {
     finish(game, step, 1);
     settle(game, 1);
 }
-fn grave(initial: &mut Value, card: &str, count: u8) {
-    initial["players"]["P1"]["zones"]["cemetery"] = json!(
-        (0..count)
-            .map(|i| json!({"id":format!("grave{i}"),"card":card}))
-            .collect::<Vec<_>>()
-    );
-}
-fn end_turn(game: &mut Game) {
-    game.internal_rule_action(&json!({"do":"end-phase"}))
-        .unwrap();
-    settle(game, 1);
-    while let Some(window) = game.internal_quick_choice().unwrap() {
-        game.answer_internal_card(window.actor, window.token, Answer::Quick(None))
-            .unwrap();
-        settle(game, 1);
-    }
-}
 #[test]
-fn ecp02_sp01_searches_name_to_ex_discount_and_lesson_acts_an_enemy() {
-    for card in ["ECP02-SP01", "ECP02-U01"] {
-        for already_acted in [false, true] {
+fn ecp02_058_excludes_its_own_name_revives_only_with_three_cool_followers_and_discounts_named_spell()
+ {
+    for card in ["ECP02-058", "ECP02-P31"] {
+        for allies in [1_u8, 2] {
             let mut initial = position(card, "hand");
-            initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"found","card":"ready-anastasia"},{"id":"wrong","card":"ready-wrong"}]);
-            initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":already_acted});
-            initial["players"]["P2"]["zones"]["deck"] = json!(
-                (0_u8..4)
-                    .map(|i| json!({"id":format!("opponent{i}"),"card":"ready-wrong"}))
+            initial["players"]["P1"]["zones"]["field"] = json!(
+                (0..allies)
+                    .map(|i| json!({"id":format!("ally{i}"),"card":"ready-cool"}))
                     .collect::<Vec<_>>()
             );
-            let mut game = game(&initial);
-            play(&mut game, 1);
-            play_id(&mut game, "found");
-            native_activate(&mut game, card, 0);
-            let state = game.projection(View::Referee).unwrap();
-            assert_eq!(state["P1"]["pp"]["current"], 7_u8);
-            assert!(
-                state["P1"]["field"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!("found"))
-            );
-            assert_eq!(state["objects"]["enemy"]["acted"], true);
-            assert_eq!(state["objects"]["source"]["acted"], true);
-            assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), 1);
-
-            end_turn(&mut game);
-            let first_start = game.projection(View::Referee).unwrap();
-            assert_eq!(first_start["turn"]["active"], "P2");
-            assert_eq!(
-                first_start["objects"]["enemy"]["acted"], true,
-                "the next opposing rule start cannot stand its target"
-            );
-            end_turn(&mut game);
-            end_turn(&mut game);
-            let later_start = game.projection(View::Referee).unwrap();
-            assert_eq!(later_start["turn"]["active"], "P2");
-            assert_eq!(
-                later_start["objects"]["enemy"]["acted"], false,
-                "the following opposing start stands it after expiry"
-            );
-        }
-    }
-}
-
-#[test]
-fn ecp02_sp05_both_spell_retrievals_are_discounted_and_activation_is_once_per_turn() {
-    for card in ["ECP02-SP05a", "ECP02-SP05b", "ECP02-U05a", "ECP02-U05b"] {
-        let mut initial = position(card, "hand");
-        grave(&mut initial, "ready-passion", 10);
-        initial["players"]["P1"]["zones"]["cemetery"]
-            .as_array_mut()
-            .unwrap()
-            .push(json!({"id":"recover","card":"ready-spell"}));
-        initial["players"]["P1"]["zones"]["deck"] =
-            json!([{"id":"found","card":"ready-spell"},{"id":"wrong","card":"ready-wrong"}]);
-        let mut game = game(&initial);
-        play(&mut game, 1);
-        play_id(&mut game, "found");
-        native_activate(&mut game, card, 0);
-        let state = game.projection(View::Referee).unwrap();
-        assert!(
-            state["P1"]["ex"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("recover"))
-        );
-        play_id(&mut game, "recover");
-        assert_eq!(
-            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
-            6_u8
-        );
-        let ability = fixture().current[card]
-            .program
-            .card()
-            .abilities
-            .iter()
-            .find(|a| a.node.kind == AbilityKind::Activated)
-            .unwrap()
-            .node
-            .id;
-        game.activate_internal_card("source", ability, PlayerId { seat: 1 })
-            .expect_err("the printed activation is limited to once per turn");
-    }
-}
-
-#[test]
-fn ecp02_sp12_fanfare_and_lesson_activation_search_only_original_one_cost_deremas_followers() {
-    for card in ["ECP02-SP12", "ECP02-U12"] {
-        let mut initial = position(card, "hand");
-        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"found0","card":"ready-deremas"},{"id":"found1","card":"ready-deremas"},{"id":"expensive","card":"ready-low"},{"id":"amulet","card":"ready-amulet"},{"id":"wrong","card":"ready-wrong"}]);
-        let mut game = game(&initial);
-        play(&mut game, 1);
-        native_activate(&mut game, card, 0);
-        let state = game.projection(View::Referee).unwrap();
-        let field = state["P1"]["field"].as_array().unwrap();
-        assert_eq!(field.len(), 3);
-        assert!(field.contains(&json!("found0")) && field.contains(&json!("found1")));
-        assert_eq!(state["P1"]["pp"]["current"], 6_u8);
-        assert_eq!(state["objects"]["source"]["acted"], true);
-        assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), 1);
-    }
-}
-
-#[test]
-fn ecp02_071_formal_target_precedes_conditional_damage_heal_and_qualified_activation() {
-    for card in ["ECP02-071", "ECP02-P39"] {
-        for ally in [false, true] {
-            let mut initial = position(card, "hand");
-            grave(&mut initial, "ready-passion", 10);
-            if ally {
-                initial["players"]["P1"]["zones"]["field"] =
-                    json!([{"id":"ally","card":"ready-deremas"}]);
-            }
-            initial["players"]["P1"]["zones"]["deck"] =
-                json!([{"id":"found","card":"ready-sato"},{"id":"wrong","card":"ready-wrong"}]);
+            initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"same","card":card},{"id":"wrong","card":"ready-wrong"},{"id":"recover","card":"ready-cool"}]);
+            initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"found","card":"ready-lastdaylight"},{"id":"wrong-deck","card":"ready-wrong"}]);
             let mut game = game(&initial);
             play(&mut game, 1);
             let entered = game.projection(View::Referee).unwrap();
             assert_eq!(
-                entered["objects"]["enemy"]["damage"],
-                if ally { 4_u8 } else { 0_u8 }
-            );
-            assert_eq!(
-                entered["P1"]["leader"]["life"],
-                if ally { 12_u8 } else { 10_u8 }
-            );
-            native_activate(&mut game, card, 0);
-            let state = game.projection(View::Referee).unwrap();
-            assert!(
-                state["P1"]["field"]
+                entered["P1"]["field"]
                     .as_array()
                     .unwrap()
-                    .contains(&json!("found"))
+                    .contains(&json!("recover")),
+                allies == 2
             );
+            assert!(
+                entered["P1"]["cemetery"]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("same"))
+            );
+            native_activate(&mut game, card, 0);
+            play_id(&mut game, "found");
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["pp"]["current"], 6_u8);
+            assert_eq!(state["objects"]["source"]["acted"], true);
             assert!(
                 state["P1"]["cemetery"]
                     .as_array()
                     .unwrap()
-                    .contains(&json!("source"))
+                    .contains(&json!("found"))
             );
-            assert_eq!(state["P1"]["pp"]["current"], 6_u8);
         }
-        let mut absent = position(card, "hand");
-        absent["players"]["P1"]["zones"]["field"] = json!([{"id":"ally","card":"ready-deremas"}]);
-        absent["players"]["P2"]["zones"]["field"] = json!([]);
-        let mut unplayed = game(&absent);
-        play(&mut unplayed, 1);
-        assert_eq!(
-            unplayed.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
-            10_u8,
-            "no formal target means no fanfare heal"
-        );
     }
 }

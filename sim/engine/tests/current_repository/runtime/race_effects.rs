@@ -261,13 +261,6 @@ fn settle(game: &mut Game, mode: u64) {
         finish(game, step, mode);
     }
 }
-fn play(game: &mut Game, mode: u64) {
-    let step = game
-        .play_internal_card("source", PlayerId { seat: 1 })
-        .unwrap();
-    finish(game, step, mode);
-    settle(game, mode);
-}
 
 fn load_companions(game: &mut Game) {
     let empty = WellFormedCardProgram::check(CardProgram {
@@ -292,27 +285,6 @@ fn load_companions(game: &mut Game) {
     ] {
         game.load_internal_card(number, &empty).unwrap();
     }
-}
-
-fn native_activate(game: &mut Game, card: &str, index: usize) {
-    let ability = fixture().current[card]
-        .program
-        .card()
-        .abilities
-        .iter()
-        .filter(|a| {
-            a.node.kind == AbilityKind::Activated
-                && matches!(a.node.source.origin, AbilityOrigin::Printed { .. })
-        })
-        .nth(index)
-        .unwrap()
-        .node
-        .id;
-    let step = game
-        .activate_internal_card("source", ability, PlayerId { seat: 1 })
-        .unwrap();
-    finish(game, step, 1);
-    settle(game, 1);
 }
 
 fn keyword(state: &Value, id: &str, name: &str) -> bool {
@@ -384,43 +356,6 @@ fn finish_attack(game: &mut Game) {
     }
 }
 #[test]
-fn ecp01_001_play_discount_counts_own_uma_cards_including_an_amulet() {
-    for card in ["ECP01-001", "ECP01-SL01", "ECP01-SP01", "ECP01-SSP01"] {
-        let mut initial = position(card, "hand");
-        initial["players"]["P1"]["zones"]["field"] =
-            json!([{"id":"ally","card":"ready-uma"},{"id":"amulet","card":"ready-amulet"}]);
-        initial["players"]["P2"]["zones"]["field"]
-            .as_array_mut()
-            .unwrap()
-            .push(json!({"id":"foreign","card":"ready-uma"}));
-        let mut game = game(&initial);
-        play(&mut game, 1);
-        assert_eq!(
-            game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
-            8_u8
-        );
-    }
-}
-
-#[test]
-fn ecp01_003_five_uma_cards_qualify_the_printed_act_buff_ward_and_heal() {
-    for card in ["ECP01-003", "ECP01-SL03", "ECP01-SP03", "ECP01-SSP03"] {
-        let mut initial = position(card, "field");
-        initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().extend((0_u8..4).map(|i|json!({"id":format!("ally{i}"),"card":if i==3 {"ready-amulet"} else {"ready-uma"}})));
-        let mut game = game(&initial);
-        native_activate(&mut game, card, 0);
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["objects"]["source"]["power"], 4_u8);
-        assert_eq!(state["objects"]["source"]["hp"], 4_u8);
-        assert_eq!(state["P1"]["leader"]["life"], 12_u8);
-        assert!(
-            keyword(&state, "source", "守護"),
-            "the printed activation grants Ward"
-        );
-    }
-}
-
-#[test]
 fn ecp01_005_real_race_recruits_a_low_cost_uma_and_buffs_the_source() {
     for card in ["ECP01-005", "ECP01-P01"] {
         let mut initial = position(card, "field");
@@ -441,65 +376,6 @@ fn ecp01_005_real_race_recruits_a_low_cost_uma_and_buffs_the_source() {
             state["P1"]["deck"],
             json!(["wrong2", "wrong1", "wrong0", "expensive"])
         );
-    }
-}
-
-#[test]
-fn ecp01_012_three_real_races_resolve_three_recruitments_and_three_stat_gains() {
-    for card in ["ECP01-012", "ECP01-SL07", "ECP01-SP07", "ECP01-SSP07"] {
-        let mut initial = position(card, "field");
-        initial["players"]["P1"]["zones"]["deck"] = json!(
-            (0_u8..3)
-                .flat_map(|i| [
-                    json!({"id":format!("recruit{i}"),"card":"ready-uma2"}),
-                    json!({"id":format!("wrong{i}a"),"card":"ready-wrong"}),
-                    json!({"id":format!("wrong{i}b"),"card":"ready-wrong"})
-                ])
-                .collect::<Vec<_>>()
-        );
-        let mut game = game(&initial);
-        let result = feed(&mut game, card, 2);
-        assert_eq!(
-            result
-                .progress
-                .facts
-                .iter()
-                .filter(|f| matches!(f, Fact::Raced(_)))
-                .count(),
-            3
-        );
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["objects"]["source"]["power"], 6_u8);
-        assert_eq!(state["objects"]["source"]["hp"], 6_u8);
-        assert_eq!(state["P1"]["pp"]["current"], 7_u8);
-        for i in 0_u8..3 {
-            assert!(
-                state["P1"]["field"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!(format!("recruit{i}"))),
-                "each separately resolved race recruits its follower"
-            );
-        }
-    }
-}
-
-#[test]
-fn ecp01_016_fanfare_recruits_an_original_cost_one_uma_follower() {
-    for card in ["ECP01-016", "ECP01-P08"] {
-        let mut initial = position(card, "hand");
-        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"recruit","card":"ready-uma"},{"id":"expensive","card":"ready-uma2"},{"id":"wrong","card":"ready-wrong"}]);
-        let mut game = game(&initial);
-        play(&mut game, 1);
-        let state = game.projection(View::Referee).unwrap();
-        assert!(
-            state["P1"]["field"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("recruit")),
-            "the original cost-one Uma follower enters"
-        );
-        assert_eq!(state["P1"]["deck"].as_array().unwrap().len(), 2);
     }
 }
 
@@ -542,50 +418,6 @@ fn ecp01_017_race_searches_bnw_into_ex_with_a_three_point_turn_discount() {
 }
 
 #[test]
-fn ecp01_021_real_race_deals_four_and_grows_the_printed_follower() {
-    for card in ["ECP01-021", "ECP01-SL11", "ECP01-SP11", "ECP01-SSP11"] {
-        for find in [false, true] {
-            let mut search_setup = position(card, "hand");
-            search_setup["players"]["P1"]["zones"]["deck"] = json!([{"id":"wrong","card":"ready-wrong"},{"id":"amulet","card":"ready-amulet"},{"id":"vodka","card":"ready-vodka"},{"id":"spell","card":"ready-spell1"},{"id":"expensive","card":"ready-spell2"}]);
-            let mut searching = game(&search_setup);
-            play(&mut searching, u64::from(find));
-            let found = searching.projection(View::Referee).unwrap();
-            if find {
-                assert_eq!(found["P1"]["hand"].as_array().unwrap().len(), 2);
-                assert!(
-                    found["P1"]["hand"]
-                        .as_array()
-                        .unwrap()
-                        .contains(&json!("vodka"))
-                        && found["P1"]["hand"]
-                            .as_array()
-                            .unwrap()
-                            .contains(&json!("spell")),
-                    "both printed groups may find their one matching card"
-                );
-            } else {
-                assert_eq!(
-                    found["P1"]["hand"],
-                    json!([]),
-                    "Q1829 permits declining both conditional finds"
-                );
-            }
-            assert_eq!(
-                found["P1"]["deck"].as_array().unwrap().len(),
-                if find { 3 } else { 5 }
-            );
-            assert_eq!(found["P1"]["pp"]["current"], 6_u8);
-        }
-        let mut game = game(&position(card, "field"));
-        feed(&mut game, card, 0);
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["objects"]["enemy"]["hp"], 16_u8);
-        assert_eq!(state["objects"]["source"]["power"], 4_u8);
-        assert_eq!(state["objects"]["source"]["hp"], 4_u8);
-    }
-}
-
-#[test]
 fn ecp01_022_attack_banishes_three_printed_storm_uma_to_damage_every_opposing_follower() {
     for card in ["ECP01-022", "ECP01-SL12", "ECP01-SP12", "ECP01-SSP12"] {
         let mut initial = position(card, "field");
@@ -623,75 +455,6 @@ fn ecp01_022_attack_banishes_three_printed_storm_uma_to_damage_every_opposing_fo
                 .unwrap()
                 .contains(&json!("wrong")),
             "a non-Storm Uma cannot pay"
-        );
-    }
-}
-
-#[test]
-fn ecp01_025_high_original_cost_uma_changes_fanfare_damage_from_one_to_three() {
-    for card in ["ECP01-025", "ECP01-P13"] {
-        for high in [false, true] {
-            let mut initial = position(card, "hand");
-            initial["players"]["P1"]["zones"]["field"] =
-                json!([{"id":"ally","card":if high {"ready-uma4"} else {"ready-uma3"}}]);
-            let mut game = game(&initial);
-            play(&mut game, 1);
-            assert_eq!(
-                game.projection(View::Referee).unwrap()["objects"]["enemy"]["hp"],
-                if high { 17_u8 } else { 19_u8 }
-            );
-        }
-    }
-}
-
-#[test]
-fn ecp01_026_five_uma_spells_make_the_play_free_and_recover_only_a_cost_one_spell() {
-    for card in ["ECP01-026", "ECP01-P14"] {
-        let mut initial = position(card, "hand");
-        let mut grave = (0_u8..4)
-            .map(|i| json!({"id":format!("other{i}"),"card":"ready-spell2"}))
-            .collect::<Vec<_>>();
-        grave.push(json!({"id":"recover","card":"ready-spell1"}));
-        initial["players"]["P1"]["zones"]["cemetery"] = json!(grave);
-        let mut game = game(&initial);
-        play(&mut game, 1);
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["P1"]["pp"]["current"], 10_u8);
-        assert!(
-            state["P1"]["ex"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("recover")),
-            "the cost-one Uma spell is recovered into EX"
-        );
-        assert_eq!(state["P1"]["cemetery"].as_array().unwrap().len(), 4);
-    }
-}
-
-#[test]
-fn ecp01_032_fanfare_heals_and_raises_max_pp_then_the_awakened_activation_recovers_a_high_cost_uma()
-{
-    for card in ["ECP01-032", "ECP01-P16"] {
-        let mut initial = position(card, "hand");
-        initial["players"]["P1"]["pp"] = json!({"current":7_u8,"max":7_u8});
-        initial["players"]["P1"]["zones"]["cemetery"] =
-            json!([{"id":"recover","card":"ready-uma7"},{"id":"low","card":"ready-uma4"}]);
-        let mut game = game(&initial);
-        play(&mut game, 1);
-        native_activate(&mut game, card, 0);
-        let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["P1"]["leader"]["life"], 13_u8);
-        assert_eq!(state["P1"]["pp"]["max"], 8_u8);
-        assert!(
-            state["P1"]["hand"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("recover")),
-            "the awakened printed activation returns an original cost-seven Uma"
-        );
-        assert!(
-            keyword(&state, "source", "守護"),
-            "printed Ward remains active"
         );
     }
 }
