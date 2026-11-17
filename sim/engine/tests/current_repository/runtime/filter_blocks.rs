@@ -513,3 +513,76 @@ fn bp02_108_destroys_every_amulet_but_no_follower() {
         assert_eq!(after["P2"]["field"], json!(["enemy"]));
     }
 }
+
+#[test]
+fn cp04_098_acts_an_amulet_for_hp_and_its_section_stands_amulets() {
+    for card in ["CP04-098", "CP04-P74", "PCS01-042"] {
+        let mut initial = position(card, "hand");
+        princess(&mut initial);
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"ally","card":"flt-enemy"},
+            {"id":"charm","card":"flt-amulet"}
+        ]);
+        let mut game = build(&initial);
+        let play = game
+            .play_internal_card("source", PlayerId { seat: 1 })
+            .unwrap();
+        finish(&mut game, play, &[]);
+        let trigger = pending(&mut game, card);
+        finish(&mut game, trigger, &["flt-enemy", "flt-amulet"]);
+        checks(&mut game);
+        let after = state(&game);
+        assert_eq!(after["objects"]["ally"]["hp"], 11_u8);
+        assert_eq!(
+            after["objects"]["charm"]["acted"], true,
+            "the amulet pays the cost"
+        );
+        let ability = activate(&mut game, "CP04-098", 0);
+        finish(&mut game, ability, &[]);
+        checks(&mut game);
+        let later = state(&game);
+        assert_eq!(later["objects"]["source"]["acted"], true);
+        assert_eq!(
+            later["objects"]["charm"]["acted"], false,
+            "the section stands every own amulet"
+        );
+        assert_eq!(later["objects"]["ally"]["acted"], false);
+    }
+}
+
+#[test]
+fn bp15_053_exiles_a_different_wizard_and_discounts_it_only_after_a_non_hand_entry() {
+    for card in ["BP15-053", "PR-390"] {
+        for zone in ["hand", "ex"] {
+            let mut initial = position(card, zone);
+            initial["players"]["P1"]["zones"]["cemetery"] = json!([
+                {"id":"twin","card":"BP15-053"},
+                {"id":"wizard","card":"flt-wizard"}
+            ]);
+            let mut game = build(&initial);
+            let entry = game
+                .play_internal_card("source", PlayerId { seat: 1 })
+                .unwrap();
+            finish(&mut game, entry, &[]);
+            let trigger = pending(&mut game, card);
+            assert_eq!(offered(&trigger), ["flt-wizard"]);
+            finish(&mut game, trigger, &[]);
+            checks(&mut game);
+            let after = state(&game);
+            assert_eq!(after["P1"]["ex"], json!(["wizard"]));
+            assert_eq!(after["P1"]["cemetery"], json!(["twin"]));
+            let before = after["P1"]["pp"]["current"].as_u64().unwrap();
+            let replay = game
+                .play_internal_card("wizard", PlayerId { seat: 1 })
+                .unwrap();
+            finish(&mut game, replay, &[]);
+            checks(&mut game);
+            let spent = before - state(&game)["P1"]["pp"]["current"].as_u64().unwrap();
+            assert_eq!(
+                spent,
+                if zone == "hand" { 3 } else { 0 },
+                "only 手札以外から場に出ていた grants -3 to the exiled wizard"
+            );
+        }
+    }
+}
