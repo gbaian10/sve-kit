@@ -15,6 +15,7 @@ from sve_carddb.domains.manual_printings import (
     load_manual_printings,
     plan_manual_files,
 )
+from sve_carddb.domains.manual_printings.loader import validate_printings
 from sve_carddb.domains.manual_printings.records import ManualName, Owner
 from sve_carddb.domains.products import load_products
 from sve_carddb.domains.products.models import FamilyRecord
@@ -43,6 +44,7 @@ class MasterImage(RecordData):
 
 class Spec(RecordData):
     slug: str
+    card_id: str
     int_id: int
     region: Literal["jp", "en"]
     home_set_id: Owner
@@ -132,6 +134,9 @@ def append_command(
     existing = load_manual_printings(root, registry=registry)
     plan = plan_manual_files(root, existing, specs)
     _check_families(root, registry, {entry.data.home_set_id for entry in plan.entries})
+    validate_printings(
+        existing.printings() + tuple(entry.data for entry in plan.entries), registry
+    )
     write_files(plan.files)
     # Re-read so a planning mistake fails here instead of in the next build.
     load_manual_printings(

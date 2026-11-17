@@ -21,7 +21,8 @@ from sve_carddb.domains.manual_printings import (
 )
 from sve_carddb.domains.manual_printings.records import AREA
 from sve_carddb.domains.products import load_products
-from sve_carddb.domains.registry.records import PrintingData
+from sve_carddb.domains.registry.build import permanent_id
+from sve_carddb.domains.registry.records import CardData, PrintingData
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.storage import Index, read_yaml, write_files
 from sve_carddb.workflows.manual_printings_commands import app
@@ -39,6 +40,9 @@ if TYPE_CHECKING:
     from ...support.shared_case_fixtures import TextCaseTemplate
 
 REVISION = "a" * 40
+# Two confirmed single-faced cards of the synthetic registry stand in for EP and SEP.
+EP_CARD = permanent_id("c", "jp:BP02-071")
+SEP_CARD = permanent_id("c", "en:GF01-001EN")
 IMAGE: dict[str, JsonValue] = {
     "sha256": "sha256:" + "3" * 64,
     "width": 918,
@@ -56,6 +60,7 @@ def image(**changes: JsonValue) -> dict[str, JsonValue]:
 def spec(**changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
         "slug": "synthetic-ep",
+        "card_id": EP_CARD,
         "int_id": 55000,
         "region": "jp",
         "home_set_id": "EP",
@@ -97,6 +102,7 @@ def test_append_uses_explicit_ids_with_gaps_and_keeps_official_registry(
         spec(),
         spec(
             slug="synthetic-en-sep",
+            card_id=SEP_CARD,
             int_id=95105,
             region="en",
             card_type="sep",
@@ -116,8 +122,7 @@ def test_append_uses_explicit_ids_with_gaps_and_keeps_official_registry(
     assert [shard.path for shard in result.shards] == [AREA + "/EP/001.yaml"]
     jp = next(item for item in printings if item.region == "jp")
     assert jp.id.startswith("p:")
-    assert jp.card_id.startswith("c:")
-    assert jp.face_id != jp.card_id
+    assert (jp.card_id, jp.face_id) == (EP_CARD, permanent_id("f", EP_CARD + ":0"))
     # Lower unused IDs can fill gaps in a later shard without touching the registry.
     second = register(
         registry_root, spec(slug="synthetic-ep-2", int_id=55009, image=None)
@@ -385,6 +390,24 @@ def test_loader_rejects_reused_ids_and_registry_collisions(registry_root: Path) 
         snapshot(registry_root)
 
 
+@pytest.mark.parametrize(
+    ("card_ids", "message"),
+    [
+        ([permanent_id("c", "jp:XX01-001")], "registry card"),
+        ([EP_CARD, SEP_CARD], "exactly one card"),
+    ],
+)
+def test_loader_rejects_cards_outside_the_registry_or_split_types(
+    registry_root: Path, card_ids: list[str], message: str
+) -> None:
+    specs = [
+        spec(slug=f"synthetic-{index}", int_id=55000 + index, card_id=card_id)
+        for index, card_id in enumerate(card_ids)
+    ]
+    with pytest.raises(ValueError, match=message):
+        register(registry_root, *specs)
+
+
 def test_shard_bytes_are_stable_block_yaml(registry_root: Path) -> None:
     register(registry_root, spec(image=None))
     path = registry_root / AREA / "EP" / "001.yaml"
@@ -406,13 +429,17 @@ def test_oversized_append_is_rejected_before_any_write(registry_root: Path) -> N
     assert not (registry_root / AREA).exists()
 
 
-@pytest.mark.parametrize("card_type", ["ep", "sep"])
-def test_populate_stages_textless_provisional_card(
-    registry_root: Path, t0_database_template: DatabaseTemplate, card_type: str
+@pytest.mark.parametrize(("card_type", "card_id"), [("ep", EP_CARD), ("sep", SEP_CARD)])
+def test_populate_stages_textless_printing_of_registry_card(
+    registry_root: Path,
+    t0_database_template: DatabaseTemplate,
+    card_type: str,
+    card_id: str,
 ) -> None:
     result = register(
         registry_root,
         spec(
+            card_id=card_id,
             card_type=card_type,
             image=None,
             references=[
@@ -432,6 +459,26 @@ def test_populate_stages_textless_provisional_card(
                     "public_code": "EP",
                     "kind": "promo",
                     "name_unit_id": "text",
+                },
+            )
+            # The registry stages the card and face; manual printings only join them.
+            cards = {row.values["id"] for row in db.rows("card")}
+            db.insert(
+                "card",
+                {
+                    "id": card_id,
+                    "layout": "single",
+                    "identity_state": "confirmed",
+                    "home_set_id": "EP",
+                },
+            )
+            db.insert(
+                "face",
+                {
+                    "id": permanent_id("f", card_id + ":0"),
+                    "card_id": card_id,
+                    "ordinal": 0,
+                    "side": "front",
                 },
             )
             populate_manual_printings(
@@ -465,10 +512,12 @@ def test_populate_stages_textless_provisional_card(
             row.values["int_id"] == 55000 and row.values["printing_id"] == data.id
             for row in db.rows("card_int_id")
         )
-        card = next(
-            row.values for row in db.rows("card") if row.values["id"] == data.card_id
-        )
-        assert card["identity_state"] == "provisional"
+        assert {row.values["id"] for row in db.rows("card")} == cards | {card_id}
+        assert {
+            (row.values["face_id"], row.values["card_id"])
+            for row in db.rows("printing_face")
+            if row.values["printing_id"] == data.id
+        } == {(data.face_id, card_id)}
         # The manual name never becomes official text, a current or a rules name.
         assert not any(
             row.values["face_id"] == data.face_id for row in db.rows("face_revision")
@@ -550,7 +599,12 @@ def test_unlisted_faces_are_not_name_owners(
     case = default_text_case.copy(tmp_path / "synthetic")
     install(case.root, "products/family/EP/001.yaml", envelope([family("EP")]))
     case.catalog = load_products(case.root, registry=case.identity.snapshot)
-    manual = register(case.root, spec(image=None))
+    card = next(
+        record.data.id
+        for record in load_registry(case.root).records.values()
+        if isinstance(record.data, CardData) and record.data.layout == "single"
+    )
+    manual = register(case.root, spec(card_id=card, image=None))
     context = BuildContext.from_inputs(REVISION, {"synthetic": True})
     with create_database(compile_build(("en", "related", "correction"))) as db:
         with db.transaction():

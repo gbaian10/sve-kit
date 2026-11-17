@@ -207,8 +207,13 @@ def media_projection(  # ruff: ignore[too-many-locals] -- source bindings and pu
         {"id": face.id, "ordinal": face.ordinal} for face in faces
     ]
     if manual is not None:
+        # Manual printings join a registry face, listed once even when shared.
+        listed = {face.id for face in faces}
         face_rows.extend(
-            {"id": data.face_id, "ordinal": 0} for data in manual.snapshot.printings()
+            {"id": face_id, "ordinal": 0}
+            for face_id in sorted(
+                {data.face_id for data in manual.snapshot.printings()} - listed
+            )
         )
     tables: dict[str, list[Record]] = {
         "printing": sorted(prints, key=lambda row: string(row["id"])),

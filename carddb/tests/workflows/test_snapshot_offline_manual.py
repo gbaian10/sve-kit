@@ -13,6 +13,7 @@ from sve_carddb.domains.manual_printings import (
     plan_manual_files,
 )
 from sve_carddb.domains.products import load_products
+from sve_carddb.domains.registry.records import CardData, PrintingData
 from sve_carddb.domains.registry.storage import write_files
 from sve_carddb.export.image_index import MEDIA_TABLES, ImageIndex, ImagePin
 from sve_carddb.export.media import prepare_media
@@ -51,6 +52,8 @@ REFERENCES = (
 def spec(*, with_image: bool = True, **changes: JsonValue) -> ManualSpec:
     base: dict[str, JsonValue] = {
         "slug": "synthetic-event-ep",
+        # register() points every spec at a registry card of the synthetic case.
+        "card_id": "c:" + "0" * 32,
         "int_id": 55000,
         "region": "jp",
         "home_set_id": "EP",
@@ -81,6 +84,8 @@ def register(case: Case, recipe: Inputs, *specs: ManualSpec) -> ManualSnapshot:
     """Append manual shards without changing the official registry."""
     root = recipe.repo / "authored"
     existing = load_manual_printings(root)
+    card = ep_card(case)
+    specs = tuple(item.model_copy(update={"card_id": card}) for item in specs)
     write_files(plan_manual_files(root, existing, specs).files)
     install(case.root, "products/family/EP/001.yaml", envelope([family("EP")]))
     case.catalog = load_products(case.root, registry=case.identity.snapshot)
@@ -90,11 +95,28 @@ def register(case: Case, recipe: Inputs, *specs: ManualSpec) -> ManualSnapshot:
     )
 
 
+def ep_card(case: Case) -> str:
+    """A confirmed single-faced card with an official JP printing stands in for EP."""
+    datas = [record.data for record in case.identity.snapshot.records.values()]
+    single = {
+        data.id
+        for data in datas
+        if isinstance(data, CardData) and data.layout == "single"
+    }
+    return min(
+        data.card_id
+        for data in datas
+        if isinstance(data, PrintingData)
+        and data.region == "jp"
+        and data.card_id in single
+    )
+
+
 @pytest.mark.parametrize(
     ("date", "precision"),
     [("2024-11-17", "day"), ("2025-09", "month"), (None, "unknown")],
 )
-def test_offline_build_exports_textless_unlisted_printing(
+def test_offline_build_exports_textless_unlisted_printing_of_its_card(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     tmp_path: Path,
     date: str | None,
@@ -111,7 +133,7 @@ def test_offline_build_exports_textless_unlisted_printing(
         date,
         precision,
     )
-    assert_provisional_card(tables, data.id, data.card_id, data.face_id)
+    assert_joined_card(tables, data.id, data.card_id, data.face_id)
     assert built.report["manual_printings"] == {"printings": 1, "with_image": 1}
     record = InputRecord.model_validate_json(built.input_content)
     pinned = object_value(parse(record.context.configuration.encode()))
@@ -164,35 +186,23 @@ def assert_manual_printing(
             assert row["manual_date_precision"] is None
 
 
-def assert_provisional_card(
+def assert_joined_card(
     tables: dict[str, list[dict[str, JsonValue]]],
     printing_id: str,
     card_id: str,
     face_id: str,
 ) -> None:
+    # The card keeps its official text and default; the textless printing only joins it.
     public_face = next(row for row in tables["face"] if row["id"] == face_id)
-    assert public_face["current"] == []
-    assert public_face["wording"] == []
-    assert not any(row["face_id"] == face_id for row in tables["face_revision"])
-    assert not any(row["face_id"] == face_id for row in tables["face_rules_name"])
+    assert [object_value(item)["region"] for item in array(public_face["current"])]
     card = next(row for row in tables["card"] if row["id"] == card_id)
-    assert card["identity_state"] == "provisional"
+    assert card["identity_state"] == "confirmed"
+    assert not any(row["identity_state"] == "provisional" for row in tables["card"])
     regions = {
         object_value(item)["region"]: object_value(item)
         for item in array(card["regions"])
     }
-    assert regions["jp"]["default_printing_id"] == printing_id
-    assert regions["jp"]["default_method"] == "fallback"
-    assert regions["jp"]["deck_role"] is None
-    support = next(
-        row for row in tables["card_engine_support"] if row["card_id"] == card_id
-    )
-    blocks = {
-        object_value(raw)["region"]: array(object_value(raw)["reasons"])
-        for raw in array(support["region_blocks"])
-    }
-    assert {"identity_unconfirmed", "missing_region_source"} <= set(blocks["jp"])
-    assert "wording_pending" not in blocks["jp"]
+    assert regions["jp"]["default_printing_id"] != printing_id
 
 
 def make_index(
