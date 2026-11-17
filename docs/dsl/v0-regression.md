@@ -136,8 +136,7 @@ CSD01-T01 的兩行歸通用規則。其餘 15 個空 abilities 卡的主 effect
 
 | 情境 | 檢查的語義 |
 | --- | --- |
-| `authored_ride_costs_share_one_payment_and_reject_missing_resources` | 讀 CP03-009、CP03-112、CSD03a-006 的資源費用宣告，顯式與隱式都只支付一次；無可用資源時不扣 PP、不改狀態 |
-| `chosen_and_actual_movement_results_diverge_at_ex_capacity` | 選兩張但 EX 可容納零／一／兩張；chosen 計數保留原選取量，placed 只計實際移動量 |
+| `explicit_and_implicit_ride_costs_choose_and_pay_exactly_one_resource`、`ride_payment_rejects_ambiguous_declarations_and_missing_unique_materials` | ride 的資源費用宣告，顯式與隱式都只支付一次；宣告不明確或無可用資源時拒絕，不扣 PP、不改狀態 |
 | `original_bp18_bodies_keep_different_remainders_when_ex_is_full` | 直接讀 BP18-059／BP18-SL14 第一個 body；EX 滿時，兩者對剩餘牌的底置集合及最終牌庫順序不同 |
 
 BP18 測試刻意保存目前兩份程式的不同結果，**不是核可兩份都符合卡文**。
