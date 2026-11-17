@@ -2,7 +2,7 @@
 
 use super::{Execution, Fact, Game, Result, invalid};
 use crate::ir::{
-    ChoiceDomain, DecisionId, ModeDecision, ModeId, Nat, Node, PlayerId, ReceiptId, ScopeId,
+    ChoiceDomain, DecisionId, Int, ModeDecision, ModeId, Nat, Node, PlayerId, ReceiptId, ScopeId,
 };
 use alloc::vec::Vec;
 
@@ -35,6 +35,15 @@ pub struct NumberDeclaration {
     pub value: Nat,
 }
 
+/// One successful PP debit owned by its execution, not a complete cost receipt.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct PpPayment {
+    /// Actual payer, which may differ from the effect controller.
+    pub player: PlayerId,
+    /// Amount passed to the successful debit after price adjustments, including zero.
+    pub amount: Int,
+}
+
 /// Accepted formal play parameters, distinct from payment and body declarations.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum PlayDeclaration {
@@ -65,6 +74,16 @@ pub enum PlayDeclaration {
         /// Accepted or declined by the player.
         accepted: bool,
     },
+}
+
+pub(super) fn record_x(execution: &mut Execution, player: PlayerId, value: Nat) {
+    execution
+        .play_declarations
+        .push(PlayDeclaration::X { player, value });
+}
+
+pub(super) fn record_pp_payment(execution: &mut Execution, player: PlayerId, amount: Int) {
+    execution.pp_payments.push(PpPayment { player, amount });
 }
 
 pub(super) fn record_modes(

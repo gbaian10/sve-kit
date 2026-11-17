@@ -1,4 +1,5 @@
 use super::*;
+use sve_engine::game::internal::PpPayment;
 
 #[test]
 fn declaration_and_resolution_survive_rejected_answers() {
@@ -145,10 +146,18 @@ fn an_accepted_answer_whose_body_fails_rolls_back_the_play_lifecycle() {
         let q = question(&game, actor);
         assert_eq!(game.internal_play_phase(), Some(PlayPhase::Resolve));
         assert_eq!(
+            game.internal_pp_payments().unwrap(),
+            &[PpPayment {
+                player: actor.player(),
+                amount: Int(1)
+            }]
+        );
+        assert_eq!(
             submit(&mut game, actor, &q, Answer::Integer(Nat(1))),
             SubmissionKind::EngineFault
         );
         assert_eq!(game.internal_play_phase(), None);
+        assert_eq!(game.internal_pp_payments(), None);
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state[me]["pp"]["current"], 3);
         assert_eq!(state[me]["leader"]["life"], 20);

@@ -103,7 +103,7 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
-pub use processing::{NumberDeclaration, PlayDeclaration, PlayPhase, QuestionStage};
+pub use processing::{NumberDeclaration, PlayDeclaration, PlayPhase, PpPayment, QuestionStage};
 mod random_sample;
 mod resource;
 mod reveal;
@@ -658,6 +658,7 @@ pub(super) struct Execution {
     play_phase: Option<PlayPhase>,
     number_declarations: Vec<NumberDeclaration>,
     play_declarations: Vec<PlayDeclaration>,
+    pp_payments: Vec<PpPayment>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
     player_receipt_links: BTreeMap<ReceiptId, player::CandidateLinks>,
@@ -853,6 +854,7 @@ impl Game {
                 play_phase: None,
                 number_declarations: Vec::new(),
                 play_declarations: Vec::new(),
+                pp_payments: Vec::new(),
                 destroy_guards: Vec::new(),
                 look_viewers: BTreeMap::new(),
                 player_receipt_links: BTreeMap::new(),
@@ -1189,10 +1191,7 @@ impl Game {
                             );
                         }
                         None if source == IntegerSource::XCost => {
-                            execution.play_declarations.push(PlayDeclaration::X {
-                                player: actor,
-                                value: number,
-                            });
+                            processing::record_x(&mut execution, actor, number);
                         }
                         None => {}
                     }
@@ -1336,6 +1335,21 @@ impl Game {
         self.typed
             .as_ref()
             .map(|execution| execution.play_declarations.as_slice())
+    }
+
+    /// Successful PP debits of this execution alone, not a complete payment summary.
+    /// Runner diagnostics bypass frame authorization; hosts must use player observation.
+    ///
+    /// ```
+    /// use sve_engine::game::Game;
+    /// let _ = Game::internal_pp_payments;
+    /// ```
+    #[cfg(feature = "runner")]
+    #[must_use]
+    pub fn internal_pp_payments(&self) -> Option<&[PpPayment]> {
+        self.typed
+            .as_ref()
+            .map(|execution| execution.pp_payments.as_slice())
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.

@@ -120,6 +120,11 @@ fn x_pp_spell_uses_the_discounted_intrinsic_quote_and_declining_does_not_ask_for
         "spell",
         json!({"x":{},"optional_cost":{"pp":"x","result":"paid"},"do":[{"if":{"cond":{"paid":{"receipt":"paid"}},"then":[{"life":{"who":"self","delta":"x"}}]}}]}),
     );
+    // Keep the frame alive after payment so the actual discounted debit can be inspected.
+    tree["cards"]["unit-follower"]["abilities"][0]["spell"]["do"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"optional":{"do":[{"life":{"who":"self","delta":1}}]}}));
     let mut printed = tree["cards"]["unit-follower"].take();
     let mut header = printed["abilities"][0].clone();
     header.as_object_mut().unwrap().remove("spell");
@@ -165,7 +170,19 @@ fn x_pp_spell_uses_the_discounted_intrinsic_quote_and_declining_does_not_ask_for
         } else {
             play
         };
-        resolved(play);
+        let may = awaiting(play);
+        let paid = game
+            .internal_pp_payments()
+            .unwrap()
+            .iter()
+            .map(|payment| payment.amount.0)
+            .collect::<Vec<_>>();
+        assert_eq!(paid, if accepted { vec![1, 4] } else { vec![1] });
+        resolved(
+            game.answer_internal_card(may.actor, may.token, Answer::Integer(Nat(0)))
+                .unwrap(),
+        );
+        assert_eq!(game.internal_pp_payments(), None);
         let view = game.projection(View::Referee).unwrap();
         assert_eq!(
             view["P1"]["pp"]["current"],
