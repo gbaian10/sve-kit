@@ -142,7 +142,12 @@ function printedNameOf(
   faceId: string,
 ): NameSource | undefined {
   const face = ((printing?.["faces"] ?? []) as Row[]).find((item) => item["face_id"] === faceId)
-  return unitName(index, face?.["name_unit_id"])
+  if (typeof face?.["name_unit_id"] !== "string") return undefined
+  // The printed name carries its own name translations, read like a revision's name.
+  return nameOf(index, {
+    name_unit_id: face["name_unit_id"],
+    translations: face["name_translations"] ?? [],
+  })
 }
 
 function unitName(index: CardIndex, unitId: Row[string] | undefined): NameSource | undefined {
@@ -517,12 +522,14 @@ export function preparePrintingOverlay(
   const base = catalogOf(previous)
   const fragments = new Map<string, Fragment[]>()
   const identities = new Set(previous.bootstrap.map((part) => part.identity))
-  // A printing's own printed name ships its text unit beside the print rows (global detail).
+  // A printing's own printed name ships its text and translations beside the print rows
+  // (global detail).
   const texts = new Map<string, Row>()
+  const translations = new Map<string, Row>()
   for (const part of additions) {
     const file = snapshot.files.get(part.file)
     const owner = objectValue(part.value["owner"])
-    const text = part.table === "text_unit"
+    const text = part.table === "text_unit" || part.table === "translation"
     if (
       !file ||
       file["purpose"] !== "print" ||
@@ -533,7 +540,7 @@ export function preparePrintingOverlay(
       part.value["partition"] !== (text ? "detail" : "bootstrap") ||
       part.value["base"] !== null ||
       owner["kind"] !== (text ? "global" : "home_set") ||
-      !["printing", "printing_product", "text_unit"].includes(part.table) ||
+      !["printing", "printing_product", "text_unit", "translation"].includes(part.table) ||
       identities.has(part.identity) ||
       part.identity !==
         canonicalText([
@@ -560,7 +567,9 @@ export function preparePrintingOverlay(
     )
       fail("shape", "printing overlay requires regional print bootstrap fragments")
     identities.add(part.identity)
-    if (text) for (const row of part.rows) texts.set(stringValue(row["id"]), row)
+    if (text)
+      for (const row of part.rows)
+        (part.table === "text_unit" ? texts : translations).set(stringValue(row["id"]), row)
     if (part.table !== "printing") continue
     const key = stringValue(owner["id"])
     const parts = fragments.get(key)
@@ -604,6 +613,7 @@ export function preparePrintingOverlay(
   const index: CardIndex = {
     ...base.index,
     textUnit: (id) => base.index.textUnit(id) ?? texts.get(id),
+    translation: (id) => base.index.translation(id) ?? translations.get(id),
     printing,
     printingsOf: (cardId) =>
       base.index.printingsOf(cardId).map((row) => printing(stringValue(row["id"])) ?? row),

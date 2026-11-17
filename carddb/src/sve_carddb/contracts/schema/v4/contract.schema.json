@@ -1182,11 +1182,17 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldTranslation"
+          }
         }
       ],
       "items": false,
-      "minItems": 16,
-      "maxItems": 16,
+      "minItems": 17,
+      "maxItems": 17,
       "x-columns": [
         "face_id",
         "art_id",
@@ -1203,7 +1209,8 @@
         "translations",
         "corrections",
         "name_concept_id",
-        "name_unit_id"
+        "name_unit_id",
+        "name_translations"
       ],
       "x-types": [
         {
@@ -1288,6 +1295,11 @@
         {
           "nullable": {
             "scalar": "ID"
+          }
+        },
+        {
+          "array": {
+            "ref": "FieldTranslation"
           }
         }
       ]
@@ -2494,11 +2506,17 @@
               "type": "null"
             }
           ]
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/FieldTranslation"
+          }
         }
       ],
       "items": false,
-      "minItems": 7,
-      "maxItems": 7,
+      "minItems": 8,
+      "maxItems": 8,
       "x-columns": [
         "face_id",
         "art_id",
@@ -2506,7 +2524,8 @@
         "signed",
         "embellishment_state",
         "stamps",
-        "name_unit_id"
+        "name_unit_id",
+        "name_translations"
       ],
       "x-types": [
         {
@@ -2542,6 +2561,11 @@
         {
           "nullable": {
             "scalar": "ID"
+          }
+        },
+        {
+          "array": {
+            "ref": "FieldTranslation"
           }
         }
       ]
@@ -16053,7 +16077,8 @@
               "translations",
               "corrections",
               "name_concept_id",
-              "name_unit_id"
+              "name_unit_id",
+              "name_translations"
             ],
             "items": [
               {
@@ -16138,6 +16163,11 @@
               {
                 "nullable": {
                   "scalar": "ID"
+                }
+              },
+              {
+                "array": {
+                  "ref": "FieldTranslation"
                 }
               }
             ]
@@ -16660,7 +16690,8 @@
               "signed",
               "embellishment_state",
               "stamps",
-              "name_unit_id"
+              "name_unit_id",
+              "name_translations"
             ],
             "items": [
               {
@@ -16696,6 +16727,11 @@
               {
                 "nullable": {
                   "scalar": "ID"
+                }
+              },
+              {
+                "array": {
+                  "ref": "FieldTranslation"
                 }
               }
             ]

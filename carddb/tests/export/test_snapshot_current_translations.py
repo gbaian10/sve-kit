@@ -560,3 +560,30 @@ def test_family_label_is_exported_with_its_selected_text(db: Database) -> None:
         )
         == result.tables
     )
+
+
+def test_an_english_printing_borrows_its_paired_jp_printings_own_name(
+    db: Database,
+) -> None:
+    dual_region(db)
+    own = DisplayBinding(
+        "use", ("face_revision", "revision"), "zh-Hant", "own_source", "translation"
+    )
+    with db.transaction():
+        db.insert(
+            "printing_face_observation",
+            dict(db.rows("printing_face_observation")[0].values)
+            | {"printing_id": "printing-en", "revision_id": "revision-en"},
+        )
+        # The EN printing prints its own name: its revision is not the face's current.
+        db.delete("face_current", {"face_id": "face", "region": "en"})
+    assert display_bindings(db, names=(own,)) == ()
+    assert display_bindings(db, names=(own,), paired={"printing-en": "printing"}) == (
+        DisplayBinding(
+            "use",
+            ("face_revision", "revision-en"),
+            "zh-Hant",
+            "jp_source",
+            "translation",
+        ),
+    )

@@ -3927,6 +3927,19 @@
               "scalar": "ID"
             }
           }
+        },
+        "name_translations": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/FieldTranslation"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "ref": "FieldTranslation"
+            }
+          }
         }
       },
       "constraints": {}
@@ -5081,6 +5094,19 @@
           "descriptor": {
             "nullable": {
               "scalar": "ID"
+            }
+          }
+        },
+        "name_translations": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/FieldTranslation"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "ref": "FieldTranslation"
             }
           }
         }

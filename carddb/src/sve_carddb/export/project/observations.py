@@ -111,9 +111,15 @@ def printed_names(view: dict[str, list[Record]], revisions: dict[str, Record]) -
             display = shown.get((string(face["face_id"]), string(printing["region"])))
             if len(own) != 1 or display is None:
                 continue
-            name = revisions[own.pop()]["name_unit_id"]
-            if name != revisions[display]["name_unit_id"]:
-                face["name_unit_id"] = name
+            revision = revisions[own.pop()]
+            if revision["name_unit_id"] != revisions[display]["name_unit_id"]:
+                face["name_unit_id"] = revision["name_unit_id"]
+                # The name keeps its own translations; the card's name keeps the card's.
+                face["name_translations"] = [
+                    dict(object_value(item))
+                    for item in array(revision["translations"])
+                    if object_value(item)["field"] == "name"
+                ]
 
 
 def _candidates(

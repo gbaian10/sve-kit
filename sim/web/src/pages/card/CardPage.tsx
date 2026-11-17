@@ -941,10 +941,16 @@ export function CardView({
                       </div>
                       {treatedAs && (
                         <p data-card-treated-as="" className="text-13 text-text-2">
-                          {t("cardPage.treatedAs", {
-                            name: displayName(treatedAs, uiLanguage, prefs.nameDisplay).primary
-                              .text,
-                          })}
+                          {/* The card's name follows the card-name setting like any other name. */}
+                          {((shown) =>
+                            shown.secondary
+                              ? t("cardPage.treatedAsBoth", {
+                                  name: shown.primary.text,
+                                  other: shown.secondary.text,
+                                })
+                              : t("cardPage.treatedAs", { name: shown.primary.text }))(
+                            displayName(treatedAs, uiLanguage, prefs.nameDisplay),
+                          )}
                         </p>
                       )}
                       <p
