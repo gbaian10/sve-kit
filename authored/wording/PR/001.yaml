@@ -10,15 +10,17 @@ records:
   - face_id: f:31c7d998836b5d858f4c4510c849dcfe
     region: en
     comparison_hash: sha256:f7cc789e43e1d0822e70ef3b41a5a802b63f15a5139257ce40a0fc1b65b0a00c
-    classification: pending_review
-    method: ai
-    reason: 空主文與完整資源使用說明並存；須確認這是共通規則提醒還是資源功能改動。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定（2026-11-17）：「EP卡全部排除 他們就是跟普通EP卡一樣」；全部 EP 是同一張卡，聯名 EP 的{食事}／{憑依}用途隨標題構築追加，卡文以一般 EP 為準。
+    basis_printing_id: p:682d9aaefe425f34b3f01fe82c81c831
   - face_id: f:31c7d998836b5d858f4c4510c849dcfe
     region: jp
     comparison_hash: sha256:5496b52201029eb681f55258d3809264790452fdc3d0fadfabc14f2a846e648d
-    classification: pending_review
-    method: ai
-    reason: 空主文與完整資源使用說明並存；須確認這是共通規則提醒還是資源功能改動。
+    classification: same_effect
+    method: manual
+    reason: 維護者判定（2026-11-17）：「EP卡全部排除 他們就是跟普通EP卡一樣」；全部 EP 是同一張卡，聯名 EP 的{食事}／{憑依}用途隨標題構築追加，卡文以一般 EP 為準。
+    basis_printing_id: p:fd34eb21fe035ec29507a7d255b05d2c
   - face_id: f:37cdd559762c5a2f93e65273e705990c
     region: jp
     comparison_hash: sha256:b2c9fba20fda2896c56df9ce0ebbe6a9f7a47c3d62a81658da9058013a096229
