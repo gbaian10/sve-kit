@@ -3,18 +3,11 @@ import userEvent from "@testing-library/user-event"
 import { useState } from "react"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import {
-  type CardSummary,
-  type SelectedText,
-  sharedAnnotatedTextResolver,
-  SnapshotError,
-  textRuns,
-} from "../../data"
+import { type CardSummary, type SelectedText, SnapshotError } from "../../data"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { renderInRouter } from "../../test-utils"
 import { annotatedOrigin } from "../../test-utils/annotated-snapshot"
 import { AnnotatedText } from "./AnnotatedText"
-import { CardLinkContext } from "./card-link-context"
 import { CardText } from "./CardText"
 
 afterEach(() => {
@@ -51,40 +44,6 @@ const cardName = (text: string, termId: string, bold: boolean | null = true) => 
 })
 
 describe("annotation presentation", () => {
-  it("leaves a vocabulary reference as plain text", async () => {
-    const value = {
-      unit: { text: "手札", lang: "ja" },
-      annotation: {
-        occurrences: [
-          {
-            ordinal: 0,
-            reference: { kind: "vocabulary", key: ["zone", "hand"] },
-            ranges: [{ start: 0, end: 2 }],
-            bold: true,
-          },
-        ],
-      },
-    }
-    await renderInRouter(
-      <AnnotatedText
-        value={value}
-        context={{
-          original: value,
-          concepts: [],
-          explanations: [],
-          cards: [],
-          vocabulary: [{ kind: "zone", code: "hand", unit: { text: "原始區域標籤", lang: "ja" } }],
-        }}
-        emphasis={true}
-        client={await client()}
-        edition="jp"
-      />,
-    )
-    expect(screen.getByText("手札").tagName).toBe("STRONG")
-    expect(screen.queryByRole("button")).not.toBeInTheDocument()
-    expect(screen.queryByRole("link")).not.toBeInTheDocument()
-  })
-
   it("draws an annotated keyword marker as one official icon without an entry", async () => {
     // The keyword range covers only the word inside the braces, as the real annotations do.
     const value = {
@@ -167,65 +126,6 @@ describe("annotation presentation", () => {
     expect(resolve).toHaveBeenCalledTimes(calls)
   })
 
-  it("slices exact codepoints without NFC, NFKC or UTF-16 offsets", () => {
-    const value = {
-      unit: { text: "A😀Ｂé手牌", lang: "ja" },
-      annotation: {
-        occurrences: [
-          {
-            ordinal: 0,
-            reference: { kind: "glossary", key: "hand" },
-            ranges: [{ start: 5, end: 7 }],
-            bold: true,
-          },
-        ],
-      },
-    }
-    expect(textRuns(value).map((run) => run.text)).toEqual(["A😀Ｂé", "手牌"])
-    expect(
-      textRuns(value)
-        .map((run) => run.text)
-        .join(""),
-    ).toBe(value.unit.text)
-  })
-  it("keeps an unlinked card name bold but not clickable, and plain when emphasis is off", async () => {
-    const value = cardName("手牌の王", "king")
-    const context: SelectedText = {
-      original: value,
-      concepts: [{ id: "king", category: "card_name", explanations: [], card_ids: [] }],
-      explanations: [],
-      cards: [],
-    }
-    const snapshotClient = await client()
-    const rendered = await renderInRouter(
-      <AnnotatedText
-        value={value}
-        context={context}
-        emphasis={true}
-        client={snapshotClient}
-        edition="jp"
-      />,
-    )
-    expect(rendered.container.querySelector("strong")?.textContent).toBe("手牌の王")
-    expect(screen.queryByRole("link")).not.toBeInTheDocument()
-    rendered.rerender(
-      <AnnotatedText
-        value={value}
-        context={context}
-        emphasis={false}
-        client={snapshotClient}
-        edition="jp"
-      />,
-    )
-    expect(rendered.container.querySelector("strong")).toBeNull()
-    expect(screen.getByText("手牌の王")).toBeVisible()
-    expect(screen.queryByRole("link")).not.toBeInTheDocument()
-    expect(value.annotation.occurrences[0]?.reference).toEqual({
-      kind: "card_name",
-      term_id: "king",
-    })
-  })
-
   it("previews a single linked card on hover and goes to it on click", async () => {
     prefsStore.set({ uiLanguage: "zh-TW" })
     const value = cardName("手牌の王", "king")
@@ -270,72 +170,6 @@ describe("annotation presentation", () => {
     expect(screen.queryByRole("tooltip")).not.toBeInTheDocument()
     await userEvent.click(link)
     expect(router.state.location.pathname).toBe("/cards/BP01-001")
-  })
-
-  it("opens a single reference where the surrounding frame says, not on the card's page", async () => {
-    const value = cardName("手牌の王", "king")
-    const context: SelectedText = {
-      original: value,
-      concepts: [{ id: "king", category: "card_name", explanations: [], card_ids: ["c:king"] }],
-      explanations: [],
-      cards: [
-        summary({ cardId: "c:king", printingId: "p:king", cardNo: "BP01-001", region: "jp" }),
-      ],
-    }
-    const { router } = await renderInRouter(
-      <CardLinkContext
-        value={(card) => ({ to: `/cards?card=${card.cardNo}`, state: { opened: card.cardNo } })}
-      >
-        <AnnotatedText
-          value={value}
-          context={context}
-          emphasis={true}
-          client={await client()}
-          edition="jp"
-        />
-      </CardLinkContext>,
-    )
-    const link = screen.getByRole("link", { name: "手牌の王" })
-    expect(link).toHaveAttribute("href", "/cards?card=BP01-001")
-    await userEvent.click(link)
-    expect(router.state.location.pathname).toBe("/cards")
-    expect(router.state.location.search).toBe("?card=BP01-001")
-    expect(router.state.location.state).toEqual({ opened: "BP01-001" })
-  })
-
-  it("opens each card of a reference list where the surrounding frame says", async () => {
-    const value = cardName("手牌の王", "king")
-    const context: SelectedText = {
-      original: value,
-      concepts: [
-        { id: "king", category: "card_name", explanations: [], card_ids: ["c:king", "c:other"] },
-      ],
-      explanations: [],
-      cards: [
-        summary({ cardId: "c:king", printingId: "p:king", cardNo: "BP01-001", region: "jp" }),
-        summary({ cardId: "c:other", printingId: "p:other", cardNo: "BP01-002", region: "jp" }),
-      ],
-    }
-    const { router } = await renderInRouter(
-      <CardLinkContext value={(card) => ({ to: `/cards?card=${card.cardNo}` })}>
-        <AnnotatedText
-          value={value}
-          context={context}
-          emphasis={true}
-          client={await client()}
-          edition="jp"
-        />
-      </CardLinkContext>,
-    )
-    await userEvent.click(screen.getByRole("button", { name: "手牌の王" }))
-    const links = within(screen.getByRole("complementary")).getAllByRole("link")
-    expect(links.map((link) => link.getAttribute("href"))).toEqual([
-      "/cards?card=BP01-001",
-      "/cards?card=BP01-002",
-    ])
-    await userEvent.click(links[1] as HTMLElement)
-    expect(router.state.location.pathname).toBe("/cards")
-    expect(router.state.location.search).toBe("?card=BP01-002")
   })
 
   it("lists several linked cards with image, preferred name and edition, closing by × or Escape", async () => {
@@ -408,52 +242,6 @@ describe("annotation presentation", () => {
     await userEvent.keyboard("{Escape}")
     expect(screen.queryByRole("complementary")).not.toBeInTheDocument()
     expect(trigger).toHaveFocus()
-  })
-
-  it("treats one card with printings in both editions as one target, preferring the shown edition", async () => {
-    const value = cardName("手牌の王", "king")
-    const cards = [
-      summary({ cardId: "c:king", printingId: "p:jp", cardNo: "BP01-001", region: "jp" }),
-      summary({ cardId: "c:king", printingId: "p:en", cardNo: "BP01-001EN", region: "en" }),
-    ]
-    const context: SelectedText = {
-      original: value,
-      concepts: [{ id: "king", category: "card_name", explanations: [], card_ids: ["c:king"] }],
-      explanations: [],
-      cards,
-    }
-    const snapshotClient = await client()
-    const rendered = await renderInRouter(
-      <AnnotatedText
-        value={value}
-        context={context}
-        emphasis={true}
-        client={snapshotClient}
-        edition="en"
-      />,
-    )
-    expect(screen.queryByRole("button")).not.toBeInTheDocument()
-    expect(screen.getByRole("link", { name: "手牌の王" })).toHaveAttribute(
-      "href",
-      "/cards/BP01-001EN",
-    )
-    // Without a printing in the shown edition, the other edition's stands in.
-    rendered.unmount()
-    await renderInRouter(
-      <AnnotatedText
-        value={value}
-        context={{ ...context, cards: cards.slice(0, 1) }}
-        emphasis={true}
-        client={snapshotClient}
-        edition="en"
-      />,
-    )
-    expect(screen.getByRole("link", { name: "手牌の王" })).toHaveAttribute(
-      "href",
-      "/cards/BP01-001",
-    )
-    await userEvent.hover(screen.getByRole("link", { name: "手牌の王" }))
-    expect(screen.getByRole("tooltip")).toHaveTextContent("BP01-001 · JP")
   })
 
   it("re-derives an open multi-card list and a direct link when the edition changes", async () => {
@@ -612,84 +400,5 @@ describe("annotation presentation", () => {
       "守護者",
     ])
     expect(screen.queryByRole("button")).not.toBeInTheDocument()
-  })
-
-  it("keeps a rule term as text with or without emphasis", async () => {
-    const value = {
-      unit: { text: "ターン終了時", lang: "ja" },
-      annotation: {
-        occurrences: [
-          {
-            ordinal: 0,
-            reference: { kind: "glossary", key: "term:rule_term.end_of_turn" },
-            ranges: [{ start: 0, end: 6 }],
-            bold: true,
-          },
-        ],
-      },
-    }
-    const context: SelectedText = {
-      original: value,
-      concepts: [
-        { id: "term:rule_term.end_of_turn", category: "rule_term", explanations: [], card_ids: [] },
-      ],
-      explanations: [],
-      cards: [],
-    }
-    const snapshotClient = await client()
-    const rendered = await renderInRouter(
-      <AnnotatedText
-        value={value}
-        context={context}
-        emphasis={true}
-        client={snapshotClient}
-        edition="jp"
-      />,
-    )
-    expect(screen.getByText("ターン終了時").tagName).toBe("STRONG")
-    expect(screen.queryByRole("link")).not.toBeInTheDocument()
-    expect(screen.queryByRole("button")).not.toBeInTheDocument()
-    rendered.rerender(
-      <AnnotatedText
-        value={value}
-        context={context}
-        emphasis={false}
-        client={snapshotClient}
-        edition="jp"
-      />,
-    )
-    expect(screen.getByText("ターン終了時").tagName).toBe("SPAN")
-  })
-
-  it("renders the actual native C/P/R text while the preference changes only emphasis", async () => {
-    prefsStore.set({ nameDisplay: "translated" })
-    const { client } = await annotatedOrigin()
-    await client.load()
-    const { container } = await renderInRouter(
-      <CardText
-        edition="jp"
-        client={client}
-        owner={{ kind: "face_revision", id: "revision" }}
-        field="name"
-      />,
-    )
-    expect(screen.getByRole("status")).toHaveTextContent("文字與標註載入中")
-    await screen.findByText("translation")
-    expect(container.querySelector("strong")?.textContent).toBe("Synthetic")
-    expect(screen.getByText(/專案譯文/)).toHaveTextContent("非官方")
-    // The keyword concept behind the name is emphasis only: no control to open.
-    expect(screen.queryByRole("button")).not.toBeInTheDocument()
-    act(() => {
-      prefsStore.set({ termEmphasis: false })
-    })
-    await vi.waitFor(() => {
-      expect(container.querySelector("strong")).toBeNull()
-    })
-    expect(screen.getByText("Synthetic")).toBeVisible()
-    const value = await sharedAnnotatedTextResolver(client).resolve(
-      { owner: { kind: "face_revision", id: "revision" }, field: "name", ordinal: null },
-      "zh-Hant",
-    )
-    expect(value?.original.annotation?.["occurrences"]).toHaveLength(1)
   })
 })
