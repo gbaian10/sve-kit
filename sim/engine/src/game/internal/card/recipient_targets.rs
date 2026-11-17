@@ -362,6 +362,7 @@ impl Game {
             },
             Wait::RecipientTargets(wait),
         ));
+        // This direct formal wait always replaces its stage; no branch may keep the prior one.
         execution.question_stage = Some(QuestionStage::Target);
         Ok(())
     }

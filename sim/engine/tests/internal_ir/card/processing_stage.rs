@@ -1,3 +1,6 @@
+#[path = "processing_stage/frame_sources.rs"]
+mod frame_sources;
+
 #[path = "processing_stage/target_allocation_stage.rs"]
 mod target_allocation_stage;
 

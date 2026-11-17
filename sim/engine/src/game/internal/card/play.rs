@@ -1357,6 +1357,7 @@ impl Game {
             waiting: None,
             question_stage: None,
             play_phase: None,
+            processing_disclosure: super::super::processing::ProcessingDisclosure::default(),
             number_declarations: Vec::new(),
             play_declarations: Vec::new(),
             pp_payments: Vec::new(),
@@ -1488,12 +1489,13 @@ impl Game {
         result
     }
 
-    pub(super) fn card_play_result(&mut self, execution: Execution) -> Result<CardPlay> {
+    pub(super) fn card_play_result(&mut self, mut execution: Execution) -> Result<CardPlay> {
         if execution.terminated {
             return Ok(CardPlay::GameEnded(
                 self.internal_effect_terminal(execution.id, execution.progress()),
             ));
         }
+        super::super::processing::disclose_source(self, &mut execution);
         if let Some((view, _)) = &execution.waiting {
             let view = view.clone();
             self.typed = Some(execution);

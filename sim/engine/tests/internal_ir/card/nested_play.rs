@@ -192,7 +192,7 @@ pub(super) fn build(side: &str, child: &str, enemy: bool, scenario: Scenario) ->
     build_custom(side, child, enemy, scenario, |_| {})
 }
 
-fn build_custom(
+pub(super) fn build_custom(
     side: &str,
     child: &str,
     enemy: bool,

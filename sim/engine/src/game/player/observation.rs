@@ -3,7 +3,8 @@
 mod context;
 pub use context::{
     AbilityQuota, DamageHistory, DiceHistory, EffectRecipient, HistoryEvent, PendingTrigger,
-    PreventionChange, StatGainHistory, SubjectHistory, TriggerTiming, TurnHistory,
+    PreventionChange, ProcessingSource, StatGainHistory, SubjectHistory, TriggerTiming,
+    TurnHistory,
 };
 
 mod board;
@@ -28,7 +29,7 @@ use crate::battle::{
     BattleReferences, ObjectTable, ProjectionError, QuestionProjection, RuleProcessing,
     build_objects, build_observation, project_turn,
 };
-use crate::game::internal::zone_capacity;
+use crate::game::internal::{observed_sources, zone_capacity};
 use crate::game::{Game, Object};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
@@ -271,6 +272,10 @@ pub struct Observation {
     pub costs: CostObservation,
     /// Disclosed pending occurrences, without question or authority identities.
     pub pending: Vec<PendingTrigger>,
+    /// Sources of formal executions actually disclosed by a question to this viewer.
+    /// This outer-to-inner subset omits unknown or undisclosed sources; empty is not
+    /// evidence of an empty processing stack and cannot authorize wire interaction.
+    pub processing_sources: Vec<ProcessingSource>,
     /// Committed public facts retained for this turn.
     pub history: TurnHistory,
 }
@@ -594,6 +599,7 @@ impl Game {
             remembered: self.card_memory(perspective)?,
             costs: self.observed_costs(perspective)?,
             pending: self.observed_pending(perspective)?,
+            processing_sources: observed_sources(self, perspective),
             history: self.observed_history(perspective)?,
         })
     }
