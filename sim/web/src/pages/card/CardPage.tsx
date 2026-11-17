@@ -941,10 +941,14 @@ export function CardView({
                       </div>
                       {treatedAs && (
                         <p data-card-treated-as="" className="text-13 text-text-2">
-                          {t("cardPage.treatedAs", {
-                            name: displayName(treatedAs, uiLanguage, prefs.nameDisplay).primary
-                              .text,
-                          })}
+                          {/* The card's original name, with its translation when the interface has one. */}
+                          {treatedAs.translations[textLang] &&
+                          treatedAs.translations[textLang] !== treatedAs.original.text
+                            ? t("cardPage.treatedAsTranslated", {
+                                name: treatedAs.original.text,
+                                translation: treatedAs.translations[textLang],
+                              })
+                            : t("cardPage.treatedAs", { name: treatedAs.original.text })}
                         </p>
                       )}
                       <p

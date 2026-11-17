@@ -7,20 +7,27 @@ records:
         card_id: c:daf1a3bc3edd58b88eb4434c04a6e500
         region: jp
       value:
-        printing_id: p:f6353ee3c5c652e4944bf3ebde2e5a87
+        printing_id: p:fd34eb21fe035ec29507a7d255b05d2c
         candidates:
           - p:02ba50fabfc459ccb7fcf4e476ec50f1
+          - p:046b9558fc755c7f904743fc79feff09
           - p:0bfe18ec3ef3577081a64aab147a11ef
+          - p:0c55eed4423c51a7b324806c6611091d
           - p:0c691e4ed8ab5a7caecdb587ff841fa1
           - p:0d55755af67b58e6a0090c2c39bd21d8
+          - p:0e31421ec5765e7996d6c568f870f56f
           - p:101152d4511b5b8ebb660f77bfbccfe8
+          - p:137da39319535289ac03f48a4428cc76
           - p:14edb6a1822a53cfa55f87084362e110
           - p:15e7e55c206357ca8404f9c2a1e6bee3
           - p:182dc288170d5f09801747fcfb8ed04d
           - p:1851981101f4557ea2ed5c70040ab045
+          - p:18b4c71e37ff59719edd054db69a4439
+          - p:211a8588085a56748219a15411321701
           - p:2453fdeaf4c150649abe1812a46c2d50
           - p:27a4a4279bd453c89fa4b407d5c27e52
           - p:29fe3d726a62539e8ed82b378f5fc594
+          - p:32d99d9eb609535aa77e079ef06e1b7c
           - p:34259c180aa25548a080fb3e1e5b0e20
           - p:35d5f3c6d6045055bd91884d9b546d40
           - p:3951472d28e653e2a2f318b1a34e58f3
@@ -28,6 +35,7 @@ records:
           - p:3ef09c7c1a7357d69d1e70ecb19d144e
           - p:3fda35444cf256eeac3e069c45b250d3
           - p:429cd989b23f58cb9052397e38d6adc5
+          - p:44c68b6bffe2580faaee1100396df222
           - p:4c26d958b29158d4be40b2467d8aa7e5
           - p:4da6d4bb2153554da847d40f0204a645
           - p:4f8be8d9ab3d5fc4b55b74f30ab5fb4c
@@ -38,14 +46,17 @@ records:
           - p:5c32d47776645f1a998329d852eea80e
           - p:6113d49931d55107a6b1907adea472c7
           - p:635f38e9aa1d50a48ffc3a85c10aa408
+          - p:68edc1d54e0651fbbfa4ebc05dab8733
           - p:697774c1a8ac54f192499d3f543a362b
           - p:6afe9d8a8bc05bf19a0fa161fbcd8467
           - p:7a780f5c6e6e5931aba064788524cdad
           - p:7af348bd93765dfcabbaebb73a76e43d
           - p:7b91cab6fc2e5eeda5e47c8a192a91b0
+          - p:806344d45e85580c9f3dbeef075d5664
           - p:81068953454e5b0bad8585c76cc81425
           - p:815e69e9926c5f6a8dd18af44d04e71e
           - p:84e18b33006f5188bef5bdf29f8a7886
+          - p:857e0d655e3f591cbc3abfd52b5ce530
           - p:92d2c8afebe156e3a9239044489a52e0
           - p:94f74a6ebf3e5281b6836171fa40f27f
           - p:97baa559bab45f6caad645fec9d6b01d
@@ -58,7 +69,9 @@ records:
           - p:b2ad770a588c547da09bffce71edde4b
           - p:b3eaf3cacd8450a9972370a90bf5dd3d
           - p:b8f58af6d0d05418a44f77337da11b4c
+          - p:ba5e9e0ca7af5a948aa5734612099536
           - p:ba9bc266ae9f5ca489c8dc0ca37f334b
+          - p:be11032393685d00b3bf6fc89e26fdf2
           - p:c00def5fe8c652e4912fe2e41ca78d9f
           - p:c0acd7f79bf658b3873699bdfba3034b
           - p:c0ddde0062915d08a14f22d93a68640e
@@ -69,26 +82,123 @@ records:
           - p:de516560a74d51469e4b90e2f9170e65
           - p:df839306bd6d59288838bf4af26736e7
           - p:e212b6637bd15147a9694d06677185ab
+          - p:e23e8e88380658a5a024cebaea4d5a61
+          - p:e2efe17528895a84a619dddce9691d49
           - p:eb7d0dbf53c553ce9cbae5e45760279c
           - p:eecb452ca9c75091bcc4a3376617aa4d
           - p:f1fbba816c4e54d39a025b923e5962ed
+          - p:f584abc6ac945e3b9929effea70b304c
           - p:f6353ee3c5c652e4944bf3ebde2e5a87
           - p:f813705f70de5b169ae7dbf0c045cd72
+          - p:facf0643241450deb00bc2e76960a060
           - p:fbb7f59ebd2a5551ab5be1f74ca6e72e
           - p:fbdfc80359895acb941006f41c712215
           - p:fd34eb21fe035ec29507a7d255b05d2c
           - p:fde9aafceecf5c65b1f95a04e37f9f01
           - p:feaedaa12a5c5023b2206afea35a37ca
+          - p:ffd0a3faf04655e4a863d1ed6b5e5549
+  - kind: default_printing_adoption
+    data:
+      subject:
+        card_id: c:daf1a3bc3edd58b88eb4434c04a6e500
+        region: en
+      value:
+        printing_id: p:682d9aaefe425f34b3f01fe82c81c831
+        candidates:
+          - p:00a9d385a7925f0e8ac4c390bb71df61
+          - p:0c53cc61036254beac7c8150d6bdb6a4
+          - p:13398184c061533ea594cade774b2805
+          - p:13721f4bca495aab94450e38e7660c12
+          - p:17d603143d0b588e821af6d5ca8f5bd5
+          - p:1fdcab78d30d586aa366fe0bd585c6f5
+          - p:20d713dfab33583d948b7240e22789c9
+          - p:26995d3bc9f05ffa8909c6f35fd38134
+          - p:26e432cc40d65accba9ba7e15b794fc8
+          - p:285c946b3d74528ab9a9ff0c37d5f4df
+          - p:296a376c260856479045457f1dae5fe9
+          - p:35d063a4a7665dedbfecbfcee6ed62bd
+          - p:3c96093d2e5b57858f33e27098c3de3a
+          - p:3de0f283fb9a5260b75db22408c65306
+          - p:418d2ff14a4e5f379fefea3d5be7d439
+          - p:43c6cfddf6ab5062a064fcf467008ec6
+          - p:43cd5fdf107556bd9cd06d92a5971930
+          - p:4650ced146135b1db3271ca88d7d7c9b
+          - p:4ce7dc1bd0335cc7a079cb2f078b674d
+          - p:4d4a0ef90cbc524f8e873c683a73aa2e
+          - p:4efc03c2d86b5abf91b6bcfe522b7dff
+          - p:5449f819d1f75a37bb87bb5c9ce65599
+          - p:58c37b0cc01950dabf8414c03fcbc9eb
+          - p:5ab547c991e25b5585923bef7f166c0c
+          - p:5f2d3ac03703539c8e68d4f3a6c568fe
+          - p:60f2f8d98e615e12ae49d0f64a79dbfc
+          - p:6811dceb199f54ef92ca9d19989f2f16
+          - p:682d9aaefe425f34b3f01fe82c81c831
+          - p:6c950822f4b859078ad6b0472d49b182
+          - p:7209dc9165165c82916bb1cd7389ef16
+          - p:72762a92465a5d7ab7ccc0274f126bd7
+          - p:737a6d0e449f56e99ca4b6fbffa01fd6
+          - p:754e6760ebd1599786d60c75272ee569
+          - p:78806579709d5a80985a9ae68bd6ac1c
+          - p:7d65e97639fe51fb89c62fce9cc8babd
+          - p:7f52e885c3e95054b5bad53d6809cc88
+          - p:8233505ee8605b4f8c6873ad5acc6028
+          - p:8293d960512656859e2aa18a5cdbd170
+          - p:82cfdcc5fd1f5ff39ac2c7bbeae34903
+          - p:8370c9dfd3815658b357d7482f744139
+          - p:8396d60ca58c5931a7c07015bae206ee
+          - p:86b187d499cb5efe83e2f026df41cad5
+          - p:87e17674e73356e3a56233dcde9735fd
+          - p:916ccb63a79f50c69c6aa4bd335af08c
+          - p:934f9789d3ac5258af8a86c2dcb1357a
+          - p:9506101a31965cc894f841ec79466bb5
+          - p:97e4060b2d055285be7637d082deb8a2
+          - p:9a89a9bebceb5a87828e8f928948937e
+          - p:9b9f3ea689af551a9d368ef60d1d69bd
+          - p:9e997f965359515e9ea4b43a0592aa42
+          - p:a1f985b105845d8799eb6281bb2550dd
+          - p:a24f3bb958ad50a5a215a1553acfe63f
+          - p:a60b86ab94665c729485f4fdc898ac07
+          - p:b34cb9ab424851ddbb10d3f728a3a476
+          - p:bf369adaab305a92b593442902a8282f
+          - p:c4bd32cdad4f5fb2b121377a8a3563be
+          - p:cb4b6a2da8bb59e18bc15d2040b13f2c
+          - p:cdf02c886624501c9c8356fcea120809
+          - p:e1b861b42bdc5e268c047c794234d13b
+          - p:e3bd00466b5651478e8b859a57fa1ec3
+          - p:e3ee82b23fd958669d13437b9a12b61d
+          - p:e56347930ed45f21908a0b2c3b23454b
+          - p:e8d76b7ea6b95f249541c61b4575af37
+          - p:e98be9fe7a915724b6d7cb6a21d45911
+          - p:ee42595ab6fd554a8136b2f35b043987
+          - p:efcc4ee44610545fa669b1f035652d1b
+          - p:f04a55a625005d0ab740715296e83425
+          - p:f501edc69e735d7e9e9cc8336289dc8a
+          - p:fab0904c5b405bb2b9f963b11fb4ae97
+          - p:fd1fa4cd8a6653abbe36df5f0eafaa7d
+          - p:ffd3757a14675b63a245952d5d2f0a9a
   - kind: default_printing_adoption
     data:
       subject:
         card_id: c:b9c04eb5f12b5c6f87bae0e44fec1e30
         region: jp
       value:
-        printing_id: p:c2a31eb2360e5f479befa82091ce3dfc
+        printing_id: p:f8a00fed97e4544da82f915a72527a6b
         candidates:
           - p:5b376d5ffea75f5cb1d7b853e3b35754
+          - p:afc5df1fe6bd573b9a55537025563ac1
           - p:c2a31eb2360e5f479befa82091ce3dfc
           - p:e0705f0e507d57eb8be3fa6ff5167dad
           - p:f6799d7012f853a5b14479c818fbaacf
           - p:f8a00fed97e4544da82f915a72527a6b
+  - kind: default_printing_adoption
+    data:
+      subject:
+        card_id: c:b9c04eb5f12b5c6f87bae0e44fec1e30
+        region: en
+      value:
+        printing_id: p:ae3ef3e377f755b2ac649d65a81aa76d
+        candidates:
+          - p:07fe9af3e3655ab09bf75c786e62fd32
+          - p:15814a9633565356af9fa6fe5b9bdfe2
+          - p:45ce4a8677415d99b97d69864a2a3903
+          - p:ae3ef3e377f755b2ac649d65a81aa76d

@@ -42,7 +42,7 @@ def _approved(db: Database, override: Row) -> None:
 
 
 def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
-    """Select within each card/region: official before unlisted, uncoded rarity before PR."""
+    """Select within each card/region, placing uncoded rarity before PR."""
     ranks = {code: rank for rank, code in enumerate(RARITY_ORDER) if code != "pr"}
     home_dates = _home_dates(db)
     groups: dict[tuple[str, str], list[Row]] = defaultdict(list)
@@ -66,17 +66,9 @@ def select_defaults(db: Database) -> tuple[DefaultPrinting, ...]:
         # A bare premium label has no tier but is known not to be the plain printing.
         return unknown + 2 if row.values["premium"] is True else unknown
 
-    def order(row: Row) -> tuple[bool, int, bool, str, str, str]:
+    def order(row: Row) -> tuple[int, bool, str, str, str]:
         day = home_dates.get((text(row, "home_set_id"), text(row, "region")))
-        # A manual unlisted printing joins an official card; it never represents it.
-        return (
-            row.values["catalog_state"] == "unlisted",
-            rank(row),
-            day is None,
-            day or "",
-            text(row, "card_no"),
-            text(row, "id"),
-        )
+        return rank(row), day is None, day or "", text(row, "card_no"), text(row, "id")
 
     result = []
     for key, candidates in sorted(groups.items()):

@@ -601,6 +601,7 @@ const zhTW = {
     separator: "・",
     backFace: "背面",
     treatedAs: "視為「{{name}}」",
+    treatedAsTranslated: "視為「{{name}}」（{{translation}}）",
     related: {
       title: "關聯卡牌",
       evolvesFrom: "進化前",

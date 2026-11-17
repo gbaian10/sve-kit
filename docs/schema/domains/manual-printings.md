@@ -146,7 +146,7 @@ unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官�
 DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlisted` 可為 none、填 `printed_code`、`manual_name_unit_id` 或 `manual_type_code`。
 人工版次不產生 `face_revision`、`face_current`、`rules_name`、翻譯或 DSL；卡的 current、表記與 `card_engine_support` 只由該卡的官方版次決定。
 版次路由走既有 `/cards/_provisional/{int_id}`（[build-db §15](../build/build-db.md#15-網址搜尋預設版次與記號)），不佔官方 `card_no` 路由。
-預設版次只在該卡同區沒有官方卡表版次時才會選到人工版次（官方版次一律優先，再比稀有度與日期）。
+EP／SEP 卡的預設版次由維護者在 `catalog/overrides/defaults` 人工指定（2026-11-17：EP 日 PR-445、英 PR-388EN；SEP 日 PR-404、英 PR-389EN）；覆寫的候選集合含人工版次，登錄新的人工 EP／SEP 後須重新指定。
 
 卡表快照（[snapshot-format](../export/snapshot-format.md)）printing 末尾新增 `printed_code?`、`manual_name_unit_id?`、`manual_type_code?`、`manual_available_on?`、`manual_date_precision?`，`card_no_state` 新增 `none`；
 `reference_urls` 來自 `printing_reference.url`。人工版次的 printing face 沒有觀測，不參與表記比較，也不讓該面在它的地區多出 current 或「表記未定」要求；

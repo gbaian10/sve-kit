@@ -228,28 +228,6 @@ def test_only_promo_printings_still_choose_lowest_card_number(
         assert (result.printing_id, result.method) == ("first", "lowest_rarity")
 
 
-def test_official_promo_precedes_an_unlisted_manual_printing() -> None:
-    with create_database(compile_t0()) as db:
-        base(db)
-        with db.transaction():
-            printing(db, "promo", "PR-001", changes={"rarity_raw": "PR"})
-            printing(
-                db,
-                "manual",
-                "",
-                state="none",
-                changes={
-                    "catalog_state": "unlisted",
-                    "decklog_available": False,
-                    "rarity_raw": "-",
-                    "manual_date_precision": "unknown",
-                },
-            )
-            populate(db)
-        result = select_defaults(db)[0]
-        assert result.printing_id == "promo"
-
-
 @pytest.mark.parametrize(
     ("region", "ranked", "promo", "premium"),
     [("jp", "SSP", "PR", "プレミアム"), ("en", "Super Special", "Promo", "Premium")],
