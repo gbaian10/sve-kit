@@ -17,6 +17,7 @@ from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Revision
 from sve_carddb.domains.catalog.adoption_loader import load_adoptions
+from sve_carddb.domains.catalog.rules_name_adoptions import collab_hashes, evaluate
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
@@ -339,6 +340,7 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
             if printing.card_id not in identifiers
         ),
     )
+    adoptions = load_adoptions(authored, entry="catalog/adoptions")
     observations = TextObservations(
         selected,
         FrozenTexts(
@@ -349,10 +351,11 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
             parser_version="official-jp-exact-v1",
             sources=frozen,
         ),
+        collab_names=collab_hashes((adoptions,)),
     )
     stores = {"public-authoring": store}
     prepared = prepare_catalog(
-        (load_adoptions(authored, entry="catalog/adoptions"),),
+        (adoptions,),
         inputs.repo,
         BuildContext.from_inputs(inputs.revision, {}),
         stores,
@@ -390,7 +393,7 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
             observations.populate(
                 db, build=context, vocabulary=vocabulary, published=()
             )
-            populate_rules_names(db)
+            populate_rules_names(db, evaluate(prepared.names, observations.plan)[0])
         yield Workspace(
             inputs,
             CurrentAuthorSources(

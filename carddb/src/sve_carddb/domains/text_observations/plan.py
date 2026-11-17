@@ -1,7 +1,7 @@
 """Retain all exact observations and select only unambiguous initial current."""
 
 from collections import defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from functools import cached_property
 from typing import TYPE_CHECKING
 
@@ -18,10 +18,13 @@ from sve_carddb.domains.source_corrections.plan import (
 )
 from sve_carddb.domains.text_observations.archive import verify_card
 from sve_carddb.domains.text_observations.closure import close_preview
+from sve_carddb.domains.text_observations.equivalence import comparable, is_collab
 from sve_carddb.domains.text_observations.models import FaceObservation
 from sve_carddb.domains.text_observations.report import comparisons, observation_report
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sve_carddb.core.regions import Region
     from sve_carddb.domains.registry.preview import PreviewPlan
     from sve_carddb.domains.source_corrections.images import ImageProvider
@@ -51,6 +54,14 @@ class TextPlan:
     diagnostic_exclusions: PreviewPlan
     corrections: tuple[Application, ...] = ()
     wording_decisions: tuple[WordingDecision, ...] = ()
+    # Exact name hashes declared as collab names per (face_id, region).
+    collab_names: Mapping[tuple[str, str], frozenset[str]] = field(
+        default_factory=dict[tuple[str, str], frozenset[str]]
+    )
+
+    def collab(self, face_id: str, region: str) -> frozenset[str]:
+        """Declared collab name hashes of one face in one region."""
+        return self.collab_names.get((face_id, region), frozenset())
 
     @cached_property
     def unapplied_corrections(self) -> dict[str, tuple[str, ...]]:
@@ -126,6 +137,17 @@ class TextPlan:
             "wording_decisions": [
                 item.model_dump(mode="json") for item in self.wording_decisions
             ],
+            # Builds without declarations keep their earlier configuration bytes.
+            **(
+                {
+                    "collab_names": [
+                        [face, region, list[JsonValue](sorted(hashes))]
+                        for (face, region), hashes in sorted(self.collab_names.items())
+                    ]
+                }
+                if self.collab_names
+                else {}
+            ),
             "regions": list[JsonValue](self.identity.regions),
             "observations_hash": digest(
                 canonical(
@@ -248,6 +270,7 @@ def _groups(
     observations: tuple[FaceObservation, ...],
     unavailable: tuple[str, ...],
     applications: tuple[Application, ...],
+    collab_names: Mapping[tuple[str, str], frozenset[str]],
 ) -> tuple[FaceGroup, ...]:
     grouped: dict[tuple[str, Region], list[FaceObservation]] = defaultdict(list)
     included = {
@@ -276,14 +299,24 @@ def _groups(
         grouped[item.face_id, item.region].append(item)
     result = []
     for (face_id, region), items in sorted(grouped.items()):
+        collab = collab_names.get((face_id, region), frozenset())
+        # A collab printing never becomes the initial current while another name exists.
         ordered = tuple(
-            sorted(items, key=lambda item: (item.card.source.id, item.printing_id))
+            sorted(
+                items,
+                key=lambda item: (
+                    is_collab(item.content, collab),
+                    item.card.source.id,
+                    item.printing_id,
+                ),
+            )
         )
+        compared = comparable(tuple(item.content for item in ordered), collab)
         conditions = (
             ("missing_source", (face_id, region) in absent),
             (
                 "observation_difference",
-                len({item.content.fingerprint() for item in ordered}) != 1,
+                len({content.fingerprint() for content in compared}) != 1,
             ),
             ("missing_effect", any(item.content.effect is None for item in ordered)),
             (
@@ -322,7 +355,11 @@ def _diagnostic_exclusions(
 
 
 def plan_text_observations(
-    preview: PreviewPlan, provider: TextProvider, *, images: ImageProvider | None = None
+    preview: PreviewPlan,
+    provider: TextProvider,
+    *,
+    images: ImageProvider | None = None,
+    collab_names: Mapping[tuple[str, str], frozenset[str]] | None = None,
 ) -> TextPlan:
     """Read every selected-region physical observation before any current selection.
 
@@ -385,11 +422,13 @@ def plan_text_observations(
         )
     )
     applications = plan_applications(preview, exact, images)
+    collab = dict(collab_names or {})
     groups = _groups(
         preview,
         corrected_observations(exact, applications),
         tuple(sorted(unavailable)),
         applications,
+        collab,
     )
     return TextPlan(
         preview,
@@ -398,4 +437,5 @@ def plan_text_observations(
         tuple(sorted(unavailable)),
         _diagnostic_exclusions(preview, groups),
         applications,
+        collab_names=collab,
     )

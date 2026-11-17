@@ -158,9 +158,11 @@ def prepared(
                     normalizer_version="nfkc-casefold-v1",
                 ),
                 case.vocabulary,
-            )
+            ),
+            names=(),
         ),
     )
+    monkeypatch.setattr(offline, "_collab_names", lambda _repo: {})
     adoption_uses = (
         SourceUse(
             source=next(iter(case.provider.cards.values())).source,
@@ -866,7 +868,8 @@ def test_missing_adopted_language_fails_before_population(
                     normalizer_version="nfkc-casefold-v1",
                 ),
                 prepared[0].vocabulary,
-            )
+            ),
+            names=(),
         ),
     )
     with pytest.raises(
