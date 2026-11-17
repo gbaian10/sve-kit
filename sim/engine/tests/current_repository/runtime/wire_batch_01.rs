@@ -129,7 +129,8 @@ fn bp15_024_reads_the_opponents_milled_card_kind() {
 
 #[test]
 fn bp18_084_makes_a_bat_only_for_a_revealed_vampy() {
-    for (top, bats) in [("BP02-069", 1_usize), ("BP02-070", 0)] {
+    // BP02-070's upper card name is Vampy; its collab name does not change the card (Q305).
+    for (top, bats) in [("BP02-069", 1_usize), ("BP02-070", 1)] {
         let mut initial = in_hand("BP18-084");
         initial["players"]["P1"]["zones"]["deck"] = cards("d", &[top, "BP01-171", "BP01-171"]);
         let state = play(&initial, &[]).projection(View::Referee).unwrap();

@@ -24,20 +24,19 @@ cards:
       - fanfare:
           do:
             - search:
-                n: 1
-                sel:
-                  kind: follower
-                  orig_cost_eq: 3
-                  who: self
-                  zone: deck
-                to: field
-            - search:
-                n: 1
-                sel:
-                  kind: follower
-                  orig_cost_eq: 1
-                  who: self
-                  zone: deck
+                groups:
+                  - n: 1
+                    sel:
+                      kind: follower
+                      orig_cost_eq: 3
+                      who: self
+                      zone: deck
+                  - n: 1
+                    sel:
+                      kind: follower
+                      orig_cost_eq: 1
+                      who: self
+                      zone: deck
                 to: field
         line: 2
     admission: light
@@ -47,5 +46,9 @@ cards:
             model: claude-opus-5-5
             who: Claude
           date: "2026-11-03"
+        - actor:
+            model: gpt-6.1-sol
+            who: Codex
+          date: "2026-11-06"
 format: 2
 kind: author_effect_set

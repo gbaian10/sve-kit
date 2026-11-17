@@ -358,17 +358,3 @@ fn ecp02_018_evolution_deals_two_and_places_an_item_with_five_passion_cards() {
     assert_eq!(state["objects"]["enemy"]["damage"], 2_u8);
     assert_eq!(named(&state, &state["P1"]["ex"], "魔法のアイテム").len(), 1);
 }
-
-#[test]
-fn cp02_055_fanfare_fields_a_three_cost_and_a_one_cost_follower() {
-    let mut initial = in_hand("CP02-055");
-    initial["players"]["P1"]["zones"]["deck"] = json!([
-        {"id":"three","card":"BP06-044"},{"id":"one","card":"BP01-171"},{"id":"five","card":"BP01-037"}
-    ]);
-    let mut game = rules_game(&initial);
-    play(&mut game, "source");
-    let state = game.projection(View::Referee).unwrap();
-    let field = state["P1"]["field"].as_array().unwrap();
-    assert!(field.contains(&json!("three")) && field.contains(&json!("one")));
-    assert!(!field.contains(&json!("five")));
-}

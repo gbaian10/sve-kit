@@ -753,12 +753,12 @@ records:
     owner: BP03
     data:
       id: a:6d54017e7f2f5f8684f9fc5c17ec7203
-      card_id: c:8a2a4b12ded850499fe4a8da903fb5f6
-      face_id: f:5d2e2f59830f5b82923a85aeb2564053
+      card_id: c:2559ecb076dd5f3ca29622c1514a8f02
+      face_id: f:da96833d2e3f5db3adc102dbe94c2baf
       classification: unclassified
       uses:
         - printing_id: p:b258eb3d1ef45236a5e1d408de1421fb
-          face_id: f:5d2e2f59830f5b82923a85aeb2564053
+          face_id: f:da96833d2e3f5db3adc102dbe94c2baf
       observation:
         region: en
         card_no: BP03-036EN
@@ -979,12 +979,12 @@ records:
     owner: BP03
     data:
       id: a:1ea5a642ac8353f6b1c9296862d16345
-      card_id: c:652b34451a725a34a18508107100c3f8
-      face_id: f:8c502d85f28350eebb8c806d19f6170d
+      card_id: c:dd8e5f6ba3d758c0a5ae95d23135f2b0
+      face_id: f:aa85a66c6a0159bea255f4818a70ed1d
       classification: unclassified
       uses:
         - printing_id: p:a3998dbf682e5f499404d5df5d2ab18f
-          face_id: f:8c502d85f28350eebb8c806d19f6170d
+          face_id: f:aa85a66c6a0159bea255f4818a70ed1d
       observation:
         region: en
         card_no: BP03-047EN
@@ -1121,12 +1121,12 @@ records:
     owner: BP03
     data:
       id: a:432bc0af7ec15a97bf269df98221c356
-      card_id: c:833992a4138c5d74a2641d5f9e8307df
-      face_id: f:96ec2dbc5c83576c97a6321833777ade
+      card_id: c:12c388740520594b8173751437adc66e
+      face_id: f:99f2bd150de757f69f3b3a85bbed10aa
       classification: unclassified
       uses:
         - printing_id: p:769eda72f61d5b5388620bbda79bb2ec
-          face_id: f:96ec2dbc5c83576c97a6321833777ade
+          face_id: f:99f2bd150de757f69f3b3a85bbed10aa
       observation:
         region: en
         card_no: BP03-054EN
@@ -1602,29 +1602,31 @@ records:
   - kind: art
     owner: BP03
     data:
-      id: a:8cd9d35003125f69ac095ef76b2135ba
       card_id: c:ba030611a53b546387555b2e5aee90ed
-      face_id: f:d135121cb1e65e478d7179f689153b81
       classification: unclassified
-      uses:
-        - printing_id: p:429753addca15ffeb1019d6a98aa7780
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:d9c87463eea855ae90a76265cb034d7d
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:eb570d8425fa5bfbbdddce3324aa1cbc
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:8c328a6b60d45c13b0568d1f12fa15dd
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:77e63c11c2fa5abeb2b9f923a9c868da
-          face_id: f:d135121cb1e65e478d7179f689153b81
-        - printing_id: p:0a098a2d95835c24b11830b0f686f042
-          face_id: f:d135121cb1e65e478d7179f689153b81
+      face_id: f:d135121cb1e65e478d7179f689153b81
+      id: a:8cd9d35003125f69ac095ef76b2135ba
       observation:
-        region: en
         card_no: BP03-076EN
         observation_hash: sha256:1f206baeaaba3e768bbf8632898ab66a91e929ae2c0221ea3046405b42f9821a
-        rules_hash: sha256:f93458986863ba3505ab05b937c1d9426d01fa22fd5960bfb731a30424516741
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:f93458986863ba3505ab05b937c1d9426d01fa22fd5960bfb731a30424516741
+      uses:
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:429753addca15ffeb1019d6a98aa7780
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:d9c87463eea855ae90a76265cb034d7d
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:eb570d8425fa5bfbbdddce3324aa1cbc
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:8c328a6b60d45c13b0568d1f12fa15dd
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:77e63c11c2fa5abeb2b9f923a9c868da
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:0a098a2d95835c24b11830b0f686f042
+        - face_id: f:d135121cb1e65e478d7179f689153b81
+          printing_id: p:a6161f7692f4543b92af3816f499200c
   - kind: art
     owner: BP03
     data:
@@ -2683,12 +2685,12 @@ records:
     owner: BP03
     data:
       id: a:ff0c7f26c1ae5b34a4f15f5dfefc4bea
-      card_id: c:8a2a4b12ded850499fe4a8da903fb5f6
-      face_id: f:5d2e2f59830f5b82923a85aeb2564053
+      card_id: c:2559ecb076dd5f3ca29622c1514a8f02
+      face_id: f:da96833d2e3f5db3adc102dbe94c2baf
       classification: unclassified
       uses:
         - printing_id: p:1580f95e870359e9b068ea639bf0b82b
-          face_id: f:5d2e2f59830f5b82923a85aeb2564053
+          face_id: f:da96833d2e3f5db3adc102dbe94c2baf
       observation:
         region: en
         card_no: BP03-SP01EN
@@ -2849,12 +2851,12 @@ records:
     owner: BP03
     data:
       id: a:7c859ea650ab5b1e9ba99198f3d039b4
-      card_id: c:5816ccb004215a5b8ca378bd51f26f64
-      face_id: f:2aeb701bbf215fd2ab5fc66f6842ca66
+      card_id: c:ed91404724c0508ba1f54f8dcaba0790
+      face_id: f:6844e233d1e450bb8e12a39537d0973b
       classification: unclassified
       uses:
         - printing_id: p:74a912b0a02059fbb969d30d8e670795
-          face_id: f:2aeb701bbf215fd2ab5fc66f6842ca66
+          face_id: f:6844e233d1e450bb8e12a39537d0973b
       observation:
         region: jp
         card_no: BP03-019
@@ -2865,12 +2867,12 @@ records:
     owner: BP03
     data:
       id: a:b919b5acf29e555a92eaf5111bb6761a
-      card_id: c:321db755874c5cf99d2538feaf53d127
-      face_id: f:009000034f7b5edea62259c2fef52ca0
+      card_id: c:cb0cfa6fccba5b69aeb8f28afbff9527
+      face_id: f:a99748ab6e9f536588e3474da7b3bc4c
       classification: unclassified
       uses:
         - printing_id: p:baba321f5f305351b5d207edc0fcea07
-          face_id: f:009000034f7b5edea62259c2fef52ca0
+          face_id: f:a99748ab6e9f536588e3474da7b3bc4c
       observation:
         region: jp
         card_no: BP03-026
@@ -2881,12 +2883,12 @@ records:
     owner: BP03
     data:
       id: a:c45e40a2bf0d55129340b0ba11050f2d
-      card_id: c:33e1b54bb0835149a6ef1e2b53b64394
-      face_id: f:ad807508ad465782ab5c468e73b6a050
+      card_id: c:12b6188775635570bc3dbc416e518e97
+      face_id: f:8ca4ce3f38705cbda282e3701ad7b1f9
       classification: unclassified
       uses:
         - printing_id: p:3f01d79e0205555bbc6ebf29e301a997
-          face_id: f:ad807508ad465782ab5c468e73b6a050
+          face_id: f:8ca4ce3f38705cbda282e3701ad7b1f9
       observation:
         region: jp
         card_no: BP03-031
@@ -2915,12 +2917,12 @@ records:
     owner: BP03
     data:
       id: a:60fc1ac9fd0a5fdcafd69f044266705e
-      card_id: c:5816ccb004215a5b8ca378bd51f26f64
-      face_id: f:2aeb701bbf215fd2ab5fc66f6842ca66
+      card_id: c:ed91404724c0508ba1f54f8dcaba0790
+      face_id: f:6844e233d1e450bb8e12a39537d0973b
       classification: unclassified
       uses:
         - printing_id: p:51b0f568912f5a96bc7a9d53e1f126e0
-          face_id: f:2aeb701bbf215fd2ab5fc66f6842ca66
+          face_id: f:6844e233d1e450bb8e12a39537d0973b
       observation:
         region: jp
         card_no: BP03-SP01

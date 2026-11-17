@@ -452,8 +452,11 @@ def test_official_registry_special_mappings(official_registry: list[Entry]) -> N
         for (region, _), entry in printings.items()
         if region == "jp" and isinstance(entry["card_id"], str)
     }
-    for number in ("GFD02-003EN", "BP03-LDⓈ01EN", "PR-041EN", "BP03-054EN"):
+    for number in ("GFD02-003EN", "BP03-LDⓈ01EN", "PR-041EN"):
         assert printings["en", number]["card_id"] not in jp_cards
+    # Former EN-only reskins were folded into their JP-backed same cards.
+    for en, jp in [("BP03-036EN", "BP03-038"), ("BP03-054EN", "BP03-054")]:
+        assert printings["en", en]["card_id"] == printings["jp", jp]["card_id"]
 
 
 def test_official_curation_and_corrections(official_registry: list[Entry]) -> None:
@@ -488,7 +491,7 @@ def test_official_curation_and_corrections(official_registry: list[Entry]) -> No
         )
     assert original_groups <= registered_groups
     assert (
-        len([entry for entry in official_registry if entry.kind == "card_related"]) == 3
+        len([entry for entry in official_registry if entry.kind == "card_related"]) == 0
     )
     assert (
         len(
@@ -498,14 +501,14 @@ def test_official_curation_and_corrections(official_registry: list[Entry]) -> No
                 if entry.kind == "region_mapping_review"
             ]
         )
-        == 127
+        == 124
     )
     corrections = [
         entry for entry in official_registry if entry.kind == "source_correction"
     ]
-    assert len(corrections) == 10
+    assert len(corrections) == 11
     active = [entry for entry in corrections if entry.data["state"] == "active"]
-    assert len(active) == 10
+    assert len(active) == 11
     original = next(
         entry
         for entry in active
@@ -745,7 +748,7 @@ def test_official_promotions_are_active_corrections(
         assert all(record.data["state"] == "active" for record in records)
         if path.parent.name in {"BP15", "BP20", "CP03", "PR"}:
             promoted.extend(records)
-    assert len(promoted) == 8
+    assert len(promoted) == 9
 
 
 def test_first_batch_starts_each_region_range(inputs: Inputs) -> None:

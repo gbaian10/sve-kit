@@ -308,19 +308,21 @@ records:
   - kind: art
     owner: BP21
     data:
-      id: a:119accac0c6857529de90cc2d5dc6af1
       card_id: c:e8f90386ace75d8dbe90252748bfaac4
-      face_id: f:f410116c552859808f54cc4bb8c62b49
       classification: unclassified
-      uses:
-        - printing_id: p:c0eaa2e811825b3994429b3d8f96f53c
-          face_id: f:f410116c552859808f54cc4bb8c62b49
+      face_id: f:f410116c552859808f54cc4bb8c62b49
+      id: a:119accac0c6857529de90cc2d5dc6af1
       observation:
-        region: jp
         card_no: BP21-018
         observation_hash: sha256:4380de8176385b4139f4dacad6b36ed1253b4e25188ba0fb01472b0b346cd12e
-        rules_hash: sha256:c43ab734024144bd8e3789735bbadc258f9084d3ddcbc55266c206b507a7960c
         recipe: registry-observation-v2
+        region: jp
+        rules_hash: sha256:c43ab734024144bd8e3789735bbadc258f9084d3ddcbc55266c206b507a7960c
+      uses:
+        - face_id: f:f410116c552859808f54cc4bb8c62b49
+          printing_id: p:c0eaa2e811825b3994429b3d8f96f53c
+        - face_id: f:f410116c552859808f54cc4bb8c62b49
+          printing_id: p:068e493fe20f57d48db81d8eab58b64a
   - kind: art
     owner: BP21
     data:

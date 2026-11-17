@@ -1254,21 +1254,23 @@ records:
   - kind: art
     owner: BP10
     data:
-      id: a:a2384fba06d5502296d8f2f93a41d886
       card_id: c:7db4e8f7a2235d90bf43c101394f353c
-      face_id: f:21d02b07192155c5ae30d8d2fcca981a
       classification: unclassified
-      uses:
-        - printing_id: p:97f75a645f245904b5f687b525df32a3
-          face_id: f:21d02b07192155c5ae30d8d2fcca981a
-        - printing_id: p:9c98674a042957b6b920dd4302edeed7
-          face_id: f:21d02b07192155c5ae30d8d2fcca981a
+      face_id: f:21d02b07192155c5ae30d8d2fcca981a
+      id: a:a2384fba06d5502296d8f2f93a41d886
       observation:
-        region: en
         card_no: BP10-062EN
         observation_hash: sha256:c3176c5f426be8efa70d60581a2d58d55e00a4803a4778876aad28b4a2ce37fe
-        rules_hash: sha256:d6882818459e7ccca94d68cb3604890b6bb3fb3c8ab893e48eff48e80de9d72c
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:d6882818459e7ccca94d68cb3604890b6bb3fb3c8ab893e48eff48e80de9d72c
+      uses:
+        - face_id: f:21d02b07192155c5ae30d8d2fcca981a
+          printing_id: p:97f75a645f245904b5f687b525df32a3
+        - face_id: f:21d02b07192155c5ae30d8d2fcca981a
+          printing_id: p:9c98674a042957b6b920dd4302edeed7
+        - face_id: f:21d02b07192155c5ae30d8d2fcca981a
+          printing_id: p:0a777aeb946e52faa4e04cdaef0ad746
   - kind: art
     owner: BP10
     data:

@@ -19,12 +19,6 @@ records:
     classification: same_effect
     method: ai
     reason: 持續能力的場上適用範圍與對象不變；差異是省略已由能力種類決定的區域敘述，或調整獨立能力段落位置。
-  - face_id: f:1b6062921bff5db6b84506b63a756c9c
-    region: jp
-    comparison_hash: sha256:b8c3b6ac9a6493656924a0242ebdb943a17a137d094e694701f6377420d18eb7
-    classification: same_effect
-    method: ai
-    reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
   - face_id: f:301dc4b4d27f55d09ac89ae3b56d6053
     region: en
     comparison_hash: sha256:e5cbf623b607253463b425a7c0f5e349aa350c4e4cb7f7fedd37aa72d1e59030
@@ -45,10 +39,16 @@ records:
     reason: 洗牌仍是相同步驟，省略或補明的是本玩家牌庫的指稱，其他操作順序不變。
   - face_id: f:62a5819751e15c639fae771572fe4e77
     region: jp
-    comparison_hash: sha256:166af5651328c73a4ef1af654a567190bf988e33ffdd3030d7e423bf1f5356f7
+    comparison_hash: sha256:4391e77feb18940416b3a554b2db75884d697434cb4114813d141e44cfbccee0
     classification: same_effect
     method: ai
     reason: 主文引用的同名生成物與操作未變，差異是補充段落列出或省略其定義；未增加主文的解決步驟。
+  - face_id: f:7b3adbefdc0e56fd8779eaf283bb1b67
+    region: jp
+    comparison_hash: sha256:3832b99453ffcd203eb3cb4359091cff2b1f327d6db8b867b67c1cc370733f4b
+    classification: same_effect
+    method: ai
+    reason: 依補充段落完整者優先規則：主文、數值、類別與特徵一致；聯名名稱版次只省略主文所引用生成物的定義段落，不改變主文的條件、數量或解決步驟。
   - face_id: f:9666d579414d5a34bd53ea6077bf28f8
     region: jp
     comparison_hash: sha256:1d005a8353cd12ed86102d34a403b4e3878efe16fbcd86c85c8698db98a1f22a

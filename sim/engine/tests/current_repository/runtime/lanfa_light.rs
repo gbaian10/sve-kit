@@ -4,7 +4,10 @@ use super::*;
 #[test]
 fn lanfa_all_printings_require_a_ub_target_refund_only_nonhand_entry_and_track_modes_per_instance() {
     let printings = aliases("CP04-075");
-    assert_eq!(printings, ["CP04-075", "CP04-SL19"]);
+    assert_eq!(
+        printings,
+        ["CP04-075", "CP04-SL19", "CP04-SP10a", "CP04-SP10b", "CP04-U10"]
+    );
     for card in printings {
         ranpha_entry(&card, "hand");
         ranpha_entry(&card, "ex");

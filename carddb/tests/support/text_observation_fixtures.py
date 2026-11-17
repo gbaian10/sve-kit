@@ -12,7 +12,7 @@ from sve_carddb.domains.products import (
 )
 from sve_carddb.domains.registry.build import build
 from sve_carddb.domains.registry.preview import plan_preview
-from sve_carddb.domains.registry.storage import plan_files, write_files
+from sve_carddb.domains.registry.storage import load, plan_files, write_files
 from sve_carddb.domains.text_observations import (
     Binding,
     FaceContent,
@@ -88,9 +88,15 @@ class Case:
 
 
 def make_case(
-    root: Path, inputs: Inputs, *, regions: tuple[Region, ...] = ("jp", "en")
+    root: Path,
+    inputs: Inputs,
+    *,
+    regions: tuple[Region, ...] = ("jp", "en"),
+    fold: bool = False,
 ) -> Case:
-    write_files(plan_files(root, build(inputs, {})))
+    # Folding needs the registry already on disk, since same-card groups name kept IDs.
+    existing = load(root)[1] if fold else {}
+    write_files(plan_files(root, build(inputs, existing), fold=fold))
     for identifier in ("BP02", "PR", "GF01"):
         install(
             root,

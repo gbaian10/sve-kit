@@ -7,6 +7,12 @@ records:
     classification: same_effect
     method: ai
     reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:1fb733ba6c9952989b71afee5baa32b1
+    region: jp
+    comparison_hash: sha256:2d37d0096dbe411c0eaf7257db6b1a63ae7edb35fbccbf471ac6e3a52e241174
+    classification: same_effect
+    method: ai
+    reason: 依補充段落完整者優先規則：主文、數值、類別與特徵一致；聯名名稱版次只省略主文所引用生成物的定義段落，不改變主文的條件、數量或解決步驟。
   - face_id: f:25a43874733b5c2fb7ee658c3961135b
     region: en
     comparison_hash: sha256:c90563847fc5623600fe1f7d82bea9f17a1bc6ae5e36e70db8db31f047036f03
@@ -205,6 +211,12 @@ records:
     classification: same_effect
     method: ai
     reason: 逐版本比對完整主文與補充欄：條件、費用、對象、數量、區域及解決順序一致；差異為同義措辭、代名詞的明示或既有規則提醒。
+  - face_id: f:d98fd800661b529dae7a22e33b3d9f5e
+    region: jp
+    comparison_hash: sha256:b714dc5bf84f51ca703413ba9e8eb3adf379b8c3cfd80599d2f88ee6dae7c9cf
+    classification: same_effect
+    method: ai
+    reason: 依補充段落完整者優先規則：主文、數值、類別與特徵一致；聯名名稱版次只省略主文所引用生成物的定義段落，不改變主文的條件、數量或解決步驟。
   - face_id: f:da3f36caf0325cf5b8304500a5c3e7d1
     region: en
     comparison_hash: sha256:38d9c1bfbcf27dd6c8114881cf5146eddf3e065ac4390e36be7795ef201b414d

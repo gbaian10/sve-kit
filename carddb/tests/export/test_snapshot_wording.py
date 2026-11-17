@@ -268,6 +268,50 @@ def test_reader_recomputes_wording_preferences_before_release_order(mode: str) -
         _wording(view)
 
 
+@pytest.mark.parametrize("declared", [True, False])
+def test_shared_basis_prefers_the_cards_own_name_over_a_newer_collab(
+    declared: bool,
+) -> None:
+    view, _, _ = shared_basis_view()
+    face = view["face"][0]
+    wording = object_value(array(face["wording"])[0])
+    chosen = next(row for row in view["face_revision"] if row["id"] == "r:a2")
+    other = next(row for row in view["face_revision"] if row["id"] == "r:a1")
+    other.update(deepcopy(chosen) | {"id": "r:a1", "revision": 1})
+    view["text_unit"].append({"id": "collab", "lang": "ja", "text": "聯名"})
+    other["name_unit_id"] = "collab"
+    array(wording["candidates"])[1] = {"printing_id": "p:b", "revision_id": "r:a1"}
+    physical = next(row for row in view["printing"] if row["id"] == "p:b")
+    object_value(array(physical["faces"])[0])["observations"] = [
+        {
+            "revision_id": "r:a1",
+            "state": "available",
+            "source_url": "https://example.invalid/b",
+        }
+    ]
+    view["printing_product"].append(
+        view["printing_product"][0]
+        | {"printing_id": "p:b", "available_on": "2027-01-01", "date_precision": "day"}
+    )
+    wording["undated_printing_ids"] = []
+    if declared:
+        view["rules_name"].append(
+            {"id": "rn:collab", "region": "jp", "official_name": "聯名"}
+        )
+        view["face_rules_name"].append(
+            {
+                "face_id": face["id"],
+                "region": "jp",
+                "rules_name_id": "rn:collab",
+                "role": "collab",
+            }
+        )
+        _wording(view)
+    else:
+        with pytest.raises(ValueError, match="wording preferences"):
+            _wording(view)
+
+
 @pytest.mark.parametrize(
     ("change", "error"),
     [

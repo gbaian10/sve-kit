@@ -47,6 +47,7 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
     corrected: str | None = None,
     raw_type: str = "Spell",
     reason: str = "Synthetic source transcription correction",
+    fold: bool = False,
 ) -> CorrectionCase:
     number = "BP02-071" if region == "jp" else "BP02-070EN"
     original = (inputs.jp if region == "jp" else inputs.en)[number].faces[0]
@@ -84,7 +85,7 @@ def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before
             reason=reason,
         )
     ]
-    case = make_case(root / "authored", inputs)
+    case = make_case(root / "authored", inputs, fold=fold)
     store = replace(_store(root / "images"), store_id="image-store")
     for record in case.identity.snapshot.records.values():
         if isinstance(record.data, CorrectionData):

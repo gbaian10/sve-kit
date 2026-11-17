@@ -7,28 +7,6 @@ records:
       source:
         owner:
           kind: face_revision
-          revision_id: rev:v1:1c089833f625d0d8cfa682c11c543a36c96ebb3184d1dfd0a3f518aeb86b808b
-        field: name
-        ordinal:
-        source_unit_id: t:en:35452d2c4d71f5a9
-        source_hash: 35452d2c4d71f5a90c20d707920ea56a93ecd426b84e3af8720afe147b08097b
-        source_ref:
-          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-          source_version_id: src:v1:17f2614a389b500637c1b01a16429dd624319ebab9876f8a752ebf98abbd4be5
-          parser: translation-en-v1
-          locator: /faces/0/name
-          text_hash: 35452d2c4d71f5a90c20d707920ea56a93ecd426b84e3af8720afe147b08097b
-      card_id: c:8a2a4b12ded850499fe4a8da903fb5f6
-      face_id: f:5d2e2f59830f5b82923a85aeb2564053
-      target_id: english.name.35452d2c4d71f5a90c20d707
-      identity: confirmed_no_jp
-      reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
-  - origin: machine
-    kind: english_exception_use
-    data:
-      source:
-        owner:
-          kind: face_revision
           revision_id: rev:v1:54968e266909133c2686788c62945ac180899b5669a63dffc0205c21f373f71e
         field: name
         ordinal:
@@ -43,50 +21,6 @@ records:
       card_id: c:af07f69660295dce9a80e9a00cae2329
       face_id: f:68e0f3413ef65d9dacf45c8a1c05e219
       target_id: english.name.35452d2c4d71f5a90c20d707
-      identity: confirmed_no_jp
-      reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
-  - origin: machine
-    kind: english_exception_use
-    data:
-      source:
-        owner:
-          kind: face_revision
-          revision_id: rev:v1:460017555dc39bca5cca933e444cb35ceea2cce76568ac4d5278c49b1b20d1af
-        field: name
-        ordinal:
-        source_unit_id: t:en:1200bdd87db3a901
-        source_hash: 1200bdd87db3a901bfe49536cb82b1636b7fe3ca8ba50d3d06b2676194da2670
-        source_ref:
-          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-          source_version_id: src:v1:fa82e6a5bd4ed302c8a9af50a0d0bce65ac03c20519db9b6a6e7fca1db54d529
-          parser: translation-en-v1
-          locator: /faces/0/name
-          text_hash: 1200bdd87db3a901bfe49536cb82b1636b7fe3ca8ba50d3d06b2676194da2670
-      card_id: c:652b34451a725a34a18508107100c3f8
-      face_id: f:8c502d85f28350eebb8c806d19f6170d
-      target_id: english.name.1200bdd87db3a901bfe49536
-      identity: confirmed_no_jp
-      reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
-  - origin: machine
-    kind: english_exception_use
-    data:
-      source:
-        owner:
-          kind: face_revision
-          revision_id: rev:v1:841116835bad02b2d99b6ec000cef8be3f17e2f0ae0338a7849808f46a563d9a
-        field: name
-        ordinal:
-        source_unit_id: t:en:630eb0c517390a12
-        source_hash: 630eb0c517390a12ffb1bc339591e30de2f85d41f9d5b61aec1dc57e6f46e09e
-        source_ref:
-          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-          source_version_id: src:v1:ecf1a6c575290b498b59e79ad09555df8c36289a1bf5c2d4df4e8323bf7c6552
-          parser: translation-en-v1
-          locator: /faces/0/name
-          text_hash: 630eb0c517390a12ffb1bc339591e30de2f85d41f9d5b61aec1dc57e6f46e09e
-      card_id: c:833992a4138c5d74a2641d5f9e8307df
-      face_id: f:96ec2dbc5c83576c97a6321833777ade
-      target_id: english.name.630eb0c517390a12ffb1bc33
       identity: confirmed_no_jp
       reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
   - origin: machine
@@ -2815,72 +2749,6 @@ records:
       card_id: c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
       face_id: f:67b8b56d010558398bab2692d34a5aed
       target_id: english.name.a00c98a1594ead09cee0ac69
-      identity: confirmed_no_jp
-      reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
-  - origin: machine
-    kind: english_exception_use
-    data:
-      source:
-        owner:
-          kind: face_revision
-          revision_id: rev:v1:1c089833f625d0d8cfa682c11c543a36c96ebb3184d1dfd0a3f518aeb86b808b
-        field: effect
-        ordinal:
-        source_unit_id: t:en:79c1ece99f81f8c9
-        source_hash: 79c1ece99f81f8c9e46ef341cf6a3e0e579feceee205e5e6ab1612f4b0efbfdc
-        source_ref:
-          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-          source_version_id: src:v1:17f2614a389b500637c1b01a16429dd624319ebab9876f8a752ebf98abbd4be5
-          parser: translation-en-v1
-          locator: /faces/0/text
-          text_hash: 79c1ece99f81f8c9e46ef341cf6a3e0e579feceee205e5e6ab1612f4b0efbfdc
-      card_id: c:8a2a4b12ded850499fe4a8da903fb5f6
-      face_id: f:5d2e2f59830f5b82923a85aeb2564053
-      target_id: english.effect.79c1ece99f81f8c9e46ef341
-      identity: confirmed_no_jp
-      reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
-  - origin: machine
-    kind: english_exception_use
-    data:
-      source:
-        owner:
-          kind: face_revision
-          revision_id: rev:v1:460017555dc39bca5cca933e444cb35ceea2cce76568ac4d5278c49b1b20d1af
-        field: effect
-        ordinal:
-        source_unit_id: t:en:2fbb788d8fe8c961
-        source_hash: 2fbb788d8fe8c961b9250171bef8d8dc812ad4ec235c6aa0a0d63e50fdca48a8
-        source_ref:
-          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-          source_version_id: src:v1:fa82e6a5bd4ed302c8a9af50a0d0bce65ac03c20519db9b6a6e7fca1db54d529
-          parser: translation-en-v1
-          locator: /faces/0/text
-          text_hash: 2fbb788d8fe8c961b9250171bef8d8dc812ad4ec235c6aa0a0d63e50fdca48a8
-      card_id: c:652b34451a725a34a18508107100c3f8
-      face_id: f:8c502d85f28350eebb8c806d19f6170d
-      target_id: english.effect.2fbb788d8fe8c961b9250171
-      identity: confirmed_no_jp
-      reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
-  - origin: machine
-    kind: english_exception_use
-    data:
-      source:
-        owner:
-          kind: face_revision
-          revision_id: rev:v1:841116835bad02b2d99b6ec000cef8be3f17e2f0ae0338a7849808f46a563d9a
-        field: effect
-        ordinal:
-        source_unit_id: t:en:93eb253f71d37f86
-        source_hash: 93eb253f71d37f86b448b79fd744fa17507d65bb9ccf9b4a922abdd881c94589
-        source_ref:
-          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-          source_version_id: src:v1:ecf1a6c575290b498b59e79ad09555df8c36289a1bf5c2d4df4e8323bf7c6552
-          parser: translation-en-v1
-          locator: /faces/0/text
-          text_hash: 93eb253f71d37f86b448b79fd744fa17507d65bb9ccf9b4a922abdd881c94589
-      card_id: c:833992a4138c5d74a2641d5f9e8307df
-      face_id: f:96ec2dbc5c83576c97a6321833777ade
-      target_id: english.effect.93eb253f71d37f86b448b79f
       identity: confirmed_no_jp
       reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
   - origin: machine
@@ -5631,29 +5499,6 @@ records:
       card_id: c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
       face_id: f:67b8b56d010558398bab2692d34a5aed
       target_id: english.section.92fadbbfb2e9613f945e61db
-      identity: confirmed_no_jp
-      reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
-  - origin: machine
-    kind: english_exception_use
-    data:
-      source:
-        owner:
-          kind: printing_face
-          printing_id: p:b258eb3d1ef45236a5e1d408de1421fb
-          face_id: f:5d2e2f59830f5b82923a85aeb2564053
-        field: flavor
-        ordinal:
-        source_unit_id: t:en:29c433189a68f54d
-        source_hash: 29c433189a68f54d17804a99ffed0affe5917d3edd5bad5e413cfb235f6fdd99
-        source_ref:
-          batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
-          source_version_id: src:v1:e8f5a71d78ff361404a724e3be0934365c08c3ae346a1bd43219202e8eb313e1
-          parser: translation-en-v1
-          locator: /faces/0/speech
-          text_hash: 29c433189a68f54d17804a99ffed0affe5917d3edd5bad5e413cfb235f6fdd99
-      card_id: c:8a2a4b12ded850499fe4a8da903fb5f6
-      face_id: f:5d2e2f59830f5b82923a85aeb2564053
-      target_id: english.flavor.29c433189a68f54d17804a99
       identity: confirmed_no_jp
       reason: 依已覆核的凍結日英身分盤點確認此卡無同卡日版；每個用途保留自己的完整英文來源。換皮關係不視為同卡日文來源。
   - origin: machine

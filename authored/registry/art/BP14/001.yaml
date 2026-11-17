@@ -340,47 +340,51 @@ records:
   - kind: art
     owner: BP14
     data:
-      id: a:d799da539b6e5fd8862076d4375ed37a
       card_id: c:74cc330abca5533ba96956c01e975a6f
-      face_id: f:4d0573d6702b5703bdc68c1885219897
       classification: unclassified
-      uses:
-        - printing_id: p:fc0cd1317cc450e3bc6535ce42e022c2
-          face_id: f:4d0573d6702b5703bdc68c1885219897
-        - printing_id: p:9836cf99495b5c8d8d976daec0028cf8
-          face_id: f:4d0573d6702b5703bdc68c1885219897
-        - printing_id: p:423a0a595d25568fb422d6c500461dbb
-          face_id: f:4d0573d6702b5703bdc68c1885219897
-        - printing_id: p:1c4a36aaaa315f4291defa0b6c923a61
-          face_id: f:4d0573d6702b5703bdc68c1885219897
+      face_id: f:4d0573d6702b5703bdc68c1885219897
+      id: a:d799da539b6e5fd8862076d4375ed37a
       observation:
-        region: en
         card_no: BP14-018EN
         observation_hash: sha256:c4ac5f4dddd961ce4bd02085ddbfd96db504f561565942927d3b1228c10caca6
-        rules_hash: sha256:95497cc1e62020399cb944fd8ab4d9fa0bbcf52dd9edaa4cf4cfe478332adc62
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:95497cc1e62020399cb944fd8ab4d9fa0bbcf52dd9edaa4cf4cfe478332adc62
+      uses:
+        - face_id: f:4d0573d6702b5703bdc68c1885219897
+          printing_id: p:fc0cd1317cc450e3bc6535ce42e022c2
+        - face_id: f:4d0573d6702b5703bdc68c1885219897
+          printing_id: p:9836cf99495b5c8d8d976daec0028cf8
+        - face_id: f:4d0573d6702b5703bdc68c1885219897
+          printing_id: p:423a0a595d25568fb422d6c500461dbb
+        - face_id: f:4d0573d6702b5703bdc68c1885219897
+          printing_id: p:1c4a36aaaa315f4291defa0b6c923a61
+        - face_id: f:4d0573d6702b5703bdc68c1885219897
+          printing_id: p:c1fbf03b0c925e3983fd1b9d3b629881
   - kind: art
     owner: BP14
     data:
-      id: a:e2210acbc9c3566da94165fd95c68f86
       card_id: c:0ab2e5eebb02566991e037b43eb50161
-      face_id: f:32082c4c029155329d3117e0974046fc
       classification: unclassified
-      uses:
-        - printing_id: p:74d77203e7095ddb94cb138f2f0b09e3
-          face_id: f:32082c4c029155329d3117e0974046fc
-        - printing_id: p:d6878568e3ac5b4aba6c997f7b303dfb
-          face_id: f:32082c4c029155329d3117e0974046fc
-        - printing_id: p:57cf6844628b5c5bb38fd71f1d63bcaa
-          face_id: f:32082c4c029155329d3117e0974046fc
-        - printing_id: p:b0abeec63db557ad8c3fce1524641156
-          face_id: f:32082c4c029155329d3117e0974046fc
+      face_id: f:32082c4c029155329d3117e0974046fc
+      id: a:e2210acbc9c3566da94165fd95c68f86
       observation:
-        region: en
         card_no: BP14-019EN
         observation_hash: sha256:17a71ec9120bb1280c4595b2a977d16b52359602059b72ca4505824a27a6e90c
-        rules_hash: sha256:36c06228e73c9a4d61627bca87ba81329c0c67057341d8d0741fdbb27dc43d8c
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:36c06228e73c9a4d61627bca87ba81329c0c67057341d8d0741fdbb27dc43d8c
+      uses:
+        - face_id: f:32082c4c029155329d3117e0974046fc
+          printing_id: p:74d77203e7095ddb94cb138f2f0b09e3
+        - face_id: f:32082c4c029155329d3117e0974046fc
+          printing_id: p:d6878568e3ac5b4aba6c997f7b303dfb
+        - face_id: f:32082c4c029155329d3117e0974046fc
+          printing_id: p:57cf6844628b5c5bb38fd71f1d63bcaa
+        - face_id: f:32082c4c029155329d3117e0974046fc
+          printing_id: p:b0abeec63db557ad8c3fce1524641156
+        - face_id: f:32082c4c029155329d3117e0974046fc
+          printing_id: p:3fb44be3c61d5c178b056bf31b022aa2
   - kind: art
     owner: BP14
     data:
@@ -2558,29 +2562,31 @@ records:
   - kind: art
     owner: BP14
     data:
-      id: a:29134931dd5b5457ac537ccd8ff02f84
       card_id: c:4fea7c0011f056059aa9a7cc1e02c8ed
-      face_id: f:efe664e204615ec4b1fcd4569c838627
       classification: unclassified
-      uses:
-        - printing_id: p:c7d4c8629f925362857b536c96dbeb6a
-          face_id: f:efe664e204615ec4b1fcd4569c838627
-        - printing_id: p:ee77108fb3c75d09aaa74e0aef99957f
-          face_id: f:efe664e204615ec4b1fcd4569c838627
-        - printing_id: p:105c959493ec5312a184886db68e8231
-          face_id: f:efe664e204615ec4b1fcd4569c838627
-        - printing_id: p:e7a913949e2b5041bfc12fb3f5f59b0c
-          face_id: f:efe664e204615ec4b1fcd4569c838627
-        - printing_id: p:9bcfea7176e65280b67260f224d00b72
-          face_id: f:efe664e204615ec4b1fcd4569c838627
-        - printing_id: p:3375905abcb85d528879d79aa48aa709
-          face_id: f:efe664e204615ec4b1fcd4569c838627
+      face_id: f:efe664e204615ec4b1fcd4569c838627
+      id: a:29134931dd5b5457ac537ccd8ff02f84
       observation:
-        region: en
         card_no: BP14-T02EN
         observation_hash: sha256:3f148f521273f23f0f3247823f3402d69a14b0423de9adb703029afb12e8a0d7
-        rules_hash: sha256:dff06e7e53bbaa6eeb72d65729ba48611f23fe9165935eb4fc6406eecb6f1d6a
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:dff06e7e53bbaa6eeb72d65729ba48611f23fe9165935eb4fc6406eecb6f1d6a
+      uses:
+        - face_id: f:efe664e204615ec4b1fcd4569c838627
+          printing_id: p:c7d4c8629f925362857b536c96dbeb6a
+        - face_id: f:efe664e204615ec4b1fcd4569c838627
+          printing_id: p:ee77108fb3c75d09aaa74e0aef99957f
+        - face_id: f:efe664e204615ec4b1fcd4569c838627
+          printing_id: p:105c959493ec5312a184886db68e8231
+        - face_id: f:efe664e204615ec4b1fcd4569c838627
+          printing_id: p:e7a913949e2b5041bfc12fb3f5f59b0c
+        - face_id: f:efe664e204615ec4b1fcd4569c838627
+          printing_id: p:9bcfea7176e65280b67260f224d00b72
+        - face_id: f:efe664e204615ec4b1fcd4569c838627
+          printing_id: p:3375905abcb85d528879d79aa48aa709
+        - face_id: f:efe664e204615ec4b1fcd4569c838627
+          printing_id: p:fe103957ea705ea8b97afbe3709313f7
   - kind: art
     owner: BP14
     data:

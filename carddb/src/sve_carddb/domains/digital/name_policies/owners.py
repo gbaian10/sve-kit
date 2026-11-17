@@ -33,16 +33,21 @@ def publication_owners(
         ):
             candidates.setdefault(candidate_revision_id(item), []).append(item)
     observations: dict[tuple[str, str], list[FaceObservation]] = {}
+    faces: dict[str, list[FaceObservation]] = {}
     for item in texts.observations:
         if item.printing_id in published:
             observations.setdefault((item.printing_id, item.face_id), []).append(item)
+            if item.region == "jp":
+                faces.setdefault(item.face_id, []).append(item)
     result = []
     for row in db.rows("face_revision"):
         if row.values["region"] != "jp":
             continue
         owner = NameOwner("face_revision", str(row.values["id"]))
         possible = candidates.get(owner.identifier, [])
-        result.append((owner, _owner(db, owner, possible)))
+        result.append(
+            (owner, _owner(db, owner, possible, faces.get(str(row.values["face_id"]))))
+        )
     printings = {r.values["id"]: r.values for r in db.rows("printing")}
     for row in db.rows("printing_face"):
         printing = printings[row.values["printing_id"]]
@@ -63,7 +68,10 @@ def publication_owners(
 
 
 def _owner(
-    db: Database, owner: NameOwner, possible: list[FaceObservation]
+    db: Database,
+    owner: NameOwner,
+    possible: list[FaceObservation],
+    face: list[FaceObservation] | None = None,
 ) -> PolicyOwner:
     source = name_source(db, owner)
     if not possible:
@@ -95,14 +103,22 @@ def _owner(
             state="unknown",
             name_ref=None,
         )
-    matches = [
-        item
-        for item in possible
-        if item.card_id == source.card_id
-        and item.face_id == source.face_id
-        and item.content.name == source.text
-        and item.card.faces[item.source_index].name == source.text
-    ]
+
+    def proven(items: list[FaceObservation]) -> list[FaceObservation]:
+        return [
+            item
+            for item in items
+            if item.card_id == source.card_id
+            and item.face_id == source.face_id
+            and item.content.name == source.text
+            and item.card.faces[item.source_index].name == source.text
+        ]
+
+    matches = proven(possible)
+    if not matches and all(item.correction_keys for item in possible):
+        # A corrected name has no raw text of its own; another official printing
+        # of the same face must carry it verbatim, or the owner stays unproven.
+        matches = proven([item for item in face or () if not item.correction_keys])
     if not matches:
         raise ValueError("Name owner differs from its verified publication source")
     item = min(matches, key=lambda item: (item.printing_id, item.card.source.id))

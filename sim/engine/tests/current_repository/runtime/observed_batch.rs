@@ -45,11 +45,12 @@ fn add_bases(snapshot: &mut String, input: &mut Value) -> BTreeMap<String, WellF
     let template = tree["cards"]["synthetic-evolution"].clone();
     let mut cards = Map::new();
     let mut programs = Map::new();
-    let (base, form) = ("regina-base", "CP02-SP09a");
+    let base = "regina-base";
     let record = snapshot
         .lines()
         .map(|line| serde_json::from_str::<Value>(line).unwrap())
-        .find(|record| record["number"] == form)
+        // The SP09a printing shows a collab name; its card's construction name is CP02-070's.
+        .find(|record| record["number"] == "CP02-070")
         .unwrap();
     // The base only produces evolution; unrelated real base abilities remain unadmitted.
     snapshot.push_str(
@@ -356,7 +357,7 @@ fn cp02_070_real_evolution_puts_one_observed_card_in_ex_and_mills_the_other_thre
     assert_remainder(&game, 4, "ex");
 }
 #[test]
-fn cp02_sp09a_real_form_keeps_its_distinct_identity_and_mills_the_remainder() {
+fn cp02_sp09a_real_form_evolves_by_its_construction_name_and_mills_the_remainder() {
     let mut game = evolution("regina-base", "CP02-SP09a", "fairy", 4, 1);
     let play = trigger(&mut game, "CP02-SP09a", 1);
     choose(&mut game, play, "fairy");

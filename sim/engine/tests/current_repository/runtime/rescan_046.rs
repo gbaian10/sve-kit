@@ -91,7 +91,8 @@ fn companions() -> &'static Companions {
         let template = tree["cards"]["synthetic-evolution"].clone();
         let mut programs = Map::new();
         for (companion, real, base) in [
-            ("rescan046-gildaria", "PR-559", true),
+            // PR-559's site name carries a corrected suffix; the base takes the card's name.
+            ("rescan046-gildaria", "BP19-023", true),
             ("rescan046-water", "PR-031", true),
             ("rescan046-floral", "PR-089", false),
             ("rescan046-priest", "PR-093", false),

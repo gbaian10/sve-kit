@@ -956,25 +956,27 @@ records:
   - kind: art
     owner: BP16
     data:
-      id: a:e5c60674bb195d61a094a0033c0d386b
       card_id: c:84d92f8977f8576496bcc9cc6e094d14
-      face_id: f:133795f6ffca516191f676001cc74921
       classification: unclassified
-      uses:
-        - printing_id: p:113ef7a4c9c25089864e27a77a4197c7
-          face_id: f:133795f6ffca516191f676001cc74921
-        - printing_id: p:fdc86a0bc4b759dcb6cd95e88c59d34a
-          face_id: f:133795f6ffca516191f676001cc74921
-        - printing_id: p:6b370c70aa7c5de2bbc5287331330914
-          face_id: f:133795f6ffca516191f676001cc74921
-        - printing_id: p:3d4c852bd8a859a9ae0132f15c1adc6b
-          face_id: f:133795f6ffca516191f676001cc74921
+      face_id: f:133795f6ffca516191f676001cc74921
+      id: a:e5c60674bb195d61a094a0033c0d386b
       observation:
-        region: en
         card_no: BP16-046EN
         observation_hash: sha256:71a00e1d62bcb317d8c7fc83884369ee9b9750d13b7c4e954eb122f29fd5caa0
-        rules_hash: sha256:6af03381bb2a0ad264a10d85feb8adefdbf67e15c05b49312b42c5343dd2b60d
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:6af03381bb2a0ad264a10d85feb8adefdbf67e15c05b49312b42c5343dd2b60d
+      uses:
+        - face_id: f:133795f6ffca516191f676001cc74921
+          printing_id: p:113ef7a4c9c25089864e27a77a4197c7
+        - face_id: f:133795f6ffca516191f676001cc74921
+          printing_id: p:fdc86a0bc4b759dcb6cd95e88c59d34a
+        - face_id: f:133795f6ffca516191f676001cc74921
+          printing_id: p:6b370c70aa7c5de2bbc5287331330914
+        - face_id: f:133795f6ffca516191f676001cc74921
+          printing_id: p:3d4c852bd8a859a9ae0132f15c1adc6b
+        - face_id: f:133795f6ffca516191f676001cc74921
+          printing_id: p:b15fec72673b5a3aa51f756115dc3f23
   - kind: art
     owner: BP16
     data:
@@ -2788,27 +2790,29 @@ records:
   - kind: art
     owner: BP16
     data:
-      id: a:8c3b6ea150d058e5913cc1cdffb7c7da
       card_id: c:1c5a74b1e95a5d3594bae80573767824
-      face_id: f:3ea425a71e145b8c890ef31e462acc18
       classification: unclassified
-      uses:
-        - printing_id: p:49b6dc0127125b24a66ea9444412bff2
-          face_id: f:3ea425a71e145b8c890ef31e462acc18
-        - printing_id: p:70faf143192250d1a1f0ed1f51e6f029
-          face_id: f:3ea425a71e145b8c890ef31e462acc18
-        - printing_id: p:f78347bdc73c50849b3672ce0fc0f7f6
-          face_id: f:3ea425a71e145b8c890ef31e462acc18
-        - printing_id: p:cb599028c980552f927961fd6e5d42f5
-          face_id: f:3ea425a71e145b8c890ef31e462acc18
-        - printing_id: p:6f5a066f3cef58cc8dbaa9b3d0480275
-          face_id: f:3ea425a71e145b8c890ef31e462acc18
+      face_id: f:3ea425a71e145b8c890ef31e462acc18
+      id: a:8c3b6ea150d058e5913cc1cdffb7c7da
       observation:
-        region: en
         card_no: BP16-T10EN
         observation_hash: sha256:69cf785d0c0dfca35f8d27422286703c3db32bf1050db1a4a7963210be156ed1
-        rules_hash: sha256:460e5cf2025a3309ab27195c363eb2e8babc06fc48a3e225c622626349d288ba
         recipe: registry-observation-v2
+        region: en
+        rules_hash: sha256:460e5cf2025a3309ab27195c363eb2e8babc06fc48a3e225c622626349d288ba
+      uses:
+        - face_id: f:3ea425a71e145b8c890ef31e462acc18
+          printing_id: p:49b6dc0127125b24a66ea9444412bff2
+        - face_id: f:3ea425a71e145b8c890ef31e462acc18
+          printing_id: p:70faf143192250d1a1f0ed1f51e6f029
+        - face_id: f:3ea425a71e145b8c890ef31e462acc18
+          printing_id: p:f78347bdc73c50849b3672ce0fc0f7f6
+        - face_id: f:3ea425a71e145b8c890ef31e462acc18
+          printing_id: p:cb599028c980552f927961fd6e5d42f5
+        - face_id: f:3ea425a71e145b8c890ef31e462acc18
+          printing_id: p:6f5a066f3cef58cc8dbaa9b3d0480275
+        - face_id: f:3ea425a71e145b8c890ef31e462acc18
+          printing_id: p:36bdcef3d3fb55538dc8634af49ef5a8
   - kind: art
     owner: BP16
     data:
