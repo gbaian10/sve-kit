@@ -1081,8 +1081,9 @@ impl Game {
             && self.internal_choice_any(execution.context.controller)?
         {
             count = Nat(u64::try_from(group.modes.len()).map_err(invalid)?);
+            // R-0015: "好きな数" widens the maximum only; a choice still takes at least one mode.
             *cardinality = Cardinality {
-                minimum: Nat(0),
+                minimum: Nat(1),
                 maximum: Some(count),
             };
         }
@@ -1956,8 +1957,9 @@ impl Game {
                 }
             }
             let available = u64::try_from(legal.len()).map_err(invalid)?;
+            // R-0015: "好きな数" widens the maximum only; a choice still takes at least one mode.
             let (count, minimum) = if any {
-                (Nat(available), 0)
+                (Nat(available), 1)
             } else {
                 (count, minimum)
             };

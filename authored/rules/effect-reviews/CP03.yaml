@@ -88,7 +88,7 @@ handwritten_differences:
       T85fc4f7014: c100543df9b94744d1c9094276ee05aa022e69530615251d0642220c22089d03
     conclusion: 等價寫法
     rationale: ride 的一般規則 lowering 補一次 link_resource；顯式宣告時不再補。保留 PP 與 EP 的支付條件；無可用資源必須拒絕，不能先扣 PP。共用 body 不負責再支付一次。
-    scenario: authored_ride_costs_share_one_payment_and_reject_missing_resources
+    scenario: explicit_and_implicit_ride_costs_choose_and_pay_exactly_one_resource
     translation_review:
       required_uses: []
       trigger: 只修正 DSL 或 lowering，不改來源語義；不得把同 frame 的全部卡號當中文重審清單。
