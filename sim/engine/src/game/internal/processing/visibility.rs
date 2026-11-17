@@ -37,7 +37,8 @@ pub(in crate::game::internal) fn disclose_source(game: &Game, execution: &mut Ex
 }
 
 pub(in crate::game) fn observed_sources(game: &Game, perspective: Viewer) -> Vec<ProcessingSource> {
-    if game.player_fault.is_some() || game.state.game["ended"] == true {
+    // A fault may keep the previous stop, whose disclosed sources belong to its restored board.
+    if game.state.game["ended"] == true {
         return vec![];
     }
     let mut sources = vec![];
