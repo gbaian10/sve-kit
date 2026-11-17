@@ -164,6 +164,39 @@ def _card_rows(
     }
 
 
+def _exclusive_regions(
+    source: Source,
+    view: dict[str, list[Record]],
+    prints_by_card: Mapping[str, list[Record]],
+) -> None:
+    """A pack the other region has not released yet makes a card leading, not exclusive."""
+    packs = {
+        string(row["id"]): string(row["home_set_id"])
+        for row in source.rows("printing", "id,home_set_id")
+    }
+    released = {
+        (packs[string(row["id"])], string(row["region"])) for row in view["printing"]
+    }
+    for card in view["card"]:
+        prints = prints_by_card.get(string(card["id"]), [])
+        own = {string(row["region"]) for row in prints}
+        exclusive: list[str] = []
+        if len(own) == 1:
+            (region,) = own
+            other = "en" if region == "jp" else "jp"
+            reviewed = any(
+                object_value(raw)["region"] == region
+                and object_value(raw)["mapping_state"] == "confirmed_none"
+                for raw in array(card["regions"])
+            )
+            if reviewed or all(
+                (packs[string(row["id"])], other) in released for row in prints
+            ):
+                exclusive.append(region)
+        # Each region's catalog carries only its own RegionView; this tells it the others.
+        card["exclusive_regions"] = json_list(exclusive)
+
+
 def region_views(
     source: Source,
     view: dict[str, list[Record]],
@@ -179,10 +212,6 @@ def region_views(
             for face in sorted(own_faces, key=lambda row: integer(row["ordinal"]))
         ]
         all_prints = by_card["printing"].get(string(card["id"]), [])
-        # Each region's catalog carries only its own RegionView; this tells it the others.
-        card["printing_regions"] = json_list(
-            sorted({string(row["region"]) for row in all_prints})
-        )
         regions: list[Record] = []
         for region in ("en", "jp"):
             prints = [row for row in all_prints if row["region"] == region]
@@ -260,6 +289,7 @@ def region_views(
                 }
             )
         card["regions"] = json_list(regions)
+    _exclusive_regions(source, view, by_card["printing"])
 
 
 def support(

@@ -1025,6 +1025,7 @@ async function addCard(ctx: CardContext): Promise<void> {
       normalized: alias.text.toLowerCase(),
     })
   }
+  const printedRegions = [...new Set(card.printings.map((printing) => printing.region))]
   builder.push("card", owner, "bootstrap", {
     id: card.id,
     layout: card.layout,
@@ -1032,9 +1033,8 @@ async function addCard(ctx: CardContext): Promise<void> {
     home_set_id: card.set,
     faces: card.faces.map((face) => face.id),
     regions: sortRows(regions, ["region"]),
-    printing_regions: [...new Set(card.printings.map((printing) => printing.region))].sort(
-      compareCodePoints,
-    ),
+    // Leading packs are the exporter's rule; here every single-region card is exclusive.
+    exclusive_regions: printedRegions.length === 1 ? printedRegions : [],
   })
   builder.push("card_engine_support", owner, "bootstrap", {
     card_id: card.id,

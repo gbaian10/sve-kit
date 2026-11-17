@@ -2214,11 +2214,10 @@ it.each(["jp", "en"] as const)(
     const only = cards(true)
     expect(only.size).toBeGreaterThan(0)
     expect(only.size).toBeLessThan(cards(false).size)
-    const other = edition === "jp" ? "en" : "jp"
     for (const card of columns.index().cards)
       expect(only.has(stringValue(card["id"]))).toBe(
         cards(false).has(stringValue(card["id"])) &&
-          !arrayValue(card["printing_regions"] ?? []).includes(other),
+          arrayValue(card["exclusive_regions"] ?? []).includes(edition),
       )
   },
 )
