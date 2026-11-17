@@ -1599,6 +1599,91 @@ def test_mapping_review_state_is_projected(db: Database, state: str) -> None:
     assert region(projected(db))["mapping_state"] == state
 
 
+def other_card_in_english(db: Database) -> None:
+    """Release the card's pack in English through a different, English-only card."""
+    printing = dict(db.rows("printing")[0].values)
+    printing_face = dict(db.rows("printing_face")[0].values)
+    revision = dict(db.rows("face_revision")[0].values)
+    with db.transaction():
+        db.insert(
+            "language",
+            {"code": "en", "display_name": "English", "fallback_order": Json(["ja"])},
+        )
+        db.insert(
+            "text_unit",
+            {
+                "id": EN_TEXT,
+                "lang": "en",
+                "text": "Synthetic official",
+                "content_hash": digest(b"Synthetic official"),
+            },
+        )
+        db.update("card", {"id": "old_card"}, {"identity_state": "confirmed"})
+        db.insert(
+            "face",
+            {"id": "old-face", "card_id": "old_card", "ordinal": 0, "side": "front"},
+        )
+        db.insert(
+            "printing",
+            printing
+            | {
+                "id": "old-en",
+                "card_id": "old_card",
+                "region": "en",
+                "card_no": "TEST-002EN",
+            },
+        )
+        db.insert("card_int_id", {"printing_id": "old-en", "int_id": 20003})
+        db.insert(
+            "printing_face",
+            printing_face
+            | {
+                "printing_id": "old-en",
+                "face_id": "old-face",
+                "card_id": "old_card",
+                "art_id": None,
+                "printed_name_unit_id": EN_TEXT,
+                "printed_effect_unit_id": EN_TEXT,
+            },
+        )
+        db.insert(
+            "face_revision",
+            revision
+            | {
+                "id": "old-revision",
+                "face_id": "old-face",
+                "region": "en",
+                "name_unit_id": EN_TEXT,
+                "effect_unit_id": EN_TEXT,
+            },
+        )
+        db.insert(
+            "face_current",
+            {
+                "face_id": "old-face",
+                "region": "en",
+                "revision_id": "old-revision",
+                "basis": "latest_observed_no_errata",
+            },
+        )
+
+
+def test_region_only_card_in_unreleased_pack_is_leading_not_exclusive(
+    db: Database,
+) -> None:
+    with db.transaction():
+        db.delete(
+            "region_mapping_review",
+            {"card_id": "card", "target_region": "en", "as_of": DATE},
+        )
+    result = dual_project(db, decisions())
+    assert one(result, "card", "card")["exclusive_regions"] == []
+    other_card_in_english(db)
+    result = dual_project(db, decisions())
+    assert one(result, "card", "card")["exclusive_regions"] == ["jp"]
+    assert one(result, "card", "old_card")["exclusive_regions"] == ["en"]
+
+
 def test_confirmed_availability_override_preserves_its_date(db: Database) -> None:
     result = region(projected(db), "en")
     assert result["release_state"] == "announced"

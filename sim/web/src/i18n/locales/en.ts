@@ -309,9 +309,9 @@ export default {
     sveOnlyHint:
       "Printings with no matching digital artwork, including cards absent from the digital games",
     jpOnly: "Japanese exclusive",
-    jpOnlyHint: "Cards with no English printing",
+    jpOnlyHint: "Cards with no English printing (excluding sets not yet released in English)",
     enOnly: "English exclusive",
-    enOnlyHint: "Cards with no Japanese printing",
+    enOnlyHint: "Cards with no Japanese printing (excluding sets not yet released in Japanese)",
     specialPrintings: "Special printings",
     specialPrintingsAll: "All",
     specialPrintingsHint: "Selecting several shows only cards that match all of them",

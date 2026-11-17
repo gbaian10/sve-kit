@@ -657,9 +657,9 @@ function build(
     const card = cards.id.length
     cards.id.push(intern(entry.cardId))
     cards.errata.push(Number(errataCards.has(entry.cardId)))
-    // Each edition's catalog only knows its own printings; the card lists every region it has.
-    const printed = arrayValue(index.card(entry.cardId)?.["printing_regions"] ?? [])
-    cards.regionOnly.push(Number(!printed.some((region) => region !== edition)))
+    // Each edition's catalog only knows its own printings; the export decides exclusivity.
+    const exclusiveRegions = arrayValue(index.card(entry.cardId)?.["exclusive_regions"] ?? [])
+    cards.regionOnly.push(Number(exclusiveRegions.includes(edition)))
     cards.restricted.push(restrictions?.cards.has(entry.cardId) ? 1 : 0)
     cards.class.push(intern(entry.classCode ?? NEUTRAL_CLASS))
     cards.printingStart.push(printings.id.length)
