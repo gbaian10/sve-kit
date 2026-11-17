@@ -1,3 +1,6 @@
+#[path = "processing_stage/play_declarations.rs"]
+mod play_declarations;
+
 #[path = "processing_stage/declarations.rs"]
 pub(super) mod declarations;
 

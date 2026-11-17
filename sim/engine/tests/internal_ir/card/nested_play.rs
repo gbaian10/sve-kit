@@ -8,6 +8,9 @@ mod lifecycle;
 #[path = "nested_play/declarations.rs"]
 mod declarations;
 
+#[path = "nested_play/play_declarations.rs"]
+mod play_declarations;
+
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};

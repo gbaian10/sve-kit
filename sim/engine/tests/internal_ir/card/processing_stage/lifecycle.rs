@@ -101,6 +101,10 @@ pub(super) fn overflowing_program() -> WellFormedCardProgram {
             {"optional":{"do":[{"life":{"who":"self","delta":1}}]}}
         ]}),
     );
+    with_overflow(&program)
+}
+
+pub(super) fn with_overflow(program: &WellFormedCardProgram) -> WellFormedCardProgram {
     let mut raw = program.card().clone();
     let changed = if let Node::Control {
         control: Control::May { body, .. },
