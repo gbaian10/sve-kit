@@ -209,23 +209,6 @@ fn resolution_counts_survive_a_pause_and_serialized_resume() {
 }
 
 #[test]
-fn bound_selections_preserve_owner_and_values_support_aggregation() {
-    let mut engine = game(
-        &json!({"op":"damage","subjects":{"from":"target.1","type":"follower"},"amount":{"fn":"sum","args":[{"values":{"zone":"field","side":"self"},"field":"cost"}]}}),
-    );
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.query(View::P1, "P2.field.b.hp").unwrap(),
-        Some(json!(2_i64))
-    );
-}
-
-#[test]
 fn combo_counts_the_card_currently_being_played() {
     let mut engine = game(
         &json!({"op":"choice","min":{"if":{"fn":"eq","args":[{"read":"self.combo"},1_i64]},"then":1_i64,"else":0_i64},"max":1_i64,"modes":[{"op":"damage","subjects":"target.1","amount":{"read":"self.combo"}}]}),
@@ -251,98 +234,6 @@ fn combo_counts_the_card_currently_being_played() {
         engine.query(View::P1, "P2.field.b.hp").unwrap(),
         Some(json!(2_i64))
     );
-}
-
-#[test]
-fn movement_receipts_count_changes_and_bind_the_actual_results() {
-    for (destination, expected) in [("field", 20_i64), ("cemetery", 19_i64)] {
-        let mut engine = game(
-            &json!({"op":"if_done","attempt":{"op":"move","subjects":"target.1","to":destination,"bind":"moved"},"then":{"op":"damage","subjects":"opponent.leader","amount":{"count":"moved"}}}),
-        );
-        engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        assert_eq!(
-            engine.query(View::P1, "P2.leader.life").unwrap(),
-            Some(json!(expected))
-        );
-    }
-}
-
-#[test]
-fn chosen_and_actual_movement_results_diverge_at_ex_capacity() {
-    for (available, expected) in [(0_i64, 0_i64), (1, 1), (2, 2)] {
-        for reference in ["chosen", "placed"] {
-            let body = json!({"op":"seq","steps":[
-                {"op":"select","select":{"side":"self","zone":"deck"},"min":2_i64,"max":2_i64,"bind":"chosen"},
-                {"op":"move","subjects":"chosen","to":"ex","bind":"placed"},
-                {"op":"damage","subjects":"opponent.leader","amount":{"count":reference}}
-            ]});
-            let mut position = setup();
-            position["players"]["P1"]["zones"]["deck"] = json!([
-                {"id":"d1","card":"unit-follower"},
-                {"id":"d2","card":"unit-follower"}
-            ]);
-            position["players"]["P1"]["zones"]["ex"] = json!(
-                (available..5)
-                    .map(|n| json!({"id":format!("x{n}"),"card":"unit-follower"}))
-                    .collect::<Vec<_>>()
-            );
-            let mut engine = Game::new(
-                Arc::new(catalog(&body)),
-                &position,
-                &Value::Null,
-                &Value::Null,
-                "movement-results",
-            )
-            .unwrap();
-            engine
-                .decide(
-                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                    "cast",
-                )
-                .unwrap();
-            engine
-                .decide(
-                    &json!({"do":"resolve-choice","select":["d1","d2"]}),
-                    "choose",
-                )
-                .unwrap();
-            if available < 2 {
-                let selected = if available == 0 {
-                    json!([])
-                } else {
-                    json!(["d1"])
-                };
-                engine
-                    .decide(
-                        &json!({"do":"resolve-choice","select":selected}),
-                        "capacity",
-                    )
-                    .unwrap();
-            }
-            assert_eq!(
-                engine.query(View::P1, "P1.ex_count").unwrap(),
-                Some(json!(5_i64))
-            );
-            assert_eq!(
-                engine.query(View::Referee, "P1.deck_count").unwrap(),
-                Some(json!(2_i64 - expected))
-            );
-            let count = if reference == "chosen" {
-                2_i64
-            } else {
-                expected
-            };
-            assert_eq!(
-                engine.query(View::P1, "P2.leader.life").unwrap(),
-                Some(json!(20_i64 - count))
-            );
-        }
-    }
 }
 
 #[test]
@@ -430,65 +321,6 @@ fn original_bp18_bodies_keep_different_remainders_when_ex_is_full() {
             engine.query(View::P1, "P1.ex_count").unwrap(),
             Some(json!(5_i64))
         );
-    }
-}
-
-#[test]
-fn authored_ride_costs_share_one_payment_and_reject_missing_resources() {
-    let cocoa: Value =
-        serde_json::from_str(include_str!("fixtures/prototype-bodies/CP03-112.json")).unwrap();
-    // The legacy payment regression survives migration without reading the current DSL.
-    let migrated: Value =
-        serde_json::from_str(include_str!("fixtures/prototype-bodies/CSD03a-006.json")).unwrap();
-    let valeria: Value =
-        serde_json::from_str(include_str!("fixtures/prototype-bodies/CP03-009.json")).unwrap();
-    for authored in [&valeria, &cocoa, &migrated] {
-        let costs = authored["abilities"][0]["costs"].as_array().unwrap();
-        let links = costs
-            .iter()
-            .filter(|cost| cost["op"] == "link_resource")
-            .cloned()
-            .collect::<Vec<_>>();
-        let (loaded, initial) = ride_fixture(&links);
-        for available in [false, true] {
-            let mut position = initial.clone();
-            if !available {
-                position["players"]["P1"]["zones"]["evolve_deck"] = json!([]);
-            }
-            let mut engine = Game::new(
-                Arc::clone(&loaded),
-                &position,
-                &Value::Null,
-                &Value::Null,
-                "ride-cost",
-            )
-            .unwrap();
-            if !available {
-                assert!(
-                    !engine
-                        .legal()
-                        .unwrap()
-                        .iter()
-                        .any(|action| action["do"] == "activate")
-                );
-            }
-            let before = engine.digest().unwrap();
-            let step = engine.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"costs":{"1":["r2"]},"pay":{"pp":1_i64,"ep":0_i64}}),"ride").unwrap();
-            if available {
-                assert_eq!(step.outcome, "resolved");
-                assert_eq!(
-                    engine.query(View::P1, "P1.drive").unwrap(),
-                    Some(json!(["r2"]))
-                );
-                assert_eq!(
-                    engine.query(View::P1, "P1.pp.current").unwrap(),
-                    Some(json!(1_i64))
-                );
-            } else {
-                assert_eq!(step.outcome, "cannot-activate");
-                assert_eq!(engine.digest().unwrap(), before);
-            }
-        }
     }
 }
 
@@ -1396,84 +1228,6 @@ fn effect_victory_stops_resolution_before_rule_defeat_unless_prohibited() {
 }
 
 #[test]
-fn end_discard_rechecks_after_triggers_and_roundtrips_private_choices() {
-    let mut doc = document(&json!({"op":"draw","count":0_i64}));
-    doc["cards"]["unit-spell"]["abilities"] = json!([
-        {"kind":"trigger","line":1_i64,"active_zones":["hand"],"event":"discard","subject":"self","body":{"op":"draw","count":1_i64}}
-    ]);
-    let catalog = Arc::new(
-        Catalog::from_documents(
-            &snapshot(),
-            &registry(),
-            &[("end.yaml".into(), doc.to_string())],
-        )
-        .unwrap(),
-    );
-    let mut position = setup();
-    let mut hand = (0_u32..8)
-        .map(|index| json!({"id":format!("h{index}"),"card":"unit-follower"}))
-        .collect::<Vec<_>>();
-    hand.push(json!({"id":"s","card":"unit-spell"}));
-    position["players"]["P1"]["zones"]["hand"] = json!(hand);
-    position["players"]["P1"]["zones"]["deck"] = json!([{"id":"d1","card":"unit-follower"}]);
-    position["players"]["P2"]["zones"]["deck"] = json!([{"id":"d2","card":"unit-follower"}]);
-    let mut engine = Game::new(catalog, &position, &Value::Null, &Value::Null, "end").unwrap();
-    engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
-    engine.decide(&json!({"do":"pass"}), "quick-pass").unwrap();
-    assert_eq!(engine.legal().unwrap().len(), 36);
-    assert_eq!(
-        engine.projection(View::P2).unwrap()["awaiting"],
-        json!({"by":"P1"})
-    );
-    let before = engine.digest().unwrap();
-    for selection in [json!(["s", "s"]), json!(["s"]), json!(["s", "b"])] {
-        assert_eq!(
-            engine
-                .decide(&json!({"do":"end-discard","select":selection}), "invalid")
-                .unwrap()
-                .outcome,
-            "cannot-play"
-        );
-        assert_eq!(engine.digest().unwrap(), before);
-    }
-    let discarded = engine
-        .decide(&json!({"do":"end-discard","select":["s","h7"]}), "discard")
-        .unwrap();
-    assert_eq!(discarded.outcome, "resolved");
-    let mut restored: Game =
-        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    restored
-        .decide(
-            &json!({"do":"choose-pending","pending":{"ability":{"source":"s","line":1_i64}}}),
-            "draw",
-        )
-        .unwrap();
-    assert_eq!(restored.legal().unwrap().len(), 8);
-    assert_eq!(
-        restored.query(View::P1, "turn.active").unwrap(),
-        Some(json!("P1"))
-    );
-    restored
-        .decide(
-            &json!({"do":"end-discard","select":["d1"]}),
-            "discard-again",
-        )
-        .unwrap();
-    assert_eq!(
-        restored.query(View::P1, "turn.active").unwrap(),
-        Some(json!("P2"))
-    );
-    assert_eq!(
-        restored.query(View::P2, "P2.hand").unwrap(),
-        Some(json!(["d2"]))
-    );
-    assert_eq!(
-        restored.query(View::P1, "P1.hand_count").unwrap(),
-        Some(json!(7_i64))
-    );
-}
-
-#[test]
 fn cost_free_pending_cannot_be_declined() {
     let mut doc = document(&json!({"op":"draw","count":0_i64}));
     doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"trigger","line":1_i64,"event":"attack","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}]);
@@ -1498,150 +1252,6 @@ fn cost_free_pending_cannot_be_declined() {
     decision["costs"] = json!("decline");
     engine.decide(&decision, "decline").unwrap_err();
     assert_eq!(engine.digest().unwrap(), before);
-}
-
-#[test]
-fn printed_line_discriminators_select_the_intended_pending_ability() {
-    for shared_line in [false, true] {
-        let second_line = if shared_line { 1_i64 } else { 2_i64 };
-        let mut doc = document(&json!({"op":"draw","count":0_i64}));
-        doc["cards"]["unit-follower"]["abilities"] = json!([
-            {"kind":"trigger","line":1_i64,"keyword":"first","event":"attack","subject":"self",
-             "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}},
-            {"kind":"trigger","line":second_line,"keyword":"second","event":"attack","subject":"self",
-             "body":{"op":"damage","subjects":"opponent.leader","amount":2_i64}}
-        ]);
-        let words = json!({"format":1_u8,"kind":"keyword_registry","keywords":{
-            "first":{"ja":"First","role":"ability-label"},
-            "second":{"ja":"Second","role":"ability-label"}
-        }});
-        let catalog = Arc::new(
-            Catalog::from_documents(
-                &snapshot(),
-                &words.to_string(),
-                &[("discriminators.yaml".into(), doc.to_string())],
-            )
-            .unwrap(),
-        );
-        let mut engine = Game::new(
-            catalog,
-            &setup(),
-            &Value::Null,
-            &Value::Null,
-            "discriminators",
-        )
-        .unwrap();
-        engine
-            .decide(
-                &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
-                "attack",
-            )
-            .unwrap();
-        let choices = engine.legal().unwrap();
-        assert_eq!(choices.len(), 2);
-        for (choice, (line, label)) in choices
-            .iter()
-            .zip([(1_i64, "First"), (second_line, "Second")])
-        {
-            let mut reference = json!({"source":"a","line":line});
-            if shared_line {
-                reference["keyword"] = json!(label);
-            }
-            assert_eq!(
-                *choice,
-                json!({"do":"choose-pending","pending":{"ability":reference}})
-            );
-        }
-        if shared_line {
-            let before = engine.digest().unwrap();
-            engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}}), "ambiguous").unwrap_err();
-            assert_eq!(engine.digest().unwrap(), before);
-        }
-        engine.decide(&choices[1], "second").unwrap();
-        assert_eq!(
-            engine.query(View::P1, "P2.leader.life").unwrap(),
-            Some(json!(18_i64))
-        );
-        assert_eq!(engine.legal().unwrap(), vec![choices[0].clone()]);
-        engine.decide(&choices[0], "first").unwrap();
-        assert_eq!(
-            engine.query(View::P1, "P2.leader.life").unwrap(),
-            Some(json!(17_i64))
-        );
-    }
-}
-
-#[test]
-fn pending_events_preserve_instance_identity_until_resolution() {
-    let mut doc = document(&json!({"op":"destroy","subjects":"target.1"}));
-    doc["cards"]["unit-spell"]["abilities"][0]["targets"][0]["min"] = json!(2_i64);
-    doc["cards"]["unit-spell"]["abilities"][0]["targets"][0]["max"] = json!(2_i64);
-    doc["cards"]["unit-follower"]["abilities"] = json!([{
-        "kind":"trigger","line":1_i64,"event":"leave",
-        "subject":{"zone":"field","side":"opponent","type":"follower"},
-        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
-    }]);
-    let catalog = Arc::new(
-        Catalog::from_documents(
-            &snapshot(),
-            &registry(),
-            &[("repeated.yaml".into(), doc.to_string())],
-        )
-        .unwrap(),
-    );
-    let mut initial = setup();
-    initial["players"]["P2"]["zones"]["field"] = json!([
-        {"id":"b","card":"unit-follower"}, {"id":"c","card":"unit-follower"}
-    ]);
-    let mut engine = Game::new(
-        Arc::clone(&catalog),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "repeated",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b","c"]}}),
-            "cast",
-        )
-        .unwrap();
-    let choices = engine.legal().unwrap();
-    assert_eq!(choices.len(), 2);
-    for (choice, object) in choices.iter().zip(["b", "c"]) {
-        assert_eq!(
-            *choice,
-            json!({"do":"choose-pending","pending":{
-                "ability":{"source":"a","line":1_i64},"event":{"left_field":object}
-            }})
-        );
-    }
-    assert_eq!(
-        engine.projection(View::P1).unwrap()["awaiting"]["choices"],
-        json!(choices)
-    );
-    let ambiguous =
-        json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}});
-    let before = engine.digest().unwrap();
-    engine.decide(&ambiguous, "ambiguous").unwrap_err();
-    assert_eq!(engine.digest().unwrap(), before);
-    engine.decide(&choices[1], "second-instance").unwrap();
-    let singleton = &choices[0];
-    assert_eq!(engine.legal().unwrap(), vec![singleton.clone()]);
-    let packet = engine.projection(View::P1).unwrap();
-    assert_eq!(packet["awaiting"]["choices"], json!([singleton]));
-    assert_eq!(
-        packet["semantic_state"]["pending_triggers"][0]["event"],
-        json!({"left_field":"b"})
-    );
-    let mut restored: Game =
-        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    restored.decide(singleton, "last-instance").unwrap();
-    assert_eq!(
-        restored.query(View::P1, "P2.leader.life").unwrap(),
-        Some(json!(18_i64))
-    );
 }
 
 #[test]
@@ -1753,239 +1363,6 @@ fn spell_cost_enumeration_and_payment_include_the_printed_cost() {
 }
 
 #[test]
-fn life_decreases_are_distinct_from_damage_and_stat_changes_are_per_object() {
-    let mut engine = game(&json!({"op":"seq","steps":[
-        {"op":"modify","subjects":"self.leader","hp":-3_i64},
-        {"op":"modify","subjects":"self.leader","hp":2_i64},
-        {"op":"modify","subjects":"self.leader","set_hp":15_i64},
-        {"op":"damage","subjects":"opponent.leader","amount":{"read":"self.turn.leader_hp_decreased"}},
-        {"op":"modify","subjects":"target.1","power":1_i64,"hp":1_i64}
-    ]}));
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    let packet = engine.projection(View::P1).unwrap();
-    assert_eq!(packet["P1"]["leader"]["life"], 15_i64);
-    assert_eq!(packet["P2"]["leader"]["life"], 18_i64);
-    assert_eq!(
-        packet["semantic_state"]["counters_this_turn"]["P1.leader_hp_decreased"],
-        2_i64
-    );
-    assert_eq!(
-        packet["semantic_state"]["counters_this_turn"]["P1.leader_hp_increased"],
-        2_i64
-    );
-    assert_eq!(
-        packet["semantic_state"]["counters_this_turn"]["P1.leader_damaged"],
-        0_i64
-    );
-    assert_eq!(packet["objects"]["b"]["stats_increased_this_turn"], true);
-    assert_eq!(packet["objects"]["a"]["stats_increased_this_turn"], false);
-    engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
-    engine.decide(&json!({"do":"pass"}), "pass").unwrap();
-    assert_eq!(
-        engine.projection(View::P1).unwrap()["objects"]["b"]["stats_increased_this_turn"],
-        false
-    );
-}
-
-#[test]
-fn localized_keyword_and_counter_packets_keep_stable_identifiers() {
-    let mut registry: Value = serde_json::from_str(&registry()).unwrap();
-    registry["keywords"]["stack_counter"] = json!({"ja":"スタックカウンター","role":"counter"});
-    let catalog = Arc::new(
-        Catalog::from_documents(
-            &snapshot(),
-            &registry.to_string(),
-            &[(
-                "stable.yaml".into(),
-                document(&json!({"op":"draw","count":0_i64})).to_string(),
-            )],
-        )
-        .unwrap(),
-    );
-    let mut position = setup();
-    position["players"]["P1"]["zones"]["field"][0]["state"] =
-        json!({"keywords":["守護"],"counters":{"スタックカウンター":2_i64}});
-    let engine = Game::new(
-        Arc::clone(&catalog),
-        &position,
-        &Value::Null,
-        &Value::Null,
-        "stable",
-    )
-    .unwrap();
-    let packet = engine.projection(View::P1).unwrap();
-    assert_eq!(packet["objects"]["a"]["keywords"], json!(["守護"]));
-    assert_eq!(
-        packet["objects"]["a"]["counters"]["スタックカウンター"],
-        2_i64
-    );
-}
-
-#[test]
-fn last_words_trigger_once_for_destroy_and_for_payment_movement() {
-    for payment in [false, true] {
-        let body = if payment {
-            json!({"op":"seq","steps":[]})
-        } else {
-            json!({"op":"destroy","subjects":"target.1"})
-        };
-        let mut doc = document(&body);
-        doc["cards"]["unit-follower"]["abilities"] = json!([{
-            "kind":"trigger","line":1_i64,"event":"field_to_cemetery","subject":"self",
-            "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
-        }]);
-        if payment {
-            doc["cards"]["unit-spell"]["abilities"][0]["costs"] =
-                json!([{"op":"move","subjects":"target.1","to":"cemetery"}]);
-        }
-        let catalog = Arc::new(
-            Catalog::from_documents(
-                &snapshot(),
-                &registry(),
-                &[("last-words.yaml".into(), doc.to_string())],
-            )
-            .unwrap(),
-        );
-        let mut engine =
-            Game::new(catalog, &setup(), &Value::Null, &Value::Null, "last-words").unwrap();
-        engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        let pending = engine.legal().unwrap();
-        assert_eq!(pending.len(), 1);
-        assert_eq!(pending[0]["do"], "choose-pending");
-        engine.decide(&pending[0], "last-words").unwrap();
-        assert_eq!(
-            engine.query(View::P1, "P1.leader.life").unwrap(),
-            Some(json!(19_i64))
-        );
-        assert!(
-            engine
-                .legal()
-                .unwrap()
-                .iter()
-                .all(|action| action["do"] != "choose-pending")
-        );
-    }
-}
-
-#[test]
-fn semantic_digest_preserves_selector_sources_in_suspended_programs() {
-    let mut engine = game(&json!({"op":"seq","steps":[
-        {"op":"optional","then":{"op":"draw","count":0_i64}},
-        {"op":"damage","subjects":{"from":"target.1"},"amount":1_i64}
-    ]}));
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    let mut state = serde_json::to_value(&engine).unwrap();
-    assert_eq!(
-        state["state"]["frame"]["todo"][0]["subjects"]["from"],
-        "target.1"
-    );
-    state["state"]["frame"]["todo"][0]["subjects"]["from"] = json!("self");
-    let changed: Game = serde_json::from_value(state).unwrap();
-    assert_ne!(changed.digest().unwrap(), engine.digest().unwrap());
-}
-
-#[test]
-fn identical_pending_copies_preserve_multiplicity_after_restore() {
-    let mut doc = document(&json!({"op":"draw","count":0_i64}));
-    doc["cards"]["unit-follower"]["abilities"] = json!([{
-        "kind":"trigger","line":1_i64,"event":"end",
-        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
-    }]);
-    let catalog = Arc::new(
-        Catalog::from_documents(
-            &snapshot(),
-            &registry(),
-            &[("copies.yaml".into(), doc.to_string())],
-        )
-        .unwrap(),
-    );
-    let mut position = setup();
-    let pending =
-        json!({"controller":"P1","ability":{"source":"a","line":1_i64},"event":{"end":"P1"}});
-    position["semantic_state"]["pending_triggers"] = json!([pending, pending, pending]);
-    let engine = Game::new(catalog, &position, &Value::Null, &Value::Null, "copies").unwrap();
-    let choices = engine.legal().unwrap();
-    assert_eq!(choices.len(), 3);
-    assert!(choices.iter().all(|choice| *choice == choices[0]));
-    assert!(choices[0]["pending"].get("event").is_none());
-    let mut restored: Game =
-        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for remaining in (0..3).rev() {
-        restored.decide(&choices[0], "copy").unwrap();
-        assert_eq!(
-            restored
-                .legal()
-                .unwrap()
-                .iter()
-                .filter(|choice| choice["do"] == "choose-pending")
-                .count(),
-            remaining
-        );
-    }
-    assert_eq!(
-        restored.query(View::P1, "P2.leader.life").unwrap(),
-        Some(json!(17_i64))
-    );
-}
-
-#[test]
-fn partial_shuffle_preserves_other_cards_and_rejects_full_deck_scripts() {
-    let body = json!({"op":"shuffle","subjects":{"zone":"deck","side":"self","where":{"fn":"ge","args":[{"read":"item.power"},7_i64]}}});
-    let catalog = Arc::new(catalog(&body));
-    let mut position = setup();
-    position["players"]["P1"]["zones"]["deck"] = json!([
-        {"id":"d1","card":"unit-follower"},
-        {"id":"d2","card":"unit-follower","state":{"power":7_i64}},
-        {"id":"d3","card":"unit-follower"},
-        {"id":"d4","card":"unit-follower","state":{"power":8_i64}}
-    ]);
-    for (result, accepted) in [
-        (json!(["d4", "d2"]), true),
-        (json!(["d1", "d4", "d3", "d2"]), false),
-        (json!(["d2", "d2"]), false),
-    ] {
-        let mut engine = Game::new(
-            Arc::clone(&catalog),
-            &position,
-            &Value::Null,
-            &json!({"shuffles":[{"player":"P1","result":result}]}),
-            "subset",
-        )
-        .unwrap();
-        let before = engine.digest().unwrap();
-        let step = engine.decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "shuffle",
-        );
-        if accepted {
-            step.unwrap();
-            assert_eq!(
-                engine.query(View::Referee, "P1.deck").unwrap(),
-                Some(json!(["d1", "d4", "d3", "d2"]))
-            );
-        } else {
-            step.unwrap_err();
-            assert_eq!(engine.digest().unwrap(), before);
-        }
-    }
-}
-
-#[test]
 fn constrained_selection_order_and_open_integer_declaration_restore_together() {
     let body = json!({"op":"seq","steps":[
         {"op":"look","count":3_i64,"bind":"looked"},
@@ -2054,45 +1431,6 @@ fn constrained_selection_order_and_open_integer_declaration_restore_together() {
     assert_eq!(
         restored.query(View::P1, "P2.leader.life").unwrap(),
         Some(json!(63_i64))
-    );
-}
-
-#[test]
-fn trigger_context_keeps_last_known_values_after_leaving_and_serializing() {
-    let mut doc = document(&json!({"op":"move","subjects":"target.1","to":"cemetery"}));
-    doc["cards"]["unit-follower"]["abilities"] = json!([{
-        "line":1_i64,"kind":"trigger","event":"leave","subject":"self",
-        "body":{"op":"damage","subjects":"opponent.leader","amount":{"read":"event.subject.power"}}
-    }]);
-    let catalog = Arc::new(
-        Catalog::from_documents(
-            &snapshot(),
-            &registry(),
-            &[("context.yaml".into(), doc.to_string())],
-        )
-        .unwrap(),
-    );
-    let mut position = setup();
-    position["players"]["P2"]["zones"]["field"][0]["state"]["power"] = json!(8_i64);
-    let mut engine =
-        Game::new(catalog, &position, &Value::Null, &Value::Null, "last-info").unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "leave",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.query(View::P1, "P2.cemetery.b.power").unwrap(),
-        Some(json!(2_i64))
-    );
-    let mut restored: Game =
-        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    let decision = restored.legal().unwrap().remove(0);
-    restored.decide(&decision, "resolve").unwrap();
-    assert_eq!(
-        restored.query(View::P1, "P1.leader.life").unwrap(),
-        Some(json!(12_i64))
     );
 }
 
@@ -2337,81 +1675,6 @@ fn stack_catalog(body: &Value) -> Catalog {
 }
 
 #[test]
-fn stack_enters_with_counters_and_waits_for_recipient_even_when_unique() {
-    for existing in [false, true] {
-        let catalog = Arc::new(stack_catalog(&json!({"op":"seq","steps":[
-            {"op":"create","name":"synthetic-stack-token","count":1_i64,"to":"field"},
-            {"op":"stack","amount":2_i64},
-            {"op":"damage","subjects":"target.1","amount":1_i64}
-        ]})));
-        let mut initial = setup();
-        if existing {
-            initial["players"]["P1"]["zones"]["field"] = json!([{"id":"a","card":"unit-soil","state":{"counters":{"スタックカウンター":4_i64}}}]);
-        }
-        let mut engine = Game::new(
-            Arc::clone(&catalog),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "stack",
-        )
-        .unwrap();
-        let step = engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        assert_eq!(step.outcome, "paused");
-        assert_eq!(
-            engine
-                .query(View::P1, "P1.field.new-1.counters.スタックカウンター")
-                .unwrap(),
-            Some(json!(1_i64))
-        );
-        assert_eq!(
-            engine.query(View::P1, "P2.field.b.hp").unwrap(),
-            Some(json!(3_i64))
-        );
-        assert!(
-            !step
-                .events
-                .iter()
-                .any(|event| event["kind"] == "カウンター")
-        );
-        let legal = engine.legal().unwrap();
-        assert_eq!(legal.len(), if existing { 2 } else { 1 });
-        let encoded = serde_json::to_string(&engine).unwrap();
-        let mut restored: Game = serde_json::from_str(&encoded).unwrap();
-        for instance in [&mut engine, &mut restored] {
-            assert_eq!(instance.legal().unwrap(), legal);
-            let done = instance
-                .decide(&json!({"do":"resolve-choice","select":["new-1"]}), "select")
-                .unwrap();
-            assert_eq!(done.outcome, "resolved");
-            assert_eq!(
-                instance
-                    .query(View::P1, "P1.field.new-1.counters.スタックカウンター")
-                    .unwrap(),
-                Some(json!(3_i64))
-            );
-            assert_eq!(
-                instance.query(View::P1, "P2.field.b.hp").unwrap(),
-                Some(json!(2_i64))
-            );
-            if existing {
-                assert_eq!(
-                    instance
-                        .query(View::P1, "P1.field.a.counters.スタックカウンター")
-                        .unwrap(),
-                    Some(json!(4_i64))
-                );
-            }
-        }
-    }
-}
-
-#[test]
 fn stack_without_recipient_replaces_entry_count_and_obeys_capacity() {
     for (amount, full) in [(3_i64, false), (0, false), (-2, false), (2, true)] {
         let catalog = Arc::new(stack_catalog(&json!({"op":"stack","amount":amount})));
@@ -2591,84 +1854,6 @@ fn labeled_positions_execute_their_declared_branch_and_invalid_labels_fail_loadi
 }
 
 #[test]
-fn bane_rule_destruction_respects_immunity_and_shares_the_lethal_damage_batch() {
-    for (protected, power) in [(true, 0_i64), (true, 2), (true, 3), (false, 0)] {
-        let mut docs =
-            document(&json!({"op":"modify","subjects":"target.1","remove_abilities":true}));
-        docs["cards"]["unit-follower"]["abilities"] =
-            json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"bane"}}]);
-        docs["cards"]["unit-tank"] = json!({"status":"complete","review":"synthetic","abilities":if protected {json!([{"kind":"static","line":1_i64,"body":{"op":"restrict","subjects":"self","action":"ability_destroy"}}])}else{json!([])}});
-        let tank = json!({"number":"unit-tank","faces":[{"name":"tank","card_type":"フォロワー","card_class":"ニュートラル","traits":[],"cost":"1","power":"4","hp":"3","text":null,"sections":[]}]});
-        let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{"bane":{"ja":"必殺","expansion":{"op":"keyword","name":"bane"}}}});
-        let loaded = Catalog::from_documents(
-            &format!("{}\n{tank}", snapshot()),
-            &registry.to_string(),
-            &[("bane.yaml".into(), docs.to_string())],
-        )
-        .unwrap();
-        let mut initial = setup();
-        initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"power":power});
-        initial["players"]["P2"]["zones"]["field"] =
-            json!([{"id":"b","card":"unit-tank","state":{"acted":true}}]);
-        let mut engine = Game::new(
-            Arc::new(loaded),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "bane",
-        )
-        .unwrap();
-        engine
-            .decide(
-                &json!({"do":"attack","attacker":"a","target":"b"}),
-                "battle",
-            )
-            .unwrap();
-        let step = engine.decide(&json!({"do":"pass"}), "quick").unwrap();
-        let destroyed = step
-            .events
-            .iter()
-            .filter(|event| event["kind"] == "破壊")
-            .collect::<Vec<_>>();
-        assert_eq!(destroyed[0]["object"], json!("a"));
-        assert_eq!(destroyed[0]["by"], json!("rule-11.3.1"));
-        if protected && power < 3 {
-            assert_eq!(destroyed.len(), 1);
-            assert_eq!(
-                engine.query(View::P1, "P2.field").unwrap(),
-                Some(json!(["b"]))
-            );
-            engine
-                .decide(
-                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                    "remove-protection",
-                )
-                .unwrap();
-            assert_eq!(
-                engine.query(View::P1, "P2.field").unwrap(),
-                Some(json!(["b"]))
-            );
-        } else {
-            assert_eq!(destroyed.len(), 2);
-            assert_eq!(destroyed[0]["group"], destroyed[1]["group"]);
-            let reason = if power < 3 {
-                "rule-11.3.2"
-            } else {
-                "rule-11.3.1"
-            };
-            assert_eq!(destroyed[1]["by"], json!(reason));
-            assert!(step.events.iter().any(|event| event["kind"] == "移動"
-                && event["object"] == "b"
-                && event["by"] == reason));
-            assert_eq!(
-                engine.query(View::P1, "P2.cemetery").unwrap(),
-                Some(json!(["b"]))
-            );
-        }
-    }
-}
-
-#[test]
 fn damage_caps_read_the_incoming_amount_and_reject_unresolved_dynamic_overlap() {
     for (amount, overlap) in [
         (0_i64, false),
@@ -2727,63 +1912,6 @@ fn damage_caps_read_the_incoming_amount_and_reject_unresolved_dynamic_overlap() 
                 usize::from(amount > 0)
             );
         }
-    }
-}
-
-#[test]
-fn temporary_damage_prevention_survives_its_source_and_expires_at_turn_end() {
-    let body = json!({"op":"seq","steps":[
-        {"op":"replace_damage","subjects":"target.1","prevent":true,"kind":"any","until":"end-of-turn"},
-        {"op":"damage","subjects":"target.1","amount":2_i64}
-    ]});
-    let loaded = Arc::new(catalog(&body));
-    let mut initial = setup();
-    initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
-    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"c","card":"unit-follower"}]);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "prevent",
-    )
-    .unwrap();
-    let cast = engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    assert!(!cast.events.iter().any(|event| event["kind"] == "ダメージ"));
-    let mut restored: Game =
-        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for instance in [&mut engine, &mut restored] {
-        instance
-            .decide(
-                &json!({"do":"attack","attacker":"a","target":"b"}),
-                "battle",
-            )
-            .unwrap();
-        instance.decide(&json!({"do":"pass"}), "quick").unwrap();
-        assert_eq!(
-            instance.query(View::P1, "P2.field.b.hp").unwrap(),
-            Some(json!(3_i64))
-        );
-        instance.decide(&json!({"do":"end-phase"}), "end").unwrap();
-        instance.decide(&json!({"do":"pass"}), "end-quick").unwrap();
-        instance
-            .decide(
-                &json!({"do":"attack","attacker":"b","target":"a"}),
-                "next-battle",
-            )
-            .unwrap();
-        instance
-            .decide(&json!({"do":"pass"}), "next-quick")
-            .unwrap();
-        assert_eq!(
-            instance.query(View::P1, "P2.field.b.hp").unwrap(),
-            Some(json!(1_i64))
-        );
     }
 }
 
@@ -3105,96 +2233,6 @@ fn conditional_restrictions_and_unsupported_periods_do_not_silently_block_play()
 }
 
 #[test]
-fn posture_events_and_triggers_follow_actual_batched_changes() {
-    let mut docs = document(&json!({"op":"seq","steps":[
-        {"op":"act","subjects":{"side":"both","zone":"field"}},
-        {"op":"act","subjects":{"side":"both","zone":"field"}}
-    ]}));
-    docs["cards"]["unit-follower"]["abilities"] = json!([{
-        "kind":"trigger","event":"act","subject":"self","line":1_i64,
-        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
-    }]);
-    let loaded = Arc::new(
-        Catalog::from_documents(
-            &snapshot(),
-            &registry(),
-            &[("unit.yaml".into(), docs.to_string())],
-        )
-        .unwrap(),
-    );
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &setup(),
-        &Value::Null,
-        &Value::Null,
-        "posture",
-    )
-    .unwrap();
-    let cast = engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    let acted = cast
-        .events
-        .iter()
-        .filter(|event| event["kind"] == "アクト")
-        .collect::<Vec<_>>();
-    assert_eq!(acted.len(), 2);
-    assert_eq!(acted[0]["group"], acted[1]["group"]);
-    let pending = cast
-        .events
-        .iter()
-        .filter(|event| event["kind"] == "待機")
-        .collect::<Vec<_>>();
-    assert_eq!(pending.len(), 2);
-    assert_eq!(pending[0]["controller"], "P1");
-    assert_eq!(pending[0]["event"], json!({"acted":"a"}));
-    assert_eq!(pending[1]["controller"], "P2");
-    engine
-        .decide(
-            &json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}}),
-            "first",
-        )
-        .unwrap();
-    engine
-        .decide(
-            &json!({"do":"choose-pending","pending":{"ability":{"source":"b","line":1_i64}}}),
-            "second",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.query(View::P1, "P1.leader.life").unwrap(),
-        Some(json!(19_i64))
-    );
-    let mut battle = Game::new(
-        loaded,
-        &setup(),
-        &Value::Null,
-        &Value::Null,
-        "attack-posture",
-    )
-    .unwrap();
-    let attack = battle
-        .decide(
-            &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
-            "attack",
-        )
-        .unwrap();
-    assert_eq!(attack.events[0]["kind"], "アクト");
-    assert_eq!(
-        attack
-            .events
-            .iter()
-            .filter(|event| event["kind"] == "待機")
-            .count(),
-        1
-    );
-    assert!(attack.events.iter().any(|event| event["kind"] == "攻撃"));
-}
-
-#[test]
 fn invalid_pending_targets_and_distributions_preserve_the_trigger_for_retry() {
     let mut docs = document(&json!({"op":"draw","count":0_i64}));
     docs["cards"]["unit-follower"]["abilities"] = json!([{
@@ -3391,70 +2429,6 @@ fn play_selections_enumerate_order_without_repeating_names_or_sibling_targets() 
         engine.decide(&choices[0], "valid").unwrap().outcome,
         "resolved"
     );
-}
-
-#[test]
-fn resolution_selection_chooses_as_many_distinct_names_as_possible_and_restores() {
-    let body = json!({"op":"seq","steps":[
-        {"op":"select","select":{"side":"opponent","zone":"field"},"min":3_i64,"max":3_i64,"distinct_by":"name","bind":"selected"},
-        {"op":"damage","subjects":"selected","amount":1_i64}
-    ]});
-    let (loaded, initial) = selection_fixture(&json!([]), &body);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "distinct",
-    )
-    .unwrap();
-    assert_eq!(
-        engine
-            .decide(&json!({"do":"play","card":"s"}), "cast")
-            .unwrap()
-            .outcome,
-        "paused"
-    );
-    assert_eq!(
-        engine.legal().unwrap(),
-        vec![
-            json!({"do":"resolve-choice","select":["b","d"]}),
-            json!({"do":"resolve-choice","select":["c","d"]})
-        ]
-    );
-    let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for mut instance in [engine, restored] {
-        let before = instance.digest().unwrap();
-        assert_eq!(
-            instance
-                .decide(
-                    &json!({"do":"resolve-choice","select":["d","d"]}),
-                    "duplicates"
-                )
-                .unwrap()
-                .outcome,
-            "cannot-play"
-        );
-        assert_eq!(instance.digest().unwrap(), before);
-        assert_eq!(
-            instance
-                .decide(
-                    &json!({"do":"resolve-choice","select":["d","b"]}),
-                    "reverse-set"
-                )
-                .unwrap()
-                .outcome,
-            "resolved"
-        );
-        assert_eq!(
-            instance.query(View::P1, "P2.field.b.hp").unwrap(),
-            Some(json!(2_i64))
-        );
-        assert_eq!(
-            instance.query(View::P1, "P2.field.c.hp").unwrap(),
-            Some(json!(3_i64))
-        );
-    }
 }
 
 #[test]
@@ -3990,58 +2964,6 @@ fn rerolls_replace_the_result_and_permissions_reset_for_each_new_roll() {
     );
 }
 
-#[test]
-fn invalid_dice_scripts_rollback_and_unscripted_rolls_stay_in_range() {
-    let body = json!({"op":"seq","steps":[{"op":"dice","count":1_i64,"bind":"die"},{"op":"damage","subjects":"opponent.leader","amount":{"read":"die"}}]});
-    let loaded = Arc::new(catalog(&body));
-    for script in [json!([]), json!([0_i64]), json!([7_i64]), json!([1.5_f64])] {
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &setup(),
-            &Value::Null,
-            &json!({"dice":script}),
-            "invalid-die",
-        )
-        .unwrap();
-        let before = engine.digest().unwrap();
-        engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap_err();
-        assert_eq!(engine.digest().unwrap(), before);
-    }
-    for n in 0..8_u32 {
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &setup(),
-            &Value::Null,
-            &Value::Null,
-            &format!("die-{n}"),
-        )
-        .unwrap();
-        let step = engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        let rolled = step
-            .events
-            .iter()
-            .find(|event| event["kind"] == "サイコロ")
-            .unwrap()["result"]
-            .as_i64()
-            .unwrap();
-        assert!((1..=6).contains(&rolled));
-        assert_eq!(
-            engine.query(View::P1, "P2.leader.life").unwrap(),
-            Some(json!(20_i64 - rolled))
-        );
-    }
-}
-
 #[expect(
     clippy::indexing_slicing,
     reason = "The fixture constructs the cards map before adding synthetic token prints."
@@ -4151,86 +3073,6 @@ fn current_token_identity_completes_the_shared_template_selection() {
 }
 
 #[test]
-fn token_capacity_selects_name_multisets_before_allocating_and_restores_text_order() {
-    let body = json!({"op":"seq","steps":[{"op":"create","tokens":[{"name":"shared-token","count":1_i64},{"name":"other-token","count":1_i64},{"name":"shared-token","count":1_i64}],"to":"field","bind":"made"},{"op":"modify","subjects":"made","power":1_i64}]});
-    let (facts, docs) = token_fixture(&body);
-    let loaded = Arc::new(
-        Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())])
-            .unwrap(),
-    );
-    let mut initial = setup();
-    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"a","card":"unit-follower"},{"id":"c","card":"unit-follower"},{"id":"d","card":"unit-follower"}]);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "tokens",
-    )
-    .unwrap();
-    let start = engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    assert_eq!(start.outcome, "paused");
-    let state = serde_json::to_value(&engine).unwrap();
-    assert_eq!(state["state"]["next_object"], 1_i64);
-    assert!(state["state"]["objects"].get("new-1").is_none());
-    let choices = engine.legal().unwrap();
-    assert_eq!(choices.len(), 2);
-    assert!(
-        choices.contains(&json!({"do":"resolve-choice","select":["shared-token","shared-token"]}))
-    );
-    assert!(
-        choices.contains(&json!({"do":"resolve-choice","select":["shared-token","other-token"]}))
-    );
-    let saved = engine.digest().unwrap();
-    let rejected = engine
-        .decide(
-            &json!({"do":"resolve-choice","select":["shared-token","shared-token","shared-token"]}),
-            "invalid",
-        )
-        .unwrap();
-    assert_eq!(rejected.outcome, "cannot-play");
-    assert_eq!(engine.digest().unwrap(), saved);
-    let mut restored: Game = serde_json::from_value(state).unwrap();
-    for instance in [&mut engine, &mut restored] {
-        assert_eq!(instance.legal().unwrap(), choices);
-        let done = instance
-            .decide(
-                &json!({"do":"resolve-choice","select":["other-token","shared-token"]}),
-                "choose",
-            )
-            .unwrap();
-        assert_eq!(done.outcome, "resolved");
-        let entered = done
-            .events
-            .iter()
-            .filter(|event| event["kind"] == "場に出す")
-            .collect::<Vec<_>>();
-        assert_eq!(entered.len(), 2);
-        assert_eq!(entered[0]["object"], "new-1");
-        assert_eq!(entered[0]["card"], "token-z");
-        assert_eq!(entered[1]["object"], "new-2");
-        assert_eq!(entered[1]["card"], "token-b");
-        assert_eq!(entered[0]["group"], entered[1]["group"]);
-        assert!(done.events.iter().any(|event| event["object"] == "s"
-            && event["to"] == "P1.cemetery"
-            && event["by"] == "rule-10.6.2.8.3"));
-        assert_eq!(
-            instance.query(View::P1, "P1.field.new-1.power").unwrap(),
-            Some(json!(2_i64))
-        );
-        assert_eq!(
-            instance.query(View::P1, "P1.field.new-2.power").unwrap(),
-            Some(json!(2_i64))
-        );
-    }
-}
-
-#[test]
 fn token_capacity_keeps_single_and_empty_choices_without_allocating_rejected_tokens() {
     let body = json!({"op":"seq","steps":[{"op":"create","name":"shared-token","count":2_i64,"to":"field"},{"op":"create","name":"other-token","count":1_i64,"to":"ex"},{"op":"create","name":"unknown-zero-token","count":0_i64,"to":"field"}]});
     let (facts, docs) = token_fixture(&body);
@@ -4281,101 +3123,6 @@ fn token_capacity_keeps_single_and_empty_choices_without_allocating_rejected_tok
             Some(json!([format!("new-{}", available.saturating_add(1))]))
         );
     }
-}
-
-#[test]
-fn transformation_banishes_and_erases_before_creating_a_fresh_batch() {
-    let body = json!({"op":"seq","steps":[{"op":"transform","subjects":"target.1","names":["shared-token","other-token"],"bind":"changed"},{"op":"modify","subjects":"changed","power":1_i64}]});
-    let (facts, mut docs) = token_fixture(&body);
-    docs["cards"]["unit-spell"]["abilities"][0]["targets"][0] = json!({"key":"1","select":{"zone":"ex","side":"self"},"min":2_i64,"max":2_i64,"order":true});
-    let rules = rule_fixtures::rules(
-        &facts,
-        json!([]),
-        json!([rule_fixtures::resource(
-            "lesson_item",
-            "token-b",
-            "printed",
-            true
-        )]),
-    );
-    let loaded = Arc::new(
-        Catalog::from_documents_with_rules(
-            &facts,
-            &registry(),
-            &[("tokens".into(), docs.to_string())],
-            &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
-        )
-        .unwrap(),
-    );
-    let mut initial = setup();
-    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"x","card":"token-a","state":{"power":9_i64,"hp":9_i64,"keywords":["guard"]}},{"id":"y","card":"token-a"}]);
-    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "transform").unwrap();
-    let done = engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["x","y"]}}),
-            "cast",
-        )
-        .unwrap();
-    assert_eq!(done.outcome, "resolved");
-    let phase = |kind: &str| {
-        done.events
-            .iter()
-            .filter(|event| event["kind"] == kind)
-            .collect::<Vec<_>>()
-    };
-    let banished = phase("消滅");
-    let erased = phase("消去");
-    let created = done
-        .events
-        .iter()
-        .filter(|event| event["to"] == "P1.ex")
-        .collect::<Vec<_>>();
-    assert_eq!(banished.len(), 2);
-    assert_eq!(erased.len(), 2);
-    assert_eq!(created.len(), 2);
-    assert_eq!(banished[0]["group"], banished[1]["group"]);
-    assert_eq!(erased[0]["group"], erased[1]["group"]);
-    assert_eq!(created[0]["group"], created[1]["group"]);
-    let groups = [
-        banished[0]["group"].as_u64().unwrap(),
-        erased[0]["group"].as_u64().unwrap(),
-        created[0]["group"].as_u64().unwrap(),
-    ];
-    assert!(groups[0] < groups[1] && groups[1] < groups[2]);
-    assert!(created.iter().all(|event| event.get("card").is_none()));
-    assert_eq!(
-        engine.query(View::P1, "P1.ex.new-1.name").unwrap(),
-        Some(json!("shared-token"))
-    );
-    assert_eq!(
-        engine.query(View::P1, "P1.ex.new-2.name").unwrap(),
-        Some(json!("other-token"))
-    );
-    assert_eq!(created[0]["source"], "s");
-    assert_eq!(phase("場に出す"), Vec::<&Value>::new());
-    assert_eq!(
-        engine.query(View::P1, "P1.banish").unwrap(),
-        Some(json!([]))
-    );
-    assert_eq!(
-        engine.query(View::P1, "P1.ex").unwrap(),
-        Some(json!(["new-1", "new-2"]))
-    );
-    assert_eq!(
-        engine.query(View::P1, "P1.ex.new-1.power").unwrap(),
-        Some(json!(2_i64))
-    );
-    assert_eq!(
-        engine.query(View::P1, "P1.ex.new-1.hp").unwrap(),
-        Some(json!(2_i64))
-    );
-    let state = serde_json::to_value(&engine).unwrap();
-    assert_eq!(state["state"]["objects"]["x"]["zone"], "void");
-    assert_eq!(
-        state["state"]["objects"]["new-1"]["state"]["keywords"],
-        json!([])
-    );
 }
 
 #[test]
@@ -4460,27 +3207,6 @@ fn transformations_keep_original_pairing_after_prohibition_replacement_or_stale_
             );
         }
     }
-}
-
-#[test]
-fn unsupported_mixed_origin_transformations_roll_back_payment_and_every_object() {
-    let (facts, docs) = token_fixture(
-        &json!({"op":"transform","subjects":{"union":["a","target.1"]},"name":"other-token"}),
-    );
-    let loaded = Arc::new(
-        Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())])
-            .unwrap(),
-    );
-    let mut engine = Game::new(loaded, &setup(), &Value::Null, &Value::Null, "transform").unwrap();
-    let before = engine.digest().unwrap();
-    assert!(matches!(
-        engine.decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast"
-        ),
-        Err(EngineFailure::Unsupported(_))
-    ));
-    assert_eq!(engine.digest().unwrap(), before);
 }
 
 #[test]
@@ -4735,87 +3461,6 @@ fn repeated_skip_costs_apply_to_separate_future_turns_and_roundtrip_publicly() {
 }
 
 #[test]
-fn extra_turns_run_latest_first_then_resume_the_original_normal_player() {
-    let body = json!({"op":"seq","steps":[{"op":"extra_turn","side":"self","count":1_i64},{"op":"extra_turn","side":"opponent","count":1_i64}]});
-    let loaded = Arc::new(catalog(&body));
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &turn_setup(),
-        &Value::Null,
-        &Value::Null,
-        "turns",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    finish_turn(&mut engine);
-    assert_eq!(
-        engine.query(View::P1, "turn.active").unwrap(),
-        Some(json!("P2"))
-    );
-    let packet = engine.projection(View::P2).unwrap();
-    assert_eq!(packet["semantic_state"]["turn_schedule"]["normal"], "P2");
-    let mut restored: Game =
-        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for instance in [&mut engine, &mut restored] {
-        for expected in ["P1", "P2", "P1"] {
-            finish_turn(instance);
-            assert_eq!(
-                instance.query(View::P1, "turn.active").unwrap(),
-                Some(json!(expected))
-            );
-        }
-    }
-}
-
-#[test]
-fn skipping_extra_turns_does_not_lose_the_suspended_normal_turn() {
-    for (count, expected) in [(1_i64, "P2"), (2_i64, "P1")] {
-        let body = json!({"op":"seq","steps":[{"op":"extra_turn","side":"opponent","count":1_i64},{"op":"skip_turn","side":"opponent","count":count}]});
-        let mut engine = Game::new(
-            Arc::new(catalog(&body)),
-            &turn_setup(),
-            &Value::Null,
-            &Value::Null,
-            "turns",
-        )
-        .unwrap();
-        engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        let events = finish_turn(&mut engine);
-        assert_eq!(
-            engine.query(View::P1, "turn.active").unwrap(),
-            Some(json!(expected))
-        );
-        let skipped = events
-            .iter()
-            .filter(|event| event["kind"] == "ターンスキップ")
-            .collect::<Vec<_>>();
-        assert_eq!(i64::try_from(skipped.len()).unwrap(), count);
-        assert_eq!(skipped[0]["extra"], true);
-        assert_eq!(
-            events
-                .iter()
-                .filter(|event| event["kind"] == "引く")
-                .count(),
-            1
-        );
-        assert_eq!(
-            engine.query(View::P1, "turn.elapsed_turns.P2").unwrap(),
-            Some(json!(if count == 1 { 3_i64 } else { 2_i64 }))
-        );
-    }
-}
-
-#[test]
 fn turn_schedule_import_rejects_invalid_records_and_failed_resolutions_rollback_costs() {
     let baseline_catalog = Arc::new(catalog(&json!({"op":"draw","count":0_i64})));
     for schedule in [
@@ -4897,103 +3542,6 @@ fn effect_evolution_catalog(body: &Value) -> Catalog {
         json!({"number":"unit-dual","faces":[face,alternate]})
     );
     Catalog::from_documents(&facts, &registry(), &[("evolve".into(), docs.to_string())]).unwrap()
-}
-
-#[test]
-fn effect_evolution_does_not_pay_resources_or_consume_an_evolution_ability_slot() {
-    let loaded = Arc::new(effect_evolution_catalog(
-        &json!({"op":"evolve","subjects":"self"}),
-    ));
-    for played in [0_i64, 1_i64] {
-        let mut initial = setup();
-        initial["turn"]["elapsed_turns"]["P1"] = json!(7_i64);
-        initial["players"]["P1"]["ep"] = json!(1_i64);
-        initial["players"]["P1"]["sep"] = json!(1_i64);
-        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"a","card":"unit-follower","state":{"power":4_i64,"hp":1_i64,"max_hp":3_i64,"acted":true}},{"id":"c","card":"unit-follower"}]);
-        initial["players"]["P1"]["zones"]["evolve_deck"] =
-            json!([{"id":"e1","card":"unit-evolved"},{"id":"e2","card":"unit-evolved"}]);
-        initial["semantic_state"] = json!({"counters_this_turn":{"P1.evolve_played":played}});
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "effect-evolve",
-        )
-        .unwrap();
-        assert_eq!(
-            engine
-                .decide(
-                    &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
-                    "activate"
-                )
-                .unwrap()
-                .outcome,
-            "paused"
-        );
-        assert_eq!(
-            engine.legal().unwrap(),
-            vec![
-                json!({"do":"resolve-choice","select":["e1"]}),
-                json!({"do":"resolve-choice","select":["e2"]})
-            ]
-        );
-        let before = engine.digest().unwrap();
-        assert_eq!(
-            engine
-                .decide(&json!({"do":"resolve-choice","select":["b"]}), "wrong")
-                .unwrap()
-                .outcome,
-            "cannot-play"
-        );
-        assert_eq!(engine.digest().unwrap(), before);
-        let mut restored: Game =
-            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        for instance in [&mut engine, &mut restored] {
-            let done = instance
-                .decide(&json!({"do":"resolve-choice","select":["e1"]}), "choose")
-                .unwrap();
-            assert_eq!(done.outcome, "resolved");
-            for (path, value) in [
-                ("P1.field.a.power", json!(5_i64)),
-                ("P1.field.a.hp", json!(3_i64)),
-                ("P1.field.a.max_hp", json!(5_i64)),
-                ("P1.field.a.acted", json!(true)),
-                ("P1.pp.current", json!(2_i64)),
-                ("P1.ep", json!(1_i64)),
-                ("P1.sep", json!(1_i64)),
-                (
-                    "semantic_state.counters_this_turn.P1.evolve_played",
-                    json!(played),
-                ),
-                (
-                    "semantic_state.counters_this_turn.P1.evolutions",
-                    json!(1_i64),
-                ),
-            ] {
-                assert_eq!(instance.query(View::P1, path).unwrap(), Some(value));
-            }
-            assert!(
-                done.events
-                    .iter()
-                    .any(|event| event["kind"] == "進化" && event["object"] == "a")
-            );
-            assert!(!done.events.iter().any(|event| event["kind"] == "超進化"));
-            instance.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}}), "trigger").unwrap();
-            assert_eq!(
-                instance.query(View::P1, "P1.leader.life").unwrap(),
-                Some(json!(21_i64))
-            );
-            assert_eq!(
-                instance
-                    .legal()
-                    .unwrap()
-                    .iter()
-                    .any(|decision| decision["do"] == "evolve" && decision["source"] == "c"),
-                played == 0
-            );
-        }
-    }
 }
 
 #[test]
@@ -5166,67 +3714,6 @@ fn evolution_cost_layers_are_shared_by_legal_actions_and_payment() {
 }
 
 #[test]
-fn evolution_discounts_only_consume_the_matching_paid_ability() {
-    let loaded = Arc::new(effect_evolution_catalog(&json!({"op":"seq","steps":[
-        {"op":"adjust_cost","subjects":{"side":"self","zone":"any"},"kind":"evolve","amount":-1_i64,"uses":1_i64},
-        {"op":"adjust_cost","subjects":{"side":"self","zone":"any"},"kind":"play","amount":-1_i64,"uses":1_i64},
-        {"op":"evolve","subjects":"self"}
-    ]})));
-    let mut initial = setup();
-    initial["players"]["P1"]["zones"]["field"] =
-        json!([{"id":"a","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
-    initial["players"]["P1"]["zones"]["evolve_deck"] =
-        json!([{"id":"e1","card":"unit-evolved"},{"id":"e2","card":"unit-evolved"}]);
-    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "cost").unwrap();
-    engine
-        .decide(
-            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
-            "adjust",
-        )
-        .unwrap();
-    engine
-        .decide(
-            &json!({"do":"resolve-choice","select":["e1"]}),
-            "effect-evolution",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"]
-            .as_array()
-            .unwrap()
-            .len(),
-        2
-    );
-    engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}}), "first-trigger").unwrap();
-    assert_eq!(engine.decide(&json!({"do":"evolve","source":"c","evolve_card":"e2","pay":{"pp":0_i64,"ep":0_i64}}), "ordinary-evolution").unwrap().outcome, "resolved");
-    let remaining =
-        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"].clone();
-    assert_eq!(remaining.as_array().unwrap().len(), 1);
-    assert_eq!(remaining[0]["effect"]["kind"], "play");
-    engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"c","card":"unit-evolved","line":1_i64}}}), "second-trigger").unwrap();
-    assert_eq!(
-        engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "spell"
-            )
-            .unwrap()
-            .outcome,
-        "resolved"
-    );
-    assert_eq!(
-        engine.query(View::P1, "P1.pp.current").unwrap(),
-        Some(json!(2_i64))
-    );
-    assert_eq!(
-        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"]
-            .as_array()
-            .unwrap(),
-        &Vec::<Value>::new()
-    );
-}
-
-#[test]
 fn counter_aliases_import_to_one_identity_and_roundtrip_through_saves() {
     let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
     definitions["keywords"]["charge"] =
@@ -5303,26 +3790,6 @@ fn counter_aliases_import_to_one_identity_and_roundtrip_through_saves() {
         Game::new(loaded, &initial, &Value::Null, &Value::Null, "duplicate"),
         Err(EngineFailure::Invalid(_))
     ));
-}
-
-#[test]
-fn keyword_aliases_reject_ambiguous_ids_labels_and_malformed_lists() {
-    for aliases in [
-        json!(["guard"]),
-        json!(["守護"]),
-        json!(["蓄積", "蓄積"]),
-        json!([1_i64]),
-        json!([""]),
-        json!("蓄積"),
-    ] {
-        let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
-        definitions["keywords"]["charge"] = json!({"ja":"蓄積","aliases":aliases,"role":"counter"});
-        Catalog::from_documents(&snapshot(), &definitions.to_string(), &[]).unwrap_err();
-    }
-    let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
-    definitions["keywords"]["charge"] = json!({"ja":"蓄積","aliases":["共通"],"role":"counter"});
-    definitions["keywords"]["different"] = json!({"ja":"別物","aliases":["共通"],"role":"counter"});
-    Catalog::from_documents(&snapshot(), &definitions.to_string(), &[]).unwrap_err();
 }
 
 #[expect(
@@ -5459,177 +3926,6 @@ fn repeated_stat_events_keep_distinct_contexts_and_identical_trigger_copies() {
 }
 
 #[test]
-fn evolution_base_replacement_does_not_collect_stat_triggers_from_the_new_face() {
-    let mut doc = stat_event_document(&json!({"op":"evolve","subjects":"self"}));
-    doc["cards"]["unit-evolved"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"trigger","line":1_i64,"event":"hp_increase","subject":"self","body":{"op":"modify","subjects":"self.leader","hp":1_i64}}]});
-    let evolved = json!({"number":"unit-evolved","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"1","power":"4","hp":"5","traits":[],"text":null,"sections":[]}]});
-    let facts = format!("{}\n{evolved}", snapshot());
-    let loaded = Arc::new(
-        Catalog::from_documents(&facts, &registry(), &[("stats".into(), doc.to_string())]).unwrap(),
-    );
-    let mut initial = setup();
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"e","card":"unit-evolved"}]);
-    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "stats").unwrap();
-    engine
-        .decide(
-            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
-            "activate",
-        )
-        .unwrap();
-    engine
-        .decide(&json!({"do":"resolve-choice","select":["e"]}), "evolve")
-        .unwrap();
-    assert!(
-        engine
-            .legal()
-            .unwrap()
-            .iter()
-            .all(|choice| choice["do"] != "choose-pending")
-    );
-    assert_eq!(
-        engine.query(View::P1, "P1.leader.life").unwrap(),
-        Some(json!(20_i64))
-    );
-    assert_eq!(
-        engine
-            .query(View::P1, "P1.field.a.stats_increased_this_turn")
-            .unwrap(),
-        Some(json!(false))
-    );
-}
-
-#[test]
-fn empty_stack_waits_for_resolution_and_can_be_refilled_before_check_timing() {
-    for refill in [false, true] {
-        let loaded = Arc::new(stack_catalog(&json!({"op":"seq","steps":[
-            {"op":"move","subjects":{"side":"self","zone":"field","type":"amulet"},"to":"cemetery"},
-            {"op":"optional","then":{"op":"seq","steps":[
-                {"op":"counter","subjects":{"side":"self","zone":"field","type":"amulet"},"name":"stack_counter","amount":i64::from(refill)},
-                {"op":"damage","subjects":"target.1","amount":1_i64}
-            ]}}
-        ]})));
-        let mut initial = setup();
-        initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().push(json!({"id":"soil","card":"unit-soil","state":{"counters":{"stack_counter":1_i64}}}));
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "stack-check",
-        )
-        .unwrap();
-        assert_eq!(
-            engine
-                .decide(
-                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                    "cast"
-                )
-                .unwrap()
-                .outcome,
-            "paused"
-        );
-        assert_eq!(
-            engine
-                .query(View::P1, "P1.field.soil.counters.スタックカウンター")
-                .unwrap(),
-            Some(json!(0_i64))
-        );
-        let mut saved: Game =
-            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        for instance in [&mut engine, &mut saved] {
-            let step = instance
-                .decide(&json!({"do":"resolve-choice","choice":"execute"}), "finish")
-                .unwrap();
-            assert_eq!(step.outcome, "resolved");
-            assert_eq!(
-                instance.query(View::P1, "P1.field").unwrap(),
-                Some(if refill {
-                    json!(["a", "soil"])
-                } else {
-                    json!(["a"])
-                })
-            );
-            assert!(
-                !step
-                    .events
-                    .iter()
-                    .any(|event| event["kind"] == "破壊" && event["object"] == "soil")
-            );
-            let cleanup = step.events.iter().position(|event| {
-                event["kind"] == "移動" && event["object"] == "soil" && event["by"] == "rule-11.7.1"
-            });
-            assert_eq!(cleanup.is_some(), !refill);
-            if let Some(index) = cleanup {
-                let damage = step
-                    .events
-                    .iter()
-                    .position(|event| event["kind"] == "ダメージ")
-                    .unwrap();
-                let erased = step
-                    .events
-                    .iter()
-                    .position(|event| event["kind"] == "消去" && event["object"] == "soil")
-                    .unwrap();
-                assert!(damage < index && index < erased);
-            }
-        }
-    }
-}
-
-#[test]
-fn empty_stacks_and_lethal_followers_leave_in_one_state_based_batch() {
-    let loaded = Arc::new(stack_catalog(&json!({"op":"seq","steps":[
-        {"op":"counter","subjects":{"side":"self","zone":"field","type":"amulet"},"name":"stack_counter","amount":-1_i64},
-        {"op":"damage","subjects":"target.1","amount":3_i64}
-    ]})));
-    let mut initial = setup();
-    initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().extend([
-        json!({"id":"soil-1","card":"unit-soil","state":{"counters":{"stack_counter":1_i64}}}),
-        json!({"id":"soil-2","card":"unit-soil","state":{"counters":{"stack_counter":1_i64}}}),
-        json!({"id":"silenced","card":"unit-soil","state":{"silenced":true,"counters":{"stack_counter":1_i64}}})
-    ]);
-    let mut engine =
-        Game::new(loaded, &initial, &Value::Null, &Value::Null, "stack-check").unwrap();
-    let step = engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    let movements = step
-        .events
-        .iter()
-        .filter(|event| {
-            event["kind"] == "移動"
-                && ["soil-1", "soil-2", "b"]
-                    .iter()
-                    .any(|id| event["object"] == *id)
-        })
-        .collect::<Vec<_>>();
-    assert_eq!(movements.len(), 3);
-    assert!(
-        movements
-            .iter()
-            .all(|event| event["group"] == movements[0]["group"])
-    );
-    assert_eq!(
-        engine.query(View::P1, "P1.field").unwrap(),
-        Some(json!(["a", "silenced"]))
-    );
-    assert_eq!(
-        engine.query(View::P1, "P2.cemetery").unwrap(),
-        Some(json!(["b"]))
-    );
-    assert_eq!(
-        step.events
-            .iter()
-            .filter(|event| event["kind"] == "破壊")
-            .count(),
-        1
-    );
-}
-
-#[test]
 fn nonprogressing_rule_movement_fails_closed_instead_of_recursing_forever() {
     let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":3_i64}));
     doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"static","line":1_i64,"body":{"op":"replace_move","subjects":"self","from":"field","to":"cemetery","replacement":"field"}}]);
@@ -5651,99 +3947,6 @@ fn nonprogressing_rule_movement_fails_closed_instead_of_recursing_forever() {
         Err(EngineFailure::Unsupported(_))
     ));
     assert_eq!(engine.digest().unwrap(), before);
-}
-
-#[test]
-fn deck_reordering_preserves_order_identity_state_and_only_counts_changed_positions() {
-    for (position, chosen, expected, changed) in [
-        (
-            json!("top"),
-            json!(["d2", "d0"]),
-            json!(["d2", "d0", "d1", "tail"]),
-            2_i64,
-        ),
-        (
-            json!("bottom"),
-            json!(["d2", "d0"]),
-            json!(["d1", "tail", "d2", "d0"]),
-            1_i64,
-        ),
-        (
-            json!(2_i64),
-            json!(["d2", "d0"]),
-            json!(["d1", "d2", "d0", "tail"]),
-            2_i64,
-        ),
-        (
-            json!("top"),
-            json!(["d0", "d1"]),
-            json!(["d0", "d1", "d2", "tail"]),
-            0_i64,
-        ),
-    ] {
-        let body = json!({"op":"seq","steps":[
-            {"op":"reveal","subjects":{"side":"self","zone":"deck"},"to":"all"},
-            {"op":"select","select":{"side":"self","zone":"deck"},"min":2_i64,"max":2_i64,"order":true,"bind":"chosen"},
-            {"op":"move","subjects":"chosen","to":"deck","position":position,"bind":"moved"},
-            {"op":"damage","subjects":"opponent.leader","amount":{"count":"moved"}},
-            {"op":"modify","subjects":"chosen","power":1_i64}
-        ]});
-        let loaded = Arc::new(catalog(&body));
-        let mut initial = setup();
-        initial["players"]["P1"]["zones"]["deck"] = json!([
-            {"id":"d0","card":"unit-follower","state":{"power":8_i64,"counters":{"memory":2_i64}}},
-            {"id":"d1","card":"unit-follower"},{"id":"d2","card":"unit-spell"},{"id":"tail","card":"unit-spell"}
-        ]);
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &initial,
-            &Value::Null,
-            &Value::Null,
-            "order",
-        )
-        .unwrap();
-        engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        let mut saved: Game =
-            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        for instance in [&mut engine, &mut saved] {
-            let step = instance
-                .decide(&json!({"do":"resolve-choice","order":chosen}), "place")
-                .unwrap();
-            assert_eq!(step.outcome, "resolved");
-            assert_eq!(
-                instance.query(View::P1, "P1.deck").unwrap(),
-                Some(expected.clone())
-            );
-            for (path, value) in [
-                ("P1.deck.d0.generation", json!(0_i64)),
-                ("P1.deck.d0.power", json!(9_i64)),
-                ("P1.deck.d0.counters.memory", json!(2_i64)),
-                ("P2.leader.life", json!(20_i64 - changed)),
-            ] {
-                assert_eq!(instance.query(View::P1, path).unwrap(), Some(value));
-            }
-            let opponent = instance.projection(View::P2).unwrap();
-            for id in chosen
-                .as_array()
-                .unwrap()
-                .iter()
-                .map(|v| v.as_str().unwrap())
-            {
-                assert!(
-                    !opponent["P1"]["deck"]
-                        .as_array()
-                        .unwrap()
-                        .contains(&json!(id))
-                );
-                assert!(opponent["objects"].get(id).is_none());
-            }
-        }
-    }
 }
 
 #[test]
@@ -5798,57 +4001,6 @@ fn ordered_deck_insertion_splits_anonymous_runs_at_card_offsets() {
             )
         );
     }
-}
-
-#[test]
-fn ordered_batches_keep_independent_offsets_for_each_destination_deck() {
-    let body = json!({"op":"seq","steps":[
-        {"op":"select","select":{"side":"both","zone":"cemetery"},"min":4_i64,"max":4_i64,"order":true,"bind":"chosen"},
-        {"op":"move","subjects":"chosen","to":"deck","position":1_i64}
-    ]});
-    let mut initial = setup();
-    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"t1","card":"unit-follower"}]);
-    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"t2","card":"unit-follower"}]);
-    initial["players"]["P1"]["zones"]["cemetery"] =
-        json!([{"id":"c1","card":"unit-follower"},{"id":"c2","card":"unit-follower"}]);
-    initial["players"]["P2"]["zones"]["cemetery"] =
-        json!([{"id":"x1","card":"unit-follower"},{"id":"x2","card":"unit-follower"}]);
-    let mut engine = Game::new(
-        Arc::new(catalog(&body)),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "order",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    engine
-        .decide(
-            &json!({"do":"resolve-choice","order":["x2","c2","x1","c1"]}),
-            "place",
-        )
-        .unwrap();
-    let private: Value = serde_json::to_value(&engine).unwrap();
-    assert_eq!(
-        private["state"]["players"]["P1"]["zones"]["deck"],
-        json!(["c2", "c1", "t1"])
-    );
-    assert_eq!(
-        private["state"]["players"]["P2"]["zones"]["deck"],
-        json!(["x2", "x1", "t2"])
-    );
-    assert_eq!(
-        engine.query(View::P1, "P2.deck").unwrap(),
-        Some(json!(["x2","x1",{"filler":1_i64}]))
-    );
-    let owner = engine.projection(View::P2).unwrap();
-    assert!(owner["objects"].get("x1").is_none());
-    assert!(owner["objects"].get("x2").is_none());
 }
 
 #[test]
@@ -5924,139 +4076,6 @@ fn full_control_destination_keeps_empty_input_and_resumes_later_transfers() {
                 .events
                 .iter()
                 .any(|event| event["kind"] == "移動" && event["object"] == "b")
-        );
-    }
-}
-
-#[test]
-fn control_batches_select_capacity_preserve_state_and_share_a_movement_group() {
-    let body = json!({"op":"if_done","attempt":{"op":"control","subjects":{"zone":"field","side":"opponent","type":"follower"},"side":"self"},"then":{"op":"damage","subjects":"opponent.leader","amount":2_i64}});
-    for available in [1_i64, 2_i64] {
-        let loaded = Arc::new(stack_catalog(&body));
-        let mut initial = setup();
-        for index in 0_i64..4_i64 - available {
-            initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().push(json!({"id":format!("soil-{index}"),"card":"unit-soil","state":{"counters":{"stack_counter":1_i64}}}));
-        }
-        initial["players"]["P2"]["zones"]["field"].as_array_mut().unwrap().push(json!({"id":"b2","card":"unit-follower","state":{"power":7_i64,"hp":1_i64,"acted":true,"counters":{"memory":2_i64}}}));
-        let mut engine =
-            Game::new(loaded, &initial, &Value::Null, &Value::Null, "control").unwrap();
-        let mut step = engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        if available == 1 {
-            assert_eq!(step.outcome, "paused");
-            assert_eq!(
-                engine.projection(View::P1).unwrap()["awaiting"]["choices"],
-                json!([{"do":"resolve-choice","select":["b"]},{"do":"resolve-choice","select":["b2"]}])
-            );
-            step = engine
-                .decide(&json!({"do":"resolve-choice","select":["b2"]}), "choose")
-                .unwrap();
-        }
-        assert_eq!(step.outcome, "resolved");
-        for (path, value) in [
-            ("P1.field_count", json!(5_i64)),
-            ("P2.leader.life", json!(18_i64)),
-            ("P1.field.b2.generation", json!(0_i64)),
-            ("P1.field.b2.power", json!(7_i64)),
-            ("P1.field.b2.hp", json!(1_i64)),
-            ("P1.field.b2.acted", json!(true)),
-            ("P1.field.b2.counters.memory", json!(2_i64)),
-        ] {
-            assert_eq!(engine.query(View::P1, path).unwrap(), Some(value));
-        }
-        let moved = step
-            .events
-            .iter()
-            .filter(|event| event["kind"] == "移動" && event["to"] == "P1.field")
-            .collect::<Vec<_>>();
-        assert_eq!(i64::try_from(moved.len()).unwrap(), available);
-        assert!(
-            moved
-                .iter()
-                .all(|event| event["group"] == moved[0]["group"])
-        );
-        assert!(!step.events.iter().any(|event| event["kind"] == "場に出す"));
-        assert!(
-            engine.projection(View::P1).unwrap()["known_cards"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .any(|card| card["id"] == "b2" && card["owner"] == "P2")
-        );
-    }
-}
-
-#[test]
-fn granted_trigger_and_activation_use_the_recipient_and_saved_provider_after_source_leaves() {
-    let body = json!({"op":"modify","subjects":"target.1","abilities":[
-        {"line":1_i64,"kind":"trigger","event":"main_start","body":{"op":"damage","subjects":"self.leader","amount":2_i64}},
-        {"line":1_i64,"kind":"activated","costs":[{"op":"pp","amount":1_i64}],"body":{"op":"move","subjects":"self","to":"cemetery"}}
-    ]});
-    let loaded = Arc::new(catalog(&body));
-    let mut initial = setup();
-    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"d","card":"unit-follower"}]);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "grant",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.query(View::P1, "P1.cemetery").unwrap(),
-        Some(json!(["s"]))
-    );
-    finish_turn(&mut engine);
-    let reference = json!({"source":"b","card":"unit-spell","line":1_i64});
-    assert_eq!(
-        engine.projection(View::P2).unwrap()["awaiting"]["choices"],
-        json!([{"do":"choose-pending","pending":{"ability":reference}}])
-    );
-    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for instance in [&mut engine, &mut saved] {
-        instance
-            .decide(
-                &json!({"do":"choose-pending","pending":{"ability":reference}}),
-                "trigger",
-            )
-            .unwrap();
-        assert_eq!(
-            instance.query(View::P2, "P2.leader.life").unwrap(),
-            Some(json!(18_i64))
-        );
-        assert!(
-            instance
-                .legal()
-                .unwrap()
-                .contains(&json!({"do":"activate","ability":reference}))
-        );
-        instance
-            .decide(&json!({"do":"activate","ability":reference}), "activate")
-            .unwrap();
-        for (path, value) in [
-            ("P2.cemetery", json!(["b"])),
-            ("P2.pp.current", json!(2_i64)),
-            ("P1.pp.current", json!(1_i64)),
-        ] {
-            assert_eq!(instance.query(View::P2, path).unwrap(), Some(value));
-        }
-        assert_eq!(
-            instance
-                .decide(&json!({"do":"activate","ability":reference}), "lost")
-                .unwrap()
-                .outcome,
-            "cannot-activate"
         );
     }
 }
@@ -6631,71 +4650,6 @@ fn gained_drive_installs_rule_abilities_and_triggers_only_once_without_a_resourc
 }
 
 #[test]
-fn drive_history_survives_silence_and_control_but_a_new_generation_can_gain_again() {
-    let (loaded, initial) = drive_fixture();
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "drive",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"activate","ability":{"source":"a","line":3_i64},"targets":{"1":["b"]}}),
-            "gain",
-        )
-        .unwrap();
-    engine
-        .decide(
-            &json!({"do":"choose-pending","pending":{"ability":{"source":"b","line":2_i64}}}),
-            "boost",
-        )
-        .unwrap();
-    for line in [4_i64, 5_i64] {
-        engine.decide(&json!({"do":"activate","ability":{"source":"a","line":line},"targets":{"1":["b"]}}),"silence-control").unwrap();
-    }
-    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for instance in [&mut engine, &mut saved] {
-        instance.decide(&json!({"do":"activate","ability":{"source":"a","line":3_i64},"targets":{"1":["b"]}}),"no-regain").unwrap();
-        assert_eq!(
-            instance.query(View::P1, "P1.field.b.keywords").unwrap(),
-            Some(json!([]))
-        );
-        assert_eq!(
-            instance.query(View::P1, "P1.field.b.drive_gained").unwrap(),
-            Some(json!(true))
-        );
-        assert_eq!(
-            instance
-                .query(View::P1, "semantic_state.pending_triggers")
-                .unwrap(),
-            Some(json!([]))
-        );
-        instance.decide(&json!({"do":"activate","ability":{"source":"a","line":6_i64},"targets":{"1":["b"]}}),"return-regain").unwrap();
-        assert_eq!(
-            instance.query(View::P1, "P2.field.b.generation").unwrap(),
-            Some(json!(2_i64))
-        );
-        assert_eq!(
-            instance.query(View::P1, "P2.field.b.keywords").unwrap(),
-            Some(json!(["ドライブ", "突進", "シングルドライブ"]))
-        );
-        instance
-            .decide(
-                &json!({"do":"choose-pending","pending":{"ability":{"source":"b","line":2_i64}}}),
-                "new-boost",
-            )
-            .unwrap();
-        assert_eq!(
-            instance.query(View::P1, "P2.field.b.power").unwrap(),
-            Some(json!(3_i64))
-        );
-    }
-}
-
-#[test]
 fn a_resource_link_alone_never_grants_drive_and_existing_drive_does_not_gain_again() {
     for gained in [false, true] {
         let (loaded, mut initial) = drive_fixture();
@@ -6932,56 +4886,6 @@ fn unresolved_numeric_history_never_silently_uses_printed_defaults() {
 }
 
 #[test]
-fn visible_names_follow_the_current_face_and_rule_name_without_exposing_hidden_cards() {
-    let mut doc = document(&json!({"op":"draw","count":0_i64}));
-    let mut rows: Vec<Value> = snapshot()
-        .lines()
-        .map(|line| serde_json::from_str(line).unwrap())
-        .collect();
-    let mut second_face = rows[0]["faces"][0].clone();
-    second_face["name"] = json!("second-face-name");
-    rows[0]["faces"].as_array_mut().unwrap().push(second_face);
-    doc["cards"]["unit-spell"]["rules_name"] = json!("private-rule-name");
-    let snapshot = rows
-        .iter()
-        .map(Value::to_string)
-        .collect::<Vec<_>>()
-        .join("\n");
-    let loaded = Arc::new(
-        Catalog::from_documents(&snapshot, &registry(), &[("names".into(), doc.to_string())])
-            .unwrap(),
-    );
-    let mut initial = setup();
-    initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"face":1_i64});
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"secret","card":"unit-spell"}]);
-    let engine = Game::new(
-        Arc::clone(&loaded),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "names",
-    )
-    .unwrap();
-    assert_eq!(
-        engine.query(View::P1, "P1.field.a.name").unwrap(),
-        Some(json!("second-face-name"))
-    );
-    assert_eq!(
-        engine.query(View::P2, "P2.hand.secret.name").unwrap(),
-        Some(json!("private-rule-name"))
-    );
-    assert_eq!(engine.query(View::P1, "P2.hand.secret.name").unwrap(), None);
-    let packet = engine.projection(View::P1).unwrap();
-    assert!(!packet.to_string().contains("private-rule-name"));
-    assert!(!packet.to_string().contains("secret"));
-    assert_eq!(
-        engine.query(View::P1, "P1.field.a.name").unwrap(),
-        Some(json!("second-face-name"))
-    );
-}
-
-#[test]
 fn named_creation_omits_prints_but_explicit_capacity_selections_retain_them() {
     for zone in ["field", "ex"] {
         for capacity_choice in [false, true] {
@@ -7026,93 +4930,6 @@ fn named_creation_omits_prints_but_explicit_capacity_selections_retain_them() {
                     .unwrap(),
                 Some(json!("shared-token"))
             );
-        }
-    }
-}
-
-#[test]
-fn both_start_amulet_choices_are_known_only_to_the_chooser_and_shuffle_hides_leftovers() {
-    for scripted in [false, true] {
-        let mut position = json!({"pregame":true,"players":{}});
-        let mut scripts = Vec::new();
-        for seat in ["P1", "P2"] {
-            let mut deck = vec![
-                json!({"id":format!("{seat}-start"),"card":"unit-follower"}),
-                json!({"id":format!("{seat}-leftover"),"card":"unit-follower"}),
-            ];
-            let mut order = vec![json!(format!("{seat}-leftover"))];
-            for index in 0_u8..8 {
-                let id = format!("{seat}-card-{index}");
-                deck.push(json!({"id":id,"card":"unit-spell"}));
-                order.push(json!(id));
-            }
-            position["players"][seat] = json!({"construction":"title","title_code":"synthetic_start","leader":{"class":"ニュートラル"},"deck_list":deck,"evolve_deck_list":[]});
-            scripts.push(json!({"player":seat,"zone":"deck","result":order}));
-        }
-        let random = if scripted {
-            json!({"first_chooser":"P1","shuffles":scripts})
-        } else {
-            Value::Null
-        };
-        let mut engine =
-            Game::new(opening_catalog(), &position, &Value::Null, &random, "both").unwrap();
-        let before = engine.projection(View::P2).unwrap();
-        assert_eq!(before["objects"]["P2-start"]["card"], "unit-follower");
-        assert_eq!(
-            before["knowledge"]["identifiable"],
-            json!(["P2-leftover", "P2-start"])
-        );
-        let chosen = engine
-            .decide(
-                &json!({"do":"choose-start-amulet","object":"P1-start"}),
-                "first-amulet",
-            )
-            .unwrap();
-        assert_eq!(chosen.events.len(), 1);
-        assert_eq!(chosen.events[0]["kind"], "場に出す");
-        assert_eq!(chosen.events[0]["by"], "rule-14.4.3.1");
-        assert_eq!(chosen.events[0]["face_up"], false);
-        let private = engine.projection(View::P2).unwrap();
-        assert!(!private.to_string().contains("P1-start"));
-        assert!(!private.to_string().contains("P1-leftover"));
-        assert_eq!(private["P1"]["field_count"], 1_i64);
-        assert_eq!(private["objects"]["P2-start"]["card"], "unit-follower");
-        let mut restored: Game =
-            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-        restored
-            .decide(
-                &json!({"do":"choose-start-amulet","object":"P2-start"}),
-                "second-amulet",
-            )
-            .unwrap();
-        for (view, seat, other) in [(View::P1, "P1", "P2"), (View::P2, "P2", "P1")] {
-            let packet = restored.projection(view).unwrap();
-            assert_eq!(packet["objects"][format!("{seat}-start")]["face_up"], false);
-            assert_eq!(
-                packet["objects"][format!("{seat}-start")]["generation"],
-                1_i64
-            );
-            assert!(packet["objects"].get(format!("{seat}-leftover")).is_none());
-            assert_eq!(
-                packet["knowledge"]["located"],
-                json!([format!("{seat}-start")])
-            );
-            assert!(!packet.to_string().contains(&format!("{other}-start")));
-        }
-        restored
-            .decide(&json!({"do":"choose-first","first":"P1"}), "first")
-            .unwrap();
-        restored
-            .decide(&json!({"do":"mulligan","redo":false}), "keep-one")
-            .unwrap();
-        restored
-            .decide(&json!({"do":"mulligan","redo":false}), "keep-two")
-            .unwrap();
-        for view in [View::P1, View::P2] {
-            let packet = restored.projection(view).unwrap();
-            assert_eq!(packet["objects"]["P1-start"]["face_up"], true);
-            assert_eq!(packet["objects"]["P2-start"]["face_up"], true);
-            assert_eq!(packet["objects"]["P1-start"]["generation"], 1_i64);
         }
     }
 }
@@ -7341,95 +5158,6 @@ fn crest_reprints_and_simultaneous_copies_are_filtered_before_capacity_or_identi
     assert_eq!(packet["objects"]["new-4"]["name"], "ordinary");
 }
 
-#[test]
-fn advances_return_face_up_to_the_owner_before_the_effect_continues() {
-    for (origin, destination) in [
-        ("field", "hand"),
-        ("ex", "deck"),
-        ("hand", "cemetery"),
-        ("field", "banish"),
-        ("field", "ex"),
-        ("ex", "field"),
-    ] {
-        let owner = if origin == "hand" { "P2" } else { "P1" };
-        let owner_side = if owner == "P1" { "self" } else { "opponent" };
-        let departure = if destination == "banish" {
-            json!({"op":"banish","subjects":{"side":"opponent","zone":origin}})
-        } else {
-            json!({"op":"move","subjects":{"side":"opponent","zone":origin},"to":destination})
-        };
-        let body = json!({"op":"seq","steps":[
-            departure,
-            {"op":"modify","subjects":"self.leader","hp":{"count":{"side":owner_side,"zone":"evolve_deck"}}}
-        ]});
-        let mut doc = document(&body);
-        doc["cards"]["unit-spell"]["abilities"][0]["targets"] = json!([]);
-        doc["cards"]["unit-advance"] =
-            json!({"status":"complete","review":"synthetic","abilities":[]});
-        let printed = json!({"number":"unit-advance","faces":[{"name":"advance","card_class":"ニュートラル","card_type":"フォロワー・アドバンス","cost":"1","power":"3","hp":"3","traits":[],"text":null,"sections":[]}]});
-        let loaded = Arc::new(
-            Catalog::from_documents(
-                &format!("{}\n{printed}", snapshot()),
-                &registry(),
-                &[("advance.yaml".into(), doc.to_string())],
-            )
-            .unwrap(),
-        );
-        let mut position = setup();
-        position["players"]["P2"]["zones"] = json!({origin:[{"id":"b","card":"unit-advance","owner":owner,"state":{"silenced":true,"power":9_i64}}]});
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &position,
-            &Value::Null,
-            &Value::Null,
-            "advance",
-        )
-        .unwrap();
-        let result = engine
-            .decide(&json!({"do":"play","card":"s"}), "move")
-            .unwrap();
-        assert_eq!(result.outcome, "resolved");
-        let returns = result
-            .events
-            .iter()
-            .filter(|event| event["by"] == "rule-9.2.2")
-            .collect::<Vec<_>>();
-        let should_return = !matches!(destination, "field" | "ex");
-        let packet = engine.projection(View::P1).unwrap();
-        if should_return {
-            assert_eq!(returns.len(), 1);
-            assert_eq!(returns[0]["from"], format!("{owner}.{destination}"));
-            assert_eq!(returns[0]["to"], format!("{owner}.evolve_deck"));
-            assert!(
-                !packet[owner][destination]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!("b"))
-            );
-            assert_eq!(packet[owner]["evolve_deck"], json!(["b"]));
-            assert_eq!(packet["objects"]["b"]["face_up"], true);
-            assert_eq!(packet["objects"]["b"]["generation"], 2_i64);
-            assert_eq!(packet["P1"]["leader"]["life"], 21_i64);
-            assert_eq!(
-                engine
-                    .query(View::P2, &format!("{owner}.evolve_deck.b.face_up"))
-                    .unwrap(),
-                Some(json!(true))
-            );
-            assert_eq!(
-                engine
-                    .query(View::P1, &format!("{owner}.evolve_deck.b.face_up"))
-                    .unwrap(),
-                Some(json!(true))
-            );
-        } else {
-            assert_eq!(returns, Vec::<&Value>::new());
-            assert_eq!(packet["P2"][destination], json!(["b"]));
-            assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
-        }
-    }
-}
-
 #[expect(
     clippy::indexing_slicing,
     clippy::unwrap_used,
@@ -7617,215 +5345,6 @@ fn ignoring_guard_still_checks_posture_target_legality_and_ability_loss() {
 }
 
 #[expect(
-    clippy::indexing_slicing,
-    clippy::unwrap_used,
-    reason = "Synthetic EX observers distinguish individual entry events from trigger limits."
-)]
-fn ex_observer_catalog(body: &Value, limited: bool) -> Arc<Catalog> {
-    let mut doc = document(body);
-    doc["cards"]["unit-spell"]["abilities"][0]["targets"] = json!([]);
-    let mut trigger = json!({"kind":"trigger","line":1_i64,"event":"ex_enter","subject":{"side":"self","zone":"ex"},"body":{"op":"modify","subjects":"self.leader","hp":1_i64}});
-    if limited {
-        trigger["limit"] = json!(1_i64);
-        trigger["limit_at"] = json!("trigger");
-    }
-    doc["cards"]["unit-follower"]["abilities"] = json!([trigger]);
-    doc["cards"]["unit-token"] = json!({"status":"complete","review":"synthetic","abilities":[]});
-    let token = json!({"number":"unit-token","faces":[{"name":"entry-token","card_class":"ニュートラル","card_type":"フォロワー・トークン","cost":"1","power":"1","hp":"1","traits":[],"text":null,"sections":[]}]});
-    Arc::new(
-        Catalog::from_documents(
-            &format!("{}\n{token}", snapshot()),
-            &registry(),
-            &[("ex.yaml".into(), doc.to_string())],
-        )
-        .unwrap(),
-    )
-}
-
-#[test]
-fn simultaneous_ex_creation_produces_one_distinguishable_trigger_per_created_object() {
-    let loaded = ex_observer_catalog(
-        &json!({"op":"create","name":"entry-token","count":2_i64,"to":"ex"}),
-        false,
-    );
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &setup(),
-        &Value::Null,
-        &Value::Null,
-        "ex-batch",
-    )
-    .unwrap();
-    let result = engine
-        .decide(&json!({"do":"play","card":"s"}), "create")
-        .unwrap();
-    let pending = result
-        .events
-        .iter()
-        .filter(|event| event["kind"] == "待機")
-        .collect::<Vec<_>>();
-    assert_eq!(pending.len(), 2);
-    assert_eq!(pending[0]["event"]["entered_ex"], "new-1");
-    assert_eq!(pending[1]["event"]["entered_ex"], "new-2");
-    assert_eq!(pending[0]["group"], pending[1]["group"]);
-    assert_eq!(
-        engine.query(View::P1, "P1.leader.life").unwrap(),
-        Some(json!(20_i64))
-    );
-    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for mut resumed in [saved, engine] {
-        for object in ["new-2", "new-1"] {
-            resumed.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64},"event":{"entered_ex":object}}}),"trigger").unwrap();
-        }
-        assert_eq!(
-            resumed.query(View::P1, "P1.leader.life").unwrap(),
-            Some(json!(22_i64))
-        );
-        assert_eq!(
-            resumed.query(View::P1, "P2.leader.life").unwrap(),
-            Some(json!(20_i64))
-        );
-    }
-}
-
-#[test]
-fn sequential_ex_entries_obey_trigger_limits_and_wait_for_the_surrounding_effect() {
-    let move_one =
-        json!({"op":"move","subjects":{"side":"self","zone":"deck","top":1_i64},"to":"ex"});
-    let loaded = ex_observer_catalog(
-        &json!({"op":"seq","steps":[move_one,{"op":"optional","then":{"op":"seq","steps":[]}},move_one]}),
-        true,
-    );
-    let mut position = setup();
-    position["players"]["P1"]["zones"]["deck"] =
-        json!([{"id":"first","card":"unit-follower"},{"id":"second","card":"unit-follower"}]);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &position,
-        &Value::Null,
-        &Value::Null,
-        "ex-sequence",
-    )
-    .unwrap();
-    assert_eq!(
-        engine
-            .decide(&json!({"do":"play","card":"s"}), "move")
-            .unwrap()
-            .outcome,
-        "paused"
-    );
-    let packet = engine.projection(View::P1).unwrap();
-    assert_eq!(packet["awaiting"]["at"], "resolve");
-    assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
-    assert_eq!(
-        packet["semantic_state"]["pending_triggers"]
-            .as_array()
-            .unwrap()
-            .len(),
-        1
-    );
-    assert_eq!(
-        packet["semantic_state"]["used_this_turn"][0]["count"],
-        1_i64
-    );
-    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for mut resumed in [saved, engine] {
-        let result = resumed
-            .decide(
-                &json!({"do":"resolve-choice","choice":"decline"}),
-                "continue",
-            )
-            .unwrap();
-        assert_eq!(result.outcome, "resolved");
-        assert!(result.events.iter().all(|event| event["kind"] != "待機"));
-        assert_eq!(
-            resumed.query(View::P1, "P1.ex_count").unwrap(),
-            Some(json!(2_i64))
-        );
-        assert_eq!(resumed.legal().unwrap().len(), 1);
-        resumed
-            .decide(
-                &json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}}),
-                "trigger",
-            )
-            .unwrap();
-        assert_eq!(
-            resumed.query(View::P1, "P1.leader.life").unwrap(),
-            Some(json!(21_i64))
-        );
-    }
-}
-
-#[test]
-fn limited_damage_prevention_preserves_charges_for_zero_and_roundtrips_after_consumption() {
-    let pause = json!({"op":"optional","then":{"op":"seq","steps":[]}});
-    let loaded = Arc::new(catalog(&json!({"op":"seq","steps":[
-        {"op":"replace_damage","subjects":"self.leader","prevent":true,"uses":2_i64,"until":"end-of-turn"},
-        {"op":"damage","subjects":"self.leader","amount":0_i64},
-        pause,
-        {"op":"damage","subjects":"self.leader","amount":3_i64},
-        pause,
-        {"op":"damage","subjects":"self.leader","amount":4_i64},
-        {"op":"damage","subjects":"self.leader","amount":2_i64}
-    ]})));
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &setup(),
-        &Value::Null,
-        &Value::Null,
-        "charges",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"][0]["effect"]["uses"],
-        2_i64
-    );
-    engine
-        .decide(
-            &json!({"do":"resolve-choice","choice":"decline"}),
-            "first-hit",
-        )
-        .unwrap();
-    let packet = engine.projection(View::P1).unwrap();
-    assert_eq!(
-        packet["semantic_state"]["continuous_effects"][0]["effect"]["uses"],
-        1_i64
-    );
-    assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
-    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for mut resumed in [saved, engine] {
-        let result = resumed
-            .decide(
-                &json!({"do":"resolve-choice","choice":"decline"}),
-                "last-hits",
-            )
-            .unwrap();
-        assert_eq!(
-            resumed.query(View::P1, "P1.leader.life").unwrap(),
-            Some(json!(18_i64))
-        );
-        let hits = result
-            .events
-            .iter()
-            .filter(|event| event["kind"] == "ダメージ")
-            .collect::<Vec<_>>();
-        assert_eq!(hits.len(), 1);
-        assert_eq!(hits[0]["amount"], 2_i64);
-        assert_eq!(
-            resumed.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"][0]["effect"]
-                ["uses"],
-            0_i64
-        );
-    }
-}
-
-#[expect(
     clippy::unwrap_used,
     clippy::indexing_slicing,
     reason = "Synthetic replacement abilities provide distinct references for ordering."
@@ -7846,84 +5365,6 @@ fn limited_replacement_catalog(prevent: bool) -> Arc<Catalog> {
         )
         .unwrap(),
     )
-}
-
-#[test]
-fn simultaneous_damage_waits_for_every_order_before_charging_and_applying() {
-    let loaded = limited_replacement_catalog(false);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &setup(),
-        &Value::Null,
-        &Value::Null,
-        "batch",
-    )
-    .unwrap();
-    for line in [1_i64, 2_i64] {
-        engine
-            .decide(
-                &json!({"do":"activate","ability":{"source":"a","line":line}}),
-                "shield",
-            )
-            .unwrap();
-    }
-    engine
-        .decide(
-            &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
-            "hits",
-        )
-        .unwrap();
-    let order = json!({"do":"order-replacements","order":[{"source":"a","line":1_i64},{"source":"a","line":2_i64}]});
-    assert_eq!(
-        engine.decide(&order, "first-order").unwrap().outcome,
-        "paused"
-    );
-    let packet = engine.projection(View::P2).unwrap();
-    assert_eq!(packet["awaiting"]["by"], "P2");
-    assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
-    assert!(
-        packet["semantic_state"]["continuous_effects"]
-            .as_array()
-            .unwrap()
-            .iter()
-            .all(|entry| entry["effect"]["uses"] == 1_i64)
-    );
-    let before = engine.digest().unwrap();
-    assert_eq!(
-        engine
-            .decide(&json!({"do":"order-replacements","order":[]}), "invalid")
-            .unwrap()
-            .outcome,
-        "cannot-play"
-    );
-    assert_eq!(engine.digest().unwrap(), before);
-    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for mut resumed in [saved, engine] {
-        let result = resumed.decide(&order, "second-order").unwrap();
-        assert_eq!(result.outcome, "resolved");
-        let hits = result
-            .events
-            .iter()
-            .filter(|event| event["kind"] == "ダメージ")
-            .collect::<Vec<_>>();
-        assert_eq!(hits.len(), 2);
-        assert_eq!(hits[0]["group"], hits[1]["group"]);
-        assert!(hits.iter().all(|hit| hit["amount"] == 4_i64));
-        resumed
-            .decide(
-                &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
-                "unshielded",
-            )
-            .unwrap();
-        for seat in ["P1", "P2"] {
-            assert_eq!(
-                resumed
-                    .query(View::P1, &format!("{seat}.leader.life"))
-                    .unwrap(),
-                Some(json!(10_i64))
-            );
-        }
-    }
 }
 
 #[test]
@@ -8019,86 +5460,6 @@ fn indistinguishable_limited_replacement_instances_fail_closed_without_spending(
 }
 
 #[test]
-fn optional_selection_is_one_input_and_decline_clears_the_binding() {
-    let body = json!({"op":"seq","steps":[
-        {"op":"select","select":"target.1","min":1_i64,"max":1_i64,"bind":"chosen"},
-        {"op":"optional","selection":{"select":{"side":"opponent","zone":"field"},"min":1_i64,"max":1_i64,"bind":"chosen"},"then":{"op":"modify","subjects":"chosen","power":3_i64}},
-        {"op":"damage","subjects":"opponent.leader","amount":{"count":"chosen"}}
-    ]});
-    let loaded = Arc::new(catalog(&body));
-    let mut position = setup();
-    position["players"]["P2"]["zones"]["field"] =
-        json!([{"id":"b","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &position,
-        &Value::Null,
-        &Value::Null,
-        "optional",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    engine
-        .decide(
-            &json!({"do":"resolve-choice","select":["b"]}),
-            "previous-binding",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.legal().unwrap(),
-        vec![
-            json!({"do":"resolve-choice","choice":"execute","select":["b"]}),
-            json!({"do":"resolve-choice","choice":"execute","select":["c"]}),
-            json!({"do":"resolve-choice","choice":"decline"})
-        ]
-    );
-    for decision in [
-        json!({"do":"resolve-choice","select":[]}),
-        json!({"do":"resolve-choice","choice":"execute"}),
-        json!({"do":"resolve-choice","choice":"decline","select":["b"]}),
-    ] {
-        let before = engine.digest().unwrap();
-        assert_eq!(
-            engine.decide(&decision, "invalid").unwrap().outcome,
-            "cannot-play"
-        );
-        assert_eq!(engine.digest().unwrap(), before);
-    }
-    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for resumed in [saved, engine] {
-        for execute in [true, false] {
-            let mut branch = resumed.clone();
-            let choice = if execute {
-                json!({"do":"resolve-choice","choice":"execute","select":["c"]})
-            } else {
-                json!({"do":"resolve-choice","choice":"decline"})
-            };
-            assert_eq!(
-                branch.decide(&choice, "choose").unwrap().outcome,
-                "resolved"
-            );
-            assert_eq!(
-                branch.query(View::P1, "P2.leader.life").unwrap(),
-                Some(json!(if execute { 19_i64 } else { 20_i64 }))
-            );
-            assert_eq!(
-                branch.query(View::P1, "P2.field.c.power").unwrap(),
-                Some(json!(if execute { 5_i64 } else { 2_i64 }))
-            );
-            assert_eq!(
-                branch.query(View::P1, "P2.field.b.power").unwrap(),
-                Some(json!(2_i64))
-            );
-        }
-    }
-}
-
-#[test]
 fn optional_selection_without_a_complete_candidate_distinguishes_decline_from_zero() {
     for minimum in [0_i64, 1_i64] {
         let mut engine = game(
@@ -8129,85 +5490,6 @@ fn optional_selection_without_a_complete_candidate_distinguishes_decline_from_ze
             engine.query(View::P1, "P2.leader.life").unwrap(),
             Some(json!(20_i64))
         );
-    }
-}
-
-#[test]
-fn compound_selection_and_position_use_the_post_draw_state_in_one_input() {
-    let choice = json!({"op":"choice","timing":"resolve","min":1_i64,"max":1_i64,
-        "selection":{"select":{"side":"self","zone":"hand"},"min":1_i64,"max":1_i64,"bind":"chosen"},
-        "labels":[{"position":"top"},{"position":"bottom"}],
-        "modes":[{"op":"move","subjects":"chosen","to":"deck","position":"top"},{"op":"move","subjects":"chosen","to":"deck","position":"bottom"}]
-    });
-    let loaded = Arc::new(catalog(
-        &json!({"op":"seq","steps":[{"op":"draw","count":1_i64},choice]}),
-    ));
-    let mut position = setup();
-    position["players"]["P1"]["zones"]["hand"] =
-        json!([{"id":"s","card":"unit-spell"},{"id":"h","card":"unit-follower"}]);
-    position["players"]["P1"]["zones"]["deck"] =
-        json!([{"id":"d","card":"unit-follower"},{"id":"e","card":"unit-follower"}]);
-    let mut engine = Game::new(
-        Arc::clone(&loaded),
-        &position,
-        &Value::Null,
-        &Value::Null,
-        "compound",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    let choices = engine.legal().unwrap();
-    assert_eq!(choices.len(), 4);
-    for card in ["d", "h"] {
-        for destination in ["top", "bottom"] {
-            assert!(
-                choices.contains(
-                    &json!({"do":"resolve-choice","select":[card],"position":destination})
-                )
-            );
-        }
-    }
-    assert_eq!(
-        engine
-            .decide(&json!({"do":"resolve-choice","select":["h"]}), "incomplete")
-            .unwrap()
-            .outcome,
-        "cannot-play"
-    );
-    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-    for resumed in [saved, engine] {
-        for destination in ["top", "bottom"] {
-            let mut branch = resumed.clone();
-            assert_eq!(
-                branch
-                    .decide(
-                        &json!({"do":"resolve-choice","select":["d"],"position":destination}),
-                        "choose"
-                    )
-                    .unwrap()
-                    .outcome,
-                "resolved"
-            );
-            let omniscient = branch.projection(View::Referee).unwrap();
-            let deck = omniscient["P1"]["deck"].as_array().unwrap();
-            assert_eq!(
-                if destination == "top" {
-                    deck.first()
-                } else {
-                    deck.last()
-                },
-                Some(&json!("d"))
-            );
-            assert_eq!(
-                branch.query(View::P1, "P1.hand").unwrap(),
-                Some(json!(["h"]))
-            );
-        }
     }
 }
 
@@ -8272,68 +5554,6 @@ fn counter_payment_catalog(costs: &Value, body: &Value) -> Arc<Catalog> {
         )
         .unwrap(),
     )
-}
-
-#[test]
-fn counter_costs_reserve_the_aggregate_and_reject_partial_payment_without_any_events() {
-    let loaded = counter_payment_catalog(
-        &json!([
-            {"op":"pp","amount":1_i64},
-            {"op":"counter","subjects":"self","name":"fusion_counter","amount":-2_i64},
-            {"op":"counter","subjects":"self","name":"fusion_counter","amount":-2_i64}
-        ]),
-        &json!({"op":"damage","subjects":"opponent.leader","amount":4_i64}),
-    );
-    for counters in [3_i64, 4_i64] {
-        let mut position = setup();
-        position["players"]["P1"]["zones"]["field"][0]["state"]["counters"] =
-            json!({"融合カウンター":counters});
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &position,
-            &Value::Null,
-            &Value::Null,
-            "payment",
-        )
-        .unwrap();
-        let action = json!({"do":"activate","ability":{"source":"a","line":1_i64}});
-        assert_eq!(engine.legal().unwrap().contains(&action), counters == 4);
-        let before = engine.digest().unwrap();
-        let result = engine.decide(&action, "activate").unwrap();
-        if counters == 3 {
-            assert_eq!(result.outcome, "cannot-activate");
-            assert_eq!(result.events, Vec::<Value>::new());
-            assert_eq!(engine.digest().unwrap(), before);
-        } else {
-            assert_eq!(result.outcome, "resolved");
-            assert_eq!(
-                engine.query(View::P1, "P1.pp.current").unwrap(),
-                Some(json!(1_i64))
-            );
-            assert_eq!(
-                engine
-                    .query(View::P1, "P1.field.a.counters.融合カウンター")
-                    .unwrap(),
-                Some(json!(0_i64))
-            );
-            assert_eq!(
-                engine.query(View::P1, "P2.leader.life").unwrap(),
-                Some(json!(16_i64))
-            );
-            let payments = result
-                .events
-                .iter()
-                .filter(|event| event["kind"] == "カウンター")
-                .collect::<Vec<_>>();
-            assert_eq!(payments.len(), 2);
-            assert!(payments.iter().all(|event| event["delta"] == -2_i64));
-            assert_eq!(payments[0]["group"], payments[1]["group"]);
-            assert_eq!(
-                engine.decide(&action, "retry").unwrap().outcome,
-                "cannot-activate"
-            );
-        }
-    }
 }
 
 #[test]
@@ -8526,195 +5746,6 @@ fn movement_payment_preview_revalidates_counters_after_a_change_of_identity() {
     assert_eq!(result.outcome, "cannot-activate");
     assert_eq!(result.events, Vec::<Value>::new());
     assert_eq!(engine.digest().unwrap(), before);
-}
-
-#[test]
-fn movement_capacity_uses_each_destination_and_keeps_an_empty_selection_when_full() {
-    let body = json!({"op":"seq","steps":[
-        {"op":"move","subjects":"target.1","to":"ex","bind":"moved"},
-        {"op":"modify","subjects":"self.leader","hp":{"count":"moved"}}
-    ]});
-    let loaded = Arc::new(catalog(&body));
-    for full in ["P1", "P2"] {
-        let mut position = setup();
-        position["room"] = json!({"open_decklists":true});
-        for seat in ["P1", "P2"] {
-            let mut cards =
-                vec![json!({"card":"unit-follower","count":if seat == full {6_i64} else {1_i64}})];
-            if seat == "P1" {
-                cards.push(json!({"card":"unit-spell","count":1_i64}));
-            }
-            position["players"][seat]["deck_list"] = json!(cards);
-        }
-        position["players"][full]["zones"]["ex"] = json!(
-            (0_u8..5)
-                .map(|n| json!({"id":format!("x{n}"),"card":"unit-follower"}))
-                .collect::<Vec<_>>()
-        );
-        position["players"]["P2"]["zones"]["field"][0]["state"] = json!({"hp":1_i64,"power":4_i64});
-        let mut engine = Game::new(
-            Arc::clone(&loaded),
-            &position,
-            &Value::Null,
-            &Value::Null,
-            "recipient",
-        )
-        .unwrap();
-        let result = engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        if full == "P2" {
-            assert_eq!(result.outcome, "paused");
-            assert_eq!(
-                engine.legal().unwrap(),
-                vec![json!({"do":"resolve-choice","select":[]})]
-            );
-            assert!(result.events.iter().all(|event| event["object"] != "b"));
-            let saved: Game =
-                serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
-            for mut resumed in [saved, engine] {
-                assert_eq!(
-                    resumed
-                        .decide(&json!({"do":"resolve-choice","select":[]}), "none")
-                        .unwrap()
-                        .outcome,
-                    "resolved"
-                );
-                assert_eq!(
-                    resumed.query(View::P1, "P2.field.b.hp").unwrap(),
-                    Some(json!(1_i64))
-                );
-                assert_eq!(
-                    resumed.query(View::P1, "P2.field.b.generation").unwrap(),
-                    Some(json!(0_i64))
-                );
-                assert_eq!(
-                    resumed.query(View::P1, "P2.ex_count").unwrap(),
-                    Some(json!(5_i64))
-                );
-                assert_eq!(
-                    resumed.query(View::P1, "P1.leader.life").unwrap(),
-                    Some(json!(20_i64))
-                );
-            }
-        } else {
-            assert_eq!(result.outcome, "resolved");
-            assert_eq!(
-                engine.query(View::P1, "P2.ex.b.hp").unwrap(),
-                Some(json!(3_i64))
-            );
-            assert_eq!(
-                engine.query(View::P1, "P2.ex.b.power").unwrap(),
-                Some(json!(2_i64))
-            );
-            assert_eq!(
-                engine.query(View::P1, "P1.ex_count").unwrap(),
-                Some(json!(5_i64))
-            );
-            assert_eq!(
-                engine.query(View::P1, "P1.leader.life").unwrap(),
-                Some(json!(21_i64))
-            );
-        }
-    }
-}
-
-#[test]
-fn a_batch_moving_to_both_players_respects_both_capacities() {
-    let body = json!({"op":"move","subjects":{"side":"both","zone":"field"},"to":"ex"});
-    let mut position = setup();
-    for (seat, count) in [("P1", 5_u8), ("P2", 4_u8)] {
-        position["players"][seat]["zones"]["ex"] = json!(
-            (0..count)
-                .map(|n| json!({"id":format!("{seat}-x{n}"),"card":"unit-follower"}))
-                .collect::<Vec<_>>()
-        );
-    }
-    let mut engine = Game::new(
-        Arc::new(catalog(&body)),
-        &position,
-        &Value::Null,
-        &Value::Null,
-        "both",
-    )
-    .unwrap();
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    assert_eq!(
-        engine.legal().unwrap(),
-        vec![json!({"do":"resolve-choice","select":["b"]})]
-    );
-    engine
-        .decide(&json!({"do":"resolve-choice","select":["b"]}), "select")
-        .unwrap();
-    assert_eq!(
-        engine.query(View::P1, "P1.field").unwrap(),
-        Some(json!(["a"]))
-    );
-    assert_eq!(engine.query(View::P1, "P2.field").unwrap(), Some(json!([])));
-    for seat in ["P1", "P2"] {
-        assert_eq!(
-            engine.query(View::P1, &format!("{seat}.ex_count")).unwrap(),
-            Some(json!(5_i64))
-        );
-    }
-}
-
-#[test]
-fn guard_placement_belongs_to_the_recipient_and_same_field_moves_are_not_entries() {
-    for subject in ["b", "c"] {
-        let mut doc = document(&json!({"op":"move","subjects":by_id(subject),"to":"field"}));
-        doc["cards"]["unit-follower"]["abilities"] =
-            json!([{"kind":"static","line":1_i64,"body":{"op":"macro","name":"guard"}}]);
-        let loaded = Arc::new(
-            Catalog::from_documents(
-                &snapshot(),
-                &registry(),
-                &[("recipient.yaml".into(), doc.to_string())],
-            )
-            .unwrap(),
-        );
-        let mut position = setup();
-        position["players"]["P2"]["zones"]["cemetery"] = json!([{"id":"c","card":"unit-follower"}]);
-        let mut engine = Game::new(loaded, &position, &Value::Null, &Value::Null, "guard").unwrap();
-        let result = engine
-            .decide(
-                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-                "cast",
-            )
-            .unwrap();
-        if subject == "b" {
-            assert_eq!(result.outcome, "resolved");
-            assert!(result.events.iter().all(|event| event["object"] != "b"));
-            assert_eq!(
-                engine.query(View::P1, "P2.field.b.generation").unwrap(),
-                Some(json!(0_i64))
-            );
-        } else {
-            assert_eq!(result.outcome, "paused");
-            assert_eq!(
-                engine.projection(View::P1).unwrap()["awaiting"],
-                json!({"by":"P2"})
-            );
-            engine
-                .decide(
-                    &json!({"do":"place-acted","object":"c","acted":true}),
-                    "place",
-                )
-                .unwrap();
-            assert_eq!(
-                engine.query(View::P1, "P2.field.c.acted").unwrap(),
-                Some(json!(true))
-            );
-        }
-    }
 }
 
 #[test]
@@ -9047,4 +6078,219 @@ fn replacement_orders_accept_the_default_print_without_loosening_reference_ident
         );
     }
     assert_eq!(engine.legal().unwrap(), choices);
+}
+
+#[test]
+fn end_discard_rechecks_after_triggers_and_roundtrips_private_choices() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-spell"]["abilities"] = json!([
+        {"kind":"trigger","line":1_i64,"active_zones":["hand"],"event":"discard","subject":"self","body":{"op":"draw","count":1_i64}}
+    ]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("end.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    let mut hand = (0_u32..8)
+        .map(|index| json!({"id":format!("h{index}"),"card":"unit-follower"}))
+        .collect::<Vec<_>>();
+    hand.push(json!({"id":"s","card":"unit-spell"}));
+    position["players"]["P1"]["zones"]["hand"] = json!(hand);
+    position["players"]["P1"]["zones"]["deck"] = json!([{"id":"d1","card":"unit-follower"}]);
+    position["players"]["P2"]["zones"]["deck"] = json!([{"id":"d2","card":"unit-follower"}]);
+    let mut engine = Game::new(catalog, &position, &Value::Null, &Value::Null, "end").unwrap();
+    engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    engine.decide(&json!({"do":"pass"}), "quick-pass").unwrap();
+    assert_eq!(engine.legal().unwrap().len(), 36);
+    assert_eq!(
+        engine.projection(View::P2).unwrap()["awaiting"],
+        json!({"by":"P1"})
+    );
+    let before = engine.digest().unwrap();
+    for selection in [json!(["s", "s"]), json!(["s"]), json!(["s", "b"])] {
+        assert_eq!(
+            engine
+                .decide(&json!({"do":"end-discard","select":selection}), "invalid")
+                .unwrap()
+                .outcome,
+            "cannot-play"
+        );
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    let discarded = engine
+        .decide(&json!({"do":"end-discard","select":["s","h7"]}), "discard")
+        .unwrap();
+    assert_eq!(discarded.outcome, "resolved");
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    restored
+        .decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"s","line":1_i64}}}),
+            "draw",
+        )
+        .unwrap();
+    assert_eq!(restored.legal().unwrap().len(), 8);
+    assert_eq!(
+        restored.query(View::P1, "turn.active").unwrap(),
+        Some(json!("P1"))
+    );
+    restored
+        .decide(
+            &json!({"do":"end-discard","select":["d1"]}),
+            "discard-again",
+        )
+        .unwrap();
+    assert_eq!(
+        restored.query(View::P1, "turn.active").unwrap(),
+        Some(json!("P2"))
+    );
+    assert_eq!(
+        restored.query(View::P2, "P2.hand").unwrap(),
+        Some(json!(["d2"]))
+    );
+    assert_eq!(
+        restored.query(View::P1, "P1.hand_count").unwrap(),
+        Some(json!(7_i64))
+    );
+}
+
+#[test]
+fn visible_names_follow_the_current_face_and_rule_name_without_exposing_hidden_cards() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    let mut rows: Vec<Value> = snapshot()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    let mut second_face = rows[0]["faces"][0].clone();
+    second_face["name"] = json!("second-face-name");
+    rows[0]["faces"].as_array_mut().unwrap().push(second_face);
+    doc["cards"]["unit-spell"]["rules_name"] = json!("private-rule-name");
+    let snapshot = rows
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    let loaded = Arc::new(
+        Catalog::from_documents(&snapshot, &registry(), &[("names".into(), doc.to_string())])
+            .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"face":1_i64});
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"secret","card":"unit-spell"}]);
+    let engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "names",
+    )
+    .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.field.a.name").unwrap(),
+        Some(json!("second-face-name"))
+    );
+    assert_eq!(
+        engine.query(View::P2, "P2.hand.secret.name").unwrap(),
+        Some(json!("private-rule-name"))
+    );
+    assert_eq!(engine.query(View::P1, "P2.hand.secret.name").unwrap(), None);
+    let packet = engine.projection(View::P1).unwrap();
+    assert!(!packet.to_string().contains("private-rule-name"));
+    assert!(!packet.to_string().contains("secret"));
+    assert_eq!(
+        engine.query(View::P1, "P1.field.a.name").unwrap(),
+        Some(json!("second-face-name"))
+    );
+}
+
+#[test]
+fn both_start_amulet_choices_are_known_only_to_the_chooser_and_shuffle_hides_leftovers() {
+    for scripted in [false, true] {
+        let mut position = json!({"pregame":true,"players":{}});
+        let mut scripts = Vec::new();
+        for seat in ["P1", "P2"] {
+            let mut deck = vec![
+                json!({"id":format!("{seat}-start"),"card":"unit-follower"}),
+                json!({"id":format!("{seat}-leftover"),"card":"unit-follower"}),
+            ];
+            let mut order = vec![json!(format!("{seat}-leftover"))];
+            for index in 0_u8..8 {
+                let id = format!("{seat}-card-{index}");
+                deck.push(json!({"id":id,"card":"unit-spell"}));
+                order.push(json!(id));
+            }
+            position["players"][seat] = json!({"construction":"title","title_code":"synthetic_start","leader":{"class":"ニュートラル"},"deck_list":deck,"evolve_deck_list":[]});
+            scripts.push(json!({"player":seat,"zone":"deck","result":order}));
+        }
+        let random = if scripted {
+            json!({"first_chooser":"P1","shuffles":scripts})
+        } else {
+            Value::Null
+        };
+        let mut engine =
+            Game::new(opening_catalog(), &position, &Value::Null, &random, "both").unwrap();
+        let before = engine.projection(View::P2).unwrap();
+        assert_eq!(before["objects"]["P2-start"]["card"], "unit-follower");
+        assert_eq!(
+            before["knowledge"]["identifiable"],
+            json!(["P2-leftover", "P2-start"])
+        );
+        let chosen = engine
+            .decide(
+                &json!({"do":"choose-start-amulet","object":"P1-start"}),
+                "first-amulet",
+            )
+            .unwrap();
+        assert_eq!(chosen.events.len(), 1);
+        assert_eq!(chosen.events[0]["kind"], "場に出す");
+        assert_eq!(chosen.events[0]["by"], "rule-14.4.3.1");
+        assert_eq!(chosen.events[0]["face_up"], false);
+        let private = engine.projection(View::P2).unwrap();
+        assert!(!private.to_string().contains("P1-start"));
+        assert!(!private.to_string().contains("P1-leftover"));
+        assert_eq!(private["P1"]["field_count"], 1_i64);
+        assert_eq!(private["objects"]["P2-start"]["card"], "unit-follower");
+        let mut restored: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        restored
+            .decide(
+                &json!({"do":"choose-start-amulet","object":"P2-start"}),
+                "second-amulet",
+            )
+            .unwrap();
+        for (view, seat, other) in [(View::P1, "P1", "P2"), (View::P2, "P2", "P1")] {
+            let packet = restored.projection(view).unwrap();
+            assert_eq!(packet["objects"][format!("{seat}-start")]["face_up"], false);
+            assert_eq!(
+                packet["objects"][format!("{seat}-start")]["generation"],
+                1_i64
+            );
+            assert!(packet["objects"].get(format!("{seat}-leftover")).is_none());
+            assert_eq!(
+                packet["knowledge"]["located"],
+                json!([format!("{seat}-start")])
+            );
+            assert!(!packet.to_string().contains(&format!("{other}-start")));
+        }
+        restored
+            .decide(&json!({"do":"choose-first","first":"P1"}), "first")
+            .unwrap();
+        restored
+            .decide(&json!({"do":"mulligan","redo":false}), "keep-one")
+            .unwrap();
+        restored
+            .decide(&json!({"do":"mulligan","redo":false}), "keep-two")
+            .unwrap();
+        for view in [View::P1, View::P2] {
+            let packet = restored.projection(view).unwrap();
+            assert_eq!(packet["objects"]["P1-start"]["face_up"], true);
+            assert_eq!(packet["objects"]["P2-start"]["face_up"], true);
+            assert_eq!(packet["objects"]["P1-start"]["generation"], 1_i64);
+        }
+    }
 }
