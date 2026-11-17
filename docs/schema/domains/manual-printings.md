@@ -12,8 +12,11 @@
 ## 1. 收錄原則
 
 - 每筆記錄是一個**實體版次**：同一張卡面不同活動發的 EP 各自一筆（例如三款「ガルミーユ×うどん」）。
-- 沒有官方卡文可比對，所以每筆都建**獨立的 provisional card／face**（`identity_state=provisional`、`layout=single`），不與官方 card 共用，
-  也不在版次之間共用。之後若官方卡表收錄，走 [identity-repair](identity-repair.md) 的明示身分修復，不改 printing ID 與 `int_id`。
+- **所有 EP 是同一張卡、所有 SEP 是同一張卡**（維護者 2026-11-17 判定，[#2314](https://github.com/gbaian10/sve-kit/issues/2314)）：
+  每筆版次掛在 registry 既有的 EP 或 SEP card 與其唯一的面下，不另建 card／face；卡文、構築名稱與引擎支援都沿該卡的官方版次。
+  同一 `card_type` 的人工版次必須掛同一張卡，EP 與 SEP 不可同卡。之後若官方卡表收錄某一筆，走 [identity-repair](identity-repair.md) 的明示身分修復，不改 printing ID 與 `int_id`。
+- 2026-11-17 以前每筆各自建 provisional card／face。維護者決定上線前直接改、不留轉址：既有 27 筆的 `card_id`／`face_id` 一次性改指 EP／SEP 卡，
+  printing ID 與 `int_id` 不變；這是分片只增不改的明示例外。
 - **卡號可以沒有**：這批全部沒有官方卡號，`card_no_state=none`、`card_no=null`（建置資料庫與快照寫成空字串 `""`）。**不編假卡號**。
   有卡面號碼證據的未收錄版次（之後的序號卡）仍可 `official`／`provisional`，規則沿 §8。官方卡表版次永遠必須有卡號。
 - **卡面左下印字**（例如「2024千葉-A」「2024福岡」）另存 `printed_code`，可顯示、可搜尋，**不是卡號、不推網址**。
@@ -41,7 +44,8 @@ record 恰為 `{kind: manual_printing, owner, data}`，`record_key = manual_prin
 | 欄位 | 型別與規則 |
 | --- | --- |
 | `slug` | `^[a-z0-9][a-z0-9-]{0,63}$`，維護者取的穩定英文識別字，全域唯一；是永久 ID 的錨點，之後不改（不叫 `key`，避免被 secret 掃描誤判） |
-| `id`、`card_id`、`face_id` | 永久 ID，沿 [authored-layout §3.1](authored-layout.md#31-id-與身分) 的 UUIDv5 namespace：`p`／`c` 的 anchor 為 `<region>:manual:<slug>`（卡號不會含 `manual:`，不可能撞官方 anchor），face 為 `f` 加 `<card_id>:0`。驗證重算必須相等 |
+| `id` | 永久 printing ID，沿 [authored-layout §3.1](authored-layout.md#31-id-與身分) 的 UUIDv5 namespace，`p` 的 anchor 為 `<region>:manual:<slug>`（卡號不會含 `manual:`，不可能撞官方 anchor）；驗證重算必須相等，且不得與 registry 任何 ID 相同 |
+| `card_id`、`face_id` | 所屬 registry 卡（confirmed、single）與它的面；`face_id` 必為 `f` 加 `<card_id>:0`，且是 registry 中該卡的面 |
 | `int_id` | 落在該區未收錄號段（§4），全域唯一，由登錄者人工指定，可留空號 |
 | `region` | `jp`／`en` |
 | `home_set_id` | 已 confirmed 的 `product_family.id`，等於 owner；EP／SEP 活動卡歸 `EP` 家族 |
@@ -133,19 +137,20 @@ unlisted 版次的 `references` 投影成公開 `reference_urls`，**只放官�
 建置資料庫（[build-db](../build/build-db.md)）每筆寫入：
 
 - `source_record`：kind `authored`、`parser_version=manual-printings-v1`、分片 canonical hash 與 authored revision
-- `card`（provisional、single）、`face`（ordinal 0、front）、`card_int_id`
+- `card_int_id`（card、face 由 registry 寫入，本入口不另建）
 - `printing`：`catalog_state=unlisted`、`card_no_state`、`card_no`（none 時 `""`）、`printed_code`、`manual_name_unit_id`（人工名稱的 text_unit）、`manual_type_code`（ep／sep）、`manual_available_on`／`manual_date_precision`（發放日期與精度）、
   `listing_confidence=high`（維護者逐張看過實卡）、`rarity_raw="-"`（卡面無稀有度，沿官方 EP 的「-」）、`decklog_available=false`、`unverified`
 - `printing_face`：`printed_text_state=unknown`、三個 printed 欄位 null、無 observation
 - `printing_reference`：每個 `references` URL 一列
 
 DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlisted` 可為 none、填 `printed_code`、`manual_name_unit_id` 或 `manual_type_code`。
-不產生 `face_revision`、`face_current`、`rules_name`、翻譯或 DSL；`card_engine_support` 該區 block 為 `identity_unconfirmed`＋`missing_region_source`。
-路由走既有 `/cards/_provisional/{int_id}`（[build-db §15](../build/build-db.md#15-網址搜尋預設版次與記號)），不佔官方 `card_no` 路由；預設版次 method 為 `fallback`。
+人工版次不產生 `face_revision`、`face_current`、`rules_name`、翻譯或 DSL；卡的 current、表記與 `card_engine_support` 只由該卡的官方版次決定。
+版次路由走既有 `/cards/_provisional/{int_id}`（[build-db §15](../build/build-db.md#15-網址搜尋預設版次與記號)），不佔官方 `card_no` 路由。
+預設版次只在該卡同區沒有官方卡表版次時才會選到人工版次（官方版次一律優先，再比稀有度與日期）。
 
 卡表快照（[snapshot-format](../export/snapshot-format.md)）printing 末尾新增 `printed_code?`、`manual_name_unit_id?`、`manual_type_code?`、`manual_available_on?`、`manual_date_precision?`，`card_no_state` 新增 `none`；
-`reference_urls` 來自 `printing_reference.url`。沒有任何觀測的 unlisted 面不要求 current 或「表記未定」項目（`face.current=[]`、`face.wording=[]`），
-這是 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本) 的明示例外，官方面規則不變。
+`reference_urls` 來自 `printing_reference.url`。人工版次的 printing face 沒有觀測，不參與表記比較，也不讓該面在它的地區多出 current 或「表記未定」要求；
+該面的 current 與 wording 照官方版次的 [snapshot-format §2.3](../export/snapshot-format.md#23-卡文版本與依據版本) 規則。
 前端缺少官方種類時，僅 unlisted 版次使用 `manual_type_code` 作種類標示、種類計數與牌組位置篩選；官方種類永遠優先，官方版次不使用人工值。建置配置釘住每片的路徑與 hash（`manual_printings`）。
 
 人工日期由維護者逐筆採納，以活動開始日為準，不以公告日替代。`available_on` 在日／月精度時必填，unknown 必為 null；
@@ -169,7 +174,8 @@ DDL 約束：`card_no_state=none` ⇔ `card_no=''`；只有 `catalog_state=unlis
 ## 9. 下游驗收
 
 程式以合成資料驗：官方卡不准空卡號或人工欄位；unlisted 配號人工指定、落在未收錄號段、全域唯一且允許空號；官方游標不受影響；基本 EP／SEP 無連結、活動卡至少一個；
-非官方 host／非官方 X 帳號拒絕；人工卡名只進 `manual_name_unit_id`，不進 `face_revision`／`rules_name`；無觀測的 unlisted 面匯出通過且無 wording；
+非官方 host／非官方 X 帳號拒絕；人工卡名只進 `manual_name_unit_id`，不進 `face_revision`／`rules_name`；人工版次掛在 registry 卡下、卡的 current 與預設版次仍是官方版次；
+card 不在 registry、同類型分到兩張卡均拒絕；
 母檔以 sha256 對應、尺寸不符或缺檔失敗、無母檔的記錄出 pending 列；索引的人工 asset 與記錄不符拒絕；分片未知欄位、ID 不符 recipe、owner 不等於 home_set 均拒絕。
 
 公開卡圖及快照保留依 [snapshot-format §4.1](../export/snapshot-format.md#41-發布窗口圖片新鮮度與回收)；卡圖 URL 以 `int_id`＋永久 `face.ordinal` 為 key。

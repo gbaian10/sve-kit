@@ -15,6 +15,7 @@ from sve_carddb.domains.manual_printings.records import (
     Shard,
 )
 from sve_carddb.domains.registry.allocation import unlisted_range
+from sve_carddb.domains.registry.records import CardData, FaceData
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -75,7 +76,7 @@ def load_manual_printings(
             records[entry.record_key] = entry
         loaded.append(LoadedShard(path, digest(content), content, shard.records))
     snapshot = ManualSnapshot(tuple(loaded), MappingProxyType(records))
-    _validate(snapshot, registry)
+    validate_printings(snapshot.printings(), registry)
     return snapshot
 
 
@@ -91,11 +92,11 @@ def _shard(content: bytes, path: str) -> Shard:
         raise ValueError(f"Invalid manual printing shard {path}: {details}") from None
 
 
-def _validate(
-    snapshot: ManualSnapshot,
+def validate_printings(
+    printings: tuple[ManualPrintingData, ...],
     registry: RegistrySnapshot | None,
 ) -> None:
-    printings = snapshot.printings()
+    """Check the whole manual set; the registration tool runs this before writing."""
     slugs = [data.slug for data in printings]
     if len(slugs) != len(set(slugs)):
         raise ValueError("Manual printing slugs must be unique")
@@ -104,10 +105,35 @@ def _validate(
         if data.int_id not in unlisted_range(data.region) or data.int_id in seen:
             raise ValueError("Invalid, out-of-range or reused unlisted int_id")
         seen.add(data.int_id)
+    # All EP are one card and all SEP another; a manual printing joins that card.
+    cards: dict[str, set[str]] = {}
+    for data in printings:
+        cards.setdefault(data.card_type, set()).add(data.card_id)
+    if any(len(ids) != 1 for ids in cards.values()) or len(cards) != len(
+        set().union(*cards.values())
+    ):
+        raise ValueError("Each manual card type must join exactly one card of its own")
     if registry is not None:
-        permanent = {
-            getattr(record.data, "id", None) for record in registry.records.values()
-        }
-        for data in printings:
-            if {data.id, data.card_id, data.face_id} & permanent:
-                raise ValueError("Manual printing ID collides with the registry")
+        _check_registry(printings, registry)
+
+
+def _check_registry(
+    printings: tuple[ManualPrintingData, ...], registry: RegistrySnapshot
+) -> None:
+    datas = [record.data for record in registry.records.values()]
+    single = {
+        data.id
+        for data in datas
+        if isinstance(data, CardData)
+        and data.layout == "single"
+        and data.identity_state == "confirmed"
+    }
+    faces = {(data.card_id, data.id) for data in datas if isinstance(data, FaceData)}
+    permanent = {getattr(data, "id", None) for data in datas}
+    for data in printings:
+        if data.id in permanent:
+            raise ValueError("Manual printing ID collides with the registry")
+        if data.card_id not in single or (data.card_id, data.face_id) not in faces:
+            raise ValueError(
+                "Manual printing must join a confirmed single-faced registry card"
+            )
