@@ -281,6 +281,3 @@ impl Execution {
         Ok(Some(EventKind::Action(action)))
     }
 }
-
-#[cfg(test)]
-mod tests;

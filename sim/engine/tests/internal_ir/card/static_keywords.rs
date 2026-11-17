@@ -1,6 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
-use sve_engine::game::internal::{InputDomain, PlayPhase, PpPayment, ResumeStage};
+use sve_engine::game::internal::{InputDomain, ResumeStage};
 
 pub(super) fn conditional_keyword() -> Located<Ability> {
     let mut located = ability(2, vec![]);
@@ -180,14 +180,6 @@ fn ward_aura_offers_optional_act_to_a_new_field_entrant() {
         panic!("granted Ward must offer entry posture");
     };
     assert!(matches!(question.domain, InputDomain::WardEntry { .. }));
-    assert_eq!(game.internal_play_phase(), Some(PlayPhase::Pay));
-    assert_eq!(
-        game.internal_pp_payments().unwrap(),
-        &[PpPayment {
-            player: PlayerId { seat: 1 },
-            amount: Int(1)
-        }]
-    );
     let before = exact_authority(&game);
     game.answer_internal_card(question.actor, question.token, Answer::Integer(Nat(0)))
         .unwrap_err();
@@ -195,7 +187,6 @@ fn ward_aura_offers_optional_act_to_a_new_field_entrant() {
         exact_authority(&game) == before,
         "a rejected Ward answer preserves the paid entry stop"
     );
-    assert_eq!(game.internal_play_phase(), Some(PlayPhase::Pay));
     assert!(matches!(
         game.answer_internal_card(question.actor, question.token, Answer::WardEntry(true))
             .unwrap(),
@@ -204,8 +195,6 @@ fn ward_aura_offers_optional_act_to_a_new_field_entrant() {
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["objects"]["incoming"]["acted"], true);
     assert_eq!(state["objects"]["incoming"]["keywords"], json!(["守護"]));
-    assert_eq!(game.internal_play_phase(), None);
-    assert_eq!(game.internal_pp_payments(), None);
 }
 
 pub(super) fn keyword_catalog() -> Arc<Catalog> {

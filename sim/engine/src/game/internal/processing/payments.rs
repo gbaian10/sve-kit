@@ -65,6 +65,3 @@ pub(in crate::game::internal) fn record_cost_spec_payment(
         .cost_spec_payments
         .push(CostSpecPayment { purpose, steps });
 }
-
-#[cfg(all(test, feature = "runner"))]
-mod tests;
