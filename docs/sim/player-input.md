@@ -15,6 +15,8 @@
 准入與可抽取的開局牌數。strict 要求雙方主牌組、進化牌組、規則產生的初始 EX 資源及
 所有 token 依存完整准入；只有原型程式的卡片不會進局，也不以空 IR 補足缺少的效果。
 宿主可先用 `Game::check_player_decks(&selected, &decks)` 檢查；開局入口仍會自行重驗。
+正式 wire 宿主先用 `Game::check_battle_decks(&selected, &decks, &references)` 完成
+[開局前支援檢查](battle-contract.md#22-開局前支援檢查)，同時檢查完整當局閉包的卡文來源投影。
 缺少准入時回傳 `StrictStartError::Admission(report)`，宿主只把
 `report.gaps(viewer)` 的卡號與封閉原因交付已認證的該席，不能把對手缺口或整份報告傳給玩家。
 依存已說明的缺口不重複列為產生者不支援。來源不符或權威資料錯誤則回傳
