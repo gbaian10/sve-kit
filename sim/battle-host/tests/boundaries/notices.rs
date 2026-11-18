@@ -76,6 +76,10 @@ fn local_look(hidden: &str) -> LocalSession {
     )
 }
 
+#[expect(
+    clippy::panic,
+    reason = "The synthetic match must open the activation window."
+)]
 fn activate(session: &mut LocalSession) -> Vec<Delivery> {
     let mut seats = Seats::default();
     let opening = session.start();
@@ -112,9 +116,13 @@ fn activate(session: &mut LocalSession) -> Vec<Delivery> {
 fn update(deliveries: &[Delivery], seat: Seat) -> &BattleUpdate {
     deliveries
         .iter()
-        .find_map(|delivery| match &delivery.message {
-            HostMessage::Update(update) if delivery.seat == seat => Some(update.as_ref()),
-            _ => None,
+        .filter(|delivery| delivery.seat == seat)
+        .find_map(|delivery| {
+            if let HostMessage::Update(update) = &delivery.message {
+                Some(update.as_ref())
+            } else {
+                None
+            }
         })
         .unwrap()
 }
@@ -154,11 +162,11 @@ fn a_publicly_empty_quick_window_requires_an_explicit_pass() {
     let mut session = local_look("t-small");
     let mut seats = Seats::default();
     seats.absorb(&session.start());
-    let (seat, main) = seats.question().unwrap();
+    let (turn_player, main) = seats.question().unwrap();
     assert_eq!(main.auto_answer, AutoAnswer::Unknown);
-    seats.absorb(&session.submit(seat, &answer(&main, "end-main")));
-    let (seat, quick) = seats.question().unwrap();
-    assert_eq!(seat, Seat::P2);
+    seats.absorb(&session.submit(turn_player, &answer(&main, "end-main")));
+    let (actor, quick) = seats.question().unwrap();
+    assert_eq!(actor, Seat::P2);
     assert_eq!(quick.usage, QuestionUse::Quick);
     let AutoAnswer::Unique {
         answer: pass,
@@ -169,7 +177,7 @@ fn a_publicly_empty_quick_window_requires_an_explicit_pass() {
     };
     assert_eq!(pass, &Answer::Quick { option: None });
     assert!(applied(&session.submit(
-        seat,
+        actor,
         &answer_with(quick.id.as_str(), pass.clone(), "pass")
     )));
 }
