@@ -7,16 +7,19 @@
     "stage": "target",
     "controller": "p1",
     "source": {
-      "card": {
-        "printing_id": "SYN01-002",
-        "face": 0
-      },
-      "wording_revision": "r1",
-      "section": "effect",
-      "line": 1,
-      "step": null,
-      "granted_by": null,
-      "holder": "o2"
+      "kind": "text",
+      "text": {
+        "card": {
+          "printing_id": "SYN01-002",
+          "face": 0
+        },
+        "wording_revision": "r1",
+        "section": "effect",
+        "line": 1,
+        "step": null,
+        "granted_by": null,
+        "holder": "o2"
+      }
     },
     "subject": null,
     "rule": null,
@@ -29,10 +32,12 @@
             "mode": 1,
             "text": null
           }
-        ]
+        ],
+        "actor": "p1"
       }
     ],
-    "payment": null
+    "actor": "p1",
+    "payments": []
   },
   "shape": {
     "kind": "select",

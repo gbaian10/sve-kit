@@ -198,22 +198,26 @@
         "stage": "resolve",
         "controller": "p2",
         "source": {
-          "card": {
-            "printing_id": "SYN01-003",
-            "face": 0
-          },
-          "wording_revision": "r1",
-          "section": "effect",
-          "line": 1,
-          "step": null,
-          "granted_by": null,
-          "holder": null
+          "kind": "text",
+          "text": {
+            "card": {
+              "printing_id": "SYN01-003",
+              "face": 0
+            },
+            "wording_revision": "r1",
+            "section": "effect",
+            "line": 1,
+            "step": null,
+            "granted_by": null,
+            "holder": null
+          }
         },
         "subject": null,
         "rule": null,
         "procedure": null,
         "declared": [],
-        "payment": null
+        "actor": null,
+        "payments": []
       },
       "dice": {
         "value": 3,
