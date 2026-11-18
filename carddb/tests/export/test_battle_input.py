@@ -1,5 +1,6 @@
 """The battle producer keeps native bytes and public source identities in one closure."""
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -7,14 +8,15 @@ from typer.testing import CliRunner
 
 from sve_carddb import cli
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
+from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.export.battle_input import build_battle_inputs
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import ExportError, Snapshot, load_battle_inputs
 from tests.support.battle_projection import snapshot as compatible_snapshot
 
-if TYPE_CHECKING:
-    from pathlib import Path
+REPOSITORY = Path(__file__).resolve().parents[3]
 
+if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.export.reader import Row
@@ -238,26 +240,28 @@ def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None
             .exit_code
         )
 
-    pinned = (
-        "scope: {region: jp}\ninput: {kind: legacy-jp, snapshot_sha256: reviewed}\n"
+    authored = (REPOSITORY / "authored/rules/engine/index.yaml").read_text("utf-8")
+    reviewed = object_value(
+        object_value(JSON_VALUE.validate_python(parse_yaml(authored.encode())))["input"]
     )
-    assert command(tmp_path / "battle", pinned) == 0
+    assert command(tmp_path / "battle", authored) == 0
     assert (tmp_path / "battle/snapshot.jsonl").read_bytes() == result.snapshot
     assert parse((tmp_path / "battle/references.json").read_bytes()) == (
         result.references
     )
-    assert parse((tmp_path / "battle/rules.json").read_bytes()) == {
-        "scope": {"region": "jp"},
-        "input": {
-            "kind": "legacy-jp",
-            "snapshot_sha256": digest(result.snapshot).removeprefix("sha256:"),
-        },
-    }
-    assert command(tmp_path / "battle", pinned) != 0, "never mixes with earlier output"
+    bound = object_value(parse((tmp_path / "battle/rules.json").read_bytes()))
+    assert bound["input"] == reviewed | {
+        "snapshot_sha256": digest(result.snapshot).removeprefix("sha256:")
+    }, "only the pin changes"
+    assert command(tmp_path / "battle", authored) != 0, (
+        "never mixes with earlier output"
+    )
+    pin = string(reviewed["snapshot_sha256"])
     for name, document, region in [
-        ("en", pinned, "en"),
-        ("other", pinned.replace("jp", "en"), "jp"),
-        ("unusable", "scope: {}\n", "jp"),
+        ("en", authored, "en"),
+        ("other", authored.replace("region: jp", "region: en"), "jp"),
+        ("missing", authored.replace(f"snapshot_sha256: {pin}", ""), "jp"),
+        ("malformed", authored.replace(pin, "reviewed"), "jp"),
     ]:
         assert command(tmp_path / name, document, region) == 3, name
         assert not (tmp_path / name).exists()
@@ -461,12 +465,17 @@ def test_en_catalogue_preserves_its_own_region_without_normalizing_card_numbers(
     } == {"SYNⓈaEN"}
 
 
-@pytest.mark.parametrize("scenario", ["empty_class", "noncontiguous_faces"])
+@pytest.mark.parametrize(
+    "scenario", ["missing_class", "empty_class", "noncontiguous_faces"]
+)
 def test_native_characteristic_and_face_coordinates_must_be_representable(
     scenario: str,
 ) -> None:
     snapshot = source()
-    if scenario == "empty_class":
+    if scenario == "missing_class":
+        # Only EP/SEP faces may lack a class; a follower without one stays unrepresentable.
+        snapshot.tables["face_revision"][0]["class_code"] = None
+    elif scenario == "empty_class":
         next(
             row for row in snapshot.tables["text_unit"] if row["id"] == "label-neutral"
         )["text"] = ""
@@ -476,18 +485,31 @@ def test_native_characteristic_and_face_coordinates_must_be_representable(
         build_battle_inputs(snapshot, "jp")
 
 
-def test_native_absent_characteristics_use_the_existing_sentinel() -> None:
+@pytest.mark.parametrize("resource", ["ep", "sep"])
+def test_native_absent_characteristics_use_the_existing_sentinel(resource: str) -> None:
     snapshot = source()
     # EP/SEP faces have neither a class nor numeric characteristics.
     snapshot.tables["face_revision"][0].update(
-        {"class_code": None, "cost": None, "attack": None, "defense": None}
+        {
+            "type_code": resource,
+            "class_code": None,
+            "cost": None,
+            "attack": None,
+            "defense": None,
+        }
+    )
+    snapshot.tables["text_unit"].append(
+        {"id": "label-resource", "lang": "ja", "text": resource.upper()}
+    )
+    snapshot.tables["vocabulary"].append(
+        {"kind": "type", "code": resource, "label_unit_id": "label-resource"}
     )
     result = build_battle_inputs(snapshot, "jp")
     first = object_value(
         array(object_value(parse(result.snapshot.strip()))["faces"])[0]
     )
-    fields = ("card_class", "cost", "power", "hp")
-    assert [first[field] for field in fields] == ["-", "-", "-", "-"]
+    fields = ("card_type", "card_class", "cost", "power", "hp")
+    assert [first[field] for field in fields] == [resource.upper(), "-", "-", "-", "-"]
 
 
 def test_battle_rule_identity_closure_keeps_parent_ids_and_all_exact_versions() -> None:

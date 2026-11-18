@@ -12,7 +12,7 @@ mod fixture;
 use core::array::from_fn;
 use serde_json::{Value, json};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_battle_contract::question::{MainIntent, QuestionShape};
+use sve_battle_contract::question::{MainIntent, QuestionShape, ShapeKind};
 use sve_battle_contract::{Answer, ClientMessage, Command};
 use sve_battle_host::load::load;
 use sve_battle_host::wire::{
@@ -271,12 +271,12 @@ fn play_look(update: &BattleUpdate, intents: &[MainIntent]) -> Answer {
 }
 
 /// P1 plays the looking amulet and gives the smallest answer to everything it is asked until its
-/// main window returns. Returns every message P2 received and the size of each pick P1 was
-/// offered.
-fn look_and_decline(deck: &str) -> (Vec<String>, Vec<usize>) {
+/// main window returns. Returns every message P2 received and each stop P1 was asked at, with the
+/// number of candidates of a pick.
+fn look_and_decline(deck: &str) -> (Vec<String>, Vec<(ShapeKind, Option<usize>)>) {
     let mut session = private_look(deck);
     let mut waiting = Vec::new();
-    let mut picks = Vec::new();
+    let mut stops = Vec::new();
     let mut latest = None;
     let mut deliver = |out: Vec<Delivery>, slot: &mut Option<BattleUpdate>| {
         for delivery in out {
@@ -298,14 +298,17 @@ fn look_and_decline(deck: &str) -> (Vec<String>, Vec<usize>) {
         };
         let answer = if let QuestionShape::ActionWindow { intents } = &question.shape {
             if played {
-                return (waiting, picks);
+                return (waiting, stops);
             }
             played = true;
             play_look(&update, intents)
         } else {
-            if let QuestionShape::Select { selection } = &question.shape {
-                picks.push(selection.candidates.len());
-            }
+            let candidates = if let QuestionShape::Select { selection } = &question.shape {
+                Some(selection.candidates.len())
+            } else {
+                None
+            };
+            stops.push((question.shape.kind(), candidates));
             fixture::passive(question)
         };
         let message = ClientMessage::Submit(Submit {
@@ -325,11 +328,26 @@ fn look_and_decline(deck: &str) -> (Vec<String>, Vec<usize>) {
 
 #[test]
 fn a_private_look_with_or_without_a_pick_sends_the_waiting_seat_the_same_messages() {
-    // Bishop followers on top give P1 a pick it declines; neutral cards leave it nothing to pick.
+    // Bishop followers on top give P1 a pick it declines; neutral cards leave nothing to pick, and
+    // the engine still asks the same empty pick rather than skipping a stop P2 could notice.
     let (with_pick, offered) = look_and_decline("BP22-102");
     let (without_pick, empty) = look_and_decline("BP10-122");
-    assert!(offered.iter().any(|&count| count > 0), "{offered:?}");
-    assert!(empty.iter().all(|&count| count == 0), "{empty:?}");
+    assert_eq!(
+        offered,
+        [
+            (ShapeKind::Choose, None),
+            (ShapeKind::Select, Some(3)),
+            (ShapeKind::Order, None)
+        ]
+    );
+    assert_eq!(
+        empty,
+        [
+            (ShapeKind::Choose, None),
+            (ShapeKind::Select, Some(0)),
+            (ShapeKind::Order, None)
+        ]
+    );
     assert_eq!(
         with_pick, without_pick,
         "P2's updates, update_seq and animate never depend on P1's private candidates"

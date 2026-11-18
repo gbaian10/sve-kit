@@ -294,7 +294,7 @@ describe("startLocalBattle", () => {
       control: ["policy", "player"],
       max_submissions: 1,
     }
-    const battle = startLocalBattle("{}", options, () => worker)
+    const battle = startLocalBattle(options, () => worker)
     expect(Object.keys(battle.channels)).toEqual(["p2"])
     expect(Object.keys(init?.ports ?? {})).toEqual(["p2"])
     expect(transferred).toHaveLength(1)

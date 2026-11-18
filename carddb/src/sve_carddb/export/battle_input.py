@@ -15,6 +15,10 @@ if TYPE_CHECKING:
     from sve_carddb.export.reader import Row
 
 
+# Printed EP/SEP resources: classless, and manual copies never become native cards.
+RESOURCE_TYPES = frozenset({"ep", "sep"})
+
+
 @dataclass(frozen=True, repr=False)
 class BattleInputs:
     """Native bytes and their identity-only bindings from one public manifest."""
@@ -102,12 +106,13 @@ class _Projection:
         sections = self.sections(revision)
         if [row["ordinal"] for row in sections] != list(range(len(sections))):
             raise ValueError("Native sections require a complete ordinal sequence")
-        # EP/SEP faces have no class; the native format writes absent characteristics as "-".
-        card_class = (
-            "-"
-            if revision["class_code"] is None
-            else self.labels["class", string(revision["class_code"])]
-        )
+        if revision["class_code"] is not None:
+            card_class = self.labels["class", string(revision["class_code"])]
+        elif revision["type_code"] in RESOURCE_TYPES:
+            # EP/SEP have no class; the native format writes absent characteristics as "-".
+            card_class = "-"
+        else:
+            raise ValueError("Native class requires a nonempty label")
         if not card_class:
             raise ValueError("Native class requires a nonempty label")
         result: Row = {
@@ -189,10 +194,10 @@ def _build(snapshot: Snapshot, region: str) -> BattleInputs:
     ):
         if printing["region"] != region:
             continue
-        if printing["card_no_state"] == "none" and printing["manual_type_code"] in {
-            "ep",
-            "sep",
-        }:
+        if (
+            printing["card_no_state"] == "none"
+            and printing["manual_type_code"] in RESOURCE_TYPES
+        ):
             continue
         number = string(printing["card_no"])
         if printing["card_no_state"] != "official" or not number or number in records:

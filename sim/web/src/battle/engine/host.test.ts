@@ -77,8 +77,6 @@ const options: MatchOptions = {
   max_submissions: 10,
 }
 
-const inputs = "{}"
-
 function setUp(
   create: (setup: string) => Promise<EngineSession>,
   ports: Partial<Record<Seat, FakePort>>,
@@ -86,13 +84,12 @@ function setUp(
   validate?: ((message: unknown) => boolean) | Promise<(message: unknown) => boolean>,
 ) {
   const host = new BattleHost(
-    (_inputs, setup) => create(setup),
+    (setup) => create(setup),
     (bytes) => bytes.fill(7),
     validate,
   )
   host.init({
     kind: "init",
-    inputs,
     options: matchOptions,
     ports: ports as unknown as InitMessage["ports"],
   })

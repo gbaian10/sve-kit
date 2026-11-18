@@ -158,11 +158,12 @@ pub fn load(inputs: &str, setup: &str) -> Result<LocalSession, LoadError> {
     // Every face of the snapshot, not only the decks' reach, must have an exact identity.
     let references = BattleReferences::new(&selected.prototypes, references)
         .map_err(|_error| LoadError::References)?;
-    // The engine matches the wording and rule manifests with each other; rules supplied without
-    // wording are matched only here, against the verified manifest this game is pinned to.
+    // The engine matches the wording and rule manifests with each other; here they must name the
+    // verified manifest this game is pinned to. References naming none were not read from it.
     if references
         .manifest_sha256()
-        .is_some_and(|manifest| manifest.strip_prefix("sha256:") != Some(&identity.snapshot.sha256))
+        .and_then(|manifest| manifest.strip_prefix("sha256:"))
+        != Some(identity.snapshot.sha256.as_str())
     {
         return Err(LoadError::References);
     }

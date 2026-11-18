@@ -11,12 +11,6 @@ export interface Delivery {
   message: HostMessage
 }
 
-/**
- * The battle inputs document `build:engine` wrote from one verified public export: the reader's
- * snapshot and references, the programs and rules bound to those bytes, and their identity.
- */
-export type MatchInputs = string
-
 interface DeckSetup {
   construction: { kind: "class" | "title"; value: string }
   main: string[]
@@ -37,7 +31,6 @@ export type LoadErrorCode = "format" | "selection" | "identity" | "references" |
 /** Main thread → Worker, once; one transferred port per player seat. */
 export interface InitMessage {
   kind: "init"
-  inputs: MatchInputs
   options: MatchOptions
   ports: Partial<Record<Seat, MessagePort>>
 }

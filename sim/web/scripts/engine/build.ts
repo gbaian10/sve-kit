@@ -48,7 +48,7 @@ export function wasmArtifact(messages: string): string {
 }
 
 /** The carddb reader's outputs and the programs, all for one region. */
-export interface BattleParts {
+interface BattleParts {
   /** Native snapshot (JSON lines), exactly as the reader wrote it. */
   snapshot: string
   /** The reader's reference identities (JSON). */
@@ -63,7 +63,7 @@ export interface BattleParts {
 const sha256 = (bytes: string | Uint8Array) => createHash("sha256").update(bytes).digest("hex")
 
 /** The battle inputs document; its identity names exactly these bytes and this engine build. */
-export function battleInputs(parts: BattleParts, engine: Uint8Array): string {
+function battleInputs(parts: BattleParts, engine: Uint8Array): string {
   const references = JSON.parse(parts.references) as {
     region: "jp" | "en"
     wording: { manifest_sha256: string } | null
