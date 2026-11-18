@@ -71,6 +71,8 @@ jobs:
               - 'docs/schema/**'
               - 'tools/schema-er/**'
               - 'authored/**' # the registry tests load and validate the real authored data
+              # carddb/tests/domains/effects/test_regression_baseline.py reads it (#2350 broke main unnoticed)
+              - 'sim/engine/tests/boundaries.rs'
             rust:
               - 'card-data/**'
               - 'carddb/src/**' # engine projection and its transitive schema/CLI dependencies
