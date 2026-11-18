@@ -85,7 +85,7 @@ export function StorageSettings() {
           <span>{format(usage?.data)}</span>
         </SettingRow>
       </div>
-      <p className="mt-3 text-13 text-text-3">{t("settings.storageHint")}</p>
+      <p className="mt-3 text-13 text-pretty text-text-3">{t("settings.storageHint")}</p>
       {clearResult && (
         <p role="status" className="mt-3 text-14">
           {clearResult === "failed"

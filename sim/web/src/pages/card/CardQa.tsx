@@ -23,8 +23,8 @@ import type { Region } from "../../domain/search"
 import { type FieldDisplay, usePrefs } from "../../settings"
 import { type CardQa as CardQaResult, loadCardQa, type QaEntry } from "./qa-data"
 
-const PRIMARY = "text-15 leading-effect"
-const SECONDARY = "text-14 leading-effect text-text-2"
+const PRIMARY = "text-15 leading-effect text-pretty"
+const SECONDARY = "text-14 leading-effect text-pretty text-text-2"
 
 type QaField = "question" | "answer"
 

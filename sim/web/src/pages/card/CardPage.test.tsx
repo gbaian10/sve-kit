@@ -826,6 +826,24 @@ describe("collab printing names", () => {
 })
 
 describe("double-face headers", () => {
+  it("loads only the first face as a high-priority image on the card page", async () => {
+    state.doubleFace = true
+    state.images = true
+    await renderRoutes([{ path: "/cards/:cardNo/:slug?", ...card }], {
+      initialEntries: ["/cards/BP-SYNTHETIC"],
+    })
+    const images = document.querySelectorAll("article button [data-image-face] img")
+    expect(
+      Array.from(images, (image) => [
+        image.getAttribute("fetchpriority"),
+        image.getAttribute("loading"),
+      ]),
+    ).toEqual([
+      ["high", "eager"],
+      [null, "lazy"],
+    ])
+  })
+
   it("shows each face's own name and preserves the back translation quality", async () => {
     state.doubleFace = true
     prefsStore.set({ uiLanguage: "zh-TW", nameDisplay: "translated" })

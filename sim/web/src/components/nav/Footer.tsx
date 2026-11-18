@@ -8,7 +8,7 @@ export function Footer({ dataVersion }: { readonly dataVersion?: string | undefi
   const { t } = useTranslation()
   return (
     <footer className="mx-auto w-full max-w-320 px-4 py-6 text-12 text-text-3 lg:px-6">
-      <p>{t("footer.unofficial")}</p>
+      <p className="text-pretty">{t("footer.unofficial")}</p>
       <p className="mt-1" title={dataVersion}>
         {t("footer.dataVersion", {
           version:

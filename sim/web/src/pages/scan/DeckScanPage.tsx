@@ -521,7 +521,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
           <Layers className="size-9 text-text-3" aria-hidden="true" />
           <div>
             <p className="text-16 font-bold">{t("scan.deck.intro")}</p>
-            <p className="mt-1 text-13 text-text-2">{t("scan.deck.tips")}</p>
+            <p className="mt-1 text-13 text-pretty text-text-2">{t("scan.deck.tips")}</p>
           </div>
           <div className="grid w-full max-w-md grid-cols-3 gap-2">
             <Button variant="primary" className={source} onClick={() => void shoot()}>

@@ -36,6 +36,7 @@ it("shares body reads, promotes queued work, and keeps the app network within it
   )
   await Promise.resolve()
   expect(started).toHaveLength(24)
+  expect(priorities.get("https://test/0")).toBe("low")
   const promoted = queue.foreground("https://test/39")
   const visible = Array.from({ length: 10 }, (_, n) =>
     queue.foreground(`https://test/visible-${String(n)}`),

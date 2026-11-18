@@ -49,7 +49,7 @@ export function OfficialNews({ edition }: { readonly edition: Region }) {
           </li>
         ))}
       </ul>
-      <p className="text-12 leading-relaxed text-text-3">{t("home.news.hint")}</p>
+      <p className="text-12 leading-relaxed text-pretty text-text-3">{t("home.news.hint")}</p>
     </section>
   )
 }

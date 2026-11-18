@@ -85,7 +85,11 @@ function RulePreview({
       {/* Plain text only: nothing inside a tooltip can take focus. */}
       <RuleKeysContext.Provider value={{ keys: new Set() }}>
         <div lang={piece.translated ? undefined : RULES_LANG[rules.index.region]}>
-          <RuleText text={piece.text} context={node.context} className="mt-0.5 line-clamp-6" />
+          <RuleText
+            text={piece.text}
+            context={node.context}
+            className="mt-0.5 line-clamp-6 text-pretty"
+          />
         </div>
       </RuleKeysContext.Provider>
     </div>

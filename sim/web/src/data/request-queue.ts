@@ -114,7 +114,7 @@ export function requestQueue(fetcher: Fetcher): {
           const response = await fetcher(job.url, {
             ...init,
             ...(nextPriority === 0 && init.priority === "low" ? { priority: "auto" } : {}),
-            ...(isSpeculative ? { priority: "low" } : {}),
+            ...(isBackground ? { priority: "low" } : {}),
             signal,
           })
           const body = await readBody(response, signal)
@@ -196,6 +196,7 @@ export function requestQueue(fetcher: Fetcher): {
           priority: init?.speculative ? 3 : foreground ? 0 : init?.priority === "low" ? 2 : 1,
           cleanup: () => init?.signal?.removeEventListener("abort", abort),
         }
+        // Keep the in-flight fetch priority so new foreground subscribers can reuse bytes already read.
         selected.waiters.add(waiter)
         init?.signal?.addEventListener("abort", abort, { once: true })
         pump()

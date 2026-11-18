@@ -215,7 +215,7 @@ function PrintingWording({
         />
       )}
       {others.length > 0 && !blank && (
-        <p className="mt-2 text-12 text-text-3" data-wording-note>
+        <p className="mt-2 text-12 text-pretty text-text-3" data-wording-note>
           {before}
           {others.map((other, index) => {
             const link = linkOf(other.id)
@@ -265,7 +265,7 @@ export function CardWording({
   // A display without an adopted current: say so, whichever branch shows the printing's own text.
   const provisionalNote = (wording?.["display"] as Row | undefined)?.["basis"] ===
     "latest_known_release" && (
-    <p role="note" className="mt-3 text-12 text-text-3">
+    <p role="note" className="mt-3 text-12 text-pretty text-text-3">
       {t("card.wording.provisional")}
     </p>
   )
