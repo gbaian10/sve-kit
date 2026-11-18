@@ -7,6 +7,8 @@
 
 #[path = "support/fixture.rs"]
 mod fixture;
+#[path = "boundaries/notices.rs"]
+mod notices;
 
 use serde_json::{Value, json};
 extern crate alloc;
