@@ -87,6 +87,13 @@ Rust 在轉換前檢查範圍，JS 檢查 Number.isSafeInteger；JSON decoder �
 ### 2.1 一致更新與提交
 
 宿主逐局序列化命令，在同一穩定停點取得 observation、input、已提交事件與合格暫態，形成一致更新。
+引擎的 `Game::battle_input(viewer, question_id, references)` 回傳 `InputProjection`，
+以同席、同停點的 `observation()` 與 `input()` 提供完整盤面和所有玩家輸入。
+`command(viewer, &Command)` 使用私有配對解碼 wire 答案或投降，再交 `submit_player`；
+主行動的攻擊目標代碼各自綁定該攻擊意圖，其他主行動不帶目標。
+Waiting 的 processing 只摘要該席已獲授權的最後一格，不表示隱藏的最內層 frame；骰值沿用原生公開值。
+Finished 的原因取自權威終局結果，停止作答與投降；EngineFault 不帶診斷或勝者，僅依原生能力提供 `can_concede`。
+必要盤面無法投影仍回 `ProjectionError`，不製造空盤面或改判 EngineFault；完整程式閉包 preflight 仍須在互動前完成。
 update_seq 只計本席可見變化；另一席的私有回答或略過分支不製造空更新、全局計數或隱藏批次痕跡。
 第一次更新是完整基線，既存歷史不播放；其後只附尚未交付的完整事件批次。規則續行不等待動畫。
 

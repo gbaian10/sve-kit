@@ -484,7 +484,7 @@ fn main_action(
             let source = decision["source"].as_str().unwrap_or_default();
             let line = decision["ability"]["line"].as_u64();
             let Some(found) = intent(question, |kind| {
-                matches!(kind, MainIntentKind::Evolve { holder, line: l }
+                matches!(kind, MainIntentKind::Evolve { holder, line: l, .. }
                     if turn.label(&holder.handle).as_deref() == Some(source)
                         && line.is_none_or(|line| *l == line))
             }) else {

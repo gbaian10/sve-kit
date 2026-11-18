@@ -1,6 +1,7 @@
 //! Closed, read-only player observations without authority identities.
 
 mod context;
+mod input;
 mod processing;
 pub use context::{
     AbilityQuota, DamageHistory, DiceHistory, EffectRecipient, HistoryEvent, PendingTrigger,
@@ -341,9 +342,9 @@ const fn rule_stage(shape: &QuestionShape) -> Option<wire::ProcessingStage> {
     let stage = match shape {
         QuestionShape::Opening(_) => wire::ProcessingStage::Opening,
         QuestionShape::Closing(_) => wire::ProcessingStage::Closing,
-        QuestionShape::ActionWindow(_) => return None,
-        // These choices declare unpaid parameters; private cost shapes do not change the stage.
-        QuestionShape::Evolution(
+        // No main action or evolution parameter commits payment; private cost shapes cannot change the stage.
+        QuestionShape::ActionWindow(_)
+        | QuestionShape::Evolution(
             EvolutionQuestion::Form(_)
             | EvolutionQuestion::Materials(_)
             | EvolutionQuestion::Discard(_)
@@ -405,7 +406,7 @@ impl Game {
     /// The host authenticates the viewer, issues a fresh ID per occurrence in this
     /// battle, and submits decoded commands to this same Game. Waiting and finished
     /// seats have no question; this method does not replace their public input summary.
-    /// Supports opening, closing, normal evolution and all admitted Decision shapes.
+    /// Supports all admitted player questions, including main-phase intents.
     /// The host must preflight the full program closure before interactive use.
     ///
     /// # Errors
@@ -419,47 +420,55 @@ impl Game {
     ) -> result::Result<Option<QuestionProjection>, ProjectionError> {
         references.validate_catalog(&self.catalog)?;
         match self.input(perspective) {
-            Input::Question(question) => {
-                let native = self
-                    .observe(perspective)
-                    .map_err(|_error| ProjectionError::Unavailable)?;
-                let rule_processing = self.battle_rule_processing(&native)?;
-                let current = if rule_processing.is_empty() {
-                    let mut active = native
-                        .processing
-                        .iter()
-                        .enumerate()
-                        .filter(|(_, context)| context.actor == Some(question.actor));
-                    let current = active.next().map(|(index, _)| index);
-                    if active.next().is_some() {
-                        return Err(ProjectionError::Unavailable);
-                    }
-                    current
-                } else {
-                    Some(
-                        native
-                            .processing
-                            .len()
-                            .checked_add(rule_processing.len())
-                            .and_then(|length| length.checked_sub(1))
-                            .ok_or(ProjectionError::Unavailable)?,
-                    )
-                };
-                let observation =
-                    build_observation(&self.catalog, references, &native, rule_processing)?;
-                QuestionProjection::project(
-                    id,
-                    *question,
-                    observation,
-                    current,
-                    &self.catalog,
-                    references,
-                )
-                .map(Some)
-            }
+            Input::Question(question) => self
+                .project_battle_question(perspective, id, *question, references)
+                .map(Some),
             Input::Waiting(_) | Input::Finished { .. } => Ok(None),
             Input::EngineFault => Err(ProjectionError::Unavailable),
         }
+    }
+
+    fn project_battle_question(
+        &self,
+        perspective: Viewer,
+        id: &QuestionId,
+        question: super::Question,
+        references: &BattleReferences,
+    ) -> result::Result<QuestionProjection, ProjectionError> {
+        let native = self
+            .observe(perspective)
+            .map_err(|_error| ProjectionError::Unavailable)?;
+        let rule_processing = self.battle_rule_processing(&native)?;
+        let current = if rule_processing.is_empty() {
+            let mut active = native
+                .processing
+                .iter()
+                .enumerate()
+                .filter(|(_, context)| context.actor == Some(question.actor));
+            let current = active.next().map(|(index, _)| index);
+            if active.next().is_some() {
+                return Err(ProjectionError::Unavailable);
+            }
+            current
+        } else {
+            Some(
+                native
+                    .processing
+                    .len()
+                    .checked_add(rule_processing.len())
+                    .and_then(|length| length.checked_sub(1))
+                    .ok_or(ProjectionError::Unavailable)?,
+            )
+        };
+        let observation = build_observation(&self.catalog, references, &native, rule_processing)?;
+        QuestionProjection::project(
+            id,
+            question,
+            observation,
+            current,
+            &self.catalog,
+            references,
+        )
     }
 
     fn battle_rule_processing(
@@ -506,8 +515,12 @@ impl Game {
             Viewer::P1 => Seat::P1,
             Viewer::P2 => Seat::P2,
         };
-        let controller = (occurrences || matches!(&question.shape, QuestionShape::Evolution(_)))
-            .then_some(actor_seat);
+        let controller = (occurrences
+            || matches!(
+                &question.shape,
+                QuestionShape::Evolution(_) | QuestionShape::ActionWindow(_)
+            ))
+        .then_some(actor_seat);
         let procedure = matches!(
             &question.shape,
             QuestionShape::Opening(OpeningQuestion::Mulligan(_))

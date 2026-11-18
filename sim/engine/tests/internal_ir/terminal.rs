@@ -1,9 +1,21 @@
 use super::*;
+use sve_battle_contract::{BattleInput, QuestionId, Seat, event::ResultReason};
+use sve_engine::game::player::Viewer;
 
 #[test]
 fn effect_victory_preserves_the_prefix_without_retaining_a_resumable_execution() {
     for seat in [1, 2] {
-        let mut game = game(seat, 4);
+        let deck = (0..4)
+            .map(|index| json!({"id":format!("d{index}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>();
+        let mut game = Game::new(
+            base_catalog().unwrap(),
+            &setup(seat, json!(deck)),
+            &Value::Null,
+            &Value::Null,
+            "terminal",
+        )
+        .unwrap();
         let win = instruction(
             2,
             Action::GameResult {
@@ -52,6 +64,20 @@ fn effect_victory_preserves_the_prefix_without_retaining_a_resumable_execution()
         assert_eq!(
             game.projection(View::Referee).unwrap()["game"]["winner"],
             if seat == 1 { "P1" } else { "P2" }
+        );
+        let input = game
+            .battle_input(
+                Viewer::P1,
+                &QuestionId::new("effect-end".into()),
+                &base_references().unwrap(),
+            )
+            .unwrap();
+        assert_eq!(
+            input.input(),
+            &BattleInput::Finished {
+                winner: Some(if seat == 1 { Seat::P1 } else { Seat::P2 }),
+                reason: ResultReason::Effect,
+            }
         );
         let before = exact_authority(&game);
         game.execute_internal_play(&later).unwrap_err();
@@ -130,7 +156,18 @@ fn surrender_during_prepared_body_keeps_draw_prefix_and_invalidates_every_handle
         game.concede_internal(PlayerId { seat }).unwrap_err();
         assert_eq!(ended, exact_authority(&game));
     }
-    let mut game = game(1, 1);
+}
+
+#[test]
+fn simultaneous_defeat_finishes_as_a_draw_and_invalidates_prepared_handles() {
+    let mut game = Game::new(
+        base_catalog().unwrap(),
+        &setup(1, json!([{"id":"d0","card":"unit-follower"}])),
+        &Value::Null,
+        &Value::Null,
+        "terminal",
+    )
+    .unwrap();
     let later = checked(vec![up_to(5, 1)]);
     let handle = game
         .prepare_internal_play(&later, &source("synthetic"), context(1))
@@ -152,6 +189,20 @@ fn surrender_during_prepared_body_keeps_draw_prefix_and_invalidates_every_handle
     assert_eq!(view["game"]["ended"], true);
     assert_eq!(view["game"]["by"], "1.2.2");
     assert!(view["game"]["winner"].is_null());
+    let input = game
+        .battle_input(
+            Viewer::P1,
+            &QuestionId::new("draw-end".into()),
+            &base_references().unwrap(),
+        )
+        .unwrap();
+    assert_eq!(
+        input.input(),
+        &BattleInput::Finished {
+            winner: None,
+            reason: ResultReason::SimultaneousDefeat,
+        }
+    );
     let ended = exact_authority(&game);
     game.execute_internal_play(&handle).unwrap_err();
     assert_eq!(ended, exact_authority(&game));

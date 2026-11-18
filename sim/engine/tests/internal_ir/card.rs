@@ -3,6 +3,8 @@ use super::*;
 mod battle_effects;
 #[path = "card/battle_evolution.rs"]
 mod battle_evolution;
+#[path = "card/battle_input.rs"]
+mod battle_input;
 #[path = "card/battle_objects.rs"]
 mod battle_objects;
 #[path = "card/battle_observation.rs"]

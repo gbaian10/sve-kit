@@ -116,10 +116,10 @@ fn wire_board_combines_one_view_without_opponent_secrets_or_placeholder_handles(
             2,
             "only the two field cards are identifiable"
         );
+        assert_eq!(projected.processing.len(), 1);
         assert_eq!(
-            projected.processing,
-            [],
-            "the main action window has no active resolution"
+            projected.processing[0].stage,
+            Some(wire::ProcessingStage::Declare)
         );
         let opponent = usize::from(viewer == Viewer::P1);
         assert_eq!(
@@ -314,8 +314,8 @@ fn wire_board_uses_real_quick_and_frozen_card_damage_after_the_arrow_is_gone() {
                 let after = read(&game, viewer);
                 assert_eq!(after.attack, None, "a completed attack leaves no arrow");
                 assert_eq!(
-                    after.processing,
-                    [],
+                    after.processing.last().unwrap().stage,
+                    Some(wire::ProcessingStage::Declare),
                     "the game has returned to its main window"
                 );
                 assert_card_damage(&after, actor, leader)
@@ -722,6 +722,16 @@ fn wire_board_refuses_malformed_resources_and_exact_integer_overflow() {
                     result.unwrap_err(),
                     ProjectionError::Range,
                     "a known integer cannot be saturated"
+                );
+                assert_eq!(
+                    game.battle_input(
+                        viewer,
+                        &sve_battle_contract::QuestionId::new("overflow".into()),
+                        &fixture().references
+                    )
+                    .unwrap_err(),
+                    ProjectionError::Range,
+                    "a projection failure must not become a native engine fault"
                 );
             }
         }

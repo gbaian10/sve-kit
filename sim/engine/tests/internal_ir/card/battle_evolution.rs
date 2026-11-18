@@ -336,8 +336,9 @@ fn wire_board_keeps_normal_evolution_form_and_payment_in_declaration_without_pri
                     .battle_observation(viewer, &references)
                     .unwrap()
                     .processing
-                    .is_empty(),
-                "committing normal evolution retires its declaration context"
+                    .iter()
+                    .all(|context| context.subject.is_none()),
+                "committing normal evolution retires its declaration subject"
             );
         }
     }
