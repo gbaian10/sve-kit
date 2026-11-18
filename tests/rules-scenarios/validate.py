@@ -27,7 +27,7 @@ SCHEMAS = {"sve-exam/2.1"}
 KINDS = {"card", "rule", "flow"}
 STATUSES = {"draft", "verified", "disputed"}
 # opus writes the holdout positions kept outside the repo.
-AUTHORS = {"fable", "astra", "opus"}
+AUTHORS = {"fable", "astra", "opus", "sol"}
 PLAYERS = {"P1", "P2"}
 CONSTRUCTIONS = {"class", "title", "crossover"}
 PHASES = {"start", "main", "end"}

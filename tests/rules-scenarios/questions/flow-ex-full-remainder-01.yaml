@@ -1,0 +1,209 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.28.0
+  cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
+id: flow-ex-full-remainder-01
+kind: flow
+must_pass: false
+mechanisms:
+  - EX 上限
+  - 看牌
+  - 牌庫順序
+cards:
+  - BP01-171
+  - BP01-173
+  - BP18-058
+  - BP18-059
+  - BP18-060
+why: >-
+  本專案解讀（inferred，見 docs/dsl/runtime-semantics.md §3.2）以成功移入 EX 的卡界定「残り」。選中但沒移動的卡仍在剩餘集合，因此三張都放底。待官方回覆（svestats）。
+discriminates: >-
+  若按選擇結果扣除而非實際移動，pick 會留在原牌庫頂，且放底排序只有兩張。
+refs:
+  rules:
+    - 4.8.3.2
+    - 5.11.1
+  qa:
+    - Q423
+    - Q1733
+evidence:
+  - ref: BP18-059
+    derivation:
+      - 容量使所選卡沒有移動，實際移入 EX 的集合為空
+      - 因此把剛看的三張都放到牌庫底
+status: disputed
+author: sol
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      依 runtime-semantics §3.2：「残り」＝看過的牌減成功移入 EX 的牌；EX 已滿所以 pick 未移動，三張依 order 放底 → [tail, d2,
+      pick, d3]（9.8 方向）
+scenarios:
+  - name: エル選中的武闘竜人因 EX 已滿未移動，與另外兩張一起放底
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ドラゴン
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - id: pick
+                card: BP18-060
+              - id: d2
+                card: BP01-171
+              - id: d3
+                card: BP01-171
+              - id: tail
+                card: BP18-058
+            field:
+              - id: el
+                card: BP18-058
+            evolve_deck:
+              - id: el-evo
+                card: BP18-059
+            ex:
+              - id: x1
+                card: BP01-173
+              - id: x2
+                card: BP01-173
+              - id: x3
+                card: BP01-173
+              - id: x4
+                card: BP01-171
+              - id: x5
+                card: BP01-171
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 7
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: el
+        evolve_card: el-evo
+        pay:
+          pp: 1
+          ep: 0
+          sep: 0
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: el
+            line: 1
+            card: BP18-059
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        choice: execute
+        select:
+          - pick
+      - n: 4
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 2
+        select: []
+      - n: 5
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 3
+        order:
+          - d2
+          - pick
+          - d3
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select: []
+      - at: after-decision-4
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              order:
+                - pick
+                - d2
+                - d3
+            - do: resolve-choice
+              order:
+                - pick
+                - d3
+                - d2
+            - do: resolve-choice
+              order:
+                - d2
+                - pick
+                - d3
+            - do: resolve-choice
+              order:
+                - d2
+                - d3
+                - pick
+            - do: resolve-choice
+              order:
+                - d3
+                - pick
+                - d2
+            - do: resolve-choice
+              order:
+                - d3
+                - d2
+                - pick
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - x1
+            - x2
+            - x3
+            - x4
+            - x5
+          P1.deck:
+            - tail
+            - d2
+            - pick
+            - d3

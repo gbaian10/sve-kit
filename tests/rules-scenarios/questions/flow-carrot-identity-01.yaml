@@ -1,0 +1,192 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.28.0
+  cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
+id: flow-carrot-identity-01
+kind: flow
+must_pass: false
+mechanisms:
+  - 規則名稱
+  - 食事
+  - 表向き進化牌庫
+cards:
+  - BP01-173
+  - BP01-176
+  - CP01-001
+  - CP01-085
+  - ECP01-037
+  - ECP01-038
+  - ECP01-058
+why: >-
+  採專案解讀（generalized），以 Q305 的上方名稱類推 ECP01-058～062 對戰中都作『にんじん』，可用於食事、計入ヒシミラクル的九張門檻。構築時同名的印刷合計最多十張；本局面驗證對戰中的食事和張數。待官方回覆（svestats）。
+discriminates: >-
+  用印刷副標題比對會拒絕食事，或漏算表向回到進化牌庫的第九張。
+refs:
+  rules:
+    - 2.14.1
+    - 6.1.1.4
+    - 14.2.1.1
+    - 14.2.1.3
+  qa:
+    - Q305
+    - Q1131
+    - Q407
+evidence:
+  - ref: Q305
+    derivation:
+      - 在卡面上方使用的名稱是『にんじん』，同名的卡滿足食事及張數條件
+status: disputed
+author: sol
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      表向的にんじん不算在エボルヴデッキ內（4.6.3），唯一可食事的是開催大成功！；サイレンススズカ 交戰被破壊，出走卡依 11.8.1 表向回エボルヴデッキ，表向にんじん 9 張
+      → 結束階段送墓 P2 牌庫 2 張
+scenarios:
+  - name: 開催大成功！可食事，出走者離場後表向回牌庫並補足第九張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: title
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: hishi
+                card: ECP01-037
+                state:
+                  evolved: true
+                  evolved_with: evo
+              - id: runner
+                card: CP01-001
+            evolution:
+              - id: evo
+                card: ECP01-038
+            evolve_deck:
+              - id: carrot1
+                card: CP01-085
+                face_up: true
+              - id: carrot2
+                card: CP01-085
+                face_up: true
+              - id: carrot3
+                card: CP01-085
+                face_up: true
+              - id: carrot4
+                card: CP01-085
+                face_up: true
+              - id: carrot5
+                card: CP01-085
+                face_up: true
+              - id: carrot6
+                card: CP01-085
+                face_up: true
+              - id: carrot7
+                card: CP01-085
+                face_up: true
+              - id: carrot8
+                card: CP01-085
+                face_up: true
+              - id: success
+                card: ECP01-058
+          title: ウマ娘 プリティーダービー
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - id: d1
+                card: BP01-173
+              - id: d2
+                card: BP01-173
+            field:
+              - id: guard
+                card: BP01-176
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: runner
+          line: 2
+        costs:
+          "1":
+            - success
+        pay:
+          pp: 1
+          ep: 0
+      - n: 2
+        by: P1
+        at: main
+        do: attack
+        attacker: runner
+        target: guard
+      - n: 3
+        by: P2
+        at: quick
+        do: pass
+      - n: 4
+        by: P1
+        at: main
+        do: end-phase
+      - n: 5
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: hishi
+            line: 1
+            card: ECP01-038
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.race:
+            - success
+          P1.field.runner:
+            links:
+              出走:
+                - success
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery:
+            - runner
+          P1.race: []
+          P1.evolve_deck.success:
+            face_up: true
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.deck: []
+          P2.cemetery:
+            - d1
+            - d2

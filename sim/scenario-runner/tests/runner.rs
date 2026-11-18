@@ -33,7 +33,7 @@ fn oracle_passes_every_scenario() {
         .filter(|r| !matches!(r.verdict, Verdict::Pass))
         .map(|r| format!("{} / {}: {:?}", r.question, r.scenario, r.verdict))
         .collect();
-    assert_eq!(reports.len(), 708, "{:?}", summary(&reports));
+    assert_eq!(reports.len(), 722, "{:?}", summary(&reports));
     assert!(
         failed.is_empty(),
         "{} failed, first: {:#?}",

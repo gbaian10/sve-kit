@@ -7,7 +7,7 @@
 #   interface: serial typed questions or player events differ from the exam's shape
 # `reason` pins the exact cause: the engine reason, or every mismatched checkpoint, view and
 # comparison of a failure. A listed scenario that fails for another reason fails the gate.
-expected_scenarios: 708
+expected_scenarios: 722
 known:
   - question: "card-BP01-001"
     scenario: "變身 0"
@@ -149,6 +149,11 @@ known:
     status: fail
     error: "typed-gap: after-decision-1 assert P1.hand (#2008)"
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.hand"
+  - question: "card-BP08-085"
+    scenario: "悪意の憑依結算時墓場只有三張，只能不消滅"
+    status: unsupported
+    error: "typed-gap: sole decline input skipped"
+    reason: "typed runner: resolve-choice at ActionWindow"
   - question: "card-BP08-089"
     scenario: "A 2 個護符：進化付 1 PP＋1 EP → 變成護符 → 進化時消滅 b1 → 不能攻擊 → テミス 不破壞它 → ダークオファリング 破壞 → ラストワード 3 傷害"
     status: unsupported
@@ -579,6 +584,11 @@ known:
     status: unsupported
     error: "legacy-state (#2008)"
     reason: "no authored program: BP20-P61"
+  - question: "card-BP20-P65"
+    scenario: "シャム＝ナクア的紋章在 EX 時仍不能選零個模式"
+    status: adapter-error
+    error: "interface: cannot-play not mapped"
+    reason: "play answer rejected"
   - question: "card-BP20-P70"
     scenario: "手牌 2"
     status: fail
@@ -639,6 +649,11 @@ known:
     status: unsupported
     error: "unadmitted CP04-104 (#2090)"
     reason: "internal D1 does not support unloaded whole card CP04-104/0, query complete card names: current ability definitions unavailable"
+  - question: "card-CP04-114"
+    scenario: "アメス先免原費用發動イオ的 UB，當回合不能再通常起動"
+    status: ineligible
+    error: "待官方回覆（svestats）"
+    reason: 'status is "disputed"'
   - question: "card-CP04-P18"
     scenario: "A 搜到ペコリーヌ放 EX → 本回合 0 費打出（ファンファーレ付不出取消）→ UB +2 → エンジェルバレッジ 1 → 3"
     status: adapter-error
@@ -689,6 +704,11 @@ known:
     status: unsupported
     error: "typed-gap: current holder carries unadmitted resource links (#2008)"
     reason: "internal D1 does not support current holder carries unadmitted resource links"
+  - question: "card-ECP01-037"
+    scenario: "ヒシミラクル送墓最後一張牌後，空牌庫抽牌敗北"
+    status: ineligible
+    error: "待官方回覆（svestats）"
+    reason: 'status is "disputed"'
   - question: "card-ECP01-053"
     scenario: "B 主要階段來臨 → 不付費 → 維持アクト、PP 不變"
     status: fail
@@ -779,6 +799,11 @@ known:
     status: unsupported
     error: "unadmitted BP15-SL13 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+  - question: "flow-carrot-identity-01"
+    scenario: "開催大成功！可食事，出走者離場後表向回牌庫並補足第九張"
+    status: ineligible
+    error: "待官方回覆（svestats）"
+    reason: 'status is "disputed"'
   - question: "flow-equipment-capacity-r3-01"
     scenario: "PP=2"
     status: unsupported
@@ -794,6 +819,11 @@ known:
     status: unsupported
     error: "typed-gap: ordinary single evolution departure association (#2008)"
     reason: "internal D1 does not support ordinary single evolution departure association"
+  - question: "flow-ex-full-remainder-01"
+    scenario: "エル選中的武闘竜人因 EX 已滿未移動，與另外兩張一起放底"
+    status: ineligible
+    error: "待官方回覆（svestats）"
+    reason: 'status is "disputed"'
   - question: "flow-main-stand-r3-01"
     scenario: "先處理第一隻並選 execute"
     status: fail
@@ -1083,6 +1113,11 @@ known:
     scenario: "set→buff"
     status: unsupported
     error: "legacy-state (#2008)"
+    reason: "no authored program: BP16-049"
+  - question: "rule-10.9.1.6-02"
+    scenario: "同時留下雙方的數值效果，回合玩家的 +2 先於對手設為 1"
+    status: unsupported
+    error: "legacy-state: simultaneous continuous effects"
     reason: "no authored program: BP16-049"
   - question: "rule-11.2.1-01"
     scenario: "生命 1"

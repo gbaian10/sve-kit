@@ -22,6 +22,7 @@ discriminates: >-
   允許 options: [] 的引擎在 B 會 resolved。把{コスト1}當成打出費用（必付）的引擎在 A 會扣 1 PP 或 cannot-play。 沒把打出的這張算進本回合打出張數的引擎，A 的 cards_played 會是 0。C 中允許選【1】的引擎會 resolved。 將付款延到結算的引擎會在
   A／E 額外暫停；把各選項費用分別檢查而未合計，會在 F 錯誤打出。
 refs:
+  rulings: [R-0006]
   rules:
     - 5.18.2.1
     - 5.18.2.2

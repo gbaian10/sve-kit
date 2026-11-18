@@ -1,0 +1,107 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.28.0
+  cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
+id: card-BP01-129
+kind: card
+must_pass: true
+mechanisms:
+  - 交戰
+  - 互相傷害
+  - 體力取代攻擊力
+cards:
+  - BP01-129
+  - BP01-137
+  - BP01-176
+why: >-
+  R-0021（official）由 Q233 確認防守方也適用レリア。クレリックランサー 以交戰傷害處理前的 5 體力再加 4 反擊，同時承受對手的 4 傷害。
+discriminates: >-
+  只套用於攻擊方、或先扣防守方體力再計算反擊，都只會打 5，讓對手的 6 體力從者殘血。
+refs:
+  rules:
+    - 8.4.9.1
+    - 11.3.1
+  qa:
+    - Q233
+  rulings:
+    - R-0021
+evidence:
+  - ref: Q233
+    derivation:
+      - 防守方同樣以自身體力加 4 對攻擊方造成傷害
+status: verified
+author: sol
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      攻擊方 4 傷害 → クレリックランサー 5-4=1；防守方依レリア與 Q233 以交戰前體力 5、在對手回合 +4 → 9，天剣の乙女 6 體力被破壊
+scenarios:
+  - name: レリア在場，防守方クレリックランサー以交戰前體力加 4 反擊
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: attacker
+                card: BP01-176
+        P2:
+          construction: class
+          leader:
+            class: ビショップ
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: lelia
+                card: BP01-129
+              - id: guard
+                card: BP01-137
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: attacker
+        target: guard
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: []
+          P1.cemetery:
+            - attacker
+          P2.field:
+            - lelia
+            - guard
+          P2.field.guard:
+            hp: 1

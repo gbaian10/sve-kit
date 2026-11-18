@@ -1,0 +1,130 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.28.0
+  cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
+id: card-BP11-113
+kind: card
+must_pass: true
+mechanisms:
+  - 數值變更事件
+  - 同一指示
+  - 待機重數
+cards:
+  - BP01-049
+  - BP01-173
+  - BP11-113
+why: >-
+  R-0012（inferred）依同一指示對同一從者只形成一個數值變更事實。武装強化同時給レヴィールの無法者 +1／+1，滿足一次「攻撃力か体力を+したとき」。
+discriminates: >-
+  把攻擊力與體力拆成兩次誘發會多出一個待機；只結算一次後，不能直接進入攻擊。
+refs:
+  rules:
+    - 10.7.2.1
+  qa:
+    - Q2075
+  rulings:
+    - R-0012
+evidence:
+  - ref: R-0012
+    derivation:
+      - 兩個變更來自同一個指示，能力只匹配一次
+status: verified
+author: sol
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      武装強化同一指示 +1/+1，只待機一次（awaiting 單一 choose-pending）；得【疾走】後本回合進場也能攻擊領袖，2 傷害
+scenarios:
+  - name: 一次武裝強化同時加攻與體，只誘發一次疾走
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - id: draw
+                card: BP01-173
+              - filler: 19
+            hand:
+              - id: buff
+                card: BP01-049
+            field:
+              - id: outlaw
+                card: BP11-113
+                state:
+                  entered_this_turn: true
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 7
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: buff
+        targets:
+          "1":
+            - outlaw
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: outlaw
+            line: 2
+      - n: 3
+        by: P1
+        at: main
+        do: attack
+        attacker: outlaw
+        target: P2.leader
+      - n: 4
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.outlaw:
+            power: 2
+            hp: 2
+        awaiting:
+          by: P1
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: outlaw
+                  line: 2
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 18
