@@ -53,14 +53,17 @@ fn architecture_replay_checks_use_the_typed_entry() {
     );
 
     // Drawing on the full source lines gives P1 different knowledge to carry into each fork.
-    let pending = reports.iter().find(|report| report.id == "R5").unwrap();
-    let Outcome::Fail { reasons } = &pending.outcome else {
-        panic!("unexpected R5 result: {:?}", pending.outcome);
+    let r5 = reports.iter().find(|report| report.id == "R5").unwrap();
+    let Outcome::Fail {
+        reasons: r5_reasons,
+    } = &r5.outcome
+    else {
+        panic!("unexpected R5 result: {:?}", r5.outcome);
     };
-    let expected: Vec<_> = (5..=12)
+    let expected: Vec<_> = (5_u8..=12)
         .map(|node| format!("M' shuffles branch N{node} P1: exports differ"))
         .collect();
-    assert_eq!(reasons, &expected);
+    assert_eq!(r5_reasons, &expected);
 }
 
 #[test]
