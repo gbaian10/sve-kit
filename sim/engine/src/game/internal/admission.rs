@@ -1138,6 +1138,8 @@ fn supported(code: &str) -> bool {
             | "numeric.add"
             | "shape.NumericChange.Set"
             | "numeric.set"
+            | "shape.NumericChange.SetOriginal"
+            | "numeric.set-original"
             | "internal.Stat.Attack"
             | "internal.Stat.Life"
             | "shape.DurationEnd.NoTemporalExpiry"

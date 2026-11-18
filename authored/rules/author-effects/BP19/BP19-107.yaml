@@ -1,0 +1,24 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-107:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [storm]
+      - line: 2
+        auto:
+          "on":
+            phase: { whose: self, which: end }
+          targets:
+            - bind: ally
+              from: { who: self, zone: field, kind: follower }
+              n: 1
+          do:
+            - set_stat: { "on": ally, hp: { original: true } }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

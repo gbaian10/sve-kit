@@ -943,6 +943,11 @@ impl BodyContext<'_> {
                     event: MovementEvent::LeaveField { event },
                 }],
             }),
+            (Some(ast::Objects::Zone(query)), _, OwnerZone::Cemetery)
+                if matches!(query.zone, ast::Zone::Ex) =>
+            {
+                self.zone_objects(query, ZoneKind::Ex, path)
+            }
             (Some(objects), _, _) => self.objects(objects, path),
             (None, _, _) => {
                 self.public_move_objects(public_query.ok_or_else(|| unsupported(path))?, path)

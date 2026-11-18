@@ -117,7 +117,7 @@ variants!(DiscardMode {
     All { eligible: Selector } => ["discard.all"],
     DownTo { count: Nat } => ["discard.down-to"]
 });
-variants!(NumericChange { Add { amount: Expr<Int> } => ["numeric.add"], Set { amount: Expr<Int> } => ["numeric.set"] });
+variants!(NumericChange { Add { amount: Expr<Int> } => ["numeric.add"], Set { amount: Expr<Int> } => ["numeric.set"], SetOriginal {} => ["numeric.set-original"] });
 variants!(DamageRecipient { FromExpression { value: Box<Expr<DamageRecipient>> } => [], Bound { binding: Binding<DamageRecipient> } => [], Object { object: ObjectOperand } => [], Leader { player: PlayerRef } => [] });
 variants!(DamageAmount { Uniform { amount: Expr<Int> } => [], Allocation { binding: Binding<Vec<DamageAllocation>> } => ["damage.allocation"] });
 record!(DamageAllocation {

@@ -14307,13 +14307,23 @@
         "shuffle"
       ]
     },
+    "A.search.placement-zone": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Zone"
+        },
+        {
+          "const": "banish"
+        }
+      ]
+    },
     "A.search.partition-part": {
       "anyOf": [
         {
           "type": "object",
           "properties": {
             "zone": {
-              "$ref": "#/$defs/Zone"
+              "$ref": "#/$defs/A.search.placement-zone"
             },
             "n": {
               "$ref": "#/$defs/A.quantity"
@@ -14329,7 +14339,7 @@
           "type": "object",
           "properties": {
             "zone": {
-              "$ref": "#/$defs/Zone"
+              "$ref": "#/$defs/A.search.placement-zone"
             },
             "upto": {
               "$ref": "#/$defs/A.quantity"
@@ -14402,7 +14412,7 @@
     "A.search.destination": {
       "anyOf": [
         {
-          "$ref": "#/$defs/Zone"
+          "$ref": "#/$defs/A.search.placement-zone"
         },
         {
           "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -16097,6 +16107,18 @@
         }
       ]
     },
+    "A.original-stat": {
+      "type": "object",
+      "properties": {
+        "original": {
+          "const": true
+        }
+      },
+      "required": [
+        "original"
+      ],
+      "additionalProperties": false
+    },
     "A.act.set-stat": {
       "type": "object",
       "properties": {
@@ -16110,10 +16132,24 @@
           "$ref": "#/$defs/A.cond"
         },
         "power": {
-          "$ref": "#/$defs/A.quantity"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.quantity"
+            },
+            {
+              "$ref": "#/$defs/A.original-stat"
+            }
+          ]
         },
         "hp": {
-          "$ref": "#/$defs/A.quantity"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/A.quantity"
+            },
+            {
+              "$ref": "#/$defs/A.original-stat"
+            }
+          ]
         },
         "until": {
           "$ref": "#/$defs/A.until"

@@ -219,6 +219,7 @@ fn discarded_card(
 ) -> Result<DiscardCard, LoweringError> {
     let ast::MovementSubject {
         r#where: None,
+        cost_le: None,
         orig_cost_eq: None,
         orig_cost_le: None,
         orig_cost_ge: None,

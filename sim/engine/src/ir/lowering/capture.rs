@@ -325,6 +325,7 @@ impl BodyContext<'_> {
             | ast::Number::Life { .. }
             | ast::Number::Cost { .. }
             | ast::Number::OriginalCost { .. }
+            | ast::Number::OriginalStat { .. }
             | ast::Number::Literal(_)
             | ast::Number::Alias(_)
             | ast::Number::Aggregate { .. }

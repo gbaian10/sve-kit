@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP01-091:
+    admission: light
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                "on": { who: self, zone: field, name: ドラゴン, token: true }
+                keywords: [rush]
+      - line: 2
+        activate:
+          cost: { act_self: true }
+          targets:
+            - bind: chosen
+              from: { who: all, zone: field, kind: follower }
+              n: 1
+          do:
+            - destroy: chosen
+            - create: { token: ドラゴン, n: 1, to: field, by: { master_of: chosen } }
+    token_sources:
+      - { card: BP01-T11, line: 1, section: 1 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

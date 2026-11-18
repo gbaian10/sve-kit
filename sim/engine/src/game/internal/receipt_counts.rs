@@ -251,8 +251,12 @@ impl ReceiptReads {
     }
 
     fn mask_change(&self, change: &mut NumericChange) -> Result<()> {
-        let (NumericChange::Add { amount } | NumericChange::Set { amount }) = change;
-        self.mask_number(amount, false)
+        match change {
+            NumericChange::Add { amount } | NumericChange::Set { amount } => {
+                self.mask_number(amount, false)
+            }
+            NumericChange::SetOriginal {} => Ok(()),
+        }
     }
 
     fn mask_patch(&self, patch: &mut CharacteristicPatch) -> Result<()> {

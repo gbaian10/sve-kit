@@ -148,6 +148,11 @@ class StatFields(TypedDict):
 type Stat = Annotated[StatFields, AfterValidator(_stats)]
 
 
+@with_config(CONFIG)
+class OriginalStat(TypedDict):
+    original: Literal[True]
+
+
 @with_config(
     ConfigDict(
         extra="forbid",
@@ -845,14 +850,14 @@ type Choose = ChooseExact | ChooseUpTo | ChooseAny
 
 @with_config(CONFIG)
 class SearchPartitionPartFields(TypedDict):
-    zone: Zone
+    zone: Zone | Literal["banish"]
 
     n: Quantity
 
 
 @with_config(CONFIG)
 class SearchPartitionUpToFields(TypedDict):
-    zone: Zone
+    zone: Zone | Literal["banish"]
 
     upto: Quantity
 
@@ -896,7 +901,7 @@ type SearchConditionalDestination = SearchConditionalDestinationFields
 
 
 type SearchDestination = (
-    Zone | ParamRef | SearchPartition | SearchConditionalDestination
+    Zone | Literal["banish"] | ParamRef | SearchPartition | SearchConditionalDestination
 )
 
 
@@ -1873,9 +1878,9 @@ class SetStatActionFields(TypedDict):
 
     precondition: NotRequired[Condition]
 
-    power: NotRequired[Quantity]
+    power: NotRequired[Quantity | OriginalStat]
 
-    hp: NotRequired[Quantity]
+    hp: NotRequired[Quantity | OriginalStat]
 
     until: NotRequired[Until]
 

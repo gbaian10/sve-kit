@@ -78,6 +78,7 @@ fn a_missing_printed_cost_is_never_zero_in_an_event_comparison() {
         for cost in [None, Some(0)] {
             let information = SubjectInformation {
                 original_cost: cost,
+                effective_cost: None,
                 keywords: &[],
                 kind: Some(CardKind::Follower),
                 traits: &[],
@@ -117,6 +118,7 @@ fn not_class_needs_captured_class_information_before_negating() {
     ] {
         let information = SubjectInformation {
             original_cost: None,
+            effective_cost: None,
             keywords: &[],
             kind: Some(CardKind::Follower),
             traits: &[],

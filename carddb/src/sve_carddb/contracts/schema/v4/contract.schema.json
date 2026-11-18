@@ -29402,10 +29402,24 @@
           "$ref": "#/$defs/DSLNodes.A.cond"
         },
         "power": {
-          "$ref": "#/$defs/DSLNodes.A.quantity"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DSLNodes.A.quantity"
+            },
+            {
+              "$ref": "#/$defs/DSLNodes.A.original-stat"
+            }
+          ]
         },
         "hp": {
-          "$ref": "#/$defs/DSLNodes.A.quantity"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DSLNodes.A.quantity"
+            },
+            {
+              "$ref": "#/$defs/DSLNodes.A.original-stat"
+            }
+          ]
         },
         "until": {
           "$ref": "#/$defs/DSLNodes.A.until"
@@ -43476,6 +43490,18 @@
         }
       ]
     },
+    "DSLNodes.A.original-stat": {
+      "type": "object",
+      "properties": {
+        "original": {
+          "const": true
+        }
+      },
+      "required": [
+        "original"
+      ],
+      "additionalProperties": false
+    },
     "DSLNodes.A.owner-ref": {
       "type": "object",
       "properties": {
@@ -43906,7 +43932,7 @@
     "DSLNodes.A.search.destination": {
       "anyOf": [
         {
-          "$ref": "#/$defs/DSLNodes.Zone"
+          "$ref": "#/$defs/DSLNodes.A.search.placement-zone"
         },
         {
           "not": {}
@@ -44017,7 +44043,7 @@
           "type": "object",
           "properties": {
             "zone": {
-              "$ref": "#/$defs/DSLNodes.Zone"
+              "$ref": "#/$defs/DSLNodes.A.search.placement-zone"
             },
             "n": {
               "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -44033,7 +44059,7 @@
           "type": "object",
           "properties": {
             "zone": {
-              "$ref": "#/$defs/DSLNodes.Zone"
+              "$ref": "#/$defs/DSLNodes.A.search.placement-zone"
             },
             "upto": {
               "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -44061,6 +44087,16 @@
       "additionalProperties": false,
       "required": [
         "per_group"
+      ]
+    },
+    "DSLNodes.A.search.placement-zone": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DSLNodes.Zone"
+        },
+        {
+          "const": "banish"
+        }
       ]
     },
     "DSLNodes.A.sel.in-objects": {

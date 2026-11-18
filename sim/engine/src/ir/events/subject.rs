@@ -115,7 +115,10 @@ impl SubjectFields {
         })
     }
 
-    fn original_cost(self) -> Option<Expr<Int>> {
+    fn cost(self, view: CharacteristicView) -> Option<Expr<Int>> {
+        if view == CharacteristicView::Effective && !matches!(self, Self::Entry(_)) {
+            return None;
+        }
         let (event, policy) = match self {
             // A departure keeps the printed cost it had on the field, wherever it arrives.
             Self::Leave(event) | Self::Cemetery(event) | Self::Hand(event) => (
@@ -148,7 +151,7 @@ impl SubjectFields {
                     event,
                     policy,
                 },
-                view: CharacteristicView::Original,
+                view,
             },
         })))
     }
@@ -173,8 +176,8 @@ impl SubjectFields {
         }))
     }
 
-    fn known_original_cost(self) -> Option<Expr<Bool>> {
-        let Expr::Compute(operation) = self.original_cost()? else {
+    fn known_cost(self, view: CharacteristicView) -> Option<Expr<Bool>> {
+        let Expr::Compute(operation) = self.cost(view)? else {
             return None;
         };
         let IntOperation::InformationOrZero { information } = *operation else {
@@ -613,6 +616,7 @@ impl SubjectFields {
 
 pub(crate) struct SubjectInformation<'subject> {
     pub(crate) original_cost: Option<i64>,
+    pub(crate) effective_cost: Option<i64>,
     pub(crate) keywords: &'subject [KeywordId],
     pub(crate) kind: Option<CardKind>,
     pub(crate) traits: &'subject [TraitId],
@@ -627,6 +631,7 @@ impl<'subject> SubjectInformation<'subject> {
     ) -> Self {
         Self {
             original_cost,
+            effective_cost: None,
             keywords: &[],
             kind: Some(characters.kind),
             traits: &characters.traits,
@@ -639,6 +644,7 @@ impl<'subject> SubjectInformation<'subject> {
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct SubjectFilter {
     pub(crate) original_cost: Option<(Comparison, i64)>,
+    pub(crate) effective_cost: Option<(Comparison, i64)>,
     pub(crate) keyword: Option<KeywordId>,
     pub(crate) own: Option<bool>,
     pub(crate) itself: Option<bool>,
@@ -808,12 +814,18 @@ impl SubjectFilter {
         fields: SubjectFields,
         predicates: &mut Vec<Expr<Bool>>,
     ) -> bool {
-        if let Some((comparison, cost)) = self.original_cost {
-            let Some(left) = fields.original_cost() else {
+        for (view, bound) in [
+            (CharacteristicView::Original, self.original_cost),
+            (CharacteristicView::Effective, self.effective_cost),
+        ] {
+            let Some((comparison, cost)) = bound else {
+                continue;
+            };
+            let Some(left) = fields.cost(view) else {
                 return false;
             };
             if comparison != Comparison::Equal || cost == 0 {
-                let Some(known) = fields.known_original_cost() else {
+                let Some(known) = fields.known_cost(view) else {
                     return false;
                 };
                 predicates.push(known);
@@ -895,7 +907,9 @@ impl SubjectFilter {
         };
         if (matches!(fields, SubjectFields::Entry(_) | SubjectFields::Ex(_))
             && *part == fields.known_class())
-            || fields.known_original_cost().as_ref() == Some(part)
+            || [CharacteristicView::Original, CharacteristicView::Effective]
+                .into_iter()
+                .any(|view| fields.known_cost(view).as_ref() == Some(part))
         {
             return Some(());
         }
@@ -941,11 +955,16 @@ impl SubjectFilter {
                     comparison,
                     Comparison::Equal | Comparison::LessEqual | Comparison::GreaterEqual
                 )
-                || fields.original_cost().as_ref() != Some(left)
             {
                 return None;
             }
-            self.original_cost = Some((*comparison, *cost));
+            if fields.cost(CharacteristicView::Original).as_ref() == Some(left) {
+                self.original_cost = Some((*comparison, *cost));
+            } else if fields.cost(CharacteristicView::Effective).as_ref() == Some(left) {
+                self.effective_cost = Some((*comparison, *cost));
+            } else {
+                return None;
+            }
         } else if let Predicate::KindEquals {
             left,
             right: Expr::Literal(kind),

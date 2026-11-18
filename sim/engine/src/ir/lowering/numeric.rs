@@ -452,6 +452,13 @@ impl BodyContext<'_> {
             (Stat::Life, &modification.hp),
         ] {
             if let Some(value) = value {
+                if set && matches!(value, ast::Number::OriginalStat { .. }) {
+                    patches.push(CharacteristicPatch::Numeric {
+                        stat,
+                        change: NumericChange::SetOriginal {},
+                    });
+                    continue;
+                }
                 let mut amount = self.number(value, path, &mut BTreeSet::new())?;
                 if let Some(replacements) = &modification.instead {
                     let [replacement] = replacements.as_slice() else {

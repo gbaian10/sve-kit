@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP04-063:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            enter_field:
+              who: self
+              sel: { other: true, class: ドラゴン, kind: follower, cost_le: 3 }
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: 2 }
+            - damage: { to: { leader_of: enemy }, n: 1 }
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond: { awakened: true }
+                then:
+                  - buff: { "on": this, power: 1, hp: 1 }
+                  - grant: { "on": this, keywords: [intimidate] }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

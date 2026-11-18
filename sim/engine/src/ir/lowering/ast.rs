@@ -653,7 +653,7 @@ pub(super) struct Create {
     pub n: Option<TokenCount>,
     pub result: Option<String>,
     pub bind: Option<String>,
-    pub by: Option<String>,
+    pub by: Option<Participant>,
 }
 
 #[derive(Deserialize)]
@@ -1630,6 +1630,7 @@ pub(super) enum SearchDestination {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum SearchZone {
+    Banish,
     Hand,
     Cemetery,
     Ex,
@@ -2135,6 +2136,9 @@ pub(super) enum CapacityZone {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum Number {
+    OriginalStat {
+        original: True,
+    },
     ZoneFree {
         zone_free: CapacityQuery,
     },
@@ -3450,7 +3454,7 @@ pub(super) struct PlayedSubscription {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PlayedSubject {
-    Single(MovementSubject),
+    Single(Box<MovementSubject>),
     Union { any_of: Box<[MovementSubject; 2]> },
 }
 impl Auto {
@@ -3514,6 +3518,7 @@ pub(super) struct ExSubscription {
 #[serde(deny_unknown_fields)]
 pub(super) struct MovementSubject {
     pub r#where: Option<Box<MovementCondition>>,
+    pub cost_le: Option<u64>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_le: Option<u64>,
     pub orig_cost_ge: Option<u64>,
@@ -4517,7 +4522,7 @@ pub(super) enum DelayedOn {
         moved: DelayedMove,
     },
     EnterField {
-        enter_field: DelayedEntry,
+        enter_field: Box<DelayedEntry>,
     },
     /// 「このターン、自分のリーダーの体力が減少したとき」 after installation.
     LifeChanged {

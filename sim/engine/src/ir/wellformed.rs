@@ -971,6 +971,7 @@ impl Checker {
             Action::Life { player, change } => {
                 self.player(player)?;
                 match change {
+                    super::NumericChange::SetOriginal {} => self.reject(),
                     super::NumericChange::Add { amount } | super::NumericChange::Set { amount } => {
                         self.integer(amount)
                     }
