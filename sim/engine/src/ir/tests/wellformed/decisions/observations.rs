@@ -18,6 +18,7 @@ fn look_into(id: u64) -> Located<Node> {
             },
             count: Expr::Literal(Nat(3)),
             mode: StepwiseMode::Exact,
+            purpose: LookPurpose::Private,
         },
         id,
         "synthetic",

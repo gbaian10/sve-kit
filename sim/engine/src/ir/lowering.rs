@@ -89,10 +89,11 @@ use super::{
     Ability, AbilityId, AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action,
     Arithmetic, BatchPolicy, Binding, Bool, CardProgram, Cardinality, DamageAmount, DamageFlags,
     EventPattern, EventSnapshotPolicy, Expr, FaceId, Instruction, InstructionContext,
-    InstructionId, Int, IntOperation, KeywordId, Located, Nat, NatRead, Node, ObjectFrozen,
-    ObjectOperand, ObjectView, PaymentReference, PlayerRef, PlayerRelation, PlayerSet, Predicate,
-    Program, ReceiptId, RecipientSet, ScopeId, SelectionView, Selector, SourceSpan, StepwiseMode,
-    TextQuantifier, TriggerCondition, TriggerSpec, WellFormedCardProgram, ZoneKind,
+    InstructionId, Int, IntOperation, KeywordId, Located, LookPurpose, Nat, NatRead, Node,
+    ObjectFrozen, ObjectOperand, ObjectView, PaymentReference, PlayerRef, PlayerRelation,
+    PlayerSet, Predicate, Program, ReceiptId, RecipientSet, ScopeId, SelectionView, Selector,
+    SourceSpan, StepwiseMode, TextQuantifier, TriggerCondition, TriggerSpec, WellFormedCardProgram,
+    ZoneKind,
 };
 pub use current::{
     CardKeywordSourceUse, CurrentCardProgram, CurrentKeywordEvidence, CurrentSourceCheck,
@@ -2347,6 +2348,7 @@ impl<'definitions> BodyContext<'definitions> {
                     },
                     count: Expr::Literal(Nat(value.top.n)),
                     mode: StepwiseMode::Exact,
+                    purpose: LookPurpose::Private,
                 })
             }
             ast::Step::Move(value) => self.observed_move(value, path),

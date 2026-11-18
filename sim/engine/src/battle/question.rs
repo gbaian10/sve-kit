@@ -91,6 +91,7 @@ impl QuestionProjection {
         native: player::Question,
         observation: BattleObservation,
         current: Option<usize>,
+        public_domain: bool,
         catalog: &Catalog,
         references: &BattleReferences,
     ) -> Result<Self> {
@@ -168,6 +169,7 @@ impl QuestionProjection {
                 main_actions::project(&actions, context)?
             }
         };
+        let auto_answer = auto_answer(usage, &shape, public_domain);
         let question = wire::Question {
             id: id.clone(),
             actor: seat(native.actor),
@@ -175,7 +177,7 @@ impl QuestionProjection {
             usage,
             processing,
             shape,
-            auto_answer: wire::AutoAnswer::Unknown,
+            auto_answer,
             assistance: wire::NoAssistance,
             // Without a verified RuleRef closure, [] would falsely assert known-empty.
             rules: None,
@@ -221,6 +223,34 @@ impl QuestionProjection {
 
     pub(super) fn into_parts(self) -> (BattleObservation, wire::Question, BoundAnswer) {
         (self.observation, self.question, self.answer)
+    }
+}
+
+fn auto_answer(
+    usage: wire::QuestionUse,
+    shape: &wire::QuestionShape,
+    public_domain: bool,
+) -> wire::AutoAnswer {
+    let answer = match (usage, shape) {
+        (wire::QuestionUse::FirstPlayer, _) => return wire::AutoAnswer::NotUnique,
+        (_, wire::QuestionShape::Quick { options, .. }) if !options.is_empty() => {
+            return wire::AutoAnswer::NotUnique;
+        }
+        (_, wire::QuestionShape::Quick { .. }) if public_domain => Answer::Quick { option: None },
+        (wire::QuestionUse::DeclareNumber, wire::QuestionShape::Integer { bounds, .. })
+            if public_domain =>
+        {
+            // The declaration producer supplies literal bounds.
+            if bounds.max != Some(bounds.min) {
+                return wire::AutoAnswer::NotUnique;
+            }
+            Answer::Integer { value: bounds.min }
+        }
+        _ => return wire::AutoAnswer::Unknown,
+    };
+    wire::AutoAnswer::Unique {
+        answer,
+        public: true,
     }
 }
 

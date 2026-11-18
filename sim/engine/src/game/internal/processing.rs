@@ -1,11 +1,11 @@
 //! Procedure boundaries stay in the runtime queue, separate from authored IR.
 
 mod visibility;
-pub(in crate::game) use visibility::observed_processing;
 pub(super) use visibility::{
     ProcessingDisclosure, capture_declarations, disclose_declared_source, disclose_played_source,
     disclose_source,
 };
+pub(in crate::game) use visibility::{observed_processing, public_number_declaration};
 mod payment_observation;
 mod procedures;
 

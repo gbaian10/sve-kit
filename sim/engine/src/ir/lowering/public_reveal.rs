@@ -1,9 +1,9 @@
 use super::{Action, BodyContext, LoweringError, ast, unsupported};
 use crate::ir::{
     AbilitySource, CardKind, Cardinality, Expr, Instruction, InstructionContext, InstructionId,
-    Located, MemberProjection, Nat, Node, ObjectReceipt, OwnerZone, PlayerRef, PlayerRelation,
-    PlayerSet, RandomnessPolicy, ReceiptId, ReceiptLocation, ReceiptReference, Selector,
-    SourceSpan, StepwiseMode, TextQuantifier, Visibility, ZoneKind, ZoneRef,
+    Located, LookPurpose, MemberProjection, Nat, Node, ObjectReceipt, OwnerZone, PlayerRef,
+    PlayerRelation, PlayerSet, RandomnessPolicy, ReceiptId, ReceiptLocation, ReceiptReference,
+    Selector, SourceSpan, StepwiseMode, TextQuantifier, Visibility, ZoneKind, ZoneRef,
 };
 
 #[expect(
@@ -161,6 +161,7 @@ impl BodyContext<'_> {
                     },
                     count: Expr::Literal(Nat(top.n)),
                     mode: StepwiseMode::Exact,
+                    purpose: LookPurpose::PrepareReveal,
                 },
             ),
             (reveal, Action::Reveal { objects }),

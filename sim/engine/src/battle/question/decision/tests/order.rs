@@ -29,6 +29,15 @@ fn make(actor: Viewer, edge: &str, deck: &[&str], other_secret: &str, count: u32
         {"move":{"ref":selected,"to":"deck","position":edge,"order":"chooser"}},
         {"life":{"who":"self","delta":1_u32}}
     ]}));
+    activate(actor, deck, other_secret, &program)
+}
+
+fn activate(
+    actor: Viewer,
+    deck: &[&str],
+    other_secret: &str,
+    program: &WellFormedCardProgram,
+) -> Game {
     let (own, other) = seats(actor);
     let mut initial = board_fixtures::setup(actor.player().seat, json!([]));
     initial["turn"]["active"] = json!(own);
@@ -51,7 +60,7 @@ fn make(actor: Viewer, edge: &str, deck: &[&str], other_secret: &str, count: u32
     for number in ["unit-spell", "unit-amulet"] {
         game.load_internal_card(number, &empty).unwrap();
     }
-    game.load_internal_card("unit-follower", &program).unwrap();
+    game.load_internal_card("unit-follower", program).unwrap();
     game.activate_internal_card(
         "source",
         program.card().abilities.first().unwrap().node.id,
@@ -152,5 +161,6 @@ fn projected(game: &Game, actor: Viewer) -> (player::Question, wire::QuestionSha
     (native, shape, binding)
 }
 
+mod notices;
 mod privacy;
 mod validation;

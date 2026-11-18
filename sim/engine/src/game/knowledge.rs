@@ -8,6 +8,7 @@ use crate::random::Random;
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::fmt::Write as _;
+use core::mem::take;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -271,6 +272,8 @@ impl Game {
             }
         }
         target.player_events.restore(&published.1);
+        // Preserve the live disclosure queue when restoring an origin.
+        target.player_notices = take(&mut self.player_notices);
         *self = target;
         Ok(())
     }

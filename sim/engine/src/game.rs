@@ -317,6 +317,8 @@ pub struct Game {
     #[serde(skip)]
     player_events: player::events::Journal,
     #[serde(skip)]
+    player_notices: player::notices::Notices,
+    #[serde(skip)]
     referee_events: Option<Vec<Value>>,
 }
 
@@ -641,6 +643,7 @@ impl Game {
             player_epoch: 0,
             player_evolution: None,
             player_events: player::events::Journal::default(),
+            player_notices: player::notices::Notices::default(),
             referee_events: None,
         };
         game.initialize_evolved(&position)?;

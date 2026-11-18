@@ -72,6 +72,7 @@ fn look() -> Located<Node> {
             },
             count: Expr::Literal(Nat(5)),
             mode: StepwiseMode::Exact,
+            purpose: LookPurpose::Private,
         },
         1,
         "BP07-SL09",

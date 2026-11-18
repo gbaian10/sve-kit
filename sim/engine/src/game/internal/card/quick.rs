@@ -17,6 +17,8 @@ use crate::ir::{
 use crate::ir::{Cardinality, Nat, TextQuantifier, ZoneKind};
 use serde_json::{Value, json};
 
+const QUICK_ZONES: [&str; 5] = ["field", "hand", "ex", "cemetery", "banish"];
+
 /// A private action description addressed only by its question-local handle.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct QuickOption {
@@ -143,6 +145,15 @@ fn procedure(window: QuickWindow) -> Result<WellFormedProcedure> {
     reason = "Quick shares the formal play authority."
 )]
 impl Game {
+    pub(in crate::game) fn publicly_empty_quick(&self, actor: Viewer) -> bool {
+        let Ok(seat) = seat_name(actor.player()) else {
+            return false;
+        };
+        QUICK_ZONES
+            .into_iter()
+            .all(|zone| self.zone_count(seat, zone) == 0)
+    }
+
     fn quick_window(&self) -> Option<QuickWindow> {
         if self.state.game["ended"] == true {
             return None;
@@ -227,10 +238,7 @@ impl Game {
             if object.controller != seat_name(actor)?
                 || int(&object.state["face"]) != 0
                 || object.state["silenced"] == true
-                || !matches!(
-                    object.zone.as_str(),
-                    "field" | "hand" | "ex" | "cemetery" | "banish"
-                )
+                || !QUICK_ZONES.contains(&object.zone.as_str())
             {
                 continue;
             }

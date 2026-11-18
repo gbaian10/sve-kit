@@ -2,6 +2,7 @@
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
 use crate::EngineFailure;
+use crate::game::player::Viewer;
 use crate::game::player::observation::face_up;
 use crate::ir::observation::{self, Consumer, LeafKind, Position, Shape};
 use crate::ir::perspective;
@@ -239,6 +240,12 @@ impl Game {
             self.internal_record_reveal(execution, *member, id)?;
         }
         self.reveal(&ids, "all", &execution.frame(), true)?;
+        execution.record_notice(
+            self,
+            &[Viewer::P1, Viewer::P2],
+            super::NoticeKind::TemporaryReveal,
+            &ids,
+        )?;
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::Revealed(current_members),

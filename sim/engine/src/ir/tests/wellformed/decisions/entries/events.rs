@@ -370,6 +370,7 @@ fn look_deck(viewer: PlayerRef) -> Located<Node> {
             },
             count: Expr::Literal(Nat(3)),
             mode: StepwiseMode::Exact,
+            purpose: LookPurpose::Private,
         },
         1,
         "synthetic",

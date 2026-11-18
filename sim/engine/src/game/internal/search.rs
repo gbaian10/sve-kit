@@ -744,6 +744,12 @@ impl Game {
             .collect::<Result<Vec<_>>>()?;
         if wait.conditional {
             self.reveal(&ids, "all", &execution.frame(), false)?;
+            execution.record_notice(
+                self,
+                &[Viewer::P1, Viewer::P2],
+                super::NoticeKind::TemporaryReveal,
+                &ids,
+            )?;
         }
         let links = if wait.conditional {
             CandidateLinks::capture(self, execution, found.iter().copied())?

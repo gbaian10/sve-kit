@@ -23,6 +23,7 @@ pub(super) fn look(id: u64, count: u64) -> Located<Node> {
             },
             count: Expr::Literal(Nat(count)),
             mode: StepwiseMode::Exact,
+            purpose: LookPurpose::Private,
         },
     )
 }
