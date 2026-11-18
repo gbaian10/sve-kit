@@ -85,16 +85,18 @@ replay:
   # Objects whose identity a view may not know, by node range on path P (inclusive).
   hidden:
     - { view: P1, objects: [b1], from: 0, to: 13 }
-    # P1 cannot tell its own deck objects apart before the search.
-    - { view: P1, objects: [a3, a4, a5], from: 0, to: 2 }
+    # Search exposes only matching candidates (docs/dsl/runtime-semantics.md §§6.2, 6.4).
+    - { view: P1, objects: [a3], from: 0, to: 2 }
+    - { view: P1, objects: [a4], from: 0, to: 12 }
+    - { view: P1, objects: [a5], from: 0, to: 13 }
     - { view: P2, objects: [a3], from: 0, to: 3 }
     - { view: P2, objects: [a4, a5], from: 0, to: 13 }
     - { view: P2, objects: [b1], from: 0, to: 10 }
   # R2b: after the path is played to N13, a replay branch from N3 carries identities.
   branch_from: 3
-  # P2 also saw its own b1 (drawn at N11) on the source branch.
-  branch_known: { P1: [a3, a4, a5], P2: [a3, b1] }
-  branch_unknown: { P2: [a4, a5] }
+  # After a3 is revealed, P2 draws b1 at N11 and P1 draws a4 at N13.
+  branch_known: { P1: [a3, a4], P2: [a3, b1] }
+  branch_unknown: { P1: [a5], P2: [a4, a5] }
   # R6
   cause:
     placed: { kind: 場に出す, object: a3 }

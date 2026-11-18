@@ -308,10 +308,11 @@ impl FakeReplay {
         let rest: Vec<String> = game.deck.iter().filter(|id| *id != "a3").cloned().collect();
         let odd = game.seed.bytes().map(usize::from).sum::<usize>() % 2 == 1;
         let skew = game.skew_unsaved && !game.saved.get();
+        // Match the fixed M seed's draw while keeping alternative orders seed-dependent.
         if odd == skew {
-            rest
-        } else {
             rest.into_iter().rev().collect()
+        } else {
+            rest
         }
     }
 
@@ -367,7 +368,7 @@ fn at_of(game: &Game, node: &Node) -> At {
     }
 }
 
-fn identifiable(at: &At, view: &str) -> Vec<String> {
+fn identifiable(game: &Game, at: &At, view: &str) -> Vec<String> {
     let k = at.k;
     let mut out: Vec<&str> = Vec::new();
     if at.lookout {
@@ -387,7 +388,7 @@ fn identifiable(at: &At, view: &str) -> Vec<String> {
     } else if view == "P1" {
         out.extend(["a1", "a2", "a6"]);
         if k >= 3 {
-            out.extend(["a3", "a4", "a5"]);
+            out.push("a3");
         }
     } else {
         out.extend(["a2", "a6"]);
@@ -401,7 +402,11 @@ fn identifiable(at: &At, view: &str) -> Vec<String> {
             out.push("b1");
         }
     }
-    out.into_iter().map(str::to_owned).collect()
+    let mut known: Vec<_> = out.into_iter().map(str::to_owned).collect();
+    if !at.lookout && view == "P1" && k >= 13 {
+        known.extend(FakeReplay::d5(game).into_iter().take(1));
+    }
+    known
 }
 
 fn with_cards(ids: &[String], game: &Game) -> Value {
@@ -556,9 +561,14 @@ impl FakeReplay {
                 m.insert("hand".into(), with_cards(&hand, game));
                 m.insert("deck_count".into(), Value::from(deck.len()));
                 m.insert("opponent_life".into(), Value::from(life));
-                let searching = if at.lookout { at.k == 2 } else { at.k == 3 };
-                if searching {
-                    m.insert("looking_at".into(), with_cards(&deck, game));
+                match (at.lookout, at.k) {
+                    (true, 2) => {
+                        m.insert("looking_at".into(), with_cards(&deck, game));
+                    }
+                    (false, 3) => {
+                        m.insert("looking_at".into(), with_cards(&["a3".to_owned()], game));
+                    }
+                    _ => {}
                 }
                 if node.touched {
                     m.insert("touched".into(), Value::from(true));
@@ -650,7 +660,7 @@ impl FakeReplay {
                     .collect()
             })
             .unwrap_or_default();
-        json!({"identifiable": identifiable(&at, key), "carried": carried})
+        json!({"identifiable": identifiable(game, &at, key), "carried": carried})
     }
 
     /// Events of the step that produced node `index`, with causes into earlier events.
@@ -806,7 +816,7 @@ impl FakeReplay {
             .filter(|i| game.nodes[*i].decisions.len() > depth)
         {
             let at = at_of(game, &game.nodes[i]);
-            for id in identifiable(&at, view) {
+            for id in identifiable(game, &at, view) {
                 if !out.contains(&id) {
                     out.push(id);
                 }
