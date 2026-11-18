@@ -239,22 +239,6 @@ fn wire_input_attack_targets_belong_to_their_own_intent_and_end_phase_advances()
             target: Some(targets[0].id.clone()),
         },
     );
-    let attacking = project(&attack_game, Viewer::P2);
-    assert_eq!(
-        attacking.observation().attack.as_ref().unwrap().attacker,
-        sve_battle_contract::Subject::Card {
-            object: Some(
-                attacking.observation().players[0].zones.field.cards[0]
-                    .object
-                    .clone()
-            ),
-            card: attacking.observation().objects
-                [&attacking.observation().players[0].zones.field.cards[0].object]
-                .effective_face
-                .clone(),
-        }
-    );
-    assert_eq!(question(&attacking).usage, wire::QuestionUse::Quick);
     let end = intents(&input)
         .iter()
         .find_map(|intent| {

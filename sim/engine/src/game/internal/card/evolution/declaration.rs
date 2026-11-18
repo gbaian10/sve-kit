@@ -167,6 +167,7 @@ impl Game {
             .iter()
             .enumerate()
             .map(|(ordinal, entry)| {
+                // Admission ties each intrinsic to this current print; a missing origin is an invariant failure.
                 let source = probe.internal_card_source(holder, entry.id, actor.player())?;
                 Ok(EvolutionOption {
                     source: SourceInformation::current(&probe, source)?

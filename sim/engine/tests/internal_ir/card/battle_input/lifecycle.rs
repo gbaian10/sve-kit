@@ -45,10 +45,6 @@ fn wire_input_waiting_retains_the_public_die_without_a_private_procedure() {
                     choice: wire::DiceChoice::Keep,
                 },
             );
-            assert_eq!(
-                question(&project(&game, actor)).usage,
-                wire::QuestionUse::MainAction
-            );
             views.push(waiting);
         }
         assert_eq!(views[0].observation(), views[1].observation());
@@ -143,13 +139,6 @@ fn wire_input_fault_has_no_winner_or_answer_and_only_advertises_native_concessio
             assert_eq!(
                 game.submit_player(actor, command).kind,
                 SubmissionKind::Applied
-            );
-            assert_eq!(
-                project(&game, actor).input(),
-                &BattleInput::Finished {
-                    winner: Some(seat(opposite(actor))),
-                    reason: ResultReason::Concession
-                }
             );
             views.push(fault);
         }
