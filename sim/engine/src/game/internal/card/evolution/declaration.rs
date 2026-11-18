@@ -349,7 +349,7 @@ impl Game {
                     .ok_or_else(|| invalid("missing selected evolution form"))?;
                 let materials = declaration.physical(self, &declaration.materials)?;
                 let discard = declaration.physical(self, &declaration.discard)?;
-                self.node = format!("player-evolution-{}", self.state.next_decision);
+                self.node = self.rule_node("player-evolution-");
                 self.state.next_decision = self.state.next_decision.saturating_add(1);
                 self.emitted.clear();
                 return self.internal_evolve_action(&json!({"do":"evolve","source":declaration.source.source,"definition":declaration.definition.0,"evolve_card":form.holder,"face":form.face,"by":seat(declaration.actor),"at":"main","pay":{"pp":pp,"ep":i64::from(ep),"sep":i64::from(super_evolution)},"costs":{"materials":materials,"discard":discard}}));

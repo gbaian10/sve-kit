@@ -233,7 +233,7 @@ fn policy_integer_routes_and_optional_answers_use_the_real_domains() {
                 card: "public".into(),
                 name: "name".into(),
                 zone: "hand".into(),
-                position: 1,
+                position: Some(1),
                 object: None,
             },
             Answer::WardEntry(true),

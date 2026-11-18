@@ -151,8 +151,10 @@ fn typed(
             reference,
             links,
             face,
+            ..
         } => {
-            domain!(domain, InputDomain::WardEntry { card, name, zone, position } => DecisionShape::WardEntry { card, name, zone, position, face: face.clone(), object: links.observed(game, actor, Some(*reference))? })
+            domain!(domain, InputDomain::WardEntry { card, name, zone, position } => DecisionShape::WardEntry { card, name, zone, position, face: face.clone(),
+                object: if position.is_some() { links.observed(game, actor, Some(*reference))? } else { None } })
         }
         Wait::OptionalCost => {
             domain!(domain, InputDomain::OptionalCost => DecisionShape::OptionalCost)

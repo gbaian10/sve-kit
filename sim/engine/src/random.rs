@@ -10,6 +10,8 @@ use sha2::{Digest as _, Sha256};
 
 use crate::{Result, invalid};
 
+pub(crate) const ALGORITHM: &str = "chacha12-sha256-rand09-v1";
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(try_from = "RandomWire", into = "RandomWire")]
 pub(crate) struct Random(Box<ChaCha12Rng>);
@@ -68,7 +70,9 @@ impl TryFrom<RandomWire> for Random {
 impl Random {
     pub(crate) fn new(seed: &str) -> Self {
         let mut hash = Sha256::new();
-        hash.update(b"sve-engine/chacha12-sha256-rand09-v1\0");
+        hash.update(b"sve-engine/");
+        hash.update(ALGORITHM.as_bytes());
+        hash.update([0]);
         hash.update(seed.as_bytes());
         Self(Box::new(ChaCha12Rng::from_seed(hash.finalize().into())))
     }

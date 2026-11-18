@@ -142,13 +142,15 @@ impl Game {
             })
             .collect::<Result<Vec<_>>>()?;
         members.sort_by(|left, right| left.0.cmp(&right.0));
-        let key = self
-            .state
-            .rng
-            .fork(&format!("player-object-handles/{seat}"));
+        let namespace = self.replay.handle_line.map_or_else(
+            || format!("player-object-handles/{seat}"),
+            |line| format!("player-object-handles/{seat}/branch/{line}"),
+        );
+        let key = self.state.rng.fork(&namespace);
+        let origin = self.replay.node.as_deref().unwrap_or(&self.node);
         for (_, id) in members {
             let object = self.object(&id)?;
-            let record = json!({"id":id,"card":object.card,"owner":object.owner,"from":self.node});
+            let record = json!({"id":id,"card":object.card,"owner":object.owner,"from":origin});
             let physical = self.physical_card_face(&id)?;
             let face = KnownFace {
                 card: physical.card,
@@ -163,6 +165,45 @@ impl Game {
             }
         }
         Ok(())
+    }
+
+    pub(super) fn begin_replay_node(&mut self, node: usize) {
+        let label = format!("n{node}");
+        if self.replay.node.is_none() {
+            for knowledge in self.state.knowledge.values_mut() {
+                for memory in knowledge.seen.values_mut() {
+                    memory["from"] = json!(label);
+                }
+            }
+        }
+        self.replay.node = Some(label);
+    }
+
+    pub(super) fn fork_replay_knowledge(&mut self, source: &Self, carry: bool, line: usize) {
+        self.begin_replay_node(line);
+        // Keep inherited handles. Fresh allocations must not reuse a sibling's handles.
+        self.replay.handle_line = Some(line);
+        if !carry {
+            return;
+        }
+        for (seat, origin) in &source.state.knowledge {
+            let target = self.state.knowledge.entry(seat.clone()).or_default();
+            target.faces.extend(origin.faces.iter().cloned());
+            for (id, memory) in &origin.seen {
+                if !self.state.objects.contains_key(id)
+                    || target.carried.iter().any(|entry| entry["object"] == *id)
+                {
+                    continue;
+                }
+                let remembered = target
+                    .seen
+                    .entry(id.clone())
+                    .or_insert_with(|| memory.clone());
+                target
+                    .carried
+                    .push(json!({"object": id, "from": remembered["from"]}));
+            }
+        }
     }
 
     fn location_key(&self, perspective: Viewer, id: &str) -> Result<(String, Option<u64>, String)> {
@@ -252,6 +293,27 @@ impl Game {
         self.player_notices
             .truncate_pending_to(&target.player_notices);
         target.state.ir_epoch = self.state.ir_epoch.max(target.state.ir_epoch);
+        target.replay.clone_from(&self.replay);
+        if self.replay.handle_line.is_some() {
+            for (seat, branch) in &self.state.knowledge {
+                let knowledge = target.state.knowledge.entry(seat.clone()).or_default();
+                for entry in &branch.carried {
+                    let Some(id) = entry["object"].as_str() else {
+                        continue;
+                    };
+                    if let Some(memory) = branch.seen.get(id)
+                        && target.state.objects.contains_key(id)
+                        && !knowledge.carried.iter().any(|saved| saved["object"] == id)
+                    {
+                        knowledge
+                            .seen
+                            .entry(id.into())
+                            .or_insert_with(|| memory.clone());
+                        knowledge.carried.push(entry.clone());
+                    }
+                }
+            }
+        }
         for (seat, previous) in &published.0 {
             let knowledge = target.state.knowledge.entry(seat.clone()).or_default();
             knowledge.issued = knowledge.issued.max(previous.issued);

@@ -69,9 +69,9 @@ pub(super) fn ward(
         return Err(ProjectionError::Unavailable);
     }
     let source = context.references.resolve(context.catalog, face)?;
-    if zone == "void" {
-        // The native sentinel is 1 before a token has any source zone membership.
-        if object.is_some() || *position != 1 {
+    if zone == "void" || (zone == "deck" && position.is_none()) {
+        // Created tokens have no source membership. Searched cards have no disclosed deck slot.
+        if object.is_some() || (zone == "void" && *position != Some(1)) {
             return Err(ProjectionError::Unavailable);
         }
         return Ok((
@@ -82,7 +82,6 @@ pub(super) fn ward(
                     card: source,
                     object: None,
                 }),
-                // A newly created token has no source membership in a rules zone.
                 origin: None,
             },
             super::Binding::Entry(Binding::Ward),
@@ -123,7 +122,7 @@ pub(super) fn ward(
         || origin.position
             != Some(Nat::try_from(
                 position
-                    .checked_sub(1)
+                    .and_then(|slot| slot.checked_sub(1))
                     .ok_or(ProjectionError::Unavailable)?,
             )?)
         || !matches!(&facts.subject, Some(Subject::Card { card: resolved, .. }) if *resolved == source)

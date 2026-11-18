@@ -9,6 +9,8 @@
 
 mod labels;
 mod params;
+mod replay;
+pub use replay::TypedReplayAdapter;
 mod turn;
 
 use core::fmt::Display;
@@ -18,7 +20,8 @@ use sve_scenario_runner::{Engine, EngineError, Fixture, Step, View};
 use super::{core_view, error};
 use crate::catalog::SelectedEffects;
 use crate::game::Game;
-use crate::game::player::{Input, QuestionShape, Viewer};
+use crate::game::player::{Input, QuestionShape, SubmissionKind, Viewer};
+use crate::game::replay::RecordedCommand;
 use labels::Labels;
 use turn::{Turn, act, settle};
 
@@ -42,9 +45,9 @@ impl TypedAdapter {
     }
 
     /// The exam's pending reference as `{ability, event}`, following a setup id.
-    fn pending_reference(&self, pending: &Value) -> Value {
+    fn pending_reference(setup: &Value, pending: &Value) -> Value {
         if let Some(id) = pending.as_str() {
-            return self.setup["semantic_state"]["pending_triggers"]
+            return setup["semantic_state"]["pending_triggers"]
                 .as_array()
                 .and_then(|items| items.iter().find(|item| item["id"] == id))
                 .cloned()
@@ -120,18 +123,11 @@ impl Engine for TypedAdapter {
     }
 
     fn decide(&mut self, decision: &Value) -> Result<Step, EngineError> {
-        let by = seat(&decision["by"])?;
-        let pending = self.pending_reference(&decision["pending"]);
         let game = self
             .game
             .as_mut()
             .ok_or_else(|| adapter("game not loaded"))?;
-        settle(game, decision, by)?;
-        let outcome = act(&mut Turn { game, by }, decision, &pending)?;
-        Ok(Step {
-            outcome,
-            events: game.referee_take_events(),
-        })
+        decide_on(game, &self.setup, decision, None)
     }
 
     fn query(&self, view: View, path: &str) -> Result<Option<Value>, EngineError> {
@@ -139,35 +135,62 @@ impl Engine for TypedAdapter {
     }
 
     fn awaiting(&self, view: View) -> Result<Option<Value>, EngineError> {
-        let game = self
-            .game
-            .as_ref()
-            .ok_or_else(|| adapter("game not loaded"))?;
-        for seat in [Viewer::P1, Viewer::P2] {
-            let Input::Question(question) = game.input(seat) else {
-                continue;
-            };
-            let by = format!("{seat:?}");
-            let own = match view {
-                View::Omniscient => true,
-                View::P1 => seat == Viewer::P1,
-                View::P2 => seat == Viewer::P2,
-            };
-            if !own {
-                return Ok(Some(json!({"by": by})));
-            }
-            let labels = Labels { game, by: seat };
-            return Ok(Some(labels.choices(&question).map_or_else(
-                || json!({"by": by, "unrendered": shape_name(&question.shape)}),
-                |choices| {
-                    json!({"by": by, "choices": choices, "fields": Labels::fields(&question)})
-                },
-            )));
-        }
-        Ok(None)
+        Ok(awaiting_on(self.game()?, view))
     }
 
     fn projection(&self, view: View) -> Result<Value, EngineError> {
         self.game()?.projection(core_view(view)).map_err(error)
     }
+}
+
+fn decide_on(
+    game: &mut Game,
+    setup: &Value,
+    decision: &Value,
+    mut record: Option<&mut Vec<RecordedCommand>>,
+) -> Result<Step, EngineError> {
+    let by = seat(&decision["by"])?;
+    let pending = TypedAdapter::pending_reference(setup, &decision["pending"]);
+    let settled = settle(game, decision, by, record.as_deref_mut());
+    let mut turn = Turn { game, by, record };
+    let result = settled.and_then(|()| act(&mut turn, decision, &pending));
+    let outcome = match result {
+        Err(_error)
+            if turn
+                .record
+                .as_ref()
+                .and_then(|commands| commands.last())
+                .is_some_and(|command| command.kind() == SubmissionKind::EngineFault) =>
+        {
+            "engine-fault".into()
+        }
+        result => result?,
+    };
+    Ok(Step {
+        outcome,
+        events: game.referee_take_events(),
+    })
+}
+
+fn awaiting_on(game: &Game, view: View) -> Option<Value> {
+    for seat in [Viewer::P1, Viewer::P2] {
+        let Input::Question(question) = game.input(seat) else {
+            continue;
+        };
+        let by = format!("{seat:?}");
+        let own = match view {
+            View::Omniscient => true,
+            View::P1 => seat == Viewer::P1,
+            View::P2 => seat == Viewer::P2,
+        };
+        if !own {
+            return Some(json!({"by": by}));
+        }
+        let labels = Labels { game, by: seat };
+        return Some(labels.choices(&question).map_or_else(
+            || json!({"by": by, "unrendered": shape_name(&question.shape)}),
+            |choices| json!({"by": by, "choices": choices, "fields": Labels::fields(&question)}),
+        ));
+    }
+    None
 }

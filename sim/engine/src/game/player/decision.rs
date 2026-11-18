@@ -223,8 +223,8 @@ pub enum DecisionShape {
         name: String,
         /// Current source zone.
         zone: String,
-        /// One-based source position, valid only in this question.
-        position: u64,
+        /// One-based source position when the actor can locate the arriving card.
+        position: Option<u64>,
         /// Current Observation capability of the entering card, when still identifiable.
         object: Option<ObjectHandle>,
     },

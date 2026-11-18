@@ -597,7 +597,7 @@ impl Game {
         execution.ids = self.internal_identities()?;
         if destination == ZoneKind::Field {
             for id in &ids {
-                if self.internal_ward_entry_choice(execution, id)? {
+                if self.internal_ward_entry_choice(execution, id, None)? {
                     execution.creating = Some(Creation {
                         receipt: instruction.receipt,
                         ids,

@@ -358,7 +358,7 @@ impl Game {
         };
         let before = self.clone();
         let published = self.published_knowledge();
-        self.node = format!("player-rule-{}", self.state.next_decision);
+        self.node = self.rule_node("player-rule-");
         self.state.next_decision = self.state.next_decision.saturating_add(1);
         let mut declared = false;
         let result = match action {

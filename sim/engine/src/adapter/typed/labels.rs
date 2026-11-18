@@ -57,6 +57,17 @@ impl Labels<'_> {
             .collect()
     }
 
+    fn card_label(&self, card: &CardOption) -> Option<String> {
+        card.object
+            .as_ref()
+            .and_then(|handle| self.label(handle))
+            .or_else(|| {
+                self.game
+                    .referee_search_member(self.by, card.handle)
+                    .map(str::to_owned)
+            })
+    }
+
     pub(super) fn cards(
         &self,
         cards: &[CardOption],
@@ -67,13 +78,7 @@ impl Labels<'_> {
             .map(|label| {
                 cards
                     .iter()
-                    .find(|card| {
-                        card.object
-                            .as_ref()
-                            .and_then(|handle| self.label(handle))
-                            .as_deref()
-                            == Some(label.as_str())
-                    })
+                    .find(|card| self.card_label(card).as_deref() == Some(label.as_str()))
                     .map(|card| card.handle)
                     .ok_or_else(|| adapter(format!("{label} is not a card candidate")))
             })
@@ -278,7 +283,11 @@ impl Labels<'_> {
                     "costs",
                 ),
                 DecisionShape::Search(search) => Self::selects(
-                    &self.card_labels(&search.cards),
+                    &search
+                        .cards
+                        .iter()
+                        .map(|card| self.card_label(card).unwrap_or_else(|| card.card.clone()))
+                        .collect::<Vec<_>>(),
                     search.cardinality.minimum.0,
                     search.cardinality.maximum,
                     "resolve-choice",
@@ -335,7 +344,10 @@ impl Labels<'_> {
                     Some(result)
                 }
                 DecisionShape::WardEntry { object, .. } => {
-                    let label = object.as_ref().and_then(|handle| self.label(handle));
+                    let label = object
+                        .as_ref()
+                        .and_then(|handle| self.label(handle))
+                        .or_else(|| self.game.referee_ward_member(self.by).map(str::to_owned));
                     Some(vec![
                         json!({"do": "place-acted", "object": label, "acted": true}),
                         json!({"do": "place-acted", "object": label, "acted": false}),

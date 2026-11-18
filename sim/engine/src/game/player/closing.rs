@@ -182,7 +182,7 @@ impl Game {
         };
         let before = self.clone();
         let published = self.published_knowledge();
-        self.node = format!("player-rule-{}", self.state.next_decision);
+        self.node = self.rule_node("player-rule-");
         self.state.next_decision = self.state.next_decision.saturating_add(1);
         let result = match action {
             Action::GuardAct(ids) => self.apply_end_guard(&ids),

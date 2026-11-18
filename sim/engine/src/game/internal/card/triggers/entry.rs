@@ -15,6 +15,7 @@ use crate::ir::optional_payment;
 use crate::ir::{EnterFieldEvent, EntryMethod, EntryOrigin, ExecutionId, ObjectRef};
 use crate::ir::{KeywordId, LimitSpec};
 use core::mem;
+use serde_json::Value;
 
 use crate::ir::events::subscriptions;
 pub(super) fn check_header(ability: &Ability) -> Result<bool> {
@@ -81,7 +82,7 @@ fn own_fanfare_suppressed(frame: &Frame, holder: &str, old: &Object, ability: &A
                 ..
             }
         )
-        && frame.values.get(ENTRY_WITHOUT_FANFARE) == Some(&serde_json::Value::Bool(true))
+        && frame.values.get(ENTRY_WITHOUT_FANFARE) == Some(&Value::Bool(true))
 }
 
 fn entry_origin(game: &Game, previous: &Object) -> Result<EntryOrigin> {
@@ -223,6 +224,7 @@ impl Game {
         previous: &[Object],
         before: SnapshotId,
         frame: &Frame,
+        #[cfg(feature = "runner")] entered: &[(Object, Value)],
     ) -> Result<()> {
         if previous.is_empty()
             || (!self.has_delayed_entries()
@@ -315,6 +317,8 @@ impl Game {
                     None,
                 )?;
                 pending.source_position = position;
+                #[cfg(feature = "runner")]
+                retain_entry_cause(&mut pending, entered, &old.id);
                 pending.timing = Some(EventPayload::EnterField {
                     event: event.clone(),
                 });
@@ -324,4 +328,16 @@ impl Game {
         }
         self.internal_admit_pending(candidates)
     }
+}
+
+#[cfg(feature = "runner")]
+fn retain_entry_cause(
+    pending: &mut super::PendingOccurrence,
+    entered: &[(Object, Value)],
+    id: &str,
+) {
+    pending.entry_cause = entered
+        .iter()
+        .find(|(card, _)| card.id == id)
+        .map(|(_, cause)| cause.clone());
 }

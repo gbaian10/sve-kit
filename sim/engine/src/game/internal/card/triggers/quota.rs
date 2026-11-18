@@ -238,6 +238,12 @@ impl Game {
                     AbilityCostPolicy::Normal,
                 )?;
             }
+            #[cfg(feature = "runner")]
+            if let Some(cause) = &pending.entry_cause
+                && let Ok((_, line)) = super::printed_origin(&pending.ability.node.source.origin)
+            {
+                self.referee_trace_pending(pending.id, &pending.holder, line.0, cause);
+            }
             self.card_runtime.pending.push(pending);
         }
         Ok(())

@@ -201,6 +201,8 @@ impl Game {
             source_position: record.position,
             captures: record.captures.clone(),
             installed: true,
+            #[cfg(feature = "runner")]
+            entry_cause: None,
         };
         pending.capture_subject_information(self)?;
         Ok(pending)
