@@ -8,6 +8,7 @@ mod selection;
 pub(super) use selection::{choose as choose_selection, search as choose_search};
 
 use super::*;
+use sve_battle_contract::{BattleInput, QuestionId, Seat, event::ResultReason};
 use sve_engine::game::player::{
     Command, Input, MainActionAnswer, MainIntentKind, Question, QuestionShape, Submission,
     SubmissionKind, Viewer,
@@ -206,7 +207,14 @@ fn player_pipeline_waiting_opponent_can_concede_without_a_token() {
 
 #[test]
 fn player_pipeline_failed_draw_ends_by_rules_after_the_answer() {
-    let mut game = game(1, 0);
+    let mut game = Game::new(
+        base_catalog().unwrap(),
+        &setup(1, json!([])),
+        &Value::Null,
+        &Value::Null,
+        "terminal",
+    )
+    .unwrap();
     game.execute_internal(
         &checked(vec![up_to(1, 1)]),
         &source("synthetic"),
@@ -223,6 +231,20 @@ fn player_pipeline_failed_draw_ends_by_rules_after_the_answer() {
         result.input,
         Input::Finished {
             winner: Some(Viewer::P2)
+        }
+    );
+    let wire = game
+        .battle_input(
+            Viewer::P1,
+            &QuestionId::new("finished".into()),
+            &base_references().unwrap(),
+        )
+        .unwrap();
+    assert_eq!(
+        wire.input(),
+        &BattleInput::Finished {
+            winner: Some(Seat::P2),
+            reason: ResultReason::Defeat,
         }
     );
 }

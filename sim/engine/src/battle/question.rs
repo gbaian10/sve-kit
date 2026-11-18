@@ -26,6 +26,7 @@ mod common;
 mod decision;
 mod evolution;
 mod flow;
+mod main_actions;
 mod opening;
 
 /// A rejected answer binding, separate from an unavailable board or question.
@@ -38,7 +39,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Supports opening, closing, normal evolution and all admitted Decision shapes.
+/// Supports all admitted player questions, including main-phase intents.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -48,6 +49,12 @@ pub struct AnswerError;
 pub struct QuestionProjection {
     observation: BattleObservation,
     question: wire::Question,
+    answer: BoundAnswer,
+}
+
+#[derive(Clone)]
+pub(super) struct BoundAnswer {
+    id: QuestionId,
     actor: Viewer,
     token: QuestionToken,
     binding: Binding,
@@ -56,6 +63,7 @@ pub struct QuestionProjection {
 #[derive(Clone)]
 enum Binding {
     Decision(decision::Binding),
+    Main(main_actions::Binding),
     Flow(flow::Binding),
     FirstPlayer(BTreeMap<OptionId, Viewer>),
     Mulligan(BTreeMap<OptionId, NativeHandle>),
@@ -156,7 +164,9 @@ impl QuestionProjection {
                 let (usage, shape, binding) = decision::project(&domain, Some(context))?;
                 (usage, shape, Binding::Decision(binding))
             }
-            player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
+            player::QuestionShape::ActionWindow(actions) => {
+                main_actions::project(&actions, context)?
+            }
         };
         let question = wire::Question {
             id: id.clone(),
@@ -173,9 +183,12 @@ impl QuestionProjection {
         Ok(Self {
             observation,
             question,
-            actor: native.actor,
-            token: native.token,
-            binding,
+            answer: BoundAnswer {
+                id: id.clone(),
+                actor: native.actor,
+                token: native.token,
+                binding,
+            },
         })
     }
 
@@ -203,11 +216,27 @@ impl QuestionProjection {
         id: &QuestionId,
         answer: &Answer,
     ) -> result::Result<player::Command, AnswerError> {
-        if viewer != self.actor || id != &self.question.id {
+        self.answer.answer(viewer, id, answer)
+    }
+
+    pub(super) fn into_parts(self) -> (BattleObservation, wire::Question, BoundAnswer) {
+        (self.observation, self.question, self.answer)
+    }
+}
+
+impl BoundAnswer {
+    pub(super) fn answer(
+        &self,
+        viewer: Viewer,
+        id: &QuestionId,
+        answer: &Answer,
+    ) -> result::Result<player::Command, AnswerError> {
+        if viewer != self.actor || id != &self.id {
             return Err(AnswerError);
         }
         Ok(match &self.binding {
             Binding::Decision(binding) => binding.answer(self.token, answer)?,
+            Binding::Main(binding) => binding.answer(self.token, answer)?,
             Binding::Flow(binding) => binding.answer(self.token, answer)?,
             Binding::EvolutionDiscard(projection) => player::Command::Evolution {
                 token: self.token,
@@ -253,16 +282,14 @@ impl QuestionProjection {
                 if chosen.len() != 1 {
                     return Err(AnswerError);
                 }
-                let decoded = OpeningAnswer::FirstPlayer(
-                    chosen
-                        .first()
-                        .and_then(|choice| choices.get(choice))
-                        .copied()
-                        .ok_or(AnswerError)?,
-                );
+                let selected = chosen
+                    .first()
+                    .and_then(|choice| choices.get(choice))
+                    .copied()
+                    .ok_or(AnswerError)?;
                 player::Command::Opening {
                     token: self.token,
-                    answer: decoded,
+                    answer: OpeningAnswer::FirstPlayer(selected),
                 }
             }
             Binding::Mulligan(cards) => {
@@ -343,7 +370,11 @@ fn question_purpose(
         player::QuestionShape::Decision(_) => {
             (native.purpose, flow::purpose(native.purpose), stage)
         }
-        player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
+        player::QuestionShape::ActionWindow(_) => (
+            player::QuestionPurpose::MainAction,
+            wire::QuestionPurpose::MainAction,
+            Some(ProcessingStage::Declare),
+        ),
     };
     if native.purpose != native_purpose
         || observation.viewer != seat(native.actor)

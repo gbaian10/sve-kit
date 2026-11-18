@@ -54,6 +54,8 @@ pub enum MainActionAnswer {
 pub enum MainIntentKind {
     /// Begin normal evolution, choosing its form and payment in subsequent questions.
     Evolve {
+        /// Authorized frozen wording origin of the intrinsic ability.
+        source: Option<EffectSource>,
         /// Authorized field card that owns the printed intrinsic ability.
         holder: Box<CardObservation>,
         /// Printed line of that evolution definition.
@@ -237,6 +239,7 @@ impl Game {
                         kind: IntentKind::Evolve(option.ordinal),
                     },
                     kind: MainIntentKind::Evolve {
+                        source: option.source,
                         holder: Box::new(holder),
                         line: option.line,
                     },

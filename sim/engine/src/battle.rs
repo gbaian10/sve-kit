@@ -31,6 +31,7 @@ mod costs;
 mod effects;
 mod events;
 mod history;
+mod input;
 mod objects;
 mod pending;
 mod processing;
@@ -49,6 +50,7 @@ pub(crate) use board::{RuleProcessing, build_observation};
 pub use events::{
     EventFeed, EventObjects, EventReferences, FeedUpdate, ProjectedEvent, project_batch,
 };
+pub use input::InputProjection;
 pub use objects::ObjectTable;
 pub(crate) use objects::build_objects;
 pub use question::{AnswerError, QuestionProjection};

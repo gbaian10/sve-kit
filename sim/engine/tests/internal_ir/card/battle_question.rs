@@ -322,16 +322,9 @@ fn wire_opening_questions_round_trip_mulligan_for_both_seats() {
                     SubmissionKind::Applied
                 );
             }
-            assert!(
-                matches!(
-                    game.battle_question(
-                        first,
-                        &QuestionId::new("main".into()),
-                        &board_fixture::fixture().unwrap().references
-                    ),
-                    Err(ProjectionError::Unavailable)
-                ),
-                "unimplemented active shapes cannot look like a supported question"
+            assert_eq!(
+                project(&game, first, "main").question().usage,
+                wire::QuestionUse::MainAction
             );
         }
     }

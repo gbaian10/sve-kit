@@ -2,8 +2,9 @@
 
 use super::{intrinsic, rule_code, usable};
 use crate::game::int;
+use crate::game::internal::source::SourceInformation;
 use crate::game::internal::{Context, Execution, Game, InputDomain, Result, Wait};
-use crate::game::player::observation::{CardObservation, seat};
+use crate::game::player::observation::{CardObservation, EffectSource, seat};
 use crate::game::player::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
     ObjectHandle, QuestionToken, Viewer,
@@ -50,6 +51,7 @@ pub(in crate::game) struct Declaration {
 
 #[derive(Clone, Debug)]
 pub(in crate::game) struct EvolutionOption {
+    pub(in crate::game) source: Option<EffectSource>,
     pub(in crate::game) ordinal: u64,
     pub(in crate::game) line: u64,
 }
@@ -160,11 +162,16 @@ impl Game {
         holder: &str,
         actor: Viewer,
     ) -> Result<Vec<EvolutionOption>> {
+        let mut probe = self.clone();
         self.main_evolution_entries(holder, actor)?
             .iter()
             .enumerate()
             .map(|(ordinal, entry)| {
+                let source = probe.internal_card_source(holder, entry.id, actor.player())?;
                 Ok(EvolutionOption {
+                    source: SourceInformation::current(&probe, source)?
+                        .origin()
+                        .observed(self, actor),
                     ordinal: u64::try_from(ordinal).map_err(invalid)?,
                     line: super::super::printed_origin(&entry.source.origin)?.1.0,
                 })
