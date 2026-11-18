@@ -1,25 +1,68 @@
 import { GripVertical } from "lucide-react"
+import { useCallback, useEffect, useId, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import { moveListColumn, prefsStore, usePrefs } from "../../settings"
-import { cn } from "../ui/cn"
 import { useColumnReorder } from "./useColumnReorder"
 
-export function ListColumnPicker({ inline = false }: { readonly inline?: boolean }) {
+export function ListColumnPicker() {
   const { t } = useTranslation()
   const { listVisibility, listOrder } = usePrefs()
   const reorder = useColumnReorder("vertical")
+  const id = useId()
+  const trigger = useRef<HTMLButtonElement>(null)
+  const panel = useRef<HTMLFieldSetElement>(null)
+  const [open, setOpen] = useState(false)
+  const place = useCallback(() => {
+    if (!trigger.current || !panel.current) return
+    const { left, bottom } = trigger.current.getBoundingClientRect()
+    panel.current.style.left = `${String(left)}px`
+    panel.current.style.top = `${String(bottom)}px`
+  }, [])
+  useEffect(() => {
+    if (!open) return
+    window.addEventListener("resize", place)
+    window.addEventListener("scroll", place, true)
+    return () => {
+      window.removeEventListener("resize", place)
+      window.removeEventListener("scroll", place, true)
+    }
+  }, [open, place])
+
   return (
-    <details className="relative text-13" data-list-column-picker="">
-      <summary className="cursor-pointer rounded-control border border-border bg-surface-1 px-2 py-1.5 whitespace-nowrap">
-        {t("results.visibleColumns")}
-      </summary>
+    <div className="relative text-13" data-list-column-picker="">
+      <button
+        ref={trigger}
+        type="button"
+        popoverTarget={id}
+        aria-controls={id}
+        aria-expanded={open}
+        onClick={(event) => {
+          event.preventDefault()
+          const popup = panel.current
+          if (!popup) return
+          if (popup.matches(":popover-open")) {
+            popup.hidePopover()
+          } else {
+            place()
+            popup.showPopover({ source: event.currentTarget })
+          }
+        }}
+        className="group block w-full cursor-pointer rounded-control border border-border bg-surface-1 px-2 py-1.5 text-left whitespace-nowrap"
+      >
+        <span className="list-item list-inside list-[disclosure-closed] group-aria-expanded:list-[disclosure-open]">
+          {t("results.visibleColumns")}
+        </span>
+      </button>
       <fieldset
+        ref={panel}
+        id={id}
+        popover="auto"
+        onToggle={(event) => {
+          setOpen(event.currentTarget.matches(":popover-open"))
+        }}
         data-column-order=""
-        className={cn(
-          "mt-1 flex min-w-40 flex-col gap-2 rounded-control border border-border bg-surface-1 p-3 shadow-lg",
-          !inline && "absolute left-0 z-10",
-        )}
+        className="fixed inset-auto m-0 mt-1 min-w-40 flex-col gap-2 overflow-visible rounded-control border border-border bg-surface-1 p-3 text-inherit shadow-lg open:flex"
       >
         <legend className="sr-only">{t("results.visibleColumns")}</legend>
         {listOrder.map((column, index) => {
@@ -78,6 +121,6 @@ export function ListColumnPicker({ inline = false }: { readonly inline?: boolean
           )
         })}
       </fieldset>
-    </details>
+    </div>
   )
 }

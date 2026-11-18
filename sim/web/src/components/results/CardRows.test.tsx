@@ -415,6 +415,20 @@ it.each(["list", "table"] as const)(
   },
 )
 
+it("dismisses the column picker with Escape and returns focus to the trigger", async () => {
+  await renderInRouter(<ListColumnPicker />)
+  const trigger = screen.getByRole("button", { name: "顯示欄位" })
+  const user = userEvent.setup()
+  await user.click(trigger)
+  const checkbox = screen.getByRole("checkbox", { name: "名稱" })
+  checkbox.focus()
+  expect(checkbox).toHaveFocus()
+  expect(trigger).toHaveAttribute("aria-expanded", "true")
+  await user.keyboard("{Escape}")
+  expect(checkbox).not.toBeVisible()
+  expect(trigger).toHaveFocus()
+})
+
 it("hides matching headers and cells, keeps an identity column, and preserves row navigation", async () => {
   await renderInRouter(
     <>
@@ -423,7 +437,7 @@ it("hides matching headers and cells, keeps an identity column, and preserves ro
     </>,
   )
   const user = userEvent.setup()
-  await user.click(screen.getByText("顯示欄位", { selector: "summary" }))
+  await user.click(screen.getByRole("button", { name: "顯示欄位" }))
   for (const name of ["稀有度", "位置", "種類", "職業", "消費", "攻擊力", "生命值"]) {
     await user.click(screen.getByRole("checkbox", { name }))
   }
@@ -574,7 +588,7 @@ it("shows only class icons with localized accessible names including neutral, an
       .getByRole("columnheader", { name: "Class" })
       .querySelector("button:not([data-column-resize])"),
   ).toBeNull()
-  await userEvent.click(screen.getByText("Visible columns", { selector: "summary" }))
+  await userEvent.click(screen.getByRole("button", { name: "Visible columns" }))
   await userEvent.click(screen.getByRole("checkbox", { name: "Class" }))
   expect(document.querySelector("[data-list-class]")).toBeNull()
   expect(screen.queryByRole("columnheader", { name: "Class" })).not.toBeInTheDocument()
@@ -587,7 +601,7 @@ it("reorders from the picker keyboard and keeps focus and cells in the same orde
       <CardList typeLabel={typeLabel} classLabel={classLabel} cells={[cell]} onOpen={vi.fn()} />
     </>,
   )
-  await userEvent.click(screen.getByText("顯示欄位", { selector: "summary" }))
+  await userEvent.click(screen.getByRole("button", { name: "顯示欄位" }))
   const handle = screen.getByRole("button", { name: "調整「職業」順序（↑／↓ 移動）" })
   handle.focus()
   await userEvent.keyboard("{ArrowUp}")
@@ -790,7 +804,7 @@ it("toggles type and location columns independently of rarity", async () => {
       />
     </>,
   )
-  await userEvent.click(screen.getByText("顯示欄位", { selector: "summary" }))
+  await userEvent.click(screen.getByRole("button", { name: "顯示欄位" }))
   await userEvent.click(screen.getByRole("checkbox", { name: "位置" }))
   expect(screen.queryByRole("columnheader", { name: "位置" })).not.toBeInTheDocument()
   expect(screen.queryByRole("img", { name: "進化" })).not.toBeInTheDocument()

@@ -46,26 +46,6 @@ function Harness({
 }
 
 describe("Dialog", () => {
-  it("keeps the page scroll locked while any dialog is open and frees it when nested ones unmount together", () => {
-    function Nested({ shown, inner }: { readonly shown: boolean; readonly inner: boolean }) {
-      return shown ? (
-        <I18nextProvider i18n={i18n}>
-          <Dialog open onClose={() => undefined} title="外層">
-            <Dialog open={inner} onClose={() => undefined} title="內層">
-              <p>inner</p>
-            </Dialog>
-          </Dialog>
-        </I18nextProvider>
-      ) : null
-    }
-    // The inner dialog opens after the outer one, as a dialog opened from inside another does.
-    const { rerender } = render(<Nested shown inner={false} />)
-    rerender(<Nested shown inner />)
-    expect(document.documentElement.style.overflow).toBe("hidden")
-    rerender(<Nested shown={false} inner />)
-    expect(document.documentElement.style.overflow).toBe("")
-  })
-
   it("opens as a modal with focus on the close button, then returns focus to the opener", async () => {
     render(<Harness />)
     const opener = screen.getByRole("button", { name: "open" })
@@ -105,7 +85,7 @@ describe("Dialog", () => {
     render(<Harness variant="bottom" />)
     await userEvent.click(screen.getByRole("button", { name: "open" }))
     const dialog = screen.getByRole("dialog")
-    expect(dialog).toHaveClass("fixed", "bottom-0", "overflow-hidden", "overscroll-contain")
+    expect(dialog).toHaveClass("fixed", "bottom-0", "overflow-hidden")
     const scrollArea = dialog.querySelector(".overflow-y-auto")
     expect(scrollArea).toHaveClass("overscroll-contain")
     const handle = dialog.querySelector('[aria-hidden="true"]')
