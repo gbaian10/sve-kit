@@ -96,8 +96,9 @@ export function cardKindOf(
   cardId: string,
   edition: Region,
 ): CardKind | undefined {
-  const revisions = [...catalog.index.facesOf(cardId)]
-    .sort((a, b) => ordinal(a) - ordinal(b))
+  const revisions = catalog.index
+    .facesOf(cardId)
+    .toSorted((a, b) => ordinal(a) - ordinal(b))
     .flatMap((face) => {
       const revision =
         typeof face["id"] === "string" ? catalog.index.displayRevision(face["id"], edition) : null

@@ -33,7 +33,7 @@ export function orderRarities<T extends { readonly code: string }>(rarities: rea
     const index = RARITY_ORDER.indexOf(code)
     return index === -1 ? RARITY_ORDER.length : index
   }
-  return [...rarities].sort((a, b) => rank(a.code) - rank(b.code))
+  return rarities.toSorted((a, b) => rank(a.code) - rank(b.code))
 }
 
 /** The PR appearance tokens (`pr:<style>`) the panel offers, in badge order. */
@@ -55,7 +55,7 @@ export function orderRarityTokens(tokens: readonly string[]): string[] {
       style === undefined ? -1 : styles.indexOf(style),
     ]
   }
-  return [...tokens].sort((a, b) => {
+  return tokens.toSorted((a, b) => {
     const [pa, ca] = key(a)
     const [pb, cb] = key(b)
     return pa - pb || ca - cb

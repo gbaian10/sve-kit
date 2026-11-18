@@ -18,14 +18,16 @@ export interface RulesBundle {
 const versionOf = (path: string) => path.split("/").at(-2) ?? ""
 const fileOf = (path: string) => path.split("/").at(-1) ?? ""
 
-function newest(versions: readonly string[]): string {
+function newest(versions: readonly string[]): string | undefined {
   const parts = (version: string) => version.split(".").map(Number)
-  return [...versions].sort((a, b) => {
-    const [x, y] = [parts(a), parts(b)]
-    for (let i = 0; i < Math.max(x.length, y.length); i++)
-      if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) - (y[i] ?? 0)
-    return 0
-  })[versions.length - 1] as string
+  return versions
+    .toSorted((a, b) => {
+      const [x, y] = [parts(a), parts(b)]
+      for (let i = 0; i < Math.max(x.length, y.length); i++)
+        if ((x[i] ?? 0) !== (y[i] ?? 0)) return (x[i] ?? 0) - (y[i] ?? 0)
+      return 0
+    })
+    .at(-1)
 }
 
 /**
@@ -44,7 +46,7 @@ export function buildRules(
     if (data.kind === "comprehensive-rules-index") index = data
     else files.set(fileOf(path), data)
   }
-  if (!index) throw new Error(`comprehensive rules ${version}: index.json missing`)
+  if (!index) throw new Error(`comprehensive rules ${String(version)}: index.json missing`)
   const nodes = index.contents.flatMap((item) => files.get(item.file)?.nodes ?? [])
   const translations = new Map<string, TranslationEntry>()
   for (const [path, file] of Object.entries(translationFiles))

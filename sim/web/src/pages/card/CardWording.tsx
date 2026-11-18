@@ -317,7 +317,7 @@ export function CardWording({
       candidate.revisionId === displayId
         ? candidate.printings.find((p) => p.id === wording?.["basis_printing_id"])
         : undefined
-    const first = [...candidate.printings].sort(
+    const first = candidate.printings.toSorted(
       (a, b) => (chipOrder.get(a.id) ?? 0) - (chipOrder.get(b.id) ?? 0),
     )[0]
     const pick = basis ?? first

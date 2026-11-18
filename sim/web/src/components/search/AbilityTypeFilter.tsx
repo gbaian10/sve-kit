@@ -29,7 +29,7 @@ const ABILITY_TYPE_DISPLAY_RANK: Readonly<Record<AbilityType, number>> = {
   on_evolve: 7,
   on_super_evolve: 8,
 }
-const ABILITY_TYPE_DISPLAY_ORDER = [...ABILITY_TYPES].sort(
+const ABILITY_TYPE_DISPLAY_ORDER = ABILITY_TYPES.toSorted(
   (left, right) => ABILITY_TYPE_DISPLAY_RANK[left] - ABILITY_TYPE_DISPLAY_RANK[right],
 )
 

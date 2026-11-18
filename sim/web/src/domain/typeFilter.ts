@@ -8,5 +8,5 @@ export function orderTypeTokens(tokens: readonly string[]): string[] {
     const index = (TYPE_ORDER as readonly string[]).indexOf(code)
     return index === -1 ? TYPE_ORDER.length : index
   }
-  return [...tokens].sort((a, b) => rank(a) - rank(b))
+  return tokens.toSorted((a, b) => rank(a) - rank(b))
 }

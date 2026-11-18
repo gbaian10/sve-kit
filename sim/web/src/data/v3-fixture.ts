@@ -55,7 +55,7 @@ export function v3Version(
           : file["purpose"] === "images"
             ? 4
             : 3
-  for (const file of [...metadata].sort(
+  for (const file of metadata.toSorted(
     (a, b) =>
       priority(a) - priority(b) || (a["region"] === null ? 0 : 1) - (b["region"] === null ? 0 : 1),
   )) {

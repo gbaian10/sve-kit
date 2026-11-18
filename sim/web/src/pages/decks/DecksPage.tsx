@@ -263,6 +263,8 @@ export function DecksPage() {
         <label className="flex flex-col gap-1 pb-2 text-13 text-text-2">
           {t("decks.nameLabel")}
           <input
+            autoComplete="off"
+            enterKeyHint="done"
             value={renameValue}
             onChange={(event) => {
               setRenameValue(event.target.value)

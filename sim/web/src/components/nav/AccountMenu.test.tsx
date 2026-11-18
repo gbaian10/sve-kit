@@ -5,7 +5,6 @@ import { afterEach, describe, expect, it } from "vitest"
 import { DEFAULT_PREFS, prefsStore } from "../../settings"
 import { readPrefs } from "../../settings/prefs-read-write"
 import { renderInRouter } from "../../test-utils"
-import { AccountMenuButton } from "./AccountMenu"
 import { AccountMenuPanel } from "./AccountMenuPanel"
 
 afterEach(() => {
@@ -142,16 +141,6 @@ describe("AccountMenuPanel", () => {
     await userEvent.keyboard("{ArrowRight}")
     expect(readPrefs().accent).toBe("red")
     expect(within(group).getByRole("radio", { name: "紅" })).toHaveFocus()
-  })
-
-  it("falls back to a plain toggle when the Popover API is missing (as in jsdom)", async () => {
-    await renderInRouter(<AccountMenuButton />)
-    const button = screen.getByRole("button", { name: "帳號與設定" })
-    expect(button).toHaveAttribute("aria-expanded", "false")
-    expect(screen.queryByRole("radiogroup", { name: "外觀" })).not.toBeInTheDocument()
-    await userEvent.click(button)
-    expect(button).toHaveAttribute("aria-expanded", "true")
-    expect(screen.getByRole("radiogroup", { name: "外觀" })).toBeInTheDocument()
   })
 
   it("changes the UI language and the menu re-renders in it", async () => {

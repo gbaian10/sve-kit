@@ -115,6 +115,8 @@ export function NewDeckDialog({
         <label className="flex flex-col gap-1 text-13 text-text-2">
           {t("decks.nameLabel")}
           <input
+            autoComplete="off"
+            enterKeyHint="done"
             value={name}
             onChange={(event) => {
               setName(event.target.value)

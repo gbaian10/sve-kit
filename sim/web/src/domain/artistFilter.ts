@@ -14,7 +14,7 @@ const idsOf = (selected: readonly string[]) => selected.filter((token) => !RESER
 export function orderArtistTokens(tokens: readonly string[]): string[] {
   const rank = (token: string) =>
     token === CREDITED_ARTIST ? 0 : token === UNCREDITED_ARTIST ? 2 : 1
-  return [...tokens].sort((a, b) => rank(a) - rank(b))
+  return tokens.toSorted((a, b) => rank(a) - rank(b))
 }
 
 /** Whether one artist reads as selected: by itself, or because every artist is selected. */
