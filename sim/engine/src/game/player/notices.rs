@@ -47,6 +47,15 @@ const fn seat(viewer: Viewer) -> Seat {
 }
 
 impl Notices {
+    pub(in crate::game) const fn pending_lengths(&self) -> [usize; 2] {
+        [self.p1.pending.len(), self.p2.pending.len()]
+    }
+
+    pub(in crate::game) fn truncate_pending(&mut self, [p1, p2]: [usize; 2]) {
+        self.p1.pending.truncate(p1);
+        self.p2.pending.truncate(p2);
+    }
+
     const fn queue(&mut self, viewer: Viewer) -> &mut Queue {
         match viewer {
             Viewer::P1 => &mut self.p1,

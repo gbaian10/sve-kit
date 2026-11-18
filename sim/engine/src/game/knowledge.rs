@@ -47,6 +47,7 @@ struct HandleSnapshot {
 pub(in crate::game) struct PublishedKnowledge(
     BTreeMap<String, HandleSnapshot>,
     super::player::events::PublishedEvents,
+    [usize; 2],
 );
 
 impl Knowledge {
@@ -240,6 +241,7 @@ impl Game {
                 })
                 .collect(),
             self.player_events.published(),
+            self.player_notices.pending_lengths(),
         )
     }
 
@@ -248,6 +250,8 @@ impl Game {
         mut target: Self,
         published: &PublishedKnowledge,
     ) -> Result<()> {
+        // Discard rolled-back disclosures even if restoring card knowledge fails.
+        self.player_notices.truncate_pending(published.2);
         target.state.ir_epoch = self.state.ir_epoch.max(target.state.ir_epoch);
         for (seat, previous) in &published.0 {
             let knowledge = target.state.knowledge.entry(seat.clone()).or_default();
@@ -272,7 +276,7 @@ impl Game {
             }
         }
         target.player_events.restore(&published.1);
-        // Preserve the live disclosure queue when restoring an origin.
+        // Keep the delivery counter from the live channels.
         target.player_notices = take(&mut self.player_notices);
         *self = target;
         Ok(())

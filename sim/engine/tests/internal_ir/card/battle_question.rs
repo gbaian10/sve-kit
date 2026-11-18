@@ -202,7 +202,7 @@ fn wire_opening_questions_round_trip_first_player_for_both_seats() {
             assert_eq!(question.purpose, wire::QuestionPurpose::RuleChoice);
             assert_eq!(question.usage, wire::QuestionUse::FirstPlayer);
             assert_eq!(question.processing, projection.observation().processing[0]);
-            assert_eq!(question.auto_answer, wire::AutoAnswer::Unknown);
+            assert_eq!(question.auto_answer, wire::AutoAnswer::NotUnique);
             assert!(question.is_coherent());
             assert_eq!(
                 serde_json::to_value(question).unwrap()["assistance"],

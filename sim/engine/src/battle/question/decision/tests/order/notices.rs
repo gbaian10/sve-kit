@@ -1,5 +1,9 @@
+use super::super::search;
 use super::*;
-use sve_battle_contract::{BattleInput, presentation::NoticeKind};
+use sve_battle_contract::{
+    BattleInput, GroupChoice,
+    presentation::{NoticeKind, ShownCard},
+};
 
 #[test]
 fn one_private_order_answer_stays_unknown_and_only_the_looker_sees_the_cards() {
@@ -117,7 +121,6 @@ fn a_literal_result_inside_a_branch_stays_unknown() {
 
 #[test]
 fn public_top_reveal_delivers_one_notice_to_both_seats_without_private_cards_or_positions() {
-    let fixture = board_fixture::fixture().unwrap();
     let body = program(json!({"cost":{"pp":1_i32},"do":[
         {"reveal":{"top":{"who":"self","n":1_i32},"bind":"shown"}},
         {"shuffle":{"who":"self"}}
@@ -125,16 +128,95 @@ fn public_top_reveal_delivers_one_notice_to_both_seats_without_private_cards_or_
     let build = |tail, secret| activate(Viewer::P1, &["unit-spell", tail], secret, &body);
     let mut a = build("unit-follower", "unit-amulet");
     let mut b = build("unit-amulet", "unit-follower");
-    let expected = fixture
-        .references
-        .resolve(
-            &fixture.catalog,
-            &player::observation::CardFace {
-                card: "unit-spell".into(),
-                face: 0,
-            },
+    assert_temporary_reveals(&mut a, &mut b, &["unit-spell"]);
+}
+
+#[test]
+fn reveal_until_notices_show_only_the_revealed_prefix_in_both_views() {
+    let body = program(json!({"cost":{"pp":1_i32},"do":[
+        {"reveal_until":{"sel":{"who":"self","zone":"deck","kind":"follower","orig_cost_le":3_i32},
+            "n":1_i32,"bind":"revealed","matched":"matched"}}
+    ]}));
+    let build = |tail| {
+        activate(
+            Viewer::P1,
+            &["unit-spell", "unit-amulet", "unit-follower", tail],
+            "unit-spell",
+            &body,
         )
-        .unwrap();
+    };
+    let mut a = build("unit-amulet");
+    let mut b = build("unit-spell");
+    assert_temporary_reveals(
+        &mut a,
+        &mut b,
+        &["unit-amulet", "unit-follower", "unit-spell"],
+    );
+}
+
+#[test]
+fn conditional_search_notices_show_only_the_chosen_cards_in_both_views() {
+    let actor = Viewer::P1;
+    let filter = json!({"groups":[
+        {"sel":{"who":"self","zone":"deck","kind":"follower"},"n":1_i32},
+        {"sel":{"who":"self","zone":"deck","kind":"spell"},"n":1_i32}
+    ],"to":"hand"});
+    let submit_search = |tail| {
+        let mut game = search::make(
+            actor,
+            &filter,
+            &["unit-spell", "unit-follower", tail],
+            "unit-spell",
+        );
+        let native = question(&game, actor).unwrap();
+        let (_, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("search".into())).unwrap();
+        let wire::QuestionShape::Select { selection } = shape else {
+            panic!("the conditional search is open")
+        };
+        let groups: Vec<_> = selection
+            .groups
+            .iter()
+            .map(|group| GroupChoice {
+                group: group.group,
+                selected: vec![group.eligible.first().unwrap().clone()],
+            })
+            .collect();
+        let answer = Answer::Select {
+            selected: groups
+                .iter()
+                .flat_map(|group| group.selected.iter().cloned())
+                .collect(),
+            groups: Some(groups),
+            roles: vec![],
+        };
+        submit_projected(&mut game, &native, &binding, &answer);
+        game
+    };
+    let mut a = submit_search("unit-amulet");
+    let mut b = submit_search("unit-follower");
+    assert_temporary_reveals(&mut a, &mut b, &["unit-follower", "unit-spell"]);
+}
+
+fn assert_temporary_reveals(a: &mut Game, b: &mut Game, sorted_cards: &[&str]) {
+    let fixture = board_fixture::fixture().unwrap();
+    let expected: Vec<_> = sorted_cards
+        .iter()
+        .map(|number| ShownCard {
+            card: fixture
+                .references
+                .resolve(
+                    &fixture.catalog,
+                    &player::observation::CardFace {
+                        card: (*number).into(),
+                        face: 0,
+                    },
+                )
+                .unwrap(),
+            owner: seat(Viewer::P1),
+            position: None,
+        })
+        .collect();
     for viewer in [Viewer::P1, Viewer::P2] {
         let notices = a.take_battle_notices(viewer, &fixture.references).unwrap();
         assert_eq!(
@@ -145,12 +227,7 @@ fn public_top_reveal_delivers_one_notice_to_both_seats_without_private_cards_or_
             panic!("one public notice")
         };
         assert_eq!(notice.kind, NoticeKind::TemporaryReveal);
-        let [shown] = notice.cards.as_slice() else {
-            panic!("one authorized face")
-        };
-        assert_eq!(shown.card, expected);
-        assert_eq!(shown.owner, seat(Viewer::P1));
-        assert_eq!(shown.position, None);
+        assert_eq!(notice.cards, expected);
         assert!(
             notice
                 .source
