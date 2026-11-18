@@ -156,6 +156,15 @@
     border: 0;
   }
 
+  dialog:modal {
+    overscroll-behavior: contain;
+  }
+
+  dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+  }
+
   [popover] {
     border: 0;
   }

@@ -177,7 +177,6 @@ describe("DeckBuilderPage", () => {
     const sheet = await screen.findByRole("dialog", { name: "牌組" })
     await user.click(await within(sheet).findByRole("button", { name: "匯出／分享" }))
     expect(await screen.findByRole("dialog", { name: "匯出／分享" })).toBeInTheDocument()
-    expect(document.documentElement.style.overflow).toBe("hidden")
 
     await act(async () => {
       setWide(true)
@@ -187,7 +186,6 @@ describe("DeckBuilderPage", () => {
       expect(router.state.location.state).toBeNull()
     })
     expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
-    expect(document.documentElement.style.overflow).toBe("")
     expect(screen.getByRole("complementary", { name: "牌組" })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe(`/decks/${id}`)
 

@@ -28,20 +28,6 @@ export interface DialogProps {
   readonly className?: string
 }
 
-// Open dialogs share one page scroll lock. A count, not each dialog's saved value: nested dialogs
-// unmounted together clean up outer first, which would restore the inner one's "hidden".
-let scrollLocks = 0
-let unlockedOverflow = ""
-function lockPageScroll() {
-  if (scrollLocks === 0) unlockedOverflow = document.documentElement.style.overflow
-  scrollLocks += 1
-  document.documentElement.style.overflow = "hidden"
-}
-function unlockPageScroll() {
-  scrollLocks -= 1
-  if (scrollLocks === 0) document.documentElement.style.overflow = unlockedOverflow
-}
-
 // Native <dialog> does the modal work (top layer, inert background, focus trap). What it does
 // not do reliably across browsers is picked up here: initial focus on the close button, returning
 // focus to the opener, Escape and backdrop clicks going through onClose so the caller stays in charge.
@@ -77,13 +63,6 @@ export function Dialog({
       openerRef.current = null
     }
   }, [open])
-  // The top layer traps focus but not the wheel: the page behind a modal must not scroll.
-  useEffect(() => {
-    if (!open) return
-    lockPageScroll()
-    return unlockPageScroll
-  }, [open])
-
   const onCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
     event.preventDefault()
     onClose()
@@ -105,7 +84,7 @@ export function Dialog({
         variant === "sheet" &&
           "fixed top-auto bottom-0 max-w-none md:top-1/2 md:bottom-auto md:left-1/2 md:max-w-lg md:-translate-x-1/2 md:-translate-y-1/2",
         variant === "bottom" &&
-          "fixed inset-x-0 top-auto bottom-0 max-w-none overflow-hidden overscroll-contain bg-surface-1",
+          "fixed inset-x-0 top-auto bottom-0 max-w-none overflow-hidden bg-surface-1",
         variant === "center" && "top-1/2 left-1/2 max-w-lg -translate-x-1/2 -translate-y-1/2",
         variant === "card" &&
           "inset-0 h-dvh max-w-none md:inset-auto md:top-1/2 md:left-1/2 md:h-auto md:max-w-[min(100%-2rem,58rem)] md:-translate-x-1/2 md:-translate-y-1/2",
