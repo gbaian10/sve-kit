@@ -334,11 +334,12 @@ impl LocalSession {
         out.extend(updates);
     }
 
-    /// The seat's update if its board or input changed, or always when `force` is set.
+    /// The seat's update if its board or input changed or it has events it has not received,
+    /// or always when `force` is set.
     ///
     /// Events are taken only on this delivery path: taking them records that the seat was
-    /// handed this stop, which must not happen at a stop the seat is never sent. Committed
-    /// events wait for the next delivered update, and a first event gap is always delivered.
+    /// handed this stop, which must not happen at a stop the seat is never sent. New committed
+    /// batches and a first event gap are themselves a reason to deliver.
     /// A forced update is a baseline: it replays no earlier events.
     fn refresh(
         &mut self,
@@ -361,10 +362,11 @@ impl LocalSession {
         };
         channel.shown = Some(projection);
         let changed = channel.seen.as_ref() != Some(&seen);
-        if !(force || changed) {
+        let news = !force && channel.feed.has_news(&self.game);
+        if !(force || changed || news) {
             return Ok(None);
         }
-        if changed {
+        if changed || news {
             channel.update_seq = safe_increment(channel.update_seq)?;
         }
         let feed = if force {
