@@ -99,12 +99,22 @@ impl Game {
             super::movement::zone_capacity("ex").ok_or_else(|| invalid("EX capacity"))?;
         let full = self.zone_count(seat_name(execution.context.controller)?, "ex") >= capacity;
         if stop || !progressed || full {
+            execution
+                .processing_disclosure
+                .procedures
+                .finish_repeat(plan.scope);
             execution.repeats.active.remove(&plan.scope);
             execution.repeats.iterations.remove(&iteration.key());
             return Ok(());
         }
         let body = plan.body.clone();
+        let scope = plan.scope;
+        execution
+            .processing_disclosure
+            .procedures
+            .begin_repeat(scope)?;
         execution.todo.push_front(Node::Control { control }.into());
+        execution.todo.push_front(super::Queued::EndRepeat(scope));
         execution.prepend(body);
         Ok(())
     }

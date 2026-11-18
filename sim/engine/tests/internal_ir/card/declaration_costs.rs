@@ -5,6 +5,10 @@
 )]
 use super::*;
 use sve_engine::game::internal::InputDomain;
+use sve_engine::game::player::{
+    Viewer,
+    observation::{ProcessingDeclaration, ProcessingStage},
+};
 
 #[test]
 fn mode_payment_rejects_resolution_alternatives_and_nonleading_payment_steps() {
@@ -75,6 +79,19 @@ fn selected_mode_fee_can_be_declined_and_an_unselected_fee_is_absent() {
                 panic!("mode fee")
             };
             assert_eq!(cost.domain, InputDomain::OptionalCost);
+            let processing = game.observe(Viewer::P2).unwrap().processing;
+            assert!(
+                processing[0]
+                    .declared
+                    .contains(&ProcessingDeclaration::Modes {
+                        actor: Viewer::P1,
+                        modes: vec![1]
+                    })
+            );
+            assert!(
+                processing[0].payments.is_empty(),
+                "an unpaid optional mode fee has no receipt"
+            );
             game.answer_internal_card(cost.actor, cost.token, Answer::OptionalCost(accepted))
                 .unwrap()
         } else {
@@ -393,6 +410,13 @@ fn player_question_resolution_payment_keeps_acceptance_separate_from_declared_co
         assert_eq!(
             payment.shape,
             QuestionShape::Decision(DecisionShape::ResolutionPayment)
+        );
+        let mine = game.observe(Viewer::P1).unwrap().processing;
+        let theirs = game.observe(Viewer::P2).unwrap().processing;
+        assert_eq!(
+            (mine[0].stage, theirs[0].stage),
+            (Some(ProcessingStage::Pay), Some(ProcessingStage::Resolve)),
+            "a private payment question does not advance the waiting seat's public stage"
         );
         let before = game.projection(View::Referee).unwrap();
         assert_eq!(

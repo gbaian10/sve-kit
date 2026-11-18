@@ -7,7 +7,7 @@ use crate::payment_fixtures;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::Viewer;
-use sve_engine::game::player::observation::PendingCost;
+use sve_engine::game::player::observation::{PendingCost, ProcessingDeclaration};
 
 fn tree(head: &str, body: Value) -> Value {
     payment_fixtures::x_document(fanfare::expanded::tree(), head, body).unwrap()
@@ -91,6 +91,15 @@ fn x_pp_binds_before_cost_filtered_targets_and_impossible_targets_restore_the_wh
     assert!(
         matches!(&target.domain, InputDomain::Targets(domain) if domain.members.len()==1),
         "target cost limits see the chosen X"
+    );
+    let processing = game.observe(Viewer::P2).unwrap().processing;
+    assert!(processing[0].declared.contains(&ProcessingDeclaration::X {
+        actor: Viewer::P1,
+        value: 1
+    }));
+    assert!(
+        processing[0].payments.is_empty(),
+        "declaring X fixes a quote without paying it"
     );
     let quoted = cost_observation::active(&game);
     assert_eq!(quoted.total_pp, Some(1));

@@ -1,10 +1,14 @@
 //! Closed, read-only player observations without authority identities.
 
 mod context;
+mod processing;
 pub use context::{
     AbilityQuota, DamageHistory, DiceHistory, EffectRecipient, HistoryEvent, PendingTrigger,
-    PreventionChange, ProcessingSource, StatGainHistory, SubjectHistory, TriggerTiming,
-    TurnHistory,
+    PreventionChange, StatGainHistory, SubjectHistory, TriggerTiming, TurnHistory,
+};
+pub use processing::{
+    PaymentKind, PaymentPurpose, ProcedureKind, ProcessingContext, ProcessingDeclaration,
+    ProcessingPayment, ProcessingProcedure, ProcessingStage, ProcessingSubject,
 };
 
 mod board;
@@ -29,7 +33,7 @@ use crate::battle::{
     BattleReferences, ObjectTable, ProjectionError, QuestionProjection, RuleProcessing,
     build_objects, build_observation, project_turn,
 };
-use crate::game::internal::{observed_sources, zone_capacity};
+use crate::game::internal::{observed_processing, zone_capacity};
 use crate::game::{Game, Object};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
@@ -272,10 +276,9 @@ pub struct Observation {
     pub costs: CostObservation,
     /// Disclosed pending occurrences, without question or authority identities.
     pub pending: Vec<PendingTrigger>,
-    /// Formal sources disclosed by public played writers or actual questions to this viewer.
-    /// This outer-to-inner subset omits unknown or undisclosed sources; empty is not
-    /// evidence of an empty processing stack and cannot authorize wire interaction.
-    pub processing_sources: Vec<ProcessingSource>,
+    /// Authorized formal executions, ordered from outer to inner.
+    /// Hidden frames leave no slot; private progress is visible only to the current actor.
+    pub processing: Vec<ProcessingContext>,
     /// Committed public facts retained for this turn.
     pub history: TurnHistory,
 }
@@ -599,7 +602,7 @@ impl Game {
             remembered: self.card_memory(perspective)?,
             costs: self.observed_costs(perspective)?,
             pending: self.observed_pending(perspective)?,
-            processing_sources: observed_sources(self, perspective),
+            processing: observed_processing(self, perspective)?,
             history: self.observed_history(perspective)?,
         })
     }

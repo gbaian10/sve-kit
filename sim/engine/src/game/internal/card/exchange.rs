@@ -14,6 +14,7 @@ use crate::game::internal::{
 use crate::game::player::ExchangeRouteChoice;
 use crate::game::player::SelectionQuestion;
 use crate::game::player::Viewer;
+use crate::game::player::observation::PaymentPurpose;
 use crate::game::player::observation::PendingCost;
 use crate::ir::exchange as exchange_shape;
 use crate::ir::flip_cost;
@@ -181,6 +182,14 @@ pub(in crate::game::internal) fn select(
     );
     exchange.selected = Some(members);
     Ok(())
+}
+
+fn pp_purpose(exchange: Option<&ExchangeState>) -> PaymentPurpose {
+    if exchange.is_some_and(|exchange| exchange.accepted == Some(true)) {
+        PaymentPurpose::Exchange
+    } else {
+        PaymentPurpose::Original
+    }
 }
 
 fn completed_payment(
@@ -754,6 +763,11 @@ impl Game {
         }
         let quantity =
             self.internal_pay_pp(execution.context.controller, Int(pay_pp), execution)?;
+        execution
+            .pp_payments
+            .last_mut()
+            .ok_or_else(|| invalid("missing exchange PP debit"))?
+            .purpose = Some(pp_purpose(exchange));
         let intrinsic = if execution.field_entry {
             ReceiptId(0)
         } else {

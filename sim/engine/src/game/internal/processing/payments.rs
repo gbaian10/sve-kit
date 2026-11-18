@@ -60,7 +60,11 @@ pub(in crate::game::internal) fn record_cost_spec_payment(
     execution: &mut Execution,
     purpose: CostPaymentPurpose,
     steps: Vec<CostStepPayment>,
+    pp_start: usize,
 ) {
+    for payment in execution.pp_payments.iter_mut().skip(pp_start) {
+        payment.purpose = Some(super::payment_observation::purpose(purpose));
+    }
     execution
         .cost_spec_payments
         .push(CostSpecPayment { purpose, steps });

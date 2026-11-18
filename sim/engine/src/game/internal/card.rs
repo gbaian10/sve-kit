@@ -1001,6 +1001,7 @@ impl Game {
         self.internal_use_prerequisite(execution, costs)?;
         self.check_hand_material_cost_entry(execution, costs)?;
         let mut captured = Vec::new();
+        let pp_start = execution.pp_payments.len();
         for step in steps {
             let actor = purpose
                 .map(|_| execution.player(self, &step.instruction.actor))
@@ -1028,7 +1029,7 @@ impl Game {
             }
         }
         if let Some(purpose) = purpose {
-            processing::record_cost_spec_payment(execution, purpose, captured);
+            processing::record_cost_spec_payment(execution, purpose, captured, pp_start);
         }
         Ok(())
     }

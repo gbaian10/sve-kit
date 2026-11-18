@@ -85,6 +85,7 @@ impl Game {
             nested.committed = true;
         }
         enter_play_phase(execution, PlayPhase::Resolve)?;
+        super::super::processing::disclose_played_source(self, execution);
         execution.record_fact(
             self,
             super::Fact::CardPlayed {

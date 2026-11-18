@@ -300,7 +300,7 @@ impl Game {
         ));
         // Each body follows a capture of its player, so a decision waiting inside a body
         // keeps that player bound when the procedure resumes.
-        for stage in stages.iter().rev() {
+        for (index, stage) in stages.iter().enumerate().rev() {
             if stage.mode == (StageMode::NonChoiceSimultaneous {}) {
                 // The remainder dispatch reuses this procedure's locals; only the outer
                 // begin_procedure owns its EndProcedure marker.
@@ -347,6 +347,13 @@ impl Game {
                     .into(),
                 );
             }
+            let round = u64::try_from(index)
+                .map_err(invalid)?
+                .checked_add(1)
+                .ok_or_else(|| invalid("processing stage round overflow"))?;
+            execution
+                .todo
+                .push_front(super::Queued::ProcedureRound(binding.key(), round));
         }
         Ok(())
     }

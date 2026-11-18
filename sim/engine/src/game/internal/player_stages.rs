@@ -353,6 +353,9 @@ where
 )]
 impl Execution {
     pub(super) fn begin_procedure(&mut self, locals: ProcedureLocals) {
+        self.processing_disclosure
+            .procedures
+            .begin_players(locals.player);
         self.todo.push_front(Queued::EndProcedure(locals.player));
         self.procedures.push(locals);
     }
@@ -364,6 +367,7 @@ impl Execution {
         if procedure.player != player {
             return Err(invalid("procedure end does not match the active procedure"));
         }
+        self.processing_disclosure.procedures.end(player)?;
         Ok(())
     }
 
@@ -411,6 +415,7 @@ impl Execution {
         self.receipts.extend(own.receipts);
         self.look_viewers.extend(own.look_viewers);
         self.player_receipt_links.extend(own.receipt_links);
+        self.processing_disclosure.procedures.players(key, next);
         procedure.actor = Some(next);
         self.procedures.push(procedure);
     }

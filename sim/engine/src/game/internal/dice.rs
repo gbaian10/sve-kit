@@ -97,9 +97,17 @@ impl Game {
     pub(super) fn internal_repeat(execution: &mut Execution, control: Control) -> Result<()> {
         let (body, count) = ir_dice::repeat(&control).ok_or_else(|| unsupported("fixed repeat"))?;
         let Some(left) = count.checked_sub(1) else {
+            execution
+                .processing_disclosure
+                .procedures
+                .finish_repeat(body.scope);
             return Ok(());
         };
         let body = body.clone();
+        execution
+            .processing_disclosure
+            .procedures
+            .begin_repeat(body.scope)?;
         let mut next = control;
         if let Control::Repeat {
             termination:
@@ -114,6 +122,9 @@ impl Game {
         execution
             .todo
             .push_front(Node::Control { control: next }.into());
+        execution
+            .todo
+            .push_front(super::Queued::EndRepeat(body.scope));
         execution.prepend(body);
         Ok(())
     }

@@ -143,7 +143,7 @@ fn a_fault_that_returns_to_the_previous_stop_neither_cancels_nor_promotes_what_w
     }
     let before = SEATS.map(|viewer| snapshot(&game, viewer));
     assert!(
-        !before[0].2.processing_sources.is_empty(),
+        !before[0].2.processing.is_empty(),
         "the retained Drive stop includes its actor's authorized processing source"
     );
     let open = [open_scopes(&before[0].0), open_scopes(&before[1].0)];

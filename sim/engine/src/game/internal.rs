@@ -103,7 +103,7 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
-pub(in crate::game) use processing::observed_sources;
+pub(in crate::game) use processing::observed_processing;
 pub use processing::{
     CostPaymentPurpose, CostSpecPayment, CostStepPayment, ExchangeMaterialPayment, ExchangePayment,
     NumberDeclaration, PlayDeclaration, PlayPhase, PpPayment, QuestionStage, TargetDeclaration,
@@ -658,21 +658,14 @@ pub(super) struct Execution {
     effect_evolution_destinations: BTreeMap<(ScopeId, u64), (Specification, ObjectRef)>,
     facts: fact_log::Facts,
     waiting: Option<(DecisionView, Wait)>,
-    // Temporarily write-only; wire processing will be its first reader after replanning.
     question_stage: Option<QuestionStage>,
     play_phase: Option<PlayPhase>,
     processing_disclosure: processing::ProcessingDisclosure,
-    // Temporarily write-only; wire processing will be its first reader after replanning.
     number_declarations: Vec<NumberDeclaration>,
-    // Temporarily write-only; wire processing will be its first reader after replanning.
     play_declarations: Vec<PlayDeclaration>,
-    // Temporarily write-only; wire processing will be its first reader after replanning.
     pp_payments: Vec<PpPayment>,
-    // Temporarily write-only; wire processing will be its first reader after replanning.
     cost_spec_payments: Vec<CostSpecPayment>,
-    // Temporarily write-only; wire processing will be its first reader after replanning.
     exchange_payments: Vec<ExchangePayment>,
-    // Temporarily write-only; wire processing will be its first reader after replanning.
     target_declarations: Vec<TargetDeclaration>,
     destroy_guards: Vec<ObjectRef>,
     look_viewers: BTreeMap<ReceiptId, PlayerId>,
@@ -1295,6 +1288,7 @@ impl Game {
                 }
                 _ => return Err(invalid("answer is outside the internal domain")),
             }
+            processing::capture_declarations(self, &mut execution);
             self.internal_run(&mut execution, &published)?;
             execution.origin = rollback.take();
             let progress = execution.progress();

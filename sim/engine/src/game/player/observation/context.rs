@@ -4,17 +4,6 @@ use super::{EffectSource, ObservedZone};
 use crate::game::player::{ObjectHandle, Viewer};
 use crate::ir::{AbilityKind, CardKind, ConsumptionPoint};
 
-/// One formal execution's source disclosed by its public played writer or a real question.
-///
-/// This is only a source subset, not a complete processing stack or progress report.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub struct ProcessingSource {
-    /// Execution controller, which may differ from the player asked.
-    pub controller: Viewer,
-    /// Separately authorized frozen wording origin and current holder link.
-    pub source: EffectSource,
-}
-
 /// A currently identifiable effect recipient.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum EffectRecipient {

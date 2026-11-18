@@ -5,7 +5,7 @@
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::DecisionShape;
-use sve_engine::game::player::Viewer;
+use sve_engine::game::player::{Viewer, observation::ProcedureKind};
 
 fn reroll() -> Located<Ability> {
     history_fixture::reroll().unwrap()
@@ -44,7 +44,20 @@ fn player_pipeline_reroll_waiting_summary_preserves_the_public_die() {
     let mut game = position_with_card(1, &program);
     game.activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
         .unwrap();
-    for _ in 0..2 {
+    for round in 1..=2 {
+        let context = game.observe(Viewer::P1).unwrap().processing.pop().unwrap();
+        let procedure = context.procedure.unwrap();
+        assert_eq!(
+            (procedure.kind, procedure.actor, procedure.round),
+            (ProcedureKind::Repeat, Viewer::P1, round)
+        );
+        assert!(
+            game.observe(Viewer::P2)
+                .unwrap()
+                .processing
+                .iter()
+                .all(|context| context.procedure.is_none())
+        );
         let question = player_question(&game, Viewer::P1);
         let QuestionShape::Decision(DecisionShape::DiceReroll { value, remaining }) =
             question.shape
