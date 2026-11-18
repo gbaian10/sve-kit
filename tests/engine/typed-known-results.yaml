@@ -803,7 +803,7 @@ known:
     scenario: "A 打出デモンビーター後跳過ファンファーレ直接攻擊 → 拒絕；處理完待機後攻擊成功"
     status: unsupported
     error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: attack at Pending"
+    reason: "typed runner: resolve-choice for OptionalCost"
   - question: "flow-opponent-choice-r3-01"
     scenario: "兩個來源都由對手選模式 1"
     status: unsupported
