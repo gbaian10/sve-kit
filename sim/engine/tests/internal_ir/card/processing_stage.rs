@@ -503,3 +503,56 @@ fn optional_acceptance_is_a_declaration_until_the_actual_debits() {
         "each writer's debit appears once with its actual cost group"
     );
 }
+
+#[test]
+fn the_payer_keeps_its_receipt_when_the_other_player_is_asked_next() {
+    use sve_engine::game::player::observation::PaymentPurpose;
+    let tree = evolution_linked_movement::tree(&[(
+        "auto",
+        json!({
+            "on":{"phase":{"whose":"self","which":"end"}},
+            "do":[{"pay":{"cost":{"pp":1},"do":[{"life":{"who":"self","delta":1}}]}}]
+        }),
+    )]);
+    let mut raw = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap()
+        .card()
+        .clone();
+    let ability = &mut raw.abilities[0];
+    let binding = Binding::new(999, ability.node.body.as_ref().unwrap().scope);
+    let mut step = instruction(
+        999,
+        Action::Declare {
+            actor: opponent(),
+            declaration: Declaration::NonnegativeInteger { binding },
+        },
+    );
+    step.source = ability.source.clone();
+    if let Node::Instruction { instruction } = &mut step.node {
+        instruction.source = ability.node.source.clone();
+    }
+    ability.node.body.as_mut().unwrap().steps.push(step);
+    let program = WellFormedCardProgram::check(raw).unwrap();
+    let mut game = fixture(&program);
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    game.advance_player_input();
+    apply(&mut game, Viewer::P1, Answer::Pending(1));
+    game.advance_player_input();
+    apply(&mut game, Viewer::P1, Answer::OptionalCost(true));
+    question(&game, Viewer::P2);
+    let mine = sources(&game, Viewer::P1);
+    assert_eq!(mine[0].actor, None, "the payer is now waiting");
+    assert!(
+        mine[0]
+            .payments
+            .iter()
+            .any(|payment| payment.actor == Viewer::P1
+                && payment.purpose == Some(PaymentPurpose::Resolution)
+                && payment.amount == 1),
+        "changing the question actor does not revoke the payer's completed receipt"
+    );
+}

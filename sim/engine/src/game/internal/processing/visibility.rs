@@ -230,14 +230,13 @@ fn append_contexts(
     };
     let boundary = disclosure.payments.unwrap_or_default();
     let mut payments = completed(execution, boundary, PaymentBoundary::default())?;
-    if active {
-        // A public play does not authorize later private payments made by another player.
-        payments.extend(
-            completed(execution, PaymentBoundary::capture(execution), boundary)?
-                .into_iter()
-                .filter(|payment| payment.actor == perspective),
-        );
-    }
+    // Payers retain their own receipts across seat changes; a public play does not
+    // authorize another player's later private payments.
+    payments.extend(
+        completed(execution, PaymentBoundary::capture(execution), boundary)?
+            .into_iter()
+            .filter(|payment| payment.actor == perspective),
+    );
     contexts.push(ProcessingContext {
         stage,
         controller,
