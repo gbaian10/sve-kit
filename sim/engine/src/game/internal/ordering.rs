@@ -556,8 +556,9 @@ fn mask_public_selectors(inspected: &mut Node) -> Result<()> {
 }
 
 fn mask_public_number_change(change: &mut NumericChange) {
-    let (NumericChange::Add { amount } | NumericChange::Set { amount }) = change;
-    mask_public_number(amount);
+    if let NumericChange::Add { amount } | NumericChange::Set { amount } = change {
+        mask_public_number(amount);
+    }
 }
 
 fn mask_numeric_union(selector: &mut Selector) -> Result<()> {

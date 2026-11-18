@@ -190,6 +190,10 @@ fn predicate_filter(value: &Expr<Bool>, binding: Binding<ObjectRef>) -> bool {
             left: Expr::Live(read),
             right: Expr::Literal(_),
         } => matches!(read.as_ref(),NamesRead::Names{object} if candidate(object,binding)),
+        Predicate::NameContains {
+            object,
+            name: Expr::Literal(name),
+        } => !name.0.is_empty() && candidate(object, binding),
         Predicate::CompareInt {
             left: Expr::Compute(operation),
             right: Expr::Literal(_),

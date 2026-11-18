@@ -78,7 +78,9 @@ fn specification_with_x(action: &Action, x: Option<PaidX>) -> Option<(&[TokenSpe
     if !(matches!(
         zone.player,
         PlayerRef::Controller {} | PlayerRef::Bound { .. }
-    ) || zone.player == opponent())
+    ) || zone.player == opponent()
+        || matches!(&zone.player, PlayerRef::FromExpression { value }
+            if matches!(value.as_ref(), Expr::Captured(_))))
         || !matches!(zone.kind, ZoneKind::Ex | ZoneKind::Field)
         || !entry_effects.is_empty()
         || match initial_state {

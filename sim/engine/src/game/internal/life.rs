@@ -60,6 +60,9 @@ impl Game {
                 .checked_add(execution.integer(self, amount)?.0)
                 .ok_or_else(|| invalid("leader life overflow"))?,
             NumericChange::Set { amount } => execution.integer(self, amount)?.0,
+            NumericChange::SetOriginal {} => {
+                return Err(unsupported("leader life has no printed stat"));
+            }
         };
         let delta = after
             .checked_sub(before)

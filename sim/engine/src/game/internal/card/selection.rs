@@ -1324,6 +1324,25 @@ impl Game {
         decision: &Decision,
     ) -> Result<()> {
         let (wait, domain) = self.target_domain(execution, decision)?;
+        // A dynamic exact count of zero declares no targets and needs no answer.
+        if wait.bounds.maximum == Some(Nat(0))
+            && let ChoiceDomain::Objects {
+                constraint,
+                target_roles: None,
+                ..
+            } = &decision.domain
+            && matches!(
+                constraint.aggregate_bounds.as_slice(),
+                [AggregateBound {
+                    property: NumericProperty::Count,
+                    comparison: Comparison::Equal,
+                    ..
+                }]
+            )
+        {
+            execution.bind_targets(&wait, Vec::new());
+            return execution.captures(self, &decision.captures);
+        }
         if wait.bounds.minimum.0 > wait.capacity()? {
             return Err(crate::EngineFailure::IllegalPlay(
                 "no legal play targets".into(),

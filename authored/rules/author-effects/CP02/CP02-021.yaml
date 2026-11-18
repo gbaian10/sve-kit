@@ -1,0 +1,37 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP02-021:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        fanfare:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n:
+                min:
+                  - 1
+                  - count: { who: self, zone: field, kind: follower, name_contains: 島村卯月 }
+          do:
+            - damage: { to: enemy, n: 5 }
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count: { who: self, zone: field, kind: follower, name_contains: 本田未央 }
+                    op: ge
+                    right: 1
+                then:
+                  - damage: { to: { leaders: opponents }, n: 5 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

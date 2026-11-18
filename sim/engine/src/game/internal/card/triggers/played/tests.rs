@@ -27,6 +27,7 @@ fn unknown_printed_values_do_not_satisfy_zero_or_upper_bounds() {
             };
             let info = SubjectInformation {
                 original_cost: known_original_cost(&value),
+                effective_cost: None,
                 keywords: &[],
                 kind: Some(CardKind::Spell),
                 class: None,

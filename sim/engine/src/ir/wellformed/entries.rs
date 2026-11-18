@@ -984,6 +984,7 @@ impl Checker {
             }
             CharacteristicPatch::Numeric { change, .. } if layer == ContinuousLayer::Numeric => {
                 match change {
+                    NumericChange::SetOriginal {} => Ok(()),
                     NumericChange::Add { amount } | NumericChange::Set { amount } => {
                         self.integer(amount)
                     }

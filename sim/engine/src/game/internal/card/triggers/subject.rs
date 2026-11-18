@@ -55,6 +55,7 @@ impl EventSubjectInformation {
         SubjectInformation {
             keywords: &[],
             original_cost: self.original_cost,
+            effective_cost: None,
             kind: Some(self.kind),
             class: Some(&self.class),
             traits: &self.traits,

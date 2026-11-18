@@ -58,6 +58,7 @@ impl PublicCharacteristics {
         SubjectInformation {
             keywords: &[],
             original_cost: None,
+            effective_cost: None,
             kind: self.kind,
             traits: &self.traits,
             names: &self.names,

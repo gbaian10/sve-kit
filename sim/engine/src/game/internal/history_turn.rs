@@ -324,6 +324,7 @@ pub(super) fn filtered_played_at(
             .collect::<Vec<_>>();
         let information = SubjectInformation {
             original_cost: None,
+            effective_cost: None,
             keywords: &[],
             kind: Some(kind),
             traits: &traits,
@@ -564,6 +565,7 @@ pub(super) fn subject_count_at(
         let information = SubjectInformation {
             keywords: &[],
             original_cost: None,
+            effective_cost: None,
             kind: Some(kind),
             class: Some(&class),
             traits: &traits,

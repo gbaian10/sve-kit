@@ -1153,6 +1153,9 @@ impl BodyContext<'_> {
             }
             ast::Number::ReceiptCount { count } => self.receipt_count(count, path),
             ast::Number::CountOf { count_of } => self.count_of(count_of, path),
+            ast::Number::OriginalStat {
+                original: ast::True,
+            } => Err(unsupported(path)),
             ast::Number::Literal(value) => Ok(Expr::Literal(Int(*value))),
             ast::Number::PaidAmount { x_paid } => self.paid_amount(x_paid, path),
             ast::Number::Aggregate { agg } => self.aggregate(agg, path),

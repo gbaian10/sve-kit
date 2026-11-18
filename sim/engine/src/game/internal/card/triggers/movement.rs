@@ -363,6 +363,7 @@ impl Game {
                     &SubjectInformation {
                         keywords,
                         original_cost: Some(snapshot.original_cost()),
+                        effective_cost: None,
                         kind: Some(characters.kind),
                         traits: &characters.traits,
                         names: &characters.names,

@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-008:
+    admission: light
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - destroy: { ref: { who: all, zone: field } }
+            - move: { ref: { who: all, zone: ex }, to: cemetery }
+            - discard: { who: self, all: true }
+            - look: { top: { who: self, n: 5 }, bind: seen }
+            - choose: { from: { in: seen }, bind: picked, upto: 5 }
+            - move: { ref: picked, to: ex, result: placed }
+            - move:
+                ref:
+                  in: seen
+                  except: { in: { objects_of: placed, view: before } }
+                to: cemetery
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

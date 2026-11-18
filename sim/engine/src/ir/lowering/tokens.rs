@@ -55,7 +55,10 @@ impl BodyContext<'_> {
                 Some(_) => return Err(unsupported(path)),
             };
             if !matches!(value.n, None | Some(ast::TokenCount::Fixed(1)))
-                || value.by.as_deref().is_some_and(|who| who != "self")
+                || !matches!(
+                    value.by,
+                    None | Some(ast::Participant::Side(ast::LeaderSide::Controller))
+                )
             {
                 return Err(unsupported(path));
             }
@@ -102,7 +105,7 @@ impl BodyContext<'_> {
             tokens,
             destination: TokenDestination::Single {
                 zone: Expr::Literal(ZoneRef {
-                    player: self.token_player(value.by.as_deref().unwrap_or("self"), path)?,
+                    player: self.participant(value.by.as_ref(), path)?,
                     kind,
                 }),
             },
@@ -113,17 +116,11 @@ impl BodyContext<'_> {
         })
     }
     fn token_player(&self, name: &str, path: &str) -> Result<PlayerRef, LoweringError> {
-        if name == "self" {
-            return Ok(PlayerRef::Controller {});
+        match name {
+            "self" => Ok(PlayerRef::Controller {}),
+            "opp" => Ok(super::super::events::timing::opponent()),
+            _ => self.named_player(name, path),
         }
-        if name == "opp" {
-            return Ok(super::super::events::timing::opponent());
-        }
-        self.players
-            .get(name)
-            .copied()
-            .map(|binding| PlayerRef::Bound { binding })
-            .ok_or_else(|| unsupported(path))
     }
 
     fn token_count(
@@ -237,7 +234,7 @@ impl BodyContext<'_> {
         let legacy = match each.stages.as_slice() {
             [stage] => match stage.as_slice() {
                 [ast::Step::Create(create)] => {
-                    create.by.as_ref() == Some(&each.binding)
+                    matches!(&create.by, Some(ast::Participant::Bound(name)) if name == &each.binding)
                         && create.result.is_none()
                         && create.bind.is_none()
                 }

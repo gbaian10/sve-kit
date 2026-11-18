@@ -351,6 +351,16 @@ pub(super) fn movement_filter(
     }) {
         return Err(unsupported(path));
     }
+    let effective_cost = subject
+        .and_then(|sel| sel.cost_le)
+        .map(|cost| {
+            if !matches!(support, FilterSupport::EntryCost) {
+                return Err(unsupported(path));
+            }
+            let cost = i64::try_from(cost).map_err(|_overflow| unsupported(path))?;
+            Ok((Comparison::LessEqual, cost))
+        })
+        .transpose()?;
     let original_cost = original_cost(subject, path)?;
     let keyword = subject.and_then(|sel| sel.keyword).map(|value| value.0);
     // Own field-to-cemetery observers read the departing card's printed cost (BP19-074).
@@ -368,6 +378,7 @@ pub(super) fn movement_filter(
     Ok(SubjectFilter {
         keyword,
         original_cost,
+        effective_cost,
         own,
         itself: if itself {
             Some(true)
@@ -412,7 +423,7 @@ pub(super) fn played(
 ) -> Result<EventPattern, LoweringError> {
     let (mut subject, alternate) = match &entry.sel {
         None => (None, None),
-        Some(ast::PlayedSubject::Single(subject)) => (Some(subject.clone()), None),
+        Some(ast::PlayedSubject::Single(subject)) => (Some(subject.as_ref().clone()), None),
         Some(ast::PlayedSubject::Union { any_of }) => {
             let [first, second] = any_of.as_ref();
             (Some(first.clone()), Some(second))

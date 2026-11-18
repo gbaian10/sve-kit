@@ -247,6 +247,9 @@ pub(super) fn view_filter(
 
 const fn destination(zone: &ast::SearchZone) -> MoveDestination {
     match zone {
+        ast::SearchZone::Banish => MoveDestination::Owners {
+            zone: OwnerZone::Banish,
+        },
         ast::SearchZone::Hand => MoveDestination::Owners {
             zone: OwnerZone::Hand,
         },

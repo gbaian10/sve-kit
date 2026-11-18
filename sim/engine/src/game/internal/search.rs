@@ -22,7 +22,7 @@ use crate::ir::printed_keywords;
 use crate::ir::trigger_restrictions::suppresses_fanfare;
 use crate::ir::{
     AbilityOrigin, Action, Binding, Bool, Cardinality, CharacteristicView, DecisionId, Expr,
-    Instruction, KeywordId, MoveDestination, MoveResult, MoveSpec, Nat, ObjectOperand,
+    Instruction, KeywordId, MoveDestination, MoveMethod, MoveResult, MoveSpec, Nat, ObjectOperand,
     ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Posture, Predicate,
     Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome,
     SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector,
@@ -267,7 +267,7 @@ fn check_destination(destination: &MoveDestination) -> Result<()> {
     if !matches!(
         destination,
         MoveDestination::Owners {
-            zone: OwnerZone::Hand | OwnerZone::Cemetery
+            zone: OwnerZone::Hand | OwnerZone::Cemetery | OwnerZone::Banish
         } | MoveDestination::Shared {
             zone: ZoneRef {
                 kind: ZoneKind::Ex | ZoneKind::Field,
@@ -1148,6 +1148,9 @@ impl Game {
     ) -> Result<(&'static str, ZoneKind)> {
         match to {
             MoveDestination::Owners {
+                zone: OwnerZone::Banish,
+            } => Ok(("banish", ZoneKind::Banish)),
+            MoveDestination::Owners {
                 zone: OwnerZone::Hand,
             } => Ok(("hand", ZoneKind::Hand)),
             MoveDestination::Owners {
@@ -1228,6 +1231,19 @@ impl Game {
                     return Err(unsupported("putting a found spell onto the field"));
                 }
             }
+        }
+        if kind == ZoneKind::Banish {
+            let (moved, _) = self.internal_move_members(
+                execution,
+                found,
+                zone,
+                kind,
+                MoveMethod::Banish,
+                true,
+                None,
+                None,
+            )?;
+            return Ok(moved);
         }
         let moved = self.internal_put_with_arrival(execution, found, zone, kind, arrival)?;
         if kind == ZoneKind::Hand {

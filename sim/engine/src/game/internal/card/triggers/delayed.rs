@@ -270,6 +270,14 @@ impl Game {
         })
     }
 
+    pub(super) fn delayed_entry_reads_effective_cost(&self) -> bool {
+        self.card_runtime.delayed.iter().any(|record| {
+            record
+                .entry_plan()
+                .is_some_and(|plan| plan.filter.effective_cost.is_some())
+        })
+    }
+
     pub(super) fn has_delayed_entries(&self) -> bool {
         self.card_runtime
             .delayed

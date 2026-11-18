@@ -49,6 +49,8 @@ pub(in crate::game) struct NumericState {
 enum Change {
     Add(i64),
     Set(i64),
+    #[serde(skip)]
+    SetOriginal,
 }
 
 impl Change {
@@ -56,13 +58,14 @@ impl Change {
         match self {
             Self::Add(amount) => add(before, amount),
             Self::Set(amount) => Ok(amount),
+            Self::SetOriginal => Err(invalid("unresolved original stat")),
         }
     }
 
     const fn operation(self) -> StatOperation {
         match self {
             Self::Add(_) => StatOperation::Add,
-            Self::Set(_) => StatOperation::Set,
+            Self::Set(_) | Self::SetOriginal => StatOperation::Set,
         }
     }
 }
@@ -128,7 +131,10 @@ pub(super) fn check_program(program: &Program) -> Result<()> {
             merge(first.0, second.0)?;
             if matches!(
                 (first.1, second.1),
-                (Some(Change::Set(_)), Some(Change::Set(_)))
+                (
+                    Some(Change::Set(_) | Change::SetOriginal),
+                    Some(Change::Set(_) | Change::SetOriginal)
+                )
             ) {
                 return Err(unsupported(
                     "same-timestamp SetLife may capture different damage",
@@ -223,6 +229,7 @@ fn shape(patch: &CharacteristicPatch) -> Result<(Option<Change>, Option<Change>)
                     AmountPlan::compile(amount)?;
                     Change::Add(0)
                 }
+                NumericChange::SetOriginal {} => Change::SetOriginal,
                 NumericChange::Set { amount } => Change::Set(
                     AmountPlan::compile(amount)?
                         .nonnegative_constant()
@@ -250,6 +257,7 @@ fn merge(left: Option<Change>, right: Option<Change>) -> Result<Option<Change>> 
         (Some(Change::Add(left)), Some(Change::Add(right))) => {
             Ok(Some(Change::Add(add(left, right)?)))
         }
+        (Some(Change::SetOriginal), Some(Change::SetOriginal)) => Ok(Some(Change::SetOriginal)),
         (Some(Change::Set(left)), Some(Change::Set(right))) if left == right => {
             Ok(Some(Change::Set(left)))
         }
@@ -697,6 +705,16 @@ impl Game {
                     effects: Vec::new(),
                     pilot: None,
                 });
+            let printed = |change, field: &str| {
+                if change == Some(Change::SetOriginal) {
+                    let value = super::cost::printed_cost(&self.face(id)?[field])?;
+                    Ok(Some(Change::Set(value)))
+                } else {
+                    Ok::<_, crate::EngineFailure>(change)
+                }
+            };
+            let attack = printed(attack, "power")?;
+            let life = printed(life, "hp")?;
             let adjusted_life = match life {
                 Some(Change::Set(value)) => Some(Change::Set(add(value, damage)?)),
                 value => value,
@@ -924,6 +942,7 @@ fn changes(
     match patch {
         CharacteristicPatch::Numeric { stat, change } => {
             let change = match change {
+                NumericChange::SetOriginal {} => Change::SetOriginal,
                 NumericChange::Add { amount } => Change::Add(execution.integer(game, amount)?.0),
                 NumericChange::Set { amount } => {
                     let value = execution.integer(game, amount)?.0;
@@ -977,8 +996,9 @@ impl Game {
             return Ok(vec![]);
         };
         let change = |value| match value {
-            Change::Add(amount) => NumberChange::Add(amount),
-            Change::Set(amount) => NumberChange::Set(amount),
+            Change::Add(amount) => Ok(NumberChange::Add(amount)),
+            Change::Set(amount) => Ok(NumberChange::Set(amount)),
+            Change::SetOriginal => Err(invalid("unresolved original stat")),
         };
         let mut result = Vec::new();
         if let Some(pilot) = &state.pilot {
@@ -1000,8 +1020,8 @@ impl Game {
                     .collect(),
                 active: effect.active(),
                 change: InstalledChange::Numeric {
-                    attack: effect.attack.map(change),
-                    life: effect.life.map(change),
+                    attack: effect.attack.map(change).transpose()?,
+                    life: effect.life.map(change).transpose()?,
                 },
             });
         }

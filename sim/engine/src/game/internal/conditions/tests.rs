@@ -470,6 +470,7 @@ fn captured_kinds_remain_exact_while_candidate_kind_inclusion_stays_unchanged() 
     let traits = [TraitId("Golem".into())];
     let mut information = SubjectInformation {
         original_cost: None,
+        effective_cost: None,
         keywords: &[],
         kind: Some(CardKind::EvolveFollower),
         traits: &traits,

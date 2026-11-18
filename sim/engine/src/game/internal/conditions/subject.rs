@@ -91,6 +91,10 @@ impl Reader for Captured<'_> {
                 NumberProperty::Cost(CharacteristicView::Original),
                 Information::Event(information),
             ) => Ok(information.original_cost),
+            (
+                NumberProperty::Cost(CharacteristicView::Effective),
+                Information::Event(information),
+            ) => Ok(information.effective_cost),
             _ => Err(unsupported("captured number information")),
         }
     }
@@ -171,6 +175,13 @@ fn subject(filter: &SubjectFilter, observer: PlayerId) -> Tree<Atom> {
     let mut conditions = Vec::new();
     if let Some((comparison, cost)) = filter.original_cost {
         conditions.push(original_cost(comparison, cost));
+    }
+    if let Some((comparison, cost)) = filter.effective_cost {
+        conditions.push(Tree::Atom(Atom::Number(
+            NumberProperty::Cost(CharacteristicView::Effective),
+            comparison,
+            Expr::Literal(Int(cost)),
+        )));
     }
     if let Some(keyword) = filter.keyword {
         conditions.push(boolean(BooleanProperty::Keyword(keyword), true));

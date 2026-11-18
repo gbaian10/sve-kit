@@ -285,6 +285,8 @@ static:
 
 數值 `buff.on`／`set_stat.on` 與 `grant.on` 共用同一效果的入場結果解析：`move.to: field` 的具名結果，以及 `search.to: field` 中 `sel.kind: follower` 且數量明示 `n: 1` 或 `upto: 1` 的具名結果，以及每組均為從者 query、各取 `n: 1` 或 `upto: 1` 且沒有 `distinct_by` 的群組搜尋結果，都可寫成 `{follow: entered}`。它只取實際成功入場的新世代；滿場、沒有找到或選擇不找到時，對空結果的指示不做，後續獨立步驟照常結算。若後續還有對自身的加成，將它寫成獨立的 `buff.on: this`；搜尋沒有結果時，仍結算該自身步驟。
 
+`set_stat` 的 `power` 或 `hp` 可寫成 `{original: true}`，沿用既有數值修正把該項設為所選從者的印刷原值（BP19-107），搜尋也可用 `to: banish` 將選中的牌直接正面消滅，之後照常洗牌（BP04-059／060，Q593）。
+
 `exists: {in: {follow: entered}, keyword: ward}` 可在同一效果中檢查具名場上移動結果（BP13-092／BP22-R15／PR-416）。lowering 與 runtime 共用封閉的守護查詢形狀；它只檢查實際成功入場且仍在場上的同世代物件，並在條件求值時讀取從者目前有效的守護，包含持續授予；其他守護持有者不算。沒有入場、選擇不放入或場上已滿時條件為假，後續獨立指示照常執行。只接受已登錄的場上結果與 `ward`，其他區域、關鍵字、未宣告結果及額外篩選仍拒絕。
 
 自己場上與 EX 的 `buff.on.any_of` 兩個分支各自沿用一般數值修正查詢，不限定 token 或相同類型；可依卡名合併場上與 EX 的普通從者，同一物件仍只套用一次。
@@ -406,7 +408,7 @@ CP04-T08 氷竜剣必須先有一名合法敵方從者目標，才會橫置它�
 
 場上來源的 `auto.on.enter_field`、`left_field` 與 `destroyed` 共用事件主體篩選：`who` 限制該時點的控制者，`sel` 可篩 `kind`、`trait`、`name`、`class`、`other`，進場與離場另可篩 `token`／`not_token`；省略的條件不加限制，省略 `who`／`sel` 可監看所有物件。進場讀進場後資訊，離場與破壞保留離場前資訊；`this` 仍是能力來源，不自動改指事件主體。`enter_field` 的 `sel` 另接受非空 `name_contains`（「カード名に『アルベール』を含む…が出たとき」，BP13-027），依入場後的完整名稱集合比對片段；其他事件頭不接受此欄。`enter_field` 的 `sel` 也接受 `traits_any: [学院, 獣]`（「学院・フォロワーか獣・フォロワーが出たとき」，BP21-008），至少兩個不重複的類型、任一符合即成立，同時具有多個類型也只觸發一次，不與單一 `trait` 並用；`left_field`、`destroyed` 等離場事件仍拒絕（Played 另有自己的 `traits_any`，見下）。`left_field` 包含送墓、回手、消滅與移 EX，`destroyed` 只由實際破壞成立，付款送墓不會觸發；`moved: {from: field, to: cemetery}` 只監看送墓；`moved: {from: field, to: hand}` 只監看場上返回手牌，可用 `ref: this` 或 `from: {who: self, zone: field}` 限制自身或自己控制的卡。回手事件在離場前收集，因此來源自己回手仍會觸發；墓場回手不會觸發。來源與主體同批離場時，來源使用封存資訊，既有自身離場與謝幕各只收集一次；正式目標、付款與限次沿用共用觸發流程。
 
-`enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。
+`enter_field.sel` 的 `orig_cost_eq`／`orig_cost_le`／`orig_cost_ge` 可與既有主體、玩家及自己回合條件組合，例如 `sel: {kind: follower, orig_cost_le: 2}` 搭配 `during: {turn: self}`。比較入場主體的印刷原費，不因有效費用或付款折扣改變。同一處也接受 `cost_le: N`，以進場當下的有效費用篩選主體（BP04-063）。
 
 事件本文的 `it` 共用標頭的型別綁定，可指向進場、入 EX、攻擊、進化、離場及破壞的主體；`this` 始終是能力來源。進場使用新世代，離場與破壞使用離場前世代；舊事件的主體離場後再回場，不會強化回來的新世代。沒有卡片主體的時點及起動能力不能使用 `it`，也不以來源代替缺少的事件欄位。本文條件可用 `exists: {in: it, trait: 獣}` 檢查該主體是否符合靜態篩選（BP09-002「場に出たフォロワーが獣・フォロワーなら、代わりに…」寫成 `if`／`else` 兩種強化），可與 `not`、`all`、`any` 組合；判斷比照已選正式目標：讀主體目前仍屬於事件那個世代時的特徵，主體已換世代（例如離場、破壞後）就不符合，不會改讀離場前的快照。
 

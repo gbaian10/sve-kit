@@ -219,6 +219,20 @@ impl Game {
         .ok_or_else(|| invalid("entry position overflow"))
     }
 
+    fn entry_cost_reads(&self, observers: &[(String, Vec<PlannedAbility>)]) -> (bool, bool) {
+        let mut original = self.delayed_entry_reads_original_cost();
+        let mut effective = self.delayed_entry_reads_effective_cost();
+        for plan in observers
+            .iter()
+            .flat_map(|(_, abilities)| abilities)
+            .filter_map(|ability| filter(&ability.node))
+        {
+            original |= plan.original_cost.is_some();
+            effective |= plan.effective_cost.is_some();
+        }
+        (original, effective)
+    }
+
     pub(in crate::game) fn internal_field_events(
         &mut self,
         previous: &[Object],
@@ -237,12 +251,7 @@ impl Game {
             return Ok(());
         }
         let observers = self.entry_observers()?;
-        let reads_original_cost = self.delayed_entry_reads_original_cost()
-            || observers.iter().any(|(_, abilities)| {
-                abilities.iter().any(|ability| {
-                    filter(&ability.node).is_some_and(|plan| plan.original_cost.is_some())
-                })
-            });
+        let (reads_original_cost, reads_effective_cost) = self.entry_cost_reads(&observers);
         let active = player_id(self.active())?;
         let effect_source = self.internal_entry_effect_source(frame);
         let (cause, actor, method) = entry_cause(frame)?;
@@ -259,7 +268,10 @@ impl Game {
             };
             let header = self.pending_header(actor, cause, effect_source, before)?;
             let token = self.object_type(&old.id)?.contains("トークン");
-            let subject = SubjectInformation::from_characters(&characters, original_cost);
+            let mut subject = SubjectInformation::from_characters(&characters, original_cost);
+            if reads_effective_cost {
+                subject.effective_cost = Some(self.internal_effective_cost(&old.id)?);
+            }
             let mut matched = Vec::new();
             for (holder, abilities) in &observers {
                 let controller = player_id(&self.object(holder)?.controller)?;
