@@ -1,40 +1,30 @@
 //! Session loading failures on the smallest inputs that reach each stage.
 
+#![expect(
+    clippy::unwrap_used,
+    reason = "A malformed synthetic fixture invalidates these tests."
+)]
+
+#[path = "support/fixture.rs"]
+mod fixture;
+
 use serde_json::json;
-use sha2::{Digest as _, Sha256};
 use sve_battle_host::load::{Inputs, LoadError, load};
+use sve_engine::battle::{ReferenceInput, RuleIdentity, RuleInput};
 
 const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","keywords":{}}"#;
 const EMPTY_SELECTION: &str = r#"{"documents":[],"authors":[]}"#;
 
-fn hex(bytes: &[u8]) -> String {
-    Sha256::digest(bytes)
-        .iter()
-        .flat_map(|byte| [byte >> 4_u8, byte & 15])
-        .filter_map(|nibble| char::from_digit(u32::from(nibble), 16))
-        .collect()
-}
-
-/// One synthetic printing, so the rule resources have an anchor for their one evidence entry.
+/// The anchor of the rule evidence and a printing no deck uses.
 fn snapshot() -> String {
-    json!({"number":"t-anchor","faces":[{"name":"t-anchor","card_class":"ニュートラル",
-        "card_type":"フォロワー","cost":"1","power":"1","hp":"1","traits":[],"text":null,
-        "sections":[],"title":"synthetic"}]})
-    .to_string()
-}
-
-/// The smallest rule resources the schema and evidence closure accept for that snapshot.
-fn rules(snapshot: &str) -> String {
-    let source = format!("src:v1:{}", "a".repeat(64));
-    json!({"format":1_u8,"kind":"engine_rules",
-        "scope":{"region":"jp","rules_version":"synthetic-1","rules_source_version_id":source},
-        "input":{"kind":"legacy-jp","snapshot_sha256":hex(snapshot.as_bytes())},
-        "evidence":[{"id":"synthetic","source_version_id":source,"rule_refs":["1.2.3"],
-            "checked_on":"2026-10-03"}],
-        "titles":[{"title_code":"synthetic_empty","capabilities":[],"evidence":["synthetic"],
-            "anchor":{"kind":"legacy-face","region":"jp","card_no":"t-anchor","face_ordinal":0_u8}}],
-        "resources":[]})
-    .to_string()
+    ["t-anchor", "t-unused"]
+        .map(|number| {
+            json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル",
+                "card_type":"フォロワー","cost":"1","power":"1","hp":"1","traits":[],"text":null,
+                "sections":[],"title":"synthetic"}]})
+            .to_string()
+        })
+        .join("\n")
 }
 
 fn setup(card: &str) -> String {
@@ -45,36 +35,95 @@ fn setup(card: &str) -> String {
     .to_string()
 }
 
-fn error(selection: &str, rules: &str, setup: &str) -> Option<LoadError> {
+fn error(selection: &str, rules: &str, references: &str, setup: &str) -> Option<LoadError> {
     let snapshot = snapshot();
     let inputs = Inputs {
         snapshot: &snapshot,
         keywords: KEYWORDS,
         selection,
         rules,
+        references,
     };
     load(inputs, setup).err()
 }
 
+fn references(edit: impl FnOnce(&mut ReferenceInput)) -> String {
+    let mut input = fixture::references(&snapshot());
+    edit(&mut input);
+    serde_json::to_string(&input).unwrap()
+}
+
 #[test]
 fn each_stage_reports_its_own_code() {
-    let rules = rules(&snapshot());
+    let rules = fixture::rules(&snapshot(), "t-anchor");
+    let exact = references(|_| ());
     assert_eq!(
-        error(EMPTY_SELECTION, &rules, "{}"),
+        error(EMPTY_SELECTION, &rules, &exact, "{}"),
         Some(LoadError::Format)
     );
-    assert_eq!(error("[", &rules, &setup("x")), Some(LoadError::Format));
     assert_eq!(
-        error(EMPTY_SELECTION, "{}", &setup("x")),
+        error("[", &rules, &exact, &setup("t-anchor")),
+        Some(LoadError::Format)
+    );
+    assert_eq!(
+        error(EMPTY_SELECTION, &rules, "{}", &setup("t-anchor")),
+        Some(LoadError::Format)
+    );
+    assert_eq!(
+        error(EMPTY_SELECTION, "{}", &exact, &setup("t-anchor")),
         Some(LoadError::Selection)
     );
-    // The selection loads, but the deck names a card outside it.
+    // Exact references pass; the deck card has no admitted effects author.
     assert_eq!(
-        error(EMPTY_SELECTION, &rules, &setup("NOT-A-CARD")),
+        error(EMPTY_SELECTION, &rules, &exact, &setup("t-anchor")),
         Some(LoadError::Match)
     );
     assert_eq!(
-        [LoadError::Format, LoadError::Selection, LoadError::Match].map(LoadError::code),
-        ["format", "selection", "match"]
+        [
+            LoadError::Format,
+            LoadError::Selection,
+            LoadError::References,
+            LoadError::Match
+        ]
+        .map(LoadError::code),
+        ["format", "selection", "references", "match"]
     );
+}
+
+#[test]
+fn references_must_bind_exactly_this_whole_snapshot() {
+    let rules = fixture::rules(&snapshot(), "t-anchor");
+    let unused_missing = references(|input| input.faces.retain(|face| face.card_no != "t-unused"));
+    let wrong_snapshot = references(|input| input.snapshot_sha256 = "0".repeat(64));
+    let wrong_region = references(|input| input.region = "en".into());
+    let unknown_printing = references(|input| {
+        let mut absent = input.faces.first().unwrap().clone();
+        absent.card_no = "t-absent".into();
+        input.faces.push(absent);
+    });
+    let rules_without_wording = references(|input| {
+        input.rules = Some(RuleInput {
+            manifest_sha256: format!("sha256:{}", "a".repeat(64)),
+            entries: vec![RuleIdentity::Cr {
+                id: "1.2.3".into(),
+                revision: "synthetic".into(),
+            }],
+        });
+    });
+    for (label, references) in [
+        ("a face outside the decks", unused_missing),
+        ("another snapshot", wrong_snapshot),
+        ("another region", wrong_region),
+        ("an unknown printing", unknown_printing),
+        (
+            "rules without their wording manifest",
+            rules_without_wording,
+        ),
+    ] {
+        assert_eq!(
+            error(EMPTY_SELECTION, &rules, &references, &setup("t-anchor")),
+            Some(LoadError::References),
+            "{label}"
+        );
+    }
 }

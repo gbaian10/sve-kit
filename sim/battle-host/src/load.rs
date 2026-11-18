@@ -4,6 +4,7 @@ use crate::session::{LocalSession, SeatControl};
 use crate::wire::{Seat, viewer_of};
 use serde::Deserialize;
 use serde_json::Value;
+use sve_engine::battle::{BattleReferences, ReferenceInput};
 use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput};
 use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck};
@@ -21,7 +22,7 @@ pub struct MatchSetup {
     pub seed: String,
     /// Who answers each seat's questions, in seat order.
     pub control: [Control; 2],
-    /// Total policy submissions allowed, including delegated player answers.
+    /// Total submissions allowed for the policy seats.
     pub max_submissions: u64,
 }
 
@@ -64,6 +65,8 @@ pub enum LoadError {
     Format,
     /// The snapshot, keywords, selection or rules were rejected.
     Selection,
+    /// The card references do not bind exactly this snapshot and every source the decks reach.
+    References,
     /// The decks or opening could not start a match.
     Match,
 }
@@ -75,6 +78,7 @@ impl LoadError {
         match self {
             Self::Format => "format",
             Self::Selection => "selection",
+            Self::References => "references",
             Self::Match => "match",
         }
     }
@@ -91,9 +95,12 @@ pub struct Inputs<'text> {
     pub selection: &'text str,
     /// Engine rule resources bound to this snapshot.
     pub rules: &'text str,
+    /// Printing, wording and rule identities produced with the snapshot by the same reader (JSON).
+    pub references: &'text str,
 }
 
-/// Select the effects the decks can reach, start the opening and bind the seat controls.
+/// Select the effects the decks can reach, bind the snapshot's references, check the whole
+/// match closure, start the opening and bind the seat controls.
 ///
 /// # Errors
 /// Returns the failing stage without engine diagnostics.
@@ -101,12 +108,19 @@ pub fn load(inputs: Inputs<'_>, setup: &str) -> Result<LocalSession, LoadError> 
     let setup: MatchSetup = serde_json::from_str(setup).map_err(|_error| LoadError::Format)?;
     let selection: Value =
         serde_json::from_str(inputs.selection).map_err(|_error| LoadError::Format)?;
+    let references: ReferenceInput =
+        serde_json::from_str(inputs.references).map_err(|_error| LoadError::Format)?;
+    // The engine compares the rule manifest only with the wording manifest. This host pins no
+    // other manifest, so rule identities without wording from the same manifest are refused.
+    if references.rules.is_some() && references.wording.is_none() {
+        return Err(LoadError::References);
+    }
     let [first, second] = setup.decks;
     let decks = [deck(first), deck(second)];
     let selected = CurrentSelectionLoader::new()
         .and_then(|loader| {
             // Lowering every author took seconds in the browser; only the decks' reach is needed.
-            // This first slice loads the reviewed JP inputs; resolved identities come later.
+            // Permanent printing identities arrive separately as references, never inferred.
             Game::select_player_decks(
                 &loader,
                 inputs.snapshot,
@@ -117,11 +131,21 @@ pub fn load(inputs: Inputs<'_>, setup: &str) -> Result<LocalSession, LoadError> 
             )
         })
         .map_err(|_error| LoadError::Selection)?;
+    // Every face of the snapshot, not only the decks' reach, must have an exact identity.
+    let references = BattleReferences::new(&selected.prototypes, references)
+        .map_err(|_error| LoadError::References)?;
+    // The selection already loaded, so a failure here is a reference or source gap.
+    let admission = Game::check_battle_decks(&selected, &decks, &references)
+        .map_err(|_error| LoadError::References)?;
+    if !admission.is_admitted() {
+        return Err(LoadError::Match);
+    }
     let game =
         Game::start_player_game(selected, decks, viewer_of(setup.first_chooser), &setup.seed)
             .map_err(|_error| LoadError::Match)?;
     Ok(LocalSession::new(
         game,
+        references,
         setup.control.map(|control| match control {
             Control::Player => SeatControl::Player,
             Control::Policy => SeatControl::Policy,

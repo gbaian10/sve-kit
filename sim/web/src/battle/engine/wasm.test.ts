@@ -13,6 +13,13 @@ beforeAll(() => {
 
 const keywords = JSON.stringify({ format: 1, kind: "keyword_registry", keywords: {} })
 const selection = JSON.stringify({ documents: [], authors: [] })
+const references = JSON.stringify({
+  region: "jp",
+  snapshot_sha256: "0".repeat(64),
+  faces: [],
+  wording: null,
+  rules: null,
+})
 const deck = { construction: { kind: "class", value: "c" }, main: ["x"], evolve: [] }
 const setup = JSON.stringify({
   decks: [deck, deck],
@@ -24,8 +31,11 @@ const setup = JSON.stringify({
 
 describe("engine WebAssembly", () => {
   it("rejects malformed setup and unusable inputs with codes only", () => {
-    expect(() => new Session("", keywords, selection, "{}", "{}")).toThrow(/^format$/)
-    expect(() => new Session("", keywords, "[", "{}", setup)).toThrow(/^format$/)
-    expect(() => new Session("", keywords, selection, "{}", setup)).toThrow(/^selection$/)
+    expect(() => new Session("", keywords, selection, "{}", references, "{}")).toThrow(/^format$/)
+    expect(() => new Session("", keywords, "[", "{}", references, setup)).toThrow(/^format$/)
+    expect(() => new Session("", keywords, selection, "{}", "{}", setup)).toThrow(/^format$/)
+    expect(() => new Session("", keywords, selection, "{}", references, setup)).toThrow(
+      /^selection$/,
+    )
   })
 })

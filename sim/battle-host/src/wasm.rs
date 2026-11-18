@@ -18,13 +18,14 @@ impl Session {
     /// Create a match from downloaded inputs and a JSON match setup.
     ///
     /// # Errors
-    /// Throws `format`, `selection` or `match`, never engine diagnostics.
+    /// Throws `format`, `selection`, `references` or `match`, never engine diagnostics.
     #[wasm_bindgen(constructor)]
     pub fn new(
         snapshot: &str,
         keywords: &str,
         selection: &str,
         rules: &str,
+        references: &str,
         setup: &str,
     ) -> Result<Self, JsError> {
         let inputs = Inputs {
@@ -32,6 +33,7 @@ impl Session {
             keywords,
             selection,
             rules,
+            references,
         };
         load(inputs, setup)
             .map(|inner| Self { inner })
@@ -55,6 +57,6 @@ impl Session {
 }
 
 fn deliveries(out: &[Delivery]) -> String {
-    // Every message is plain strings and integers, so serialization cannot fail.
+    // Contract messages hold only strings, booleans and checked integers, so serialization cannot fail.
     serde_json::to_string(out).unwrap_or_default()
 }

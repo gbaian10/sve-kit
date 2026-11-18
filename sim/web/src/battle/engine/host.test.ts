@@ -1,9 +1,13 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs"
+import path from "node:path"
+
 import { describe, expect, it } from "vitest"
 
 import { validateHostMessage } from "../contract"
 import { BattleHost, type EngineSession, type SeatPort } from "./host"
 import type {
+  BattleUpdate,
   Delivery,
   InitMessage,
   MatchOptions,
@@ -23,16 +27,20 @@ class FakePort implements SeatPort {
   }
 }
 
+/** The contract's example of a seat waiting for its opponent. */
+const waiting = JSON.parse(
+  readFileSync(
+    path.resolve(
+      import.meta.dirname,
+      "../../../../battle-contract/fixtures/host/update-waiting.json",
+    ),
+    "utf8",
+  ),
+) as BattleUpdate
+
 const update = (seat: Seat, seq: number): Delivery => ({
   seat,
-  message: {
-    kind: "update",
-    format: 0,
-    viewer: seat,
-    update_seq: seq,
-    baseline: false,
-    input: { kind: "waiting", actor: seat === "p1" ? "p2" : "p1" },
-  },
+  message: { ...waiting, viewer: seat, update_seq: seq },
 })
 
 /** Records every call and checks that no call starts while another is running. */
@@ -69,7 +77,7 @@ const options: MatchOptions = {
   max_submissions: 10,
 }
 
-const inputs = { snapshot: "s", keywords: "k", selection: "{}", rules: "{}" }
+const inputs = { snapshot: "s", keywords: "k", selection: "{}", rules: "{}", references: "{}" }
 
 function setUp(
   create: (setup: string) => Promise<EngineSession>,
@@ -110,7 +118,11 @@ describe("BattleHost", () => {
       },
       { p1, p2 },
     )
-    const submit = { request_id: "r1", command: { kind: "concede" as const } }
+    const submit = {
+      kind: "submit" as const,
+      request_id: "r1",
+      command: { kind: "concede" as const },
+    }
     p2.send({ kind: "submit", submit })
     p1.send({ kind: "baseline", request_id: "b1" })
     await settle()
@@ -169,6 +181,7 @@ describe("BattleHost", () => {
   it("reports load failures by code only and ignores later requests", async () => {
     for (const [message, code] of [
       ["selection", "selection"],
+      ["references", "references"],
       ["format", "format"],
       ["match", "match"],
       ["RuntimeError: unreachable at secret.rs:1", "engine"],
@@ -192,7 +205,10 @@ describe("BattleHost", () => {
       baseline: () => "[]",
     }
     setUp(() => Promise.resolve(trapping), { p1, p2 })
-    p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
+    p1.send({
+      kind: "submit",
+      submit: { kind: "submit", request_id: "r", command: { kind: "concede" } },
+    })
     p1.send({ kind: "baseline", request_id: "b1" })
     await settle()
     const stopped = { kind: "host_error", format: 1, reason: "projection" }
@@ -200,7 +216,7 @@ describe("BattleHost", () => {
     expect(p2.received).toEqual([stopped])
   })
 
-  it("checks receipts and host errors against the generated contract validator", async () => {
+  it("checks every message, updates included, against the generated contract validator", async () => {
     const receipt = (result: string) =>
       JSON.stringify([
         {
@@ -216,7 +232,10 @@ describe("BattleHost", () => {
         baseline: () => "[]",
       }
       setUp(() => Promise.resolve(session), { p1 }, options, validateHostMessage)
-      p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
+      p1.send({
+        kind: "submit",
+        submit: { kind: "submit", request_id: "r", command: { kind: "concede" } },
+      })
       p1.send({ kind: "baseline", request_id: "b1" })
       await settle()
       return p1.received
@@ -229,6 +248,13 @@ describe("BattleHost", () => {
     ])
     // A result outside the contract is never delivered; interaction stops instead.
     expect(await run(receipt("maybe"))).toEqual([stopped])
+    const valid = update("p1", 9)
+    expect(await run(JSON.stringify([valid]))).toEqual([
+      valid.message,
+      { kind: "baseline_start", request_id: "b1" },
+    ])
+    const advised = { ...valid, message: { ...waiting, advice: ["hint"] } }
+    expect(await run(JSON.stringify([advised]))).toEqual([stopped])
   })
 
   it("queues commands while a lazily imported validator loads, then still validates", async () => {
@@ -246,7 +272,10 @@ describe("BattleHost", () => {
       baseline: () => "[]",
     }
     setUp(() => Promise.resolve(session), { p1 }, options, validator)
-    p1.send({ kind: "submit", submit: { request_id: "r", command: { kind: "concede" } } })
+    p1.send({
+      kind: "submit",
+      submit: { kind: "submit", request_id: "r", command: { kind: "concede" } },
+    })
     await settle()
     expect(p1.received).toEqual([])
     provide(validateHostMessage)
