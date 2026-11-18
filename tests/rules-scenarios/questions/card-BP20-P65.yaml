@@ -1,0 +1,119 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.28.0
+  cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
+id: card-BP20-P65
+kind: card
+must_pass: false
+mechanisms:
+  - チョイス
+  - クレスト
+  - 模式數下限
+cards:
+  - BP01-173
+  - BP20-082
+  - BP20-P65
+why: >-
+  R-0015（official）採英文官方 Q2451，紋章的「好きな数」只放寬上限，玩家仍要選至少一項。
+discriminates: >-
+  無視紋章會拒絕同一張法術選兩項；把「好きな数」解成可選零項會讓第二張法術空打且離開手牌。
+refs:
+  rules:
+    - 5.18.2.1
+    - 5.18.3
+  qa:
+    - Q2451-EN
+  rulings:
+    - R-0015
+evidence:
+  - ref: Q2451-EN
+    quote: No. You must choose at least 1 option.
+status: draft
+author: sol
+verified_by: []
+scenarios:
+  - name: シャム＝ナクア的紋章在 EX 時仍不能選零個模式
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: first
+                card: BP20-082
+              - id: second
+                card: BP20-082
+            ex:
+              - id: crest
+                card: BP20-P65
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 7
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: fighter
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: first
+        options:
+          - 1
+          - 2
+        targets:
+          1:
+            - fighter
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: second
+        options: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery:
+            - first
+          P1.pp.current: 6
+          P2.cemetery:
+            - fighter
+          P2.leader.life: 18
+      - at: after-decision-2
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.hand:
+            - second
+          P1.ex:
+            - crest
+          P1.pp.current: 6
+          P1.cemetery:
+            - first

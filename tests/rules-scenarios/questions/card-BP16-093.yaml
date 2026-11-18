@@ -1,0 +1,109 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.28.0
+  cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
+id: card-BP16-093
+kind: card
+must_pass: false
+mechanisms:
+  - 持續效果
+  - 數值變更事件
+  - 種類變更
+cards:
+  - BP01-173
+  - BP16-093
+why: >-
+  R-0011（inferred）區分明示的數值增加與派生數值。第四個祈りカウンター使命中ラピス常在條件而成為 5／5 從者，沒有執行體力增加。
+discriminates: >-
+  把種類切換後重新可讀取的體力當成增加會多發體力增加事件。
+refs:
+  rules:
+    - "10.9"
+    - 7.3.1
+  qa:
+    - Q2758
+    - Q2130
+  rulings:
+    - R-0011
+evidence:
+  - ref: R-0011
+    derivation:
+      - 種類切換後顯示的數值是派生資訊，並非數值處理的結果
+status: draft
+author: sol
+verified_by: []
+scenarios:
+  - name: 第四個祈りカウンター讓ラピス變回從者，沒有體力增加事件
+    setup:
+      turn:
+        active: P2
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 8
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ビショップ
+            life: 20
+          pp:
+            current: 8
+            max: 8
+          zones:
+            deck:
+              - id: draw
+                card: BP01-173
+              - filler: 19
+            field:
+              - id: lapis
+                card: BP16-093
+                state:
+                  counters:
+                    祈りカウンター: 3
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 7
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P2
+        at: main
+        do: end-phase
+      - n: 2
+        by: P1
+        at: quick
+        do: pass
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: lapis
+            line: 2
+        targets:
+          "1": []
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.lapis:
+            power: 5
+            hp: 5
+            counters:
+              祈りカウンター: 4
+        forbidden_events:
+          - kind: 体力増加
+            target: lapis
