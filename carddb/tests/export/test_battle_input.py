@@ -256,12 +256,21 @@ def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None
     assert command(tmp_path / "battle", authored) != 0, (
         "never mixes with earlier output"
     )
-    pin = string(reviewed["snapshot_sha256"])
+
+    def synthetic(region: str = "jp", **pin: JsonValue) -> str:
+        # Only the fields the binding reads; JSON is YAML.
+        rules: JsonValue = {
+            "scope": {"region": region},
+            "input": {"kind": "legacy-jp", **pin},
+        }
+        return canonical(rules).decode()
+
     for name, document, region in [
-        ("en", authored, "en"),
-        ("other", authored.replace("region: jp", "region: en"), "jp"),
-        ("missing", authored.replace(f"snapshot_sha256: {pin}", ""), "jp"),
-        ("malformed", authored.replace(pin, "reviewed"), "jp"),
+        ("en", synthetic(snapshot_sha256="0" * 64), "en"),
+        ("other", synthetic("en", snapshot_sha256="0" * 64), "jp"),
+        ("missing", synthetic(), "jp"),
+        ("number", synthetic(snapshot_sha256=0), "jp"),
+        ("malformed", synthetic(snapshot_sha256="reviewed"), "jp"),
     ]:
         assert command(tmp_path / name, document, region) == 3, name
         assert not (tmp_path / name).exists()
