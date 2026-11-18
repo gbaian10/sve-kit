@@ -7,6 +7,8 @@
     reason = "Exam decisions are read through serde_json's total indexing; a missing key is null."
 )]
 
+mod assist;
+pub use assist::TypedAssistAdapter;
 mod labels;
 mod params;
 mod replay;
@@ -15,6 +17,7 @@ mod turn;
 
 use core::fmt::Display;
 use serde_json::{Value, json};
+use sve_scenario_runner::arch::Observation;
 use sve_scenario_runner::{Engine, EngineError, Fixture, Step, View};
 
 use super::{core_view, error};
@@ -193,4 +196,23 @@ fn awaiting_on(game: &Game, view: View) -> Option<Value> {
         ));
     }
     None
+}
+
+fn observe_on(game: &Game, view: View) -> Result<Observation, EngineError> {
+    let mut projection = game.projection(core_view(view)).map_err(error)?;
+    let awaiting = awaiting_on(game, view);
+    let knowledge = projection.get("knowledge").cloned().unwrap_or_default();
+    if let Some(fields) = projection.as_object_mut() {
+        fields.insert("awaiting".into(), awaiting.clone().unwrap_or_default());
+        if view != View::Omniscient {
+            for authority in ["legal", "flow", "continuation", "semantic_state"] {
+                fields.remove(authority);
+            }
+        }
+    }
+    Ok(Observation {
+        projection,
+        awaiting,
+        knowledge,
+    })
 }

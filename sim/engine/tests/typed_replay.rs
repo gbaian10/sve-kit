@@ -5,7 +5,7 @@
 use core::array::from_fn;
 use serde_json::{Value, json};
 use std::path::PathBuf;
-use sve_engine::adapter::TypedReplayAdapter;
+use sve_engine::adapter::{TypedAssistAdapter, TypedReplayAdapter};
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     Command, DeckConstruction, Input, OpeningAnswer, OpeningQuestion, PlayerDeck, QuestionShape,
@@ -13,7 +13,8 @@ use sve_engine::game::player::{
 };
 use sve_engine::game::replay::{Replay, ReplayNode};
 use sve_scenario_runner::arch::{
-    ArchOptions, BranchKind, CheckReport, Outcome, ReplayEngine, check_replay, load_fixtures,
+    ArchOptions, AssistEngine, BranchKind, CheckReport, Layer, Outcome, ReplayEngine, check_assist,
+    check_replay, load_fixtures,
 };
 use sve_scenario_runner::{EngineError, Fixture, View};
 
@@ -64,6 +65,41 @@ fn architecture_replay_checks_use_the_typed_entry() {
         .map(|node| format!("M' shuffles branch N{node} P1: exports differ"))
         .collect();
     assert_eq!(r5_reasons, &expected);
+}
+
+#[test]
+fn architecture_assist_checks_use_the_typed_entry() {
+    let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let fixtures = load_fixtures(&root.join("tests/architecture-fixtures")).unwrap();
+    let selected = repository::selection_with_rules();
+    let mut assist =
+        || -> Box<dyn AssistEngine> { Box::new(TypedAssistAdapter::new(selected.clone())) };
+    let mut replay =
+        || -> Box<dyn ReplayEngine> { Box::new(TypedReplayAdapter::new(selected.clone())) };
+    let reports = check_assist(&mut assist, &mut replay, &fixtures, &ArchOptions::default());
+    let failed: Vec<_> = reports
+        .iter()
+        .filter(|report| report.outcome != Outcome::Pass)
+        .collect();
+    assert_eq!(failed, Vec::<&CheckReport>::new());
+}
+
+#[test]
+fn manual_operations_cannot_attach_private_object_identities_to_a_divergence() {
+    let fixture = position(&json!({}), Value::Null);
+    let mut assist = TypedAssistAdapter::new(repository::selection_with_rules().clone());
+    assist.start(&fixture, "assist-privacy", "privacy").unwrap();
+    assist
+        .act(&json!({
+            "by": "P1", "do": "attack", "manual": true,
+            "attacker": "private-opponent", "target": "P2.leader"
+        }))
+        .unwrap_err();
+    assert_eq!(assist.divergences().unwrap(), Vec::<Value>::new());
+    assert_eq!(
+        assist.digest(Layer::Sandbox).unwrap(),
+        assist.digest(Layer::Shadow).unwrap()
+    );
 }
 
 #[test]

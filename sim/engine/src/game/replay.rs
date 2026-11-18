@@ -1,6 +1,7 @@
 //! In-process authority records for typed games.
 
 use super::Game;
+use super::assist::{Expected, ManualOverride};
 use super::player::events::{EventError, PlayerEventBatch};
 use super::player::observation::Observation;
 use super::player::{
@@ -28,6 +29,12 @@ pub struct ReplayNode(usize);
 impl ReplayNode {
     /// The position at initialization, before any player submission.
     pub const ROOT: Self = Self(0);
+}
+
+impl fmt::Display for ReplayNode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "n{}", self.0)
+    }
 }
 
 #[derive(Clone)]
@@ -108,7 +115,14 @@ impl RecordedCommand {
 enum Operation {
     Start,
     Commands(Vec<RecordedCommand>),
-    Fork { observed: ReplayNode },
+    Fork {
+        observed: ReplayNode,
+    },
+    Override {
+        viewer: Viewer,
+        command: ManualOverride,
+        expected: Expected,
+    },
 }
 
 struct Node {
@@ -130,7 +144,7 @@ impl Node {
     fn checkpoint(&self, game: &Game) -> Result<ReplayCheckpoint> {
         let receipts = match &self.operation {
             Operation::Commands(commands) => commands.iter().map(RecordedCommand::kind).collect(),
-            Operation::Start | Operation::Fork { .. } => Vec::new(),
+            Operation::Start | Operation::Fork { .. } | Operation::Override { .. } => Vec::new(),
         };
         Ok(ReplayCheckpoint {
             digest: game.referee_replay_digest()?,
@@ -235,6 +249,14 @@ impl Replay {
         Ok(&self.node(at)?.game)
     }
 
+    pub(super) fn require_tip(&self, at: ReplayNode) -> Result<()> {
+        let node = self.node(at)?;
+        if self.tails.get(&node.line).copied() != Some(at) {
+            return Err(invalid("decisions append only at a replay line tip"));
+        }
+        Ok(())
+    }
+
     /// Submit to a line's current node. A rejected command returns that same node.
     ///
     /// # Errors
@@ -256,10 +278,8 @@ impl Replay {
         error: impl Fn(EngineFailure) -> E,
         action: impl FnOnce(&mut Game, &mut Vec<RecordedCommand>) -> result::Result<T, E>,
     ) -> result::Result<(ReplayNode, T), E> {
+        self.require_tip(at).map_err(&error)?;
         let parent = self.node(at).map_err(&error)?;
-        if self.tails.get(&parent.line).copied() != Some(at) {
-            return Err(error(invalid("decisions append only at a replay line tip")));
-        }
         let line = parent.line;
         let mut game = parent.game.clone();
         let id = ReplayNode(self.nodes.len());
@@ -311,6 +331,46 @@ impl Replay {
             },
         );
         Ok(id)
+    }
+
+    pub(super) fn record_override(
+        &mut self,
+        at: ReplayNode,
+        viewer: Viewer,
+        command: &ManualOverride,
+    ) -> Result<Option<(ReplayNode, Expected)>> {
+        self.require_tip(at)?;
+        let original = self.game(at)?;
+        let mut game = original.clone();
+        let Some(expected) = command.apply(&mut game, viewer)? else {
+            return Ok(None);
+        };
+        let id = ReplayNode(self.nodes.len());
+        game.fork_replay_knowledge(original, false, id.0);
+        self.push(
+            id,
+            Node {
+                game,
+                parent: at,
+                operation: Operation::Override {
+                    viewer,
+                    command: command.clone(),
+                    expected: expected.clone(),
+                },
+                line: id,
+            },
+        );
+        Ok(Some((id, expected)))
+    }
+
+    pub(super) fn recover_tip(&mut self, at: ReplayNode) -> Result<()> {
+        self.require_tip(at)?;
+        let game = self.recover(at)?;
+        self.nodes
+            .get_mut(at.0)
+            .ok_or_else(|| invalid("unknown replay tip"))?
+            .game = game;
+        Ok(())
     }
 
     /// Rebuild this position by initializing the match and checking the outcome
@@ -403,6 +463,19 @@ impl Replay {
                         .get(&observed.0)
                         .ok_or_else(|| invalid("missing replay source"))?;
                     game.fork_replay_knowledge(source, *observed != node.parent, index);
+                }
+                Operation::Override {
+                    viewer,
+                    command,
+                    expected,
+                } => {
+                    if command.apply(&mut game, *viewer)?.as_ref() != Some(expected) {
+                        return Err(invalid("recorded override did not reproduce its result"));
+                    }
+                    let source = games
+                        .get(&node.parent.0)
+                        .ok_or_else(|| invalid("missing replay parent"))?;
+                    game.fork_replay_knowledge(source, false, index);
                 }
             }
             games.insert(index, game);
