@@ -85,7 +85,7 @@ export function DownloadSettings() {
             })}
           </p>
         )}
-        <p className="text-13 text-text-3">
+        <p className="text-13 text-pretty text-text-3">
           {state === "partial"
             ? t(`settings.downloadReason.${progress?.reason ?? "manifest"}`)
             : state === "paused"

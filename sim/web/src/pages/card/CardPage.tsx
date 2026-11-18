@@ -857,6 +857,7 @@ export function CardView({
                       images={images}
                       alt="decorative"
                       size="large"
+                      priority={frame === undefined && ordinal === 0 ? "high" : undefined}
                       className="w-full"
                     />
                   </button>

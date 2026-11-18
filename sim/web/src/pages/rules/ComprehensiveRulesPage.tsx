@@ -172,7 +172,7 @@ function RuleNodeView({
             <RuleText
               text={view.text.text}
               context={node.context}
-              className="mt-2 max-w-[66ch] text-15 text-text-1"
+              className="mt-2 max-w-[66ch] text-15 text-pretty text-text-1"
             />
           </div>
         )}
@@ -191,7 +191,7 @@ function RuleNodeView({
       style={{ marginLeft: `${String(indent * 0.75)}rem` }}
     >
       {numberButton ?? <span />}
-      <div className="max-w-[66ch] min-w-0 text-15 text-text-1">
+      <div className="max-w-[66ch] min-w-0 text-15 text-pretty text-text-1">
         <div lang={lang(view.text.translated)}>
           <RuleText text={view.text.text} context={node.context} />
         </div>
@@ -391,7 +391,7 @@ export function ComprehensiveRulesPage() {
         </a>
       </p>
       {mode === "translated" && translatedCount < rules.nodes.length && (
-        <p className="mt-4 rounded-card border border-dashed border-border bg-surface-1 px-4 py-3 text-13 text-text-2">
+        <p className="mt-4 rounded-card border border-dashed border-border bg-surface-1 px-4 py-3 text-13 text-pretty text-text-2">
           {translatedCount === 0
             ? t("rules.translationNone")
             : t("rules.translationPartial", { done: translatedCount, total: rules.nodes.length })}

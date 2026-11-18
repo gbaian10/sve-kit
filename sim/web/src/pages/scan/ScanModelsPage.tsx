@@ -111,7 +111,7 @@ export function ScanModelsPage({ store = appScanModels }: ScanModelsPageProps) {
       </Link>
       <div>
         <h1 className="text-24 font-bold">{t("scan.models.title")}</h1>
-        <p className="mt-1 text-14 text-text-2">{t("scan.models.intro")}</p>
+        <p className="mt-1 text-14 text-pretty text-text-2">{t("scan.models.intro")}</p>
       </div>
 
       {status && status.manifest !== "ok" && (

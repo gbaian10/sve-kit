@@ -37,7 +37,7 @@ function TextBox({
   return (
     <section className={cn(TEXT_BOX, "mt-3 px-3 py-2.5")} aria-label={heading} data-field={field}>
       <h3 className="text-12 leading-5 text-text-3">{heading}</h3>
-      <div className="mt-1 space-y-2">{children}</div>
+      <div className={cn("mt-1 space-y-2", field === "effect" && "text-pretty")}>{children}</div>
     </section>
   )
 }

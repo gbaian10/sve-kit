@@ -27,6 +27,7 @@ export interface CardImageProps {
   readonly alt: ImageAlt
   /** Which file this slot displays, chosen by the layout that places the image. */
   readonly size: ImageSlot
+  readonly priority?: "high" | undefined
   /** Must set the width (`w-full`, `w-8`); the height follows the 63:88 ratio. */
   readonly className: string
   readonly onReady?: (() => void) | undefined
@@ -54,6 +55,7 @@ function ImageContent({
   images,
   alt,
   size,
+  priority,
   className,
   onReady,
   t,
@@ -125,7 +127,12 @@ function ImageContent({
             width={source.width}
             height={source.height}
             alt=""
-            loading={images?.eager?.(summary.printingId, summary.faceId) ? "eager" : "lazy"}
+            fetchPriority={priority}
+            loading={
+              priority === "high" || images?.eager?.(summary.printingId, summary.faceId)
+                ? "eager"
+                : "lazy"
+            }
             decoding="async"
             onError={() => {
               setFailed(source.src)
