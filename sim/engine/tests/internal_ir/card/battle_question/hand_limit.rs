@@ -247,7 +247,7 @@ fn wire_hand_limit_round_trips_the_exact_excess_for_both_seats() {
             );
             assert_eq!(
                 projection.question().processing.stage,
-                ProcessingStage::Closing
+                Some(ProcessingStage::Closing)
             );
             assert!(projection.question().is_coherent());
             let selected = candidates(&projection)

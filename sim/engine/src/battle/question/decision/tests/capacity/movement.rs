@@ -91,10 +91,7 @@ fn private_look_capacity_keeps_both_directions_of_complete_seat_views_private() 
         let id = QuestionId::new("private".into());
         assert!(matches!(a.battle_question(other, &id, refs), Ok(None)));
         assert!(matches!(b.battle_question(other, &id, refs), Ok(None)));
-        assert!(matches!(
-            a.battle_question(actor, &id, refs),
-            Err(ProjectionError::Unavailable)
-        ));
+        assert!(matches!(a.battle_question(actor, &id, refs), Ok(Some(_))));
         assert_ne!(projected(&a, actor).1, projected(&b, actor).1);
         assert!(
             board_fixtures::exact_authority(&a) == before_a,

@@ -33,6 +33,7 @@ mod events;
 mod history;
 mod objects;
 mod pending;
+mod processing;
 mod question;
 mod references;
 mod rules;

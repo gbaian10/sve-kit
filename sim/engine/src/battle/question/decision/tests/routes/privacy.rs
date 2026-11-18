@@ -29,7 +29,7 @@ fn unchosen_search_secrets_preserve_the_complete_waiting_replacement_view() {
                 domain(&native),
                 Some(DecisionShape::SearchReplacement(_))
             ));
-            project_question(&native, &components(&game, actor), &id).unwrap();
+            project_game(&game, actor, &id).unwrap();
             let view = (
                 game.input(other),
                 game.observe(other).unwrap(),
@@ -50,7 +50,7 @@ fn unchosen_search_secrets_preserve_the_complete_waiting_replacement_view() {
             );
             assert!(matches!(
                 game.battle_question(actor, &id, references),
-                Err(ProjectionError::Unavailable)
+                Ok(Some(_))
             ));
             assert!(
                 board_fixtures::exact_authority(&game) == before,
@@ -77,9 +77,8 @@ fn opponent_secrets_preserve_both_complete_actor_route_views() {
                     searched(actor, &["unit-follower", "unit-spell"], secret, vec![0], 2).0
                 };
                 let before = board_fixtures::exact_authority(&game);
-                let native = question(&game, actor).unwrap();
                 let observation = components(&game, actor);
-                let (usage, shape, _) = project_question(&native, &observation, &id).unwrap();
+                let (usage, shape, _) = project_game(&game, actor, &id).unwrap();
                 let view = (game.observe(actor).unwrap(), observation, usage, shape);
                 if let Some(previous) = &previous {
                     assert!(

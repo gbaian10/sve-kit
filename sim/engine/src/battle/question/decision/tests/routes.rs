@@ -1,9 +1,8 @@
 use super::super::*;
-use super::select::{components, domain, project_question, question, seats};
+use super::select::{components, domain, project_game, project_question, question, seats};
 use crate::game::internal::SearchAnswer;
 use crate::game::player::{SubmissionKind, Viewer};
 use crate::game::{Game, View};
-use crate::ir::SearchReplacementAnswer;
 use serde_json::json;
 use sve_battle_contract::{QuestionId, Seat, Zone};
 
@@ -19,12 +18,8 @@ fn found_movement_offers_real_original_and_replacement_destinations_for_both_sea
                 2,
             );
             let native = question(&game, actor).unwrap();
-            let (usage, shape, binding) = project_question(
-                &native,
-                &components(&game, actor),
-                &QuestionId::new("search-route".into()),
-            )
-            .unwrap();
+            let (usage, shape, binding) =
+                project_game(&game, actor, &QuestionId::new("search-route".into())).unwrap();
             assert_eq!(usage, wire::QuestionUse::SearchReplacement);
             let wire::QuestionShape::Choose { options, .. } = shape else {
                 panic!("route choice")
@@ -48,16 +43,13 @@ fn found_movement_offers_real_original_and_replacement_destinations_for_both_sea
                 chosen: vec![options[usize::from(replacement)].id.clone()],
             };
             assert_eq!(
-                binding.decode(&answer),
-                Ok(player::Answer::SearchReplacement(if replacement {
-                    SearchReplacementAnswer::Replacement
-                } else {
-                    SearchReplacementAnswer::Original
-                }))
-            );
-            assert_eq!(
-                game.submit_player(actor, binding.answer(native.token, &answer).unwrap())
-                    .kind,
+                game.submit_player(
+                    actor,
+                    binding
+                        .answer(native.actor, &binding.question().id, &answer)
+                        .unwrap()
+                )
+                .kind,
                 SubmissionKind::Applied
             );
             assert!(

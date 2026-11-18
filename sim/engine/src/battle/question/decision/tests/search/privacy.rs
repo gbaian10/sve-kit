@@ -58,10 +58,7 @@ fn different_real_search_domains_hide_candidates_and_group_sizes_from_the_waitin
             assert!(matches!(a.battle_question(other, &id, refs), Ok(None)));
             assert!(matches!(b.battle_question(other, &id, refs), Ok(None)));
             assert_ne!(projected(&a, actor).1, projected(&b, actor).1);
-            assert!(matches!(
-                a.battle_question(actor, &id, refs),
-                Err(ProjectionError::Unavailable)
-            ));
+            assert!(matches!(a.battle_question(actor, &id, refs), Ok(Some(_))));
             assert!(
                 board_fixtures::exact_authority(&a) == before_a,
                 "read-only projection preserves authority"

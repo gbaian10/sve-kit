@@ -148,10 +148,14 @@ fn assert_domain(
     );
     assert_eq!(
         question.processing.stage,
-        ProcessingStage::Declare,
+        Some(ProcessingStage::Declare),
         "selection is not a payment receipt"
     );
-    assert_eq!(question.processing.payment, None, "nothing has been paid");
+    assert_eq!(
+        question.processing.payments,
+        vec![],
+        "nothing has been paid"
+    );
     assert!(
         question.is_coherent(),
         "the use retains its strict answer shape"

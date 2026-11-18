@@ -32,7 +32,8 @@ fn resolution_declarations_keep_their_numeric_use_and_native_binding() {
             let native = question(&game, actor).unwrap();
             assert_eq!(native.purpose, player::QuestionPurpose::ResolutionChoice);
             let before = board_fixtures::exact_authority(&game);
-            let (usage, shape, binding) = project(domain(&native).unwrap(), None).unwrap();
+            let (usage, shape, binding) =
+                project_game(&game, actor, &QuestionId::new("number".into())).unwrap();
             assert_eq!(usage, wire::QuestionUse::DeclareNumber);
             assert_eq!(
                 shape,
@@ -46,13 +47,18 @@ fn resolution_declarations_keep_their_numeric_use_and_native_binding() {
                 }
             );
             assert_eq!(
-                binding.answer(native.token, &Answer::Confirm { accept: true }),
+                binding.answer(
+                    native.actor,
+                    &binding.question().id,
+                    &Answer::Confirm { accept: true }
+                ),
                 Err(AnswerError)
             );
             if declaration.get("max").is_some() {
                 assert_eq!(
                     binding.answer(
-                        native.token,
+                        native.actor,
+                        &binding.question().id,
                         &Answer::Integer {
                             value: 4_u32.into()
                         }
@@ -64,17 +70,10 @@ fn resolution_declarations_keep_their_numeric_use_and_native_binding() {
                 if waiting.actor == actor && waiting.dice.is_none()));
             game.observe(actor).unwrap();
             game.observe(other).unwrap();
-            assert!(matches!(
-                game.battle_question(
-                    actor,
-                    &QuestionId::new("number".into()),
-                    &board_fixture::fixture().unwrap().references
-                ),
-                Err(ProjectionError::Unavailable)
-            ));
             let command = binding
                 .answer(
-                    native.token,
+                    native.actor,
+                    &binding.question().id,
                     &Answer::Integer {
                         value: 3_u32.into(),
                     },

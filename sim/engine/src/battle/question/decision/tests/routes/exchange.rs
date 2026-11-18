@@ -1,8 +1,9 @@
+use super::super::select::project_game;
 use super::*;
 use crate::battle::tests::{board_fixture, board_fixtures, payment_fixtures};
 use crate::game::Game;
 use crate::ir::lowering::ExpandedLowerer;
-use crate::ir::{CardProgram, Nat, WellFormedCardProgram, payment_expanded_tree};
+use crate::ir::{CardProgram, WellFormedCardProgram, payment_expanded_tree};
 use alloc::sync::Arc;
 use serde_json::Value;
 use sve_battle_contract::Nat as WireNat;
@@ -78,12 +79,8 @@ fn affordable_exchange_indices_keep_gaps_and_real_before_payment_costs() {
         for (field, route) in [(true, 0_u64), (true, 1), (false, 1)] {
             let mut game = board(actor, field, "unit-spell");
             let native = question(&game, actor).unwrap();
-            let (usage, shape, binding) = project_question(
-                &native,
-                &components(&game, actor),
-                &QuestionId::new("exchange".into()),
-            )
-            .unwrap();
+            let (usage, shape, binding) =
+                project_game(&game, actor, &QuestionId::new("exchange".into())).unwrap();
             assert_eq!(usage, wire::QuestionUse::ExchangeRoute);
             let wire::QuestionShape::Choose { options, .. } = shape else {
                 panic!("exchange routes")
@@ -115,12 +112,13 @@ fn affordable_exchange_indices_keep_gaps_and_real_before_payment_costs() {
                 chosen: vec![option.id.clone()],
             };
             assert_eq!(
-                binding.decode(&answer),
-                Ok(player::Answer::Integer(Nat(route)))
-            );
-            assert_eq!(
-                game.submit_player(actor, binding.answer(native.token, &answer).unwrap())
-                    .kind,
+                game.submit_player(
+                    actor,
+                    binding
+                        .answer(native.actor, &binding.question().id, &answer)
+                        .unwrap()
+                )
+                .kind,
                 SubmissionKind::Applied
             );
             let material = question(&game, actor).unwrap();

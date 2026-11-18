@@ -1,5 +1,5 @@
 use super::super::*;
-use super::select::{board, components, domain, project_question, question, seats};
+use super::select::{board, components, domain, project_game, project_question, question, seats};
 use crate::battle::tests::{board_fixtures, payment_fixtures};
 use crate::game::View;
 use crate::game::player::{SubmissionKind, Viewer};
@@ -45,12 +45,8 @@ fn effective_ability_choices_keep_the_authoritative_source_and_native_handle() {
             matches!(domain(&native),Some(DecisionShape::Abilities(options)) if options.len()==1)
         );
         let before = board_fixtures::exact_authority(&game);
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("ability".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("ability".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::Ability);
         let options = if let wire::QuestionShape::Choose {
             options,
@@ -73,12 +69,13 @@ fn effective_ability_choices_keep_the_authoritative_source_and_native_handle() {
         let answer = Answer::Choose {
             chosen: vec![options.first().unwrap().id.clone()],
         };
-        assert_eq!(binding.decode(&answer), Ok(player::Answer::Ability(0)));
         assert!(
             board_fixtures::exact_authority(&game) == before,
             "ability projection preserves authority"
         );
-        let command = binding.answer(native.token, &answer).unwrap();
+        let command = binding
+            .answer(native.actor, &binding.question().id, &answer)
+            .unwrap();
         assert_eq!(
             game.submit_player(actor, command).kind,
             SubmissionKind::Applied

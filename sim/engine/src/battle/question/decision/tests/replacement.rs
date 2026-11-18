@@ -1,5 +1,6 @@
 use super::super::*;
-use super::select::{board, components, domain, program, project_question, question};
+use super::select::{board, components, domain, program, project_game, project_question, question};
+use crate::battle::QuestionProjection;
 use crate::battle::tests::{board_fixture, board_fixtures};
 use crate::game::player::{Input, SubmissionKind};
 use crate::game::{Game, View};
@@ -22,8 +23,7 @@ fn damage_application_order_uses_captured_sources_and_changes_real_arithmetic() 
             );
             let before = board_fixtures::exact_authority(&game);
             let id = QuestionId::new("replacement".into());
-            let (usage, shape, binding) =
-                project_question(&native, &components(&game, actor), &id).unwrap();
+            let (usage, shape, binding) = project_game(&game, actor, &id).unwrap();
             assert_eq!(usage, wire::QuestionUse::DamageReplacementOrder);
             let wire::QuestionShape::Order {
                 items,
@@ -44,10 +44,8 @@ fn damage_application_order_uses_captured_sources_and_changes_real_arithmetic() 
             if reverse {
                 order.reverse();
             }
-            reject_invalid_orders(&binding, &order);
+            reject_invalid_orders(&binding, actor, &order);
             let answer = Answer::Order { order };
-            let expected = if reverse { vec![1, 0] } else { vec![0, 1] };
-            assert_eq!(binding.decode(&answer), Ok(player::Answer::Order(expected)));
             let other = if actor == Viewer::P1 {
                 Viewer::P2
             } else {
@@ -64,7 +62,9 @@ fn damage_application_order_uses_captured_sources_and_changes_real_arithmetic() 
                 board_fixtures::exact_authority(&game) == before,
                 "projection and rejected answers preserve authority"
             );
-            let command = binding.answer(native.token, &answer).unwrap();
+            let command = binding
+                .answer(native.actor, &binding.question().id, &answer)
+                .unwrap();
             assert_eq!(
                 game.submit_player(other, command.clone()).kind,
                 SubmissionKind::Rejected
@@ -211,7 +211,7 @@ fn native_suppresses_replacement_questions_when_the_order_cannot_matter() {
     }
 }
 
-fn reject_invalid_orders(binding: &Binding, order: &[OptionId]) {
+fn reject_invalid_orders(binding: &QuestionProjection, actor: Viewer, order: &[OptionId]) {
     for invalid in [
         Answer::Confirm { accept: true },
         Answer::Order { order: vec![] },
@@ -222,7 +222,10 @@ fn reject_invalid_orders(binding: &Binding, order: &[OptionId]) {
             order: vec![order[0].clone(), OptionId::new("foreign".into())],
         },
     ] {
-        assert_eq!(binding.decode(&invalid), Err(AnswerError));
+        assert_eq!(
+            binding.answer(actor, &binding.question().id, &invalid),
+            Err(AnswerError)
+        );
     }
 }
 

@@ -143,7 +143,8 @@ fn declaring(
     assert_eq!(
         board.processing,
         vec![wire::ProcessingContext {
-            stage: wire::ProcessingStage::Declare,
+            stage: Some(wire::ProcessingStage::Declare),
+            actor: (viewer == actor).then_some(actor_seat),
             controller: Some(if actor == Viewer::P1 {
                 Seat::P1
             } else {
@@ -160,7 +161,7 @@ fn declaring(
             rule: None,
             procedure: None,
             declared: vec![],
-            payment: None,
+            payments: vec![],
         }],
         "unpaid evolution parameters keep one public declaration without private details"
     );

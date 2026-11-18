@@ -102,7 +102,7 @@ fn empty_quick_windows_keep_explicit_pass_in_both_seats() {
             assert_eq!(projection.question().usage, wire::QuestionUse::Quick);
             assert_eq!(
                 projection.question().processing.stage,
-                ProcessingStage::Quick
+                Some(ProcessingStage::Quick)
             );
             let (window, options) = wire_options(&projection).unwrap();
             assert_eq!(

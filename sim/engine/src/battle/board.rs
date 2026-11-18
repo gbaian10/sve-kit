@@ -3,7 +3,7 @@
 use super::{
     BattleReferences, ObjectTable, ProjectionError, costs, effects, history,
     objects::{self, ObjectScope},
-    pending, turn,
+    pending, processing as context_projection, turn,
 };
 use crate::catalog::Catalog;
 use crate::game::player::{ObjectHandle as NativeHandle, Viewer, observation as native};
@@ -14,6 +14,7 @@ use sve_battle_contract::{CardRef, Int, Nat, Seat, Subject, observation as wire}
 type Result<T> = result::Result<T, ProjectionError>;
 
 pub(crate) struct RuleProcessing {
+    pub(crate) actor: Option<Seat>,
     pub(crate) stage: wire::ProcessingStage,
     pub(crate) controller: Option<Seat>,
     pub(crate) subject: Option<NativeHandle>,
@@ -30,11 +31,17 @@ pub(crate) fn build_observation(
     let scope = ObjectScope::new(observation)?;
     let objects = objects::build_scoped(catalog, references, observation, &scope)?;
     // Rule subjects share the board's scope and effective faces, just like attack subjects.
+    let mut contexts = observation
+        .processing
+        .iter()
+        .map(|context| context_projection::project(catalog, references, &scope, context))
+        .collect::<Result<Vec<_>>>()?;
     let processing = processing
         .into_iter()
         .map(|context| {
             Ok(wire::ProcessingContext {
-                stage: context.stage,
+                stage: Some(context.stage),
+                actor: context.actor,
                 controller: context.controller,
                 source: None,
                 subject: context
@@ -47,10 +54,11 @@ pub(crate) fn build_observation(
                 // These rule stops have no public declarations; evolution parameters have
                 // no Declared variant and cannot serve as payment receipts.
                 declared: vec![],
-                payment: None,
+                payments: vec![],
             })
         })
         .collect::<Result<Vec<_>>>()?;
+    contexts.extend(processing);
     let attack = observation
         .attack
         .as_ref()
@@ -91,7 +99,7 @@ pub(crate) fn build_observation(
                 })
             })
             .collect::<Result<Vec<_>>>()?,
-        processing,
+        processing: contexts,
         costs: costs::scoped(observation, &scope)?,
         pending: pending::scoped(catalog, references, observation, &scope)?,
         history: history::scoped(observation, &scope)?,

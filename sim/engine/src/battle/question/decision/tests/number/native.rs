@@ -1,4 +1,5 @@
 use super::super::super::*;
+use super::super::select::project_game;
 use crate::battle::tests::{board_fixture, board_fixtures, history_fixture, payment_fixtures};
 use crate::game::player::observation::DiceHistory;
 use crate::game::player::{Input, Question, QuestionShape, SubmissionKind, Viewer};
@@ -9,7 +10,10 @@ use crate::ir::{
 };
 use alloc::sync::Arc;
 use serde_json::{Value, json};
-use sve_battle_contract::{Nat as WireNat, QuestionId};
+use sve_battle_contract::{
+    Nat as WireNat, QuestionId,
+    observation::{Procedure, ProcedureKind},
+};
 
 mod declaration;
 
@@ -116,24 +120,18 @@ fn real_x_bounds_pay_the_declared_value_and_keep_rejections_read_only() {
             );
             assert_eq!(native.purpose, player::QuestionPurpose::PlayParameter);
             let before = board_fixtures::exact_authority(&game);
-            let (usage, _, binding) = project(domain(&native).unwrap(), None).unwrap();
+            let (usage, _, binding) =
+                project_game(&game, actor, &QuestionId::new("x".into())).unwrap();
             assert_eq!(usage, wire::QuestionUse::DeclareX);
             game.observe(actor).unwrap();
             game.observe(other).unwrap();
             assert!(
                 matches!(game.input(other), Input::Waiting(waiting) if waiting.actor == actor && waiting.dice.is_none())
             );
-            assert!(matches!(
-                game.battle_question(
-                    actor,
-                    &QuestionId::new("x".into()),
-                    &board_fixture::fixture().unwrap().references
-                ),
-                Err(ProjectionError::Unavailable)
-            ));
             assert_eq!(
                 binding.answer(
-                    native.token,
+                    native.actor,
+                    &binding.question().id,
                     &Answer::Integer {
                         value: WireNat::from(4_u32)
                     }
@@ -142,7 +140,8 @@ fn real_x_bounds_pay_the_declared_value_and_keep_rejections_read_only() {
             );
             let command = binding
                 .answer(
-                    native.token,
+                    native.actor,
+                    &binding.question().id,
                     &Answer::Integer {
                         value: WireNat::from(value),
                     },
@@ -174,7 +173,7 @@ fn real_x_bounds_pay_the_declared_value_and_keep_rejections_read_only() {
 #[test]
 fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
     let program = history_fixture::card(vec![
-        history_fixture::ability(1, vec![history_fixture::roll(1)]).unwrap(),
+        history_fixture::repeated().unwrap(),
         history_fixture::reroll().unwrap(),
     ])
     .unwrap();
@@ -192,8 +191,21 @@ fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
             assert_eq!(remaining, Nat(1));
             assert_eq!(native.purpose, player::QuestionPurpose::ResolutionChoice);
             let before = board_fixtures::exact_authority(&game);
-            let (usage, shape, binding) = project(domain(&native).unwrap(), None).unwrap();
+            let (usage, shape, binding) =
+                project_game(&game, actor, &QuestionId::new("number".into())).unwrap();
             assert_eq!(usage, wire::QuestionUse::DiceReroll);
+            assert_eq!(
+                binding.question().processing.procedure,
+                Some(Procedure {
+                    kind: ProcedureKind::Repeat,
+                    actor: if actor == Viewer::P1 {
+                        sve_battle_contract::Seat::P1
+                    } else {
+                        sve_battle_contract::Seat::P2
+                    },
+                    round: Some(WireNat::from(1_u32)),
+                })
+            );
             assert_eq!(
                 shape,
                 wire::QuestionShape::DiceReroll {
@@ -217,13 +229,10 @@ fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
                     .unwrap()
                     .is_none()
             );
-            assert!(matches!(
-                game.battle_question(actor, &QuestionId::new("dice".into()), references),
-                Err(ProjectionError::Unavailable)
-            ));
             assert_eq!(
                 binding.answer(
-                    native.token,
+                    native.actor,
+                    &binding.question().id,
                     &Answer::Integer {
                         value: WireNat::ZERO
                     }
@@ -231,7 +240,11 @@ fn real_dice_commands_keep_public_waiting_values_and_native_reroll_semantics() {
                 Err(AnswerError)
             );
             let command = binding
-                .answer(native.token, &Answer::DiceReroll { choice })
+                .answer(
+                    native.actor,
+                    &binding.question().id,
+                    &Answer::DiceReroll { choice },
+                )
                 .unwrap();
             assert_eq!(
                 game.submit_player(other, command.clone()).kind,

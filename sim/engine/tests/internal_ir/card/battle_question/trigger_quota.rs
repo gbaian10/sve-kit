@@ -155,7 +155,7 @@ fn trigger_quota_projects_a_real_admission_and_preserves_the_native_handle() {
         assert_eq!(projection.question().usage, wire::QuestionUse::TriggerQuota);
         assert_eq!(
             projection.question().processing.stage,
-            ProcessingStage::TriggerAdmission
+            Some(ProcessingStage::TriggerAdmission)
         );
         assert_eq!(
             projection.question().processing,
