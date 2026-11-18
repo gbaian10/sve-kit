@@ -33,38 +33,9 @@ fn architecture_replay_checks_use_the_typed_entry() {
     let reports = check_replay(&mut factory, &fixtures, &ArchOptions::default());
     let failed: Vec<_> = reports
         .iter()
-        .filter(|report| !matches!(report.id, "R2b" | "R5") && report.outcome != Outcome::Pass)
+        .filter(|report| report.outcome != Outcome::Pass)
         .collect();
     assert_eq!(failed, Vec::<&CheckReport>::new());
-
-    // R2b still requires memory of an undisclosed nonmatching card.
-    let pending = reports.iter().find(|report| report.id == "R2b").unwrap();
-    let Outcome::Fail { reasons } = &pending.outcome else {
-        panic!("unexpected R2b result: {:?}", pending.outcome);
-    };
-    let missing =
-        "replay branch: P1 does not carry a5 from a node of the source line where it knew it";
-    assert!(reasons.iter().any(|reason| reason == missing));
-    assert!(
-        reasons.iter().all(|reason| {
-            reason == missing
-                || (reason.starts_with("replay branch N") && reason.ends_with("P1 forgot a5"))
-        }),
-        "{reasons:?}"
-    );
-
-    // Drawing on the full source lines gives P1 different knowledge to carry into each fork.
-    let r5 = reports.iter().find(|report| report.id == "R5").unwrap();
-    let Outcome::Fail {
-        reasons: r5_reasons,
-    } = &r5.outcome
-    else {
-        panic!("unexpected R5 result: {:?}", r5.outcome);
-    };
-    let expected: Vec<_> = (5_u8..=12)
-        .map(|node| format!("M' shuffles branch N{node} P1: exports differ"))
-        .collect();
-    assert_eq!(r5_reasons, &expected);
 }
 
 #[test]
