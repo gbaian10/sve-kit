@@ -47,13 +47,15 @@ const fn seat(viewer: Viewer) -> Seat {
 }
 
 impl Notices {
-    pub(in crate::game) const fn pending_lengths(&self) -> [usize; 2] {
-        [self.p1.pending.len(), self.p2.pending.len()]
-    }
-
-    pub(in crate::game) fn truncate_pending(&mut self, [p1, p2]: [usize; 2]) {
-        self.p1.pending.truncate(p1);
-        self.p2.pending.truncate(p2);
+    pub(in crate::game) fn truncate_pending_to(&mut self, target: &Self) {
+        for (current, saved) in [(&mut self.p1, &target.p1), (&mut self.p2, &target.p2)] {
+            // Delivery may have removed a prefix since this authority snapshot was taken.
+            let delivered = current.delivered.saturating_sub(saved.delivered);
+            let delivered = usize::try_from(delivered).unwrap_or(usize::MAX);
+            current
+                .pending
+                .truncate(saved.pending.len().saturating_sub(delivered));
+        }
     }
 
     const fn queue(&mut self, viewer: Viewer) -> &mut Queue {
