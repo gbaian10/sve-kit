@@ -353,7 +353,7 @@ fn ward_refuses_missing_mismatched_and_wrong_viewer_source_facts() {
         {
             match fault {
                 0 => *object = None,
-                1 => *position = 0,
+                1 => *position = Some(0),
                 2 => *zone = "unknown".into(),
                 3 => face.face = 1,
                 _ => face.card = "unit-spell".into(),

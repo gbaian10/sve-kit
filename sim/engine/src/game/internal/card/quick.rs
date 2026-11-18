@@ -401,7 +401,7 @@ impl Game {
             }
         } else {
             // Each Pass is a separate match input, so its events need their own causal node.
-            let node = format!("internal-rule-{}", self.state.next_decision);
+            let node = self.rule_node("internal-rule-");
             self.state.next_decision = self.state.next_decision.saturating_add(1);
             self.apply_rule_decision(&json!({"do":"pass","by":seat,"at":"quick"}), &node)
                 .map(CardPlay::Continued)

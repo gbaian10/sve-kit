@@ -233,8 +233,8 @@ pub enum InputDomain {
         name: String,
         /// The controller's current source zone, before the batch moves.
         zone: String,
-        /// One-based position in that zone, valid only for this question.
-        position: u64,
+        /// One-based position when the actor can locate the arriving card.
+        position: Option<u64>,
     },
     /// Legal private plays plus an explicit Pass, bound to the current rule procedure.
     Quick {
@@ -588,6 +588,7 @@ enum Wait {
         face: CardFace,
         reference: ObjectRef,
         links: player::CandidateLinks,
+        search: Option<Box<search::SingleArrival>>,
     },
     OptionalCost,
     ResolutionPayment {
@@ -991,12 +992,17 @@ impl Game {
                 }
                 (
                     Wait::WardEntry {
-                        reference: object, ..
+                        reference: object,
+                        search,
+                        ..
                     },
                     Answer::WardEntry(acted),
                 ) => {
                     rollback = execution.answer_origin(validated);
                     execution.ward_entries.push((object, acted));
+                    if let Some(arrival) = search {
+                        self.internal_search_single_arrival(&mut execution, *arrival)?;
+                    }
                 }
                 (Wait::OptionalCost, Answer::OptionalCost(accepted)) => {
                     rollback = execution.answer_origin(validated);

@@ -286,6 +286,10 @@ impl Game {
                 "internal IR executions and loaded cards have no digest format",
             ));
         }
+        self.normalized_state_digest()
+    }
+
+    pub(super) fn normalized_state_digest(&self) -> Result<String> {
         let mut value = serde_json::to_value(&self.state).map_err(invalid)?;
         normalize_origins(&mut value);
         if let Some(observers) = value["knowledge"].as_object_mut() {

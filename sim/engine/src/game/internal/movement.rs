@@ -994,7 +994,7 @@ impl Game {
             let id = execution.object_id(member)?.to_owned();
             if movement.initial_posture.is_none()
                 && self.object(&id)?.generation == member.generation.0
-                && self.internal_ward_entry_choice(execution, &id)?
+                && self.internal_ward_entry_choice(execution, &id, None)?
             {
                 execution.todo.push_front(
                     Node::Instruction {

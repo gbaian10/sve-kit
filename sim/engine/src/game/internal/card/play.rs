@@ -1294,7 +1294,10 @@ impl Game {
 
     pub(super) fn new_card_execution(&mut self, context: Context) -> Result<Execution> {
         self.emitted.clear();
-        self.fresh_card_execution(context)
+        let execution = self.fresh_card_execution(context)?;
+        #[cfg(feature = "runner")]
+        self.referee_trace_execution(execution.id.0, None);
+        Ok(execution)
     }
 
     pub(super) fn fresh_card_execution(&mut self, context: Context) -> Result<Execution> {

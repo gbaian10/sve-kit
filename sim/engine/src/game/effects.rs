@@ -872,7 +872,13 @@ impl Game {
             .map(|plan| plan.previous.clone())
             .collect::<Vec<_>>();
         self.internal_record_field_entry_methods(&entry_previous, frame)?;
-        self.internal_field_events(&entry_previous, typed_entry_before, frame)?;
+        self.internal_field_events(
+            &entry_previous,
+            typed_entry_before,
+            frame,
+            #[cfg(feature = "runner")]
+            &entered,
+        )?;
         for (object, cause) in entered {
             self.enter_triggers(&self.object(&object.id)?.clone(), &cause, frame)?;
         }

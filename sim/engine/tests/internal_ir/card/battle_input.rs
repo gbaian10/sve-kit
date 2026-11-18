@@ -6,7 +6,8 @@
 use super::*;
 use crate::{board_fixture, board_fixtures};
 use sve_battle_contract::{
-    Answer as WireAnswer, BattleInput, Command as WireCommand, QuestionId, Seat, question as wire,
+    Answer as WireAnswer, BattleInput, Command as WireCommand, QuestionId, Seat, Subject,
+    question as wire,
 };
 use sve_engine::battle::{AnswerError, BattleReferences, InputProjection};
 use sve_engine::game::player::{SubmissionKind, Viewer};
@@ -78,6 +79,84 @@ fn board(initial: &Value, follower: &WellFormedCardProgram, spell: &WellFormedCa
         .unwrap();
     game.advance_player_input();
     game
+}
+
+#[test]
+fn single_search_uses_wire_ward_confirmation_without_disclosing_a_deck_slot() {
+    let tree = evolution_linked_movement::tree(&[
+        (
+            "activate",
+            json!({"cost":{"pp":0_u8},"do":[{"search":{
+                "sel":{"who":"self","zone":"deck","name":"unit-follower"},"n":1_u8,"to":"field"
+            }}]}),
+        ),
+        (
+            "static",
+            json!({"effects":[{"grant":{"keywords":["ward"]}}]}),
+        ),
+    ]);
+    let programs = lowerer().lower(&tree).unwrap();
+    let mut initial = setup(1, json!([{"id":"found","card":"unit-follower"}]));
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"unit-follower"}]);
+    let actor = Viewer::P1;
+    let mut game = board(&initial, &programs["unit-follower"], &card(vec![]));
+    let main = project(&game, actor);
+    let intent = intents(&main)
+        .iter()
+        .find_map(|intent| {
+            if let wire::MainIntent::Activate { id, .. } = intent {
+                Some(id.clone())
+            } else {
+                None
+            }
+        })
+        .unwrap();
+    submit(
+        &mut game,
+        actor,
+        &main,
+        WireAnswer::ActionWindow {
+            intent,
+            target: None,
+        },
+    );
+
+    let search = project(&game, actor);
+    let wire::QuestionShape::Select { selection } = &question(&search).shape else {
+        panic!("search selection");
+    };
+    let candidate = selection.candidates.first().unwrap();
+    submit(
+        &mut game,
+        actor,
+        &search,
+        WireAnswer::Select {
+            selected: vec![candidate.id.clone()],
+            groups: None,
+            roles: vec![],
+        },
+    );
+
+    let ward = project(&game, actor);
+    assert!(
+        matches!(&question(&ward).shape, wire::QuestionShape::Confirm {
+        allowed, subject: Some(subject @ Subject::Card { object: None, .. }), origin: None,
+    } if allowed == &[false, true] && Some(subject) == candidate.subject.as_ref())
+    );
+    assert_eq!(
+        game.query(View::Referee, "P1.field").unwrap(),
+        Some(json!(["source"]))
+    );
+    submit(
+        &mut game,
+        actor,
+        &ward,
+        WireAnswer::Confirm { accept: true },
+    );
+    assert_eq!(
+        game.query(View::Referee, "P1.field.found.acted").unwrap(),
+        Some(json!(true))
+    );
 }
 
 #[test]

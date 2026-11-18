@@ -17,9 +17,10 @@ use crate::game::player::{
     Answer, AttackTarget, CardOption, ClosingAnswer, ClosingQuestion, Command, DecisionShape,
     DiscardKind, EvolutionAnswer, EvolutionQuestion, Input, MainActionAnswer, MainIntent,
     MainIntentKind, ObjectHandle, OpeningAnswer, OpeningQuestion, PendingChoice, Question,
-    QuestionPurpose, QuestionShape, QuickChoice, SelectionGroup, SelectionQuestion, SubmissionKind,
-    TargetRoleAssignment, Viewer,
+    QuestionPurpose, QuestionShape, QuickChoice, SelectionGroup, SelectionQuestion, Submission,
+    SubmissionKind, TargetRoleAssignment, Viewer,
 };
+use crate::game::replay::RecordedCommand;
 use crate::ir::{ModeId, Nat, Position, StepwiseAnswer};
 use core::mem::take;
 
@@ -29,6 +30,7 @@ const MAX_QUESTIONS: usize = 64;
 pub(super) struct Turn<'game> {
     pub(super) game: &'game mut Game,
     pub(super) by: Viewer,
+    pub(super) record: Option<&'game mut Vec<RecordedCommand>>,
 }
 
 impl Turn<'_> {
@@ -46,7 +48,7 @@ impl Turn<'_> {
     }
 
     fn submit(&mut self, command: Command) -> Result<SubmissionKind, EngineError> {
-        let submission = self.game.submit_player(self.by, command);
+        let submission = submit(self.game, self.by, command, self.record.as_deref_mut());
         if submission.kind == SubmissionKind::EngineFault {
             return Err(fault(&*self.game));
         }
@@ -812,7 +814,12 @@ fn progress(game: &Game) -> String {
 }
 
 /// Pass Quick windows the exam leaves implicit because Pass is the only legal answer.
-pub(super) fn settle(game: &mut Game, decision: &Value, by: Viewer) -> Result<(), EngineError> {
+pub(super) fn settle(
+    game: &mut Game,
+    decision: &Value,
+    by: Viewer,
+    mut record: Option<&mut Vec<RecordedCommand>>,
+) -> Result<(), EngineError> {
     for _ in 0..MAX_QUESTIONS {
         let mut forced = None;
         for seat in [Viewer::P1, Viewer::P2] {
@@ -834,16 +841,31 @@ pub(super) fn settle(game: &mut Game, decision: &Value, by: Viewer) -> Result<()
         let Some((seat, token)) = forced else {
             return Ok(());
         };
-        let submission = game.submit_player(
+        let submission = submit(
+            game,
             seat,
             Command::Answer {
                 token,
                 answer: Answer::Quick(None),
             },
+            record.as_deref_mut(),
         );
         if submission.kind != SubmissionKind::Applied {
             return Err(fault(game));
         }
     }
     Err(adapter("too many implicit Quick passes"))
+}
+
+fn submit(
+    game: &mut Game,
+    viewer: Viewer,
+    command: Command,
+    record: Option<&mut Vec<RecordedCommand>>,
+) -> Submission {
+    if let Some(record) = record {
+        RecordedCommand::submit(game, record, viewer, command)
+    } else {
+        game.submit_player(viewer, command)
+    }
 }

@@ -194,31 +194,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-1 assert P2.leader.life (#2008)"
     reason: "after-decision-1 omniscient assert P2.leader.life"
-  - question: "card-BP10-020"
-    scenario: "A 骰 3 → 7 傷害使對手歸 0；再骰 1 → 全體破壞；之後檢查時點才敗北"
-    status: fail
-    error: "typed-gap: after-decision-2 outcome (#2008)"
-    reason: "after-decision-2 omniscient outcome; after-decision-2 omniscient assert P2.leader.life; after-decision-2 omniscient assert game; after-decision-2 omniscient events"
-  - question: "card-BP10-020"
-    scenario: "B 骰 5、6 → 自己受 14"
-    status: fail
-    error: "typed-gap: after-decision-2 assert P1.leader.life (#2008)"
-    reason: "after-decision-2 omniscient assert P1.leader.life; after-decision-2 omniscient assert P2.field; after-decision-2 omniscient events"
-  - question: "card-BP10-SL06"
-    scenario: "[3, 4]"
-    status: fail
-    error: "typed-gap: after-decision-2 assert P1.leader.life (#2008)"
-    reason: "after-decision-2 omniscient assert P1.leader.life; after-decision-2 omniscient assert P2.field; after-decision-2 omniscient assert P2.leader.life"
-  - question: "card-BP10-SL06"
-    scenario: "[3, 5]"
-    status: fail
-    error: "typed-gap: after-decision-2 assert P2.field (#2008)"
-    reason: "after-decision-2 omniscient assert P2.field; after-decision-2 omniscient assert P2.leader.life; after-decision-2 omniscient assert game"
-  - question: "card-BP10-SL06"
-    scenario: "[1, 2]"
-    status: fail
-    error: "typed-gap: after-decision-2 assert P1.leader.life (#2008)"
-    reason: "after-decision-2 omniscient assert P1.leader.life"
   - question: "card-BP11-042"
     scenario: "A 付土の秘術 → レイサム得到必殺 → 交戰後天剣の乙女被必殺破壞"
     status: unsupported
@@ -719,11 +694,6 @@ known:
     status: fail
     error: "interface: awaiting-compound (#2008)"
     reason: "after-decision-2 omniscient awaiting"
-  - question: "card-ECP02-065"
-    scenario: "A 擲到 3、不重擲 → 對手把攻擊力最高的從者放到墓場"
-    status: adapter-error
-    error: "interface: runner translation / interface (#2008)"
-    reason: "P2 has no question"
   - question: "card-ECP02-065"
     scenario: "B 擲到 4（無事）→ 重擲 → 2 → 對手リーダー 3 傷害、自己 +3；舊目不再參照"
     status: fail

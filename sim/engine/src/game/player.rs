@@ -126,6 +126,7 @@ pub enum InputKind {
 
 /// Classification for the player submission result.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+#[cfg_attr(feature = "runner", derive(serde::Serialize, serde::Deserialize))]
 pub enum SubmissionKind {
     /// Accepted input advanced the procedure, possibly returning to target selection.
     Applied,

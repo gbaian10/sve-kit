@@ -83,13 +83,13 @@ impl Game {
     }
 
     fn internal_die(&mut self) -> Result<DieFace> {
-        match self.state.rng.bounded(6)? {
-            0 => Ok(DieFace::One),
-            1 => Ok(DieFace::Two),
-            2 => Ok(DieFace::Three),
-            3 => Ok(DieFace::Four),
-            4 => Ok(DieFace::Five),
-            5 => Ok(DieFace::Six),
+        match self.roll_die()? {
+            1 => Ok(DieFace::One),
+            2 => Ok(DieFace::Two),
+            3 => Ok(DieFace::Three),
+            4 => Ok(DieFace::Four),
+            5 => Ok(DieFace::Five),
+            6 => Ok(DieFace::Six),
             _ => Err(invalid("die outside its closed range")),
         }
     }

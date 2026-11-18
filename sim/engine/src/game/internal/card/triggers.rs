@@ -90,6 +90,8 @@ pub(in crate::game::internal) struct PendingOccurrence {
     source_position: u64,
     captures: Vec<((ScopeId, u64), Slot)>,
     installed: bool,
+    #[cfg(feature = "runner")]
+    entry_cause: Option<serde_json::Value>,
 }
 
 pub(in crate::game) struct DeparturePlan {
@@ -286,6 +288,8 @@ impl Game {
             timing: None,
             captures: vec![],
             installed: false,
+            #[cfg(feature = "runner")]
+            entry_cause: None,
             source_position: u64::try_from(
                 self.zone_ids(
                     super::seat_name(source.controller)?,
@@ -796,6 +800,11 @@ impl Game {
                 controller: pending.source.controller,
             };
             let mut execution = self.new_card_execution(context)?;
+            #[cfg(feature = "runner")]
+            if let Ok((_, line)) = printed_origin(&pending.ability.node.source.origin) {
+                let ability = serde_json::json!({"source":pending.holder,"line":line.0});
+                self.referee_trace_execution(execution.id.0, Some(ability));
+            }
             execution.event_reads = super::super::event_reads::EventReads::capture(
                 pending.ability.node.trigger.as_ref(),
                 pending.timing.as_ref(),

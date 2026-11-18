@@ -77,7 +77,7 @@ impl Game {
                 "full field after payment".into(),
             ));
         }
-        if self.internal_ward_entry_choice(execution, &holder)? {
+        if self.internal_ward_entry_choice(execution, &holder, None)? {
             return Ok(());
         }
         let played = execution.reference(self, &holder)?;

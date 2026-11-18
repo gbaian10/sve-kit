@@ -153,14 +153,18 @@ impl Game {
         Ok(())
     }
 
-    fn roll_once(&mut self, bind: &str, reroll: bool, frame: &mut Frame) -> Result<()> {
-        let result = match self.next_random_script("dice")? {
+    pub(super) fn roll_die(&mut self) -> Result<i64> {
+        match self.next_random_script("dice")? {
             Some(value) => value
                 .as_i64()
                 .filter(|n| (1..=6).contains(n))
-                .ok_or_else(|| invalid("scripted die must be an integer from one to six"))?,
-            None => i64::try_from(self.bounded_random(6)?.saturating_add(1)).map_err(invalid)?,
-        };
+                .ok_or_else(|| invalid("scripted die must be an integer from one to six")),
+            None => i64::try_from(self.bounded_random(6)?.saturating_add(1)).map_err(invalid),
+        }
+    }
+
+    fn roll_once(&mut self, bind: &str, reroll: bool, frame: &mut Frame) -> Result<()> {
+        let result = self.roll_die()?;
         frame.values.insert(bind.into(), json!(result));
         frame.performed = 1;
         let group = self.group();

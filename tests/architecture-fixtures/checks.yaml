@@ -20,6 +20,7 @@ replay:
       at: check-timing
       do: choose-pending
       pending: { ability: { source: a1, line: 2 } }
+      choice: execute
     - n: 4
       by: P1
       at: resolve
@@ -38,6 +39,7 @@ replay:
       at: check-timing
       do: choose-pending
       pending: { ability: { source: a3, line: 2 } }
+      choice: decline
     - { n: 7, by: P1, at: main, do: attack, attacker: a2, target: P2.leader }
     - { n: 8, by: P2, at: quick, do: pass }
     - { n: 9, by: P1, at: main, do: end-phase }

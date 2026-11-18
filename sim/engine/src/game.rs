@@ -27,6 +27,7 @@ mod progression;
 mod randomness;
 #[cfg(feature = "runner")]
 mod referee;
+pub mod replay;
 mod resources;
 mod restrictions;
 mod rules;
@@ -311,6 +312,8 @@ pub struct Game {
     #[serde(skip)]
     player_fault: Option<EngineFailure>,
     #[serde(skip)]
+    replay: replay::Coordinates,
+    #[serde(skip)]
     player_epoch: u64,
     #[serde(skip)]
     player_evolution: Option<Box<internal::EvolutionDeclaration>>,
@@ -318,6 +321,7 @@ pub struct Game {
     player_events: player::events::Journal,
     #[serde(skip)]
     player_notices: player::notices::Notices,
+    #[cfg(feature = "runner")]
     #[serde(skip)]
     referee_events: Option<Vec<Value>>,
 }
@@ -640,10 +644,12 @@ impl Game {
             prepared: BTreeMap::new(),
             card_runtime: internal::CardRuntime::default(),
             player_fault: None,
+            replay: replay::Coordinates::default(),
             player_epoch: 0,
             player_evolution: None,
             player_events: player::events::Journal::default(),
             player_notices: player::notices::Notices::default(),
+            #[cfg(feature = "runner")]
             referee_events: None,
         };
         game.initialize_evolved(&position)?;
@@ -1049,8 +1055,16 @@ impl Game {
         let value = self.state.counters.entry(key.into()).or_default();
         *value = value.saturating_add(amount);
     }
+    fn rule_node(&self, prefix: &str) -> String {
+        self.replay
+            .node
+            .clone()
+            .unwrap_or_else(|| format!("{prefix}{}", self.state.next_decision))
+    }
+
     fn emit(&mut self, mut event: Value, cause: &Value, group: u64) -> String {
-        let id = format!("{}:e{}", self.node, self.state.next_event);
+        let node = self.replay.node.as_deref().unwrap_or(&self.node);
+        let id = format!("{node}:e{}", self.state.next_event);
         self.state.next_event = self.state.next_event.saturating_add(1);
         if event.get("by").is_none()
             && let Some(rule) = cause["rule"].as_str()
@@ -1061,8 +1075,9 @@ impl Game {
         event["cause"] = cause.clone();
         event["group"] = json!(group);
         self.record_player_step(&event);
-        if let Some(log) = &mut self.referee_events {
-            log.push(event.clone());
+        #[cfg(feature = "runner")]
+        if self.referee_events.is_some() {
+            self.referee_trace_event(event.clone());
         }
         self.emitted.push(event);
         id

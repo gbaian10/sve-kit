@@ -1,4 +1,5 @@
 //! Current printed keyword authority and the CR 12.8.2 optional entry procedure.
+use super::super::search::SingleArrival;
 use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant, player_id};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::game::internal::player::CandidateLinks;
@@ -80,6 +81,7 @@ impl Game {
         &mut self,
         execution: &mut Execution,
         holder: &str,
+        search: Option<&SingleArrival>,
     ) -> Result<bool> {
         let reference = execution.reference(self, holder)?;
         if execution
@@ -115,12 +117,16 @@ impl Game {
         {
             return Ok(false);
         }
-        let position = if previous.zone == "void" && previous.generation == 0 {
-            1
+        let position = if search.is_some() {
+            None
+        } else if previous.zone == "void" && previous.generation == 0 {
+            Some(1)
         } else {
-            self.object_position(holder)?
-                .and_then(|position| position.checked_add(1))
-                .ok_or_else(|| invalid("Ward entry has no source zone position"))?
+            Some(
+                self.object_position(holder)?
+                    .and_then(|position| position.checked_add(1))
+                    .ok_or_else(|| invalid("Ward entry has no source zone position"))?,
+            )
         };
         self.internal_wait(
             execution,
@@ -136,6 +142,7 @@ impl Game {
                 face: self.physical_card_face(holder)?,
                 reference,
                 links: CandidateLinks::capture(self, execution, [reference])?,
+                search: search.cloned().map(Box::new),
             },
         )?;
         Ok(true)

@@ -74,6 +74,14 @@ pub struct SearchPartitionDomain {
 }
 
 #[derive(Clone, Debug)]
+pub(super) struct SingleArrival {
+    instruction: Box<Instruction>,
+    player: PlayerId,
+    object: ObjectRef,
+    outcome: SearchOutcome,
+}
+
+#[derive(Clone, Debug)]
 struct PartitionContinuation {
     links: CandidateLinks,
     instruction: Box<Instruction>,
@@ -790,6 +798,28 @@ impl Game {
                         },
                     );
                 }
+                if let [object] = found.as_slice()
+                    && wait.domain.groups.is_none()
+                    && wait.domain.cardinality.maximum == Some(Nat(1))
+                    && movement.initial_posture.is_none()
+                    && self
+                        .internal_search_destination(execution, &movement.to, wait.player)?
+                        .1
+                        == ZoneKind::Field
+                    && self.movement_free_spaces(wait.player, ZoneKind::Field)? > 0
+                {
+                    let id = execution.object_id(*object)?.to_owned();
+                    let arrival = SingleArrival {
+                        instruction: wait.instruction.clone(),
+                        player: wait.player,
+                        object: *object,
+                        outcome,
+                    };
+                    if self.internal_ward_entry_choice(execution, &id, Some(&arrival))? {
+                        return Ok(());
+                    }
+                    return self.internal_search_single_arrival(execution, arrival);
+                }
                 let moved = self.internal_search_move_with_arrival(
                     execution,
                     &found,
@@ -832,6 +862,42 @@ impl Game {
             }
             _ => Err(unsupported("search movement continuation")),
         }
+    }
+
+    pub(super) fn internal_search_single_arrival(
+        &mut self,
+        execution: &mut Execution,
+        arrival: SingleArrival,
+    ) -> Result<()> {
+        let Action::Search {
+            destination: Some(SearchDestination::Single { movement }),
+            ..
+        } = &arrival.instruction.action
+        else {
+            return Err(invalid("missing single search destination"));
+        };
+        let moved = self.internal_search_move_with_arrival(
+            execution,
+            &[arrival.object],
+            &movement.to,
+            arrival.player,
+            FieldArrival {
+                posture: movement.initial_posture,
+                without_fanfare: suppresses_fanfare(&movement.entry_effects),
+            },
+        )?;
+        if moved.iter().any(|result| result.after.is_some()) {
+            self.internal_ward_entry_posture(execution, arrival.object)?;
+        }
+        self.internal_search_finish(
+            execution,
+            &arrival.instruction,
+            arrival.player,
+            SearchOutcome {
+                moved,
+                ..arrival.outcome
+            },
+        )
     }
 
     fn internal_search_capacity(
@@ -1183,6 +1249,40 @@ fn zone_name(kind: ZoneKind) -> Result<&'static str> {
         ZoneKind::Field => Ok("field"),
         ZoneKind::Ex => Ok("ex"),
         _ => Err(unsupported("search capacity zone")),
+    }
+}
+
+#[cfg(feature = "runner")]
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "The referee translates native search choices for neutral fixture inputs."
+)]
+impl Game {
+    pub(crate) fn referee_search_member(&self, actor: Viewer, handle: u64) -> Option<&str> {
+        // Only the replay runner needs frozen fixture labels for hidden candidates.
+        self.replay.node.as_ref()?;
+        let execution = self.typed.as_ref()?;
+        let (question, Wait::Search(wait)) = execution.waiting.as_ref()? else {
+            return None;
+        };
+        if question.actor != actor.player() {
+            return None;
+        }
+        let member = wait.members.get(usize::try_from(handle).ok()?)?;
+        execution.object_id(*member).ok()
+    }
+
+    pub(crate) fn referee_ward_member(&self, actor: Viewer) -> Option<&str> {
+        // Only the replay runner needs to match a hidden entrant to its fixture label.
+        self.replay.node.as_ref()?;
+        let execution = self.typed.as_ref()?;
+        let (question, Wait::WardEntry { reference, .. }) = execution.waiting.as_ref()? else {
+            return None;
+        };
+        if question.actor != actor.player() {
+            return None;
+        }
+        execution.object_id(*reference).ok()
     }
 }
 
