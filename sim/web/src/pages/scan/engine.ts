@@ -74,10 +74,10 @@ async function createScanEngine(
   const options = { executionProviders: [backend === "webgpu" ? "webgpu" : "wasm"] }
   // ONNX Runtime keeps each session's native memory until it is released, not until it is dropped.
   const sessions: Ort.InferenceSession[] = []
-  const { promise: freed, resolve: resolveFreed } = Promise.withResolvers<void>()
+  const { promise: freed, resolve: resolveFreed } = Promise.withResolvers<undefined>()
   const free = async () => {
     await Promise.allSettled(sessions.map((session) => session.release()))
-    resolveFreed()
+    resolveFreed(undefined)
   }
   let recSession: Ort.InferenceSession
   let detSession: Ort.InferenceSession

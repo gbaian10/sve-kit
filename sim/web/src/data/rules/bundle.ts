@@ -46,7 +46,7 @@ export function buildRules(
     if (data.kind === "comprehensive-rules-index") index = data
     else files.set(fileOf(path), data)
   }
-  if (!index) throw new Error(`comprehensive rules ${version}: index.json missing`)
+  if (!index) throw new Error(`comprehensive rules ${String(version)}: index.json missing`)
   const nodes = index.contents.flatMap((item) => files.get(item.file)?.nodes ?? [])
   const translations = new Map<string, TranslationEntry>()
   for (const [path, file] of Object.entries(translationFiles))
