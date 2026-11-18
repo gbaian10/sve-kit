@@ -14313,6 +14313,7 @@
           "$ref": "#/$defs/Zone"
         },
         {
+          "type": "string",
           "const": "banish"
         }
       ]
@@ -16111,6 +16112,7 @@
       "type": "object",
       "properties": {
         "original": {
+          "type": "boolean",
           "const": true
         }
       },

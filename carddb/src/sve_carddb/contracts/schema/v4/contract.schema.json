@@ -43494,6 +43494,7 @@
       "type": "object",
       "properties": {
         "original": {
+          "type": "boolean",
           "const": true
         }
       },
@@ -44095,6 +44096,7 @@
           "$ref": "#/$defs/DSLNodes.Zone"
         },
         {
+          "type": "string",
           "const": "banish"
         }
       ]

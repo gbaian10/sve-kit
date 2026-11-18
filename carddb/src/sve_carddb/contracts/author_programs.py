@@ -848,16 +848,19 @@ type ChooseAny = ChooseAnyFields
 type Choose = ChooseExact | ChooseUpTo | ChooseAny
 
 
+type SearchPlacementZone = Zone | Literal["banish"]
+
+
 @with_config(CONFIG)
 class SearchPartitionPartFields(TypedDict):
-    zone: Zone | Literal["banish"]
+    zone: SearchPlacementZone
 
     n: Quantity
 
 
 @with_config(CONFIG)
 class SearchPartitionUpToFields(TypedDict):
-    zone: Zone | Literal["banish"]
+    zone: SearchPlacementZone
 
     upto: Quantity
 
@@ -901,7 +904,7 @@ type SearchConditionalDestination = SearchConditionalDestinationFields
 
 
 type SearchDestination = (
-    Zone | Literal["banish"] | ParamRef | SearchPartition | SearchConditionalDestination
+    SearchPlacementZone | ParamRef | SearchPartition | SearchConditionalDestination
 )
 
 
