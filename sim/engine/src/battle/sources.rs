@@ -22,7 +22,7 @@ pub(super) fn source(
     )
 }
 
-pub(super) fn source_ref(
+pub(crate) fn source_ref(
     catalog: &Catalog,
     references: &BattleReferences,
     origin: &EffectSource,

@@ -57,6 +57,7 @@ pub use question::{AnswerError, QuestionProjection};
 pub use references::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 pub use rules::{RuleIdentity, RuleInput};
 pub use selection::{CandidateDetails, SelectionProjection};
+pub(crate) use sources::source_ref;
 pub(crate) use turn::project_turn;
 pub use wording::{
     WordingFaceIdentity, WordingFieldIdentity, WordingInput, WordingRevisionIdentity,

@@ -110,6 +110,25 @@ HostError 表示宿主、數值或必要投影出錯，無法繼續提供安全�
 BattleInput.engine_fault 則是 native 規則執行故障，仍由權威決定能否投降，不能把宿主錯誤偽裝成規則結果。
 投降仍走原生入口，故障時只有 can_concede=true 才可提出；「結束對局」由本機關閉 Worker，不另造無效局勝者。
 
+### 2.2 開局前支援檢查
+
+可信宿主先取得同一驗證 reader 的 `SelectedEffects`、兩席 `PlayerDeck` 與 `BattleReferences`，
+在建立或發布任何玩家輸入前呼叫 `Game::check_battle_decks(&selected, &decks, &references)`。
+只有回傳的 `StrictAdmission::is_admitted()` 為 true，才以同一份 selection／decks 呼叫 `start_player_game`。
+未准入時各席只取得自己的 `gaps(viewer)`；引用背景損壞或必要來源無法投影是宿主錯誤，原始診斷不傳給玩家。
+
+檢查沿用 strict 開局的主牌組、進化牌組、規則產生的初始 EX 資源與完整 token 依存閉包。
+整張程式的准入檢查遍歷所有分支及巢狀定義；目前已准入的玩家題型都有正式 adapter，不另建立一份候選合法性求解器。
+之後逐一走訪該閉包內已准入能力的來源，以實際印刷面映射及同一個 SourceRef／TextRef resolver 核對；
+未走到的分支與可能生成的 token 也檢查，不執行規則、不試跑秘密條件或 RNG。
+未選入當局閉包的作者不影響這次支援判斷，完整印刷／卡面身分目錄仍不可裁切。
+
+preflight 不推論規則引用的完整性：公開規則身分目錄只證明可定位，不能把單條 CR／QA／裁定或空目錄當作完整依據。
+現有題目沒有提供完整依據集合的可信 producer，因此 `Question.rules` 保持 null；
+單獨驗證 RuleRef 時仍由同一 resolver 核對精確 revision 及呼叫點明示的 strength。
+原文未提供時沿用已知卡面提示；有精確卡文閉包卻不符 owner／revision／field 時拒絕，不改拿其他版次。
+執行後的數值範圍、物件世代與授權仍逐停點重驗；preflight 不保證任意答案合法，也不把執行期故障改判敗北。
+
 ## 3. 玩家盤面與文字引用
 
 BattleObservation 完整保留[玩家輸入](player-input.md)的觀察語義，現物件只在 objects 表出現一次，區域以代號引用。
