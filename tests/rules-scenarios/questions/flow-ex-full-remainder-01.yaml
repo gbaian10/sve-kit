@@ -33,7 +33,12 @@ evidence:
       - 因此把剛看的三張都放到牌庫底
 status: disputed
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      依 runtime-semantics §3.2：「残り」＝看過的牌減成功移入 EX 的牌；EX 已滿所以 pick 未移動，三張依 order 放底 → [tail, d2,
+      pick, d3]（9.8 方向）
 scenarios:
   - name: エル選中的武闘竜人因 EX 已滿未移動，與另外兩張一起放底
     setup:

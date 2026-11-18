@@ -4,7 +4,7 @@ sources:
   cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
 id: card-BP16-093
 kind: card
-must_pass: false
+must_pass: true
 mechanisms:
   - 持續效果
   - 數值變更事件
@@ -29,9 +29,14 @@ evidence:
   - ref: R-0011
     derivation:
       - 種類切換後顯示的數值是派生資訊，並非數值處理的結果
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      P2 結束階段 P1 Quick pass；P1 主要階段誘發，好きな枚数選 0，第 4 個祈り使ラピス依常在條件成為 5/5
+      從者；種類切換不是數值處理，沒有体力増加（Q2130 為同卡依據）
 scenarios:
   - name: 第四個祈りカウンター讓ラピス變回從者，沒有體力增加事件
     setup:

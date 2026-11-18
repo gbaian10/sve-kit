@@ -4,7 +4,7 @@ sources:
   cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
 id: rule-11.7.1-01
 kind: rule
-must_pass: false
+must_pass: true
 mechanisms:
   - スタック
   - 舊版提示文字
@@ -28,9 +28,13 @@ evidence:
     derivation:
       - スタック的移轉由 13.3.2.2 給予
       - 剩零個時依 11.7.1 放到墓場
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      舊版魔片依 13.3.2.2 起動、アクト後移走唯一計數器；0 個依 11.7.1 送墓，token 依 9.1.4.4 消去；沒有破壊事件，other 變成 2 個
 scenarios:
   - name: 舊版魔片把最後一個計數器移走後，依規則送墓並消去
     setup:

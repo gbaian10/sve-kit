@@ -34,11 +34,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-2 awaiting (#2008)"
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.resolution; after-decision-1 omniscient awaiting"
-  - question: "card-BP01-129"
-    scenario: "レリア在場，防守方クレリックランサー以交戰前體力加 4 反擊"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
   - question: "card-BP01-170"
     scenario: "[fable] A 結束階段捨光の道筋 → 抽 1 → 再捨 1"
     status: fail
@@ -124,11 +119,6 @@ known:
     status: unsupported
     error: "unadmitted BP05-SL12 (#2090)"
     reason: "internal D1 does not support unloaded whole card BP05-SL12/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP06-021"
-    scenario: "エズディア把サムライ變成護符後，サムライ起動不增加體力"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
   - question: "card-BP07-030"
     scenario: "A ハルバードウルフ 起動：アクト 2 棵大樹 → 2 傷害"
     status: fail
@@ -161,9 +151,9 @@ known:
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.hand"
   - question: "card-BP08-085"
     scenario: "悪意の憑依結算時墓場只有三張，只能不消滅"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
+    status: unsupported
+    error: "typed-gap: sole decline input skipped"
+    reason: "typed runner: resolve-choice at ActionWindow"
   - question: "card-BP08-089"
     scenario: "A 2 個護符：進化付 1 PP＋1 EP → 變成護符 → 進化時消滅 b1 → 不能攻擊 → テミス 不破壞它 → ダークオファリング 破壞 → ラストワード 3 傷害"
     status: unsupported
@@ -239,11 +229,6 @@ known:
     status: unsupported
     error: "interface: runner translation / interface (#2008)"
     reason: "typed runner: attack at CostMaterials"
-  - question: "card-BP11-113"
-    scenario: "一次武裝強化同時加攻與體，只誘發一次疾走"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
   - question: "card-BP11-P30"
     scenario: "[fable] A 回合開始就在場的列車：操縦 → 攻擊アクト從者 → 攻撃時破壞它並 +2 → 不交戰"
     status: fail
@@ -274,11 +259,6 @@ known:
     status: unsupported
     error: "interface: runner translation / interface (#2008)"
     reason: "typed runner: resolve-choice for Abilities"
-  - question: "card-BP14-046"
-    scenario: "先打出移入 EX 的第一張哥布林，第二張照常付費"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
   - question: "card-BP14-081"
     scenario: "A 復活アンサージュ +1／疾走 → 進化後 4/3 且仍有疾走 → 攻擊リーダー 4"
     status: unsupported
@@ -354,11 +334,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
-  - question: "card-BP16-093"
-    scenario: "第四個祈りカウンター讓ラピス變回從者，沒有體力增加事件"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
   - question: "card-BP16-SL08"
     scenario: "[astra] 原 EX 0"
     status: unsupported
@@ -611,9 +586,9 @@ known:
     reason: "no authored program: BP20-P61"
   - question: "card-BP20-P65"
     scenario: "シャム＝ナクア的紋章在 EX 時仍不能選零個模式"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
+    status: adapter-error
+    error: "interface: cannot-play not mapped"
+    reason: "play answer rejected"
   - question: "card-BP20-P70"
     scenario: "手牌 2"
     status: fail
@@ -629,11 +604,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-4 omniscient events"
-  - question: "card-BP21-057"
-    scenario: "ジョー只有九個情熱カウンター，橫置付款後兩句效果都不做"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
   - question: "card-BP21-P56"
     scenario: "A 第一次 +2 抽 1 張；同回合第二次不抽"
     status: fail
@@ -1146,9 +1116,9 @@ known:
     reason: "no authored program: BP16-049"
   - question: "rule-10.9.1.6-02"
     scenario: "同時留下雙方的數值效果，回合玩家的 +2 先於對手設為 1"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
+    status: unsupported
+    error: "legacy-state: simultaneous continuous effects"
+    reason: "no authored program: BP16-049"
   - question: "rule-11.2.1-01"
     scenario: "生命 1"
     status: unsupported
@@ -1164,11 +1134,6 @@ known:
     status: unsupported
     error: "legacy-state (#2008)"
     reason: "no authored program: BP01-P25"
-  - question: "rule-11.7.1-01"
-    scenario: "舊版魔片把最後一個計數器移走後，依規則送墓並消去"
-    status: ineligible
-    error: "待獨立審核"
-    reason: 'status is "draft"'
   - question: "rule-12.15-01"
     scenario: "1 オーラ：粛清の一刀 不能選它（唯一目標時不能打出）；テミス 的全體破壞照樣破壞它"
     status: adapter-error

@@ -37,7 +37,12 @@ evidence:
       - 在卡面上方使用的名稱是『にんじん』，同名的卡滿足食事及張數條件
 status: disputed
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      表向的にんじん不算在エボルヴデッキ內（4.6.3），唯一可食事的是開催大成功！；サイレンススズカ 交戰被破壊，出走卡依 11.8.1 表向回エボルヴデッキ，表向にんじん 9 張
+      → 結束階段送墓 P2 牌庫 2 張
 scenarios:
   - name: 開催大成功！可食事，出走者離場後表向回牌庫並補足第九張
     setup:

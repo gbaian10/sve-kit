@@ -27,7 +27,7 @@
 | 共同  | 兩者              | 24                   |
 | sol   | Codex gpt-6-sol   | 14                   |
 
-定案題目經過交叉審核，雙方同意後標為 `verified`。
+定案題目經過交叉審核，雙方同意後標為 `verified`。核對者代號 `opus` 指 Claude Opus 5.5。
 
 `verified_by[].note` 裡出現的 `xverify-*/recheck.md`、`last.md`、`split.md` 等檔名是設計期本機審核稿，
 不隨 repo 發布。題目的公開依據以題目的 `refs`、`evidence` 與裁定登錄（`authored/rules/rulings/`）為準。
@@ -38,7 +38,7 @@
 
 ## 必過題
 
-`must_pass: true` 的 223 題（659 個局面）是 DSL 必須通過的門檻；其餘 28 題（63 個局面）是參考題，不列入門檻。
+`must_pass: true` 的 230 題（666 個局面）是 DSL 必須通過的門檻；其餘 21 題（56 個局面）是參考題，不列入門檻。
 
 ## 檢查格式
 

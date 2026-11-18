@@ -28,9 +28,14 @@ refs:
 evidence:
   - ref: Q2451-EN
     quote: No. You must choose at least 1 option.
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      紋章在 EX 有效（10.3.6）；叫喚と憎悪「1つチョイス」適用「好きな数」：選 1、2 → ファイター 3 傷害破壊、領袖 18、PP 6；選 0 依 Q2451-EN
+      不合法 → cannot-play，局面不變
 scenarios:
   - name: シャム＝ナクア的紋章在 EX 時仍不能選零個模式
     setup:

@@ -30,9 +30,14 @@ evidence:
   - ref: R-0014
     derivation:
       - 同層且沒有依存，發生時點相同時以回合玩家優先
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      兩個數值效果同層、無 10.9.1.5 依存、同時戳；依 R-0014 先套回合玩家的 +2 再套 P2 的設為 1，ファイター 1/1，領袖 19。同時戳是契約第 0
+      節給定局面，已在 why 註明
 scenarios:
   - name: 同時留下雙方的數值效果，回合玩家的 +2 先於對手設為 1
     setup:

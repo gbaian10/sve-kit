@@ -4,7 +4,7 @@ sources:
   cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
 id: card-BP14-046
 kind: card
-must_pass: false
+must_pass: true
 mechanisms:
   - EX
   - 打出費用
@@ -28,9 +28,13 @@ evidence:
   - ref: R-0010
     derivation:
       - 『次に自分が』只修正玩家下次打出這批卡中的任一張
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      7 費後剩 1 PP；EX 3→5 只移入 g1、g2；兩者共用一次 0 費，g2 照原費 1，PP 1→0；原有的ファイター不在這一組
 scenarios:
   - name: 先打出移入 EX 的第一張哥布林，第二張照常付費
     setup:

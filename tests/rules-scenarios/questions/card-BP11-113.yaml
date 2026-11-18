@@ -4,7 +4,7 @@ sources:
   cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
 id: card-BP11-113
 kind: card
-must_pass: false
+must_pass: true
 mechanisms:
   - 數值變更事件
   - 同一指示
@@ -28,9 +28,13 @@ evidence:
   - ref: R-0012
     derivation:
       - 兩個變更來自同一個指示，能力只匹配一次
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      武装強化同一指示 +1/+1，只待機一次（awaiting 單一 choose-pending）；得【疾走】後本回合進場也能攻擊領袖，2 傷害
 scenarios:
   - name: 一次武裝強化同時加攻與體，只誘發一次疾走
     setup:

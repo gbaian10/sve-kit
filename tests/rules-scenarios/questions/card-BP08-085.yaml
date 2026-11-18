@@ -30,9 +30,13 @@ evidence:
   - ref: R-0018
     derivation:
       - 四張是自願執行的完整數量，結算中的法術還不在墓場
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      天剣の乙女 6-3=3；墓場 3 張不能選消滅，「〜てよい」只剩 decline 仍是輸入點（§10.24、§10.33(b)）；法術在解決領域不能自選，結算後進墓、不回手
 scenarios:
   - name: 悪意の憑依結算時墓場只有三張，只能不消滅
     setup:

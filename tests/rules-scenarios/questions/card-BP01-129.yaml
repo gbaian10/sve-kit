@@ -4,7 +4,7 @@ sources:
   cards_jsonl_sha256: 541781306484527c858c6587a2c838764b0513595b00711751370534050c3fa1
 id: card-BP01-129
 kind: card
-must_pass: false
+must_pass: true
 mechanisms:
   - 交戰
   - 互相傷害
@@ -29,9 +29,13 @@ evidence:
   - ref: Q233
     derivation:
       - 防守方同樣以自身體力加 4 對攻擊方造成傷害
-status: draft
+status: verified
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      攻擊方 4 傷害 → クレリックランサー 5-4=1；防守方依レリア與 Q233 以交戰前體力 5、在對手回合 +4 → 9，天剣の乙女 6 體力被破壊
 scenarios:
   - name: レリア在場，防守方クレリックランサー以交戰前體力加 4 反擊
     setup:

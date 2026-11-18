@@ -31,7 +31,12 @@ evidence:
       - 送墓至多現有的一張，該張的原始費用就是全體唯一費用，於空牌庫執行抽牌
 status: disputed
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      牌庫 1 張只送墓 1 張（1.3.2）；R-0017 一張即「すべて同じ」成立 → 從空牌庫抽牌，依 11.2.2 敗北；refs Q1130、Q1906 與
+      svestats 提問原文一致
 scenarios:
   - name: ヒシミラクル送墓最後一張牌後，空牌庫抽牌敗北
     setup:

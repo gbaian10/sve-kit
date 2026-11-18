@@ -34,7 +34,12 @@ evidence:
       - Q2488 回答通常起動在前的順序，反向順序依目前採用的限次記錄
 status: disputed
 author: sol
-verified_by: []
+verified_by:
+  - by: opus
+    method: independent-derivation
+    note: >-
+      エリス兩次 UB 後アメス進化（PP 7），【2】的「2回以上」成立，イオ UB 免原費用發動；P2 選 b1 送墓，UB 計數 4；依 R-0016
+      效果發動占用「1ターンに1回」，再通常起動 → cannot-activate
 scenarios:
   - name: アメス先免原費用發動イオ的 UB，當回合不能再通常起動
     setup:
