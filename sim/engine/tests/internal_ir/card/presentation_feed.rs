@@ -420,6 +420,10 @@ fn a_failed_projection_stops_one_viewers_events_for_good_without_stopping_the_ga
         unavailable(),
         "a later baseline does not revive them either"
     );
+    assert!(
+        !first.has_news(&game),
+        "a gap already reported is no reason for another delivery"
+    );
     assert_eq!(
         answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
         SubmissionKind::Applied,
@@ -546,7 +550,15 @@ fn a_seat_that_was_not_handed_the_stop_plays_every_batch() {
         SubmissionKind::Applied,
         "the spell and then the parent resolve completely"
     );
+    assert!(
+        waiting.has_news(&game),
+        "the committed batches are a reason to deliver to the seat whose board never showed them"
+    );
     let update = waiting.deliver_with(&mut game, &board);
+    assert!(
+        !waiting.has_news(&game),
+        "delivered batches are not news again"
+    );
     let (batches, animate) = committed(&update);
     assert_eq!(
         animate,

@@ -119,6 +119,18 @@ impl EventFeed {
         }
     }
 
+    /// Whether a delivery now would bring this viewer committed batches it has not received,
+    /// or the first report that its events are unavailable. Reads without recording that the
+    /// viewer was handed this stop, so a host can decide to deliver before calling
+    /// [`Self::deliver`].
+    #[must_use]
+    pub fn has_news(&self, game: &Game) -> bool {
+        !self.stopped
+            && game
+                .event_batches(self.viewer, self.committed.as_ref())
+                .map_or(true, |mut batches| batches.next().is_some())
+    }
+
     /// Everything that happened for this viewer since its previous delivery, naming each
     /// card as its event froze it under the game's own catalogue.
     ///

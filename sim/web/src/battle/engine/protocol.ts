@@ -1,40 +1,22 @@
-// Local-battle messages. Seat, Receipt and HostError are the generated battle contract types;
-// Update and Submit stay temporary (format 0) until the engine projection supplies the contract's
-// BattleUpdate, Question and Answer. The Worker init and port routing below stay.
-import type { HostError, Receipt, Seat } from "../contract"
+// Local-battle messages. Every host message is the generated battle contract's `HostMessage`;
+// only the Worker init, the port requests and the two local wrappers below are local.
+import type {
+  BattleUpdate,
+  Command,
+  HostMessage,
+  Identity,
+  Receipt,
+  Seat,
+  Submit,
+} from "../contract"
 
-export type { Receipt, Seat }
+export type { BattleUpdate, Command, Receipt, Seat }
 export const SEATS: readonly Seat[] = ["p1", "p2"]
 type Control = "player" | "policy"
 
-type InputState =
-  | { kind: "question"; id: string; purpose: string; shape: string }
-  | { kind: "waiting"; actor: Seat }
-  | { kind: "finished"; winner: Seat | null }
-  | { kind: "engine_fault"; can_concede: boolean }
-
-export interface Update {
-  kind: "update"
-  format: 0
-  viewer: Seat
-  update_seq: number
-  baseline: boolean
-  input: InputState
-}
-
-type Outgoing = Update | Receipt | HostError
-
 export interface Delivery {
   seat: Seat
-  message: Outgoing
-}
-
-export type Command =
-  { kind: "answer"; question_id: string; answer: { kind: "policy" } } | { kind: "concede" }
-
-interface Submit {
-  request_id: string
-  command: Command
+  message: HostMessage
 }
 
 /** Engine inputs exactly as downloaded. */
@@ -43,6 +25,10 @@ export interface MatchInputs {
   keywords: string
   selection: string
   rules: string
+  /** Printing, wording and rule identities produced with the snapshot by the same reader. */
+  references: string
+  /** The verified public manifest, programs, engine build and rules; each seat gets it in Ready. */
+  identity: Identity
 }
 
 interface DeckSetup {
@@ -60,7 +46,7 @@ export interface MatchOptions {
   first_chooser?: Seat
 }
 
-export type LoadErrorCode = "format" | "selection" | "match" | "engine"
+export type LoadErrorCode = "format" | "selection" | "identity" | "references" | "match" | "engine"
 
 /** Main thread → Worker, once; one transferred port per player seat. */
 export interface InitMessage {
@@ -79,6 +65,6 @@ export type SeatRequest =
  * so the receiver can tell them from updates already queued on the port.
  */
 export type SeatMessage =
-  | Outgoing
+  | HostMessage
   | { kind: "load_error"; code: LoadErrorCode }
   | { kind: "baseline_start"; request_id: string }

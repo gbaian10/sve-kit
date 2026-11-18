@@ -1,5 +1,6 @@
 // Main-thread side of the local battle: one channel per player seat and the hot-seat view.
 import type {
+  BattleUpdate,
   Command,
   InitMessage,
   MatchInputs,
@@ -8,7 +9,6 @@ import type {
   Seat,
   SeatMessage,
   SeatRequest,
-  Update,
 } from "./protocol"
 import { SEATS } from "./protocol"
 
@@ -86,7 +86,10 @@ export class SeatChannel {
     const id = `${this.seat}-c${String(this.#sent)}`
     return new Promise((resolve, reject) => {
       this.#pending = { id, resolve, reject }
-      this.#port.postMessage({ kind: "submit", submit: { request_id: id, command } })
+      this.#port.postMessage({
+        kind: "submit",
+        submit: { kind: "submit", request_id: id, command },
+      })
     })
   }
 
@@ -178,16 +181,16 @@ export function startLocalBattle(
  */
 export class HotSeat {
   readonly #channels: Record<Seat, SeatChannel>
-  readonly #onChange: (viewer: Seat, update: Update | undefined) => void
+  readonly #onChange: (viewer: Seat, update: BattleUpdate | undefined) => void
   #viewer: Seat
-  #latest: Update | undefined
+  #latest: BattleUpdate | undefined
   #awaiting: string | undefined
   #stopped: StopMessage | undefined
 
   constructor(
     channels: Record<Seat, SeatChannel>,
     viewer: Seat,
-    onChange: (viewer: Seat, update: Update | undefined) => void,
+    onChange: (viewer: Seat, update: BattleUpdate | undefined) => void,
   ) {
     this.#channels = channels
     this.#viewer = viewer
@@ -203,7 +206,7 @@ export class HotSeat {
     return this.#viewer
   }
 
-  get latest(): Update | undefined {
+  get latest(): BattleUpdate | undefined {
     return this.#latest
   }
 

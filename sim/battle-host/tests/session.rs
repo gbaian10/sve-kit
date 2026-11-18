@@ -6,32 +6,28 @@
     reason = "Missing generated inputs or an unexpected message invalidate these fixtures."
 )]
 
+#[path = "support/fixture.rs"]
+mod fixture;
+
 use core::array::from_fn;
 use serde_json::{Value, json};
-use sha2::{Digest as _, Sha256};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
+use sve_battle_contract::{ClientMessage, Command};
 use sve_battle_host::load::{Inputs, load};
 use sve_battle_host::wire::{
-    InputState, Outgoing, ReceiptResult, RequestId, Seat, Submit, SubmitCommand, TemporaryAnswer,
-    Update,
+    BattleInput, BattleUpdate, HostMessage, ReceiptResult, RequestId, Seat, Submit,
 };
 use sve_battle_host::{Delivery, LocalSession, SeatControl};
+use sve_engine::battle::BattleReferences;
 use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
 use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck, Viewer};
 use sve_engine::host::HostLimits;
 
-fn hex(bytes: &[u8]) -> String {
-    Sha256::digest(bytes)
-        .iter()
-        .flat_map(|byte| [byte >> 4_u8, byte & 15])
-        .filter_map(|nibble| char::from_digit(u32::from(nibble), 16))
-        .collect()
-}
-
-/// Snapshot, keywords, selection and bound rules, exactly as a host would pass them.
-fn texts() -> &'static [String; 4] {
-    static TEXTS: OnceLock<[String; 4]> = OnceLock::new();
+/// Snapshot, keywords, selection, bound rules, references and identity, exactly as a host
+/// passes them.
+fn texts() -> &'static [String; 6] {
+    static TEXTS: OnceLock<[String; 6]> = OnceLock::new();
     TEXTS.get_or_init(|| {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
         let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
@@ -43,18 +39,23 @@ fn texts() -> &'static [String; 4] {
         .unwrap();
         // The pin names the reviewed batch; generated test inputs keep the same rule capabilities.
         *rules.pointer_mut("/input/snapshot_sha256").unwrap() =
-            Value::String(hex(snapshot.as_bytes()));
-        [snapshot, keywords, selection, rules.to_string()]
+            Value::String(fixture::hex(snapshot.as_bytes()));
+        let references = serde_json::to_string(&fixture::references(&snapshot)).unwrap();
+        let rules = rules.to_string();
+        let identity = serde_json::to_string(&fixture::identity(&selection, &rules)).unwrap();
+        [snapshot, keywords, selection, rules, references, identity]
     })
 }
 
 fn inputs() -> Inputs<'static> {
-    let [snapshot, keywords, selection, rules] = texts();
+    let [snapshot, keywords, selection, rules, references, identity] = texts();
     Inputs {
         snapshot,
         keywords,
         selection,
         rules,
+        references,
+        identity,
     }
 }
 
@@ -87,14 +88,33 @@ fn session(control: [SeatControl; 2]) -> LocalSession {
             .collect(),
         evolve: Vec::new(),
     });
+    let references = BattleReferences::new(
+        &selection().prototypes,
+        fixture::references(inputs().snapshot),
+    )
+    .unwrap();
     let game =
         Game::start_player_game(selection().clone(), decks, Viewer::P2, "battle-host").unwrap();
-    LocalSession::new(game, control, HostLimits::default())
+    LocalSession::new(
+        game,
+        references,
+        fixture::identity("", ""),
+        control,
+        HostLimits::default(),
+    )
 }
 
-fn absorb(deliveries: &[Delivery], latest: &mut [Option<Update>; 2]) {
+/// The deliveries as the Worker posts them: every message must survive the strict contract
+/// decoder unchanged.
+fn absorb(deliveries: &[Delivery], latest: &mut [Option<BattleUpdate>; 2]) {
     for delivery in deliveries {
-        if let Outgoing::Update(update) = &delivery.message {
+        let json = serde_json::to_string(&delivery.message).unwrap();
+        let decoded: HostMessage = sve_battle_contract::decode(&json).unwrap();
+        assert_eq!(
+            decoded, delivery.message,
+            "the contract decodes what the host sends"
+        );
+        if let HostMessage::Update(update) = &delivery.message {
             let [first, second] = latest;
             let slot = if delivery.seat == Seat::P1 {
                 first
@@ -104,51 +124,51 @@ fn absorb(deliveries: &[Delivery], latest: &mut [Option<Update>; 2]) {
             if let Some(previous) = slot.as_ref() {
                 assert!(update.update_seq > previous.update_seq, "{update:?}");
             }
-            *slot = Some(update.clone());
+            *slot = Some((**update).clone());
         }
     }
 }
 
-/// Delegate every question until the match ends; returns each seat's last update.
-fn play_out(session: &mut LocalSession) -> [Option<Update>; 2] {
-    let mut latest: [Option<Update>; 2] = [None, None];
+/// Answer every question passively until the match ends; returns each seat's last update.
+fn play_out(session: &mut LocalSession) -> [Option<BattleUpdate>; 2] {
+    let mut latest: [Option<BattleUpdate>; 2] = [None, None];
     absorb(&session.start(), &mut latest);
     for request in 0..5_000_u32 {
         let open = latest
             .iter()
             .flatten()
             .find_map(|update| match &update.input {
-                InputState::Question { id, .. } => Some((update.viewer, id.clone())),
-                InputState::Waiting { .. }
-                | InputState::Finished { .. }
-                | InputState::EngineFault { .. } => None,
+                BattleInput::Question { question } => Some((update.viewer, question.clone())),
+                BattleInput::Waiting { .. }
+                | BattleInput::Finished { .. }
+                | BattleInput::EngineFault { .. } => None,
             });
-        let Some((seat, id)) = open else {
+        let Some((seat, question)) = open else {
             return latest;
         };
         let request = format!("r{request}");
-        let out = session.submit(
-            seat,
-            Submit {
-                request_id: RequestId::new(request.clone()),
-                command: SubmitCommand::Answer {
-                    question_id: id,
-                    answer: TemporaryAnswer::Policy,
-                },
+        let message = ClientMessage::Submit(Submit {
+            request_id: RequestId::new(request.clone()),
+            command: Command::Answer {
+                answer: fixture::passive(&question),
+                question_id: question.id,
             },
-        );
+        });
+        // The Worker's entry point: a seat name and the client message as JSON.
+        let name = if seat == Seat::P1 { "p1" } else { "p2" };
+        let out = session.submit_named(name, &serde_json::to_string(&message).unwrap());
         let first = out.first().unwrap();
         assert_eq!(first.seat, seat, "the receipt goes to the submitting seat");
         assert!(
             matches!(&first.message,
-            Outgoing::Receipt(receipt) if receipt.request_id().as_str() == request
+            HostMessage::Receipt(receipt) if receipt.request_id().as_str() == request
                 && receipt.result() == ReceiptResult::Applied),
             "the receipt comes first: {first:?}"
         );
         assert!(
             out.iter()
                 .skip(1)
-                .all(|delivery| matches!(delivery.message, Outgoing::Update(_))),
+                .all(|delivery| matches!(delivery.message, HostMessage::Update(_))),
             "only updates follow the receipt"
         );
         absorb(&out, &mut latest);
@@ -162,7 +182,10 @@ fn hot_seat_match_runs_to_a_result_with_receipts_first() {
     let latest = play_out(&mut session);
     assert!(latest.iter().all(|update| matches!(
         update.as_ref().map(|update| &update.input),
-        Some(InputState::Finished { winner: Some(_) })
+        Some(BattleInput::Finished {
+            winner: Some(_),
+            ..
+        })
     )));
     assert_eq!(session.stopped(), None);
 }
@@ -183,6 +206,9 @@ fn loaded_policy_seat_plays_inside_the_host_against_a_player_channel() {
     assert!(second.is_none(), "the policy seat has no channel");
     assert!(matches!(
         first.map(|update| update.input),
-        Some(InputState::Finished { winner: Some(_) })
+        Some(BattleInput::Finished {
+            winner: Some(_),
+            ..
+        })
     ));
 }

@@ -29,7 +29,7 @@ export interface SeatPort {
   onmessage: ((event: MessageEvent<SeatRequest>) => void) | null
 }
 
-const LOAD_CODES: readonly string[] = ["format", "selection", "match"]
+const LOAD_CODES: readonly string[] = ["format", "selection", "identity", "references", "match"]
 
 function loadCode(error: unknown): LoadErrorCode {
   const message = error instanceof Error ? error.message : ""
@@ -123,10 +123,8 @@ export class BattleHost {
       this.#fail()
       return
     }
-    // The temporary update has no contract schema yet; receipts and host errors are contract messages.
-    const invalid = deliveries.some(
-      ({ message }) => message.kind !== "update" && this.#validate?.(message) === false,
-    )
+    // Every delivery is a contract message, updates included.
+    const invalid = deliveries.some(({ message }) => this.#validate?.(message) === false)
     if (invalid) {
       this.#fail()
       return

@@ -1,4 +1,7 @@
 // @vitest-environment node
+import { readFileSync } from "node:fs"
+import path from "node:path"
+
 import { afterEach, describe, expect, it } from "vitest"
 
 import {
@@ -11,13 +14,13 @@ import {
   startLocalBattle,
 } from "./client"
 import type {
+  BattleUpdate,
   InitMessage,
   MatchOptions,
   Receipt,
   Seat,
   SeatMessage,
   SeatRequest,
-  Update,
 } from "./protocol"
 
 const opened: MessagePort[] = []
@@ -45,18 +48,21 @@ const receipt = (id: string): Receipt => ({
   rejection: null,
 })
 
-const update = (seat: Seat, seq: number, baseline = false): Update => ({
-  kind: "update",
-  format: 0,
+/** The contract's baseline example: a question for its viewer. */
+const asked = JSON.parse(
+  readFileSync(
+    path.resolve(
+      import.meta.dirname,
+      "../../../../battle-contract/fixtures/host/update-baseline.json",
+    ),
+    "utf8",
+  ),
+) as BattleUpdate
+
+const update = (seat: Seat, seq: number): BattleUpdate => ({
+  ...asked,
   viewer: seat,
   update_seq: seq,
-  baseline,
-  input: {
-    kind: "question",
-    id: `${seat}-q${String(seq)}`,
-    purpose: "main_action",
-    shape: "action_window",
-  },
 })
 
 const concede = { kind: "concede" } as const
@@ -68,7 +74,7 @@ describe("SeatChannel", () => {
     await expect(channel.submit(concede)).rejects.toBeInstanceOf(CommandOutstandingError)
     await tick()
     expect(requests).toEqual([
-      { kind: "submit", submit: { request_id: "p1-c1", command: concede } },
+      { kind: "submit", submit: { kind: "submit", request_id: "p1-c1", command: concede } },
     ])
     expect(channel.busy).toBe(true)
     worker.postMessage(receipt("someone-else"))
@@ -79,7 +85,7 @@ describe("SeatChannel", () => {
     await tick()
     expect(requests.at(-1)).toEqual({
       kind: "submit",
-      submit: { request_id: "p1-c2", command: concede },
+      submit: { kind: "submit", request_id: "p1-c2", command: concede },
     })
   })
 
@@ -109,7 +115,7 @@ describe("SeatChannel", () => {
     await expect(channel.submit(concede)).rejects.toBeInstanceOf(ChannelClosedError)
     // Only the command sent before close reached the Worker; nothing after it.
     expect(requests).toEqual([
-      { kind: "submit", submit: { request_id: "p1-c1", command: concede } },
+      { kind: "submit", submit: { kind: "submit", request_id: "p1-c1", command: concede } },
     ])
   })
 })
@@ -126,7 +132,7 @@ describe("HotSeat", () => {
   }
 
   /** Reply to a baseline request the way the Worker does: marker first, then the update. */
-  function reply(worker: MessagePort, request: SeatRequest | undefined, latest: Update) {
+  function reply(worker: MessagePort, request: SeatRequest | undefined, latest: BattleUpdate) {
     if (request?.kind !== "baseline") throw new Error("expected a baseline request")
     worker.postMessage({ kind: "baseline_start", request_id: request.request_id })
     worker.postMessage(latest)
@@ -134,8 +140,8 @@ describe("HotSeat", () => {
 
   it("shows only the viewer and reloads that seat after a switch", async () => {
     const { hot, p1, p2, shown } = hotSeat()
-    p1.worker.postMessage(update("p1", 1, true))
-    p2.worker.postMessage(update("p2", 1, true))
+    p1.worker.postMessage(update("p1", 1))
+    p2.worker.postMessage(update("p2", 1))
     await tick()
     expect(shown).toEqual([["p1", 1]])
 
@@ -144,7 +150,7 @@ describe("HotSeat", () => {
     p1.worker.postMessage(update("p1", 2))
     await tick()
     expect(p2.requests).toEqual([{ kind: "baseline", request_id: "p2-b1" }])
-    reply(p2.worker, p2.requests[0], update("p2", 1, true))
+    reply(p2.worker, p2.requests[0], update("p2", 1))
     p2.worker.postMessage(update("p2", 2))
     await tick()
     expect(hot.viewer).toBe("p2")
@@ -164,15 +170,15 @@ describe("HotSeat", () => {
   it("does not take an older queued baseline as the reply to this switch", async () => {
     const { hot, p2, shown } = hotSeat()
     // The start baseline and a later update for p2 are still on the port when the user switches.
-    p2.worker.postMessage(update("p2", 1, true))
+    p2.worker.postMessage(update("p2", 1))
     p2.worker.postMessage(update("p2", 2))
     hot.switchTo("p2")
     await tick()
     expect(hot.latest).toBeUndefined()
     expect(shown).toEqual([["p2", undefined]])
-    reply(p2.worker, p2.requests[0], update("p2", 2, true))
+    reply(p2.worker, p2.requests[0], update("p2", 2))
     await tick()
-    expect(hot.latest).toEqual(update("p2", 2, true))
+    expect(hot.latest).toEqual(update("p2", 2))
   })
 
   it("ignores replies to earlier switches after switching back and forth", async () => {
@@ -186,13 +192,13 @@ describe("HotSeat", () => {
       { kind: "baseline", request_id: "p2-b2" },
     ])
     expect(p1.requests).toEqual([{ kind: "baseline", request_id: "p1-b1" }])
-    reply(p2.worker, p2.requests[0], update("p2", 1, true))
+    reply(p2.worker, p2.requests[0], update("p2", 1))
     p2.worker.postMessage(update("p2", 2))
     await tick()
     expect(hot.latest).toBeUndefined()
-    reply(p2.worker, p2.requests[1], update("p2", 2, true))
+    reply(p2.worker, p2.requests[1], update("p2", 2))
     await tick()
-    expect(hot.latest).toEqual(update("p2", 2, true))
+    expect(hot.latest).toEqual(update("p2", 2))
   })
 
   for (const stop of [
@@ -202,7 +208,7 @@ describe("HotSeat", () => {
     for (const inFlight of [false, true]) {
       it(`stops for good on ${stop.kind} (command in flight: ${String(inFlight)})`, async () => {
         const { hot, p1, p2, shown } = hotSeat()
-        p1.worker.postMessage(update("p1", 1, true))
+        p1.worker.postMessage(update("p1", 1))
         await tick()
         expect(hot.latest?.input.kind).toBe("question")
         // Settle into a value right away so the rejection is observed before the assertion.
@@ -228,7 +234,7 @@ describe("HotSeat", () => {
         hot.switchTo("p2")
         // A late update cannot revive interaction.
         p1.worker.postMessage(update("p1", 2))
-        p2.worker.postMessage(update("p2", 2, true))
+        p2.worker.postMessage(update("p2", 2))
         await tick()
         expect(hot.latest).toBeUndefined()
         expect(p1.requests).toHaveLength(sent)
@@ -262,7 +268,21 @@ describe("startLocalBattle", () => {
       control: ["policy", "player"],
       max_submissions: 1,
     }
-    const inputs = { snapshot: "", keywords: "", selection: "", rules: "" }
+    const identity = {
+      snapshot: { id: "s", sha256: "1".repeat(64) },
+      programs: { id: "p", sha256: "2".repeat(64) },
+      engine: { id: "e", sha256: "3".repeat(64) },
+      rules: { id: "r", sha256: "4".repeat(64) },
+      region: "jp" as const,
+    }
+    const inputs = {
+      snapshot: "",
+      keywords: "",
+      selection: "",
+      rules: "",
+      references: "",
+      identity,
+    }
     const battle = startLocalBattle(inputs, options, () => worker)
     expect(Object.keys(battle.channels)).toEqual(["p2"])
     expect(Object.keys(init?.ports ?? {})).toEqual(["p2"])
@@ -274,7 +294,7 @@ describe("startLocalBattle", () => {
     battle.channels.p2?.listen((message) => seen.push(message))
     battle.terminate()
     expect(terminated).toBe(true)
-    port.postMessage(update("p2", 1, true))
+    port.postMessage(update("p2", 1))
     await tick()
     expect(seen).toEqual([])
   })
