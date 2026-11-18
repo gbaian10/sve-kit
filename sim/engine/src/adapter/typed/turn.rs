@@ -639,7 +639,7 @@ pub(super) fn act(
             Some(kind) => kind,
             None => return Ok(refused(verb)),
         },
-        ("attack", _) => return Ok(refused(verb)),
+        ("attack", QuestionShape::Decision(DecisionShape::Pending(_))) => return Ok(refused(verb)),
         ("choose-pending", QuestionShape::Decision(DecisionShape::Pending(choices))) => {
             choose_pending(turn, pending, &question, choices, &mut params)?
         }

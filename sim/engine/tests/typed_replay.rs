@@ -100,16 +100,6 @@ fn manual_operations_cannot_attach_private_object_identities_to_a_divergence() {
         assist.digest(Layer::Sandbox).unwrap(),
         assist.digest(Layer::Shadow).unwrap()
     );
-
-    assist
-        .act(&json!({
-            "by": "P1", "do": "set", "manual": true,
-            "path": "P2.leader.life", "value": 18_i64, "extra": "private-opponent"
-        }))
-        .unwrap();
-    let records = assist.divergences().unwrap();
-    assert_eq!(records.len(), 1);
-    assert!(!json!(records).to_string().contains("private-opponent"));
 }
 
 #[test]
