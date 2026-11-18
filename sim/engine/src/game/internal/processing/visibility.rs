@@ -83,6 +83,7 @@ pub(in crate::game::internal) fn disclose_played_source(game: &Game, execution: 
 
 fn disclose_public(game: &Game, execution: &mut Execution, stage: ProcessingStage) {
     // Match fact_log::event_source's frozen public-holder gate, not current source visibility.
+    // Field plays have no SourceInformation; both calls check while the card is in public Resolution.
     let public = execution
         .source_information
         .as_ref()
@@ -372,6 +373,7 @@ fn declarations(
             declared.push(ProcessingDeclaration::Targets { actor, targets });
         }
     }
+    // Number declarations are public actions: Fact::Declared projects to both seats unfiltered.
     declared.extend(
         execution
             .number_declarations
