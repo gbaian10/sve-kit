@@ -2,7 +2,9 @@
 use super::*;
 use crate::player_pipeline::question;
 use crate::{board_fixture, payment_fixtures};
-use sve_engine::game::player::observation::ProcessingSource;
+use sve_engine::game::player::observation::{
+    PaymentKind, ProcessingContext, ProcessingDeclaration, ProcessingStage, ProcessingSubject,
+};
 use sve_engine::game::player::{
     Command, DecisionShape, Question, QuestionShape, SubmissionKind, Viewer,
 };
@@ -153,12 +155,17 @@ fn apply(game: &mut Game, actor: Viewer, answer: Answer) {
 }
 fn empty(game: &Game, viewer: Viewer) {
     assert!(
-        game.observe(viewer).unwrap().processing_sources.is_empty(),
+        game.observe(viewer).unwrap().processing.is_empty(),
         "no unauthorized or retired frame remains"
     );
 }
-fn sources(game: &Game, viewer: Viewer) -> Vec<ProcessingSource> {
-    game.observe(viewer).unwrap().processing_sources
+fn sources(game: &Game, viewer: Viewer) -> Vec<ProcessingContext> {
+    game.observe(viewer)
+        .unwrap()
+        .processing
+        .into_iter()
+        .filter(|context| context.source.is_some())
+        .collect()
 }
 
 #[test]
@@ -188,6 +195,14 @@ fn rejected_answers_and_failed_bodies_preserve_the_correct_play_boundary() {
     ));
     let mut game = fixture(&program);
     activate(&mut game, &program);
+    let mine = sources(&game, Viewer::P1);
+    let theirs = sources(&game, Viewer::P2);
+    assert_eq!(mine[0].stage, Some(ProcessingStage::Target));
+    assert_eq!(theirs[0].stage, Some(ProcessingStage::Declare));
+    assert!(
+        theirs[0].payments.is_empty(),
+        "declaration is not a receipt"
+    );
     let q = question(&game, Viewer::P1);
     assert_eq!(
         submit(&mut game, Viewer::P2, &q, Answer::Targets(vec![0])),
@@ -199,8 +214,33 @@ fn rejected_answers_and_failed_bodies_preserve_the_correct_play_boundary() {
         "rejection retains the outstanding question"
     );
     apply(&mut game, Viewer::P1, Answer::Targets(vec![0]));
+    let paid = sources(&game, Viewer::P2);
+    assert_eq!(paid[0].stage, Some(ProcessingStage::Resolve));
+    assert_eq!(
+        paid[0]
+            .payments
+            .iter()
+            .map(|payment| (&payment.kind, payment.amount))
+            .collect::<Vec<_>>(),
+        [(&PaymentKind::Pp, 1), (&PaymentKind::Move, 1)]
+    );
     assert!(
-        sources(&game, Viewer::P1)[0].source.holder.is_none(),
+        matches!(paid[0].declared.as_slice(), [ProcessingDeclaration::Targets { targets, .. }] if matches!(targets.as_slice(), [ProcessingSubject::Card { object: Some(_), .. }]))
+    );
+    assert!(
+        matches!(
+            &paid[0].subject,
+            Some(ProcessingSubject::Card { object: None, .. })
+        ),
+        "payment retires the subject link without losing its declared face"
+    );
+    assert!(
+        sources(&game, Viewer::P1)[0]
+            .source
+            .as_ref()
+            .unwrap()
+            .holder
+            .is_none(),
         "the frozen source does not reconnect after its cost moves it"
     );
     let q = question(&game, Viewer::P1);
@@ -219,9 +259,11 @@ fn rejected_answers_and_failed_bodies_preserve_the_correct_play_boundary() {
 
 #[test]
 fn an_effect_number_records_the_actual_declarer() {
-    let mut raw = program(json!({"cost":{"pp":0},"do":[{"life":{"who":"self","delta":1}}]}))
-        .card()
-        .clone();
+    let mut raw = program(
+        json!({"cost":{"pp":0},"do":[{"optional":{"do":[{"life":{"who":"self","delta":1}}]}}]}),
+    )
+    .card()
+    .clone();
     let ability = &mut raw.abilities[0];
     let binding = Binding::new(999, ability.node.body.as_ref().unwrap().scope);
     let mut step = instruction(
@@ -240,13 +282,24 @@ fn an_effect_number_records_the_actual_declarer() {
     let mut game = fixture(&program);
     activate(&mut game, &program);
     let q = game.internal_decision(View::Referee).unwrap();
-    let result = resolved(
-        game.answer_internal_card(q.actor, q.token, Answer::Integer(Nat(7)))
-            .unwrap(),
-    );
+    let public = sources(&game, Viewer::P2);
     assert_eq!(
-        result
-            .progress
+        (public[0].controller, public[0].actor),
+        (Viewer::P1, Some(Viewer::P2))
+    );
+    game.answer_internal_card(q.actor, q.token, Answer::Integer(Nat(7)))
+        .unwrap();
+    assert!(
+        sources(&game, Viewer::P2)[0]
+            .declared
+            .contains(&ProcessingDeclaration::Number {
+                actor: Viewer::P2,
+                value: 7
+            })
+    );
+    let progress = finish_may(&mut game);
+    assert_eq!(
+        progress
             .facts
             .iter()
             .find(|fact| matches!(fact, Fact::Declared { .. })),
@@ -301,17 +354,27 @@ fn a_known_parent_does_not_expose_unplayed_child_private_candidate_counts() {
         );
         game.activate_internal_card("parent", definition, Viewer::P1.player())
             .unwrap();
-        empty(&game, Viewer::P2);
+        assert_eq!(
+            sources(&game, Viewer::P2).len(),
+            1,
+            "formal public declaration discloses the parent before its targets are answered"
+        );
         apply(&mut game, Viewer::P1, Answer::Targets(vec![0]));
         let seen = sources(&game, Viewer::P2);
         assert_eq!(
             seen.len(),
-            1,
-            "the actual parent played writer is independently disclosed"
+            2,
+            "the parent played and child formally declared public sources are independently disclosed"
         );
         assert_eq!(
-            seen[0].source.card, "unit-amulet",
+            seen[0].source.as_ref().unwrap().card,
+            "unit-amulet",
             "the unplayed child leaves no source slot"
+        );
+        assert_eq!(
+            seen[1].stage,
+            Some(ProcessingStage::Declare),
+            "the waiting seat sees only the child's public milestone"
         );
         let q = question(&game, Viewer::P1);
         let members = if let QuestionShape::Decision(DecisionShape::CostMaterials(domain)) = q.shape
@@ -340,5 +403,103 @@ fn a_known_parent_does_not_expose_unplayed_child_private_candidate_counts() {
     assert!(
         waiting[0] == waiting[1],
         "the waiting summary ignores the private child candidate count"
+    );
+}
+
+#[test]
+fn a_private_selection_does_not_change_the_other_seats_processing_view() {
+    let program = program(json!({"cost":{"pp":0},"do":[
+        {"choose":{"bind":"private","from":{"who":"self","zone":"hand","kind":"follower"},"upto":1}},
+        {"optional":{"do":[{"life":{"who":"self","delta":1}}]}}
+    ]}));
+    for actor in [Viewer::P1, Viewer::P2] {
+        let (me, other) = if actor == Viewer::P1 {
+            ("P1", Viewer::P2)
+        } else {
+            ("P2", Viewer::P1)
+        };
+        let mut views = Vec::new();
+        let mut shapes = Vec::new();
+        for follower in [false, true] {
+            let mut initial = setup(actor.player().seat, json!([]));
+            initial["turn"]["active"] = json!(me);
+            initial["players"][me]["pp"] = json!({"current":3,"max":3});
+            initial["players"][me]["zones"]["field"] =
+                json!([{"id":"source","card":"unit-follower"}]);
+            initial["players"][me]["zones"]["hand"] =
+                json!([{"id":"secret","card":if follower {"unit-follower"} else {"unit-spell"}}]);
+            let mut game = Game::new(
+                catalog(),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "private-processing",
+            )
+            .unwrap();
+            game.load_internal_card("unit-follower", &program).unwrap();
+            game.load_internal_card("unit-spell", &card(vec![]))
+                .unwrap();
+            game.activate_internal_card(
+                "source",
+                program.card().abilities[0].node.id,
+                actor.player(),
+            )
+            .unwrap();
+            shapes.push(question(&game, actor).shape);
+            views.push((game.observe(other).unwrap(), game.input(other)));
+        }
+        assert_ne!(
+            shapes[0], shapes[1],
+            "the actor sees different private candidate sets"
+        );
+        assert_eq!(
+            views[0], views[1],
+            "a private selection does not change the complete waiting view"
+        );
+    }
+}
+
+#[test]
+fn optional_acceptance_is_a_declaration_until_the_actual_debits() {
+    use sve_engine::game::player::observation::PaymentPurpose;
+    let program = program(json!({
+        "cost":{"pp":1},
+        "targets":[{"bind":"enemy","option":1,"from":{"who":"opp","zone":"field","kind":"follower"},"n":1}],
+        "do":[{"choice":{"n":1,"options":[
+            [{"pay":{"cost":{"pp":1},"do":[{"optional":{"do":[{"life":{"who":"self","delta":1}}]}}]}}],
+            [{"life":{"who":"self","delta":1}}]
+        ]}}]
+    }));
+    let mut game = fixture(&program);
+    activate(&mut game, &program);
+    apply(&mut game, Viewer::P1, Answer::Modes(vec![ModeId(1)]));
+    apply(&mut game, Viewer::P1, Answer::OptionalCost(true));
+    let declared = sources(&game, Viewer::P2);
+    assert!(
+        declared[0]
+            .declared
+            .contains(&ProcessingDeclaration::OptionalCost {
+                actor: Viewer::P1,
+                required: false,
+                accepted: true,
+            })
+    );
+    assert!(
+        declared[0].payments.is_empty(),
+        "the formal target question still precedes both debits"
+    );
+    apply(&mut game, Viewer::P1, Answer::Targets(vec![0]));
+    let paid = sources(&game, Viewer::P2);
+    assert_eq!(
+        paid[0]
+            .payments
+            .iter()
+            .map(|payment| (payment.purpose, payment.amount))
+            .collect::<Vec<_>>(),
+        [
+            (Some(PaymentPurpose::Original), 1),
+            (Some(PaymentPurpose::Optional { required: false }), 1),
+        ],
+        "each writer's debit appears once with its actual cost group"
     );
 }

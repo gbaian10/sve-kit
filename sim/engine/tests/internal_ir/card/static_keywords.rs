@@ -1,6 +1,7 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
+use sve_engine::game::player::{Viewer, observation::ProcessingSubject};
 
 pub(super) fn conditional_keyword() -> Located<Ability> {
     let mut located = ability(2, vec![]);
@@ -180,6 +181,10 @@ fn ward_aura_offers_optional_act_to_a_new_field_entrant() {
         panic!("granted Ward must offer entry posture");
     };
     assert!(matches!(question.domain, InputDomain::WardEntry { .. }));
+    let native = game.observe(Viewer::P2).unwrap();
+    assert!(
+        matches!(native.processing.as_slice(), [context] if context.source.is_none() && matches!(&context.subject, Some(ProcessingSubject::Card { object: Some(_), .. })))
+    );
     let before = exact_authority(&game);
     game.answer_internal_card(question.actor, question.token, Answer::Integer(Nat(0)))
         .unwrap_err();

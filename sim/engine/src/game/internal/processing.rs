@@ -1,8 +1,13 @@
 //! Procedure boundaries stay in the runtime queue, separate from authored IR.
 
 mod visibility;
-pub(in crate::game) use visibility::observed_sources;
-pub(super) use visibility::{ProcessingDisclosure, disclose_played_source, disclose_source};
+pub(in crate::game) use visibility::observed_processing;
+pub(super) use visibility::{
+    ProcessingDisclosure, capture_declarations, disclose_declared_source, disclose_played_source,
+    disclose_source,
+};
+mod payment_observation;
+mod procedures;
 
 mod selections;
 pub(super) use selections::{discard_selection_round, record_play_declaration};
@@ -19,6 +24,7 @@ pub(super) use payments::record_cost_spec_payment;
 pub use payments::{CostPaymentPurpose, CostSpecPayment, CostStepPayment};
 
 use super::{Execution, Fact, Game, Result, invalid};
+use crate::game::player::observation::PaymentPurpose;
 use crate::ir::{
     ChoiceDomain, DecisionId, Int, ModeDecision, ModeId, Nat, Node, ObjectRef, PlayerId, ReceiptId,
     ResolvedDamageAllocation, RuntimeDamageRecipient, ScopeId,
@@ -65,6 +71,8 @@ pub struct PpPayment {
     pub player: PlayerId,
     /// Amount passed to the successful debit after price adjustments, including zero.
     pub amount: Int,
+    /// The completed payment producer, when one has identified the group.
+    pub purpose: Option<PaymentPurpose>,
 }
 
 /// Accepted formal play choices, distinct from payment and body declarations.
@@ -161,7 +169,11 @@ pub(super) fn record_x(execution: &mut Execution, player: PlayerId, value: Nat) 
 }
 
 pub(super) fn record_pp_payment(execution: &mut Execution, player: PlayerId, amount: Int) {
-    execution.pp_payments.push(PpPayment { player, amount });
+    execution.pp_payments.push(PpPayment {
+        player,
+        amount,
+        purpose: None,
+    });
 }
 
 pub(super) fn record_modes(
@@ -221,6 +233,8 @@ pub(super) fn enter_play_phase(execution: &mut Execution, next: PlayPhase) -> Re
 pub(super) enum Queued {
     Node(Box<Node>),
     EndProcedure((ScopeId, u64)),
+    ProcedureRound((ScopeId, u64), u64),
+    EndRepeat(ScopeId),
 }
 
 impl From<Node> for Queued {
@@ -233,7 +247,7 @@ impl Queued {
     pub(super) fn node(&self) -> Option<&Node> {
         match self {
             Self::Node(node) => Some(node.as_ref()),
-            Self::EndProcedure(_) => None,
+            Self::EndProcedure(_) | Self::ProcedureRound(..) | Self::EndRepeat(_) => None,
         }
     }
 }
@@ -243,6 +257,13 @@ pub(super) fn next_node(execution: &mut Execution) -> Result<Option<Node>> {
         match execution.todo.pop_front() {
             Some(Queued::Node(node)) => return Ok(Some(*node)),
             Some(Queued::EndProcedure(player)) => execution.end_procedure(player)?,
+            Some(Queued::ProcedureRound(key, round)) => execution
+                .processing_disclosure
+                .procedures
+                .round(key, round)?,
+            Some(Queued::EndRepeat(scope)) => {
+                execution.processing_disclosure.procedures.end((scope, 0))?;
+            }
             None => return Ok(None),
         }
     }

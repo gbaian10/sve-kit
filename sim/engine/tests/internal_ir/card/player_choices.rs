@@ -4,6 +4,10 @@
 )]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::{
+    Viewer,
+    observation::{ProcedureKind, ProcessingProcedure},
+};
 
 fn tree(number: &str, head: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -694,3 +698,35 @@ fn a_nested_procedure_shuffles_the_deck_its_action_names() {
 
 #[path = "player_gifts.rs"]
 mod gifts;
+
+#[test]
+fn processing_tracks_the_real_participant_and_stage_round() {
+    let steps = json!([{"each_player":{"as":"p","stages":[
+        [{"choose":{"bind":"first","from":{"who":"p","zone":"field","kind":"follower"},"n":1,"by":"p"}}],
+        [{"choose":{"bind":"second","from":{"who":"p","zone":"field","kind":"follower"},"n":1,"by":"p"}}]
+    ]}}]);
+    let (mut game, mut next) = play(&steps, (1, 2), (json!([]), json!([])));
+    for round in 1..=2 {
+        for actor in [Viewer::P1, Viewer::P2] {
+            let current = next.take().unwrap();
+            let context = game.observe(actor).unwrap().processing.pop().unwrap();
+            assert_eq!(
+                (context.controller, context.actor),
+                (Viewer::P1, Some(actor))
+            );
+            assert_eq!(
+                context.procedure,
+                Some(ProcessingProcedure {
+                    kind: ProcedureKind::EachPlayer,
+                    actor,
+                    round
+                })
+            );
+            next = answer(&mut game, &current, vec![handles(&current)[0]]);
+        }
+    }
+    assert!(
+        next.is_none(),
+        "the actual procedure ends after both stages"
+    );
+}

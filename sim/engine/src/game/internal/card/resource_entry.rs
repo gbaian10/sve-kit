@@ -9,6 +9,7 @@ use super::{
 use crate::game::internal::player::CandidateLinks;
 use crate::game::player::SelectionQuestion;
 use crate::game::player::Viewer;
+use crate::game::player::observation::{PaymentKind, PaymentPurpose, ProcessingPayment};
 use crate::game::{int, list};
 use crate::ir::ride;
 use crate::ir::{
@@ -522,6 +523,11 @@ impl Game {
             Int(entry.pp_amount(chosen.ep)),
             execution,
         )?;
+        execution
+            .pp_payments
+            .last_mut()
+            .ok_or_else(|| invalid("missing entry PP debit"))?
+            .purpose = Some(PaymentPurpose::ResourceEntry);
         self.pay_entry_ep(execution, chosen.ep)?;
         let ids = chosen
             .resources
@@ -567,6 +573,17 @@ impl Game {
                 ))
                 .or_insert(next);
         }
+        execution
+            .processing_disclosure
+            .direct_payments
+            .push(ProcessingPayment {
+                actor: super::super::fact_log::viewer(execution.context.controller)
+                    .ok_or_else(|| invalid("entry material payer"))?,
+                kind: PaymentKind::EntryResources,
+                purpose: Some(PaymentPurpose::ResourceEntry),
+                amount: i64::try_from(chosen.resources.len()).map_err(invalid)?,
+                unit: QuantityUnit::Cards,
+            });
         self.consume_entry_quota(execution)?;
         let CostSpec::Ordered { steps } = &play.costs else {
             return Err(invalid("missing resource entry steps"));
@@ -599,12 +616,12 @@ impl Game {
         Ok(())
     }
 
-    fn commit_entry_payment(&mut self, execution: &Execution, use_ep: bool) -> Result<()> {
+    fn commit_entry_payment(&mut self, execution: &mut Execution, use_ep: bool) -> Result<()> {
         self.pay_entry_ep(execution, use_ep)?;
         self.consume_entry_quota(execution)
     }
 
-    fn pay_entry_ep(&mut self, execution: &Execution, use_ep: bool) -> Result<()> {
+    fn pay_entry_ep(&mut self, execution: &mut Execution, use_ep: bool) -> Result<()> {
         let seat = seat_name(execution.context.controller)?;
         let player = self.player_mut(seat)?;
         let after = player
@@ -613,6 +630,19 @@ impl Game {
             .filter(|ep| *ep >= 0)
             .ok_or_else(|| invalid("entry EP changed"))?;
         player.set_ep(after);
+        if use_ep {
+            execution
+                .processing_disclosure
+                .direct_payments
+                .push(ProcessingPayment {
+                    actor: super::super::fact_log::viewer(execution.context.controller)
+                        .ok_or_else(|| invalid("entry EP payer"))?,
+                    kind: PaymentKind::Ep,
+                    purpose: Some(PaymentPurpose::ResourceEntry),
+                    amount: 1,
+                    unit: QuantityUnit::Ep,
+                });
+        }
         Ok(())
     }
 

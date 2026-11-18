@@ -1467,6 +1467,7 @@ impl Game {
             distribution_captures: None,
         });
         enter_play_phase(execution, PlayPhase::Declare)?;
+        super::super::processing::disclose_declared_source(self, execution);
         Ok(())
     }
 
@@ -2340,6 +2341,7 @@ impl Game {
             distribution_captures: None,
         });
         enter_play_phase(execution, PlayPhase::Declare)?;
+        super::super::processing::disclose_declared_source(self, execution);
         Ok(())
     }
 }
