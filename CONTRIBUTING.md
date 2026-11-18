@@ -166,6 +166,10 @@ Snapshot wire changes must pass the [format lock check](docs/schema/export/snaps
 - Keep one real-data end-to-end test per behaviour. Rejection paths, edge cases and
   parameter combinations use the smallest synthetic input that shows them; never
   parametrize a full-repository run.
+- Do not add getters, seams or evidence files just for tests. Test each code path
+  once; leave other variants of the same path untested.
+- Exception: keep confidentiality negative assertions (output contains no private
+  data, private state cannot be read). Coverage cannot show what makes them unique.
 - CI fails any test whose setup, call and teardown together exceed 30 seconds
   (`SVE_TEST_TIME_LIMIT` overrides the limit); local runs warn instead. An exception
   requires `@pytest.mark.slow(reason="concrete reason")`. Shared preparation is
