@@ -12,7 +12,7 @@ mod fixture;
 use core::array::from_fn;
 use serde_json::{Value, json};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_battle_contract::Command;
+use sve_battle_contract::{ClientMessage, Command};
 use sve_battle_host::load::{Inputs, load};
 use sve_battle_host::wire::{
     BattleInput, BattleUpdate, HostMessage, ReceiptResult, RequestId, Seat, Submit,
@@ -24,9 +24,10 @@ use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck, Viewer};
 use sve_engine::host::HostLimits;
 
-/// Snapshot, keywords, selection, bound rules and references, exactly as a host passes them.
-fn texts() -> &'static [String; 5] {
-    static TEXTS: OnceLock<[String; 5]> = OnceLock::new();
+/// Snapshot, keywords, selection, bound rules, references and identity, exactly as a host
+/// passes them.
+fn texts() -> &'static [String; 6] {
+    static TEXTS: OnceLock<[String; 6]> = OnceLock::new();
     TEXTS.get_or_init(|| {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
         let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
@@ -40,18 +41,21 @@ fn texts() -> &'static [String; 5] {
         *rules.pointer_mut("/input/snapshot_sha256").unwrap() =
             Value::String(fixture::hex(snapshot.as_bytes()));
         let references = serde_json::to_string(&fixture::references(&snapshot)).unwrap();
-        [snapshot, keywords, selection, rules.to_string(), references]
+        let rules = rules.to_string();
+        let identity = serde_json::to_string(&fixture::identity(&selection, &rules)).unwrap();
+        [snapshot, keywords, selection, rules, references, identity]
     })
 }
 
 fn inputs() -> Inputs<'static> {
-    let [snapshot, keywords, selection, rules, references] = texts();
+    let [snapshot, keywords, selection, rules, references, identity] = texts();
     Inputs {
         snapshot,
         keywords,
         selection,
         rules,
         references,
+        identity,
     }
 }
 
@@ -91,11 +95,25 @@ fn session(control: [SeatControl; 2]) -> LocalSession {
     .unwrap();
     let game =
         Game::start_player_game(selection().clone(), decks, Viewer::P2, "battle-host").unwrap();
-    LocalSession::new(game, references, control, HostLimits::default())
+    LocalSession::new(
+        game,
+        references,
+        fixture::identity("", ""),
+        control,
+        HostLimits::default(),
+    )
 }
 
+/// The deliveries as the Worker posts them: every message must survive the strict contract
+/// decoder unchanged.
 fn absorb(deliveries: &[Delivery], latest: &mut [Option<BattleUpdate>; 2]) {
     for delivery in deliveries {
+        let json = serde_json::to_string(&delivery.message).unwrap();
+        let decoded: HostMessage = sve_battle_contract::decode(&json).unwrap();
+        assert_eq!(
+            decoded, delivery.message,
+            "the contract decodes what the host sends"
+        );
         if let HostMessage::Update(update) = &delivery.message {
             let [first, second] = latest;
             let slot = if delivery.seat == Seat::P1 {
@@ -129,17 +147,16 @@ fn play_out(session: &mut LocalSession) -> [Option<BattleUpdate>; 2] {
             return latest;
         };
         let request = format!("r{request}");
-        let answer = fixture::passive(&question);
-        let out = session.submit(
-            seat,
-            &Submit {
-                request_id: RequestId::new(request.clone()),
-                command: Command::Answer {
-                    question_id: question.id,
-                    answer,
-                },
+        let message = ClientMessage::Submit(Submit {
+            request_id: RequestId::new(request.clone()),
+            command: Command::Answer {
+                answer: fixture::passive(&question),
+                question_id: question.id,
             },
-        );
+        });
+        // The Worker's entry point: a seat name and the client message as JSON.
+        let name = if seat == Seat::P1 { "p1" } else { "p2" };
+        let out = session.submit_named(name, &serde_json::to_string(&message).unwrap());
         let first = out.first().unwrap();
         assert_eq!(first.seat, seat, "the receipt goes to the submitting seat");
         assert!(

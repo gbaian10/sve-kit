@@ -18,7 +18,8 @@ impl Session {
     /// Create a match from downloaded inputs and a JSON match setup.
     ///
     /// # Errors
-    /// Throws `format`, `selection`, `references` or `match`, never engine diagnostics.
+    /// Throws `format`, `selection`, `identity`, `references` or `match`, never engine
+    /// diagnostics.
     #[wasm_bindgen(constructor)]
     pub fn new(
         snapshot: &str,
@@ -26,6 +27,7 @@ impl Session {
         selection: &str,
         rules: &str,
         references: &str,
+        identity: &str,
         setup: &str,
     ) -> Result<Self, JsError> {
         let inputs = Inputs {
@@ -34,6 +36,7 @@ impl Session {
             selection,
             rules,
             references,
+            identity,
         };
         load(inputs, setup)
             .map(|inner| Self { inner })

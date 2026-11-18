@@ -5,12 +5,12 @@
 //! cannot touch rules state or randomness.
 
 use crate::wire::{
-    BattleInput, BattleUpdate, ClientMessage, HostError, HostErrorReason, HostMessage, Nat,
-    QuestionId, Receipt, ReceiptResult, RequestId, Seat, Submit, seat_named, seat_of, viewer_of,
+    BattleInput, BattleUpdate, ClientMessage, HostError, HostErrorReason, HostMessage, Identity,
+    Nat, QuestionId, Ready, Receipt, ReceiptResult, RequestId, Seat, Submit, seat_named, seat_of,
+    viewer_of,
 };
 use core::fmt;
 use serde::Serialize;
-use sve_battle_contract::event::EventDelivery;
 use sve_battle_contract::observation::BattleObservation;
 use sve_battle_contract::{Format, NoAdvice};
 use sve_engine::battle::{BattleReferences, EventFeed, InputProjection, ProjectionError};
@@ -88,6 +88,8 @@ impl fmt::Debug for Channel {
 pub struct LocalSession {
     game: Game,
     references: BattleReferences,
+    identity: Identity,
+    ready: bool,
     control: [SeatControl; 2],
     policy: PolicyHost,
     channels: [Channel; 2],
@@ -108,18 +110,22 @@ impl fmt::Debug for LocalSession {
 const SEATS: [Viewer; 2] = [Viewer::P1, Viewer::P2];
 
 impl LocalSession {
-    /// Bind an initialized game whose player input is ready to the references of its snapshot.
+    /// Bind an initialized game whose player input is ready to the references of its snapshot
+    /// and the content identity each seat is told in `Ready`.
     /// `limits` bounds the policy seats' submissions.
     #[must_use]
     pub fn new(
         game: Game,
         references: BattleReferences,
+        identity: Identity,
         control: [SeatControl; 2],
         limits: HostLimits,
     ) -> Self {
         Self {
             game,
             references,
+            identity,
+            ready: false,
             control,
             policy: PolicyHost::new(limits),
             channels: [Channel::new(Viewer::P1), Channel::new(Viewer::P2)],
@@ -139,13 +145,29 @@ impl LocalSession {
         self.stopped
     }
 
-    /// Let policy seats reach the first player stop, then send each player seat its baseline.
+    /// Tell each player seat the game's identity once, let policy seats reach the first player
+    /// stop, then send each player seat its baseline.
     pub fn start(&mut self) -> Vec<Delivery> {
         let mut out = Vec::new();
         if let Some(reason) = self.stopped {
             // Repeat the existing error; a stopped host never advances policies again.
             self.stop(reason, &mut out);
             return out;
+        }
+        if !self.ready {
+            self.ready = true;
+            for viewer in SEATS {
+                if self.control_of(viewer) == SeatControl::Player {
+                    out.push(Delivery {
+                        seat: seat_of(viewer),
+                        message: HostMessage::Ready(Ready {
+                            format: Format,
+                            viewer: seat_of(viewer),
+                            identity: self.identity.clone(),
+                        }),
+                    });
+                }
+            }
         }
         if let Err(reason) = self.advance_policies() {
             self.stop(reason, &mut out);
@@ -312,7 +334,11 @@ impl LocalSession {
         out.extend(updates);
     }
 
-    /// The seat's update if its board, input or events changed, or always when `force` is set.
+    /// The seat's update if its board or input changed, or always when `force` is set.
+    ///
+    /// Events are taken only on this delivery path: taking them records that the seat was
+    /// handed this stop, which must not happen at a stop the seat is never sent. Committed
+    /// events wait for the next delivered update, and a first event gap is always delivered.
     /// A forced update is a baseline: it replays no earlier events.
     fn refresh(
         &mut self,
@@ -325,11 +351,6 @@ impl LocalSession {
             Viewer::P1 => first,
             Viewer::P2 => second,
         };
-        let feed = if force {
-            channel.feed.baseline(&mut self.game)
-        } else {
-            channel.feed.deliver(&mut self.game, &self.references)
-        };
         let projection = self
             .game
             .battle_input(viewer, &id, &self.references)
@@ -338,19 +359,19 @@ impl LocalSession {
             observation: projection.observation().clone(),
             input: projection.input().clone(),
         };
-        let changed = channel.seen.as_ref() != Some(&seen);
-        let eventful = match &feed.events {
-            EventDelivery::Available { batches, .. } => !batches.is_empty(),
-            // Unavailable events only ever stop a seat once; the board stays authoritative.
-            EventDelivery::Unavailable { .. } => false,
-        } || !feed.presentation.is_empty();
         channel.shown = Some(projection);
-        if !(force || changed || eventful) {
+        let changed = channel.seen.as_ref() != Some(&seen);
+        if !(force || changed) {
             return Ok(None);
         }
-        if changed || eventful {
+        if changed {
             channel.update_seq = safe_increment(channel.update_seq)?;
         }
+        let feed = if force {
+            channel.feed.baseline(&mut self.game)
+        } else {
+            channel.feed.deliver(&mut self.game, &self.references)
+        };
         let update = BattleUpdate {
             format: Format,
             viewer: seat_of(viewer),

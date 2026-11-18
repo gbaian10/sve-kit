@@ -9,6 +9,7 @@
 mod fixture;
 
 use serde_json::json;
+use sve_battle_contract::Identity;
 use sve_battle_host::load::{Inputs, LoadError, load};
 use sve_engine::battle::{ReferenceInput, RuleIdentity, RuleInput};
 
@@ -35,16 +36,44 @@ fn setup(card: &str) -> String {
     .to_string()
 }
 
-fn error(selection: &str, rules: &str, references: &str, setup: &str) -> Option<LoadError> {
+fn loaded(
+    selection: &str,
+    rules: &str,
+    references: &str,
+    identity: &Identity,
+    setup: &str,
+) -> Option<LoadError> {
     let snapshot = snapshot();
+    let identity = serde_json::to_string(identity).unwrap();
     let inputs = Inputs {
         snapshot: &snapshot,
         keywords: KEYWORDS,
         selection,
         rules,
         references,
+        identity: &identity,
     };
     load(inputs, setup).err()
+}
+
+fn error(selection: &str, rules: &str, references: &str, setup: &str) -> Option<LoadError> {
+    loaded(
+        selection,
+        rules,
+        references,
+        &fixture::identity(selection, rules),
+        setup,
+    )
+}
+
+fn rule_input(manifest: &str) -> RuleInput {
+    RuleInput {
+        manifest_sha256: format!("sha256:{manifest}"),
+        entries: vec![RuleIdentity::Cr {
+            id: "1.2.3".into(),
+            revision: "synthetic".into(),
+        }],
+    }
 }
 
 fn references(edit: impl FnOnce(&mut ReferenceInput)) -> String {
@@ -69,6 +98,12 @@ fn each_stage_reports_its_own_code() {
         error(EMPTY_SELECTION, &rules, "{}", &setup("t-anchor")),
         Some(LoadError::Format)
     );
+    let stated = fixture::identity("{}", &rules);
+    assert_eq!(
+        loaded(EMPTY_SELECTION, &rules, &exact, &stated, &setup("t-anchor")),
+        Some(LoadError::Identity),
+        "an identity must name exactly the programs and rules loaded"
+    );
     assert_eq!(
         error(EMPTY_SELECTION, "{}", &exact, &setup("t-anchor")),
         Some(LoadError::Selection)
@@ -82,11 +117,12 @@ fn each_stage_reports_its_own_code() {
         [
             LoadError::Format,
             LoadError::Selection,
+            LoadError::Identity,
             LoadError::References,
             LoadError::Match
         ]
         .map(LoadError::code),
-        ["format", "selection", "references", "match"]
+        ["format", "selection", "identity", "references", "match"]
     );
 }
 
@@ -101,24 +137,14 @@ fn references_must_bind_exactly_this_whole_snapshot() {
         absent.card_no = "t-absent".into();
         input.faces.push(absent);
     });
-    let rules_without_wording = references(|input| {
-        input.rules = Some(RuleInput {
-            manifest_sha256: format!("sha256:{}", "a".repeat(64)),
-            entries: vec![RuleIdentity::Cr {
-                id: "1.2.3".into(),
-                revision: "synthetic".into(),
-            }],
-        });
-    });
+    let rules_of_another_manifest =
+        references(|input| input.rules = Some(rule_input(&"a".repeat(64))));
     for (label, references) in [
         ("a face outside the decks", unused_missing),
         ("another snapshot", wrong_snapshot),
         ("another region", wrong_region),
         ("an unknown printing", unknown_printing),
-        (
-            "rules without their wording manifest",
-            rules_without_wording,
-        ),
+        ("rules of another manifest", rules_of_another_manifest),
     ] {
         assert_eq!(
             error(EMPTY_SELECTION, &rules, &references, &setup("t-anchor")),
@@ -126,4 +152,15 @@ fn references_must_bind_exactly_this_whole_snapshot() {
             "{label}"
         );
     }
+}
+
+#[test]
+fn rules_without_wording_must_come_from_the_pinned_manifest() {
+    let rules = fixture::rules(&snapshot(), "t-anchor");
+    let pinned = references(|input| input.rules = Some(rule_input(fixture::MANIFEST)));
+    // The references pass; the deck card has no admitted effects author.
+    assert_eq!(
+        error(EMPTY_SELECTION, &rules, &pinned, &setup("t-anchor")),
+        Some(LoadError::Match)
+    );
 }

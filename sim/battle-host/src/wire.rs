@@ -5,7 +5,8 @@
 
 pub use sve_battle_contract::{
     Answer, BattleInput, BattleUpdate, ClientMessage, Command, HostError, HostErrorReason,
-    HostMessage, Nat, QuestionId, Receipt, ReceiptResult, Rejection, RequestId, Seat, Submit,
+    HostMessage, Identity, Nat, QuestionId, Ready, Receipt, ReceiptResult, Region, Rejection,
+    RequestId, Seat, Submit,
 };
 use sve_engine::game::player::Viewer;
 

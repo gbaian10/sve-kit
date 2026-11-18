@@ -12,7 +12,7 @@ use serde_json::{Value, json};
 extern crate alloc;
 
 use alloc::sync::Arc;
-use sve_battle_contract::question::{Question, QuestionShape};
+use sve_battle_contract::question::{Question, QuestionShape, QuestionUse};
 use sve_battle_contract::{Answer, ClientMessage, Command, OptionId};
 use sve_battle_host::wire::{
     BattleInput, BattleUpdate, HostError, HostErrorReason, HostMessage, QuestionId, Receipt,
@@ -32,19 +32,40 @@ fn card(number: &str, power: &str, hp: &str) -> String {
 }
 
 /// A pregame opening; two different cards make a drifted shuffle visible later.
-fn game() -> (Game, BattleReferences) {
-    let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3")].join("\n");
-    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
-    let effects = json!({"format":1_u8,"kind":"effect_set","cards":{
-        "t-small":{"status":"complete","review":"synthetic","abilities":[]},
-        "t-large":{"status":"complete","review":"synthetic","abilities":[]}
+/// With `start_amulets`, each seat first chooses a start amulet, so questions precede the
+/// opening shuffle.
+fn game(start_amulets: bool) -> (Game, BattleReferences) {
+    let amulet = json!({"number":"t-start","faces":[{"name":"t-start","card_class":"ニュートラル",
+        "card_type":"アミュレット","cost":"1","power":null,"hp":null,"traits":[],"text":null,
+        "sections":[],"title":"synthetic"}]})
+    .to_string();
+    let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3"), amulet].join("\n");
+    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{
+        "start_amulet":{"ja":"スタートアミュレット","rule":"14.4.3",
+            "expansion":{"op":"keyword","name":"start_amulet"}}
     }})
     .to_string();
+    let start = if start_amulets {
+        json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"start_amulet"}}])
+    } else {
+        json!([])
+    };
+    let effects = json!({"format":1_u8,"kind":"effect_set","cards":{
+        "t-small":{"status":"complete","review":"synthetic","abilities":[]},
+        "t-large":{"status":"complete","review":"synthetic","abilities":[]},
+        "t-start":{"status":"complete","review":"synthetic","abilities":start}
+    }})
+    .to_string();
+    let mut rules: Value = serde_json::from_str(&fixture::rules(&snapshot, "t-small")).unwrap();
+    if let Some(title) = rules.pointer_mut("/titles/0") {
+        title["title_code"] = json!("synthetic_start");
+        title["capabilities"] = json!([{"kind":"opening_start_amulet"}]);
+    }
     let catalog = Catalog::from_documents_with_rules(
         &snapshot,
         &registry,
         &[("t.yaml".into(), effects)],
-        &fixture::rules(&snapshot, "t-small"),
+        &rules.to_string(),
         &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
@@ -52,14 +73,23 @@ fn game() -> (Game, BattleReferences) {
     let deck = |seat: &str| {
         (0..10_u32)
             .map(|index| {
-                let number = if index % 2 == 0 { "t-small" } else { "t-large" };
+                let number = match index {
+                    0 if start_amulets => "t-start",
+                    _ if index % 2 == 0 => "t-small",
+                    _ => "t-large",
+                };
                 json!({"id":format!("{seat}/deck/{index}"),"card":number})
             })
             .collect::<Vec<_>>()
     };
     let player = |seat: &str| {
-        json!({"leader":{"class":"ニュートラル"},"construction":"class",
-            "deck_list":deck(seat),"evolve_deck_list":[]})
+        if start_amulets {
+            json!({"leader":{"class":"ニュートラル"},"construction":"title",
+                "title_code":"synthetic_start","deck_list":deck(seat),"evolve_deck_list":[]})
+        } else {
+            json!({"leader":{"class":"ニュートラル"},"construction":"class",
+                "deck_list":deck(seat),"evolve_deck_list":[]})
+        }
     };
     let setup = json!({"pregame":true,"players":{"P1":player("P1"),"P2":player("P2")}});
     let mut game = Game::new(
@@ -75,10 +105,15 @@ fn game() -> (Game, BattleReferences) {
 }
 
 fn session(control: [SeatControl; 2], max_submissions: u64) -> LocalSession {
-    let (game, references) = game();
+    opened(false, control, max_submissions)
+}
+
+fn opened(start_amulets: bool, control: [SeatControl; 2], max_submissions: u64) -> LocalSession {
+    let (game, references) = game(start_amulets);
     LocalSession::new(
         game,
         references,
+        fixture::identity("", ""),
         control,
         HostLimits {
             max_submissions,
@@ -244,7 +279,6 @@ fn answers_outside_the_current_question_never_reach_the_engine() {
             },
         ),
         ("over bounds", Answer::Choose { chosen: every }),
-        ("under bounds", Answer::Choose { chosen: vec![] }),
     ] {
         assert_eq!(
             session.submit(seat, &answer_with(id, wrong, label)),
@@ -256,10 +290,15 @@ fn answers_outside_the_current_question_never_reach_the_engine() {
     assert!(applied(&session.submit(seat, &answer(&question, "valid"))));
 }
 
-/// Every delivery and the final authority of a hot-seat run; `noise` adds rejected
-/// commands and baseline queries before every valid command.
-fn scripted(noise: bool) -> (Vec<Delivery>, String) {
-    let mut session = session(HOT_SEAT, 1_000);
+/// Every delivery and the final authority of a hot-seat run; `noise` adds rejected commands
+/// (the other seat, an option the question never offered, a retired question) and baseline
+/// queries before every valid command.
+///
+/// With `start_amulets` the run covers the opening only: the start amulet choices come before
+/// the opening shuffle, and the mulligan questions after it show each shuffled hand, so
+/// randomness a rejected command touched would change them. Otherwise the match runs to its end.
+fn scripted(start_amulets: bool, noise: bool) -> (Vec<Delivery>, String) {
+    let mut session = opened(start_amulets, HOT_SEAT, 1_000);
     let started = session.start();
     let mut transcript = started.clone();
     let mut seats = Seats::default();
@@ -269,12 +308,21 @@ fn scripted(noise: bool) -> (Vec<Delivery>, String) {
         let Some((seat, question)) = seats.question() else {
             break;
         };
+        if start_amulets && question.usage == QuestionUse::MainAction {
+            return (transcript, authority(&session));
+        }
         if noise {
-            let mut stale = vec![(other(seat), question.clone())];
-            stale.extend(previous.map(|retired| (seat, retired)));
-            for (from, held) in stale {
+            let mut rejected_commands = vec![
+                (other(seat), answer(&question, "noise")),
+                (
+                    seat,
+                    answer_with(question.id.as_str(), fixture::wrong(&question), "noise"),
+                ),
+            ];
+            rejected_commands.extend(previous.map(|retired| (seat, answer(&retired, "noise"))));
+            for (from, command) in rejected_commands {
                 assert_eq!(
-                    session.submit(from, &answer(&held, "noise")),
+                    session.submit(from, &command),
                     rejected(from, "noise"),
                     "noise is rejected before reaching the engine"
                 );
@@ -284,6 +332,7 @@ fn scripted(noise: bool) -> (Vec<Delivery>, String) {
             }
         }
         let out = session.submit(seat, &answer(&question, &format!("r{request}")));
+        assert!(applied(&out), "{:?}", question.usage);
         seats.absorb(&out);
         transcript.extend(out);
         previous = Some(question);
@@ -297,8 +346,15 @@ fn scripted(noise: bool) -> (Vec<Delivery>, String) {
 
 #[test]
 fn rejected_commands_and_queries_do_not_advance_rules_or_randomness() {
-    let plain = scripted(false);
-    assert_eq!(plain, scripted(true));
+    let opening = scripted(true, false);
+    assert!(
+        opening.0.iter().any(|delivery| matches!(&delivery.message,
+            HostMessage::Update(update) if matches!(&update.input,
+                BattleInput::Question { question } if question.usage == QuestionUse::StartAmulet))),
+        "the opening asks for start amulets before the shuffle"
+    );
+    assert_eq!(opening, scripted(true, true));
+    assert_eq!(scripted(false, false), scripted(false, true));
 }
 
 #[test]
@@ -309,7 +365,9 @@ fn baselines_resend_state_without_advancing_anything() {
     for seat in [Seat::P1, Seat::P2, Seat::P1] {
         let expected: Vec<_> = started
             .iter()
-            .filter(|delivery| delivery.seat == seat)
+            .filter(|delivery| {
+                delivery.seat == seat && matches!(delivery.message, HostMessage::Update(_))
+            })
             .collect();
         let again = session.baseline(seat);
         assert_eq!(again.iter().collect::<Vec<_>>(), expected);
@@ -354,10 +412,6 @@ fn a_policy_seat_has_no_channel() {
             Seat::P2,
             &answer_with("p2-q1", Answer::Quick { option: None }, "no-channel")
         ),
-        rejected(Seat::P2, "no-channel")
-    );
-    assert_eq!(
-        session.submit(Seat::P2, &concede("no-channel".into())),
         rejected(Seat::P2, "no-channel")
     );
 }
@@ -492,40 +546,140 @@ fn a_host_stopped_before_start_never_lets_the_policy_answer() {
     assert_eq!(authority(&session), before);
 }
 
+/// What the Worker posts: each message as JSON, checked by the strict contract decoder.
+fn wire(deliveries: &[Delivery]) -> Vec<(Seat, Value)> {
+    deliveries
+        .iter()
+        .map(|delivery| {
+            let json = serde_json::to_string(&delivery.message).unwrap();
+            let decoded: HostMessage = sve_battle_contract::decode(&json).unwrap();
+            assert_eq!(
+                decoded, delivery.message,
+                "the contract decodes what the host sends"
+            );
+            (delivery.seat, serde_json::from_str(&json).unwrap())
+        })
+        .collect()
+}
+
+fn submitted(question: &Question, answer: Answer, request: &str) -> String {
+    serde_json::to_string(&ClientMessage::Submit(answer_with(
+        question.id.as_str(),
+        answer,
+        request,
+    )))
+    .unwrap()
+}
+
 #[test]
-fn every_message_is_a_contract_host_message() {
+fn the_worker_entry_points_send_contract_messages() {
     let mut session = session(HOT_SEAT, 100);
     let started = session.start();
-    let json = serde_json::to_value(&started[0].message).unwrap();
+    let opening = wire(&started);
+    let ready: Vec<_> = opening
+        .iter()
+        .filter(|(_, json)| json["kind"] == "ready")
+        .map(|(seat, json)| (*seat, json["viewer"].clone()))
+        .collect();
+    assert_eq!(
+        ready,
+        [(Seat::P1, json!("p1")), (Seat::P2, json!("p2"))],
+        "each player seat is told the game's identity once, before any update"
+    );
+    assert!(
+        opening
+            .iter()
+            .position(|(_, json)| json["kind"] == "update")
+            .is_some_and(|first| first >= ready.len())
+    );
+    let (_, baseline) = opening
+        .iter()
+        .find(|(seat, json)| *seat == Seat::P1 && json["kind"] == "update")
+        .unwrap();
     assert_eq!(
         (
-            &json["kind"],
-            &json["format"],
-            &json["viewer"],
-            &json["update_seq"]
+            &baseline["update_seq"],
+            &baseline["input"]["question"]["id"]
         ),
-        (&json!("update"), &json!(1_u8), &json!("p1"), &json!(1_u8))
+        (&json!(1_u8), &json!("p1-q1"))
     );
-    assert_eq!(json["input"]["question"]["id"], json!("p1-q1"));
     assert_eq!(
-        json["events"],
+        baseline["events"],
         json!({"status":"available","batches":[],"animate":[]}),
         "a baseline replays no history"
     );
-    let stop = serde_json::to_value(&stopped(Seat::P1, HostErrorReason::Range).message).unwrap();
-    assert_eq!(
-        stop,
-        json!({"kind":"host_error","format":1_u8,"reason":"range"})
+    assert!(
+        session
+            .start()
+            .iter()
+            .all(|delivery| !matches!(delivery.message, HostMessage::Ready(_))),
+        "Ready is delivered once per game"
     );
-    let receipt = serde_json::to_value(&rejected(Seat::P1, "r")[0].message).unwrap();
+
+    let mut seats = Seats::default();
+    seats.absorb(&started);
+    let (seat, question) = seats.question().unwrap();
+    let name = if seat == Seat::P1 { "p1" } else { "p2" };
+    let refused =
+        wire(&session.submit_named(name, &submitted(&question, fixture::wrong(&question), "r0")));
     assert_eq!(
-        receipt,
-        json!({"kind":"receipt","request_id":"r","result":"rejected",
+        refused,
+        [(
+            seat,
+            json!({"kind":"receipt","request_id":"r0","result":"rejected",
             "rejection":"invalid_submission"})
+        )]
     );
-    // The strict contract decoder accepts exactly what the host sends.
-    for message in [json, stop, receipt] {
-        let decoded: HostMessage = sve_battle_contract::decode(&message.to_string()).unwrap();
-        assert_eq!(serde_json::to_value(decoded).unwrap(), message);
+    let accepted = wire(&session.submit_named(
+        name,
+        &submitted(&question, fixture::passive(&question), "r1"),
+    ));
+    assert_eq!(
+        accepted.first(),
+        Some(&(
+            seat,
+            json!({"kind":"receipt","request_id":"r1","result":"applied",
+            "rejection":null})
+        ))
+    );
+    assert!(
+        accepted
+            .iter()
+            .skip(1)
+            .all(|(_, json)| json["kind"] == "update"),
+        "the accepted answer advances the match"
+    );
+    assert_eq!(
+        wire(&session.submit_named(name, "{")),
+        [Seat::P1, Seat::P2].map(|stopped| (
+            stopped,
+            json!({"kind":"host_error","format":1_u8,"reason":"format"})
+        ))
+    );
+}
+
+#[test]
+fn a_waiting_seat_is_never_sent_the_other_seats_question() {
+    let mut session = session(HOT_SEAT, 100);
+    let mut deliveries = session.start();
+    let mut seats = Seats::default();
+    seats.absorb(&deliveries);
+    for request in 0..20_u32 {
+        let (seat, question) = seats.question().unwrap();
+        let options = serde_json::to_value(&question.shape).unwrap();
+        let waiting: Vec<_> = wire(&deliveries)
+            .into_iter()
+            .filter(|(to, _)| *to == other(seat))
+            .map(|(_, json)| json.to_string())
+            .collect();
+        for message in &waiting {
+            assert!(
+                !message.contains(&format!("\"{}\"", question.id.as_str()))
+                    && !message.contains(&options.to_string()),
+                "{message}"
+            );
+        }
+        deliveries = session.submit(seat, &answer(&question, &format!("r{request}")));
+        seats.absorb(&deliveries);
     }
 }

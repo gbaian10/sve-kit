@@ -19,6 +19,7 @@ const host = new BattleHost(
       inputs.selection,
       inputs.rules,
       inputs.references,
+      JSON.stringify(inputs.identity),
       setup,
     )
   },

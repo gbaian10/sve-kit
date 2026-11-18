@@ -29,7 +29,7 @@ export interface SeatPort {
   onmessage: ((event: MessageEvent<SeatRequest>) => void) | null
 }
 
-const LOAD_CODES: readonly string[] = ["format", "selection", "references", "match"]
+const LOAD_CODES: readonly string[] = ["format", "selection", "identity", "references", "match"]
 
 function loadCode(error: unknown): LoadErrorCode {
   const message = error instanceof Error ? error.message : ""

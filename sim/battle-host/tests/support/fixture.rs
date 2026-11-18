@@ -9,7 +9,7 @@
 use serde_json::{Value, json};
 use sha2::{Digest as _, Sha256};
 use sve_battle_contract::question::{DiceChoice, MainIntent, Question, QuestionShape};
-use sve_battle_contract::{Answer, CardRef, Nat, OptionId};
+use sve_battle_contract::{Answer, CardRef, ContentRef, Identity, Nat, OptionId, Region};
 use sve_engine::battle::{PrintingFaceIdentity, ReferenceInput};
 
 pub(crate) fn hex(bytes: &[u8]) -> String {
@@ -33,6 +33,25 @@ pub(crate) fn rules(snapshot: &str, anchor: &str) -> String {
             "anchor":{"kind":"legacy-face","region":"jp","card_no":anchor,"face_ordinal":0_u8}}],
         "resources":[]})
     .to_string()
+}
+
+/// The verified public manifest the synthetic tests pin their games to.
+pub(crate) const MANIFEST: &str =
+    "1111111111111111111111111111111111111111111111111111111111111111";
+
+/// The content identity of a game loaded from these programs and rules.
+pub(crate) fn identity(selection: &str, rules: &str) -> Identity {
+    let content = |id: &str, sha256: String| ContentRef {
+        id: id.into(),
+        sha256,
+    };
+    Identity {
+        snapshot: content("snapshot-test", MANIFEST.into()),
+        programs: content("programs-test", hex(selection.as_bytes())),
+        engine: content("engine-test", "2".repeat(64)),
+        rules: content("rules-test", hex(rules.as_bytes())),
+        region: Region::Jp,
+    }
 }
 
 /// One test identity per native face of every snapshot record.
@@ -78,6 +97,42 @@ fn first(count: Nat, ids: impl IntoIterator<Item = OptionId>) -> Vec<OptionId> {
     ids.into_iter()
         .take(usize::try_from(count.get()).unwrap())
         .collect()
+}
+
+/// An answer of the question's own kind naming an option it never offered, or of another kind
+/// where the question offers no options.
+pub(crate) fn wrong(question: &Question) -> Answer {
+    let absent = OptionId::new("not-offered".into());
+    match &question.shape {
+        QuestionShape::Choose { .. } => Answer::Choose {
+            chosen: vec![absent],
+        },
+        QuestionShape::ActionWindow { .. } => Answer::ActionWindow {
+            intent: absent,
+            target: None,
+        },
+        QuestionShape::Quick { .. } => Answer::Quick {
+            option: Some(absent),
+        },
+        QuestionShape::Select { .. } => Answer::Select {
+            selected: vec![absent],
+            groups: None,
+            roles: vec![],
+        },
+        QuestionShape::Mulligan { .. } => Answer::Mulligan {
+            redraw: true,
+            bottom_order: vec![absent],
+        },
+        QuestionShape::Integer { .. } => Answer::Confirm { accept: true },
+        QuestionShape::ResourcePayment { .. }
+        | QuestionShape::EvolutionPayment { .. }
+        | QuestionShape::Confirm { .. }
+        | QuestionShape::DiceReroll { .. }
+        | QuestionShape::Order { .. }
+        | QuestionShape::DriveTrigger { .. }
+        | QuestionShape::Partition { .. }
+        | QuestionShape::Distribute { .. } => Answer::Integer { value: Nat::ZERO },
+    }
 }
 
 /// A player who never acts: keeps the hand, ends every main phase, passes every window and

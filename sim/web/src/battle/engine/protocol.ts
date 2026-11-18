@@ -1,6 +1,14 @@
 // Local-battle messages. Every host message is the generated battle contract's `HostMessage`;
 // only the Worker init, the port requests and the two local wrappers below are local.
-import type { BattleUpdate, Command, HostMessage, Receipt, Seat, Submit } from "../contract"
+import type {
+  BattleUpdate,
+  Command,
+  HostMessage,
+  Identity,
+  Receipt,
+  Seat,
+  Submit,
+} from "../contract"
 
 export type { BattleUpdate, Command, Receipt, Seat }
 export const SEATS: readonly Seat[] = ["p1", "p2"]
@@ -19,6 +27,8 @@ export interface MatchInputs {
   rules: string
   /** Printing, wording and rule identities produced with the snapshot by the same reader. */
   references: string
+  /** The verified public manifest, programs, engine build and rules; each seat gets it in Ready. */
+  identity: Identity
 }
 
 interface DeckSetup {
@@ -36,7 +46,7 @@ export interface MatchOptions {
   first_chooser?: Seat
 }
 
-export type LoadErrorCode = "format" | "selection" | "references" | "match" | "engine"
+export type LoadErrorCode = "format" | "selection" | "identity" | "references" | "match" | "engine"
 
 /** Main thread → Worker, once; one transferred port per player seat. */
 export interface InitMessage {
