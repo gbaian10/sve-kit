@@ -15,7 +15,7 @@ use sve_engine::game::replay::{Replay, ReplayNode};
 use sve_scenario_runner::arch::{
     ArchOptions, BranchKind, CheckReport, Outcome, ReplayEngine, check_replay, load_fixtures,
 };
-use sve_scenario_runner::{Fixture, View};
+use sve_scenario_runner::{EngineError, Fixture, View};
 
 #[path = "support/repository.rs"]
 mod repository;
@@ -32,7 +32,7 @@ fn architecture_replay_checks_use_the_typed_entry() {
     let reports = check_replay(&mut factory, &fixtures, &ArchOptions::default());
     let failed: Vec<_> = reports
         .iter()
-        .filter(|report| report.id != "R2b" && report.outcome != Outcome::Pass)
+        .filter(|report| !matches!(report.id, "R2b" | "R5") && report.outcome != Outcome::Pass)
         .collect();
     assert_eq!(failed, Vec::<&CheckReport>::new());
 
@@ -51,6 +51,16 @@ fn architecture_replay_checks_use_the_typed_entry() {
         }),
         "{reasons:?}"
     );
+
+    // Drawing on the full source lines gives P1 different knowledge to carry into each fork.
+    let pending = reports.iter().find(|report| report.id == "R5").unwrap();
+    let Outcome::Fail { reasons } = &pending.outcome else {
+        panic!("unexpected R5 result: {:?}", pending.outcome);
+    };
+    let expected: Vec<_> = (5..=12)
+        .map(|node| format!("M' shuffles branch N{node} P1: exports differ"))
+        .collect();
+    assert_eq!(reasons, &expected);
 }
 
 #[test]
@@ -190,6 +200,10 @@ fn save_replays_the_rule_bound_stack_selection_and_preserves_branch_privacy() {
         Some(json!(5_u8))
     );
     let branch = restored.branch(&root, BranchKind::Undo).unwrap();
+    assert_eq!(
+        restored.restore(&restored.save(&branch).unwrap()).unwrap(),
+        branch
+    );
     assert!(
         !restored
             .export(&branch, View::P1)
@@ -273,4 +287,23 @@ fn private_save_requires_the_random_algorithm_version() {
     adapter()
         .restore(&serde_json::to_vec(&archive).unwrap())
         .unwrap_err();
+}
+
+#[test]
+fn private_restore_rejects_a_tampered_command_receipt() {
+    let mut game = adapter();
+    let root = game
+        .start(&position(&json!({}), Value::Null), "tampered", "tampered")
+        .unwrap();
+    let (next, _) = game
+        .decide(&root, &json!({"by":"P1","at":"main","do":"end-phase"}))
+        .unwrap();
+    let mut archive: Value = serde_json::from_slice(&game.save(&next).unwrap()).unwrap();
+    assert_eq!(archive["checkpoints"][1]["receipts"][0], "Applied");
+    archive["checkpoints"][1]["receipts"][0] = json!("Cancelled");
+    let failure = game
+        .restore(&serde_json::to_vec(&archive).unwrap())
+        .unwrap_err();
+    assert!(matches!(failure, EngineError::Adapter(message)
+        if message.contains("recorded replay checkpoint did not reproduce its result")));
 }

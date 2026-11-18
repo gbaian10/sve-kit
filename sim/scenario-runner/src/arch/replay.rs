@@ -534,7 +534,7 @@ fn r5(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
     Ok(fails)
 }
 
-/// The observed prefix of path P and a branch that continues through the whole path.
+/// A played path P plus the replay branch from `branch_from`, continued to N13.
 struct Played {
     run: Run,
     line: Line,
@@ -545,12 +545,11 @@ fn play_with_branch(
     factory: &mut ReplayFactory<'_>,
     fixtures: &ArchFixtures,
     name: &str,
-    observed_through: usize,
 ) -> Result<Played, EngineError> {
     let spec = &fixtures.spec;
     let at = spec.replay.branch_from;
     let (mut run, root) = Run::start(factory, fixtures, name, &spec.seed)?;
-    let (line, _) = run.walk(&root, 0, head(&spec.replay.path, observed_through))?;
+    let (line, _) = run.walk(&root, 0, &spec.replay.path)?;
     let b = run.branch(node_at(&line, at)?, BranchKind::Replay)?;
     let (branch, _) = run.walk(&b, at, tail(&spec.replay.path, at))?;
     Ok(Played { run, line, branch })
@@ -579,7 +578,7 @@ fn scan_node(
 fn scan_path_and_branch(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
     let spec = &fixtures.spec;
     let cards = card_numbers(&fixtures.position(positions::M)?.setup);
-    let played = play_with_branch(factory, fixtures, positions::M, spec.replay.path.len())?;
+    let played = play_with_branch(factory, fixtures, positions::M)?;
     let mut fails = Vec::new();
     for view in PLAYERS {
         let carried = spec
@@ -682,10 +681,9 @@ fn paired(
 ) -> Checked {
     let spec = &fixtures.spec;
     let all = |_: usize| true;
-    let through = spec.replay.path.len();
-    let m = play_with_branch(factory, fixtures, positions::M, through)?;
-    let card = play_with_branch(factory, fixtures, positions::M_CARD, through)?;
-    let order = play_with_branch(factory, fixtures, positions::M_ORDER, through)?;
+    let m = play_with_branch(factory, fixtures, positions::M)?;
+    let card = play_with_branch(factory, fixtures, positions::M_CARD)?;
+    let order = play_with_branch(factory, fixtures, positions::M_ORDER)?;
     let mut fails = same_exports(
         (&m.run, &m.line),
         (&card.run, &card.line),
@@ -721,12 +719,9 @@ fn paired(
         "M/M''",
     )?);
     fails.extend(search_awaiting(&m, fixtures)?);
-    let hidden_order = 5..=12;
-    // Drawing on the source line gives P1 different memories even if the branch hides its deck.
-    let before_draw = *hidden_order.end();
-    let s45 = play_with_branch(factory, fixtures, positions::M_CARD_45, before_draw)?;
-    let s54 = play_with_branch(factory, fixtures, positions::M_CARD_54, before_draw)?;
-    let shuffled = |k: usize| hidden_order.contains(&k);
+    let s45 = play_with_branch(factory, fixtures, positions::M_CARD_45)?;
+    let s54 = play_with_branch(factory, fixtures, positions::M_CARD_54)?;
+    let shuffled = |k: usize| (5..=12).contains(&k);
     fails.extend(same_exports(
         (&s45.run, &s45.line),
         (&s54.run, &s54.line),

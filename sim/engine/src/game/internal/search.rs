@@ -1259,6 +1259,7 @@ fn zone_name(kind: ZoneKind) -> Result<&'static str> {
 )]
 impl Game {
     pub(crate) fn referee_search_member(&self, actor: Viewer, handle: u64) -> Option<&str> {
+        // Only the replay runner needs frozen fixture labels for hidden candidates.
         self.replay.node.as_ref()?;
         let execution = self.typed.as_ref()?;
         let (question, Wait::Search(wait)) = execution.waiting.as_ref()? else {
@@ -1272,6 +1273,7 @@ impl Game {
     }
 
     pub(crate) fn referee_ward_member(&self, actor: Viewer) -> Option<&str> {
+        // Only the replay runner needs to match a hidden entrant to its fixture label.
         self.replay.node.as_ref()?;
         let execution = self.typed.as_ref()?;
         let (question, Wait::WardEntry { reference, .. }) = execution.waiting.as_ref()? else {

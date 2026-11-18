@@ -118,6 +118,27 @@ struct Node {
     line: ReplayNode,
 }
 
+#[cfg(feature = "runner")]
+#[derive(PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub(crate) struct ReplayCheckpoint {
+    digest: String,
+    receipts: Vec<SubmissionKind>,
+}
+
+#[cfg(feature = "runner")]
+impl Node {
+    fn checkpoint(&self, game: &Game) -> Result<ReplayCheckpoint> {
+        let receipts = match &self.operation {
+            Operation::Commands(commands) => commands.iter().map(RecordedCommand::kind).collect(),
+            Operation::Start | Operation::Fork { .. } => Vec::new(),
+        };
+        Ok(ReplayCheckpoint {
+            digest: game.referee_replay_digest()?,
+            receipts,
+        })
+    }
+}
+
 /// A node as one seat saw it, with the committed events added at that node.
 /// Parent event coordinates can refer to earlier summaries on the same line.
 #[derive(Debug)]
@@ -224,10 +245,9 @@ impl Replay {
         viewer: Viewer,
         command: Command,
     ) -> Result<(ReplayNode, Submission)> {
-        let (node, result, _commands) = self.advance(at, identity, |game, commands| {
+        self.advance(at, identity, |game, commands| {
             Ok(RecordedCommand::submit(game, commands, viewer, command))
-        })?;
-        Ok((node, result))
+        })
     }
 
     pub(crate) fn advance<T, E>(
@@ -235,7 +255,7 @@ impl Replay {
         at: ReplayNode,
         error: impl Fn(EngineFailure) -> E,
         action: impl FnOnce(&mut Game, &mut Vec<RecordedCommand>) -> result::Result<T, E>,
-    ) -> result::Result<(ReplayNode, T, Vec<SubmissionKind>), E> {
+    ) -> result::Result<(ReplayNode, T), E> {
         let parent = self.node(at).map_err(&error)?;
         if self.tails.get(&parent.line).copied() != Some(at) {
             return Err(error(invalid("decisions append only at a replay line tip")));
@@ -247,9 +267,8 @@ impl Replay {
         let mut commands = Vec::new();
         let result = action(&mut game, &mut commands)?;
         if commands.is_empty() {
-            return Ok((at, result, Vec::new()));
+            return Ok((at, result));
         }
-        let receipts = commands.iter().map(|entry| entry.result.kind).collect();
         self.push(
             id,
             Node {
@@ -259,7 +278,7 @@ impl Replay {
                 line,
             },
         );
-        Ok((id, result, receipts))
+        Ok((id, result))
     }
 
     fn push(&mut self, id: ReplayNode, node: Node) {
@@ -300,8 +319,44 @@ impl Replay {
     /// # Errors
     /// Rejects an unknown position or a command whose result fails to reproduce.
     pub fn recover(&self, at: ReplayNode) -> Result<Game> {
+        self.recover_nodes(vec![at])?
+            .remove(&at.0)
+            .ok_or_else(|| invalid("missing recovered replay node"))
+    }
+
+    #[cfg(feature = "runner")]
+    pub(crate) fn checkpoints(&self, through: ReplayNode) -> Result<Vec<ReplayCheckpoint>> {
+        self.nodes
+            .get(..=through.0)
+            .ok_or_else(|| invalid("unknown replay node"))?
+            .iter()
+            .map(|node| node.checkpoint(&node.game))
+            .collect()
+    }
+
+    #[cfg(feature = "runner")]
+    pub(crate) fn recover_prefix(&mut self, expected: Vec<ReplayCheckpoint>) -> Result<()> {
+        if expected.len() != self.nodes.len() {
+            return Err(invalid("replay checkpoint count differs"));
+        }
+        // The archive includes every line created before the selected node.
+        let mut games = self.recover_nodes(self.tails.values().copied().collect())?;
+        for (index, (node, checkpoint)) in self.nodes.iter_mut().zip(expected).enumerate() {
+            let game = games
+                .remove(&index)
+                .ok_or_else(|| invalid("missing recovered replay node"))?;
+            if node.checkpoint(&game)? != checkpoint {
+                return Err(invalid(
+                    "recorded replay checkpoint did not reproduce its result",
+                ));
+            }
+            node.game = game;
+        }
+        Ok(())
+    }
+
+    fn recover_nodes(&self, mut remaining: Vec<ReplayNode>) -> Result<BTreeMap<usize, Game>> {
         let mut needed = BTreeSet::new();
-        let mut remaining = vec![at];
         while let Some(id) = remaining.pop() {
             if !needed.insert(id.0) {
                 continue;
@@ -337,6 +392,11 @@ impl Replay {
                             return Err(invalid("recorded command did not reproduce its result"));
                         }
                     }
+                    #[cfg(feature = "runner")]
+                    if matches!(self.initial, Start::Position { .. }) {
+                        // The fixture adapter drains these events after every recorded decision.
+                        drop(game.referee_take_events());
+                    }
                 }
                 Operation::Fork { observed } => {
                     let source = games
@@ -347,9 +407,7 @@ impl Replay {
             }
             games.insert(index, game);
         }
-        games
-            .remove(&at.0)
-            .ok_or_else(|| invalid("missing recovered replay node"))
+        Ok(games)
     }
 
     /// Read only one seat's view at this position, using the same observation and

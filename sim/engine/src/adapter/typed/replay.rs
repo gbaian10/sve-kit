@@ -4,8 +4,7 @@ use super::{adapter, awaiting_on, decide_on};
 use crate::adapter::{core_view, error};
 use crate::catalog::SelectedEffects;
 use crate::game::Game;
-use crate::game::player::SubmissionKind;
-use crate::game::replay::{Replay, ReplayNode};
+use crate::game::replay::{Replay, ReplayCheckpoint, ReplayNode};
 use crate::random::ALGORITHM;
 use alloc::collections::BTreeMap;
 use core::fmt;
@@ -25,16 +24,8 @@ struct Position {
 
 #[derive(Clone, Serialize, Deserialize)]
 enum Operation {
-    Decision {
-        at: String,
-        decision: Value,
-        receipts: Vec<SubmissionKind>,
-        outcome: String,
-    },
-    Branch {
-        at: String,
-        undo: bool,
-    },
+    Decision { at: String, decision: Value },
+    Branch { at: String, undo: bool },
 }
 
 // The fixture vocabulary is sufficient to reproduce native commands for this runner.
@@ -46,6 +37,7 @@ struct Archive {
     random_algorithm: String,
     initial: Position,
     operations: Vec<Operation>,
+    checkpoints: Vec<ReplayCheckpoint>,
     selected: String,
 }
 
@@ -183,7 +175,7 @@ impl TypedReplayAdapter {
             .replay
             .as_mut()
             .ok_or_else(|| adapter("replay not started"))?;
-        let (next, step, receipts) = replay.advance(native, error, |game, commands| {
+        let (next, step) = replay.advance(native, error, |game, commands| {
             decide_on(game, &initial.setup, decision, Some(commands))
         })?;
         if next == native {
@@ -192,8 +184,6 @@ impl TypedReplayAdapter {
         self.operations.push(Operation::Decision {
             at: at.0.clone(),
             decision: decision.clone(),
-            receipts,
-            outcome: step.outcome.clone(),
         });
         let node = self.insert(Node {
             native: next,
@@ -205,26 +195,10 @@ impl TypedReplayAdapter {
         Ok((node, step))
     }
 
-    fn rebuild(&mut self, operation: Operation) -> Result<(), EngineError> {
+    fn translate_operation(&mut self, operation: Operation) -> Result<(), EngineError> {
         match operation {
-            Operation::Decision {
-                at,
-                decision,
-                receipts,
-                outcome,
-            } => {
-                let source = NodeId(at);
-                let (next, step) = self.record_decision(&source, &decision)?;
-                if let Some(Operation::Decision {
-                    receipts: actual, ..
-                }) = self.operations.last()
-                    && source != next
-                    && *actual == receipts
-                    && step.outcome == outcome
-                {
-                    return Ok(());
-                }
-                Err(adapter("recorded decision did not reproduce its result"))
+            Operation::Decision { at, decision } => {
+                self.record_decision(&NodeId(at), &decision)?;
             }
             Operation::Branch { at, undo } => {
                 let kind = if undo {
@@ -233,9 +207,9 @@ impl TypedReplayAdapter {
                     BranchKind::Replay
                 };
                 self.branch(&NodeId(at), kind)?;
-                Ok(())
             }
         }
+        Ok(())
     }
 }
 
@@ -286,6 +260,7 @@ impl ReplayEngine for TypedReplayAdapter {
                 .take(selected.operation_count)
                 .cloned()
                 .collect(),
+            checkpoints: self.replay()?.checkpoints(selected.native).map_err(error)?,
             selected: at.0.clone(),
         };
         serde_json::to_vec(&archive).map_err(|e| adapter(e.to_string()))
@@ -302,9 +277,15 @@ impl ReplayEngine for TypedReplayAdapter {
         }
         let mut rebuilt = Self::new(self.selected.clone());
         rebuilt.start_position(archive.initial)?;
+        // Fixture choices bind to the current typed question. Recovery then checks
+        // the translated native prefix, including forks, against the saved checkpoints.
         for operation in archive.operations {
-            rebuilt.rebuild(operation)?;
+            rebuilt.translate_operation(operation)?;
         }
+        rebuilt
+            .replay_mut()?
+            .recover_prefix(archive.checkpoints)
+            .map_err(error)?;
         let selected = NodeId(archive.selected);
         rebuilt.node(&selected)?;
         *self = rebuilt;
