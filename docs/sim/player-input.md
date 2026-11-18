@@ -38,6 +38,8 @@ token，起始護符與整手換牌排序使用當席 `ObjectHandle`，提交時
 `input` 只讀既有狀態，不配置 token、不改 RNG、不執行規則或重發事件。回傳封閉的
 `Input`：當席待答、等待他席、正常終局或 `EngineFault`。非應答席不取得 token 或
 私有候選；骰子重擲仍提供公開骰值與剩餘次數的等待摘要。
+正式 wire 宿主使用 `Game::battle_input` 同時取得盤面、完整輸入及私有答案配對；
+投影與提交方式見[對戰契約 §2.1](battle-contract.md#21-一致更新與提交)。
 
 `Question` 的用途與答案形狀分開。現有 typed 決定以玩家專用的 [`DecisionShape`](player-questions.md) 描述操作，沿用 `Answer` 的
 當題候選代號，`QuestionToken` 只代表輸入 occurrence，不暴露 execution 或 instruction
