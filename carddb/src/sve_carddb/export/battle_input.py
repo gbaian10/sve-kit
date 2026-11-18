@@ -102,9 +102,12 @@ class _Projection:
         sections = self.sections(revision)
         if [row["ordinal"] for row in sections] != list(range(len(sections))):
             raise ValueError("Native sections require a complete ordinal sequence")
-        if revision["class_code"] is None:
-            raise ValueError("Native class requires a nonempty label")
-        card_class = self.labels["class", string(revision["class_code"])]
+        # EP/SEP faces have no class; the native format writes absent characteristics as "-".
+        card_class = (
+            "-"
+            if revision["class_code"] is None
+            else self.labels["class", string(revision["class_code"])]
+        )
         if not card_class:
             raise ValueError("Native class requires a nonempty label")
         result: Row = {

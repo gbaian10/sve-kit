@@ -294,22 +294,7 @@ describe("startLocalBattle", () => {
       control: ["policy", "player"],
       max_submissions: 1,
     }
-    const identity = {
-      snapshot: { id: "s", sha256: "1".repeat(64) },
-      programs: { id: "p", sha256: "2".repeat(64) },
-      engine: { id: "e", sha256: "3".repeat(64) },
-      rules: { id: "r", sha256: "4".repeat(64) },
-      region: "jp" as const,
-    }
-    const inputs = {
-      snapshot: "",
-      keywords: "",
-      selection: "",
-      rules: "",
-      references: "",
-      identity,
-    }
-    const battle = startLocalBattle(inputs, options, () => worker)
+    const battle = startLocalBattle("{}", options, () => worker)
     expect(Object.keys(battle.channels)).toEqual(["p2"])
     expect(Object.keys(init?.ports ?? {})).toEqual(["p2"])
     expect(transferred).toHaveLength(1)

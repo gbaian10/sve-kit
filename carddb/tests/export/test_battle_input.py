@@ -3,7 +3,9 @@
 from typing import TYPE_CHECKING
 
 import pytest
+from typer.testing import CliRunner
 
+from sve_carddb import cli
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
 from sve_carddb.export.battle_input import build_battle_inputs
 from sve_carddb.export.preview import Roots, write_preview
@@ -224,6 +226,41 @@ def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None
     } in array(rules["entries"])
     with pytest.raises(ExportError):
         load_battle_inputs(roots.preview, "en")
+
+    def command(output: Path, rules: str, region: str = "jp") -> int:
+        engine_rules = tmp_path / f"{output.name}.yaml"
+        engine_rules.write_text(rules, encoding="utf-8")
+        arguments = ["--output", str(output), "--engine-rules", str(engine_rules)]
+        arguments += ["--export-dir", str(roots.preview), "--region", region]
+        return (
+            CliRunner()
+            .invoke(cli.app, ["snapshot", "battle-inputs", *arguments])
+            .exit_code
+        )
+
+    pinned = (
+        "scope: {region: jp}\ninput: {kind: legacy-jp, snapshot_sha256: reviewed}\n"
+    )
+    assert command(tmp_path / "battle", pinned) == 0
+    assert (tmp_path / "battle/snapshot.jsonl").read_bytes() == result.snapshot
+    assert parse((tmp_path / "battle/references.json").read_bytes()) == (
+        result.references
+    )
+    assert parse((tmp_path / "battle/rules.json").read_bytes()) == {
+        "scope": {"region": "jp"},
+        "input": {
+            "kind": "legacy-jp",
+            "snapshot_sha256": digest(result.snapshot).removeprefix("sha256:"),
+        },
+    }
+    assert command(tmp_path / "battle", pinned) != 0, "never mixes with earlier output"
+    for name, document, region in [
+        ("en", pinned, "en"),
+        ("other", pinned.replace("jp", "en"), "jp"),
+        ("unusable", "scope: {}\n", "jp"),
+    ]:
+        assert command(tmp_path / name, document, region) == 3, name
+        assert not (tmp_path / name).exists()
     blob = object_value(array(snapshot.manifest["files"])[0])
     (roots.preview / string(blob["path"])).write_bytes(b"{}")
     with pytest.raises(ExportError):
@@ -424,16 +461,12 @@ def test_en_catalogue_preserves_its_own_region_without_normalizing_card_numbers(
     } == {"SYNⓈaEN"}
 
 
-@pytest.mark.parametrize(
-    "scenario", ["missing_class", "empty_class", "noncontiguous_faces"]
-)
+@pytest.mark.parametrize("scenario", ["empty_class", "noncontiguous_faces"])
 def test_native_characteristic_and_face_coordinates_must_be_representable(
     scenario: str,
 ) -> None:
     snapshot = source()
-    if scenario == "missing_class":
-        snapshot.tables["face_revision"][0]["class_code"] = None
-    elif scenario == "empty_class":
+    if scenario == "empty_class":
         next(
             row for row in snapshot.tables["text_unit"] if row["id"] == "label-neutral"
         )["text"] = ""
@@ -443,16 +476,18 @@ def test_native_characteristic_and_face_coordinates_must_be_representable(
         build_battle_inputs(snapshot, "jp")
 
 
-def test_native_absent_numeric_characteristics_use_the_existing_sentinel() -> None:
+def test_native_absent_characteristics_use_the_existing_sentinel() -> None:
     snapshot = source()
+    # EP/SEP faces have neither a class nor numeric characteristics.
     snapshot.tables["face_revision"][0].update(
-        {"cost": None, "attack": None, "defense": None}
+        {"class_code": None, "cost": None, "attack": None, "defense": None}
     )
     result = build_battle_inputs(snapshot, "jp")
     first = object_value(
         array(object_value(parse(result.snapshot.strip()))["faces"])[0]
     )
-    assert [first[field] for field in ("cost", "power", "hp")] == ["-", "-", "-"]
+    fields = ("card_class", "cost", "power", "hp")
+    assert [first[field] for field in fields] == ["-", "-", "-", "-"]
 
 
 def test_battle_rule_identity_closure_keeps_parent_ids_and_all_exact_versions() -> None:

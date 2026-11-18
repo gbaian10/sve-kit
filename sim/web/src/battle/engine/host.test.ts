@@ -77,21 +77,7 @@ const options: MatchOptions = {
   max_submissions: 10,
 }
 
-const identity = {
-  snapshot: { id: "s", sha256: "1".repeat(64) },
-  programs: { id: "p", sha256: "2".repeat(64) },
-  engine: { id: "e", sha256: "3".repeat(64) },
-  rules: { id: "r", sha256: "4".repeat(64) },
-  region: "jp" as const,
-}
-const inputs = {
-  snapshot: "s",
-  keywords: "k",
-  selection: "{}",
-  rules: "{}",
-  references: "{}",
-  identity,
-}
+const inputs = "{}"
 
 function setUp(
   create: (setup: string) => Promise<EngineSession>,

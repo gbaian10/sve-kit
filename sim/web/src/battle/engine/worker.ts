@@ -13,15 +13,7 @@ const host = new BattleHost(
   async (inputs, setup) => {
     ready ??= init()
     await ready
-    return new Session(
-      inputs.snapshot,
-      inputs.keywords,
-      inputs.selection,
-      inputs.rules,
-      inputs.references,
-      JSON.stringify(inputs.identity),
-      setup,
-    )
+    return new Session(inputs, setup)
   },
   undefined,
   validate,

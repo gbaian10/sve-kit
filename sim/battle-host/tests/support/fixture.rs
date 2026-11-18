@@ -54,6 +54,17 @@ pub(crate) fn identity(selection: &str, rules: &str) -> Identity {
     }
 }
 
+/// The battle inputs document exactly as `build:engine` writes it.
+pub(crate) fn document(
+    [snapshot, keywords, selection, rules]: [&str; 4],
+    references: &Value,
+    identity: &Identity,
+) -> String {
+    json!({"snapshot":snapshot,"keywords":keywords,"selection":selection,"rules":rules,
+        "references":references,"identity":identity})
+    .to_string()
+}
+
 /// One test identity per native face of every snapshot record.
 ///
 /// The public test batch carries no permanent printing ids; production references come with

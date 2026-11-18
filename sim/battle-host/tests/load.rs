@@ -10,7 +10,7 @@ mod fixture;
 
 use serde_json::json;
 use sve_battle_contract::Identity;
-use sve_battle_host::load::{Inputs, LoadError, load};
+use sve_battle_host::load::{LoadError, load};
 use sve_engine::battle::{ReferenceInput, RuleIdentity, RuleInput};
 
 const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","keywords":{}}"#;
@@ -44,16 +44,13 @@ fn loaded(
     setup: &str,
 ) -> Option<LoadError> {
     let snapshot = snapshot();
-    let identity = serde_json::to_string(identity).unwrap();
-    let inputs = Inputs {
-        snapshot: &snapshot,
-        keywords: KEYWORDS,
-        selection,
-        rules,
-        references,
-        identity: &identity,
-    };
-    load(inputs, setup).err()
+    let references = serde_json::from_str(references).unwrap();
+    let inputs = fixture::document(
+        [&snapshot, KEYWORDS, selection, rules],
+        &references,
+        identity,
+    );
+    load(&inputs, setup).err()
 }
 
 fn error(selection: &str, rules: &str, references: &str, setup: &str) -> Option<LoadError> {
