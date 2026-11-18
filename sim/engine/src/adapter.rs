@@ -1,7 +1,7 @@
 //! Thin neutral-runner adapter; it only converts input and result types.
 
 mod typed;
-pub use typed::{TypedAdapter, TypedReplayAdapter};
+pub use typed::{TypedAdapter, TypedAssistAdapter, TypedReplayAdapter};
 
 use sve_scenario_runner::{EngineError, View};
 

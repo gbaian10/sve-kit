@@ -1,7 +1,7 @@
 //! Translation between the neutral architecture runner and the typed authority record.
 
-use super::{adapter, awaiting_on, decide_on};
-use crate::adapter::{core_view, error};
+use super::{adapter, decide_on, observe_on};
+use crate::adapter::error;
 use crate::catalog::SelectedEffects;
 use crate::game::Game;
 use crate::game::replay::{Replay, ReplayCheckpoint, ReplayNode};
@@ -301,23 +301,7 @@ impl ReplayEngine for TypedReplayAdapter {
     }
 
     fn observe(&self, at: &NodeId, view: View) -> Result<Observation, EngineError> {
-        let game = self.game(at)?;
-        let mut projection = game.projection(core_view(view)).map_err(error)?;
-        let awaiting = awaiting_on(game, view);
-        let knowledge = projection.get("knowledge").cloned().unwrap_or_default();
-        if let Some(fields) = projection.as_object_mut() {
-            fields.insert("awaiting".into(), awaiting.clone().unwrap_or_default());
-            if view != View::Omniscient {
-                for authority in ["legal", "flow", "continuation", "semantic_state"] {
-                    fields.remove(authority);
-                }
-            }
-        }
-        Ok(Observation {
-            projection,
-            awaiting,
-            knowledge,
-        })
+        observe_on(self.game(at)?, view)
     }
 
     fn query(&self, at: &NodeId, view: View, path: &str) -> Result<Option<Value>, EngineError> {
