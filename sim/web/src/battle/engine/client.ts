@@ -1,4 +1,6 @@
 // Main-thread side of the local battle: one channel per player seat and the hot-seat view.
+import type { Notice } from "../contract"
+import { NoticeInbox } from "../presentation/notices"
 import type {
   BattleUpdate,
   Command,
@@ -48,6 +50,7 @@ export class SeatChannel {
   readonly seat: Seat
   readonly #port: ChannelPort
   readonly #listeners = new Set<(message: SeatMessage) => void>()
+  readonly #inbox = new NoticeInbox()
   #pending:
     { id: string; resolve: (receipt: Receipt) => void; reject: (error: Error) => void } | undefined
   #sent = 0
@@ -70,6 +73,19 @@ export class SeatChannel {
   /** The host or load error that stopped interaction, if any; it never clears. */
   get stopped(): StopMessage | undefined {
     return this.#stopped
+  }
+
+  get notices(): readonly Notice[] {
+    return this.#inbox.pending()
+  }
+
+  dismissNotice(id: string): void {
+    this.#inbox.dismiss(id)
+  }
+
+  setAutoAnswer(enabled: boolean): void {
+    if (!this.#closed && this.#stopped === undefined)
+      this.#port.postMessage({ kind: "auto_answer", enabled })
   }
 
   /** Every non-receipt message, in delivery order. */
@@ -112,6 +128,7 @@ export class SeatChannel {
     this.#port.onmessage = null
     this.#port.close()
     this.#listeners.clear()
+    this.#inbox.clear()
     this.#pending?.reject(new ChannelClosedError())
     this.#pending = undefined
   }
@@ -126,6 +143,10 @@ export class SeatChannel {
       return
     }
     if (this.#stopped !== undefined) return
+    if (message.kind === "update") {
+      if (message.viewer !== this.seat) return
+      this.#inbox.receive(message.notices)
+    }
     if (message.kind === "host_error" || message.kind === "load_error") {
       // Interaction stops for good; an outstanding command will never get a receipt.
       this.#stopped = message
@@ -177,11 +198,17 @@ export function startLocalBattle(
 
 /**
  * Hot seat: the UI follows one viewer. Switching drops the old seat's state and accepts updates
- * again only after the reply to this switch's own baseline request begins.
+ * again only after the reply to this switch's own baseline request begins. Each channel keeps
+ * its own notices even while it is not the viewer. The callback's notice list is the viewer's
+ * unread queue, including notices delivered in earlier updates.
  */
 export class HotSeat {
   readonly #channels: Record<Seat, SeatChannel>
-  readonly #onChange: (viewer: Seat, update: BattleUpdate | undefined) => void
+  readonly #onChange: (
+    viewer: Seat,
+    update: BattleUpdate | undefined,
+    notices: readonly Notice[],
+  ) => void
   #viewer: Seat
   #latest: BattleUpdate | undefined
   #awaiting: string | undefined
@@ -190,7 +217,7 @@ export class HotSeat {
   constructor(
     channels: Record<Seat, SeatChannel>,
     viewer: Seat,
-    onChange: (viewer: Seat, update: BattleUpdate | undefined) => void,
+    onChange: (viewer: Seat, update: BattleUpdate | undefined, notices: readonly Notice[]) => void,
   ) {
     this.#channels = channels
     this.#viewer = viewer
@@ -218,8 +245,23 @@ export class HotSeat {
   switchTo(viewer: Seat): void {
     this.#viewer = viewer
     this.#latest = undefined
-    this.#onChange(viewer, undefined)
-    if (this.#stopped === undefined) this.#awaiting = this.#channels[viewer].baseline()
+    this.#awaiting = this.#stopped === undefined ? this.#channels[viewer].baseline() : undefined
+    this.#onChange(
+      viewer,
+      undefined,
+      this.#awaiting === undefined ? this.#channels[viewer].notices : [],
+    )
+  }
+
+  setAutoAnswer(enabled: boolean): void {
+    this.#channels[this.#viewer].setAutoAnswer(enabled)
+  }
+
+  dismissNotice(id: string): void {
+    if (this.#awaiting !== undefined) return
+    const channel = this.#channels[this.#viewer]
+    channel.dismissNotice(id)
+    this.#onChange(this.#viewer, this.#latest, channel.notices)
   }
 
   /** Commands go only through the current viewer's channel, and only while a question is shown. */
@@ -235,7 +277,7 @@ export class HotSeat {
       this.#stopped = message
       this.#awaiting = undefined
       this.#latest = undefined
-      this.#onChange(this.#viewer, undefined)
+      this.#onChange(this.#viewer, undefined, this.#channels[this.#viewer].notices)
       return
     }
     if (seat !== this.#viewer) return
@@ -246,6 +288,6 @@ export class HotSeat {
     // Anything before this switch's baseline reply was queued for the old view.
     if (message.kind !== "update" || this.#awaiting !== undefined) return
     this.#latest = message
-    this.#onChange(seat, message)
+    this.#onChange(seat, message, this.#channels[seat].notices)
   }
 }

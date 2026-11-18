@@ -5,9 +5,11 @@ import type {
   BattleObservation,
   HostError,
   HostMessage,
+  Notice,
   Question,
   Ready,
 } from "../../battle/contract"
+import { NoticeInbox } from "../../battle/presentation/notices"
 import { accept, EMPTY, type PresentationState, skip } from "../../battle/presentation/queue"
 import type { BattleSource } from "../../battle/source"
 import { place, type Placement, type SlotArrangement, UNPLACED } from "../../battle/view/table"
@@ -28,6 +30,8 @@ export interface BattleState {
   readonly input: BattleInput | null
   /** Interaction stopped for good; nothing shown may be answered. */
   readonly stopped: HostError | null
+  readonly notices: readonly Notice[]
+  readonly dismissNotice: (id: string) => void
 }
 
 interface Progress {
@@ -68,6 +72,7 @@ function step(progress: Progress, message: HostMessage, first: SlotArrangement):
 }
 
 const NOTHING_LAID: SlotArrangement = {}
+const inboxes = new WeakMap<BattleSource, NoticeInbox>()
 
 /**
  * One seat's screen state, fed by its source through the presentation queue. `first` lays the
@@ -77,15 +82,27 @@ export function useBattle(
   source: BattleSource,
   first: SlotArrangement = NOTHING_LAID,
 ): BattleState {
-  const [progress, setProgress] = useState(START)
+  const [screen, setScreen] = useState<{
+    source: BattleSource
+    progress: Progress
+    notices: readonly Notice[]
+  }>()
   useEffect(() => {
     // A source replays its messages to a new listener, so each subscription starts over.
     let current = START
+    const inbox = inboxes.get(source) ?? new NoticeInbox()
+    inboxes.set(source, inbox)
     return source.listen((message) => {
+      if (message.kind === "update") {
+        if (message.viewer !== source.seat) return
+        inbox.receive(message.notices)
+      }
       current = step(current, message, first)
-      setProgress(current)
+      setScreen({ source, progress: current, notices: inbox.pending() })
     })
   }, [source, first])
+  const shown = screen?.source === source ? screen : undefined
+  const progress = shown?.progress ?? START
   return {
     ready: progress.ready,
     board: progress.queue.board,
@@ -93,5 +110,14 @@ export function useBattle(
     question: progress.queue.question,
     input: progress.input,
     stopped: progress.stopped,
+    notices: shown?.notices ?? [],
+    dismissNotice(id) {
+      const inbox = inboxes.get(source)
+      if (inbox === undefined) return
+      inbox.dismiss(id)
+      setScreen((current) =>
+        current?.source === source ? { ...current, notices: inbox.pending() } : current,
+      )
+    },
   }
 }
