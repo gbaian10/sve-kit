@@ -2,12 +2,13 @@ use super::{
     Ability, AbilityId, Allocator, BodyContext, CardCoordinates, Located, LoweringError,
     ability_source, ast, numeric, source_span, unsupported,
 };
+use crate::ir::phase_restrictions::{Restriction, affected_player};
 use crate::ir::prevention::{holder_counter_step, opponent_controller, own_leader, projection};
 use crate::ir::{
     AbilityKind, AbilityQualification, AbilitySource, Action, Binding, Bool, Cardinality,
     DamageKind, DamageRecipient, Duration, DurationEnd, Effect, EffectDefinitionId,
     EffectReference, EventRewrite, Expr, InstallationSubjects, InstallationTime, Int, Nat,
-    ObjectOperand, OncePerEvent, PlayerRef, PlayerRelation, PlayerSet, Predicate,
+    ObjectOperand, OncePerEvent, Phase, PlayerRef, PlayerRelation, PlayerSet, Predicate,
     ProposedEventPattern, RecipientPredicate, ReplacementScope, ScopeId, Selector, SourcePredicate,
     TextQuantifier, UsageScope, UseLimit, ZoneKind,
 };
@@ -210,6 +211,9 @@ impl BodyContext<'_> {
         source: &AbilitySource,
         path: &str,
     ) -> Result<Action, LoweringError> {
+        if let ast::InstalledEffect::Cannot(ast::Cannot::RulePhase(rule)) = &value.effect {
+            return self.rule_phase_permission(value, rule.what, path);
+        }
         if matches!(value.effect, ast::InstalledEffect::PlayPermission(_)) {
             return self.player_play_permission(value, path);
         }
@@ -223,6 +227,46 @@ impl BodyContext<'_> {
         } else {
             self.player_cost(value, path)
         }
+    }
+
+    fn rule_phase_permission(
+        &mut self,
+        value: &ast::PlayerEffect,
+        rule: ast::RulePhaseAction,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let Some(ast::Until::DuringNextPhase { during_next_phase }) = &value.until else {
+            return Err(unsupported(path));
+        };
+        let player = match (&value.who, &during_next_phase.who) {
+            (ast::Side::Controller, ast::StandPlayer::Controller) => PlayerRef::Controller {},
+            (ast::Side::Opponent, ast::StandPlayer::Opponent) => {
+                super::super::events::timing::opponent()
+            }
+            _ => return Err(unsupported(path)),
+        };
+        let phase = match during_next_phase.phase {
+            ast::RuleWindowPhase::Start => Phase::Start,
+            ast::RuleWindowPhase::Main => Phase::Main,
+        };
+        let rule = match rule {
+            ast::RulePhaseAction::NormalDraw => Restriction::Draw,
+            ast::RulePhaseAction::NormalMaxPpGain => Restriction::MaximumPp,
+            ast::RulePhaseAction::PlayFollower => Restriction::FollowerPlay,
+        };
+        if phase != rule.phase() {
+            return Err(unsupported(path));
+        }
+        let players = affected_player(player.clone());
+        Ok(Action::InstallEffect {
+            subjects: InstallationSubjects::Players {
+                players: players.clone(),
+                affected: Binding::new(1, self.card_allocator.scope(path)?),
+            },
+            capture: InstallationTime::InstructionStart,
+            effect: Box::new(rule.permission(players, player.clone())),
+            duration: rule.duration(player),
+        })
     }
 
     #[expect(
@@ -473,6 +517,7 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(
                 ast::Cannot::Draw(_)
+                | ast::Cannot::RulePhase(_)
                 | ast::Cannot::Player(_)
                 | ast::Cannot::Stand(_)
                 | ast::Cannot::Attack(_)

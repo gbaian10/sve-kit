@@ -4,7 +4,7 @@ use crate::game::internal::player::CandidateLinks;
 use crate::game::player::Viewer;
 use crate::game::player::observation::{ObservedZone, viewer};
 use crate::game::player::{OrderDirection, OrderQuestion, SelectionDestination};
-use crate::ir::play_restrictions;
+use crate::ir::{phase_restrictions, play_restrictions};
 
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
@@ -79,9 +79,20 @@ pub(super) fn check_condition(condition: &Expr<Bool>, source: &SourceSpan) -> Re
     )
 }
 
-fn mask_ability_permission(node: &mut Node) -> Result<()> {
-    if let Node::Instruction { instruction } = node
-        && matches!(&instruction.action, Action::InstallEffect { effect, .. }
+fn mask_fixed_permissions(node: &mut Node) -> Result<()> {
+    let Node::Instruction { instruction } = node else {
+        return Ok(());
+    };
+    if phase_restrictions::projection(&instruction.action).is_some() {
+        // The literal card kind does not grant permission to inspect any cards.
+        instruction.action = Action::Draw {
+            player: PlayerRef::Controller {},
+            count: Expr::Literal(Int(0)),
+            mode: StepwiseMode::Exact,
+        };
+        return Ok(());
+    }
+    if matches!(&instruction.action, Action::InstallEffect { effect, .. }
             if matches!(effect.as_ref(), Effect::Permission { action: ActionPattern::PlayAbility { .. }, .. }))
     {
         super::card::ability_restrictions::check_install(&instruction.action)?;
@@ -204,7 +215,7 @@ pub(super) fn check_node_with_x(
     mask_whole_return(&mut inspected);
     mask_prevention(&mut inspected)?;
     mask_stand_subjects(&mut inspected)?;
-    mask_ability_permission(&mut inspected)?;
+    mask_fixed_permissions(&mut inspected)?;
     mask_discard(&mut inspected)?;
     mask_player_cost_filter(&mut inspected)?;
     super::random_sample::mask(&mut inspected)?;

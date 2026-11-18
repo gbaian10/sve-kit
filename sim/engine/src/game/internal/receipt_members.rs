@@ -196,6 +196,14 @@ pub(super) fn members(
     receipt: &ObjectReceipt,
     destination: Option<ZoneKind>,
 ) -> Result<Vec<MemberView>> {
+    if let ObjectReceipt::Movement {
+        receipt: MovementReceipt::Move { receipt },
+    } = receipt
+        && let ReceiptLocation::Iteration { binding } = receipt.location()
+    {
+        let outcome = execution.repeats.iteration(binding.key())?;
+        return successful_move_members(game, execution, outcome, destination);
+    }
     let id = local_receipt(receipt)?;
     if matches!(receipt, ObjectReceipt::Fusion { .. }) {
         return PaidMembers::load(execution, id, "missing Fusion payment outcome")?.fusion();
@@ -240,51 +248,60 @@ pub(super) fn members(
                 })
             })
             .collect(),
-        Some(InstructionOutcome::Move(outcome)) => outcome
-            .moved
-            .iter()
-            .filter(|movement| {
-                movement.after.is_some()
-                    && destination
-                        .is_none_or(|zone| movement.actual_to.is_some_and(|to| to.kind == zone))
-            })
-            .map(|movement| {
-                let fact = execution
-                    .facts
-                    .iter()
-                    .find_map(|fact| match fact {
-                        Fact::Movement(fact) if fact.movement == *movement => Some(fact),
-                        _ => None,
-                    })
-                    .ok_or_else(|| invalid("missing receipt movement fact"))?;
-                let information = match fact.from.kind {
-                    ZoneKind::Deck => MemberInformation::Properties(printed_card(
-                        game,
-                        execution,
-                        movement.before,
-                    )?),
-                    ZoneKind::Field
-                        if fact.method == MoveMethod::Put
-                            && movement.after.is_some_and(|after| {
-                                after.id == movement.before.id
-                                    && after.generation != movement.before.generation
-                            })
-                            && movement
-                                .actual_to
-                                .is_some_and(|to| to.kind == ZoneKind::Cemetery) =>
-                    {
-                        MemberInformation::OriginalPrinting(fact.card_before.clone())
-                    }
-                    _ => return Err(unsupported("receipt member movement origin or destination")),
-                };
-                Ok(MemberView {
-                    before: movement.before,
-                    information,
-                })
-            })
-            .collect(),
+        Some(InstructionOutcome::Move(outcome)) => {
+            successful_move_members(game, execution, outcome, destination)
+        }
         _ => Err(invalid("missing receipt member producer")),
     }
+}
+
+fn successful_move_members(
+    game: &Game,
+    execution: &Execution,
+    outcome: &MoveOutcome,
+    destination: Option<ZoneKind>,
+) -> Result<Vec<MemberView>> {
+    outcome
+        .moved
+        .iter()
+        .filter(|movement| {
+            movement.after.is_some()
+                && destination
+                    .is_none_or(|zone| movement.actual_to.is_some_and(|to| to.kind == zone))
+        })
+        .map(|movement| {
+            let fact = execution
+                .facts
+                .iter()
+                .find_map(|fact| match fact {
+                    Fact::Movement(fact) if fact.movement == *movement => Some(fact),
+                    _ => None,
+                })
+                .ok_or_else(|| invalid("missing receipt movement fact"))?;
+            let information = match fact.from.kind {
+                ZoneKind::Deck => {
+                    MemberInformation::Properties(printed_card(game, execution, movement.before)?)
+                }
+                ZoneKind::Field
+                    if fact.method == MoveMethod::Put
+                        && movement.after.is_some_and(|after| {
+                            after.id == movement.before.id
+                                && after.generation != movement.before.generation
+                        })
+                        && movement
+                            .actual_to
+                            .is_some_and(|to| to.kind == ZoneKind::Cemetery) =>
+                {
+                    MemberInformation::OriginalPrinting(fact.card_before.clone())
+                }
+                _ => return Err(unsupported("receipt member movement origin or destination")),
+            };
+            Ok(MemberView {
+                before: movement.before,
+                information,
+            })
+        })
+        .collect()
 }
 
 fn moved_deck_members(

@@ -56,6 +56,7 @@ mod played;
 mod quota;
 mod race;
 mod subject;
+mod targeted;
 mod timing;
 pub(in crate::game::internal) use quota::Admission;
 pub use quota::{QuotaDomain, QuotaSelection};

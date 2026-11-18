@@ -584,6 +584,11 @@ class CannotDealDamageFields(TypedDict):
 type CannotDealDamage = CannotDealDamageFields
 
 
+@with_config(CONFIG)
+class CannotRulePhase(TypedDict):
+    what: Literal["normal_draw", "normal_max_pp_gain", "play_follower"]
+
+
 type Cannot = (
     CannotPlayCard
     | CannotPlayAbility
@@ -594,6 +599,7 @@ type Cannot = (
     | CannotStand
     | CannotPlayer
     | CannotDealDamage
+    | CannotRulePhase
 )
 
 

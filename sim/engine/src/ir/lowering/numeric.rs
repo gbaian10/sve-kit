@@ -49,7 +49,11 @@ pub(super) fn distinct_count(
 pub(super) fn duration(until: Option<&ast::Until>, path: &str) -> Result<Duration, LoweringError> {
     Ok(Duration {
         end: match until {
-            Some(ast::Until::NextPhase { .. } | ast::Until::DuringNextTurn { .. }) => {
+            Some(
+                ast::Until::NextPhase { .. }
+                | ast::Until::DuringNextTurn { .. }
+                | ast::Until::DuringNextPhase { .. },
+            ) => {
                 return Err(unsupported(path));
             }
             None | Some(ast::Until::Game) => DurationEnd::NoTemporalExpiry {},
@@ -251,6 +255,9 @@ impl BodyContext<'_> {
         objects: &ast::Objects,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        if let ast::Objects::Follow { follow } = objects {
+            return self.followed(follow, path);
+        }
         if let ast::Objects::Zone(query) = objects
             && matches!(query.r#where, Some(ast::ObjectQueryWhere::Damaged(_)))
         {
@@ -562,6 +569,7 @@ impl BodyContext<'_> {
             }
             ast::InstalledEffect::Cannot(
                 ast::Cannot::Draw(_)
+                | ast::Cannot::RulePhase(_)
                 | ast::Cannot::Player(_)
                 | ast::Cannot::Removal(_)
                 | ast::Cannot::DealDamage(_),

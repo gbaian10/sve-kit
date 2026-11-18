@@ -704,6 +704,9 @@ impl Allocator {
             payment::record_discard(&mut context, &name, receipt, bounds, path)?;
         }
         let guard = context.activation_qualification(entry.activate.as_ref(), path)?;
+        let body_path = format!("{path}/{head}");
+        let early_payment =
+            context.declare_material_count(body, &source, &ability_source, &body_path)?;
         let trigger_choice = context.prepare_parameters(
             body,
             path,
@@ -713,8 +716,10 @@ impl Allocator {
             play_target_cost::record(&mut context, body, &source);
         }
         let triggered_play = play::trigger_play_spec(entry, body, trigger_choice);
-        let optional =
-            context.optional_payment(body, &source, &ability_source, &format!("{path}/{head}"))?;
+        let optional = match early_payment {
+            Some(payment) => Some(payment),
+            None => context.optional_payment(body, &source, &ability_source, &body_path)?,
+        };
         let events = head_events(entry);
         if events.self_entry {
             context.entry_event = Some(Binding::new(context.allocator.id(path)?, scope));
@@ -1129,6 +1134,17 @@ fn lowered_subscription(
                 predicate: super::dice::predicate(binding),
             })
         }
+        ast::PhaseSubscription::Targeted(subscription) => {
+            let ast::This::This = subscription.reference;
+            let binding = Binding::new(event_id, scope);
+            Ok(EventPattern::Targeted {
+                binding,
+                predicate: super::events::timing::targeted_predicate(
+                    binding,
+                    subscription.during.is_some(),
+                ),
+            })
+        }
         ast::PhaseSubscription::Equipped(_) => {
             let binding = Binding::new(event_id, scope);
             Ok(EventPattern::Equip {
@@ -1364,7 +1380,8 @@ fn lowered_change(
         | ast::PhaseSubscription::LifeChanged(_)
         | ast::PhaseSubscription::Equipped(_)
         | ast::PhaseSubscription::DiceRolled(_)
-        | ast::PhaseSubscription::Banished(_) => Err(unsupported(path)),
+        | ast::PhaseSubscription::Banished(_)
+        | ast::PhaseSubscription::Targeted(_) => Err(unsupported(path)),
     }
 }
 
@@ -1516,6 +1533,7 @@ enum ChoiceContext {
 
 struct BodyContext<'definitions> {
     x: Option<x_pp::Parameter>,
+    declared_material: Option<(String, Binding<Selector>)>,
     static_zone: Option<ZoneKind>,
     source_stats: SourceStats,
     /// Only an activation printed in the hand may move its own card to EX as a cost.
@@ -1598,6 +1616,7 @@ impl<'definitions> BodyContext<'definitions> {
     ) -> Self {
         Self {
             x: None,
+            declared_material: None,
             spell: entry.spell.as_ref(),
             source_stats: if entry.r#static.is_some() {
                 SourceStats::Current

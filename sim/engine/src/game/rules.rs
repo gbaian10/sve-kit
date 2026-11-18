@@ -871,6 +871,7 @@ impl Game {
         self.internal_delayed_end_turn(turn);
         self.internal_player_play_end_turn(turn);
         self.internal_preventions_end_turn(turn);
+        self.internal_phase_restrictions_end_turn();
         self.expire_effects()?;
         let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);

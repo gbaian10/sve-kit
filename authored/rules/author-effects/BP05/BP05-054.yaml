@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-054:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [storm]
+      - line: 2
+        fanfare:
+          do:
+            - repeat:
+                check: after
+                while:
+                  cmp:
+                    left:
+                      count:
+                        in: { objects_of: milled, view: before }
+                        name: 魔導電磁サイ
+                    op: gt
+                    right: 0
+                do:
+                  - buff: { "on": this, power: 3 }
+                  - move:
+                      top: { who: self, n: 4 }
+                      to: cemetery
+                      result: milled
+      - line: 3
+        lastword:
+          do:
+            - choose:
+                from: { who: self, zone: cemetery, name: 魔導電磁サイ }
+                bind: returned
+                any: true
+            - move: { ref: returned, to: deck }
+            - shuffle: { who: self }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

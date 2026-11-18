@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-071:
+    admission: light
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - look:
+                top: { who: self, n: 7 }
+                bind: seen
+            - choose:
+                from: { in: seen, kind: follower, class: ナイトメア, orig_cost_le: 6 }
+                bind: picked
+                upto: 4
+                distinct_by: name
+            - move: { ref: picked, to: field, result: entered }
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in: { objects_of: entered, view: before }
+                to: deck
+                position: bottom
+                order: chooser
+            - destroy: { follow: entered }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

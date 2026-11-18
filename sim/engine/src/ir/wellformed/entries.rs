@@ -967,6 +967,7 @@ impl Checker {
             | ActionPattern::ChooseMode { .. }
             | ActionPattern::Win { .. }
             | ActionPattern::Lose { .. }
+            | ActionPattern::PlayCardKind { .. }
             | ActionPattern::TriggerAdmission { .. } => self.reject(),
         }
     }

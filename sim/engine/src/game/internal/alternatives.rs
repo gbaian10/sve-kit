@@ -128,7 +128,7 @@ impl Game {
         else {
             return Err(unsupported("resolution alternative domain"));
         };
-        if chosen.actor != (PlayerRef::Controller {})
+        if !participant(&chosen.actor)
             || chosen.visibility != (Visibility::Public {})
             || chosen.kind
                 != (ModeDecisionKind::ResolutionChoice {

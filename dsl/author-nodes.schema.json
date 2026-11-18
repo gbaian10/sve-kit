@@ -8918,6 +8918,9 @@
         },
         "by": {
           "$ref": "#/$defs/A.event-by"
+        },
+        "during": {
+          "$ref": "#/$defs/A.during"
         }
       },
       "type": "object"
@@ -14054,6 +14057,22 @@
       ],
       "type": "object"
     },
+    "A.effect.cannot.rule-phase": {
+      "type": "object",
+      "properties": {
+        "what": {
+          "enum": [
+            "normal_draw",
+            "normal_max_pp_gain",
+            "play_follower"
+          ]
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "additionalProperties": false
+    },
     "A.effect.cannot": {
       "anyOf": [
         {
@@ -14079,6 +14098,9 @@
         },
         {
           "$ref": "#/$defs/A.effect.cannot.player"
+        },
+        {
+          "$ref": "#/$defs/A.effect.cannot.rule-phase"
         },
         {
           "$ref": "#/$defs/A.effect.cannot.deal-damage"

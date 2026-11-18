@@ -10,7 +10,7 @@ use crate::ir::{
     Binding, Bool, Capture, CharacteristicPatch, CharacteristicView, ClassRead, Comparison, Expr,
     Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt, NamesRead, NumberRead,
     NumericChange, ObjectProperty, ObjectReceipt, ObjectView, Predicate, ReceiptId,
-    RuntimeObjectView, TraitsRead,
+    ReceiptLocation, RuntimeObjectView, TraitsRead,
 };
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
@@ -42,7 +42,12 @@ fn check_shape(
     member: Binding<RuntimeObjectView>,
     predicate: &Expr<Bool>,
 ) -> Result<()> {
-    local_receipt(receipt)?;
+    if !matches!(receipt,
+        ObjectReceipt::Movement { receipt: MovementReceipt::Move { receipt } }
+            if matches!(receipt.location(), ReceiptLocation::Iteration { .. }))
+    {
+        local_receipt(receipt)?;
+    }
     if projection != MemberProjection::Before {
         return Err(unsupported("receipt member projection"));
     }
@@ -346,7 +351,15 @@ pub(super) fn any(
     predicate: &Expr<Bool>,
 ) -> Result<bool> {
     check_shape(receipt, projection, member, predicate)?;
-    let members = members(game, execution, receipt, None)?;
+    let destination = match receipt {
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Move { receipt },
+        } if matches!(receipt.location(), ReceiptLocation::Iteration { .. }) => {
+            Some(ZoneKind::Cemetery)
+        }
+        _ => None,
+    };
+    let members = members(game, execution, receipt, destination)?;
     for view in &members {
         let card = view.card();
         if matches(predicate, member, card, Some((game, execution, view)))? {

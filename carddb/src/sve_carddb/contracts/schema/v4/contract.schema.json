@@ -33909,6 +33909,9 @@
           "$ref": "#/$defs/DSLNodes.A.effect.cannot.player"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.effect.cannot.rule-phase"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.effect.cannot.deal-damage"
         }
       ]
@@ -34125,6 +34128,22 @@
         "what"
       ],
       "type": "object"
+    },
+    "DSLNodes.A.effect.cannot.rule-phase": {
+      "type": "object",
+      "properties": {
+        "what": {
+          "enum": [
+            "normal_draw",
+            "normal_max_pp_gain",
+            "play_follower"
+          ]
+        }
+      },
+      "required": [
+        "what"
+      ],
+      "additionalProperties": false
     },
     "DSLNodes.A.effect.cannot.stand": {
       "additionalProperties": false,
@@ -36615,6 +36634,9 @@
         },
         "by": {
           "$ref": "#/$defs/DSLNodes.A.event-by"
+        },
+        "during": {
+          "$ref": "#/$defs/DSLNodes.A.during"
         }
       },
       "type": "object"

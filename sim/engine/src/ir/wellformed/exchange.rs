@@ -167,6 +167,8 @@ impl Checker {
                     && step.keyword == Some(KeywordId::EarthRite));
         let valid = flip_cost::payment(&step.instruction.action, decision)
             || earth_rite
+            || matches!(&step.instruction.action, Action::Reveal { objects }
+                if *zone == ZoneKind::Hand && *objects == selected)
             || matches!(&step.instruction.action,
             Action::Move { objects, movement, reason: MoveReason::Put }
                 if *zone == ZoneKind::Field && *objects == selected

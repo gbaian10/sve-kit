@@ -18,14 +18,14 @@ use crate::ir::material_sets;
 use crate::ir::quick::is_printed_quick;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::x_pp as x_payment;
-use crate::ir::{choice_rules, optional_payment};
+use crate::ir::{choice_rules, optional_payment, public_numbers};
 
 use crate::ir::{
     AbilityCostPolicy, DiscardMode, FaceId, PaymentResult, PlayCostPayment, RuntimeReceiptId,
 };
 use crate::ir::{
-    AbilityKind, AbilityQualification, Action, Bool, Cardinality, LimitSpec, ModeUse, ObjectId,
-    ObjectOperand, ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet,
+    AbilityKind, AbilityQualification, Action, Binding, Bool, Cardinality, LimitSpec, ModeUse,
+    ObjectId, ObjectOperand, ObjectRef, PaymentTime, PlaySpec, PlayerRef, ReceiptId, RecipientSet,
     SelectionSnapshot, Selector, TargetRoleAnswer, TurnId,
 };
 use crate::ir::{
@@ -226,9 +226,7 @@ impl PlayState {
             // Cost materials of every selected mode follow all formal targets (R-0006).
             // Without mode merging, additional-cost materials retain their earlier question.
             if !self.groups.is_empty() {
-                self.parameters
-                    .make_contiguous()
-                    .sort_by_key(super::material::is_parameter);
+                order_parameters(self.parameters.make_contiguous());
             }
             // The first target fixes the game view; later answers only extend immutable slots.
             self.snapshot_id = SnapshotId(game.state.ir_epoch);
@@ -381,7 +379,7 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
         return Err(unsupported("X with modes or Quick"));
     }
     check_overlapping_mode_materials(play, &groups)?;
-    parameters.sort_by_key(super::material::is_parameter);
+    order_parameters(&mut parameters);
     check_parameters(&parameters)?;
     let mut steps = play
         .captures
@@ -505,9 +503,48 @@ fn check_private_mode_cost(ability: &Ability, mode: &Mode) -> Result<()> {
     Ok(())
 }
 
+fn material_dependency(decision: &Decision) -> Option<Binding<Selector>> {
+    let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
+        return None;
+    };
+    constraint
+        .aggregate_bounds
+        .iter()
+        .find_map(|bound| public_numbers::material_target_limit(&bound.value))
+}
+
+fn material_dependencies(parameters: &[Decision]) -> BTreeSet<(ScopeId, u64)> {
+    parameters
+        .iter()
+        .filter_map(material_dependency)
+        .map(Binding::key)
+        .collect()
+}
+
+fn order_parameters(parameters: &mut [Decision]) {
+    let dependencies = material_dependencies(parameters);
+    parameters.sort_by_key(|decision| {
+        if x_payment::parameter(decision).is_some() {
+            0_u8
+        } else if super::material::is_parameter(decision) {
+            if matches!(&decision.domain, ChoiceDomain::Objects { binding, .. }
+                if dependencies.contains(&binding.key()))
+            {
+                1_u8
+            } else {
+                3_u8
+            }
+        } else {
+            2_u8
+        }
+    });
+}
+
 fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut distribution = false;
-    let mut material = false;
+    let mut late_material = false;
+    let dependencies = material_dependencies(parameters);
+    let mut public_materials = BTreeSet::new();
     let mut targets = BTreeSet::new();
     let mut declarations = true;
     for decision in parameters {
@@ -520,11 +557,21 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
         declarations = false;
         if super::material::is_parameter(decision) {
             super::material::check_parameter(decision)?;
-            material = true;
+            if decision.visibility == (Visibility::Public {})
+                && let ChoiceDomain::Objects { binding, .. } = &decision.domain
+            {
+                public_materials.insert(binding.key());
+                late_material |= !dependencies.contains(&binding.key());
+            } else {
+                late_material = true;
+            }
             continue;
         }
-        if material {
-            return Err(unsupported("targets must precede materials"));
+        if late_material
+            || material_dependency(decision)
+                .is_some_and(|binding| !public_materials.contains(&binding.key()))
+        {
+            return Err(unsupported("target and material declaration order"));
         }
         match (&decision.kind, &decision.domain) {
             (
@@ -545,8 +592,7 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
                     for group in &constraint.groups {
                         super::selection::field_selector(&group.selector)?;
                     }
-                }
-                if target_roles.is_none() {
+                } else {
                     targets.insert(binding.key());
                 }
             }
@@ -1769,6 +1815,7 @@ impl Game {
     }
 
     fn finish_play_payment(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
+        let targets = self.internal_targeted_occurrences(execution)?;
         enter_play_phase(execution, PlayPhase::Pay)?;
         let consumed = if execution.spell || execution.field_entry {
             self.internal_matching_player_costs(execution)?
@@ -1802,6 +1849,7 @@ impl Game {
         self.card_runtime.active_source = previous;
         payment?;
         self.internal_consume_player_costs(&consumed);
+        self.internal_commit_targeted(targets)?;
         if execution.field_entry {
             return Ok(());
         }

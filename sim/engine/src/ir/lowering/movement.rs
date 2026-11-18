@@ -122,7 +122,8 @@ pub(super) fn subscription(
         | ast::PhaseSubscription::DiceRolled(_)
         | ast::PhaseSubscription::Banished(_)
         | ast::PhaseSubscription::LifeChanged(_)
-        | ast::PhaseSubscription::Equipped(_) => Err(unsupported(path)),
+        | ast::PhaseSubscription::Equipped(_)
+        | ast::PhaseSubscription::Targeted(_) => Err(unsupported(path)),
     }
 }
 

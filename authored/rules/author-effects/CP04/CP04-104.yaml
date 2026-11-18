@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP04-104:
+    admission: light
+    abilities:
+      - line: 1
+        evolve_time:
+          ub: true
+          cost:
+            act:
+              sel: { who: self, zone: field, kind: amulet }
+              any: true
+              result: amulets
+          targets:
+            - bind: enemies
+              from: { who: opp, zone: field, kind: follower }
+              upto: { count_of: amulets }
+          do:
+            - damage: { to: enemies, n: 2 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

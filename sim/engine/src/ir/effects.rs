@@ -91,7 +91,7 @@ tags!(Polarity {
     Require
 });
 variants!(ActionPattern {
-    PlayCard { objects: Selector } => [], PlayAbility { predicate: AbilityPredicate } => [],
+    PlayCard { objects: Selector } => [], PlayCardKind { kind: CardKind } => [], PlayAbility { predicate: AbilityPredicate } => [],
     Attack { attacker: Selector, target: Option<RecipientSet> } => [],
     ChooseTarget { objects: Selector } => [], Draw { player: PlayerRef } => [],
     Destroy { objects: Selector, cause: CausePattern } => [], Banish { objects: Selector, cause: CausePattern } => [],

@@ -30,7 +30,7 @@ use core::num::NonZeroU64;
 use serde_json::Value;
 
 use crate::ir::events::timing::{
-    attack_predicate, evolve_predicate, opponent, phase_predicate, second_header,
+    attack_predicate, evolve_predicate, opponent, phase_predicate, second_header, targeted_filter,
 };
 
 use crate::game::internal::grant::EffectiveAbility;
@@ -42,7 +42,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     if fusion::has_phase(ability) {
         return super::fusion::check_header(ability);
     }
-    let admitted = if super::evolution::observer_filter(ability).is_some() {
+    let admitted = if observes_printed_event(ability) {
         true
     } else if let Some(valid) = second_header(ability) {
         valid
@@ -138,6 +138,10 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
+fn observes_printed_event(ability: &Ability) -> bool {
+    super::evolution::observer_filter(ability).is_some() || targeted_filter(ability).is_some()
+}
+
 fn timing_zone_allowed(ability: &Ability, trigger: &TriggerSpec) -> bool {
     trigger.active_zones == [ZoneKind::Field]
         || super::phase_in_zone(ability, ZoneKind::Ex)
@@ -201,6 +205,7 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
             "Move deck to cemetery of player {} at field slot {position}",
             event.from.player.seat
         )),
+        Event::Targeted { .. } => Ok(format!("Targeted at field slot {position}")),
         Event::Attack { event } => Ok(format!(
             "Attack {} from field slot {position}",
             event.ordinal.0

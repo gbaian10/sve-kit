@@ -48,7 +48,9 @@ use crate::ir::{Bool, DamageEvent, Expr, Int, ObjectRef};
 use crate::ir::{EventPattern, TriggerCondition, TriggerSpec};
 use crate::ir::{NumericChange, play_restrictions};
 use crate::ir::{PlayerRef, PlayerStage, RepeatBody, Selector};
-use crate::ir::{advance_entry, effect_evolution, prevention, printed_keywords};
+use crate::ir::{
+    advance_entry, effect_evolution, phase_restrictions, prevention, printed_keywords,
+};
 use alloc::collections::BTreeSet;
 use alloc::sync::Arc;
 use core::num::NonZeroU32;
@@ -446,8 +448,7 @@ fn check_requirements(
                             || (card && play_requirement(requirement.capability.code))
                             || (matches!(
                                 requirement.capability.code,
-                                "shape.PermissionSubject.Players"
-                                    | "shape.ActionPattern.PlayCard"
+                                "shape.ActionPattern.PlayCard"
                                     | "internal.Polarity.Allow"
                                     | "internal.ZoneKind.Evolve"
                                     | "shape.AbilityOrigin.Keyword"
@@ -459,6 +460,7 @@ fn check_requirements(
                                     | "shape.ObjectFrozen.DriveCheckedHolder"
                                     | "shape.ObjectFrozen.AttackAttacker"
                                     | "shape.ObjectFrozen.EvolveSubject"
+                                    | "shape.ObjectFrozen.TargetedObject"
                                     | "shape.ObjectFrozen.DestroyObjectBefore"
                                     | "shape.ObjectFrozen.LeaveFieldObjectBefore"
                                     | "shape.IntFrozen.DamageAmount"
@@ -613,6 +615,9 @@ fn check_action(
     super::declaration::check(action)?;
     super::victory::check_action(action, source)?;
     super::scheduled_turn::check_action(action)?;
+    if phase_restrictions::projection(action).is_some() {
+        return Ok(());
+    }
     if let Action::InstallEffect { effect, .. } = action
         && matches!(effect.as_ref(), Effect::Replacement { .. })
     {
@@ -1174,12 +1179,19 @@ fn supported(code: &str) -> bool {
             | "read.cost"
             | "effect.permission"
             | "shape.PermissionSubject.Objects"
+            | "shape.PermissionSubject.Players"
+            | "shape.ActionPattern.Draw"
+            | "shape.ActionPattern.PlayCardKind"
+            | "shape.ActionPattern.IncreasePpMaximum"
             | "shape.ActionPattern.Attack"
             | "shape.ActionPattern.Stand"
             | "shape.StandScope.RuleStart"
             | "shape.DurationEnd.NextPhaseEdge"
             | "duration.next-phase-edge"
+            | "shape.Interval.DuringNextPhase"
+            | "duration.next-phase-interval"
             | "internal.Phase.Start"
+            | "internal.Phase.Main"
             | "internal.Edge.End"
             | "shape.ActionPattern.Destroy"
             | "shape.CausePattern.Effect"
@@ -1251,6 +1263,7 @@ fn supported(code: &str) -> bool {
             | "internal.TextQuantifier.One"
             | "cardinality.bounded"
             | "cardinality.unbounded"
+            | "event.match.Targeted"
             | "shape.Expr.Literal"
             | "shape.Expr.Bound"
             | "shape.Expr.Captured"
@@ -1373,6 +1386,7 @@ fn supported(code: &str) -> bool {
             | "shape.MeasuredReceipt.Counters"
             | "internal.QuantityUnit.Cards"
             | "receipt.local"
+            | "receipt.iteration"
             | "decision.input"
             | "shape.ChoiceDomain.Integer"
             | "shape.ChoiceDomain.Distribution"

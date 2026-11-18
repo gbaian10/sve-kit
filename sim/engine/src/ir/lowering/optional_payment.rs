@@ -1,7 +1,7 @@
 use super::{AbilitySource, BodyContext, Located, LoweringError, Node, SourceSpan, ast, payment};
 use crate::ir::{
-    Action, Control, CostSpec, Decision, PaymentOptionality, PaymentTime, PlayerRef, Program,
-    ReceiptId,
+    Action, Cardinality, ChoiceDomain, Control, CostSpec, Decision, DecisionKind, Declinable, Nat,
+    PaymentOptionality, PaymentTime, PlayerRef, Program, ReceiptId,
 };
 use core::slice;
 
@@ -22,14 +22,19 @@ impl BodyContext<'_> {
         source: &SourceSpan,
         origin: &AbilitySource,
     ) -> Result<Located<Node>, LoweringError> {
-        if self.auto.is_none() {
-            return Err(super::unsupported(path));
-        }
         let payer = self.participant(payment.who.as_ref(), path)?;
         let operations = match &payment.cost {
             ast::Cost::Short(operation) => slice::from_ref(operation.as_ref()),
             ast::Cost::Ordered { steps } => steps.as_slice(),
         };
+        if payer == (PlayerRef::Controller {})
+            && matches!(operations, [ast::CostOperation::EarthRite(_)])
+        {
+            return self.resolution_earth_rite(payment, path, source, origin);
+        }
+        if self.auto.is_none() {
+            return Err(super::unsupported(path));
+        }
         // A fixed positive PP amount is the payer's own resource, so any player may pay it.
         let player_pp =
             matches!(operations, [ast::CostOperation::Pp(ast::PpAmount::Literal(n))] if *n > 0);
@@ -71,6 +76,72 @@ impl BodyContext<'_> {
         ))
     }
 
+    fn resolution_earth_rite(
+        &mut self,
+        payment: &ast::ModePayment,
+        path: &str,
+        source: &SourceSpan,
+        origin: &AbilitySource,
+    ) -> Result<Located<Node>, LoweringError> {
+        let scope = self.scope;
+        let sequence = self.card_allocator.scope(path)?;
+        self.scope = sequence;
+        let mut play = payment::lower(self, &payment.cost, origin, path)?;
+        let Some(mut choice) = play.parameters.pop() else {
+            return Err(super::unsupported(path));
+        };
+        let ChoiceDomain::Objects { constraint, .. } = &mut choice.domain else {
+            return Err(super::unsupported(path));
+        };
+        let [group] = constraint.groups.as_mut_slice() else {
+            return Err(super::unsupported(path));
+        };
+        let cardinality = Cardinality {
+            minimum: Nat(0),
+            maximum: Some(Nat(1)),
+        };
+        constraint.cardinality = cardinality;
+        group.cardinality = cardinality;
+        choice.kind = DecisionKind::ResolutionChoice {
+            may: Declinable::Required,
+            cardinality,
+            precondition: None,
+        };
+        self.scope = self.card_allocator.scope(path)?;
+        let on_paid = self.steps(&payment.steps, path, source, origin)?;
+        self.scope = scope;
+        let receipt = ReceiptId(self.card_allocator.id(path)?);
+        if let Some(result) = &payment.result {
+            self.bind_payment(result, receipt, path)?;
+        }
+        let settle = Self::located_step(
+            source,
+            path,
+            Node::Control {
+                control: Control::Pay {
+                    at: PaymentTime::ResolutionChoice,
+                    costs: play.costs,
+                    optional: PaymentOptionality::Required,
+                    on_paid,
+                    receipt,
+                },
+            },
+        );
+        let choose = Self::located_step(source, path, Node::Decision { decision: choice });
+        Ok(Self::located_step(
+            source,
+            path,
+            Node::Control {
+                control: Control::Sequence {
+                    body: Program {
+                        scope: sequence,
+                        steps: vec![choose, settle],
+                    },
+                },
+            },
+        ))
+    }
+
     fn bind_payment(
         &mut self,
         name: &str,
@@ -85,6 +156,46 @@ impl BodyContext<'_> {
             return Err(super::unsupported(path));
         }
         Ok(())
+    }
+
+    pub(super) fn declare_material_count(
+        &mut self,
+        body: &ast::Body,
+        source: &SourceSpan,
+        origin: &AbilitySource,
+        path: &str,
+    ) -> Result<Option<PaymentDeclaration>, LoweringError> {
+        let Some(ast::Cost::Short(operation)) = &body.head_cost else {
+            return Ok(None);
+        };
+        let ast::CostOperation::Act(material) = operation.as_ref() else {
+            return Ok(None);
+        };
+        let Some(name) = &material.result else {
+            return Ok(None);
+        };
+        let has_dependent_target = body.targets.iter().any(|target| {
+            matches!(&target.upto, Some(ast::NumericArgument::Expression(argument))
+                if argument.get("count_of").and_then(serde_json::Value::as_str) == Some(name))
+        });
+        if !has_dependent_target {
+            return Ok(None);
+        }
+        let mut payment = self
+            .optional_payment(body, source, origin, path)?
+            .ok_or_else(|| super::unsupported(path))?;
+        let [
+            Decision {
+                domain: ChoiceDomain::Objects { binding, .. },
+                ..
+            },
+        ] = payment.parameters.as_slice()
+        else {
+            return Err(super::unsupported(path));
+        };
+        self.declared_material = Some((name.clone(), *binding));
+        self.parameters.append(&mut payment.parameters);
+        Ok(Some(payment))
     }
 
     pub(super) fn optional_payment(

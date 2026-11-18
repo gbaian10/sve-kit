@@ -668,8 +668,14 @@ fn evaluated_counts(
     }
     let mut constraint = printed.clone();
     if let [bound] = constraint.aggregate_bounds.as_slice() {
-        let count =
-            Nat(u64::try_from(execution.integer(game, &bound.value)?.0.max(0)).map_err(invalid)?);
+        let count = if let Some(binding) = public_numbers::material_target_limit(&bound.value) {
+            let Some(Slot::Objects { members, .. }) = execution.slots.get(&binding.key()) else {
+                return Err(invalid("missing declared material count"));
+            };
+            Nat(u64::try_from(members.len()).map_err(invalid)?)
+        } else {
+            Nat(u64::try_from(execution.integer(game, &bound.value)?.0.max(0)).map_err(invalid)?)
+        };
         let cardinality = Cardinality {
             minimum: if bound.comparison == Comparison::Equal {
                 count
@@ -1725,6 +1731,19 @@ impl Game {
             .front()
             .ok_or_else(|| invalid("missing target restart"))?;
         if super::material::is_parameter(first) {
+            return self.internal_feasible_targets(
+                execution,
+                slots,
+                &parameters.iter().skip(1).cloned().collect(),
+            );
+        }
+        if let ChoiceDomain::Objects { constraint, .. } = &first.domain
+            && constraint.aggregate_bounds.iter().any(|bound| {
+                public_numbers::material_target_limit(&bound.value)
+                    .is_some_and(|binding| !slots.contains_key(&binding.key()))
+            })
+        {
+            // An up-to limit always admits an empty target selection before payment is declared.
             return self.internal_feasible_targets(
                 execution,
                 slots,

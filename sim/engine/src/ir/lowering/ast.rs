@@ -1147,6 +1147,24 @@ pub(super) enum Until {
     NextPhase {
         next_phase: PhaseEdge,
     },
+    #[serde(untagged)]
+    DuringNextPhase {
+        during_next_phase: RulePhaseInterval,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RulePhaseInterval {
+    pub who: StandPlayer,
+    pub phase: RuleWindowPhase,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RuleWindowPhase {
+    Start,
+    Main,
 }
 
 #[derive(Deserialize)]
@@ -2082,8 +2100,7 @@ pub(super) enum ModeCap {
 #[serde(deny_unknown_fields)]
 pub(super) struct Either {
     pub options: Vec<Vec<Step>>,
-    #[serde(rename = "who")]
-    pub _who: Option<SelfPlayer>,
+    pub who: Option<LeaderSide>,
     pub bind: Option<String>,
 }
 
@@ -2521,6 +2538,8 @@ pub(super) enum PhaseSubscription {
     AnyOf(Vec<Self>),
     #[serde(rename = "equipped")]
     Equipped(EquippedSubscription),
+    #[serde(rename = "targeted")]
+    Targeted(TargetedSubscription),
     #[serde(rename = "drew")]
     Drew(DrawSubscription),
     #[serde(rename = "drive_checked")]
@@ -2567,6 +2586,14 @@ pub(super) enum PhaseSubscription {
     Stood(PostureSubscription),
     #[serde(rename = "stat_changed")]
     StatChanged(StatSubscription),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct TargetedSubscription {
+    #[serde(rename = "ref")]
+    pub reference: This,
+    pub during: Option<During>,
 }
 
 #[derive(Deserialize)]
@@ -3153,6 +3180,7 @@ pub(super) struct OptionalCost {
     pub earth_rite: Option<u64>,
     pub one_of: Option<Vec<Self>>,
     pub discard: Option<HandMaterial>,
+    pub reveal: Option<HandMaterial>,
     pub to_cemetery: Option<Material>,
     pub banish: Option<Material>,
     pub act: Option<Material>,
@@ -3818,12 +3846,27 @@ pub(super) struct StaticGrant {
 #[serde(untagged)]
 pub(super) enum Cannot {
     Draw(CannotDraw),
+    RulePhase(CannotRulePhase),
     Player(CannotPlayer),
     PlayAbility(CannotPlayAbility),
     Removal(CannotRemoval),
     Stand(CannotStand),
     DealDamage(CannotDealDamage),
     Attack(Box<CannotAttack>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CannotRulePhase {
+    pub what: RulePhaseAction,
+}
+
+#[derive(Clone, Copy, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum RulePhaseAction {
+    NormalDraw,
+    NormalMaxPpGain,
+    PlayFollower,
 }
 
 #[derive(Deserialize)]

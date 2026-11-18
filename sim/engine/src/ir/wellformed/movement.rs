@@ -403,7 +403,7 @@ impl Checker {
         movement_dispatch!(receipt, MovementReceipt, receipt => {
             match receipt.location() {
                 ReceiptLocation::Local { id } => self.visible_object(self.env.movement_before_access.get(id)),
-                ReceiptLocation::Iteration { .. } => self.reject(),
+                ReceiptLocation::Iteration { binding } => self.visible_object(self.env.access.get(&binding.key())),
             }
         }; trigger => self.reject())
     }

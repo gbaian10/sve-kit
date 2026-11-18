@@ -477,13 +477,18 @@ impl Checker {
     ) -> Checked {
         for (index, bound) in bounds.iter().enumerate() {
             self.at(&format!("aggregate_bounds/{index}"), |checker| {
+                let declared_material = formal_targets
+                    && bound.comparison == super::super::Comparison::LessEqual
+                    && public_numbers::material_target_limit(&bound.value).is_some();
                 let history_limit = bound.property == NumericProperty::Count
                     && formal_targets
                     && !public_numbers::check(&bound.value)
+                    && !declared_material
                     && public_numbers::target_count(&bound.value, bound.comparison);
                 if bound.property == NumericProperty::Count
                     && !public_numbers::check(&bound.value)
                     && !history_limit
+                    && !declared_material
                 {
                     return checker.reject();
                 }
