@@ -58,6 +58,13 @@ impl Game {
         holder: &str,
         actor: PlayerId,
     ) -> Result<bool> {
+        if self.internal_phase_restricted(seat_name(actor)?, "play_follower")
+            && self.face(holder)?["card_type"]
+                .as_str()
+                .is_some_and(|kind| kind.contains("フォロワー"))
+        {
+            return Ok(true);
+        }
         self.internal_card_play_rule_matches(holder, actor, true)
     }
 

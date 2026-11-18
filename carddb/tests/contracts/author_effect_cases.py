@@ -44,6 +44,7 @@ EFFECT_NAMES = {
     "A.effect.cannot.draw-not-phase": "DrawNotPhase",
     "A.effect.cannot.draw-rule-phase": "DrawRulePhase",
     "A.effect.cannot.stand-rule-phase": "StandRulePhase",
+    "A.effect.cannot.rule-phase": "CannotRulePhase",
     "A.effect.cannot.play-card": "CannotPlayCard",
     "A.effect.cannot.play-ability": "CannotPlayAbility",
     "A.effect.cannot.attack": "CannotAttack",

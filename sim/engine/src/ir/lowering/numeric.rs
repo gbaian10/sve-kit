@@ -1,13 +1,13 @@
 use super::super::{
     CharacteristicPatch, ContinuousLayer, Duration, DurationEnd, Effect, EffectDefinitionId,
-    EffectReference, EffectTarget, ExecutionRef, InstallationSubjects, InstallationTime, Interval,
-    NumericChange, ObjectRef, ObjectView, RemoveScope, Resource, ResourceOperation, Stat,
-    TimeAnchor, TimestampBasis, TraitId,
+    EffectReference, EffectTarget, ExecutionRef, FollowPermission, InstallationSubjects,
+    InstallationTime, Interval, NumericChange, ObjectRef, ObjectView, RemoveScope, Resource,
+    ResourceOperation, Stat, TimeAnchor, TimestampBasis, TraitId,
 };
 use super::{
-    AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError,
-    Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView, Selector,
-    TextQuantifier, ZoneKind, ast, unsupported,
+    AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, FieldOutputKind, Int,
+    LoweringError, Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView,
+    Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
 use crate::ir::ObjectRelation;
 
@@ -49,7 +49,11 @@ pub(super) fn distinct_count(
 pub(super) fn duration(until: Option<&ast::Until>, path: &str) -> Result<Duration, LoweringError> {
     Ok(Duration {
         end: match until {
-            Some(ast::Until::NextPhase { .. } | ast::Until::DuringNextTurn { .. }) => {
+            Some(
+                ast::Until::NextPhase { .. }
+                | ast::Until::DuringNextTurn { .. }
+                | ast::Until::DuringNextPhase { .. },
+            ) => {
                 return Err(unsupported(path));
             }
             None | Some(ast::Until::Game) => DurationEnd::NoTemporalExpiry {},
@@ -251,6 +255,17 @@ impl BodyContext<'_> {
         objects: &ast::Objects,
         path: &str,
     ) -> Result<Selector, LoweringError> {
+        if let ast::Objects::Follow { follow } = objects {
+            let output = self
+                .field_outputs
+                .get(follow)
+                .filter(|output| output.kind == FieldOutputKind::ObservedSelection)
+                .ok_or_else(|| unsupported(path))?;
+            return Ok(Selector::MoveAfter {
+                receipt: output.receipt.clone(),
+                permission: FollowPermission::SameEffectExplicitReference {},
+            });
+        }
         if let ast::Objects::Zone(query) = objects
             && matches!(query.r#where, Some(ast::ObjectQueryWhere::Damaged(_)))
         {
@@ -562,6 +577,7 @@ impl BodyContext<'_> {
             }
             ast::InstalledEffect::Cannot(
                 ast::Cannot::Draw(_)
+                | ast::Cannot::RulePhase(_)
                 | ast::Cannot::Player(_)
                 | ast::Cannot::Removal(_)
                 | ast::Cannot::DealDamage(_),

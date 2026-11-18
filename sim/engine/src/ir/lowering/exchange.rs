@@ -174,6 +174,24 @@ fn lower_material(
         let (action, decision) = super::flip_cost::lower(allocator, binding, material, up, path)?;
         return Ok((decision, action));
     }
+    if let Some(reveal) = &optional.reveal {
+        let constraint = super::hand_payment::constraint(allocator, reveal, path)?;
+        let [group] = constraint.groups.as_slice() else {
+            return Err(unsupported(path));
+        };
+        let Selector::Zone { players, .. } = &group.selector else {
+            return Err(unsupported(path));
+        };
+        let visibility = Visibility::Only {
+            players: players.clone(),
+        };
+        return Ok((
+            decision(binding, constraint, visibility, allocator, path)?,
+            Action::Reveal {
+                objects: Selector::Bound { reference: binding },
+            },
+        ));
+    }
     lower_public_material(optional, binding, allocator, path, multiple)
 }
 
@@ -458,6 +476,7 @@ fn single_kind(value: &ast::OptionalCost) -> bool {
         value.earth_rite.is_some(),
         value.one_of.is_some(),
         value.discard.is_some(),
+        value.reveal.is_some(),
         value.to_cemetery.is_some(),
         value.banish.is_some(),
         value.act.is_some(),

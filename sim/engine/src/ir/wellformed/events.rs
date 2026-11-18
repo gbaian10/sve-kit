@@ -817,8 +817,10 @@ impl Checker {
             EventPattern::Play { binding, predicate } => {
                 self.played_pattern(*binding, predicate, view, triggering)
             }
-            EventPattern::Targeted { .. }
-            | EventPattern::Resolve { .. }
+            EventPattern::Targeted { binding, predicate } => {
+                event!(binding, predicate, EventSnapshotPolicy::AfterEntry)
+            }
+            EventPattern::Resolve { .. }
             | EventPattern::Banish { .. }
             | EventPattern::Posture { .. }
             | EventPattern::UbActivated { .. }

@@ -2354,6 +2354,7 @@ type HistoryFusedCondition = Annotated[
 class EventTargetedFields(TypedDict):
     ref: NotRequired[Ref]
     by: NotRequired[EventBy]
+    during: NotRequired[During]
 
 
 type EventTargetedPayload = Annotated[

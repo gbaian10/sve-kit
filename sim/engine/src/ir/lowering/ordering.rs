@@ -99,6 +99,11 @@ impl BodyContext<'_> {
                         {
                             FieldOutputKind::SingleFollower
                         }
+                        Some(ast::MoveObjects::Field(ast::Objects::Bound(target)))
+                            if self.observed_targets.contains(target) =>
+                        {
+                            FieldOutputKind::ObservedSelection
+                        }
                         _ => FieldOutputKind::Other,
                     },
                 },

@@ -15,6 +15,12 @@ pub(super) struct State {
 }
 
 impl State {
+    pub(super) fn iteration(&self, key: (ScopeId, u64)) -> Result<&MoveOutcome> {
+        self.iterations
+            .get(&key)
+            .ok_or_else(|| invalid("missing repeat movement"))
+    }
+
     pub(super) fn followed(&self, key: (ScopeId, u64)) -> Result<Vec<ObjectRef>> {
         Ok(self
             .lists
@@ -95,9 +101,13 @@ impl Game {
                 Termination::Count { .. } => return Err(unsupported("move repeat termination")),
             }
         };
-        let capacity =
-            super::movement::zone_capacity("ex").ok_or_else(|| invalid("EX capacity"))?;
-        let full = self.zone_count(seat_name(execution.context.controller)?, "ex") >= capacity;
+        let full = if plan.to_ex {
+            let capacity =
+                super::movement::zone_capacity("ex").ok_or_else(|| invalid("EX capacity"))?;
+            self.zone_count(seat_name(execution.context.controller)?, "ex") >= capacity
+        } else {
+            false
+        };
         if stop || !progressed || full {
             execution
                 .processing_disclosure

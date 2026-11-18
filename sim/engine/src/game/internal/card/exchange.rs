@@ -847,6 +847,13 @@ impl Game {
                 .insert(instruction.receipt, InstructionOutcome::Flip(outcome));
             return Ok(());
         }
+        if let Action::Reveal { objects } = &instruction.action {
+            let members = exchange
+                .selected
+                .as_ref()
+                .ok_or_else(|| invalid("missing materials"))?;
+            return self.internal_reveal_members(execution, instruction, members, Some(objects));
+        }
         self.pay_public_exchange_materials(execution, exchange)
     }
 

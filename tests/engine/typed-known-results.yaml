@@ -39,21 +39,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-3 omniscient events"
-  - question: "card-BP02-SL16"
-    scenario: "能力 1 手牌 0"
-    status: unsupported
-    error: "unadmitted BP02-SL17 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP02-SL17/0, query complete card names: current ability definitions unavailable"
-  - question: "card-BP02-SL16"
-    scenario: "能力 2 手牌 3"
-    status: unsupported
-    error: "unadmitted BP02-SL17 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP02-SL17/0, query complete card names: current ability definitions unavailable"
-  - question: "card-BP02-SL16"
-    scenario: "能力 2 手牌 2"
-    status: unsupported
-    error: "unadmitted BP02-SL17 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP02-SL17/0, query complete card names: current ability definitions unavailable"
   - question: "card-BP03-109"
     scenario: "A 奪走出走中的ハルウララ → 仍有突進 → 攻擊アクト狀態的ファイター → 互相受傷"
     status: unsupported
@@ -74,21 +59,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-1 omniscient events"
-  - question: "card-BP05-006"
-    scenario: "A P2 選【1】→ P2 的下一個開始階段不抽牌（PP 最大值照常 +1）"
-    status: unsupported
-    error: "unadmitted BP05-006 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP05-006/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP05-006"
-    scenario: "B P2 選【2】→ 下一個開始階段 PP 最大值不 +1（照常抽牌）"
-    status: unsupported
-    error: "unadmitted BP05-006 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP05-006/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP05-006"
-    scenario: "C P2 選【3】→ 下一個主要階段不能打出從者，法術可以"
-    status: unsupported
-    error: "unadmitted BP05-006 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP05-006/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-BP05-007"
     scenario: "選 1 張 EX滿=True"
     status: fail
@@ -111,14 +81,9 @@ known:
     reason: "after-decision-3 omniscient events"
   - question: "card-BP05-SL12"
     scenario: "A 三輪：第 1、2 輪各放到 1 張サイ → 第 3 輪沒有 → 停；攻撃力 +9、墓場 12 張"
-    status: unsupported
-    error: "unadmitted BP05-SL12 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP05-SL12/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP05-SL12"
-    scenario: "B 牌庫 0 張：+3 照做，放牌庫不做，不敗北"
-    status: unsupported
-    error: "unadmitted BP05-SL12 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP05-SL12/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: after-decision-2 events (#2008)"
+    reason: 'after-decision-2 omniscient events; after-decision-2 omniscient events_exact ["プレイ"]'
   - question: "card-BP07-030"
     scenario: "A ハルバードウルフ 起動：アクト 2 棵大樹 → 2 傷害"
     status: fail
@@ -160,25 +125,20 @@ known:
     error: "typed-gap: ordinary single evolution departure association (#2008)"
     reason: "internal D1 does not support ordinary single evolution departure association"
   - question: "card-BP08-SL15"
-    scenario: "[astra] 出場 0 張"
-    status: unsupported
-    error: "unadmitted BP08-SL15 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-SL15/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-BP08-SL15"
     scenario: "[astra] 出場 1 張"
-    status: unsupported
-    error: "unadmitted BP08-SL15 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-SL15/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: after-decision-4 assert semantic_state.pending_triggers (#2008)"
+    reason: "after-decision-4 omniscient assert semantic_state.pending_triggers"
   - question: "card-BP08-SL15"
     scenario: "[astra] 出場 3 張"
-    status: unsupported
-    error: "unadmitted BP08-SL15 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-SL15/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: after-decision-4 assert semantic_state.pending_triggers (#2008)"
+    reason: "after-decision-4 omniscient assert semantic_state.pending_triggers"
   - question: "card-BP08-SL15"
     scenario: "[fable] A 看 7 張出 2 隻（デモンビーター、サロメ）→ 其餘放底 → 破壞 → 4 個待機自選順序"
     status: unsupported
-    error: "unadmitted BP08-SL15 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP08-SL15/0, holder a1 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    error: "typed-gap: anonymous deck members (#2008)"
+    reason: "internal D1 does not support anonymous deck members"
   - question: "card-BP09-004"
     scenario: "A 選『真紅の絆・ポーラ』（face 1）：進化時把場上其他 2 張放到 EX"
     status: fail
@@ -609,21 +569,6 @@ known:
     status: adapter-error
     error: "interface: runner translation / interface (#2008)"
     reason: "d is not a card candidate"
-  - question: "card-CP04-104"
-    scenario: "zero"
-    status: unsupported
-    error: "unadmitted CP04-104 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-104/0, query complete card names: current ability definitions unavailable"
-  - question: "card-CP04-104"
-    scenario: "decline"
-    status: unsupported
-    error: "unadmitted CP04-104 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-104/0, query complete card names: current ability definitions unavailable"
-  - question: "card-CP04-104"
-    scenario: "one"
-    status: unsupported
-    error: "unadmitted CP04-104 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-104/0, query complete card names: current ability definitions unavailable"
   - question: "card-CP04-114"
     scenario: "アメス先免原費用發動イオ的 UB，當回合不能再通常起動"
     status: ineligible
@@ -646,14 +591,9 @@ known:
     reason: "no authored program: CP04-SL10"
   - question: "card-EBD02-005"
     scenario: "A 墓場 10 張法術 → 打出運命の導き（費用 0）→ 墓場只剩 9 → 不回復 PP → 解決後回墓場"
-    status: unsupported
-    error: "unadmitted BP14-050 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP14-050/0, holder s10 generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-EBD02-005"
-    scenario: "B 墓場 11 張法術 → 打出後仍有 10 張 → SC10 成立 → 回復 1 PP"
-    status: unsupported
-    error: "unadmitted BP14-050 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP14-050/0, holder s10 generation 0, query restriction lose active zones: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: after-decision-1 awaiting (#2008)"
+    reason: "after-decision-1 omniscient awaiting"
   - question: "card-EBD02-015"
     scenario: "[astra] 選兩體但分配 3 加 0"
     status: adapter-error
@@ -709,16 +649,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-1 awaiting (#2008)"
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
-  - question: "card-ETD01-011"
-    scenario: "自己回合被 Quick 選中"
-    status: unsupported
-    error: "unadmitted ETD01-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ETD01-011/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "card-ETD01-011"
-    scenario: "對手回合被選中不符合誘發條件"
-    status: unsupported
-    error: "unadmitted ETD01-011 (#2090)"
-    reason: "internal D1 does not support unloaded whole card ETD01-011/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "card-PCS01-048"
     scenario: "場上 4 張"
     status: unsupported
@@ -759,16 +689,6 @@ known:
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
-  - question: "flow-advance-decline-r3-01"
-    scenario: "七張拒絕出場仍耗額度"
-    status: unsupported
-    error: "unadmitted BP15-SL13 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-advance-decline-r3-01"
-    scenario: "四張雙屬性不能算八張"
-    status: unsupported
-    error: "unadmitted BP15-SL13 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-carrot-identity-01"
     scenario: "開催大成功！可食事，出走者離場後表向回牌庫並補足第九張"
     status: ineligible
@@ -804,16 +724,6 @@ known:
     status: unsupported
     error: "interface: runner translation / interface (#2008)"
     reason: "typed runner: resolve-choice for OptionalCost"
-  - question: "flow-opponent-choice-r3-01"
-    scenario: "兩個來源都由對手選模式 1"
-    status: unsupported
-    error: "unadmitted BP05-006 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP05-006/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "flow-opponent-choice-r3-01"
-    scenario: "兩個來源都由對手選模式 2"
-    status: unsupported
-    error: "unadmitted BP05-006 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP05-006/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "flow-paid-count-r3-01"
     scenario: "裝備=False 嘗試支付已橫置樹=False"
     status: fail
@@ -966,14 +876,14 @@ known:
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.field; after-decision-1 omniscient assert P1.field.a1; after-decision-1 omniscient assert P1.pp.current; after-decision-1 omniscient assert P2.field.b1; after-decision-1 omniscient events"
   - question: "rule-10.6.2.5-01"
     scenario: "B 0 單位費用：X=0 → 費用視為已執行 → UB 能力被打出並結算（發動成立），沒有目標、沒有傷害"
-    status: unsupported
-    error: "unadmitted CP04-104 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-104/0, query complete card names: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: after-decision-1 events (#2008)"
+    reason: "after-decision-1 omniscient events; after-decision-1 omniscient awaiting; after-decision-2 omniscient events"
   - question: "rule-10.6.2.5-01"
     scenario: "B2 對照：拒付費用 → 不能打出、待機取消 → UB 不算發動；進化不回溯"
-    status: unsupported
-    error: "unadmitted CP04-104 (#2090)"
-    reason: "internal D1 does not support unloaded whole card CP04-104/0, query complete card names: current ability definitions unavailable"
+    status: fail
+    error: "typed-gap: after-decision-2 events (#2008)"
+    reason: "after-decision-2 omniscient events"
   - question: "rule-10.6.2.5.2-01"
     scenario: "stack=2 已橫置=False"
     status: fail
@@ -1109,16 +1019,6 @@ known:
     status: adapter-error
     error: "interface: runner translation / interface (#2008)"
     reason: "b1 is not a candidate"
-  - question: "rule-12.16.3-01"
-    scenario: "advance 先用，共用一次額度"
-    status: unsupported
-    error: "unadmitted BP15-SL13 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
-  - question: "rule-12.16.3-01"
-    scenario: "evolve 先用，共用一次額度"
-    status: unsupported
-    error: "unadmitted BP15-SL13 (#2090)"
-    reason: "internal D1 does not support unloaded whole card BP15-SL13/0, holder a generation 0, query restriction lose active zones: current ability definitions unavailable"
   - question: "rule-12.2.4-01"
     scenario: "SEP=0 抑制=False"
     status: fail

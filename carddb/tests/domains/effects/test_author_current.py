@@ -441,8 +441,7 @@ def check_synthetic_sibling_root_closure(
 
 
 @pytest.mark.slow(
-    reason="Checks every committed prototype shard against real current author sources once; "
-    "retains the repository-wide prototype/author overlap regression (#1104)."
+    reason="Checks real current author sources and any remaining prototype shards together."
 )
 def test_real_current_author_set(
     base_current_fixture: CurrentSourceFixture,
@@ -456,7 +455,6 @@ def test_real_current_author_set(
     assert all(record.kind == "author_effect_set" for record in real.index.records)
     record_keys = {record.record_key for record in real.index.records}
     assert {"BP01-015", "BP01-169", "BP01-180"} <= record_keys
-    assert real.prototype_files
     with current(base_current_fixture) as source:
         for index, number in enumerate(CARDS):
             check_real_current_entry_and_container(

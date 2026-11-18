@@ -88,12 +88,34 @@ pub(super) fn hand_count(selector: &Selector) -> bool {
         && players.relative_to == (PlayerRef::Controller {})
         && **predicate == Expr::Literal(Bool(true)))
 }
+pub(crate) fn material_target_limit(value: &Expr<Int>) -> Option<Binding<Selector>> {
+    let Expr::Compute(operation) = value else {
+        return None;
+    };
+    let IntOperation::FromNat {
+        value: Expr::Live(count),
+    } = operation.as_ref()
+    else {
+        return None;
+    };
+    let NatRead::ZoneCount {
+        selector: Selector::Bound { reference },
+    } = count.as_ref()
+    else {
+        return None;
+    };
+    Some(*reference)
+}
+
 pub(crate) fn target_count(value: &Expr<Int>, comparison: super::Comparison) -> bool {
     if check(value) {
         return true;
     }
     if comparison != super::Comparison::LessEqual {
         return false;
+    }
+    if material_target_limit(value).is_some() {
+        return true;
     }
     let Expr::Compute(operation) = value else {
         return false;

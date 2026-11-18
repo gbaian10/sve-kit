@@ -1,0 +1,59 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP15-041:
+    admission: light
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            reveal:
+              sel: { who: self, zone: hand, trait: 陰陽師 }
+              n: 2
+          optional_cost_delta: -1
+      - line: 2
+        activate:
+          advance: true
+          cost: { pp: 4 }
+          usable_if:
+            cmp:
+              left:
+                minus:
+                  - plus:
+                      - count: { who: self, zone: cemetery, trait: 陰陽師 }
+                      - count: { who: self, zone: cemetery, kind: spell }
+                  - count: { who: self, zone: cemetery, kind: spell, trait: 陰陽師 }
+              op: ge
+              right: 7
+          do:
+            - choose:
+                bind: incoming
+                from:
+                  who: self
+                  zone: evolve_deck
+                  kind: follower
+                  advance_follower: true
+                  name: 貴人
+                n: 1
+                may: true
+            - move: { ref: incoming, to: field }
+      - line: 3
+        fanfare:
+          do:
+            - draw: { n: 1 }
+            - discard: { who: self, n: 1 }
+      - line: 4
+        activate:
+          cost: { act_self: true }
+          targets:
+            - bind: recalled
+              from: { who: self, zone: cemetery, kind: follower, trait: 陰陽師, orig_cost_le: 4 }
+              n: 1
+          do:
+            - move: { ref: recalled, to: field, result: entered }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

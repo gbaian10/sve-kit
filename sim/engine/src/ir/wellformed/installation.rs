@@ -1,5 +1,4 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
-use crate::ir::play_restrictions;
 use crate::ir::prevention;
 use crate::ir::{
     AbilityKind, ActionPattern, Binding, Bool, CharacteristicPatch, ContinuousLayer, CostChange,
@@ -7,6 +6,7 @@ use crate::ir::{
     InstallationSubjects, InstallationTime, Interval, KeywordId, PermissionSubject, Polarity,
     Selector, StandScope, TimeAnchor, TimestampBasis, UsageScope,
 };
+use crate::ir::{phase_restrictions, play_restrictions};
 
 fn is_installed_activation_permission(
     effect: &Effect,
@@ -83,6 +83,9 @@ impl Checker {
         if let InstallationSubjects::Players { players, .. } = subjects {
             self.players(players)?;
             self.installed_duration(duration)?;
+            if phase_restrictions::effect_window(players, effect, duration).is_some() {
+                return Ok(());
+            }
             if let Some(objects) = play_restrictions::banish_play_filter(players, effect, duration)
             {
                 return self.selector(objects);

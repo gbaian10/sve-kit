@@ -10,10 +10,11 @@ use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::x_pp;
 use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Control, CostSpec, DecisionId,
-    DiscardEvent, EventPattern, Expr, InstructionContext, Int, MoveDestination, MoveReason,
-    MovementEvent, Node, ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime, PlayerId,
-    PlayerRef, Program, ReceiptId, RepeatBody, Resource, ResourceOperation, RuntimeReceiptId,
-    Selector, TriggerCondition, WellFormedCardProgram, ZoneKind, ZoneRef, optional_payment,
+    DiscardEvent, EventPattern, Expr, InstructionContext, Int, KeywordId, MoveDestination,
+    MoveReason, MovementEvent, Node, ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime,
+    PlayerId, PlayerRef, Program, ReceiptId, RepeatBody, Resource, ResourceOperation,
+    RuntimeReceiptId, Selector, TriggerCondition, WellFormedCardProgram, ZoneKind, ZoneRef,
+    optional_payment,
 };
 use core::slice::from_ref;
 
@@ -91,13 +92,15 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
     for ability in &card.card().abilities {
         if let Some(body) = &ability.node.body {
             if has_resolution_payment(body)
+                && !(ability.node.kind == AbilityKind::Spell
+                    && resolution_costs(body, &earth_rite_cost))
                 && !(ability.node.kind == AbilityKind::Triggered
                     && matches!(ability.node.source.origin, AbilityOrigin::Printed { .. })
                     && (((matches!(
                         ability.node.active_zones.as_slice(),
                         [ZoneKind::Field | ZoneKind::Cemetery]
                     ) || super::triggers::phase_in_zone(&ability.node, ZoneKind::Cemetery))
-                        && source_resolution_costs(body))
+                        && resolution_costs(body, &source_resolution_cost))
                         || hand_pp_payment(&ability.node)))
             {
                 return Err(unsupported(
@@ -303,18 +306,66 @@ fn hand_pp_payment(ability: &Ability) -> bool {
     positive_pp(costs) && discard_return(on_paid) == Some(event)
 }
 
-fn source_resolution_costs(program: &Program) -> bool {
+fn earth_rite_material(costs: &CostSpec) -> Option<Binding<Selector>> {
+    let CostSpec::Ordered { steps } = costs else {
+        return None;
+    };
+    let [step] = steps.as_slice() else {
+        return None;
+    };
+    if step.keyword != Some(KeywordId::EarthRite) {
+        return None;
+    }
+    super::super::counters::selected_cost(&step.instruction.action)
+}
+
+fn earth_rite_cost(costs: &CostSpec) -> bool {
+    earth_rite_material(costs).is_some()
+}
+
+fn source_resolution_cost(costs: &CostSpec) -> bool {
+    earth_rite_cost(costs)
+        || player_pp(costs).is_some()
+        || matches!(costs, CostSpec::Ordered { steps } if !steps.is_empty()
+            && steps.iter().all(|cost| super::material::source_field_cost(&cost.instruction.action)))
+}
+
+fn resolution_costs(program: &Program, check: &impl Fn(&CostSpec) -> bool) -> bool {
     program.steps.iter().all(|step| match &step.node {
-        Node::Control { control: Control::Pay { at: PaymentTime::ResolutionChoice, costs, .. } } => {
-            player_pp(costs).is_some()
-                || matches!(costs, CostSpec::Ordered { steps } if !steps.is_empty()
-                && steps.iter().all(|cost| super::material::source_field_cost(&cost.instruction.action)))
+        Node::Control {
+            control:
+                Control::Pay {
+                    at: PaymentTime::ResolutionChoice,
+                    costs,
+                    on_paid,
+                    ..
+                },
+        } => check(costs) && resolution_costs(on_paid, check),
+        Node::Control {
+            control:
+                Control::If {
+                    then_body,
+                    else_body,
+                    ..
+                },
+        } => {
+            resolution_costs(then_body, check)
+                && else_body
+                    .as_ref()
+                    .is_none_or(|body| resolution_costs(body, check))
         }
-        Node::Control { control: Control::If { then_body, else_body, .. } } => {
-            source_resolution_costs(then_body) && else_body.as_ref().is_none_or(source_resolution_costs)
-        }
-        Node::Control { control: Control::Sequence { body } | Control::May { body, .. } | Control::Repeat { body: RepeatBody::Program { body }, .. } } => source_resolution_costs(body),
-        Node::Control { control: Control::Mode { modes, .. } } => modes.iter().all(|mode| source_resolution_costs(&mode.body)),
+        Node::Control {
+            control:
+                Control::Sequence { body }
+                | Control::May { body, .. }
+                | Control::Repeat {
+                    body: RepeatBody::Program { body },
+                    ..
+                },
+        } => resolution_costs(body, check),
+        Node::Control {
+            control: Control::Mode { modes, .. },
+        } => modes.iter().all(|mode| resolution_costs(&mode.body, check)),
         _ => true,
     })
 }
@@ -468,6 +519,15 @@ pub(in crate::game::internal) fn accept(
 }
 
 pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> {
+    if matches!(control, Control::Pay {
+        at: PaymentTime::ResolutionChoice,
+        costs,
+        optional: PaymentOptionality::Required,
+        ..
+    } if earth_rite_cost(costs))
+    {
+        return Ok(());
+    }
     if let Control::Pay {
         at: PaymentTime::ResolutionChoice,
         costs: costs @ CostSpec::Ordered { steps },
@@ -512,11 +572,19 @@ impl Game {
             costs,
             on_paid,
             receipt,
-            ..
+            optional,
         } = control
         else {
             return Err(unsupported("resolution payment timing"));
         };
+        if optional == PaymentOptionality::Required {
+            let reference = earth_rite_material(&costs)
+                .ok_or_else(|| unsupported("declared Earth Rite payment"))?;
+            let accepted = !execution
+                .objects(self, &Selector::Bound { reference })?
+                .is_empty();
+            return self.resolve_internal_payment(execution, &costs, on_paid, receipt, accepted);
+        }
         // The payer answers its own payment; source costs stay with the effect controller.
         let payer = match player_pp(&costs) {
             Some(payer) => execution.player(self, payer)?,

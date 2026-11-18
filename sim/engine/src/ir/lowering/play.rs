@@ -698,7 +698,24 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         };
         let number: ast::Number = super::decode(argument.as_ref().clone(), path)?;
-        let value = self.number(&number, path, &mut BTreeSet::new())?;
+        let value = if let (
+            ast::Number::CountOf {
+                count_of: ast::CountOf::Named(name),
+            },
+            Some((declared, reference)),
+        ) = (&number, &self.declared_material)
+            && target.upto.is_some()
+            && name == declared
+        {
+            super::numeric::aggregate_count(
+                Selector::Bound {
+                    reference: *reference,
+                },
+                None,
+            )
+        } else {
+            self.number(&number, path, &mut BTreeSet::new())?
+        };
         let comparison = if target.n.is_some() {
             Comparison::Equal
         } else {
@@ -1205,6 +1222,7 @@ impl BodyContext<'_> {
                 cardinality,
                 exclude: choice.exclude_chosen.is_some(),
                 kind: ModeChoiceKind::ChoiceKeyword,
+                actor: PlayerRef::Controller {},
             },
             path,
             source,
@@ -1232,6 +1250,10 @@ impl BodyContext<'_> {
                 },
                 exclude: false,
                 kind: ModeChoiceKind::ResolutionAlternative,
+                actor: match either.who {
+                    None | Some(ast::LeaderSide::Controller) => PlayerRef::Controller {},
+                    Some(ast::LeaderSide::Opponent) => super::super::events::timing::opponent(),
+                },
             },
             path,
             source,
@@ -1259,6 +1281,7 @@ impl BodyContext<'_> {
             let mut context = BodyContext {
                 declared_numbers: self.declared_numbers.clone(),
                 x: None,
+                declared_material: None,
                 discard_event: self.discard_event,
                 banish_event: self.banish_event,
                 hand_exit: self.hand_exit,
@@ -1472,13 +1495,14 @@ struct ModeShape<'options> {
     cardinality: Cardinality,
     exclude: bool,
     kind: ModeChoiceKind,
+    actor: PlayerRef,
 }
 
 impl ModeShape<'_> {
     fn decision(&self, id: u64, binding: Binding<Vec<ModeId>>, modes: &[Mode]) -> ModeDecision {
         ModeDecision {
             id: DecisionId(id),
-            actor: PlayerRef::Controller {},
+            actor: self.actor.clone(),
             domain: ChoiceDomain::Modes {
                 modes: modes.iter().map(|mode| mode.id).collect(),
                 cardinality: self.cardinality,

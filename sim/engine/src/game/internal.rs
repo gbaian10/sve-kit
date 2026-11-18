@@ -14,7 +14,6 @@ use crate::game::player::{IntegerSource, Viewer};
 use crate::ir::BatchOutcome;
 use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
-use crate::ir::shuffle as shuffle_shape;
 use crate::ir::{
     AbilityChoiceKind, AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool,
     BoxPilotMode, Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics,
@@ -36,6 +35,7 @@ use crate::ir::{
     FaceId, PaymentEvent, PaymentResult, QuickWindow, RaceEvent,
 };
 use crate::ir::{DiceEvent, EquipEvent};
+use crate::ir::{phase_restrictions as phase_rules, shuffle as shuffle_shape};
 use crate::{EngineFailure, Result, invalid};
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -98,6 +98,7 @@ mod number_plan;
 mod numeric;
 mod observation;
 mod ordering;
+mod phase_restrictions;
 mod play_target_cost;
 mod player;
 mod player_stages;
@@ -1925,6 +1926,9 @@ impl Game {
             Action::Transform { .. } => self.internal_transform(execution, &instruction)?,
             Action::Posture { objects, posture } => {
                 self.internal_posture(execution, &instruction, objects, *posture)?;
+            }
+            action @ Action::InstallEffect { .. } if phase_rules::projection(action).is_some() => {
+                self.internal_install_phase_restriction(execution, &instruction)?;
             }
             Action::InstallEffect { effect, .. }
                 if matches!(effect.as_ref(), Effect::Continuous { .. }) =>

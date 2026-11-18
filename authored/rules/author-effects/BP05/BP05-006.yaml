@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-006:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase: { whose: self, which: end }
+          do:
+            - either:
+                who: opp
+                options:
+                  - - player_effect:
+                        who: opp
+                        effect:
+                          cannot: { what: normal_draw }
+                        until:
+                          during_next_phase: { who: opp, phase: start }
+                  - - player_effect:
+                        who: opp
+                        effect:
+                          cannot: { what: normal_max_pp_gain }
+                        until:
+                          during_next_phase: { who: opp, phase: start }
+                  - - player_effect:
+                        who: opp
+                        effect:
+                          cannot: { what: play_follower }
+                        until:
+                          during_next_phase: { who: opp, phase: main }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

@@ -162,6 +162,7 @@ pub(in crate::game) struct CardRuntime {
     pub(in crate::game::internal) quick: Option<quick::Question>,
     pub(in crate::game::internal) quick_start: bool,
     pub(in crate::game::internal) banish_play: BTreeMap<u32, play_restrictions::BanishPermission>,
+    pub(in crate::game::internal) phase_restrictions: Vec<super::phase_restrictions::Installed>,
     pub(in crate::game::internal) other_costs: Vec<other_costs::InstalledCost>,
     pub(in crate::game::internal) live_costs: BTreeMap<u64, super::cost::LiveCost>,
 }
@@ -205,6 +206,7 @@ impl CardRuntime {
 
     pub(in crate::game::internal) fn terminate(&mut self) {
         self.banish_play.clear();
+        self.phase_restrictions.clear();
         self.pending.clear();
         self.unadmitted.clear();
         self.admission = None;
@@ -221,6 +223,7 @@ impl CardRuntime {
 
     pub(in crate::game) fn requires_typed_play(&self) -> bool {
         !self.banish_play.is_empty()
+            || !self.phase_restrictions.is_empty()
             || !self.other_costs.is_empty()
             || self.definitions.cards.values().any(|card| {
                 !card.card().card_play_costs.is_empty()

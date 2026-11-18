@@ -31,6 +31,7 @@ pub(crate) fn permission(effect: &Effect) -> Option<(&PlayerRelation, bool)> {
         | ActionPattern::IgnoreWard { .. }
         | ActionPattern::Reroll { .. }
         | ActionPattern::ChooseMode { .. }
+        | ActionPattern::PlayCardKind { .. }
         | ActionPattern::TriggerAdmission { .. } => return None,
     };
     (players == affected

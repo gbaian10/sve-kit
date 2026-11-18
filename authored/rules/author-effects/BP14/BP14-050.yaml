@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-050:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [quick]
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: 5 }
+            - pay:
+                cost: { earth_rite: 1 }
+                do:
+                  - damage: { to: { leader_of: enemy }, n: 2 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

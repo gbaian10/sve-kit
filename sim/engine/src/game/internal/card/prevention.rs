@@ -19,9 +19,9 @@ use crate::ir::{
     AbilityKind, AbilityOrigin, AbilityQualification, AbilitySource, Action, BatchPolicy, Bool,
     Control, DamageAmount, DamageFlags, DamageKind, DurationEnd, Effect, EventRewrite, ExecutionId,
     Expr, FaceId, InstallationSubjects, InstallationTime, Instruction, InstructionContext,
-    InstructionId, Int, Node, ObjectOperand, ObjectRef, ObjectView, PlayerId, PlayerRef, Program,
-    ProposedEventPattern, ReceiptId, RecipientSet, Requirement, Requirements, Selector, TimeAnchor,
-    ZoneKind,
+    InstructionId, Int, Interval, Node, ObjectOperand, ObjectRef, ObjectView, PlayerId, PlayerRef,
+    Program, ProposedEventPattern, ReceiptId, RecipientSet, Requirement, Requirements, Selector,
+    TimeAnchor, ZoneKind,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -392,13 +392,21 @@ pub(in crate::game::internal) fn check_install(
                 && shape.damage_source.is_none()
         }
     };
+    let object_prevention_interval = matches!(subjects, InstallationSubjects::Objects { .. })
+        && matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
+        && shape.usage.is_none()
+        && duration.end == (DurationEnd::CurrentTurnEnd {})
+        && matches!(
+            duration.intervals.as_slice(),
+            [Interval::DuringNextTurn { .. }]
+        );
     if !captured
         || shape.source != origin
         || shape.duration != duration
         || shape.condition != &Expr::Literal(Bool(true))
         || duration.anchor != (TimeAnchor::Installation {})
         || duration.usage.is_some()
-        || (!duration.intervals.is_empty() && !object_cap)
+        || (!duration.intervals.is_empty() && !object_cap && !object_prevention_interval)
         || !matches!(
             duration.end,
             DurationEnd::CurrentTurnEnd {}

@@ -138,7 +138,12 @@ impl super::BodyContext<'_> {
                 let receipt = self
                     .field_outputs
                     .get(follow)
-                    .filter(|output| output.kind != FieldOutputKind::Other)
+                    .filter(|output| {
+                        matches!(
+                            output.kind,
+                            FieldOutputKind::ReturnedSource | FieldOutputKind::SingleFollower
+                        )
+                    })
                     .map(|output| output.receipt.clone())
                     .ok_or_else(|| unsupported(path))?;
                 let binding = Binding::new(3, self.card_allocator.scope(path)?);

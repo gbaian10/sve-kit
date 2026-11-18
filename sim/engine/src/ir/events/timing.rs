@@ -8,7 +8,7 @@ use crate::ir::{
 use crate::ir::{
     AttackEvent, Binding, Bool, Cardinality, Edge, EdgeFields, EvolveEvent, Expr, Nat,
     ObjectFrozen, Phase, PhaseEvent, PhaseFields, PlayerFrozen, PlayerRef, PlayerRelation,
-    PlayerSet, Predicate, TextQuantifier, ValueEquality,
+    PlayerSet, Predicate, TargetedEvent, TextQuantifier, ValueEquality,
 };
 
 pub(crate) fn opponent() -> PlayerRef {
@@ -86,6 +86,35 @@ pub(super) fn turn_predicate(own: bool) -> Expr<Bool> {
             opponent()
         }),
     }))
+}
+
+pub(crate) fn targeted_predicate(event: Binding<TargetedEvent>, own_turn: bool) -> Expr<Bool> {
+    let object = Expr::Compute(Box::new(Predicate::ObjectEquals {
+        left: Expr::Frozen(Box::new(ObjectFrozen::TargetedObject { event })),
+        right: Expr::Frozen(Box::new(ObjectFrozen::SourceHolder {})),
+    }));
+    if own_turn {
+        Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![object, turn_predicate(true)],
+        }))
+    } else {
+        object
+    }
+}
+
+pub(crate) fn targeted_filter(ability: &Ability) -> Option<bool> {
+    let TriggerCondition::Event {
+        pattern: EventPattern::Targeted { binding, predicate },
+    } = &ability.trigger.as_ref()?.on
+    else {
+        return None;
+    };
+    if !matches!(ability.source.origin, AbilityOrigin::Printed { .. }) {
+        return None;
+    }
+    [false, true]
+        .into_iter()
+        .find(|own| *predicate == targeted_predicate(*binding, *own))
 }
 
 pub(crate) fn leave_predicate(event: Binding<LeaveFieldEvent>, own_turn: bool) -> Expr<Bool> {

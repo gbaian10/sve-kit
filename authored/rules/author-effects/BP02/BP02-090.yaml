@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP02-090:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [aura]
+      - line: 2
+        static:
+          effects:
+            - cannot: { on: this, what: destroy, by: ability }
+      - line: 3
+        evolve_time:
+          do:
+            - apply:
+                "on": this
+                until: this_and_next_opp_turn
+                effect:
+                  prevent: { kind: any }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

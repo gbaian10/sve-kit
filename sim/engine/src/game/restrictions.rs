@@ -37,6 +37,12 @@ impl Game {
     }
 
     pub(super) fn restricted(&self, id: &str, action: &str) -> Result<bool> {
+        if id
+            .strip_suffix(".leader")
+            .is_some_and(|seat| self.internal_phase_restricted(seat, action))
+        {
+            return Ok(true);
+        }
         if let Some(seat) = id.strip_suffix(".leader")
             && action == "draw"
             && self.internal_draw_forbidden(seat)?
