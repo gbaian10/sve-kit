@@ -16,7 +16,7 @@ export interface Detection {
 export function orderCorners(quad: readonly Point[]): Quad {
   const cx = quad.reduce((sum, p) => sum + p[0], 0) / quad.length
   const cy = quad.reduce((sum, p) => sum + p[1], 0) / quad.length
-  const byAngle = [...quad].sort(
+  const byAngle = quad.toSorted(
     (a, b) => Math.atan2(a[1] - cy, a[0] - cx) - Math.atan2(b[1] - cy, b[0] - cx),
   )
   let first = 0

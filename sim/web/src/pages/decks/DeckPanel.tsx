@@ -140,6 +140,8 @@ export function DeckPanel({
             <ArrowLeft className="size-4.5" aria-hidden="true" />
           </Link>
           <input
+            autoComplete="off"
+            enterKeyHint="done"
             value={deck.name}
             onChange={(event) => {
               editor.rename(event.target.value)

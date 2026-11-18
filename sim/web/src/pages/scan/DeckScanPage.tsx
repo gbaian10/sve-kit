@@ -688,6 +688,7 @@ export function DeckScanPage({ store = appScanModels }: DeckScanPageProps) {
                 <span>{t("scan.deck.guessRow", { cards: counts.guess })}</span>
                 <input
                   type="number"
+                  inputMode="decimal"
                   step="0.01"
                   min="0"
                   max="0.3"

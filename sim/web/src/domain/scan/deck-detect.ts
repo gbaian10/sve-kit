@@ -183,7 +183,7 @@ export function placeTileFinds(finds: readonly Box[], tile: Tile, input: number)
 
 /** One box per card, strongest find first, then in reading order: rows top to bottom, left to right. */
 export function mergeDeckBoxes(boxes: readonly Box[]): Box[] {
-  const sorted = [...boxes].sort((a, b) => b.score - a.score)
+  const sorted = boxes.toSorted((a, b) => b.score - a.score)
   let keep: Box[] = []
   for (const box of sorted) {
     const iouOk = keep.every((kept) => {

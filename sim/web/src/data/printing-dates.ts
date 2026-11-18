@@ -48,6 +48,6 @@ export function printingReleaseDate(
   const bootstrap = snapshot?.bootstrap
   const dates = bootstrap && typeof id === "string" ? inclusionDatesOf(bootstrap).get(id) : []
   return dates?.length && dates.every((date) => date !== undefined)
-    ? [...dates].sort()[0]
+    ? dates.toSorted()[0]
     : undefined
 }

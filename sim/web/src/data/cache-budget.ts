@@ -136,8 +136,8 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
     entries.sort((a, b) => a.touched - b.touched)
     const hashes = [
       ...new Set(
-        [...entries]
-          .reverse()
+        entries
+          .toReversed()
           .filter((e) => e.root && e.hash)
           .map((e) => e.hash),
       ),
@@ -158,7 +158,7 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
         entries.splice(i, 1)
       }
     }
-    const latestView = [...entries].reverse().find((e) => e.root && e.view)
+    const latestView = entries.findLast((e) => e.root && e.view)
     const pinned = (entry: (typeof entries)[number]) =>
       entry.protected ||
       entry === latestView ||
@@ -166,7 +166,7 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
     let total = entries.reduce((n, e) => n + e.bytes, reserve)
     let own = entries.filter((e) => e.root).reduce((n, e) => n + e.bytes, reserve)
     let views = entries.filter((e) => e.root && e.view).reduce((n, e) => n + e.bytes, 0)
-    const eviction = [...entries].sort(
+    const eviction = entries.toSorted(
       (a, b) => Number(pinned(a)) - Number(pinned(b)) || a.touched - b.touched,
     )
     for (const e of eviction) {

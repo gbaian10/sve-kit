@@ -43,6 +43,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 
 ### 前端與部署邊界
 
+- **瀏覽器只支援最近兩年的 Chrome、Safari、Firefox**。直接使用支援範圍內的新功能，不寫備援或 polyfill
 - **查卡、建牌、對戰是同一個前端**（`sim/web`），放在同一個主網域，用路徑區分（例如 `/cards`、`/decks`、`/play`）。不要另外做一個查卡網站
 - 卡圖、語音、卡表快照放在 Cloudflare R2，由 `cdn.` 子網域提供
 - 對戰伺服器（`sim/server`）放在 `ws.` 子網域

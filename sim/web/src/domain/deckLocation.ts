@@ -32,7 +32,7 @@ export function orderLocationTokens(tokens: readonly string[]): string[] {
     const children: readonly string[] = parent === "leader" ? LEADER_FRAMES : TOKEN_TYPES
     return [rank(LOCATION_ORDER, parent), child === undefined ? -1 : rank(children, child)]
   }
-  return [...tokens].sort((a, b) => {
+  return tokens.toSorted((a, b) => {
     const [pa, ca] = key(a)
     const [pb, cb] = key(b)
     return pa - pb || ca - cb
