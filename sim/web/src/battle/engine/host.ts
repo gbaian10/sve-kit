@@ -4,7 +4,6 @@ import type {
   Delivery,
   InitMessage,
   LoadErrorCode,
-  MatchInputs,
   Seat,
   SeatMessage,
   SeatRequest,
@@ -18,7 +17,8 @@ export interface EngineSession {
   baseline(seat: string): string
 }
 
-export type CreateSession = (inputs: MatchInputs, setup: string) => Promise<EngineSession>
+/** Loads the engine and the match inputs it was built with, then starts from the setup. */
+export type CreateSession = (setup: string) => Promise<EngineSession>
 
 type Random = (bytes: Uint8Array<ArrayBuffer>) => Uint8Array<ArrayBuffer>
 type ProvenAnswer = { id: string; answer: Answer }
@@ -70,7 +70,7 @@ export class BattleHost {
     this.#validator = validate
   }
 
-  init({ inputs, options, ports }: InitMessage): void {
+  init({ options, ports }: InitMessage): void {
     this.#limit = options.max_submissions
     this.#remaining = this.#limit
     for (const seat of SEATS) {
@@ -96,7 +96,7 @@ export class BattleHost {
       try {
         // A validator still loading delays the engine like any other load step; commands keep queueing.
         this.#validate = await this.#validator
-        this.#session = await this.#create(inputs, setup)
+        this.#session = await this.#create(setup)
       } catch (error) {
         this.#stopped = true
         this.#broadcast({ kind: "load_error", code: loadCode(error) })

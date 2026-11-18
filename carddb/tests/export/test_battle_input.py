@@ -1,18 +1,22 @@
 """The battle producer keeps native bytes and public source identities in one closure."""
 
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+from typer.testing import CliRunner
 
+from sve_carddb import cli
 from sve_carddb.core.json import array, canonical, digest, object_value, parse, string
+from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.export.battle_input import build_battle_inputs
 from sve_carddb.export.preview import Roots, write_preview
 from sve_carddb.export.read_api import ExportError, Snapshot, load_battle_inputs
 from tests.support.battle_projection import snapshot as compatible_snapshot
 
-if TYPE_CHECKING:
-    from pathlib import Path
+REPOSITORY = Path(__file__).resolve().parents[3]
 
+if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.export.reader import Row
@@ -224,6 +228,52 @@ def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None
     } in array(rules["entries"])
     with pytest.raises(ExportError):
         load_battle_inputs(roots.preview, "en")
+
+    def command(output: Path, rules: str, region: str = "jp") -> int:
+        engine_rules = tmp_path / f"{output.name}.yaml"
+        engine_rules.write_text(rules, encoding="utf-8")
+        arguments = ["--output", str(output), "--engine-rules", str(engine_rules)]
+        arguments += ["--export-dir", str(roots.preview), "--region", region]
+        return (
+            CliRunner()
+            .invoke(cli.app, ["snapshot", "battle-inputs", *arguments])
+            .exit_code
+        )
+
+    authored = (REPOSITORY / "authored/rules/engine/index.yaml").read_text("utf-8")
+    reviewed = object_value(
+        object_value(JSON_VALUE.validate_python(parse_yaml(authored.encode())))["input"]
+    )
+    assert command(tmp_path / "battle", authored) == 0
+    assert (tmp_path / "battle/snapshot.jsonl").read_bytes() == result.snapshot
+    assert parse((tmp_path / "battle/references.json").read_bytes()) == (
+        result.references
+    )
+    bound = object_value(parse((tmp_path / "battle/rules.json").read_bytes()))
+    assert bound["input"] == reviewed | {
+        "snapshot_sha256": digest(result.snapshot).removeprefix("sha256:")
+    }, "only the pin changes"
+    assert command(tmp_path / "battle", authored) != 0, (
+        "never mixes with earlier output"
+    )
+
+    def synthetic(region: str = "jp", **pin: JsonValue) -> str:
+        # Only the fields the binding reads; JSON is YAML.
+        rules: JsonValue = {
+            "scope": {"region": region},
+            "input": {"kind": "legacy-jp", **pin},
+        }
+        return canonical(rules).decode()
+
+    for name, document, region in [
+        ("en", synthetic(snapshot_sha256="0" * 64), "en"),
+        ("other", synthetic("en", snapshot_sha256="0" * 64), "jp"),
+        ("missing", synthetic(), "jp"),
+        ("number", synthetic(snapshot_sha256=0), "jp"),
+        ("malformed", synthetic(snapshot_sha256="reviewed"), "jp"),
+    ]:
+        assert command(tmp_path / name, document, region) == 3, name
+        assert not (tmp_path / name).exists()
     blob = object_value(array(snapshot.manifest["files"])[0])
     (roots.preview / string(blob["path"])).write_bytes(b"{}")
     with pytest.raises(ExportError):
@@ -432,6 +482,7 @@ def test_native_characteristic_and_face_coordinates_must_be_representable(
 ) -> None:
     snapshot = source()
     if scenario == "missing_class":
+        # Only EP/SEP faces may lack a class; a follower without one stays unrepresentable.
         snapshot.tables["face_revision"][0]["class_code"] = None
     elif scenario == "empty_class":
         next(
@@ -443,16 +494,31 @@ def test_native_characteristic_and_face_coordinates_must_be_representable(
         build_battle_inputs(snapshot, "jp")
 
 
-def test_native_absent_numeric_characteristics_use_the_existing_sentinel() -> None:
+@pytest.mark.parametrize("resource", ["ep", "sep"])
+def test_native_absent_characteristics_use_the_existing_sentinel(resource: str) -> None:
     snapshot = source()
+    # EP/SEP faces have neither a class nor numeric characteristics.
     snapshot.tables["face_revision"][0].update(
-        {"cost": None, "attack": None, "defense": None}
+        {
+            "type_code": resource,
+            "class_code": None,
+            "cost": None,
+            "attack": None,
+            "defense": None,
+        }
+    )
+    snapshot.tables["text_unit"].append(
+        {"id": "label-resource", "lang": "ja", "text": resource.upper()}
+    )
+    snapshot.tables["vocabulary"].append(
+        {"kind": "type", "code": resource, "label_unit_id": "label-resource"}
     )
     result = build_battle_inputs(snapshot, "jp")
     first = object_value(
         array(object_value(parse(result.snapshot.strip()))["faces"])[0]
     )
-    assert [first[field] for field in ("cost", "power", "hp")] == ["-", "-", "-"]
+    fields = ("card_type", "card_class", "cost", "power", "hp")
+    assert [first[field] for field in fields] == [resource.upper(), "-", "-", "-", "-"]
 
 
 def test_battle_rule_identity_closure_keeps_parent_ids_and_all_exact_versions() -> None:

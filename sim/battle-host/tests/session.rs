@@ -12,8 +12,9 @@ mod fixture;
 use core::array::from_fn;
 use serde_json::{Value, json};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_battle_contract::{ClientMessage, Command};
-use sve_battle_host::load::{Inputs, load};
+use sve_battle_contract::question::{MainIntent, QuestionShape, ShapeKind};
+use sve_battle_contract::{Answer, ClientMessage, Command};
+use sve_battle_host::load::load;
 use sve_battle_host::wire::{
     BattleInput, BattleUpdate, HostMessage, ReceiptResult, RequestId, Seat, Submit,
 };
@@ -24,10 +25,10 @@ use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck, Viewer};
 use sve_engine::host::HostLimits;
 
-/// Snapshot, keywords, selection, bound rules, references and identity, exactly as a host
-/// passes them.
-fn texts() -> &'static [String; 6] {
-    static TEXTS: OnceLock<[String; 6]> = OnceLock::new();
+/// Snapshot, keywords, selection and the rules bound to that snapshot, as `build:engine` binds
+/// them.
+fn texts() -> &'static [String; 4] {
+    static TEXTS: OnceLock<[String; 4]> = OnceLock::new();
     TEXTS.get_or_init(|| {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
         let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
@@ -40,36 +41,35 @@ fn texts() -> &'static [String; 6] {
         // The pin names the reviewed batch; generated test inputs keep the same rule capabilities.
         *rules.pointer_mut("/input/snapshot_sha256").unwrap() =
             Value::String(fixture::hex(snapshot.as_bytes()));
-        let references = serde_json::to_string(&fixture::references(&snapshot)).unwrap();
-        let rules = rules.to_string();
-        let identity = serde_json::to_string(&fixture::identity(&selection, &rules)).unwrap();
-        [snapshot, keywords, selection, rules, references, identity]
+        [snapshot, keywords, selection, rules.to_string()]
     })
 }
 
-fn inputs() -> Inputs<'static> {
-    let [snapshot, keywords, selection, rules, references, identity] = texts();
-    Inputs {
-        snapshot,
-        keywords,
-        selection,
-        rules,
-        references,
-        identity,
-    }
+/// The battle inputs document over these texts.
+fn document() -> &'static str {
+    static DOCUMENT: OnceLock<String> = OnceLock::new();
+    DOCUMENT.get_or_init(|| {
+        let [snapshot, keywords, selection, rules] = texts();
+        let references = serde_json::to_value(fixture::references(snapshot)).unwrap();
+        fixture::document(
+            [snapshot, keywords, selection, rules],
+            &references,
+            &fixture::identity(selection, rules),
+        )
+    })
 }
 
 fn selection() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
     SELECTED.get_or_init(|| {
-        let input = inputs();
+        let [snapshot, keywords, selection, rules] = texts();
         CurrentSelectionLoader::new()
             .unwrap()
             .select_with_rules(
-                input.snapshot,
-                input.keywords,
-                &serde_json::from_str(input.selection).unwrap(),
-                input.rules,
+                snapshot,
+                keywords,
+                &serde_json::from_str(selection).unwrap(),
+                rules,
                 &EngineIdentityInput::LegacyJp,
             )
             .unwrap()
@@ -88,11 +88,8 @@ fn session(control: [SeatControl; 2]) -> LocalSession {
             .collect(),
         evolve: Vec::new(),
     });
-    let references = BattleReferences::new(
-        &selection().prototypes,
-        fixture::references(inputs().snapshot),
-    )
-    .unwrap();
+    let references =
+        BattleReferences::new(&selection().prototypes, fixture::references(&texts()[0])).unwrap();
     let game =
         Game::start_player_game(selection().clone(), decks, Viewer::P2, "battle-host").unwrap();
     LocalSession::new(
@@ -201,7 +198,7 @@ fn setup() -> String {
 
 #[test]
 fn loaded_policy_seat_plays_inside_the_host_against_a_player_channel() {
-    let mut session = load(inputs(), &setup()).unwrap();
+    let mut session = load(document(), &setup()).unwrap();
     let [first, second] = play_out(&mut session);
     assert!(second.is_none(), "the policy seat has no channel");
     assert!(matches!(
@@ -211,4 +208,148 @@ fn loaded_policy_seat_plays_inside_the_host_against_a_player_channel() {
             ..
         })
     ));
+}
+
+/// P1 holds BP07-102 (look at the top three cards, may reveal a Bishop follower into the hand)
+/// on a mid-game board whose P1 deck is ten copies of `deck`.
+fn private_look(deck: &str) -> LocalSession {
+    let cards = |seat: &str, card: &str| {
+        (0..10_u8)
+            .map(|n| json!({"id":format!("{seat}-{n}"),"card":card}))
+            .collect::<Vec<_>>()
+    };
+    let player = |hand: &str, pile: Vec<Value>| {
+        json!({"leader":{"class":"ビショップ","life":20_u8},"pp":{"current":2_u8,"max":2_u8},
+            "ep":0_u8,"sep":0_u8,"zones":{"hand":[{"id":hand,"card":"BP07-102"}],"deck":pile}})
+    };
+    let position = json!({
+        "turn":{"active":"P1","first_player":"P1","elapsed_turns":{"P1":3_u8,"P2":2_u8},
+            "phase":"main"},
+        "players":{"P1":player("look", cards("p1", deck)),"P2":player("idle", cards("p2", "BP10-122"))}
+    });
+    let game = Game::from_selected_effects(
+        selection().clone(),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "private-look",
+    )
+    .unwrap();
+    let references =
+        BattleReferences::new(&selection().prototypes, fixture::references(&texts()[0])).unwrap();
+    LocalSession::new(
+        game,
+        references,
+        fixture::identity("", ""),
+        [SeatControl::Player, SeatControl::Player],
+        HostLimits::default(),
+    )
+}
+
+/// The intent playing P1's BP07-102.
+fn play_look(update: &BattleUpdate, intents: &[MainIntent]) -> Answer {
+    let intent = intents.iter().find_map(|intent| match intent {
+        MainIntent::Play { id, source, .. }
+            if update
+                .observation
+                .objects
+                .get(source)
+                .is_some_and(|object| object.card.printing_id == "test-BP07-102") =>
+        {
+            Some(id.clone())
+        }
+        MainIntent::Play { .. }
+        | MainIntent::Activate { .. }
+        | MainIntent::Evolve { .. }
+        | MainIntent::Attack { .. }
+        | MainIntent::EndPhase { .. } => None,
+    });
+    Answer::ActionWindow {
+        intent: intent.unwrap(),
+        target: None,
+    }
+}
+
+/// P1 plays the looking amulet and gives the smallest answer to everything it is asked until its
+/// main window returns. Returns every message P2 received and each stop P1 was asked at, with the
+/// number of candidates of a pick.
+fn look_and_decline(deck: &str) -> (Vec<String>, Vec<(ShapeKind, Option<usize>)>) {
+    let mut session = private_look(deck);
+    let mut waiting = Vec::new();
+    let mut stops = Vec::new();
+    let mut latest = None;
+    let mut deliver = |out: Vec<Delivery>, slot: &mut Option<BattleUpdate>| {
+        for delivery in out {
+            if delivery.seat == Seat::P2 {
+                waiting.push(serde_json::to_string(&delivery.message).unwrap());
+                continue;
+            }
+            if let HostMessage::Update(update) = delivery.message {
+                *slot = Some(*update);
+            }
+        }
+    };
+    deliver(session.start(), &mut latest);
+    let mut played = false;
+    for request in 0..10_u8 {
+        let update = latest.clone().unwrap();
+        let BattleInput::Question { question } = &update.input else {
+            panic!("P1 always answers here: {:?}", update.input);
+        };
+        let answer = if let QuestionShape::ActionWindow { intents } = &question.shape {
+            if played {
+                return (waiting, stops);
+            }
+            played = true;
+            play_look(&update, intents)
+        } else {
+            let candidates = if let QuestionShape::Select { selection } = &question.shape {
+                Some(selection.candidates.len())
+            } else {
+                None
+            };
+            stops.push((question.shape.kind(), candidates));
+            fixture::passive(question)
+        };
+        let message = ClientMessage::Submit(Submit {
+            request_id: RequestId::new(format!("r{request}")),
+            command: Command::Answer {
+                answer,
+                question_id: question.id.clone(),
+            },
+        });
+        deliver(
+            session.submit_named("p1", &serde_json::to_string(&message).unwrap()),
+            &mut latest,
+        );
+    }
+    panic!("the main window did not return");
+}
+
+#[test]
+fn a_private_look_with_or_without_a_pick_sends_the_waiting_seat_the_same_messages() {
+    // Bishop followers on top give P1 a pick it declines; neutral cards leave nothing to pick, and
+    // the engine still asks the same empty pick rather than skipping a stop P2 could notice.
+    let (with_pick, offered) = look_and_decline("BP22-102");
+    let (without_pick, empty) = look_and_decline("BP10-122");
+    assert_eq!(
+        offered,
+        [
+            (ShapeKind::Choose, None),
+            (ShapeKind::Select, Some(3)),
+            (ShapeKind::Order, None)
+        ]
+    );
+    assert_eq!(
+        empty,
+        [
+            (ShapeKind::Choose, None),
+            (ShapeKind::Select, Some(0)),
+            (ShapeKind::Order, None)
+        ]
+    );
+    assert_eq!(
+        with_pick, without_pick,
+        "P2's updates, update_seq and animate never depend on P1's private candidates"
+    );
 }

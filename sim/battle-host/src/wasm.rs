@@ -2,7 +2,7 @@
 //! exactly one runs at a time. Seat names and messages are validated by the session, so
 //! a malformed call stops interaction instead of throwing past it.
 
-use crate::load::{Inputs, load};
+use crate::load::load;
 use crate::session::{Delivery, LocalSession};
 use wasm_bindgen::prelude::{JsError, wasm_bindgen};
 
@@ -15,29 +15,14 @@ pub struct Session {
 
 #[wasm_bindgen]
 impl Session {
-    /// Create a match from downloaded inputs and a JSON match setup.
+    /// Create a match from the battle inputs document `build:engine` wrote and a JSON match
+    /// setup.
     ///
     /// # Errors
     /// Throws `format`, `selection`, `identity`, `references` or `match`, never engine
     /// diagnostics.
     #[wasm_bindgen(constructor)]
-    pub fn new(
-        snapshot: &str,
-        keywords: &str,
-        selection: &str,
-        rules: &str,
-        references: &str,
-        identity: &str,
-        setup: &str,
-    ) -> Result<Self, JsError> {
-        let inputs = Inputs {
-            snapshot,
-            keywords,
-            selection,
-            rules,
-            references,
-            identity,
-        };
+    pub fn new(inputs: &str, setup: &str) -> Result<Self, JsError> {
         load(inputs, setup)
             .map(|inner| Self { inner })
             .map_err(|error| JsError::new(error.code()))

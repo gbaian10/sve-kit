@@ -5,7 +5,6 @@ import type {
   BattleUpdate,
   Command,
   InitMessage,
-  MatchInputs,
   MatchOptions,
   Receipt,
   Seat,
@@ -173,7 +172,6 @@ function defaultWorker(): BattleWorker {
 }
 
 export function startLocalBattle(
-  inputs: MatchInputs,
   options: MatchOptions,
   createWorker: () => BattleWorker = defaultWorker,
 ): LocalBattle {
@@ -186,7 +184,7 @@ export function startLocalBattle(
     channels[seat] = new SeatChannel(seat, port1)
     ports[seat] = port2
   })
-  worker.postMessage({ kind: "init", inputs, options, ports }, Object.values(ports))
+  worker.postMessage({ kind: "init", options, ports }, Object.values(ports))
   return {
     channels,
     terminate() {

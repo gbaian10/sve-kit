@@ -1,4 +1,4 @@
-//! Build a local session from host-supplied text; nothing reads the filesystem.
+//! Build a local session from the battle inputs document; nothing reads the filesystem.
 
 use crate::session::{LocalSession, SeatControl};
 use crate::wire::{Identity, Region, Seat, viewer_of};
@@ -88,49 +88,55 @@ impl LoadError {
     }
 }
 
-/// Inputs exactly as the host downloaded them.
-#[derive(Clone, Copy, Debug)]
-pub struct Inputs<'text> {
+/// The battle inputs document `build:engine` writes from one verified public export: the
+/// reader's native snapshot and references, the programs and engine rules bound to those exact
+/// snapshot bytes, and the content identity naming them.
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct Inputs {
     /// Engine card snapshot (JSON lines).
-    pub snapshot: &'text str,
+    snapshot: String,
     /// Keyword registry.
-    pub keywords: &'text str,
+    keywords: String,
     /// Current effect selection (JSON).
-    pub selection: &'text str,
+    selection: String,
     /// Engine rule resources bound to this snapshot.
-    pub rules: &'text str,
-    /// Printing, wording and rule identities produced with the snapshot by the same reader (JSON).
-    pub references: &'text str,
-    /// The contract `Identity` (JSON): the verified public manifest the snapshot and references
-    /// were read from, the programs, the engine build and the rules. Each seat receives it in
-    /// `Ready`.
-    pub identity: &'text str,
+    rules: String,
+    /// Printing, wording and rule identities produced with the snapshot by the same reader.
+    references: ReferenceInput,
+    /// The verified public manifest, the programs, the engine build and the rules; each seat
+    /// receives it in `Ready`.
+    identity: Identity,
 }
 
 /// Select the effects the decks can reach, bind the snapshot's references, check the whole
 /// match closure, start the opening and bind the seat controls.
 ///
+/// `inputs` is the battle inputs document (JSON) exactly as `build:engine` wrote it.
+///
 /// # Errors
 /// Returns the failing stage without engine diagnostics.
-pub fn load(inputs: Inputs<'_>, setup: &str) -> Result<LocalSession, LoadError> {
+pub fn load(inputs: &str, setup: &str) -> Result<LocalSession, LoadError> {
     let setup: MatchSetup = serde_json::from_str(setup).map_err(|_error| LoadError::Format)?;
-    let selection: Value =
-        serde_json::from_str(inputs.selection).map_err(|_error| LoadError::Format)?;
-    let references: ReferenceInput =
-        serde_json::from_str(inputs.references).map_err(|_error| LoadError::Format)?;
-    let identity: Identity =
-        serde_json::from_str(inputs.identity).map_err(|_error| LoadError::Format)?;
+    let Inputs {
+        snapshot,
+        keywords,
+        selection: programs,
+        rules,
+        references,
+        identity,
+    } = serde_json::from_str(inputs).map_err(|_error| LoadError::Format)?;
+    let selection: Value = serde_json::from_str(&programs).map_err(|_error| LoadError::Format)?;
     let region = match identity.region {
         Region::Jp => "jp",
         Region::En => "en",
     };
     // The engine build cannot hash itself; the other identities must name exactly these bytes.
-    if identity.programs.sha256 != hex(inputs.selection)
-        || identity.rules.sha256 != hex(inputs.rules)
-    {
+    if identity.programs.sha256 != hex(&programs) || identity.rules.sha256 != hex(&rules) {
         return Err(LoadError::Identity);
     }
-    if references.region != region {
+    // The references name the exact native bytes they were read with, not a display catalogue.
+    if references.region != region || references.snapshot_sha256 != hex(&snapshot) {
         return Err(LoadError::References);
     }
     let [first, second] = setup.decks;
@@ -141,10 +147,10 @@ pub fn load(inputs: Inputs<'_>, setup: &str) -> Result<LocalSession, LoadError> 
             // Permanent printing identities arrive separately as references, never inferred.
             Game::select_player_decks(
                 &loader,
-                inputs.snapshot,
-                inputs.keywords,
+                &snapshot,
+                &keywords,
                 &selection,
-                Some((inputs.rules, &EngineIdentityInput::LegacyJp)),
+                Some((&rules, &EngineIdentityInput::LegacyJp)),
                 &decks,
             )
         })
@@ -152,11 +158,12 @@ pub fn load(inputs: Inputs<'_>, setup: &str) -> Result<LocalSession, LoadError> 
     // Every face of the snapshot, not only the decks' reach, must have an exact identity.
     let references = BattleReferences::new(&selected.prototypes, references)
         .map_err(|_error| LoadError::References)?;
-    // The engine matches the wording and rule manifests with each other; rules supplied without
-    // wording are matched only here, against the verified manifest this game is pinned to.
+    // The engine matches the wording and rule manifests with each other; here they must name the
+    // verified manifest this game is pinned to. References naming none were not read from it.
     if references
         .manifest_sha256()
-        .is_some_and(|manifest| manifest.strip_prefix("sha256:") != Some(&identity.snapshot.sha256))
+        .and_then(|manifest| manifest.strip_prefix("sha256:"))
+        != Some(identity.snapshot.sha256.as_str())
     {
         return Err(LoadError::References);
     }

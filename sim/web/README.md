@@ -34,6 +34,15 @@ matching binary. `build:all` (so also `deploy:dev`) and `check:all` run it first
 web job. Type checking (including the pre-push hook) and Vitest import the generated glue, so run
 `bun run build:engine` once after a fresh checkout and again after engine changes.
 
+The Worker loads every match from `generated/battle-inputs.json` beside the engine; callers pass
+only decks, controls and limits, never inputs. With `SVE_BATTLE_EXPORT` set to the absolute root of
+a verified public export, `build:engine` writes that document: carddb's `snapshot battle-inputs` reads the export into the
+native snapshot, its reference identities for every catalogue face and the engine rules bound to
+those exact bytes; `author check` supplies the whole current effect selection over the JP card batch
+in `tests/engine/card-input.json`. Its identity names the export's manifest, the selection, the rules
+and the built `engine_bg.wasm`. The host refuses any of these that do not match each other. Without
+the document the Worker reports a load error.
+
 Set `SVE_DEV_TLS_CERT` and `SVE_DEV_TLS_KEY` to absolute paths to use a certificate issued by a locally trusted CA, such as a mkcert certificate for a LAN IP. For example: `SVE_DEV_TLS_CERT=/path/to/cert.pem SVE_DEV_TLS_KEY=/path/to/key.pem bun run dev:lan`.
 
 ### Real data (4.0.0 preview export)

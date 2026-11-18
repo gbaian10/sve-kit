@@ -12,26 +12,36 @@ beforeAll(() => {
   initSync({ module: readFileSync(path.join(import.meta.dirname, "generated/engine_bg.wasm")) })
 })
 
-const keywords = JSON.stringify({ format: 1, kind: "keyword_registry", keywords: {} })
-const selection = JSON.stringify({ documents: [], authors: [] })
-const references = JSON.stringify({
-  region: "jp",
-  snapshot_sha256: "0".repeat(64),
-  faces: [],
-  wording: null,
-  rules: null,
-})
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex")
 const content = (id: string, sha: string) => ({ id, sha256: sha })
-/** Names exactly the selection and rules below; the snapshot and engine are stated by the host. */
-const identity = (rules: string) =>
-  JSON.stringify({
-    snapshot: content("snapshot", "1".repeat(64)),
-    programs: content("programs", sha256(selection)),
-    engine: content("engine", "2".repeat(64)),
-    rules: content("rules", sha256(rules)),
-    region: "jp",
+const selection = JSON.stringify({ documents: [], authors: [] })
+
+/** A battle inputs document over an empty snapshot whose identity names the stated programs. */
+function inputs(
+  edit: { selection?: string; references?: unknown; programs?: string } = {},
+): string {
+  const programs = edit.selection ?? selection
+  return JSON.stringify({
+    snapshot: "",
+    keywords: JSON.stringify({ format: 1, kind: "keyword_registry", keywords: {} }),
+    selection: programs,
+    rules: "{}",
+    references: edit.references ?? {
+      region: "jp",
+      snapshot_sha256: sha256(""),
+      faces: [],
+      wording: null,
+      rules: null,
+    },
+    identity: {
+      snapshot: content("snapshot", "1".repeat(64)),
+      programs: content("programs", sha256(edit.programs ?? programs)),
+      engine: content("engine", "2".repeat(64)),
+      rules: content("rules", sha256("{}")),
+      region: "jp",
+    },
   })
+}
 const deck = { construction: { kind: "class", value: "c" }, main: ["x"], evolve: [] }
 const setup = JSON.stringify({
   decks: [deck, deck],
@@ -43,21 +53,10 @@ const setup = JSON.stringify({
 
 describe("engine WebAssembly", () => {
   it("rejects malformed setup and unusable inputs with codes only", () => {
-    const stated = identity("{}")
-    expect(() => new Session("", keywords, selection, "{}", references, stated, "{}")).toThrow(
-      /^format$/,
-    )
-    expect(() => new Session("", keywords, "[", "{}", references, stated, setup)).toThrow(
-      /^format$/,
-    )
-    expect(() => new Session("", keywords, selection, "{}", "{}", stated, setup)).toThrow(
-      /^format$/,
-    )
-    expect(
-      () => new Session("", keywords, selection, "{}", references, identity("[]"), setup),
-    ).toThrow(/^identity$/)
-    expect(() => new Session("", keywords, selection, "{}", references, stated, setup)).toThrow(
-      /^selection$/,
-    )
+    expect(() => new Session(inputs(), "{}")).toThrow(/^format$/)
+    expect(() => new Session(inputs({ selection: "[" }), setup)).toThrow(/^format$/)
+    expect(() => new Session(inputs({ references: {} }), setup)).toThrow(/^format$/)
+    expect(() => new Session(inputs({ programs: "[]" }), setup)).toThrow(/^identity$/)
+    expect(() => new Session(inputs(), setup)).toThrow(/^selection$/)
   })
 })
