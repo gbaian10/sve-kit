@@ -6,7 +6,24 @@ use sve_battle_contract::{
 use sve_engine::ir::lowering::ExpandedLowerer;
 use sve_engine::ir::{CardProgram, WellFormedCardProgram};
 
-fn local_look(hidden: &str) -> LocalSession {
+fn local_look(hidden: &str, quick_hand: Option<&str>) -> LocalSession {
+    local_game(
+        hidden,
+        quick_hand,
+        &json!([
+            {"look":{"top":{"who":"self","n":1_i32},"bind":"seen"}},
+            {"shuffle":{"who":"self"}}
+        ]),
+        &Value::Null,
+    )
+}
+
+fn local_game(
+    hidden: &str,
+    quick_hand: Option<&str>,
+    steps: &Value,
+    random: &Value,
+) -> LocalSession {
     let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3")].join("\n");
     let registry = json!({"format":1_i32,"kind":"keyword_registry","keywords":{}}).to_string();
     let effects = json!({"format":1_i32,"kind":"effect_set","cards":{
@@ -28,16 +45,10 @@ fn local_look(hidden: &str) -> LocalSession {
             "construction":"class","zones":{"field":[{"id":"source","card":"t-small"}],
                 "deck":[{"id":"hidden","card":hidden},{"id":"tail","card":"t-small"}]}},
         "P2":{"leader":{"class":"ニュートラル","life":20_i32},"pp":{"current":2_i32,"max":2_i32},
-            "construction":"class","zones":{"deck":[{"id":"other","card":"t-small"}]}}
+            "construction":"class","zones":{"deck":[{"id":"other","card":"t-small"}],
+                "hand":quick_hand.map(|card| json!({"id":"quick-secret","card":card})).into_iter().collect::<Vec<_>>()}}
     }});
-    let mut game = Game::new(
-        Arc::new(catalog),
-        &setup,
-        &Value::Null,
-        &Value::Null,
-        "no-stop",
-    )
-    .unwrap();
+    let mut game = Game::new(Arc::new(catalog), &setup, &Value::Null, random, "no-stop").unwrap();
     let program = ExpandedLowerer::new()
         .unwrap()
         .lower(&json!({
@@ -51,9 +62,7 @@ fn local_look(hidden: &str) -> LocalSession {
                         "field":"effect","ordinal":null,"source_hash":"0".repeat(64),
                         "line_ordinal":0_i32,"role":"body","segments":[{"start":0_i32,"end":1_i32}]
                     }}],"ports":{"imports":{},"exports":{}},
-                    "activate":{"cost":{"pp":1_i32},"do":[
-                        {"look":{"top":{"who":"self","n":1_i32},"bind":"seen"}},
-                        {"shuffle":{"who":"self"}}]}}]
+                    "activate":{"cost":{"pp":1_i32},"do":steps}}]
             }}
         }))
         .unwrap()
@@ -129,8 +138,8 @@ fn update(deliveries: &[Delivery], seat: Seat) -> &BattleUpdate {
 
 #[test]
 fn a_look_without_a_question_is_delivered_once_to_its_seat() {
-    let mut a = local_look("t-small");
-    let mut b = local_look("t-large");
+    let mut a = local_look("t-small", None);
+    let mut b = local_look("t-large", None);
     let (a_out, b_out) = (activate(&mut a), activate(&mut b));
     assert!(applied(&a_out) && applied(&b_out));
     assert_eq!(update(&a_out, Seat::P2), update(&b_out, Seat::P2));
@@ -159,7 +168,7 @@ fn a_look_without_a_question_is_delivered_once_to_its_seat() {
 
 #[test]
 fn a_publicly_empty_quick_window_requires_an_explicit_pass() {
-    let mut session = local_look("t-small");
+    let mut session = local_look("t-small", None);
     let mut seats = Seats::default();
     seats.absorb(&session.start());
     let (turn_player, main) = seats.question().unwrap();
@@ -180,4 +189,66 @@ fn a_publicly_empty_quick_window_requires_an_explicit_pass() {
         actor,
         &answer_with(quick.id.as_str(), pass.clone(), "pass")
     )));
+}
+
+#[test]
+fn a_quick_window_with_private_cards_and_no_available_play_stays_unknown() {
+    let reach_quick = |card| {
+        let mut session = local_look("t-small", Some(card));
+        let mut seats = Seats::default();
+        seats.absorb(&session.start());
+        let (actor, main) = seats.question().unwrap();
+        session.submit(actor, &answer(&main, "end-main"))
+    };
+    let a = reach_quick("t-small");
+    let b = reach_quick("t-large");
+    assert_eq!(update(&a, Seat::P1), update(&b, Seat::P1));
+    for deliveries in [&a, &b] {
+        let BattleInput::Question { question } = &update(deliveries, Seat::P2).input else {
+            panic!("the Quick window remains open");
+        };
+        assert!(
+            matches!(&question.shape, QuestionShape::Quick { options, .. } if options.is_empty())
+        );
+        assert_eq!(question.auto_answer, AutoAnswer::Unknown);
+    }
+}
+
+#[test]
+fn a_fault_after_revealing_drops_the_rolled_back_notice_for_both_seats() {
+    let mut session = local_game(
+        "t-large",
+        None,
+        &json!([
+            {"look":{"top":{"who":"self","n":1_i32},"bind":"seen"}},
+            {"declare":{"kind":"number","bind":"one","min":1_i32,"max":1_i32}},
+            {"reveal":{"top":{"who":"self","n":2_i32},"bind":"shown"}},
+            {"shuffle":{"who":"self"}}
+        ]),
+        &json!({"shuffles":[{"player":"P1","result":["not-a-deck-member"]}]}),
+    );
+    let started = activate(&mut session);
+    assert!(applied(&started));
+    let stop = update(&started, Seat::P1);
+    assert!(matches!(stop.notices.as_slice(), [notice] if notice.kind == NoticeKind::Look));
+    let BattleInput::Question { question } = &stop.input else {
+        panic!("the number declaration is open");
+    };
+    let fault = session.submit(
+        Seat::P1,
+        &answer_with(
+            question.id.as_str(),
+            Answer::Integer {
+                value: 1_u32.into(),
+            },
+            "bad-shuffle",
+        ),
+    );
+    assert!(matches!(fault.first().map(|delivery| &delivery.message),
+        Some(HostMessage::Receipt(receipt)) if receipt.result() == ReceiptResult::EngineFault));
+    for seat in [Seat::P1, Seat::P2] {
+        let failed = update(&fault, seat);
+        assert!(matches!(failed.input, BattleInput::EngineFault { .. }));
+        assert_eq!(failed.notices, []);
+    }
 }
