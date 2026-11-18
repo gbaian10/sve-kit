@@ -122,7 +122,7 @@ function Body({
       )
     return <Text text={sample[field]} lang={language} bold={termEmphasis} />
   }
-  const big = field === "name" ? "text-16 font-bold" : "text-14 leading-effect"
+  const big = field === "name" ? "text-16 font-bold" : "text-14 leading-effect text-pretty"
   const original = render(ORIGINAL_SAMPLE, ORIGINAL_LANG)
   // Without a translation the card page shows the original and says so (except in Japanese).
   if (!translated)
@@ -145,7 +145,7 @@ function Body({
       </div>
     )
   return (
-    <div className="space-y-2 text-14 leading-effect">
+    <div className={cn("space-y-2", big)}>
       {render(translated, lang)}
       <OriginalBox>{original}</OriginalBox>
     </div>

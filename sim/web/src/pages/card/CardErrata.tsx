@@ -51,7 +51,7 @@ function Wording({
     />
   )
   return (
-    <p lang={lang} className="whitespace-pre-wrap">
+    <p lang={lang} className="text-pretty whitespace-pre-wrap">
       {side === "before" ? <del className="line-through decoration-2">{content}</del> : content}
     </p>
   )
@@ -80,7 +80,7 @@ function PairedWording({
   // JP-source translations keep their source alongside them, as the card text does.
   const showOriginal = prefs.effectLanguage === "both" || region === "jp"
   return (
-    <div className="space-y-2 text-16 leading-effect text-text-1">
+    <div className="space-y-2 text-16 leading-effect text-pretty text-text-1">
       <Wording text={translation} lang="zh-Hant" side={side} />
       {showOriginal && <OriginalBox>{source}</OriginalBox>}
     </div>

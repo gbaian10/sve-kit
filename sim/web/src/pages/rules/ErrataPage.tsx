@@ -86,7 +86,9 @@ export function ErrataPage() {
   )
   return (
     <div>
-      <p className="mb-6 max-w-2xl text-14 text-text-2">{t("errata.listDescription")}</p>
+      <p className="mb-6 max-w-2xl text-14 text-pretty text-text-2">
+        {t("errata.listDescription")}
+      </p>
       {rows.length > 0 ? (
         <div ref={imageRoot}>
           <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">

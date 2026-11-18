@@ -107,7 +107,7 @@ export function DeckImportPage() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-3 pb-6">
       <PageTitle>{t("decks.importTitle")}</PageTitle>
-      <p className="text-14 text-text-2">
+      <p className="text-14 text-pretty text-text-2">
         {params.has(CODE_PARAM) ? t("decks.importLinkHint") : t("decks.importHint")}
       </p>
       <textarea

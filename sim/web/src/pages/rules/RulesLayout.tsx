@@ -34,7 +34,7 @@ export function RulesLayout() {
           {onErrata ? t("errata.listTitle") : t("rules.comprehensive")}
         </h1>
         {!onErrata && (
-          <p className="mt-2 text-13 text-text-2">
+          <p className="mt-2 text-13 text-pretty text-text-2">
             <a
               href={OFFICIAL_RULES_URL[region]}
               target="_blank"
