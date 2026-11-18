@@ -58,7 +58,9 @@ export interface InitMessage {
 
 /** Seat port → Worker. */
 export type SeatRequest =
-  { kind: "submit"; submit: Submit } | { kind: "baseline"; request_id: string }
+  | { kind: "submit"; submit: Submit }
+  | { kind: "baseline"; request_id: string }
+  | { kind: "auto_answer"; enabled: boolean }
 
 /**
  * Worker → seat port. `baseline_start` precedes the deliveries answering that baseline request,

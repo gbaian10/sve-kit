@@ -506,6 +506,7 @@ fn look(id: u64, count: Expr<Nat>, mode: StepwiseMode) -> Located<Node> {
             },
             count,
             mode,
+            purpose: LookPurpose::Private,
         },
         id,
         "synthetic",

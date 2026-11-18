@@ -2,6 +2,7 @@ use super::super::player_pipeline::{answer, question};
 use super::nested_play::{Scenario, build};
 use super::*;
 use alloc::collections::BTreeMap;
+use sve_battle_contract::presentation::NoticeKind;
 use sve_engine::game::player::events::{
     ActionKind, EventKind, PlayerEvent, PresentationOp, ProvisionalBatch,
 };
@@ -201,6 +202,7 @@ fn paused_parent_with_a_full_field() -> Game {
         "do":[
             {"life":{"who":"self","delta":1}},
             {"choose":{"bind":"pause","from":{"who":"self","zone":"field","kind":"follower"},"n":1}},
+            {"look":{"top":{"who":"self","n":1},"bind":"seen"}},
             {"play_card":{"ref":"selected","cost":0}},
             {"life":{"who":"self","delta":10}}
         ]
@@ -214,7 +216,7 @@ fn paused_parent_with_a_full_field() -> Game {
     tree["cards"] = json!({"unit-amulet":template,"unit-follower":follower});
     let programs = lowerer().lower(&tree).unwrap();
 
-    let mut initial = setup(1, json!([]));
+    let mut initial = setup(1, json!([{"id":"deck-top","card":"unit-spell"}]));
     initial["players"]["P1"]["pp"] = json!({"current":3,"max":3});
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     let mut field = vec![json!({"id":"parent","card":"unit-amulet"})];
@@ -223,7 +225,7 @@ fn paused_parent_with_a_full_field() -> Game {
     initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"child","card":"unit-follower"}]);
     initial["players"]["P2"]["zones"]["field"] = json!([]);
     let mut game = Game::new(
-        catalog(),
+        Arc::clone(&board_fixture::fixture().unwrap().catalog),
         &initial,
         &Value::Null,
         &Value::Null,
@@ -233,6 +235,8 @@ fn paused_parent_with_a_full_field() -> Game {
     for (number, program) in &programs {
         game.load_internal_card(number, program).unwrap();
     }
+    game.load_internal_card("unit-spell", &card(vec![]))
+        .unwrap();
     game.advance_player_input();
     game.activate_internal_card(
         "parent",
@@ -293,6 +297,31 @@ fn a_rules_cancellation_of_the_child_never_withdraws_what_the_parent_already_sho
             "the undone child entry left no history: {kinds:?}"
         );
     }
+}
+
+#[test]
+fn a_cancelled_child_preserves_the_parents_look_in_the_same_submission() {
+    let mut game = paused_parent_with_a_full_field();
+    let refs = &board_fixture::fixture().unwrap().references;
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied
+    );
+    assert_eq!(game.take_battle_notices(Viewer::P1, refs).unwrap(), []);
+    assert_eq!(
+        answer(&mut game, Viewer::P1, Answer::Targets(vec![0])).kind,
+        SubmissionKind::Applied
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+        json!(["child"])
+    );
+    let notices = game.take_battle_notices(Viewer::P1, refs).unwrap();
+    assert!(
+        matches!(notices.as_slice(), [notice] if notice.kind == NoticeKind::Look
+        && matches!(notice.cards.as_slice(), [shown] if shown.card.printing_id == "printing-spell"))
+    );
+    assert_eq!(game.take_battle_notices(Viewer::P2, refs).unwrap(), []);
 }
 
 /// A parent ability that plays a follower and then a spell from the cemetery. The spell asks

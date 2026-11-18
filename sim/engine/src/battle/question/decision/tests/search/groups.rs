@@ -1,3 +1,4 @@
+use super::super::select::{project_game, submit_projected};
 use super::*;
 use crate::game::player::SubmissionKind;
 use sve_battle_contract::{GroupChoice, Nat as WireNat};
@@ -114,9 +115,15 @@ fn overlapping_eligible_groups_require_a_disjoint_explicit_assignment() {
         {"sel":{"who":"self","zone":"deck","kind":"follower"},"n":1_u32},
         {"sel":{"who":"self","zone":"deck","kind":"follower"},"n":1_u32}
     ],"to":"hand"});
+    let id = QuestionId::new("grouped-search".into());
     for actor in [Viewer::P1, Viewer::P2] {
         let mut game = make(actor, &search, &deck(), "unit-spell");
-        let (native, selection, binding) = projected(&game, actor);
+        let native = question(&game, actor).unwrap();
+        let (_, shape, binding) = project_game(&game, actor, &id).unwrap();
+        assert_eq!(binding.question().auto_answer, wire::AutoAnswer::Unknown);
+        let wire::QuestionShape::Select { selection } = shape else {
+            panic!("the grouped search is a selection");
+        };
         let first = selection.candidates.first().unwrap().id.clone();
         let last = selection.candidates.last().unwrap().id.clone();
         let mut answer = Answer::Select {
@@ -133,7 +140,7 @@ fn overlapping_eligible_groups_require_a_disjoint_explicit_assignment() {
             ),
             roles: vec![],
         };
-        assert_eq!(binding.decode(&answer), Err(AnswerError));
+        assert_eq!(binding.answer(actor, &id, &answer), Err(AnswerError));
         let Answer::Select {
             selected,
             groups: Some(groups),
@@ -144,7 +151,7 @@ fn overlapping_eligible_groups_require_a_disjoint_explicit_assignment() {
         };
         selected.push(last.clone());
         groups.last_mut().unwrap().selected = vec![last];
-        submit_exact(&mut game, &native, &binding, &answer);
+        submit_projected(&mut game, &native, &binding, &answer);
         assert_eq!(
             game.projection(View::Referee).unwrap()[seats(actor).0]["hand"],
             json!(["deck-0", "deck-2"])

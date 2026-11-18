@@ -12,6 +12,7 @@ import { type SlotArrangement, tableModel } from "../../battle/view/table"
 import { cn } from "../../components/ui/cn"
 import { prefsStore, useBattleMatPicture, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
+import { BattleNotices } from "./hud/BattleNotices"
 import { CARD_FRAMING } from "./hud/mat-crop"
 import { PileBrowser } from "./hud/PileBrowser"
 import { Plate } from "./hud/Plate"
@@ -489,6 +490,11 @@ export function BattleScreen({
           ) : null}
 
           <Hand hand={model.self.hand} layout={layout} />
+          <BattleNotices
+            notices={battle.notices}
+            dismiss={battle.dismissNotice}
+            style={{ left: layout.boardLeft, bottom: layout.handReserve + 8 }}
+          />
           {bar !== null ? (
             <SelectionBar
               shown={bar}

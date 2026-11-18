@@ -19,7 +19,7 @@ variants!(@visit Action {
     Damage { recipients: RecipientSet, amount: DamageAmount, flags: DamageFlags, source: ObjectView, batch: BatchPolicy } => ["action.damage"],
     Life { player: PlayerRef, change: NumericChange } => ["action.life"],
     Draw { player: PlayerRef, count: Expr<Int>, mode: StepwiseMode } => ["action.draw"],
-    Look { viewer: PlayerRef, zone: ZoneRef, count: Expr<Nat>, mode: StepwiseMode } => ["action.look"],
+    Look { viewer: PlayerRef, zone: ZoneRef, count: Expr<Nat>, mode: StepwiseMode, purpose: LookPurpose } => ["action.look"],
     Search { decision: DecisionId, player: PlayerRef, deck: PlayerRef, candidate: Binding<ObjectRef>, filter: Expr<Bool>, cardinality: Cardinality, groups: Option<SelectionConstraint>, destination: Option<SearchDestination>, continuation: SearchContinuation } => ["action.search", "receipt.move-after"],
     Reveal { objects: Selector } => ["action.reveal"],
     RevealUntil { deck: PlayerRef, candidate: Binding<ObjectRef>, predicate: Expr<Bool>, required: Expr<Nat> } => ["action.reveal-until"],
@@ -51,6 +51,18 @@ variants!(@visit Action {
     GameResult { players: PlayerSet, result: Outcome, source: AbilitySource } => ["action.game-result"],
     BoxPilot { subject: ObjectOperand, mode: BoxPilotMode } => ["action.box-pilot"]
 });
+/// Whether the instruction itself exposes a Look, or only prepares a later public reveal.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum LookPurpose {
+    /// Only the viewer looks at the cards.
+    Private,
+    /// The author asked to reveal these cards publicly.
+    PrepareReveal,
+}
+
+impl Walk for LookPurpose {
+    fn walk(&self, _visitor: &mut impl Visitor, _path: &str) {}
+}
 record!(MoveSpec { to: MoveDestination, initial_posture: Option<Posture>, entry_effects: Vec<Effect>, position: Option<Position>, order: Option<Decision> });
 variants!(
     /// R4-1 resolves these destinations separately for every moved object's owner.

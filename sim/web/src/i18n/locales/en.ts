@@ -1063,6 +1063,13 @@ export default {
     stopped: "The match data has a problem and cannot continue. Reload the page.",
     table: "Battle table",
     leave: "Leave",
+    notices: {
+      title: "Card notices ({{count}})",
+      look: "Cards you looked at",
+      temporary_reveal: "Cards revealed",
+      empty: "No cards were seen.",
+      dismiss: "Dismiss",
+    },
     settings: {
       title: "Battle settings",
       own: "These stay on this device; your opponent never sees your playmat.",

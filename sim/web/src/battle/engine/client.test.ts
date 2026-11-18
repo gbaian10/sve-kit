@@ -4,6 +4,7 @@ import path from "node:path"
 
 import { afterEach, describe, expect, it } from "vitest"
 
+import type { Notice } from "../contract"
 import {
   type BattleWorker,
   ChannelClosedError,
@@ -125,10 +126,12 @@ describe("HotSeat", () => {
     const p1 = pair("p1")
     const p2 = pair("p2")
     const shown: [Seat, number | undefined][] = []
-    const hot = new HotSeat({ p1: p1.channel, p2: p2.channel }, viewer, (seat, latest) => {
+    let notices: readonly Notice[] = []
+    const hot = new HotSeat({ p1: p1.channel, p2: p2.channel }, viewer, (seat, latest, pending) => {
       shown.push([seat, latest?.update_seq])
+      notices = pending
     })
-    return { hot, p1, p2, shown }
+    return { hot, p1, p2, shown, notices: () => notices }
   }
 
   /** Reply to a baseline request the way the Worker does: marker first, then the update. */
@@ -139,14 +142,22 @@ describe("HotSeat", () => {
   }
 
   it("shows only the viewer and reloads that seat after a switch", async () => {
-    const { hot, p1, p2, shown } = hotSeat()
-    p1.worker.postMessage(update("p1", 1))
-    p2.worker.postMessage(update("p2", 1))
+    const { hot, p1, p2, shown, notices } = hotSeat()
+    const look = (owner: Seat): Notice => ({
+      id: "n1",
+      kind: "look",
+      source: null,
+      cards: [{ card: { printing_id: `secret-${owner}`, face: 0 }, owner, position: 0 }],
+    })
+    p1.worker.postMessage({ ...update("p1", 1), notices: [look("p1")] })
+    p2.worker.postMessage({ ...update("p2", 1), notices: [look("p2")] })
     await tick()
     expect(shown).toEqual([["p1", 1]])
+    expect(notices()).toEqual([look("p1")])
 
     hot.switchTo("p2")
     expect(hot.latest).toBeUndefined()
+    expect(notices()).toEqual([])
     p1.worker.postMessage(update("p1", 2))
     await tick()
     expect(p2.requests).toEqual([{ kind: "baseline", request_id: "p2-b1" }])
@@ -154,6 +165,7 @@ describe("HotSeat", () => {
     p2.worker.postMessage(update("p2", 2))
     await tick()
     expect(hot.viewer).toBe("p2")
+    expect(notices()).toEqual([look("p2")])
     expect(shown).toEqual([
       ["p1", 1],
       ["p2", undefined],
@@ -162,9 +174,23 @@ describe("HotSeat", () => {
     ])
 
     void hot.submit(concede)
+    hot.setAutoAnswer(true)
     await tick()
-    expect(p2.requests.at(-1)).toMatchObject({ kind: "submit" })
+    expect(p2.requests.slice(1)).toMatchObject([
+      { kind: "submit" },
+      { kind: "auto_answer", enabled: true },
+    ])
     expect(p1.requests).toEqual([])
+
+    hot.dismissNotice("n1")
+    p2.worker.postMessage({ ...update("p2", 3), notices: [look("p2")] })
+    await tick()
+    expect(notices()).toEqual([])
+    hot.switchTo("p1")
+    await tick()
+    reply(p1.worker, p1.requests[0], update("p1", 2))
+    await tick()
+    expect(notices()).toEqual([look("p1")])
   })
 
   it("does not take an older queued baseline as the reply to this switch", async () => {

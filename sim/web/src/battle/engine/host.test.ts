@@ -4,7 +4,7 @@ import path from "node:path"
 
 import { describe, expect, it } from "vitest"
 
-import { validateHostMessage } from "../contract"
+import { type Notice, type Submit, validateHostMessage } from "../contract"
 import { BattleHost, type EngineSession, type SeatPort } from "./host"
 import type {
   BattleUpdate,
@@ -116,6 +116,104 @@ function setUp(
 const settle = () => new Promise((resolve) => setTimeout(resolve, 0))
 
 describe("BattleHost", () => {
+  it("uses the latest preference for unsent answers and delivers Look before continuing", async () => {
+    const p1 = new FakePort()
+    const p2 = new FakePort()
+    const commands: { seat: string; submit: Submit }[] = []
+    const look: Notice = {
+      id: "only-p1",
+      kind: "look",
+      source: null,
+      cards: [{ card: { printing_id: "secret", face: 0 }, owner: "p1", position: 0 }],
+    }
+    const pass = { kind: "quick", option: null } as const
+    const ask = (id: string, seq: number, publicProof: boolean, notices: Notice[]): Delivery => ({
+      seat: "p1",
+      message: {
+        ...waiting,
+        viewer: "p1",
+        observation: { ...waiting.observation, viewer: "p1" },
+        update_seq: seq,
+        notices,
+        input: {
+          kind: "question",
+          question: {
+            id,
+            actor: "p1",
+            purpose: "quick_window",
+            use: "quick",
+            processing: {
+              stage: "quick",
+              controller: null,
+              actor: "p1",
+              source: null,
+              subject: null,
+              rule: null,
+              procedure: null,
+              declared: [],
+              payments: [],
+            },
+            shape: { kind: "quick", window: "end_phase", options: [] },
+            auto_answer: { kind: "unique", answer: pass, public: publicProof },
+            assistance: null,
+            rules: null,
+          },
+        },
+      },
+    })
+    const first = ask("q-first", 1, true, [look])
+    const following = ask("q-second", 2, false, [])
+    const session: EngineSession = {
+      start: () => JSON.stringify([first, update("p2", 1)]),
+      submit(seat, message) {
+        const submit = JSON.parse(message) as Submit
+        commands.push({ seat, submit })
+        return JSON.stringify([
+          {
+            seat,
+            message: {
+              kind: "receipt",
+              request_id: submit.request_id,
+              result: "applied",
+              rejection: null,
+            },
+          },
+          following,
+        ])
+      },
+      baseline: () => JSON.stringify([]),
+    }
+    setUp(() => Promise.resolve(session), { p1, p2 }, options, validateHostMessage)
+    p2.send({ kind: "auto_answer", enabled: true })
+    await settle()
+    expect(commands).toEqual([])
+    p1.send({ kind: "auto_answer", enabled: true })
+    p1.send({ kind: "auto_answer", enabled: false })
+    await settle()
+    await settle()
+    expect(commands).toEqual([])
+    expect(p1.received).toEqual([first.message])
+    p1.send({ kind: "auto_answer", enabled: true })
+    await settle()
+    await settle()
+    expect(commands).toEqual([
+      {
+        seat: "p1",
+        submit: {
+          kind: "submit",
+          request_id: "local-auto-q-first",
+          command: { kind: "answer", question_id: "q-first", answer: pass },
+        },
+      },
+    ])
+    expect(p1.received).toEqual([
+      first.message,
+      { kind: "receipt", request_id: "local-auto-q-first", result: "applied", rejection: null },
+      following.message,
+    ])
+    expect(p2.received).toEqual([update("p2", 1).message])
+  })
+
   it("queues requests sent during loading and runs every command in arrival order", async () => {
     const p1 = new FakePort()
     const p2 = new FakePort()

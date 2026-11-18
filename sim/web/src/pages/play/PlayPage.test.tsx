@@ -395,6 +395,32 @@ describe("BattleScreen", () => {
     expect(await screen.findByRole("status")).toHaveTextContent("正在載入對局")
   })
 
+  it("keeps a Look readable after a later board update and lets the viewer dismiss it", async () => {
+    const board = SCENES[0].script.p1.find((message) => message.kind === "update")
+    if (board === undefined) throw new Error("the scene needs a baseline")
+    await renderRoutes(
+      routes([
+        {
+          ...board,
+          notices: [
+            {
+              id: "n1",
+              kind: "look",
+              source: null,
+              cards: [{ card: { printing_id: "looked-card", face: 0 }, owner: "p1", position: 0 }],
+            },
+          ],
+        },
+        { ...board, update_seq: board.update_seq + 1 },
+      ]),
+    )
+    const user = userEvent.setup()
+    await user.click(await screen.findByText("卡片通知（1）"))
+    expect(screen.getByText("looked-card")).toBeVisible()
+    await user.click(screen.getByRole("button", { name: "關閉通知" }))
+    expect(screen.queryByText("looked-card")).toBeNull()
+  })
+
   it("stops for good when the host reports an error", async () => {
     await renderRoutes(routes([{ kind: "host_error", format: 1, reason: "projection" }]))
     expect(await screen.findByRole("alert")).toHaveTextContent("無法繼續")

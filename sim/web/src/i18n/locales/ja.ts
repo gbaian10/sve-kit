@@ -1044,6 +1044,13 @@ export default {
     },
   },
   play: {
+    notices: {
+      title: "カードの通知（{{count}}）",
+      look: "確認したカード",
+      temporary_reveal: "公開されたカード",
+      empty: "確認したカードはありません。",
+      dismiss: "閉じる",
+    },
     title: "対戦",
     loading: "対戦を読み込んでいます…",
     stopped: "対戦データに問題があり、続行できません。ページを再読み込みしてください。",

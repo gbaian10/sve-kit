@@ -8,6 +8,7 @@ use crate::random::Random;
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::fmt::Write as _;
+use core::mem::take;
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
@@ -247,6 +248,9 @@ impl Game {
         mut target: Self,
         published: &PublishedKnowledge,
     ) -> Result<()> {
+        // The child snapshot can already contain disclosures from its parent.
+        self.player_notices
+            .truncate_pending_to(&target.player_notices);
         target.state.ir_epoch = self.state.ir_epoch.max(target.state.ir_epoch);
         for (seat, previous) in &published.0 {
             let knowledge = target.state.knowledge.entry(seat.clone()).or_default();
@@ -271,6 +275,8 @@ impl Game {
             }
         }
         target.player_events.restore(&published.1);
+        // Keep the delivery counter from the live channels.
+        target.player_notices = take(&mut self.player_notices);
         *self = target;
         Ok(())
     }

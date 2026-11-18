@@ -194,6 +194,37 @@ pub(in crate::game) fn observed_processing(
     Ok(contexts)
 }
 
+pub(in crate::game) fn public_number_declaration(game: &Game) -> bool {
+    let Some(execution) = game
+        .typed
+        .as_ref()
+        .filter(|execution| execution.nested.is_none())
+    else {
+        return false;
+    };
+    let Some((
+        _,
+        Wait::Integer {
+            declaration: Some(receipt),
+            ..
+        },
+    )) = &execution.waiting
+    else {
+        return false;
+    };
+    execution
+        .plan
+        .as_ref()
+        .is_some_and(|plan| plan.has_unconditional_number(*receipt))
+        && [Viewer::P1, Viewer::P2].into_iter().all(|viewer| {
+            execution
+                .processing_disclosure
+                .viewers
+                .get(&viewer)
+                .is_some_and(|disclosure| disclosure.stage == Some(ProcessingStage::Resolve))
+        })
+}
+
 fn append_contexts(
     game: &Game,
     execution: &Execution,

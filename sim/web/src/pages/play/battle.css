@@ -2625,6 +2625,39 @@
   text-align: center;
 }
 
+.bp-revelations {
+  position: absolute;
+  z-index: 6;
+  max-width: min(18rem, 70vw);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  background: var(--surface-1);
+  color: var(--text-1);
+  font-size: 12px;
+}
+
+.bp-revelations summary {
+  cursor: pointer;
+}
+
+.bp-revelations-log {
+  display: grid;
+  gap: 8px;
+  max-height: min(35dvh, 18rem);
+  overflow: auto;
+}
+
+.bp-revelations-log h2 {
+  margin-block: 6px 0;
+  font-size: inherit;
+}
+
+.bp-revelations-log ul {
+  margin-block: 4px;
+  padding-inline-start: 18px;
+}
+
 /* A face whose image is not in yet keeps the card's box. */
 .bp-face.is-missing {
   position: relative;

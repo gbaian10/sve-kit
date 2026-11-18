@@ -813,6 +813,7 @@ impl Checker {
                 zone,
                 count,
                 mode,
+                ..
             } => {
                 self.stepwise(mode, viewer, super::StepwiseTiming::AfterLook)?;
                 self.player(viewer)?;

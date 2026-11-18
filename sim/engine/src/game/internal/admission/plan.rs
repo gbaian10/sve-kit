@@ -3,8 +3,8 @@ use crate::ir::events::subscriptions;
 use crate::ir::lowering::CurrentCardProgram;
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
-    Ability, AbilityId, Action, CardProgram, Instruction, InstructionId, Located, Program,
-    SourceSpan, WellFormedCardProgram, WellFormedProgram,
+    Ability, AbilityId, Action, CardProgram, Instruction, InstructionId, Located, Node, Program,
+    ReceiptId, SourceSpan, WellFormedCardProgram, WellFormedProgram,
 };
 use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
@@ -206,7 +206,7 @@ impl PlannedAbility {
         walk::ability(definition, &mut compiler);
         Ok(Self {
             definition: owner,
-            plan: Arc::new(compiler.finish()?),
+            plan: Arc::new(compiler.finish(definition.node.body.as_ref())?),
         })
     }
     pub(in crate::game::internal) fn event_alternatives(self) -> Vec<Self> {
@@ -239,12 +239,16 @@ pub(in crate::game::internal) struct BodyPlan {
     tokens: BTreeMap<InstructionId, tokens::TokenPlan>,
     grants: Vec<(Option<Instruction>, PlannedAbility)>,
     delays: BTreeMap<InstructionId, (Instruction, Arc<Self>)>,
+    unconditional_numbers: Vec<ReceiptId>,
 }
 impl BodyPlan {
     fn compile(program: &Program, source: &SourceSpan) -> Result<Self> {
         let mut compiler = Compiler::new(source);
         walk::program(program, "", &mut compiler);
-        compiler.finish()
+        compiler.finish(Some(program))
+    }
+    pub(in crate::game::internal) fn has_unconditional_number(&self, receipt: ReceiptId) -> bool {
+        self.unconditional_numbers.contains(&receipt)
     }
     pub(in crate::game::internal) fn token(
         &self,
@@ -343,7 +347,7 @@ impl Compiler {
             error: None,
         }
     }
-    fn finish(self) -> Result<BodyPlan> {
+    fn finish(self, body: Option<&Program>) -> Result<BodyPlan> {
         if let Some(error) = self.error {
             return Err(error);
         }
@@ -351,6 +355,7 @@ impl Compiler {
             tokens: self.tokens,
             grants: self.grants,
             delays: self.delays,
+            unconditional_numbers: unconditional_numbers(body),
         })
     }
     fn observe(&mut self, node: NodeRef<'_>) -> Result<Traversal> {
@@ -403,6 +408,27 @@ impl Compiler {
         }
         Ok(Traversal::Descend)
     }
+}
+
+fn unconditional_numbers(body: Option<&Program>) -> Vec<ReceiptId> {
+    // A literal bound inside a branch can still expose which private path was taken.
+    let mut numbers = Vec::new();
+    for step in body.into_iter().flat_map(|program| &program.steps) {
+        let Node::Instruction { instruction } = &step.node else {
+            break;
+        };
+        if instruction.precondition.is_some() {
+            break;
+        }
+        if matches!(instruction.action, Action::Look { .. }) {
+            continue;
+        }
+        if !matches!(instruction.action, Action::Declare { .. }) {
+            break;
+        }
+        numbers.push(instruction.receipt);
+    }
+    numbers
 }
 impl Visitor for Compiler {
     fn enter(&mut self, node: NodeRef<'_>, _path: &str) -> Traversal {

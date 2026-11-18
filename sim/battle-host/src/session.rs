@@ -362,7 +362,11 @@ impl LocalSession {
         };
         channel.shown = Some(projection);
         let changed = channel.seen.as_ref() != Some(&seen);
-        let news = !force && channel.feed.has_news(&self.game);
+        let notices = self
+            .game
+            .take_battle_notices(viewer, &self.references)
+            .map_err(projection_reason)?;
+        let news = !notices.is_empty() || (!force && channel.feed.has_news(&self.game));
         if !(force || changed || news) {
             return Ok(None);
         }
@@ -382,7 +386,7 @@ impl LocalSession {
             input: seen.input.clone(),
             events: feed.events,
             presentation: feed.presentation,
-            notices: Vec::new(),
+            notices,
             advice: NoAdvice,
         };
         channel.seen = Some(seen);

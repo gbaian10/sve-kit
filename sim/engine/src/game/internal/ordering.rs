@@ -20,11 +20,11 @@ use crate::ir::{
     Action, ActionPattern, Binding, Bool, BoolRead, Capture, CaptureRef, CaptureTime, Cardinality,
     ChoiceDomain, Control, CounterOperation, ExecutionRef, Expr, GrantedAbility, Holder,
     InstallationSubjects, Instruction, Int, IntOperation, IntRead, Located, LookOutcome,
-    MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand, ObjectReceipt, ObjectRef,
-    OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef, PlayerRelation, Position, Predicate,
-    Program, ReceiptLocation, RecipientSet, Requirements, ResultMember, ResultMemberId,
-    RuntimeObjectView, ScopeId, SelectionView, Selector, SnapshotId, SourceSpan, StepwiseMode,
-    Visibility, ZoneKind,
+    LookPurpose, MemberProjection, MoveDestination, Nat, NatRead, Node, ObjectOperand,
+    ObjectReceipt, ObjectRef, OrderAnswer, OrderOutcome, OwnerZone, PlayerId, PlayerRef,
+    PlayerRelation, Position, Predicate, Program, ReceiptLocation, RecipientSet, Requirements,
+    ResultMember, ResultMemberId, RuntimeObjectView, ScopeId, SelectionView, Selector, SnapshotId,
+    SourceSpan, StepwiseMode, Visibility, ZoneKind,
 };
 use crate::ir::{
     CharacteristicPatch, DamageAmount, Effect, NatFrozen, NatOperation, NumericChange,
@@ -782,6 +782,7 @@ impl Game {
             viewer,
             zone,
             count,
+            purpose,
             ..
         } = &instruction.action
         else {
@@ -795,13 +796,12 @@ impl Game {
         let seat = seat_name(player)?;
         let count = usize::try_from(execution.natural(self, count)?.0).map_err(invalid)?;
         let deck = self.internal_known_deck(seat)?;
+        let ids = deck
+            .get(..count.min(deck.len()))
+            .ok_or_else(|| invalid("look prefix"))?;
         let mut looked = Vec::new();
-        self.learn_members(
-            seat,
-            &deck.iter().take(count).cloned().collect::<Vec<_>>(),
-            true,
-        )?;
-        for id in deck.iter().take(count) {
+        self.learn_members(seat, ids, true)?;
+        for id in ids {
             let object = execution.reference(self, id)?;
             looked.push(RuntimeObjectView {
                 object,
@@ -817,6 +817,10 @@ impl Game {
             instruction.receipt,
             InstructionOutcome::Look(LookOutcome { looked }),
         );
+        if *purpose == LookPurpose::Private {
+            let viewer = super::fact_log::viewer(viewer).ok_or_else(|| invalid("look viewer"))?;
+            execution.record_notice(self, &[viewer], super::NoticeKind::Look, ids)?;
+        }
         Ok(())
     }
 

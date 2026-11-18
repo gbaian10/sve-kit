@@ -34,7 +34,7 @@ use crate::battle::{
     BattleReferences, ObjectTable, ProjectionError, QuestionProjection, RuleProcessing,
     build_objects, build_observation, project_turn,
 };
-use crate::game::internal::{observed_processing, zone_capacity};
+use crate::game::internal::{observed_processing, public_number_declaration, zone_capacity};
 use crate::game::{Game, Object};
 use crate::ir::{EvolutionState, Phase, Posture, Stat};
 use crate::{Result, invalid};
@@ -461,11 +461,26 @@ impl Game {
             )
         };
         let observation = build_observation(&self.catalog, references, &native, rule_processing)?;
+        let public_domain = match &question.shape {
+            QuestionShape::Decision(DecisionShape::Integer {
+                source: super::IntegerSource::NumberDeclaration,
+                ..
+            }) => public_number_declaration(self),
+            QuestionShape::Decision(DecisionShape::Quick { .. }) => {
+                self.publicly_empty_quick(perspective)
+            }
+            QuestionShape::Opening(_)
+            | QuestionShape::Closing(_)
+            | QuestionShape::Evolution(_)
+            | QuestionShape::Decision(_)
+            | QuestionShape::ActionWindow(_) => false,
+        };
         QuestionProjection::project(
             id,
             question,
             observation,
             current,
+            public_domain,
             &self.catalog,
             references,
         )

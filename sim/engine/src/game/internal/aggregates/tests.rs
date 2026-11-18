@@ -62,6 +62,7 @@ fn paused_actions() -> Vec<Action> {
             },
             count: Expr::Literal(Nat(1)),
             mode: StepwiseMode::Exact,
+            purpose: LookPurpose::Private,
         },
         Action::Order {
             decision: DecisionId(3),

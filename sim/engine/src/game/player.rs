@@ -4,6 +4,7 @@
 //! The observation module exposes authorized state; player submissions are separate.
 
 pub mod events;
+pub(super) mod notices;
 pub mod observation;
 
 mod closing;

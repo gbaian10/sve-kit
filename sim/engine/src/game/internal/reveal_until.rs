@@ -2,6 +2,7 @@
 use core::slice;
 
 use super::{Execution, Game, InstructionOutcome, Result, invalid, seat_name, unsupported};
+use crate::game::player::Viewer;
 use crate::ir::{
     Action, Bool, Expr, Instruction, Nat, ObjectReceipt, ObjectRef, ReceiptLocation,
     ReceiptReference, RevealUntilMembers, RevealUntilOutcome, RuntimeObjectView, Selector,
@@ -59,6 +60,15 @@ impl Game {
             }
         }
         let exhausted = Bool(revealed.len() == cards.len());
+        let ids = cards
+            .get(..revealed.len())
+            .ok_or_else(|| invalid("revealed prefix"))?;
+        execution.record_notice(
+            self,
+            &[Viewer::P1, Viewer::P2],
+            super::NoticeKind::TemporaryReveal,
+            ids,
+        )?;
         execution.receipts.insert(
             instruction.receipt,
             InstructionOutcome::RevealUntil(RevealUntilOutcome {

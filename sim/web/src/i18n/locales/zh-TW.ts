@@ -997,6 +997,13 @@ const zhTW = {
     },
   },
   play: {
+    notices: {
+      title: "卡片通知（{{count}}）",
+      look: "你查看的卡片",
+      temporary_reveal: "公開的卡片",
+      empty: "這次沒有看到卡片。",
+      dismiss: "關閉通知",
+    },
     title: "對戰",
     loading: "正在載入對局…",
     stopped: "對局資料有問題，無法繼續。請重新載入頁面。",

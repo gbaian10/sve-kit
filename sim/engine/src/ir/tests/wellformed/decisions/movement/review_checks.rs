@@ -85,6 +85,7 @@ fn looking(viewer: PlayerRef) -> Located<Node> {
             },
             count: Expr::Literal(Nat(1)),
             mode: StepwiseMode::Exact,
+            purpose: LookPurpose::Private,
         },
         10,
         "synthetic",

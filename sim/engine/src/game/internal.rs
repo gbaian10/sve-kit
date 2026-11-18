@@ -9,8 +9,8 @@ use self::card::play::PlayState;
 use super::knowledge::PublishedKnowledge;
 use super::{Frame, Game, View, int, string};
 use crate::game::player::ExchangeRouteChoice;
-use crate::game::player::IntegerSource;
 use crate::game::player::observation::CardFace;
+use crate::game::player::{IntegerSource, Viewer};
 use crate::ir::BatchOutcome;
 use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
@@ -44,6 +44,7 @@ use core::slice::from_ref;
 use serde::ser::Error as _;
 use serde::{Serialize as _, Serializer};
 use serde_json::{Value, json};
+use sve_battle_contract::presentation::NoticeKind;
 
 use crate::ir::RevealUntilOutcome;
 
@@ -103,11 +104,11 @@ mod player_stages;
 mod posture;
 mod processing;
 use processing::Queued;
-pub(in crate::game) use processing::observed_processing;
 pub use processing::{
     CostPaymentPurpose, CostSpecPayment, CostStepPayment, ExchangeMaterialPayment, ExchangePayment,
     NumberDeclaration, PlayDeclaration, PlayPhase, PpPayment, QuestionStage, TargetDeclaration,
 };
+pub(in crate::game) use processing::{observed_processing, public_number_declaration};
 mod random_sample;
 mod resource;
 mod reveal;
@@ -2099,6 +2100,21 @@ impl Execution {
             cause: json!({"effect":{"execution":self.id.0}}),
             ..Frame::default()
         }
+    }
+
+    fn record_notice(
+        &self,
+        game: &mut Game,
+        audience: &[Viewer],
+        kind: NoticeKind,
+        ids: &[String],
+    ) -> Result<()> {
+        game.record_battle_notice(audience, kind, ids, |game, viewer| {
+            self.source_information
+                .as_ref()?
+                .origin()
+                .observed(game, viewer)
+        })
     }
     fn object_id(&self, object: ObjectRef) -> Result<&str> {
         self.ids
