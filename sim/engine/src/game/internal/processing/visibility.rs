@@ -3,6 +3,7 @@
 use super::payment_observation::{PaymentBoundary, completed};
 use super::{Execution, Game, PlayDeclaration, PlayPhase, QuestionStage};
 use crate::game::internal::{
+    Wait,
     fact_log::viewer,
     observation::{EffectOrigin, ObjectLink, SourceIdentity},
     source::SourceInformation,
@@ -209,11 +210,12 @@ fn append_contexts(
     let Some(controller) = viewer(execution.context.controller) else {
         return Ok(());
     };
+    // Quota admission belongs to its rule context, not this play's private progress.
     let active = top
-        && execution
-            .waiting
-            .as_ref()
-            .is_some_and(|(question, _)| viewer(question.actor) == Some(perspective));
+        && execution.waiting.as_ref().is_some_and(|(question, wait)| {
+            !matches!(wait, Wait::TriggerQuota { .. })
+                && viewer(question.actor) == Some(perspective)
+        });
     let stage = if active {
         match execution.question_stage {
             Some(QuestionStage::Target) => Some(ProcessingStage::Target),

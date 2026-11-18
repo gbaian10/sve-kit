@@ -582,3 +582,104 @@ fn printing(projection: &QuestionProjection) -> Option<(&str, u64)> {
     };
     Some((printing_id.as_str(), face.get()))
 }
+
+fn typed_position(controller: Viewer, later_round: bool) -> Game {
+    let step = json!([{"destroy":{"ref":{"who":"p","zone":"field","kind":"follower"}}}]);
+    let silent = json!([{
+        "if":{"cond":{"cmp":{"left":0,"op":"eq","right":1}},
+            "then":[{"life":{"who":"self","delta":1}}]}
+    }]);
+    let mut stages = if later_round { vec![silent] } else { vec![] };
+    stages.push(step);
+    let mut tree = equipment_played::tree(
+        &json!({"activate":{"cost":{"pp":0},"do":[
+            {"each_player":{"as":"p","stages":stages}}
+        ]}}),
+        "unit-amulet",
+    );
+    tree["cards"]["unit-amulet"]["abilities"][0]["line"] = json!(1);
+    let mut observer = tree["cards"]["unit-amulet"]["abilities"][0].clone();
+    observer.as_object_mut().unwrap().remove("activate");
+    observer["line"] = json!(2);
+    observer["auto"] =
+        json!({"per_turn":1,"on":{"left_field":{"who":"self","sel":{"kind":"follower"}}},"do":[]});
+    tree["cards"]["unit-amulet"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(observer);
+    let program = lowerer()
+        .lower(&tree)
+        .unwrap()
+        .remove("unit-amulet")
+        .unwrap();
+    let (me, them) = if controller == Viewer::P1 {
+        ("P1", "P2")
+    } else {
+        ("P2", "P1")
+    };
+    let mut initial = setup(controller.player().seat, json!([]));
+    initial["turn"]["active"] = json!(me);
+    initial["players"][me]["zones"] = json!({"field":[{"id":"source","card":"unit-amulet"}]});
+    initial["players"][them]["zones"] = json!({"field":[{"id":"observer","card":"unit-amulet"},
+        {"id":"first","card":"unit-follower"},{"id":"second","card":"unit-follower"}]});
+    let mut game = Game::new(
+        Arc::clone(&board_fixture::fixture().unwrap().catalog),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "typed-quota",
+    )
+    .unwrap();
+    game.load_internal_card("unit-amulet", &program).unwrap();
+    for number in ["unit-follower", "unit-spell"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
+    game.activate_internal_card("source", AbilityId(1), controller.player())
+        .unwrap();
+    game.advance_player_input();
+    game
+}
+
+#[test]
+fn typed_quota_hides_the_suspended_plays_private_procedure_from_both_seats() {
+    let references = &board_fixture::fixture().unwrap().references;
+    for controller in [Viewer::P1, Viewer::P2] {
+        let actor = opposite(controller);
+        let mut views = Vec::new();
+        for later_round in [false, true] {
+            let game = typed_position(controller, later_round);
+            let native = question(&game, actor);
+            assert!(
+                matches!(&native.shape, QuestionShape::Decision(DecisionShape::TriggerQuota(domain)) if domain.candidates.len() == 2)
+            );
+            let projection = project(&game, actor, "typed-quota");
+            let contexts = &projection.observation().processing;
+            assert_eq!(contexts.len(), 2);
+            let (rule, suspended) = contexts.split_last().unwrap();
+            assert_eq!(rule.actor, Some(seat(actor)));
+            assert!(
+                suspended
+                    .iter()
+                    .all(|context| context.actor.is_none() && context.procedure.is_none()),
+                "quota admission cannot activate the suspended play"
+            );
+            assert_eq!(contexts[0].stage, Some(ProcessingStage::Resolve));
+            let waiting = game.battle_observation(controller, references).unwrap();
+            assert_eq!(
+                waiting.processing.len(),
+                2,
+                "the other seat gains no frame for private procedure rounds"
+            );
+            views.push((
+                projection.observation().clone(),
+                projection.question().clone(),
+                waiting,
+                game.input(controller),
+            ));
+        }
+        assert_eq!(
+            views[0], views[1],
+            "private procedure rounds preserve both complete wire boards, the question and Waiting"
+        );
+    }
+}
