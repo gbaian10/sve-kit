@@ -1,13 +1,13 @@
 use super::super::{
     CharacteristicPatch, ContinuousLayer, Duration, DurationEnd, Effect, EffectDefinitionId,
-    EffectReference, EffectTarget, ExecutionRef, InstallationSubjects, InstallationTime, Interval,
-    NumericChange, ObjectRef, ObjectView, RemoveScope, Resource, ResourceOperation, Stat,
-    TimeAnchor, TimestampBasis, TraitId,
+    EffectReference, EffectTarget, ExecutionRef, FollowPermission, InstallationSubjects,
+    InstallationTime, Interval, NumericChange, ObjectRef, ObjectView, RemoveScope, Resource,
+    ResourceOperation, Stat, TimeAnchor, TimestampBasis, TraitId,
 };
 use super::{
-    AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, Int, LoweringError,
-    Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView, Selector,
-    TextQuantifier, ZoneKind, ast, unsupported,
+    AbilitySource, Action, BTreeSet, Binding, BodyContext, Cardinality, Expr, FieldOutputKind, Int,
+    LoweringError, Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView,
+    Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
 use crate::ir::ObjectRelation;
 
@@ -256,7 +256,15 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Selector, LoweringError> {
         if let ast::Objects::Follow { follow } = objects {
-            return self.followed(follow, path);
+            let output = self
+                .field_outputs
+                .get(follow)
+                .filter(|output| output.kind == FieldOutputKind::ObservedSelection)
+                .ok_or_else(|| unsupported(path))?;
+            return Ok(Selector::MoveAfter {
+                receipt: output.receipt.clone(),
+                permission: FollowPermission::SameEffectExplicitReference {},
+            });
         }
         if let ast::Objects::Zone(query) = objects
             && matches!(query.r#where, Some(ast::ObjectQueryWhere::Damaged(_)))

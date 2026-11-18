@@ -1516,6 +1516,7 @@ struct FieldOutput {
 enum FieldOutputKind {
     ReturnedSource,
     SingleFollower,
+    ObservedSelection,
     Other,
 }
 
