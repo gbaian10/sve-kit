@@ -16,7 +16,7 @@ cards:
   - BP18-059
   - BP18-060
 why: >-
-  本專案解讀（inferred，見 runtime-semantics §3.2）以成功移入 EX 的卡界定「残り」。選中但沒移動的卡仍在剩餘集合，因此三張都放底。待官方回覆（svestats）。
+  本專案解讀（inferred，見 docs/dsl/runtime-semantics.md §3.2）以成功移入 EX 的卡界定「残り」。選中但沒移動的卡仍在剩餘集合，因此三張都放底。待官方回覆（svestats）。
 discriminates: >-
   若按選擇結果扣除而非實際移動，pick 會留在原牌庫頂，且放底排序只有兩張。
 refs:
