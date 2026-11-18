@@ -10,7 +10,7 @@ use serde_json::{Value, json};
 use sha2::{Digest as _, Sha256};
 use sve_battle_contract::question::{DiceChoice, MainIntent, Question, QuestionShape};
 use sve_battle_contract::{Answer, CardRef, ContentRef, Identity, Nat, OptionId, Region};
-use sve_engine::battle::{PrintingFaceIdentity, ReferenceInput};
+use sve_engine::battle::{PrintingFaceIdentity, ReferenceInput, RuleIdentity, RuleInput};
 
 pub(crate) fn hex(bytes: &[u8]) -> String {
     Sha256::digest(bytes)
@@ -54,6 +54,17 @@ pub(crate) fn identity(selection: &str, rules: &str) -> Identity {
     }
 }
 
+/// The battle inputs document exactly as `build:engine` writes it.
+pub(crate) fn document(
+    [snapshot, keywords, selection, rules]: [&str; 4],
+    references: &Value,
+    identity: &Identity,
+) -> String {
+    json!({"snapshot":snapshot,"keywords":keywords,"selection":selection,"rules":rules,
+        "references":references,"identity":identity})
+    .to_string()
+}
+
 /// One test identity per native face of every snapshot record.
 ///
 /// The public test batch carries no permanent printing ids; production references come with
@@ -89,7 +100,14 @@ pub(crate) fn references(snapshot: &str) -> ReferenceInput {
         snapshot_sha256: hex(snapshot.as_bytes()),
         faces,
         wording: None,
-        rules: None,
+        // Rule identities read from the pinned manifest, as the reader supplies them.
+        rules: Some(RuleInput {
+            manifest_sha256: format!("sha256:{MANIFEST}"),
+            entries: vec![RuleIdentity::Cr {
+                id: "1.2.3".into(),
+                revision: "synthetic".into(),
+            }],
+        }),
     }
 }
 

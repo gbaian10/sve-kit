@@ -1,5 +1,6 @@
 """Explicit preview mode and fail-closed formal publication command boundary."""
 
+import re
 from dataclasses import replace
 from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Typer resolves runtime annotations
 from typing import TYPE_CHECKING, Annotated
@@ -8,8 +9,9 @@ import typer
 
 from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import profile
-from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.json import canonical, digest, object_value, string
 from sve_carddb.core.stage_log import mark
+from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.export.construction_index import (
     ConstructionIndexError,
     write_construction_indexes,
@@ -18,13 +20,15 @@ from sve_carddb.export.image_index import ImageIndex
 from sve_carddb.export.media_config import offline_configuration
 from sve_carddb.export.preview import Roots, write_artifact, write_preview
 from sve_carddb.export.publication import require_preview
-from sve_carddb.export.read_api import load_snapshot
+from sve_carddb.export.read_api import ExportError, load_battle_inputs, load_snapshot
 from sve_carddb.export.transport import export_snapshot
 from sve_carddb.export.transport.compression import python_brotli
 from sve_carddb.workflows.offline import Built, Inputs
 from sve_carddb.workflows.offline import build as build_offline
 
 if TYPE_CHECKING:
+    from pydantic import JsonValue
+
     from sve_carddb.export.transport import Brotli
 
 app = typer.Typer(no_args_is_help=True, help="Export isolated offline previews.")
@@ -104,6 +108,53 @@ def construction_index_command(
 ) -> None:
     """Write each region's construction index beside the export's current preview snapshot."""
     _write_construction(export_dir)
+
+
+@app.command("battle-inputs")
+def battle_inputs_command(
+    output: Annotated[Path, typer.Option(help="Absolute directory; must not exist.")],
+    engine_rules: Annotated[
+        Path, typer.Option(help="Authored engine rules (YAML) to bind to the snapshot.")
+    ],
+    export_dir: Annotated[Path, typer.Option(envvar="SVE_EXPORT_DIR")],
+    region: Annotated[str, typer.Option()] = "jp",
+) -> None:
+    """Write the engine's native snapshot, its reference identities and the rules bound to it."""
+    if not output.is_absolute():
+        raise typer.BadParameter("--output requires an absolute path")
+    try:
+        inputs = load_battle_inputs(export_dir.resolve(), region)
+        rules = _bound_rules(engine_rules, region, inputs.snapshot)
+    except ExportError as error:
+        typer.echo(str(error), err=True)
+        raise typer.Exit(3) from None
+    # The host hashes these exact bytes; a partial or reused directory must never pass for them.
+    output.mkdir(parents=True)
+    (output / "snapshot.jsonl").write_bytes(inputs.snapshot)
+    (output / "references.json").write_bytes(canonical(inputs.references))
+    (output / "rules.json").write_bytes(canonical(rules))
+
+
+def _bound_rules(path: Path, region: str, snapshot: bytes) -> dict[str, JsonValue]:
+    """Bind the authored engine rules to the snapshot this reader produced.
+
+    The authored pin names the reviewed card batch; the engine requires the exact bytes it loads.
+    Only the pin is replaced, so it must first be what the engine rules schema requires; the
+    engine still validates every other field.
+    """
+    try:
+        rules = object_value(JSON_VALUE.validate_python(parse_yaml(path.read_bytes())))
+        covered = object_value(rules["scope"])["region"]
+        source = object_value(rules["input"])
+        pinned = re.fullmatch(r"[a-f0-9]{64}", string(source["snapshot_sha256"]))
+    except ValueError, KeyError, TypeError:
+        raise ExportError("Engine rules are unusable") from None
+    if pinned is None:
+        raise ExportError("Engine rules are unusable")
+    if covered != region:
+        raise ExportError("Engine rules cover another region")
+    source["snapshot_sha256"] = digest(snapshot)[7:]
+    return rules
 
 
 def _write_construction(export_dir: Path) -> None:

@@ -10,7 +10,7 @@ mod fixture;
 
 use serde_json::json;
 use sve_battle_contract::Identity;
-use sve_battle_host::load::{Inputs, LoadError, load};
+use sve_battle_host::load::{LoadError, load};
 use sve_engine::battle::{ReferenceInput, RuleIdentity, RuleInput};
 
 const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","keywords":{}}"#;
@@ -44,16 +44,13 @@ fn loaded(
     setup: &str,
 ) -> Option<LoadError> {
     let snapshot = snapshot();
-    let identity = serde_json::to_string(identity).unwrap();
-    let inputs = Inputs {
-        snapshot: &snapshot,
-        keywords: KEYWORDS,
-        selection,
-        rules,
-        references,
-        identity: &identity,
-    };
-    load(inputs, setup).err()
+    let references = serde_json::from_str(references).unwrap();
+    let inputs = fixture::document(
+        [&snapshot, KEYWORDS, selection, rules],
+        &references,
+        identity,
+    );
+    load(&inputs, setup).err()
 }
 
 fn error(selection: &str, rules: &str, references: &str, setup: &str) -> Option<LoadError> {
@@ -139,12 +136,17 @@ fn references_must_bind_exactly_this_whole_snapshot() {
     });
     let rules_of_another_manifest =
         references(|input| input.rules = Some(rule_input(&"a".repeat(64))));
+    let no_manifest = references(|input| input.rules = None);
     for (label, references) in [
         ("a face outside the decks", unused_missing),
         ("another snapshot", wrong_snapshot),
         ("another region", wrong_region),
         ("an unknown printing", unknown_printing),
         ("rules of another manifest", rules_of_another_manifest),
+        (
+            "neither wording nor rules from the pinned manifest",
+            no_manifest,
+        ),
     ] {
         assert_eq!(
             error(EMPTY_SELECTION, &rules, &references, &setup("t-anchor")),
@@ -152,15 +154,4 @@ fn references_must_bind_exactly_this_whole_snapshot() {
             "{label}"
         );
     }
-}
-
-#[test]
-fn rules_without_wording_must_come_from_the_pinned_manifest() {
-    let rules = fixture::rules(&snapshot(), "t-anchor");
-    let pinned = references(|input| input.rules = Some(rule_input(fixture::MANIFEST)));
-    // The references pass; the deck card has no admitted effects author.
-    assert_eq!(
-        error(EMPTY_SELECTION, &rules, &pinned, &setup("t-anchor")),
-        Some(LoadError::Match)
-    );
 }

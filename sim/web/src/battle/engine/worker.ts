@@ -1,4 +1,5 @@
 // Local battle Worker: loads the engine WebAssembly and serves the seat ports.
+import { loadBattleInputs } from "../../data"
 import init, { Session } from "./generated/engine"
 import { BattleHost } from "./host"
 import type { InitMessage } from "./protocol"
@@ -10,18 +11,10 @@ const validate = import.meta.env.DEV
   ? import("../contract").then((contract) => contract.validateHostMessage)
   : undefined
 const host = new BattleHost(
-  async (inputs, setup) => {
+  async (setup) => {
     ready ??= init()
-    await ready
-    return new Session(
-      inputs.snapshot,
-      inputs.keywords,
-      inputs.selection,
-      inputs.rules,
-      inputs.references,
-      JSON.stringify(inputs.identity),
-      setup,
-    )
+    const [, inputs] = await Promise.all([ready, loadBattleInputs()])
+    return new Session(inputs, setup)
   },
   undefined,
   validate,
