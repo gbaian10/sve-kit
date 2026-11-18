@@ -3,27 +3,30 @@ use sve_battle_contract::{
     presentation::NoticeKind,
     question::{AutoAnswer, MainIntent},
 };
+use sve_engine::game::player::Viewer;
 use sve_engine::ir::lowering::ExpandedLowerer;
-use sve_engine::ir::{CardProgram, WellFormedCardProgram};
+use sve_engine::ir::{AbilityId, CardProgram, WellFormedCardProgram};
 
 fn local_look(hidden: &str, quick_hand: Option<&str>) -> LocalSession {
-    local_game(
-        hidden,
-        quick_hand,
+    let (mut game, references) = position(hidden, quick_hand, &Value::Null, false);
+    load_activation(
+        &mut game,
+        "t-small",
         &json!([
             {"look":{"top":{"who":"self","n":1_i32},"bind":"seen"}},
             {"shuffle":{"who":"self"}}
         ]),
-        &Value::Null,
-    )
+    );
+    game.advance_player_input();
+    hot_seat(game, references)
 }
 
-fn local_game(
+fn position(
     hidden: &str,
     quick_hand: Option<&str>,
-    steps: &Value,
     random: &Value,
-) -> LocalSession {
+    warmup: bool,
+) -> (Game, BattleReferences) {
     let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3")].join("\n");
     let registry = json!({"format":1_i32,"kind":"keyword_registry","keywords":{}}).to_string();
     let effects = json!({"format":1_i32,"kind":"effect_set","cards":{
@@ -39,20 +42,36 @@ fn local_game(
     )
     .unwrap();
     let references = BattleReferences::new(&catalog, fixture::references(&snapshot)).unwrap();
+    let mut field = vec![json!({"id":"source","card":"t-small"})];
+    if warmup {
+        field.push(json!({"id":"warmup","card":"t-large"}));
+    }
     let setup = json!({"history":"explicit","turn":{"active":"P1","first_player":"P1","phase":"main",
         "elapsed_turns":{"P1":3_i32,"P2":2_i32}},"players":{
         "P1":{"leader":{"class":"ニュートラル","life":20_i32},"pp":{"current":2_i32,"max":2_i32},
-            "construction":"class","zones":{"field":[{"id":"source","card":"t-small"}],
+            "construction":"class","zones":{"field":field,
                 "deck":[{"id":"hidden","card":hidden},{"id":"tail","card":"t-small"}]}},
         "P2":{"leader":{"class":"ニュートラル","life":20_i32},"pp":{"current":2_i32,"max":2_i32},
             "construction":"class","zones":{"deck":[{"id":"other","card":"t-small"}],
                 "hand":quick_hand.map(|card| json!({"id":"quick-secret","card":card})).into_iter().collect::<Vec<_>>()}}
     }});
     let mut game = Game::new(Arc::new(catalog), &setup, &Value::Null, random, "no-stop").unwrap();
+    if !warmup {
+        let vanilla = WellFormedCardProgram::check(CardProgram {
+            abilities: vec![],
+            card_play_costs: vec![],
+        })
+        .unwrap();
+        game.load_internal_card("t-large", &vanilla).unwrap();
+    }
+    (game, references)
+}
+
+fn load_activation(game: &mut Game, number: &str, steps: &Value) -> AbilityId {
     let program = ExpandedLowerer::new()
         .unwrap()
         .lower(&json!({
-            "format":1_i32,"kind":"author_effect_set","scope":"shared","cards":{"t-small":{
+            "format":1_i32,"kind":"author_effect_set","scope":"shared","cards":{(number):{
                 "meta":{"dsl":"1.0","source":format!("effect-source-v1:sha256:{}", "3".repeat(64)),
                     "written_by":[{"actor":{"who":"synthetic","model":null},"date":"2026-10-22"}],
                     "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
@@ -66,16 +85,13 @@ fn local_game(
             }}
         }))
         .unwrap()
-        .remove("t-small")
+        .remove(number)
         .unwrap();
-    game.load_internal_card("t-small", &program).unwrap();
-    let vanilla = WellFormedCardProgram::check(CardProgram {
-        abilities: vec![],
-        card_play_costs: vec![],
-    })
-    .unwrap();
-    game.load_internal_card("t-large", &vanilla).unwrap();
-    game.advance_player_input();
+    game.load_internal_card(number, &program).unwrap();
+    program.card().abilities.first().unwrap().node.id
+}
+
+fn hot_seat(game: Game, references: BattleReferences) -> LocalSession {
     LocalSession::new(
         game,
         references,
@@ -216,21 +232,43 @@ fn a_quick_window_with_private_cards_and_no_available_play_stays_unknown() {
 
 #[test]
 fn a_fault_after_revealing_drops_the_rolled_back_notice_for_both_seats() {
-    let mut session = local_game(
+    let (mut game, references) = position(
         "t-large",
         None,
+        &json!({"shuffles":[{"player":"P1","result":["not-a-deck-member"]}]}),
+        true,
+    );
+    let actor = Viewer::P1.player();
+    let first = load_activation(
+        &mut game,
+        "t-large",
+        &json!([
+            {"look":{"top":{"who":"self","n":1_i32},"bind":"first"}}
+        ]),
+    );
+    let second = load_activation(
+        &mut game,
+        "t-small",
         &json!([
             {"look":{"top":{"who":"self","n":1_i32},"bind":"seen"}},
             {"declare":{"kind":"number","bind":"one","min":1_i32,"max":1_i32}},
             {"reveal":{"top":{"who":"self","n":2_i32},"bind":"shown"}},
             {"shuffle":{"who":"self"}}
         ]),
-        &json!({"shuffles":[{"player":"P1","result":["not-a-deck-member"]}]}),
     );
-    let started = activate(&mut session);
-    assert!(applied(&started));
+    game.advance_player_input();
+    game.activate_internal_card("warmup", first, actor).unwrap();
+    game.advance_player_input();
+    // The second play's origin still has the first Look pending when the channel opens.
+    game.activate_internal_card("source", second, actor)
+        .unwrap();
+    game.advance_player_input();
+    let mut session = hot_seat(game, references);
+    let started = session.start();
     let stop = update(&started, Seat::P1);
-    assert!(matches!(stop.notices.as_slice(), [notice] if notice.kind == NoticeKind::Look));
+    assert!(matches!(stop.notices.as_slice(), [first_look, second_look]
+        if first_look.kind == NoticeKind::Look && second_look.kind == NoticeKind::Look
+            && first_look.id != second_look.id));
     let BattleInput::Question { question } = &stop.input else {
         panic!("the number declaration is open");
     };
