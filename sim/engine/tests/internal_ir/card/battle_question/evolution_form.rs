@@ -197,9 +197,9 @@ fn wire_evolution_form_round_trips_physical_twins_and_reindexed_destinations() {
         );
         assert_eq!(
             projection.question().processing.stage,
-            ProcessingStage::Declare
+            Some(ProcessingStage::Declare)
         );
-        assert_eq!(projection.question().processing.payment, None);
+        assert_eq!(projection.question().processing.payments, vec![]);
         assert!(projection.question().is_coherent());
         let choices = options(&projection).unwrap();
         assert_eq!(choices.len(), forms.len());

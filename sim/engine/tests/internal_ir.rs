@@ -14,6 +14,7 @@ extern crate alloc;
 mod history_fixture;
 use alloc::sync::Arc;
 use serde_json::{Value, json};
+use sve_engine::battle::BattleReferences;
 use sve_engine::catalog::Catalog;
 use sve_engine::game::internal::{Answer, Context, Fact, InstructionOutcome, Progress};
 use sve_engine::game::{Game, View};
@@ -1323,3 +1324,57 @@ mod movement;
 
 #[path = "internal_ir/crimson.rs"]
 mod crimson;
+
+/// Identity-only references for the original one-face synthetic catalogue.
+fn base_references() -> sve_engine::Result<BattleReferences> {
+    use sve_battle_contract::{CardRef, Nat};
+    use sve_engine::EngineFailure;
+    use sve_engine::battle::{PrintingFaceIdentity, ReferenceInput};
+    let snapshot = base_snapshot();
+    let faces = [
+        ("unit-follower", "printing-follower"),
+        ("unit-spell", "printing-spell"),
+        ("unit-amulet", "printing-amulet"),
+    ]
+    .into_iter()
+    .map(|(number, printing)| PrintingFaceIdentity {
+        card_no: number.into(),
+        native_face: 0,
+        card: CardRef {
+            printing_id: printing.into(),
+            face: Nat::ZERO,
+        },
+    })
+    .collect();
+    let catalog = base_catalog()?;
+    BattleReferences::new(
+        &catalog,
+        ReferenceInput {
+            region: "jp".into(),
+            snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
+            faces,
+            wording: None,
+            rules: None,
+        },
+    )
+    .map_err(|error| EngineFailure::Invalid(error.to_string()))
+}
+
+fn base_catalog() -> sve_engine::Result<Arc<Catalog>> {
+    board_fixture::catalog_for(&base_snapshot()).map(Arc::new)
+}
+
+fn base_snapshot() -> String {
+    let (snapshot, _, _) = catalog_documents(&json!("1"));
+    snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            if row["number"] == "unit-follower" {
+                row["faces"][0]["title"] = json!("synthetic-title");
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n")
+}

@@ -2,6 +2,7 @@
 use super::*;
 use crate::player_pipeline::question;
 use crate::{board_fixture, payment_fixtures};
+use sve_battle_contract::{QuestionId, Seat, observation as wire};
 use sve_engine::game::player::observation::{
     PaymentKind, ProcessingContext, ProcessingDeclaration, ProcessingStage, ProcessingSubject,
 };
@@ -102,10 +103,8 @@ fn opponent() -> PlayerRef {
     }
 }
 
-fn private_granted_question() -> WellFormedCardProgram {
-    let mut raw = source_provenance::granting("unit-amulet", true)
-        .card()
-        .clone();
+fn private_granted_question(number: &str) -> WellFormedCardProgram {
+    let mut raw = source_provenance::granting(number, true).card().clone();
     let nested = if let Node::Instruction { instruction } =
         &mut raw.abilities[0].node.body.as_mut().unwrap().steps[0].node
         && let Action::Grant { abilities, .. } = &mut instruction.action
@@ -281,14 +280,39 @@ fn an_effect_number_records_the_actual_declarer() {
     let program = WellFormedCardProgram::check(raw).unwrap();
     let mut game = fixture(&program);
     activate(&mut game, &program);
-    let q = game.internal_decision(View::Referee).unwrap();
     let public = sources(&game, Viewer::P2);
     assert_eq!(
         (public[0].controller, public[0].actor),
         (Viewer::P1, Some(Viewer::P2))
     );
-    game.answer_internal_card(q.actor, q.token, Answer::Integer(Nat(7)))
+    let projection = game
+        .battle_question(
+            Viewer::P2,
+            &QuestionId::new("declarer".into()),
+            &board_fixture::fixture().unwrap().references,
+        )
+        .unwrap()
         .unwrap();
+    assert_eq!(
+        (
+            projection.question().processing.controller,
+            projection.question().processing.actor
+        ),
+        (Some(Seat::P1), Some(Seat::P2))
+    );
+    let command = projection
+        .answer(
+            Viewer::P2,
+            &projection.question().id,
+            &sve_battle_contract::Answer::Integer {
+                value: 7_u32.into(),
+            },
+        )
+        .unwrap();
+    assert_eq!(
+        game.submit_player(Viewer::P2, command).kind,
+        SubmissionKind::Applied
+    );
     assert!(
         sources(&game, Viewer::P2)[0]
             .declared
@@ -312,34 +336,81 @@ fn an_effect_number_records_the_actual_declarer() {
 
 #[test]
 fn a_public_holder_does_not_authorize_its_private_wording_owner() {
-    let program = private_granted_question();
-    let mut game = source_provenance::prepared_program(1, "unit-amulet", true, &program);
-    source_provenance::attack(&mut game, 1, "recipient");
-    let pending = question(&game, Viewer::P1);
-    let selected = if let QuestionShape::Decision(DecisionShape::Pending(choices)) = &pending.shape
-    {
-        Some(choices[0].handle)
-    } else {
-        None
-    };
-    assert_eq!(
-        submit(
-            &mut game,
-            Viewer::P1,
-            &pending,
-            Answer::Pending(selected.unwrap())
-        ),
-        SubmissionKind::Applied
-    );
-    question(&game, Viewer::P2);
-    assert_eq!(sources(&game, Viewer::P1).len(), 1);
-    empty(&game, Viewer::P2);
+    let references = base_references().unwrap();
+    for controller in [Viewer::P1, Viewer::P2] {
+        let actor = if controller == Viewer::P1 {
+            Viewer::P2
+        } else {
+            Viewer::P1
+        };
+        let mut views = Vec::new();
+        for number in ["unit-amulet", "unit-spell"] {
+            let program = private_granted_question(number);
+            let mut game = source_provenance::prepared_program(
+                controller.player().seat,
+                number,
+                true,
+                &program,
+            );
+            source_provenance::attack(&mut game, controller.player().seat, "recipient");
+            let pending = question(&game, controller);
+            let QuestionShape::Decision(DecisionShape::Pending(choices)) = &pending.shape else {
+                panic!("a real granted occurrence")
+            };
+            let selected = choices[0].handle;
+            assert_eq!(
+                submit(&mut game, controller, &pending, Answer::Pending(selected)),
+                SubmissionKind::Applied
+            );
+            question(&game, actor);
+            assert_eq!(sources(&game, controller).len(), 1);
+            empty(&game, actor);
+            let projection = game
+                .battle_question(actor, &QuestionId::new("opaque".into()), &references)
+                .unwrap()
+                .unwrap();
+            assert!(
+                projection.observation().processing.is_empty(),
+                "a hidden frame leaves no board slot"
+            );
+            assert!(projection.question().processing.source.is_none());
+            assert_eq!(projection.question().processing.stage, None);
+            views.push((
+                projection.observation().clone(),
+                projection.question().clone(),
+                game.input(controller),
+            ));
+            assert!(
+                game.battle_question(controller, &projection.question().id, &references)
+                    .unwrap()
+                    .is_none()
+            );
+            let command = projection
+                .answer(
+                    actor,
+                    &projection.question().id,
+                    &sve_battle_contract::Answer::Integer {
+                        value: 0_u32.into(),
+                    },
+                )
+                .unwrap();
+            assert_eq!(
+                game.submit_player(actor, command).kind,
+                SubmissionKind::Applied
+            );
+        }
+        assert_eq!(
+            views[0], views[1],
+            "hidden wording owners preserve the complete question, board and waiting summary in both directions"
+        );
+    }
 }
 
 #[test]
 fn a_known_parent_does_not_expose_unplayed_child_private_candidate_counts() {
     use super::nested_play::{self, Scenario};
     let mut boards = Vec::new();
+    let mut wire_boards = Vec::new();
     let mut waiting = Vec::new();
     let mut counts = Vec::new();
     for eligible in [1, 2] {
@@ -387,6 +458,28 @@ fn a_known_parent_does_not_expose_unplayed_child_private_candidate_counts() {
             members.is_some(),
             "the child's actual private reveal material question is pending"
         );
+        let projection = game
+            .battle_question(
+                Viewer::P1,
+                &QuestionId::new("nested".into()),
+                &base_references().unwrap(),
+            )
+            .unwrap()
+            .unwrap();
+        assert_eq!(projection.observation().processing.len(), 2);
+        assert_eq!(
+            projection.question().processing,
+            projection.observation().processing[1],
+            "the question belongs to the declared child, not its suspended parent"
+        );
+        assert_eq!(
+            projection.question().processing.stage,
+            Some(wire::ProcessingStage::Declare)
+        );
+        wire_boards.push(
+            game.battle_observation(Viewer::P2, &base_references().unwrap())
+                .unwrap(),
+        );
         counts.push(members.unwrap());
         boards.push(game.observe(Viewer::P2).unwrap());
         waiting.push(game.input(Viewer::P2));
@@ -395,6 +488,10 @@ fn a_known_parent_does_not_expose_unplayed_child_private_candidate_counts() {
         counts,
         [1, 2],
         "the real hidden candidate sets differ with equal hand sizes"
+    );
+    assert_eq!(
+        wire_boards[0], wire_boards[1],
+        "the complete wire board hides child candidates"
     );
     assert!(
         boards[0] == boards[1],
@@ -544,6 +641,23 @@ fn the_payer_keeps_its_receipt_when_the_other_player_is_asked_next() {
     game.advance_player_input();
     apply(&mut game, Viewer::P1, Answer::OptionalCost(true));
     question(&game, Viewer::P2);
+    let wire = game
+        .battle_observation(Viewer::P1, &board_fixture::fixture().unwrap().references)
+        .unwrap();
+    assert_eq!(
+        wire.processing[0].stage,
+        Some(wire::ProcessingStage::Resolve),
+        "the waiting payer retains the public milestone"
+    );
+    assert_eq!(wire.processing[0].actor, None);
+    assert!(
+        wire.processing[0]
+            .payments
+            .iter()
+            .any(|payment| payment.actor == Seat::P1
+                && payment.purpose == Some(wire::PaymentPurpose::Resolution)
+                && payment.amount.get() == 1)
+    );
     let mine = sources(&game, Viewer::P1);
     assert_eq!(mine[0].actor, None, "the payer is now waiting");
     assert!(

@@ -337,13 +337,11 @@ fn public_resource(value: &Value) -> Result<i64> {
         .ok_or_else(|| invalid("invalid public resource"))
 }
 
-const fn rule_stage(
-    shape: &QuestionShape,
-) -> result::Result<Option<wire::ProcessingStage>, ProjectionError> {
+const fn rule_stage(shape: &QuestionShape) -> Option<wire::ProcessingStage> {
     let stage = match shape {
         QuestionShape::Opening(_) => wire::ProcessingStage::Opening,
         QuestionShape::Closing(_) => wire::ProcessingStage::Closing,
-        QuestionShape::ActionWindow(_) => return Ok(None),
+        QuestionShape::ActionWindow(_) => return None,
         // These choices declare unpaid parameters; private cost shapes do not change the stage.
         QuestionShape::Evolution(
             EvolutionQuestion::Form(_)
@@ -359,11 +357,11 @@ const fn rule_stage(
             } else if matches!(shape, DecisionShape::TriggerQuota(_)) {
                 wire::ProcessingStage::TriggerAdmission
             } else {
-                return Err(ProjectionError::Unavailable);
+                return None;
             }
         }
     };
-    Ok(Some(stage))
+    Some(stage)
 }
 
 #[expect(
@@ -407,7 +405,7 @@ impl Game {
     /// The host authenticates the viewer, issues a fresh ID per occurrence in this
     /// battle, and submits decoded commands to this same Game. Waiting and finished
     /// seats have no question; this method does not replace their public input summary.
-    /// Supports opening, closing, rule-owned Quick, and normal evolution questions.
+    /// Supports opening, closing, normal evolution and all admitted Decision shapes.
     /// The host must preflight the full program closure before interactive use.
     ///
     /// # Errors
@@ -422,9 +420,42 @@ impl Game {
         references.validate_catalog(&self.catalog)?;
         match self.input(perspective) {
             Input::Question(question) => {
-                let observation = self.battle_observation(perspective, references)?;
-                QuestionProjection::project(id, *question, observation, &self.catalog, references)
-                    .map(Some)
+                let native = self
+                    .observe(perspective)
+                    .map_err(|_error| ProjectionError::Unavailable)?;
+                let rule_processing = self.battle_rule_processing(&native)?;
+                let current = if rule_processing.is_empty() {
+                    let mut active = native
+                        .processing
+                        .iter()
+                        .enumerate()
+                        .filter(|(_, context)| context.actor == Some(question.actor));
+                    let current = active.next().map(|(index, _)| index);
+                    if active.next().is_some() {
+                        return Err(ProjectionError::Unavailable);
+                    }
+                    current
+                } else {
+                    Some(
+                        native
+                            .processing
+                            .len()
+                            .checked_add(rule_processing.len())
+                            .and_then(|length| length.checked_sub(1))
+                            .ok_or(ProjectionError::Unavailable)?,
+                    )
+                };
+                let observation =
+                    build_observation(&self.catalog, references, &native, rule_processing)?;
+                QuestionProjection::project(
+                    id,
+                    *question,
+                    observation,
+                    current,
+                    &self.catalog,
+                    references,
+                )
+                .map(Some)
             }
             Input::Waiting(_) | Input::Finished { .. } => Ok(None),
             Input::EngineFault => Err(ProjectionError::Unavailable),
@@ -435,10 +466,6 @@ impl Game {
         &self,
         observation: &Observation,
     ) -> result::Result<Vec<RuleProcessing>, ProjectionError> {
-        // Effect executions need their frozen source, parent stack and declarations.
-        if self.typed.is_some() {
-            return Err(ProjectionError::Unavailable);
-        }
         let question = match self.input(observation.viewer) {
             Input::Question(question) => question,
             Input::Waiting(waiting) => {
@@ -453,7 +480,7 @@ impl Game {
             Input::Finished { .. } => return Ok(vec![]),
             Input::EngineFault => return Err(ProjectionError::Unavailable),
         };
-        let Some(stage) = rule_stage(&question.shape)? else {
+        let Some(stage) = rule_stage(&question.shape) else {
             return Ok(vec![]);
         };
         let occurrences = matches!(
@@ -495,6 +522,7 @@ impl Game {
             .transpose()
             .map_err(|_authority_error| ProjectionError::Unavailable)?;
         Ok(vec![RuleProcessing {
+            actor: (question.actor == observation.viewer).then_some(actor_seat),
             stage,
             controller,
             subject,

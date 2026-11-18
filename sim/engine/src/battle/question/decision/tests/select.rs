@@ -1,5 +1,5 @@
 use super::super::*;
-use crate::battle::build_observation;
+use crate::battle::QuestionProjection;
 use crate::battle::tests::{board_fixture, board_fixtures, payment_fixtures};
 use crate::game::player::{Input, Question, QuestionShape, SubmissionKind, Viewer};
 use crate::game::{Game, View};
@@ -122,14 +122,7 @@ const fn selection(shape: &wire::QuestionShape) -> Option<&wire::Selection> {
 
 pub(super) fn components(game: &Game, actor: Viewer) -> BattleObservation {
     let fixture = board_fixture::fixture().unwrap();
-    // Only board components are tested here; the public processing gate stays closed.
-    build_observation(
-        &fixture.catalog,
-        &fixture.references,
-        &game.observe(actor).unwrap(),
-        vec![],
-    )
-    .unwrap()
+    game.battle_observation(actor, &fixture.references).unwrap()
 }
 
 pub(super) fn project_question(
@@ -149,6 +142,37 @@ pub(super) fn project_question(
             references: &fixture.references,
         }),
     )
+}
+
+pub(super) fn project_game(
+    game: &Game,
+    actor: Viewer,
+    id: &QuestionId,
+) -> Result<(wire::QuestionUse, wire::QuestionShape, QuestionProjection)> {
+    let fixture = board_fixture::fixture().map_err(|_fixture| ProjectionError::Unavailable)?;
+    let projection = game
+        .battle_question(actor, id, &fixture.references)?
+        .ok_or(ProjectionError::Unavailable)?;
+    Ok((
+        projection.question().usage,
+        projection.question().shape.clone(),
+        projection,
+    ))
+}
+
+pub(super) fn submit_projected(
+    game: &mut Game,
+    native: &Question,
+    projection: &QuestionProjection,
+    answer: &Answer,
+) {
+    let command = projection
+        .answer(native.actor, &projection.question().id, answer)
+        .unwrap();
+    assert_eq!(
+        game.submit_player(native.actor, command).kind,
+        SubmissionKind::Applied
+    );
 }
 
 fn pick_first(shape: &wire::QuestionShape) -> Answer {
@@ -191,12 +215,8 @@ fn ordinary_materials_keep_the_ex_origin_and_native_payment_channel() {
             domain(&native),
             Some(DecisionShape::CostMaterials(_))
         ));
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("material".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("material".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::CostMaterial);
         assert_eq!(
             selection(&shape).unwrap().distinct,
@@ -219,7 +239,9 @@ fn ordinary_materials_keep_the_ex_origin_and_native_payment_channel() {
                     .as_ref()
                     .is_some_and(|origin| origin.zone == Zone::Ex))
         );
-        let command = binding.answer(native.token, &pick_first(&shape)).unwrap();
+        let command = binding
+            .answer(native.actor, &binding.question().id, &pick_first(&shape))
+            .unwrap();
         assert!(matches!(
             &command,
             player::Command::Answer {
@@ -255,14 +277,12 @@ fn effect_discards_keep_the_effect_answer_channel_after_payment() {
                 ..
             })
         ));
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("discard".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("discard".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::EffectDiscard);
-        let command = binding.answer(native.token, &pick_first(&shape)).unwrap();
+        let command = binding
+            .answer(native.actor, &binding.question().id, &pick_first(&shape))
+            .unwrap();
         assert!(matches!(
             &command,
             player::Command::Answer {
@@ -292,12 +312,8 @@ fn leader_targets_use_the_native_recipient_without_inventing_a_card() {
     for actor in [Viewer::P1, Viewer::P2] {
         let mut game = board(actor, &program);
         let native = question(&game, actor).unwrap();
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("leader".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("leader".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::Targets);
         assert!(matches!(
             &selection(&shape)
@@ -308,7 +324,9 @@ fn leader_targets_use_the_native_recipient_without_inventing_a_card() {
                 .subject,
             Some(Subject::Leader { .. })
         ));
-        let command = binding.answer(native.token, &pick_first(&shape)).unwrap();
+        let command = binding
+            .answer(native.actor, &binding.question().id, &pick_first(&shape))
+            .unwrap();
         assert_eq!(
             game.submit_player(actor, command).kind,
             SubmissionKind::Applied
@@ -333,24 +351,15 @@ fn formal_targets_keep_their_subjects_and_submit_to_the_native_stop_both_seats()
         let native = question(&game, actor).unwrap();
         let observation = components(&game, actor);
         assert_eq!(observation.viewer, super::super::super::common::seat(actor));
-        let (usage, shape, binding) = project(
-            domain(&native).unwrap(),
-            Some(Context {
-                id: &QuestionId::new("select".into()),
-                actor,
-                purpose: native.purpose,
-                observation: &observation,
-                catalog: &board_fixture::fixture().unwrap().catalog,
-                references: &board_fixture::fixture().unwrap().references,
-            }),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("select".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::Targets);
         let selection = selection(&shape).unwrap();
         assert_eq!(selection.candidates.len(), 1);
         let command = binding
             .answer(
-                native.token,
+                native.actor,
+                &binding.question().id,
                 &Answer::Select {
                     selected: vec![selection.candidates.first().unwrap().id.clone()],
                     groups: None,
@@ -388,18 +397,15 @@ fn grouped_hand_costs_keep_both_groups_and_the_cost_material_answer_channel() {
                 ..
             })
         ));
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("cost".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("cost".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::CostDiscard);
         let selection = selection(&shape).unwrap();
         assert_eq!(selection.groups.len(), 2);
         let command = binding
             .answer(
-                native.token,
+                native.actor,
+                &binding.question().id,
                 &Answer::Select {
                     selected: selection
                         .candidates

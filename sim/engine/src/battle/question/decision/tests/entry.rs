@@ -1,7 +1,9 @@
 use super::super::*;
-use super::select::{components, domain, project_question, question, seats};
+use super::select::{
+    components, domain, project_game, project_question, question, seats, submit_projected,
+};
 use crate::battle::tests::{board_fixture, board_fixtures, history_fixture, payment_fixtures};
-use crate::game::player::{Input, Question, SubmissionKind};
+use crate::game::player::{Input, SubmissionKind};
 use crate::game::{Game, View};
 use crate::ir::lowering::ExpandedLowerer;
 use crate::ir::{self, WellFormedCardProgram, payment_expanded_tree};
@@ -155,37 +157,6 @@ fn board(actor: Viewer, ward: bool, first: bool, secret: &str) -> Game {
     game
 }
 
-fn submit(game: &mut Game, native: &Question, binding: &Binding, answer: &Answer) {
-    let other = if native.actor == Viewer::P1 {
-        Viewer::P2
-    } else {
-        Viewer::P1
-    };
-    let before = board_fixtures::exact_authority(game);
-    let command = binding.answer(native.token, answer).unwrap();
-    assert_eq!(
-        game.submit_player(other, command.clone()).kind,
-        SubmissionKind::Rejected
-    );
-    assert!(
-        board_fixtures::exact_authority(game) == before,
-        "wrong seat preserves authority"
-    );
-    assert_eq!(
-        game.submit_player(native.actor, command.clone()).kind,
-        SubmissionKind::Applied
-    );
-    let after = board_fixtures::exact_authority(game);
-    assert_eq!(
-        game.submit_player(native.actor, command).kind,
-        SubmissionKind::Rejected
-    );
-    assert!(
-        board_fixtures::exact_authority(game) == after,
-        "stale answers preserve authority"
-    );
-}
-
 #[test]
 fn before_draw_chooses_typed_steps_and_keeps_each_native_stop() {
     for actor in [Viewer::P1, Viewer::P2] {
@@ -195,8 +166,7 @@ fn before_draw_chooses_typed_steps_and_keeps_each_native_stop() {
             let native = question(&game, actor).unwrap();
             assert_eq!(domain(&native), Some(&DecisionShape::BeforeDraw));
             let before = board_fixtures::exact_authority(&game);
-            let (usage, shape, binding) =
-                project_question(&native, &components(&game, actor), &id).unwrap();
+            let (usage, shape, binding) = project_game(&game, actor, &id).unwrap();
             assert_eq!(usage, wire::QuestionUse::DrawContinue);
             let (options, bounds, count, earlier, capacity) = if let wire::QuestionShape::Choose {
                 options,
@@ -222,7 +192,11 @@ fn before_draw_chooses_typed_steps_and_keeps_each_native_stop() {
                 .id
                 .clone();
             assert_eq!(
-                binding.decode(&Answer::Confirm { accept: true }),
+                binding.answer(
+                    native.actor,
+                    &binding.question().id,
+                    &Answer::Confirm { accept: true }
+                ),
                 Err(AnswerError)
             );
             for invalid in [
@@ -231,7 +205,11 @@ fn before_draw_chooses_typed_steps_and_keeps_each_native_stop() {
                 vec![sve_battle_contract::OptionId::new("foreign".into())],
             ] {
                 assert_eq!(
-                    binding.decode(&Answer::Choose { chosen: invalid }),
+                    binding.answer(
+                        native.actor,
+                        &binding.question().id,
+                        &Answer::Choose { chosen: invalid }
+                    ),
                     Err(AnswerError)
                 );
             }
@@ -239,7 +217,7 @@ fn before_draw_chooses_typed_steps_and_keeps_each_native_stop() {
                 board_fixtures::exact_authority(&game) == before,
                 "reads preserve authority"
             );
-            submit(
+            submit_projected(
                 &mut game,
                 &native,
                 &binding,
@@ -267,12 +245,8 @@ fn ward_confirm_preserves_private_card_origin_and_posture_channel() {
         for accept in [false, true] {
             let mut game = board(actor, true, false, "unit-spell");
             let native = question(&game, actor).unwrap();
-            let (usage, shape, binding) = project_question(
-                &native,
-                &components(&game, actor),
-                &QuestionId::new("ward".into()),
-            )
-            .unwrap();
+            let (usage, shape, binding) =
+                project_game(&game, actor, &QuestionId::new("ward".into())).unwrap();
             assert_eq!(usage, wire::QuestionUse::WardEntry);
             let (allowed, subject, origin) = if let wire::QuestionShape::Confirm {
                 allowed,
@@ -293,12 +267,16 @@ fn ward_confirm_preserves_private_card_origin_and_posture_channel() {
             assert_eq!(origin.zone, Zone::Hand);
             assert_eq!(origin.position.unwrap().get(), 1);
             assert_eq!(
-                binding.decode(&Answer::Integer {
-                    value: sve_battle_contract::Nat::from(1_u32)
-                }),
+                binding.answer(
+                    native.actor,
+                    &binding.question().id,
+                    &Answer::Integer {
+                        value: sve_battle_contract::Nat::from(1_u32)
+                    }
+                ),
                 Err(AnswerError)
             );
-            submit(&mut game, &native, &binding, &Answer::Confirm { accept });
+            submit_projected(&mut game, &native, &binding, &Answer::Confirm { accept });
             assert_eq!(
                 game.projection(View::Referee).unwrap()["objects"]["b"]["acted"],
                 accept

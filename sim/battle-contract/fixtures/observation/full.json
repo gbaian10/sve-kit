@@ -887,19 +887,22 @@
       "stage": "resolve",
       "controller": "p1",
       "source": {
-        "card": {
-          "printing_id": "SYN01-001",
-          "face": 0
-        },
-        "wording_revision": "r1",
-        "section": "effect",
-        "line": 1,
-        "step": 2,
-        "granted_by": {
-          "printing_id": "SYN01-009",
-          "face": 0
-        },
-        "holder": "o1"
+        "kind": "text",
+        "text": {
+          "card": {
+            "printing_id": "SYN01-001",
+            "face": 0
+          },
+          "wording_revision": "r1",
+          "section": "effect",
+          "line": 1,
+          "step": 2,
+          "granted_by": {
+            "printing_id": "SYN01-009",
+            "face": 0
+          },
+          "holder": "o1"
+        }
       },
       "subject": {
         "kind": "card",
@@ -943,12 +946,14 @@
               "mode": 3,
               "text": null
             }
-          ]
+          ],
+          "actor": "p1"
         },
         {
           "kind": "number",
           "role": "x",
-          "value": 3
+          "value": 3,
+          "actor": "p1"
         },
         {
           "kind": "targets",
@@ -969,157 +974,35 @@
               },
               "object": null
             }
-          ]
+          ],
+          "actor": "p1"
         },
         {
           "kind": "optional_cost",
-          "accepted": true
+          "accepted": true,
+          "actor": "p1",
+          "required": false
         },
         {
           "kind": "name",
-          "rules_name": "合成フォロワー乙"
+          "rules_name": "合成フォロワー乙",
+          "actor": "p1"
         }
       ],
-      "payment": {
-        "basis": "before_payment",
-        "total_pp": null,
-        "groups": [
-          {
-            "role": {
-              "kind": "original"
-            },
-            "lines": [
-              {
-                "kind": "pp",
-                "quote": {
-                  "kind": "known",
-                  "amount": 2
-                }
-              },
-              {
-                "kind": "pp",
-                "quote": {
-                  "kind": "variable",
-                  "fixed": 1,
-                  "copies": 2,
-                  "x": null
-                }
-              },
-              {
-                "kind": "pp",
-                "quote": {
-                  "kind": "variable",
-                  "fixed": 0,
-                  "copies": 1,
-                  "x": 3
-                }
-              },
-              {
-                "kind": "pp",
-                "quote": {
-                  "kind": "unavailable"
-                }
-              },
-              {
-                "kind": "posture",
-                "cards": 1
-              },
-              {
-                "kind": "life",
-                "change": -2
-              },
-              {
-                "kind": "counter",
-                "name": "合成カウンター",
-                "count": null
-              },
-              {
-                "kind": "move",
-                "cards": null
-              },
-              {
-                "kind": "discard",
-                "cards": 1,
-                "selected": false
-              },
-              {
-                "kind": "banish",
-                "cards": 2
-              },
-              {
-                "kind": "reveal",
-                "cards": null
-              },
-              {
-                "kind": "fusion",
-                "cards": 2,
-                "selected": true
-              },
-              {
-                "kind": "entry_resources",
-                "cards": 3,
-                "use_ep": null
-              },
-              {
-                "kind": "other"
-              }
-            ]
+      "actor": null,
+      "payments": [
+        {
+          "actor": "p1",
+          "kind": {
+            "kind": "pp"
           },
-          {
-            "role": {
-              "kind": "additional"
-            },
-            "lines": []
+          "purpose": {
+            "kind": "original"
           },
-          {
-            "role": {
-              "kind": "mode"
-            },
-            "lines": [
-              {
-                "kind": "life",
-                "change": null
-              }
-            ]
-          },
-          {
-            "role": {
-              "kind": "optional",
-              "required": false,
-              "accepted": null
-            },
-            "lines": [
-              {
-                "kind": "posture",
-                "cards": null
-              }
-            ]
-          },
-          {
-            "role": {
-              "kind": "optional",
-              "required": true,
-              "accepted": true
-            },
-            "lines": [
-              {
-                "kind": "entry_resources",
-                "cards": 1,
-                "use_ep": true
-              }
-            ]
-          }
-        ],
-        "pending": [
-          "x",
-          "optional",
-          "modes",
-          "materials",
-          "exchange",
-          "entry_resources",
-          "unavailable"
-        ]
-      }
+          "amount": 2,
+          "unit": "pp"
+        }
+      ]
     },
     {
       "stage": "quick",
@@ -1133,7 +1016,8 @@
         "round": null
       },
       "declared": [],
-      "payment": null
+      "actor": null,
+      "payments": []
     }
   ],
   "costs": {

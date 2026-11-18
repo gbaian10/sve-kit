@@ -21,12 +21,8 @@ fn foreign_duplicate_and_wrong_group_answers_cannot_commit_a_partial_payment() {
             &["unit-spell"],
         );
         let native = question(&game, actor).unwrap();
-        let (_, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("checked".into()),
-        )
-        .unwrap();
+        let (_, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("checked".into())).unwrap();
         let selection = selection(&shape).unwrap();
         let ids = selection
             .candidates
@@ -41,7 +37,8 @@ fn foreign_duplicate_and_wrong_group_answers_cannot_commit_a_partial_payment() {
         ] {
             assert_eq!(
                 binding.answer(
-                    native.token,
+                    native.actor,
+                    &binding.question().id,
                     &Answer::Select {
                         selected,
                         groups: None,
@@ -52,17 +49,27 @@ fn foreign_duplicate_and_wrong_group_answers_cannot_commit_a_partial_payment() {
             );
         }
         assert_eq!(
-            binding.answer(native.token, &Answer::Confirm { accept: true }),
+            binding.answer(
+                native.actor,
+                &binding.question().id,
+                &Answer::Confirm { accept: true }
+            ),
             Err(AnswerError)
         );
+        assert_unchanged(&game, &before);
         let bad = Answer::Select {
             selected: ids.iter().take(2).cloned().collect(),
             groups: None,
             roles: vec![],
         };
         assert_eq!(
-            game.submit_player(actor, binding.answer(native.token, &bad).unwrap())
-                .kind,
+            game.submit_player(
+                actor,
+                binding
+                    .answer(native.actor, &binding.question().id, &bad)
+                    .unwrap()
+            )
+            .kind,
             SubmissionKind::Rejected
         );
         assert_unchanged(&game, &before);
@@ -72,8 +79,13 @@ fn foreign_duplicate_and_wrong_group_answers_cannot_commit_a_partial_payment() {
             roles: vec![],
         };
         assert_eq!(
-            game.submit_player(actor, binding.answer(native.token, &good).unwrap())
-                .kind,
+            game.submit_player(
+                actor,
+                binding
+                    .answer(native.actor, &binding.question().id, &good)
+                    .unwrap()
+            )
+            .kind,
             SubmissionKind::Applied
         );
         assert_eq!(

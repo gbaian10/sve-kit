@@ -91,7 +91,7 @@ pub(super) fn prepared_program(
             .push(json!({"id":"giver","card":number}));
     }
     let mut game = Game::new(
-        catalog(),
+        base_catalog().unwrap(),
         &initial,
         &Value::Null,
         &Value::Null,

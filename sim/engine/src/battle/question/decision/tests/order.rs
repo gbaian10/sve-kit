@@ -1,6 +1,8 @@
 use super::super::*;
 use super::joint::submit_exact;
-use super::select::{components, domain, program, project_question, question, seats};
+use super::select::{
+    components, domain, program, project_game, project_question, question, seats, submit_projected,
+};
 use crate::battle::question::common::seat;
 use crate::battle::tests::{board_fixture, board_fixtures};
 use crate::game::player::Viewer;
@@ -92,12 +94,8 @@ fn looked_cards_keep_native_order_direction_destination_and_full_permutation_bot
                 "Look creates the real native Order stop"
             );
             let before = board_fixtures::exact_authority(&game);
-            let (usage, shape, binding) = project_question(
-                &native,
-                &components(&game, actor),
-                &QuestionId::new("order".into()),
-            )
-            .unwrap();
+            let (usage, shape, binding) =
+                project_game(&game, actor, &QuestionId::new("order".into())).unwrap();
             assert!(
                 board_fixtures::exact_authority(&game) == before,
                 "projection preserves authority"
@@ -124,7 +122,9 @@ fn looked_cards_keep_native_order_direction_destination_and_full_permutation_bot
             let answer = Answer::Order {
                 order: items.iter().rev().map(|item| item.id.clone()).collect(),
             };
-            let command = binding.answer(native.token, &answer).unwrap();
+            let command = binding
+                .answer(native.actor, &binding.question().id, &answer)
+                .unwrap();
             assert!(matches!(
                 &command,
                 player::Command::Answer {
@@ -132,7 +132,7 @@ fn looked_cards_keep_native_order_direction_destination_and_full_permutation_bot
                     ..
                 }
             ));
-            submit_exact(&mut game, &native, &binding, &answer);
+            submit_projected(&mut game, &native, &binding, &answer);
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state[seats(actor).0]["deck"], expected);
             assert_eq!(state[seats(actor).0]["leader"]["life"], 21_u32);

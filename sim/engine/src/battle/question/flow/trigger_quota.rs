@@ -1,8 +1,8 @@
-use super::{AnswerError, Context, ProjectionError, Result, pending};
+use super::{AnswerError, Context, Result, pending};
 use crate::battle::question::common::seat;
 use crate::game::player::{self, QuotaQuestion};
 use core::result;
-use sve_battle_contract::{Answer, observation::ProcessingStage, question as wire};
+use sve_battle_contract::{Answer, question as wire};
 
 #[derive(Clone)]
 pub(in crate::battle::question) struct Binding {
@@ -13,14 +13,6 @@ pub(super) fn project(
     domain: &QuotaQuestion,
     context: Context<'_>,
 ) -> Result<(wire::QuestionShape, Binding)> {
-    if context
-        .observation
-        .processing
-        .first()
-        .is_none_or(|processing| processing.stage != ProcessingStage::TriggerAdmission)
-    {
-        return Err(ProjectionError::Unavailable);
-    }
     let (options, candidates) = pending::options(&domain.candidates, context)?;
     let earlier = domain
         .earlier

@@ -260,7 +260,10 @@ fn wire_board_uses_real_quick_and_frozen_card_damage_after_the_arrow_is_gone() {
             );
             game.advance_player_input();
             let during = read(&game, actor);
-            assert_eq!(during.processing[0].stage, wire::ProcessingStage::Quick);
+            assert_eq!(
+                during.processing[0].stage,
+                Some(wire::ProcessingStage::Quick)
+            );
             let arrow = during.attack.unwrap();
             let Subject::Card {
                 object: Some(current),
@@ -345,7 +348,7 @@ fn wire_board_pending_rules_keep_the_follower_target_arrow_and_public_controller
             let view = read(&game, viewer);
             assert_eq!(
                 view.processing[0].stage,
-                wire::ProcessingStage::PendingOrder
+                Some(wire::ProcessingStage::PendingOrder)
             );
             assert_eq!(
                 view.processing[0].controller,
@@ -432,7 +435,7 @@ fn wire_board_admission_uses_the_current_public_group_and_keeps_budgets_controll
             assert_eq!(view.processing.len(), 1);
             assert_eq!(
                 view.processing[0].stage,
-                wire::ProcessingStage::TriggerAdmission
+                Some(wire::ProcessingStage::TriggerAdmission)
             );
             assert_eq!(
                 view.processing[0].controller,
@@ -501,7 +504,10 @@ fn wire_board_has_a_closing_context_without_disclosing_the_other_hand() {
         for viewer in [Viewer::P1, Viewer::P2] {
             let view = read(&game, viewer);
             assert_eq!(view.processing.len(), 1);
-            assert_eq!(view.processing[0].stage, wire::ProcessingStage::Closing);
+            assert_eq!(
+                view.processing[0].stage,
+                Some(wire::ProcessingStage::Closing)
+            );
             let index = usize::from(actor != Viewer::P1);
             assert_eq!(view.players[index].zones.hand.count.get(), 8);
             assert_eq!(
@@ -556,7 +562,10 @@ fn wire_board_opening_context_keeps_the_unestablished_turn_unknown() {
             let view = read(&game, viewer);
             assert_eq!(view.turn.active, None);
             assert_eq!(view.turn.first_player, None);
-            assert_eq!(view.processing[0].stage, wire::ProcessingStage::Opening);
+            assert_eq!(
+                view.processing[0].stage,
+                Some(wire::ProcessingStage::Opening)
+            );
             assert_eq!(
                 view.processing[0].controller, None,
                 "the first-choice actor is not an established turn controller"
@@ -581,7 +590,10 @@ fn wire_board_opening_context_keeps_the_unestablished_turn_unknown() {
         );
         for viewer in [Viewer::P1, Viewer::P2] {
             let view = read(&game, viewer);
-            assert_eq!(view.processing[0].stage, wire::ProcessingStage::Opening);
+            assert_eq!(
+                view.processing[0].stage,
+                Some(wire::ProcessingStage::Opening)
+            );
             assert_eq!(
                 view.turn.active,
                 Some(if first == Viewer::P1 {
@@ -623,7 +635,7 @@ fn wire_board_opening_context_keeps_the_unestablished_turn_unknown() {
 }
 
 #[test]
-fn wire_board_refuses_active_typed_processing_instead_of_inventing_an_empty_stack() {
+fn wire_board_keeps_active_formal_processing_in_the_same_scope() {
     let mut activation = ability(1, vec![draw(1, 0)]);
     activation
         .node
@@ -642,17 +654,28 @@ fn wire_board_refuses_active_typed_processing_instead_of_inventing_an_empty_stac
             panic!("an actual declaration is waiting")
         };
         let before = format!("{game:?}");
-        for viewer in [Viewer::P1, Viewer::P2] {
-            assert_eq!(
-                game.battle_observation(viewer, &fixture().references)
-                    .unwrap_err(),
-                ProjectionError::Unavailable,
-                "unsupported required processing must stop the whole projection"
-            );
-        }
+        let view = read(&game, actor);
+        let context = &view.processing[0];
+        assert_eq!(context.stage, Some(wire::ProcessingStage::Target));
+        assert_eq!(
+            context.actor,
+            Some(if actor == Viewer::P1 {
+                Seat::P1
+            } else {
+                Seat::P2
+            })
+        );
+        let Some(Subject::Card {
+            object: Some(object),
+            ..
+        }) = &context.subject
+        else {
+            panic!("the formal source shares the board object scope")
+        };
+        assert!(view.objects.contains_key(object));
         assert!(
             format!("{game:?}") == before,
-            "failed board reads must not mutate authority"
+            "board reads must not mutate authority"
         );
     }
 }

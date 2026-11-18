@@ -51,10 +51,7 @@ fn private_partition_remainders_preserve_waiting_complete_views_at_both_real_sto
             let id = QuestionId::new(stage.into());
             assert!(matches!(a.battle_question(other, &id, refs), Ok(None)));
             assert!(matches!(b.battle_question(other, &id, refs), Ok(None)));
-            assert!(matches!(
-                a.battle_question(actor, &id, refs),
-                Err(ProjectionError::Unavailable)
-            ));
+            assert!(matches!(a.battle_question(actor, &id, refs), Ok(Some(_))));
             let (native_a, items_a, buckets_a, binding_a) = projected(&a, actor, stage);
             let (native_b, items_b, buckets_b, binding_b) = projected(&b, actor, stage);
             assert_ne!(items_a, items_b);

@@ -117,7 +117,9 @@ fn drive_designation_and_acceptance_reach_the_native_stop_both_seats() {
             for accept in [false, true] {
                 let mut game = make(actor, name);
                 let before = board_fixtures::exact_authority(&game);
-                let (native, usage, shape, binding) = projected(&game, actor);
+                let native = question(&game, actor).unwrap();
+                let (usage, shape, binding) =
+                    project_game(&game, actor, &QuestionId::new("joint".into())).unwrap();
                 assert!(
                     board_fixtures::exact_authority(&game) == before,
                     "Drive projection preserves authority"
@@ -139,7 +141,7 @@ fn drive_designation_and_acceptance_reach_the_native_stop_both_seats() {
                 assert_eq!(targets.len(), usize::from(required));
                 let target = (accept && required).then(|| targets.first().unwrap().id.clone());
                 let answer = Answer::DriveTrigger { accept, target };
-                submit_exact(&mut game, &native, &binding, &answer);
+                submit_projected(&mut game, &native, &binding, &answer);
                 let state = game.projection(View::Referee).unwrap();
                 match name {
                     "critical" => assert_eq!(

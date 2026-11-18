@@ -1,5 +1,7 @@
 use super::super::*;
-use super::select::{board, components, domain, program, project_question, question, seats};
+use super::select::{
+    board, components, domain, program, project_game, project_question, question, seats,
+};
 use crate::game::View;
 use crate::game::player::{Input, SubmissionKind};
 use crate::ir::{self, ModeId, WellFormedCardProgram};
@@ -48,12 +50,8 @@ fn declaration_modes_preserve_printed_ids_order_count_and_native_answers() {
         assert!(
             matches!(domain(&native), Some(DecisionShape::Modes { modes, count: ir::Nat(2), .. }) if *modes == vec![ModeId(9), ModeId(2), ModeId(7)])
         );
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("modes".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("modes".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::Modes);
         let (options, bounds, count) = if let wire::QuestionShape::Choose {
             options,
@@ -86,14 +84,12 @@ fn declaration_modes_preserve_printed_ids_order_count_and_native_answers() {
             options.last().unwrap().id.clone(),
             options.first().unwrap().id.clone(),
         ];
-        assert_eq!(
-            binding.decode(&Answer::Choose {
-                chosen: chosen.clone()
-            }),
-            Ok(player::Answer::Modes(vec![ModeId(7), ModeId(9)]))
-        );
         let command = binding
-            .answer(native.token, &Answer::Choose { chosen })
+            .answer(
+                native.actor,
+                &binding.question().id,
+                &Answer::Choose { chosen },
+            )
             .unwrap();
         assert_eq!(
             game.submit_player(actor, command).kind,
@@ -120,12 +116,8 @@ fn a_resolution_alternative_keeps_its_use_and_one_mode_answer() {
             domain(&native),
             Some(DecisionShape::ResolutionAlternative { .. })
         ));
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("alternative".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("alternative".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::ResolutionAlternative);
         let options = if let wire::QuestionShape::Choose {
             options,
@@ -148,14 +140,12 @@ fn a_resolution_alternative_keeps_its_use_and_one_mode_answer() {
         }
         .unwrap();
         let chosen = vec![options.last().unwrap().id.clone()];
-        assert_eq!(
-            binding.decode(&Answer::Choose {
-                chosen: chosen.clone()
-            }),
-            Ok(player::Answer::Modes(vec![ModeId(2)]))
-        );
         let command = binding
-            .answer(native.token, &Answer::Choose { chosen })
+            .answer(
+                native.actor,
+                &binding.question().id,
+                &Answer::Choose { chosen },
+            )
             .unwrap();
         assert_eq!(
             game.submit_player(actor, command).kind,

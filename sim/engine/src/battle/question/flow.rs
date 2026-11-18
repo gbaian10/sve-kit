@@ -8,7 +8,7 @@ use crate::game::player::{self, DecisionShape, QuestionToken};
 use core::result;
 use sve_battle_contract::{
     Answer,
-    observation::{BattleObservation, ProcessingStage},
+    observation::{ProcessingContext, ProcessingStage},
     question as wire,
 };
 
@@ -25,25 +25,15 @@ pub(super) enum Binding {
 
 pub(super) fn context(
     purpose: player::QuestionPurpose,
-    observation: &BattleObservation,
+    processing: &ProcessingContext,
 ) -> Result<(
     player::QuestionPurpose,
     wire::QuestionPurpose,
     ProcessingStage,
 )> {
-    let wire_purpose = match purpose {
-        player::QuestionPurpose::PlayParameter => wire::QuestionPurpose::PlayParameter,
-        player::QuestionPurpose::ResolutionChoice => wire::QuestionPurpose::ResolutionChoice,
-        player::QuestionPurpose::RuleChoice => wire::QuestionPurpose::RuleChoice,
-        player::QuestionPurpose::QuickWindow => wire::QuestionPurpose::QuickWindow,
-        player::QuestionPurpose::MainAction => wire::QuestionPurpose::MainAction,
-    };
-    // The board owns stage facts; this check only admits supported purpose/stage pairs.
-    let stage = observation
-        .processing
-        .first()
-        .ok_or(ProjectionError::Unavailable)?
-        .stage;
+    let wire_purpose = self::purpose(purpose);
+    // The board owns the current producer's stage, including suspended parent frames.
+    let stage = processing.stage.ok_or(ProjectionError::Unavailable)?;
     match (purpose, stage) {
         (player::QuestionPurpose::QuickWindow, ProcessingStage::Quick)
         | (
@@ -54,32 +44,49 @@ pub(super) fn context(
     }
 }
 
+pub(super) const fn purpose(purpose: player::QuestionPurpose) -> wire::QuestionPurpose {
+    match purpose {
+        player::QuestionPurpose::PlayParameter => wire::QuestionPurpose::PlayParameter,
+        player::QuestionPurpose::ResolutionChoice => wire::QuestionPurpose::ResolutionChoice,
+        player::QuestionPurpose::RuleChoice => wire::QuestionPurpose::RuleChoice,
+        player::QuestionPurpose::QuickWindow => wire::QuestionPurpose::QuickWindow,
+        player::QuestionPurpose::MainAction => wire::QuestionPurpose::MainAction,
+    }
+}
+
 pub(super) fn project(
     domain: &DecisionShape,
     context: Context<'_>,
+    stage: ProcessingStage,
     catalog: &Catalog,
     references: &BattleReferences,
 ) -> Result<(wire::QuestionUse, wire::QuestionShape, QuestionBinding)> {
-    let (usage, shape, binding) = if let DecisionShape::Quick { window, options } = domain {
-        let (shape, binding) = quick::project(*window, options, context, catalog, references)?;
-        (wire::QuestionUse::Quick, shape, Binding::Quick(binding))
-    } else if let DecisionShape::Pending(choices) = domain {
-        let (shape, binding) = pending::project(choices, context)?;
-        (
-            wire::QuestionUse::PendingOrder,
-            shape,
-            Binding::Pending(binding),
-        )
-    } else if let DecisionShape::TriggerQuota(domain) = domain {
-        let (shape, binding) = trigger_quota::project(domain, context)?;
-        (
-            wire::QuestionUse::TriggerQuota,
-            shape,
-            Binding::TriggerQuota(binding),
-        )
-    } else {
-        return Err(ProjectionError::Unavailable);
-    };
+    let (usage, shape, binding) =
+        if let (DecisionShape::Quick { window, options }, ProcessingStage::Quick) = (domain, stage)
+        {
+            let (shape, binding) = quick::project(*window, options, context, catalog, references)?;
+            (wire::QuestionUse::Quick, shape, Binding::Quick(binding))
+        } else if let (DecisionShape::Pending(choices), ProcessingStage::PendingOrder) =
+            (domain, stage)
+        {
+            let (shape, binding) = pending::project(choices, context)?;
+            (
+                wire::QuestionUse::PendingOrder,
+                shape,
+                Binding::Pending(binding),
+            )
+        } else if let (DecisionShape::TriggerQuota(domain), ProcessingStage::TriggerAdmission) =
+            (domain, stage)
+        {
+            let (shape, binding) = trigger_quota::project(domain, context)?;
+            (
+                wire::QuestionUse::TriggerQuota,
+                shape,
+                Binding::TriggerQuota(binding),
+            )
+        } else {
+            return Err(ProjectionError::Unavailable);
+        };
     Ok((usage, shape, QuestionBinding::Flow(binding)))
 }
 

@@ -1,3 +1,4 @@
+use super::super::select::submit_projected;
 use super::*;
 use sve_battle_contract::{Nat as WireNat, ObjectHandle};
 
@@ -35,7 +36,13 @@ fn prospective_token_combinations_keep_exact_printings_and_create_nothing_until_
                 .keys()
                 .cloned()
                 .collect::<Vec<ObjectHandle>>();
-            let (native, shape, binding) = fixture::project_game(&game, actor, "tokens");
+            let native = captured;
+            let id = QuestionId::new("tokens".into());
+            let binding = game
+                .battle_question(actor, &id, &fixture::fixture().references)
+                .unwrap()
+                .unwrap();
+            let shape = binding.question().shape.clone();
             assert!(
                 board_fixtures::exact_authority(&game) == before,
                 "a prospective printing creates no object and consumes no authority"
@@ -94,13 +101,15 @@ fn prospective_token_combinations_keep_exact_printings_and_create_nothing_until_
                 chosen: vec![last.id.clone()],
             };
             assert!(matches!(
-                binding.answer(native.token, &answer).unwrap(),
+                binding
+                    .answer(native.actor, &binding.question().id, &answer)
+                    .unwrap(),
                 player::Command::Answer {
                     answer: player::Answer::TokenCapacity(2),
                     ..
                 }
             ));
-            submit_exact(&mut game, &native, &binding, &answer);
+            submit_projected(&mut game, &native, &binding, &answer);
             assert_committed(&game, actor, zone, &old_ids);
         }
     }

@@ -3,11 +3,12 @@
     reason = "A missing decision invalidates the player choice scenarios."
 )]
 use super::*;
-use sve_engine::game::internal::{DecisionView, InputDomain};
-use sve_engine::game::player::{
-    Viewer,
-    observation::{ProcedureKind, ProcessingProcedure},
+use sve_battle_contract::{
+    Nat as WireNat, QuestionId, Seat,
+    observation::{Procedure, ProcedureKind},
 };
+use sve_engine::game::internal::{DecisionView, InputDomain};
+use sve_engine::game::player::Viewer;
 
 fn tree(number: &str, head: &Value) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
@@ -221,7 +222,14 @@ fn play_as(
     initial["players"][me]["zones"]["field"] = cards("m", fields.0, "unit-follower");
     initial["players"][them]["zones"]["field"] = cards("t", fields.1, "unit-follower");
     initial["players"][them]["zones"]["hand"] = hands.1;
-    let mut game = Game::new(catalog(), &initial, &Value::Null, &Value::Null, "procedure").unwrap();
+    let mut game = Game::new(
+        base_catalog().unwrap(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "procedure",
+    )
+    .unwrap();
     game.load_internal_card("unit-follower", &programs["unit-follower"])
         .unwrap();
     for number in ["unit-spell", "unit-amulet"] {
@@ -706,20 +714,33 @@ fn processing_tracks_the_real_participant_and_stage_round() {
         [{"choose":{"bind":"second","from":{"who":"p","zone":"field","kind":"follower"},"n":1,"by":"p"}}]
     ]}}]);
     let (mut game, mut next) = play(&steps, (1, 2), (json!([]), json!([])));
-    for round in 1..=2 {
+    for round in 1_u32..=2 {
         for actor in [Viewer::P1, Viewer::P2] {
             let current = next.take().unwrap();
-            let context = game.observe(actor).unwrap().processing.pop().unwrap();
+            let projection = game
+                .battle_question(
+                    actor,
+                    &QuestionId::new("participant".into()),
+                    &base_references().unwrap(),
+                )
+                .unwrap()
+                .unwrap();
+            let context = &projection.question().processing;
+            let seat = if actor == Viewer::P1 {
+                Seat::P1
+            } else {
+                Seat::P2
+            };
             assert_eq!(
                 (context.controller, context.actor),
-                (Viewer::P1, Some(actor))
+                (Some(Seat::P1), Some(seat))
             );
             assert_eq!(
                 context.procedure,
-                Some(ProcessingProcedure {
+                Some(Procedure {
                     kind: ProcedureKind::EachPlayer,
-                    actor,
-                    round
+                    actor: seat,
+                    round: Some(WireNat::from(round))
                 })
             );
             next = answer(&mut game, &current, vec![handles(&current)[0]]);

@@ -6,6 +6,7 @@
 mod costs;
 mod effects;
 mod history;
+mod payments;
 mod processing;
 
 pub use costs::{
@@ -22,9 +23,11 @@ pub use history::{
     TurnHistory,
 };
 pub use processing::{
-    Declared, DeclaredMode, DeclaredNumber, Procedure, ProcedureKind, ProcessingContext,
-    ProcessingStage,
+    Declared, DeclaredAllocation, DeclaredMode, DeclaredNumber, Procedure, ProcedureKind,
+    ProcessingContext, ProcessingDeclaration, ProcessingStage,
 };
+
+pub use payments::{PaymentKind, PaymentPurpose, PaymentUnit, ProcessingPayment};
 
 use crate::common::{CardRef, ObjectHandle, Seat, Subject};
 use crate::number::{Int, Nat};

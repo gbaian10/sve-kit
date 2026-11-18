@@ -84,8 +84,7 @@ fn private_mode_sources_change_real_candidates_without_changing_the_waiting_view
             let before = board_fixtures::exact_authority(&game);
             let native = question(&game, actor).unwrap();
             domains.push(native.shape.clone());
-            let (_, shape, binding) =
-                project_question(&native, &components(&game, actor), &id).unwrap();
+            let (_, shape, binding) = project_game(&game, actor, &id).unwrap();
             let view = (
                 game.input(other),
                 game.observe(other).unwrap(),
@@ -107,7 +106,7 @@ fn private_mode_sources_change_real_candidates_without_changing_the_waiting_view
             );
             assert!(matches!(
                 game.battle_question(actor, &id, references),
-                Err(ProjectionError::Unavailable)
+                Ok(Some(_))
             ));
             assert!(
                 board_fixtures::exact_authority(&game) == before,
@@ -121,7 +120,8 @@ fn private_mode_sources_change_real_candidates_without_changing_the_waiting_view
             .unwrap();
             let command = binding
                 .answer(
-                    native.token,
+                    native.actor,
+                    &binding.question().id,
                     &Answer::Choose {
                         chosen: vec![option.id.clone()],
                     },
@@ -167,9 +167,8 @@ fn opponent_secrets_preserve_the_actor_view(actor: Viewer, id: &QuestionId) {
     let mut actor_view = None;
     for secret in ["unit-spell", "unit-amulet"] {
         let game = private_board(actor, "follower", secret);
-        let native = question(&game, actor).unwrap();
         let observation = components(&game, actor);
-        let (usage, shape, _) = project_question(&native, &observation, id).unwrap();
+        let (usage, shape, _) = project_game(&game, actor, id).unwrap();
         let view = (game.observe(actor).unwrap(), observation, usage, shape);
         if let Some(previous) = &actor_view {
             assert!(

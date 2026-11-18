@@ -173,9 +173,9 @@ fn wire_evolution_payment_round_trips_every_legal_tuple_for_both_seats() {
             );
             assert_eq!(
                 projection.question().processing.stage,
-                ProcessingStage::Declare
+                Some(ProcessingStage::Declare)
             );
-            assert_eq!(projection.question().processing.payment, None);
+            assert_eq!(projection.question().processing.payments, vec![]);
             assert_eq!(
                 projection.observation(),
                 &game.battle_observation(actor, &references).unwrap()

@@ -18,7 +18,7 @@ fn entry_private_sources_preserve_complete_waiting_and_opponent_views() {
                 let before = board_fixtures::exact_authority(&game);
                 let native = question(&game, actor).unwrap();
                 domains.push(native.shape.clone());
-                project_question(&native, &components(&game, actor), &id).unwrap();
+                project_game(&game, actor, &id).unwrap();
                 assert!(matches!(game.input(other), Input::Waiting(_)));
                 assert!(
                     game.battle_question(other, &id, references)
@@ -27,7 +27,7 @@ fn entry_private_sources_preserve_complete_waiting_and_opponent_views() {
                 );
                 assert!(matches!(
                     game.battle_question(actor, &id, references),
-                    Err(ProjectionError::Unavailable)
+                    Ok(Some(_))
                 ));
                 let view = (
                     game.input(other),
@@ -55,9 +55,8 @@ fn entry_private_sources_preserve_complete_waiting_and_opponent_views() {
             let mut actor_view = None;
             for secret in ["unit-spell", "unit-amulet"] {
                 let game = board(actor, ward, true, secret);
-                let native = question(&game, actor).unwrap();
                 let observation = components(&game, actor);
-                let (usage, shape, _) = project_question(&native, &observation, &id).unwrap();
+                let (usage, shape, _) = project_game(&game, actor, &id).unwrap();
                 let view = (game.observe(actor).unwrap(), observation, usage, shape);
                 if let Some(actor_view) = &actor_view {
                     assert!(

@@ -61,10 +61,7 @@ fn different_real_private_order_domains_preserve_the_waiting_seat_complete_views
                 projected(&b, actor).1,
                 "only the chooser receives its frozen domain"
             );
-            assert!(matches!(
-                a.battle_question(actor, &id, refs),
-                Err(ProjectionError::Unavailable)
-            ));
+            assert!(matches!(a.battle_question(actor, &id, refs), Ok(Some(_))));
             assert!(
                 board_fixtures::exact_authority(&a) == before_a,
                 "projection preserves complete authority"

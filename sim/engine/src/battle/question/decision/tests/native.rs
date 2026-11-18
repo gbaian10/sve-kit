@@ -169,16 +169,16 @@ fn confirm_commands_keep_native_tokens_and_submit_to_the_producing_game() {
                     }
                 );
                 let before = board_fixtures::exact_authority(&game);
-                let (_, _, binding) = project(&domain, None).unwrap();
+                let id = QuestionId::new("confirm".into());
+                let projection = game
+                    .battle_question(actor, &id, references)
+                    .unwrap()
+                    .unwrap();
                 game.observe(actor).unwrap();
                 game.observe(other).unwrap();
                 assert!(
                     matches!(game.input(other), Input::Waiting(waiting) if waiting.actor == actor && waiting.dice.is_none())
                 );
-                assert!(matches!(
-                    game.battle_question(actor, &QuestionId::new("confirm".into()), references),
-                    Err(ProjectionError::Unavailable)
-                ));
                 assert!(
                     game.battle_question(other, &QuestionId::new("confirm".into()), references)
                         .unwrap()
@@ -189,7 +189,7 @@ fn confirm_commands_keep_native_tokens_and_submit_to_the_producing_game() {
                     "reading a confirmation preserves authority state"
                 );
                 let wire_answer = Answer::Confirm { accept };
-                let command = binding.answer(native.token, &wire_answer).unwrap();
+                let command = projection.answer(actor, &id, &wire_answer).unwrap();
                 assert!(
                     matches!(&command, Command::Answer { token, .. } if *token == native.token)
                 );

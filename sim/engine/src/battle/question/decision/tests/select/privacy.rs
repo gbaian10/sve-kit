@@ -41,7 +41,12 @@ fn assert_unchanged(game: &Game, before: &str) {
     );
 }
 
-fn submit_complete(game: &mut Game, native: &Question, binding: &Binding, answer: &Answer) {
+fn submit_complete(
+    game: &mut Game,
+    native: &Question,
+    binding: &QuestionProjection,
+    answer: &Answer,
+) {
     let actor = native.actor;
     let other = if actor == Viewer::P1 {
         Viewer::P2
@@ -49,7 +54,9 @@ fn submit_complete(game: &mut Game, native: &Question, binding: &Binding, answer
         Viewer::P1
     };
     let before = board_fixtures::exact_authority(game);
-    let command = binding.answer(native.token, answer).unwrap();
+    let command = binding
+        .answer(native.actor, &binding.question().id, answer)
+        .unwrap();
     assert_eq!(
         game.submit_player(other, command.clone()).kind,
         SubmissionKind::Rejected
@@ -101,8 +108,7 @@ fn waiting_view_is_private(
         let before = board_fixtures::exact_authority(&game);
         let native = question(&game, actor).unwrap();
         native_candidates.push(native_selection(&native).unwrap().members.clone());
-        let observation = components(&game, actor);
-        let (usage, shape, binding) = project_question(&native, &observation, id).unwrap();
+        let (usage, shape, binding) = project_game(&game, actor, id).unwrap();
         assert_eq!(usage, expected);
         let offered = selection(&shape).unwrap();
         candidates.push(offered.clone());
@@ -134,7 +140,7 @@ fn waiting_view_is_private(
         );
         assert!(matches!(
             game.battle_question(actor, id, references),
-            Err(ProjectionError::Unavailable)
+            Ok(Some(_))
         ));
         assert_unchanged(&game, &before);
         let answer = Answer::Select {
@@ -174,9 +180,8 @@ fn opponent_secrets_preserve_actor_view(
             &["unit-follower", "unit-spell", "unit-amulet"],
             &[secret],
         );
-        let native = question(&game, actor).unwrap();
         let observation = components(&game, actor);
-        let (_, shape, _) = project_question(&native, &observation, id).unwrap();
+        let (_, shape, _) = project_game(&game, actor, id).unwrap();
         let public = game.observe(actor).unwrap();
         if let Some(previous) = &actor_board {
             assert!(
@@ -222,15 +227,13 @@ fn an_empty_private_resolution_selection_is_a_real_zero_candidate_stop() {
             &["unit-spell"],
         );
         let native = question(&game, actor).unwrap();
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("empty".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("empty".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::ResolutionSelection);
         assert_eq!(selection(&shape).unwrap().candidates, []);
-        let command = binding.answer(native.token, &pick_first(&shape)).unwrap();
+        let command = binding
+            .answer(native.actor, &binding.question().id, &pick_first(&shape))
+            .unwrap();
         assert_eq!(
             game.submit_player(actor, command).kind,
             SubmissionKind::Applied

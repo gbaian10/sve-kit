@@ -177,7 +177,7 @@ fn assert_material_domain(
     );
     assert_eq!(
         projection.question().processing.stage,
-        ProcessingStage::Declare,
+        Some(ProcessingStage::Declare),
         "choosing materials is not a payment"
     );
     assert_eq!(

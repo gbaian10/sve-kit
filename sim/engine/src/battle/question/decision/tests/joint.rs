@@ -1,5 +1,8 @@
 use super::super::*;
-use super::select::{board, components, domain, program, project_question, question, seats};
+use super::select::{
+    board, components, domain, program, project_game, project_question, question, seats,
+    submit_projected,
+};
 use crate::battle::tests::board_fixtures;
 use crate::game::player::{Question, SubmissionKind, Viewer};
 use crate::game::{Game, View};
@@ -62,7 +65,9 @@ fn distribution_preserves_frozen_recipients_and_native_damage_both_seats() {
     for actor in [Viewer::P1, Viewer::P2] {
         let mut game = distribution(actor);
         let before = board_fixtures::exact_authority(&game);
-        let (native, usage, shape, binding) = projected(&game, actor);
+        let native = question(&game, actor).unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("joint".into())).unwrap();
         assert!(
             board_fixtures::exact_authority(&game) == before,
             "projection preserves authority"
@@ -88,7 +93,9 @@ fn distribution_preserves_frozen_recipients_and_native_damage_both_seats() {
                 amount: total,
             }],
         };
-        let command = binding.answer(native.token, &answer).unwrap();
+        let command = binding
+            .answer(native.actor, &binding.question().id, &answer)
+            .unwrap();
         assert!(matches!(
             &command,
             player::Command::Answer {
@@ -96,7 +103,7 @@ fn distribution_preserves_frozen_recipients_and_native_damage_both_seats() {
                 ..
             }
         ));
-        submit_exact(&mut game, &native, &binding, &answer);
+        submit_projected(&mut game, &native, &binding, &answer);
         assert_eq!(
             game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],
             2_i32

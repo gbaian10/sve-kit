@@ -1,6 +1,8 @@
 use super::super::*;
 use super::joint::submit_exact;
-use super::select::{components, domain, program, project_question, question, seats};
+use super::select::{
+    components, domain, program, project_game, project_question, question, seats, submit_projected,
+};
 use crate::battle::question::common::seat;
 use crate::battle::tests::{board_fixture, board_fixtures};
 use crate::game::player::Viewer;
@@ -101,12 +103,8 @@ fn actual_movement_capacity_selects_exactly_the_frozen_available_spaces_both_sea
             matches!(domain(&native), Some(DecisionShape::MovementCapacity(_))),
             "real native movement capacity stop"
         );
-        let (usage, shape, binding) = project_question(
-            &native,
-            &components(&game, actor),
-            &QuestionId::new("capacity".into()),
-        )
-        .unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("capacity".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::MovementCapacity);
         let wire::QuestionShape::Select { selection } = shape else {
             panic!("capacity selection");
@@ -131,13 +129,15 @@ fn actual_movement_capacity_selects_exactly_the_frozen_available_spaces_both_sea
             roles: vec![],
         };
         assert!(matches!(
-            binding.answer(native.token, &answer).unwrap(),
+            binding
+                .answer(native.actor, &binding.question().id, &answer)
+                .unwrap(),
             player::Command::Answer {
                 answer: player::Answer::SearchPartition(_),
                 ..
             }
         ));
-        submit_exact(&mut game, &native, &binding, &answer);
+        submit_projected(&mut game, &native, &binding, &answer);
         let state = game.projection(View::Referee).unwrap();
         assert!(
             state[seats(actor).0]["field"]

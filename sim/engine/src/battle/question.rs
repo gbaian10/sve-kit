@@ -10,7 +10,7 @@ use alloc::collections::BTreeMap;
 use core::{fmt, result};
 use sve_battle_contract::{
     Answer, OptionId, QuestionId,
-    observation::{BattleObservation, ProcessingStage},
+    observation::{BattleObservation, ProcessingContext, ProcessingStage},
     question as wire,
 };
 
@@ -38,7 +38,7 @@ pub struct AnswerError;
 /// The host issues a fresh question ID for this occurrence in this battle. It
 /// authenticates the viewer before decoding, then submits the returned command
 /// to the same Game, which still checks token freshness and game legality.
-/// Supports opening, closing, rule-owned Quick, and normal evolution questions.
+/// Supports opening, closing, normal evolution and all admitted Decision shapes.
 ///
 /// ```compile_fail,E0624
 /// use sve_engine::battle::QuestionProjection;
@@ -82,46 +82,31 @@ impl QuestionProjection {
         id: &QuestionId,
         native: player::Question,
         observation: BattleObservation,
+        current: Option<usize>,
         catalog: &Catalog,
         references: &BattleReferences,
     ) -> Result<Self> {
-        let (native_purpose, purpose, expected_stage) = match &native.shape {
-            player::QuestionShape::Opening(_) => (
-                player::QuestionPurpose::RuleChoice,
-                wire::QuestionPurpose::RuleChoice,
-                ProcessingStage::Opening,
-            ),
-            player::QuestionShape::Closing(_) => (
-                player::QuestionPurpose::RuleChoice,
-                wire::QuestionPurpose::RuleChoice,
-                ProcessingStage::Closing,
-            ),
-            player::QuestionShape::Evolution(_) => (
-                player::QuestionPurpose::PlayParameter,
-                wire::QuestionPurpose::PlayParameter,
-                ProcessingStage::Declare,
-            ),
-            player::QuestionShape::Decision(
-                player::DecisionShape::Quick { .. }
-                | player::DecisionShape::Pending(_)
-                | player::DecisionShape::TriggerQuota(_),
-            ) => flow::context(native.purpose, &observation)?,
-            player::QuestionShape::Decision(_) | player::QuestionShape::ActionWindow(_) => {
-                return Err(ProjectionError::Unavailable);
+        let processing = if let Some(index) = current {
+            observation
+                .processing
+                .get(index)
+                .cloned()
+                .ok_or(ProjectionError::Unavailable)?
+        } else {
+            // The question authorizes its actor, but cannot reveal a hidden frame's existence or source.
+            ProcessingContext {
+                stage: None,
+                actor: Some(seat(native.actor)),
+                controller: None,
+                source: None,
+                subject: None,
+                rule: None,
+                procedure: None,
+                declared: vec![],
+                payments: vec![],
             }
         };
-        if native.purpose != native_purpose
-            || observation.viewer != seat(native.actor)
-            || observation.processing.len() != 1
-        {
-            return Err(ProjectionError::Unavailable);
-        }
-        let processing = observation
-            .processing
-            .first()
-            .filter(|context| context.stage == expected_stage)
-            .cloned()
-            .ok_or(ProjectionError::Unavailable)?;
+        let purpose = question_purpose(&native, &observation, &processing)?;
         let context = decision::Context {
             id,
             actor: native.actor,
@@ -160,7 +145,13 @@ impl QuestionProjection {
                 domain @ (player::DecisionShape::Quick { .. }
                 | player::DecisionShape::Pending(_)
                 | player::DecisionShape::TriggerQuota(_)),
-            ) => flow::project(&domain, context, catalog, references)?,
+            ) => flow::project(
+                &domain,
+                context,
+                processing.stage.ok_or(ProjectionError::Unavailable)?,
+                catalog,
+                references,
+            )?,
             player::QuestionShape::Decision(domain) => {
                 let (usage, shape, binding) = decision::project(&domain, Some(context))?;
                 (usage, shape, Binding::Decision(binding))
@@ -313,4 +304,52 @@ impl QuestionProjection {
             }
         })
     }
+}
+
+fn question_purpose(
+    native: &player::Question,
+    observation: &BattleObservation,
+    processing: &ProcessingContext,
+) -> Result<wire::QuestionPurpose> {
+    let stage = processing.stage;
+    if processing.actor != Some(seat(native.actor)) {
+        return Err(ProjectionError::Unavailable);
+    }
+    let (native_purpose, purpose, expected_stage) = match &native.shape {
+        player::QuestionShape::Opening(_) => (
+            player::QuestionPurpose::RuleChoice,
+            wire::QuestionPurpose::RuleChoice,
+            Some(ProcessingStage::Opening),
+        ),
+        player::QuestionShape::Closing(_) => (
+            player::QuestionPurpose::RuleChoice,
+            wire::QuestionPurpose::RuleChoice,
+            Some(ProcessingStage::Closing),
+        ),
+        player::QuestionShape::Evolution(_) => (
+            player::QuestionPurpose::PlayParameter,
+            wire::QuestionPurpose::PlayParameter,
+            Some(ProcessingStage::Declare),
+        ),
+        player::QuestionShape::Decision(
+            player::DecisionShape::Quick { .. }
+            | player::DecisionShape::Pending(_)
+            | player::DecisionShape::TriggerQuota(_),
+        ) => {
+            let (native_purpose, purpose, recorded_stage) =
+                flow::context(native.purpose, processing)?;
+            (native_purpose, purpose, Some(recorded_stage))
+        }
+        player::QuestionShape::Decision(_) => {
+            (native.purpose, flow::purpose(native.purpose), stage)
+        }
+        player::QuestionShape::ActionWindow(_) => return Err(ProjectionError::Unavailable),
+    };
+    if native.purpose != native_purpose
+        || observation.viewer != seat(native.actor)
+        || stage != expected_stage
+    {
+        return Err(ProjectionError::Unavailable);
+    }
+    Ok(purpose)
 }

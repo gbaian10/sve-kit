@@ -97,7 +97,9 @@ fn make(actor: Viewer, resources: &[&str], other_secret: &str, pp: u32, ep: u32)
 fn resource_payment_keeps_materials_and_ep_in_one_native_submission_both_seats() {
     for actor in [Viewer::P1, Viewer::P2] {
         let mut game = make(actor, &["unit-follower", "unit-spell"], "unit-spell", 0, 1);
-        let (native, usage, shape, binding) = projected(&game, actor);
+        let native = question(&game, actor).unwrap();
+        let (usage, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("joint".into())).unwrap();
         assert_eq!(usage, wire::QuestionUse::ResourceEntryPayment);
         let wire::QuestionShape::ResourcePayment {
             materials,
@@ -124,7 +126,9 @@ fn resource_payment_keeps_materials_and_ep_in_one_native_submission_both_seats()
             materials: vec![materials.candidates.first().unwrap().id.clone()],
             use_ep: true,
         };
-        let command = binding.answer(native.token, &answer).unwrap();
+        let command = binding
+            .answer(native.actor, &binding.question().id, &answer)
+            .unwrap();
         assert!(matches!(
             &command,
             player::Command::Answer {
@@ -132,7 +136,7 @@ fn resource_payment_keeps_materials_and_ep_in_one_native_submission_both_seats()
                 ..
             }
         ));
-        submit_exact(&mut game, &native, &binding, &answer);
+        submit_projected(&mut game, &native, &binding, &answer);
         let state = game.projection(View::Referee).unwrap();
         let (own, _) = seats(actor);
         assert_eq!(state[own]["ep"], 0_u32);

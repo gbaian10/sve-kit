@@ -72,7 +72,7 @@ fn equal_hidden_deck_sizes_with_different_candidates_preserve_the_waiting_seat_b
         );
         assert!(matches!(
             a.battle_question(actor, &QuestionId::new("private".into()), refs),
-            Err(ProjectionError::Unavailable)
+            Ok(Some(_))
         ));
         assert!(
             board_fixtures::exact_authority(&a) == before[0],

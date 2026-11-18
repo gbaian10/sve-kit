@@ -2,8 +2,8 @@
 //!
 //! Hidden inner contexts leave no slot, depth or serial behind.
 
-use super::costs::CostSummary;
-use crate::common::{RuleRef, Seat, Subject, TextRef};
+use super::payments::ProcessingPayment;
+use crate::common::{RuleRef, Seat, SourceRef, Subject, TextRef};
 use crate::number::{Int, Nat};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
@@ -109,18 +109,82 @@ pub enum Declared {
     },
 }
 
+/// One authorized recipient's formal allocation, not delivered damage.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(deny_unknown_fields)]
+pub struct DeclaredAllocation {
+    /// Authorized recipient.
+    pub target: Subject,
+    /// Accepted quantity.
+    pub amount: Nat,
+}
+
+/// Accepted processing information, independently authorized from event delivery.
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
+pub enum ProcessingDeclaration {
+    /// Modes in printed order.
+    Modes {
+        /// Actual declarer.
+        actor: Seat,
+        /// Accepted modes.
+        modes: Vec<DeclaredMode>,
+    },
+    /// X or an explicitly declared effect number.
+    Number {
+        /// Actual declarer.
+        actor: Seat,
+        /// Role of the number.
+        role: DeclaredNumber,
+        /// Accepted value.
+        value: Int,
+    },
+    /// Formal targets in accepted order.
+    Targets {
+        /// Actual declarer.
+        actor: Seat,
+        /// Authorized targets.
+        targets: Vec<Subject>,
+    },
+    /// Acceptance is not a payment receipt.
+    OptionalCost {
+        /// Actual declarer.
+        actor: Seat,
+        /// Whether declining cancels the play.
+        required: bool,
+        /// Accepted or declined.
+        accepted: bool,
+    },
+    /// Reserved card-name declaration; this does not admit a new native rule.
+    Name {
+        /// Actual declarer.
+        actor: Seat,
+        /// Rules name from the snapshot.
+        rules_name: String,
+    },
+    /// Formal damage assignment, before damage is dealt.
+    Distribution {
+        /// Actual declarer.
+        actor: Seat,
+        /// Accepted recipients and quantities.
+        allocations: Vec<DeclaredAllocation>,
+    },
+}
+
 /// One authorized processing context.
 ///
 /// The seat answering a question need not be the controller.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(deny_unknown_fields)]
 pub struct ProcessingContext {
-    /// Step of the procedure.
-    pub stage: ProcessingStage,
+    /// Authorized progress; unknown private progress remains null.
+    pub stage: Option<ProcessingStage>,
+    /// Current question actor only when this viewer is answering this frame.
+    pub actor: Option<Seat>,
     /// Controller of what is processed, when it has one.
     pub controller: Option<Seat>,
-    /// Authorized text being processed.
-    pub source: Option<TextRef>,
+    /// Authorized text or known card origin, without guessing exact wording.
+    pub source: Option<SourceRef>,
     /// Authorized subject of the processing.
     pub subject: Option<Subject>,
     /// Rule the procedure rests on.
@@ -128,7 +192,7 @@ pub struct ProcessingContext {
     /// Position within a procedure of several seats or rounds.
     pub procedure: Option<Procedure>,
     /// Declarations made so far that this seat may know.
-    pub declared: Vec<Declared>,
-    /// Payment summary, when this seat may know it.
-    pub payment: Option<CostSummary>,
+    pub declared: Vec<ProcessingDeclaration>,
+    /// Completed debits this seat may know; not a quote or whole-play receipt.
+    pub payments: Vec<ProcessingPayment>,
 }

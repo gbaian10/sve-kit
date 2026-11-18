@@ -306,13 +306,14 @@ const QUICK_QUESTION: Question = {
   use: "quick",
   processing: {
     stage: "quick",
+    actor: "p1",
     controller: "p1",
     source: null,
     subject: null,
     rule: null,
     procedure: null,
     declared: [],
-    payment: null,
+    payments: [],
   },
   shape: {
     kind: "quick",

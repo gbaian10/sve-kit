@@ -170,6 +170,9 @@ native 卡文讀該版次唯一可用的來源觀測，不拿共享 current 或�
 
 已證明 Printed／Granted 且帶有 wording 座標的來源，若提供精確 wording 閉包卻無法核對 owner、revision 或 field，則拒絕投影，不以其他版本替代。沒有精確卡文時，SourceRef::Card 保留已知印刷與座標；printing_id 可指文字提供者、holder 可指授予接受者。引擎投影拒絕有 line 卻沒有 face 的來源，不推定面 0；face 與 line 都未知時保持 null。
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
+題目存在本身只授權回答席：若來源 frame 未獲授權，Question.processing 僅保留 actor，其餘脈絡未知，不在盤面補空槽或改用可見父層。
+processing 的 actor 只屬於本席正在回答的效果或規則脈絡。TriggerQuota 由額外的 TriggerAdmission 脈絡承接；暫停的 play frame 不取得 actor 或私有程序輪次，stage 僅保留已授權公開里程碑（未知時為 null）。已知來源不因 stage 未知而被丟棄。source 使用 SourceRef：有精確證據時為 TextRef，否則保留已知卡面／卡文座標提示。
+processing.declared 保留各次實際宣告席與已接受內容；這與事件的 Declared 分開授權。payments 是各筆已完成扣款，包含付款席、實際數量／單位與已知費用群組，不使用報價的 CostSummary，也不宣稱整次 play 已付款完成；報價仍在 costs。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
 strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表示任意答案合法，也不表示官方核可。
 
@@ -201,7 +204,7 @@ interface Question {
 
 purpose 是規則用途、use 是具體細目、shape.kind 是嚴格答案語義；各種合法組合由 native 程序決定。
 rules 必填：null 表示沒有經完整驗證的規則依據（未提供），[] 表示明確已知沒有規則引用，非空陣列表示經可信來源驗證的完整依據；不完整的單條不得當作完整集合。null 不代表已確認合法，也不解除其他 strict／preflight 互動阻擋；引用的 strength 不預設為 official。
-ProcessingContext 至少保留 stage、controller、已授權 TextRef／subject、規則依據、逐席程序與 Declared；actor 不一定是 controller。
+ProcessingContext 至少保留已授權 stage、actor／controller、SourceRef／subject、規則依據、逐席程序與 ProcessingDeclaration；actor 不一定是 controller。
 等待席只取得公開脈絡及骰值／剩餘次數，不取得候選、唯一性、私有題數或隱藏執行堆疊。
 UI 可共用 actions、confirm、options、select、order、partition、distribute、number、declare_name 九種元件分類；declare_name 只預留，不表示首片增加卡名宣告規則。
 不能因共用元件就將嚴格答案變成無限制 options 或省略進化付款、Drive、角色分派等限制。

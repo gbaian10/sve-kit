@@ -238,7 +238,7 @@ pub(super) fn build_position(
             .unwrap(),
         )
     } else {
-        catalog()
+        base_catalog().unwrap()
     };
     customize_position(&mut initial);
     let mut game = Game::new(catalog, &initial, &Value::Null, &Value::Null, "nested-card").unwrap();

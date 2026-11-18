@@ -1,6 +1,8 @@
 use super::super::*;
 use super::joint::submit_exact;
-use super::select::{components, domain, program, project_question, question, seats};
+use super::select::{
+    components, domain, program, project_game, project_question, question, seats, submit_projected,
+};
 use crate::battle::question::common::seat;
 use crate::battle::tests::{board_fixture, board_fixtures};
 use crate::game::player::Viewer;
@@ -119,7 +121,12 @@ mod validation;
 fn hidden_search_printings_keep_exact_faces_without_inventing_board_links_both_seats() {
     for actor in [Viewer::P1, Viewer::P2] {
         let mut game = make(actor, &single(), &deck(), "unit-spell");
-        let (native, selection, binding) = projected(&game, actor);
+        let native = question(&game, actor).unwrap();
+        let (_, shape, binding) =
+            project_game(&game, actor, &QuestionId::new("search".into())).unwrap();
+        let wire::QuestionShape::Select { selection } = shape else {
+            panic!("search");
+        };
         assert_eq!(selection.candidates.len(), 2);
         assert_eq!(selection.group_assignment, wire::GroupAssignment::Existence);
         assert_eq!(selection.groups, []);
@@ -168,13 +175,15 @@ fn hidden_search_printings_keep_exact_faces_without_inventing_board_links_both_s
             roles: vec![],
         };
         assert!(matches!(
-            binding.answer(native.token, &answer).unwrap(),
+            binding
+                .answer(native.actor, &binding.question().id, &answer)
+                .unwrap(),
             player::Command::Answer {
                 answer: player::Answer::Search(player::SearchAnswer::Ungrouped(_)),
                 ..
             }
         ));
-        submit_exact(&mut game, &native, &binding, &answer);
+        submit_projected(&mut game, &native, &binding, &answer);
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state[seats(actor).0]["hand"], json!(["deck-0", "deck-2"]));
         assert_eq!(state[seats(actor).0]["leader"]["life"], 21_u32);

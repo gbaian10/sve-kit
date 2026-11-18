@@ -3,9 +3,7 @@ use crate::battle::{question::common, sources};
 use crate::game::player::{self, PendingChoice};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::result;
-use sve_battle_contract::{
-    Answer, Nat, ObjectHandle, OptionId, observation::ProcessingStage, question as wire,
-};
+use sve_battle_contract::{Answer, Nat, ObjectHandle, OptionId, question as wire};
 
 mod event;
 
@@ -18,14 +16,6 @@ pub(super) fn project(
     choices: &[PendingChoice],
     context: Context<'_>,
 ) -> Result<(wire::QuestionShape, Binding)> {
-    if context
-        .observation
-        .processing
-        .first()
-        .is_none_or(|processing| processing.stage != ProcessingStage::PendingOrder)
-    {
-        return Err(ProjectionError::Unavailable);
-    }
     let (options, binding) = options(choices, context)?;
     Ok((shape(options, vec![]), binding))
 }

@@ -302,7 +302,7 @@ fn wire_end_guard_round_trips_empty_partial_and_complete_subsets() {
             assert_eq!(projection.question().usage, wire::QuestionUse::EndGuard);
             assert_eq!(
                 projection.question().processing.stage,
-                ProcessingStage::Closing
+                Some(ProcessingStage::Closing)
             );
             assert_eq!(
                 projection.observation(),

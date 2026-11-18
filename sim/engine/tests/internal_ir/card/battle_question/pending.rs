@@ -56,7 +56,10 @@ fn pending_order_uses_the_completed_attack_and_native_answer_in_both_seats() {
         let projected = projection.question();
         assert_eq!(projected.usage, wire::QuestionUse::PendingOrder);
         assert_eq!(projected.purpose, wire::QuestionPurpose::RuleChoice);
-        assert_eq!(projected.processing.stage, ProcessingStage::PendingOrder);
+        assert_eq!(
+            projected.processing.stage,
+            Some(ProcessingStage::PendingOrder)
+        );
         assert_eq!(projected.processing, projection.observation().processing[0]);
         assert!(projected.is_coherent());
         assert_eq!(projected.rules, None);
