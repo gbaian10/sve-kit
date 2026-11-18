@@ -1,6 +1,7 @@
 //! Whole-card admission and dependency closure before any player opening is published.
 
 use super::{DeckConstruction, PlayerDeck, Viewer};
+use crate::battle::BattleReferences;
 use crate::catalog::{Catalog, CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
 use crate::game::Game;
 use crate::ir::lowering::CurrentCardProgram;
@@ -269,6 +270,32 @@ impl Game {
         decks: &[PlayerDeck; 2],
     ) -> Result<StrictAdmission> {
         Self::prepare_strict_player_decks(selected, decks).map(|(_, report)| report)
+    }
+
+    /// Preflight the complete match before publishing any battle input.
+    ///
+    /// Uses the same main/evolve, generated-resource and transitive token closure
+    /// as strict startup. Whole-card admission checks every branch and nested
+    /// definition; all admitted player shapes have battle adapters. Source
+    /// references are checked throughout that closure, including untaken branches.
+    /// Hosts still authenticate `gaps(viewer)` and start the same selection/decks.
+    ///
+    /// # Errors
+    /// Rejects invalid authority inputs or required references. These errors are
+    /// host failures, never player diagnostics; an unadmitted deck has scoped gaps.
+    pub fn check_battle_decks(
+        selected: &SelectedEffects,
+        decks: &[PlayerDeck; 2],
+        references: &BattleReferences,
+    ) -> Result<StrictAdmission> {
+        references
+            .validate_catalog(&selected.prototypes)
+            .map_err(|_reference| crate::invalid("battle reference background mismatch"))?;
+        let (admitted, report) = Self::prepare_strict_player_decks(selected, decks)?;
+        if report.is_admitted() {
+            admitted.validate_battle_sources(references)?;
+        }
+        Ok(report)
     }
 
     /// Select only what these decks can reach: main and evolve cards, generated EX resources

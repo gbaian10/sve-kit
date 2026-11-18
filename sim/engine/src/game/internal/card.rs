@@ -81,6 +81,7 @@ mod declarations;
 pub(super) mod optional;
 pub(super) mod other_costs;
 pub(in crate::game::internal) mod play_restrictions;
+mod preflight;
 pub(super) mod prevention;
 mod printed;
 mod provider;
