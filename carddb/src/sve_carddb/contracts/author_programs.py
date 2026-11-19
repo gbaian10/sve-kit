@@ -2387,6 +2387,8 @@ class CreateDestinationChoiceFields(TypedDict):
 
     scope: Literal["each", "batch"]
 
+    max_per_zone: NotRequired[Quantity]
+
 
 type CreateDestinationChoice = CreateDestinationChoiceFields
 
