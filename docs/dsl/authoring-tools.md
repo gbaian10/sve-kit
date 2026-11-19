@@ -1464,6 +1464,14 @@ BP13-072／BP13-SL16 的謝幕使用明示 `simultaneous.do`，內含依序兩�
 入口不接受其他來源、數量、子集、另一 binding、排序或結果名稱；`one_of` 與其他位置
 宣告不在此准入範圍。解決時沒有手牌仍沿原「盡可能執行」規則，不改成打出時的正式目標。
 
+## Token 分配與公開條件
+
+`create.token: {allocate: {among: [甲, 乙], total: 3}}` 讓玩家選各模板的張數。用 `to: {one_of: [field, ex], by: self, scope: each}` 可逐張指定目的區，`upto` 允許少放或不放，`max_per_zone` 可限制各區張數。選擇依當前空位與可用模板產生。
+
+`pp.delta` 可用 `count: {in: {objects_of: milled, view: before}, kind: spell}` 計算從自己牌庫頂實際送墓的咒術，整手公開的具名結果也可用 `orig_cost_eq` 篩選。送墓條件可在同一個前態篩選交集卡種與印刷關鍵字。
+
+`exists: {in: chosen, racing: true}` 可在正文依已選從者當前的出走狀態分支。
+
 ## 送墓成功成員的原始費用種類數
 
 `distinct_orig_costs: {in: {objects_of: milled, view: before}}` 沿既有種類數聚合，僅讀同一本文先前由自己牌庫頂固定正張數送到墓場的實際成功成員。
