@@ -216,7 +216,6 @@ pub struct TokenChoice {
     /// Its face in the pinned snapshot, when known.
     pub card: Option<CardRef>,
     /// Destination declared for this token, when the question allocates tokens.
-    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub destination: Option<Destination>,
 }
 
