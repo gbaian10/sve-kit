@@ -77,41 +77,11 @@ fn trigger_mode(game: &mut Game, mode: u64) {
     finish_mode(game, play, mode);
 }
 
-fn position(card: &str, material: &str, count: usize, payment: bool) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
-    if payment {
-        initial["players"]["P1"]["zones"]["hand"]
-            .as_array_mut()
-            .unwrap()
-            .push(json!({"id":"payment","card":material}));
-    }
-    initial["players"]["P1"]["zones"]["cemetery"] = json!(
-        (0..count)
-            .map(|i| json!({"id":format!("grave-{i}"),"card":material}))
-            .collect::<Vec<_>>()
-    );
-    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"BP01-037"},{"id":"next","card":"BP01-037"},{"id":"last","card":"BP01-037"}]);
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP04-117"}]);
-    initial
-}
-
 fn finish(game: &mut Game, play: CardPlay) {
     finish_mode(game, play, 1);
 }
 fn trigger(game: &mut Game) {
     trigger_mode(game, 1);
-}
-fn ex_position(card: &str, material: &str, count: usize) -> Value {
-    let mut initial = position(card, material, 0, false);
-    initial["players"]["P1"]["zones"]["ex"] = json!(
-        (0..count)
-            .map(|i| json!({"id":format!("own-ex-{i}"),"card":material}))
-            .collect::<Vec<_>>()
-    );
-    initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"opponent-ex","card":material}]);
-    initial
 }
 fn play_and_trigger(game: &mut Game, mode: u64) {
     let play = game
@@ -165,7 +135,7 @@ fn batch_game(initial: &Value) -> Game {
 }
 
 fn evolution_position(card: &str, base: &str, material: &str, count: usize) -> Value {
-    let mut initial = ex_position(card, material, count);
+    let mut initial = ex_filter_position(card, material, count);
     initial["players"]["P1"]["zones"]["hand"] = json!([]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":base}]);
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":card}]);
@@ -188,7 +158,7 @@ fn evolve_and_trigger(game: &mut Game) {
 fn ex_batch_02_bp07_089_checks_printed_effect() {
     for card in ["BP07-089", "PR-337"] {
         for count in [4_usize, 5] {
-            let mut initial = ex_position(card, "BP07-T02", count);
+            let mut initial = ex_filter_position(card, "BP07-T02", count);
             initial["players"]["P1"]["zones"]["hand"] = json!([]);
             initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":card}]);
             initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
@@ -215,7 +185,7 @@ fn ex_batch_02_bp07_089_checks_printed_effect() {
 fn ex_batch_02_bp07_096_checks_printed_effect() {
     for card in ["BP07-096"] {
         for count in [4_usize, 5] {
-            let mut initial = ex_position(card, "BP01-037", count);
+            let mut initial = ex_filter_position(card, "BP01-037", count);
             initial["players"]["P1"]["zones"]["deck"][2]["card"] = json!("BP01-016");
             let mut game = batch_game(&initial);
             play_and_trigger(&mut game, 1);
@@ -280,7 +250,7 @@ fn ex_batch_02_bp15_003_checks_printed_effect() {
 fn ex_batch_02_bp17_065_checks_printed_effect() {
     for card in ["BP17-065"] {
         for from_ex in [false, true] {
-            let mut initial = ex_position(card, "BP17-065", 3);
+            let mut initial = ex_filter_position(card, "BP17-065", 3);
             initial["players"]["P1"]["zones"]["hand"]
                 .as_array_mut()
                 .unwrap()
@@ -317,7 +287,7 @@ fn ex_batch_02_bp17_065_checks_printed_effect() {
 fn ex_batch_02_bp17_106_checks_printed_effect() {
     for card in ["BP17-106", "BP17-P25"] {
         for count in [1_usize, 2] {
-            let mut game = batch_game(&ex_position(card, "BP07-T02", count));
+            let mut game = batch_game(&ex_filter_position(card, "BP07-T02", count));
             play_and_trigger(&mut game, 1);
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), count + 1);
@@ -333,7 +303,7 @@ fn ex_batch_02_bp17_106_checks_printed_effect() {
 fn ex_batch_02_bp17_119_checks_printed_effect() {
     for card in ["BP17-119", "BP17-P28"] {
         for from_ex in [false, true] {
-            let mut initial = ex_position(card, "BP07-089", 3);
+            let mut initial = ex_filter_position(card, "BP07-089", 3);
             initial["players"]["P1"]["zones"]["hand"]
                 .as_array_mut()
                 .unwrap()
@@ -367,7 +337,7 @@ fn ex_batch_02_bp17_119_checks_printed_effect() {
 fn ex_batch_02_bp12_016_checks_printed_effect() {
     for card in ["BP12-016"] {
         for count in [0_usize, 2] {
-            let mut initial = ex_position(card, "BP01-T03", count);
+            let mut initial = ex_filter_position(card, "BP01-T03", count);
             initial["players"]["P1"]["zones"]["ex"]
                 .as_array_mut()
                 .unwrap()
@@ -385,7 +355,7 @@ fn ex_batch_02_bp12_016_checks_printed_effect() {
 fn ex_batch_02_bp21_018_checks_printed_effect() {
     for card in ["BP21-018", "PR-595"] {
         for count in [0_usize, 2] {
-            let mut initial = ex_position(card, "BP01-T03", count);
+            let mut initial = ex_filter_position(card, "BP01-T03", count);
             initial["players"]["P1"]["zones"]["ex"]
                 .as_array_mut()
                 .unwrap()
@@ -416,7 +386,7 @@ fn ex_batch_02_bp21_018_checks_printed_effect() {
 fn ex_batch_02_bp22_008_checks_printed_effect() {
     for card in ["BP22-008", "PR-592"] {
         for count in [0_usize, 3] {
-            let mut game = batch_game(&ex_position(card, "BP01-T03", count));
+            let mut game = batch_game(&ex_filter_position(card, "BP01-T03", count));
             play_and_trigger(&mut game, 1);
             assert_eq!(
                 game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],
@@ -430,7 +400,7 @@ fn ex_batch_02_bp22_008_checks_printed_effect() {
 fn ex_batch_02_bp22_011_checks_printed_effect() {
     for card in ["BP22-011", "PR-609"] {
         for count in [3_usize, 4] {
-            let mut game = batch_game(&ex_position(card, "BP01-T03", count));
+            let mut game = batch_game(&ex_filter_position(card, "BP01-T03", count));
             play_and_trigger(&mut game, 1);
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), count + 1);
@@ -450,7 +420,7 @@ fn ex_batch_02_bp22_011_checks_printed_effect() {
 fn ex_batch_02_bp22_058_checks_printed_effect() {
     for card in ["BP22-058", "BP22-SL16"] {
         for count in [1_usize, 2] {
-            let mut game = batch_game(&ex_position(card, "BP22-058", count));
+            let mut game = batch_game(&ex_filter_position(card, "BP22-058", count));
             play_and_trigger(&mut game, 1);
             assert_eq!(
                 game.projection(View::Referee).unwrap()["P1"]["pp"]["current"],

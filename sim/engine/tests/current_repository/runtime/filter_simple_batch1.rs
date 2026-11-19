@@ -1,70 +1,8 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the scenario."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use std::{fs::read_to_string, path::PathBuf};
 use sve_engine::catalog::EngineIdentityInput;
-use sve_engine::game::internal::DecisionView;
 
-fn awaiting(play: CardPlay) -> DecisionView {
-    let CardPlay::Awaiting(question) = play else {
-        panic!("expected choice")
-    };
-    question
-}
-fn choose(game: &mut Game, play: CardPlay, card: &str) -> CardPlay {
-    let question = awaiting(play);
-    let (InputDomain::Targets(domain) | InputDomain::CostMaterials(domain)) = &question.domain
-    else {
-        panic!("objects")
-    };
-    let members = &domain.members;
-    let material = matches!(question.domain, InputDomain::CostMaterials(_));
-    let chosen = members
-        .iter()
-        .find(|member| member.card.as_deref() == Some(card))
-        .unwrap()
-        .handle;
-    game.answer_internal_card(
-        question.actor,
-        question.token,
-        if material {
-            Answer::CostMaterials(vec![chosen])
-        } else {
-            Answer::Targets(vec![chosen])
-        },
-    )
-    .unwrap()
-}
-fn trigger(game: &mut Game, card: &str) -> CardPlay {
-    let pending = game.internal_pending_choice().unwrap().unwrap();
-    let InputDomain::Pending(options) = pending.domain else {
-        panic!("pending trigger")
-    };
-    let option = options.iter().find(|option| option.card == card).unwrap();
-    let play = game
-        .answer_internal_card(pending.actor, pending.token, Answer::Pending(option.handle))
-        .unwrap();
-    accept(game, play)
-}
-fn position(card: &str, zone: &str) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"][zone] = json!([{"id":"source","card":card}]);
-    initial
-}
-fn enter(game: &mut Game, card: &str) -> CardPlay {
-    let play = game
-        .play_internal_card("source", PlayerId { seat: 1 })
-        .unwrap();
-    let play = accept(game, play);
-    assert!(
-        matches!(play, CardPlay::Entered(_)),
-        "the follower enters before its trigger"
-    );
-    trigger(game, card)
-}
 fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgram>) {
     static PREPARED: OnceLock<(SelectedEffects, BTreeMap<String, WellFormedCardProgram>)> =
         OnceLock::new();
@@ -148,13 +86,17 @@ fn bp02_007_evolution_destroys_a_cheap_amulet_and_excludes_expensive_followers()
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"cheap","card":"BP09-102"},{"id":"expensive","card":"BP01-037"}]);
     let mut game = evolution(&mut initial, "BP02-006", "BP02-007", 1);
-    let play = trigger(&mut game, "BP02-007");
-    let question = awaiting(play);
+    let play = resolve_pending_card(&mut game, "BP02-007");
+    let question = await_card_choice(play);
     let InputDomain::Targets(domain) = &question.domain else {
         panic!("targets")
     };
     assert_eq!(domain.members.len(), 1);
-    resolved(choose(&mut game, CardPlay::Awaiting(question), "BP09-102"));
+    resolved(choose_card_by_number(
+        &mut game,
+        CardPlay::Awaiting(question),
+        "BP09-102",
+    ));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P2"]["field"],
         json!(["expensive"])
@@ -166,8 +108,8 @@ fn bp02_060_evolution_destroys_a_damaged_follower_with_three_life() {
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"victim","card":"BP01-037","state":{"damage":2_u8}}]);
     let mut game = evolution(&mut initial, "BP02-059", "BP02-060", 1);
-    let play = trigger(&mut game, "BP02-060");
-    resolved(choose(&mut game, play, "BP01-037"));
+    let play = resolve_pending_card(&mut game, "BP02-060");
+    resolved(choose_card_by_number(&mut game, play, "BP01-037"));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P2"]["field"],
         json!([])
@@ -175,17 +117,21 @@ fn bp02_060_evolution_destroys_a_damaged_follower_with_three_life() {
 }
 #[test]
 fn bp02_102_fanfare_banishes_a_four_or_less_cost_follower() {
-    let mut initial = position("BP02-102", "hand");
+    let mut initial = position_with_source("BP02-102", "hand");
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"victim","card":"BP01-046"},{"id":"expensive","card":"BP01-037"}]);
     let mut game = game(&initial);
-    let play = enter(&mut game, "BP02-102");
-    let question = awaiting(play);
+    let play = enter_with_fanfare(&mut game, "BP02-102");
+    let question = await_card_choice(play);
     let InputDomain::Targets(domain) = &question.domain else {
         panic!("targets")
     };
     assert_eq!(domain.members.len(), 1);
-    resolved(choose(&mut game, CardPlay::Awaiting(question), "BP01-046"));
+    resolved(choose_card_by_number(
+        &mut game,
+        CardPlay::Awaiting(question),
+        "BP01-046",
+    ));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P2"]["banish"],
         json!(["victim"])
@@ -196,8 +142,8 @@ fn bp06_120_evolution_destroys_a_two_cost_amulet() {
     let mut initial = draw_position();
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"victim","card":"BP09-102"}]);
     let mut game = evolution(&mut initial, "BP06-119", "BP06-120", 2);
-    let play = trigger(&mut game, "BP06-120");
-    resolved(choose(&mut game, play, "BP09-102"));
+    let play = resolve_pending_card(&mut game, "BP06-120");
+    resolved(choose_card_by_number(&mut game, play, "BP09-102"));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P2"]["field"],
         json!([])
@@ -205,7 +151,7 @@ fn bp06_120_evolution_destroys_a_two_cost_amulet() {
 }
 #[test]
 fn bp08_098_opponent_main_trigger_destroys_a_four_life_follower() {
-    let mut initial = position("BP08-098", "field");
+    let mut initial = position_with_source("BP08-098", "field");
     initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"draw","card":"BP01-037"}]);
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"victim","card":"BP01-037","state":{"damage":1_u8}}]);
@@ -225,8 +171,8 @@ fn bp08_098_opponent_main_trigger_destroys_a_four_life_follower() {
         game.answer_internal_card(question.actor, question.token, Answer::Quick(None))
             .unwrap();
     }
-    let play = trigger(&mut game, "BP08-098");
-    resolved(choose(&mut game, play, "BP01-037"));
+    let play = resolve_pending_card(&mut game, "BP08-098");
+    resolved(choose_card_by_number(&mut game, play, "BP01-037"));
     assert_eq!(
         game.projection(View::Referee).unwrap()["P2"]["field"],
         json!([])
@@ -234,27 +180,27 @@ fn bp08_098_opponent_main_trigger_destroys_a_four_life_follower() {
 }
 #[test]
 fn bp08_109_destroys_a_cheap_card_and_damages_its_leader_with_two_or_less_hand_cards() {
-    let mut initial = position("BP08-109", "hand");
+    let mut initial = position_with_source("BP08-109", "hand");
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"victim","card":"BP09-102"}]);
     let mut game = game(&initial);
     let play = game
         .play_internal_card("source", PlayerId { seat: 1 })
         .unwrap();
-    resolved(choose(&mut game, play, "BP09-102"));
+    resolved(choose_card_by_number(&mut game, play, "BP09-102"));
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P2"]["field"], json!([]));
     assert_eq!(state["P2"]["leader"]["life"], 18_u8);
 }
 #[test]
 fn bp09_016_returns_a_cheap_enemy_then_creates_a_puppet_in_ex() {
-    let mut initial = position("BP09-016", "hand");
+    let mut initial = position_with_source("BP09-016", "hand");
     initial["players"]["P2"]["zones"]["field"] =
         json!([{"id":"victim","card":"BP01-046"},{"id":"expensive","card":"BP01-037"}]);
     let mut game = game(&initial);
     let play = game
         .play_internal_card("source", PlayerId { seat: 1 })
         .unwrap();
-    resolved(choose(&mut game, play, "BP01-046"));
+    resolved(choose_card_by_number(&mut game, play, "BP01-046"));
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P2"]["hand"], json!(["victim"]));
     assert_eq!(state["P2"]["field"], json!(["expensive"]));

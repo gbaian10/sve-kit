@@ -3,7 +3,6 @@
     reason = "Unexpected decisions invalidate the printed grant scenarios."
 )]
 use super::*;
-use sve_engine::game::internal::SearchAnswer;
 
 fn pass_quick(game: &mut Game) {
     for _ in 0_u8..4 {
@@ -20,85 +19,11 @@ fn pass_quick(game: &mut Game) {
     panic!("Quick window did not close");
 }
 
-fn position(card: &str) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
-    initial["players"]["P1"]["zones"]["field"] = json!([]);
-    initial["players"]["P2"]["zones"]["field"] =
-        json!([{"id":"enemy","card":"BP01-037","state":{"acted":true}}]);
-    initial
-}
-fn finish(game: &mut Game, mut step: CardPlay, target: Option<&str>) {
-    while let CardPlay::Awaiting(q) = step {
-        let answer = if matches!(q.domain, InputDomain::OptionalCost) {
-            Answer::OptionalCost(true)
-        } else if matches!(q.domain, InputDomain::WardEntry { .. }) {
-            Answer::WardEntry(false)
-        } else if let InputDomain::Targets(d) = &q.domain {
-            let member = d
-                .members
-                .iter()
-                .find(|m| target.is_none_or(|target| m.card.as_deref() == Some(target)))
-                .unwrap();
-            Answer::Targets(vec![member.handle])
-        } else if let InputDomain::CostMaterials(d) = &q.domain {
-            Answer::CostMaterials(
-                d.members
-                    .iter()
-                    .take(usize::try_from(d.cardinality.maximum.unwrap().0).unwrap())
-                    .map(|m| m.handle)
-                    .collect(),
-            )
-        } else if let InputDomain::Search(d) = &q.domain {
-            Answer::Search(SearchAnswer::Ungrouped(
-                d.cards
-                    .iter()
-                    .take(usize::try_from(d.cardinality.maximum.unwrap().0).unwrap())
-                    .map(|m| m.handle)
-                    .collect(),
-            ))
-        } else {
-            panic!("unexpected printed decision");
-        };
-        step = game.answer_internal_card(q.actor, q.token, answer).unwrap();
-    }
-}
-fn trigger(game: &mut Game, line: u64, target: Option<&str>) {
-    let q = game.internal_pending_choice().unwrap().unwrap();
-    let InputDomain::Pending(options) = &q.domain else {
-        panic!("printed pending ability");
-    };
-    let chosen = options.iter().find(|o| o.line == line).unwrap();
-    let step = game
-        .answer_internal_card(q.actor, q.token, Answer::Pending(chosen.handle))
-        .unwrap();
-    finish(game, step, target);
-    finish_checks(game);
-}
-fn play(game: &mut Game, target: Option<&str>) {
-    let step = game.play_internal_card("source", actor()).unwrap();
-    finish(game, step, target);
-    finish_checks(game);
-}
-fn keyword(view: &Value, object: &str, keyword: &str) -> bool {
-    view["objects"][object]["keywords"]
-        .as_array()
-        .unwrap()
-        .contains(&json!(keyword))
-}
-fn produce(game: &mut Game) {
-    let step = game
-        .activate_internal_card("producer", AbilityId(1), actor())
-        .unwrap();
-    finish(game, step, None);
-    finish_checks(game);
-}
-
 #[test]
 fn bp06_018_all_printings_count_only_face_up_evolve_followers_and_stand_on_the_granted_attack() {
     for printing in ["BP06-018", "BP06-SL04", "PR-212"] {
         for count in [2_u8, 3, 7] {
-            let mut initial = position(printing);
+            let mut initial = grant_position(printing);
             initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037","state":{"acted":true}},{"id":"other","card":"BP01-037","state":{"acted":true}}]);
             let mut cards = (0..count)
                 .map(|n| json!({"id":format!("used-{n}"),"card":"BP02-119","face_up":true}))
@@ -108,8 +33,8 @@ fn bp06_018_all_printings_count_only_face_up_evolve_followers_and_stand_on_the_g
             initial["players"]["P1"]["zones"]["evolve_deck"] = json!(cards);
             let mut game = rules_game(&initial);
             let before = game.projection(View::Referee).unwrap();
-            play(&mut game, None);
-            trigger(&mut game, 2, None);
+            play_grant_source(&mut game, None);
+            resolve_grant_trigger(&mut game, 2, None);
             let buffed = game.projection(View::Referee).unwrap();
             assert_eq!(
                 buffed["objects"]["source"]["power"]
@@ -119,11 +44,14 @@ fn bp06_018_all_printings_count_only_face_up_evolve_followers_and_stand_on_the_g
                     .unwrap(),
                 i64::from(count)
             );
-            assert_eq!(keyword(&buffed, "source", "指定攻撃"), count >= 3);
+            assert_eq!(
+                has_granted_keyword(&buffed, "source", "指定攻撃"),
+                count >= 3
+            );
             game.internal_rule_action(&json!({"do":"attack","attacker":"source","target":"enemy"}))
                 .unwrap();
             if count == 7 {
-                trigger(&mut game, 2, None);
+                resolve_grant_trigger(&mut game, 2, None);
                 assert_eq!(
                     game.projection(View::Referee).unwrap()["objects"]["source"]["acted"],
                     false
@@ -148,7 +76,7 @@ fn bp06_018_all_printings_count_only_face_up_evolve_followers_and_stand_on_the_g
 fn bp12_029_and_030_grant_the_real_azord_attack_stats_and_the_evolved_printing_searches_its_real_card()
  {
     for evolved in [false, true] {
-        let mut initial = position("BP01-037");
+        let mut initial = grant_position("BP01-037");
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
         initial["players"]["P1"]["zones"]["field"] =
             json!([{"id":"source","card":"BP12-029"},{"id":"azord","card":"BP08-025"}]);
@@ -157,7 +85,7 @@ fn bp12_029_and_030_grant_the_real_azord_attack_stats_and_the_evolved_printing_s
         let mut without_provider = initial.clone();
         without_provider["players"]["P1"]["zones"]["field"] =
             json!([{"id":"azord","card":"BP08-025"}]);
-        assert!(!keyword(
+        assert!(!has_granted_keyword(
             &rules_game(&without_provider)
                 .projection(View::Referee)
                 .unwrap(),
@@ -170,17 +98,17 @@ fn bp12_029_and_030_grant_the_real_azord_attack_stats_and_the_evolved_printing_s
                 &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}}),
             )
             .unwrap();
-            trigger(&mut game, 3, None);
+            resolve_grant_trigger(&mut game, 3, None);
             assert_eq!(
                 game.projection(View::Referee).unwrap()["P1"]["hand"],
                 json!(["found"])
             );
         }
         let before = game.projection(View::Referee).unwrap();
-        assert!(keyword(&before, "azord", "疾走"));
+        assert!(has_granted_keyword(&before, "azord", "疾走"));
         game.internal_rule_action(&json!({"do":"attack","attacker":"azord","target":"P2.leader"}))
             .unwrap();
-        trigger(&mut game, if evolved { 2 } else { 3 }, None);
+        resolve_grant_trigger(&mut game, if evolved { 2 } else { 3 }, None);
         let after = game.projection(View::Referee).unwrap();
         for stat in ["power", "hp"] {
             assert_eq!(
@@ -199,7 +127,7 @@ fn bp12_029_and_030_grant_the_real_azord_attack_stats_and_the_evolved_printing_s
 fn bp13_033_all_printings_grant_attack_stats_only_at_five_real_levion_cards() {
     for printing in ["BP13-033", "SD07-020"] {
         for count in [4_u8, 5] {
-            let mut initial = position("BP01-037");
+            let mut initial = grant_position("BP01-037");
             initial["players"]["P1"]["zones"]["hand"] = json!([]);
             initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":printing}]);
             initial["players"]["P1"]["zones"]["cemetery"] = json!(
@@ -209,13 +137,16 @@ fn bp13_033_all_printings_grant_attack_stats_only_at_five_real_levion_cards() {
             );
             let mut game = rules_game(&initial);
             let before = game.projection(View::Referee).unwrap();
-            assert_eq!(keyword(&before, "source", "指定攻撃"), count == 5);
+            assert_eq!(
+                has_granted_keyword(&before, "source", "指定攻撃"),
+                count == 5
+            );
             game.internal_rule_action(
                 &json!({"do":"attack","attacker":"source","target":"P2.leader"}),
             )
             .unwrap();
             if count == 5 {
-                trigger(&mut game, 2, None);
+                resolve_grant_trigger(&mut game, 2, None);
                 let after = game.projection(View::Referee).unwrap();
                 assert_eq!(
                     after["objects"]["source"]["power"]
@@ -242,16 +173,16 @@ fn bp13_033_all_printings_grant_attack_stats_only_at_five_real_levion_cards() {
 
 #[test]
 fn bp18_017_buffs_the_other_follower_and_grants_rush_with_a_turn_shield() {
-    let mut initial = position("BP18-017");
+    let mut initial = grant_position("BP18-017");
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"ally","card":"BP01-037"}]);
     let mut game = with_producer(&initial, damage_own());
-    play(&mut game, None);
-    trigger(&mut game, 1, Some("BP01-037"));
+    play_grant_source(&mut game, None);
+    resolve_grant_trigger(&mut game, 1, Some("BP01-037"));
     let before = game.projection(View::Referee).unwrap();
     assert_eq!(before["objects"]["ally"]["power"], 6_u8);
-    assert!(keyword(&before, "ally", "突進"));
-    assert!(!keyword(&before, "source", "突進"));
-    produce(&mut game);
+    assert!(has_granted_keyword(&before, "ally", "突進"));
+    assert!(!has_granted_keyword(&before, "source", "突進"));
+    run_grant_producer(&mut game);
     assert_eq!(
         game.projection(View::Referee).unwrap()["objects"]["ally"]["hp"],
         before["objects"]["ally"]["hp"]
@@ -270,7 +201,7 @@ fn sirius_all_six_printings_count_the_entering_uma_and_only_then_grant_the_real_
         "ECP01-SSP08",
     ] {
         for count in [2_u8, 3] {
-            let mut initial = position(printing);
+            let mut initial = grant_position(printing);
             initial["players"]["P1"]["zones"]["field"] = json!(
                 (0..count.checked_sub(1).unwrap())
                     .map(|n| json!({"id":format!("uma-{n}"),"card":"ECP01-008"}))
@@ -279,8 +210,8 @@ fn sirius_all_six_printings_count_the_entering_uma_and_only_then_grant_the_real_
             initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"drawn","card":"BP01-037"}]);
             let mut game = rules_game(&initial);
             let before = game.projection(View::Referee).unwrap();
-            play(&mut game, None);
-            trigger(&mut game, 3, None);
+            play_grant_source(&mut game, None);
+            resolve_grant_trigger(&mut game, 3, None);
             let buffed = game.projection(View::Referee).unwrap();
             assert_eq!(
                 buffed["objects"]["source"]["hp"]
@@ -295,7 +226,7 @@ fn sirius_all_six_printings_count_the_entering_uma_and_only_then_grant_the_real_
             )
             .unwrap();
             if count == 3 {
-                trigger(&mut game, 3, None);
+                resolve_grant_trigger(&mut game, 3, None);
                 let after = game.projection(View::Referee).unwrap();
                 assert_eq!(after["P1"]["hand"], json!([]));
                 assert!(
@@ -315,7 +246,7 @@ fn sirius_all_six_printings_count_the_entering_uma_and_only_then_grant_the_real_
 fn ecp01_043_all_printings_apply_the_granted_attack_only_at_twenty_real_uma_cards() {
     for printing in ["ECP01-043", "ECP01-P23"] {
         for count in [19_u8, 20] {
-            let mut initial = position("BP01-037");
+            let mut initial = grant_position("BP01-037");
             initial["players"]["P1"]["zones"]["hand"] = json!([]);
             initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":printing}]);
             initial["players"]["P1"]["zones"]["cemetery"] = json!(
@@ -325,13 +256,13 @@ fn ecp01_043_all_printings_apply_the_granted_attack_only_at_twenty_real_uma_card
             );
             let mut game = rules_game(&initial);
             let before = game.projection(View::Referee).unwrap();
-            assert_eq!(keyword(&before, "source", "疾走"), count == 20);
+            assert_eq!(has_granted_keyword(&before, "source", "疾走"), count == 20);
             game.internal_rule_action(
                 &json!({"do":"attack","attacker":"source","target":"P2.leader"}),
             )
             .unwrap();
             if count == 20 {
-                trigger(&mut game, 2, None);
+                resolve_grant_trigger(&mut game, 2, None);
                 let after = game.projection(View::Referee).unwrap();
                 for stat in ["power", "hp"] {
                     assert_eq!(
@@ -355,7 +286,7 @@ fn both_uzuki_cards_and_all_printings_search_without_their_own_name_then_pay_les
  {
     for printing in ["ECP02-015", "ECP02-SL09", "ECP02-SP04", "ECP02-U04"] {
         for cute in [4_u8, 5] {
-            let mut initial = position(printing);
+            let mut initial = grant_position(printing);
             initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"same","card":printing},{"id":"discounted","card":"ECP02-013"},{"id":"other","card":"ECP02-008"}]);
             initial["players"]["P1"]["zones"]["ex"] =
                 json!([{"id":"item1","card":"PR-155"},{"id":"item2","card":"PR-156"}]);
@@ -365,8 +296,8 @@ fn both_uzuki_cards_and_all_printings_search_without_their_own_name_then_pay_les
                     .collect::<Vec<_>>()
             );
             let mut game = rules_game(&initial);
-            play(&mut game, None);
-            trigger(&mut game, 1, None);
+            play_grant_source(&mut game, None);
+            resolve_grant_trigger(&mut game, 1, None);
             let searched = game.projection(View::Referee).unwrap();
             assert!(
                 searched["P1"]["deck"]
@@ -388,7 +319,7 @@ fn both_uzuki_cards_and_all_printings_search_without_their_own_name_then_pay_les
             let step = game
                 .activate_internal_card("source", activated(printing), actor())
                 .unwrap();
-            finish(&mut game, step, Some("ECP02-013"));
+            finish_grant_play(&mut game, step, Some("ECP02-013"));
             finish_checks(&mut game);
             let paid = game.projection(View::Referee).unwrap();
             assert_eq!(
@@ -406,7 +337,7 @@ fn both_uzuki_cards_and_all_printings_search_without_their_own_name_then_pay_les
             );
             assert_eq!(format!("{game:?}"), before_retry);
             let play_step = game.play_internal_card("discounted", actor()).unwrap();
-            finish(&mut game, play_step, None);
+            finish_grant_play(&mut game, play_step, None);
             let played = game.projection(View::Referee).unwrap();
             assert!(
                 played["P1"]["field"]
@@ -425,7 +356,7 @@ fn both_uzuki_cards_and_all_printings_search_without_their_own_name_then_pay_les
 #[test]
 fn ecp01_043_all_printings_pay_the_real_meal_then_race_damage_buff_and_mill() {
     for printing in ["ECP01-043", "ECP01-P23"] {
-        let mut initial = position("BP01-037");
+        let mut initial = grant_position("BP01-037");
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
         initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":printing}]);
         initial["players"]["P1"]["zones"]["evolve_deck"] =
@@ -443,7 +374,7 @@ fn ecp01_043_all_printings_pay_the_real_meal_then_race_damage_buff_and_mill() {
                 .any(|fact| matches!(fact, Fact::Raced(_)))
         );
         finish_checks(&mut game);
-        trigger(&mut game, 3, Some("BP01-037"));
+        resolve_grant_trigger(&mut game, 3, Some("BP01-037"));
         let after = game.projection(View::Referee).unwrap();
         assert_eq!(after["P1"]["pp"]["current"], 9_u8);
         assert_eq!(after["P1"]["race"], json!(["carrot"]));
@@ -470,7 +401,7 @@ fn csd03b_overlord_all_printings_stand_once_after_combat_damage_only_when_awaken
         ("CSD03b-001", "PR-288"),
     ] {
         for awakened in [false, true] {
-            let mut initial = position(base);
+            let mut initial = grant_position(base);
             initial["players"]["P1"]["zones"]["hand"] = json!([]);
             initial["players"]["P1"]["pp"] =
                 json!({"current":10_u8,"max":if awakened {10_u8} else {6_u8}});
@@ -487,14 +418,14 @@ fn csd03b_overlord_all_printings_stand_once_after_combat_damage_only_when_awaken
             ]);
             let mut game = rules_game(&initial);
             assert_eq!(
-                keyword(&game.projection(View::Referee).unwrap(), "source", "疾走"),
+                has_granted_keyword(&game.projection(View::Referee).unwrap(), "source", "疾走"),
                 awakened
             );
             game.internal_rule_action(
                 &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}}),
             )
             .unwrap();
-            trigger(&mut game, 3, Some("BP01-037"));
+            resolve_grant_trigger(&mut game, 3, Some("BP01-037"));
             assert_eq!(
                 game.projection(View::Referee).unwrap()["objects"]["source"]["acted"],
                 false
@@ -506,10 +437,10 @@ fn csd03b_overlord_all_printings_stand_once_after_combat_damage_only_when_awaken
             assert!(game.internal_pending_choice().unwrap().is_none());
             game.internal_rule_action(&json!({"do":"attack","attacker":"source","target":"enemy"}))
                 .unwrap();
-            trigger(&mut game, 1, None);
+            resolve_grant_trigger(&mut game, 1, None);
             pass_quick(&mut game);
             if awakened {
-                trigger(&mut game, 3, None);
+                resolve_grant_trigger(&mut game, 3, None);
                 assert_eq!(
                     game.projection(View::Referee).unwrap()["objects"]["source"]["acted"],
                     false
@@ -518,7 +449,7 @@ fn csd03b_overlord_all_printings_stand_once_after_combat_damage_only_when_awaken
                     &json!({"do":"attack","attacker":"source","target":"enemy"}),
                 )
                 .unwrap();
-                trigger(&mut game, 1, None);
+                resolve_grant_trigger(&mut game, 1, None);
                 pass_quick(&mut game);
             }
             assert!(game.internal_pending_choice().unwrap().is_none());
