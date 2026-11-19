@@ -79,7 +79,7 @@ fn window(game: &mut Game) -> (DecisionView, Vec<u64>) {
     (q, handles)
 }
 
-fn quick_game(initial: &Value, program: &WellFormedCardProgram) -> Game {
+pub(super) fn quick_game(initial: &Value, program: &WellFormedCardProgram) -> Game {
     let mut initial = initial.clone();
     initial["turn"]["active"] = json!("P2");
     let mut game = load(&initial, program);

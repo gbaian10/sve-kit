@@ -319,7 +319,10 @@ fn player_evolution_withdrawn_at_the_super_payment_returns_to_the_action_window(
     assert_eq!(declared.kind, SubmissionKind::Applied);
     let payment = loop {
         let current = question(&game);
-        assert!(current.withdrawable, "every evolution stage can be withdrawn");
+        assert!(
+            current.withdrawable,
+            "every evolution stage can be withdrawn"
+        );
         let QuestionShape::Evolution(stage) = &current.shape else {
             panic!("evolution declaration stage");
         };

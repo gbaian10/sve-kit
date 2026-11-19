@@ -115,6 +115,50 @@ fn withdraw_an_activation_at_its_cost_choice_returns_to_the_action_window() {
 }
 
 #[test]
+fn withdraw_a_quick_activation_returns_to_the_same_quick_window() {
+    let mut game = quick_counter::quick_game(
+        &quick_counter::initial(true, 2, false),
+        &quick_counter::program(true, true),
+    );
+    game.advance_player_input();
+    let window = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Quick { options, .. }) = &window.shape else {
+        panic!("a Quick window");
+    };
+    assert!(!window.withdrawable, "a Quick window is not a declaration");
+    let before = game.projection(View::Referee).unwrap();
+    let waiting = waiting_view(&game);
+    let offered = options.len();
+    assert_eq!(
+        answer(
+            &mut game,
+            Viewer::P1,
+            Answer::Quick(Some(options[0].handle))
+        )
+        .kind,
+        SubmissionKind::Applied,
+        "the Quick activation is declared"
+    );
+    let cost = question(&game, Viewer::P1);
+    assert!(
+        cost.withdrawable,
+        "its cost choice is a declaration parameter"
+    );
+    assert_eq!(withdraw(&mut game, &cost), SubmissionKind::Reverted);
+    // The restored window carries a new epoch; everything else is as it was.
+    let mut after = game.projection(View::Referee).unwrap();
+    after["awaiting"]["epoch"] = before["awaiting"]["epoch"].clone();
+    assert_eq!(after, before, "the state is the one before the declaration");
+    let again = question(&game, Viewer::P1);
+    assert!(
+        matches!(&again.shape, QuestionShape::Decision(DecisionShape::Quick { options, .. }) if options.len() == offered),
+        "the same Quick window is offered again"
+    );
+    assert_ne!(again.token, window.token, "it is a new occurrence");
+    assert_eq!(waiting_view(&game), waiting, "the other seat saw nothing");
+}
+
+#[test]
 fn withdraw_is_rejected_outside_a_declaration_and_for_a_retired_question() {
     let mut game = play::position(&play::choice_program(), "hand", 1);
     game.advance_player_input();
