@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-070:
+    admission: light
+    abilities:
+      - line: 1
+        auto:
+          on:
+            played: { who: self, sel: { orig_cost_eq: 2 } }
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - damage: { to: { who: opp, zone: field, kind: follower }, n: 2 }
+                    - life: { who: self, delta: 2 }
+                  - - damage: { to: { leaders: opponents }, n: 2 }
+      - line: 2
+        evolve_time:
+          do:
+            - reveal: { ref: { who: self, zone: hand }, bind: shown }
+            - pp:
+                who: self
+                delta:
+                  count: { in: { objects_of: shown, view: before }, orig_cost_eq: 2 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

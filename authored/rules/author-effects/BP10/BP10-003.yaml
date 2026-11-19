@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-003:
+    admission: light
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: [エンシェントアーティファクト, ミスティックアーティファクト]
+                to: { one_of: [field, ex], by: self, scope: each, max_per_zone: 1 }
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - banish: { sel: { who: self, zone: ex }, n: 5, distinct_by: orig_cost }
+          do:
+            - choose:
+                bind: relic
+                from:
+                  who: self
+                  zone: evolve_deck
+                  kind: follower
+                  advance_follower: true
+                  name: 神秘の遺物・スピネ＆ルチル
+                n: 1
+                may: true
+            - move: { ref: relic, to: field }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"
