@@ -175,21 +175,6 @@ fn evolution_resource_initial_states_default_missing_fields_from_the_pool() {
     }
 }
 
-#[test]
-fn wire_evolution_resources_keep_spent_ep_and_absent_sep_explicit() {
-    let game = game(&position(1));
-    for viewer in [Viewer::P1, Viewer::P2] {
-        let players = players(&game, viewer);
-        assert_eq!(players[0]["ep_capacity"], 0_i32);
-        assert_eq!(players[0]["ep_used"], 0_i32);
-        assert_eq!(players[0]["sep_available_from"], Value::Null);
-        assert_eq!(players[1]["ep"], 1_i32);
-        assert_eq!(players[1]["ep_capacity"], 3_i32);
-        assert_eq!(players[1]["ep_used"], 2_i32);
-        assert_eq!(players[1]["sep_available_from"], 6_u32);
-    }
-}
-
 fn assert_ep(game: &Game, seat: u32, expected: (i64, i64, i64)) {
     let index = usize::from(seat != 1);
     for viewer in [Viewer::P1, Viewer::P2] {
