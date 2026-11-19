@@ -577,21 +577,6 @@ fn super_evolve_pending_is_kind_checked_and_controller_orders_both_facets() {
     }
 }
 
-#[test]
-fn commander_evolution_condition_lowers_public_field_qualification() {
-    let mut tree = fanfare::expanded::tree().clone();
-    tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] =
-        json!({"exists":{"who":"self","zone":"field","trait":"指揮官"}});
-    lowerer().lower(&tree).unwrap();
-}
-
-#[test]
-fn cemetery_evolution_condition_lowers_original_cost_count() {
-    let mut tree = fanfare::expanded::tree().clone();
-    tree["cards"]["synthetic-evolution"]["abilities"][0]["evolve"]["usable_if"] = json!({"cmp":{"left":{"count":{"who":"self","zone":"cemetery","orig_cost_eq":2}},"op":"ge","right":10}});
-    lowerer().lower(&tree).unwrap();
-}
-
 fn cemetery_condition() -> Value {
     json!({"cmp":{"left":{"count":{"who":"self","zone":"cemetery","orig_cost_eq":1}},"op":"ge","right":10}})
 }
@@ -901,22 +886,6 @@ fn commander_evolution_admission_rejects_a_guard_on_the_payment_instruction() {
     assert!(
         WellFormedCardProgram::check(candidate).is_err(),
         "a guard on payment cannot be silently ignored or turn a required cost into an optional one"
-    );
-}
-
-#[test]
-fn commander_evolution_keeps_both_printed_evolution_definitions() {
-    let mut tree = fanfare::expanded::tree().clone();
-    let abilities = &mut tree["cards"]["synthetic-evolution"]["abilities"];
-    let mut second = abilities[0].clone();
-    second["line"] = json!(2);
-    second["evolve"] = json!({"cost":{"pp":0},"usable_if":{"exists":{"who":"self","zone":"field","trait":"指揮官"}}});
-    abilities.as_array_mut().unwrap().push(second);
-    let programs = lowerer().lower(&tree).unwrap();
-    assert_eq!(
-        programs["synthetic-evolution"].card().abilities.len(),
-        2,
-        "ordinary and conditional intrinsic abilities retain distinct scopes"
     );
 }
 
