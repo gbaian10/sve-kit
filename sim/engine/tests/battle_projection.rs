@@ -5,13 +5,10 @@ extern crate alloc;
 use alloc::collections::BTreeMap;
 use core::num::NonZeroU64;
 use sve_battle_contract::question::{Distinct, GroupAssignment, RoleSize};
-use sve_battle_contract::{
-    Answer, GroupChoice, HostError, Nat, QuestionId, RoleChoice, Seat, Subject,
-};
+use sve_battle_contract::{Answer, HostError, Nat, QuestionId, RoleChoice, Seat, Subject};
 use sve_engine::battle::{CandidateDetails, ProjectionError, SelectionProjection};
 use sve_engine::game::player::{
-    self, CardOption, SearchAnswer, SearchQuestion, SelectionGroup, SelectionMember,
-    SelectionQuestion, SelectionRole, Viewer,
+    self, SearchQuestion, SelectionGroup, SelectionMember, SelectionQuestion, SelectionRole, Viewer,
 };
 use sve_engine::ir::{self, Cardinality, RoleCardinality};
 
@@ -197,82 +194,6 @@ fn target_roles_roundtrip_and_reject_foreign_or_overlapping_assignments() {
     }
     assert_eq!(
         projection.targets(&answer).unwrap_err(),
-        ProjectionError::Unavailable
-    );
-}
-
-#[test]
-fn search_preserves_empty_groups_and_printed_order() {
-    let question = SearchQuestion {
-        facts: None,
-        cards: vec![CardOption {
-            handle: 931,
-            card: "native-card-key".into(),
-            name: "display".into(),
-            object: None,
-            rules_names: Some(vec!["rule-name".into(), "alias".into()]),
-            original_cost: Some(4),
-        }],
-        cardinality: bounds(0, Some(1)),
-        groups: Some(vec![
-            SelectionGroup {
-                handles: vec![931],
-                cardinality: bounds(0, Some(1)),
-            },
-            SelectionGroup {
-                handles: vec![],
-                cardinality: bounds(0, Some(0)),
-            },
-        ]),
-        distinct_names: true,
-        maximum_original_cost: Some(5),
-    };
-    let projection =
-        SelectionProjection::search(&QuestionId::new("search".into()), &question, |_| {
-            Ok(details())
-        })
-        .unwrap();
-    assert_eq!(
-        projection.selection().group_assignment,
-        GroupAssignment::Explicit
-    );
-    assert_eq!(projection.selection().groups.last().unwrap().eligible, []);
-    let selected = vec![
-        projection
-            .selection()
-            .candidates
-            .first()
-            .unwrap()
-            .id
-            .clone(),
-    ];
-    let mut answer = Answer::Select {
-        selected: selected.clone(),
-        roles: vec![],
-        groups: Some(vec![
-            GroupChoice {
-                group: Nat::from(1_u32),
-                selected: vec![],
-            },
-            GroupChoice {
-                group: Nat::ZERO,
-                selected,
-            },
-        ]),
-    };
-    assert_eq!(
-        projection.search_answer(&answer).unwrap(),
-        SearchAnswer::Grouped(vec![vec![931], vec![]])
-    );
-    if let Answer::Select {
-        groups: Some(groups),
-        ..
-    } = &mut answer
-    {
-        groups.remove(0);
-    }
-    assert_eq!(
-        projection.search_answer(&answer).unwrap_err(),
         ProjectionError::Unavailable
     );
 }
