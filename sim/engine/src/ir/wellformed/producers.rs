@@ -83,8 +83,35 @@ impl Checker {
                 checker.natural(&token.count)
             })?;
         }
-        let TokenDestination::Single { zone } = destination else {
-            return self.reject();
+        let zone = match destination {
+            TokenDestination::Single { zone } => zone,
+            TokenDestination::Split {
+                player,
+                actor,
+                zones,
+                total,
+                up_to,
+                max_per_zone,
+            } => {
+                if zones.is_empty()
+                    || zones
+                        .iter()
+                        .any(|kind| !matches!(kind, ZoneKind::Field | ZoneKind::Ex))
+                    || zones
+                        .iter()
+                        .enumerate()
+                        .any(|(index, kind)| zones.iter().take(index).any(|prior| prior == kind))
+                    || total.is_some_and(|count| count.0 == 0)
+                    || max_per_zone.is_some_and(|count| count.0 == 0)
+                    || (up_to.0 && total.is_none())
+                    || initial.is_some()
+                {
+                    return self.reject();
+                }
+                self.player(player)?;
+                return self.player(actor);
+            }
+            TokenDestination::Allocated { .. } => return self.reject(),
         };
         match zone {
             Expr::Literal(zone) if matches!(zone.kind, ZoneKind::Field | ZoneKind::Ex) => {

@@ -1,4 +1,5 @@
 use crate::ir::player_stages;
+mod allocation;
 mod capacity;
 pub(super) mod dynamic;
 pub(super) mod equipment;
@@ -9,6 +10,7 @@ use crate::ir::{
 use crate::ir::{KeywordId, ObjectRef, PlayerId, printed_keywords};
 use crate::ir::{optional_payment, x_pp};
 
+pub(super) use allocation::AllocationWait;
 pub(super) use capacity::CapacityWait;
 
 pub(super) use dynamic::check_each;
@@ -25,10 +27,12 @@ use crate::ir::{
     ZoneKind, ZoneRef,
 };
 
+type TokenBatches = Vec<(ZoneKind, Vec<String>)>;
+
 #[derive(Clone, Debug)]
 pub(super) struct Creation {
     receipt: ReceiptId,
-    ids: Vec<String>,
+    batches: TokenBatches,
 }
 
 #[derive(Clone, Copy, Debug)]
@@ -119,25 +123,44 @@ fn specification_with_x(action: &Action, x: Option<PaidX>) -> Option<(&[TokenSpe
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct TokenPlan {
     instruction: Instruction,
-    destination: ZoneRef,
+    destination: DestinationPlan,
     counts: Vec<CountPlan>,
+}
+
+#[derive(Clone, Debug)]
+enum DestinationPlan {
+    Single(ZoneRef),
+    Split,
 }
 impl TokenPlan {
     pub(in crate::game::internal) fn compile(
         instruction: &Instruction,
         x: Option<PaidX>,
     ) -> Result<Self> {
-        let (tokens, destination) = specification_with_x(&instruction.action, x)
-            .ok_or_else(|| unsupported("token creation shape"))?;
+        let (tokens, destination) =
+            if let Some((tokens, destination)) = specification_with_x(&instruction.action, x) {
+                (tokens, DestinationPlan::Single(destination.clone()))
+            } else if let Some(tokens) = allocation::specification(&instruction.action) {
+                (tokens, DestinationPlan::Split)
+            } else {
+                return Err(unsupported("token creation shape"));
+            };
         Ok(Self {
             instruction: instruction.clone(),
-            destination: destination.clone(),
+            destination,
             counts: tokens
                 .iter()
                 .map(|token| CountPlan::compile_with_x(&token.count, x.map(|paid| paid.0)))
                 .collect::<Result<_>>()?,
         })
     }
+    fn single(&self) -> Result<&ZoneRef> {
+        match &self.destination {
+            DestinationPlan::Single(zone) => Ok(zone),
+            DestinationPlan::Split => Err(invalid("single destination token plan required")),
+        }
+    }
+
     pub(in crate::game::internal) const fn instruction(&self) -> &Instruction {
         &self.instruction
     }
@@ -183,7 +206,10 @@ pub(super) fn departure_name(name: &Expr<CardName>) -> bool {
 }
 
 pub(super) fn check_action(action: &Action, source: &SourceSpan, x: Option<PaidX>) -> Result<()> {
-    if matches!(action, Action::Token { .. }) && specification_with_x(action, x).is_none() {
+    if matches!(action, Action::Token { .. })
+        && specification_with_x(action, x).is_none()
+        && allocation::specification(action).is_none()
+    {
         return Err(unsupported(&format!(
             "token creation with admitted counts and destination at {}:{} ({})",
             source.card_no, source.line, source.author_path
@@ -199,6 +225,7 @@ pub(super) fn check_catalog(
     x: Option<PaidX>,
 ) -> Result<()> {
     check_action(action, source, x)?;
+    allocation::check_catalog(game, action)?;
     if let Some((tokens, zone)) = specification_with_x(action, x) {
         for token in tokens {
             let TokenTemplate::Fixed { template } = &token.template else {
@@ -265,20 +292,23 @@ impl Game {
         instruction: &Instruction,
     ) -> Result<()> {
         let plan = execution.token_plan(instruction)?;
-        let destination = &plan.destination;
-        let ids = if let Some(ids) = Self::saved_creation(execution, instruction.receipt)? {
-            ids
+        let batches = if let Some(batches) = Self::saved_creation(execution, instruction.receipt)? {
+            batches
+        } else if matches!(plan.destination, DestinationPlan::Split) {
+            let Some(batches) = self.allocate_split_tokens(execution, &plan)? else {
+                return Ok(());
+            };
+            batches
         } else {
             let Some(ids) = self.allocate_tokens(execution, instruction)? else {
                 return Ok(());
             };
-            ids
+            vec![(plan.single()?.kind, ids)]
         };
-        self.commit_tokens(
+        self.commit_token_batches(
             execution,
             instruction,
-            destination.kind,
-            ids,
+            batches,
             Node::Instruction {
                 instruction: Box::new(instruction.clone()),
             },
@@ -406,13 +436,13 @@ impl Game {
             return Err(invalid("token stage instruction"));
         };
         let plan = execution.token_plan(instruction)?;
-        let destination = &plan.destination;
+        let destination = plan.single()?;
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
         let result = (|| {
-            let ids =
-                if let Some(ids) = Self::saved_creation(execution, instruction.receipt)? {
-                    ids
+            let batches =
+                if let Some(batches) = Self::saved_creation(execution, instruction.receipt)? {
+                    batches
                 } else {
                     let mut members = execution.players(self, players)?;
                     let active = super::player_id(self.active())?;
@@ -424,13 +454,12 @@ impl Game {
                             || invalid("single-template player stage requested capacity input"),
                         )?);
                     }
-                    ids
+                    vec![(destination.kind, ids)]
                 };
-            self.commit_tokens(
+            self.commit_token_batches(
                 execution,
                 instruction,
-                destination.kind,
-                ids,
+                batches,
                 Node::Control {
                     control: control.clone(),
                 },
@@ -443,7 +472,7 @@ impl Game {
     fn saved_creation(
         execution: &mut Execution,
         receipt: ReceiptId,
-    ) -> Result<Option<Vec<String>>> {
+    ) -> Result<Option<TokenBatches>> {
         execution
             .creating
             .take()
@@ -451,7 +480,7 @@ impl Game {
                 if creation.receipt != receipt {
                     return Err(invalid("token creation continuation mismatch"));
                 }
-                Ok(creation.ids)
+                Ok(creation.batches)
             })
             .transpose()
     }
@@ -462,7 +491,8 @@ impl Game {
         instruction: &Instruction,
     ) -> Result<Option<Vec<String>>> {
         let plan = execution.token_plan(instruction)?;
-        let actor = execution.player(self, &plan.destination.player)?;
+        let zone = plan.single()?;
+        let actor = execution.player(self, &zone.player)?;
         let Action::Token { tokens, .. } = &plan.instruction.action else {
             return Err(invalid("token plan action"));
         };
@@ -487,7 +517,7 @@ impl Game {
             }
             requests.push((name, count));
         }
-        let destination = plan.destination.kind;
+        let destination = zone.kind;
         match self.allocate_token_requests(&requests, destination, actor)? {
             TokenAllocation::Created(ids) => Ok(Some(ids)),
             TokenAllocation::Capacity {
@@ -588,21 +618,20 @@ impl Game {
         prints_for_names(&prints, &names, chosen).map(TokenSelection::Chosen)
     }
 
-    fn commit_tokens(
+    fn commit_token_batches(
         &mut self,
         execution: &mut Execution,
         instruction: &Instruction,
-        destination: ZoneKind,
-        ids: Vec<String>,
+        batches: TokenBatches,
         retry: Node,
     ) -> Result<()> {
         execution.ids = self.internal_identities()?;
-        if destination == ZoneKind::Field {
-            for id in &ids {
+        for (_, ids) in batches.iter().filter(|(zone, _)| *zone == ZoneKind::Field) {
+            for id in ids {
                 if self.internal_ward_entry_choice(execution, id, None)? {
                     execution.creating = Some(Creation {
                         receipt: instruction.receipt,
-                        ids,
+                        batches,
                     });
                     execution.todo.push_front(retry.into());
                     return Ok(());
@@ -619,7 +648,15 @@ impl Game {
             } => Some(*amount),
             _ => None,
         };
-        let created = self.commit_token_objects_with_stack(execution, destination, &ids, stack)?;
+        let mut created = Vec::new();
+        for (destination, ids) in batches {
+            created.extend(self.commit_token_objects_with_stack(
+                execution,
+                destination,
+                &ids,
+                stack,
+            )?);
+        }
         let Action::Token { output, .. } = &instruction.action else {
             return Err(invalid("token output"));
         };

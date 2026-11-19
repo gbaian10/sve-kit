@@ -617,6 +617,7 @@ enum Wait {
         receipt: ReceiptId,
     },
     TokenCapacity(Box<tokens::CapacityWait>),
+    TokenAllocation(Box<tokens::AllocationWait>),
     TransformTemplates(Box<transform::TemplateWait>),
     MovementCapacity(Box<movement::CapacityWait>),
     Distribution(allocation::DistributionWait),
@@ -1153,6 +1154,11 @@ impl Game {
                     let prints = wait.validate(handle)?;
                     rollback = execution.answer_origin(validated);
                     self.internal_token_capacity_answer(&mut execution, &wait, &prints)?;
+                }
+                (Wait::TokenAllocation(wait), Answer::TokenCapacity(handle)) => {
+                    let index = wait.validate(handle)?;
+                    rollback = execution.answer_origin(validated);
+                    self.internal_token_allocation_answer(&mut execution, &wait, index)?;
                 }
                 (Wait::TransformTemplates(wait), Answer::TokenCapacity(handle)) => {
                     let prints = wait.validate(handle)?;

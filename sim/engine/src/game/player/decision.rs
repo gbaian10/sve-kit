@@ -189,6 +189,8 @@ pub struct TokenCapacityQuestion {
     pub choices: Vec<Vec<String>>,
     /// Exact creation faces for each original combination, when provided by its frozen native wait.
     pub faces: Option<Vec<Vec<CardFace>>>,
+    /// Per-token destinations for an allocation across one or more zones.
+    pub placements: Option<Vec<Vec<ObservedZone>>>,
 }
 
 /// Closed, actor-authorized decision shapes, separate from the native execution domain.

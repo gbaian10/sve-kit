@@ -14,7 +14,7 @@ pub(super) fn matches(game: &Game, id: &str, keyword: KeywordId) -> Result<bool>
         .any(|ability| has_keyword(&ability.node, keyword)))
 }
 
-fn has_keyword(ability: &Ability, keyword: KeywordId) -> bool {
+pub(in crate::game::internal) fn has_keyword(ability: &Ability, keyword: KeywordId) -> bool {
     if keyword == KeywordId::Lastword {
         return matches!(
             ability.source.origin,

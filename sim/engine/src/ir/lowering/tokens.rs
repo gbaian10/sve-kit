@@ -23,10 +23,8 @@ impl BodyContext<'_> {
         value: &ast::Create,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let kind = match value.to {
-            ast::CreateZone::Ex => ZoneKind::Ex,
-            ast::CreateZone::Field => ZoneKind::Field,
-        };
+        let allocation = value.token.allocation();
+        let destination = self.creation_destination(value, allocation, path)?;
         if value.result.is_some() && value.bind.is_some() {
             return Err(unsupported(path));
         }
@@ -38,9 +36,14 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        if kind == ZoneKind::Ex
-            && let Some(name) = value.result.as_ref().or(value.bind.as_ref())
-        {
+        let only_ex = match &destination {
+            TokenDestination::Single {
+                zone: Expr::Literal(zone),
+            } => zone.kind == ZoneKind::Ex,
+            TokenDestination::Split { zones, .. } => zones == &[ZoneKind::Ex],
+            TokenDestination::Single { .. } | TokenDestination::Allocated { .. } => false,
+        };
+        if only_ex && let Some(name) = value.result.as_ref().or(value.bind.as_ref()) {
             self.ex_outputs
                 .insert(name.clone(), Selector::Bound { reference: output });
         }
@@ -85,36 +88,82 @@ impl BodyContext<'_> {
                 count: Expr::Literal(Nat(1)),
             }]
         } else {
-            let names = value.token.names().ok_or_else(|| unsupported(path))?;
+            let names = allocation
+                .map(|rule| rule.among.as_slice())
+                .or_else(|| value.token.names())
+                .ok_or_else(|| unsupported(path))?;
             if names.is_empty() || names.iter().any(String::is_empty) {
                 return Err(unsupported(path));
             }
+            let count = match allocation.map(|rule| rule.total).or(value.upto) {
+                Some(count) => Expr::Literal(Nat(count)),
+                None => self.token_count(value.n.as_ref(), path)?,
+            };
             names
                 .iter()
-                .map(|name| {
-                    Ok(TokenSpec {
-                        template: TokenTemplate::Fixed {
-                            template: TokenTemplateId(name.clone()),
-                        },
-                        count: self.token_count(value.n.as_ref(), path)?,
-                    })
+                .map(|name| TokenSpec {
+                    template: TokenTemplate::Fixed {
+                        template: TokenTemplateId(name.clone()),
+                    },
+                    count: count.clone(),
                 })
-                .collect::<Result<Vec<_>, LoweringError>>()?
+                .collect()
         };
         Ok(Action::Token {
             tokens,
-            destination: TokenDestination::Single {
-                zone: Expr::Literal(ZoneRef {
-                    player: self.participant(value.by.as_ref(), path)?,
-                    kind,
-                }),
-            },
+            destination,
             output,
             initial_state: None,
             initial_posture: Posture::Standing,
             entry_effects: vec![],
         })
     }
+    fn creation_destination(
+        &mut self,
+        value: &ast::Create,
+        allocation: Option<&ast::CreateAllocation>,
+        path: &str,
+    ) -> Result<TokenDestination, LoweringError> {
+        let player = self.participant(value.by.as_ref(), path)?;
+        let total = value
+            .upto
+            .or_else(|| allocation.map(|rule| rule.total))
+            .map(Nat);
+        Ok(match (&value.to, allocation, value.upto) {
+            (ast::CreateDestination::Single(zone), None, None) => TokenDestination::Single {
+                zone: Expr::Literal(ZoneRef {
+                    player,
+                    kind: zone.kind(),
+                }),
+            },
+            (ast::CreateDestination::Single(zone), allocate, upto) => TokenDestination::Split {
+                player,
+                actor: self.participant(allocate.and_then(|rule| rule.by.as_ref()), path)?,
+                zones: vec![zone.kind()],
+                total,
+                up_to: super::super::Bool(upto.is_some()),
+                max_per_zone: None,
+            },
+            (
+                ast::CreateDestination::Split {
+                    one_of,
+                    by,
+                    scope: ast::SplitScope::Each,
+                    max_per_zone,
+                },
+                _,
+                upto,
+            ) => TokenDestination::Split {
+                player,
+                actor: self.participant(Some(by), path)?,
+                zones: one_of.iter().map(ast::CreateZone::kind).collect(),
+                total,
+                up_to: super::super::Bool(upto.is_some()),
+                max_per_zone: max_per_zone.map(Nat),
+            },
+        })
+    }
+
     fn token_player(&self, name: &str, path: &str) -> Result<PlayerRef, LoweringError> {
         match name {
             "self" => Ok(PlayerRef::Controller {}),
@@ -235,6 +284,9 @@ impl BodyContext<'_> {
             [stage] => match stage.as_slice() {
                 [ast::Step::Create(create)] => {
                     matches!(&create.by, Some(ast::Participant::Bound(name)) if name == &each.binding)
+                        && matches!(&create.to, ast::CreateDestination::Single(_))
+                        && create.upto.is_none()
+                        && !matches!(&create.token, ast::CreateToken::Allocate { .. })
                         && create.result.is_none()
                         && create.bind.is_none()
                 }

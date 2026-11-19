@@ -28,14 +28,29 @@ pub(super) fn tokens(
         || faces.len() != domain.choices.len()
         || domain.choices.is_empty()
         || available == Nat::ZERO
-        || !matches!(domain.zone, ObservedZone::Field | ObservedZone::Ex)
+        || domain
+            .placements
+            .as_ref()
+            .is_some_and(|placements| placements.len() != faces.len())
+        || (domain.placements.is_none()
+            && !matches!(domain.zone, ObservedZone::Field | ObservedZone::Ex))
     {
         return Err(ProjectionError::Unavailable);
     }
     let mut options = vec![];
     let mut coordinates = BTreeMap::new();
     for (index, (names, printings)) in domain.choices.iter().zip(faces).enumerate() {
-        if names.is_empty()
+        let placements = domain
+            .placements
+            .as_ref()
+            .and_then(|placements| placements.get(index));
+        if (placements.is_none() && names.is_empty())
+            || placements.is_some_and(|zones| {
+                zones.len() != names.len()
+                    || zones
+                        .iter()
+                        .any(|kind| !matches!(kind, ObservedZone::Field | ObservedZone::Ex))
+            })
             || names.iter().any(|name| name.trim().is_empty())
             || names.len() != printings.len()
             || u64::try_from(names.len())
@@ -47,7 +62,8 @@ pub(super) fn tokens(
         let tokens = names
             .iter()
             .zip(printings)
-            .map(|(name, face)| {
+            .enumerate()
+            .map(|(member_index, (name, face))| {
                 let card = created_card(face, context)?;
                 let ordinal =
                     usize::try_from(face.face).map_err(|_range| ProjectionError::Range)?;
@@ -63,6 +79,13 @@ pub(super) fn tokens(
                 Ok(wire::TokenChoice {
                     rules_name: name.clone(),
                     card: Some(card),
+                    destination: placements
+                        .and_then(|zones| zones.get(member_index))
+                        .map(|kind| wire::Destination {
+                            player: seat(domain.destination),
+                            zone: zone(*kind),
+                            position: None,
+                        }),
                 })
             })
             .collect::<Result<_>>()?;
@@ -87,7 +110,7 @@ pub(super) fn tokens(
             },
             count: None,
             earlier: vec![],
-            capacity: Some(wire::Capacity {
+            capacity: domain.placements.is_none().then_some(wire::Capacity {
                 destination: wire::Destination {
                     player: seat(domain.destination),
                     zone: zone(domain.zone),
