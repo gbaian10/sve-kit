@@ -215,6 +215,8 @@ pub struct TokenChoice {
     pub rules_name: String,
     /// Its face in the pinned snapshot, when known.
     pub card: Option<CardRef>,
+    /// Destination declared for this token, when the question allocates tokens.
+    pub destination: Option<Destination>,
 }
 
 /// Typed meaning of one option; never a free label or an index.

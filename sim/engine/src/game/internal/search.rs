@@ -32,6 +32,7 @@ use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
 mod keywords;
+pub(in crate::game::internal) use keywords::has_keyword;
 mod replacement;
 pub(super) use replacement::ReplacementWait;
 

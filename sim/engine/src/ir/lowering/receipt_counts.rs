@@ -154,13 +154,23 @@ impl BodyContext<'_> {
         ))
     }
 
+    pub(super) fn is_mill_receipt(&self, name: &str) -> bool {
+        matches!(self.observations.get(name),
+            Some(ObjectReceipt::Movement { receipt: MovementReceipt::Move { receipt } })
+                if matches!(receipt.location(), ReceiptLocation::Local { id }
+                    if self.receipt_reads.deck_cemetery.contains(id)))
+    }
+
     pub(super) fn receipt_count(
         &mut self,
         query: &ast::ReceiptCountQuery,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        if let Some(receipt @ ObjectReceipt::Fusion { .. }) =
-            self.observations.get(&query.r#in.objects_of).cloned()
+        if let Some(receipt) = self.observations.get(&query.r#in.objects_of).cloned()
+            && (matches!(
+                receipt,
+                ObjectReceipt::Fusion { .. } | ObjectReceipt::Reveal { .. }
+            ) || self.is_mill_receipt(&query.r#in.objects_of))
         {
             let (member, predicate) = self.count_query_filter(query, path)?;
             return Ok(Expr::Compute(Box::new(IntOperation::FromNat {
@@ -239,6 +249,7 @@ impl BodyContext<'_> {
         if matches!(&receipt, ObjectReceipt::Movement { receipt: MovementReceipt::Move { receipt } }
             if matches!(receipt.location(), ReceiptLocation::Local { id } if self.receipt_reads.field_cemetery.contains(id)))
             && (query.kind.is_some()
+                || query.keyword.is_some()
                 || query.r#trait.is_some()
                 || query.class.is_some()
                 || query.not_class.is_some()
@@ -264,6 +275,7 @@ impl BodyContext<'_> {
         self.receipt_filter(
             &super::selection::ObjectFilter {
                 kind: query.kind.as_ref().map(super::search::card_kind),
+                keyword: query.keyword.map(|keyword| keyword.0),
                 trait_id: query.r#trait.as_deref(),
                 class: query.class.as_deref(),
                 not_class: query.not_class.as_deref(),

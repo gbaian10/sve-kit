@@ -5,13 +5,13 @@ use super::receipt_members::{
 use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::receipt_reads;
-use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{
-    Binding, Bool, Capture, CharacteristicPatch, CharacteristicView, ClassRead, Comparison, Expr,
-    Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt, NamesRead, NumberRead,
-    NumericChange, ObjectProperty, ObjectReceipt, ObjectView, Predicate, ReceiptId,
-    ReceiptLocation, RuntimeObjectView, TraitsRead,
+    AbilitiesRead, Binding, Bool, Capture, CharacteristicPatch, CharacteristicView, ClassRead,
+    Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt,
+    NamesRead, NumberRead, NumericChange, ObjectProperty, ObjectReceipt, ObjectView, Predicate,
+    ReceiptId, ReceiptLocation, RuntimeObjectView, TraitsRead,
 };
+use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
@@ -65,6 +65,7 @@ pub(super) struct ReceiptReads {
     field: BTreeSet<ReceiptId>,
     observations: BTreeSet<ReceiptId>,
     published: BTreeSet<ReceiptId>,
+    revealed: BTreeSet<ReceiptId>,
 }
 
 impl ReceiptReads {
@@ -93,6 +94,13 @@ impl ReceiptReads {
                     && self.observations.contains(&id)
                 {
                     self.published.insert(id);
+                }
+                if instruction.precondition.is_none()
+                    && matches!(&instruction.action, Action::Reveal {
+                        objects: objects @ Selector::Zone { zone: ZoneKind::Hand, .. }
+                    } if super::reveal::check_objects(objects).is_ok())
+                {
+                    self.revealed.insert(instruction.receipt);
                 }
                 let looked = matches!(&instruction.action,
                     Action::Move { objects: Selector::Bound { reference }, .. }
@@ -203,11 +211,24 @@ impl ReceiptReads {
                         projection,
                         member,
                         predicate,
-                    } if deck_count => {
-                        if !self.cemetery.contains(&local_receipt(receipt)?) {
-                            return Err(unsupported(
-                                "filtered count outside a deck-to-cemetery producer",
-                            ));
+                    } if deck_count
+                        && matches!(
+                            receipt,
+                            ObjectReceipt::Movement {
+                                receipt: MovementReceipt::Move { .. }
+                            } | ObjectReceipt::Reveal { .. }
+                        ) =>
+                    {
+                        let id = local_receipt(receipt)?;
+                        let produced = match receipt {
+                            ObjectReceipt::Movement {
+                                receipt: MovementReceipt::Move { .. },
+                            } => self.cemetery.contains(&id),
+                            ObjectReceipt::Reveal { .. } => self.revealed.contains(&id),
+                            _ => false,
+                        };
+                        if !produced {
+                            return Err(unsupported("filtered count without a checked producer"));
                         }
                         check_count(receipt, *projection, *member, predicate)?;
                         *number = Expr::Literal(Int(0));
@@ -315,8 +336,8 @@ impl ReceiptReads {
                 *condition = Expr::Literal(Bool(false));
             }
             Predicate::CompareInt { left, right, .. } => {
-                self.mask_number(left, false)?;
-                self.mask_number(right, false)?;
+                self.mask_number(left, true)?;
+                self.mask_number(right, true)?;
             }
             Predicate::ReceiptAny {
                 receipt:
@@ -379,7 +400,10 @@ fn check_count(
     member: Binding<RuntimeObjectView>,
     predicate: &Expr<Bool>,
 ) -> Result<()> {
-    if matches!(receipt, ObjectReceipt::Fusion { .. }) {
+    if matches!(
+        receipt,
+        ObjectReceipt::Fusion { .. } | ObjectReceipt::Reveal { .. }
+    ) {
         return check_shape(receipt, projection, member, predicate);
     }
     if !matches!(
@@ -402,7 +426,9 @@ pub(super) fn count(
     predicate: &Expr<Bool>,
 ) -> Result<Nat> {
     check_count(receipt, projection, member, predicate)?;
-    let members = members(game, execution, receipt, Some(ZoneKind::Cemetery))?;
+    let destination =
+        matches!(receipt, ObjectReceipt::Movement { .. }).then_some(ZoneKind::Cemetery);
+    let members = members(game, execution, receipt, destination)?;
     let mut count = 0_u64;
     for view in &members {
         let card = view.card();
@@ -474,6 +500,22 @@ fn matches(
                     _ => false,
                 }),
             )
+        }
+        Predicate::HasAbility {
+            abilities: Expr::Live(read),
+            predicate,
+        } if predicate.kind.is_none()
+            && predicate.except.is_empty()
+            && predicate.holder.is_none()
+            && predicate.origin.is_none()
+            && let Some(keyword) = predicate.keyword =>
+        {
+            let AbilitiesRead::Abilities { object, .. } = read.as_ref();
+            snapshot(object, member)?;
+            original.map_or(Ok(false), |(game, execution, view)| {
+                let card = &game.object(execution.object_id(view.before)?)?.card;
+                Ok(game.internal_print_has_keyword(card, 0, keyword))
+            })
         }
         Predicate::HasTrait {
             traits: Expr::Live(read),

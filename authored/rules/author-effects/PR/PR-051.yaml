@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  PR-051:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        static:
+          effects:
+            - grant:
+                "on": { who: self, zone: field, kind: follower, trait: 妖精, other: true }
+                keywords: [rush]
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: フェアリー
+                to: { one_of: [field, ex], by: self, scope: each }
+                upto: 9
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

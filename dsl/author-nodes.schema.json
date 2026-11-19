@@ -17017,6 +17017,9 @@
             "each",
             "batch"
           ]
+        },
+        "max_per_zone": {
+          "$ref": "#/$defs/A.quantity"
         }
       },
       "additionalProperties": false,

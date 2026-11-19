@@ -624,6 +624,7 @@ impl<'query> From<&'query ast::SelectedQuery> for ObjectFilter<'query> {
             name: query.name.as_deref(),
             contains: query.name_contains.as_deref(),
             acted: query.acted,
+            racing: query.racing,
             ..Self::default()
         }
     }

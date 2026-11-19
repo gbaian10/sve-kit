@@ -4,8 +4,8 @@ use crate::EngineFailure;
 use crate::ir::names;
 use crate::ir::{
     AbilityQualification, AssociationId, CardKind, CardName, Characteristics, ClassId,
-    EvolutionState, Generation, Info, Int, ObjectRef, RuntimeAbilityReference, Stat, TitleId,
-    TraitId,
+    EvolutionState, Generation, Info, Int, KeywordId, ObjectRef, RuntimeAbilityReference, Stat,
+    TitleId, TraitId,
 };
 use serde_json::Value;
 
@@ -161,6 +161,28 @@ impl Game {
             })
             .map(|ability| program.ability(ability))
             .collect::<Result<Vec<_>>>()
+    }
+
+    pub(in crate::game::internal) fn internal_print_has_keyword(
+        &self,
+        card: &str,
+        face: usize,
+        keyword: KeywordId,
+    ) -> bool {
+        self.card_runtime
+            .definitions
+            .cards
+            .get(card)
+            .is_some_and(|program| {
+                program.card().abilities.iter().any(|ability| {
+                    (super::printed_keywords::card_declaration(&ability.node) == Some(keyword)
+                        || super::super::search::has_keyword(&ability.node, keyword))
+                        && printed_origin(&ability.node.source.origin).is_ok_and(|(printed, _)| {
+                            self.printed_face_ordinal(card, printed)
+                                .is_ok_and(|ordinal| ordinal == face)
+                        })
+                })
+            })
     }
 
     pub(in crate::game) fn internal_printed_name_aliases(

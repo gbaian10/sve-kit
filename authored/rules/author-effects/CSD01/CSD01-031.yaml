@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD01-031:
+    admission: light
+    abilities:
+      - line: 1
+        activate:
+          cost: { act_self: true }
+          targets:
+            - bind: trainee
+              from: { who: self, zone: field, kind: follower, trait: ウマ娘 }
+              n: 1
+          do:
+            - if:
+                cond: { exists: { in: trainee, racing: true } }
+                then:
+                  - buff: { "on": trainee, hp: 2 }
+                else:
+                  - buff: { "on": trainee, hp: 1 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

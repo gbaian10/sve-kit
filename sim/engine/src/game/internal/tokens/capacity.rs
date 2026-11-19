@@ -101,11 +101,10 @@ impl Game {
             return Err(invalid("token capacity changed during its decision"));
         }
         let ids = self.internal_create_prints(prints, seat)?;
-        self.commit_tokens(
+        self.commit_token_batches(
             execution,
             &wait.instruction,
-            wait.zone,
-            ids,
+            vec![(wait.zone, ids)],
             Node::Instruction {
                 instruction: Box::new(wait.instruction.clone()),
             },

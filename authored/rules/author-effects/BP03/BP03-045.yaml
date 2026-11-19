@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-045:
+    admission: light
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - move: { top: { who: self, n: 4 }, to: cemetery, result: milled }
+            - pp:
+                who: self
+                delta:
+                  count: { in: { objects_of: milled, view: before }, kind: spell }
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard: { sel: { who: self, zone: hand, kind: spell }, n: 1 }
+          targets:
+            - bind: victim
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: victim, n: 4 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

@@ -9,6 +9,7 @@ use crate::ir::{
     ReceiptLocation, ReceiptReference, Selector, TraitId, ZoneKind,
 };
 use alloc::collections::BTreeSet;
+use core::result;
 
 /// The member information a receipt condition may read.
 pub(super) struct MemberCard {
@@ -40,6 +41,10 @@ pub(super) fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
         ObjectReceipt::Movement {
             receipt: MovementReceipt::Move { receipt },
         } => match receipt.location() {
+            ReceiptLocation::Local { id } => Some(id),
+            ReceiptLocation::Iteration { .. } => None,
+        },
+        ObjectReceipt::Reveal { receipt } => match receipt.location() {
             ReceiptLocation::Local { id } => Some(id),
             ReceiptLocation::Iteration { .. } => None,
         },
@@ -248,6 +253,21 @@ pub(super) fn members(
                 })
             })
             .collect(),
+        Some(InstructionOutcome::Revealed(revealed))
+            if matches!(receipt, ObjectReceipt::Reveal { .. }) =>
+        {
+            revealed
+                .iter()
+                .map(|before| {
+                    Ok(MemberView {
+                        before: *before,
+                        information: MemberInformation::Properties(printed_card(
+                            game, execution, *before,
+                        )?),
+                    })
+                })
+                .collect()
+        }
         Some(InstructionOutcome::Move(outcome)) => {
             successful_move_members(game, execution, outcome, destination)
         }
@@ -278,6 +298,12 @@ fn successful_move_members(
                     _ => None,
                 })
                 .ok_or_else(|| invalid("missing receipt movement fact"))?;
+            if fact.from.kind == ZoneKind::Deck
+                && movement.requested_to.kind == ZoneKind::Cemetery
+                && movement.actual_to != Some(movement.requested_to)
+            {
+                return Ok(None);
+            }
             let information = match fact.from.kind {
                 ZoneKind::Deck => {
                     MemberInformation::Properties(printed_card(game, execution, movement.before)?)
@@ -296,11 +322,12 @@ fn successful_move_members(
                 }
                 _ => return Err(unsupported("receipt member movement origin or destination")),
             };
-            Ok(MemberView {
+            Ok(Some(MemberView {
                 before: movement.before,
                 information,
-            })
+            }))
         })
+        .filter_map(result::Result::transpose)
         .collect()
 }
 

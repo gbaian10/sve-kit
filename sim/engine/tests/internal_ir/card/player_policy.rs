@@ -495,6 +495,7 @@ fn policy_drive_and_token_capacity_use_only_advertised_choices() {
         zone: ObservedZone::Field,
         available: Nat(1),
         choices: vec![vec!["a".into()], vec!["b".into()]],
+        placements: None,
     };
     assert_eq!(
         answer(DecisionShape::TokenCapacity(tokens.clone())).unwrap(),

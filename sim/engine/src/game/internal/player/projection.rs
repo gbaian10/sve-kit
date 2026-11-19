@@ -179,12 +179,18 @@ fn typed(
         }
         Wait::TokenCapacity(wait) => {
             let (destination, zone, available) = capacity(wait.player_details())?;
-            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, faces: Some(wait.player_faces(game, &choices)?), choices }))
+            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, faces: Some(wait.player_faces(game, &choices)?), choices, placements: None }))
         }
         // Same template-combination handles, addressed to the decider for the destination's EX.
+        Wait::TokenAllocation(wait) => match domain {
+            InputDomain::TokenCapacity { choices } => {
+                Ok(DecisionShape::TokenCapacity(wait.question(game, choices)?))
+            }
+            _ => Err(invalid("inconsistent token allocation domain")),
+        },
         Wait::TransformTemplates(wait) => {
             let (destination, zone, available) = capacity(wait.player_details())?;
-            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, faces: Some(wait.player_faces(game, &choices)?), choices }))
+            domain!(domain, InputDomain::TokenCapacity { choices } => DecisionShape::TokenCapacity(TokenCapacityQuestion { destination, zone, available, faces: Some(wait.player_faces(game, &choices)?), choices, placements: None }))
         }
         Wait::MovementCapacity(wait) => {
             let (destination, zone, available) = capacity(wait.player_details())?;

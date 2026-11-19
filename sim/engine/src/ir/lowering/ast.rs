@@ -649,8 +649,9 @@ pub(super) struct Equip {
 #[serde(deny_unknown_fields)]
 pub(super) struct Create {
     pub token: CreateToken,
-    pub to: CreateZone,
+    pub to: CreateDestination,
     pub n: Option<TokenCount>,
+    pub upto: Option<u64>,
     pub result: Option<String>,
     pub bind: Option<String>,
     pub by: Option<Participant>,
@@ -661,6 +662,9 @@ pub(super) struct Create {
 pub(super) enum CreateToken {
     One(String),
     Many(Vec<String>),
+    Allocate {
+        allocate: CreateAllocation,
+    },
     SameName {
         same_name_as: String,
         kind: Option<String>,
@@ -668,13 +672,46 @@ pub(super) enum CreateToken {
 }
 
 impl CreateToken {
+    pub(super) const fn allocation(&self) -> Option<&CreateAllocation> {
+        match self {
+            Self::Allocate { allocate } => Some(allocate),
+            Self::One(_) | Self::Many(_) | Self::SameName { .. } => None,
+        }
+    }
+
     pub(super) fn names(&self) -> Option<&[String]> {
         match self {
             Self::One(name) => Some(from_ref(name)),
             Self::Many(names) => Some(names),
-            Self::SameName { .. } => None,
+            Self::Allocate { .. } | Self::SameName { .. } => None,
         }
     }
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct CreateAllocation {
+    pub among: Vec<String>,
+    pub total: u64,
+    pub by: Option<Participant>,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum CreateDestination {
+    Single(CreateZone),
+    Split {
+        one_of: Vec<CreateZone>,
+        by: Participant,
+        scope: SplitScope,
+        max_per_zone: Option<u64>,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum SplitScope {
+    Each,
 }
 
 #[derive(Deserialize)]
@@ -760,6 +797,15 @@ pub(super) struct TokenPlayer {
 pub(super) enum CreateZone {
     Ex,
     Field,
+}
+
+impl CreateZone {
+    pub(super) const fn kind(&self) -> ZoneKind {
+        match self {
+            Self::Ex => ZoneKind::Ex,
+            Self::Field => ZoneKind::Field,
+        }
+    }
 }
 
 #[derive(Deserialize)]
@@ -3097,6 +3143,7 @@ pub(super) struct SelectedQuery {
     pub name: Option<String>,
     pub name_contains: Option<String>,
     pub acted: Option<bool>,
+    pub racing: Option<bool>,
 }
 
 #[derive(Clone, Deserialize, PartialEq, Eq)]
@@ -4103,6 +4150,7 @@ pub(super) enum DistinctQuery {
 pub(super) struct ReceiptCountQuery {
     pub r#in: BeforeObjects,
     pub kind: Option<SearchKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,

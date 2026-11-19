@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP19-052:
+    admission: light
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create: { token: 大地の魔片, to: field }
+      - line: 2
+        activate:
+          cost:
+            steps:
+              - pp: 5
+              - earth_rite: 1
+          do:
+            - create:
+                token: { allocate: { among: [防御型ゴーレム, 攻撃型ゴーレム], total: 3 } }
+                to: field
+    token_sources:
+      - { card: BP03-T02, section: 1, line: 1 }
+      - { card: BP01-T09, section: 1, line: 2 }
+      - { card: BP01-T08, section: 1, line: 3 }
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

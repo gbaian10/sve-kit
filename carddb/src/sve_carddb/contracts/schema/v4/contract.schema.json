@@ -33524,6 +33524,9 @@
             "each",
             "batch"
           ]
+        },
+        "max_per_zone": {
+          "$ref": "#/$defs/DSLNodes.A.quantity"
         }
       },
       "additionalProperties": false,

@@ -1,0 +1,30 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP08-097:
+    admission: light
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        fanfare:
+          do:
+            - move: { top: { who: self, n: 1 }, to: cemetery, result: milled }
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        { in: { objects_of: milled, view: before }, kind: follower, keyword: ward }
+                    op: ge
+                    right: 1
+                then:
+                  - grant:
+                      "on": this
+                      keywords: [bane]
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-19"

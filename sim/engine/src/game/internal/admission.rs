@@ -1025,6 +1025,7 @@ fn supported(code: &str) -> bool {
             | "value.unique-name"
             | "shape.Capture.Name"
             | "shape.TokenDestination.Single"
+            | "shape.TokenDestination.Split"
             | "shape.TokenInitialState.StackCounters"
             | "shape.Action.Resource"
             | "action.resource"

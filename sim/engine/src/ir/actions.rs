@@ -5,7 +5,7 @@ use super::{
     Nat, ObjectOperand, ObjectRef, ObjectView, PlaySpec, PlayerRef, PlayerSet, Position, Posture,
     Program, RandomnessPolicy, RollId, RuleId, ScheduleAnchor, ScheduleToken, SelectionConstraint,
     Selector, TextProvider, TimestampBasis, TokenTemplateId, TriggerSpec, UsageReference,
-    Visibility, Visitor, Walk, ZoneRef,
+    Visibility, Visitor, Walk, ZoneKind, ZoneRef,
 };
 
 // I.swap remains rule-only; there is deliberately no constructible variant.
@@ -220,7 +220,11 @@ variants!(DestinationAllocation { Batch { domain: Vec<ZoneRef> } => [], PerItem 
 
 variants!(TokenInitialState { StackCounters { amount: Expr<Nat> } => ["action.counter"] });
 
-variants!(TokenDestination { Single { zone: Expr<ZoneRef> } => [], Allocated { allocation: DestinationAllocation } => [] });
+variants!(TokenDestination {
+    Single { zone: Expr<ZoneRef> } => [],
+    Allocated { allocation: DestinationAllocation } => [],
+    Split { player: PlayerRef, actor: PlayerRef, zones: Vec<ZoneKind>, total: Option<Nat>, up_to: Bool, max_per_zone: Option<Nat> } => []
+});
 record!(TokenCount {
     template: TokenTemplateId,
     count: Nat
