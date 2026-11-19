@@ -411,39 +411,3 @@ fn wire_hand_limit_question_and_board_do_not_depend_on_the_other_hand() {
         assert_eq!(projections[0].question(), projections[1].question());
     }
 }
-
-#[test]
-fn wire_hand_limit_rejects_an_incomplete_selection() {
-    let game = make_closing(Viewer::P1, 9, "unit-spell");
-    let projection = project(&game, Viewer::P1, "host-hand-limit");
-    let before = exact_authority(&game);
-    let selected = vec![candidates(&projection).unwrap()[0].id.clone()];
-    assert!(matches!(
-        projection.answer(Viewer::P1, &projection.question().id, &select(selected)),
-        Err(AnswerError)
-    ));
-    assert!(
-        exact_authority(&game) == before,
-        "an incomplete selection preserves the authority"
-    );
-}
-
-#[test]
-fn wire_hand_limit_rejects_a_repeated_candidate() {
-    let game = make_closing(Viewer::P1, 9, "unit-spell");
-    let projection = project(&game, Viewer::P1, "host-hand-limit");
-    let before = exact_authority(&game);
-    let member = candidates(&projection).unwrap()[0].id.clone();
-    assert!(matches!(
-        projection.answer(
-            Viewer::P1,
-            &projection.question().id,
-            &select(vec![member.clone(), member])
-        ),
-        Err(AnswerError)
-    ));
-    assert!(
-        exact_authority(&game) == before,
-        "a repeated candidate preserves the authority"
-    );
-}

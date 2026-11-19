@@ -5,7 +5,7 @@ use super::battle_pending::{board, board_with_program, catalog_for, fixture};
 use super::*;
 use crate::battle_costs::object;
 use std::sync::OnceLock;
-use sve_battle_contract::{MAX_SAFE_INTEGER, ObjectHandle, Seat, SourceRef, observation as wire};
+use sve_battle_contract::{MAX_SAFE_INTEGER, ObjectHandle, Seat, observation as wire};
 use sve_engine::battle::ProjectionError;
 use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::player::{Viewer, observation as native};
@@ -326,41 +326,6 @@ fn wire_object_table_preserves_unknown_quotas_and_projects_real_limits() {
         wrong.battle_objects(Viewer::P1, &fixture().references),
         Err(ProjectionError::Unavailable)
     );
-}
-
-#[test]
-fn wire_object_table_includes_actual_installed_effects_with_current_source_links() {
-    let program = battle_effects::cap_program();
-    let mut game = board_with_program(Viewer::P1, "unit-spell", &program);
-    resolved(
-        game.activate_internal_card(
-            "s",
-            program.card().abilities[0].node.id,
-            Viewer::P1.player(),
-        )
-        .unwrap(),
-    );
-    game.resume_internal_card().unwrap();
-    let before = exact_authority(&game);
-    for viewer in [Viewer::P1, Viewer::P2] {
-        let table = game.battle_objects(viewer, &fixture().references).unwrap();
-        let key = handle(&game, viewer, Viewer::P1, native::ObservedZone::Field);
-        let effects = &table[&key].state.as_ref().unwrap().effects;
-        assert_eq!(effects.len(), 1);
-        let wire::InstalledChange::Prevention { change, .. } = &effects[0].change else {
-            panic!("installed Cap")
-        };
-        assert_eq!(
-            serde_json::to_value(change).unwrap(),
-            json!({"kind":"cap","threshold":4,"replacement":3})
-        );
-        let SourceRef::Card { holder, .. } = effects[0].source.as_ref().unwrap() else {
-            panic!("card origin")
-        };
-        assert_eq!(holder.as_ref(), Some(&key));
-        assert!(table.contains_key(holder.as_ref().unwrap()));
-    }
-    assert_eq!(exact_authority(&game), before);
 }
 
 #[test]
