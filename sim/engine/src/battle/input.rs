@@ -88,8 +88,9 @@ impl InputProjection {
     /// Decode an authenticated wire command without changing the authority.
     ///
     /// # Errors
-    /// Rejects invalid answers, a different viewer, and concession after termination
-    /// or when the native authority cannot accept it.
+    /// Rejects invalid answers, a different viewer, a withdrawal from a question that is not
+    /// withdrawable, and concession after termination or when the native authority cannot
+    /// accept it.
     pub fn command(
         &self,
         viewer: Viewer,
@@ -103,6 +104,11 @@ impl InputProjection {
                 question_id,
                 answer,
             } => self.answer(viewer, question_id, answer),
+            Command::Withdraw { question_id } => self
+                .answer
+                .as_ref()
+                .ok_or(AnswerError)?
+                .withdraw(viewer, question_id),
             Command::Concede if self.can_concede => Ok(player::Command::Concede),
             Command::Concede => Err(AnswerError),
         }

@@ -118,7 +118,7 @@ pub enum ReceiptResult {
     Applied,
     /// The input was refused; the question, state and randomness are unchanged.
     Rejected,
-    /// A validated play was illegal and returned to its origin.
+    /// A validated play was illegal, or its declaration was withdrawn, and it returned to its origin.
     Reverted,
     /// The rules cancelled a pending occurrence.
     Cancelled,

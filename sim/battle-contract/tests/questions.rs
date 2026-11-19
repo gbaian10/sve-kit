@@ -99,11 +99,11 @@ fn every_answer_meaning_is_asked_and_has_a_submission_fixture() {
         .map(|submit| tag(submit, "/command/answer/kind"))
         .collect();
     assert_eq!(answered, shapes);
-    assert!(
-        submissions
-            .iter()
-            .any(|submit| tag(submit, "/command/kind") == "concede")
-    );
+    let commands: BTreeSet<_> = submissions
+        .iter()
+        .map(|submit| tag(submit, "/command/kind"))
+        .collect();
+    assert_eq!(commands, variants("Command", "/properties/kind/const"));
 }
 
 #[test]

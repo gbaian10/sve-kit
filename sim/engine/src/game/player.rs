@@ -132,7 +132,7 @@ pub enum SubmissionKind {
     Applied,
     /// Invalid actor, token or answer preserved the original question.
     Rejected,
-    /// An illegal play returned to its origin and invalidated its question.
+    /// An illegal or withdrawn play returned to its origin and invalidated its question.
     Reverted,
     /// The existing rules procedure cancelled a pending occurrence.
     Cancelled,
@@ -181,6 +181,8 @@ pub struct Question {
     pub purpose: QuestionPurpose,
     /// Only candidates authorized for this actor.
     pub shape: QuestionShape,
+    /// Whether the actor may withdraw its own unfinished declaration instead of answering.
+    pub withdrawable: bool,
 }
 
 /// Public information available while another seat answers.
@@ -260,6 +262,11 @@ pub enum Command {
         token: QuestionToken,
         /// Existing typed payload, addressed only by question-scoped handles.
         answer: Answer,
+    },
+    /// Withdraw the actor's own unfinished declaration, returning the play to its origin.
+    Withdraw {
+        /// Exact withdrawable question returned to this seat.
+        token: QuestionToken,
     },
     /// Surrender even while another player is deciding.
     Concede,

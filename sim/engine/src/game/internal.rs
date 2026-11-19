@@ -1314,16 +1314,26 @@ impl Game {
         })();
         if result.is_err() {
             if let Some(origin) = rollback {
-                let epoch = self.state.ir_epoch.max(before.state.ir_epoch);
-                self.restore_player_state(*origin, &published)?;
-                // An externally observed token must never become live again after rollback.
-                self.state.ir_epoch = self.state.ir_epoch.max(epoch);
-                self.refresh_internal_quick()?;
+                self.state.ir_epoch = self.state.ir_epoch.max(before.state.ir_epoch);
+                self.restore_play_origin(*origin, &published)?;
             } else {
                 *self = before;
             }
         }
         result
+    }
+
+    /// Return a play to the state it started from, keeping what was already published.
+    pub(super) fn restore_play_origin(
+        &mut self,
+        origin: Self,
+        published: &PublishedKnowledge,
+    ) -> Result<()> {
+        let epoch = self.state.ir_epoch;
+        self.restore_player_state(origin, published)?;
+        // An externally observed token must never become live again after rollback.
+        self.state.ir_epoch = self.state.ir_epoch.max(epoch);
+        self.refresh_internal_quick()
     }
 
     /// Inspect the actor's question; dice reroll results are public to both players.

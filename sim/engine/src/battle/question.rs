@@ -57,6 +57,7 @@ pub(super) struct BoundAnswer {
     id: QuestionId,
     actor: Viewer,
     token: QuestionToken,
+    withdrawable: bool,
     binding: Binding,
 }
 
@@ -177,6 +178,7 @@ impl QuestionProjection {
             usage,
             processing,
             shape,
+            can_withdraw: native.withdrawable,
             auto_answer,
             assistance: wire::NoAssistance,
             // Without a verified RuleRef closure, [] would falsely assert known-empty.
@@ -189,6 +191,7 @@ impl QuestionProjection {
                 id: id.clone(),
                 actor: native.actor,
                 token: native.token,
+                withdrawable: native.withdrawable,
                 binding,
             },
         })
@@ -255,6 +258,18 @@ fn auto_answer(
 }
 
 impl BoundAnswer {
+    /// Withdraw the declaration this exact question belongs to, when it may be withdrawn.
+    pub(super) fn withdraw(
+        &self,
+        viewer: Viewer,
+        id: &QuestionId,
+    ) -> result::Result<player::Command, AnswerError> {
+        if viewer != self.actor || id != &self.id || !self.withdrawable {
+            return Err(AnswerError);
+        }
+        Ok(player::Command::Withdraw { token: self.token })
+    }
+
     pub(super) fn answer(
         &self,
         viewer: Viewer,

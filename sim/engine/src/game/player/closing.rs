@@ -71,6 +71,7 @@ impl Game {
             actor,
             purpose: QuestionPurpose::RuleChoice,
             shape: QuestionShape::Closing(shape),
+            withdrawable: false,
         }))
     }
 
