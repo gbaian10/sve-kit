@@ -35,7 +35,7 @@ struct HandleEntry {
     index: u64,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 struct HandleSnapshot {
     issued: u64,
     handles: BTreeMap<String, HandleEntry>,
@@ -48,6 +48,22 @@ pub(in crate::game) struct PublishedKnowledge(
     BTreeMap<String, HandleSnapshot>,
     super::player::events::PublishedEvents,
 );
+
+impl PublishedKnowledge {
+    /// Other seats never saw an unplayed declaration: they keep the handles and faces they knew at
+    /// its origin, and only the issuance high water mark, so identities are never reissued.
+    pub(in crate::game) fn concealing(mut self, controller: &str, origin: &Self) -> Self {
+        for (seat, known) in &mut self.0 {
+            if seat == controller {
+                continue;
+            }
+            let issued = known.issued;
+            *known = origin.0.get(seat).cloned().unwrap_or_default();
+            known.issued = known.issued.max(issued);
+        }
+        self
+    }
+}
 
 impl Knowledge {
     pub(super) const fn located(&self) -> &BTreeSet<String> {

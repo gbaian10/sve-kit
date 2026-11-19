@@ -57,6 +57,7 @@ interface Submit {
   kind: "submit";
   request_id: Opaque;
   command: { kind: "answer"; question_id: Opaque; answer: Answer }
+    | { kind: "withdraw"; question_id: Opaque }
     | { kind: "concede" };
 }
 interface HostError {
@@ -105,6 +106,7 @@ receipt 先於該席相關 update，另一席只收獲授權更新；重答已�
 
 非法席位、題期、選項或答案統一 invalid_submission，保留原題且不消耗 RNG；本地可依已知候選提示漏選／重複。
 有效輸入造成 native Reverted／Cancelled／EngineFault 分別回報，不改成一般拒答；正常終局與故障不混用。
+withdraw 只對 `can_withdraw` 為 true 的當前題有效，受理後回 reverted，與違規回滾走同一條回到原點路徑；其餘情況回 invalid_submission。
 必要盤面／題目無法安全投影、格式錯誤或資源預算失敗回 host_error，停用互動；錯誤不包含原始 payload、秘密、卡文或 stack trace。
 HostError 表示宿主、數值或必要投影出錯，無法繼續提供安全的互動；projection 也包含呈現來源對應損壞。
 BattleInput.engine_fault 則是 native 規則執行故障，仍由權威決定能否投降，不能把宿主錯誤偽裝成規則結果。
@@ -199,7 +201,8 @@ native 卡文讀該版次唯一可用的來源觀測，不拿共享 current 或�
 Declared 保留已公開或本席可知的模式、X、效果要求宣告的數值、目標、可選費用及卡名；未付費的宣告不是付款回條。
 題目存在本身只授權回答席：若來源 frame 未獲授權，Question.processing 僅保留 actor，其餘脈絡未知，不在盤面補空槽或改用可見父層。
 processing 的 actor 只屬於本席正在回答的效果或規則脈絡。TriggerQuota 由額外的 TriggerAdmission 脈絡承接；暫停的 play frame 不取得 actor 或私有程序輪次，stage 僅保留已授權公開里程碑（未知時為 null）。已知來源不因 stage 未知而被丟棄。source 使用 SourceRef：有精確證據時為 TextRef，否則保留已知卡面／卡文座標提示。
-processing.declared 保留各次實際宣告席與已接受內容；這與事件的 Declared 分開授權。payments 是各筆已完成扣款，包含付款席、實際數量／單位與已知費用群組，不使用報價的 CostSummary，也不宣稱整次 play 已付款完成；報價仍在 costs。
+processing.declared 保留各次實際宣告席與已接受內容；這與事件的 Declared 分開授權。
+自己發起、尚未過[打出步驟 7](../dsl/play-semantics.md#2-程序已打出與回復點)的打出或起動（不含自動能力與結算中被打出者）仍可撤回或回滾，其他席在此之前看到的是宣告起點的盤面與 processing；成立後才一併看到。一般進化宣告期間，其他席的 processing 同樣只有行動視窗的 declare，不含進化主語。回到原點時，其他席只保留起點時的知識，物件代號的發號水位不倒退。payments 是各筆已完成扣款，包含付款席、實際數量／單位與已知費用群組，不使用報價的 CostSummary，也不宣稱整次 play 已付款完成；報價仍在 costs。
 費用區分 CurrentContext／BeforePayment、基本／追加／模式／可選組、PP 固定額與 X、非 PP 材料；未知總額不是零，報價不保證可合法完成。
 strict 的支援檢查依當局引擎、規則及程式閉包；automatic 不表示任意答案合法，也不表示官方核可。
 
@@ -222,6 +225,7 @@ interface Question {
   use: string;
   processing: ProcessingContext;
   shape: QuestionShape;
+  can_withdraw: boolean;
   auto_answer: { kind: "unique"; answer: Answer; public: boolean }
     | { kind: "not_unique" } | { kind: "unknown" };
   assistance: null;
@@ -233,6 +237,8 @@ purpose 是規則用途、use 是具體細目、shape.kind 是嚴格答案語義
 rules 必填：null 表示沒有經完整驗證的規則依據（未提供），[] 表示明確已知沒有規則引用，非空陣列表示經可信來源驗證的完整依據；不完整的單條不得當作完整集合。null 不代表已確認合法，也不解除其他 strict／preflight 互動阻擋；引用的 strength 不預設為 official。
 ProcessingContext 至少保留已授權 stage、actor／controller、SourceRef／subject、規則依據、逐席程序與 ProcessingDeclaration；actor 不一定是 controller。
 等待席只取得公開脈絡及骰值／剩餘次數，不取得候選、唯一性、私有題數或隱藏執行堆疊。
+can_withdraw 為 true 的題，回答席可改送 withdraw 撤回自己的宣告：上述尚未打出的打出、起動（含 Quick 發動）的每一題 play_parameter，以及一般進化／超進化宣告的每一階段；判斷是結構性的，不逐題型列白名單。
+撤回後盤面、亂數流與知識回到宣告前，並以新題號再出同一個行動視窗（Quick 發動則回到該 Quick 視窗）；結算中的題（resolution_choice）、規則題與自動能力的題一律為 false。
 UI 可共用 actions、confirm、options、select、order、partition、distribute、number、declare_name 九種元件分類；declare_name 只預留，不表示首片增加卡名宣告規則。
 不能因共用元件就將嚴格答案變成無限制 options 或省略進化付款、Drive、角色分派等限制。
 
@@ -476,6 +482,7 @@ Worker 路徑在測試與 dev build 跑產生的 validator；release 本機不�
 | 傷害後再選目標、抽 2 棄 1 | 先呈現合法暫態再啟用下一題，兩席各驗授權；晉升不二次播放 |
 | 費用→成立→結算停點 | 成立前無事件語音；首次合格更新補費用，與成立／效果保持順序，只播一次 |
 | 付款後容量非法、整次回滾 | 沒有未成立暫態；已看資訊不收回、舊題失效 |
+| 打出、進化（含超進化付法）、起動中途撤回 | 狀態摘要回到宣告前、再出行動視窗；等待席在宣告中與撤回後的盤面、事件、輸入都與宣告前相同 |
 | 外層可回復而內層成立、nested 取消 | 不提早外發可規則回復內容；不將 native Cancelled 當 cancel |
 | 無 origin 懸置、短暫公開後失知 | 前者不發暫態；後者需獨立觀看證據，沒有新 handle 連回秘密 |
 | 故障回 origin／上一停點 | 停動畫、對齊真實故障快照，只 cancel 實際丟棄者；不假勝負、不等待永遠不提交的呈現 |

@@ -17,7 +17,7 @@ fn tree(activation: &Value) -> Value {
     tree
 }
 
-fn program(quick: bool, other: bool) -> WellFormedCardProgram {
+pub(super) fn program(quick: bool, other: bool) -> WellFormedCardProgram {
     let mut query = json!({"who":"self","zone":"field","name":"unit-amulet"});
     if other {
         query["other"] = json!(true);

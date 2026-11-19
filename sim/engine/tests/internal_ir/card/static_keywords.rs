@@ -181,7 +181,7 @@ fn ward_aura_offers_optional_act_to_a_new_field_entrant() {
         panic!("granted Ward must offer entry posture");
     };
     assert!(matches!(question.domain, InputDomain::WardEntry { .. }));
-    let native = game.observe(Viewer::P2).unwrap();
+    let native = game.observe(Viewer::P1).unwrap();
     assert!(
         matches!(native.processing.as_slice(), [context] if context.source.is_none() && matches!(&context.subject, Some(ProcessingSubject::Card { object: Some(_), .. })))
     );

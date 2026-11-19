@@ -352,7 +352,7 @@ fn impossible_or_live_predicate_targets_reject_before_any_target_question() {
     assert_eq!(before, exact_authority(&empty));
 }
 
-fn choice_program() -> WellFormedCardProgram {
+pub(super) fn choice_program() -> WellFormedCardProgram {
     let chosen = ModeDecision {
         id: DecisionId(20),
         actor: PlayerRef::Controller {},

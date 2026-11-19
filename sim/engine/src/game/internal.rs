@@ -944,6 +944,9 @@ impl Game {
     ) -> Result<Progress> {
         let before = self.clone();
         let published = before.published_knowledge();
+        let concealed = self
+            .concealed_declaration()
+            .map(|(_, controller)| controller);
         let mut rollback = None;
         let result = (|| {
             let mut execution = self
@@ -1315,7 +1318,7 @@ impl Game {
         if result.is_err() {
             if let Some(origin) = rollback {
                 self.state.ir_epoch = self.state.ir_epoch.max(before.state.ir_epoch);
-                self.restore_play_origin(*origin, &published)?;
+                self.restore_play_origin(*origin, published, concealed)?;
             } else {
                 *self = before;
             }
@@ -1323,14 +1326,22 @@ impl Game {
         result
     }
 
-    /// Return a play to the state it started from, keeping what was already published.
+    /// Return a play to the state it started from, keeping what was already published. Other
+    /// seats than the controller of a `concealed` declaration keep only what they knew at origin.
     pub(super) fn restore_play_origin(
         &mut self,
         origin: Self,
-        published: &PublishedKnowledge,
+        published: PublishedKnowledge,
+        concealed: Option<PlayerId>,
     ) -> Result<()> {
+        let published = match concealed {
+            Some(controller) => {
+                published.concealing(seat_name(controller)?, &origin.published_knowledge())
+            }
+            None => published,
+        };
         let epoch = self.state.ir_epoch;
-        self.restore_player_state(origin, published)?;
+        self.restore_player_state(origin, &published)?;
         // An externally observed token must never become live again after rollback.
         self.state.ir_epoch = self.state.ir_epoch.max(epoch);
         self.refresh_internal_quick()

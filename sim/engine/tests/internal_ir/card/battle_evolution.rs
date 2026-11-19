@@ -151,7 +151,8 @@ fn declaring(
                 Seat::P2
             }),
             source: None,
-            subject: Some(Subject::Card {
+            // The declaration can still be withdrawn, so only its actor sees the subject.
+            subject: (viewer == actor).then(|| Subject::Card {
                 card: CardRef {
                     printing_id: "printing-base".into(),
                     face: WireNat::ZERO,
@@ -468,20 +469,17 @@ fn wire_board_evolution_subject_selects_the_later_public_twin_for_each_viewer() 
                     board.objects[first].effective_face, board.objects[second].effective_face,
                     "two public twins cannot be distinguished by printing"
                 );
+                let subject = (viewer == actor).then(|| Subject::Card {
+                    card: board.objects[second].effective_face.clone(),
+                    object: Some(second.clone()),
+                });
                 assert_eq!(
-                    board.processing[0].subject,
-                    Some(Subject::Card {
-                        card: board.objects[second].effective_face.clone(),
-                        object: Some(second.clone()),
-                    }),
-                    "the subject follows the selected physical base rather than the first matching printing"
+                    board.processing[0].subject, subject,
+                    "the subject follows the selected physical base rather than the first matching printing, and only its actor sees it before the declaration ends"
                 );
                 handles.push(second.clone());
             }
-            assert_ne!(
-                handles[0], handles[1],
-                "each viewer owns its subject handle"
-            );
+            assert_ne!(handles[0], handles[1], "each viewer owns its handles");
             assert!(
                 exact_authority(&game) == before,
                 "reading the public subject is read-only"

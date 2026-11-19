@@ -264,8 +264,8 @@ fn presentation_shows_nothing_of_a_declared_card_until_it_is_played() {
         });
         let mut cursors = [None, None];
         declare(&mut game, "BP04-066");
-        let resolution = |current: &Game| {
-            current.observe(Viewer::P2).unwrap().players[0]
+        let resolution = |current: &Game, viewer: Viewer| {
+            current.observe(viewer).unwrap().players[0]
                 .zones
                 .iter()
                 .find(|zone| zone.kind == ObservedZone::Resolution)
@@ -277,9 +277,9 @@ fn presentation_shows_nothing_of_a_declared_card_until_it_is_played() {
             ("targets", Answer::Targets(vec![0])),
         ] {
             assert_eq!(
-                resolution(&game),
-                1,
-                "the declared card already moved, so an uncommitted result exists at the {shape} question"
+                [resolution(&game, Viewer::P1), resolution(&game, Viewer::P2)],
+                [1, 0],
+                "the declared card already moved, so an uncommitted result exists at the {shape} question; the other seat still sees the origin"
             );
             assert_eq!(
                 present(&mut game, &mut cursors),

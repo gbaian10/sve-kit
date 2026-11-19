@@ -22,7 +22,7 @@ cursor 回 `InvalidCursor`。這是 Rust 行程內介面，沒有穩定的 wire 
 
 有懸置的 typed execution 時，事件只留在交易內，直到執行完成才發布。
 這個保守邊界同時涵蓋 origin、nested play、付款與沒有 origin 的分支。
-中途的 Resolution 或已公開資訊仍可從 `observe` 讀到。付款不足而 `Reverted`，
+中途的 Resolution 或已公開資訊仍可從 `observe` 讀到；但自己發起、尚未打出的打出或起動，其他席讀到的是宣告起點。付款不足而 `Reverted`，
 或故障回到 origin 時，未提交事件一起丟棄，不消耗公開編號。
 終局與投降提交已執行的前綴；拒絕的回答不新增事件。
 
