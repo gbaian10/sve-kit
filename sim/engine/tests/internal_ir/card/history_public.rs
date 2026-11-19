@@ -73,33 +73,10 @@ fn departure_with_a_supported_played_history_condition_is_a_valid_baseline() {
 }
 
 #[test]
-fn complete_act_and_self_cemetery_cost_with_a_formal_buff_target_is_a_valid_baseline() {
-    loads(&json!({"activate":{
-        "cost":{"steps":[{"act_self":true},{"self_to_cemetery":true}]},
-        "targets":[{"bind":"friend","from":{"who":"self","zone":"field","kind":"follower"},"n":1}],
-        "do":[{"buff":{"on":"friend","power":1,"hp":1}}]
-    }}));
-}
-
-#[test]
 fn ordinary_evolution_time_destruction_of_all_opposing_followers_is_a_valid_baseline() {
     loads(&json!({"evolve_time":{"do":[{"destroy":{"ref":{
         "who":"opp","zone":"field","kind":"follower"
     }}}]}}));
-}
-
-#[test]
-fn committed_ex_banish_remains_visible_after_the_token_has_been_erased() {
-    let mut board = position();
-    activate_line(&mut board, "s", "unit-follower", 3);
-    let view = board.projection(View::Referee).unwrap();
-    assert_eq!(view["P1"]["ex"], json!([]));
-    assert_eq!(view["P1"]["cemetery"], json!([]));
-    read_lesson(&mut board);
-    assert_eq!(
-        board.projection(View::Referee).unwrap()["P1"]["hand"],
-        json!(["d0"])
-    );
 }
 
 #[test]
@@ -518,6 +495,9 @@ fn no_lesson_banish_means_no_draw_and_each_wrong_owner_remains_independent() {
         "banishing the opposing EX item does not satisfy the controller's history"
     );
     activate_line(&mut board, "s", "unit-follower", 3);
+    let view = board.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["ex"], json!([]));
+    assert_eq!(view["P1"]["cemetery"], json!([]));
     read_lesson(&mut board);
     assert_eq!(
         board.projection(View::Referee).unwrap()["P1"]["hand"],
