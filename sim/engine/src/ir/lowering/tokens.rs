@@ -24,6 +24,13 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         let allocation = value.token.allocation();
+        if (value.n.is_some() && value.upto.is_some())
+            || (allocation.is_some() && (value.n.is_some() || value.upto.is_some()))
+            || (matches!(&value.to, ast::CreateDestination::Split { .. })
+                && allocation.is_some_and(|rule| rule.by.is_some()))
+        {
+            return Err(unsupported(path));
+        }
         let destination = self.creation_destination(value, allocation, path)?;
         if value.result.is_some() && value.bind.is_some() {
             return Err(unsupported(path));
