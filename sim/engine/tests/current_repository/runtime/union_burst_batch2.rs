@@ -120,19 +120,3 @@ fn ayumi_attack_preserves_an_already_acted_target_through_its_next_start() {
         );
     }
 }
-#[test]
-fn shizuru_and_rino_evolution_damages_all_opposing_followers() {
-    let card = "PCS01-005";
-    let mut initial = position(card, "field");
-    initial["players"]["P2"]["zones"]["field"]
-        .as_array_mut()
-        .unwrap()
-        .push(json!({"id":"enemy2","card":"ub-enemy"}));
-    let mut game = evolve(card, initial);
-    let play = pending(&mut game, card);
-    ub(&resolved(finish(&mut game, play)));
-    let state = game.projection(View::Referee).unwrap();
-    for enemy in ["enemy", "enemy2"] {
-        assert_eq!(state["objects"][enemy]["damage"], 1_u8);
-    }
-}

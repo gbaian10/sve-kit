@@ -768,12 +768,145 @@ fn draw_position() -> Value {
     })
 }
 
+fn cemetery_filter_position(card: &str, material: &str, count: usize, payment: bool) -> Value {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
+    if payment {
+        initial["players"]["P1"]["zones"]["hand"]
+            .as_array_mut()
+            .unwrap()
+            .push(json!({"id":"payment","card":material}));
+    }
+    initial["players"]["P1"]["zones"]["cemetery"] = json!(
+        (0..count)
+            .map(|i| json!({"id":format!("grave-{i}"),"card":material}))
+            .collect::<Vec<_>>()
+    );
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"BP01-037"},{"id":"next","card":"BP01-037"},{"id":"last","card":"BP01-037"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP04-117"}]);
+    initial
+}
+
+fn ex_filter_position(card: &str, material: &str, count: usize) -> Value {
+    let mut initial = cemetery_filter_position(card, material, 0, false);
+    initial["players"]["P1"]["zones"]["ex"] = json!(
+        (0..count)
+            .map(|i| json!({"id":format!("own-ex-{i}"),"card":material}))
+            .collect::<Vec<_>>()
+    );
+    initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"opponent-ex","card":material}]);
+    initial
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn finish_filtered_play(game: &mut Game, mut play: CardPlay) {
+    while let CardPlay::Awaiting(question) = play {
+        let answer = if matches!(&question.domain, InputDomain::WardEntry { .. }) {
+            Answer::WardEntry(false)
+        } else if matches!(&question.domain, InputDomain::OptionalCost) {
+            Answer::OptionalCost(true)
+        } else if let InputDomain::CostMaterials(domain) = &question.domain {
+            Answer::CostMaterials(domain.members.iter().take(1).map(|m| m.handle).collect())
+        } else {
+            let InputDomain::Targets(domain) = &question.domain else {
+                panic!("unexpected printed choice: {:?}", question.domain);
+            };
+            Answer::Targets(domain.members.iter().take(1).map(|m| m.handle).collect())
+        };
+        play = game
+            .answer_internal_card(question.actor, question.token, answer)
+            .unwrap();
+    }
+    assert!(
+        !matches!(play, CardPlay::Cancelled),
+        "the printed play has legal targets and payment"
+    );
+}
+
 fn projected_zone_count(zone: &Value) -> u64 {
     zone.as_array()
         .unwrap()
         .iter()
         .map(|card| card.get("filler").and_then(Value::as_u64).unwrap_or(1))
         .sum()
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn await_card_choice(play: CardPlay) -> DecisionView {
+    let CardPlay::Awaiting(question) = play else {
+        panic!("expected choice")
+    };
+    question
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn choose_card_by_number(game: &mut Game, play: CardPlay, card: &str) -> CardPlay {
+    let question = await_card_choice(play);
+    let (InputDomain::Targets(domain) | InputDomain::CostMaterials(domain)) = &question.domain
+    else {
+        panic!("objects")
+    };
+    let members = &domain.members;
+    let material = matches!(question.domain, InputDomain::CostMaterials(_));
+    let chosen = members
+        .iter()
+        .find(|member| member.card.as_deref() == Some(card))
+        .unwrap()
+        .handle;
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        if material {
+            Answer::CostMaterials(vec![chosen])
+        } else {
+            Answer::Targets(vec![chosen])
+        },
+    )
+    .unwrap()
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn resolve_pending_card(game: &mut Game, card: &str) -> CardPlay {
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = pending.domain else {
+        panic!("pending trigger")
+    };
+    let option = options.iter().find(|option| option.card == card).unwrap();
+    let play = game
+        .answer_internal_card(pending.actor, pending.token, Answer::Pending(option.handle))
+        .unwrap();
+    accept(game, play)
+}
+
+fn position_with_source(card: &str, zone: &str) -> Value {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"][zone] = json!([{"id":"source","card":card}]);
+    initial
+}
+
+fn enter_with_fanfare(game: &mut Game, card: &str) -> CardPlay {
+    let play = game
+        .play_internal_card("source", PlayerId { seat: 1 })
+        .unwrap();
+    let play = accept(game, play);
+    assert!(
+        matches!(play, CardPlay::Entered(_)),
+        "the follower enters before its trigger"
+    );
+    resolve_pending_card(game, card)
 }
 
 // Helpers shared verbatim by several runtime scenario files.
@@ -1073,6 +1206,93 @@ fn field_damage(view: &Value) {
         json!(["soil"]),
         "two removed Stack immediately clear their holder"
     );
+}
+
+fn grant_position(card: &str) -> Value {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([]);
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"enemy","card":"BP01-037","state":{"acted":true}}]);
+    initial
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn finish_grant_play(game: &mut Game, mut step: CardPlay, target: Option<&str>) {
+    while let CardPlay::Awaiting(q) = step {
+        let answer = if matches!(q.domain, InputDomain::OptionalCost) {
+            Answer::OptionalCost(true)
+        } else if matches!(q.domain, InputDomain::WardEntry { .. }) {
+            Answer::WardEntry(false)
+        } else if let InputDomain::Targets(d) = &q.domain {
+            let member = d
+                .members
+                .iter()
+                .find(|m| target.is_none_or(|target| m.card.as_deref() == Some(target)))
+                .unwrap();
+            Answer::Targets(vec![member.handle])
+        } else if let InputDomain::CostMaterials(d) = &q.domain {
+            Answer::CostMaterials(
+                d.members
+                    .iter()
+                    .take(usize::try_from(d.cardinality.maximum.unwrap().0).unwrap())
+                    .map(|m| m.handle)
+                    .collect(),
+            )
+        } else if let InputDomain::Search(d) = &q.domain {
+            Answer::Search(SearchAnswer::Ungrouped(
+                d.cards
+                    .iter()
+                    .take(usize::try_from(d.cardinality.maximum.unwrap().0).unwrap())
+                    .map(|m| m.handle)
+                    .collect(),
+            ))
+        } else {
+            panic!("unexpected printed decision");
+        };
+        step = game.answer_internal_card(q.actor, q.token, answer).unwrap();
+    }
+}
+
+#[expect(
+    clippy::panic,
+    reason = "An unexpected decision invalidates the scenario."
+)]
+fn resolve_grant_trigger(game: &mut Game, line: u64, target: Option<&str>) {
+    let q = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &q.domain else {
+        panic!("printed pending ability");
+    };
+    let chosen = options.iter().find(|o| o.line == line).unwrap();
+    let step = game
+        .answer_internal_card(q.actor, q.token, Answer::Pending(chosen.handle))
+        .unwrap();
+    finish_grant_play(game, step, target);
+    finish_checks(game);
+}
+
+fn play_grant_source(game: &mut Game, target: Option<&str>) {
+    let step = game.play_internal_card("source", actor()).unwrap();
+    finish_grant_play(game, step, target);
+    finish_checks(game);
+}
+
+fn has_granted_keyword(view: &Value, object: &str, keyword: &str) -> bool {
+    view["objects"][object]["keywords"]
+        .as_array()
+        .unwrap()
+        .contains(&json!(keyword))
+}
+
+fn run_grant_producer(game: &mut Game) {
+    let step = game
+        .activate_internal_card("producer", AbilityId(1), actor())
+        .unwrap();
+    finish_grant_play(game, step, None);
+    finish_checks(game);
 }
 
 fn finish_checks(game: &mut Game) {

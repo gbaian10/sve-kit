@@ -27,6 +27,102 @@ pub(super) fn position() -> Value {
     initial
 }
 
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "An unexpected Lesson question invalidates the scenario."
+)]
+fn finish_choices(game: &mut Game, mut play: CardPlay) -> CardPlay {
+    while let CardPlay::Awaiting(question) = play {
+        let answer = match &question.domain {
+            InputDomain::WardEntry { .. } => Answer::WardEntry(false),
+            InputDomain::OptionalCost => Answer::OptionalCost(true),
+            InputDomain::CostMaterials(domain) => Answer::CostMaterials(
+                domain
+                    .members
+                    .iter()
+                    .take(usize::try_from(domain.cardinality.minimum.0).unwrap())
+                    .map(|member| member.handle)
+                    .collect(),
+            ),
+            InputDomain::Targets(domain) => Answer::Targets(
+                domain
+                    .members
+                    .iter()
+                    .take(usize::try_from(domain.cardinality.maximum.unwrap_or(Nat(1)).0).unwrap())
+                    .map(|member| member.handle)
+                    .collect(),
+            ),
+            _ => panic!("unexpected Lesson question"),
+        };
+        play = game
+            .answer_internal_card(question.actor, question.token, answer)
+            .unwrap();
+    }
+    play
+}
+
+pub(super) fn play_with_lesson(number: &str, activated: bool, hand: Value) -> (Game, Value) {
+    let mut initial = position();
+    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+    initial["players"]["P1"]["zones"]["ex"] = json!([
+        {"id":"item0","card":"PR-155"},{"id":"item1","card":"PR-155"},
+        {"id":"item2","card":"PR-155"},{"id":"item3","card":"PR-155"},
+        {"id":"item4","card":"PR-155"}
+    ]);
+    initial["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"drawn","card":"BP01-037"},{"id":"tail","card":"BP01-037"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"enemy","card":"BP01-037","state":{"power":3_u8,"hp":10_u8,"max_hp":10_u8}},
+        {"id":"other","card":"BP01-037","state":{"power":3_u8,"hp":10_u8,"max_hp":10_u8}}
+    ]);
+    initial["players"]["P1"]["zones"]["hand"] = hand;
+    if activated {
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":number}]);
+    } else {
+        initial["players"]["P1"]["zones"]["hand"]
+            .as_array_mut()
+            .unwrap()
+            .insert(0, json!({"id":"source","card":number}));
+    }
+    let mut game = game(&initial);
+    let before;
+    let play = if activated {
+        before = game.projection(View::Referee).unwrap();
+        let id = selection().current[number]
+            .program
+            .card()
+            .abilities
+            .iter()
+            .find(|ability| {
+                ability.node.kind == AbilityKind::Activated
+                    && matches!(ability.node.source.origin, AbilityOrigin::Printed { .. })
+            })
+            .unwrap()
+            .node
+            .id;
+        game.activate_internal_card("source", id, PlayerId { seat: 1 })
+            .unwrap()
+    } else {
+        let play = game
+            .play_internal_card("source", PlayerId { seat: 1 })
+            .unwrap();
+        assert!(
+            matches!(finish_choices(&mut game, play), CardPlay::Entered(_)),
+            "the real source enters before its Fanfare"
+        );
+        before = game.projection(View::Referee).unwrap();
+        let pending = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &pending.domain else {
+            panic!("real Fanfare")
+        };
+        let option = options.iter().find(|option| option.card == number).unwrap();
+        game.answer_internal_card(pending.actor, pending.token, Answer::Pending(option.handle))
+            .unwrap()
+    };
+    resolved(finish_choices(&mut game, play));
+    (game, before)
+}
+
 fn materials(play: CardPlay) -> DecisionView {
     let CardPlay::Awaiting(question) = play else {
         panic!("Lesson material choice")

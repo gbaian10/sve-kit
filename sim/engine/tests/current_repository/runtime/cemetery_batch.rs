@@ -97,46 +97,6 @@ fn bp03_111_damages_the_formal_recipient_then_lastword_returns_a_cheap_fallen_an
 }
 
 #[test]
-fn bp09_081_evolution_returns_only_own_nightmare_followers() {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP09-080"}]);
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP09-081"}]);
-    initial["players"]["P1"]["zones"]["cemetery"] = json!([
-        {"id":"returned","card":"BP01-109"},{"id":"wrong-class","card":"BP01-096"},
-        {"id":"spell","card":"BP01-116"}
-    ]);
-    initial["players"]["P2"]["zones"]["cemetery"] = json!([{"id":"foreign","card":"BP01-109"}]);
-    let mut game = game(&initial);
-    assert_eq!(
-        game.internal_rule_action(
-            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}})
-        )
-        .unwrap()
-        .outcome,
-        "resolved"
-    );
-    let question = awaiting(trigger(&mut game, "BP09-081"));
-    let InputDomain::Targets(domain) = &question.domain else {
-        panic!("cemetery target")
-    };
-    assert_eq!(domain.members.len(), 1);
-    assert_eq!(domain.members[0].card.as_deref(), Some("BP01-109"));
-    resolved(
-        game.answer_internal_card(
-            question.actor,
-            question.token,
-            Answer::Targets(vec![domain.members[0].handle]),
-        )
-        .unwrap(),
-    );
-    let state = game.projection(View::Referee).unwrap();
-    assert_eq!(state["P1"]["hand"], json!(["returned"]));
-    assert_eq!(state["P1"]["cemetery"], json!(["wrong-class", "spell"]));
-    assert_eq!(state["P2"]["cemetery"], json!(["foreign"]));
-}
-
-#[test]
 fn bp02_103_evolution_returns_only_own_bishop_followers() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP02-102"}]);

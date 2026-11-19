@@ -57,26 +57,6 @@ fn trigger(game: &mut Game) {
     finish(game, play);
 }
 
-fn position(card: &str, material: &str, count: usize, payment: bool) -> Value {
-    let mut initial = draw_position();
-    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":card}]);
-    if payment {
-        initial["players"]["P1"]["zones"]["hand"]
-            .as_array_mut()
-            .unwrap()
-            .push(json!({"id":"payment","card":material}));
-    }
-    initial["players"]["P1"]["zones"]["cemetery"] = json!(
-        (0..count)
-            .map(|i| json!({"id":format!("grave-{i}"),"card":material}))
-            .collect::<Vec<_>>()
-    );
-    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"BP01-037"},{"id":"next","card":"BP01-037"},{"id":"last","card":"BP01-037"}]);
-    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP04-117"}]);
-    initial
-}
-
 fn finish(game: &mut Game, play: CardPlay) {
     finish_mode(game, play, 1);
 }
@@ -133,36 +113,7 @@ fn vampy_game(initial: &Value) -> Game {
 fn filtered_batch_03_bp06_042_checks_printed_effect() {
     for card in ["BP06-042", "PR-132"] {
         for extra in [0_usize, 1] {
-            let mut initial = position(card, "BP06-042", 3, false);
-            initial["players"]["P1"]["zones"]["cemetery"]
-                .as_array_mut()
-                .unwrap()
-                .push(json!({"id":"onmyoji-follower","card":"BP06-048"}));
-            for i in 0..(2 + extra) {
-                initial["players"]["P1"]["zones"]["cemetery"]
-                    .as_array_mut()
-                    .unwrap()
-                    .push(json!({"id":format!("other-{i}"),"card":"BP01-015"}));
-            }
-            let mut game = rules_game(&initial);
-            let play = game
-                .play_internal_card("source", PlayerId { seat: 1 })
-                .unwrap();
-            finish(&mut game, play);
-            let state = game.projection(View::Referee).unwrap();
-            assert_eq!(state["P1"]["hand"].as_array().unwrap().len(), extra);
-            let field = state["P1"]["field"].as_array().unwrap();
-            assert_eq!(field.len(), 1_usize);
-            assert_eq!(state["objects"][field[0].as_str().unwrap()]["name"], "形代");
-        }
-    }
-}
-
-#[test]
-fn filtered_batch_03_bp06_043_checks_printed_effect() {
-    for card in ["BP06-043"] {
-        for extra in [0_usize, 1] {
-            let mut initial = position(card, "BP06-042", 3, false);
+            let mut initial = cemetery_filter_position(card, "BP06-042", 3, false);
             initial["players"]["P1"]["zones"]["cemetery"]
                 .as_array_mut()
                 .unwrap()
@@ -192,7 +143,7 @@ fn filtered_batch_03_bp09_075_checks_printed_effect() {
     for card in ["BP09-075", "PR-230", "PR-488"] {
         for count in [4_usize, 5] {
             for named in [false, true] {
-                let mut initial = position(card, card, count, false);
+                let mut initial = cemetery_filter_position(card, card, count, false);
                 if named {
                     initial["players"]["P1"]["zones"]["cemetery"]
                         .as_array_mut()
@@ -229,7 +180,7 @@ fn filtered_batch_03_bp09_075_checks_printed_effect() {
 fn filtered_batch_03_bp13_042_checks_printed_effect() {
     for card in ["BP13-042", "BP13-P09"] {
         for count in [3_usize, 4] {
-            let mut game = rules_game(&position(card, card, count, true));
+            let mut game = rules_game(&cemetery_filter_position(card, card, count, true));
             let play = game
                 .play_internal_card("source", PlayerId { seat: 1 })
                 .unwrap();
@@ -262,7 +213,7 @@ fn filtered_batch_03_bp13_p30_checks_printed_effect() {
     for card in ["BP13-P30", "BP13-T02"] {
         for mode in [1_u64, 2] {
             for count in [14_usize, 15] {
-                let mut initial = position(card, "BP13-042", count, false);
+                let mut initial = cemetery_filter_position(card, "BP13-042", count, false);
                 initial["players"]["P2"]["zones"]["field"]
                     .as_array_mut()
                     .unwrap()
@@ -291,7 +242,7 @@ fn filtered_batch_03_bp18_096_checks_printed_effect() {
     for card in ["BP18-096"] {
         for count in [4_usize, 5] {
             for matching in [false, true] {
-                let mut initial = position(card, card, count, false);
+                let mut initial = cemetery_filter_position(card, card, count, false);
                 if matching {
                     initial["players"]["P1"]["zones"]["deck"][0]["card"] = json!(card);
                 }
@@ -332,7 +283,7 @@ fn filtered_batch_03_bp18_096_checks_printed_effect() {
 fn filtered_batch_03_bp21_pr10_checks_printed_effect() {
     for card in ["BP21-PR10", "DSD01a-009", "DSD01a-P03"] {
         for count in [4_usize, 5] {
-            let mut game = rules_game(&position(card, "BP21-PR10", count, false));
+            let mut game = rules_game(&cemetery_filter_position(card, "BP21-PR10", count, false));
             let play = game
                 .play_internal_card("source", PlayerId { seat: 1 })
                 .unwrap();
@@ -358,7 +309,7 @@ fn filtered_batch_03_dsd01a_002_checks_printed_effect() {
         "SP01-U12",
     ] {
         for count in [9_usize, 10] {
-            let mut game = rules_game(&position(card, "DSD01a-002", count, false));
+            let mut game = rules_game(&cemetery_filter_position(card, "DSD01a-002", count, false));
             let play = game
                 .play_internal_card("source", PlayerId { seat: 1 })
                 .unwrap();
@@ -381,7 +332,7 @@ fn filtered_batch_03_dsd01a_002_checks_printed_effect() {
 fn filtered_batch_03_dsd01a_006_checks_printed_effect() {
     for card in ["DSD01a-006", "DSD01a-P01"] {
         for count in [4_usize, 5] {
-            let mut initial = position(card, card, count, false);
+            let mut initial = cemetery_filter_position(card, card, count, false);
             initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
             let mut game = rules_game(&initial);
             let play = game
@@ -427,7 +378,7 @@ fn filtered_batch_03_dsd01a_006_checks_printed_effect() {
 fn filtered_batch_03_dsd01a_t01_checks_printed_effect() {
     for card in ["DSD01a-T01", "PR-267"] {
         for count in [9_usize, 10] {
-            let mut game = rules_game(&position(card, "DSD01a-002", count, false));
+            let mut game = rules_game(&cemetery_filter_position(card, "DSD01a-002", count, false));
             let play = game
                 .play_internal_card("source", PlayerId { seat: 1 })
                 .unwrap();
@@ -447,7 +398,7 @@ fn filtered_batch_03_ecp01_027_checks_printed_effect() {
     for card in ["ECP01-027", "ECP01-P15"] {
         for count in [4_usize, 5] {
             for matching in [false, true] {
-                let mut initial = position(card, card, count, false);
+                let mut initial = cemetery_filter_position(card, card, count, false);
                 if matching {
                     initial["players"]["P1"]["zones"]["deck"][0]["card"] = json!(card);
                 }
