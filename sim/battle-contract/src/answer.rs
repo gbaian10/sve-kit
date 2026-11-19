@@ -172,6 +172,12 @@ pub enum Command {
         /// The answer.
         answer: Answer,
     },
+    /// Withdraw this seat's own declaration and return the play to its origin; legal only while
+    /// the named question has `can_withdraw`, and accepted with a `reverted` receipt.
+    Withdraw {
+        /// Declaration question being withdrawn from.
+        question_id: QuestionId,
+    },
     /// Concede; legal while waiting and bound to no question.
     Concede,
 }

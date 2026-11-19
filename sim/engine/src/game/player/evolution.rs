@@ -127,6 +127,8 @@ impl Game {
             token,
             purpose: QuestionPurpose::PlayParameter,
             shape: QuestionShape::Evolution(self.evolution_view(token)?),
+            // Stages only record choices; nothing is moved or paid before the last answer.
+            withdrawable: true,
         }))))
     }
 

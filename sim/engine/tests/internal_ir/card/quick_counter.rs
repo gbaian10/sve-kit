@@ -17,7 +17,7 @@ fn tree(activation: &Value) -> Value {
     tree
 }
 
-fn program(quick: bool, other: bool) -> WellFormedCardProgram {
+pub(super) fn program(quick: bool, other: bool) -> WellFormedCardProgram {
     let mut query = json!({"who":"self","zone":"field","name":"unit-amulet"});
     if other {
         query["other"] = json!(true);
@@ -79,7 +79,7 @@ fn window(game: &mut Game) -> (DecisionView, Vec<u64>) {
     (q, handles)
 }
 
-fn quick_game(initial: &Value, program: &WellFormedCardProgram) -> Game {
+pub(super) fn quick_game(initial: &Value, program: &WellFormedCardProgram) -> Game {
     let mut initial = initial.clone();
     initial["turn"]["active"] = json!("P2");
     let mut game = load(&initial, program);

@@ -281,6 +281,8 @@ pub struct Question {
     pub processing: ProcessingContext,
     /// Answer domain.
     pub shape: QuestionShape,
+    /// Whether the actor may withdraw its own unfinished declaration instead of answering.
+    pub can_withdraw: bool,
     /// Whether the answer is proved unique.
     pub auto_answer: AutoAnswer,
     /// Assistance slot.

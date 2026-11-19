@@ -334,6 +334,7 @@ const QUICK_QUESTION: Question = {
     ],
   },
   rules: null,
+  can_withdraw: false,
   auto_answer: { kind: "not_unique" },
   assistance: null,
 }

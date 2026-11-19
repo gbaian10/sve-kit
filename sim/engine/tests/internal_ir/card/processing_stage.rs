@@ -195,13 +195,9 @@ fn rejected_answers_and_failed_bodies_preserve_the_correct_play_boundary() {
     let mut game = fixture(&program);
     activate(&mut game, &program);
     let mine = sources(&game, Viewer::P1);
-    let theirs = sources(&game, Viewer::P2);
     assert_eq!(mine[0].stage, Some(ProcessingStage::Target));
-    assert_eq!(theirs[0].stage, Some(ProcessingStage::Declare));
-    assert!(
-        theirs[0].payments.is_empty(),
-        "declaration is not a receipt"
-    );
+    assert!(mine[0].payments.is_empty(), "declaration is not a receipt");
+    empty(&game, Viewer::P2);
     let q = question(&game, Viewer::P1);
     assert_eq!(
         submit(&mut game, Viewer::P2, &q, Answer::Targets(vec![0])),
@@ -425,10 +421,9 @@ fn a_known_parent_does_not_expose_unplayed_child_private_candidate_counts() {
         );
         game.activate_internal_card("parent", definition, Viewer::P1.player())
             .unwrap();
-        assert_eq!(
-            sources(&game, Viewer::P2).len(),
-            1,
-            "formal public declaration discloses the parent before its targets are answered"
+        assert!(
+            sources(&game, Viewer::P2).is_empty(),
+            "the other seat sees no parent until it is played"
         );
         apply(&mut game, Viewer::P1, Answer::Targets(vec![0]));
         let seen = sources(&game, Viewer::P2);
@@ -571,7 +566,8 @@ fn optional_acceptance_is_a_declaration_until_the_actual_debits() {
     activate(&mut game, &program);
     apply(&mut game, Viewer::P1, Answer::Modes(vec![ModeId(1)]));
     apply(&mut game, Viewer::P1, Answer::OptionalCost(true));
-    let declared = sources(&game, Viewer::P2);
+    empty(&game, Viewer::P2);
+    let declared = sources(&game, Viewer::P1);
     assert!(
         declared[0]
             .declared

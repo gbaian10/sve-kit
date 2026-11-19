@@ -988,6 +988,9 @@ mod quick_counter;
 #[path = "card/payment_recovery.rs"]
 mod payment_recovery;
 
+#[path = "card/withdraw.rs"]
+mod withdraw;
+
 #[path = "card/participant.rs"]
 mod participant;
 

@@ -12,7 +12,7 @@ mod fixture;
 use core::array::from_fn;
 use serde_json::{Value, json};
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_battle_contract::question::{MainIntent, QuestionShape, ShapeKind};
+use sve_battle_contract::question::{MainIntent, Question, QuestionShape, ShapeKind};
 use sve_battle_contract::{Answer, ClientMessage, Command};
 use sve_battle_host::load::load;
 use sve_battle_host::wire::{
@@ -352,4 +352,128 @@ fn a_private_look_with_or_without_a_pick_sends_the_waiting_seat_the_same_message
         with_pick, without_pick,
         "P2's updates, update_seq and animate never depend on P1's private candidates"
     );
+}
+
+/// P1 on its seventh turn with BP09-004 on the field and BP09-005 in its evolution deck.
+fn evolution() -> LocalSession {
+    let player = |seat: &str, field: Value, evolve: Value| {
+        json!({"leader":{"class":"エルフ","life":20_u8},"pp":{"current":7_u8,"max":7_u8},
+            "ep":0_u8,"sep":1_u8,"zones":{"field":field,"evolve_deck":evolve,
+            "deck":[{"id":format!("{seat}-deck"),"card":"BP10-122"}]}})
+    };
+    let position = json!({
+        "turn":{"active":"P1","first_player":"P1","elapsed_turns":{"P1":7_u8,"P2":6_u8},
+            "phase":"main"},
+        "players":{
+            "P1":player("p1", json!([{"id":"source","card":"BP09-004"}]),
+                json!([{"id":"form","card":"BP09-005"}])),
+            "P2":player("p2", json!([]), json!([]))
+        }
+    });
+    let game = Game::from_selected_effects(
+        selection().clone(),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "withdraw",
+    )
+    .unwrap();
+    let references =
+        BattleReferences::new(&selection().prototypes, fixture::references(&texts()[0])).unwrap();
+    LocalSession::new(
+        game,
+        references,
+        fixture::identity("", ""),
+        [SeatControl::Player, SeatControl::Player],
+        HostLimits::default(),
+    )
+}
+
+fn p1_submit(session: &mut LocalSession, request: &str, command: Command) -> Vec<Delivery> {
+    let message = ClientMessage::Submit(Submit {
+        request_id: RequestId::new(request.into()),
+        command,
+    });
+    session.submit_named("p1", &serde_json::to_string(&message).unwrap())
+}
+
+fn p1_question(out: &[Delivery]) -> Question {
+    out.iter()
+        .filter(|delivery| delivery.seat == Seat::P1)
+        .find_map(|delivery| match &delivery.message {
+            HostMessage::Update(update) => match &update.input {
+                BattleInput::Question { question } => Some((**question).clone()),
+                BattleInput::Waiting { .. }
+                | BattleInput::Finished { .. }
+                | BattleInput::EngineFault { .. } => None,
+            },
+            HostMessage::Ready(_) | HostMessage::Receipt(_) | HostMessage::HostError(_) => None,
+        })
+        .unwrap()
+}
+
+#[test]
+fn a_withdrawn_evolution_reverts_on_the_wire_and_sends_the_waiting_seat_nothing() {
+    let mut session = evolution();
+    let window = p1_question(&session.start());
+    assert!(!window.can_withdraw);
+    let QuestionShape::ActionWindow { intents } = &window.shape else {
+        panic!("main window: {window:?}");
+    };
+    let evolve = intents
+        .iter()
+        .find_map(|intent| match intent {
+            MainIntent::Evolve { id, .. } => Some(id.clone()),
+            MainIntent::Play { .. }
+            | MainIntent::Activate { .. }
+            | MainIntent::Attack { .. }
+            | MainIntent::EndPhase { .. } => None,
+        })
+        .unwrap();
+    let declared = p1_submit(
+        &mut session,
+        "declare",
+        Command::Answer {
+            question_id: window.id.clone(),
+            answer: Answer::ActionWindow {
+                intent: evolve,
+                target: None,
+            },
+        },
+    );
+    let asked = p1_question(&declared);
+    assert!(asked.can_withdraw, "an evolution stage can be withdrawn");
+    let withdrawn = p1_submit(
+        &mut session,
+        "withdraw",
+        Command::Withdraw {
+            question_id: asked.id.clone(),
+        },
+    );
+    assert!(matches!(
+        &withdrawn[0].message,
+        HostMessage::Receipt(receipt) if receipt.result() == ReceiptResult::Reverted
+    ));
+    let again = p1_question(&withdrawn);
+    assert!(matches!(again.shape, QuestionShape::ActionWindow { .. }));
+    assert_ne!(again.id, window.id, "the restored window is a new question");
+    assert!(
+        declared
+            .iter()
+            .chain(&withdrawn)
+            .all(|delivery| delivery.seat == Seat::P1),
+        "the waiting seat receives nothing from a declaration and its withdrawal"
+    );
+    let stale = p1_submit(
+        &mut session,
+        "stale",
+        Command::Withdraw {
+            question_id: asked.id,
+        },
+    );
+    assert!(matches!(
+        &*stale,
+        [Delivery { message: HostMessage::Receipt(receipt), .. }]
+            if receipt.result() == ReceiptResult::Rejected
+    ));
 }

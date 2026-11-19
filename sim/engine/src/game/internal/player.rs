@@ -2,6 +2,7 @@
 
 use super::{
     Answer, CardPlay, DecisionToken, DecisionView, Execution, Fact, Game, PlayerId, Result, Wait,
+    invalid,
 };
 use crate::game::player::{QuestionPurpose, SubmissionKind};
 use crate::ir::DecisionKind;
@@ -114,6 +115,53 @@ impl Game {
                 (execution.ability.is_some() || execution.field_entry) && !execution.played()
             })
             .map(|execution| execution.began)
+    }
+
+    /// The origin and controller of a play its controller started itself and has not played yet
+    /// (step 7). Until then the play may still be withdrawn or reverted, so other seats keep
+    /// seeing its origin. Automatic abilities and plays nested in a resolution are excluded:
+    /// they belong to a procedure already under way.
+    pub(in crate::game) fn concealed_declaration(&self) -> Option<(&Self, PlayerId)> {
+        let execution = self.typed.as_ref()?;
+        if !(execution.ability.is_some() || execution.field_entry)
+            || execution.nested.is_some()
+            || execution.trigger_occurrence.is_some()
+            || execution.played()
+        {
+            return None;
+        }
+        let origin = execution.origin.as_deref()?;
+        Some((origin, execution.context.controller))
+    }
+
+    /// Whether the waiting question is a parameter of its own concealed declaration.
+    pub(in crate::game) fn withdrawable_declaration(&self) -> bool {
+        self.concealed_declaration()
+            .zip(
+                self.typed
+                    .as_ref()
+                    .and_then(|execution| execution.waiting.as_ref()),
+            )
+            .is_some_and(|((_, controller), (question, wait))| {
+                wait.purpose() == QuestionPurpose::PlayParameter && question.actor == controller
+            })
+    }
+
+    /// Return the withdrawn play to its origin through the same restoration an illegal play uses.
+    pub(in crate::game) fn withdraw_declaration(&mut self) -> Result<()> {
+        if !self.withdrawable_declaration() {
+            return Err(invalid("no withdrawable declaration"));
+        }
+        let published = self.published_knowledge();
+        let concealed = self
+            .concealed_declaration()
+            .map(|(_, controller)| controller);
+        let origin = self
+            .typed
+            .as_mut()
+            .and_then(|execution| execution.origin.take())
+            .ok_or_else(|| invalid("withdrawn play lost its origin"))?;
+        self.restore_play_origin(*origin, published, concealed)
     }
 
     pub(in crate::game) fn player_decision(&self) -> Option<(DecisionView, QuestionPurpose)> {

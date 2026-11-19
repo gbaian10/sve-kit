@@ -103,6 +103,7 @@ impl Game {
                 actor,
                 purpose,
                 shape: QuestionShape::Decision(shape),
+                withdrawable: self.withdrawable_declaration(),
             }
         } else {
             if self.typed.is_some() || self.internal_card_stage().is_some() {
@@ -134,6 +135,7 @@ impl Game {
                         actor,
                         purpose,
                         shape: QuestionShape::ActionWindow(actions),
+                        withdrawable: false,
                     }
                 }
             }
@@ -179,6 +181,7 @@ impl Game {
                 }
             }
             Command::Answer { token, answer } => self.submit_player_answer(viewer, token, answer),
+            Command::Withdraw { token } => self.submit_player_withdraw(viewer, token),
         };
         if kind != SubmissionKind::Rejected {
             self.publish_player_events();
@@ -236,6 +239,39 @@ impl Game {
             SubmissionKind::EngineFault
         } else {
             kind
+        }
+    }
+
+    fn submit_player_withdraw(&mut self, viewer: Viewer, token: QuestionToken) -> SubmissionKind {
+        if self.player_fault.is_some() {
+            return SubmissionKind::EngineFault;
+        }
+        let Input::Question(question) = self.input(viewer) else {
+            return SubmissionKind::Rejected;
+        };
+        if question.token != token || !question.withdrawable {
+            return SubmissionKind::Rejected;
+        }
+        let Some(next) = self.player_epoch.checked_add(1) else {
+            self.player_fault = Some(invalid("player input epoch exhausted"));
+            return SubmissionKind::EngineFault;
+        };
+        // Evolution stages only record choices, so dropping them is its whole origin.
+        if self.player_evolution.take().is_none()
+            && let Err(error) = self.withdraw_declaration()
+        {
+            self.player_epoch = next;
+            self.player_fault = Some(error);
+            return SubmissionKind::EngineFault;
+        }
+        self.player_events.settle_presentation(false);
+        // The restored action window is a new occurrence; the withdrawn token stays dead.
+        self.player_epoch = next;
+        self.advance_player_input();
+        if self.player_fault.is_some() {
+            SubmissionKind::EngineFault
+        } else {
+            SubmissionKind::Reverted
         }
     }
 

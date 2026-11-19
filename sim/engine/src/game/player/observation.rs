@@ -375,8 +375,18 @@ impl Game {
     /// # Errors
     /// The authority cannot produce a complete, safe player observation.
     pub fn observe(&self, perspective: Viewer) -> Result<Observation> {
-        self.player_observation(perspective)
+        self.observed_from(perspective)
+            .player_observation(perspective)
             .map_err(|_authority_error| invalid("player observation unavailable"))
+    }
+
+    /// The state a seat may see: other seats see an unplayed declaration's origin, since it can
+    /// still be withdrawn without a trace.
+    fn observed_from(&self, perspective: Viewer) -> &Self {
+        match self.concealed_declaration() {
+            Some((origin, controller)) if controller != perspective.player() => origin,
+            Some(_) | None => self,
+        }
     }
 
     /// Project all authorized board components from one read and object scope.
@@ -394,10 +404,11 @@ impl Game {
         perspective: Viewer,
         references: &BattleReferences,
     ) -> result::Result<wire::BattleObservation, ProjectionError> {
-        let observation = self
+        let observed = self.observed_from(perspective);
+        let observation = observed
             .observe(perspective)
             .map_err(|_authority_error| ProjectionError::Unavailable)?;
-        let processing = self.battle_rule_processing(&observation)?;
+        let processing = observed.battle_rule_processing(&observation)?;
         build_observation(&self.catalog, references, &observation, processing)
     }
 
@@ -545,7 +556,9 @@ impl Game {
             actor: actor_seat,
             round: None,
         });
-        let subject = matches!(&question.shape, QuestionShape::Evolution(_))
+        // An evolution declaration can still be withdrawn: other seats see the action window.
+        let subject = (matches!(&question.shape, QuestionShape::Evolution(_))
+            && question.actor == observation.viewer)
             .then(|| self.evolution_subject(observation.viewer))
             .transpose()
             .map_err(|_authority_error| ProjectionError::Unavailable)?;

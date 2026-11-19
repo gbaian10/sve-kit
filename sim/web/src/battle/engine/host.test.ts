@@ -137,6 +137,7 @@ describe("BattleHost", () => {
               payments: [],
             },
             shape: { kind: "quick", window: "end_phase", options: [] },
+            can_withdraw: false,
             auto_answer: { kind: "unique", answer: pass, public: publicProof },
             assistance: null,
             rules: null,

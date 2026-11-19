@@ -154,6 +154,7 @@ impl Game {
             actor,
             purpose: QuestionPurpose::RuleChoice,
             shape: QuestionShape::Opening(shape),
+            withdrawable: false,
         })
     }
 

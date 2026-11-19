@@ -56,6 +56,7 @@ export function ask(
       },
       shape,
       rules: null,
+      can_withdraw: purpose === "play_parameter",
       auto_answer: { kind: "not_unique" },
       assistance: null,
     },

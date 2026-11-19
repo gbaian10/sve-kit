@@ -291,3 +291,66 @@ fn player_evolution_real_pp_cost_can_use_ep_and_sep_without_expanding_face_payme
         );
     }
 }
+
+#[test]
+fn player_evolution_withdrawn_at_the_super_payment_returns_to_the_action_window() {
+    let mut initial = evolution_payment::position("BP09-004", "BP09-005");
+    initial["players"]["P1"]["sep"] = json!(1_i64);
+    let mut game = evolution_payment::game(&initial);
+    game.advance_player_input();
+    let window = question(&game);
+    let before = game.projection(View::Referee).unwrap();
+    let QuestionShape::ActionWindow(actions) = &window.shape else {
+        panic!("main actions");
+    };
+    let intent = actions
+        .intents
+        .iter()
+        .find(|intent| matches!(intent.kind, MainIntentKind::Evolve { .. }))
+        .unwrap();
+    let declared = game.submit_player(
+        Viewer::P1,
+        Command::MainAction {
+            token: window.token,
+            intent: intent.id.clone(),
+            answer: MainActionAnswer::None,
+        },
+    );
+    assert_eq!(declared.kind, SubmissionKind::Applied);
+    let payment = loop {
+        let current = question(&game);
+        assert!(
+            current.withdrawable,
+            "every evolution stage can be withdrawn"
+        );
+        let QuestionShape::Evolution(stage) = &current.shape else {
+            panic!("evolution declaration stage");
+        };
+        let EvolutionQuestion::Form(forms) = stage else {
+            break current;
+        };
+        let answered = game.submit_player(
+            Viewer::P1,
+            Command::Evolution {
+                token: current.token,
+                answer: EvolutionAnswer::Form(forms[0].id),
+            },
+        );
+        assert_eq!(answered.kind, SubmissionKind::Applied);
+    };
+    assert!(matches!(
+        payment.shape,
+        QuestionShape::Evolution(EvolutionQuestion::Payment(quote)) if quote.super_allowed
+    ));
+    let withdrawn = game.submit_player(
+        Viewer::P1,
+        Command::Withdraw {
+            token: payment.token,
+        },
+    );
+    assert_eq!(withdrawn.kind, SubmissionKind::Reverted);
+    assert_eq!(game.projection(View::Referee).unwrap(), before);
+    let again = question(&game);
+    assert!(matches!(again.shape, QuestionShape::ActionWindow(_)));
+    assert_ne!(again.token, window.token);
+}
