@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef } from "react"
-import { useLocation, useNavigate } from "react-router"
+import { NavigationType, useLocation, useNavigate, useNavigationType } from "react-router"
 
 interface DialogState {
   /** The topmost open dialog. */
@@ -94,17 +94,23 @@ export function useDialogHistory(id: string, open: boolean, onClose: () => void)
 export function useDropDialogs(): () => void {
   const navigate = useNavigate()
   const location = useLocation()
+  const navigationType = useNavigationType()
   const dropping = useRef(false)
   const inDialog = dialogsOf(location.state).length > 0
-  // Each step back lands on a new entry; keep stepping while it still belongs to a dialog.
+  const key = location.key
+  const drop = useCallback(() => {
+    const entry = window.history.state as { readonly key?: string; readonly idx?: number } | null
+    // A back request at the first entry never emits popstate. A history reset can leave idx stale.
+    const atStart = entry?.key === key && (entry.idx === 0 || window.history.length === 1)
+    dropping.current = inDialog && !atStart
+    if (dropping.current) void navigate(-1)
+  }, [inDialog, key, navigate])
+
   useEffect(() => {
     if (!dropping.current) return
-    if (inDialog) void navigate(-1)
-    else dropping.current = false
-  }, [inDialog, location.key, navigate])
-  return useCallback(() => {
-    if (!inDialog) return
-    dropping.current = true
-    void navigate(-1)
-  }, [inDialog, navigate])
+    if (navigationType === NavigationType.Push) dropping.current = false
+    else drop()
+  }, [drop, navigationType])
+
+  return drop
 }
