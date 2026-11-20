@@ -3270,6 +3270,7 @@ pub(super) struct OptionalCost {
     pub flip_down: Option<FlipMaterial>,
     pub pp: Option<u64>,
     pub earth_rite: Option<u64>,
+    pub counter: Option<CounterCost>,
     pub one_of: Option<Vec<Self>>,
     pub discard: Option<HandMaterial>,
     pub reveal: Option<HandMaterial>,

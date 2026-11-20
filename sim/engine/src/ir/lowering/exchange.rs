@@ -60,8 +60,8 @@ pub(super) fn lower(
             _ => return Err(unsupported(&path)),
         })
     };
-    if let Some(amount) = optional.earth_rite {
-        return earth_rite(entry, source, allocator, &path, amount, change).map(Some);
+    if optional.earth_rite.is_some() || optional.counter.is_some() {
+        return counter_exchange(entry, source, allocator, &path, optional, change).map(Some);
     }
     let scope = allocator.scope(&path)?;
     let choices = if let Some(routes) = &optional.one_of {
@@ -445,18 +445,25 @@ pub(super) fn bindings(
     Ok(super::PaymentBindings { complete, discard })
 }
 
-fn earth_rite(
+fn counter_exchange(
     entry: &ast::Ability,
     source: &SourceSpan,
     allocator: &mut Allocator,
     path: &str,
-    amount: u64,
+    optional: &ast::OptionalCost,
     change: PlayCostExchangeChange,
 ) -> Result<Located<PlayCostExchange>, LoweringError> {
     let scope = allocator.scope(path)?;
     let body = ast::Body::default();
     let mut context = super::BodyContext::new(entry, scope, &body, None, allocator);
-    let (action, decision) = super::earth::cost(&mut context, amount, path)?;
+    let (action, decision, keyword) = if let Some(amount) = optional.earth_rite {
+        let (action, decision) = super::earth::cost(&mut context, amount, path)?;
+        (action, decision, Some(KeywordId::EarthRite))
+    } else {
+        let counter = optional.counter.as_ref().ok_or_else(|| unsupported(path))?;
+        let (action, decision) = super::counters::cost(&mut context, counter, path)?;
+        (action, decision, None)
+    };
     let id = context.card_allocator.id(path)?;
     let mut located = source.clone();
     path.clone_into(&mut located.author_path);
@@ -469,7 +476,7 @@ fn earth_rite(
             route: None,
             cost: CostSpec::Ordered {
                 steps: vec![CostStep {
-                    keyword: Some(KeywordId::EarthRite),
+                    keyword,
                     materials: None,
                     instruction: Box::new(Instruction {
                         id: InstructionId(id),
@@ -492,6 +499,7 @@ fn single_kind(value: &ast::OptionalCost) -> bool {
     [
         value.pp.is_some(),
         value.earth_rite.is_some(),
+        value.counter.is_some(),
         value.one_of.is_some(),
         value.discard.is_some(),
         value.reveal.is_some(),

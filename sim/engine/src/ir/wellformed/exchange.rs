@@ -162,14 +162,18 @@ impl Checker {
         let selected = Selector::Bound {
             reference: *binding,
         };
-        let earth_rite = matches!(&step.instruction.action,
-            Action::Counter { holder: Holder::Object { object: ObjectOperand::Selected { selection } },
-                kind, operation: CounterOperation::Remove {}, amount: Expr::Literal(Nat(amount)) }
-                if *selection == *binding && kind.0 == "stack_counter" && *amount > 0
-                    && *zone == ZoneKind::Field && constraint.cardinality.minimum == Nat(1)
-                    && step.keyword == Some(KeywordId::EarthRite));
+        let counter = matches!(&step.instruction.action,
+        Action::Counter { holder: Holder::Object { object: ObjectOperand::Selected { selection } },
+            kind, operation: CounterOperation::Remove {}, amount: Expr::Literal(Nat(amount)) }
+            if *selection == *binding && !kind.0.is_empty() && *amount > 0
+                && *zone == ZoneKind::Field && constraint.cardinality.minimum == Nat(1)
+                && match step.keyword {
+                    None => true,
+                    Some(KeywordId::EarthRite) => kind.0 == "stack_counter",
+                    Some(_) => false,
+                });
         let valid = flip_cost::payment(&step.instruction.action, decision)
-            || earth_rite
+            || counter
             || matches!(&step.instruction.action, Action::Reveal { objects }
                 if *zone == ZoneKind::Hand && *objects == selected)
             || matches!(&step.instruction.action,
@@ -187,7 +191,7 @@ impl Checker {
                     if matches!(sets.as_slice(), [Selector::Zone {players: hand_players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, ..}, other]
                         if hand_players == players && **predicate == Expr::Literal(Bool(true)) && *other == selected)));
         if !valid
-            || (step.keyword.is_some() && !earth_rite)
+            || (step.keyword.is_some() && !counter)
             || step.materials.is_some()
             || step.instruction.precondition.is_some()
             || step.instruction.actor != (PlayerRef::Controller {})

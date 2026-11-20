@@ -1,0 +1,28 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP14-063:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            counter:
+              on: { who: self, zone: field, name: 竜山温泉 }
+              name: 神湯カウンター
+              holders: 1
+              n: 2
+          optional_cost_delta: -2
+      - line: 2
+        spell:
+          targets:
+            - bind: target
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - destroy: target
+            - draw: { who: self, n: 1 }
