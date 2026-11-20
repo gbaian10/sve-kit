@@ -368,15 +368,6 @@ impl Game {
         }) else {
             return Ok(None);
         };
-        if !self.card_runtime.is_empty() {
-            for holder in self.state.objects.keys() {
-                self.require_internal_abilities(holder, "exchange payment subscriptions")?;
-            }
-        }
-        if self.card_runtime.quick_start {
-            return Err(unsupported("exchange Quick payment"));
-        }
-        self.check_exchange_observers()?;
         let accepted = match &exchange.node.change {
             PlayCostExchangeChange::ReplaceOriginal { condition, may } => {
                 if !super::super::number_plan::CostConditionPlan::compile(condition, true)?
@@ -388,6 +379,15 @@ impl Game {
             }
             PlayCostExchangeChange::Adjust(_) => None,
         };
+        if !self.card_runtime.is_empty() {
+            for holder in self.state.objects.keys() {
+                self.require_internal_abilities(holder, "exchange payment subscriptions")?;
+            }
+        }
+        if self.card_runtime.quick_start {
+            return Err(unsupported("exchange Quick payment"));
+        }
+        self.check_exchange_observers()?;
         let state = ExchangeState {
             face: face.clone(),
             definition: exchange.node.clone(),

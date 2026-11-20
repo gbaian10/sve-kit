@@ -2938,7 +2938,6 @@ pub(super) struct PlayCosts {
 pub(super) struct AlternativePlayCost {
     pub r#if: CostCondition,
     pub cost: OptionalCost,
-    #[serde(default)]
     pub may: bool,
 }
 

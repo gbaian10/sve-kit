@@ -11,13 +11,18 @@ fn phantom_blaster_overlord_replaces_original_pp_with_its_named_follower() {
     ]);
     initial["players"]["P1"]["zones"]["evolution"] = json!([{"id":"form","card":"CP03-085"}]);
     initial["players"]["P1"]["zones"]["cemetery"] = json!(cards("paladin", "CP03-086", 15));
-    let mut game = game(&initial);
-    let play = game.play_internal_card("source", actor()).unwrap();
-    let materials = accept(&mut game, play);
-    let entered = choose_card_by_number(&mut game, materials, "CP03-084");
-    assert!(matches!(accept(&mut game, entered), CardPlay::Entered(_)));
+    let mut replacing_play = game(&initial);
+    let play = replacing_play
+        .play_internal_card("source", actor())
+        .unwrap();
+    let materials = accept(&mut replacing_play, play);
+    let entered = choose_card_by_number(&mut replacing_play, materials, "CP03-084");
+    assert!(matches!(
+        accept(&mut replacing_play, entered),
+        CardPlay::Entered(_)
+    ));
 
-    let after = game.projection(View::Referee).unwrap();
+    let after = replacing_play.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["pp"]["current"], 1_i64);
     assert!(
         after["P1"]["cemetery"]
@@ -28,6 +33,25 @@ fn phantom_blaster_overlord_replaces_original_pp_with_its_named_follower() {
     assert_eq!(after["P1"]["field"], json!(["other", "source"]));
     assert_eq!(after["P1"]["evolve_deck"], json!(["form"]));
     assert_eq!(after["P1"]["evolution"], json!([]));
+
+    initial["players"]["P1"]["pp"] = json!({"current": 10_u8, "max": 10_u8});
+    let mut normal_play = game(&initial);
+    let choice = await_card_choice(normal_play.play_internal_card("source", actor()).unwrap());
+    assert!(matches!(choice.domain, InputDomain::OptionalCost));
+    let paid = normal_play
+        .answer_internal_card(choice.actor, choice.token, Answer::OptionalCost(false))
+        .unwrap();
+    assert!(matches!(
+        accept(&mut normal_play, paid),
+        CardPlay::Entered(_)
+    ));
+    let after_decline = normal_play.projection(View::Referee).unwrap();
+    assert_eq!(after_decline["P1"]["pp"]["current"], 1_i64);
+    assert_eq!(
+        after_decline["P1"]["field"],
+        json!(["fee", "other", "source"])
+    );
+    assert_eq!(after_decline["P1"]["evolution"], json!(["form"]));
 }
 
 #[test]
@@ -148,7 +172,7 @@ fn blazing_core_evolves_for_one_pp_and_two_named_cemetery_materials() {
     ]);
     let mut game = evolution_payment::game(&initial);
     assert_eq!(
-        player_evolution::evolve(&mut game, false),
+        player_evolution::evolve_with_material_groups(&mut game, 2),
         SubmissionKind::Applied
     );
     let after = game.projection(View::Referee).unwrap();

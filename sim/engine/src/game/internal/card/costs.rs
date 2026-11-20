@@ -281,14 +281,7 @@ impl Game {
         if object.state.get("cost").is_some() || !self.state.continuous.is_empty() {
             return Err(unsupported("typed payment state or prototype cost layers"));
         }
-        let printed_base = if matches!(
-            exchange,
-            Some(PlayCostExchangeChange::ReplaceOriginal { .. })
-        ) {
-            0
-        } else {
-            super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?
-        };
+        let printed_base = super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?;
         let mut base =
             if let Some(CostOverride::SetBase { amount }) = execution.cost_override.as_ref() {
                 amount.0
@@ -344,7 +337,17 @@ impl Game {
                 _ => return Err(unsupported("exchange change")),
             }
         }
-        self.internal_other_play_cost(execution, base, delta)
+        let (base, delta) = self.internal_other_play_cost_parts(execution, base, delta)?;
+        let base = if matches!(
+            exchange,
+            Some(PlayCostExchangeChange::ReplaceOriginal { .. })
+        ) {
+            0
+        } else {
+            base
+        };
+        base.checked_add(delta)
             .map(|cost| cost.max(0))
+            .ok_or_else(|| invalid("play cost overflow"))
     }
 }
