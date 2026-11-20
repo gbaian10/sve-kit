@@ -221,8 +221,12 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
         .unwrap()
         .push(json!({"unknown_step":{}}));
     let mut unsupported = p25(input).clone();
-    unsupported["tree"]["cards"]["BP01-P25"]["faces"][BP01_P25_FACE]["abilities"][0]["lastword"]["do"]
-        .as_array_mut().unwrap().push(json!({"dice":{"bind":"roll","who":"opponent"}}));
+    let unsupported_steps = unsupported["tree"]["cards"]["BP01-P25"]["faces"][BP01_P25_FACE]
+        ["abilities"][0]["lastword"]["do"]
+        .as_array_mut()
+        .unwrap();
+    let unsupported_index = unsupported_steps.len();
+    unsupported_steps.push(json!({"dice":{"bind":"roll","who":"opp"}}));
     // Mutations must reach the direct handoff's real inventory and face-qualified body.
     for (candidate, code, path, exact) in [
         (
@@ -240,7 +244,9 @@ fn repository_lastword_rejects_missing_sources_and_unknown_or_unsupported_steps(
         (
             unsupported,
             "unsupported_construct",
-            format!("/cards/BP01-P25/faces/{BP01_P25_FACE}/abilities/0"),
+            format!(
+                "/cards/BP01-P25/faces/{BP01_P25_FACE}/abilities/0/lastword/do/{unsupported_index}"
+            ),
             true,
         ),
     ] {
