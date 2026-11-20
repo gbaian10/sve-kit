@@ -1,0 +1,38 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-062:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+              option: 1
+          do:
+            - choice:
+                upto: 2
+                options:
+                  - - damage: { to: enemy, n: 2 }
+                  - - pay:
+                        cost:
+                          steps:
+                            - pp: x
+                            - pp: x
+                        do:
+                          - search:
+                              sel:
+                                who: self
+                                zone: deck
+                                kind: follower
+                                name: スターフェニックス
+                              upto: x
+                              to: field
+                              result: entered
+                          - grant: { "on": { follow: entered }, keywords: [rush] }

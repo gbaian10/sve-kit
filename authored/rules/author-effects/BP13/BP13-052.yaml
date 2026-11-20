@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP13-052:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: material
+              from: { who: self, zone: cemetery }
+              n: 1
+          do:
+            - banish: { ref: material, result: banished }
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: { same_as: { objects_of: banished, view: before } }
+                  orig_cost_eq: { orig_cost_of: { objects_of: banished, view: before } }
+                n: 1
+                to: hand

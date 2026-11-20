@@ -344,7 +344,7 @@ impl BodyContext<'_> {
             }
             _ => None,
         };
-        let (power_at_least, power_at_most) = super::selection::power_bounds(power);
+        let (power_at_least, power_at_most) = super::selection::stat_bounds(power);
         let (relation, relative_to) = self.side_set(&query.who, path)?;
         let objects = Selector::Zone {
             players: PlayerSet {

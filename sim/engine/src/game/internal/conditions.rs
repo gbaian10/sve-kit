@@ -5,9 +5,9 @@ use crate::ir::public_numbers;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, Binding, Bool, BoolRead, BooleanState,
     CardKind, CardName, CharacteristicView, ClassRead, Comparison, CounterKind, EvolutionRead,
-    EvolutionState, Expr, Info, Int, IntOperation, KeywordId, KindRead, NamesRead, NatRead,
-    NumberRead, ObjectOperand, ObjectReceipt, ObjectRef, ObjectView, PlayerId, Posture,
-    PostureRead, Predicate, Stat, TraitsRead, paid_names,
+    EvolutionState, Expr, Info, Int, IntOperation, KeywordId, KindRead, MemberProjection,
+    MovementReceipt, NamesRead, NatRead, NumberRead, ObjectOperand, ObjectReceipt, ObjectRef,
+    ObjectView, PlayerId, Posture, PostureRead, Predicate, Stat, TraitsRead, paid_names,
 };
 
 pub(super) mod candidate;
@@ -38,7 +38,7 @@ pub(super) enum BooleanProperty {
 #[derive(Clone, Debug)]
 pub(super) enum NumberProperty {
     Cost(CharacteristicView),
-    Stat(Stat),
+    Stat(CharacteristicView, Stat),
     Counter(CounterKind),
 }
 
@@ -79,6 +79,11 @@ pub(super) trait Resolver {
             "payment names unavailable to this candidate adapter",
         ))
     }
+    fn receipt_kinds(&self, _receipt: &ObjectReceipt) -> Result<Vec<CardKind>> {
+        Err(unsupported(
+            "receipt kinds unavailable to this candidate adapter",
+        ))
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -100,6 +105,7 @@ enum Names {
 #[derive(Clone, Debug)]
 enum Atom {
     Kind(CharacteristicView, CardKind),
+    ReceiptKind(ObjectReceipt),
     Boolean(BooleanProperty),
     Labels(LabelsProperty, Names),
     Contains(String),
@@ -115,6 +121,7 @@ enum Operand<T> {
 #[derive(Clone, Debug)]
 enum PreparedAtom {
     Kind(CharacteristicView, CardKind),
+    ReceiptKind(Operand<Vec<CardKind>>),
     Boolean(BooleanProperty),
     Labels(LabelsProperty, Operand<Vec<String>>),
     Contains(String),
@@ -272,8 +279,19 @@ fn number(
         } if candidate(object, binding)
             && (policy != Policy::Search || *property == Stat::Attack) =>
         {
-            Some(NumberProperty::Stat(*property))
+            Some(NumberProperty::Stat(
+                CharacteristicView::Effective,
+                *property,
+            ))
         }
+        NumberRead::Stats {
+            object,
+            view: CharacteristicView::Original,
+            property: Stat::Attack,
+        } if policy == Policy::Search && candidate(object, binding) => Some(NumberProperty::Stat(
+            CharacteristicView::Original,
+            Stat::Attack,
+        )),
         _ => None,
     }
 }
@@ -404,6 +422,22 @@ fn atomic(expression: &Expr<Bool>, binding: Binding<ObjectRef>, policy: Policy) 
         return Err(unsupported("candidate condition"));
     };
     let labels = match operation.as_ref() {
+        Predicate::ReceiptAny {
+            receipt:
+                receipt @ ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Banish { .. },
+                },
+            projection: MemberProjection::Before,
+            member,
+            predicate: Expr::Compute(predicate),
+        } if policy == Policy::Search
+            && matches!(predicate.as_ref(), Predicate::KindEquals {
+                left: Expr::Live(left), right: Expr::Live(right),
+            } if matches!(left.as_ref(), KindRead::Kind { object, view: CharacteristicView::Original } if candidate(object, binding))
+                && matches!(right.as_ref(), KindRead::Kind { object: ObjectView::Snapshot { value }, view: CharacteristicView::Original } if **value == Expr::Bound(*member))) =>
+        {
+            return Ok(Atom::ReceiptKind(receipt.clone()));
+        }
         Predicate::ClassEquals {
             left: Expr::Live(read),
             right: Expr::Literal(Info::Present(class)),
@@ -491,6 +525,10 @@ impl Tree<Atom> {
             ),
             Self::Atom(atom) => Tree::Atom(match atom {
                 Atom::Kind(view, kind) => PreparedAtom::Kind(*view, *kind),
+                Atom::ReceiptKind(receipt) => PreparedAtom::ReceiptKind(match resolver {
+                    Some(resolver) => Operand::Value(resolver.receipt_kinds(receipt)?),
+                    None => Operand::Unavailable,
+                }),
                 Atom::Boolean(property) => PreparedAtom::Boolean(property.clone()),
                 Atom::Contains(text) => PreparedAtom::Contains(text.clone()),
                 Atom::Labels(property, source) => PreparedAtom::Labels(
@@ -565,6 +603,10 @@ impl PreparedAtom {
     fn evaluate(&self, reader: &impl Reader) -> Result<bool> {
         match self {
             Self::Kind(view, kind) => reader.matches_kind(*view, *kind),
+            Self::ReceiptKind(Operand::Value(kinds)) => reader.matches_labels(
+                &LabelsProperty::Kind(CharacteristicView::Original),
+                &|actual| kinds.iter().any(|kind| actual == kind_name(*kind)),
+            ),
             Self::Boolean(property) => reader.boolean(property),
             Self::Contains(text) => {
                 reader.matches_labels(&LabelsProperty::Names, &|name| name.contains(text))
@@ -583,7 +625,9 @@ impl PreparedAtom {
             Self::Number(property, comparison, Operand::Value(expected)) => Ok(reader
                 .number(property)?
                 .is_some_and(|actual| values::compare(actual, *comparison, *expected))),
-            Self::Labels(_, Operand::Unavailable) | Self::Number(_, _, Operand::Unavailable) => {
+            Self::Labels(_, Operand::Unavailable)
+            | Self::ReceiptKind(Operand::Unavailable)
+            | Self::Number(_, _, Operand::Unavailable) => {
                 Err(unsupported("unprepared candidate condition operand"))
             }
         }

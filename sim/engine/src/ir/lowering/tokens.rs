@@ -297,7 +297,7 @@ impl BodyContext<'_> {
                         && create.result.is_none()
                         && create.bind.is_none()
                 }
-                [ast::Step::Banish(ast::BanishAction::Top { top })] => {
+                [ast::Step::Banish(ast::BanishAction::Top { top, .. })] => {
                     matches!(&top.who, ast::DeckHolder::Bound(name) if name == &each.binding)
                 }
                 _ => false,

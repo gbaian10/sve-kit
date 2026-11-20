@@ -250,7 +250,8 @@ pub(super) fn check_node_with_x(
     }
 
     if let Node::Instruction { instruction } = &mut inspected
-        && super::movement::deck_top(&instruction.action).is_some()
+        && (super::movement::deck_top(&instruction.action).is_some()
+            || super::movement::declared_deck_banish(&instruction.action).is_some())
         && let Action::Move { objects, .. } | Action::Banish { objects } = &mut instruction.action
     {
         // Only this checked slice is authorized; instruction metadata keeps its private-read guard.
@@ -443,6 +444,8 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
                 | "reference.snapshot"
                 | "shape.IntOperation.Sum"
                 | "value.aggregate.sum"
+                | "shape.IntOperation.Extremum"
+                | "value.aggregate.extremum"
                 | "shape.Selector.Extremum"
                 | "selector.extremum"
         ) || (!private_spine
@@ -670,8 +673,9 @@ fn mask_public_number(number: &mut Expr<Int>) {
         match operation.as_mut() {
             IntOperation::FromNat { value } => mask_public_natural(value),
             IntOperation::Sum { objects, property }
-                if super::aggregates::check(objects, *property).is_ok() =>
-            {
+            | IntOperation::Extremum {
+                objects, property, ..
+            } if super::aggregates::check(objects, *property).is_ok() => {
                 *number = Expr::Literal(Int(0));
             }
             IntOperation::Conditional {

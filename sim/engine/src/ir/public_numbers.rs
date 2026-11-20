@@ -5,10 +5,10 @@
 )]
 use super::{
     Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Holder, Info, Int,
-    IntOperation, IntRead, KindRead, NamesRead, NatFrozen, NatOperation, NatRead, NumberRead,
-    NumericProperty, ObjectOperand, ObjectProperty, ObjectRef, ObjectView, PlayerRef,
-    PlayerRelation, PlayerResource, Predicate, SelectionView, Selector, SnapshotFields, TraitsRead,
-    ZoneKind,
+    IntOperation, IntRead, KindRead, MemberProjection, MovementReceipt, NamesRead, NatFrozen,
+    NatOperation, NatRead, NumberRead, NumericProperty, ObjectOperand, ObjectProperty,
+    ObjectReceipt, ObjectRef, ObjectView, PlayerRef, PlayerRelation, PlayerResource, Predicate,
+    SelectionView, Selector, SnapshotFields, TraitsRead, ZoneKind,
 };
 pub(crate) fn check(value: &Expr<Int>) -> bool {
     match value {
@@ -27,13 +27,14 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
                     | Arithmetic::Subtract
                     | Arithmetic::Multiply
                     | Arithmetic::FloorDivide
-                    | Arithmetic::Minimum,
+                    | Arithmetic::Minimum
+                    | Arithmetic::HalfUp,
                 arguments,
             } => !arguments.is_empty() && arguments.iter().all(check),
             IntOperation::FromNat {
                 value: Expr::Live(read),
             } => {
-                matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector) || hand_count(selector))
+                matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector) || hand_count(selector) || own_deck_count(selector))
                     || matches!(
                         read.as_ref(),
                         NatRead::Counter {
@@ -65,7 +66,15 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
                 value: Expr::Bound(_),
             }
             | IntOperation::Sum {
-                objects: Selector::Bound { .. },
+                objects:
+                    Selector::Bound { .. }
+                    | Selector::ReceiptMembers {
+                        receipt:
+                            ObjectReceipt::Movement {
+                                receipt: MovementReceipt::Banish { .. },
+                            },
+                        projection: MemberProjection::Before,
+                    },
                 property: NumericProperty::OriginalCost,
             } => true,
             // The distinct name count of the same public populations is just as candidate-independent.
@@ -82,9 +91,17 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
 }
 
 pub(super) fn hand_count(selector: &Selector) -> bool {
+    own_zone_count(selector, ZoneKind::Hand)
+}
+
+fn own_deck_count(selector: &Selector) -> bool {
+    own_zone_count(selector, ZoneKind::Deck)
+}
+
+fn own_zone_count(selector: &Selector, expected: ZoneKind) -> bool {
     matches!(selector, Selector::Zone {
-        players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, ..
-    } if players.relation == PlayerRelation::SelfPlayer
+        players, zone, view: SelectionView::Current {}, predicate, ..
+    } if *zone == expected && players.relation == PlayerRelation::SelfPlayer
         && players.relative_to == (PlayerRef::Controller {})
         && **predicate == Expr::Literal(Bool(true)))
 }

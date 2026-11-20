@@ -45,6 +45,12 @@ pub(super) fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
             ReceiptLocation::Local { id } => Some(id),
             ReceiptLocation::Iteration { .. } => None,
         },
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Banish { receipt },
+        } => match receipt.location() {
+            ReceiptLocation::Local { id } => Some(id),
+            ReceiptLocation::Iteration { .. } => None,
+        },
         ObjectReceipt::Reveal { receipt } => match receipt.location() {
             ReceiptLocation::Local { id } => Some(id),
             ReceiptLocation::Iteration { .. } => None,
@@ -273,8 +279,54 @@ pub(super) fn members(
         Some(InstructionOutcome::Move(outcome)) => {
             successful_move_members(game, execution, outcome, destination)
         }
+        Some(InstructionOutcome::Banish(outcome))
+            if matches!(
+                receipt,
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Banish { .. }
+                }
+            ) =>
+        {
+            outcome
+                .successful
+                .iter()
+                .map(|result| {
+                    let before = result
+                        .before
+                        .ok_or_else(|| invalid("missing banished before member"))?
+                        .object;
+                    Ok(MemberView {
+                        before,
+                        information: MemberInformation::Properties(printed_card(
+                            game, execution, before,
+                        )?),
+                    })
+                })
+                .collect()
+        }
         _ => Err(invalid("missing receipt member producer")),
     }
+}
+
+pub(super) fn original_cost_sum(
+    game: &Game,
+    execution: &Execution,
+    receipt: &ObjectReceipt,
+) -> Result<Int> {
+    let destination = matches!(
+        receipt,
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Move { .. },
+        }
+    )
+    .then_some(ZoneKind::Cemetery);
+    super::aggregates::checked_sum(
+        members(game, execution, receipt, destination)?
+            .iter()
+            .map(|member| member.original_cost(game, execution)),
+        "receipt original cost sum overflow",
+    )
+    .map(Int)
 }
 
 fn successful_move_members(
@@ -522,6 +574,23 @@ impl Execution {
 
     /// Successful before members; a same-deck reorder keeps generations, so all ordered cards count.
     pub(super) fn movement_before(&self, receipt: &MovementReceipt) -> Result<Vec<ObjectRef>> {
+        if let MovementReceipt::Banish { receipt } = receipt {
+            let Some(InstructionOutcome::Banish(outcome)) =
+                self.receipts.get(local_id(receipt.location())?)
+            else {
+                return Err(invalid("missing successful banish outcome"));
+            };
+            return outcome
+                .successful
+                .iter()
+                .map(|member| {
+                    member
+                        .before
+                        .map(|view| view.object)
+                        .ok_or_else(|| invalid("missing banish before member"))
+                })
+                .collect();
+        }
         let MovementReceipt::Order { receipt } = receipt else {
             return Ok(self
                 .successful_moves(receipt)?

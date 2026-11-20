@@ -1140,7 +1140,8 @@ pub(super) enum DeckEdge {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishAction {
     Top {
-        top: DeckTop,
+        top: BanishDeckTop,
+        result: Option<String>,
     },
     // The `in` shape reserves observation authority for private Look sets.
     Observed {
@@ -1151,6 +1152,13 @@ pub(super) enum BanishAction {
         r#ref: PublicBanishUnion,
     },
     Objects(Box<ObjectAction>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BanishDeckTop {
+    pub who: DeckHolder,
+    pub n: Box<Number>,
 }
 
 #[derive(Deserialize)]
@@ -1583,7 +1591,7 @@ pub(super) enum Affected {
 pub(super) struct Search {
     pub sel: Option<SearchSelector>,
     pub n: Option<u64>,
-    pub upto: Option<u64>,
+    pub upto: Option<NumericArgument>,
     pub groups: Option<Vec<SearchGroup>>,
     pub to: SearchDestination,
     pub acted: Option<True>,
@@ -1626,7 +1634,7 @@ pub(super) enum SearchSelector {
 pub(super) struct SearchQuery {
     pub who: SelfPlayer,
     pub zone: DeckZone,
-    pub kind: Option<SearchKind>,
+    pub kind: Option<SearchKindFilter>,
     pub r#trait: Option<String>,
     #[serde(default)]
     pub traits_all: Vec<String>,
@@ -1659,6 +1667,22 @@ pub(super) struct SearchWhere {
 pub(super) enum SearchName {
     Literal(String),
     SameAs { same_as: BeforeObjects },
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum SearchKindFilter {
+    Literal(SearchKind),
+    SameAs { same_as: BeforeObjects },
+}
+
+impl SearchKindFilter {
+    pub(super) const fn literal(&self) -> Option<&SearchKind> {
+        match self {
+            Self::Literal(value) => Some(value),
+            Self::SameAs { .. } => None,
+        }
+    }
 }
 
 impl SearchName {
@@ -3125,6 +3149,7 @@ pub(super) struct PublicPowerComparison {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PublicCandidateNumber {
     Power(ItemPower),
+    Hp { hp_of: Item },
     Counter { counter: ItemCounter },
 }
 #[derive(Clone, Deserialize, PartialEq, Eq)]

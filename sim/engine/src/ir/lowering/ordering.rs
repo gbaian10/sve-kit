@@ -166,9 +166,14 @@ impl BodyContext<'_> {
                     },
                 },
             )),
-            ast::Step::Banish(ast::BanishAction::Observed {
-                result: Some(name), ..
-            }) => Some((
+            ast::Step::Banish(
+                ast::BanishAction::Observed {
+                    result: Some(name), ..
+                }
+                | ast::BanishAction::Top {
+                    result: Some(name), ..
+                },
+            ) => Some((
                 name,
                 ObjectReceipt::Movement {
                     receipt: MovementReceipt::Banish {
@@ -579,13 +584,7 @@ impl BodyContext<'_> {
     ) -> Result<Action, LoweringError> {
         Ok(Action::Banish {
             objects: match value {
-                ast::BanishAction::Top { top }
-                    if own_deck(top)
-                        || matches!(&top.who, ast::DeckHolder::Bound(name) if self.players.contains_key(name)) =>
-                {
-                    self.deck_slice(top, path)?
-                }
-                ast::BanishAction::Top { .. } => return Err(unsupported(path)),
+                ast::BanishAction::Top { top, .. } => self.banish_deck_slice(top, path)?,
                 ast::BanishAction::Observed { r#ref, .. } => {
                     self.observed(r#ref, ObservationUse::Move, path)?
                 }
@@ -1104,7 +1103,43 @@ impl BodyContext<'_> {
         if top.n == 0 {
             return Err(unsupported(path));
         }
-        let player = match &top.who {
+        let player = self.deck_holder(&top.who, path)?;
+        Ok(deck_top_selector(player, super::Expr::Literal(Nat(top.n))))
+    }
+
+    fn banish_deck_slice(
+        &mut self,
+        top: &ast::BanishDeckTop,
+        path: &str,
+    ) -> Result<Selector, LoweringError> {
+        let own = matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller));
+        if !own
+            && !matches!(&top.who, ast::DeckHolder::Bound(name) if self.players.contains_key(name))
+        {
+            return Err(unsupported(path));
+        }
+        let player = self.deck_holder(&top.who, path)?;
+        let count = if let ast::Number::Literal(n) = top.n.as_ref() {
+            if *n <= 0 {
+                return Err(unsupported(path));
+            }
+            super::Expr::Literal(Nat(n.unsigned_abs()))
+        } else {
+            let value = self.number(&top.n, path, &mut super::BTreeSet::new())?;
+            if !own || !super::super::public_numbers::check(&value) {
+                return Err(unsupported(path));
+            }
+            super::Expr::Compute(Box::new(super::super::NatOperation::CheckedInt { value }))
+        };
+        Ok(deck_top_selector(player, count))
+    }
+
+    fn deck_holder(
+        &mut self,
+        who: &ast::DeckHolder,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        Ok(match who {
             ast::DeckHolder::Side(ast::LeaderSide::Controller) => PlayerRef::Controller {},
             ast::DeckHolder::Side(ast::LeaderSide::Opponent) => {
                 super::super::events::timing::opponent()
@@ -1127,15 +1162,6 @@ impl BodyContext<'_> {
             ast::DeckHolder::Bound(name) => PlayerRef::Bound {
                 binding: *self.players.get(name).ok_or_else(|| unsupported(path))?,
             },
-        };
-        Ok(Selector::Ordered {
-            zone: super::super::ZoneRef {
-                player,
-                kind: ZoneKind::Deck,
-            },
-            start: Position::Top {},
-            count: super::Expr::Literal(Nat(top.n)),
-            direction: super::super::SliceDirection::Forward,
         })
     }
 
@@ -1160,6 +1186,18 @@ impl BodyContext<'_> {
 
 const fn own_deck(top: &ast::DeckTop) -> bool {
     matches!(top.who, ast::DeckHolder::Side(ast::LeaderSide::Controller))
+}
+
+const fn deck_top_selector(player: PlayerRef, count: super::Expr<Nat>) -> Selector {
+    Selector::Ordered {
+        zone: super::super::ZoneRef {
+            player,
+            kind: ZoneKind::Deck,
+        },
+        start: Position::Top {},
+        count,
+        direction: super::super::SliceDirection::Forward,
+    }
 }
 
 pub(super) const fn shared_put(objects: Selector, kind: ZoneKind) -> Action {

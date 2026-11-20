@@ -210,23 +210,30 @@ fn fixed_top_banish_uses_available_cards_without_a_draw_or_look() {
 }
 
 #[test]
-fn deck_top_lowering_accepts_ex_and_banish_but_rejects_other_top_banish_shapes() {
+fn fixed_deck_top_lowering_admits_own_ex_and_banish_receipts() {
     assert!(
         lowerer()
             .lower(&tree(&json!({"top":{"who":"self","n":2},"to":"ex"})))
             .is_ok(),
         "the schema's existing fixed own top-to-EX syntax lowers through ordinary movement"
     );
+
+    let mut input = tree(&json!({"top":{"who":"self","n":1},"to":"cemetery"}));
+    input["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] =
+        json!([{"banish":{"top":{"who":"self","n":1},"result":"banished"}}]);
+    assert!(
+        lowerer().lower(&input).is_ok(),
+        "banishing an own deck top slice can bind a movement receipt"
+    );
+
     for banish in [
         json!({"top":{"who":"opp","n":1}}),
         json!({"top":{"who":"self","n":0}}),
-        json!({"top":{"who":"self","n":1},"result":"unadmitted"}),
     ] {
-        let mut input = tree(&json!({"top":{"who":"self","n":1},"to":"cemetery"}));
         input["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{"banish":banish}]);
         assert!(
             lowerer().lower(&input).is_err(),
-            "top banishment outside a checked each-player stage does not admit foreign decks, zero counts or unimplemented result syntax"
+            "fixed top banishment outside an each-player stage rejects foreign decks and zero counts"
         );
     }
 }

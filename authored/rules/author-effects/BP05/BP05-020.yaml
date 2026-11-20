@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP05-020:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - banish:
+                top:
+                  who: self
+                  n: { half_up: { count: { who: self, zone: deck } } }
+                result: banished_cards
+            - damage:
+                to:
+                  any_of:
+                    - { leaders: opponents }
+                    - { who: opp, zone: field, kind: follower }
+                n: 4
+                instead:
+                  - if: { cmp: { left: { count_of: banished_cards }, op: ge, right: 15 } }
+                    n: 8

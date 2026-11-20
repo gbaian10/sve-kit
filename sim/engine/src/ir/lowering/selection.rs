@@ -465,6 +465,7 @@ pub(super) struct ObjectFilter<'query> {
     pub cost: [Option<u64>; 3],
     pub original_cost: [Option<u64>; 3],
     pub hp_at_most: Option<u64>,
+    pub hp_at_least: Option<u64>,
     pub power_at_most: Option<u64>,
     pub power_at_least: Option<u64>,
     /// 「…カウンターがN個以上」: the candidate's own counter of this name against a bound.
@@ -560,12 +561,12 @@ impl<'query> From<&'query ast::TargetQuery> for ObjectFilter<'query> {
     }
 }
 
-pub(super) fn power_bounds(power: Option<(ast::PowerBound, u64)>) -> (Option<u64>, Option<u64>) {
+pub(super) fn stat_bounds(bound: Option<(ast::PowerBound, u64)>) -> (Option<u64>, Option<u64>) {
     (
-        power
+        bound
             .filter(|(op, _)| matches!(op, ast::PowerBound::Ge | ast::PowerBound::Eq))
             .map(|(_, right)| right),
-        power
+        bound
             .filter(|(op, _)| matches!(op, ast::PowerBound::Le | ast::PowerBound::Eq))
             .map(|(_, right)| right),
     )
@@ -577,13 +578,24 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
         let power = comparison
             .filter(|cmp| matches!(cmp.left, ast::PublicCandidateNumber::Power(_)))
             .map(|cmp| (cmp.op, cmp.right));
+        let hp = comparison
+            .filter(|cmp| {
+                matches!(
+                    cmp.left,
+                    ast::PublicCandidateNumber::Hp {
+                        hp_of: ast::Item::Item
+                    }
+                )
+            })
+            .map(|cmp| (cmp.op, cmp.right));
         let counter = comparison.and_then(|cmp| match &cmp.left {
             ast::PublicCandidateNumber::Counter { counter } => {
                 Some((counter.name.as_str(), cmp.op, cmp.right))
             }
-            ast::PublicCandidateNumber::Power(_) => None,
+            ast::PublicCandidateNumber::Power(_) | ast::PublicCandidateNumber::Hp { .. } => None,
         });
-        let (power_at_least, power_at_most) = power_bounds(power);
+        let (power_at_least, power_at_most) = stat_bounds(power);
+        let (hp_at_least, hp_at_most) = stat_bounds(hp);
         Self {
             power_at_most,
             power_at_least,
@@ -606,7 +618,8 @@ impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
             token: query.token,
             cost: [query.cost_eq, query.cost_le, query.cost_ge],
             original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
-            hp_at_most: query.hp_le,
+            hp_at_most: hp_at_most.into_iter().chain(query.hp_le).min(),
+            hp_at_least,
             not_same_name_as_this: query.not_same_name_as_this,
             ..Self::default()
         }
@@ -656,7 +669,11 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::SearchQuery) -> Self {
         Self {
-            kind: query.kind.as_ref().map(super::search::card_kind),
+            kind: query
+                .kind
+                .as_ref()
+                .and_then(ast::SearchKindFilter::literal)
+                .map(super::search::card_kind),
             has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,
@@ -728,7 +745,7 @@ pub(super) fn view_filter(
     filter: &ObjectFilter<'_>,
     object: super::ObjectView,
 ) -> super::Expr<super::Bool> {
-    use super::super::{CharacteristicView, Comparison, NumberRead};
+    use super::super::{CharacteristicView, Comparison};
     let base =
         super::search::view_filter(filter.kind, filter.trait_id, filter.name, object.clone());
     let mut predicates = Vec::new();
@@ -805,16 +822,11 @@ pub(super) fn view_filter(
     if filter.not_same_name_as_this {
         predicates.push(holder_name_exclusion(object.clone()));
     }
+    if let Some(limit) = filter.hp_at_least {
+        predicates.push(life_limit(object.clone(), Comparison::GreaterEqual, limit));
+    }
     if let Some(limit) = filter.hp_at_most {
-        predicates.push(number_limit(
-            NumberRead::Stats {
-                object,
-                view: CharacteristicView::Effective,
-                property: super::super::Stat::Life,
-            },
-            Comparison::LessEqual,
-            limit,
-        ));
+        predicates.push(life_limit(object, Comparison::LessEqual, limit));
     }
     match predicates.as_mut_slice() {
         [] => super::Expr::Literal(super::Bool(true)),
@@ -973,7 +985,7 @@ fn numeric_limits(
     predicates
 }
 
-fn number_limit(
+pub(super) fn number_limit(
     information: super::super::NumberRead,
     comparison: super::super::Comparison,
     limit: u64,
@@ -987,6 +999,21 @@ fn number_limit(
     )
 }
 
+fn life_limit(
+    object: super::ObjectView,
+    comparison: super::super::Comparison,
+    limit: u64,
+) -> super::Expr<super::Bool> {
+    number_limit(
+        super::super::NumberRead::Stats {
+            object,
+            view: super::super::CharacteristicView::Effective,
+            property: super::super::Stat::Life,
+        },
+        comparison,
+        limit,
+    )
+}
 fn number_limit_of(
     left: super::Expr<super::Int>,
     comparison: super::super::Comparison,

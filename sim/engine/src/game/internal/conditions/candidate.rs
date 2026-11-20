@@ -7,8 +7,8 @@ use super::{
 use crate::game::internal::{Execution, Game, Result, invalid, unsupported};
 use crate::game::list;
 use crate::ir::{
-    BooleanState, CardName, CharacteristicView, EvolutionState, Expr, Int, ObjectReceipt, Posture,
-    Stat,
+    BooleanState, CardKind, CardName, CharacteristicView, EvolutionState, Expr, Int, ObjectReceipt,
+    Posture, Stat,
 };
 use serde_json::Value;
 
@@ -36,6 +36,18 @@ impl Resolver for Operands<'_> {
 
     fn payment_names(&self, receipt: &ObjectReceipt) -> Result<Vec<CardName>> {
         super::super::receipt_members::paid_names(self.execution, receipt)
+    }
+
+    fn receipt_kinds(&self, receipt: &ObjectReceipt) -> Result<Vec<CardKind>> {
+        super::super::receipt_members::members(self.game, self.execution, receipt, None)?
+            .iter()
+            .map(|member| {
+                member
+                    .card()
+                    .map(|card| card.kind)
+                    .ok_or_else(|| invalid("missing printed receipt kind"))
+            })
+            .collect()
     }
 }
 
@@ -131,7 +143,16 @@ impl Reader for Candidate<'_> {
             NumberProperty::Cost(CharacteristicView::Effective) => {
                 self.game.internal_effective_cost(self.id)?
             }
-            NumberProperty::Stat(property) if self.policy != Policy::Search => {
+            NumberProperty::Stat(CharacteristicView::Original, Stat::Attack) => {
+                let power = self.game.face(self.id)?["power"].as_str();
+                return power
+                    .filter(|value| *value != "-")
+                    .map(|value| value.parse().map_err(invalid))
+                    .transpose();
+            }
+            NumberProperty::Stat(CharacteristicView::Effective, property)
+                if self.policy != Policy::Search =>
+            {
                 if self.game.object(self.id)?.zone != "field"
                     || !self.game.object_type(self.id)?.contains("フォロワー")
                 {
@@ -139,7 +160,7 @@ impl Reader for Candidate<'_> {
                 }
                 self.game.internal_numeric_stat(self.id, *property)?
             }
-            NumberProperty::Stat(Stat::Attack) => {
+            NumberProperty::Stat(CharacteristicView::Effective, Stat::Attack) => {
                 if self.game.object_type(self.id)?.contains("フォロワー") {
                     self.game.object(self.id)?.state["power"]
                         .as_i64()

@@ -3,6 +3,7 @@ use crate::ir::{
     Binding, Cardinality, ChoiceDomain, Decision, DecisionId, DecisionKind, ExecutionRef, Expr,
     InputMode, Int, IntOperation, Nat, PlaySlot, PlayerRef, SelectionSnapshot, Visibility,
 };
+use core::slice::from_ref;
 
 #[derive(Clone, Copy)]
 pub(super) struct Parameter {
@@ -22,6 +23,10 @@ impl BodyContext<'_> {
         if !declaration.is_empty() || self.definitions.contains_key("x") || !self.formal_play {
             return Err(unsupported(path));
         }
+        self.declare_x(path)
+    }
+
+    pub(super) fn declare_x(&mut self, path: &str) -> Result<(), LoweringError> {
         let binding = Binding::new(self.allocator.id(path)?, self.scope);
         self.x = Some(Parameter {
             binding,
@@ -118,4 +123,17 @@ impl BodyContext<'_> {
             }
         }
     }
+}
+
+pub(super) fn uses_pp_x(cost: &ast::Cost) -> bool {
+    let steps = match cost {
+        ast::Cost::Short(step) => from_ref(step.as_ref()),
+        ast::Cost::Ordered { steps } => steps.as_slice(),
+    };
+    steps.iter().any(|step| {
+        matches!(
+            step,
+            ast::CostOperation::Pp(ast::PpAmount::Variable(ast::PpVariable::X))
+        )
+    })
 }

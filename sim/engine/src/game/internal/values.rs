@@ -705,61 +705,81 @@ impl Execution {
                 }
             },
             Expr::Frozen(frozen) => self.frozen_integer(frozen),
-            Expr::Compute(operation) => match operation.as_ref() {
-                IntOperation::InformationOrZero { information } => {
-                    self.number_information(game, information).map(Int)
-                }
-                IntOperation::FromNat { value } => Ok(Int(i64::try_from(
-                    self.natural(game, value)?.0,
-                )
-                .map_err(invalid)?)),
-                IntOperation::Sum { objects, property } if target_plan(objects).is_some() => {
-                    self.attack_target_sum(game, objects, *property).map(Int)
-                }
-                IntOperation::Sum {
-                    objects: objects @ Selector::Bound { .. },
-                    property: property @ (NumericProperty::Attack | NumericProperty::Life),
-                } => self.selected_live_sum(game, objects, *property).map(Int),
-                IntOperation::Sum {
-                    objects: objects @ Selector::Bound { .. },
-                    property: NumericProperty::OriginalCost,
-                } => self.selected_original_cost(game, objects).map(Int),
-                IntOperation::Sum { objects, property }
-                    if super::aggregates::followed_sum_plan(objects, *property).is_some() =>
-                {
-                    super::aggregates::followed_sum(self, game, objects, *property).map(Int)
-                }
-                IntOperation::Sum { objects, property }
-                    if super::reveal::look_sum(objects, *property).is_some() =>
-                {
-                    self.public_look_sum(game, objects, *property).map(Int)
-                }
-                IntOperation::Sum { objects, property } => {
-                    super::aggregates::sum(self, game, objects, *property).map(Int)
-                }
-                IntOperation::Conditional {
-                    condition,
-                    then_value,
-                    else_value,
-                } => self.integer(
-                    game,
-                    if self.boolean(game, condition)?.0 {
-                        then_value
-                    } else {
-                        else_value
+            Expr::Compute(operation) => self.computed_integer(game, operation),
+        }
+    }
+
+    fn computed_integer(&self, game: &Game, operation: &IntOperation) -> Result<Int> {
+        match operation {
+            IntOperation::InformationOrZero { information } => {
+                self.number_information(game, information).map(Int)
+            }
+            IntOperation::FromNat { value } => Ok(Int(
+                i64::try_from(self.natural(game, value)?.0).map_err(invalid)?
+            )),
+            IntOperation::Sum { objects, property } if target_plan(objects).is_some() => {
+                self.attack_target_sum(game, objects, *property).map(Int)
+            }
+            IntOperation::Sum {
+                objects: objects @ Selector::Bound { .. },
+                property: property @ (NumericProperty::Attack | NumericProperty::Life),
+            } => self.selected_live_sum(game, objects, *property).map(Int),
+            IntOperation::Sum {
+                objects: objects @ Selector::Bound { .. },
+                property: NumericProperty::OriginalCost,
+            } => self.selected_original_cost(game, objects).map(Int),
+            IntOperation::Sum { objects, property }
+                if super::aggregates::followed_sum_plan(objects, *property).is_some() =>
+            {
+                super::aggregates::followed_sum(self, game, objects, *property).map(Int)
+            }
+            IntOperation::Sum { objects, property }
+                if super::reveal::look_sum(objects, *property).is_some() =>
+            {
+                self.public_look_sum(game, objects, *property).map(Int)
+            }
+            IntOperation::Sum {
+                objects:
+                    Selector::ReceiptMembers {
+                        receipt:
+                            receipt @ ObjectReceipt::Movement {
+                                receipt:
+                                    MovementReceipt::Move { .. } | MovementReceipt::Banish { .. },
+                            },
+                        projection: MemberProjection::Before,
                     },
-                ),
-                IntOperation::Arithmetic {
-                    operation,
-                    arguments,
-                } => {
-                    let values = arguments
-                        .iter()
-                        .map(|argument| self.integer(game, argument).map(|value| value.0))
-                        .collect::<Result<Vec<_>>>()?;
-                    arithmetic(*operation, &values).map(Int)
-                }
-            },
+                property: NumericProperty::OriginalCost,
+            } => super::receipt_members::original_cost_sum(game, self, receipt),
+            IntOperation::Sum { objects, property } => {
+                super::aggregates::sum(self, game, objects, *property).map(Int)
+            }
+            IntOperation::Extremum {
+                objects,
+                property,
+                kind,
+            } => super::aggregates::extremum_number(self, game, objects, *property, *kind).map(Int),
+            IntOperation::Conditional {
+                condition,
+                then_value,
+                else_value,
+            } => self.integer(
+                game,
+                if self.boolean(game, condition)?.0 {
+                    then_value
+                } else {
+                    else_value
+                },
+            ),
+            IntOperation::Arithmetic {
+                operation,
+                arguments,
+            } => {
+                let values = arguments
+                    .iter()
+                    .map(|argument| self.integer(game, argument).map(|value| value.0))
+                    .collect::<Result<Vec<_>>>()?;
+                arithmetic(*operation, &values).map(Int)
+            }
         }
     }
 

@@ -19,14 +19,16 @@ use super::{
 };
 use crate::ir::observation_selection::{CardTotals, card_totals};
 use crate::ir::printed_keywords;
+use crate::ir::public_numbers;
 use crate::ir::trigger_restrictions::suppresses_fanfare;
 use crate::ir::{
-    AbilityOrigin, Action, Binding, Bool, Cardinality, CharacteristicView, DecisionId, Expr,
-    Instruction, KeywordId, MoveDestination, MoveMethod, MoveResult, MoveSpec, Nat, ObjectOperand,
-    ObjectProperty, ObjectRef, ObjectView, OwnerZone, PlayerId, PlayerRelation, Posture, Predicate,
-    Requirement, Requirements, RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome,
-    SearchPartition, SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector,
-    SnapshotId, ZoneKind, ZoneRef,
+    AbilityOrigin, Action, AggregateBound, Binding, Bool, Cardinality, CharacteristicView,
+    Comparison, DecisionId, Expr, Instruction, Int, KeywordId, MoveDestination, MoveMethod,
+    MoveResult, MoveSpec, Nat, NumericProperty, ObjectOperand, ObjectProperty, ObjectRef,
+    ObjectView, OwnerZone, PlayerId, PlayerRelation, Posture, Predicate, Requirement, Requirements,
+    RuntimeObjectView, RuntimeZoneRef, SearchDestination, SearchOutcome, SearchPartition,
+    SearchPartitionAnswer, SearchSelectionAnswer, SelectionView, Selector, SnapshotId, ZoneKind,
+    ZoneRef,
 };
 use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
@@ -158,7 +160,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
             .is_some_and(|g| g.distinct_by == Some(ObjectProperty::Names));
     if let Some(groups) = groups {
         if matches!(
-            card_totals(&groups.aggregate_bounds),
+            search_bounds(&groups.aggregate_bounds)?.0,
             CardTotals::Unsupported
         ) || !matches!(groups.distinct_by, None | Some(ObjectProperty::Names))
         {
@@ -236,6 +238,18 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         return Err(unsupported("count-only search onto the field"));
     }
     Ok(())
+}
+
+fn search_bounds(bounds: &[AggregateBound]) -> Result<(CardTotals, Option<&Expr<Int>>)> {
+    if let Some((last, rest)) = bounds.split_last()
+        && last.property == NumericProperty::Count
+    {
+        if last.comparison != Comparison::LessEqual || !public_numbers::check(&last.value) {
+            return Err(unsupported("search count cap"));
+        }
+        return Ok((card_totals(rest), Some(&last.value)));
+    }
+    Ok((card_totals(bounds), None))
 }
 
 fn check_movement(movement: &MoveSpec) -> Result<()> {
@@ -461,6 +475,36 @@ impl Game {
         if execution.player(self, deck_player)? != player {
             return Err(unsupported("searching another player's deck"));
         }
+        let (totals, count_cap) = search_bounds(
+            groups
+                .as_ref()
+                .map_or(&[][..], |constraint| constraint.aggregate_bounds.as_slice()),
+        )?;
+        let count_cap = count_cap
+            .map(|value| {
+                let Int(count) = execution.integer(self, value)?;
+                u64::try_from(count).map(Nat).map_err(invalid)
+            })
+            .transpose()?;
+        if count_cap == Some(Nat(0)) {
+            execution.receipts.insert(
+                instruction.receipt,
+                InstructionOutcome::Search(SearchOutcome {
+                    found: vec![],
+                    revealed: vec![],
+                    moved: vec![],
+                }),
+            );
+            return Ok(());
+        }
+        let cap_count = |mut bounds: Cardinality| {
+            if let Some(maximum) = count_cap {
+                bounds.maximum = Some(Nat(bounds
+                    .maximum
+                    .map_or(maximum.0, |printed| printed.0.min(maximum.0))));
+            }
+            bounds
+        };
         let seat = seat_name(player)?;
         let deck = self.internal_known_deck(seat)?;
         match destination {
@@ -537,7 +581,7 @@ impl Game {
                 }
                 views.push(SearchGroup {
                     handles,
-                    cardinality: bounds(group.cardinality, domain.len(), true)?,
+                    cardinality: bounds(cap_count(group.cardinality), domain.len(), true)?,
                 });
                 domains.push(domain);
             }
@@ -545,7 +589,7 @@ impl Game {
         } else {
             (None, None)
         };
-        let cardinality = bounds(*cardinality, deck.len(), conditional)?;
+        let cardinality = bounds(cap_count(*cardinality), deck.len(), conditional)?;
         let domain = SearchDomain {
             cards,
             cardinality,
@@ -555,13 +599,10 @@ impl Game {
         let distinct_names = groups
             .as_ref()
             .is_some_and(|groups| groups.distinct_by == Some(ObjectProperty::Names));
-        let cost_cap = match groups
-            .as_ref()
-            .map(|groups| card_totals(&groups.aggregate_bounds))
-        {
-            None | Some(CardTotals::Unbounded) => None,
-            Some(CardTotals::OriginalCostAtMost(limit)) => Some(limit),
-            Some(CardTotals::Unsupported) => return Err(unsupported("search aggregate bound")),
+        let cost_cap = match totals {
+            CardTotals::Unbounded => None,
+            CardTotals::OriginalCostAtMost(limit) => Some(limit),
+            CardTotals::Unsupported => return Err(unsupported("search aggregate bound")),
         };
         let names = if distinct_names {
             members

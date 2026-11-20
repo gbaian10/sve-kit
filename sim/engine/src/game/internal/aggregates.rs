@@ -188,15 +188,29 @@ pub(super) fn extremum(
     kind: ExtremumKind,
 ) -> Result<Vec<ObjectRef>> {
     let members = values(execution, game, objects, property)?;
-    let numbers = members.iter().map(|(_, value)| *value);
-    let limit = match kind {
-        ExtremumKind::Minimum => numbers.min(),
-        ExtremumKind::Maximum => numbers.max(),
-    };
+    let limit = extreme_value(&members, kind);
     Ok(members
         .into_iter()
         .filter_map(|(reference, value)| (Some(value) == limit).then_some(reference))
         .collect())
+}
+
+pub(super) fn extremum_number(
+    execution: &Execution,
+    game: &Game,
+    objects: &Selector,
+    property: NumericProperty,
+    kind: ExtremumKind,
+) -> Result<i64> {
+    Ok(extreme_value(&values(execution, game, objects, property)?, kind).unwrap_or(0))
+}
+
+fn extreme_value(members: &[(ObjectRef, i64)], kind: ExtremumKind) -> Option<i64> {
+    let numbers = members.iter().map(|(_, value)| *value);
+    match kind {
+        ExtremumKind::Minimum => numbers.min(),
+        ExtremumKind::Maximum => numbers.max(),
+    }
 }
 
 #[cfg(test)]

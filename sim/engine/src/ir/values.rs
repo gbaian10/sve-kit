@@ -458,6 +458,7 @@ variants!(IntOperation {
     FromNat { value: Expr<Nat> } => ["value.nat-to-int"],
     InformationOrZero { information: NumberRead } => ["value.absent-number-zero"],
     Sum { objects: Selector, property: NumericProperty } => ["value.aggregate.sum"],
+    Extremum { objects: Selector, property: NumericProperty, kind: ExtremumKind } => ["value.aggregate.extremum"],
     Conditional { condition: Expr<Bool>, then_value: Expr<Int>, else_value: Expr<Int> } => ["value.conditional"]
 });
 variants!(NatOperation {

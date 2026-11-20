@@ -143,6 +143,7 @@ pub(in crate::game::internal) struct PlayState {
     pub(in crate::game::internal) snapshot_id: SnapshotId,
     modes: VecDeque<PlayMode>,
     groups: Vec<PlayMode>,
+    modes_prepared: bool,
     pub(in crate::game::internal) chosen: BTreeMap<DecisionId, Vec<ModeId>>,
     parameters: VecDeque<Decision>,
     pub(super) exchange: Option<super::exchange::ExchangeState>,
@@ -193,16 +194,8 @@ impl PlayState {
         })
     }
 
-    fn freeze_selection(&mut self, game: &Game, execution: &Execution) -> Result<()> {
-        if self.snapshot.is_none()
-            && game.has_target_cost(execution, None)?
-            && !game.internal_play_affordable(execution, self)?
-        {
-            return Err(crate::EngineFailure::IllegalPlay(
-                "no affordable formal target plan".into(),
-            ));
-        }
-        if self.snapshot.is_none() {
+    fn prepare_modes(&mut self) -> Result<()> {
+        if !self.modes_prepared {
             for group in &self.groups {
                 let chosen = self
                     .chosen
@@ -228,6 +221,21 @@ impl PlayState {
             if !self.groups.is_empty() {
                 order_parameters(self.parameters.make_contiguous());
             }
+            self.modes_prepared = true;
+        }
+        Ok(())
+    }
+
+    fn freeze_selection(&mut self, game: &Game, execution: &Execution) -> Result<()> {
+        if self.snapshot.is_none()
+            && game.has_target_cost(execution, None)?
+            && !game.internal_play_affordable(execution, self)?
+        {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "no affordable formal target plan".into(),
+            ));
+        }
+        if self.snapshot.is_none() {
             // The first target fixes the game view; later answers only extend immutable slots.
             self.snapshot_id = SnapshotId(game.state.ir_epoch);
             self.snapshot = Some(Box::new(game.clone()));
@@ -349,7 +357,9 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
             }
             if mode_steps.iter().any(|step| !matches!(&step.instruction.action,
                 Action::Resource { player: PlayerRef::Controller {}, resource: Resource::PpCurrent,
-                    operation: ResourceOperation::Pay, amount: Expr::Literal(Int(amount)) } if *amount >= 0)) {
+                    operation: ResourceOperation::Pay, amount } if matches!(amount, Expr::Literal(Int(amount)) if *amount >= 0)
+                        || x_payment::amount(amount).is_some_and(|binding| mode.parameters.iter()
+                            .any(|parameter| x_payment::parameter(parameter) == Some(binding))))) {
                 return Err(unsupported("mode PP payment"));
             }
             check_private_mode_cost(ability, mode)?;
@@ -374,9 +384,9 @@ pub(super) fn check(ability: &Ability, source: &SourceSpan) -> Result<()> {
     if parameters
         .iter()
         .any(|decision| x_payment::parameter(decision).is_some())
-        && (!groups.is_empty() || is_printed_quick(ability))
+        && is_printed_quick(ability)
     {
-        return Err(unsupported("X with modes or Quick"));
+        return Err(unsupported("X with Quick"));
     }
     check_overlapping_mode_materials(play, &groups)?;
     order_parameters(&mut parameters);
@@ -1500,6 +1510,7 @@ impl Game {
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: groups.clone().into(),
             groups,
+            modes_prepared: false,
             chosen: BTreeMap::new(),
             parameters,
             exchange: if execution.spell {
@@ -1685,6 +1696,7 @@ impl Game {
             return Ok(());
         }
         play.waive_original_costs(execution)?;
+        play.prepare_modes()?;
         if self.internal_x_parameter(execution, &mut play)? {
             execution.play = Some(play);
             return Ok(());
@@ -2033,7 +2045,7 @@ impl Game {
             let turn = TurnId(self.state.schedule.current()?);
             let mut legal = Vec::new();
             for mode in &group.modes {
-                if self.internal_mode_affordable(execution, play, &mode.costs)?
+                if self.internal_mode_affordable(execution, play, mode)?
                     && self.internal_mode_targets_feasible(execution, &mode.parameters)?
                     && (exclude_used.is_none()
                         || !self.card_runtime.mode_uses.iter().any(|used| {
@@ -2096,8 +2108,9 @@ impl Game {
         &self,
         execution: &Execution,
         play: &PlayState,
-        costs: &CostSpec,
+        mode: &Mode,
     ) -> Result<bool> {
+        let costs = &mode.costs;
         let CostSpec::Ordered { steps } = costs else {
             return Err(unsupported("mode costs"));
         };
@@ -2109,6 +2122,10 @@ impl Game {
         }
         let spell = execution.spell;
         for mut trial in self.internal_public_material_probes(execution, play)? {
+            for binding in mode.parameters.iter().filter_map(x_payment::parameter) {
+                // Before the mode is selected, zero proves whether its fixed costs can be paid.
+                trial.slots.insert(binding.key(), Slot::Natural(Nat(0)));
+            }
             let mut probe = self.clone();
             probe.card_runtime.active_source = trial.ability;
             let paid = probe
@@ -2420,6 +2437,7 @@ impl Game {
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: VecDeque::new(),
             groups: vec![],
+            modes_prepared: false,
             chosen: BTreeMap::new(),
             parameters,
             exchange: self.internal_exchange(execution)?,

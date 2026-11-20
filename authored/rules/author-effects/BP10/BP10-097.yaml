@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP10-097:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        keywords: [storm]
+      - line: 2
+        auto:
+          "on": { phase: { whose: self, which: end } }
+          do:
+            - if:
+                cond: { cmp: { left: { power_of: this }, op: ge, right: 3 } }
+                then:
+                  - stand: this
+      - line: 3
+        fanfare:
+          do:
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    kind: follower
+                    where: { cmp: { left: { hp_of: item }, op: ge, right: 7 } }
+                then:
+                  - damage: { to: { who: opp, zone: field, kind: follower }, n: 4 }

@@ -161,6 +161,42 @@ impl BodyContext<'_> {
                     if self.receipt_reads.deck_cemetery.contains(id)))
     }
 
+    pub(super) fn moved_original_cost(
+        &self,
+        name: &str,
+        path: &str,
+    ) -> Result<Expr<Int>, LoweringError> {
+        let receipt = self
+            .observations
+            .get(name)
+            .ok_or_else(|| unsupported(path))?;
+        Ok(Expr::Compute(Box::new(IntOperation::Sum {
+            objects: Selector::ReceiptMembers {
+                receipt: receipt.clone(),
+                projection: MemberProjection::Before,
+            },
+            property: super::super::NumericProperty::OriginalCost,
+        })))
+    }
+
+    pub(super) fn banish_receipt(
+        &self,
+        name: &str,
+        path: &str,
+    ) -> Result<&ObjectReceipt, LoweringError> {
+        self.observations
+            .get(name)
+            .filter(|receipt| {
+                matches!(
+                    receipt,
+                    ObjectReceipt::Movement {
+                        receipt: MovementReceipt::Banish { .. }
+                    }
+                )
+            })
+            .ok_or_else(|| unsupported(path))
+    }
+
     pub(super) fn receipt_count(
         &mut self,
         query: &ast::ReceiptCountQuery,
