@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The printed Fanfare needs each player's own selection."
-)]
 use super::*;
 
 #[test]
@@ -60,12 +56,12 @@ fn bp06_107_finishes_the_turn_players_choice_before_asking_the_opponent() {
     assert_eq!(between["P2"]["field"], json!(["first", "second"]));
     assert_eq!(second.actor.seat, 2);
     assert!(game.internal_decision(View::P1).is_none());
-    let InputDomain::Targets(candidates) = &second.domain else {
+    let InputDomain::Targets(opposing_candidates) = &second.domain else {
         panic!("opponent's own followers")
     };
-    assert_eq!(candidates.members.len(), 2);
+    assert_eq!(opposing_candidates.members.len(), 2);
     assert!(
-        candidates
+        opposing_candidates
             .members
             .iter()
             .all(|member| member.player == second.actor)
@@ -74,7 +70,7 @@ fn bp06_107_finishes_the_turn_players_choice_before_asking_the_opponent() {
         game.answer_internal_card(
             second.actor,
             second.token,
-            Answer::Targets(vec![candidates.members[1].handle]),
+            Answer::Targets(vec![opposing_candidates.members[1].handle]),
         )
         .unwrap(),
     );

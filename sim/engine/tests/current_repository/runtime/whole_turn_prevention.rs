@@ -43,7 +43,7 @@ fn bp04_103_prevents_repeated_ability_hits_to_the_leader_and_captured_followers(
     ));
     finish_checks(&mut game);
     resolve_grant_trigger(&mut game, 1, None);
-    for _ in 0..2 {
+    for _ in 0_u8..2 {
         activate(&mut game, "P1");
         finish_checks(&mut game);
     }
@@ -53,7 +53,7 @@ fn bp04_103_prevents_repeated_ability_hits_to_the_leader_and_captured_followers(
     assert_eq!(protected["objects"]["source"]["damage"], 0_u8);
     assert_eq!(protected["objects"]["late"]["damage"], 2_u8);
 
-    for _ in 0..2 {
+    for _ in 0_u8..2 {
         next_turn(&mut game);
         finish_checks(&mut game);
     }

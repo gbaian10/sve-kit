@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The printed Fanfare must resolve as two movement rounds."
-)]
 use super::*;
 
 #[test]
@@ -15,7 +11,7 @@ fn bp08_115_moves_both_tops_before_starting_the_second_round() {
         {"id":"opp-first","card":"BP01-037"},{"id":"opp-second","card":"CP03-101"}
     ]);
     initial["players"]["P2"]["zones"]["ex"] = json!(
-        (0..4)
+        (0_u8..4)
             .map(|n| json!({"id":format!("old-{n}"),"card":"BP01-037"}))
             .collect::<Vec<_>>()
     );
@@ -37,17 +33,16 @@ fn bp08_115_moves_both_tops_before_starting_the_second_round() {
         .progress
         .facts
         .iter()
-        .filter_map(|fact| match fact {
-            Fact::Movement(event)
-                if event.from.kind == ZoneKind::Deck
-                    && event
-                        .movement
-                        .actual_to
-                        .is_some_and(|to| to.kind == ZoneKind::Ex) =>
-            {
-                Some(event.from.player.seat)
-            }
-            _ => None,
+        .filter_map(|fact| {
+            let Fact::Movement(event) = fact else {
+                return None;
+            };
+            (event.from.kind == ZoneKind::Deck
+                && event
+                    .movement
+                    .actual_to
+                    .is_some_and(|to| to.kind == ZoneKind::Ex))
+            .then_some(event.from.player.seat)
         })
         .collect::<Vec<_>>();
     assert_eq!(seats, [1, 2, 1]);

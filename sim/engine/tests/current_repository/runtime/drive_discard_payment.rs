@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The printed Drive trigger must use both resolution payment questions."
-)]
 use super::*;
 use sve_engine::game::player::{Input, QuestionPurpose};
 
