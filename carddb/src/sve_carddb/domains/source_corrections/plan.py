@@ -284,6 +284,7 @@ def corrected_observations(
                 update={
                     "content": item.content.model_copy(update=fields),
                     "correction_keys": tuple(a.key() for a in applied),
+                    "correction_ids": tuple(sorted(a.data.id for a in applied)),
                 }
             )
             if applied
