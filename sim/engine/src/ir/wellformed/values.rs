@@ -79,33 +79,7 @@ impl Checker {
                 IntOperation::Arithmetic {
                     operation,
                     arguments,
-                } => {
-                    // Author min/max take one or more operands; the other operations are fixed.
-                    let arity = match operation {
-                        Arithmetic::HalfUp => 1..=1,
-                        Arithmetic::Minimum | Arithmetic::Maximum => 1..=usize::MAX,
-                        Arithmetic::Add
-                        | Arithmetic::Subtract
-                        | Arithmetic::Multiply
-                        | Arithmetic::FloorDivide => 2..=2,
-                    };
-                    if !arity.contains(&arguments.len()) {
-                        return Err(self.error(WellFormedReason::ArithmeticArity));
-                    }
-                    if *operation == Arithmetic::FloorDivide {
-                        match arguments.last() {
-                            Some(Expr::Literal(Int(divisor))) if *divisor > 0 => {}
-                            Some(Expr::Literal(_)) => {
-                                return Err(self.error(WellFormedReason::InvalidDivisor));
-                            }
-                            _ => return self.reject(),
-                        }
-                    }
-                    for argument in arguments {
-                        self.integer(argument)?;
-                    }
-                    Ok(())
-                }
+                } => self.arithmetic(*operation, arguments),
                 IntOperation::FromNat { value } => self.natural(value),
                 IntOperation::Conditional {
                     condition,
@@ -117,6 +91,7 @@ impl Checker {
                     self.integer(else_value)
                 }
                 IntOperation::Sum { objects, property } => self.sum(objects, *property),
+                IntOperation::Extremum { objects, .. } => self.selector(objects),
                 IntOperation::InformationOrZero { information } => match information {
                     NumberRead::Cost { object, view } | NumberRead::Stats { object, view, .. } => {
                         if !matches!(
@@ -130,6 +105,34 @@ impl Checker {
                 },
             },
         }
+    }
+
+    fn arithmetic(&mut self, operation: Arithmetic, arguments: &[Expr<Int>]) -> Checked {
+        // Author min/max take one or more operands; the other operations are fixed.
+        let arity = match operation {
+            Arithmetic::HalfUp => 1..=1,
+            Arithmetic::Minimum | Arithmetic::Maximum => 1..=usize::MAX,
+            Arithmetic::Add
+            | Arithmetic::Subtract
+            | Arithmetic::Multiply
+            | Arithmetic::FloorDivide => 2..=2,
+        };
+        if !arity.contains(&arguments.len()) {
+            return Err(self.error(WellFormedReason::ArithmeticArity));
+        }
+        if operation == Arithmetic::FloorDivide {
+            match arguments.last() {
+                Some(Expr::Literal(Int(divisor))) if *divisor > 0 => {}
+                Some(Expr::Literal(_)) => {
+                    return Err(self.error(WellFormedReason::InvalidDivisor));
+                }
+                _ => return self.reject(),
+            }
+        }
+        for argument in arguments {
+            self.integer(argument)?;
+        }
+        Ok(())
     }
 
     /// A printed cost may outlive its card's public move, but never a private pick.

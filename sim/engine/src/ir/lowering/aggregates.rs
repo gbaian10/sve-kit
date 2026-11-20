@@ -20,7 +20,9 @@ impl BodyContext<'_> {
         aggregate: &ast::Aggregate,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        if !matches!(aggregate.function, ast::AggregateFunction::Sum) {
+        if !matches!(aggregate.function, ast::AggregateFunction::Sum)
+            && !matches!(aggregate.of, ast::AggregateOf::Public(_))
+        {
             return Err(unsupported(path));
         }
         let objects = match &aggregate.of {
@@ -79,10 +81,20 @@ impl BodyContext<'_> {
                 objects
             }
         };
-        Ok(Expr::Compute(Box::new(IntOperation::Sum {
-            objects,
-            property: property(aggregate.attr),
-        })))
+        let property = property(aggregate.attr);
+        let operation = match aggregate.function {
+            ast::AggregateFunction::Sum => IntOperation::Sum { objects, property },
+            ast::AggregateFunction::Min | ast::AggregateFunction::Max => IntOperation::Extremum {
+                objects,
+                property,
+                kind: if matches!(aggregate.function, ast::AggregateFunction::Min) {
+                    ExtremumKind::Minimum
+                } else {
+                    ExtremumKind::Maximum
+                },
+            },
+        };
+        Ok(Expr::Compute(Box::new(operation)))
     }
 
     pub(super) fn extremum_query(

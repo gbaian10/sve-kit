@@ -958,6 +958,8 @@ fn supported(code: &str) -> bool {
             | "internal.NumericProperty.Life"
             | "shape.IntOperation.Sum"
             | "value.aggregate.sum"
+            | "shape.IntOperation.Extremum"
+            | "value.aggregate.extremum"
             | "shape.Control.Pay"
             | "shape.Control.May"
             | "control.may"

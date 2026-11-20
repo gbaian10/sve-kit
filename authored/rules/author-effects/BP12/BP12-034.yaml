@@ -1,0 +1,25 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP12-034:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: enemies
+              from: { who: opp, zone: field, kind: follower }
+              upto: 2
+          do:
+            - damage:
+                to: enemies
+                distribute: true
+                n:
+                  agg:
+                    of: { who: self, zone: field, kind: follower }
+                    attr: power
+                    fn: max

@@ -443,6 +443,8 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
                 | "reference.snapshot"
                 | "shape.IntOperation.Sum"
                 | "value.aggregate.sum"
+                | "shape.IntOperation.Extremum"
+                | "value.aggregate.extremum"
                 | "shape.Selector.Extremum"
                 | "selector.extremum"
         ) || (!private_spine
