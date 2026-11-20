@@ -33,9 +33,9 @@ lowest permanent printing ID that observes each candidate. Corrected candidates
 follow in lexicographic order of their sorted permanent correction IDs. The
 printing ID and source face index break ties. Ordinals are recomputed on each build
 and can move when the candidate set or its supporting printings change.
-`initial`/`wording` records represent
-observed candidates, without equivalence, temporal ordering, supersession or
-human adoption claims. Effective dates stay null and temporal status unknown.
+`initial`/`wording` records represent observed candidates, without equivalence,
+temporal ordering, supersession or human adoption claims. Effective dates stay
+null and temporal status unknown.
 Printed effects and section kinds remain unknown; sections preserve empty strings
 and original order. Numeric symbols `-`, `X` and `Q` stay null in DB numeric
 columns and survive exactly in the report. Invalid numeric values fail.
