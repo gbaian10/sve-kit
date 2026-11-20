@@ -143,7 +143,8 @@ async function post(
     method: "POST",
     headers: { "Content-Type": "application/json", ...headers },
     body: JSON.stringify(body),
-    redirect: "error",
+    // Workers reject redirect: "error"; with "manual" a 3xx is not ok and fails below.
+    redirect: "manual",
     signal: AbortSignal.timeout(10_000),
   })
   if (!response.ok) throw new Error("Upstream request failed")
