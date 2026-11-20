@@ -2929,6 +2929,16 @@ pub(super) struct PlayCosts {
     pub optional_cost: Option<OptionalCost>,
     pub optional_cost_delta: Option<i64>,
     pub optional_cost_set: Option<i64>,
+    pub alt_cost: Option<AlternativePlayCost>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct AlternativePlayCost {
+    pub r#if: CostCondition,
+    pub cost: OptionalCost,
+    #[serde(default)]
+    pub may: bool,
 }
 
 #[derive(Deserialize)]

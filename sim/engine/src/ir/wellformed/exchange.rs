@@ -6,9 +6,9 @@ use crate::ir::{
     Action, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, CounterOperation, Decision,
     DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, Holder, InputMode,
     InstructionContext, Int, KeywordId, MoveDestination, MoveReason, Nat, ObjectOperand,
-    ObjectProperty, OwnerZone, PlayCostExchange, PlayCostPayment, PlaySlot, PlayerRef,
-    PlayerRelation, PlayerSet, Posture, SelectionSnapshot, SelectionView, Selector, Visibility,
-    ZoneKind,
+    ObjectProperty, OwnerZone, PlayCostExchange, PlayCostExchangeChange, PlayCostPayment, PlaySlot,
+    PlayerRef, PlayerRelation, PlayerSet, Posture, SelectionSnapshot, SelectionView, Selector,
+    Visibility, ZoneKind,
 };
 
 #[expect(
@@ -53,13 +53,16 @@ impl Checker {
 
     pub(super) fn exchange(&mut self, exchange: &PlayCostExchange, has_set: &mut bool) -> Checked {
         match &exchange.change {
-            CostChange::Delta {
+            PlayCostExchangeChange::Adjust(CostChange::Delta {
                 amount: Expr::Literal(Int(value)),
-            } if *value <= 0 || exchange_shape::pp_increase(exchange) => {}
-            CostChange::Set {
+            }) if *value <= 0 || exchange_shape::pp_increase(exchange) => {}
+            PlayCostExchangeChange::Adjust(CostChange::Set {
                 amount: Expr::Literal(Int(value)),
-            } if *value >= 0 && !*has_set => *has_set = true,
-            CostChange::Delta { .. } | CostChange::Set { .. } => return self.reject(),
+            }) if *value >= 0 && !*has_set => *has_set = true,
+            PlayCostExchangeChange::ReplaceOriginal { condition, .. } => {
+                self.isolated(|checker| checker.boolean(condition))?;
+            }
+            PlayCostExchangeChange::Adjust(_) => return self.reject(),
         }
         if !self.scopes.insert(exchange.scope) {
             return Err(self.error(WellFormedReason::DuplicateScope));

@@ -374,13 +374,9 @@ fn lower_play_costs(
                 if exchange.is_some() {
                     return Err(unsupported(entry_path));
                 }
-                payment_result = Some(exchange::bindings(
-                    play.optional_cost
-                        .as_ref()
-                        .ok_or_else(|| unsupported(entry_path))?,
-                    &lowered.node,
-                    entry_path,
-                )?);
+                if let Some(optional) = &play.optional_cost {
+                    payment_result = Some(exchange::bindings(optional, &lowered.node, entry_path)?);
+                }
                 exchange = Some(lowered);
             }
         }

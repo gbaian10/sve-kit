@@ -10,7 +10,7 @@ pub(crate) const fn pp_increase(exchange: &PlayCostExchange) -> bool {
     exchange.materials.is_empty()
         && exchange.route.is_none()
         && matches!(&exchange.cost, super::CostSpec::Ordered { steps } if steps.is_empty())
-        && matches!(&exchange.change, super::CostChange::Delta { amount: Expr::Literal(super::Int(value)) } if *value > 0)
+        && matches!(&exchange.change, super::PlayCostExchangeChange::Adjust(super::CostChange::Delta { amount: Expr::Literal(super::Int(value)) }) if *value > 0)
 }
 
 pub(crate) fn predicate(selector: &Selector) -> Option<(&Expr<Bool>, bool)> {

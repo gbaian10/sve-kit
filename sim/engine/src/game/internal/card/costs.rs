@@ -4,7 +4,9 @@ use crate::ir::flip_cost as flip_payment;
 use crate::ir::play_target_cost;
 use crate::ir::quick::card_permission;
 use crate::ir::reveal_cost as reveal_payment;
-use crate::ir::{AbilityKind, Bool, CostOverride, FaceId, Located, PlayCostPayment};
+use crate::ir::{
+    AbilityKind, Bool, CostOverride, FaceId, Located, PlayCostExchangeChange, PlayCostPayment,
+};
 use crate::ir::{AbilityOrigin, AbilitySource, CostSpec, ObjectOperand};
 use crate::ir::{CostChange, Expr, Int, Nat, PlayerRef, Selector, SourceSpan};
 use alloc::collections::BTreeSet;
@@ -63,6 +65,11 @@ pub(super) fn check(game: &Game, card_no: &str, card: &WellFormedCardProgram) ->
                 u64::from(exchange.source.line),
             )
             .map_err(|error| at_source(error, &exchange.source))?;
+            if let PlayCostExchangeChange::ReplaceOriginal { condition, .. } = &exchange.node.change
+            {
+                CostConditionPlan::compile(condition, true)
+                    .map_err(|error| at_source(error, &exchange.source))?;
+            }
             for (_, step) in exchange
                 .node
                 .routes()
@@ -247,7 +254,7 @@ impl Game {
     pub(super) fn internal_card_play_cost_with(
         &self,
         execution: &Execution,
-        exchange: Option<&CostChange>,
+        exchange: Option<&PlayCostExchangeChange>,
     ) -> Result<i64> {
         let holder = &execution.context.source;
         let object = self.object(holder)?;
@@ -264,13 +271,24 @@ impl Game {
         self.quote_card_cost(execution, None)
     }
 
-    fn quote_card_cost(&self, execution: &Execution, exchange: Option<&CostChange>) -> Result<i64> {
+    fn quote_card_cost(
+        &self,
+        execution: &Execution,
+        exchange: Option<&PlayCostExchangeChange>,
+    ) -> Result<i64> {
         let holder = &execution.context.source;
         let object = self.object(holder)?;
         if object.state.get("cost").is_some() || !self.state.continuous.is_empty() {
             return Err(unsupported("typed payment state or prototype cost layers"));
         }
-        let printed_base = super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?;
+        let printed_base = if matches!(
+            exchange,
+            Some(PlayCostExchangeChange::ReplaceOriginal { .. })
+        ) {
+            0
+        } else {
+            super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?
+        };
         let mut base =
             if let Some(CostOverride::SetBase { amount }) = execution.cost_override.as_ref() {
                 amount.0
@@ -311,7 +329,7 @@ impl Game {
                 }
             }
         }
-        if let Some(change) = exchange {
+        if let Some(PlayCostExchangeChange::Adjust(change)) = exchange {
             match change {
                 CostChange::Set {
                     amount: Expr::Literal(Int(amount)),

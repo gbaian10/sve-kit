@@ -4,8 +4,9 @@ use crate::ir::{
     DecisionId, DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, InputMode,
     Instruction, InstructionContext, InstructionId, Int, KeywordId, MoveDestination, MoveReason,
     MoveSpec, Nat, ObjectOperand, ObjectProperty, ObjectView, OwnerZone, PlayCostExchange,
-    PlaySlot, PlayerRef, Posture, PostureRead, Predicate, ReceiptId, SelectionConstraint,
-    SelectionGroup, SelectionSnapshot, SelectionView, Selector, Visibility, ZoneKind,
+    PlayCostExchangeChange, PlaySlot, PlayerRef, Posture, PostureRead, Predicate, ReceiptId,
+    SelectionConstraint, SelectionGroup, SelectionSnapshot, SelectionView, Selector, Visibility,
+    ZoneKind,
 };
 
 enum MaterialAction {
@@ -20,8 +21,18 @@ pub(super) fn lower(
     source: &SourceSpan,
     allocator: &mut Allocator,
 ) -> Result<Option<Located<PlayCostExchange>>, LoweringError> {
-    let path = format!("{}/play/optional_cost", source.author_path);
-    let Some(optional) = &play.optional_cost else {
+    let field = if play.alt_cost.is_some() {
+        "alt_cost"
+    } else {
+        "optional_cost"
+    };
+    let path = format!("{}/play/{field}", source.author_path);
+    let optional = play
+        .alt_cost
+        .as_ref()
+        .map(|alt| &alt.cost)
+        .or(play.optional_cost.as_ref());
+    let Some(optional) = optional else {
         if play.optional_cost_delta.is_some() || play.optional_cost_set.is_some() {
             return Err(unsupported(&path));
         }
@@ -30,17 +41,24 @@ pub(super) fn lower(
     if !single_kind(optional) {
         return Err(unsupported(&path));
     }
-    if let Some(pp) = optional.pp {
-        return pp_increase(pp, optional, play, source, allocator, &path).map(Some);
-    }
-    let change = match (play.optional_cost_delta, play.optional_cost_set) {
-        (Some(value), None) if value <= 0 => CostChange::Delta {
-            amount: Expr::Literal(Int(value)),
-        },
-        (None, Some(value)) if value >= 0 => CostChange::Set {
-            amount: Expr::Literal(Int(value)),
-        },
-        _ => return Err(unsupported(&path)),
+    let change = if let Some(alt) = &play.alt_cost {
+        PlayCostExchangeChange::ReplaceOriginal {
+            condition: costs::condition(&alt.r#if, entry, allocator, source, &path)?,
+            may: alt.may,
+        }
+    } else {
+        if let Some(pp) = optional.pp {
+            return pp_increase(pp, optional, play, source, allocator, &path).map(Some);
+        }
+        PlayCostExchangeChange::Adjust(match (play.optional_cost_delta, play.optional_cost_set) {
+            (Some(value), None) if value <= 0 => CostChange::Delta {
+                amount: Expr::Literal(Int(value)),
+            },
+            (None, Some(value)) if value >= 0 => CostChange::Set {
+                amount: Expr::Literal(Int(value)),
+            },
+            _ => return Err(unsupported(&path)),
+        })
     };
     if let Some(amount) = optional.earth_rite {
         return earth_rite(entry, source, allocator, &path, amount, change).map(Some);
@@ -145,11 +163,11 @@ fn pp_increase(
             materials: vec![],
             route: None,
             cost: CostSpec::Ordered { steps: vec![] },
-            change: CostChange::Delta {
+            change: PlayCostExchangeChange::Adjust(CostChange::Delta {
                 amount: Expr::Literal(
                     Int(i64::try_from(pp).map_err(|_private| unsupported(path))?),
                 ),
-            },
+            }),
             receipt: ReceiptId(allocator.id(path)?),
         },
     })
@@ -433,7 +451,7 @@ fn earth_rite(
     allocator: &mut Allocator,
     path: &str,
     amount: u64,
-    change: CostChange,
+    change: PlayCostExchangeChange,
 ) -> Result<Located<PlayCostExchange>, LoweringError> {
     let scope = allocator.scope(path)?;
     let body = ast::Body::default();

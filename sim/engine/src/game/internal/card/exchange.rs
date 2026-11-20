@@ -20,8 +20,9 @@ use crate::ir::exchange as exchange_shape;
 use crate::ir::flip_cost;
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, CostSpec, Decision, DecisionId, DiscardOutcome, FaceId, Int,
-    MoveMethod, MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange, PlayerId, Posture,
-    PostureEvent, Quantity, QuantityUnit, Selector, ZoneKind,
+    MoveMethod, MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange,
+    PlayCostExchangeChange, PlayerId, Posture, PostureEvent, Quantity, QuantityUnit, Selector,
+    ZoneKind,
 };
 use crate::ir::{BanishOutcome, Bool, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId};
 
@@ -335,10 +336,21 @@ impl Game {
             return Err(unsupported("exchange Quick payment"));
         }
         self.check_exchange_observers()?;
+        let accepted = match &exchange.node.change {
+            PlayCostExchangeChange::ReplaceOriginal { condition, may } => {
+                if !super::super::number_plan::CostConditionPlan::compile(condition, true)?
+                    .evaluate(execution, self)?
+                {
+                    return Ok(None);
+                }
+                (!may).then_some(true)
+            }
+            PlayCostExchangeChange::Adjust(_) => None,
+        };
         let state = ExchangeState {
             face: face.clone(),
             definition: exchange.node.clone(),
-            accepted: None,
+            accepted,
             route: (exchange.node.materials.len() == 1).then_some(0),
             selected: None,
             pay_pp: None,
