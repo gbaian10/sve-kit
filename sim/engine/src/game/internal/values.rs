@@ -477,6 +477,13 @@ impl Execution {
         }
     }
 
+    pub(super) fn declared_material_count(&self, binding: Binding<Selector>) -> Result<Nat> {
+        let Some(Slot::Objects { members, .. }) = self.slots.get(&binding.key()) else {
+            return Err(invalid("missing declared material count"));
+        };
+        Ok(Nat(u64::try_from(members.len()).map_err(invalid)?))
+    }
+
     pub(super) fn recipients(
         &self,
         game: &Game,
@@ -1159,6 +1166,15 @@ impl Execution {
 
     fn boolean_receipt(&self, read: &BoolFrozen) -> Result<Bool> {
         match read {
+            BoolFrozen::EntryAdditionalMaterial { event, from, name } => {
+                let materials = self
+                    .event_reads
+                    .entry_additional_materials(*event)
+                    .ok_or_else(|| invalid("missing entry payment event"))?;
+                Ok(Bool(materials.iter().any(|material| {
+                    material.from == *from && material.names.contains(name)
+                })))
+            }
             BoolFrozen::EvolutionSucceeded { receipt } => {
                 let ReceiptLocation::Local { id } = receipt.location() else {
                     return Err(unsupported("iterated effect evolution result"));

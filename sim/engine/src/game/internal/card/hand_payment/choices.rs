@@ -9,7 +9,9 @@ use crate::game::internal::conditions::{ConditionPlan, Policy};
 use crate::game::internal::discard::HandWait;
 use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{DistributionMember, InputDomain, TargetDomain, Wait, search};
-use crate::ir::{Action, CostSpec, Instruction, Nat, ObjectOperand, ObjectRef, Selector};
+use crate::ir::{
+    Action, CostSpec, DiscardMode, Instruction, Nat, ObjectOperand, ObjectRef, Selector,
+};
 
 struct Choice {
     wait: HandWait,
@@ -100,15 +102,27 @@ impl Game {
                 || matches!(action, Action::Fusion { .. })
                 || matches!(action, Action::Banish { objects: Selector::Objects { objects } }
                     if objects == &[ObjectOperand::SourceHolder {}]);
-            if matches!(action, Action::Discard { .. }) && !source_discard(action) {
+            if matches!(
+                action,
+                Action::Discard {
+                    mode: DiscardMode::Chosen { .. },
+                    ..
+                }
+            ) && !source_discard(action)
+            {
                 reserved |= selection(action)?.source;
             }
         }
         instructions
             .into_iter()
             .filter(|instruction| {
-                matches!(instruction.action, Action::Discard { .. })
-                    && !source_discard(&instruction.action)
+                matches!(
+                    instruction.action,
+                    Action::Discard {
+                        mode: DiscardMode::Chosen { .. },
+                        ..
+                    }
+                ) && !source_discard(&instruction.action)
                     && !execution.cost_materials.contains_key(&instruction.receipt)
             })
             .map(|instruction| self.internal_hand_choice(execution, instruction, reserved))

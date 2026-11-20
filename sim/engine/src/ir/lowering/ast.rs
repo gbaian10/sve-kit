@@ -256,12 +256,14 @@ pub(super) enum CostOperation {
     FlipUp(FlipMaterial),
     FlipDown(FlipMaterial),
     Pp(PpAmount),
+    PpMax(u64),
     Lesson(u64),
     Counter(CounterCost),
     EarthRite(u64),
     SkipTurn(SkipTurnCost),
     LeaderLife(u64),
     ToCemetery(Material),
+    ToDeck(ShuffledCost),
     ReturnToHand(Material),
     ToEx(ExMaterial),
     Banish(BanishMaterial),
@@ -280,6 +282,15 @@ pub(super) enum CostOperation {
 #[serde(deny_unknown_fields)]
 pub(super) struct SkipTurnCost {
     pub who: SelfPlayer,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ShuffledCost {
+    pub sel: PublicQuery,
+    pub n: u64,
+    #[serde(rename = "shuffle")]
+    pub _shuffle: True,
 }
 
 #[derive(Deserialize)]
@@ -328,11 +339,31 @@ pub(super) struct RevealedSelection {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum DiscardCost {
     Material(Box<HandMaterial>),
+    Random(RandomDiscardCost),
     Groups(Box<HandMaterialGroups>),
     Reference {
         r#ref: String,
         result: Option<String>,
     },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RandomDiscardCost {
+    #[serde(rename = "sel")]
+    pub _sel: OwnHand,
+    pub n: u64,
+    #[serde(rename = "random")]
+    pub _random: True,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct OwnHand {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: HandZone,
 }
 
 #[derive(Deserialize)]
@@ -3290,12 +3321,43 @@ pub(super) enum Condition {
     Combo(u64),
     Spellchain(u64),
     Necro(u64),
-    Did(String),
+    Did(DidResult),
     Paid(PaidReceipt),
     Cmp(Box<BodyComparison>),
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DidResult {
+    Named(String),
+    EntryPayment {
+        #[serde(rename = "result")]
+        _result: EntryPaymentRef,
+        r#where: EntryPaymentFilter,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryPaymentRef {
+    #[serde(rename = "entry_payment")]
+    pub _entry_payment: EntryPaymentKind,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EntryPaymentKind {
+    Additional,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryPaymentFilter {
+    pub name: String,
+    pub zone: TargetSingleZone,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -4452,7 +4514,8 @@ pub(super) struct RevealUntilSelector {
     pub who: SelfPlayer,
     pub zone: DeckZone,
     pub kind: RevealFollower,
-    pub orig_cost_le: u64,
+    pub orig_cost_le: Option<u64>,
+    pub orig_cost_gt: Option<Number>,
 }
 
 #[derive(Deserialize)]

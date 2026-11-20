@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP07-103:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        fanfare:
+          cost:
+            banish:
+              sel: { who: self, zone: cemetery, trait: 機械 }
+              n: 3
+          targets:
+            - bind: follower
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+              option: 1
+            - bind: amulet
+              from: { who: opp, zone: field, kind: amulet }
+              n: 1
+              option: 2
+          do:
+            - choice:
+                upto: 2
+                options:
+                  - - destroy: { ref: follower }
+                  - - destroy: { ref: amulet }
+                  - - damage: { to: { leaders: opponents }, n: 3 }
+                  - - search:
+                        sel: { who: self, zone: deck, trait: 機械, not_same_name_as_this: true }
+                        n: 1
+                        to: hand

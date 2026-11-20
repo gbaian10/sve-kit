@@ -165,6 +165,40 @@ fn lower_operations(
                 parameters.extend(decision);
                 action
             }
+            ast::CostOperation::ToDeck(material) => {
+                if material.n == 0
+                    || !matches!(material.sel.who, ast::Side::Controller)
+                    || !matches!(material.sel.zone, ast::PublicZone::Cemetery)
+                {
+                    return Err(unsupported(path));
+                }
+                let count = super::Nat(material.n);
+                let (objects, decision) = super::material::choice(
+                    context.card_allocator,
+                    &mut context.allocator,
+                    context.scope,
+                    &material.sel,
+                    Cardinality {
+                        minimum: count,
+                        maximum: Some(count),
+                    },
+                    path,
+                )?;
+                parameters.push(decision);
+                Action::Move {
+                    objects,
+                    movement: MoveSpec {
+                        to: MoveDestination::Owners {
+                            zone: OwnerZone::Deck,
+                        },
+                        position: None,
+                        order: None,
+                        initial_posture: None,
+                        entry_effects: vec![],
+                    },
+                    reason: MoveReason::Put,
+                }
+            }
             ast::CostOperation::Counter(value) => {
                 let (action, decision) = super::counters::cost(context, value, path)?;
                 parameters.extend(decision);
@@ -304,6 +338,17 @@ fn lower_operations(
             ast::CostOperation::Discard(ast::DiscardCost::Groups(material)) => {
                 super::hand_payment::grouped(context.card_allocator, material, path)?
             }
+            ast::CostOperation::Discard(ast::DiscardCost::Random(material)) => {
+                context.random_discard_cost(material.n, path)?
+            }
+            ast::CostOperation::PpMax(amount) if *amount > 0 => Action::Resource {
+                player: PlayerRef::Controller {},
+                resource: Resource::PpMaximum,
+                operation: ResourceOperation::Pay,
+                amount: Expr::Literal(Int(
+                    i64::try_from(*amount).map_err(|_overflow| unsupported(path))?
+                )),
+            },
             ast::CostOperation::Pp(amount) => Action::Resource {
                 player: PlayerRef::Controller {},
                 resource: Resource::PpCurrent,
@@ -376,7 +421,8 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
+            ast::CostOperation::PpMax(_)
+            | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)
             | ast::CostOperation::SelfToCemetery(false)
@@ -459,6 +505,26 @@ fn lower_operations(
                 action,
             }),
         });
+        if matches!(operation, ast::CostOperation::ToDeck(_)) {
+            let shuffle_id = context.card_allocator.id(path)?;
+            steps.push(CostStep {
+                keyword: None,
+                materials: None,
+                instruction: Box::new(Instruction {
+                    id: InstructionId(shuffle_id),
+                    receipt: ReceiptId(shuffle_id),
+                    actor: PlayerRef::Controller {},
+                    source: source.clone(),
+                    precondition: None,
+                    context: InstructionContext::Cost,
+                    action: Action::Shuffle {
+                        deck: PlayerRef::Controller {},
+                        scope: super::super::ShuffleScope::FullZone {},
+                        randomness: super::super::RandomnessPolicy::FreshRequest,
+                    },
+                }),
+            });
+        }
     }
     if !multiple_materials && parameters.len() > 1 {
         return Err(unsupported(path));
@@ -484,6 +550,8 @@ fn material_operation(
         ast::CostOperation::Counter(_)
         | ast::CostOperation::EarthRite(_)
         | ast::CostOperation::Pp(_)
+        | ast::CostOperation::PpMax(_)
+        | ast::CostOperation::ToDeck(_)
         | ast::CostOperation::Lesson(_)
         | ast::CostOperation::LeaderLife(_)
         | ast::CostOperation::BanishSelf(_)

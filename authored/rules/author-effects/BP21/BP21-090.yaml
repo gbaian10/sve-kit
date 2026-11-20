@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP21-090:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        spell:
+          targets:
+            - bind: first
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+              option: 1
+            - bind: second
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+              option: 2
+          do:
+            - choice:
+                upto: 2
+                options:
+                  - - pay:
+                        cost:
+                          banish:
+                            sel: { who: self, zone: cemetery, kind: follower, class: ナイトメア }
+                            n: 1
+                            result: nightmare
+                        do:
+                          - damage:
+                              to: first
+                              n:
+                                times:
+                                  - 2
+                                  - power_of: { objects_of: nightmare, view: before }
+                  - - pay:
+                        cost:
+                          banish:
+                            sel:
+                              { who: self, zone: cemetery, kind: follower, not_class: ナイトメア }
+                            n: 1
+                            result: other
+                        do:
+                          - damage:
+                              { to: second, n: { power_of: { objects_of: other, view: before } } }

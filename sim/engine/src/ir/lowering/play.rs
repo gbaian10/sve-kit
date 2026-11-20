@@ -1126,6 +1126,36 @@ impl BodyContext<'_> {
         })
     }
 
+    fn numeric_mode_limit(
+        &mut self,
+        argument: &super::Value,
+        path: &str,
+    ) -> Result<Expr<Nat>, LoweringError> {
+        let number: ast::Number = super::decode(argument.clone(), path)?;
+        match (&number, &self.declared_material) {
+            (
+                ast::Number::CountOf {
+                    count_of: ast::CountOf::Named(name),
+                },
+                Some((declared, reference)),
+            ) if name == declared => Ok(Expr::Live(Box::new(super::NatRead::ZoneCount {
+                selector: Selector::Bound {
+                    reference: *reference,
+                },
+            }))),
+            (ast::Number::Per { per }, _)
+                if per.unit > 0 && matches!(per.of, ast::Number::Count { .. }) =>
+            {
+                let value = self.number(&number, path, &mut BTreeSet::new())?;
+                if !public_numbers::check(&value) {
+                    return Err(unsupported(path));
+                }
+                Ok(Expr::Compute(Box::new(NatOperation::CheckedInt { value })))
+            }
+            _ => Err(unsupported(path)),
+        }
+    }
+
     pub(super) fn choice(
         &mut self,
         choice: &ast::Choice,
@@ -1188,17 +1218,8 @@ impl BodyContext<'_> {
             if choice.n.is_some() || choice.instead.is_some() || choice.exclude_chosen.is_some() {
                 return Err(unsupported(path));
             }
-            let number: ast::Number = super::decode(argument.as_ref().clone(), path)?;
-            if !matches!(&number,ast::Number::Per{per} if per.unit>0 && matches!(per.of,ast::Number::Count{..}))
-            {
-                return Err(unsupported(path));
-            }
-            let value = self.number(&number, path, &mut BTreeSet::new())?;
-            if !public_numbers::check(&value) {
-                return Err(unsupported(path));
-            }
             (
-                Expr::Compute(Box::new(NatOperation::CheckedInt { value })),
+                self.numeric_mode_limit(argument, path)?,
                 Cardinality {
                     minimum: Nat(1),
                     maximum: None,

@@ -7,8 +7,26 @@ use super::{
 };
 use crate::ir::events::discard::DiscardFilter;
 use crate::ir::events::discard::{DiscardCard, DiscardSource};
-use crate::ir::{BatchPolicy, ClassId, TraitId, TriggerAggregation};
+use crate::ir::{BatchPolicy, ClassId, ObjectRef, TraitId, TriggerAggregation};
 use alloc::collections::BTreeSet;
+
+fn hand_zone(player: &PlayerRef, binding: Binding<ObjectRef>) -> Selector {
+    Selector::Zone {
+        players: PlayerSet {
+            relation: PlayerRelation::SelfPlayer,
+            relative_to: player.clone(),
+            cardinality: Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            },
+            text_quantifier: TextQuantifier::Implicit,
+        },
+        zone: ZoneKind::Hand,
+        view: SelectionView::Current {},
+        binding,
+        predicate: Box::new(Expr::Literal(Bool(true))),
+    }
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -16,20 +34,29 @@ use alloc::collections::BTreeSet;
 )]
 impl BodyContext<'_> {
     fn whole_hand(&mut self, player: &PlayerRef, path: &str) -> Result<Selector, LoweringError> {
-        Ok(Selector::Zone {
-            players: PlayerSet {
-                relation: PlayerRelation::SelfPlayer,
-                relative_to: player.clone(),
-                cardinality: Cardinality {
-                    minimum: Nat(1),
-                    maximum: Some(Nat(1)),
-                },
-                text_quantifier: TextQuantifier::Implicit,
+        Ok(hand_zone(
+            player,
+            Binding::new(self.allocator.id(path)?, self.scope),
+        ))
+    }
+
+    pub(super) fn random_discard_cost(
+        &mut self,
+        count: u64,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        if count == 0 {
+            return Err(unsupported(path));
+        }
+        let player = PlayerRef::Controller {};
+        Ok(Action::Discard {
+            mode: DiscardMode::Random {
+                population: hand_zone(&player, Binding::new(1, self.card_allocator.scope(path)?)),
+                count: Expr::Literal(Int(
+                    i64::try_from(count).map_err(|_overflow| unsupported(path))?
+                )),
             },
-            zone: ZoneKind::Hand,
-            view: SelectionView::Current {},
-            binding: Binding::new(self.allocator.id(path)?, self.scope),
-            predicate: Box::new(Expr::Literal(Bool(true))),
+            player,
         })
     }
 

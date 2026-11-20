@@ -451,11 +451,7 @@ fn raw_paid_material_number_does_not_open_other_properties_or_future_payments() 
     let original = lowerer().lower(&tree(&fee(), &read)).unwrap()["unit-follower"]
         .card()
         .clone();
-    for property in [
-        NumericProperty::Count,
-        NumericProperty::Life,
-        NumericProperty::OriginalCost,
-    ] {
+    for property in [NumericProperty::Count, NumericProperty::Life] {
         let mut raw = original.clone();
         let Node::Instruction { instruction } =
             &mut raw.abilities[0].node.body.as_mut().unwrap().steps[0].node
@@ -481,7 +477,7 @@ fn raw_paid_material_number_does_not_open_other_properties_or_future_payments() 
         *target = property;
         assert!(
             WellFormedCardProgram::check(raw).is_err(),
-            "the receipt only retains the supported cost and attack projections"
+            "the receipt only exposes supported cost and attack properties"
         );
     }
     let mut no_payment = original;

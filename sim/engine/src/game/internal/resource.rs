@@ -10,7 +10,10 @@ use super::{
     unsupported,
 };
 use crate::EngineFailure;
-use crate::ir::{Action, Instruction, Int, PlayerId, PlayerRef, Resource, ResourceOperation};
+use crate::ir::{
+    Action, Expr, Instruction, Int, PlayerId, PlayerRef, Quantity, QuantityUnit, Resource,
+    ResourceOperation,
+};
 use serde_json::json;
 
 /// Authority-only result of one body resource instruction.
@@ -52,11 +55,60 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     Ok(())
 }
 
+pub(super) const fn maximum_pp_cost(action: &Action) -> bool {
+    matches!(action, Action::Resource {
+        player: PlayerRef::Controller {},
+        resource: Resource::PpMaximum,
+        operation: ResourceOperation::Pay,
+        amount: Expr::Literal(amount),
+    } if amount.0 > 0)
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Body resource increases mutate the authoritative player resource."
 )]
 impl Game {
+    pub(super) fn internal_pay_maximum_pp(
+        &mut self,
+        execution: &Execution,
+        amount: Int,
+    ) -> Result<Quantity> {
+        let seat = seat_name(execution.context.controller)?;
+        let pp = &mut self.player_mut(seat)?.pp;
+        let read = |key| {
+            pp.get(key)
+                .and_then(serde_json::Value::as_i64)
+                .ok_or_else(|| invalid("invalid PP value"))
+        };
+        let before = read("max")?;
+        let current = read("current")?;
+        if before < amount.0 {
+            return Err(EngineFailure::IllegalPlay("insufficient maximum PP".into()));
+        }
+        let after = before
+            .checked_sub(amount.0)
+            .ok_or_else(|| invalid("maximum PP payment overflow"))?;
+        let delta = amount
+            .0
+            .checked_neg()
+            .ok_or_else(|| invalid("maximum PP payment overflow"))?;
+        pp["max"] = json!(after);
+        pp["current"] = json!(current.min(after));
+        let frame = execution.frame();
+        let group = self.group();
+        self.emit(
+            json!({"kind":"PP最大値変化","player":seat,"source":frame.source,
+                "delta":delta,"before":before,"after":after}),
+            &frame.cause,
+            group,
+        );
+        Ok(Quantity {
+            amount,
+            unit: QuantityUnit::Pp,
+        })
+    }
+
     pub(super) fn internal_resource(
         &mut self,
         execution: &mut Execution,

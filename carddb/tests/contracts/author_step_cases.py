@@ -173,7 +173,12 @@ SYNTHETIC_ACTIONS: list[dict[str, JsonValue]] = [
     },
     {
         "reveal_until": {
-            "sel": {"who": "self", "zone": "deck", "kind": "follower"},
+            "sel": {
+                "who": "self",
+                "zone": "deck",
+                "kind": "follower",
+                "orig_cost_le": 3,
+            },
             "n": 1,
             "bind": "seen",
             "matched": "hits",

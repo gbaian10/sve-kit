@@ -233,6 +233,10 @@ impl Game {
         (original, effective)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Each entry fact shares one immutable context across its trigger observers."
+    )]
     pub(in crate::game) fn internal_field_events(
         &mut self,
         previous: &[Object],
@@ -306,13 +310,18 @@ impl Game {
                 continue;
             }
             // Only a matching occurrence publishes the origin; unadmitted zones still reject it.
+            let payment = frame
+                .entry_payment
+                .as_ref()
+                .filter(|_| frame.source == old.id);
             let event = EnterFieldEvent {
                 object,
                 from: entry_origin(self, old)?,
                 controller: entry_controller,
                 characters,
                 method,
-                play_receipt: None,
+                play_receipt: payment.map(|(receipt, _)| *receipt),
+                additional_materials: payment.map_or_else(Vec::new, |(_, members)| members.clone()),
                 ability_source_traits: ability_source_traits.clone(),
             };
             let position = self.entry_position(event.controller, &old.id)?;

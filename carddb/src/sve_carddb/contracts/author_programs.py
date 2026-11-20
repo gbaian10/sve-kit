@@ -1795,9 +1795,28 @@ type RevealTop = RevealTopFields
 type RevealAction = RevealRef | RevealTop
 
 
+class RevealUntilSelectorFields(TypedDict):
+    who: Literal["self"]
+    zone: Literal["deck"]
+    kind: Literal["follower"]
+
+
+@with_config(CONFIG)
+class RevealUntilAtMost(RevealUntilSelectorFields):
+    orig_cost_le: Quantity
+
+
+@with_config(CONFIG)
+class RevealUntilAbove(RevealUntilSelectorFields):
+    orig_cost_gt: Quantity
+
+
+type RevealUntilSelector = RevealUntilAtMost | RevealUntilAbove
+
+
 @with_config(CONFIG)
 class RevealUntilActionFields(TypedDict):
-    sel: ObjectSel
+    sel: RevealUntilSelector
 
     n: Quantity
 

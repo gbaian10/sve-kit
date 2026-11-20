@@ -75,6 +75,17 @@ pub(crate) const fn action(action: &Action) -> bool {
         || matches!(action, Action::Shuffle { deck: PlayerRef::Controller {}, .. }) && consumed(action).is_some())
 }
 
+pub(crate) const fn payment(action: &Action) -> bool {
+    matches!(
+        action,
+        Action::Shuffle {
+            deck: PlayerRef::Controller {},
+            scope: ShuffleScope::FullZone {},
+            randomness: RandomnessPolicy::FreshRequest,
+        }
+    )
+}
+
 fn instruction(node: &Located<Node>) -> Option<&Instruction> {
     match &node.node {
         Node::Instruction { instruction } => Some(instruction),

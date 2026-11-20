@@ -1,11 +1,15 @@
 //! Public prefix observation admits only the printed original-cost follower condition.
 use super::{
-    Action, Binding, Bool, CardKind, CharacteristicView, Comparison, Expr, Int, IntOperation,
-    KindRead, MemberProjection, Nat, NumberRead, ObjectOperand, ObjectReceipt, ObjectRef,
-    ObjectView, PlayerRef, Predicate, RevealUntilMembers, Selector,
+    Action, Binding, Bool, CardKind, CharacteristicView, Comparison, Expr, Int, IntFrozen,
+    IntOperation, KindRead, MemberProjection, Nat, NumberRead, NumericProperty, ObjectOperand,
+    ObjectReceipt, ObjectRef, ObjectView, PlayerRef, Predicate, RevealUntilMembers, Selector,
 };
 
-pub(crate) fn filter(candidate: Binding<ObjectRef>, maximum: Int) -> Expr<Bool> {
+pub(crate) fn filter(
+    candidate: Binding<ObjectRef>,
+    comparison: Comparison,
+    threshold: Expr<Int>,
+) -> Expr<Bool> {
     let object = ObjectView::Current {
         object: Box::new(ObjectOperand::Bound { binding: candidate }),
     };
@@ -25,14 +29,14 @@ pub(crate) fn filter(candidate: Binding<ObjectRef>, maximum: Int) -> Expr<Bool> 
                         view: CharacteristicView::Original,
                     },
                 })),
-                comparison: Comparison::LessEqual,
-                right: Expr::Literal(maximum),
+                comparison,
+                right: threshold,
             })),
         ],
     }))
 }
 
-pub(crate) fn action(action: &Action) -> bool {
+pub(crate) fn cost_filter(action: &Action) -> Option<(Comparison, &Expr<Int>)> {
     let Action::RevealUntil {
         deck: PlayerRef::Controller {},
         candidate,
@@ -40,25 +44,43 @@ pub(crate) fn action(action: &Action) -> bool {
         required: Expr::Literal(Nat(required)),
     } = action
     else {
-        return false;
+        return None;
     };
     let Expr::Compute(operation) = predicate else {
-        return false;
+        return None;
     };
     let Predicate::And { predicates } = operation.as_ref() else {
-        return false;
+        return None;
     };
-    let Some(Expr::Compute(comparison)) = predicates.get(1) else {
-        return false;
+    let Some(Expr::Compute(cost_test)) = predicates.get(1) else {
+        return None;
     };
     let Predicate::CompareInt {
-        right: Expr::Literal(maximum),
-        ..
-    } = comparison.as_ref()
+        comparison, right, ..
+    } = cost_test.as_ref()
     else {
-        return false;
+        return None;
     };
-    *required > 0 && maximum.0 >= 0 && *predicate == filter(*candidate, *maximum)
+    let allowed = match (comparison, right) {
+        (Comparison::LessEqual | Comparison::Greater, Expr::Literal(bound)) => bound.0 >= 0,
+        (Comparison::Greater, Expr::Frozen(read)) => matches!(
+            read.as_ref(),
+            IntFrozen::PaidMaterialNumber {
+                property: NumericProperty::OriginalCost,
+                ..
+            }
+        ),
+        (Comparison::Greater, Expr::Compute(read)) => matches!(
+            read.as_ref(),
+            IntOperation::Sum {
+                objects: Selector::Bound { .. },
+                property: NumericProperty::OriginalCost
+            }
+        ),
+        _ => false,
+    };
+    (*required > 0 && allowed && *predicate == filter(*candidate, *comparison, right.clone()))
+        .then_some((*comparison, right))
 }
 
 pub(crate) const fn matched(selector: &Selector) -> bool {

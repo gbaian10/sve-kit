@@ -25,6 +25,7 @@ use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::repeated_moves as ir_repeated_moves;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::shuffle;
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::trigger_restrictions as trigger_permission;
 use crate::ir::{
@@ -905,6 +906,10 @@ impl Game {
         })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Cost actions share one dispatch for successful quantities and frozen materials."
+    )]
     fn internal_payment_step(
         &mut self,
         execution: &mut Execution,
@@ -927,6 +932,17 @@ impl Game {
                 Vec::new(),
                 Vec::new(),
             ),
+            action if shuffle::payment(action) => {
+                self.internal_shuffle(execution, &step.instruction)?;
+                (
+                    Quantity {
+                        amount: Int(1),
+                        unit: QuantityUnit::Times,
+                    },
+                    Vec::new(),
+                    Vec::new(),
+                )
+            }
             Action::Fusion { .. } => self.internal_fusion_payment(execution, &step.instruction)?,
             Action::Discard { .. } => {
                 let (quantity, subjects) =
@@ -936,7 +952,20 @@ impl Game {
             action if reveal_cost::selected(execution, action) => {
                 self.internal_hand_material_cost_payment(execution, &step.instruction)?
             }
-            Action::Resource { player, amount, .. } => {
+            action @ Action::Resource {
+                amount: Expr::Literal(amount),
+                ..
+            } if super::resource::maximum_pp_cost(action) => (
+                self.internal_pay_maximum_pp(execution, *amount)?,
+                Vec::new(),
+                Vec::new(),
+            ),
+            Action::Resource {
+                player,
+                resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay,
+                amount,
+            } => {
                 let payer = execution.player(self, player)?;
                 let amount = execution.integer(self, amount)?;
                 let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;
@@ -1438,6 +1467,7 @@ pub(super) fn check_payment(
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             Action::Fusion { .. } => fusion::check_cost(&instruction.action),
+            action if shuffle::payment(action) => !quick,
             action if hand_payment::source_to_ex(action) => true,
             action => material::check_cost(action, play),
         };

@@ -7,6 +7,7 @@ use crate::game::internal::{
 };
 use crate::ir::events::discard as discard_header;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::shuffle;
 use crate::ir::x_pp;
 use crate::ir::{
     Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Control, CostSpec, DecisionId,
@@ -61,6 +62,7 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
             || !(matches!(&instruction.action, Action::Resource { player,
             resource: Resource::PpCurrent, operation: ResourceOperation::Pay,
             amount } if *player == instruction.actor && x_pp::cost_amount(amount))
+                || (foreign && super::super::resource::maximum_pp_cost(&instruction.action))
                 || (required && super::super::life::is_cost(&instruction.action))
                 || (required
                     && matches!(
@@ -72,6 +74,7 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
                     && matches!(instruction.action, Action::Banish { .. })
                     && super::super::movement::deck_top(&instruction.action).is_some())
                 || super::hand_payment::check_cost(&instruction.action)
+                || shuffle::payment(&instruction.action)
                 || super::material::source_field_cost(&instruction.action)
                 || super::super::counters::is_cost(&instruction.action)
                 || super::material::cost_objects(&instruction.action)
@@ -102,6 +105,15 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                     ) || super::triggers::phase_in_zone(&ability.node, ZoneKind::Cemetery))
                         && resolution_costs(body, &source_resolution_cost))
                         || hand_pp_payment(&ability.node)))
+                && !(ability.node.kind == AbilityKind::Triggered
+                    && matches!(
+                        &ability.node.source.origin,
+                        AbilityOrigin::Keyword {
+                            keyword: KeywordId::Lastword,
+                            ..
+                        }
+                    )
+                    && resolution_costs(body, &maximum_pp))
             {
                 return Err(unsupported(
                     "resolution source payment needs a field auto ability",
@@ -131,6 +143,7 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                         || (optional_payment::required(body)
                             && super::super::life::is_cost(&step.instruction.action))
                         || super::hand_payment::check_cost(&step.instruction.action)
+                        || shuffle::payment(&step.instruction.action)
                         || play.parameters.iter().any(|decision| {
                             reveal_payment::field_parameter(&ability.node, decision)
                                 && reveal_payment::selected(
@@ -199,6 +212,12 @@ pub(super) fn cemetery_self_banish(ability: &Ability) -> bool {
 
 fn positive_pp(costs: &CostSpec) -> bool {
     player_pp(costs) == Some(&PlayerRef::Controller {})
+}
+
+fn maximum_pp(costs: &CostSpec) -> bool {
+    matches!(costs, CostSpec::Ordered { steps }
+        if matches!(steps.as_slice(), [step]
+            if super::super::resource::maximum_pp_cost(&step.instruction.action)))
 }
 
 fn player_pp(costs: &CostSpec) -> Option<&PlayerRef> {
@@ -326,6 +345,7 @@ fn earth_rite_cost(costs: &CostSpec) -> bool {
 fn source_resolution_cost(costs: &CostSpec) -> bool {
     earth_rite_cost(costs)
         || player_pp(costs).is_some()
+        || maximum_pp(costs)
         || matches!(costs, CostSpec::Ordered { steps } if !steps.is_empty()
             && steps.iter().all(|cost| super::material::source_field_cost(&cost.instruction.action)))
 }
@@ -538,6 +558,7 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
     {
         if (positive_pp(costs) && discard_return(on_paid).is_some())
             || player_pp(costs).is_some()
+            || maximum_pp(costs)
             || (!steps.is_empty()
                 && steps
                     .iter()

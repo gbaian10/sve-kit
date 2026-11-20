@@ -669,10 +669,7 @@ fn evaluated_counts(
     let mut constraint = printed.clone();
     if let [bound] = constraint.aggregate_bounds.as_slice() {
         let count = if let Some(binding) = public_numbers::material_target_limit(&bound.value) {
-            let Some(Slot::Objects { members, .. }) = execution.slots.get(&binding.key()) else {
-                return Err(invalid("missing declared material count"));
-            };
-            Nat(u64::try_from(members.len()).map_err(invalid)?)
+            execution.declared_material_count(binding)?
         } else {
             Nat(u64::try_from(execution.integer(game, &bound.value)?.0.max(0)).map_err(invalid)?)
         };

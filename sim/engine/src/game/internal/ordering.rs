@@ -9,6 +9,7 @@ use crate::ir::{phase_restrictions, play_restrictions};
 use super::{
     Execution, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, seat_name, unsupported,
 };
+use crate::ir::BoolFrozen;
 use crate::ir::events::attack::target_plan;
 use crate::ir::history_turn::public::{banished_condition, damaged_plan};
 use crate::ir::history_turn::{HistoryPlan, NumericHistoryPlan};
@@ -113,7 +114,7 @@ fn mask_public_prefix(node: &mut Node) -> Result<()> {
     if let Node::Instruction { instruction } = node
         && matches!(instruction.action, Action::RevealUntil { .. })
     {
-        if !reveal_shape::action(&instruction.action)
+        if reveal_shape::cost_filter(&instruction.action).is_none()
             || instruction.actor != (PlayerRef::Controller {})
             || instruction.context != InstructionContext::Effect
             || instruction.precondition.is_some()
@@ -418,7 +419,10 @@ fn mask_prevention(inspected: &mut Node) -> Result<()> {
 }
 
 fn check_control_guard(condition: &Expr<Bool>, source: &SourceSpan) -> Result<()> {
-    if banished_condition(condition).is_some() {
+    if banished_condition(condition).is_some()
+        || matches!(condition, Expr::Frozen(read)
+            if matches!(read.as_ref(), BoolFrozen::EntryAdditionalMaterial { .. }))
+    {
         Ok(())
     } else {
         check_condition(condition, source)

@@ -1,5 +1,8 @@
 use super::{BodyContext, LoweringError, ast, unsupported};
-use crate::ir::{Expr, Int, IntFrozen, NumericProperty, ReceiptId, ReceiptReference};
+use crate::ir::{
+    Expr, Int, IntFrozen, MovementReceipt, NumericProperty, ObjectReceipt, ReceiptId,
+    ReceiptReference,
+};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -122,13 +125,21 @@ impl BodyContext<'_> {
         property: NumericProperty,
         path: &str,
     ) -> Result<Expr<Int>, LoweringError> {
-        let receipt = *self
-            .receipt_reads
-            .paid_materials
-            .get(name)
-            .ok_or_else(|| unsupported(path))?;
+        let receipt = if let Some(&id) = self.receipt_reads.paid_materials.get(name) {
+            MovementReceipt::Move {
+                receipt: ReceiptReference::new(id),
+            }
+        } else if let Some(ObjectReceipt::Movement {
+            receipt: receipt @ MovementReceipt::Banish { .. },
+        }) = self.receipt_reads.paid_names.get(name)
+            && property == NumericProperty::Attack
+        {
+            receipt.clone()
+        } else {
+            return Err(unsupported(path));
+        };
         Ok(Expr::Frozen(Box::new(IntFrozen::PaidMaterialNumber {
-            receipt: ReceiptReference::new(receipt),
+            receipt,
             property,
         })))
     }

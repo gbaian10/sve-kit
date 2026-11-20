@@ -358,6 +358,9 @@ impl Game {
             class,
             title,
             cost: Info::Present(Int(self.internal_effective_cost(holder)?)),
+            original_cost: Int(super::super::cost::printed_cost(
+                &self.internal_cost_print(holder)?["cost"],
+            )?),
             attack,
             life,
             abilities,

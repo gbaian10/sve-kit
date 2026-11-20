@@ -355,7 +355,27 @@ impl BodyContext<'_> {
                 predicate: self.condition(item, path)?,
             },
             ast::Condition::Cmp(value) => return self.comparison_condition(value, path),
-            ast::Condition::Did(name) => return self.move_success(name, path),
+            ast::Condition::Did(ast::DidResult::Named(name)) => {
+                return self.move_success(name, path);
+            }
+            ast::Condition::Did(ast::DidResult::EntryPayment { r#where, .. }) => {
+                let event = self.entry_event.ok_or_else(|| unsupported(path))?;
+                let from = match r#where.zone {
+                    ast::TargetSingleZone::Field => ZoneKind::Field,
+                    ast::TargetSingleZone::Hand => ZoneKind::Hand,
+                    ast::TargetSingleZone::Ex => ZoneKind::Ex,
+                    ast::TargetSingleZone::Cemetery => ZoneKind::Cemetery,
+                    ast::TargetSingleZone::Banish => ZoneKind::Banish,
+                    ast::TargetSingleZone::EvolveDeck => ZoneKind::Evolve,
+                };
+                return Ok(Expr::Frozen(Box::new(
+                    super::super::BoolFrozen::EntryAdditionalMaterial {
+                        event,
+                        from,
+                        name: super::super::CardName(r#where.name.clone()),
+                    },
+                )));
+            }
             ast::Condition::Paid(paid) => return self.paid_condition(paid, path),
         })))
     }
@@ -1141,9 +1161,12 @@ impl BodyContext<'_> {
                         property: super::super::NumericProperty::OriginalCost,
                     })))
                 }
-                ast::Observation::Binding(_) | ast::Observation::Before { .. } => {
-                    Err(unsupported(path))
-                }
+                ast::Observation::Before { objects_of, .. } => self.paid_material_number(
+                    objects_of,
+                    super::super::NumericProperty::OriginalCost,
+                    path,
+                ),
+                ast::Observation::Binding(_) => Err(unsupported(path)),
             },
             ast::Number::HistoryCount { history_count } => {
                 if history_count.at_least.is_some() {

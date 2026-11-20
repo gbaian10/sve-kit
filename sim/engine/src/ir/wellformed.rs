@@ -239,6 +239,7 @@ struct Environment {
     capture_times: BTreeMap<Key, CaptureTime>,
     field_act_materials: BTreeSet<Key>,
     field_materials: BTreeSet<Key>,
+    cemetery_materials: BTreeSet<Key>,
     reveal_materials: BTreeSet<Key>,
     single_material_moves: BTreeSet<ReceiptId>,
     single_discards: BTreeSet<ReceiptId>,
@@ -254,6 +255,8 @@ impl Environment {
             .extend(other.field_act_materials.iter().copied());
         self.field_materials
             .extend(other.field_materials.iter().copied());
+        self.cemetery_materials
+            .extend(other.cemetery_materials.iter().copied());
         self.reveal_materials
             .extend(other.reveal_materials.iter().copied());
         self.single_material_moves
@@ -337,6 +340,7 @@ impl Checker {
             capture_times: BTreeMap::new(),
             field_act_materials: BTreeSet::new(),
             field_materials: BTreeSet::new(),
+            cemetery_materials: BTreeSet::new(),
             reveal_materials: BTreeSet::new(),
             single_material_moves: BTreeSet::new(),
             single_discards: BTreeSet::new(),
@@ -799,7 +803,7 @@ impl Checker {
                 candidate,
                 predicate,
                 ..
-            } if super::reveal_until::action(action)
+            } if super::reveal_until::cost_filter(action).is_some()
                 && *instruction_actor == (PlayerRef::Controller {}) =>
             {
                 self.isolated(|checker| {

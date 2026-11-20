@@ -12,7 +12,7 @@ use super::{
 use crate::ir::{
     Action, Bool, Cardinality, Cause, DecisionId, DiscardEvent, DiscardMode, DiscardOutcome,
     Disjointness, Expr, Instruction, InstructionContext, Int, MoveMethod, Nat, ObjectRef, PlayerId,
-    PlayerRelation, ReceiptId, SelectionView, Selector, ZoneKind,
+    PlayerRef, PlayerRelation, ReceiptId, SelectionView, Selector, ZoneKind,
 };
 use alloc::collections::BTreeSet;
 
@@ -114,6 +114,16 @@ fn random_count(action: &Action) -> Result<&Expr<Int>> {
         return Err(unsupported("unfiltered random hand discard"));
     }
     Ok(count)
+}
+
+pub(super) fn random_cost(action: &Action) -> bool {
+    matches!(
+        action,
+        Action::Discard {
+            player: PlayerRef::Controller {},
+            ..
+        }
+    ) && matches!(random_count(action), Ok(Expr::Literal(Int(amount))) if *amount > 0)
 }
 
 /// The player chooses as many cards from their whole current hand as a value read on resolution.
@@ -431,24 +441,12 @@ impl Game {
             return Ok(());
         }
         if let Action::Discard {
-            player,
             mode: DiscardMode::Random { .. },
+            ..
         } = &instruction.action
         {
-            let count = execution.integer(self, random_count(&instruction.action)?)?;
-            // A value read on resolution may be zero or negative and then discards nothing.
-            let count = u64::try_from(count.0).unwrap_or(0);
-            let seat = seat_name(execution.player(self, player)?)?;
-            let hand = self.zone_ids(seat, "hand");
-            // Anonymous hand cards still belong to the population; never draw around them.
-            if i64::try_from(hand.len()).map_err(invalid)? != self.zone_count(seat, "hand") {
-                return Err(unsupported("random discard from anonymous hand cards"));
-            }
-            let chosen = self.random_members(hand, usize::try_from(count).map_err(invalid)?)?;
-            let members = chosen
-                .iter()
-                .map(|id| execution.reference(self, id))
-                .collect::<Result<Vec<_>>>()?;
+            let members =
+                self.internal_random_discard_members(execution, &instruction.action, false)?;
             let outcome = self.internal_discard_members(execution, &members)?;
             execution
                 .receipts
@@ -500,6 +498,34 @@ impl Game {
                 count,
             )),
         )
+    }
+
+    pub(super) fn internal_random_discard_members(
+        &mut self,
+        execution: &Execution,
+        action: &Action,
+        required: bool,
+    ) -> Result<Vec<ObjectRef>> {
+        let Action::Discard { player, .. } = action else {
+            return Err(unsupported("random discard action"));
+        };
+        let count = execution.integer(self, random_count(action)?)?;
+        let count = usize::try_from(count.0.max(0)).map_err(invalid)?;
+        let seat = seat_name(execution.player(self, player)?)?;
+        let hand = self.zone_ids(seat, "hand");
+        // Anonymous hand cards still belong to the population.
+        if i64::try_from(hand.len()).map_err(invalid)? != self.zone_count(seat, "hand") {
+            return Err(unsupported("random discard from anonymous hand cards"));
+        }
+        if required && hand.len() < count {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "insufficient hand to pay random discard".into(),
+            ));
+        }
+        self.random_members(hand, count)?
+            .iter()
+            .map(|id| execution.reference(self, id))
+            .collect()
     }
 
     /// Chosen bounds; a counted discard reads its value now and records nothing for zero or less.

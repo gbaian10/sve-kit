@@ -15,6 +15,7 @@ use crate::game::internal::{
 use crate::game::legal::subsets;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::shuffle::{self, Placement};
 use crate::ir::{
     AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
     DecisionId, DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int,
@@ -440,7 +441,7 @@ pub(super) const fn cost_objects(action: &Action) -> Option<&Selector> {
         } if (matches!(
             movement.to,
             MoveDestination::Owners {
-                zone: OwnerZone::Cemetery | OwnerZone::Hand
+                zone: OwnerZone::Cemetery | OwnerZone::Hand | OwnerZone::Deck
             }
         ) || matches!(
             movement.to,
@@ -620,6 +621,9 @@ fn cost_zone(action: &Action, zone: ZoneKind) -> bool {
     match action {
         Action::Banish { .. } => true,
         Action::Posture { .. } => zone == ZoneKind::Field,
+        action if shuffle::placement(action) == Some(Placement::Return) => {
+            zone == ZoneKind::Cemetery
+        }
         Action::Move { movement, .. } if matches!(movement.to, MoveDestination::Shared { .. }) => {
             zone == ZoneKind::Field
         }
@@ -1018,26 +1022,15 @@ impl Game {
                 ));
             }
         }
-        let characters = if matches!(
-            instruction.action,
-            Action::Banish {
-                objects: Selector::Bound { .. }
-            }
-        ) {
+        let characters = if matches!(objects, Selector::Bound { .. })
+            && (matches!(instruction.action, Action::Banish { .. })
+                || matches!(&instruction.action, Action::Move { movement, reason: MoveReason::Put, .. }
+                    if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })))
+        {
             members
                 .iter()
                 .map(|member| self.internal_characteristics(execution.object_id(*member)?))
                 .collect::<Result<Vec<_>>>()?
-        } else if let [member] = members.as_slice()
-            && matches!(objects, Selector::Bound { .. })
-            && matches!(&instruction.action, Action::Move { movement, reason: MoveReason::Put, .. }
-                if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))
-            && self.object(execution.object_id(*member)?)?.zone == "field"
-            && self
-                .object_type(execution.object_id(*member)?)?
-                .contains("フォロワー")
-        {
-            vec![self.internal_characteristics(execution.object_id(*member)?)?]
         } else {
             vec![]
         };
@@ -1084,17 +1077,27 @@ impl Game {
                     ));
                 }
             }
-            let (moved, _) = self.internal_move_members(
-                execution,
-                &members,
-                destination,
-                kind,
-                method,
-                false,
-                None,
-                None,
-            )?;
-            if moved.len() != members.len() || moved.iter().any(|result| result.after.is_none()) {
+            let moved = if kind == ZoneKind::Deck {
+                self.internal_unordered_deck_return(execution, instruction, &members)?
+            } else {
+                self.internal_move_members(
+                    execution,
+                    &members,
+                    destination,
+                    kind,
+                    method,
+                    false,
+                    None,
+                    None,
+                )?
+                .0
+            };
+            if moved.len() != members.len()
+                || moved.iter().any(|result| {
+                    result.after.is_none()
+                        || (kind == ZoneKind::Deck && result.actual_to != Some(result.requested_to))
+                })
+            {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "incomplete material movement cost".into(),
                 ));
@@ -1175,6 +1178,9 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
 fn cost_destination(action: &Action) -> Result<(&'static str, ZoneKind, MoveMethod)> {
     match action {
         Action::Banish { .. } => Ok(("banish", ZoneKind::Banish, MoveMethod::Banish)),
+        action if shuffle::placement(action) == Some(Placement::Return) => {
+            Ok(("deck", ZoneKind::Deck, MoveMethod::Put))
+        }
         Action::Move { movement, .. }
             if movement.to
                 == (MoveDestination::Owners {

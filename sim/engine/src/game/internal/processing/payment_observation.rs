@@ -78,8 +78,14 @@ pub(super) fn completed(
         .skip(since.costs)
     {
         for step in &payment.steps {
+            // Shuffling completes the return, but the movement already accounts for the debit.
+            if matches!(step.instruction.action, Action::Shuffle { .. }) {
+                continue;
+            }
             let kind = kind(&step.instruction.action)?;
-            if kind == PaymentKind::Pp {
+            if kind == PaymentKind::Pp
+                && !super::super::resource::maximum_pp_cost(&step.instruction.action)
+            {
                 continue;
             }
             payments.push(ProcessingPayment {

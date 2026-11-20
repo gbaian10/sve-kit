@@ -5,6 +5,8 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 
+use crate::ir::{AdditionalMaterial, RuntimeReceiptId};
+
 pub mod assist;
 mod combat;
 mod costs;
@@ -164,6 +166,8 @@ struct Frame {
     // Serialized legacy frames cannot provide the typed ability-source evidence.
     #[serde(skip)]
     entry_source: Option<internal::EntrySource>,
+    #[serde(skip)]
+    entry_payment: Option<(RuntimeReceiptId, Vec<AdditionalMaterial>)>,
     controller: String,
     #[serde(default)]
     event: Value,

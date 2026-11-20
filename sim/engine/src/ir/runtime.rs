@@ -72,7 +72,7 @@ runtime_record!(
     }
 );
 
-runtime_record!(Characteristics { names: Vec<CardName>, kind: CardKind, traits: Vec<TraitId>, class: Option<ClassId>, title: Option<TitleId>, cost: Info<Int>, attack: Info<Int>, life: Info<Int>, abilities: Vec<RuntimeAbilityReference>, face: FaceId, evolution: EvolutionState, links: Vec<AssociationId> });
+runtime_record!(Characteristics { names: Vec<CardName>, kind: CardKind, traits: Vec<TraitId>, class: Option<ClassId>, title: Option<TitleId>, cost: Info<Int>, original_cost: Int, attack: Info<Int>, life: Info<Int>, abilities: Vec<RuntimeAbilityReference>, face: FaceId, evolution: EvolutionState, links: Vec<AssociationId> });
 
 runtime_record!(PendingInstance { ability: AbilityInstanceId, occurrence: Occurrence, controller: PlayerId, quota_reservation: Option<UsageId>, captures: Vec<CapturedValue> });
 
@@ -103,7 +103,9 @@ runtime_record!(
 
 runtime_record!(DiceEvent { roller: PlayerId, roll: RollId, value: DieFace, attempts: Vec<DieFace>, accepted_attempt: Nat });
 
-runtime_record!(EnterFieldEvent { object: ObjectRef, from: EntryOrigin, controller: PlayerId, characters: Characteristics, method: EntryMethod, play_receipt: Option<RuntimeReceiptId>, ability_source_traits: Option<Vec<TraitId>> });
+runtime_record!(EnterFieldEvent { object: ObjectRef, from: EntryOrigin, controller: PlayerId, characters: Characteristics, method: EntryMethod, play_receipt: Option<RuntimeReceiptId>, additional_materials: Vec<AdditionalMaterial>, ability_source_traits: Option<Vec<TraitId>> });
+
+runtime_record!(AdditionalMaterial { from: ZoneKind, names: Vec<CardName> });
 
 runtime_record!(Receipt { id: RuntimeReceiptId, action: InstructionId, requested: Quantity, actual: Quantity, status: ReceiptStatus, successful: Vec<ResultMember>, moves: Vec<MoveResult>, payment: Option<PaymentResult>, reason: Option<ReceiptReason> });
 

@@ -29092,7 +29092,7 @@
       "type": "object",
       "properties": {
         "sel": {
-          "$ref": "#/$defs/DSLNodes.A.sel.object-core"
+          "$ref": "#/$defs/DSLNodes.A.sel.reveal-until"
         },
         "n": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -44529,6 +44529,44 @@
         "any_of"
       ],
       "additionalProperties": false
+    },
+    "DSLNodes.A.sel.reveal-until": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "const": "self"
+        },
+        "zone": {
+          "const": "deck"
+        },
+        "kind": {
+          "const": "follower"
+        },
+        "orig_cost_le": {
+          "$ref": "#/$defs/DSLNodes.A.quantity"
+        },
+        "orig_cost_gt": {
+          "$ref": "#/$defs/DSLNodes.A.quantity"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "zone",
+        "kind"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "orig_cost_le"
+          ]
+        },
+        {
+          "required": [
+            "orig_cost_gt"
+          ]
+        }
+      ]
     },
     "DSLNodes.A.sel.zone-objects": {
       "type": "object",

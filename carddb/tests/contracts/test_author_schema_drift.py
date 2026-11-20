@@ -235,6 +235,36 @@ def _python_schemas() -> dict[str, dict[str, JsonValue]]:
     }
 
 
+def _reveal_until_variants(definition: JsonValue) -> JsonValue:
+    # Expand exclusive required keys into the equivalent closed TypedDict variants.
+    common = dict(object_value(definition))
+    alternatives = [object_value(branch) for branch in array(common.pop("oneOf"))]
+    fields = [array(branch["required"]) for branch in alternatives]
+    assert all(branch.keys() == {"required"} for branch in alternatives)
+    assert all(len(required) == 1 for required in fields)
+    keys = [string(required[0]) for required in fields]
+    properties = object_value(common["properties"])
+    required = set(map(string, array(common["required"])))
+    assert len(set(keys)) == len(keys)
+    assert required.isdisjoint(keys)
+    assert properties.keys() == required | set(keys)
+    assert common["additionalProperties"] is False
+    shared = {key: dict(object_value(properties[key])) for key in required}
+    for prop in shared.values():
+        if isinstance(prop.get("const"), str):
+            prop.setdefault("type", "string")
+    return {
+        "oneOf": [
+            {
+                **common,
+                "properties": {**shared, key: properties[key]},
+                "required": [*sorted(required), key],
+            }
+            for key in keys
+        ]
+    }
+
+
 def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
     python = _python_schemas()[name]
     names = (
@@ -259,8 +289,11 @@ def assert_selector_definition(schema: dict[str, JsonValue], name: str) -> None:
         if isinstance(reference, str)
         else python
     )
+    definition = object_value(schema["$defs"])[name]
+    if name == "A.sel.reveal-until":
+        definition = _reveal_until_variants(definition)
     assert _shape(
-        object_value(schema["$defs"])[name],
+        definition,
         schema,
         {key: key for key in names if name != "authored" or key != "A.file"},
     ) == _shape(body, python, python_names)

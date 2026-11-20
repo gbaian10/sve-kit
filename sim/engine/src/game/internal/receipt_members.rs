@@ -2,6 +2,7 @@
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::paid_names as ir_paid_names;
+use crate::ir::receipt_reads::paid_movement_id;
 use crate::ir::{
     CardKind, CardName, Characteristics, ClassId, DestroyOutcome, DiscardOutcome, Info, Int,
     MaterialActOutcome, MemberProjection, MoveMethod, MoveOutcome, MoveResult, MovementReceipt,
@@ -156,6 +157,7 @@ impl<'execution> PaidMembers<'execution> {
         let information = match property {
             NumericProperty::Attack => &characters.attack,
             NumericProperty::Cost => &characters.cost,
+            NumericProperty::OriginalCost => return Ok(characters.original_cost),
             _ => return Err(unsupported("paid material numeric property")),
         };
         match information {
@@ -438,13 +440,12 @@ pub(super) fn paid_material_acts(
 
 pub(super) fn paid_material_number(
     execution: &Execution,
-    receipt: &ReceiptReference<MoveOutcome>,
+    receipt: &MovementReceipt,
     property: NumericProperty,
 ) -> Result<Int> {
-    let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("iterated paid material number"));
-    };
-    PaidMembers::load(execution, *id, "missing material payment")?.number(property)
+    let id =
+        paid_movement_id(receipt).ok_or_else(|| unsupported("paid material number receipt"))?;
+    PaidMembers::load(execution, id, "missing material payment")?.number(property)
 }
 
 pub(super) fn discarded_cost(
