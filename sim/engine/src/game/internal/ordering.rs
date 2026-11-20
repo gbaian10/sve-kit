@@ -673,8 +673,9 @@ fn mask_public_number(number: &mut Expr<Int>) {
         match operation.as_mut() {
             IntOperation::FromNat { value } => mask_public_natural(value),
             IntOperation::Sum { objects, property }
-                if super::aggregates::check(objects, *property).is_ok() =>
-            {
+            | IntOperation::Extremum {
+                objects, property, ..
+            } if super::aggregates::check(objects, *property).is_ok() => {
                 *number = Expr::Literal(Int(0));
             }
             IntOperation::Conditional {
