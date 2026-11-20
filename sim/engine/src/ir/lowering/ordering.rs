@@ -1074,7 +1074,14 @@ impl BodyContext<'_> {
     ) -> Result<Action, LoweringError> {
         let zone = match value.to {
             ast::Destination::Cemetery => OwnerZone::Cemetery,
-            ast::Destination::Ex if own_deck(top) => OwnerZone::Ex,
+            ast::Destination::Ex
+                if own_deck(top)
+                    || (top.n == 1
+                        && matches!(&top.who, ast::DeckHolder::Bound(name)
+                            if self.players.get(name).copied() == self.procedure_player)) =>
+            {
+                OwnerZone::Ex
+            }
             ast::Destination::Ex
             | ast::Destination::Field
             | ast::Destination::Deck

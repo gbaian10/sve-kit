@@ -159,7 +159,7 @@ fn typed(
         Wait::OptionalCost => {
             domain!(domain, InputDomain::OptionalCost => DecisionShape::OptionalCost)
         }
-        Wait::ResolutionPayment { .. } => {
+        Wait::ResolutionPayment(_) => {
             domain!(domain, InputDomain::OptionalCost => DecisionShape::ResolutionPayment)
         }
         Wait::ExchangeRoute { affordable, quotes } => {

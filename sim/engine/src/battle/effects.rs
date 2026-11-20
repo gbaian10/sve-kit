@@ -155,6 +155,7 @@ fn change(
         } => wire::InstalledChange::Prevention {
             damage: match kind {
                 DamageKind::Any => wire::DamageKind::Any,
+                DamageKind::Attack => return Err(ProjectionError::Unavailable),
                 DamageKind::Combat => wire::DamageKind::Combat,
                 DamageKind::Ability => wire::DamageKind::Ability,
             },

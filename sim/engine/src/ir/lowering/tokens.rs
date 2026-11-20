@@ -269,6 +269,8 @@ impl BodyContext<'_> {
                     matches!(&movement.r#ref, Some(ast::MoveObjects::Whole(whole))
                         if matches!(&whole.who, ast::DeckHolder::Bound(name) if bound(name)))
                         && Self::unordered_deck(movement)
+                        || (matches!(movement.to, ast::Destination::Ex)
+                            && matches!(&movement.top, Some(ast::DeckTop { who: ast::DeckHolder::Bound(name), n: 1 }) if bound(name)))
                 } else {
                     false
                 };

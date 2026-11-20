@@ -155,7 +155,6 @@ fn ability_loss_until_turn_restores_live_abilities_after_the_end_phase() {
 #[test]
 fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
     for body in [
-        json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":"this_and_next_opp_turn"}}),
         json!({"apply":{"on":"enemy","effect":{"lose_abilities":{}},"until":{"during_next_turn":{"who":"opp"}}}}),
         json!({"apply":{"on":{"who":"opp","zone":"field","kind":"follower"},"effect":{"lose_abilities":{}}}}),
         json!({"apply":{"on":"enemy","effect":{"lose_abilities":{"on":"enemy"}}}}),
@@ -197,8 +196,9 @@ fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
                 }
             }
             4 => {
+                duration.end = DurationEnd::CurrentTurnEnd {};
                 duration.intervals = vec![Interval::DuringNextTurn {
-                    player: PlayerRef::Controller {},
+                    player: PlayerRef::ProposedDamageRecipient {},
                 }];
             }
             5 => *subjects = Selector::Objects { objects: vec![] },

@@ -126,17 +126,18 @@ fn source_filter(predicate: &SourcePredicate) -> Option<DamageSource<'_>> {
     (*binding == predicate.binding).then_some(DamageSource::Objects(set))
 }
 
-/// A whole-turn reduction or cap of damage to the own leader without a use count (BP14-T07, BP05-101).
-pub(crate) fn whole_turn_leader_reduction(shape: &Prevention<'_>) -> bool {
+/// An unlimited leader rewrite lasts for the turn.
+pub(crate) fn whole_turn_leader_rewrite(shape: &Prevention<'_>) -> bool {
     shape.usage.is_none()
-        && shape.kind == DamageKind::Any
         && shape.damage_source.is_none()
-        && (matches!(
-            shape.rewrite,
-            EventRewrite::AddDamage {
-                amount: Expr::Literal(super::Int(i64::MIN..=-1))
-            }
-        ) || matches!(shape.rewrite, EventRewrite::CapDamage { .. }))
+        && (matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
+            || (shape.kind == DamageKind::Any
+                && (matches!(
+                    shape.rewrite,
+                    EventRewrite::AddDamage {
+                        amount: Expr::Literal(super::Int(i64::MIN..=-1))
+                    }
+                ) || matches!(shape.rewrite, EventRewrite::CapDamage { .. }))))
         && shape.duration.end == (super::DurationEnd::CurrentTurnEnd {})
         && shape.duration.intervals.is_empty()
 }
@@ -203,6 +204,21 @@ pub(crate) fn holder_counter_step(amount: &Expr<super::Int>) -> Option<(&super::
     (*step > 0).then_some((kind, *step))
 }
 
+pub(crate) fn damage_multiplier(rewrite: &EventRewrite) -> Option<i64> {
+    let EventRewrite::MultiplyDamage {
+        numerator,
+        denominator,
+        rounding: super::Rounding::Exact,
+    } = rewrite
+    else {
+        return None;
+    };
+    if numerator.0 == 0 || denominator.0.get() != 1 {
+        return None;
+    }
+    i64::try_from(numerator.0).ok()
+}
+
 pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
     let Effect::Replacement {
         source,
@@ -258,7 +274,7 @@ pub(crate) fn projection(effect: &Effect) -> Option<Prevention<'_>> {
         }
     ) || matches!(rewrite, EventRewrite::AddDamage { amount } if usage.is_none() && holder_counter_step(amount).is_some())
         || matches!(rewrite, EventRewrite::CapDamage { threshold: Expr::Literal(threshold), replacement: Expr::Literal(replacement) } if threshold.0 > replacement.0 && threshold.0 <= i64::MAX.unsigned_abs());
-    if !supported {
+    if !supported && damage_multiplier(rewrite).is_none() {
         return None;
     }
     if recipient.is_none() && damage_source.is_none() {

@@ -24,6 +24,7 @@ pub(super) struct HandWait {
     bounds: Cardinality,
     groups: GroupConstraints,
     formal_cost: Option<ReceiptId>,
+    pub(super) resolution_payment: Option<Box<super::card::optional::ResolutionPayment>>,
 }
 
 pub(super) fn check_action(action: &Action) -> Result<()> {
@@ -252,6 +253,7 @@ impl HandWait {
     ) -> Self {
         Self {
             formal_cost: None,
+            resolution_payment: None,
             links,
             instruction,
             groups: GroupConstraints {
@@ -272,6 +274,7 @@ impl HandWait {
     ) -> Self {
         Self {
             formal_cost: None,
+            resolution_payment: None,
             links,
             instruction,
             members,

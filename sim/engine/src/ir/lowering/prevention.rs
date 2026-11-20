@@ -13,6 +13,7 @@ use crate::ir::{
     TextQuantifier, UsageScope, UseLimit, ZoneKind,
 };
 use core::mem::swap;
+use core::num::NonZeroU64;
 
 fn recipient(objects: Selector, binding: Binding<DamageRecipient>) -> RecipientPredicate {
     RecipientPredicate {
@@ -21,6 +22,15 @@ fn recipient(objects: Selector, binding: Binding<DamageRecipient>) -> RecipientP
             recipient: DamageRecipient::Bound { binding },
             objects,
         })),
+    }
+}
+
+const fn damage_kind(kind: Option<&ast::PreventionKind>) -> DamageKind {
+    match kind {
+        None | Some(ast::PreventionKind::Any) => DamageKind::Any,
+        Some(ast::PreventionKind::Attack) => DamageKind::Attack,
+        Some(ast::PreventionKind::Combat) => DamageKind::Combat,
+        Some(ast::PreventionKind::Ability) => DamageKind::Ability,
     }
 }
 
@@ -159,11 +169,7 @@ impl BodyContext<'_> {
             .as_ref()
             .map(|filter| self.prevention_filter(filter, path))
             .transpose()?;
-        let kind = match shape.kind {
-            ast::PreventionKind::Any => DamageKind::Any,
-            ast::PreventionKind::Combat => DamageKind::Combat,
-            ast::PreventionKind::Ability => DamageKind::Ability,
-        };
+        let kind = damage_kind(Some(&shape.kind));
         let effect = self.damage_prevention(
             ProposedEventPattern::Damage {
                 recipient,
@@ -269,10 +275,6 @@ impl BodyContext<'_> {
         })
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Every player-level prevention and damage rewrite shares one installation boundary."
-    )]
     pub(super) fn player_prevention(
         &mut self,
         value: &ast::PlayerEffect,
@@ -324,15 +326,11 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(_) => return Err(unsupported(path)),
         };
-        // Fixed reductions and caps may last the whole turn (BP14-T07); full prevention stays once-only.
         let limited = next == Some(true);
-        if (!limited
-            && !matches!(
-                value.effect,
-                ast::InstalledEffect::DamageMod(_) | ast::InstalledEffect::DamageCap(_)
-            ))
-            || damage_source.is_some()
-            || !matches!(kind, None | Some(ast::PreventionKind::Any))
+        let kind = damage_kind(kind);
+        if damage_source.is_some()
+            || (limited && kind != DamageKind::Any)
+            || (!matches!(rewrite, EventRewrite::PreventDamage { .. }) && kind != DamageKind::Any)
             || !matches!(
                 on,
                 None | Some(ast::Recipients::Leader {
@@ -359,7 +357,7 @@ impl BodyContext<'_> {
             ProposedEventPattern::Damage {
                 recipient: Some(recipient),
                 source: None,
-                kind: DamageKind::Any,
+                kind,
             },
             source,
             Expr::Literal(Bool(true)),
@@ -382,6 +380,30 @@ impl BodyContext<'_> {
             effect: Box::new(effect),
             duration,
         })
+    }
+
+    fn static_damage_modifier(
+        &mut self,
+        modifier: &ast::DamageModifier,
+        path: &str,
+    ) -> Result<EventRewrite, LoweringError> {
+        match (&modifier.delta, modifier.multiply) {
+            (None, Some(multiplier)) if multiplier > 0 && i64::try_from(multiplier).is_ok() => {
+                Ok(EventRewrite::MultiplyDamage {
+                    numerator: Nat(multiplier),
+                    denominator: super::super::PositiveInt(NonZeroU64::MIN),
+                    rounding: super::super::Rounding::Exact,
+                })
+            }
+            (Some(delta), None) => {
+                let amount = self.number(delta, path, &mut super::BTreeSet::new())?;
+                if !matches!(amount, Expr::Literal(_)) && holder_counter_step(&amount).is_none() {
+                    return Err(unsupported(path));
+                }
+                Ok(EventRewrite::AddDamage { amount })
+            }
+            _ => Err(unsupported(path)),
+        }
     }
 
     #[expect(
@@ -642,28 +664,11 @@ pub(super) fn lower_at_source(
                 if shape.next_only == Some(true) {
                     return Err(unsupported(path));
                 }
-                let kind = match shape.kind {
-                    None | Some(ast::PreventionKind::Any) => DamageKind::Any,
-                    Some(ast::PreventionKind::Combat) => DamageKind::Combat,
-                    Some(ast::PreventionKind::Ability) => DamageKind::Ability,
-                };
                 (
                     shape.on.as_ref(),
                     shape.source.as_ref(),
-                    kind,
-                    EventRewrite::AddDamage {
-                        amount: if let Some(delta) = shape.literal_delta() {
-                            Expr::Literal(Int(delta))
-                        } else {
-                            // 「これの…カウンター1個につき+N」 reads the holder when damage is proposed.
-                            let amount =
-                                context.number(&shape.delta, path, &mut super::BTreeSet::new())?;
-                            if holder_counter_step(&amount).is_none() {
-                                return Err(unsupported(path));
-                            }
-                            amount
-                        },
-                    },
+                    damage_kind(shape.kind.as_ref()),
+                    context.static_damage_modifier(shape, path)?,
                 )
             }
             ast::StaticEffect::DamageCap(shape) => (

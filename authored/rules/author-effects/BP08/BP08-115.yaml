@@ -1,0 +1,23 @@
+cards:
+  BP08-115:
+    abilities:
+      - evolve:
+          cost: { pp: 1 }
+        line: 1
+      - fanfare:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - move: { top: { who: p, n: 1 }, to: ex }
+                  - - move: { top: { who: p, n: 1 }, to: ex }
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set

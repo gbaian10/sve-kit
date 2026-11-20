@@ -27,6 +27,9 @@ impl Wait {
             Self::RecipientTargets(wait) => wait.purpose,
             Self::Distribution(wait) => wait.purpose,
             Self::Integer { purpose, .. } => *purpose,
+            Self::CostDiscard(wait) if wait.resolution_payment.is_some() => {
+                QuestionPurpose::ResolutionChoice
+            }
             Self::ResourceEntryPayment(_)
             | Self::CostDiscard(_)
             | Self::OptionalCost
@@ -44,7 +47,7 @@ impl Wait {
             Self::Dice(_)
             | Self::Ability(_)
             | Self::Discard(_)
-            | Self::ResolutionPayment { .. }
+            | Self::ResolutionPayment(_)
             | Self::Alternative(_)
             | Self::May { .. }
             | Self::Order(_)

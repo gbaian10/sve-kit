@@ -181,6 +181,10 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 目前限結算時付款。
 `cost.to_deck: {sel: {who: self, zone: cemetery}, n: N, shuffle: true}` 需要指定張數全數進入牌庫，再洗整副牌庫。
 `cost.discard: {sel: {who: self, zone: hand}, n: N, random: true}` 需要足量手牌，在付款時抽樣，且沿用付款回滾。
+場上誘發能力的本文可用 `pay.cost.discard` 指定從自己的手牌支付固定張數，並依材料篩選。接受付款後由控制者私下選擇材料，足額支付才執行 `pay.do`。
+
+`player_effect: {who: self, until: turn, effect: {prevent: {kind: ability}}}` 讓自己的領袖免受指定種類的傷害。`prevent` 不帶 `next_only` 時整回合有效。
+同行若也保護從者，可用本回合的 `grant` 授予場上當時符合條件的從者防傷常在能力。
 
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
@@ -1283,6 +1287,8 @@ on:
 墓場、牌組與看牌區仍能按持有的能力篩選，無須該能力可在當地發動或當下付得起費用。
 場上的篩選使用有效能力，包含授予、失去能力與目前進化卡面的變化。
 
+`apply.effect.lose_abilities` 與攻擊禁令可用 `until: this_and_next_opp_turn`，分別在本回合及下一個對手回合生效。兩者套用於所選從者當下的物件世代，離場再入場會重新取得印刷能力。
+
 ## Drive 事件觀察
 
 場上印刷自動能力可訂閱 `drive_checked: {holder: {who: self, zone: field, kind: follower}}`，
@@ -1588,6 +1594,9 @@ counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `dama
 不查找目前手牌或其他牌區的新物件。省略 `on` 時，符合來源的能力對從者及領袖造成的每次傷害都套用加值；
 多個提供者的加值會疊加。進化時搜尋及下一次同名牌的減費仍沿用獨立的 `player_effect.cost_mod`，不綁定搜尋結果。
 
+場上常在傷害替代可寫 `damage_mod: {source: this, kind: attack, multiply: 2}`，只倍增來源對領袖的攻擊傷害。
+`kind: combat` 比對對從者的交戰傷害，包含反擊。倍數為正整數，適用於該次傷害的現有規則替代流程。
+
 ## 安裝本回合受到傷害的加值
 
 `apply: {on: …, effect: {damage_mod: {delta: N}}, until: turn}`（N 為正整數）
@@ -1733,6 +1742,10 @@ CP04-115 的 PP X、バッテリーカウンター X 與搜尋原費上限共用
 ## 逐玩家棄牌與非開始階段抽牌禁止
 
 `discard: {who: p, down_to: N}` 可在 `each_player` 的選擇程序中，要求每位玩家把自己的手牌捨至常值 N 張。輪到該玩家時才讀目前手牌數；不超過 N 時直接繼續，超過時只向該玩家提供恰好超額張數的私有選擇。每位玩家完成棄牌後才輪到下一位，回合玩家先處理。這不是把 `self` 改解為目前程序玩家，必須明寫 `who: p`；一般 `self` 仍指效果控制者。此入口不開放與其他數量、隨機選擇或結果命名混用。
+
+逐玩家程序也可用 `choose.by: p` 讓每位玩家從 `choose.from: {who: p, zone: field, kind: follower}` 選取自己的從者。選完可用 `move.ref.except: {in: kept}` 排除所保留的從者，完成當前玩家的移動才向下一位發題。
+
+每個 `each_player` 階段可用 `move: {top: {who: p, n: 1}, to: ex}` 同時將各玩家的牌庫頂放進自己的 EX。每個階段為一輪，兩邊的移動完成後才讀下一輪牌庫頂，EX 已滿時牌仍留在原位。
 
 場上印刷常在能力可寫 `cannot: {what: draw, who: opp, during: {not_phase: start}}`，也可用 `who: self`。能力有效時只禁止指定玩家在開始階段以外的抽牌，不禁止打出含抽牌效果的卡，也不跳過後續指示。禁止的抽牌不發生、不產生抽牌事件、不視為空牌庫抽牌失敗；搜尋、Look 選牌或其他加入手牌仍依各自流程處理。來源離場或失去能力後解除。此入口只收無條件、場上、非開始階段的印刷常在形式，不開放安裝型或其他階段條件。
 

@@ -670,7 +670,11 @@ fn check_player_stage(
                         Action::Draw { player, .. } => *player = PlayerRef::Controller {},
                         Action::Shuffle { deck, .. } => *deck = PlayerRef::Controller {},
                         Action::Move { objects, .. } => {
-                            *objects = Selector::Objects { objects: vec![] }
+                            if let Selector::Ordered { zone, .. } = objects {
+                                zone.player = PlayerRef::Controller {};
+                            } else {
+                                *objects = Selector::Objects { objects: vec![] };
+                            }
                         }
                         _ => return Err(unsupported("checked player stage")),
                     }

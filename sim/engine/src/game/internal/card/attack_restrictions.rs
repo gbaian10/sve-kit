@@ -1,4 +1,4 @@
-use super::super::duration::{EffectEnd, TurnInterval};
+use super::super::duration::{TurnInterval, TurnWindow};
 use super::super::observation::EffectOrigin;
 use super::super::{Execution, InstructionOutcome, Slot};
 use crate::game::player::Viewer;
@@ -130,19 +130,20 @@ impl Game {
                             .collect::<Result<Vec<_>>>()
                     })
                     .transpose()?;
-                let live = !lock.end.source_expired(self);
+                let live = !lock.window.end.source_expired(self);
                 Ok(InstalledEffect {
                     source: lock.origin.observed(self, perspective),
-                    expires: lock.end.observed()?,
-                    main_live: live,
+                    expires: lock.window.end.observed()?,
+                    main_live: live && !lock.window.main_ended,
                     intervals: lock
+                        .window
                         .interval
                         .map(TurnInterval::observed)
                         .transpose()?
                         .flatten()
                         .into_iter()
                         .collect(),
-                    active: live && lock.interval.is_none_or(TurnInterval::active),
+                    active: live && lock.window.active(),
                     change: InstalledChange::AttackRestriction { leaders },
                 })
             })
@@ -340,8 +341,8 @@ pub(in crate::game) struct AttackLock {
     id: String,
     generation: u64,
     leaders: Option<Vec<u32>>,
-    end: EffectEnd,
-    interval: Option<TurnInterval>,
+    #[serde(flatten)]
+    window: TurnWindow,
 }
 
 pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
@@ -358,7 +359,8 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
     let valid_interval = match duration.intervals.as_slice() {
         [] => true,
         [Interval::DuringNextTurn { player }] => {
-            matches!(&duration.end, DurationEnd::NextTurnEnd { player: end } if player == end)
+            duration.end == (DurationEnd::CurrentTurnEnd {})
+                || matches!(&duration.end, DurationEnd::NextTurnEnd { player: end } if player == end)
         }
         _ => false,
     };
@@ -443,12 +445,7 @@ impl Game {
                 on_field_at_capture: true,
             },
         );
-        let end = EffectEnd::at(self, execution, &duration.end)?;
-        let interval = duration
-            .intervals
-            .first()
-            .map(|interval| TurnInterval::at(self, execution, interval))
-            .transpose()?;
+        let window = TurnWindow::at(self, execution, duration)?;
         let mut installed = Vec::new();
         for member in members {
             let id = execution.object_id(member)?.to_owned();
@@ -461,8 +458,7 @@ impl Game {
                 id,
                 generation: member.generation.0,
                 leaders: leaders.clone(),
-                end,
-                interval,
+                window,
             });
             installed.push(member);
         }
@@ -484,8 +480,8 @@ impl Game {
             lock.id == attacker
                 && lock.generation == object.generation
                 && object.zone == "field"
-                && lock.interval.is_none_or(TurnInterval::active)
-                && !lock.end.source_expired(self)
+                && lock.window.active()
+                && !lock.window.end.source_expired(self)
                 && lock
                     .leaders
                     .as_ref()
@@ -494,21 +490,15 @@ impl Game {
     }
 
     pub(in crate::game) fn internal_attack_restrictions_end_turn(&mut self, turn: u64) {
-        self.state.ir_attack_restrictions.retain_mut(|lock| {
-            if let Some(interval) = lock.interval.as_mut() {
-                interval.finish(turn);
-            }
-            lock.end != EffectEnd::Turn(turn) && lock.interval.is_none_or(TurnInterval::pending)
-        });
+        self.state
+            .ir_attack_restrictions
+            .retain_mut(|lock| lock.window.retain_after(turn));
     }
     pub(in crate::game) fn internal_attack_restrictions_begin_turn(&mut self) -> Result<()> {
         let turn = self.state.schedule.current()?;
         let player = player_id(self.active())?.seat;
         for lock in &mut self.state.ir_attack_restrictions {
-            lock.end.begin(turn, player);
-            if let Some(interval) = lock.interval.as_mut() {
-                interval.begin(turn, player);
-            }
+            lock.window.begin(turn, player);
         }
         Ok(())
     }

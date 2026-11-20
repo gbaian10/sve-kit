@@ -28,6 +28,7 @@ pub(super) struct DamageReplacement {
     pub(super) active: bool,
     pub(super) depends_on_amount: bool,
     pub(super) delta: i64,
+    pub(super) multiply: Option<i64>,
     pub(super) set: Option<i64>,
     pub(super) cap: Option<(i64, i64)>,
     pub(super) prevent: bool,
@@ -277,6 +278,7 @@ impl Game {
                 active: true,
                 depends_on_amount: false,
                 delta: int(&reference["delta"]),
+                multiply: reference["multiply"].as_i64(),
                 set: None,
                 cap: reference["cap"]
                     .as_array()
@@ -487,6 +489,7 @@ impl Game {
             active,
             depends_on_amount,
             delta: self.number(&body["amount"], &frame)?,
+            multiply: None,
             set,
             cap: None,
             prevent: body["prevent"] == true,
@@ -539,6 +542,10 @@ impl DamageReplacement {
             Ok(value)
         } else if let Some((_, value)) = self.cap {
             Ok(value)
+        } else if let Some(factor) = self.multiply {
+            amount
+                .checked_mul(factor)
+                .ok_or_else(|| invalid("damage replacement overflow"))
         } else if self.arithmetic == Arithmetic::Checked {
             amount
                 .checked_add(self.delta)

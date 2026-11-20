@@ -1,0 +1,31 @@
+cards:
+  BP05-061:
+    abilities:
+      - keywords: [ward]
+        line: 1
+      - evolve_time:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - apply:
+                "on": enemy
+                effect:
+                  lose_abilities: {}
+                until: this_and_next_opp_turn
+            - apply:
+                "on": enemy
+                effect:
+                  cannot: { what: attack }
+                until: this_and_next_opp_turn
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set

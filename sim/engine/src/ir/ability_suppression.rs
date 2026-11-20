@@ -1,6 +1,6 @@
 //! Admission is limited to the suppression lifetimes with turn cleanup.
 use super::{
-    Action, DurationEnd, ExecutionRef, ObjectOperand, RemoveScope, Selector, TimeAnchor,
+    Action, DurationEnd, ExecutionRef, Interval, ObjectOperand, RemoveScope, Selector, TimeAnchor,
     TimestampBasis,
 };
 
@@ -27,7 +27,12 @@ pub(crate) fn supported(action: &Action) -> bool {
         )
         && duration.anchor == (TimeAnchor::Installation {})
         && duration.usage.is_none()
-        && duration.intervals.is_empty()
+        && (duration.intervals.is_empty()
+            || (duration.end == (DurationEnd::CurrentTurnEnd {})
+                && matches!(
+                    duration.intervals.as_slice(),
+                    [Interval::DuringNextTurn { .. }]
+                )))
         && *timestamp
             == (TimestampBasis::ProperPlay {
                 execution: ExecutionRef::Current {},

@@ -766,10 +766,11 @@ impl Game {
                 destination,
                 carry_grants,
             )?;
-            if (previous.zone != destination || previous.controller != *owner)
-                && let Some(count) = self.state.counters.get_mut(&format!("{id}.attacks"))
-            {
-                *count = 0;
+            if previous.zone != destination || previous.controller != *owner {
+                self.state.ir_ability_suppression.remove(id);
+                if let Some(count) = self.state.counters.get_mut(&format!("{id}.attacks")) {
+                    *count = 0;
+                }
             }
             self.collect_movement_knowledge(id, owner, destination, &mut learned);
             self.internal_record_lesson_history(id, previous, destination)?;

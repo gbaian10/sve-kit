@@ -4162,6 +4162,7 @@ pub(super) struct Prevent {
 #[serde(rename_all = "snake_case")]
 pub(super) enum PreventionKind {
     Any,
+    Attack,
     Combat,
     Ability,
 }
@@ -4277,12 +4278,13 @@ pub(super) struct DamageModifier {
     pub on: Option<Recipients>,
     pub source: Option<PreventionSource>,
     pub kind: Option<PreventionKind>,
-    pub delta: Number,
+    pub delta: Option<Number>,
+    pub multiply: Option<u64>,
     pub next_only: Option<bool>,
 }
 impl DamageModifier {
     pub(super) const fn literal_delta(&self) -> Option<i64> {
-        if let Number::Literal(delta) = self.delta {
+        if let Some(Number::Literal(delta)) = self.delta {
             Some(delta)
         } else {
             None

@@ -1,10 +1,10 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::prevention::{
-    DamageSource, Recipients, own_leader, projection, whole_turn_leader_reduction,
+    DamageSource, Recipients, own_leader, projection, whole_turn_leader_rewrite,
 };
 use crate::ir::{
-    Bool, DurationEnd, Effect, EventRewrite, Expr, PlayerSet, ProposedEventPattern, Selector,
-    TimeAnchor, ZoneKind,
+    Bool, DamageKind, DurationEnd, Effect, EventRewrite, Expr, PlayerSet, ProposedEventPattern,
+    Selector, TimeAnchor, ZoneKind,
 };
 
 #[expect(
@@ -72,9 +72,8 @@ impl Checker {
                 self.natural(threshold)?;
                 self.natural(replacement)?;
             }
-            EventRewrite::PreventDamage { .. } => {}
+            EventRewrite::PreventDamage { .. } | EventRewrite::MultiplyDamage { .. } => {}
             EventRewrite::RedirectMove { .. }
-            | EventRewrite::MultiplyDamage { .. }
             | EventRewrite::EntryPosture { .. }
             | EventRewrite::EvolutionCost { .. }
             | EventRewrite::ReplaceInstruction { .. } => return self.reject(),
@@ -88,9 +87,9 @@ impl Checker {
         players: &PlayerSet,
     ) -> Checked {
         let shape = projection(effect).ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
-        // Only a whole-turn negative reduction may omit the use limit; prevention stays once-only.
         if players != &own_leader()
-            || (shape.usage.is_none() && !whole_turn_leader_reduction(&shape))
+            || shape.kind == DamageKind::Attack
+            || (shape.usage.is_none() && !whole_turn_leader_rewrite(&shape))
             || !matches!(shape.recipients, Some(Recipients::Leaders(expected)) if expected == players)
             || shape.damage_source.is_some()
             || *shape.condition != Expr::Literal(Bool(true))
@@ -107,7 +106,10 @@ impl Checker {
             | (None, Some(DamageSource::Objects(objects))) => objects == targets,
             _ => false,
         };
-        if !captured || *shape.condition != Expr::Literal(Bool(true)) {
+        if !captured
+            || shape.kind == DamageKind::Attack
+            || *shape.condition != Expr::Literal(Bool(true))
+        {
             return self.reject();
         }
         self.prevention_shape(effect)
