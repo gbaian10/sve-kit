@@ -247,6 +247,7 @@ def _groups_to_database(
         raw_groups.setdefault((item.face_id, item.region), []).append(item)
     for group in plan.groups:
         variants: dict[str, FaceObservation] = {}
+        # The plan orders raw observations by printing ID, so shared content keeps the lowest one.
         raw = raw_groups[group.face_id, group.region]
         for item in (*raw, *group.observations):
             if (item.printing_id, item.face_id, item.card.source.id) in selected:
@@ -257,7 +258,7 @@ def _groups_to_database(
                 variants.setdefault(revision_id(item), item)
         ordered = sorted(
             variants.values(),
-            key=lambda item: (bool(item.correction_keys), revision_id(item)),
+            key=lambda item: (item.correction_ids, item.printing_id, item.source_index),
         )
         for ordinal, item in enumerate(ordered, 1):
             original = next(

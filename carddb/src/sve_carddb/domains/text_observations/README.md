@@ -27,9 +27,13 @@ remain exact.
 Differences retain their individual observations. `populate_wording_basis` compares
 dated printings, applies exact-content AI/manual decisions, and selects the latest
 known release only after equivalence. Fetch times never rank variants. Current uses the existing
-`latest_observed_no_errata` basis with no invented decision. Candidate revision
-ordinals enumerate deterministically sorted revision IDs; raw variants precede
-corrected variants. `initial`/`wording` records represent
+`latest_observed_no_errata` basis with no invented decision. Each face-region
+numbers its distinct candidates from 1. Raw candidates come first, ordered by the
+lowest permanent printing ID that observes each candidate. Corrected candidates
+follow in lexicographic order of their sorted permanent correction IDs. The
+printing ID and source face index break ties. Ordinals are recomputed on each build
+and can move when the candidate set or its supporting printings change.
+`initial`/`wording` records represent
 observed candidates, without equivalence, temporal ordering, supersession or
 human adoption claims. Effective dates stay null and temporal status unknown.
 Printed effects and section kinds remain unknown; sections preserve empty strings
