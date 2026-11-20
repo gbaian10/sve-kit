@@ -1,0 +1,37 @@
+cards:
+  BP06-107:
+    abilities:
+      - fanfare:
+          do:
+            - each_player:
+                as: p
+                stages:
+                  - - choose:
+                        bind: kept
+                        by: p
+                        from: { who: p, zone: field, kind: follower }
+                        n: 1
+                    - move:
+                        ref:
+                          who: p
+                          zone: field
+                          kind: follower
+                          except: { in: kept }
+                        to: cemetery
+        line: 1
+      - lastword:
+          do:
+            - search:
+                n: 1
+                sel: { who: self, zone: deck, name: 頂きの闘技場 }
+                to: field
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set
