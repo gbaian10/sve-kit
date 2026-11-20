@@ -120,6 +120,11 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
+  "vars": {
+    "SITE_ORIGIN": "https://dev.svekit.app",
+    "CARD_REPORT_GITHUB_APP_ID": "",
+    "CARD_REPORT_GITHUB_INSTALLATION_ID": ""
+  },
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
   "ratelimits": [
     { "name": "CARD_REPORT_LIMITER", "namespace_id": "19901", "simple": { "limit": 3, "period": 60 } }
@@ -343,8 +348,10 @@ CORS error，須先個別登入該網域，工作階段到期後也須重新登�
 
 1. 在 `gbaian10/sve-kit` 建立 `card-report` 標籤。建立或指定 GitHub App，
    安裝範圍只選 `sve-kit`，repository permissions 設定 **Issues: Read and write**。
-   記下數值 App ID 與 installation ID，分別設定為 Worker 變數
-   `CARD_REPORT_GITHUB_APP_ID`、`CARD_REPORT_GITHUB_INSTALLATION_ID`。
+   維護者在 `sim/web/wrangler.dev.jsonc` 的 `vars` 中填入數值 App ID 與
+   installation ID，分別對應 `CARD_REPORT_GITHUB_APP_ID`、
+   `CARD_REPORT_GITHUB_INSTALLATION_ID`，以字串保存。開發站的 `SITE_ORIGIN`
+   已在同一處設為 `https://dev.svekit.app`。以下兩種憑證使用 `wrangler secret put`。
 2. 將 App 私鑰以 **PKCS#8 PEM** 放入 Worker secret `CARD_REPORT_GITHUB_PRIVATE_KEY`。
    GitHub 下載的 PKCS#1 PEM 可由維護者在本機以管線轉換並輸入 Wrangler，
    先把 `GITHUB_APP_PEM` 指向剛下載的私鑰檔，再於 `sim/web` 執行。
@@ -362,8 +369,9 @@ CORS error，須先個別登入該網域，工作階段到期後也須重新登�
    `bun x wrangler secret put TURNSTILE_SECRET --config wrangler.dev.jsonc`，
    並輸入對應的 always-pass 測試 secret。正式環境建立只允許正式
    hostname 的 Turnstile widget，以 `VITE_TURNSTILE_SITE_KEY` 傳入公開 site key 後
-   建置，並將正式 secret 存為 Worker 的 `TURNSTILE_SECRET`。正式 Worker 設
-   `SITE_ORIGIN=https://svekit.app`，使用獨立的 Rate Limiting namespace。
+   建置，並以正式設定檔執行 `wrangler secret put TURNSTILE_SECRET`。
+   維護者在正式的 `sim/web/wrangler.prod.jsonc` 的 `vars` 中填入兩個 ID 欄位，
+   並設 `SITE_ORIGIN` 為 `https://svekit.app`，使用獨立的 Rate Limiting namespace。
    若另在平台設定了 CSP，`script-src` 與 `frame-src` 須允許 `https://challenges.cloudflare.com`。
    參考 [Turnstile 測試金鑰](https://developers.cloudflare.com/turnstile/troubleshooting/testing/)、
    [Siteverify](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/)
@@ -383,3 +391,4 @@ bun run test:all tests/card-report-worker.test.ts src/pages/card/CardReport.test
 確認預選「翻譯」且顯示目前卡號與版本。用明確標為測試的說明送出一筆，確認成功畫面的連結
 指向帶 `card-report` 標籤的 issue。換用 Cloudflare 的 always-fail 測試 secret 可驗證
 人機驗證錯誤，再恢復 always-pass 測試 secret。Worker 測試另驗超頻與缺少 secret 的拒絕。
+送出失敗時可在 Workers Logs 查找 `card-report:`，以固定的階段名稱定位問題。

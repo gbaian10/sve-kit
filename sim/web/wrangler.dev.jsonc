@@ -6,6 +6,11 @@
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
+  "vars": {
+    "SITE_ORIGIN": "https://dev.svekit.app",
+    "CARD_REPORT_GITHUB_APP_ID": "",
+    "CARD_REPORT_GITHUB_INSTALLATION_ID": "",
+  },
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
   "ratelimits": [
     {

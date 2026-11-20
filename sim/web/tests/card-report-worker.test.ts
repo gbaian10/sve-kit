@@ -27,6 +27,7 @@ function fixture(configured = true) {
     .mockResolvedValue({ success: true })
   const upstream = vi.fn<typeof fetch>()
   vi.stubGlobal("fetch", upstream)
+  const log = vi.spyOn(console, "error").mockImplementation(() => undefined)
   const env: Parameters<typeof worker.fetch>[1] = {
     PREVIEW_BUCKET: {
       get: () => Promise.reject(new Error("Unexpected bucket access")),
@@ -49,22 +50,32 @@ function fixture(configured = true) {
       env,
       { waitUntil: () => undefined },
     )
-  return { limit, send, upstream }
+  return { limit, log, send, upstream }
 }
 
-afterEach(() => vi.unstubAllGlobals())
+afterEach(() => {
+  vi.unstubAllGlobals()
+  vi.restoreAllMocks()
+})
 
-it("rejects an invalid card number before calling external services", async () => {
-  const { send, upstream } = fixture()
-  const response = await send({ ...report, cardNo: "../BP03-001" })
-
-  expect(response.status).toBe(400)
-  expect(await response.json()).toEqual({ error: "invalid-report" })
+it("rejects invalid fields before calling external services", async () => {
+  const { log, send, upstream } = fixture()
+  const invalidFields = [
+    { cardNo: "../BP03-001" },
+    { description: "Unexpected\u0000NUL" },
+    { contact: "Unexpected\u202eoverride" },
+  ]
+  for (const fields of invalidFields) {
+    const response = await send({ ...report, ...fields })
+    expect(response.status).toBe(400)
+    expect(await response.json()).toEqual({ error: "invalid-report" })
+  }
   expect(upstream).not.toHaveBeenCalled()
+  expect(log.mock.calls).toEqual(invalidFields.map(() => ["card-report: fields"]))
 })
 
 it("refuses a report with a rejected Turnstile token", async () => {
-  const { send, upstream, limit } = fixture()
+  const { send, upstream, limit, log } = fixture()
   upstream.mockResolvedValueOnce(Response.json({ success: false }))
 
   const response = await send()
@@ -73,10 +84,11 @@ it("refuses a report with a rejected Turnstile token", async () => {
   expect(await response.json()).toEqual({ error: "verification-failed" })
   expect(upstream).toHaveBeenCalledExactlyOnceWith(siteverify, expect.anything())
   expect(limit).not.toHaveBeenCalled()
+  expect(log).toHaveBeenCalledExactlyOnceWith("card-report: siteverify")
 })
 
 it("refuses a report over the rate limit without contacting GitHub", async () => {
-  const { send, upstream, limit } = fixture()
+  const { send, upstream, limit, log } = fixture()
   upstream.mockResolvedValueOnce(Response.json({ success: true }))
   limit.mockResolvedValueOnce({ success: false })
 
@@ -85,16 +97,18 @@ it("refuses a report over the rate limit without contacting GitHub", async () =>
   expect(response.status).toBe(429)
   expect(await response.json()).toEqual({ error: "rate-limited" })
   expect(upstream).toHaveBeenCalledExactlyOnceWith(siteverify, expect.anything())
+  expect(log).toHaveBeenCalledExactlyOnceWith("card-report: rate-limit")
 })
 
 it("reports missing secrets without calling external services", async () => {
-  const { send, upstream } = fixture(false)
+  const { log, send, upstream } = fixture(false)
 
   const response = await send()
 
   expect(response.status).toBe(503)
   expect(await response.json()).toEqual({ error: "not-configured" })
   expect(upstream).not.toHaveBeenCalled()
+  expect(log).toHaveBeenCalledExactlyOnceWith("card-report: configuration")
 })
 
 it("opens a labeled issue with validated metadata and literal user text", async () => {
@@ -133,7 +147,7 @@ it("opens a labeled issue with validated metadata and literal user text", async 
         expect(payload).toHaveProperty(
           "body",
           expect.stringContaining(
-            "\n    @\u200bexample\n    ![image](https://example.com/image.png)\n    <img src=x>",
+            "\n    @\u200bexample\n    ![image](https://example.com/image.png)\n    <img\tsrc=x>",
           ),
         )
         expect(payload).toHaveProperty(
@@ -150,7 +164,7 @@ it("opens a labeled issue with validated metadata and literal user text", async 
 
   const response = await send({
     ...report,
-    description: "@example\r\n![image](https://example.com/image.png)\r<img src=x>",
+    description: "@example\r\n![image](https://example.com/image.png)\r<img\tsrc=x>",
     contact: "card@example.com",
   })
 

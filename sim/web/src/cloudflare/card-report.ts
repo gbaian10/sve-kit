@@ -20,10 +20,27 @@ export interface CardReportEnv {
 const SITEVERIFY = "https://challenges.cloudflare.com/turnstile/v0/siteverify"
 const TEST_TURNSTILE_SECRET = "1x0000000000000000000000000000000AA"
 const GITHUB = "https://api.github.com"
+const GITHUB_HEADERS = {
+  Accept: "application/vnd.github+json",
+  "User-Agent": "sve-kit-card-report",
+  "X-GitHub-Api-Version": "2022-11-28",
+}
 const MAX_BODY_BYTES = 32 * 1024
 const CARD_NO = /^[A-Z0-9][A-Za-z0-9]*-(?:[A-ZⓈ]*[0-9]+[A-Za-z0-9Ⓢ]*|S?EP)$/u
 const DATA_VERSION = /^(?:preview-)?[0-9]{8}T[0-9]{6}Z-[0-9]{4}$/u
+// eslint-disable-next-line no-control-regex -- Reports permit tabs and line breaks within otherwise visible text.
+const DISALLOWED_TEXT = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\p{Bidi_Control}]/u
 const encoder = new TextEncoder()
+
+type FailureStage =
+  | "request"
+  | "fields"
+  | "configuration"
+  | "siteverify"
+  | "rate-limit"
+  | "github-jwt"
+  | "github-installation"
+  | "github-issue"
 
 function json(body: Record<string, string | number>, status: number): Response {
   return Response.json(body, {
@@ -33,6 +50,11 @@ function json(body: Record<string, string | number>, status: number): Response {
       ...(status === 405 ? { Allow: "POST" } : {}),
     },
   })
+}
+
+function failure(stage: FailureStage, error: string, status: number): Response {
+  console.error(`card-report: ${stage}`)
+  return json({ error }, status)
 }
 
 async function readReport(request: Request): Promise<CardReportInput | null> {
@@ -85,11 +107,14 @@ async function readReport(request: Request): Promise<CardReportInput | null> {
       typeof description !== "string" ||
       description.length > REPORT_DESCRIPTION_LIMIT ||
       !description.trim() ||
+      DISALLOWED_TEXT.test(description) ||
       typeof contact !== "string" ||
       contact.length > REPORT_CONTACT_LIMIT ||
+      DISALLOWED_TEXT.test(contact) ||
       typeof token !== "string" ||
       token.length > 2048 ||
-      !token.trim()
+      !token.trim() ||
+      DISALLOWED_TEXT.test(token)
     )
       return null
     return {
@@ -176,23 +201,18 @@ function plainTextMarkdown(text: string): string {
     .join("\n")
 }
 
-async function createIssue(
-  report: CardReportInput,
-  jwt: string,
-  installationId: string,
-): Promise<number> {
-  const githubHeaders = {
-    Accept: "application/vnd.github+json",
-    "User-Agent": "sve-kit-card-report",
-    "X-GitHub-Api-Version": "2022-11-28",
-  }
+async function exchangeInstallationToken(jwt: string, installationId: string): Promise<string> {
   const installation = await post(
     `${GITHUB}/app/installations/${installationId}/access_tokens`,
     { repositories: [CARD_REPORT_REPOSITORY.split("/")[1]], permissions: { issues: "write" } },
-    { ...githubHeaders, Authorization: `Bearer ${jwt}` },
+    { ...GITHUB_HEADERS, Authorization: `Bearer ${jwt}` },
   )
   const accessToken = field(installation, "token")
   if (typeof accessToken !== "string" || !accessToken) throw new Error("Missing installation token")
+  return accessToken
+}
+
+async function createIssue(report: CardReportInput, accessToken: string): Promise<number> {
   const card = report.cardNo ?? `Printing ${String(report.printingIntId)}`
   const body = [
     `- Card number: ${report.cardNo ?? "—"}`,
@@ -219,7 +239,7 @@ async function createIssue(
       body,
       labels: ["card-report"],
     },
-    { ...githubHeaders, Authorization: `Bearer ${accessToken}` },
+    { ...GITHUB_HEADERS, Authorization: `Bearer ${accessToken}` },
   )
   const number = field(result, "number")
   if (typeof number !== "number" || !Number.isSafeInteger(number) || number <= 0)
@@ -228,16 +248,16 @@ async function createIssue(
 }
 
 export async function submitCardReport(request: Request, env: CardReportEnv): Promise<Response> {
-  if (request.method !== "POST") return json({ error: "method-not-allowed" }, 405)
+  if (request.method !== "POST") return failure("request", "method-not-allowed", 405)
   const url = new URL(request.url)
   const origin = request.headers.get("Origin")
-  if (origin !== null && origin !== url.origin) return json({ error: "invalid-report" }, 403)
+  if (origin !== null && origin !== url.origin) return failure("request", "invalid-report", 403)
   if (
     request.headers.get("Content-Type")?.split(";")[0]?.trim().toLowerCase() !== "application/json"
   )
-    return json({ error: "invalid-report" }, 415)
+    return failure("request", "invalid-report", 415)
   const report = await readReport(request)
-  if (!report) return json({ error: "invalid-report" }, 400)
+  if (!report) return failure("fields", "invalid-report", 400)
 
   const secret = env.TURNSTILE_SECRET
   const appId = env.CARD_REPORT_GITHUB_APP_ID
@@ -255,15 +275,16 @@ export async function submitCardReport(request: Request, env: CardReportEnv): Pr
     !limiter ||
     (testSecret && url.hostname !== "dev.svekit.app")
   )
-    return json({ error: "not-configured" }, 503)
+    return failure("configuration", "not-configured", 503)
 
+  let stage: FailureStage = "siteverify"
   try {
     const verification = await post(SITEVERIFY, { secret, response: report.token })
     const errors = field(verification, "error-codes")
     if (Array.isArray(errors)) {
       if (errors.includes("missing-input-secret") || errors.includes("invalid-input-secret"))
-        return json({ error: "not-configured" }, 503)
-      if (errors.includes("internal-error")) return json({ error: "server-error" }, 502)
+        return failure(stage, "not-configured", 503)
+      if (errors.includes("internal-error")) return failure(stage, "server-error", 502)
     }
     if (
       field(verification, "success") !== true ||
@@ -271,12 +292,17 @@ export async function submitCardReport(request: Request, env: CardReportEnv): Pr
         (field(verification, "hostname") !== url.hostname ||
           field(verification, "action") !== REPORT_TURNSTILE_ACTION))
     )
-      return json({ error: "verification-failed" }, 403)
+      return failure(stage, "verification-failed", 403)
+    stage = "rate-limit"
     const limit = await limiter.limit({ key: await sourceKey(request, secret) })
-    if (!limit.success) return json({ error: "rate-limited" }, 429)
+    if (!limit.success) return failure(stage, "rate-limited", 429)
+    stage = "github-jwt"
     const jwt = await signAppJwt(appId, privateKey)
-    return json({ issueNumber: await createIssue(report, jwt, installationId) }, 201)
+    stage = "github-installation"
+    const accessToken = await exchangeInstallationToken(jwt, installationId)
+    stage = "github-issue"
+    return json({ issueNumber: await createIssue(report, accessToken) }, 201)
   } catch {
-    return json({ error: "server-error" }, 502)
+    return failure(stage, "server-error", 502)
   }
 }
