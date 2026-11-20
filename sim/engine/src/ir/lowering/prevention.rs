@@ -324,15 +324,15 @@ impl BodyContext<'_> {
             | ast::InstalledEffect::EvolveCostMod(_)
             | ast::InstalledEffect::Cannot(_) => return Err(unsupported(path)),
         };
-        // Fixed reductions and caps may last the whole turn (BP14-T07); full prevention stays once-only.
         let limited = next == Some(true);
-        if (!limited
-            && !matches!(
-                value.effect,
-                ast::InstalledEffect::DamageMod(_) | ast::InstalledEffect::DamageCap(_)
-            ))
-            || damage_source.is_some()
-            || !matches!(kind, None | Some(ast::PreventionKind::Any))
+        let kind = match kind {
+            None | Some(ast::PreventionKind::Any) => DamageKind::Any,
+            Some(ast::PreventionKind::Combat) => DamageKind::Combat,
+            Some(ast::PreventionKind::Ability) => DamageKind::Ability,
+        };
+        if damage_source.is_some()
+            || (limited && kind != DamageKind::Any)
+            || (!matches!(rewrite, EventRewrite::PreventDamage { .. }) && kind != DamageKind::Any)
             || !matches!(
                 on,
                 None | Some(ast::Recipients::Leader {
@@ -359,7 +359,7 @@ impl BodyContext<'_> {
             ProposedEventPattern::Damage {
                 recipient: Some(recipient),
                 source: None,
-                kind: DamageKind::Any,
+                kind,
             },
             source,
             Expr::Literal(Bool(true)),

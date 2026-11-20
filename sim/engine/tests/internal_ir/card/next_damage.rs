@@ -75,24 +75,24 @@ fn raw_object_reduction_cannot_bypass_the_seeded_prevention_boundary() {
 }
 
 #[test]
-fn only_the_own_leader_reduction_may_last_the_whole_turn() {
+fn own_leader_reduction_and_prevention_may_last_the_whole_turn() {
     let whole_turn = |effect: Value, who: &str, until: &str| {
         tree(
             json!({"cost":{"pp":0},"do":[{"player_effect":{"who":who,"effect":effect,"until":until}}]}),
         )
     };
-    let programs = lowerer()
-        .lower(&whole_turn(
-            json!({"damage_mod":{"delta":-1}}),
-            "self",
-            "turn",
-        ))
-        .unwrap();
-    game(1, 0)
-        .load_internal_card("unit-follower", &programs["unit-follower"])
-        .unwrap();
+    for effect in [
+        json!({"damage_mod":{"delta":-1}}),
+        json!({"prevent":{"kind":"ability"}}),
+    ] {
+        let programs = lowerer()
+            .lower(&whole_turn(effect, "self", "turn"))
+            .unwrap();
+        game(1, 0)
+            .load_internal_card("unit-follower", &programs["unit-follower"])
+            .unwrap();
+    }
     for rejected in [
-        whole_turn(json!({"prevent":{"kind":"any"}}), "self", "turn"),
         whole_turn(json!({"damage_mod":{"delta":-1}}), "opp", "turn"),
         whole_turn(json!({"damage_mod":{"delta":-1}}), "self", "next_turn"),
         whole_turn(json!({"damage_mod":{"delta":1}}), "self", "turn"),

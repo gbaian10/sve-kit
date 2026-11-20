@@ -1,6 +1,6 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::prevention::{
-    DamageSource, Recipients, own_leader, projection, whole_turn_leader_reduction,
+    DamageSource, Recipients, own_leader, projection, whole_turn_leader_rewrite,
 };
 use crate::ir::{
     Bool, DurationEnd, Effect, EventRewrite, Expr, PlayerSet, ProposedEventPattern, Selector,
@@ -88,9 +88,8 @@ impl Checker {
         players: &PlayerSet,
     ) -> Checked {
         let shape = projection(effect).ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;
-        // Only a whole-turn negative reduction may omit the use limit; prevention stays once-only.
         if players != &own_leader()
-            || (shape.usage.is_none() && !whole_turn_leader_reduction(&shape))
+            || (shape.usage.is_none() && !whole_turn_leader_rewrite(&shape))
             || !matches!(shape.recipients, Some(Recipients::Leaders(expected)) if expected == players)
             || shape.damage_source.is_some()
             || *shape.condition != Expr::Literal(Bool(true))

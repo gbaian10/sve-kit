@@ -11,7 +11,7 @@ use crate::game::player::observation::seat;
 use crate::ir::ObjectRelation;
 use crate::ir::prevention::{
     DamageSource, Prevention, Recipients, holder_counter_step, lasting_object_cap,
-    lasting_object_increase, own_leader, projection, whole_turn_leader_reduction,
+    lasting_object_increase, own_leader, projection, whole_turn_leader_rewrite,
 };
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::static_declarations::{self, Family};
@@ -348,16 +348,15 @@ pub(in crate::game::internal) fn check_install(
         return Err(unsupported("damage prevention installation"));
     };
     let shape = projection(effect).ok_or_else(|| unsupported("damage prevention shape"))?;
-    // A whole-turn reduction on the own leader (BP14-T07) needs no use count.
-    let leader_reduction = matches!(subjects, InstallationSubjects::Players { .. })
-        && whole_turn_leader_reduction(&shape);
+    let leader_rewrite = matches!(subjects, InstallationSubjects::Players { .. })
+        && whole_turn_leader_rewrite(&shape);
     let object_cap =
         matches!(subjects, InstallationSubjects::Objects { .. }) && lasting_object_cap(&shape);
     let object_increase =
         matches!(subjects, InstallationSubjects::Objects { .. }) && lasting_object_increase(&shape);
     if !matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
         && shape.usage.is_none()
-        && !leader_reduction
+        && !leader_rewrite
         && !object_cap
         && !object_increase
     {
@@ -386,7 +385,7 @@ pub(in crate::game::internal) fn check_install(
             }
         }
         InstallationSubjects::Players { players, .. } => {
-            (shape.usage.is_some() || leader_reduction)
+            (shape.usage.is_some() || leader_rewrite)
                 && *players == own_leader()
                 && matches!(shape.recipients, Some(Recipients::Leaders(expected)) if expected == players)
                 && shape.damage_source.is_none()

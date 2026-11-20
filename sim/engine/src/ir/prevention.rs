@@ -126,17 +126,18 @@ fn source_filter(predicate: &SourcePredicate) -> Option<DamageSource<'_>> {
     (*binding == predicate.binding).then_some(DamageSource::Objects(set))
 }
 
-/// A whole-turn reduction or cap of damage to the own leader without a use count (BP14-T07, BP05-101).
-pub(crate) fn whole_turn_leader_reduction(shape: &Prevention<'_>) -> bool {
+/// An unlimited leader rewrite lasts for the turn.
+pub(crate) fn whole_turn_leader_rewrite(shape: &Prevention<'_>) -> bool {
     shape.usage.is_none()
-        && shape.kind == DamageKind::Any
         && shape.damage_source.is_none()
-        && (matches!(
-            shape.rewrite,
-            EventRewrite::AddDamage {
-                amount: Expr::Literal(super::Int(i64::MIN..=-1))
-            }
-        ) || matches!(shape.rewrite, EventRewrite::CapDamage { .. }))
+        && (matches!(shape.rewrite, EventRewrite::PreventDamage { .. })
+            || (shape.kind == DamageKind::Any
+                && (matches!(
+                    shape.rewrite,
+                    EventRewrite::AddDamage {
+                        amount: Expr::Literal(super::Int(i64::MIN..=-1))
+                    }
+                ) || matches!(shape.rewrite, EventRewrite::CapDamage { .. }))))
         && shape.duration.end == (super::DurationEnd::CurrentTurnEnd {})
         && shape.duration.intervals.is_empty()
 }
