@@ -4,6 +4,7 @@
 )]
 
 use super::*;
+use sve_engine::game::player::SubmissionKind;
 
 #[test]
 fn phantom_blaster_overlord_replaces_original_pp_with_its_named_follower() {
@@ -134,4 +135,25 @@ fn new_generations_pays_nine_disjoint_cards_across_three_traits() {
     assert_eq!(after["P1"]["cemetery"].as_array().unwrap().len(), 1_usize);
     assert_eq!(after["P1"]["banish"].as_array().unwrap().len(), 9_usize);
     assert_eq!(after["P1"]["field"], json!(["source"]));
+}
+
+#[test]
+fn blazing_core_evolves_for_one_pp_and_two_named_cemetery_materials() {
+    let mut initial = evolution_payment::position("CP03-066", "CP03-067");
+    initial["players"]["P1"]["pp"] = json!({"current": 1, "max": 1});
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"claw","card":"CP03-077"},
+        {"id":"tail","card":"CP03-080"},
+        {"id":"extra","card":"CP03-086"}
+    ]);
+    let mut game = evolution_payment::game(&initial);
+    assert_eq!(
+        player_evolution::evolve(&mut game, false),
+        SubmissionKind::Applied
+    );
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["pp"]["current"], 0_i64);
+    assert_eq!(after["P1"]["cemetery"], json!(["extra"]));
+    assert_eq!(after["P1"]["banish"].as_array().unwrap().len(), 2_usize);
+    assert_eq!(after["objects"]["source"]["evolved_with"], "form");
 }

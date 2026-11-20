@@ -19,13 +19,13 @@ fn question(game: &Game) -> Question {
 fn assert_selection(game: &Game, selection: &SelectionQuestion) {
     let observation = game.observe(Viewer::P1).unwrap();
     assert_eq!(
-        selection.groups.len(),
-        1,
-        "An evolution payment has one effective selection group"
-    );
-    assert_eq!(
-        selection.groups[0].cardinality, selection.cardinality,
-        "The effective group bounds match the complete selection"
+        selection
+            .groups
+            .iter()
+            .map(|group| group.cardinality.minimum.0)
+            .sum::<u64>(),
+        selection.cardinality.minimum.0,
+        "The effective group minima match the complete selection"
     );
     assert!(
         selection.members.iter().all(|member| {

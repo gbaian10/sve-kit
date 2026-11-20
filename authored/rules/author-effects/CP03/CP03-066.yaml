@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-066:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        evolve:
+          into: ブレイジングフレア・ドラゴン
+          cost: { pp: 3 }
+      - line: 2
+        evolve:
+          into: ブレイジングフレア・ドラゴン
+          cost:
+            steps:
+              - pp: 1
+              - banish:
+                  groups:
+                    - sel: { who: self, zone: cemetery, name: アイアンテイル・ドラゴン }
+                      n: 1
+                    - sel: { who: self, zone: cemetery, name: ガトリングクロー・ドラゴン }
+                      n: 1
