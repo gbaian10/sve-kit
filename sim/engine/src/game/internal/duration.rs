@@ -135,7 +135,6 @@ impl TurnInterval {
 pub(super) struct TurnWindow {
     pub(super) end: EffectEnd,
     pub(super) interval: Option<TurnInterval>,
-    #[serde(default)]
     pub(super) main_ended: bool,
 }
 

@@ -183,7 +183,7 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 `cost.discard: {sel: {who: self, zone: hand}, n: N, random: true}` 需要足量手牌，在付款時抽樣，且沿用付款回滾。
 場上誘發能力的本文可用 `pay.cost.discard` 指定從自己的手牌支付固定張數，並依材料篩選。接受付款後由控制者私下選擇材料，足額支付才執行 `pay.do`。
 
-`player_effect: {who: self, until: turn, effect: {prevent: {kind: ability}}}` 讓自己的領袖在本回合每次免受能力傷害。
+`player_effect: {who: self, until: turn, effect: {prevent: {kind: ability}}}` 讓自己的領袖免受指定種類的傷害。`prevent` 不帶 `next_only` 時整回合有效。
 同行若也保護從者，可用本回合的 `grant` 授予場上當時符合條件的從者防傷常在能力。
 
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
