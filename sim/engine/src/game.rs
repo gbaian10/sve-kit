@@ -164,6 +164,11 @@ struct Frame {
     // Serialized legacy frames cannot provide the typed ability-source evidence.
     #[serde(skip)]
     entry_source: Option<internal::EntrySource>,
+    #[serde(skip)]
+    entry_payment: Option<(
+        crate::ir::RuntimeReceiptId,
+        Vec<crate::ir::AdditionalMaterial>,
+    )>,
     controller: String,
     #[serde(default)]
     event: Value,

@@ -418,7 +418,10 @@ fn mask_prevention(inspected: &mut Node) -> Result<()> {
 }
 
 fn check_control_guard(condition: &Expr<Bool>, source: &SourceSpan) -> Result<()> {
-    if banished_condition(condition).is_some() {
+    if banished_condition(condition).is_some()
+        || matches!(condition, Expr::Frozen(read)
+            if matches!(read.as_ref(), crate::ir::BoolFrozen::EntryAdditionalMaterial { .. }))
+    {
         Ok(())
     } else {
         check_condition(condition, source)

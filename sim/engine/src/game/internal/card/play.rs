@@ -2405,17 +2405,23 @@ fn independent_selector(selector: &Selector) -> bool {
 impl Game {
     pub(super) fn prepare_field_play(&self, execution: &mut Execution) -> Result<()> {
         execution.field_entry = true;
+        let additional = self.internal_additional(execution)?;
+        let parameters = additional
+            .as_deref()
+            .map_or_else(VecDeque::new, |(_, payment)| {
+                payment.play.parameters.clone().into()
+            });
         execution.play = Some(PlayState {
             cost_policy: AbilityCostPolicy::Normal,
             qualification: AbilityQualification::Ordinary,
-            additional: None,
+            additional,
             resource_entry: None,
             snapshot: None,
             snapshot_id: SnapshotId(self.state.ir_epoch),
             modes: VecDeque::new(),
             groups: vec![],
             chosen: BTreeMap::new(),
-            parameters: VecDeque::new(),
+            parameters,
             exchange: self.internal_exchange(execution)?,
             optional: vec![],
             costs: CostSpec::Ordered { steps: vec![] },

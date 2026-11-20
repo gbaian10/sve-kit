@@ -323,6 +323,12 @@ impl Checker {
                 }
                 BoolFrozen::DriveGainedFirstGain { event } => self.event_field(*event),
                 BoolFrozen::DriveCheckedTriggerAccepted { event } => self.event_field(*event),
+                BoolFrozen::EntryAdditionalMaterial { event, name, .. } => {
+                    if name.0.is_empty() {
+                        return self.reject();
+                    }
+                    self.event_field(*event)
+                }
                 BoolFrozen::PaymentComplete {
                     receipt: PaymentReference::CardPlay { face, receipt },
                 } if self.capture_time.is_none()

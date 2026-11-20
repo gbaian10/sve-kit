@@ -1,6 +1,7 @@
 //! Completed cost facts stay separate from quotes and from whole-play completion.
 
 use super::Execution;
+use crate::ir::{AdditionalMaterial, RuntimeReceiptId, ZoneKind};
 use crate::ir::{Characteristics, Instruction, ObjectRef, PlayerId, Quantity, ReceiptId};
 use alloc::vec::Vec;
 
@@ -68,4 +69,47 @@ pub(in crate::game::internal) fn record_cost_spec_payment(
     execution
         .cost_spec_payments
         .push(CostSpecPayment { purpose, steps });
+}
+
+pub(in crate::game::internal) fn entry_additional_payment(
+    execution: &Execution,
+) -> Option<(RuntimeReceiptId, Vec<AdditionalMaterial>)> {
+    let (_, receipt) = execution.card_payment.as_ref()?;
+    let paid = execution.cost_spec_payments.iter().find(|payment| {
+        payment.purpose == (CostPaymentPurpose::Additional { receipt: *receipt })
+    })?;
+    let materials = paid
+        .steps
+        .iter()
+        .flat_map(|step| {
+            step.subjects
+                .iter()
+                .zip(&step.characters)
+                .filter_map(|(subject, characters)| {
+                    let from = execution.facts.iter().find_map(|fact| {
+                        if let super::Fact::Movement(fact) = fact
+                            && fact.movement.before == *subject
+                            && fact
+                                .movement
+                                .actual_to
+                                .is_some_and(|zone| zone.kind == ZoneKind::Cemetery)
+                        {
+                            return Some(fact.from.kind);
+                        }
+                        None
+                    })?;
+                    Some(AdditionalMaterial {
+                        from,
+                        names: characters.names.clone(),
+                    })
+                })
+        })
+        .collect();
+    Some((
+        RuntimeReceiptId {
+            execution: execution.id,
+            slot: *receipt,
+        },
+        materials,
+    ))
 }

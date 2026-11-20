@@ -1028,16 +1028,14 @@ impl Game {
                 .iter()
                 .map(|member| self.internal_characteristics(execution.object_id(*member)?))
                 .collect::<Result<Vec<_>>>()?
-        } else if let [member] = members.as_slice()
-            && matches!(objects, Selector::Bound { .. })
+        } else if matches!(objects, Selector::Bound { .. })
             && matches!(&instruction.action, Action::Move { movement, reason: MoveReason::Put, .. }
                 if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))
-            && self.object(execution.object_id(*member)?)?.zone == "field"
-            && self
-                .object_type(execution.object_id(*member)?)?
-                .contains("フォロワー")
         {
-            vec![self.internal_characteristics(execution.object_id(*member)?)?]
+            members
+                .iter()
+                .map(|member| self.internal_characteristics(execution.object_id(*member)?))
+                .collect::<Result<Vec<_>>>()?
         } else {
             vec![]
         };

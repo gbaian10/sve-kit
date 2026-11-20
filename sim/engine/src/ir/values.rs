@@ -671,6 +671,7 @@ variants!(BoolFrozen {
     PaymentReplaced { event: Binding<PaymentEvent> } => ["read.event-field"],
     DriveGainedFirstGain { event: Binding<DriveGainedEvent> } => ["read.event-field"],
     DriveCheckedTriggerAccepted { event: Binding<DriveCheckedEvent> } => ["read.event-field"],
+    EntryAdditionalMaterial { event: Binding<EnterFieldEvent>, from: ZoneKind, name: CardName } => ["read.event-field"],
     PaymentComplete { receipt: PaymentReference } => ["read.receipt.payment-complete"]
 });
 variants!(#[derive(Copy)] ZoneFrozen {

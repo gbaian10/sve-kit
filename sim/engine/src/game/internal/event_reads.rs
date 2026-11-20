@@ -27,6 +27,7 @@ enum Context {
         method: EntryMethod,
         origin: EntryOrigin,
         source_traits: Option<Vec<TraitId>>,
+        additional_materials: Vec<crate::ir::AdditionalMaterial>,
     },
     Attack {
         subject: EventObject,
@@ -98,6 +99,7 @@ impl Context {
                     method: event.method,
                     origin: event.from,
                     source_traits: event.ability_source_traits.clone(),
+                    additional_materials: event.additional_materials.clone(),
                 },
                 _ => Self::Subject(subject),
             });
@@ -214,6 +216,20 @@ impl EventReads {
                 origin,
                 ..
             } if *saved == binding => Some(*origin),
+            _ => None,
+        }
+    }
+
+    pub(super) fn entry_additional_materials(
+        &self,
+        binding: Binding<EnterFieldEvent>,
+    ) -> Option<&[crate::ir::AdditionalMaterial]> {
+        match &self.0 {
+            Context::Entry {
+                binding: saved,
+                additional_materials,
+                ..
+            } if *saved == binding => Some(additional_materials),
             _ => None,
         }
     }

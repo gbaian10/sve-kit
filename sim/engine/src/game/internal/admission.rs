@@ -883,6 +883,7 @@ fn event_field_requirement(requirements: &Requirements, requirement: &Requiremen
                         other.capability.code,
                         "shape.NatFrozen.DiceValue"
                             | "shape.IntFrozen.MoveBatchCount"
+                            | "shape.BoolFrozen.EntryAdditionalMaterial"
                             | "shape.EntryMethodFields.EnterFieldMethod"
                             | "shape.TraitsFrozen.EnterFieldAbilitySourceTraits"
                             | "shape.EntryOriginFields.EnterFieldFrom"
@@ -980,6 +981,7 @@ fn supported(code: &str) -> bool {
             | "read.receipt.evolution-succeeded"
             | "read.receipt.payment-complete"
             | "shape.Node.Instruction"
+            | "shape.BoolFrozen.EntryAdditionalMaterial"
             | "shape.Node.Control"
             | "shape.Node.Capture"
             | "shape.Node.Decision"

@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-084:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            to_cemetery:
+              sel: { who: self, zone: field, kind: follower, trait: シャドウパラディン }
+              n: 1
+      - line: 2
+        evolve:
+          cost: { pp: 1 }
+      - line: 3
+        keywords: [storm, twin_drive]
+      - line: 4
+        fanfare:
+          do:
+            - if:
+                cond:
+                  did:
+                    result: { entry_payment: additional }
+                    where: { name: ブラスター・ダーク, zone: field }
+                then:
+                  - evolve: { ref: this }

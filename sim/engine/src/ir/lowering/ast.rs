@@ -3290,12 +3290,43 @@ pub(super) enum Condition {
     Combo(u64),
     Spellchain(u64),
     Necro(u64),
-    Did(String),
+    Did(DidResult),
     Paid(PaidReceipt),
     Cmp(Box<BodyComparison>),
     All(Vec<Self>),
     Any(Vec<Self>),
     Not(Box<Self>),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum DidResult {
+    Named(String),
+    EntryPayment {
+        #[serde(rename = "result")]
+        _result: EntryPaymentRef,
+        r#where: EntryPaymentFilter,
+    },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryPaymentRef {
+    #[serde(rename = "entry_payment")]
+    pub _entry_payment: EntryPaymentKind,
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum EntryPaymentKind {
+    Additional,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct EntryPaymentFilter {
+    pub name: String,
+    pub zone: TargetSingleZone,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

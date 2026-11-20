@@ -20,6 +20,7 @@ mod exchanges;
 pub use exchanges::{ExchangeMaterialPayment, ExchangePayment};
 
 mod payments;
+pub(super) use payments::entry_additional_payment;
 pub(super) use payments::record_cost_spec_payment;
 pub use payments::{CostPaymentPurpose, CostSpecPayment, CostStepPayment};
 

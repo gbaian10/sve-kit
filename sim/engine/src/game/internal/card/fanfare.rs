@@ -5,6 +5,7 @@ use super::{
 };
 use crate::game::internal::PlayPhase;
 use crate::game::internal::processing::enter_play_phase;
+use crate::game::internal::processing::entry_additional_payment;
 use crate::game::knowledge::PublishedKnowledge;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
@@ -72,6 +73,7 @@ impl Game {
             decision["at"] = json!("main");
         }
         let mut frame = self.start_frame(&holder, serde_json::Value::Null, &decision)?;
+        frame.entry_payment = entry_additional_payment(execution);
         if self.zone_count(seat, "field") >= 5 {
             return Err(crate::EngineFailure::IllegalPlay(
                 "full field after payment".into(),

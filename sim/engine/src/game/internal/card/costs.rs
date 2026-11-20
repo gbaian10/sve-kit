@@ -134,9 +134,9 @@ fn check_additional(
 ) -> Result<()> {
     if !matches!(
         game.catalog.face(card_no, 0)?["card_type"].as_str(),
-        Some("スペル" | "スペル・トークン")
+        Some("スペル" | "スペル・トークン" | "フォロワー" | "アミュレット")
     ) {
-        return Err(unsupported("additional cost requires a Spell"));
+        return Err(unsupported("additional cost card kind"));
     }
     for ability in &card.card().abilities {
         if ability.node.kind == AbilityKind::Spell {

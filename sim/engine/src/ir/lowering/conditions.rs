@@ -355,7 +355,27 @@ impl BodyContext<'_> {
                 predicate: self.condition(item, path)?,
             },
             ast::Condition::Cmp(value) => return self.comparison_condition(value, path),
-            ast::Condition::Did(name) => return self.move_success(name, path),
+            ast::Condition::Did(ast::DidResult::Named(name)) => {
+                return self.move_success(name, path);
+            }
+            ast::Condition::Did(ast::DidResult::EntryPayment { r#where, .. }) => {
+                let event = self.entry_event.ok_or_else(|| unsupported(path))?;
+                let from = match r#where.zone {
+                    ast::TargetSingleZone::Field => ZoneKind::Field,
+                    ast::TargetSingleZone::Hand => ZoneKind::Hand,
+                    ast::TargetSingleZone::Ex => ZoneKind::Ex,
+                    ast::TargetSingleZone::Cemetery => ZoneKind::Cemetery,
+                    ast::TargetSingleZone::Banish => ZoneKind::Banish,
+                    ast::TargetSingleZone::EvolveDeck => ZoneKind::Evolve,
+                };
+                return Ok(Expr::Frozen(Box::new(
+                    super::super::BoolFrozen::EntryAdditionalMaterial {
+                        event,
+                        from,
+                        name: super::super::CardName(r#where.name.clone()),
+                    },
+                )));
+            }
             ast::Condition::Paid(paid) => return self.paid_condition(paid, path),
         })))
     }
