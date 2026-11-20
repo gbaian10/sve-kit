@@ -46,7 +46,7 @@ const qaWindows = (snapshot: LoadedSnapshot, region: string) =>
 export function cardQaDate(snapshot: LoadedSnapshot, region: string): string {
   let latest: string | undefined
   for (const window of qaWindows(snapshot, region)) {
-    if (window["scope_key"] !== "region:*") continue
+    if (window["scope_key"] !== "region:*" || window["state"] !== "complete") continue
     const asOf = stringValue(window["as_of"])
     if (latest === undefined || asOf > latest) latest = asOf
   }

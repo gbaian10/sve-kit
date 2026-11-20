@@ -253,6 +253,13 @@ it("uses the edition's Q&A coverage date to prove and display absence", async ()
           ? [
               { ...window, as_of: "2029-07-11" },
               { ...window, region: "en", as_of: date },
+              {
+                ...window,
+                region: "en",
+                from_date: "2029-07-05",
+                as_of: "2029-07-25",
+                state: "partial",
+              },
             ]
           : [{ ...window, region: "en", as_of: "2029-07-18" }]
       }),
