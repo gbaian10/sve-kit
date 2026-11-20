@@ -35,9 +35,9 @@ function fixture(configured = true) {
     },
     ASSETS: { fetch: () => Promise.reject(new Error("Unexpected asset request")) },
     ...(configured ? { TURNSTILE_SECRET: "1x0000000000000000000000000000000AA" } : {}),
-    CARD_REPORT_GITHUB_APP_ID: "123",
-    CARD_REPORT_GITHUB_INSTALLATION_ID: "456",
-    CARD_REPORT_GITHUB_PRIVATE_KEY: privateKey.export({ type: "pkcs8", format: "pem" }),
+    REPORT_GITHUB_APP_ID: "123",
+    REPORT_GITHUB_INSTALLATION_ID: "456",
+    REPORT_GITHUB_PRIVATE_KEY: privateKey.export({ type: "pkcs8", format: "pem" }),
     CARD_REPORT_LIMITER: { limit },
   }
   const send = (body: object = report) =>

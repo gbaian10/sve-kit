@@ -11,9 +11,9 @@ import { isUiLanguage } from "../i18n/languages"
 
 export interface CardReportEnv {
   readonly TURNSTILE_SECRET?: string
-  readonly CARD_REPORT_GITHUB_APP_ID?: string
-  readonly CARD_REPORT_GITHUB_INSTALLATION_ID?: string
-  readonly CARD_REPORT_GITHUB_PRIVATE_KEY?: string
+  readonly REPORT_GITHUB_APP_ID?: string
+  readonly REPORT_GITHUB_INSTALLATION_ID?: string
+  readonly REPORT_GITHUB_PRIVATE_KEY?: string
   readonly CARD_REPORT_LIMITER?: { limit(input: { key: string }): Promise<{ success: boolean }> }
 }
 
@@ -260,9 +260,9 @@ export async function submitCardReport(request: Request, env: CardReportEnv): Pr
   if (!report) return failure("fields", "invalid-report", 400)
 
   const secret = env.TURNSTILE_SECRET
-  const appId = env.CARD_REPORT_GITHUB_APP_ID
-  const installationId = env.CARD_REPORT_GITHUB_INSTALLATION_ID
-  const privateKey = env.CARD_REPORT_GITHUB_PRIVATE_KEY
+  const appId = env.REPORT_GITHUB_APP_ID
+  const installationId = env.REPORT_GITHUB_INSTALLATION_ID
+  const privateKey = env.REPORT_GITHUB_PRIVATE_KEY
   const limiter = env.CARD_REPORT_LIMITER
   const testSecret = secret === TEST_TURNSTILE_SECRET
   if (
