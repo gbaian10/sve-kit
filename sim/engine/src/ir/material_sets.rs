@@ -12,6 +12,27 @@ use super::{
     ObjectOperand, PlayerRef, PlayerRelation, Predicate, Selector, ZoneKind,
 };
 
+/// Fixed disjoint group quotas paid from the controller's cemetery.
+pub(crate) fn grouped_cemetery(constraint: &super::SelectionConstraint) -> bool {
+    use super::{Disjointness, Nat, SelectionView};
+
+    constraint.groups.len() >= 2
+        && constraint.disjoint == Disjointness::Disjoint
+        && constraint.distinct_by.is_none()
+        && constraint.aggregate_bounds.is_empty()
+        && constraint.cardinality.maximum == Some(constraint.cardinality.minimum)
+        && constraint.groups.iter().try_fold(0_u64, |total, group| {
+            let bounds = group.cardinality;
+            (bounds.minimum != Nat(0)
+                && bounds.maximum == Some(bounds.minimum)
+                && matches!(&group.selector, Selector::Zone { players, zone: ZoneKind::Cemetery, view: SelectionView::Current {}, .. }
+                    if players.relative_to == (PlayerRef::Controller {})
+                        && players.relation == PlayerRelation::SelfPlayer))
+            .then(|| total.checked_add(bounds.minimum.0))
+            .flatten()
+        }) == Some(constraint.cardinality.minimum.0)
+}
+
 /// Kind filters match by type label inclusion: an evolved follower is also a follower, but
 /// every printed type has one base (follower, spell, amulet or crest). Classes and kinds
 /// compare only within the same characteristic view.

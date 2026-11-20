@@ -1,5 +1,5 @@
 //! Cost materials use their own strict selection, without target permissions.
-use crate::ir::flip_cost;
+use crate::ir::{flip_cost, material_sets};
 
 use crate::game::player::{SelectionQuestion, Viewer};
 
@@ -7,6 +7,7 @@ use super::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, distinct_original_cost_count,
     original_material_cost, unique_handles,
 };
+use super::selection::groups::GroupConstraints;
 use super::{Execution, Game, Result, invalid, player_id, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
@@ -43,6 +44,7 @@ pub(in crate::game::internal) struct MaterialWait {
     selector: Selector,
     floor: Option<CostFloor>,
     original_costs: Option<FrozenCosts>,
+    groups: Option<GroupConstraints>,
 }
 
 #[derive(Clone, Debug)]
@@ -116,6 +118,9 @@ impl MaterialWait {
     ) -> Result<SelectionQuestion> {
         let references = self.members.iter().copied().map(Some).collect::<Vec<_>>();
         let mut question = game.player_selection(actor, domain, &references, &self.links)?;
+        if let Some(groups) = &self.groups {
+            question.groups = groups.observed(domain, self.members.iter().copied());
+        }
         if let Some(floor) = &self.floor {
             question.minimum_original_cost = Some(floor.minimum);
             let costs = self
@@ -179,6 +184,7 @@ impl MaterialWait {
             selector,
             floor: None,
             original_costs: None,
+            groups: None,
         }
     }
 
@@ -218,6 +224,13 @@ impl MaterialWait {
                 .copied()
                 .ok_or_else(|| invalid("foreign material handle"))
         })?;
+        if self
+            .groups
+            .as_ref()
+            .is_some_and(|groups| !groups.accepts(&members))
+        {
+            return Err(invalid("material group quotas"));
+        }
         if let Some(costs) = &self.original_costs {
             let mut distinct = DistinctProperties::default();
             for member in &members {
@@ -383,9 +396,7 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
     else {
         return Err(unsupported("material choice domain"));
     };
-    let [group] = constraint.groups.as_slice() else {
-        return Err(unsupported("one material group"));
-    };
+    let grouped = material_sets::grouped_cemetery(constraint);
     if !decision.captures.is_empty()
         || decision.actor != (PlayerRef::Controller {})
         || (decision.visibility != (Visibility::Public {})
@@ -406,7 +417,6 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
             })
             || (constraint.cardinality.minimum.0 > 0
                 && constraint.cardinality.maximum == Some(constraint.cardinality.minimum)))
-        || group.cardinality != constraint.cardinality
         || constraint.distinct_by.is_some_and(|property| {
             property != ObjectProperty::Cost
                 || constraint.cardinality.minimum.0 == 0
@@ -419,8 +429,19 @@ pub(in crate::game::internal) fn check_parameter(decision: &Decision) -> Result<
     {
         return Err(unsupported("strict single material group"));
     }
-    if zones(&group.selector)?.len() > 1 && constraint.cardinality.minimum == Nat(0) {
-        return Err(unsupported("fixed material zone union"));
+    if grouped {
+        for group in &constraint.groups {
+            zones(&group.selector)?;
+        }
+    } else {
+        let [group] = constraint.groups.as_slice() else {
+            return Err(unsupported("material groups"));
+        };
+        if group.cardinality != constraint.cardinality
+            || (zones(&group.selector)?.len() > 1 && constraint.cardinality.minimum == Nat(0))
+        {
+            return Err(unsupported("material group bounds"));
+        }
     }
     Ok(())
 }
@@ -754,7 +775,11 @@ impl Game {
             .first()
             .ok_or_else(|| invalid("material group"))?
             .selector;
-        let (members, costs) = self.material_cost_candidates(execution, constraint, standing)?;
+        let groups = (constraint.groups.len() > 1)
+            .then(|| self.grouped_materials(execution, constraint))
+            .transpose()?;
+        let (members, costs) =
+            self.material_cost_candidates(execution, constraint, standing, groups.as_ref())?;
         let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
         let field = zones(selector)? == [ZoneKind::Field];
         let names = (0..members.len())
@@ -771,6 +796,12 @@ impl Game {
                         .ok_or_else(|| invalid("material subset"))
                 })
                 .collect::<Result<Vec<_>>>()?;
+            if groups
+                .as_ref()
+                .is_some_and(|groups| !groups.accepts(&chosen))
+            {
+                continue;
+            }
             if costs.as_ref().is_some_and(|costs| {
                 distinct_original_cost_count(
                     costs
@@ -807,18 +838,32 @@ impl Game {
         self.material_parameter(execution, decision, false)
     }
 
+    pub(super) fn grouped_materials(
+        &self,
+        execution: &Execution,
+        constraint: &SelectionConstraint,
+    ) -> Result<GroupConstraints> {
+        GroupConstraints::from_constraint(constraint, |selector| {
+            self.material_candidates(execution, selector, false)
+        })
+    }
+
     fn material_cost_candidates(
         &self,
         execution: &Execution,
         constraint: &SelectionConstraint,
         standing: bool,
+        groups: Option<&GroupConstraints>,
     ) -> Result<(Vec<ObjectRef>, Option<FrozenCosts>)> {
         let selector = &constraint
             .groups
             .first()
             .ok_or_else(|| invalid("material group"))?
             .selector;
-        let members = self.material_candidates(execution, selector, standing)?;
+        let members = match groups {
+            Some(groups) => groups.candidates(),
+            None => self.material_candidates(execution, selector, standing)?,
+        };
         if constraint.distinct_by != Some(ObjectProperty::Cost) {
             return Ok((members, None));
         }
@@ -875,8 +920,11 @@ impl Game {
             .first()
             .ok_or_else(|| invalid("material group"))?
             .selector;
+        let groups = (constraint.groups.len() > 1)
+            .then(|| self.grouped_materials(execution, constraint))
+            .transpose()?;
         let (members, original_costs) =
-            self.material_cost_candidates(execution, constraint, standing)?;
+            self.material_cost_candidates(execution, constraint, standing, groups.as_ref())?;
         let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
         let floor = self.material_cost_floor(execution, constraint, &members)?;
         // Every candidate together is the largest total, so it decides whether paying is possible.
@@ -887,7 +935,11 @@ impl Game {
         let available = original_costs.as_ref().map_or(members.len(), |costs| {
             distinct_original_cost_count(costs.iter().map(|(_, cost)| *cost))
         });
-        if available < count || short {
+        let incomplete = match groups.as_ref() {
+            Some(groups) => !groups.has_witness()?,
+            None => false,
+        };
+        if available < count || short || incomplete {
             return Err(crate::EngineFailure::IllegalPlay(
                 "insufficient materials".into(),
             ));
@@ -944,6 +996,7 @@ impl Game {
                 selector: selector.clone(),
                 floor,
                 original_costs,
+                groups,
             }),
         ));
         Ok(())

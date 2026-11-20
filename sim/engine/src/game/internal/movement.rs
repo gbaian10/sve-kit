@@ -469,7 +469,12 @@ impl Game {
             || resource_links;
         if special {
             if execution.ability.is_none()
-                && !self.internal_exchange_token_cost_authorized(execution, &previous.id, zone)?
+                && !self.internal_exchange_field_put_authorized(
+                    execution,
+                    &previous.id,
+                    zone,
+                    has_evolution,
+                )?
             {
                 return Err(unsupported(
                     "special-card movement requires whole-card authority",

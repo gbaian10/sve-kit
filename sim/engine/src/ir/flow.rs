@@ -294,9 +294,35 @@ record!(PlayCostExchange {
     materials: Vec<Decision>,
     route: Option<DecisionId>,
     cost: CostSpec,
-    change: super::CostChange,
+    change: PlayCostExchangeChange,
     receipt: ReceiptId
 });
+
+/// How an accepted material payment changes the PP quote.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub enum PlayCostExchangeChange {
+    /// Adjust the payable PP cost by a fixed set or delta.
+    Adjust(super::CostChange),
+    /// Pay the materials in place of the original PP, before other cost adjustments.
+    ReplaceOriginal {
+        /// Eligibility at declaration time.
+        condition: Expr<Bool>,
+        /// Whether the player may decline the replacement.
+        may: bool,
+    },
+}
+
+impl Walk for PlayCostExchangeChange {
+    fn walk(&self, visitor: &mut impl Visitor, path: &str) {
+        match self {
+            Self::Adjust(change) => change.walk(visitor, path),
+            Self::ReplaceOriginal { condition, .. } => {
+                condition.walk(visitor, &format!("{path}/condition"));
+            }
+        }
+    }
+}
+
 impl PlayCostExchange {
     /// Closed route pairing keeps each material decision tied to its own cost.
     pub(crate) fn routes(&self) -> Option<Vec<(&Decision, &CostStep)>> {

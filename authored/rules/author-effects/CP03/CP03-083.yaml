@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP03-083:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        play:
+          alt_cost:
+            if:
+              cmp:
+                left: { count: { who: self, zone: cemetery, trait: シャドウパラディン } }
+                op: ge
+                right: 15
+            may: true
+            cost:
+              to_cemetery:
+                sel:
+                  { who: self, zone: field, kind: follower, name: ファントム・ブラスター・ドラゴン }
+                n: 1
+      - line: 2
+        keywords: [ward, twin_drive]
+      - line: 3
+        fanfare:
+          targets:
+            - bind: target
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - destroy: target
+            - draw: { who: self, n: 3 }
+      - line: 4
+        activate:
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  sel: { who: self, zone: hand, name: ファントム・ブラスター・オーバーロード }
+                  n: 1
+          do:
+            - buff: { on: this, power: 6, hp: 6 }

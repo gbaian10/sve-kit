@@ -16,17 +16,41 @@ fn question(game: &Game) -> Question {
     *question
 }
 
-fn assert_selection(game: &Game, selection: &SelectionQuestion) {
+fn assert_selection(game: &Game, selection: &SelectionQuestion, expected_groups: usize) {
     let observation = game.observe(Viewer::P1).unwrap();
     assert_eq!(
         selection.groups.len(),
-        1,
-        "An evolution payment has one effective selection group"
+        expected_groups,
+        "The evolution payment has the printed number of selection groups"
     );
-    assert_eq!(
-        selection.groups[0].cardinality, selection.cardinality,
-        "The effective group bounds match the complete selection"
-    );
+    if let [group] = selection.groups.as_slice() {
+        assert_eq!(
+            group.cardinality, selection.cardinality,
+            "The effective group bounds match the complete selection"
+        );
+    } else {
+        assert!(
+            selection
+                .groups
+                .iter()
+                .all(|group| group.cardinality.maximum == Some(group.cardinality.minimum)),
+            "Each grouped evolution material has a fixed quota"
+        );
+        assert_eq!(
+            selection
+                .groups
+                .iter()
+                .map(|group| group.cardinality.minimum.0)
+                .sum::<u64>(),
+            selection.cardinality.minimum.0,
+            "The effective group minima match the complete selection"
+        );
+        assert_eq!(
+            selection.cardinality.maximum,
+            Some(selection.cardinality.minimum),
+            "The complete grouped selection also has a fixed quota"
+        );
+    }
     assert!(
         selection.members.iter().all(|member| {
             member.object.as_ref().is_some_and(|link| {
@@ -47,10 +71,22 @@ fn assert_selection(game: &Game, selection: &SelectionQuestion) {
 }
 
 pub(super) fn evolve(game: &mut Game, super_evolution: bool) -> SubmissionKind {
-    evolve_with_ep(game, super_evolution, false)
+    evolve_with_ep(game, super_evolution, false, 1)
 }
 
-fn evolve_with_ep(game: &mut Game, super_evolution: bool, use_ep: bool) -> SubmissionKind {
+pub(super) fn evolve_with_material_groups(
+    game: &mut Game,
+    expected_groups: usize,
+) -> SubmissionKind {
+    evolve_with_ep(game, false, false, expected_groups)
+}
+
+fn evolve_with_ep(
+    game: &mut Game,
+    super_evolution: bool,
+    use_ep: bool,
+    expected_groups: usize,
+) -> SubmissionKind {
     game.advance_player_input();
     let main = question(game);
     let QuestionShape::ActionWindow(actions) = main.shape else {
@@ -82,7 +118,7 @@ fn evolve_with_ep(game: &mut Game, super_evolution: bool, use_ep: bool) -> Submi
         let (answer, finish) = match stage {
             EvolutionQuestion::Form(forms) => (EvolutionAnswer::Form(forms[0].id), false),
             EvolutionQuestion::Materials(domain) => {
-                assert_selection(game, &domain);
+                assert_selection(game, &domain, expected_groups);
                 (
                     EvolutionAnswer::Materials(
                         domain
@@ -96,7 +132,7 @@ fn evolve_with_ep(game: &mut Game, super_evolution: bool, use_ep: bool) -> Submi
                 )
             }
             EvolutionQuestion::Discard(domain) => {
-                assert_selection(game, &domain);
+                assert_selection(game, &domain, 1);
                 (
                     EvolutionAnswer::Discard(
                         domain
@@ -266,7 +302,7 @@ fn player_evolution_real_pp_cost_can_use_ep_and_sep_without_expanding_face_payme
         initial["players"]["P1"]["sep"] = json!(1_i64);
         let mut game = evolution_payment::game(&initial);
         assert_eq!(
-            evolve_with_ep(&mut game, super_evolution, true),
+            evolve_with_ep(&mut game, super_evolution, true, 1),
             SubmissionKind::Applied,
             "One EP replaces the printed PP, with optional SEP at turn seven"
         );

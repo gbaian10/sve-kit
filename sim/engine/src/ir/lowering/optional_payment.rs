@@ -250,7 +250,9 @@ impl BodyContext<'_> {
                         | ast::CostOperation::Banish(ast::BanishMaterial::Hand(material)) => {
                             material.result.as_ref()
                         }
-                        ast::CostOperation::Banish(ast::BanishMaterial::Top(_))
+                        ast::CostOperation::Banish(
+                            ast::BanishMaterial::Top(_) | ast::BanishMaterial::Grouped(_),
+                        )
                         | ast::CostOperation::Pp(_)
                         | ast::CostOperation::PpMax(_)
                         | ast::CostOperation::Lesson(_)

@@ -411,12 +411,12 @@ impl Game {
             .other_costs
             .retain(|cost| !cost.limited || !ids.contains(&cost.id));
     }
-    pub(in crate::game::internal) fn internal_other_play_cost(
+    pub(super) fn internal_other_play_cost_parts(
         &self,
         execution: &Execution,
         mut base: i64,
         mut delta: i64,
-    ) -> Result<i64> {
+    ) -> Result<(i64, i64)> {
         let holder = &execution.context.source;
         (base, delta) = self.internal_installed_play_parts(holder, base, delta)?;
         let origin = execution
@@ -477,8 +477,7 @@ impl Game {
                 apply(&cost.change, &mut base, &mut delta)?;
             }
         }
-        base.checked_add(delta)
-            .ok_or_else(|| invalid("play cost overflow"))
+        Ok((base, delta))
     }
 }
 

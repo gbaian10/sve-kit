@@ -313,6 +313,44 @@ fn exchange_set_then_delta_banishes_exact_materials_or_restores_the_entire_play(
 }
 
 #[test]
+fn replacement_exchange_waives_the_set_base_and_keeps_the_delta() {
+    let tree = candidate(
+        "unit-follower",
+        json!({
+            "cost_set": 7_u8,
+            "cost_delta": 1_u8,
+            "alt_cost": {
+                "if": {"cmp": {"left": {"count": {"who":"self", "zone":"field"}}, "op":"ge", "right":1_u8}},
+                "cost": {"to_cemetery": {"sel": {"who":"self", "zone":"field"}, "n":1_u8}},
+                "may": true
+            }
+        }),
+        false,
+    );
+    let program = lower(&tree, 0);
+    let mut game = position(
+        &program,
+        &initial("unit-follower", "field", 1, 2),
+        4,
+        "unit-follower",
+    );
+    let offer = start(&mut game);
+    let selection = materials(&mut game, &offer);
+    assert!(matches!(
+        game.answer_internal_card(
+            selection.actor,
+            selection.token,
+            Answer::CostMaterials(vec![0])
+        )
+        .unwrap(),
+        CardPlay::Entered(_)
+    ));
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["pp"]["current"], 1_u8);
+    assert_eq!(after["P1"]["cemetery"], json!(["m0"]));
+}
+
+#[test]
 fn exchange_follower_pays_materials_before_capacity_and_keeps_the_pre_payment_cost() {
     let tree = candidate(
         "unit-follower",
@@ -1158,9 +1196,9 @@ fn pp_increase_exchange_rejects_mixed_empty_or_forged_material_routes() {
             .as_mut()
             .unwrap()
             .node
-            .change = CostChange::Delta {
+            .change = PlayCostExchangeChange::Adjust(CostChange::Delta {
             amount: Expr::Literal(Int(delta)),
-        };
+        });
         WellFormedCardProgram::check(bad).unwrap_err();
     }
     let material = lower(
@@ -1178,9 +1216,9 @@ fn pp_increase_exchange_rejects_mixed_empty_or_forged_material_routes() {
         .as_mut()
         .unwrap()
         .node
-        .change = CostChange::Delta {
+        .change = PlayCostExchangeChange::Adjust(CostChange::Delta {
         amount: Expr::Literal(Int(4)),
-    };
+    });
     WellFormedCardProgram::check(bad).unwrap_err();
 }
 

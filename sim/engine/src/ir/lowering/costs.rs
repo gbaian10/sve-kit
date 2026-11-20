@@ -171,7 +171,7 @@ fn population(
     Ok(super::numeric::aggregate_count(objects, None))
 }
 
-fn condition(
+pub(super) fn condition(
     value: &ast::CostCondition,
     entry: &ast::Ability,
     allocator: &mut Allocator,

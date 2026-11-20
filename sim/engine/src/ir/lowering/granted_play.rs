@@ -23,6 +23,7 @@ pub(super) fn lower(
         optional_cost,
         optional_cost_delta,
         optional_cost_set,
+        alt_cost,
     } = entry.play.as_ref().ok_or_else(|| unsupported(path))?;
     let amount = cost_delta
         .as_ref()
@@ -37,6 +38,7 @@ pub(super) fn lower(
         || optional_cost.is_some()
         || optional_cost_delta.is_some()
         || optional_cost_set.is_some()
+        || alt_cost.is_some()
     {
         return Err(unsupported(path));
     }
