@@ -3125,6 +3125,7 @@ pub(super) struct PublicPowerComparison {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum PublicCandidateNumber {
     Power(ItemPower),
+    Hp { hp_of: Item },
     Counter { counter: ItemCounter },
 }
 #[derive(Clone, Deserialize, PartialEq, Eq)]
