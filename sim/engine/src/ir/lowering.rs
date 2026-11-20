@@ -370,14 +370,17 @@ fn lower_play_costs(
                 additional = Some(lowered);
             }
             let source = source_span(coordinates, entry_path, ability)?;
-            if let Some(lowered) = exchange::lower(ability, play, &source, allocator)? {
-                if exchange.is_some() {
+            let alternative = exchange::lower_alternative(ability, play, &source, allocator)?;
+            let optional = exchange::lower_optional(ability, play, &source, allocator)?;
+            if let Some(lowered) = &optional
+                && let Some(cost) = &play.optional_cost
+            {
+                payment_result = Some(exchange::bindings(cost, &lowered.node, entry_path)?);
+            }
+            for lowered in [alternative, optional].into_iter().flatten() {
+                if exchange.replace(lowered).is_some() {
                     return Err(unsupported(entry_path));
                 }
-                if let Some(optional) = &play.optional_cost {
-                    payment_result = Some(exchange::bindings(optional, &lowered.node, entry_path)?);
-                }
-                exchange = Some(lowered);
             }
         }
     }

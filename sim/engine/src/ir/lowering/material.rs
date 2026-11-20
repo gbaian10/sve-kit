@@ -131,6 +131,60 @@ const fn field_ex_token_material(material: &ast::Material) -> bool {
     )
 }
 
+pub(super) fn grouped_banish(
+    allocator: &mut Allocator,
+    bindings: &mut Allocator,
+    scope: ScopeId,
+    material: &ast::GroupedMaterials,
+    path: &str,
+) -> Result<(Action, Decision), LoweringError> {
+    let [first, rest @ ..] = material.groups.as_slice() else {
+        return Err(unsupported(path));
+    };
+    let (objects, mut decision) = choice(
+        allocator,
+        bindings,
+        scope,
+        &first.sel,
+        cardinality(first, path)?,
+        path,
+    )?;
+    let ChoiceDomain::Objects { constraint, .. } = &mut decision.domain else {
+        return Err(unsupported(path));
+    };
+    for group in rest {
+        let (_, next) = choice(
+            allocator,
+            bindings,
+            scope,
+            &group.sel,
+            cardinality(group, path)?,
+            path,
+        )?;
+        let ChoiceDomain::Objects {
+            constraint: next, ..
+        } = next.domain
+        else {
+            return Err(unsupported(path));
+        };
+        constraint.groups.extend(next.groups);
+        let total = constraint
+            .cardinality
+            .minimum
+            .0
+            .checked_add(next.cardinality.minimum.0)
+            .ok_or_else(|| unsupported(path))?;
+        constraint.cardinality = Cardinality {
+            minimum: Nat(total),
+            maximum: Some(Nat(total)),
+        };
+    }
+    if !super::super::material_sets::grouped_cemetery(constraint) {
+        return Err(unsupported(path));
+    }
+    Ok((Action::Banish { objects }, decision))
+}
+
 pub(super) fn cardinality(
     material: &ast::Material,
     path: &str,

@@ -1,15 +1,15 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::exchange as exchange_shape;
-use crate::ir::flip_cost;
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::{
-    Action, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, CounterOperation, Decision,
-    DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, Holder, InputMode,
+    Action, Binding, Bool, ChoiceDomain, CostChange, CostSpec, CostStep, CounterOperation,
+    Decision, DecisionKind, DiscardMode, Disjointness, ExecutionRef, Expr, Holder, InputMode,
     InstructionContext, Int, KeywordId, MoveDestination, MoveReason, Nat, ObjectOperand,
     ObjectProperty, OwnerZone, PlayCostExchange, PlayCostExchangeChange, PlayCostPayment, PlaySlot,
     PlayerRef, PlayerRelation, PlayerSet, Posture, SelectionSnapshot, SelectionView, Selector,
     Visibility, ZoneKind,
 };
+use crate::ir::{flip_cost, material_sets};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -111,9 +111,15 @@ impl Checker {
         else {
             return checker.reject();
         };
-        let [group] = constraint.groups.as_slice() else {
+        let grouped = material_sets::grouped_cemetery(constraint)
+            && matches!(step.instruction.action, Action::Banish { .. });
+        let Some(group) = constraint.groups.first() else {
             return checker.reject();
         };
+        if !grouped && (constraint.groups.len() != 1 || group.cardinality != constraint.cardinality)
+        {
+            return checker.reject();
+        }
         let Selector::Zone {
             players,
             zone,
@@ -135,7 +141,6 @@ impl Checker {
             )
             || constraint.cardinality.minimum.0 == 0
             || constraint.cardinality.maximum != Some(constraint.cardinality.minimum)
-            || group.cardinality != constraint.cardinality
             || constraint.disjoint != Disjointness::Disjoint
             || (constraint.distinct_by.is_some()
                 && (constraint.distinct_by != Some(ObjectProperty::Cost)
@@ -162,16 +167,7 @@ impl Checker {
         let selected = Selector::Bound {
             reference: *binding,
         };
-        let counter = matches!(&step.instruction.action,
-        Action::Counter { holder: Holder::Object { object: ObjectOperand::Selected { selection } },
-            kind, operation: CounterOperation::Remove {}, amount: Expr::Literal(Nat(amount)) }
-            if *selection == *binding && !kind.0.is_empty() && *amount > 0
-                && *zone == ZoneKind::Field && constraint.cardinality.minimum == Nat(1)
-                && match step.keyword {
-                    None => true,
-                    Some(KeywordId::EarthRite) => kind.0 == "stack_counter",
-                    Some(_) => false,
-                });
+        let counter = selected_counter(step, *binding, *zone, constraint.cardinality.minimum);
         let valid = flip_cost::payment(&step.instruction.action, decision)
             || counter
             || matches!(&step.instruction.action, Action::Reveal { objects }
@@ -202,6 +198,24 @@ impl Checker {
             checker.instruction_in(&step.instruction, InstructionContext::Cost, false)
         })
     }
+}
+
+fn selected_counter(
+    step: &CostStep,
+    binding: Binding<Selector>,
+    zone: ZoneKind,
+    count: Nat,
+) -> bool {
+    matches!(&step.instruction.action,
+    Action::Counter { holder: Holder::Object { object: ObjectOperand::Selected { selection } },
+        kind, operation: CounterOperation::Remove {}, amount: Expr::Literal(Nat(amount)) }
+        if *selection == binding && !kind.0.is_empty() && *amount > 0
+            && zone == ZoneKind::Field && count == Nat(1)
+            && match step.keyword {
+                None => true,
+                Some(KeywordId::EarthRite) => kind.0 == "stack_counter",
+                Some(_) => false,
+            })
 }
 
 fn material_visibility(decision: &Decision, zone: ZoneKind, players: &PlayerSet) -> Visibility {

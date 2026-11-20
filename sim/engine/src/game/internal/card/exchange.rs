@@ -4,6 +4,7 @@ use super::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, distinct_original_cost_count,
     original_material_cost, unique_handles,
 };
+use super::selection::groups::GroupConstraints;
 use super::static_keywords;
 use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
@@ -17,14 +18,14 @@ use crate::game::player::Viewer;
 use crate::game::player::observation::PaymentPurpose;
 use crate::game::player::observation::PendingCost;
 use crate::ir::exchange as exchange_shape;
-use crate::ir::flip_cost;
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, CostSpec, Decision, DecisionId, DiscardOutcome, FaceId, Int,
     MoveMethod, MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange,
-    PlayCostExchangeChange, PlayerId, Posture, PostureEvent, Quantity, QuantityUnit, Selector,
-    ZoneKind,
+    PlayCostExchangeChange, PlayerId, Posture, PostureEvent, Quantity, QuantityUnit,
+    SelectionConstraint, Selector, ZoneKind,
 };
 use crate::ir::{BanishOutcome, Bool, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId};
+use crate::ir::{flip_cost, material_sets};
 
 #[derive(Clone, Debug)]
 pub(super) struct ExchangeState {
@@ -40,6 +41,7 @@ pub(super) struct ExchangeState {
 pub(in crate::game::internal) struct MaterialWait {
     links: CandidateLinks,
     members: Vec<MaterialCandidate>,
+    groups: Option<GroupConstraints>,
     count: usize,
     decision: DecisionId,
 }
@@ -69,7 +71,7 @@ impl MaterialWait {
         actor: Viewer,
         domain: &super::TargetDomain,
     ) -> Result<SelectionQuestion> {
-        game.player_selection(
+        let mut question = game.player_selection(
             actor,
             domain,
             &self
@@ -78,7 +80,12 @@ impl MaterialWait {
                 .map(|member| Some(member.reference))
                 .collect::<Vec<_>>(),
             &self.links,
-        )
+        )?;
+        if let Some(groups) = &self.groups {
+            question.groups =
+                groups.observed(domain, self.members.iter().map(|member| member.reference));
+        }
+        Ok(question)
     }
 
     pub(in crate::game::internal) fn validate(&self, handles: &[u64]) -> Result<Vec<ObjectRef>> {
@@ -92,7 +99,7 @@ impl MaterialWait {
             "material cardinality",
         )?;
         let mut costs = DistinctProperties::default();
-        unique_handles(handles, "duplicate material handle", |handle| {
+        let selected = unique_handles(handles, "duplicate material handle", |handle| {
             let candidate = self
                 .members
                 .get(usize::try_from(handle).map_err(invalid)?)
@@ -103,15 +110,49 @@ impl MaterialWait {
                 return Err(invalid("duplicate original material cost"));
             }
             Ok(candidate.reference)
-        })
+        })?;
+        if self
+            .groups
+            .as_ref()
+            .is_some_and(|groups| !groups.accepts(&selected))
+        {
+            return Err(invalid("exchange material group quotas"));
+        }
+        Ok(selected)
     }
 }
 
-fn available_count(members: &[MaterialCandidate], distinct: Option<ObjectProperty>) -> usize {
-    if distinct == Some(ObjectProperty::Cost) {
-        distinct_original_cost_count(members.iter().filter_map(|member| member.original_cost))
-    } else {
-        members.len()
+struct ExchangeCandidates {
+    members: Vec<MaterialCandidate>,
+    groups: Option<GroupConstraints>,
+}
+
+impl ExchangeCandidates {
+    fn accepts(&self, selected: &[ObjectRef]) -> bool {
+        self.groups
+            .as_ref()
+            .is_none_or(|groups| groups.accepts(selected))
+            && selected.iter().all(|member| {
+                self.members
+                    .iter()
+                    .any(|candidate| candidate.reference == *member)
+            })
+    }
+
+    fn affordable(&self, constraint: &SelectionConstraint) -> Result<bool> {
+        if let Some(groups) = &self.groups {
+            return groups.has_witness();
+        }
+        let available = if constraint.distinct_by == Some(ObjectProperty::Cost) {
+            distinct_original_cost_count(
+                self.members
+                    .iter()
+                    .filter_map(|member| member.original_cost),
+            )
+        } else {
+            self.members.len()
+        };
+        Ok(u64::try_from(available).map_err(invalid)? >= constraint.cardinality.minimum.0)
     }
 }
 
@@ -407,27 +448,45 @@ impl Game {
         execution: &Execution,
         exchange: &PlayCostExchange,
         index: usize,
-    ) -> Result<Vec<MaterialCandidate>> {
+    ) -> Result<ExchangeCandidates> {
         let decision = exchange
             .materials
             .get(index)
             .ok_or_else(|| unsupported("exchange material route"))?;
-        if flip_cost::payment(&route_step(exchange, index)?.action, decision) {
+        let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
+            return Err(unsupported("exchange material domain"));
+        };
+        if material_sets::grouped_cemetery(constraint) {
+            let groups = self.grouped_materials(execution, constraint)?;
+            return Ok(ExchangeCandidates {
+                members: groups
+                    .candidates()
+                    .into_iter()
+                    .map(|reference| MaterialCandidate {
+                        reference,
+                        original_cost: None,
+                    })
+                    .collect(),
+                groups: Some(groups),
+            });
+        }
+        let members = if flip_cost::payment(&route_step(exchange, index)?.action, decision) {
             let (selector, _) = flip_cost::material(decision)
                 .ok_or_else(|| unsupported("flip exchange selector"))?;
-            return self
-                .flip_cost_candidates(execution, selector)
-                .map(|members| {
-                    members
-                        .into_iter()
-                        .map(|reference| MaterialCandidate {
-                            reference,
-                            original_cost: None,
-                        })
-                        .collect()
-                });
-        }
-        self.public_exchange_candidates(execution, exchange, index)
+            self.flip_cost_candidates(execution, selector)?
+                .into_iter()
+                .map(|reference| MaterialCandidate {
+                    reference,
+                    original_cost: None,
+                })
+                .collect()
+        } else {
+            self.public_exchange_candidates(execution, exchange, index)?
+        };
+        Ok(ExchangeCandidates {
+            members,
+            groups: None,
+        })
     }
 
     fn public_exchange_candidates(
@@ -624,9 +683,7 @@ impl Game {
                 return Err(unsupported("exchange route domain"));
             };
             let members = self.exchange_candidates(execution, &exchange.definition, index)?;
-            if u64::try_from(available_count(&members, constraint.distinct_by)).map_err(invalid)?
-                >= constraint.cardinality.minimum.0
-            {
+            if members.affordable(constraint)? {
                 affordable.push(index);
             }
         }
@@ -688,11 +745,12 @@ impl Game {
             return Err(unsupported("exchange domain"));
         };
         let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
-        if available_count(&members, constraint.distinct_by) < count {
+        if !members.affordable(constraint)? {
             return Err(crate::EngineFailure::IllegalPlay(
                 "insufficient exchange materials".into(),
             ));
         }
+        let ExchangeCandidates { members, groups } = members;
         let public = members
             .iter()
             .enumerate()
@@ -734,6 +792,7 @@ impl Game {
                     members.iter().map(|member| member.reference),
                 )?,
                 members,
+                groups,
                 count,
             }),
         )?;
@@ -763,11 +822,7 @@ impl Game {
                     .route
                     .ok_or_else(|| invalid("missing selected route"))?,
             )?;
-            if selected.iter().any(|member| {
-                !candidates
-                    .iter()
-                    .any(|candidate| candidate.reference == *member)
-            }) {
+            if !candidates.accepts(selected) {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "exchange materials changed".into(),
                 ));

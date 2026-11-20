@@ -296,6 +296,7 @@ pub(super) struct ShuffledCost {
 #[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishMaterial {
+    Grouped(GroupedMaterials),
     Public(Box<Material>),
     Hand(Box<HandMaterial>),
     Top(Box<TopBanishMaterial>),
@@ -3275,10 +3276,16 @@ pub(super) struct OptionalCost {
     pub discard: Option<HandMaterial>,
     pub reveal: Option<HandMaterial>,
     pub to_cemetery: Option<Material>,
-    pub banish: Option<Material>,
+    pub banish: Option<BanishMaterial>,
     pub act: Option<Material>,
     pub result: Option<String>,
 }
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct GroupedMaterials {
+    pub groups: Vec<Material>,
+}
+
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct Material {

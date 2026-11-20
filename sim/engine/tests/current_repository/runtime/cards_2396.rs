@@ -1,3 +1,8 @@
+#![expect(
+    clippy::panic,
+    reason = "Unexpected payment questions invalidate the scenario."
+)]
+
 use super::*;
 
 #[test]
@@ -15,7 +20,12 @@ fn phantom_blaster_overlord_replaces_original_pp_with_its_named_follower() {
 
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["pp"]["current"], 1_i64);
-    assert!(after["P1"]["cemetery"].as_array().unwrap().contains(&json!("fee")));
+    assert!(
+        after["P1"]["cemetery"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("fee"))
+    );
     assert_eq!(after["P1"]["field"], json!(["other", "source"]));
 }
 
@@ -52,8 +62,76 @@ fn dragon_mountain_spell_pays_two_spring_counters_before_resolving() {
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["pp"]["current"], 0_i64);
     assert_eq!(after["objects"]["pool"]["counters"]["神湯カウンター"], 0_u8);
-    assert_eq!(after["objects"]["shallow"]["counters"]["神湯カウンター"], 1_u8);
-    assert_eq!(after["objects"]["foreign"]["counters"]["神湯カウンター"], 3_u8);
+    assert_eq!(
+        after["objects"]["shallow"]["counters"]["神湯カウンター"],
+        1_u8
+    );
+    assert_eq!(
+        after["objects"]["foreign"]["counters"]["神湯カウンター"],
+        3_u8
+    );
     assert_eq!(after["P2"]["cemetery"], json!(["target"]));
     assert_eq!(after["P1"]["hand"], json!(["draw0"]));
+}
+
+#[test]
+fn new_generations_pays_nine_disjoint_cards_across_three_traits() {
+    let mut initial = position_with_source("CP02-SL19a", "hand");
+    initial["players"]["P1"]["pp"] = json!({"current": 1, "max": 1});
+    let cemetery = [
+        cards("cute", "CP02-014", 4),
+        cards("cool", "CP02-100", 3),
+        cards("passion", "CP02-101", 2),
+        cards("all", "CP02-104", 1),
+    ]
+    .concat();
+    initial["players"]["P1"]["zones"]["cemetery"] = json!(cemetery);
+    let mut game = game(&initial);
+    let play = game.play_internal_card("source", actor()).unwrap();
+    let materials = await_card_choice(accept(&mut game, play));
+    let InputDomain::CostMaterials(domain) = &materials.domain else {
+        panic!("exchange requires the full disjoint set");
+    };
+    let handles = |exclude| {
+        domain
+            .members
+            .iter()
+            .filter(|member| member.handle != exclude)
+            .map(|member| member.handle)
+            .collect()
+    };
+    let overlap = domain
+        .members
+        .iter()
+        .find(|member| member.card.as_deref() == Some("CP02-104"))
+        .unwrap()
+        .handle;
+    let before_payment = game.projection(View::Referee).unwrap();
+    game.answer_internal_card(
+        materials.actor,
+        materials.token,
+        Answer::CostMaterials(handles(overlap)),
+    )
+    .unwrap_err();
+    assert_eq!(game.projection(View::Referee).unwrap(), before_payment);
+
+    let spare = domain
+        .members
+        .iter()
+        .rfind(|member| member.card.as_deref() == Some("CP02-014"))
+        .unwrap()
+        .handle;
+    let play = game
+        .answer_internal_card(
+            materials.actor,
+            materials.token,
+            Answer::CostMaterials(handles(spare)),
+        )
+        .unwrap();
+    assert!(matches!(accept(&mut game, play), CardPlay::Entered(_)));
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["pp"]["current"], 0_i64);
+    assert_eq!(after["P1"]["cemetery"].as_array().unwrap().len(), 1_usize);
+    assert_eq!(after["P1"]["banish"].as_array().unwrap().len(), 9_usize);
+    assert_eq!(after["P1"]["field"], json!(["source"]));
 }

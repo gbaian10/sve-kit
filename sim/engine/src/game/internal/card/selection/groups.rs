@@ -1,9 +1,12 @@
 //! Frozen membership gives validation and affordability the same disjoint partition.
 
+use super::TargetDomain;
 use crate::game::internal::{Result, contains, invalid, unsupported};
-use crate::ir::{Cardinality, Nat, ObjectRef};
+use crate::game::player::SelectionGroup;
+use crate::ir::{Cardinality, Nat, ObjectRef, SelectionConstraint, Selector};
 use alloc::collections::BTreeSet;
 use core::array::from_fn;
+use core::slice::from_ref;
 
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct GroupConstraints {
@@ -12,6 +15,59 @@ pub(in crate::game::internal) struct GroupConstraints {
 }
 
 impl GroupConstraints {
+    pub(in crate::game::internal) fn from_constraint(
+        constraint: &SelectionConstraint,
+        mut candidates: impl FnMut(&Selector) -> Result<Vec<ObjectRef>>,
+    ) -> Result<Self> {
+        Ok(Self {
+            members: constraint
+                .groups
+                .iter()
+                .map(|group| candidates(&group.selector))
+                .collect::<Result<_>>()?,
+            bounds: constraint
+                .groups
+                .iter()
+                .map(|group| group.cardinality)
+                .collect(),
+        })
+    }
+
+    pub(in crate::game::internal) fn candidates(&self) -> Vec<ObjectRef> {
+        let mut seen = BTreeSet::new();
+        self.members
+            .iter()
+            .flatten()
+            .copied()
+            .filter(|member| seen.insert((member.id, member.generation)))
+            .collect()
+    }
+
+    pub(in crate::game::internal) fn observed(
+        &self,
+        domain: &TargetDomain,
+        candidates: impl Iterator<Item = ObjectRef>,
+    ) -> Vec<SelectionGroup> {
+        let coordinates = candidates.zip(&domain.members).collect::<Vec<_>>();
+        self.members
+            .iter()
+            .zip(&self.bounds)
+            .map(|(members, cardinality)| SelectionGroup {
+                handles: coordinates
+                    .iter()
+                    .filter_map(|(reference, member)| {
+                        members.contains(reference).then_some(member.handle)
+                    })
+                    .collect(),
+                cardinality: *cardinality,
+            })
+            .collect()
+    }
+
+    pub(in crate::game::internal) fn has_witness(&self) -> Result<bool> {
+        Ok(Self::joint_witness(from_ref(self))?.is_some())
+    }
+
     /// Match all required slots together; earlier broad choices may move for a narrow slot.
     pub(in crate::game::internal) fn joint_witness(
         proofs: &[Self],

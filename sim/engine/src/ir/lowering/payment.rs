@@ -279,6 +279,17 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
+            ast::CostOperation::Banish(ast::BanishMaterial::Grouped(material)) => {
+                let (action, decision) = super::material::grouped_banish(
+                    context.card_allocator,
+                    &mut context.allocator,
+                    context.scope,
+                    material,
+                    path,
+                )?;
+                parameters.push(decision);
+                action
+            }
             ast::CostOperation::Banish(ast::BanishMaterial::Hand(material)) => {
                 let (action, decision) = super::reveal_cost::banish(context, material, path)?;
                 parameters.push(decision);

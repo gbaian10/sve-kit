@@ -15,55 +15,77 @@ enum MaterialAction {
     Act,
 }
 
-pub(super) fn lower(
+pub(super) fn lower_alternative(
     entry: &ast::Ability,
     play: &ast::PlayCosts,
     source: &SourceSpan,
     allocator: &mut Allocator,
 ) -> Result<Option<Located<PlayCostExchange>>, LoweringError> {
-    let field = if play.alt_cost.is_some() {
-        "alt_cost"
-    } else {
-        "optional_cost"
+    let Some(alt) = &play.alt_cost else {
+        return Ok(None);
     };
-    let path = format!("{}/play/{field}", source.author_path);
-    let optional = play
-        .alt_cost
-        .as_ref()
-        .map(|alt| &alt.cost)
-        .or(play.optional_cost.as_ref());
-    let Some(optional) = optional else {
+    let path = format!("{}/play/alt_cost", source.author_path);
+    let change = PlayCostExchangeChange::ReplaceOriginal {
+        condition: costs::condition(&alt.r#if, entry, allocator, source, &path)?,
+        may: alt.may,
+    };
+    lower_exchange(entry, &alt.cost, source, allocator, &path, change).map(Some)
+}
+
+pub(super) fn lower_optional(
+    entry: &ast::Ability,
+    play: &ast::PlayCosts,
+    source: &SourceSpan,
+    allocator: &mut Allocator,
+) -> Result<Option<Located<PlayCostExchange>>, LoweringError> {
+    let path = format!("{}/play/optional_cost", source.author_path);
+    let Some(optional) = &play.optional_cost else {
         if play.optional_cost_delta.is_some() || play.optional_cost_set.is_some() {
             return Err(unsupported(&path));
         }
         return Ok(None);
     };
-    if !single_kind(optional) {
-        return Err(unsupported(&path));
+    if let Some(pp) = optional.pp {
+        if !single_kind(optional) {
+            return Err(unsupported(&path));
+        }
+        return pp_increase(pp, optional, play, source, allocator, &path).map(Some);
     }
-    let change = if let Some(alt) = &play.alt_cost {
-        PlayCostExchangeChange::ReplaceOriginal {
-            condition: costs::condition(&alt.r#if, entry, allocator, source, &path)?,
-            may: alt.may,
-        }
-    } else {
-        if let Some(pp) = optional.pp {
-            return pp_increase(pp, optional, play, source, allocator, &path).map(Some);
-        }
-        PlayCostExchangeChange::Adjust(match (play.optional_cost_delta, play.optional_cost_set) {
-            (Some(value), None) if value <= 0 => CostChange::Delta {
-                amount: Expr::Literal(Int(value)),
-            },
-            (None, Some(value)) if value >= 0 => CostChange::Set {
-                amount: Expr::Literal(Int(value)),
-            },
-            _ => return Err(unsupported(&path)),
-        })
+    let change = match (play.optional_cost_delta, play.optional_cost_set) {
+        (Some(value), None) if value <= 0 => CostChange::Delta {
+            amount: Expr::Literal(Int(value)),
+        },
+        (None, Some(value)) if value >= 0 => CostChange::Set {
+            amount: Expr::Literal(Int(value)),
+        },
+        _ => return Err(unsupported(&path)),
     };
-    if optional.earth_rite.is_some() || optional.counter.is_some() {
-        return counter_exchange(entry, source, allocator, &path, optional, change).map(Some);
+    lower_exchange(
+        entry,
+        optional,
+        source,
+        allocator,
+        &path,
+        PlayCostExchangeChange::Adjust(change),
+    )
+    .map(Some)
+}
+
+fn lower_exchange(
+    entry: &ast::Ability,
+    optional: &ast::OptionalCost,
+    source: &SourceSpan,
+    allocator: &mut Allocator,
+    path: &str,
+    change: PlayCostExchangeChange,
+) -> Result<Located<PlayCostExchange>, LoweringError> {
+    if !single_kind(optional) {
+        return Err(unsupported(path));
     }
-    let scope = allocator.scope(&path)?;
+    if optional.earth_rite.is_some() || optional.counter.is_some() {
+        return counter_exchange(entry, source, allocator, path, optional, change);
+    }
+    let scope = allocator.scope(path)?;
     let choices = if let Some(routes) = &optional.one_of {
         if routes.len() != 2
             || optional.discard.is_some()
@@ -78,7 +100,7 @@ pub(super) fn lower(
                     || route.result.is_some()
             })
         {
-            return Err(unsupported(&path));
+            return Err(unsupported(path));
         }
         routes.iter().collect::<Vec<_>>()
     } else {
@@ -89,8 +111,20 @@ pub(super) fn lower(
     let mut alternatives = Vec::new();
     for (index, choice) in choices.into_iter().enumerate() {
         let route_path = format!("{path}/one_of/{index}");
-        let binding = Binding::new(allocator.id(&route_path)?, scope);
-        let (decision, action) = lower_material(choice, binding, allocator, &route_path, multiple)?;
+        let (decision, action) = if let Some(ast::BanishMaterial::Grouped(grouped)) = &choice.banish
+        {
+            let (action, decision) = super::material::grouped_banish(
+                allocator,
+                &mut Allocator::default(),
+                scope,
+                grouped,
+                &route_path,
+            )?;
+            (decision, action)
+        } else {
+            let binding = Binding::new(allocator.id(&route_path)?, scope);
+            lower_material(choice, binding, allocator, &route_path, multiple)?
+        };
         materials.push(decision);
         let id = allocator.id(&route_path)?;
         alternatives.push(CostSpec::Ordered {
@@ -112,26 +146,26 @@ pub(super) fn lower(
     let cost = if multiple {
         CostSpec::Alternative { alternatives }
     } else {
-        alternatives.pop().ok_or_else(|| unsupported(&path))?
+        alternatives.pop().ok_or_else(|| unsupported(path))?
     };
     let mut located = source.clone();
-    located.author_path.clone_from(&path);
-    Ok(Some(Located {
+    path.clone_into(&mut located.author_path);
+    Ok(Located {
         source: located,
         node: PlayCostExchange {
             scope,
-            decision: DecisionId(allocator.id(&path)?),
+            decision: DecisionId(allocator.id(path)?),
             materials,
             route: if multiple {
-                Some(DecisionId(allocator.id(&path)?))
+                Some(DecisionId(allocator.id(path)?))
             } else {
                 None
             },
             cost,
             change,
-            receipt: ReceiptId(allocator.id(&path)?),
+            receipt: ReceiptId(allocator.id(path)?),
         },
-    }))
+    })
 }
 
 fn pp_increase(
@@ -271,11 +305,11 @@ fn lower_public_material(
         (Some(material), None, None) if matches!(material.sel.zone, ast::PublicZone::Field) => {
             (material, MaterialAction::Put)
         }
-        (None, Some(material), None)
+        (None, Some(ast::BanishMaterial::Public(material)), None)
             if matches!(material.sel.zone, ast::PublicZone::Cemetery)
                 || (multiple && matches!(material.sel.zone, ast::PublicZone::Ex)) =>
         {
-            (material, MaterialAction::Banish)
+            (material.as_ref(), MaterialAction::Banish)
         }
         (None, None, Some(material)) if matches!(material.sel.zone, ast::PublicZone::Field) => {
             (material, MaterialAction::Act)
