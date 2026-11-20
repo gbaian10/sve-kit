@@ -1,6 +1,6 @@
 use super::{Execution, Game, Result, unsupported};
 use crate::game::player::observation::{EffectExpiry, EffectInterval, viewer};
-use crate::ir::{DurationEnd, Interval, ObjectOperand, PlayerId, ZoneKind};
+use crate::ir::{Duration, DurationEnd, Interval, ObjectOperand, PlayerId, ZoneKind};
 use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
@@ -128,5 +128,48 @@ impl TurnInterval {
             Self::Active(_) => Some(EffectInterval::CurrentTurn),
             Self::Finished => None,
         })
+    }
+}
+
+#[derive(Clone, Copy, Debug, Serialize, Deserialize)]
+pub(super) struct TurnWindow {
+    pub(super) end: EffectEnd,
+    pub(super) interval: Option<TurnInterval>,
+    #[serde(default)]
+    pub(super) main_ended: bool,
+}
+
+impl TurnWindow {
+    pub(super) fn at(game: &Game, execution: &Execution, duration: &Duration) -> Result<Self> {
+        let interval = duration
+            .intervals
+            .first()
+            .map(|interval| TurnInterval::at(game, execution, interval))
+            .transpose()?;
+        Ok(Self {
+            end: EffectEnd::at(game, execution, &duration.end)?,
+            interval,
+            main_ended: false,
+        })
+    }
+
+    pub(super) fn active(self) -> bool {
+        (!self.main_ended && (self.interval.is_none() || matches!(self.end, EffectEnd::Turn(_))))
+            || self.interval.is_some_and(TurnInterval::active)
+    }
+
+    pub(super) const fn begin(&mut self, turn: u64, player: u32) {
+        self.end.begin(turn, player);
+        if let Some(interval) = self.interval.as_mut() {
+            interval.begin(turn, player);
+        }
+    }
+
+    pub(super) fn retain_after(&mut self, turn: u64) -> bool {
+        if let Some(interval) = self.interval.as_mut() {
+            interval.finish(turn);
+        }
+        self.main_ended |= self.end == EffectEnd::Turn(turn);
+        !self.main_ended || self.interval.is_some_and(TurnInterval::pending)
     }
 }

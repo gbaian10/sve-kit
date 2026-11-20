@@ -1,6 +1,6 @@
 //! Later grants survive both Box and ability removal (CR 5.31.2.1, 10.9.1.6).
 
-use super::duration::EffectEnd;
+use super::duration::{TurnInterval, TurnWindow};
 use super::grant::GrantOrigin;
 use super::{Execution, Game, InstructionOutcome, Result, Selector, unsupported};
 use crate::game::player::Viewer;
@@ -23,7 +23,8 @@ pub(in crate::game) struct SuppressionState {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct Suppression {
     origin_record: super::observation::EffectOrigin,
-    end: EffectEnd,
+    #[serde(flatten)]
+    window: TurnWindow,
     boxed: bool,
     origins: BTreeSet<GrantOrigin>,
     racing_rush: bool,
@@ -73,8 +74,12 @@ impl Game {
     }
 
     pub(in crate::game) fn internal_boxed(&self, holder: &str) -> bool {
-        self.suppression_state(holder)
-            .is_some_and(|state| state.effects.iter().any(|effect| effect.boxed))
+        self.suppression_state(holder).is_some_and(|state| {
+            state
+                .effects
+                .iter()
+                .any(|effect| effect.window.active() && effect.boxed)
+        })
     }
 
     pub(in crate::game) fn internal_suppresses_printed(
@@ -84,10 +89,9 @@ impl Game {
         face: usize,
     ) -> bool {
         self.suppression_state(holder).is_some_and(|state| {
-            state
-                .effects
-                .iter()
-                .any(|effect| effect.printed.0 == card && effect.printed.1 == face)
+            state.effects.iter().any(|effect| {
+                effect.window.active() && effect.printed.0 == card && effect.printed.1 == face
+            })
         })
     }
 
@@ -100,13 +104,17 @@ impl Game {
             state
                 .effects
                 .iter()
-                .any(|effect| effect.origins.contains(origin))
+                .any(|effect| effect.window.active() && effect.origins.contains(origin))
         })
     }
 
     pub(in crate::game::internal) fn internal_suppresses_racing(&self, holder: &str) -> bool {
-        self.suppression_state(holder)
-            .is_some_and(|state| state.effects.iter().any(|effect| effect.racing_rush))
+        self.suppression_state(holder).is_some_and(|state| {
+            state
+                .effects
+                .iter()
+                .any(|effect| effect.window.active() && effect.racing_rush)
+        })
     }
 
     pub(super) fn internal_box(
@@ -166,8 +174,10 @@ impl Game {
         source: &AbilitySource,
     ) -> Result<Vec<ObjectRef>> {
         let members = execution.objects(self, subjects)?;
-        let [reference] = members.as_slice() else {
-            return Err(unsupported("one current field suppression target"));
+        let reference = match members.as_slice() {
+            [] => return Ok(vec![]),
+            [reference] => reference,
+            _ => return Err(unsupported("one current field suppression target")),
         };
         let id = execution.object_id(*reference)?.to_owned();
         let object = self.object(&id)?;
@@ -175,7 +185,7 @@ impl Game {
         if object.zone == "field" && object.generation == reference.generation.0 {
             let effect = Suppression {
                 origin_record: super::observation::EffectOrigin::capture(self, execution, source)?,
-                end: EffectEnd::at(self, execution, &duration.end)?,
+                window: TurnWindow::at(self, execution, duration)?,
                 boxed,
                 // Underlying grants remain captured when another box currently suppresses them.
                 origins: self.internal_suppression_origins(&id)?,
@@ -208,7 +218,7 @@ impl Game {
         let player = super::player_id(self.active())?.seat;
         for state in self.state.ir_ability_suppression.values_mut() {
             for effect in &mut state.effects {
-                effect.end.begin(turn, player);
+                effect.window.begin(turn, player);
             }
         }
         Ok(())
@@ -218,7 +228,7 @@ impl Game {
         self.state.ir_ability_suppression.retain(|_, state| {
             state
                 .effects
-                .retain(|effect| effect.end != EffectEnd::Turn(turn));
+                .retain_mut(|effect| effect.window.retain_after(turn));
             !state.effects.is_empty()
         });
     }
@@ -241,10 +251,17 @@ impl Game {
             .map(|effect| {
                 Ok(InstalledEffect {
                     source: effect.origin_record.observed(self, perspective),
-                    expires: effect.end.observed()?,
-                    main_live: true,
-                    intervals: vec![],
-                    active: true,
+                    expires: effect.window.end.observed()?,
+                    main_live: !effect.window.main_ended,
+                    intervals: effect
+                        .window
+                        .interval
+                        .map(TurnInterval::observed)
+                        .transpose()?
+                        .into_iter()
+                        .flatten()
+                        .collect(),
+                    active: effect.window.active(),
                     change: InstalledChange::AbilityRemoval {
                         boxed: effect.boxed,
                     },

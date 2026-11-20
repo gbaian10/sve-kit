@@ -250,7 +250,6 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let duration = match &installation.until {
-            Some(ast::Until::ThisAndNextOppTurn) => return Err(unsupported(path)),
             Some(ast::Until::DuringNextTurn { during_next_turn }) => {
                 let player = super::posture::player(during_next_turn.who);
                 Duration {
