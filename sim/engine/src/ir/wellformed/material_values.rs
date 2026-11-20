@@ -112,7 +112,10 @@ impl Checker {
         receipt: &ReceiptReference<MoveOutcome>,
         property: NumericProperty,
     ) -> Checked {
-        if !matches!(property, NumericProperty::Attack | NumericProperty::Cost) {
+        if !matches!(
+            property,
+            NumericProperty::Attack | NumericProperty::Cost | NumericProperty::OriginalCost
+        ) {
             return self.reject();
         }
         self.receipt(receipt)?;

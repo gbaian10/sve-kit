@@ -113,7 +113,7 @@ fn mask_public_prefix(node: &mut Node) -> Result<()> {
     if let Node::Instruction { instruction } = node
         && matches!(instruction.action, Action::RevealUntil { .. })
     {
-        if !reveal_shape::action(&instruction.action)
+        if reveal_shape::cost_filter(&instruction.action).is_none()
             || instruction.actor != (PlayerRef::Controller {})
             || instruction.context != InstructionContext::Effect
             || instruction.precondition.is_some()

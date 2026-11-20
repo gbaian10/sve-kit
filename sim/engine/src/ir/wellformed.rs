@@ -799,7 +799,7 @@ impl Checker {
                 candidate,
                 predicate,
                 ..
-            } if super::reveal_until::action(action)
+            } if super::reveal_until::cost_filter(action).is_some()
                 && *instruction_actor == (PlayerRef::Controller {}) =>
             {
                 self.isolated(|checker| {

@@ -1141,9 +1141,12 @@ impl BodyContext<'_> {
                         property: super::super::NumericProperty::OriginalCost,
                     })))
                 }
-                ast::Observation::Binding(_) | ast::Observation::Before { .. } => {
-                    Err(unsupported(path))
-                }
+                ast::Observation::Before { objects_of, .. } => self.paid_material_number(
+                    objects_of,
+                    super::super::NumericProperty::OriginalCost,
+                    path,
+                ),
+                ast::Observation::Binding(_) => Err(unsupported(path)),
             },
             ast::Number::HistoryCount { history_count } => {
                 if history_count.at_least.is_some() {

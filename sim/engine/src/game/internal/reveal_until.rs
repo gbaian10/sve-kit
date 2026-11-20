@@ -19,14 +19,14 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<()> {
-        if !reveal_until::action(&instruction.action) {
+        let Some((comparison, bound)) = reveal_until::cost_filter(&instruction.action) else {
             return Err(unsupported("public original-cost follower prefix"));
-        }
+        };
         let Action::RevealUntil {
             deck,
             candidate,
-            predicate,
             required: Expr::Literal(Nat(required)),
+            ..
         } = &instruction.action
         else {
             return Err(unsupported("reveal-until action"));
@@ -34,8 +34,10 @@ impl Game {
         let player = execution.player(self, deck)?;
         let cards = self.internal_known_deck(seat_name(player)?)?;
         let required = usize::try_from(*required).map_err(invalid)?;
+        let bound = execution.integer(self, bound)?;
+        let filter = reveal_until::filter(*candidate, comparison, Expr::Literal(bound));
         let predicate = &super::conditions::ConditionPlan::compile(
-            predicate,
+            &filter,
             *candidate,
             super::conditions::Policy::Search,
         )?

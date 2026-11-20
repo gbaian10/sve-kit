@@ -72,7 +72,7 @@ runtime_record!(
     }
 );
 
-runtime_record!(Characteristics { names: Vec<CardName>, kind: CardKind, traits: Vec<TraitId>, class: Option<ClassId>, title: Option<TitleId>, cost: Info<Int>, attack: Info<Int>, life: Info<Int>, abilities: Vec<RuntimeAbilityReference>, face: FaceId, evolution: EvolutionState, links: Vec<AssociationId> });
+runtime_record!(Characteristics { names: Vec<CardName>, kind: CardKind, traits: Vec<TraitId>, class: Option<ClassId>, title: Option<TitleId>, cost: Info<Int>, original_cost: Int, attack: Info<Int>, life: Info<Int>, abilities: Vec<RuntimeAbilityReference>, face: FaceId, evolution: EvolutionState, links: Vec<AssociationId> });
 
 runtime_record!(PendingInstance { ability: AbilityInstanceId, occurrence: Occurrence, controller: PlayerId, quota_reservation: Option<UsageId>, captures: Vec<CapturedValue> });
 

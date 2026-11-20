@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-055:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        fanfare:
+          cost:
+            to_cemetery:
+              sel: { who: self, zone: field, kind: follower, other: true }
+              n: 1
+              result: material
+          do:
+            - reveal_until:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  orig_cost_gt: { orig_cost_of: { objects_of: material, view: before } }
+                n: 1
+                bind: revealed
+                matched: matched
+            - move: { ref: { in: matched }, to: field, result: entered }
+            - move:
+                ref: { in: revealed, except: { in: { objects_of: entered, view: before } } }
+                to: deck
+                position: bottom
+                order: shuffle

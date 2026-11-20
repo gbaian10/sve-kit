@@ -4452,7 +4452,8 @@ pub(super) struct RevealUntilSelector {
     pub who: SelfPlayer,
     pub zone: DeckZone,
     pub kind: RevealFollower,
-    pub orig_cost_le: u64,
+    pub orig_cost_le: Option<u64>,
+    pub orig_cost_gt: Option<Number>,
 }
 
 #[derive(Deserialize)]

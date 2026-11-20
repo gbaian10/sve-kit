@@ -1,5 +1,8 @@
 use super::{Action, Binding, BodyContext, Expr, Int, LoweringError, Nat, ast, unsupported};
-use crate::ir::{ObjectReceipt, ReceiptId, ReceiptReference, RevealUntilMembers, reveal_until};
+use crate::ir::{
+    Comparison, ObjectReceipt, ReceiptId, ReceiptReference, RevealUntilMembers, reveal_until,
+};
+use alloc::collections::BTreeSet;
 
 pub(super) fn lower(
     context: &mut BodyContext<'_>,
@@ -12,12 +15,24 @@ pub(super) fn lower(
     if value.n == 0 {
         return Err(unsupported(path));
     }
-    let maximum = i64::try_from(value.sel.orig_cost_le).map_err(|_overflow| unsupported(path))?;
+    let (comparison, threshold) = match (&value.sel.orig_cost_le, &value.sel.orig_cost_gt) {
+        (Some(maximum), None) => (
+            Comparison::LessEqual,
+            Expr::Literal(Int(
+                i64::try_from(*maximum).map_err(|_overflow| unsupported(path))?
+            )),
+        ),
+        (None, Some(minimum)) => (
+            Comparison::Greater,
+            context.number(minimum, path, &mut BTreeSet::new())?,
+        ),
+        _ => return Err(unsupported(path)),
+    };
     let candidate = Binding::new(context.allocator.id(path)?, context.scope);
     Ok(Action::RevealUntil {
         deck: super::PlayerRef::Controller {},
         candidate,
-        predicate: reveal_until::filter(candidate, Int(maximum)),
+        predicate: reveal_until::filter(candidate, comparison, threshold),
         required: Expr::Literal(Nat(value.n)),
     })
 }

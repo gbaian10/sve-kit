@@ -156,6 +156,7 @@ impl<'execution> PaidMembers<'execution> {
         let information = match property {
             NumericProperty::Attack => &characters.attack,
             NumericProperty::Cost => &characters.cost,
+            NumericProperty::OriginalCost => return Ok(characters.original_cost),
             _ => return Err(unsupported("paid material numeric property")),
         };
         match information {
