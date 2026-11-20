@@ -7,6 +7,13 @@
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
+  "ratelimits": [
+    {
+      "name": "CARD_REPORT_LIMITER",
+      "namespace_id": "19901",
+      "simple": { "limit": 3, "period": 60 },
+    },
+  ],
   "observability": { "enabled": true },
   "assets": {
     "directory": "./dist",

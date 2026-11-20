@@ -10,6 +10,7 @@ export {
 export { artCredits, type FaceArtist } from "./artists"
 export { appBackgroundDownloads } from "./background-downloads"
 export { loadBattleInputs } from "./battle-inputs"
+export { type CardReportResult, sendCardReport } from "./card-report"
 export { type CardRouteInput, locateCard, type LocatedCard } from "./card-route"
 export {
   type CardSummary,

@@ -1,3 +1,6 @@
+import { CARD_REPORT_PATH } from "../domain/card-report"
+import { type CardReportEnv, submitCardReport } from "./card-report"
+
 interface ObjectMetadata {
   httpEtag: string
   httpMetadata?: {
@@ -12,7 +15,8 @@ interface ReadObject extends ObjectMetadata {
 }
 
 // Structural binding types keep the Worker independent of browser and generated runtime globals.
-interface Env {
+interface Env extends CardReportEnv {
+  SITE_ORIGIN?: string
   PREVIEW_BUCKET: {
     get(key: string): Promise<ReadObject | null>
     head(key: string): Promise<ObjectMetadata | null>
@@ -136,15 +140,18 @@ export default {
   async fetch(request: Request, env: Env, ctx: Context): Promise<Response> {
     const url = new URL(request.url)
     // Disabled aliases are also denied here if a deployment still exposes one.
-    if (url.origin !== "https://dev.svekit.app") return failure(404)
+    const developmentOrigin = "https://dev.svekit.app"
+    if (url.origin !== (env.SITE_ORIGIN ?? developmentOrigin)) return failure(404)
 
     // URL.pathname normalizes dot segments; check the incoming spelling before that normalization.
     const pathname = /^https?:\/\/[^/?#]+([^?#]*)/.exec(request.url)?.[1] ?? ""
+    if (pathname === CARD_REPORT_PATH) return submitCardReport(request, env)
     const dataPath =
       pathname === "/cdn-preview" ||
       pathname.startsWith(PREFIX) ||
       /^\/cdn-preview[%\\]/.test(pathname)
     if (!dataPath) return asset(request, env, pathname)
+    if (url.origin !== developmentOrigin) return failure(404)
     if (request.method !== "GET" && request.method !== "HEAD") return failure(405)
     if (!pathname.startsWith(PREFIX)) return failure(404)
     const key = pathname.slice(PREFIX.length)
