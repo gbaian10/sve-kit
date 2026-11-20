@@ -168,8 +168,10 @@ impl BodyContext<'_> {
         let Some(ast::Cost::Short(operation)) = &body.head_cost else {
             return Ok(None);
         };
-        let ast::CostOperation::Act(material) = operation.as_ref() else {
-            return Ok(None);
+        let material = match operation.as_ref() {
+            ast::CostOperation::Act(material) => material,
+            ast::CostOperation::Banish(ast::BanishMaterial::Public(material)) => material.as_ref(),
+            _ => return Ok(None),
         };
         let Some(name) = &material.result else {
             return Ok(None);
@@ -178,7 +180,12 @@ impl BodyContext<'_> {
             matches!(&target.upto, Some(ast::NumericArgument::Expression(argument))
                 if argument.get("count_of").and_then(serde_json::Value::as_str) == Some(name))
         });
-        if !has_dependent_target {
+        let has_dependent_mode = body.steps.iter().any(|step| {
+            matches!(step, ast::Step::Choice(ast::Choice {
+                upto: Some(ast::ModeCap::Number(argument)), ..
+            }) if argument.get("count_of").and_then(serde_json::Value::as_str) == Some(name))
+        });
+        if !has_dependent_target && !has_dependent_mode {
             return Ok(None);
         }
         let mut payment = self

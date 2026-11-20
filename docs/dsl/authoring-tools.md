@@ -153,6 +153,9 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 `reveal_until.sel.orig_cost_gt` 以嚴格大於比對牌庫從者的印刷原費。下限可讀公開的單一正式目標
 （`{orig_cost_of: target}`），或讀成功送墓的單一場上從者材料（`{orig_cost_of: {objects_of: material, view: before}}`）。
 
+自己的公開場上材料可以命名為頭成本的 `result`，再用 `choice.upto: {count_of: materials}` 讀宣告張數。
+先宣告材料再選模式，之後才一併付款。模式上限以印刷選項數為限，宣告零張時略過模式選擇。
+
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
 

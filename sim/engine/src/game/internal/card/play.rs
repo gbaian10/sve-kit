@@ -1656,6 +1656,18 @@ impl Game {
         Ok(())
     }
 
+    fn stamp_play_selection(&mut self, execution: &mut Execution) -> Result<()> {
+        if let Some((view, _)) = execution.waiting.as_mut() {
+            self.state.ir_epoch = self
+                .state
+                .ir_epoch
+                .checked_add(1)
+                .ok_or_else(|| invalid("IR epoch exhausted"))?;
+            view.token.epoch = self.state.ir_epoch;
+        }
+        Ok(())
+    }
+
     pub(in crate::game::internal) fn internal_play_parameters(
         &mut self,
         execution: &mut Execution,
@@ -1709,14 +1721,7 @@ impl Game {
                         snapshot.internal_target(execution, &decision)?;
                     }
                     // Target construction is pure; the live authority alone allocates the token.
-                    if let Some((view, _)) = execution.waiting.as_mut() {
-                        self.state.ir_epoch = self
-                            .state
-                            .ir_epoch
-                            .checked_add(1)
-                            .ok_or_else(|| invalid("IR epoch exhausted"))?;
-                        view.token.epoch = self.state.ir_epoch;
-                    }
+                    self.stamp_play_selection(execution)?;
                 }
                 ChoiceDomain::Distribution {
                     recipients, total, ..
@@ -1957,6 +1962,30 @@ impl Game {
         Ok(())
     }
 
+    fn internal_mode_material_question(
+        &mut self,
+        execution: &mut Execution,
+        play: &mut PlayState,
+        count: &Expr<Nat>,
+    ) -> Result<bool> {
+        let Some(binding) = public_numbers::material_count(count) else {
+            return Ok(false);
+        };
+        let Some(index) = play.parameters.iter().position(|decision| {
+            matches!(&decision.domain, ChoiceDomain::Objects { binding: candidate, .. }
+                if *candidate == binding)
+        }) else {
+            return Ok(false);
+        };
+        let decision = play
+            .parameters
+            .remove(index)
+            .ok_or_else(|| invalid("missing mode material parameter"))?;
+        self.internal_play_material_parameter(execution, &decision, play)?;
+        self.stamp_play_selection(execution)?;
+        Ok(true)
+    }
+
     fn internal_play_modes(
         &mut self,
         execution: &mut Execution,
@@ -1969,9 +1998,17 @@ impl Game {
                 play.chosen.insert(group.chosen.id, Vec::new());
                 continue;
             }
+            if self.internal_mode_material_question(execution, play, &group.count)? {
+                play.modes.push_front(group);
+                return Ok(true);
+            }
             // The count may read this play's declaration, held by the detached play state.
             let detached = execution.play.replace(play.clone());
-            let count = execution.natural(self, &group.count);
+            let count = if let Some(binding) = public_numbers::material_count(&group.count) {
+                execution.declared_material_count(binding)
+            } else {
+                execution.natural(self, &group.count)
+            };
             execution.play = detached;
             let count = count?;
             let ChoiceDomain::Modes {

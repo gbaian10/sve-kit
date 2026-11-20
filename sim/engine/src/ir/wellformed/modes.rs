@@ -128,8 +128,18 @@ impl Checker {
             return self.reject();
         }
         self.cardinality(*cardinality)?;
-        self.at("count", |checker| checker.natural(count))?;
-        self.mode_count(count, *cardinality, modes.len())?;
+        if let Some(material) = public_numbers::material_count(count) {
+            if kind != ModeChoiceKind::ChoiceKeyword
+                || cardinality.minimum != Nat(1)
+                || cardinality.maximum.is_some()
+                || !original.field_act_materials.contains(&material.key())
+            {
+                return self.reject();
+            }
+        } else {
+            self.at("count", |checker| checker.natural(count))?;
+            self.mode_count(count, *cardinality, modes.len())?;
+        }
         self.define(*binding, BindingKind::Value)?;
         let input = self.env.clone();
         self.count_time = previous_time;

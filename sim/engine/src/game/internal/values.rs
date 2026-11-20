@@ -477,6 +477,13 @@ impl Execution {
         }
     }
 
+    pub(super) fn declared_material_count(&self, binding: Binding<Selector>) -> Result<Nat> {
+        let Some(Slot::Objects { members, .. }) = self.slots.get(&binding.key()) else {
+            return Err(invalid("missing declared material count"));
+        };
+        Ok(Nat(u64::try_from(members.len()).map_err(invalid)?))
+    }
+
     pub(super) fn recipients(
         &self,
         game: &Game,

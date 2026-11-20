@@ -37,7 +37,7 @@ use crate::ir::{entry_posture, move_replacement, optional_payment};
 use crate::ir::{trigger_restrictions, victory};
 use alloc::collections::BTreeSet;
 
-/// A fixed-count public head-cost material; activated modes may follow it (BP09-071, BP09-078).
+/// A public head-cost material with a fixed count or an explicitly declared count.
 fn public_cost_material(decision: &Decision) -> bool {
     matches!(
         decision.kind,
@@ -48,8 +48,9 @@ fn public_cost_material(decision: &Decision) -> bool {
     ) && decision.visibility == (Visibility::Public {})
         && matches!(&decision.domain, ChoiceDomain::Objects { constraint, .. }
             if constraint.aggregate_bounds.is_empty()
-                && constraint.cardinality.minimum.0 > 0
-                && constraint.cardinality.maximum == Some(constraint.cardinality.minimum))
+                && (constraint.cardinality.minimum.0 == 0 && constraint.cardinality.maximum.is_none()
+                    || constraint.cardinality.minimum.0 > 0
+                        && constraint.cardinality.maximum == Some(constraint.cardinality.minimum)))
 }
 
 fn batch_discard(trigger: &TriggerSpec) -> bool {
