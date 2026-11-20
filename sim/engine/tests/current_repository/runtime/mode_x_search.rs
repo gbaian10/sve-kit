@@ -1,7 +1,6 @@
 use super::*;
 
 #[test]
-#[expect(clippy::panic, reason = "The printed modes supply their own declarations.")]
 fn phoenix_howl_pays_for_its_selected_search_and_grants_rush_to_each_entrant() {
     let mut initial = position_with_source("BP12-P12", "hand");
     initial["players"]["P1"]["zones"]["deck"] = json!(cards("phoenix-", "BP04-064", 3));

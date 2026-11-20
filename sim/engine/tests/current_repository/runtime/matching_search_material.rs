@@ -1,7 +1,6 @@
 use super::*;
 
 #[test]
-#[expect(clippy::panic, reason = "The printed effect offers a private search.")]
 fn magical_replication_matches_both_the_printed_kind_and_original_cost() {
     let mut initial = position_with_source("BP13-052", "hand");
     initial["players"]["P1"]["zones"]["cemetery"] =

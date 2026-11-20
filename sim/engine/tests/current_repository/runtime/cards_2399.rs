@@ -1,7 +1,6 @@
 use super::*;
 
 #[test]
-#[expect(clippy::panic, reason = "The printed evolution must offer a private search.")]
 fn hotaru_searches_for_exactly_one_printed_attack_when_she_evolves() {
     let mut initial = position_with_source("ECP02-044", "field");
     initial["players"]["P1"]["zones"]["evolve_deck"] =
