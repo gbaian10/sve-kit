@@ -73,6 +73,7 @@ pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<(
                     && matches!(instruction.action, Action::Banish { .. })
                     && super::super::movement::deck_top(&instruction.action).is_some())
                 || super::hand_payment::check_cost(&instruction.action)
+                || crate::ir::shuffle::payment(&instruction.action)
                 || super::material::source_field_cost(&instruction.action)
                 || super::super::counters::is_cost(&instruction.action)
                 || super::material::cost_objects(&instruction.action)
@@ -141,6 +142,7 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                         || (optional_payment::required(body)
                             && super::super::life::is_cost(&step.instruction.action))
                         || super::hand_payment::check_cost(&step.instruction.action)
+                        || crate::ir::shuffle::payment(&step.instruction.action)
                         || play.parameters.iter().any(|decision| {
                             reveal_payment::field_parameter(&ability.node, decision)
                                 && reveal_payment::selected(

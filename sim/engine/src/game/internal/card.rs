@@ -927,6 +927,17 @@ impl Game {
                 Vec::new(),
                 Vec::new(),
             ),
+            action if crate::ir::shuffle::payment(action) => {
+                self.internal_shuffle(execution, &step.instruction)?;
+                (
+                    Quantity {
+                        amount: Int(1),
+                        unit: QuantityUnit::Times,
+                    },
+                    Vec::new(),
+                    Vec::new(),
+                )
+            }
             Action::Fusion { .. } => self.internal_fusion_payment(execution, &step.instruction)?,
             Action::Discard { .. } => {
                 let (quantity, subjects) =
@@ -1451,6 +1462,7 @@ pub(super) fn check_payment(
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             Action::Fusion { .. } => fusion::check_cost(&instruction.action),
+            action if crate::ir::shuffle::payment(action) => !quick,
             action if hand_payment::source_to_ex(action) => true,
             action => material::check_cost(action, play),
         };

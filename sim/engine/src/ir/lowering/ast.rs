@@ -285,6 +285,15 @@ pub(super) struct SkipTurnCost {
 }
 
 #[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct ShuffledCost {
+    pub sel: PublicQuery,
+    pub n: u64,
+    #[serde(rename = "shuffle")]
+    pub _shuffle: True,
+}
+
+#[derive(Deserialize)]
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishMaterial {
     Public(Box<Material>),

@@ -813,6 +813,7 @@ impl Checker {
                             return Err(checker.error(WellFormedReason::PreconditionTiming));
                         }
                         let valid = flip_cost::bound_action(&step.instruction.action).is_some()
+                            || shuffle::payment(&step.instruction.action)
                             || matches!(&step.instruction.action,
                             Action::Discard { .. }
                             | Action::ScheduleTurn { player: PlayerRef::Controller {}, operation: TurnOperation::SkipNext {}, .. }
@@ -833,7 +834,7 @@ impl Checker {
                             || hand_source_to_ex(&step.instruction.action);
                         let selected_move = matches!(&step.instruction.action,
                             Action::Move { objects: Selector::Bound { .. }, movement, reason: MoveReason::Put }
-                                if (matches!(movement.to, MoveDestination::Owners { zone: OwnerZone::Cemetery | OwnerZone::Hand })
+                                if (matches!(movement.to, MoveDestination::Owners { zone: OwnerZone::Cemetery | OwnerZone::Hand | OwnerZone::Deck })
                                     || matches!(movement.to, MoveDestination::Shared { zone: ZoneRef { player: PlayerRef::Controller {}, kind: ZoneKind::Ex } }))
                                     && movement.position.is_none() && movement.order.is_none()
                                     && movement.initial_posture.is_none() && movement.entry_effects.is_empty())

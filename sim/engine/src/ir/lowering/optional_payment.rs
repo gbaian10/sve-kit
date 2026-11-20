@@ -256,6 +256,7 @@ impl BodyContext<'_> {
                         | ast::CostOperation::Discard(_)
                         | ast::CostOperation::Reveal(_)
                         | ast::CostOperation::ToDeckBottom(_)
+                        | ast::CostOperation::ToDeck(_)
                         | ast::CostOperation::BanishSelf(_)
                         | ast::CostOperation::ActSelf(_)
                         | ast::CostOperation::SelfToCemetery(_)
