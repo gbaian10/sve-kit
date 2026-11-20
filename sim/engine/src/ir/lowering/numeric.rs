@@ -346,6 +346,46 @@ impl BodyContext<'_> {
         };
         let (power_at_least, power_at_most) = super::selection::stat_bounds(power);
         let (relation, relative_to) = self.side_set(&query.who, path)?;
+        let predicate = super::selection::field_filter(
+            &super::selection::ObjectFilter {
+                kind: kind.as_ref().map(super::search::card_kind),
+                keyword: query.keyword.map(|keyword| keyword.0),
+                power_at_most,
+                power_at_least,
+                trait_id: query.r#trait.as_deref(),
+                class: query.class.as_deref(),
+                not_class: query.not_class.as_deref(),
+                token: query
+                    .token
+                    .or_else(|| query.not_token.map(|excluded| !excluded)),
+                original_cost: [
+                    query
+                        .orig_cost_eq
+                        .as_ref()
+                        .and_then(ast::NumericArgument::literal),
+                    query.orig_cost_le,
+                    query.orig_cost_ge,
+                ],
+                hp_at_most: query.hp_le,
+                not_trait: query.not_trait.as_deref(),
+                name: query.name.as_deref(),
+                contains: query.name_contains.as_deref(),
+                acted: query.acted,
+                not_same_name_as_this: query.not_same_name_as_this,
+                ..super::selection::ObjectFilter::default()
+            },
+            binding,
+        );
+        let predicate = self.dynamic_limits(
+            predicate,
+            binding,
+            &[(
+                query.orig_cost_eq.as_ref(),
+                super::super::CharacteristicView::Original,
+                super::super::Comparison::Equal,
+            )],
+            path,
+        )?;
         let objects = Selector::Zone {
             players: PlayerSet {
                 relation,
@@ -363,29 +403,7 @@ impl BodyContext<'_> {
             zone,
             view: SelectionView::Current {},
             binding,
-            predicate: Box::new(super::selection::field_filter(
-                &super::selection::ObjectFilter {
-                    kind: kind.as_ref().map(super::search::card_kind),
-                    keyword: query.keyword.map(|keyword| keyword.0),
-                    power_at_most,
-                    power_at_least,
-                    trait_id: query.r#trait.as_deref(),
-                    class: query.class.as_deref(),
-                    not_class: query.not_class.as_deref(),
-                    token: query
-                        .token
-                        .or_else(|| query.not_token.map(|excluded| !excluded)),
-                    original_cost: [query.orig_cost_eq, query.orig_cost_le, query.orig_cost_ge],
-                    hp_at_most: query.hp_le,
-                    not_trait: query.not_trait.as_deref(),
-                    name: query.name.as_deref(),
-                    contains: query.name_contains.as_deref(),
-                    acted: query.acted,
-                    not_same_name_as_this: query.not_same_name_as_this,
-                    ..super::selection::ObjectFilter::default()
-                },
-                binding,
-            )),
+            predicate: Box::new(predicate),
         };
         let objects = if query.other {
             Selector::Difference {

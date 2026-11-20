@@ -1,6 +1,6 @@
 //! Numeric declarations are scoped values, separate from payment parameters and dice.
 use super::{Action, Binding, BodyContext, Expr, Int, LoweringError, Nat, ast, unsupported};
-use crate::ir::{Declaration, IntOperation};
+use crate::ir::{Arithmetic, Declaration, IntOperation, NatOperation};
 
 #[derive(Clone, Copy)]
 pub(super) enum DeclaredBinding {
@@ -39,6 +39,25 @@ impl BodyContext<'_> {
             _ => None,
         }
     }
+    pub(super) fn declared_amount(&self, value: &ast::Number) -> Option<Expr<Nat>> {
+        let ast::Number::Alias(name) = value else {
+            return None;
+        };
+        Some(match self.declared_numbers.get(name)? {
+            DeclaredBinding::Natural(binding) => Expr::Bound(*binding),
+            DeclaredBinding::Integer(binding) => {
+                // The question accepts only nonnegative answers. Keep that guarantee visible
+                // to consumers that inspect the amount without the declaration's bounds.
+                Expr::Compute(Box::new(NatOperation::CheckedInt {
+                    value: Expr::Compute(Box::new(IntOperation::Arithmetic {
+                        operation: Arithmetic::Maximum,
+                        arguments: vec![Expr::Literal(Int(0)), Expr::Bound(*binding)],
+                    })),
+                }))
+            }
+        })
+    }
+
     pub(super) fn declare(
         &mut self,
         value: &ast::Declare,

@@ -1313,7 +1313,7 @@ pub(super) struct ObjectQuery {
     pub not_class: Option<String>,
     pub token: Option<bool>,
     pub not_token: Option<bool>,
-    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_eq: Option<NumericArgument>,
     pub orig_cost_le: Option<u64>,
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,

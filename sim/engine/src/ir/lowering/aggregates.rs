@@ -122,7 +122,10 @@ impl BodyContext<'_> {
             name_contains: query.name_contains.clone(),
             other: query.other,
             racing: None,
-            orig_cost_eq: query.orig_cost_eq,
+            orig_cost_eq: query
+                .orig_cost_eq
+                .as_ref()
+                .and_then(ast::NumericArgument::literal),
             orig_cost_le: query.orig_cost_le,
             orig_cost_ge: query.orig_cost_ge,
             cost_eq: None,
@@ -132,7 +135,15 @@ impl BodyContext<'_> {
             r#where: None,
         };
         let condition = match &query.r#where {
-            Some(ast::ObjectQueryWhere::Extremum(condition)) => Some(condition.as_ref()),
+            Some(ast::ObjectQueryWhere::Extremum(condition))
+                if !query
+                    .orig_cost_eq
+                    .as_ref()
+                    .is_some_and(ast::NumericArgument::is_dynamic) =>
+            {
+                Some(condition.as_ref())
+            }
+            Some(ast::ObjectQueryWhere::Extremum(_)) => return Err(unsupported(path)),
             Some(ast::ObjectQueryWhere::Damaged(_)) => return Err(unsupported(path)),
             Some(ast::ObjectQueryWhere::Power(_)) | None => None,
         };
