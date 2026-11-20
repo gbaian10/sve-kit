@@ -120,7 +120,15 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
+  "vars": {
+    "SITE_ORIGIN": "https://dev.svekit.app",
+    "CARD_REPORT_GITHUB_APP_ID": "",
+    "CARD_REPORT_GITHUB_INSTALLATION_ID": ""
+  },
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
+  "ratelimits": [
+    { "name": "CARD_REPORT_LIMITER", "namespace_id": "19901", "simple": { "limit": 3, "period": 60 } }
+  ],
   "observability": { "enabled": true },
   "assets": {
     "directory": "./dist",
@@ -133,7 +141,8 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
 
 `main` 指向受審的 Worker entrypoint，`PREVIEW_BUCKET` 綁開發桶，`ASSETS` 提供前端。
 配置以 `assets.run_worker_first: true` 讓 handler 在 SPA fallback 之前驗 host，
-資料路徑讀 R2，其餘委派 `ASSETS.fetch`；所有靜態路徑亦會經過 Worker，可能有額外計費。
+資料路徑讀 R2，卡片回報由第 11 節的端點處理，其餘委派 `ASSETS.fetch`。
+所有靜態路徑亦會經過 Worker，可能有額外計費。
 `observability.enabled` 開啟 Workers Logs；設定以此檔為準，不在後台手動切換，部署時才不會與後台設定不一致。
 依官方文件（2026-10-25 查核），Workers Logs 免費方案每天 20 萬筆、保留 3 天；2026-12-01 起改用
 Cloudflare Observability 計價，額度以當時公告為準。開發環境的卡圖與快照也經 Worker：2026-10-25 的一次
@@ -327,3 +336,59 @@ Access 登入 cookie 每個網域各一份；未登入第二個網域時，跨�
 CORS error，須先個別登入該網域，工作階段到期後也須重新登入。**依官方文件，未實測**。
 開發環境因此採同源前端與資料路徑，避免第二個登入入口；不以匿名 GET Bypass 解決此問題。
 正式 `cdn.svekit.app` 維持獨立 R2 自訂網域直出，公開操作另行安排。
+
+## 11. 單卡頁問題回報
+
+同源 `POST /api/card-reports` 由 Worker 處理。開發端點也受第 4 節的 Access 保護。
+送出成功會在 `gbaian10/sve-kit` 建立公開 issue，包含資料版本、卡號、版次、介面語言、
+問題類型、說明、選填的聯絡資訊，以及該版次的官方卡片頁連結。
+未收錄印刷品以永久印刷 ID 識別。表單只送出上述欄位與人機驗證權杖，官方頁面連結由 Worker 組出。
+
+維護者前置設定如下。
+
+1. 在 `gbaian10/sve-kit` 建立 `card-report` 標籤。建立或指定 GitHub App，
+   安裝範圍只選 `sve-kit`，repository permissions 設定 **Issues: Read and write**。
+   維護者在 `sim/web/wrangler.dev.jsonc` 的 `vars` 中填入數值 App ID 與
+   installation ID，分別對應 `CARD_REPORT_GITHUB_APP_ID`、
+   `CARD_REPORT_GITHUB_INSTALLATION_ID`，以字串保存。開發站的 `SITE_ORIGIN`
+   已在同一處設為 `https://dev.svekit.app`。以下兩種憑證使用 `wrangler secret put`。
+2. 將 App 私鑰以 **PKCS#8 PEM** 放入 Worker secret `CARD_REPORT_GITHUB_PRIVATE_KEY`。
+   GitHub 下載的 PKCS#1 PEM 可由維護者在本機以管線轉換並輸入 Wrangler，
+   先把 `GITHUB_APP_PEM` 指向剛下載的私鑰檔，再於 `sim/web` 執行。
+
+   ```bash
+   openssl pkcs8 -topk8 -nocrypt -in "$GITHUB_APP_PEM" |
+     bun x wrangler secret put CARD_REPORT_GITHUB_PRIVATE_KEY --config wrangler.dev.jsonc
+   ```
+
+   Worker 用 Web Crypto 簽 RS256 App JWT，每次回報換取限 `sve-kit` 與
+   `issues: write` 的短效 installation token。參考 [GitHub App JWT](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-a-json-web-token-jwt-for-a-github-app)、
+   [installation token](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/generating-an-installation-access-token-for-a-github-app)
+   及 [App 私鑰格式](https://docs.github.com/en/apps/creating-github-apps/authenticating-with-a-github-app/managing-private-keys-for-github-apps)。
+3. 開發部署的 `deploy:dev` 使用 Cloudflare 的可見測試 site key。維護者執行
+   `bun x wrangler secret put TURNSTILE_SECRET --config wrangler.dev.jsonc`，
+   並輸入對應的 always-pass 測試 secret。正式環境建立只允許正式
+   hostname 的 Turnstile widget，以 `VITE_TURNSTILE_SITE_KEY` 傳入公開 site key 後
+   建置，並以正式設定檔執行 `wrangler secret put TURNSTILE_SECRET`。
+   維護者在正式的 `sim/web/wrangler.prod.jsonc` 的 `vars` 中填入兩個 ID 欄位，
+   並設 `SITE_ORIGIN` 為 `https://svekit.app`，使用獨立的 Rate Limiting namespace。
+   若另在平台設定了 CSP，`script-src` 與 `frame-src` 須允許 `https://challenges.cloudflare.com`。
+   參考 [Turnstile 測試金鑰](https://developers.cloudflare.com/turnstile/troubleshooting/testing/)、
+   [Siteverify](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/)
+   及 [CSP](https://developers.cloudflare.com/turnstile/reference/content-security-policy/)。
+4. 開發設定的 `CARD_REPORT_LIMITER` 每來源每 60 秒約允許三次通過驗證的回報。
+   Cloudflare 按位置計數，維護者須確認 `namespace_id` 在帳號內未被占用。
+   計數鍵使用來源 IP 的 HMAC，原始 IP 不寫入 issue、應用程式日誌或送往 Siteverify。
+   參考 [Workers Rate Limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/)。
+
+本機可在 `sim/web` 用下列指令驗證。測試模擬 Siteverify 與 GitHub 的回應。
+
+```bash
+bun run test:all tests/card-report-worker.test.ts src/pages/card/CardReport.test.tsx
+```
+
+維護者完成 dev 設定並部署後，用 Access 登入開發站，從有機翻的單卡頁開啟「回報譯文問題」，
+確認預選「翻譯」且顯示目前卡號與版本。用明確標為測試的說明送出一筆，確認成功畫面的連結
+指向帶 `card-report` 標籤的 issue。換用 Cloudflare 的 always-fail 測試 secret 可驗證
+人機驗證錯誤，再恢復 always-pass 測試 secret。Worker 測試另驗超頻與缺少 secret 的拒絕。
+送出失敗時可在 Workers Logs 查找 `card-report:`，以固定的階段名稱定位問題。

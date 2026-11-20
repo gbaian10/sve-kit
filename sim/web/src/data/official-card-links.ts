@@ -1,3 +1,4 @@
+import { officialCardUrl } from "../domain/cardRoute"
 import type { Catalog } from "./catalog"
 import type { Row } from "./format-v3/decode"
 import { arrayValue, objectValue, stringValue } from "./format-v3/json"
@@ -11,11 +12,7 @@ function officialUrl(printing: Row | undefined, region: "jp" | "en"): string | u
   if (printing?.["catalog_state"] !== "official") return undefined
   const cardNo = stringValue(printing["card_no"])
   if (!cardNo) return undefined
-  const base =
-    region === "jp"
-      ? "https://shadowverse-evolve.com/cardlist/"
-      : "https://en.shadowverse-evolve.com/cards/"
-  return `${base}?cardno=${encodeURIComponent(cardNo)}`
+  return officialCardUrl(region, cardNo)
 }
 
 /** Return official pages in the selected printing's region order, using its exact catalog number. */

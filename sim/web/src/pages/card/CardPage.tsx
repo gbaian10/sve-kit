@@ -1,4 +1,4 @@
-import { ArrowLeft, ChevronLeft, ChevronRight, Link2, Maximize2, X } from "lucide-react"
+import { ArrowLeft, ChevronLeft, ChevronRight, Flag, Link2, Maximize2, X } from "lucide-react"
 import {
   type ReactNode,
   useCallback,
@@ -23,6 +23,7 @@ import {
 } from "../../app/snapshot"
 import { StatusStrip } from "../../app/StatusStrip"
 import { CardLinkContext, useCardLinkClick } from "../../components/card/card-link-context"
+import { CardReportContext } from "../../components/card/card-report-context"
 import { CardImage } from "../../components/card/CardImage"
 import { CardNameHeading, PlainNameHeading } from "../../components/card/CardNameHeading"
 import { CardTypeBadge } from "../../components/card/CardTypeBadge"
@@ -59,6 +60,7 @@ import {
   type SnapshotStatus,
   stringValue,
 } from "../../data"
+import type { ReportType } from "../../domain/card-report"
 import { CardRouteError, printingPath, usesIntRoute } from "../../domain/cardRoute"
 import { classStyle } from "../../domain/classes"
 import { deckLocationBadges } from "../../domain/deckLocation"
@@ -74,6 +76,7 @@ import { frontArtOf, useCardSequence } from "./card-sequence"
 import { CardExternalLinks } from "./CardExternalLinks"
 import { CardQa } from "./CardQa"
 import { CardReleaseDate } from "./CardReleaseDate"
+import { CardReportDialog, type CardReportDraft } from "./CardReport"
 import { CardRestrictions } from "./CardRestrictions"
 import { CardTextPanel } from "./CardTextPanel"
 import { CardWording } from "./CardWording"
@@ -205,6 +208,10 @@ export function CardView({
   const [zoomed, setZoomed] = useState<string | null>(null)
   const closeZoom = useDialogHistory("card-zoom", zoomed !== null, () => {
     setZoomed(null)
+  })
+  const [report, setReport] = useState<CardReportDraft | null>(null)
+  const closeReport = useDialogHistory("card-report", report !== null, () => {
+    setReport(null)
   })
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
   const textLang = UI_TEXT_LANG[uiLanguage]
@@ -677,6 +684,24 @@ export function CardView({
     return { faceId, ordinal, wording, revision, faceSummary, name }
   })
   const zoomedView = views.find((view) => view.faceId === zoomed)
+  const dataVersion = client.snapshot()?.dataVersion
+  const reportCardNo =
+    resolved && !unlisted && !usesIntRoute(resolved.cardNoState) ? resolved.cardNo : null
+  const reportPrintingId = reportCardNo === null ? (resolved?.intId ?? null) : null
+  const canReport = !frame && !pending && (reportCardNo || reportPrintingId) && dataVersion
+  const openReport = (initialType: ReportType) => {
+    if (!canReport) return
+    setReport({
+      initialType,
+      metadata: {
+        cardNo: reportCardNo,
+        printingIntId: reportPrintingId,
+        edition: region,
+        uiLanguage,
+        dataVersion,
+      },
+    })
+  }
   const Heading = frame ? "h2" : "h1"
   const navigation = (sequence.phase === "pending" || sequence.phase === "found") && (
     <>
@@ -713,7 +738,7 @@ export function CardView({
       </Button>
     </>
   )
-  return (
+  const cardView = (
     <CardLinkContext value={summaryLink}>
       <article
         ref={articleRef}
@@ -1129,6 +1154,20 @@ export function CardView({
                 region={region}
               />
             )}
+            {canReport && (
+              <div className="mt-6 border-t border-border pt-2">
+                <button
+                  type="button"
+                  className="inline-flex min-h-11 items-center gap-2 text-14 font-medium text-accent-text underline underline-offset-4"
+                  onClick={() => {
+                    openReport("data")
+                  }}
+                >
+                  <Flag className="size-4" aria-hidden="true" />
+                  {t("cardReport.title")}
+                </button>
+              </div>
+            )}
           </div>
         </div>
         {frame && navigation && (
@@ -1153,7 +1192,21 @@ export function CardView({
             />
           )}
         </Dialog>
+        {!frame && <CardReportDialog draft={report} onClose={closeReport} />}
       </article>
     </CardLinkContext>
+  )
+  return (
+    <CardReportContext
+      value={
+        canReport
+          ? () => {
+              openReport("translation")
+            }
+          : null
+      }
+    >
+      {cardView}
+    </CardReportContext>
   )
 }

@@ -35,6 +35,14 @@ function validRouteKey(key: string): boolean {
 export const usesIntRoute = (cardNoState: string | undefined): boolean =>
   cardNoState === "provisional" || cardNoState === "none"
 
+export function officialCardUrl(region: Region, cardNo: string): string {
+  const base =
+    region === "jp"
+      ? "https://shadowverse-evolve.com/cardlist/"
+      : "https://en.shadowverse-evolve.com/cards/"
+  return `${base}?cardno=${encodeURIComponent(cardNo)}`
+}
+
 export function printingPath(printing: {
   readonly cardNo: string
   readonly cardNoState?: string

@@ -3,6 +3,7 @@ interface ImportMetaEnv {
   readonly VITE_CDN_BASE?: string
   /** "1" in dev builds only: adds the battle screen at `/play` (src/app/routes.tsx). */
   readonly VITE_DEV_ONLY_PLAY?: string
+  readonly VITE_TURNSTILE_SITE_KEY?: string
   /** Injected by vite.config: "1" when SVE_PREVIEW_DIR was set for this dev server. */
   readonly SVE_PREVIEW_CONFIGURED?: string
   /** Injected by vite.config: "1" when `/cdn` serves the committed fixture (no SVE_EXPORT_DIR). */
