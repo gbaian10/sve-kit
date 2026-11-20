@@ -34,13 +34,20 @@ export class SearchBlobs {
     receive: (file: JsonObject, bytes: Uint8Array) => void,
   ): Promise<void> {
     await this.migration
-    // One inventory for this transfer avoids rescanning every cached file after each write.
+    const controller = new AbortController()
+    const batchSignal = AbortSignal.any([signal, controller.signal])
     await this.raw.batch(async (read) => {
-      await Promise.all(
-        files.map(async (file) => {
-          receive(file, await read(rawBlobDescriptor(file), { signal }))
-        }),
-      )
+      const reads = files.map(async (file) => {
+        receive(file, await read(rawBlobDescriptor(file), { signal: batchSignal }))
+      })
+      try {
+        await Promise.all(reads)
+      } catch (error) {
+        // Let sibling reads settle before the closing inventory.
+        controller.abort(error)
+        await Promise.allSettled(reads)
+        throw error
+      }
     })
   }
 
