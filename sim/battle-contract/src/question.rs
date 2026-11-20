@@ -159,6 +159,8 @@ pub enum QuestionUse {
     ResolutionSelection,
     /// Choose which tokens fit the remaining space.
     TokenCapacity,
+    /// Declare one public rules card name.
+    DeclareName,
     /// Declare modes.
     Modes,
     /// Choose a resolution alternative.
@@ -191,6 +193,7 @@ impl QuestionUse {
             | Self::TriggerQuota
             | Self::SearchReplacement
             | Self::TokenCapacity
+            | Self::DeclareName
             | Self::Modes
             | Self::ResolutionAlternative => ShapeKind::Choose,
             Self::Mulligan => ShapeKind::Mulligan,

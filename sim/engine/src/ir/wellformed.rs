@@ -1111,7 +1111,7 @@ impl Checker {
                 }
                 self.define(*binding, BindingKind::Value)
             }
-            Declaration::CardNames { .. } => self.reject(),
+            Declaration::CardNames { binding, .. } => self.define(*binding, BindingKind::Value),
         }
     }
 

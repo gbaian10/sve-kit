@@ -156,6 +156,7 @@ pub(super) fn offered(play: &CardPlay) -> Vec<String> {
 pub(super) fn finish(game: &mut Game, mut play: CardPlay, prefer: &[&str]) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match &question.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::OptionalCost => Answer::OptionalCost(true),

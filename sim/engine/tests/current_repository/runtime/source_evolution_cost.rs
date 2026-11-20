@@ -28,6 +28,7 @@ fn finish(game: &mut Game, mut play: CardPlay) {
     loop {
         while let CardPlay::Awaiting(question) = play {
             let answer = match &question.domain {
+                InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
                 InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => {
                     Answer::Targets(domain.members.iter().map(|member| member.handle).collect())

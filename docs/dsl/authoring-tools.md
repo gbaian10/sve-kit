@@ -1685,7 +1685,9 @@ BP02-035／036 同時使用下文的 SpellChain 計數母體；逐次補滿與�
 
 進化後的ミトラ用 `cmp` 比對獨立擲骰的點數與宣告值，並用 `pp: {who: self, to_max: true}` 依結算當下的 PP 差額回復。
 
-名稱宣告、動態宣告上下界及宣告前置條件仍未接入執行器。
+`declare: {bind: chosen, kind: name}` 從公開卡表的規則卡名選一個，包含 token，同名印刷合併為一項。先宣告，再公開比對的卡片。`count: {in: {objects_of: shown, view: before}, name: {bound: chosen}}` 用該宣告篩選已公開的回條成員。
+
+宣告的上下界目前使用固定整數。
 
 ## 保留能力的卡種改寫
 

@@ -1406,6 +1406,7 @@ struct FieldEntryGuard {
 /// none of them once the nested body ends.
 struct LocalBindings {
     dice_results: BTreeMap<String, Binding<Nat>>,
+    declared_names: BTreeMap<String, Binding<super::CardName>>,
     declared_numbers: BTreeMap<String, declaration::DeclaredBinding>,
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
@@ -1543,6 +1544,7 @@ struct BodyContext<'definitions> {
     damage_event: Option<Binding<super::DamageEvent>>,
     dice_event: Option<Binding<super::DiceEvent>>,
     dice_results: BTreeMap<String, Binding<Nat>>,
+    declared_names: BTreeMap<String, Binding<super::CardName>>,
     declared_numbers: BTreeMap<String, declaration::DeclaredBinding>,
     equip_event: Option<Binding<super::EquipEvent>>,
     drive_checked_event: Option<Binding<super::DriveCheckedEvent>>,
@@ -1639,6 +1641,7 @@ impl<'definitions> BodyContext<'definitions> {
             damage_event: None,
             dice_event: None,
             dice_results: BTreeMap::new(),
+            declared_names: BTreeMap::new(),
             declared_numbers: BTreeMap::new(),
             equip_event: None,
             drive_checked_event: None,
@@ -1923,6 +1926,7 @@ impl<'definitions> BodyContext<'definitions> {
     fn local_bindings(&self) -> LocalBindings {
         LocalBindings {
             dice_results: self.dice_results.clone(),
+            declared_names: self.declared_names.clone(),
             declared_numbers: self.declared_numbers.clone(),
             targets: self.targets.clone(),
             recipient_targets: self.recipient_targets.clone(),
@@ -1947,6 +1951,7 @@ impl<'definitions> BodyContext<'definitions> {
 
     fn restore_bindings(&mut self, saved: LocalBindings) {
         self.dice_results = saved.dice_results;
+        self.declared_names = saved.declared_names;
         self.declared_numbers = saved.declared_numbers;
         self.targets = saved.targets;
         self.recipient_targets = saved.recipient_targets;

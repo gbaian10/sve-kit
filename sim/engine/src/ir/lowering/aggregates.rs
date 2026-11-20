@@ -135,17 +135,8 @@ impl BodyContext<'_> {
             r#where: None,
         };
         let condition = match &query.r#where {
-            Some(ast::ObjectQueryWhere::Extremum(condition))
-                if !query
-                    .orig_cost_eq
-                    .as_ref()
-                    .is_some_and(ast::NumericArgument::is_dynamic) =>
-            {
-                Some(condition.as_ref())
-            }
-            Some(ast::ObjectQueryWhere::Extremum(_) | ast::ObjectQueryWhere::Damaged(_)) => {
-                return Err(unsupported(path));
-            }
+            Some(ast::ObjectQueryWhere::Extremum(condition)) => Some(condition.as_ref()),
+            Some(ast::ObjectQueryWhere::Damaged(_)) => return Err(unsupported(path)),
             Some(ast::ObjectQueryWhere::Power(_)) | None => None,
         };
         self.checked_extremum(query.alias.as_deref(), condition, &population, input, path)

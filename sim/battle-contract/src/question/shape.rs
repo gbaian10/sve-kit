@@ -274,6 +274,11 @@ pub enum ChoiceValue {
         /// The tokens created by this option.
         tokens: Vec<TokenChoice>,
     },
+    /// A rules name from the pinned public catalogue.
+    CardName {
+        /// The rules name, shared by all printings with that name.
+        rules_name: String,
+    },
     /// A printed mode or resolution alternative.
     Mode {
         /// Printed mode identifier, never renumbered.

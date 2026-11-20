@@ -233,6 +233,12 @@ impl Turn<'_> {
                 };
                 Answer::Integer(Nat(x))
             }
+            DecisionShape::DeclareName(_) => {
+                let Some(name) = params.declared_name.take() else {
+                    return Ok(None);
+                };
+                Answer::DeclareName(name)
+            }
             DecisionShape::Search(search) => {
                 let Some(select) = params.select.take() else {
                     return Ok(None);

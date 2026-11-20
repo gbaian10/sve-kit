@@ -155,7 +155,7 @@ pub enum ProcessingDeclaration {
         /// Accepted or declined.
         accepted: bool,
     },
-    /// Reserved card-name declaration; this does not admit a new native rule.
+    /// A public card-name declaration accepted during resolution.
     Name {
         /// Actual declarer.
         actor: Seat,

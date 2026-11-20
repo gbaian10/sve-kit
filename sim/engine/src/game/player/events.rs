@@ -244,7 +244,7 @@ pub struct ActionEvent {
     pub source: Option<EffectSource>,
     /// Explicit numeric results.
     pub numbers: Vec<NumberFacet>,
-    /// Rules name of a resource or counter; never an ability reference.
+    /// Rules name of a resource, counter or declared card.
     pub name: Option<String>,
     /// Facing result when applicable.
     pub face_up: Option<bool>,

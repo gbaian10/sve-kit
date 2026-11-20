@@ -1,6 +1,6 @@
 //! Numeric declarations are scoped values, separate from payment parameters and dice.
 use super::{Action, Binding, BodyContext, Expr, Int, LoweringError, Nat, ast, unsupported};
-use crate::ir::{Arithmetic, Declaration, IntOperation, NatOperation};
+use crate::ir::{Arithmetic, CardSnapshot, Declaration, IntOperation, NatOperation};
 
 #[derive(Clone, Copy)]
 pub(super) enum DeclaredBinding {
@@ -63,8 +63,8 @@ impl BodyContext<'_> {
         value: &ast::Declare,
         path: &str,
     ) -> Result<Action, LoweringError> {
-        let ast::DeclareNumber::Number = value.kind;
-        if self.declared_numbers.contains_key(&value.bind)
+        if self.declared_names.contains_key(&value.bind)
+            || self.declared_numbers.contains_key(&value.bind)
             || self.definitions.contains_key(&value.bind)
             || self.dice_results.contains_key(&value.bind)
             || value.bind == "x"
@@ -73,6 +73,20 @@ impl BodyContext<'_> {
         }
         let actor = self.participant(value.who.as_ref(), path)?;
         let id = self.allocator.id(path)?;
+        if matches!(value.kind, ast::DeclareKind::Name) {
+            if value.min.is_some() || value.max.is_some() {
+                return Err(unsupported(path));
+            }
+            let binding = Binding::new(id, self.scope);
+            self.declared_names.insert(value.bind.clone(), binding);
+            return Ok(Action::Declare {
+                actor,
+                declaration: Declaration::CardNames {
+                    snapshot: CardSnapshot::CurrentVerifiedSnapshot,
+                    binding,
+                },
+            });
+        }
         let (declaration, bound) = match (value.min, value.max) {
             (None | Some(0), None) => {
                 let binding = Binding::new(id, self.scope);

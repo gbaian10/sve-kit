@@ -175,6 +175,11 @@ impl Execution {
                     i64::try_from(value.0).map_err(|_authority_error| EventError::ProjectionGap)?,
                 ));
             }
+            Fact::NameDeclared { player, name } => {
+                action.kind = ActionKind::Declare;
+                action.player = viewer(*player);
+                action.name = Some(name.0.clone());
+            }
             Fact::Fused(event) => {
                 action.kind = ActionKind::Fusion;
                 action.details = Some(ActionDetails::Fusion(

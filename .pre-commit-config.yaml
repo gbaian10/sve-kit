@@ -18,6 +18,9 @@ repos:
         exclude: ^(carddb/tests/fixtures/(synthetic|official)_(jp|en)/.*\.html$|sim/web/fixtures/)
       - id: check-added-large-files
         args: [--maxkb=1024, --enforce-all]
+        # The generated v4 snapshot contract embeds the DSL schemas. Its content
+        # is checked against the sources and version lock by snapshot-format.
+        exclude: ^carddb/src/sve_carddb/contracts/schema/v4/contract\.schema\.json$
       - id: check-ast
       - id: check-case-conflict
       - id: check-merge-conflict

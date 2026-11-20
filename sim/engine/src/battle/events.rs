@@ -647,14 +647,20 @@ fn dice(action: &ActionEvent) -> Result<EventBody, ProjectionError> {
     })
 }
 
-/// The number an effect had its player declare; it is not the X of a cost.
 fn declared(action: &ActionEvent) -> Result<EventBody, ProjectionError> {
-    Ok(EventBody::ChoiceDeclared {
-        player: player(action)?,
-        declared: observation::Declared::Number {
+    let declared = if let Some(rules_name) = &action.name {
+        observation::Declared::Name {
+            rules_name: rules_name.clone(),
+        }
+    } else {
+        observation::Declared::Number {
             role: observation::DeclaredNumber::Free,
             value: int(number(action)?.amount)?,
-        },
+        }
+    };
+    Ok(EventBody::ChoiceDeclared {
+        player: player(action)?,
+        declared,
     })
 }
 

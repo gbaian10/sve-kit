@@ -43,6 +43,7 @@ fn trigger(board: &mut Game, card: &str, line: u64) -> CardPlay {
 fn finish(board: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::Targets(d) => {
                 let count = d.cardinality.maximum.map_or(d.members.len(), |n| {
                     usize::try_from(n.0).unwrap().min(d.members.len())

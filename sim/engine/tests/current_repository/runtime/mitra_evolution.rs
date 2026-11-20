@@ -2,10 +2,6 @@ use super::union_burst_batch1::{pending, question};
 use super::*;
 
 #[test]
-#[expect(
-    clippy::panic,
-    reason = "The matching roll must open its printed search."
-)]
 fn evolved_mitra_declares_before_rolling_and_gets_all_three_rewards_on_a_match() {
     let mut initial = position_with_source("BP06-110", "field");
     initial["players"]["P1"]["leader"]["life"] = json!(10_u8);

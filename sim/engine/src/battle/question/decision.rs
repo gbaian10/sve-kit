@@ -16,6 +16,7 @@ mod distribution;
 mod drive;
 mod entry;
 mod modes;
+mod name;
 mod number;
 mod order;
 mod partition;
@@ -43,6 +44,7 @@ pub(super) enum Binding {
     Distribution(distribution::Binding),
     Drive(drive::Binding),
     Number(number::Binding),
+    Name(name::Binding),
     Resource(Box<resource::Binding>),
     Select(Box<select::Binding>),
     Order(order::Binding),
@@ -66,6 +68,7 @@ pub(super) fn project(
         }
         DecisionShape::May => Ok(confirm::project(confirm::Binding::May)),
         DecisionShape::Integer { bounds, source } => number::integer(*bounds, *source),
+        DecisionShape::DeclareName(names) => name::project(names, context),
         DecisionShape::DiceReroll { value, remaining } => number::dice(*value, *remaining),
         DecisionShape::Distribution(domain) => {
             distribution::project(domain, context.ok_or(ProjectionError::Unavailable)?)
@@ -191,6 +194,7 @@ impl Binding {
             Self::Distribution(binding) => binding.answer(answer),
             Self::Drive(binding) => binding.answer(answer),
             Self::Number(binding) => binding.answer(answer),
+            Self::Name(binding) => binding.answer(answer),
             Self::Resource(binding) => binding.answer(answer),
             Self::Select(binding) => binding.answer(answer),
             Self::Order(binding) => binding.answer(answer),

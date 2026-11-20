@@ -406,6 +406,14 @@ fn declarations(
             declared.push(ProcessingDeclaration::Targets { actor, targets });
         }
     }
+    append_resolution_declarations(execution, &mut declared);
+    declared
+}
+
+fn append_resolution_declarations(
+    execution: &Execution,
+    declared: &mut Vec<ProcessingDeclaration>,
+) {
     // Number declarations are public actions: Fact::Declared projects to both seats unfiltered.
     declared.extend(
         execution
@@ -418,5 +426,13 @@ fn declarations(
                 })
             }),
     );
-    declared
+    declared.extend(execution.facts.iter().filter_map(|fact| {
+        let super::super::Fact::NameDeclared { player, name } = fact else {
+            return None;
+        };
+        Some(ProcessingDeclaration::Name {
+            actor: viewer(*player)?,
+            rules_name: name.0.clone(),
+        })
+    }));
 }

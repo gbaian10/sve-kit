@@ -32,6 +32,7 @@ fn count(cardinality: &Cardinality, available: usize) -> usize {
 
 fn answer(domain: &InputDomain) -> Answer {
     match domain {
+        InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
         InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
         InputDomain::Targets(d) => Answer::Targets(
             d.members

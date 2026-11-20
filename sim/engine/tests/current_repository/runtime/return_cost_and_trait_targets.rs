@@ -25,6 +25,7 @@ fn game(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::Targets(d) => Answer::Targets(
                 d.members
                     .iter()

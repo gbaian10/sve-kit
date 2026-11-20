@@ -33,6 +33,7 @@ pub(super) fn game(initial: &Value) -> Game {
 pub(super) fn finish(game: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::Targets(d) => {
                 let targets = d
                     .members

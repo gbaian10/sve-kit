@@ -239,7 +239,7 @@ ProcessingContext 至少保留已授權 stage、actor／controller、SourceRef�
 等待席只取得公開脈絡及骰值／剩餘次數，不取得候選、唯一性、私有題數或隱藏執行堆疊。
 can_withdraw 為 true 的題，回答席可改送 withdraw 撤回自己的宣告：上述尚未打出的打出、起動（含 Quick 發動）的每一題 play_parameter，以及一般進化／超進化宣告的每一階段；判斷是結構性的，不逐題型列白名單。
 撤回後盤面、亂數流與知識回到宣告前，並以新題號再出同一個行動視窗（Quick 發動則回到該 Quick 視窗）；結算中的題（resolution_choice）、規則題與自動能力的題一律為 false。
-UI 可共用 actions、confirm、options、select、order、partition、distribute、number、declare_name 九種元件分類；declare_name 只預留，不表示首片增加卡名宣告規則。
+UI 可共用 actions、confirm、options、select、order、partition、distribute、number 題型。結算的卡名宣告沿用 options 的選取與答題契約。
 不能因共用元件就將嚴格答案變成無限制 options 或省略進化付款、Drive、角色分派等限制。
 
 ### 4.1 現有題型對照
@@ -266,6 +266,7 @@ Answer 用表中的語義 tag；use 可以區分同形狀的規則目的，不�
 | D.Pending／D.TriggerQuota | pending_order／trigger_quota | choose 一個 occurrence；後者附 earlier 歷史，不能回答 earlier |
 | D.Integer（原生 X 費用宣言） | declare_x | integer：有效界限／單位／來源，依 native Wait 的來源識別 X，不由形狀推斷 |
 | D.Integer（原生結算數值宣言） | declare_number | integer：結算時宣告數值，保留有效界限／單位／來源；對應 NonnegativeInteger／BoundedInteger，依 native Wait 的來源識別 |
+| Declare.CardNames | declare_name | choose：恰選一項，選項值為 card_name 與 rules_name |
 | D.DiceReroll | dice_reroll | keep／reroll；公開 value、remaining 及 allowed，映回 Integer 0／1 |
 | D.Order／D.DamageReplacements | order_cards／damage_replacement_order | order：完整排列、方向、目的地；替代項逐個 TextRef |
 | D.DriveTrigger | drive_trigger | accept＋必要 target；公開 icon，拒絕時 target=null |
@@ -342,7 +343,7 @@ body 的 CardRef／位置／原因／數量及事件存在性都須授權；不�
 | fusion／race／drive_gained／drive_trigger／drive_checked | 公開材料／數量、主體、icon、是否接受、目的地；不公開私有 receipt |
 | payment／dice／shuffled | 已完成付款及公開成分／最終接受骰值／區域；不帶排列或 seed |
 | control_changed／phase_started／turn_started／turn_skipped／result | 控制權與 owner 分開、公開階段及回合、正常勝負／平手／投降原因 |
-| game_started／mulligan、choice_declared／targets_declared、trigger_pending／pending_cancelled | 公開先攻／換牌張數、已公開宣告（效果要求宣告的數值是 number／free，與 X 分開）、待機來源與有限取消原因；須有 producer，不能用盤面 diff 補造 |
+| game_started／mulligan、choice_declared／targets_declared、trigger_pending／pending_cancelled | 公開先攻／換牌張數、已公開宣告（效果要求宣告的數值是 number／free，卡名是 name／rules_name）、待機來源與有限取消原因；須有 producer，不能用盤面 diff 補造 |
 
 當步 after 值由 producer 完成動作時凍結，不用最後盤面回填。晉升不得新增當時未授權的資訊。
 歷史卡面不連回新 handle；中途曾公開又失知者，若缺獨立觀看證據不得提前披露未提交歷史。

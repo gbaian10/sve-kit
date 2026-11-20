@@ -25,6 +25,7 @@ fn play(game: &mut Game, mode: u64) -> Vec<Vec<String>> {
     loop {
         while let Some(CardPlay::Awaiting(question)) = &step {
             let answer = match &question.domain {
+                InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
                 InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => Answer::Targets(vec![domain.members[0].handle]),
                 InputDomain::Search(domain) => {

@@ -119,6 +119,7 @@ pub(super) fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
             | InputDomain::Pending(_)
             | InputDomain::TriggerQuota(_)
             | InputDomain::Integer(_)
+            | InputDomain::DeclareName(_)
             | InputDomain::Order(_)
             | InputDomain::DamageReplacements(_)
             | InputDomain::Search(_)

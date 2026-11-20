@@ -353,6 +353,10 @@ impl Checker {
         clippy::wildcard_enum_match_arm,
         reason = "Only explicitly supported shapes pass this gate."
     )]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The predicate dispatch checks each operand's type and authority together."
+    )]
     fn predicate(&mut self, expression: &Predicate) -> Checked {
         match expression {
             Predicate::ClassEquals {
@@ -423,6 +427,10 @@ impl Checker {
             Predicate::NamesIntersect { left, right } => {
                 self.names(left)?;
                 self.names(right)
+            }
+            Predicate::NameEquals { object, name } => {
+                self.information_view(object)?;
+                self.name(name)
             }
             Predicate::ReceiptAny {
                 receipt,
@@ -549,7 +557,11 @@ impl Checker {
                 }
                 NameOperation::UniqueName { object } => self.information_view(object),
             },
-            Expr::Frozen(_) | Expr::Live(_) | Expr::Bound(_) => self.reject(),
+            Expr::Bound(binding) => {
+                self.reference(*binding, BindingKind::Value)?;
+                self.visible(self.env.access.get(&binding.key()))
+            }
+            Expr::Frozen(_) | Expr::Live(_) => self.reject(),
         }
     }
 

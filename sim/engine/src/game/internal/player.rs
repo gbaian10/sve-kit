@@ -45,6 +45,7 @@ impl Wait {
             | Self::Drive(_)
             | Self::SearchReplacement(_) => QuestionPurpose::RuleChoice,
             Self::Dice(_)
+            | Self::DeclareName(_)
             | Self::Ability(_)
             | Self::Discard(_)
             | Self::ResolutionPayment(_)

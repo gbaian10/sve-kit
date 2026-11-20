@@ -114,6 +114,9 @@ pub(super) fn answer(question: &DecisionShape) -> Result<Answer, PolicyFailure> 
             }
             Answer::Integer(bounds.minimum)
         }
+        DecisionShape::DeclareName(names) => {
+            Answer::DeclareName(names.first().ok_or(PolicyFailure::NoSolution)?.clone())
+        }
         DecisionShape::Order(cards) => {
             Answer::Order(ordered(cards.cards.iter().map(|card| card.handle))?)
         }

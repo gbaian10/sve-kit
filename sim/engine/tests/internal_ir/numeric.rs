@@ -77,6 +77,7 @@ fn changes(progress: &Progress) -> Vec<&StatChangeFact> {
             | Fact::DriveChecked(_)
             | Fact::Payment { .. }
             | Fact::Declared { .. }
+            | Fact::NameDeclared { .. }
             | Fact::AbilityResolved { .. } => None,
         })
         .collect()

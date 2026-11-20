@@ -1,0 +1,39 @@
+cards:
+  BP12-115:
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - declare: { bind: declared, kind: name }
+            - reveal: { top: { who: self, n: 1 }, bind: shown }
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in: { objects_of: shown, view: before }
+                        name: { bound: declared }
+                    op: ge
+                    right: 1
+                then:
+                  - draw: { who: self, n: 2 }
+                else:
+                  - if:
+                      cond:
+                        cmp:
+                          left:
+                            count:
+                              in: { objects_of: shown, view: before }
+                          op: ge
+                          right: 1
+                      then:
+                        - draw: { who: self, n: 1 }
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set

@@ -208,6 +208,9 @@ fn typed(
         Wait::SearchReplacement(wait) => {
             domain!(domain, InputDomain::SearchReplacement => DecisionShape::SearchReplacement(wait.player_question()))
         }
+        Wait::DeclareName(_) => {
+            domain!(domain, InputDomain::DeclareName(names) => DecisionShape::DeclareName(names))
+        }
         Wait::Integer { source, .. } => {
             domain!(domain, InputDomain::Integer(bounds) => DecisionShape::Integer { bounds, source: *source })
         }

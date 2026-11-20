@@ -47,9 +47,11 @@ fn mitra_resolves_the_turn_players_roll_and_draw_before_the_other_players_roll_a
             .answer_internal_card(reroll.actor, reroll.token, Answer::Integer(Nat(0)))
             .unwrap(),
     );
-    let rolls = result.progress.facts.iter().filter_map(|fact| match fact {
-        Fact::Dice(event) => Some((event.roller.seat, event.value)),
-        _ => None,
+    let rolls = result.progress.facts.iter().filter_map(|fact| {
+        let Fact::Dice(event) = fact else {
+            return None;
+        };
+        Some((event.roller.seat, event.value))
     });
     assert!(rolls.eq([(1, DieFace::Two), (2, DieFace::Five)]));
     checks(&mut board);
