@@ -33,7 +33,8 @@ fn assert_selection(game: &Game, selection: &SelectionQuestion, expected_groups:
             selection
                 .groups
                 .iter()
-                .all(|group| { group.cardinality.maximum == Some(group.cardinality.minimum) })
+                .all(|group| group.cardinality.maximum == Some(group.cardinality.minimum)),
+            "Each grouped evolution material has a fixed quota"
         );
         assert_eq!(
             selection
@@ -46,7 +47,8 @@ fn assert_selection(game: &Game, selection: &SelectionQuestion, expected_groups:
         );
         assert_eq!(
             selection.cardinality.maximum,
-            Some(selection.cardinality.minimum)
+            Some(selection.cardinality.minimum),
+            "The complete grouped selection also has a fixed quota"
         );
     }
     assert!(
