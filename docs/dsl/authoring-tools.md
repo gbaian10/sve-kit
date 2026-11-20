@@ -163,6 +163,7 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 讀取本次打出所付且確實到達墓場的材料。條件查付款前的來源區與卡名。
 
 `pay.cost.pp_max` 以正整數支付 PP 最大值。付款不足時跳過付款本文；成功時，當前 PP 隨新的最大值下修。
+目前限結算時付款。
 `cost.to_deck: {sel: {who: self, zone: cemetery}, n: N, shuffle: true}` 需要指定張數全數進入牌庫，再洗整副牌庫。
 `cost.discard: {sel: {who: self, zone: hand}, n: N, random: true}` 需要足量手牌，在付款時抽樣，且沿用付款回滾。
 
