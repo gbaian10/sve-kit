@@ -24,6 +24,7 @@ import {
   withoutCardParam,
 } from "../../app/card-overlay"
 import { useDrawerSide } from "../../app/cards-layout"
+import { useDialogHistory } from "../../app/dialog-history"
 import {
   type CardEntryState,
   type ListEntryState,
@@ -39,6 +40,7 @@ import { printingPath } from "../../domain/cardRoute"
 import type { QueryState } from "../../domain/query/model"
 import { usePrefs } from "../../settings"
 import type { CardFrame, OverlayLinkTarget } from "../card/CardPage"
+import { CardReportDialog, type CardReportDraft } from "../card/CardReport"
 import { routeInput } from "../card/useCardContent"
 import { CardOverlayContent } from "./CardOverlayContent"
 import { DrawerHandle } from "./DrawerHandle"
@@ -80,7 +82,7 @@ export interface CardOverlay {
   readonly close: () => void
   /** The drawer at its configured app-frame edge, kept while it slides out; null otherwise. */
   readonly drawer: ReactNode
-  /** The modal over the results; always rendered so its dialog can hand focus back on close. */
+  /** The card and report dialogs, kept mounted so they can hand focus back on close. */
   readonly modal: ReactNode
 }
 
@@ -146,7 +148,15 @@ export function useCardOverlay({
   const [params] = useSearchParams()
   const edition = useRouteEdition()
   const preferred = useCardPresentation()
-  const presentation = presentationOverride ?? preferred
+  // Opening a replacement card modal during resize would put it above the report.
+  const [report, setReport] = useState<{
+    draft: CardReportDraft
+    presentation: CardPresentation
+  } | null>(null)
+  const presentation = report?.presentation ?? presentationOverride ?? preferred
+  const closeReport = useDialogHistory("card-report", report !== null, () => {
+    setReport(null)
+  })
   const side = useDrawerSide()
   const { drawerWidth } = usePrefs()
   const viewportWidth = useViewportWidth()
@@ -466,6 +476,9 @@ export function useCardOverlay({
           if (contentParam !== null) setPlaced({ param: contentParam, key: resultKey })
         },
         onClose: close,
+        onReport: (draft) => {
+          setReport({ draft, presentation })
+        },
         ...(deckAction ? { deckAction } : {}),
       }
     : null
@@ -497,19 +510,22 @@ export function useCardOverlay({
       </aside>
     ) : null,
     modal: (
-      <Dialog
-        open={open && presentation === "modal"}
-        onClose={close}
-        title={t("cardPage.panel")}
-        variant="card"
-        bare
-      >
-        {open && presentation === "modal" && (
-          <div data-card-overlay="" className="@container min-h-full">
-            {content}
-          </div>
-        )}
-      </Dialog>
+      <>
+        <Dialog
+          open={open && presentation === "modal"}
+          onClose={close}
+          title={t("cardPage.panel")}
+          variant="card"
+          bare
+        >
+          {open && presentation === "modal" && (
+            <div data-card-overlay="" className="@container min-h-full">
+              {content}
+            </div>
+          )}
+        </Dialog>
+        <CardReportDialog draft={report?.draft ?? null} onClose={closeReport} />
+      </>
     ),
   }
 }
