@@ -217,7 +217,7 @@ fn installed_attack_permissions_reject_disconnected_turn_intervals() {
         reference: affected,
     };
     let duration = Duration {
-        end: DurationEnd::CurrentTurnEnd {},
+        end: DurationEnd::NoTemporalExpiry {},
         anchor: TimeAnchor::Installation {},
         usage: None,
         intervals: vec![Interval::DuringNextTurn {
@@ -252,7 +252,7 @@ fn installed_attack_permissions_reject_disconnected_turn_intervals() {
             game.load_internal_card("producer", &producer(action)),
             Err(EngineFailure::Unsupported(_))
         ),
-        "a disconnected interval cannot silently disable an accepted permission"
+        "an indefinite attack restriction cannot carry a next-turn interval"
     );
 }
 
