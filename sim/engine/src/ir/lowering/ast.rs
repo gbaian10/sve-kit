@@ -4572,7 +4572,7 @@ pub(super) enum RevealFollower {
 #[serde(deny_unknown_fields)]
 pub(super) struct Dice {
     pub bind: String,
-    pub who: Option<SelfPlayer>,
+    pub who: Option<Side>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]

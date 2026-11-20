@@ -1405,6 +1405,7 @@ struct FieldEntryGuard {
 /// Names a nested body (an optional or a player procedure) may bind; the enclosing body sees
 /// none of them once the nested body ends.
 struct LocalBindings {
+    dice_results: BTreeMap<String, Binding<Nat>>,
     declared_numbers: BTreeMap<String, declaration::DeclaredBinding>,
     targets: BTreeMap<String, Binding<Selector>>,
     recipient_targets: BTreeMap<String, Binding<Vec<super::DamageRecipient>>>,
@@ -1921,6 +1922,7 @@ impl<'definitions> BodyContext<'definitions> {
 
     fn local_bindings(&self) -> LocalBindings {
         LocalBindings {
+            dice_results: self.dice_results.clone(),
             declared_numbers: self.declared_numbers.clone(),
             targets: self.targets.clone(),
             recipient_targets: self.recipient_targets.clone(),
@@ -1944,6 +1946,7 @@ impl<'definitions> BodyContext<'definitions> {
     }
 
     fn restore_bindings(&mut self, saved: LocalBindings) {
+        self.dice_results = saved.dice_results;
         self.declared_numbers = saved.declared_numbers;
         self.targets = saved.targets;
         self.recipient_targets = saved.recipient_targets;
@@ -1963,6 +1966,20 @@ impl<'definitions> BodyContext<'definitions> {
         self.cemetery_banish_targets = saved.cemetery_banish_targets;
         self.deck_return_targets = saved.deck_return_targets;
         self.local_payments = saved.local_payments;
+    }
+
+    fn instruction_actor(
+        &self,
+        step: &ast::Step,
+        action: &Action,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        if let ast::Step::Dice(dice) = step {
+            return self.dice_actor(dice, path);
+        }
+        Ok(self
+            .look_remainder_actor(step)
+            .unwrap_or_else(|| action_actor(action)))
     }
 
     /// A named payment result is readable only by later steps of the same step list.
@@ -2205,6 +2222,7 @@ impl<'definitions> BodyContext<'definitions> {
             }
             let instruction_id = self.card_allocator.id(&step_path)?;
             let action = self.action(step, &step_path, ability_source, source)?;
+            let actor = self.instruction_actor(step, &action, &step_path)?;
             self.remember(step, ReceiptId(instruction_id), &action, &step_path)?;
             let mut step_source = source.clone();
             step_source.author_path = step_path;
@@ -2214,9 +2232,7 @@ impl<'definitions> BodyContext<'definitions> {
                     instruction: Box::new(Instruction {
                         id: InstructionId(instruction_id),
                         receipt: ReceiptId(instruction_id),
-                        actor: self
-                            .look_remainder_actor(step)
-                            .unwrap_or_else(|| action_actor(&action)),
+                        actor,
                         source: ability_source.clone(),
                         precondition: None,
                         context: InstructionContext::Effect,
