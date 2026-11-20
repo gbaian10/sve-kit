@@ -439,13 +439,12 @@ pub(super) fn paid_material_acts(
 
 pub(super) fn paid_material_number(
     execution: &Execution,
-    receipt: &ReceiptReference<MoveOutcome>,
+    receipt: &MovementReceipt,
     property: NumericProperty,
 ) -> Result<Int> {
-    let ReceiptLocation::Local { id } = receipt.location() else {
-        return Err(unsupported("iterated paid material number"));
-    };
-    PaidMembers::load(execution, *id, "missing material payment")?.number(property)
+    let id = crate::ir::receipt_reads::paid_movement_id(receipt)
+        .ok_or_else(|| unsupported("paid material number receipt"))?;
+    PaidMembers::load(execution, id, "missing material payment")?.number(property)
 }
 
 pub(super) fn discarded_cost(

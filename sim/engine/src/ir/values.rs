@@ -5,12 +5,12 @@ use super::{
     EarthRitePaidComponent, EnterExEvent, EnterFieldEvent, EntryMethod, EquipEvent, Event,
     EventSnapshotPolicy, EvolutionStateFields, EvolveEvent, FusedEvent, HistoryCount, HistoryQuery,
     Info, LeaveFieldEvent, LifeChangeEvent, MaterialActOutcome, MeasuredReceipt,
-    MeasuredReceiptList, MoveEvent, MoveOutcome, MoveResult, MovementReceipt, MovementReceiptList,
-    NonEmpty, NumericHistoryQuery, ObjectReceipt, ObjectReceiptList, ObjectRef, PaymentEvent,
-    PaymentReceipt, PaymentResult, PhaseEvent, PhaseFields, PlayEvent, PlaySubject, PostureEvent,
-    PostureFields, RaceEvent, ReceiptList, ReceiptReference, ReceiptStatus, ResolveEvent,
-    RuntimeAbilityReference, RuntimeObjectView, SourcePredicate, StatChangeEvent, StatDelta,
-    TargetedEvent, TokenOutcome, TurnIdFields, UbActivatedEvent, ValueEquality, Visitor, Walk,
+    MeasuredReceiptList, MoveEvent, MoveResult, MovementReceipt, MovementReceiptList, NonEmpty,
+    NumericHistoryQuery, ObjectReceipt, ObjectReceiptList, ObjectRef, PaymentEvent, PaymentReceipt,
+    PaymentResult, PhaseEvent, PhaseFields, PlayEvent, PlaySubject, PostureEvent, PostureFields,
+    RaceEvent, ReceiptList, ReceiptReference, ReceiptStatus, ResolveEvent, RuntimeAbilityReference,
+    RuntimeObjectView, SourcePredicate, StatChangeEvent, StatDelta, TargetedEvent, TokenOutcome,
+    TurnIdFields, UbActivatedEvent, ValueEquality, Visitor, Walk,
 };
 use core::fmt::Debug;
 use core::marker::PhantomData;
@@ -634,7 +634,7 @@ impl Walk for NoRead {
 }
 variants!(IntFrozen {
     PaidMaterialActs { receipt: ReceiptReference<MaterialActOutcome> } => ["read.receipt.paid-material-acts"],
-    PaidMaterialNumber { receipt: ReceiptReference<MoveOutcome>, property: NumericProperty } => ["read.receipt.paid-material-number"],
+    PaidMaterialNumber { receipt: MovementReceipt, property: NumericProperty } => ["read.receipt.paid-material-number"],
     DiscardedCost { receipt: ReceiptReference<DiscardOutcome> } => ["read.receipt.discarded-cost"],
     StatBefore { facet: Binding<StatDelta> } => ["read.event-field"],
     StatAfter { facet: Binding<StatDelta> } => ["read.event-field"],

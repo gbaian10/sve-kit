@@ -1,9 +1,8 @@
 use super::{Checked, Checker, WellFormedReason};
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, Decision, DecisionKind, Instruction, InstructionContext,
-    MoveDestination, MoveOutcome, MoveReason, Nat, NumericProperty, ObjectOperand, OwnerZone,
-    PlaySlot, PlayerRef, PlayerRelation, Posture, ReceiptLocation, ReceiptReference, Selector,
-    Visibility, ZoneKind,
+    MoveDestination, MoveReason, MovementReceipt, Nat, NumericProperty, ObjectOperand, OwnerZone,
+    PlaySlot, PlayerRef, PlayerRelation, Posture, Selector, Visibility, ZoneKind, receipt_reads,
 };
 
 #[expect(
@@ -42,7 +41,7 @@ impl Checker {
                 })
                 || (constraint.cardinality.minimum.0 > 0
                     && constraint.cardinality.maximum == Some(constraint.cardinality.minimum)))
-            && own_field(&group.selector)
+            && own_zone(&group.selector, ZoneKind::Field)
         {
             self.env.field_act_materials.insert(binding.key());
         }
@@ -50,11 +49,13 @@ impl Checker {
             minimum: Nat(1),
             maximum: Some(Nat(1)),
         };
-        if constraint.cardinality == single
-            && group.cardinality == single
-            && own_field(&group.selector)
-        {
-            self.env.field_materials.insert(binding.key());
+        if constraint.cardinality == single && group.cardinality == single {
+            if own_zone(&group.selector, ZoneKind::Field) {
+                self.env.field_materials.insert(binding.key());
+            }
+            if own_zone(&group.selector, ZoneKind::Cemetery) {
+                self.env.cemetery_materials.insert(binding.key());
+            }
         }
     }
 
@@ -88,6 +89,11 @@ impl Checker {
         ) {
             self.env.name_payments.insert(instruction.receipt);
         }
+        if matches!(&instruction.action, Action::Banish { objects: Selector::Bound { reference } }
+            if self.env.cemetery_materials.contains(&reference.key()))
+        {
+            self.env.single_material_moves.insert(instruction.receipt);
+        }
         if let Action::Move {
             objects: Selector::Bound { reference },
             movement,
@@ -109,17 +115,21 @@ impl Checker {
 
     pub(super) fn paid_material_number(
         &self,
-        receipt: &ReceiptReference<MoveOutcome>,
+        receipt: &MovementReceipt,
         property: NumericProperty,
     ) -> Checked {
         if !matches!(
-            property,
-            NumericProperty::Attack | NumericProperty::Cost | NumericProperty::OriginalCost
+            (receipt, property),
+            (
+                MovementReceipt::Move { .. },
+                NumericProperty::Attack | NumericProperty::Cost | NumericProperty::OriginalCost
+            ) | (MovementReceipt::Banish { .. }, NumericProperty::Attack)
         ) {
             return self.reject();
         }
-        self.receipt(receipt)?;
-        if matches!(receipt.location(), ReceiptLocation::Local { id } if self.env.single_material_moves.contains(id))
+        self.movement_receipt(receipt)?;
+        if receipt_reads::paid_movement_id(receipt)
+            .is_some_and(|id| self.env.single_material_moves.contains(&id))
         {
             Ok(())
         } else {
@@ -128,11 +138,12 @@ impl Checker {
     }
 }
 
-fn own_field(selector: &Selector) -> bool {
+fn own_zone(selector: &Selector, zone: ZoneKind) -> bool {
     if let Selector::Difference { input, except } = selector {
         return matches!(except.as_ref(), Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}])
-            && own_field(input);
+            && own_zone(input, zone);
     }
-    matches!(selector, Selector::Zone { players, zone: ZoneKind::Field, .. }
-        if players.relation == PlayerRelation::SelfPlayer && players.relative_to == (PlayerRef::Controller {}))
+    matches!(selector, Selector::Zone { players, zone: selected, .. }
+        if zone == *selected && players.relation == PlayerRelation::SelfPlayer
+            && players.relative_to == (PlayerRef::Controller {}))
 }
