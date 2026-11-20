@@ -5,7 +5,7 @@ fn corpses_paid_to_each_invasion_mode_supply_their_own_attack() {
     let mut initial = position_with_source("BP21-090", "hand");
     initial["players"]["P1"]["zones"]["cemetery"] = json!([
         {"id":"nightmare","card":"BP01-117"},
-        {"id":"other","card":"BP01-171"}
+        {"id":"other","card":"BP18-005"}
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([
         {"id":"first","card":"BP03-055"},
@@ -27,12 +27,12 @@ fn corpses_paid_to_each_invasion_mode_supply_their_own_attack() {
     let play = choose_card_by_number(&mut game, play, "BP03-055");
     let play = choose_card_by_number(&mut game, play, "BP05-057");
     let play = choose_card_by_number(&mut game, play, "BP01-117");
-    let play = choose_card_by_number(&mut game, play, "BP01-171");
+    let play = choose_card_by_number(&mut game, play, "BP18-005");
     drop(accept(&mut game, play));
     checks(&mut game);
 
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["objects"]["first"]["damage"], 4_i64);
-    assert_eq!(after["objects"]["second"]["damage"], 2_i64);
+    assert_eq!(after["objects"]["second"]["damage"], 1_i64);
     assert_eq!(after["P1"]["banish"], json!(["nightmare", "other"]));
 }
