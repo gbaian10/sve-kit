@@ -212,7 +212,7 @@ fn selected_counter(
         if *selection == binding && !kind.0.is_empty() && *amount > 0
             && zone == ZoneKind::Field && count == Nat(1)
             && match step.keyword {
-                None => true,
+                None => kind.0 != "stack_counter",
                 Some(KeywordId::EarthRite) => kind.0 == "stack_counter",
                 Some(_) => false,
             })
