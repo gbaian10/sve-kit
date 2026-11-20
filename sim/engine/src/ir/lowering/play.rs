@@ -638,6 +638,13 @@ impl BodyContext<'_> {
                 if cardinality.maximum == Some(Nat(1)) =>
             {
                 self.playable_targets.insert(target.bind.clone());
+                if target.any_of.is_none()
+                    && target.from.observation.is_none()
+                    && matches!(target.from.who, Some(ast::Side::Controller))
+                    && cardinality.minimum == Nat(1)
+                {
+                    self.cemetery_banish_targets.insert(target.bind.clone());
+                }
                 if matches!(target.from.who, Some(ast::Side::Opponent)) {
                     self.opponent_cemetery_targets.insert(target.bind.clone());
                 }

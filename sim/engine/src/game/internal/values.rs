@@ -743,7 +743,8 @@ impl Execution {
                     Selector::ReceiptMembers {
                         receipt:
                             receipt @ ObjectReceipt::Movement {
-                                receipt: MovementReceipt::Move { .. },
+                                receipt:
+                                    MovementReceipt::Move { .. } | MovementReceipt::Banish { .. },
                             },
                         projection: MemberProjection::Before,
                     },

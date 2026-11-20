@@ -5,10 +5,10 @@
 )]
 use super::{
     Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Holder, Info, Int,
-    IntOperation, IntRead, KindRead, NamesRead, NatFrozen, NatOperation, NatRead, NumberRead,
-    NumericProperty, ObjectOperand, ObjectProperty, ObjectRef, ObjectView, PlayerRef,
-    PlayerRelation, PlayerResource, Predicate, SelectionView, Selector, SnapshotFields, TraitsRead,
-    ZoneKind,
+    IntOperation, IntRead, KindRead, MemberProjection, MovementReceipt, NamesRead, NatFrozen,
+    NatOperation, NatRead, NumberRead, NumericProperty, ObjectOperand, ObjectProperty,
+    ObjectReceipt, ObjectRef, ObjectView, PlayerRef, PlayerRelation, PlayerResource, Predicate,
+    SelectionView, Selector, SnapshotFields, TraitsRead, ZoneKind,
 };
 pub(crate) fn check(value: &Expr<Int>) -> bool {
     match value {
@@ -66,7 +66,15 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
                 value: Expr::Bound(_),
             }
             | IntOperation::Sum {
-                objects: Selector::Bound { .. },
+                objects:
+                    Selector::Bound { .. }
+                    | Selector::ReceiptMembers {
+                        receipt:
+                            ObjectReceipt::Movement {
+                                receipt: MovementReceipt::Banish { .. },
+                            },
+                        projection: MemberProjection::Before,
+                    },
                 property: NumericProperty::OriginalCost,
             } => true,
             // The distinct name count of the same public populations is just as candidate-independent.

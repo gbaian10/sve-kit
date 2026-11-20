@@ -669,7 +669,11 @@ impl<'query> From<&'query ast::CountQuery> for ObjectFilter<'query> {
 impl<'query> From<&'query ast::SearchQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::SearchQuery) -> Self {
         Self {
-            kind: query.kind.as_ref().map(super::search::card_kind),
+            kind: query
+                .kind
+                .as_ref()
+                .and_then(ast::SearchKindFilter::literal)
+                .map(super::search::card_kind),
             has_evolve: query.has_evolve.is_some(),
             trait_id: query.r#trait.as_deref(),
             all_traits: &query.traits_all,

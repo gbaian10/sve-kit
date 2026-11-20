@@ -179,6 +179,24 @@ impl BodyContext<'_> {
         })))
     }
 
+    pub(super) fn banish_receipt(
+        &self,
+        name: &str,
+        path: &str,
+    ) -> Result<&ObjectReceipt, LoweringError> {
+        self.observations
+            .get(name)
+            .filter(|receipt| {
+                matches!(
+                    receipt,
+                    ObjectReceipt::Movement {
+                        receipt: MovementReceipt::Banish { .. }
+                    }
+                )
+            })
+            .ok_or_else(|| unsupported(path))
+    }
+
     pub(super) fn receipt_count(
         &mut self,
         query: &ast::ReceiptCountQuery,

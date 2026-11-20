@@ -1634,7 +1634,7 @@ pub(super) enum SearchSelector {
 pub(super) struct SearchQuery {
     pub who: SelfPlayer,
     pub zone: DeckZone,
-    pub kind: Option<SearchKind>,
+    pub kind: Option<SearchKindFilter>,
     pub r#trait: Option<String>,
     #[serde(default)]
     pub traits_all: Vec<String>,
@@ -1667,6 +1667,22 @@ pub(super) struct SearchWhere {
 pub(super) enum SearchName {
     Literal(String),
     SameAs { same_as: BeforeObjects },
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum SearchKindFilter {
+    Literal(SearchKind),
+    SameAs { same_as: BeforeObjects },
+}
+
+impl SearchKindFilter {
+    pub(super) const fn literal(&self) -> Option<&SearchKind> {
+        match self {
+            Self::Literal(value) => Some(value),
+            Self::SameAs { .. } => None,
+        }
+    }
 }
 
 impl SearchName {

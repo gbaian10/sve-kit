@@ -153,6 +153,8 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 `search.sel` 可用 `as: candidate` 與 `where: {cmp: {left: {power_of: candidate}, op: eq, right: N}}`
 比對牌庫卡片的印刷攻擊力。沒有印刷攻擊力的卡片不符合此條件。
 
+`search.sel.kind: {same_as: {objects_of: banished, view: before}}` 可比對成功消滅的卡片種類；同一搜尋可用 `orig_cost_eq: {orig_cost_of: {objects_of: banished, view: before}}` 限定印刷原費。
+
 場上公開查詢的 `where.cmp.left: {hp_of: item}` 可用 `ge`、`le`、`eq` 比對候選從者的目前體力。
 
 `agg: {of: {who: self, zone: field, kind: follower}, attr: power, fn: max}` 讀取場上從者的最大有效攻擊力，可作為傷害分配的總量。公開數值聚合的 `min`／`max` 在集合為空時回傳 0。

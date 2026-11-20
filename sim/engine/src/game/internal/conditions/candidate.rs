@@ -7,8 +7,8 @@ use super::{
 use crate::game::internal::{Execution, Game, Result, invalid, unsupported};
 use crate::game::list;
 use crate::ir::{
-    BooleanState, CardName, CharacteristicView, EvolutionState, Expr, Int, ObjectReceipt, Posture,
-    Stat,
+    BooleanState, CardKind, CardName, CharacteristicView, EvolutionState, Expr, Int, ObjectReceipt,
+    Posture, Stat,
 };
 use serde_json::Value;
 
@@ -36,6 +36,18 @@ impl Resolver for Operands<'_> {
 
     fn payment_names(&self, receipt: &ObjectReceipt) -> Result<Vec<CardName>> {
         super::super::receipt_members::paid_names(self.execution, receipt)
+    }
+
+    fn receipt_kinds(&self, receipt: &ObjectReceipt) -> Result<Vec<CardKind>> {
+        super::super::receipt_members::members(self.game, self.execution, receipt, None)?
+            .iter()
+            .map(|member| {
+                member
+                    .card()
+                    .map(|card| card.kind)
+                    .ok_or_else(|| invalid("missing printed receipt kind"))
+            })
+            .collect()
     }
 }
 

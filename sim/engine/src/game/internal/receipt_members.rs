@@ -45,6 +45,12 @@ pub(super) fn local_receipt(receipt: &ObjectReceipt) -> Result<ReceiptId> {
             ReceiptLocation::Local { id } => Some(id),
             ReceiptLocation::Iteration { .. } => None,
         },
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Banish { receipt },
+        } => match receipt.location() {
+            ReceiptLocation::Local { id } => Some(id),
+            ReceiptLocation::Iteration { .. } => None,
+        },
         ObjectReceipt::Reveal { receipt } => match receipt.location() {
             ReceiptLocation::Local { id } => Some(id),
             ReceiptLocation::Iteration { .. } => None,
@@ -272,6 +278,31 @@ pub(super) fn members(
         }
         Some(InstructionOutcome::Move(outcome)) => {
             successful_move_members(game, execution, outcome, destination)
+        }
+        Some(InstructionOutcome::Banish(outcome))
+            if matches!(
+                receipt,
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Banish { .. }
+                }
+            ) =>
+        {
+            outcome
+                .successful
+                .iter()
+                .map(|result| {
+                    let before = result
+                        .before
+                        .ok_or_else(|| invalid("missing banished before member"))?
+                        .object;
+                    Ok(MemberView {
+                        before,
+                        information: MemberInformation::Properties(printed_card(
+                            game, execution, before,
+                        )?),
+                    })
+                })
+                .collect()
         }
         _ => Err(invalid("missing receipt member producer")),
     }

@@ -1,9 +1,10 @@
 use super::super::{
     CardKind, CardName, CharacteristicView, Comparison, CostChange, CostKind, DecisionId,
     Disjointness, Effect, FollowPermission, InstallationSubjects, InstallationTime, KindRead,
-    MoveDestination, MoveSpec, MovementReceipt, NamesRead, NumberRead, ObjectProperty, ObjectRef,
-    OwnerZone, Posture, ReceiptReference, SearchContinuation, SearchDestination, SearchFound,
-    SearchPartition, SelectionConstraint, SelectionGroup, Stat, TraitId, TraitsRead, ZoneRef,
+    MemberProjection, MoveDestination, MoveSpec, MovementReceipt, NamesRead, NumberRead,
+    ObjectProperty, ObjectRef, OwnerZone, Posture, ReceiptReference, SearchContinuation,
+    SearchDestination, SearchFound, SearchPartition, SelectionConstraint, SelectionGroup, Stat,
+    TraitId, TraitsRead, ZoneRef,
 };
 use super::groups::{Groups, TotalBounds};
 use super::{
@@ -48,6 +49,16 @@ fn entry_posture(search: &ast::Search, path: &str) -> Result<Option<Posture>, Lo
 fn view(binding: Binding<ObjectRef>) -> ObjectView {
     ObjectView::Current {
         object: Box::new(ObjectOperand::Bound { binding }),
+    }
+}
+
+fn and_filter(predicate: Expr<Bool>, clause: Expr<Bool>) -> Expr<Bool> {
+    if predicate == Expr::Literal(Bool(true)) {
+        clause
+    } else {
+        Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![predicate, clause],
+        }))
     }
 }
 
@@ -103,7 +114,12 @@ fn query_filter(
                     None
                 }
                 ast::Comparison::Eq => Some(condition.cmp.right),
-                _ => return Err(unsupported(path)),
+                ast::Comparison::Ne
+                | ast::Comparison::Lt
+                | ast::Comparison::Ge
+                | ast::Comparison::Gt => {
+                    return Err(unsupported(path));
+                }
             }
         }
         _ => return Err(unsupported(path)),
@@ -119,19 +135,33 @@ fn query_filter(
             Comparison::Equal,
             limit,
         );
-        predicate = Expr::Compute(Box::new(Predicate::And {
-            predicates: vec![predicate, attack],
-        }));
+        predicate = and_filter(predicate, attack);
     }
     if let Some(ast::SearchName::SameAs { same_as }) = &query.name {
         let names = context.paid_name_filter(same_as, candidate, path)?;
-        predicate = if predicate == Expr::Literal(Bool(true)) {
-            names
-        } else {
-            Expr::Compute(Box::new(Predicate::And {
-                predicates: vec![predicate, names],
-            }))
-        };
+        predicate = and_filter(predicate, names);
+    }
+    if let Some(ast::SearchKindFilter::SameAs { same_as }) = &query.kind {
+        let receipt = context.banish_receipt(&same_as.objects_of, path)?.clone();
+        let member = Binding::new(1, context.card_allocator.scope(path)?);
+        let kind = Expr::Compute(Box::new(Predicate::ReceiptAny {
+            receipt,
+            projection: MemberProjection::Before,
+            member,
+            predicate: Expr::Compute(Box::new(Predicate::KindEquals {
+                left: Expr::Live(Box::new(KindRead::Kind {
+                    object: view(candidate),
+                    view: CharacteristicView::Original,
+                })),
+                right: Expr::Live(Box::new(KindRead::Kind {
+                    object: ObjectView::Snapshot {
+                        value: Box::new(Expr::Bound(member)),
+                    },
+                    view: CharacteristicView::Original,
+                })),
+            })),
+        }));
+        predicate = and_filter(predicate, kind);
     }
     let predicate = context.dynamic_limits(
         predicate,
@@ -316,11 +346,11 @@ impl BodyContext<'_> {
                 ast::SearchDestination::Single(ast::SearchZone::Field)
             )
         {
-            let single = matches!(&search.sel, Some(ast::SearchSelector::Query(query)) if matches!(query.kind, Some(ast::SearchKind::Follower)))
+            let single = matches!(&search.sel, Some(ast::SearchSelector::Query(query)) if matches!(query.kind, Some(ast::SearchKindFilter::Literal(ast::SearchKind::Follower))))
                 && matches!((search.n, search.upto), (Some(1), None) | (None, Some(1)));
             let grouped = search.distinct_by.is_none()
                 && search.groups.as_ref().is_some_and(|groups| !groups.is_empty() && groups.iter().all(|group| {
-                    matches!(&group.sel, ast::SearchSelector::Query(query) if matches!(query.kind, Some(ast::SearchKind::Follower)))
+                    matches!(&group.sel, ast::SearchSelector::Query(query) if matches!(query.kind, Some(ast::SearchKindFilter::Literal(ast::SearchKind::Follower))))
                         && matches!((group.n, group.upto), (Some(1), None) | (None, Some(1)))
                 }));
             if single || grouped {
