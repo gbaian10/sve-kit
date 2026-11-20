@@ -244,7 +244,7 @@ impl Checker {
         }
     }
 
-    fn installed_duration(&mut self, duration: &Duration) -> Checked {
+    pub(super) fn installed_duration(&mut self, duration: &Duration) -> Checked {
         match duration.anchor {
             TimeAnchor::Installation {} => {}
             TimeAnchor::Bound { binding } => self.reference(binding, BindingKind::Value)?,

@@ -196,8 +196,9 @@ fn ability_loss_rejects_unneeded_author_shapes_and_raw_scopes_or_expiry() {
                 }
             }
             4 => {
+                duration.end = DurationEnd::CurrentTurnEnd {};
                 duration.intervals = vec![Interval::DuringNextTurn {
-                    player: PlayerRef::Controller {},
+                    player: PlayerRef::ProposedDamageRecipient {},
                 }];
             }
             5 => *subjects = Selector::Objects { objects: vec![] },

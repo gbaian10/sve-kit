@@ -896,9 +896,7 @@ impl Checker {
             Action::RemoveAbility {
                 subjects, duration, ..
             } if super::ability_suppression::supported(action) => {
-                if let super::DurationEnd::NextTurnEnd { player } = &duration.end {
-                    self.player(player)?;
-                }
+                self.installed_duration(duration)?;
                 self.selector(subjects)
             }
             Action::Damage {
