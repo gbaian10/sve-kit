@@ -936,7 +936,20 @@ impl Game {
             action if reveal_cost::selected(execution, action) => {
                 self.internal_hand_material_cost_payment(execution, &step.instruction)?
             }
-            Action::Resource { player, amount, .. } => {
+            action @ Action::Resource {
+                amount: Expr::Literal(amount),
+                ..
+            } if super::resource::maximum_pp_cost(action) => (
+                self.internal_pay_maximum_pp(execution, *amount)?,
+                Vec::new(),
+                Vec::new(),
+            ),
+            Action::Resource {
+                player,
+                resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay,
+                amount,
+            } => {
                 let payer = execution.player(self, player)?;
                 let amount = execution.integer(self, amount)?;
                 let amount = self.internal_card_pp_amount(execution, card_cost, amount)?;

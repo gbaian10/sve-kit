@@ -32,7 +32,9 @@ impl BodyContext<'_> {
         {
             return self.resolution_earth_rite(payment, path, source, origin);
         }
-        if self.auto.is_none() {
+        let maximum_pp = payer == (PlayerRef::Controller {})
+            && matches!(operations, [ast::CostOperation::PpMax(n)] if *n > 0);
+        if self.auto.is_none() && !maximum_pp {
             return Err(super::unsupported(path));
         }
         // A fixed positive PP amount is the payer's own resource, so any player may pay it.
@@ -46,7 +48,7 @@ impl BodyContext<'_> {
                     ast::CostOperation::ActSelf(true) | ast::CostOperation::SelfToCemetery(true)
                 )
             });
-        if !player_pp && !source_costs {
+        if !player_pp && !source_costs && !maximum_pp {
             return Err(super::unsupported(path));
         }
         let mut play = payment::lower(self, &payment.cost, origin, path)?;
@@ -246,6 +248,7 @@ impl BodyContext<'_> {
                         }
                         ast::CostOperation::Banish(ast::BanishMaterial::Top(_))
                         | ast::CostOperation::Pp(_)
+                        | ast::CostOperation::PpMax(_)
                         | ast::CostOperation::Lesson(_)
                         | ast::CostOperation::Counter(_)
                         | ast::CostOperation::EarthRite(_)

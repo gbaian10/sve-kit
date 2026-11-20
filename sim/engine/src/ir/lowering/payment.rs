@@ -304,6 +304,14 @@ fn lower_operations(
             ast::CostOperation::Discard(ast::DiscardCost::Groups(material)) => {
                 super::hand_payment::grouped(context.card_allocator, material, path)?
             }
+            ast::CostOperation::PpMax(amount) if *amount > 0 => Action::Resource {
+                player: PlayerRef::Controller {},
+                resource: Resource::PpMaximum,
+                operation: ResourceOperation::Pay,
+                amount: Expr::Literal(Int(
+                    i64::try_from(*amount).map_err(|_overflow| unsupported(path))?
+                )),
+            },
             ast::CostOperation::Pp(amount) => Action::Resource {
                 player: PlayerRef::Controller {},
                 resource: Resource::PpCurrent,
@@ -376,7 +384,8 @@ fn lower_operations(
                 parameters.push(decision);
                 action
             }
-            ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
+            ast::CostOperation::PpMax(_)
+            | ast::CostOperation::ToDeckBottom(ast::BottomMaterial::Revealed(_))
             | ast::CostOperation::BanishSelf(false)
             | ast::CostOperation::ActSelf(false)
             | ast::CostOperation::SelfToCemetery(false)
@@ -484,6 +493,7 @@ fn material_operation(
         ast::CostOperation::Counter(_)
         | ast::CostOperation::EarthRite(_)
         | ast::CostOperation::Pp(_)
+        | ast::CostOperation::PpMax(_)
         | ast::CostOperation::Lesson(_)
         | ast::CostOperation::LeaderLife(_)
         | ast::CostOperation::BanishSelf(_)

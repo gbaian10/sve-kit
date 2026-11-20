@@ -79,7 +79,9 @@ pub(super) fn completed(
     {
         for step in &payment.steps {
             let kind = kind(&step.instruction.action)?;
-            if kind == PaymentKind::Pp {
+            if kind == PaymentKind::Pp
+                && !super::super::resource::maximum_pp_cost(&step.instruction.action)
+            {
                 continue;
             }
             payments.push(ProcessingPayment {
