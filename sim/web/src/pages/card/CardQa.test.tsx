@@ -237,7 +237,7 @@ it("only attributes visible translations when the question and answer have diffe
   expect(within(entry).queryByText(/試作の隊長が2体いる時/u)).toBeNull()
 })
 
-it("proves absence at the snapshot date even when today is later than the source window", async () => {
+it("uses the edition's Q&A coverage date to prove and display absence", async () => {
   const { client } = await loadedClient()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("synthetic snapshot did not load")
@@ -246,11 +246,23 @@ it("proves absence at the snapshot date even when today is later than the source
     ...snapshot,
     manifest: {
       ...snapshot.manifest,
-      data_as_of: date,
-      source_windows: arrayValue(snapshot.manifest["source_windows"]).map((raw) => ({
-        ...objectValue(raw),
-        as_of: date,
-      })),
+      data_as_of: "2029-08-01",
+      source_windows: arrayValue(snapshot.manifest["source_windows"]).flatMap((raw) => {
+        const window = objectValue(raw)
+        return window["kind"] === "qa"
+          ? [
+              { ...window, as_of: "2029-07-11" },
+              { ...window, region: "en", as_of: date },
+              {
+                ...window,
+                region: "en",
+                from_date: "2029-07-05",
+                as_of: "2029-07-25",
+                state: "partial",
+              },
+            ]
+          : [{ ...window, region: "en", as_of: "2029-07-18" }]
+      }),
       qa_card_index: {
         jp: {
           "c:bp01-002": ["qa:bp01-002-1:v1"],
@@ -269,8 +281,8 @@ it("proves absence at the snapshot date even when today is later than the source
     await renderInRouter(
       <CardQa
         client={{ ...client, snapshot: () => covered, fragments }}
-        cardId="c:bp01-001"
-        edition="jp"
+        cardId="c:bp01-002"
+        edition="en"
         showOther={false}
       />,
     )
@@ -281,7 +293,7 @@ it("proves absence at the snapshot date even when today is later than the source
   }
 })
 
-it("shows the snapshot date when Q&A coverage is unknown", async () => {
+it("falls back to the snapshot date when there is no Q&A window", async () => {
   const { client } = await loadedClient()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("synthetic snapshot did not load")

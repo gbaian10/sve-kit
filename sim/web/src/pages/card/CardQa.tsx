@@ -21,7 +21,7 @@ import {
 } from "../../data"
 import type { Region } from "../../domain/search"
 import { type FieldDisplay, usePrefs } from "../../settings"
-import { type CardQa as CardQaResult, loadCardQa, type QaEntry } from "./qa-data"
+import { type CardQa as CardQaResult, cardQaDate, loadCardQa, type QaEntry } from "./qa-data"
 
 const PRIMARY = "text-15 leading-effect text-pretty"
 const SECONDARY = "text-14 leading-effect text-pretty text-text-2"
@@ -253,12 +253,10 @@ function QaGroup({
   const [selection, setSelection] = useState<{ readonly key: string; readonly index: number }>()
   const key = canonicalText([snapshot?.manifestHash ?? null, cardId, edition, attempt])
   const [loaded, setLoaded] = useState<Loaded>()
-  // Use manifest data_as_of as the data baseline until #995 exposes the Q&A coverage window's as_of.
-  const dataAsOf = snapshot ? stringValue(snapshot.manifest["data_as_of"]) : ""
+  const queryDate = snapshot ? cardQaDate(snapshot, edition) : ""
   useEffect(() => {
     if (!snapshot) return
     let active = true
-    const queryDate = stringValue(snapshot.manifest["data_as_of"])
     void loadCardQa(client, snapshot, cardId, edition, queryDate).then(
       (result) => {
         if (active) setLoaded({ key, result })
@@ -271,7 +269,7 @@ function QaGroup({
     return () => {
       active = false
     }
-  }, [client, snapshot, key, cardId, edition])
+  }, [client, snapshot, key, cardId, edition, queryDate])
   const current = loaded?.key === key ? loaded : undefined
   let body
   if (!current)
@@ -302,7 +300,7 @@ function QaGroup({
       </Notice>
     )
   else if (current.result.coverage === "absent" || current.result.coverage === "unknown")
-    body = <p className="text-13 text-text-2">{t("qa.noneAsOf", { date: dataAsOf })}</p>
+    body = <p className="text-13 text-text-2">{t("qa.noneAsOf", { date: queryDate })}</p>
   else {
     const { entries } = current.result
     const selectedIndex = selection?.key === key ? Math.min(selection.index, entries.length - 1) : 0

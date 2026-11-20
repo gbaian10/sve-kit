@@ -38,11 +38,24 @@ const tableFiles = (snapshot: LoadedSnapshot, table: string, region?: string) =>
     )
     .map(([key]) => key)
 
-/** A complete source window of the whole edition that covers `queryDate` proves the absence. */
-function windowCovers(snapshot: LoadedSnapshot, region: string, queryDate: string): boolean {
-  const windows = arrayValue(snapshot.manifest["source_windows"])
+const qaWindows = (snapshot: LoadedSnapshot, region: string) =>
+  arrayValue(snapshot.manifest["source_windows"] ?? [])
     .map((raw) => objectValue(raw))
     .filter((window) => window["kind"] === "qa" && window["region"] === region)
+
+export function cardQaDate(snapshot: LoadedSnapshot, region: string): string {
+  let latest: string | undefined
+  for (const window of qaWindows(snapshot, region)) {
+    if (window["scope_key"] !== "region:*" || window["state"] !== "complete") continue
+    const asOf = stringValue(window["as_of"])
+    if (latest === undefined || asOf > latest) latest = asOf
+  }
+  return latest ?? stringValue(snapshot.manifest["data_as_of"])
+}
+
+/** A complete source window of the whole edition that covers `queryDate` proves the absence. */
+function windowCovers(snapshot: LoadedSnapshot, region: string, queryDate: string): boolean {
+  const windows = qaWindows(snapshot, region)
   return windows.some((window) => {
     const until = window["until_date"]
     return (
