@@ -67,6 +67,7 @@ STEP_NAMES = {
     "A.act.reveal.ref": "RevealRef",
     "A.act.reveal.top": "RevealTop",
     "A.act.reveal": "RevealAction",
+    "A.sel.reveal-until": "RevealUntilSelector",
     "A.act.reveal-until": "RevealUntilAction",
     "A.act.life": "LifeAction",
     "A.act.set-life": "SetLifeAction",
