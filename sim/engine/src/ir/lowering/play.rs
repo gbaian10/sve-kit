@@ -1422,7 +1422,7 @@ impl BodyContext<'_> {
                 }
             }
             let head = if resolution { "either" } else { "choice" };
-            let body = mode_body(
+            let (body, costs) = mode_body(
                 &mut context,
                 steps,
                 resolution,
@@ -1443,7 +1443,7 @@ impl BodyContext<'_> {
                 )
             });
             modes.push(Mode {
-                costs: CostSpec::Ordered { steps: vec![] },
+                costs,
                 id: ModeId(mode_id),
                 parameters: context.parameters,
                 body,
@@ -1478,9 +1478,12 @@ fn mode_body(
     source: &SourceSpan,
     origin: &AbilitySource,
     path: &str,
-) -> Result<Program, LoweringError> {
+) -> Result<(Program, CostSpec), LoweringError> {
     let [ast::Step::Pay(payment)] = steps else {
-        return context.steps(steps, path, source, origin);
+        return Ok((
+            context.steps(steps, path, source, origin)?,
+            CostSpec::Ordered { steps: vec![] },
+        ));
     };
     // A chosen mode is paid by its chooser and has no separate payment result.
     if resolution
@@ -1492,6 +1495,16 @@ fn mode_body(
     {
         return Err(unsupported(path));
     }
+    if super::x_pp::uses_pp_x(&payment.cost) {
+        context.declare_x(path)?;
+        let paid = super::payment::lower(context, &payment.cost, origin, path)?;
+        context.parameters.extend(paid.parameters);
+        context.check_x(path)?;
+        return Ok((
+            context.steps(&payment.steps, path, source, origin)?,
+            paid.costs,
+        ));
+    }
     let paid = super::payment::lower(context, &payment.cost, origin, path)?;
     context.parameters.extend(paid.parameters);
     let scope = context.scope;
@@ -1499,22 +1512,25 @@ fn mode_body(
     let body = context.steps(&payment.steps, path, source, origin)?;
     context.scope = scope;
     let receipt = ReceiptId(context.card_allocator.id(path)?);
-    Ok(Program {
-        scope,
-        steps: vec![BodyContext::located_step(
-            source,
-            path,
-            Node::Control {
-                control: Control::Pay {
-                    at: PaymentTime::PlayParameter,
-                    costs: paid.costs,
-                    optional: PaymentOptionality::Optional,
-                    on_paid: body,
-                    receipt,
+    Ok((
+        Program {
+            scope,
+            steps: vec![BodyContext::located_step(
+                source,
+                path,
+                Node::Control {
+                    control: Control::Pay {
+                        at: PaymentTime::PlayParameter,
+                        costs: paid.costs,
+                        optional: PaymentOptionality::Optional,
+                        on_paid: body,
+                        receipt,
+                    },
                 },
-            },
-        )],
-    })
+            )],
+        },
+        CostSpec::Ordered { steps: vec![] },
+    ))
 }
 
 struct ModeShape<'options> {

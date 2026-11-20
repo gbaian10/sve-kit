@@ -1591,7 +1591,7 @@ pub(super) enum Affected {
 pub(super) struct Search {
     pub sel: Option<SearchSelector>,
     pub n: Option<u64>,
-    pub upto: Option<u64>,
+    pub upto: Option<NumericArgument>,
     pub groups: Option<Vec<SearchGroup>>,
     pub to: SearchDestination,
     pub acted: Option<True>,

@@ -1,10 +1,10 @@
 use super::super::{
-    CardKind, CardName, CharacteristicView, Comparison, CostChange, CostKind, DecisionId,
-    Disjointness, Effect, FollowPermission, InstallationSubjects, InstallationTime, KindRead,
-    MemberProjection, MoveDestination, MoveSpec, MovementReceipt, NamesRead, NumberRead,
-    ObjectProperty, ObjectRef, OwnerZone, Posture, ReceiptReference, SearchContinuation,
-    SearchDestination, SearchFound, SearchPartition, SelectionConstraint, SelectionGroup, Stat,
-    TraitId, TraitsRead, ZoneRef,
+    AggregateBound, CardKind, CardName, CharacteristicView, Comparison, CostChange, CostKind,
+    DecisionId, Disjointness, Effect, FollowPermission, InstallationSubjects, InstallationTime,
+    KindRead, MemberProjection, MoveDestination, MoveSpec, MovementReceipt, NamesRead, NumberRead,
+    NumericProperty, ObjectProperty, ObjectRef, OwnerZone, Posture, ReceiptReference,
+    SearchContinuation, SearchDestination, SearchFound, SearchPartition, SelectionConstraint,
+    SelectionGroup, Stat, TraitId, TraitsRead, ZoneRef,
 };
 use super::groups::{Groups, TotalBounds};
 use super::{
@@ -346,14 +346,20 @@ impl BodyContext<'_> {
                 ast::SearchDestination::Single(ast::SearchZone::Field)
             )
         {
-            let single = matches!(&search.sel, Some(ast::SearchSelector::Query(query)) if matches!(query.kind, Some(ast::SearchKindFilter::Literal(ast::SearchKind::Follower))))
-                && matches!((search.n, search.upto), (Some(1), None) | (None, Some(1)));
+            let followers = matches!(&search.sel, Some(ast::SearchSelector::Query(query)) if matches!(query.kind, Some(ast::SearchKindFilter::Literal(ast::SearchKind::Follower))));
+            let upto = search.upto.as_ref().and_then(ast::NumericArgument::literal);
+            let single = followers
+                && matches!((search.n, upto), (Some(1), None) | (None, Some(1)))
+                && !search
+                    .upto
+                    .as_ref()
+                    .is_some_and(ast::NumericArgument::is_dynamic);
             let grouped = search.distinct_by.is_none()
                 && search.groups.as_ref().is_some_and(|groups| !groups.is_empty() && groups.iter().all(|group| {
                     matches!(&group.sel, ast::SearchSelector::Query(query) if matches!(query.kind, Some(ast::SearchKindFilter::Literal(ast::SearchKind::Follower))))
                         && matches!((group.n, group.upto), (Some(1), None) | (None, Some(1)))
                 }));
-            if single || grouped {
+            if followers || grouped {
                 self.field_outputs.insert(
                     name.clone(),
                     super::FieldOutput {
@@ -453,15 +459,50 @@ impl BodyContext<'_> {
         Ok(Some(constraint))
     }
 
+    fn search_count_bound(
+        &mut self,
+        search: &ast::Search,
+        path: &str,
+    ) -> Result<Option<AggregateBound>, LoweringError> {
+        let Some(ast::NumericArgument::Expression(expression)) = &search.upto else {
+            return Ok(None);
+        };
+        if search.n.is_some() || search.sel.is_none() {
+            return Err(unsupported(path));
+        }
+        let number = super::decode(expression.as_ref().clone(), path)?;
+        let value = self.number(&number, path, &mut super::BTreeSet::new())?;
+        if !super::super::public_numbers::check(&value) {
+            return Err(unsupported(path));
+        }
+        Ok(Some(AggregateBound {
+            property: NumericProperty::Count,
+            comparison: Comparison::LessEqual,
+            value,
+        }))
+    }
+
     pub(super) fn search(
         &mut self,
         search: &ast::Search,
         path: &str,
     ) -> Result<Action, LoweringError> {
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
+        let upper_bound = self.search_count_bound(search, path)?;
         let (filter, cardinality, groups) = if let Some(query) = &search.sel {
             let predicate = filter(self, query, candidate, path)?;
-            let cardinality = quantity(search.n, search.upto, path)?;
+            let cardinality = if upper_bound.is_some() {
+                Cardinality {
+                    minimum: Nat(0),
+                    maximum: None,
+                }
+            } else {
+                quantity(
+                    search.n,
+                    search.upto.as_ref().and_then(ast::NumericArgument::literal),
+                    path,
+                )?
+            };
             if search.distinct_by.is_some() {
                 (
                     predicate,
@@ -509,7 +550,15 @@ impl BodyContext<'_> {
         } else {
             return Err(unsupported(path));
         };
-        let groups = self.capped_search_groups(search, cardinality, groups, path)?;
+        let mut groups = self.capped_search_groups(search, cardinality, groups, path)?;
+        if let Some(bound) = upper_bound {
+            let mut constraint = match groups {
+                Some(constraint) => constraint,
+                None => self.deck_search_group(cardinality, false, path)?,
+            };
+            constraint.aggregate_bounds.push(bound);
+            groups = Some(constraint);
+        }
         if matches!(filter, Expr::Literal(_))
             && groups.is_none()
             && matches!(

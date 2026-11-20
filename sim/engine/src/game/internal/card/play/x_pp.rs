@@ -84,8 +84,8 @@ impl Game {
         let Some(binding) = x_pp::parameter(declaration) else {
             return Ok(false);
         };
-        if !play.groups.is_empty() || play.exchange.is_some() || play.resource_entry.is_some() {
-            return Err(unsupported("X beside modes or card cost exchange"));
+        if play.exchange.is_some() || play.resource_entry.is_some() {
+            return Err(unsupported("X beside card cost exchange"));
         }
         let mut budget = Budget::default();
         let resolved = |parameter: Binding<Nat>| match execution.slots.get(&parameter.key()) {
