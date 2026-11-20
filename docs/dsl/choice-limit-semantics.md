@@ -23,7 +23,8 @@ PDF SHA-256 `c44b8f2ff7e1019bc2b4ec59df894d6a067179ff05eac2542b7723648a22cd47`�
 
 先拒絕：對手／其他 actor 選模式、巢狀或多個 ChoiceKeyword、If／Repeat 內的
 ChoiceKeyword、模式內 Distribution、無 option 的根 targets 與模式 targets 混用、
-任意私有選擇、可變 X、通用條件模式數、選擇數取代、共享／玩家／整局額度、授予能力限次。
+任意私有選擇、通用條件模式數、選擇數取代、共享／玩家／整局額度、授予能力限次。
+模式付款已支援選定模式後宣告 X，並將該模式的 `pp: x` 隨打出一併支付。寫法見[效果作者工具](authoring-tools.md#對局能力)。
 觸發 `per_turn=N` 使用同一 LimitSpec 與能力實例，於 PendingAdmission 消耗；同時批次依剩餘額度選足可收集的發生，詳見觸發契約。
 
 這些是第一版支援界線，不是否認合法卡文。模式內既有 Search 等獨立已驗操作不因本文件
