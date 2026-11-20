@@ -138,6 +138,7 @@ export interface CardFrame {
   /** The card was found in the list under another key (its card or art cell). */
   readonly onPlaced: (resultKey: string) => void
   readonly onClose: () => void
+  readonly onReport: (draft: CardReportDraft) => void
   /** The deck builder's control for the shown card, in the bottom bar's deck slot. */
   readonly deckAction?: (summary: CardSummary | undefined) => ReactNode
 }
@@ -688,10 +689,10 @@ export function CardView({
   const reportCardNo =
     resolved && !unlisted && !usesIntRoute(resolved.cardNoState) ? resolved.cardNo : null
   const reportPrintingId = reportCardNo === null ? (resolved?.intId ?? null) : null
-  const canReport = !frame && !pending && (reportCardNo || reportPrintingId) && dataVersion
+  const canReport = !pending && (reportCardNo || reportPrintingId) && dataVersion
   const openReport = (initialType: ReportType) => {
     if (!canReport) return
-    setReport({
+    const draft: CardReportDraft = {
       initialType,
       metadata: {
         cardNo: reportCardNo,
@@ -700,7 +701,9 @@ export function CardView({
         uiLanguage,
         dataVersion,
       },
-    })
+    }
+    if (frame) frame.onReport(draft)
+    else setReport(draft)
   }
   const Heading = frame ? "h2" : "h1"
   const navigation = (sequence.phase === "pending" || sequence.phase === "found") && (

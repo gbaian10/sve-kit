@@ -1,19 +1,24 @@
 import { act, screen, waitFor, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
+import { useRef } from "react"
 import { useParams } from "react-router"
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 
+import { useListEntryState } from "../../app/listEntryState"
 import { useCardSnapshot } from "../../app/snapshot"
 import { ToastProvider } from "../../components/ui/Toast"
 import { stringValue } from "../../data"
 import { CardRouteError } from "../../domain/cardRoute"
 import { DEFAULT_PREFS, prefsStore, showsOtherEdition } from "../../settings"
 import { renderRoutes } from "../../test-utils"
-import { CardView } from "./CardPage"
+import { useCardOverlay } from "../cards/CardOverlay"
+import { type CardFrame, CardView } from "./CardPage"
 
-function CardPage() {
+function CardPage({ frame }: { readonly frame?: CardFrame } = {}) {
   const { catalog, client, status } = useCardSnapshot()
-  const { cardNo, intId } = useParams()
+  const params = useParams()
+  const cardNo = frame?.key ?? params["cardNo"]
+  const intId = params["intId"]
   const row = cardNo
     ? (catalog?.index.printingByCardNo("jp", cardNo) ??
       catalog?.index.printingByCardNo("en", cardNo))
@@ -23,6 +28,7 @@ function CardPage() {
   return (
     <CardView
       client={client}
+      {...(frame ? { frame } : {})}
       status={status}
       catalog={catalog}
       resolved={
@@ -39,6 +45,31 @@ function CardPage() {
           : undefined
       }
     />
+  )
+}
+
+vi.mock("../cards/CardOverlayContent", () => ({
+  CardOverlayContent: ({ frame }: { readonly frame: CardFrame }) => <CardPage frame={frame} />,
+}))
+
+function CardPanel() {
+  const [entry] = useListEntryState()
+  const overlay = useCardOverlay({
+    entry,
+    background: "?q=synthetic",
+    pages: 1,
+    unit: "printing",
+    cells: [],
+    listScroll: useRef({ top: 0, left: 0 }),
+    root: useRef<HTMLElement>(null),
+    onReturned: () => undefined,
+    presentation: "panel",
+  })
+  return (
+    <ToastProvider>
+      {overlay.drawer}
+      {overlay.modal}
+    </ToastProvider>
   )
 }
 
@@ -65,7 +96,7 @@ const state = vi.hoisted(() => ({
   catalogReads: 0,
   printingsFailure: false,
   doubleFace: false,
-  order: null as { key: string; printingId: string }[] | null,
+  order: null as { key: string; printingId: string; cardNo?: string }[] | null,
   suggestions: [] as { cardId: string; printingId: string; cardNo: string }[],
   multiplePrintings: false,
   printingRows: null as
@@ -80,6 +111,8 @@ const state = vi.hoisted(() => ({
       }[]
     | null,
   translated: false,
+  reportable: false,
+  reportVersion: "preview-20261121T010000Z-0001",
   originalName: false,
   sections: false,
   // A recognisable image per printing face, so identity checks can read it back from the DOM.
@@ -140,6 +173,8 @@ vi.mock("../../app/other-edition", () => ({
   }),
 }))
 vi.mock("../../app/snapshot", () => {
+  const snapshot = { manifestHash: "synthetic", manifest: { data_as_of: "2026-10-24" } }
+  const reportSnapshot = { ...snapshot, dataVersion: state.reportVersion }
   const printing = () => ({
     id: "p:synthetic",
     card_no: "BP-SYNTHETIC",
@@ -280,6 +315,7 @@ vi.mock("../../app/snapshot", () => {
       updating: false,
       retry: () => undefined,
     }),
+    useRouteEdition: () => "jp",
     useWorkerSuggestions: (text: string, edition: string) => ({
       lastInput: { state: { text }, edition },
       result: {
@@ -308,7 +344,10 @@ vi.mock("../../app/snapshot", () => {
           page: {
             items: order.map((item) => ({
               ...item,
-              summary: { cardNo: "BP-SYNTHETIC", printingId: item.printingId },
+              summary: {
+                cardNo: "cardNo" in item ? item.cardNo : "BP-SYNTHETIC",
+                printingId: item.printingId,
+              },
             })),
           },
         },
@@ -317,10 +356,7 @@ vi.mock("../../app/snapshot", () => {
     useCardSnapshot: () => ({
       status: { state: "ready" },
       client: {
-        snapshot: () =>
-          state.credits
-            ? { manifestHash: "synthetic", manifest: { data_as_of: "2026-10-24" } }
-            : null,
+        snapshot: () => (state.reportable ? reportSnapshot : state.credits ? snapshot : null),
         catalog: () => {
           state.catalogReads += 1
           return state.catalogFailure
@@ -404,8 +440,13 @@ vi.mock("../../app/snapshot", () => {
                   { ...printing(), id: "p:third", card_no: "BP-THIRD" },
                 ]
               : [printing()]),
-          printingByCardNo: (region: string) =>
-            state.crossRegion && region === "jp" ? undefined : printing(),
+          printingByCardNo: (region: string, cardNo: string) => {
+            if (state.crossRegion && region === "jp") return undefined
+            const matching = state.order?.find((item) => item.cardNo === cardNo)
+            return matching
+              ? { ...printing(), id: matching.printingId, card_no: cardNo }
+              : printing()
+          },
           facesOf: () => [{ id: "f:synthetic" }, ...(state.doubleFace ? [{ id: "f:back" }] : [])],
           wording: (face: string, region: string) => {
             state.wording(face, region)
@@ -503,6 +544,7 @@ beforeEach(() => {
   state.multiplePrintings = false
   state.printingRows = null
   state.translated = false
+  state.reportable = false
   state.sections = false
   state.images = false
   state.summary = false
@@ -532,6 +574,49 @@ beforeEach(() => {
 
 afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
+})
+
+it("reports the current card from the side panel and returns to it on close or Back", async () => {
+  state.available = true
+  state.current = true
+  state.translated = true
+  state.reportable = true
+  state.candidates = [
+    { printing_id: "p:synthetic", revision_id: "rev:synthetic" },
+    { printing_id: "p:second", revision_id: "rev:synthetic" },
+  ]
+  state.undated = []
+  state.order = [
+    { key: "p:synthetic", printingId: "p:synthetic", cardNo: "BP-SYNTHETIC" },
+    { key: "p:second", printingId: "p:second", cardNo: "BP-SECOND" },
+  ]
+  const user = userEvent.setup()
+  const { router } = await renderRoutes([{ path: "/cards", element: <CardPanel /> }], {
+    initialEntries: ["/cards?q=synthetic", "/cards?q=synthetic&card=BP-SYNTHETIC"],
+  })
+  const panel = screen.getByRole("complementary")
+  const report = "回報這張卡的問題"
+  const dialog = () => screen.getByRole("dialog", { name: report })
+  const initialKey = router.state.location.key
+
+  await user.click(within(panel).getByRole("button", { name: report }))
+  expect(within(dialog()).getByText("BP-SYNTHETIC")).toBeVisible()
+  await user.click(within(dialog()).getByRole("button", { name: "關閉" }))
+  expect(screen.queryByRole("dialog", { name: report })).toBeNull()
+  expect(router.state.location.key).toBe(initialKey)
+
+  await user.click(within(panel).getByRole("button", { name: "下一張" }))
+  const nextKey = router.state.location.key
+  await user.click(within(panel).getByRole("button", { name: "回報譯文問題" }))
+  expect(within(dialog()).getByText("BP-SECOND")).toBeVisible()
+  expect(within(dialog()).getByText("JP")).toBeVisible()
+  expect(within(dialog()).getByText(state.reportVersion)).toBeVisible()
+  expect(within(dialog()).getByRole("combobox", { name: "問題類型" })).toHaveValue("translation")
+
+  await act(() => router.navigate(-1))
+  expect(screen.queryByRole("dialog", { name: report })).toBeNull()
+  expect(router.state.location.key).toBe(nextKey)
+  expect(panel).toBeVisible()
 })
 
 describe("original card titles", () => {
