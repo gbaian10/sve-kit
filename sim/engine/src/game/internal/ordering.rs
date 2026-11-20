@@ -250,7 +250,8 @@ pub(super) fn check_node_with_x(
     }
 
     if let Node::Instruction { instruction } = &mut inspected
-        && super::movement::deck_top(&instruction.action).is_some()
+        && (super::movement::deck_top(&instruction.action).is_some()
+            || super::movement::declared_deck_banish(&instruction.action).is_some())
         && let Action::Move { objects, .. } | Action::Banish { objects } = &mut instruction.action
     {
         // Only this checked slice is authorized; instruction metadata keeps its private-read guard.

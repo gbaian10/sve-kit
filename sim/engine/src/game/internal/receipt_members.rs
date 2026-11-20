@@ -522,6 +522,23 @@ impl Execution {
 
     /// Successful before members; a same-deck reorder keeps generations, so all ordered cards count.
     pub(super) fn movement_before(&self, receipt: &MovementReceipt) -> Result<Vec<ObjectRef>> {
+        if let MovementReceipt::Banish { receipt } = receipt {
+            let Some(InstructionOutcome::Banish(outcome)) =
+                self.receipts.get(local_id(receipt.location())?)
+            else {
+                return Err(invalid("missing successful banish outcome"));
+            };
+            return outcome
+                .successful
+                .iter()
+                .map(|member| {
+                    member
+                        .before
+                        .map(|view| view.object)
+                        .ok_or_else(|| invalid("missing banish before member"))
+                })
+                .collect();
+        }
         let MovementReceipt::Order { receipt } = receipt else {
             return Ok(self
                 .successful_moves(receipt)?

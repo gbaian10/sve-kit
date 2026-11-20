@@ -27,13 +27,14 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
                     | Arithmetic::Subtract
                     | Arithmetic::Multiply
                     | Arithmetic::FloorDivide
-                    | Arithmetic::Minimum,
+                    | Arithmetic::Minimum
+                    | Arithmetic::HalfUp,
                 arguments,
             } => !arguments.is_empty() && arguments.iter().all(check),
             IntOperation::FromNat {
                 value: Expr::Live(read),
             } => {
-                matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector) || hand_count(selector))
+                matches!(read.as_ref(),NatRead::ZoneCount {selector} if count(selector) || hand_count(selector) || own_deck_count(selector))
                     || matches!(
                         read.as_ref(),
                         NatRead::Counter {
@@ -82,9 +83,17 @@ pub(crate) fn check(value: &Expr<Int>) -> bool {
 }
 
 pub(super) fn hand_count(selector: &Selector) -> bool {
+    own_zone_count(selector, ZoneKind::Hand)
+}
+
+fn own_deck_count(selector: &Selector) -> bool {
+    own_zone_count(selector, ZoneKind::Deck)
+}
+
+fn own_zone_count(selector: &Selector, expected: ZoneKind) -> bool {
     matches!(selector, Selector::Zone {
-        players, zone: ZoneKind::Hand, view: SelectionView::Current {}, predicate, ..
-    } if players.relation == PlayerRelation::SelfPlayer
+        players, zone, view: SelectionView::Current {}, predicate, ..
+    } if *zone == expected && players.relation == PlayerRelation::SelfPlayer
         && players.relative_to == (PlayerRef::Controller {})
         && **predicate == Expr::Literal(Bool(true)))
 }

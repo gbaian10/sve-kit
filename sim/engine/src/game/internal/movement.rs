@@ -10,16 +10,17 @@ use crate::ir::events::timing::opponent;
 use crate::ir::hand_position;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::perspective;
+use crate::ir::public_numbers;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::trigger_restrictions::suppresses_fanfare;
 use crate::ir::{
     Action, ActionPattern, BanishOutcome, Binding, Bool, Cause, CausePattern, Control,
     DestroyOutcome, DurationEnd, Effect, EffectId, EffectSource, Expr, Generation, Instruction,
     InstructionContext, MoveDestination, MoveMethod, MoveOutcome, MoveReason, MoveResult, MoveSpec,
-    MovementEvent, Nat, Node, ObjectOperand, ObjectRef, OwnerZone, PlayerId, PlayerRef,
-    PlayerRelation, Polarity, Position, PositiveNat, Posture, ResultMember, ResultMemberId,
-    RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection, SnapshotId,
-    TimeAnchor, ZoneKind,
+    MovementEvent, Nat, NatOperation, Node, ObjectOperand, ObjectRef, OwnerZone, PlayerId,
+    PlayerRef, PlayerRelation, Polarity, Position, PositiveNat, Posture, ResultMember,
+    ResultMemberId, RuntimeObjectView, RuntimeZoneRef, SelectionView, Selector, SliceDirection,
+    SnapshotId, TimeAnchor, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::num::{NonZeroU32, NonZeroU64};
@@ -111,7 +112,9 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
         }
         | Action::Banish {
             objects: Selector::Ordered { .. },
-        } if deck_top(action).is_none() => Err(unsupported("fixed deck top movement")),
+        } if deck_top(action).is_none() && declared_deck_banish(action).is_none() => {
+            Err(unsupported("deck top movement"))
+        }
         Action::Move {
             objects,
             movement,
@@ -274,6 +277,28 @@ pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
         }
         _ => None,
     }
+}
+
+pub(super) fn declared_deck_banish(action: &Action) -> Option<&Expr<Nat>> {
+    let Action::Banish {
+        objects:
+            Selector::Ordered {
+                zone,
+                start: Position::Top {},
+                count: count @ Expr::Compute(operation),
+                direction: SliceDirection::Forward,
+            },
+    } = action
+    else {
+        return None;
+    };
+    let NatOperation::CheckedInt { value } = operation.as_ref() else {
+        return None;
+    };
+    (zone.kind == ZoneKind::Deck
+        && zone.player == (PlayerRef::Controller {})
+        && public_numbers::check(value))
+    .then_some(count)
 }
 
 pub(super) fn advance_entry(action: &Action) -> bool {
@@ -572,6 +597,9 @@ impl Game {
                 .1
         } else if let Some((player, count)) = deck_top(&instruction.action) {
             self.deck_top_members(execution, player, count)?
+        } else if let Some(count) = declared_deck_banish(&instruction.action) {
+            let count = execution.natural(self, count)?;
+            self.deck_top_members(execution, &PlayerRef::Controller {}, count.0)?
         } else {
             let members =
                 if let Some(materials) = execution.private_hand_banish_materials(instruction) {

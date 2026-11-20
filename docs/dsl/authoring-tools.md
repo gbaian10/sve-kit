@@ -157,6 +157,8 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 
 `agg: {of: {who: self, zone: field, kind: follower}, attr: power, fn: max}` 讀取場上從者的最大有效攻擊力，可作為傷害分配的總量。公開數值聚合的 `min`／`max` 在集合為空時回傳 0。
 
+`banish.top.n` 可用自己牌庫的張數搭配 `half_up` 計算消滅張數。`banish.result` 對應的 `count_of` 讀取成功消滅的張數。
+
 `reveal_until.sel.orig_cost_gt` 以嚴格大於比對牌庫從者的印刷原費。下限可讀公開的單一正式目標
 （`{orig_cost_of: target}`），或讀成功送墓的單一場上從者材料（`{orig_cost_of: {objects_of: material, view: before}}`）。
 

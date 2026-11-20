@@ -1140,7 +1140,8 @@ pub(super) enum DeckEdge {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum BanishAction {
     Top {
-        top: DeckTop,
+        top: BanishDeckTop,
+        result: Option<String>,
     },
     // The `in` shape reserves observation authority for private Look sets.
     Observed {
@@ -1151,6 +1152,13 @@ pub(super) enum BanishAction {
         r#ref: PublicBanishUnion,
     },
     Objects(Box<ObjectAction>),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct BanishDeckTop {
+    pub who: DeckHolder,
+    pub n: Box<Number>,
 }
 
 #[derive(Deserialize)]

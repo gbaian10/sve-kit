@@ -26,7 +26,9 @@ impl BodyContext<'_> {
             ast::Step::Choose(value) => Some(value.bind.as_str()),
             ast::Step::Either(value) => value.bind.as_deref(),
             ast::Step::Destroy(ast::ObjectAction::Long { result, .. })
-            | ast::Step::Banish(ast::BanishAction::Observed { result, .. }) => result.as_deref(),
+            | ast::Step::Banish(
+                ast::BanishAction::Top { result, .. } | ast::BanishAction::Observed { result, .. },
+            ) => result.as_deref(),
             ast::Step::Reveal(value) => Some(value.bind.as_str()),
             ast::Step::Banish(ast::BanishAction::Objects(objects)) => {
                 if let ast::ObjectAction::Long { result, .. } = objects.as_ref() {
