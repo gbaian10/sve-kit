@@ -24,7 +24,11 @@ fn calamity_circle_uses_declared_counters_and_destroys_only_matching_original_co
         })
     );
     let answer = board
-        .answer_internal_card(declaration.actor, declaration.token, Answer::Integer(Nat(2)))
+        .answer_internal_card(
+            declaration.actor,
+            declaration.token,
+            Answer::Integer(Nat(2)),
+        )
         .unwrap();
     let result = resolved(finish(&mut board, answer));
     assert!(result.progress.facts.iter().any(|fact| {
@@ -45,7 +49,9 @@ fn calamity_circle_uses_declared_counters_and_destroys_only_matching_original_co
         .unwrap()
         .node
         .id;
-    let activation = board.activate_internal_card("source", ability, actor()).unwrap();
+    let activation = board
+        .activate_internal_card("source", ability, actor())
+        .unwrap();
     drop(resolved(finish(&mut board, activation)));
     checks(&mut board);
     let state = board.projection(View::Referee).unwrap();

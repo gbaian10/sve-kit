@@ -143,8 +143,9 @@ impl BodyContext<'_> {
             {
                 Some(condition.as_ref())
             }
-            Some(ast::ObjectQueryWhere::Extremum(_)) => return Err(unsupported(path)),
-            Some(ast::ObjectQueryWhere::Damaged(_)) => return Err(unsupported(path)),
+            Some(ast::ObjectQueryWhere::Extremum(_) | ast::ObjectQueryWhere::Damaged(_)) => {
+                return Err(unsupported(path));
+            }
             Some(ast::ObjectQueryWhere::Power(_)) | None => None,
         };
         self.checked_extremum(query.alias.as_deref(), condition, &population, input, path)

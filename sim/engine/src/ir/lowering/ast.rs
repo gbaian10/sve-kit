@@ -449,7 +449,7 @@ pub(super) enum Step {
     Draw(Draw),
     Win(Win),
     ExtraTurn(ExtraTurn),
-    Pp(ResourceIncrease),
+    Pp(PpChange),
     Discard(Discard),
     PpMax(ResourceIncrease),
     Ep(ResourceIncrease),
@@ -854,6 +854,17 @@ pub(super) enum LifeHolder {
     Controller(SelfPlayer),
     MasterOf { master_of: String },
     Bound(String),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PpChange {
+    Increase(ResourceIncrease),
+    Recover {
+        who: SelfPlayer,
+        #[serde(rename = "to_max")]
+        _to_max: True,
+    },
 }
 
 #[derive(Deserialize)]

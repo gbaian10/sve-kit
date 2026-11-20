@@ -2387,7 +2387,7 @@ impl<'definitions> BodyContext<'definitions> {
                 })
             }
             ast::Step::Move(value) => self.observed_move(value, path),
-            ast::Step::Pp(value) => self.resource_increase(value, super::Resource::PpCurrent, path),
+            ast::Step::Pp(value) => self.pp_change(value, path),
             ast::Step::Discard(value) => self.discard(value, path),
             ast::Step::PpMax(value) => {
                 self.resource_increase(value, super::Resource::PpMaximum, path)

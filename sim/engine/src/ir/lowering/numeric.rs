@@ -9,7 +9,7 @@ use super::{
     LoweringError, Nat, ObjectOperand, PlayerRef, PlayerRelation, PlayerSet, SelectionView,
     Selector, TextQuantifier, ZoneKind, ast, unsupported,
 };
-use crate::ir::ObjectRelation;
+use crate::ir::{Arithmetic, IntOperation, IntRead, ObjectRelation, PlayerResource};
 
 pub(super) fn holder() -> Selector {
     Selector::Objects {
@@ -28,7 +28,7 @@ pub(super) fn aggregate_count(
         })),
         None => Expr::Live(Box::new(super::NatRead::ZoneCount { selector })),
     };
-    Expr::Compute(Box::new(super::IntOperation::FromNat { value }))
+    Expr::Compute(Box::new(IntOperation::FromNat { value }))
 }
 
 pub(super) fn distinct_count(
@@ -88,6 +88,39 @@ fn combined(
 }
 
 impl BodyContext<'_> {
+    pub(super) fn pp_change(
+        &mut self,
+        value: &ast::PpChange,
+        path: &str,
+    ) -> Result<Action, LoweringError> {
+        let who = match value {
+            ast::PpChange::Increase(increase) => {
+                return self.resource_increase(increase, Resource::PpCurrent, path);
+            }
+            ast::PpChange::Recover { who, .. } => who,
+        };
+        let ast::SelfPlayer::Controller = who;
+        let pp = |property| {
+            Expr::Live(Box::new(IntRead::PlayerResource {
+                player: PlayerRef::Controller {},
+                property,
+            }))
+        };
+        let missing = Expr::Compute(Box::new(IntOperation::Arithmetic {
+            operation: Arithmetic::Subtract,
+            arguments: vec![pp(PlayerResource::PpMaximum), pp(PlayerResource::PpCurrent)],
+        }));
+        Ok(Action::Resource {
+            player: PlayerRef::Controller {},
+            resource: Resource::PpCurrent,
+            operation: ResourceOperation::Add,
+            amount: Expr::Compute(Box::new(IntOperation::Arithmetic {
+                operation: Arithmetic::Maximum,
+                arguments: vec![Expr::Literal(Int(0)), missing],
+            })),
+        })
+    }
+
     pub(super) fn resource_increase(
         &mut self,
         value: &ast::ResourceIncrease,
@@ -337,45 +370,9 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         }
         let binding: Binding<ObjectRef> = Binding::new(self.allocator.id(path)?, self.scope);
-        let kind = query.kind.map(ast::FieldKind::search);
-        let power = match &query.r#where {
-            Some(ast::ObjectQueryWhere::Power(condition)) => {
-                Some((condition.cmp.op, condition.cmp.right))
-            }
-            _ => None,
-        };
-        let (power_at_least, power_at_most) = super::selection::stat_bounds(power);
         let (relation, relative_to) = self.side_set(&query.who, path)?;
-        let predicate = super::selection::field_filter(
-            &super::selection::ObjectFilter {
-                kind: kind.as_ref().map(super::search::card_kind),
-                keyword: query.keyword.map(|keyword| keyword.0),
-                power_at_most,
-                power_at_least,
-                trait_id: query.r#trait.as_deref(),
-                class: query.class.as_deref(),
-                not_class: query.not_class.as_deref(),
-                token: query
-                    .token
-                    .or_else(|| query.not_token.map(|excluded| !excluded)),
-                original_cost: [
-                    query
-                        .orig_cost_eq
-                        .as_ref()
-                        .and_then(ast::NumericArgument::literal),
-                    query.orig_cost_le,
-                    query.orig_cost_ge,
-                ],
-                hp_at_most: query.hp_le,
-                not_trait: query.not_trait.as_deref(),
-                name: query.name.as_deref(),
-                contains: query.name_contains.as_deref(),
-                acted: query.acted,
-                not_same_name_as_this: query.not_same_name_as_this,
-                ..super::selection::ObjectFilter::default()
-            },
-            binding,
-        );
+        let predicate =
+            super::selection::field_filter(&super::selection::ObjectFilter::from(query), binding);
         let predicate = self.dynamic_limits(
             predicate,
             binding,
@@ -482,7 +479,7 @@ impl BodyContext<'_> {
                     let [replacement] = replacements.as_slice() else {
                         return Err(unsupported(path));
                     };
-                    amount = Expr::Compute(Box::new(super::IntOperation::Conditional {
+                    amount = Expr::Compute(Box::new(IntOperation::Conditional {
                         condition: self.condition(&replacement.r#if, path)?,
                         then_value: self.number(&replacement.power, path, &mut BTreeSet::new())?,
                         else_value: amount,
