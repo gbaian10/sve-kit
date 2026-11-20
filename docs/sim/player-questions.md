@@ -25,6 +25,7 @@
 | Pending | Pending | 選一個本題待處理 occurrence |
 | TriggerQuota | TriggerQuota | 選一個本題候選 occurrence |
 | Integer | Integer | 在提供的界限內填值 |
+| DeclareName | DeclareName | 從公開卡表的規則卡名恰選一個 |
 | Order | Order | 每個候選恰好一次的完整排列 |
 | DamageReplacements | Order | 全部取代效果代號的排列 |
 | DriveTrigger | DriveTrigger | 是否執行及適用時的目標代號 |

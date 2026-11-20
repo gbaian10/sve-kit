@@ -1,0 +1,65 @@
+{
+  "id": "q-declare_name",
+  "actor": "p1",
+  "purpose": "resolution_choice",
+  "use": "declare_name",
+  "processing": {
+    "stage": "resolve",
+    "controller": "p1",
+    "source": {
+      "kind": "text",
+      "text": {
+        "card": {
+          "printing_id": "SYN01-002",
+          "face": 0
+        },
+        "wording_revision": "r1",
+        "section": "effect",
+        "line": 1,
+        "step": null,
+        "granted_by": null,
+        "holder": "o2"
+      }
+    },
+    "subject": null,
+    "rule": null,
+    "procedure": null,
+    "declared": [],
+    "actor": "p1",
+    "payments": []
+  },
+  "shape": {
+    "kind": "choose",
+    "options": [
+      {
+        "id": "c1",
+        "value": {
+          "kind": "card_name",
+          "rules_name": "合成カード甲"
+        },
+        "cost": null
+      },
+      {
+        "id": "c2",
+        "value": {
+          "kind": "card_name",
+          "rules_name": "合成カード乙"
+        },
+        "cost": null
+      }
+    ],
+    "bounds": {
+      "min": 1,
+      "max": 1
+    },
+    "count": 1,
+    "earlier": [],
+    "capacity": null
+  },
+  "can_withdraw": false,
+  "auto_answer": {
+    "kind": "not_unique"
+  },
+  "assistance": null,
+  "rules": []
+}

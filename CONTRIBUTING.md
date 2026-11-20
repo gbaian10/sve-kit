@@ -269,6 +269,8 @@ use `#[allow]` only when the lint does not fire everywhere the attribute applies
 - **Out:** regenerable data outside those explicit exceptions (crawl caches, images, audio, build output),
   personal settings, secrets and local notes.
 - Files larger than 1 MiB (1024 KiB) are rejected by pre-commit. Split `authored/` data per card set.
+  The generated v4 snapshot contract schema is exempt. The `snapshot-format` hook checks it
+  against its sources and version lock.
 
 ## Setup
 
