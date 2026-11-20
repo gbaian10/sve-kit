@@ -1,6 +1,7 @@
-import { act, screen, waitFor } from "@testing-library/react"
+import { act, render, screen, waitFor } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { type ReactNode, useState } from "react"
+import { createBrowserRouter, RouterProvider } from "react-router"
 import { describe, expect, it, vi } from "vitest"
 
 import { renderInRouter } from "../test-utils"
@@ -144,5 +145,41 @@ describe("useDialogHistory", () => {
     })
     expect(router.state.location.pathname + router.state.location.search).toBe("/decks/1")
     expect(onClosed).toHaveBeenCalledTimes(1)
+  })
+
+  it("stops at the only browser history entry even if it still belongs to a dialog", async () => {
+    // Resetting browser history can leave the surviving entry's router index intact.
+    window.history.replaceState({ idx: 1, key: "deck", usr: { dialog: "deck" } }, "", "/decks/1")
+    const go = vi.spyOn(window.history, "go")
+    const router = createBrowserRouter([{ path: "*", element: <Harness onClosed={vi.fn()} /> }])
+    const { unmount } = render(<RouterProvider router={router} />)
+    try {
+      await userEvent.click(screen.getByRole("button", { name: "drop from filters" }))
+      await userEvent.click(screen.getByRole("button", { name: "open filters" }))
+
+      expect(screen.getByRole("dialog", { name: "filters" })).toBeInTheDocument()
+      expect(go).not.toHaveBeenCalled()
+    } finally {
+      unmount()
+      router.dispose()
+      go.mockRestore()
+    }
+  })
+
+  it("keeps a dialog pushed while history cleanup is in progress", async () => {
+    const { router } = await renderInRouter(<Harness onClosed={vi.fn()} />, {
+      initialEntries: [
+        "/decks/1",
+        { pathname: "/decks/1", state: { dialog: "deck" } },
+        { pathname: "/decks/1", state: { dialogs: ["deck", "export"] } },
+      ],
+    })
+
+    await act(async () => {
+      screen.getByRole("button", { name: "drop from filters" }).click()
+      await router.navigate("/decks/1", { state: { dialogs: ["deck", "filters"] } })
+    })
+
+    expect(router.state.location.state).toEqual({ dialogs: ["deck", "filters"] })
   })
 })
