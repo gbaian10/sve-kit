@@ -106,6 +106,12 @@ fn declaration(
                 value: Int::try_from(*value)?,
             }
         }
+        native::ProcessingDeclaration::Name { actor, rules_name } => {
+            wire::ProcessingDeclaration::Name {
+                actor: seat(*actor),
+                rules_name: rules_name.clone(),
+            }
+        }
         native::ProcessingDeclaration::Targets { actor, targets } => {
             wire::ProcessingDeclaration::Targets {
                 actor: seat(*actor),

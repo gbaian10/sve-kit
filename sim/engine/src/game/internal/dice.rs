@@ -19,9 +19,14 @@ pub(super) struct RollWait {
 pub(super) fn check_instruction(instruction: &Instruction) -> Result<()> {
     check_action(&instruction.action)?;
     if matches!(instruction.action, Action::Dice { .. })
-        && instruction.actor != (PlayerRef::Controller {})
+        && !matches!(
+            instruction.actor,
+            PlayerRef::Controller {} | PlayerRef::Bound { .. }
+        )
     {
-        return Err(unsupported("dice requires the controller as roller"));
+        return Err(unsupported(
+            "dice requires the controller or a procedure player as roller",
+        ));
     }
     Ok(())
 }
@@ -142,8 +147,9 @@ impl Game {
         else {
             return Err(unsupported("roll action"));
         };
+        let roller = execution.player(self, &instruction.actor)?;
         let mut remaining = 0_u64;
-        for holder in self.zone_ids(seat_name(execution.context.controller)?, "field") {
+        for holder in self.zone_ids(seat_name(roller)?, "field") {
             let (card, _) = self.internal_effective_print(&holder)?;
             if !self.card_runtime.is_loaded(&card) {
                 continue;
@@ -167,7 +173,7 @@ impl Game {
             RollWait {
                 instruction: instruction.clone(),
                 event: DiceEvent {
-                    roller: execution.context.controller,
+                    roller,
                     roll: RollId(self.state.ir_epoch),
                     value,
                     attempts: vec![value],

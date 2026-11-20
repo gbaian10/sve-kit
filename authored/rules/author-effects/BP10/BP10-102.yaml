@@ -1,0 +1,39 @@
+cards:
+  BP10-102:
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - if:
+                cond:
+                  exists: { who: self, zone: field, name: 《運命の輪》・スロース }
+                then:
+                  - declare: { bind: amount, kind: number, min: 0, max: 2 }
+                  - counter: { "on": this, name: 災いカウンター, delta: amount }
+      - line: 2
+        activate:
+          cost: { act_self: true }
+          do:
+            - counter: { "on": this, name: 災いカウンター, delta: 1 }
+      - line: 3
+        activate:
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - destroy:
+                ref:
+                  who: opp
+                  zone: field
+                  kind: follower
+                  orig_cost_eq: { counter: { "on": this, name: 災いカウンター } }
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set

@@ -630,6 +630,7 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
                     | Fact::DriveTrigger(_)
                     | Fact::DriveChecked(_)
                     | Fact::Declared { .. }
+                    | Fact::NameDeclared { .. }
                     | Fact::Posture(_) => None,
                 })
                 .collect::<Vec<_>>()

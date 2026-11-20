@@ -34,6 +34,7 @@ _FIELD_READS = {
     "A.position.chosen": ("chosen", frozenset({"PositionChoice"})),
     "A.x.payment": ("from_payment", frozenset({"ReceiptId"})),
     "A.expr.dice": ("dice", frozenset({"Number"})),
+    "A.expr.declared-name": ("bound", frozenset({"CardName"})),
     "A.expr.x-paid": ("x_paid", frozenset({"ReceiptId"})),
     "A.chosen-payload": ("ref", frozenset({"ObjectSet", "RecipientSet"})),
 }

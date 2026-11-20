@@ -30033,6 +30033,9 @@
               "$ref": "#/$defs/DSLNodes.CardName"
             },
             {
+              "$ref": "#/$defs/DSLNodes.A.expr.declared-name"
+            },
+            {
               "$ref": "#/$defs/DSLNodes.A.same-as"
             }
           ]
@@ -37147,6 +37150,18 @@
         "name"
       ],
       "type": "object"
+    },
+    "DSLNodes.A.expr.declared-name": {
+      "type": "object",
+      "properties": {
+        "bound": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        }
+      },
+      "required": [
+        "bound"
+      ],
+      "additionalProperties": false
     },
     "DSLNodes.A.expr.dice": {
       "additionalProperties": false,

@@ -152,6 +152,7 @@ impl Labels<'_> {
                 | DecisionShape::BeforeDraw
                 | DecisionShape::TriggerQuota(_)
                 | DecisionShape::Integer { .. }
+                | DecisionShape::DeclareName(_)
                 | DecisionShape::DamageReplacements(_)
                 | DecisionShape::Distribution(_)
                 | DecisionShape::SearchReplacement(_)
@@ -388,6 +389,7 @@ impl Labels<'_> {
                 | DecisionShape::BeforeDraw
                 | DecisionShape::TriggerQuota(_)
                 | DecisionShape::Integer { .. }
+                | DecisionShape::DeclareName(_)
                 | DecisionShape::MovementCapacity(_)
                 | DecisionShape::Distribution(_)
                 | DecisionShape::SearchReplacement(_)

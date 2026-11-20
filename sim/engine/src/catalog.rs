@@ -324,6 +324,19 @@ impl Catalog {
             .ok_or_else(|| invalid("referenced face has no rules name"))
     }
 
+    pub(crate) fn declarable_names(&self) -> Result<Vec<String>> {
+        let mut names = BTreeSet::new();
+        for (number, card) in &self.cards {
+            for face in 0..card.faces.len() {
+                names.insert(self.rules_label(number, face)?);
+            }
+        }
+        if names.is_empty() {
+            return Err(invalid("snapshot has no declarable card names"));
+        }
+        Ok(names.into_iter().collect())
+    }
+
     /// Number of authored card programs, including explicit partial programs.
     #[must_use]
     pub fn authored_count(&self) -> usize {

@@ -1,0 +1,29 @@
+cards:
+  BP06-110:
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 1 }
+      - line: 2
+        fanfare:
+          do:
+            - each_player:
+                as: roller
+                stages:
+                  - - dice: { bind: rolled, who: roller }
+                    - if:
+                        cond:
+                          cmp: { left: { dice: rolled }, op: le, right: 3 }
+                        then:
+                          - draw: { who: roller, n: 2 }
+                        else:
+                          - discard: { who: roller, n: 2, random: true }
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set

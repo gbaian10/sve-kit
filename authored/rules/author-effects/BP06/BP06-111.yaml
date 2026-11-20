@@ -1,0 +1,27 @@
+cards:
+  BP06-111:
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - declare: { bind: declared, kind: number, min: 1, max: 6 }
+            - dice: { bind: rolled }
+            - if:
+                cond:
+                  cmp: { left: { dice: rolled }, op: eq, right: declared }
+                then:
+                  - life: { who: self, delta: 5 }
+                  - search:
+                      sel: { who: self, zone: deck }
+                      n: 1
+                      to: ex
+                  - pp: { who: self, to_max: true }
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set

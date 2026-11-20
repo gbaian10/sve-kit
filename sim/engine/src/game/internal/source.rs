@@ -174,6 +174,10 @@ impl Execution {
     pub(super) fn name(&self, game: &Game, value: &Expr<CardName>) -> Result<CardName> {
         match value {
             Expr::Literal(name) => Ok(name.clone()),
+            Expr::Bound(binding) => match self.slots.get(&binding.key()) {
+                Some(Slot::Name(name)) => Ok(name.clone()),
+                _ => Err(invalid("missing declared name")),
+            },
             Expr::Captured(reference) => match self.slots.get(&reference.binding.key()) {
                 Some(Slot::Name(name)) => Ok(name.clone()),
                 _ => Err(invalid("missing captured name")),

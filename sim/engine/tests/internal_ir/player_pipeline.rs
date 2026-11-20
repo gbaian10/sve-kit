@@ -283,6 +283,7 @@ pub(super) fn selected_answer(shape: &QuestionShape, selected: &[u64], accept: b
         panic!("expected a native decision shape")
     };
     match shape {
+        DecisionShape::DeclareName(_) => panic!("unexpected card name declaration"),
         DecisionShape::DiceReroll { .. } | DecisionShape::May => {
             Answer::Integer(Nat(u64::from(accept)))
         }

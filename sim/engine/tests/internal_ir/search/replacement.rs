@@ -463,6 +463,7 @@ fn optional_replacement_can_follow_and_precede_distribution() {
             loop {
                 let question = game.internal_decision(View::Referee).unwrap();
                 let answer = match question.domain {
+                    InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
                     InputDomain::Distribution(_) => {
                         super::super::allocation::answer(&[(0, 3), (1, 1)])
                     }

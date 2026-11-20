@@ -170,6 +170,8 @@ impl BodyContext<'_> {
                     u64::try_from(amount).map_err(|_private| unsupported(path))?
                 )),
             )
+        } else if let Some(amount) = self.declared_amount(&value.delta) {
+            (CounterOperation::Add {}, amount)
         } else {
             let delta = self.number(&value.delta, path, &mut BTreeSet::new())?;
             signed_change(delta, path)?

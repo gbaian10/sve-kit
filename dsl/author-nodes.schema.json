@@ -3891,6 +3891,9 @@
               "$ref": "#/$defs/CardName"
             },
             {
+              "$ref": "#/$defs/A.expr.declared-name"
+            },
+            {
               "$ref": "#/$defs/A.same-as"
             }
           ]
@@ -4194,6 +4197,18 @@
         "event"
       ],
       "type": "object"
+    },
+    "A.expr.declared-name": {
+      "type": "object",
+      "properties": {
+        "bound": {
+          "$ref": "#/$defs/BindingName"
+        }
+      },
+      "required": [
+        "bound"
+      ],
+      "additionalProperties": false
     },
     "A.expr.dice": {
       "additionalProperties": false,

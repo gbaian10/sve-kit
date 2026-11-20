@@ -308,20 +308,43 @@ impl BodyContext<'_> {
         query: &ast::ReceiptCountQuery,
         path: &str,
     ) -> Result<(Binding<RuntimeObjectView>, Expr<Bool>), LoweringError> {
-        self.receipt_filter(
+        let name = match &query.name {
+            Some(ast::ReceiptName::Literal(name)) => Some(name.as_str()),
+            Some(ast::ReceiptName::Bound { .. }) | None => None,
+        };
+        let (member, predicate) = self.receipt_filter(
             &super::selection::ObjectFilter {
                 kind: query.kind.as_ref().map(super::search::card_kind),
                 keyword: query.keyword.map(|keyword| keyword.0),
                 trait_id: query.r#trait.as_deref(),
                 class: query.class.as_deref(),
                 not_class: query.not_class.as_deref(),
-                name: query.name.as_deref(),
+                name,
                 contains: query.name_contains.as_deref(),
                 original_cost: [query.orig_cost_eq, None, query.orig_cost_ge],
                 ..super::selection::ObjectFilter::default()
             },
             path,
-        )
+        )?;
+        let Some(ast::ReceiptName::Bound { bound }) = &query.name else {
+            return Ok((member, predicate));
+        };
+        let binding = *self
+            .declared_names
+            .get(bound)
+            .ok_or_else(|| unsupported(path))?;
+        let matched = Expr::Compute(Box::new(Predicate::NameEquals {
+            object: ObjectView::Snapshot {
+                value: Box::new(Expr::Bound(member)),
+            },
+            name: Expr::Bound(binding),
+        }));
+        Ok((
+            member,
+            Expr::Compute(Box::new(Predicate::And {
+                predicates: vec![predicate, matched],
+            })),
+        ))
     }
 
     fn receipt_filter(

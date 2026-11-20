@@ -33,6 +33,7 @@ fn make_game(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {
     while let CardPlay::Awaiting(question) = play {
         let answer = match question.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),
             InputDomain::Targets(domain) => Answer::Targets(

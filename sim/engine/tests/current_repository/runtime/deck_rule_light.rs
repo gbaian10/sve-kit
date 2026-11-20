@@ -17,6 +17,7 @@ fn position() -> Value {
 fn finish(board: &mut Game, mut play: CardPlay) {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Targets(d) => {
                 Answer::Targets(d.members.iter().take(1).map(|m| m.handle).collect())

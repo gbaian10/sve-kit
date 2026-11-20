@@ -16,6 +16,9 @@ cd sim/web && bun run check:contract                  # reproducible generation 
 - `encode` and `decode` are the boundary: `decode` accepts only text that states a message exactly
   (every field present, no unknown field, no repeated key, every number a safe integer) and reports
   any other input as a `HostError`.
+- `declare_name` uses the existing `choose` question and answer. Each option carries a `card_name`
+  value with `rules_name` from the public snapshot. Submitting one option ID produces a public
+  `choice_declared` event with `declared.kind = "name"`.
 - `Nat` and `Int` keep numbers within what a JavaScript `number` holds exactly; conversions from raw
   Rust values are checked.
 - `fixtures/` holds hand-written, synthetic messages. The Rust tests decode them and damage them field

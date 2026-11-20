@@ -572,6 +572,46 @@ pub(super) fn stat_bounds(bound: Option<(ast::PowerBound, u64)>) -> (Option<u64>
     )
 }
 
+impl<'query> From<&'query ast::ObjectQuery> for ObjectFilter<'query> {
+    fn from(query: &'query ast::ObjectQuery) -> Self {
+        let kind = query.kind.map(ast::FieldKind::search);
+        let power = match &query.r#where {
+            Some(ast::ObjectQueryWhere::Power(condition)) => {
+                Some((condition.cmp.op, condition.cmp.right))
+            }
+            _ => None,
+        };
+        let (power_at_least, power_at_most) = stat_bounds(power);
+        Self {
+            kind: kind.as_ref().map(super::search::card_kind),
+            keyword: query.keyword.map(|keyword| keyword.0),
+            power_at_most,
+            power_at_least,
+            trait_id: query.r#trait.as_deref(),
+            class: query.class.as_deref(),
+            not_class: query.not_class.as_deref(),
+            token: query
+                .token
+                .or_else(|| query.not_token.map(|excluded| !excluded)),
+            original_cost: [
+                query
+                    .orig_cost_eq
+                    .as_ref()
+                    .and_then(ast::NumericArgument::literal),
+                query.orig_cost_le,
+                query.orig_cost_ge,
+            ],
+            hp_at_most: query.hp_le,
+            not_trait: query.not_trait.as_deref(),
+            name: query.name.as_deref(),
+            contains: query.name_contains.as_deref(),
+            acted: query.acted,
+            not_same_name_as_this: query.not_same_name_as_this,
+            ..Self::default()
+        }
+    }
+}
+
 impl<'query> From<&'query ast::PublicQuery> for ObjectFilter<'query> {
     fn from(query: &'query ast::PublicQuery) -> Self {
         let comparison = query.r#where.as_ref().map(|condition| &condition.cmp);

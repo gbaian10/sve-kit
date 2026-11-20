@@ -197,6 +197,7 @@ fn bp12_078_distributes_six_among_any_selected_followers_including_zero() {
         let mut allocated = false;
         while let CardPlay::Awaiting(question) = step {
             let answer = match &question.domain {
+                InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
                 InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => {
                     assert_eq!(domain.members.len(), 2);
@@ -348,6 +349,7 @@ fn cp04_109_and_all_printings_pay_two_priconne_then_opponent_privately_discards_
         let mut discarded = false;
         while let CardPlay::Awaiting(question) = step {
             let answer = match &question.domain {
+                InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
                 InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::OptionalCost => Answer::OptionalCost(true),
                 InputDomain::CostMaterials(domain) => {

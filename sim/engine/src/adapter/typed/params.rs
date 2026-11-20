@@ -43,6 +43,7 @@ pub(super) struct Params {
     pub(super) optional: Vec<bool>,
     pub(super) options: Option<Vec<u64>>,
     pub(super) x: Option<u64>,
+    pub(super) declared_name: Option<String>,
     pub(super) pay: Value,
     pub(super) select: Option<Vec<String>>,
     pub(super) order: Option<Vec<String>>,
@@ -100,6 +101,7 @@ impl Params {
             x: decision["x"]
                 .as_u64()
                 .or_else(|| decision["declare"].as_u64()),
+            declared_name: decision["declare"].as_str().map(str::to_owned),
             pay: decision["pay"].clone(),
             select: decision.get("select").map(labels),
             order: decision.get("order").and_then(|order| {
@@ -124,6 +126,7 @@ impl Params {
             && self.optional.is_empty()
             && self.options.is_none()
             && self.x.is_none()
+            && self.declared_name.is_none()
             && self.select.is_none()
             && self.order.is_none()
             && self.choice.is_none()

@@ -1,4 +1,4 @@
-//! Declared numbers use the ordinary public integer question and a dedicated public fact.
+//! Declarations bind public choices before later instructions read them.
 use super::{Execution, Game, InputDomain, Result, Slot, Wait, invalid, unsupported};
 use crate::game::player::{IntegerSource, QuestionPurpose};
 use crate::ir::{Action, Binding, Cardinality, DecisionId, Declaration, Instruction, Int, Nat};
@@ -31,11 +31,11 @@ pub(super) fn check(action: &Action) -> Result<()> {
             return Err(unsupported("number declarer"));
         }
         match declaration {
-            Declaration::NonnegativeInteger { .. } => {}
+            Declaration::NonnegativeInteger { .. } | Declaration::CardNames { .. } => {}
             Declaration::BoundedInteger {
                 minimum, maximum, ..
             } if minimum.0 >= 0 && minimum.0 <= maximum.0 => {}
-            Declaration::BoundedInteger { .. } | Declaration::CardNames { .. } => {
+            Declaration::BoundedInteger { .. } => {
                 return Err(unsupported("nonnegative number declaration"));
             }
         }
@@ -57,6 +57,7 @@ impl Game {
         let Action::Declare { actor, declaration } = &instruction.action else {
             return Err(unsupported("number declaration"));
         };
+        let actor = execution.player(self, actor)?;
         let (binding, bounds) = match declaration {
             Declaration::NonnegativeInteger { binding } => (
                 NumberBinding::Natural(*binding),
@@ -76,9 +77,17 @@ impl Game {
                     maximum: Some(Nat(u64::try_from(maximum.0).map_err(invalid)?)),
                 },
             ),
-            Declaration::CardNames { .. } => return Err(unsupported("name declaration")),
+            Declaration::CardNames { binding, .. } => {
+                let names = self.catalog.declarable_names()?;
+                return self.internal_wait(
+                    execution,
+                    DecisionId(instruction.receipt.0),
+                    actor,
+                    InputDomain::DeclareName(names),
+                    Wait::DeclareName(*binding),
+                );
+            }
         };
-        let actor = execution.player(self, actor)?;
         self.internal_wait(
             execution,
             DecisionId(instruction.receipt.0),

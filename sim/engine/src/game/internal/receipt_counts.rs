@@ -6,10 +6,11 @@ use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::observation_selection::private_look_choice;
 use crate::ir::receipt_reads;
 use crate::ir::{
-    AbilitiesRead, Binding, Bool, Capture, CharacteristicPatch, CharacteristicView, ClassRead,
-    Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt,
-    NamesRead, NumberRead, NumericChange, NumericProperty, ObjectProperty, ObjectReceipt,
-    ObjectView, Predicate, ReceiptId, ReceiptLocation, RuntimeObjectView, TraitsRead,
+    AbilitiesRead, Binding, Bool, Capture, CardName, CharacteristicPatch, CharacteristicView,
+    ClassRead, Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection,
+    MovementReceipt, NamesRead, NumberRead, NumericChange, NumericProperty, ObjectProperty,
+    ObjectReceipt, ObjectView, Predicate, ReceiptId, ReceiptLocation, RuntimeObjectView,
+    TraitsRead,
 };
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
@@ -553,6 +554,10 @@ fn matches(
                 characters.names.iter().any(|name| expected.contains(name))
             }))
         }
+        Predicate::NameEquals {
+            object,
+            name: name @ Expr::Bound(_),
+        } => declared_name_matches(object, name, member, characters, original),
         Predicate::NameContains {
             object,
             name: Expr::Literal(name),
@@ -567,6 +572,20 @@ fn matches(
         }
         _ => Err(unsupported("receipt member predicate shape")),
     }
+}
+
+fn declared_name_matches(
+    object: &ObjectView,
+    name: &Expr<CardName>,
+    member: Binding<RuntimeObjectView>,
+    characters: Option<&MemberCard>,
+    original: Option<(&Game, &Execution, &MemberView)>,
+) -> Result<bool> {
+    snapshot(object, member)?;
+    let (Some(characters), Some((game, execution, _))) = (characters, original) else {
+        return Ok(false);
+    };
+    Ok(characters.names.contains(&execution.name(game, name)?))
 }
 
 #[expect(

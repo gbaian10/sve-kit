@@ -77,6 +77,13 @@ pub enum ProcessingDeclaration {
         /// Accepted value.
         value: u64,
     },
+    /// An accepted public declaration from the card catalogue.
+    Name {
+        /// Actual declarer.
+        actor: Viewer,
+        /// Accepted rules name.
+        rules_name: String,
+    },
     /// Formal targets in accepted order.
     Targets {
         /// Actual declarer.

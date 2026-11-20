@@ -207,6 +207,7 @@ pub(super) fn assert_reverted_from(actual: &Game, origin: &Game, published: &Gam
 )]
 fn response(question: &DecisionView) -> Answer {
     match &question.domain {
+        InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
         InputDomain::BeforeDraw => Answer::Stepwise(StepwiseAnswer::Continue),
         InputDomain::Distribution(_) => shares(&[(0, 3), (1, 1)]),
         InputDomain::Order(cards) => {

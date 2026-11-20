@@ -78,6 +78,10 @@ class ExprBound(RecordData):
     bound: BindingName
 
 
+# The author schema names the binding shape separately for card-name filters.
+type ExprDeclaredName = ExprBound
+
+
 class ExprPowerOf(RecordData):
     power_of: Ref | SnapshotRead
 
@@ -280,12 +284,15 @@ class ObjectFilterFields(_SharedFilterFields, _ClassFilter, total=False):
     name: Text | ParamRef | SameAs
 
 
-@with_config(FILTER_CONFIG)
-class CountFilterFields(_SharedFilterFields, _CountClassFilter, total=False):
+class _CountFilterFields(_SharedFilterFields, _CountClassFilter, total=False):
     # Shared attribute names do not grant Sel's parameter-source permissions.
     kind: Code | SameAs
     trait: Text
     traits_all: Annotated[tuple[Text, ...], Field(min_length=1)]
+
+
+@with_config(FILTER_CONFIG)
+class CountFilterFields(_CountFilterFields, total=False):
     name: Text | SameAs
 
 
@@ -405,8 +412,8 @@ class CollectionObjectsFields(CollectionFilterFields):
 
 
 @with_config(SELECTION_CONFIG)
-class CollectionInFields(CollectionFilterFields, _InSource):
-    pass
+class CollectionInFields(_CountFilterFields, _CollectionScope, _InSource, total=False):
+    name: Text | SameAs | ExprDeclaredName
 
 
 def _validate_count[T: Mapping[str, object]](value: T) -> T:

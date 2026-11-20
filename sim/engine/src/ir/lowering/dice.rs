@@ -2,7 +2,8 @@
 use super::{
     Ability, AbilityId, AbilityKind, AbilityQualification, AbilitySource, Action, Allocator,
     Binding, BodyContext, Bool, CardCoordinates, Expr, Located, LoweringError, Nat, NatRead, Node,
-    Predicate, ScopeId, SourceSpan, ZoneKind, ability_source, ast, source_span, unsupported,
+    PlayerRef, Predicate, ScopeId, SourceSpan, ZoneKind, ability_source, ast, source_span,
+    unsupported,
 };
 use crate::ir::{DiceOperation, IterationCheck, RepeatBody, RuleId, Termination};
 
@@ -15,15 +16,29 @@ impl BodyContext<'_> {
         if self.dice_results.contains_key(&value.bind) {
             return Err(unsupported(path));
         }
-        if let Some(who) = &value.who {
-            let ast::SelfPlayer::Controller = who;
-        }
         let result = Binding::new(self.allocator.id(path)?, self.scope);
         self.dice_results.insert(value.bind.clone(), result);
         Ok(Action::Dice {
             operation: DiceOperation::Roll {},
             result,
         })
+    }
+
+    pub(super) fn dice_actor(
+        &self,
+        value: &ast::Dice,
+        path: &str,
+    ) -> Result<PlayerRef, LoweringError> {
+        match &value.who {
+            None | Some(ast::Side::Controller) => Ok(PlayerRef::Controller {}),
+            Some(ast::Side::Bound(name)) => self
+                .players
+                .get(name)
+                .copied()
+                .map(|binding| PlayerRef::Bound { binding })
+                .ok_or_else(|| unsupported(path)),
+            Some(ast::Side::Opponent | ast::Side::All) => Err(unsupported(path)),
+        }
     }
 
     pub(super) fn fixed_repeat(
@@ -44,10 +59,8 @@ impl BodyContext<'_> {
         let scope = self.card_allocator.scope(path)?;
         self.scope = self.card_allocator.scope(path)?;
         let saved = self.local_bindings();
-        let previous = self.dice_results.clone();
         let body = self.steps(&value.steps, &format!("{path}/repeat/do"), source, origin);
         self.restore_bindings(saved);
-        self.dice_results = previous;
         self.scope = parent;
         Ok(Node::Control {
             control: super::super::Control::Repeat {

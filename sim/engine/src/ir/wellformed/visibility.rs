@@ -264,7 +264,9 @@ impl Checker {
                 Declaration::BoundedInteger { binding, .. } => {
                     self.env.access.insert(binding.key(), Visibility::Public {});
                 }
-                Declaration::CardNames { .. } => {}
+                Declaration::CardNames { binding, .. } => {
+                    self.env.access.insert(binding.key(), Visibility::Public {});
+                }
             },
             Action::FlipDown { .. } => self.revoked = true,
             Action::Reveal { .. }

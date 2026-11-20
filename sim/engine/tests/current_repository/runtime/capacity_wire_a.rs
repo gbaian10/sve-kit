@@ -34,6 +34,7 @@ fn settle(game: &mut Game, mut step: Option<CardPlay>, offered: &mut Vec<Vec<Str
     loop {
         while let Some(CardPlay::Awaiting(question)) = &step {
             let answer = match &question.domain {
+                InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
                 InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
                 InputDomain::Targets(domain) => {
                     let mut cards: Vec<_> = domain

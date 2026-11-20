@@ -68,6 +68,7 @@ fn enter(board: &mut Game, id: &str) {
 fn finish_head(board: &mut Game, mut play: CardPlay, accept_cost: bool, evolve: bool) -> CardPlay {
     while let CardPlay::Awaiting(q) = play {
         let answer = match &q.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::OptionalCost => Answer::OptionalCost(accept_cost),
             InputDomain::CostMaterials(d) => {
@@ -172,6 +173,7 @@ fn finish_look(board: &mut Game, mut play: CardPlay, machine: bool, take: bool) 
             "the unchosen top cards remain private"
         );
         let answer = match &q.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Targets(d) => {
                 saw_pick = true;

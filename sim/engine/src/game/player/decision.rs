@@ -267,6 +267,8 @@ pub enum DecisionShape {
         /// Origin recorded by the native Wait producer, never inferred from bounds.
         source: IntegerSource,
     },
+    /// One public rules name, chosen from the pinned card catalogue.
+    DeclareName(Vec<String>),
     /// Frozen permutation; answer `Order` with every handle once.
     Order(OrderQuestion),
     /// Replacement order; answer `Order`.

@@ -142,6 +142,7 @@ fn accept(game: &mut Game, mut play: CardPlay) -> CardPlay {
             return play;
         };
         let answer = match q.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::OptionalCost => Answer::OptionalCost(true),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),

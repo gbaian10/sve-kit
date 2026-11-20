@@ -18,6 +18,7 @@ COUNTS: dict[str, TypeAdapter[object]] = {
     "A.expr.count-source": TypeAdapter(author.CountSource, config=CONFIG),
 }
 SELECTOR_NAMES = {
+    "A.expr.declared-name": "ExprDeclaredName",
     "A.sel.zone-objects": "ZoneObjects",
     "A.sel.in-objects": "InObjects",
     "A.sel.object-atom": "ObjectAtom",
@@ -79,6 +80,7 @@ QUERY_CASES.extend(
     [
         ("A.expr.count-atom", {"in": "shown"}),
         ("A.collection.in", {"in": {"objects_of": "moved", "view": "after"}}),
+        ("A.collection.in", {"in": "shown", "name": {"bound": "declared"}}),
         ("A.collection.objects", {"who": "self", "zone": "field"}),
         ("A.collection.atom", {"in": "shown"}),
         (

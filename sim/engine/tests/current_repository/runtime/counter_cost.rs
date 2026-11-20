@@ -90,6 +90,7 @@ fn game(initial: &Value) -> Game {
 fn finish(game: &mut Game, mut step: CardPlay, mode: u64) {
     while let CardPlay::Awaiting(question) = step {
         let answer = match &question.domain {
+            InputDomain::DeclareName(_) => panic!("unexpected card name declaration"),
             InputDomain::DiceReroll { .. } => panic!("unexpected fixture dice reroll"),
             InputDomain::Modes { .. } => Answer::Modes(vec![ModeId(mode)]),
             InputDomain::WardEntry { .. } => Answer::WardEntry(false),

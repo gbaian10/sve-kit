@@ -36,6 +36,16 @@ fn extrema_require_the_same_public_population_and_matching_numeric_property() {
     lowerer()
         .lower(&tree(json!([{"destroy":{"ref":wrong_population}}])))
         .unwrap_err();
+    let mut dynamic_cost = query.clone();
+    dynamic_cost["orig_cost_eq"] = json!({"resource":{"who":"self","kind":"pp"}});
+    let error = lowerer()
+        .lower(&tree(json!([{"destroy":{"ref":dynamic_cost}}])))
+        .unwrap_err();
+    assert_eq!(error.code, "unsupported_construct");
+    dynamic_cost.as_object_mut().unwrap().remove("where");
+    lowerer()
+        .lower(&tree(json!([{"destroy":{"ref":dynamic_cost}}])))
+        .unwrap();
     let mut wrong_property = query;
     wrong_property["where"]["cmp"]["right"]["agg"]["attr"] = json!("orig_cost");
     lowerer()

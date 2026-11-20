@@ -226,6 +226,8 @@ do:
 
 擲骰使用 `dice: {bind: die}`（可明示 `who: self`），降低為既有 `Action::Dice`，共用洗牌與隨機選取的可重現亂數串流。後續本文用 `{dice: die}` 讀取該次最終接受點數；未定義、先讀後擲或重複命名均拒絕。骰值不由玩家宣告。
 
+在 `each_player` 的同一段 `stages` 中用 `dice: {bind: die, who: p}`，並在後續抽牌或隨機棄牌明寫 `who: p`。回合玩家先完成該段，骰值與重擲許可都屬於各自的擲骰者。
+
 場上的重擲許可寫成 `static: {effects: [{reroll: {who: self, times: 1}}]}`；只接受固定正整數、自身與無額外條件的場上宣告；只計入自己場上仍有效的印刷能力，失去能力或離場的來源不提供額度。每次擲骰後可逐次選擇重擲或接受，多個來源額度累加；重擲取代前一點數，下一次獨立擲骰重新取得額度（CR 5.20、Q2205–Q2209）。決策公開目前點數及剩餘額度；回答 1 重擲、0 接受，沿用既有整數回答邊界。
 
 `auto: {on: {dice_rolled: {who: self}}, do: [...]}` 觀察一次完整擲骰的最終結果，本文用 `{event: value}` 讀取該次點數。點數條件寫在本文，不能放在事件頭；重擲嘗試不另計誘發或歷史。歷史條件接受 `history: {event: dice_rolled, who: self, window: this_turn, where: {value: {eq: 6}}}`；`where` 可省略，點數門檻為單一 `eq`／`le`／`ge`，限 1 至 6。只查詢當前回合的已接受結果，包含目前指示與來源進場前發生的擲骰（BP21-081，Q2753）。
@@ -1678,7 +1680,14 @@ BP02-035／036 同時使用下文的 SpellChain 計數母體；逐次補滿與�
 `count_of: {receipt: milled, where: {orig_cost_eq: chosen}, view: before}`
 沿已驗證的牌庫到墓場移動回條，以每張實際成功移動卡片的原費用比對宣告值；
 原有的 `trait` 篩選仍可同時使用。BP08-103 先宣告、移動最多五張，再對對手全部從者造成相符張數的傷害。
-名稱宣告、動態宣告上下界及宣告前置條件仍未接入執行器。
+
+`counter.delta` 可用宣告的非負數量增加指示物。場上本文對象的 `orig_cost_eq` 可讀公開數值，例如以 `{counter: {on: this, name: 災いカウンター}}` 比對來源支付自身送墓前的指示物數。
+
+進化後的ミトラ用 `cmp` 比對獨立擲骰的點數與宣告值，並用 `pp: {who: self, to_max: true}` 依結算當下的 PP 差額回復。
+
+`declare: {bind: chosen, kind: name}` 從公開卡表的規則卡名選一個，包含 token，同名印刷合併為一項。先宣告，再公開比對的卡片。`count: {in: {objects_of: shown, view: before}, name: {bound: chosen}}` 用該宣告篩選已公開的回條成員。
+
+宣告的上下界目前使用固定整數。
 
 ## 保留能力的卡種改寫
 

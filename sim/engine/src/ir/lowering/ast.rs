@@ -449,7 +449,7 @@ pub(super) enum Step {
     Draw(Draw),
     Win(Win),
     ExtraTurn(ExtraTurn),
-    Pp(ResourceIncrease),
+    Pp(PpChange),
     Discard(Discard),
     PpMax(ResourceIncrease),
     Ep(ResourceIncrease),
@@ -854,6 +854,17 @@ pub(super) enum LifeHolder {
     Controller(SelfPlayer),
     MasterOf { master_of: String },
     Bound(String),
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum PpChange {
+    Increase(Box<ResourceIncrease>),
+    Recover {
+        who: SelfPlayer,
+        #[serde(rename = "to_max")]
+        _to_max: True,
+    },
 }
 
 #[derive(Deserialize)]
@@ -1313,7 +1324,7 @@ pub(super) struct ObjectQuery {
     pub not_class: Option<String>,
     pub token: Option<bool>,
     pub not_token: Option<bool>,
-    pub orig_cost_eq: Option<u64>,
+    pub orig_cost_eq: Option<NumericArgument>,
     pub orig_cost_le: Option<u64>,
     pub orig_cost_ge: Option<u64>,
     pub hp_le: Option<u64>,
@@ -4259,10 +4270,16 @@ pub(super) struct ReceiptCountQuery {
     pub r#trait: Option<String>,
     pub class: Option<String>,
     pub not_class: Option<String>,
-    pub name: Option<String>,
+    pub name: Option<ReceiptName>,
     pub name_contains: Option<String>,
     pub orig_cost_eq: Option<u64>,
     pub orig_cost_ge: Option<u64>,
+}
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum ReceiptName {
+    Literal(String),
+    Bound { bound: String },
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -4572,7 +4589,7 @@ pub(super) enum RevealFollower {
 #[serde(deny_unknown_fields)]
 pub(super) struct Dice {
     pub bind: String,
-    pub who: Option<SelfPlayer>,
+    pub who: Option<Side>,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
@@ -4793,15 +4810,16 @@ pub(super) enum FlipZone {
 #[serde(deny_unknown_fields)]
 pub(super) struct Declare {
     pub bind: String,
-    pub kind: DeclareNumber,
+    pub kind: DeclareKind,
     pub min: Option<u64>,
     pub max: Option<u64>,
     pub who: Option<Participant>,
 }
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub(super) enum DeclareNumber {
+pub(super) enum DeclareKind {
     Number,
+    Name,
 }
 
 #[derive(Deserialize)]

@@ -256,6 +256,8 @@ pub enum InputDomain {
     TriggerQuota(QuotaDomain),
     /// One natural number in the checked inclusive range.
     Integer(Cardinality),
+    /// Rules names from the immutable public catalogue.
+    DeclareName(Vec<String>),
     /// Token-scoped handles and printed information, visible only to the chooser.
     Order(Vec<OrderCard>),
     /// Order the public replacement occurrences affecting one damage recipient.
@@ -321,6 +323,8 @@ pub enum Answer {
     TriggerQuota(u64),
     /// Answer a bounded integer decision.
     Integer(Nat),
+    /// An exact rules name from the active declaration question.
+    DeclareName(String),
     /// Complete permutation of this question's handles, in top-to-bottom order.
     Order(Vec<u64>),
     /// Accept the revealed icon and optionally designate one eligible follower.
@@ -550,6 +554,13 @@ pub enum Fact {
         /// The declared number.
         value: Nat,
     },
+    /// A public card name fixed before later instructions inspect any hidden card.
+    NameDeclared {
+        /// Player who declared the name.
+        player: PlayerId,
+        /// Rules name from the pinned snapshot.
+        name: CardName,
+    },
     /// One physical movement, including its action method and causal execution.
     Movement(Box<MovementFact>),
     /// One explicit numeric instruction's nonzero facets for one subject.
@@ -580,6 +591,7 @@ enum Slot {
 
 #[derive(Clone, Debug)]
 enum Wait {
+    DeclareName(Binding<CardName>),
     Dice(Box<dice::RollWait>),
     Ability(card::AbilityWait),
     ResourceEntryPayment(card::resource_entry::ResourceEntryWait),
@@ -959,6 +971,25 @@ impl Game {
             // Transaction rollback restores the phase if the answer type is rejected.
             execution.question_stage = None;
             match (wait, answer) {
+                (Wait::DeclareName(binding), Answer::DeclareName(name)) => {
+                    let InputDomain::DeclareName(options) = view.domain else {
+                        return Err(invalid("invalid name declaration question"));
+                    };
+                    if options.binary_search(&name).is_err() {
+                        return Err(invalid("card name is not in the declaration domain"));
+                    }
+                    rollback = execution.answer_origin(validated);
+                    execution
+                        .slots
+                        .insert(binding.key(), Slot::Name(CardName(name.clone())));
+                    execution.record_fact(
+                        self,
+                        Fact::NameDeclared {
+                            player: actor,
+                            name: CardName(name),
+                        },
+                    );
+                }
                 (Wait::Ability(wait), Answer::Ability(handle)) => {
                     let source = wait.validate(self, &execution, handle)?;
                     rollback = execution.answer_origin(validated);
@@ -1389,6 +1420,7 @@ impl Game {
                 InputDomain::SearchPartition(domain) => json!({"kind":"search-partition","cards":domain.cards.iter().map(ordering::card_packet).collect::<Vec<_>>(),"minimum":domain.cardinality.minimum.0,"maximum":domain.cardinality.maximum.map(|value| value.0)}),
                 InputDomain::Distribution(domain) => allocation::packet(&domain),
                 InputDomain::SearchReplacement => json!({"kind":"search-replacement","options":["original","replacement"]}),
+                InputDomain::DeclareName(names) => json!({"kind":"declare-name","options":names}),
             };
             json!({"by":seat_name(question.actor).unwrap_or_default(),"execution":question.token.execution.0,"decision":question.token.decision.0,"epoch":question.token.epoch,"domain":domain})
         })
