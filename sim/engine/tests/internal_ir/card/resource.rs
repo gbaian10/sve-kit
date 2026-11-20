@@ -164,12 +164,14 @@ fn unproved_signed_resource_amount_is_a_capability_gap_without_mutation() {
 }
 
 #[test]
-fn pp_author_lowering_rejects_opponent_and_to_max() {
-    for pp in [
-        json!({"who":"opp","delta":3}),
-        json!({"who":"self","to_max":true}),
-    ] {
-        for kind in ["pp", "pp_max", "ep"] {
+fn resource_author_lowering_rejects_opponent_changes_and_to_max_outside_current_pp() {
+    let cases: [(&[&str], Value); 3] = [
+        (&["pp", "pp_max", "ep"], json!({"who":"opp","delta":3})),
+        (&["pp"], json!({"who":"opp","to_max":true})),
+        (&["pp_max", "ep"], json!({"who":"self","to_max":true})),
+    ];
+    for (kinds, pp) in cases {
+        for &kind in kinds {
             let mut tree = fanfare::expanded::tree().clone();
             tree["cards"]["BP08-038"]["abilities"][0]["fanfare"]["do"] = json!([{kind:pp}]);
             lowerer().lower(&tree).unwrap_err();
