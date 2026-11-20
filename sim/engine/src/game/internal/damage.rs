@@ -119,11 +119,20 @@ fn order_independent(replacements: &[DamageReplacement]) -> bool {
             .first()
             .and_then(|effect| effect.cap)
             .is_some_and(|cap| replacements.iter().all(|effect| effect.cap == Some(cap)))
+        || replacements.iter().all(|effect| effect.multiply.is_some())
         || replacements.iter().all(|effect| {
-            !effect.prevent && effect.cap.is_none() && effect.set.is_none() && effect.delta >= 0
+            !effect.prevent
+                && effect.cap.is_none()
+                && effect.set.is_none()
+                && effect.multiply.is_none()
+                && effect.delta >= 0
         })
         || replacements.iter().all(|effect| {
-            !effect.prevent && effect.cap.is_none() && effect.set.is_none() && effect.delta <= 0
+            !effect.prevent
+                && effect.cap.is_none()
+                && effect.set.is_none()
+                && effect.multiply.is_none()
+                && effect.delta <= 0
         })
 }
 

@@ -1592,6 +1592,9 @@ counter 為 0 時加值為 0。安裝型（`apply`、`player_effect`）的 `dama
 不查找目前手牌或其他牌區的新物件。省略 `on` 時，符合來源的能力對從者及領袖造成的每次傷害都套用加值；
 多個提供者的加值會疊加。進化時搜尋及下一次同名牌的減費仍沿用獨立的 `player_effect.cost_mod`，不綁定搜尋結果。
 
+場上常在傷害替代可寫 `damage_mod: {source: this, kind: attack, multiply: 2}`，只倍增來源對領袖的攻擊傷害。
+`kind: combat` 比對對從者的交戰傷害，包含反擊。倍數為正整數，適用於該次傷害的現有規則替代流程。
+
 ## 安裝本回合受到傷害的加值
 
 `apply: {on: …, effect: {damage_mod: {delta: N}}, until: turn}`（N 為正整數）

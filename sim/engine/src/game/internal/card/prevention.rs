@@ -10,8 +10,8 @@ use crate::game::player::observation::InstalledEffect;
 use crate::game::player::observation::seat;
 use crate::ir::ObjectRelation;
 use crate::ir::prevention::{
-    DamageSource, Prevention, Recipients, holder_counter_step, lasting_object_cap,
-    lasting_object_increase, own_leader, projection, whole_turn_leader_rewrite,
+    DamageSource, Prevention, Recipients, damage_multiplier, holder_counter_step,
+    lasting_object_cap, lasting_object_increase, own_leader, projection, whole_turn_leader_rewrite,
 };
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::static_declarations::{self, Family};
@@ -76,6 +76,7 @@ struct Member {
 #[derive(Clone, Copy, Debug, Serialize, Deserialize)]
 enum Kind {
     Any,
+    Attack,
     Combat,
     Ability,
 }
@@ -83,6 +84,7 @@ impl From<DamageKind> for Kind {
     fn from(kind: DamageKind) -> Self {
         match kind {
             DamageKind::Any => Self::Any,
+            DamageKind::Attack => Self::Attack,
             DamageKind::Combat => Self::Combat,
             DamageKind::Ability => Self::Ability,
         }
@@ -92,6 +94,12 @@ impl Kind {
     fn matches(self, hit: &Value) -> bool {
         match self {
             Self::Any => true,
+            Self::Attack => {
+                hit["attack"] == true
+                    && hit["target"]
+                        .as_str()
+                        .is_some_and(|target| target.ends_with(".leader"))
+            }
             Self::Combat => {
                 hit["battle"] == true && !hit["target"].as_str().unwrap_or("").ends_with(".leader")
             }
@@ -515,6 +523,7 @@ impl Game {
             change: InstalledChange::Prevention {
                 kind: match effect.kind {
                     Kind::Any => DamageKind::Any,
+                    Kind::Attack => DamageKind::Attack,
                     Kind::Combat => DamageKind::Combat,
                     Kind::Ability => DamageKind::Ability,
                 },
@@ -895,6 +904,12 @@ impl Game {
                             threshold: Expr::Literal(threshold),
                             replacement: Expr::Literal(amount),
                         } => replacement["cap"] = json!([threshold.0, amount.0]),
+                        EventRewrite::MultiplyDamage { .. } => {
+                            replacement["multiply"] = json!(
+                                damage_multiplier(shape.rewrite)
+                                    .ok_or_else(|| unsupported("damage multiplier"))?
+                            );
+                        }
                         _ => return Err(unsupported("damage rewrite arithmetic")),
                     }
                     references.push(replacement);

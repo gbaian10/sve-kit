@@ -61,6 +61,7 @@ variants!(ProposedEventPattern {
 });
 tags!(DamageKind {
     Any,
+    Attack,
     Combat,
     Ability
 });
