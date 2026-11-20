@@ -5,14 +5,17 @@ use super::{
 };
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
 use crate::ir::{
-    Action, CardQuantityOutcome, Control, Expr, Instruction, Int, Located, MoveOutcome, Nat, Node,
-    ObjectRef, PlayerId, PlayerStage, ReceiptId, ScopeId, Selector, ZoneKind,
+    Action, Binding, CardQuantityOutcome, Control, Expr, Instruction, Int, Located, MoveMethod,
+    MoveOutcome, Nat, Node, ObjectRef, PlayerId, PlayerRef, PlayerStage, ReceiptId, ScopeId,
+    Selector, ZoneKind,
 };
 use alloc::collections::{BTreeMap, BTreeSet};
 
 #[cfg(test)]
 mod tests;
-use crate::ir::player_stages::{choice_procedure, look_remainder, procedure, returned_share};
+use crate::ir::player_stages::{
+    choice_procedure, look_remainder, procedure, returned_share, top_to_ex_player,
+};
 use crate::ir::{RuntimeZoneRef, shuffle};
 use core::slice::from_ref;
 
@@ -176,6 +179,14 @@ impl Game {
                                 .collect::<Result<Vec<_>>>()?;
                             game.internal_player_draws(execution, instruction, &counts)?;
                         }
+                        action @ Action::Move { .. } if top_to_ex_player(action).is_some() => {
+                            game.internal_player_top_moves(
+                                execution,
+                                instruction,
+                                &players,
+                                binding,
+                            )?;
+                        }
                         Action::Move { .. } => {
                             let mut members = Vec::new();
                             for player in &players {
@@ -197,6 +208,37 @@ impl Game {
             }
         }
         execution.slots.remove(&binding.key());
+        Ok(())
+    }
+
+    fn internal_player_top_moves(
+        &mut self,
+        execution: &mut Execution,
+        instruction: &Instruction,
+        players: &[PlayerId],
+        binding: Binding<PlayerRef>,
+    ) -> Result<()> {
+        let player = top_to_ex_player(&instruction.action)
+            .ok_or_else(|| invalid("checked player deck top move"))?;
+        let mut members = Vec::new();
+        for seat in players {
+            execution.slots.insert(binding.key(), Slot::Player(*seat));
+            members.extend(self.deck_top_members(execution, player, 1)?);
+        }
+        let (moved, _) = self.internal_move_members(
+            execution,
+            &members,
+            "ex",
+            ZoneKind::Ex,
+            MoveMethod::Put,
+            true,
+            None,
+            None,
+        )?;
+        execution.receipts.insert(
+            instruction.receipt,
+            InstructionOutcome::Move(MoveOutcome { moved }),
+        );
         Ok(())
     }
 

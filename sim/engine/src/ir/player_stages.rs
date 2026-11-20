@@ -3,8 +3,8 @@ use super::{
     Action, Binding, Cardinality, Control, Expr, Instruction, InstructionContext, Int,
     IntOperation, MemberProjection, MoveDestination, MoveReason, MovementReceipt, Nat, NatRead,
     Node, ObjectReceipt, OwnerZone, PlayerOrder, PlayerRef, PlayerRelation, PlayerSet, PlayerStage,
-    Program, RandomnessPolicy, ReceiptId, ReceiptLocation, Selector, ShuffleScope, StageMode,
-    StepwiseMode, TextQuantifier,
+    Position, Program, RandomnessPolicy, ReceiptId, ReceiptLocation, Selector, ShuffleScope,
+    SliceDirection, StageMode, StepwiseMode, TextQuantifier, ZoneKind,
 };
 
 pub(crate) fn procedure(
@@ -64,6 +64,8 @@ pub(crate) fn procedure(
             } else if super::shuffle::whole_return(action) == Some(&actor) {
                 returns.push(instruction.receipt);
                 true
+            } else if top_to_ex_player(action) == Some(&actor) {
+                true
             } else {
                 matches!(action, Action::Shuffle {
                     deck,
@@ -77,6 +79,34 @@ pub(crate) fn procedure(
         }
     }
     Some((players, *player, stages))
+}
+
+/// A single card from each player's deck can move simultaneously without a capacity choice.
+pub(crate) fn top_to_ex_player(action: &Action) -> Option<&PlayerRef> {
+    let Action::Move {
+        objects:
+            Selector::Ordered {
+                zone,
+                start: Position::Top {},
+                count: Expr::Literal(Nat(1)),
+                direction: SliceDirection::Forward,
+            },
+        movement,
+        reason: MoveReason::Put,
+    } = action
+    else {
+        return None;
+    };
+    (zone.kind == ZoneKind::Deck
+        && movement.to
+            == (MoveDestination::Owners {
+                zone: OwnerZone::Ex,
+            })
+        && movement.position.is_none()
+        && movement.order.is_none()
+        && movement.initial_posture.is_none()
+        && movement.entry_effects.is_empty())
+    .then_some(&zone.player)
 }
 
 /// Inside a player stage, counting an earlier whole return reads only the current player's

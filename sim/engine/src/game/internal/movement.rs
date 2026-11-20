@@ -10,6 +10,7 @@ use crate::ir::events::timing::opponent;
 use crate::ir::hand_position;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::perspective;
+use crate::ir::player_stages::top_to_ex_player;
 use crate::ir::public_numbers;
 use crate::ir::shuffle as shuffle_shape;
 use crate::ir::trigger_restrictions::suppresses_fanfare;
@@ -271,7 +272,10 @@ pub(super) fn deck_top(action: &Action) -> Option<(&PlayerRef, u64)> {
             direction: SliceDirection::Forward,
         } if *count > 0
             && zone.kind == ZoneKind::Deck
-            && (!own_only || zone.player == (PlayerRef::Controller {})) =>
+            && (!own_only
+                || zone.player == (PlayerRef::Controller {})
+                || top_to_ex_player(action)
+                    .is_some_and(|player| matches!(player, PlayerRef::Bound { .. }))) =>
         {
             Some((&zone.player, *count))
         }
