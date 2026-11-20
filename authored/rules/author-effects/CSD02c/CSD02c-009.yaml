@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  CSD02c-009:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        keywords: [ward]
+      - line: 2
+        fanfare:
+          do:
+            - move:
+                top: { who: self, n: 1 }
+                to: cemetery
+                result: milled
+            - if:
+                cond:
+                  cmp:
+                    left: { count: { in: { objects_of: milled, view: before } } }
+                    op: gt
+                    right: 0
+                then:
+                  - if:
+                      cond:
+                        cmp:
+                          left: { orig_cost_of: { objects_of: milled, view: before } }
+                          op: eq
+                          right:
+                            times:
+                              - 2
+                              - per:
+                                  of: { orig_cost_of: { objects_of: milled, view: before } }
+                                  unit: 2
+                      then:
+                        - life: { who: self, delta: 2 }
+                      else:
+                        - draw: { who: self, n: 1 }

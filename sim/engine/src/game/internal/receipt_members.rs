@@ -277,6 +277,27 @@ pub(super) fn members(
     }
 }
 
+pub(super) fn original_cost_sum(
+    game: &Game,
+    execution: &Execution,
+    receipt: &ObjectReceipt,
+) -> Result<Int> {
+    let destination = matches!(
+        receipt,
+        ObjectReceipt::Movement {
+            receipt: MovementReceipt::Move { .. },
+        }
+    )
+    .then_some(ZoneKind::Cemetery);
+    super::aggregates::checked_sum(
+        members(game, execution, receipt, destination)?
+            .iter()
+            .map(|member| member.original_cost(game, execution)),
+        "receipt original cost sum overflow",
+    )
+    .map(Int)
+}
+
 fn successful_move_members(
     game: &Game,
     execution: &Execution,

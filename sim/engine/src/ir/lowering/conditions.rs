@@ -1161,6 +1161,9 @@ impl BodyContext<'_> {
                         property: super::super::NumericProperty::OriginalCost,
                     })))
                 }
+                ast::Observation::Before { objects_of, .. } if self.is_mill_receipt(objects_of) => {
+                    self.moved_original_cost(objects_of, path)
+                }
                 ast::Observation::Before { objects_of, .. } => self.paid_material_number(
                     objects_of,
                     super::super::NumericProperty::OriginalCost,

@@ -738,6 +738,17 @@ impl Execution {
             {
                 self.public_look_sum(game, objects, *property).map(Int)
             }
+            IntOperation::Sum {
+                objects:
+                    Selector::ReceiptMembers {
+                        receipt:
+                            receipt @ ObjectReceipt::Movement {
+                                receipt: MovementReceipt::Move { .. },
+                            },
+                        projection: MemberProjection::Before,
+                    },
+                property: NumericProperty::OriginalCost,
+            } => super::receipt_members::original_cost_sum(game, self, receipt),
             IntOperation::Sum { objects, property } => {
                 super::aggregates::sum(self, game, objects, *property).map(Int)
             }

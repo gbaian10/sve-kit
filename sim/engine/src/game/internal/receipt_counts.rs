@@ -8,8 +8,8 @@ use crate::ir::receipt_reads;
 use crate::ir::{
     AbilitiesRead, Binding, Bool, Capture, CharacteristicPatch, CharacteristicView, ClassRead,
     Comparison, Expr, Info, Int, IntOperation, KindRead, MemberProjection, MovementReceipt,
-    NamesRead, NumberRead, NumericChange, ObjectProperty, ObjectReceipt, ObjectView, Predicate,
-    ReceiptId, ReceiptLocation, RuntimeObjectView, TraitsRead,
+    NamesRead, NumberRead, NumericChange, NumericProperty, ObjectProperty, ObjectReceipt,
+    ObjectView, Predicate, ReceiptId, ReceiptLocation, RuntimeObjectView, TraitsRead,
 };
 use crate::ir::{Action, ChoiceDomain, Control, Selector, ZoneKind};
 use crate::ir::{DamageAmount, MoveDestination, Nat, NatOperation, OwnerZone, PlayerRef};
@@ -200,6 +200,24 @@ impl ReceiptReads {
                         .ok_or_else(|| unsupported("public cost sum"))?;
                     if !self.published.contains(&id) {
                         return Err(unsupported("cost sum before revelation"));
+                    }
+                    *number = Expr::Literal(Int(0));
+                }
+                IntOperation::Sum {
+                    objects:
+                        Selector::ReceiptMembers {
+                            receipt:
+                                receipt @ ObjectReceipt::Movement {
+                                    receipt: MovementReceipt::Move { .. },
+                                },
+                            projection: MemberProjection::Before,
+                        },
+                    property: NumericProperty::OriginalCost,
+                } => {
+                    if !self.cemetery.contains(&local_receipt(receipt)?) {
+                        return Err(unsupported(
+                            "original cost sum without deck-to-cemetery movement",
+                        ));
                     }
                     *number = Expr::Literal(Int(0));
                 }
