@@ -978,29 +978,25 @@ export class SearchEngine {
       let completed = false
       try {
         for (const purpose of ["printings", "mechanics"] as const) {
-          const parts = await Promise.all(
-            backgroundFiles
-              .filter((file) =>
-                purpose === "printings"
-                  ? ["print", "product"].includes(stringValue(file["purpose"]))
-                  : !["print", "product"].includes(stringValue(file["purpose"])),
-              )
-              .map(async (file) =>
-                decodeMessage({
-                  kind: "file",
-                  file,
-                  bytes: await backgroundBlobs.read(file, signal),
-                  version,
-                }),
-              ),
+          const phaseFiles = backgroundFiles.filter((file) =>
+            purpose === "printings"
+              ? ["print", "product"].includes(stringValue(file["purpose"]))
+              : !["print", "product"].includes(stringValue(file["purpose"])),
           )
+          const parts = new Map<JsonObject, ReturnType<typeof decodeMessage>>()
+          await backgroundBlobs.readAll(phaseFiles, signal, (file, bytes) => {
+            parts.set(file, decodeMessage({ kind: "file", file, bytes, version }))
+          })
           signal.throwIfAborted()
           if (this.active !== active) return
-          for (const part of parts)
-            if (part.kind === "fragments")
+          // Preserve manifest order even when a shard finishes before an earlier one.
+          for (const file of phaseFiles) {
+            const part = parts.get(file)
+            if (part?.kind === "fragments")
               catalogWork("background:ingest", () => {
                 background.ingest(part.fragments)
               })
+          }
           catalogWork("background:seal", () => {
             background.seal()
           })

@@ -4,6 +4,7 @@ const MIB = 1024 * 1024
 export const VIEW_BUDGET = 2 * MIB
 const ROOT_BUDGET = 96 * MIB
 const ORIGIN_BUDGET = 128 * MIB
+const INVENTORY_MATCH_BATCH = 16
 
 // The adopted-selection pointer names a retained manifest; losing it would drop the active choice.
 const activeSelection = (url: string) => /\/active$/u.test(url)
@@ -82,22 +83,28 @@ export async function readDataCacheBudget(storage: CacheStorage, root: string) {
   }[] = []
   for (const name of names) {
     const cache = await storage.open(name)
-    for (const key of await cache.keys()) {
-      const response = await cache.match(key)
-      if (!response) continue
-      const size = response.headers.get("x-sve-bytes")
-      // Legacy automatic records can be rebuilt; never materialize their unbounded bodies to count.
-      if (size === null || !Number.isFinite(Number(size)) || Number(size) < 0) {
-        await cache.delete(key)
-        continue
+    const keys = await cache.keys()
+    // Overlap CacheStorage round trips without queuing a large raw cache's entire inventory.
+    for (let start = 0; start < keys.length; start += INVENTORY_MATCH_BATCH) {
+      const batch = keys.slice(start, start + INVENTORY_MATCH_BATCH)
+      const responses = await Promise.all(batch.map((key) => cache.match(key)))
+      for (const [i, key] of batch.entries()) {
+        const response = responses[i]
+        if (!response) continue
+        const size = response.headers.get("x-sve-bytes")
+        // Legacy automatic records can be rebuilt; avoid materializing their bodies to count.
+        if (size === null || !Number.isFinite(Number(size)) || Number(size) < 0) {
+          await cache.delete(key)
+          continue
+        }
+        entries.push({
+          ...describe(name, key.url),
+          cache,
+          url: key.url,
+          bytes: Number(size),
+          touched: Number(response.headers.get("x-sve-touched") ?? 0),
+        })
       }
-      entries.push({
-        ...describe(name, key.url),
-        cache,
-        url: key.url,
-        bytes: Number(size),
-        touched: Number(response.headers.get("x-sve-touched") ?? 0),
-      })
     }
   }
   let usage = {

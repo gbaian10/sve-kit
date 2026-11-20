@@ -168,6 +168,31 @@ it("shares raw identity across worker, metadata and detail subscribers with inde
   }
 })
 
+it("keeps verified batch reads usable when budget inventory fails and retries storage next time", async () => {
+  const storage = memoryCache()
+  const keys = vi.spyOn(storage, "keys").mockRejectedValueOnce(new Error("unavailable inventory"))
+  const fetcher = vi.fn<Fetcher>(() => Promise.resolve(new Response(payload)))
+  const store = new RawBlobStore(base, fetcher, storage)
+  const readBatch = () =>
+    store.batch(async (read) => {
+      expect(await read(file)).toEqual(payload)
+    })
+
+  await readBatch()
+  expect(store.persistent).toBe(false)
+  expect(await store.has(file)).toBe(false)
+
+  await readBatch()
+  expect(store.persistent).toBe(true)
+  expect(await store.has(file)).toBe(true)
+  expect(fetcher).toHaveBeenCalledTimes(2)
+
+  keys.mockClear()
+  await readBatch()
+  expect(keys).toHaveBeenCalledOnce()
+  expect(fetcher).toHaveBeenCalledTimes(2)
+})
+
 it("recovers persistence only on a successful write without a newer concurrent storage failure", async () => {
   const storage = memoryCache()
   const name = `sve-raw:${encodeURIComponent(base)}`

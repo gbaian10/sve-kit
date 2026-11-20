@@ -53,7 +53,7 @@ interface ReadOptions {
   readonly batch?: BatchWrites
 }
 interface BatchWrites {
-  readonly inventory: DataCacheBudget | undefined
+  inventory: Promise<DataCacheBudget> | undefined
   readonly failures: number
   writing: Promise<void>
 }
@@ -146,9 +146,7 @@ export class RawBlobStore {
     inventory?: DataCacheBudget,
   ): Promise<void> {
     const batch: BatchWrites = {
-      inventory:
-        inventory ??
-        (this.storage ? await readDataCacheBudget(this.storage, this.base) : undefined),
+      inventory: inventory ? Promise.resolve(inventory) : undefined,
       failures: this.failures,
       writing: Promise.resolve(),
     }
@@ -234,17 +232,25 @@ export class RawBlobStore {
       signal?.throwIfAborted()
       if (!(await valid(bytes))) continue
       signal?.throwIfAborted()
-      if (cache) await this.write(cache, slot, bytes, options.batch)
+      if (cache) await this.write(cache, slot, bytes, options)
       signal?.throwIfAborted()
       return bytes
     }
     throw new SnapshotError("blob-integrity", `hash/length mismatch for ${file.key} after retry`)
   }
 
-  private write(cache: Cache, slot: string, bytes: Uint8Array, batch?: BatchWrites): Promise<void> {
+  private write(
+    cache: Cache,
+    slot: string,
+    bytes: Uint8Array,
+    { batch, signal }: ReadOptions,
+  ): Promise<void> {
     if (!batch) return this.persist(cache, slot, bytes)
-    // Serialize accounting for the two producers, without locking any other store or tab.
-    const write = batch.writing.then(() => this.persist(cache, slot, bytes, batch))
+    // Serialize accounting for this batch without locking another store or tab.
+    const write = batch.writing.then(() => {
+      signal?.throwIfAborted()
+      return this.persist(cache, slot, bytes, batch)
+    })
     batch.writing = write.catch(() => undefined)
     return write
   }
@@ -263,7 +269,10 @@ export class RawBlobStore {
       })
     try {
       if (!this.storage) return
-      const budget = batch?.inventory ?? (await readDataCacheBudget(this.storage, this.base))
+      // A failed inventory is a storage failure; readers still receive the verified bytes.
+      const inventory = batch?.inventory ?? readDataCacheBudget(this.storage, this.base)
+      if (batch) batch.inventory = inventory
+      const budget = await inventory
       try {
         await cache.put(slot, response())
       } catch {
