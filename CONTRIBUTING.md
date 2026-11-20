@@ -125,8 +125,8 @@ review procedures.
 
 ## Coding standards
 
-Reviewers apply this section to every pull request. Formatting, lint, types and
-the commit format are enforced by tools and are not repeated here.
+Reviewers apply this section to every pull request and flag overengineering as a finding.
+Tools enforce formatting, lint, types and the commit format.
 
 ### Design
 
@@ -136,6 +136,12 @@ the commit format are enforced by tools and are not repeated here.
   its fixtures, without a compatibility path.
 - The project has one maintainer on one machine. Add locks, ledgers, receipts, replay
   or extra verification layers only for a stated requirement the maintainer agreed to.
+- When proposing validation, checks, schema fields or tests, state the time, memory, review and maintenance costs,
+  the concrete failure they prevent and its likelihood. If costs are high and the failure is unlikely, check
+  only what changed, check periodically or before release, or omit the check.
+- Before implementing performance changes, data migrations or algorithm fixes, run a quick prototype on about 1%
+  of real data without requiring lint or tests, measure time and peak memory, and extrapolate to the full dataset.
+  Report the sample size and extrapolation method, and adjust course if the estimate is impractical.
 - Keep one-off migration and conversion scripts out of the repository.
 - Manage dependencies through package managers and lockfiles rather than assuming
   the maintainer's system library versions. Pass machine-specific paths and host
@@ -153,12 +159,14 @@ the commit format are enforced by tools and are not repeated here.
 
 ### Schema and contracts
 
+Add fields to data and YAML schemas only when current code uses them.
 Snapshot wire changes must pass the [format lock check](docs/schema/export/snapshot-contract.md#格式指紋鎖定): update the lock in the same PR while unfrozen, or bump the format under [transport §1.1](docs/schema/export/snapshot-transport.md#11-版本與相容判斷) once frozen.
 
 ### Tests
 
 - Test behaviour through the public interface. A test that restates the
   implementation (copied constants, private call order or counts, source text) is a defect.
+- Prioritize realistic cases and regressions that have occurred.
 - Do not mock the code under test.
 - Build expensive setup once. Anything that loads the real repository (author set,
   public profile, catalog, build database or real-current results) is a session-scoped
