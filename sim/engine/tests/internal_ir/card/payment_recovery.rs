@@ -365,14 +365,14 @@ fn a_failed_required_head_payment_matches_decline_without_reviving_the_occurrenc
 }
 
 #[test]
-fn random_discard_from_the_opponents_hand_cannot_pay_a_cost() {
+fn filtered_random_hand_discard_cannot_pay_a_cost() {
     for quick in [false, true] {
-        let mut header = json!({"activate":{"cost":{"pp":0},"do":[{"discard":{"who":"opponent","n":1,"random":true}}]}});
+        let mut header = json!({"activate":{"cost":{"pp":0},"do":[{"discard":{"who":"self","n":1,"random":true}}]}});
         if quick {
             header["activate"]["quick"] = json!(true);
         }
         let mut raw = fragment(&header, "unit-follower").card().clone();
-        let Node::Instruction { instruction } = raw.abilities[0]
+        let Node::Instruction { mut instruction } = raw.abilities[0]
             .node
             .body
             .as_mut()
@@ -383,6 +383,18 @@ fn random_discard_from_the_opponents_hand_cannot_pay_a_cost() {
         else {
             panic!("random discard")
         };
+        let Action::Discard {
+            mode:
+                DiscardMode::Random {
+                    population: Selector::Zone { predicate, .. },
+                    ..
+                },
+            ..
+        } = &mut instruction.action
+        else {
+            panic!("random whole-hand discard")
+        };
+        **predicate = Expr::Literal(Bool(false));
         let CostSpec::Ordered { steps } = &mut raw.abilities[0].node.play.as_mut().unwrap().costs
         else {
             panic!("cost")
