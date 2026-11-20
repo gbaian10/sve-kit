@@ -120,7 +120,9 @@ pub(in crate::game::internal) fn source_to_ex(action: &Action) -> bool {
 }
 
 pub(super) fn check_cost(action: &Action) -> bool {
-    source_discard(action) || selection(action).is_ok()
+    source_discard(action)
+        || super::super::discard::random_cost(action)
+        || selection(action).is_ok()
 }
 
 pub(super) fn single_additional(costs: &CostSpec) -> bool {
@@ -215,7 +217,9 @@ impl Game {
         execution: &mut Execution,
         instruction: &Instruction,
     ) -> Result<(Quantity, Vec<ObjectRef>)> {
-        let members = if source_discard(&instruction.action) {
+        let members = if super::super::discard::random_cost(&instruction.action) {
+            self.internal_random_discard_members(execution, &instruction.action, true)?
+        } else if source_discard(&instruction.action) {
             vec![execution.object(self, &ObjectOperand::SourceHolder {})?]
         } else {
             let plan = selection(&instruction.action)?;

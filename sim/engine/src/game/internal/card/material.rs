@@ -1024,19 +1024,10 @@ impl Game {
                 ));
             }
         }
-        let characters = if matches!(
-            instruction.action,
-            Action::Banish {
-                objects: Selector::Bound { .. }
-            }
-        ) {
-            members
-                .iter()
-                .map(|member| self.internal_characteristics(execution.object_id(*member)?))
-                .collect::<Result<Vec<_>>>()?
-        } else if matches!(objects, Selector::Bound { .. })
-            && matches!(&instruction.action, Action::Move { movement, reason: MoveReason::Put, .. }
-                if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery }))
+        let characters = if matches!(objects, Selector::Bound { .. })
+            && (matches!(instruction.action, Action::Banish { .. })
+                || matches!(&instruction.action, Action::Move { movement, reason: MoveReason::Put, .. }
+                    if movement.to == (MoveDestination::Owners { zone: OwnerZone::Cemetery })))
         {
             members
                 .iter()

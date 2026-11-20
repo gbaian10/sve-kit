@@ -156,6 +156,16 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 自己的公開場上材料可以命名為頭成本的 `result`，再用 `choice.upto: {count_of: materials}` 讀宣告張數。
 先宣告材料再選模式，之後才一併付款。模式上限以印刷選項數為限，宣告零張時略過模式選擇。
 
+以 `banish` 支付自己的單一墓場從者後，`power_of: {objects_of: material, view: before}`
+讀取該次成功付款所保留的攻擊力。各模式只能讀自己的付款結果。
+
+入場曲可用 `did: {result: {entry_payment: additional}, where: {name: X, zone: field}}`
+讀取本次打出所付且確實到達墓場的材料。條件查付款前的來源區與卡名。
+
+`pay.cost.pp_max` 以正整數支付 PP 最大值。付款不足時跳過付款本文；成功時，當前 PP 隨新的最大值下修。
+`cost.to_deck: {sel: {who: self, zone: cemetery}, n: N, shuffle: true}` 需要指定張數全數進入牌庫，再洗整副牌庫。
+`cost.discard: {sel: {who: self, zone: hand}, n: N, random: true}` 需要足量手牌，在付款時抽樣，且沿用付款回滾。
+
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：
 
@@ -364,7 +374,7 @@ name:
 
 起動成本的 `act` 素材可寫 `{any: true, cost_sum_ge: N, sel: {...}}` 表示「元のコストの合計がN以上になるように好きな枚數アクト」（BP11-P30）：出題時若全部候選合計仍不足 N 就不能起動，作答時合計不足的組合拒絕、題目不變；原費取印刷資料。其他素材動作、固定張數與交換付款不接受此欄。操縦中的乘物護符除【疾走】外也接受印刷的【突進】。
 
-`play.additional_cost` 在卡片宣告打出前必須完整支付，沿用能力費用的 `Cost` 操作與素材選擇；付不起或素材不合法時整次打出取消。目前限法術，且不與模式付款或能力頭的可選付款並用。已接通自己場上素材的送墓／橫置、自己公開 EX／墓場素材的消滅，可用 `steps` 保留多組成本的順序。這不是可選付款，也不會在效果結算時才收費。`result` 可供同次法術本文以 `paid: {receipt: 名稱}` 讀取；指定進場素材條件、私有手牌材料與 Quick 預檢仍須各自的支援入口。
+`play.additional_cost` 適用於法術、從者與護符。沿用 `Cost` 宣告材料並於打出時完整付款；付不起或材料不合法時取消打出。自己的場上材料可以送墓／橫置，公開 EX／墓場材料可以消滅。以 `steps` 保留多組成本的順序。法術本文可用 `paid: {receipt: 名稱}` 讀取同次打出的具名付款，入場曲可讀取本次追加費用中從場上送墓的材料卡名。私有手牌材料與 Quick 預檢依各自的入口處理。
 
 數值算式接受 `plus`、`minus`、`times`（各恰兩項）、`min`（非空列表）與 `per: {of, unit}`。`per` 是「N 枚につき」：`of` 除以正整數 `unit` 後向下取整（負數往負無限大取整），`unit` 為零在載入時拒絕；有號溢位使整個指示失敗、不改變局面。`max` 與 `half_up` 尚未接線。傷害事件頭（`damaged`／`dealt_damage`）的本文可用 `{event: amount}` 讀該次實際傷害值；其他事件頭、起動與入場曲不提供此讀值，`{event: value}` 亦未接線。
 

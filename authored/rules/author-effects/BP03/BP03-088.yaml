@@ -1,0 +1,19 @@
+format: 2
+kind: author_effect_set
+cards:
+  BP03-088:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        keywords: [rush]
+      - line: 2
+        fanfare:
+          cost:
+            discard: { sel: { who: self, zone: hand }, n: 1, random: true }
+          do:
+            - buff: { on: this, power: 1 }
+            - grant: { on: this, keywords: [drain] }

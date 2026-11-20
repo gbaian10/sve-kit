@@ -338,6 +338,9 @@ fn lower_operations(
             ast::CostOperation::Discard(ast::DiscardCost::Groups(material)) => {
                 super::hand_payment::grouped(context.card_allocator, material, path)?
             }
+            ast::CostOperation::Discard(ast::DiscardCost::Random(material)) => {
+                context.random_discard_cost(material.n, path)?
+            }
             ast::CostOperation::PpMax(amount) if *amount > 0 => Action::Resource {
                 player: PlayerRef::Controller {},
                 resource: Resource::PpMaximum,

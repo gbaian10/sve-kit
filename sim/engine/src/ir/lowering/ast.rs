@@ -339,11 +339,31 @@ pub(super) struct RevealedSelection {
 #[serde(untagged, deny_unknown_fields)]
 pub(super) enum DiscardCost {
     Material(Box<HandMaterial>),
+    Random(RandomDiscardCost),
     Groups(Box<HandMaterialGroups>),
     Reference {
         r#ref: String,
         result: Option<String>,
     },
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct RandomDiscardCost {
+    #[serde(rename = "sel")]
+    pub _sel: OwnHand,
+    pub n: u64,
+    #[serde(rename = "random")]
+    pub _random: True,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct OwnHand {
+    #[serde(rename = "who")]
+    pub _who: SelfPlayer,
+    #[serde(rename = "zone")]
+    pub _zone: HandZone,
 }
 
 #[derive(Deserialize)]
