@@ -122,8 +122,8 @@ Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另�
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
   "vars": {
     "SITE_ORIGIN": "https://dev.svekit.app",
-    "CARD_REPORT_GITHUB_APP_ID": "",
-    "CARD_REPORT_GITHUB_INSTALLATION_ID": ""
+    "REPORT_GITHUB_APP_ID": "5853202",
+    "REPORT_GITHUB_INSTALLATION_ID": "184135707"
   },
   "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
   "ratelimits": [
@@ -346,19 +346,19 @@ CORS error，須先個別登入該網域，工作階段到期後也須重新登�
 
 維護者前置設定如下。
 
-1. 在 `gbaian10/sve-kit` 建立 `card-report` 標籤。建立或指定 GitHub App，
+1. 在 `gbaian10/sve-kit` 建立 `card-report` 標籤。代開 issue 的 GitHub App 是 `sve-kit-report`
+   （App ID `5853202`），開發與正式共用，之後其他類型的回報也沿用並以標籤區分；
    安裝範圍只選 `sve-kit`，repository permissions 設定 **Issues: Read and write**。
-   維護者在 `sim/web/wrangler.dev.jsonc` 的 `vars` 中填入數值 App ID 與
-   installation ID，分別對應 `CARD_REPORT_GITHUB_APP_ID`、
-   `CARD_REPORT_GITHUB_INSTALLATION_ID`，以字串保存。開發站的 `SITE_ORIGIN`
+   App ID 與 installation ID 已以字串填在 `sim/web/wrangler.dev.jsonc` 的 `vars`，
+   分別對應 `REPORT_GITHUB_APP_ID`、`REPORT_GITHUB_INSTALLATION_ID`。開發站的 `SITE_ORIGIN`
    已在同一處設為 `https://dev.svekit.app`。以下兩種憑證使用 `wrangler secret put`。
-2. 將 App 私鑰以 **PKCS#8 PEM** 放入 Worker secret `CARD_REPORT_GITHUB_PRIVATE_KEY`。
+2. 將 App 私鑰以 **PKCS#8 PEM** 放入 Worker secret `REPORT_GITHUB_PRIVATE_KEY`。
    GitHub 下載的 PKCS#1 PEM 可由維護者在本機以管線轉換並輸入 Wrangler，
    先把 `GITHUB_APP_PEM` 指向剛下載的私鑰檔，再於 `sim/web` 執行。
 
    ```bash
    openssl pkcs8 -topk8 -nocrypt -in "$GITHUB_APP_PEM" |
-     bun x wrangler secret put CARD_REPORT_GITHUB_PRIVATE_KEY --config wrangler.dev.jsonc
+     bun x wrangler secret put REPORT_GITHUB_PRIVATE_KEY --config wrangler.dev.jsonc
    ```
 
    Worker 用 Web Crypto 簽 RS256 App JWT，每次回報換取限 `sve-kit` 與
