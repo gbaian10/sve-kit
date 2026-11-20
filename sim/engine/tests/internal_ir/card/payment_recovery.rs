@@ -365,9 +365,9 @@ fn a_failed_required_head_payment_matches_decline_without_reviving_the_occurrenc
 }
 
 #[test]
-fn random_costs_are_rejected_before_any_payment_or_revelation() {
+fn random_discard_from_the_opponents_hand_cannot_pay_a_cost() {
     for quick in [false, true] {
-        let mut header = json!({"activate":{"cost":{"pp":0},"do":[{"discard":{"who":"self","n":1,"random":true}}]}});
+        let mut header = json!({"activate":{"cost":{"pp":0},"do":[{"discard":{"who":"opponent","n":1,"random":true}}]}});
         if quick {
             header["activate"]["quick"] = json!(true);
         }

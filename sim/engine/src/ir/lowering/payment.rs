@@ -506,13 +506,13 @@ fn lower_operations(
             }),
         });
         if matches!(operation, ast::CostOperation::ToDeck(_)) {
-            let id = context.card_allocator.id(path)?;
+            let shuffle_id = context.card_allocator.id(path)?;
             steps.push(CostStep {
                 keyword: None,
                 materials: None,
                 instruction: Box::new(Instruction {
-                    id: InstructionId(id),
-                    receipt: ReceiptId(id),
+                    id: InstructionId(shuffle_id),
+                    receipt: ReceiptId(shuffle_id),
                     actor: PlayerRef::Controller {},
                     source: source.clone(),
                     precondition: None,

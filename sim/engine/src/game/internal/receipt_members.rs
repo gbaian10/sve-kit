@@ -2,6 +2,7 @@
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::paid_names as ir_paid_names;
+use crate::ir::receipt_reads::paid_movement_id;
 use crate::ir::{
     CardKind, CardName, Characteristics, ClassId, DestroyOutcome, DiscardOutcome, Info, Int,
     MaterialActOutcome, MemberProjection, MoveMethod, MoveOutcome, MoveResult, MovementReceipt,
@@ -442,8 +443,8 @@ pub(super) fn paid_material_number(
     receipt: &MovementReceipt,
     property: NumericProperty,
 ) -> Result<Int> {
-    let id = crate::ir::receipt_reads::paid_movement_id(receipt)
-        .ok_or_else(|| unsupported("paid material number receipt"))?;
+    let id =
+        paid_movement_id(receipt).ok_or_else(|| unsupported("paid material number receipt"))?;
     PaidMembers::load(execution, id, "missing material payment")?.number(property)
 }
 

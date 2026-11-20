@@ -1,10 +1,6 @@
 use super::*;
 
 #[test]
-#[expect(
-    clippy::panic,
-    reason = "The declared materials are a required payment question."
-)]
 fn colossus_shuffles_five_graveyard_cards_into_the_whole_deck_before_dealing_damage() {
     let mut initial = position_with_source("BP05-067", "hand");
     initial["players"]["P1"]["zones"]["cemetery"] = json!(cards("fee", "BP01-171", 5));
@@ -26,18 +22,18 @@ fn colossus_shuffles_five_graveyard_cards_into_the_whole_deck_before_dealing_dam
     let InputDomain::CostMaterials(domain) = &q.domain else {
         panic!("the cost requires five cards from the cemetery");
     };
-    let play = game
+    let paid = game
         .answer_internal_card(
             q.actor,
             q.token,
             Answer::CostMaterials(domain.members.iter().map(|member| member.handle).collect()),
         )
         .unwrap();
-    drop(accept(&mut game, play));
+    drop(accept(&mut game, paid));
     checks(&mut game);
 
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["cemetery"], json!([]));
     assert_eq!(after["P1"]["deck"], shuffled);
-    assert_eq!(after["objects"]["enemy"]["damage"], 5);
+    assert_eq!(after["objects"]["enemy"]["damage"], 5_i64);
 }

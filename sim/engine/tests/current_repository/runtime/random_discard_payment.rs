@@ -20,6 +20,6 @@ fn demonic_piper_pays_a_random_hand_card_before_gaining_attack_and_drain() {
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["hand"].as_array().unwrap().len(), 1);
     assert_eq!(after["P1"]["cemetery"].as_array().unwrap().len(), 1);
-    assert_eq!(after["objects"]["source"]["power"], 4);
+    assert_eq!(after["objects"]["source"]["power"], 4_i64);
     assert!(has_keyword(&after, "source", "ドレイン"));
 }

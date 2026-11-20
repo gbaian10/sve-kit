@@ -1,7 +1,6 @@
 use super::*;
 
 #[test]
-#[expect(clippy::panic, reason = "The declared materials and the search use distinct questions.")]
 fn machine_god_banishes_three_materials_then_resolves_two_selected_modes() {
     let mut initial = position_with_source("BP07-103", "hand");
     initial["players"]["P1"]["zones"]["cemetery"] = json!(cards("fee", "BP07-047", 3));
@@ -11,27 +10,47 @@ fn machine_god_banishes_three_materials_then_resolves_two_selected_modes() {
     ]);
     let mut game = game(&initial);
     let mode = await_card_choice(enter_with_fanfare(&mut game, "BP07-103"));
-    let play = game.answer_internal_card(
-        mode.actor, mode.token, Answer::Modes(vec![ModeId(3), ModeId(4)]),
-    ).unwrap();
-    let q = await_card_choice(accept(&mut game, play));
-    let InputDomain::CostMaterials(domain) = &q.domain else {
+    let play = game
+        .answer_internal_card(
+            mode.actor,
+            mode.token,
+            Answer::Modes(vec![ModeId(3), ModeId(4)]),
+        )
+        .unwrap();
+    let materials = await_card_choice(accept(&mut game, play));
+    let InputDomain::CostMaterials(material_domain) = &materials.domain else {
         panic!("the chosen modes share the head cost");
     };
-    let play = game.answer_internal_card(
-        q.actor, q.token, Answer::CostMaterials(domain.members.iter().map(|member| member.handle).collect()),
-    ).unwrap();
-    let q = await_card_choice(play);
-    let InputDomain::Search(domain) = &q.domain else {
+    let paid = game
+        .answer_internal_card(
+            materials.actor,
+            materials.token,
+            Answer::CostMaterials(
+                material_domain
+                    .members
+                    .iter()
+                    .map(|member| member.handle)
+                    .collect(),
+            ),
+        )
+        .unwrap();
+    let search_question = await_card_choice(paid);
+    let InputDomain::Search(domain) = &search_question.domain else {
         panic!("the fourth mode searches the deck");
     };
     assert_eq!(domain.cards.len(), 1);
-    let play = game.answer_internal_card(q.actor, q.token, Answer::Search(search(domain))).unwrap();
-    drop(play);
+    drop(
+        game.answer_internal_card(
+            search_question.actor,
+            search_question.token,
+            Answer::Search(search(domain)),
+        )
+        .unwrap(),
+    );
     checks(&mut game);
 
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["banish"].as_array().unwrap().len(), 3);
     assert_eq!(after["P1"]["hand"], json!(["found"]));
-    assert_eq!(after["P2"]["leader"]["life"], 17);
+    assert_eq!(after["P2"]["leader"]["life"], 17_i64);
 }

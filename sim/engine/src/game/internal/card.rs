@@ -25,6 +25,7 @@ use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::repeated_moves as ir_repeated_moves;
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::shuffle;
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::trigger_restrictions as trigger_permission;
 use crate::ir::{
@@ -905,6 +906,10 @@ impl Game {
         })
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Cost actions share one dispatch for successful quantities and frozen materials."
+    )]
     fn internal_payment_step(
         &mut self,
         execution: &mut Execution,
@@ -927,7 +932,7 @@ impl Game {
                 Vec::new(),
                 Vec::new(),
             ),
-            action if crate::ir::shuffle::payment(action) => {
+            action if shuffle::payment(action) => {
                 self.internal_shuffle(execution, &step.instruction)?;
                 (
                     Quantity {
@@ -1462,7 +1467,7 @@ pub(super) fn check_payment(
             Action::Counter { .. } => super::counters::check_cost(&instruction.action, play),
             Action::Discard { .. } => hand_payment::check_cost(&instruction.action),
             Action::Fusion { .. } => fusion::check_cost(&instruction.action),
-            action if crate::ir::shuffle::payment(action) => !quick,
+            action if shuffle::payment(action) => !quick,
             action if hand_payment::source_to_ex(action) => true,
             action => material::check_cost(action, play),
         };

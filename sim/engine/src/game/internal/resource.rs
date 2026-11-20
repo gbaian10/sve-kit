@@ -86,14 +86,20 @@ impl Game {
         if before < amount.0 {
             return Err(EngineFailure::IllegalPlay("insufficient maximum PP".into()));
         }
-        let after = before - amount.0;
+        let after = before
+            .checked_sub(amount.0)
+            .ok_or_else(|| invalid("maximum PP payment overflow"))?;
+        let delta = amount
+            .0
+            .checked_neg()
+            .ok_or_else(|| invalid("maximum PP payment overflow"))?;
         pp["max"] = json!(after);
         pp["current"] = json!(current.min(after));
         let frame = execution.frame();
         let group = self.group();
         self.emit(
             json!({"kind":"PP最大値変化","player":seat,"source":frame.source,
-                "delta":-amount.0,"before":before,"after":after}),
+                "delta":delta,"before":before,"after":after}),
             &frame.cause,
             group,
         );

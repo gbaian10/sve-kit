@@ -3,7 +3,7 @@ use super::*;
 #[test]
 fn phoenix_empress_spends_maximum_pp_to_return_acted() {
     let mut initial = position_with_source("BP06-058", "field");
-    initial["players"]["P1"]["pp"] = json!({"current":1,"max":1});
+    initial["players"]["P1"]["pp"] = json!({"current":1_i64,"max":1_i64});
     let mut game = with_producer(
         &initial,
         Action::Destroy {
@@ -16,8 +16,8 @@ fn phoenix_empress_spends_maximum_pp_to_return_acted() {
     checks(&mut game);
 
     let after = game.projection(View::Referee).unwrap();
-    assert_eq!(after["P1"]["pp"]["max"], 0);
-    assert_eq!(after["P1"]["pp"]["current"], 0);
+    assert_eq!(after["P1"]["pp"]["max"], 0_i64);
+    assert_eq!(after["P1"]["pp"]["current"], 0_i64);
     assert_eq!(after["P1"]["field"], json!(["source"]));
     assert_eq!(after["objects"]["source"]["acted"], true);
 }

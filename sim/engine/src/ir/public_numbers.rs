@@ -88,8 +88,8 @@ pub(super) fn hand_count(selector: &Selector) -> bool {
         && players.relative_to == (PlayerRef::Controller {})
         && **predicate == Expr::Literal(Bool(true)))
 }
-pub(crate) fn material_target_limit(value: &Expr<Int>) -> Option<Binding<Selector>> {
-    match value {
+pub(crate) fn material_target_limit(expression: &Expr<Int>) -> Option<Binding<Selector>> {
+    match expression {
         Expr::Compute(operation) => match operation.as_ref() {
             IntOperation::FromNat { value } => material_count(value),
             _ => None,

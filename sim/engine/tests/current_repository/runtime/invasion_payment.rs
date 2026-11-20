@@ -12,10 +12,16 @@ fn corpses_paid_to_each_invasion_mode_supply_their_own_attack() {
         {"id":"second","card":"BP05-057"}
     ]);
     let mut game = game(&initial);
-    let play = game.play_internal_card("source", PlayerId { seat: 1 }).unwrap();
-    let mode = await_card_choice(play);
+    let mode = await_card_choice(
+        game.play_internal_card("source", PlayerId { seat: 1 })
+            .unwrap(),
+    );
     let play = game
-        .answer_internal_card(mode.actor, mode.token, Answer::Modes(vec![ModeId(1), ModeId(2)]))
+        .answer_internal_card(
+            mode.actor,
+            mode.token,
+            Answer::Modes(vec![ModeId(1), ModeId(2)]),
+        )
         .unwrap();
     let play = accept(&mut game, play);
     let play = choose_card_by_number(&mut game, play, "BP03-055");
@@ -26,7 +32,7 @@ fn corpses_paid_to_each_invasion_mode_supply_their_own_attack() {
     checks(&mut game);
 
     let after = game.projection(View::Referee).unwrap();
-    assert_eq!(after["objects"]["first"]["damage"], 4);
-    assert_eq!(after["objects"]["second"]["damage"], 2);
+    assert_eq!(after["objects"]["first"]["damage"], 4_i64);
+    assert_eq!(after["objects"]["second"]["damage"], 2_i64);
     assert_eq!(after["P1"]["banish"], json!(["nightmare", "other"]));
 }

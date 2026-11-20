@@ -12,13 +12,13 @@ fn phantom_blaster_dragon_evolves_from_its_committed_additional_material() {
     let play = choose_card_by_number(&mut game, play, "CP03-086");
     assert!(matches!(accept(&mut game, play), CardPlay::Entered(_)));
     checks(&mut game);
-    let play = resolve_pending_card(&mut game, "CP03-084");
-    let play = choose_card_by_number(&mut game, play, "CP03-085");
-    drop(accept(&mut game, play));
+    let fanfare = resolve_pending_card(&mut game, "CP03-084");
+    let fanfare = choose_card_by_number(&mut game, fanfare, "CP03-085");
+    drop(accept(&mut game, fanfare));
     checks(&mut game);
 
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["cemetery"], json!(["fee"]));
     assert_eq!(after["objects"]["source"]["evolved_with"], "form");
-    assert_eq!(after["P1"]["pp"]["current"], 7);
+    assert_eq!(after["P1"]["pp"]["current"], 7_i64);
 }

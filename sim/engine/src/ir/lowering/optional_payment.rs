@@ -170,10 +170,14 @@ impl BodyContext<'_> {
         let Some(ast::Cost::Short(operation)) = &body.head_cost else {
             return Ok(None);
         };
-        let material = match operation.as_ref() {
-            ast::CostOperation::Act(material) => material,
-            ast::CostOperation::Banish(ast::BanishMaterial::Public(material)) => material.as_ref(),
-            _ => return Ok(None),
+        let material = if let ast::CostOperation::Act(material) = operation.as_ref() {
+            material
+        } else if let ast::CostOperation::Banish(ast::BanishMaterial::Public(material)) =
+            operation.as_ref()
+        {
+            material.as_ref()
+        } else {
+            return Ok(None);
         };
         let Some(name) = &material.result else {
             return Ok(None);

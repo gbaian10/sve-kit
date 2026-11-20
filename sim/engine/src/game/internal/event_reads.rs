@@ -2,6 +2,7 @@
 
 use super::source::{EventObject, SourceSnapshot};
 use super::{Result, invalid, unsupported};
+use crate::ir::AdditionalMaterial;
 use crate::ir::events::banish as banish_header;
 use crate::ir::events::discard as discard_header;
 use crate::ir::events::drive as drive_header;
@@ -27,7 +28,7 @@ enum Context {
         method: EntryMethod,
         origin: EntryOrigin,
         source_traits: Option<Vec<TraitId>>,
-        additional_materials: Vec<crate::ir::AdditionalMaterial>,
+        additional_materials: Vec<AdditionalMaterial>,
     },
     Attack {
         subject: EventObject,
@@ -223,7 +224,7 @@ impl EventReads {
     pub(super) fn entry_additional_materials(
         &self,
         binding: Binding<EnterFieldEvent>,
-    ) -> Option<&[crate::ir::AdditionalMaterial]> {
+    ) -> Option<&[AdditionalMaterial]> {
         match &self.0 {
             Context::Entry {
                 binding: saved,

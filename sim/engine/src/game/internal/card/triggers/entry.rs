@@ -233,6 +233,10 @@ impl Game {
         (original, effective)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Each entry fact shares one immutable context across its trigger observers."
+    )]
     pub(in crate::game) fn internal_field_events(
         &mut self,
         previous: &[Object],

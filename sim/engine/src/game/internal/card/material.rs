@@ -15,6 +15,7 @@ use crate::game::internal::{
 use crate::game::legal::subsets;
 use crate::ir::quick::{card_permission, is_printed_quick};
 use crate::ir::reveal_cost as reveal_payment;
+use crate::ir::shuffle::{self, Placement};
 use crate::ir::{
     AbilityKind, Action, Binding, Cardinality, Characteristics, ChoiceDomain, CostSpec, Decision,
     DecisionId, DecisionKind, Disjointness, ExecutionRef, InputMode, Instruction, Int,
@@ -620,10 +621,7 @@ fn cost_zone(action: &Action, zone: ZoneKind) -> bool {
     match action {
         Action::Banish { .. } => true,
         Action::Posture { .. } => zone == ZoneKind::Field,
-        action
-            if crate::ir::shuffle::placement(action)
-                == Some(crate::ir::shuffle::Placement::Return) =>
-        {
+        action if shuffle::placement(action) == Some(Placement::Return) => {
             zone == ZoneKind::Cemetery
         }
         Action::Move { movement, .. } if matches!(movement.to, MoveDestination::Shared { .. }) => {
@@ -1180,10 +1178,7 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
 fn cost_destination(action: &Action) -> Result<(&'static str, ZoneKind, MoveMethod)> {
     match action {
         Action::Banish { .. } => Ok(("banish", ZoneKind::Banish, MoveMethod::Banish)),
-        action
-            if crate::ir::shuffle::placement(action)
-                == Some(crate::ir::shuffle::Placement::Return) =>
-        {
+        action if shuffle::placement(action) == Some(Placement::Return) => {
             Ok(("deck", ZoneKind::Deck, MoveMethod::Put))
         }
         Action::Move { movement, .. }

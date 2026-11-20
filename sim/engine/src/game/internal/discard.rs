@@ -502,7 +502,7 @@ impl Game {
 
     pub(super) fn internal_random_discard_members(
         &mut self,
-        execution: &mut Execution,
+        execution: &Execution,
         action: &Action,
         required: bool,
     ) -> Result<Vec<ObjectRef>> {
