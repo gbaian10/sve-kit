@@ -24,11 +24,11 @@ fn tanzanite_convictor_checks_current_friendly_hp_for_its_fanfare() {
     drop(resolved(enter_with_fanfare(&mut below_threshold, "BP10-097")));
     checks(&mut below_threshold);
 
-    let state = below_threshold.projection(View::Referee).unwrap();
-    assert_eq!(state["objects"]["ally"]["hp"], 6_u8);
-    assert_eq!(state["objects"]["ally"]["max_hp"], 9_u8);
-    assert_eq!(state["P2"]["field"], json!(["low", "high"]));
-    assert_eq!(state["P2"]["cemetery"], json!([]));
-    assert_eq!(state["objects"]["low"]["hp"], 4_u8);
-    assert_eq!(state["objects"]["high"]["hp"], 8_u8);
+    let below_threshold_state = below_threshold.projection(View::Referee).unwrap();
+    assert_eq!(below_threshold_state["objects"]["ally"]["hp"], 6_u8);
+    assert_eq!(below_threshold_state["objects"]["ally"]["max_hp"], 9_u8);
+    assert_eq!(below_threshold_state["P2"]["field"], json!(["low", "high"]));
+    assert_eq!(below_threshold_state["P2"]["cemetery"], json!([]));
+    assert_eq!(below_threshold_state["objects"]["low"]["hp"], 4_u8);
+    assert_eq!(below_threshold_state["objects"]["high"]["hp"], 8_u8);
 }
