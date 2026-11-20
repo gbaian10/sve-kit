@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  ECP02-045:
+    admission: light
+    meta:
+      written_by:
+        - actor: { who: Codex, model: gpt-6.2-sol }
+          date: "2026-11-20"
+    abilities:
+      - line: 1
+        auto:
+          "on": { phase: { whose: self, which: end } }
+          targets:
+            - bind: ally
+              from: { who: self, zone: field, kind: follower }
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left: { count: { who: self, zone: cemetery, trait: キュート } }
+                    op: ge
+                    right: 5
+                then:
+                  - buff: { "on": ally, hp: 2 }
+      - line: 2
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  trait: デレマス
+                  as: candidate
+                  where: { cmp: { left: { power_of: candidate }, op: eq, right: 1 } }
+                n: 1
+                to: hand

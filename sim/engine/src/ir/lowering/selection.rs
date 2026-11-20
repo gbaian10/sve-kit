@@ -973,7 +973,7 @@ fn numeric_limits(
     predicates
 }
 
-fn number_limit(
+pub(super) fn number_limit(
     information: super::super::NumberRead,
     comparison: super::super::Comparison,
     limit: u64,

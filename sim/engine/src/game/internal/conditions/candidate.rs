@@ -131,7 +131,16 @@ impl Reader for Candidate<'_> {
             NumberProperty::Cost(CharacteristicView::Effective) => {
                 self.game.internal_effective_cost(self.id)?
             }
-            NumberProperty::Stat(property) if self.policy != Policy::Search => {
+            NumberProperty::Stat(CharacteristicView::Original, Stat::Attack) => {
+                let power = self.game.face(self.id)?["power"].as_str();
+                return power
+                    .filter(|value| *value != "-")
+                    .map(|value| value.parse().map_err(invalid))
+                    .transpose();
+            }
+            NumberProperty::Stat(CharacteristicView::Effective, property)
+                if self.policy != Policy::Search =>
+            {
                 if self.game.object(self.id)?.zone != "field"
                     || !self.game.object_type(self.id)?.contains("フォロワー")
                 {
@@ -139,7 +148,7 @@ impl Reader for Candidate<'_> {
                 }
                 self.game.internal_numeric_stat(self.id, *property)?
             }
-            NumberProperty::Stat(Stat::Attack) => {
+            NumberProperty::Stat(CharacteristicView::Effective, Stat::Attack) => {
                 if self.game.object_type(self.id)?.contains("フォロワー") {
                     self.game.object(self.id)?.state["power"]
                         .as_i64()

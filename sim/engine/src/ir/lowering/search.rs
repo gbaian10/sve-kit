@@ -3,7 +3,7 @@ use super::super::{
     Disjointness, Effect, FollowPermission, InstallationSubjects, InstallationTime, KindRead,
     MoveDestination, MoveSpec, MovementReceipt, NamesRead, NumberRead, ObjectProperty, ObjectRef,
     OwnerZone, Posture, ReceiptReference, SearchContinuation, SearchDestination, SearchFound,
-    SearchPartition, SelectionConstraint, SelectionGroup, TraitId, TraitsRead, ZoneRef,
+    SearchPartition, SelectionConstraint, SelectionGroup, Stat, TraitId, TraitsRead, ZoneRef,
 };
 use super::groups::{Groups, TotalBounds};
 use super::{
@@ -92,18 +92,37 @@ fn query_filter(
                 .ok_or_else(|| unsupported(path))?,
         );
     }
-    filter.power_at_most = match (&query.alias, &query.r#where) {
+    let original_power = match (&query.alias, &query.r#where) {
         (None, None) => None,
         (Some(alias), Some(condition))
-            if !alias.is_empty()
-                && condition.cmp.left.power_of == *alias
-                && matches!(condition.cmp.op, ast::Comparison::Le) =>
+            if !alias.is_empty() && condition.cmp.left.power_of == *alias =>
         {
-            Some(condition.cmp.right)
+            match condition.cmp.op {
+                ast::Comparison::Le => {
+                    filter.power_at_most = Some(condition.cmp.right);
+                    None
+                }
+                ast::Comparison::Eq => Some(condition.cmp.right),
+                _ => return Err(unsupported(path)),
+            }
         }
         _ => return Err(unsupported(path)),
     };
     let mut predicate = super::selection::field_filter(&filter, candidate);
+    if let Some(limit) = original_power {
+        let attack = super::selection::number_limit(
+            NumberRead::Stats {
+                object: view(candidate),
+                view: CharacteristicView::Original,
+                property: Stat::Attack,
+            },
+            Comparison::Equal,
+            limit,
+        );
+        predicate = Expr::Compute(Box::new(Predicate::And {
+            predicates: vec![predicate, attack],
+        }));
+    }
     if let Some(ast::SearchName::SameAs { same_as }) = &query.name {
         let names = context.paid_name_filter(same_as, candidate, path)?;
         predicate = if predicate == Expr::Literal(Bool(true)) {

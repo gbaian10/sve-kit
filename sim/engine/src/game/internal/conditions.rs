@@ -38,7 +38,7 @@ pub(super) enum BooleanProperty {
 #[derive(Clone, Debug)]
 pub(super) enum NumberProperty {
     Cost(CharacteristicView),
-    Stat(Stat),
+    Stat(CharacteristicView, Stat),
     Counter(CounterKind),
 }
 
@@ -272,8 +272,19 @@ fn number(
         } if candidate(object, binding)
             && (policy != Policy::Search || *property == Stat::Attack) =>
         {
-            Some(NumberProperty::Stat(*property))
+            Some(NumberProperty::Stat(
+                CharacteristicView::Effective,
+                *property,
+            ))
         }
+        NumberRead::Stats {
+            object,
+            view: CharacteristicView::Original,
+            property: Stat::Attack,
+        } if policy == Policy::Search && candidate(object, binding) => Some(NumberProperty::Stat(
+            CharacteristicView::Original,
+            Stat::Attack,
+        )),
         _ => None,
     }
 }
