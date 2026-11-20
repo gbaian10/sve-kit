@@ -525,7 +525,8 @@ impl Game {
         let action = &route_step(exchange, index)?.action;
         let posture = matches!(action, Action::Posture { .. });
         let counter = matches!(action, Action::Counter { .. });
-        let token_put = execution.field_entry && exchange_shape::field_put_route(exchange, index);
+        let field_put = exchange_shape::field_put_route(exchange, index);
+        let token_put = execution.field_entry && field_put;
         let zone = match zone {
             ZoneKind::Field => "field",
             ZoneKind::Cemetery => "cemetery",
@@ -563,10 +564,11 @@ impl Game {
                 && (object.controller != controller
                     || (!posture && !token_put && self.object_type(&id)?.contains("トークン"))
                     || self.object_type(&id)?.contains("アドバンス")
-                    || object
-                        .state
-                        .get("evolved_with")
-                        .is_some_and(|value| !value.is_null())
+                    || (!field_put
+                        && object
+                            .state
+                            .get("evolved_with")
+                            .is_some_and(|value| !value.is_null()))
                     || object
                         .state
                         .get("links")
@@ -595,18 +597,20 @@ impl Game {
         Ok(members)
     }
 
-    pub(in crate::game::internal) fn internal_exchange_token_cost_authorized(
+    pub(in crate::game::internal) fn internal_exchange_field_put_authorized(
         &self,
         execution: &Execution,
         id: &str,
         destination: &str,
+        has_evolution: bool,
     ) -> Result<bool> {
         if !execution.field_entry
             || destination != "cemetery"
-            || !matches!(
-                self.object_type(id)?,
-                "フォロワー・トークン" | "アミュレット・トークン"
-            )
+            || !(has_evolution
+                || matches!(
+                    self.object_type(id)?,
+                    "フォロワー・トークン" | "アミュレット・トークン"
+                ))
         {
             return Ok(false);
         }

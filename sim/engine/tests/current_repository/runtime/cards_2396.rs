@@ -1,17 +1,15 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected payment questions invalidate the scenario."
-)]
-
 use super::*;
 use sve_engine::game::player::SubmissionKind;
 
 #[test]
 fn phantom_blaster_overlord_replaces_original_pp_with_its_named_follower() {
     let mut initial = position_with_source("CP03-083", "hand");
-    initial["players"]["P1"]["pp"] = json!({"current": 1, "max": 1});
-    initial["players"]["P1"]["zones"]["field"] =
-        json!([{"id":"fee","card":"CP03-084"}, {"id":"other","card":"CP03-086"}]);
+    initial["players"]["P1"]["pp"] = json!({"current": 1_u8, "max": 1_u8});
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"fee","card":"CP03-084","state":{"evolved":true,"evolved_with":"form"}},
+        {"id":"other","card":"CP03-086"}
+    ]);
+    initial["players"]["P1"]["zones"]["evolution"] = json!([{"id":"form","card":"CP03-085"}]);
     initial["players"]["P1"]["zones"]["cemetery"] = json!(cards("paladin", "CP03-086", 15));
     let mut game = game(&initial);
     let play = game.play_internal_card("source", actor()).unwrap();
@@ -28,12 +26,14 @@ fn phantom_blaster_overlord_replaces_original_pp_with_its_named_follower() {
             .contains(&json!("fee"))
     );
     assert_eq!(after["P1"]["field"], json!(["other", "source"]));
+    assert_eq!(after["P1"]["evolve_deck"], json!(["form"]));
+    assert_eq!(after["P1"]["evolution"], json!([]));
 }
 
 #[test]
 fn dragon_mountain_spell_pays_two_spring_counters_before_resolving() {
     let mut initial = position_with_source("BP14-063", "hand");
-    initial["players"]["P1"]["pp"] = json!({"current": 2, "max": 2});
+    initial["players"]["P1"]["pp"] = json!({"current": 2_u8, "max": 2_u8});
     initial["players"]["P1"]["zones"]["field"] = json!([
         {"id":"pool","card":"BP14-059","state":{"counters":{"神湯カウンター":2_u8}}},
         {"id":"shallow","card":"BP14-059","state":{"counters":{"神湯カウンター":1_u8}}}
@@ -78,7 +78,7 @@ fn dragon_mountain_spell_pays_two_spring_counters_before_resolving() {
 #[test]
 fn new_generations_pays_nine_disjoint_cards_across_three_traits() {
     let mut initial = position_with_source("CP02-SL19a", "hand");
-    initial["players"]["P1"]["pp"] = json!({"current": 1, "max": 1});
+    initial["players"]["P1"]["pp"] = json!({"current": 1_u8, "max": 1_u8});
     let cemetery = [
         cards("cute", "CP02-014", 4),
         cards("cool", "CP02-100", 3),
@@ -122,14 +122,14 @@ fn new_generations_pays_nine_disjoint_cards_across_three_traits() {
         .rfind(|member| member.card.as_deref() == Some("CP02-014"))
         .unwrap()
         .handle;
-    let play = game
+    let entered = game
         .answer_internal_card(
             materials.actor,
             materials.token,
             Answer::CostMaterials(handles(spare)),
         )
         .unwrap();
-    assert!(matches!(accept(&mut game, play), CardPlay::Entered(_)));
+    assert!(matches!(accept(&mut game, entered), CardPlay::Entered(_)));
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P1"]["pp"]["current"], 0_i64);
     assert_eq!(after["P1"]["cemetery"].as_array().unwrap().len(), 1_usize);
@@ -140,7 +140,7 @@ fn new_generations_pays_nine_disjoint_cards_across_three_traits() {
 #[test]
 fn blazing_core_evolves_for_one_pp_and_two_named_cemetery_materials() {
     let mut initial = evolution_payment::position("CP03-066", "CP03-067");
-    initial["players"]["P1"]["pp"] = json!({"current": 1, "max": 1});
+    initial["players"]["P1"]["pp"] = json!({"current": 1_u8, "max": 1_u8});
     initial["players"]["P1"]["zones"]["cemetery"] = json!([
         {"id":"claw","card":"CP03-077"},
         {"id":"tail","card":"CP03-080"},
