@@ -15,6 +15,7 @@ from sve_carddb.domains.text_observations import (
     Binding,
     Vocabulary,
     diagnostic_exclusion_report,
+    models,
     plan_text_observations,
 )
 from sve_carddb.domains.text_observations.importer import stat
@@ -27,6 +28,7 @@ from ..registry.test_registry import inputs as inputs  # ruff: ignore[useless-im
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.build import Value
     from sve_carddb.domains.registry.review import Inputs
     from sve_carddb.domains.registry.storage import Entry
 
@@ -181,6 +183,63 @@ def test_sections_are_ordered_unknown_and_not_removed_from_diffs(
         )
         assert not db.rows("face_current")
         assert not db.rows("printing_text_section")
+
+
+def test_revision_ordinals_survive_a_hash_recipe_change(
+    tmp_path: Path, inputs: Inputs, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    raw_effects = {"BP02-071": "Raw one.", "PR-001": "Raw two."}
+    inputs.decisions.corrections = []
+    for number, effect in raw_effects.items():
+        inputs.jp[number].faces[0].text = effect
+        inputs.decisions.corrections.append(
+            Correction(
+                region="jp",
+                card_no=number,
+                field="effect",
+                expected_raw_value=effect,
+                corrected_value=f"Corrected {number}.",
+                image_sha256="sha256:" + "1" * 64,
+                locator="effect",
+                state="active",
+                reason="Synthetic correction",
+            )
+        )
+    case = make_case(tmp_path / "authored", inputs, regions=("jp",))
+    schema = compile_build(("correction",))
+    observations = case.compose()
+
+    def build_revisions() -> dict[Value, tuple[Value, Value]]:
+        with create_database(schema) as db, db.transaction():
+            case.stage(db)
+            observations.populate(
+                db, build=case.context(), vocabulary=case.vocabulary, published=()
+            )
+            return {
+                row.values["effect_unit_id"]: (row.values["id"], row.values["revision"])
+                for row in db.rows("face_revision")
+            }
+
+    def reverse_revision_hash_order(payload: bytes) -> str:
+        hashed = digest(payload)
+        if payload.startswith(b"["):
+            # Complement the revision identity's hex digits to reverse its sort order.
+            return "sha256:" + hashed.removeprefix("sha256:").translate(
+                str.maketrans("0123456789abcdef", "fedcba9876543210")
+            )
+        return hashed
+
+    before = build_revisions()
+    monkeypatch.setattr(models, "digest", reverse_revision_hash_order)
+    after = build_revisions()
+
+    assert len(before) == 4
+    assert {effect: ordinal for effect, (_, ordinal) in before.items()} == {
+        effect: ordinal for effect, (_, ordinal) in after.items()
+    }
+    assert all(
+        identifier != after[effect][0] for effect, (identifier, _) in before.items()
+    )
 
 
 def test_partial_double_face_quarantines_entire_card_region_and_all_ids(

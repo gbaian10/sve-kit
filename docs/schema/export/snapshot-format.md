@@ -235,6 +235,9 @@ DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [�
 
 ### 2.3 卡文版本與依據版本
 
+公開 `face_revision.revision` 沿用[建置端的候選編號](../build/build-db.md#4-文字現行版本與印刷原文)。
+序號的範圍是同一快照中的單一卡面與地區。版本引用使用 `face_revision.id`。
+
 各版次的日文／英文原文取該版次官網頁面的 `PrintingFace.observations`，不以共享依據版本覆寫。
 單一 available 觀測的 revision 提供該版次卡名、數值、主文與補充段落；同版次多種觀測且無可驗更新順序時列候選，不任取一筆。
 missing_effect 表示未知，不能顯示為沒有能力；correction_conflict 不作可信依據。
