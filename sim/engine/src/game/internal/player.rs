@@ -44,7 +44,7 @@ impl Wait {
             Self::Dice(_)
             | Self::Ability(_)
             | Self::Discard(_)
-            | Self::ResolutionPayment { .. }
+            | Self::ResolutionPayment(_)
             | Self::Alternative(_)
             | Self::May { .. }
             | Self::Order(_)

@@ -181,6 +181,7 @@ Rust lowering 保存已核對的型別資料，不產生對局能力。
 目前限結算時付款。
 `cost.to_deck: {sel: {who: self, zone: cemetery}, n: N, shuffle: true}` 需要指定張數全數進入牌庫，再洗整副牌庫。
 `cost.discard: {sel: {who: self, zone: hand}, n: N, random: true}` 需要足量手牌，在付款時抽樣，且沿用付款回滾。
+場上誘發能力的本文可用 `pay.cost.discard` 指定從自己的手牌支付固定張數，並依材料篩選。接受付款後由控制者私下選擇材料，足額支付才執行 `pay.do`。
 
 場上持續防傷的 `prevent.on` 接受物件分支的 `any_of`，每個分支保留自己的公開篩選與
 `not_same_name_as_this`。例如 BP21-001 的學院分支排除來源同名，獸分支仍保護同名的獸從者：

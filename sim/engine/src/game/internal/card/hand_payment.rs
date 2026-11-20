@@ -125,6 +125,21 @@ pub(super) fn check_cost(action: &Action) -> bool {
         || selection(action).is_ok()
 }
 
+pub(super) fn resolution_cost(costs: &CostSpec) -> bool {
+    let CostSpec::Ordered { steps } = costs else {
+        return false;
+    };
+    let [step] = steps.as_slice() else {
+        return false;
+    };
+    selection(&step.instruction.action).is_ok_and(|plan| {
+        !plan.source
+            && plan.groups.len() == 1
+            && plan.cardinality.minimum.0 > 0
+            && plan.cardinality.maximum == Some(plan.cardinality.minimum)
+    })
+}
+
 pub(super) fn single_additional(costs: &CostSpec) -> bool {
     let CostSpec::Ordered { steps } = costs else {
         return false;

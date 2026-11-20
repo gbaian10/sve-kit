@@ -34,7 +34,10 @@ impl BodyContext<'_> {
         }
         let maximum_pp = payer == (PlayerRef::Controller {})
             && matches!(operations, [ast::CostOperation::PpMax(n)] if *n > 0);
-        if self.auto.is_none() && !maximum_pp {
+        let discard = payer == (PlayerRef::Controller {})
+            && matches!(operations, [ast::CostOperation::Discard(ast::DiscardCost::Material(material))]
+                if material.n.is_some_and(|n| n > 0) && material.upto.is_none() && !material.any);
+        if self.auto.is_none() && !maximum_pp && !discard {
             return Err(super::unsupported(path));
         }
         // A fixed positive PP amount is the payer's own resource, so any player may pay it.
@@ -48,7 +51,7 @@ impl BodyContext<'_> {
                     ast::CostOperation::ActSelf(true) | ast::CostOperation::SelfToCemetery(true)
                 )
             });
-        if !player_pp && !source_costs && !maximum_pp {
+        if !player_pp && !source_costs && !maximum_pp && !discard {
             return Err(super::unsupported(path));
         }
         let mut play = payment::lower(self, &payment.cost, origin, path)?;

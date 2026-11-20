@@ -27,6 +27,13 @@ pub(super) struct OptionalState {
     pub(super) accepted: Option<bool>,
 }
 
+#[derive(Clone, Debug)]
+pub(in crate::game::internal) struct ResolutionPayment {
+    pub(in crate::game::internal) costs: CostSpec,
+    pub(in crate::game::internal) on_paid: Program,
+    pub(in crate::game::internal) receipt: ReceiptId,
+}
+
 pub(super) fn check_costs(control: &Control, origin: &AbilitySource) -> Result<()> {
     let Control::Pay {
         at,
@@ -105,6 +112,9 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                     ) || super::triggers::phase_in_zone(&ability.node, ZoneKind::Cemetery))
                         && resolution_costs(body, &source_resolution_cost))
                         || hand_pp_payment(&ability.node)))
+                && !(ability.node.kind == AbilityKind::Triggered
+                    && ability.node.active_zones == [ZoneKind::Field]
+                    && resolution_costs(body, &super::hand_payment::resolution_cost))
                 && !(ability.node.kind == AbilityKind::Triggered
                     && matches!(
                         &ability.node.source.origin,
@@ -346,6 +356,7 @@ fn source_resolution_cost(costs: &CostSpec) -> bool {
     earth_rite_cost(costs)
         || player_pp(costs).is_some()
         || maximum_pp(costs)
+        || super::hand_payment::resolution_cost(costs)
         || matches!(costs, CostSpec::Ordered { steps } if !steps.is_empty()
             && steps.iter().all(|cost| super::material::source_field_cost(&cost.instruction.action)))
 }
@@ -559,6 +570,7 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
         if (positive_pp(costs) && discard_return(on_paid).is_some())
             || player_pp(costs).is_some()
             || maximum_pp(costs)
+            || super::hand_payment::resolution_cost(costs)
             || (!steps.is_empty()
                 && steps
                     .iter()
@@ -616,14 +628,52 @@ impl Game {
             DecisionId(receipt.0),
             payer,
             InputDomain::OptionalCost,
-            Wait::ResolutionPayment {
+            Wait::ResolutionPayment(ResolutionPayment {
                 costs,
                 on_paid,
                 receipt,
-            },
+            }),
         )?;
         execution.question_stage = Some(QuestionStage::Pay);
         Ok(())
+    }
+
+    pub(in crate::game::internal) fn answer_resolution_payment(
+        &mut self,
+        execution: &mut Execution,
+        payment: ResolutionPayment,
+        accepted: bool,
+    ) -> Result<()> {
+        if accepted && super::hand_payment::resolution_cost(&payment.costs) {
+            match self.internal_hand_cost_materials(execution, &payment.costs) {
+                Ok(true) => {
+                    let Some((_, Wait::CostDiscard(wait))) = &mut execution.waiting else {
+                        return Err(invalid("missing resolution hand cost question"));
+                    };
+                    wait.resolution_payment = Some(Box::new(payment));
+                    execution.question_stage = Some(QuestionStage::Pay);
+                    return Ok(());
+                }
+                Ok(false) => return Err(invalid("missing resolution hand cost")),
+                Err(crate::EngineFailure::IllegalPlay(_)) => {
+                    return self.resolve_internal_payment(
+                        execution,
+                        &payment.costs,
+                        payment.on_paid,
+                        payment.receipt,
+                        false,
+                    );
+                }
+                Err(error) => return Err(error),
+            }
+        }
+        self.resolve_internal_payment(
+            execution,
+            &payment.costs,
+            payment.on_paid,
+            payment.receipt,
+            accepted,
+        )
     }
 
     pub(in crate::game::internal) fn resolve_internal_payment(

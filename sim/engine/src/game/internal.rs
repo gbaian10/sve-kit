@@ -17,7 +17,7 @@ use crate::ir::effect_evolution::Specification;
 use crate::ir::{
     AbilityChoiceKind, AbilityQualification, Action, ActionPattern, Arithmetic, Binding, Bool,
     BoxPilotMode, Capture, CaptureRef, CardName, CardQuantityOutcome, Cardinality, Characteristics,
-    ChoiceDomain, Comparison, Control, CostOverride, CostSpec, CounterChangeEvent, DamageEvent,
+    ChoiceDomain, Comparison, Control, CostOverride, CounterChangeEvent, DamageEvent,
     DamageQuantityOutcome, DamageRecipient, Decision, DecisionId, DecisionKind, Declinable,
     DestroyOutcome, DrawEvent, DriveCheckedEvent, DriveTriggerEvent, Effect, EffectId, ExecutionId,
     Expr, FlipOutcome, FusedEvent, Generation, InstallationSubjects, Instruction,
@@ -592,11 +592,7 @@ enum Wait {
         search: Option<Box<search::SingleArrival>>,
     },
     OptionalCost,
-    ResolutionPayment {
-        costs: CostSpec,
-        on_paid: Program,
-        receipt: ReceiptId,
-    },
+    ResolutionPayment(card::optional::ResolutionPayment),
     CostMaterials(card::exchange::MaterialWait),
     ExchangeRoute {
         affordable: Vec<usize>,
@@ -989,6 +985,15 @@ impl Game {
                     if let Some(declaration) = declaration {
                         processing::record_play_declaration(&mut execution, declaration);
                     }
+                    if let Some(payment) = wait.resolution_payment {
+                        self.resolve_internal_payment(
+                            &mut execution,
+                            &payment.costs,
+                            payment.on_paid,
+                            payment.receipt,
+                            true,
+                        )?;
+                    }
                 }
                 (Wait::Discard(wait), Answer::Targets(handles)) => {
                     let members = wait.validate(self, &execution, &handles)?;
@@ -1026,22 +1031,9 @@ impl Game {
                         }
                     }
                 }
-                (
-                    Wait::ResolutionPayment {
-                        costs,
-                        on_paid,
-                        receipt,
-                    },
-                    Answer::OptionalCost(accepted),
-                ) => {
+                (Wait::ResolutionPayment(payment), Answer::OptionalCost(accepted)) => {
                     rollback = execution.answer_origin(validated);
-                    self.resolve_internal_payment(
-                        &mut execution,
-                        &costs,
-                        on_paid,
-                        receipt,
-                        accepted,
-                    )?;
+                    self.answer_resolution_payment(&mut execution, payment, accepted)?;
                 }
                 (Wait::MaterialParameter(wait), Answer::CostMaterials(handles)) => {
                     let members = wait.validate(&handles)?;

@@ -1,0 +1,26 @@
+cards:
+  CP03-101:
+    abilities:
+      - line: 1
+        ride:
+          cost: { pp: 1 }
+      - drive_time:
+          do:
+            - buff: { on: this, power: 1, hp: 1 }
+            - pay:
+                cost:
+                  discard:
+                    n: 1
+                    sel: { who: self, zone: hand, trait: シャドウパラディン }
+                do:
+                  - draw: { n: 2 }
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-20"
+format: 2
+kind: author_effect_set
