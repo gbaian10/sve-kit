@@ -1,5 +1,5 @@
 use super::{
-    Execution, Game, InputDomain, PlayState, Result, Slot, Wait, int, invalid, seat_name,
+    Defer, Execution, Game, InputDomain, PlayState, Result, Slot, Wait, int, invalid, seat_name,
     unsupported,
 };
 use crate::game::player::IntegerSource;
@@ -7,6 +7,8 @@ use crate::ir::x_pp;
 use crate::ir::{
     Action, Binding, Cardinality, CostSpec, Expr, Int, Nat, PlayerRef, Resource, ResourceOperation,
 };
+
+const MAX_MAIN_X_PROBES: u64 = 16;
 
 #[derive(Default)]
 pub(super) struct Budget {
@@ -84,6 +86,81 @@ impl Game {
         let Some(binding) = x_pp::parameter(declaration) else {
             return Ok(false);
         };
+        let maximum = self.affordable_x_maximum(execution, play, binding)?;
+        let decision = play
+            .parameters
+            .pop_front()
+            .ok_or_else(|| invalid("missing X parameter"))?;
+        let Some(maximum) = maximum else {
+            execution.slots.insert(binding.key(), Slot::Natural(Nat(0)));
+            return Ok(false);
+        };
+        let bounds = Cardinality {
+            minimum: Nat(0),
+            maximum: Some(maximum),
+        };
+        self.internal_wait(
+            execution,
+            decision.id,
+            execution.context.controller,
+            InputDomain::Integer(bounds),
+            Wait::Integer {
+                binding: super::super::super::declaration::NumberBinding::Natural(binding),
+                bounds,
+                source: IntegerSource::XCost,
+                purpose: super::super::super::player::purpose(&decision.kind),
+                declaration: None,
+            },
+        )?;
+        Ok(true)
+    }
+
+    pub(super) fn main_x_targets_feasible(
+        &self,
+        execution: &Execution,
+        play: &PlayState,
+        binding: Binding<Nat>,
+    ) -> Result<bool> {
+        // Earlier choices can change the budget or introduce other X declarations.
+        if !play.modes.is_empty()
+            || play
+                .optional
+                .iter()
+                .any(|payment| payment.accepted.is_none())
+            || play
+                .parameters
+                .iter()
+                .skip(1)
+                .any(|decision| x_pp::parameter(decision).is_some())
+        {
+            return Ok(true);
+        }
+        let maximum = match self.affordable_x_maximum(execution, play, binding) {
+            Ok(maximum) => maximum.unwrap_or(Nat(0)),
+            Err(crate::EngineFailure::Unsupported(_)) => return Ok(true),
+            Err(error) => return Err(error),
+        };
+        if maximum.0 >= MAX_MAIN_X_PROBES {
+            return Ok(true);
+        }
+        let mut probe = execution.clone();
+        for value in 0..=maximum.0 {
+            probe.slots.insert(binding.key(), Slot::Natural(Nat(value)));
+            match self.internal_play_targets_feasible(&probe, play.parameters.iter(), Defer) {
+                Ok(true) | Err(crate::EngineFailure::Unsupported(_)) => return Ok(true),
+                Ok(false) | Err(crate::EngineFailure::IllegalPlay(_)) => {}
+                Err(error) => return Err(error),
+            }
+        }
+        Ok(false)
+    }
+
+    fn affordable_x_maximum(
+        &self,
+        execution: &Execution,
+        play: &PlayState,
+        binding: Binding<Nat>,
+    ) -> Result<Option<Nat>> {
         if play.exchange.is_some() || play.resource_entry.is_some() {
             return Err(unsupported("X beside card cost exchange"));
         }
@@ -118,13 +195,8 @@ impl Game {
             }
         }
         let counter_maximum = super::counter_budget::maximum(self, execution, binding, &costs)?;
-        let decision = play
-            .parameters
-            .pop_front()
-            .ok_or_else(|| invalid("missing X parameter"))?;
         if budget.copies == 0 && counter_maximum.is_none() {
-            execution.slots.insert(binding.key(), Slot::Natural(Nat(0)));
-            return Ok(false);
+            return Ok(None);
         }
         let current = int(&self.player(seat_name(execution.context.controller)?)?.pp["current"]);
         let available = current
@@ -150,23 +222,6 @@ impl Game {
             (Some(value), None) | (None, Some(value)) => value,
             (None, None) => return Err(invalid("missing X payment")),
         };
-        let bounds = Cardinality {
-            minimum: Nat(0),
-            maximum: Some(Nat(maximum)),
-        };
-        self.internal_wait(
-            execution,
-            decision.id,
-            execution.context.controller,
-            InputDomain::Integer(bounds),
-            Wait::Integer {
-                binding: super::super::super::declaration::NumberBinding::Natural(binding),
-                bounds,
-                source: IntegerSource::XCost,
-                purpose: super::super::super::player::purpose(&decision.kind),
-                declaration: None,
-            },
-        )?;
-        Ok(true)
+        Ok(Some(Nat(maximum)))
     }
 }
