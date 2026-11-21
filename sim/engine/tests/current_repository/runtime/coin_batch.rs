@@ -3,6 +3,9 @@
     reason = "The real cards declare mandatory trigger, mode and material choices."
 )]
 use super::*;
+use sve_engine::game::player::{
+    Command, Input, MainActionAnswer, MainIntentKind, QuestionShape, SubmissionKind, Viewer,
+};
 
 fn position() -> Value {
     let mut initial = draw_position();
@@ -47,6 +50,41 @@ fn assert_gold(board: &Game, expected: usize) {
             "each generated object must use the complete coin template"
         );
     }
+}
+
+#[test]
+fn shining_gold_coin_can_be_played_as_a_zero_pp_spell_without_activating_it() {
+    let mut initial = position();
+    initial["players"]["P1"]["pp"]["current"] = json!(0_u8);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"coin","card":"BP14-T02"}]);
+    let mut board = game(&initial);
+    board.advance_player_input();
+    let Input::Question(question) = board.input(Viewer::P1) else {
+        panic!("main phase question");
+    };
+    let QuestionShape::ActionWindow(actions) = question.shape else {
+        panic!("main action window");
+    };
+    let play = actions
+        .intents
+        .into_iter()
+        .find(|intent| matches!(&intent.kind, MainIntentKind::Play { card } if card.properties.card == "BP14-T02"))
+        .expect("a single coin can be played at zero PP");
+    assert_eq!(
+        board.submit_player(
+            Viewer::P1,
+            Command::MainAction { token: question.token, intent: play.id, answer: MainActionAnswer::None }
+        ).kind,
+        SubmissionKind::Applied
+    );
+    let state = board.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 0_u8);
+    assert_eq!(state["P1"]["ex"], json!([]));
+    assert_eq!(state["P1"]["cemetery"], json!([]));
+    assert!(state["objects"].get("coin").is_none());
+    assert_eq!(state["P1"]["leader"]["life"], 10_u8);
+    assert_eq!(state["P1"]["hand"], json!([]));
+    assert_eq!(state["P1"]["deck"], json!(["top", "next"]));
 }
 
 #[test]

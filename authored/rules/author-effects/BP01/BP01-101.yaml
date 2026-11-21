@@ -22,10 +22,9 @@ cards:
                 then:
                   - create:
                       to: ex
-                      token: 冥焔の右腕・ミミ
-                  - create:
-                      to: ex
-                      token: 冥焔の左腕・ココ
+                      token:
+                        - 冥焔の右腕・ミミ
+                        - 冥焔の左腕・ココ
         line: 2
     admission: light
     meta:

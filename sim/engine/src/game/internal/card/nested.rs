@@ -78,10 +78,7 @@ impl Game {
             self.check_internal_resources()?;
         }
         let ability = self.card_play_ability(holder)?;
-        let spell = ability.is_some();
-        if !spell && self.object_type(holder)?.contains("トークン") && object.zone != "ex" {
-            return Err(unsupported("field token play origin"));
-        }
+        let spell = ability.is_some() || self.object_type(holder)? == "スペル・トークン";
         if nested.is_none()
             && let Some(ability) = ability
         {
@@ -113,8 +110,8 @@ impl Game {
             .as_ref()
             .and_then(|entry| entry.cost_override.clone());
         execution.nested = nested;
+        execution.spell = spell;
         if let Some(ability) = &ability {
-            execution.spell = true;
             execution.captures(
                 self,
                 &ability
@@ -145,7 +142,7 @@ impl Game {
             execution.bind_source(self, source)?;
             self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
         } else {
-            self.prepare_field_play(&mut execution)?;
+            self.prepare_intrinsic_card_play(&mut execution)?;
         }
         Ok(execution)
     }
@@ -154,10 +151,16 @@ impl Game {
         &self,
         holder: &str,
     ) -> Result<Option<super::super::admission::PlannedAbility>> {
-        match self.object_type(holder)? {
-            "フォロワー" | "アミュレット" | "フォロワー・トークン" | "アミュレット・トークン" =>
-            {
-                return Ok(None);
+        let object = self.object(holder)?;
+        let kind = self.object_type(holder)?;
+        match kind {
+            "フォロワー" | "アミュレット" => return Ok(None),
+            "フォロワー・トークン" | "アミュレット・トークン" => {
+                return if object.zone == "ex" {
+                    Ok(None)
+                } else {
+                    Err(unsupported("field token play origin"))
+                };
             }
             "スペル" | "スペル・トークン" | "スペル・アドバンス" => {}
             "フォロワー・アドバンス" if self.object(holder)?.zone == "ex" => {
@@ -169,7 +172,6 @@ impl Game {
                 ));
             }
         }
-        let object = self.object(holder)?;
         let definition = self
             .card_runtime
             .definitions
@@ -182,8 +184,18 @@ impl Game {
             .iter()
             .filter(|a| a.node.kind == AbilityKind::Spell)
             .collect::<Vec<_>>();
-        let [located] = abilities.as_slice() else {
-            return Err(unsupported("one printed Spell per card"));
+        let located = match abilities.as_slice() {
+            [located] => *located,
+            [] if kind == "スペル・トークン" => {
+                return if object.zone == "ex" {
+                    Ok(None)
+                } else {
+                    Err(crate::EngineFailure::IllegalPlay(
+                        "spell token play origin".into(),
+                    ))
+                };
+            }
+            _ => return Err(unsupported("one printed Spell per card")),
         };
         let ability = definition.ability(located)?;
         let (face, _) = printed_origin(&ability.node.source.origin)?;

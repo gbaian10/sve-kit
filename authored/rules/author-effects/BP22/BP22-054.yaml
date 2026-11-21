@@ -6,10 +6,9 @@ cards:
           do:
             - create:
                 to: ex
-                token: 防御型ゴーレム
-            - create:
-                to: ex
-                token: 攻撃型ゴーレム
+                token:
+                  - 防御型ゴーレム
+                  - 攻撃型ゴーレム
             - if:
                 cond:
                   paid:

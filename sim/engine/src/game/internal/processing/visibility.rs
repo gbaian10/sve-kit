@@ -84,12 +84,12 @@ pub(in crate::game::internal) fn disclose_played_source(game: &Game, execution: 
 
 fn disclose_public(game: &Game, execution: &mut Execution, stage: ProcessingStage) {
     // Match fact_log::event_source's frozen public-holder gate, not current source visibility.
-    // Field plays have no SourceInformation; both calls check while the card is in public Resolution.
+    // Plays without an ability check the card's visibility while it is in Resolution.
     let public = execution
         .source_information
         .as_ref()
         .is_some_and(SourceInformation::publicly_identified)
-        || (execution.field_entry
+        || (execution.ability.is_none()
             && [Viewer::P1, Viewer::P2].into_iter().all(|perspective| {
                 game.player_knows_object(perspective, &execution.context.source)
             }));
@@ -116,7 +116,7 @@ fn disclose_to(
     for perspective in audience {
         let origin = origin.filter(|origin| origin.observed(game, perspective).is_some());
         // A public holder alone does not disclose a secretly granted ability's existence.
-        if origin.is_none() && !execution.field_entry {
+        if origin.is_none() && execution.ability.is_some() {
             continue;
         }
         let subject = subject

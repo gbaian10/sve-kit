@@ -1693,26 +1693,37 @@ impl Game {
             self.player_step_actor(&player_step, &frame.controller);
         }
         self.internal_fused_events(execution)?;
-        match execution.ability {
-            Some(source) => {
+        let resolved = if execution.spell {
+            let (object, controller) = execution
+                .facts
+                .iter()
+                .rev()
+                .find_map(|fact| match fact {
+                    Fact::CardPlayed {
+                        execution: id,
+                        object,
+                        controller,
+                    } if *id == execution.id => Some((*object, *controller)),
+                    _ => None,
+                })
+                .ok_or_else(|| invalid("missing played spell"))?;
+            Some(Fact::CardResolved {
+                execution: execution.id,
+                object,
+                controller,
+            })
+        } else {
+            execution.ability.map(|source| Fact::AbilityResolved {
+                execution: execution.id,
+                source,
+            })
+        };
+        match resolved {
+            Some(resolved) => {
                 if execution.nested.is_none() {
                     self.card_runtime.checkpoint = Some(execution.id);
                 }
-                execution.record_fact(
-                    self,
-                    if execution.spell {
-                        Fact::CardResolved {
-                            execution: execution.id,
-                            object: source.holder,
-                            controller: source.controller,
-                        }
-                    } else {
-                        Fact::AbilityResolved {
-                            execution: execution.id,
-                            source,
-                        }
-                    },
-                );
+                execution.record_fact(self, resolved);
             }
             None => {
                 if execution.nested.is_none() {
