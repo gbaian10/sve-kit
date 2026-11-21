@@ -10,7 +10,7 @@ use crate::game::internal::processing::{
     discard_selection_round, disclose_played_source, enter_play_phase, record_target_declaration,
 };
 use crate::game::internal::repeated_moves;
-use crate::game::internal::{InstructionOutcome, player_id};
+use crate::game::internal::{InstructionOutcome, player_id, zone_capacity};
 use crate::game::internal::{PlayPhase, TargetDeclaration};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
@@ -186,6 +186,19 @@ impl PlayState {
             .iter()
             .any(|payment| payment.required && payment.accepted.is_none())
     }
+    fn required_extra_costs(&self) -> impl Iterator<Item = &CostSpec> {
+        self.additional
+            .as_deref()
+            .into_iter()
+            .map(|(_, payment)| &payment.play.costs)
+            .chain(
+                self.optional
+                    .iter()
+                    .filter(|payment| payment.required)
+                    .map(|payment| &payment.costs),
+            )
+    }
+
     fn material_posture(&self, decision: &Decision) -> bool {
         super::material::posture_parameter(&self.costs, decision)
             || self
@@ -1668,6 +1681,90 @@ impl Game {
         }
     }
 
+    pub(super) fn main_play_pp_available(
+        &self,
+        execution: &Execution,
+        play: &PlayState,
+        available: i64,
+    ) -> Result<bool> {
+        if play.resource_entry.is_some() {
+            return Ok(true);
+        }
+        if !self.has_target_cost(execution, None)? {
+            return self.quoted_main_pp_available(execution, play, available);
+        }
+        // A price tied to the selection must have a witness in the formal target domain.
+        if play
+            .parameters
+            .iter()
+            .any(|decision| x_payment::parameter(decision).is_some())
+        {
+            return Ok(true);
+        }
+        for probe in self.internal_quote_target_probes(execution, &play.parameters)? {
+            if self.quoted_main_pp_available(&probe, play, available)? {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    fn quoted_main_pp_available(
+        &self,
+        execution: &Execution,
+        play: &PlayState,
+        available: i64,
+    ) -> Result<bool> {
+        if let Some(exchange) = &play.exchange {
+            return self.main_exchange_available(execution, exchange);
+        }
+        // Fixed PP is due even while material and mode choices are pending.
+        let mut budget = x_pp::Budget::default();
+        if execution.ability.is_none() {
+            budget.fixed = self.internal_card_play_cost(execution)?;
+        } else {
+            budget.include(&play.costs, None, |printed| {
+                self.internal_card_pp_amount(execution, execution.spell, printed)
+            })?;
+        }
+        for cost in play.required_extra_costs() {
+            budget.include(cost, None, Ok)?;
+        }
+        Ok(budget.fixed <= available)
+    }
+
+    fn check_main_head_ex_capacity(&self, execution: &Execution, play: &PlayState) -> Result<()> {
+        let CostSpec::Ordered { steps } = &play.costs else {
+            return Ok(());
+        };
+        let capacity = zone_capacity("ex").ok_or_else(|| invalid("EX capacity"))?;
+        let occupied = self.zone_count(seat_name(execution.context.controller)?, "ex");
+        let mut remaining = capacity.saturating_sub(occupied);
+        for step in steps {
+            let action = &step.instruction.action;
+            if matches!(action, Action::Resource { .. } | Action::Posture { .. }) {
+                continue;
+            }
+            let selected_to_ex = reveal_payment::transfer(action).is_some()
+                && reveal_payment::bottom(action).is_none()
+                && play
+                    .parameters
+                    .iter()
+                    .any(|decision| reveal_payment::selected(action, from_ref(decision)));
+            if !super::hand_payment::source_to_ex(action) && !selected_to_ex {
+                // An unexamined earlier payment could move an EX card before the hand transfer.
+                break;
+            }
+            if remaining <= 0 {
+                return Err(crate::EngineFailure::IllegalPlay(
+                    "insufficient EX capacity for cost".into(),
+                ));
+            }
+            remaining = remaining.saturating_sub(1);
+        }
+        Ok(())
+    }
+
     fn internal_play_material_parameter(
         &self,
         execution: &mut Execution,
@@ -1745,18 +1842,9 @@ impl Game {
                 self.internal_play_material_parameter(&mut execution, decision, &play)?;
             }
         }
-        let additional = play
-            .additional
-            .as_deref()
-            .map(|(_, payment)| &payment.play.costs);
+        self.check_main_head_ex_capacity(&execution, &play)?;
         let required = once(&play.costs)
-            .chain(additional)
-            .chain(
-                play.optional
-                    .iter()
-                    .filter(|payment| payment.required)
-                    .map(|payment| &payment.costs),
-            )
+            .chain(play.required_extra_costs())
             .collect::<Vec<_>>();
         self.internal_probe_hand_payments(&mut execution, &required)
     }
