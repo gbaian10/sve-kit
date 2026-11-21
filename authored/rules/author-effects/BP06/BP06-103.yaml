@@ -29,6 +29,7 @@ cards:
               from:
                 leader: opp
               n: 1
+              option: 1
           do:
             - if:
                 cond:
@@ -40,6 +41,9 @@ cards:
                     op: ge
                     right: 2
                 then:
-                  - damage:
+                  - choice:
                       n: 1
-                      to: enemy
+                      options:
+                        - - damage:
+                              n: 1
+                              to: enemy

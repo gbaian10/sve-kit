@@ -19,9 +19,12 @@ cards:
                     op: ge
                     right: 5
                 then:
-                  - damage:
-                      n: 4
-                      to: enemy
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 4
+                              to: enemy
           targets:
             - bind: enemy
               from:
@@ -29,6 +32,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 2
     admission: light
     meta:

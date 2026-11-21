@@ -20,12 +20,15 @@ cards:
                 cond:
                   awakened: true
                 then:
-                  - damage:
+                  - choice:
                       n: 1
-                      to:
-                        any_of:
-                          - victim
-                          - this
+                      options:
+                        - - damage:
+                              n: 1
+                              to:
+                                any_of:
+                                  - victim
+                                  - this
           targets:
             - bind: victim
               from:
@@ -34,6 +37,7 @@ cards:
                 who: all
                 zone: field
               n: 1
+              option: 1
         line: 2
     admission: light
     meta:

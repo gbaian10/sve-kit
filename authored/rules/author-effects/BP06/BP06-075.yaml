@@ -7,9 +7,12 @@ cards:
                 cond:
                   crimson: true
                 then:
-                  - damage:
-                      n: 3
-                      to: enemy
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 3
+                              to: enemy
           on:
             phase:
               which: end
@@ -22,6 +25,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 1
       - fanfare:
           cost:

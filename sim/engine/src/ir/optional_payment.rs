@@ -1,8 +1,10 @@
 //! One optional payment declared before targets and committed before play.
 use super::{
-    Ability, Bool, Capture, CaptureTime, Comparison, Control, CostSpec, ExecutionRef, Expr, Int,
-    IntOperation, IntRead, NatRead, Node, PaymentOptionality, PaymentTime, PlaySpec, PlayerRef,
-    PlayerResource, Predicate, Program, ReceiptId, ScopeId,
+    Ability, Bool, BoolRead, Capture, CaptureTime, Cardinality, ChoiceDomain, Comparison, Control,
+    CostSpec, ExecutionRef, Expr, HistoryCount, Int, IntOperation, IntRead, Located,
+    ModeChoiceKind, ModeDecision, Nat, NatOperation, NatRead, Node, ObjectProperty,
+    PaymentOptionality, PaymentTime, PlaySpec, PlayerRef, PlayerResource, Predicate, Program,
+    ReceiptId, ScopeId, history_turn, public_numbers,
 };
 
 pub(crate) fn declaration(body: &Program) -> Option<(&CostSpec, ReceiptId)> {
@@ -79,7 +81,7 @@ fn declared_choice(body: &Program) -> bool {
                     then_body,
                     else_body: None,
                 },
-        } => public_mode_guard(condition) && declared_choice(then_body),
+        } => public_mode_guard(condition, then_body) && declared_choice(then_body),
         Node::Instruction { .. }
         | Node::Control { .. }
         | Node::Capture { .. }
@@ -102,7 +104,7 @@ fn resolution_capture(node: &Node, scope: ScopeId) -> bool {
     *at == CaptureTime::AtResolution { scope }
 }
 
-pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
+pub(crate) fn public_mode_guard(condition: &Expr<Bool>, body: &Program) -> bool {
     if entry_origin_guard(condition) {
         return true;
     }
@@ -116,6 +118,74 @@ pub(crate) fn public_mode_guard(condition: &Expr<Bool>) -> bool {
         } if matches!(read.as_ref(), NatRead::Combo {
             player: PlayerRef::Controller {}, execution: ExecutionRef::Current {},
         }))))
+        || (single_mode_body(body) && public_target_guard(condition))
+}
+
+/// A conditional declaration may have a single required branch that needs no mode input.
+pub(crate) fn required_single_mode(count: &Expr<Nat>, chosen: &ModeDecision) -> bool {
+    *count == Expr::Literal(Nat(1))
+        && matches!(&chosen.domain, ChoiceDomain::Modes {
+            modes,
+            cardinality: Cardinality { minimum: Nat(1), maximum: Some(Nat(1)) },
+            exclude_used: None,
+            ..
+        } if modes.len() == 1)
+}
+
+fn single_mode_body(body: &Program) -> bool {
+    matches!(body.steps.as_slice(), [Located {
+        node: Node::Control { control: Control::Mode {
+            count, chosen, choice_kind: ModeChoiceKind::ChoiceKeyword, ..
+        }},
+        ..
+    }] if required_single_mode(count, chosen))
+}
+
+fn public_target_guard(condition: &Expr<Bool>) -> bool {
+    if let Expr::Live(read) = condition {
+        return matches!(
+            read.as_ref(),
+            BoolRead::Crimson {
+                player: PlayerRef::Controller {}
+            }
+        );
+    }
+    let Expr::Compute(predicate) = condition else {
+        return false;
+    };
+    matches!(predicate.as_ref(), Predicate::Exists { objects } if public_numbers::count(objects))
+        || matches!(predicate.as_ref(), Predicate::CompareInt {
+            left, comparison: Comparison::GreaterEqual, right: Expr::Literal(Int(0..)),
+        } if public_target_threshold(left))
+}
+
+fn public_target_threshold(threshold: &Expr<Int>) -> bool {
+    if let Expr::Live(read) = threshold {
+        return matches!(
+            read.as_ref(),
+            IntRead::PlayerResource {
+                player: PlayerRef::Controller {},
+                property: PlayerResource::Life | PlayerResource::PpCurrent,
+            }
+        );
+    }
+    let Expr::Compute(operation) = threshold else {
+        return false;
+    };
+    let IntOperation::FromNat { value } = operation.as_ref() else {
+        return false;
+    };
+    match value {
+        Expr::Live(read) => {
+            matches!(read.as_ref(), NatRead::ZoneCount { selector } if public_numbers::count(selector))
+                || matches!(read.as_ref(), NatRead::HistoryCount { query, count: HistoryCount::Facts }
+                    if matches!(history_turn::HistoryPlan::compile(query), Some(history_turn::HistoryPlan::Discarded)))
+        }
+        Expr::Compute(distinct) => matches!(distinct.as_ref(), NatOperation::DistinctCount {
+            objects, property: ObjectProperty::Names,
+        } if public_numbers::count(objects)),
+        Expr::Literal(_) | Expr::Frozen(_) | Expr::Captured(_) | Expr::Bound(_) => false,
+    }
 }
 
 pub(crate) fn public_pp_guard(condition: &Expr<Bool>) -> bool {
