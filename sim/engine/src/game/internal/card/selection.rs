@@ -1675,13 +1675,12 @@ impl Game {
 
     /// A later target may read an earlier answer (an original cost limit), so each target is
     /// proved under a bound answer to the ones before it, as an ordinary target sequence is.
-    pub(super) fn internal_mode_targets_feasible(
+    pub(super) fn internal_play_targets_feasible<'decision>(
         &self,
         execution: &Execution,
-        parameters: &[Decision],
+        parameters: impl Iterator<Item = &'decision Decision>,
     ) -> Result<bool> {
         let targets = parameters
-            .iter()
             .filter(|decision| {
                 !super::material::is_parameter(decision)
                     && matches!(

@@ -16,6 +16,73 @@ fn question(game: &Game, actor: Viewer) -> Question {
     *question
 }
 
+#[test]
+fn player_main_actions_require_enough_spell_targets() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"BP22-018"}]);
+    for has_target in [false, true] {
+        if has_target {
+            initial["players"]["P2"]["zones"]["field"] =
+                json!([{"id":"enemy","card":"BP01-037"}]);
+        }
+        let mut game = Game::from_selected_effects(
+            selection_with_rules().clone(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "main-spell-target",
+        )
+        .unwrap();
+        game.advance_player_input();
+        let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+            panic!("main actions");
+        };
+        assert_eq!(
+            actions.intents.iter().any(|intent| matches!(
+                &intent.kind,
+                MainIntentKind::Play { card } if card.properties.card == "BP22-018"
+            )),
+            has_target,
+        );
+    }
+}
+
+#[test]
+fn player_main_actions_require_payable_activation_materials() {
+    let mut initial = draw_position();
+    let mut field = vec![
+        json!({"id":"priest","card":"BP22-102"}),
+        json!({"id":"first-amulet","card":"BP01-016"}),
+        json!({"id":"second-amulet","card":"BP01-016"}),
+    ];
+    for can_pay in [false, true] {
+        if can_pay {
+            field.push(json!({"id":"third-amulet","card":"BP01-016"}));
+        }
+        initial["players"]["P1"]["zones"]["field"] = json!(field);
+        let mut game = Game::from_selected_effects(
+            selection_with_rules().clone(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "main-activation-materials",
+        )
+        .unwrap();
+        game.advance_player_input();
+        let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+            panic!("main actions");
+        };
+        assert_eq!(
+            actions.intents.iter().any(|intent| matches!(
+                &intent.kind,
+                MainIntentKind::Activate { holder, line: 2, .. }
+                    if holder.properties.card == "BP22-102"
+            )),
+            can_pay,
+        );
+    }
+}
+
 fn quick_pass(game: &mut Game, actor: Viewer) {
     let quick = question(game, actor);
     assert_eq!(

@@ -39,6 +39,7 @@ pub(super) mod cost_observation;
 mod counter_budget;
 mod x_pp;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
+use core::iter::once;
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
@@ -181,11 +182,19 @@ impl PlayState {
     }
 
     fn declined_material(&self, decision: &Decision) -> bool {
+        self.material_for_payment(decision, |payment| payment.accepted == Some(false))
+    }
+
+    fn material_for_payment(
+        &self,
+        decision: &Decision,
+        matches_payment: impl Fn(&super::optional::OptionalState) -> bool,
+    ) -> bool {
         let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
             return false;
         };
         self.optional.iter().any(|payment| {
-            payment.accepted == Some(false)
+            matches_payment(payment)
                 && matches!(&payment.costs, CostSpec::Ordered { steps } if steps.iter().any(|step| {
                     let action = &step.instruction.action;
                     matches!(super::material::cost_objects(action).or_else(|| reveal_payment::objects(action)), Some(Selector::Bound { reference }) if reference == binding)
@@ -1667,6 +1676,40 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn check_main_play_requirements(&self, mut execution: Execution) -> Result<()> {
+        let play = execution
+            .play
+            .take()
+            .ok_or_else(|| invalid("missing prepared declaration"))?;
+        if !self.internal_play_targets_feasible(&execution, play.parameters.iter())? {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "no legal play targets".into(),
+            ));
+        }
+        // Use the formal material and hand domains on scratch slots before exposing a declaration.
+        for decision in &play.parameters {
+            if super::material::is_parameter(decision)
+                && !play.material_for_payment(decision, |payment| !payment.required)
+            {
+                self.internal_play_material_parameter(&mut execution, decision, &play)?;
+            }
+        }
+        let additional = play
+            .additional
+            .as_deref()
+            .map(|(_, payment)| &payment.play.costs);
+        let required = once(&play.costs)
+            .chain(additional)
+            .chain(
+                play.optional
+                    .iter()
+                    .filter(|payment| payment.required)
+                    .map(|payment| &payment.costs),
+            )
+            .collect::<Vec<_>>();
+        self.internal_probe_hand_payments(&mut execution, &required)
+    }
+
     fn stamp_play_selection(&mut self, execution: &mut Execution) -> Result<()> {
         if let Some((view, _)) = execution.waiting.as_mut() {
             self.state.ir_epoch = self
@@ -2046,7 +2089,7 @@ impl Game {
             let mut legal = Vec::new();
             for mode in &group.modes {
                 if self.internal_mode_affordable(execution, play, mode)?
-                    && self.internal_mode_targets_feasible(execution, &mode.parameters)?
+                    && self.internal_play_targets_feasible(execution, mode.parameters.iter())?
                     && (exclude_used.is_none()
                         || !self.card_runtime.mode_uses.iter().any(|used| {
                             used.ability_instance == source.instance
