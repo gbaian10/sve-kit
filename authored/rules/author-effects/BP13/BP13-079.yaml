@@ -35,10 +35,10 @@ cards:
                   - damage:
                       to: enemy
                       n: 4
+                  - draw:
+                      who: self
+                      n: 1
                 else:
                   - damage:
                       to: enemy
                       n: 3
-            - draw:
-                who: self
-                n: 1

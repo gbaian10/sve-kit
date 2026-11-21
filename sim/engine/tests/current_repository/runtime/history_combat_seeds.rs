@@ -87,7 +87,7 @@ fn setus_printings_heal_at_end_and_use_departure_history_after_the_subject_retur
 }
 
 #[test]
-fn liberte_evolution_reads_earlier_field_cemetery_history_and_always_draws() {
+fn liberte_evolution_reads_earlier_field_cemetery_history_to_replace_damage_and_draw() {
     for (to, expected) in [(OwnerZone::Cemetery, 4_u8), (OwnerZone::Hand, 3)] {
         let mut initial = position("history-base", false);
         initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP13-079"}]);
@@ -109,11 +109,12 @@ fn liberte_evolution_reads_earlier_field_cemetery_history_and_always_draws() {
         resolve(&mut game, "BP13-079", 1, None);
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["objects"]["enemy"]["hp"], 6_u8 - expected);
-        assert!(
+        assert_eq!(
             state["P1"]["hand"]
                 .as_array()
                 .unwrap()
-                .contains(&json!("draw"))
+                .contains(&json!("draw")),
+            to == OwnerZone::Cemetery
         );
     }
 }

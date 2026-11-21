@@ -33,6 +33,17 @@ use alloc::collections::BTreeMap;
 
 type FrozenCosts = Vec<(ObjectRef, i64)>;
 
+pub(super) fn material_selection_available(
+    minimum: Nat,
+    member_count: usize,
+    original_costs: Option<impl Iterator<Item = i64>>,
+    groups: Option<&GroupConstraints>,
+) -> Result<bool> {
+    let available = original_costs.map_or(member_count, distinct_original_cost_count);
+    let groups_satisfied = groups.map_or(Ok(true), GroupConstraints::has_witness)?;
+    Ok(u64::try_from(available).map_err(invalid)? >= minimum.0 && groups_satisfied)
+}
+
 #[derive(Clone, Debug)]
 pub(in crate::game::internal) struct MaterialWait {
     links: CandidateLinks,
@@ -925,21 +936,21 @@ impl Game {
             .transpose()?;
         let (members, original_costs) =
             self.material_cost_candidates(execution, constraint, standing, groups.as_ref())?;
-        let count = usize::try_from(constraint.cardinality.minimum.0).map_err(invalid)?;
         let floor = self.material_cost_floor(execution, constraint, &members)?;
         // Every candidate together is the largest total, so it decides whether paying is possible.
         let short = match &floor {
             Some(floor) => !floor.reached(&members)?,
             None => false,
         };
-        let available = original_costs.as_ref().map_or(members.len(), |costs| {
-            distinct_original_cost_count(costs.iter().map(|(_, cost)| *cost))
-        });
-        let incomplete = match groups.as_ref() {
-            Some(groups) => !groups.has_witness()?,
-            None => false,
-        };
-        if available < count || short || incomplete {
+        let available = material_selection_available(
+            constraint.cardinality.minimum,
+            members.len(),
+            original_costs
+                .as_ref()
+                .map(|costs| costs.iter().map(|(_, cost)| *cost)),
+            groups.as_ref(),
+        )?;
+        if !available || short {
             return Err(crate::EngineFailure::IllegalPlay(
                 "insufficient materials".into(),
             ));

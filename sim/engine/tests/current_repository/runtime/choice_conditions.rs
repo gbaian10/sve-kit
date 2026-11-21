@@ -132,7 +132,7 @@ pub(super) fn keyword(state: &Value, name: &str) -> bool {
 }
 
 #[test]
-fn bp18_023_and_sl08_count_only_royal_followers_and_heal_at_every_threshold() {
+fn bp18_023_and_sl08_count_only_royal_followers_and_heal_at_ten() {
     for number in ["BP18-023", "BP18-SL08"] {
         for count in [0_usize, 5, 10, 15, 20] {
             let mut initial = position(number, "P1");
@@ -149,7 +149,7 @@ fn bp18_023_and_sl08_count_only_royal_followers_and_heal_at_every_threshold() {
             enter(&mut game, "P1");
             resolved(trigger(&mut game));
             let state = game.projection(View::Referee).unwrap();
-            assert_eq!(state["P1"]["leader"]["life"], 12_u8);
+            assert_eq!(state["P1"]["leader"]["life"], if count >= 10 { 12_u8 } else { 10 });
             assert_eq!(
                 state["P1"]["hand"].as_array().unwrap().len(),
                 usize::from(count >= 5)
@@ -171,7 +171,7 @@ fn bp18_023_and_sl08_count_only_royal_followers_and_heal_at_every_threshold() {
 }
 
 #[test]
-fn bp19_112_and_all_printings_draw_and_heal_independently_of_sep() {
+fn bp19_112_and_all_printings_draw_at_any_sep_and_heal_at_zero_sep() {
     for number in ["BP19-112", "BP19-SL28", "PCS02-003"] {
         for seat in ["P1", "P2"] {
             for sep in [0_u8, 1] {
@@ -182,7 +182,7 @@ fn bp19_112_and_all_printings_draw_and_heal_independently_of_sep() {
                 enter(&mut game, seat);
                 resolved(trigger(&mut game));
                 let state = game.projection(View::Referee).unwrap();
-                assert_eq!(state[seat]["leader"]["life"], 12_u8);
+                assert_eq!(state[seat]["leader"]["life"], if sep == 0 { 12_u8 } else { 10 });
                 assert_eq!(state[seat]["hand"], json!(["first"]));
                 let gain = if sep == 0 { 2 } else { 0 };
                 assert_eq!(

@@ -23,9 +23,9 @@ cards:
                       n: 1
                       to: ex
                       token: クレスト 不殺の継承者・クルル
-            - life:
-                delta: 2
-                who: self
+                  - life:
+                      delta: 2
+                      who: self
     token_sources:
       - section: 1
         line: 1

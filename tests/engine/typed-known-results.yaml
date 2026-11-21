@@ -239,16 +239,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-2 events (#2008)"
     reason: "after-decision-2 omniscient events"
-  - question: "card-BP15-118"
-    scenario: "表向進化從者 0"
-    status: fail
-    error: "typed-gap: after-decision-1 assert P1.pp.current (#2008)"
-    reason: "after-decision-1 omniscient assert P1.pp.current"
-  - question: "card-BP15-118"
-    scenario: "表向進化從者 3"
-    status: fail
-    error: "typed-gap: after-decision-1 assert P1.pp.current (#2008)"
-    reason: "after-decision-1 omniscient assert P1.pp.current"
   - question: "card-BP15-PR10"
     scenario: "對手墓場 9 選項 [1, 2]"
     status: adapter-error
@@ -489,16 +479,6 @@ known:
     status: fail
     error: "interface: typed fusion has no separate X declaration; X is the chosen material count (#2090)"
     reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.cemetery; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient assert P1.hand; after-decision-1 omniscient forbidden_events"
-  - question: "card-BP20-P12"
-    scenario: "[astra] 沒付追加費用"
-    status: fail
-    error: "typed-gap: after-decision-1 assert P1.deck (#2008)"
-    reason: "after-decision-1 omniscient assert P1.deck; after-decision-1 omniscient assert P1.hand; after-decision-1 omniscient forbidden_events"
-  - question: "card-BP20-P12"
-    scenario: "[fable] B 沒付追加費用"
-    status: fail
-    error: "typed-gap: after-decision-1 assert P1.deck (#2008)"
-    reason: "after-decision-1 omniscient assert P1.deck; after-decision-1 omniscient assert P1.hand; after-decision-1 omniscient forbidden_events"
   - question: "card-BP20-P61"
     scenario: "返戻原有 6 個"
     status: unsupported
@@ -745,16 +725,6 @@ known:
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
     reason: "after-decision-2 omniscient events"
   - question: "rule-10.10-01"
-    scenario: "A 自我取代先套：2→4，再 −1 → シオン受 3"
-    status: fail
-    error: "typed-gap: after-decision-1 assert P1.pp.current (#2008)"
-    reason: "after-decision-1 omniscient assert P1.pp.current; after-decision-1 omniscient forbidden_events"
-  - question: "rule-10.10-01"
-    scenario: "A2 對照：表向き只有 2 枚 → 沒有自我取代 → 2−1 → 受 1"
-    status: fail
-    error: "typed-gap: after-decision-1 assert P1.pp.current (#2008)"
-    reason: "after-decision-1 omniscient assert P1.pp.current; after-decision-1 omniscient forbidden_events"
-  - question: "rule-10.10-01"
     scenario: "B1 受影響者 P1 選「+1 → −1」→ シオン受 1"
     status: fail
     error: "interface: awaiting-extra-fields (#2008)"
@@ -784,11 +754,6 @@ known:
     status: adapter-error
     error: "typed-gap: prototype continuation cannot enter the typed player interface (#2008)"
     reason: "prototype continuation cannot enter the typed player interface"
-  - question: "rule-10.4.7-01"
-    scenario: "B 對手只有ヘヴンリーイージス → 選不到目標 → 不能打出（付 +5 也不行）"
-    status: fail
-    error: "typed-gap: after-decision-1 awaiting (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
   - question: "rule-10.4.7-01"
     scenario: "D1 ダークアリス的ラストワード：付「デッキの上10枚を消滅」→ 出場、捨 1 張"
     status: fail

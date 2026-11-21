@@ -1,8 +1,8 @@
 use super::super::conditions::{ConditionPlan, Policy};
+use super::material::material_selection_available;
 use super::play::PlayState;
 use super::selection::constraints::{
-    DistinctProperties, PropertyKey, check_count, distinct_original_cost_count,
-    original_material_cost, unique_handles,
+    DistinctProperties, PropertyKey, check_count, original_material_cost, unique_handles,
 };
 use super::selection::groups::GroupConstraints;
 use super::static_keywords;
@@ -20,8 +20,8 @@ use crate::game::player::observation::PendingCost;
 use crate::ir::exchange as exchange_shape;
 use crate::ir::{
     Action, Cardinality, ChoiceDomain, CostSpec, Decision, DecisionId, DiscardOutcome, FaceId, Int,
-    MoveMethod, MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange,
-    PlayCostExchangeChange, PlayerId, Posture, PostureEvent, Quantity, QuantityUnit,
+    KeywordId, MoveMethod, MoveOutcome, Nat, ObjectProperty, ObjectRef, PlayCostExchange,
+    PlayCostExchangeChange, PlayerId, Posture, PostureEvent, Quantity, QuantityUnit, RuntimeHolder,
     SelectionConstraint, Selector, ZoneKind,
 };
 use crate::ir::{BanishOutcome, Bool, Instruction, PaymentResult, ReceiptId, RuntimeReceiptId};
@@ -140,19 +140,17 @@ impl ExchangeCandidates {
     }
 
     fn affordable(&self, constraint: &SelectionConstraint) -> Result<bool> {
-        if let Some(groups) = &self.groups {
-            return groups.has_witness();
-        }
-        let available = if constraint.distinct_by == Some(ObjectProperty::Cost) {
-            distinct_original_cost_count(
-                self.members
-                    .iter()
-                    .filter_map(|member| member.original_cost),
-            )
-        } else {
-            self.members.len()
-        };
-        Ok(u64::try_from(available).map_err(invalid)? >= constraint.cardinality.minimum.0)
+        let original_costs = (constraint.distinct_by == Some(ObjectProperty::Cost)).then(|| {
+            self.members
+                .iter()
+                .filter_map(|member| member.original_cost)
+        });
+        material_selection_available(
+            constraint.cardinality.minimum,
+            self.members.len(),
+            original_costs,
+            self.groups.as_ref(),
+        )
     }
 }
 
@@ -388,7 +386,7 @@ impl Game {
             return Err(unsupported("exchange Quick payment"));
         }
         self.check_exchange_observers()?;
-        let state = ExchangeState {
+        let mut state = ExchangeState {
             face: face.clone(),
             definition: exchange.node.clone(),
             accepted,
@@ -398,6 +396,16 @@ impl Game {
         };
         for index in 0..state.definition.materials.len() {
             self.exchange_candidates(execution, &state.definition, index)?;
+        }
+        if state.accepted.is_none()
+            && state.definition.routes().is_some_and(|routes| {
+                routes
+                    .iter()
+                    .any(|(_, step)| step.keyword == Some(KeywordId::EarthRite))
+            })
+            && !self.exchange_payment_available(execution, &state, true)?
+        {
+            state.accepted = Some(false);
         }
         Ok(Some(state))
     }
@@ -635,8 +643,13 @@ impl Game {
                 .node
                 .routes()
                 .ok_or_else(|| unsupported("exchange route authority"))?;
-            for (index, (decision, _)) in routes.into_iter().enumerate() {
-                if !exchange_shape::field_put_route(&exchange.node, index) {
+            for (index, (decision, cost)) in routes.into_iter().enumerate() {
+                let spent_stack = cost.keyword == Some(KeywordId::EarthRite)
+                    && matches!(execution.receipts.get(&cost.instruction.receipt),
+                        Some(InstructionOutcome::Counter(change))
+                            if change.after == Nat(0)
+                                && change.holder == (RuntimeHolder::Object { object: reference }));
+                if !spent_stack && !exchange_shape::field_put_route(&exchange.node, index) {
                     continue;
                 }
                 let ChoiceDomain::Objects { binding, .. } = &decision.domain else {
@@ -660,7 +673,15 @@ impl Game {
             .exchange
             .as_ref()
             .ok_or_else(|| invalid("missing exchange preflight"))?;
-        let accepted = exchange.accepted == Some(true);
+        self.exchange_payment_available(execution, exchange, exchange.accepted == Some(true))
+    }
+
+    fn exchange_payment_available(
+        &self,
+        execution: &Execution,
+        exchange: &ExchangeState,
+        accepted: bool,
+    ) -> Result<bool> {
         let pay_pp = self.internal_card_play_cost_with(
             execution,
             accepted.then_some(&exchange.definition.change),

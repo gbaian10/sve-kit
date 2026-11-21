@@ -47,9 +47,9 @@ cards:
                       "on": this
                       keywords:
                         - storm
-            - life:
-                who: self
-                delta: 2
+                  - life:
+                      who: self
+                      delta: 2
             - if:
                 cond:
                   cmp:
