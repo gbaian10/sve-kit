@@ -75,35 +75,25 @@ pub(super) fn board(stack: u8, pp: u8) -> Game {
 
 #[test]
 fn earth_exchange_sets_pp_only_after_complete_keyword_payment_and_can_be_declined() {
-    for (count, pp, accept) in [
-        (2_u8, 1_u8, true),
-        (3, 1, true),
-        (2, 4, false),
-        (1, 1, true),
-    ] {
+    let mut game = board(1, 1);
+    let before = game.projection(View::Referee).unwrap();
+    assert!(matches!(
+        game.play_internal_card("s", PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
+    ));
+    assert_eq!(game.projection(View::Referee).unwrap(), before);
+
+    for (count, pp, accept) in [(2_u8, 1_u8, true), (3, 1, true), (2, 4, false)] {
         let mut game = board(count, pp);
-        let before = game.projection(View::Referee).unwrap();
         let CardPlay::Awaiting(question) =
             game.play_internal_card("s", PlayerId { seat: 1 }).unwrap()
         else {
             panic!("optional exchange");
         };
         assert_eq!(question.domain, InputDomain::OptionalCost);
-        let result =
-            game.answer_internal_card(question.actor, question.token, Answer::OptionalCost(accept));
-        if count < 2 && accept {
-            result.unwrap_err();
-            assert_eq!(
-                game.projection(View::Referee).unwrap()["P1"]["pp"],
-                before["P1"]["pp"]
-            );
-            assert_eq!(
-                game.projection(View::Referee).unwrap()["P1"]["hand"],
-                json!(["s"])
-            );
-            continue;
-        }
-        let mut play = result.unwrap();
+        let mut play = game
+            .answer_internal_card(question.actor, question.token, Answer::OptionalCost(accept))
+            .unwrap();
         if accept {
             let CardPlay::Awaiting(material) = play else {
                 panic!("Stack material");
