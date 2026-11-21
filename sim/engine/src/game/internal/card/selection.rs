@@ -1321,7 +1321,7 @@ impl Game {
         decision: &Decision,
     ) -> Result<()> {
         let (wait, domain) = self.target_domain(execution, decision)?;
-        // A dynamic exact count of zero declares no targets and needs no answer.
+        // A count of zero leaves the empty target set as the only legal answer.
         if wait.bounds.maximum == Some(Nat(0))
             && let ChoiceDomain::Objects {
                 constraint,
@@ -1332,7 +1332,7 @@ impl Game {
                 constraint.aggregate_bounds.as_slice(),
                 [AggregateBound {
                     property: NumericProperty::Count,
-                    comparison: Comparison::Equal,
+                    comparison: Comparison::Equal | Comparison::LessEqual,
                     ..
                 }]
             )

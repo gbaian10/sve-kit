@@ -387,45 +387,53 @@ fn bp11_058_freezes_the_formal_upper_bound_from_only_qualifying_own_grave_cards(
                 .collect::<Vec<_>>()
         );
         let mut game = enter(&initial, "hand");
-        let CardPlay::Awaiting(question) = pending_start(&mut game, 1) else {
-            panic!("formal quantity target");
+        let play = pending_start(&mut game, 1);
+        let play = if count == 0 {
+            assert!(
+                matches!(play, CardPlay::Resolved(_)),
+                "a zero upper bound resolves without a target question"
+            );
+            play
+        } else {
+            let CardPlay::Awaiting(question) = play else {
+                panic!("formal quantity target");
+            };
+            let InputDomain::Targets(domain) = &question.domain else {
+                panic!("bounded objects");
+            };
+            assert_eq!(
+                domain.cardinality,
+                Cardinality {
+                    minimum: Nat(0),
+                    maximum: Some(Nat(u64::from(count)))
+                }
+            );
+            let before = game.projection(View::Referee).unwrap();
+            let too_many = domain
+                .members
+                .iter()
+                .take(usize::from(count) + 1)
+                .map(|m| m.handle)
+                .collect();
+            assert!(
+                game.answer_internal_card(question.actor, question.token, Answer::Targets(too_many))
+                    .is_err(),
+                "the printed public count bounds the answer"
+            );
+            assert_eq!(
+                game.projection(View::Referee).unwrap(),
+                before,
+                "over-cap answers do not mutate the state"
+            );
+            let chosen = domain
+                .members
+                .iter()
+                .take(usize::from(count))
+                .map(|m| m.handle)
+                .collect();
+            game.answer_internal_card(question.actor, question.token, Answer::Targets(chosen))
+                .unwrap()
         };
-        let InputDomain::Targets(domain) = &question.domain else {
-            panic!("bounded objects");
-        };
-        assert_eq!(
-            domain.cardinality,
-            Cardinality {
-                minimum: Nat(0),
-                maximum: Some(Nat(u64::from(count)))
-            }
-        );
-        let before = game.projection(View::Referee).unwrap();
-        let too_many = domain
-            .members
-            .iter()
-            .take(usize::from(count) + 1)
-            .map(|m| m.handle)
-            .collect();
-        assert!(
-            game.answer_internal_card(question.actor, question.token, Answer::Targets(too_many))
-                .is_err(),
-            "the printed public count bounds the answer"
-        );
-        assert_eq!(
-            game.projection(View::Referee).unwrap(),
-            before,
-            "over-cap answers do not mutate the state"
-        );
-        let chosen = domain
-            .members
-            .iter()
-            .take(usize::from(count))
-            .map(|m| m.handle)
-            .collect();
-        let play = game
-            .answer_internal_card(question.actor, question.token, Answer::Targets(chosen))
-            .unwrap();
         resolved(finish(&mut game, play, &[1]));
         settle(&mut game, &[1]);
         assert_eq!(
@@ -587,27 +595,35 @@ fn cp03_022_counts_complete_pairs_of_the_two_exact_grave_names() {
                 .collect::<Vec<_>>()
         );
         let mut game = enter(&initial, "hand");
-        let CardPlay::Awaiting(question) = pending_start(&mut game, 3) else {
-            panic!("paired target declaration");
-        };
-        let InputDomain::Targets(domain) = &question.domain else {
-            panic!("formal objects");
-        };
         let pairs = blades.min(darks);
-        assert_eq!(
-            domain.cardinality.maximum,
-            Some(Nat(u64::from(pairs))),
-            "uneven populations produce complete pairs, never total divided by two"
-        );
-        let chosen = domain
-            .members
-            .iter()
-            .take(usize::from(pairs))
-            .map(|m| m.handle)
-            .collect();
-        let play = game
-            .answer_internal_card(question.actor, question.token, Answer::Targets(chosen))
-            .unwrap();
+        let play = pending_start(&mut game, 3);
+        let play = if pairs == 0 {
+            assert!(
+                matches!(play, CardPlay::Resolved(_)),
+                "a zero upper bound resolves without a target question"
+            );
+            play
+        } else {
+            let CardPlay::Awaiting(question) = play else {
+                panic!("paired target declaration");
+            };
+            let InputDomain::Targets(domain) = &question.domain else {
+                panic!("formal objects");
+            };
+            assert_eq!(
+                domain.cardinality.maximum,
+                Some(Nat(u64::from(pairs))),
+                "uneven populations produce complete pairs, never total divided by two"
+            );
+            let chosen = domain
+                .members
+                .iter()
+                .take(usize::from(pairs))
+                .map(|m| m.handle)
+                .collect();
+            game.answer_internal_card(question.actor, question.token, Answer::Targets(chosen))
+                .unwrap()
+        };
         resolved(finish(&mut game, play, &[1]));
         settle(&mut game, &[1]);
         assert_eq!(
