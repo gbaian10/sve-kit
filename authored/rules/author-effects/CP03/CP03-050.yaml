@@ -22,9 +22,9 @@ cards:
                     right: 5
                 then:
                   - destroy: enemy
-            - life:
-                delta: 2
-                who: self
+                  - life:
+                      delta: 2
+                      who: self
           targets:
             - bind: enemy
               from:

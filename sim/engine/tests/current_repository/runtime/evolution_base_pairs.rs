@@ -195,7 +195,7 @@ fn ward_counter(base: &str) {
 }
 
 #[test]
-fn bp20_064_awakening_only_changes_damage_then_real_evolution_keeps_ward() {
+fn bp20_064_awakening_enables_damage_and_healing_then_real_evolution_keeps_ward() {
     for (base, form) in [("BP20-064", "BP20-065"), ("BP20-P33", "BP20-P34")] {
         ward_counter(base);
         ward_counter(form);
@@ -208,7 +208,7 @@ fn bp20_064_awakening_only_changes_damage_then_real_evolution_keeps_ward() {
             let before = game.projection(View::Referee).unwrap();
             assert_eq!(before["objects"]["enemy"]["damage"], u8::from(maximum == 7));
             assert_eq!(before["objects"]["source"]["damage"], 0_u8);
-            assert_eq!(before["P1"]["leader"]["life"], 12_u8);
+            assert_eq!(before["P1"]["leader"]["life"], if maximum == 7 { 12_u8 } else { 10 });
             evolve(&mut game);
             assert!(trigger(&mut game, form, 2));
             let after = game.projection(View::Referee).unwrap();

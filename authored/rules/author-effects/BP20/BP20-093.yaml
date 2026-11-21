@@ -20,9 +20,9 @@ cards:
                             right: 3
                         then:
                           - banish: chosen
-                    - life:
-                        delta: 2
-                        who: self
+                          - life:
+                              delta: 2
+                              who: self
                   - - create:
                         n: 1
                         to: ex

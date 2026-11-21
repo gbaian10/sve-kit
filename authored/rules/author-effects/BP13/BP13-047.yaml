@@ -23,10 +23,10 @@ cards:
                   - damage:
                       n: 4
                       to: chosen
-            - damage:
-                n: 1
-                to:
-                  leaders: opponents
+                  - damage:
+                      n: 1
+                      to:
+                        leader_of: chosen
           targets:
             - bind: chosen
               from:

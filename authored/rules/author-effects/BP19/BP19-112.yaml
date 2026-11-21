@@ -18,4 +18,4 @@ cards:
                 cond: { cmp: { left: { resource: { who: self, kind: sep } }, op: eq, right: 0 } }
                 then:
                   - buff: { on: this, power: 2, hp: 2 }
-            - life: { who: self, delta: 2 }
+                  - life: { who: self, delta: 2 }
