@@ -271,25 +271,28 @@ fn play(game: &mut Game, id: &str) {
 }
 
 #[test]
-fn bp04_121_stands_and_buffs_an_ally_but_forbids_its_leader_attack() {
+fn bp04_121_stands_and_buffs_an_ally_but_forbids_its_attacks() {
     for card in ["BP04-121", "SP01-052", "SP01-SL52"] {
         let mut initial = position(card);
         initial["players"]["P1"]["zones"]["field"] =
             json!([{"id":"friend","card":"wire-plain","state":{"acted":true}}]);
+        initial["players"]["P2"]["zones"]["field"][0]["state"]["acted"] = json!(true);
         let mut game = game(&initial);
         play(&mut game, "source");
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["objects"]["friend"]["acted"], false);
         assert_eq!(state["objects"]["friend"]["power"], 5_u8);
         assert_eq!(state["objects"]["friend"]["hp"], 22_u8);
-        assert_eq!(
-            game.internal_rule_action(
-                &json!({"do":"attack","attacker":"friend","target":"P2.leader"})
-            )
-            .unwrap()
-            .outcome,
-            "cannot-attack",
-            "the printed restriction survives the Stand action"
-        );
+        for target in ["P2.leader", "enemy"] {
+            assert_eq!(
+                game.internal_rule_action(
+                    &json!({"do":"attack","attacker":"friend","target":target})
+                )
+                .unwrap()
+                .outcome,
+                "cannot-attack",
+                "the printed restriction forbids attacking {target}"
+            );
+        }
     }
 }

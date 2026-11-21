@@ -37,7 +37,10 @@ fn settle(game: &mut Game, mut play: CardPlay, picked: &[&str], offered: &mut Ve
                 play = game.answer_internal_card(q.actor, q.token, answer).unwrap();
             }
             // Cancelled also starts a scenario that begins with a pending trigger.
-            CardPlay::Entered(_) | CardPlay::Resolved(_) | CardPlay::Cancelled => {
+            CardPlay::Entered(_)
+            | CardPlay::Resolved(_)
+            | CardPlay::ResolvedCard(_)
+            | CardPlay::Cancelled => {
                 while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
                     game.resume_internal_card().unwrap();
                 }

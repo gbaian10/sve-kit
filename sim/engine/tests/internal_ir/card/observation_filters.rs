@@ -433,6 +433,7 @@ fn awaiting_order(play: CardPlay) -> Option<DecisionView> {
         CardPlay::Awaiting(q) if matches!(q.domain, InputDomain::Order(_)) => Some(q),
         CardPlay::Awaiting(_)
         | CardPlay::Resolved(_)
+        | CardPlay::ResolvedCard(_)
         | CardPlay::Entered(_)
         | CardPlay::Cancelled
         | CardPlay::Continued(_)
@@ -806,6 +807,7 @@ fn crowded_look(choose: &Value, destination: &str, deck: Value) -> (Game, Option
     let question = match play {
         CardPlay::Awaiting(q) => Some(q),
         CardPlay::Resolved(_)
+        | CardPlay::ResolvedCard(_)
         | CardPlay::Entered(_)
         | CardPlay::Cancelled
         | CardPlay::Continued(_)
@@ -908,6 +910,7 @@ fn awaiting_any(play: CardPlay) -> Option<DecisionView> {
     match play {
         CardPlay::Awaiting(q) => Some(q),
         CardPlay::Resolved(_)
+        | CardPlay::ResolvedCard(_)
         | CardPlay::Entered(_)
         | CardPlay::Cancelled
         | CardPlay::Continued(_)

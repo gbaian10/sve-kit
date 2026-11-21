@@ -30,7 +30,10 @@ fn finish(game: &mut Game, mut play: CardPlay) -> Vec<u64> {
                 hits.extend(triggers(game));
                 return hits;
             }
-            CardPlay::Entered(_) | CardPlay::Cancelled | CardPlay::Continued(_) => {
+            CardPlay::Entered(_)
+            | CardPlay::ResolvedCard(_)
+            | CardPlay::Cancelled
+            | CardPlay::Continued(_) => {
                 return triggers(game);
             }
             CardPlay::GameEnded(_) => panic!("unexpected arithmetic scenario termination"),
