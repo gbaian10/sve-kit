@@ -1,14 +1,14 @@
 //! Intrinsic evolution and its field permission share the existing rule procedure.
 use super::{
-    Ability, AbilityOrigin, Action, CostSpec, Expr, Game, Generation, KeywordId, Located, Node,
-    Result, SourceSpan, invalid, unsupported,
+    Ability, AbilityId, AbilityOrigin, Action, Context, CostSpec, Execution, Expr, Game,
+    Generation, KeywordId, Located, Node, Result, SourceSpan, invalid, unsupported,
 };
 use crate::game::string;
 use crate::ir::evolution_destination::Destination;
 use crate::ir::evolution_limits;
 use crate::ir::{
-    Bool, ChoiceDomain, Control, Int, PlayerRef, Resource, ResourceOperation, SelectionGroup,
-    Selector,
+    Bool, ChoiceDomain, Control, Int, PlaySpec, PlayerId, PlayerRef, Resource, ResourceOperation,
+    SelectionGroup, Selector,
 };
 use serde_json::{Value, json};
 
@@ -69,6 +69,33 @@ pub(super) fn cost(ability: &Ability) -> Result<i64> {
         })
 }
 
+fn non_pp_play(ability: &Ability) -> Result<PlaySpec> {
+    let mut play = ability
+        .play
+        .clone()
+        .ok_or_else(|| invalid("missing evolution play"))?;
+    let CostSpec::Ordered { steps } = &mut play.costs else {
+        return Err(unsupported("evolution costs"));
+    };
+    if play.parameters.is_empty() || steps.is_empty() {
+        return Err(invalid("missing evolution form parameter or reveal cost"));
+    }
+    // The rule procedure handles the form reveal and the adjusted PP/EP payment.
+    play.parameters.remove(0);
+    steps.remove(0);
+    steps.retain(|step| {
+        !matches!(
+            step.instruction.action,
+            Action::Resource {
+                resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay,
+                ..
+            }
+        )
+    });
+    Ok(play)
+}
+
 fn qualification(ability: &Ability) -> Result<Option<&Expr<Bool>>> {
     let play = ability
         .play
@@ -84,18 +111,10 @@ fn usable(game: &Game, holder: &str, ability: &Ability) -> Result<bool> {
     let Some(predicate) = qualification(ability)? else {
         return Ok(true);
     };
-    let object = game.object(holder)?;
-    let controller = super::player_id(&object.controller)?;
-    let context = super::Context {
-        source: holder.into(),
-        generation: Generation(object.generation),
-        controller,
-    };
+    let controller = super::player_id(&game.object(holder)?.controller)?;
     // A legality probe must not allocate clocks or ability instances in the real game.
     let mut probe = game.clone();
-    let mut execution = probe.new_card_execution(context)?;
-    let source = probe.internal_card_source(holder, ability.id, controller)?;
-    execution.bind_source(&probe, source)?;
+    let execution = probe.evolution_selection(holder, ability.id, controller)?;
     Ok(execution.boolean(&probe, predicate)?.0)
 }
 
@@ -187,6 +206,22 @@ pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {
     reason = "The intrinsic proof delegates to the existing validated rule procedure."
 )]
 impl Game {
+    fn evolution_selection(
+        &mut self,
+        holder: &str,
+        definition: AbilityId,
+        controller: PlayerId,
+    ) -> Result<Execution> {
+        let mut execution = self.new_card_execution(Context {
+            source: holder.into(),
+            generation: Generation(self.object(holder)?.generation),
+            controller,
+        })?;
+        let origin = self.internal_card_source(holder, definition, controller)?;
+        execution.bind_source(self, origin)?;
+        Ok(execution)
+    }
+
     pub(in crate::game) fn internal_evolution_payment(
         &mut self,
         ability: &Ability,
@@ -195,40 +230,15 @@ impl Game {
         if self.internal_ability_forbidden(string(&decision["source"]), ability)? {
             return Ok(false);
         }
-        let mut play = ability
-            .play
-            .clone()
-            .ok_or_else(|| invalid("evolution play"))?;
-        play.parameters.remove(0);
-        let CostSpec::Ordered { steps } = &mut play.costs else {
-            return Err(unsupported("evolution costs"));
-        };
-        steps.remove(0);
-        steps.retain(|step| {
-            !matches!(
-                step.instruction.action,
-                Action::Resource {
-                    resource: Resource::PpCurrent,
-                    operation: ResourceOperation::Pay,
-                    ..
-                }
-            )
-        });
-        if steps.is_empty() {
+        let play = non_pp_play(ability)?;
+        if matches!(&play.costs, CostSpec::Ordered { steps } if steps.is_empty()) {
             return Ok(true);
         }
         let mut probe = self.clone();
         let holder = string(&decision["source"]);
-        let object = self.object(holder)?;
-        let controller = super::player_id(&object.controller)?;
-        let mut execution = probe.new_card_execution(super::Context {
-            source: holder.into(),
-            generation: Generation(object.generation),
-            controller,
-        })?;
-        let origin = probe.internal_card_source(holder, ability.id, controller)?;
-        execution.bind_source(&probe, origin)?;
-        probe.card_runtime.active_source = Some(origin);
+        let controller = super::player_id(&self.object(holder)?.controller)?;
+        let mut execution = probe.evolution_selection(holder, ability.id, controller)?;
+        probe.card_runtime.active_source = execution.ability;
         let attempt = (|| {
             for parameter in &play.parameters {
                 probe.internal_material_parameter(

@@ -16,6 +16,30 @@ fn question(game: &Game) -> Question {
     *question
 }
 
+fn offered_evolution_lines(game: &mut Game) -> Vec<u64> {
+    let before = game.projection(View::Referee).unwrap();
+    game.advance_player_input();
+    let QuestionShape::ActionWindow(actions) = question(game).shape else {
+        panic!("main actions");
+    };
+    assert_eq!(
+        game.projection(View::Referee).unwrap(),
+        before,
+        "inspecting the menu does not reveal the form or pay a cost"
+    );
+    actions
+        .intents
+        .into_iter()
+        .filter_map(|intent| {
+            if let MainIntentKind::Evolve { line, .. } = intent.kind {
+                Some(line)
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
 fn assert_selection(game: &Game, selection: &SelectionQuestion, expected_groups: usize) {
     let observation = game.observe(Viewer::P1).unwrap();
     assert_eq!(
@@ -169,41 +193,33 @@ fn evolve_with_ep(
 }
 
 #[test]
-fn player_evolution_real_life_cost_is_native_and_unpayable_cost_reverts() {
+fn player_evolution_real_life_cost_is_native_and_unpayable_cost_is_hidden() {
     for life in [2_u8, 20] {
         let mut initial = evolution_payment::position("BP01-105", "BP01-106");
         initial["players"]["P1"]["leader"]["life"] = json!(life);
         let mut game = evolution_payment::game(&initial);
-        let before = game.projection(View::Referee).unwrap();
-        assert_eq!(
-            evolve(&mut game, false),
-            if life == 2 {
-                SubmissionKind::Reverted
-            } else {
-                SubmissionKind::Applied
-            },
-            "Life is paid by the original intrinsic rule procedure"
-        );
-        let state = game.projection(View::Referee).unwrap();
         if life == 2 {
             assert_eq!(
-                state, before,
-                "Failed life payment reveals and spends nothing"
+                offered_evolution_lines(&mut game),
+                Vec::<u64>::new(),
+                "two life cannot pay three"
             );
-        } else {
-            assert_eq!(
-                state["P1"]["leader"]["life"], 17_i64,
-                "The printed three life is paid once"
-            );
-            assert_eq!(
-                state["P1"]["pp"]["current"], 10_i64,
-                "This evolution has no PP cost"
-            );
-            assert_eq!(
-                state["objects"]["source"]["evolved_with"], "form",
-                "The selected real form is used"
-            );
+            continue;
         }
+        assert_eq!(evolve(&mut game, false), SubmissionKind::Applied);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["leader"]["life"], 17_i64,
+            "The printed three life is paid once"
+        );
+        assert_eq!(
+            state["P1"]["pp"]["current"], 10_i64,
+            "This evolution has no PP cost"
+        );
+        assert_eq!(
+            state["objects"]["source"]["evolved_with"], "form",
+            "The selected real form is used"
+        );
     }
 }
 
@@ -217,38 +233,30 @@ fn player_evolution_real_cemetery_materials_are_selected_before_native_payment()
                 .collect::<Vec<_>>()
         );
         let mut game = evolution_payment::game(&initial);
-        let before = game.projection(View::Referee).unwrap();
-        assert_eq!(
-            evolve(&mut game, false),
-            if available == 1 {
-                SubmissionKind::Reverted
-            } else {
-                SubmissionKind::Applied
-            },
-            "The native material count remains two"
-        );
-        let state = game.projection(View::Referee).unwrap();
         if available == 1 {
             assert_eq!(
-                state, before,
-                "An impossible material declaration spends nothing"
+                offered_evolution_lines(&mut game),
+                Vec::<u64>::new(),
+                "one cemetery card cannot pay for two"
             );
-        } else {
-            assert_eq!(
-                state["P1"]["banish"],
-                json!(["fee0", "fee1"]),
-                "Both selected cemetery cards pay the real cost"
-            );
-            assert_eq!(
-                state["P1"]["cemetery"],
-                json!([]),
-                "The material movement is committed once"
-            );
-            assert_eq!(
-                state["objects"]["source"]["evolved_with"], "form",
-                "The form is committed after payment"
-            );
+            continue;
         }
+        assert_eq!(evolve(&mut game, false), SubmissionKind::Applied);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["banish"],
+            json!(["fee0", "fee1"]),
+            "Both selected cemetery cards pay the real cost"
+        );
+        assert_eq!(
+            state["P1"]["cemetery"],
+            json!([]),
+            "The material movement is committed once"
+        );
+        assert_eq!(
+            state["objects"]["source"]["evolved_with"], "form",
+            "The form is committed after payment"
+        );
     }
 }
 
@@ -258,39 +266,107 @@ fn player_evolution_real_hand_discard_uses_own_hand_and_preserves_other_zones() 
         let mut initial = evolution_payment::position("BP05-098", "BP05-099");
         initial["players"]["P1"]["zones"][zone] = json!([{"id":"fee","card":"BP01-171"}]);
         let mut game = evolution_payment::game(&initial);
-        let before = game.projection(View::Referee).unwrap();
-        assert_eq!(
-            evolve(&mut game, false),
-            if zone == "hand" {
-                SubmissionKind::Applied
-            } else {
-                SubmissionKind::Reverted
-            },
-            "Only an own-hand card can pay the printed discard"
-        );
-        let state = game.projection(View::Referee).unwrap();
         if zone == "cemetery" {
             assert_eq!(
-                state, before,
-                "Another zone cannot substitute for a discard"
+                offered_evolution_lines(&mut game),
+                Vec::<u64>::new(),
+                "a cemetery card cannot pay a discard"
             );
-        } else {
-            assert_eq!(
-                state["P1"]["hand"],
-                json!([]),
-                "The selected hand card is discarded once"
-            );
-            assert_eq!(
-                state["P1"]["cemetery"],
-                json!(["fee"]),
-                "The original discard movement is retained"
-            );
-            assert_eq!(
-                state["objects"]["source"]["evolved_with"], "form",
-                "The real source evolves after discarding"
-            );
+            continue;
         }
+        assert_eq!(evolve(&mut game, false), SubmissionKind::Applied);
+        let state = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            state["P1"]["hand"],
+            json!([]),
+            "The selected hand card is discarded once"
+        );
+        assert_eq!(
+            state["P1"]["cemetery"],
+            json!(["fee"]),
+            "The original discard movement is retained"
+        );
+        assert_eq!(
+            state["objects"]["source"]["evolved_with"], "form",
+            "The real source evolves after discarding"
+        );
     }
+}
+
+#[test]
+fn player_evolution_cosmos_fang_requires_another_own_follower() {
+    let mut initial = evolution_payment::position("BP03-002", "BP03-003");
+    initial["players"]["P1"]["pp"]["current"] = json!(0_u8);
+    initial["players"]["P1"]["ep"] = json!(1_u8);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-171"}]);
+    assert_eq!(
+        offered_evolution_lines(&mut evolution_payment::game(&initial)),
+        Vec::<u64>::new(),
+        "an opposing follower cannot pay the return cost"
+    );
+
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"ally","card":"BP01-171"}));
+    let mut game = evolution_payment::game(&initial);
+    assert_eq!(offered_evolution_lines(&mut game), [1]);
+    assert_eq!(
+        evolve_with_ep(&mut game, false, true, 1),
+        SubmissionKind::Applied
+    );
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["hand"], json!(["ally"]));
+    assert_eq!(after["P2"]["field"], json!(["enemy"]));
+}
+
+#[test]
+fn player_evolution_tsukasa_offers_only_payable_printed_lines() {
+    let mut initial = evolution_payment::position("CP02-057", "CP02-058");
+    initial["players"]["P1"]["pp"]["current"] = json!(1_u8);
+    initial["players"]["P1"]["zones"]["ex"] = json!([
+        {"id":"item1","card":"CP02-T01"},{"id":"item2","card":"CP02-T01"}
+    ]);
+    assert_eq!(
+        offered_evolution_lines(&mut evolution_payment::game(&initial)),
+        Vec::<u64>::new(),
+        "one PP and two items cannot pay either evolution cost"
+    );
+
+    initial["players"]["P1"]["zones"]["ex"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"item3","card":"CP02-T01"}));
+    assert_eq!(
+        offered_evolution_lines(&mut evolution_payment::game(&initial)),
+        [2]
+    );
+
+    initial["players"]["P1"]["pp"]["current"] = json!(2_u8);
+    assert_eq!(
+        offered_evolution_lines(&mut evolution_payment::game(&initial)),
+        [1, 2]
+    );
+}
+
+#[test]
+fn player_evolution_blazing_core_needs_both_named_cemetery_materials() {
+    let mut initial = evolution_payment::position("CP03-066", "CP03-067");
+    initial["players"]["P1"]["pp"]["current"] = json!(1_u8);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"tail1","card":"CP03-080"},{"id":"tail2","card":"CP03-080"}
+    ]);
+    assert_eq!(
+        offered_evolution_lines(&mut evolution_payment::game(&initial)),
+        Vec::<u64>::new(),
+        "two identical materials cannot fill different name groups"
+    );
+
+    initial["players"]["P1"]["zones"]["cemetery"][1] = json!({"id":"claw","card":"CP03-077"});
+    assert_eq!(
+        offered_evolution_lines(&mut evolution_payment::game(&initial)),
+        [2]
+    );
 }
 
 #[test]
