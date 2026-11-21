@@ -15,24 +15,28 @@ cards:
           - ward
       - line: 2
         fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+              option: 1
           do:
             - if:
                 cond:
                   combo: 3
                 then:
-                  - choose:
-                      bind: enemy
-                      from:
-                        who: opp
-                        zone: field
-                        kind: follower
+                  - choice:
                       n: 1
-                  - destroy: enemy
-                  - create:
-                      token: フェアリー
-                      to: field
-                      by: opp
-                      n: 1
+                      options:
+                        - - destroy: enemy
+                          - create:
+                              token: フェアリー
+                              to: field
+                              by: opp
+                              n: 1
     token_sources:
       - section: 1
         line: 1

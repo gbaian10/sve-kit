@@ -24,9 +24,12 @@ cards:
                     op: ge
                     right: 3
                 then:
-                  - buff:
-                      "on": enemy
-                      power: -4
+                  - choice:
+                      n: 1
+                      options:
+                        - - buff:
+                              "on": enemy
+                              power: -4
           targets:
             - bind: enemy
               from:
@@ -34,3 +37,4 @@ cards:
                 zone: field
                 kind: follower
               n: 1
+              option: 1

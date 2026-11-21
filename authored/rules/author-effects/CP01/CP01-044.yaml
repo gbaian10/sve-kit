@@ -29,9 +29,12 @@ cards:
                     who: self
                     zone: field
                 then:
-                  - damage:
-                      n: 4
-                      to: chosen
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 4
+                              to: chosen
           targets:
             - bind: chosen
               from:
@@ -39,6 +42,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 2
     admission: light
     meta:

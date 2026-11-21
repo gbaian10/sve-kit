@@ -14,14 +14,17 @@ cards:
                     op: ge
                     right: 3
                 then:
-                  - destroy: enemy
-                  - damage:
-                      n: 2
-                      to:
-                        leader_of: enemy
-                  - life:
-                      delta: 2
-                      who: self
+                  - choice:
+                      n: 1
+                      options:
+                        - - destroy: enemy
+                          - damage:
+                              n: 2
+                              to:
+                                leader_of: enemy
+                          - life:
+                              delta: 2
+                              who: self
           targets:
             - bind: enemy
               from:
@@ -29,6 +32,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 1
     admission: light
     meta:

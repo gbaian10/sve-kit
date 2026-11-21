@@ -7,9 +7,12 @@ cards:
                 cond:
                   awakened: true
                 then:
-                  - damage:
-                      n: 4
-                      to: enemy
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 4
+                              to: enemy
           targets:
             - bind: enemy
               from:
@@ -17,6 +20,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 1
     admission: light
     meta:

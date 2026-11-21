@@ -11,9 +11,12 @@ cards:
                     who: self
                     window: this_turn
                 then:
-                  - damage:
-                      n: 2
-                      to: enemy
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 2
+                              to: enemy
           on:
             phase:
               which: end
@@ -26,6 +29,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 1
       - fanfare:
           cost:

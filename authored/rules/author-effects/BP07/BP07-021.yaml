@@ -32,7 +32,10 @@ cards:
                     op: ge
                     right: 5
                 then:
-                  - destroy: enemy
+                  - choice:
+                      n: 1
+                      options:
+                        - - destroy: enemy
           targets:
             - bind: enemy
               from:
@@ -40,6 +43,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 2
     admission: light
     meta:
