@@ -1788,20 +1788,48 @@ impl Game {
         Ok(())
     }
 
+    fn main_play_targets_feasible(&self, execution: &Execution, play: &PlayState) -> Result<bool> {
+        if let Some(binding) = play.parameters.front().and_then(x_payment::parameter) {
+            return self.main_x_targets_feasible(execution, play, binding);
+        }
+        if !self.internal_play_targets_feasible(execution, play.parameters.iter(), Defer)? {
+            return Ok(false);
+        }
+        for group in &play.modes {
+            // Conditional groups and dynamic counts may depend on earlier choices.
+            if group.condition.is_some() || !matches!(group.count, Expr::Literal(Nat(1..))) {
+                continue;
+            }
+            let ChoiceDomain::Modes { cardinality, .. } = &group.chosen.domain else {
+                return Err(invalid("missing main play modes"));
+            };
+            let mut remaining = mode_minimum(*cardinality);
+            for mode in &group.modes {
+                if remaining == 0 {
+                    break;
+                }
+                match self.internal_play_targets_feasible(execution, mode.parameters.iter(), Defer)
+                {
+                    Ok(true) | Err(crate::EngineFailure::Unsupported(_)) => {
+                        remaining = remaining.saturating_sub(1);
+                    }
+                    Ok(false) | Err(crate::EngineFailure::IllegalPlay(_)) => {}
+                    Err(error) => return Err(error),
+                }
+            }
+            if remaining != 0 {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
     pub(super) fn check_main_play_requirements(&self, mut execution: Execution) -> Result<()> {
         let play = execution
             .play
             .take()
             .ok_or_else(|| invalid("missing prepared declaration"))?;
-        // A formal target selector may need the value supplied by the preceding X question.
-        let pending_x = play
-            .parameters
-            .front()
-            .and_then(x_payment::parameter)
-            .is_some();
-        if !pending_x
-            && !self.internal_play_targets_feasible(&execution, play.parameters.iter(), Defer)?
-        {
+        if !self.main_play_targets_feasible(&execution, &play)? {
             return Err(crate::EngineFailure::IllegalPlay(
                 "no legal play targets".into(),
             ));

@@ -21,7 +21,16 @@ cards:
                 who: opp
                 zone: field
                 kind: follower
-              n: 1
+              n:
+                minus:
+                  - 1
+                  - min:
+                      - 1
+                      - count:
+                          who: self
+                          zone: field
+                          kind: follower
+                          other: true
           do:
             - if:
                 cond:

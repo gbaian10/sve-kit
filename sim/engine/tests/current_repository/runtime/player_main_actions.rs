@@ -282,6 +282,38 @@ fn player_main_actions_require_enough_spell_targets() {
 }
 
 #[test]
+fn player_main_actions_require_a_mode_with_legal_targets() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"BP13-008"}]);
+    // This Sekka qualifies for mode 2 but lacks the exact name needed for mode 1.
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"sekka","card":"BP13-001"}]);
+    for has_target in [false, true] {
+        if has_target {
+            initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-171"}]);
+        }
+        let mut game = Game::from_selected_effects(
+            selection_with_rules().clone(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "main-mode-targets",
+        )
+        .unwrap();
+        game.advance_player_input();
+        let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+            panic!("main actions");
+        };
+        assert_eq!(
+            actions.intents.iter().any(|intent| matches!(
+                &intent.kind,
+                MainIntentKind::Play { card } if card.properties.card == "BP13-008"
+            )),
+            has_target,
+        );
+    }
+}
+
+#[test]
 fn player_main_actions_require_payable_activation_materials() {
     let mut initial = draw_position();
     let mut field = vec![
@@ -349,33 +381,38 @@ fn player_main_actions_require_enough_stack_for_great_magician() {
 }
 
 #[test]
-fn player_main_actions_remain_available_with_an_undeclared_x_target_limit() {
+fn player_main_actions_require_a_target_within_affordable_x() {
     let mut initial = draw_position();
-    initial["players"]["P1"]["pp"]["current"] = json!(1_u8);
     initial["players"]["P1"]["zones"]["field"] =
         json!([{"id":"strategist","card":"BP21-030"}]);
     initial["players"]["P1"]["zones"]["cemetery"] = json!([
         {"id":"expensive","card":"BP21-055"},
         {"id":"same-name","card":"BP21-030"}
     ]);
-    let mut game = Game::from_selected_effects(
-        selection_with_rules().clone(),
-        &initial,
-        &Value::Null,
-        &Value::Null,
-        "main-x-target-limit",
-    )
-    .unwrap();
-    game.advance_player_input();
-    let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
-        panic!("main actions");
-    };
-    assert!(actions.intents.iter().any(|intent| matches!(intent.kind, MainIntentKind::EndPhase)));
-    assert!(actions.intents.iter().any(|intent| matches!(
-        &intent.kind,
-        MainIntentKind::Activate { holder, line: 1, .. }
-            if holder.properties.card == "BP21-030"
-    )));
+    for (pp, can_pay) in [(1_u8, false), (2, true)] {
+        initial["players"]["P1"]["pp"]["current"] = json!(pp);
+        let mut game = Game::from_selected_effects(
+            selection_with_rules().clone(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "main-x-target-limit",
+        )
+        .unwrap();
+        game.advance_player_input();
+        let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+            panic!("main actions");
+        };
+        assert!(actions.intents.iter().any(|intent| matches!(intent.kind, MainIntentKind::EndPhase)));
+        assert_eq!(
+            actions.intents.iter().any(|intent| matches!(
+                &intent.kind,
+                MainIntentKind::Activate { holder, line: 1, .. }
+                    if holder.properties.card == "BP21-030"
+            )),
+            can_pay,
+        );
+    }
 }
 
 fn quick_pass(game: &mut Game, actor: Viewer) {

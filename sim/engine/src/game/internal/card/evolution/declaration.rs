@@ -1,6 +1,6 @@
 //! Normal evolution stages borrow the native material validators without trial payment.
 
-use super::{intrinsic, rule_code, usable};
+use super::{intrinsic, non_pp_play, rule_code, usable};
 use crate::game::int;
 use crate::game::internal::source::SourceInformation;
 use crate::game::internal::{Context, Execution, Game, InputDomain, Result, Wait};
@@ -9,10 +9,7 @@ use crate::game::player::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
     ObjectHandle, QuestionToken, Viewer,
 };
-use crate::ir::{
-    Ability, AbilityId, Action, CostSpec, Generation, ObjectRef, PlaySpec, Resource,
-    ResourceOperation,
-};
+use crate::ir::{Ability, AbilityId, CostSpec, Decision, ObjectRef, PlaySpec};
 use crate::{EngineFailure, invalid};
 use serde_json::{Value, json};
 
@@ -149,12 +146,70 @@ impl Game {
             {
                 continue;
             }
-            entries.push(entry.node.clone());
+            match self.check_evolution_costs(holder, actor, &entry.node) {
+                Ok(()) => entries.push(entry.node.clone()),
+                Err(EngineFailure::IllegalPlay(_)) => {}
+                Err(error) => return Err(error),
+            }
         }
         entries.sort_by_key(|entry| {
             super::super::printed_origin(&entry.source.origin).map_or(u64::MAX, |(_, line)| line.0)
         });
         Ok(entries)
+    }
+
+    fn check_evolution_costs(&self, holder: &str, actor: Viewer, ability: &Ability) -> Result<()> {
+        let play = non_pp_play(ability)?;
+        if matches!(&play.costs, CostSpec::Ordered { steps } if steps.is_empty()) {
+            return Ok(());
+        }
+        let mut probe = self.clone();
+        let mut selection = probe.evolution_selection(holder, ability.id, actor.player())?;
+        probe.card_runtime.active_source = selection.ability;
+        if play.parameters.is_empty()
+            && probe.known_costs_available(
+                holder,
+                &selection,
+                &play.costs,
+                actor.player(),
+                false,
+            )? == Some(false)
+        {
+            return Err(illegal("insufficient evolution resources"));
+        }
+        if let Some(parameter) = play.parameters.first() {
+            probe.prepare_evolution_materials(&mut selection, &play.costs, parameter)?;
+            selection.waiting = None;
+        }
+        probe.internal_probe_hand_costs(&mut selection, &play.costs)
+    }
+
+    fn prepare_evolution_materials(
+        &self,
+        selection: &mut Execution,
+        costs: &CostSpec,
+        parameter: &Decision,
+    ) -> Result<()> {
+        self.internal_material_parameter(
+            selection,
+            parameter,
+            super::super::material::posture_parameter(costs, parameter),
+        )?;
+        let source = selection.reference(self, &selection.context.source)?;
+        let Some((view, Wait::MaterialParameter(wait))) = selection.waiting.as_mut() else {
+            return Err(invalid("missing evolution material question"));
+        };
+        let InputDomain::CostMaterials(domain) = &mut view.domain else {
+            return Err(invalid("evolution material domain"));
+        };
+        let forbidden = wait.handles_for(source)?;
+        domain
+            .members
+            .retain(|member| !forbidden.contains(&member.handle));
+        if u64::try_from(domain.members.len()).map_err(invalid)? < domain.cardinality.minimum.0 {
+            return Err(illegal("insufficient evolution materials"));
+        }
+        Ok(())
     }
 
     pub(in crate::game) fn main_evolution_options(
@@ -193,41 +248,10 @@ impl Game {
             .ok_or_else(|| invalid("retired evolution option"))?;
         let code = rule_code(&entry)?;
         let forms = self.evolution_forms(holder, actor, &code)?;
-        let object = self.object(holder)?;
-        let source = Context {
-            source: holder.into(),
-            generation: Generation(object.generation),
-            controller: actor.player(),
-        };
         let mut probe = self.clone();
-        let mut selection = probe.new_card_execution(source.clone())?;
-        let origin = probe.internal_card_source(holder, entry.id, actor.player())?;
-        selection.bind_source(&probe, origin)?;
-        let mut play = entry
-            .play
-            .ok_or_else(|| invalid("missing evolution play"))?;
-        // Admission already permits one face parameter and at most one material parameter.
-        if play.parameters.is_empty() || play.parameters.len() > 2 {
-            return Err(super::super::unsupported("evolution material parameters"));
-        }
-        play.parameters.remove(0);
-        let CostSpec::Ordered { steps } = &mut play.costs else {
-            return Err(invalid("evolution costs"));
-        };
-        if steps.is_empty() {
-            return Err(invalid("evolution reveal cost"));
-        }
-        steps.remove(0);
-        steps.retain(|step| {
-            !matches!(
-                step.instruction.action,
-                Action::Resource {
-                    resource: Resource::PpCurrent,
-                    operation: ResourceOperation::Pay,
-                    ..
-                }
-            )
-        });
+        let selection = probe.evolution_selection(holder, entry.id, actor.player())?;
+        let source = selection.context.clone();
+        let play = non_pp_play(&entry)?;
         self.player_evolution = Some(Box::new(Declaration {
             actor,
             source,
@@ -439,26 +463,7 @@ impl Declaration {
         let mut probe = game.clone();
         probe.card_runtime.active_source = self.selection.ability;
         if let Some(parameter) = self.play.parameters.get(self.parameter) {
-            probe.internal_material_parameter(
-                &mut self.selection,
-                parameter,
-                super::super::material::posture_parameter(&self.play.costs, parameter),
-            )?;
-            let source = self.selection.reference(game, &self.source.source)?;
-            if let Some((view, Wait::MaterialParameter(wait))) = self.selection.waiting.as_mut() {
-                let InputDomain::CostMaterials(domain) = &mut view.domain else {
-                    return Err(invalid("evolution material domain"));
-                };
-                let forbidden = wait.handles_for(source)?;
-                domain
-                    .members
-                    .retain(|member| !forbidden.contains(&member.handle));
-                if u64::try_from(domain.members.len()).map_err(invalid)?
-                    < domain.cardinality.minimum.0
-                {
-                    return Err(illegal("insufficient evolution materials"));
-                }
-            }
+            probe.prepare_evolution_materials(&mut self.selection, &self.play.costs, parameter)?;
             self.stage = Stage::Materials;
             return Ok(());
         }
