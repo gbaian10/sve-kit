@@ -67,7 +67,7 @@ impl Game {
         Ok(true)
     }
 
-    pub(super) fn internal_probe_hand_payments(
+    pub(in crate::game::internal::card) fn internal_probe_hand_payments(
         &self,
         execution: &mut Execution,
         costs: &[&CostSpec],

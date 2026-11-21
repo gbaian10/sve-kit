@@ -46,6 +46,7 @@ it("submits a translation report with read-only card details and links to the cr
   const dialog = within(screen.getByRole("dialog", { name: "回報這張卡的問題" }))
   expect(dialog.getByText("BP03-LDⓈ01EN")).toBeVisible()
   expect(dialog.getByRole("combobox", { name: "問題類型" })).toHaveValue("translation")
+  expect(dialog.queryByRole("textbox", { name: /聯絡方式或暱稱/ })).not.toBeInTheDocument()
   const description = dialog.getByRole("textbox", { name: "問題說明（必填）" })
   expect(description).toHaveValue("")
   await user.type(description, "The translation is missing an instruction.")
@@ -70,7 +71,6 @@ it("submits a translation report with read-only card details and links to the cr
     dataVersion: "preview-20261121T010000Z-0001",
     type: "translation",
     description: "The translation is missing an instruction.",
-    contact: "",
     token: "XXXX.DUMMY.TOKEN.XXXX",
   })
 })

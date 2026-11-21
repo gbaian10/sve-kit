@@ -79,13 +79,13 @@ impl Game {
         }
         let mut probe = self.clone();
         match probe.prepare_card_execution(holder, actor, None) {
-            Ok(execution) => probe.declaration_cost_available(holder, &execution),
+            Ok(execution) => probe.declaration_available(holder, execution),
             Err(EngineFailure::IllegalPlay(_)) => Ok(false),
             Err(error) => Err(error),
         }
     }
 
-    fn declaration_cost_available(&self, holder: &str, execution: &Execution) -> Result<bool> {
+    fn declaration_available(&self, holder: &str, execution: Execution) -> Result<bool> {
         let play = execution
             .play
             .as_ref()
@@ -93,7 +93,7 @@ impl Game {
         let available_pp =
             int(&self.player(seat_name(execution.context.controller)?)?.pp["current"]);
         let cost = self
-            .prepared_declaration_cost(execution)
+            .prepared_declaration_cost(&execution)
             .ok_or_else(|| invalid("missing prepared cost"))?;
         if execution.field_entry
             && play.exchange.is_none()
@@ -113,7 +113,7 @@ impl Game {
             && fixed_head(&play.costs)
             && self.known_costs_available(
                 holder,
-                execution,
+                &execution,
                 &play.costs,
                 execution.context.controller,
                 execution.spell,
@@ -121,7 +121,11 @@ impl Game {
         {
             return Ok(false);
         }
-        Ok(true)
+        match self.check_main_play_requirements(execution) {
+            Ok(()) => Ok(true),
+            Err(EngineFailure::IllegalPlay(_)) => Ok(false),
+            Err(error) => Err(error),
+        }
     }
 
     fn main_activation_candidates(
@@ -160,7 +164,7 @@ impl Game {
                 Err(EngineFailure::IllegalPlay(_)) => continue,
                 Err(error) => return Err(error),
             };
-            if !probe.declaration_cost_available(holder, &execution)? {
+            if !probe.declaration_available(holder, execution)? {
                 continue;
             }
             let line = if let Some(origin) = &ability.grant {
