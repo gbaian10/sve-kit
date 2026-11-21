@@ -95,6 +95,36 @@ fn bp13_002_plays_from_ex_for_three_pp_and_resolves_its_fanfare() {
 }
 
 #[test]
+fn player_main_actions_require_a_standing_source_for_death_declaration() {
+    let mut initial = draw_position();
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"enemy","card":"BP01-171"}]);
+    for acted in [false, true] {
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"amulet","card":"BP01-150","state":{"acted":acted}}]);
+        let mut game = Game::from_selected_effects(
+            selection_with_rules().clone(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "main-self-act-cost",
+        )
+        .unwrap();
+        game.advance_player_input();
+        let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+            panic!("main actions");
+        };
+        assert_eq!(
+            actions.intents.iter().any(|intent| matches!(
+                &intent.kind,
+                MainIntentKind::Activate { holder, .. } if holder.properties.card == "BP01-150"
+            )),
+            !acted,
+        );
+    }
+}
+
+#[test]
 fn player_main_actions_require_enough_spell_targets() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"BP22-018"}]);

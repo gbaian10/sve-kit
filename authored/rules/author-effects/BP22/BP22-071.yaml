@@ -14,14 +14,14 @@ cards:
           - storm
         line: 1
       - fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
             - damage:
                 n: 5
                 to: enemy
