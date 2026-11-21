@@ -719,7 +719,10 @@ impl Game {
                         && object.zone == "banish"
                         && object.owner == actor
                         && object.controller == actor
-                        && banished_hand_return(execution, objects, member))
+                        && (banished_hand_return(execution, objects, member)
+                            || (object.state["face_up"] != false
+                                && matches!(objects, Selector::Bound { reference }
+                                    if execution.targets.contains_key(&reference.key())))))
                     || (kind == ZoneKind::Ex
                         && execution.is_private_advance_target(objects, member)
                         && self.own_evolve_advance(&object.id, actor)?);

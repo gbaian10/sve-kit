@@ -118,3 +118,68 @@ fn bp22_037_fanfare_evolves_the_next_witch_follower_only_from_ten_banished() {
         );
     }
 }
+
+#[test]
+fn bp22_038_recovers_two_banished_followers_for_zero_pp() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["pp"]["current"] = json!(1_u8);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP22-037"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP22-038"}]);
+    initial["players"]["P1"]["zones"]["banish"] = json!([
+        {"id":"erina","card":"BP22-046"}, {"id":"cat","card":"BP22-042"}
+    ]);
+    let mut game = game(&initial);
+    assert_eq!(
+        game.internal_rule_action(
+            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}})
+        )
+        .unwrap()
+        .outcome,
+        "resolved"
+    );
+
+    let pending = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &pending.domain else {
+        panic!("Chronowitch's evolve trigger");
+    };
+    let CardPlay::Awaiting(question) = game
+        .answer_internal_card(
+            pending.actor,
+            pending.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap()
+    else {
+        panic!("Chronowitch must declare banish targets");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("Chronowitch's banish targets");
+    };
+    assert_eq!(
+        domain.members.len(),
+        2,
+        "both banished Witch followers qualify"
+    );
+    let selected = domain.members.iter().map(|member| member.handle).collect();
+    let next = game
+        .answer_internal_card(question.actor, question.token, Answer::Targets(selected))
+        .unwrap();
+    resolved(next);
+    settle(&mut game, None);
+
+    let after_return = game.projection(View::Referee).unwrap();
+    assert_eq!(after_return["P1"]["banish"], json!([]));
+    let ex = after_return["P1"]["ex"].as_array().unwrap();
+    assert_eq!(ex.len(), 2, "both targets move to EX");
+    assert_eq!(after_return["P1"]["pp"]["current"], 0_u8);
+    for id in ["erina", "cat"] {
+        assert!(ex.contains(&json!(id)), "{id} moved to EX");
+        play(&mut game, id);
+        let view = game.projection(View::Referee).unwrap();
+        assert!(
+            view["P1"]["field"].as_array().unwrap().contains(&json!(id)),
+            "{id} enters from EX"
+        );
+        assert_eq!(view["P1"]["pp"]["current"], 0_u8, "{id} costs zero PP");
+    }
+}
