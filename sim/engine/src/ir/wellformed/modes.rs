@@ -47,7 +47,7 @@ impl Checker {
         else {
             return false;
         };
-        optional_payment::public_mode_guard(condition)
+        optional_payment::public_mode_guard(condition, then_body)
     }
 
     #[expect(

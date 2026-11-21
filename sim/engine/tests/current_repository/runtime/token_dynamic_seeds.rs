@@ -9,7 +9,7 @@ fn finish(game: &mut Game, mut play: CardPlay, mode: usize, expect_targets: bool
         let answer = if let InputDomain::Modes { modes, .. } = &question.domain {
             Answer::Modes(vec![modes[mode]])
         } else if let InputDomain::Targets(targets) = &question.domain {
-            assert!(expect_targets, "an inactive Combo must not ask for targets");
+            assert!(expect_targets, "this play should reach target selection");
             Answer::Targets(
                 targets
                     .members
@@ -30,7 +30,7 @@ fn finish(game: &mut Game, mut play: CardPlay, mode: usize, expect_targets: bool
     play
 }
 
-fn trigger(game: &mut Game, expect_targets: bool) {
+fn trigger(game: &mut Game, expect_targets: bool) -> CardPlay {
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {
         panic!("fanfare trigger");
@@ -42,10 +42,7 @@ fn trigger(game: &mut Game, expect_targets: bool) {
             Answer::Pending(options.first().unwrap().handle),
         )
         .unwrap();
-    assert!(
-        matches!(finish(game, play, 0, expect_targets), CardPlay::Resolved(_)),
-        "the printed fanfare resolves"
-    );
+    finish(game, play, 0, expect_targets)
 }
 
 #[test]
@@ -104,12 +101,14 @@ fn either_spell_can_choose_the_other_mode_and_buff_only_own_forest_bats() {
 
 #[test]
 fn noble_fairy_destroys_then_creates_for_opponent_only_with_combo_three() {
-    for prior in [1_usize, 2] {
+    for (prior, has_target) in [(1_usize, true), (2, true), (2, false)] {
         let mut initial = draw_position();
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP01-014"}]);
         initial["players"]["P1"]["zones"]["ex"] = json!([
             {"id":"first","card":"BP07-T02"},{"id":"second","card":"BP07-T02"}]);
-        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+        if has_target {
+            initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+        }
         let mut game = game(&initial);
         for repair in ["first", "second"].iter().take(prior) {
             resolved(game.play_internal_card(repair, actor()).unwrap());
@@ -120,10 +119,20 @@ fn noble_fairy_destroys_then_creates_for_opponent_only_with_combo_three() {
             finish(&mut game, play, 0, false),
             CardPlay::Entered(_)
         ));
-        trigger(&mut game, prior == 2);
+        let fanfare = trigger(&mut game, prior == 2 && has_target);
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["P1"]["field"], json!(["source"]));
         let enemies = state["P2"]["field"].as_array().unwrap();
+        if !has_target {
+            assert_eq!(
+                fanfare,
+                CardPlay::Cancelled,
+                "active Combo requires a follower target"
+            );
+            assert_eq!(enemies, &Vec::<Value>::new(), "no Fairy is created");
+            continue;
+        }
+        resolved(fanfare);
         assert_eq!(enemies.len(), 1);
         if prior == 2 {
             assert_eq!(state["P2"]["cemetery"], json!(["enemy"]));

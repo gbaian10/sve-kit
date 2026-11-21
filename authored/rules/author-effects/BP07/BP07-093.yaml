@@ -10,9 +10,12 @@ cards:
                       from: hand
                       ref: this
                 then:
-                  - damage:
-                      n: 3
-                      to: chosen
+                  - choice:
+                      n: 1
+                      options:
+                        - - damage:
+                              n: 3
+                              to: chosen
           targets:
             - bind: chosen
               from:
@@ -20,6 +23,7 @@ cards:
                 who: opp
                 zone: field
               n: 1
+              option: 1
         line: 1
       - activate:
           cost:

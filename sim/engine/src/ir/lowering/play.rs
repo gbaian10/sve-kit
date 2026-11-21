@@ -1767,6 +1767,16 @@ pub(super) fn trigger_choice(
     match body.steps.as_slice() {
         [ast::Step::Choice(_)] => Ok(true),
         [ast::Step::If(branch)]
+            if branch.r#else.is_none()
+                && matches!(branch.then.as_slice(), [ast::Step::Choice(choice)]
+                    if choice.n == Some(1) && choice.options.len() == 1
+                        && choice.instead.is_none() && choice.upto.is_none()
+                        && choice.exclude_chosen.is_none()) =>
+        {
+            // Well-formedness checks that the guard can be read before targets are declared.
+            Ok(true)
+        }
+        [ast::Step::If(branch)]
             if (matches!(
                 branch.cond,
                 ast::Condition::Awakened(true)

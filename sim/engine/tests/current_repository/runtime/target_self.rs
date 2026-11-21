@@ -74,7 +74,7 @@ fn board(initial: &Value) -> Game {
 }
 
 #[test]
-fn disciple_all_printings_declare_targets_before_awakened_and_draw_only_after_self_damage() {
+fn disciple_all_printings_choose_only_when_awakened_and_draw_only_after_self_damage() {
     for number in ["BP05-063", "BP05-P29"] {
         for maximum in [6_u8, 7_u8] {
             for other in [None, Some("P1"), Some("P2")] {
@@ -93,8 +93,8 @@ fn disciple_all_printings_declare_targets_before_awakened_and_draw_only_after_se
                     .unwrap();
                 assert_eq!(
                     declarations,
-                    usize::from(other.is_some()),
-                    "the header target is chosen even below Awakened; Q724 cancels when absent"
+                    usize::from(maximum == 7 && other.is_some()),
+                    "Awakened enables the choice; Q724 cancels without a legal target"
                 );
                 let hit = maximum == 7 && other.is_some();
                 let state = game.projection(View::Referee).unwrap();

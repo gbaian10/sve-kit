@@ -788,7 +788,7 @@ fn conditional_modes(
     if groups.is_empty() && other.is_empty() {
         return Ok(groups);
     }
-    let public_condition = optional_payment::public_mode_guard(condition);
+    let public_condition = optional_payment::public_mode_guard(condition, then_body);
     if !allowed || groups.len() != 1 || !other.is_empty() || !public_condition {
         return Err(unsupported("conditional play mode"));
     }
@@ -2187,6 +2187,22 @@ impl Game {
         Ok(true)
     }
 
+    fn internal_mode_count(
+        &self,
+        execution: &mut Execution,
+        play: &PlayState,
+        count: &Expr<Nat>,
+    ) -> Result<Nat> {
+        // The count may read this play's declaration, held by the detached play state.
+        let detached = execution.play.replace(play.clone());
+        let value = public_numbers::material_count(count).map_or_else(
+            || execution.natural(self, count),
+            |binding| execution.declared_material_count(binding),
+        );
+        execution.play = detached;
+        value
+    }
+
     fn internal_play_modes(
         &mut self,
         execution: &mut Execution,
@@ -2203,15 +2219,7 @@ impl Game {
                 play.modes.push_front(group);
                 return Ok(true);
             }
-            // The count may read this play's declaration, held by the detached play state.
-            let detached = execution.play.replace(play.clone());
-            let count = if let Some(binding) = public_numbers::material_count(&group.count) {
-                execution.declared_material_count(binding)
-            } else {
-                execution.natural(self, &group.count)
-            };
-            execution.play = detached;
-            let count = count?;
+            let count = self.internal_mode_count(execution, play, &group.count)?;
             let ChoiceDomain::Modes {
                 modes,
                 cardinality,
@@ -2227,7 +2235,11 @@ impl Game {
                 continue;
             }
             let minimum = mode_minimum(*cardinality);
-            let any = minimum > 0 && self.internal_choice_any(execution.context.controller)?;
+            let automatic = group.condition.is_some()
+                && optional_payment::required_single_mode(&group.count, &group.chosen);
+            let any = !automatic
+                && minimum > 0
+                && self.internal_choice_any(execution.context.controller)?;
             let source = execution
                 .ability
                 .ok_or_else(|| invalid("missing mode source"))?;
@@ -2262,6 +2274,11 @@ impl Game {
             }
             if count == Nat(0) {
                 play.chosen.insert(group.chosen.id, Vec::new());
+                continue;
+            }
+            if automatic {
+                // The guard determines whether the sole branch declares its targets.
+                play.chosen.insert(group.chosen.id, legal);
                 continue;
             }
             let mut chosen = group.chosen;

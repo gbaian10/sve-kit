@@ -70,7 +70,7 @@ fn finish(game: &mut Game, mut play: CardPlay, leader: bool, accept: bool) -> Ca
     play
 }
 
-fn resolve(game: &mut Game, number: &str, line: u64, leader: bool, accept: bool) -> CardPlay {
+fn select_pending(game: &mut Game, number: &str, line: u64) -> CardPlay {
     finish_checks(game);
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {
@@ -80,13 +80,16 @@ fn resolve(game: &mut Game, number: &str, line: u64, leader: bool, accept: bool)
         .iter()
         .find(|option| option.card == number && option.line == line)
         .unwrap();
-    let play = game
-        .answer_internal_card(
-            question.actor,
-            question.token,
-            Answer::Pending(option.handle),
-        )
-        .unwrap();
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::Pending(option.handle),
+    )
+    .unwrap()
+}
+
+fn resolve(game: &mut Game, number: &str, line: u64, leader: bool, accept: bool) -> CardPlay {
+    let play = select_pending(game, number, line);
     let play = finish(game, play, leader, accept);
     finish_checks(game);
     play
@@ -158,7 +161,8 @@ fn declining_the_real_fanfare_leaves_history_false_and_keeps_the_printed_play_co
     );
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
-    resolved(resolve(&mut game, "BP02-062", 1, true, true));
+    resolved(select_pending(&mut game, "BP02-062", 1));
+    finish_checks(&mut game);
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P2"]["leader"]["life"], 20_u8);
     assert_eq!(state["P1"]["hand"], json!(["fuel"]));
@@ -176,7 +180,8 @@ fn q302_hand_limit_discard_occurs_after_the_real_ritual_resolves_and_does_not_re
     let mut game = actual(&initial);
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
-    resolved(resolve(&mut game, "BP02-062", 1, true, true));
+    resolved(select_pending(&mut game, "BP02-062", 1));
+    finish_checks(&mut game);
     assert_eq!(
         game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
         20_u8

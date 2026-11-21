@@ -4,8 +4,8 @@
     reason = "Unlisted reads must stay outside the closed public declaration grammar."
 )]
 use super::{
-    Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Holder, Info, Int,
-    IntOperation, IntRead, KindRead, MemberProjection, MovementReceipt, NamesRead, NatFrozen,
+    AbilitiesRead, Arithmetic, Binding, Bool, CharacteristicView, ClassRead, Expr, Holder, Info,
+    Int, IntOperation, IntRead, KindRead, MemberProjection, MovementReceipt, NamesRead, NatFrozen,
     NatOperation, NatRead, NumberRead, NumericProperty, ObjectOperand, ObjectProperty,
     ObjectReceipt, ObjectRef, ObjectView, PlayerRef, PlayerRelation, PlayerResource, Predicate,
     SelectionView, Selector, SnapshotFields, TraitsRead, ZoneKind,
@@ -158,7 +158,7 @@ pub(crate) fn target_count(value: &Expr<Int>, comparison: super::Comparison) -> 
         if filter.own == Some(true) && filter.up == Some(true))
 }
 
-fn count(selector: &Selector) -> bool {
+pub(super) fn count(selector: &Selector) -> bool {
     match selector {
         Selector::Difference { input, except } => {
             matches!(except.as_ref(),Selector::Objects{objects} if objects.as_slice()==[ObjectOperand::SourceHolder{}])
@@ -205,6 +205,18 @@ fn predicate_filter(value: &Expr<Bool>, binding: Binding<ObjectRef>) -> bool {
             ..
         } => {
             matches!(read.as_ref(),TraitsRead::Traits {object,view:CharacteristicView::Effective} if candidate(object,binding))
+        }
+        Predicate::HasAbility {
+            abilities: Expr::Live(read),
+            predicate,
+        } => {
+            matches!(read.as_ref(), AbilitiesRead::Abilities { object, view: CharacteristicView::Effective }
+                if candidate(object, binding))
+                && predicate.kind.is_none()
+                && predicate.keyword.is_some()
+                && predicate.except.is_empty()
+                && predicate.holder.is_none()
+                && predicate.origin.is_none()
         }
         Predicate::NamesIntersect {
             left: Expr::Live(read),
