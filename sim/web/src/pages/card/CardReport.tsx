@@ -9,7 +9,6 @@ import {
   CARD_REPORT_REPOSITORY,
   CARD_REPORT_TYPES,
   type CardReportMetadata,
-  REPORT_CONTACT_LIMIT,
   REPORT_DESCRIPTION_LIMIT,
   type ReportType,
   TEST_TURNSTILE_SITE_KEY,
@@ -80,14 +79,12 @@ function CardReportForm({ initialType, metadata }: CardReportDraft) {
       field.reportValidity()
       return
     }
-    const contact = new FormData(event.currentTarget).get("contact")
     setSending(true)
     setResult(null)
     const response = await sendCardReport({
       ...metadata,
       type,
       description,
-      contact: typeof contact === "string" ? contact.trim() : "",
       token,
     })
     setSending(false)
@@ -188,23 +185,6 @@ function CardReportForm({ initialType, metadata }: CardReportDraft) {
               {t("cardReport.translationHint")}
             </p>
           )}
-        </div>
-        <div>
-          <label htmlFor={`${id}-contact`} className="mb-1 block text-14 font-semibold">
-            {t("cardReport.contact")}{" "}
-            <span className="font-normal text-text-2">{t("cardReport.optional")}</span>
-          </label>
-          <input
-            id={`${id}-contact`}
-            name="contact"
-            type="text"
-            maxLength={REPORT_CONTACT_LIMIT}
-            aria-describedby={`${id}-public`}
-            className={FIELD}
-          />
-          <p id={`${id}-public`} className="mt-1 text-13 text-text-2">
-            {t("cardReport.public")}
-          </p>
         </div>
       </fieldset>
       {SITE_KEY && (
