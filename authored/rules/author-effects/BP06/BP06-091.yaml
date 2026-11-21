@@ -54,7 +54,14 @@ cards:
                 kind: follower
                 who: opp
                 zone: field
-              upto: 1
+              upto:
+                min:
+                  - 1
+                  - minus:
+                      - resource:
+                          kind: pp
+                          who: self
+                      - 5
         line: 2
     admission: light
     meta:
