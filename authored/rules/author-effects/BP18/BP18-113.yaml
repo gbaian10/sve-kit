@@ -11,14 +11,14 @@ cards:
           date: "2026-10-29"
     abilities:
       - fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
             - destroy:
                 ref: enemy
             - life:
