@@ -36,7 +36,7 @@ fn discard_stop(
     assert_eq!(
         answer(&mut game, Answer::Targets(vec![0])),
         SubmissionKind::Applied,
-        "the only enemy follower is a legal selection"
+        "the selected opposing follower is eligible"
     );
     if stops[1] {
         for (all, new) in seen.iter_mut().zip(present(&mut game, &mut cursors)) {
@@ -238,7 +238,7 @@ fn concession_commits_the_executed_prefix_promotes_it_and_adds_one_result() {
         );
         assert_eq!(
             kinds(&seen[0]).len(),
-            if stops[1] { 5 } else { 3 },
+            if stops[1] { 5 } else { 0 },
             "the scenario showed the intended stops"
         );
     }

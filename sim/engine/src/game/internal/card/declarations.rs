@@ -37,7 +37,9 @@ fn fixed_head(costs: &CostSpec) -> bool {
             amount: Expr::Literal(_),
             ..
         } => true,
-        Action::Posture { objects, .. } | Action::Banish { objects } => source_only(objects),
+        Action::Posture { objects, .. }
+        | Action::Banish { objects }
+        | Action::Move { objects, .. } => source_only(objects),
         Action::Discard { .. } => super::hand_payment::source_discard(&step.instruction.action),
         _ => false,
     })
@@ -123,6 +125,12 @@ impl Game {
             return Ok(false);
         }
         if cost.total_pp.is_some_and(|amount| amount > available_pp) {
+            return Ok(false);
+        }
+        if play.exchange.is_some()
+            && !self.has_target_cost(&execution, None)?
+            && !self.internal_exchange_affordable(&execution, play)?
+        {
             return Ok(false);
         }
         if cost.pending.is_empty()

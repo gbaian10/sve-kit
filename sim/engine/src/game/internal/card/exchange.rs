@@ -673,7 +673,12 @@ impl Game {
             .exchange
             .as_ref()
             .ok_or_else(|| invalid("missing exchange preflight"))?;
-        self.exchange_payment_available(execution, exchange, exchange.accepted == Some(true))
+        if let Some(accepted) = exchange.accepted {
+            return self.exchange_payment_available(execution, exchange, accepted);
+        }
+        // The main action window has no exchange answer yet, so either payment route can qualify.
+        Ok(self.exchange_payment_available(execution, exchange, false)?
+            || self.exchange_payment_available(execution, exchange, true)?)
     }
 
     fn exchange_payment_available(

@@ -171,34 +171,18 @@ fn presentation_shows_each_completed_batch_once_before_the_next_question() {
             question(&game).shape,
             QuestionShape::Decision(DecisionShape::Targets(_))
         ),
-        "the printed selection is asked during the resolution, after the spell is played"
+        "the printed target is chosen before the spell is paid for and played"
     );
-    for (viewer, batches) in SEATS.into_iter().zip(present(&mut game, &mut cursors)) {
-        let kinds = kinds(&batches);
-        let resolution = position_of(&kinds, enters_resolution);
-        let paid = position_of(&kinds, |kind| is_action(kind, ActionKind::Resource));
-        let played = position_of(&kinds, |kind| is_action(kind, ActionKind::Play));
-        assert!(
-            resolution < paid && paid < played && kinds.len() == 3,
-            "the first qualifying stop shows the declaration, the PP payment and the play in \
-             rules order: {kinds:?}"
-        );
-        assert_eq!(batches.len(), 3, "sequential results are separate batches");
-        assert_ne!(
-            batches[0].scope, batches[1].scope,
-            "every complete batch opens its own scope"
-        );
-        assert_eq!(
-            game.events(viewer, None).unwrap().count(),
-            0,
-            "showing a batch early commits nothing"
-        );
-    }
+    assert_eq!(
+        present(&mut game, &mut cursors),
+        [vec![], vec![]],
+        "the declaration is still private at the formal target question"
+    );
 
     assert_eq!(
         answer(&mut game, Answer::Targets(vec![0])),
         SubmissionKind::Applied,
-        "the only enemy follower is a legal selection"
+        "the selected opposing follower is eligible"
     );
     assert!(
         matches!(
@@ -213,11 +197,23 @@ fn presentation_shows_each_completed_batch_once_before_the_next_question() {
     let shown = present(&mut game, &mut cursors);
     for (viewer, batches) in SEATS.into_iter().zip(&shown) {
         let kinds = kinds(batches);
+        let resolution = position_of(&kinds, enters_resolution);
+        let paid = position_of(&kinds, |kind| is_action(kind, ActionKind::Resource));
+        let played = position_of(&kinds, |kind| is_action(kind, ActionKind::Play));
         let damage = position_of(&kinds, |kind| is_action(kind, ActionKind::Damage));
         let drawn = position_of(&kinds, is_draw);
         assert!(
-            damage < drawn && kinds.len() == 2,
-            "only the results completed since the last stop are new: {kinds:?}"
+            resolution < paid
+                && paid < played
+                && played < damage
+                && damage < drawn
+                && kinds.len() == 5,
+            "the first presentation shows declaration, payment, play, damage and draw in rules order: {kinds:?}"
+        );
+        assert_eq!(batches.len(), 5, "sequential results are separate batches");
+        assert_ne!(
+            batches[0].scope, batches[1].scope,
+            "every complete batch opens its own scope"
         );
         let EventKind::Movement { before, after, .. } = kinds[drawn] else {
             panic!("draw movement");
