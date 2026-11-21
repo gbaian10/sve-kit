@@ -5,7 +5,7 @@ use super::{ActivationKey, CardPlay, Execution, Game, PlayerId, Result, int, sea
 use crate::game::player::observation::{EffectSource, seat};
 use crate::game::player::{ActivationOption, Viewer};
 use crate::ir::{
-    AbilityKind, AbilityOrigin, Action, CostSpec, Expr, Holder, ObjectOperand, Selector,
+    AbilityKind, AbilityOrigin, Action, CostSpec, Expr, Holder, ObjectOperand, Posture, Selector,
 };
 use crate::{EngineFailure, invalid};
 
@@ -95,6 +95,18 @@ impl Game {
             .play
             .as_ref()
             .ok_or_else(|| invalid("missing prepared declaration"))?;
+        // A mandatory source Act still requires a standing source when other costs are deferred.
+        if let CostSpec::Ordered { steps } = &play.costs
+            && self.object(holder)?.state["acted"] != false
+            && steps.iter().any(|step| {
+                matches!(
+                    &step.instruction.action,
+                    Action::Posture { objects, posture: Posture::Acted } if source_only(objects)
+                )
+            })
+        {
+            return Ok(false);
+        }
         let available_pp =
             int(&self.player(seat_name(execution.context.controller)?)?.pp["current"]);
         let cost = self
