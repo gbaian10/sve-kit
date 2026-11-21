@@ -21,10 +21,10 @@ cards:
                     ref: this
                 then:
                   - destroy: enemy
-            - damage:
-                n: 1
-                to:
-                  leader_of: enemy
+                  - damage:
+                      n: 1
+                      to:
+                        leader_of: enemy
     admission: light
     meta:
       written_by:

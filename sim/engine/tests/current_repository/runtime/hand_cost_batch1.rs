@@ -162,7 +162,7 @@ fn cp02_sp06a_discards_three_then_resolves_damage_and_draw_for_all_printings() {
     }
 }
 #[test]
-fn bp20_018_optional_hand_extra_changes_damage_and_always_draws_for_all_printings() {
+fn bp20_018_optional_hand_extra_changes_damage_and_enables_draw_for_all_printings() {
     for number in ["BP20-018", "BP20-P12"] {
         for accepted in [false, true] {
             let initial = position(
@@ -186,8 +186,8 @@ fn bp20_018_optional_hand_extra_changes_damage_and_always_draws_for_all_printing
             );
             assert_eq!(
                 view["P1"]["deck"].as_array().unwrap().len(),
-                1,
-                "both paths draw one"
+                if accepted { 1 } else { 2 },
+                "only the paid branch draws"
             );
             assert_eq!(
                 view["P1"]["cemetery"],

@@ -47,9 +47,9 @@ cards:
                       n: 1
                       to: field
                       token: ドラゴウェポン
-            - pp:
-                delta: 1
-                who: self
+                  - pp:
+                      delta: 1
+                      who: self
         line: 1
     admission: light
     meta:

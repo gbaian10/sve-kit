@@ -19,10 +19,10 @@ cards:
                       hp: -2
                       on: enemy
                       power: -2
-            - buff:
-                hp: 2
-                on: this
-                power: 2
+                  - buff:
+                      hp: 2
+                      on: this
+                      power: 2
           targets:
             - bind: enemy
               from:

@@ -21,4 +21,4 @@ cards:
                 cond: { cmp: { left: { resource: { who: self, kind: sep } }, op: eq, right: 0 } }
                 then:
                   - damage: { to: enemy, n: 5 }
-            - life: { who: self, delta: 2 }
+                  - life: { who: self, delta: 2 }

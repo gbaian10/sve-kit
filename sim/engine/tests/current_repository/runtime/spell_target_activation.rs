@@ -39,6 +39,51 @@ fn position(printing: &str, cemetery: Value) -> Value {
     initial
 }
 
+fn desperados_shot(allies: Value) -> Value {
+    let mut initial = in_hand("BP11-028");
+    initial["players"]["P1"]["zones"]["field"] = allies;
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP04-117"}]);
+    let mut game = game(&initial);
+    let play = game.play_internal_card("source", actor()).unwrap();
+    resolved(answer(&mut game, play, "BP04-117"));
+    game.projection(View::Referee).unwrap()
+}
+
+#[test]
+fn desperados_shot_without_either_ally_only_deals_four_to_the_follower() {
+    let view = desperados_shot(json!([]));
+    assert_eq!(view["objects"]["enemy"]["damage"], 4_u8);
+    assert_eq!(view["P2"]["leader"]["life"], 20_u8);
+}
+
+#[test]
+fn desperados_shot_with_both_allies_deals_six_to_the_follower_and_two_to_its_leader() {
+    let view = desperados_shot(json!([
+        {"id":"bunny","card":"BP11-019"}, {"id":"vehicle","card":"BP11-T01"}
+    ]));
+    assert_eq!(view["objects"]["enemy"]["damage"], 6_u8);
+    assert_eq!(view["P2"]["leader"]["life"], 18_u8);
+}
+
+#[test]
+fn seed_shot_requires_a_plant_follower_for_leader_damage_and_draw() {
+    for has_plant in [false, true] {
+        let mut initial = in_hand("BP22-018");
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP04-117"}]);
+        if has_plant {
+            initial["players"]["P1"]["zones"]["field"] =
+                json!([{"id":"plant","card":"BP22-005"}]);
+        }
+        let mut game = game(&initial);
+        let play = game.play_internal_card("source", actor()).unwrap();
+        resolved(answer(&mut game, play, "BP04-117"));
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["objects"]["enemy"]["damage"], 3_u8);
+        assert_eq!(view["P2"]["leader"]["life"], if has_plant { 19_u8 } else { 20 });
+        assert_eq!(view["P1"]["hand"], if has_plant { json!(["first"]) } else { json!([]) });
+    }
+}
+
 #[test]
 fn bp09_001_all_printings_search_an_elf_spell() {
     for printing in ["BP09-001", "BP09-SL01", "BP09-U01"] {

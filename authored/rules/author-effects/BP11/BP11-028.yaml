@@ -31,10 +31,10 @@ cards:
                   - damage:
                       n: 6
                       to: chosen
-            - damage:
-                n: 2
-                to:
-                  leaders: opponents
+                  - damage:
+                      n: 2
+                      to:
+                        leader_of: chosen
           targets:
             - bind: chosen
               from:

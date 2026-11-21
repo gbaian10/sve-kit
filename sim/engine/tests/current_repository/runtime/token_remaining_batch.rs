@@ -255,7 +255,7 @@ fn dragosnake_printings_pay_lastword_and_find_a_real_same_name_follower_on_field
 }
 
 #[test]
-fn zombie_dog_printings_buff_at_exactly_two_grave_copies_and_always_damage_the_enemy_leader() {
+fn zombie_dog_printings_buff_and_damage_the_enemy_leader_at_exactly_two_grave_copies() {
     for number in ["BP22-080", "BP22-P42"] {
         for count in [1_usize, 2, 3] {
             let mut initial = draw_position();
@@ -280,7 +280,10 @@ fn zombie_dog_printings_buff_at_exactly_two_grave_copies_and_always_damage_the_e
                 state["objects"]["source"]["hp"],
                 if count == 2 { 4_u8 } else { 2_u8 }
             );
-            assert_eq!(state["P2"]["leader"]["life"], 18_u8);
+            assert_eq!(
+                state["P2"]["leader"]["life"],
+                if count == 2 { 18_u8 } else { 20 }
+            );
             assert_eq!(state["P1"]["ex"], json!([]));
         }
     }
@@ -383,5 +386,5 @@ fn zombie_dog_lastword_finds_a_real_same_name_card_in_ex_after_battle_destructio
     assert_eq!(state["P1"]["ex"], json!(["replacement"]));
     assert_eq!(state["P1"]["deck"], json!([]));
     assert_eq!(state["objects"]["replacement"]["card"], "BP22-P42");
-    assert_eq!(state["P2"]["leader"]["life"], 18_u8);
+    assert_eq!(state["P2"]["leader"]["life"], 20_u8);
 }

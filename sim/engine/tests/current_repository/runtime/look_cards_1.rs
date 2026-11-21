@@ -217,9 +217,9 @@ fn cp03_111_and_cp03_106_order_chosen_cards_on_top_and_the_rest_on_the_bottom() 
 }
 
 #[test]
-fn bp13_041_needs_six_original_costs_for_its_damage() {
+fn bp13_041_needs_six_original_costs_for_damage_draw_and_discard() {
     // Q1746: without an enemy follower the ability is not played, so nothing is drawn.
-    for (costs, enemy, destroyed, hand) in [(6_usize, true, true, 1_usize), (5, true, false, 1), (6, false, false, 0)] {
+    for (costs, enemy, destroyed, hand) in [(6_usize, true, true, 1_usize), (5, true, false, 0), (6, false, false, 0)] {
         let mut state = draw_position();
         state["players"]["P1"]["zones"]["field"] = json!([{"id":"base","card":"BP13-040"}]);
         state["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP13-041"}]);

@@ -299,6 +299,27 @@ fn bp20_p67_every_printing_weakens_by_crest_threshold_at_end_phase() {
 }
 
 #[test]
+fn marwynn_first_mode_requires_three_crests_to_banish_and_heal() {
+    for enough_crests in [false, true] {
+        let mut initial = in_hand("BP20-093");
+        initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+        let mut crests = vec![
+            json!({"id":"ezdia","card":"BP20-T01"}),
+            json!({"id":"lishenna","card":"BP20-T05"}),
+        ];
+        if enough_crests {
+            crests.push(json!({"id":"marwynn","card":"BP20-T07"}));
+        }
+        initial["players"]["P1"]["zones"]["ex"] = json!(crests);
+        let mut game = game(&initial);
+        play(&mut game);
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P2"]["banish"], if enough_crests { json!(["enemy"]) } else { json!([]) });
+        assert_eq!(view["P1"]["leader"]["life"], if enough_crests { 12_u8 } else { 10 });
+    }
+}
+
+#[test]
 fn bp20_094_places_its_crest_in_ex() {
     let mut game = game(&in_hand("BP20-094"));
     play(&mut game);
