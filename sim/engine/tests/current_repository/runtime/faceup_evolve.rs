@@ -209,7 +209,7 @@ fn bp13_110_printings_gate_both_follower_and_its_leader_damage() {
 }
 
 #[test]
-fn bp15_118_printings_separate_damage_draw_and_unconditional_pp_recovery() {
+fn bp15_118_printings_replace_damage_at_three_and_draw_and_recover_pp_at_five() {
     for card in ["BP15-118", "PR-433"] {
         for count in [0_usize, 2, 3, 4, 5] {
             let mut game = game(&position(card, count));
@@ -227,7 +227,7 @@ fn bp15_118_printings_separate_damage_draw_and_unconditional_pp_recovery() {
                     json!([])
                 }
             );
-            assert_eq!(state["P1"]["pp"]["current"], 10_u8);
+            assert_eq!(state["P1"]["pp"]["current"], if count >= 5 { 10_u8 } else { 9 });
         }
     }
 }

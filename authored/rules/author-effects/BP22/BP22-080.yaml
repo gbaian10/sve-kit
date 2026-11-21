@@ -31,10 +31,10 @@ cards:
                       "on": this
                       power: 2
                       hp: 2
-            - damage:
-                to:
-                  leaders: opponents
-                n: 2
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 2
       - line: 3
         lastword:
           do:

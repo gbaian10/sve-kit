@@ -467,7 +467,7 @@ fn dies_attacking(game: &mut Game) {
 }
 
 #[test]
-fn bp17_043_end_phase_damage_needs_three_ex_machines_and_lastword_stores_a_machine() {
+fn bp17_043_end_phase_damage_and_draw_need_three_ex_machines_and_lastword_stores_a_machine() {
     for machines in [2_usize, 3] {
         let mut initial = position("BP17-043");
         initial["players"]["P1"]["zones"]["hand"] = json!([]);
@@ -488,8 +488,7 @@ fn bp17_043_end_phase_damage_needs_three_ex_machines_and_lastword_stores_a_machi
         );
         assert_eq!(
             view["P1"]["hand"],
-            json!(["draw0"]),
-            "the draw is not conditional"
+            if machines == 3 { json!(["draw0"]) } else { json!([]) }
         );
     }
     let mut initial = position("BP17-043");

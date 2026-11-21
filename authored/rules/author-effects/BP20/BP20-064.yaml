@@ -17,9 +17,9 @@ cards:
                   - damage:
                       n: 1
                       to: enemy
-            - life:
-                delta: 2
-                who: self
+                  - life:
+                      delta: 2
+                      who: self
           targets:
             - bind: enemy
               from:

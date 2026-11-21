@@ -197,8 +197,9 @@ fn check_effect(view: &Value, case: Case) {
                 "destruction requires five banished cards"
             );
             assert_eq!(
-                view["P1"]["leader"]["life"], 12_u8,
-                "the leader heals after the conditional destruction"
+                view["P1"]["leader"]["life"],
+                if count >= 5 { 12_u8 } else { 10 },
+                "healing requires five banished cards"
             );
         }
         Case::BanishTop => {
