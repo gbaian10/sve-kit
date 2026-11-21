@@ -122,8 +122,14 @@ impl Game {
         {
             return Ok(false);
         }
-        if cost.total_pp.is_some_and(|amount| amount > available_pp) {
-            return Ok(false);
+        match cost.total_pp {
+            Some(amount) if amount > available_pp => return Ok(false),
+            None => match self.main_play_pp_available(&execution, play, available_pp) {
+                Ok(false) | Err(EngineFailure::IllegalPlay(_)) => return Ok(false),
+                Ok(true) | Err(EngineFailure::Unsupported(_)) => {}
+                Err(error) => return Err(error),
+            },
+            Some(_) => {}
         }
         if cost.pending.is_empty()
             && play.exchange.is_none()
