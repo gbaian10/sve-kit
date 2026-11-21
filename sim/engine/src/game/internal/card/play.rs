@@ -1829,6 +1829,7 @@ impl Game {
             .play
             .take()
             .ok_or_else(|| invalid("missing prepared declaration"))?;
+        self.check_main_meal_resources(&execution, &play)?;
         if !self.main_play_targets_feasible(&execution, &play)? {
             return Err(crate::EngineFailure::IllegalPlay(
                 "no legal play targets".into(),

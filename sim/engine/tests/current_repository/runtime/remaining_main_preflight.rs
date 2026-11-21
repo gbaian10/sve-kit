@@ -94,3 +94,27 @@ fn cp04_036_requires_a_payable_exchange_or_enough_original_pp() {
     initial["players"]["P1"]["pp"]["current"] = json!(3_u8);
     assert!(offers_spell(&actions(&initial), "CP04-036"));
 }
+
+#[test]
+fn ecp01_015_meal_requires_a_face_down_carrot() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"ECP01-015"}]);
+    assert!(
+        !offers_activation(&initial, "ECP01-015", 1),
+        "Meal requires a carrot in the evolve deck"
+    );
+
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([
+        {"id":"carrot","card":"CSD01-032","face_up":true}
+    ]);
+    assert!(
+        !offers_activation(&initial, "ECP01-015", 1),
+        "a face-up carrot cannot pay for Meal"
+    );
+
+    initial["players"]["P1"]["zones"]["evolve_deck"][0]["face_up"] = json!(false);
+    assert!(
+        offers_activation(&initial, "ECP01-015", 1),
+        "a face-down carrot can pay for Meal"
+    );
+}
