@@ -62,7 +62,11 @@ impl Game {
         let kind = self.object_type(holder)?;
         let field_card = matches!(
             kind,
-            "フォロワー" | "アミュレット" | "フォロワー・トークン" | "アミュレット・トークン"
+            "フォロワー"
+                | "アミュレット"
+                | "フォロワー・トークン"
+                | "アミュレット・トークン"
+                | "フォロワー・アドバンス"
         );
         if !field_card {
             if !matches!(kind, "スペル" | "スペル・トークン" | "スペル・アドバンス")

@@ -5,15 +5,93 @@
 
 use super::*;
 use sve_engine::game::player::{
-    AttackTarget, Command, Input, MainActionAnswer, MainIntentKind, Question, QuestionShape,
-    SubmissionKind, Viewer,
+    AttackTarget, Command, DecisionShape, Input, MainActionAnswer, MainIntentKind, Question,
+    QuestionShape, SearchAnswer, SubmissionKind, Viewer,
 };
+use sve_engine::ir::ModeId;
 
 fn question(game: &Game, actor: Viewer) -> Question {
     let Input::Question(question) = game.input(actor) else {
         panic!("player question");
     };
     *question
+}
+
+#[test]
+fn bp13_002_plays_from_ex_for_three_pp_and_resolves_its_fanfare() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["pp"] = json!({"current":3_u8,"max":3_u8});
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"secca","card":"BP13-002"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"resolve","card":"BP13-008"}]);
+    let mut game = Game::from_selected_effects(
+        selection_with_rules().clone(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "main-advance-from-ex",
+    )
+    .unwrap();
+    game.advance_player_input();
+    let main = question(&game, Viewer::P1);
+    let QuestionShape::ActionWindow(actions) = main.shape else {
+        panic!("main actions");
+    };
+    let intent = actions
+        .intents
+        .into_iter()
+        .find(|intent| {
+            matches!(&intent.kind, MainIntentKind::Play { card } if card.properties.card == "BP13-002")
+        })
+        .expect("the Advance follower in EX can be played");
+    assert_eq!(
+        game.submit_player(
+            Viewer::P1,
+            Command::MainAction {
+                token: main.token,
+                intent: intent.id,
+                answer: MainActionAnswer::None,
+            },
+        )
+        .kind,
+        SubmissionKind::Applied
+    );
+    let answer = |board: &mut Game, prompt: Question, response| {
+        assert_eq!(
+            board.submit_player(
+                Viewer::P1,
+                Command::Answer {
+                    token: prompt.token,
+                    answer: response,
+                },
+            )
+            .kind,
+            SubmissionKind::Applied
+        );
+    };
+    let pending = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Pending(options)) = &pending.shape else {
+        panic!("Secca's Fanfare");
+    };
+    assert_eq!(options.len(), 1);
+    let occurrence = options[0].handle;
+    answer(&mut game, pending, Answer::Pending(occurrence));
+    let choice = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Modes { modes, .. }) = &choice.shape else {
+        panic!("Fanfare modes");
+    };
+    assert_eq!(modes, &[ModeId(1)]);
+    answer(&mut game, choice, Answer::Modes(vec![ModeId(1)]));
+    let search = question(&game, Viewer::P1);
+    let QuestionShape::Decision(DecisionShape::Search(found)) = &search.shape else {
+        panic!("search for 九尾の決意");
+    };
+    let card = found.cards[0].handle;
+    answer(&mut game, search, Answer::Search(SearchAnswer::Ungrouped(vec![card])));
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 0_u8);
+    assert_eq!(state["P1"]["ex"], json!([]));
+    assert_eq!(state["P1"]["field"], json!(["secca"]));
+    assert_eq!(state["P1"]["hand"], json!(["resolve"]));
 }
 
 #[test]
