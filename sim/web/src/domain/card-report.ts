@@ -3,7 +3,6 @@ import type { UiLanguage } from "../i18n/languages"
 export const CARD_REPORT_PATH = "/api/card-reports"
 export const CARD_REPORT_TYPES = ["data", "mapping", "translation", "rules", "other"] as const
 export const REPORT_DESCRIPTION_LIMIT = 2000
-export const REPORT_CONTACT_LIMIT = 100
 export const REPORT_TURNSTILE_ACTION = "card_report"
 export const TEST_TURNSTILE_SITE_KEY = "1x00000000000000000000AA"
 
@@ -22,6 +21,5 @@ export interface CardReportMetadata {
 export interface CardReportInput extends CardReportMetadata {
   readonly type: ReportType
   readonly description: string
-  readonly contact: string
   readonly token: string
 }

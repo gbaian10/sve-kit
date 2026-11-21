@@ -2,7 +2,6 @@ import {
   CARD_REPORT_REPOSITORY,
   CARD_REPORT_TYPES,
   type CardReportInput,
-  REPORT_CONTACT_LIMIT,
   REPORT_DESCRIPTION_LIMIT,
   REPORT_TURNSTILE_ACTION,
 } from "../domain/card-report"
@@ -78,17 +77,8 @@ async function readReport(request: Request): Promise<CardReportInput | null> {
       new TextDecoder("utf-8", { fatal: true }).decode(buffer.subarray(0, size)),
     )
     if (typeof value !== "object" || value === null || Array.isArray(value)) return null
-    const {
-      cardNo,
-      printingIntId,
-      edition,
-      uiLanguage,
-      dataVersion,
-      type,
-      description,
-      contact,
-      token,
-    } = value as Record<string, unknown>
+    const { cardNo, printingIntId, edition, uiLanguage, dataVersion, type, description, token } =
+      value as Record<string, unknown>
     const reportType = CARD_REPORT_TYPES.find((candidate) => candidate === type)
     if (
       (cardNo !== null &&
@@ -108,9 +98,6 @@ async function readReport(request: Request): Promise<CardReportInput | null> {
       description.length > REPORT_DESCRIPTION_LIMIT ||
       !description.trim() ||
       DISALLOWED_TEXT.test(description) ||
-      typeof contact !== "string" ||
-      contact.length > REPORT_CONTACT_LIMIT ||
-      DISALLOWED_TEXT.test(contact) ||
       typeof token !== "string" ||
       token.length > 2048 ||
       !token.trim() ||
@@ -125,7 +112,6 @@ async function readReport(request: Request): Promise<CardReportInput | null> {
       dataVersion,
       type: reportType,
       description: description.trim(),
-      contact: contact.trim(),
       token,
     }
   } catch {
@@ -229,9 +215,6 @@ async function createIssue(report: CardReportInput, accessToken: string): Promis
     "### Description",
     "",
     plainTextMarkdown(report.description),
-    ...(report.contact
-      ? ["", "### Contact or nickname", "", plainTextMarkdown(report.contact)]
-      : []),
   ].join("\n")
   const result = await post(
     `${GITHUB}/repos/${CARD_REPORT_REPOSITORY}/issues`,
