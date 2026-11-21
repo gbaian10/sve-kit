@@ -1675,13 +1675,13 @@ impl Game {
 
     /// A later target may read an earlier answer (an original cost limit), so each target is
     /// proved under a bound answer to the ones before it, as an ordinary target sequence is.
-    pub(super) fn internal_mode_targets_feasible(
+    pub(super) fn internal_play_targets_feasible<'decision>(
         &self,
         execution: &Execution,
-        parameters: &[Decision],
+        parameters: impl Iterator<Item = &'decision Decision>,
+        on_limit: TargetFeasibilityLimit,
     ) -> Result<bool> {
         let targets = parameters
-            .iter()
             .filter(|decision| {
                 !super::material::is_parameter(decision)
                     && matches!(
@@ -1693,7 +1693,7 @@ impl Game {
             })
             .cloned()
             .collect::<VecDeque<_>>();
-        self.internal_feasible_targets(execution, &execution.slots, &targets)
+        self.feasible_targets(execution, &execution.slots, &targets, on_limit)
     }
 
     pub(super) fn internal_quote_target_probes(
@@ -1740,6 +1740,21 @@ impl Game {
         slots: &BTreeMap<(ScopeId, u64), Slot>,
         parameters: &VecDeque<Decision>,
     ) -> Result<bool> {
+        self.feasible_targets(
+            execution,
+            slots,
+            parameters,
+            TargetFeasibilityLimit::RequireProof,
+        )
+    }
+
+    fn feasible_targets(
+        &self,
+        execution: &Execution,
+        slots: &BTreeMap<(ScopeId, u64), Slot>,
+        parameters: &VecDeque<Decision>,
+        on_limit: TargetFeasibilityLimit,
+    ) -> Result<bool> {
         if parameters.is_empty() {
             return Ok(true);
         }
@@ -1747,10 +1762,11 @@ impl Game {
             .front()
             .ok_or_else(|| invalid("missing target restart"))?;
         if super::material::is_parameter(first) {
-            return self.internal_feasible_targets(
+            return self.feasible_targets(
                 execution,
                 slots,
                 &parameters.iter().skip(1).cloned().collect(),
+                on_limit,
             );
         }
         if let ChoiceDomain::Objects { constraint, .. } = &first.domain
@@ -1760,10 +1776,11 @@ impl Game {
             })
         {
             // An up-to limit always admits an empty target selection before payment is declared.
-            return self.internal_feasible_targets(
+            return self.feasible_targets(
                 execution,
                 slots,
                 &parameters.iter().skip(1).cloned().collect(),
+                on_limit,
             );
         }
         let mut candidate = execution.clone();
@@ -1776,10 +1793,11 @@ impl Game {
                 return Ok(false);
             }
             candidate.captures(self, &first.captures)?;
-            return self.internal_feasible_targets(
+            return self.feasible_targets(
                 &candidate,
                 &candidate.slots,
                 &parameters.iter().skip(1).cloned().collect(),
+                on_limit,
             );
         }
         if matches!(first.domain, ChoiceDomain::Recipients { .. }) {
@@ -1793,10 +1811,11 @@ impl Game {
                         characteristics: wait.characteristics.clone(),
                     },
                 );
-                if self.internal_feasible_targets(
+                if self.feasible_targets(
                     &next,
                     &next.slots,
                     &parameters.iter().skip(1).cloned().collect(),
+                    on_limit,
                 )? {
                     return Ok(true);
                 }
@@ -1814,7 +1833,7 @@ impl Game {
         // ignores it and sees at least the candidates any answer would leave; no answer then
         // rescues a rest that is already unanswerable, so independent questions skip enumeration.
         if matches!(
-            self.internal_feasible_targets(&candidate, &candidate.slots, &rest),
+            self.feasible_targets(&candidate, &candidate.slots, &rest, on_limit),
             Ok(false)
         ) {
             return Ok(false);
@@ -1826,17 +1845,28 @@ impl Game {
             }
             attempts = attempts.saturating_add(1);
             if attempts > MAX_FEASIBILITY_ATTEMPTS {
-                return Err(unsupported("target feasibility proof is too large"));
+                return match on_limit {
+                    TargetFeasibilityLimit::RequireProof => {
+                        Err(unsupported("target feasibility proof is too large"))
+                    }
+                    TargetFeasibilityLimit::Defer => Ok(true),
+                };
             }
             let mut candidate = candidate.clone();
             candidate.bind_targets(&wait, members);
             candidate.captures(self, &first.captures)?;
-            if self.internal_feasible_targets(&candidate, &candidate.slots, &rest)? {
+            if self.feasible_targets(&candidate, &candidate.slots, &rest, on_limit)? {
                 return Ok(true);
             }
         }
         Ok(false)
     }
+}
+
+#[derive(Clone, Copy)]
+pub(super) enum TargetFeasibilityLimit {
+    RequireProof,
+    Defer,
 }
 
 /// Legal answers tried before a target feasibility proof gives up rather than stall play.

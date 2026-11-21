@@ -795,11 +795,6 @@ known:
     error: "typed-gap: prototype continuation cannot enter the typed player interface (#2008)"
     reason: "prototype continuation cannot enter the typed player interface"
   - question: "rule-10.4.7-01"
-    scenario: "B 對手只有ヘヴンリーイージス → 選不到目標 → 不能打出（付 +5 也不行）"
-    status: fail
-    error: "typed-gap: after-decision-1 awaiting (#2008)"
-    reason: "after-decision-1 omniscient awaiting"
-  - question: "rule-10.4.7-01"
     scenario: "D1 ダークアリス的ラストワード：付「デッキの上10枚を消滅」→ 出場、捨 1 張"
     status: fail
     error: "typed-gap: no pending or ability play/resolve events (#2008)"
