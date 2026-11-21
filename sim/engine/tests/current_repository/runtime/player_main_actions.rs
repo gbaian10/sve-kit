@@ -17,6 +17,132 @@ fn question(game: &Game, actor: Viewer) -> Question {
     *question
 }
 
+fn main_intents(initial: &Value) -> Vec<MainIntentKind> {
+    let mut game = Game::from_selected_effects(
+        selection_with_rules().clone(),
+        initial,
+        &Value::Null,
+        &Value::Null,
+        "main-payment-availability",
+    )
+    .unwrap();
+    game.advance_player_input();
+    let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+        panic!("main actions");
+    };
+    actions.intents.into_iter().map(|intent| intent.kind).collect()
+}
+
+#[test]
+fn player_main_actions_hide_play_without_a_payable_exchange_route() {
+    for (field, ex, pp, available) in [
+        (2_u8, 2_u8, 0_u8, false),
+        (4, 0, 0, true),
+        (0, 4, 0, true),
+        (2, 2, 9, true),
+    ] {
+        let mut initial = draw_position();
+        let p1 = &mut initial["players"]["P1"];
+        p1["pp"]["current"] = json!(pp);
+        p1["zones"]["hand"] = json!([{"id":"source","card":"BP01-103"}]);
+        p1["zones"]["field"] = json!(
+            (0..field)
+                .map(|n| json!({"id":format!("field{n}"),"card":"BP04-T01"}))
+                .collect::<Vec<_>>()
+        );
+        p1["zones"]["ex"] = json!(
+            (0..ex)
+                .map(|n| json!({"id":format!("ex{n}"),"card":"BP01-125"}))
+                .collect::<Vec<_>>()
+        );
+        assert_eq!(
+            main_intents(&initial).iter().any(|intent| matches!(
+                intent, MainIntentKind::Play { card } if card.properties.card == "BP01-103"
+            )),
+            available,
+            "field {field}, EX {ex}, PP {pp}",
+        );
+    }
+}
+
+#[test]
+fn player_main_actions_require_a_target_with_an_affordable_price() {
+    let mut initial = draw_position();
+    let p1 = &mut initial["players"]["P1"];
+    p1["zones"]["hand"] = json!([{"id":"source","card":"BP17-030"}]);
+    p1["zones"]["ex"] = json!(
+        (0_u8..5)
+            .map(|n| json!({"id":format!("ex{n}"),"card":"BP01-037"}))
+            .collect::<Vec<_>>()
+    );
+    for (follower, pp, available) in [
+        ("BP17-035", 0_u8, false),
+        ("BP17-022", 0, true),
+        ("BP17-035", 2, true),
+    ] {
+        initial["players"]["P1"]["pp"]["current"] = json!(pp);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"assassin","card":follower}]);
+        assert_eq!(
+            main_intents(&initial).iter().any(|intent| matches!(
+                intent, MainIntentKind::Play { card } if card.properties.card == "BP17-030"
+            )),
+            available,
+            "{follower}, PP {pp}, full EX",
+        );
+    }
+}
+
+#[test]
+fn player_main_actions_require_fixed_pp_even_when_a_mode_is_pending() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP03-030"}]);
+    for (princess, pp, available) in [(false, 0_u8, false), (true, 0, true), (false, 1, true)] {
+        let p1 = &mut initial["players"]["P1"];
+        p1["pp"]["current"] = json!(pp);
+        p1["zones"]["field"] = if princess {
+            json!([{"id":"princess","card":"BP01-026"}])
+        } else {
+            json!([])
+        };
+        assert_eq!(
+            main_intents(&initial).iter().any(|intent| matches!(
+                intent, MainIntentKind::Play { card } if card.properties.card == "BP03-030"
+            )),
+            available,
+            "Princess {princess}, PP {pp}",
+        );
+    }
+}
+
+#[test]
+fn player_main_actions_require_ex_space_for_a_mandatory_hand_transfer() {
+    let mut initial = draw_position();
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-171"}]);
+    let p1 = &mut initial["players"]["P1"];
+    p1["zones"]["hand"] = json!([
+        {"id":"wolf","card":"BP10-017"},
+        {"id":"material","card":"BP17-071"}
+    ]);
+    p1["zones"]["field"] = json!([{"id":"archer","card":"BP17-071"}]);
+    for ex in [4_u8, 5] {
+        initial["players"]["P1"]["zones"]["ex"] = json!(
+            (0..ex)
+                .map(|n| json!({"id":format!("ex{n}"),"card":"BP01-037"}))
+                .collect::<Vec<_>>()
+        );
+        let intents = main_intents(&initial);
+        for printing in ["BP10-017", "BP17-071"] {
+            assert_eq!(
+                intents.iter().any(|intent| matches!(
+                    intent, MainIntentKind::Activate { holder, .. } if holder.properties.card == printing
+                )),
+                ex == 4,
+                "{printing}, EX {ex}",
+            );
+        }
+    }
+}
+
 #[test]
 fn bp13_002_plays_from_ex_for_three_pp_and_resolves_its_fanfare() {
     let mut initial = draw_position();

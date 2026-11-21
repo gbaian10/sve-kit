@@ -681,6 +681,18 @@ impl Game {
             || self.exchange_payment_available(execution, exchange, true)?)
     }
 
+    pub(super) fn main_exchange_available(
+        &self,
+        execution: &Execution,
+        exchange: &ExchangeState,
+    ) -> Result<bool> {
+        if let Some(accepted) = exchange.accepted {
+            return self.exchange_payment_available(execution, exchange, accepted);
+        }
+        Ok(self.exchange_payment_available(execution, exchange, false)?
+            || self.exchange_payment_available(execution, exchange, true)?)
+    }
+
     fn exchange_payment_available(
         &self,
         execution: &Execution,
