@@ -83,6 +83,37 @@ fn player_main_actions_require_payable_activation_materials() {
     }
 }
 
+#[test]
+fn player_main_actions_require_enough_stack_for_great_magician() {
+    for (stack, can_pay) in [(2_u8, false), (3, true)] {
+        let mut initial = draw_position();
+        initial["players"]["P1"]["zones"]["field"] = json!([
+            {"id":"magician","card":"BP22-044"},
+            {"id":"soil","card":"BP01-075","state":{"counters":{"stack_counter":stack}}}
+        ]);
+        let mut game = Game::from_selected_effects(
+            selection_with_rules().clone(),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "main-earth-rite",
+        )
+        .unwrap();
+        game.advance_player_input();
+        let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+            panic!("main actions");
+        };
+        assert_eq!(
+            actions.intents.iter().any(|intent| matches!(
+                &intent.kind,
+                MainIntentKind::Activate { holder, line: 2, .. }
+                    if holder.properties.card == "BP22-044"
+            )),
+            can_pay,
+        );
+    }
+}
+
 fn quick_pass(game: &mut Game, actor: Viewer) {
     let quick = question(game, actor);
     assert_eq!(
