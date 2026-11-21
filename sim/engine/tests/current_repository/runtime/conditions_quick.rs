@@ -147,6 +147,7 @@ fn bp08_028_accepts_zero_targets_without_requiring_a_damage_allocation() {
             );
         }
         CardPlay::Entered(_)
+        | CardPlay::ResolvedCard(_)
         | CardPlay::Cancelled
         | CardPlay::Continued(_)
         | CardPlay::GameEnded(_) => {

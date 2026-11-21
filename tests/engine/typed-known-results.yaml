@@ -290,20 +290,10 @@ known:
     error: "typed-gap: after-decision-3 events (#2008)"
     reason: "after-decision-3 omniscient events"
   - question: "card-BP16-T15"
-    scenario: "[astra] 從 ex 打出"
-    status: fail
-    error: "typed-gap: after-decision-1 outcome (#2008)"
-    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient events"
-  - question: "card-BP16-T15"
     scenario: "[fable] A 用 EX 的 3 張輝く金貨起動：消滅 3 張（消去）、+1、抽 1"
     status: fail
     error: "typed-gap: after-decision-1 events (#2008)"
     reason: "after-decision-1 omniscient events"
-  - question: "card-BP16-T15"
-    scenario: "[fable] B 當 0 費法術打出：沒有效果，進墓場後消去"
-    status: fail
-    error: "typed-gap: after-decision-1 outcome (#2008)"
-    reason: "after-decision-1 omniscient outcome; after-decision-1 omniscient assert P1.ex; after-decision-1 omniscient events"
   - question: "card-BP17-030"
     scenario: "[astra] BP21-PR05 EX滿=True"
     status: fail

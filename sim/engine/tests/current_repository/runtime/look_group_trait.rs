@@ -84,6 +84,7 @@ fn finish(board: &mut Game, choice: &DecisionView, picked: Vec<u64>) {
         }
         CardPlay::Resolved(_) => (),
         CardPlay::Entered(_)
+        | CardPlay::ResolvedCard(_)
         | CardPlay::Cancelled
         | CardPlay::Continued(_)
         | CardPlay::GameEnded(_) => panic!("Look must finish after ordering its remainder"),

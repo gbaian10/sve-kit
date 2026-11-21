@@ -69,10 +69,11 @@ impl Game {
             {
                 return Ok(false);
             }
-            let entries = self.internal_printed_abilities(holder)?;
-            if !entries
-                .iter()
-                .any(|entry| entry.node.kind == AbilityKind::Spell)
+            if kind != "スペル・トークン"
+                && !self
+                    .internal_printed_abilities(holder)?
+                    .iter()
+                    .any(|entry| entry.node.kind == AbilityKind::Spell)
             {
                 return Ok(false);
             }

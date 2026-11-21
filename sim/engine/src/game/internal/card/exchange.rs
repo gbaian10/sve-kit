@@ -839,18 +839,7 @@ impl Game {
             .last_mut()
             .ok_or_else(|| invalid("missing exchange PP debit"))?
             .purpose = Some(pp_purpose(exchange));
-        let intrinsic = if execution.field_entry {
-            ReceiptId(0)
-        } else {
-            let CostSpec::Ordered { steps } = &play.costs else {
-                return Err(unsupported("intrinsic costs"));
-            };
-            steps
-                .first()
-                .ok_or_else(|| invalid("missing intrinsic payment"))?
-                .instruction
-                .receipt
-        };
+        let intrinsic = play.card_play_payment_receipt(execution)?;
         execution.receipts.insert(
             intrinsic,
             InstructionOutcome::Payment {
