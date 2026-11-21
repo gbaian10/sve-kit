@@ -53,6 +53,8 @@ pub enum CardPlay {
     Awaiting(DecisionView),
     /// Complete printed Spell or ability, followed by explicit check timing.
     Resolved(Activation),
+    /// A Spell without a spell ability has completed, followed by explicit check timing.
+    ResolvedCard(super::super::Progress),
     /// Complete follower or amulet play, followed by its separately produced fanfare.
     Entered(CardEntry),
     /// One pending occurrence cannot legally be played and has been cancelled by rules.
@@ -166,6 +168,19 @@ struct SelectionOrigin {
 }
 
 impl PlayState {
+    pub(super) fn card_play_payment_receipt(&self, execution: &Execution) -> Result<ReceiptId> {
+        if execution.ability.is_none() {
+            return Ok(ReceiptId(0));
+        }
+        let CostSpec::Ordered { steps } = &self.costs else {
+            return Err(unsupported("intrinsic costs"));
+        };
+        steps
+            .first()
+            .map(|step| step.instruction.receipt)
+            .ok_or_else(|| invalid("missing intrinsic payment"))
+    }
+
     pub(in crate::game::internal) fn required_head_pending(&self) -> bool {
         self.optional
             .iter()
@@ -1575,7 +1590,7 @@ impl Game {
         } else if let Some(entry) = self.card_runtime.entry_result.take() {
             Ok(CardPlay::Entered(entry))
         } else {
-            activation(execution.progress(), execution.ability).map(CardPlay::Resolved)
+            resolved_play(execution.progress(), execution.ability, execution.spell)
         }
     }
 
@@ -1605,11 +1620,9 @@ impl Game {
         if self.typed.is_none() && self.card_runtime.question.is_some() {
             return self.answer_internal_pending(actor, token, &answer, validated);
         }
-        if self
-            .typed
-            .as_ref()
-            .is_none_or(|execution| execution.ability.is_none() && !execution.field_entry)
-        {
+        if self.typed.as_ref().is_none_or(|execution| {
+            execution.ability.is_none() && !execution.field_entry && !execution.spell
+        }) {
             return Err(invalid("no pending formal play"));
         }
         if self.decline_internal_head_payment(actor, token, &answer)? {
@@ -1628,6 +1641,7 @@ impl Game {
             })
             .and_then(|execution| execution.trigger_occurrence.map(|id| (id, execution.id)));
         let source = self.typed.as_ref().and_then(Execution::root_ability);
+        let spell = self.typed.as_ref().is_some_and(|execution| execution.spell);
         let progress = match self.answer_internal_step(actor, token, answer, validated) {
             Err(crate::EngineFailure::IllegalPlay(_)) if occurrence.is_some() => {
                 let (id, checkpoint) = occurrence.ok_or_else(|| invalid("missing occurrence"))?;
@@ -1650,7 +1664,7 @@ impl Game {
         } else if let Some(entry) = self.card_runtime.entry_result.take() {
             Ok(CardPlay::Entered(entry))
         } else {
-            activation(progress, source).map(CardPlay::Resolved)
+            resolved_play(progress, source, spell)
         }
     }
 
@@ -1895,7 +1909,7 @@ impl Game {
         self.card_runtime.active_source = execution.ability;
         let payment = if play.resource_entry.is_some() {
             self.internal_resource_entry_payment(execution, &play)
-        } else if play.exchange.is_some() || execution.field_entry {
+        } else if play.exchange.is_some() || execution.ability.is_none() {
             self.internal_exchange_payment(execution, &play)
         } else {
             self.internal_card_payment(
@@ -1926,14 +1940,11 @@ impl Game {
     }
 
     fn commit_internal_play(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
-        let source = execution
+        let controller = execution
             .ability
-            .ok_or_else(|| invalid("missing formal source"))?;
+            .map_or(execution.context.controller, |source| source.controller);
         if execution.spell {
-            self.internal_commit_card_play(
-                &execution.context.source,
-                seat_name(source.controller)?,
-            )?;
+            self.internal_commit_card_play(&execution.context.source, seat_name(controller)?)?;
             let group = self.group();
             let player_step = self.emit(
                 json!({"kind":"プレイ","object":execution.context.source}),
@@ -1942,6 +1953,68 @@ impl Game {
             );
             self.player_step_actor(&player_step, &execution.frame().controller);
         }
+        if let Some(source) = execution.ability {
+            self.commit_ability_use(execution, &play, source)?;
+        }
+        if let Some(nested) = execution.nested.as_mut() {
+            nested.committed = true;
+        }
+        enter_play_phase(execution, PlayPhase::Resolve)?;
+        disclose_played_source(self, execution);
+        let played = if execution.spell {
+            let object = execution.ability.map_or_else(
+                || execution.reference(self, &execution.context.source),
+                |source| Ok(source.holder),
+            )?;
+            Fact::CardPlayed {
+                execution: execution.id,
+                object,
+                controller,
+            }
+        } else {
+            Fact::AbilityPlayed {
+                execution: execution.id,
+                source: execution
+                    .ability
+                    .ok_or_else(|| invalid("missing formal source"))?,
+                qualification: play.qualification,
+            }
+        };
+        execution.record_fact(self, played);
+        self.player_play_prefix(execution.began);
+        if !execution.spell && play.qualification == AbilityQualification::UnionBurst {
+            self.internal_commit_union_burst(execution.id, controller)?;
+        }
+        if play.qualification == AbilityQualification::UnionBurst {
+            self.internal_ub_activated_events(execution)?;
+        }
+        if execution.spell {
+            let receipt = play.card_play_payment_receipt(execution)?;
+            self.internal_played_card_events(execution, receipt)?;
+        }
+        let paid = play
+            .optional
+            .iter()
+            .filter(|payment| payment.accepted == Some(true))
+            .map(|payment| payment.receipt)
+            .collect();
+        let empty_fusion = play.qualification == AbilityQualification::Fusion
+            && execution
+                .facts
+                .iter()
+                .any(|fact| matches!(fact, Fact::Fused(event) if event.materials.is_empty()));
+        if !empty_fusion {
+            execution.prepend(selected_body(play.body, &play.chosen, &paid)?);
+        }
+        Ok(())
+    }
+
+    fn commit_ability_use(
+        &mut self,
+        execution: &Execution,
+        play: &PlayState,
+        source: RuntimeAbilitySource,
+    ) -> Result<()> {
         let turn = TurnId(self.state.schedule.current()?);
         if let Some(limit) = play.limit {
             self.card_runtime
@@ -1969,59 +2042,6 @@ impl Game {
                     }
                 }
             }
-        }
-        if let Some(nested) = execution.nested.as_mut() {
-            nested.committed = true;
-        }
-        enter_play_phase(execution, PlayPhase::Resolve)?;
-        disclose_played_source(self, execution);
-        execution.record_fact(
-            self,
-            if execution.spell {
-                Fact::CardPlayed {
-                    execution: execution.id,
-                    object: source.holder,
-                    controller: source.controller,
-                }
-            } else {
-                Fact::AbilityPlayed {
-                    execution: execution.id,
-                    source,
-                    qualification: play.qualification,
-                }
-            },
-        );
-        self.player_play_prefix(execution.began);
-        if !execution.spell && play.qualification == AbilityQualification::UnionBurst {
-            self.internal_commit_union_burst(execution.id, source.controller)?;
-        }
-        if play.qualification == AbilityQualification::UnionBurst {
-            self.internal_ub_activated_events(execution)?;
-        }
-        if execution.spell {
-            let CostSpec::Ordered { steps } = &play.costs else {
-                return Err(unsupported("card play costs"));
-            };
-            let receipt = steps
-                .first()
-                .ok_or_else(|| invalid("missing intrinsic payment"))?
-                .instruction
-                .receipt;
-            self.internal_played_card_events(execution, receipt)?;
-        }
-        let paid = play
-            .optional
-            .iter()
-            .filter(|payment| payment.accepted == Some(true))
-            .map(|payment| payment.receipt)
-            .collect();
-        let empty_fusion = play.qualification == AbilityQualification::Fusion
-            && execution
-                .facts
-                .iter()
-                .any(|fact| matches!(fact, Fact::Fused(event) if event.materials.is_empty()));
-        if !empty_fusion {
-            execution.prepend(selected_body(play.body, &play.chosen, &paid)?);
         }
         Ok(())
     }
@@ -2353,10 +2373,15 @@ impl Game {
     }
 }
 
-fn activation(
+fn resolved_play(
     progress: super::super::Progress,
     source: Option<RuntimeAbilitySource>,
-) -> Result<Activation> {
+    spell: bool,
+) -> Result<CardPlay> {
+    if spell && source.is_none() && matches!(progress.facts.last(), Some(Fact::CardResolved { .. }))
+    {
+        return Ok(CardPlay::ResolvedCard(progress));
+    }
     let source = source.ok_or_else(|| invalid("missing formal source"))?;
     let execution = match progress.facts.last() {
         Some(Fact::AbilityResolved {
@@ -2370,12 +2395,12 @@ fn activation(
         }) if *object == source.holder && *controller == source.controller => *execution,
         _ => return Err(invalid("formal play did not complete")),
     };
-    Ok(Activation {
+    Ok(CardPlay::Resolved(Activation {
         execution,
         source,
         progress,
         resume: ResumeStage::CheckTiming,
-    })
+    }))
 }
 
 fn selected_body(
@@ -2473,8 +2498,8 @@ fn independent_selector(selector: &Selector) -> bool {
     reason = "Field plays share the card payment continuation."
 )]
 impl Game {
-    pub(super) fn prepare_field_play(&self, execution: &mut Execution) -> Result<()> {
-        execution.field_entry = true;
+    pub(super) fn prepare_intrinsic_card_play(&self, execution: &mut Execution) -> Result<()> {
+        execution.field_entry = !execution.spell;
         let additional = self.internal_additional(execution)?;
         let parameters = additional
             .as_deref()

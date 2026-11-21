@@ -287,7 +287,7 @@ fn play_cost(play: &PlayState, game: &Game, execution: &Execution) -> CostSummar
                 CostLine::EntryResources { cards, use_ep },
             ],
         });
-    } else if execution.field_entry || play.exchange.is_some() {
+    } else if execution.ability.is_none() || play.exchange.is_some() {
         let quoted = play.exchange.as_ref().map_or_else(
             || game.internal_card_play_cost(execution),
             |exchange| {
