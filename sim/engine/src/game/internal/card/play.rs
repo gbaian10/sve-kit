@@ -1,5 +1,6 @@
 use super::super::CostPaymentPurpose;
 use super::super::{Answer, DecisionToken, DecisionView, InputDomain, Slot, Wait};
+use super::selection::TargetFeasibilityLimit::{Defer, RequireProof};
 use super::{
     Ability, Activation, Context, Execution, ExecutionId, Expr, Fact, Game, Generation, Int,
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
@@ -1687,7 +1688,9 @@ impl Game {
             .front()
             .and_then(x_payment::parameter)
             .is_some();
-        if !pending_x && !self.internal_play_targets_feasible(&execution, play.parameters.iter())? {
+        if !pending_x
+            && !self.internal_play_targets_feasible(&execution, play.parameters.iter(), Defer)?
+        {
             return Err(crate::EngineFailure::IllegalPlay(
                 "no legal play targets".into(),
             ));
@@ -2094,8 +2097,9 @@ impl Game {
             let turn = TurnId(self.state.schedule.current()?);
             let mut legal = Vec::new();
             for mode in &group.modes {
+                let parameters = mode.parameters.iter();
                 if self.internal_mode_affordable(execution, play, mode)?
-                    && self.internal_play_targets_feasible(execution, mode.parameters.iter())?
+                    && self.internal_play_targets_feasible(execution, parameters, RequireProof)?
                     && (exclude_used.is_none()
                         || !self.card_runtime.mode_uses.iter().any(|used| {
                             used.ability_instance == source.instance

@@ -137,6 +137,11 @@ fn player_main_actions_remain_available_with_an_undeclared_x_target_limit() {
         panic!("main actions");
     };
     assert!(actions.intents.iter().any(|intent| matches!(intent.kind, MainIntentKind::EndPhase)));
+    assert!(actions.intents.iter().any(|intent| matches!(
+        &intent.kind,
+        MainIntentKind::Activate { holder, line: 1, .. }
+            if holder.properties.card == "BP21-030"
+    )));
 }
 
 fn quick_pass(game: &mut Game, actor: Viewer) {
