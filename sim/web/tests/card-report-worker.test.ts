@@ -16,7 +16,6 @@ const report = {
   dataVersion: "preview-20261121T010000Z-0001",
   type: "translation",
   description: "Example wording",
-  contact: "",
   token: "XXXX.DUMMY.TOKEN.XXXX",
 }
 const { privateKey, publicKey } = generateKeyPairSync("rsa", { modulusLength: 2048 })
@@ -60,11 +59,7 @@ afterEach(() => {
 
 it("rejects invalid fields before calling external services", async () => {
   const { log, send, upstream } = fixture()
-  const invalidFields = [
-    { cardNo: "../BP03-001" },
-    { description: "Unexpected\u0000NUL" },
-    { contact: "Unexpected\u202eoverride" },
-  ]
+  const invalidFields = [{ cardNo: "../BP03-001" }, { description: "Unexpected\u0000NUL" }]
   for (const fields of invalidFields) {
     const response = await send({ ...report, ...fields })
     expect(response.status).toBe(400)
@@ -111,7 +106,7 @@ it("reports missing secrets without calling external services", async () => {
   expect(log).toHaveBeenCalledExactlyOnceWith("card-report: configuration")
 })
 
-it("opens a labeled issue with validated metadata and literal user text", async () => {
+it("opens a labeled issue with validated metadata and literal user text, ignoring legacy contact", async () => {
   const { send, upstream, limit } = fixture()
   upstream.mockImplementation(async (url, init) => {
     const request = new Request(url, init)
@@ -156,6 +151,8 @@ it("opens a labeled issue with validated metadata and literal user text", async 
             "https://en.shadowverse-evolve.com/cards/?cardno=BP03-LD%E2%93%8801EN",
           ),
         )
+        expect(payload).not.toHaveProperty("body", expect.stringContaining("Contact or nickname"))
+        expect(payload).not.toHaveProperty("body", expect.stringContaining("card@example.com"))
         return Response.json({ number: 987 }, { status: 201 })
       default:
         throw new Error("Unexpected upstream request")
@@ -165,7 +162,7 @@ it("opens a labeled issue with validated metadata and literal user text", async 
   const response = await send({
     ...report,
     description: "@example\r\n![image](https://example.com/image.png)\r<img\tsrc=x>",
-    contact: "card@example.com",
+    contact: "card@example.com\u202e",
   })
 
   expect(response.status).toBe(201)

@@ -624,11 +624,8 @@ export default {
     descriptionRequired: "Please describe the issue.",
     translationHint:
       "If you suggest a translation, say whether it’s your own, from the official digital game, or used by the community. Include a source link if available.",
-    contact: "Contact details or nickname",
-    optional: "(optional)",
     submit: "Send report",
     sent: "Report sent",
-    public: "Your description and contact details will be visible in the public issue.",
     sending: "Sending report…",
     viewIssue: "View issue on GitHub (opens in a new tab)",
     retryVerification: "Reload verification",

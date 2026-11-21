@@ -608,11 +608,8 @@ export default {
     descriptionRequired: "問題の詳細を入力してください。",
     translationHint:
       "訳語を提案する場合は、自分の訳、デジタル版の公式訳、コミュニティでの用語のいずれかを明記し、出典があればリンクを添えてください。",
-    contact: "連絡先またはニックネーム",
-    optional: "（任意）",
     submit: "報告を送信",
     sent: "送信しました",
-    public: "説明と連絡先は GitHub の公開 Issue に掲載されます。",
     sending: "報告を送信中…",
     viewIssue: "GitHub で Issue を表示（新しいタブで開く）",
     retryVerification: "認証を読み込み直す",
