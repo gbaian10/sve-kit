@@ -1,6 +1,7 @@
 use super::*;
 use crate::catalog::Catalog;
 use crate::game::player::{Command, Input, SubmissionKind};
+use crate::ir::Generation;
 use alloc::sync::Arc;
 
 fn broken_material_question() -> Game {
