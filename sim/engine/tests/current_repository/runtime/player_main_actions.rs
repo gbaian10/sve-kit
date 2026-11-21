@@ -114,6 +114,31 @@ fn player_main_actions_require_enough_stack_for_great_magician() {
     }
 }
 
+#[test]
+fn player_main_actions_remain_available_with_an_undeclared_x_target_limit() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["pp"]["current"] = json!(1_u8);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"strategist","card":"BP21-030"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"expensive","card":"BP21-055"},
+        {"id":"same-name","card":"BP21-030"}
+    ]);
+    let mut game = Game::from_selected_effects(
+        selection_with_rules().clone(),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "main-x-target-limit",
+    )
+    .unwrap();
+    game.advance_player_input();
+    let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+        panic!("main actions");
+    };
+    assert!(actions.intents.iter().any(|intent| matches!(intent.kind, MainIntentKind::EndPhase)));
+}
+
 fn quick_pass(game: &mut Game, actor: Viewer) {
     let quick = question(game, actor);
     assert_eq!(

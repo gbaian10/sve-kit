@@ -1681,7 +1681,13 @@ impl Game {
             .play
             .take()
             .ok_or_else(|| invalid("missing prepared declaration"))?;
-        if !self.internal_play_targets_feasible(&execution, play.parameters.iter())? {
+        // A formal target selector may need the value supplied by the preceding X question.
+        let pending_x = play
+            .parameters
+            .front()
+            .and_then(x_payment::parameter)
+            .is_some();
+        if !pending_x && !self.internal_play_targets_feasible(&execution, play.parameters.iter())? {
             return Err(crate::EngineFailure::IllegalPlay(
                 "no legal play targets".into(),
             ));
