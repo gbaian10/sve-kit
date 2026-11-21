@@ -163,6 +163,9 @@ impl Game {
                 };
             }
             "スペル" | "スペル・トークン" | "スペル・アドバンス" => {}
+            "フォロワー・アドバンス" if self.object(holder)?.zone == "ex" => {
+                return Ok(None);
+            }
             _ => {
                 return Err(crate::EngineFailure::IllegalPlay(
                     "effect cannot play this card face".into(),

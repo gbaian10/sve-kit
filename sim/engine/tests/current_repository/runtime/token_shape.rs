@@ -194,6 +194,49 @@ fn bp05_037_q697_ex_capacity_can_choose_black_artifact() {
     }
 }
 
+fn play_golem_assault(game: &mut Game) -> CardPlay {
+    let play = game
+        .play_internal_card("source", PlayerId { seat: 1 })
+        .unwrap();
+    if let CardPlay::Awaiting(choice) = &play
+        && matches!(choice.domain, InputDomain::OptionalCost)
+    {
+        return game
+            .answer_internal_card(choice.actor, choice.token, Answer::OptionalCost(false))
+            .unwrap();
+    }
+    play
+}
+
+#[test]
+fn bp22_054_q2830_lets_the_player_choose_the_golem_for_the_last_ex_slot() {
+    let mut game = fixture("BP22-054", "ex", 4);
+    let CardPlay::Awaiting(choice) = play_golem_assault(&mut game) else {
+        panic!("the last EX slot requires a Golem choice");
+    };
+    let InputDomain::TokenCapacity { choices } = &choice.domain else {
+        panic!("the effect offers an EX capacity choice");
+    };
+    assert_eq!(choices.len(), 2, "the two Golems are the only options");
+    assert!(
+        choices.contains(&vec!["防御型ゴーレム".to_owned()])
+            && choices.contains(&vec!["攻撃型ゴーレム".to_owned()]),
+        "either Golem can occupy the final space"
+    );
+    assert!(cards(&game, "ex").is_empty(), "selection precedes creation");
+    resolved(capacity(&mut game, &choice, &["攻撃型ゴーレム"]));
+    assert_eq!(cards(&game, "ex"), ["BP01-T08"]);
+}
+
+#[test]
+fn bp22_054_creates_both_golems_when_two_ex_slots_are_free() {
+    let mut game = fixture("BP22-054", "ex", 3);
+    resolved(play_golem_assault(&mut game));
+    let mut created = cards(&game, "ex");
+    created.sort();
+    assert_eq!(created, ["BP01-T08", "BP01-T09"]);
+}
+
 #[test]
 fn bp07_008_chooses_tree_or_fairy_during_fanfare_resolution() {
     for number in ["BP07-008", "BP07-P02"] {
