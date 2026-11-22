@@ -119,11 +119,6 @@ known:
     status: unsupported
     error: "typed-gap: sole decline input skipped"
     reason: "typed runner: resolve-choice at ActionWindow"
-  - question: "card-BP08-089"
-    scenario: "A 2 個護符：進化付 1 PP＋1 EP → 變成護符 → 進化時消滅 b1 → 不能攻擊 → テミス 不破壞它 → ダークオファリング 破壞 → ラストワード 3 傷害"
-    status: unsupported
-    error: "typed-gap: ordinary single evolution departure association (#2008)"
-    reason: "internal D1 does not support ordinary single evolution departure association"
   - question: "card-BP08-SL15"
     scenario: "[astra] 出場 1 張"
     status: fail
@@ -676,9 +671,9 @@ known:
     reason: "no authored program: CP04-019"
   - question: "flow-evolved-amulet-r3-01"
     scenario: "沒有敵方從者也能進化成護符，裝備延後到回手才消去"
-    status: unsupported
-    error: "typed-gap: ordinary single evolution departure association (#2008)"
-    reason: "internal D1 does not support ordinary single evolution departure association"
+    status: fail
+    error: "typed-gap: after-decision-2 outcome (#2008)"
+    reason: "after-decision-2 omniscient outcome"
   - question: "flow-ex-full-remainder-01"
     scenario: "エル選中的武闘竜人因 EX 已滿未移動，與另外兩張一起放底"
     status: ineligible
