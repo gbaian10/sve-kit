@@ -1,5 +1,5 @@
 //! Current printed keyword authority and the CR 12.8.2 optional entry procedure.
-use super::super::search::SingleArrival;
+use super::super::search::SearchArrival;
 use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant, player_id};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::game::internal::player::CandidateLinks;
@@ -81,7 +81,7 @@ impl Game {
         &mut self,
         execution: &mut Execution,
         holder: &str,
-        search: Option<&SingleArrival>,
+        search: Option<&SearchArrival>,
     ) -> Result<bool> {
         let reference = execution.reference(self, holder)?;
         if execution

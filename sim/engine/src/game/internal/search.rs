@@ -77,11 +77,21 @@ pub struct SearchPartitionDomain {
 }
 
 #[derive(Clone, Debug)]
-pub(super) struct SingleArrival {
-    instruction: Box<Instruction>,
+pub(super) struct SearchArrival {
     player: PlayerId,
-    object: ObjectRef,
-    outcome: SearchOutcome,
+    members: Vec<ObjectRef>,
+    to: MoveDestination,
+    field: FieldArrival,
+    next: AfterArrival,
+}
+
+#[derive(Clone, Debug)]
+enum AfterArrival {
+    Finish {
+        instruction: Box<Instruction>,
+        outcome: SearchOutcome,
+    },
+    Partition(PartitionContinuation),
 }
 
 #[derive(Clone, Debug)]
@@ -816,6 +826,10 @@ impl Game {
                 destination: Some(SearchDestination::Single { movement }),
                 ..
             } => {
+                let field = FieldArrival {
+                    posture: movement.initial_posture,
+                    without_fanfare: suppresses_fanfare(&movement.entry_effects),
+                };
                 if let Some(partition) = self.internal_search_capacity(
                     execution,
                     &movement.to,
@@ -833,50 +847,22 @@ impl Game {
                             destinations: VecDeque::from([partition]),
                             next_handle: u64::try_from(wait.domain.cards.len()).map_err(invalid)?,
                             capacity_remainder: Some(movement.to.clone()),
-                            arrival: FieldArrival {
-                                posture: movement.initial_posture,
-                                without_fanfare: suppresses_fanfare(&movement.entry_effects),
-                            },
+                            arrival: field,
                         },
                     );
                 }
-                if let [object] = found.as_slice()
-                    && wait.domain.groups.is_none()
-                    && wait.domain.cardinality.maximum == Some(Nat(1))
-                    && movement.initial_posture.is_none()
-                    && self
-                        .internal_search_destination(execution, &movement.to, wait.player)?
-                        .1
-                        == ZoneKind::Field
-                    && self.movement_free_spaces(wait.player, ZoneKind::Field)? > 0
-                {
-                    let id = execution.object_id(*object)?.to_owned();
-                    let arrival = SingleArrival {
-                        instruction: wait.instruction.clone(),
+                self.internal_search_arrival(
+                    execution,
+                    SearchArrival {
                         player: wait.player,
-                        object: *object,
-                        outcome,
-                    };
-                    if self.internal_ward_entry_choice(execution, &id, Some(&arrival))? {
-                        return Ok(());
-                    }
-                    return self.internal_search_single_arrival(execution, arrival);
-                }
-                let moved = self.internal_search_move_with_arrival(
-                    execution,
-                    &found,
-                    &movement.to,
-                    wait.player,
-                    FieldArrival {
-                        posture: movement.initial_posture,
-                        without_fanfare: suppresses_fanfare(&movement.entry_effects),
+                        members: found,
+                        to: movement.to.clone(),
+                        field,
+                        next: AfterArrival::Finish {
+                            instruction: wait.instruction.clone(),
+                            outcome,
+                        },
                     },
-                )?;
-                self.internal_search_finish(
-                    execution,
-                    &wait.instruction,
-                    wait.player,
-                    SearchOutcome { moved, ..outcome },
                 )
             }
             Action::Search {
@@ -906,40 +892,53 @@ impl Game {
         }
     }
 
-    pub(super) fn internal_search_single_arrival(
+    pub(super) fn internal_search_arrival(
         &mut self,
         execution: &mut Execution,
-        arrival: SingleArrival,
+        arrival: SearchArrival,
     ) -> Result<()> {
-        let Action::Search {
-            destination: Some(SearchDestination::Single { movement }),
-            ..
-        } = &arrival.instruction.action
-        else {
-            return Err(invalid("missing single search destination"));
-        };
+        let (_, kind) = self.internal_search_destination(execution, &arrival.to, arrival.player)?;
+        let choose_posture = kind == ZoneKind::Field
+            && arrival.field.posture.is_none()
+            && self.movement_free_spaces(arrival.player, kind)? > 0;
+        if choose_posture {
+            // Collect choices before committing the simultaneous field movement.
+            for &member in &arrival.members {
+                let id = execution.object_id(member)?.to_owned();
+                if self.internal_ward_entry_choice(execution, &id, Some(&arrival))? {
+                    return Ok(());
+                }
+            }
+        }
         let moved = self.internal_search_move_with_arrival(
             execution,
-            &[arrival.object],
-            &movement.to,
+            &arrival.members,
+            &arrival.to,
             arrival.player,
-            FieldArrival {
-                posture: movement.initial_posture,
-                without_fanfare: suppresses_fanfare(&movement.entry_effects),
-            },
+            arrival.field,
         )?;
-        if moved.iter().any(|result| result.after.is_some()) {
-            self.internal_ward_entry_posture(execution, arrival.object)?;
+        if choose_posture {
+            for member in &moved {
+                if member.after.is_some() {
+                    self.internal_ward_entry_posture(execution, member.before)?;
+                }
+            }
         }
-        self.internal_search_finish(
-            execution,
-            &arrival.instruction,
-            arrival.player,
-            SearchOutcome {
-                moved,
-                ..arrival.outcome
-            },
-        )
+        match arrival.next {
+            AfterArrival::Finish {
+                instruction,
+                outcome,
+            } => self.internal_search_finish(
+                execution,
+                &instruction,
+                arrival.player,
+                SearchOutcome { moved, ..outcome },
+            ),
+            AfterArrival::Partition(mut continuation) => {
+                continuation.outcome.moved.extend(moved);
+                self.internal_search_partition(execution, continuation)
+            }
+        }
     }
 
     fn internal_search_capacity(
@@ -1147,7 +1146,7 @@ impl Game {
         &mut self,
         execution: &mut Execution,
         wait: &PartitionWait,
-        cards: &[ObjectRef],
+        cards: Vec<ObjectRef>,
     ) -> Result<()> {
         if self.internal_known_deck(seat_name(wait.continuation.player)?)? != wait.deck
             || self.state.ir_epoch
@@ -1169,17 +1168,16 @@ impl Game {
         continuation
             .remaining
             .retain(|object| !cards.contains(object));
-        continuation
-            .outcome
-            .moved
-            .extend(self.internal_search_move_with_arrival(
-                execution,
-                cards,
-                &wait.partition.zone,
-                continuation.player,
-                continuation.arrival,
-            )?);
-        self.internal_search_partition(execution, continuation)
+        self.internal_search_arrival(
+            execution,
+            SearchArrival {
+                player: continuation.player,
+                members: cards,
+                to: wait.partition.zone.clone(),
+                field: continuation.arrival,
+                next: AfterArrival::Partition(continuation),
+            },
+        )
     }
 
     fn internal_search_destination(
