@@ -61,7 +61,7 @@ fn chosen_search(
     clippy::too_many_lines,
     reason = "All public question types are mapped to their native commands."
 )]
-pub(super) fn choose(
+pub(in crate::game) fn choose(
     question: &Question,
     rng: &mut ChaCha8Rng,
 ) -> Result<(Command, String), &'static str> {
