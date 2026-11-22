@@ -1258,7 +1258,10 @@ impl Game {
         Ok(execution)
     }
 
-    pub(super) fn fresh_card_execution(&mut self, context: Context) -> Result<Execution> {
+    pub(in crate::game::internal) fn fresh_card_execution(
+        &mut self,
+        context: Context,
+    ) -> Result<Execution> {
         self.state.ir_epoch = self
             .state
             .ir_epoch

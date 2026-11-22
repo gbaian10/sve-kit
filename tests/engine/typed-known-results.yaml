@@ -726,24 +726,14 @@ known:
     reason: "no authored program: BP03-SL07"
   - question: "rule-10.10-02"
     scenario: "A P2 選「+1 → −1」→ シオン受 1；反擊破壞一ツ尾狐 → ギンセツ誘發"
-    status: adapter-error
-    error: "typed-gap: prototype continuation cannot enter the typed player interface (#2008)"
-    reason: "prototype continuation cannot enter the typed player interface"
+    status: fail
+    error: "interface: awaiting labels omit the provider card number (#2008)"
+    reason: "after-decision-2 omniscient awaiting; after-decision-3 omniscient awaiting"
   - question: "rule-10.10-02"
     scenario: "B P2 選「−1 → +1」→ 0 → 傷害行動不存在 → シオン不受傷；交戰與反擊照常"
-    status: adapter-error
-    error: "typed-gap: prototype continuation cannot enter the typed player interface (#2008)"
-    reason: "prototype continuation cannot enter the typed player interface"
-  - question: "rule-10.10.2-01"
-    scenario: "減傷先套用"
-    status: adapter-error
-    error: "typed-gap: prototype continuation cannot enter the typed player interface (#2008)"
-    reason: "prototype continuation cannot enter the typed player interface"
-  - question: "rule-10.10.2-01"
-    scenario: "加傷先套用"
-    status: adapter-error
-    error: "typed-gap: prototype continuation cannot enter the typed player interface (#2008)"
-    reason: "prototype continuation cannot enter the typed player interface"
+    status: fail
+    error: "interface: awaiting labels omit the provider card number (#2008)"
+    reason: "after-decision-3 omniscient awaiting"
   - question: "rule-10.4.7-01"
     scenario: "D1 ダークアリス的ラストワード：付「デッキの上10枚を消滅」→ 出場、捨 1 張"
     status: fail

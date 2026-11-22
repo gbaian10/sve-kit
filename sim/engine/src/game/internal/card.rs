@@ -161,7 +161,7 @@ pub(in crate::game) struct CardRuntime {
     rule_ids: BTreeMap<String, RuleId>,
     pub(in crate::game::internal) active_source: Option<RuntimeAbilitySource>,
     pub(in crate::game::internal) quick: Option<quick::Question>,
-    pub(in crate::game::internal) quick_start: bool,
+    pub(in crate::game) quick_start: bool,
     pub(in crate::game::internal) banish_play: BTreeMap<u32, play_restrictions::BanishPermission>,
     pub(in crate::game::internal) phase_restrictions: Vec<super::phase_restrictions::Installed>,
     pub(in crate::game::internal) other_costs: Vec<other_costs::InstalledCost>,
