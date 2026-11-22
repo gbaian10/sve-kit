@@ -6,7 +6,7 @@ use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::{
-    Command, DecisionShape, Input, QuestionShape, SubmissionKind, Viewer,
+    Command, DecisionShape, Input, MainIntentKind, QuestionShape, SubmissionKind, Viewer,
 };
 
 fn fragment(header: &Value, number: &str) -> WellFormedCardProgram {
@@ -426,11 +426,25 @@ fn player_payment_errors_are_reason_free_and_keep_rejected_reverted_and_fault_di
     let program = WellFormedCardProgram::check(raw).unwrap();
     let mut game = quick_counter::load(&quick_counter::initial(true, 2, false), &program);
     game.advance_player_input();
-    let command = player_declarations::activation_command(&game, "unit-amulet", 0);
-    assert_eq!(
-        game.submit_player(Viewer::P1, command).kind,
-        SubmissionKind::Applied
+    let QuestionShape::ActionWindow(actions) = question(&game, Viewer::P1).shape else {
+        panic!("main actions before payment")
+    };
+    assert!(
+        !actions
+            .intents
+            .iter()
+            .any(|intent| matches!(intent.kind, MainIntentKind::Activate { .. }))
     );
+    // Open the failing continuation directly to exercise recovery through the player answer.
+    awaiting(
+        game.activate_internal_card(
+            "source",
+            program.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
+        )
+        .unwrap(),
+    );
+    game.advance_player_input();
     let q = question(&game, Viewer::P1);
     let QuestionShape::Decision(DecisionShape::CostMaterials(materials)) = &q.shape else {
         panic!("player cost materials")

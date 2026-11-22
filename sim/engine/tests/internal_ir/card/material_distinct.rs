@@ -6,7 +6,7 @@
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::{
-    Command, DecisionShape, Input, QuestionShape, SubmissionKind, Viewer,
+    Command, DecisionShape, Input, MainIntentKind, QuestionShape, SubmissionKind, Viewer,
 };
 
 fn tree(count: u64, body: &Value, quick: bool) -> Value {
@@ -225,8 +225,18 @@ fn duplicate_costs_bad_counts_and_foreign_handles_preserve_the_pending_payment()
 fn the_player_question_exposes_frozen_original_costs_and_rejects_duplicate_costs() {
     let program = program(2);
     let mut game = board(&program, &initial(1, &["m2a", "m2b", "m3"]));
-    let question = start(&mut game, &program, 1);
-    let InputDomain::CostMaterials(domain) = &question.domain else {
+    assert!(matches!(
+        game.clone().play_internal_card("e1", PlayerId { seat: 1 }),
+        Err(sve_engine::EngineFailure::Unsupported(_))
+    ));
+    game.advance_player_input();
+    let command = player_declarations::activation_command(&game, "unit-follower", 0);
+    assert_eq!(
+        game.submit_player(Viewer::P1, command).kind,
+        SubmissionKind::Applied
+    );
+    let decision = game.internal_decision(View::P1).unwrap();
+    let InputDomain::CostMaterials(domain) = &decision.domain else {
         panic!("ordinary materials")
     };
     assert_eq!(domain.members.len(), 3);
@@ -240,7 +250,6 @@ fn the_player_question_exposes_frozen_original_costs_and_rejects_duplicate_costs
             .collect::<Vec<_>>(),
         vec![2, 2, 3]
     );
-    game.advance_player_input();
     let Input::Question(question) = game.input(Viewer::P1) else {
         panic!("player question")
     };
@@ -287,6 +296,18 @@ fn the_player_question_exposes_frozen_original_costs_and_rejects_duplicate_costs
     );
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["ex"], json!(["e1"]));
+    let Input::Question(next) = game.input(Viewer::P1) else {
+        panic!("next player question")
+    };
+    let QuestionShape::ActionWindow(actions) = next.shape else {
+        panic!("main actions after payment")
+    };
+    assert!(
+        !actions
+            .intents
+            .iter()
+            .any(|intent| matches!(intent.kind, MainIntentKind::Play { .. }))
+    );
 }
 
 #[test]
