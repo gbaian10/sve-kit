@@ -131,6 +131,59 @@ fn bp08_114_does_not_reduce_ability_damage_but_reduces_combat_by_two() {
 }
 
 #[test]
+fn quick_pass_offers_the_recipient_a_typed_combat_damage_replacement_order() {
+    use sve_engine::game::player::{Command, DecisionShape, Input, QuestionShape, SubmissionKind};
+
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"attacker","card":"BP01-037"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"defender","card":"BP01-134","state":{"acted":true}},
+        {"id":"cap","card":"BP10-092"}
+    ]);
+    let mut game = game(&initial);
+    game.internal_rule_action(
+        &json!({"do":"attack","attacker":"attacker","target":"defender"}),
+    )
+    .unwrap();
+    game.advance_player_input();
+    let Input::Question(quick) = game.input(Viewer::P2) else {
+        panic!("Quick window");
+    };
+    let passed = game.submit_player(
+        Viewer::P2,
+        Command::Answer {
+            token: quick.token,
+            answer: Answer::Quick(None),
+        },
+    );
+    assert_eq!(passed.kind, SubmissionKind::Applied);
+    let Input::Question(order) = passed.input else {
+        panic!("combat replacement question");
+    };
+    let QuestionShape::Decision(DecisionShape::DamageReplacements(effects)) = order.shape else {
+        panic!("combat replacement candidates");
+    };
+    let handle = |card| effects.iter().find(|effect| effect.card == card).unwrap().handle;
+    let before_damage = game.projection(View::Referee).unwrap();
+    assert_eq!(before_damage["objects"]["attacker"]["damage"], 0_u8);
+    assert_eq!(before_damage["objects"]["defender"]["damage"], 0_u8);
+    let resolved = game.submit_player(
+        Viewer::P2,
+        Command::Answer {
+            token: order.token,
+            answer: Answer::Order(vec![handle("BP10-092"), handle("BP01-134")]),
+        },
+    );
+    assert_eq!(resolved.kind, SubmissionKind::Applied);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["defender"]["damage"],
+        2_u8
+    );
+    assert!(matches!(game.input(Viewer::P1), Input::Question(_)));
+}
+
+#[test]
 fn bp10_092_all_printings_cap_only_damage_at_or_above_four() {
     for number in ["BP10-092", "BP10-SL22", "BP10-U06"] {
         for (amount, expected) in [(3, 3), (4, 3), (9, 3)] {

@@ -1,15 +1,15 @@
 use super::source::SourceSnapshot;
 use super::{
-    Execution, Fact, Game, InputDomain, InstructionOutcome, Result, Wait, invalid, player_id,
-    seat_name, unsupported,
+    Context, Execution, Fact, Game, InputDomain, InstructionOutcome, Result, Wait, invalid,
+    player_id, seat_name, unsupported,
 };
 use crate::game::damage::{DamageReplacement, DamageUse};
 use crate::game::player::ReplacementChoice;
 use crate::game::player::Viewer;
-use crate::game::{BTreeMap, int, string};
+use crate::game::{BTreeMap, Frame, int, string};
 use crate::ir::{
-    Action, DamageEvent, DamageFlags, DamageQuantityOutcome, DecisionId, Instruction, Int, Nat,
-    PlayerId, PositiveInt, RuntimeDamageRecipient,
+    Action, DamageEvent, DamageFlags, DamageQuantityOutcome, DecisionId, Generation, Instruction,
+    Int, Nat, PlayerId, PositiveInt, ReceiptId, RuntimeDamageRecipient,
 };
 use alloc::collections::BTreeSet;
 use core::num::NonZeroU64;
@@ -41,11 +41,22 @@ impl DamageOccurrence {
 }
 
 #[derive(Clone, Debug)]
-pub(super) struct DamageRun {
-    instruction: Box<Instruction>,
+struct AbilityDamage {
+    receipt: ReceiptId,
     source: SourceSnapshot,
     controller: PlayerId,
     requested: i64,
+}
+
+#[derive(Clone, Debug)]
+enum DamageOrigin {
+    Ability(Box<AbilityDamage>),
+    Battle(Box<Frame>),
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct DamageRun {
+    origin: DamageOrigin,
     remaining: Vec<(RuntimeDamageRecipient, Value)>,
     hits: Vec<Value>,
     consumed: BTreeMap<DamageUse, i64>,
@@ -56,6 +67,19 @@ pub(super) struct DamageRun {
 }
 
 impl DamageRun {
+    const fn new(origin: DamageOrigin, remaining: Vec<(RuntimeDamageRecipient, Value)>) -> Self {
+        Self {
+            origin,
+            remaining,
+            hits: vec![],
+            consumed: BTreeMap::new(),
+            facts: vec![],
+            choices: vec![],
+            choice_links: BTreeMap::new(),
+            choice_origins: vec![],
+        }
+    }
+
     pub(in crate::game::internal) fn player_options(
         &self,
         game: &Game,
@@ -206,21 +230,53 @@ impl Game {
         remaining.reverse();
         self.continue_damage(
             execution,
-            DamageRun {
-                instruction: Box::new(instruction.clone()),
-                source,
-                controller,
-                requested,
+            DamageRun::new(
+                DamageOrigin::Ability(Box::new(AbilityDamage {
+                    receipt: instruction.receipt,
+                    source,
+                    controller,
+                    requested,
+                })),
                 remaining,
-                hits: vec![],
-                consumed: BTreeMap::new(),
-                facts: vec![],
-                choices: vec![],
-                choice_links: BTreeMap::new(),
-                choice_origins: vec![],
-            },
+            ),
             None,
         )
+    }
+
+    pub(in crate::game) fn internal_battle_damage(
+        &mut self,
+        frame: Frame,
+        hits: Vec<Value>,
+    ) -> Result<()> {
+        let mut execution = self.fresh_card_execution(Context {
+            source: frame.source.clone(),
+            generation: Generation(self.object(&frame.source)?.generation),
+            controller: player_id(&frame.controller)?,
+        })?;
+        let remaining = hits
+            .into_iter()
+            .filter(|hit| int(&hit["amount"]) > 0)
+            .map(|hit| {
+                let target = string(&hit["target"]);
+                let recipient = if let Some(seat) = target.strip_suffix(".leader") {
+                    RuntimeDamageRecipient::Leader {
+                        player: player_id(seat)?,
+                    }
+                } else {
+                    RuntimeDamageRecipient::Object {
+                        object: execution.reference(self, target)?,
+                    }
+                };
+                Ok((recipient, hit))
+            })
+            .collect::<Result<_>>()?;
+        // The counter-hit is popped first, so the turn player orders their replacements first.
+        let run = DamageRun::new(DamageOrigin::Battle(Box::new(frame)), remaining);
+        self.continue_damage(&mut execution, run, None)?;
+        if execution.waiting.is_some() {
+            self.typed = Some(execution);
+        }
+        Ok(())
     }
 
     fn damage_replacement_options(
@@ -260,16 +316,25 @@ impl Game {
         mut run: DamageRun,
         order: Option<Vec<DamageReplacement>>,
     ) -> Result<()> {
+        let ability = match &run.origin {
+            DamageOrigin::Ability(source) => Some(source.as_ref()),
+            DamageOrigin::Battle(_) => None,
+        };
         let mut selected = order;
         while let Some((recipient, mut hit)) = run.remaining.pop() {
             let replacements = if let Some(chosen) = selected.take() {
                 chosen
             } else {
-                self.damage_replacements_with_source(&hit, &run.consumed, Some(&run.source))?
+                self.damage_replacements_with_source(
+                    &hit,
+                    &run.consumed,
+                    ability.map(|ability| &ability.source),
+                )?
             };
-            if replacements
-                .iter()
-                .any(|replacement| matches!(replacement.consumption, Some(DamageUse::Legacy(_))))
+            if ability.is_some()
+                && replacements.iter().any(|replacement| {
+                    matches!(replacement.consumption, Some(DamageUse::Legacy(_)))
+                })
             {
                 return Err(unsupported("typed limited damage replacement"));
             }
@@ -328,36 +393,52 @@ impl Game {
             self.internal_damage_arithmetic(string(&hit["target"]), actual)?;
             hit["amount"] = json!(actual);
             run.hits.push(hit);
-            run.facts.push(DamageOccurrence {
-                source: run.source.clone(),
-                event: DamageEvent {
-                    source: run.source.view(),
-                    recipient,
-                    amount: PositiveInt(
-                        NonZeroU64::new(u64::try_from(actual).map_err(invalid)?)
-                            .ok_or_else(|| invalid("positive actual damage"))?,
-                    ),
-                    flags: DamageFlags::Ability,
-                    controller: run.controller,
-                },
-            });
+            if let Some(ability) = ability {
+                run.facts.push(DamageOccurrence {
+                    source: ability.source.clone(),
+                    event: DamageEvent {
+                        source: ability.source.view(),
+                        recipient,
+                        amount: PositiveInt(
+                            NonZeroU64::new(u64::try_from(actual).map_err(invalid)?)
+                                .ok_or_else(|| invalid("positive actual damage"))?,
+                        ),
+                        flags: DamageFlags::Ability,
+                        controller: ability.controller,
+                    },
+                });
+            }
         }
-        let actual = run.facts.iter().try_fold(0_u64, |sum, fact| {
-            sum.checked_add(fact.event.amount.0.get())
-                .ok_or_else(|| invalid("damage outcome overflow"))
-        })?;
-        self.commit_damage_uses(&run.consumed)?;
-        self.apply_damage(&run.hits, &execution.frame(), Some(&run.facts))?;
-        for fact in run.facts {
-            execution.record_fact(self, Fact::Damage(fact.event));
+        self.finish_damage(execution, run)
+    }
+
+    fn finish_damage(&mut self, execution: &mut Execution, mut run: DamageRun) -> Result<()> {
+        match run.origin {
+            DamageOrigin::Battle(frame) => {
+                // Publish the attack hit first in the simultaneous damage batch.
+                run.hits.reverse();
+                self.commit_damage_uses(&run.consumed)?;
+                self.apply_damage(&run.hits, &frame, None)
+            }
+            DamageOrigin::Ability(ability) => {
+                let actual = run.facts.iter().try_fold(0_u64, |sum, fact| {
+                    sum.checked_add(fact.event.amount.0.get())
+                        .ok_or_else(|| invalid("damage outcome overflow"))
+                })?;
+                self.commit_damage_uses(&run.consumed)?;
+                self.apply_damage(&run.hits, &execution.frame(), Some(&run.facts))?;
+                for fact in run.facts {
+                    execution.record_fact(self, Fact::Damage(fact.event));
+                }
+                execution.receipts.insert(
+                    ability.receipt,
+                    InstructionOutcome::Damage(DamageQuantityOutcome {
+                        requested: Int(ability.requested),
+                        actual: Nat(actual),
+                    }),
+                );
+                Ok(())
+            }
         }
-        execution.receipts.insert(
-            run.instruction.receipt,
-            InstructionOutcome::Damage(DamageQuantityOutcome {
-                requested: Int(run.requested),
-                actual: Nat(actual),
-            }),
-        );
-        Ok(())
     }
 }

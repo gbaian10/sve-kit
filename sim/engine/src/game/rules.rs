@@ -181,7 +181,10 @@ impl Game {
             self.emitted.clear();
             return Ok(Self::rejection(operation).into());
         }
-        self.checks()?;
+        // Battle checks require all simultaneous hits to finish ordering and commit.
+        if self.typed.is_none() {
+            self.checks()?;
+        }
         Ok(if self.state.game["ended"] == true {
             "game-end"
         } else if self.state.prompt.is_some() && operation != "pass" {
@@ -772,8 +775,12 @@ impl Game {
                         self.object_mut(source)?.state["bane_damaged"] = json!(true);
                     }
                 }
-                frame.todo = vec![json!({"op":"_damage","hits":hits,"orders":{}})];
-                self.run_frame(frame)?;
+                if self.card_runtime.quick_start {
+                    self.internal_battle_damage(frame, hits)?;
+                } else {
+                    frame.todo = vec![json!({"op":"_damage","hits":hits,"orders":{}})];
+                    self.run_frame(frame)?;
+                }
             }
             "end" => self.state.flow["stage"] = json!("discard"),
             _ => return Err(invalid("pass outside Quick")),

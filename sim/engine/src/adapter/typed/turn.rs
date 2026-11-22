@@ -626,7 +626,7 @@ pub(super) fn act(
         && decision["select"].as_array().is_some_and(Vec::is_empty)
         && !mid_resolution(&question)
     {
-        return Ok(progress(turn.game));
+        return Ok(progress(turn.game, verb));
     }
     let kind = match (verb, &question.shape) {
         ("play" | "activate", QuestionShape::Decision(DecisionShape::Quick { options, .. })) => {
@@ -736,7 +736,7 @@ pub(super) fn act(
         }
     };
     Ok(match kind {
-        SubmissionKind::Applied => progress(turn.game),
+        SubmissionKind::Applied => progress(turn.game, verb),
         SubmissionKind::Reverted => refused(verb),
         SubmissionKind::Cancelled => "pending-cancelled".into(),
         SubmissionKind::Rejected => {
@@ -804,15 +804,17 @@ fn assign(
 }
 
 /// The exam outcome of an applied decision, read from where play now waits.
-fn progress(game: &Game) -> String {
+fn progress(game: &Game, verb: &str) -> String {
     if [Viewer::P1, Viewer::P2]
         .into_iter()
         .any(|seat| matches!(game.input(seat), Input::Finished { .. }))
     {
         "game-end".into()
-    } else if [Viewer::P1, Viewer::P2]
-        .into_iter()
-        .any(|seat| matches!(game.input(seat), Input::Question(q) if mid_resolution(&q)))
+    // A Quick pass has resolved even when the following battle needs an order choice.
+    } else if verb != "pass"
+        && [Viewer::P1, Viewer::P2]
+            .into_iter()
+            .any(|seat| matches!(game.input(seat), Input::Question(q) if mid_resolution(&q)))
     {
         "paused".into()
     } else {
