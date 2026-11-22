@@ -1043,7 +1043,7 @@ known:
     scenario: "A 場上 3 張、要出 3 個 token → 只能選 2 個"
     status: unsupported
     error: "interface: runner translation / interface (#2008)"
-    reason: "typed runner: resolve-choice for WardEntry"
+    reason: "typed runner: resolve-choice for TokenCapacity"
   - question: "rule-4.4.4-01"
     scenario: "C 場上 5 張 → 法術可以打出，但 0 個 token 建立"
     status: fail
