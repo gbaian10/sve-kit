@@ -669,11 +669,6 @@ known:
     status: unsupported
     error: "legacy-state (#2008)"
     reason: "no authored program: CP04-019"
-  - question: "flow-evolved-amulet-r3-01"
-    scenario: "沒有敵方從者也能進化成護符，裝備延後到回手才消去"
-    status: fail
-    error: "typed-gap: after-decision-2 outcome (#2008)"
-    reason: "after-decision-2 omniscient outcome"
   - question: "flow-ex-full-remainder-01"
     scenario: "エル選中的武闘竜人因 EX 已滿未移動，與另外兩張一起放底"
     status: ineligible

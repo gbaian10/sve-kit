@@ -40,6 +40,26 @@ fn bp06_032_cannot_draw_without_a_fanfare_target() {
     assert_eq!(state["P1"]["hand"], json!([]));
 }
 
+#[test]
+fn bp08_090_stays_evolved_when_its_trigger_has_no_follower_target() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP08-089"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP08-090"}]);
+    let mut game = game(&initial);
+    let step = game
+        .internal_rule_action(&json!({
+            "do":"evolve","source":"source","evolve_card":"form","pay":{"pp":2_u8}
+        }))
+        .unwrap();
+    assert_eq!(step.outcome, "resolved");
+    assert_eq!(answer_trigger(&mut game, "BP08-090"), CardPlay::Cancelled);
+
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"], json!(["source"]));
+    assert_eq!(state["P1"]["evolution"], json!(["form"]));
+    assert_eq!(state["objects"]["source"]["evolved_with"], "form");
+}
+
 fn riko_attacks(initial: &Value) -> (Game, CardPlay) {
     let mut game = game(initial);
     assert_eq!(
