@@ -421,6 +421,22 @@ fn e_b7_004_current_evolution_uses_the_accepted_resource_path() {
 }
 
 #[test]
+fn bp04_076_evolves_without_ward_and_play_continues() {
+    let mut game = game(&initial("BP04-075", "BP04-076", "P1"));
+    assert_eq!(evolve(&mut game, &json!({"pp":4_u8})).outcome, "resolved");
+
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["base"]["evolved_with"], "resource");
+    assert_eq!(state["objects"]["base"]["keywords"], json!([]));
+    assert_eq!(
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+}
+
+#[test]
 fn super_evolution_with_a_change_observer_keeps_the_resource_admission_boundary() {
     let mut initial = initial("BP01-171", "BP01-172", "P1");
     initial["players"]["P1"]["zones"]["field"]
