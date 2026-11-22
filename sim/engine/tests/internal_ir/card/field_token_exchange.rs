@@ -261,7 +261,7 @@ fn foreign_owned_tokens_advance_and_other_token_types_keep_the_entire_play_uncha
         assert!(
             matches!(
                 attempt_payment(&mut game, &mut published),
-                Err(sve_engine::EngineFailure::Unsupported(_))
+                Err(sve_engine::EngineFailure::IllegalPlay(_))
             ),
             "{variant}"
         );
@@ -392,7 +392,7 @@ fn a_spell_exchange_does_not_gain_field_token_movement_authority() {
     );
     tree["cards"]["unit-spell"]["abilities"][1]["spell"]["do"] = json!([{"draw":{"n":0}}]);
     let program = exchange::lower(&tree, 4);
-    let mut initial = initial(1, 0);
+    let mut initial = initial(1, 4);
     initial["players"]["P1"]["zones"]["hand"][0]["card"] = json!("unit-spell");
     let mut game = Game::new(
         catalogue(),
@@ -415,11 +415,22 @@ fn a_spell_exchange_does_not_gain_field_token_movement_authority() {
         game.load_internal_card(number, &card(vec![])).unwrap();
     }
     let origin = game.clone();
+    let accept = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    let published = game.clone();
     assert!(matches!(
-        game.play_internal_card("s", PlayerId { seat: 1 }),
-        Err(sve_engine::EngineFailure::Unsupported(_))
+        game.answer_internal_card(accept.actor, accept.token, Answer::OptionalCost(true)),
+        Err(sve_engine::EngineFailure::IllegalPlay(_))
     ));
-    transactions::assert_restored(&game, &origin);
+    transactions::assert_reverted_from(&game, &origin, &published);
+
+    let decline = awaiting(game.play_internal_card("s", PlayerId { seat: 1 }).unwrap());
+    resolved(
+        game.answer_internal_card(decline.actor, decline.token, Answer::OptionalCost(false))
+            .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 0);
+    assert_eq!(state["P1"]["field"], json!(["m0", "m1", "m2", "m3"]));
 }
 
 #[test]
