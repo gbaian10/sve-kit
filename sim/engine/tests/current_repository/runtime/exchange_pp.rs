@@ -176,6 +176,69 @@ fn bp13_035_pp_exchange_searches_one_sister_or_one_of_each_for_every_printing() 
     }
 }
 #[test]
+fn bp13_035_grouped_search_offers_ward_posture_for_bp13_032() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["pp"]["current"] = json!(5_u8);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP13-035"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"maim","card":"BP13-030"},
+        {"id":"miim","card":"BP13-032"},
+        {"id":"meim","card":"BP13-033"}
+    ]);
+    let mut game = game(&initial);
+    let CardPlay::Awaiting(cost) = game.play_internal_card("source", actor()).unwrap() else {
+        panic!("expected the optional PP increase");
+    };
+    assert_eq!(cost.domain, InputDomain::OptionalCost);
+    let CardPlay::Awaiting(search) = game
+        .answer_internal_card(cost.actor, cost.token, Answer::OptionalCost(true))
+        .unwrap()
+    else {
+        panic!("expected the paid spell's grouped search");
+    };
+    let InputDomain::Search(domain) = &search.domain else {
+        panic!("expected search candidates");
+    };
+    let selected = domain
+        .groups
+        .as_ref()
+        .unwrap()
+        .iter()
+        .map(|group| vec![group.handles[0]])
+        .collect();
+    let CardPlay::Awaiting(ward) = game
+        .answer_internal_card(
+            search.actor,
+            search.token,
+            Answer::Search(SearchAnswer::Grouped(selected)),
+        )
+        .unwrap()
+    else {
+        panic!("expected BP13-032 to offer its Ward entry choice");
+    };
+    assert_eq!(ward.actor, actor());
+    assert!(matches!(
+        &ward.domain,
+        InputDomain::WardEntry { card, zone, .. } if card == "BP13-032" && zone == "deck"
+    ));
+
+    for acted in [false, true] {
+        let mut game = game.clone();
+        let resolved = game
+            .answer_internal_card(ward.actor, ward.token, Answer::WardEntry(acted))
+            .unwrap();
+        assert!(matches!(resolved, CardPlay::Resolved(_)));
+        let view = game.projection(View::Referee).unwrap();
+        let field = view["P1"]["field"].as_array().unwrap();
+        assert_eq!(field.len(), 3);
+        for member in ["maim", "miim", "meim"] {
+            assert!(field.contains(&json!(member)));
+            assert_eq!(view["objects"][member]["acted"], acted && member == "miim");
+        }
+    }
+}
+
+#[test]
 fn bp13_060_pp_exchange_damages_the_target_and_grants_assail_only_after_an_increase() {
     for number in ["BP13-060", "PR-361"] {
         for accepted in [false, true] {
