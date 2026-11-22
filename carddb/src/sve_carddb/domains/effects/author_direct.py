@@ -43,6 +43,7 @@ _CARD_KEYS = frozenset(
         "token",
         "token_sources",
         "rule_sections",
+        "lint_exceptions",
     }
 )
 _META_KEYS = frozenset(

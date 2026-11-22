@@ -1,5 +1,10 @@
 cards:
   BP13-043:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 1
+        path: "/spell/do/0/each_player/stages/0/0/choose"
+        reason: "Q1766 指明各玩家於結算時依序選自己的從者。"
     abilities:
       - line: 1
         spell:

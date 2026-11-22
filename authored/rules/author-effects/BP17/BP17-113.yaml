@@ -1,5 +1,10 @@
 cards:
   BP17-113:
+    lint_exceptions:
+      - rule: combine_consecutive_create
+        line: 2
+        path: "/fanfare/do/0/create"
+        reason: "日版卡文分兩句指示，分別建立到場上及 EX。"
     abilities:
       - line: 1
         evolve:

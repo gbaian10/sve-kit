@@ -18,14 +18,14 @@ cards:
           - ward
         line: 2
       - fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
             - damage:
                 n: 3
                 to: enemy

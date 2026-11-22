@@ -2,14 +2,14 @@ cards:
   ECP02-068:
     abilities:
       - evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  kind: follower
-                  who: opp
-                  zone: field
-                n: 1
             - banish: enemy
         line: 1
     admission: light

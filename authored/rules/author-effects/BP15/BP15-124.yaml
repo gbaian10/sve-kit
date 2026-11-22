@@ -1,5 +1,10 @@
 cards:
   BP15-124:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 1
+        path: "/evolve_time/do/1/choose"
+        reason: "手牌是非公開區域，於結算時選取當時的手牌。"
     abilities:
       - evolve_time:
           do:

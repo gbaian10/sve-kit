@@ -1,5 +1,10 @@
 cards:
   BP14-042:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 1
+        path: "/spell/do/1/choose"
+        reason: "從結算時該次看牌所見的牌中選取。"
     abilities:
       - line: 1
         spell:

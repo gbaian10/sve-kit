@@ -15,13 +15,13 @@ cards:
             pp: 1
         line: 1
       - fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  who: opp
-                  zone: field
-                n: 1
             - destroy:
                 ref: enemy
         line: 2

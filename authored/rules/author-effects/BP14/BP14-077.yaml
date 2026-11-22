@@ -2,6 +2,11 @@ format: 2
 kind: author_effect_set
 cards:
   BP14-077:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 1
+        path: "/spell/do/0/repeat/do/1/choose"
+        reason: "手牌是非公開區域，於結算時選取當時的手牌。"
     admission: light
     rule_sections:
       - section: 1

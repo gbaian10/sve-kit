@@ -6,28 +6,28 @@ cards:
             pp: 1
         line: 1
       - fanfare:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  kind: follower
-                  who: opp
-                  zone: field
-                n: 1
             - act:
                 ref: enemy
         line: 2
       - activate:
           cost:
             pp: 2
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  kind: follower
-                  who: opp
-                  zone: field
-                n: 1
             - act:
                 ref: enemy
         line: 3

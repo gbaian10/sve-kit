@@ -1,5 +1,10 @@
 cards:
   BP16-025:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 1
+        path: "/fanfare/do/1/choose"
+        reason: "Q2089 的宣告目標是對手從者，EX 兵士則是傷害後結算的入場指示。"
     abilities:
       - fanfare:
           do:

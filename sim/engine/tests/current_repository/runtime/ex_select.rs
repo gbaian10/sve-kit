@@ -86,36 +86,40 @@ fn bp01_156_evolution_chooses_only_opposing_ex_and_banishes() {
         };
         assert_eq!(options.len(), 1);
         assert_eq!(options[0].card, "BP01-156");
-        let CardPlay::Awaiting(question) = game
+        let play = game
             .answer_internal_card(
                 pending.actor,
                 pending.token,
                 Answer::Pending(options[0].handle),
             )
-            .unwrap()
-        else {
-            panic!("EX choice")
-        };
-        let InputDomain::Targets(domain) = &question.domain else {
-            panic!("targets")
-        };
-        assert_eq!(domain.members.len(), usize::from(available));
-        assert_eq!(domain.cardinality.minimum, Nat(u64::from(available)));
-        let before = format!("{game:?}");
-        game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![99]))
-            .unwrap_err();
-        assert!(
-            format!("{game:?}") == before,
-            "invalid handles preserve the pending choice"
-        );
-        resolved(
-            game.answer_internal_card(
-                question.actor,
-                question.token,
-                Answer::Targets(if available { vec![0] } else { vec![] }),
-            )
-            .unwrap(),
-        );
+            .unwrap();
+        if available {
+            let CardPlay::Awaiting(question) = play else {
+                panic!("EX target")
+            };
+            let InputDomain::Targets(domain) = &question.domain else {
+                panic!("targets")
+            };
+            assert_eq!(domain.members.len(), 1);
+            assert_eq!(domain.cardinality.minimum, Nat(1));
+            let before = format!("{game:?}");
+            game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![99]))
+                .unwrap_err();
+            assert!(
+                format!("{game:?}") == before,
+                "invalid handles preserve the pending choice"
+            );
+            resolved(
+                game.answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Targets(vec![domain.members[0].handle]),
+                )
+                .unwrap(),
+            );
+        } else {
+            assert_eq!(play, CardPlay::Cancelled);
+        }
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["P2"]["ex"], json!([]));
         assert_eq!(

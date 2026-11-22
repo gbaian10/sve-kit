@@ -2,14 +2,14 @@ cards:
   BP02-094:
     abilities:
       - fanfare:
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: chosen
-                from:
-                  kind: follower
-                  who: opp
-                  zone: field
-                n: 1
             - destroy:
                 ref: chosen
         line: 1

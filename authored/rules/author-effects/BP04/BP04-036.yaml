@@ -5,14 +5,14 @@ cards:
           - ward
         line: 1
       - evolve_time:
+          targets:
+            - bind: returned
+              from:
+                trait: 円卓
+                who: self
+                zone: cemetery
+              n: 1
           do:
-            - choose:
-                bind: returned
-                from:
-                  trait: 円卓
-                  who: self
-                  zone: cemetery
-                n: 1
             - move:
                 ref: returned
                 to: hand

@@ -2,6 +2,11 @@ format: 2
 kind: author_effect_set
 cards:
   BP08-094:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 1
+        path: "/evolve_time/do/0/choose"
+        reason: "對手在結算時從自己的場上選擇要送墓的從者。"
     admission: light
     meta:
       written_by:

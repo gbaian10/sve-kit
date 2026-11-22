@@ -956,6 +956,13 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 
 `check` 檢查全部索引作者卡；`body_usage` 依永久 CardId 去重，達三張提示整理共用本體，無額外資格 consumer。review 紀錄只報實際 verdict，不以 SHA freshness 授予核可或阻擋。source pending 不擋直接入口，真正 disputed／revise 只擋受影響卡。
 
+作者檢查會在展開具名本體後，檢查會改變對局時點的選取和衍生物建立寫法。
+
+- 無條件、必選固定正張數的公開目標寫在能力的 `targets`，宣告時確認合法目標。本文的條件或選項分支，以及可少選的 `choose`，仍依卡文在結算時處理。固定次數的 `repeat` 沿用外層選取時點，條件式重複保留結算時的選取。
+- 同一道指示建立多種衍生物時，用一個 `create` 和 `token` 清單。作者檢查會標示相鄰的不同衍生物建立步驟，空位不足時清單讓玩家選擇要放入的衍生物。
+
+確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。
+
 移除既有原型後，若歷史共享情境仍使用該卡，依[舊 DSL 回歸](v0-regression.md#已遷移到-dsl-10-的卡)原樣保存各舊原型印刷條目。歷史 fixture 只供回歸測試，不填回 current 選用，也不作為准入證據。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。

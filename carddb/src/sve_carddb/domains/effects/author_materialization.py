@@ -37,7 +37,9 @@ if TYPE_CHECKING:
 _EMPTY_PORTS: dict[str, JsonValue] = {"imports": {}, "exports": {}}
 _LOCATORS = frozenset({"line", "face", "section", "scope"})
 _USE = frozenset({"use", "params", "edition", "registration"})
-_CARD_KEYS = frozenset({"meta", "abilities", "note", "deck_rule", "container"})
+_CARD_KEYS = frozenset(
+    {"meta", "abilities", "note", "deck_rule", "container", "lint_exceptions"}
+)
 
 
 @dataclass(frozen=True)

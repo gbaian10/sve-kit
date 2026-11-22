@@ -1,5 +1,10 @@
 cards:
   BP01-111:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 1
+        path: "/evolve_time/do/2/choose"
+        reason: "結算時先公開對手手牌，再從該次公開的卡選擇。"
     abilities:
       - evolve_time:
           do:

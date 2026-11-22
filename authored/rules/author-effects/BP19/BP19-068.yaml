@@ -18,14 +18,14 @@ cards:
           - intimidate
         line: 2
       - attack_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
             - buff:
                 "on": enemy
                 power: -1

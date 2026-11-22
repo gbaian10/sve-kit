@@ -20,6 +20,7 @@ from sve_carddb.domains.effects.author_expansion import (
     equivalent_ability,
 )
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, Diagnostic
+from sve_carddb.domains.effects.author_lint import lint
 from sve_carddb.domains.effects.author_set import load_author_set
 from sve_carddb.domains.effects.author_source_hash import (
     AuthorSourcePayload,
@@ -468,20 +469,33 @@ class CurrentAuthorSources:
                     payload = inventory(
                         self, record.record_key, card_id=supported.card_id
                     )
-                    results.append(
-                        CardAccepted(
-                            supported,
-                            candidate(selected, expander),
-                            canonical(payload),
-                            "direct",
-                            b"{}",
-                        )
+                    accepted = CardAccepted(
+                        supported,
+                        candidate(selected, expander),
+                        canonical(payload),
+                        "direct",
+                        b"{}",
                     )
-                    continue
-                results.append(
-                    self._validate_card(
+                else:
+                    accepted = self._validate_card(
                         supported, selected, file.input_hash, inputs, expander
                     )
+                diagnostic = lint(
+                    accepted.candidate.tree,
+                    inputs.lint_exceptions.get(record.record_key, []),
+                )
+                results.append(
+                    CardRejected(
+                        record,
+                        replace(
+                            diagnostic,
+                            card_id=record.card_id,
+                            card_no=record.record_key,
+                            scope=record.scope,
+                        ),
+                    )
+                    if diagnostic is not None
+                    else accepted
                 )
             # Reader/schema failures remain global, including expanded-schema failures.
             # Only source admission and semantic expansion errors are card-local.
