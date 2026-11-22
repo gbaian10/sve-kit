@@ -601,7 +601,7 @@ enum Wait {
         face: CardFace,
         reference: ObjectRef,
         links: player::CandidateLinks,
-        search: Option<Box<search::SingleArrival>>,
+        search: Option<Box<search::SearchArrival>>,
     },
     OptionalCost,
     ResolutionPayment(card::optional::ResolutionPayment),
@@ -1042,7 +1042,7 @@ impl Game {
                     rollback = execution.answer_origin(validated);
                     execution.ward_entries.push((object, acted));
                     if let Some(arrival) = search {
-                        self.internal_search_single_arrival(&mut execution, *arrival)?;
+                        self.internal_search_arrival(&mut execution, *arrival)?;
                     }
                 }
                 (Wait::OptionalCost, Answer::OptionalCost(accepted)) => {
@@ -1244,7 +1244,7 @@ impl Game {
                     let cards =
                         self.internal_search_partition_validate(&execution, &wait, &handles)?;
                     rollback = execution.answer_origin(validated);
-                    self.internal_search_partition_answer(&mut execution, &wait, &cards)?;
+                    self.internal_search_partition_answer(&mut execution, &wait, cards)?;
                 }
                 (Wait::SearchReplacement(wait), Answer::SearchReplacement(answer)) => {
                     rollback = execution.answer_origin(validated);
