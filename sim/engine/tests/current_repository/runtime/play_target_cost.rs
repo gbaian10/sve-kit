@@ -4,6 +4,9 @@
 )]
 use super::*;
 use sve_engine::game::internal::DecisionView;
+use sve_engine::game::player::{
+    Command, Input, MainActionAnswer, MainIntentKind, QuestionShape, SubmissionKind, Viewer,
+};
 
 fn position(pp: u8) -> Value {
     let mut initial = draw_position();
@@ -136,6 +139,63 @@ fn hidden_memory_cannot_borrow_an_unselected_riord_for_payment() {
         json!(["source"])
     );
 }
+
+#[test]
+fn main_menu_checks_the_target_price_without_spending_or_revealing_the_spell() {
+    let mut initial = position(0);
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"other","card":"BP17-035"},{"id":"riord","card":"BP17-022"}]);
+    let mut game = build(&initial);
+    game.advance_player_input();
+    let snapshot = game.projection(View::Referee).unwrap();
+    let Input::Question(main) = game.input(Viewer::P1) else {
+        panic!("main question");
+    };
+    let QuestionShape::ActionWindow(actions) = &main.shape else {
+        panic!("main action window");
+    };
+    let intent = actions.intents.iter().find(|intent| {
+        matches!(
+            &intent.kind,
+            MainIntentKind::Play { card } if card.properties.card == "BP17-030"
+        )
+    }).unwrap();
+    assert_eq!(game.projection(View::Referee).unwrap(), snapshot);
+    assert_eq!(game.input(Viewer::P1), Input::Question(main.clone()));
+    assert_eq!(
+        game.submit_player(Viewer::P1, Command::MainAction {
+            token: main.token,
+            intent: intent.id.clone(),
+            answer: MainActionAnswer::None,
+        }).kind,
+        SubmissionKind::Applied
+    );
+
+    let target = game.internal_decision(View::P1).unwrap();
+    resolved(choose(&mut game, &target, "BP17-022").unwrap());
+    assert_eq!(game.projection(View::Referee).unwrap()["P1"]["cemetery"], json!(["source"]));
+
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"other","card":"BP17-035"}]);
+    let mut only_expensive = build(&initial);
+    only_expensive.advance_player_input();
+    let Input::Question(unpaid_question) = only_expensive.input(Viewer::P1) else {
+        panic!("main question");
+    };
+    let QuestionShape::ActionWindow(unpaid_actions) = unpaid_question.shape else {
+        panic!("main action window");
+    };
+    assert!(!unpaid_actions.intents.iter().any(|choice| {
+        matches!(
+            &choice.kind,
+            MainIntentKind::Play { card } if card.properties.card == "BP17-030"
+        )
+    }));
+    assert!(matches!(
+        only_expensive.play_internal_card("source", PlayerId { seat: 1 }),
+        Err(EngineFailure::IllegalPlay(_))
+    ));
+}
+
 #[test]
 fn play_target_quote_wf_rejects_foreign_decisions_bindings_faces_and_private_targets() {
     let base = selection().current["BP17-030"].program.card().clone();

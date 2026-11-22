@@ -16,6 +16,7 @@ use std::sync::OnceLock;
 pub(crate) struct AdmittedCard {
     checked: Arc<WellFormedCardProgram>,
     abilities: Vec<PlannedAbility>,
+    observes_payment_pp: bool,
 }
 
 impl AdmittedCard {
@@ -36,7 +37,20 @@ impl AdmittedCard {
                 )
             })
             .collect::<Result<_>>()?;
-        Ok(Self { checked, abilities })
+        let observes_payment_pp = checked
+            .card()
+            .abilities
+            .iter()
+            .any(super::super::card::payment_dependent);
+        Ok(Self {
+            checked,
+            abilities,
+            observes_payment_pp,
+        })
+    }
+
+    pub(in crate::game::internal) const fn observes_payment_pp(&self) -> bool {
+        self.observes_payment_pp
     }
 
     pub(crate) fn card(&self) -> &CardProgram {

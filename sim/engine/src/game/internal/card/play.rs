@@ -1,6 +1,5 @@
 use super::super::CostPaymentPurpose;
-use super::super::{Answer, DecisionToken, DecisionView, InputDomain, Slot, Wait};
-use super::selection::TargetFeasibilityLimit::{Defer, RequireProof};
+use super::super::{Answer, DecisionToken, DecisionView, DeclarationMode, InputDomain, Slot, Wait};
 use super::{
     Ability, Activation, Context, Execution, ExecutionId, Expr, Fact, Game, Generation, Int,
     Located, Nat, Node, PlayerId, Result, ResumeStage, RuntimeAbilitySource, SourceSpan, Step,
@@ -10,7 +9,7 @@ use crate::game::internal::processing::{
     discard_selection_round, disclose_played_source, enter_play_phase, record_target_declaration,
 };
 use crate::game::internal::repeated_moves;
-use crate::game::internal::{InstructionOutcome, player_id, zone_capacity};
+use crate::game::internal::{InstructionOutcome, player_id};
 use crate::game::internal::{PlayPhase, TargetDeclaration};
 use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
@@ -40,7 +39,7 @@ pub(super) mod cost_observation;
 mod counter_budget;
 mod x_pp;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
-use core::iter::once;
+use alloc::sync::Arc;
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
@@ -143,7 +142,7 @@ pub(in crate::game::internal) struct PlayState {
     cost_policy: AbilityCostPolicy,
     qualification: AbilityQualification,
     pub(in crate::game::internal) resource_entry: Option<super::resource_entry::ResourceEntryState>,
-    snapshot: Option<Box<Game>>,
+    snapshot: Option<Arc<Game>>,
     pub(in crate::game::internal) snapshot_id: SnapshotId,
     modes: VecDeque<PlayMode>,
     groups: Vec<PlayMode>,
@@ -186,19 +185,6 @@ impl PlayState {
             .iter()
             .any(|payment| payment.required && payment.accepted.is_none())
     }
-    fn required_extra_costs(&self) -> impl Iterator<Item = &CostSpec> {
-        self.additional
-            .as_deref()
-            .into_iter()
-            .map(|(_, payment)| &payment.play.costs)
-            .chain(
-                self.optional
-                    .iter()
-                    .filter(|payment| payment.required)
-                    .map(|payment| &payment.costs),
-            )
-    }
-
     fn material_posture(&self, decision: &Decision) -> bool {
         super::material::posture_parameter(&self.costs, decision)
             || self
@@ -273,10 +259,10 @@ impl PlayState {
                 "no affordable formal target plan".into(),
             ));
         }
-        if self.snapshot.is_none() {
+        if self.snapshot.is_none() && !self.parameters.is_empty() {
             // The first target fixes the game view; later answers only extend immutable slots.
             self.snapshot_id = SnapshotId(game.state.ir_epoch);
-            self.snapshot = Some(Box::new(game.clone()));
+            self.snapshot = Some(Arc::new(game.clone()));
             self.restart = Some(SelectionOrigin {
                 slots: execution.slots.clone(),
                 parameters: self.parameters.clone(),
@@ -983,101 +969,6 @@ impl Game {
         probe.internal_payment_probe(&mut payment, costs, spell)
     }
 
-    pub(super) fn known_costs_available(
-        &self,
-        holder: &str,
-        execution: &Execution,
-        costs: &CostSpec,
-        actor: PlayerId,
-        spell: bool,
-    ) -> Result<Option<bool>> {
-        let CostSpec::Ordered { steps } = costs else {
-            return Ok(None);
-        };
-        let mut pp = int(&self.player(seat_name(actor)?)?.pp["current"]);
-        let mut life = int(&self.player(seat_name(actor)?)?.leader["life"]);
-        let mut standing = self.object(holder)?.state["acted"] == false;
-        let mut counters = BTreeMap::new();
-        for step in steps {
-            match &step.instruction.action {
-                Action::Resource {
-                    amount: Expr::Literal(Int(amount)),
-                    ..
-                } => {
-                    let amount = if spell {
-                        self.internal_quote_card_cost(execution)?
-                    } else {
-                        *amount
-                    };
-                    if pp < amount {
-                        return Ok(Some(false));
-                    }
-                    pp = pp
-                        .checked_sub(amount)
-                        .ok_or_else(|| invalid("PP quote overflow"))?;
-                }
-                Action::Counter {
-                    holder: counter_holder,
-                    kind,
-                    amount: Expr::Literal(amount),
-                    ..
-                } => {
-                    let key = self.catalog.keyword_id(&kind.0);
-                    let count = counters
-                        .entry(key)
-                        .or_insert(execution.counter(self, counter_holder, kind)?.0);
-                    if *count < amount.0 {
-                        return Ok(Some(false));
-                    }
-                    *count = count
-                        .checked_sub(amount.0)
-                        .ok_or_else(|| invalid("counter quote overflow"))?;
-                }
-                Action::Posture { .. } => {
-                    if !standing {
-                        return Ok(Some(false));
-                    }
-                    standing = false;
-                }
-                Action::Life {
-                    change:
-                        NumericChange::Add {
-                            amount: Expr::Literal(Int(delta)),
-                        },
-                    ..
-                } => {
-                    life = life
-                        .checked_add(*delta)
-                        .ok_or_else(|| invalid("life quote overflow"))?;
-                    if life < 0 {
-                        return Ok(Some(false));
-                    }
-                }
-                Action::Discard { .. }
-                    if super::hand_payment::source_discard(&step.instruction.action) =>
-                {
-                    let object = self.object(holder)?;
-                    if object.zone != "hand" || object.owner != seat_name(actor)? {
-                        return Ok(Some(false));
-                    }
-                }
-                Action::Banish {
-                    objects: Selector::Objects { objects },
-                } if objects == &[ObjectOperand::SourceHolder {}] => {
-                    let object = self.object(holder)?;
-                    if !matches!(object.zone.as_str(), "field" | "ex" | "cemetery")
-                        || object.owner != seat_name(actor)?
-                    {
-                        return Ok(Some(false));
-                    }
-                }
-                Action::Move { .. } => {}
-                _ => return Ok(None),
-            }
-        }
-        Ok(Some(true))
-    }
-
     fn quick_additional_costs_available(
         &self,
         holder: &str,
@@ -1247,18 +1138,11 @@ impl Game {
         }
         let before = self.clone();
         let published = before.published_knowledge();
-        let result = if matches!(
-            self.object_type(holder)?,
-            "スペル" | "スペル・トークン" | "スペル・アドバンス"
-        ) {
-            self.play_internal_spell(holder, actor, &published, declared)
-        } else {
-            self.play_internal_field_card(holder, actor, &published, declared)
-        };
+        let result = self.run_card_declaration(holder, actor, &published, declared);
         self.finish_card_attempt(before, result)
     }
 
-    pub(super) fn play_internal_spell(
+    pub(super) fn run_card_declaration(
         &mut self,
         holder: &str,
         actor: PlayerId,
@@ -1302,17 +1186,12 @@ impl Game {
         Ok(execution)
     }
 
-    pub(super) fn check_card_play_holder(&self, holder: &str, actor: PlayerId) -> Result<()> {
-        let object = self.object(holder)?;
+    pub(super) fn check_card_play_context(&self, holder: &str, actor: PlayerId) -> Result<()> {
         self.internal_context(&Context {
             source: holder.into(),
-            generation: Generation(object.generation),
+            generation: Generation(self.object(holder)?.generation),
             controller: actor,
-        })?;
-        if !self.card_play_permission(holder, actor)? {
-            return Err(unsupported("card play holder, permission or timing"));
-        }
-        self.check_internal_resources()
+        })
     }
 
     pub(super) fn card_play_permission(&self, holder: &str, actor: PlayerId) -> Result<bool> {
@@ -1321,38 +1200,23 @@ impl Game {
         if (object.owner != seat && object.zone != "ex")
             || object.controller != seat
             || !matches!(object.zone.as_str(), "hand" | "ex" | "cemetery" | "banish")
-            || !self.internal_play_timing(actor, self.internal_quick_spell(holder)?)
             || int(&object.state["face"]) != 0
             || !self.prepared.is_empty()
             || object.state["evolved_with"].is_string()
-            || self.restricted(holder, "play")?
         {
             return Ok(false);
         }
-        if self.internal_card_play_forbidden(holder, actor)?
-            || (object.zone == "cemetery"
-                && !self.internal_card_cemetery_play_allowed(holder, actor)?)
+        if (object.zone == "cemetery"
+            && !self.internal_card_cemetery_play_allowed(holder, actor)?)
             || (object.zone == "banish"
                 && !self.internal_card_banish_play_allowed(holder, actor)?)
+            || !self.internal_play_timing(actor, self.internal_quick_spell(holder)?)
+            || self.restricted(holder, "play")?
+            || self.internal_card_play_forbidden(holder, actor)?
         {
             return Ok(false);
         }
         Ok(true)
-    }
-
-    pub(super) fn start_internal_ability(
-        &mut self,
-        ability: admission::PlannedAbility,
-        context: Context,
-        source: RuntimeAbilitySource,
-        spell: bool,
-        published: &PublishedKnowledge,
-        declared: &mut bool,
-    ) -> Result<CardPlay> {
-        let mut execution = self.prepare_activated_execution(ability, context, source, spell)?;
-        *declared = true;
-        self.internal_run(&mut execution, published)?;
-        self.card_play_result(execution)
     }
 
     pub(super) fn prepare_activated_execution(
@@ -1476,6 +1340,7 @@ impl Game {
             play: None,
             spell: false,
             field_entry: false,
+            declaration_mode: DeclarationMode::Live,
             play_origin,
             play_origin_object: None,
             card_payment: None,
@@ -1681,90 +1546,6 @@ impl Game {
         }
     }
 
-    pub(super) fn main_play_pp_available(
-        &self,
-        execution: &Execution,
-        play: &PlayState,
-        available: i64,
-    ) -> Result<bool> {
-        if play.resource_entry.is_some() {
-            return Ok(true);
-        }
-        if !self.has_target_cost(execution, None)? {
-            return self.quoted_main_pp_available(execution, play, available);
-        }
-        // A price tied to the selection must have a witness in the formal target domain.
-        if play
-            .parameters
-            .iter()
-            .any(|decision| x_payment::parameter(decision).is_some())
-        {
-            return Ok(true);
-        }
-        for probe in self.internal_quote_target_probes(execution, &play.parameters)? {
-            if self.quoted_main_pp_available(&probe, play, available)? {
-                return Ok(true);
-            }
-        }
-        Ok(false)
-    }
-
-    fn quoted_main_pp_available(
-        &self,
-        execution: &Execution,
-        play: &PlayState,
-        available: i64,
-    ) -> Result<bool> {
-        if let Some(exchange) = &play.exchange {
-            return self.main_exchange_available(execution, exchange);
-        }
-        // Fixed PP is due even while material and mode choices are pending.
-        let mut budget = x_pp::Budget::default();
-        if execution.ability.is_none() {
-            budget.fixed = self.internal_card_play_cost(execution)?;
-        } else {
-            budget.include(&play.costs, None, |printed| {
-                self.internal_card_pp_amount(execution, execution.spell, printed)
-            })?;
-        }
-        for cost in play.required_extra_costs() {
-            budget.include(cost, None, Ok)?;
-        }
-        Ok(budget.fixed <= available)
-    }
-
-    fn check_main_head_ex_capacity(&self, execution: &Execution, play: &PlayState) -> Result<()> {
-        let CostSpec::Ordered { steps } = &play.costs else {
-            return Ok(());
-        };
-        let capacity = zone_capacity("ex").ok_or_else(|| invalid("EX capacity"))?;
-        let occupied = self.zone_count(seat_name(execution.context.controller)?, "ex");
-        let mut remaining = capacity.saturating_sub(occupied);
-        for step in steps {
-            let action = &step.instruction.action;
-            if matches!(action, Action::Resource { .. } | Action::Posture { .. }) {
-                continue;
-            }
-            let selected_to_ex = reveal_payment::transfer(action).is_some()
-                && reveal_payment::bottom(action).is_none()
-                && play
-                    .parameters
-                    .iter()
-                    .any(|decision| reveal_payment::selected(action, from_ref(decision)));
-            if !super::hand_payment::source_to_ex(action) && !selected_to_ex {
-                // An unexamined earlier payment could move an EX card before the hand transfer.
-                break;
-            }
-            if remaining <= 0 {
-                return Err(crate::EngineFailure::IllegalPlay(
-                    "insufficient EX capacity for cost".into(),
-                ));
-            }
-            remaining = remaining.saturating_sub(1);
-        }
-        Ok(())
-    }
-
     fn internal_play_material_parameter(
         &self,
         execution: &mut Execution,
@@ -1786,68 +1567,6 @@ impl Game {
         // Shared material constructors also serve probes and inline evolution without a declaration.
         wait.mark_formal_parameter(decision.id);
         Ok(())
-    }
-
-    fn main_play_targets_feasible(&self, execution: &Execution, play: &PlayState) -> Result<bool> {
-        if let Some(binding) = play.parameters.front().and_then(x_payment::parameter) {
-            return self.main_x_targets_feasible(execution, play, binding);
-        }
-        if !self.internal_play_targets_feasible(execution, play.parameters.iter(), Defer)? {
-            return Ok(false);
-        }
-        for group in &play.modes {
-            // Conditional groups and dynamic counts may depend on earlier choices.
-            if group.condition.is_some() || !matches!(group.count, Expr::Literal(Nat(1..))) {
-                continue;
-            }
-            let ChoiceDomain::Modes { cardinality, .. } = &group.chosen.domain else {
-                return Err(invalid("missing main play modes"));
-            };
-            let mut remaining = mode_minimum(*cardinality);
-            for mode in &group.modes {
-                if remaining == 0 {
-                    break;
-                }
-                match self.internal_play_targets_feasible(execution, mode.parameters.iter(), Defer)
-                {
-                    Ok(true) | Err(crate::EngineFailure::Unsupported(_)) => {
-                        remaining = remaining.saturating_sub(1);
-                    }
-                    Ok(false) | Err(crate::EngineFailure::IllegalPlay(_)) => {}
-                    Err(error) => return Err(error),
-                }
-            }
-            if remaining != 0 {
-                return Ok(false);
-            }
-        }
-        Ok(true)
-    }
-
-    pub(super) fn check_main_play_requirements(&self, mut execution: Execution) -> Result<()> {
-        let play = execution
-            .play
-            .take()
-            .ok_or_else(|| invalid("missing prepared declaration"))?;
-        self.check_main_meal_resources(&execution, &play)?;
-        if !self.main_play_targets_feasible(&execution, &play)? {
-            return Err(crate::EngineFailure::IllegalPlay(
-                "no legal play targets".into(),
-            ));
-        }
-        // Use the formal material and hand domains on scratch slots before exposing a declaration.
-        for decision in &play.parameters {
-            if super::material::is_parameter(decision)
-                && !play.material_for_payment(decision, |payment| !payment.required)
-            {
-                self.internal_play_material_parameter(&mut execution, decision, &play)?;
-            }
-        }
-        self.check_main_head_ex_capacity(&execution, &play)?;
-        let required = once(&play.costs)
-            .chain(play.required_extra_costs())
-            .collect::<Vec<_>>();
-        self.internal_probe_hand_payments(&mut execution, &required)
     }
 
     fn stamp_play_selection(&mut self, execution: &mut Execution) -> Result<()> {
@@ -2048,6 +1767,13 @@ impl Game {
         let payment = payment.and_then(|()| self.internal_optional_payment(execution, &play));
         self.card_runtime.active_source = previous;
         payment?;
+        if execution.probing_declaration() {
+            return if execution.field_entry {
+                self.check_field_play_capacity(execution.context.controller)
+            } else {
+                Ok(())
+            };
+        }
         self.internal_consume_player_costs(&consumed);
         self.internal_commit_targeted(targets)?;
         if execution.field_entry {
@@ -2248,7 +1974,7 @@ impl Game {
             for mode in &group.modes {
                 let parameters = mode.parameters.iter();
                 if self.internal_mode_affordable(execution, play, mode)?
-                    && self.internal_play_targets_feasible(execution, parameters, RequireProof)?
+                    && self.internal_play_targets_feasible(execution, parameters)?
                     && (exclude_used.is_none()
                         || !self.card_runtime.mode_uses.iter().any(|used| {
                             used.ability_instance == source.instance
@@ -2463,6 +2189,11 @@ impl Game {
     }
 
     fn retry_play_targets(execution: &mut Execution, play: &mut PlayState) -> Result<()> {
+        if execution.probing_declaration() {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "target choices require a retry".into(),
+            ));
+        }
         let restart = play
             .restart
             .as_ref()

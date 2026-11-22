@@ -881,6 +881,9 @@ impl Game {
         let mut abilities = self.local_abilities(id)?;
         if self.object(id)?.zone == "field" {
             self.require_ability_sources("granted abilities")?;
+            if self.prototype_field_abilities_absent() {
+                return Ok(abilities);
+            }
             for source in self.field_ids() {
                 for ability in self.local_abilities(&source)? {
                     let body = &ability["body"];
@@ -928,15 +931,23 @@ impl Game {
         if !self.card_runtime.is_empty() {
             // Off-field subscriptions cannot be excluded using unadmitted prototype headers.
             let query = format!("{query} active zones");
-            for holder in self.state.objects.keys() {
-                self.require_internal_abilities(holder, &query)?;
+            for object in self.state.objects.values() {
+                self.require_object_abilities(object, &query)?;
             }
         }
         Ok(())
     }
 
+    fn prototype_field_abilities_absent(&self) -> bool {
+        // Checked typed field sources contribute no prototype abilities of their own.
+        !self.card_runtime.is_empty() && self.state.continuous.is_empty()
+    }
+
     fn ability_sources(&self, query: &str) -> Result<Vec<String>> {
         self.require_ability_sources(query)?;
+        if self.prototype_field_abilities_absent() {
+            return Ok(Vec::new());
+        }
         if !self.card_runtime.is_empty() {
             return Ok(self.field_ids());
         }

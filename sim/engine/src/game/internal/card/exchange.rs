@@ -5,7 +5,6 @@ use super::selection::constraints::{
     DistinctProperties, PropertyKey, check_count, original_material_cost, unique_handles,
 };
 use super::selection::groups::GroupConstraints;
-use super::static_keywords;
 use super::{Execution, Game, Result, int, invalid, seat_name, unsupported};
 use crate::game::internal::player::CandidateLinks;
 use crate::game::internal::{
@@ -411,13 +410,13 @@ impl Game {
     }
 
     fn check_exchange_observers(&self) -> Result<()> {
-        let dependent = self.card_runtime.definitions.cards.values().any(|card| {
-            card.card()
-                .abilities
-                .iter()
-                .any(static_keywords::payment_dependent)
-        });
-        if dependent {
+        if self
+            .card_runtime
+            .definitions
+            .cards
+            .values()
+            .any(|card| card.observes_payment_pp())
+        {
             return Err(unsupported(
                 "exchange with PP-dependent continuous declarations",
             ));
@@ -677,18 +676,6 @@ impl Game {
             return self.exchange_payment_available(execution, exchange, accepted);
         }
         // The main action window has no exchange answer yet, so either payment route can qualify.
-        Ok(self.exchange_payment_available(execution, exchange, false)?
-            || self.exchange_payment_available(execution, exchange, true)?)
-    }
-
-    pub(super) fn main_exchange_available(
-        &self,
-        execution: &Execution,
-        exchange: &ExchangeState,
-    ) -> Result<bool> {
-        if let Some(accepted) = exchange.accepted {
-            return self.exchange_payment_available(execution, exchange, accepted);
-        }
         Ok(self.exchange_payment_available(execution, exchange, false)?
             || self.exchange_payment_available(execution, exchange, true)?)
     }

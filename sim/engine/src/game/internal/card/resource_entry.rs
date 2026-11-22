@@ -396,23 +396,6 @@ impl Game {
         Ok(members)
     }
 
-    pub(super) fn check_main_meal_resources(
-        &self,
-        execution: &Execution,
-        play: &super::play::PlayState,
-    ) -> Result<()> {
-        if let Some(entry) = &play.resource_entry
-            && entry.kind == EntryKind::Meal
-            && self.resource_entry_candidates(execution, entry.kind)?.len()
-                < usize::try_from(entry.count).map_err(invalid)?
-        {
-            return Err(crate::EngineFailure::IllegalPlay(
-                "insufficient entry resources".into(),
-            ));
-        }
-        Ok(())
-    }
-
     pub(super) fn internal_resource_entry_question(
         &mut self,
         execution: &mut Execution,

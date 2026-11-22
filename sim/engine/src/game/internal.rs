@@ -651,6 +651,12 @@ enum Wait {
     },
 }
 
+#[derive(Clone, Copy, Debug)]
+pub(super) enum DeclarationMode {
+    Live,
+    Probe,
+}
+
 #[derive(Clone, Debug)]
 pub(super) struct Execution {
     plan: Option<Arc<admission::BodyPlan>>,
@@ -694,6 +700,7 @@ pub(super) struct Execution {
     play: Option<PlayState>,
     spell: bool,
     field_entry: bool,
+    declaration_mode: DeclarationMode,
     play_origin: Option<ZoneKind>,
     play_origin_object: Option<ObjectRef>,
     card_payment: Option<(FaceId, ReceiptId)>,
@@ -894,6 +901,7 @@ impl Game {
                 play: None,
                 spell: false,
                 field_entry: false,
+                declaration_mode: DeclarationMode::Live,
                 play_origin: None,
                 play_origin_object: None,
                 card_payment: None,
@@ -950,8 +958,12 @@ impl Game {
         answer: Answer,
         validated: &mut bool,
     ) -> Result<Progress> {
-        let before = self.clone();
-        let published = before.published_knowledge();
+        let before = (!self
+            .typed
+            .as_ref()
+            .is_some_and(Execution::probing_declaration))
+        .then(|| self.clone());
+        let published = self.published_knowledge();
         let concealed = self
             .concealed_declaration()
             .map(|(_, controller)| controller);
@@ -1338,7 +1350,9 @@ impl Game {
             }
             Ok(progress)
         })();
-        if result.is_err() {
+        if result.is_err()
+            && let Some(before) = before
+        {
             if let Some(origin) = rollback {
                 self.state.ir_epoch = self.state.ir_epoch.max(before.state.ir_epoch);
                 self.restore_play_origin(*origin, published, concealed)?;
@@ -1575,6 +1589,9 @@ impl Game {
             }
             if execution.play.is_some() {
                 self.internal_play_parameters(execution)?;
+                if execution.probing_declaration() {
+                    return Ok(());
+                }
                 if execution.waiting.is_some() {
                     break;
                 }
@@ -2142,6 +2159,10 @@ impl Game {
     reason = "Value evaluation shares the private execution environment."
 )]
 impl Execution {
+    const fn probing_declaration(&self) -> bool {
+        matches!(self.declaration_mode, DeclarationMode::Probe)
+    }
+
     fn token_plan(&self, instruction: &Instruction) -> Result<tokens::TokenPlan> {
         self.plan
             .as_ref()

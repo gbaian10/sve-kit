@@ -49,9 +49,12 @@ impl Game {
         nested: Option<Box<Continuation>>,
     ) -> Result<Execution> {
         self.require_internal_abilities(holder, "card play")?;
-        let object = self.object(holder)?.clone();
+        let object = self.object(holder)?;
         if nested.is_none() {
-            self.check_card_play_holder(holder, actor)?;
+            self.check_card_play_context(holder, actor)?;
+            if !self.card_play_permission(holder, actor)? {
+                return Err(unsupported("card play holder, permission or timing"));
+            }
         } else {
             let normal_advance = nested
                 .as_ref()
@@ -75,8 +78,18 @@ impl Game {
                     "effect card play is no longer legal".into(),
                 ));
             }
-            self.check_internal_resources()?;
         }
+        self.prepare_permitted_card_execution(holder, actor, nested)
+    }
+
+    pub(super) fn prepare_permitted_card_execution(
+        &mut self,
+        holder: &str,
+        actor: PlayerId,
+        nested: Option<Box<Continuation>>,
+    ) -> Result<Execution> {
+        self.check_internal_resources()?;
+        let object = self.object(holder)?.clone();
         let ability = self.card_play_ability(holder)?;
         let spell = ability.is_some() || self.object_type(holder)? == "スペル・トークン";
         if nested.is_none()

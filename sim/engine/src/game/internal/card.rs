@@ -760,16 +760,22 @@ impl Game {
         }
         let (ability, source) =
             selected.ok_or_else(|| invalid("ability is not effective for this holder"))?;
+        let mut execution = self.prepare_effective_activation(holder, ability, actor, source)?;
+        *declared = true;
+        self.internal_run(&mut execution, published)?;
+        self.card_play_result(execution)
+    }
+
+    fn prepare_effective_activation(
+        &mut self,
+        holder: &str,
+        ability: super::grant::EffectiveAbility,
+        actor: PlayerId,
+        source: RuntimeAbilitySource,
+    ) -> Result<Execution> {
         let context =
             self.check_internal_activation(holder, &ability, actor, Some(source.instance))?;
-        self.start_internal_ability(
-            ability.definition,
-            context,
-            source,
-            false,
-            published,
-            declared,
-        )
+        self.prepare_activated_execution(ability.definition, context, source, false)
     }
 
     pub(in crate::game) fn check_internal_resources(&self) -> Result<()> {

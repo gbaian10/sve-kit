@@ -1,6 +1,7 @@
 //! Effective printed definitions are resolved once at the catalogue boundary.
 use super::{Game, Result, invalid, player_id, printed_origin};
 use crate::EngineFailure;
+use crate::game::Object;
 use crate::ir::names;
 use crate::ir::{
     AbilityQualification, AssociationId, CardKind, CardName, Characteristics, ClassId,
@@ -46,34 +47,62 @@ impl Game {
         holder: &str,
         query: &str,
     ) -> Result<()> {
-        let object = self.object(holder)?;
-        let printed = object.state["evolved_with"].as_str().unwrap_or(holder);
-        let (card, face) = self.internal_effective_print(holder)?;
-        // A reverse face is selected before reveal while the resource is still in the deck.
-        // Resting-face validation belongs to the input boundary, not these availability probes.
-        let deck_resource = self.card_runtime.resources.get(printed) == Some(&card)
-            && self.object(printed)?.zone == "evolve_deck";
-        if self.card_runtime.is_loaded(&card)
-            || deck_resource
-            || self.internal_evolution_resource(printed)?
+        self.require_object_abilities(self.object(holder)?, query)
+    }
+
+    pub(in crate::game) fn require_object_abilities(
+        &self,
+        object: &Object,
+        query: &str,
+    ) -> Result<()> {
+        // Every admitted print has a validated base face.
+        if !object.state["evolved_with"].is_string()
+            && object.state["face"] == 0_u64
+            && self.card_runtime.is_loaded(&object.card)
         {
             return Ok(());
         }
-        Err(unavailable(&card, face, holder, object.generation, query))
+        let (card, face) = self.effective_print(object)?;
+        if self.card_runtime.is_loaded(card) {
+            return Ok(());
+        }
+        let printed = object.state["evolved_with"].as_str().unwrap_or(&object.id);
+        // A reverse face is selected before reveal while the resource is still in the deck.
+        // Resting-face validation belongs to the input boundary, not these availability probes.
+        let deck_resource = self
+            .card_runtime
+            .resources
+            .get(printed)
+            .is_some_and(|resource| resource == card)
+            && self.object(printed)?.zone == "evolve_deck";
+        if deck_resource || self.internal_evolution_resource(printed)? {
+            return Ok(());
+        }
+        Err(unavailable(
+            card,
+            face,
+            &object.id,
+            object.generation,
+            query,
+        ))
     }
 
     pub(in crate::game::internal) fn internal_effective_print(
         &self,
         holder: &str,
     ) -> Result<(String, usize)> {
-        let object = self.object(holder)?;
+        let (card, face) = self.effective_print(self.object(holder)?)?;
+        Ok((card.into(), face))
+    }
+
+    fn effective_print<'game>(&'game self, object: &'game Object) -> Result<(&'game str, usize)> {
         let effective = if let Some(form) = object.state["evolved_with"].as_str() {
             let form = self.object(form)?;
             if object.zone != "field"
                 || form.zone != "evolution"
                 || (form.owner != object.owner
                     && (object.state["face"] != form.state["face"]
-                        || !super::evolution::resource_association(self, holder, &form.id)?
+                        || !super::evolution::resource_association(self, &object.id, &form.id)?
                         || self
                             .state
                             .objects
@@ -94,7 +123,7 @@ impl Game {
             .ok_or_else(|| invalid("missing printed face"))?;
         let face = usize::try_from(face).map_err(invalid)?;
         self.catalog.face(&effective.card, face)?;
-        Ok((effective.card.clone(), face))
+        Ok((&effective.card, face))
     }
 
     pub(in crate::game::internal) fn internal_printed_abilities(

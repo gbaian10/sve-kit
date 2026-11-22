@@ -1,13 +1,11 @@
-//! Declaration inspection never runs payment, random actions or effect bodies.
+//! Menu options use the same declaration and payment stages as live play.
 
 use super::super::grant::EffectiveAbility;
-use super::{ActivationKey, CardPlay, Execution, Game, PlayerId, Result, int, seat_name};
+use super::{ActivationKey, CardPlay, Game, PlayerId, Result};
 use crate::game::player::observation::{EffectSource, seat};
 use crate::game::player::{ActivationOption, Viewer};
-use crate::ir::{
-    AbilityKind, AbilityOrigin, Action, CostSpec, Expr, Holder, ObjectOperand, Posture, Selector,
-};
-use crate::{EngineFailure, invalid};
+use crate::invalid;
+use crate::ir::{AbilityKind, AbilityOrigin};
 
 struct ActivationCandidate {
     ability: EffectiveAbility,
@@ -15,35 +13,7 @@ struct ActivationCandidate {
     line: u64,
 }
 
-fn source_only(objects: &Selector) -> bool {
-    matches!(objects, Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}])
-}
-
-fn fixed_head(costs: &CostSpec) -> bool {
-    let CostSpec::Ordered { steps } = costs else {
-        return false;
-    };
-    steps.iter().all(|step| match &step.instruction.action {
-        Action::Resource {
-            amount: Expr::Literal(_),
-            ..
-        }
-        | Action::Life { .. }
-        | Action::Counter {
-            holder:
-                Holder::Object {
-                    object: ObjectOperand::SourceHolder {},
-                },
-            amount: Expr::Literal(_),
-            ..
-        } => true,
-        Action::Posture { objects, .. }
-        | Action::Banish { objects }
-        | Action::Move { objects, .. } => source_only(objects),
-        Action::Discard { .. } => super::hand_payment::source_discard(&step.instruction.action),
-        _ => false,
-    })
-}
+pub(super) mod probe;
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -84,79 +54,10 @@ impl Game {
                 return Ok(false);
             }
         }
-        let mut probe = self.clone();
-        match probe.prepare_card_execution(holder, actor, None) {
-            Ok(execution) => probe.declaration_available(holder, execution),
-            Err(EngineFailure::IllegalPlay(_)) => Ok(false),
-            Err(error) => Err(error),
-        }
-    }
-
-    fn declaration_available(&self, holder: &str, execution: Execution) -> Result<bool> {
-        let play = execution
-            .play
-            .as_ref()
-            .ok_or_else(|| invalid("missing prepared declaration"))?;
-        // A mandatory source Act still requires a standing source when other costs are deferred.
-        if let CostSpec::Ordered { steps } = &play.costs
-            && self.object(holder)?.state["acted"] != false
-            && steps.iter().any(|step| {
-                matches!(
-                    &step.instruction.action,
-                    Action::Posture { objects, posture: Posture::Acted } if source_only(objects)
-                )
-            })
-        {
-            return Ok(false);
-        }
-        let available_pp =
-            int(&self.player(seat_name(execution.context.controller)?)?.pp["current"]);
-        let cost = self
-            .prepared_declaration_cost(&execution)
-            .ok_or_else(|| invalid("missing prepared cost"))?;
-        if execution.field_entry
-            && play.exchange.is_none()
-            && cost.pending.is_empty()
-            && fixed_head(&play.costs)
-            && play.additional.is_none()
-            && play.optional.is_empty()
-            && self.zone_count(seat_name(execution.context.controller)?, "field") >= 5
-        {
-            return Ok(false);
-        }
-        match cost.total_pp {
-            Some(amount) if amount > available_pp => return Ok(false),
-            None => match self.main_play_pp_available(&execution, play, available_pp) {
-                Ok(false) | Err(EngineFailure::IllegalPlay(_)) => return Ok(false),
-                Ok(true) | Err(EngineFailure::Unsupported(_)) => {}
-                Err(error) => return Err(error),
-            },
-            Some(_) => {}
-        }
-        if play.exchange.is_some()
-            && !self.has_target_cost(&execution, None)?
-            && !self.internal_exchange_affordable(&execution, play)?
-        {
-            return Ok(false);
-        }
-        if cost.pending.is_empty()
-            && play.exchange.is_none()
-            && fixed_head(&play.costs)
-            && self.known_costs_available(
-                holder,
-                &execution,
-                &play.costs,
-                execution.context.controller,
-                execution.spell,
-            )? == Some(false)
-        {
-            return Ok(false);
-        }
-        match self.check_main_play_requirements(execution) {
-            Ok(()) => Ok(true),
-            Err(EngineFailure::IllegalPlay(_)) => Ok(false),
-            Err(error) => Err(error),
-        }
+        self.check_card_play_context(holder, actor)?;
+        let mut probe = self.declaration_probe();
+        let execution = probe.prepare_permitted_card_execution(holder, actor, None);
+        probe.declaration_payable(execution)
     }
 
     fn main_activation_candidates(
@@ -174,28 +75,6 @@ impl Game {
                 || super::evolution::intrinsic(&ability.node)
                 || !self.activation_holder_available(holder, &ability, actor.player())?
             {
-                continue;
-            }
-            let instance = self.cached_effective_instance(holder, &ability)?;
-            let context =
-                match self.check_internal_activation(holder, &ability, actor.player(), instance) {
-                    Ok(context) => context,
-                    Err(EngineFailure::IllegalPlay(_)) => continue,
-                    Err(error) => return Err(error),
-                };
-            let mut probe = self.clone();
-            let runtime_source = probe.internal_effective_source(holder, &ability)?;
-            let execution = match probe.prepare_activated_execution(
-                ability.definition.clone(),
-                context,
-                runtime_source,
-                false,
-            ) {
-                Ok(execution) => execution,
-                Err(EngineFailure::IllegalPlay(_)) => continue,
-                Err(error) => return Err(error),
-            };
-            if !probe.declaration_available(holder, execution)? {
                 continue;
             }
             let line = if let Some(origin) = &ability.grant {
@@ -234,17 +113,29 @@ impl Game {
         holder: &str,
         actor: Viewer,
     ) -> Result<Vec<ActivationOption>> {
-        self.main_activation_candidates(holder, actor)?
+        let mut options = Vec::new();
+        for (ordinal, candidate) in self
+            .main_activation_candidates(holder, actor)?
             .into_iter()
             .enumerate()
-            .map(|(ordinal, candidate)| {
-                Ok(ActivationOption {
+        {
+            let mut probe = self.declaration_probe();
+            let source = probe.internal_effective_source(holder, &candidate.ability)?;
+            let execution = probe.prepare_effective_activation(
+                holder,
+                candidate.ability,
+                actor.player(),
+                source,
+            );
+            if probe.declaration_payable(execution)? {
+                options.push(ActivationOption {
                     ordinal: u64::try_from(ordinal).map_err(invalid)?,
                     source: candidate.source,
                     line: candidate.line,
-                })
-            })
-            .collect()
+                });
+            }
+        }
+        Ok(options)
     }
 
     pub(in crate::game) fn activate_main_option(

@@ -275,7 +275,7 @@ impl Game {
             };
             code
         };
-        self.evolve_with_code(decision, &code, None)
+        self.evolve_with_code(decision, &code, None, false)
     }
 
     pub(in crate::game) fn evolve_with_code(
@@ -283,6 +283,7 @@ impl Game {
         decision: &Value,
         code: &Value,
         intrinsic: Option<&Ability>,
+        probe: bool,
     ) -> Result<bool> {
         let source = string(&decision["source"]);
         let evolve = string(&decision["evolve_card"]);
@@ -326,6 +327,9 @@ impl Game {
             && !self.internal_evolution_payment(ability, decision)?
         {
             return Ok(false);
+        }
+        if probe {
+            return Ok(true);
         }
         if intrinsic.is_some() {
             self.object_mut(evolve)?.state["face"] = json!(face);
