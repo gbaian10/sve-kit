@@ -422,7 +422,10 @@ impl Game {
         if object.zone != "field"
             || form.zone != "evolution"
             || base_print["card_type"] != "フォロワー"
-            || form_print["card_type"] != "フォロワー・エボルヴ"
+            || !matches!(
+                form_print["card_type"].as_str(),
+                Some("フォロワー・エボルヴ" | "アミュレット・エボルヴ")
+            )
             || !super::card::resource_association(self, &object.id, &form.id)?
             || object.state["face"] != form.state["face"]
             || form

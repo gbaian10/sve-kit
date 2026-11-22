@@ -58,6 +58,62 @@ fn bp07_032_returns_the_base_after_evolution_release() {
 }
 
 #[test]
+fn bp08_090_returns_face_up_and_resolves_lastword_when_destroyed() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP08-095"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"draw","card":"BP01-037"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{
+        "id":"base","card":"BP08-089","state":{"evolved":true,"evolved_with":"form"}
+    }]);
+    initial["players"]["P2"]["zones"]["evolution"] = json!([{"id":"form","card":"BP08-090"}]);
+    let mut game = game(&initial);
+    let CardPlay::Awaiting(target) = enter_with_fanfare(&mut game, "BP08-095") else {
+        panic!("expected a destruction target");
+    };
+    let InputDomain::Targets(domain) = target.domain else {
+        panic!("expected a target domain");
+    };
+    assert_eq!(domain.members.len(), 1);
+    resolved(
+        game.answer_internal_card(
+            target.actor,
+            target.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+
+    let departed = game.projection(View::Referee).unwrap();
+    assert_eq!(departed["P2"]["field"], json!([]));
+    assert_eq!(departed["P2"]["cemetery"], json!(["base"]));
+    assert_eq!(departed["P2"]["evolution"], json!([]));
+    assert_eq!(departed["P2"]["evolve_deck"], json!(["form"]));
+    assert_eq!(departed["objects"]["form"]["face_up"], true);
+    let question = game.internal_pending_choice().unwrap().unwrap();
+    assert_eq!(question.actor.seat, 2);
+    let InputDomain::Pending(options) = question.domain else {
+        panic!("expected Lastword");
+    };
+    assert_eq!(options.len(), 1);
+    assert_eq!(options[0].card, "BP08-090");
+    assert_eq!(options[0].line, 2);
+    resolved(
+        game.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["leader"]["life"], 17_u8);
+    assert_eq!(state["P2"]["leader"]["life"], 20_u8);
+    assert!(game.internal_pending_choice().unwrap().is_none());
+}
+
+#[test]
 fn bp01_155_moves_an_evolved_opponent_to_ex_and_returns_its_form_without_lastword() {
     for seat in ["P1", "P2"] {
         let opponent = if seat == "P1" { "P2" } else { "P1" };
