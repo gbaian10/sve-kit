@@ -237,6 +237,57 @@ fn bp22_054_creates_both_golems_when_two_ex_slots_are_free() {
     assert_eq!(created, ["BP01-T08", "BP01-T09"]);
 }
 
+fn evolve_celia(other_cards: usize) -> Game {
+    let mut state = draw_position();
+    let mut field = vec![json!({"id":"source","card":"BP09-018"})];
+    field.extend((0..other_cards).map(|n| json!({"id":format!("old-{n}"),"card":"BP17-T11"})));
+    state["players"]["P1"]["zones"]["field"] = json!(field);
+    state["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP09-019"}]);
+    let mut game = game(&state);
+    let step = game
+        .internal_rule_action(&json!({
+            "do":"evolve","source":"source","evolve_card":"form",
+            "definition":ability("BP09-018", 1).0,"face":1_u8,"pay":{"pp":4_u8}
+        }))
+        .unwrap();
+    assert_eq!(
+        step.outcome, "resolved",
+        "the four-PP evolution must enter Celia's reverse face"
+    );
+    game
+}
+
+#[test]
+fn bp09_019_q1160_lets_the_player_choose_the_knight_for_the_last_field_slot() {
+    let mut game = evolve_celia(3);
+    let choice = question(resolve_pending_card(&mut game, "BP09-019"));
+    let InputDomain::TokenCapacity { choices } = &choice.domain else {
+        panic!("the effect offers a field capacity choice");
+    };
+    assert_eq!(choice.actor.seat, 1);
+    assert_eq!(choices.len(), 2);
+    assert!(
+        choices.contains(&vec!["スティールナイト".to_owned()])
+            && choices.contains(&vec!["ナイト".to_owned()])
+    );
+    assert_eq!(
+        cards(&game, "field"),
+        Vec::<String>::new(),
+        "selection precedes creation"
+    );
+    resolved(capacity(&mut game, &choice, &["ナイト"]));
+    assert_eq!(cards(&game, "field"), ["BP17-T11"]);
+}
+
+#[test]
+fn bp09_019_creates_both_knights_when_two_field_slots_are_free() {
+    let mut game = evolve_celia(2);
+    resolved(resolve_pending_card(&mut game, "BP09-019"));
+    let mut created = cards(&game, "field");
+    created.sort();
+    assert_eq!(created, ["BP17-T11", "BP17-T12"]);
+}
+
 #[test]
 fn bp07_008_chooses_tree_or_fairy_during_fanfare_resolution() {
     for number in ["BP07-008", "BP07-P02"] {
