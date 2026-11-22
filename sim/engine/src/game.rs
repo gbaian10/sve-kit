@@ -30,11 +30,19 @@ mod progression;
 mod randomness;
 #[cfg(feature = "runner")]
 mod referee;
+#[cfg(all(test, feature = "runner"))]
+#[path = "../tests/support/repository.rs"]
+mod repository;
+#[cfg(all(test, feature = "runner"))]
+use crate::battle::tests::rule_fixtures;
 pub mod replay;
 mod resources;
 mod restrictions;
 mod rules;
 mod selections;
+#[cfg(all(test, feature = "runner"))]
+#[path = "../tests/selfplay/run.rs"]
+mod selfplay;
 mod state_rules;
 mod statistics;
 mod suppression;
