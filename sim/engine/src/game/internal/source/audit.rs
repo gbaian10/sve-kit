@@ -1,13 +1,10 @@
 //! The accepted catalogue must produce a bound owner before any ability executes.
 
 use super::{Game, SourceInformation};
-use crate::battle::tests::rule_fixtures;
+use crate::game::repository;
 use crate::ir::{AbilityId, AbilityInstanceId, PlayerId, RuntimeAbilitySource};
 use alloc::collections::BTreeMap;
 use serde_json::{Value, json};
-
-#[path = "../../../../tests/support/repository.rs"]
-mod repository;
 
 fn position() -> Value {
     json!({"history":"explicit","turn":{"active":"P1","first_player":"P1","phase":"main",
