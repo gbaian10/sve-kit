@@ -1679,7 +1679,6 @@ impl Game {
         &self,
         execution: &Execution,
         parameters: impl Iterator<Item = &'decision Decision>,
-        on_limit: TargetFeasibilityLimit,
     ) -> Result<bool> {
         let targets = parameters
             .filter(|decision| {
@@ -1693,7 +1692,7 @@ impl Game {
             })
             .cloned()
             .collect::<VecDeque<_>>();
-        self.feasible_targets(execution, &execution.slots, &targets, on_limit)
+        self.feasible_targets(execution, &execution.slots, &targets)
     }
 
     pub(super) fn internal_quote_target_probes(
@@ -1740,12 +1739,7 @@ impl Game {
         slots: &BTreeMap<(ScopeId, u64), Slot>,
         parameters: &VecDeque<Decision>,
     ) -> Result<bool> {
-        self.feasible_targets(
-            execution,
-            slots,
-            parameters,
-            TargetFeasibilityLimit::RequireProof,
-        )
+        self.feasible_targets(execution, slots, parameters)
     }
 
     fn feasible_targets(
@@ -1753,7 +1747,6 @@ impl Game {
         execution: &Execution,
         slots: &BTreeMap<(ScopeId, u64), Slot>,
         parameters: &VecDeque<Decision>,
-        on_limit: TargetFeasibilityLimit,
     ) -> Result<bool> {
         if parameters.is_empty() {
             return Ok(true);
@@ -1766,7 +1759,6 @@ impl Game {
                 execution,
                 slots,
                 &parameters.iter().skip(1).cloned().collect(),
-                on_limit,
             );
         }
         if let ChoiceDomain::Objects { constraint, .. } = &first.domain
@@ -1780,7 +1772,6 @@ impl Game {
                 execution,
                 slots,
                 &parameters.iter().skip(1).cloned().collect(),
-                on_limit,
             );
         }
         let mut candidate = execution.clone();
@@ -1797,7 +1788,6 @@ impl Game {
                 &candidate,
                 &candidate.slots,
                 &parameters.iter().skip(1).cloned().collect(),
-                on_limit,
             );
         }
         if matches!(first.domain, ChoiceDomain::Recipients { .. }) {
@@ -1815,7 +1805,6 @@ impl Game {
                     &next,
                     &next.slots,
                     &parameters.iter().skip(1).cloned().collect(),
-                    on_limit,
                 )? {
                     return Ok(true);
                 }
@@ -1833,7 +1822,7 @@ impl Game {
         // ignores it and sees at least the candidates any answer would leave; no answer then
         // rescues a rest that is already unanswerable, so independent questions skip enumeration.
         if matches!(
-            self.feasible_targets(&candidate, &candidate.slots, &rest, on_limit),
+            self.feasible_targets(&candidate, &candidate.slots, &rest),
             Ok(false)
         ) {
             return Ok(false);
@@ -1845,17 +1834,16 @@ impl Game {
             }
             attempts = attempts.saturating_add(1);
             if attempts > MAX_FEASIBILITY_ATTEMPTS {
-                return match on_limit {
-                    TargetFeasibilityLimit::RequireProof => {
-                        Err(unsupported("target feasibility proof is too large"))
-                    }
-                    TargetFeasibilityLimit::Defer => Ok(true),
+                return if execution.probing_declaration() {
+                    Ok(false)
+                } else {
+                    Err(unsupported("target feasibility proof is too large"))
                 };
             }
             let mut candidate = candidate.clone();
             candidate.bind_targets(&wait, members);
             candidate.captures(self, &first.captures)?;
-            if self.feasible_targets(&candidate, &candidate.slots, &rest, on_limit)? {
+            if self.feasible_targets(&candidate, &candidate.slots, &rest)? {
                 return Ok(true);
             }
         }
@@ -1863,36 +1851,41 @@ impl Game {
     }
 }
 
-#[derive(Clone, Copy)]
-pub(super) enum TargetFeasibilityLimit {
-    RequireProof,
-    Defer,
-}
-
 /// Legal answers tried before a target feasibility proof gives up rather than stall play.
 const MAX_FEASIBILITY_ATTEMPTS: u32 = 1024;
 
 /// Every subset of `members` whose size the bounds allow, smallest first, in member order.
-fn sized_selections(
-    members: &[ObjectRef],
+pub(in crate::game::internal) fn sized_selections<T>(
+    members: &[T],
     bounds: Cardinality,
-) -> impl Iterator<Item = Vec<ObjectRef>> + '_ {
+) -> impl Iterator<Item = Vec<T>> + '_
+where
+    T: Copy,
+{
+    selection_indices(members.len(), bounds).map(|indices| {
+        indices
+            .into_iter()
+            .filter_map(|index| members.get(index).copied())
+            .collect()
+    })
+}
+
+pub(in crate::game::internal) fn selection_indices(
+    len: usize,
+    bounds: Cardinality,
+) -> impl Iterator<Item = Vec<usize>> {
     let smallest = usize::try_from(bounds.minimum.0).unwrap_or(usize::MAX);
     let largest = bounds
         .maximum
         .and_then(|maximum| usize::try_from(maximum.0).ok())
         .unwrap_or(usize::MAX)
-        .min(members.len());
+        .min(len);
     (smallest..=largest).flat_map(move |size| {
         let mut indices = Some((0..size).collect::<Vec<_>>());
         from_fn(move || {
             let current = indices.take()?;
-            let selection = current
-                .iter()
-                .filter_map(|index| members.get(*index).copied())
-                .collect();
-            indices = next_combination(current, members.len());
-            Some(selection)
+            indices = next_combination(current.clone(), len);
+            Some(current)
         })
     })
 }

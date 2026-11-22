@@ -204,6 +204,12 @@ fn player_evolution_real_life_cost_is_native_and_unpayable_cost_is_hidden() {
                 Vec::<u64>::new(),
                 "two life cannot pay three"
             );
+            let before = game.projection(View::Referee).unwrap();
+            let outcome = game.internal_rule_action(&json!({
+                "do":"evolve", "source":"source", "evolve_card":"form", "pay":{"pp":0_u8}
+            }));
+            assert_eq!(outcome.unwrap().outcome, "cannot-evolve");
+            assert_eq!(game.projection(View::Referee).unwrap(), before);
             continue;
         }
         assert_eq!(evolve(&mut game, false), SubmissionKind::Applied);

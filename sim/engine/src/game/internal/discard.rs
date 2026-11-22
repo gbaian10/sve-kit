@@ -24,6 +24,7 @@ pub(super) struct HandWait {
     bounds: Cardinality,
     groups: GroupConstraints,
     formal_cost: Option<ReceiptId>,
+    pub(super) declaration_witness: Option<Vec<u64>>,
     pub(super) resolution_payment: Option<Box<super::card::optional::ResolutionPayment>>,
 }
 
@@ -253,6 +254,7 @@ impl HandWait {
     ) -> Self {
         Self {
             formal_cost: None,
+            declaration_witness: None,
             resolution_payment: None,
             links,
             instruction,
@@ -274,6 +276,7 @@ impl HandWait {
     ) -> Self {
         Self {
             formal_cost: None,
+            declaration_witness: None,
             resolution_payment: None,
             links,
             instruction,

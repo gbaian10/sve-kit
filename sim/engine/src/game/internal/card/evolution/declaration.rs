@@ -1,9 +1,9 @@
-//! Normal evolution stages borrow the native material validators without trial payment.
+//! The menu and live evolution share the same form, material and payment stages.
 
+use super::super::declarations::probe::{MAX_ANSWERS, cost_selections};
 use super::{intrinsic, non_pp_play, rule_code, usable};
 use crate::game::int;
-use crate::game::internal::source::SourceInformation;
-use crate::game::internal::{Context, Execution, Game, InputDomain, Result, Wait};
+use crate::game::internal::{Context, DeclarationMode, Execution, Game, InputDomain, Result, Wait};
 use crate::game::player::observation::{CardObservation, EffectSource, seat};
 use crate::game::player::{
     EvolutionAnswer, EvolutionForm, EvolutionFormId, EvolutionPayment, EvolutionQuestion,
@@ -136,52 +136,12 @@ impl Game {
             if !intrinsic(&entry.node) || !usable(self, holder, &entry.node)? {
                 continue;
             }
-            let code = rule_code(&entry.node)?;
-            let quote = self.evolution_quote(holder, &code)?;
-            if quote
-                .available_pp
-                .saturating_add(i64::from(quote.ep_allowed))
-                < quote.total_pp
-                || self.evolution_forms(holder, actor, &code)?.is_empty()
-            {
-                continue;
-            }
-            match self.check_evolution_costs(holder, actor, &entry.node) {
-                Ok(()) => entries.push(entry.node.clone()),
-                Err(EngineFailure::IllegalPlay(_)) => {}
-                Err(error) => return Err(error),
-            }
+            entries.push(entry.node.clone());
         }
         entries.sort_by_key(|entry| {
             super::super::printed_origin(&entry.source.origin).map_or(u64::MAX, |(_, line)| line.0)
         });
         Ok(entries)
-    }
-
-    fn check_evolution_costs(&self, holder: &str, actor: Viewer, ability: &Ability) -> Result<()> {
-        let play = non_pp_play(ability)?;
-        if matches!(&play.costs, CostSpec::Ordered { steps } if steps.is_empty()) {
-            return Ok(());
-        }
-        let mut probe = self.clone();
-        let mut selection = probe.evolution_selection(holder, ability.id, actor.player())?;
-        probe.card_runtime.active_source = selection.ability;
-        if play.parameters.is_empty()
-            && probe.known_costs_available(
-                holder,
-                &selection,
-                &play.costs,
-                actor.player(),
-                false,
-            )? == Some(false)
-        {
-            return Err(illegal("insufficient evolution resources"));
-        }
-        if let Some(parameter) = play.parameters.first() {
-            probe.prepare_evolution_materials(&mut selection, &play.costs, parameter)?;
-            selection.waiting = None;
-        }
-        probe.internal_probe_hand_costs(&mut selection, &play.costs)
     }
 
     fn prepare_evolution_materials(
@@ -217,22 +177,30 @@ impl Game {
         holder: &str,
         actor: Viewer,
     ) -> Result<Vec<EvolutionOption>> {
-        let mut probe = self.clone();
-        self.main_evolution_entries(holder, actor)?
+        let mut options = Vec::new();
+        for (ordinal, entry) in self
+            .main_evolution_entries(holder, actor)?
             .iter()
             .enumerate()
-            .map(|(ordinal, entry)| {
-                // Admission ties each intrinsic to this current print; a missing origin is an invariant failure.
-                let source = probe.internal_card_source(holder, entry.id, actor.player())?;
-                Ok(EvolutionOption {
-                    source: SourceInformation::current(&probe, source)?
+        {
+            let mut declaration = self.prepare_main_evolution(holder, actor, entry)?;
+            declaration.selection.declaration_mode = DeclarationMode::Probe;
+            let mut budget = MAX_ANSWERS;
+            if declaration.has_payment(self, &mut budget)? {
+                options.push(EvolutionOption {
+                    source: declaration
+                        .selection
+                        .source_information
+                        .as_ref()
+                        .ok_or_else(|| invalid("missing evolution source"))?
                         .origin()
                         .observed(self, actor),
                     ordinal: u64::try_from(ordinal).map_err(invalid)?,
                     line: super::super::printed_origin(&entry.source.origin)?.1.0,
-                })
-            })
-            .collect()
+                });
+            }
+        }
+        Ok(options)
     }
 
     pub(in crate::game) fn begin_main_evolution(
@@ -246,13 +214,27 @@ impl Game {
             .into_iter()
             .nth(usize::try_from(ordinal).map_err(invalid)?)
             .ok_or_else(|| invalid("retired evolution option"))?;
-        let code = rule_code(&entry)?;
+        let declaration = self.prepare_main_evolution(holder, actor, &entry)?;
+        if matches!(&declaration.stage, Stage::Form(forms) if forms.is_empty()) {
+            return Ok(false);
+        }
+        self.player_evolution = Some(Box::new(declaration));
+        Ok(true)
+    }
+
+    fn prepare_main_evolution(
+        &self,
+        holder: &str,
+        actor: Viewer,
+        entry: &Ability,
+    ) -> Result<Declaration> {
+        let code = rule_code(entry)?;
         let forms = self.evolution_forms(holder, actor, &code)?;
         let mut probe = self.clone();
         let selection = probe.evolution_selection(holder, entry.id, actor.player())?;
         let source = selection.context.clone();
-        let play = non_pp_play(&entry)?;
-        self.player_evolution = Some(Box::new(Declaration {
+        let play = non_pp_play(entry)?;
+        Ok(Declaration {
             actor,
             source,
             definition: entry.id,
@@ -265,8 +247,7 @@ impl Game {
             discard: vec![],
             hand_done: false,
             stage: Stage::Form(forms),
-        }));
-        Ok(true)
+        })
     }
 
     pub(in crate::game) fn evolution_actor(&self) -> Option<Viewer> {
@@ -341,17 +322,12 @@ impl Game {
                 declaration.form = Some(form);
             }
             (Stage::Materials, EvolutionAnswer::Materials(handles)) => {
-                declaration.material_answer(self, &handles, false)?;
+                declaration.choose_materials(self, &handles, false)?;
                 *validated = true;
-                declaration.parameter = declaration
-                    .parameter
-                    .checked_add(1)
-                    .ok_or_else(|| invalid("evolution material parameter overflow"))?;
             }
             (Stage::Discard, EvolutionAnswer::Discard(handles)) => {
-                declaration.material_answer(self, &handles, true)?;
+                declaration.choose_materials(self, &handles, true)?;
                 *validated = true;
-                declaration.hand_done = true;
             }
             (
                 Stage::Payment(payment),
@@ -365,22 +341,14 @@ impl Game {
                     return Err(invalid("evolution payment answer"));
                 }
                 *validated = true;
-                declaration.validate_source(self)?;
-                declaration.validate_references(self)?;
-                let form = declaration
-                    .form
-                    .as_ref()
-                    .ok_or_else(|| invalid("missing selected evolution form"))?;
-                let materials = declaration.physical(self, &declaration.materials)?;
-                let discard = declaration.physical(self, &declaration.discard)?;
+                let decision = declaration.payment_decision(self, pp, ep, super_evolution)?;
                 self.node = self.rule_node("player-evolution-");
                 self.state.next_decision = self.state.next_decision.saturating_add(1);
                 self.emitted.clear();
-                return self.internal_evolve_action(&json!({"do":"evolve","source":declaration.source.source,"definition":declaration.definition.0,"evolve_card":form.holder,"face":form.face,"by":seat(declaration.actor),"at":"main","pay":{"pp":pp,"ep":i64::from(ep),"sep":i64::from(super_evolution)},"costs":{"materials":materials,"discard":discard}}));
+                return self.internal_evolve_action(&decision);
             }
             _ => return Err(invalid("evolution answer shape")),
         }
-        declaration.validate_source(self)?;
         declaration.next_stage(self)?;
         self.player_evolution = Some(declaration);
         Ok(true)
@@ -428,6 +396,111 @@ impl Declaration {
         Ok(())
     }
 
+    fn payment_decision(
+        &self,
+        game: &Game,
+        pp: i64,
+        ep: bool,
+        super_evolution: bool,
+    ) -> Result<Value> {
+        self.validate_source(game)?;
+        self.validate_references(game)?;
+        let form = self
+            .form
+            .as_ref()
+            .ok_or_else(|| invalid("missing selected evolution form"))?;
+        let materials = self.physical(game, &self.materials)?;
+        let discard = self.physical(game, &self.discard)?;
+        Ok(json!({
+            "do":"evolve", "source":self.source.source, "definition":self.definition.0,
+            "evolve_card":form.holder, "face":form.face, "by":seat(self.actor), "at":"main",
+            "pay":{"pp":pp,"ep":i64::from(ep),"sep":i64::from(super_evolution)},
+            "costs":{"materials":materials,"discard":discard}
+        }))
+    }
+
+    fn has_payment(&self, game: &Game, budget: &mut u32) -> Result<bool> {
+        match &self.stage {
+            Stage::Form(forms) => {
+                for form in forms {
+                    if *budget == 0 {
+                        break;
+                    }
+                    *budget = budget.saturating_sub(1);
+                    let mut branch = self.clone();
+                    branch.form = Some(form.clone());
+                    if branch.probe_next_stage(game, budget)? {
+                        return Ok(true);
+                    }
+                }
+            }
+            Stage::Materials | Stage::Discard => {
+                let discard = matches!(self.stage, Stage::Discard);
+                let Some((view, wait)) = &self.selection.waiting else {
+                    return Err(invalid("missing evolution selection"));
+                };
+                let InputDomain::CostMaterials(domain) = &view.domain else {
+                    return Err(invalid("evolution selection domain"));
+                };
+                for handles in cost_selections(domain, wait) {
+                    if *budget == 0 {
+                        break;
+                    }
+                    *budget = budget.saturating_sub(1);
+                    let mut branch = self.clone();
+                    match branch.choose_materials(game, &handles, discard) {
+                        Ok(()) if branch.probe_next_stage(game, budget)? => return Ok(true),
+                        Ok(()) | Err(EngineFailure::Invalid(_) | EngineFailure::IllegalPlay(_)) => {
+                        }
+                        Err(error) => return Err(error),
+                    }
+                }
+            }
+            Stage::Payment(payment) => {
+                for ep in [false, true] {
+                    let pp = payment.total_pp.saturating_sub(i64::from(ep));
+                    if *budget == 0 {
+                        break;
+                    }
+                    if payment.is_valid(pp, ep, false) {
+                        *budget = budget.saturating_sub(1);
+                        let decision = self.payment_decision(game, pp, ep, false)?;
+                        match game
+                            .declaration_probe()
+                            .run_internal_evolution(&decision, true)
+                        {
+                            Ok(true) => return Ok(true),
+                            Ok(false) | Err(EngineFailure::IllegalPlay(_)) => {}
+                            Err(error) => return Err(error),
+                        }
+                    }
+                }
+            }
+        }
+        Ok(false)
+    }
+
+    fn probe_next_stage(&mut self, game: &Game, budget: &mut u32) -> Result<bool> {
+        match self.next_stage(game) {
+            Ok(()) => self.has_payment(game, budget),
+            Err(EngineFailure::IllegalPlay(_)) => Ok(false),
+            Err(error) => Err(error),
+        }
+    }
+
+    fn choose_materials(&mut self, game: &Game, handles: &[u64], discard: bool) -> Result<()> {
+        self.material_answer(game, handles, discard)?;
+        if discard {
+            self.hand_done = true;
+        } else {
+            self.parameter = self
+                .parameter
+                .checked_add(1)
+                .ok_or_else(|| invalid("evolution material parameter overflow"))?;
+        }
+        Ok(())
+    }
+
     fn material_answer(&mut self, game: &Game, handles: &[u64], discard: bool) -> Result<()> {
         let Some((view, wait)) = self.selection.waiting.clone() else {
             return Err(invalid("missing evolution selection"));
@@ -459,6 +532,7 @@ impl Declaration {
     }
 
     fn next_stage(&mut self, game: &Game) -> Result<()> {
+        self.validate_source(game)?;
         self.validate_references(game)?;
         let mut probe = game.clone();
         probe.card_runtime.active_source = self.selection.ability;

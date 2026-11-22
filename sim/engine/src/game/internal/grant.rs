@@ -588,26 +588,6 @@ impl Game {
         }
     }
 
-    pub(in crate::game::internal) fn cached_effective_instance(
-        &self,
-        holder: &str,
-        ability: &EffectiveAbility,
-    ) -> Result<Option<AbilityInstanceId>> {
-        let generation = self.object(holder)?.generation;
-        Ok(if let Some(origin) = &ability.grant {
-            self.card_runtime
-                .keyword_instances
-                .get(&(holder.into(), generation, origin.clone(), ability.node.id))
-                .copied()
-        } else {
-            let (card, face) = self.internal_effective_print(holder)?;
-            self.card_runtime
-                .instances
-                .get(&(holder.into(), generation, card, face, ability.node.id))
-                .copied()
-        })
-    }
-
     pub(in crate::game::internal) fn activation_text_source(
         &self,
         holder: &str,

@@ -1,7 +1,7 @@
 use super::*;
 use crate::catalog::Catalog;
 use crate::game::internal::repeated_moves;
-use crate::game::internal::{Context, RuntimeAbilitySource};
+use crate::game::internal::{Context, DeclarationMode, RuntimeAbilitySource};
 use crate::ir::*;
 use alloc::collections::{BTreeMap, VecDeque};
 use alloc::sync::Arc;
@@ -85,6 +85,7 @@ fn execution(game: &mut Game) -> Execution {
         play: None,
         spell: false,
         field_entry: false,
+        declaration_mode: DeclarationMode::Live,
         play_origin: None,
         play_origin_object: None,
         card_payment: None,

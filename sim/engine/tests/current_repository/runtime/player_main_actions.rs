@@ -412,6 +412,24 @@ fn player_main_actions_require_a_target_within_affordable_x() {
             )),
             can_pay,
         );
+        let source = game.internal_activated_sources("strategist").unwrap().remove(0);
+        let play = game.activate_internal_card("strategist", source.definition, PlayerId { seat: 1 }).unwrap();
+        let CardPlay::Awaiting(x) = play else {
+            panic!("X question");
+        };
+        let after_x = game.answer_internal_card(x.actor, x.token, Answer::Integer(Nat(u64::from(pp))));
+        if can_pay {
+            let CardPlay::Awaiting(target) = after_x.unwrap() else {
+                panic!("X target question");
+            };
+            let InputDomain::Targets(domain) = &target.domain else {
+                panic!("X target domain");
+            };
+            let candidate = domain.members.iter().find(|member| member.card.as_deref() == Some("BP21-055")).unwrap();
+            resolved(game.answer_internal_card(target.actor, target.token, Answer::Targets(vec![candidate.handle])).unwrap());
+        } else {
+            assert!(matches!(after_x, Err(EngineFailure::IllegalPlay(_))));
+        }
     }
 }
 

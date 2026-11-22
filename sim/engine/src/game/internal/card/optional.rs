@@ -733,21 +733,12 @@ impl Game {
         let Some(execution) = self.typed.as_ref() else {
             return Ok(false);
         };
-        if execution.nested.is_some() {
+        if !execution.declines_required_head(answer) {
             return Ok(false);
         }
-        let Some((view, Wait::OptionalCost)) = &execution.waiting else {
-            return Ok(false);
+        let Some((view, _)) = &execution.waiting else {
+            return Err(invalid("missing head payment question"));
         };
-        if !matches!(answer, Answer::OptionalCost(false))
-            || !execution
-                .play
-                .as_ref()
-                .and_then(|play| play.optional.iter().find(|payment| payment.required))
-                .is_some_and(|payment| payment.required)
-        {
-            return Ok(false);
-        }
         if view.actor != actor || view.token != token {
             return Err(invalid("wrong actor or stale head payment answer"));
         }
@@ -829,5 +820,21 @@ impl Game {
             );
         }
         Ok(())
+    }
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Head payment cancellation is shared by live play and menu probes."
+)]
+impl Execution {
+    pub(super) fn declines_required_head(&self, answer: &Answer) -> bool {
+        self.nested.is_none()
+            && matches!(answer, Answer::OptionalCost(false))
+            && matches!(self.waiting, Some((_, Wait::OptionalCost)))
+            && self
+                .play
+                .as_ref()
+                .is_some_and(|play| play.optional.iter().any(|payment| payment.required))
     }
 }

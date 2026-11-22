@@ -392,7 +392,7 @@ impl Game {
                     &mut false,
                 )
             } else {
-                self.play_internal_spell(
+                self.run_card_declaration(
                     &action.holder,
                     actor,
                     &before.published_knowledge(),

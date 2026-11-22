@@ -6,7 +6,6 @@ use super::{
 use crate::game::internal::PlayPhase;
 use crate::game::internal::processing::enter_play_phase;
 use crate::game::internal::processing::entry_additional_payment;
-use crate::game::knowledge::PublishedKnowledge;
 use crate::ir::LimitSpec;
 use crate::ir::optional_payment;
 use crate::ir::{
@@ -48,17 +47,13 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     reason = "Fanfare has its own authority producer and continuation."
 )]
 impl Game {
-    pub(super) fn play_internal_field_card(
-        &mut self,
-        holder: &str,
-        actor: PlayerId,
-        published: &PublishedKnowledge,
-        declared: &mut bool,
-    ) -> Result<super::CardPlay> {
-        let mut execution = self.prepare_card_execution(holder, actor, None)?;
-        *declared = true;
-        self.internal_run(&mut execution, published)?;
-        self.card_play_result(execution)
+    pub(super) fn check_field_play_capacity(&self, actor: PlayerId) -> Result<()> {
+        if self.zone_count(seat_name(actor)?, "field") >= 5 {
+            return Err(crate::EngineFailure::IllegalPlay(
+                "full field after payment".into(),
+            ));
+        }
+        Ok(())
     }
 
     pub(in crate::game::internal) fn internal_field_card_finish(
@@ -74,11 +69,7 @@ impl Game {
         }
         let mut frame = self.start_frame(&holder, serde_json::Value::Null, &decision)?;
         frame.entry_payment = entry_additional_payment(execution);
-        if self.zone_count(seat, "field") >= 5 {
-            return Err(crate::EngineFailure::IllegalPlay(
-                "full field after payment".into(),
-            ));
-        }
+        self.check_field_play_capacity(actor)?;
         if self.internal_ward_entry_choice(execution, &holder, None)? {
             return Ok(());
         }

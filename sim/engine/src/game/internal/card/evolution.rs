@@ -282,6 +282,10 @@ impl Game {
     }
 
     pub(in crate::game) fn internal_evolve_action(&mut self, decision: &Value) -> Result<bool> {
+        self.run_internal_evolution(decision, false)
+    }
+
+    fn run_internal_evolution(&mut self, decision: &Value, probe: bool) -> Result<bool> {
         let holder = string(&decision["source"]);
         let object = self.object(holder)?;
         if object.state["evolved_with"].is_string()
@@ -333,7 +337,7 @@ impl Game {
         if self.catalog.face(&resource.card, face).is_err() {
             return Ok(false);
         }
-        self.evolve_with_code(decision, &code, Some(&entry.node))
+        self.evolve_with_code(decision, &code, Some(&entry.node), probe)
     }
 }
 

@@ -53,10 +53,16 @@ impl Game {
         costs: &[&CostSpec],
     ) -> Result<bool> {
         let choices = self.internal_hand_choices(execution, costs)?;
-        let _assignment = witness(&choices)?;
-        let Some(choice) = choices.into_iter().next() else {
+        let assignment = witness(&choices)?;
+        let Some(mut choice) = choices.into_iter().next() else {
             return Ok(false);
         };
+        if execution.probing_declaration() {
+            let first = assignment
+                .first()
+                .ok_or_else(|| invalid("missing hand cost witness"))?;
+            choice.wait.declaration_witness = Some(choice.wait.handles(first)?);
+        }
         self.internal_wait(
             execution,
             choice.wait.decision(),
