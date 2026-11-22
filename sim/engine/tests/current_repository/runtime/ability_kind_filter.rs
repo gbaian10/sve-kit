@@ -120,6 +120,21 @@ fn bp03_054_takes_earth_rite_but_never_stack_alone_and_reveals_only_the_chosen_c
 }
 
 #[test]
+fn bp03_054_can_take_the_optional_earth_rite_follower_bp22_039() {
+    let mut initial = position("BP03-054");
+    initial["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"golem","card":"BP22-039"}]);
+    let mut game = game(&initial);
+    let play = game.play_internal_card("source", actor()).unwrap();
+    finish(&mut game, play, &[], true);
+    trigger(&mut game, "BP03-054", &["BP22-039"], true);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P1"]["hand"],
+        json!(["golem"])
+    );
+}
+
+#[test]
 fn bp08_049_may_decline_earth_rite_then_orders_all_four_cards_below_the_unseen_remainder() {
     let mut initial = position("BP08-048");
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

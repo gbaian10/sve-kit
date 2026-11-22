@@ -2,16 +2,22 @@ use super::{Game, KeywordId, Result};
 use crate::ir::{Ability, AbilityOrigin, Control, CostSpec, Node, Program, RepeatBody};
 
 pub(super) fn matches(game: &Game, id: &str, keyword: KeywordId) -> Result<bool> {
-    if game.object(id)?.zone == "field" {
-        return Ok(game
-            .internal_effective_abilities(id)?
+    let object = game.object(id)?;
+    let ability_matches = if object.zone == "field" {
+        game.internal_effective_abilities(id)?
             .iter()
-            .any(|ability| has_keyword(&ability.node, keyword)));
+            .any(|ability| has_keyword(&ability.node, keyword))
+    } else {
+        game.internal_characteristic_abilities(id)?
+            .iter()
+            .any(|ability| has_keyword(&ability.node, keyword))
+    };
+    if ability_matches || keyword != KeywordId::EarthRite || object.state["silenced"] == true {
+        return Ok(ability_matches);
     }
-    Ok(game
-        .internal_characteristic_abilities(id)?
-        .iter()
-        .any(|ability| has_keyword(&ability.node, keyword)))
+    let (card, face) = game.internal_effective_print(id)?;
+    Ok(!game.internal_suppresses_printed(id, &card, face)
+        && game.internal_print_has_earth_rite_exchange(&card, face))
 }
 
 pub(in crate::game::internal) fn has_keyword(ability: &Ability, keyword: KeywordId) -> bool {
@@ -30,16 +36,16 @@ pub(in crate::game::internal) fn has_keyword(ability: &Ability, keyword: Keyword
     ability
         .play
         .as_ref()
-        .is_some_and(|play| has_cost(&play.costs))
+        .is_some_and(|play| has_earth_rite_cost(&play.costs))
         || ability.body.as_ref().is_some_and(has_program)
 }
 
-fn has_cost(cost: &CostSpec) -> bool {
+pub(in crate::game::internal) fn has_earth_rite_cost(cost: &CostSpec) -> bool {
     match cost {
         CostSpec::Ordered { steps } => steps
             .iter()
             .any(|step| step.keyword == Some(KeywordId::EarthRite)),
-        CostSpec::Alternative { alternatives } => alternatives.iter().any(has_cost),
+        CostSpec::Alternative { alternatives } => alternatives.iter().any(has_earth_rite_cost),
     }
 }
 
@@ -49,10 +55,12 @@ fn has_program(program: &Program) -> bool {
             return false;
         };
         match control {
-            Control::Pay { costs, on_paid, .. } => has_cost(costs) || has_program(on_paid),
+            Control::Pay { costs, on_paid, .. } => {
+                has_earth_rite_cost(costs) || has_program(on_paid)
+            }
             Control::Mode { modes, .. } => modes
                 .iter()
-                .any(|mode| has_cost(&mode.costs) || has_program(&mode.body)),
+                .any(|mode| has_earth_rite_cost(&mode.costs) || has_program(&mode.body)),
             Control::Sequence { body }
             | Control::May { body, .. }
             | Control::EachObject { body, .. }
