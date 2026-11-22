@@ -183,6 +183,28 @@ impl Game {
                         })
                 })
             })
+            || (keyword == KeywordId::EarthRite
+                && self.internal_print_has_earth_rite_exchange(card, face))
+    }
+
+    pub(in crate::game::internal) fn internal_print_has_earth_rite_exchange(
+        &self,
+        card: &str,
+        face: usize,
+    ) -> bool {
+        self.card_runtime
+            .definitions
+            .cards
+            .get(card)
+            .is_some_and(|program| {
+                program.card().card_play_costs.iter().any(|cost| {
+                    cost.node.exchange.as_ref().is_some_and(|exchange| {
+                        super::super::search::has_earth_rite_cost(&exchange.node.cost)
+                    }) && self
+                        .printed_face_ordinal(card, &cost.node.face)
+                        .is_ok_and(|printed| printed == face)
+                })
+            })
     }
 
     pub(in crate::game) fn internal_printed_name_aliases(

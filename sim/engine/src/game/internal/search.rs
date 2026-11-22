@@ -34,7 +34,7 @@ use alloc::collections::{BTreeSet, VecDeque};
 use serde_json::{Value, json};
 
 mod keywords;
-pub(in crate::game::internal) use keywords::has_keyword;
+pub(in crate::game::internal) use keywords::{has_earth_rite_cost, has_keyword};
 mod replacement;
 pub(super) use replacement::ReplacementWait;
 
