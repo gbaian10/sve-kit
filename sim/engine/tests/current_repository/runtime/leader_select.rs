@@ -1,4 +1,5 @@
 use super::*;
+use sve_engine::game::player::observation::ProcessingStage;
 
 #[test]
 fn bp01_094_fanfare_selects_a_leader_or_follower_after_entry() {
@@ -43,13 +44,17 @@ fn bp01_094_fanfare_selects_a_leader_or_follower_after_entry() {
                     )
                     .unwrap()
                 else {
-                    panic!("resolution recipient choice")
+                    panic!("recipient target declaration")
                 };
                 let InputDomain::Targets(domain) = &question.domain else {
                     panic!("targets")
                 };
                 assert_eq!(domain.members.len(), 1 + usize::from(enemy));
                 assert_eq!(domain.cardinality.minimum, Nat(1));
+                let viewer = if seat == "P1" { Viewer::P1 } else { Viewer::P2 };
+                let processing = game.observe(viewer).unwrap().processing;
+                let timing = processing.last().unwrap().stage;
+                assert_eq!(timing, Some(ProcessingStage::Target));
                 assert!(
                     domain
                         .members

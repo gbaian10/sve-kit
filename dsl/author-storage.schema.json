@@ -51,6 +51,35 @@
               "written_by"
             ]
           },
+          "lint_exceptions": {
+            "type": "array",
+            "minItems": 1,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "rule": {
+                  "enum": [
+                    "required_choose_use_targets",
+                    "combine_consecutive_create"
+                  ]
+                },
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "path": {
+                  "type": "string",
+                  "pattern": "^/"
+                },
+                "reason": {
+                  "type": "string",
+                  "pattern": "\\S"
+                }
+              },
+              "required": ["rule", "line", "path", "reason"]
+            }
+          },
           "abilities": {
             "type": "array",
             "items": {

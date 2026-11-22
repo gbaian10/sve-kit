@@ -1,5 +1,10 @@
 cards:
   BP14-006:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 2
+        path: "/activate/do/0/choose"
+        reason: "手牌是非公開區域，於結算時選取當時的手牌。"
     abilities:
       - auto:
           cost:

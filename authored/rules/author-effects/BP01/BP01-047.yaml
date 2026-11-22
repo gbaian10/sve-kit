@@ -2,15 +2,15 @@ cards:
   BP01-047:
     abilities:
       - fanfare:
+          targets:
+            - bind: ally
+              from:
+                kind: follower
+                other: true
+                who: self
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: ally
-                from:
-                  kind: follower
-                  other: true
-                  who: self
-                  zone: field
-                n: 1
             - grant:
                 keywords:
                   - assail

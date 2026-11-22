@@ -1,5 +1,10 @@
 cards:
   BP14-094:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 2
+        path: "/activate/do/0/choose"
+        reason: "卡文指定結算時將一張招來の狐從 EX 放到場上，起動條件另列於卡文。"
     abilities:
       - fanfare:
           do:

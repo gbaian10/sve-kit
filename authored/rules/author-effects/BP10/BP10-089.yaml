@@ -18,14 +18,14 @@ cards:
                   leader: self
         line: 1
       - lastword:
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: ally
-                from:
-                  who: self
-                  zone: field
-                  kind: follower
-                n: 1
             - buff:
                 "on": ally
                 power: 1

@@ -16,14 +16,14 @@ cards:
             pp: 1
       - line: 2
         fanfare:
+          targets:
+            - bind: departed
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: departed
-                from:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
             - move:
                 ref: departed
                 to: ex

@@ -564,9 +564,19 @@ fn both_mcqueen_amulets_complete_the_real_cost_lastword_evolution_return_and_old
                     ordinary.outcome, "resolved",
                     "effect evolution leaves the ordinary evolution quota available, Q1861"
                 );
-                let returned = trigger(&mut board, "CP01-067", 2);
-                resolved(finish_head(&mut board, returned, true, true));
+                assert_eq!(
+                    trigger(&mut board, "CP01-067", 2),
+                    CardPlay::Cancelled,
+                    "the first evolution already returned the only amulet target"
+                );
                 no_pending(&mut board);
+                let after_ordinary = board.projection(View::Referee).unwrap();
+                assert_eq!(after_ordinary["P1"]["hand"], json!(["amulet"]));
+                assert_eq!(after_ordinary["P1"]["cemetery"], json!([]));
+                assert_eq!(
+                    after_ordinary["objects"]["existing"]["evolved_with"],
+                    "other-form"
+                );
             }
         }
     }

@@ -22,14 +22,14 @@ cards:
                 to:
                   leader: self
       - fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
             - destroy:
                 ref: enemy
         line: 2

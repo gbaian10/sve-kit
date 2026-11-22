@@ -12,11 +12,11 @@ cards:
     abilities:
       - line: 1
         evolve_time:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                zone: ex
+              n: 1
           do:
-            - choose:
-                bind: victim
-                from:
-                  who: opp
-                  zone: ex
-                n: 1
             - banish: victim

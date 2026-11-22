@@ -7,14 +7,14 @@ cards:
           cost:
             pp: 0
           per_turn: 1
+          targets:
+            - bind: chosen
+              from:
+                kind: follower
+                who: self
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: chosen
-                from:
-                  kind: follower
-                  who: self
-                  zone: field
-                n: 1
             - damage:
                 n: 1
                 to: chosen

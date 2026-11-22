@@ -1,5 +1,10 @@
 cards:
   CP03-054:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 2
+        path: "/drive_time/do/2/choose"
+        reason: "從結算時該次看牌所見的牌中選取。"
     abilities:
       - line: 1
         ride:

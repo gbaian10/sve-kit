@@ -50,6 +50,7 @@ class AuthorInputSet:
     author_files: tuple[InputFile, ...]
     body_files: tuple[InputFile, ...]
     prototype_files: tuple[InputFile, ...]
+    lint_exceptions: dict[str, JsonValue] = field(default_factory=dict)
 
 
 def _reject(reason: str, path: str, record: IndexRecord | None = None) -> Never:

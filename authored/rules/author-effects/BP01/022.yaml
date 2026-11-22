@@ -12,14 +12,14 @@ cards:
     abilities:
       - line: 1
         fanfare:
+          targets:
+            - bind: victim
+              from:
+                who: opp
+                kind: follower
+                leader_or: true
+              n: 1
           do:
-            - choose:
-                bind: victim
-                from:
-                  who: opp
-                  kind: follower
-                  leader_or: true
-                n: 1
             - damage:
                 to: victim
                 n: 1

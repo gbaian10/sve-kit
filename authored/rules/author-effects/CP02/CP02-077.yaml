@@ -6,14 +6,14 @@ cards:
             pp: 1
         line: 1
       - fanfare:
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  kind: follower
-                  who: opp
-                  zone: field
-                n: 1
             - damage:
                 n: 5
                 to: enemy

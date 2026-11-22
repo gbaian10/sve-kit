@@ -2,14 +2,14 @@ cards:
   BP07-015:
     abilities:
       - evolve_time:
+          targets:
+            - bind: returned
+              from:
+                trait: 自然
+                who: self
+                zone: cemetery
+              n: 1
           do:
-            - choose:
-                bind: returned
-                from:
-                  trait: 自然
-                  who: self
-                  zone: cemetery
-                n: 1
             - move:
                 ref: returned
                 to: hand

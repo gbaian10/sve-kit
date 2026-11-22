@@ -73,6 +73,7 @@ type Stage = Literal[
     "recipe",
     "dependency",
     "anchor",
+    "lint",
 ]
 
 

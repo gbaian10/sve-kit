@@ -162,7 +162,16 @@ def materialize_inputs(
         for file in inputs.body_files
     )
     return Materialized(
-        replace(inputs, author_files=authors, body_files=companions),
+        replace(
+            inputs,
+            author_files=authors,
+            body_files=companions,
+            lint_exceptions={
+                number: card["lint_exceptions"]
+                for number, card in handwritten.cards.items()
+                if "lint_exceptions" in card
+            },
+        ),
         failures,
     )
 

@@ -2,6 +2,11 @@ format: 2
 kind: author_effect_set
 cards:
   BP17-029:
+    lint_exceptions:
+      - rule: combine_consecutive_create
+        line: 1
+        path: "/fanfare/do/0/create"
+        reason: "日版卡文分兩句指示，分別建立到場上及 EX。"
     admission: light
     meta:
       written_by:

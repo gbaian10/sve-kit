@@ -1,7 +1,9 @@
+use super::event_cemetery::finish_checks;
 use super::*;
+use sve_engine::game::player::observation::ProcessingStage;
 
 #[test]
-fn bp01_097_fanfare_chooses_after_entry_and_keeps_entry_when_no_enemy_exists() {
+fn bp01_097_enters_before_its_fanfare_declares_or_cancels() {
     for seat in ["P1", "P2"] {
         let opponent = if seat == "P1" { "P2" } else { "P1" };
         for enemy in [false, true] {
@@ -35,58 +37,25 @@ fn bp01_097_fanfare_chooses_after_entry_and_keeps_entry_when_no_enemy_exists() {
             };
             assert_eq!(options.len(), 1);
             assert_eq!(options[0].card, "BP01-097");
-            let CardPlay::Awaiting(question) = game
+            let fanfare = game
                 .answer_internal_card(
                     pending.actor,
                     pending.token,
                     Answer::Pending(options[0].handle),
                 )
-                .unwrap()
-            else {
-                panic!("resolution field choice");
-            };
-            let InputDomain::Targets(domain) = &question.domain else {
-                panic!("field choice")
-            };
-            assert_eq!(domain.members.len(), usize::from(enemy));
-            assert_eq!(domain.cardinality.minimum, Nat(u64::from(enemy)));
-            let before = format!("{game:?}");
-            game.answer_internal_card(
-                PlayerId {
-                    seat: seat_number(opponent),
-                },
-                question.token,
-                Answer::Targets(vec![]),
-            )
-            .unwrap_err();
-            assert!(
-                format!("{game:?}") == before,
-                "another actor cannot change the pending choice"
-            );
-            let result = resolved(
-                game.answer_internal_card(
-                    question.actor,
-                    question.token,
-                    Answer::Targets(if enemy { vec![0] } else { vec![] }),
-                )
-                .unwrap(),
-            );
-            assert_eq!(
-                result
-                    .progress
-                    .facts
-                    .iter()
-                    .filter(|fact| matches!(fact, Fact::Damage(_)))
-                    .count(),
-                usize::from(enemy)
-            );
+                .unwrap();
             if enemy {
-                assert_eq!(
-                    game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],
-                    7_u8
-                );
+                let viewer = if seat == "P1" { Viewer::P1 } else { Viewer::P2 };
+                let other_player = PlayerId {
+                    seat: seat_number(opponent),
+                };
+                resolve_fanfare_target(&mut game, fanfare, viewer, other_player);
+            } else {
+                assert_eq!(fanfare, CardPlay::Cancelled);
+                assert!(game.internal_decision(View::Referee).is_none());
             }
-            game.resume_internal_card().unwrap();
+            finish_checks(&mut game);
+            assert!(game.internal_pending_choice().unwrap().is_none());
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state[seat]["field"], json!(["dragon"]));
             assert_eq!(state[seat]["pp"]["current"], 3_u8);
@@ -95,4 +64,60 @@ fn bp01_097_fanfare_chooses_after_entry_and_keeps_entry_when_no_enemy_exists() {
             }
         }
     }
+}
+
+#[expect(
+    clippy::panic,
+    reason = "The printed Fanfare must declare a legal target."
+)]
+fn resolve_fanfare_target(game: &mut Game, play: CardPlay, viewer: Viewer, opponent: PlayerId) {
+    let CardPlay::Awaiting(question) = play else {
+        panic!("the Fanfare declares a field target");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("field target");
+    };
+    assert_eq!(
+        domain.members.len(),
+        1,
+        "the opposing follower is the only candidate"
+    );
+    assert_eq!(
+        domain.cardinality.minimum,
+        Nat(1),
+        "the target is mandatory"
+    );
+    let processing = game.observe(viewer).unwrap().processing;
+    assert_eq!(
+        processing.last().unwrap().stage,
+        Some(ProcessingStage::Target),
+        "the Fanfare declares the target before resolution"
+    );
+    let answer = Answer::Targets(vec![domain.members[0].handle]);
+    let before = format!("{game:?}");
+    game.answer_internal_card(opponent, question.token, answer.clone())
+        .unwrap_err();
+    assert!(
+        format!("{game:?}") == before,
+        "another actor cannot change the target declaration"
+    );
+    let result = resolved(
+        game.answer_internal_card(question.actor, question.token, answer)
+            .unwrap(),
+    );
+    assert_eq!(
+        result
+            .progress
+            .facts
+            .iter()
+            .filter(|fact| matches!(fact, Fact::Damage(_)))
+            .count(),
+        1,
+        "resolving the declared target produces one damage event"
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["enemy"]["damage"],
+        7_u8,
+        "the Fanfare deals its printed damage"
+    );
 }

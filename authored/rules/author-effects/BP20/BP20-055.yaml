@@ -1,5 +1,10 @@
 cards:
   BP20-055:
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 2
+        path: "/activate/do/0/choose"
+        reason: "Q2656 確認沒有其他偶像卡也可起動，仍支付將自身置入墓場的費用。"
     abilities:
       - line: 1
         fanfare:

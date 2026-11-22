@@ -23,14 +23,14 @@ cards:
       - activate:
           cost:
             pp: 2
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
           do:
-            - choose:
-                bind: enemy
-                from:
-                  who: opp
-                  zone: field
-                  kind: follower
-                n: 1
             - damage:
                 n: 2
                 to: enemy

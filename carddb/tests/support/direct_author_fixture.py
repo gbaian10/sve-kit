@@ -12,7 +12,13 @@ from ..domains.effects.test_author_current_absent import synthetic_current
 from ..domains.text_observations.test_effect_presence import page
 
 
-def direct_author_input(root: Path, *, aliases: bool = False) -> JsonValue:
+def direct_author_input(
+    root: Path,
+    *,
+    aliases: bool = False,
+    steps: list[JsonValue] | None = None,
+    lint_exceptions: list[JsonValue] | None = None,
+) -> JsonValue:
     """Exercise writer, closure, named substitution and current handoff without anchors."""
     authored = root / "authored"
     (authored / "rules").mkdir(parents=True)
@@ -34,6 +40,11 @@ def direct_author_input(root: Path, *, aliases: bool = False) -> JsonValue:
                             ]
                         },
                         "abilities": [{"line": 1, "use": "draw", "params": {"n": 1}}],
+                        **(
+                            {"lint_exceptions": lint_exceptions}
+                            if lint_exceptions is not None
+                            else {}
+                        ),
                     }
                 },
             }
@@ -58,7 +69,9 @@ def direct_author_input(root: Path, *, aliases: bool = False) -> JsonValue:
                         ],
                         "body": {
                             "spell": {
-                                "do": [{"draw": {"who": "self", "n": {"param": "n"}}}]
+                                "do": steps
+                                if steps is not None
+                                else [{"draw": {"who": "self", "n": {"param": "n"}}}]
                             }
                         },
                     }
