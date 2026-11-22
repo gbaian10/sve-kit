@@ -237,13 +237,17 @@ fn bp22_054_creates_both_golems_when_two_ex_slots_are_free() {
     assert_eq!(created, ["BP01-T08", "BP01-T09"]);
 }
 
-fn evolve_celia(other_cards: usize) -> Game {
+fn evolution_fixture(base: &str, form: &str, other_cards: usize) -> Game {
     let mut state = draw_position();
-    let mut field = vec![json!({"id":"source","card":"BP09-018"})];
+    let mut field = vec![json!({"id":"source","card":base})];
     field.extend((0..other_cards).map(|n| json!({"id":format!("old-{n}"),"card":"BP17-T11"})));
     state["players"]["P1"]["zones"]["field"] = json!(field);
-    state["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP09-019"}]);
-    let mut game = game(&state);
+    state["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":form}]);
+    game(&state)
+}
+
+fn evolve_celia(other_cards: usize) -> Game {
+    let mut game = evolution_fixture("BP09-018", "BP09-019", other_cards);
     let step = game
         .internal_rule_action(&json!({
             "do":"evolve","source":"source","evolve_card":"form",
@@ -257,18 +261,28 @@ fn evolve_celia(other_cards: usize) -> Game {
     game
 }
 
-#[test]
-fn bp09_019_q1160_lets_the_player_choose_the_knight_for_the_last_field_slot() {
-    let mut game = evolve_celia(3);
-    let choice = question(resolve_pending_card(&mut game, "BP09-019"));
+fn last_field_slot(play: CardPlay, names: &[&str]) -> DecisionView {
+    let choice = question(play);
     let InputDomain::TokenCapacity { choices } = &choice.domain else {
         panic!("the effect offers a field capacity choice");
     };
-    assert_eq!(choice.actor.seat, 1);
-    assert_eq!(choices.len(), 2);
-    assert!(
-        choices.contains(&vec!["スティールナイト".to_owned()])
-            && choices.contains(&vec!["ナイト".to_owned()])
+    assert_eq!(choice.actor.seat, 1, "the controller picks the token");
+    assert_eq!(choices.len(), names.len(), "each token is its own option");
+    for name in names {
+        assert!(
+            choices.iter().any(|offered| offered == &[*name]),
+            "the final slot may receive {name}"
+        );
+    }
+    choice
+}
+
+#[test]
+fn bp09_019_q1160_lets_the_player_choose_the_knight_for_the_last_field_slot() {
+    let mut game = evolve_celia(3);
+    let choice = last_field_slot(
+        resolve_pending_card(&mut game, "BP09-019"),
+        &["スティールナイト", "ナイト"],
     );
     assert_eq!(
         cards(&game, "field"),
@@ -286,6 +300,56 @@ fn bp09_019_creates_both_knights_when_two_field_slots_are_free() {
     let mut created = cards(&game, "field");
     created.sort();
     assert_eq!(created, ["BP17-T11", "BP17-T12"]);
+}
+
+#[test]
+fn bp16_024_q2088_can_create_the_shield_guardian_in_the_last_field_slot() {
+    let mut game = evolution_fixture("BP16-023", "BP16-024", 3);
+    let step = game
+        .internal_rule_action(&json!({
+            "do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}
+        }))
+        .unwrap();
+    assert_eq!(step.outcome, "resolved");
+    let choice = last_field_slot(
+        resolve_pending_card(&mut game, "BP16-024"),
+        &["スティールナイト", "シールドガーディアン"],
+    );
+    let play = capacity(&mut game, &choice, &["シールドガーディアン"]);
+    resolved(accept(&mut game, play));
+    assert_eq!(cards(&game, "field"), ["BP17-T13"]);
+}
+
+#[test]
+fn bp16_036_mode_one_can_create_the_knight_in_the_last_field_slot() {
+    let mut game = fixture("BP16-036", "field", 4);
+    let mode = question(game.play_internal_card("source", actor()).unwrap());
+    let InputDomain::Modes { modes, .. } = &mode.domain else {
+        panic!("BP16-036 offers its printed modes");
+    };
+    let play = game
+        .answer_internal_card(mode.actor, mode.token, Answer::Modes(vec![modes[0]]))
+        .unwrap();
+    let choice = last_field_slot(play, &["スティールナイト", "シールドガーディアン", "ナイト"]);
+    resolved(capacity(&mut game, &choice, &["ナイト"]));
+    assert_eq!(cards(&game, "field"), ["BP17-T11"]);
+}
+
+#[test]
+fn bp19_022_q2567_can_create_the_knight_in_the_last_field_slot() {
+    let mut state = position_with_source("BP19-022", "hand");
+    state["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"old-0","card":"BP01-173"},
+        {"id":"old-1","card":"BP01-173"},
+        {"id":"old-2","card":"BP01-173"}
+    ]);
+    let mut game = game(&state);
+    let choice = last_field_slot(
+        trigger(&mut game, "BP19-022"),
+        &["スティールナイト", "ナイト"],
+    );
+    resolved(capacity(&mut game, &choice, &["ナイト"]));
+    assert_eq!(cards(&game, "field"), ["BP17-T11"]);
 }
 
 #[test]

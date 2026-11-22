@@ -4,13 +4,10 @@ cards:
       - evolve_time:
           do:
             - create:
-                n: 1
                 to: field
-                token: スティールナイト
-            - create:
-                n: 1
-                to: field
-                token: シールドガーディアン
+                token:
+                  - スティールナイト
+                  - シールドガーディアン
         line: 1
       - line: 2
         super_evolve_time:

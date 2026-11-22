@@ -8,13 +8,10 @@ cards:
       - fanfare:
           do:
             - create:
-                n: 1
                 to: field
-                token: スティールナイト
-            - create:
-                n: 1
-                to: field
-                token: ナイト
+                token:
+                  - スティールナイト
+                  - ナイト
             - if:
                 cond:
                   cmp:
