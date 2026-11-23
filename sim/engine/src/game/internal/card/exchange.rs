@@ -267,6 +267,10 @@ fn route_step(exchange: &PlayCostExchange, index: usize) -> Result<&Instruction>
         .ok_or_else(|| unsupported("exchange route cost"))
 }
 
+fn field_put_special_kind(kind: &str, evolved: bool) -> bool {
+    evolved || matches!(kind, "フォロワー・トークン" | "アミュレット・トークン")
+}
+
 fn material(exchange: &ExchangeState) -> Result<&Decision> {
     let index = exchange
         .route
@@ -532,8 +536,7 @@ impl Game {
         let action = &route_step(exchange, index)?.action;
         let posture = matches!(action, Action::Posture { .. });
         let counter = matches!(action, Action::Counter { .. });
-        let field_put = exchange_shape::field_put_route(exchange, index);
-        let token_put = execution.field_entry && field_put;
+        let field_put = execution.field_entry && exchange_shape::field_put_route(exchange, index);
         let zone = match zone {
             ZoneKind::Field => "field",
             ZoneKind::Cemetery => "cemetery",
@@ -566,38 +569,32 @@ impl Game {
             if zone == "hand" && (object.owner != controller || object.controller != controller) {
                 return Err(invalid("foreign hand exchange material"));
             }
-            if zone != "hand"
-                && !counter
-                && (object.controller != controller
-                    || (!posture && !token_put && self.object_type(&id)?.contains("トークン"))
-                    || self.object_type(&id)?.contains("アドバンス")
-                    || (!field_put
-                        && object
-                            .state
-                            .get("evolved_with")
-                            .is_some_and(|value| !value.is_null()))
-                    || object
-                        .state
-                        .get("links")
-                        .is_some_and(|value| !value.is_null())
-                    || self.state.objects.values().any(|other| {
-                        matches!(other.zone.as_str(), "field" | "cemetery")
-                            && other.state["equipped_to"] == id
-                    })
-                    || self.restricted(
-                        &id,
-                        if posture {
-                            "act"
-                        } else if zone == "field" {
-                            "move"
-                        } else {
-                            "banish"
-                        },
-                    )?)
-            {
-                return Err(unsupported(
-                    "exchange material has unsupported movement or permission",
-                ));
+            if zone != "hand" && !counter {
+                let permission = if posture {
+                    "act"
+                } else if zone == "field" {
+                    "move"
+                } else {
+                    "banish"
+                };
+                if object.controller != controller || self.restricted(&id, permission)? {
+                    continue;
+                }
+                // Acting leaves the evolved face and its attachments in place.
+                if !posture {
+                    let kind = self.object_type(&id)?;
+                    let evolved = !object.state["evolved_with"].is_null();
+                    if kind.contains("アドバンス")
+                        || ((evolved || kind.contains("トークン"))
+                            && (!field_put
+                                || object.owner != controller
+                                || !field_put_special_kind(kind, evolved)))
+                        || !object.state["links"].is_null()
+                        || self.internal_equipment_links(&id)?
+                    {
+                        continue;
+                    }
+                }
             }
             members.push(candidate);
         }
@@ -613,11 +610,7 @@ impl Game {
     ) -> Result<bool> {
         if !execution.field_entry
             || destination != "cemetery"
-            || !(has_evolution
-                || matches!(
-                    self.object_type(id)?,
-                    "フォロワー・トークン" | "アミュレット・トークン"
-                ))
+            || !field_put_special_kind(self.object_type(id)?, has_evolution)
         {
             return Ok(false);
         }
