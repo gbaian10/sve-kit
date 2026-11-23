@@ -915,6 +915,25 @@ fn earlier_public_selection(selector: &Selector) -> bool {
         || matches!(selector, Selector::Filter { input, .. } if matches!(input.as_ref(), Selector::Bound { .. }))
 }
 
+fn fixed_trigger_target(selector: &Selector) -> bool {
+    match selector {
+        Selector::Zone {
+            players,
+            zone: ZoneKind::Field | ZoneKind::Cemetery,
+            view: SelectionView::Current {},
+            ..
+        } => players.relative_to == (PlayerRef::Controller {}),
+        Selector::Difference { input, except }
+            if matches!(except.as_ref(),
+                Selector::Objects { objects } if objects == &[ObjectOperand::SourceHolder {}]
+            ) =>
+        {
+            fixed_trigger_target(input)
+        }
+        _ => false,
+    }
+}
+
 pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result<()> {
     if effect_evolution::is_choice(decision) || advance_entry::selection(decision).is_some() {
         return Ok(());
@@ -1300,6 +1319,38 @@ pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
     reason = "Target evaluation uses the play's frozen authority view."
 )]
 impl Game {
+    pub(super) fn missing_fixed_target(&self, execution: &Execution, decision: &Decision) -> bool {
+        let ChoiceDomain::Objects {
+            constraint,
+            target_roles: None,
+            ..
+        } = &decision.domain
+        else {
+            return false;
+        };
+        let [group] = constraint.groups.as_slice() else {
+            return false;
+        };
+        if !matches!(
+            decision.kind,
+            DecisionKind::PlayParameter {
+                slot: PlaySlot::Targets,
+                ..
+            }
+        ) || decision.actor != (PlayerRef::Controller {})
+            || !constraint.aggregate_bounds.is_empty()
+            || !fixed_trigger_target(&group.selector)
+        {
+            return false;
+        }
+        // A predicate using an earlier choice can be unevaluable here; only a proven lack counts.
+        self.target_domain(execution, decision)
+            .is_ok_and(|(wait, _)| {
+                wait.capacity()
+                    .is_ok_and(|capacity| wait.bounds.minimum.0 > capacity)
+            })
+    }
+
     pub(in crate::game::internal) fn current_observed_deck(
         &self,
         execution: &Execution,

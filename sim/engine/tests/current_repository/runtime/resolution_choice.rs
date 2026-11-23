@@ -68,6 +68,29 @@ fn bp03_002_fanfare_uses_hand_when_its_own_entry_fills_the_field() {
 }
 
 #[test]
+fn bp11_078_cancels_before_asking_for_targets_when_the_cemetery_has_none() {
+    let mut initial = position_with_source("BP11-078", "hand");
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"enemy","card":"BP01-037"}]);
+    let mut game = game(&initial);
+    assert_eq!(enter_with_fanfare(&mut game, "BP11-078"), CardPlay::Cancelled);
+    finish_checks(&mut game);
+    assert!(game.internal_pending_choice().unwrap().is_none());
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["field"], json!(["source"]));
+    assert_eq!(state["objects"]["enemy"]["damage"], 0_u8);
+}
+
+#[test]
+fn bp22_040_cancels_before_optional_rite_when_there_is_no_mandatory_target() {
+    let mut game = game(&position_with_source("BP22-040", "hand"));
+    assert_eq!(enter_with_fanfare(&mut game, "BP22-040"), CardPlay::Cancelled);
+    finish_checks(&mut game);
+    assert!(game.internal_pending_choice().unwrap().is_none());
+    assert_eq!(game.projection(View::Referee).unwrap()["P1"]["field"], json!(["source"]));
+}
+
+#[test]
 fn bp01_097_enters_before_its_fanfare_declares_or_cancels() {
     for seat in ["P1", "P2"] {
         let opponent = if seat == "P1" { "P2" } else { "P1" };

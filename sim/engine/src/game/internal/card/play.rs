@@ -1365,6 +1365,22 @@ impl Game {
         published: &PublishedKnowledge,
     ) -> Result<CardPlay> {
         self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
+        // Required head costs have their own declaration and cancellation procedure.
+        // Without a preceding question, the first target check already handles this.
+        if execution.trigger_occurrence.is_some()
+            && let Some(play) = &execution.play
+            && !play.optional.iter().any(|payment| payment.required)
+            && (play.parameters.len() > 1 || !play.optional.is_empty())
+            && play
+                .parameters
+                .iter()
+                .any(|decision| self.missing_fixed_target(&execution, decision))
+        {
+            // A fixed mandatory target cannot become legal by changing a declaration answer.
+            return Err(crate::EngineFailure::IllegalPlay(
+                "no legal play targets".into(),
+            ));
+        }
         self.internal_run(&mut execution, published)?;
         self.card_play_result(execution)
     }
