@@ -98,6 +98,50 @@ fn cp04_036_only_acts_a_matching_follower_and_deals_distinct_damage_to_its_leade
 }
 
 #[test]
+fn cp04_036_quotes_and_acts_an_evolved_follower_with_equipment() {
+    use super::event_cemetery::finish_checks;
+    use sve_engine::game::player::{Input, MainIntentKind, QuestionShape};
+
+    let mut initial = draw_position();
+    initial["players"]["P1"]["pp"] = json!({"current":1_u8,"max":1_u8});
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"CP04-036"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"fee","card":"CP04-019"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP04-020"}]);
+    initial["players"]["P1"]["zones"]["equipment"] =
+        json!([{"id":"sword","card":"CP04-T02","state":{"equipped_to":"fee"}}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-097"}]);
+    let mut game = super::game(&initial);
+    let evolve = game
+        .internal_rule_action(
+            &json!({"do":"evolve","source":"fee","evolve_card":"form","pay":{"pp":1_u8}}),
+        )
+        .unwrap();
+    assert_eq!(evolve.outcome, "resolved");
+    finish_checks(&mut game);
+    game.advance_player_input();
+    let Input::Question(question) = game.input(Viewer::P1) else {
+        panic!("main action question");
+    };
+    let QuestionShape::ActionWindow(actions) = question.shape else {
+        panic!("main action window");
+    };
+    assert!(actions.intents.iter().any(|intent| matches!(
+        &intent.kind, MainIntentKind::Play { card } if card.properties.card == "CP04-036"
+    )));
+
+    let play = game
+        .play_internal_card("source", PlayerId { seat: 1 })
+        .unwrap();
+    finish(&mut game, play, 1);
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["pp"]["current"], 0_u8);
+    assert_eq!(state["objects"]["fee"]["acted"], true);
+    assert_eq!(state["objects"]["fee"]["evolved_with"], "form");
+    assert_eq!(state["objects"]["sword"]["equipped_to"], "fee");
+    assert_eq!(state["objects"]["enemy"]["damage"], 5_u8);
+}
+
+#[test]
 fn cp04_106_acts_itself_and_one_other_card_before_moving_the_target_to_its_owners_ex() {
     let mut initial = draw_position();
     initial["turn"]["elapsed_turns"] = json!({"P1":10_u8,"P2":10_u8});
