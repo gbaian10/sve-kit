@@ -15,12 +15,13 @@
     reason = "A missing fixture or malformed run configuration must fail this diagnostic test."
 )]
 
-use super::player::{DeckConstruction, PlayerDeck, Viewer};
+use super::player::{DeckConstruction, Input, PlayerDeck, Question, Viewer};
 use super::{Game, repository};
 use crate::catalog::SelectedEffects;
 use crate::ir::{Cardinality, KeywordId, printed_keywords};
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use core::num::NonZeroUsize;
+use core::ops::ControlFlow;
 use core::panic::AssertUnwindSafe;
 use core::sync::atomic::{AtomicU64, Ordering};
 use rand::seq::{IndexedRandom as _, SliceRandom as _};
@@ -31,7 +32,7 @@ use std::env;
 use std::panic::catch_unwind;
 use std::{thread, time::Instant};
 
-mod answers;
+pub(super) mod answers;
 
 #[derive(Clone, Default)]
 struct Pool {
@@ -46,13 +47,13 @@ struct Printing {
     start_amulet: bool,
 }
 
-struct DeckPool {
+pub(super) struct DeckPool {
     basis: DeckConstruction,
     cards: Pool,
     mandatory_amulet: bool,
 }
 
-fn pools(selected: &SelectedEffects, reprints: bool) -> Vec<DeckPool> {
+pub(super) fn pools(selected: &SelectedEffects, reprints: bool) -> Vec<DeckPool> {
     let mut neutral = Pool::default();
     let mut classes = BTreeMap::<String, Pool>::new();
     let mut titles = BTreeMap::<String, Pool>::new();
@@ -230,14 +231,22 @@ impl Trace {
     }
 }
 
+enum MatchEnd {
+    Finished(Option<Viewer>),
+    Sampled,
+}
+
+type Inspect = Result<ControlFlow<()>, (&'static str, String)>;
+
 fn play(
     selected: &SelectedEffects,
     decks: [PlayerDeck; 2],
     seed: u64,
     rng: &mut ChaCha8Rng,
     trace: &mut Trace,
-) -> Result<Option<Viewer>, (&'static str, String)> {
-    use super::player::{Input, StrictStartError, SubmissionKind};
+    mut inspect: impl FnMut(&Game, &Question, usize) -> Inspect,
+) -> Result<MatchEnd, (&'static str, String)> {
+    use super::player::{StrictStartError, SubmissionKind};
     let first = if rng.random() { Viewer::P1 } else { Viewer::P2 };
     let mut game = Game::start_player_game(selected.clone(), decks, first, &seed.to_string())
         .map_err(|error| match error {
@@ -256,11 +265,8 @@ fn play(
         trace.step = step;
         trace.record_visible(&game);
         trace.turn = game.state.turn.clone();
-        if let Input::Waiting(wait) = input {
-            input = game.input(wait.actor);
-        }
-        let question = match input {
-            Input::Finished { winner } => return Ok(winner),
+        let question = match active_input(&game, input) {
+            Input::Finished { winner } => return Ok(MatchEnd::Finished(winner)),
             Input::EngineFault => {
                 return Err(game.referee_fault().map_or_else(
                     || {
@@ -280,6 +286,9 @@ fn play(
                 "step_limit",
                 "game did not finish within the submission limit".into(),
             ));
+        }
+        if inspect(&game, &question, step)?.is_break() {
+            return Ok(MatchEnd::Sampled);
         }
         let (command, context) = answers::choose(&question, rng)
             .map_err(|message| ("policy", format!("{:?}: {message}", question.purpose)))?;
@@ -316,6 +325,13 @@ fn play(
     Err(("step_limit", "unreachable loop exit".into()))
 }
 
+pub(super) fn active_input(game: &Game, input: Input) -> Input {
+    match input {
+        Input::Waiting(wait) => game.input(wait.actor),
+        other @ (Input::Question(_) | Input::Finished { .. } | Input::EngineFault) => other,
+    }
+}
+
 fn diagnostic(error: &crate::EngineFailure) -> (&'static str, String) {
     use crate::EngineFailure::{
         AuthorizationIntegrity, IllegalPlay, Invalid, Invariant, Unsupported,
@@ -330,17 +346,22 @@ fn diagnostic(error: &crate::EngineFailure) -> (&'static str, String) {
     (kind, error.to_string())
 }
 
-struct MatchReport {
+pub(super) struct MatchReport {
     outcome: &'static str,
     included: BTreeSet<String>,
     seen: BTreeSet<String>,
-    failure: Option<Value>,
+    pub(super) failure: Option<Value>,
     steps: usize,
     rollbacks: usize,
     cancellations: usize,
 }
 
-fn run_match(selected: &SelectedEffects, pools: &[DeckPool], seed: u64) -> MatchReport {
+pub(super) fn run_match(
+    selected: &SelectedEffects,
+    pools: &[DeckPool],
+    seed: u64,
+    inspect: impl FnMut(&Game, &Question, usize) -> Inspect,
+) -> MatchReport {
     let mut rng = ChaCha8Rng::seed_from_u64(seed);
     let decks = [
         deck(pools.choose(&mut rng).unwrap(), &mut rng),
@@ -353,7 +374,7 @@ fn run_match(selected: &SelectedEffects, pools: &[DeckPool], seed: u64) -> Match
         .collect();
     let mut trace = Trace::default();
     let result = catch_unwind(AssertUnwindSafe(|| {
-        play(selected, decks.clone(), seed, &mut rng, &mut trace)
+        play(selected, decks.clone(), seed, &mut rng, &mut trace, inspect)
     }))
     .unwrap_or_else(|payload| {
         let message = payload
@@ -365,9 +386,10 @@ fn run_match(selected: &SelectedEffects, pools: &[DeckPool], seed: u64) -> Match
         Err(("panic", message))
     });
     let (outcome, failure) = match result {
-        Ok(Some(Viewer::P1)) => ("P1", None),
-        Ok(Some(Viewer::P2)) => ("P2", None),
-        Ok(None) => ("draw", None),
+        Ok(MatchEnd::Finished(Some(Viewer::P1))) => ("P1", None),
+        Ok(MatchEnd::Finished(Some(Viewer::P2))) => ("P2", None),
+        Ok(MatchEnd::Finished(None)) => ("draw", None),
+        Ok(MatchEnd::Sampled) => ("sampled", None),
         Err((kind, message)) => (
             kind,
             Some(json!({
@@ -390,6 +412,43 @@ fn run_match(selected: &SelectedEffects, pools: &[DeckPool], seed: u64) -> Match
     }
 }
 
+fn worker_count() -> usize {
+    thread::available_parallelism()
+        .map_or(1, NonZeroUsize::get)
+        .min(6)
+}
+
+pub(super) fn run_seeds<T>(
+    seeds: &(impl Iterator<Item = u64> + Clone + Send),
+    run: impl Fn(u64) -> T + Sync,
+) -> Vec<(u64, T)>
+where
+    T: Send,
+{
+    let jobs = worker_count().min(seeds.size_hint().1.unwrap_or(usize::MAX));
+    let mut reports = thread::scope(|scope| {
+        let workers: Vec<_> = (0..jobs)
+            .map(|slot| {
+                let seeds = seeds.clone();
+                let run = &run;
+                scope.spawn(move || {
+                    seeds
+                        .skip(slot)
+                        .step_by(jobs)
+                        .map(|seed| (seed, run(seed)))
+                        .collect::<Vec<_>>()
+                })
+            })
+            .collect();
+        workers
+            .into_iter()
+            .flat_map(|worker| worker.join().unwrap())
+            .collect::<Vec<_>>()
+    });
+    reports.sort_by_key(|(seed, _)| *seed);
+    reports
+}
+
 #[test]
 #[ignore = "opt-in multi-game diagnostic using the current repository selection"]
 fn run() {
@@ -406,34 +465,21 @@ fn run() {
         .unwrap();
     assert!(count > 0);
     let last_seed = first_seed.checked_add(count.saturating_sub(1)).unwrap();
-    let jobs = thread::available_parallelism()
-        .map_or(1, NonZeroUsize::get)
-        .min(6);
     let start = Instant::now();
     let completed = AtomicU64::new(0);
-    let mut reports = thread::scope(|scope| {
-        let workers: Vec<_> = (0..jobs).map(|slot| {
-            let pools = &pools;
-            let completed = &completed;
-            scope.spawn(move || {
-                (first_seed..=last_seed).skip(slot).step_by(jobs)
-                    .map(|seed| {
-                        let report = run_match(selected, pools, seed);
-                        let done = completed.fetch_add(1, Ordering::Relaxed).saturating_add(1);
-                        if count <= 30 || done.is_multiple_of(64) {
-                            eprintln!("selfplay {done}/{count} games complete (seed {seed}, {} submissions)", report.steps);
-                        }
-                        (seed, report)
-                    })
-                    .collect::<Vec<_>>()
-            })
-        }).collect();
-        workers
-            .into_iter()
-            .flat_map(|worker| worker.join().unwrap())
-            .collect::<Vec<_>>()
+    let reports = run_seeds(&(first_seed..=last_seed), |seed| {
+        let report = run_match(selected, &pools, seed, |_, _, _| {
+            Ok(ControlFlow::Continue(()))
+        });
+        let done = completed.fetch_add(1, Ordering::Relaxed).saturating_add(1);
+        if count <= 30 || done.is_multiple_of(64) {
+            eprintln!(
+                "selfplay {done}/{count} games complete (seed {seed}, {} submissions)",
+                report.steps
+            );
+        }
+        report
     });
-    reports.sort_by_key(|(seed, _)| *seed);
     let mut included = BTreeMap::<String, u64>::new();
     let mut seen = BTreeMap::<String, u64>::new();
     let mut outcomes = BTreeMap::<&str, u64>::new();
@@ -468,7 +514,7 @@ fn run() {
     println!(
         "{}",
         json!({"first_seed":first_seed,"games":count,"elapsed_seconds":start.elapsed().as_secs_f64(),
-        "total_seconds":setup.elapsed().as_secs_f64(),"reprints":reprints,"workers":jobs,
+        "total_seconds":setup.elapsed().as_secs_f64(),"reprints":reprints,"workers":worker_count(),
         "submissions":submissions,"rollbacks":rollbacks,"cancellations":cancellations,
         "selection":selected.current.len(),"eligible":eligible,
         "built":included,"seen":seen,"outcomes":outcomes})
