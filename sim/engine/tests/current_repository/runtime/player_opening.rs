@@ -302,6 +302,30 @@ fn deck_scoped_selection_starts_the_same_game_as_the_whole_selection() {
 }
 
 #[test]
+fn strict_opening_keeps_alternate_printings_with_their_representative_source() {
+    let mut decks = decks();
+    decks[0].construction = DeckConstruction::Class("ナイトメア".into());
+    decks[0].main.truncate(4);
+    decks[0].main[0] = "BP03-SL15".into();
+    let selected = repository::select_decks(&decks).unwrap();
+    assert_eq!(selected.current["BP03-SL15"].card_no, "BP03-074");
+    assert_eq!(selected.current["BP03-T05"].card_no, "BP01-T14");
+    assert!(!selected.current.contains_key("BP03-074"));
+    assert!(!selected.current.contains_key("BP01-T14"));
+
+    let mut game = Game::start_player_game(selected, decks, Viewer::P1, "alternate-printings").unwrap();
+    assert_eq!(
+        submit(&mut game, Viewer::P1, OpeningAnswer::FirstPlayer(Viewer::P1)),
+        SubmissionKind::Applied,
+    );
+    let QuestionShape::Opening(OpeningQuestion::Mulligan(hand)) = question(&game, Viewer::P1).shape
+    else {
+        panic!("the first player should have a mulligan question");
+    };
+    assert!(hand.iter().any(|card| card.physical.card == "BP03-SL15"));
+}
+
+#[test]
 fn player_opening_load_errors_are_distinct_from_game_submission_errors() {
     let mut absent = decks();
     absent[0].main[0] = "missing-printing".into();

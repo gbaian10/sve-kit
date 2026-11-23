@@ -125,12 +125,7 @@ fn span(game: &Game, source: &SourceSpan, expected: &SourceSpan) -> Result<()> {
     {
         return Err(invalid("evolution source evidence mapping mismatch"));
     }
-    game.check_card_source(
-        source,
-        &expected.card_no,
-        &expected.face,
-        u64::from(expected.line),
-    )
+    game.check_nested_card_source(source, expected)
 }
 
 pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {

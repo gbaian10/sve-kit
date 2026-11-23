@@ -158,7 +158,10 @@ impl CurrentCard {
             .ok_or_else(|| invalid("unknown current face ordinal"))
     }
 
-    pub(crate) fn check_source(&self, source: &SourceSpan) -> Result<()> {
+    pub(crate) fn check_source(&self, source: &SourceSpan, face: &str, line: u64) -> Result<()> {
+        if source.face != face || u64::from(source.line) != line {
+            return Err(invalid("current printed source coordinate mismatch"));
+        }
         let expected = self
             .candidate
             .source_at(&source.author_path)

@@ -376,25 +376,36 @@ impl Game {
 
     fn prepare_current_cards(&mut self, selected: &SelectedEffects) -> Result<Arc<RuntimeCards>> {
         let mut definitions = RuntimeCards::default();
-        let mut representatives = BTreeMap::new();
         // The caller verified the public candidates against these accepted copies.
         for (number, accepted) in selected.accepted() {
-            let candidate = accepted.candidate();
-            let card = if let Some(card) = representatives.get(&candidate.card_id) {
-                Arc::clone(card)
-            } else {
-                let card = Arc::new(self.catalog.resolve_current(Arc::clone(candidate))?);
-                representatives.insert(candidate.card_id.clone(), Arc::clone(&card));
-                card
-            };
-            self.catalog.check_current_printing(number, &card)?;
-            definitions.current.insert(number.clone(), card);
+            self.register_current_printing(&mut definitions, number, accepted)?;
         }
         self.card_runtime.definitions = Arc::new(definitions);
         for (number, accepted) in selected.accepted() {
             self.load_accepted_card(number, accepted)?;
         }
         Ok(Arc::clone(&self.card_runtime.definitions))
+    }
+
+    fn register_current_printing(
+        &self,
+        definitions: &mut RuntimeCards,
+        number: &str,
+        accepted: &CandidateAdmission,
+    ) -> Result<()> {
+        let candidate = accepted.candidate();
+        let card = if let Some(card) = definitions.representatives.get(&candidate.card_id) {
+            Arc::clone(card)
+        } else {
+            let card = Arc::new(self.catalog.resolve_current(Arc::clone(candidate))?);
+            definitions
+                .representatives
+                .insert(candidate.card_id.clone(), Arc::clone(&card));
+            card
+        };
+        self.catalog.check_current_printing(number, &card)?;
+        definitions.current.insert(number.into(), card);
+        Ok(())
     }
 
     pub(in crate::game) fn prepare_strict_cards(
@@ -408,11 +419,7 @@ impl Game {
             let Some(accepted) = selected.accepted().get(number) else {
                 continue;
             };
-            let card = self
-                .catalog
-                .resolve_current(Arc::clone(accepted.candidate()))?;
-            self.catalog.check_current_printing(number, &card)?;
-            definitions.current.insert(number.clone(), Arc::new(card));
+            self.register_current_printing(&mut definitions, number, accepted)?;
         }
         self.card_runtime.selected = true;
         self.card_runtime.definitions = Arc::new(definitions);
@@ -468,12 +475,23 @@ impl Game {
         line: u64,
     ) -> Result<()> {
         if let Some(current) = self.card_runtime.definitions.current.get(card) {
-            if source.face != face || u64::from(source.line) != line {
-                return Err(invalid("current printed source coordinate mismatch"));
-            }
-            return current.check_source(source);
+            return current.check_source(source, face, line);
         }
         check_source(source, card, face, line)
+    }
+
+    fn check_nested_card_source(&self, source: &SourceSpan, parent: &SourceSpan) -> Result<()> {
+        let line = u64::from(parent.line);
+        // The enclosing ability was checked against the admitted printing before walking its body.
+        if let Some(current) = self
+            .card_runtime
+            .definitions
+            .representatives
+            .get(&parent.card_id)
+        {
+            return current.check_source(source, &parent.face, line);
+        }
+        check_source(source, &parent.card_no, &parent.face, line)
     }
 
     /// Load one complete internal card against this game's exact catalogue.
@@ -1813,7 +1831,7 @@ fn check_node_source(game: &Game, span: &SourceSpan, source: &SourceSpan) -> Res
     {
         return Err(invalid("instruction source evidence mapping mismatch"));
     }
-    game.check_card_source(span, &source.card_no, &source.face, u64::from(source.line))?;
+    game.check_nested_card_source(span, source)?;
     Ok(())
 }
 
