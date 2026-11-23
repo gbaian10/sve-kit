@@ -6,6 +6,10 @@ use crate::game::{Game, other};
 use crate::{EngineFailure, Result, invalid};
 use core::fmt;
 
+#[cfg(all(test, feature = "runner"))]
+#[path = "../../../tests/selfplay/menu_property.rs"]
+mod menu_property;
+
 /// A question-local main-action option, unrelated to authority object identities.
 /// This in-process capability has no serialization or wire representation.
 #[derive(Clone, PartialEq, Eq)]
