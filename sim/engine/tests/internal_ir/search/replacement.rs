@@ -200,24 +200,29 @@ fn effective_cost_boundary_controls_the_question_without_changing_found() {
 }
 
 #[test]
-fn full_field_rejects_only_an_actual_optional_choice_and_restores_the_search() {
+fn full_field_sends_the_found_card_to_hand_without_opening_replacement() {
     for seat in [1, 2] {
         let mut game = position(seat, 2, 1, 5);
         execute(&mut game, seat, replacement(cost_condition()));
-        let before = exact_authority(&game);
         let token = game.internal_decision(view(seat)).unwrap().token;
+        let result = answer(&mut game, seat, SearchAnswer::Ungrouped(vec![0]));
+        assert!(result.complete && game.internal_decision(view(seat)).is_none());
+        assert_eq!(
+            outcome(&result).moved[0].actual_to.unwrap().kind,
+            ZoneKind::Hand
+        );
+        assert_eq!(shuffles(&result), 1);
+
+        let before = exact_authority(&game);
         assert!(matches!(
             game.answer_internal(
                 PlayerId { seat },
                 token,
                 Answer::Search(SearchAnswer::Ungrouped(vec![0]))
             ),
-            Err(EngineFailure::Unsupported(_))
+            Err(EngineFailure::Invalid(_))
         ));
         assert_eq!(exact_authority(&game), before);
-        let result = answer(&mut game, seat, SearchAnswer::Ungrouped(vec![]));
-        assert!(result.complete);
-        assert_eq!(shuffles(&result), 1);
     }
 }
 
