@@ -357,6 +357,7 @@ impl Game {
             "アミュレット" | "アミュレット・トークン" | "アミュレット・エボルヴ" => {
                 CardKind::Amulet
             }
+            "クレスト・トークン" => CardKind::Crest,
             _ => return Err(EngineFailure::Unsupported("event card kind".into())),
         };
         let traits = if printed_only {
