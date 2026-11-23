@@ -31,6 +31,8 @@ pub struct SelectedEffects {
 pub(crate) struct RuntimeCards {
     pub(crate) cards: BTreeMap<String, Arc<AdmittedCard>>,
     pub(crate) current: BTreeMap<String, Arc<CurrentCard>>,
+    /// Source proofs are keyed by permanent card ID even when only an alternate printing is admitted.
+    pub(crate) representatives: BTreeMap<String, Arc<CurrentCard>>,
 }
 
 impl fmt::Debug for RuntimeCards {
