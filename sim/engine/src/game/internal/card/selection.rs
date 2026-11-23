@@ -501,6 +501,14 @@ impl TargetWait {
         {
             return self.pair_capacity(maximum.0);
         }
+        if self.groups.members.len() == 1
+            && self.bounds.maximum == Some(Nat(3))
+            && self.distinct_names
+            && self.distinct_classes.is_none()
+            && self.cost_cap.is_none()
+        {
+            return self.three_name_capacity();
+        }
         if self.members.len() > 10 {
             return Err(unsupported("name selection exceeds both fields"));
         }
@@ -521,6 +529,32 @@ impl TargetWait {
             }
         }
         Ok(maximum)
+    }
+
+    fn three_name_capacity(&self) -> Result<u64> {
+        // Equal frozen name sets are interchangeable for feasibility. Overlapping aliases
+        // among different sets still use the same compatibility check as a player's answer.
+        let mut name_sets = BTreeSet::new();
+        let representatives = self
+            .characteristics
+            .iter()
+            .filter_map(|(member, characteristics)| {
+                let names = characteristics.names.iter().collect::<BTreeSet<_>>();
+                (names.is_empty() || name_sets.insert(names)).then_some(*member)
+            })
+            .collect::<Vec<_>>();
+        for count in [3_u64, 2, 1] {
+            let bounds = Cardinality {
+                minimum: Nat(count),
+                maximum: Some(Nat(count)),
+            };
+            for members in sized_selections(&representatives, bounds) {
+                if self.compatible(&members)? {
+                    return Ok(count);
+                }
+            }
+        }
+        Ok(0)
     }
 
     fn pair_capacity(&self, maximum: u64) -> Result<u64> {

@@ -56,6 +56,67 @@ fn aurora_healing_printings_stand_and_forbid_attacks_and_draw_only_for_original_
 }
 
 #[test]
+fn bp08_104_declares_three_distinct_names_from_an_eleven_card_cemetery() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP08-103"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP08-104"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!(
+        [
+            "BP01-012", "BP01-012", "BP01-012",
+            "BP01-146", "BP01-146", "BP01-146",
+            "BP01-159", "BP01-159", "BP01-159",
+            "BP01-037", "BP01-037",
+        ]
+        .into_iter()
+        .enumerate()
+        .map(|(index, card)| json!({"id":format!("grave-{index}"),"card":card}))
+        .collect::<Vec<_>>()
+    );
+    let mut game = game(&initial);
+    let evolve = game
+        .internal_rule_action(
+            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":2_u8}}),
+        )
+        .unwrap();
+    assert_eq!(evolve.outcome, "resolved");
+    let play = resolve_pending_card(&mut game, "BP08-104");
+    let targets = await_card_choice(play);
+    let InputDomain::Targets(domain) = &targets.domain else {
+        panic!("three cemetery targets");
+    };
+    assert_eq!(domain.members.len(), 11);
+    assert_eq!(domain.cardinality.minimum, Nat(3));
+    let handles = |number| {
+        domain
+            .members
+            .iter()
+            .filter(|member| member.card.as_deref() == Some(number))
+            .map(|member| member.handle)
+            .collect::<Vec<_>>()
+    };
+    let first_name = handles("BP01-012");
+    let second_name = handles("BP01-146");
+    let third_name = handles("BP01-159");
+    game.answer_internal_card(
+        targets.actor,
+        targets.token,
+        Answer::Targets(vec![first_name[0], first_name[1], second_name[0]]),
+    )
+    .unwrap_err();
+    resolved(
+        game.answer_internal_card(
+            targets.actor,
+            targets.token,
+            Answer::Targets(vec![first_name[0], second_name[0], third_name[0]]),
+        )
+        .unwrap(),
+    );
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["P1"]["hand"], json!(["grave-0", "grave-3", "grave-6"]));
+    assert_eq!(state["P1"]["cemetery"].as_array().unwrap().len(), 8);
+}
+
+#[test]
 fn ruler_of_the_otherworld_printings_return_the_whole_selection_only_when_all_original_costs_match() {
     for number in ["BP08-104", "BP08-SL20"] {
         for (third, returns, short) in [("BP01-159",true,false),("BP01-041",false,false),("BP01-159",false,true)] {
