@@ -524,7 +524,6 @@ fn known_engine_issue(error: &str) -> Option<u16> {
             2481,
             "prototype continuation cannot enter the typed player interface",
         ),
-        (2482, "event card kind"),
     ]
     .into_iter()
     .find_map(|(issue, diagnostic)| error.contains(diagnostic).then_some(issue))

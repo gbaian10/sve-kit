@@ -4,6 +4,49 @@
     reason = "Unexpected decisions invalidate the printed count scenarios."
 )]
 use super::*;
+use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind};
+
+#[test]
+fn bp20_112_evolution_creates_its_crest_with_an_ex_observer() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"BP20-111"},
+        {"id":"observer","card":"BP22-020"}
+    ]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] =
+        json!([{"id":"form","card":"BP20-112"}]);
+    let mut board = game(&initial);
+    let step = board
+        .internal_rule_action(&json!({
+            "do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}
+        }))
+        .unwrap();
+    assert_eq!(step.outcome, "resolved");
+
+    board.advance_player_input();
+    let QuestionShape::Decision(DecisionShape::Pending(options)) =
+        player_presentation::question(&board).shape
+    else {
+        panic!("the evolved follower has a pending ability");
+    };
+    let [option] = options.as_slice() else {
+        panic!("exactly one evolution ability should be pending");
+    };
+    assert_eq!(
+        player_presentation::answer(&mut board, Answer::Pending(option.handle)),
+        SubmissionKind::Applied,
+    );
+    let view = board.projection(View::Referee).unwrap();
+    let [crest] = view["P1"]["ex"].as_array().unwrap().as_slice() else {
+        panic!("the evolution should create exactly one Crest in EX");
+    };
+    assert!(matches!(
+        view["objects"][crest.as_str().unwrap()]["card"].as_str(),
+        Some("BP20-P70" | "BP20-T11")
+    ));
+    assert_eq!(view["P1"]["field"], json!(["source", "observer"]));
+    assert!(board.internal_pending_choice().unwrap().is_none());
+}
 
 fn position(card: &str, count: usize) -> Value {
     let mut initial = draw_position();
