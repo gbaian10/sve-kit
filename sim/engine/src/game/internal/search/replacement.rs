@@ -95,12 +95,6 @@ impl Game {
     ) -> Result<()> {
         if !found.is_empty() && self.search_replacement_applies(execution, found, predicate)? {
             self.internal_search_check_move(execution, found, destination, player)?;
-            let (zone, _) = self.internal_search_destination(execution, destination, player)?;
-            if self.zone_count(seat_name(player)?, zone) >= 5 {
-                return Err(unsupported(
-                    "search optional replacement needs two executable destinations",
-                ));
-            }
         }
         Ok(())
     }
@@ -129,7 +123,10 @@ impl Game {
             .iter()
             .map(|view| view.object)
             .collect::<Vec<_>>();
-        if found.is_empty() || !self.search_replacement_applies(execution, &found, predicate)? {
+        if found.is_empty()
+            || !self.search_replacement_applies(execution, &found, predicate)?
+            || self.movement_free_spaces(player, ZoneKind::Field)? == 0
+        {
             outcome.moved = self.internal_search_move(
                 execution,
                 &found,

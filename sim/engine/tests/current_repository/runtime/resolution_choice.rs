@@ -3,6 +3,71 @@ use super::*;
 use sve_engine::game::player::observation::ProcessingStage;
 
 #[test]
+fn bp03_002_fanfare_uses_hand_when_its_own_entry_fills_the_field() {
+    for field_full in [true, false] {
+        let mut initial = position_with_source("BP03-002", "hand");
+        initial["players"]["P1"]["zones"]["field"] = json!(
+            (0_u8..if field_full { 4 } else { 3 })
+                .map(|i| json!({"id":format!("prior-{i}"),"card":"BP01-037"}))
+                .collect::<Vec<_>>()
+        );
+        initial["players"]["P1"]["zones"]["deck"] = json!([
+            {"id":"beast","card":"BP03-005"},
+            {"id":"spare","card":"BP01-037"}
+        ]);
+        let mut game = game(&initial);
+        let play = enter_with_fanfare(&mut game, "BP03-002");
+        let search = await_card_choice(play);
+        let InputDomain::Search(domain) = &search.domain else {
+            panic!("printed deck search");
+        };
+        let beast = domain
+            .cards
+            .iter()
+            .find(|card| card.card == "BP03-005")
+            .unwrap();
+        let after_search = game
+            .answer_internal_card(
+                search.actor,
+                search.token,
+                Answer::Search(SearchAnswer::Ungrouped(vec![beast.handle])),
+            )
+            .unwrap();
+        let result = if field_full {
+            resolved(after_search)
+        } else {
+            let replacement = await_card_choice(after_search);
+            assert_eq!(replacement.domain, InputDomain::SearchReplacement);
+            resolved(
+                game.answer_internal_card(
+                    replacement.actor,
+                    replacement.token,
+                    Answer::SearchReplacement(SearchReplacementAnswer::Replacement),
+                )
+                .unwrap(),
+            )
+        };
+        let state = game.projection(View::Referee).unwrap();
+        let destination = if field_full { "hand" } else { "field" };
+        assert!(
+            state["P1"][destination]
+                .as_array()
+                .unwrap()
+                .contains(&json!("beast"))
+        );
+        assert_eq!(
+            result
+                .progress
+                .facts
+                .iter()
+                .filter(|fact| matches!(fact, Fact::Shuffled { .. }))
+                .count(),
+            1
+        );
+    }
+}
+
+#[test]
 fn bp01_097_enters_before_its_fanfare_declares_or_cancels() {
     for seat in ["P1", "P2"] {
         let opponent = if seat == "P1" { "P2" } else { "P1" };
