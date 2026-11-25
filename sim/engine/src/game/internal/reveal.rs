@@ -235,10 +235,7 @@ impl Game {
                 }
             }
             let current_reference = execution.reference(self, &id)?;
-            if zone == "hand"
-                && object.generation == member.generation.0
-                && object.controller == seat_name(execution.context.controller)?
-            {
+            if zone == "hand" && object.generation == member.generation.0 {
                 hand_reveals.push((id.clone(), current_reference));
             }
             ids.push(id);

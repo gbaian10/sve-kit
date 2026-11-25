@@ -52,7 +52,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | drew | 無 | who:PlayerRef、not_phase:Phase、by:By | BP05-094；by 合成 |
 | equipped | 無 | equipment:(Ref 或 EventObjectSel) | CP04-PR22；selector 合成 |
 | limit_broke／final_limit_broke | ref:this | 無 | CR 14.6.4；場上從者自身完成的普通／最終階段 |
-| hand_revealed | ref:this | 無 | CP05-068；手牌能力，自己的本文或付款從手牌公開此卡 |
+| hand_revealed | ref:this | 無 | CP05-068；能力使手牌中的此卡公開給對手，待機控制者為手牌持有者 |
 | fused_as_material | 無 | ref:Ref、by:By | BP19-048 |
 
 counter_reached 是額外巨集：ref:Ref／name:CounterName／value:Nat 三者必填，沒有選填欄位。

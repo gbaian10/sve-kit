@@ -35,11 +35,13 @@ fn reveal_game(initial: &Value) -> Game {
         &Value::Null,
         &Value::Null,
         "cp05-hand-reveal",
-    ).unwrap();
+    )
+    .unwrap();
     let blank = WellFormedCardProgram::check(CardProgram {
         abilities: vec![],
         card_play_costs: vec![],
-    }).unwrap();
+    })
+    .unwrap();
     for printing in [FIRE, DARK] {
         game.load_internal_card(printing, &blank).unwrap();
     }
@@ -52,8 +54,12 @@ fn start_pending(game: &mut Game, line: u64) -> CardPlay {
         panic!("printed trigger pending");
     };
     let option = options.iter().find(|option| option.line == line).unwrap();
-    game.answer_internal_card(question.actor, question.token, Answer::Pending(option.handle))
-        .unwrap()
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::Pending(option.handle),
+    )
+    .unwrap()
 }
 
 fn select_target(game: &mut Game, play: CardPlay, printing: &str) -> CardPlay {
@@ -63,9 +69,18 @@ fn select_target(game: &mut Game, play: CardPlay, printing: &str) -> CardPlay {
     let InputDomain::Targets(domain) = &question.domain else {
         panic!("expected formal targets");
     };
-    let handle = domain.members.iter().find(|member| member.card.as_deref() == Some(printing)).unwrap().handle;
-    game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![handle]))
+    let handle = domain
+        .members
+        .iter()
+        .find(|member| member.card.as_deref() == Some(printing))
         .unwrap()
+        .handle;
+    game.answer_internal_card(
+        question.actor,
+        question.token,
+        Answer::Targets(vec![handle]),
+    )
+    .unwrap()
 }
 
 #[test]
@@ -101,17 +116,35 @@ fn cp05_068_attack_reveals_exactly_three_fire_cards_and_each_copy_observes_itsel
     };
     assert_eq!(domain.members.len(), 3);
     assert!(game.internal_decision(View::P2).is_none());
-    let handles = domain.members.iter().map(|member| member.handle).collect::<Vec<_>>();
-    game.answer_internal_card(materials.actor, materials.token, Answer::CostMaterials(handles[..2].to_vec()))
-        .unwrap_err();
+    let handles = domain
+        .members
+        .iter()
+        .map(|member| member.handle)
+        .collect::<Vec<_>>();
+    game.answer_internal_card(
+        materials.actor,
+        materials.token,
+        Answer::CostMaterials(handles[..2].to_vec()),
+    )
+    .unwrap_err();
     assert!(game.projection(View::P2).unwrap()["objects"]["first"].is_null());
-    resolved(game.answer_internal_card(materials.actor, materials.token, Answer::CostMaterials(handles)).unwrap());
+    resolved(
+        game.answer_internal_card(
+            materials.actor,
+            materials.token,
+            Answer::CostMaterials(handles),
+        )
+        .unwrap(),
+    );
 
     game.resume_internal_card().unwrap();
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["P2"]["leader"]["life"], 14_u8);
     assert_eq!(after["P2"]["cemetery"], json!(["enemy"]));
-    assert_eq!(after["P1"]["hand"], json!(["first","second","third","wrong"]));
+    assert_eq!(
+        after["P1"]["hand"],
+        json!(["first", "second", "third", "wrong"])
+    );
     for id in ["first", "second", "third", "wrong"] {
         assert!(game.projection(View::P2).unwrap()["objects"][id].is_null());
     }
@@ -121,7 +154,11 @@ fn cp05_068_attack_reveals_exactly_three_fire_cards_and_each_copy_observes_itsel
     };
     assert_eq!(options.len(), 2);
     for printing in ["CP05-068", "CP05-P52"] {
-        assert!(options.iter().any(|option| option.card == printing && option.line == 1));
+        assert!(
+            options
+                .iter()
+                .any(|option| option.card == printing && option.line == 1)
+        );
         let reveal = start_pending(&mut game, 1);
         resolved(select_target(&mut game, reveal, FIRE));
         game.resume_internal_card().unwrap();
@@ -133,18 +170,99 @@ fn cp05_068_attack_reveals_exactly_three_fire_cards_and_each_copy_observes_itsel
 }
 
 #[test]
-fn opponent_whole_hand_reveal_does_not_induce_an_own_hand_disclosure() {
+fn cp05_068_observes_its_owners_whole_hand_reveal_on_the_opponents_turn() {
     let mut initial = draw_position();
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"detective","card":"BP06-118"}]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"own_ally","card":FIRE}]);
     initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"opponents_card","card":"CP05-068"}]);
     let mut game = reveal_game(&initial);
     assert!(matches!(
-        game.play_internal_card("detective", PlayerId { seat: 1 }).unwrap(),
+        game.play_internal_card("detective", PlayerId { seat: 1 })
+            .unwrap(),
+        CardPlay::Entered(_)
+    ));
+    resolved(start_pending(&mut game, 1));
+    game.resume_internal_card().unwrap();
+    let reveal = game.internal_pending_choice().unwrap().unwrap();
+    assert_eq!(reveal.actor, PlayerId { seat: 2 });
+    let InputDomain::Pending(options) = &reveal.domain else {
+        panic!("the revealed printing must have a pending ability");
+    };
+    assert_eq!(options.len(), 1);
+    assert_eq!(options[0].card, "CP05-068");
+    assert!(game.projection(View::P1).unwrap()["objects"]["opponents_card"].is_null());
+    let target = start_pending(&mut game, 1);
+    resolved(select_target(&mut game, target, FIRE));
+    game.resume_internal_card().unwrap();
+    let view = game.projection(View::Referee).unwrap();
+    let keywords = view["objects"]["own_ally"]["keywords"].as_array().unwrap();
+    assert!(keywords.contains(&json!("突進")));
+    assert!(keywords.contains(&json!("指定攻撃")));
+}
+
+#[test]
+fn cp05_068_does_not_observe_revelation_in_the_deck() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"BP19-113"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"revealed","card":"CP05-068"}]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"ally","card":FIRE}]);
+    let mut game = reveal_game(&initial);
+    assert!(matches!(
+        game.play_internal_card("source", PlayerId { seat: 1 })
+            .unwrap(),
         CardPlay::Entered(_)
     ));
     resolved(start_pending(&mut game, 1));
     game.resume_internal_card().unwrap();
     assert!(game.internal_pending_choice().unwrap().is_none());
-    assert!(game.projection(View::P1).unwrap()["objects"]["opponents_card"].is_null());
+    let public = game.projection(View::P2).unwrap();
+    assert!(
+        public["known_cards"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .any(|card| card["id"] == "revealed")
+    );
+}
+
+#[test]
+fn cp05_068_keeps_its_pending_ability_when_random_hand_revelation_moves_it() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"BP11-112"}, {"id":"ally","card":FIRE}
+    ]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"revealed","card":"CP05-P52"}, {"id":"other","card":DARK}
+    ]);
+    let mut game = reveal_game(&initial);
+    let printed = selection_with_rules().current["BP11-112"]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.source.line == 3)
+        .unwrap()
+        .node
+        .id;
+    resolved(
+        game.activate_internal_card("source", printed, PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    assert!(
+        game.projection(View::Referee).unwrap()["P1"]["field"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("revealed"))
+    );
+    let target = start_pending(&mut game, 1);
+    resolved(select_target(&mut game, target, FIRE));
+    game.resume_internal_card().unwrap();
+    let after = game.projection(View::Referee).unwrap();
+    assert!(
+        after["objects"]["ally"]["keywords"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("指定攻撃"))
+    );
 }

@@ -3,7 +3,7 @@
 use super::{
     Ability, AbilityKind, AbilityOrigin, Cause, EventPattern, EventPayload, EventSnapshotPolicy,
     Game, Result, SnapshotId, TriggerAggregation, TriggerCondition, ZoneKind, invalid,
-    optional_payment, unsupported,
+    optional_payment, player_id, unsupported,
 };
 use crate::game::internal::Execution;
 use crate::ir::ObjectRef;
@@ -48,7 +48,6 @@ impl Game {
         before: SnapshotId,
     ) -> Result<()> {
         let mut pending = Vec::new();
-        let player = execution.context.controller;
         for (holder, card) in members {
             let (printing, _) = self.internal_effective_print(holder)?;
             if !self
@@ -66,6 +65,7 @@ impl Game {
             {
                 continue;
             }
+            let player = player_id(&self.object(holder)?.controller)?;
             let header = self.pending_header(
                 player,
                 Cause::Effect {
