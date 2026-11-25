@@ -266,3 +266,64 @@ fn cp05_068_keeps_its_pending_ability_when_random_hand_revelation_moves_it() {
             .contains(&json!("指定攻撃"))
     );
 }
+
+#[test]
+fn cp05_057s_variable_reveal_also_triggers_cp05_068_in_hand() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["sep"] = json!(1_u8);
+    initial["turn"]["elapsed_turns"] = json!({"P1":7_u8,"P2":6_u8});
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"CP05-056"}, {"id":"ally","card":FIRE}
+    ]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP05-057"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"revealed","card":"CP05-P52"}]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP04-117"}]);
+    let mut game = reveal_game(&initial);
+    assert_eq!(
+        game.internal_rule_action(&json!({
+            "do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8,"sep":1_u8}
+        }))
+        .unwrap()
+        .outcome,
+        "resolved"
+    );
+    let CardPlay::Awaiting(payment) = start_pending(&mut game, 2) else {
+        panic!("the evolved card offers a reveal cost");
+    };
+    assert_eq!(payment.domain, InputDomain::OptionalCost);
+    let enemy = game
+        .answer_internal_card(payment.actor, payment.token, Answer::OptionalCost(true))
+        .unwrap();
+    let CardPlay::Awaiting(materials) = select_target(&mut game, enemy, "BP04-117") else {
+        panic!("the printed reveal must ask for private materials");
+    };
+    let InputDomain::CostMaterials(domain) = &materials.domain else {
+        panic!("expected variable Fire materials");
+    };
+    assert_eq!(domain.members.len(), 1);
+    assert_eq!(domain.members[0].card.as_deref(), Some("CP05-P52"));
+    resolved(
+        game.answer_internal_card(
+            materials.actor,
+            materials.token,
+            Answer::CostMaterials(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+
+    game.resume_internal_card().unwrap();
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+        19_u8
+    );
+    let grant = start_pending(&mut game, 1);
+    resolved(select_target(&mut game, grant, FIRE));
+    game.resume_internal_card().unwrap();
+    let result = game.projection(View::Referee).unwrap();
+    assert!(
+        result["objects"]["ally"]["keywords"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("指定攻撃"))
+    );
+}
