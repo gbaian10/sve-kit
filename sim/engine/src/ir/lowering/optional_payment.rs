@@ -173,6 +173,24 @@ impl BodyContext<'_> {
         let Some(ast::Cost::Short(operation)) = &body.head_cost else {
             return Ok(None);
         };
+        if let ast::CostOperation::Reveal(material) = operation.as_ref() {
+            let Some(name) = &material.result else {
+                return Ok(None);
+            };
+            let distribution_uses_materials = body.steps.iter().any(|step| {
+                matches!(step, ast::Step::Damage(damage)
+                    if damage.distribute == Some(true)
+                        && matches!(&damage.n, ast::Number::CountOf {
+                            count_of: ast::CountOf::Named(counted),
+                        } if counted == name))
+            });
+            if material.any && distribution_uses_materials {
+                return self
+                    .declare_material(body, source, origin, path, name)
+                    .map(Some);
+            }
+            return Ok(None);
+        }
         let material = if let ast::CostOperation::Act(material) = operation.as_ref() {
             material
         } else if let ast::CostOperation::Banish(ast::BanishMaterial::Public(material)) =
@@ -197,6 +215,18 @@ impl BodyContext<'_> {
         if !has_dependent_target && !has_dependent_mode {
             return Ok(None);
         }
+        self.declare_material(body, source, origin, path, name)
+            .map(Some)
+    }
+
+    fn declare_material(
+        &mut self,
+        body: &ast::Body,
+        source: &SourceSpan,
+        origin: &AbilitySource,
+        path: &str,
+        name: &str,
+    ) -> Result<PaymentDeclaration, LoweringError> {
         let mut payment = self
             .optional_payment(body, source, origin, path)?
             .ok_or_else(|| super::unsupported(path))?;
@@ -209,9 +239,9 @@ impl BodyContext<'_> {
         else {
             return Err(super::unsupported(path));
         };
-        self.declared_material = Some((name.clone(), *binding));
+        self.declared_material = Some((name.to_owned(), *binding));
         self.parameters.append(&mut payment.parameters);
-        Ok(Some(payment))
+        Ok(payment)
     }
 
     pub(super) fn optional_payment(
@@ -251,6 +281,9 @@ impl BodyContext<'_> {
                         }
                         ast::CostOperation::ToEx(ast::ExMaterial::Hand(material))
                         | ast::CostOperation::Banish(ast::BanishMaterial::Hand(material)) => {
+                            material.result.as_ref()
+                        }
+                        ast::CostOperation::Reveal(material) if material.any => {
                             material.result.as_ref()
                         }
                         ast::CostOperation::Banish(

@@ -1069,7 +1069,22 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         let recipients = self.recipients(&damage.to, path)?;
-        let mut value = self.number(&damage.n, path, &mut BTreeSet::new())?;
+        let mut value = match (&damage.n, &self.declared_material) {
+            (
+                ast::Number::CountOf {
+                    count_of: ast::CountOf::Named(name),
+                },
+                Some((declared, reference)),
+            ) if damage.distribute == Some(true) && name == declared => {
+                super::numeric::aggregate_count(
+                    Selector::Bound {
+                        reference: *reference,
+                    },
+                    None,
+                )
+            }
+            _ => self.number(&damage.n, path, &mut BTreeSet::new())?,
+        };
         if let Some(replacements) = &damage.instead {
             let [replacement] = replacements.as_slice() else {
                 return Err(unsupported(path));
@@ -1099,7 +1114,12 @@ impl BodyContext<'_> {
             let scope = declaration_scope
                 .filter(|_| self.formal_play)
                 .ok_or_else(|| unsupported(path))?;
-            let total = if let Expr::Literal(Int(total)) = value {
+            let total = if let Expr::Compute(operation) = &value
+                && let super::IntOperation::FromNat { value } = operation.as_ref()
+                && public_numbers::material_count(value).is_some()
+            {
+                value.clone()
+            } else if let Expr::Literal(Int(total)) = value {
                 Expr::Literal(Nat(
                     u64::try_from(total).map_err(|_private| unsupported(path))?
                 ))

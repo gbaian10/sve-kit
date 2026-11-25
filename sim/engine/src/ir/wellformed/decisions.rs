@@ -301,7 +301,15 @@ impl Checker {
                     return Err(self.error(WellFormedReason::DecisionCardinality));
                 }
                 self.recipients(recipients)?;
-                self.natural(total)?;
+                if cardinality.is_none()
+                    && let Some(material) = public_numbers::material_count(total)
+                    && self.env.reveal_materials.contains(&material.key())
+                {
+                    // Allocation announces only the selected count, not the private cards.
+                    self.reference(material, BindingKind::Value)?;
+                } else {
+                    self.natural(total)?;
+                }
                 self.define(*binding, BindingKind::Value)?;
                 self.env
                     .distributions

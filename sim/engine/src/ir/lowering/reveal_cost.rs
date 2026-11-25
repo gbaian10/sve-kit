@@ -103,10 +103,6 @@ fn choice(
     material: &ast::HandMaterial,
     path: &str,
 ) -> Result<Decision, LoweringError> {
-    let count = super::hand_payment::cardinality(material, path)?;
-    if !matches!(count.minimum.0, 1 | 2) || count.maximum != Some(count.minimum) {
-        return Err(unsupported(path));
-    }
     let constraint = super::hand_payment::constraint(context.card_allocator, material, path)?;
     let [group] = constraint.groups.as_slice() else {
         return Err(unsupported(path));
@@ -140,7 +136,15 @@ pub(super) fn field(
     material: &ast::HandMaterial,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    if material.n.is_none() || material.upto.is_some() || material.any {
+    let exact = matches!(material.n, Some(1 | 2)) && !material.any;
+    let variable = material.any
+        && material.n.is_none()
+        && material.sel.r#trait.is_some()
+        && material
+            .result
+            .as_ref()
+            .is_some_and(|name| !name.is_empty());
+    if material.upto.is_some() || !(exact || variable) {
         return Err(unsupported(path));
     }
     let decision = choice(context, material, path)?;
