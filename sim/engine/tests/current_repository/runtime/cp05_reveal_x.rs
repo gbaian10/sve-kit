@@ -98,18 +98,18 @@ fn cp05_057_uses_selected_fire_card_count_for_formal_damage_allocation() {
     };
     assert_eq!(targets.cardinality.maximum, Some(Nat(2)));
     let step = target(&mut game, step, 2);
-    let CardPlay::Awaiting(question) = &step else {
+    let CardPlay::Awaiting(material_question) = &step else {
         panic!("fire material question");
     };
-    let InputDomain::CostMaterials(materials) = &question.domain else {
+    let InputDomain::CostMaterials(materials) = &material_question.domain else {
         panic!("fire material domain");
     };
     assert_eq!(materials.members.len(), 3);
     assert_eq!(materials.cardinality.minimum, Nat(2));
     assert!(
         game.answer_internal_card(
-            question.actor,
-            question.token,
+            material_question.actor,
+            material_question.token,
             Answer::CostMaterials(vec![materials.members[0].handle]),
         )
         .is_err(),
