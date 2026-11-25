@@ -32,18 +32,6 @@ fn board_with_maximum(program: &WellFormedCardProgram, maximum: u64) -> Game {
 }
 
 fn board_with_resources(program: &WellFormedCardProgram, current: u64, maximum: u64) -> Game {
-    let (mut snapshot, registry, document) = catalog_documents(&json!("1"));
-    snapshot.push('\n');
-    snapshot.push_str(&json!({"number":"form","faces":[{"name":"form","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"5","traits":[],"text":null,"sections":[]}]}).to_string());
-    let forms=json!({"format":1,"kind":"effect_set","cards":{"form":{"status":"complete","abilities":[]}}}).to_string();
-    let catalog = Arc::new(
-        Catalog::from_documents(
-            &snapshot,
-            &registry,
-            &[("unit.yaml".into(), document), ("form.yaml".into(), forms)],
-        )
-        .unwrap(),
-    );
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["pp"] = json!({"current":current,"max":maximum});
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
@@ -56,10 +44,173 @@ fn board_with_resources(program: &WellFormedCardProgram, current: u64, maximum: 
     ]);
     initial["players"]["P2"]["zones"]["evolve_deck"] =
         json!([{"id":"opposing","card":"form","face_up":true}]);
-    let mut game = Game::new(catalog, &initial, &Value::Null, &Value::Null, "flip-down").unwrap();
+    board_from_position(program, &initial)
+}
+
+fn board_from_position(program: &WellFormedCardProgram, initial: &Value) -> Game {
+    let (mut snapshot, registry, document) = catalog_documents(&json!("1"));
+    for (number, attribute) in [("form", "土属性"), ("other-form", "闇属性")] {
+        snapshot.push('\n');
+        snapshot.push_str(&json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"5","traits":[attribute],"text":null,"sections":[]}]}).to_string());
+    }
+    let forms = json!({"format":1,"kind":"effect_set","cards":{
+        "form":{"status":"complete","abilities":[]},
+        "other-form":{"status":"complete","abilities":[]}
+    }})
+    .to_string();
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot,
+            &registry,
+            &[("unit.yaml".into(), document), ("form.yaml".into(), forms)],
+        )
+        .unwrap(),
+    );
+    let mut game = Game::new(catalog, initial, &Value::Null, &Value::Null, "evolve-flip").unwrap();
     game.load_internal_card("unit-follower", program).unwrap();
-    game.load_internal_card("form", &card(vec![])).unwrap();
+    let form_program = card(vec![]);
+    game.load_internal_card("form", &form_program).unwrap();
+    game.load_internal_card("other-form", &form_program)
+        .unwrap();
     game
+}
+
+fn flip_up_tree(selection: &Value) -> Value {
+    let mut tree = tree(&query(), false);
+    tree["cards"]["unit-follower"]["abilities"][0]["activate"] = json!({
+        "cost":{"pp":0},
+        "do":[
+            {"flip_up":selection},
+            {"if":{"cond":{"cmp":{"op":"ge","right":4,"left":{"count":{
+                "who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true,"trait":"土属性"
+            }}}},"then":[{"life":{"who":"self","delta":2}}]}},
+            {"ep":{"who":"self","delta":1}}
+        ]
+    });
+    tree
+}
+
+fn flip_up_position() -> Value {
+    let mut initial = setup(1, json!([]));
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
+    initial["players"]["P1"]["ep"] = json!(0);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([
+        {"id":"open-a","card":"form","face_up":true},
+        {"id":"open-b","card":"form","face_up":true},
+        {"id":"hidden-a","card":"form","face_up":false},
+        {"id":"hidden-b","card":"form","face_up":false},
+        {"id":"other","card":"other-form","face_up":false}
+    ]);
+    initial["players"]["P2"]["zones"]["evolve_deck"] =
+        json!([{"id":"enemy","card":"form","face_up":false}]);
+    initial
+}
+
+#[test]
+fn body_flip_up_keeps_options_private_and_updates_the_later_public_count() {
+    // CP05-054 may flip up to two earth evolutions. CP05-069 and CP05-091
+    // read the new face-up total after their optional flip.
+    let program = lowerer()
+        .lower(&flip_up_tree(&json!({
+            "sel":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","trait":"土属性"},
+            "upto":2
+        })))
+        .unwrap()
+        .remove("unit-follower")
+        .unwrap();
+    let initial = flip_up_position();
+    for choose in [false, true] {
+        let mut game = board_from_position(&program, &initial);
+        let before = game.projection(View::Referee).unwrap();
+        let CardPlay::Awaiting(question) = game
+            .activate_internal_card("s", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap()
+        else {
+            panic!("face-up selection")
+        };
+        assert!(
+            game.internal_decision(View::P2).is_none(),
+            "the opponent cannot see this choice"
+        );
+        let InputDomain::Targets(domain) = &question.domain else {
+            panic!("private evolve-deck options")
+        };
+        assert_eq!(
+            domain.members.len(),
+            2,
+            "only face-down earth evolutions in the chooser's deck qualify"
+        );
+        assert_eq!(domain.cardinality.minimum, Nat(0), "the flip is optional");
+        assert_eq!(
+            domain.cardinality.maximum,
+            Some(Nat(2)),
+            "the printed upper bound applies"
+        );
+        let selected = domain
+            .members
+            .iter()
+            .filter(|_| choose)
+            .map(|member| member.handle)
+            .collect();
+        resolved(
+            game.answer_internal_card(question.actor, question.token, Answer::Targets(selected))
+                .unwrap(),
+        );
+        let after = game.projection(View::Referee).unwrap();
+        let opponent = game.projection(View::P2).unwrap();
+        assert_eq!(
+            after["P1"]["evolve_deck"], before["P1"]["evolve_deck"],
+            "the cards keep their positions"
+        );
+        for id in ["hidden-a", "hidden-b"] {
+            assert_eq!(
+                after["objects"][id]["face_up"], choose,
+                "only a selected card flips"
+            );
+            assert_eq!(
+                after["objects"][id]["generation"], before["objects"][id]["generation"],
+                "flipping does not create a new generation"
+            );
+            assert_eq!(
+                opponent["objects"].get(id).is_some(),
+                choose,
+                "only the successful flip exposes the card"
+            );
+        }
+        assert_eq!(
+            after["objects"]["other"]["face_up"], false,
+            "the unrelated attribute stays down"
+        );
+        assert!(
+            opponent["objects"].get("other").is_none(),
+            "the unrelated card stays hidden"
+        );
+        assert_eq!(
+            after["objects"]["enemy"]["face_up"], false,
+            "the other player's cards stay down"
+        );
+        assert_eq!(
+            after["P1"]["ep"], 1,
+            "the next instruction executes even with a zero selection"
+        );
+        assert_eq!(
+            after["P1"]["leader"]["life"],
+            if choose { 22_u8 } else { 20_u8 },
+            "the follow-up condition reads the new face-up total"
+        );
+    }
+}
+
+#[test]
+fn body_flip_up_rejects_other_players_face_up_cards_and_zero_bounds() {
+    for selection in [
+        json!({"sel":{"who":"opp","zone":"evolve_deck","kind":"evolve_follower"},"upto":1}),
+        json!({"sel":{"who":"self","zone":"evolve_deck","kind":"evolve_follower","face_up":true},"upto":1}),
+        json!({"sel":{"who":"self","zone":"evolve_deck","kind":"evolve_follower"},"upto":0}),
+    ] {
+        lowerer().lower(&flip_up_tree(&selection)).unwrap_err();
+    }
 }
 
 #[test]

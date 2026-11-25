@@ -464,6 +464,7 @@ pub(super) enum Step {
     Steal(Steal),
     Give(Give),
     FlipDown(FlipDown),
+    FlipUp(FlipUpSelection),
     MakeType(MakeType),
     Buff(Modify),
     Grant(Grant),
@@ -4812,6 +4813,12 @@ pub(super) struct FlipMaterial {
     pub sel: FlipFilter,
     pub n: u64,
     pub result: Option<String>,
+}
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct FlipUpSelection {
+    pub sel: FlipFilter,
+    pub upto: u64,
 }
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
