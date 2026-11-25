@@ -1,0 +1,65 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-037:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            hand_revealed:
+              ref: this
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1
+      - line: 2
+        keywords:
+          - final_limit_break_possible
+      - line: 3
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4
+      - line: 4
+        auto:
+          "on":
+            final_limit_broke:
+              ref: this
+          targets:
+            - bind: ally
+              from:
+                who: self
+                zone: field
+                kind: follower
+                orig_cost_le: 3
+              n: 1
+          do:
+            - grant:
+                "on": ally
+                keywords:
+                  - storm
