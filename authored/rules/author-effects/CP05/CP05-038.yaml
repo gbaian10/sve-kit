@@ -37,7 +37,7 @@ cards:
           do:
             - damage:
                 to:
-                  leader: opp
+                  leaders: opponents
                 n: 4
       - line: 4
         activate:

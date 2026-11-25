@@ -87,6 +87,39 @@ fn quatre_discards_itself_to_damage_a_target_and_draw() {
 }
 
 #[test]
+fn quatre_limit_break_damages_a_follower_and_final_limit_break_damages_every_enemy_leader() {
+    let mut initial = enemy_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"CP05-038"}]);
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"material","card":"CP05-T15"}]);
+    let mut game = game(&initial);
+    let life = game.projection(View::Referee).unwrap()["P2"]["leader"]["life"]
+        .as_u64()
+        .unwrap();
+    let play = game
+        .activate_internal_card(
+            "material",
+            definition("CP05-T15", AbilityKind::Activated, 0),
+            PLAYER,
+        )
+        .unwrap();
+    resolved(answer_single_target(&mut game, play));
+    for _ in 0_u8..2 {
+        if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+            game.resume_internal_card().unwrap();
+        }
+        let play = first_trigger(&mut game, "CP05-038");
+        if matches!(play, CardPlay::Awaiting(_)) {
+            resolved(answer_single_target(&mut game, play));
+        } else {
+            resolved(play);
+        }
+    }
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(state["objects"]["enemy"]["damage"], 4_u8);
+    assert_eq!(state["P2"]["leader"]["life"], life - 4);
+}
+
+#[test]
 fn base_cagliostro_creates_both_ex_cards_at_seven_maximum_pp() {
     let mut initial = draw_position();
     initial["players"]["P1"]["pp"] = json!({"current":2_u8,"max":7_u8});
