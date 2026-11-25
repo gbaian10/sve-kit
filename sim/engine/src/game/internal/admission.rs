@@ -1192,6 +1192,7 @@ fn supported(code: &str) -> bool {
             | "shape.CostChange.Set"
             | "effect.cost-set"
             | "internal.CostKind.Play"
+            | "internal.CostKind.QuickActivation"
             | "internal.CostKind.Evolution"
             | "shape.CostChange.Delta"
             | "effect.cost-delta"

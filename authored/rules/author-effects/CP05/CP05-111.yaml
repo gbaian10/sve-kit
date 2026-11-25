@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-111:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        fanfare:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  keyword: quick_activation
+                  orig_cost_eq: 1
+                n: 1
+                to: field
+            - create:
+                token: 水晶のエレメント
+                to: ex
+                n: 1
+      - line: 3
+        activate:
+          zone: hand
+          quick: true
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - create:
+                token: 水晶のエレメント
+                to: ex
+                n: 1
+            - draw:
+                who: self
+                n: 1

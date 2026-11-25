@@ -107,6 +107,7 @@ impl BodyContext<'_> {
                         | ast::StaticEffect::DamageMod(_)
                         | ast::StaticEffect::DamageCap(_),
                     ) => super::prevention::lower_at_source,
+                    Some(ast::StaticEffect::CostMod(_)) => super::other_costs::lower_at_source,
                     Some(ast::StaticEffect::MustAttack(_)) => {
                         super::attack_restrictions::lower_at_source
                     }

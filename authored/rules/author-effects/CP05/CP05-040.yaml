@@ -1,0 +1,45 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-040:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - pp:
+                who: self
+                delta: 3
+      - line: 2
+        super_evolve_time:
+          do:
+            - grant:
+                "on": this
+                abilities:
+                  - static:
+                      effects:
+                        - cost_mod:
+                            when_playing:
+                              any_of:
+                                - who: self
+                                  kind: spell
+                                  keyword: quick_spell
+                                - who: self
+                                  kind: follower
+                                  keyword: quick_activation
+                            delta: -1
+                        - cost_mod:
+                            when_activating:
+                              who: self
+                              quick: true
+                            delta: -1

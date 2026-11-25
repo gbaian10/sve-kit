@@ -214,22 +214,53 @@ class MakeTypeFields(TypedDict):
 type MakeType = MakeTypeFields
 
 
+@with_config(CONFIG)
+class QuickActivationCostSubject(TypedDict):
+    who: Literal["self"]
+    quick: Literal[True]
+
+
 @with_config(
     ConfigDict(
         extra="forbid",
         strict=True,
         regex_engine="python-re",
-        json_schema_extra={"oneOf": [{"required": ["delta"]}, {"required": ["set"]}]},
+        json_schema_extra={
+            "oneOf": [{"required": ["delta"]}, {"required": ["set"]}],
+            "allOf": [
+                {
+                    "oneOf": [
+                        {
+                            "required": ["when_playing"],
+                            "not": {"required": ["when_activating"]},
+                        },
+                        {
+                            "required": ["when_activating", "delta"],
+                            "not": {"required": ["when_playing"]},
+                        },
+                    ]
+                }
+            ],
+        },
     )
 )
 class CostModFields(TypedDict):
-    when_playing: ObjectSel
+    when_playing: NotRequired[ObjectSel]
+    when_activating: NotRequired[QuickActivationCostSubject]
     delta: NotRequired[NumericExpr | ParamRef]
     set: NotRequired[Quantity | ParamRef]
     next_only: NotRequired[bool]
 
 
-type CostMod = Annotated[CostModFields, AfterValidator(_adjustment)]
+def _cost_mod(value: CostModFields) -> CostModFields:
+    if ("when_playing" in value) == ("when_activating" in value):
+        raise ValueError("Cost modifiers name one play subject")
+    if "when_activating" in value and "delta" not in value:
+        raise ValueError("Quick activation cost modifiers require a delta")
+    return _adjustment(value)
+
+
+type CostMod = Annotated[CostModFields, AfterValidator(_cost_mod)]
 
 
 @with_config(

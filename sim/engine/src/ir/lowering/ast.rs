@@ -1540,10 +1540,18 @@ pub(super) struct EvolutionCostModifier {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct CostModifier {
-    pub when_playing: Playing,
+    pub when_playing: Option<Playing>,
+    pub when_activating: Option<QuickActivationCostSubject>,
     pub delta: Option<Value>,
     pub set: Option<i64>,
     pub next_only: Option<bool>,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct QuickActivationCostSubject {
+    pub who: SelfPlayer,
+    pub quick: True,
 }
 
 #[derive(Deserialize)]
@@ -1561,6 +1569,7 @@ pub(super) struct PlayingQuery {
     pub who: Side,
     pub zone: Option<PlayingZones>,
     pub kind: Option<SearchKind>,
+    pub keyword: Option<FilterKeyword>,
     pub r#trait: Option<String>,
     #[serde(default)]
     pub traits_all: Vec<String>,

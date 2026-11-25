@@ -1,0 +1,34 @@
+cards:
+  CP05-083:
+    abilities:
+      - line: 1
+        play:
+          additional_cost:
+            discard:
+              n: 1
+              sel:
+                trait: 闇属性
+                who: self
+                zone: hand
+      - line: 2
+        spell:
+          do:
+            - damage:
+                n: 5
+                to:
+                  kind: follower
+                  who: all
+                  zone: field
+            - damage:
+                n: 2
+                to:
+                  leaders: opponents
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set

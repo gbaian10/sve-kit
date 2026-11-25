@@ -1,0 +1,52 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-047:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    token_sources:
+      - section: 1
+        line: 1
+        card: CP05-T07
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        keyword: quick_activation
+                    op: ge
+                    right: 7
+                then:
+                  - create:
+                      token: ハクタク
+                      n: 1
+                      to: field
+      - line: 2
+        activate:
+          quick: true
+          per_turn: 1
+          cost:
+            pp: 0
+          do:
+            - player_effect:
+                who: self
+                effect:
+                  cost_mod:
+                    when_activating:
+                      who: self
+                      quick: true
+                    delta: -1
+                    next_only: true
+                until: turn
