@@ -154,6 +154,8 @@ HISTORY_NAMES = {
     "A.history.ub-activated-where": "UbActivatedHistoryWhere",
     "A.history.ub-activated": "HistoryUbActivated",
     "A.history.ub-activated-condition": "HistoryUbActivatedCondition",
+    "A.history.limit-break": "HistoryLimitBreak",
+    "A.history.limit-break-condition": "HistoryLimitBreakCondition",
     "A.event.fused-payload": "EventFusedPayload",
     "A.event.fused": "EventFused",
     "A.history.fused-where": "FusedHistoryWhere",

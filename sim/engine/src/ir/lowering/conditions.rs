@@ -65,6 +65,23 @@ pub(super) fn discarded_history(
     ))
 }
 
+fn limit_break_history(
+    history: &ast::HistoryQuery,
+    path: &str,
+) -> Result<super::super::HistoryQuery, LoweringError> {
+    if !matches!(history.who, Some(ast::LeaderSide::Controller))
+        || history.sel.is_some()
+        || history.from.is_some()
+        || history.to.is_some()
+        || history.r#where.is_some()
+        || history.exclude.is_some()
+        || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+    {
+        return Err(unsupported(path));
+    }
+    Ok(super::super::history_turn::limit_break_query())
+}
+
 fn life_history(
     history: &ast::HistoryQuery,
     event: Binding<LifeChangeEvent>,
@@ -845,6 +862,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<super::super::HistoryQuery, LoweringError> {
         use super::super::history_turn::{SubjectHistoryKind, subject_query};
+        if matches!(history.event, ast::HistoryEvent::LimitBreak) {
+            return limit_break_history(history, path);
+        }
         if matches!(history.event, ast::HistoryEvent::AbilityPlayed) {
             return quick_activation_history(history, path);
         }
@@ -929,6 +949,7 @@ impl BodyContext<'_> {
             | ast::HistoryEvent::Played
             | ast::HistoryEvent::Discarded
             | ast::HistoryEvent::UbActivated
+            | ast::HistoryEvent::LimitBreak
             | ast::HistoryEvent::LifeChanged
             | ast::HistoryEvent::AbilityPlayed => {
                 return Err(unsupported(path));
