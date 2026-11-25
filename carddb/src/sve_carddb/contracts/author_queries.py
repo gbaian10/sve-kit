@@ -2330,14 +2330,15 @@ type HistoryUbActivatedCondition = Annotated[
 ]
 
 
-@with_config(HISTORY_CONFIG)
+# No subject or where clause exists, so the history subject guard does not apply.
+@with_config(SHAPE_CONFIG)
 class HistoryLimitBreak(TypedDict):
     event: Literal["limit_break"]
     window: Literal["this_turn"]
     who: Literal["self"]
 
 
-@with_config(HISTORY_CONFIG)
+@with_config(SHAPE_CONFIG)
 class HistoryLimitBreakCondition(HistoryLimitBreak):
     at_least: NotRequired[UInt]
 
