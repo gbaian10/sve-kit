@@ -192,6 +192,7 @@ HISTORY_NAMES = {
     "A.event.equipped": "EventEquipped",
     "A.event.self-limit-break": "SelfLimitBreak",
     "A.event.limit-broke": "EventLimitBroke",
+    "A.event.hand-revealed": "EventHandRevealed",
     "A.event.final-limit-broke": "EventFinalLimitBroke",
     "A.history.equipped-where": "EquippedHistoryWhere",
     "A.history.equipped": "HistoryEquipped",

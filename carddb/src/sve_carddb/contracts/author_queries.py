@@ -2667,6 +2667,14 @@ class EventEquipped(RecordData):
     equipped: EventEquippedPayload
 
 
+class SelfHandReveal(RecordData):
+    ref: Literal["this"]
+
+
+class EventHandRevealed(RecordData):
+    hand_revealed: SelfHandReveal
+
+
 class SelfLimitBreak(RecordData):
     ref: Literal["this"]
 
@@ -2840,6 +2848,7 @@ type EventAtom = (
     | EventDrew
     | EventEquipped
     | EventLimitBroke
+    | EventHandRevealed
     | EventFinalLimitBroke
     | EventFusedAsMaterial
     | EventCounterReached

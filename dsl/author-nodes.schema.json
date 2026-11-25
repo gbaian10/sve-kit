@@ -9860,6 +9860,28 @@
       ],
       "type": "object"
     },
+    "A.event.hand-revealed": {
+      "additionalProperties": false,
+      "properties": {
+        "hand_revealed": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "const": "this",
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "hand_revealed"
+      ],
+      "type": "object"
+    },
     "A.event.self-limit-break": {
       "additionalProperties": false,
       "properties": {
@@ -10409,6 +10431,9 @@
         },
         {
           "$ref": "#/$defs/A.event.limit-broke"
+        },
+        {
+          "$ref": "#/$defs/A.event.hand-revealed"
         },
         {
           "$ref": "#/$defs/A.event.final-limit-broke"
