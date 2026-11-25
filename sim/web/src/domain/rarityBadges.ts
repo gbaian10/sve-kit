@@ -4,7 +4,7 @@ export const RARITY_BADGE_HEIGHT = 11
 export const RARITY_COLUMN_MIN_WIDTH = Math.ceil((RARITY_BADGE_HEIGHT * 56) / 21) + 10
 
 export const BADGE_STYLES = ["br", "sr", "gr", "lg", "sl", "sp", "none"] as const
-type BadgeStyle = (typeof BADGE_STYLES)[number]
+type BadgeStyle = (typeof BADGE_STYLES)[number] | "gbf"
 export type RarityBadge = { readonly style: BadgeStyle; readonly text?: string }
 
 export interface RarityBadgeInput {

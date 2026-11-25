@@ -22,11 +22,15 @@ def authored(tmp_path: Path, records: str) -> Path:
     return tmp_path
 
 
-def test_appearance_does_not_change_official_rarity(tmp_path: Path) -> None:
+@pytest.mark.parametrize(("style", "badge_text"), [("br", "BR"), ("gbf", "PR")])
+def test_appearance_does_not_change_official_rarity(
+    tmp_path: Path, style: str, badge_text: str
+) -> None:
     records = load_badges(
         authored(
             tmp_path,
-            "- printing_id: printing\n  region: jp\n  card_no: TEST-001\n  style: br\n  text: BR\n",
+            "- printing_id: printing\n  region: jp\n  card_no: TEST-001\n"
+            f"  style: {style}\n  text: {badge_text}\n",
         )
     )
     with create_database(compile_t0()) as db:
@@ -44,7 +48,10 @@ def test_appearance_does_not_change_official_rarity(tmp_path: Path) -> None:
             printing["rarity_raw"],
             printing["premium"],
         ) == ("pr", "PR", False)
-        assert printing["rarity_badge_text"] == "BR"
+        assert (printing["rarity_badge_style"], printing["rarity_badge_text"]) == (
+            style,
+            badge_text,
+        )
 
 
 @pytest.mark.parametrize("style", ["br", "sr", "gr"])

@@ -343,6 +343,12 @@ function optionOf(index: CardIndex, row: JsonObject, field: string): SearchOptio
   }
 }
 
+function prBadgeFilterStyle(row?: JsonObject): string {
+  const style = row && badgeOf(row)?.style
+  // Use the existing fallback group until the filter offers a GBF appearance.
+  return style === "gbf" ? "unknown" : (style ?? "unknown")
+}
+
 function optionsOf(
   bootstrap: BootstrapColumns,
   index: CardIndex,
@@ -366,7 +372,7 @@ function optionsOf(
     const countToken = premium ? PREMIUM_RARITY : token
     rarityCounts[countToken] = (rarityCounts[countToken] ?? 0) + 1
     if (official === "pr" && !premium) {
-      const child = `pr:${badgeOf(row)?.style ?? "unknown"}`
+      const child = `pr:${prBadgeFilterStyle(row)}`
       rarityCounts[child] = (rarityCounts[child] ?? 0) + 1
     }
   }
@@ -443,7 +449,7 @@ function optionsOf(
             (row) =>
               row["region"] === edition && row["rarity_code"] === "pr" && row["premium"] !== true,
           )
-          .map((row) => badgeOf(row)?.style ?? "unknown"),
+          .map(prBadgeFilterStyle),
       ),
     ],
     rarities: bootstrap
@@ -710,9 +716,7 @@ function build(
               : "",
         ),
       )
-      printings.badge.push(
-        intern(fullPrinting ? (badgeOf(fullPrinting)?.style ?? "unknown") : "unknown"),
-      )
+      printings.badge.push(intern(prBadgeFilterStyle(fullPrinting)))
       printings.art.push(intern(art || printing.id))
       printings.sveOnly.push(Number(exclusive(entry.cardId, art)))
       const credited = [
@@ -1076,7 +1080,7 @@ export class SearchIndex {
         printings.serial[ordinal] = Number(row["serial"] === true)
         printings.unlisted[ordinal] = Number(isUnlistedPrinting(row))
         printings.rarity[ordinal] = intern(official)
-        printings.badge[ordinal] = intern(badgeOf(row)?.style ?? "unknown")
+        printings.badge[ordinal] = intern(prBadgeFilterStyle(row))
         printings.art[ordinal] = intern(art || id)
         printings.alt[ordinal] = Number(!!art && !!defaultArt && art !== defaultArt)
         const credited = [...new Set(artsOf(row).flatMap((value) => artistsByArt.get(value) ?? []))]

@@ -1059,39 +1059,32 @@ it("retains badge, Premium and raw dash metadata in compact and restored search 
   }
 })
 
-it("unions unrated printings with official rarities without confusing absent PR labels", async () => {
+it("keeps GBF appearances in the PR fallback group alongside other rarity filters", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
   await client.prefetchPrintings?.()
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("missing snapshot")
+  const raritiesByPrinting: Record<string, JsonObject> = {
+    "p:bp01-001": { rarity_code: "pr", rarity_badge: { style: "none" } },
+    "p:bp01-020": { rarity_code: null, rarity_raw: "-" },
+    "p:bp01-021": {
+      rarity_code: "pr",
+      premium: false,
+      rarity_badge: { style: "gbf", text: "PR" },
+    },
+    "p:bp01-021-sp": { rarity_code: "-", premium: false },
+  }
   const columns = new BootstrapColumns()
   columns.ingest(
     snapshot.bootstrap.map((fragment) =>
       fragment.table === "printing"
         ? {
             ...fragment,
-            rows: fragment.rows.map((row) =>
-              row["id"] === "p:bp01-001"
-                ? {
-                    ...row,
-                    rarity_code: "pr",
-                    rarity_badge: { style: "none" },
-                  }
-                : row["id"] === "p:bp01-020"
-                  ? {
-                      ...row,
-                      rarity_code: null,
-                      rarity_raw: "-",
-                    }
-                  : row["id"] === "p:bp01-021-sp"
-                    ? {
-                        ...row,
-                        rarity_code: "-",
-                        premium: false,
-                      }
-                    : row,
-            ),
+            rows: fragment.rows.map((row) => ({
+              ...row,
+              ...raritiesByPrinting[stringValue(row["id"])],
+            })),
           }
         : fragment,
     ),
@@ -1108,6 +1101,12 @@ it("unions unrated printings with official rarities without confusing absent PR 
     expect(unrated).toContain("p:bp01-021-sp")
     expect(unrated).not.toContain("p:bp01-001")
     expect(ids(["pr:none"])).toContain("p:bp01-001")
+    expect(ids(["pr"])).toContain("p:bp01-021")
+    expect(ids(["pr:none"])).not.toContain("p:bp01-021")
+    expect(ids(["pr:unknown"])).toContain("p:bp01-021")
+    expect(index.options.prBadgeStyles).toContain("unknown")
+    expect(index.options.prBadgeStyles).not.toContain("gbf")
+    expect(index.options.rarityCounts["pr:unknown"]).toBe(ids(["pr:unknown"]).length)
     expect(ids(["pr:none", "unrated"]).sort()).toEqual([...ids(["pr:none"]), ...unrated].sort())
     expect(index.options.rarityCounts["unrated"]).toBe(unrated.length)
   }

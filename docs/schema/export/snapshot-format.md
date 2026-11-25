@@ -161,14 +161,14 @@ PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none
 例如 `rarity=sp,pr:br,unrated` 同時包含官方 SP、官方 PR 的 BR 標籤外觀，以及無分類版次；圖牌仍依卡面外觀顯示。
 
 `printing.rarity_badge` 是與 `rarity_code` 一同載入的可空物件：`null` 表示待確認；
-`{style: "none"}` 表示已確認無標籤；其他 style 為 `br / sr / gr / lg / sl / sp`，
+`{style: "none"}` 表示已確認無標籤；其他 style 為 `br / sr / gr / lg / sl / sp / gbf`，
 必須帶 `text` 原樣印字（例如 `PR` 或 `BR`）。每版次一筆，雙面標註時一起確認；
 不由同名卡、另一地區或卡號前綴推導。採物件讓「無資料」和「無標籤」各自有明確表示，且 style／text 同屬一筆外觀。
 
 稀有度篩選 `pr` 只依官方 `rarity_code=pr`，包含全部 PR 外觀與待確認版次；
 子選項 `pr:br / pr:sr / pr:gr / pr:lg / pr:sl / pr:sp / pr:none` 同時要求
 **同一版次**的官方 pr 與對應 style。早期印 BR 的 PR 仍屬 PR（BR）；六種外觀子項的三語標籤皆由 style 大寫產生。
-`pr:unknown` 只包含外觀為 null 的官方 PR；該區沒有這類版次時不顯示子選項。
+Web 將外觀為 null 或尚無對應顯示的官方 PR 歸至 `pr:unknown`，例如 `gbf`。該區沒有這類版次時隱藏子選項。
 多選稀有度時為聯集，其他版次條件仍需同一版次滿足；排序與預設版次照官方代碼，外觀全空時原有行為不變。
 
 ### 主戰者卡名框篩選
