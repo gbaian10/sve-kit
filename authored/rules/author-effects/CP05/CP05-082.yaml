@@ -1,0 +1,64 @@
+cards:
+  CP05-082:
+    abilities:
+      - auto:
+          do:
+            - pay:
+                cost:
+                  pp: 1
+                do:
+                  - damage:
+                      n: 3
+                      to: enemy
+          on:
+            discarded:
+              by:
+                ability_of:
+                  trait: 闇属性
+                  who: self
+              from: hand
+              ref: this
+              who: self
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+          zone: hand
+        line: 1
+      - auto:
+          do:
+            - grant:
+                abilities:
+                  - lastword:
+                      do:
+                        - move:
+                            ref: this
+                            to: field
+                on: this
+          on:
+            limit_broke:
+              ref: this
+        line: 2
+      - fanfare:
+          do:
+            - destroy: enemy
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set
