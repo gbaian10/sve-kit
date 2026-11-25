@@ -83,10 +83,17 @@ fn target(game: &mut Game, play: CardPlay, count: usize) -> CardPlay {
 
 #[test]
 fn cp05_057_uses_selected_fire_card_count_for_formal_damage_allocation() {
-    let mut game = evolved(false, 2);
+    let mut game = evolved(false, 3);
     let step = pending_line(&mut game, 1);
     let step = accept(&mut game, step);
     let step = reveal(&mut game, step, 3);
+    let CardPlay::Awaiting(ref question) = step else {
+        panic!("formal target question");
+    };
+    let InputDomain::Targets(targets) = &question.domain else {
+        panic!("formal targets");
+    };
+    assert_eq!(targets.cardinality.maximum, Some(Nat(2)));
     let CardPlay::Awaiting(allocation) = target(&mut game, step, 2) else {
         panic!("variable damage distribution");
     };
@@ -101,6 +108,7 @@ fn cp05_057_uses_selected_fire_card_count_for_formal_damage_allocation() {
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["objects"]["enemy0"]["damage"], 1_u8);
     assert_eq!(view["objects"]["enemy1"]["damage"], 2_u8);
+    assert_eq!(view["objects"]["enemy2"]["damage"], 0_u8);
     assert_eq!(view["P1"]["hand"], json!(["fire1","fire2","fire3","other"]));
 }
 
@@ -134,10 +142,20 @@ fn cp05_056_adds_only_the_matching_top_fire_card_without_moving_the_next_card() 
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["P1"]["hand"], json!(["fire"]));
     assert_eq!(view["P1"]["deck"], json!(["tail"]));
+    let public = game.projection(View::P2).unwrap();
+    assert!(public["known_cards"].as_array().unwrap().iter().any(|card| card["id"] == "fire"));
 }
 
 #[test]
 fn cp05_057_may_pay_with_zero_ordinary_targets_but_requires_one_for_super_evolution() {
+    let mut unpaid = evolved(false, 0);
+    let normal = pending_line(&mut unpaid, 1);
+    let normal = accept(&mut unpaid, normal);
+    let normal = reveal(&mut unpaid, normal, 0);
+    resolved(target(&mut unpaid, normal, 0));
+    let public = unpaid.projection(View::P2).unwrap();
+    assert!(public["known_cards"].as_array().unwrap().iter().all(|card| card["id"] != "fire1"));
+
     let mut ordinary = evolved(false, 0);
     let normal = pending_line(&mut ordinary, 1);
     let normal = accept(&mut ordinary, normal);
