@@ -6,9 +6,6 @@
 use super::event_cemetery::finish_checks;
 use super::*;
 
-#[path = "../../support/current_fixture.rs"]
-mod current_fixture;
-
 const GOLD: &str = "nightmare-seed-treasure";
 const SEARCH_RESULT: &str = "nightmare-search-follower";
 
