@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-006:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  history:
+                    event: limit_break
+                    window: this_turn
+                    who: self
+                    at_least: 3
+                then:
+                  - create:
+                      token: フィル
+                      n: 1
+                      to: ex
+      - line: 2
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  orig_cost_eq: 1
+                  trait: 風属性
+                n: 1
+                to: hand

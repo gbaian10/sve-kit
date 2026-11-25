@@ -1,0 +1,54 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-007:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          targets:
+            - bind: revived
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                keyword: quick_activation
+              upto: 2
+              cost_sum_le: 6
+          do:
+            - move:
+                ref: revived
+                result: entered
+                to: field
+      - line: 3
+        activate:
+          zone: hand
+          quick: true
+          cost:
+            steps:
+              - pp: 2
+              - discard:
+                  ref: this
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4

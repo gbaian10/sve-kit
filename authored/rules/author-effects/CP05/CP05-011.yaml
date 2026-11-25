@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-011:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 5
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  history:
+                    event: limit_break
+                    window: this_turn
+                    who: self
+                    at_least: 3
+                then:
+                  - damage:
+                      to:
+                        leaders: opponents
+                      n: 5
