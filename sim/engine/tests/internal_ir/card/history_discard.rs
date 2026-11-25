@@ -51,8 +51,16 @@ fn initial() -> Value {
 }
 
 fn fixture(initial: &Value, program: &WellFormedCardProgram) -> Game {
+    fixture_with_catalog(initial, program, catalog())
+}
+
+fn fixture_with_catalog(
+    initial: &Value,
+    program: &WellFormedCardProgram,
+    catalog: Arc<Catalog>,
+) -> Game {
     let mut game = Game::new(
-        catalog(),
+        catalog,
         initial,
         &Value::Null,
         &Value::Null,
@@ -63,6 +71,30 @@ fn fixture(initial: &Value, program: &WellFormedCardProgram) -> Game {
     game.load_internal_card("unit-spell", &card(vec![]))
         .unwrap();
     game
+}
+
+fn elemental_catalog() -> Arc<Catalog> {
+    let (snapshot, registry, document) = catalog_documents(&json!("1"));
+    let snapshot = snapshot
+        .lines()
+        .map(|line| {
+            let mut row: Value = serde_json::from_str(line).unwrap();
+            if row["number"] == "unit-follower" {
+                row["faces"][0]["traits"] = json!(["全属性", "土属性"]);
+            }
+            row.to_string()
+        })
+        .collect::<Vec<_>>()
+        .join("\n");
+    Arc::new(
+        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+    )
+}
+
+fn dark_history() -> Value {
+    let mut query = history();
+    query["sel"] = json!({"trait":"闇属性"});
+    query
 }
 
 fn finish_checks(game: &mut Game) {
@@ -285,7 +317,8 @@ fn explicit_discard_history_is_additive_and_resets_at_the_next_turn() {
 #[test]
 fn a_rule_hand_limit_discard_is_committed_before_its_observer_reads_history() {
     let program = lower(&[json!({"auto":{
-        "on":{"discarded":{"who":"self"}},"do":[read_history()]
+        "on":{"discarded":{"who":"self"}},
+        "do":[{"life":{"who":"self","delta":{"history_count":dark_history()}}}]
     }})]);
     let mut initial = initial();
     initial["players"]["P1"]["zones"]["hand"] = json!(
@@ -293,7 +326,8 @@ fn a_rule_hand_limit_discard_is_committed_before_its_observer_reads_history() {
             .map(|i| json!({"id":format!("h{i}"),"card":"unit-spell"}))
             .collect::<Vec<_>>()
     );
-    let mut game = fixture(&initial, &program);
+    initial["players"]["P1"]["zones"]["hand"][7]["card"] = json!("unit-follower");
+    let mut game = fixture_with_catalog(&initial, &program, elemental_catalog());
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
     quick::pass(&mut game);
@@ -317,6 +351,38 @@ fn a_rule_hand_limit_discard_is_committed_before_its_observer_reads_history() {
         game.projection(View::Referee).unwrap()["P1"]["leader"]["life"],
         21
     );
+}
+
+#[test]
+fn matching_discard_is_required_for_activation_and_counts_one_fact_per_card() {
+    let program = lower(&[
+        json!({"activate":{"cost":{"pp":0},"do":[{"discard":{"who":"self","all":true}}]}}),
+        json!({"activate":{"cost":{"pp":1},"usable_if":{"history":dark_history()},
+            "do":[{"life":{"who":"self","delta":{"history_count":dark_history()}}}]}}),
+    ]);
+    let mut initial = initial();
+    initial["players"]["P1"]["zones"]["hand"][0]["card"] = json!("unit-follower");
+    let mut game = fixture_with_catalog(&initial, &program, elemental_catalog());
+    let reader = program.card().abilities[1].node.id;
+    game.activate_internal_card("source", reader, PlayerId { seat: 1 })
+        .unwrap_err();
+    resolved(activate(&mut game, program.card().abilities[0].node.id));
+    resolved(activate(&mut game, reader));
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["leader"]["life"], 21);
+    assert_eq!(view["P1"]["pp"]["current"], 1);
+
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    quick::pass(&mut game);
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    quick::pass(&mut game);
+    let turn = game.projection(View::Referee).unwrap()["turn"].clone();
+    assert_eq!(turn["active"], "P1");
+    assert_eq!(turn["phase"], "main");
+    game.activate_internal_card("source", reader, PlayerId { seat: 1 })
+        .unwrap_err();
 }
 
 #[test]

@@ -155,6 +155,27 @@ pub(super) fn public_requirement(requirements: &Requirements, requirement: &Requ
         .all(|location| public_location(requirements, location))
 }
 
+pub(super) fn discard_trait_requirement(
+    requirements: &Requirements,
+    requirement: &Requirement,
+) -> bool {
+    matches!(
+        requirement.capability.code,
+        "shape.Predicate.HasTrait" | "predicate.has-trait"
+    ) && requirement.locations.iter().all(|location| {
+        let Some((read, _)) = location.ir_path.split_once("/query/pattern/") else {
+            return false;
+        };
+        // Well-formed discard history has a closed predicate on committed hand facts.
+        let event_path = format!("{read}/query/pattern");
+        public_location(requirements, location)
+            && requirements.required.iter().any(|other| {
+                other.capability.code == "event.match.Discard"
+                    && other.locations.iter().any(|at| at.ir_path == event_path)
+            })
+    })
+}
+
 pub(super) fn public_location(requirements: &Requirements, location: &Location) -> bool {
     location
         .ir_path
@@ -217,7 +238,7 @@ pub(super) fn exists(execution: &Execution, game: &Game, plan: &HistoryPlan<'_>)
             ))
         }
         HistoryPlan::Dice(_)
-        | HistoryPlan::Discarded
+        | HistoryPlan::Discarded(_)
         | HistoryPlan::Life(_)
         | HistoryPlan::Ub { .. }
         | HistoryPlan::Played(_)
@@ -428,11 +449,27 @@ pub(super) fn count(
             }
             super::dice::history_count(execution, game, filter.face)
         }
-        HistoryPlan::Discarded => {
+        HistoryPlan::Discarded(trait_id) => {
             if count != HistoryCount::Facts {
                 return Err(unsupported("discard history subject count"));
             }
-            committed_counter(game, execution.context.controller, "discarded").map(Nat)
+            let Some(trait_id) = trait_id else {
+                return committed_counter(game, execution.context.controller, "discarded").map(Nat);
+            };
+            let seat = seat_name(execution.context.controller)?;
+            let count = game
+                .state
+                .ir_discard_traits
+                .get(seat)
+                .into_iter()
+                .flatten()
+                .filter(|traits| {
+                    traits
+                        .iter()
+                        .any(|actual| trait_matches(actual, &trait_id.0))
+                })
+                .count();
+            Ok(Nat(u64::try_from(count).map_err(invalid)?))
         }
         HistoryPlan::Life(filter) => {
             if count != HistoryCount::Facts {

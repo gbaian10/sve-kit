@@ -179,7 +179,7 @@ fn public_target_threshold(threshold: &Expr<Int>) -> bool {
         Expr::Live(read) => {
             matches!(read.as_ref(), NatRead::ZoneCount { selector } if public_numbers::count(selector))
                 || matches!(read.as_ref(), NatRead::HistoryCount { query, count: HistoryCount::Facts }
-                    if matches!(history_turn::HistoryPlan::compile(query), Some(history_turn::HistoryPlan::Discarded)))
+                    if matches!(history_turn::HistoryPlan::compile(query), Some(history_turn::HistoryPlan::Discarded(_))))
         }
         Expr::Compute(distinct) => matches!(distinct.as_ref(), NatOperation::DistinctCount {
             objects, property: ObjectProperty::Names,

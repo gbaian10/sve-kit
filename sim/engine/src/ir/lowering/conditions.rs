@@ -20,7 +20,6 @@ pub(super) fn discarded_history(
     if !matches!(history.event, ast::HistoryEvent::Discarded)
         || !matches!(history.who, Some(ast::LeaderSide::Controller))
         || !matches!(history.from, Some(ast::HistoryOrigin::Hand(_)))
-        || history.sel.is_some()
         || history.to.is_some()
         || history.r#where.is_some()
         || history.exclude.is_some()
@@ -28,7 +27,42 @@ pub(super) fn discarded_history(
     {
         return Err(unsupported(path));
     }
-    Ok(super::super::history_turn::discarded_query(event))
+    let trait_id = match &history.sel {
+        None => None,
+        Some(ast::HistorySubject::Single(subject))
+            if subject.other.is_none() && subject.not_same_name_as_this.is_none() =>
+        {
+            let filter = super::movement::movement_filter(
+                Some(true),
+                false,
+                Some(subject),
+                false,
+                path,
+                super::movement::FilterSupport::Basic,
+            )?;
+            let trait_id = filter
+                .trait_id
+                .as_ref()
+                .filter(|id| !id.0.trim().is_empty())
+                .ok_or_else(|| unsupported(path))?;
+            let only_trait = super::super::events::subject::SubjectFilter {
+                own: Some(true),
+                trait_id: Some(trait_id.clone()),
+                ..Default::default()
+            };
+            if filter != only_trait {
+                return Err(unsupported(path));
+            }
+            Some(trait_id.clone())
+        }
+        Some(ast::HistorySubject::Single(_) | ast::HistorySubject::Union(_)) => {
+            return Err(unsupported(path));
+        }
+    };
+    Ok(super::super::history_turn::discarded_query(
+        event,
+        trait_id.as_ref(),
+    ))
 }
 
 fn life_history(

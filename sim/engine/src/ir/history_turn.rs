@@ -3,17 +3,16 @@
 pub(crate) mod public;
 pub(crate) mod source_link;
 
-use super::events::discard::DiscardFilter;
 use super::events::subject::{SubjectFields, SubjectFilter};
 use super::{
-    Binding, Bool, DiscardEvent, EventPattern, ExecutionRef, Expr, HistoryCutoff, HistoryQuery,
-    HistoryRange, HistoryWindow, InclusionPolicy, PlayEvent, PlayerFrozen, PlayerRef, Predicate,
-    UbActivatedEvent,
+    Binding, Bool, CharacteristicsFields, DiscardEvent, EventPattern, ExecutionRef, Expr,
+    HistoryCutoff, HistoryQuery, HistoryRange, HistoryWindow, InclusionPolicy, PlayEvent,
+    PlayerFrozen, PlayerRef, Predicate, TraitId, TraitsFrozen, UbActivatedEvent,
 };
 
 pub(crate) enum HistoryPlan<'query> {
     Dice(super::dice::History),
-    Discarded,
+    Discarded(Option<TraitId>),
     Life(super::events::life::LifeFilter),
     Ub {
         player: Option<PlayerRef>,
@@ -36,7 +35,7 @@ impl<'query> HistoryPlan<'query> {
     pub(crate) const fn cost_facts(&self) -> bool {
         matches!(
             self,
-            Self::Discarded | Self::Played(_) | Self::PlayedFiltered { .. }
+            Self::Discarded(_) | Self::Played(_) | Self::PlayedFiltered { .. }
         ) || matches!(self, Self::Subject {
                 event: SubjectHistoryKind::Attack
                     | SubjectHistoryKind::Evolve
@@ -55,7 +54,7 @@ impl<'query> HistoryPlan<'query> {
     pub(crate) fn compile(query: &'query HistoryQuery) -> Option<Self> {
         match &query.pattern {
             EventPattern::Dice { .. } => super::dice::history(query).map(Self::Dice),
-            EventPattern::Discard { .. } => discarded_plan(query).then_some(Self::Discarded),
+            EventPattern::Discard { .. } => discarded_plan(query),
             EventPattern::LifeChange { .. } => life_plan(query).map(Self::Life),
             EventPattern::UbActivated { .. } => {
                 ub_plan(query).map(|(player, exclude_current)| Self::Ub {
@@ -139,12 +138,12 @@ pub(crate) fn played_query(event: Binding<PlayEvent>, player: Option<PlayerRef>)
 /// Closed filters share one committed card binding, including the trait union.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum PlayedHistoryFilter {
-    Trait(super::TraitId),
-    TraitsAny([super::TraitId; 2]),
+    Trait(TraitId),
+    TraitsAny([TraitId; 2]),
     Spell,
     Intersection {
         kind: Option<super::CardKind>,
-        trait_id: Option<super::TraitId>,
+        trait_id: Option<TraitId>,
         token: Option<bool>,
         name: Option<super::CardName>,
     },
@@ -292,18 +291,28 @@ pub(crate) enum PlayedBy {
     Player(PlayerRef),
 }
 
-pub(crate) fn discarded_query(event: Binding<DiscardEvent>) -> HistoryQuery {
+pub(crate) fn discarded_query(
+    event: Binding<DiscardEvent>,
+    trait_id: Option<&TraitId>,
+) -> HistoryQuery {
+    let mut predicates = vec![Expr::Compute(Box::new(Predicate::PlayerEquals {
+        left: Expr::Frozen(Box::new(PlayerFrozen::DiscardPlayer { event })),
+        right: Expr::Literal(PlayerRef::Controller {}),
+    }))];
+    if let Some(trait_id) = trait_id {
+        predicates.push(Expr::Compute(Box::new(Predicate::HasTrait {
+            traits: Expr::Frozen(Box::new(TraitsFrozen::Characters {
+                characters: Expr::Frozen(Box::new(CharacteristicsFields::DiscardCharacters {
+                    event,
+                })),
+            })),
+            trait_id: trait_id.clone(),
+        })));
+    }
     HistoryQuery {
         pattern: EventPattern::Discard {
             binding: event,
-            predicate: DiscardFilter {
-                own: Some(true),
-                itself: false,
-                own_turn: false,
-                by: None,
-                card: None,
-            }
-            .predicate(event),
+            predicate: Expr::Compute(Box::new(Predicate::And { predicates })),
         },
         window: HistoryWindow {
             range: HistoryRange::CurrentTurn {},
@@ -314,9 +323,32 @@ pub(crate) fn discarded_query(event: Binding<DiscardEvent>) -> HistoryQuery {
     }
 }
 
-fn discarded_plan(query: &HistoryQuery) -> bool {
-    matches!(&query.pattern, EventPattern::Discard { binding, .. }
-        if *query == discarded_query(*binding))
+fn discarded_plan(query: &HistoryQuery) -> Option<HistoryPlan<'_>> {
+    let EventPattern::Discard {
+        binding,
+        predicate: Expr::Compute(predicate),
+    } = &query.pattern
+    else {
+        return None;
+    };
+    let Predicate::And { predicates } = predicate.as_ref() else {
+        return None;
+    };
+    let trait_id = match predicates.as_slice() {
+        [_] => None,
+        [_, Expr::Compute(subject)] => {
+            let Predicate::HasTrait { trait_id, .. } = subject.as_ref() else {
+                return None;
+            };
+            if trait_id.0.trim().is_empty() {
+                return None;
+            }
+            Some(trait_id)
+        }
+        _ => return None,
+    };
+    (*query == discarded_query(*binding, trait_id))
+        .then(|| HistoryPlan::Discarded(trait_id.cloned()))
 }
 
 fn played_by(query: &HistoryQuery) -> Option<PlayedBy> {

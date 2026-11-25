@@ -232,6 +232,21 @@ impl Game {
         self.bump(&format!("{controller}.discarded"), 1);
     }
 
+    pub(in crate::game) fn internal_record_discard_traits(
+        &mut self,
+        controller: &str,
+        traits: alloc::collections::BTreeSet<String>,
+    ) {
+        if traits.is_empty() {
+            return;
+        }
+        self.state
+            .ir_discard_traits
+            .entry(controller.into())
+            .or_default()
+            .push(traits);
+    }
+
     pub(in crate::game) fn internal_record_lesson_history(
         &mut self,
         id: &str,
@@ -253,6 +268,7 @@ impl Game {
             *value = 0;
         }
         self.state.ir_subject_history.clear();
+        self.state.ir_discard_traits.clear();
         self.state.ir_damage_history.clear();
         self.state.ir_stat_gain_history.clear();
         self.state.ir_ub_history.clear();

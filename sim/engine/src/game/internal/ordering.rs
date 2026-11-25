@@ -457,7 +457,8 @@ fn check_private_requirements(requirements: &Requirements, private_spine: bool) 
                 && !super::source::count_zone(requirements, requirement))
             || (super::search::private_requirement(code)
                 && !super::source::source_original(requirements, requirement)
-                && !super::source::count_zone(requirements, requirement))
+                && !super::source::count_zone(requirements, requirement)
+                && !super::history_turn::discard_trait_requirement(requirements, requirement))
         {
             return Err(unsupported(
                 "private observation outside an authorized selector spine",
