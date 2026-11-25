@@ -65,7 +65,6 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
         || !zones_allowed
         || trigger.view != EventSnapshotPolicy::BeforeExit
         || !aggregation_allowed
-        || (plan.itself && plan.own_turn)
         || trigger
             .limit
             .is_some_and(|limit| !LimitSpec::is_triggered(limit))

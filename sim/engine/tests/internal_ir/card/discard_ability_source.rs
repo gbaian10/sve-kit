@@ -357,7 +357,7 @@ fn optional_ex_movement_follows_only_the_triggering_successful_generation() {
 fn source_filters_reject_other_players_kinds_and_missing_self_hand_authority() {
     let valid = observer(true, json!([{"life":{"who":"self","delta":1_u8}}]));
     lowerer().lower(&tree(&valid, &discard_all())).unwrap();
-    for case in 0_u8..12 {
+    for case in 0_u8..11 {
         let mut head = valid.clone();
         match case {
             0 => {
@@ -376,30 +376,27 @@ fn source_filters_reject_other_players_kinds_and_missing_self_hand_authority() {
                     .remove("who");
             }
             3 => {
-                head["on"]["discarded"]["during"] = json!({"turn":"self"});
-            }
-            4 => {
                 head["on"]["discarded"]["by"]["ability_of"]["trait"] = json!("");
             }
-            5 => {
+            4 => {
                 head["on"]["discarded"]["by"]["ability_of"]["who"] = json!("opp");
             }
-            6 => {
+            5 => {
                 head["on"]["discarded"]["by"]["ability_of"]
                     .as_object_mut()
                     .unwrap()
                     .remove("who");
             }
-            7 => {
+            6 => {
                 head["on"]["discarded"]["by"]["ability_of"]["name"] = json!("unit-amulet");
             }
-            8 => {
+            7 => {
                 head["on"]["discarded"]["by"]["ability_of"]["kind"] = json!("amulet");
             }
-            9 => {
+            8 => {
                 head["on"]["discarded"]["by"]["ability_of"]["zone"] = json!("field");
             }
-            10 => {
+            9 => {
                 head["on"]["discarded"]["by"]["ability_of"]["traits"] = json!(["ウマ娘"]);
             }
             _ => {
