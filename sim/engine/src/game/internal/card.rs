@@ -32,12 +32,12 @@ use crate::ir::trigger_restrictions as trigger_permission;
 use crate::ir::{
     Ability, AbilityCostPolicy, AbilityId, AbilityInstanceId, AbilityKind, AbilityOrigin,
     AbilityQualification, AbilitySource, Action, AssociationId, CardKind, CharacteristicPatch,
-    Control, CostSpec, DamageAmount, DiscardMode, Effect, ExecutionId, Expr, FaceId, Generation,
-    GrantedAbility, Instruction, InstructionContext, Int, KeywordId, Located, MealRaceOperation,
-    MoveReason, MoveSpec, Nat, Node, NumericChange, ObjectOperand, ObjectRef, PlayerId, PlayerRef,
-    Posture, Quantity, QuantityUnit, Requirements, Resource, ResourceOperation, RideDriveOperation,
-    RuleId, RuntimeAbilitySource, Selector, SourceSpan, StepwiseMode, WellFormedCardProgram,
-    ZoneKind,
+    Control, CostKind, CostSpec, DamageAmount, DiscardMode, Effect, ExecutionId, Expr, FaceId,
+    Generation, GrantedAbility, Instruction, InstructionContext, Int, KeywordId, Located,
+    MealRaceOperation, MoveReason, MoveSpec, Nat, Node, NumericChange, ObjectOperand, ObjectRef,
+    PlayerId, PlayerRef, Posture, Quantity, QuantityUnit, Requirements, Resource,
+    ResourceOperation, RideDriveOperation, RuleId, RuntimeAbilitySource, Selector, SourceSpan,
+    StepwiseMode, WellFormedCardProgram, ZoneKind,
 };
 use crate::ir::{Bool, ChoiceDomain, Decision, PreconditionKind, PreconditionReason};
 use crate::ir::{Characteristics, CostStep};
@@ -1892,6 +1892,18 @@ fn check_granted_static(located: &Located<Ability>) -> Result<()> {
             return Err(unsupported("nested continuous definitions"));
         }
         static_keywords::check(located, &located.node.declarations)
+    } else if located.node.active_zones == [ZoneKind::Field]
+        && located.node.declarations.iter().all(|effect| {
+            matches!(
+                effect,
+                Effect::CostModifier {
+                    kind: CostKind::Play | CostKind::QuickActivation,
+                    ..
+                }
+            )
+        })
+    {
+        other_costs::check(located, &located.node.declarations)
     } else if super::grant::static_cost(&located.node) {
         Ok(())
     } else if is_required_static(&located.node) {

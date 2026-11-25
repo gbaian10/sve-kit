@@ -8,12 +8,13 @@ use crate::game::player::observation::InstalledEffect;
 use crate::ir::public_numbers;
 use crate::ir::static_declarations::{self, Family};
 use crate::ir::{
-    AbilityKind, AbilityOrigin, AbilityQualification, Action, CostChange, CostKind, Duration,
-    DurationEnd, Effect, EffectReference, Expr, InstallationSubjects, InstallationTime,
-    Instruction, Int, Interval, Nat, ObjectOperand, PlayerId, PlayerRef, PlayerRelation,
-    SelectionView, Selector, TimeAnchor, UsageScope, ZoneKind,
+    AbilityKind, AbilityOrigin, AbilityQualification, Action, Bool, CostChange, CostKind, CostSpec,
+    Duration, DurationEnd, Effect, EffectReference, Expr, InstallationSubjects, InstallationTime,
+    Instruction, Int, Interval, Nat, ObjectOperand, PlayerId, PlayerRef, PlayerRelation, Resource,
+    ResourceOperation, SelectionView, Selector, TimeAnchor, UsageScope, ZoneKind,
 };
 use crate::ir::{MovementReceiptList, ObjectRef};
+use alloc::borrow::Cow;
 use core::slice::from_ref;
 
 #[derive(Clone, Debug)]
@@ -22,6 +23,7 @@ pub(in crate::game::internal) struct InstalledCost {
     id: u64,
     controller: PlayerId,
     players: Vec<PlayerId>,
+    kind: CostKind,
     subjects: Selector,
     members: Option<Vec<ObjectRef>>,
     change: CostChange,
@@ -42,30 +44,55 @@ fn check_change(change: &CostChange) -> Result<()> {
     }
 }
 
-fn check_subjects(subjects: &Selector) -> Result<()> {
+fn check_subjects(kind: CostKind, subjects: &Selector) -> Result<()> {
     match subjects {
         Selector::Union { sets } if !sets.is_empty() => {
             for set in sets {
-                check_subjects(set)?;
+                check_subjects(kind, set)?;
             }
             Ok(())
         }
         Selector::Zone {
             players,
-            zone: ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Banish,
+            zone,
             view: SelectionView::Current {},
             binding,
             predicate,
-        } if players.relative_to == (PlayerRef::Controller {}) => {
+        } if players.relative_to == (PlayerRef::Controller {})
+            && match kind {
+                CostKind::Play => matches!(
+                    zone,
+                    ZoneKind::Hand | ZoneKind::Ex | ZoneKind::Cemetery | ZoneKind::Banish
+                ),
+                CostKind::QuickActivation => {
+                    matches!(
+                        zone,
+                        ZoneKind::Field | ZoneKind::Hand | ZoneKind::Cemetery | ZoneKind::Ex
+                    ) && players.relation == PlayerRelation::SelfPlayer
+                        && predicate.as_ref() == &Expr::Literal(Bool(true))
+                }
+                CostKind::Evolution => false,
+            } =>
+        {
             super::selection::check_predicate(predicate, *binding, false)
         }
         Selector::MoveAfter { .. }
         | Selector::MoveAfterAll {
             receipts: MovementReceiptList::Move { .. },
             ..
-        } => Ok(()),
+        } if kind == CostKind::Play => Ok(()),
         _ => Err(unsupported("player cost filter")),
     }
+}
+
+fn check_play_change(kind: CostKind, change: &CostChange) -> Result<()> {
+    check_change(change)?;
+    if kind == CostKind::QuickActivation
+        && !matches!(change, CostChange::Delta { amount: Expr::Literal(Int(delta)) } if *delta < 0)
+    {
+        return Err(unsupported("Quick activation cost reduction"));
+    }
+    Ok(())
 }
 
 fn check_duration(duration: &Duration, installed: bool) -> Result<()> {
@@ -136,7 +163,7 @@ pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Resu
             continue;
         }
         let Effect::CostModifier {
-            kind: CostKind::Play,
+            kind: kind @ (CostKind::Play | CostKind::QuickActivation),
             subjects,
             change,
             duration,
@@ -145,8 +172,8 @@ pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Resu
         else {
             return Err(unsupported("static player cost declaration"));
         };
-        check_subjects(subjects)?;
-        check_change(change)?;
+        check_subjects(*kind, subjects)?;
+        check_play_change(*kind, change)?;
         check_duration(duration, false)?;
     }
     Ok(())
@@ -163,7 +190,7 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
         return Err(unsupported("player cost installation"));
     };
     let Effect::CostModifier {
-        kind: CostKind::Play,
+        kind: kind @ (CostKind::Play | CostKind::QuickActivation),
         subjects,
         change,
         duration: inner,
@@ -184,8 +211,8 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
     {
         return Err(unsupported("player cost quota across players"));
     }
-    check_subjects(subjects)?;
-    check_change(change)?;
+    check_subjects(*kind, subjects)?;
+    check_play_change(*kind, change)?;
     check_duration(duration, true)
 }
 
@@ -316,7 +343,10 @@ impl Game {
             return Err(unsupported("player cost installation"));
         };
         let Effect::CostModifier {
-            subjects, change, ..
+            kind,
+            subjects,
+            change,
+            ..
         } = effect.as_ref()
         else {
             return Err(unsupported("player cost effect"));
@@ -345,6 +375,7 @@ impl Game {
             id,
             controller: execution.context.controller,
             players,
+            kind: *kind,
             subjects: subjects.clone(),
             members,
             change: change.clone(),
@@ -361,13 +392,23 @@ impl Game {
         &self,
         execution: &Execution,
     ) -> Result<Vec<u64>> {
-        let mut ids = Vec::new();
-        let holder = &execution.context.source;
         let origin = execution
             .play_origin
             .ok_or_else(|| invalid("missing play origin"))?;
+        self.matching_player_costs(execution, CostKind::Play, origin)
+    }
+
+    fn matching_player_costs(
+        &self,
+        execution: &Execution,
+        kind: CostKind,
+        origin: ZoneKind,
+    ) -> Result<Vec<u64>> {
+        let mut ids = Vec::new();
+        let holder = &execution.context.source;
         for cost in &self.card_runtime.other_costs {
-            if matches!(cost.end, EffectEnd::Turn(turn) if self.state.schedule.current()? != turn)
+            if cost.kind != kind
+                || matches!(cost.end, EffectEnd::Turn(turn) if self.state.schedule.current()? != turn)
                 || (!cost.intervals.is_empty()
                     && !cost.intervals.iter().any(|interval| interval.active()))
                 || !cost.players.contains(&execution.context.controller)
@@ -422,13 +463,79 @@ impl Game {
         let origin = execution
             .play_origin
             .ok_or_else(|| invalid("missing play origin"))?;
+        let matching = self.matching_player_costs(execution, CostKind::Play, origin)?;
+        self.player_cost_parts(execution, CostKind::Play, origin, &matching, base, delta)
+    }
+
+    pub(super) fn internal_quick_activation_payment<'cost>(
+        &self,
+        execution: &Execution,
+        costs: &'cost CostSpec,
+    ) -> Result<(Cow<'cost, CostSpec>, Vec<u64>)> {
+        let holder = &execution.context.source;
+        let origin = match self.object(holder)?.zone.as_str() {
+            "field" => ZoneKind::Field,
+            "hand" => ZoneKind::Hand,
+            "cemetery" => ZoneKind::Cemetery,
+            "ex" => ZoneKind::Ex,
+            _ => return Err(unsupported("Quick activation cost origin")),
+        };
+        let matching = self.matching_player_costs(execution, CostKind::QuickActivation, origin)?;
+        let (_, delta) = self.player_cost_parts(
+            execution,
+            CostKind::QuickActivation,
+            origin,
+            &matching,
+            0,
+            0,
+        )?;
+        if delta == 0 {
+            return Ok((Cow::Borrowed(costs), matching));
+        }
+        let mut remaining = delta
+            .checked_neg()
+            .ok_or_else(|| invalid("Quick cost overflow"))?;
+        let mut quote = costs.clone();
+        let CostSpec::Ordered { steps } = &mut quote else {
+            return Err(unsupported("Quick cost plan"));
+        };
+        for step in steps {
+            if let Action::Resource {
+                resource: Resource::PpCurrent,
+                operation: ResourceOperation::Pay,
+                amount,
+                ..
+            } = &mut step.instruction.action
+            {
+                let current = execution.integer(self, amount)?.0;
+                if current < 0 {
+                    return Err(invalid("negative printed Quick PP cost"));
+                }
+                let saved = remaining.min(current);
+                remaining = remaining.saturating_sub(saved);
+                *amount = Expr::Literal(Int(current.saturating_sub(saved)));
+            }
+        }
+        Ok((Cow::Owned(quote), matching))
+    }
+
+    fn player_cost_parts(
+        &self,
+        execution: &Execution,
+        kind: CostKind,
+        origin: ZoneKind,
+        matching: &[u64],
+        mut base: i64,
+        mut delta: i64,
+    ) -> Result<(i64, i64)> {
+        let holder = &execution.context.source;
         for source in self.field_ids() {
             let (card, _) = self.internal_effective_print(&source)?;
             if !self.card_runtime.is_loaded(&card) {
                 continue;
             }
             let abilities = self
-                .internal_printed_abilities(&source)?
+                .internal_local_abilities(&source)?
                 .into_iter()
                 .filter(|ability| static_declarations::contains(&ability.node, Family::Cost))
                 .collect::<Vec<_>>();
@@ -438,16 +545,8 @@ impl Game {
             let provider = self.provider_execution(&source, Some(execution))?;
             for ability in abilities {
                 for effect in &ability.node.declarations {
-                    if matches!(
-                        effect,
-                        Effect::CostModifier {
-                            kind: CostKind::Evolution,
-                            ..
-                        }
-                    ) {
-                        continue;
-                    }
                     let Effect::CostModifier {
+                        kind: effect_kind,
                         subjects,
                         change,
                         duration,
@@ -459,6 +558,9 @@ impl Game {
                         }
                         return Err(unsupported("static cost declaration"));
                     };
+                    if kind != *effect_kind || ability.node.active_zones != [ZoneKind::Field] {
+                        continue;
+                    }
                     if let DurationEnd::While { predicate } = &duration.end
                         && !CostConditionPlan::compile(predicate, false)?
                             .evaluate(&provider, self)?
@@ -471,7 +573,6 @@ impl Game {
                 }
             }
         }
-        let matching = self.internal_matching_player_costs(execution)?;
         for cost in &self.card_runtime.other_costs {
             if matching.contains(&cost.id) {
                 apply(&cost.change, &mut base, &mut delta)?;

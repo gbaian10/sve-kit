@@ -29,6 +29,7 @@ use crate::ir::{
     AggregateBound, BoolRead, BooleanState, CharacteristicView, Comparison, Expr, NumericProperty,
     ObjectView, Predicate, SelectionConstraint, TraitId, TraitsRead,
 };
+use alloc::borrow::Cow;
 use alloc::collections::BTreeMap;
 
 type FrozenCosts = Vec<(ObjectRef, i64)>;
@@ -1363,7 +1364,14 @@ impl Game {
             let mut paid = execution.clone();
             trial.card_runtime.active_source = paid.ability;
             wait.bind(&mut paid, wait.validate(&handles)?);
-            if trial.internal_payment_probe(&mut paid, &play.costs, false)? {
+            let quoted = if paid.spell {
+                Cow::Borrowed(&play.costs)
+            } else {
+                trial
+                    .internal_quick_activation_payment(&paid, &play.costs)?
+                    .0
+            };
+            if trial.internal_payment_probe(&mut paid, &quoted, false)? {
                 return Ok(true);
             }
         }
