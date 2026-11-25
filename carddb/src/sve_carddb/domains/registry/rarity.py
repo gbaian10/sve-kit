@@ -17,6 +17,7 @@ _LABELS = {
         "UR": "ur",
         "SP": "sp",
         "SSP": "ssp",
+        "GBF": "gbf",
         "PR": "pr",
     },
     "en": {

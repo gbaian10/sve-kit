@@ -10,7 +10,7 @@ def test_repository_catalog_adoptions_load_without_private_sources() -> None:
     snapshot = load_adoptions(root, entry="catalog/adoptions")
     records = snapshot.current_records()
     assert sum(r.kind == "language_adoption" for r in records) == 3
-    assert sum(r.kind == "vocabulary_adoption" for r in records) == 149
+    assert sum(r.kind == "vocabulary_adoption" for r in records) == 161
     assert {r.data.subject.code for r in records if r.kind == "language_adoption"} == {
         "ja",
         "en",

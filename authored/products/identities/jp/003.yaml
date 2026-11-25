@@ -1,0 +1,31 @@
+format: 1
+kind: product_identity_shard
+records:
+  - kind: product_identity
+    filing_key: jp
+    data:
+      product_id: jp-cp05
+      region: jp
+      match:
+        kind: expansion_link
+        search_url: https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CP05
+        expansion_code: CP05
+    evidence:
+      - batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:f316fcb2da874db35f9ef799c86f9818a03ca6cfac52fe5e9a7cab51ef2487f4
+        locator: '{"product_block_ordinal":0}'
+        role: product_identity_match
+  - kind: product_identity
+    filing_key: jp
+    data:
+      product_id: jp-scs02
+      region: jp
+      match:
+        kind: product_link
+        product_url: https://shadowverse-evolve.com/products/scs02/
+        expansion_code: SCS02
+    evidence:
+      - batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:b24aae0596c692400a2ddbd482fb2c7131e15f9fd9ef4c171d35cccdeba04a2e
+        locator: '{"product_block_ordinal":0}'
+        role: product_identity_match
