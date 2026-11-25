@@ -497,30 +497,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:0f8397160ec396f45129753c3f50d3b705f438bd68549372d557fe26b762049a
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}捨棄手牌中的"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張碧藍幻想・卡片：抽
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張卡片。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:0f89f99e4ba1e6adc9f3d6bfecb6692a42d04149a72f8b80672f1f7b1dccea76
       lang: zh-Hant
       target:
@@ -558,50 +534,6 @@ records:
             slot: leaf_7
           - kind: Literal
             text: 點傷害。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:0fbb9391d7cf3528dafa0527273305195563cfd2c7d832352b90842e2d52250d
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}捨棄手牌中的"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張碧藍幻想・卡片：將
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 張『
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 』或
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 張『
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 』放置到
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 。抽
-          - kind: LeafRef
-            slot: leaf_7
-          - kind: Literal
-            text: 張卡片。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -838,51 +770,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:16346a8daa8a4f9753452f3a27bf588bf779b62afd8f11772408663f242bfa0b
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 的
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 到來時，自己的主戰者{
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: "}+"
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。若自己戰場上有
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_5
-          - kind: Literal
-            text: 個以上原始消費為
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 的碧藍幻想・從者，則改為{
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: "}+"
-          - kind: LeafRef
-            slot: leaf_7
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:16eed359835f0c8a0e21ac08b720b84feb57117b8cda120636e9465ec7afac18
       lang: zh-Hant
       target:
@@ -996,30 +883,6 @@ records:
             slot: leaf_3
           - kind: Literal
             text: 個）
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:1cfb709ce0c4140f568f53e9d2c646ac08f36b57bf5f3ee7e0d373b5398be4ca
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}捨棄手牌中的"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張闇屬性・卡片：抽
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張卡片。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -1880,30 +1743,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:32874fb28738a0df25a5ba9248121ebf6221f0ae4492bfea529a9f360ebc1c69
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}{消費"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己戰場上的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個碧藍幻想・從者。使其上限解放。若其具有【可最終上限解放】，則再使其最終上限解放。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:329bb3cf13a2eba815db373ebbdfe0f9542f73f13f224ed18986cfb33721636b
       lang: zh-Hant
       target:
@@ -1933,59 +1772,6 @@ records:
             text: 個EP。
       expression_targets: {}
     note: 沿用語義相同的既有句框架 frame:50810fdb62ac36ef53f0f7dd190434369fd02be3a5bce72ca6083a01fbd20560 的譯文。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:333091d5b403a89b14d9316b10f3e38b3f3805adc0e4e2f0194713951a90914e
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】選擇
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 。給予其
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 點傷害。給予敵方的全部主戰者
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 點傷害。若自己戰場上有
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_7
-          - kind: Literal
-            text: 個以上原始消費為
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 的碧藍幻想・從者，則給予所選從者
-          - kind: LeafRef
-            slot: leaf_8
-          - kind: Literal
-            text: 點傷害。給予敵方的全部主戰者
-          - kind: LeafRef
-            slot: leaf_9
-          - kind: Literal
-            text: 點傷害。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
     kind: template_translation
     data:
@@ -3065,30 +2851,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:4c22e029136572e9bb7e54338bd6fb8bcbc8db21daf2f9d0cf81fd58c2964e80
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}{消費"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己戰場上的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個土屬性・從者。使其上限解放。若其具有【可最終上限解放】且已上限解放，則改為使其最終上限解放。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:4d74898994408f17e98dc4c342363a0567e77a7c4935174e3ea9a4e06baa3229
       lang: zh-Hant
       target:
@@ -3617,34 +3379,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:61309f889c07c1c649158640fa073ecb2f271cf243b572db718cbab622f6cf32
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}將這張卡片{"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己的墓場中的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張闇屬性・卡片。將其放置到
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:61b8066bce49ea18505fc798952dc4865e8493adf991a8c4b284a20482523e07
       lang: zh-Hant
       target:
@@ -3740,38 +3474,6 @@ records:
             slot: leaf_2
           - kind: Literal
             text: PP。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:6488a4091f5c616cbe141e06de5852b7f13cf9be2cddbeedec82800dc356cdec
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 選擇自己戰場上的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 個碧藍幻想・從者。使其{
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}+"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: /{
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: "}+"
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -3917,26 +3619,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:6c16850817325eed1d941774117a81cdac5ef92748c38b50dc538cc2d68c709f
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】捨棄手牌中的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 張闇屬性・卡片：抽
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張卡片。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:6cefb7aec2ae0893963fa695de09d3fdd280ebf250404fa33d8d736a34a615a8
       lang: zh-Hant
       target:
@@ -4028,70 +3710,6 @@ records:
             slot: leaf_7
           - kind: Literal
             text: 點傷害。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:6d4fa54dd143d2558372f568420017c272632f48168bda3669ef9e4df52c6efd
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}捨棄手牌中的"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張闇屬性・卡片：抽
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張卡片。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:6efdcdc18c1e324302feae131d816d5c37c129beafb708af72bdc24c37690b5c
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}將"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張『
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 』放置到
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 。若自己戰場上有原始消費為
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 的碧藍幻想・從者，則自己的主戰者{
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: "}+"
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -4512,42 +4130,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:79d83e76589c53c7b5996f68eb23a1d830ed8f93ab2d0908123c1d1f324f45c1
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】將
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張『
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 』放置到
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 。若自己戰場上有原始消費為
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 的碧藍幻想・從者，則自己的主戰者{
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: "}+"
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:7a422308ccd3ef64782ed7e863e852d6046556f4c163598c790f3b4612868972
       lang: zh-Hant
       target:
@@ -4567,53 +4149,6 @@ records:
             slot: leaf_2
           - kind: Literal
             text: PP。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:7af1d58a8cb15017c6796c6b0ed0826b116bb104fbd5161d1f2a4d594847b16a
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}將這張卡片{"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}並放置到墓場：將"
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 張『
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 』放置到
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 。抽
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 張卡片。自己戰場上有
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_7
-          - kind: Literal
-            text: 個以上原始消費為
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 的碧藍幻想・從者時，才可以使用這個能力。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -4660,30 +4195,6 @@ records:
             slot: leaf_8
           - kind: Literal
             text: 點傷害。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:7bfb3784da5e43e254e947cd12c472abb4f63086a652b65ac0f01653d7c18a98
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}{消費"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己戰場上的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個水屬性・從者。使其上限解放。若其具有【可最終上限解放】且已上限解放，則改為使其最終上限解放。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -4756,30 +4267,6 @@ records:
             slot: leaf_3
           - kind: Literal
             text: 個）
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:7d300c1b86bfb6c436623823ee8ccabf5e4fb379ca39bbaac4042ff9da214f94
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}{消費"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己戰場上的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個闇屬性・從者。使其上限解放。若其具有【可最終上限解放】且已上限解放，則改為使其最終上限解放。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -5986,59 +5473,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:9da501a22f9f2b9eca6d00eb7e7f454776e6fa807ad87682f15c40ff2f5856c6
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】選擇
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 。給予其
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 點傷害。給予敵方的全部主戰者
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 點傷害。若自己戰場上有
-          - kind: Form
-            form_id: quantity.existence_count.value
-            args:
-              quantity:
-                slot: leaf_7
-          - kind: Literal
-            text: 個以上原始消費為
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 的碧藍幻想・從者，則給予所選從者
-          - kind: LeafRef
-            slot: leaf_8
-          - kind: Literal
-            text: 點傷害。給予敵方的全部主戰者
-          - kind: LeafRef
-            slot: leaf_9
-          - kind: Literal
-            text: 點傷害。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:9df06f148d60db9436effc899d448ff1d6b2878aa870c634d713ef538097f9f2
       lang: zh-Hant
       target:
@@ -6252,30 +5686,6 @@ records:
             text: 個EP。
       expression_targets: {}
     note: 沿用語義相同的既有句框架 frame:50810fdb62ac36ef53f0f7dd190434369fd02be3a5bce72ca6083a01fbd20560 的譯文。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:a0d930e9c3d500d4bc0c218d17df956298196db5daca1b6d116b53a86f4937eb
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}捨棄手牌中的"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張碧藍幻想・卡片：抽
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張卡片。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
     kind: template_translation
     data:
@@ -6597,30 +6007,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:a9d3ec49caefb4a142fe1a0bc2a4f949693eb824538a337df4b195c5ccb33c2a
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}{消費"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己戰場上的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個火屬性・從者。使其上限解放。若其具有【可最終上限解放】且已上限解放，則改為使其最終上限解放。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:a9ff1e0d40b647a8d10b2215b31eb7646289631b3e6e5cb38cda85de421666d0
       lang: zh-Hant
       target:
@@ -6710,30 +6096,6 @@ records:
             text: 。將其破壞。
       expression_targets: {}
     note: 沿用語義相同的既有句框架 frame:b8c6a0bfec5fe9d43a8aaa7c485abb1832734a85c2225fd29acf06a8f0f7a8e6 的譯文。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:abe959450dd403875da3ecd63291c03986a6d67c6a3f368ed65e6c84ab904eed
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】選擇自己的墓場中的
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張原始消費為
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 的碧藍幻想・從者。將其召喚到
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 上。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
     kind: template_translation
     data:
@@ -7171,26 +6533,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:bbfb565206e4441ef8b6740ef44cd7bc74ddd42cfaff4912ba48ac78e51fb96c
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 這張卡片上限解放時，選擇自己的墓場中的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 張碧藍幻想・從者。將其加入
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:bbfc2cfdf3061a1eb4d59a292bc59d42107b1bc34bf6473c9dde3d2dcd826143
       lang: zh-Hant
       target:
@@ -7357,30 +6699,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:be30032198a8e816b6ac80ad3cf8f54ddb38467607d47f2ba076c95f8d26825f
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}{消費"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己戰場上的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個風屬性・從者。使其上限解放。若其具有【可最終上限解放】且已上限解放，則改為使其最終上限解放。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:bf53cd6340e7d627576290aea1198566211e7b7c5717007470870905707d7e67
       lang: zh-Hant
       target:
@@ -7535,30 +6853,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:c28b6055b45fbbb0a7f7767e148cb7060912513696e6f63bdc4ea8cb8c915ce6
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}{消費"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: "}：選擇自己戰場上的"
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 個光屬性・從者。使其上限解放。若其具有【可最終上限解放】且已上限解放，則改為使其最終上限解放。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:c31abd07d38ee38ec0a965971666c13b708f0137772a9f7e2352005dbd989640
       lang: zh-Hant
       target:
@@ -7653,44 +6947,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:c4b7e293a5dd860cad046e65deac140ac8cf1a7d6765a9f20cbe801ae604ce20
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】選擇
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 上的
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 個
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 。給予其等同於「自己的進化牌堆中正面朝上的土屬性・進化從者張數」的傷害。將
-          - kind: LeafRef
-            slot: leaf_5
-          - kind: Literal
-            text: 張『
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 』放置到
-          - kind: LeafRef
-            slot: leaf_6
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:c56f1a01e3510930fda086e739260cf607b10838baf4646891e5725e991d800a
       lang: zh-Hant
       target:
@@ -7736,50 +6992,6 @@ records:
             slot: leaf_9
           - kind: Literal
             text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:c5a57eb49a77f4b6ee0ef4062b2d4bc61a5cc595fb651b21db4e1de2bbbb00f2
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 這張卡片上限解放時，選擇自己的墓場中的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 張碧藍幻想・從者。將其加入
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:c6341ed826ceb3df881128a36912d4683a589155887307f1cfad83d65ee7e8a9
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 從自己的手牌公開這張卡片時，選擇自己戰場上的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 個火屬性・從者。其具有【
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 】【
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 】。
       expression_targets: {}
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
@@ -8023,47 +7235,6 @@ records:
           - kind: Literal
             text: 個）
       expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:c9c398c5893f07f8bb052cf025c857e9eb0fed8c48a3c3e7302cedd2751a8e89
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】選擇自己戰場上的
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 個其他碧藍幻想・從者。從
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 的
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 中搜尋
-          - kind: LeafRef
-            slot: leaf_3
-          - kind: Literal
-            text: 張「
-          - kind: LeafRef
-            slot: name_5
-          - kind: Literal
-            text: 的卡片」，召喚到
-          - kind: LeafRef
-            slot: leaf_4
-          - kind: Literal
-            text: 上。其具有「自己的結束階段到來時，這張卡片消失」。
-      expression_targets:
-        name.relative.objects.equal.v1:
-          format: 1
-          nodes:
-            - kind: Literal
-              text: 與其同名
     note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
     kind: template_translation
@@ -8632,30 +7803,6 @@ records:
   - origin: machine
     kind: template_translation
     data:
-      template_id: frame:d882406216913e1d1d8621135d1333fd8a3da2d52488a77f8c3cb5a5b238e51d
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: "{"
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: "}捨棄手牌中的"
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張碧藍幻想・卡片：抽
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 張卡片。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
-  - origin: machine
-    kind: template_translation
-    data:
       template_id: frame:d95d0d81088642df1f3eaeac3505549b0988aa5c9e495118b972bae69cd5c456
       lang: zh-Hant
       target:
@@ -8875,30 +8022,6 @@ records:
             text: 。
       expression_targets: {}
     note: 沿用語義相同的既有句框架 frame:06da84dd54a76c3c369b867f772983f96d0d27328fcd621084e67d0401ff2403 的譯文。
-  - origin: machine
-    kind: template_translation
-    data:
-      template_id: frame:dee89e21c8c8c18a8c25c26d9c3be768f97a67dbf0553678954f676533636f55
-      lang: zh-Hant
-      target:
-        format: 1
-        nodes:
-          - kind: Literal
-            text: 【進化時】從自己的牌堆中搜尋
-          - kind: LeafRef
-            slot: leaf_1
-          - kind: Literal
-            text: 張原始消費為
-          - kind: LeafRef
-            slot: leaf_0
-          - kind: Literal
-            text: 的碧藍幻想・從者，加入
-          - kind: LeafRef
-            slot: leaf_2
-          - kind: Literal
-            text: 。
-      expression_targets: {}
-    note: 依完整凍結日文與既有句型起草；保留原 semantic_variant/pending 與來源 scope，不宣稱完成規則實作。
   - origin: machine
     kind: template_translation
     data:
