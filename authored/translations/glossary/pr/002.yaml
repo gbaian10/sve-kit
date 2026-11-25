@@ -15,20 +15,21 @@ records:
       source_span:
       authored_source_ja:
   - origin: machine
-    note: 碧藍幻想卡莉歐斯托蘿的技能名，採社群譯名（灰機 wiki 簡中「辉誉术」轉繁）；維護者 11-25 定案。
+    note: 招式名比照同為卡莉歐斯托蘿系列的一代與二代官方「アルス・マグナ＝魔創鍊金」，Ars 招式取鍊金字尾；數位版沒有アルス・グローリア；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.ars_gloria
       lang: zh-Hant
       value:
         kind: authored
-        text: 輝譽術
+        text: 榮光鍊金
       concept_evidence: []
       source_claim:
-        source_work: Granblue Fantasy
+        source_work: "Shadowverse / Shadowverse: Worlds Beyond"
         source_urls:
-          - https://gbf.huijiwiki.com/wiki/Char/3040320000
-        claimed_source: 碧藍幻想卡莉歐斯托蘿的技能名，採社群譯名（灰機 wiki 簡中「辉誉术」轉繁）；維護者 11-25 定案。
+          - https://shadowverse-portal.com/card/900334030?lang=zh-tw
+          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=60
+        claimed_source: 招式名比照同為卡莉歐斯托蘿系列的一代與二代官方「アルス・マグナ＝魔創鍊金」，Ars 招式取鍊金字尾；數位版沒有アルス・グローリア；維護者 11-25 定案。
   - kind: glossary_term
     data:
       id: term:name.arthur_staunch_dragon
