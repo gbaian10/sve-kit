@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-102:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        evolve_time:
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  keyword: quick_activation
+                  orig_cost_le: 3
+                n: 1
+                to: field
