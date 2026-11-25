@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-057:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve_time:
+          cost:
+            reveal:
+              any: true
+              sel: { who: self, zone: hand, trait: 火属性 }
+              result: revealed
+          targets:
+            - bind: enemies
+              from: { who: opp, zone: field, kind: follower }
+              upto: 2
+          do:
+            - damage: { to: enemies, n: { count_of: revealed }, distribute: true }
+      - line: 2
+        super_evolve_time:
+          cost:
+            reveal:
+              any: true
+              sel: { who: self, zone: hand, trait: 火属性 }
+              result: revealed
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage:
+                to:
+                  any_of: [enemy, { leader_of: enemy }]
+                n: { x_paid: revealed }

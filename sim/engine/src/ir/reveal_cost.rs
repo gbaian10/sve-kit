@@ -32,8 +32,8 @@ pub(crate) fn parameter(decision: &Decision) -> Option<(Binding<Selector>, Cardi
         return None;
     };
     let count = constraint.cardinality;
-    (matches!(count.minimum.0, 1 | 2)
-        && count.maximum == Some(count.minimum)
+    let fixed = matches!(count.minimum.0, 1 | 2) && count.maximum == Some(count.minimum);
+    ((fixed || variable(count))
         && group.cardinality == count
         && constraint.disjoint == Disjointness::Disjoint
         && constraint.distinct_by.is_none()
@@ -59,6 +59,10 @@ pub(crate) fn parameter(decision: &Decision) -> Option<(Binding<Selector>, Cardi
                 input: InputMode::Inline,
             }))
     .then_some((*binding, count))
+}
+
+const fn variable(count: Cardinality) -> bool {
+    count.minimum.0 == 0 && count.maximum.is_none()
 }
 
 pub(crate) fn selected(action: &Action, parameters: &[Decision]) -> bool {
@@ -110,6 +114,14 @@ pub(crate) fn field_parameter(ability: &Ability, decision: &Decision) -> bool {
             ability.kind,
             AbilityKind::Activated | AbilityKind::Triggered
         )
+        && (!variable(count)
+            || matches!(
+                &ability.source.origin,
+                super::AbilityOrigin::Keyword {
+                    keyword: super::KeywordId::OnEvolve | super::KeywordId::OnSuperEvolve,
+                    ..
+                }
+            ))
         && play.parameters.contains(decision)
         && (field_steps(&play.costs, binding, count.minimum)
             || ability.body.as_ref().is_some_and(|body| {
@@ -212,7 +224,8 @@ pub(crate) fn payment(play: &PlaySpec) -> bool {
         return false;
     };
     let selected = Selector::Bound { reference: binding };
-    if play.limit.is_some()
+    if variable(count)
+        || play.limit.is_some()
         || !play.captures.is_empty()
         || first.instruction.action
             != (Action::Reveal {

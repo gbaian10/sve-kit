@@ -538,13 +538,14 @@ fn check_private_mode_cost(ability: &Ability, mode: &Mode) -> Result<()> {
 }
 
 fn material_dependency(decision: &Decision) -> Option<Binding<Selector>> {
-    let ChoiceDomain::Objects { constraint, .. } = &decision.domain else {
-        return None;
-    };
-    constraint
-        .aggregate_bounds
-        .iter()
-        .find_map(|bound| public_numbers::material_target_limit(&bound.value))
+    match &decision.domain {
+        ChoiceDomain::Objects { constraint, .. } => constraint
+            .aggregate_bounds
+            .iter()
+            .find_map(|bound| public_numbers::material_target_limit(&bound.value)),
+        ChoiceDomain::Distribution { total, .. } => public_numbers::material_count(total),
+        _ => None,
+    }
 }
 
 fn material_dependencies(parameters: &[Decision]) -> BTreeSet<(ScopeId, u64)> {
@@ -579,6 +580,7 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
     let mut late_material = false;
     let dependencies = material_dependencies(parameters);
     let mut public_materials = BTreeSet::new();
+    let mut private_reveals = BTreeSet::new();
     let mut targets = BTreeSet::new();
     let mut declarations = true;
     for decision in parameters {
@@ -596,83 +598,99 @@ fn check_parameters(parameters: &[Decision]) -> Result<()> {
             {
                 public_materials.insert(binding.key());
                 late_material |= !dependencies.contains(&binding.key());
+            } else if let Some((binding, _)) = reveal_payment::parameter(decision)
+                && dependencies.contains(&binding.key())
+            {
+                private_reveals.insert(binding.key());
             } else {
                 late_material = true;
             }
             continue;
         }
         if late_material
-            || material_dependency(decision)
-                .is_some_and(|binding| !public_materials.contains(&binding.key()))
+            || material_dependency(decision).is_some_and(|binding| {
+                !(public_materials.contains(&binding.key())
+                    || (matches!(decision.domain, ChoiceDomain::Distribution { .. })
+                        && private_reveals.contains(&binding.key())))
+            })
         {
             return Err(unsupported("target and material declaration order"));
         }
-        match (&decision.kind, &decision.domain) {
-            (
-                DecisionKind::PlayParameter {
-                    slot: PlaySlot::Targets,
-                    selection_snapshot: SelectionSnapshot::AtDecision,
-                    play_scope: ExecutionRef::Current {},
-                    input: InputMode::Inline,
-                },
-                ChoiceDomain::Objects {
-                    constraint,
-                    binding,
-                    target_roles,
-                },
-            ) if !distribution => {
-                super::selection::check(constraint)?;
-                if target_roles.is_some() {
-                    for group in &constraint.groups {
-                        super::selection::field_selector(&group.selector)?;
-                    }
-                } else {
-                    targets.insert(binding.key());
+        check_target_parameter(decision, &mut targets, &mut distribution)?;
+    }
+    Ok(())
+}
+
+fn check_target_parameter(
+    decision: &Decision,
+    targets: &mut BTreeSet<(ScopeId, u64)>,
+    distribution: &mut bool,
+) -> Result<()> {
+    match (&decision.kind, &decision.domain) {
+        (
+            DecisionKind::PlayParameter {
+                slot: PlaySlot::Targets,
+                selection_snapshot: SelectionSnapshot::AtDecision,
+                play_scope: ExecutionRef::Current {},
+                input: InputMode::Inline,
+            },
+            ChoiceDomain::Objects {
+                constraint,
+                binding,
+                target_roles,
+            },
+        ) if !*distribution => {
+            super::selection::check(constraint)?;
+            if target_roles.is_some() {
+                for group in &constraint.groups {
+                    super::selection::field_selector(&group.selector)?;
                 }
+            } else {
+                targets.insert(binding.key());
             }
-            (
-                DecisionKind::PlayParameter {
-                    slot: PlaySlot::Distribution,
-                    selection_snapshot: SelectionSnapshot::AtDecision,
-                    play_scope: ExecutionRef::Current {},
-                    input: InputMode::Inline,
-                },
-                ChoiceDomain::Distribution {
-                    recipients:
-                        RecipientSet::Objects {
-                            objects: Selector::Bound { reference },
-                        },
-                    minimum: Nat(1),
-                    ..
-                },
-            ) if targets.contains(&reference.key()) => {
-                distribution = true;
-            }
-            (
-                DecisionKind::PlayParameter {
-                    slot: PlaySlot::Targets,
-                    selection_snapshot: SelectionSnapshot::AtDecision,
-                    play_scope: ExecutionRef::Current {},
-                    input: InputMode::Inline,
-                },
-                ChoiceDomain::Recipients {
-                    candidates,
-                    cardinality,
-                    ..
-                },
-            ) if !distribution => {
-                super::recipient_targets::check(candidates, *cardinality)?;
-                if !decision.captures.is_empty() {
-                    return Err(unsupported("recipient target captures"));
-                }
-            }
-            _ => return Err(unsupported("play parameter order, dependencies or domain")),
         }
-        if decision.actor != (PlayerRef::Controller {})
-            || decision.visibility != (Visibility::Public {})
-        {
-            return Err(unsupported("play parameter actor or visibility"));
+        (
+            DecisionKind::PlayParameter {
+                slot: PlaySlot::Distribution,
+                selection_snapshot: SelectionSnapshot::AtDecision,
+                play_scope: ExecutionRef::Current {},
+                input: InputMode::Inline,
+            },
+            ChoiceDomain::Distribution {
+                recipients:
+                    RecipientSet::Objects {
+                        objects: Selector::Bound { reference },
+                    },
+                minimum: Nat(1),
+                ..
+            },
+        ) if targets.contains(&reference.key()) => {
+            *distribution = true;
         }
+        (
+            DecisionKind::PlayParameter {
+                slot: PlaySlot::Targets,
+                selection_snapshot: SelectionSnapshot::AtDecision,
+                play_scope: ExecutionRef::Current {},
+                input: InputMode::Inline,
+            },
+            ChoiceDomain::Recipients {
+                candidates,
+                cardinality,
+                ..
+            },
+        ) if !*distribution => {
+            super::recipient_targets::check(candidates, *cardinality)?;
+            if !decision.captures.is_empty() {
+                return Err(unsupported("recipient target captures"));
+            }
+        }
+        _ => return Err(unsupported("play parameter order, dependencies or domain")),
+    }
+    if decision.actor != (PlayerRef::Controller {})
+        || decision.visibility != (Visibility::Public {})
+    {
+        return Err(unsupported("play parameter actor or visibility"));
     }
     Ok(())
 }

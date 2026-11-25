@@ -79,9 +79,6 @@ impl Game {
             .get(&reference.key())
             .ok_or_else(|| invalid("missing reveal selection proof"))?
             .revalidate(self, execution, &members)?;
-        if !matches!(members.len(), 1 | 2) {
-            return Err(invalid("mandatory revelation cardinality"));
-        }
         let seat = seat_name(execution.context.controller)?;
         for member in &members {
             let object = self.object(execution.object_id(*member)?)?;

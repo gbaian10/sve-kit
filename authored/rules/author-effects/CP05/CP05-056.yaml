@@ -1,0 +1,26 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-056:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 1 }
+      - line: 2
+        fanfare:
+          do:
+            - look: { top: { who: self, n: 1 }, bind: seen }
+            - choose:
+                bind: picked
+                from: { in: seen, trait: 火属性 }
+                may: true
+                n: 1
+            - move: { ref: picked, to: hand }
+            - reveal: { ref: picked, bind: revealed }

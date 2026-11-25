@@ -8,6 +8,7 @@ use super::{
     Execution, Game, InputDomain, QuestionStage, Result, Wait, invalid, seat_name, unsupported,
 };
 use crate::game::player::QuestionPurpose;
+use crate::ir::public_numbers;
 use crate::ir::{
     Binding, ChoiceDomain, DamageAllocation, DamageAmount, Decision, DecisionId, ExecutionId, Expr,
     Nat, PlayerId, RecipientSet, ResolvedDamageAllocation, ResolvedRecipients,
@@ -119,6 +120,13 @@ pub(super) struct Allocation {
     answer: Vec<ResolvedDamageAllocation>,
 }
 
+fn formal_total(execution: &Execution, game: &Game, total: &Expr<Nat>) -> Result<Nat> {
+    public_numbers::material_count(total).map_or_else(
+        || execution.natural(game, total),
+        |binding| execution.declared_material_count(binding),
+    )
+}
+
 pub(super) fn feasible(
     execution: &Execution,
     game: &Game,
@@ -126,9 +134,11 @@ pub(super) fn feasible(
     total: &Expr<Nat>,
 ) -> Result<bool> {
     let recipients = execution.recipients(game, recipients)?;
-    let total = execution.natural(game, total)?;
-    Ok(recipients.members().is_empty()
-        || u64::try_from(recipients.members().len()).map_err(invalid)? <= total.0)
+    if recipients.members().is_empty() {
+        return Ok(true);
+    }
+    let total = formal_total(execution, game, total)?;
+    Ok(u64::try_from(recipients.members().len()).map_err(invalid)? <= total.0)
 }
 
 pub(super) fn packet(domain: &DistributionDomain) -> Value {
@@ -181,7 +191,11 @@ impl Game {
         let actor = execution.player(snapshot, &decision.actor)?;
         let expression = recipients.clone();
         let recipients = execution.recipients(snapshot, recipients)?;
-        let total = execution.natural(snapshot, total)?;
+        let total = if formal_parameter.is_some() {
+            formal_total(execution, snapshot, total)?
+        } else {
+            execution.natural(snapshot, total)?
+        };
         let mut members = Vec::new();
         for (index, recipient) in recipients.members().iter().enumerate() {
             let (player, card, name) = match *recipient {
