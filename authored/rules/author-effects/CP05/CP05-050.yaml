@@ -1,0 +1,62 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-050:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          targets:
+            - bind: recovered
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: グラブル
+              n: 1
+          do:
+            - move:
+                ref: recovered
+                to: hand
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: chosen
+              from:
+                who: self
+                zone: field
+                kind: follower
+                trait: グラブル
+                other: true
+              n: 1
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                same_name_as: chosen
+                n: 1
+                to: field
+                result: entered
+            - grant:
+                "on":
+                  follow: entered
+                abilities:
+                  - auto:
+                      "on":
+                        phase:
+                          which: end
+                          whose: self
+                      do:
+                        - banish:
+                            ref: this
