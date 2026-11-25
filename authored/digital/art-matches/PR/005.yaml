@@ -371,7 +371,7 @@ records:
     card_id: c:a9f2855e52385eed83802260f96aade2
     face_id: f:fa7dcd911ad55146b162dbba29b118a2
     game: sv1
-    state: unknown
+    state: not_found
     same_card_targets:
       - "109641010"
     witness:
@@ -408,8 +408,12 @@ records:
           - 463
         inliers: 0
     complete: true
-    review_level: model_reviewed
-    reason: 原生裁圖的同卡線上版卡圖落在 10 至 99 inliers，待核對。
+    review_level: confirmed
+    reason: 協調者目視確認完整候選均為不同插畫。
+    manual_review:
+      source: 協調者 11-25 目視確認為同角色不同插畫（構圖、背景不同），維護者授權協調者決定補包細節
+      reviewed_on: "2026-11-25"
+      matched_candidates: []
   - art_id: a:4ca1dc7739d75c1d8eec5cae1d04cbf3
     card_id: c:a9f2855e52385eed83802260f96aade2
     face_id: f:fa7dcd911ad55146b162dbba29b118a2
@@ -457,7 +461,7 @@ records:
     card_id: c:dcfc363e567a515ab03160156a16fcd6
     face_id: f:f80a585ef2b45a2eb479d0a723f62514
     game: sv1
-    state: unknown
+    state: not_found
     same_card_targets:
       - "119031010"
       - "810031140"
@@ -496,8 +500,12 @@ records:
           - 463
         inliers: 16
     complete: true
-    review_level: model_reviewed
-    reason: 原生裁圖的同卡線上版卡圖落在 10 至 99 inliers，待核對。
+    review_level: confirmed
+    reason: 協調者目視確認完整候選均為不同插畫。
+    manual_review:
+      source: 協調者 11-25 目視確認為同角色不同插畫（構圖、背景不同），維護者授權協調者決定補包細節
+      reviewed_on: "2026-11-25"
+      matched_candidates: []
   - art_id: a:4dc91e2d702e5ce5a01eda2a57ddbb36
     card_id: c:dcfc363e567a515ab03160156a16fcd6
     face_id: f:f80a585ef2b45a2eb479d0a723f62514
@@ -631,7 +639,7 @@ records:
     card_id: c:37a8eff80eda5d318793427bab35484f
     face_id: f:8b0fe7f9845658e0b768673e14e03f6d
     game: sv1
-    state: unknown
+    state: not_found
     same_card_targets:
       - "119031010"
       - "810031140"
@@ -670,8 +678,12 @@ records:
           - 463
         inliers: 24
     complete: true
-    review_level: model_reviewed
-    reason: 原生裁圖的同卡線上版卡圖落在 10 至 99 inliers，待核對。
+    review_level: confirmed
+    reason: 協調者目視確認完整候選均為不同插畫。
+    manual_review:
+      source: 協調者 11-25 目視確認為同角色不同插畫（構圖、背景不同），維護者授權協調者決定補包細節
+      reviewed_on: "2026-11-25"
+      matched_candidates: []
   - art_id: a:5111b0e312d85f588d015a6ac0174caa
     card_id: c:37a8eff80eda5d318793427bab35484f
     face_id: f:8b0fe7f9845658e0b768673e14e03f6d
@@ -913,7 +925,7 @@ records:
     card_id: c:faec564a2bb95221b32a5f46376d9d21
     face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
     game: sv1
-    state: unknown
+    state: not_found
     same_card_targets:
       - "109331020"
     witness:
@@ -950,8 +962,12 @@ records:
           - 463
         inliers: 10
     complete: true
-    review_level: model_reviewed
-    reason: 原生裁圖的同卡線上版卡圖落在 10 至 99 inliers，待核對。
+    review_level: confirmed
+    reason: 協調者目視確認完整候選均為不同插畫。
+    manual_review:
+      source: 協調者 11-25 目視確認為同角色不同插畫（構圖、背景不同），維護者授權協調者決定補包細節
+      reviewed_on: "2026-11-25"
+      matched_candidates: []
   - art_id: a:6a3ec45bafd35ab693dd71e8c4c276c0
     card_id: c:faec564a2bb95221b32a5f46376d9d21
     face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
