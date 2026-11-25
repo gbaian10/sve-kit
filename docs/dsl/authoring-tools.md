@@ -1333,7 +1333,15 @@ Twin Drive 在每次事件時捕捉觀察者，兩次檢查與 trigger 效果都
 
 空牌庫不曾公開任何卡；若卡文依「公開卡是奇數／偶數」或「不是某類卡」分支，
 先以不帶篩選的 `count` ≥ 1 確認存在卡，再判斷屬性（CP01-083、BP21-066）。
-總和為零不等於公開過零費卡。此入口不支援從公開集合選取成員後處理差集餘牌。
+總和為零不等於公開過零費卡。
+
+公開同批成員後可依印刷特徵計算傷害量，例如
+`damage: {to: enemy, n: {count: {in: {objects_of: shown, view: before}, trait: 光属性}}}`。
+先結算需要整批卡的數值，再用 `choose: {bind: picked, from: {in: shown}, n: 1}` 選一張，
+以 `move: {ref: picked, to: hand, result: taken}` 記下成功加入手牌的卡。
+接著以 `move: {ref: {in: shown, except: {in: {objects_of: taken, view: before}}}, to: deck, position: bottom, order: chooser}`
+把餘牌按控制者的選擇放到牌庫底。先以 `count: {in: {objects_of: shown, view: before}}` ≥ 1
+確認公開集合非空，再選一張。未公開的私下 Look 不能供上述傷害計數。
 
 ## 解決中的法術來源回手
 
