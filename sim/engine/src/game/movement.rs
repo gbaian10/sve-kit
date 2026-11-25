@@ -205,7 +205,7 @@ impl Game {
             .filter(|object| object.zone == "hand")
             .cloned()
             .collect::<Vec<_>>();
-        let traits = discarded
+        let hand_traits = discarded
             .iter()
             .map(|object| self.card_traits(&object.id))
             .collect::<Result<Vec<_>>>()?;
@@ -225,7 +225,7 @@ impl Game {
             .collect::<Vec<_>>();
         let player_mark = self.player_event_mark();
         self.move_objects(&actual, "cemetery", None, None, frame)?;
-        for (previous, traits) in discarded.iter().zip(traits) {
+        for (previous, traits) in discarded.iter().zip(hand_traits) {
             if self.object(&previous.id)?.generation != previous.generation {
                 self.internal_record_discard_traits(&previous.controller, traits);
             }

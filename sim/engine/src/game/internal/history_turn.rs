@@ -457,7 +457,7 @@ pub(super) fn count(
                 return committed_counter(game, execution.context.controller, "discarded").map(Nat);
             };
             let seat = seat_name(execution.context.controller)?;
-            let count = game
+            let matches = game
                 .state
                 .ir_discard_traits
                 .get(seat)
@@ -469,7 +469,7 @@ pub(super) fn count(
                         .any(|actual| trait_matches(actual, &trait_id.0))
                 })
                 .count();
-            Ok(Nat(u64::try_from(count).map_err(invalid)?))
+            Ok(Nat(u64::try_from(matches).map_err(invalid)?))
         }
         HistoryPlan::Life(filter) => {
             if count != HistoryCount::Facts {

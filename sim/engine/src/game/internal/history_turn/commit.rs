@@ -11,6 +11,7 @@ use crate::ir::{
     CardKind, CardName, DamageEvent, EventPayload, ExecutionId, PlayerId, RuntimeDamageRecipient,
     RuntimeHolder, Stat,
 };
+use alloc::collections::BTreeSet;
 use core::iter::once;
 use serde_json::{Value, json};
 
@@ -235,7 +236,7 @@ impl Game {
     pub(in crate::game) fn internal_record_discard_traits(
         &mut self,
         controller: &str,
-        traits: alloc::collections::BTreeSet<String>,
+        traits: BTreeSet<String>,
     ) {
         if traits.is_empty() {
             return;
