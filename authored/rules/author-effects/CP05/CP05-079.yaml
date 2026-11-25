@@ -1,0 +1,57 @@
+cards:
+  CP05-079:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to: enemy
+          on:
+            discarded:
+              from: hand
+              sel:
+                trait: 闇属性
+              who: self
+          per_turn: 1
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 1
+      - activate:
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  n: 1
+                  sel:
+                    trait: 闇属性
+                    who: self
+                    zone: hand
+          do:
+            - look:
+                bind: top
+                top:
+                  n: 1
+                  who: self
+            - optional:
+                do:
+                  - move:
+                      order: chooser
+                      position: bottom
+                      ref:
+                        in: top
+                      to: deck
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set

@@ -1,0 +1,57 @@
+cards:
+  CP05-076:
+    abilities:
+      - auto:
+          do:
+            - move:
+                ref: this
+                to: field
+          on:
+            discarded:
+              by:
+                ability_of:
+                  trait: 闇属性
+                  who: self
+              during:
+                turn: self
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - evolve:
+          cost:
+            pp: 1
+        line: 2
+      - keywords:
+          - final_limit_break_possible
+        line: 3
+      - auto:
+          do:
+            - pay:
+                cost:
+                  pp: 3
+                do:
+                  - stand: allies
+          on:
+            final_limit_broke:
+              ref: this
+          targets:
+            - bind: allies
+              from:
+                kind: follower
+                other: true
+                trait: 闇属性
+                who: self
+                zone: field
+              upto: 2
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set
