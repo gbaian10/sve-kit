@@ -1,0 +1,53 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-019:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 2
+        path: /auto/do/1/choose
+        reason: 選牌在抽兩張後結算，包含剛抽到的手牌。
+    abilities:
+      - line: 1
+        keywords:
+          - final_limit_break_possible
+      - line: 2
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          do:
+            - draw:
+                n: 2
+            - choose:
+                bind: bottom
+                from:
+                  who: self
+                  zone: hand
+                n: 1
+            - move:
+                ref: bottom
+                to: deck
+                position: bottom
+      - line: 3
+        auto:
+          "on":
+            final_limit_broke:
+              ref: this
+          do:
+            - search:
+                sel:
+                  who: self
+                  zone: deck
+                  kind: follower
+                  orig_cost_le: 2
+                upto: 2
+                to: field
+                distinct_by: name

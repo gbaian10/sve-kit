@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-T03:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: 水晶のエレメント
+                n: 1
+                to: ex
+            - draw:
+                n: 1
+            - discard:
+                who: self
+                n: 1
