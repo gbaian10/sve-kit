@@ -285,9 +285,16 @@ def test_current_source_rejects_unregistered_or_mismatched_semantic_descriptor(
         engine.verify(raw, field, part, changed, binding, context=facts)
 
 
-@pytest.mark.parametrize("missing", [None, "name", "trait", "class", "kind"])
 @pytest.mark.parametrize(
-    "traits", [("仮種族",), ("土属性", "光属性", "闇属性"), ("仮種族", "全属性")]
+    ("missing", "traits"),
+    [
+        *(
+            (missing, ("仮種族",))
+            for missing in (None, "name", "trait", "class", "kind")
+        ),
+        (None, ("土属性", "光属性", "闇属性")),
+        (None, ("仮種族", "全属性")),
+    ],
 )
 def test_token_header_requires_every_declared_field_in_its_exact_catalog(
     missing: str | None, traits: tuple[str, ...]

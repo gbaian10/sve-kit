@@ -74,7 +74,7 @@ def numeric_classifier(
         ),
     ],
 )
-def test_limit_break_batch_numeric_constructions(raw: str, roles: list[str]) -> None:
+def test_complete_constructs_supply_numeric_roles(raw: str, roles: list[str]) -> None:
     engine = numeric_classifier(
         extra=(
             "original_cost_sum_bound",
