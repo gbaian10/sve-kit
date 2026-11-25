@@ -26,7 +26,11 @@ fn answer_single_target(game: &mut Game, play: CardPlay) -> CardPlay {
     let InputDomain::Targets(domain) = &question.domain else {
         panic!("expected a formal target");
     };
-    assert_eq!(domain.members.len(), 1);
+    assert_eq!(
+        domain.members.len(),
+        1,
+        "the test position has one eligible target"
+    );
     answer(
         game,
         &question,
@@ -134,7 +138,11 @@ fn arulumaya_creates_earth_material_heals_and_flips_one_earth_form() {
         Some(Nat(1)),
         "only one evolution can flip"
     );
-    assert_eq!(domain.members.len(), 1);
+    assert_eq!(
+        domain.members.len(),
+        1,
+        "only the face-down earth form is a flip candidate"
+    );
     assert!(
         game.internal_decision(View::P2).is_none(),
         "the opponent cannot see the face-down choice"
