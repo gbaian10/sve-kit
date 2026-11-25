@@ -28,6 +28,7 @@
     "shots": "bun run scripts/screenshots/main.ts",
     "bench:catalog": "bun run scripts/catalog/main.ts",
     "check:drawer": "bun run scripts/drawer-check/main.ts",
+    "rules:revision": "bun run scripts/rules/revision.ts",
     "rules:stamp": "bun run scripts/rules/stamp.ts"
   },
   "dependencies": {

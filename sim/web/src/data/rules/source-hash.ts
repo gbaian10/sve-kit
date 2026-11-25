@@ -1,4 +1,4 @@
-import { canonical, type JsonValue } from "../format-v3/json"
+import { canonical } from "../format-v3/json"
 import { digest } from "../format-v3/sha256"
 import type { RuleNode, RulesTranslationFile, TranslationEntry } from "./model"
 
@@ -7,7 +7,7 @@ import type { RuleNode, RulesTranslationFile, TranslationEntry } from "./model"
  * example, one table cell) makes the stored hash stale. This is the only implementation: the data
  * test and `bun run rules:stamp` both call it.
  */
-export function sourceProjection(node: RuleNode): JsonValue {
+export function sourceProjection(node: RuleNode) {
   return {
     title: node.title ?? "",
     text: node.text,

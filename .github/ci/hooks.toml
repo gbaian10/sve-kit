@@ -83,6 +83,9 @@ job = "python"
 [hooks.mypy-schema-er]
 job = "python"
 
+[hooks.mypy-rules-pdf]
+job = "python"
+
 [hooks.cargo-fmt]
 job = "rust"
 
