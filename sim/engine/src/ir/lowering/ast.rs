@@ -1609,6 +1609,7 @@ pub(super) enum Affected {
 #[serde(deny_unknown_fields)]
 pub(super) struct Search {
     pub sel: Option<SearchSelector>,
+    pub same_name_as: Option<String>,
     pub n: Option<u64>,
     pub upto: Option<NumericArgument>,
     pub groups: Option<Vec<SearchGroup>>,

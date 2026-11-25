@@ -632,6 +632,19 @@ impl Execution {
                 into.binding.key(),
                 Slot::Boolean(self.boolean(game, value)?),
             ),
+            Capture::Names { value, into, .. } => {
+                let Expr::Live(read) = value else {
+                    return Err(unsupported("selected name collection"));
+                };
+                let crate::ir::NamesRead::Names { object } = read.as_ref();
+                let ObjectView::Selected { selection } = object else {
+                    return Err(unsupported("selected name collection"));
+                };
+                (
+                    into.binding.key(),
+                    Slot::Names(self.selected_names(game, *selection)?),
+                )
+            }
             Capture::Name { value, into, .. } => {
                 (into.binding.key(), Slot::Name(self.name(game, value)?))
             }

@@ -585,6 +585,7 @@ enum Slot {
     Integer(Int),
     Natural(Nat),
     Name(CardName),
+    Names(Vec<CardName>),
     Boolean(Bool),
     Player(PlayerId),
     Objects {

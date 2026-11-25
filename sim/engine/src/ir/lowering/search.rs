@@ -489,9 +489,37 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Action, LoweringError> {
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
+        let target_names = search
+            .same_name_as
+            .as_ref()
+            .map(|name| {
+                if search.n != Some(1)
+                    || search.upto.is_some()
+                    || search.groups.is_some()
+                    || !matches!(search.to, ast::SearchDestination::Single(ast::SearchZone::Field))
+                    || !matches!(&search.sel, Some(ast::SearchSelector::Query(query))
+                        if query.name.is_none()
+                            && matches!(query.kind, Some(ast::SearchKindFilter::Literal(ast::SearchKind::Follower))))
+                {
+                    return Err(unsupported(path));
+                }
+                self.selected_follower_names(name, path)
+            })
+            .transpose()?;
         let upper_bound = self.search_count_bound(search, path)?;
         let (filter, cardinality, groups) = if let Some(query) = &search.sel {
-            let predicate = filter(self, query, candidate, path)?;
+            let mut predicate = filter(self, query, candidate, path)?;
+            if let Some(names) = target_names {
+                predicate = and_filter(
+                    predicate,
+                    Expr::Compute(Box::new(Predicate::NamesIntersect {
+                        left: Expr::Live(Box::new(NamesRead::Names {
+                            object: view(candidate),
+                        })),
+                        right: names,
+                    })),
+                );
+            }
             let cardinality = if upper_bound.is_some() {
                 Cardinality {
                     minimum: Nat(0),

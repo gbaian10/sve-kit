@@ -566,7 +566,7 @@ impl Checker {
         }
     }
 
-    fn names(&self, expression: &Expr<Vec<CardName>>) -> Checked {
+    pub(super) fn names(&self, expression: &Expr<Vec<CardName>>) -> Checked {
         match expression {
             Expr::Literal(_) => Ok(()),
             Expr::Live(read) if !self.event_capture() => {
@@ -574,7 +574,11 @@ impl Checker {
                 self.information_view(object)
             }
             Expr::Frozen(_) => self.projection(expression),
-            Expr::Live(_) | Expr::Captured(_) | Expr::Bound(_) | Expr::Compute(_) => self.reject(),
+            Expr::Captured(reference) => {
+                self.reference(reference.binding, BindingKind::Capture)?;
+                self.visible(self.env.access.get(&reference.binding.key()))
+            }
+            Expr::Live(_) | Expr::Bound(_) | Expr::Compute(_) => self.reject(),
         }
     }
 

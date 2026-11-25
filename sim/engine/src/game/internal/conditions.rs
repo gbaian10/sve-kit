@@ -6,10 +6,11 @@ use crate::ir::public_numbers;
 use crate::ir::trait_matches;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, Binding, Bool, BoolRead, BooleanState,
-    CardKind, CardName, CharacteristicView, ClassRead, Comparison, CounterKind, EvolutionRead,
-    EvolutionState, Expr, Info, Int, IntOperation, KeywordId, KindRead, MemberProjection,
-    MovementReceipt, NamesRead, NatRead, NumberRead, ObjectOperand, ObjectReceipt, ObjectRef,
-    ObjectView, PlayerId, Posture, PostureRead, Predicate, Stat, TraitsRead, paid_names,
+    CaptureRef, CardKind, CardName, CharacteristicView, ClassRead, Comparison, CounterKind,
+    EvolutionRead, EvolutionState, Expr, Info, Int, IntOperation, KeywordId, KindRead,
+    MemberProjection, MovementReceipt, NamesRead, NatRead, NumberRead, ObjectOperand,
+    ObjectReceipt, ObjectRef, ObjectView, PlayerId, Posture, PostureRead, Predicate, Stat,
+    TraitsRead, paid_names,
 };
 
 pub(super) mod candidate;
@@ -76,6 +77,12 @@ pub(super) enum SourceNames {
 pub(super) trait Resolver {
     fn number(&self, expression: &Expr<Int>) -> Result<i64>;
     fn names(&self, source: SourceNames) -> Result<Vec<CardName>>;
+    fn captured_names(&self, _reference: &CaptureRef<Vec<CardName>>) -> Result<Vec<CardName>> {
+        Err(unsupported(
+            "captured names unavailable to this candidate adapter",
+        ))
+    }
+
     fn payment_names(&self, _receipt: &ObjectReceipt) -> Result<Vec<CardName>> {
         Err(unsupported(
             "payment names unavailable to this candidate adapter",
@@ -102,6 +109,7 @@ enum Names {
     Literal(Vec<String>),
     Source(SourceNames),
     Payment(ObjectReceipt),
+    Captured(CaptureRef<Vec<CardName>>),
 }
 
 #[derive(Clone, Debug)]
@@ -227,6 +235,9 @@ fn candidate(view: &ObjectView, binding: Binding<ObjectRef>) -> bool {
 
 fn names(expression: &Expr<Vec<CardName>>, policy: Policy) -> Option<Names> {
     match expression {
+        Expr::Captured(reference) if policy == Policy::Search => {
+            Some(Names::Captured(reference.clone()))
+        }
         Expr::Literal(names)
             if !names.is_empty() && names.iter().all(|name| !name.0.is_empty()) =>
         {
@@ -541,6 +552,16 @@ impl Tree<Atom> {
                             Some(resolver) => Operand::Value(
                                 resolver
                                     .names(*source)?
+                                    .into_iter()
+                                    .map(|name| name.0)
+                                    .collect(),
+                            ),
+                            None => Operand::Unavailable,
+                        },
+                        Names::Captured(reference) => match resolver {
+                            Some(resolver) => Operand::Value(
+                                resolver
+                                    .captured_names(reference)?
                                     .into_iter()
                                     .map(|name| name.0)
                                     .collect(),

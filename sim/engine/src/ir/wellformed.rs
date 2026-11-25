@@ -1183,6 +1183,24 @@ impl Checker {
                 self.save_access(into.binding.key(), access);
                 Ok(())
             }
+            Capture::Names {
+                at: at @ CaptureTime::AtSelection { .. },
+                value: Expr::Live(read),
+                into,
+            } if matches!(
+                read.as_ref(),
+                super::NamesRead::Names {
+                    object: ObjectView::Selected { .. }
+                }
+            ) =>
+            {
+                let value = &Expr::Live(read.clone());
+                let access = self.capture_access(*at, |checker| checker.names(value));
+                self.frozen(*at, |checker| checker.names(value))?;
+                self.define(into.binding, BindingKind::Capture)?;
+                self.save_access(into.binding.key(), access);
+                Ok(())
+            }
             Capture::Name {
                 at: at @ CaptureTime::AtSelection { .. },
                 value: Expr::Compute(operation),

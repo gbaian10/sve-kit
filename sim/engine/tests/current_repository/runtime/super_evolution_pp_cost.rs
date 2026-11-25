@@ -142,7 +142,7 @@ fn evolve_with(game: &mut Game, cost: u8, mode: u64) {
 }
 
 // Some printed bases are not admitted yet, so a same-name companion supplies only evolution.
-fn synthetic_base(form: &str, initial: &Value) -> Game {
+pub(super) fn synthetic_base(form: &str, initial: &Value) -> Game {
     let (snapshot, keywords, mut input) = inputs().clone();
     let printed: Value = snapshot
         .lines()
