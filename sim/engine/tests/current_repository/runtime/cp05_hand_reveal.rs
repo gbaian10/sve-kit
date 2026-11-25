@@ -48,12 +48,15 @@ fn reveal_game(initial: &Value) -> Game {
     game
 }
 
-fn start_pending(game: &mut Game, line: u64) -> CardPlay {
+fn start_pending(game: &mut Game, card: &str, line: u64) -> CardPlay {
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {
         panic!("printed trigger pending");
     };
-    let option = options.iter().find(|option| option.line == line).unwrap();
+    let option = options
+        .iter()
+        .find(|option| option.card == card && option.line == line)
+        .unwrap();
     game.answer_internal_card(
         question.actor,
         question.token,
@@ -101,7 +104,7 @@ fn cp05_068_attack_reveals_exactly_three_fire_cards_and_each_copy_observes_itsel
             .outcome,
         "resolved"
     );
-    let CardPlay::Awaiting(payment) = start_pending(&mut game, 3) else {
+    let CardPlay::Awaiting(payment) = start_pending(&mut game, "CP05-P52", 3) else {
         panic!("head payment declaration");
     };
     assert_eq!(payment.domain, InputDomain::OptionalCost);
@@ -159,7 +162,7 @@ fn cp05_068_attack_reveals_exactly_three_fire_cards_and_each_copy_observes_itsel
                 .iter()
                 .any(|option| option.card == printing && option.line == 1)
         );
-        let reveal = start_pending(&mut game, 1);
+        let reveal = start_pending(&mut game, printing, 1);
         resolved(select_target(&mut game, reveal, FIRE));
         game.resume_internal_card().unwrap();
     }
@@ -181,7 +184,7 @@ fn cp05_068_observes_its_owners_whole_hand_reveal_on_the_opponents_turn() {
             .unwrap(),
         CardPlay::Entered(_)
     ));
-    resolved(start_pending(&mut game, 1));
+    resolved(start_pending(&mut game, "BP06-118", 1));
     game.resume_internal_card().unwrap();
     let reveal = game.internal_pending_choice().unwrap().unwrap();
     assert_eq!(reveal.actor, PlayerId { seat: 2 });
@@ -191,7 +194,7 @@ fn cp05_068_observes_its_owners_whole_hand_reveal_on_the_opponents_turn() {
     assert_eq!(options.len(), 1);
     assert_eq!(options[0].card, "CP05-068");
     assert!(game.projection(View::P1).unwrap()["objects"]["opponents_card"].is_null());
-    let target = start_pending(&mut game, 1);
+    let target = start_pending(&mut game, "CP05-068", 1);
     resolved(select_target(&mut game, target, FIRE));
     game.resume_internal_card().unwrap();
     let view = game.projection(View::Referee).unwrap();
@@ -212,7 +215,7 @@ fn cp05_068_does_not_observe_revelation_in_the_deck() {
             .unwrap(),
         CardPlay::Entered(_)
     ));
-    resolved(start_pending(&mut game, 1));
+    resolved(start_pending(&mut game, "BP19-113", 1));
     game.resume_internal_card().unwrap();
     assert!(game.internal_pending_choice().unwrap().is_none());
     let public = game.projection(View::P2).unwrap();
@@ -255,7 +258,7 @@ fn cp05_068_keeps_its_pending_ability_when_random_hand_revelation_moves_it() {
             .unwrap()
             .contains(&json!("revealed"))
     );
-    let target = start_pending(&mut game, 1);
+    let target = start_pending(&mut game, "CP05-P52", 1);
     resolved(select_target(&mut game, target, FIRE));
     game.resume_internal_card().unwrap();
     let after = game.projection(View::Referee).unwrap();
@@ -287,7 +290,7 @@ fn cp05_057s_variable_reveal_also_triggers_cp05_068_in_hand() {
         .outcome,
         "resolved"
     );
-    let CardPlay::Awaiting(payment) = start_pending(&mut game, 2) else {
+    let CardPlay::Awaiting(payment) = start_pending(&mut game, "CP05-057", 2) else {
         panic!("the evolved card offers a reveal cost");
     };
     assert_eq!(payment.domain, InputDomain::OptionalCost);
@@ -316,7 +319,7 @@ fn cp05_057s_variable_reveal_also_triggers_cp05_068_in_hand() {
         game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
         19_u8
     );
-    let grant = start_pending(&mut game, 1);
+    let grant = start_pending(&mut game, "CP05-P52", 1);
     resolved(select_target(&mut game, grant, FIRE));
     game.resume_internal_card().unwrap();
     let result = game.projection(View::Referee).unwrap();
