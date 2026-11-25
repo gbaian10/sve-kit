@@ -1,0 +1,39 @@
+cards:
+  CP05-086:
+    abilities:
+      - line: 1
+        static:
+          effects:
+            - grant:
+                keywords:
+                  - storm
+          while:
+            cmp:
+              left:
+                count:
+                  face_up: true
+                  kind: evolve_follower
+                  trait: 土属性
+                  who: self
+                  zone: evolve_deck
+              op: ge
+              right: 4
+      - fanfare:
+          do:
+            - flip_up:
+                sel:
+                  kind: evolve_follower
+                  trait: 土属性
+                  who: self
+                  zone: evolve_deck
+                upto: 1
+        line: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set
