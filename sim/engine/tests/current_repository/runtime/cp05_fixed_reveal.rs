@@ -57,7 +57,11 @@ fn enemy_position() -> Value {
 
 fn accept_reveal(game: &mut Game, card: &str) -> DecisionView {
     let decision = awaiting(fanfare(game, card));
-    assert_eq!(decision.domain, InputDomain::OptionalCost);
+    assert_eq!(
+        decision.domain,
+        InputDomain::OptionalCost,
+        "the fanfare first asks whether to pay its reveal cost"
+    );
     let target = answer(game, &decision, Answer::OptionalCost(true));
     awaiting(answer_single_target(game, target))
 }
