@@ -256,7 +256,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 ## 8. 事件與歷史
 
-`A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、limit_broke、final_limit_broke、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
+`A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、limit_broke、final_limit_broke、hand_revealed、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
 
 自身手牌棄牌／消滅的 `any_of` 子集為：
 `{any_of: [{discarded: {ref: this, from: hand, who: self}}, {banished: {ref: this, from: hand, who: self}}]}`。

@@ -149,7 +149,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 
 ## 事件與歷史的封閉變體
 
-35 個直接事件鍵如下。`any_of` 是事件組合，`counter_reached` 是 counter_changed.after 的比較。每一列須分開窄化，**不是可套在每個事件的總欄位池**。以下只列DSL 文件明示的 filter；事件當時可讀的 payload 另依配對 IR 型別，不自動成為 filter。
+36 個直接事件鍵如下。`any_of` 是事件組合，`counter_reached` 是 counter_changed.after 的比較。每一列須分開窄化，**不是可套在每個事件的總欄位池**。以下只列DSL 文件明示的 filter；事件當時可讀的 payload 另依配對 IR 型別，不自動成為 filter。
 
 | 直接事件 | DSL 明示的專屬 filter／責任 |
 | --- | --- |
@@ -186,6 +186,7 @@ move／banish／look／reveal 的同層 top 共用 DeckSlice，不接受 ref:{to
 | drew | who、not_phase；與 played 等事件不同 |
 | equipped | equipment；本文 event.holder |
 | limit_broke／final_limit_broke | ref:this |
+| hand_revealed | ref:this；只在 on，不收 history |
 | fused_as_material | ref、by.ability_of |
 
 共同 `by:{ability_of:EventObjectSel}` 仍須該事件支持直接來源。history／history_count／history_sum 共用 `{event,who?,zone?,from?,to?,sel?,where?,window,distinct?,exclude?}`，history 可 at_least，history_sum 必有 field。window 為 this_turn/game/{since:BindingName} 錨；distinct=facts/subjects，exclude=this_execution。where 僅接受所選事件的 filter。history_sum 的 amount/delta/removed_stack 分別需要相應事件／方向／EarthRite 付款窄化，不能由字串欄名就授予任意 payload 存取。removed_stack 是唯一正式拼法，不接受 removed 別名。完整變體、history 頂層提升與 on/history 差異見[事件與歷史形狀](author-history-shapes-1.0.md)；sum 的 distinct 只收 facts。

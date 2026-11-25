@@ -15,7 +15,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 卡例沿事件與歷史形狀文件的凍結日文來源；本矩陣不把 Q&A 命中算為卡例。
 「合成」只表示契約形狀的測試，不能據此宣稱該格已有真卡或可執行。
 
-## 直接事件（35 鍵）
+## 直接事件（36 鍵）
 
 | 事件 | payload 必填 | payload 選填（型別／enum） | 卡例／合成 |
 | --- | --- | --- | --- |
@@ -52,10 +52,11 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | drew | 無 | who:PlayerRef、not_phase:Phase、by:By | BP05-094；by 合成 |
 | equipped | 無 | equipment:(Ref 或 EventObjectSel) | CP04-PR22；selector 合成 |
 | limit_broke／final_limit_broke | ref:this | 無 | CR 14.6.4；場上從者自身完成的普通／最終階段 |
+| hand_revealed | ref:this | 無 | CP05-068；手牌能力，自己的本文或付款從手牌公開此卡 |
 | fused_as_material | 無 | ref:Ref、by:By | BP19-048 |
 
 counter_reached 是額外巨集：ref:Ref／name:CounterName／value:Nat 三者必填，沒有選填欄位。
-加上此巨集共有 34 個可直接寫的鍵；它以 counter_changed 的 after 比較展開，不新增歷史事實。
+加上此巨集共有 37 個可直接寫的鍵；它以 counter_changed 的 after 比較展開，不新增歷史事實。
 any_of 是非空事件列表組合，可含 counter_reached，但不含 state／巢狀 any_of。
 
 ## 歷史（32 個非 state 事件與 payment）
