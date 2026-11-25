@@ -493,7 +493,7 @@ Played 的 `sel` 另接受 `orig_cost_eq`、`orig_cost_le` 或 `orig_cost_ge`，
 `history_sum: {window: this_turn, event: payment, who: self, where: {cost_kind: earth_rite}, field: removed_stack}` 累加本回合自己的【土の秘術】實際取下的【スタック】個數，跨多次付款加總（Q1895～Q1897）。只接受 `who: self` 與 `this_turn`；可作 `usable_if` 等條件的數值。付款計入雙方共用的回合計數，拒絕或回復的付款不計，回合開始時清空。
 正式目標 `upto` 可直接讀這個封閉的增加次數查詢；上限為 0 時仍可選 0 個目標並繼續本文。此入口不放寬費用、搜索上限或其他歷史查詢。代表卡 BP21-092／BP21-SL22 與 BP21-T09（Q2769）。
 
-`history: {window: this_turn, event: discarded, who: self, from: hand}` 查詢本回合自己是否曾捨棄手牌；`history_count` 使用相同查詢計算實際捨棄的張數。只接受這個玩家與來源形狀，`distinct` 可省略或為 `facts`，不接受主體篩選、其他來源、排除執行或 `subjects` 去重。效果、正式費用與手牌上限的捨棄都經共同入口計入；普通移區、消滅與抽牌不計，失敗付款連同歷史回復，雙方歷史在下一回合開始歸零。稍後入場的卡仍能讀取本回合較早的捨棄。
+`history: {window: this_turn, event: discarded, who: self, from: hand}` 查詢本回合自己是否曾捨棄手牌；`history_count` 使用相同查詢計算實際捨棄的張數。可加 `sel: {trait: 闇属性}` 讀離手前的單一類型條件，每張符合的卡計一次。CP05-017 的結算條件與 CP05-071 的起動條件使用相同查詢。玩家與來源固定為自己的手牌，`distinct` 可省略或為 `facts`。效果、正式費用與手牌上限的捨棄都經共同入口計入；普通移區、消滅與抽牌不計，失敗付款連同歷史回復，雙方歷史在下一回合開始歸零。稍後入場的卡仍能讀取本回合較早的捨棄。
 
 同一個 `history` 條件可放入 `play.cost_delta.if`，在共同打出付款流程讀取，適用手牌與 EX 起點；此費用條件入口不因此開放其他歷史事件。一般 `auto` 仍依 R-0004／R-0009 先選正式 `targets`、結算處理到 `if` 時才讀歷史。結束階段的能力先於手牌上限捨棄結算，因此稍後的規則捨棄不會補做已略過的傷害（Q302）；同一結束階段內較早結算的能力所支付的捨棄則已可讀取。
 
