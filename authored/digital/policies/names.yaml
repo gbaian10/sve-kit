@@ -61,10 +61,7 @@ content:
       - 8287
       - 12288
     trim_or_normalize: false
-  excluded_names:
-    - source_lang: ja
-      source_name_hash: sha256:943863a8437e2984bec31bca695d5384a71b79d5113190518932def89ca99eb0
-      reason: 一代官方譯名「十天眾統御者‧葛蘭與吉塔」的連接符與碧藍幻想雙人卡名慣例不同；改用 glossary 選詞，依二代與 Versus 官方統一為「葛蘭＆吉塔」（維護者 11-25 定案）。
+  excluded_names: []
   name_overrides:
     - owner:
         kind: face_revision
