@@ -1,5 +1,5 @@
 // Fills the missing source hashes of comprehensive-rules translation files from their originals:
-//   bun run rules:stamp <repo>/authored/translations/comprehensive-rules/zh-TW/1.28.0/ch01.json …
+//   bun run rules:stamp <repo>/authored/translations/comprehensive-rules/zh-TW/1.29.0/ch01.json …
 // Existing hashes are kept; entries whose original changed since translation are listed as stale.
 // Prints keys and counts only, never rules wording.
 import { readFileSync, writeFileSync } from "node:fs"
