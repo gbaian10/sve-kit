@@ -1,0 +1,46 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-022:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: revived
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: グラブル
+                orig_cost_eq: 5
+              n: 1
+          do:
+            - move:
+                ref: revived
+                result: entered
+                to: field
+      - line: 2
+        super_evolve_time:
+          do:
+            - grant:
+                "on": this
+                keywords: [aura]
+                abilities:
+                  - auto:
+                      "on":
+                        attacked:
+                          who: opp
+                          sel:
+                            kind: follower
+                            keyword: storm
+                      do:
+                        - buff:
+                            "on": it
+                            power: -5
