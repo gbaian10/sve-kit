@@ -265,24 +265,124 @@ impl PlayState {
             // The first target fixes the game view; later answers only extend immutable slots.
             self.snapshot_id = SnapshotId(game.state.ir_epoch);
             self.snapshot = Some(Arc::new(game.clone()));
-            self.restart = Some(SelectionOrigin {
-                slots: execution.slots.clone(),
-                parameters: self.parameters.clone(),
-            });
             // Never ask a target question that no target and distribution plan can satisfy.
             if self
                 .parameters
                 .iter()
                 .any(|decision| matches!(decision.domain, ChoiceDomain::Distribution { .. }))
-                && !game.internal_feasible_targets(execution, &execution.slots, &self.parameters)?
             {
-                return Err(crate::EngineFailure::IllegalPlay(
-                    "no legal target and distribution plan".into(),
-                ));
+                let proof = bound_distribution_reveal(game, execution, &mut self.parameters)?;
+                if !game.internal_feasible_targets(execution, &execution.slots, &proof)? {
+                    return Err(crate::EngineFailure::IllegalPlay(
+                        "no legal target and distribution plan".into(),
+                    ));
+                }
             }
+            self.restart = Some(SelectionOrigin {
+                slots: execution.slots.clone(),
+                parameters: self.parameters.clone(),
+            });
         }
         Ok(())
     }
+}
+
+// A variable reveal is paid after targets. Its available cards bound the target question,
+// while only the eventual reveal answer determines the distribution total.
+fn bound_distribution_reveal(
+    game: &Game,
+    execution: &Execution,
+    parameters: &mut VecDeque<Decision>,
+) -> Result<VecDeque<Decision>> {
+    let mut proof = parameters.clone();
+    for distribution in &mut proof {
+        let ChoiceDomain::Distribution {
+            recipients:
+                RecipientSet::Objects {
+                    objects: Selector::Bound { reference },
+                },
+            total,
+            minimum: Nat(1),
+            ..
+        } = &mut distribution.domain
+        else {
+            continue;
+        };
+        let Some(material) = public_numbers::material_count(total) else {
+            continue;
+        };
+        let Some(reveal_index) = parameters.iter().position(|decision| {
+            reveal_payment::parameter(decision)
+                .is_some_and(|(binding, bounds)| binding == material && bounds.maximum.is_none())
+        }) else {
+            continue;
+        };
+        let reveal = parameters
+            .remove(reveal_index)
+            .ok_or_else(|| invalid("missing distribution reveal"))?;
+        let ChoiceDomain::Objects {
+            constraint: reveal_constraint,
+            ..
+        } = &reveal.domain
+        else {
+            return Err(invalid("distribution reveal domain"));
+        };
+        let selector = &reveal_constraint
+            .groups
+            .first()
+            .ok_or_else(|| invalid("distribution reveal selector"))?
+            .selector;
+        let available = u64::try_from(game.material_candidates(execution, selector, false)?.len())
+            .map_err(invalid)?;
+
+        let target = parameters
+            .iter_mut()
+            .find_map(|decision| match &mut decision.domain {
+                ChoiceDomain::Objects {
+                    constraint,
+                    binding,
+                    ..
+                } if binding == reference => Some(constraint),
+                _ => None,
+            })
+            .ok_or_else(|| invalid("missing distribution targets"))?;
+        target.cardinality.maximum = Some(Nat(target
+            .cardinality
+            .maximum
+            .map_or(available, |maximum| maximum.0.min(available))));
+
+        let index = parameters
+            .iter()
+            .position(|decision| decision.id == distribution.id)
+            .ok_or_else(|| invalid("missing reveal distribution"))?;
+        parameters.insert(index, reveal);
+        *total = Expr::Literal(Nat(available));
+    }
+    Ok(proof)
+}
+
+fn distribution_reveal_minimum(
+    game: &Game,
+    execution: &Execution,
+    parameters: &VecDeque<Decision>,
+    material: Binding<Selector>,
+) -> Result<Nat> {
+    let mut required = 0;
+    for decision in parameters {
+        if let ChoiceDomain::Distribution {
+            recipients,
+            total,
+            minimum: Nat(1),
+            ..
+        } = &decision.domain
+            && public_numbers::material_count(total) == Some(material)
+        {
+            let count = u64::try_from(execution.recipients(game, recipients)?.members().len())
+                .map_err(invalid)?;
+            required = required.max(count);
+        }
+    }
+    Ok(Nat(required))
 }
 
 pub(super) fn has_mode_payments(body: &Program) -> Result<bool> {
@@ -1598,11 +1698,16 @@ impl Game {
         decision: &Decision,
         play: &PlayState,
     ) -> Result<()> {
-        if reveal_payment::parameter(decision).is_some() {
+        if let Some((binding, bounds)) = reveal_payment::parameter(decision) {
             if let Some((_, additional)) = play.additional.as_deref() {
                 self.internal_reveal_material_parameter(execution, decision, &additional.play)?;
             } else {
-                self.internal_material_parameter(execution, decision, false)?;
+                let minimum = if bounds.maximum.is_none() {
+                    distribution_reveal_minimum(self, execution, &play.parameters, binding)?
+                } else {
+                    Nat(0)
+                };
+                self.internal_material_parameter_with_minimum(execution, decision, false, minimum)?;
             }
         } else {
             self.internal_material_parameter(execution, decision, play.material_posture(decision))?;
