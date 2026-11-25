@@ -1,0 +1,50 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-015:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        static:
+          while:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: evolve_deck
+                  kind: evolve_follower
+                  face_up: true
+                  trait: 土属性
+              op: ge
+              right: 4
+          effects:
+            - grant:
+                "on": this
+                keywords: [rush]
+                abilities:
+                  - attack_time:
+                      do:
+                        - create:
+                            token: 土晶のエレメント
+                            n: 1
+                            to: ex
+      - line: 2
+        fanfare:
+          do:
+            - create:
+                token: 土晶のエレメント
+                n: 1
+                to: ex
+            - flip_up:
+                sel:
+                  who: self
+                  zone: evolve_deck
+                  kind: evolve_follower
+                  trait: 土属性
+                upto: 1
