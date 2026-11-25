@@ -495,12 +495,10 @@ pub(super) fn count(
             }
             ub_count(execution, game, player.as_ref(), *exclude_current)
         }
-        HistoryPlan::LimitBreak => {
-            if count != HistoryCount::Facts {
-                return Err(unsupported("limit-break history subject count"));
-            }
+        HistoryPlan::LimitBreak if count == HistoryCount::Facts => {
             committed_counter(game, execution.context.controller, LIMIT_BREAK_COUNTER).map(Nat)
         }
+        HistoryPlan::LimitBreak => Err(unsupported("limit-break history subject count")),
         HistoryPlan::Subject { event, filter } => {
             // 「これと同名を除く」 reads the card itself as it is now; during a play that is
             // the card on its way to the field, not an earlier generation (BP10-009).
