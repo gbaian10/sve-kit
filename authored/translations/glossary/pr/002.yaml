@@ -15,21 +15,20 @@ records:
       source_span:
       authored_source_ja:
   - origin: machine
-    low_confidence: true
-    note: 招式名新譯；比照一代官方「アルス・マグナ＝魔創鍊金」取鍊金字尾。招式正式譯名待維護者確認，列入待確認清單。
+    note: 碧藍幻想卡莉歐斯托蘿的技能名，採社群譯名（灰機 wiki 簡中「辉誉术」轉繁）；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.ars_gloria
       lang: zh-Hant
       value:
         kind: authored
-        text: 榮光鍊金
+        text: 輝譽術
       concept_evidence: []
       source_claim:
-        source_work: Shadowverse
+        source_work: Granblue Fantasy
         source_urls:
-          - https://shadowverse-portal.com/card/900334030?lang=zh-tw
-        claimed_source: 招式名新譯；比照一代官方「アルス・マグナ＝魔創鍊金」取鍊金字尾。招式正式譯名待維護者確認，列入待確認清單。
+          - https://gbf.huijiwiki.com/wiki/Char/3040320000
+        claimed_source: 碧藍幻想卡莉歐斯托蘿的技能名，採社群譯名（灰機 wiki 簡中「辉誉术」轉繁）；維護者 11-25 定案。
   - kind: glossary_term
     data:
       id: term:name.arthur_staunch_dragon
@@ -96,22 +95,22 @@ records:
       source_span:
       authored_source_ja:
   - origin: machine
-    low_confidence: true
-    note: 人名沿一代與二代官方；碧藍幻想職業名レリックバスター（Relic Buster）意譯。職業名數位版查無官方繁中，列入待確認。
+    note: 人名沿一代與二代官方；碧藍幻想職業名レリックバスター採社群譯名「星遺獵手」（灰機 wiki 簡中「星遗猎手」轉繁）；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.gran_and_djeeta_relic_busters
       lang: zh-Hant
       value:
         kind: authored
-        text: 遺物破壞者‧葛蘭＆吉塔
+        text: 星遺獵手‧葛蘭＆吉塔
       concept_evidence: []
       source_claim:
-        source_work: "Shadowverse / Shadowverse: Worlds Beyond"
+        source_work: "Shadowverse / Shadowverse: Worlds Beyond / Granblue Fantasy"
         source_urls:
+          - https://gbf.huijiwiki.com/wiki/%E6%98%9F%E9%81%97%E7%8C%8E%E6%89%8B
           - https://shadowverse-portal.com/card/900041140?lang=zh-tw
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=480
-        claimed_source: 人名沿一代與二代官方；碧藍幻想職業名レリックバスター（Relic Buster）意譯。職業名數位版查無官方繁中，列入待確認。
+        claimed_source: 人名沿一代與二代官方；碧藍幻想職業名レリックバスター採社群譯名「星遺獵手」（灰機 wiki 簡中「星遗猎手」轉繁）；維護者 11-25 定案。
   - kind: glossary_term
     data:
       id: term:name.katalina_skys_protector
