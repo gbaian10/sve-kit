@@ -759,8 +759,18 @@ impl Game {
         decision: &Decision,
         standing: bool,
     ) -> Result<()> {
+        self.internal_material_parameter_with_minimum(execution, decision, standing, Nat(0))
+    }
+
+    pub(super) fn internal_material_parameter_with_minimum(
+        &self,
+        execution: &mut Execution,
+        decision: &Decision,
+        standing: bool,
+        minimum: Nat,
+    ) -> Result<()> {
         check_parameter(decision)?;
-        self.material_parameter(execution, decision, standing)
+        self.material_parameter(execution, decision, standing, minimum)
     }
 
     /// Every legal way to fill a public head-cost material, for an affordability probe.
@@ -847,7 +857,7 @@ impl Game {
             ));
         }
         check_reveal_parameter(decision)?;
-        self.material_parameter(execution, decision, false)
+        self.material_parameter(execution, decision, false, Nat(0))
     }
 
     pub(super) fn grouped_materials(
@@ -918,6 +928,7 @@ impl Game {
         execution: &mut Execution,
         decision: &Decision,
         standing: bool,
+        minimum: Nat,
     ) -> Result<()> {
         let ChoiceDomain::Objects {
             constraint,
@@ -943,15 +954,24 @@ impl Game {
             Some(floor) => !floor.reached(&members)?,
             None => false,
         };
+        let bounds = Cardinality {
+            minimum: Nat(constraint.cardinality.minimum.0.max(minimum.0)),
+            ..constraint.cardinality
+        };
         let available = material_selection_available(
-            constraint.cardinality.minimum,
+            bounds.minimum,
             members.len(),
             original_costs
                 .as_ref()
                 .map(|costs| costs.iter().map(|(_, cost)| *cost)),
             groups.as_ref(),
         )?;
-        if !available || short {
+        if !available
+            || short
+            || bounds
+                .maximum
+                .is_some_and(|maximum| maximum.0 < bounds.minimum.0)
+        {
             return Err(crate::EngineFailure::IllegalPlay(
                 "insufficient materials".into(),
             ));
@@ -980,7 +1000,7 @@ impl Game {
                 actor: execution.context.controller,
                 domain: InputDomain::CostMaterials(super::TargetDomain {
                     members: public,
-                    cardinality: constraint.cardinality,
+                    cardinality: bounds,
                     distinct_names: false,
                     original_costs: original_costs
                         .as_ref()
@@ -1002,7 +1022,7 @@ impl Game {
                 formal_parameter: None,
                 destination: MaterialDestination::Binding(*binding),
                 members,
-                bounds: constraint.cardinality,
+                bounds,
                 field: reveal_payment::parameter(decision).is_none()
                     && zones(selector)? == [ZoneKind::Field],
                 selector: selector.clone(),

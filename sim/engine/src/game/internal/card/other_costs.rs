@@ -242,15 +242,15 @@ fn matches(
             && execution
                 .players(game, players)?
                 .contains(&player_id(&game.object(holder)?.controller)?)
-            && super::selection::matches_candidate(
-                game,
-                holder,
+            && super::super::conditions::candidate::matches_play_cost(
                 &super::super::conditions::ConditionPlan::compile(
                     predicate,
                     *binding,
                     super::super::conditions::Policy::Selection,
                 )?
                 .prepare(None)?,
+                game,
+                holder,
             )?),
         _ => Err(unsupported("player cost selector")),
     }
