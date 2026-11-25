@@ -1,0 +1,1117 @@
+format: 2
+kind: catalog_adoption_shard
+records:
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:670521ab765298b9ac3b152e69be716a6db9ab340385be1cee154c21b6b5d14d
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:a3ecc7191661294315d97f161ffb68ecbef542c93bc7703791cacc143114b0d1
+        identity_ref:
+          face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
+          card_id: c:faec564a2bb95221b32a5f46376d9d21
+        observations:
+          - printing_id: p:4370aec59c9558f3b250acbb3b40f0cb
+            face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:dcaf14247320d8dbce39f1ba5c311e96c6430aa46c0ee354ddcf2151fd9584f0
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:37b5d86447481f1832194329602e2c2cc122441bb94e81ea376e2abd7cf698f1
+          - printing_id: p:ca09183a16aa545eb6a40210e18bc513
+            face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:526f5c41f3868b640451b8da4c36b7c1a291ef394b0ee321a95632cf0fb83c64
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:37b5d86447481f1832194329602e2c2cc122441bb94e81ea376e2abd7cf698f1
+          - printing_id: p:e6b167b3427154868212cbb0ccbbb77c
+            face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:670521ab765298b9ac3b152e69be716a6db9ab340385be1cee154c21b6b5d14d
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:a3ecc7191661294315d97f161ffb68ecbef542c93bc7703791cacc143114b0d1
+          - printing_id: p:f8ac50336b2a52169a54ff3d9a358ae9
+            face_id: f:1bccd3225c505f4b9475bb389ad8a9d6
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:e707a55623e918aa6dfbd74b0c539219ac023e563799955b461d24d15bffd905
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:37b5d86447481f1832194329602e2c2cc122441bb94e81ea376e2abd7cf698f1
+        name_basis_hash: sha256:bd5d793744deb1f83b588c6c56c7ed756fd5170f2b63bafbb410daa473a95c72
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:1eb5d13f14d255ab87fb59d56e86ff19
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:6fa6cb10f23a83fd8073023cecf59b48e9983e11d4ac876c0ffa006711ec00bb
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:bd6d7b23e1be4e1494497349feade3879b986bf97276c6cea1d7e8f32c22ab86
+        identity_ref:
+          face_id: f:1eb5d13f14d255ab87fb59d56e86ff19
+          card_id: c:358ae90e39df516e913182eca81d6c54
+        observations:
+          - printing_id: p:19f143aa0d8e5cd5a69e40ec805b6b92
+            face_id: f:1eb5d13f14d255ab87fb59d56e86ff19
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:911748678b046af4dadd1d2ac3b3b57454a294201ab6ac76b5e269bee2122bb7
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:5bbe3119e461c17b3f3cfa445989817a3002d6939e387ad7bd9bd450126bc2e4
+          - printing_id: p:43090a268d06552592a0fc5cfeaafb70
+            face_id: f:1eb5d13f14d255ab87fb59d56e86ff19
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:7dd020802b48ed75376031aaa8aabccbf8d71e6a2c4dc01c1267f6bbf520cb07
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:5bbe3119e461c17b3f3cfa445989817a3002d6939e387ad7bd9bd450126bc2e4
+          - printing_id: p:db69d187accc568488f38a9f7d51af9c
+            face_id: f:1eb5d13f14d255ab87fb59d56e86ff19
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:6fa6cb10f23a83fd8073023cecf59b48e9983e11d4ac876c0ffa006711ec00bb
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:bd6d7b23e1be4e1494497349feade3879b986bf97276c6cea1d7e8f32c22ab86
+        name_basis_hash: sha256:82bc309617c1a2d1254867a1dc80ec3eb197dab9b537986769924e9a630ca2b2
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:1ecc64f9238a51b89167e2a8f93977a2
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:fba973c3d0d58a7cb454e58c68f40c092488e5b003119fc94bf6dcd9ac2a760f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:b1541749da2dfd675b53433d0880b4bf833ef548db964d1a6d6a926be4394c7a
+        identity_ref:
+          face_id: f:1ecc64f9238a51b89167e2a8f93977a2
+          card_id: c:df488b50de395d84835be8565bf764f0
+        observations:
+          - printing_id: p:2e8c3d6b50075bd8a7c60ed906ec2cf6
+            face_id: f:1ecc64f9238a51b89167e2a8f93977a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:739e3ad108f80452d733cdc03b5d1852aaeae95466505141b87d9334ea9a354a
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:adaf25496a9ee6cf5733d93df799b0da0be4013e023c379668feef4096a327b1
+          - printing_id: p:46d4438c179c5506876ca7281f3351eb
+            face_id: f:1ecc64f9238a51b89167e2a8f93977a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:09dc650c355a3febaf9abbca2454d802567e25c1d4699ed035d8fa2265c3a72f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:adaf25496a9ee6cf5733d93df799b0da0be4013e023c379668feef4096a327b1
+          - printing_id: p:5a529294db0d5d1c93b69bf44a977924
+            face_id: f:1ecc64f9238a51b89167e2a8f93977a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:8afe5e7234d74d7f7ba01a5b1bae7db810c92ce345b6d5eb2c69efdaab8c1f3f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:adaf25496a9ee6cf5733d93df799b0da0be4013e023c379668feef4096a327b1
+          - printing_id: p:6a9378c550125115ade3e2157557ce5c
+            face_id: f:1ecc64f9238a51b89167e2a8f93977a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:fba973c3d0d58a7cb454e58c68f40c092488e5b003119fc94bf6dcd9ac2a760f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:b1541749da2dfd675b53433d0880b4bf833ef548db964d1a6d6a926be4394c7a
+        name_basis_hash: sha256:5b0c648d27e0f83b15d6042765f59b480f9a3292c156bdb6e6cbaa5a4969e02a
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:24fffc2bf1ea5923b358e016fc236f72
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:663158555e73e5b479e7d70f43f9c1f2e1a25966e53e2bcb7a66eccfe8f7b088
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:74007886131bbccc2e643fe766a44f818f7b1eac22a56c678540878a9f1e517c
+        identity_ref:
+          face_id: f:24fffc2bf1ea5923b358e016fc236f72
+          card_id: c:cc5498b8aabb5112b5c4a20002fe311d
+        observations:
+          - printing_id: p:1d759d697140515689e39245cbe8b379
+            face_id: f:24fffc2bf1ea5923b358e016fc236f72
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:c9780cc4866f605d76c903a62ef120ea98901f2810300747dd7849caa5588467
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:74007886131bbccc2e643fe766a44f818f7b1eac22a56c678540878a9f1e517c
+          - printing_id: p:2b959b18d1d85b909e36b99e3ebbc1d1
+            face_id: f:24fffc2bf1ea5923b358e016fc236f72
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:178d2c93a711ca7e2b063bca9f12c1dc74a890c62d697af6cf81cdffedd83421
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:3f844f89ea1d711be57f73f4327e0ebc90cc2385cacd48d14d54da83eb07f3eb
+          - printing_id: p:454dd08f836f5bb49e680feefed69418
+            face_id: f:24fffc2bf1ea5923b358e016fc236f72
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:74449493488952712c4f3568153857779b84f08f493e1c8085a52a5fcc123497
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:74007886131bbccc2e643fe766a44f818f7b1eac22a56c678540878a9f1e517c
+          - printing_id: p:50930f2839f25fd49cee1b0524916dbb
+            face_id: f:24fffc2bf1ea5923b358e016fc236f72
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:663158555e73e5b479e7d70f43f9c1f2e1a25966e53e2bcb7a66eccfe8f7b088
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:74007886131bbccc2e643fe766a44f818f7b1eac22a56c678540878a9f1e517c
+          - printing_id: p:882179cbb62c5178a312b1615e8a3917
+            face_id: f:24fffc2bf1ea5923b358e016fc236f72
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:73b37a9e6a964d0d809d08d350d4468f3f055a2793671ee44e1ebe0b0c3014c6
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:3f844f89ea1d711be57f73f4327e0ebc90cc2385cacd48d14d54da83eb07f3eb
+          - printing_id: p:c510759ce7a85ba7a071a0920e020de3
+            face_id: f:24fffc2bf1ea5923b358e016fc236f72
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:276562ed327bcebd4cccd1869af3ae1d411f89ab6f23db37deff8e7694eba5ed
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:3f844f89ea1d711be57f73f4327e0ebc90cc2385cacd48d14d54da83eb07f3eb
+        name_basis_hash: sha256:1e01924ac6cbb8704512ad9a062c37a47d7f9a752b363694230ce8260889715d
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:600dc34257c0503183636b7a584fc6e0
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:cce6dd9009360dc5bd8128af800c90f57989d068fe6982273aa3191f5f61046b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:8ac9b94ad3b21516f37bb36f202bddf891c83ee285b4b03da5d04a36e0cce8d9
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:f1169ddeeae97c5b37ead672ee5d242ef0b70871012cb9fab3147373aa8ae383
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:9d8ea93eba178f0796dec65cf8f2d2c3b5560b3ea8c86fce7e11f4e214dd965f
+        identity_ref:
+          face_id: f:600dc34257c0503183636b7a584fc6e0
+          card_id: c:48c3dcb225445091ab1fa37946359acc
+        observations:
+          - printing_id: p:50f5e5eaabf550d2bc72dcabe10e615b
+            face_id: f:600dc34257c0503183636b7a584fc6e0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:505e56a01effe001b3fc78ecb39b05015ee2915cb2452da67cb3d6bf1bf6871e
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:747531b4c3a3c52e871eff611357f7934783ccb52a59c9e4a17d9c365aad9757
+          - printing_id: p:71e6bea65ffe5e3dac808b7906240924
+            face_id: f:600dc34257c0503183636b7a584fc6e0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:f1169ddeeae97c5b37ead672ee5d242ef0b70871012cb9fab3147373aa8ae383
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:9d8ea93eba178f0796dec65cf8f2d2c3b5560b3ea8c86fce7e11f4e214dd965f
+          - printing_id: p:a28d2cfcd8f151d0a0257afd83fbc32e
+            face_id: f:600dc34257c0503183636b7a584fc6e0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:0db47e1e1b3efa019a2d6b1b21b32ba97d1f85643011d8ff2ad1058d63edf320
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:747531b4c3a3c52e871eff611357f7934783ccb52a59c9e4a17d9c365aad9757
+          - printing_id: p:b97a8e3cdcfe52c4823f207077043a41
+            face_id: f:600dc34257c0503183636b7a584fc6e0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:cce6dd9009360dc5bd8128af800c90f57989d068fe6982273aa3191f5f61046b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:8ac9b94ad3b21516f37bb36f202bddf891c83ee285b4b03da5d04a36e0cce8d9
+          - printing_id: p:be1aee6b7ab35cef995f00501e0d7e6e
+            face_id: f:600dc34257c0503183636b7a584fc6e0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:97412476655316489980841ad5ff72c76db871a3693b6f67c664944a9d225f6a
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:8ac9b94ad3b21516f37bb36f202bddf891c83ee285b4b03da5d04a36e0cce8d9
+          - printing_id: p:eec97df78c5a5dafb33221dfa827468d
+            face_id: f:600dc34257c0503183636b7a584fc6e0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:932894eebaf2370a9e5e64345862cbf96c0daa9657e6bed459e34ca712747090
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:8ac9b94ad3b21516f37bb36f202bddf891c83ee285b4b03da5d04a36e0cce8d9
+          - printing_id: p:ff664aec3a16596390ffe093d6211031
+            face_id: f:600dc34257c0503183636b7a584fc6e0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:efdf72d9d344bd228dffef4768adad9d53bfe9a18e3bc9ac2a43503d98bff20b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:747531b4c3a3c52e871eff611357f7934783ccb52a59c9e4a17d9c365aad9757
+        name_basis_hash: sha256:b2576a68249b8d7207795c90ad97cd5c352eadf80ded8497aec80940f3452e53
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:60660d63f70554a89d3f8395a710a05e
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:19ef420cc0f937518ce9064d646d6d7aba66eb03a44c69fe9a543faa10f8c0af
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:644659940de0b62587883e0874d991c305de0d60df41ddecd1748324982f9cea
+        identity_ref:
+          face_id: f:60660d63f70554a89d3f8395a710a05e
+          card_id: c:70398a58fd445d00a8bb9f7a7d765580
+        observations:
+          - printing_id: p:1e3f19337b265f22b2a08c138946dc99
+            face_id: f:60660d63f70554a89d3f8395a710a05e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:19ef420cc0f937518ce9064d646d6d7aba66eb03a44c69fe9a543faa10f8c0af
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:644659940de0b62587883e0874d991c305de0d60df41ddecd1748324982f9cea
+          - printing_id: p:6830f31bb2f459f584210db97b3b34ea
+            face_id: f:60660d63f70554a89d3f8395a710a05e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:bade73302ab6eb5a1a1c4ee9515b4f0f285dcdd95e87cc458e3584a090397647
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:ca63d3ff89556389f3cb357dba6f4dee03679355026804ffb2212ff9828f2512
+          - printing_id: p:74cf2c0712aa5f549f36600254d23d03
+            face_id: f:60660d63f70554a89d3f8395a710a05e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:94258f8714ec0b5415dfa31f25b762a3bcec885b05825ff55df4bfa28e89611a
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:ca63d3ff89556389f3cb357dba6f4dee03679355026804ffb2212ff9828f2512
+          - printing_id: p:96f9e6c7c2d9571ea7a4f0217083afdc
+            face_id: f:60660d63f70554a89d3f8395a710a05e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:db90a69846c5929cfba66a05b216929da15e0ba89086367a8a7789f805083377
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:ca63d3ff89556389f3cb357dba6f4dee03679355026804ffb2212ff9828f2512
+        name_basis_hash: sha256:a20250613807851a568e037eb35d6e45d20cff374f487c61bc2396351fbb635b
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:62d37dad22455014b4cd9819f26587d0
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:ea7273db02c991ad113accb5e07a8535faa244426d4b92f7965c66b90617f5df
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:3f3e30a3ee61b57d8715f0914152b67a2616b8f9a4293daaa6fd38b185895679
+        identity_ref:
+          face_id: f:62d37dad22455014b4cd9819f26587d0
+          card_id: c:a5e4433776b95ea7b84cfdb16fedbce0
+        observations:
+          - printing_id: p:7baaef17dcbb5d2bb033d11ae557ffb3
+            face_id: f:62d37dad22455014b4cd9819f26587d0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:ea7273db02c991ad113accb5e07a8535faa244426d4b92f7965c66b90617f5df
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:3f3e30a3ee61b57d8715f0914152b67a2616b8f9a4293daaa6fd38b185895679
+          - printing_id: p:8b8999f1197d5e48a5a235688dede9d9
+            face_id: f:62d37dad22455014b4cd9819f26587d0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:529eb468b48e6146810dc58821e2a05acf320a08c9df8a13056745405fbbd870
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:af21dc63379f6e84a76d8fc78637cd5b0a203d7bf6ba5ddd3b216496b062e087
+          - printing_id: p:bcfc6525b65756bcbfd6d3e9badb9bb5
+            face_id: f:62d37dad22455014b4cd9819f26587d0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:578461ac141032ad40da14591da7ea6ba487293015a62b0c3dd7d84aaa21b356
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:af21dc63379f6e84a76d8fc78637cd5b0a203d7bf6ba5ddd3b216496b062e087
+          - printing_id: p:dd6d20170932505da8d0a3c050d418aa
+            face_id: f:62d37dad22455014b4cd9819f26587d0
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:a5b9962de8aed1bae1e4b0236ab4855de8163aa9309bea030b271c9da43c848e
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:af21dc63379f6e84a76d8fc78637cd5b0a203d7bf6ba5ddd3b216496b062e087
+        name_basis_hash: sha256:22ddee56fd6b6af22759160436d2e28e6b68419f31dadd1896e51e84d6148acb
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:6f18f677f3e9542d928c489a748649a3
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:b79d0242bb91368b4ea9d4292bc356642a2ae367da181c455fec90c29670dd75
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:238084cd3828ff14ef34f8d5450b5dbd45251d7006cf40ca060057826365ff10
+        identity_ref:
+          face_id: f:6f18f677f3e9542d928c489a748649a3
+          card_id: c:c60b51ec42ce5ea58ff89c613ddab80b
+        observations:
+          - printing_id: p:1cde15aec7e855ecbbb1b2b26ce7145b
+            face_id: f:6f18f677f3e9542d928c489a748649a3
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:8ecf80bcda5e314d31c38ad9b43b66f2c12b26c689e40e69ca072cc18db7a1a5
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:85a8ff19e9a009f38fc79fb31f9095bd15cacea763b1621128f18020c2314cda
+          - printing_id: p:6e394599e0b5575a861a908c3e4f370e
+            face_id: f:6f18f677f3e9542d928c489a748649a3
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:499c89390d2f7fa8971740aa94286cba8d5b78f40e99407f88885c6f423a5430
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:85a8ff19e9a009f38fc79fb31f9095bd15cacea763b1621128f18020c2314cda
+          - printing_id: p:9892fbef155d505f821ccb46495858ca
+            face_id: f:6f18f677f3e9542d928c489a748649a3
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:24c876588aa74eb4bd4fd0be8ec1b17052ed117c4d7b18dcd37945b3c9c8a53d
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:85a8ff19e9a009f38fc79fb31f9095bd15cacea763b1621128f18020c2314cda
+          - printing_id: p:b2e94c579ef15a299f0be7dddf3cdabd
+            face_id: f:6f18f677f3e9542d928c489a748649a3
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:b79d0242bb91368b4ea9d4292bc356642a2ae367da181c455fec90c29670dd75
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:238084cd3828ff14ef34f8d5450b5dbd45251d7006cf40ca060057826365ff10
+        name_basis_hash: sha256:e86a67e7520f66117532a1576a8be0668e739588a11be2b360baab83d37062fa
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:776402491f5f5bcf945ceb59ef94b5a2
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:ed0aaab355984c050cc9f9fc4348027d981764c8dd21fd43008b387ed1e0c8f0
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:5d642be01aef1a5f18a4c8f4119a6d22b5a7c3db12aa7af6b52248121c84b735
+        identity_ref:
+          face_id: f:776402491f5f5bcf945ceb59ef94b5a2
+          card_id: c:161e536ad47b5a3aa7e0d27c4e19f3db
+        observations:
+          - printing_id: p:04c5363fbd125eb5acf1166892b95715
+            face_id: f:776402491f5f5bcf945ceb59ef94b5a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:649e7fa4d4f10f160222e8312fcb755edbe8b5a007434943b9a361141cfa1493
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:9124d8440f8c4320289dc0ca25691ccfd048be144346f588b343c00a9478b514
+          - printing_id: p:0ec1e157e60e576c90b56f0558d16280
+            face_id: f:776402491f5f5bcf945ceb59ef94b5a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:bb92df8645ef27e79427acf0351ba23c9c1d3bb0ca7c967019a9d9555bfc5275
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:9124d8440f8c4320289dc0ca25691ccfd048be144346f588b343c00a9478b514
+          - printing_id: p:413e11f988cc5de28cd91160faedba3e
+            face_id: f:776402491f5f5bcf945ceb59ef94b5a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:4c102cfa715cc3f06566c4545c6a27fa94f85e49e58305c38d939e7944ce8b32
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:9124d8440f8c4320289dc0ca25691ccfd048be144346f588b343c00a9478b514
+          - printing_id: p:41666618295955a895c0cc44a15f6189
+            face_id: f:776402491f5f5bcf945ceb59ef94b5a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:ed0aaab355984c050cc9f9fc4348027d981764c8dd21fd43008b387ed1e0c8f0
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:5d642be01aef1a5f18a4c8f4119a6d22b5a7c3db12aa7af6b52248121c84b735
+        name_basis_hash: sha256:ec529958c979daff266801c54ca2d94781f61415d4462b64d6c7dcaff1efabf4
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:87d7f4728b1e5b329c9cfce1d3e27a2e
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:81d62e37f9806e1aac7ec5f80b903abb48bfba70e57cc9404dd19b69b86088a0
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:b2478a9345310b72c8f193506dc9ae7d6bc7f9ecd85981e3350f1ee941ac0011
+        identity_ref:
+          face_id: f:87d7f4728b1e5b329c9cfce1d3e27a2e
+          card_id: c:054bdfe3afc15ed89997a1a11b23f1cf
+        observations:
+          - printing_id: p:1cbe464064b05d6fb31df3906376fe03
+            face_id: f:87d7f4728b1e5b329c9cfce1d3e27a2e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:81d62e37f9806e1aac7ec5f80b903abb48bfba70e57cc9404dd19b69b86088a0
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:b2478a9345310b72c8f193506dc9ae7d6bc7f9ecd85981e3350f1ee941ac0011
+          - printing_id: p:425c6856f16151ffa2589c672a98a4bd
+            face_id: f:87d7f4728b1e5b329c9cfce1d3e27a2e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:b5a94b5b44fad5ad280c2ba159218dfefa5f7b66920b896994ec65c598ab4d81
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:af13b1de621f3038fb04ab5a4f68c91e808428444d4d3959a3d7e08bb0d0ae9b
+          - printing_id: p:92594b4448d154779237e9bc698fadce
+            face_id: f:87d7f4728b1e5b329c9cfce1d3e27a2e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:14c01beac3b831703d038c383ed1da262d79727a06d046feb238a7887d731528
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:af13b1de621f3038fb04ab5a4f68c91e808428444d4d3959a3d7e08bb0d0ae9b
+          - printing_id: p:d3d48a2f28fe5fa1a4080a0a9918bf04
+            face_id: f:87d7f4728b1e5b329c9cfce1d3e27a2e
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:5696af6bac59461bc53b938510297fc470e6e98584b3427d8815841375f0f626
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:af13b1de621f3038fb04ab5a4f68c91e808428444d4d3959a3d7e08bb0d0ae9b
+        name_basis_hash: sha256:70608f47dfa5729982625f4b2947f06a25c4f6cdc22c4ede5e0f02f02ee464d0
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:8b0fe7f9845658e0b768673e14e03f6d
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:f6857f3920d97f084b09cf3c60783e1d0cb087e5fa2cd2f1f9fb9f5f088f5777
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:923e36dbcaec9d181731f609b1186ca062250ef5f1f030e79cba8b83d90bba42
+        identity_ref:
+          face_id: f:8b0fe7f9845658e0b768673e14e03f6d
+          card_id: c:37a8eff80eda5d318793427bab35484f
+        observations:
+          - printing_id: p:7a9bc268c1c75ef39ebe18f175e42441
+            face_id: f:8b0fe7f9845658e0b768673e14e03f6d
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:4725ebb5ecb51951fbf1d65e2fd2246757d812e7f2674ed351b7344ad5c4ad72
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f54101bfbef4742b313d6290971edba2fa8d88f556e598f0f751c058daf64057
+          - printing_id: p:84914ff1d1e05f5b94d909c18b474eab
+            face_id: f:8b0fe7f9845658e0b768673e14e03f6d
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:f6857f3920d97f084b09cf3c60783e1d0cb087e5fa2cd2f1f9fb9f5f088f5777
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:923e36dbcaec9d181731f609b1186ca062250ef5f1f030e79cba8b83d90bba42
+          - printing_id: p:86ac8bc8d64d5c18a6d337e762e0e149
+            face_id: f:8b0fe7f9845658e0b768673e14e03f6d
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:f1f1750e4e5ae52ce9d001928eb9b26fcb21042c6616322d67988723a7c54e8f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f54101bfbef4742b313d6290971edba2fa8d88f556e598f0f751c058daf64057
+          - printing_id: p:97d9d82fad5058f3953cf90181431410
+            face_id: f:8b0fe7f9845658e0b768673e14e03f6d
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:83b54fc02f21e4d0d2685b3995188ca789573fc72bfeef57c75fc28fd2edad84
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f54101bfbef4742b313d6290971edba2fa8d88f556e598f0f751c058daf64057
+        name_basis_hash: sha256:7f6390d784d7b6173f8b8b2aca38ab85d05219ba7fb9be96d8f297ed970355e2
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:90ded43f9d6e5fc2845cc0062340417b
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:43ac532a0997bb10a1b0a5ced86ddc82bee790e37df95ce8b63de8571684602a
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:a3ecc7191661294315d97f161ffb68ecbef542c93bc7703791cacc143114b0d1
+        identity_ref:
+          face_id: f:90ded43f9d6e5fc2845cc0062340417b
+          card_id: c:a942c058f5145563b8205cb795b521da
+        observations:
+          - printing_id: p:13a604de22d25d9f8bd428ab8053e1f6
+            face_id: f:90ded43f9d6e5fc2845cc0062340417b
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:43ac532a0997bb10a1b0a5ced86ddc82bee790e37df95ce8b63de8571684602a
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:a3ecc7191661294315d97f161ffb68ecbef542c93bc7703791cacc143114b0d1
+          - printing_id: p:9cb89ec8715a5ee1b12a85c89955f5a1
+            face_id: f:90ded43f9d6e5fc2845cc0062340417b
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:11b80d61a3f9e89d6385c30b682ec95d6aa67fe06224a543af5c1b3eb8168c28
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:37b5d86447481f1832194329602e2c2cc122441bb94e81ea376e2abd7cf698f1
+          - printing_id: p:dd8bedf2e0905f8d84b41d966f082f00
+            face_id: f:90ded43f9d6e5fc2845cc0062340417b
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:7059611113946384f64f9800308a610dddde49a29559595c6f0e5f0dd5c0cfef
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:37b5d86447481f1832194329602e2c2cc122441bb94e81ea376e2abd7cf698f1
+          - printing_id: p:fdcd01e310805679bece6fcc5801d529
+            face_id: f:90ded43f9d6e5fc2845cc0062340417b
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:98aa127dc4f7b8a94c3fb6c0f9531ab738b0c7d017136b6d81405c360321b29b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:37b5d86447481f1832194329602e2c2cc122441bb94e81ea376e2abd7cf698f1
+        name_basis_hash: sha256:bd5d793744deb1f83b588c6c56c7ed756fd5170f2b63bafbb410daa473a95c72
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:a4b3f8f581eb53b28d541c9d6c3a9bab
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:44b6255d5a3b9f24cd1294a5eaf2c55c757b889e0cd4d97cedc2b7b645f0ea9e
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:4017115cf4153e7bbdde73e911ff9c89bc7075d7cdd66868676049a079dabfb3
+        identity_ref:
+          face_id: f:a4b3f8f581eb53b28d541c9d6c3a9bab
+          card_id: c:79cfab38ac1f503c8fc302ef41ed3a87
+        observations:
+          - printing_id: p:2917eb5e0cfd5132843df33a04881f8f
+            face_id: f:a4b3f8f581eb53b28d541c9d6c3a9bab
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:59057a52c1f15875e5845979ef3c483e6bbc436a979bb1a5de9f9f58fd15f678
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:ae4448c63ecd138f58e5fc8026543010b3e03f6529bd1d1f002a5ad85e4ae1e2
+          - printing_id: p:a85d3ac05b805be7868b08e1db619a0b
+            face_id: f:a4b3f8f581eb53b28d541c9d6c3a9bab
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:a1593305fb89be0f735e9d092c3a68d80dd1910a866ebc2747b1e3d5038b3e6b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:ae4448c63ecd138f58e5fc8026543010b3e03f6529bd1d1f002a5ad85e4ae1e2
+          - printing_id: p:e7dca3241819529196bfe6c3e1e81a7d
+            face_id: f:a4b3f8f581eb53b28d541c9d6c3a9bab
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:44b6255d5a3b9f24cd1294a5eaf2c55c757b889e0cd4d97cedc2b7b645f0ea9e
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:4017115cf4153e7bbdde73e911ff9c89bc7075d7cdd66868676049a079dabfb3
+        name_basis_hash: sha256:06f581fc22f928656c5470508621c56f0a337f4761379dadcfecdf7ca3ab3eba
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:ab6ac0c018ce52ccaecc8919deb794ef
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:308ec20af13e0b5e9541374f0ae60af6f141b43bf1cb9600f40c49fc7695d4f7
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:c81b0c2082eddd2afc64077382e72fe9a50cb8ceb03c3be0be25f9ebbbe3fd85
+        identity_ref:
+          face_id: f:ab6ac0c018ce52ccaecc8919deb794ef
+          card_id: c:a00c994db0155ab6b5e722f922288b88
+        observations:
+          - printing_id: p:027d827f67ed5c4084639985670bf1bc
+            face_id: f:ab6ac0c018ce52ccaecc8919deb794ef
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:308ec20af13e0b5e9541374f0ae60af6f141b43bf1cb9600f40c49fc7695d4f7
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:c81b0c2082eddd2afc64077382e72fe9a50cb8ceb03c3be0be25f9ebbbe3fd85
+          - printing_id: p:303c51b7dfd051ceb6c60183171c32f2
+            face_id: f:ab6ac0c018ce52ccaecc8919deb794ef
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:ef96ffd5365dd60d1bf9310bfc3246bdaca8eef6562f1a847824175be4e3ad63
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:cf9384525761406fc2d6209563a091ae279431e19bc2ee159bd873c1cee53946
+          - printing_id: p:d9cfc005102754de9b7968168abc8b0d
+            face_id: f:ab6ac0c018ce52ccaecc8919deb794ef
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:051c374478c6d9235d9911407da224724021881938fd22bec3a51399a5a1b3c1
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:cf9384525761406fc2d6209563a091ae279431e19bc2ee159bd873c1cee53946
+        name_basis_hash: sha256:0a9be2909639e999ad2c04ee6566a1eface69f9a6e5890eae21e8e7e044c285e
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:c077ba82a2605b57b31337a2bd829779
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:2bc278e20179a2861cd75d823e2559fec06bbf5c909e6cce1ccb3d9983c57b8b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f7af1683b397f9c6f4bd50c0a8308ef581229402343d8fad37b6ed3708e1d806
+        identity_ref:
+          face_id: f:c077ba82a2605b57b31337a2bd829779
+          card_id: c:4f162062f6f752f9b6a6396749df44e5
+        observations:
+          - printing_id: p:21ead3f00e60500995dfb7b447c9cf47
+            face_id: f:c077ba82a2605b57b31337a2bd829779
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:095fafd0cd7583780298265da13d8aa47132057df893cff52896f3e55e3a4e70
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:b421d54341b83cf8166986b4dc4602454ed75a959550290c593cfc5cb21cf53d
+          - printing_id: p:6e0a4b7f410e5530b3aa180fe8ef2f7c
+            face_id: f:c077ba82a2605b57b31337a2bd829779
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:2bc278e20179a2861cd75d823e2559fec06bbf5c909e6cce1ccb3d9983c57b8b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f7af1683b397f9c6f4bd50c0a8308ef581229402343d8fad37b6ed3708e1d806
+          - printing_id: p:c7c33ee2533357ff9acb631162c99f91
+            face_id: f:c077ba82a2605b57b31337a2bd829779
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:ec484dac1b0839ff4adf5b6f46b5b85cccf3c2fcebb86a7426c9d5ef55edea57
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:b421d54341b83cf8166986b4dc4602454ed75a959550290c593cfc5cb21cf53d
+          - printing_id: p:d88349a616d959b39b3c927b37ab51e9
+            face_id: f:c077ba82a2605b57b31337a2bd829779
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:1c10b8b60af91f5812e2c109edd0c5edeaa1e2807b9a69b86625685bbb26d252
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:b421d54341b83cf8166986b4dc4602454ed75a959550290c593cfc5cb21cf53d
+        name_basis_hash: sha256:fc6b63283dd7455239c6a40fb11ced149ddc7fa6bfb75c035ee1ad4668289ed0
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:d1046784466a584aabad88552acd6f6c
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:d8475c6e21d6667b6a23354edd4cbc83f0d7171d01880952bf7e508609758bd8
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:4017115cf4153e7bbdde73e911ff9c89bc7075d7cdd66868676049a079dabfb3
+        identity_ref:
+          face_id: f:d1046784466a584aabad88552acd6f6c
+          card_id: c:5b09567f3d8f555d8d320cef90f1a4df
+        observations:
+          - printing_id: p:1c3aef4b644d5cea9af1e0f7862976c0
+            face_id: f:d1046784466a584aabad88552acd6f6c
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:d8475c6e21d6667b6a23354edd4cbc83f0d7171d01880952bf7e508609758bd8
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:4017115cf4153e7bbdde73e911ff9c89bc7075d7cdd66868676049a079dabfb3
+          - printing_id: p:a3a1972ec478589da2daa97fd73c373d
+            face_id: f:d1046784466a584aabad88552acd6f6c
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:e11497935eb2bb0737eb45757897f1789b2ec5f36989eb21b45ded2d655732e4
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:ae4448c63ecd138f58e5fc8026543010b3e03f6529bd1d1f002a5ad85e4ae1e2
+          - printing_id: p:b068a6e10a305f378c3f03a6ae7acf47
+            face_id: f:d1046784466a584aabad88552acd6f6c
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:d9415744234607fd2fff893b6d068be8669ba3e6e4aa5f57a411cbf5788c68e0
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:ae4448c63ecd138f58e5fc8026543010b3e03f6529bd1d1f002a5ad85e4ae1e2
+        name_basis_hash: sha256:06f581fc22f928656c5470508621c56f0a337f4761379dadcfecdf7ca3ab3eba
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:d79ef69b6aff542f9d38bdc47a124900
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:122bde7c8992ba9183996eb68fc1f6e343bbd0c769b0ce60bb6a41a8e06a5008
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:cca3933f86dc82b1da393c189732b05698d3c9ac02d4babdb59f4fce520ae865
+        identity_ref:
+          face_id: f:d79ef69b6aff542f9d38bdc47a124900
+          card_id: c:790e7036817d53f6b27766659decc1b4
+        observations:
+          - printing_id: p:3b6e8af099e1552988961d61158e6fff
+            face_id: f:d79ef69b6aff542f9d38bdc47a124900
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:122bde7c8992ba9183996eb68fc1f6e343bbd0c769b0ce60bb6a41a8e06a5008
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:cca3933f86dc82b1da393c189732b05698d3c9ac02d4babdb59f4fce520ae865
+          - printing_id: p:a385bc236cf9538c87226046818d639b
+            face_id: f:d79ef69b6aff542f9d38bdc47a124900
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:4f4ec53f0878b9e3dcd5cf1e8e8e9fc7898a3240216282dca151fdeabec0240b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:66017fddd85e67a05390ce7689076094eacd2100d0bad0c857b2a0e196690a24
+          - printing_id: p:fd277dd6b6f25cefa65dbda37d9abb4d
+            face_id: f:d79ef69b6aff542f9d38bdc47a124900
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:293c44ecdf7e2f931f301adda196cae72756609d26e1937483fbd68668798e1f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:66017fddd85e67a05390ce7689076094eacd2100d0bad0c857b2a0e196690a24
+        name_basis_hash: sha256:6765641fa42a03c8e3b81ca5bb714bea1291e495f708055161ec137375c30f1e
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:e8169ddb90a35611ac9230670abaf83a
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:b161d7c9cb5d37c420637cd0436acf7777d67cebb79f461359155d5c970b79b3
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:a76c6338615f73ccb890b0ec102a1f3e52f06e4598154938a7f5abd9dfbbdc23
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:f9a386d7b78d1c87a97fa7088741f5099ce56fed8d1b84fe2e10c1cb345d486f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:943863a8437e2984bec31bca695d5384a71b79d5113190518932def89ca99eb0
+        identity_ref:
+          face_id: f:e8169ddb90a35611ac9230670abaf83a
+          card_id: c:f5a59cdf36c05d5185b02305110ba1e7
+        observations:
+          - printing_id: p:35a25909b0735ef58f78947748579ccf
+            face_id: f:e8169ddb90a35611ac9230670abaf83a
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:d1c0f2d5c596fb662d448b845dfe00cbc47a3b8476ec1ac73d65245f7e00ec70
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:978de1a3275afcfce5cf38601699fc2e2d432f1a8cefbc2fa7ce73d3a0017110
+          - printing_id: p:75f1d21df39a5419a3104103071c1ad3
+            face_id: f:e8169ddb90a35611ac9230670abaf83a
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:1b68f5506df7d3a8f518a7b28e74b028f5914acef3d7e3ca880a213823263204
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:978de1a3275afcfce5cf38601699fc2e2d432f1a8cefbc2fa7ce73d3a0017110
+          - printing_id: p:856d75ead38c5d0da1a8fc924e7a5ff6
+            face_id: f:e8169ddb90a35611ac9230670abaf83a
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:b161d7c9cb5d37c420637cd0436acf7777d67cebb79f461359155d5c970b79b3
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:a76c6338615f73ccb890b0ec102a1f3e52f06e4598154938a7f5abd9dfbbdc23
+          - printing_id: p:c2b7eafc05755fae8251cbf6b8709554
+            face_id: f:e8169ddb90a35611ac9230670abaf83a
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:63ba20ae588f06ea6b197559670e2d7f5d6fc36a2867a362d272cab0a0661e27
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:978de1a3275afcfce5cf38601699fc2e2d432f1a8cefbc2fa7ce73d3a0017110
+          - printing_id: p:e7e20d62dd0d53e3823db3876bdb93fa
+            face_id: f:e8169ddb90a35611ac9230670abaf83a
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:f9a386d7b78d1c87a97fa7088741f5099ce56fed8d1b84fe2e10c1cb345d486f
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:943863a8437e2984bec31bca695d5384a71b79d5113190518932def89ca99eb0
+        name_basis_hash: sha256:bf824a581c66b38b584f3d57b67a9b286b3792caa85c66de20a33bc694b0562f
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:f80a585ef2b45a2eb479d0a723f62514
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:072bbc28d9dce5de00235684a504acfca545f2f636506eba56f7a7692627bfae
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:923e36dbcaec9d181731f609b1186ca062250ef5f1f030e79cba8b83d90bba42
+        identity_ref:
+          face_id: f:f80a585ef2b45a2eb479d0a723f62514
+          card_id: c:dcfc363e567a515ab03160156a16fcd6
+        observations:
+          - printing_id: p:482f99bf37e459509904194607ab284f
+            face_id: f:f80a585ef2b45a2eb479d0a723f62514
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:eaf27f90e8498a05cd43b3c19867a817aaabe182dd9db0e91a1ced9c7cdbcf98
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f54101bfbef4742b313d6290971edba2fa8d88f556e598f0f751c058daf64057
+          - printing_id: p:65cff13523155e7592defdb0f3e4cbc8
+            face_id: f:f80a585ef2b45a2eb479d0a723f62514
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:e7a1b0b84475061fe5b1881b01608067fff37b35a07e00587f5585017dafa074
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f54101bfbef4742b313d6290971edba2fa8d88f556e598f0f751c058daf64057
+          - printing_id: p:716994d2c6de565d8fb43acff008aa73
+            face_id: f:f80a585ef2b45a2eb479d0a723f62514
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:248cefd78837f6d9c0cef7ea1a36be1d1c04599dc734e01c2e4507f914bd49e8
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:f54101bfbef4742b313d6290971edba2fa8d88f556e598f0f751c058daf64057
+          - printing_id: p:f596fa165bb35444b47a0ce45ffd3734
+            face_id: f:f80a585ef2b45a2eb479d0a723f62514
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:072bbc28d9dce5de00235684a504acfca545f2f636506eba56f7a7692627bfae
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:923e36dbcaec9d181731f609b1186ca062250ef5f1f030e79cba8b83d90bba42
+        name_basis_hash: sha256:7f6390d784d7b6173f8b8b2aca38ab85d05219ba7fb9be96d8f297ed970355e2
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:fa7dcd911ad55146b162dbba29b118a2
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:cbe587608151a5d87606d31bb386e18dc6c16d69c63d64d6aa30c96751d2b44b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:9d8ea93eba178f0796dec65cf8f2d2c3b5560b3ea8c86fce7e11f4e214dd965f
+        identity_ref:
+          face_id: f:fa7dcd911ad55146b162dbba29b118a2
+          card_id: c:a9f2855e52385eed83802260f96aade2
+        observations:
+          - printing_id: p:1055d786d87b591aab60af60502a464e
+            face_id: f:fa7dcd911ad55146b162dbba29b118a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:50d204f156e780d207dd2a5a26ad3afb17e6d8454fef98cb9802cc48078425ec
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:747531b4c3a3c52e871eff611357f7934783ccb52a59c9e4a17d9c365aad9757
+          - printing_id: p:4cd71b5d4eb156d6af95b8822c9f2d9c
+            face_id: f:fa7dcd911ad55146b162dbba29b118a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:31669a8d3086f416c7a15c2718ec0d1627465a77c4e89ca35180b5ac31c74355
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:747531b4c3a3c52e871eff611357f7934783ccb52a59c9e4a17d9c365aad9757
+          - printing_id: p:58cfb1eacc615e22a34ce4611d13d7dd
+            face_id: f:fa7dcd911ad55146b162dbba29b118a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:cbe587608151a5d87606d31bb386e18dc6c16d69c63d64d6aa30c96751d2b44b
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:9d8ea93eba178f0796dec65cf8f2d2c3b5560b3ea8c86fce7e11f4e214dd965f
+          - printing_id: p:f25ba43049ba555db1710e62d62db30c
+            face_id: f:fa7dcd911ad55146b162dbba29b118a2
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:d1956c65966f39bb577cd1711f4a22b7ef183b5895ef31bf13241ba7120aec31
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:747531b4c3a3c52e871eff611357f7934783ccb52a59c9e4a17d9c365aad9757
+        name_basis_hash: sha256:3aa876c060bb6be7309d108fc3d1a322defe0400ece30e1c6644af1c0becbb71
+  - kind: rules_name_adoption
+    data:
+      subject:
+        face_id: f:ffc25ba0f09c5d60b28587442fc063fb
+        region: jp
+        role: collab
+      value:
+        names:
+          - kind: source
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:d43b996fcf48ef54f6148dd4692e4f656fc2befb028ca5ab5248b514b13ed6b5
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:035d39c95aff6ed0575211ef75a80901aad7240f06e957e62ae77a1fc5f9a3f0
+        identity_ref:
+          face_id: f:ffc25ba0f09c5d60b28587442fc063fb
+          card_id: c:621d729139dd5746aeeefbf3a6774a7e
+        observations:
+          - printing_id: p:0a4cf6be32df5ad2855dc25ad3b17011
+            face_id: f:ffc25ba0f09c5d60b28587442fc063fb
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:d43b996fcf48ef54f6148dd4692e4f656fc2befb028ca5ab5248b514b13ed6b5
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:035d39c95aff6ed0575211ef75a80901aad7240f06e957e62ae77a1fc5f9a3f0
+          - printing_id: p:27f72a22c0965c5a84d256869550cc25
+            face_id: f:ffc25ba0f09c5d60b28587442fc063fb
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:953b048e06cdd58409744c424f8e65b9b835eb8c0574bbe841b98f544ac6b4e6
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:d772a22391515f67588f7caf7ef7566999cdbeb686b017b0c610c3a1340db676
+          - printing_id: p:41395526d07155789449218456a09e60
+            face_id: f:ffc25ba0f09c5d60b28587442fc063fb
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:fb46f8b2a7625ff2ea1c735370513a8b1914ceac064b10fcf218fcf1f1d8cd32
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:d772a22391515f67588f7caf7ef7566999cdbeb686b017b0c610c3a1340db676
+          - printing_id: p:97c38af3b2df56379be62b34354e7f63
+            face_id: f:ffc25ba0f09c5d60b28587442fc063fb
+            source_ref:
+              batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+              source_version_id: src:v1:b60301a769ce4e2490a363d2391e753beaea300763ccfa01d5422645f76e919a
+              parser: official-jp-exact-v1
+              locator: /faces/0/name
+              text_hash: sha256:d772a22391515f67588f7caf7ef7566999cdbeb686b017b0c610c3a1340db676
+        name_basis_hash: sha256:613fe685650beaf6eb7f401225c299e19ea35dbb00e8d0c66c0e67824222cbe3
