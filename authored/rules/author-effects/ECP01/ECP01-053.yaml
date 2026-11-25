@@ -19,10 +19,12 @@ cards:
                 on: this
                 what: stand
       - auto:
-          cost:
-            pp: 1
           do:
-            - stand: this
+            - pay:
+                cost:
+                  pp: 1
+                do:
+                  - stand: this
           on:
             phase:
               which: main
