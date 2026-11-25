@@ -138,11 +138,11 @@ fn cp05_068_attack_reveals_exactly_three_fire_cards_and_each_copy_observes_itsel
     );
 
     game.resume_internal_card().unwrap();
-    let after = game.projection(View::Referee).unwrap();
-    assert_eq!(after["P2"]["leader"]["life"], 14_u8);
-    assert_eq!(after["P2"]["cemetery"], json!(["enemy"]));
+    let attack_result = game.projection(View::Referee).unwrap();
+    assert_eq!(attack_result["P2"]["leader"]["life"], 14_u8);
+    assert_eq!(attack_result["P2"]["cemetery"], json!(["enemy"]));
     assert_eq!(
-        after["P1"]["hand"],
+        attack_result["P1"]["hand"],
         json!(["first", "second", "third", "wrong"])
     );
     for id in ["first", "second", "third", "wrong"] {
