@@ -8838,6 +8838,55 @@
       ],
       "type": "object"
     },
+    "A.history.limit-break": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "limit_break",
+          "type": "string"
+        },
+        "window": {
+          "const": "this_turn",
+          "type": "string"
+        },
+        "who": {
+          "const": "self",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event",
+        "window",
+        "who"
+      ],
+      "additionalProperties": false
+    },
+    "A.history.limit-break-condition": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "limit_break",
+          "type": "string"
+        },
+        "window": {
+          "const": "this_turn",
+          "type": "string"
+        },
+        "who": {
+          "const": "self",
+          "type": "string"
+        },
+        "at_least": {
+          "$ref": "#/$defs/Nat"
+        }
+      },
+      "required": [
+        "event",
+        "window",
+        "who"
+      ],
+      "additionalProperties": false
+    },
     "A.event.fused-payload": {
       "additionalProperties": false,
       "properties": {
@@ -10522,6 +10571,9 @@
           "$ref": "#/$defs/A.history.ub-activated"
         },
         {
+          "$ref": "#/$defs/A.history.limit-break"
+        },
+        {
           "$ref": "#/$defs/A.history.fused"
         },
         {
@@ -10623,6 +10675,9 @@
         },
         {
           "$ref": "#/$defs/A.history.ub-activated-condition"
+        },
+        {
+          "$ref": "#/$defs/A.history.limit-break-condition"
         },
         {
           "$ref": "#/$defs/A.history.fused-condition"
