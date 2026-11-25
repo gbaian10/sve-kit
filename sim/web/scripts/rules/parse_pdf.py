@@ -18,7 +18,8 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
 import pdfplumber
-from pdfplumber.utils import cluster_objects, extract_text
+from pdfplumber.utils.clustering import cluster_objects
+from pdfplumber.utils.text import extract_text
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -36,6 +37,7 @@ APPENDIX_CLAUSE = re.compile(r"^(\d+(?:\.\d+)*)\.? +(.+)$")
 HISTORY = re.compile(r"^\d{4}年\d{1,2}月\d{1,2}日 +ver\.? +\d+\.\d+\.\d+$")
 EXAMPLE = re.compile(r"^(?:[-–] *)?(例：|Example:) *")
 JP = r"[^\x00-\x7f]"
+RGB_COMPONENTS = 3
 RED_COMPONENT_MINIMUM = 0.8
 MIN_PRINTED_GLYPH_SIZE = 2
 DIAGRAM_LABEL_GAP = 25
@@ -143,12 +145,12 @@ class _Line:
     @property
     def top(self) -> float:
         """The upper edge of the line."""
-        return min(char["top"] for char in self.chars)
+        return min(float(char["top"]) for char in self.chars)
 
     @property
     def bottom(self) -> float:
         """The lower edge of the line."""
-        return max(char["bottom"] for char in self.chars)
+        return max(float(char["bottom"]) for char in self.chars)
 
     @property
     def text(self) -> str:
@@ -161,7 +163,8 @@ class _Line:
         """Whether any visible character uses the update color."""
         return any(
             isinstance(rgb := char["non_stroking_color"], tuple)
-            and rgb[-2:] == (0, 0)
+            and len(rgb) == RGB_COMPONENTS
+            and rgb[1:] == (0, 0)
             and rgb[0] >= RED_COMPONENT_MINIMUM
             for char in self.chars
             if char["text"].strip()
@@ -248,7 +251,7 @@ def _add_icons(body: list[_Line], images: list[PdfObject], region: str) -> None:
 
 
 def _split_labels(line: _Line, region: str) -> list[str]:
-    labels = [[]]
+    labels: list[list[PdfObject]] = [[]]
     previous = None
     for char in sorted(line.chars, key=itemgetter("x0")):
         if previous is not None and char["x0"] - previous > DIAGRAM_LABEL_GAP:
@@ -273,8 +276,9 @@ def _figure_caption(chars: list[PdfObject], legend_start: float, region: str) ->
     return ("　" if region == "jp" else " / ").join(labels[:2] + legend + labels[2:])
 
 
-def _text_events(page: Page, region: str) -> Iterator[_Line | JsonObject]:
-    """Two columns resume below the full-width card diagram."""
+def _page_regions(
+    page: Page, region: str
+) -> tuple[list[PdfObject], list[PdfObject], list[PdfObject]]:
     large = [image for image in page.images if image["width"] > CARD_IMAGE_WIDTH]
     illustrations = [
         image
@@ -284,18 +288,6 @@ def _text_events(page: Page, region: str) -> Iterator[_Line | JsonObject]:
     table = None
     if len(illustrations) == len(CLASSES[region]):
         table = max(page.find_tables(), key=lambda item: len(item.cells))
-    x_middle = page.width / 2
-
-    def columns(chars: list[PdfObject], images: list[PdfObject]) -> Iterator[_Line]:
-        for left in (True, False):
-            body = _lines([char for char in chars if (char["x0"] < x_middle) == left])
-            _add_icons(
-                body,
-                [image for image in images if (image["x0"] < x_middle) == left],
-                region,
-            )
-            yield from body
-
     chars = page.chars
     icons = [
         image
@@ -314,6 +306,24 @@ def _text_events(page: Page, region: str) -> Iterator[_Line | JsonObject]:
             raise ValueError(f"Unexpected class legend on page {page.page_number}")
         label_ids = {id(char) for char in legend}
         chars = [char for char in chars if id(char) not in label_ids]
+    return chars, icons, large
+
+
+def _text_events(page: Page, region: str) -> Iterator[_Line | JsonObject]:
+    """Two columns resume below the full-width card diagram."""
+    chars, icons, large = _page_regions(page, region)
+    x_middle = page.width / 2
+
+    def columns(chars: list[PdfObject], images: list[PdfObject]) -> Iterator[_Line]:
+        for left in (True, False):
+            body = _lines([char for char in chars if (char["x0"] < x_middle) == left])
+            _add_icons(
+                body,
+                [image for image in images if (image["x0"] < x_middle) == left],
+                region,
+            )
+            yield from body
+
     if not large:
         yield from columns(chars, icons)
         return
@@ -404,10 +414,12 @@ class _Rules:
             self.node["figure"] = line
             return
         text = line.text
-        if self._numbered(text):
-            if line.red:
-                self.node["changed"] = True
-            return
+        if not self._numbered(text):
+            self._unnumbered(text)
+        if line.red:
+            self.node["changed"] = True
+
+    def _unnumbered(self, text: str) -> None:
         if match := APPENDIX.fullmatch(text):
             self._appendix(*match.groups())
         elif match := FORMAT.fullmatch(text):
@@ -427,7 +439,11 @@ class _Rules:
             history = re.sub(r"日 *ver\.? *", "日 ver ", history)
             count = len(self.files["appendix-c.json"])
             self._start(f"C:{count}", "block", 2, title=history)
-        elif match := EXAMPLE.match(text):
+        else:
+            self._append_text(text)
+
+    def _append_text(self, text: str) -> None:
+        if match := EXAMPLE.match(text):
             separator = (
                 " "
                 if self.region == "en" or text[len(match[1]) :].startswith(" ")
@@ -454,8 +470,6 @@ class _Rules:
             self.parts[-1].append(_normalize(text, self.region))
         else:
             self.parts.append([_normalize(text, self.region)])
-        if line.red:
-            self.node["changed"] = True
 
     def _numbered(self, text: str) -> bool:
         clause = APPENDIX_CLAUSE if self.context in {"B-1", "B-2"} else CLAUSE
@@ -522,26 +536,7 @@ class _Rules:
         if self.region == "jp":
             bounds.insert(0, (headings[-1].top - 1, table.bbox[1]))
         for index, (top, bottom) in enumerate(bounds):
-            cells = []
-            for x0, x1 in pairwise(columns):
-                chars = [
-                    c
-                    for c in page.chars
-                    if x0 <= (c["x0"] + c["x1"]) / 2 < x1
-                    and top <= (c["top"] + c["bottom"]) / 2 < bottom
-                ]
-                cell_lines = _lines(chars)
-                if any(line.red for line in cell_lines):
-                    self.node["changed"] = True
-                parts = [_normalize(line.text, self.region) for line in cell_lines]
-                if (
-                    cells
-                    and x1 == columns[-1]
-                    and cells[0] not in {"カード名", "Card Name"}
-                ):
-                    cells.append(_token_text(parts, cells[0], self.region))
-                else:
-                    cells.append(_join_lines(parts, self.region))
+            cells = self._table_cells(page, columns, top, bottom)
             if cells[0] in {"カード名", "Card Name"}:
                 data = self.node.setdefault("table", {"header": cells, "rows": []})
                 if index != 0 or data["header"] != cells:
@@ -558,6 +553,31 @@ class _Rules:
                 raise ValueError(
                     f"Token table row has no name on page {page.page_number}"
                 )
+
+    def _table_cells(
+        self, page: Page, columns: list[float], top: float, bottom: float
+    ) -> list[str]:
+        cells: list[str] = []
+        for x0, x1 in pairwise(columns):
+            chars = [
+                c
+                for c in page.chars
+                if x0 <= (c["x0"] + c["x1"]) / 2 < x1
+                and top <= (c["top"] + c["bottom"]) / 2 < bottom
+            ]
+            cell_lines = _lines(chars)
+            if any(line.red for line in cell_lines):
+                self.node["changed"] = True
+            parts = [_normalize(line.text, self.region) for line in cell_lines]
+            if (
+                cells
+                and x1 == columns[-1]
+                and cells[0] not in {"カード名", "Card Name"}
+            ):
+                cells.append(_token_text(parts, cells[0], self.region))
+            else:
+                cells.append(_join_lines(parts, self.region))
+        return cells
 
     def _table_headings(self, headings: list[_Line], page_number: int) -> None:
         for line in headings:
@@ -607,7 +627,7 @@ TOKEN_PARAGRAPHS = {
 
 
 def _token_text(parts: list[str], name: str, region: str) -> str:
-    paragraphs = []
+    paragraphs: list[list[str]] = []
     for part in parts:
         paragraph_start = part.startswith(TOKEN_PARAGRAPHS[region].get(name, ()))
         if region == "jp":

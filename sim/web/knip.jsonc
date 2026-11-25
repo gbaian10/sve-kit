@@ -18,7 +18,8 @@
     "scripts/engine/*.ts",
     // `fixture` builds test snapshots and is not shipped.
     "scripts/fixture/main.ts",
-    // `rules:stamp` fills comprehensive-rules translation hashes; a package-script CLI.
+    // The rules revision and stamp commands are package-script CLIs.
+    "scripts/rules/revision.ts",
     "scripts/rules/stamp.ts",
     // `screenshots` is a development-only CLI invoked by package scripts.
     "scripts/screenshots/main.ts",

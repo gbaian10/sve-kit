@@ -17,6 +17,10 @@ import { sourceHash } from "../../src/data/rules/source-hash"
 
 const SCRIPT = fileURLToPath(new URL("revision.ts", import.meta.url))
 
+function runRevision(args: readonly string[]): unknown {
+  return JSON.parse(execFileSync("bun", [SCRIPT, ...args], { encoding: "utf8" }))
+}
+
 function writeJson(file: string, value: unknown) {
   writeFileSync(file, JSON.stringify(value), "utf8")
 }
@@ -84,9 +88,7 @@ it("diffs translated content and carries complete entries with their original ha
       },
     }
     writeJson(path.join(oldTranslation, "ch01.json"), old)
-    const report = JSON.parse(
-      execFileSync("bun", [SCRIPT, "diff", before, after, "--json"], { encoding: "utf8" }),
-    ) as unknown
+    const report = runRevision(["diff", before, after, "--json"])
     const modified = {
       key: edited.key,
       file: "ch01.json",
@@ -107,11 +109,7 @@ it("diffs translated content and carries complete entries with their original ha
         { key: removed.key, file: "ch01.json", status: "deleted" },
       ],
     })
-    const result = JSON.parse(
-      execFileSync("bun", [SCRIPT, "carry", before, after, oldTranslation, output], {
-        encoding: "utf8",
-      }),
-    ) as unknown
+    const result = runRevision(["carry", before, after, oldTranslation, output])
     expect(result).toEqual({
       region: "jp",
       from: "1.0.0",

@@ -1,4 +1,4 @@
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs"
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs"
 import path from "node:path"
 
 import { canonicalText } from "../../src/data/format-v3/json"
@@ -22,29 +22,44 @@ interface Version {
   readonly files: ReadonlyMap<string, RulesFile>
 }
 
-function readJson(file: string): unknown {
-  return JSON.parse(readFileSync(file, "utf8"))
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value)
+}
+
+function readJson(file: string): Record<string, unknown> {
+  const value: unknown = JSON.parse(readFileSync(file, "utf8"))
+  if (!isRecord(value)) throw new Error(`${file}: expected a JSON object`)
+  return value
 }
 
 function readVersion(directory: string): Version {
-  const index = readJson(path.join(directory, "index.json")) as RulesIndex
-  if (index.format !== 1 || index.kind !== "comprehensive-rules-index") {
+  const indexDocument = readJson(path.join(directory, "index.json"))
+  if (
+    indexDocument["format"] !== 1 ||
+    indexDocument["kind"] !== "comprehensive-rules-index" ||
+    typeof indexDocument["version"] !== "string" ||
+    (indexDocument["region"] !== "jp" && indexDocument["region"] !== "en") ||
+    !Array.isArray(indexDocument["contents"])
+  ) {
     throw new Error(`${directory}: invalid rules index`)
   }
+  const index = indexDocument as unknown as RulesIndex
   const nodes = new Map<string, LocatedNode>()
   const files = new Map<string, RulesFile>()
   for (const { file } of index.contents) {
     if (!/^(ch\d+|appendix-[a-z])\.json$/.test(file) || files.has(file)) {
       throw new Error(`${directory}: invalid or repeated file ${file}`)
     }
-    const data = readJson(path.join(directory, file)) as RulesFile
+    const document = readJson(path.join(directory, file))
     if (
-      data.format !== 1 ||
-      data.kind !== "comprehensive-rules" ||
-      data.version !== index.version
+      document["format"] !== 1 ||
+      document["kind"] !== "comprehensive-rules" ||
+      document["version"] !== index.version ||
+      !Array.isArray(document["nodes"])
     ) {
       throw new Error(`${directory}: invalid rules file ${file}`)
     }
+    const data = document as unknown as RulesFile
     files.set(file, data)
     for (const node of data.nodes) {
       if (nodes.has(node.key)) throw new Error(`${directory}: duplicate rule ${node.key}`)
@@ -126,16 +141,18 @@ function readTranslations(directory: string, before: Version): Map<string, Trans
   const entries = new Map<string, TranslationEntry>()
   for (const name of readdirSync(directory).filter((file) => file.endsWith(".json"))) {
     const source = before.files.get(name)
-    const translation = readJson(path.join(directory, name)) as RulesTranslationFile
+    const document = readJson(path.join(directory, name))
     if (
       !source ||
-      translation.format !== 1 ||
-      translation.kind !== "comprehensive-rules-translation" ||
-      translation.version !== before.index.version ||
-      translation.language !== "zh-TW"
+      document["format"] !== 1 ||
+      document["kind"] !== "comprehensive-rules-translation" ||
+      document["version"] !== before.index.version ||
+      document["language"] !== "zh-TW" ||
+      !isRecord(document["entries"])
     ) {
       throw new Error(`${name}: translation does not match the old Japanese version`)
     }
+    const translation = document as unknown as RulesTranslationFile
     for (const problem of translationProblems(source.nodes, translation)) {
       throw new Error(`${name}: ${problem.kind} ${problem.key}`)
     }
