@@ -757,7 +757,7 @@ auto:
 `move this to ex` 只跟隨該次成功移動的新世代；EX 已滿或卡片已再次移區時略過。
 BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效果仍完整寫在原有 section 座標。
 
-被捨的卡可用 `sel: {kind, class, trait}` 篩選（至少一項），各條件以離手前的手牌特徵判定。BP09-006 用 `sel: {class: エルフ, kind: spell}`，CP05-079 用 `sel: {trait: 闇属性}`。`sel` 與 `ref: this`、`by` 或批次彙整維持各自的訂閱入口。
+被捨的卡可用 `sel: {kind, class, trait}` 篩選（至少一項），各條件以離手前的手牌特徵判定。BP09-006 用 `sel: {class: エルフ, kind: spell}`，CP05-079 用 `sel: {trait: 闇属性}`。同時指定 `sel` 與 `ref: this` 或 `by` 時，lowering 會拒絕該訂閱。
 
 「自己回合、自己捨棄一張以上」另用 `auto.aggregation: batch` 搭配 `on.discarded: {who: self, during: {turn: self}}`（BP12-052／053）。單一捨棄指令中的多張成功棄牌，只讓每個來源能力待機一次；分開的兩次捨棄仍各觸發，去重先於每回合額度。
 規則手牌上限的一次完整選取也屬同一批；抽牌後再次超限的另一次捨棄則是新批（[Q1666–1668](https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL14&faq=)）。
