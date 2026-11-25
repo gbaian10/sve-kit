@@ -751,7 +751,9 @@ impl BodyContext<'_> {
             return Err(unsupported(path));
         };
         let objects = self.objects(&installation.on, path)?;
-        let ast::Playing::Affected(filter) = &modifier.when_playing else {
+        let (Some(ast::Playing::Affected(filter)), None) =
+            (&modifier.when_playing, &modifier.when_activating)
+        else {
             return Err(unsupported(path));
         };
         let ast::Affected::Affected = filter.subjects;

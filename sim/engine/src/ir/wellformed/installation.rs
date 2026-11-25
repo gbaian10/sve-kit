@@ -97,7 +97,7 @@ impl Checker {
                 return self.installed_player_prevention(effect, players);
             }
             let Effect::CostModifier {
-                kind: CostKind::Play,
+                kind: CostKind::Play | CostKind::QuickActivation,
                 subjects: filter,
                 change,
                 duration: inner,
@@ -157,11 +157,11 @@ impl Checker {
                 self.installed_prevention(effect, &targets)
             }
             Effect::CostModifier {
+                kind: CostKind::Play | CostKind::Evolution,
                 subjects,
                 change,
                 duration: inner,
                 usage: None,
-                ..
             } if *subjects == targets && inner == duration => match change {
                 CostChange::Set {
                     amount: Expr::Literal(amount),

@@ -934,6 +934,8 @@ apply:
 只檢查先前已提交的打出，不會把目前正在檢查合法性的卡算入。
 失敗的打出不新增歷史；缺少已保存名稱的外部歷史仍依既有的完整性邊界拒絕查詢。
 
+`cost_mod.when_playing.keyword` 可依印刷的 `quick_spell` 或 `quick_activation` 篩選卡片。Quick 起動的 PP 費用使用 `cost_mod: {when_activating: {who: self, quick: true}, delta: -1}`。Quick 預檢與正式付款都用同一個報價，印刷 PP 減到零為止，其他付款步驟照常執行。場上來源可以在 `grant.abilities` 授予這兩類持續修正（CP05-040），持有者在場且能力有效時套用。放在 `player_effect` 時可合併 `next_only: true` 與 `until: turn`，下一次符合的 Quick 起動成功付款後才用掉額度（CP05-047）。
+
 ## 傷害能力持有者
 
 `damage: {to: this, n: 1}` 以能力持有者作為傷害收件者（CSD02b-003），沿用一般傷害、資訊來源及物件世代檢查。來源引用直接進入本文，不需要正式目標宣告，控制者與來源身分沿用原能力；致命傷害也沿用一般規則檢查。搭配公開條件可表達「自己場上沒有其他クール從者時對自身造成傷害」，能力持有者本身由既有 `other: true` 排除。

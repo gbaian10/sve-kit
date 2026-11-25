@@ -106,6 +106,7 @@ fn change(
             cost: match kind {
                 CostKind::Play => wire::CostKind::Play,
                 CostKind::Evolution => wire::CostKind::Evolution,
+                CostKind::QuickActivation => return Err(ProjectionError::Unavailable),
             },
             change: number(*change)?,
         },

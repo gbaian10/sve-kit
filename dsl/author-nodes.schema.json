@@ -13365,9 +13365,54 @@
           ]
         }
       ],
+      "allOf": [
+        {
+          "oneOf": [
+            {
+              "required": [
+                "when_playing"
+              ],
+              "not": {
+                "required": [
+                  "when_activating"
+                ]
+              }
+            },
+            {
+              "required": [
+                "when_activating",
+                "delta"
+              ],
+              "not": {
+                "required": [
+                  "when_playing"
+                ]
+              }
+            }
+          ]
+        }
+      ],
       "properties": {
         "when_playing": {
           "$ref": "#/$defs/A.sel.object-core"
+        },
+        "when_activating": {
+          "additionalProperties": false,
+          "properties": {
+            "who": {
+              "const": "self",
+              "type": "string"
+            },
+            "quick": {
+              "const": true,
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "who",
+            "quick"
+          ],
+          "type": "object"
         },
         "delta": {
           "anyOf": [
@@ -13393,9 +13438,6 @@
           "type": "boolean"
         }
       },
-      "required": [
-        "when_playing"
-      ],
       "type": "object"
     },
     "A.effect.damage-mod": {

@@ -105,6 +105,7 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
                         DurationEnd::CurrentTurnEnd {} | DurationEnd::NoTemporalExpiry {}
                     )
             }
+            CostKind::QuickActivation => false,
         };
         if !supported
             || *capture != InstallationTime::InstructionStart

@@ -3,6 +3,7 @@ use super::{
     Nat, PlayerRef, PlayerSet, ScopeId, SelectionView, Selector, TextQuantifier, ZoneKind, ast,
     unsupported,
 };
+use crate::ir::Bool;
 use crate::ir::{
     AbilityKind, AbilityQualification, Action, CostChange, CostKind, Duration, DurationEnd, Effect,
     EffectReference, InstallationSubjects, InstallationTime, Int, Interval, TimeAnchor, UsageScope,
@@ -61,6 +62,7 @@ fn query(
                 let predicate = super::selection::field_filter(
                     &super::selection::ObjectFilter {
                         kind: value.kind.as_ref().map(super::search::card_kind),
+                        keyword: value.keyword.map(|keyword| keyword.0),
                         trait_id: value.r#trait.as_deref(),
                         all_traits: &value.traits_all,
                         class: value.class.as_deref(),
@@ -108,6 +110,35 @@ fn selector(
             Err(unsupported(path))
         }
     }
+}
+
+fn quick_activation_subject(
+    value: &ast::QuickActivationCostSubject,
+    allocator: &mut Allocator,
+    path: &str,
+) -> Result<Selector, LoweringError> {
+    let ast::SelfPlayer::Controller = value.who;
+    let ast::True = value.quick;
+    let players = players(&ast::Side::Controller, path)?;
+    Ok(Selector::Union {
+        sets: [
+            ZoneKind::Field,
+            ZoneKind::Hand,
+            ZoneKind::Cemetery,
+            ZoneKind::Ex,
+        ]
+        .into_iter()
+        .map(|zone| {
+            Ok(Selector::Zone {
+                players: players.clone(),
+                zone,
+                view: SelectionView::Current {},
+                binding: Binding::new(1, allocator.scope(path)?),
+                predicate: Box::new(Expr::Literal(Bool(true))),
+            })
+        })
+        .collect::<Result<_, LoweringError>>()?,
+    })
 }
 
 pub(super) fn lower(
@@ -179,7 +210,17 @@ pub(super) fn lower_at_source(
         if value.next_only.is_some() {
             return Err(unsupported(path));
         }
-        let subjects = selector(&value.when_playing, context.card_allocator, path)?;
+        let (kind, subjects) = match (&value.when_playing, &value.when_activating) {
+            (Some(playing), None) => (
+                CostKind::Play,
+                selector(playing, context.card_allocator, path)?,
+            ),
+            (None, Some(activating)) if value.set.is_none() => (
+                CostKind::QuickActivation,
+                quick_activation_subject(activating, context.card_allocator, path)?,
+            ),
+            _ => return Err(unsupported(path)),
+        };
         let mut duration = super::numeric::duration(None, path)?;
         if let Some(predicate) = &condition {
             duration.end = DurationEnd::While {
@@ -187,7 +228,7 @@ pub(super) fn lower_at_source(
             };
         }
         declarations.push(Effect::CostModifier {
-            kind: CostKind::Play,
+            kind,
             subjects,
             change: change(value, path)?,
             duration,
@@ -226,11 +267,19 @@ impl BodyContext<'_> {
         let ast::InstalledEffect::CostMod(modifier) = &value.effect else {
             return Err(unsupported(path));
         };
-        let subjects = match &modifier.when_playing {
-            ast::Playing::Follow { r#in } => self.followed(&r#in.follow, path)?,
-            other @ (ast::Playing::Affected(_)
-            | ast::Playing::Union { .. }
-            | ast::Playing::Query(_)) => selector(other, self.card_allocator, path)?,
+        let (kind, subjects) = match (&modifier.when_playing, &modifier.when_activating) {
+            (Some(ast::Playing::Follow { r#in }), None) => {
+                (CostKind::Play, self.followed(&r#in.follow, path)?)
+            }
+            (Some(playing), None) => (
+                CostKind::Play,
+                selector(playing, self.card_allocator, path)?,
+            ),
+            (None, Some(activating)) if modifier.set.is_none() => (
+                CostKind::QuickActivation,
+                quick_activation_subject(activating, self.card_allocator, path)?,
+            ),
+            _ => return Err(unsupported(path)),
         };
         let mut duration =
             if let Some(ast::Until::DuringNextTurn { during_next_turn }) = &value.until {
@@ -265,7 +314,7 @@ impl BodyContext<'_> {
             },
             capture: InstallationTime::InstructionStart,
             effect: Box::new(Effect::CostModifier {
-                kind: CostKind::Play,
+                kind,
                 subjects,
                 change: change(modifier, path)?,
                 duration: duration.clone(),

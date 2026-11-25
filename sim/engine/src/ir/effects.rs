@@ -49,7 +49,11 @@ record!(UseLimit {
     scope: UsageScope
 });
 variants!(UsageScope { PerObject { object: ObjectOperand } => [], SharedPlayer { player: PlayerRef, effect: EffectReference } => ["usage.shared-player"] });
-tags!(CostKind { Play, Evolution });
+tags!(CostKind {
+    Play,
+    Evolution,
+    QuickActivation
+});
 variants!(CostChange { Delta { amount: Expr<Int> } => ["effect.cost-delta"], Set { amount: Expr<Int> } => ["effect.cost-set"] });
 tags!(ReplacementScope { SelfOnly, General });
 variants!(ProposedEventPattern {

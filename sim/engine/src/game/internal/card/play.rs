@@ -15,7 +15,7 @@ use crate::game::knowledge::PublishedKnowledge;
 use crate::game::legal::subsets;
 use crate::ir::flip_cost as flip_payment;
 use crate::ir::material_sets;
-use crate::ir::quick::is_printed_quick;
+use crate::ir::quick::{is_printed_quick, printed_activation};
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::x_pp as x_payment;
 use crate::ir::{choice_rules, optional_payment, public_numbers};
@@ -38,6 +38,7 @@ pub(super) mod ability_cost;
 pub(super) mod cost_observation;
 mod counter_budget;
 mod x_pp;
+use alloc::borrow::Cow;
 use alloc::collections::{BTreeMap, BTreeSet, VecDeque};
 use alloc::sync::Arc;
 use core::slice::from_ref;
@@ -985,7 +986,12 @@ impl Game {
             payment
         };
         probe.card_runtime.active_source = payment.ability;
-        probe.internal_payment_probe(&mut payment, costs, spell)
+        let quoted = if spell {
+            Cow::Borrowed(costs)
+        } else {
+            probe.internal_quick_activation_payment(&payment, costs)?.0
+        };
+        probe.internal_payment_probe(&mut payment, &quoted, spell)
     }
 
     fn quick_additional_costs_available(
@@ -1415,7 +1421,7 @@ impl Game {
         self.internal_require_ability_permission(&execution.context.source, &ability)?;
         let conditional = conditional_play_modes(&ability);
         let resource_entry = super::resource_entry::payment(&ability)?;
-        let quick_activation = ability.kind == AbilityKind::Activated && is_printed_quick(&ability);
+        let quick_activation = printed_activation(&ability);
         let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;
         let optional = super::optional::take(&mut body);
         let groups = collect_modes(&body, conditional)?;
@@ -1776,10 +1782,15 @@ impl Game {
     fn finish_play_payment(&mut self, execution: &mut Execution, play: PlayState) -> Result<()> {
         let targets = self.internal_targeted_occurrences(execution)?;
         enter_play_phase(execution, PlayPhase::Pay)?;
-        let consumed = if execution.spell || execution.field_entry {
-            self.internal_matching_player_costs(execution)?
+        let (quoted, consumed) = if play.quick_activation {
+            self.internal_quick_activation_payment(execution, &play.costs)?
+        } else if execution.spell || execution.field_entry {
+            (
+                Cow::Borrowed(&play.costs),
+                self.internal_matching_player_costs(execution)?,
+            )
         } else {
-            vec![]
+            (Cow::Borrowed(&play.costs), vec![])
         };
         let previous = self.card_runtime.active_source;
         self.card_runtime.active_source = execution.ability;
@@ -1790,7 +1801,7 @@ impl Game {
         } else {
             self.internal_card_payment(
                 execution,
-                &play.costs,
+                &quoted,
                 execution.spell,
                 Some(CostPaymentPurpose::Original),
             )
@@ -2165,15 +2176,16 @@ impl Game {
         for mut probe in self.internal_public_material_probes(execution, play)? {
             let mut payment_game = self.clone();
             payment_game.card_runtime.active_source = execution.ability;
+            let quoted = if play.quick_activation {
+                self.internal_quick_activation_payment(&probe, &play.costs)?
+                    .0
+            } else {
+                Cow::Borrowed(&play.costs)
+            };
             match payment_game
-                .internal_probe_hand_costs(&mut probe, &play.costs)
+                .internal_probe_hand_costs(&mut probe, &quoted)
                 .and_then(|()| {
-                    payment_game.internal_card_payment(
-                        &mut probe,
-                        &play.costs,
-                        execution.spell,
-                        None,
-                    )
+                    payment_game.internal_card_payment(&mut probe, &quoted, execution.spell, None)
                 }) {
                 Ok(()) => return Ok(true),
                 Err(crate::EngineFailure::IllegalPlay(_)) => {}
