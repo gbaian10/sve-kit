@@ -1,0 +1,54 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-025:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+          - final_limit_break_possible
+      - line: 2
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          do:
+            - grant:
+                "on": this
+                abilities:
+                  - attack_time:
+                      targets:
+                        - bind: chosen
+                          from:
+                            who: opp
+                            zone: field
+                            kind: follower
+                          n: 1
+                      do:
+                        - damage:
+                            to: chosen
+                            n: 5
+      - line: 3
+        auto:
+          "on":
+            final_limit_broke:
+              ref: this
+          do:
+            - grant:
+                "on": this
+                abilities:
+                  - attack_time:
+                      do:
+                        - damage:
+                            to:
+                              who: opp
+                              zone: field
+                              kind: follower
+                            n: 2

@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-029:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - storm
+      - line: 2
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - search:
+                        sel:
+                          who: self
+                          zone: deck
+                          kind: follower
+                          name: 真紅の穿光・ゼタ
+                        n: 1
+                        to: field
+                  - - pp:
+                        who: self
+                        delta: 4

@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-023:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        keywords:
+          - bane
+      - line: 3
+        fanfare:
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: グラブル
+              n: 1
+          do:
+            - choice:
+                n: 1
+                options:
+                  - - create:
+                        token: 風晶のエレメント
+                        n: 1
+                        to: ex
+                  - - create:
+                        token: 闇晶のエレメント
+                        n: 1
+                        to: ex
+            - draw:
+                n: 1
