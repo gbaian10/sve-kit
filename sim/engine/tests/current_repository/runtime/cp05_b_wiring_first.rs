@@ -43,6 +43,7 @@ fn attack(game: &mut Game, target: &str) {
         game.internal_rule_action(&json!({"do":"attack","attacker":"source","target":target}))
             .unwrap().outcome,
         "resolved",
+        "the printed follower can declare this attack",
     );
     settle(game, None);
 }
@@ -56,6 +57,7 @@ fn evolve(game: &mut Game) {
         game.internal_rule_action(&json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}}))
             .unwrap().outcome,
         "resolved",
+        "the printed form evolves for one PP",
     );
     settle(game, None);
 }
@@ -180,8 +182,8 @@ fn fil_cast_from_ex_increases_only_the_formal_granblue_target() {
         panic!("Fil formal target");
     };
     assert_eq!(domain.members.len(), 1);
-    let step = game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![domain.members[0].handle])).unwrap();
-    settle(&mut game, Some(step));
+    let cast = game.answer_internal_card(question.actor, question.token, Answer::Targets(vec![domain.members[0].handle])).unwrap();
+    settle(&mut game, Some(cast));
     let board = state(&game);
     for stat in ["power", "hp"] {
         assert_eq!(
