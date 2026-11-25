@@ -38802,6 +38802,10 @@
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
+        "kind": {
+          "const": "quick_activation",
+          "type": "string"
+        },
         "holder": {
           "anyOf": [
             {
