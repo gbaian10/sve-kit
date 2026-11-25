@@ -1160,7 +1160,31 @@ async function addCard(ctx: CardContext): Promise<void> {
   }
   if (card.errata) {
     const face = card.faces[0]
-    if (face?.previousEffectJa !== undefined) {
+    const changes =
+      card.errata.changes ??
+      (face?.previousEffectJa !== undefined
+        ? [
+            {
+              face_id: face.id,
+              field: "effect",
+              wording_translations:
+                face.previousEffectZh && face.effect.zhHant
+                  ? [
+                      {
+                        lang: "zh-Hant",
+                        before: face.previousEffectZh,
+                        after: face.effect.zhHant,
+                        origin: "machine",
+                        low_confidence: false,
+                      },
+                    ]
+                  : [],
+              before: face.previousEffectJa,
+              after: face.effect.ja,
+            },
+          ]
+        : [])
+    if (changes.length) {
       builder.push("errata", GLOBAL, "detail", {
         id: card.errata.id,
         region: "jp",
@@ -1174,26 +1198,7 @@ async function addCard(ctx: CardContext): Promise<void> {
             date_raw: null,
             reason_unit_id: builder.unit(LANGS.ja, card.errata.reasonJa),
             exchange_offered: null,
-            changes: [
-              {
-                face_id: face.id,
-                field: "effect",
-                wording_translations:
-                  face.previousEffectZh && face.effect.zhHant
-                    ? [
-                        {
-                          lang: "zh-Hant",
-                          before: face.previousEffectZh,
-                          after: face.effect.zhHant,
-                          origin: "machine",
-                          low_confidence: false,
-                        },
-                      ]
-                    : [],
-                before: face.previousEffectJa,
-                after: face.effect.ja,
-              },
-            ],
+            changes: [...changes],
             printings: [...card.errata.printings]
               .sort(compareCodePoints)
               .map((printingId) => ({ printing_id: printingId, scope: "listed" })),
