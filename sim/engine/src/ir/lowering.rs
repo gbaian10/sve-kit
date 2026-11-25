@@ -867,22 +867,20 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
         return Err(unsupported(path));
     }
     if let Some(auto) = &entry.auto {
-        if matches!(auto.on, ast::PhaseSubscription::FusedAsMaterial(_)) {
-            return if zones == [ZoneKind::Hand, ZoneKind::Ex] {
-                Ok(zones)
-            } else {
-                Err(unsupported(path))
-            };
-        }
-        if matches!(auto.on, ast::PhaseSubscription::HandRevealed(_)) {
-            return if zones == [ZoneKind::Hand] {
-                Ok(zones)
-            } else {
-                Err(unsupported(path))
-            };
-        }
-        if matches!(auto.on, ast::PhaseSubscription::Equipped(_)) {
-            return if zones == [ZoneKind::Equipment] {
+        if matches!(
+            auto.on,
+            ast::PhaseSubscription::FusedAsMaterial(_)
+                | ast::PhaseSubscription::HandRevealed(_)
+                | ast::PhaseSubscription::Equipped(_)
+        ) {
+            return if matches!(
+                (&auto.on, zones.as_slice()),
+                (
+                    ast::PhaseSubscription::FusedAsMaterial(_),
+                    [ZoneKind::Hand, ZoneKind::Ex]
+                ) | (ast::PhaseSubscription::HandRevealed(_), [ZoneKind::Hand])
+                    | (ast::PhaseSubscription::Equipped(_), [ZoneKind::Equipment])
+            ) {
                 Ok(zones)
             } else {
                 Err(unsupported(path))
