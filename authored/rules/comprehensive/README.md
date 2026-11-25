@@ -42,3 +42,47 @@ cell, whether a printed line ends a paragraph follows the official card text, be
 keeps no paragraph structure there. Nothing else is rewritten. Our structure is CC0-1.0; the
 official rules text is excluded from the project's licenses, see
 [LICENSING.md](../../../LICENSING.md).
+
+## Updating an edition
+
+Use absolute paths for the command inputs and outputs below.
+
+Check the official rules version when adding a card set. If an edition changed, save its PDF
+in the source archive and use that copy as the input. Keep the PDF outside Git. Update the
+Japanese and English editions independently.
+
+1. **Parse.** From the repository root, generate a new version directory. Supply the rules page
+   and PDF URLs from the official site. The parser reads the version and date from the cover
+   and records the SHA-256 of the PDF it used.
+
+   ```bash
+   uv run --locked sim/web/scripts/rules/parse_pdf.py "$pdf" "$new_rules" \
+     --region jp --page-url "$page_url" --source-url "$source_url"
+   bun fmt "$new_rules"
+   ```
+
+   The command expects the official, text-based Word PDF layouts. Check any new image marker
+   against the PDF and map it to the site's card-text marker in `parse_pdf.py`. Review token
+   paragraph boundaries against the official card text when a line can be either a wrap or a
+   paragraph break. If a previous rules directory was replaced in Git, restore it to a scratch
+   directory from the corresponding commit.
+
+2. **Compare.** Review the readable report and save the JSON when another tool needs the list.
+   Changes are matched by node key. A red update marker or a figure's pagination alone leaves a
+   node unchanged for translation. Changed token tables also list rows by card name. Appendix A
+   and C keys use block order, so inserting a block can shift the keys of later blocks.
+
+   ```bash
+   bun run --cwd sim/web rules:revision diff "$old_rules" "$new_rules"
+   bun run --cwd sim/web rules:revision diff "$old_rules" "$new_rules" --json > changes.json
+   ```
+
+3. **Carry and translate.** For Japanese rules, use the previous Traditional Chinese translation
+   to start the new version as described in the [translation workflow][translations]. The
+   carry command takes a new output directory and reports the node keys to translate.
+4. **Stamp and test.** Stamp the translated entries and run the rules data tests. Commit the new
+   source JSON and the reviewed translations for the new version, and update the applicable rules
+   bundle in `sim/web/src/data/rules/` so the site loads it. Include the changes found by the
+   comparison in the PR.
+
+[translations]: ../../translations/comprehensive-rules/README.md#updating-a-translation
