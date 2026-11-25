@@ -1,5 +1,5 @@
 use super::ability_combinations::{
-    activate_card, evolve, evolve_position, loaded, play, position, view,
+    activate_card, evolve, evolve_position, finish, loaded, play, position, view,
 };
 use super::*;
 
@@ -200,4 +200,56 @@ fn lyria_keeps_one_granblue_card_and_orders_the_others_below_an_unseen_card() {
     let state = view(&game);
     assert_eq!(state["P1"]["hand"], json!(["top"]));
     assert_eq!(state["P1"]["deck"], json!(["fourth", "second", "third"]));
+}
+
+#[test]
+fn le_fiee_heals_one_or_three_at_the_end_phase_by_cost_five_allies() {
+    for (allies, expected) in [(0_usize, 11_u8), (2, 13_u8)] {
+        let mut initial = support("CP05-095", "field");
+        let mut field = vec![json!({"id":"source","card":"CP05-095"})];
+        field.extend((0..allies).map(|index| json!({"id":format!("ally{index}"),"card":"CP05-105"})));
+        initial["players"]["P1"]["zones"]["field"] = json!(field);
+        let mut game = loaded(&initial);
+        game.internal_rule_action(&json!({"do":"end-phase"})).unwrap();
+        let question = game.internal_pending_choice().unwrap().unwrap();
+        let InputDomain::Pending(options) = &question.domain else {
+            panic!("the printed end-phase trigger is pending")
+        };
+        let play = game
+            .answer_internal_card(question.actor, question.token, Answer::Pending(options[0].handle))
+            .unwrap();
+        finish(&mut game, Some(play), &[]);
+        assert_eq!(view(&game)["P1"]["leader"]["life"], expected);
+    }
+}
+
+#[test]
+fn luminiera_keeps_maximum_pp_when_the_revealed_card_is_not_light() {
+    let mut initial = support("CP05-096", "hand");
+    initial["players"]["P1"]["pp"] = json!({"current":3_u8,"max":5_u8});
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"BP01-171"}]);
+    let mut game = loaded(&initial);
+    play(&mut game, &[]);
+    assert_eq!(view(&game)["P1"]["pp"], json!({"current":0_u8,"max":5_u8}));
+}
+
+#[test]
+fn trou_activated_ability_acts_and_creates_a_water_material() {
+    let mut game = loaded(&support("CP05-103", "field"));
+    activate_card(&mut game, "CP05-103", 3, &[]);
+    assert_eq!(token_card(&game, 0), "CP05-T10");
+    assert_eq!(view(&game)["objects"]["source"]["acted"], true);
+}
+
+#[test]
+fn tikoh_evolution_heals_two_with_a_cost_five_granblue_follower() {
+    let mut initial = evolve_position("CP05-097", "CP05-098");
+    initial["players"]["P1"]["leader"]["life"] = json!(10_u8);
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"source","card":"CP05-097"},
+        {"id":"support","card":"CP05-105"}
+    ]);
+    let mut game = loaded(&initial);
+    evolve(&mut game, 1);
+    assert_eq!(view(&game)["P1"]["leader"]["life"], 12_u8);
 }
