@@ -1,0 +1,64 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-092:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 4
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  trait: グラブル
+                upto: 1
+            - move:
+                ref: picked
+                to: hand
+                result: taken
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                position: bottom
+                order: chooser
+                to: deck
+      - line: 2
+        super_evolve_time:
+          do:
+            - create:
+                token: 土晶のエレメント
+                to: ex
+                n: &id001
+                  per:
+                    of:
+                      plus:
+                        - count:
+                            who: self
+                            zone: evolve_deck
+                            kind: evolve_follower
+                            trait: 土属性
+                            face_up: true
+                        - 1
+                    unit: 2
+            - life:
+                who: self
+                delta: *id001
