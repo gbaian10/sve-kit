@@ -107,11 +107,11 @@ fn quatre_limit_break_damages_a_follower_and_final_limit_break_damages_every_ene
         if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
             game.resume_internal_card().unwrap();
         }
-        let play = first_trigger(&mut game, "CP05-038");
-        if matches!(play, CardPlay::Awaiting(_)) {
-            resolved(answer_single_target(&mut game, play));
+        let trigger = first_trigger(&mut game, "CP05-038");
+        if matches!(trigger, CardPlay::Awaiting(_)) {
+            resolved(answer_single_target(&mut game, trigger));
         } else {
-            resolved(play);
+            resolved(trigger);
         }
     }
     let state = game.projection(View::Referee).unwrap();
@@ -225,8 +225,8 @@ fn lunalu_returns_a_granblue_follower_after_ordinary_limit_break() {
         .unwrap();
     resolved(answer_single_target(&mut game, play));
     game.resume_internal_card().unwrap();
-    let play = first_trigger(&mut game, "CP05-049");
-    resolved(answer_single_target(&mut game, play));
+    let trigger = first_trigger(&mut game, "CP05-049");
+    resolved(answer_single_target(&mut game, trigger));
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["hand"], json!(["returned"]));
     assert_eq!(state["P1"]["cemetery"], json!(["ordinary"]));
