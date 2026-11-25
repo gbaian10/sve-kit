@@ -107,14 +107,16 @@ fn chloe_pays_a_dark_card_and_returns_it_from_the_cemetery_to_the_bottom() {
 }
 
 #[test]
-fn kou_and_you_put_the_revealed_cost_five_granblue_follower_onto_the_field() {
-    let mut initial = position_with_source("CP05-016", "field");
-    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":"CP05-001"}]);
-    let mut game = game(&initial);
-    attack(&mut game, "P2.leader");
-    let board = state(&game);
-    assert!(board["P1"]["field"].as_array().unwrap().contains(&json!("top")));
-    assert_eq!(board["P1"]["hand"], json!([]));
+fn kou_and_you_move_the_revealed_card_to_the_printed_destination() {
+    for (number, destination) in [("CP05-001", "field"), ("BP01-037", "hand")] {
+        let mut initial = position_with_source("CP05-016", "field");
+        initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"top","card":number}]);
+        let mut game = game(&initial);
+        attack(&mut game, "P2.leader");
+        let board = state(&game);
+        assert!(board["P1"][destination].as_array().unwrap().contains(&json!("top")));
+        assert_eq!(board["P1"]["deck"], json!([]));
+    }
 }
 
 #[test]
