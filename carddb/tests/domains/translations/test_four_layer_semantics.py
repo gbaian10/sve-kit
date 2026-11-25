@@ -285,17 +285,29 @@ def test_current_source_rejects_unregistered_or_mismatched_semantic_descriptor(
         engine.verify(raw, field, part, changed, binding, context=facts)
 
 
-@pytest.mark.parametrize("missing", [None, "name", "trait", "class", "kind"])
+@pytest.mark.parametrize(
+    ("missing", "traits"),
+    [
+        *(
+            (missing, ("仮種族",))
+            for missing in (None, "name", "trait", "class", "kind")
+        ),
+        (None, ("土属性", "光属性", "闇属性")),
+        (None, ("仮種族", "全属性")),
+    ],
+)
 def test_token_header_requires_every_declared_field_in_its_exact_catalog(
-    missing: str | None,
+    missing: str | None, traits: tuple[str, ...]
 ) -> None:
     raw = (
-        "『仮トークン😀』{仮クラス}仮種族・フォロワー{コスト２}{攻撃力}３/{体力}４仮。"
+        "『仮トークン😀』{仮クラス}"
+        + "・".join(traits)
+        + "・フォロワー{コスト２}{攻撃力}３/{体力}４仮。"
     )
     field = normalize_source(raw, source(raw, "section"))
     terms = {
         "name": Term("term:name.synthetic", "card_name", "仮トークン😀"),
-        "trait": Term("term:trait.synthetic", "trait", "仮種族"),
+        "trait": Term("term:trait.synthetic_0", "trait", traits[0]),
     }
     vocabulary = {
         "class": Binding(region="jp", kind="class", raw="仮クラス", code="synthetic"),
@@ -312,7 +324,14 @@ def test_token_header_requires_every_declared_field_in_its_exact_catalog(
         ),
     )
     engine = classifier(
-        tuple(t for k, t in terms.items() if k != missing), vocabulary=catalog
+        (
+            *(t for k, t in terms.items() if k != missing),
+            *(
+                Term(f"term:trait.synthetic_{i}", "trait", trait)
+                for i, trait in enumerate(traits[1:], start=1)
+            ),
+        ),
+        vocabulary=catalog,
     )
     part = next(p for p in field.parts if p.source_span.role == "token_header")
     found = engine.recognize(raw, field.source, part, field=field)
@@ -330,7 +349,7 @@ def test_token_header_requires_every_declared_field_in_its_exact_catalog(
     assert [s.role for s in frame.leaf_schema.slots] == [
         "declared_name",
         "declared_class",
-        "declared_trait",
+        *(["declared_trait"] * len(traits)),
         "declared_kind",
         "cost_value",
         "stat_value",

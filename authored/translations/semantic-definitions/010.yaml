@@ -1,0 +1,529 @@
+format: 1
+kind: frame_semantics_shard
+definitions:
+  - id: 4588
+    hash: 0e072bb37934922f3b5ffda5305562e747490991f9c8fd4764ad7ff224366717
+    value:
+      domains: "@2081"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@606"
+  - id: 4589
+    hash: 255630a7e5e506cf38dfb1cabd9220e843108b90b09c1c8776b03d2fe8c5bc25
+    value:
+      domains: "@2108"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@535"
+  - id: 4590
+    hash: 277d503eb8695060de3774e0ba57773750a8ef64b7fce7fe60ef126889503a34
+    value:
+      domains: "@4139"
+      expressions: "@633"
+      omissions: {}
+      resolved: null
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal: null
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:7f6dea019ffd5285dcaeeee951f02338a6efc13ef36d43f6748530d301e31f0e
+                role: body
+                segments:
+                  - end: 106
+                    start: 46
+                source_hash: afb096fbd5c4746d00740d5d906fb595b5824a19ad163c388864ba8f2ae2221f
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:96db73f1e5ee31817d8f8a4033c4ca77111bf5f1a4f8b43c1208c6d90c6bb68a
+                origin: selection
+            name: names_port_96db73f1e5ee3181
+            scope: read_ability_0
+            source_role: name_source
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1451"
+  - id: 4591
+    hash: 3922f2fbf3502978e189735ca58977fe24dca46e059107b9e4765ffd98ced8c2
+    value:
+      domains: "@2744"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@2315"
+  - id: 4592
+    hash: c515de75b7247b3923f957729c390a55b7459a0d5b81beb1cca8ffe3acae0afe
+    value:
+      domains: "@3443"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_1: object_count
+        leaf_3: object_count
+        leaf_4: play_points
+  - id: 4593
+    hash: 88ff86926a0ce88348dfa09237b1e21ecd65186d45213f4af43f56160ba6612e
+    value:
+      domains: "@1240"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@77"
+  - id: 4594
+    hash: 5abbd08bd3ef04db278a29dafe71c82dd91270bf83c41df7f02a38b643bbc2e1
+    value:
+      domains:
+        deck_position.edge.v1: "@430"
+        player.relative.v1: "@10"
+        predicate.name.relative.v1: "@15"
+        zone.single.v1: "@22"
+      expressions: "@25"
+      omissions: {}
+      resolved: null
+      source_links:
+        ports:
+          - evidence:
+              capture: live
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal: null
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:2ae0a51fd07c1e49c40a50046cfc9603c5169f7a2bbb673930b3125bf4c9b7f0
+                role: body
+                segments:
+                  - end: 154
+                    start: 58
+                source_hash: bf889c86a86261d3f4bdf4a2a806b6adf89358447d3f4abdbb46c536501c3942
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:6547ae0b2c11c7cb5cf1c6aa0162df48d6da82b7b60b35df68f66879b20eaa6f
+                origin: holder
+            name: names_port_8c0bcca2f3f8e6c5
+            scope: read_ability_0
+            source_role: name_source
+            type: ObjectSet
+        scopes: "@316"
+      units: "@51"
+  - id: 4595
+    hash: f83fa3061de01e98e3507154834a9e327d059bde1d55e596d91d0375fcb26b94
+    value:
+      domains: "@1878"
+      expressions: {}
+      omissions: "@243"
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_10: object_count
+        leaf_4: object_count
+        leaf_6: object_count
+        leaf_8: object_count
+  - id: 4596
+    hash: 4dee2054fb4185aae15e97531727ea533363e93f3ff61bd93a98ff652e47a79c
+    value:
+      - "@473"
+      - "@781"
+      - "@1129"
+  - id: 4597
+    hash: ad46851240cfd2191395c9aee8089c9a312ff38afe3c4d7589b549d49b086d8f
+    value:
+      domain: quantity.read.context.v1
+      history: null
+      id: read.faceup_evolve.trait.v1
+      imports: []
+      measure: card_count
+      parameters: "@4596"
+      result_type: Nat
+      role: read_value
+      scalable: true
+      source_family: A1
+  - id: 4598
+    hash: 52ce4294526062f724c46076299c8f32594d951e1b2ce3c7582db0aa53be541d
+    value:
+      read.faceup_evolve.trait.v1: "@4597"
+  - id: 4599
+    hash: 3c4fc38f33db7702281b806131c3f2f4056e42c4901d05cdc771b863708aef0d
+    value:
+      domains:
+        card_kind.follower.v1: "@6"
+        concept.trait.v1: "@90"
+        player.relative.v1: "@10"
+        quantity.read.context.v1: "@199"
+        quantity.selection_count.constant.v1: "@17"
+        zone.single.v1: "@22"
+      expressions: "@4598"
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_3: object_count
+        leaf_9: damage_amount
+  - id: 4600
+    hash: 1bb9649065613eb8c6917025e3a4b0d1b531535508751ee13509748e881eca89
+    value:
+      domains: "@2020"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@484"
+  - id: 4601
+    hash: 9046d07227e3785046f61dcbab7ea0dc942049e4999dcd2347cef70fdbc3b7cd
+    value:
+      domains:
+        card_kind.selection.v1: "@148"
+        concept.rule_term.v1: "@65"
+        concept.trait.v1: "@90"
+        phase.named.v1: "@648"
+        player.relative.v1: "@10"
+        quantity.existence_count.constant.v1: "@177"
+        zone.single.v1: "@22"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@469"
+  - id: 4602
+    hash: 3f4de81520d795cfe11be65ea95f4bcf23c57c7a1c4d8ff2565580e9f00b2690
+    value:
+      domains:
+        card_kind.selection.v1: "@148"
+        card_name.any.v1: "@50"
+        concept.ability.v1: "@8"
+        concept.rule_term.v1: "@65"
+        concept.trait.v1: "@90"
+        player.relative.v1: "@10"
+        zone.single.v1: "@22"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@84"
+  - id: 4603
+    hash: 1f79b7496534e22f5e43087cc99eda4c587fcd15956d74f4f758ded33530c730
+    value:
+      domains:
+        concept.ability.v1: "@8"
+        deck_position.edge.v1: "@430"
+        player.relative.v1: "@10"
+        quantity.selection_count.constant.v1: "@17"
+        zone.hand.v1: "@20"
+        zone.single.v1: "@22"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@535"
+  - id: 4604
+    hash: 31a13d6b2124647ccf757fec06c42be13724f08831f9f710a0f76d8890eed8ef
+    value:
+      domains: "@1009"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@829"
+  - id: 4605
+    hash: 40ab4b4547b12f0d6bfdf059b679630f1a6277d0ef052e1e2716ee62a0c875ec
+    value:
+      domains: "@3110"
+      expressions: {}
+      omissions: "@32"
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_4: object_count
+        leaf_5: object_count
+        leaf_7: event_count
+  - id: 4606
+    hash: bd799f3a4bba36197f10d0016f56cf7efa83388eab0fb8954eef88db09471957
+    value:
+      domains: "@4139"
+      expressions: "@633"
+      omissions: {}
+      resolved: null
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 2
+                ordinal: null
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:f0856716245918fccae1c08476dd24fd438088f702c07f726e0685c180da55d0
+                role: body
+                segments:
+                  - end: 106
+                    start: 46
+                source_hash: afb096fbd5c4746d00740d5d906fb595b5824a19ad163c388864ba8f2ae2221f
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:a8fda2225bdee510395f29311b7d0ac839808dea66819960f3f2aba85eac9fc2
+                origin: selection
+            name: names_port_a8fda2225bdee510
+            scope: read_ability_0
+            source_role: name_source
+            type: ObjectSet
+        scopes: "@316"
+      units: "@1451"
+  - id: 4607
+    hash: b39b2b60c6bf8478da2be6a5320f53008fc9698d3f63b34e81c5a9d8debb3379
+    value:
+      leaf_11: object_count
+      leaf_12: damage_amount
+      leaf_13: damage_amount
+      leaf_3: object_count
+      leaf_4: damage_amount
+      leaf_5: damage_amount
+  - id: 4608
+    hash: 88128f9bb161ea1db429ebb16ce2417234d03b8914d879e843747ed734116727
+    value:
+      domains: "@329"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@4607"
+  - id: 4609
+    hash: 4513b3f7f2ce475c526ae8f2fc8c70ec215f81d0673cfa4e1ae7bc4901918f29
+    value:
+      domains:
+        card_kind.selection.v1: "@148"
+        card_name.any.v1: "@50"
+        concept.rule_term.v1: "@65"
+        concept.trait.v1: "@90"
+        player.relative.v1: "@10"
+        zone.single.v1: "@22"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@1451"
+  - id: 4610
+    hash: 11809e13e5b3573868a2633f75ae4e01ea6cffd5e0e63e26879e766a0032dcdb
+    value:
+      domains: "@2471"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@69"
+  - id: 4611
+    hash: 5a7c62598b2944b1854df915b084f13f6b090b6e0796f84370ee69b31c61f127
+    value:
+      domains: "@3504"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@84"
+  - id: 4612
+    hash: 17161ee67dad0f065ae83b6d78962a7d6a9f92b28c485d1f9d745a54c898793d
+    value:
+      domains: "@3577"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_4: turn_count
+        leaf_5: event_count
+  - id: 4613
+    hash: 32591afbf303e3c6bd1a52439938bcbe9cea6523dcd4778f8e2dd144a890e22a
+    value:
+      domains: "@2646"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_7: turn_count
+        leaf_8: event_count
+  - id: 4614
+    hash: 5da7eb66ceac9191a885b1d0269ce88a238c1fa1126bdc4df25ec7c77b4cdcf9
+    value:
+      card_kind.follower.v1: "@6"
+      concept.keyword.v1: "@59"
+      player.relative.v1: "@10"
+      quantity.selection_count.constant.v1: "@17"
+      zone.single.v1: "@22"
+  - id: 4615
+    hash: bb98b0050b6a2549f9498861b060d18e9759d676a192fe647f4d6dd430cd3945
+    value:
+      domains: "@4614"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@69"
+  - id: 4616
+    hash: edb45e1888ab454458699f934d790b789fa802970eb4a0010c29ad49ac9c1e9a
+    value:
+      domains:
+        concept.ability.v1: "@8"
+        concept.rule_term.v1: "@65"
+        concept.trait.v1: "@90"
+        deck_position.edge.v1: "@430"
+        player.relative.v1: "@10"
+        quantity.selection_count.constant.v1: "@17"
+        zone.single.v1: "@22"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@79"
+  - id: 4617
+    hash: 5ee8cc36e896abe5fb612937abe710cb3a86a0d6c53f2b5c31141f3d4d226ded
+    value:
+      domains:
+        card_kind.follower.v1: "@6"
+        card_name.any.v1: "@50"
+        concept.trait.v1: "@90"
+        player.relative.v1: "@10"
+        quantity.read.context.v1: "@199"
+        quantity.selection_count.constant.v1: "@17"
+        zone.single.v1: "@22"
+      expressions: "@4598"
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units: "@1426"
+  - id: 4618
+    hash: bfe3c1698330f4a8f524932779e31a288cceb80e142ec7746c843aebfb7225e1
+    value:
+      domains:
+        card_kind.selection.v1: "@148"
+        card_name.any.v1: "@50"
+        concept.ability.v1: "@8"
+        concept.trait.v1: "@90"
+        player.relative.v1: "@10"
+        quantity.existence_count.constant.v1: "@177"
+        zone.single.v1: "@22"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_11: object_count
+        leaf_3: object_count
+        leaf_5: object_count
+  - id: 4619
+    hash: 3c85873af3f7756207ae084c41f54da732217e54e09cee4ca7d783478b6a3d3d
+    value:
+      domains: "@979"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_10: damage_amount
+        leaf_5: object_count
+        leaf_6: damage_amount
+        leaf_8: object_count
+        leaf_9: damage_amount
+  - id: 4620
+    hash: b086c527008d55dd58d168e4c6793153244c6f8cab04b32f2b0464f3aed478e1
+    value:
+      domains:
+        card_kind.follower.v1: "@6"
+        concept.trait.v1: "@90"
+        player.relative.v1: "@10"
+        predicate.name.relative.v1: "@15"
+        quantity.selection_count.constant.v1: "@17"
+        zone.single.v1: "@22"
+      expressions: "@2893"
+      omissions: {}
+      resolved: null
+      source_links:
+        ports:
+          - evidence:
+              capture: selection
+              source:
+                field: effect
+                line_ordinal: 1
+                ordinal: null
+                owner:
+                  kind: face_revision
+                  revision_id: rev:v1:a6e994587eb8c39cb86a3689b0424e04388cb213ca5cc8c140fba7d03d258d63
+                role: body
+                segments:
+                  - end: 135
+                    start: 45
+                source_hash: 5b6172c946505b2398601b5b5758ef1f298b6101cc0bc0caa8c67f990922ba1f
+              source_leaves: []
+              value:
+                kind: ObjectSet
+                objects:
+                  - generation: 0
+                    object_id: source:008fc782d14a7586965d03330637a40411f3932cd0ead7afcab05168838e6ff8
+                origin: selection
+            name: names_port_008fc782d14a7586
+            scope: read_ability_1
+            source_role: name_source
+            type: ObjectSet
+        scopes: "@144"
+      units: "@852"
+  - id: 4621
+    hash: 57caf40d1d377c74bac0f674eef4e45954fd1f30fadc009929b53ecfef57563c
+    value:
+      domains: "@3110"
+      expressions: {}
+      omissions: "@840"
+      resolved: null
+      source_links: "@41"
+      units: "@53"
+  - id: 4622
+    hash: c189f49dd501c65f9b1114fd9b47ad1e28f9bbf448420704a8359f757248e056
+    value:
+      card_kind.follower.v1: "@6"
+      deck_position.edge.v1: "@430"
+      player.relative.v1: "@10"
+      quantity.selection_count.constant.v1: "@17"
+      zone.hand.v1: "@20"
+      zone.single.v1: "@22"
+  - id: 4623
+    hash: c0657dbe1ec653eb3b024fbd4e25cfda2ff42f33509e65b9192e39508b9010af
+    value:
+      domains: "@4622"
+      expressions: {}
+      omissions: {}
+      resolved: null
+      source_links: "@41"
+      units:
+        leaf_3: object_count
+        leaf_6: object_count
+        leaf_7: object_count
+  - id: 4624
+    hash: 326afcd496fa06c004c50aaefd162f5f78cfaa185791c9d730e2ce49765e2564
+    value:
+      domains: "@3675"
+      expressions: {}
+      omissions: "@32"
+      resolved: null
+      source_links: "@41"
+      units: "@77"

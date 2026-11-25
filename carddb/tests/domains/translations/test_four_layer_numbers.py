@@ -38,6 +38,76 @@ def numeric_classifier(
 
 
 @pytest.mark.parametrize(
+    ("raw", "roles"),
+    [
+        (
+            "このターン、自分の場のフォロワーが上限解放や最終上限解放を合わせて２回以上していたなら、仮。",
+            ["threshold"],
+        ),
+        (
+            "この能力はこのターン、相手の場のフォロワーが上限解放や最終上限解放を合わせて４回以上していたなら使える。",
+            ["threshold"],
+        ),
+        (
+            "自分の墓場の{Q}{起動}能力を持つフォロワーが４枚以上なら、仮。",
+            ["existence_count"],
+        ),
+        (
+            "自分のデッキの上４枚を見る。その中から、{クイック}を持つスペルや{Q}{起動}能力を持つフォロワー２枚まで公開して手札に加えてよい。",
+            ["count", "selection_count"],
+        ),
+        (
+            "自分の墓場の{Q}{起動}能力を持つフォロワーを元のコストの合計が４以下になるように２枚まで選ぶ。",
+            ["threshold", "selection_count"],
+        ),
+        (
+            "自分のデッキから元のコスト２の{Q}{起動}能力を持つフォロワー３枚を探し、場に出す。",
+            ["cost_value", "count"],
+        ),
+        (
+            "自分のエボルヴデッキの裏向きの仮族・エボルヴフォロワー２枚まで表向きにしてよい。",
+            ["selection_count"],
+        ),
+        (
+            "相手のPP最大値が６以上である限り、これが受けるダメージを-２する。",
+            ["threshold", "damage_delta_magnitude"],
+        ),
+    ],
+)
+def test_complete_constructs_supply_numeric_roles(raw: str, roles: list[str]) -> None:
+    engine = numeric_classifier(
+        extra=(
+            "original_cost_sum_bound",
+            "pp_capacity_bound",
+            "received_all_damage_delta",
+        )
+    )
+    derived = derive_source(raw, source(raw), engine)
+    assert not derived.recognized[0].issues
+    frame, binding = derived.bind(0)
+    engine.verify(raw, derived.field, derived.field.parts[0], frame, binding)
+    assert [s.role for s in numeric_slots(frame)] == roles
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "自分の場のフォロワーが上限解放や最終上限解放を合わせて２回以上していたなら、仮。",
+        "このターン、自分の場のフォロワーが不明や最終上限解放を合わせて２回以上していたなら、仮。",
+        "自分の墓場の{Q}{起動}能力を持つフォロワーが２体以上なら、仮。",
+        "自分のエボルヴデッキの裏向きの仮族・エボルヴフォロワー２体まで表向きにしてよい。",
+        "相手のPP最大値が６である限り、仮。",
+    ],
+)
+def test_new_numeric_forms_require_the_counted_set_unit_and_comparator(
+    raw: str,
+) -> None:
+    engine = numeric_classifier(extra=("pp_capacity_bound",))
+    derived = derive_source(raw, source(raw), engine)
+    assert derived.recognized[0].issues
+
+
+@pytest.mark.parametrize(
     "raw",
     [
         "仮。相手プレイヤー１人は手札を公開する。自分はその中から２枚を選ぶ。",

@@ -1,0 +1,103 @@
+format: 3
+kind: translation_shard
+records:
+  - kind: glossary_choice
+    note: 依綜合規則 1.29.0 第 14.6.3 條登錄。
+    data:
+      term_id: term:keyword.final_limit_break_possible
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 最終上限解放可能
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.granblue
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 碧藍幻想
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.light_attribute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 光屬性
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.fire_attribute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 火屬性
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.water_attribute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 水屬性
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.wind_attribute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 風屬性
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.dark_attribute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 闇屬性
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.earth_attribute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 土屬性
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice
+    note: 選詞沿用 CP05 的類型詞彙登錄。
+    data:
+      term_id: term:trait.all_attributes
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 全屬性
+      concept_evidence: []
+  - origin: machine
+    kind: glossary_choice_variant
+    note: 承接既有上限解放素材效果文的選詞。
+    data:
+      term_id: term:keyword.final_limit_break_possible
+      lang: zh-Hant
+      variant_key: eligibility_condition
+      value:
+        kind: authored
+        text: 可最終上限解放
+      concept_evidence: []
