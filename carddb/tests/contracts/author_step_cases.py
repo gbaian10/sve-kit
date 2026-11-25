@@ -191,6 +191,17 @@ SYNTHETIC_ACTIONS: list[dict[str, JsonValue]] = [
     {"flip_down": {"ref": "t"}},
     {"flip_up": "t"},
     {"flip_up": {"ref": "t"}},
+    {
+        "flip_up": {
+            "sel": {
+                "who": "self",
+                "zone": "evolve_deck",
+                "kind": "evolve_follower",
+                "trait": "土属性",
+            },
+            "upto": 2,
+        }
+    },
     {"life": {"who": "self", "delta": {"param": "recovery"}}},
     {"buff": {"on": "this", "power": 1}},
     {"buff": {"on": "t", "hp": -1}},
