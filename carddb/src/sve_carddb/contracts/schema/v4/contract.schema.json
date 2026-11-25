@@ -29203,6 +29203,9 @@
         "sel": {
           "$ref": "#/$defs/DSLNodes.A.sel.object-core"
         },
+        "same_name_as": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        },
         "n": {
           "$ref": "#/$defs/DSLNodes.A.selection-quantity"
         },

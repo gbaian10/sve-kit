@@ -2809,6 +2809,9 @@
         "sel": {
           "$ref": "#/$defs/A.sel.object-core"
         },
+        "same_name_as": {
+          "$ref": "#/$defs/BindingName"
+        },
         "n": {
           "$ref": "#/$defs/A.selection-quantity"
         },
