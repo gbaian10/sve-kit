@@ -8,7 +8,8 @@ use crate::ir::observation::{self, Consumer, LeafKind, Position, Shape};
 use crate::ir::perspective;
 use crate::ir::{
     Action, Bool, Expr, Instruction, MemberProjection, Nat, Node, NumericProperty, ObjectReceipt,
-    ObjectRef, PlayerRelation, ReceiptId, ReceiptLocation, SelectionView, Selector, ZoneKind,
+    ObjectRef, PlayerRelation, ReceiptId, ReceiptLocation, SelectionView, Selector, SnapshotId,
+    ZoneKind,
 };
 use core::mem::take;
 
@@ -199,6 +200,7 @@ impl Game {
         });
         let mut ids = Vec::new();
         let mut current_members = Vec::with_capacity(members.len());
+        let mut hand_reveals = Vec::new();
         for member in members {
             let id = execution.object_id(*member)?.to_owned();
             let object = self.object(&id)?;
@@ -233,13 +235,21 @@ impl Game {
                 }
             }
             let current_reference = execution.reference(self, &id)?;
+            if zone == "hand"
+                && object.generation == member.generation.0
+                && object.controller == seat_name(execution.context.controller)?
+            {
+                hand_reveals.push((id.clone(), current_reference));
+            }
             ids.push(id);
             current_members.push(current_reference);
         }
         for (member, id) in current_members.iter().zip(&ids) {
             self.internal_record_reveal(execution, *member, id)?;
         }
+        let before = SnapshotId(self.state.ir_epoch);
         self.reveal(&ids, "all", &execution.frame(), true)?;
+        self.internal_hand_reveal_events(&hand_reveals, execution, before)?;
         execution.record_notice(
             self,
             &[Viewer::P1, Viewer::P2],

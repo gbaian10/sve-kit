@@ -6,6 +6,7 @@ pub(crate) const fn view(pattern: &EventPattern) -> EventSnapshotPolicy {
     match pattern {
         EventPattern::AnyOf { .. }
         | EventPattern::Play { .. }
+        | EventPattern::SelfHandReveal {}
         | EventPattern::UbActivated { .. } => EventSnapshotPolicy::AtReveal,
         EventPattern::Fused { .. }
         | EventPattern::Move { .. }

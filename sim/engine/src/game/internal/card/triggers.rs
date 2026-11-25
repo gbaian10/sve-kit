@@ -37,6 +37,7 @@ mod draw;
 mod drive;
 mod equipment;
 mod fusion;
+mod hand_reveal;
 mod limit_break;
 pub(in crate::game::internal) use banish::hand_header as hand_banish;
 pub(in crate::game::internal) use discard::cemetery_header as cemetery_discard;
@@ -44,6 +45,7 @@ pub(in crate::game::internal) use discard::hand_header as hand_discard;
 pub(in crate::game::internal) use entry::cemetery_header as cemetery_entry;
 pub(in crate::game::internal) use entry::ex_header as ex_entry;
 pub(in crate::game::internal) use equipment::check_header as equipment_header;
+pub(in crate::game::internal) use hand_reveal::check_header as hand_reveal_header;
 mod entry;
 pub(in crate::game::internal) mod event_operand;
 mod evolution;
@@ -146,6 +148,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || ability::check_header(ability)?
         || banish::check_header(ability)?
         || discard::check_header(ability)?
+        || hand_reveal::check_header(ability)?
         || draw::check_header(ability)?
         || drive::check_header(ability)?
         || dice::check_header(ability)?
@@ -1030,6 +1033,7 @@ const fn trigger_timing(event: &EventPayload) -> TriggerTiming {
         EventPayload::Payment { .. } => TriggerTiming::Payment,
         EventPayload::CounterChange { .. } => TriggerTiming::CounterChange,
         EventPayload::Discard { .. } => TriggerTiming::Discard,
+        EventPayload::HandReveal { .. } => TriggerTiming::HandReveal,
         EventPayload::Banish { .. } => TriggerTiming::Banish,
         EventPayload::Draw { .. } => TriggerTiming::Draw,
         EventPayload::DriveGained { .. } => TriggerTiming::DriveGained,

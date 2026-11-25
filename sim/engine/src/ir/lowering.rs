@@ -841,6 +841,7 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     let zones = match requested {
         Some(ast::ActivationZones::One(zone)) => vec![zone.kind()],
         Some(ast::ActivationZones::Many(zones)) => zones.iter().map(|zone| zone.kind()).collect(),
+        None if entry.auto.as_ref().is_some_and(|head| matches!(head.on, ast::PhaseSubscription::HandRevealed(_))) => vec![ZoneKind::Hand],
         None if hand_exit::is_union(entry) || entry.auto.as_ref().is_some_and(|auto| matches!(&auto.on, ast::PhaseSubscription::Discarded(event) if event.reference.is_some())) => vec![ZoneKind::Hand],
         None if entry.spell.is_some() => vec![ZoneKind::Resolution],
         None if entry.activate.as_ref().is_some_and(|head| head.fusion.is_some()) => vec![ZoneKind::Hand],
@@ -868,6 +869,13 @@ fn active_zones(entry: &ast::Ability, path: &str) -> Result<Vec<ZoneKind>, Lower
     if let Some(auto) = &entry.auto {
         if matches!(auto.on, ast::PhaseSubscription::FusedAsMaterial(_)) {
             return if zones == [ZoneKind::Hand, ZoneKind::Ex] {
+                Ok(zones)
+            } else {
+                Err(unsupported(path))
+            };
+        }
+        if matches!(auto.on, ast::PhaseSubscription::HandRevealed(_)) {
+            return if zones == [ZoneKind::Hand] {
                 Ok(zones)
             } else {
                 Err(unsupported(path))
@@ -1071,6 +1079,7 @@ fn lowered_trigger(
                 pattern,
                 EventPattern::Play { .. }
                     | EventPattern::UbActivated { .. }
+                    | EventPattern::SelfHandReveal {}
                     | EventPattern::AnyOf { .. }
             ) || super::events::fusion::combined(&pattern)
             {
@@ -1186,6 +1195,10 @@ fn lowered_subscription(
                 binding: event,
                 predicate: super::events::draw::predicate(event),
             })
+        }
+        ast::PhaseSubscription::HandRevealed(reveal) => {
+            let ast::This::This = reveal.reference;
+            Ok(EventPattern::SelfHandReveal {})
         }
         ast::PhaseSubscription::Discarded(event) => {
             discard::subscription(event, event_id, subject_id, scope, path)
@@ -1383,6 +1396,7 @@ fn lowered_change(
         | ast::PhaseSubscription::DriveTrigger(_)
         | ast::PhaseSubscription::Drew(_)
         | ast::PhaseSubscription::Discarded(_)
+        | ast::PhaseSubscription::HandRevealed(_)
         | ast::PhaseSubscription::LifeChanged(_)
         | ast::PhaseSubscription::Equipped(_)
         | ast::PhaseSubscription::LimitBroke(_)

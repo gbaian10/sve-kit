@@ -49,6 +49,7 @@ pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<Pendin
         Some(EventPayload::Fused { .. }) => (PendingEvent::Fusion, true),
         Some(EventPayload::Play { .. }) => (PendingEvent::Play, true),
         Some(EventPayload::Discard { .. }) => (PendingEvent::Discard, false),
+        Some(EventPayload::HandReveal { .. }) => (PendingEvent::HandReveal, false),
         Some(EventPayload::Banish { .. }) => (PendingEvent::Banish, false),
         Some(EventPayload::Draw { .. }) => (PendingEvent::Draw, false),
         Some(EventPayload::DriveChecked { .. }) => (PendingEvent::DriveChecked, false),
