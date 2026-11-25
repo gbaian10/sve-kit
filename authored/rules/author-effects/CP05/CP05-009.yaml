@@ -1,0 +1,53 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-009:
+    admission: light
+    token_sources:
+      - section: 1
+        line: 1
+        card: CP05-T01
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        keyword: quick_activation
+                    op: ge
+                    right: 7
+                then:
+                  - create:
+                      token: ガンパウダーミキサー・クムユ
+                      n: 1
+                      to: field
+      - line: 3
+        activate:
+          zone: hand
+          quick: true
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - damage:
+                to:
+                  leaders: opponents
+                n: 2

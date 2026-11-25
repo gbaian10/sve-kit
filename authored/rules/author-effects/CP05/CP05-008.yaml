@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-008:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create:
+                token: 水晶のエレメント
+                n: 1
+                to: ex
+      - line: 2
+        activate:
+          quick: true
+          cost:
+            act_self: true
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        keyword: quick_activation
+                    op: ge
+                    right: 7
+                then:
+                  - damage:
+                      to: enemy
+                      n: 7
+                  - damage:
+                      to:
+                        leader_of: enemy
+                      n: 2
+                else:
+                  - damage:
+                      to: enemy
+                      n: 1

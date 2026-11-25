@@ -1,0 +1,46 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-005:
+    admission: light
+    token_sources:
+      - section: 1
+        line: 1
+        card: CP05-T02
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          do:
+            - if:
+                cond:
+                  history:
+                    event: limit_break
+                    window: this_turn
+                    who: self
+                    at_least: 3
+                then:
+                  - create:
+                      token: フィル
+                      n: 1
+                      to: ex
+      - line: 3
+        fanfare:
+          do:
+            - create:
+                token: 風晶のエレメント
+                n: 1
+                to: ex

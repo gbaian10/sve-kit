@@ -1,0 +1,46 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-033:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        static:
+          while:
+            history:
+              event: limit_break
+              window: this_turn
+              who: self
+              at_least: 3
+          effects:
+            - grant:
+                "on": this
+                keywords:
+                  - rush
+                  - assail
+                  - bane
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  not:
+                    exists:
+                      who: self
+                      zone: field
+                      name: 眠れる獅子・モルドレッド
+                then:
+                  - search:
+                      sel:
+                        who: self
+                        zone: deck
+                        kind: follower
+                        name: 眠れる獅子・モルドレッド
+                      n: 1
+                      to: field
