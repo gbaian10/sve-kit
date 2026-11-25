@@ -1319,6 +1319,132 @@
       ]
     },
     {
+      "card_no": "PR-622",
+      "documents": {
+        "documents-0f85ae46048100bb": {
+          "region": "jp",
+          "record": {
+            "number": "PR-622",
+            "faces": [
+              {
+                "name": "アルケミック・フレア",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "グラブル",
+                  "火属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "これを自分の手札から公開したとき、『火晶のエレメント』1枚をEXエリアに置く。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。『火晶のエレメント』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-622.png",
+                "trait_raw": "グラブル・火属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2902",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、『アルケミック・フレア』をプレイして『火晶のエレメント』1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、『アルケミック・フレア』をプレイすることができず、『火晶のエレメント』1枚をEXエリアに置くことができません。"
+              },
+              {
+                "id": "Q2894",
+                "date": "2026-11-24",
+                "question": "何らかの能力によって、相手のターン中にこのカードを自分の手札から公開した場合、このカードの「これを自分の手札から公開したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q2893",
+                "date": "2026-11-24",
+                "question": "「これを自分の手札から公開したとき、～」とはなんですか？",
+                "answer": "カードの能力によって手札にあるこのカードを相手に公開することで発動する能力です。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T09"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7cfec31205f17df1c797690b36586f2d6f7bfbaaea5a84fd885e2baaa1dc1207",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-622",
+            "fetched_at": "2026-11-25T06:48:54.771734Z"
+          },
+          "document_ref": "documents-0f85ae46048100bb"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-623",
+      "documents": {
+        "documents-e0e4c3f210a42571": {
+          "region": "jp",
+          "record": {
+            "number": "PR-623",
+            "faces": [
+              {
+                "name": "アルス・グローリア",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "グラブル",
+                  "土属性",
+                  "光属性",
+                  "闇属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "1",
+                "power": "-",
+                "hp": "-",
+                "text": "自分のデッキの上4枚を見る。その中から、土属性・カードか光属性・カードか闇属性・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": "天才美少女錬金術師カリオストロの\nバカでもわかるスパルタ錬金術講座☆ はっじまっるよー☆",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-623.png",
+                "trait_raw": "グラブル・土属性・光属性・闇属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9817d3548c1d590cc371a67b922fff7f7094b4193353b294b34ae50c26a9d981",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-623",
+            "fetched_at": "2026-11-25T06:48:56.882547Z"
+          },
+          "document_ref": "documents-e0e4c3f210a42571"
+        }
+      ]
+    },
+    {
       "card_no": "PR-624",
       "documents": {
         "documents-6dedd039b9a6d85f": {
@@ -1452,6 +1578,2128 @@
             "fetched_at": "2026-10-26T10:49:21.865985Z"
           },
           "document_ref": "documents-9abd925b6df93c75"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-626",
+      "documents": {
+        "documents-736285410b769c62": {
+          "region": "jp",
+          "record": {
+            "number": "PR-626",
+            "faces": [
+              {
+                "name": "ピュアクリスタリア・リリィ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "クリスタリア"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}相手の場のフォロワー1体を選ぶ。それの攻撃力と体力を1にする。",
+                "sections": [],
+                "flavor": "魔法が躍り、雪が舞い、訪れた客人を一生懸命もてなす。\n「リリの魔法で、いっぱいおもてなしするね！」",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-626.png",
+                "trait_raw": "クリスタリア"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9f391b695d0dedba3c7ea1ea447b905e454484c2800f29bae0a8edaada0715cc",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-626",
+            "fetched_at": "2026-11-25T06:48:59.801934Z"
+          },
+          "document_ref": "documents-736285410b769c62"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-627",
+      "documents": {
+        "documents-b9fa400831e74936": {
+          "region": "jp",
+          "record": {
+            "number": "PR-627",
+            "faces": [
+              {
+                "name": "希望の守護者・ソニア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、【守護】を持つフォロワー1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": "リテュエル様の不幸は、従者たる私が防ぐわ。\n……あぁっ、リテュエル様が何も無い所でお転びに！？",
+                "illustrator": "えなれいん",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-627.png",
+                "trait_raw": "信仰"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7b9d352e9b57f71038148958e87e9fd69604129fcc8c4a7dd76a32fe79378952",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-627",
+            "fetched_at": "2026-11-25T06:49:02.665977Z"
+          },
+          "document_ref": "documents-b9fa400831e74936"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-628",
+      "documents": {
+        "documents-396f0bdd4b55b282": {
+          "region": "jp",
+          "record": {
+            "number": "PR-628",
+            "faces": [
+              {
+                "name": "舞い戻る奏絶",
+                "card_class": "ウィッチ",
+                "card_type": "スペル",
+                "traits": [
+                  "絶傑",
+                  "アイドル"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "2",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、追加コストとして墓場の「カード名に『リーシェナ』を含むフォロワー」1枚を消滅させる。（追加コストを支払わなければプレイできない）\n自分の場のアイドル・カードが2枚以上なら、自分のデッキから「カード名に『リーシェナ』を含むフォロワー」1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "根岸千秋",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-628.png",
+                "trait_raw": "絶傑・アイドル"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP05-037"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP15-040"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-037"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-418"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f8aa13f6fd1a283ea9af1c96cee38cde283ac0b06d4db76f30c03e127e77d414",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-628",
+            "fetched_at": "2026-11-25T06:49:05.238437Z"
+          },
+          "document_ref": "documents-396f0bdd4b55b282"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-629",
+      "documents": {
+        "documents-3eb5e7bb37663ca0": {
+          "region": "jp",
+          "record": {
+            "number": "PR-629",
+            "faces": [
+              {
+                "name": "箒星",
+                "card_class": "エルフ",
+                "card_type": "スペル",
+                "traits": [
+                  "グラブル",
+                  "風属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "-",
+                "hp": "-",
+                "text": "これをプレイする際、コストを-Xする。Xは「このターン中に自分の場のフォロワーが上限解放や最終上限解放をした回数」である。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。『風晶のエレメント』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-629.png",
+                "trait_raw": "グラブル・風属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2881",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、『箒星』をプレイして『風晶のエレメント』1枚をEXエリアに置くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、『箒星』をプレイすることができず、『風晶のエレメント』1枚をEXエリアに置くことができません。"
+              },
+              {
+                "id": "Q2880",
+                "date": "2026-11-24",
+                "question": "自分の場の『蒼の少女・ルリア』を『ヒヒイロカネ』で最終上限解放させた場合、『箒星』のコストは-2されますか？",
+                "answer": "はい。-2されます。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c07e177018362991816cff6c347cd827ee58d13d33b92f6c47e414a1c6b67af3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-629",
+            "fetched_at": "2026-11-25T06:49:08.086550Z"
+          },
+          "document_ref": "documents-3eb5e7bb37663ca0"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-630",
+      "documents": {
+        "documents-98c48ca9c9b84c78": {
+          "region": "jp",
+          "record": {
+            "number": "PR-630",
+            "faces": [
+              {
+                "name": "決意の輝竜・アーサー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "風属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "1",
+                "hp": "2",
+                "text": "このターン、自分の場のフォロワーが上限解放や最終上限解放を合わせて3回以上していたなら、これは【突進】【指定攻撃】【必殺】を持つ。\n{ファンファーレ}自分の場に『眠れる獅子・モルドレッド』がいないなら、自分のデッキから『眠れる獅子・モルドレッド』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-630.png",
+                "trait_raw": "グラブル・風属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2889",
+                "date": "2026-11-24",
+                "question": "何らかの能力により、『眠れる輝竜・アーサー』が2体同時に場に出た場合、『眠れる輝竜・アーサー』の《ファンファーレ》能力はどちらも誘発しますか？",
+                "answer": "『眠れる輝竜・アーサー』の《ファンファーレ》能力はどちらも誘発します。処理順は以下の通りです。\n『眠れる輝竜・アーサー』が2体同時に場に出た場合、『眠れる輝竜・アーサー』の《ファンファーレ》能力はどちらも誘発し待機状態になります。待機状態になった1体目の能力を解決し自分のデッキから『眠れる獅子・モルドレッド』1枚を探し、場に出すことができます。その後待機状態になった2体目の能力を解決しますが、既に自分の場に『眠れる獅子・モルドレッド』がいるため、自分のデッキから『眠れる獅子・モルドレッド』1枚を探し、場に出すことができません。"
+              },
+              {
+                "id": "Q2888",
+                "date": "2026-11-24",
+                "question": "このターン、『蒼の少女・ルリア』を『ヒヒイロカネ』で最終上限解放させて『眠れる輝竜・アーサー』を『風晶のエレメント』で上限解放させていた場合、「このターン、自分の場のフォロワーが上限解放や最終上限解放を合わせて3回以上していたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-033"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-034"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-631"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:122bde7c8992ba9183996eb68fc1f6e343bbd0c769b0ce60bb6a41a8e06a5008",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-630",
+            "fetched_at": "2026-11-25T06:49:10.904323Z"
+          },
+          "document_ref": "documents-98c48ca9c9b84c78"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-631",
+      "documents": {
+        "documents-0f9b437d9764a37f": {
+          "region": "jp",
+          "record": {
+            "number": "PR-631",
+            "faces": [
+              {
+                "name": "迷夢の獅子・モルドレッド",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "風属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "2",
+                "hp": "1",
+                "text": "このターン、自分の場のフォロワーが上限解放や最終上限解放を合わせて3回以上していたなら、これは【疾走】を持つ。\n{ファンファーレ}自分の場に『眠れる輝竜・アーサー』がいないなら、自分のデッキから『眠れる輝竜・アーサー』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-631.png",
+                "trait_raw": "グラブル・風属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2891",
+                "date": "2026-11-24",
+                "question": "何らかの能力により、『眠れる獅子・モルドレッド』が2体同時に場に出た場合、『眠れる獅子・モルドレッド』の《ファンファーレ》能力はどちらも誘発しますか？",
+                "answer": "『眠れる獅子・モルドレッド』の《ファンファーレ》能力はどちらも誘発します。処理順は以下の通りです。\n『眠れる獅子・モルドレッド』が2体同時に場に出た場合、『眠れる獅子・モルドレッド』の《ファンファーレ》能力はどちらも誘発し待機状態になります。待機状態になった1体目の能力を解決し自分のデッキから『眠れる輝竜・アーサー』1枚を探し、場に出すことができます。その後待機状態になった2体目の能力を解決しますが、既に自分の場に『眠れる輝竜・アーサー』がいるため、自分のデッキから『眠れる輝竜・アーサー』1枚を探し、場に出すことができません。"
+              },
+              {
+                "id": "Q2890",
+                "date": "2026-11-24",
+                "question": "このターン、『蒼の少女・ルリア』を『ヒヒイロカネ』で最終上限解放させて『眠れる獅子・モルドレッド』を『風晶のエレメント』で上限解放させていた場合、「このターン、自分の場のフォロワーが上限解放や最終上限解放を合わせて3回以上していたなら、」という条件を満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-033"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-034"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-630"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:308ec20af13e0b5e9541374f0ae60af6f141b43bf1cb9600f40c49fc7695d4f7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-631",
+            "fetched_at": "2026-11-25T06:49:13.622873Z"
+          },
+          "document_ref": "documents-0f9b437d9764a37f"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-632",
+      "documents": {
+        "documents-049afc7921732e85": {
+          "region": "jp",
+          "record": {
+            "number": "PR-632",
+            "faces": [
+              {
+                "name": "懐旧の送り火・エルモート",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "火属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "これが上限解放したとき、相手のリーダーすべてに1ダメージ。\n{ファンファーレ}手札の火属性・カード3枚を公開：相手の場のフォロワー1体を選ぶ。それに3ダメージ。",
+                "sections": [],
+                "flavor": "海の家を手伝ったり、先公になったり……。\n成り行きで色々やったが、案外悪くなかったなァ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-632.png",
+                "trait_raw": "グラブル・火属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-051"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:6fa6cb10f23a83fd8073023cecf59b48e9983e11d4ac876c0ffa006711ec00bb",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-632",
+            "fetched_at": "2026-11-25T06:49:16.036702Z"
+          },
+          "document_ref": "documents-049afc7921732e85"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-633",
+      "documents": {
+        "documents-b330648f6f3a1761": {
+          "region": "jp",
+          "record": {
+            "number": "PR-633",
+            "faces": [
+              {
+                "name": "ゼエン教の僧侶・ソフィア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "水属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}『水晶のエレメント』1枚をEXエリアに置く。\n{Q}{起動}{コスト3}手札のこれを捨てる：2枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-633.png",
+                "trait_raw": "グラブル・水属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2920",
+                "date": "2026-11-24",
+                "question": "「《Q》《起動》《コスト3》手札のこれを捨てる：2枚引く。」という能力は、『星跡の巡礼者・ソフィア』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『星跡の巡礼者・ソフィア』が手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-101"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T10"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-634"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:44b6255d5a3b9f24cd1294a5eaf2c55c757b889e0cd4d97cedc2b7b645f0ea9e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-633",
+            "fetched_at": "2026-11-25T06:49:18.669104Z"
+          },
+          "document_ref": "documents-b330648f6f3a1761"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-634",
+      "documents": {
+        "documents-250e2dd018e9ff24": {
+          "region": "jp",
+          "record": {
+            "number": "PR-634",
+            "faces": [
+              {
+                "name": "ゼエン教の僧侶・ソフィア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "水属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【守護】\n【進化時】自分のデッキから元のコスト3以下の{Q}{起動}能力を持つフォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "聖地巡礼の旅の途中でも、\n出会う人々に救いを……って、あれ？聖地への地図がない！？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-634.png",
+                "trait_raw": "グラブル・水属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-102"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-633"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d8475c6e21d6667b6a23354edd4cbc83f0d7171d01880952bf7e508609758bd8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-634",
+            "fetched_at": "2026-11-25T06:49:21.688528Z"
+          },
+          "document_ref": "documents-250e2dd018e9ff24"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-635",
+      "documents": {
+        "documents-d5b729b634a5f8a4": {
+          "region": "jp",
+          "record": {
+            "number": "PR-635",
+            "faces": [
+              {
+                "name": "天才美少女錬金術師・カリオストロ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "土属性",
+                  "光属性",
+                  "闇属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のPP最大値が7以上なら、『アルス・マグナ』1枚と『ヒヒイロカネ』1枚をEXエリアに置く。\n{起動}これを{アクト}手札のグラブル・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-635.png",
+                "trait_raw": "グラブル・土属性・光属性・闇属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2899",
+                "date": "2026-11-24",
+                "question": "自分のPP最大値が7以上で、EXエリアにカードが4枚ある状態で《ファンファーレ》能力を解決する場合、『アルス・マグナ』と『ヒヒイロカネ』のどちらをEXエリアに置くか選択することができますか？",
+                "answer": "はい。どちらをEXエリアに置くかを選択することができます。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-041"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T08"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T15"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-636"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:670521ab765298b9ac3b152e69be716a6db9ab340385be1cee154c21b6b5d14d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-635",
+            "fetched_at": "2026-11-25T06:49:24.243075Z"
+          },
+          "document_ref": "documents-d5b729b634a5f8a4"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-636",
+      "documents": {
+        "documents-5b0be258b2b6e232": {
+          "region": "jp",
+          "record": {
+            "number": "PR-636",
+            "faces": [
+              {
+                "name": "天才美少女錬金術師・カリオストロ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "土属性",
+                  "光属性",
+                  "闇属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{起動}これを{アクト}手札のグラブル・カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-636.png",
+                "trait_raw": "グラブル・土属性・光属性・闇属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-042"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-635"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:43ac532a0997bb10a1b0a5ced86ddc82bee790e37df95ce8b63de8571684602a",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-636",
+            "fetched_at": "2026-11-25T06:49:26.989712Z"
+          },
+          "document_ref": "documents-5b0be258b2b6e232"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-637",
+      "documents": {
+        "documents-31dd8f3d46cc4b89": {
+          "region": "jp",
+          "record": {
+            "number": "PR-637",
+            "faces": [
+              {
+                "name": "不屈の鋭刃・バザラガ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "闇属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "7",
+                "power": "4",
+                "hp": "7",
+                "text": "自分の闇属性・カードの能力によってこれを自分の手札から捨てたとき、{コスト1}：相手の場のフォロワー1体を選ぶ。それに3ダメージ。\nこれが上限解放したとき、これは「{ラストワード}これを場に出す」を持つ。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それを破壊する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-637.png",
+                "trait_raw": "グラブル・闇属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-082"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:19ef420cc0f937518ce9064d646d6d7aba66eb03a44c69fe9a543faa10f8c0af",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-637",
+            "fetched_at": "2026-11-25T06:49:29.733425Z"
+          },
+          "document_ref": "documents-31dd8f3d46cc4b89"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-638",
+      "documents": {
+        "documents-5a771846fc73ea00": {
+          "region": "jp",
+          "record": {
+            "number": "PR-638",
+            "faces": [
+              {
+                "name": "威容なる星晶騎士・ヴィーラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "光属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n自分のPP最大値が7以上である限り、これが受けるダメージを-1する。\n{ファンファーレ}『光晶のエレメント』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-638.png",
+                "trait_raw": "グラブル・光属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-093"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T13"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-639"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:cbe587608151a5d87606d31bb386e18dc6c16d69c63d64d6aa30c96751d2b44b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-638",
+            "fetched_at": "2026-11-25T06:49:32.406197Z"
+          },
+          "document_ref": "documents-5a771846fc73ea00"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-639",
+      "documents": {
+        "documents-997e1885257c39c1": {
+          "region": "jp",
+          "record": {
+            "number": "PR-639",
+            "faces": [
+              {
+                "name": "威容なる星晶騎士・ヴィーラ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "光属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【守護】\n自分のPP最大値が7以上である限り、これが受けるダメージを-1する。\n【進化時】相手の場のフォロワー1体を選ぶ。自分のデッキの上3枚を公開する。それに「これによって公開した光属性・カードの枚数」と同じダメージ。公開したカードの中から、1枚を手札に加える。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-639.png",
+                "trait_raw": "グラブル・光属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2921",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイして自分のデッキの上3枚を公開することはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができず、自分のデッキの上3枚を公開することができません。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-094"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-638"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f1169ddeeae97c5b37ead672ee5d242ef0b70871012cb9fab3147373aa8ae383",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-639",
+            "fetched_at": "2026-11-25T06:49:35.174850Z"
+          },
+          "document_ref": "documents-997e1885257c39c1"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-640",
+      "documents": {
+        "documents-dff315203d6e123a": {
+          "region": "jp",
+          "record": {
+            "number": "PR-640",
+            "faces": [
+              {
+                "name": "空駆ける庇護者・カタリナ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "水属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のデッキから元のコスト1の{Q}{起動}能力を持つフォロワー1枚を探し、場に出す。『水晶のエレメント』1枚をEXエリアに置く。\n{Q}{起動}{コスト1}手札のこれを捨てる：『水晶のエレメント』1枚をEXエリアに置く。1枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-640.png",
+                "trait_raw": "グラブル・水属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2926",
+                "date": "2026-11-24",
+                "question": "「《Q》《起動》《コスト1》手札のこれを捨てる：〜」という能力は、『蒼天の守護騎士・カタリナ』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『蒼天の守護騎士・カタリナ』が手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-111"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T10"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b79d0242bb91368b4ea9d4292bc356642a2ae367da181c455fec90c29670dd75",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-640",
+            "fetched_at": "2026-11-25T06:49:37.837965Z"
+          },
+          "document_ref": "documents-dff315203d6e123a"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-641",
+      "documents": {
+        "documents-b074c17906cdbf4e": {
+          "region": "jp",
+          "record": {
+            "number": "PR-641",
+            "faces": [
+              {
+                "name": "愛すべき相棒・ビィ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "全属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分の場に『グラン＆ジータ』がいるなら、これは進化する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-641.png",
+                "trait_raw": "グラブル・全属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2923",
+                "date": "2026-11-24",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-107"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-108"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-642"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-646"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f6857f3920d97f084b09cf3c60783e1d0cb087e5fa2cd2f1f9fb9f5f088f5777",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-641",
+            "fetched_at": "2026-11-25T06:49:40.437109Z"
+          },
+          "document_ref": "documents-b074c17906cdbf4e"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-642",
+      "documents": {
+        "documents-caf71fe26b801d07": {
+          "region": "jp",
+          "record": {
+            "number": "PR-642",
+            "faces": [
+              {
+                "name": "愛すべき相棒・ビィ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "全属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】『ヒヒイロカネ』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-642.png",
+                "trait_raw": "グラブル・全属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-109"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T15"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-641"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:072bbc28d9dce5de00235684a504acfca545f2f636506eba56f7a7692627bfae",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-642",
+            "fetched_at": "2026-11-25T06:49:42.984354Z"
+          },
+          "document_ref": "documents-caf71fe26b801d07"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-643",
+      "documents": {
+        "documents-065f741ab81833c2": {
+          "region": "jp",
+          "record": {
+            "number": "PR-643",
+            "faces": [
+              {
+                "name": "空の命運を握る少女・ルリア",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "全属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【最終上限解放可能】\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、グラブル・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-643.png",
+                "trait_raw": "グラブル・全属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-110"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fba973c3d0d58a7cb454e58c68f40c092488e5b003119fc94bf6dcd9ac2a760f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-643",
+            "fetched_at": "2026-11-25T06:49:45.731113Z"
+          },
+          "document_ref": "documents-065f741ab81833c2"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-644",
+      "documents": {
+        "documents-46c029261e74d159": {
+          "region": "jp",
+          "record": {
+            "number": "PR-644",
+            "faces": [
+              {
+                "name": "真紅と群青・ゼタ＆ベアトリクス",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "火属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "【疾走】【最終上限解放可能】\nこれが上限解放したとき、これは「【攻撃時】相手の場のフォロワー1体を選ぶ。それに5ダメージ」を持つ。\nこれが最終上限解放したとき、これは「【攻撃時】相手の場のフォロワーすべてに2ダメージ」を持つ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-644.png",
+                "trait_raw": "グラブル・火属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2884",
+                "date": "2026-11-24",
+                "question": "最終上限解放した『真紅の穿光・ゼタ』が攻撃した場合、誘発した2つの【攻撃時】能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。\nまた、「【攻撃時】相手の場のフォロワー1体を選ぶ。それに5ダメージ」が解決できない場合でも、「【攻撃時】相手の場のフォロワーすべてに2ダメージ」を解決することができます。"
+              },
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-025"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ed0aaab355984c050cc9f9fc4348027d981764c8dd21fd43008b387ed1e0c8f0",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-644",
+            "fetched_at": "2026-11-25T06:49:48.166942Z"
+          },
+          "document_ref": "documents-46c029261e74d159"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-645",
+      "documents": {
+        "documents-174169d98b77c025": {
+          "region": "jp",
+          "record": {
+            "number": "PR-645",
+            "faces": [
+              {
+                "name": "休暇の猛者・メグ＆まりっぺ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "闇属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】自分の墓場の「これと同名を除く元のコスト2以下の闇属性・フォロワー」1枚を選ぶ。それを場に出す。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-645.png",
+                "trait_raw": "グラブル・闇属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-058"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-059"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d43b996fcf48ef54f6148dd4692e4f656fc2befb028ca5ab5248b514b13ed6b5",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-645",
+            "fetched_at": "2026-11-25T06:49:51.196659Z"
+          },
+          "document_ref": "documents-174169d98b77c025"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-646",
+      "documents": {
+        "documents-091a7aadeade0fe7": {
+          "region": "jp",
+          "record": {
+            "number": "PR-646",
+            "faces": [
+              {
+                "name": "レリックバスター・グラン＆ジータ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "全属性"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "これが上限解放したとき、{コスト3}：相手の場のフォロワー1体を選ぶ。それに4ダメージ。それのリーダーに2ダメージ。『ヒヒイロカネ』1枚をEXエリアに置く。\n{ファンファーレ}手札のグラブル・カード1枚を捨てる：2枚引く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-646.png",
+                "trait_raw": "グラブル・全属性"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2925",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが上限解放したとき、《コスト3》：～」という能力をプレイして相手のリーダーに2ダメージ与えることはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが上限解放したとき、《コスト3》：～」という能力をプレイすることができず、相手のリーダーに2ダメージを与えることができません。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-107"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-T15"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b161d7c9cb5d37c420637cd0436acf7777d67cebb79f461359155d5c970b79b3",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-646",
+            "fetched_at": "2026-11-25T06:49:53.659128Z"
+          },
+          "document_ref": "documents-091a7aadeade0fe7"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-647",
+      "documents": {
+        "documents-b52403ecf16bbcbf": {
+          "region": "jp",
+          "record": {
+            "number": "PR-647",
+            "faces": [
+              {
+                "name": "異端の指導者・ベルディリア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "先導",
+                  "学院"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。これが能力によって場に出ていたなら、それに2ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-647.png",
+                "trait_raw": "先導・学院"
+              }
+            ],
+            "release_date": null,
+            "errata_url": "https://shadowverse-evolve.com/errata/PR-647",
+            "notes": [
+              "レアリティにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2718",
+                "date": "2026-07-27",
+                "question": "このフォロワーが相手のターン中に何らかの能力によって場に出た場合でも、「これが能力によって場に出ていたなら、」を満たしますか？",
+                "answer": "はい。満たします。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-648"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0fef24144b43d04b2e507aa47a9a64102268c604c43381aaeb835dd4aaa7900f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-647",
+            "fetched_at": "2026-11-25T06:49:56.494089Z"
+          },
+          "document_ref": "documents-b52403ecf16bbcbf"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-648",
+      "documents": {
+        "documents-ab040440bc436090": {
+          "region": "jp",
+          "record": {
+            "number": "PR-648",
+            "faces": [
+              {
+                "name": "異端の指導者・ベルディリア",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "先導",
+                  "学院"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【守護】\n【進化時】自分のリーダーは{体力}+1する。1枚引く。\n【超進化時】『長久の導き』1枚をEXエリアに置く。",
+                "sections": [
+                  "『長久の導き』{ビショップ}先導・学院・スペル{コスト2}相手の場のフォロワーX体まで選ぶ。それに5ダメージ。自分の場の学院・フォロワーすべては{攻撃力}+1/{体力}+1する。Xは「このターン中に自分のリーダーの{体力}を+した回数」である。"
+                ],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-648.png",
+                "trait_raw": "先導・学院"
+              }
+            ],
+            "release_date": null,
+            "errata_url": "https://shadowverse-evolve.com/errata/PR-647",
+            "notes": [
+              "レアリティにエラッタが含まれます。くわしくはこちら"
+            ],
+            "qa": [
+              {
+                "id": "Q2707",
+                "date": "2026-07-27",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2706",
+                "date": "2026-07-27",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-T09"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-647"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3f0260f734b03d0ea8cf88bb1d78e8905a04cdea023beae0b9f96c1cfb343039",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-648",
+            "fetched_at": "2026-11-25T06:49:59.217084Z"
+          },
+          "document_ref": "documents-ab040440bc436090"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-649",
+      "documents": {
+        "documents-8e6c1853db4fd616": {
+          "region": "jp",
+          "record": {
+            "number": "PR-649",
+            "faces": [
+              {
+                "name": "蒼炎のドラゴニュート",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "ドラゴニュート"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "7",
+                "power": "6",
+                "hp": "6",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。それに6ダメージ。\n{起動}{コスト1}手札のこれと元のコスト7以上の{ドラゴン}カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに4ダメージ。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "Tabaroki",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-649.png",
+                "trait_raw": "ドラゴニュート"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1538",
+                "date": "2024-08-20",
+                "question": "「《起動》《コスト1》手札のこれと元のコスト7以上の《ドラゴン》カード1枚を捨てる：相手の場のフォロワー1体を選ぶ。それに4ダメージ。」という能力は、『蒼炎のドラゴニュート』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『蒼炎のドラゴニュート』が手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=SD08-013"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e565899ad3ba9f9982939740b21512e2d5823912a680fea42c89236e1d31f489",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-649",
+            "fetched_at": "2026-11-25T06:50:02.121804Z"
+          },
+          "document_ref": "documents-8e6c1853db4fd616"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-650",
+      "documents": {
+        "documents-5a4ab291033d7d0c": {
+          "region": "jp",
+          "record": {
+            "number": "PR-650",
+            "faces": [
+              {
+                "name": "ブラッドロード・ユヅキ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。自分の墓場の元のコスト2のカードが10枚以上なら、それを破壊する。",
+                "sections": [],
+                "flavor": "これはこれは。愛とは、なるほど。\n泡沫に酔ったおゆかり様が、のぼせて海へ身投げるよう。",
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-650.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-651"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:38ac9a083b39047e3397364bad0acd2490f4d520c1d2251ae436a9652effd734",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-650",
+            "fetched_at": "2026-11-25T06:50:04.537015Z"
+          },
+          "document_ref": "documents-5a4ab291033d7d0c"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-651",
+      "documents": {
+        "documents-873a3306282430ee": {
+          "region": "jp",
+          "record": {
+            "number": "PR-651",
+            "faces": [
+              {
+                "name": "ブラッドロード・ユヅキ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上2枚を見る。その中から、元のコスト2のカード1枚をEXエリアに置いてよい。残りを好きな順にデッキの下に置く。このターン、それをプレイする際、コストを-2する。",
+                "sections": [],
+                "flavor": "醒めれば果てる一夜の花。だが儚くとも確かに花。\n呪わずとも傷付け合わずとも、月の間はそこに在る。",
+                "illustrator": "ツネくん",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-651.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-650"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2f762a3dc2adcc3fbd2c725086e3a6516b7f5b1b369d6427bafb80a2abc7ee91",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-651",
+            "fetched_at": "2026-11-25T06:50:07.101498Z"
+          },
+          "document_ref": "documents-873a3306282430ee"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-652",
+      "documents": {
+        "documents-f7a734d80a362d30": {
+          "region": "jp",
+          "record": {
+            "number": "PR-652",
+            "faces": [
+              {
+                "name": "荒波のドラグーン・ザハール",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "竜使い",
+                  "海洋"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "8",
+                "power": "4",
+                "hp": "4",
+                "text": "これを自分の手札から捨てたとき、自分のデッキの上2枚を見る。その中から、元のコスト7以上の{ドラゴン}カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、「これと同名を除く{ドラゴン}フォロワー」1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "ニジハヤシ",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-652.png",
+                "trait_raw": "竜使い・海洋"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2061",
+                "date": "2025-06-23",
+                "question": "何らかの能力により、相手のターン中に『荒波のドラグーン・ザハール』を自分の手札から捨てたとき、「これを自分の手札から捨てたとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aee9d11f20e9f4a2bf5f2a72e8cbf4dcd6dda8ad910b6bf898652416eca3c362",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-652",
+            "fetched_at": "2026-11-25T06:50:09.907481Z"
+          },
+          "document_ref": "documents-f7a734d80a362d30"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-653",
+      "documents": {
+        "documents-343a00712e1675e7": {
+          "region": "jp",
+          "record": {
+            "number": "PR-653",
+            "faces": [
+              {
+                "name": "小さな勇士・スクナ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。",
+                "sections": [],
+                "flavor": "「ほんじゃあ、いっちょお、思いっきりやりますかぁ～。\nしんどいのは嫌だけど～、たまにはちゃんとしないとね～」",
+                "illustrator": "u介",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-653.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-654"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:c0d178886e3fde911b25cb5693008fa17fdd5b961c2e1c67e2e15059705c5e19",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-653",
+            "fetched_at": "2026-11-25T06:50:12.670767Z"
+          },
+          "document_ref": "documents-343a00712e1675e7"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-654",
+      "documents": {
+        "documents-9fa7e96447b2b7ce": {
+          "region": "jp",
+          "record": {
+            "number": "PR-654",
+            "faces": [
+              {
+                "name": "小さな勇士・スクナ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "狩人"
+                ],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": null,
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【疾走】\n【進化時】【コンボ_3】これは{攻撃力}+1/{体力}+1する。【コンボ_5】代わりに{攻撃力}+3/{体力}+3する。",
+                "sections": [],
+                "flavor": null,
+                "illustrator": "u介",
+                "image": "/wordpress/wp-content/images/cardlist/PR/PR-654.png",
+                "trait_raw": "狩人"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q563",
+                "date": "2023-02-20",
+                "question": "自分のターン中、手札から『小さな勇士・スクナ』をプレイし、次にEXエリアから『フェアリー』をプレイしました。その後、場に出した『小さな勇士・スクナ』を進化させた場合、『小さな勇士・スクナ(EVOLVE)』の【進化時】能力にある【コンボ_3】の条件を満たしていますか？",
+                "answer": "いいえ。フォロワーの進化はカードのプレイには含まず、このターンにプレイしたカードは『小さな勇士・スクナ』と『フェアリー』の2枚のみのため、【コンボ_3】の条件を満たしていません。"
+              }
+            ],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=PR-653"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:2a1c477ca306167ce61922ae980ec8d9bda427a4397bdc6165e2ba09ff663a72",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-654",
+            "fetched_at": "2026-11-25T06:50:15.455556Z"
+          },
+          "document_ref": "documents-9fa7e96447b2b7ce"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-659",
+      "documents": {
+        "documents-9df45861c1f5313b": {
+          "region": "jp",
+          "record": {
+            "number": "PR-659",
+            "faces": [
+              {
+                "name": "六竜の『翠』・イーウィヤ",
+                "card_class": "エルフ",
+                "card_type": "リーダー",
+                "traits": [],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/pr-659.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [
+              "※このカードはボックス特典からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:dbeda28f5de3eebadf04806bfc0e97ffb07ff129077f00a67653bdd2becd5461",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-659",
+            "fetched_at": "2026-11-25T06:50:18.290108Z"
+          },
+          "document_ref": "documents-9df45861c1f5313b"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-660",
+      "documents": {
+        "documents-9a2e79179c79bf8d": {
+          "region": "jp",
+          "record": {
+            "number": "PR-660",
+            "faces": [
+              {
+                "name": "六竜の『白』・ル・オー",
+                "card_class": "ロイヤル",
+                "card_type": "リーダー",
+                "traits": [],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/pr-660.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [
+              "※このカードはボックス特典からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:a28afac4183a15a0d4a14cee9bb41d921bf601ac0898b86df486e07c6c8ae9ef",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-660",
+            "fetched_at": "2026-11-25T06:50:21.026359Z"
+          },
+          "document_ref": "documents-9a2e79179c79bf8d"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-661",
+      "documents": {
+        "documents-63947af7b8cd7a81": {
+          "region": "jp",
+          "record": {
+            "number": "PR-661",
+            "faces": [
+              {
+                "name": "六竜の『碧』・ワムデュス",
+                "card_class": "ウィッチ",
+                "card_type": "リーダー",
+                "traits": [],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/pr-661.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [
+              "※このカードはボックス特典からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:73488ad8bf483c68fced2a166f2f044cbd7f7a43f0494c94ce373f2f87af51bf",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-661",
+            "fetched_at": "2026-11-25T06:50:23.666247Z"
+          },
+          "document_ref": "documents-63947af7b8cd7a81"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-662",
+      "documents": {
+        "documents-dd526ae2df1773d2": {
+          "region": "jp",
+          "record": {
+            "number": "PR-662",
+            "faces": [
+              {
+                "name": "六竜の『朱』・ウィルナス",
+                "card_class": "ドラゴン",
+                "card_type": "リーダー",
+                "traits": [],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/pr-662.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [
+              "※このカードはボックス特典からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:21cd67ee89973221b1bb965aa0becad4c1180c8130667468f654f905ab520d1e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-662",
+            "fetched_at": "2026-11-25T06:50:26.155146Z"
+          },
+          "document_ref": "documents-dd526ae2df1773d2"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-663",
+      "documents": {
+        "documents-e4cedbb6485fb55e": {
+          "region": "jp",
+          "record": {
+            "number": "PR-663",
+            "faces": [
+              {
+                "name": "六竜の『黒』・フェディエル",
+                "card_class": "ナイトメア",
+                "card_type": "リーダー",
+                "traits": [],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/pr-663.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [
+              "※このカードはボックス特典からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:30b7b867db49091286868e47ff703c7fc2163f84e81cfafb7023167aff016657",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-663",
+            "fetched_at": "2026-11-25T06:50:29.027850Z"
+          },
+          "document_ref": "documents-e4cedbb6485fb55e"
+        }
+      ]
+    },
+    {
+      "card_no": "PR-664",
+      "documents": {
+        "documents-347f7eaf6c4fbbfb": {
+          "region": "jp",
+          "record": {
+            "number": "PR-664",
+            "faces": [
+              {
+                "name": "六竜の『金』・ガレヲン",
+                "card_class": "ビショップ",
+                "card_type": "リーダー",
+                "traits": [],
+                "rarity": "PR",
+                "product": "PRカード",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": null,
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/PR/pr-664.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": null,
+            "errata_url": null,
+            "notes": [
+              "※このカードはボックス特典からも出現します。詳細はこちら"
+            ],
+            "qa": [],
+            "products_ref": "products-f795aea45c820156",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:56e347523ce8c81523b0700c8c64b11f6deb71c20f6c281e384cec4d76a19c8b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=PR-664",
+            "fetched_at": "2026-11-25T06:50:31.937077Z"
+          },
+          "document_ref": "documents-347f7eaf6c4fbbfb"
         }
       ]
     }

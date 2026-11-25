@@ -1,0 +1,663 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "SCS02",
+  "range": "000-099",
+  "products": {
+    "products-4f2cb3f7a8e66647": [
+      {
+        "name": "「Special Card Selection Vol.2」",
+        "date": "2026-12-12",
+        "links": [
+          "/cardlist/cardsearch?expansion=SCS02",
+          "https://shadowverse-evolve.com/products/scs02/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "SCS02-001",
+      "documents": {
+        "documents-37ea049ae9a58820": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-001",
+            "faces": [
+              {
+                "name": "新緑の新入生・カステル",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "エルフ族",
+                  "学院",
+                  "超克"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "1",
+                "power": "1",
+                "hp": "2",
+                "text": "これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。\n{ファンファーレ}自分の場の学院・フォロワーや獣・フォロワーが3体以上なら、『緑の顕現』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "お姉ちゃんは、私にとっても優しい。私を見てくれる。\nそんなお姉ちゃんが好き。大好きだから、私は……。",
+                "illustrator": "ヘスン",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-001.png",
+                "trait_raw": "エルフ族・学院・超克"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2786",
+                "date": "2026-08-24",
+                "question": "自分の場に『屍術王・コルネリウス』、相手の場に『新緑の新入生・カステル』と『農作のエルフ（EVOLVE）』がいる状況で、『屍術王・コルネリウス』が超進化しました。誘発した能力の中から最初に【進化時】能力を解決し、自分の墓場の『エンペラーフィスト・ガロム』を場に出しました。その後の処理はどのようになりますか？また「【超進化時】下記を3回くり返す。サイコロをふる。」から解決し、サイコロの出た目が「4→1→2」の順だった場合、『エンペラーフィスト・ガロム』の能力で先に2ダメージを『新緑の新入生・カステル』に与えて破壊した後、4ダメージを『農作のエルフ（EVOLVE）』に与えるような処理を行うことはできますか？",
+                "answer": "その状況におけるその後の処理は以下の通りです。\n誘発し待機状態となっている『屍術王・コルネリウス』の【超進化時】能力と『エンペラーフィスト・ガロム』の《ファンファーレ》能力を任意の順で解決することができます。\n『屍術王・コルネリウス』の【超進化時】能力から解決する場合の処理を記載します。サイコロを3回ふります。出た目が「4→1→2」だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・『エンペラーフィスト・ガロム』の《ファンファーレ》能力\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n次にこれら4つの誘発し待機状態となっている能力を任意の順で解決することができます。\n『エンペラーフィスト・ガロム』の《ファンファーレ》能力を先に解決する場合の処理を記載します。サイコロをふります。出た目が3だったとします。\nこの時点で誘発し待機状態となっている能力は以下の4つです。\n・出た目が4に対応する相手のフォロワーに4ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が1に対応する相手のフォロワーに1ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が2に対応する相手のフォロワーに2ダメージ与える『エンペラーフィスト・ガロム』の能力\n・出た目が3に対応する相手のフォロワーに3ダメージ与える『エンペラーフィスト・ガロム』の能力\nこれらを任意の順で解決できます。\n\n『新緑の新入生・カステル』に2ダメージ与える『エンペラーフィスト・ガロム』の能力から先に解決することは可能です。その場合、次のチェックタイミングにおいて体力が0以下になった『新緑の新入生・カステル』は破壊され、残りの誘発し待機状態となっている能力を任意の順で解決することができます。\n先に『新緑の新入生・カステル』を破壊しておくことで、「これが場にいる限り、自分の場の「これと同名を除く学院・フォロワー」と獣・フォロワーすべては能力ダメージを受けない。」という効果が適用されなくなった状態の『農作のエルフ（EVOLVE）』に4ダメージ与えることも可能になります。"
+              },
+              {
+                "id": "Q2705",
+                "date": "2026-07-27",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP21-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b24aae0596c692400a2ddbd482fb2c7131e15f9fd9ef4c171d35cccdeba04a2e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-001",
+            "fetched_at": "2026-11-25T06:31:20.369746Z"
+          },
+          "document_ref": "documents-37ea049ae9a58820"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-002",
+      "documents": {
+        "documents-1d2b2ed95bb8f2db": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-002",
+            "faces": [
+              {
+                "name": "千金武装の大参謀・アルメリゼ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "指揮官",
+                  "貴族"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『輝く金貨』1枚をEXエリアに置く。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "士気高揚の大義も使命も、戦略も練兵も、並べて木端。\n戦の勝敗を左右するものは、ただ一つしか有り得ません。",
+                "illustrator": "ラエル",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-002.png",
+                "trait_raw": "指揮官・貴族"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-022"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP22-T07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ceea5f75404147361e67b2b6cb24cb4fb84d79a9fd9e4c681b727d4aa0b7f320",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-002",
+            "fetched_at": "2026-11-25T06:31:22.884838Z"
+          },
+          "document_ref": "documents-1d2b2ed95bb8f2db"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-003",
+      "documents": {
+        "documents-454c75fd049cfe2c": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-003",
+            "faces": [
+              {
+                "name": "耽溺の咎人・セフィー",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "八獄",
+                  "錬金術師",
+                  "禁忌"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}これの融合カウンター1個を取る：『多頭の実験体』1体を場に出す。\n{起動}【融合】トークンでないフォロワー1枚：これに融合カウンター1個を置く。八獄・フォロワーを融合したなら、1枚引く。",
+                "sections": [],
+                "flavor": "研究とは、真理へ続く道を舗装する尊ぶべき行いだ。\n実証する。実験する。行う全てはあの子の為に。",
+                "illustrator": "おにねこ",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-003.png",
+                "trait_raw": "八獄・錬金術師・禁忌"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2571",
+                "date": "2026-03-25",
+                "question": "「《起動》【融合】トークンでないフォロワー1枚：これに融合カウンター1個を置く。八獄・フォロワーを融合したなら、1枚引く。」という能力は、『耽溺の咎人・セフィー』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『耽溺の咎人・セフィー』が手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-039"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-T02"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f314abb24f37ff4ab5492385ae971f3b667bc62c0e450318cb9423238f1ab82d",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-003",
+            "fetched_at": "2026-11-25T06:31:25.611812Z"
+          },
+          "document_ref": "documents-454c75fd049cfe2c"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-004",
+      "documents": {
+        "documents-82bb103fd1b5d1fa": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-004",
+            "faces": [
+              {
+                "name": "奏絶の顕現・リーシェナ",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "アイドル"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "2",
+                "power": "1",
+                "hp": "1",
+                "text": "{ファンファーレ}下記から1つチョイスする。【1】自分の場の他のアイドル・カード1枚を選ぶ。それを破壊する。『奏絶の独唱』1枚をEXエリアに置く。【2】『新約・白の章』1つを場に出す。",
+                "sections": [],
+                "flavor": "破滅的に壊してよ。ボク以外の天地万物遍く全てを！\n――じゃあ、世界の試練を続けよっか！",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-004.png",
+                "trait_raw": "絶傑・アイドル"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2648",
+                "date": "2026-05-18",
+                "question": "自分の場の他のアイドル・カードを選ぶことができない場合、このフォロワーの《ファンファーレ》能力で【1】をチョイスし、何も起こらないことを選択できますか？",
+                "answer": "いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-T03"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-T04"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-T13"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:349c0b070cd27bec6d4a882a3e6f285eae1e508880d45495331de6c5bcc7e389",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-004",
+            "fetched_at": "2026-11-25T06:31:28.264357Z"
+          },
+          "document_ref": "documents-82bb103fd1b5d1fa"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-005",
+      "documents": {
+        "documents-0b6e849226b1b41a": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-005",
+            "faces": [
+              {
+                "name": "烈絶の顕現・ガルミーユ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "竜族"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "【覚醒】状態である限り、これは【疾走】を持つ。\n自分のターンごとに1回、これが能力ダメージを受けたとき、相手の場のフォロワー1体を選ぶ。それに2ダメージ。\n{ファンファーレ}『クレスト 烈絶の顕現・ガルミーユ』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "眼差しの視座同列に、この目睨むは獣に非ず。\n――アハッ！世界の試練を続けてあげる！",
+                "illustrator": "ell",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-005.png",
+                "trait_raw": "絶傑・竜族"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2658",
+                "date": "2026-05-18",
+                "question": "自分のターン中、このフォロワーの体力が0以下になるように能力ダメージを受けた場合、「自分のターン中、これが能力ダメージを受けたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、体力が0以下になったフォロワーの破壊処理が行われた後に、解決します。"
+              },
+              {
+                "id": "Q2657",
+                "date": "2026-05-18",
+                "question": "『烈絶の顕現・ガルミーユ』の「【覚醒】状態である限り、これは【疾走】を持つ。」という能力は永続能力ですか？",
+                "answer": "はい。永続能力です。【覚醒】状態である限り、『烈絶の顕現・ガルミーユ』は【疾走】を持ちます。\n『烈絶の顕現・ガルミーユ』を場に出した後に自分のPPが6以下から7以上になり【覚醒】状態を満たした場合、【疾走】を持ちます。\n『烈絶の顕現・ガルミーユ』を場に出した後に自分のPPが7以上から6以下になり【覚醒】状態を満たさなくなった場合、【疾走】を失います。"
+              },
+              {
+                "id": "Q2637",
+                "date": "2026-05-18",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-T05"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:e305f37522d4bd363a2695b6911d1d7b9dfd202300426f9151880f54d30d0150",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-005",
+            "fetched_at": "2026-11-25T06:31:30.989699Z"
+          },
+          "document_ref": "documents-0b6e849226b1b41a"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-006",
+      "documents": {
+        "documents-e510619161af24be": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-006",
+            "faces": [
+              {
+                "name": "侮蔑の継承者・アジュラフリート",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "絶傑",
+                  "継承者",
+                  "竜族"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "4",
+                "power": "3",
+                "hp": "5",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n自分のターン中、これが能力ダメージを受けたとき、相手の場のフォロワーすべてに1ダメージ。\n{ファンファーレ}自分の場か自分のEXエリアに他の絶傑・カードがあるなら、場のフォロワーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": "憐れむほどに世界は脆く、触れた先から命は崩れた。\n故に黒竜は代行する。強き者を生む、絶傑の試練を。",
+                "illustrator": "タツヤキ",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-006.png",
+                "trait_raw": "絶傑・継承者・竜族"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2658",
+                "date": "2026-05-18",
+                "question": "自分のターン中、このフォロワーの体力が0以下になるように能力ダメージを受けた場合、「自分のターン中、これが能力ダメージを受けたとき、～」という能力は誘発しますか？",
+                "answer": "はい。誘発します。誘発したこの能力は、体力が0以下になったフォロワーの破壊処理が行われた後に、解決します。"
+              },
+              {
+                "id": "Q2637",
+                "date": "2026-05-18",
+                "question": "能力ダメージとは何ですか？",
+                "answer": "フォロワーへの交戦によるダメージとリーダーへの攻撃によるダメージを除く、その他のあらゆるダメージが能力ダメージです。スペルの能力によるダメージやフォロワーの能力によるダメージがこれに該当します。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP20-058"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:bd70dc3311473374a5411ff185e55d6ed2dc75d9fb6b3319b3c4c9574cb673ad",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-006",
+            "fetched_at": "2026-11-25T06:31:33.653115Z"
+          },
+          "document_ref": "documents-e510619161af24be"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-007",
+      "documents": {
+        "documents-e9f39a1f520daad1": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-007",
+            "faces": [
+              {
+                "name": "死期を視るもの・グレモリー",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "魔界"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}自分のデッキの上2枚を墓場に置く。\n{起動}{コスト1}：自分の墓場のこれを場に出す。これは「{ラストワード}これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。",
+                "sections": [],
+                "flavor": "未来が視えないと、焦っちゃうかもしれないけど……\nたまには私と、ゆっくりのんびり、しようよ☆",
+                "illustrator": "こーやふ",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-007.png",
+                "trait_raw": "魔界"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q1680",
+                "date": "2024-10-15",
+                "question": "自分の墓場が『死期を視るもの・グレモリー』を含めて10枚の状況で、自分の場に『死期を視るもの・グレモリー』がいない場合、「《起動》《コスト1》：自分の墓場のこれを場に出す。これは「《ラストワード》これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。」という《起動》能力をプレイすることができますか？",
+                "answer": "はい。プレイすることができます。"
+              },
+              {
+                "id": "Q1679",
+                "date": "2024-10-15",
+                "question": "「《起動》《コスト1》：自分の墓場のこれを場に出す。これは「《ラストワード》これは消滅する」を持つ。この能力は自分の墓場が10枚以上あり、自分の場に『死期を視るもの・グレモリー』がいないなら使える。」という《起動》能力は、『死期を視るもの・グレモリー』が墓場にある場合に有効となる能力ですか？",
+                "answer": "はい。『死期を視るもの・グレモリー』が墓場にある場合に有効となる能力です。\n『死期を視るもの・グレモリー』が墓場にある状況で、かつ自分の墓場が10枚以上あり、自分の場に他の『死期を視るもの・グレモリー』がいない場合に、この《起動》能力をプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:0b514c19429a1afb47e86d9131d4d3c0f24c38dd90732e2903dcf1f06719ab2b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-007",
+            "fetched_at": "2026-11-25T06:31:36.523823Z"
+          },
+          "document_ref": "documents-e9f39a1f520daad1"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-008",
+      "documents": {
+        "documents-31d3ac165ecae8e7": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-008",
+            "faces": [
+              {
+                "name": "白翼の慈愛・アイテール",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "信仰",
+                  "先導",
+                  "光輝"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "4",
+                "power": "2",
+                "hp": "3",
+                "text": "【守護】\n{ファンファーレ}手札の【守護】を持つフォロワー1枚を捨てる：自分のデッキから元のコスト2の【守護】を持つフォロワー1枚と元のコスト1の【守護】を持つフォロワー1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "私はヴァーレリアの守護神、天のアイテール。\n民の繋がりを守る為、世界を守りに行きましょう！",
+                "illustrator": "ぽんず",
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-008.png",
+                "trait_raw": "信仰・先導・光輝"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2860",
+                "date": "2026-09-28",
+                "question": "《ファンファーレ》能力によって、自分のデッキから元のコスト2の【守護】を持つフォロワー1枚を場に出し、元のコスト1の【守護】を持つフォロワー1枚を場に出さないという選択をすることは可能ですか？",
+                "answer": "はい。可能です。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:be97050e809beaafcb8885b716507af0418154eed1df6e119c995d9f33f034f4",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-008",
+            "fetched_at": "2026-11-25T06:31:39.423306Z"
+          },
+          "document_ref": "documents-31d3ac165ecae8e7"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-009",
+      "documents": {
+        "documents-cb361ea8ded0297a": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-009",
+            "faces": [
+              {
+                "name": "機鋒の咎人・カットスロート",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "八獄",
+                  "超克"
+                ],
+                "rarity": "SP",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】相手の場のフォロワー2体まで選ぶ。それに4ダメージを割りふる。\n【超進化時】相手の場のフォロワー1体を選ぶ。それとそれのリーダーに8ダメージ。",
+                "sections": [],
+                "flavor": "鋭利の才、天賦の煥発。\n――機鋒の咎人・カットスロート",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-009.png",
+                "trait_raw": "八獄・超克"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2554",
+                "date": "2026-03-25",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2553",
+                "date": "2026-03-25",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=BP19-110"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:713f6aa03558caffb93185b4c91ffdfeb4ad62fd4b2c3b08de96341e07ed0b7b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-009",
+            "fetched_at": "2026-11-25T06:31:42.486011Z"
+          },
+          "document_ref": "documents-cb361ea8ded0297a"
+        }
+      ]
+    },
+    {
+      "card_no": "SCS02-010",
+      "documents": {
+        "documents-b7a416d08dbeaf66": {
+          "region": "jp",
+          "record": {
+            "number": "SCS02-010",
+            "faces": [
+              {
+                "name": "EP",
+                "card_class": "-",
+                "card_type": "EP",
+                "traits": [],
+                "rarity": "-",
+                "product": "「Special Card Selection Vol.2」",
+                "title": null,
+                "cost": "-",
+                "power": "-",
+                "hp": "-",
+                "text": null,
+                "sections": [],
+                "flavor": "その視線が見据えるは、果てしなき生。\nその視界が見届けるは、生の果て。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/SCS02/scs02-010.png",
+                "trait_raw": "-"
+              }
+            ],
+            "release_date": "2026-12-12",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-4f2cb3f7a8e66647",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:412053f2fea539e3e91c97a47605c082b07e43db6919edf362ae92d1e5e6a002",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=SCS02-010",
+            "fetched_at": "2026-11-25T06:31:44.636076Z"
+          },
+          "document_ref": "documents-b7a416d08dbeaf66"
+        }
+      ]
+    }
+  ]
+}

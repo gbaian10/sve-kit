@@ -1,0 +1,165 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CP05",
+  "range": "SP/000-099",
+  "shared": {
+    "recipes": {
+      "recipes-7066bdd4434734ac": {
+        "recipe": "sve-parsed-card-v1",
+        "producer_revision": "6d028fea00de00ae45e4e0f8536bf50e3431bfb8"
+      }
+    },
+    "parsers": {
+      "parsers-21c8e47f7d6d7dbe": {
+        "recipe": "effect-presence-v1",
+        "parser_version": "effect-presence-v1/detail-v1",
+        "template_id": "jp-card-detail-v1"
+      }
+    },
+    "locators": {
+      "locators-f5c2e2ab998395c2": "{\"container\":\".detail\",\"faces\":\".cardlist-Detail .cardlist-Detail_Box_Inner\",\"omission_parent\":\".txt-Inner\",\"source_index\":0}"
+    },
+    "presence": {
+      "presence-fef43e41d001b695": {
+        "parser": "parsers-21c8e47f7d6d7dbe",
+        "source_index": 0,
+        "container_locator": "locators-f5c2e2ab998395c2",
+        "state": "present",
+        "reason_code": "nonempty_container"
+      }
+    },
+    "products": {
+      "products-18f450a953fc0ef8": [
+        {
+          "ordinal": 0,
+          "name": "コラボパック「グランブルーファンタジー」",
+          "date_raw": "2026-11-27",
+          "href_raw": [
+            "/cardlist/cardsearch?expansion=CP05",
+            "https://dev.shadowverse-evolve.com/products/cp05/"
+          ],
+          "resolved_urls": [
+            "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CP05",
+            "https://dev.shadowverse-evolve.com/products/cp05/"
+          ],
+          "matches": [
+            {
+              "kind": "expansion_link",
+              "search_url": "https://shadowverse-evolve.com/cardlist/cardsearch?expansion=CP05",
+              "expansion_code": "CP05"
+            },
+            {
+              "kind": "source_block",
+              "product_block_ordinal": 0
+            }
+          ],
+          "diagnostics": [
+            "unverified_link"
+          ]
+        }
+      ]
+    },
+    "qa": {
+      "qa-9d841002a0e01e1b": [
+        {
+          "stable_source_key": "Q2921",
+          "official_number": "Q2921",
+          "locator": "qa-block:0",
+          "published_on": "2026-11-24",
+          "date_raw": "2026-11-24"
+        }
+      ],
+      "qa-b093f1de9f5de8e8": [
+        {
+          "stable_source_key": "Q2906",
+          "official_number": "Q2906",
+          "locator": "qa-block:0",
+          "published_on": "2026-11-24",
+          "date_raw": "2026-11-24"
+        }
+      ]
+    },
+    "related": {
+      "related-1de7d073534bd786": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP05-105"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=CP05-106"
+        }
+      ],
+      "related-d8f7b0f770182067": [
+        {
+          "locator": "related-link:0",
+          "href_raw": "/cardlist/?cardno=CP05-093"
+        },
+        {
+          "locator": "related-link:1",
+          "href_raw": "/cardlist/?cardno=CP05-094"
+        }
+      ]
+    },
+    "errata_urls": {
+      "errata-4f53cda18c2baa0c": []
+    }
+  },
+  "observations": {
+    "src:v1:663158555e73e5b479e7d70f43f9c1f2e1a25966e53e2bcb7a66eccfe8f7b088": {
+      "recipe": "recipes-7066bdd4434734ac",
+      "raw": {
+        "raw_sha256": "sha256:309d7148e1077827557bdb0301417e6ec926f676284d338ffd5b7183a7e3d6ae",
+        "raw_bytes": 38716,
+        "first_receipt_id": "sha256:8b3050dd6cfe0bce460b6c84eee0dfde98e802abde7e8709c57beb8eb6a2a3bb",
+        "descriptor_sha256": "sha256:845b8ed2ce3ac03600f348bf3d448e867136fea1f988bdc8163be2ef89d5c418",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:7719aa8d7c4768092dce73fa68a40a2bfa636df0bc0c630c7125f3fcbe3ee348"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-18f450a953fc0ef8",
+        "qa": "qa-b093f1de9f5de8e8",
+        "related": "related-1de7d073534bd786",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:3ffc254f9a0c1e25c7f7f5604d635a9fea5c127d98cbe40e03177638a50c76ac"
+    },
+    "src:v1:cce6dd9009360dc5bd8128af800c90f57989d068fe6982273aa3191f5f61046b": {
+      "recipe": "recipes-7066bdd4434734ac",
+      "raw": {
+        "raw_sha256": "sha256:725d052c87f3b2bce3a723218c2f4c42fb15b1bf291eef2f43c28c5685a2026f",
+        "raw_bytes": 38782,
+        "first_receipt_id": "sha256:fd956f92657d6cec0beb3b49d7380aae0f31a6b22b38ecaefce583a52f59f030",
+        "descriptor_sha256": "sha256:1f49e60370405bbd7af37f1ba6de6c392ed7c90c1d7b551d2ad37f8d030a0b9a",
+        "etag": null,
+        "last_modified": null
+      },
+      "layout": {
+        "presence": [
+          {
+            "template": "presence-fef43e41d001b695",
+            "result_hash": "sha256:8c0f751230bb7ff5bd5cfc22a926addf105685b052418460f7932fe008b95932"
+          }
+        ],
+        "whitespace": [
+          null
+        ],
+        "products": "products-18f450a953fc0ef8",
+        "qa": "qa-9d841002a0e01e1b",
+        "related": "related-d8f7b0f770182067",
+        "errata_urls": "errata-4f53cda18c2baa0c"
+      },
+      "content_hash": "sha256:e9f432cc9773b3c6e1e14b63a65f23433dc0e8df6a2e454f3f8a4065f64ce336"
+    }
+  }
+}
