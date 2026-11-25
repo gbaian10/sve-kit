@@ -77,7 +77,7 @@ fn fediel_deals_damage_once_for_each_dark_card_in_a_mixed_discard() {
         json!([{"id":"observer","card":"CP05-GBF47"},{"id":"producer","card":"producer"}]);
     initial["players"]["P1"]["zones"]["hand"] = json!([
         {"id":"dark1","card":"CP05-074"}, {"id":"other","card":"BP01-171"},
-        {"id":"dark2","card":"CP05-074"}
+        {"id":"dark2","card":"CP05-076"}
     ]);
     initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-171"}]);
     let mut board = real_game(&initial, producer_selection());
@@ -86,7 +86,10 @@ fn fediel_deals_damage_once_for_each_dark_card_in_a_mixed_discard() {
         resolved(pending_card(&mut board, "CP05-GBF47", remaining));
     }
     finish_checks(&mut board);
-    assert!(board.internal_pending_choice().unwrap().is_none());
+    assert!(
+        board.internal_pending_choice().unwrap().is_none(),
+        "Ferry cannot respond to the non-dark producer that discarded her"
+    );
     let view = board.projection(View::Referee).unwrap();
     assert_eq!(view["P2"]["leader"]["life"], 18_u8);
     assert_eq!(view["P2"]["cemetery"], json!(["enemy"]));
