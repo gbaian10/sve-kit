@@ -1,0 +1,38 @@
+format: 2
+kind: effect_body_shard
+records:
+  - admission: shared
+    body:
+      activate:
+        cost:
+          pp: 0
+        do:
+          - if:
+              cond:
+                all:
+                  - limit_broken: target
+                  - final_limit_break_possible: target
+              else:
+                - limit_break:
+                    on: target
+              then:
+                - final_limit_break:
+                    on: target
+        targets:
+          - bind: target
+            from:
+              kind: follower
+              trait:
+                param: attribute
+              who: self
+              zone: field
+            n: 1
+        zone: ex
+    id: element-limit-break
+    params:
+      attribute: Concept
+    written_by:
+      - actor:
+          model: gpt-6.2-sol
+          who: Codex
+        date: "2026-11-25"
