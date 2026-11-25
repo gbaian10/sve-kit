@@ -1,0 +1,31 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-098:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve_time:
+          do:
+            - create:
+                token: 光晶のエレメント
+                to: ex
+                n: 1
+            - if:
+                cond:
+                  exists:
+                    who: self
+                    zone: field
+                    kind: follower
+                    orig_cost_eq: 5
+                    trait: グラブル
+                then:
+                  - life:
+                      who: self
+                      delta: 2
