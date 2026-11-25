@@ -734,7 +734,7 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 `win: {who: self}` 表示能力控制者在效果處理中勝利，沿用共用勝負判定及禁止檢查。勝利即停止剩餘效果並清除所有待解問題，不先執行下一個檢查時機；因此斯巴達克斯先抽空牌庫、再滿足勝利條件時，勝利先於空牌庫的規則敗北。條件只在本次程序指定處檢查，不因其他待機能力稍後抽牌而重驗（Q1162、Q1480）。此變體不含對手／全體、`result` 或 `precondition`；不提供常駐的禁止勝利／敗北能力。
 
-手牌棄置可用 `auto: {on: {discarded: {who: self, from: hand}}, do: [{pay: {cost: {act_self: true}, do: [{draw: {n: 1}}]}}]}` 訂閱。省略 `who` 時觀察雙方棄牌，也可用 `opp`；場上來源只在場上有效。`ref: this` 則訂閱自身離開前的手牌世代，省略 `zone` 時依該事件使用 Hand，也可明寫 `zone: hand`（BP01-170）；不接受矛盾的 `ref: this`／`who: opp`，也不沿移區後的新世代發動。只由實際成功的捨棄事實觸發，普通手牌移動或消滅不算。每張卡各產生一次待機；同時捨棄兩張時，天威的兩次待機都保留，但首個在結算時支付橫置自身後，第二個不能再支付，因而只抽一張（Q2150）。場上觀察者可加 `during: {turn: self}`，在捕捉時以當前回合玩家判定，不把捨棄者或能力因果當成回合玩家；自身手牌訂閱與 `during` 的組合仍拒絕。
+手牌棄置可用 `auto: {on: {discarded: {who: self, from: hand}}, do: [{pay: {cost: {act_self: true}, do: [{draw: {n: 1}}]}}]}` 訂閱。省略 `who` 時觀察雙方棄牌，也可用 `opp`；場上來源只在場上有效。`ref: this` 則訂閱自身離開前的手牌世代，省略 `zone` 時依該事件使用 Hand，也可明寫 `zone: hand`（BP01-170）；不接受矛盾的 `ref: this`／`who: opp`，也不沿移區後的新世代發動。只由實際成功的捨棄事實觸發，普通手牌移動或消滅不算。每張卡各產生一次待機；同時捨棄兩張時，天威的兩次待機都保留，但首個在結算時支付橫置自身後，第二個不能再支付，因而只抽一張（Q2150）。場上觀察者與明寫 `who: self` 的自身手牌訂閱可加 `during: {turn: self}`，在捕捉時以當前回合玩家判定。CP05-076 同時用 `by: {ability_of: {who: self, trait: 闇属性}}` 檢查捨棄來源的能力。
 
 墓場中的 `auto` 可觀察 `on.discarded`，沿用玩家、回合與每回合限制。冒號後的解決時付款寫在本文 `pay`；拒付不移動來源，付款成功後可用既有自體回場指示。
 
@@ -757,7 +757,7 @@ auto:
 `move this to ex` 只跟隨該次成功移動的新世代；EX 已滿或卡片已再次移區時略過。
 BP14-081 的同一事件頭可接正式目標與一般本文，其法術主效果仍完整寫在原有 section 座標。
 
-被捨的卡可用 `sel: {kind, class}` 篩選（至少一項），以離手前的手牌特徵判定，例如 BP09-006 的 `sel: {class: エルフ, kind: spell}`；不接受其他 `sel` 欄位，也不與 `ref: this` 或 `by` 並用。
+被捨的卡可用 `sel: {kind, class, trait}` 篩選（至少一項），各條件以離手前的手牌特徵判定。BP09-006 用 `sel: {class: エルフ, kind: spell}`，CP05-079 用 `sel: {trait: 闇属性}`。`sel` 與 `ref: this`、`by` 或批次彙整維持各自的訂閱入口。
 
 「自己回合、自己捨棄一張以上」另用 `auto.aggregation: batch` 搭配 `on.discarded: {who: self, during: {turn: self}}`（BP12-052／053）。單一捨棄指令中的多張成功棄牌，只讓每個來源能力待機一次；分開的兩次捨棄仍各觸發，去重先於每回合額度。
 規則手牌上限的一次完整選取也屬同一批；抽牌後再次超限的另一次捨棄則是新批（[Q1666–1668](https://shadowverse-evolve.com/cardlist/?cardno=BP12-SL14&faq=)）。
