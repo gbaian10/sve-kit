@@ -614,18 +614,21 @@ def test_extra_public_collection_is_rejected(
         export_snapshot(projection, ownership, BATCH)
 
 
-def test_adopted_badge_survives_projection_export_and_reader() -> None:
+@pytest.mark.parametrize(("style", "text"), [("br", "BR"), ("gbf", "PR")])
+def test_adopted_badge_survives_projection_export_and_reader(
+    style: str, text: str
+) -> None:
     with create_database(schema()) as db:
         with db.transaction():
             populate(db)
             db.update(
                 "printing",
                 {"id": "printing"},
-                {"rarity_badge_style": "br", "rarity_badge_text": "BR"},
+                {"rarity_badge_style": style, "rarity_badge_text": text},
             )
         projection = projected(db)
         printing = projection.tables["printing"][0]
-        assert printing["rarity_badge"] == {"style": "br", "text": "BR"}
+        assert printing["rarity_badge"] == {"style": style, "text": text}
         assert printing["rarity_code"] is None
         projection = replace(projection, tables=projection.tables | media_rows())
         prepared = prepare_media(projection, None, revision=1).projection

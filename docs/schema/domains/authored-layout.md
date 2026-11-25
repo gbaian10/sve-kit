@@ -101,7 +101,7 @@ records:
 
 `catalog/rarity-badges.yaml` 是可修改的單一檔案，封套為 `format: 1`、`kind: printing_rarity_badges`、`records`。
 每列以 `printing_id` 為鍵，必填審閱標註 `region`（jp／en）、`card_no`，以及
-`style`（br／sr／gr／lg／sl／sp／none）。非 none 必填卡面原樣 `text`；none 必須省略 text。
+`style`（br／sr／gr／lg／sl／sp／gbf／none）。非 none 必填卡面原樣 `text`；none 必須省略 text。
 未知欄位、未知 style、YAML 重複鍵、重複 printing_id 與不存在的版次都使建置失敗；
 region／card_no 僅供審閱，不作識別鍵。沒有記錄表示待確認，不表示無標籤。
 外觀不綁圖片 hash，不改寫官方稀有度；雙面卡需一起看兩面後登錄一筆。

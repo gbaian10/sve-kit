@@ -336,6 +336,7 @@ TABLES = (
                     "lg",
                     "sl",
                     "sp",
+                    "gbf",
                     "none",
                 ),
             ),
