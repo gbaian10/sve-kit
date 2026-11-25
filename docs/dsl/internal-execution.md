@@ -1132,7 +1132,7 @@ BP12-074 不限制材料為從者，因此 token 護符同樣可支付（Q1685�
 
 ## 場上能力的固定手牌公開成本
 
-場上 Activated 的固有費用與 Triggered 的必要頭付款，可公開精確一或兩張自己目前的手牌，
+場上 Activated 的固有費用與 Triggered 的必要頭付款，可公開精確一至三張自己目前的手牌，
 並與固定 PP、自身橫置組合。沿用 `ir::reveal_cost`、`CostMaterials`、`MaterialWait`、
 `internal_hand_material_cost_payment` 與共用 Reveal；沒有另一個 picker、renderer 或付款帳本。
 只有控制者能回答材料題目，付款前依原選取篩選及張數重驗，並檢查 owner、controller、所在區域與世代。
