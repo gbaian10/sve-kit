@@ -5,9 +5,6 @@
 use super::event_cemetery::finish_checks;
 use super::*;
 
-#[path = "../../support/current_fixture.rs"]
-mod current_fixture;
-
 const P1: PlayerId = PlayerId { seat: 1 };
 const ELEMENT: &str = "CP05-T14";
 const LOOK_MATCH: &str = "nightmare-look-follower";
