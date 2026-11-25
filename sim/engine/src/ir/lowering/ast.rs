@@ -2114,6 +2114,8 @@ impl TryFrom<String> for FilterKeyword {
             Some(
                 keyword @ (super::super::KeywordId::EarthRite
                 | super::super::KeywordId::Lastword
+                | super::super::KeywordId::QuickActivation
+                | super::super::KeywordId::QuickSpell
                 | super::super::KeywordId::Ward
                 | super::super::KeywordId::Aura
                 | super::super::KeywordId::Storm

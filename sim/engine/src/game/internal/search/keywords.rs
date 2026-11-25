@@ -1,9 +1,12 @@
 use super::{Game, KeywordId, Result};
+use crate::ir::quick;
 use crate::ir::{Ability, AbilityOrigin, Control, CostSpec, Node, Program, RepeatBody};
 
 pub(super) fn matches(game: &Game, id: &str, keyword: KeywordId) -> Result<bool> {
     let object = game.object(id)?;
-    let ability_matches = if object.zone == "field" {
+    let ability_matches = if object.zone == "field"
+        && !matches!(keyword, KeywordId::QuickActivation | KeywordId::QuickSpell)
+    {
         game.internal_effective_abilities(id)?
             .iter()
             .any(|ability| has_keyword(&ability.node, keyword))
@@ -21,6 +24,12 @@ pub(super) fn matches(game: &Game, id: &str, keyword: KeywordId) -> Result<bool>
 }
 
 pub(in crate::game::internal) fn has_keyword(ability: &Ability, keyword: KeywordId) -> bool {
+    if keyword == KeywordId::QuickActivation {
+        return quick::printed_activation(ability);
+    }
+    if keyword == KeywordId::QuickSpell {
+        return quick::card_permission(ability);
+    }
     if keyword == KeywordId::Lastword {
         return matches!(
             ability.source.origin,

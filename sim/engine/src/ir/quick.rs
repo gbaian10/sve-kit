@@ -10,6 +10,10 @@ pub(crate) fn is_printed_quick(ability: &Ability) -> bool {
         if matches!(origin.as_ref(), AbilityOrigin::Printed { .. }))
 }
 
+pub(crate) fn printed_activation(ability: &Ability) -> bool {
+    ability.kind == AbilityKind::Activated && is_printed_quick(ability)
+}
+
 pub(crate) fn card_permission(ability: &Ability) -> bool {
     card_condition(ability).is_some()
 }

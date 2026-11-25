@@ -376,6 +376,8 @@ pub(super) fn keyword_requirement(
             | "internal.KeywordId.Stack"
             | "internal.KeywordId.EarthRite"
             | "internal.KeywordId.Lastword"
+            | "internal.KeywordId.QuickActivation"
+            | "internal.KeywordId.QuickSpell"
     ) {
         return false;
     }
@@ -421,7 +423,13 @@ fn bounds(printed: Cardinality, available: usize, conditional: bool) -> Result<C
 
 pub(super) fn matches_keyword(game: &Game, id: &str, keyword: KeywordId) -> Result<bool> {
     game.require_internal_abilities(id, "search keyword")?;
-    if matches!(keyword, KeywordId::EarthRite | KeywordId::Lastword) {
+    if matches!(
+        keyword,
+        KeywordId::EarthRite
+            | KeywordId::Lastword
+            | KeywordId::QuickActivation
+            | KeywordId::QuickSpell
+    ) {
         return keywords::matches(game, id, keyword);
     }
     if let Some(name) = super::grant::keyword(keyword)

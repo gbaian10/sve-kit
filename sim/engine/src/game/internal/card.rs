@@ -22,7 +22,7 @@ use crate::ir::kind_change as kind_patch;
 use crate::ir::mixed_ex;
 use crate::ir::names;
 use crate::ir::play_restrictions::card_play_rule;
-use crate::ir::quick::{card_permission, is_printed_quick};
+use crate::ir::quick::{card_permission, is_printed_quick, printed_activation};
 use crate::ir::removal_restrictions as holder_removal;
 use crate::ir::repeated_moves as ir_repeated_moves;
 use crate::ir::reveal_cost as reveal_payment;
@@ -1131,16 +1131,14 @@ fn check_ability_face(ability: &Ability, printed: &serde_json::Value, pilot: boo
     if printed["card_type"] == TREASURE && ability.active_zones != [ZoneKind::Ex] {
         return Err(unsupported("treasure abilities require EX"));
     }
-    if is_printed_quick(ability)
-        && ability.kind == AbilityKind::Activated
+    if printed_activation(ability)
         && !printed["card_type"]
             .as_str()
             .is_some_and(|kind| quick_activation_type(kind, &ability.active_zones))
     {
         return Err(unsupported("Quick activation on this printed face or zone"));
     }
-    if is_printed_quick(ability)
-        && ability.kind == AbilityKind::Activated
+    if printed_activation(ability)
         && printed["card_type"] == "フォロワー・エボルヴ"
         && ability.play.as_ref().is_some_and(|play| {
             matches!(&play.costs, CostSpec::Ordered { steps }
@@ -1180,7 +1178,11 @@ fn check_printed_face(printed: &serde_json::Value, pilot: bool) -> Result<()> {
 
 pub(super) fn quick_activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
     kind == "フォロワー"
-        || (zones == [ZoneKind::Field] && matches!(kind, "アミュレット" | "フォロワー・エボルヴ"))
+        || (zones == [ZoneKind::Field]
+            && matches!(
+                kind,
+                "アミュレット" | "フォロワー・エボルヴ" | "フォロワー・トークン"
+            ))
 }
 
 // Evolved forms carry their own printed definitions.

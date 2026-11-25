@@ -8,7 +8,7 @@ use crate::game::internal::observation::ObjectLink;
 use crate::game::player::QuickChoice;
 use crate::game::player::Viewer;
 use crate::game::player::observation::zone;
-use crate::ir::quick::{card_condition, card_permission, is_printed_quick};
+use crate::ir::quick::{card_condition, card_permission, printed_activation};
 use crate::ir::{Ability, Control, Located, Node, Program};
 use crate::ir::{
     CardProgram, ChoiceDomain, Decision, DecisionId, DecisionKind, ExecutionId, PlayerRef,
@@ -258,8 +258,7 @@ impl Game {
                         && !self.restricted(holder, "play")?
                         && !self.internal_card_play_forbidden(holder, actor)?
                 } else {
-                    ability.kind == AbilityKind::Activated
-                        && is_printed_quick(ability)
+                    printed_activation(ability)
                         && matches!(
                             (object.zone.as_str(), ability.active_zones.as_slice()),
                             ("field", [ZoneKind::Field])
