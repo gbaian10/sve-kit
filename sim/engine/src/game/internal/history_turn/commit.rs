@@ -1,8 +1,8 @@
 //! Each caller commits its own occurrence at its established transaction point.
 
 use super::{
-    DamageHistoryFact, DiceHistoryFact, Game, Nat, ObjectLink, Result, StatGainHistoryFact,
-    SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact, invalid, seat_name, unsupported,
+    AbilityPlayHistoryFact, DamageHistoryFact, DiceHistoryFact, Game, Nat, ObjectLink, Result,
+    StatGainHistoryFact, SubjectHistoryEvent, SubjectHistoryFact, invalid, seat_name, unsupported,
 };
 use crate::game::Object;
 use crate::game::internal::{DamageOccurrence, player_id};
@@ -189,7 +189,7 @@ impl Game {
         controller: PlayerId,
     ) -> Result<()> {
         self.bump(&format!("{}.ub_activated", seat_name(controller)?), 1);
-        self.state.ir_ub_history.push(UbHistoryFact {
+        self.state.ir_ub_history.push(AbilityPlayHistoryFact {
             execution: execution.0,
             controller: controller.seat,
         });
@@ -227,6 +227,19 @@ impl Game {
                 after.saturating_sub(before),
             );
         }
+    }
+
+    pub(in crate::game::internal) fn internal_record_quick_activation(
+        &mut self,
+        execution: ExecutionId,
+        controller: PlayerId,
+    ) {
+        self.state
+            .ir_quick_activation_history
+            .push(AbilityPlayHistoryFact {
+                execution: execution.0,
+                controller: controller.seat,
+            });
     }
 
     pub(in crate::game) fn internal_record_discard_history(&mut self, controller: &str) {
@@ -273,6 +286,7 @@ impl Game {
         self.state.ir_damage_history.clear();
         self.state.ir_stat_gain_history.clear();
         self.state.ir_ub_history.clear();
+        self.state.ir_quick_activation_history.clear();
     }
 
     #[expect(

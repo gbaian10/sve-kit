@@ -704,7 +704,7 @@ fn mask_public_natural(value: &mut Expr<Nat>) {
         *value = Expr::Literal(Nat(0));
         return;
     }
-    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if matches!(HistoryPlan::compile(query), Some(HistoryPlan::Subject { .. } | HistoryPlan::Life(_) | HistoryPlan::PlayedFiltered { .. } | HistoryPlan::Dice(_)))))
+    if matches!(value, Expr::Live(read) if matches!(read.as_ref(), NatRead::HistoryCount { query, .. } if matches!(HistoryPlan::compile(query), Some(HistoryPlan::Subject { .. } | HistoryPlan::Life(_) | HistoryPlan::PlayedFiltered { .. } | HistoryPlan::Dice(_) | HistoryPlan::QuickActivation { .. }))))
     {
         *value = Expr::Literal(Nat(0));
         return;
