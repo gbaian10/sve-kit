@@ -10,12 +10,13 @@ use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::shuffle;
 use crate::ir::x_pp;
 use crate::ir::{
-    Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Control, CostSpec, DecisionId,
-    DiscardEvent, EventPattern, Expr, InstructionContext, Int, KeywordId, MoveDestination,
-    MoveReason, MovementEvent, Node, ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime,
-    PlayerId, PlayerRef, Program, ReceiptId, RepeatBody, Resource, ResourceOperation,
-    RuntimeReceiptId, Selector, TriggerCondition, WellFormedCardProgram, ZoneKind, ZoneRef,
-    optional_payment,
+    Ability, AbilityKind, AbilityOrigin, Action, Binding, Bool, Cardinality, ChoiceDomain, Control,
+    CostSpec, DamageAmount, DamageFlags, DecisionId, DecisionKind, DiscardEvent, EventPattern,
+    Expr, InstructionContext, Int, KeywordId, MoveDestination, MoveReason, MovementEvent, Nat,
+    Node, ObjectOperand, PaymentOptionality, PaymentResult, PaymentTime, PlaySlot, PlayerId,
+    PlayerRef, PlayerRelation, Program, ReceiptId, RecipientSet, RepeatBody, Resource,
+    ResourceOperation, RuntimeReceiptId, SelectionView, Selector, TriggerCondition, Visibility,
+    WellFormedCardProgram, ZoneKind, ZoneRef, optional_payment,
 };
 use core::slice::from_ref;
 
@@ -285,6 +286,64 @@ fn discard_return(program: &Program) -> Option<Binding<DiscardEvent>> {
     Some(*event)
 }
 
+fn discard_target_damage(ability: &Ability, program: &Program) -> bool {
+    let [step] = program.steps.as_slice() else {
+        return false;
+    };
+    let Node::Instruction { instruction } = &step.node else {
+        return false;
+    };
+    let Action::Damage {
+        recipients:
+            RecipientSet::Objects {
+                objects: Selector::Bound { reference },
+            },
+        amount: DamageAmount::Uniform {
+            amount: Expr::Literal(Int(1..)),
+        },
+        flags: DamageFlags::Ability,
+        ..
+    } = &instruction.action
+    else {
+        return false;
+    };
+    let Some([target]) = ability.play.as_ref().map(|play| play.parameters.as_slice()) else {
+        return false;
+    };
+    let ChoiceDomain::Objects {
+        binding,
+        constraint,
+        target_roles: None,
+    } = &target.domain
+    else {
+        return false;
+    };
+    let [group] = constraint.groups.as_slice() else {
+        return false;
+    };
+    target.actor == (PlayerRef::Controller {})
+        && target.visibility == (Visibility::Public {})
+        && matches!(
+            target.kind,
+            DecisionKind::PlayParameter {
+                slot: PlaySlot::Targets,
+                ..
+            }
+        )
+        && binding == reference
+        && constraint.cardinality
+            == (Cardinality {
+                minimum: Nat(1),
+                maximum: Some(Nat(1)),
+            })
+        && group.cardinality == constraint.cardinality
+        && constraint.aggregate_bounds.is_empty()
+        && matches!(&group.selector, Selector::Zone {
+            zone: ZoneKind::Field, view: SelectionView::Current {}, players, ..
+        } if players.relation == PlayerRelation::Opponents
+            && players.relative_to == (PlayerRef::Controller {}))
+}
+
 fn hand_pp_payment(ability: &Ability) -> bool {
     let Some(event) = ability
         .trigger
@@ -302,7 +361,7 @@ fn hand_pp_payment(ability: &Ability) -> bool {
     let [step] = body.steps.as_slice() else {
         return false;
     };
-    let Node::Control {
+    let (payment, guarded) = if let Node::Control {
         control:
             Control::If {
                 condition,
@@ -310,14 +369,16 @@ fn hand_pp_payment(ability: &Ability) -> bool {
                 else_body: None,
             },
     } = &step.node
-    else {
-        return false;
-    };
-    if !optional_payment::public_pp_guard(condition) {
-        return false;
-    }
-    let [payment] = then_body.steps.as_slice() else {
-        return false;
+    {
+        if !optional_payment::public_pp_guard(condition) {
+            return false;
+        }
+        let [payment] = then_body.steps.as_slice() else {
+            return false;
+        };
+        (payment, true)
+    } else {
+        (step, false)
     };
     let Node::Control {
         control:
@@ -332,7 +393,9 @@ fn hand_pp_payment(ability: &Ability) -> bool {
     else {
         return false;
     };
-    positive_pp(costs) && discard_return(on_paid) == Some(event)
+    positive_pp(costs)
+        && (discard_return(on_paid) == Some(event)
+            || (!guarded && discard_target_damage(ability, on_paid)))
 }
 
 fn earth_rite_material(costs: &CostSpec) -> Option<Binding<Selector>> {
