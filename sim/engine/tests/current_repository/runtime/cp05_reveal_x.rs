@@ -28,7 +28,8 @@ fn evolved(super_evolution: bool, enemy_count: usize) -> Game {
             "do":"evolve","source":"source","evolve_card":"form",
             "pay":{"pp":1_u8,"sep":u8::from(super_evolution)}
         })).unwrap().outcome,
-        "resolved"
+        "resolved",
+        "the printed evolution must succeed before testing its triggered ability"
     );
     game
 }
@@ -46,7 +47,7 @@ fn accept(game: &mut Game, play: CardPlay) -> CardPlay {
     let CardPlay::Awaiting(fee) = play else {
         panic!("head cost declaration");
     };
-    assert_eq!(fee.domain, InputDomain::OptionalCost);
+    assert_eq!(fee.domain, InputDomain::OptionalCost, "reveal is a head cost");
     game.answer_internal_card(fee.actor, fee.token, Answer::OptionalCost(true)).unwrap()
 }
 
@@ -57,9 +58,12 @@ fn reveal(game: &mut Game, play: CardPlay, count: usize) -> CardPlay {
     let InputDomain::CostMaterials(domain) = &question.domain else {
         panic!("private reveal materials");
     };
-    assert_eq!(domain.members.len(), 3);
-    assert!(domain.members.iter().all(|member| member.card.as_deref() == Some("CP05-056")));
-    assert!(game.internal_decision(View::P2).is_none());
+    assert_eq!(domain.members.len(), 3, "only the three matching fire cards are selectable");
+    assert!(
+        domain.members.iter().all(|member| member.card.as_deref() == Some("CP05-056")),
+        "non-fire cards must be excluded from the material question"
+    );
+    assert!(game.internal_decision(View::P2).is_none(), "the material question is private");
     game.answer_internal_card(
         question.actor,
         question.token,
@@ -87,7 +91,7 @@ fn cp05_057_uses_selected_fire_card_count_for_formal_damage_allocation() {
     let step = pending_line(&mut game, 1);
     let step = accept(&mut game, step);
     let step = reveal(&mut game, step, 3);
-    let CardPlay::Awaiting(ref question) = step else {
+    let CardPlay::Awaiting(question) = &step else {
         panic!("formal target question");
     };
     let InputDomain::Targets(targets) = &question.domain else {
@@ -149,26 +153,26 @@ fn cp05_056_adds_only_the_matching_top_fire_card_without_moving_the_next_card() 
 #[test]
 fn cp05_057_may_pay_with_zero_ordinary_targets_but_requires_one_for_super_evolution() {
     let mut unpaid = evolved(false, 0);
-    let normal = pending_line(&mut unpaid, 1);
-    let normal = accept(&mut unpaid, normal);
-    let normal = reveal(&mut unpaid, normal, 0);
-    resolved(target(&mut unpaid, normal, 0));
-    let public = unpaid.projection(View::P2).unwrap();
-    assert!(public["known_cards"].as_array().unwrap().iter().all(|card| card["id"] != "fire1"));
+    let zero_cost = pending_line(&mut unpaid, 1);
+    let zero_cost = accept(&mut unpaid, zero_cost);
+    let zero_cost = reveal(&mut unpaid, zero_cost, 0);
+    resolved(target(&mut unpaid, zero_cost, 0));
+    let unpaid_view = unpaid.projection(View::P2).unwrap();
+    assert!(unpaid_view["known_cards"].as_array().unwrap().iter().all(|card| card["id"] != "fire1"));
 
     let mut ordinary = evolved(false, 0);
     let normal = pending_line(&mut ordinary, 1);
     let normal = accept(&mut ordinary, normal);
     let normal = reveal(&mut ordinary, normal, 1);
     resolved(target(&mut ordinary, normal, 0));
-    let public = ordinary.projection(View::P2).unwrap();
-    assert!(public["known_cards"].as_array().unwrap().iter().any(|card| card["id"] == "fire1"));
+    let ordinary_view = ordinary.projection(View::P2).unwrap();
+    assert!(ordinary_view["known_cards"].as_array().unwrap().iter().any(|card| card["id"] == "fire1"));
     assert_eq!(ordinary.projection(View::Referee).unwrap()["P2"]["leader"]["life"], 20_u8);
 
     let mut super_evolved = evolved(true, 0);
     let ability = pending_line(&mut super_evolved, 2);
     assert!(matches!(accept(&mut super_evolved, ability), CardPlay::Cancelled));
-    let public = super_evolved.projection(View::P2).unwrap();
-    assert!(public["known_cards"].as_array().unwrap().iter().all(|card| card["id"] != "fire1"));
+    let super_view = super_evolved.projection(View::P2).unwrap();
+    assert!(super_view["known_cards"].as_array().unwrap().iter().all(|card| card["id"] != "fire1"));
     assert_eq!(super_evolved.projection(View::Referee).unwrap()["P2"]["leader"]["life"], 20_u8);
 }
