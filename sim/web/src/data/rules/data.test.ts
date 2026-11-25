@@ -59,8 +59,8 @@ const compare = (a: readonly number[], b: readonly number[]) => {
   return 0
 }
 
-it("has at least the Japanese 1.28.0 and English 1.26.1 rules", () => {
-  expect([...VERSIONS.keys()]).toEqual(expect.arrayContaining(["jp/1.28.0", "en/1.26.1"]))
+it("has at least the Japanese 1.29.0 and English 1.26.1 rules", () => {
+  expect([...VERSIONS.keys()]).toEqual(expect.arrayContaining(["jp/1.29.0", "en/1.26.1"]))
 })
 
 describe.each([...VERSIONS])("comprehensive rules %s", (id, { index, files, nodes }) => {
