@@ -941,7 +941,12 @@ impl Checker {
                 }
                 Ok(())
             }
-            Action::LimitBreak { holder, .. } => self.object(holder),
+            Action::LimitBreak { holder, .. } => {
+                if !matches!(holder, ObjectOperand::Selected { .. }) {
+                    return self.reject();
+                }
+                self.object(holder)
+            }
             Action::Equip {
                 holder, template, ..
             } => {

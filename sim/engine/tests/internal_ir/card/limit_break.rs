@@ -477,3 +477,64 @@ fn limit_break_is_a_noop_if_its_selected_follower_has_left() {
     assert_eq!(view["P1"]["ex"], json!(["m1"]));
     assert_eq!(view["P1"]["limit_break"], json!([]));
 }
+
+#[test]
+fn limit_break_commits_the_materials_ex_departure_for_other_observers() {
+    let observer = json!({"auto":{
+        "on":{"moved":{"from":{"who":"self","zone":"ex"},"during":{"turn":"self"}}},
+        "aggregation":"batch","per_turn":1,"do":[{"life":{"who":"self","delta":{"event":"amount"}}}]
+    }});
+    let mut game = board(&setup_board(1), element("光属性"), vec![observer]);
+    activate_material(&mut game, "m1");
+    assert_eq!(drain_pending(&mut game), 1);
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"]["leader"]["life"], 21);
+    assert_eq!(after["P1"]["limit_break"], json!(["m1"]));
+}
+
+#[test]
+fn limit_break_admission_requires_a_selected_target_and_a_treasure_source() {
+    let missing_target = json!({"activate":{
+        "zone":"ex","cost":{"pp":0},"do":[{"limit_break":{"on":"this"}}]
+    }});
+    lowerer()
+        .lower(&equipment_played::tree(&missing_target, "unit-spell"))
+        .unwrap_err();
+
+    let mut invalid_source = target_ability(
+        "グラブル",
+        &json!([
+            {"limit_break":{"on":"target"}}
+        ]),
+    );
+    invalid_source["activate"]["zone"] = json!("field");
+    let error = Game::from_selected_effects(
+        selection(vec![], vec![invalid_source]),
+        &setup_board(0),
+        &Value::Null,
+        &Value::Null,
+        "invalid-limit-break-source",
+    )
+    .unwrap_err();
+    assert!(error.to_string().contains("requires a treasure source"));
+}
+
+#[test]
+fn all_attributes_counts_for_each_elemental_attack_reference() {
+    let mut game = board(&setup_board(0), vec![], vec![]);
+    game.internal_rule_action(&json!({"do":"attack","attacker":"s","target":"P2.leader"}))
+        .unwrap();
+    let view = game.projection(View::Referee).unwrap();
+    let counters = &view["semantic_state"]["counters_this_turn"]["P1"];
+    for attribute in [
+        "火属性",
+        "水属性",
+        "土属性",
+        "風属性",
+        "光属性",
+        "闇属性",
+        "全属性",
+    ] {
+        assert_eq!(counters[format!("trait_attacks.{attribute}")], 1);
+    }
+}

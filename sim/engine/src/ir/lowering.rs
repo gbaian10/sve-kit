@@ -2364,7 +2364,7 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Boxed(value) => self.boxed(value, path),
             ast::Step::LimitBreak(value) | ast::Step::FinalLimitBreak(value) => {
                 Ok(Action::LimitBreak {
-                    holder: self.limit_break_operand(&value.on, path)?,
+                    holder: self.limit_break_target(&value.on, path)?,
                     final_break: Bool(matches!(step, ast::Step::FinalLimitBreak(_))),
                 })
             }

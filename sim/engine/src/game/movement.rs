@@ -2,13 +2,48 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use super::limit_break::Attachment;
 use super::{Frame, Game, Object, int, list, scalar, string};
 use crate::ir::SnapshotId;
 use crate::{Result, invalid};
 use alloc::collections::{BTreeMap, BTreeSet};
 use core::slice::from_ref;
 use serde_json::{Value, json};
+
+#[derive(Clone, Copy, PartialEq, Eq, PartialOrd, Ord)]
+pub(super) enum Attachment {
+    Equipment,
+    LimitBreak,
+}
+
+impl Attachment {
+    pub(super) const fn zone(self) -> &'static str {
+        match self {
+            Self::Equipment => "equipment",
+            Self::LimitBreak => "limit_break",
+        }
+    }
+
+    pub(super) const fn link(self) -> &'static str {
+        match self {
+            Self::Equipment => "equipped_to",
+            Self::LimitBreak => "limit_break_of",
+        }
+    }
+
+    pub(super) const fn erasure_rule(self) -> &'static str {
+        match self {
+            Self::Equipment => "11.11.1",
+            Self::LimitBreak => "11.12.1",
+        }
+    }
+
+    pub(super) const fn controller_rule(self) -> &'static str {
+        match self {
+            Self::Equipment => "11.11.2",
+            Self::LimitBreak => "11.12.2",
+        }
+    }
+}
 
 #[expect(
     clippy::multiple_inherent_impl,

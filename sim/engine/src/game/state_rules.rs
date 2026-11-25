@@ -4,7 +4,7 @@
 )]
 use serde_json::json;
 
-use super::limit_break::Attachment;
+use super::movement::Attachment;
 use super::{Frame, Game, int};
 use crate::{EngineFailure, Result};
 

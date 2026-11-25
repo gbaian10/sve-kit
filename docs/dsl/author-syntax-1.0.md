@@ -1758,8 +1758,8 @@ auto:
 
 ### 上限解放與最終上限解放
 
-`limit_break: {on: Ref}` 和 `final_limit_break: {on: Ref}` 的 `on` 指向單一已選物件
-或 `this`。動作要求能力來源是上限解放素材、對象是場上從者，且對象尚未完成該階段。
+`limit_break: {on: Ref}` 和 `final_limit_break: {on: Ref}` 的 `on` 指向單一已選物件。
+動作要求能力來源是上限解放素材、對象是場上從者，且對象尚未完成該階段。
 最終上限解放還要求對象當下持有 `keywords: [final_limit_break_possible]` 對應的能力。
 合法的素材從 EX 移入公開的上限解放領域。每個階段成功才產生自己的事件及加值。
 

@@ -1649,6 +1649,15 @@ fn check_instruction(
 ) -> Result<()> {
     super::tokens::check_catalog(game, &instruction.action, source, x)?;
     super::tokens::equipment::check_catalog(game, &instruction.action)?;
+    if matches!(instruction.action, Action::LimitBreak { .. }) {
+        let (face, _) = printed_origin(&ability_source.origin)?;
+        let ordinal = game.printed_face_ordinal(&source.card_no, face)?;
+        if game.catalog.face(&source.card_no, ordinal)?["card_type"] != TREASURE {
+            return Err(unsupported(
+                "limit-break instruction requires a treasure source",
+            ));
+        }
+    }
     super::transform::check_catalog(game, &instruction.action)?;
     nested::check(&instruction.action)?;
     nested::ability::check_action(&instruction.action)?;

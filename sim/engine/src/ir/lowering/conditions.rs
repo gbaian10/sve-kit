@@ -275,20 +275,16 @@ impl BodyContext<'_> {
         })
     }
 
-    pub(super) fn limit_break_operand(
+    pub(super) fn limit_break_target(
         &self,
         reference: &str,
         path: &str,
     ) -> Result<ObjectOperand, LoweringError> {
-        if reference == "this" {
-            Ok(ObjectOperand::SourceHolder {})
-        } else {
-            self.targets
-                .get(reference)
-                .copied()
-                .map(|selection| ObjectOperand::Selected { selection })
-                .ok_or_else(|| unsupported(path))
-        }
+        self.targets
+            .get(reference)
+            .copied()
+            .map(|selection| ObjectOperand::Selected { selection })
+            .ok_or_else(|| unsupported(path))
     }
 
     fn limit_break_read(
@@ -298,7 +294,11 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<Expr<Bool>, LoweringError> {
         Ok(Expr::Live(Box::new(BoolRead::LimitBreak {
-            object: self.limit_break_operand(reference, path)?,
+            object: if reference == "this" {
+                ObjectOperand::SourceHolder {}
+            } else {
+                self.limit_break_target(reference, path)?
+            },
             state,
         })))
     }
