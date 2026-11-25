@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-013:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          cost:
+            reveal:
+              sel:
+                who: self
+                zone: hand
+                trait: 火属性
+              n: 3
+          do:
+            - create:
+                token: 火晶のエレメント
+                n: 1
+                to: ex
+            - life:
+                who: self
+                delta: 2
