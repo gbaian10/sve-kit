@@ -4,8 +4,8 @@ use crate::ir::{
     Binding, Bool, CardKind, CausePattern, CharacteristicView, Characteristics,
     CharacteristicsFields, ClassFrozen, ClassId, DiscardEvent, EffectSource, EventContext,
     EventSnapshotPolicy, Expr, Info, KindFrozen, ObjectFrozen, ObjectOperand, ObjectRef,
-    ObjectView, PlayerFrozen, PlayerRef, Predicate, SourcePredicate, TraitId, TraitsRead,
-    TriggerSpec,
+    ObjectView, PlayerFrozen, PlayerRef, Predicate, SourcePredicate, TraitId, TraitsFrozen,
+    TraitsRead, TriggerSpec,
 };
 
 #[derive(Clone)]
@@ -89,6 +89,7 @@ impl DiscardSource {
 pub(crate) struct DiscardCard {
     pub(crate) kind: Option<CardKind>,
     pub(crate) class: Option<ClassId>,
+    pub(crate) trait_id: Option<TraitId>,
 }
 
 impl DiscardCard {
@@ -114,6 +115,14 @@ impl DiscardCard {
                 right: Expr::Literal(Info::Present(class.clone())),
             })));
         }
+        if let Some(trait_id) = &self.trait_id {
+            predicates.push(Expr::Compute(Box::new(Predicate::HasTrait {
+                traits: Expr::Frozen(Box::new(TraitsFrozen::Characters {
+                    characters: Self::characters(event),
+                })),
+                trait_id: trait_id.clone(),
+            })));
+        }
         predicates
     }
 
@@ -122,6 +131,7 @@ impl DiscardCard {
         let mut card = Self {
             kind: None,
             class: None,
+            trait_id: None,
         };
         for predicate in predicates {
             let Expr::Compute(operation) = predicate else {
@@ -138,12 +148,17 @@ impl DiscardCard {
                 right: Expr::Literal(Info::Present(class)),
                 ..
             } = operation.as_ref()
+                && !class.0.trim().is_empty()
             {
                 card.class = Some(class.clone());
             }
+            if let Predicate::HasTrait { trait_id, .. } = operation.as_ref()
+                && !trait_id.0.trim().is_empty()
+            {
+                card.trait_id = Some(trait_id.clone());
+            }
         }
-        (card.kind.is_some() || card.class.as_ref().is_some_and(|class| !class.0.is_empty()))
-            .then_some(card)
+        (card.kind.is_some() || card.class.is_some() || card.trait_id.is_some()).then_some(card)
     }
 }
 
@@ -199,7 +214,8 @@ impl DiscardFilter {
         for own in [None, Some(false), Some(true)] {
             for itself in [false, true] {
                 for own_turn in [false, true] {
-                    if (by.is_some() && (own != Some(true) || !itself || own_turn))
+                    if (itself && own != Some(true) && (by.is_some() || own_turn))
+                        || (by.is_some() && !itself)
                         || (card.is_some() && (itself || by.is_some()))
                     {
                         continue;
@@ -237,7 +253,6 @@ pub(crate) fn self_event(trigger: &TriggerSpec) -> Option<Binding<DiscardEvent>>
         && trigger.aggregation == (TriggerAggregation::PerFact {})
         && trigger.view == EventSnapshotPolicy::BeforeExit
         && plan.itself
-        && plan.own == Some(true)
-        && !plan.own_turn)
-        .then_some(*binding)
+        && plan.own == Some(true))
+    .then_some(*binding)
 }

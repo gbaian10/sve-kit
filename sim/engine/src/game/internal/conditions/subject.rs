@@ -139,7 +139,8 @@ impl Reader for Captured<'_> {
                     Information::Event(information) => information.traits,
                     Information::Source(information) => &information.traits,
                     Information::Traits(traits) => traits,
-                    Information::Hand(_) | Information::None => {
+                    Information::Hand(information) => &information.traits,
+                    Information::None => {
                         return Err(unsupported("captured trait information"));
                     }
                 };
@@ -424,6 +425,12 @@ pub(in crate::game::internal) fn discard_card(
         conditions.push(labels(
             LabelsProperty::Class(CharacteristicView::Effective),
             vec![class.0.clone()],
+        ));
+    }
+    if let Some(trait_id) = &filter.trait_id {
+        conditions.push(labels(
+            LabelsProperty::Traits(CharacteristicView::Effective),
+            vec![trait_id.0.clone()],
         ));
     }
     evaluate(

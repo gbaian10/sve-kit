@@ -194,7 +194,8 @@ pub(super) fn subscription(
     path: &str,
 ) -> Result<super::EventPattern, LoweringError> {
     if discard.reference.is_some()
-        && (matches!(discard.who, Some(ast::EntryPlayer::Opponent)) || discard.during.is_some())
+        && (matches!(discard.who, Some(ast::EntryPlayer::Opponent))
+            || (discard.during.is_some() && discard.who.is_none()))
     {
         return Err(unsupported(path));
     }
@@ -206,7 +207,6 @@ pub(super) fn subscription(
             let ast::SelfPlayer::Controller = by.ability_of.who;
             if discard.reference.is_none()
                 || !matches!(discard.who, Some(ast::EntryPlayer::Controller))
-                || discard.during.is_some()
                 || by.ability_of.r#trait.trim().is_empty()
             {
                 return Err(unsupported(path));
@@ -238,7 +238,6 @@ pub(super) fn subscription(
     })
 }
 
-/// Only constant kind and class filters on another discarded card are carried by the closed header.
 fn discarded_card(
     sel: &ast::MovementSubject,
     discard: &ast::DiscardSubscription,
@@ -255,7 +254,7 @@ fn discarded_card(
         class,
         not_class: None,
         kind,
-        trait_id: None,
+        trait_id,
         name: None,
         name_contains: None,
         token: None,
@@ -268,14 +267,16 @@ fn discarded_card(
     };
     if discard.reference.is_some()
         || discard.by.is_some()
-        || (kind.is_none() && class.is_none())
+        || (kind.is_none() && class.is_none() && trait_id.is_none())
         || class.as_ref().is_some_and(|class| class.trim().is_empty())
+        || trait_id.as_ref().is_some_and(|id| id.trim().is_empty())
     {
         return Err(unsupported(path));
     }
     Ok(DiscardCard {
         kind: kind.as_ref().map(super::search::card_kind),
         class: class.clone().map(ClassId),
+        trait_id: trait_id.clone().map(TraitId),
     })
 }
 
