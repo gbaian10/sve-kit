@@ -15693,6 +15693,57 @@
         "ref"
       ]
     },
+    "A.act.flip-up.selection": {
+      "type": "object",
+      "properties": {
+        "sel": {
+          "type": "object",
+          "properties": {
+            "who": {
+              "const": "self",
+              "type": "string"
+            },
+            "zone": {
+              "const": "evolve_deck",
+              "type": "string"
+            },
+            "kind": {
+              "const": "evolve_follower",
+              "type": "string"
+            },
+            "face_up": {
+              "const": false,
+              "type": "boolean"
+            },
+            "name": {
+              "$ref": "#/$defs/CardName"
+            },
+            "name_contains": {
+              "$ref": "#/$defs/CardName"
+            },
+            "trait": {
+              "$ref": "#/$defs/Concept"
+            }
+          },
+          "required": [
+            "who",
+            "zone",
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        "upto": {
+          "maximum": 9007199254740991,
+          "minimum": 1,
+          "type": "integer"
+        }
+      },
+      "required": [
+        "sel",
+        "upto"
+      ],
+      "additionalProperties": false
+    },
     "A.act.flip-up": {
       "anyOf": [
         {
@@ -15700,6 +15751,9 @@
         },
         {
           "$ref": "#/$defs/A.act.flip-up.long"
+        },
+        {
+          "$ref": "#/$defs/A.act.flip-up.selection"
         }
       ]
     },

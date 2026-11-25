@@ -36,6 +36,7 @@ use crate::ir::delayed as delayed_ir;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::events::{drive, equipment};
+use crate::ir::flip_cost;
 use crate::ir::hand_position;
 use crate::ir::observation_selection::{private_hand_choice, private_look_choice, revealed_choice};
 use crate::ir::player_stages;
@@ -858,6 +859,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
     // A public reveal choice may also be declined, like a choice among looked cards.
     let private_look =
         private_look_choice(decision) || private_hand_choice(decision) || revealed_choice(decision);
+    let private_flip = flip_cost::private_resolution(decision);
     if !matches!(
         decision.domain,
         ChoiceDomain::Integer {
@@ -871,7 +873,7 @@ fn check_decision(decision: &Decision, source: &SourceSpan, card: bool) -> Resul
             | ChoiceDomain::Objects { .. }
             | ChoiceDomain::Recipients { .. }
     ) || !decision.captures.is_empty()
-        || !(public_required || private_look || stack_rule)
+        || !(public_required || private_look || private_flip || stack_rule)
     {
         return Err(unsupported("decision metadata"));
     }

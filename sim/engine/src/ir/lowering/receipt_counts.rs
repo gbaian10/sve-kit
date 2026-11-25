@@ -206,7 +206,10 @@ impl BodyContext<'_> {
             && (matches!(
                 receipt,
                 ObjectReceipt::Fusion { .. } | ObjectReceipt::Reveal { .. }
-            ) || self.is_mill_receipt(&query.r#in.objects_of))
+            ) || self.is_mill_receipt(&query.r#in.objects_of)
+                || self
+                    .public_observation(&query.r#in.objects_of, path)
+                    .is_ok())
         {
             let (member, predicate) = self.count_query_filter(query, path)?;
             return Ok(Expr::Compute(Box::new(IntOperation::FromNat {

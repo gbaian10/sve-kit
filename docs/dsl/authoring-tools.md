@@ -81,6 +81,14 @@ records:
 
 `flip_down.ref` 可直接指定自己進化牌堆的正面集合，例如 `{who: self, zone: evolve_deck, kind: evolve_follower, face_up: true}`；沿用公開進化牌堆篩選，翻面後撤銷對手的公開位置知識。具名結果仍記錄實際成功翻面的成員。
 
+## 本文翻開進化牌組卡片
+
+`flip_up: {sel: {who: self, zone: evolve_deck, kind: evolve_follower, trait: 土属性}, upto: 2}`
+讓能力控制者在結算時從自己的裏面進化從者中選擇零至兩張。選取時只有控制者看得到候選，
+成功翻成表面的卡才公開，並保留原本區域與世代。依卡文可設定名稱、名稱片段或類型篩選。
+選零張仍結算後續指示。後續可用 `count: {who: self, zone: evolve_deck, kind: evolve_follower, face_up: true, trait: 土属性}`
+讀取此時表面的符合卡片張數。
+
 ## 進化牌組翻面付款
 
 既有成本 `flip_up: {sel: {who: self, zone: evolve_deck, kind: evolve_follower}, n: N}`
@@ -1349,7 +1357,15 @@ Twin Drive 在每次事件時捕捉觀察者，兩次檢查與 trigger 效果都
 
 空牌庫不曾公開任何卡；若卡文依「公開卡是奇數／偶數」或「不是某類卡」分支，
 先以不帶篩選的 `count` ≥ 1 確認存在卡，再判斷屬性（CP01-083、BP21-066）。
-總和為零不等於公開過零費卡。此入口不支援從公開集合選取成員後處理差集餘牌。
+總和為零不等於公開過零費卡。
+
+公開同批成員後可依印刷特徵計算傷害量，例如
+`damage: {to: enemy, n: {count: {in: {objects_of: shown, view: before}, trait: 光属性}}}`。
+先結算需要整批卡的數值，再用 `choose: {bind: picked, from: {in: shown}, n: 1}` 選一張，
+以 `move: {ref: picked, to: hand, result: taken}` 記下成功加入手牌的卡。
+接著以 `move: {ref: {in: shown, except: {in: {objects_of: taken, view: before}}}, to: deck, position: bottom, order: chooser}`
+把餘牌按控制者的選擇放到牌庫底。先以 `count: {in: {objects_of: shown, view: before}}` ≥ 1
+確認公開集合非空，再選一張。未公開的私下 Look 不能供上述傷害計數。
 
 ## 解決中的法術來源回手
 

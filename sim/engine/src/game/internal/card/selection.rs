@@ -7,6 +7,7 @@ use crate::game::player::Viewer;
 use crate::game::player::observation::{ObservedZone, viewer};
 use crate::game::player::{self, SelectionQuestion};
 use crate::ir::events::timing::opponent;
+use crate::ir::flip_cost;
 use crate::ir::history_turn::public::damaged_plan;
 use crate::ir::observation::{self, Consumer};
 use crate::ir::observation_selection::{
@@ -960,6 +961,18 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
     if target_roles.is_some() && hand_position::positioned(decision).is_none() {
         return Err(unsupported("resolution position roles"));
     }
+    if flip_cost::private_resolution(decision) {
+        let [group] = constraint.groups.as_slice() else {
+            return Err(unsupported("one face-down evolve-deck group"));
+        };
+        let Selector::Zone {
+            binding, predicate, ..
+        } = &group.selector
+        else {
+            return Err(unsupported("face-down evolve-deck selector"));
+        };
+        return check_predicate(predicate, *binding, false);
+    }
     if private_hand_choice(decision) {
         let [group] = constraint.groups.as_slice() else {
             return Err(unsupported("one hand group"));
@@ -1008,6 +1021,10 @@ pub(in crate::game::internal) fn check_resolution(decision: &Decision) -> Result
         }
         return Ok(());
     }
+    check_public_resolution(decision, constraint)
+}
+
+fn check_public_resolution(decision: &Decision, constraint: &SelectionConstraint) -> Result<()> {
     let group = target_group(constraint)?;
     // Objects an earlier selection bound (such as a formal target) were already authorized;
     // each must still be a current public card when this question is asked.
@@ -1501,6 +1518,7 @@ impl Game {
         }
         let evolution = effect_evolution::is_choice(decision);
         let private_evolve = evolution || advance_entry::selection(decision).is_some();
+        let flip_up = flip_cost::private_resolution(decision);
         let allow_resolution_zones = matches!(decision.kind, DecisionKind::ResolutionChoice { .. });
         let own_hand = allow_resolution_zones && private_hand_choice(decision);
         let revealed = revealed_groups(constraint);
@@ -1549,6 +1567,9 @@ impl Game {
                         && object.controller == actor_seat)
                     || public_object(object)
                     || ((private_evolve
+                        || (flip_up
+                            && object.owner == actor_seat
+                            && object.controller == actor_seat)
                         || (object.controller == actor_seat && object.state["face_up"] == true))
                         && object.zone == "evolve_deck"))
                     || object.generation != reference.generation.0

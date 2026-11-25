@@ -180,10 +180,16 @@ impl ReceiptReads {
                 predicate,
             } = operation.as_ref()
         {
-            if !self.cemetery.contains(&local_receipt(receipt)?) {
-                return Err(unsupported(
-                    "filtered count outside a deck-to-cemetery producer",
-                ));
+            let id = local_receipt(receipt)?;
+            let produced = match receipt {
+                ObjectReceipt::Look { .. } => self.published.contains(&id),
+                ObjectReceipt::Movement {
+                    receipt: MovementReceipt::Move { .. },
+                } => self.cemetery.contains(&id),
+                _ => false,
+            };
+            if !produced {
+                return Err(unsupported("damage count without a checked producer"));
             }
             check_count(receipt, *projection, *member, predicate)?;
             *amount = Expr::Literal(Int(0));
@@ -421,7 +427,7 @@ fn check_count(
 ) -> Result<()> {
     if matches!(
         receipt,
-        ObjectReceipt::Fusion { .. } | ObjectReceipt::Reveal { .. }
+        ObjectReceipt::Fusion { .. } | ObjectReceipt::Reveal { .. } | ObjectReceipt::Look { .. }
     ) {
         return check_shape(receipt, projection, member, predicate);
     }

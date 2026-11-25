@@ -30,7 +30,10 @@ use core::iter::once;
 )]
 impl Checker {
     pub(super) fn program_steps(&mut self, program: &Program) -> Checked {
-        if !shuffle::closed(&program.steps) || !hand_position::valid(program) {
+        if !shuffle::closed(&program.steps)
+            || !hand_position::valid(program)
+            || !flip_cost::closed_resolution(&program.steps)
+        {
             return self.reject();
         }
         let mut steps = program.steps.iter().enumerate();

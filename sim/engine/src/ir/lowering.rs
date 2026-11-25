@@ -2012,6 +2012,22 @@ impl<'definitions> BodyContext<'definitions> {
         program
     }
 
+    fn object_choice_step(
+        &mut self,
+        step: &ast::Step,
+        path: &str,
+        source: &SourceSpan,
+        ability_source: &AbilitySource,
+    ) -> Option<Result<Located<Node>, LoweringError>> {
+        if let ast::Step::Choose(choice) = step {
+            Some(self.choose(choice, path, source))
+        } else if let ast::Step::FlipUp(flip) = step {
+            Some(self.flip_up(flip, path, source, ability_source))
+        } else {
+            None
+        }
+    }
+
     #[expect(
         clippy::too_many_lines,
         reason = "Step dispatch shares one binding and receipt environment."
@@ -2192,8 +2208,9 @@ impl<'definitions> BodyContext<'definitions> {
                 steps.push(self.choice(choice, &step_path, source, ability_source)?);
                 continue;
             }
-            if let ast::Step::Choose(choose) = step {
-                steps.push(self.choose(choose, &step_path, source)?);
+            if let Some(choice) = self.object_choice_step(step, &step_path, source, ability_source)
+            {
+                steps.push(choice?);
                 continue;
             }
             if let ast::Step::Move(movement) = step
@@ -2320,6 +2337,7 @@ impl<'definitions> BodyContext<'definitions> {
             | ast::Step::Pay(_)
             | ast::Step::Either(_)
             | ast::Step::Choose(_)
+            | ast::Step::FlipUp(_)
             | ast::Step::If(_)
             | ast::Step::ByKind(_)
             | ast::Step::EachPlayer(_)

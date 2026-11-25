@@ -57,7 +57,7 @@ from sve_carddb.contracts.author_selection_parents import (
 )
 from sve_carddb.contracts.four_layer import Code  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves TypedDict fields at runtime.
 from sve_carddb.core.json import integer
-from sve_carddb.core.models import Text
+from sve_carddb.core.models import Text, UInt
 
 
 def _grant[T: Mapping[str, object]](value: T) -> T:
@@ -1589,7 +1589,24 @@ class FlipUpLongFields(TypedDict):
 type FlipUpLong = FlipUpLongFields
 
 
-type FlipUpAction = Ref | FlipUpLong
+@with_config(CONFIG)
+class FlipUpSelector(TypedDict):
+    who: Literal["self"]
+    zone: Literal["evolve_deck"]
+    kind: Literal["evolve_follower"]
+    face_up: NotRequired[Literal[False]]
+    name: NotRequired[CardName]
+    name_contains: NotRequired[CardName]
+    trait: NotRequired[Concept]
+
+
+@with_config(CONFIG)
+class FlipUpSelection(TypedDict):
+    sel: FlipUpSelector
+    upto: Annotated[UInt, Field(ge=1)]
+
+
+type FlipUpAction = Ref | FlipUpLong | FlipUpSelection
 
 
 @with_config(

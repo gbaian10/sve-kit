@@ -1755,6 +1755,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Steal(_)
         | ast::Step::Give(_)
         | ast::Step::FlipDown(_)
+        | ast::Step::FlipUp(_)
         | ast::Step::MakeType(_)
         | ast::Step::Buff(_)
         | ast::Step::Grant(_)

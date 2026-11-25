@@ -1,8 +1,5 @@
 use super::*;
 
-#[path = "../../support/current_fixture.rs"]
-mod current_fixture;
-
 #[test]
 fn lu_woh_super_evolves_and_weakens_only_the_opposing_storm_attacker() {
     let mut initial = position_with_source("synthetic-evolution", "field");
