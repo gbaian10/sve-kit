@@ -1,0 +1,65 @@
+cards:
+  CP05-072:
+    abilities:
+      - auto:
+          do:
+            - pay:
+                cost:
+                  pp: 3
+                do:
+                  - move:
+                      ref: this
+                      to: field
+          on:
+            discarded:
+              by:
+                ability_of:
+                  trait: 闇属性
+                  who: self
+              during:
+                turn: self
+              from: hand
+              ref: this
+              who: self
+          zone: hand
+        line: 1
+      - keywords:
+          - final_limit_break_possible
+        line: 2
+      - auto:
+          do:
+            - grant:
+                keywords:
+                  - storm
+                on: this
+          on:
+            limit_broke:
+              ref: this
+        line: 3
+      - auto:
+          do:
+            - pay:
+                cost:
+                  pp: 2
+                do:
+                  - search:
+                      n: 1
+                      sel:
+                        kind: follower
+                        name: 神狼・シス
+                        who: self
+                        zone: deck
+                      to: field
+          on:
+            final_limit_broke:
+              ref: this
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set
