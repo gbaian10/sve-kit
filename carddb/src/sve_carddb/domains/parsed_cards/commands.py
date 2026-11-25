@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Annotated, Self
+from typing import Annotated, Literal, Self
 
 import typer
 from pydantic import model_validator
@@ -11,6 +11,7 @@ from sve_carddb.core.json import parse
 from sve_carddb.core.models import Hash, RecordData, Text
 from sve_carddb.core.provenance import Revision
 from sve_carddb.core.regions import Region
+from sve_carddb.domains.card_extras.errata_archive import stage as stage_errata
 from sve_carddb.domains.card_extras.reviewed_errata import validate as validate_errata
 from sve_carddb.domains.card_extras.reviewed_errata_verify import (
     verify as verify_errata,
@@ -144,6 +145,29 @@ def schema_command(output: Path) -> None:
             json.dumps(codec.schema(model), ensure_ascii=False, indent=2) + "\n",
             encoding="utf-8",
         )
+
+
+@app.command("stage-errata")
+def stage_errata_command(
+    archive: Path,
+    store_id: str,
+    batch_id: str,
+    source_version: str,
+    region: Literal["jp", "en"],
+    output: Path,
+) -> None:
+    """Transcribe one sealed announcement into a new JSON file for review."""
+    try:
+        output = _absolute(output)
+        content = stage_errata(
+            _absolute(archive), store_id, batch_id, source_version, region=region
+        )
+        with output.open("x", encoding="utf-8") as destination:
+            destination.write(content)
+    except OSError, ValueError, ArchiveError:
+        typer.echo("Frozen errata staging failed.", err=True)
+        raise typer.Exit(1) from None
+    typer.echo("Staged one frozen announcement for review.")
 
 
 @app.command("verify-errata")

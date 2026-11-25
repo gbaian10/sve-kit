@@ -1093,6 +1093,79 @@
         }
       ],
       "review_note": "公告列出的版次僅記為 listed；文字保留公告片段，不反推實體印刷卡文。"
+    },
+    {
+      "source": {
+        "id": "src:v1:9f7d7d7a47d83f3d765c0e870574ffa80a5ad9c1df333c8dc9e272032672072e",
+        "url": "https://shadowverse-evolve.com/errata/pr-647/",
+        "sha256": "sha256:e2845bb0dffa468bd1e880f71550ec927cd456de2612c78e26efb0e585e88ed4",
+        "fetched_at": "2026-11-25T08:27:54.895883Z",
+        "etag": null,
+        "last_modified": null,
+        "parser_version": "official-errata-staging-v2",
+        "batch_id": "sha256:6727f2473935f67db480567291baa9e7509920f1cf48aac5010a5dcddcc36254",
+        "descriptor_sha256": "sha256:43fb9093f250a233635df42aeacacbee0b8489692f3bb14cbed0724ac32d6ae5",
+        "first_receipt_id": "sha256:36a4af9dea38eb065899184644fce97d6c7095a2d52a009287b6202540a7c959"
+      },
+      "region": "jp",
+      "announced_on": "2026-11-24",
+      "effective_on": null,
+      "date_raw": "2026.11.24",
+      "reason": "レアリティの記載に誤りがあったため、修正いたしました。",
+      "exchange_offered": false,
+      "changes": [
+        {
+          "card_no": "PR-647",
+          "face_id": "f:a972c87604395fd1a0f7f60a537220de",
+          "field": "other",
+          "before_value": "レアリティ: SL",
+          "after_value": "レアリティ: PR",
+          "locator": "blocks/0/PR-647",
+          "scope": "field"
+        },
+        {
+          "card_no": "PR-648",
+          "face_id": "f:c451ceca2f4959069a466a5574a4a1ce",
+          "field": "other",
+          "before_value": "レアリティ: SL",
+          "after_value": "レアリティ: PR",
+          "locator": "blocks/0/PR-648",
+          "scope": "field"
+        }
+      ],
+      "printings": [
+        {
+          "card_no": "PR-647",
+          "scope": "listed",
+          "decision_id": null
+        },
+        {
+          "card_no": "PR-648",
+          "scope": "listed",
+          "decision_id": null
+        }
+      ],
+      "blocks": [
+        {
+          "ordinal": 0,
+          "context": [
+            "▼修正内容"
+          ],
+          "before": "レアリティ「SL」",
+          "after": "レアリティ「PR」",
+          "raw_before": {
+            "start": 23817,
+            "end": 23840,
+            "sha256": "sha256:b96f541eefd70ed49cdee352514d7abd26836d3d77148e8be15bd16313485670"
+          },
+          "raw_after": {
+            "start": 23891,
+            "end": 23952,
+            "sha256": "sha256:d4323ae18afac1177460bb96340c68a3d0ad74e1ce885b4483cdd83eaa34acba"
+          }
+        }
+      ],
+      "review_note": "公告列出兩個不同卡面的版次，兩者稀有度皆由 SL 改為 PR，版次僅記為 listed。"
     }
   ]
 }
