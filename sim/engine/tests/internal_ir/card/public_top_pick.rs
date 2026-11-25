@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the public deck scenarios."
-)]
-
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 
