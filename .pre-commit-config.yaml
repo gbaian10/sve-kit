@@ -42,7 +42,7 @@ repos:
         args: [-o, array_auto_collapse=false, -o, "indent_string=    "] # 4 spaces
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.17.4
+    rev: v0.17.5
     hooks:
       # Standalone Python tools extend the carddb settings; scan/ keeps its own.
       - id: ruff-format
@@ -52,7 +52,7 @@ repos:
         files: ^(carddb|publish|scan|tools/schema-er|sim/web/scripts/rules|\.github/ci)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.24.0
+    rev: v0.24.1
     hooks:
       # The Node hook installs the exact version pinned by `rev` (the Docker image tag was mutable);
       # a pinned Node (same as mise.toml) keeps it off whatever `node` happens to be on PATH.
@@ -95,7 +95,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.13.7
+    rev: 0.13.9
     hooks:
       - id: uv-lock
         files: ^(pyproject\.toml|uv\.lock|(carddb|publish)/pyproject\.toml)$
