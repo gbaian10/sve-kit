@@ -90,19 +90,19 @@ fn funf_excludes_its_reprint_keeps_look_private_and_orders_the_remainder() {
     let action = game
         .activate_internal_card("material", activated("CP05-T15"), actor())
         .unwrap();
-    let question = choose(action);
-    let InputDomain::Targets(candidates) = &question.domain else {
+    let material_target = choose(action);
+    let InputDomain::Targets(material_choices) = &material_target.domain else {
         panic!("material target")
     };
     resolved(answer(
         &mut game,
-        &question,
-        Answer::Targets(vec![candidates.members[0].handle]),
+        &material_target,
+        Answer::Targets(vec![material_choices.members[0].handle]),
     ));
     game.resume_internal_card().unwrap();
 
-    let question = choose(resolve_pending_card(&mut game, card));
-    let ordinary = answer(&mut game, &question, Answer::Targets(vec![]));
+    let normal_break = choose(resolve_pending_card(&mut game, card));
+    let ordinary = answer(&mut game, &normal_break, Answer::Targets(vec![]));
     resolved(ordinary);
     game.resume_internal_card().unwrap();
     let look = choose(resolve_pending_card(&mut game, card));
@@ -122,7 +122,7 @@ fn funf_excludes_its_reprint_keeps_look_private_and_orders_the_remainder() {
         panic!("Look remainder order")
     };
     assert_eq!(cards.len(), 4);
-    let remainder = cards.iter().rev().map(|card| card.handle).collect();
+    let remainder = cards.iter().rev().map(|member| member.handle).collect();
     resolved(answer(&mut game, &order, Answer::Order(remainder)));
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["field"], json!(["source", "eligible"]));
@@ -130,7 +130,7 @@ fn funf_excludes_its_reprint_keeps_look_private_and_orders_the_remainder() {
         state["P1"]["deck"],
         json!(["unseen", "wrong-kind", "wrong-trait", "wrong-cost", "same"])
     );
-    assert_eq!(state["P1"]["pp"]["current"], 8);
+    assert_eq!(state["P1"]["pp"]["current"], 8_u8);
 }
 
 #[test]
@@ -145,27 +145,27 @@ fn affection_oath_only_searches_after_the_private_discard_succeeds() {
         ]);
         initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"found","card":"vira"}]);
         initial["players"]["P2"]["zones"]["field"] = json!([
-            {"id":"enemy","card":"BP01-037","state":{"hp":10,"max_hp":10}}
+            {"id":"enemy","card":"BP01-037","state":{"hp":10_u8,"max_hp":10_u8}}
         ]);
         let mut game = game(&initial);
 
         let target = choose(game.play_internal_card("source", actor()).unwrap());
-        let InputDomain::Targets(candidates) = &target.domain else {
+        let InputDomain::Targets(formal_targets) = &target.domain else {
             panic!("formal spell target")
         };
-        let hand = choose(answer(
+        let discard_choice = choose(answer(
             &mut game,
             &target,
-            Answer::Targets(vec![candidates.members[0].handle]),
+            Answer::Targets(vec![formal_targets.members[0].handle]),
         ));
-        let InputDomain::Targets(candidates) = &hand.domain else {
+        let InputDomain::Targets(candidates) = &discard_choice.domain else {
             panic!("private discard choice")
         };
         assert!(game.internal_decision(View::P2).is_none());
         assert_eq!(candidates.members.len(), 1);
         assert_eq!(candidates.members[0].card.as_deref(), Some("CP05-090"));
         let before_discard = game.projection(View::Referee).unwrap();
-        assert_eq!(before_discard["objects"]["enemy"]["hp"], 8);
+        assert_eq!(before_discard["objects"]["enemy"]["hp"], 8_u8);
         assert_eq!(before_discard["P1"]["ex"].as_array().unwrap().len(), 1);
         assert_eq!(before_discard["P1"]["deck"], json!(["found"]));
 
@@ -174,7 +174,7 @@ fn affection_oath_only_searches_after_the_private_discard_succeeds() {
         } else {
             vec![]
         };
-        let paid = answer(&mut game, &hand, Answer::Targets(chosen));
+        let paid = answer(&mut game, &discard_choice, Answer::Targets(chosen));
         if discard {
             let search = choose(paid);
             let InputDomain::Search(domain) = &search.domain else {
