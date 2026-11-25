@@ -895,7 +895,7 @@ impl Checker {
             self.without_keyword_filter(predicate)?;
         }
         if let EventPattern::Discard { binding, predicate } = &query.pattern {
-            return if matches!(&compiled, Some(HistoryPlan::Discarded)) {
+            return if matches!(&compiled, Some(HistoryPlan::Discarded(_))) {
                 self.local_value(*binding, predicate)
             } else {
                 self.reject()
