@@ -252,7 +252,7 @@ fn discard_headers_reject_unimplemented_filters_and_nonself_hand_observers() {
         json!({"ref":"another"}),
         json!({"sel":{}}),
         json!({"sel":{"name":"unit-spell"}}),
-        json!({"sel":{"trait":"学院"}}),
+        json!({"sel":{"trait":" "}}),
         json!({"sel":{"class":" "}}),
         json!({"ref":"this","sel":{"kind":"spell"}}),
         json!({"who":"self","sel":{"kind":"spell"},"by":{"ability_of":{"who":"self","trait":"学院"}}}),
