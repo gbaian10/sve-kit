@@ -112,7 +112,9 @@ it("shows a shared rarity correction on both listed card faces", async () => {
     const notice = await renderErrata(cards, key)
     await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
     expect(notice.querySelector('[lang="ja"] del')).toHaveTextContent("レアリティ: A")
-    expect(notice.querySelector('[lang="ja"] ins')).toHaveTextContent("B")
+    const added = notice.querySelector('[lang="ja"] ins')
+    expect(added).toHaveTextContent(/^B$/u)
+    expect(added?.closest("p")).toHaveTextContent(/^レアリティ: B$/u)
     expect(notice.querySelector('[lang="zh-Hant"] del')).toHaveTextContent("稀有度：A")
     expect(within(notice).getByText("稀有度：B")).toBeVisible()
     expect(
