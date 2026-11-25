@@ -8,7 +8,7 @@ use crate::game::internal::{Execution, Game, Result, Slot, invalid, unsupported}
 use crate::game::list;
 use crate::ir::{
     BooleanState, CaptureRef, CardKind, CardName, CharacteristicView, EvolutionState, Expr, Int,
-    ObjectReceipt, Posture, Stat,
+    KeywordId, ObjectReceipt, Posture, Stat,
 };
 use serde_json::Value;
 
@@ -62,6 +62,7 @@ struct Candidate<'source> {
     game: &'source Game,
     id: &'source str,
     policy: Policy,
+    play_cost: bool,
 }
 
 pub(in crate::game::internal) fn matches(
@@ -73,6 +74,20 @@ pub(in crate::game::internal) fn matches(
         game,
         id,
         policy: condition.policy,
+        play_cost: false,
+    })
+}
+
+pub(in crate::game::internal) fn matches_play_cost(
+    condition: &PreparedCondition,
+    game: &Game,
+    id: &str,
+) -> Result<bool> {
+    condition.evaluate(&Candidate {
+        game,
+        id,
+        policy: condition.policy,
+        play_cost: true,
     })
 }
 
@@ -81,6 +96,9 @@ impl Reader for Candidate<'_> {
         match property {
             BooleanProperty::State(BooleanState::HasTrigger) => {
                 Ok(self.game.internal_trigger_icon(self.id)?.is_some())
+            }
+            BooleanProperty::Keyword(KeywordId::QuickSpell) if self.play_cost => {
+                self.game.internal_quick_spell(self.id)
             }
             BooleanProperty::Keyword(keyword) => {
                 super::super::search::matches_keyword(self.game, self.id, *keyword)

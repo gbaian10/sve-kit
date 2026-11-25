@@ -184,3 +184,37 @@ fn super_evolved_wamdus_reduces_the_three_printed_quick_costs() {
         "the opponent pays the printed point despite Wamdus",
     );
 }
+
+#[test]
+fn wamdus_reduces_dragonic_rage_only_while_the_caster_is_awakened() {
+    for (zone, max_pp, remaining_pp) in [("hand", 6_u8, 0_u8), ("hand", 7, 1), ("ex", 7, 1)] {
+        let mut initial = draw_position();
+        initial["turn"]["elapsed_turns"] = json!({"P1":7_u8,"P2":6_u8});
+        initial["players"]["P1"]["pp"] = json!({"current":3_u8,"max":max_pp});
+        initial["players"]["P1"]["sep"] = json!(1_u8);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"CP05-039"}]);
+        initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP05-040"}]);
+        initial["players"]["P1"]["zones"][zone] = json!([{"id":"spell","card":"BP12-058"}]);
+        initial["players"]["P2"]["zones"]["field"] =
+            json!([{"id":"enemy","card":"BP01-037","state":{"hp":8_u8,"max_hp":8_u8}}]);
+        let mut game = game(&initial);
+        assert_eq!(
+            game.internal_rule_action(&json!({
+                "do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8,"sep":1_u8}
+            }))
+            .unwrap()
+            .outcome,
+            "resolved"
+        );
+        resolve_pending(&mut game, "CP05-040");
+        let play = game.play_internal_card("spell", PLAYER).unwrap();
+        resolved(choose_card_by_number(&mut game, play, "BP01-037"));
+        let board = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            board["P1"]["pp"]["current"], remaining_pp,
+            "PP cap {max_pp}, played from {zone}"
+        );
+        assert_eq!(board["P1"]["cemetery"], json!(["spell"]));
+        assert_eq!(board["objects"]["enemy"]["hp"], 4_u8);
+    }
+}
