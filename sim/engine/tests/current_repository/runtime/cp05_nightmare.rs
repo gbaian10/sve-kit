@@ -16,7 +16,7 @@ fn game_with_fixtures(initial: &Value) -> Game {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
     let selected = SELECTED.get_or_init(|| {
         let (mut snapshot, keywords, mut input) = inputs().clone();
-        let (mut material, author) = current_fixture::author(
+        let (mut material, material_author) = current_fixture::author(
             GOLD,
             "a671bda5000000000000000000000001",
             "トレジャー・トークン",
@@ -33,8 +33,8 @@ fn game_with_fixtures(initial: &Value) -> Game {
         material["faces"][0]["hp"] = json!("-");
         snapshot.push_str(&material.to_string());
         snapshot.push('\n');
-        input["authors"].as_array_mut().unwrap().push(author);
-        let (mut follower, mut author) = current_fixture::author(
+        input["authors"].as_array_mut().unwrap().push(material_author);
+        let (mut follower, mut follower_author) = current_fixture::author(
             SEARCH_RESULT,
             "a671bda5000000000000000000000002",
             "フォロワー",
@@ -42,10 +42,10 @@ fn game_with_fixtures(initial: &Value) -> Game {
         );
         follower["faces"][0]["cost"] = json!("5");
         follower["faces"][0]["traits"] = json!(["グラブル"]);
-        author["input"]["source_payload"]["faces"][0]["cost"] = json!(5_u8);
+        follower_author["input"]["source_payload"]["faces"][0]["cost"] = json!(5_u8);
         snapshot.push_str(&follower.to_string());
         snapshot.push('\n');
-        input["authors"].as_array_mut().unwrap().push(author);
+        input["authors"].as_array_mut().unwrap().push(follower_author);
         repository::selection_with_rules_from(&snapshot, &keywords, &input)
     });
     Game::from_selected_effects(
@@ -311,6 +311,68 @@ fn evolved_fediel_discards_two_to_draw_two_and_observes_only_the_dark_card() {
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["P1"]["hand"], json!(["first", "second"]));
     assert_eq!(view["P2"]["leader"]["life"], 19_u8);
+}
+
+#[test]
+fn super_evolved_fediel_returns_different_names_then_discards_one_card() {
+    let mut initial = field("CP05-074");
+    initial["turn"]["elapsed_turns"] = json!({"P1":7_u8,"P2":6_u8});
+    initial["players"]["P1"]["sep"] = json!(1_u8);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP05-GBF48"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([
+        {"id":"same","card":"CP05-GBF47"},
+        {"id":"repeat-first","card":"BP01-171"},
+        {"id":"repeat-second","card":"BP01-171"},
+        {"id":"other","card":"BP01-037"}
+    ]);
+    let mut game = game(&initial);
+    assert_eq!(
+        game.internal_rule_action(
+            &json!({"do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8,"sep":1_u8}}),
+        )
+        .unwrap()
+        .outcome,
+        "resolved"
+    );
+
+    let targets = waiting(pending(&mut game, "CP05-GBF48", 3));
+    let InputDomain::Targets(domain) = &targets.domain else {
+        panic!("the printed ability declares its cemetery targets");
+    };
+    assert_eq!(domain.members.len(), 3);
+    assert_eq!(domain.cardinality.minimum, Nat(0));
+    assert_eq!(domain.cardinality.maximum, Some(Nat(2)));
+    assert!(
+        domain
+            .members
+            .iter()
+            .all(|member| member.card.as_deref() != Some("CP05-GBF47"))
+    );
+    let repeated: Vec<_> = domain
+        .members
+        .iter()
+        .filter(|member| member.card.as_deref() == Some("BP01-171"))
+        .map(|member| member.handle)
+        .collect();
+    assert_eq!(repeated.len(), 2);
+    let first = repeated[0];
+    let other = domain
+        .members
+        .iter()
+        .find(|member| member.card.as_deref() == Some("BP01-037"))
+        .unwrap()
+        .handle;
+    game.answer_internal_card(targets.actor, targets.token, Answer::Targets(repeated))
+        .unwrap_err();
+    let discard = choose(&mut game, &targets, Answer::Targets(vec![first, other]));
+    resolved(target(&mut game, discard, "BP01-037"));
+    let view = game.projection(View::Referee).unwrap();
+    let hand = view["P1"]["hand"].as_array().unwrap();
+    assert_eq!(hand.len(), 1);
+    assert_eq!(
+        view["objects"][hand[0].as_str().unwrap()]["card"],
+        "BP01-171"
+    );
 }
 
 #[test]
