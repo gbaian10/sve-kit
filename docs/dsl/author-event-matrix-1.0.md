@@ -15,7 +15,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 卡例沿事件與歷史形狀文件的凍結日文來源；本矩陣不把 Q&A 命中算為卡例。
 「合成」只表示契約形狀的測試，不能據此宣稱該格已有真卡或可執行。
 
-## 直接事件（33 鍵）
+## 直接事件（35 鍵）
 
 | 事件 | payload 必填 | payload 選填（型別／enum） | 卡例／合成 |
 | --- | --- | --- | --- |
@@ -51,6 +51,7 @@ Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 se
 | moved | 無 | from:(Zone 或 A.move-origin)、ref:Ref、sel:SubjectFilter、to:Zone、during:During、by:By | BP05-029、BP01-012、BP20-025；by 合成 |
 | drew | 無 | who:PlayerRef、not_phase:Phase、by:By | BP05-094；by 合成 |
 | equipped | 無 | equipment:(Ref 或 EventObjectSel) | CP04-PR22；selector 合成 |
+| limit_broke／final_limit_broke | ref:this | 無 | CR 14.6.4；場上從者自身完成的普通／最終階段 |
 | fused_as_material | 無 | ref:Ref、by:By | BP19-048 |
 
 counter_reached 是額外巨集：ref:Ref／name:CounterName／value:Nat 三者必填，沒有選填欄位。

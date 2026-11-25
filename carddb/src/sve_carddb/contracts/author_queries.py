@@ -193,6 +193,9 @@ type Condition = (
     | CondDid
     | CondOnField
     | CondStanding
+    | CondLimitBroken
+    | CondFinalLimitBroken
+    | CondFinalLimitBreakPossible
     | CondActed
     | CondEvolved
     | CondMyTurn
@@ -570,6 +573,18 @@ class CondOnField(RecordData):
 
 class CondStanding(RecordData):
     standing: Ref
+
+
+class CondLimitBroken(RecordData):
+    limit_broken: Ref
+
+
+class CondFinalLimitBroken(RecordData):
+    final_limit_broken: Ref
+
+
+class CondFinalLimitBreakPossible(RecordData):
+    final_limit_break_possible: Ref
 
 
 class CondActed(RecordData):
@@ -2652,6 +2667,18 @@ class EventEquipped(RecordData):
     equipped: EventEquippedPayload
 
 
+class SelfLimitBreak(RecordData):
+    ref: Literal["this"]
+
+
+class EventLimitBroke(RecordData):
+    limit_broke: SelfLimitBreak
+
+
+class EventFinalLimitBroke(RecordData):
+    final_limit_broke: SelfLimitBreak
+
+
 @with_config(NONEMPTY_CONFIG)
 class EquippedHistoryWhereFields(TypedDict):
     equipment: NotRequired[Ref | EventObjectSel]
@@ -2812,6 +2839,8 @@ type EventAtom = (
     | EventMoved
     | EventDrew
     | EventEquipped
+    | EventLimitBroke
+    | EventFinalLimitBroke
     | EventFusedAsMaterial
     | EventCounterReached
 )

@@ -1138,6 +1138,15 @@
           "$ref": "#/$defs/A.cond.standing"
         },
         {
+          "$ref": "#/$defs/A.cond.limit-broken"
+        },
+        {
+          "$ref": "#/$defs/A.cond.final-limit-broken"
+        },
+        {
+          "$ref": "#/$defs/A.cond.final-limit-break-possible"
+        },
+        {
           "$ref": "#/$defs/A.cond.acted"
         },
         {
@@ -3433,6 +3442,42 @@
       },
       "required": [
         "standing"
+      ],
+      "type": "object"
+    },
+    "A.cond.limit-broken": {
+      "additionalProperties": false,
+      "properties": {
+        "limit_broken": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "limit_broken"
+      ],
+      "type": "object"
+    },
+    "A.cond.final-limit-broken": {
+      "additionalProperties": false,
+      "properties": {
+        "final_limit_broken": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "final_limit_broken"
+      ],
+      "type": "object"
+    },
+    "A.cond.final-limit-break-possible": {
+      "additionalProperties": false,
+      "properties": {
+        "final_limit_break_possible": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "final_limit_break_possible"
       ],
       "type": "object"
     },
@@ -9812,6 +9857,43 @@
       ],
       "type": "object"
     },
+    "A.event.self-limit-break": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "const": "this",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref"
+      ],
+      "type": "object"
+    },
+    "A.event.limit-broke": {
+      "additionalProperties": false,
+      "properties": {
+        "limit_broke": {
+          "$ref": "#/$defs/A.event.self-limit-break"
+        }
+      },
+      "required": [
+        "limit_broke"
+      ],
+      "type": "object"
+    },
+    "A.event.final-limit-broke": {
+      "additionalProperties": false,
+      "properties": {
+        "final_limit_broke": {
+          "$ref": "#/$defs/A.event.self-limit-break"
+        }
+      },
+      "required": [
+        "final_limit_broke"
+      ],
+      "type": "object"
+    },
     "A.history.equipped-where": {
       "additionalProperties": false,
       "minProperties": 1,
@@ -10321,6 +10403,12 @@
         },
         {
           "$ref": "#/$defs/A.event.equipped"
+        },
+        {
+          "$ref": "#/$defs/A.event.limit-broke"
+        },
+        {
+          "$ref": "#/$defs/A.event.final-limit-broke"
         },
         {
           "$ref": "#/$defs/A.event.fused-as-material"
@@ -16594,6 +16682,18 @@
         "token"
       ]
     },
+    "A.act.limit-break": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/A.ref"
+        }
+      },
+      "required": [
+        "on"
+      ],
+      "type": "object"
+    },
     "A.act.steal": {
       "type": "object",
       "properties": {
@@ -17863,6 +17963,12 @@
         "equip": {
           "$ref": "#/$defs/A.act.equip"
         },
+        "limit_break": {
+          "$ref": "#/$defs/A.act.limit-break"
+        },
+        "final_limit_break": {
+          "$ref": "#/$defs/A.act.limit-break"
+        },
         "steal": {
           "$ref": "#/$defs/A.act.steal"
         },
@@ -18020,6 +18126,12 @@
         },
         "equip": {
           "$ref": "#/$defs/A.act.equip"
+        },
+        "limit_break": {
+          "$ref": "#/$defs/A.act.limit-break"
+        },
+        "final_limit_break": {
+          "$ref": "#/$defs/A.act.limit-break"
         },
         "steal": {
           "$ref": "#/$defs/A.act.steal"

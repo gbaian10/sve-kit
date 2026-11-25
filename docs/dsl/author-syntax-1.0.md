@@ -64,11 +64,11 @@ DSL 用主版.次版：次版只容許舊資料不必修改且降低語義不變
 
 ## 2. 能力頭與來源
 
-降低成 `B.ability`、`B.source`。持有者、controller、文字提供者與印刷位置分開；授予不是複製來源身分。共通欄位：`targets? / cost? / optional_cost? / x? / define? / do / per_turn? / ub?`；只有適用的頭可填相應欄位。`per_turn` 為正安全整數；`zone` 只適用 auto／activate／static，接單值或非空列表（field、hand、ex、cemetery、equipment 等已登錄區域），預設依 CR 10.3：場上從者／護符 field、crest ex、equipment equipment。
+降低成 `B.ability`、`B.source`。持有者、controller、文字提供者與印刷位置分開；授予不是複製來源身分。共通欄位：`targets? / cost? / optional_cost? / x? / define? / do / per_turn? / ub?`；只有適用的頭可填相應欄位。`per_turn` 為正安全整數；`zone` 只適用 auto／activate／static，接單值或非空列表（field、hand、ex、cemetery、equipment 等已登錄區域），預設依 CR 10.3：場上從者／護符 field、crest ex、equipment equipment。上限解放素材（treasure）的能力只在 EX 區有效，起動頭寫 `zone: ex`。
 
 | 構造 | 內容與降低 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `keywords: [Keyword…]` | `B.keyword`，保留規則展開來源；quick、ward、storm、rush、assail、bane、drain、intimidate、aura、stack、single_drive、twin_drive、drive、start_amulet。`quick` 表示卡的 Quick 許可，不控制引擎是否開窗口；參數型關鍵字依 CR 12–14 登錄 |
+| `keywords: [Keyword…]` | `B.keyword`，保留規則展開來源；quick、ward、storm、rush、assail、bane、drain、intimidate、aura、stack、single_drive、twin_drive、drive、start_amulet、final_limit_break_possible。`quick` 表示卡的 Quick 許可，不控制引擎是否開窗口；參數型關鍵字依 CR 12–14 登錄 |
 | `fanfare / lastword / evolve_time / super_evolve_time / attack_time / race_time / drive_time` | `B.trigger` 巨集；分別匹配入場／場到墓地／進化／超進化／攻擊／出走／首次獲 Drive，均以 this 為主體 |
 | `auto: {on, do, …}` | 一般事件能力；`on: {state: Cond}` 是 CR 10.7.6 狀態誘發，保留待機 latch |
 | `activate: {cost, do, …}` 或 `{fusion, do, …}` | 一般起動可有 usable_if／quick／advance；fusion 與 cost 互斥且不收 quick／advance；數量與欄位見[能力矩陣](author-ability-shapes-1.0.md) |
@@ -243,6 +243,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 | dice / declare | `{bind,who?}` / §4 | I.dice / I.declare；骰值非玩家宣告 |
 | flip_down / flip_up | Ref 或 `{ref}` | I.flip-down / I.flip-up；進化牌庫表裏，不是 EP 資源 |
 | equip | `{on,token}` | I.equip；裝備物不占普通場格 |
+| limit_break / final_limit_break | `{on: Ref}` | 使用能力來源的素材，成功時在上限解放領域建立關聯 |
 | steal / give | `{ref,to?,precondition?}` | I.transfer；場間轉移同世代、不生入場事件 |
 | stack_plus | Expr | K.if＋D.rule-choice StackRecipient＋I.counter 或 I.token 初始 N 個 counter（非 N+1） |
 | box / pilot | box:`{ref,until}`；pilot:`{ref}`（目前只准入 this） | I.box-pilot；依 CR 5.31/5.32 的能力及關聯展開 |
@@ -255,7 +256,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 ## 8. 事件與歷史
 
-`A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
+`A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、limit_broke、final_limit_broke、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
 
 自身手牌棄牌／消滅的 `any_of` 子集為：
 `{any_of: [{discarded: {ref: this, from: hand, who: self}}, {banished: {ref: this, from: hand, who: self}}]}`。
@@ -1754,6 +1755,51 @@ auto:
               },
             ]
 ```
+
+### 上限解放與最終上限解放
+
+`limit_break: {on: Ref}` 和 `final_limit_break: {on: Ref}` 的 `on` 指向單一已選物件
+或 `this`。動作要求能力來源是上限解放素材、對象是場上從者，且對象尚未完成該階段。
+最終上限解放還要求對象當下持有 `keywords: [final_limit_break_possible]` 對應的能力。
+合法的素材從 EX 移入公開的上限解放領域。每個階段成功才產生自己的事件及加值。
+
+`limit_broken: Ref`、`final_limit_broken: Ref` 讀取兩個獨立狀態。
+`final_limit_break_possible: Ref` 讀取對象是否持有該關鍵字。素材與場上對象的關聯
+持續期間，普通階段增加 1 攻擊力，最終階段增加 1 攻擊力及 1 體力。
+
+屬性素材在效果中用 `if` 選擇一個階段。下例的 `trait` 也會選到「全属性」從者。
+其他屬性素材以相應的屬性類型替換 `trait`。
+
+```yaml
+activate:
+  zone: ex
+  cost: { pp: 0 }
+  targets:
+    - bind: target
+      from: { who: self, zone: field, kind: follower, trait: 火属性 }
+      n: 1
+  do:
+    - if:
+        cond:
+          all:
+            - limit_broken: target
+            - final_limit_break_possible: target
+        then:
+          - final_limit_break: { on: target }
+        else:
+          - limit_break: { on: target }
+```
+
+同一能力要讓素材供應兩個階段時，先寫 `limit_break`，再用
+`if: {cond: {final_limit_break_possible: target}, then: [{final_limit_break: {on: target}}]}`。
+若第一步成功，第二步可沿用同一能力剛移入的素材。各階段各自驗證並發生事件。
+
+從者用 `auto.on: {limit_broke: {ref: this}}` 或
+`auto.on: {final_limit_broke: {ref: this}}` 訂閱自己的解放事件。兩次都成功時，
+各自等待正常的誘發順序。素材的種類篩選寫 `kind: treasure`。
+
+規則依據為綜合規則 1.29.0 §4.17、11.12、14.6、附錄 A 及
+[同一素材完成兩個階段的官方裁定](https://shadowverse-evolve.com/cardlist/?cardno=CP05-054&view=image)。
 
 ## 14. 複合缺口拆項與補充完整例
 

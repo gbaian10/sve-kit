@@ -23,6 +23,10 @@ class TraitCase:
 CASES = (
     TraitCase("-", ()),
     TraitCase("Alpha・Beta", ("Alpha", "Beta")),
+    TraitCase(
+        "グラブル・〈Synthetic・Compound〉・全属性",
+        ("グラブル", "〈Synthetic・Compound〉", "全属性"),
+    ),
     TraitCase("ジオ・テオゴニア", ("ジオ・テオゴニア",)),
     TraitCase("〈Synthetic・Compound〉", ("〈Synthetic・Compound〉",)),
     TraitCase(
