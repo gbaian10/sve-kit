@@ -150,7 +150,10 @@ impl Checker {
     fn history_count_read(&mut self, query: &HistoryQuery, count: HistoryCount) -> Checked {
         let plan = HistoryPlan::compile(query);
         if (matches!(query.pattern, EventPattern::Discard { .. })
-            || matches!(&plan, Some(HistoryPlan::PlayedFiltered { .. })))
+            || matches!(
+                &plan,
+                Some(HistoryPlan::PlayedFiltered { .. } | HistoryPlan::LimitBreak)
+            ))
             && count != HistoryCount::Facts
         {
             return self.reject();

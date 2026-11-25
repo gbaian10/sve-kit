@@ -828,7 +828,9 @@ impl BodyContext<'_> {
             .map(|side| matches!(side, ast::LeaderSide::Controller));
         if matches!(
             history.event,
-            ast::HistoryEvent::LifeChanged | ast::HistoryEvent::UbActivated
+            ast::HistoryEvent::LifeChanged
+                | ast::HistoryEvent::UbActivated
+                | ast::HistoryEvent::LimitBreak
         ) && (history.sel.is_some()
             || history.from.is_some()
             || history.to.is_some()
@@ -851,6 +853,13 @@ impl BodyContext<'_> {
         }
         if history.r#where.is_some() {
             return Err(unsupported(path));
+        }
+        if matches!(history.event, ast::HistoryEvent::LimitBreak) {
+            return if own == Some(true) {
+                Ok(super::super::history_turn::limit_break_query())
+            } else {
+                Err(unsupported(path))
+            };
         }
         if matches!(history.event, ast::HistoryEvent::UbActivated) {
             return Ok(super::super::history_turn::ub_query(
@@ -905,6 +914,7 @@ impl BodyContext<'_> {
             | ast::HistoryEvent::Played
             | ast::HistoryEvent::Discarded
             | ast::HistoryEvent::UbActivated
+            | ast::HistoryEvent::LimitBreak
             | ast::HistoryEvent::LifeChanged => {
                 return Err(unsupported(path));
             }

@@ -4,6 +4,7 @@ mod commit;
 
 use super::observation::ObjectLink;
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
+use crate::game::limit_break::LIMIT_BREAK_COUNTER;
 use crate::game::player::Viewer;
 use crate::game::player::observation::TurnHistory;
 use crate::ir::events::change::StatFilter;
@@ -241,6 +242,7 @@ pub(super) fn exists(execution: &Execution, game: &Game, plan: &HistoryPlan<'_>)
         | HistoryPlan::Discarded(_)
         | HistoryPlan::Life(_)
         | HistoryPlan::Ub { .. }
+        | HistoryPlan::LimitBreak
         | HistoryPlan::Played(_)
         | HistoryPlan::PlayedFiltered { .. }
         | HistoryPlan::Subject { .. } => Err(unsupported("boolean expression")),
@@ -492,6 +494,12 @@ pub(super) fn count(
                 return Err(unsupported("UB history subject count"));
             }
             ub_count(execution, game, player.as_ref(), *exclude_current)
+        }
+        HistoryPlan::LimitBreak => {
+            if count != HistoryCount::Facts {
+                return Err(unsupported("limit-break history subject count"));
+            }
+            committed_counter(game, execution.context.controller, LIMIT_BREAK_COUNTER).map(Nat)
         }
         HistoryPlan::Subject { event, filter } => {
             // 「これと同名を除く」 reads the card itself as it is now; during a play that is

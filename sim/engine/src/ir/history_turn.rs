@@ -18,6 +18,7 @@ pub(crate) enum HistoryPlan<'query> {
         player: Option<PlayerRef>,
         exclude_current: bool,
     },
+    LimitBreak,
     Played(PlayedBy),
     PlayedFiltered {
         filter: PlayedHistoryFilter,
@@ -35,7 +36,7 @@ impl<'query> HistoryPlan<'query> {
     pub(crate) const fn cost_facts(&self) -> bool {
         matches!(
             self,
-            Self::Discarded(_) | Self::Played(_) | Self::PlayedFiltered { .. }
+            Self::Discarded(_) | Self::LimitBreak | Self::Played(_) | Self::PlayedFiltered { .. }
         ) || matches!(self, Self::Subject {
                 event: SubjectHistoryKind::Attack
                     | SubjectHistoryKind::Evolve
@@ -62,6 +63,22 @@ impl<'query> HistoryPlan<'query> {
                     exclude_current,
                 })
             }
+            EventPattern::AnyOf { patterns }
+                if matches!(
+                    patterns.as_slice(),
+                    [
+                        EventPattern::LimitBreak {
+                            final_break: Bool(false)
+                        },
+                        EventPattern::LimitBreak {
+                            final_break: Bool(true)
+                        },
+                    ]
+                ) && query.window == LIMIT_BREAK_WINDOW
+                    && query.include_execution == (InclusionPolicy::IncludeAll {}) =>
+            {
+                Some(Self::LimitBreak)
+            }
             EventPattern::Play { .. } => played_by(query).map(Self::Played).or_else(|| {
                 played_filter(query).map(|(filter, card)| Self::PlayedFiltered { filter, card })
             }),
@@ -75,6 +92,29 @@ impl<'query> HistoryPlan<'query> {
             EventPattern::Banish { .. } => public::banished_plan(query).map(Self::Lesson),
             _ => None,
         }
+    }
+}
+
+const LIMIT_BREAK_WINDOW: HistoryWindow = HistoryWindow {
+    range: HistoryRange::CurrentTurn {},
+    cutoff: HistoryCutoff::CurrentPoint {},
+    relative_player: Some(PlayerRef::Controller {}),
+};
+
+pub(crate) fn limit_break_query() -> HistoryQuery {
+    HistoryQuery {
+        pattern: EventPattern::AnyOf {
+            patterns: vec![
+                EventPattern::LimitBreak {
+                    final_break: Bool(false),
+                },
+                EventPattern::LimitBreak {
+                    final_break: Bool(true),
+                },
+            ],
+        },
+        window: LIMIT_BREAK_WINDOW,
+        include_execution: InclusionPolicy::IncludeAll {},
     }
 }
 

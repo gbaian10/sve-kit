@@ -2486,6 +2486,7 @@ pub(super) enum HistoryEvent {
     Played,
     Discarded,
     UbActivated,
+    LimitBreak,
     Attacked,
     Evolved,
     Destroyed,

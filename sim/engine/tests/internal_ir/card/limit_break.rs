@@ -28,6 +28,14 @@ fn setup_board(count: u8) -> Value {
 }
 
 fn selection(treasure: Vec<Value>, follower: Vec<Value>) -> SelectedEffects {
+    selection_with_readers(treasure, follower, vec![])
+}
+
+fn selection_with_readers(
+    treasure: Vec<Value>,
+    follower: Vec<Value>,
+    readers: Vec<(Value, Value)>,
+) -> SelectedEffects {
     let (mut material, material_author) = current_fixture::author(
         "unit-spell",
         "11111111111111111111111111111111",
@@ -45,10 +53,19 @@ fn selection(treasure: Vec<Value>, follower: Vec<Value>) -> SelectedEffects {
     follower["faces"][0]["power"] = json!("2");
     follower["faces"][0]["hp"] = json!("3");
     follower["faces"][0]["traits"] = json!(["グラブル", "全属性", "〈Test・Group〉"]);
+    let (cards, authors): (Vec<_>, Vec<_>) =
+        [(material, material_author), (follower, follower_author)]
+            .into_iter()
+            .chain(readers)
+            .map(|(card, author)| (card.to_string(), author))
+            .unzip();
     Catalog::from_current_selection(
-        &format!("{material}\n{follower}"),
-        &json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string(),
-        &json!({"documents":[],"authors":[material_author,follower_author]}),
+        &cards.join("\n"),
+        include_str!(concat!(
+            env!("CARGO_MANIFEST_DIR"),
+            "/../../authored/rules/keywords.yaml"
+        )),
+        &json!({"documents":[],"authors":authors}),
     )
     .unwrap()
 }
@@ -125,7 +142,9 @@ fn follower_program(keyword: bool) -> Vec<Value> {
 }
 
 fn drain_pending(game: &mut Game) -> usize {
-    game.resume_internal_card().unwrap();
+    if game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
+        game.resume_internal_card().unwrap();
+    }
     let mut count = 0_usize;
     while let Some(question) = game.internal_pending_choice().unwrap() {
         let InputDomain::Pending(options) = &question.domain else {
@@ -536,5 +555,185 @@ fn all_attributes_counts_for_each_elemental_attack_reference() {
         "全属性",
     ] {
         assert_eq!(counters[format!("trait_attacks.{attribute}")], 1);
+    }
+}
+
+fn limit_break_history_board() -> (Game, AbilityId) {
+    let query = json!({"event":"limit_break","window":"this_turn","who":"self"});
+    let threshold = json!({"history":{
+        "event":"limit_break","window":"this_turn","who":"self","at_least":3
+    }});
+    let (reader, author) = current_fixture::author(
+        "history-watcher",
+        "33333333333333333333333333333333",
+        "フォロワー",
+        vec![
+            // CP05-011 checks the threshold at end phase.
+            json!({"auto":{"on":{"phase":{"which":"end","whose":"self"}},"do":[
+                {"if":{"cond":threshold,"then":[{"damage":{"to":{"leader":"opp"},"n":5}}]}}
+            ]}}),
+            // CP05-034 grants Storm and CP05-061 gates activation at the same threshold.
+            json!({"static":{"while":threshold,"effects":[{"grant":{"keywords":["storm"]}}]}}),
+            json!({"activate":{"usable_if":threshold,"cost":{"pp":0},"do":[
+                {"life":{"who":"self","delta":1}}
+            ]}}),
+        ],
+    );
+    let (mut discounted, mut discounted_author) = current_fixture::author(
+        "discounted-follower",
+        "44444444444444444444444444444444",
+        "フォロワー",
+        // CP05-036 subtracts the number of completed break stages from the play cost.
+        vec![json!({"play":{"cost_delta":{"minus":[0,{"history_count":query}]}}})],
+    );
+    discounted["faces"][0]["cost"] = json!("6");
+    discounted_author["input"]["source_payload"]["faces"][0]["cost"] = json!(6_u8);
+    let material = vec![target_ability(
+        "グラブル",
+        &json!([
+            {"limit_break":{"on":"target"}},
+            {"if":{"cond":{"final_limit_break_possible":"target"},"then":[{"final_limit_break":{"on":"target"}}]}}
+        ]),
+    )];
+    let mut initial = setup_board(3);
+    initial["players"]["P1"]["pp"] = json!({"current":8_u8,"max":8_u8});
+    initial["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"s","card":"unit-follower"},
+        {"id":"reader","card":"history-watcher"}
+    ]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"replacement","card":"unit-follower"},
+        {"id":"discount","card":"discounted-follower"}
+    ]);
+    initial["players"]["P2"]["zones"]["deck"] = json!([
+        {"id":"next","card":"history-watcher"}
+    ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"opponent-reader","card":"history-watcher"}
+    ]);
+    let selected = selection_with_readers(
+        material,
+        vec![
+            json!({"activate":{"cost":{"pp":0},"do":[{"move":{"ref":"this","to":"cemetery"}}]}}),
+            json!({"keywords":["final_limit_break_possible"]}),
+        ],
+        vec![(reader, author), (discounted, discounted_author)],
+    );
+    let activation = selected.current["history-watcher"]
+        .program
+        .card()
+        .abilities
+        .iter()
+        .find(|ability| ability.source.line == 3)
+        .unwrap()
+        .node
+        .id;
+    let game = Game::from_selected_effects(
+        selected,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "limit-break-history",
+    )
+    .unwrap();
+    (game, activation)
+}
+
+#[test]
+fn turn_limit_break_history_drives_end_phase_keywords_activation_and_play_cost() {
+    let (mut game, activation) = limit_break_history_board();
+    let actor = PlayerId { seat: 1 };
+    activate_material(&mut game, "m1");
+    game.resume_internal_card().unwrap();
+    activate_material(&mut game, "m2");
+    game.resume_internal_card().unwrap();
+    assert!(
+        matches!(game.activate_internal_card("reader", activation, actor), Err(sve_engine::EngineFailure::IllegalPlay(message)) if message.contains("use prerequisite")),
+        "the reader cannot activate at two successful breaks"
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["reader"]["keywords"],
+        json!([]),
+        "a failed repeat cannot meet the three-break threshold"
+    );
+
+    activate(&mut game, 1);
+    game.resume_internal_card().unwrap();
+    assert!(
+        matches!(
+            game.play_internal_card("replacement", actor).unwrap(),
+            CardPlay::Entered(_)
+        ),
+        "a new bearer enters after the original leaves"
+    );
+    game.resume_internal_card().unwrap();
+    activate_material(&mut game, "m2");
+    game.resume_internal_card().unwrap();
+    resolved(
+        game.activate_internal_card("reader", activation, actor)
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+    assert!(
+        matches!(
+            game.play_internal_card("discount", actor).unwrap(),
+            CardPlay::Entered(_)
+        ),
+        "the discounted follower enters"
+    );
+    game.resume_internal_card().unwrap();
+
+    let state = game.projection(View::Referee).unwrap();
+    assert_eq!(
+        state["P1"]["pp"]["current"], 5_u8,
+        "four successful stages discount the six-PP play"
+    );
+    assert_eq!(
+        state["P1"]["leader"]["life"], 21_u8,
+        "the activation qualified"
+    );
+    assert_eq!(
+        state["objects"]["reader"]["keywords"],
+        json!(["疾走"]),
+        "our reader gains Storm"
+    );
+    assert_eq!(
+        state["objects"]["opponent-reader"]["keywords"],
+        json!([]),
+        "the opponent did not break"
+    );
+
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    assert_eq!(
+        drain_pending(&mut game),
+        1,
+        "the turn owner has one end-phase trigger"
+    );
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["P2"]["leader"]["life"],
+        15_u8,
+        "the end-phase ability sees both stages from each material"
+    );
+    quick::pass(&mut game);
+    assert_eq!(
+        game.projection(View::Referee).unwrap()["objects"]["reader"]["keywords"],
+        json!([]),
+        "the previous turn's facts clear before the next turn"
+    );
+}
+
+#[test]
+fn limit_break_history_rejects_non_controller_and_distinct_subject_queries() {
+    for query in [
+        json!({"event":"limit_break","window":"this_turn","who":"opp"}),
+        json!({"event":"limit_break","window":"this_turn","who":"self","distinct":"subjects"}),
+    ] {
+        let head = json!({"activate":{"cost":{"pp":0},"do":[
+            {"life":{"who":"self","delta":{"history_count":query}}}
+        ]}});
+        lowerer()
+            .lower(&equipment_played::tree(&head, "unit-follower"))
+            .unwrap_err();
     }
 }
