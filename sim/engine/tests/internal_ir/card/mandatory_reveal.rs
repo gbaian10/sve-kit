@@ -82,6 +82,52 @@ fn awaiting(play: CardPlay) -> DecisionView {
 }
 
 #[test]
+fn non_quick_spell_requires_one_private_hand_discard_before_resolving() {
+    let cost = json!({"discard":{"sel":{"who":"self","zone":"hand","kind":"follower"},"n":1_u8}});
+    let program = lower(&tree(&cost, &json!([{"draw":{"n":1_u8}}])))
+        .unwrap()
+        .remove("unit-spell")
+        .unwrap();
+    let mut denied = board_for(&program, 0, 2);
+    let actor = PlayerId { seat: 1 };
+    let before = exact_authority(&denied);
+    denied.play_internal_card("source", actor).unwrap_err();
+    assert_eq!(
+        exact_authority(&denied),
+        before,
+        "missing materials cancel the play atomically"
+    );
+
+    let mut game = board_for(&program, 1, 2);
+    let question = awaiting(game.play_internal_card("source", actor).unwrap());
+    let InputDomain::CostMaterials(domain) = &question.domain else {
+        panic!("the spell requires its hand material");
+    };
+    assert_eq!(domain.members.len(), 1);
+    assert!(game.internal_decision(View::P2).is_none());
+    let awaiting_payment = exact_authority(&game);
+    game.answer_internal_card(actor, question.token, Answer::CostMaterials(vec![]))
+        .unwrap_err();
+    assert_eq!(
+        exact_authority(&game),
+        awaiting_payment,
+        "a required material cannot be declined"
+    );
+    resolved(
+        game.answer_internal_card(
+            actor,
+            question.token,
+            Answer::CostMaterials(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["pp"]["current"], 1_u8);
+    assert_eq!(view["P1"]["hand"], json!(["wrong", "drawn"]));
+    assert_eq!(view["P1"]["cemetery"], json!(["h0", "source"]));
+}
+
+#[test]
 fn mandatory_reveal_filters_private_candidates_and_expires_at_resolution_end() {
     let mut game = board(2, 3, false, true, 2);
     let cost = awaiting(

@@ -226,40 +226,36 @@ fn quick_quote_requires_another_payable_hand_card_without_committing_payment() {
 }
 
 #[test]
-fn additional_quick_hand_payment_rejects_wider_raw_ir_shapes() {
-    for (count, relation) in [
-        (0, PlayerRelation::SelfPlayer),
-        (2, PlayerRelation::SelfPlayer),
-        (1, PlayerRelation::Opponents),
-    ] {
-        let mut game = Game::new(
-            catalog(),
-            &setup(1, json!([])),
-            &Value::Null,
-            &Value::Null,
-            "hand-shape",
-        )
-        .unwrap();
-        // A foreign hand selector is rejected by WF before runtime admission.
-        if let Ok(typed) = WellFormedCardProgram::check(raw_program(count, relation)) {
-            game.load_internal_card("unit-spell", &typed).unwrap_err();
+fn additional_hand_payment_only_admits_one_own_card_with_or_without_printed_quick() {
+    for quick in [false, true] {
+        for (count, relation, admitted) in [
+            (0, PlayerRelation::SelfPlayer, false),
+            (1, PlayerRelation::SelfPlayer, true),
+            (2, PlayerRelation::SelfPlayer, false),
+            (1, PlayerRelation::Opponents, false),
+        ] {
+            let mut candidate = raw_program(count, relation);
+            if !quick {
+                candidate
+                    .abilities
+                    .retain(|ability| ability.node.kind == AbilityKind::Spell);
+            }
+            let mut game = Game::new(
+                catalog(),
+                &setup(1, json!([])),
+                &Value::Null,
+                &Value::Null,
+                "hand-shape",
+            )
+            .unwrap();
+            let loaded = WellFormedCardProgram::check(candidate)
+                .is_ok_and(|typed| game.load_internal_card("unit-spell", &typed).is_ok());
+            assert_eq!(
+                loaded, admitted,
+                "count {count}, relation {relation:?}, printed Quick {quick}"
+            );
         }
     }
-    let mut ordinary = program(1, PlayerRelation::SelfPlayer).card().clone();
-    ordinary
-        .abilities
-        .retain(|ability| ability.node.kind == AbilityKind::Spell);
-    let ordinary = WellFormedCardProgram::check(ordinary).unwrap();
-    let mut game = Game::new(
-        catalog(),
-        &setup(1, json!([])),
-        &Value::Null,
-        &Value::Null,
-        "non-quick-hand",
-    )
-    .unwrap();
-    game.load_internal_card("unit-spell", &ordinary)
-        .unwrap_err();
 }
 
 #[test]

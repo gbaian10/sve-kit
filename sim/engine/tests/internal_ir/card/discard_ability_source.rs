@@ -295,6 +295,114 @@ fn conditional_payment_rechecks_maximum_and_never_moves_or_spends_on_decline_or_
 }
 
 #[test]
+fn self_discard_returns_the_discarded_generation_only_after_resolution_payment() {
+    let mut head = observer(
+        true,
+        json!([{"pay":{"cost":{"pp":3_u8},"do":[{"move":{"ref":"this","to":"field"}}]}}]),
+    );
+    head["on"]["discarded"]["during"] = json!({"turn":"self"});
+    for (current, accept, enters) in [(3_u8, true, true), (3, false, false), (2, true, false)] {
+        let mut state = initial();
+        state["players"]["P1"]["pp"]["current"] = json!(current);
+        let mut game = fixture(&head, &discard_all(), Some("ウマ娘"), &state);
+        resolved(activate(&mut game, 1));
+        let payment = question(take_pending(&mut game));
+        assert_eq!(payment.domain, InputDomain::OptionalCost);
+        let before = game.projection(View::Referee).unwrap();
+        assert_eq!(before["P1"]["cemetery"], json!(["h"]));
+        assert_eq!(before["P1"]["pp"]["current"], current);
+        resolved(
+            game.answer_internal_card(payment.actor, payment.token, Answer::OptionalCost(accept))
+                .unwrap(),
+        );
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(
+            view["P1"]["pp"]["current"],
+            if enters { 0 } else { current }
+        );
+        assert_eq!(
+            view["P1"]["field"],
+            if enters {
+                json!(["p", "h"])
+            } else {
+                json!(["p"])
+            }
+        );
+    }
+}
+
+fn damage_after_payment() -> Value {
+    let mut head = observer(
+        true,
+        json!([{"pay":{"cost":{"pp":1_u8},"do":[{"damage":{"to":"enemy","n":3_u8}}]}}]),
+    );
+    head["targets"] =
+        json!([{"bind":"enemy","from":{"who":"opp","zone":"field","kind":"follower"},"n":1_u8}]);
+    head
+}
+
+#[test]
+fn self_discard_declares_one_enemy_before_resolving_the_pp_payment() {
+    for (current, accept) in [(1_u8, true), (1, false), (0, true)] {
+        let mut state = initial();
+        state["players"]["P1"]["pp"]["current"] = json!(current);
+        state["players"]["P2"]["zones"]["field"] = json!([
+            {"id":"first","card":"unit-follower"}, {"id":"second","card":"unit-follower"}
+        ]);
+        let mut game = fixture(
+            &damage_after_payment(),
+            &discard_all(),
+            Some("ウマ娘"),
+            &state,
+        );
+        resolved(activate(&mut game, 1));
+        let targets = question(take_pending(&mut game));
+        let InputDomain::Targets(domain) = &targets.domain else {
+            panic!("the formal target must precede the resolution payment");
+        };
+        assert_eq!(domain.members.len(), 2);
+        let fee = question(
+            game.answer_internal_card(
+                targets.actor,
+                targets.token,
+                Answer::Targets(vec![domain.members[1].handle]),
+            )
+            .unwrap(),
+        );
+        assert_eq!(fee.domain, InputDomain::OptionalCost);
+        let before = game.projection(View::Referee).unwrap();
+        assert_eq!(before["P1"]["pp"]["current"], current);
+        assert_eq!(before["objects"]["second"]["damage"], 0_u8);
+        resolved(
+            game.answer_internal_card(fee.actor, fee.token, Answer::OptionalCost(accept))
+                .unwrap(),
+        );
+        let after = game.projection(View::Referee).unwrap();
+        let paid = u8::from(current > 0 && accept);
+        assert_eq!(after["P1"]["pp"]["current"], current - paid);
+        assert_eq!(after["objects"]["first"]["damage"], 0_u8);
+        assert_eq!(after["objects"]["second"]["damage"], paid * 3);
+    }
+}
+
+#[test]
+fn self_discard_payment_rejects_damage_without_one_declared_enemy() {
+    for (selector, maximum) in [("self", 1_u8), ("opp", 2)] {
+        let mut head = damage_after_payment();
+        head["targets"][0]["from"]["who"] = json!(selector);
+        head["targets"][0]["n"] = json!(maximum);
+        reject_raw(lowered_observer(&head));
+    }
+    let no_target = observer(
+        true,
+        json!([
+            {"pay":{"cost":{"pp":1_u8},"do":[{"damage":{"to":{"leaders":"opponents"},"n":3_u8}}]}}
+        ]),
+    );
+    reject_raw(lowered_observer(&no_target));
+}
+
+#[test]
 fn optional_ex_movement_follows_only_the_triggering_successful_generation() {
     for accept in [true, false] {
         let head = observer(
@@ -418,6 +526,7 @@ fn self_discard_movement_and_resolution_pp_remain_closed_to_the_needed_actions()
         match case {
             0 => {
                 head["do"] = head["do"][0]["if"]["then"].clone();
+                head["do"][0]["pay"]["do"] = json!([{"draw":{"n":1_u8}}]);
             }
             1 => {
                 head["do"][0]["if"]["cond"] = json!({"cmp":{"left":{"resource":{"who":"self","kind":"pp"}},"op":"ge","right":7_u8}});
@@ -439,7 +548,7 @@ fn self_discard_movement_and_resolution_pp_remain_closed_to_the_needed_actions()
                     json!({"steps":[{"pp":3_u8},{"act_self":true}]});
             }
         }
-        // A hand-zone payment keeps its guarded discard shape at lowering or at load.
+        // The alternatives keep their single authorized continuation at lowering or at load.
         if let Ok(programs) = lowerer().lower(&tree(&head, &discard_all())) {
             reject_raw(programs["unit-follower"].card().clone());
         }
