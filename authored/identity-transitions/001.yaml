@@ -1,0 +1,3488 @@
+format: 1
+kind: identity_transition_shard
+records:
+  - kind: identity_transition
+    action: apply
+    reverts:
+    sequence: 1
+    previous:
+    registry_basis:
+      authored_revision: e5570665c1ebee7465144be91b3ff9d0d4eb3fef
+      index_path: ids/index.yaml
+      index_hash: sha256:1afc211e4056637b584ab8c410e288b8db72b478fa4645a4c556397ad9867a24
+    review_context:
+      context:
+        program_revision: e5570665c1ebee7465144be91b3ff9d0d4eb3fef
+        configuration:
+          '{"dependencies":[{"name":"uv.lock","sha256":"sha256:33b29d7464fa82faf30004dd8471d12882c3fda808773e1787c1636650ab7630"}],"profile":"registry-confirmed-none-renewal-v1","registry":{"authored_revision":"e5570665c1ebee7465144be91b3ff9d0d4eb3fef","index_hash":"sha256:1afc211e4056637b584ab8c410e288b8db72b478fa4645a4c556397ad9867a24","index_path":"ids/index.yaml"},"review_input":{"as_of":"2026-11-25","batch_id":"2026-11-25-cp05-review-v1","bytes":4486615,"coverage_hash":"sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba","coverage_scope":"All
+          Japanese official card extractions in the reviewed input batch","filename":"jp.jsonl","inventory_sha256":"sha256:84002946ee99d0d95928aff3b9f8929db9d108a95bf51681f341ea8426326f99","target_region":"jp"},"sources":[{"card_batch":"sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446","image_batch":null,"parser_version":"official-en-exact-v1","region":"en"},{"card_batch":"sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa","image_batch":null,"parser_version":"official-jp-exact-v1","region":"jp"}]}'
+      source_batches:
+        - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        - batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+    updates:
+      - target_key: region_mapping_review:c:043ec4851f3d57b2b66f79b61598957d
+        before:
+          record_key: region_mapping_review:c:043ec4851f3d57b2b66f79b61598957d
+          record_hash: sha256:bad1980db69fc523696dd9bf7cacfc4931e300762cb10816a0d6b9f57d39665b
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:043ec4851f3d57b2b66f79b61598957d
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-LD01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:98ffccd9aa58c05317603724e025a6f711b903425ad3a6d486626d87ac347166
+                rules_hash: sha256:2ee536de4683f604e102b23b872be1f1f88b858b43066b6b5513f7c3473a77f5
+        allocation_anchor:
+      - target_key: region_mapping_review:c:04e2f74691dd56f68de8fcfd7e270f33
+        before:
+          record_key: region_mapping_review:c:04e2f74691dd56f68de8fcfd7e270f33
+          record_hash: sha256:b44638889776a039840aeb6ddbac7034c934359dfd6787a057009c33c337cc05
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:04e2f74691dd56f68de8fcfd7e270f33
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-022EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:c3ece1f47eeedd82265ceda519f9ac068ca086976f596a464dfe41cdd88cba7e
+                rules_hash: sha256:66675b5f3c0d6559a8fe0d503c0f9decaf5c501438b2980e432e403f7960877b
+              - region: en
+                card_no: GFB01d-026EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:285b6677226e0bd86b59b8d6e9e84416c0669012412b1320f96d4a6a29b6433c
+                rules_hash: sha256:66675b5f3c0d6559a8fe0d503c0f9decaf5c501438b2980e432e403f7960877b
+        allocation_anchor:
+      - target_key: region_mapping_review:c:051a4af5738e5a67a33835de82ccea2b
+        before:
+          record_key: region_mapping_review:c:051a4af5738e5a67a33835de82ccea2b
+          record_hash: sha256:e3c9c004a7df411faf86b7cafce98201ae0a1c851c819ffdbd1111cb0964980c
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:051a4af5738e5a67a33835de82ccea2b
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-016EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:48168ae99ae6cdd1d5f59f27132f5f30085cd9c30806baee114cdd1c57983011
+                rules_hash: sha256:978631ad943295e7683370bf526104bc4c023bcf4a32715a759455cfa2ac7516
+        allocation_anchor:
+      - target_key: region_mapping_review:c:082fc16f00d85018ba4a8722993e7eff
+        before:
+          record_key: region_mapping_review:c:082fc16f00d85018ba4a8722993e7eff
+          record_hash: sha256:b95305944cbe822e299ff8888e5edd4bfe9c6d3ab30f17e034c3b989c00ac643
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:082fc16f00d85018ba4a8722993e7eff
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-003EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0954bf94ccba96c982e453da19f146290cd752a0e8da6a0cbfe1bd728620fe5f
+                rules_hash: sha256:a8e5ca907da64bbf8358a255e266c3423eb2701099474ca8c6a4447d88e33a25
+        allocation_anchor:
+      - target_key: region_mapping_review:c:0990e72d82ab58e4a7a886a6bab91b15
+        before:
+          record_key: region_mapping_review:c:0990e72d82ab58e4a7a886a6bab91b15
+          record_hash: sha256:610219ff5d94e1fa60706e6e60c7d276da77a760aaf19ab61af4d72fd0f7baaa
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:0990e72d82ab58e4a7a886a6bab91b15
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-004EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0d43633f4ea04dbf7123b441a7c1d443b4d5c4138b33ef53f02f43b9dc201a64
+                rules_hash: sha256:7e19153886ee5e443be8505d15717ade021beecd51158d3b3a66b69d01aad70a
+        allocation_anchor:
+      - target_key: region_mapping_review:c:0a0c6b422f2f52e6834510a3e44f7ea8
+        before:
+          record_key: region_mapping_review:c:0a0c6b422f2f52e6834510a3e44f7ea8
+          record_hash: sha256:324452e33d6b2ad7c34e89b98e4a3920eeb2c118efe7f88115c525feb96994c3
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:0a0c6b422f2f52e6834510a3e44f7ea8
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-016EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:024c8fa9749802e867e410e002fccfa243263dc9117bee006276e47aea0d115a
+                rules_hash: sha256:dff9260729d5ff0e6b91caf58c53275d60e7a4a33f811485ee3669c777eede0f
+        allocation_anchor:
+      - target_key: region_mapping_review:c:0a89d1615ffc562c85e66d0711c05fe1
+        before:
+          record_key: region_mapping_review:c:0a89d1615ffc562c85e66d0711c05fe1
+          record_hash: sha256:daeade75e0f0359db9dbea17877cb41def95a8de6d3d2cbc7953bcee9e25ba72
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:0a89d1615ffc562c85e66d0711c05fe1
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-017EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:2a9cbb1d36db38bd10027013e14b68485f340d5db2c41c29646a4acdde53c5dc
+                rules_hash: sha256:fdb0eb602003442072248490bede817fc094af51b0735d8db93091cc9a6d667c
+        allocation_anchor:
+      - target_key: region_mapping_review:c:0d7c732c586a52eba17798ff39461ab0
+        before:
+          record_key: region_mapping_review:c:0d7c732c586a52eba17798ff39461ab0
+          record_hash: sha256:e88fedd0b30eff03500565a4873b98e061d607c8b7ca654a5f56bc3dfb0a7a2e
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:0d7c732c586a52eba17798ff39461ab0
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-008EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:82280a1d993cac0f2031c88ce471a8b3d1d78ca85500f2040fcb9a874ce2a2cb
+                rules_hash: sha256:83268309bfd89acd2f88df16f8bb3a62df07471790d71208756b995631c78337
+              - region: en
+                card_no: GFB01c-008EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:de62c1e860e178dd449e827783884dfb33b8ad138cbe610db09d3e84a2cf4877
+                rules_hash: sha256:83268309bfd89acd2f88df16f8bb3a62df07471790d71208756b995631c78337
+        allocation_anchor:
+      - target_key: region_mapping_review:c:0e55c2df8dba56a98e5b41d9d1d6fd43
+        before:
+          record_key: region_mapping_review:c:0e55c2df8dba56a98e5b41d9d1d6fd43
+          record_hash: sha256:db8414f957032603cbd81d78f1d9de5da5dbf4ad1800b016541d569552ef2837
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:0e55c2df8dba56a98e5b41d9d1d6fd43
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-019EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:bb4fa5ba20b5db3d44a19d40b462eea831761a7f956257200b372d057985f9c3
+                rules_hash: sha256:f4722bd84026842efd6da714a7c29e1564eb431be643d919df6599a05e65d8c7
+        allocation_anchor:
+      - target_key: region_mapping_review:c:0f0643339cba56d0b5b8c6b4fb077dc8
+        before:
+          record_key: region_mapping_review:c:0f0643339cba56d0b5b8c6b4fb077dc8
+          record_hash: sha256:0b8f7d1bfdb9db222ab015367c509197e138c927e80b48e2a7163d7c6f014c78
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:0f0643339cba56d0b5b8c6b4fb077dc8
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-007EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:729f58fdf28ee3a3de7e28d0f473e5824c230505701f4816dfeb888efa603fcf
+                rules_hash: sha256:9f2978907ddf54c56982fefbdd16a953c27f049d54814d75977176ea73629a0d
+        allocation_anchor:
+      - target_key: region_mapping_review:c:1b8e971cb76b5447bd78a076df386f73
+        before:
+          record_key: region_mapping_review:c:1b8e971cb76b5447bd78a076df386f73
+          record_hash: sha256:ce850ec130e7e36a07537f52d928de1c6ab1973258a88afa378d481b9806adf9
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:1b8e971cb76b5447bd78a076df386f73
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-002EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:add7e58f1834b0395e9e9a0fb8ef243841d8db72248def42db5f69238e4ebf72
+                rules_hash: sha256:b4d428f03c9554e89d86174a7e88bd01893a2d4f738a210df787af46a7903f49
+        allocation_anchor:
+      - target_key: region_mapping_review:c:1e97d5de18ed5afc9c47370556d3fd57
+        before:
+          record_key: region_mapping_review:c:1e97d5de18ed5afc9c47370556d3fd57
+          record_hash: sha256:266d2118b2c69a949a08bef917218c55102d665e195aac0b4d96202ab0c2406e
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:1e97d5de18ed5afc9c47370556d3fd57
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-027EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:535dfed45e88a3559e9168303611d31affcc870af2560c4f314e82522353e29d
+                rules_hash: sha256:76c043e22f04a840d2637ca1394c89f7cf2d93c956a9b173440f37f80a751ec8
+        allocation_anchor:
+      - target_key: region_mapping_review:c:221e81b981ca574bb53d16fe78aaa700
+        before:
+          record_key: region_mapping_review:c:221e81b981ca574bb53d16fe78aaa700
+          record_hash: sha256:7f25af9057f3164ce2309a79c365f318b2c702e8f0122a5dece2d5517fa2ea97
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:221e81b981ca574bb53d16fe78aaa700
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-006EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:9f2a296168300ba14849c7caa769c4c8659fb3a6a76afe8d4b2d897f0acc1145
+                rules_hash: sha256:ca54413e1c2db6ac5ddf5862b085f1134fad067e90aee204b84143032dd61d3c
+        allocation_anchor:
+      - target_key: region_mapping_review:c:24aea5130c155cea901bb1971870e1f2
+        before:
+          record_key: region_mapping_review:c:24aea5130c155cea901bb1971870e1f2
+          record_hash: sha256:c2c4327893877d5d163dccf3be842f2c1bed6d99488bcc4f1d643d39f55100be
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:24aea5130c155cea901bb1971870e1f2
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-026EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:5e074124f878fe8bb9ace6b4037b9fe5078b1bb302a2e392971a8b64d148f9c8
+                rules_hash: sha256:4597daeb3f2e7b30f216b0365f95923510cf185c8924df0aa00645f218f9553d
+        allocation_anchor:
+      - target_key: region_mapping_review:c:29fcdc3a37545a3b9f8ce12e8060ee29
+        before:
+          record_key: region_mapping_review:c:29fcdc3a37545a3b9f8ce12e8060ee29
+          record_hash: sha256:14953672f7dcf66627dd3806423685a95e095e7f05a55c0d25a8a6ace9838df5
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:29fcdc3a37545a3b9f8ce12e8060ee29
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-012EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:b39411708d12583e7350d28dc6d1ef2b77bd189d73ffc60882481fdc31c37db0
+                rules_hash: sha256:9b7fc622699f4a2f2554f57f7d13430a0d3ce6b4eab0050cc52d1bb46412ac72
+        allocation_anchor:
+      - target_key: region_mapping_review:c:2a581e1d869c5e6585a6c83ddb89b757
+        before:
+          record_key: region_mapping_review:c:2a581e1d869c5e6585a6c83ddb89b757
+          record_hash: sha256:63f61d25e6785d6ff49a9c88f97482bed6915037521af0a844029b654c2c9486
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:2a581e1d869c5e6585a6c83ddb89b757
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-024EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:a199f78e7f484e887706274ba8c9f746276ea3c47ff9e36d82546cef7079ec48
+                rules_hash: sha256:16ed1e3afce896fae0f4b586a1e635bf365fb064b3b59ea4b758a52b4e6bfbe0
+        allocation_anchor:
+      - target_key: region_mapping_review:c:2cdc3c4359a95ce6969941a94eaf5d7f
+        before:
+          record_key: region_mapping_review:c:2cdc3c4359a95ce6969941a94eaf5d7f
+          record_hash: sha256:a0170fb5c922a1a3dc7ca94b3478f94d42660c88f8792e6b7dfdd2f5f42336aa
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:2cdc3c4359a95ce6969941a94eaf5d7f
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-002EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:2518fbe10e975889356d5c94c3b0816ab535c66050117298df1f697aed204c7d
+                rules_hash: sha256:ce78cc8fdc1f01a7babeb8a0a5f8f07b19276d958c8e6470eece153b737319a4
+        allocation_anchor:
+      - target_key: region_mapping_review:c:2da09e98179f54218133f776826b4084
+        before:
+          record_key: region_mapping_review:c:2da09e98179f54218133f776826b4084
+          record_hash: sha256:a39d841166bcdd33e16e559e621c5d841e6cc4188c077aff103c49ddad164f42
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:2da09e98179f54218133f776826b4084
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-011EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:d5fc4b57216eb0f5d02f66a000f4aee38b01124e965cd3f552a5e8dab93f847b
+                rules_hash: sha256:b6466b822be8ed3dc0ce9115ad750668931d220684e3285823f73c7d3cd926de
+        allocation_anchor:
+      - target_key: region_mapping_review:c:2e7baa5a7861597c8ee4c768251ff366
+        before:
+          record_key: region_mapping_review:c:2e7baa5a7861597c8ee4c768251ff366
+          record_hash: sha256:a8405c4a81056141f4d893e78dad7637d8f5d94884bfc3bfcd422736d4b3bf98
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:2e7baa5a7861597c8ee4c768251ff366
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-019EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:ac722828891553e36a832631fe866d553dacf6437d3e376c3b943555aa845d39
+                rules_hash: sha256:0b5518504f25d3bcfdde454d9498b5e9ede3741740e72712c1955feb4078a12e
+        allocation_anchor:
+      - target_key: region_mapping_review:c:31a6e44de4655ecc98c2e5450c382012
+        before:
+          record_key: region_mapping_review:c:31a6e44de4655ecc98c2e5450c382012
+          record_hash: sha256:2d6b3dc21a6c5d1109c803f5046fef510f77836bb3d9b0c10de03a5ab3005e24
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:31a6e44de4655ecc98c2e5450c382012
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-018EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:232bbae08b75e5925fd123608a7a1e8a8d42d614e4f0e65cd4f045ec5b3b8b40
+                rules_hash: sha256:b1ace084b8b6ff0022d91f1c755da884622d69e80aedc45e3c19051df5b219dc
+        allocation_anchor:
+      - target_key: region_mapping_review:c:32ebaff32a74502390b5094569557eb2
+        before:
+          record_key: region_mapping_review:c:32ebaff32a74502390b5094569557eb2
+          record_hash: sha256:b2216891e98b6888518e994e787cfd533b235c1e4b90ec78bf22226469bddc22
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:32ebaff32a74502390b5094569557eb2
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-LD01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:bc5b5b3b9d276fff5fce0e57f8b9d1e4a38085037ae17f23920b566901ac8d15
+                rules_hash: sha256:9e4b1a5528c92196b297ab75d577b29317529df32c275dc057e1b4dc82479160
+        allocation_anchor:
+      - target_key: region_mapping_review:c:345b782b2ea95ddeb5d2387905aca886
+        before:
+          record_key: region_mapping_review:c:345b782b2ea95ddeb5d2387905aca886
+          record_hash: sha256:919bc77193ce379e41c80d297fbcecaa72a82e24817f195013b82be14d95545f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:345b782b2ea95ddeb5d2387905aca886
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-015EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:611e706901af7c5441f3ced5f37e565df58952567f23d7d70ce27b3cdfbab669
+                rules_hash: sha256:32bc53c5559bc292002f447d8e94d096add7c1ea507a239a23c2ad6f13499e18
+        allocation_anchor:
+      - target_key: region_mapping_review:c:350f1491757a5aeea5e903732096ef02
+        before:
+          record_key: region_mapping_review:c:350f1491757a5aeea5e903732096ef02
+          record_hash: sha256:f66fda9e86813f6c9e19373678df1c428dc0e26ee032dfe24463c54e1b460872
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:350f1491757a5aeea5e903732096ef02
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:51bf4c6b08c93db9103aae744182ec1262cc140f6bf00a35073ccc8e3b97e0e9
+                rules_hash: sha256:bcd37663d5a0c1c8e585b350abe422981000bb1e0683ce8e98f1669e1b2a7ee7
+        allocation_anchor:
+      - target_key: region_mapping_review:c:359bcfd389015f2982e29f80c5152366
+        before:
+          record_key: region_mapping_review:c:359bcfd389015f2982e29f80c5152366
+          record_hash: sha256:e70cab0c8252bffeaae1b76491c9eb9dd8f9e2d4ffda8808372e9d5457646dca
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:359bcfd389015f2982e29f80c5152366
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:2e51a3113f29690368a77e3083f7d74fca0ebab9aa39d395e13fbb5209db84e1
+                rules_hash: sha256:ddcb6c4fc77e56905a5ad116bebe82c747ed008dd6a4190b0978eb733ec2f0a1
+        allocation_anchor:
+      - target_key: region_mapping_review:c:36c0e7e7521450bda81706250844370d
+        before:
+          record_key: region_mapping_review:c:36c0e7e7521450bda81706250844370d
+          record_hash: sha256:16d3025d4ed0b0e2e4552c050656241925995f30ed4925ecb1e9810f2e357be2
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:36c0e7e7521450bda81706250844370d
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-022EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:423040f7fa6408b30944f7872863c8a5e22e85b27c687741baff1a5638ef2d98
+                rules_hash: sha256:323b917a0cfc404f3fcae6415b40999e61a4ad779535adb38865350505310712
+        allocation_anchor:
+      - target_key: region_mapping_review:c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
+        before:
+          record_key: region_mapping_review:c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
+          record_hash: sha256:090084ff362161d0461aeed4ee8d362db03b681ad560f708d202fdd7f9c2d27d
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: NY2024
+          data:
+            card_id: c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: NY2024-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:6f44d34b0d6eff3f806046d8e98b4c6799469fecc97506cc570e59fdcb494a7e
+                rules_hash: sha256:52ff9a161f0bc87480d60510a7ec43b7a3ae0e8e9e2e47bcf9eb15262a2c8ffc
+        allocation_anchor:
+      - target_key: region_mapping_review:c:39b8ed717ea15dd9bc8ceca87a5145df
+        before:
+          record_key: region_mapping_review:c:39b8ed717ea15dd9bc8ceca87a5145df
+          record_hash: sha256:3d68ecbae07e3231bdb8aab7b689d6591598cdcfcc4e54e027f288e7219397c7
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:39b8ed717ea15dd9bc8ceca87a5145df
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-020EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:efa4315bde70fa1a84167bcc0d911c217e861054c50c797fee4a1ac25aa4b89c
+                rules_hash: sha256:cdc3af21f2a63686e4c1e1b764ba83704a88070d24196b92fac5a87d819b65d0
+        allocation_anchor:
+      - target_key: region_mapping_review:c:3a9acb2a492d501a9f82649c7b37944c
+        before:
+          record_key: region_mapping_review:c:3a9acb2a492d501a9f82649c7b37944c
+          record_hash: sha256:943658c678965558551287288c60b24870f65e08ad314fdaeb0ae4666c68245b
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:3a9acb2a492d501a9f82649c7b37944c
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-T01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:be1133a64c97e639ec476dbe82e326595baffc1ac01f0016ec3ea3f0502f45af
+                rules_hash: sha256:44a97882ea28f4d385e31f4e2f63dbd80b9083263475c516dc6a15e35da12d92
+        allocation_anchor:
+      - target_key: region_mapping_review:c:3d9b4503939759b09d7fa2b574ac58a1
+        before:
+          record_key: region_mapping_review:c:3d9b4503939759b09d7fa2b574ac58a1
+          record_hash: sha256:b6f2e3229419efbd90e995f64524d0d96a45bfe66edc1607f3d395418f4fd113
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:3d9b4503939759b09d7fa2b574ac58a1
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-023EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:14da2cfeaa5cf646183181e6820c5fda999bde9d16e62ab59e48fda39e7076e2
+                rules_hash: sha256:0d45bfa5d156f610e0176cd209940ca18fc79bef1ca8bd3ce93552d306e032a6
+        allocation_anchor:
+      - target_key: region_mapping_review:c:3ef9cb2995865b398946a6f6cf8b1a9f
+        before:
+          record_key: region_mapping_review:c:3ef9cb2995865b398946a6f6cf8b1a9f
+          record_hash: sha256:9389e82ffc79b309d0e2d39ebf781737319d737b80330262463591aabfdd70a3
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:3ef9cb2995865b398946a6f6cf8b1a9f
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-024EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:02bbf38fd9038c486b879d00101d3e80b7eb25d33ea4c0d9ff79e0a5e4f76894
+                rules_hash: sha256:8a2837e49b1788b3ae0f679ad7309309142d96960bb81f2f382e522f8b3ab3e9
+        allocation_anchor:
+      - target_key: region_mapping_review:c:3fd0f45dfdc6531eae36affe1182d61c
+        before:
+          record_key: region_mapping_review:c:3fd0f45dfdc6531eae36affe1182d61c
+          record_hash: sha256:6dfa56d65d59d51b2f77fe35ada5fc074fd0d985e02b0722b5e5758b530be14b
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:3fd0f45dfdc6531eae36affe1182d61c
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-021EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:a311f5700fefc88300f184af6ba90e5ff8cb7c679c44c6d483233fc461ff83a9
+                rules_hash: sha256:cb1e6e524ad3f6e0671d81757578e8272ec23b67086ca5e624309382b4d7ceb6
+        allocation_anchor:
+      - target_key: region_mapping_review:c:3ffe7dad46d1550fafa6d9cbd151245a
+        before:
+          record_key: region_mapping_review:c:3ffe7dad46d1550fafa6d9cbd151245a
+          record_hash: sha256:8831e09a462fef747cbdccd20cf2836cd75ce2b1a4c3414ccb0dcc7dd282b45b
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:3ffe7dad46d1550fafa6d9cbd151245a
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-017EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0d9c6a10e8f2585c4f1e6fa1b63e5cd89e24309101aa0a749d5b687fafb7da00
+                rules_hash: sha256:494a2be960ed810171c5d45bd1a5ec38cd92e44571480f0e35ceda9dfb85c918
+        allocation_anchor:
+      - target_key: region_mapping_review:c:440b8e0b50bd5df8b5330f751d5e18cc
+        before:
+          record_key: region_mapping_review:c:440b8e0b50bd5df8b5330f751d5e18cc
+          record_hash: sha256:d7732e0074b1063e874adbb78222decbee6cf47db9c3ad45baf5422dac797e73
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:440b8e0b50bd5df8b5330f751d5e18cc
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-008EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:f7d44e5ecfac1ae2dd64a82e7601c8b8763468fe5f36f15c73a07fc01d58ac51
+                rules_hash: sha256:aa31b64e64e4f0fff458681312af1e20198382c7e623181dca56528d4c078a55
+        allocation_anchor:
+      - target_key: region_mapping_review:c:47626d66ee915e578daa93068dc8c529
+        before:
+          record_key: region_mapping_review:c:47626d66ee915e578daa93068dc8c529
+          record_hash: sha256:6a933cbdc37b3d643ce34710008b39e7860c1be617815efbf72c96fc7404979d
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:47626d66ee915e578daa93068dc8c529
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-013EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:6e211b93d50d6c6b54312559bf88e51b0e470f0cb6e0867f273fdcd647f4edb3
+                rules_hash: sha256:d921a5e36159bb8aae70e76569aa91deeab6af8f79a7024110a426b40675f7ff
+        allocation_anchor:
+      - target_key: region_mapping_review:c:48264f83ff595af3aebcdb755f6d765a
+        before:
+          record_key: region_mapping_review:c:48264f83ff595af3aebcdb755f6d765a
+          record_hash: sha256:c3d444a2ba21c6a592b7b5d7edc9417c1fa5551e36a7594db8c1648642c45fd8
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:48264f83ff595af3aebcdb755f6d765a
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-009EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:1651fcf5008a9f9a66102da67a68bc2a2a82339b08781b7d90ad13b39a0392d5
+                rules_hash: sha256:0a45084333b57619496a6e65d24b1540a60814a05edced38456059e8f04e3999
+        allocation_anchor:
+      - target_key: region_mapping_review:c:4a4c302ff8cd504b8ca57026591e8933
+        before:
+          record_key: region_mapping_review:c:4a4c302ff8cd504b8ca57026591e8933
+          record_hash: sha256:f72c55315b3dc8030d7de021a5c19f788aca1528f23734467c7e765e9fd132f5
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:4a4c302ff8cd504b8ca57026591e8933
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-006EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:c53ab6a377ec1dcdd220fe28ce2c4d37ae49b6fd5924e7336f439c23331effb1
+                rules_hash: sha256:24e9bde785a244aa11a646e99aa74619aab6f88a880b956282b9ade1460cb5be
+        allocation_anchor:
+      - target_key: region_mapping_review:c:504f085673c958ac9aa4aeb9c6e89bbc
+        before:
+          record_key: region_mapping_review:c:504f085673c958ac9aa4aeb9c6e89bbc
+          record_hash: sha256:aa0bee448c693c7d1284fbfae2fd7acd4208904564aafa8a9bd023e642d2aa4a
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:504f085673c958ac9aa4aeb9c6e89bbc
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-014EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:2d09c2e44c7c3d20b987b9e5daa2204bdb2439c3687188ce68e6cb427492aca9
+                rules_hash: sha256:567b11f5cab68616969e45f1727a5efe1cbef60ffb2972bd37ec250587f03057
+        allocation_anchor:
+      - target_key: region_mapping_review:c:54c6f68d2ff6575fba38a827c80cee95
+        before:
+          record_key: region_mapping_review:c:54c6f68d2ff6575fba38a827c80cee95
+          record_hash: sha256:0799f5df3438042840dbdb72dda7648ee3f30fd2f6da5f5bd890a29ed2276231
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:54c6f68d2ff6575fba38a827c80cee95
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-005EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:e4caa414141b97f4d1de9340e80b6c7e1ccfb508da6e633fd816b971792d2ba1
+                rules_hash: sha256:f508ed27f128c7f33d572c2698b75452a9e765eabad1873a82dc9c845095b044
+        allocation_anchor:
+      - target_key: region_mapping_review:c:58d04aa573a75583afd341c6cc40bf56
+        before:
+          record_key: region_mapping_review:c:58d04aa573a75583afd341c6cc40bf56
+          record_hash: sha256:cf40ea2da963308362c988fde5f861cdc1d741742d96e416b107e29ee0b210d2
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:58d04aa573a75583afd341c6cc40bf56
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-004EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:2fe14a18130837f0bded000dd7f50c16e1c796e85dde514ad45d2af5a4cc6bb7
+                rules_hash: sha256:c043757f32377d9aa8fbcd7e3992816e35853b5f0293be0d078d84a2b911ad86
+        allocation_anchor:
+      - target_key: region_mapping_review:c:598af1a499aa53c3b330afed184dbdda
+        before:
+          record_key: region_mapping_review:c:598af1a499aa53c3b330afed184dbdda
+          record_hash: sha256:cc45646c10e6c50f30b4825d32f9e1e62966ac9662a4c39d3ecc112552bc7e25
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:598af1a499aa53c3b330afed184dbdda
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-002EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:beea6d710247d6798dabe91d7b85e4884996d65e64b5f7344dd9c7fb5eea069c
+                rules_hash: sha256:71aa3adcd7ddfdc10c8eb0038a3a8b672ec5761b8f4db257b52f0eff9bcbaf3e
+        allocation_anchor:
+      - target_key: region_mapping_review:c:5aa3918c11175da99edd1bbe5fa6c3ed
+        before:
+          record_key: region_mapping_review:c:5aa3918c11175da99edd1bbe5fa6c3ed
+          record_hash: sha256:59dc338c1f01a4ec81f399cf7abfe800b2c973320a1ca720ad5596fcd26379eb
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:5aa3918c11175da99edd1bbe5fa6c3ed
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-018EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:5d71cd1ddc0aeb17dd4a15d3c76dbbd3efefc029e003d3665a501c83108e9f7f
+                rules_hash: sha256:174273d2281decf0c274879f08c4e881355cefd76be5cfc92d8c130f5a5f7219
+        allocation_anchor:
+      - target_key: region_mapping_review:c:63a7606446685898862f424a6acbfd5f
+        before:
+          record_key: region_mapping_review:c:63a7606446685898862f424a6acbfd5f
+          record_hash: sha256:8df8d0630dbac3a291f9724070029aa2ab6a1c534c7b3b0bb2ba4fac9eb75d15
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:63a7606446685898862f424a6acbfd5f
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-006EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:27f776c40950b8836059979b63a4d5b8393fdbb940aea5062aba2c8810d7bfc9
+                rules_hash: sha256:e71f323c916d6fff4bbce1539893b151e79da43f8f65d1702dfb3b50a87214bd
+              - region: en
+                card_no: PR-220EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:b1fac04d3512838196bd797d0c715be408f2aeb5a1dd4e1c9e2de5f0d26efab5
+                rules_hash: sha256:e71f323c916d6fff4bbce1539893b151e79da43f8f65d1702dfb3b50a87214bd
+        allocation_anchor:
+      - target_key: region_mapping_review:c:63b4e9b0fe3a5a398ff4e0c72df6945f
+        before:
+          record_key: region_mapping_review:c:63b4e9b0fe3a5a398ff4e0c72df6945f
+          record_hash: sha256:73925f800f6d113518b75b5357d76eecd549832ff8527f44beb91808ed39d424
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:63b4e9b0fe3a5a398ff4e0c72df6945f
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:faa0719785899dc38307a9fd29180187313b05ecc647c516ea3fd31500d91d7d
+                rules_hash: sha256:5ebb00b483f8b7695b38fa2c54f924ae101ffecfc86da2a0bdaa887afbbc721f
+        allocation_anchor:
+      - target_key: region_mapping_review:c:65cdec7235db56059d871403e4879a0e
+        before:
+          record_key: region_mapping_review:c:65cdec7235db56059d871403e4879a0e
+          record_hash: sha256:3dd27ebf4c1aae3d4517066ac04b80d74e713ca4a7d3710a81bbeea33262e68e
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:65cdec7235db56059d871403e4879a0e
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-010EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:c37f3a6f4b48bc5c5154c12535e1cfca33985ab8b443402e304066324c3629fe
+                rules_hash: sha256:d73a2064bcac9eb3bb7cb6c5a3566fe72f5e79cca3d63a2f600ebab50dd1bb85
+        allocation_anchor:
+      - target_key: region_mapping_review:c:663229821dda51d9ad1ab722774ad56d
+        before:
+          record_key: region_mapping_review:c:663229821dda51d9ad1ab722774ad56d
+          record_hash: sha256:00d384623d55c78b170ea99cffd05af45136c0485f279850dc8f7451304c46a2
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:663229821dda51d9ad1ab722774ad56d
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-023EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0ce70a7a638deed9db8865c128ef8da0cd5df5217f9805adbdec41ee2f938574
+                rules_hash: sha256:61e6b677541481fc9b830bd0edf9d4c87d632996817213f7654365f0249e60c5
+              - region: en
+                card_no: PR-138EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:859c768d5821921b6c1d225e3161f5ef5e67adf59d7581f9f5a7c4ea245f0dc7
+                rules_hash: sha256:61e6b677541481fc9b830bd0edf9d4c87d632996817213f7654365f0249e60c5
+        allocation_anchor:
+      - target_key: region_mapping_review:c:667117d388f753ed90fa2c7bfbbf2e17
+        before:
+          record_key: region_mapping_review:c:667117d388f753ed90fa2c7bfbbf2e17
+          record_hash: sha256:2f3653517a355e5a63d05d10277786eb958378f455726ff663b419a88d4b4418
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:667117d388f753ed90fa2c7bfbbf2e17
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-019EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:7da30ec25a7f1c6e714c11da4e4f903ece48d7a6589eca75b8911bdc024617f9
+                rules_hash: sha256:994fbf1e2f65942cd19af5dc21e7e7cb1e2746151f667c2a6a8dfb44c223b254
+              - region: en
+                card_no: PR-440EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:c586a331825788cfbca0a099109920de6948f43c3b0b51082da32d500f0f7948
+                rules_hash: sha256:7d41f135d55a65eec073af16f41050eba9811c481010c50d892f45769b5120d2
+        allocation_anchor:
+      - target_key: region_mapping_review:c:694eda755f9251518795d232ef8979e0
+        before:
+          record_key: region_mapping_review:c:694eda755f9251518795d232ef8979e0
+          record_hash: sha256:5ac712f6b8c4ada24db9f2d45557a2f11957aa5cbd09937bd24fee2c3bba8abb
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:694eda755f9251518795d232ef8979e0
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-019EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:9e18675e5df9ed2abd17268c0a13dfa1e5ac0bd49fd6a4ca2175cea9ec76ddcb
+                rules_hash: sha256:73263c5308297fe6c75f2096ef53ebd4719fc8ad40727e30b6f031402552fd93
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6be6d89dd588569f98af99d02726a54a
+        before:
+          record_key: region_mapping_review:c:6be6d89dd588569f98af99d02726a54a
+          record_hash: sha256:37831892e0bff2dedeae8dd0dfc9f0dee3a1c8bf4b5ffa1514e7b4228bdfbf7f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:6be6d89dd588569f98af99d02726a54a
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-023EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:8231a42c938652811bbbe5dda2c799d3701e122e75115297abadae96b890590b
+                rules_hash: sha256:e9639c3b6bf60de9143788b32f15c8745c60e44c073f374ebfebe961c1d59f6e
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6cc635019ab8511f90104b42ac0b7254
+        before:
+          record_key: region_mapping_review:c:6cc635019ab8511f90104b42ac0b7254
+          record_hash: sha256:de59809b63cb61c15a4762034e2fb48a85cb9ed33c9680f25c56171307f7d447
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:6cc635019ab8511f90104b42ac0b7254
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-019EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:5c840efffde3d6deab210fe93c2f4914e5efd26de6f5e4ba6cb44edbd6a20178
+                rules_hash: sha256:ba94ddb1b6a0db637e53503ca5af9dd133ed229d3fab37f4b9bae93b6b355c03
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6cc8646ed0b658219e9f5a8fe8988840
+        before:
+          record_key: region_mapping_review:c:6cc8646ed0b658219e9f5a8fe8988840
+          record_hash: sha256:d74d337044d5a1df8b65a5b8a89526ef657525d08c00b657d65e3a5a5f97f1ce
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:6cc8646ed0b658219e9f5a8fe8988840
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-007EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:cb2d8d391ff7978dfcf5b596c9672b6ef9d4a110876d3d5c1bdc8209968067be
+                rules_hash: sha256:ff68d783f8d19a3ab089094c651baf1b2076544f0fe825dfda8f525e90fe8862
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6cc97ab394f05ca99b70439fdf50d0ba
+        before:
+          record_key: region_mapping_review:c:6cc97ab394f05ca99b70439fdf50d0ba
+          record_hash: sha256:62d5c418c94f22b363336db0e5dda65fa3681b8c1c2b2bfe383fec661edfc7b5
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:6cc97ab394f05ca99b70439fdf50d0ba
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-007EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:bcc71297ad6b71b2c55302266eb75f58b022d3a4f966469a15c46e0625b7e044
+                rules_hash: sha256:386937be03000e0b1ecede31f67743015933691d5330742aef06d0857dde93a3
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6db3a51da46d515db8c1e302371b9104
+        before:
+          record_key: region_mapping_review:c:6db3a51da46d515db8c1e302371b9104
+          record_hash: sha256:664c433150ca2e2d7ddcc674fcbe4d0572d857427837736955e98a4399f10890
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:6db3a51da46d515db8c1e302371b9104
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-019EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:aa06a696db4a16db1800aa8e4612975ee726265dd0d9dc211a6c87c09f3a148e
+                rules_hash: sha256:160c6042c97e7d5799c56b2096c43a71541c00ad7b5c8bcdde8f772edc57febf
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6df6c547ff2a5f3c82a9769fd134d720
+        before:
+          record_key: region_mapping_review:c:6df6c547ff2a5f3c82a9769fd134d720
+          record_hash: sha256:7a2ac996fcaefc48aaf9e395e355c2d4cffa187cad0a806484b94022caaada12
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:6df6c547ff2a5f3c82a9769fd134d720
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-023EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:2c1de8c62898fadc7653076cab2258b4c651ee90bc3ae9029257cdb3e2f07a86
+                rules_hash: sha256:b5a450643d510cd98d762cda7dbbc3224e0154f721c9530edb1380ea59c9fbc8
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6e5009170172592f9c1f1f2e0f50e08c
+        before:
+          record_key: region_mapping_review:c:6e5009170172592f9c1f1f2e0f50e08c
+          record_hash: sha256:430563e1ab0f27ec15ec0c986359e312760192c8b9386a1e80e1c950107c37be
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:6e5009170172592f9c1f1f2e0f50e08c
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-027EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:8a42cbbe2d453fb96489ff26dfcd0e2874801ca483f930107bc200d2eb714ddd
+                rules_hash: sha256:b742e9a0cf51d1f2c9445f676271c55e42cbbf5df93af16dee3a34e3da62e8ae
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6e9b63df42415270a627648b6b7aa3fd
+        before:
+          record_key: region_mapping_review:c:6e9b63df42415270a627648b6b7aa3fd
+          record_hash: sha256:4da216c90240107e3475b6bcf5992b98605941dcc6df170856076fece5bb4673
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:6e9b63df42415270a627648b6b7aa3fd
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-021EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:d76ce794e45ee894293688a7af67434d954f5759cbe575a3c8fd4352e876bc4f
+                rules_hash: sha256:e8250dbd13e972992c4f24cf889ea2c793140781d787feebbc7bc361f285396f
+        allocation_anchor:
+      - target_key: region_mapping_review:c:6fb50f8ca0945b08a94cb7cbb68ff6b3
+        before:
+          record_key: region_mapping_review:c:6fb50f8ca0945b08a94cb7cbb68ff6b3
+          record_hash: sha256:4426a45e9ca64d727fe7e3c4c34a5e1a356b2f49fd0e9fec73be1b6f4114cb5a
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:6fb50f8ca0945b08a94cb7cbb68ff6b3
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-003EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:16a5591482b2ddd0088883d72103b2a44ed57f03162fd8b7d7053d82ab7d89ab
+                rules_hash: sha256:3a17f85bc61f7b9c2e627e806030fd78b865319ea2e4ed41927a2e21cf1b917e
+        allocation_anchor:
+      - target_key: region_mapping_review:c:70ce171777da52008aaa94c18bbd418a
+        before:
+          record_key: region_mapping_review:c:70ce171777da52008aaa94c18bbd418a
+          record_hash: sha256:f5ff4522f5e9a520074b14ccc7e5e12178e5894caa56b1f8531ff956255d6fd1
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:70ce171777da52008aaa94c18bbd418a
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-018EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:b03e595bf13be9c27b3b6a41943cd34f861bc78ba30b78c68cd083541bb1c32a
+                rules_hash: sha256:d9eca7b2eb4720310296725bbf0af3a1e89108de975289dc09c9966f0ebd4b98
+        allocation_anchor:
+      - target_key: region_mapping_review:c:734b5e7661e6520cb94c989e33e15a58
+        before:
+          record_key: region_mapping_review:c:734b5e7661e6520cb94c989e33e15a58
+          record_hash: sha256:3a17fe087f56a577d853e7cc9556726f360d9e3cc588c3efd4ec66845866c41f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:734b5e7661e6520cb94c989e33e15a58
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-021EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:6679a39f47abc050977a0248b57b582accf3a525e39a8eadac728154ce82692b
+                rules_hash: sha256:68011588e278b6d593f565ef5476e662287849f10e51fcf393ca544e4742c834
+        allocation_anchor:
+      - target_key: region_mapping_review:c:75d1f1c519aa5b7893344861faccee60
+        before:
+          record_key: region_mapping_review:c:75d1f1c519aa5b7893344861faccee60
+          record_hash: sha256:cf910e9ba34a5374f983c612bcacfd6d58ce592873afed245ca8b402c3c64f22
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:75d1f1c519aa5b7893344861faccee60
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-024EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:b4ad0460b0727fec41b540211673155e9ed6f281b2c73634af573ccd66f0a7a3
+                rules_hash: sha256:ef27d54dc4fda95eaf01ccefe38098dcd4eeb479e38d4da5a499d330c38df4e1
+        allocation_anchor:
+      - target_key: region_mapping_review:c:776562bf7efc5294963c1b3c991347ce
+        before:
+          record_key: region_mapping_review:c:776562bf7efc5294963c1b3c991347ce
+          record_hash: sha256:20b4c4d7690ca78c51d956954382e8ba7ec0323a85ca53f46072b9bef20547c2
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:776562bf7efc5294963c1b3c991347ce
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-005EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:41a84c9c8d0eedb2570199c12b2525d2ac7be8ec0420c6c2428ce48c8062b188
+                rules_hash: sha256:15a515c6ad102bda48cef73122ddeebda96ce9716f33c732893b96cda97f01af
+        allocation_anchor:
+      - target_key: region_mapping_review:c:7ffc577b8e4d51c590be26f8c3ad0cef
+        before:
+          record_key: region_mapping_review:c:7ffc577b8e4d51c590be26f8c3ad0cef
+          record_hash: sha256:ef322a0cef82c6574542627a722bfdeccf7a544453a1ab31984ef13fcb30a990
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:7ffc577b8e4d51c590be26f8c3ad0cef
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-005EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0ae0c4478349d572aab694778d15a3ee6632cc582de3698b835b931a1ff86d15
+                rules_hash: sha256:fbce76a3709fdd2cc0afb5a73d0518e291262835ba0aeba4b3c3c71071af3f58
+        allocation_anchor:
+      - target_key: region_mapping_review:c:8781ddabe6b6554bb59ed01f553e7990
+        before:
+          record_key: region_mapping_review:c:8781ddabe6b6554bb59ed01f553e7990
+          record_hash: sha256:701a7de73adf40f8b0af329367ed5a79903c02f4d9975552d0ffa591411a974f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:8781ddabe6b6554bb59ed01f553e7990
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-LD01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:cf7ddd3e5250188ef37ff52b5b76974e98e481f05aa96a18eed64e83aec5d811
+                rules_hash: sha256:dda836740783da8322ded140b9df37f7efec3cb914d0a7307d5b1547e5720834
+        allocation_anchor:
+      - target_key: region_mapping_review:c:87b87b416a815da5b323277b68abf1a2
+        before:
+          record_key: region_mapping_review:c:87b87b416a815da5b323277b68abf1a2
+          record_hash: sha256:5687ce84458c84a0806e9ba62dc40c72f91a4a702c6df6d3c9ce678f97426cff
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:87b87b416a815da5b323277b68abf1a2
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-021EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:7fae3210aeedfbe5abd6725f078fb02ceaae2be812127a339aafdc8994e876d8
+                rules_hash: sha256:0be92bfe1bd5c9a8d8c28c38f95eec2d8a0cf52e922dcdef68739c72c9f83d7f
+              - region: en
+                card_no: PR-219EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:f85fa8b5099986c5bd5d2fb03600035696b4232dfb375e36c06a7ae299208045
+                rules_hash: sha256:0be92bfe1bd5c9a8d8c28c38f95eec2d8a0cf52e922dcdef68739c72c9f83d7f
+        allocation_anchor:
+      - target_key: region_mapping_review:c:88c0954e53315ff58ab4ea111c2fe4ea
+        before:
+          record_key: region_mapping_review:c:88c0954e53315ff58ab4ea111c2fe4ea
+          record_hash: sha256:ad031073a89e273b9214b20ccd3af64d325e9da07ccd5610094bb33dd46db0c4
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:88c0954e53315ff58ab4ea111c2fe4ea
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-019EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:3c6ff937822cb03d6e88a58b002003b9190504dc16284f63bbf1aa5e124a7d9f
+                rules_hash: sha256:09f7af9129da430417a40960da9280f381dfa4f889600ebfa1690d1336fe1cef
+        allocation_anchor:
+      - target_key: region_mapping_review:c:8a8000ac8bd25c1f9d28435e1371745a
+        before:
+          record_key: region_mapping_review:c:8a8000ac8bd25c1f9d28435e1371745a
+          record_hash: sha256:301d059f2fe2842a613c2b331bb6a728268a88b30e1b2be03b1369354832003d
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:8a8000ac8bd25c1f9d28435e1371745a
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-020EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:de272b50d63daf5a890b29e6eced380c3184b44fee7bd725510972a8e8b1ed95
+                rules_hash: sha256:d285fd98945b08b2ae14245ad3bfa2139e1fb8bbd5685c5c9914c6a56f0b207b
+        allocation_anchor:
+      - target_key: region_mapping_review:c:8d2051ffa3f95bf49a3baf392e7a44cd
+        before:
+          record_key: region_mapping_review:c:8d2051ffa3f95bf49a3baf392e7a44cd
+          record_hash: sha256:ddd7e7e0766420da23340d5ba31f4f1ed437e7e136ee02b9c5c4d93ad8931ad9
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:8d2051ffa3f95bf49a3baf392e7a44cd
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-007EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:09c76256c9d895fbb73f5f8a23b628fc46fd6a117dbbb7718cb9db061cfe3859
+                rules_hash: sha256:a1e1b5b091905f251958340dfac4e01bad9f0c7f2d57359b8fb37ca0075f0d4c
+        allocation_anchor:
+      - target_key: region_mapping_review:c:8d57f8834a32577d9df35333c1c34352
+        before:
+          record_key: region_mapping_review:c:8d57f8834a32577d9df35333c1c34352
+          record_hash: sha256:1576ce726da4ba6bb17f22cbe551dc5885df153543679b54219eb0d607e4404b
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:8d57f8834a32577d9df35333c1c34352
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-008EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:834d61716e2489377c6a9ea4dcaca933831a79802867d9b20de1ff356ac01291
+                rules_hash: sha256:7a7dcb69532a892c409698c1c16579d205b23863a15b1ee52eac548c3b301370
+        allocation_anchor:
+      - target_key: region_mapping_review:c:8e307cd096425b6b995d4eebfb5c4a32
+        before:
+          record_key: region_mapping_review:c:8e307cd096425b6b995d4eebfb5c4a32
+          record_hash: sha256:c58468fbc6f2e4619a9961a0b12e27003c11462b93ab9a3e42fea9809653cea7
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:8e307cd096425b6b995d4eebfb5c4a32
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-020EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:8166a3e78886c9a2947bb958d0851643637232d4bcaaf7443ab4486135341673
+                rules_hash: sha256:68171724ce3143af2cb1b17e717c1dfb98cb81fc0d590aa5277d55eb0ca428c7
+        allocation_anchor:
+      - target_key: region_mapping_review:c:8e8e0b4e60c852bfbebe21b3b6c65193
+        before:
+          record_key: region_mapping_review:c:8e8e0b4e60c852bfbebe21b3b6c65193
+          record_hash: sha256:dfd2fa3b09da6b6f5884ddad431ca1660f99c71490baa04738e6eebd1d9f9e6d
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:8e8e0b4e60c852bfbebe21b3b6c65193
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-023EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:b0501ab0d9cc892c977cb2e9c187c2feeeeb9eb4daf76934e72b0d555332cb3d
+                rules_hash: sha256:35d0ad892cecf62509ced758cb2071a3bc0e3414a1acd561d06c512c526f3e66
+        allocation_anchor:
+      - target_key: region_mapping_review:c:8fe8e94b40b55e7d9235afeaf45c1d5d
+        before:
+          record_key: region_mapping_review:c:8fe8e94b40b55e7d9235afeaf45c1d5d
+          record_hash: sha256:a049f18336a0d2ade205366c6de60d6e6fd072c6c8efdc5947b71d1f89b1b045
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:8fe8e94b40b55e7d9235afeaf45c1d5d
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-018EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:a2b26d5694960e240bf92287d608185ff09fdc3334da7c6fdd2ca6fb4991396b
+                rules_hash: sha256:7556ef445ddb132289b54570250a946e7a8bbcefcb570887af7e7332b568379f
+        allocation_anchor:
+      - target_key: region_mapping_review:c:94e99579a7425fc79b561c1050c176c8
+        before:
+          record_key: region_mapping_review:c:94e99579a7425fc79b561c1050c176c8
+          record_hash: sha256:5a34b211518c7bed064c58b188c7629c2f5e79c9125ee769a78b0ffcc1bf877f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:94e99579a7425fc79b561c1050c176c8
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-025EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:f2813c0d183c100943690c9dc576312153e021fe75f78d18bed632fd34ab1534
+                rules_hash: sha256:80afc5f532c7bb55f0402bab08b1f4500674540389d5516b62cdd431b99ec5a5
+        allocation_anchor:
+      - target_key: region_mapping_review:c:9750f1700a305c1f9a97595e518bf1f5
+        before:
+          record_key: region_mapping_review:c:9750f1700a305c1f9a97595e518bf1f5
+          record_hash: sha256:e8476c2fd76740395143cc18347659eec2e4e838e615c5afc2448294c7c907b0
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:9750f1700a305c1f9a97595e518bf1f5
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-006EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0cdc9930bee9ed517a11cff554608f509abc6910c7ecba74e78402dfa4ef2788
+                rules_hash: sha256:4389646832ca1690cc48ed3a97f60b7c7559714aa9c10ac0e7b606535882aedb
+        allocation_anchor:
+      - target_key: region_mapping_review:c:98a175ff131252e9a196ea48ed8faac1
+        before:
+          record_key: region_mapping_review:c:98a175ff131252e9a196ea48ed8faac1
+          record_hash: sha256:3b771e2e811b6684ac463c42c54c4d66df6dae5850b163669450e8022e73b6d9
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:98a175ff131252e9a196ea48ed8faac1
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-020EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:c00bb4f7e81afb512b96b460a3bafea7dae41cf2075ba3c8eb90c21ef7845ccc
+                rules_hash: sha256:f671dc9c02b8a2dcc1af245593f96a2e95947b884e2b15454400be86d3d7822c
+        allocation_anchor:
+      - target_key: region_mapping_review:c:9963aee7cb5658d8ba2d4e0e3134c018
+        before:
+          record_key: region_mapping_review:c:9963aee7cb5658d8ba2d4e0e3134c018
+          record_hash: sha256:ad13b4a8dc619d80047a018bf0a596e8d5a0dd186fb872930f84ee676e535cbf
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:9963aee7cb5658d8ba2d4e0e3134c018
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-004EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:deeb43152fc5092c16bcd1bed00770a2399298c7a3c1b9a2f48d79f5287c7550
+                rules_hash: sha256:188924e87af11bf5e5475972fde65d8cccee3b90dd83e4da43202ba6d3ed8272
+        allocation_anchor:
+      - target_key: region_mapping_review:c:9b4a1306f0765adbb1afb32d593476fb
+        before:
+          record_key: region_mapping_review:c:9b4a1306f0765adbb1afb32d593476fb
+          record_hash: sha256:11cc527325712b7d379ab9df5886a0b554ed993f667f86f3c6b68d9388c0e602
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:9b4a1306f0765adbb1afb32d593476fb
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-002EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:61acb087a9d23c60c668189c255d530436e9581c631a81533b1f76bf6b1094cb
+                rules_hash: sha256:40847f1255c021580d3da2eae44c05d92484876847d7c4156a5f43c1bf027d0a
+        allocation_anchor:
+      - target_key: region_mapping_review:c:9b6d087960305a599db61f7cc0756d17
+        before:
+          record_key: region_mapping_review:c:9b6d087960305a599db61f7cc0756d17
+          record_hash: sha256:194314aef074b0a75a98ba1a413adb0c8f30bf4388abc981707ddbfd4b3d8438
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:9b6d087960305a599db61f7cc0756d17
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-005EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:78fb92e4ab9fede69990f4099a32de6db8e05f8d1327e7bbfc65aeb35d4ad1bf
+                rules_hash: sha256:6bc7d438b4fbc354915b08d4dd8005d2b196163d3a7accccad0ab643f6477e16
+        allocation_anchor:
+      - target_key: region_mapping_review:c:9f94478fa11c521884b70c3e77240e56
+        before:
+          record_key: region_mapping_review:c:9f94478fa11c521884b70c3e77240e56
+          record_hash: sha256:9d82b4c222f9fed3226bb4cfd7bc104f7d11af8e0fe1abc609e108dfce34415f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:9f94478fa11c521884b70c3e77240e56
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-028EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:ae71955af7b922f9a084a64fd6b58e142e33b55e5e98c4e51ebfa0e8a75eb1d6
+                rules_hash: sha256:25da68fc2b482214e87406ddfe4d5e04d7aef74175989e5c4b379f63da6cdef1
+        allocation_anchor:
+      - target_key: region_mapping_review:c:a23593471e42524dbfaa5423790348b8
+        before:
+          record_key: region_mapping_review:c:a23593471e42524dbfaa5423790348b8
+          record_hash: sha256:54c04117ff958844f1864321d6276e9f6cfc09e402b9260563cee9e917783ded
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:a23593471e42524dbfaa5423790348b8
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-006EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:68a885091a4c083f3cf64f565c4916015f0ea49964f2bdf37e9bf65b69a3ac4f
+                rules_hash: sha256:38c31e32e6b150ec4d35a02376db5568ad4f549822d87353e92f3a2b1f4272ab
+        allocation_anchor:
+      - target_key: region_mapping_review:c:a489cc375a6256dd820f95c2194ce8dc
+        before:
+          record_key: region_mapping_review:c:a489cc375a6256dd820f95c2194ce8dc
+          record_hash: sha256:380784a0f782de06d632ac24c12621dc369f8d747c8950654db90e99e3efa0d1
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:a489cc375a6256dd820f95c2194ce8dc
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-003EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:5b9a7105cbd99afc508bfee19eeccab5772bfc90538426c741ebf2b8d28f9dae
+                rules_hash: sha256:f2f9156c5b9e394a983a4f8d93df8add9bb7b418183b1282b789ce59896f464a
+        allocation_anchor:
+      - target_key: region_mapping_review:c:a65f02d50ded5a1d9cec0598033c3201
+        before:
+          record_key: region_mapping_review:c:a65f02d50ded5a1d9cec0598033c3201
+          record_hash: sha256:67a6f4b18e3ece218ac05babb83d0424461107e035fdcd785eb8b33624b90412
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:a65f02d50ded5a1d9cec0598033c3201
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-025EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:a11acf8ac718555cef8347b877234d41311d88ccb0e940b1388b99ebcd91516a
+                rules_hash: sha256:944e7cf6389dc80aca69ae4840da32c43cf9422b9a7a659dbc8cce20bb3a85d2
+        allocation_anchor:
+      - target_key: region_mapping_review:c:a6d2ee2b05f45f05bb6be265b72ab06b
+        before:
+          record_key: region_mapping_review:c:a6d2ee2b05f45f05bb6be265b72ab06b
+          record_hash: sha256:92bd5d875df9e19ead02ee3aa9374c5347d3ef9840f584458ffb569ba595622c
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:a6d2ee2b05f45f05bb6be265b72ab06b
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-021EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:49777e1019a3a77feacbf85fc04f2eb19852ab1431571543efd1949132fba377
+                rules_hash: sha256:b86a981e3e52637db7f40776abfff20d177837c92c118aad8813398084b613cc
+        allocation_anchor:
+      - target_key: region_mapping_review:c:aea81d9859225fd7a7a357d191ec9147
+        before:
+          record_key: region_mapping_review:c:aea81d9859225fd7a7a357d191ec9147
+          record_hash: sha256:b60a2383f54244814f7312f67eed54d5780423a530694022cfb5e44596b4132d
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:aea81d9859225fd7a7a357d191ec9147
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-004EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:b0cf48e3324114d5f98fd24d1f5bfd9372ca21167ebe58cb8145d6f6f6daca45
+                rules_hash: sha256:02be7a1fb92cfd69a91fc059cd3423e1dcb74aff25e6ed06d3a9a2403546e2d2
+        allocation_anchor:
+      - target_key: region_mapping_review:c:af07f69660295dce9a80e9a00cae2329
+        before:
+          record_key: region_mapping_review:c:af07f69660295dce9a80e9a00cae2329
+          record_hash: sha256:74b655fa5f5fe4d6ab804fd882928cf75d51fe990378a8de94ac906add92166b
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: BP03
+          data:
+            card_id: c:af07f69660295dce9a80e9a00cae2329
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: BP03-LDⓈ01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:3f4e75c735d290e386cae25c04d0c83f9a4112d83169c81d819990730585f9b0
+                rules_hash: sha256:194210db546732485991c59acd1b13a3d49fa96b87b1f30b3482afe6f07ac1fd
+              - region: en
+                card_no: PR-041EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:1b352d84c40a30815dad650169ab690693f42f01e06fea5bda2395fdc179e44b
+                rules_hash: sha256:194210db546732485991c59acd1b13a3d49fa96b87b1f30b3482afe6f07ac1fd
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b0c216ee62fa5784a9ad0c58a5b88273
+        before:
+          record_key: region_mapping_review:c:b0c216ee62fa5784a9ad0c58a5b88273
+          record_hash: sha256:10e233347d6fc826ea92587101d05e3b92d7fae35bff13664c3fbae9e6831448
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:b0c216ee62fa5784a9ad0c58a5b88273
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-005EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:af6e461cbb0a0cfc2f3580e639636419d4eb0d87962360340b19072f8260dfc9
+                rules_hash: sha256:9a42138fd440ff6525bfdd7986e49d2d87160e039b88f98119547c3bddf269e2
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b460db320865554eb71dbafb95a71961
+        before:
+          record_key: region_mapping_review:c:b460db320865554eb71dbafb95a71961
+          record_hash: sha256:73a049f558ea1cc4d5aeee6e76e3a55b5aed85f0ef663e1498746bc37a1f1390
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:b460db320865554eb71dbafb95a71961
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-LD01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:1ee71f4a8450b88dc72156d35f793edf21a24bc64d2e8ce0a5cf5f29a5e628bb
+                rules_hash: sha256:f8fea7468c36586c799b6ace38883672bcc0797efd044bbe284e627de1380a59
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b50e6330c89e54ea86247c6c43fa43e8
+        before:
+          record_key: region_mapping_review:c:b50e6330c89e54ea86247c6c43fa43e8
+          record_hash: sha256:3beb7b23cf0425dff1bdfce56fd8dad681673bd4d7c75daea00e227ad35b2d06
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:b50e6330c89e54ea86247c6c43fa43e8
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-018EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:458a9ca6138648ba2c8f090587f189f76461e7a95734f69a86f64df8988f82ec
+                rules_hash: sha256:74ad00d1481e487ce416e1e2d23dd8e89f4234046943703e48b8d7789a36f208
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b5dffe6f822755698fc6807688ef1110
+        before:
+          record_key: region_mapping_review:c:b5dffe6f822755698fc6807688ef1110
+          record_hash: sha256:0a9807c1a0b45886f3d80caff010c6f1f94fb968a17077ebd4987cb3e8281cbf
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:b5dffe6f822755698fc6807688ef1110
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-022EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:18fc052b888550c6a4fb8ff96f82aa346966c0509a46d31d35207b0882754b9f
+                rules_hash: sha256:e1aef38d5afbb31ea24b9c82192c45bd0acd6fc48463be74fbe4df465c53a696
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b689054e0a5152aaa53f3f6323f39dea
+        before:
+          record_key: region_mapping_review:c:b689054e0a5152aaa53f3f6323f39dea
+          record_hash: sha256:eccb2a1a8971421e4a444d980377d76f9af5e7fe6b3c405f721ad00609420397
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:b689054e0a5152aaa53f3f6323f39dea
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-003EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:e151d5e32f43dbb12776bc2cbb7012dd15acbb6d0eae9b4690007f336396a394
+                rules_hash: sha256:074e4e74b36a563e911670eb61d03a525da0eb97278daa0066cc9c5e4f327377
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b706193e26be5c21a46c913da3ee0ba6
+        before:
+          record_key: region_mapping_review:c:b706193e26be5c21a46c913da3ee0ba6
+          record_hash: sha256:bf4755b723ecc7726657700dec2dd870388073bb6ec27d36af76603f8ca59ee6
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:b706193e26be5c21a46c913da3ee0ba6
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-LD01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:46cfe31020535b4dbe61bdf1b0a8e55f3dd066fbb37e2ed1b3f5af7a4536a2d4
+                rules_hash: sha256:3aa34c680d2bbc8e14a6bdeb2fd750cbb186f6b2ea58bb4ce6988939d58f0438
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b774b1d3be8556ae872521c2220b6cba
+        before:
+          record_key: region_mapping_review:c:b774b1d3be8556ae872521c2220b6cba
+          record_hash: sha256:a017ffd8597cd915b86456a181733e8c5f98044be8113da285c1b582364066c1
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:b774b1d3be8556ae872521c2220b6cba
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-020EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:1828dce7744b0f41b24e1903edf20084ba361121da1566a5aefea4359f0ed6e5
+                rules_hash: sha256:334c213772dc079865e5c91cfe974402b8945f0fb7804bb3e1275b9944d364b2
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b8a8a17184dc57f0b684af970832f9b0
+        before:
+          record_key: region_mapping_review:c:b8a8a17184dc57f0b684af970832f9b0
+          record_hash: sha256:2b1d93de4cdcca64f7295a1b98e2a0b49984430ba6364a979b09f72d7ac47863
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:b8a8a17184dc57f0b684af970832f9b0
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-023EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0d417255da5ffaa13425bfb32bd358d4213ab0bddeee0ade776c5c3676706f27
+                rules_hash: sha256:ea208d73f3f21b5220e637e963158b9b04ca36600a445f527264d2a8bf67d203
+              - region: en
+                card_no: GFB01b-025EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:3be4847626b28f35ac21a4a0fd786d2f79e86b6785a5253a0f4ba184efdf1b27
+                rules_hash: sha256:ea208d73f3f21b5220e637e963158b9b04ca36600a445f527264d2a8bf67d203
+              - region: en
+                card_no: PR-137EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:9c89dc96d916abfe47f9d207bedfd1db674a130ac581dc37f5a3b3ed07aed1b5
+                rules_hash: sha256:ea208d73f3f21b5220e637e963158b9b04ca36600a445f527264d2a8bf67d203
+        allocation_anchor:
+      - target_key: region_mapping_review:c:b98b1e48c8505b8383e519c1ae1c2482
+        before:
+          record_key: region_mapping_review:c:b98b1e48c8505b8383e519c1ae1c2482
+          record_hash: sha256:c1d0c86a5e0d69c41a5597d43cd747dcbba8cd04f2f9a7e337e610a5f7e8ca56
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:b98b1e48c8505b8383e519c1ae1c2482
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-007EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:612cea8e195a776252ce10eaba81a13965b60adbd94d2534caef097c0b854f54
+                rules_hash: sha256:bd8b450f25d0b51d51f8efd2dd4e129ddcd5100ac2b739d0c7fe3a5ceb14924f
+        allocation_anchor:
+      - target_key: region_mapping_review:c:be19c1560cbf55c1aa28bbbaf8c532e4
+        before:
+          record_key: region_mapping_review:c:be19c1560cbf55c1aa28bbbaf8c532e4
+          record_hash: sha256:4cee803d8c06c09a4862b0b8cb2e10d02e9f86dfce86ffc45da97df8494d49ab
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:be19c1560cbf55c1aa28bbbaf8c532e4
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:99a8e38c3aafe840aa64cf21853674c4ce1c9b364c47d86ca868fba81e63a1d4
+                rules_hash: sha256:bd19d44e69434d9b51c917200829c3bec63bde3a624bdbe54e7c86e4fd88be7e
+        allocation_anchor:
+      - target_key: region_mapping_review:c:c2002aaf4df25e5487ed7defc9ad18d6
+        before:
+          record_key: region_mapping_review:c:c2002aaf4df25e5487ed7defc9ad18d6
+          record_hash: sha256:a8b0cf0b6f66a13d633a2f5f6702df64f450ac873321dd7d84276c2248d19d3a
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:c2002aaf4df25e5487ed7defc9ad18d6
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-T01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0e11b7aa1381834ac68d9f7993ba49973af71a110a24327b603ca73402a0e6f9
+                rules_hash: sha256:f7c0fd074c80fb02b62f5f3601c1a03841af26f82fec5ddb50463af9b221412e
+        allocation_anchor:
+      - target_key: region_mapping_review:c:c39c15c67a7652479bf6bbe8577843af
+        before:
+          record_key: region_mapping_review:c:c39c15c67a7652479bf6bbe8577843af
+          record_hash: sha256:e31e31ca478aff1b5e7ee4db63854ec5b94fa49172d6d49bad355831ee779b90
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:c39c15c67a7652479bf6bbe8577843af
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:aec21e6c4eeb7c6ab5f5579bff2522d13b775d57af4a6eaed4aba0b9b35c0b49
+                rules_hash: sha256:7dd471d99f6e08148b79afb49e147482a83f3c76554c5e0e44d67443870eef1a
+        allocation_anchor:
+      - target_key: region_mapping_review:c:c3abd57858cd57b6a873d7dfe112fae9
+        before:
+          record_key: region_mapping_review:c:c3abd57858cd57b6a873d7dfe112fae9
+          record_hash: sha256:9b578d0d7904417943bbf911c9bcfd54ab3df529541e210c12306f2e2c19b2b9
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:c3abd57858cd57b6a873d7dfe112fae9
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-006EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:254bb356f94111113905718bf12667d65a74ae056a6d2bd5069a687f3c059475
+                rules_hash: sha256:d92ff72977cc6562f3c17c6deed2a95d47ee5e0bebc44e03d73d99ef33d08486
+        allocation_anchor:
+      - target_key: region_mapping_review:c:c709ad1f8169559aa00ce295618a7028
+        before:
+          record_key: region_mapping_review:c:c709ad1f8169559aa00ce295618a7028
+          record_hash: sha256:5986d55282a61369247c57f24a4bd462becc1904d49e0f8cc040b1f45cc1e160
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:c709ad1f8169559aa00ce295618a7028
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-020EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:c0455fc13578f5a9168474480236ac49b5b1ce88993924f0567a2739a4b0009f
+                rules_hash: sha256:63e69667743f5a7a1c5193b651e3d0772dc1d619695e77eb466af032753af3f4
+        allocation_anchor:
+      - target_key: region_mapping_review:c:c75174f8443e515e9b3ddb22ce1e0ca4
+        before:
+          record_key: region_mapping_review:c:c75174f8443e515e9b3ddb22ce1e0ca4
+          record_hash: sha256:601418274760bf296e0bdc0aa8b66e96834fc99e3df3baf3d0136a84512c798f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:c75174f8443e515e9b3ddb22ce1e0ca4
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-007EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:5530afb7c09f0c0bccdadab99c099ef63588fc6815229292adefc622f719ed88
+                rules_hash: sha256:cba0a6d55659c9ff2b81f62a4d9703087364afabff0f857651584b65cd7ca6ca
+        allocation_anchor:
+      - target_key: region_mapping_review:c:c7dbc215a3745d0b864a33100ee14534
+        before:
+          record_key: region_mapping_review:c:c7dbc215a3745d0b864a33100ee14534
+          record_hash: sha256:a32297dd515ec4b1e410671258d498a7b5c4129a80c4c332f10b41aadbcd9db4
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:c7dbc215a3745d0b864a33100ee14534
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-004EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:d57ba9e1c5b145cb7f4ac882af2196a6144a8f44292f331fc7cde417d8270df5
+                rules_hash: sha256:8ac830c74988292f2627546cc2cf6d691b452f7b67e3ae13b2ebc23fede5962c
+        allocation_anchor:
+      - target_key: region_mapping_review:c:c9d3e31edd7e53e8a6e0041edefd28a1
+        before:
+          record_key: region_mapping_review:c:c9d3e31edd7e53e8a6e0041edefd28a1
+          record_hash: sha256:d57c654e59a56feed3bae28f2348f4f03b95b72abdccab8f69f2d1efe45f08e6
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:c9d3e31edd7e53e8a6e0041edefd28a1
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-021EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:85fb7b4309c181fcbac46baf63b95e0250e91c6ae2ac5f8cb65146b9ee7e403c
+                rules_hash: sha256:6f35bc98496b72e07a31fa455b6388f1bad453fc17b0079ddb73f86f43e2e597
+        allocation_anchor:
+      - target_key: region_mapping_review:c:ca194d168ee55246b53fbd93dcad43a9
+        before:
+          record_key: region_mapping_review:c:ca194d168ee55246b53fbd93dcad43a9
+          record_hash: sha256:a2dedeea830cc934bea3f0558c773692241574efb8e74e44c600859c986f2431
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:ca194d168ee55246b53fbd93dcad43a9
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-003EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:d83203e7eaf17d4a815f89afb6c52e895c860639cf7ff5354670e973acff8f70
+                rules_hash: sha256:6e389a3d2e894a7b97c7287d841ca42635d141c66e567d02cf13a233bc87d371
+        allocation_anchor:
+      - target_key: region_mapping_review:c:cb00dc320e3353e48fae6d4390e5d586
+        before:
+          record_key: region_mapping_review:c:cb00dc320e3353e48fae6d4390e5d586
+          record_hash: sha256:67a747fd5468420261df24cfd915f50676197b7bb260e0d1db3a2fa9e51ba279
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:cb00dc320e3353e48fae6d4390e5d586
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-006EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:23013343a82b3ad642fde51f5dfc05f01c371b27955d71c0e4767848e54fef88
+                rules_hash: sha256:3b04c2930eeb9fc032349112fe1e8724329228108df76ecffbbacf13005ccb3f
+        allocation_anchor:
+      - target_key: region_mapping_review:c:cf40e0f278495e8c9fecea679761b054
+        before:
+          record_key: region_mapping_review:c:cf40e0f278495e8c9fecea679761b054
+          record_hash: sha256:3a9f0794f3b6bba9b462e9aedf31068e793396c06cd33665c17b235189f8f48f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:cf40e0f278495e8c9fecea679761b054
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-002EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:ff2f61aaa3ddf40f3b5b88f6964f254441918c228a0af82ec0123159b4833edd
+                rules_hash: sha256:9684b4525a6ed2d67e97eeccb4ba5850ae0dffeceeec56ae865b034a3161807b
+        allocation_anchor:
+      - target_key: region_mapping_review:c:d75707fa41c75ac59db8315c1a9ce2e6
+        before:
+          record_key: region_mapping_review:c:d75707fa41c75ac59db8315c1a9ce2e6
+          record_hash: sha256:5192a2bd0dcfa120e475902321507b5f6a51ec12419d38dd6fee344ebf324fbf
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:d75707fa41c75ac59db8315c1a9ce2e6
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-008EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:fbf4fd3235289b8e197210161397dc4e8496bf94cf71dfbf2b9113fb16832037
+                rules_hash: sha256:186ea55bc85b624c24128eddfb15b4f08afb6b39e752c747a471237139d1c33d
+        allocation_anchor:
+      - target_key: region_mapping_review:c:d8ee9156d3d05a9685c1fdb193692554
+        before:
+          record_key: region_mapping_review:c:d8ee9156d3d05a9685c1fdb193692554
+          record_hash: sha256:9e8e550c09103d89c690f53a16477487552cda693dba125fd720b7e603ed4ef4
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:d8ee9156d3d05a9685c1fdb193692554
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-003EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:95ac72a6577aa272fbf91610a04eb0ac56dcc201df649e48a47813ab48847c01
+                rules_hash: sha256:6a38520f025124c388f72fdcd10269ab68f74b7eb6c46852026f317e9ebb9f9a
+        allocation_anchor:
+      - target_key: region_mapping_review:c:da4faeaebed65bfa8264e1861534b0c7
+        before:
+          record_key: region_mapping_review:c:da4faeaebed65bfa8264e1861534b0c7
+          record_hash: sha256:b51c95a6360a3d5aed17a4b24b5c1f105da3ceee6c747d77be378335840bbb93
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:da4faeaebed65bfa8264e1861534b0c7
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-LD01EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:fc98ded25ec150d8af9ae84b316da670e4d616e3f04d8e70c2d25486fc73e041
+                rules_hash: sha256:2b14b984aecd193f5cf00587643a9f9296f37381000aa8f561409a8f314bc114
+        allocation_anchor:
+      - target_key: region_mapping_review:c:dcc07c4cb20859388111ce8ccf2ac929
+        before:
+          record_key: region_mapping_review:c:dcc07c4cb20859388111ce8ccf2ac929
+          record_hash: sha256:78a9670f1dacd0264ebc92476e43d6751e3717ac7309f7b14765eb8e53ca9479
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:dcc07c4cb20859388111ce8ccf2ac929
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-007EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:194c275678144f58a2f4d02f10da4753b54db90a8df6f0aa9e0471c26f079873
+                rules_hash: sha256:4e4867be20780ee8bb90c7d210e524131954c72c402373d991d2f366cabb88f0
+        allocation_anchor:
+      - target_key: region_mapping_review:c:e4ddba56119f5efe92f71c0c65c2671b
+        before:
+          record_key: region_mapping_review:c:e4ddba56119f5efe92f71c0c65c2671b
+          record_hash: sha256:b436647c8b762480ebd67ec08ae40d4097132f810c825dbf4d5a80b017df3d2e
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:e4ddba56119f5efe92f71c0c65c2671b
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-024EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:50b8bc3a2e7893b9536fade482bf4b6430a26805e1493a28eb73c48cf7ae9141
+                rules_hash: sha256:8140294112b102ea5d865e22edab9d1325bd9b181429f6d17dd89222d3d7d4db
+              - region: en
+                card_no: GFB01d-025EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:80e8cbec27f2f7c1dafbf81bf5dddf9f65215392f96800fdd61ec5e94851a7e5
+                rules_hash: sha256:8140294112b102ea5d865e22edab9d1325bd9b181429f6d17dd89222d3d7d4db
+        allocation_anchor:
+      - target_key: region_mapping_review:c:e8078cea6a0d5258982639dec65a9bbd
+        before:
+          record_key: region_mapping_review:c:e8078cea6a0d5258982639dec65a9bbd
+          record_hash: sha256:0fbe7482afdbdbcbd60de0531c3fdb83c9e5fb721cf4d0d54a8abfc11cc7eba0
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:e8078cea6a0d5258982639dec65a9bbd
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:1d4989af2e2af00f0f5cbcec3b1e6b632fcfeee70f143e9e59924bed2559a181
+                rules_hash: sha256:168a160011f2a948225771cdc962dc61d370564846fe2467426d9645c592a9c6
+        allocation_anchor:
+      - target_key: region_mapping_review:c:eacaa53248a1541ca97df4e54e5fc0a5
+        before:
+          record_key: region_mapping_review:c:eacaa53248a1541ca97df4e54e5fc0a5
+          record_hash: sha256:058eb02e6ac011e9bc09e4c5fa4eb77f8807acabd3b08f11309e1c9d5b00e135
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01a
+          data:
+            card_id: c:eacaa53248a1541ca97df4e54e5fc0a5
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01a-008EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:37a832c46ee4576167f0ca101d59f94f1298eff4c7d16be3ef9dbe3e9633931d
+                rules_hash: sha256:93df6691d862e8e9842b12a63e0ac435bb18c1524c754faf455f5528cd91d8ce
+              - region: en
+                card_no: GFB01d-008EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:238fffa0390591c85e691bd547c1e87ac9cb6a0efea73ca39ea6189a90248d81
+                rules_hash: sha256:93df6691d862e8e9842b12a63e0ac435bb18c1524c754faf455f5528cd91d8ce
+        allocation_anchor:
+      - target_key: region_mapping_review:c:edd9d175b3a9557d8c05636f45391735
+        before:
+          record_key: region_mapping_review:c:edd9d175b3a9557d8c05636f45391735
+          record_hash: sha256:fa1c80c5acc90c5448d9b0881b235de30c55e086a68aea0bce269e1cd393e67f
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:edd9d175b3a9557d8c05636f45391735
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-004EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:0592afb86c7d402e81bc123f8d85a857be0224c8182cf99e62cce12dfc5b5711
+                rules_hash: sha256:d6ca5f136d674ee9563f432ba7add78f2d88cc0cf03d5ff778cb1d94b2c1b349
+        allocation_anchor:
+      - target_key: region_mapping_review:c:ee1463dbe486512999967f149a08ca3c
+        before:
+          record_key: region_mapping_review:c:ee1463dbe486512999967f149a08ca3c
+          record_hash: sha256:82b375b760b7f0d890b2334fb2e31b1eeb85b8d23c7dc48325de184f6273d9d0
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:ee1463dbe486512999967f149a08ca3c
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-005EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:f0b1474e77364145bf5e5e5473b0c554f882f2cd4bc7f523c7311aec16b8ffc3
+                rules_hash: sha256:a3afdd5bee20293b29eceaec264caf6f2bbe64ca99c0cc2adc0e9daf30fc8b8b
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f0ee5f3d3cf451ff9f5dab01554f1933
+        before:
+          record_key: region_mapping_review:c:f0ee5f3d3cf451ff9f5dab01554f1933
+          record_hash: sha256:1ef2dcea23b63d7482cf9fb7b6369b069ae6154f3041f851f8d12d178cffda0a
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:f0ee5f3d3cf451ff9f5dab01554f1933
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-020EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:8d1ed18f94dadcc4db2b789a82cbb754e15b3b4946f8d20e01ff67950b84a597
+                rules_hash: sha256:6ffe6c30bfb7a39cc2ec404d70b6eb0d017f959266f1a1c28aadc305b0895b51
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f13649d14aa353dcab38fa8ff5c5dfdd
+        before:
+          record_key: region_mapping_review:c:f13649d14aa353dcab38fa8ff5c5dfdd
+          record_hash: sha256:74fc6fccfa90ce9484088760f1f2b1884a9441634bde95e7cdeab294c3cbe3e9
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:f13649d14aa353dcab38fa8ff5c5dfdd
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-026EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:03bc2809065810d86ee6ceb159a899bb44b8056e4410f650a7ac8552000630cc
+                rules_hash: sha256:5437d1d571bd24d1bb892884c16f53135444d2c90039ef7d8ce8226879b73df3
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f1fe82f2597b50f3bd692f3df5f47879
+        before:
+          record_key: region_mapping_review:c:f1fe82f2597b50f3bd692f3df5f47879
+          record_hash: sha256:b388f966f2535839a2b136a6425a6aecd90b5debef67ca4d3fb32e97db4b6b4a
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:f1fe82f2597b50f3bd692f3df5f47879
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-022EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:689f6b5280470c75a58b252d250080a73472e6a5a01df1be08ec2bf254b15c39
+                rules_hash: sha256:5485ec9dd86a384a28f1d6e31b734069eb023f46a033a8d49d96b1f6efb33009
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f2122836abad524bad59ca5839476784
+        before:
+          record_key: region_mapping_review:c:f2122836abad524bad59ca5839476784
+          record_hash: sha256:3e7708a0e2d2500e57cd9f847dbfaedb4ffee2aa41fb6eeba51995c0f295e1d8
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01d
+          data:
+            card_id: c:f2122836abad524bad59ca5839476784
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01d-002EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:c3a917c8decac7a33f8ffea7131d92a7d258a01008fae661123f69486e3417af
+                rules_hash: sha256:dec453a03f015563e35ce45f3da4d279998c273cfd2009d31ba9394bdbac8d79
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f3d23386cfa55e97ab16d9e74860113a
+        before:
+          record_key: region_mapping_review:c:f3d23386cfa55e97ab16d9e74860113a
+          record_hash: sha256:ec0f2f85710d7c46496fccfba182609b66d9c4663ff38878dc0548fae73ba803
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:f3d23386cfa55e97ab16d9e74860113a
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-022EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:2958c7a6ed967bd125e41fe961e7924146154795d92d591a9607fbcf964a8935
+                rules_hash: sha256:13155dc5e58d6bbca8f0b25753736ad8c52baac705b990f6c7e5af6a47e2a815
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f404487267355cacbe046ba0946c2914
+        before:
+          record_key: region_mapping_review:c:f404487267355cacbe046ba0946c2914
+          record_hash: sha256:3e2674174bcfb14a520d18af16ce35344056ebc1481ca2ad2134227c1678950d
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:f404487267355cacbe046ba0946c2914
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-005EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:b89a0789528acb1d471e739fd5692567e721845f7a399fa4299ef0d4dc35fcec
+                rules_hash: sha256:d144fa708b30ffc2d3f97509cb79ff55ef0c92c067068845f21e6fa426e0805b
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f44d1f8aaed45490933662e29140866e
+        before:
+          record_key: region_mapping_review:c:f44d1f8aaed45490933662e29140866e
+          record_hash: sha256:0e3c3a9c6902bd08cfb6031a1685c1a935da45260b4963b79cbd5ef861a141c0
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFE01
+          data:
+            card_id: c:f44d1f8aaed45490933662e29140866e
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFE01-004EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:fb24edc18816a2c4fa7a20ef8fc9ab3519caf9a22c6bd397ab8e95ad4fe16d18
+                rules_hash: sha256:77a0aa7892bef003c65b095ec5ca5b30a9a4ed97116df8ed1f31ebf25b130ef8
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f5b9dee96d005ecfbc5e4eb56b2b24a3
+        before:
+          record_key: region_mapping_review:c:f5b9dee96d005ecfbc5e4eb56b2b24a3
+          record_hash: sha256:75d66aa7e2189f128fff815a60edfff1fa66063c09f4601f5f8e6318bfe25f2b
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:f5b9dee96d005ecfbc5e4eb56b2b24a3
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-003EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:f18b6caf672d5536a6f499c748fee6ac63734d77529344afdfd19c845046512b
+                rules_hash: sha256:fed6a48b59b250eb1d232acda43121d72320fb0ed84631606cc390ad5c42979c
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f62c136f811c5d7cae7dafaa16d146e9
+        before:
+          record_key: region_mapping_review:c:f62c136f811c5d7cae7dafaa16d146e9
+          record_hash: sha256:dc7ac1cd8f188bf99329f4bea6529f203e9c0be37874e44ad88b5be6ed5b6394
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD01
+          data:
+            card_id: c:f62c136f811c5d7cae7dafaa16d146e9
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD01-001EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:4496d8078ced1aee064a1f03fe77153c3cca54074894d19f0461f15cbf52cd44
+                rules_hash: sha256:67bb0d241afa1614b50700c2d0c936db6b3e916968716cca0265c1051791dd7b
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f6463b6c6ebb55929c2be206e0bd405e
+        before:
+          record_key: region_mapping_review:c:f6463b6c6ebb55929c2be206e0bd405e
+          record_hash: sha256:77d6426cddcbc6de791288152511eed4cf6181362d957e6f15c703af388089c0
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01b
+          data:
+            card_id: c:f6463b6c6ebb55929c2be206e0bd405e
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01b-024EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:1ddd04ec02ac454eac0b4473ace57fc7ec0e67d4dd8741874d96fa2fe96c76e7
+                rules_hash: sha256:6c1d617400eb452e52d65e8b6e54eb5e167842a7c0c60699ba7adc0f072f4189
+              - region: en
+                card_no: GFB01c-025EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:5422e7b7d3e0a52d24099a943c48ea1b33cc4e97236671602cf57f1f477313b1
+                rules_hash: sha256:6c1d617400eb452e52d65e8b6e54eb5e167842a7c0c60699ba7adc0f072f4189
+        allocation_anchor:
+      - target_key: region_mapping_review:c:f6ae45c656c9544fab516dfb85a74988
+        before:
+          record_key: region_mapping_review:c:f6ae45c656c9544fab516dfb85a74988
+          record_hash: sha256:64ee334e90b4fdf24e4016ad309581e18f07d95bbc2aac054ef6b76705c7cf38
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFD02
+          data:
+            card_id: c:f6ae45c656c9544fab516dfb85a74988
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFD02-022EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:919f0dce3af73ebe036b620a619115aaf1bd1a226f08fce21588d11bc7530a54
+                rules_hash: sha256:025f37513931ab4a49cddbefadde4f40f35bcaa137fef66a0de77eb879afa209
+        allocation_anchor:
+      - target_key: region_mapping_review:c:fb85badd7b5c56d2a62fc3c95358285b
+        before:
+          record_key: region_mapping_review:c:fb85badd7b5c56d2a62fc3c95358285b
+          record_hash: sha256:cd87bc8ece24dc3e5009045c3cfb63b3f7adbed65e512b40fb881951fc5db416
+          transition_key:
+        after:
+          kind: region_mapping_review
+          owner: GFB01c
+          data:
+            card_id: c:fb85badd7b5c56d2a62fc3c95358285b
+            target_region: jp
+            state: confirmed_none
+            as_of: "2026-11-25"
+            coverage_scope: All Japanese official card extractions in the
+              reviewed input batch
+            coverage_hash: sha256:5144de5d51a64ca3462227bc24cae08a4ae767ef5b8c4e5da954ee08287cc2ba
+            observations:
+              - region: en
+                card_no: GFB01c-002EN
+                recipe: registry-observation-v2
+                observation_hash: sha256:bd8e70e3992ca00e2125549e28d37636e6e2a6768278c51ee75072f963ef8f6d
+                rules_hash: sha256:2140c9b009dfaa190888c53fd2a1a19591268c0314061ff2c3bd0988e9eb0c5c
+        allocation_anchor:
+    repairs: []
+    routes: []
+    evidence:
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:c31e81fc427298e92c0573d553b14d23a960da87584adc2408eed13d4e5d96af
+        locator: BP03-LDⓈ01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:a641c0b55af7948f1fd719cf3d922809a2ab9dbdc41e5f37017638f325c5eac4
+        locator: GFB01a-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:105cf48389000d3a41b6e05953f3faed441e79fbb54b72684947d449572e76d0
+        locator: GFB01a-002EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:f89a69799f13a1b2b6bb4751deeae73e9d4b6682e51cbc5a5dee2e58c68a964c
+        locator: GFB01a-003EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:b0a12a48cf67de96ba6b3d678c1ddb8616cd12856b5b5cf952fe7690ea72a0b1
+        locator: GFB01a-004EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:90d66a8fe061ba0eaa7979139137a69c01b55c45d439694c5222f009d95ffc29
+        locator: GFB01a-005EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:575b97c944c3030931301d4ad0a5aed2d45f3d8e538d5b90835124bfc6be572d
+        locator: GFB01a-006EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:256a088f185e35a70d542108b6e74c6c90acf53efe880ec0a4c92d982e1a2cc0
+        locator: GFB01a-007EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:7033969fe8260ecbc6196e116b63f7c7cf0e15da20e43eaa15bce04c2396b9b6
+        locator: GFB01a-008EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:89f1272619415febb4ce64ba810b57fcf74ed3cf34952eaedfb733f9fe799eff
+        locator: GFB01a-016EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:a119610992a58de538cfeb395827a856e0562733d6019e94240d9bad18540872
+        locator: GFB01a-017EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:3f206fa6c8a6d318934b47676661ae5317999cfe16e0ffb7dcecf85cc8d884de
+        locator: GFB01a-018EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:a87b696f6f67e8692ddfa3f4cd751bf8e8e9fa0b2e08e9cc33e4e13ef43bc7b0
+        locator: GFB01a-019EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:a7a3c2f043134d9f67383a3487520046eda064038513e8773ee8cfc93259676c
+        locator: GFB01a-020EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:8e612d2084535795aa1d496eb15d33480b4e604236c164ded2e9c20b85bafb04
+        locator: GFB01a-021EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:9d155575c5e1e93c59e44eb0ab21073d1bf09bbde3184d778eeb3980993ce12b
+        locator: GFB01a-022EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:9b67dfaa282c95578a7c1288e8cfe400e2214266bb8bcd963c9c48959a62b3e3
+        locator: GFB01a-023EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:5e1eea02db66b1a92bfcc77a79c96297fc04d3cfba2048b7048dfb4eb75b57ba
+        locator: GFB01a-LD01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:c2d62b6eea155e71ab07f04b2a0864c04a8d63afbf13e9d5a7a3ddf3f08dc7b2
+        locator: GFB01b-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:0a8ed7ca81d54a8742a7ef81d6fc555ac00d922bb3fc2be105d5f14da3e737f5
+        locator: GFB01b-002EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:11e8d05607630587f3703fc4cb4abefc31fa62e5cc2f27d50d2b56aec364237b
+        locator: GFB01b-003EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:88e5c08e28f530974cfe87d15bc463bc4f278dad98fa34fdf328a26871e47278
+        locator: GFB01b-004EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:9bd663cb950460de975870da00b132485e2b8cb233d21d80153a1224e61be58a
+        locator: GFB01b-005EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6c9f62d37c6a577a77a8498e7868ea3567baf929a783da67fdcc2ca69b174f31
+        locator: GFB01b-006EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:604e293e6d78cc0c5c3c5585ffaaf4f0b2e2a1bae47f0dfdf620bcf771b4b1ba
+        locator: GFB01b-007EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:88585cfcf836b67d916f012f22a45c19b413fc88253c6696f9c164756e55f12c
+        locator: GFB01b-008EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:610f71e48f95898d87f0e20bb6038ef03d28408129336eec7b1f5451f4f4b5aa
+        locator: GFB01b-018EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:f43d982feb6b8d9a7344813a6f6dd9225b3d04d905575677946a846073b4c0a9
+        locator: GFB01b-019EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:8ca8141325b1be9060e3ede56d1cf5bc335f1a0a3c6dd94e554b35318a2875d7
+        locator: GFB01b-020EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:c5492a024dfc4160473f9e83c59a03c4d967539c044cb87d089db096948ec715
+        locator: GFB01b-021EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:ec059add3a95c4d3fc10f0aff9af43556518d429aec7e3c355873da62ce2f3fb
+        locator: GFB01b-022EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:11d456fadced183ae0109268b41c6987ca2acd0ec5041c5bbc27628eed46a8cc
+        locator: GFB01b-023EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:00893c735542c8e5001868437ba5fce7720cc34ba3a6d847990604fbd56d108d
+        locator: GFB01b-024EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:337ce684e36fe78502846609d2dd5dd3cd3bf12c9e6e668f6f7a6b550e73f480
+        locator: GFB01b-025EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:4d0379d6ece755eba963edb1f72965de8811074279e6a971e7555e35c8805aa5
+        locator: GFB01b-LD01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:0aa4c56d1e049f41343e41658df35a2ae39512df2c9dcbefc3fa7f42314ca9d2
+        locator: GFB01c-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:d140920278c81fef01059323386fc2eadc039ad5491efc511c32856e63a0ec43
+        locator: GFB01c-002EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:d9d4c263367ae8a01f5191d10c32a05eefd0167a49fc691078c64e1e9aecb9b3
+        locator: GFB01c-003EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:388f215f0312b093a7bd6e4e8c70833da449de0672c8b876b8775bce7100b3a8
+        locator: GFB01c-004EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:839921a9d381cab2eac32b8ef5f3424d8f1e4b141020b73afa73a10c138a0dc7
+        locator: GFB01c-005EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:050b4677d1d63ba9bb854b1d5dd3ecb8c1fb6311d1d8084da2178cd60dbda0de
+        locator: GFB01c-006EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:ed5579943409055ee81e51b751d7e370e50963a172ca9e3fcb1c18d49b2f1150
+        locator: GFB01c-007EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:804f6ae644215d1b7625f13f790fce602d867c61647bc19b5d61ec6383c19fe5
+        locator: GFB01c-008EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:8030d5c9fe83351b9d397e520970e70d81a374ac459d2082ddda5e11a4afb0b1
+        locator: GFB01c-018EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:42d7107e5faf8754b72b7185bc4dab0516c4ce5d55438d468c6961d376647fb3
+        locator: GFB01c-019EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:3fc150db5228becebaee1809bd397a396126dcb34f85365b29316ac6d3fc74e9
+        locator: GFB01c-020EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:f867c914aaf52cd58c325dbd4ed1b92e9142d7f25521abc2b36bd1e611737b14
+        locator: GFB01c-021EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:959000e567b986e4bd1fac24c3f4ce855c98172d94cafca6e6af4ba8bdb301f8
+        locator: GFB01c-022EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6a19f19447324cb470efc639a5e26de5db35012c2535ce689fce369dd200c717
+        locator: GFB01c-023EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:de30c6431be55f7340912dfbe5765d2555940f9abaacac4d98aade67d5d5287f
+        locator: GFB01c-024EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6ca9ca506ef53a48a0f2dc6dc4136ee271b37338d5926dc051b72edc17fcce25
+        locator: GFB01c-025EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:7522c4d01b606290e829d265bbf1753710d6e8a8c24cc2a243ad207a8fe9a907
+        locator: GFB01c-LD01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:555f9c626f84e197caa42e1cc9ed97109f2817e10700730385aa9fcac63c1100
+        locator: GFB01d-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6f461e28b6b4e65fb4872177374db7cdf09812830cb9a3e4db47855e06684f0f
+        locator: GFB01d-002EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:a55766f6c0d1ba2f82c5ce50b46e7f40e0a4e059d9bacefbcf2856fd09d1fb02
+        locator: GFB01d-003EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:213e03067ef4ed9e374ba08740dacc8c643a35250aa8078e6331fb10224902ce
+        locator: GFB01d-004EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:4cf80ac52e815db0404e4eea5aa38b111a4b647969354684b864bab7057a17b0
+        locator: GFB01d-005EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:1d721100d7c99454ce9582f97a8e788c593d33e4d9b54245c3782c95fa884d74
+        locator: GFB01d-006EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:90ceda6dda48097e864c3ccec7c26c306c2c43d9039b6021bb5d7e7153d9379e
+        locator: GFB01d-007EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:71f5ccca56eda1470be9973921b5f4cae4c7a6f3acb49a1e22670dfea25bfff4
+        locator: GFB01d-008EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:068ce1f0dadd739c0be944f4cc69c54230c573383de61bb69cec89fc5a91da9b
+        locator: GFB01d-019EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:15be0a19642d44e4e8f5de31685bd2ad54bdb50c5f956824ed5cb9cc1f499168
+        locator: GFB01d-020EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:2a0de34491039eee2622417c16d739cb6448dd793f1bdc7c98178486ee778dde
+        locator: GFB01d-021EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:eaec804c1f86751f4fe8526ffc626ed06a77d8e0c5f9b57bc4fb81b2ce5c2dfa
+        locator: GFB01d-022EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6afa8cff0e840de7cc5449d3df5d3b31fe2a70f2ef98d07f7738798d36dc4c24
+        locator: GFB01d-023EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:3fc36bb9d55b421c8cc03c6c232498482c6fee533051c589806b2cfd7386ee7a
+        locator: GFB01d-024EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:77de26613eca1aaa7c347cb48f9aed57c113590762ebc42de60d517629931c8c
+        locator: GFB01d-025EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:25aed25ad3b12b60050097567f0bb50260053f6d455f21d9117d6c66f9d6867e
+        locator: GFB01d-026EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:bd97977dcbddc359a999c67d55e6c80b3a9bba4684d54ecf779aa2adfe204ced
+        locator: GFB01d-LD01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:1c1ae62a2799730ca8d566c2c552195dc9ae57c9f963452de6653a9c0939ec6c
+        locator: GFD01-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:474cec94fab7ad03faee02e02af13765324a7464c59a331afe1aba1e536f63a2
+        locator: GFD01-002EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:63d2258f67c58d97f8c62542b25bd43acce46a23f88ce04450447a7d2180496d
+        locator: GFD01-003EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:11b39a67c17e0ea517d08cf368991a027d5417a25a140b11c33d0b79e62a822c
+        locator: GFD01-004EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:8381f029bece0c26f24a5a24b2e19d0a9b9c07b1e2827d222a70046c9da87030
+        locator: GFD01-005EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:9e03a416a5d56f0a11e7ff274c8aea79a3bcf948d86904f471f7fea90c156f01
+        locator: GFD01-006EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:577c8208886103d21fe7ddad018aa73b2ae1a24143ed9338813975a73808453e
+        locator: GFD01-007EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6d79c6aebae2089d8b8433e0f42c2fe367e6c8c52ca2faa55f1a07fbf2957519
+        locator: GFD01-008EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:2ce7d3c96d7bf726891d302b6f0cfebed1d8e2541a5844f09da73b3f3956ed1d
+        locator: GFD01-018EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:85ce0f2427b6bc6686fc19b37dc5b154c622522a6685c9304f3fd2a88560b7cf
+        locator: GFD01-019EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:28417967773f7034009ed2bd67cca5a2c5cfc7ebf16068c4bed55e3df584e16f
+        locator: GFD01-020EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:13f5e39c002d9a4770e89934a32cac22e2d02e79829d6194c9faa34d8d8b57cb
+        locator: GFD01-021EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:3be6147b9e6db1b7d3b6d6549bafd626af74fa57727e4afd89d344af09fc16bf
+        locator: GFD01-022EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:d7f2ae10bc2b0f375798b526fdbd015f9bc7fb577b619dacd3185fda25caee42
+        locator: GFD01-023EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:49e426076ddbac7cbc980791efbcec749e812e4eb92b35c021f746910b55b94a
+        locator: GFD01-024EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6fb82d3f86300aafb2eea5e421064a858f0ed618a70170ed7d2dfd0fa3f5f241
+        locator: GFD01-025EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:e23929e7e09dadcc6026679d6824131c7fbfe3d44667fb00cec7446641e029c0
+        locator: GFD01-026EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:e27c28ba391175d5c104f58b851bdecd55a5209c0b6d9f8bbd6b6d0f03fda81b
+        locator: GFD01-027EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:9f04616d4a1eea2adb58e3b39aaa61c5f598c8930d10523b77b08c28021128f8
+        locator: GFD01-LD01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:7be75db46f4bbb58bf1a785b7957a7c9fc5ca38da95121d18a8ef49e1a54eca7
+        locator: GFD01-T01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:bcdb4a056ddf6d1cb1a8d02d52c49ba1d05955c1e8f8c07322a9b75f68913e77
+        locator: GFD02-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:4753866c4ddb994cd6b4b7597f05bd6ebd07f46210be8f0c9623acfc4eb70c6d
+        locator: GFD02-002EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:73f5f6d7613d00bdadd3beeef802a61fa132c64feafc47ea905e3acd85e16151
+        locator: GFD02-003EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:00e8ffce4ac5b3443a975ff960d8c0c72a0454f3edaa6c0b5b17a8b5865e9d0d
+        locator: GFD02-004EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:28791ffec766a464456431d1653118c83af2c2377779daedf806483bfdd3605a
+        locator: GFD02-005EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:3e4afda0cb09fe331db475b0c964894532529066cdae3983f18c85e8e487e8dc
+        locator: GFD02-006EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:0568ed0a0b6ceae507040fcbe306f9feb6105b17c8c766c76f210e3e5c522ec2
+        locator: GFD02-007EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:123338feff2331167a159db7c06a23544a63320286f8b0d41dc119e12a709db0
+        locator: GFD02-008EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:c7bec8425ca02298e6b7a3e22a26fc76bcda28384bd66d93fc3e0aeb9b59beef
+        locator: GFD02-019EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:cbed5ddf3217a2217ab11006fcd258c969fda6930d726a0987347b1891e95a55
+        locator: GFD02-020EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:18d18937855581cb397ec73c57af78c6fd41c0c141f4de6d75a9f4265d663903
+        locator: GFD02-021EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:0c3a97cdbd01a276ae1311a39816eb9baf50ca8e5472a61cebb9bf485b3ae480
+        locator: GFD02-022EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:fd0ab77dfc529fb286f821e27eb210b472e5f93d1469cd30847d60d6261ac6f1
+        locator: GFD02-023EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6d6643b66005dee56f913ce4712f4d8796871aa4c0acdebe243097c653cdf962
+        locator: GFD02-024EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:d0319bd6d974b3def250707195ee66ede8776f3b3ba959d814c4e67471e35df5
+        locator: GFD02-025EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6ed6828fc7ede193a7a4961259dc0eaae76a414ceb7d3854b9bd428eb0868015
+        locator: GFD02-026EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:cd29000f773dfa6cb608f5df87a9f38b85bef078b9ddb5703b6847dd55b86c27
+        locator: GFD02-027EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:352d2cf60c8aa091ee8315b173faf2dd579e31f997c910c3b3b042c802ec8446
+        locator: GFD02-028EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:d584db0411e0c8ac8f49ca2e0bf9f905cfa9db7ecf72092b3ad7b5f593798ed0
+        locator: GFD02-LD01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:9fcc0571108fd1f55fc4db2dab81bb6e358e1f3a60e51fe95b728993c5f0b4fc
+        locator: GFE01-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:2ecaa2f535f1921b02555259074944d613940a9cc14e7c93891e9cf67aa73639
+        locator: GFE01-002EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:2ffbdbc3dfc701921bdeab3123bbc257365a192d36563ecef19f1f4e90a152f4
+        locator: GFE01-003EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:060fb3145faac0f6ccd442968cba7e5c5f84bfec58e373a1f655861dd378cd27
+        locator: GFE01-004EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:e513f7582ff6c15b35806d86d252794c844a724e9141687d5fa69488aec16ac5
+        locator: GFE01-005EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:8027a0017dc5847f9f11b3e151702b9ed90bdded012775f16f18b71457110348
+        locator: GFE01-006EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:b46271d66703199b5ca8e28294d7e518259d228ff91d7426188b990a72489269
+        locator: GFE01-007EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:27a06f33e834f5ae0562cbeef0a29b49e41bb300bb9c7eb1552715dc5f0f3363
+        locator: GFE01-008EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:f1eb69009f19385d1d16cb90f3e6d31075c7ae8655140e733d56e304632c547b
+        locator: GFE01-009EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:9b8e2dc1a7e5c4b82bb9f0cc517068a2fcce774cf7168d551d2dd85fb0ac0d53
+        locator: GFE01-010EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:da9924da2e7319a3973fb75611436fa6b807b8094e3e46426c20f3b7b2bc2fc2
+        locator: GFE01-011EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:e3c94afbccae541dad288331120b0848a1409123f2c29ae97e1b4a4a1ff44a6c
+        locator: GFE01-012EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:6d02faffe8250dab69f58fc50d00764b8c37842ce5a0349917d527f8ab9f45d2
+        locator: GFE01-013EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:10ab5313f86e920998a0bdba81eb4fd86f4fb1f618834a69c997982c262fb495
+        locator: GFE01-014EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:c0fb16aebecdba3f929f538cecf87e356e7867f629866ad2d5b182597bb38455
+        locator: GFE01-015EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:0323155c9a9e84a0fa149fd6f3449a967be8a462221b91d10919f2a8c6337d83
+        locator: GFE01-016EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:8f13707e4c9db7551f8a19310d77b32500bb13dd1bced9857c8d20555fc27325
+        locator: GFE01-017EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:15c71833ae45115ee3a2416a6b18c0d16303d2383d033eba00d01e14b2c926f7
+        locator: GFE01-018EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:8dca59971c562f375859159f0a30f1439d308740effaae947df07d7ee8f07814
+        locator: GFE01-019EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:993c05b461615bd1345f159665f2a6cb0da5d330402e88e425df8cedcc23da6b
+        locator: GFE01-020EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:e39b2351759a544161e9654547cb6f5e0bcc3c37854d87b3d2691ece4426762f
+        locator: GFE01-T01EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:ccbdd681e9e358555c8855f962ced09473015e650c4e734f8eaf03669946a75a
+        locator: NY2024-001EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:1f17a0a71c4d7659d7c541012e73dd4e31e1a0fc6fbb13032ec974c20abe2083
+        locator: PR-041EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:35e436cfae4575e62a7db0505ea101e72157c7e302e01c3ae22c9e366cd04195
+        locator: PR-137EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:51dcbf50728d4b8d674af79684c61ed75855e3cf356ecbebfbf4f5f57044d105
+        locator: PR-138EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:936da6a451b8f8a78ce2393e3ad6f7c48939378e0bc0403b03c758fa83d41b5a
+        locator: PR-219EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:898367791f8fa8567b917545827e04f747539beda8f6b476032afb89f945789f
+        locator: PR-220EN
+        role: identity_observation
+      - batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+        source_version_id: src:v1:624667a689457142d735873864bf976ece131e67695b29b1f451459b1379163c
+        locator: PR-440EN
+        role: identity_observation
+      - batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
+        locator: jp:all
+        role: mapping_coverage
+    reason: Reviewed the 403 JP printings added in CP05, SCS02 and the PR
+      supplement against all existing EN-only identities. No matching JP
+      identity was found.
