@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-064:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - history_count: { event: limit_break, who: self, window: this_turn }
+      - line: 2
+        fanfare:
+          do:
+            - create: { token: 風晶のエレメント, n: 1, to: ex }
+            - draw: { n: 1 }
