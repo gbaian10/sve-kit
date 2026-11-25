@@ -851,6 +851,60 @@
           "position": 0
         },
         "cost": null
+      },
+      {
+        "id": "c31",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "effect",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "limit_break"
+          },
+          "position": 0
+        },
+        "cost": null
+      },
+      {
+        "id": "c32",
+        "value": {
+          "kind": "occurrence",
+          "source": {
+            "kind": "text",
+            "text": {
+              "card": {
+                "printing_id": "SYN01-001",
+                "face": 0
+              },
+              "wording_revision": "r1",
+              "section": "effect",
+              "line": 2,
+              "step": null,
+              "granted_by": null,
+              "holder": "o1"
+            }
+          },
+          "controller": "p1",
+          "event": {
+            "kind": "final_limit_break"
+          },
+          "position": 0
+        },
+        "cost": null
       }
     ],
     "bounds": {
