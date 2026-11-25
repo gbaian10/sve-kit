@@ -90,7 +90,9 @@ impl Game {
             if !owned {
                 return Err(unsupported("flip requires the controller's evolve deck"));
             }
-            if object.state["face_up"] != up {
+            if object.state["face_up"] != up
+                && (!up || self.object_type(id)? == "フォロワー・エボルヴ")
+            {
                 planned.push((id.to_owned(), *member));
             }
         }

@@ -1,8 +1,8 @@
 //! Flip payments retain their own strict material choice, independent of target permissions.
 use super::{
     Action, Binding, Bool, BoolRead, BooleanState, CardKind, CharacteristicView, ChoiceDomain,
-    Decision, Expr, KindRead, ObjectOperand, ObjectRef, ObjectView, PlayerRef, PlayerRelation,
-    Predicate, SelectionView, Selector, ZoneKind,
+    Decision, Expr, KindRead, Located, Node, ObjectOperand, ObjectRef, ObjectView, PlayerRef,
+    PlayerRelation, Predicate, SelectionView, Selector, ZoneKind,
 };
 
 #[expect(
@@ -103,6 +103,40 @@ pub(crate) fn payment(action: &Action, decision: &Decision) -> bool {
 }
 
 pub(crate) fn private_material(decision: &Decision) -> bool {
+    private_face_down(decision)
+        && matches!(
+            decision.kind,
+            super::DecisionKind::PlayParameter {
+                slot: super::PlaySlot::CostMaterials,
+                ..
+            }
+        )
+}
+
+pub(crate) fn private_resolution(decision: &Decision) -> bool {
+    let super::DecisionKind::ResolutionChoice {
+        may: super::Declinable::Required,
+        cardinality,
+        precondition: None,
+    } = decision.kind
+    else {
+        return false;
+    };
+    if cardinality.minimum != super::Nat(0)
+        || cardinality.maximum.is_none_or(|n| n.0 == 0)
+        || !private_face_down(decision)
+    {
+        return false;
+    }
+    matches!(&decision.domain, ChoiceDomain::Objects { constraint, .. }
+        if constraint.cardinality == cardinality
+            && constraint.groups.first().is_some_and(|group| group.cardinality == cardinality)
+            && constraint.distinct_by.is_none()
+            && constraint.aggregate_bounds.is_empty()
+            && constraint.disjoint == super::Disjointness::Disjoint)
+}
+
+fn private_face_down(decision: &Decision) -> bool {
     let Some((Selector::Zone { players, .. }, false)) = material(decision) else {
         return false;
     };
@@ -111,13 +145,22 @@ pub(crate) fn private_material(decision: &Decision) -> bool {
             == (super::Visibility::Only {
                 players: players.clone(),
             })
-        && matches!(
-            decision.kind,
-            super::DecisionKind::PlayParameter {
-                slot: super::PlaySlot::CostMaterials,
-                ..
-            }
-        )
+}
+
+/// Keep the private choice in the same scope as its single use.
+pub(crate) fn closed_resolution(steps: &[Located<Node>]) -> bool {
+    for step in steps {
+        if let Node::Decision { decision } = &step.node
+            && private_resolution(decision)
+        {
+            return matches!(steps, [first, second]
+                if matches!(&first.node, Node::Decision { decision: first } if first == decision)
+                    && matches!(&second.node, Node::Instruction { instruction }
+                        if instruction.precondition.is_none()
+                            && payment(&instruction.action, decision)));
+        }
+    }
+    true
 }
 
 #[expect(

@@ -56,6 +56,7 @@ STEP_NAMES = {
     "A.act.flip-down.long": "FlipDownLong",
     "A.act.flip-down": "FlipDownAction",
     "A.act.flip-up.long": "FlipUpLong",
+    "A.act.flip-up.selection": "FlipUpSelection",
     "A.act.flip-up": "FlipUpAction",
     "A.act.move.ref": "MoveRef",
     "A.act.move.top": "MoveTop",

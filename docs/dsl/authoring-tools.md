@@ -81,6 +81,14 @@ records:
 
 `flip_down.ref` 可直接指定自己進化牌堆的正面集合，例如 `{who: self, zone: evolve_deck, kind: evolve_follower, face_up: true}`；沿用公開進化牌堆篩選，翻面後撤銷對手的公開位置知識。具名結果仍記錄實際成功翻面的成員。
 
+## 本文翻開進化牌組卡片
+
+`flip_up: {sel: {who: self, zone: evolve_deck, kind: evolve_follower, trait: 土属性}, upto: 2}`
+讓能力控制者在結算時從自己的裏面進化從者中選擇零至兩張。選取時只有控制者看得到候選，
+成功翻成表面的卡才公開，並保留原本區域與世代。依卡文可設定名稱、名稱片段或類型篩選。
+選零張仍結算後續指示。後續可用 `count: {who: self, zone: evolve_deck, kind: evolve_follower, face_up: true, trait: 土属性}`
+讀取此時表面的符合卡片張數。
+
 ## 進化牌組翻面付款
 
 既有成本 `flip_up: {sel: {who: self, zone: evolve_deck, kind: evolve_follower}, n: N}`

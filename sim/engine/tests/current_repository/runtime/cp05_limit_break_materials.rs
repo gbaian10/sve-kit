@@ -2,9 +2,6 @@
 
 use super::*;
 
-#[path = "../../support/current_fixture.rs"]
-mod current_fixture;
-
 const ELEMENTS: [(&str, &str, &str, &str); 6] = [
     ("CP05-T09", "CP05-P93", "fire", "火属性"),
     ("CP05-T10", "CP05-P94", "water", "水属性"),

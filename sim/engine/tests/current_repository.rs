@@ -19,6 +19,8 @@ const BP06_048_FACE: &str = "f:e9d8deca215953a99d12bd07acd566fa";
 #[path = "support/repository.rs"]
 mod repository;
 
+#[path = "support/current_fixture.rs"]
+mod current_fixture;
 #[path = "support/expanded.rs"]
 mod expanded;
 #[path = "support/rule_fixtures.rs"]
