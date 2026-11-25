@@ -40,7 +40,8 @@ mismatches. Our translation contributions are CC0-1.0; the official rules text i
 ## Updating a translation
 
 After [parsing and comparing the new Japanese rules][rules], use the old source and translation
-directories to create the new translation directory. Run these commands from the repository root.
+directories to create the new translation directory. Run these commands from the repository root
+and use absolute paths for the rules and translation directories.
 
 ```bash
 bun run --cwd sim/web rules:revision carry \
@@ -48,6 +49,8 @@ bun run --cwd sim/web rules:revision carry \
 ```
 
 Read the full new rules and refer to the previous translation to keep terminology consistent.
+For modified nodes, use the old entry as a starting point where helpful. Retrieve it from the
+previous translation directory or Git history.
 Translate the `pending` nodes listed in the report, which includes added nodes and modified
 nodes. Existing entries for unchanged nodes are copied with their original `source_sha256`.
 `previouslyUntranslated` lists unchanged nodes that had no entry in the old version. If a
@@ -55,8 +58,7 @@ particular unchanged node warrants a translation correction, explain that correc
 in the PR.
 
 Put the new rules and translation files under their version directories before stamping, so
-`rules:stamp` can locate the source by version and file name. Use absolute paths for the translation
-files because Bun runs this command from `sim/web`.
+`rules:stamp` can locate the source by version and file name.
 
 ```bash
 bun run --cwd sim/web rules:stamp "$new_translation"/*.json

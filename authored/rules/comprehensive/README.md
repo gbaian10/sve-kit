@@ -10,17 +10,17 @@ is not adoption evidence, and the original PDFs remain preserved in the source a
 the rules page and PDF URLs, the PDF's SHA-256 and the files in reading order. Each `chNN.json`
 holds one chapter and `appendix-a.json` onwards the appendices, as an ordered `nodes` array:
 
-| Field           | Meaning                                                                                                 |
-| --------------- | ------------------------------------------------------------------------------------------------------- |
-| `key`           | Unique per version: the body clause number (`1.3.2.2`), or `<context>:<number>` in appendices           |
-| `context`       | `main` (body), `A` (tokens), `B` / `B-1` / `B-2` (special formats), `C` (update history, Japanese only) |
-| `number`        | Official number as printed; absent for unnumbered appendix blocks                                       |
-| `kind`, `depth` | `chapter`, `section`, `rule` or `block`, and nesting depth                                              |
-| `title`, `text` | Heading text and body; `\n` separates printed lines such as `*` bullets                                 |
-| `examples`      | `例：` / `Example:` notes under the clause, omitted when there are none                                 |
-| `table`         | `header` and `rows` of an appendix A token table                                                        |
-| `figure`        | A printed figure not reproduced here: its PDF page and labels                                           |
-| `changed`       | Printed in red, the official marker for content updated in this version                                 |
+| Field | Meaning |
+| --- | --- |
+| `key` | Unique per version: the body clause number (`1.3.2.2`), or `<context>:<number>` in appendices |
+| `context` | `main` (body), `A` (tokens), `B` / `B-1` / `B-2` (special formats), `C` (update history, Japanese only) |
+| `number` | Official number as printed; absent for unnumbered appendix blocks |
+| `kind`, `depth` | `chapter`, `section`, `rule` or `block`, and nesting depth |
+| `title`, `text` | Heading text and body; `\n` separates printed lines such as `*` bullets |
+| `examples` | `例：` / `Example:` notes under the clause, omitted when there are none |
+| `table` | `header` and `rows` of an appendix A token table |
+| `figure` | A printed figure not reproduced here: its PDF page and labels |
+| `changed` | Printed in red, the official marker for content updated in this version |
 
 Both editions number clauses the same way, so a clause number present in both shares its page
 anchor; a clause only one edition has exists only there.
@@ -45,6 +45,8 @@ official rules text is excluded from the project's licenses, see
 
 ## Updating an edition
 
+Use absolute paths for the command inputs and outputs below.
+
 Check the official rules version when adding a card set. If an edition changed, save its PDF
 in the source archive and use that copy as the input. Keep the PDF outside Git. Update the
 Japanese and English editions independently.
@@ -67,7 +69,8 @@ Japanese and English editions independently.
 
 2. **Compare.** Review the readable report and save the JSON when another tool needs the list.
    Changes are matched by node key. A red update marker or a figure's pagination alone leaves a
-   node unchanged for translation. Changed token tables also list rows by card name.
+   node unchanged for translation. Changed token tables also list rows by card name. Appendix A
+   and C keys use block order, so inserting a block can shift the keys of later blocks.
 
    ```bash
    bun run --cwd sim/web rules:revision diff "$old_rules" "$new_rules"
