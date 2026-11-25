@@ -1,6 +1,8 @@
 // Handwritten synthetic cards for the development snapshot. Nothing here is real card text; the
 // point is coverage of every shape the pages must render (docs/schema/export/snapshot-format.md).
 
+import type { JsonObject } from "../../src/data/format-v3/json"
+
 type ClassCode = "elf" | "royal" | "witch" | "dragon" | "nightmare" | "bishop"
 type TypeCode = "follower" | "spell" | "amulet" | "evolved" | "leader" | "token"
 type Rarity = "bronze" | "silver" | "gold" | "legend" | "sp"
@@ -65,6 +67,7 @@ interface Errata {
   readonly announcedOn: string
   readonly effectiveOn: string
   readonly reasonJa: string
+  readonly changes?: readonly JsonObject[]
   readonly printings: readonly string[]
 }
 

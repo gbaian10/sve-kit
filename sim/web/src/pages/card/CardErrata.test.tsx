@@ -1,4 +1,4 @@
-import { render, screen, within } from "@testing-library/react"
+import { cleanup, render, screen, within } from "@testing-library/react"
 import userEvent from "@testing-library/user-event"
 import { afterEach, expect, it } from "vitest"
 
@@ -15,7 +15,7 @@ import { CardErrata } from "./CardErrata"
 
 afterEach(() => prefsStore.set(DEFAULT_PREFS))
 
-async function renderErrata(cards: readonly Card[] = CARDS) {
+async function renderErrata(cards: readonly Card[] = CARDS, card = "bp01-020") {
   const built = await buildSnapshot({
     cards,
     encodeImage: () => Promise.resolve(new Uint8Array([1])),
@@ -34,9 +34,9 @@ async function renderErrata(cards: readonly Card[] = CARDS) {
   await renderInRouter(
     <CardErrata
       client={client}
-      cardId="c:bp01-020"
-      printingId="p:bp01-020"
-      faceId="f:bp01-020"
+      cardId={`c:${card}`}
+      printingId={`p:${card}`}
+      faceId={`f:${card}`}
       region="jp"
     />,
   )
@@ -74,6 +74,54 @@ it("shows reconstructed full text and pairs excerpt translations with marked ori
   expect(within(notice).getByRole("heading", { name: "勘誤後完整文字" })).toBeVisible()
   expect(within(notice).getByText(/此版次的完整印刷文字尚未確認/u)).toBeVisible()
   expect(within(notice).getByText(/BP01-020（印刷文字未確認）/u)).toBeVisible()
+})
+
+it("shows a shared rarity correction on both listed card faces", async () => {
+  const keys = ["bp01-020", "bp01-021"]
+  const cards = CARDS.map((card) => {
+    if (!keys.some((key) => card.id === `c:${key}`)) return card
+    const { errata, ...other } = card
+    if (!errata) throw new Error("missing synthetic errata")
+    return card.id === "c:bp01-020"
+      ? {
+          ...other,
+          errata: {
+            ...errata,
+            printings: keys.map((key) => `p:${key}`),
+            changes: keys.map((key) => ({
+              face_id: `f:${key}`,
+              field: "other",
+              before: "レアリティ: A",
+              after: "レアリティ: B",
+              wording_translations: [
+                {
+                  lang: "zh-Hant",
+                  before: "稀有度：A",
+                  after: "稀有度：B",
+                  origin: "machine",
+                  low_confidence: false,
+                },
+              ],
+            })),
+          },
+        }
+      : other
+  })
+
+  for (const key of keys) {
+    const notice = await renderErrata(cards, key)
+    await userEvent.click(within(notice).getByRole("button", { name: "勘誤" }))
+    expect(notice.querySelector('[lang="ja"] del')).toHaveTextContent("レアリティ: A")
+    const added = notice.querySelector('[lang="ja"] ins')
+    expect(added).toHaveTextContent(/^B$/u)
+    expect(added?.closest("p")).toHaveTextContent(/^レアリティ: B$/u)
+    expect(notice.querySelector('[lang="zh-Hant"] del')).toHaveTextContent("稀有度：A")
+    expect(within(notice).getByText("稀有度：B")).toBeVisible()
+    expect(
+      within(notice).queryByRole("heading", { name: "勘誤前完整文字（依公告還原）" }),
+    ).toBeNull()
+    cleanup()
+  }
 })
 
 it("hides excerpt translations when original-only is preferred", async () => {

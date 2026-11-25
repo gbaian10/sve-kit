@@ -29,6 +29,16 @@
 新增觀測須使用新來源版本，不能藉重算檔案 hash 覆寫既有來源觀測。
 `source`、`blocks`、公告資訊與明列版次維持不可變；人工採納的 `changes`／`review_note`
 可透過獨立審查的資料修正 commit 更正，不冒充新的官方來源觀測。
+新增公告時，先從封存批次選定來源版本，產生待審 JSON：
+
+```bash
+sve-carddb parsed-cards stage-errata /absolute/archive store-id 'sha256:<batch>' 'src:v1:<version>' jp /absolute/staged.json
+```
+
+指令接受 `jp` 或 `en`，只讀指定批次與來源版本。輸出含可採納的來源 pin、公告日期及配對，
+並列出結尾依據、配對外文字與解析疑點。審讀原件後確認配對邊界、理由、換卡與生效日，
+再採納對應的卡面、欄位及列出版次。追加公告時保留舊項原有位元組，並更新受影響的索引 hash 與大小。
+
 寫入端須用下列獨立核對指令驗原件與 UTF-8 byte ranges；路徑及 store ID 由操作者明示：
 
 ```bash
