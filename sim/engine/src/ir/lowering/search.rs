@@ -483,6 +483,41 @@ impl BodyContext<'_> {
         }))
     }
 
+    fn search_filter(
+        &mut self,
+        search: &ast::Search,
+        query: &ast::SearchSelector,
+        candidate: Binding<ObjectRef>,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        let predicate = filter(self, query, candidate, path)?;
+        let Some(name) = &search.same_name_as else {
+            return Ok(predicate);
+        };
+        if search.n != Some(1)
+            || search.upto.is_some()
+            || search.groups.is_some()
+            || !matches!(
+                search.to,
+                ast::SearchDestination::Single(ast::SearchZone::Field)
+            )
+            || !matches!(query, ast::SearchSelector::Query(query)
+                if query.name.is_none()
+                    && matches!(query.kind, Some(ast::SearchKindFilter::Literal(ast::SearchKind::Follower))))
+        {
+            return Err(unsupported(path));
+        }
+        Ok(and_filter(
+            predicate,
+            Expr::Compute(Box::new(Predicate::NamesIntersect {
+                left: Expr::Live(Box::new(NamesRead::Names {
+                    object: view(candidate),
+                })),
+                right: self.selected_follower_names(name, path)?,
+            })),
+        ))
+    }
+
     pub(super) fn search(
         &mut self,
         search: &ast::Search,
@@ -491,7 +526,7 @@ impl BodyContext<'_> {
         let candidate = Binding::new(1, self.card_allocator.scope(path)?);
         let upper_bound = self.search_count_bound(search, path)?;
         let (filter, cardinality, groups) = if let Some(query) = &search.sel {
-            let predicate = filter(self, query, candidate, path)?;
+            let predicate = self.search_filter(search, query, candidate, path)?;
             let cardinality = if upper_bound.is_some() {
                 Cardinality {
                     minimum: Nat(0),
@@ -513,7 +548,7 @@ impl BodyContext<'_> {
             } else {
                 (predicate, cardinality, None)
             }
-        } else if let Some(groups) = &search.groups {
+        } else if let (Some(groups), None) = (&search.groups, &search.same_name_as) {
             let mut lowered = Groups::new(TotalBounds::Sum);
             for group in groups {
                 let cardinality = quantity(group.n, group.upto, path)?;

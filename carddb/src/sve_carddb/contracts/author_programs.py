@@ -1285,6 +1285,8 @@ type DestroyInstead = Annotated[DestroyInsteadFields, AfterValidator(_replacemen
 class SearchExactFields(TypedDict):
     sel: ObjectSel
 
+    same_name_as: NotRequired[BindingName]
+
     n: SelectionQuantity
 
     to: SearchDestination

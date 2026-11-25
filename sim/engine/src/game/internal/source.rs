@@ -8,10 +8,10 @@ use crate::game::{Frame, Object};
 use crate::ir::events::numbers;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
-    Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
+    Binding, Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
     LkiReason, NameOperation, Nat, NumberRead, ObjectOperand, ObjectRef, ObjectView, PostureRead,
-    Predicate, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView, SnapshotId,
-    Stat, TraitId, ZoneKind,
+    Predicate, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView, Selector,
+    SnapshotId, Stat, TraitId, ZoneKind,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
@@ -172,6 +172,19 @@ impl Execution {
         Ok(snapshot.counters.get(&key).copied().unwrap_or(Nat(0)))
     }
 
+    pub(super) fn selected_names(
+        &self,
+        game: &Game,
+        selection: Binding<Selector>,
+    ) -> Result<Vec<CardName>> {
+        let reference = self.selected_object(game, selection)?;
+        let id = self.object_id(reference)?;
+        if game.object(id)?.generation != reference.generation.0 {
+            return Err(invalid("stale selected name"));
+        }
+        Ok(game.card_names(id)?.into_iter().map(CardName).collect())
+    }
+
     pub(super) fn name(&self, game: &Game, value: &Expr<CardName>) -> Result<CardName> {
         match value {
             Expr::Literal(name) => Ok(name.clone()),
@@ -186,17 +199,7 @@ impl Execution {
             Expr::Compute(operation) => {
                 let NameOperation::UniqueName { object } = operation.as_ref();
                 let names = match object {
-                    ObjectView::Selected { selection } => {
-                        let reference = self.selected_object(game, *selection)?;
-                        let id = self.object_id(reference)?;
-                        if game.object(id)?.generation != reference.generation.0 {
-                            return Err(invalid("stale selected name"));
-                        }
-                        game.card_names(id)?
-                            .into_iter()
-                            .map(CardName)
-                            .collect::<Vec<_>>()
-                    }
+                    ObjectView::Selected { selection } => self.selected_names(game, *selection)?,
                     ObjectView::LastKnown {
                         object,
                         reason: LkiReason::ZoneExit,

@@ -8,8 +8,8 @@ use crate::ir::events::numbers;
 use crate::ir::events::timing;
 use crate::ir::{
     Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, Comparison,
-    EventContext, IntOperation, NameOperation, NatRead, NumberRead, PlayerRead, Predicate, Role,
-    ScopeId, Stat,
+    EventContext, IntOperation, NameOperation, NamesRead, NatRead, NumberRead, PlayerRead,
+    Predicate, Role, ScopeId, Stat,
 };
 
 #[expect(
@@ -140,6 +140,34 @@ impl BodyContext<'_> {
             side.relation().ok_or_else(|| unsupported(path))?,
             PlayerRef::Controller {},
         ))
+    }
+
+    pub(super) fn selected_follower_names(
+        &mut self,
+        name: &str,
+        path: &str,
+    ) -> Result<Expr<Vec<CardName>>, LoweringError> {
+        if !self.follower_targets.contains(name) {
+            return Err(unsupported(path));
+        }
+        let (index, selection) = self.selected_parameter(name, path)?;
+        let into = CaptureRef {
+            binding: Binding::new(self.allocator.id(path)?, selection.key().0),
+        };
+        let decision = self
+            .parameters
+            .get_mut(index)
+            .ok_or_else(|| unsupported(path))?;
+        decision.captures.push(Capture::Names {
+            at: CaptureTime::AtSelection {
+                decision: decision.id,
+            },
+            value: Expr::Live(Box::new(NamesRead::Names {
+                object: ObjectView::Selected { selection },
+            })),
+            into: into.clone(),
+        });
+        Ok(Expr::Captured(into))
     }
 
     pub(super) fn selected_name(

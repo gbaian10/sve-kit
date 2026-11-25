@@ -4,11 +4,11 @@ use super::{
     BooleanProperty, LabelsProperty, NumberProperty, Policy, PreparedCondition, Reader, Resolver,
     SourceNames,
 };
-use crate::game::internal::{Execution, Game, Result, invalid, unsupported};
+use crate::game::internal::{Execution, Game, Result, Slot, invalid, unsupported};
 use crate::game::list;
 use crate::ir::{
-    BooleanState, CardKind, CardName, CharacteristicView, EvolutionState, Expr, Int, ObjectReceipt,
-    Posture, Stat,
+    BooleanState, CaptureRef, CardKind, CardName, CharacteristicView, EvolutionState, Expr, Int,
+    ObjectReceipt, Posture, Stat,
 };
 use serde_json::Value;
 
@@ -31,6 +31,13 @@ impl Resolver for Operands<'_> {
                 .game
                 .card_names(&self.execution.context.source)
                 .map(|names| names.into_iter().map(CardName).collect()),
+        }
+    }
+
+    fn captured_names(&self, reference: &CaptureRef<Vec<CardName>>) -> Result<Vec<CardName>> {
+        match self.execution.slots.get(&reference.binding.key()) {
+            Some(Slot::Names(names)) => Ok(names.clone()),
+            _ => Err(invalid("missing captured target names")),
         }
     }
 
