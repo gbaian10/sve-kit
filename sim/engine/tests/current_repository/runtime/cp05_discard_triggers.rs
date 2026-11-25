@@ -1,6 +1,5 @@
 #![expect(
     clippy::panic,
-    clippy::wildcard_enum_match_arm,
     reason = "An unexpected decision invalidates the printed discard scenarios."
 )]
 use super::event_cemetery::finish_checks;
