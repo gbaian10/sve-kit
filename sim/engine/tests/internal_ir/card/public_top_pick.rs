@@ -19,6 +19,10 @@ fn tree(observation: Value) -> Value {
         ]}}
     ]);
     steps.as_array_mut().unwrap().insert(0, observation);
+    ability(&steps)
+}
+
+fn ability(steps: &Value) -> Value {
     equipment_played::tree(
         &json!({"activate":{
             "cost":{"pp":0_u8},
@@ -132,9 +136,14 @@ fn damage_counts_the_whole_reveal_before_selection_and_orders_only_the_remainder
 
 #[test]
 fn a_private_look_does_not_authorize_the_same_filtered_damage_count() {
-    lowerer()
-        .lower(&tree(
-            json!({"look":{"top":{"who":"self","n":3},"bind":"shown"}}),
-        ))
+    // Only the Look and the damage remain, so the rejection cannot come from the later
+    // non-empty check, which separately refuses a private receipt.
+    let error = lowerer()
+        .lower(&ability(&json!([
+            {"look":{"top":{"who":"self","n":3},"bind":"shown"}},
+            {"damage":{"to":"enemy","n":{"count":{"in":{"objects_of":"shown","view":"before"},"kind":"follower"}}}}
+        ])))
         .unwrap_err();
+    assert_eq!(error.code, "unsupported_construct", "{error:?}");
+    assert!(error.path.contains("/activate/do/1"), "{error:?}");
 }
