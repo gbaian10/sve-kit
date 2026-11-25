@@ -509,11 +509,10 @@ fn field_quick_activation_admits_amulet_evolved_and_token_faces_with_source_paym
         };
         let mut game =
             Game::new(catalog, &initial, &Value::Null, &Value::Null, "quick-face").unwrap();
-        // Internal D1 has no evolved-holder departure yet, so the evolved form pays without leaving;
-        // a token would cease to exist instead of reaching the cemetery, so it pays the same way.
-        let stays = matches!(kind, "フォロワー・エボルヴ" | "フォロワー・トークン");
+        // Evolved forms lack departure-cost support, and tokens cannot reach the cemetery.
+        let pays_in_place = matches!(kind, "フォロワー・エボルヴ" | "フォロワー・トークン");
         let mut costs = vec![payment::pp(1), payment::act()];
-        if !stays {
+        if !pays_in_place {
             costs.push(payment::self_to_cemetery());
         }
         let program = card(vec![quick_activated(payment::paid_ability(
@@ -548,7 +547,7 @@ fn field_quick_activation_admits_amulet_evolved_and_token_faces_with_source_paym
         assert_eq!(before["objects"]["s"]["acted"], false);
         resolved(choose(&mut game, &q, Some(options[0].handle)));
         let after = game.projection(View::Referee).unwrap();
-        if stays {
+        if pays_in_place {
             assert_eq!(after["objects"]["s"]["acted"], true);
             assert_eq!(after["P2"]["field"], json!(["s"]));
         } else {

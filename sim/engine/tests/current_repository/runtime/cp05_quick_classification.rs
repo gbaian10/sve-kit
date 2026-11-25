@@ -6,16 +6,23 @@
 use super::*;
 
 fn resolve_fanfare(game: &mut Game, holder: &str) -> CardPlay {
-    assert!(matches!(
-        game.play_internal_card(holder, PlayerId { seat: 1 })
-            .unwrap(),
-        CardPlay::Entered(_)
-    ));
+    assert!(
+        matches!(
+            game.play_internal_card(holder, PlayerId { seat: 1 })
+                .unwrap(),
+            CardPlay::Entered(_)
+        ),
+        "the follower enters before its fanfare"
+    );
     let question = game.internal_pending_choice().unwrap().unwrap();
     let InputDomain::Pending(options) = &question.domain else {
         panic!("expected fanfare");
     };
-    assert_eq!(options.len(), 1);
+    assert_eq!(
+        options.len(),
+        1,
+        "the follower's fanfare is the only pending ability"
+    );
     game.answer_internal_card(
         question.actor,
         question.token,
@@ -70,7 +77,7 @@ fn wamdus_selects_quick_spell_and_quick_follower_and_mills_quick_amulet() {
 
 #[test]
 fn cassius_counts_only_followers_with_printed_quick_activations_in_cemetery() {
-    for (quick_followers, pp_after_fanfare) in [(6, 0_u8), (7, 3_u8)] {
+    for (quick_followers, pp_after_fanfare) in [(6_u8, 0_u8), (7_u8, 3_u8)] {
         let mut initial = draw_position();
         initial["players"]["P1"]["pp"] = json!({"current":4_u8,"max":7_u8});
         initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"source","card":"CP05-043"}]);
@@ -80,7 +87,7 @@ fn cassius_counts_only_followers_with_printed_quick_activations_in_cemetery() {
             json!({"id":"ordinary_follower","card":"BP01-037"}),
         ];
         cemetery.extend(
-            (0..quick_followers)
+            (0_u8..quick_followers)
                 .map(|n| json!({"id":format!("quick-follower-{n}"),"card":"BP10-101"})),
         );
         initial["players"]["P1"]["zones"]["cemetery"] = json!(cemetery);
@@ -121,7 +128,9 @@ fn hakutaku_activates_on_opponents_turn_and_cannot_repeat_in_the_same_window() {
         game.resume_internal_card().unwrap();
     }
     let next = game.internal_quick_choice().unwrap().unwrap();
-    assert!(matches!(&next.domain, InputDomain::Quick { options, .. } if options.is_empty()));
+    assert!(
+        matches!(&next.domain, InputDomain::Quick { options: remaining, .. } if remaining.is_empty())
+    );
     let state = game.projection(View::Referee).unwrap();
     assert_eq!(state["P1"]["leader"]["life"], 17_u8);
     assert_eq!(state["P1"]["pp"]["current"], 1_u8);
