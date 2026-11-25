@@ -3,7 +3,7 @@
 import pytest
 
 from sve_carddb.build import create_database
-from sve_carddb.domains.registry.rarity import normalize, populate
+from sve_carddb.domains.registry.rarity import RARITY_ORDER, normalize, populate
 from tests.support.schema_helpers import compile_t0
 
 from ...support.build_db_fixtures import seed
@@ -15,6 +15,13 @@ from ...support.build_db_fixtures import seed
 )
 def test_region_labels_share_a_code(jp: str, en: str, code: str) -> None:
     assert normalize("jp", jp) == normalize("en", en) == (code, False)
+
+
+def test_japanese_granblue_rarity_follows_super_special() -> None:
+    assert normalize("jp", "GBF") == ("gbf", False)
+    assert normalize("jp", "GBF・プレミアム") == ("gbf", True)
+    assert normalize("en", "GBF") is None
+    assert RARITY_ORDER[-3:] == ("ssp", "gbf", "pr")
 
 
 @pytest.mark.parametrize(
