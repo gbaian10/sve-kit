@@ -1,0 +1,39 @@
+cards:
+  CP05-084:
+    abilities:
+      - evolve:
+          cost:
+            pp: 1
+        line: 1
+      - keywords:
+          - drain
+        line: 2
+      - auto:
+          do:
+            - buff:
+                hp: 0
+                on: this
+                power: 1
+          on:
+            discarded:
+              from: hand
+              sel:
+                trait: 闇属性
+              who: self
+        line: 3
+      - fanfare:
+          do:
+            - create:
+                n: 1
+                to: ex
+                token: 闇晶のエレメント
+        line: 4
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set
