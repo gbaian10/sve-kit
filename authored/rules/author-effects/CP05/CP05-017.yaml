@@ -1,0 +1,58 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-017:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          cost:
+            discard:
+              sel:
+                who: self
+                zone: hand
+                trait: 闇属性
+              n: 1
+          do:
+            - draw:
+                n: 1
+      - line: 2
+        auto:
+          "on":
+            phase:
+              which: end
+              whose: self
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - if:
+                cond:
+                  history:
+                    window: this_turn
+                    event: discarded
+                    who: self
+                    from: hand
+                    sel:
+                      trait: 闇属性
+                then:
+                  - damage:
+                      to: enemy
+                      n: 2
+                  - damage:
+                      to:
+                        leader_of: enemy
+                      n: 1

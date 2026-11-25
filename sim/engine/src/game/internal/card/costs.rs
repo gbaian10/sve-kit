@@ -139,8 +139,10 @@ fn check_additional(
     face: &FaceId,
     payment: &Located<PlayCostPayment>,
 ) -> Result<()> {
+    let printed = game.catalog.face(card_no, 0)?;
+    let kind = printed["card_type"].as_str();
     if !matches!(
-        game.catalog.face(card_no, 0)?["card_type"].as_str(),
+        kind,
         Some("スペル" | "スペル・トークン" | "フォロワー" | "アミュレット")
     ) {
         return Err(unsupported("additional cost card kind"));
@@ -155,7 +157,7 @@ fn check_additional(
         .abilities
         .iter()
         .any(|ability| card_permission(&ability.node));
-    let hand = quick
+    let hand = (quick || matches!(kind, Some("スペル" | "スペル・トークン")))
         && super::hand_payment::single_additional(&payment.node.play.costs)
         && payment.node.play.parameters.is_empty();
     let flips = !payment.node.play.parameters.is_empty()

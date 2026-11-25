@@ -1,0 +1,39 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-055:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords: [final_limit_break_possible]
+      - line: 2
+        auto:
+          "on": { limit_broke: { ref: this } }
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: 5 }
+            - pp_max: { who: self, delta: 1 }
+      - line: 3
+        auto:
+          "on": { final_limit_broke: { ref: this } }
+          cost: { pp: 1 }
+          do:
+            - buff:
+                "on":
+                  who: self
+                  zone: field
+                  kind: follower
+                  other: true
+                  trait: グラブル
+                  orig_cost_eq: 5
+                power: 2
+                hp: 2

@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-T01:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+      - line: 2
+        lastword:
+          do:
+            - damage:
+                to:
+                  leaders: all
+                n: 2

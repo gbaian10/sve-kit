@@ -35169,6 +35169,9 @@
           "$ref": "#/$defs/DSLNodes.A.event.limit-broke"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.event.hand-revealed"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.event.final-limit-broke"
         },
         {
@@ -36351,6 +36354,28 @@
           "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
         }
       },
+      "type": "object"
+    },
+    "DSLNodes.A.event.hand-revealed": {
+      "additionalProperties": false,
+      "properties": {
+        "hand_revealed": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "const": "this",
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "hand_revealed"
+      ],
       "type": "object"
     },
     "DSLNodes.A.event.left-field": {
@@ -38533,6 +38558,9 @@
           "$ref": "#/$defs/DSLNodes.A.history.ub-activated-condition"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.history.limit-break-condition"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.history.fused-condition"
         },
         {
@@ -38634,6 +38662,9 @@
         },
         {
           "$ref": "#/$defs/DSLNodes.A.history.ub-activated"
+        },
+        {
+          "$ref": "#/$defs/DSLNodes.A.history.limit-break"
         },
         {
           "$ref": "#/$defs/DSLNodes.A.history.fused"
@@ -41486,6 +41517,55 @@
         "direction"
       ],
       "type": "object"
+    },
+    "DSLNodes.A.history.limit-break": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "limit_break",
+          "type": "string"
+        },
+        "window": {
+          "const": "this_turn",
+          "type": "string"
+        },
+        "who": {
+          "const": "self",
+          "type": "string"
+        }
+      },
+      "required": [
+        "event",
+        "window",
+        "who"
+      ],
+      "additionalProperties": false
+    },
+    "DSLNodes.A.history.limit-break-condition": {
+      "type": "object",
+      "properties": {
+        "event": {
+          "const": "limit_break",
+          "type": "string"
+        },
+        "window": {
+          "const": "this_turn",
+          "type": "string"
+        },
+        "who": {
+          "const": "self",
+          "type": "string"
+        },
+        "at_least": {
+          "$ref": "#/$defs/DSLNodes.Nat"
+        }
+      },
+      "required": [
+        "event",
+        "window",
+        "who"
+      ],
+      "additionalProperties": false
     },
     "DSLNodes.A.history.moved": {
       "additionalProperties": false,

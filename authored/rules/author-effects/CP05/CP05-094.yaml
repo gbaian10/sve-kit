@@ -1,0 +1,77 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-094:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        static:
+          while:
+            cmp:
+              left:
+                resource:
+                  who: self
+                  kind: pp_max
+              op: ge
+              right: 7
+          effects:
+            - damage_mod:
+                "on": this
+                delta: -1
+      - line: 3
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - reveal:
+                bind: seen
+                top:
+                  who: self
+                  n: 3
+            - damage:
+                to: enemy
+                n:
+                  count:
+                    in:
+                      objects_of: seen
+                      view: before
+                    trait: 光属性
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                n: 1
+            - move:
+                ref: picked
+                to: hand
+                result: taken
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                position: bottom
+                order: chooser
+                to: deck
+    lint_exceptions:
+      - rule: required_choose_use_targets
+        line: 3
+        path: /evolve_time/do/2/choose
+        reason: The mandatory selection is from the three cards revealed by this effect
+          during resolution.

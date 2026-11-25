@@ -136,7 +136,7 @@ pub(super) fn field(
     material: &ast::HandMaterial,
     path: &str,
 ) -> Result<(Action, Decision), LoweringError> {
-    let exact = matches!(material.n, Some(1 | 2)) && !material.any;
+    let exact = matches!(material.n, Some(1..=3)) && !material.any;
     let variable = material.any
         && material.n.is_none()
         && material.sel.r#trait.is_some()

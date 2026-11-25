@@ -1,0 +1,60 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-096:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - reveal:
+                bind: shown
+                top:
+                  who: self
+                  n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: shown
+                          view: before
+                        trait: 光属性
+                    op: ge
+                    right: 1
+                then:
+                  - pp_max:
+                      who: self
+                      delta: 1
+      - line: 2
+        activate:
+          usable_if:
+            cmp:
+              left:
+                count:
+                  who: self
+                  zone: field
+                  kind: follower
+                  orig_cost_eq: 5
+                  trait: グラブル
+              op: ge
+              right: 3
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - create:
+                token: 光晶のエレメント
+                to: ex
+                n: 1
+            - draw:
+                who: self
+                n: 1

@@ -152,7 +152,11 @@ impl Checker {
         if (matches!(query.pattern, EventPattern::Discard { .. })
             || matches!(
                 &plan,
-                Some(HistoryPlan::PlayedFiltered { .. } | HistoryPlan::QuickActivation { .. })
+                Some(
+                    HistoryPlan::PlayedFiltered { .. }
+                        | HistoryPlan::LimitBreak
+                        | HistoryPlan::QuickActivation { .. }
+                )
             ))
             && count != HistoryCount::Facts
         {

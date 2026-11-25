@@ -80,6 +80,19 @@ def _check(name: str, value: JsonValue, *, accepted: bool = True) -> None:
             adapter.validate_json(json.dumps(value), strict=True)
 
 
+def test_limit_break_history_only_accepts_the_controllers_current_turn_facts() -> None:
+    query: dict[str, JsonValue] = {
+        "event": "limit_break",
+        "window": "this_turn",
+        "who": "self",
+    }
+    _check(QUERY, query)
+    _check(C, {"history": {**query, "at_least": 3}})
+    _check(QUERY, {**query, "window": "game"}, accepted=False)
+    _check(QUERY, {**query, "who": "opp"}, accepted=False)
+    _check(QUERY, {**query, "distinct": "subjects"}, accepted=False)
+
+
 def test_played_union_is_an_event_filter_but_not_a_history_selector() -> None:
     payload: dict[str, JsonValue] = {
         "who": "self",

@@ -1,0 +1,51 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-107:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          cost:
+            pp: 3
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 4
+            - damage:
+                to:
+                  leader_of: enemy
+                n: 2
+            - create:
+                token: ヒヒイロカネ
+                to: ex
+                n: 1
+      - line: 2
+        fanfare:
+          cost:
+            discard:
+              n: 1
+              sel:
+                who: self
+                zone: hand
+                trait: グラブル
+          do:
+            - draw:
+                who: self
+                n: 2

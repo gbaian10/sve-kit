@@ -1,0 +1,27 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-T07:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+          - ward
+      - line: 2
+        activate:
+          quick: true
+          per_turn: 1
+          cost:
+            pp: 1
+          do:
+            - life:
+                who: self
+                delta: 2

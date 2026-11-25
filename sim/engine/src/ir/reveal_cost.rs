@@ -32,7 +32,7 @@ pub(crate) fn parameter(decision: &Decision) -> Option<(Binding<Selector>, Cardi
         return None;
     };
     let count = constraint.cardinality;
-    let fixed = matches!(count.minimum.0, 1 | 2) && count.maximum == Some(count.minimum);
+    let fixed = matches!(count.minimum.0, 1..=3) && count.maximum == Some(count.minimum);
     ((fixed || variable(count))
         && group.cardinality == count
         && constraint.disjoint == Disjointness::Disjoint
@@ -225,6 +225,7 @@ pub(crate) fn payment(play: &PlaySpec) -> bool {
     };
     let selected = Selector::Bound { reference: binding };
     if variable(count)
+        || count.minimum.0 > 2
         || play.limit.is_some()
         || !play.captures.is_empty()
         || first.instruction.action

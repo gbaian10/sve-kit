@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-016:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - rush
+          - assail
+      - line: 2
+        attack_time:
+          do:
+            - reveal:
+                top:
+                  who: self
+                  n: 1
+                bind: shown
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        in:
+                          objects_of: shown
+                          view: before
+                        kind: follower
+                        trait: グラブル
+                        orig_cost_eq: 5
+                    op: ge
+                    right: 1
+                then:
+                  - move:
+                      ref:
+                        in: shown
+                      to: field
+                      result: entered
+                else:
+                  - move:
+                      ref:
+                        in: shown
+                      to: hand

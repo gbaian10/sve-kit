@@ -256,7 +256,7 @@ move／banish／look／reveal 的 top 一律在動作同層使用
 
 ## 8. 事件與歷史
 
-`A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、limit_broke、final_limit_broke、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
+`A.event` 保留 enter_field、left_field、placed_ex、discarded、banished、destroyed、damaged、dealt_damage、attacked、attack_target、evolved、super_evolved、phase、played、ability_played、life_changed、stat_changed、counter_changed、acted、stood、raced、drive_gained、ub_activated、fused、targeted、state。新增 dice_rolled、drive_checked、drive_trigger、moved、drew、equipped、limit_broke、final_limit_broke、hand_revealed、fused_as_material；any_of 合併多種事件但仍是一條能力／限次。payload 必須按事件型別窄化，不可讀不存在欄位。
 
 自身手牌棄牌／消滅的 `any_of` 子集為：
 `{any_of: [{discarded: {ref: this, from: hand, who: self}}, {banished: {ref: this, from: hand, who: self}}]}`。
@@ -1797,6 +1797,13 @@ activate:
 從者用 `auto.on: {limit_broke: {ref: this}}` 或
 `auto.on: {final_limit_broke: {ref: this}}` 訂閱自己的解放事件。兩次都成功時，
 各自等待正常的誘發順序。素材的種類篩選寫 `kind: treasure`。
+
+`history: {event: limit_break, window: this_turn, who: self, at_least: 3}`
+檢查本回合己方場上從者成功解放的合計，可用於本文、起動資格與常在條件。
+`history_count: {event: limit_break, window: this_turn, who: self}` 可將同一合計用於打出減費。
+普通解放與最終解放各計一次，同一素材成功完成兩個階段時合計為二。
+每次成功依從者當時的控制者計入，從者之後離場或變更控制者皆保留原紀錄。
+回合交替時清空紀錄。
 
 規則依據為綜合規則 1.29.0 §4.17、11.12、14.6、附錄 A 及
 [同一素材完成兩個階段的官方裁定](https://shadowverse-evolve.com/cardlist/?cardno=CP05-054&view=image)。

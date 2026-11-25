@@ -1,0 +1,48 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-001:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            act:
+              sel:
+                who: self
+                zone: field
+                kind: follower
+                trait: グラブル
+                orig_cost_eq: 5
+              n: 2
+          optional_cost_delta: -5
+      - line: 2
+        keywords:
+          - final_limit_break_possible
+      - line: 3
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          do:
+            - draw:
+                n: 2
+            - discard:
+                who: self
+                n: 1
+      - line: 4
+        auto:
+          "on":
+            final_limit_broke:
+              ref: this
+          do:
+            - grant:
+                "on": this
+                keywords:
+                  - storm

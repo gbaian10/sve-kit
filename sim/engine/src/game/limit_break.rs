@@ -9,6 +9,7 @@ use serde_json::json;
 
 pub(super) const TREASURE: &str = "トレジャー・トークン";
 pub(super) const FINAL_LIMIT_BREAK_POSSIBLE: &str = "final_limit_break_possible";
+pub(super) const LIMIT_BREAK_COUNTER: &str = "limit_break";
 
 pub(super) const fn stage(final_break: bool) -> &'static str {
     if final_break {
@@ -70,6 +71,8 @@ impl Game {
         }
         self.object_mut(material)?.state[stage(final_break)] = json!(true);
         self.add_limit_break_bonus(holder, material, final_break, timestamp)?;
+        let controller = &self.object(holder)?.controller;
+        self.bump(&format!("{controller}.{LIMIT_BREAK_COUNTER}"), 1);
         let group = self.group();
         let player_step = self.emit(
             json!({"kind":if final_break {"最終上限解放"} else {"上限解放"},"object":holder,"material":material}),

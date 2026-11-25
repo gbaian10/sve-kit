@@ -62,6 +62,8 @@ pub enum PendingEvent {
     LimitBreak,
     /// The follower completed a final limit break.
     FinalLimitBreak,
+    /// The holder was publicly revealed from its controller’s hand.
+    HandReveal,
     /// Cards moved between zones.
     Move {
         /// Player whose zone they left.

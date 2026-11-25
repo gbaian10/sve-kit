@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-026:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        play:
+          optional_cost:
+            pp: 2
+            result: enhanced
+      - line: 2
+        spell:
+          do:
+            - choice:
+                upto: 2
+                instead:
+                  - if:
+                      paid:
+                        receipt: enhanced
+                    upto: 4
+                options:
+                  - - create:
+                        token: 俊英の双剣士・ランスロット
+                        n: 1
+                        to: field
+                  - - create:
+                        token: 不撓不屈の騎士・ヴェイン
+                        n: 1
+                        to: field
+                  - - create:
+                        token: 竜殺しの騎士・ジークフリート
+                        n: 1
+                        to: field
+                  - - create:
+                        token: 炎帝・パーシヴァル
+                        n: 1
+                        to: field
+        covers:
+          - 2
+          - 3

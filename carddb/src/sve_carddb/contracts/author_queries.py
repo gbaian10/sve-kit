@@ -2331,6 +2331,19 @@ type HistoryUbActivatedCondition = Annotated[
 ]
 
 
+# No subject or where clause exists, so the history subject guard does not apply.
+@with_config(SHAPE_CONFIG)
+class HistoryLimitBreak(TypedDict):
+    event: Literal["limit_break"]
+    window: Literal["this_turn"]
+    who: Literal["self"]
+
+
+@with_config(SHAPE_CONFIG)
+class HistoryLimitBreakCondition(HistoryLimitBreak):
+    at_least: NotRequired[UInt]
+
+
 @with_config(SHAPE_CONFIG)
 class EventFusedFields(TypedDict):
     who: NotRequired[PlayerRef]
@@ -2668,6 +2681,14 @@ class EventEquipped(RecordData):
     equipped: EventEquippedPayload
 
 
+class SelfHandReveal(RecordData):
+    ref: Literal["this"]
+
+
+class EventHandRevealed(RecordData):
+    hand_revealed: SelfHandReveal
+
+
 class SelfLimitBreak(RecordData):
     ref: Literal["this"]
 
@@ -2841,6 +2862,7 @@ type EventAtom = (
     | EventDrew
     | EventEquipped
     | EventLimitBroke
+    | EventHandRevealed
     | EventFinalLimitBroke
     | EventFusedAsMaterial
     | EventCounterReached
@@ -2878,6 +2900,7 @@ type HistoryQuery = (
     | HistoryRaced
     | HistoryDriveGained
     | HistoryUbActivated
+    | HistoryLimitBreak
     | HistoryFused
     | HistoryTargeted
     | HistoryDiceRolled
@@ -2915,6 +2938,7 @@ type HistoryConditionQuery = (
     | HistoryRacedCondition
     | HistoryDriveGainedCondition
     | HistoryUbActivatedCondition
+    | HistoryLimitBreakCondition
     | HistoryFusedCondition
     | HistoryTargetedCondition
     | HistoryDiceRolledCondition

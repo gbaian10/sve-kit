@@ -1,0 +1,49 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-106:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords:
+          - ward
+      - line: 2
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              upto: 2
+          do:
+            - &id001
+              damage:
+                to: enemy
+                n: 2
+            - &id002
+              damage:
+                to:
+                  leaders: opponents
+                n: 2
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: field
+                        kind: follower
+                        orig_cost_eq: 5
+                        trait: グラブル
+                    op: ge
+                    right: 3
+                then:
+                  - *id001
+                  - *id002

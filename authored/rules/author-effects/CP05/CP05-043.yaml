@@ -1,0 +1,72 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-043:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - draw:
+                n: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: cemetery
+                        kind: follower
+                        keyword: quick_activation
+                    op: ge
+                    right: 7
+                then:
+                  - pp:
+                      who: self
+                      delta: 3
+      - line: 2
+        activate:
+          zone: hand
+          quick: true
+          cost:
+            steps:
+              - pp: 1
+              - discard:
+                  ref: this
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 3
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  keyword: quick_activation
+                may: true
+                n: 1
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                ref: picked
+                bind: shown
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser

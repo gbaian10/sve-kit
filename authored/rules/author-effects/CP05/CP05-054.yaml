@@ -1,0 +1,40 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-054:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords: [final_limit_break_possible]
+      - line: 2
+        auto:
+          "on": { limit_broke: { ref: this } }
+          do:
+            - flip_up:
+                sel: { who: self, zone: evolve_deck, kind: evolve_follower, trait: 土属性 }
+                upto: 2
+      - line: 3
+        auto:
+          "on": { final_limit_broke: { ref: this } }
+          do:
+            - damage:
+                to:
+                  any_of:
+                    - { leaders: opponents }
+                    - { who: opp, zone: field, kind: follower }
+                n:
+                  per:
+                    of:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        kind: evolve_follower
+                        trait: 土属性
+                        face_up: true
+                    unit: 2

@@ -4,6 +4,7 @@ mod commit;
 
 use super::observation::ObjectLink;
 use super::{Execution, Fact, Game, Nat, Result, invalid, seat_name, unsupported};
+use crate::game::limit_break::LIMIT_BREAK_COUNTER;
 use crate::game::player::Viewer;
 use crate::game::player::observation::TurnHistory;
 use crate::ir::events::change::StatFilter;
@@ -242,6 +243,7 @@ pub(super) fn exists(execution: &Execution, game: &Game, plan: &HistoryPlan<'_>)
         | HistoryPlan::QuickActivation { .. }
         | HistoryPlan::Life(_)
         | HistoryPlan::Ub { .. }
+        | HistoryPlan::LimitBreak
         | HistoryPlan::Played(_)
         | HistoryPlan::PlayedFiltered { .. }
         | HistoryPlan::Subject { .. } => Err(unsupported("boolean expression")),
@@ -458,6 +460,13 @@ fn quick_activation_count(
     u64::try_from(total).map(Nat).map_err(invalid)
 }
 
+fn limit_break_count(execution: &Execution, game: &Game, count: HistoryCount) -> Result<Nat> {
+    if count != HistoryCount::Facts {
+        return Err(unsupported("limit-break history subject count"));
+    }
+    committed_counter(game, execution.context.controller, LIMIT_BREAK_COUNTER).map(Nat)
+}
+
 pub(super) fn count(
     execution: &Execution,
     game: &Game,
@@ -515,6 +524,7 @@ pub(super) fn count(
             }
             ub_count(execution, game, player.as_ref(), *exclude_current)
         }
+        HistoryPlan::LimitBreak => limit_break_count(execution, game, count),
         HistoryPlan::Subject { event, filter } => {
             // 「これと同名を除く」 reads the card itself as it is now; during a play that is
             // the card on its way to the field, not an earlier generation (BP10-009).

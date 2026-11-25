@@ -147,7 +147,7 @@ pub(super) fn single_additional(costs: &CostSpec) -> bool {
     let [step] = steps.as_slice() else {
         return false;
     };
-    // The Quick quote covers another hand card; its Spell source is already in Resolution.
+    // The Spell source is already in Resolution when its extra hand material is chosen.
     selection(&step.instruction.action).is_ok_and(|plan| {
         !plan.source
             && plan.groups.len() == 1

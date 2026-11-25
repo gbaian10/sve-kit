@@ -2114,6 +2114,8 @@ impl TryFrom<String> for FilterKeyword {
             Some(
                 keyword @ (super::super::KeywordId::EarthRite
                 | super::super::KeywordId::Lastword
+                | super::super::KeywordId::QuickActivation
+                | super::super::KeywordId::QuickSpell
                 | super::super::KeywordId::Ward
                 | super::super::KeywordId::Aura
                 | super::super::KeywordId::Storm
@@ -2500,6 +2502,7 @@ pub(super) enum HistoryEvent {
     Played,
     Discarded,
     UbActivated,
+    LimitBreak,
     Attacked,
     Evolved,
     Destroyed,
@@ -2698,6 +2701,8 @@ pub(super) enum PhaseSubscription {
     DiceRolled(DiceSubscription),
     #[serde(rename = "discarded")]
     Discarded(DiscardSubscription),
+    #[serde(rename = "hand_revealed")]
+    HandRevealed(SelfHandReveal),
     #[serde(rename = "banished")]
     Banished(BanishedSubscription),
     #[serde(rename = "evolved")]
@@ -2783,6 +2788,13 @@ pub(super) struct FusedMaterial {
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub(super) struct SelfLimitBreak {
+    #[serde(rename = "ref")]
+    pub reference: This,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SelfHandReveal {
     #[serde(rename = "ref")]
     pub reference: This,
 }

@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-070:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - reveal: { top: { who: self, n: 1 }, bind: shown }
+            - if:
+                cond:
+                  cmp:
+                    left: { count: { in: { objects_of: shown, view: before }, trait: 光属性 } }
+                    op: ge
+                    right: 1
+                then:
+                  - create: { token: 光晶のエレメント, n: 1, to: ex }
+                  - pp_max: { who: self, delta: 1 }
+            - if:
+                cond:
+                  cmp:
+                    left: { resource: { who: self, kind: pp_max } }
+                    op: eq
+                    right: 10
+                then:
+                  - search:
+                      sel: { who: self, zone: deck, name: 大いなる調停者・ゾーイ }
+                      n: 1
+                      to: hand

@@ -1,0 +1,42 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-091:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - flip_up:
+                sel:
+                  who: self
+                  zone: evolve_deck
+                  kind: evolve_follower
+                  trait: 土属性
+                upto: 1
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      count:
+                        who: self
+                        zone: evolve_deck
+                        kind: evolve_follower
+                        trait: 土属性
+                        face_up: true
+                    op: ge
+                    right: 4
+                then:
+                  - draw:
+                      who: self
+                      n: 1

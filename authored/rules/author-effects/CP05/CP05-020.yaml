@@ -1,0 +1,63 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-020:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        play:
+          cost_delta:
+            minus:
+              - 0
+              - times:
+                  - 2
+                  - per:
+                      of:
+                        count:
+                          who: self
+                          zone: evolve_deck
+                          kind: evolve_follower
+                          face_up: true
+                          trait: 土属性
+                      unit: 2
+      - line: 2
+        keywords:
+          - final_limit_break_possible
+      - line: 3
+        auto:
+          "on":
+            limit_broke:
+              ref: this
+          do:
+            - grant:
+                "on": this
+                keywords:
+                  - rush
+                  - assail
+      - line: 4
+        auto:
+          "on":
+            final_limit_broke:
+              ref: this
+          cost:
+            pp: 1
+          targets:
+            - bind: chosen
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - destroy:
+                ref: chosen
+            - damage:
+                to:
+                  leader_of: chosen
+                n: 3

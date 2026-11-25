@@ -1,0 +1,55 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-044:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 2
+          cost:
+            reveal:
+              sel:
+                who: self
+                zone: hand
+                trait: 火属性
+              n: 3
+      - line: 2
+        activate:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 1
+          cost:
+            steps:
+              - pp: 1
+              - act_self: true
+              - reveal:
+                  sel:
+                    who: self
+                    zone: hand
+                    trait: 火属性
+                  n: 1
