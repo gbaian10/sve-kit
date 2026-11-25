@@ -48,6 +48,17 @@ describe("accessible rarity badges", () => {
     expect(document.querySelector("img")).toBeNull()
   })
 
+  it("falls back to plain PR for a GBF appearance", async () => {
+    await renderInRouter(
+      <RarityBadges region="jp" rarityCode="pr" rarityBadge={{ style: "gbf", text: "PR" }} />,
+      {
+        language: "en",
+      },
+    )
+    expect(screen.getByRole("img", { name: "Official rarity: PR" })).toHaveTextContent(/^PR$/u)
+    expect(document.querySelector("img")).toBeNull()
+  })
+
   it("shows only plain PR when a Premium printing has no appearance", async () => {
     await renderInRouter(<RarityBadges region="en" rarityCode="pr" premium />, { language: "en" })
     expect(screen.getByText("PR")).toBeVisible()
