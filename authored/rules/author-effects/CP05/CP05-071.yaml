@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-071:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field }
+              n: 1
+          do:
+            - destroy: enemy
+      - line: 2
+        activate:
+          usable_if:
+            history:
+              event: discarded
+              who: self
+              from: hand
+              window: this_turn
+              sel: { trait: 闇属性 }
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - create: { token: 闇晶のエレメント, n: 1, to: ex }
+            - draw: { n: 1 }
