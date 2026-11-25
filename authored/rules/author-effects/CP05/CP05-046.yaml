@@ -1,0 +1,35 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-046:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n:
+                  count:
+                    who: self
+                    zone: evolve_deck
+                    kind: evolve_follower
+                    face_up: true
+                    trait: 土属性
+            - create:
+                token: 土晶のエレメント
+                n: 1
+                to: ex

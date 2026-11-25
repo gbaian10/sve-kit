@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-049:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 2
+      - line: 2
+        auto:
+          on:
+            limit_broke:
+              ref: this
+          targets:
+            - bind: returned
+              from:
+                who: self
+                zone: cemetery
+                kind: follower
+                trait: グラブル
+              n: 1
+          do:
+            - move:
+                ref: returned
+                to: hand

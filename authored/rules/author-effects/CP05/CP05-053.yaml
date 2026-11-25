@@ -1,0 +1,47 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-053:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        spell:
+          do:
+            - look:
+                bind: seen
+                top:
+                  who: self
+                  n: 4
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  traits_any:
+                    - 土属性
+                    - 光属性
+                    - 闇属性
+                n: 1
+                may: true
+            - move:
+                ref: picked
+                result: taken
+                to: hand
+            - reveal:
+                bind: shown
+                ref: picked
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in:
+                      objects_of: taken
+                      view: before
+                to: deck
+                position: bottom
+                order: chooser
