@@ -1,0 +1,325 @@
+format: 3
+kind: translation_shard
+records:
+  - kind: glossary_term
+    data:
+      id: term:name.ars_gloria
+      category: card_name
+      concept_key: name.ars_gloria
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:9817d3548c1d590cc371a67b922fff7f7094b4193353b294b34ae50c26a9d981
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:5b2063af97463de515ab6dd0e2476817a3c8b496642bcd185809f7ec9b4f54c8
+      source_span:
+      authored_source_ja:
+  - origin: machine
+    low_confidence: true
+    note: 招式名新譯；比照一代官方「アルス・マグナ＝魔創鍊金」取鍊金字尾。招式正式譯名待維護者確認，列入待確認清單。
+    kind: glossary_choice
+    data:
+      term_id: term:name.ars_gloria
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 榮光鍊金
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls:
+          - https://shadowverse-portal.com/card/900334030?lang=zh-tw
+        claimed_source: 招式名新譯；比照一代官方「アルス・マグナ＝魔創鍊金」取鍊金字尾。招式正式譯名待維護者確認，列入待確認清單。
+  - kind: glossary_term
+    data:
+      id: term:name.arthur_staunch_dragon
+      category: card_name
+      concept_key: name.arthur_staunch_dragon
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:122bde7c8992ba9183996eb68fc1f6e343bbd0c769b0ce60bb6a41a8e06a5008
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:cca3933f86dc82b1da393c189732b05698d3c9ac02d4babdb59f4fce520ae865
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.azureflame_dragonewt
+      category: card_name
+      concept_key: name.azureflame_dragonewt
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:e565899ad3ba9f9982939740b21512e2d5823912a680fea42c89236e1d31f489
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:339d8c38c377e342b6520cc2b6da8c2d2770a473efbd2cd5c38fd8de443c62da
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.cagliostro_genius_alchemist
+      category: card_name
+      concept_key: name.cagliostro_genius_alchemist
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:670521ab765298b9ac3b152e69be716a6db9ab340385be1cee154c21b6b5d14d
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:a3ecc7191661294315d97f161ffb68ecbef542c93bc7703791cacc143114b0d1
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.elmott_remembrance_aflame
+      category: card_name
+      concept_key: name.elmott_remembrance_aflame
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:6fa6cb10f23a83fd8073023cecf59b48e9983e11d4ac876c0ffa006711ec00bb
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:bd6d7b23e1be4e1494497349feade3879b986bf97276c6cea1d7e8f32c22ab86
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.gran_and_djeeta_relic_busters
+      category: card_name
+      concept_key: name.gran_and_djeeta_relic_busters
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:b161d7c9cb5d37c420637cd0436acf7777d67cebb79f461359155d5c970b79b3
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:a76c6338615f73ccb890b0ec102a1f3e52f06e4598154938a7f5abd9dfbbdc23
+      source_span:
+      authored_source_ja:
+  - origin: machine
+    low_confidence: true
+    note: 人名沿一代與二代官方；碧藍幻想職業名レリックバスター（Relic Buster）意譯。職業名數位版查無官方繁中，列入待確認。
+    kind: glossary_choice
+    data:
+      term_id: term:name.gran_and_djeeta_relic_busters
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 遺物破壞者‧葛蘭＆吉塔
+      concept_evidence: []
+      source_claim:
+        source_work: "Shadowverse / Shadowverse: Worlds Beyond"
+        source_urls:
+          - https://shadowverse-portal.com/card/900041140?lang=zh-tw
+          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=480
+        claimed_source: 人名沿一代與二代官方；碧藍幻想職業名レリックバスター（Relic Buster）意譯。職業名數位版查無官方繁中，列入待確認。
+  - kind: glossary_term
+    data:
+      id: term:name.katalina_skys_protector
+      category: card_name
+      concept_key: name.katalina_skys_protector
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:b79d0242bb91368b4ea9d4292bc356642a2ae367da181c455fec90c29670dd75
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:238084cd3828ff14ef34f8d5450b5dbd45251d7006cf40ca060057826365ff10
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.lily_crystalian_innocence
+      category: card_name
+      concept_key: name.lily_crystalian_innocence
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:9f391b695d0dedba3c7ea1ea447b905e454484c2800f29bae0a8edaada0715cc
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:3c32cc452eb32ab8417bd67c4143ccc5c770a341f2dc285a7546fdc6ee0ef010
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.lyria_skydestined
+      category: card_name
+      concept_key: name.lyria_skydestined
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:fba973c3d0d58a7cb454e58c68f40c092488e5b003119fc94bf6dcd9ac2a760f
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:b1541749da2dfd675b53433d0880b4bf833ef548db964d1a6d6a926be4394c7a
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.meg_and_mari_vacation_veterans
+      category: card_name
+      concept_key: name.meg_and_mari_vacation_veterans
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:d43b996fcf48ef54f6148dd4692e4f656fc2befb028ca5ab5248b514b13ed6b5
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:035d39c95aff6ed0575211ef75a80901aad7240f06e957e62ae77a1fc5f9a3f0
+      source_span:
+      authored_source_ja:
+  - origin: machine
+    low_confidence: true
+    note: 人名沿二代官方「梅格」「瑪莉莉」；「猛者」取身經百戰之意譯為老手，稱號屬意譯。
+    kind: glossary_choice
+    data:
+      term_id: term:name.meg_and_mari_vacation_veterans
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 度假老手‧梅格＆瑪莉莉
+      concept_evidence: []
+      source_claim:
+        source_work: "Shadowverse: Worlds Beyond"
+        source_urls:
+          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=210
+        claimed_source: 人名沿二代官方「梅格」「瑪莉莉」；「猛者」取身經百戰之意譯為老手，稱號屬意譯。
+  - kind: glossary_term
+    data:
+      id: term:name.melodys_return
+      category: card_name
+      concept_key: name.melodys_return
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:f8aa13f6fd1a283ea9af1c96cee38cde283ac0b06d4db76f30c03e127e77d414
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:75449affeec421b5e883ab098eae407ce2804c2d9c6e8fc31df158edaa8996eb
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.mordred_illusory_lion
+      category: card_name
+      concept_key: name.mordred_illusory_lion
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:308ec20af13e0b5e9541374f0ae60af6f141b43bf1cb9600f40c49fc7695d4f7
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:c81b0c2082eddd2afc64077382e72fe9a50cb8ceb03c3be0be25f9ebbbe3fd85
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.sophia_zeyen_priestess
+      category: card_name
+      concept_key: name.sophia_zeyen_priestess
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:44b6255d5a3b9f24cd1294a5eaf2c55c757b889e0cd4d97cedc2b7b645f0ea9e
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:4017115cf4153e7bbdde73e911ff9c89bc7075d7cdd66868676049a079dabfb3
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.sukuna_brave_and_small
+      category: card_name
+      concept_key: name.sukuna_brave_and_small
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:c0d178886e3fde911b25cb5693008fa17fdd5b961c2e1c67e2e15059705c5e19
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:ebcc26e3fbbc97efcd72ee06dd52dcbdde36b2a0986600a1bee4f81c4b863a40
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.vaseraga_unyielding_scythe
+      category: card_name
+      concept_key: name.vaseraga_unyielding_scythe
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:19ef420cc0f937518ce9064d646d6d7aba66eb03a44c69fe9a543faa10f8c0af
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:644659940de0b62587883e0874d991c305de0d60df41ddecd1748324982f9cea
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.verdilia_rogue_professor
+      category: card_name
+      concept_key: name.verdilia_rogue_professor
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:0fef24144b43d04b2e507aa47a9a64102268c604c43381aaeb835dd4aaa7900f
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:1dbf43aa27bd7fd47c037f961cf1020ff2d705edba9a02ddc55c72c9f8bd7c60
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.vira_luminous_primal_knight
+      category: card_name
+      concept_key: name.vira_luminous_primal_knight
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:cbe587608151a5d87606d31bb386e18dc6c16d69c63d64d6aa30c96751d2b44b
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:9d8ea93eba178f0796dec65cf8f2d2c3b5560b3ea8c86fce7e11f4e214dd965f
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.vyrn_bestest_pal
+      category: card_name
+      concept_key: name.vyrn_bestest_pal
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:f6857f3920d97f084b09cf3c60783e1d0cb087e5fa2cd2f1f9fb9f5f088f5777
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:923e36dbcaec9d181731f609b1186ca062250ef5f1f030e79cba8b83d90bba42
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.yuzuki_bloodlord
+      category: card_name
+      concept_key: name.yuzuki_bloodlord
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:38ac9a083b39047e3397364bad0acd2490f4d520c1d2251ae436a9652effd734
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:e5cc249510ced147529258d3b0b9f4e6c485dc8522d46319010be139360375c5
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.zahar_stormwave_dragoon
+      category: card_name
+      concept_key: name.zahar_stormwave_dragoon
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:aee9d11f20e9f4a2bf5f2a72e8cbf4dcd6dda8ad910b6bf898652416eca3c362
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:e8f2e3d5d107cb0e627bb204a16388c84c831aaf8ee524f8e4539155e5df2f14
+      source_span:
+      authored_source_ja:
+  - kind: glossary_term
+    data:
+      id: term:name.zeta_and_bea_crimson_and_blue
+      category: card_name
+      concept_key: name.zeta_and_bea_crimson_and_blue
+      source_ref:
+        batch_id: sha256:b8572bc66b8c4fe4a033aba32afdf1f669adfd1621e2b7e8d3847b23af1caffa
+        source_version_id: src:v1:ed0aaab355984c050cc9f9fc4348027d981764c8dd21fd43008b387ed1e0c8f0
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:5d642be01aef1a5f18a4c8f4119a6d22b5a7c3db12aa7af6b52248121c84b735
+      source_span:
+      authored_source_ja:
