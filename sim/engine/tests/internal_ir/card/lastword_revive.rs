@@ -151,13 +151,17 @@ fn resurrection_head_payment_can_be_declined_or_unaffordable_without_reviving() 
     for (pp, accept) in [(1_u8, true), (2, false), (3, true)] {
         let mut game = loaded(&board(pp), program);
         depart(&mut game, program.card().abilities[0].node.id);
-        let CardPlay::Awaiting(question) = fire(&mut game, 2) else {
-            panic!("head payment");
+        let play = fire(&mut game, 2);
+        let play = if pp >= 2 {
+            let CardPlay::Awaiting(question) = play else {
+                panic!("head payment");
+            };
+            assert!(matches!(question.domain, InputDomain::OptionalCost));
+            game.answer_internal_card(question.actor, question.token, Answer::OptionalCost(accept))
+                .unwrap()
+        } else {
+            play
         };
-        assert!(matches!(question.domain, InputDomain::OptionalCost));
-        let play = game
-            .answer_internal_card(question.actor, question.token, Answer::OptionalCost(accept))
-            .unwrap();
         let succeeds = accept && pp >= 2;
         if succeeds {
             resolved(play);

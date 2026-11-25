@@ -68,14 +68,14 @@ fn lady_grey_creates_a_dark_element_in_ex_on_entry() {
 
 #[test]
 fn ewig_kamerad_quick_creates_elements_and_draws_only_after_the_dark_payment() {
-    for accept in [false, true] {
+    for (has_material, accept) in [(false, false), (true, false), (true, true)] {
         let mut initial = draw_position();
         initial["turn"]["active"] = json!("P2");
         let mut hand = vec![
             json!({"id":"spell","card":"CP05-P67"}),
             json!({"id":"other","card":"BP01-037"}),
         ];
-        if accept {
+        if has_material {
             hand.push(json!({"id":"ferry","card":"CP05-076"}));
         }
         initial["players"]["P1"]["zones"]["hand"] = json!(hand);
@@ -91,13 +91,16 @@ fn ewig_kamerad_quick_creates_elements_and_draws_only_after_the_dark_payment() {
             .iter()
             .find(|option| option.card == "CP05-P67")
             .unwrap();
-        let declaration = waiting(choose(
+        let mut play = choose(
             &mut game,
             &question,
             Answer::Quick(Some(option.handle)),
-        ));
-        assert!(matches!(declaration.domain, InputDomain::OptionalCost));
-        let mut play = choose(&mut game, &declaration, Answer::OptionalCost(accept));
+        );
+        if has_material {
+            let declaration = waiting(play);
+            assert!(matches!(declaration.domain, InputDomain::OptionalCost));
+            play = choose(&mut game, &declaration, Answer::OptionalCost(accept));
+        }
         if accept {
             let materials = waiting(play);
             let InputDomain::CostMaterials(domain) = &materials.domain else {
@@ -128,7 +131,14 @@ fn ewig_kamerad_quick_creates_elements_and_draws_only_after_the_dark_payment() {
                     .contains(&json!("ferry"))
             );
         } else {
-            assert_eq!(view["P1"]["hand"], json!(["other"]));
+            assert_eq!(
+                view["P1"]["hand"],
+                if has_material {
+                    json!(["other", "ferry"])
+                } else {
+                    json!(["other"])
+                }
+            );
             assert_eq!(view["P1"]["cemetery"], json!(["spell"]));
         }
     }

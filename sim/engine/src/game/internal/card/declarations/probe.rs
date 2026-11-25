@@ -29,9 +29,22 @@ impl Game {
     }
 
     pub(in crate::game::internal::card) fn declaration_payable(
-        mut self,
+        self,
         execution: Result<Execution>,
     ) -> Result<bool> {
+        Ok(self.declaration_availability(execution)?.unwrap_or(false))
+    }
+
+    pub(in crate::game::internal::card) fn declaration_may_be_payable(
+        self,
+        execution: Result<Execution>,
+    ) -> Result<bool> {
+        // Exhausting the search cannot cancel an already triggered occurrence.
+        Ok(self.declaration_availability(execution)?.unwrap_or(true))
+    }
+
+    fn declaration_availability(mut self, execution: Result<Execution>) -> Result<Option<bool>> {
+        let mut budget = MAX_ANSWERS;
         let attempt = (|| {
             let mut execution = execution?;
             execution.declaration_mode = DeclarationMode::Probe;
@@ -40,10 +53,10 @@ impl Game {
                 return Ok(true);
             }
             self.typed = Some(execution);
-            let mut budget = MAX_ANSWERS;
             self.follow_declaration(&mut budget)
         })();
-        rejected_branch(attempt)
+        let payable = rejected_branch(attempt)?;
+        Ok((payable || budget > 0).then_some(payable))
     }
 
     fn follow_declaration(mut self, budget: &mut u32) -> Result<bool> {

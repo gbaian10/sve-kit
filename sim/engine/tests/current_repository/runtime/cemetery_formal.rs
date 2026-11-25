@@ -102,7 +102,20 @@ fn bp02_066_cemetery_formal_target_excludes_discard_cost_and_cancels_without_tar
                 "resolved"
             );
             let before = game.projection(View::Referee).unwrap();
-            let declaration = awaiting(trigger(&mut game));
+            let declaration = trigger(&mut game);
+            if !available {
+                assert_eq!(declaration, CardPlay::Cancelled);
+                assert_eq!(
+                    game.projection(View::Referee).unwrap()["P1"]["hand"],
+                    json!(["payer"])
+                );
+                assert_eq!(
+                    game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+                    before["P1"]["cemetery"]
+                );
+                continue;
+            }
+            let declaration = awaiting(declaration);
             assert!(
                 matches!(declaration.domain, InputDomain::OptionalCost),
                 "accepting the trigger precedes its targets and payment"
@@ -114,18 +127,6 @@ fn bp02_066_cemetery_formal_target_excludes_discard_cost_and_cancels_without_tar
                     Answer::OptionalCost(true),
                 )
                 .unwrap();
-            if !available {
-                assert_eq!(play, CardPlay::Cancelled);
-                assert_eq!(
-                    game.projection(View::Referee).unwrap()["P1"]["hand"],
-                    json!(["payer"])
-                );
-                assert_eq!(
-                    game.projection(View::Referee).unwrap()["P1"]["cemetery"],
-                    before["P1"]["cemetery"]
-                );
-                continue;
-            }
             let question = awaiting(play);
             let InputDomain::Targets(domain) = &question.domain else {
                 panic!("targets before costs")

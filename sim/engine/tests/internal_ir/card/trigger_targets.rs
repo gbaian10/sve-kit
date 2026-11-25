@@ -180,13 +180,16 @@ fn phase_targets_precede_head_payment_and_failed_declarations_cancel() {
         let result = game
             .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
             .unwrap();
-        let CardPlay::Awaiting(payment) = result else {
-            panic!("head declaration")
+        let result = if has_target {
+            let CardPlay::Awaiting(payment) = result else {
+                panic!("head declaration")
+            };
+            assert_eq!(payment.domain, InputDomain::OptionalCost);
+            game.answer_internal_card(payment.actor, payment.token, Answer::OptionalCost(accept))
+                .unwrap()
+        } else {
+            result
         };
-        assert_eq!(payment.domain, InputDomain::OptionalCost);
-        let result = game
-            .answer_internal_card(payment.actor, payment.token, Answer::OptionalCost(accept))
-            .unwrap();
         if accept && has_target {
             let CardPlay::Awaiting(targets) = result else {
                 panic!("targets before payment")

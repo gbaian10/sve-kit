@@ -112,7 +112,7 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
                         [ZoneKind::Field | ZoneKind::Cemetery]
                     ) || super::triggers::phase_in_zone(&ability.node, ZoneKind::Cemetery))
                         && resolution_costs(body, &source_resolution_cost))
-                        || hand_pp_payment(&ability.node)))
+                        || hand_pp_payment(&ability.node).is_some()))
                 && !(ability.node.kind == AbilityKind::Triggered
                     && ability.node.active_zones == [ZoneKind::Field]
                     && resolution_costs(body, &super::hand_payment::resolution_cost))
@@ -344,22 +344,19 @@ fn discard_target_damage(ability: &Ability, program: &Program) -> bool {
             && players.relative_to == (PlayerRef::Controller {}))
 }
 
-fn hand_pp_payment(ability: &Ability) -> bool {
-    let Some(event) = ability
-        .trigger
-        .as_ref()
-        .and_then(discard_header::self_event)
-    else {
-        return false;
-    };
-    let Some(body) = &ability.body else {
-        return false;
-    };
+enum HandPpPayment<'ability> {
+    Return,
+    Targeted(&'ability CostSpec),
+}
+
+fn hand_pp_payment(ability: &Ability) -> Option<HandPpPayment<'_>> {
     if ability.active_zones != [ZoneKind::Hand] {
-        return false;
+        return None;
     }
+    let event = discard_header::self_event(ability.trigger.as_ref()?)?;
+    let body = ability.body.as_ref()?;
     let [step] = body.steps.as_slice() else {
-        return false;
+        return None;
     };
     let (payment, guarded) = if let Node::Control {
         control:
@@ -371,10 +368,10 @@ fn hand_pp_payment(ability: &Ability) -> bool {
     } = &step.node
     {
         if !optional_payment::public_pp_guard(condition) {
-            return false;
+            return None;
         }
         let [payment] = then_body.steps.as_slice() else {
-            return false;
+            return None;
         };
         (payment, true)
     } else {
@@ -391,11 +388,25 @@ fn hand_pp_payment(ability: &Ability) -> bool {
             },
     } = &payment.node
     else {
-        return false;
+        return None;
     };
-    positive_pp(costs)
-        && (discard_return(on_paid) == Some(event)
-            || (!guarded && discard_target_damage(ability, on_paid)))
+    if !positive_pp(costs) {
+        return None;
+    }
+    if discard_return(on_paid) == Some(event) {
+        Some(HandPpPayment::Return)
+    } else if !guarded && discard_target_damage(ability, on_paid) {
+        Some(HandPpPayment::Targeted(costs))
+    } else {
+        None
+    }
+}
+
+pub(super) fn targeted_discard_pp_cost(ability: &Ability) -> Option<&CostSpec> {
+    match hand_pp_payment(ability)? {
+        HandPpPayment::Targeted(costs) => Some(costs),
+        HandPpPayment::Return => None,
+    }
 }
 
 fn earth_rite_material(costs: &CostSpec) -> Option<Binding<Selector>> {
@@ -824,17 +835,30 @@ impl Game {
     pub(super) fn internal_optional_decision(
         &mut self,
         execution: &mut Execution,
-        play: &PlayState,
+        play: &mut PlayState,
     ) -> Result<bool> {
         let Some(payment) = play
             .optional
-            .iter()
+            .iter_mut()
             .find(|payment| payment.accepted.is_none())
         else {
             return Ok(false);
         };
-        if payment.accepted.is_some() {
-            return Ok(false);
+        if execution.spell
+            && !payment.required
+            && super::hand_payment::single_additional(&payment.costs)
+        {
+            // A standalone discard can only use the hand present at declaration.
+            let mut probe = execution.clone();
+            match self.internal_probe_hand_payments(&mut probe, &[&payment.costs]) {
+                Ok(()) => {}
+                Err(crate::EngineFailure::IllegalPlay(_)) => {
+                    // Only player answers are recorded as declarations.
+                    payment.accepted = Some(false);
+                    return self.internal_optional_decision(execution, play);
+                }
+                Err(error) => return Err(error),
+            }
         }
         self.internal_wait(
             execution,

@@ -281,7 +281,7 @@ fn assert_random_continuation(restored: &Game, origin: &Game, dice: AbilityId, d
     );
 }
 
-fn cancelled_head() -> (Game, DecisionView) {
+fn unpayable_head() -> (Game, DecisionView) {
     let mut raw=fragment(&json!({"fanfare":{"cost":{"steps":[{"pp":1},{"counter":{"on":{"who":"self","zone":"field","name":"unit-amulet"},"holders":1,"name":"test","n":1}},{"leader_life":21}]},"do":[]}}),"unit-follower").card().clone();
     let Node::Control {
         control: Control::Pay { costs, .. },
@@ -313,48 +313,29 @@ fn cancelled_head() -> (Game, DecisionView) {
         game.resume_internal_card().unwrap();
     }
     let pending = game.internal_pending_choice().unwrap().unwrap();
+    (game, pending)
+}
+
+#[test]
+fn a_failed_required_head_probe_preserves_the_board_and_retires_the_occurrence() {
+    let (mut game, pending) = unpayable_head();
     let InputDomain::Pending(options) = &pending.domain else {
         panic!("pending")
     };
-    let q = awaiting(
+    let before = game.projection(View::Referee).unwrap();
+    assert!(matches!(
         game.answer_internal_card(
             pending.actor,
             pending.token,
             Answer::Pending(options[0].handle),
         )
         .unwrap(),
-    );
-    (game, q)
-}
-
-#[test]
-fn a_failed_required_head_payment_matches_decline_without_reviving_the_occurrence() {
-    let (mut game, q) = cancelled_head();
-    assert_eq!(q.domain, InputDomain::OptionalCost);
-    let mut declined = game.clone();
-    assert!(matches!(
-        declined
-            .answer_internal_card(q.actor, q.token, Answer::OptionalCost(false))
-            .unwrap(),
         CardPlay::Cancelled
     ));
-    let mut result = game
-        .answer_internal_card(q.actor, q.token, Answer::OptionalCost(true))
-        .unwrap();
-    if let CardPlay::Awaiting(materials) = result {
-        let InputDomain::CostMaterials(domain) = &materials.domain else {
-            panic!("head materials")
-        };
-        result = game
-            .answer_internal_card(
-                materials.actor,
-                materials.token,
-                Answer::CostMaterials(vec![domain.members[0].handle]),
-            )
-            .unwrap();
-    }
-    assert!(matches!(result, CardPlay::Cancelled));
-    transactions::assert_restored(&game, &declined);
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["P1"], before["P1"]);
+    assert_eq!(after["P2"], before["P2"]);
+    assert_eq!(after["objects"], before["objects"]);
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {
         game.resume_internal_card().unwrap();
     }
@@ -499,10 +480,10 @@ fn player_payment_errors_are_reason_free_and_keep_rejected_reverted_and_fault_di
         fault.projection(View::Referee).unwrap()["P1"]["pp"]["current"],
         2
     );
-    let (mut cancel, _decline) = cancelled_head();
+    let (mut cancel, _) = unpayable_head();
     cancel.advance_player_input();
     assert_eq!(
-        answer(&mut cancel, Viewer::P1, Answer::OptionalCost(false)).kind,
+        answer(&mut cancel, Viewer::P1, Answer::Pending(1)).kind,
         SubmissionKind::Cancelled
     );
 }

@@ -80,7 +80,7 @@ fn player_pipeline_illegal_optional_payment_reverts_without_reviving_the_pending
 }
 
 #[test]
-fn ordered_trigger_costs_roll_back_earlier_discard_and_pp_on_late_failure() {
+fn ordered_trigger_costs_require_enough_pp_for_all_steps_before_asking() {
     let mut tree = tree();
     tree["cards"]["unit-follower"]["abilities"][0]["fanfare"] = json!({
         "cost":{"steps":[{"pp":1},{"discard":{"sel":{"who":"self","zone":"hand"},"n":1}},{"pp":3}]},
@@ -100,13 +100,18 @@ fn ordered_trigger_costs_roll_back_earlier_discard_and_pp_on_late_failure() {
             .unwrap();
         game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
         let pending = game.internal_pending_choice().unwrap().unwrap();
-        let CardPlay::Awaiting(declare) = game
+        let before = game.projection(View::Referee).unwrap();
+        let declaration = game
             .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
-            .unwrap()
-        else {
+            .unwrap();
+        if pp == 4 {
+            assert!(matches!(declaration, CardPlay::Cancelled));
+            assert_payment_state(&game.projection(View::Referee).unwrap(), &before);
+            continue;
+        }
+        let CardPlay::Awaiting(declare) = declaration else {
             panic!("declaration")
         };
-        let before = game.projection(View::Referee).unwrap();
         let play = game
             .answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(accept))
             .unwrap();
@@ -120,21 +125,18 @@ fn ordered_trigger_costs_roll_back_earlier_discard_and_pp_on_late_failure() {
         };
         assert!(game.internal_decision(View::P2).is_none());
         assert_payment_state(&game.projection(View::Referee).unwrap(), &before);
-        let result = game.answer_internal_card(
-            material.actor,
-            material.token,
-            Answer::CostMaterials(vec![0]),
+        resolved(
+            game.answer_internal_card(
+                material.actor,
+                material.token,
+                Answer::CostMaterials(vec![0]),
+            )
+            .unwrap(),
         );
         let view = game.projection(View::Referee).unwrap();
-        if pp == 4 {
-            assert!(matches!(result.unwrap(), CardPlay::Cancelled));
-            assert_payment_state(&view, &before);
-        } else {
-            resolved(result.unwrap());
-            assert_eq!(view["P1"]["pp"]["current"], 0);
-            assert_eq!(view["P1"]["cemetery"], json!(["h"]));
-            assert_eq!(view["P1"]["hand"], json!(["d"]));
-        }
+        assert_eq!(view["P1"]["pp"]["current"], 0);
+        assert_eq!(view["P1"]["cemetery"], json!(["h"]));
+        assert_eq!(view["P1"]["hand"], json!(["d"]));
     }
 }
 

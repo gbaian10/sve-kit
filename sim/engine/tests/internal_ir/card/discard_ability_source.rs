@@ -356,7 +356,16 @@ fn self_discard_declares_one_enemy_before_resolving_the_pp_payment() {
             &state,
         );
         resolved(activate(&mut game, 1));
-        let targets = question(take_pending(&mut game));
+        let play = take_pending(&mut game);
+        if current == 0 {
+            assert_eq!(play, CardPlay::Cancelled);
+            let after = game.projection(View::Referee).unwrap();
+            assert_eq!(after["P1"]["pp"]["current"], 0_u8);
+            assert_eq!(after["objects"]["first"]["damage"], 0_u8);
+            assert_eq!(after["objects"]["second"]["damage"], 0_u8);
+            continue;
+        }
+        let targets = question(play);
         let InputDomain::Targets(domain) = &targets.domain else {
             panic!("the formal target must precede the resolution payment");
         };
@@ -378,7 +387,7 @@ fn self_discard_declares_one_enemy_before_resolving_the_pp_payment() {
                 .unwrap(),
         );
         let after = game.projection(View::Referee).unwrap();
-        let paid = u8::from(current > 0 && accept);
+        let paid = u8::from(accept);
         assert_eq!(after["P1"]["pp"]["current"], current - paid);
         assert_eq!(after["objects"]["first"]["damage"], 0_u8);
         assert_eq!(after["objects"]["second"]["damage"], paid * 3);

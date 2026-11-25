@@ -310,18 +310,12 @@ fn filtered_trigger_head_declares_before_private_materials_and_can_decline_or_fa
             game.resume_internal_card().unwrap();
         }
         let pending = game.internal_pending_choice().unwrap().unwrap();
-        let CardPlay::Awaiting(declare) = game
-            .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
-            .unwrap()
-        else {
-            panic!("head declaration");
-        };
-        assert_eq!(declare.domain, InputDomain::OptionalCost);
         let before = game.projection(View::Referee).unwrap();
-        let play =
-            game.answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(accept));
+        let declaration = game
+            .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
+            .unwrap();
         if !eligible {
-            assert!(matches!(play.unwrap(), CardPlay::Cancelled));
+            assert!(matches!(declaration, CardPlay::Cancelled));
             let cancelled = game.projection(View::Referee).unwrap();
             assert_eq!(cancelled["P1"], before["P1"]);
             assert_eq!(cancelled["objects"], before["objects"]);
@@ -329,13 +323,15 @@ fn filtered_trigger_head_declares_before_private_materials_and_can_decline_or_fa
                 game.resume_internal_card().unwrap();
             }
             assert!(game.internal_pending_choice().unwrap().is_none());
-        } else if !accept {
-            assert!(matches!(play.unwrap(), CardPlay::Cancelled));
-            assert_eq!(
-                game.projection(View::Referee).unwrap()["P1"]["hand"],
-                json!(["h"])
-            );
-        } else {
+            continue;
+        }
+        let CardPlay::Awaiting(declare) = declaration else {
+            panic!("head declaration");
+        };
+        assert_eq!(declare.domain, InputDomain::OptionalCost);
+        let play =
+            game.answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(accept));
+        if accept {
             let CardPlay::Awaiting(materials) = play.unwrap() else {
                 panic!("private hand materials");
             };
@@ -359,6 +355,12 @@ fn filtered_trigger_head_declares_before_private_materials_and_can_decline_or_fa
             );
             assert_eq!(
                 game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+                json!(["h"])
+            );
+        } else {
+            assert!(matches!(play.unwrap(), CardPlay::Cancelled));
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["hand"],
                 json!(["h"])
             );
         }
