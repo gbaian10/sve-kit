@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected decision invalidates the scenario."
-)]
-
 use super::*;
 
 #[path = "../../support/current_fixture.rs"]
@@ -66,10 +61,10 @@ fn matching_search_grants_end_phase_banish_only_to_the_entered_card() {
         "11111111111111111111111111111111",
         "フォロワー",
         vec![json!({"fanfare":{
-            "targets":[{"bind":"chosen","from":{"who":"self","zone":"field","kind":"follower","other":true},"n":1}],
+            "targets":[{"bind":"chosen","from":{"who":"self","zone":"field","kind":"follower","other":true},"n":1_u8}],
             "do":[
                 {"search":{"sel":{"who":"self","zone":"deck","kind":"follower"},
-                    "same_name_as":"chosen","n":1,"to":"field","result":"entered"}},
+                    "same_name_as":"chosen","n":1_u8,"to":"field","result":"entered"}},
                 {"grant":{"on":{"follow":"entered"},"abilities":[{"auto":{
                     "on":{"phase":{"which":"end","whose":"self"}},
                     "do":[{"banish":{"ref":"this"}}]
@@ -107,7 +102,7 @@ fn matching_search_grants_end_phase_banish_only_to_the_entered_card() {
         initial["players"]["P1"]["zones"]["deck"] = json!([
             {"id":"found","card":"match"}, {"id":"decoy","card":"other"}
         ]);
-        let field = (0..if full { 4 } else { 1 })
+        let field = (0_u8..if full { 4 } else { 1 })
             .map(|number| json!({"id":format!("candidate-{number}"),"card":"alias"}))
             .collect::<Vec<_>>();
         initial["players"]["P1"]["zones"]["field"] = json!(field);
