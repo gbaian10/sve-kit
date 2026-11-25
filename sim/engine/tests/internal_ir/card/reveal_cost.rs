@@ -316,7 +316,7 @@ fn reveal_cost_lowering_rejects_unrequested_material_shapes() {
         json!({"sel":{"who":"opp","zone":"hand"},"n":1}),
         json!({"sel":{"who":"self","zone":"cemetery"},"n":1}),
         json!({"sel":{"who":"self","zone":"hand"},"n":0}),
-        json!({"sel":{"who":"self","zone":"hand"},"n":3}),
+        json!({"sel":{"who":"self","zone":"hand"},"n":4}),
         json!({"sel":{"who":"self","zone":"hand"},"upto":1}),
         json!({"sel":{"who":"self","zone":"hand"},"any":true}),
         json!({"sel":{"who":"self","zone":"hand","name_contains":""},"n":1}),
