@@ -1,0 +1,36 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-104:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords: [quick]
+      - line: 2
+        spell:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              n: 1
+          do:
+            - damage: { to: enemy, n: 2 }
+            - create: { token: 光晶のエレメント, n: 1, to: ex }
+            - choose:
+                bind: offering
+                from: { who: self, zone: hand, kind: follower, orig_cost_eq: 5, trait: グラブル }
+                upto: 1
+            - discard: { ref: offering, result: discarded }
+            - if:
+                cond:
+                  cmp: { left: { count_of: discarded }, op: eq, right: 1 }
+                then:
+                  - search:
+                      sel: { who: self, zone: deck, name: 狂恋の華鎧・ヴィーラ }
+                      n: 1
+                      to: hand
