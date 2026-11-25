@@ -1,0 +1,941 @@
+format: 1
+kind: qa_translation_shard
+entries:
+  - qa_id: qa:v1:05cc0e5e16a0b66a75ac24055e928e0929125608652609864e81b8b6668ba99c
+    field: answer
+    source_hash: sha256:0f964524f67541e162b9cc369259b83c0af0996b5b7e2c17c4a1e6bc9904d004
+    lang: zh-Hant
+    text: "不行。無法抉擇同1項選項2次以上。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:05cc0e5e16a0b66a75ac24055e928e0929125608652609864e81b8b6668ba99c
+    field: question
+    source_hash: sha256:3f49351884a5aa4ef511053c5494b628fa3bb5fb52610536991877a8ba74ed45
+    lang: zh-Hant
+    text: "抉擇2項以上的選項時，可以抉擇同1項選項2次以上嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0a0b74cb482970de644021ee71573c8f034a8b43c7d0f88806f7ff11b06d0d5b
+    field: answer
+    source_hash: sha256:a7b4884d4a2d3f992ff716a84d13f76d3b6aae294d5da68756de4afa8b94f913
+    lang: zh-Hant
+    text: "是的。即使敵方戰場上沒有從者，也可以藉由選擇敵方戰場上的0個從者來使用這個從者的{入場曲}能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:0a0b74cb482970de644021ee71573c8f034a8b43c7d0f88806f7ff11b06d0d5b
+    field: question
+    source_hash: sha256:c8e053dae5ba45a4e37696859e3de9465b19a574c87cf1257ab1d9986a2c634b
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1265dc87f415afae0e8a0aad5eb0873a4c31d4fabd90c900eca997dbf7ef964c
+    field: answer
+    source_hash: sha256:59f5c42c661c376c62f59dd811d02c4938775c31a8fe59a370b6dbb2c2da30a2
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『光晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1265dc87f415afae0e8a0aad5eb0873a4c31d4fabd90c900eca997dbf7ef964c
+    field: question
+    source_hash: sha256:c5d619a9fb07468a05dbc122f31f6628e08c91eef00ecf5609fb35661b49ce11
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『光晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1a9f5f9e090e0549669ea8a49a28ccbb9931619bf368b0e1aca1aaf9bc49ebff
+    field: answer
+    source_hash: sha256:196fa48bf25579a238caf1960c544701f11a9efb86881d1cca06aecd24339782
+    lang: zh-Hant
+    text: "不行。在此情況下，無法支付『遺物守門人‧璐契兒』的{起動}能力的消費，因此無法使用這個能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1a9f5f9e090e0549669ea8a49a28ccbb9931619bf368b0e1aca1aaf9bc49ebff
+    field: question
+    source_hash: sha256:5191724ab8c646b3089b937f8001858c7500ab92e1607beeac4b69170ccf8f87
+    lang: zh-Hant
+    text: "自己的EX區中有這1張卡片以及4張原始消費各不相同的卡片時，可以使用『遺物守門人‧璐契兒』的{起動}能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1b6706a7ed527e684709f17cef6598cd34df5c733f5a7757dd285380e345ab5d
+    field: answer
+    source_hash: sha256:e6ac20936e2441884ca0db1bf2c7a8745082063779cca94eefecab78957041d4
+    lang: zh-Hant
+    text: "兩個『沉睡的輝龍‧亞瑟』的{入場曲}能力都會觸發。處理順序如下。\n2個『沉睡的輝龍‧亞瑟』同時進入戰場時，兩者的{入場曲}能力都會觸發並進入待機狀態。結算第1個從者處於待機狀態的能力時，可以從自己的牌堆中搜尋1張『沉睡的獅子‧莫德雷德』，召喚到戰場上。之後結算第2個從者處於待機狀態的能力時，由於自己戰場上已有『沉睡的獅子‧莫德雷德』，無法從自己的牌堆中搜尋1張『沉睡的獅子‧莫德雷德』並召喚到戰場上。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1b6706a7ed527e684709f17cef6598cd34df5c733f5a7757dd285380e345ab5d
+    field: question
+    source_hash: sha256:f1d19bdba18f9c22e0025464749e8945130abb1a5eff5e77b14be52007a7e1da
+    lang: zh-Hant
+    text: "若因某個能力而有2個『沉睡的輝龍‧亞瑟』同時進入戰場，兩者的{入場曲}能力都會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1e44cef49c08a9c1e02db7737865036c95c060bd04927c695c1fd273f7dec00b
+    field: answer
+    source_hash: sha256:6f4ca8c0f037a6b4c9dba21b28b536b86f40e11cfcc07f05e24a428c5588f84c
+    lang: zh-Hant
+    text: "是的。選擇卡片時，上限解放素材（Treasure）也包含在卡片之中。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:1e44cef49c08a9c1e02db7737865036c95c060bd04927c695c1fd273f7dec00b
+    field: question
+    source_hash: sha256:bb0aeb4e49bb61e4f499972cd13c17b02a07a23e7249c21249fda60a9c65770f
+    lang: zh-Hant
+    text: "選擇EX區中的卡片時，可以選擇該EX區中的上限解放素材（Treasure）嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:21fe7a54b33b975472959a623b9e7fe5874eca98ce75ac294ccd96273fa22c02
+    field: answer
+    source_hash: sha256:2e4ba9655a4289b68928913c67654c7daff602570a341d880903bca588464142
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的「這張卡片上限解放時，～」能力，也無法給予敵方的主戰者2點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:21fe7a54b33b975472959a623b9e7fe5874eca98ce75ac294ccd96273fa22c02
+    field: question
+    source_hash: sha256:fac6bd7ee9a186991a686c5bca4284403d72033910a41ad284ed46261307ca27
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的「這張卡片上限解放時，～」能力，給予敵方的主戰者2點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:24ce180ecad3150bbff5ad3c99c0cdc426d470dbf09e42c8cde5db05ee418bc2
+    field: answer
+    source_hash: sha256:8be49e05dd4e808dc8481a352fb956edf2fef3452fdd77c3c9492fc379467861
+    lang: zh-Hant
+    text: "是的。會觸發。\n捨棄手牌中的1張闇屬性・卡片作為『腐敗侵襲』的追加消費時，『闇之攝理‧菲迪耶爾』仍在戰場上，因此「從自己的手牌捨棄1張闇屬性・卡片時，～」的能力會進入待機狀態。\n之後，生命值變為0的『闇之攝理‧菲迪耶爾』會在檢查時點離開戰場。由於其「從自己的手牌捨棄1張闇屬性・卡片時，～」的能力已進入待機狀態，因此會給予敵方的全部主戰者與敵方戰場上的全部從者1點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:24ce180ecad3150bbff5ad3c99c0cdc426d470dbf09e42c8cde5db05ee418bc2
+    field: question
+    source_hash: sha256:514f5dff7668da48ae8ea449ba950eaf013e536a8973305da9632de4f457ffe0
+    lang: zh-Hant
+    text: "自己戰場上有『闇之攝理‧菲迪耶爾』時，使用了『腐敗侵襲』。\n捨棄手牌中的1張闇屬性・卡片作為『腐敗侵襲』的追加消費後，若『闇之攝理‧菲迪耶爾』因『腐敗侵襲』的效果而被破壞，『闇之攝理‧菲迪耶爾』具有的「自己捨棄手牌中的1張闇屬性・卡片時，～」能力會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2ab201d81f9fa99f8cc24911037c4e0007b14934bd1ff4115e3151bda0f62c26
+    field: answer
+    source_hash: sha256:e65340971ce9fd2a78e0d1d96f9038e7bdfb0ff4e310095cb7be74ac070a9d3d
+    lang: zh-Hant
+    text: "是的。即使敵方戰場上沒有從者，也可以藉由選擇敵方戰場上的0個從者來使用這個從者的【進化時】能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2ab201d81f9fa99f8cc24911037c4e0007b14934bd1ff4115e3151bda0f62c26
+    field: question
+    source_hash: sha256:4aa6e6f165ae2b53743625d53ab4580c41c305078c7db75c4ff96ef27573f73c
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2dbde1314cd79611851b707cc83eb056bd1a2f2d66cf9672f03fd0018e7009c3
+    field: answer
+    source_hash: sha256:f9f9f7a84b01d4385ba50b87b56995ca7f2044c92b44e61ea266c197b064c119
+    lang: zh-Hant
+    text: "是的。會-2。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:2dbde1314cd79611851b707cc83eb056bd1a2f2d66cf9672f03fd0018e7009c3
+    field: question
+    source_hash: sha256:f618aecea84508c40a8a2c76181ea310e6724042b71b49e9186948bce799d0ea
+    lang: zh-Hant
+    text: "用『緋緋色金』使自己戰場上的『蒼藍少女‧露莉亞』最終上限解放時，『帚星』的消費會-2嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30960f7234e27dc9794b785ae606c148c17071317adc3da022f521296a03c6b4
+    field: answer
+    source_hash: sha256:4ae1239ec34282fea68e233b94aa42b0189b41ed8dc1f021e98fcbcedd827bd6
+    lang: zh-Hant
+    text: "不會。這不計入1回合中1次的限制。\n進化前的『哥布林』所具有的那類{進化}能力（可以進化的起動能力，圖示為「圈E」），在1回合中只能使用1次。透過其他能力進化等情況都不受此限制。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:30960f7234e27dc9794b785ae606c148c17071317adc3da022f521296a03c6b4
+    field: question
+    source_hash: sha256:1dd40dbab7fb6e26530c8a4a27d79b291541f98d0bcf9faa0fdcc397d2c91039
+    lang: zh-Hant
+    text: "若這個從者因{入場曲}能力而進化，這次進化會計入進化前的『哥布林』所具有的那類{進化}能力（可以進化的起動能力，圖示為「圈E」）在1回合中1次的使用次數限制嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:322fb0e6536ce1ab008585b3e70a1babbb9155840e73a2c5875e2620ccb48823
+    field: answer
+    source_hash: sha256:c8455e1359eb9b1fc9c60eff5f9026f5f43bac9bdc29467352e8445c229b4b80
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『魔創鍊金』，也無法給予敵方的主戰者2點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:322fb0e6536ce1ab008585b3e70a1babbb9155840e73a2c5875e2620ccb48823
+    field: question
+    source_hash: sha256:3554f71f6a8c3b83fa49c668cdbedab1035a5538ce09d5b80ec532726f870035
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用『魔創鍊金』，給予敵方的主戰者2點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:33b18bf102224063ee49fda455d4cebec65d93c04cf763253525f419b7995110
+    field: answer
+    source_hash: sha256:c050516cb4cfa203432b0e7a1342b228c6611b3698f31d2dbe523f600beec2fe
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法將1張『火晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:33b18bf102224063ee49fda455d4cebec65d93c04cf763253525f419b7995110
+    field: question
+    source_hash: sha256:4460406e0b11f1c3e8349a9a21252d0887240301acd3b9238a591d60ec80669b
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，將1張『火晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:397c99914c3bf5693948f4f8569742c22fb99db9db124f9b9b34c9fbc8251960
+    field: answer
+    source_hash: sha256:aa8f080267a3bdb4ce9b9f5befc4d8ad6de16aa2293538b036e66933c9440391
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的「自己的結束階段到來時，～」能力，也無法給予敵方的主戰者1點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:397c99914c3bf5693948f4f8569742c22fb99db9db124f9b9b34c9fbc8251960
+    field: question
+    source_hash: sha256:87f2061a61bbaa55f4cff8c0ddd6f012261d382a79a88b9b2385dbfc8de06ec0
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的「自己的結束階段到來時，～」能力，給予敵方的主戰者1點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4089fd1c5fbacab424e270c6304ad001cd7bd32d58c5a061981e5b879ed2ace2
+    field: answer
+    source_hash: sha256:96841fe9747ecc5ca025702d8fa98cc8fc353073fad3e80cc315cb3c0a4f3dd7
+    lang: zh-Hant
+    text: "是的。『蒼天守護騎士‧卡塔莉娜』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4089fd1c5fbacab424e270c6304ad001cd7bd32d58c5a061981e5b879ed2ace2
+    field: question
+    source_hash: sha256:543bc4ed634768e3519f940b52e494c0fc86b0179523efb206087f977d2470f2
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費1}捨棄手牌中的這張卡片：～」是在『蒼天守護騎士‧卡塔莉娜』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:448b815fe6d5abde72de53ff39d92230b61fd9816839502848d0916fa0a6dcd9
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: "可以依任意順序結算。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:448b815fe6d5abde72de53ff39d92230b61fd9816839502848d0916fa0a6dcd9
+    field: question
+    source_hash: sha256:3feeb797529d1d9be1f2a8c9dcf0ccbc409d9eb46c67d501d8ebe0a07a7bbccf
+    lang: zh-Hant
+    text: "以『緋緋色金』的{起動}能力，使同時具有「這張卡片上限解放時，～」與「這張卡片最終上限解放時，～」能力的這個從者最終上限解放時，觸發的2個能力要先結算哪一個？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:44a5d6e5e49376947cce6d5551fbfc21d6581f22602818a21585eabeb5630eb2
+    field: answer
+    source_hash: sha256:318035b62ab1a55e48f27c4079fcb72dbaf6889acd6695071fa5beb7d7b33f31
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的「這張卡片上限解放時，{消費3}：～」能力，也無法給予敵方的主戰者2點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:44a5d6e5e49376947cce6d5551fbfc21d6581f22602818a21585eabeb5630eb2
+    field: question
+    source_hash: sha256:d98efd7e5b5b3ac721a1b3772bcff82514522c7ba86256260b628b788a21755e
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的「這張卡片上限解放時，{消費3}：～」能力，給予敵方的主戰者2點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:45979815c39a20659e2c9d75eb0f43facfdcbf39d879c58022b08c92c7db017f
+    field: answer
+    source_hash: sha256:51d7c2cf2b00b2d398b8be807912557e54a5a043850b379754aa922017e5d7f7
+    lang: zh-Hant
+    text: "可以依任意順序結算。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:45979815c39a20659e2c9d75eb0f43facfdcbf39d879c58022b08c92c7db017f
+    field: question
+    source_hash: sha256:0998a2d51ddb12e99cc626e3aed9611fe508f0fc48be32ee27d3aac3a69437f7
+    lang: zh-Hant
+    text: "同時具有【進化時】與【超進化時】能力的從者超進化時，觸發的2個能力要先結算哪一個？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:47bf4b40d7e0a476e40a9393d46c253334f228ec8913b91695c4d3f4b2343e5c
+    field: answer
+    source_hash: sha256:0f234ce5087cf96c5f82c262a628c4eddc36e0b53500095d47480a9fb30876d2
+    lang: zh-Hant
+    text: "是的。『調和的舞者‧尤埃爾＆蘇希耶』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:47bf4b40d7e0a476e40a9393d46c253334f228ec8913b91695c4d3f4b2343e5c
+    field: question
+    source_hash: sha256:cf5a4d9f7a60b06df607a8e9d22399f71775e74a95b2eddced1169fd3b150a04
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費1}捨棄手牌中的這張卡片：選擇敵方戰場上的1個從者。～」是在『調和的舞者‧尤埃爾＆蘇希耶』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4d1a64900f0191080a6c234c72e4f238c8f37adb403f21b1ad98aa5903614cbb
+    field: answer
+    source_hash: sha256:f9f9f7a84b01d4385ba50b87b56995ca7f2044c92b44e61ea266c197b064c119
+    lang: zh-Hant
+    text: "是的。會-2。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4d1a64900f0191080a6c234c72e4f238c8f37adb403f21b1ad98aa5903614cbb
+    field: question
+    source_hash: sha256:da53423376f0f8cca4ee5de90da38ead61098145964fbc1ba4b0c0820454791c
+    lang: zh-Hant
+    text: "用『緋緋色金』使自己戰場上的『蒼藍少女‧露莉亞』最終上限解放時，『護國真龍‧斯卡塔赫』的消費會-2嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4d86ab6c78bd6009cc13cc226299e720cf11a8c02f744530876d9d51fcd0d95b
+    field: answer
+    source_hash: sha256:17812e8deb8ec0faf46e80ae46e6769fffb9a99655ebba5cba208faec845797a
+    lang: zh-Hant
+    text: "是的。『星跡的朝聖者‧蘇菲雅』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:4d86ab6c78bd6009cc13cc226299e720cf11a8c02f744530876d9d51fcd0d95b
+    field: question
+    source_hash: sha256:9025f4c9e9cb14bd1844210155999383d3d984f5ded7a77b11ad359e6db62edd
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費3}捨棄手牌中的這張卡片：抽2張卡片。」是在『星跡的朝聖者‧蘇菲雅』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:57405d8c2f11e2dec1d33f09f26988d9600ab31a9ec0c3b67842a44332173175
+    field: answer
+    source_hash: sha256:dd963e06accdd93080d66c90bb93903c5468382118a3a30fd7b3d8f4b11d3755
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【超進化時】能力，也無法給予敵方的主戰者等同於從手牌公開的火屬性・卡片張數的傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:57405d8c2f11e2dec1d33f09f26988d9600ab31a9ec0c3b67842a44332173175
+    field: question
+    source_hash: sha256:1939dc96ec54edb74261b17f0a1bcafb1f875ef3da17ab36d9b7bc24ae47418a
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【超進化時】能力，公開手牌中的火屬性・卡片嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5769af30fad7a1b3fb3778a1ea18ffbeb9411f66dce82493eddf7d4c0ecd1397
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: "是的。會滿足。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:5769af30fad7a1b3fb3778a1ea18ffbeb9411f66dce82493eddf7d4c0ecd1397
+    field: question
+    source_hash: sha256:73632ea78a5f6cd3e77e97fa3f6882326f03635b732a4aa1eb46bab4ac380049
+    lang: zh-Hant
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『沉睡的獅子‧莫德雷德』上限解放時，會滿足「若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:58c686ca20df1143f0fa2f154706404a7409d7db97d47977043a71a0b61f57c1
+    field: answer
+    source_hash: sha256:ce23adb9751bd0eb20f28f1f6a7138305db21095fbbc4b9e51b26c8bb0d5ef28
+    lang: zh-Hant
+    text: "是的。可以選擇要將哪一張放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:58c686ca20df1143f0fa2f154706404a7409d7db97d47977043a71a0b61f57c1
+    field: question
+    source_hash: sha256:a03df22673a146015aa303abe5dc2fcd189e76bf56603f866aa20cddc54bc4ca
+    lang: zh-Hant
+    text: "自己的PP最大值為7以上，且EX區中的卡片數量為4張的情況下，結算{入場曲}能力時，可以選擇將『魔創鍊金』或『緋緋色金』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:61d0276d9eb9566092b9e0e0037a1b4378dc569a6ae6010a759de0b27418123f
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: "是的。會滿足。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:61d0276d9eb9566092b9e0e0037a1b4378dc569a6ae6010a759de0b27418123f
+    field: question
+    source_hash: sha256:0fc83ca7e9a907cc3020f81aeaeef85476d2a07da099365712628e9f71d12ebf
+    lang: zh-Hant
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『沉睡的輝龍‧亞瑟』上限解放時，會滿足「這個能力在本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上時，」的條件嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:653139e6fb65b5c0ef30575fce61c026fadb52c63bc86322a99261954dfce844
+    field: answer
+    source_hash: sha256:6ec60dfc4b1cdf058bb06949dd3a252186d4f13d9a66855904484c15006122f4
+    lang: zh-Hant
+    text: "是的。『奮勉的俊秀‧席爾瓦』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:653139e6fb65b5c0ef30575fce61c026fadb52c63bc86322a99261954dfce844
+    field: question
+    source_hash: sha256:e8f56773dfbd33cdd61a996031b3abf782a961e7bff9c71f31a699d5d20e62c6
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費2}捨棄手牌中的這張卡片：選擇敵方戰場上的1個從者。～」是在『奮勉的俊秀‧席爾瓦』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6ef40e56d4f1c52665d9ef4e15f49d6c2cd735b768640c68e53a683b6e28cb2f
+    field: answer
+    source_hash: sha256:f63b0b50fec390a1ce0bb0b0a1222d947f5a9e02e19c99351f9a3b179690c973
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的「這張卡片上限解放時，～」能力，也無法使自己的PP最大值+1。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:6ef40e56d4f1c52665d9ef4e15f49d6c2cd735b768640c68e53a683b6e28cb2f
+    field: question
+    source_hash: sha256:9462395881917df407da75db3a954aa70be2dab1f8dd54c6124eafc8a7d4ec4d
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的「這張卡片上限解放時，～」能力，使自己的PP最大值+1嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:70a4d472d8138ed336c3c3bfcfbad273856a1de8f1d8d6403bfc4efaa31a44c1
+    field: answer
+    source_hash: sha256:70b385836962e3da036f9ba46c3d95c7fe36a0f3af51c59196c7c799c4c41378
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法公開自己牌堆頂的3張卡片。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:70a4d472d8138ed336c3c3bfcfbad273856a1de8f1d8d6403bfc4efaa31a44c1
+    field: question
+    source_hash: sha256:08419558a0c6c98b1c854ea6ac4326e4ad0bbc277d4fdc6d142cbc185fe9adf2
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，公開自己牌堆頂的3張卡片嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:728b520ef03881bb8635513f620a3d473e04e55f1bc8753baa91b7f505e732a7
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: "是的。即使在敵方的回合中也會觸發。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:728b520ef03881bb8635513f620a3d473e04e55f1bc8753baa91b7f505e732a7
+    field: question
+    source_hash: sha256:d0a8d3acd4b4c97741a4d3410db0e247f3a5f5421c625b7bcaa23af891a9c35f
+    lang: zh-Hant
+    text: "若因某個能力而在敵方的回合中從自己的手牌公開這張卡片，這張卡片的「從自己的手牌公開這張卡片時，～」能力會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:815f1643792104f9e745182c34668d8c84bf5e4fe1d469fe0f302dd8db3bd334
+    field: answer
+    source_hash: sha256:386628db9577a7ba75a76d8273f8367252ba868d98bd4a95d916b62021e3d11f
+    lang: zh-Hant
+    text: "是的。可以。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:815f1643792104f9e745182c34668d8c84bf5e4fe1d469fe0f302dd8db3bd334
+    field: question
+    source_hash: sha256:b825a44f6b03b49cccb70be933973e0723e1cb276b2f4e56edadc37999499358
+    lang: zh-Hant
+    text: "可以透過某種方法使EX區中的上限解放素材（Treasure）消失或變身嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:823289c082c584b843cabcf72f049df9ad5bb695da2ed7ac32a228c4885974ed
+    field: answer
+    source_hash: sha256:19a023b4c3b6587bafa3f3eb1dceb7c0281f74ced1d69a7103413417a8800698
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『碎石烈槍』，也無法給予敵方的主戰者1點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:823289c082c584b843cabcf72f049df9ad5bb695da2ed7ac32a228c4885974ed
+    field: question
+    source_hash: sha256:68231326a405b4ebe36e78cf16e0910f779b6a06a2cc0a34036fd0fa84032d79
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用『碎石烈槍』，給予敵方的主戰者1點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:82d6cd029f9625539fbe3bc395e670c83b1799b5ca20f28e8192379d3b818b07
+    field: answer
+    source_hash: sha256:34734fca6e68c3aa3a20fd4079627d0f21d9accd7fff962c3b5831270bbfdea8
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{起動}能力，也無法抽1張卡片。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:82d6cd029f9625539fbe3bc395e670c83b1799b5ca20f28e8192379d3b818b07
+    field: question
+    source_hash: sha256:3280ae26f3d7c6b9a76a5cb87ebc96be6e0c7d1591a5d40be7da396dbd5c9148
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{起動}能力，抽1張卡片嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8c08986d3aabdcfcb94f0387207eb32cea3f8fe1086b2426c6fdec3660550b91
+    field: answer
+    source_hash: sha256:4e1d10c3d4eceef860faa989a982bcbdb6ecb50c0d8e4e27d81eb580c1df18f3
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法將1張『緋緋色金』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8c08986d3aabdcfcb94f0387207eb32cea3f8fe1086b2426c6fdec3660550b91
+    field: question
+    source_hash: sha256:1477edd59c460427af28987ec4d9699745d3f7234be093f744cb0ce0316c3adc
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，將1張『緋緋色金』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8e3277f06063330b07aba7a1fab47cec37aec69a0ce50f0182a31ecc9bbaa78c
+    field: answer
+    source_hash: sha256:6181b5b4b3eb352ec5071cd81bb47c6da239a86409a82c885d10ef0cffbe72c3
+    lang: zh-Hant
+    text: "是的。『清新的槍械設計師‧庫庫璐』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:8e3277f06063330b07aba7a1fab47cec37aec69a0ce50f0182a31ecc9bbaa78c
+    field: question
+    source_hash: sha256:b02940847ac08d63c5835d9ba66202f8e8245aa88248dbee1cdb2f5d839ca6b2
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費1}捨棄手牌中的這張卡片：給予敵方的全部主戰者2點傷害。」是在『清新的槍械設計師‧庫庫璐』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:93a1385e8a99a4fafa2707359d0c87b1185247f3a91a23e7153eecd8c773be36
+    field: answer
+    source_hash: sha256:f9791052d2cd1a3a5f7185b28dc619b53fc191a0a528c0451b2cd56142fc68a9
+    lang: zh-Hant
+    text: "是的。即使在敵方的回合中也會觸發。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:93a1385e8a99a4fafa2707359d0c87b1185247f3a91a23e7153eecd8c773be36
+    field: question
+    source_hash: sha256:06078e4893f95d9f46623b62617e2991a5469d02139acfac6d64dc96718689a3
+    lang: zh-Hant
+    text: "若因某個能力而在敵方的回合中捨棄自己手牌中的闇屬性・卡片，「自己捨棄手牌中的1張闇屬性・卡片時，～」的能力會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:93def8bb01a6c5bf19ba15006d60a1d13b7ffb102885b42ab9a9fabe5b81d071
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: "是的。會滿足。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:93def8bb01a6c5bf19ba15006d60a1d13b7ffb102885b42ab9a9fabe5b81d071
+    field: question
+    source_hash: sha256:95cecb17f269e7a998c04fede111232ebafa8357d004e8697b713a6d29df42f1
+    lang: zh-Hant
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『天賦的射手‧梅提拉』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:956134d702506b65d5f20bb672091c4c4bbaea209c4004c5c2bdba65a65bc535
+    field: answer
+    source_hash: sha256:548062ce969ce5856bff1f27888332adcee5bdc7a3aaccdad85934334ea23ef6
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的「這張卡片最終上限解放時，～」能力，也無法給予敵方的主戰者3點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:956134d702506b65d5f20bb672091c4c4bbaea209c4004c5c2bdba65a65bc535
+    field: question
+    source_hash: sha256:7a07ba9c4bd155c5a40ca9f59ef1652f9f195059e031b3d4c63c5ecf6bd9f1d0
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的「這張卡片最終上限解放時，～」能力，給予敵方的主戰者3點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:95bc728a377021c2edd7ba5440b5d09f5ce043acdfb0733d93a1170566c90fed
+    field: answer
+    source_hash: sha256:88e5d9d1180f251998962bd40a6421e6d275903c5e68396a90ca8a5124de4589
+    lang: zh-Hant
+    text: "是的。『思慕蒼空的歸還者‧卡希烏斯』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:95bc728a377021c2edd7ba5440b5d09f5ce043acdfb0733d93a1170566c90fed
+    field: question
+    source_hash: sha256:7793a1e9bf37c9108bf66851cfbf4a957160a342fcdd41379ba16d5f717f99d4
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費1}捨棄手牌中的這張卡片：查看自己牌堆頂的3張卡片。～」是在『思慕蒼空的歸還者‧卡希烏斯』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9e9841b8f4227e26f8528900bf347c80d0b300c98a9e0c8381b6e9c5244648fb
+    field: answer
+    source_hash: sha256:cd85f84880143e8212af7d994c3ac11e68bfbb711781e410424ae00ffcb364f0
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『火晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:9e9841b8f4227e26f8528900bf347c80d0b300c98a9e0c8381b6e9c5244648fb
+    field: question
+    source_hash: sha256:385071772cda5060adc65030306849d8034a0212766bb1e0b352e83edb162aba
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『火晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a146f1888e3b7b7d5d49b6f77e568049582754fcd0d264a66506223eea1033b9
+    field: answer
+    source_hash: sha256:d9a9ec73585fa3e77a8e41124fffa1c7481b92029a3a2c7427a598b88be5fa54
+    lang: zh-Hant
+    text: "是的。兩者都會觸發，並可以依任意順序結算。\n即使先結算「自己的結束階段到來時，這張卡片消失。」，仍可以結算「自己的結束階段到來時，選擇敵方戰場上的1個從者。～」能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a146f1888e3b7b7d5d49b6f77e568049582754fcd0d264a66506223eea1033b9
+    field: question
+    source_hash: sha256:b8ebd3ee96f57b9c0865b2fcaa22976a16e327fa42243cc40e83ec23b1f34368
+    lang: zh-Hant
+    text: "以『妄想少女A‧璐娜露』的【進化時】能力將『可愛的花花甜心‧瑪娜麥莉』召喚到戰場上後，自己的結束階段到來時，「自己的結束階段到來時，這張卡片消失。」與『可愛的花花甜心‧瑪娜麥莉』的「自己的結束階段到來時，選擇敵方戰場上的1個從者。～」能力都會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a165387627cf473f99defcc8c16ca9ab19e84eac223cb3587104d14a41d76dfd
+    field: answer
+    source_hash: sha256:d169b5438b2fb2cbb611c7a9fb22097a51f227914fb0ac678cf6c9fb3c1e5ce0
+    lang: zh-Hant
+    text: "是的。會觸發2次。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a165387627cf473f99defcc8c16ca9ab19e84eac223cb3587104d14a41d76dfd
+    field: question
+    source_hash: sha256:34420f6142b0bfe055b02d88808dc305b568837e1c7429ac42e044c118f69be0
+    lang: zh-Hant
+    text: "自己同時捨棄手牌中的2張闇屬性・卡片時，這個從者的能力會觸發2次嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1d0714cf3be0da20224b18a371b2b974b91f4f8a135f8e351959237adb93dee
+    field: answer
+    source_hash: sha256:34040ab2df4f4579643f6387a1edd9416157c836c8bf18d9edf92002187f2b67
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『帚星』，也無法將1張『風晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a1d0714cf3be0da20224b18a371b2b974b91f4f8a135f8e351959237adb93dee
+    field: question
+    source_hash: sha256:ec54dbd60081f35e80c33f2fa8b8ab7eb680b78d1389942e8b07a259a54aa183
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用『帚星』，將1張『風晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a6180728726e546a601f4c62ede8f49b5510f6ccb9b2cc32afd63690cdf8df25
+    field: answer
+    source_hash: sha256:bdc35505476401885f6e2c2eae4cd78b659cc6ad5d0dfa84f8c41f1fbdcaa210
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『鍊金爆炎』，也無法將1張『火晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a6180728726e546a601f4c62ede8f49b5510f6ccb9b2cc32afd63690cdf8df25
+    field: question
+    source_hash: sha256:333c2e4bf54380c90e77ea4bbc52780d00c32c60e65fd99bf1dbaf051c504ef5
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用『鍊金爆炎』，將1張『火晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a64d9432f1cdbf1bf973322af28759c2520d3709676a8d08ad6dec2da49823de
+    field: answer
+    source_hash: sha256:714ea2081a4cfcda44bb3985595ff0d1e30bf4c51f8f856341bd8289af88ee1e
+    lang: zh-Hant
+    text: "不會。消費不會-1。\n【攻擊時】能力等在從者攻擊時觸發的能力全部結算後，才會來到非回合玩家的Quick時點。\n因此，在Quick時點未位於戰場上的『水之攝理‧瓦姆杜斯（EVOLVE）』的能力不會適用。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:a64d9432f1cdbf1bf973322af28759c2520d3709676a8d08ad6dec2da49823de
+    field: question
+    source_hash: sha256:fb317597a1b52e5f74cc9407ab5d535fa12a2c24c5984487871fa9a612dd2db5
+    lang: zh-Hant
+    text: "這個已超進化的從者被已上限解放的『鮮紅的穿光‧瑟塔』的【攻擊時】能力破壞。\n若在之後的Quick時點使用具有{Quick}的法術或{Q}{起動}能力，其消費會-1嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ac56df1b0bb50b227d5b02dd2f88acedede7ce277d5586bf7d26cd88c41c3d4f
+    field: answer
+    source_hash: sha256:1efa521b9f3b9a0aa57a77f1d3ecc6e77a218a2e0dce8f57867ef9a2de3b9825
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法給予敵方的主戰者3點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ac56df1b0bb50b227d5b02dd2f88acedede7ce277d5586bf7d26cd88c41c3d4f
+    field: question
+    source_hash: sha256:eb6b518cdaa98755dce0c33416101c7ddf39f26db5ae43ca2595ca7446674826
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，給予敵方的主戰者3點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b451f2a35b53b4bf039f3c1de51dc70e818acf3dcb96e514fc2996965c614ecb
+    field: answer
+    source_hash: sha256:a530756d63f2ec31f21090ab8baf200f6c929d744e96e034e34c20ebf19b12ed
+    lang: zh-Hant
+    text: "不行。無法再次上限解放或最終上限解放。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b451f2a35b53b4bf039f3c1de51dc70e818acf3dcb96e514fc2996965c614ecb
+    field: question
+    source_hash: sha256:567e27f22b7f34e3c26f1f7c4e300ac2a8e7573c3f671ce2f8f55a23d0e59ba3
+    lang: zh-Hant
+    text: "已經上限解放或最終上限解放過的從者因某個能力而失去能力時，可以讓該從者再次上限解放或最終上限解放嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b5b3cec11c84fb88033e14f3084019c8d8b4bad932e1b359ef9519b289ac9e64
+    field: answer
+    source_hash: sha256:2271f5bb638f90b221b36d3018066cc9a18cb5e2957b295fbef96e45a326ffe8
+    lang: zh-Hant
+    text: "這是因卡片能力而將手牌中的這張卡片向敵方公開時觸發的能力。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b5b3cec11c84fb88033e14f3084019c8d8b4bad932e1b359ef9519b289ac9e64
+    field: question
+    source_hash: sha256:6b78fc8048fa277d9b60037bea1d12e7755cffa4ade5479cd3191cb76b903d75
+    lang: zh-Hant
+    text: "「從自己的手牌公開這張卡片時，～」是什麼意思？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b894af75c33369de5a18edf011f6ef53780483dd797bd7327dc638da29dbb711
+    field: answer
+    source_hash: sha256:9e10eb64868fdee1b5e8e55c8ea5c76689a4bee62dfa0c1a89590040d0481ded
+    lang: zh-Hant
+    text: "是的。會消失。\n以『妄想少女A‧璐娜露』的【進化時】能力進入戰場的『可愛的花花甜心‧瑪娜麥莉』具有「自己的結束階段到來時，這張卡片消失。」能力，即使『妄想少女A‧璐娜露』離開戰場，這個能力仍然有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b894af75c33369de5a18edf011f6ef53780483dd797bd7327dc638da29dbb711
+    field: question
+    source_hash: sha256:a739b884c8ce3b024ede9f9e5829b40f6cff16b646f1bc972f91a19f33860596
+    lang: zh-Hant
+    text: "以『妄想少女A‧璐娜露』的【進化時】能力將『可愛的花花甜心‧瑪娜麥莉』召喚到戰場上後，『妄想少女A‧璐娜露』因某個能力離開了戰場。自己的結束階段到來時，這個『可愛的花花甜心‧瑪娜麥莉』會消失嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b9a0b60d36a1a61697475f8e2d2bb599458069f6fb2a4d94ed55f16b1d5536c9
+    field: answer
+    source_hash: sha256:f9dabef907c0cc9d36ecbc35da4d5c363e7345d7917ad44e183408d86a707eca
+    lang: zh-Hant
+    text: "是的。除了【超進化時】能力之外，【進化時】能力也會觸發。觸發的2個能力可以依任意順序結算。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:b9a0b60d36a1a61697475f8e2d2bb599458069f6fb2a4d94ed55f16b1d5536c9
+    field: question
+    source_hash: sha256:899e2c7fc15a54c95c7a417bd8f763db7a34bab8d6fee0a0032065cf2ff1e837
+    lang: zh-Hant
+    text: "具有【進化時】能力的從者超進化時，該從者的【進化時】能力會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc2777e09a6fd90faedad16a84ac94ea8aaf3eb5ec0d85c08f7b98522b649f08
+    field: answer
+    source_hash: sha256:e788e12a563f96ca474f6fdac934d590616ad7c325eac32d6dd472a1c1c65330
+    lang: zh-Hant
+    text: "不行。若公開的卡片並非光屬性・卡片，就無法發動「若公開了光屬性・卡片，～」之後的效果，因而無法使自己的PP最大值+1。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:bc2777e09a6fd90faedad16a84ac94ea8aaf3eb5ec0d85c08f7b98522b649f08
+    field: question
+    source_hash: sha256:f6cc5fcb51c139d034e58f8898900bd9ac0ee3cbb7d8bb1242e1ef4e2ce008fa
+    lang: zh-Hant
+    text: "使用了這張卡片，並公開了牌堆頂的1張卡片。\n即使公開的卡片並非光屬性・卡片，也可以使自己的PP最大值+1嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c4100adbd5d867c7012a059d0180e4e5458aa84186cc984fe2309592360a88d1
+    field: answer
+    source_hash: sha256:de19128c905327fefdbe18f5f244cd74f70834eb3f1b41a13312f53501c1da6e
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『愛慕誓約』，也無法將1張『光晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c4100adbd5d867c7012a059d0180e4e5458aa84186cc984fe2309592360a88d1
+    field: question
+    source_hash: sha256:42e8b3722cc564a0f255ba38d367d691f0d444d0a11a371e5115d5849e50cd18
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用『愛慕誓約』，將1張『光晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c60f2354a08a76a5a101d8600c89a96d3851099ee5302647af98e8c78d140946
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: "是的。會滿足。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c60f2354a08a76a5a101d8600c89a96d3851099ee5302647af98e8c78d140946
+    field: question
+    source_hash: sha256:5ddb373b3b272a646bc72d9d9c70909a4b0644527ed4eb706192351383b71e72
+    lang: zh-Hant
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『武魂夢想家‧味琳』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c84d590b8d1b443ed1cf58645b4083841c3b5705d20cb5eb9c4d82c9240a411a
+    field: answer
+    source_hash: sha256:acc713d74b04ea0093f711d97bd0ead300da49ce6dbf0daa5275f80a9b7beee9
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『風晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:c84d590b8d1b443ed1cf58645b4083841c3b5705d20cb5eb9c4d82c9240a411a
+    field: question
+    source_hash: sha256:0aa920a44d001f9371d63d87098527ce5647db6ef866c1cd317c94272c88cf34
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『風晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d69e945d2d80483ab77c0ad6e40c5202eb42378880b26e70a869f56d1e944a80
+    field: answer
+    source_hash: sha256:f9f9f7a84b01d4385ba50b87b56995ca7f2044c92b44e61ea266c197b064c119
+    lang: zh-Hant
+    text: "是的。會-2。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:d69e945d2d80483ab77c0ad6e40c5202eb42378880b26e70a869f56d1e944a80
+    field: question
+    source_hash: sha256:cf7a489d457e62cf37dd9a975cb9c0d949d6d5b60a282734af1e9bca09069eb1
+    lang: zh-Hant
+    text: "用『緋緋色金』使自己戰場上的『蒼藍少女‧露莉亞』最終上限解放時，『信念的踢擊‧蘭德爾』的消費會-2嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dae2c6d06b6c9cc4130f4008e19c9086e06461d93d601b47c71d4e8d2d36dbb3
+    field: answer
+    source_hash: sha256:b374bebc84cd396e995aef6ee09b994bd48a2203209353e8716072c8b019bdd0
+    lang: zh-Hant
+    text: "兩個『沉睡的獅子‧莫德雷德』的{入場曲}能力都會觸發。處理順序如下。\n2個『沉睡的獅子‧莫德雷德』同時進入戰場時，兩者的{入場曲}能力都會觸發並進入待機狀態。結算第1個從者處於待機狀態的能力時，可以從自己的牌堆中搜尋1張『沉睡的輝龍‧亞瑟』，召喚到戰場上。之後結算第2個從者處於待機狀態的能力時，由於自己戰場上已有『沉睡的輝龍‧亞瑟』，無法從自己的牌堆中搜尋1張『沉睡的輝龍‧亞瑟』並召喚到戰場上。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:dae2c6d06b6c9cc4130f4008e19c9086e06461d93d601b47c71d4e8d2d36dbb3
+    field: question
+    source_hash: sha256:19fdef8949e4e48e6f59499d756282a1b4c9ca7c203b75434abf68d7142f7aa0
+    lang: zh-Hant
+    text: "若因某個能力而有2個『沉睡的獅子‧莫德雷德』同時進入戰場，兩者的{入場曲}能力都會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e01a0baa7a5811db34bd2ab4182b01caad6ff71a8fdd4288352503bb17047348
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: "是的。會滿足。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e01a0baa7a5811db34bd2ab4182b01caad6ff71a8fdd4288352503bb17047348
+    field: question
+    source_hash: sha256:93cfbe8f9d28c4a0ec9b80f170c36b165df0cf7a0c8931efee8391bdc135470b
+    lang: zh-Hant
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『絢麗的紡織者‧歌露瓦』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e2ead49359d37b26aaa5991afbceac82f8a9023e7b3913761e74a75297a57e5b
+    field: answer
+    source_hash: sha256:879185a133563e20676fbda01f776dc56bfa9b892d649bb0b604257f204984dc
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{Q}{起動}能力，也無法給予敵方的主戰者2點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e2ead49359d37b26aaa5991afbceac82f8a9023e7b3913761e74a75297a57e5b
+    field: question
+    source_hash: sha256:d798c86632eaa22e3ccda2be1d2299b961aee00de44a3407cf691466a34c2b13
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{Q}{起動}能力，給予敵方的主戰者2點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e7c0557d0320df0492b8498105f52353898562865bd371871d699dd511a6b7e7
+    field: answer
+    source_hash: sha256:3b92cb7b9c8645ad3687cd91bacfbc5dac23e2df27b7ff5b1e480b30082e002b
+    lang: zh-Hant
+    text: "是的。會滿足。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e7c0557d0320df0492b8498105f52353898562865bd371871d699dd511a6b7e7
+    field: question
+    source_hash: sha256:3fe10ba74a068bf96a812629e4006293d58f63f8cc3f7f315df7f4785afd5621
+    lang: zh-Hant
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『沉睡的輝龍‧亞瑟』上限解放時，會滿足「若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e92026923d44fdc37a6dc7cf5dbf32d25d967d26f198026fd208ff911613f377
+    field: answer
+    source_hash: sha256:566bf42f53f1e5f9601cbf5491081fc031a69e9a258ee348d50604fc951a9654
+    lang: zh-Hant
+    text: "可以依任意順序結算。\n此外，即使無法結算「【攻擊時】選擇敵方戰場上的1個從者。給予其5點傷害」，仍可以結算「【攻擊時】給予敵方戰場上的全部從者2點傷害」。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e92026923d44fdc37a6dc7cf5dbf32d25d967d26f198026fd208ff911613f377
+    field: question
+    source_hash: sha256:06c008c86127d411a516ca6071a38c4a6ee31b4802b7791c96406be211113d84
+    lang: zh-Hant
+    text: "最終上限解放後的『鮮紅的穿光‧瑟塔』攻擊時，觸發的2個【攻擊時】能力要先結算哪一個？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e9cd816b33523c4ff5e5e60294514dbfb7eae97fd1a57a6fe2576fcecd38554a
+    field: answer
+    source_hash: sha256:b4673f83e7ed5119c7da26dc76001ee4c153566365ba74cf72dc9417620fd374
+    lang: zh-Hant
+    text: "是的。『緋緋色金』的{起動}能力使其進行上限解放與最終上限解放，因此兩個能力都會觸發。觸發的2個能力可以依任意順序結算。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:e9cd816b33523c4ff5e5e60294514dbfb7eae97fd1a57a6fe2576fcecd38554a
+    field: question
+    source_hash: sha256:becddb856be52ee463efec6b792a770badc2224eb2ec63dfbbe44e49616a0b1f
+    lang: zh-Hant
+    text: "以『緋緋色金』的{起動}能力，使尚未上限解放且具有【可最終上限解放】的這個從者最終上限解放時，「這張卡片上限解放時，～」與「這張卡片最終上限解放時，～」的能力都會觸發嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ead0f0f4fa9dc8d9efdb48d784a5b412a99e1d7be6219703ac1b7f869cf684ee
+    field: answer
+    source_hash: sha256:b47460a93a962d0876db6687b4681b1f97123e3904fccab59cc9b6c08cc76e0c
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『土晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:ead0f0f4fa9dc8d9efdb48d784a5b412a99e1d7be6219703ac1b7f869cf684ee
+    field: question
+    source_hash: sha256:37d7ed9a3e9ee3de40ddcb2ba70fdc824c5060d0140a926ec1d28860a1c35446
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『土晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f05c81e32d0e5af5a773458d53dbc89193653dea891f3b7508ca59ea413ed0a7
+    field: answer
+    source_hash: sha256:85e6eeb846304f0eda0b086001ac231be963fe3f06c8c23adc24b4275e1fb3ba
+    lang: zh-Hant
+    text: "是的。『水之攝理‧瓦姆杜斯』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f05c81e32d0e5af5a773458d53dbc89193653dea891f3b7508ca59ea413ed0a7
+    field: question
+    source_hash: sha256:26d44a1ff9aa152866bff918207ded71179bce5d90765fddd30ca436e04c22c6
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費1}捨棄手牌中的這張卡片：選擇敵方戰場上的1個從者。給予其2點傷害。」是在『水之攝理‧瓦姆杜斯』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f1b43c3c85d5829be95c5218329d1a70b092830ee1ec0621d564e5106228cb56
+    field: answer
+    source_hash: sha256:15003b71176d49cdece5e15260a3ae5f3e43187952fb6ec15b9ca5a3cf3016ad
+    lang: zh-Hant
+    text: "是的。『冰心霸王‧阿格羅瓦爾』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f1b43c3c85d5829be95c5218329d1a70b092830ee1ec0621d564e5106228cb56
+    field: question
+    source_hash: sha256:948d2ceea0090ec6eadfc7222bd1328598b6f29c6f31cd52b242d4f43391bf00
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費3}捨棄手牌中的這張卡片：選擇敵方戰場上的1個從者。～」是在『冰心霸王‧阿格羅瓦爾』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f5a497e95223247676dfc8142c303101cd4673ca775ba26d005015d81bf12b22
+    field: answer
+    source_hash: sha256:8f8b39c64029a2fbd36b520493c9be31c386291f6b3ba34b7f44d19bdc9bdaf9
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【攻擊時】能力，也無法給予敵方的主戰者6點傷害。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:f5a497e95223247676dfc8142c303101cd4673ca775ba26d005015d81bf12b22
+    field: question
+    source_hash: sha256:a6a733ed903f3c9d9184d5f2daef7d9088f41209822d5fdb700d989da9a619c0
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【攻擊時】能力，給予敵方的主戰者6點傷害嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb5efb8b653b38b92c072dccbf636f0a0da1da6ce84e60c7a6774f00732a9c8b
+    field: answer
+    source_hash: sha256:14315835db6e8c625a45612cfc4c0e52f8257895ce1f470fc8def875b306086a
+    lang: zh-Hant
+    text: "是的。即使公開的卡片並非光屬性・卡片，也可以從自己的牌堆中搜尋1張『偉大的調停者‧佐伊』並加入手牌。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fb5efb8b653b38b92c072dccbf636f0a0da1da6ce84e60c7a6774f00732a9c8b
+    field: question
+    source_hash: sha256:3a9a1f1ab2cefe019a033909db875457eded0f40460bea0b08a8d3c12bf2ad30
+    lang: zh-Hant
+    text: "自己的PP最大值為10時，使用了這張卡片，並公開牌堆頂的1張卡片。\n即使公開的卡片並非光屬性・卡片，也可以從自己的牌堆中搜尋1張『偉大的調停者‧佐伊』並加入手牌嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fd6af0246a68e136eb567f08bc39ef0fbec28f7a0c8652f3db9f231aeef6cdc9
+    field: answer
+    source_hash: sha256:92c86cce7f83238fd77643dd3458446ce13c5185fbf12c9f1bb104704e336df2
+    lang: zh-Hant
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法將1張『土晶元素』放置到EX區。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fd6af0246a68e136eb567f08bc39ef0fbec28f7a0c8652f3db9f231aeef6cdc9
+    field: question
+    source_hash: sha256:aca0abb5fdaf92160224b9dce28db8f9b03155339860442748a9d173541bf5d5
+    lang: zh-Hant
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，將1張『土晶元素』放置到EX區嗎？"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fe24b0f52e1a546630293bc2dcf3a7fe8f81ed1bacd00a6fc6c100ca7a9ce2eb
+    field: answer
+    source_hash: sha256:6e9b2a36d564d19039981285fea067f7431b9c4637a5645cec07781154d25dc9
+    lang: zh-Hant
+    text: "是的。『閃耀雙劍‧卡托魯』位於手牌中時，這個能力有效。"
+    origin: machine
+    low_confidence: true
+  - qa_id: qa:v1:fe24b0f52e1a546630293bc2dcf3a7fe8f81ed1bacd00a6fc6c100ca7a9ce2eb
+    field: question
+    source_hash: sha256:d5314983495d5a4d51d9e04cebaecde2522b8cd63a2c506a9faf77717f34070b
+    lang: zh-Hant
+    text: "「{Q}{起動}{消費3}捨棄手牌中的這張卡片：選擇敵方戰場上的1個從者。～」是在『閃耀雙劍‧卡托魯』位於手牌中時有效的能力嗎？"
+    origin: machine
+    low_confidence: true
