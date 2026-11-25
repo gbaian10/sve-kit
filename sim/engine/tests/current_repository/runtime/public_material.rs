@@ -20,7 +20,7 @@ fn awaiting(play: CardPlay) -> DecisionView {
     question
 }
 
-fn fanfare(game: &mut Game) -> DecisionView {
+fn fanfare(game: &mut Game) -> CardPlay {
     let mut play = game
         .play_internal_card("payer", PlayerId { seat: 1 })
         .unwrap();
@@ -38,10 +38,8 @@ fn fanfare(game: &mut Game) -> DecisionView {
         "the follower enters before its fanfare"
     );
     let question = game.internal_pending_choice().unwrap().unwrap();
-    awaiting(
-        game.answer_internal_card(question.actor, question.token, Answer::Pending(1))
-            .unwrap(),
-    )
+    game.answer_internal_card(question.actor, question.token, Answer::Pending(1))
+        .unwrap()
 }
 
 #[test]
@@ -53,7 +51,7 @@ fn bp05_013_declares_then_targets_then_pays_ex_material_before_ability_play() {
     let baseline = game_with_rules(&initial);
     for accepted in [false, true] {
         let mut game = baseline.clone();
-        let declaration = fanfare(&mut game);
+        let declaration = awaiting(fanfare(&mut game));
         assert_eq!(declaration.domain, InputDomain::OptionalCost);
         let before = format!("{game:?}");
         game.answer_internal_card(
@@ -186,6 +184,15 @@ fn bp15_013_moves_only_a_token_to_ex_and_full_ex_cancels_without_payment() {
         );
         let mut game = game(&initial);
         let declaration = fanfare(&mut game);
+        if capacity == 5 {
+            assert_eq!(declaration, CardPlay::Cancelled);
+            let state = game.projection(View::Referee).unwrap();
+            assert_eq!(state["P1"]["field"], json!(["token", "ordinary", "payer"]));
+            assert_eq!(state["P1"]["ex"], json!(["ex0", "ex1", "ex2", "ex3", "ex4"]));
+            assert_eq!(state["P1"]["leader"]["life"], 20_u8);
+            continue;
+        }
+        let declaration = awaiting(declaration);
         let materials = awaiting(
             game.answer_internal_card(
                 declaration.actor,
@@ -207,28 +214,18 @@ fn bp15_013_moves_only_a_token_to_ex_and_full_ex_cancels_without_payment() {
             )
             .unwrap();
         let state = game.projection(View::Referee).unwrap();
-        if capacity == 5 {
-            assert_eq!(result, CardPlay::Cancelled);
-            assert_eq!(state["P1"]["field"], before["P1"]["field"]);
-            assert_eq!(state["P1"]["ex"], before["P1"]["ex"]);
-            assert_eq!(
-                state["P1"]["leader"]["life"],
-                before["P1"]["leader"]["life"]
-            );
-        } else {
-            resolved(result);
-            assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), 5);
-            assert!(
-                state["P1"]["ex"]
-                    .as_array()
-                    .unwrap()
-                    .contains(&json!("token"))
-            );
-            assert_eq!(
-                state["P1"]["leader"]["life"].as_i64().unwrap(),
-                before["P1"]["leader"]["life"].as_i64().unwrap() + 2
-            );
-        }
+        resolved(result);
+        assert_eq!(state["P1"]["ex"].as_array().unwrap().len(), 5);
+        assert!(
+            state["P1"]["ex"]
+                .as_array()
+                .unwrap()
+                .contains(&json!("token"))
+        );
+        assert_eq!(
+            state["P1"]["leader"]["life"].as_i64().unwrap(),
+            before["P1"]["leader"]["life"].as_i64().unwrap() + 2
+        );
     }
 }
 
@@ -238,7 +235,7 @@ fn bp01_002_can_pay_by_returning_a_token_which_is_then_erased_by_rules() {
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"payer","card":"BP01-002"}]);
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"token","card":"BP01-T02"}]);
     let mut game = game(&initial);
-    let declaration = fanfare(&mut game);
+    let declaration = awaiting(fanfare(&mut game));
     let before = game.projection(View::Referee).unwrap();
     let materials = awaiting(
         game.answer_internal_card(

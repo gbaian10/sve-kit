@@ -452,16 +452,19 @@ fn required_reveal_head_cancels_without_revealing_when_declined_or_unpayable() {
             game.resume_internal_card().unwrap();
         }
         let pending = game.internal_pending_choice().unwrap().unwrap();
-        let CardPlay::Awaiting(declare) = game
+        let declaration = game
             .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
-            .unwrap()
-        else {
-            panic!("declaration");
-        };
-        assert_eq!(declare.domain, InputDomain::OptionalCost);
-        let play = game
-            .answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(accept))
             .unwrap();
+        let play = if eligible {
+            let CardPlay::Awaiting(declare) = declaration else {
+                panic!("declaration");
+            };
+            assert_eq!(declare.domain, InputDomain::OptionalCost);
+            game.answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(accept))
+                .unwrap()
+        } else {
+            declaration
+        };
         if accept && eligible {
             let CardPlay::Awaiting(materials) = play else {
                 panic!("materials");

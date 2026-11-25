@@ -1489,25 +1489,32 @@ impl Game {
         ability: admission::PlannedAbility,
         published: &PublishedKnowledge,
     ) -> Result<CardPlay> {
+        let resolution_cost = super::optional::targeted_discard_pp_cost(&ability.node).cloned();
         self.prepare_ability_play(&mut execution, ability, AbilityCostPolicy::Normal)?;
-        // Required head costs have their own declaration and cancellation procedure.
-        // Without a preceding question, the first target check already handles this.
-        if execution.trigger_occurrence.is_some()
-            && let Some(play) = &execution.play
-            && !play.optional.iter().any(|payment| payment.required)
-            && (play.parameters.len() > 1 || !play.optional.is_empty())
-            && play
-                .parameters
-                .iter()
-                .any(|decision| self.missing_fixed_target(&execution, decision))
-        {
-            // A fixed mandatory target cannot become legal by changing a declaration answer.
+        if !self.pending_declaration_payable(&execution, resolution_cost.as_ref())? {
             return Err(crate::EngineFailure::IllegalPlay(
-                "no legal play targets".into(),
+                "unplayable pending ability".into(),
             ));
         }
         self.internal_run(&mut execution, published)?;
         self.card_play_result(execution)
+    }
+
+    fn pending_declaration_payable(
+        &self,
+        execution: &Execution,
+        resolution_cost: Option<&CostSpec>,
+    ) -> Result<bool> {
+        let probe = self.declaration_probe();
+        // The discard ability's formal target is used only by its paid branch.
+        if let Some(costs) = resolution_cost
+            && !probe
+                .clone()
+                .internal_payment_probe(&mut execution.clone(), costs, false)?
+        {
+            return Ok(false);
+        }
+        probe.declaration_may_be_payable(Ok(execution.clone()))
     }
 
     pub(super) fn prepare_ability_play(
@@ -1740,7 +1747,7 @@ impl Game {
             return Ok(());
         };
         play.waive_original_costs(execution)?;
-        if self.internal_optional_decision(execution, &play)?
+        if self.internal_optional_decision(execution, &mut play)?
             || self.internal_resource_entry_question(execution, &play)?
             || self.internal_exchange_decision(execution, &play)?
             || self.internal_play_modes(execution, &mut play)?
@@ -1755,7 +1762,7 @@ impl Game {
             return Ok(());
         }
         play.freeze_selection(self, execution)?;
-        if self.internal_optional_decision(execution, &play)? {
+        if self.internal_optional_decision(execution, &mut play)? {
             execution.play = Some(play);
             return Ok(());
         }

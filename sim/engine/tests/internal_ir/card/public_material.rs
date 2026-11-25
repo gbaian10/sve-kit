@@ -314,19 +314,11 @@ fn trigger_head_requires_five_own_cemetery_cards_or_cancels_without_playing() {
             CardPlay::Entered(_)
         ));
         let pending = game.internal_pending_choice().unwrap().unwrap();
-        let declaration = awaiting(
-            game.answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
-                .unwrap(),
-        );
-        let result = game
-            .answer_internal_card(
-                declaration.actor,
-                declaration.token,
-                Answer::OptionalCost(true),
-            )
+        let declaration = game
+            .answer_internal_card(pending.actor, pending.token, Answer::Pending(1))
             .unwrap();
         if count == 4 {
-            assert_eq!(result, CardPlay::Cancelled);
+            assert_eq!(declaration, CardPlay::Cancelled);
             let state = game.projection(View::Referee).unwrap();
             assert_eq!(state["P1"]["cemetery"].as_array().unwrap().len(), 4);
             assert_eq!(state["P1"]["leader"]["life"], 20);
@@ -334,7 +326,15 @@ fn trigger_head_requires_five_own_cemetery_cards_or_cancels_without_playing() {
             assert!(game.internal_pending_choice().unwrap().is_none());
             continue;
         }
-        let question = awaiting(result);
+        let declaration = awaiting(declaration);
+        let question = awaiting(
+            game.answer_internal_card(
+                declaration.actor,
+                declaration.token,
+                Answer::OptionalCost(true),
+            )
+            .unwrap(),
+        );
         let InputDomain::CostMaterials(domain) = &question.domain else {
             panic!("materials")
         };
@@ -407,11 +407,7 @@ fn player_pipeline_unpayable_required_head_cancels_only_the_pending_occurrence()
         .unwrap();
     game.play_internal_card("s", PlayerId { seat: 1 }).unwrap();
     game.advance_player_input();
-    assert_eq!(
-        answer(&mut game, Viewer::P1, Answer::Pending(1)).kind,
-        SubmissionKind::Applied
-    );
-    let cancelled = answer(&mut game, Viewer::P1, Answer::OptionalCost(true));
+    let cancelled = answer(&mut game, Viewer::P1, Answer::Pending(1));
     assert_eq!(cancelled.kind, SubmissionKind::Cancelled);
     assert!(matches!(
         player_question(&game, Viewer::P1).shape,

@@ -592,8 +592,8 @@ known:
   - question: "card-ECP01-053"
     scenario: "B 主要階段來臨 → 不付費 → 維持アクト、PP 不變"
     status: fail
-    error: "typed-gap: after-decision-4 outcome (#2008)"
-    reason: "after-decision-4 omniscient outcome; after-decision-4 omniscient events"
+    error: "typed-gap: after-decision-4 events (#2008)"
+    reason: "after-decision-4 omniscient events"
   - question: "card-ECP02-001"
     scenario: "A EX 滿（含 1 アイテム）→ 付レッスン 費用空出一格 → 前川みく 進 EX → 同回合 0 費打出"
     status: fail
@@ -678,7 +678,7 @@ known:
     scenario: "先處理第一隻並選 execute"
     status: fail
     error: "typed-gap: after-decision-5 awaiting (#2008)"
-    reason: "after-decision-5 omniscient awaiting; after-decision-6 omniscient outcome"
+    reason: "after-decision-5 omniscient awaiting"
   - question: "flow-missed-trigger-01"
     scenario: "A 打出デモンビーター後跳過ファンファーレ直接攻擊 → 拒絕；處理完待機後攻擊成功"
     status: unsupported
@@ -878,7 +878,7 @@ known:
     scenario: "[fable] A PP 不足付不出ファンファーレ費用 → 待機取消一次"
     status: fail
     error: "typed-gap: after-decision-1 events (#2008)"
-    reason: "after-decision-1 omniscient events; after-decision-2 omniscient events; after-decision-3 omniscient outcome; after-decision-3 omniscient events"
+    reason: "after-decision-1 omniscient events; after-decision-2 omniscient events; after-decision-3 omniscient events"
   - question: "rule-10.7.3.2-01"
     scenario: "[fable] A2 付得出 → 搜到另一張放到場上 → 它也誘發 → 這次 PP 0 付不出 → 取消"
     status: unsupported
@@ -1019,11 +1019,6 @@ known:
     status: fail
     error: "typed-gap: after-decision-3 assert P1.equipment (#2008)"
     reason: "after-decision-3 omniscient outcome; after-decision-3 omniscient assert P1.equipment; after-decision-3 omniscient assert P1.equipment.new-1; after-decision-3 omniscient assert P1.pp.current; after-decision-3 omniscient events"
-  - question: "rule-14.5-01"
-    scenario: "C2 PP 只有 3 → 打出後 PP 0 → ファンファーレ費用付不出 → 待機取消"
-    status: fail
-    error: "interface: outcome-question-count-triage (#2008)"
-    reason: "after-decision-3 omniscient outcome"
   - question: "rule-4.4.4-01"
     scenario: "A 場上 3 張、要出 3 個 token → 只能選 2 個"
     status: unsupported

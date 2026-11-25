@@ -234,9 +234,8 @@ fn cp05_057_may_pay_with_zero_ordinary_targets_but_requires_one_for_super_evolut
     );
 
     let mut super_evolved = evolved(true, 0, 3);
-    let ability = pending_line(&mut super_evolved, 2);
     assert!(matches!(
-        accept(&mut super_evolved, ability),
+        pending_line(&mut super_evolved, 2),
         CardPlay::Cancelled
     ));
     let super_view = super_evolved.projection(View::P2).unwrap();
