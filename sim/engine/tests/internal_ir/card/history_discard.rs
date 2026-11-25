@@ -237,12 +237,16 @@ fn an_opponents_discard_does_not_count_as_the_effect_controllers_discard() {
 fn paid_discard_counts_but_a_later_payment_failure_rolls_it_back() {
     let program = lower(&[
         json!({"activate":{"cost":{"steps":[{"discard":{"sel":{"who":"self","zone":"hand"},"n":1}},{"pp":3}]},"do":[]}}),
-        json!({"activate":{"cost":{"pp":0},"do":[read_history()]}}),
+        json!({"activate":{"cost":{"pp":0},"do":[
+            read_history(),
+            {"life":{"who":"self","delta":{"history_count":dark_history()}}}
+        ]}}),
     ]);
     for pp in [2, 4] {
         let mut initial = initial();
         initial["players"]["P1"]["pp"] = json!({"current":pp,"max":pp});
-        let mut game = fixture(&initial, &program);
+        initial["players"]["P1"]["zones"]["hand"][0]["card"] = json!("unit-follower");
+        let mut game = fixture_with_catalog(&initial, &program, elemental_catalog());
         let before = game.projection(View::Referee).unwrap();
         let CardPlay::Awaiting(question) = game
             .activate_internal_card(
@@ -257,6 +261,7 @@ fn paid_discard_counts_but_a_later_payment_failure_rolls_it_back() {
         let InputDomain::CostMaterials(domain) = &question.domain else {
             panic!("private hand materials")
         };
+        assert_eq!(domain.members[0].card.as_deref(), Some("unit-follower"));
         let result = game.answer_internal_card(
             question.actor,
             question.token,
@@ -271,7 +276,7 @@ fn paid_discard_counts_but_a_later_payment_failure_rolls_it_back() {
         finish_checks(&mut game);
         resolved(activate(&mut game, program.card().abilities[1].node.id));
         let state = game.projection(View::Referee).unwrap();
-        assert_eq!(state["P1"]["leader"]["life"], if pp == 2 { 20 } else { 21 });
+        assert_eq!(state["P1"]["leader"]["life"], if pp == 2 { 20 } else { 22 });
         assert_eq!(state["P1"]["pp"]["current"], if pp == 2 { 2 } else { 1 });
         assert_eq!(
             state["P1"]["hand"].as_array().unwrap().len(),
