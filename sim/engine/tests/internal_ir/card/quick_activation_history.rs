@@ -101,6 +101,11 @@ fn answer(game: &mut Game, question: &DecisionView, answer: Answer) -> CardPlay 
 #[test]
 fn a_quick_spell_does_not_unlock_the_activation_but_a_paid_quick_activation_does() {
     let mut game = sequence_game();
+    resolved(
+        game.activate_internal_card("enemy", AbilityId(1), PlayerId { seat: 1 })
+            .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
     game.internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap();
     resolved(choose(&mut game, "unit-spell", false));
