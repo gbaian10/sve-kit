@@ -1324,6 +1324,10 @@ on:
 墓場、牌組與看牌區仍能按持有的能力篩選，無須該能力可在當地發動或當下付得起費用。
 場上的篩選使用有效能力，包含授予、失去能力與目前進化卡面的變化。
 
+`keyword: quick_activation` 篩選目前卡面有印刷 Quick 起動能力的卡，通常與 `kind: follower`
+搭配。`keyword: quick_spell` 篩選有印刷 Quick 打出許可的法術。兩者都讀印刷定義，
+保留目前卡面與失去能力的判定，無須候選能在當地發動。場上的從者衍生物也可宣告印刷 Quick 起動能力。
+
 `apply.effect.lose_abilities` 與攻擊禁令可用 `until: this_and_next_opp_turn`，分別在本回合及下一個對手回合生效。兩者套用於所選從者當下的物件世代，離場再入場會重新取得印刷能力。
 
 ## Drive 事件觀察
