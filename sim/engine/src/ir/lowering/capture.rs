@@ -8,8 +8,8 @@ use crate::ir::events::numbers;
 use crate::ir::events::timing;
 use crate::ir::{
     Capture, CaptureRef, CaptureTime, CardName, CharacteristicView, ChoiceDomain, Comparison,
-    EventContext, IntOperation, NameOperation, NatRead, NumberRead, PlayerRead, Predicate, Role,
-    ScopeId, Stat,
+    EventContext, IntOperation, NameOperation, NamesRead, NatRead, NumberRead, PlayerRead,
+    Predicate, Role, ScopeId, Stat,
 };
 
 #[expect(
@@ -162,7 +162,7 @@ impl BodyContext<'_> {
             at: CaptureTime::AtSelection {
                 decision: decision.id,
             },
-            value: Expr::Live(Box::new(crate::ir::NamesRead::Names {
+            value: Expr::Live(Box::new(NamesRead::Names {
                 object: ObjectView::Selected { selection },
             })),
             into: into.clone(),

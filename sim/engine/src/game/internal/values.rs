@@ -20,7 +20,7 @@ use crate::ir::{
 };
 use crate::ir::{CapacityProperty, CapacityZone, MovementReceiptList};
 use crate::ir::{
-    FollowPermission, MemberProjection, MovementEvent, MovementReceipt, ObjectProperty,
+    FollowPermission, MemberProjection, MovementEvent, MovementReceipt, NamesRead, ObjectProperty,
     ObjectReceipt, ObjectView, PlayerRead, ReceiptId, Role, SelectionView, SnapshotFields,
 };
 use crate::ir::{NumericProperty, Posture, PostureRead};
@@ -636,7 +636,7 @@ impl Execution {
                 let Expr::Live(read) = value else {
                     return Err(unsupported("selected name collection"));
                 };
-                let crate::ir::NamesRead::Names { object } = read.as_ref();
+                let NamesRead::Names { object } = read.as_ref();
                 let ObjectView::Selected { selection } = object else {
                     return Err(unsupported("selected name collection"));
                 };

@@ -8,10 +8,10 @@ use crate::game::{Frame, Object};
 use crate::ir::events::numbers;
 use crate::ir::events::subject::SubjectInformation;
 use crate::ir::{
-    Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
+    Binding, Bool, CardKind, CardName, CharacteristicView, ClassId, CounterKind, ExecutionId, Expr,
     LkiReason, NameOperation, Nat, NumberRead, ObjectOperand, ObjectRef, ObjectView, PostureRead,
-    Predicate, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView, SnapshotId,
-    Stat, TraitId, ZoneKind,
+    Predicate, Requirement, Requirements, RuntimeAbilitySource, RuntimeObjectView, Selector,
+    SnapshotId, Stat, TraitId, ZoneKind,
 };
 use alloc::collections::BTreeMap;
 use serde_json::Value;
@@ -175,7 +175,7 @@ impl Execution {
     pub(super) fn selected_names(
         &self,
         game: &Game,
-        selection: crate::ir::Binding<crate::ir::Selector>,
+        selection: Binding<Selector>,
     ) -> Result<Vec<CardName>> {
         let reference = self.selected_object(game, selection)?;
         let id = self.object_id(reference)?;

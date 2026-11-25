@@ -19,6 +19,8 @@ fn lu_woh_super_evolves_and_weakens_only_the_opposing_storm_attacker() {
         json!([{"id":"own-draw","card":"BP01-037"}]);
     initial["players"]["P2"]["zones"]["deck"] =
         json!([{"id":"enemy-draw","card":"BP01-037"}]);
+    initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap()
+        .push(json!({"id":"ally","card":"BP01-048"}));
     initial["players"]["P2"]["zones"]["field"] = json!([
         {"id":"ordinary","card":"BP01-037"},
         {"id":"storm","card":"BP01-048","state":{"power":8_u8}}
@@ -34,6 +36,11 @@ fn lu_woh_super_evolves_and_weakens_only_the_opposing_storm_attacker() {
     assert!(has_granted_keyword(&state(&game), "source", "オーラ"));
     assert_eq!(resolve_pending_card(&mut game, "CP05-022"), CardPlay::Cancelled);
     finish_checks(&mut game);
+    assert_eq!(game.internal_rule_action(&json!({
+        "do":"attack","attacker":"ally","target":"P2.leader"
+    })).unwrap().outcome, "resolved");
+    assert!(game.internal_pending_choice().unwrap().is_none());
+    pass_quick(&mut game);
     attack_batch::end_turn(&mut game);
 
     assert_eq!(game.internal_rule_action(&json!({
@@ -48,7 +55,7 @@ fn lu_woh_super_evolves_and_weakens_only_the_opposing_storm_attacker() {
     })).unwrap().outcome, "resolved");
     resolve_grant_trigger(&mut game, 2, None);
     let after = state(&game);
-    assert_eq!(after["objects"]["storm"]["power"], before["objects"]["storm"]["power"].as_i64().unwrap().saturating_sub(5).max(0));
+    assert_eq!(after["objects"]["storm"]["power"], 3_u8);
     assert_eq!(after["objects"]["ordinary"]["power"], before["objects"]["ordinary"]["power"]);
 }
 
@@ -66,7 +73,8 @@ fn matching_search_grants_end_phase_banish_only_to_the_entered_card() {
                 {"grant":{"on":{"follow":"entered"},"abilities":[{"auto":{
                     "on":{"phase":{"which":"end","whose":"self"}},
                     "do":[{"banish":{"ref":"this"}}]
-                }}]}}
+                }}]}},
+                {"banish":{"ref":"this"}}
             ]
         }})],
     );
@@ -124,12 +132,13 @@ fn matching_search_grants_end_phase_banish_only_to_the_entered_card() {
             state(&game)["P1"]["field"].as_array().unwrap().contains(&json!("found")),
             !full,
         );
+        assert_eq!(state(&game)["P1"]["banish"], json!(["source"]));
         game.internal_rule_action(&json!({"do":"end-phase"})).unwrap();
         if full {
             assert!(game.internal_pending_choice().unwrap().is_none());
         } else {
             resolve_grant_trigger(&mut game, 1, None);
-            assert_eq!(state(&game)["P1"]["banish"], json!(["found"]));
+            assert_eq!(state(&game)["P1"]["banish"], json!(["source", "found"]));
         }
         assert!(state(&game)["P1"]["field"].as_array().unwrap().contains(&json!("candidate-0")));
     }
