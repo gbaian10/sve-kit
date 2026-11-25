@@ -1,0 +1,32 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-065:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        auto:
+          "on":
+            discarded:
+              ref: this
+              who: self
+              from: hand
+              by: { ability_of: { who: self, trait: 闇属性 } }
+          do:
+            - create: { token: 闇晶のエレメント, n: 1, to: ex }
+            - draw: { n: 1 }
+      - line: 2
+        fanfare:
+          do:
+            - create: { token: 闇晶のエレメント, n: 1, to: ex }
+            - if:
+                cond:
+                  exists: { who: self, zone: field, name: どこにでもいるフツーの女の子・メグ }
+                then:
+                  - life: { who: self, delta: 2 }

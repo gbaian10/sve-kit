@@ -1,0 +1,23 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-058:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost: { pp: 1 }
+      - line: 2
+        fanfare:
+          cost:
+            discard:
+              sel: { who: self, zone: hand, trait: 闇属性 }
+              n: 1
+          do:
+            - draw: { n: 1 }

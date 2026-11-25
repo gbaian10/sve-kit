@@ -1,0 +1,21 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-063:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve_time:
+          targets:
+            - bind: enemy
+              from: { who: opp, zone: field, kind: follower }
+              upto: 2
+          do:
+            - destroy: enemy
+            - create: { token: 光晶のエレメント, n: 1, to: ex }
