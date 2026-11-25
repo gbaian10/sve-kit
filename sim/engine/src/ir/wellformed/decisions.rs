@@ -211,6 +211,19 @@ impl Checker {
         self.define(binding, BindingKind::Ability(filter))
     }
 
+    fn one_payload(&self, cardinality: Option<Cardinality>) -> Checked {
+        if cardinality.is_some_and(|value| {
+            value
+                != (Cardinality {
+                    minimum: Nat(1),
+                    maximum: Some(Nat(1)),
+                })
+        }) {
+            return Err(self.error(WellFormedReason::DecisionCardinality));
+        }
+        Ok(())
+    }
+
     fn domain(
         &mut self,
         domain: &ChoiceDomain,
@@ -263,15 +276,7 @@ impl Checker {
             }
             ChoiceDomain::Compound { domains } => {
                 // The envelope cardinality counts execution, not members of heterogeneous payloads.
-                if cardinality.is_some_and(|value| {
-                    value
-                        != (Cardinality {
-                            minimum: Nat(1),
-                            maximum: Some(Nat(1)),
-                        })
-                }) {
-                    return Err(self.error(WellFormedReason::DecisionCardinality));
-                }
+                self.one_payload(cardinality)?;
                 let start = self.env.clone();
                 let mut after = start.clone();
                 for (index, child) in domains.iter().enumerate() {
@@ -291,15 +296,7 @@ impl Checker {
                 binding,
                 ..
             } => {
-                if cardinality.is_some_and(|value| {
-                    value
-                        != (Cardinality {
-                            minimum: Nat(1),
-                            maximum: Some(Nat(1)),
-                        })
-                }) {
-                    return Err(self.error(WellFormedReason::DecisionCardinality));
-                }
+                self.one_payload(cardinality)?;
                 self.recipients(recipients)?;
                 if cardinality.is_none()
                     && let Some(material) = public_numbers::material_count(total)

@@ -1115,10 +1115,10 @@ impl BodyContext<'_> {
                 .filter(|_| self.formal_play)
                 .ok_or_else(|| unsupported(path))?;
             let total = if let Expr::Compute(operation) = &value
-                && let super::IntOperation::FromNat { value } = operation.as_ref()
-                && public_numbers::material_count(value).is_some()
+                && let super::IntOperation::FromNat { value: natural } = operation.as_ref()
+                && public_numbers::material_count(natural).is_some()
             {
-                value.clone()
+                natural.clone()
             } else if let Expr::Literal(Int(total)) = value {
                 Expr::Literal(Nat(
                     u64::try_from(total).map_err(|_private| unsupported(path))?

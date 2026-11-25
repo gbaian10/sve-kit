@@ -8,6 +8,7 @@ use super::{
     Execution, Game, InputDomain, QuestionStage, Result, Wait, invalid, seat_name, unsupported,
 };
 use crate::game::player::QuestionPurpose;
+use crate::ir::public_numbers;
 use crate::ir::{
     Binding, ChoiceDomain, DamageAllocation, DamageAmount, Decision, DecisionId, ExecutionId, Expr,
     Nat, PlayerId, RecipientSet, ResolvedDamageAllocation, ResolvedRecipients,
@@ -120,7 +121,7 @@ pub(super) struct Allocation {
 }
 
 fn formal_total(execution: &Execution, game: &Game, total: &Expr<Nat>) -> Result<Nat> {
-    crate::ir::public_numbers::material_count(total).map_or_else(
+    public_numbers::material_count(total).map_or_else(
         || execution.natural(game, total),
         |binding| execution.declared_material_count(binding),
     )
