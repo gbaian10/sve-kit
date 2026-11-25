@@ -489,6 +489,7 @@ impl Checker {
         triggering: bool,
     ) -> Option<Checked> {
         match pattern {
+            EventPattern::LimitBreak { .. } => Some(Ok(())),
             EventPattern::Equip { binding, predicate } => self.committed_header(
                 *binding,
                 EventSnapshotPolicy::AfterEntry,
@@ -824,6 +825,7 @@ impl Checker {
             | EventPattern::Banish { .. }
             | EventPattern::Posture { .. }
             | EventPattern::UbActivated { .. }
+            | EventPattern::LimitBreak { .. }
             | EventPattern::Equip { .. } => self.reject(),
         }
     }

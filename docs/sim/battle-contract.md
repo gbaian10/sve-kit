@@ -139,12 +139,16 @@ BattleObservation 完整保留[玩家輸入](player-input.md)的觀察語義，�
 | --- | --- |
 | objects | ObjectHandle → 已知 CardRef、有效卡面、owner／controller、public／private 知識、正背面、有效特徵與狀態 |
 | players | 每席生命、PP／最大 PP、剩餘 EP／SEP、EP 容量／已用格、SEP 開放回合、公開效果、區域總數、已授權成員、容量；主戰者只是席位外觀，沒有假物件代號 |
-| zones | deck、evolve_deck、hand、field、ex、cemetery、banish、resolution、evolution、race、drive、trigger、equipment |
+| zones | deck、evolve_deck、hand、field、ex、cemetery、banish、resolution、evolution、race、drive、trigger、equipment、limit_break |
 | turn／attack | 活動席、先攻席、階段、逐席回合數、公開攻擊者與目標；重畫盤面即可保留攻擊箭頭 |
 | relationships | 裝備、Ride、出走／Drive 等有型別關係；兩端可辨識才帶 handle |
 | processing | 外層至內層的已授權處理脈絡、stage、controller、來源、主語、程序席位、宣告與付款摘要 |
 | costs／pending／history | 現行成本的已知／未決部分、公開待處理、已提交的回合歷史；不包含續體、capture 或暫態歷史 |
 | remembered | 曾看過的卡面與 owner；沒有現位置、實體副本數或可追蹤暗牌標記 |
+
+`limit_break` 是公開無序區域。素材成員的 `position` 為 null，`relationships` 的
+`limit_break` 由素材指向場上的關聯卡。完成解放時公開 `limit_broken` 事件，
+以 `final_break` 表示是否為最終上限解放。
 
 玩家資源皆由引擎狀態提供，畫面不硬編先後手的配置或開放時機：
 

@@ -162,6 +162,7 @@ impl Game {
                     "banish" => ZoneKind::Banish,
                     "resolution" => ZoneKind::Resolution,
                     "ex" => ZoneKind::Ex,
+                    "limit_break" => ZoneKind::LimitBreak,
                     "evolve_deck" => ZoneKind::Evolve,
                     _ => return Err(invalid("unknown EX departure destination")),
                 };

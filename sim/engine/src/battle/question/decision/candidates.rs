@@ -182,6 +182,7 @@ pub(in crate::battle::question) fn details(
             (Zone::Drive, &zones.drive),
             (Zone::Trigger, &zones.trigger),
             (Zone::Equipment, &zones.equipment),
+            (Zone::LimitBreak, &zones.limit_break),
         ] {
             for located in &zone.cards {
                 if located.object.as_str() != handle.as_str() {

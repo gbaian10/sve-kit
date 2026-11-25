@@ -21,6 +21,8 @@ pub enum RelationshipKind {
     Evolution,
     /// An equipment token attached to its bearer.
     Equipment,
+    /// A treasure supplying a normal or final limit break.
+    LimitBreak,
     /// A Meal resource attached for racing.
     Race,
     /// A paid `DrivePoint` attached to its field card.
@@ -53,19 +55,24 @@ impl Game {
                 "field" => {
                     self.observed_field_relationships(perspective, object, &mut relationships)?;
                 }
-                "equipment" => {
+                "equipment" | "limit_break" => {
+                    let (kind, link_field) = if object.zone == "equipment" {
+                        (RelationshipKind::Equipment, "equipped_to")
+                    } else {
+                        (RelationshipKind::LimitBreak, "limit_break_of")
+                    };
                     if let Some(link) = object
                         .state
-                        .get("equipped_to")
+                        .get(link_field)
                         .filter(|value| !value.is_null())
                     {
                         relationships.extend(
                             self.observed_relationship(
                                 perspective,
-                                RelationshipKind::Equipment,
+                                kind,
                                 &object.id,
                                 link.as_str()
-                                    .ok_or_else(|| invalid("invalid equipment link"))?,
+                                    .ok_or_else(|| invalid("invalid attachment link"))?,
                             )?,
                         );
                     }
@@ -145,6 +152,7 @@ impl Game {
         let zone = match kind {
             RelationshipKind::Evolution => "evolution",
             RelationshipKind::Equipment => "equipment",
+            RelationshipKind::LimitBreak => "limit_break",
             RelationshipKind::Race => "race",
             RelationshipKind::Drive => "drive",
         };
@@ -157,7 +165,9 @@ impl Game {
                     return Ok(None);
                 }
             }
-            RelationshipKind::Evolution | RelationshipKind::Equipment => {}
+            RelationshipKind::Evolution
+            | RelationshipKind::Equipment
+            | RelationshipKind::LimitBreak => {}
         }
         Ok(Some(Relationship {
             kind,

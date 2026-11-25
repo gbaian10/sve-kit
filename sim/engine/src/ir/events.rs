@@ -131,6 +131,7 @@ variants!(EventPattern {
     DriveTrigger { binding: Binding<DriveTriggerEvent>, predicate: Expr<Bool> } => ["event.match.DriveTrigger"],
     UbActivated { binding: Binding<UbActivatedEvent>, predicate: Expr<Bool> } => ["event.match.UbActivated"],
     Fused { binding: Binding<FusedEvent>, predicate: Expr<Bool> } => ["event.match.Fused"],
+    LimitBreak { final_break: Bool } => ["event.match.LimitBreak"],
     Equip { binding: Binding<EquipEvent>, predicate: Expr<Bool> } => ["event.match.Equip"],
     Dice { binding: Binding<DiceEvent>, predicate: Expr<Bool> } => ["event.match.Dice"],
     DriveChecked { binding: Binding<DriveCheckedEvent>, predicate: Expr<Bool> } => ["event.match.DriveChecked"],

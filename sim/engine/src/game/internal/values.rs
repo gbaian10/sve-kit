@@ -130,6 +130,28 @@ impl Execution {
         }
     }
 
+    pub(super) fn current_limit_break_subject(
+        &self,
+        game: &Game,
+        operand: &ObjectOperand,
+    ) -> Result<Option<ObjectRef>> {
+        let reference = if let ObjectOperand::Selected { selection } = operand {
+            // The original choice fixes the identity. Eligibility uses the follower's current state.
+            let selected = self.object_slot(*selection)?;
+            let [reference] = selected.as_slice() else {
+                return Ok(None);
+            };
+            *reference
+        } else {
+            self.object(game, operand)?
+        };
+        let object = game.object(self.object_id(reference)?)?;
+        Ok(
+            (object.generation == reference.generation.0 && object.zone == "field")
+                .then_some(reference),
+        )
+    }
+
     pub(super) fn object(&self, game: &Game, object: &ObjectOperand) -> Result<ObjectRef> {
         match object {
             ObjectOperand::FollowEventMove {
@@ -1340,6 +1362,13 @@ impl Execution {
 
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
         match read {
+            BoolRead::LimitBreak { object, state } => {
+                let Some(reference) = self.current_limit_break_subject(game, object)? else {
+                    return Ok(Bool(false));
+                };
+                game.limit_break_condition(self.object_id(reference)?, *state)
+                    .map(Bool)
+            }
             BoolRead::HistoryExists { query } => {
                 let plan =
                     HistoryPlan::compile(query).ok_or_else(|| unsupported("boolean expression"))?;

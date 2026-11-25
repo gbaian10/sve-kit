@@ -117,6 +117,10 @@ pub enum ActionKind {
     Erase,
     /// Equipment association established.
     Equip,
+    /// A follower completed a normal limit break.
+    LimitBreak,
+    /// A follower completed a final limit break.
+    FinalLimitBreak,
     /// Evolution performed by the shared rule primitive.
     Evolve,
     /// A public counter change.

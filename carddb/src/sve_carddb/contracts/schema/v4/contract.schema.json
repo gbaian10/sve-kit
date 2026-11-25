@@ -28458,6 +28458,18 @@
         "delta"
       ]
     },
+    "DSLNodes.A.act.limit-break": {
+      "additionalProperties": false,
+      "properties": {
+        "on": {
+          "$ref": "#/$defs/DSLNodes.A.ref"
+        }
+      },
+      "required": [
+        "on"
+      ],
+      "type": "object"
+    },
     "DSLNodes.A.act.look": {
       "anyOf": [
         {
@@ -29685,6 +29697,12 @@
         "equip": {
           "$ref": "#/$defs/DSLNodes.A.act.equip"
         },
+        "limit_break": {
+          "$ref": "#/$defs/DSLNodes.A.act.limit-break"
+        },
+        "final_limit_break": {
+          "$ref": "#/$defs/DSLNodes.A.act.limit-break"
+        },
         "steal": {
           "$ref": "#/$defs/DSLNodes.A.act.steal"
         },
@@ -30309,6 +30327,15 @@
           "$ref": "#/$defs/DSLNodes.A.cond.standing"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.cond.limit-broken"
+        },
+        {
+          "$ref": "#/$defs/DSLNodes.A.cond.final-limit-broken"
+        },
+        {
+          "$ref": "#/$defs/DSLNodes.A.cond.final-limit-break-possible"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.cond.acted"
         },
         {
@@ -30673,6 +30700,30 @@
       ],
       "type": "object"
     },
+    "DSLNodes.A.cond.final-limit-break-possible": {
+      "additionalProperties": false,
+      "properties": {
+        "final_limit_break_possible": {
+          "$ref": "#/$defs/DSLNodes.A.ref"
+        }
+      },
+      "required": [
+        "final_limit_break_possible"
+      ],
+      "type": "object"
+    },
+    "DSLNodes.A.cond.final-limit-broken": {
+      "additionalProperties": false,
+      "properties": {
+        "final_limit_broken": {
+          "$ref": "#/$defs/DSLNodes.A.ref"
+        }
+      },
+      "required": [
+        "final_limit_broken"
+      ],
+      "type": "object"
+    },
     "DSLNodes.A.cond.from-payload": {
       "additionalProperties": false,
       "properties": {
@@ -30778,6 +30829,18 @@
       },
       "required": [
         "leader_life"
+      ],
+      "type": "object"
+    },
+    "DSLNodes.A.cond.limit-broken": {
+      "additionalProperties": false,
+      "properties": {
+        "limit_broken": {
+          "$ref": "#/$defs/DSLNodes.A.ref"
+        }
+      },
+      "required": [
+        "limit_broken"
       ],
       "type": "object"
     },
@@ -35045,6 +35108,12 @@
           "$ref": "#/$defs/DSLNodes.A.event.equipped"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.event.limit-broke"
+        },
+        {
+          "$ref": "#/$defs/DSLNodes.A.event.final-limit-broke"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.event.fused-as-material"
         },
         {
@@ -36166,6 +36235,18 @@
       },
       "type": "object"
     },
+    "DSLNodes.A.event.final-limit-broke": {
+      "additionalProperties": false,
+      "properties": {
+        "final_limit_broke": {
+          "$ref": "#/$defs/DSLNodes.A.event.self-limit-break"
+        }
+      },
+      "required": [
+        "final_limit_broke"
+      ],
+      "type": "object"
+    },
     "DSLNodes.A.event.fused": {
       "additionalProperties": false,
       "properties": {
@@ -36289,6 +36370,18 @@
           "type": "boolean"
         }
       },
+      "type": "object"
+    },
+    "DSLNodes.A.event.limit-broke": {
+      "additionalProperties": false,
+      "properties": {
+        "limit_broke": {
+          "$ref": "#/$defs/DSLNodes.A.event.self-limit-break"
+        }
+      },
+      "required": [
+        "limit_broke"
+      ],
       "type": "object"
     },
     "DSLNodes.A.event.moved": {
@@ -36502,6 +36595,19 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         }
       },
+      "type": "object"
+    },
+    "DSLNodes.A.event.self-limit-break": {
+      "additionalProperties": false,
+      "properties": {
+        "ref": {
+          "const": "this",
+          "type": "string"
+        }
+      },
+      "required": [
+        "ref"
+      ],
       "type": "object"
     },
     "DSLNodes.A.event.stat-changed": {
@@ -45186,6 +45292,12 @@
         },
         "equip": {
           "$ref": "#/$defs/DSLNodes.A.act.equip"
+        },
+        "limit_break": {
+          "$ref": "#/$defs/DSLNodes.A.act.limit-break"
+        },
+        "final_limit_break": {
+          "$ref": "#/$defs/DSLNodes.A.act.limit-break"
         },
         "steal": {
           "$ref": "#/$defs/DSLNodes.A.act.steal"

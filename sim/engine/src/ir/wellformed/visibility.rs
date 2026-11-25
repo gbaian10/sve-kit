@@ -298,6 +298,7 @@ impl Checker {
             | Action::RideDrive { .. }
             | Action::DriveCheck { .. }
             | Action::Equip { .. }
+            | Action::LimitBreak { .. }
             | Action::Fusion { .. }
             | Action::Random { .. }
             | Action::ScheduleTurn { .. }

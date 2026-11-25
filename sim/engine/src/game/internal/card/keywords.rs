@@ -3,6 +3,7 @@ use super::super::search::SearchArrival;
 use super::super::{DecisionId, Execution, InputDomain, ObjectRef, Wait, grant, player_id};
 use super::{Ability, Game, KeywordId, Located, Result, invalid, unsupported};
 use crate::game::internal::player::CandidateLinks;
+use crate::game::limit_break::FINAL_LIMIT_BREAK_POSSIBLE;
 use crate::game::list;
 use crate::ir::events::{banish as banish_header, discard as discard_header};
 use crate::ir::lowering::PrintedKeyword;
@@ -56,6 +57,7 @@ impl Game {
                     KeywordId::Drain => Some("drain"),
                     KeywordId::Stack => Some("stack"),
                     KeywordId::StartAmulet => Some("start_amulet"),
+                    KeywordId::FinalLimitBreakPossible => Some(FINAL_LIMIT_BREAK_POSSIBLE),
                     _ => grant::keyword(keyword),
                 },
             ) {
@@ -358,6 +360,10 @@ pub(super) fn check(
                     | (PrintedKeyword::SingleDrive, KeywordId::SingleDrive)
                     | (PrintedKeyword::TwinDrive, KeywordId::TwinDrive)
                     | (PrintedKeyword::StartAmulet, KeywordId::StartAmulet)
+                    | (
+                        PrintedKeyword::FinalLimitBreakPossible,
+                        KeywordId::FinalLimitBreakPossible
+                    )
             )
         })
         .ok_or_else(|| invalid("foreign printed keyword"))?;

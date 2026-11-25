@@ -86,6 +86,7 @@ fn subject(
         active: seat(fact.active),
         card_kind: match fact.kind {
             CardKind::Crest => wire::CardKind::Crest,
+            CardKind::Treasure => wire::CardKind::Treasure,
             CardKind::EvolveFollower => wire::CardKind::EvolveFollower,
             CardKind::Follower => wire::CardKind::Follower,
             CardKind::Spell => wire::CardKind::Spell,
@@ -122,6 +123,7 @@ const fn zone(value: native::ObservedZone) -> Zone {
         native::ObservedZone::Drive => Zone::Drive,
         native::ObservedZone::Trigger => Zone::Trigger,
         native::ObservedZone::Equipment => Zone::Equipment,
+        native::ObservedZone::LimitBreak => Zone::LimitBreak,
     }
 }
 

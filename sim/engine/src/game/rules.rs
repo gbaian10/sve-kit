@@ -3,6 +3,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 use crate::ir::Phase;
+use crate::ir::{ELEMENTAL_TRAITS, trait_matches};
 use core::mem::take;
 use serde_json::{Value, json};
 
@@ -714,7 +715,16 @@ impl Game {
         self.bump(&format!("{id}.attacks"), 1);
         let attacks = int(&self.object(id)?.state["attacks_this_turn"]);
         self.object_mut(id)?.state["attacks_this_turn"] = json!(attacks.saturating_add(1));
-        for trait_name in self.card_traits(id)? {
+        let traits = self.card_traits(id)?;
+        let elemental_references = ELEMENTAL_TRAITS.into_iter().filter(|attribute| {
+            !traits.contains(*attribute)
+                && traits.iter().any(|actual| trait_matches(actual, attribute))
+        });
+        for trait_name in traits
+            .iter()
+            .map(String::as_str)
+            .chain(elemental_references)
+        {
             self.bump(&format!("{}.trait_attacks.{trait_name}", self.active()), 1);
         }
         let group = self.group();
@@ -1014,7 +1024,7 @@ impl Game {
             self.internal_terminal_cleanup();
             return Ok(());
         }
-        if self.clean_equipment_rules()? || self.clean_field_rules()? {
+        if self.clean_attachment_rules()? || self.clean_field_rules()? {
             return self.checks();
         }
         if self.state.pending.is_empty()

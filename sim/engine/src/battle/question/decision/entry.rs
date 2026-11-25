@@ -114,6 +114,7 @@ pub(super) fn ward(
         "drive" => Zone::Drive,
         "trigger" => Zone::Trigger,
         "equipment" => Zone::Equipment,
+        "limit_break" => Zone::LimitBreak,
         _ => return Err(ProjectionError::Unavailable),
     };
     // Changed effective faces need an explicit entry display policy before projection.

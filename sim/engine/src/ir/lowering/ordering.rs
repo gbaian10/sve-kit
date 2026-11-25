@@ -291,6 +291,8 @@ impl BodyContext<'_> {
             | ast::Step::PlayCard(_)
             | ast::Step::Create(_)
             | ast::Step::Equip(_)
+            | ast::Step::LimitBreak(_)
+            | ast::Step::FinalLimitBreak(_)
             | ast::Step::Pilot(_)
             | ast::Step::Delayed(_)
             | ast::Step::Boxed(_)

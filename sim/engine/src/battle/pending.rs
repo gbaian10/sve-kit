@@ -83,6 +83,8 @@ pub(super) const fn timing(value: native::TriggerTiming) -> wire::TriggerTiming 
         native::TriggerTiming::DriveTrigger => wire::TriggerTiming::DriveTrigger,
         native::TriggerTiming::Dice => wire::TriggerTiming::Dice,
         native::TriggerTiming::Equip => wire::TriggerTiming::Equip,
+        native::TriggerTiming::LimitBreak => wire::TriggerTiming::LimitBreak,
+        native::TriggerTiming::FinalLimitBreak => wire::TriggerTiming::FinalLimitBreak,
         native::TriggerTiming::Move => wire::TriggerTiming::Move,
         native::TriggerTiming::Race => wire::TriggerTiming::Race,
         native::TriggerTiming::LifeChange => wire::TriggerTiming::LifeChange,

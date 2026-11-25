@@ -517,5 +517,6 @@ pub(super) const fn zone(value: ObservedZone) -> Zone {
         ObservedZone::Drive => Zone::Drive,
         ObservedZone::Trigger => Zone::Trigger,
         ObservedZone::Equipment => Zone::Equipment,
+        ObservedZone::LimitBreak => Zone::LimitBreak,
     }
 }

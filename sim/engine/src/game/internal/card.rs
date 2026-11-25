@@ -8,6 +8,7 @@ use super::{
 use super::{CostPaymentPurpose, CostStepPayment};
 use crate::catalog::{RuntimeCards, SelectedEffects};
 use crate::game::knowledge::PublishedKnowledge;
+use crate::game::limit_break::TREASURE;
 use crate::game::player::observation::AbilityQuota;
 use crate::game::player::{AdmissionGapReason, Viewer};
 use crate::ir::TurnOperation;
@@ -1127,6 +1128,9 @@ fn check_base_face(printed: &serde_json::Value, pilot: bool) -> Result<()> {
 
 fn check_ability_face(ability: &Ability, printed: &serde_json::Value, pilot: bool) -> Result<()> {
     check_printed_face(printed, pilot)?;
+    if printed["card_type"] == TREASURE && ability.active_zones != [ZoneKind::Ex] {
+        return Err(unsupported("treasure abilities require EX"));
+    }
     if is_printed_quick(ability)
         && ability.kind == AbilityKind::Activated
         && !printed["card_type"]
@@ -1202,6 +1206,7 @@ pub(super) fn activation_type(kind: &str, zones: &[ZoneKind]) -> bool {
                 | "アミュレット"
                 | "フォロワー・トークン"
                 | "クレスト・トークン"
+                | TREASURE
                 | "スペル・トークン"
                 | "アミュレット・トークン"
         ),
@@ -1548,7 +1553,8 @@ pub(in crate::game::internal) fn printed_origin(origin: &AbilityOrigin) -> Resul
                 | KeywordId::SingleDrive
                 | KeywordId::TwinDrive
                 | KeywordId::Stack
-                | KeywordId::StartAmulet,
+                | KeywordId::StartAmulet
+                | KeywordId::FinalLimitBreakPossible,
             origin,
         } => {
             if let AbilityOrigin::Printed { face, line } = origin.as_ref() {
@@ -1643,6 +1649,15 @@ fn check_instruction(
 ) -> Result<()> {
     super::tokens::check_catalog(game, &instruction.action, source, x)?;
     super::tokens::equipment::check_catalog(game, &instruction.action)?;
+    if matches!(instruction.action, Action::LimitBreak { .. }) {
+        let (face, _) = printed_origin(&ability_source.origin)?;
+        let ordinal = game.printed_face_ordinal(&source.card_no, face)?;
+        if game.catalog.face(&source.card_no, ordinal)?["card_type"] != TREASURE {
+            return Err(unsupported(
+                "limit-break instruction requires a treasure source",
+            ));
+        }
+    }
     super::transform::check_catalog(game, &instruction.action)?;
     nested::check(&instruction.action)?;
     nested::ability::check_action(&instruction.action)?;
@@ -1701,6 +1716,7 @@ fn check_instruction(
             | Action::Search { .. }
             | Action::Token { .. }
             | Action::Equip { .. }
+            | Action::LimitBreak { .. }
             | Action::BoxPilot { .. }
             | Action::RemoveAbility { .. }
             | Action::Order { .. }

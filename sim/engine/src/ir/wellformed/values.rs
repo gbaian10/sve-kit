@@ -300,7 +300,8 @@ impl Checker {
                 } => Ok(()),
                 BoolRead::State { object, .. } => self.view(object),
                 BoolRead::FieldEntryOrigin { object, .. }
-                | BoolRead::FieldEntryMethod { object, .. } => self.object(object),
+                | BoolRead::FieldEntryMethod { object, .. }
+                | BoolRead::LimitBreak { object, .. } => self.object(object),
                 BoolRead::HistoryExists { query } => self.history(query),
                 BoolRead::LegalAttack {
                     attacker,

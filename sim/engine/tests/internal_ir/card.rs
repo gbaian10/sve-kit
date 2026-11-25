@@ -787,6 +787,8 @@ mod equipment;
 mod equipment_dealt;
 #[path = "card/equipment_equipped.rs"]
 mod equipment_equipped;
+#[path = "card/limit_break.rs"]
+mod limit_break;
 #[path = "card/material_power.rs"]
 mod material_power;
 

@@ -90,6 +90,11 @@
             "count": 0,
             "capacity": null,
             "cards": []
+          },
+          "limit_break": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
           }
         }
       },
@@ -166,6 +171,11 @@
             "cards": []
           },
           "equipment": {
+            "count": 0,
+            "capacity": null,
+            "cards": []
+          },
+          "limit_break": {
             "count": 0,
             "capacity": null,
             "cards": []
@@ -1251,6 +1261,38 @@
         ]
       },
       {
+        "id": "b31b",
+        "events": [
+          {
+            "id": "e38b",
+            "cause": "k31b",
+            "parent": null,
+            "body": {
+              "kind": "limit_broken",
+              "material": {
+                "kind": "card",
+                "card": {
+                  "printing_id": "SYN01-010",
+                  "face": 0
+                },
+                "object": "o12"
+              },
+              "follower": {
+                "kind": "card",
+                "card": {
+                  "printing_id": "SYN01-001",
+                  "face": 1
+                },
+                "object": "o1"
+              },
+              "final_break": false
+            },
+            "about": [],
+            "presentation_id": null
+          }
+        ]
+      },
+      {
         "id": "b32",
         "events": [
           {
@@ -1892,6 +1934,7 @@
       "b29",
       "b30",
       "b31",
+      "b31b",
       "b32",
       "b33",
       "b34",

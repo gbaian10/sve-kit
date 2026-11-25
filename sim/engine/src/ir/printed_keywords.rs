@@ -149,6 +149,7 @@ pub(crate) fn definition(
         | KeywordId::Bane
         | KeywordId::Intimidate
         | KeywordId::Assail
+        | KeywordId::FinalLimitBreakPossible
         | KeywordId::StartAmulet => None,
         _ => return None,
     };

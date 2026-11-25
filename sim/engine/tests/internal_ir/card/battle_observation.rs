@@ -136,19 +136,13 @@ fn wire_board_combines_one_view_without_opponent_secrets_or_placeholder_handles(
             let zones = serde_json::to_value(&player.zones).unwrap();
             assert_eq!(
                 zones.as_object().unwrap().len(),
-                13,
+                14,
                 "all contract zones exist"
             );
-            assert_eq!(
-                player.zones.equipment.count.get(),
-                0,
-                "an absent area is empty"
-            );
-            assert_eq!(
-                player.zones.equipment.cards,
-                [],
-                "an absent area has no fabricated members"
-            );
+            for area in [&player.zones.equipment, &player.zones.limit_break] {
+                assert_eq!(area.count.get(), 0, "an absent area is empty");
+                assert_eq!(area.cards, [], "an absent area has no fabricated members");
+            }
             for zone in zones.as_object().unwrap().values() {
                 for member in zone["cards"].as_array().unwrap() {
                     let handle = member["object"].as_str().unwrap();

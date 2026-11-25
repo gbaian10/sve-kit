@@ -1144,6 +1144,13 @@ fn lowered_subscription(
                 ),
             })
         }
+        ast::PhaseSubscription::LimitBroke(value)
+        | ast::PhaseSubscription::FinalLimitBroke(value) => {
+            let ast::This::This = value.reference;
+            Ok(EventPattern::LimitBreak {
+                final_break: Bool(matches!(on, ast::PhaseSubscription::FinalLimitBroke(_))),
+            })
+        }
         ast::PhaseSubscription::Equipped(_) => {
             let binding = Binding::new(event_id, scope);
             Ok(EventPattern::Equip {
@@ -1378,6 +1385,8 @@ fn lowered_change(
         | ast::PhaseSubscription::Discarded(_)
         | ast::PhaseSubscription::LifeChanged(_)
         | ast::PhaseSubscription::Equipped(_)
+        | ast::PhaseSubscription::LimitBroke(_)
+        | ast::PhaseSubscription::FinalLimitBroke(_)
         | ast::PhaseSubscription::DiceRolled(_)
         | ast::PhaseSubscription::Banished(_)
         | ast::PhaseSubscription::Targeted(_) => Err(unsupported(path)),
@@ -2353,6 +2362,12 @@ impl<'definitions> BodyContext<'definitions> {
             ast::Step::Create(value) => self.create(value, path),
             ast::Step::Pilot(value) => numeric::pilot(value, path),
             ast::Step::Boxed(value) => self.boxed(value, path),
+            ast::Step::LimitBreak(value) | ast::Step::FinalLimitBreak(value) => {
+                Ok(Action::LimitBreak {
+                    holder: self.limit_break_target(&value.on, path)?,
+                    final_break: Bool(matches!(step, ast::Step::FinalLimitBreak(_))),
+                })
+            }
             ast::Step::Equip(value) => {
                 let ast::This::This = value.on;
                 if value.token.is_empty() {

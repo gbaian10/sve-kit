@@ -201,6 +201,10 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
         Event::DriveTrigger { .. } => Ok("DriveTrigger".into()),
         Event::Dice { event } => Ok(format!("Dice {}", ir_dice::value(event.value))),
         Event::Equip { .. } => Ok(format!("Equip while source at equipment slot {position}")),
+        Event::LimitBreak { event } if event.final_break => {
+            Ok(format!("FinalLimitBreak at field slot {position}"))
+        }
+        Event::LimitBreak { .. } => Ok(format!("LimitBreak at field slot {position}")),
         Event::Move { event } => Ok(format!(
             "Move deck to cemetery of player {} at field slot {position}",
             event.from.player.seat

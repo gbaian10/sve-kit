@@ -146,6 +146,7 @@ const fn zone(zone: ObservedZone) -> Zone {
         ObservedZone::Drive => Zone::Drive,
         ObservedZone::Trigger => Zone::Trigger,
         ObservedZone::Equipment => Zone::Equipment,
+        ObservedZone::LimitBreak => Zone::LimitBreak,
     }
 }
 
@@ -361,6 +362,11 @@ impl<O: EventObjects> Projection<'_, O> {
                 .subject(slot(action, 0))
                 .map(|subject| EventBody::Erased { subject }),
             ActionKind::Equip => self.equipped(action),
+            ActionKind::LimitBreak | ActionKind::FinalLimitBreak => Ok(EventBody::LimitBroken {
+                material: self.subject(slot(action, 1))?,
+                follower: self.subject(slot(action, 0))?,
+                final_break: action.kind == ActionKind::FinalLimitBreak,
+            }),
             ActionKind::Evolve => self.evolved(action, wire::EvolutionRole::Normal),
             ActionKind::EffectEvolve => self.evolved(action, wire::EvolutionRole::Effect),
             ActionKind::Fusion => self.fusion(action),

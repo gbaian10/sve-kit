@@ -59,6 +59,10 @@ pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<Pendin
             },
             false,
         ),
+        Some(EventPayload::LimitBreak { event }) if event.final_break => {
+            (PendingEvent::FinalLimitBreak, true)
+        }
+        Some(EventPayload::LimitBreak { .. }) => (PendingEvent::LimitBreak, true),
         Some(EventPayload::Equip { .. }) => (PendingEvent::Equip, true),
         Some(EventPayload::Move { event }) => (
             PendingEvent::Move {

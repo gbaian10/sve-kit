@@ -1,8 +1,8 @@
 use super::super::{
-    CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, EventPattern, IntFrozen,
-    IntRead, LifeChangeEvent, NatFrozen, NumberRead, ObjectView, PlayerResource, Precondition,
-    PreconditionKind, PreconditionReason, SnapshotFields, Stat, TraitId, TraitsFrozen,
-    TriggerCondition,
+    BoolRead, CharacteristicView, Comparison, CostSpec, CounterKind, DiscardEvent, EventPattern,
+    IntFrozen, IntRead, LifeChangeEvent, LimitBreakState, NatFrozen, NumberRead, ObjectOperand,
+    ObjectView, PlayerResource, Precondition, PreconditionKind, PreconditionReason, SnapshotFields,
+    Stat, TraitId, TraitsFrozen, TriggerCondition,
 };
 use super::{
     Arithmetic, BTreeSet, Binding, BodyContext, Bool, Cardinality, CounterReadView, Expr, Int,
@@ -218,14 +218,12 @@ impl BodyContext<'_> {
             {
                 return Err(unsupported(path));
             }
-            return Ok(Expr::Live(Box::new(
-                super::super::BoolRead::HistoryExists {
-                    query: super::super::history_turn::public::banished_query(
-                        Binding::new(self.allocator.id(path)?, self.scope),
-                        name,
-                    ),
-                },
-            )));
+            return Ok(Expr::Live(Box::new(BoolRead::HistoryExists {
+                query: super::super::history_turn::public::banished_query(
+                    Binding::new(self.allocator.id(path)?, self.scope),
+                    name,
+                ),
+            })));
         }
         let threshold = history.at_least.unwrap_or(1);
         Ok(Expr::Compute(Box::new(Predicate::CompareInt {
@@ -277,6 +275,38 @@ impl BodyContext<'_> {
         })
     }
 
+    pub(super) fn limit_break_target(
+        &self,
+        reference: &str,
+        path: &str,
+    ) -> Result<ObjectOperand, LoweringError> {
+        self.targets
+            .get(reference)
+            .copied()
+            .map(|selection| ObjectOperand::Selected { selection })
+            .ok_or_else(|| unsupported(path))
+    }
+
+    fn limit_break_read(
+        &self,
+        reference: &str,
+        state: LimitBreakState,
+        path: &str,
+    ) -> Result<Expr<Bool>, LoweringError> {
+        Ok(Expr::Live(Box::new(BoolRead::LimitBreak {
+            object: if reference == "this" {
+                ObjectOperand::SourceHolder {}
+            } else {
+                self.limit_break_target(reference, path)?
+            },
+            state,
+        })))
+    }
+
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Each author condition has one lowering branch."
+    )]
     pub(super) fn condition(
         &mut self,
         value: &ast::Condition,
@@ -314,10 +344,19 @@ impl BodyContext<'_> {
                 return self.frozen_population(*threshold, false, path);
             }
             ast::Condition::Exists(query) => return self.public_exists(query, path),
+            ast::Condition::LimitBroken(reference) => {
+                return self.limit_break_read(reference, LimitBreakState::Normal, path);
+            }
+            ast::Condition::FinalLimitBroken(reference) => {
+                return self.limit_break_read(reference, LimitBreakState::Final, path);
+            }
+            ast::Condition::FinalLimitBreakPossible(reference) => {
+                return self.limit_break_read(reference, LimitBreakState::FinalPossible, path);
+            }
             ast::Condition::Standing(ast::This::This) => Predicate::PostureEquals {
                 left: Expr::Live(Box::new(super::super::PostureRead::Posture {
                     object: ObjectView::Current {
-                        object: Box::new(super::super::ObjectOperand::SourceHolder {}),
+                        object: Box::new(ObjectOperand::SourceHolder {}),
                     },
                 })),
                 right: Expr::Literal(super::super::Posture::Standing),
@@ -333,7 +372,7 @@ impl BodyContext<'_> {
             ast::Condition::LeaderLife(threshold) => leader_life_condition(threshold, path)?,
 
             ast::Condition::Crimson(true) => {
-                return Ok(Expr::Live(Box::new(super::super::BoolRead::Crimson {
+                return Ok(Expr::Live(Box::new(BoolRead::Crimson {
                     player: PlayerRef::Controller {},
                 })));
             }
@@ -528,12 +567,10 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        Ok(Expr::Live(Box::new(
-            super::super::BoolRead::FieldEntryOrigin {
-                object: super::super::ObjectOperand::SourceHolder {},
-                zone,
-            },
-        )))
+        Ok(Expr::Live(Box::new(BoolRead::FieldEntryOrigin {
+            object: ObjectOperand::SourceHolder {},
+            zone,
+        })))
     }
 
     pub(super) fn entered_by(
@@ -568,12 +605,10 @@ impl BodyContext<'_> {
             })));
         }
         if self.evolution.is_some() {
-            return Ok(Expr::Live(Box::new(
-                super::super::BoolRead::FieldEntryMethod {
-                    object: super::super::ObjectOperand::SourceHolder {},
-                    method,
-                },
-            )));
+            return Ok(Expr::Live(Box::new(BoolRead::FieldEntryMethod {
+                object: ObjectOperand::SourceHolder {},
+                method,
+            })));
         }
         Err(unsupported(path))
     }
@@ -589,12 +624,10 @@ impl BodyContext<'_> {
         };
         if self.spell.is_some() {
             return Ok(Predicate::And {
-                predicates: vec![Expr::Live(Box::new(
-                    super::super::BoolRead::CardPlayOrigin {
-                        zone,
-                        execution: super::super::ExecutionRef::Current {},
-                    },
-                ))],
+                predicates: vec![Expr::Live(Box::new(BoolRead::CardPlayOrigin {
+                    zone,
+                    execution: super::super::ExecutionRef::Current {},
+                }))],
             });
         }
         let event = self.entry_event.ok_or_else(|| unsupported(path))?;
@@ -1483,7 +1516,7 @@ fn this_number(
         && view == CharacteristicView::Effective
     {
         ObjectView::Current {
-            object: Box::new(super::super::ObjectOperand::SourceHolder {}),
+            object: Box::new(ObjectOperand::SourceHolder {}),
         }
     } else {
         ObjectView::SourceInformation {}

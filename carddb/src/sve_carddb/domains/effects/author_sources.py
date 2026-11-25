@@ -141,6 +141,7 @@ PRINTED_KEYWORDS: dict[str, PrintedKeyword] = {
     "term:keyword.bane": "bane",
     "term:keyword.intimidate": "intimidate",
     "term:keyword.assail": "assail",
+    "term:keyword.final_limit_break_possible": "final_limit_break_possible",
 }
 
 ADAPTER_RECIPE = digest(

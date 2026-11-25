@@ -2150,6 +2150,14 @@ type EquipAction = EquipActionFields
 
 
 @with_config(CONFIG)
+class LimitBreakActionFields(TypedDict):
+    on: Ref
+
+
+type LimitBreakAction = LimitBreakActionFields
+
+
+@with_config(CONFIG)
 class StealActionFields(TypedDict):
     ref: EffectObject
 
@@ -2859,6 +2867,10 @@ class ActionFields(TypedDict):
 
     equip: NotRequired[EquipAction]
 
+    limit_break: NotRequired[LimitBreakAction]
+
+    final_limit_break: NotRequired[LimitBreakAction]
+
     steal: NotRequired[StealAction]
 
     give: NotRequired[GiveAction]
@@ -2970,6 +2982,10 @@ class StepFields(_StepKeys):
     pilot: NotRequired[PilotAction]
 
     equip: NotRequired[EquipAction]
+
+    limit_break: NotRequired[LimitBreakAction]
+
+    final_limit_break: NotRequired[LimitBreakAction]
 
     steal: NotRequired[StealAction]
 

@@ -61,7 +61,7 @@ fn damage_source_matches(
             let own = !opposing_damage_controller(hit, execution.context.controller)?;
             Ok(own == filter.own
                 && snapshot.subject.kind == Some(filter.kind)
-                && snapshot.subject.traits.contains(filter.trait_id))
+                && filter.trait_id.matches_any(&snapshot.subject.traits))
         }
     }
 }

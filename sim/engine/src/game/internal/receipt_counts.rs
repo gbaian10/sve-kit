@@ -542,7 +542,7 @@ fn matches(
         } => {
             let TraitsRead::Traits { object, .. } = read.as_ref();
             snapshot(object, member)?;
-            Ok(characters.is_some_and(|characters| characters.traits.contains(trait_id)))
+            Ok(characters.is_some_and(|card| trait_id.matches_any(&card.traits)))
         }
         Predicate::NamesIntersect {
             left: Expr::Live(read),

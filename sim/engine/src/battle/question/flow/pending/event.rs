@@ -36,6 +36,8 @@ pub(super) fn project(event: &PendingEvent) -> Result<TriggerEvent, ProjectionEr
             value: Nat::try_from(*value)?,
         },
         PendingEvent::Equip => TriggerEvent::Equip,
+        PendingEvent::LimitBreak => TriggerEvent::LimitBreak,
+        PendingEvent::FinalLimitBreak => TriggerEvent::FinalLimitBreak,
         PendingEvent::Move { player, from, to } => TriggerEvent::Move {
             player: super::common::seat(*player),
             from: zone(*from),
@@ -88,5 +90,6 @@ const fn zone(zone: ZoneKind) -> Zone {
         ZoneKind::Drive => Zone::Drive,
         ZoneKind::Trigger => Zone::Trigger,
         ZoneKind::Equipment => Zone::Equipment,
+        ZoneKind::LimitBreak => Zone::LimitBreak,
     }
 }

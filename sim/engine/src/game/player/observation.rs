@@ -74,6 +74,8 @@ pub enum ObservedZone {
     Trigger,
     /// Equipment area.
     Equipment,
+    /// Public area for attached limit-break materials.
+    LimitBreak,
 }
 
 impl ObservedZone {
@@ -89,7 +91,8 @@ impl ObservedZone {
             | Self::Race
             | Self::Drive
             | Self::Trigger
-            | Self::Equipment => true,
+            | Self::Equipment
+            | Self::LimitBreak => true,
         }
     }
 }
@@ -328,6 +331,7 @@ pub(in crate::game) fn zone(value: &str) -> Result<ObservedZone> {
         "drive" => Ok(ObservedZone::Drive),
         "trigger" => Ok(ObservedZone::Trigger),
         "equipment" => Ok(ObservedZone::Equipment),
+        "limit_break" => Ok(ObservedZone::LimitBreak),
         _ => Err(invalid("unknown player zone")),
     }
 }
@@ -689,7 +693,9 @@ impl Game {
                 if let Some(id) = item.as_str() {
                     if self.player_knows_object(perspective, id) {
                         cards.push(ZoneCard {
-                            position: (name != "hand" || perspective == player).then_some(offset),
+                            position: (name != "limit_break"
+                                && (name != "hand" || perspective == player))
+                                .then_some(offset),
                             card: self.observed_card(perspective, id)?,
                         });
                     }
@@ -706,7 +712,7 @@ impl Game {
                         .ok_or_else(|| invalid("zone count overflow"))?;
                 }
             }
-            if name == "hand" && perspective != player {
+            if name == "limit_break" || (name == "hand" && perspective != player) {
                 cards.sort_by(|left, right| left.card.handle.cmp(&right.card.handle));
             }
             zones.push(ZoneObservation {

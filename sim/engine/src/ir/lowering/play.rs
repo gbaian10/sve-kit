@@ -1748,6 +1748,8 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         | ast::Step::Move(_)
         | ast::Step::Create(_)
         | ast::Step::Equip(_)
+        | ast::Step::LimitBreak(_)
+        | ast::Step::FinalLimitBreak(_)
         | ast::Step::Pilot(_)
         | ast::Step::Boxed(_)
         | ast::Step::Win(_)

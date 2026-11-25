@@ -259,7 +259,16 @@ names!(
     FaceId,
     CounterKind
 );
+impl TraitId {
+    pub(crate) fn matches_any(&self, traits: &[Self]) -> bool {
+        traits
+            .iter()
+            .any(|actual| super::trait_matches(&actual.0, &self.0))
+    }
+}
+
 tags!(CardKind {
+    Treasure,
     Crest,
     EvolveFollower,
     Follower,
@@ -278,7 +287,8 @@ tags!(ZoneKind {
     Race,
     Drive,
     Trigger,
-    Equipment
+    Equipment,
+    LimitBreak
 });
 tags!(CharacteristicView {
     Original,
@@ -559,6 +569,7 @@ variants!(BoolRead {
     Awakening { player: PlayerRef } => ["read.awakening"],
     Crimson { player: PlayerRef } => ["read.crimson"],
     State { object: ObjectView, property: BooleanState } => ["read.state"],
+    LimitBreak { object: ObjectOperand, state: LimitBreakState } => ["read.limit-break"],
     HistoryExists { query: HistoryQuery } => ["read.history.exists"],
     OwnTurn { player: PlayerRef } => ["read.turn.own"],
     LegalAttack { attacker: ObjectOperand, ignore_querying_clause: EffectDefinitionId } => ["read.legal-attack"]
@@ -577,6 +588,11 @@ tags!(BooleanState {
     AdvanceFollower,
     AdvanceSpell,
     EnteredThisTurn
+});
+tags!(LimitBreakState {
+    Normal,
+    Final,
+    FinalPossible
 });
 variants!(NameRead { CollaborationName { object: ObjectView } => ["read.collaboration-name"] });
 variants!(ZoneRead { Zone { object: ObjectView } => ["read.zone"] });
@@ -618,7 +634,8 @@ tags!(KeywordId {
     Drive,
     OnDriveGain,
     Ride,
-    UnionBurst
+    UnionBurst,
+    FinalLimitBreakPossible
 });
 
 /// Uninhabited: a domain without this operation cannot construct a fallback.

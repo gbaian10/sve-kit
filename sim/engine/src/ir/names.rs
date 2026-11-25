@@ -5,7 +5,7 @@ use super::{
     Selector, TimeAnchor, TimestampBasis, ZoneKind,
 };
 
-pub(crate) const ALL_ZONES: [ZoneKind; 12] = [
+pub(crate) const ALL_ZONES: [ZoneKind; 13] = [
     ZoneKind::Deck,
     ZoneKind::Hand,
     ZoneKind::Field,
@@ -18,6 +18,7 @@ pub(crate) const ALL_ZONES: [ZoneKind; 12] = [
     ZoneKind::Drive,
     ZoneKind::Trigger,
     ZoneKind::Equipment,
+    ZoneKind::LimitBreak,
 ];
 
 pub(crate) fn name(ability: &Ability) -> Option<&CardName> {

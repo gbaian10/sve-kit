@@ -91,6 +91,7 @@ pub(crate) fn build_observation(
                     kind: match link.kind {
                         native::RelationshipKind::Evolution => wire::RelationshipKind::Evolution,
                         native::RelationshipKind::Equipment => wire::RelationshipKind::Equipment,
+                        native::RelationshipKind::LimitBreak => wire::RelationshipKind::LimitBreak,
                         native::RelationshipKind::Race => wire::RelationshipKind::Race,
                         native::RelationshipKind::Drive => wire::RelationshipKind::Drive,
                     },
@@ -172,7 +173,8 @@ fn zones(scope: &ObjectScope<'_>, observed: &[native::ZoneObservation]) -> Resul
         race: empty.clone(),
         drive: empty.clone(),
         trigger: empty.clone(),
-        equipment: empty,
+        equipment: empty.clone(),
+        limit_break: empty,
     };
     let mut seen = Vec::new();
     for zone in observed {
@@ -223,6 +225,7 @@ const fn zone_slot(zones: &mut wire::Zones, zone: native::ObservedZone) -> &mut 
         native::ObservedZone::Drive => &mut zones.drive,
         native::ObservedZone::Trigger => &mut zones.trigger,
         native::ObservedZone::Equipment => &mut zones.equipment,
+        native::ObservedZone::LimitBreak => &mut zones.limit_break,
     }
 }
 

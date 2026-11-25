@@ -37,6 +37,7 @@ mod draw;
 mod drive;
 mod equipment;
 mod fusion;
+mod limit_break;
 pub(in crate::game::internal) use banish::hand_header as hand_banish;
 pub(in crate::game::internal) use discard::cemetery_header as cemetery_discard;
 pub(in crate::game::internal) use discard::hand_header as hand_discard;
@@ -149,6 +150,7 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
         || drive::check_header(ability)?
         || dice::check_header(ability)?
         || equipment::check_header(ability)?
+        || limit_break::check_header(ability)?
         || mill::check_header(ability)?
         || ex_departure::check_header(ability)?
         || change::check_header(ability)?
@@ -1034,6 +1036,8 @@ const fn trigger_timing(event: &EventPayload) -> TriggerTiming {
         EventPayload::DriveChecked { .. } => TriggerTiming::DriveChecked,
         EventPayload::DriveTrigger { .. } => TriggerTiming::DriveTrigger,
         EventPayload::Dice { .. } => TriggerTiming::Dice,
+        EventPayload::LimitBreak { event } if event.final_break => TriggerTiming::FinalLimitBreak,
+        EventPayload::LimitBreak { .. } => TriggerTiming::LimitBreak,
         EventPayload::Equip { .. } => TriggerTiming::Equip,
         EventPayload::Move { .. } => TriggerTiming::Move,
         EventPayload::Race { .. } => TriggerTiming::Race,

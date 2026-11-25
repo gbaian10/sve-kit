@@ -51,6 +51,7 @@ const fn base(kind: CardKind) -> u8 {
         CardKind::Spell => 1,
         CardKind::Amulet => 2,
         CardKind::Crest => 3,
+        CardKind::Treasure => 5,
     }
 }
 

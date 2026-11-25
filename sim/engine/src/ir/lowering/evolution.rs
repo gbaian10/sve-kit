@@ -18,7 +18,7 @@ use crate::ir::{
     TextQuantifier, Visibility, ZoneKind,
 };
 use crate::ir::{Bool, BoolRead, Effect, Expr, RuleModifier};
-use crate::ir::{CardKind, EventPattern, FollowPermission, TraitId};
+use crate::ir::{EventPattern, FollowPermission, TraitId};
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -456,12 +456,7 @@ pub(super) fn subscription(
             .sel
             .as_ref()
             .and_then(|sel| sel.kind.as_ref())
-            .map(|kind| match kind {
-                ast::SearchKind::Follower => CardKind::Follower,
-                ast::SearchKind::Spell => CardKind::Spell,
-                ast::SearchKind::Amulet => CardKind::Amulet,
-                ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,
-            }),
+            .map(super::search::card_kind),
         trait_id: entry
             .sel
             .as_ref()

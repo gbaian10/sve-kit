@@ -270,6 +270,8 @@ pub enum Zone {
     Trigger,
     /// Equipment area.
     Equipment,
+    /// Public area for attached limit-break materials.
+    LimitBreak,
 }
 
 /// Something an item is about: a player, a leader or a known card.

@@ -3,6 +3,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 
+use crate::ir::trait_matches;
 use alloc::collections::BTreeSet;
 use serde_json::{Value, json};
 
@@ -217,6 +218,7 @@ impl Game {
             "amulet" => "アミュレット",
             "spell" => "スペル",
             "crest" => "クレスト",
+            "treasure" => super::limit_break::TREASURE,
             _ => "",
         };
         if selector["type"] == "evolved_follower" && !card_type.contains("エボルヴ") {
@@ -229,7 +231,10 @@ impl Game {
             return Ok(false);
         }
         if let Some(trait_name) = selector["trait"].as_str()
-            && !self.card_traits(id)?.contains(trait_name)
+            && !self
+                .card_traits(id)?
+                .iter()
+                .any(|actual| trait_matches(actual, trait_name))
         {
             return Ok(false);
         }

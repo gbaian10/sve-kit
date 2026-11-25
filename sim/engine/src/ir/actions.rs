@@ -42,6 +42,7 @@ variants!(@visit Action {
     MealRace { subject: ObjectOperand, operation: MealRaceOperation, amount: Expr<Nat>, resource_links: Vec<ObjectOperand> } => ["action.meal-race"],
     RideDrive { subject: ObjectOperand, operation: RideDriveOperation, usage: UsageReference } => ["action.ride-drive"],
     DriveCheck { player: PlayerRef, repetitions: Nat, source: AbilitySource } => ["action.drive-check"],
+    LimitBreak { holder: ObjectOperand, final_break: Bool } => ["action.limit-break"],
     Equip { holder: ObjectOperand, template: TokenTemplateId, count: Nat } => ["action.equip", "action.token"],
     Fusion { subject: ObjectOperand, materials: SelectionConstraint } => ["action.fusion", "receipt.move-after", "reference.follow-generation"],
     Random { population: Selector, count: Nat, rng: RandomnessPolicy, visibility: Visibility } => ["action.random"],

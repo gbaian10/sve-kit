@@ -91,6 +91,7 @@ STEP_NAMES = {
     "A.act.declare": "DeclareAction",
     "A.act.pilot": "PilotAction",
     "A.act.equip": "EquipAction",
+    "A.act.limit-break": "LimitBreakAction",
     "A.act.steal": "StealAction",
     "A.act.give": "GiveAction",
     "A.act.box": "BoxAction",
