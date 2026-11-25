@@ -1341,7 +1341,9 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     let played_trigger = filter(ability).is_some()
         || fusion_events::filter(ability).is_some()
         || fusion_events::material_filter(ability).is_some();
-    let hand_trigger = triggers::hand_discard(ability) || triggers::hand_banish(ability);
+    let hand_trigger = triggers::hand_discard(ability)
+        || triggers::hand_banish(ability)
+        || triggers::hand_reveal_header(ability)?;
     let cemetery_entry_trigger =
         triggers::cemetery_entry(ability) || triggers::cemetery_discard(ability);
     let equipment_trigger = triggers::equipment_header(ability)?;

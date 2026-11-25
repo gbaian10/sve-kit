@@ -37,6 +37,7 @@ runtime_variants!(EventPayload {
     EnterEx { event: EnterExEvent },
     Draw { event: DrawEvent },
     Discard { event: DiscardEvent },
+    HandReveal { card: ObjectRef, player: PlayerId },
     Destroy { event: DestroyEvent },
     Banish { event: BanishEvent },
     Damage { event: DamageEvent },

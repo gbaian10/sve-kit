@@ -35169,6 +35169,9 @@
           "$ref": "#/$defs/DSLNodes.A.event.limit-broke"
         },
         {
+          "$ref": "#/$defs/DSLNodes.A.event.hand-revealed"
+        },
+        {
           "$ref": "#/$defs/DSLNodes.A.event.final-limit-broke"
         },
         {
@@ -36351,6 +36354,28 @@
           "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
         }
       },
+      "type": "object"
+    },
+    "DSLNodes.A.event.hand-revealed": {
+      "additionalProperties": false,
+      "properties": {
+        "hand_revealed": {
+          "additionalProperties": false,
+          "properties": {
+            "ref": {
+              "const": "this",
+              "type": "string"
+            }
+          },
+          "required": [
+            "ref"
+          ],
+          "type": "object"
+        }
+      },
+      "required": [
+        "hand_revealed"
+      ],
       "type": "object"
     },
     "DSLNodes.A.event.left-field": {

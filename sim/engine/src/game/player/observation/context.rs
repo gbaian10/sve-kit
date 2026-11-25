@@ -84,6 +84,8 @@ pub enum TriggerTiming {
     LimitBreak,
     /// The follower completed a final limit break.
     FinalLimitBreak,
+    /// The holder was publicly revealed from its controller’s hand.
+    HandReveal,
     /// A card moves.
     Move,
     /// A race completes.

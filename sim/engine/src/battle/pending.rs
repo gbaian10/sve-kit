@@ -76,6 +76,7 @@ pub(super) const fn timing(value: native::TriggerTiming) -> wire::TriggerTiming 
         native::TriggerTiming::Fusion => wire::TriggerTiming::Fusion,
         native::TriggerTiming::Play => wire::TriggerTiming::Play,
         native::TriggerTiming::Discard => wire::TriggerTiming::Discard,
+        native::TriggerTiming::HandReveal => wire::TriggerTiming::HandReveal,
         native::TriggerTiming::Banish => wire::TriggerTiming::Banish,
         native::TriggerTiming::Draw => wire::TriggerTiming::Draw,
         native::TriggerTiming::DriveGained => wire::TriggerTiming::DriveGained,
