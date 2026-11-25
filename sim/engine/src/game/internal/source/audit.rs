@@ -1,7 +1,7 @@
 //! The accepted catalogue must produce a bound owner before any ability executes.
 
 use super::{Game, SourceInformation};
-use crate::game::repository;
+use crate::game::{limit_break::TREASURE, repository};
 use crate::ir::{AbilityId, AbilityInstanceId, PlayerId, RuntimeAbilitySource};
 use alloc::collections::BTreeMap;
 use serde_json::{Value, json};
@@ -16,10 +16,10 @@ fn position() -> Value {
 
 fn source_position(empty: &Value, number: &str, face: u64, kind: &str) -> Value {
     let mut initial = empty.clone();
-    let zone = if kind.starts_with("スペル") {
-        "hand"
-    } else {
-        "field"
+    let zone = match kind {
+        TREASURE => "ex",
+        kind if kind.starts_with("スペル") => "hand",
+        _ => "field",
     };
     // Source information requires followers on the field; binding does not execute their text.
     initial["players"]["P1"]["zones"][zone] = json!([

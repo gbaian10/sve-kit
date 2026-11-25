@@ -1,0 +1,34 @@
+cards:
+  CP05-T15:
+    abilities:
+      - activate:
+          cost:
+            pp: 0
+          do:
+            - limit_break:
+                on: target
+            - if:
+                cond:
+                  final_limit_break_possible: target
+                then:
+                  - final_limit_break:
+                      on: target
+          targets:
+            - bind: target
+              from:
+                kind: follower
+                trait: グラブル
+                who: self
+                zone: field
+              n: 1
+          zone: ex
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set
