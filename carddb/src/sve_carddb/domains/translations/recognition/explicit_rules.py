@@ -78,7 +78,7 @@ EXPLICIT = {
     "pp_capacity_bound": ExplicitRule(
         "pp_capacity_bound",
         r"(?:自分|相手|自分と相手)のPP最大値が$",
-        r"^(?:以上|以下)?なら",
+        r"^(?:(?:以上|以下)?なら|(?:以上|以下)である限り)",
     ),
     "pp_remaining_bound": ExplicitRule(
         "pp_remaining_bound",

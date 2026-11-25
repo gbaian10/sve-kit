@@ -162,6 +162,15 @@ _COUNTER_THRESHOLD = re.compile(
 _EVENT_THRESHOLD = re.compile(
     r"^回以上(?:攻撃した|攻撃していた|発動していた)なら" + _END
 )
+_LIMIT_BREAK_TOTAL = re.compile(
+    r"(?:^|[。、:：}】])(?:この能力は)?このターン(?:、|中に)"
+    r"(?:自分|相手)の場のフォロワーが上限解放や最終上限解放を合わせて$"
+)
+_LIMIT_BREAK_THRESHOLD = re.compile(r"^回(?:以上|以下)していたなら(?:使える)?" + _END)
+_FLIP = re.compile(
+    r"^枚(?:(?P<limit>まで)(?:を)?(?:表向き|裏向き)にしてよい|"
+    r"を(?:表向き|裏向き)に(?:する|してよい))" + _END
+)
 _EVOLUTION_FREQUENCY = re.compile(r"^ターンに何回でも使える" + _END)
 _ENTRY_DIGIT = r"(?:N|[0-9０-９]+)"
 _ENTRY_FREQUENCY = r"ターンに進化か(?:食事|憑依)はどちらか"
@@ -654,16 +663,25 @@ def _action_number(value: int, before: str, after: str) -> Number | None:
         r"(?:『X』|フォロワー|アミュレット)(?:を)?$", before
     ):
         return Number("Nat", "count", value, match["unit"])
-    if count_context(before) is not None and re.match(
-        r"^枚を(?:表向き|裏向き)に(?:する|してよい)" + _END, after
-    ):
-        return Number("Nat", "count", value, "枚")
     return (
-        _movement_number(value, after)
+        _flip_number(value, before, after)
+        or _movement_number(value, after)
         or _payment_number(value, before, after)
         or _repetition_number(value, before, after)
         or _field_number(value, before, after)
     )
+
+
+def _flip_number(value: int, before: str, after: str) -> Number | None:
+    if (match := _FLIP.match(after)) is None or (
+        counted := count_context(before)
+    ) is None:
+        return None
+    if not match["limit"]:
+        return Number("Nat", "count", value, "枚")
+    if counted.counted_zones == ("evolve_deck",):
+        return _quantity("selection_count", value, "枚", "up_to")
+    return None
 
 
 def _event_count_number(value: int, before: str, after: str) -> Number | None:
@@ -862,7 +880,7 @@ def _repetition_number(value: int, before: str, after: str) -> Number | None:
         _EVENT_THRESHOLD.match(after)
         and "このターン" in before
         and before.endswith("が")
-    ):
+    ) or (_LIMIT_BREAK_THRESHOLD.match(after) and _LIMIT_BREAK_TOTAL.search(before)):
         return Number("Nat", "threshold", value, "回")
     return (
         Number("Nat", "group_divisor", value, "回")

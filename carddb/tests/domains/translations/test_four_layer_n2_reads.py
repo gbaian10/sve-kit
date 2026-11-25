@@ -164,6 +164,10 @@ def read_engine() -> Classifier:
             "read.faceup_evolve.trait.v1",
         ),
         (
+            "それにXダメージ。Xは「自分のエボルヴデッキの表向きの仮族・エボルヴフォロワーの枚数」である。Xが4以上なら、3枚引く。",
+            "read.faceup_evolve.trait.v1",
+        ),
+        (
             "それに「自分のエボルヴデッキの表向きの『仮場手札自分』の枚数」と同じダメージ。",
             "read.faceup_evolve.count.v1",
         ),
@@ -193,6 +197,7 @@ def read_engine() -> Classifier:
         "previous-counter",
         "dice",
         "faceup-trait",
+        "faceup-trait-later-x",
         "faceup-name",
         "distinct-cost",
         "lki",
