@@ -91,6 +91,14 @@ fn life_history(
     ))
 }
 
+fn history_player(own: bool) -> PlayerRef {
+    if own {
+        PlayerRef::Controller {}
+    } else {
+        super::super::events::timing::opponent()
+    }
+}
+
 fn quick_activation_history(
     history: &ast::HistoryQuery,
     path: &str,
@@ -797,13 +805,7 @@ impl BodyContext<'_> {
             .who
             .as_ref()
             .map(|side| matches!(side, ast::LeaderSide::Controller));
-        let player = own.map(|own| {
-            if own {
-                PlayerRef::Controller {}
-            } else {
-                super::super::events::timing::opponent()
-            }
-        });
+        let player = own.map(history_player);
         let Some(subject) = &history.sel else {
             return Ok(super::super::history_turn::played_query(
                 Binding::new(id, self.scope),
@@ -864,13 +866,7 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let player = own.map(|own| {
-            if own {
-                PlayerRef::Controller {}
-            } else {
-                super::super::events::timing::opponent()
-            }
-        });
+        let player = own.map(history_player);
         if history.exclude.is_some() && !matches!(history.event, ast::HistoryEvent::UbActivated) {
             return Err(unsupported(path));
         }
