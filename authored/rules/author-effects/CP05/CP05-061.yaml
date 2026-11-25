@@ -1,0 +1,33 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-061:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        fanfare:
+          do:
+            - create: { token: 風晶のエレメント, n: 2, to: ex }
+      - line: 2
+        activate:
+          usable_if:
+            history: { event: limit_break, who: self, window: this_turn, at_least: 3 }
+          cost:
+            steps:
+              - act_self: true
+              - self_to_cemetery: true
+          do:
+            - look: { top: { who: self, n: 1 }, bind: seen }
+            - choose:
+                bind: picked
+                from: { in: seen, trait: 風属性 }
+                may: true
+                n: 1
+            - move: { ref: picked, to: hand }
+            - reveal: { ref: picked, bind: revealed }
