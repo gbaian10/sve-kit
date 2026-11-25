@@ -73,13 +73,14 @@ fn pay_dark_discard(game: &mut Game) {
 #[test]
 fn cp05_071_requires_a_dark_discard_before_spending_its_source() {
     let mut initial = draw_position();
-    initial["players"]["P1"]["zones"]["field"] = json!([
-        {"id":"amulet","card":"CP05-P55"}, {"id":"enabler","card":"CP05-079"}
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"enabler","card":"CP05-079"}]);
+    initial["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"amulet","card":"CP05-P55"}, {"id":"dark","card":"CP05-071"}
     ]);
-    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"dark","card":"CP05-071"}]);
     initial["players"]["P1"]["zones"]["deck"] = json!([
         {"id":"drawn","card":"BP01-037"}, {"id":"tail","card":"BP01-037"}
     ]);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy_amulet","card":"BP13-087"}]);
     let mut game = Game::from_selected_effects(
         selection_with_rules().clone(),
         &initial,
@@ -88,6 +89,38 @@ fn cp05_071_requires_a_dark_discard_before_spending_its_source() {
         "cp05-dragon-discard",
     )
     .unwrap();
+    assert!(matches!(
+        game.play_internal_card("amulet", ACTOR).unwrap(),
+        CardPlay::Entered(_)
+    ));
+    let fanfare = game.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &fanfare.domain else {
+        panic!("printed fanfare must enter check timing");
+    };
+    let target = game
+        .answer_internal_card(
+            fanfare.actor,
+            fanfare.token,
+            Answer::Pending(options[0].handle),
+        )
+        .unwrap();
+    let CardPlay::Awaiting(target) = target else {
+        panic!("fanfare must ask for a formal target");
+    };
+    let InputDomain::Targets(domain) = &target.domain else {
+        panic!("fanfare targets enemy field cards");
+    };
+    assert_eq!(domain.members[0].card.as_deref(), Some("BP13-087"));
+    resolved(
+        game.answer_internal_card(
+            target.actor,
+            target.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        )
+        .unwrap(),
+    );
+    game.resume_internal_card().unwrap();
+
     let ability = activation_id("CP05-P55");
     assert!(matches!(
         game.activate_internal_card("amulet", ability, ACTOR),
@@ -99,6 +132,7 @@ fn cp05_071_requires_a_dark_discard_before_spending_its_source() {
             .unwrap(),
     );
     let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P2"]["cemetery"], json!(["enemy_amulet"]));
     assert_eq!(view["P1"]["cemetery"], json!(["dark", "amulet"]));
     assert_eq!(view["P1"]["hand"], json!(["drawn"]));
     assert_eq!(view["P1"]["deck"], json!(["tail"]));
