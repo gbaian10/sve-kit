@@ -303,6 +303,22 @@ records:
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=480
         claimed_source: 人名沿一代官方「十天眾統御者‧葛蘭與吉塔」與二代官方「邁向蒼空的騎空士‧葛蘭＆吉塔」；完整名稱為機器組合。
   - origin: machine
+    note: 稱號沿一代官方『十天衆を総べし者・グラン＆ジータ』「十天眾統御者」；人名連接符依二代官方「邁向蒼空的騎空士‧葛蘭＆吉塔」與 Versus 官方慣例改為＆；維護者 11-25 定案。
+    kind: glossary_choice
+    data:
+      term_id: term:name.gran_and_djeeta_eternal_heroes
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 十天眾統御者‧葛蘭＆吉塔
+      concept_evidence: []
+      source_claim:
+        source_work: "Shadowverse / Shadowverse: Worlds Beyond"
+        source_urls:
+          - https://shadowverse-portal.com/card/900041140?lang=zh-tw
+          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=480
+        claimed_source: 稱號沿一代官方『十天衆を総べし者・グラン＆ジータ』「十天眾統御者」；人名連接符依二代官方「邁向蒼空的騎空士‧葛蘭＆吉塔」與 Versus 官方慣例改為＆；維護者 11-25 定案。
+  - origin: machine
     note: sv1『蒼空の先導者・ラカム』官方風味
     kind: glossary_choice
     data:
@@ -484,7 +500,7 @@ records:
           - https://shadowverse-portal.com/card/900331070?lang=zh-tw
         claimed_source: sv1『ハクタク』官方風味
   - origin: machine
-    note: 聖德芬沿二代官方，與碧藍幻想 Relink 官方繁中一致；路西法照碧藍幻想 Relink、GBVSR 官方繁中（ルシフェル＝路西法，ルシファー＝路西弗）。一代官方『ルシフェル』同譯「路西法」但為 Shadowverse 自有角色；維護者 11-25 定案。
+    note: 聖德芬沿二代官方，與碧藍幻想 Relink 官方繁中一致；路西法照碧藍幻想 Relink、GBVSR 官方繁中（ルシフェル＝路西法，ルシファー＝路西弗；Relink 無盡黃昏官方角色頁日繁對照「星晶獣ルシフェル＝星晶獸路西法」）。一代官方『ルシフェル』同譯「路西法」但為 Shadowverse 自有角色；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.sandalphon_and_lucifer_fleeting_dream
@@ -496,10 +512,12 @@ records:
       source_claim:
         source_work: "Shadowverse: Worlds Beyond / Granblue Fantasy: Relink"
         source_urls:
-          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=720
           - https://asia.sega.com/relink.granbluefantasy/cht/characters/detail/?chara=sandalphon
           - https://forum.gamer.com.tw/Co.php?bsn=25204&sn=135105
-        claimed_source: 聖德芬沿二代官方，與碧藍幻想 Relink 官方繁中一致；路西法照碧藍幻想 Relink、GBVSR 官方繁中（ルシフェル＝路西法，ルシファー＝路西弗）。一代官方『ルシフェル』同譯「路西法」但為 Shadowverse 自有角色；維護者 11-25 定案。
+          - https://relink-ragnarok.granbluefantasy.com/cht/characters/lucilius/
+          - https://relink-ragnarok.granbluefantasy.com/ja/characters/lucilius/
+          - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=720
+        claimed_source: 聖德芬沿二代官方，與碧藍幻想 Relink 官方繁中一致；路西法照碧藍幻想 Relink、GBVSR 官方繁中（ルシフェル＝路西法，ルシファー＝路西弗；Relink 無盡黃昏官方角色頁日繁對照「星晶獣ルシフェル＝星晶獸路西法」）。一代官方『ルシフェル』同譯「路西法」但為 Shadowverse 自有角色；維護者 11-25 定案。
   - origin: machine
     note: 人名與「巫女」沿二代官方『砂神の巫女・サラ』（碧藍幻想合作卡）；稱號其餘部分為機器新譯。
     kind: glossary_choice
