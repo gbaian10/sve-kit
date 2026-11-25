@@ -1,0 +1,24 @@
+cards:
+  CP05-081:
+    abilities:
+      - evolve_time:
+          do:
+            - search:
+                n: 1
+                sel:
+                  kind: follower
+                  orig_cost_eq: 5
+                  trait: グラブル
+                  who: self
+                  zone: deck
+                to: hand
+        line: 1
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set

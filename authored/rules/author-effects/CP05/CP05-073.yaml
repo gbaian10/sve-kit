@@ -1,0 +1,49 @@
+cards:
+  CP05-073:
+    abilities:
+      - keywords:
+          - final_limit_break_possible
+        line: 1
+      - auto:
+          do:
+            - buff:
+                hp: -1
+                on: enemy
+                power: -1
+          on:
+            limit_broke:
+              ref: this
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 2
+      - auto:
+          do:
+            - buff:
+                hp: -2
+                on: enemy
+                power: -2
+          on:
+            final_limit_broke:
+              ref: this
+          targets:
+            - bind: enemy
+              from:
+                kind: follower
+                who: opp
+                zone: field
+              n: 1
+        line: 3
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set

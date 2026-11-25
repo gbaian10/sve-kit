@@ -1,0 +1,57 @@
+cards:
+  CP05-075:
+    abilities:
+      - auto:
+          do:
+            - damage:
+                n: 1
+                to:
+                  any_of:
+                    - leaders: opponents
+                    - kind: follower
+                      who: opp
+                      zone: field
+          on:
+            discarded:
+              from: hand
+              sel:
+                trait: 闇属性
+              who: self
+        line: 1
+      - evolve_time:
+          cost:
+            discard:
+              n: 2
+              sel:
+                who: self
+                zone: hand
+          do:
+            - draw:
+                n: 2
+        line: 2
+      - line: 3
+        super_evolve_time:
+          do:
+            - move:
+                ref: recover
+                to: hand
+            - discard:
+                n: 1
+                who: self
+          targets:
+            - bind: recover
+              distinct_by: name
+              from:
+                not_same_name_as_this: true
+                who: self
+                zone: cemetery
+              upto: 2
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            model: gpt-6.2-sol
+            who: Codex
+          date: "2026-11-25"
+format: 2
+kind: author_effect_set
