@@ -2,16 +2,20 @@ format: 3
 kind: translation_shard
 records:
   - origin: machine
-    low_confidence: true
-    note: 外來語招式名意譯。招式正式譯名待維護者確認，列入待確認清單。
+    note: 碧藍幻想闇屬性維拉的技能名，採社群譯名（灰機 wiki 簡中「钟情誓言」轉繁）；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.affection_oath
       lang: zh-Hant
       value:
         kind: authored
-        text: 愛慕誓約
+        text: 鍾情誓言
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/Char/3040043000
+        claimed_source: 碧藍幻想闇屬性維拉的技能名，採社群譯名（灰機 wiki 簡中「钟情誓言」轉繁）；維護者 11-25 定案。
   - origin: machine
     note: sv1『天象の風・ペトラ』官方風味
     kind: glossary_choice
@@ -28,21 +32,20 @@ records:
           - https://shadowverse-portal.com/card/109731020?lang=zh-tw
         claimed_source: sv1『天象の風・ペトラ』官方風味
   - origin: machine
-    low_confidence: true
-    note: 招式名新譯；比照一代官方「アルス・マグナ＝魔創鍊金」取鍊金字尾。日文用半形中黑，與 PR-623 全形版本為不同 exact 名稱，譯詞相同。招式正式譯名待維護者確認，列入待確認清單。
+    note: 碧藍幻想卡莉歐斯托蘿的技能名，採社群譯名（灰機 wiki 簡中「辉誉术」轉繁）。日文用半形中黑，與 PR-623 全形版本為不同 exact 名稱，譯詞相同；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.ars_gloria_halfwidth_dot
       lang: zh-Hant
       value:
         kind: authored
-        text: 榮光鍊金
+        text: 輝譽術
       concept_evidence: []
       source_claim:
-        source_work: Shadowverse
+        source_work: Granblue Fantasy
         source_urls:
-          - https://shadowverse-portal.com/card/900334030?lang=zh-tw
-        claimed_source: 招式名新譯；比照一代官方「アルス・マグナ＝魔創鍊金」取鍊金字尾。日文用半形中黑，與 PR-623 全形版本為不同 exact 名稱，譯詞相同。招式正式譯名待維護者確認，列入待確認清單。
+          - https://gbf.huijiwiki.com/wiki/Char/3040320000
+        claimed_source: 碧藍幻想卡莉歐斯托蘿的技能名，採社群譯名（灰機 wiki 簡中「辉誉术」轉繁）。日文用半形中黑，與 PR-623 全形版本為不同 exact 名稱，譯詞相同；維護者 11-25 定案。
   - origin: machine
     note: sv1『蒼の少女・ルリア』官方風味
     kind: glossary_choice
@@ -119,27 +122,35 @@ records:
           - https://shadowverse-portal.com/card/109321020?lang=zh-tw
         claimed_source: sv1『未完の錬金術師・クラリス』官方卡名與風味
   - origin: machine
-    low_confidence: true
-    note: 碧藍幻想素材名直譯，六種屬性元素維持同一句式；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.dark_crystal_element
       lang: zh-Hant
       value:
         kind: authored
-        text: 闇晶元素
+        text: 闇晶之元素
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/%E7%B4%A0%E6%9D%90%E8%AF%A6%E6%83%85
+        claimed_source: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
   - origin: machine
-    low_confidence: true
-    note: 碧藍幻想素材名直譯，六種屬性元素維持同一句式；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.earth_crystal_element
       lang: zh-Hant
       value:
         kind: authored
-        text: 土晶元素
+        text: 土晶之元素
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/%E7%B4%A0%E6%9D%90%E8%AF%A6%E6%83%85
+        claimed_source: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
   - origin: machine
     note: sv1『不滅の群青・ベアトリクス』官方風味
     kind: glossary_choice
@@ -171,16 +182,20 @@ records:
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=90
         claimed_source: svwb『魔杖の外科医・ティコ』官方風味
   - origin: machine
-    low_confidence: true
-    note: 德語 ewig Kamerad 意譯。招式正式譯名待維護者確認，列入待確認清單。
+    note: 碧藍幻想菲莉的技能名，採社群譯名（灰機 wiki 簡中「永恒牵绊」轉繁）；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.ewig_kamerad
       lang: zh-Hant
       value:
         kind: authored
-        text: 永恆戰友
+        text: 永恆牽絆
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/Char/3040073000
+        claimed_source: 碧藍幻想菲莉的技能名，採社群譯名（灰機 wiki 簡中「永恒牵绊」轉繁）；維護者 11-25 定案。
   - origin: machine
     note: 人名與「六龍之「翠」」沿二代官方『風の理・イーウィヤ』卡名及風味；名稱內『』照數位官方慣例改為「」。
     kind: glossary_choice
@@ -227,16 +242,20 @@ records:
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=510
         claimed_source: svwb『花開く筋肉・フィオリト』官方風味「小蘿薩」；一代『解放の少女・ローザ』的蘿夏是不同角色
   - origin: machine
-    low_confidence: true
-    note: 碧藍幻想素材名直譯，六種屬性元素維持同一句式；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.fire_crystal_element
       lang: zh-Hant
       value:
         kind: authored
-        text: 火晶元素
+        text: 火晶之元素
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/%E7%B4%A0%E6%9D%90%E8%AF%A6%E6%83%85
+        claimed_source: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
   - origin: machine
     note: 人名與「六龍之「金」」沿二代官方『土の理・ガレヲン』卡名及風味；名稱內『』照數位官方慣例改為「」。
     kind: glossary_choice
@@ -299,8 +318,7 @@ records:
           - https://shadowverse-portal.com/card/109011010?lang=zh-tw
         claimed_source: sv1『蒼空の先導者・ラカム』官方風味
   - origin: machine
-    low_confidence: true
-    note: 日本傳說金屬名的常見漢字寫法；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想台灣與簡中社群通用譯名（巴哈姆特 GBF 板、灰機 wiki）；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.hihiirokane
@@ -309,6 +327,12 @@ records:
         kind: authored
         text: 緋緋色金
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://forum.gamer.com.tw/Co.php?bsn=25204&sn=32165
+          - https://gbf.huijiwiki.com/wiki/%E7%BB%AF%E7%BB%AF%E8%89%B2%E9%87%91
+        claimed_source: 碧藍幻想台灣與簡中社群通用譯名（巴哈姆特 GBF 板、灰機 wiki）；維護者 11-25 定案。
   - origin: machine
     note: sv1『古今独歩の大拳豪・ガンダゴウザ』官方風味
     kind: glossary_choice
@@ -340,16 +364,20 @@ records:
           - https://shadowverse-portal.com/card/900231040?lang=zh-tw
         claimed_source: sv1『不撓不屈の騎士・ヴェイン』官方風味
   - origin: machine
-    low_confidence: true
-    note: 碧藍幻想素材名直譯，六種屬性元素維持同一句式；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.light_crystal_element
       lang: zh-Hant
       value:
         kind: authored
-        text: 光晶元素
+        text: 光晶之元素
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/%E7%B4%A0%E6%9D%90%E8%AF%A6%E6%83%85
+        claimed_source: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
   - origin: machine
     note: 人名與「六龍之「白」」沿二代官方『光の理・ル・オー』卡名及風味；名稱內『』照數位官方慣例改為「」。
     kind: glossary_choice
@@ -396,16 +424,20 @@ records:
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=510
         claimed_source: svwb『カワイイ花マル・マナマル』官方風味
   - origin: machine
-    low_confidence: true
-    note: 外來語招式名意譯。招式正式譯名待維護者確認，列入待確認清單。
+    note: 碧藍幻想佐伊的技能名，採社群譯名（灰機 wiki 簡中「唯一期愿」轉繁）；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.only_one_wish
       lang: zh-Hant
       value:
         kind: authored
-        text: 唯一心願
+        text: 唯一期願
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/Char/3040150000
+        claimed_source: 碧藍幻想佐伊的技能名，採社群譯名（灰機 wiki 簡中「唯一期愿」轉繁）；維護者 11-25 定案。
   - origin: machine
     note: sv1『妄想少女A・ルナール』官方風味
     kind: glossary_choice
@@ -452,8 +484,7 @@ records:
           - https://shadowverse-portal.com/card/900331070?lang=zh-tw
         claimed_source: sv1『ハクタク』官方風味
   - origin: machine
-    low_confidence: true
-    note: 聖德芬沿二代官方；路西法取 Lucifer 的通行譯法。一代官方『ルシフェル』同譯「路西法」，但那是 Shadowverse 自有角色，與碧藍幻想的路西法不同人，網址只作同名異角的比較；列入待確認。
+    note: 聖德芬沿二代官方，與碧藍幻想 Relink 官方繁中一致；路西法照碧藍幻想 Relink、GBVSR 官方繁中（ルシフェル＝路西法，ルシファー＝路西弗）。一代官方『ルシフェル』同譯「路西法」但為 Shadowverse 自有角色；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.sandalphon_and_lucifer_fleeting_dream
@@ -463,11 +494,12 @@ records:
         text: 幻想的片刻‧聖德芬＆路西法
       concept_evidence: []
       source_claim:
-        source_work: "Shadowverse / Shadowverse: Worlds Beyond"
+        source_work: "Shadowverse: Worlds Beyond / Granblue Fantasy: Relink"
         source_urls:
-          - https://shadowverse-portal.com/card/101041020?lang=zh-tw
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=720
-        claimed_source: 聖德芬沿二代官方；路西法取 Lucifer 的通行譯法。一代官方『ルシフェル』同譯「路西法」，但那是 Shadowverse 自有角色，與碧藍幻想的路西法不同人，網址只作同名異角的比較；列入待確認。
+          - https://asia.sega.com/relink.granbluefantasy/cht/characters/detail/?chara=sandalphon
+          - https://forum.gamer.com.tw/Co.php?bsn=25204&sn=135105
+        claimed_source: 聖德芬沿二代官方，與碧藍幻想 Relink 官方繁中一致；路西法照碧藍幻想 Relink、GBVSR 官方繁中（ルシフェル＝路西法，ルシファー＝路西弗）。一代官方『ルシフェル』同譯「路西法」但為 Shadowverse 自有角色；維護者 11-25 定案。
   - origin: machine
     note: 人名與「巫女」沿二代官方『砂神の巫女・サラ』（碧藍幻想合作卡）；稱號其餘部分為機器新譯。
     kind: glossary_choice
@@ -559,8 +591,7 @@ records:
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=900
         claimed_source: svwb『純朴の鋼体・ムゲン』官方風味
   - origin: machine
-    low_confidence: true
-    note: 碧藍幻想用語「召喚石」照漢字沿用；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想用語，台灣與簡中社群通用「召喚石」，照漢字沿用；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.summon_stone_fragment
@@ -569,6 +600,11 @@ records:
         kind: authored
         text: 召喚石
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://forum.gamer.com.tw/Co.php?bsn=25204&sn=32165
+        claimed_source: 碧藍幻想用語，台灣與簡中社群通用「召喚石」，照漢字沿用；維護者 11-25 定案。
   - origin: machine
     note: 人名沿一代官方「艾席兒」「卡托魯」；連接符照二代官方雙人卡保留＆；稱號為機器新譯。
     kind: glossary_choice
@@ -633,16 +669,20 @@ records:
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=390
         claimed_source: 人名與「六龍之「碧」」沿二代官方『水の理・ワムデュス』卡名及風味；名稱內『』照數位官方慣例改為「」。
   - origin: machine
-    low_confidence: true
-    note: 碧藍幻想素材名直譯，六種屬性元素維持同一句式；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.water_crystal_element
       lang: zh-Hant
       value:
         kind: authored
-        text: 水晶元素
+        text: 水晶之元素
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/%E7%B4%A0%E6%9D%90%E8%AF%A6%E6%83%85
+        claimed_source: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
   - origin: machine
     note: 人名與「六龍之「朱」」沿二代官方『炎の理・ウィルナス』卡名及風味；名稱內『』照數位官方慣例改為「」。
     kind: glossary_choice
@@ -659,16 +699,20 @@ records:
           - https://shadowverse-wb.com/web/CardList/cardList?include_token=1&lang=cht&offset=840
         claimed_source: 人名與「六龍之「朱」」沿二代官方『炎の理・ウィルナス』卡名及風味；名稱內『』照數位官方慣例改為「」。
   - origin: machine
-    low_confidence: true
-    note: 碧藍幻想素材名直譯，六種屬性元素維持同一句式；數位版查無官方繁中，列入待確認。
+    note: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
     kind: glossary_choice
     data:
       term_id: term:name.wind_crystal_element
       lang: zh-Hant
       value:
         kind: authored
-        text: 風晶元素
+        text: 風晶之元素
       concept_evidence: []
+      source_claim:
+        source_work: Granblue Fantasy
+        source_urls:
+          - https://gbf.huijiwiki.com/wiki/%E7%B4%A0%E6%9D%90%E8%AF%A6%E6%83%85
+        claimed_source: 碧藍幻想社群譯名（灰機 wiki 簡中「火晶之元素」等素材名轉繁；屬性字沿本專案「闇」）；六種屬性元素維持同一句式；維護者 11-25 定案。
   - origin: machine
     note: sv1『天象の風・ペトラ』官方風味
     kind: glossary_choice

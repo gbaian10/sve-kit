@@ -33,14 +33,14 @@ entries:
     field: answer
     source_hash: sha256:59f5c42c661c376c62f59dd811d02c4938775c31a8fe59a370b6dbb2c2da30a2
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『光晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『光晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:1265dc87f415afae0e8a0aad5eb0873a4c31d4fabd90c900eca997dbf7ef964c
     field: question
     source_hash: sha256:c5d619a9fb07468a05dbc122f31f6628e08c91eef00ecf5609fb35661b49ce11
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『光晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『光晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:1a9f5f9e090e0549669ea8a49a28ccbb9931619bf368b0e1aca1aaf9bc49ebff
@@ -173,14 +173,14 @@ entries:
     field: answer
     source_hash: sha256:c050516cb4cfa203432b0e7a1342b228c6611b3698f31d2dbe523f600beec2fe
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法將1張『火晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法將1張『火晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:33b18bf102224063ee49fda455d4cebec65d93c04cf763253525f419b7995110
     field: question
     source_hash: sha256:4460406e0b11f1c3e8349a9a21252d0887240301acd3b9238a591d60ec80669b
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，將1張『火晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，將1張『火晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:397c99914c3bf5693948f4f8569742c22fb99db9db124f9b9b34c9fbc8251960
@@ -320,7 +320,7 @@ entries:
     field: question
     source_hash: sha256:73632ea78a5f6cd3e77e97fa3f6882326f03635b732a4aa1eb46bab4ac380049
     lang: zh-Hant
-    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『沉睡的獅子‧莫德雷德』上限解放時，會滿足「若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶之元素』使『沉睡的獅子‧莫德雷德』上限解放時，會滿足「若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:58c686ca20df1143f0fa2f154706404a7409d7db97d47977043a71a0b61f57c1
@@ -348,7 +348,7 @@ entries:
     field: question
     source_hash: sha256:0fc83ca7e9a907cc3020f81aeaeef85476d2a07da099365712628e9f71d12ebf
     lang: zh-Hant
-    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『沉睡的輝龍‧亞瑟』上限解放時，會滿足「這個能力在本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上時，」的條件嗎？"
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶之元素』使『沉睡的輝龍‧亞瑟』上限解放時，會滿足「這個能力在本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上時，」的條件嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:653139e6fb65b5c0ef30575fce61c026fadb52c63bc86322a99261954dfce844
@@ -502,7 +502,7 @@ entries:
     field: question
     source_hash: sha256:95cecb17f269e7a998c04fede111232ebafa8357d004e8697b713a6d29df42f1
     lang: zh-Hant
-    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『天賦的射手‧梅提拉』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶之元素』使『天賦的射手‧梅提拉』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:956134d702506b65d5f20bb672091c4c4bbaea209c4004c5c2bdba65a65bc535
@@ -537,14 +537,14 @@ entries:
     field: answer
     source_hash: sha256:cd85f84880143e8212af7d994c3ac11e68bfbb711781e410424ae00ffcb364f0
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『火晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『火晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:9e9841b8f4227e26f8528900bf347c80d0b300c98a9e0c8381b6e9c5244648fb
     field: question
     source_hash: sha256:385071772cda5060adc65030306849d8034a0212766bb1e0b352e83edb162aba
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『火晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『火晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:a146f1888e3b7b7d5d49b6f77e568049582754fcd0d264a66506223eea1033b9
@@ -579,28 +579,28 @@ entries:
     field: answer
     source_hash: sha256:34040ab2df4f4579643f6387a1edd9416157c836c8bf18d9edf92002187f2b67
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『帚星』，也無法將1張『風晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『帚星』，也無法將1張『風晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:a1d0714cf3be0da20224b18a371b2b974b91f4f8a135f8e351959237adb93dee
     field: question
     source_hash: sha256:ec54dbd60081f35e80c33f2fa8b8ab7eb680b78d1389942e8b07a259a54aa183
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用『帚星』，將1張『風晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用『帚星』，將1張『風晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:a6180728726e546a601f4c62ede8f49b5510f6ccb9b2cc32afd63690cdf8df25
     field: answer
     source_hash: sha256:bdc35505476401885f6e2c2eae4cd78b659cc6ad5d0dfa84f8c41f1fbdcaa210
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『鍊金爆炎』，也無法將1張『火晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『鍊金爆炎』，也無法將1張『火晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:a6180728726e546a601f4c62ede8f49b5510f6ccb9b2cc32afd63690cdf8df25
     field: question
     source_hash: sha256:333c2e4bf54380c90e77ea4bbc52780d00c32c60e65fd99bf1dbaf051c504ef5
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用『鍊金爆炎』，將1張『火晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用『鍊金爆炎』，將1張『火晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:a64d9432f1cdbf1bf973322af28759c2520d3709676a8d08ad6dec2da49823de
@@ -705,14 +705,14 @@ entries:
     field: answer
     source_hash: sha256:de19128c905327fefdbe18f5f244cd74f70834eb3f1b41a13312f53501c1da6e
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『愛慕誓約』，也無法將1張『光晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用『鍾情誓言』，也無法將1張『光晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:c4100adbd5d867c7012a059d0180e4e5458aa84186cc984fe2309592360a88d1
     field: question
     source_hash: sha256:42e8b3722cc564a0f255ba38d367d691f0d444d0a11a371e5115d5849e50cd18
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用『愛慕誓約』，將1張『光晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用『鍾情誓言』，將1張『光晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:c60f2354a08a76a5a101d8600c89a96d3851099ee5302647af98e8c78d140946
@@ -726,21 +726,21 @@ entries:
     field: question
     source_hash: sha256:5ddb373b3b272a646bc72d9d9c70909a4b0644527ed4eb706192351383b71e72
     lang: zh-Hant
-    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『武魂夢想家‧味琳』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶之元素』使『武魂夢想家‧味琳』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:c84d590b8d1b443ed1cf58645b4083841c3b5705d20cb5eb9c4d82c9240a411a
     field: answer
     source_hash: sha256:acc713d74b04ea0093f711d97bd0ead300da49ce6dbf0daa5275f80a9b7beee9
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『風晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『風晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:c84d590b8d1b443ed1cf58645b4083841c3b5705d20cb5eb9c4d82c9240a411a
     field: question
     source_hash: sha256:0aa920a44d001f9371d63d87098527ce5647db6ef866c1cd317c94272c88cf34
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『風晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『風晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:d69e945d2d80483ab77c0ad6e40c5202eb42378880b26e70a869f56d1e944a80
@@ -782,7 +782,7 @@ entries:
     field: question
     source_hash: sha256:93cfbe8f9d28c4a0ec9b80f170c36b165df0cf7a0c8931efee8391bdc135470b
     lang: zh-Hant
-    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『絢麗的紡織者‧歌露瓦』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶之元素』使『絢麗的紡織者‧歌露瓦』上限解放。自己的結束階段到來時，會滿足「自己的結束階段到來時，若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:e2ead49359d37b26aaa5991afbceac82f8a9023e7b3913761e74a75297a57e5b
@@ -810,7 +810,7 @@ entries:
     field: question
     source_hash: sha256:3fe10ba74a068bf96a812629e4006293d58f63f8cc3f7f315df7f4785afd5621
     lang: zh-Hant
-    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶元素』使『沉睡的輝龍‧亞瑟』上限解放時，會滿足「若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
+    text: "本回合已用『緋緋色金』使『蒼藍少女‧露莉亞』最終上限解放，並用『風晶之元素』使『沉睡的輝龍‧亞瑟』上限解放時，會滿足「若本回合自己戰場上的從者曾上限解放或最終上限解放合計3次以上，」的條件嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:e92026923d44fdc37a6dc7cf5dbf32d25d967d26f198026fd208ff911613f377
@@ -845,14 +845,14 @@ entries:
     field: answer
     source_hash: sha256:b47460a93a962d0876db6687b4681b1f97123e3904fccab59cc9b6c08cc76e0c
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『土晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的{入場曲}能力，也無法將1張『土晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:ead0f0f4fa9dc8d9efdb48d784a5b412a99e1d7be6219703ac1b7f869cf684ee
     field: question
     source_hash: sha256:37d7ed9a3e9ee3de40ddcb2ba70fdc824c5060d0140a926ec1d28860a1c35446
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『土晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的{入場曲}能力，將1張『土晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:f05c81e32d0e5af5a773458d53dbc89193653dea891f3b7508ca59ea413ed0a7
@@ -915,14 +915,14 @@ entries:
     field: answer
     source_hash: sha256:92c86cce7f83238fd77643dd3458446ce13c5185fbf12c9f1bb104704e336df2
     lang: zh-Hant
-    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法將1張『土晶元素』放置到EX區。"
+    text: "不行。若無法選擇敵方戰場上的從者，就無法使用這個從者的【進化時】能力，也無法將1張『土晶之元素』放置到EX區。"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:fd6af0246a68e136eb567f08bc39ef0fbec28f7a0c8652f3db9f231aeef6cdc9
     field: question
     source_hash: sha256:aca0abb5fdaf92160224b9dce28db8f9b03155339860442748a9d173541bf5d5
     lang: zh-Hant
-    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，將1張『土晶元素』放置到EX區嗎？"
+    text: "若無法選擇敵方戰場上的從者，可以使用這個從者的【進化時】能力，將1張『土晶之元素』放置到EX區嗎？"
     origin: machine
     low_confidence: true
   - qa_id: qa:v1:fe24b0f52e1a546630293bc2dcf3a7fe8f81ed1bacd00a6fc6c100ca7a9ce2eb
