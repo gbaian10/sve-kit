@@ -25,6 +25,8 @@ mod board_relationships;
 mod by_kind;
 #[path = "card/condition_inputs.rs"]
 mod condition_inputs;
+#[path = "../support/current_fixture.rs"]
+mod current_fixture;
 #[path = "card/deck_edges.rs"]
 mod deck_edges;
 #[path = "card/dice.rs"]

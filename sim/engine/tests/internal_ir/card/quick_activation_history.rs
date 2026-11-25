@@ -5,9 +5,6 @@
 
 use super::*;
 
-#[path = "../../support/current_fixture.rs"]
-mod current_fixture;
-
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};
 
 fn sequence_game() -> Game {

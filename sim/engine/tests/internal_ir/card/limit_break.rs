@@ -5,8 +5,6 @@
 
 use super::*;
 
-#[path = "../../support/current_fixture.rs"]
-mod current_fixture;
 use sve_engine::catalog::SelectedEffects;
 use sve_engine::game::internal::{InputDomain, InstructionOutcome};
 use sve_engine::game::player::Viewer;
