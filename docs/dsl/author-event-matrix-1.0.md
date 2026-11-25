@@ -80,7 +80,7 @@ any_of 是非空事件列表組合，可含 counter_reached，但不含 state／
 | super_evolved | 無 | sel:SubjectFilter、who:PlayerRef | 無 | ref:Ref、by:By |
 | phase | where | — | which:Phase、whose:PlayerRef | — |
 | played | 無 | from:Zone、who:PlayerRef、sel:SubjectFilter | 無 | during:During |
-| ability_played | 無 | who:PlayerRef | 無 | holder:(Ref 或 EventObjectSel) |
+| ability_played | 無 | who:PlayerRef | 無 | holder:(Ref 或 EventObjectSel)、kind:quick_activation |
 | life_changed | 無 | who:PlayerRef | 無 | direction:up/down、during:During、by:By、crosses_zero:true |
 | stat_changed | 無 | — | 無 | ref:Ref、stat:(power/hp 或 非空 [power/hp])、direction:up/down |
 | counter_changed | 無 | — | 無 | ref:Ref、name:CounterName、after:A.nat-threshold、direction:up/down |

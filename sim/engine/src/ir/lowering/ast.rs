@@ -2384,7 +2384,7 @@ pub(super) struct HistoryQuery {
     pub from: Option<HistoryOrigin>,
     pub to: Option<DepartureDestination>,
     pub at_least: Option<u64>,
-    pub r#where: Option<LifeHistoryFilter>,
+    pub r#where: Option<HistoryWhere>,
     pub exclude: Option<HistoryExclusion>,
 }
 #[derive(Deserialize)]
@@ -2405,6 +2405,19 @@ pub(super) struct HistoryTraitUnion {
 #[serde(rename_all = "snake_case")]
 pub(super) enum HistoryExclusion {
     ThisExecution,
+}
+
+#[derive(Deserialize)]
+#[serde(untagged, deny_unknown_fields)]
+pub(super) enum HistoryWhere {
+    Life(LifeHistoryFilter),
+    AbilityPlayed { kind: AbilityHistoryKind },
+}
+
+#[derive(Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub(super) enum AbilityHistoryKind {
+    QuickActivation,
 }
 
 #[derive(Deserialize)]
@@ -2481,6 +2494,7 @@ pub(super) enum LifeHistoryField {
 #[derive(Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum HistoryEvent {
+    AbilityPlayed,
     Banished,
     LifeChanged,
     Played,

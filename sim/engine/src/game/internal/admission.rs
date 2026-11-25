@@ -1324,6 +1324,8 @@ fn supported(code: &str) -> bool {
             | "history.sum.earth-rite-stack"
             | "event.payment.earth-rite"
             | "shape.EventPattern.Play"
+            | "shape.EventPattern.QuickActivation"
+            | "event.match.QuickActivation"
             | "event.match.Play"
             | "shape.HistoryRange.CurrentTurn"
             | "shape.HistoryCutoff.CurrentPoint"

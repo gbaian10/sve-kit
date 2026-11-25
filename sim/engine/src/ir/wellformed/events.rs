@@ -638,6 +638,7 @@ impl Checker {
             | EventPattern::Fused { .. }
             | EventPattern::Dice { .. }
             | EventPattern::DriveChecked { .. }
+            | EventPattern::QuickActivation {}
             | EventPattern::AnyOf { .. } => None,
         }
     }
@@ -826,6 +827,7 @@ impl Checker {
             | EventPattern::Posture { .. }
             | EventPattern::UbActivated { .. }
             | EventPattern::LimitBreak { .. }
+            | EventPattern::QuickActivation {}
             | EventPattern::Equip { .. } => self.reject(),
         }
     }
@@ -876,6 +878,9 @@ impl Checker {
 
     pub(super) fn history(&mut self, query: &HistoryQuery) -> Checked {
         let compiled = HistoryPlan::compile(query);
+        if matches!(compiled, Some(HistoryPlan::QuickActivation { .. })) {
+            return Ok(());
+        }
         if let EventPattern::StatChange { binding, .. } = &query.pattern {
             let Some(HistoryPlan::StatGain(plan)) = &compiled else {
                 return self.reject();

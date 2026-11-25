@@ -141,6 +141,7 @@ impl PlayMode {
 pub(in crate::game::internal) struct PlayState {
     cost_policy: AbilityCostPolicy,
     qualification: AbilityQualification,
+    quick_activation: bool,
     pub(in crate::game::internal) resource_entry: Option<super::resource_entry::ResourceEntryState>,
     snapshot: Option<Arc<Game>>,
     pub(in crate::game::internal) snapshot_id: SnapshotId,
@@ -1414,6 +1415,7 @@ impl Game {
         self.internal_require_ability_permission(&execution.context.source, &ability)?;
         let conditional = conditional_play_modes(&ability);
         let resource_entry = super::resource_entry::payment(&ability)?;
+        let quick_activation = ability.kind == AbilityKind::Activated && is_printed_quick(&ability);
         let mut body = ability.body.ok_or_else(|| invalid("missing body"))?;
         let optional = super::optional::take(&mut body);
         let groups = collect_modes(&body, conditional)?;
@@ -1444,6 +1446,7 @@ impl Game {
         execution.play = Some(PlayState {
             cost_policy,
             qualification: ability.qualification,
+            quick_activation,
             additional,
             resource_entry,
             snapshot: None,
@@ -1861,6 +1864,9 @@ impl Game {
             }
         };
         execution.record_fact(self, played);
+        if play.quick_activation {
+            self.internal_record_quick_activation(execution.id, controller);
+        }
         self.player_play_prefix(execution.began);
         if !execution.spell && play.qualification == AbilityQualification::UnionBurst {
             self.internal_commit_union_burst(execution.id, controller)?;
@@ -2411,6 +2417,7 @@ impl Game {
         execution.play = Some(PlayState {
             cost_policy: AbilityCostPolicy::Normal,
             qualification: AbilityQualification::Ordinary,
+            quick_activation: false,
             additional,
             resource_entry: None,
             snapshot: None,

@@ -70,7 +70,9 @@ fn life_history(
     event: Binding<LifeChangeEvent>,
     path: &str,
 ) -> Result<super::super::HistoryQuery, LoweringError> {
-    let filter = history.r#where.as_ref().ok_or_else(|| unsupported(path))?;
+    let Some(ast::HistoryWhere::Life(filter)) = &history.r#where else {
+        return Err(unsupported(path));
+    };
     let up = matches!(filter.direction, ast::LifeDirection::Up);
     if history.who.is_none() || (up && !matches!(history.who, Some(ast::LeaderSide::Controller))) {
         return Err(unsupported(path));
@@ -86,6 +88,37 @@ fn life_history(
             up: Some(up),
             own_turn: None,
         },
+    ))
+}
+
+fn history_player(own: bool) -> PlayerRef {
+    if own {
+        PlayerRef::Controller {}
+    } else {
+        super::super::events::timing::opponent()
+    }
+}
+
+fn quick_activation_history(
+    history: &ast::HistoryQuery,
+    path: &str,
+) -> Result<super::super::HistoryQuery, LoweringError> {
+    if !matches!(history.who, Some(ast::LeaderSide::Controller))
+        || !matches!(
+            &history.r#where,
+            Some(ast::HistoryWhere::AbilityPlayed {
+                kind: ast::AbilityHistoryKind::QuickActivation,
+            })
+        )
+        || history.sel.is_some()
+        || history.from.is_some()
+        || history.to.is_some()
+        || matches!(history.distinct, Some(ast::HistoryDistinct::Subjects))
+    {
+        return Err(unsupported(path));
+    }
+    Ok(super::super::history_turn::quick_activation_query(
+        history.exclude.is_some(),
     ))
 }
 
@@ -772,13 +805,7 @@ impl BodyContext<'_> {
             .who
             .as_ref()
             .map(|side| matches!(side, ast::LeaderSide::Controller));
-        let player = own.map(|own| {
-            if own {
-                PlayerRef::Controller {}
-            } else {
-                super::super::events::timing::opponent()
-            }
-        });
+        let player = own.map(history_player);
         let Some(subject) = &history.sel else {
             return Ok(super::super::history_turn::played_query(
                 Binding::new(id, self.scope),
@@ -818,6 +845,9 @@ impl BodyContext<'_> {
         path: &str,
     ) -> Result<super::super::HistoryQuery, LoweringError> {
         use super::super::history_turn::{SubjectHistoryKind, subject_query};
+        if matches!(history.event, ast::HistoryEvent::AbilityPlayed) {
+            return quick_activation_history(history, path);
+        }
         let id = self.allocator.id(path)?;
         if matches!(history.event, ast::HistoryEvent::Discarded) {
             return discarded_history(history, Binding::new(id, self.scope), path);
@@ -836,13 +866,7 @@ impl BodyContext<'_> {
         {
             return Err(unsupported(path));
         }
-        let player = own.map(|own| {
-            if own {
-                PlayerRef::Controller {}
-            } else {
-                super::super::events::timing::opponent()
-            }
-        });
+        let player = own.map(history_player);
         if history.exclude.is_some() && !matches!(history.event, ast::HistoryEvent::UbActivated) {
             return Err(unsupported(path));
         }
@@ -905,7 +929,8 @@ impl BodyContext<'_> {
             | ast::HistoryEvent::Played
             | ast::HistoryEvent::Discarded
             | ast::HistoryEvent::UbActivated
-            | ast::HistoryEvent::LifeChanged => {
+            | ast::HistoryEvent::LifeChanged
+            | ast::HistoryEvent::AbilityPlayed => {
                 return Err(unsupported(path));
             }
         };

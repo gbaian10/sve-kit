@@ -190,6 +190,7 @@ phase.where.which/whose 必填，which 只收 Phase；on 的 phase 參數權限�
 每個變體有 `A.history.<事件>`、`-condition`，有 where 時另有 `-where` 定義。
 
 dice_rolled.where 額外收 `value:{eq/le/ge:1..6}` 恰一（BP21-081、PR-573）。
+ability_played.where 在歷史額外收 `kind: quick_activation`，只計成功付款的印刷 Quick 起動能力，不含 Quick 法術（CP05-002）。
 payment 只在歷史：who 選填，where 必填且恰為 `{cost_kind:earth_rite}`，不收 phase。
 state、any_of、counter_reached 不作 history.event。歷史保存事件當時特徵，不查目前卡片。
 

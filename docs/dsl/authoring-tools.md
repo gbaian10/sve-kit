@@ -1326,6 +1326,13 @@ on:
 
 `apply.effect.lose_abilities` 與攻擊禁令可用 `until: this_and_next_opp_turn`，分別在本回合及下一個對手回合生效。兩者套用於所選從者當下的物件世代，離場再入場會重新取得印刷能力。
 
+## 本回合 Quick 起動紀錄
+
+`usable_if.history` 使用 `event: ability_played`、`window: this_turn`、`who: self`
+及 `where: {kind: quick_activation}`，檢查自己在本回合是否已成功打出 Quick 起動能力。
+`exclude: this_execution` 排除目前這次打出。`at_least` 省略時為 1。
+引擎在完成正式付款後記錄，每回合開始重置。Quick 法術的打出沿用卡片紀錄。
+
 ## Drive 事件觀察
 
 場上印刷自動能力可訂閱 `drive_checked: {holder: {who: self, zone: field, kind: follower}}`，

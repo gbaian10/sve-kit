@@ -1885,6 +1885,7 @@ class EventAbilityPlayed(RecordData):
 
 @with_config(NONEMPTY_CONFIG)
 class AbilityPlayedHistoryWhereFields(TypedDict):
+    kind: NotRequired[Literal["quick_activation"]]
     holder: NotRequired[Ref | EventObjectSel]
 
 

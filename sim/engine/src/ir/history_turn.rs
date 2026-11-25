@@ -13,6 +13,9 @@ use super::{
 pub(crate) enum HistoryPlan<'query> {
     Dice(super::dice::History),
     Discarded(Option<TraitId>),
+    QuickActivation {
+        exclude_current: bool,
+    },
     Life(super::events::life::LifeFilter),
     Ub {
         player: Option<PlayerRef>,
@@ -35,7 +38,10 @@ impl<'query> HistoryPlan<'query> {
     pub(crate) const fn cost_facts(&self) -> bool {
         matches!(
             self,
-            Self::Discarded(_) | Self::Played(_) | Self::PlayedFiltered { .. }
+            Self::Discarded(_)
+                | Self::QuickActivation { .. }
+                | Self::Played(_)
+                | Self::PlayedFiltered { .. }
         ) || matches!(self, Self::Subject {
                 event: SubjectHistoryKind::Attack
                     | SubjectHistoryKind::Evolve
@@ -56,6 +62,14 @@ impl<'query> HistoryPlan<'query> {
             EventPattern::Dice { .. } => super::dice::history(query).map(Self::Dice),
             EventPattern::Discard { .. } => discarded_plan(query),
             EventPattern::LifeChange { .. } => life_plan(query).map(Self::Life),
+            EventPattern::QuickActivation {} => {
+                let exclude_current = matches!(
+                    query.include_execution,
+                    InclusionPolicy::ExcludeCurrentExecution { .. }
+                );
+                (*query == quick_activation_query(exclude_current))
+                    .then_some(Self::QuickActivation { exclude_current })
+            }
             EventPattern::UbActivated { .. } => {
                 ub_plan(query).map(|(player, exclude_current)| Self::Ub {
                     player,
@@ -112,6 +126,24 @@ pub(crate) const fn earth_rite_stack_query(
             relative_player: Some(PlayerRef::Controller {}),
         },
         include_execution: InclusionPolicy::IncludeAll {},
+    }
+}
+
+pub(crate) const fn quick_activation_query(exclude_current: bool) -> HistoryQuery {
+    HistoryQuery {
+        pattern: EventPattern::QuickActivation {},
+        window: HistoryWindow {
+            range: HistoryRange::CurrentTurn {},
+            cutoff: HistoryCutoff::CurrentPoint {},
+            relative_player: Some(PlayerRef::Controller {}),
+        },
+        include_execution: if exclude_current {
+            InclusionPolicy::ExcludeCurrentExecution {
+                execution: ExecutionRef::Current {},
+            }
+        } else {
+            InclusionPolicy::IncludeAll {}
+        },
     }
 }
 

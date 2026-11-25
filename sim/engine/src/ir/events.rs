@@ -132,6 +132,7 @@ variants!(EventPattern {
     UbActivated { binding: Binding<UbActivatedEvent>, predicate: Expr<Bool> } => ["event.match.UbActivated"],
     Fused { binding: Binding<FusedEvent>, predicate: Expr<Bool> } => ["event.match.Fused"],
     LimitBreak { final_break: Bool } => ["event.match.LimitBreak"],
+    QuickActivation {} => ["event.match.QuickActivation"],
     Equip { binding: Binding<EquipEvent>, predicate: Expr<Bool> } => ["event.match.Equip"],
     Dice { binding: Binding<DiceEvent>, predicate: Expr<Bool> } => ["event.match.Dice"],
     DriveChecked { binding: Binding<DriveCheckedEvent>, predicate: Expr<Bool> } => ["event.match.DriveChecked"],

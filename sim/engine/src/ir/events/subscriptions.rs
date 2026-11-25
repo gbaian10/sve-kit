@@ -33,6 +33,7 @@ pub(crate) const fn view(pattern: &EventPattern) -> EventSnapshotPolicy {
         | EventPattern::DriveTrigger { .. }
         | EventPattern::Equip { .. }
         | EventPattern::LimitBreak { .. }
+        | EventPattern::QuickActivation {}
         | EventPattern::Dice { .. }
         | EventPattern::DriveChecked { .. } => EventSnapshotPolicy::AfterEntry,
     }

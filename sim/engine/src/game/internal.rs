@@ -85,10 +85,10 @@ mod grant;
 mod history_turn;
 mod limit_break;
 mod transfer;
-pub(in crate::game) use history_turn::{DamageHistoryFact, DiceHistoryFact};
 pub(super) use history_turn::{
-    StatGainHistoryFact, SubjectHistoryEvent, SubjectHistoryFact, UbHistoryFact,
+    AbilityPlayHistoryFact, StatGainHistoryFact, SubjectHistoryEvent, SubjectHistoryFact,
 };
+pub(in crate::game) use history_turn::{DamageHistoryFact, DiceHistoryFact};
 mod fact_log;
 mod field_entry;
 pub(in crate::game) use field_entry::FieldEntry;

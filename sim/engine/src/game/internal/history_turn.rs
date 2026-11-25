@@ -239,6 +239,7 @@ pub(super) fn exists(execution: &Execution, game: &Game, plan: &HistoryPlan<'_>)
         }
         HistoryPlan::Dice(_)
         | HistoryPlan::Discarded(_)
+        | HistoryPlan::QuickActivation { .. }
         | HistoryPlan::Life(_)
         | HistoryPlan::Ub { .. }
         | HistoryPlan::Played(_)
@@ -373,7 +374,7 @@ pub(super) fn filtered_played_at(
 
 /// Only committed IR executions can exclude their own fact from the shared counter.
 #[derive(Clone, Debug, Serialize, Deserialize)]
-pub(in crate::game) struct UbHistoryFact {
+pub(in crate::game) struct AbilityPlayHistoryFact {
     pub(in crate::game::internal) execution: u64,
     pub(in crate::game::internal) controller: u32,
 }
@@ -434,6 +435,27 @@ fn ub_count(
             .ok_or_else(|| invalid("UB counter omits its committed execution"))?;
     }
     Ok(Nat(total))
+}
+
+fn quick_activation_count(
+    execution: &Execution,
+    game: &Game,
+    exclude_current: bool,
+    count: HistoryCount,
+) -> Result<Nat> {
+    if count != HistoryCount::Facts {
+        return Err(unsupported("Quick activation history subject count"));
+    }
+    let total = game
+        .state
+        .ir_quick_activation_history
+        .iter()
+        .filter(|fact| {
+            fact.controller == execution.context.controller.seat
+                && (!exclude_current || fact.execution != execution.id.0)
+        })
+        .count();
+    u64::try_from(total).map(Nat).map_err(invalid)
 }
 
 pub(super) fn count(
@@ -509,6 +531,9 @@ pub(super) fn count(
                 count,
                 excluded.as_deref(),
             )
+        }
+        HistoryPlan::QuickActivation { exclude_current } => {
+            quick_activation_count(execution, game, *exclude_current, count)
         }
         HistoryPlan::PlayedFiltered { filter, .. } => {
             if count != HistoryCount::Facts {
