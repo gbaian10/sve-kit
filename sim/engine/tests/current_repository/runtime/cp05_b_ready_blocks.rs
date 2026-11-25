@@ -25,11 +25,11 @@ fn discard_owned_hand() -> Action {
 
 #[test]
 fn manamel_damages_the_formal_target_and_its_leader_only_after_a_dark_discard() {
-    for (discarded, follower_life, leader_life) in [
-        ("CP05-017", 4_u8, 19_u8),
-        ("BP01-037", 6_u8, 20_u8),
+    for (printing, discarded, follower_life, leader_life) in [
+        ("CP05-P13", "CP05-017", 4_u8, 19_u8),
+        ("CP05-017", "BP01-037", 6_u8, 20_u8),
     ] {
-        let mut initial = position_with_source("CP05-017", "field");
+        let mut initial = position_with_source(printing, "field");
         initial["players"]["P1"]["zones"]["hand"] =
             json!([{"id":"discarded","card":discarded}]);
         initial["players"]["P2"]["zones"]["field"] = json!([
