@@ -548,9 +548,7 @@ impl BodyContext<'_> {
             } else {
                 (predicate, cardinality, None)
             }
-        } else if let Some(groups) = &search.groups
-            && search.same_name_as.is_none()
-        {
+        } else if let (Some(groups), None) = (&search.groups, &search.same_name_as) {
             let mut lowered = Groups::new(TotalBounds::Sum);
             for group in groups {
                 let cardinality = quantity(group.n, group.upto, path)?;
