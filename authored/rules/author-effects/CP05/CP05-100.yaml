@@ -1,0 +1,41 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-100:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        fanfare:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - apply:
+                "on": enemy
+                effect:
+                  cannot:
+                    what: stand
+                    "on": affected
+                    during:
+                      cause: rule
+                      phase: start
+                      who: opp
+                until:
+                  next_phase:
+                    edge: end
+                    phase: start
+                    who: opp
+            - create:
+                token: 風晶のエレメント
+                to: ex
+                n: 1
