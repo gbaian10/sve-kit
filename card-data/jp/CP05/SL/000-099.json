@@ -1,0 +1,1835 @@
+{
+  "format": 1,
+  "region": "jp",
+  "family": "CP05",
+  "range": "SL/000-099",
+  "products": {
+    "products-dae0a33142c6d851": [
+      {
+        "name": "コラボパック「グランブルーファンタジー」",
+        "date": "2026-11-27",
+        "links": [
+          "/cardlist/cardsearch?expansion=CP05",
+          "https://dev.shadowverse-evolve.com/products/cp05/"
+        ]
+      }
+    ]
+  },
+  "cards": [
+    {
+      "card_no": "CP05-SL01",
+      "documents": {
+        "documents-66d7e945557bc28d": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL01",
+            "faces": [
+              {
+                "name": "魔眼の狩人・ソーン",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "光属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "5",
+                "power": "3",
+                "hp": "3",
+                "text": "これをプレイする際、場の元のコスト5のグラブル・フォロワー2体を{アクト}：コストを-5する。\n【最終上限解放可能】\nこれが上限解放したとき、2枚引く。自分の手札1枚を捨てる。\nこれが最終上限解放したとき、これは【疾走】を持つ。",
+                "sections": [],
+                "flavor": "どんなに小さな痕跡も私の魔眼は見逃さない。\n私は天性の狩人……逃げ場なんて与えないわ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl01.png",
+                "trait_raw": "グラブル・十天衆・光属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:7e677615f17e3403ae18ec21ce0d250a7f2d634de1128c97a1fad19ae259318b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL01",
+            "fetched_at": "2026-11-25T06:40:35.487016Z"
+          },
+          "document_ref": "documents-66d7e945557bc28d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL02",
+      "documents": {
+        "documents-42e9a00dff0edddf": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL02",
+            "faces": [
+              {
+                "name": "調和の舞手・ユエル＆ソシエ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "火属性",
+                  "水属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{ファンファーレ}手札の火属性・カード3枚を公開：相手の場のフォロワー1体を選ぶ。それに3ダメージ。それのリーダーに3ダメージ。\n{Q}{起動}{コスト1}手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。それに4ダメージ。この能力はこのターン、自分が他の{Q}{起動}能力をプレイしていたなら使える。",
+                "sections": [],
+                "flavor": "「ちゅうことで、ほな！一緒におーどろ！ソシエ♪」\n「うん、みんなも誘って思いっきり楽しもうな」",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl02.png",
+                "trait_raw": "グラブル・火属性・水属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2870",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイして相手のリーダーに3ダメージ与えることはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができず、相手のリーダーに3ダメージ与えることができません。"
+              },
+              {
+                "id": "Q2869",
+                "date": "2026-11-24",
+                "question": "「《Q》《起動》《コスト1》手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。〜」という能力は、『調和の舞手・ユエル＆ソシエ』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『調和の舞手・ユエル＆ソシエ』が手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1099e4463764e1e288ad64dcf42a3504ba47b4d3972772e9542f2faa337f4e92",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL02",
+            "fetched_at": "2026-11-25T06:40:37.855352Z"
+          },
+          "document_ref": "documents-42e9a00dff0edddf"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL03",
+      "documents": {
+        "documents-511a7f303d4ac266": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL03",
+            "faces": [
+              {
+                "name": "風の理・イーウィヤ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "風属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『風晶のエレメント』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "イーウィヤこそは風の理、六竜の『翠』！\n只猫ではないのじゃから、倍甘やかし倍尽くすのじゃ～！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl03.png",
+                "trait_raw": "グラブル・六竜・風属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-P96"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL04"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:122e76fb3d173c113c8e2662d1a0e1888372458c0e7c1f0c9f1f56370b848919",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL03",
+            "fetched_at": "2026-11-25T06:40:40.636493Z"
+          },
+          "document_ref": "documents-511a7f303d4ac266"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL04",
+      "documents": {
+        "documents-ff7e87b83acb74e5": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL04",
+            "faces": [
+              {
+                "name": "風の理・イーウィヤ",
+                "card_class": "エルフ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "風属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "2",
+                "hp": "2",
+                "text": "【進化時】『風晶のエレメント』1枚をEXエリアに置く。1枚引く。\n【超進化時】『ヒヒイロカネ』1枚をEXエリアに置く。1枚引く。",
+                "sections": [],
+                "flavor": "現身は、全人類が無条件に崇める自由上位存在、猫一択！\nやはりイーウィヤこそ、いっちばん賢い六竜なのじゃ～！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl04.png",
+                "trait_raw": "グラブル・六竜・風属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2872",
+                "date": "2026-11-24",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2871",
+                "date": "2026-11-24",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-P96"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-P99"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL03"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b3a8d6c3decca35a3e9fd3a86d2f3321c2610fa411cabcd17dc7f724f80b364f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL04",
+            "fetched_at": "2026-11-25T06:40:43.580641Z"
+          },
+          "document_ref": "documents-ff7e87b83acb74e5"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL05",
+      "documents": {
+        "documents-104962b0eb11d18c": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL05",
+            "faces": [
+              {
+                "name": "天星剣王・シエテ",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "風属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "5",
+                "power": "3",
+                "hp": "3",
+                "text": "【最終上限解放可能】\nこれが上限解放したとき、2枚引く。自分の手札1枚をデッキの下に置く。\nこれが最終上限解放したとき、自分のデッキから元のコスト2以下のフォロワーをカード名が異なるように2枚まで探し、場に出す。",
+                "sections": [],
+                "flavor": "全空最強の十天衆、彼らを束ねし頭目……\nそれがこの俺、天星剣王のシエテ様だ！すごいだろー？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl05.png",
+                "trait_raw": "グラブル・十天衆・風属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5696af6bac59461bc53b938510297fc470e6e98584b3427d8815841375f0f626",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL05",
+            "fetched_at": "2026-11-25T06:40:46.416243Z"
+          },
+          "document_ref": "documents-104962b0eb11d18c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL06",
+      "documents": {
+        "documents-89eee73ec94f26e8": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL06",
+            "faces": [
+              {
+                "name": "刀神・オクトー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "土属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "8",
+                "power": "5",
+                "hp": "5",
+                "text": "これをプレイする際、自分のエボルヴデッキの表向きの土属性・エボルヴフォロワー2枚につき、コストを-2する。\n【最終上限解放可能】\nこれが上限解放したとき、これは【突進】【指定攻撃】を持つ。\nこれが最終上限解放したとき、{コスト1}：相手の場のフォロワー1体を選ぶ。それを破壊する。それのリーダーに3ダメージ。",
+                "sections": [],
+                "flavor": "我が歩むは最強へと至る道。交えし刃の狭間に滅ぶは本望。\nげに恐ろしきは歩みを止め、我が身錆び果てる事よ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl06.png",
+                "trait_raw": "グラブル・十天衆・土属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2882",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが最終上限解放したとき、～」という能力をプレイして相手のリーダーに3ダメージ与えることはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが最終上限解放したとき、～」という能力をプレイすることができず、相手のリーダーに3ダメージ与えることができません。"
+              },
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9130ced36e1c53f90b771ea713c3f92909f693598493035e2cc2e6ab3418440e",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL06",
+            "fetched_at": "2026-11-25T06:40:49.299974Z"
+          },
+          "document_ref": "documents-89eee73ec94f26e8"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL07",
+      "documents": {
+        "documents-53941854435027d5": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL07",
+            "faces": [
+              {
+                "name": "光の理・ル・オー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "光属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "5",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『光晶のエレメント』1枚をEXエリアに置く。",
+                "sections": [],
+                "flavor": "六竜の『白』、光のル・オーは宣言する。\n必ずやこの不完全を是正し、空の世界に夜明けを齎すと。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl07.png",
+                "trait_raw": "グラブル・六竜・光属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-P97"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL08"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:fc8e81607f55ba1427ea4415a2555cd46850000c212e1fd7c6408248d19e8983",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL07",
+            "fetched_at": "2026-11-25T06:40:52.090301Z"
+          },
+          "document_ref": "documents-53941854435027d5"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL08",
+      "documents": {
+        "documents-c9e3eda3bb48e26e": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL08",
+            "faces": [
+              {
+                "name": "光の理・ル・オー",
+                "card_class": "ロイヤル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "光属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "【進化時】自分の墓場の元のコスト5のグラブル・フォロワー1枚を選ぶ。それを場に出す。\n【超進化時】これは【オーラ】と「相手の場の【疾走】を持つフォロワーが攻撃したとき、それは{攻撃力}-5する」を持つ。",
+                "sections": [],
+                "flavor": "ヒトの子の想いは空へ還元され、六竜へと僅かな影響を及ぼす。\n君が見た光に、同じ輝きを還さぬとはいかないだろうね。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl08.png",
+                "trait_raw": "グラブル・六竜・光属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2872",
+                "date": "2026-11-24",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2871",
+                "date": "2026-11-24",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL07"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f0fbc722b4cd83bff271575ff4192fbf0e4f6b3d9bcf61d6bb962b52a25c24a8",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL08",
+            "fetched_at": "2026-11-25T06:40:54.777237Z"
+          },
+          "document_ref": "documents-c9e3eda3bb48e26e"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL09",
+      "documents": {
+        "documents-682830219d58929b": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL09",
+            "faces": [
+              {
+                "name": "魔弾の射手・エッセル",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "火属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "2",
+                "hp": "4",
+                "text": "これを自分の手札から公開したとき、相手の場のフォロワー1体を選ぶ。それに1ダメージ。\n【最終上限解放可能】\nこれが上限解放したとき、相手の場のフォロワー1体を選ぶ。それに4ダメージ。\nこれが最終上限解放したとき、自分の場の元のコスト3以下のフォロワー1体を選ぶ。それは【疾走】を持つ。",
+                "sections": [],
+                "flavor": "守りたいもののために、誰かの守りたいものを奪った。\nでも……終わらせなくちゃ、って思うんだ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl09.png",
+                "trait_raw": "グラブル・十天衆・火属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2894",
+                "date": "2026-11-24",
+                "question": "何らかの能力によって、相手のターン中にこのカードを自分の手札から公開した場合、このカードの「これを自分の手札から公開したとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q2893",
+                "date": "2026-11-24",
+                "question": "「これを自分の手札から公開したとき、～」とはなんですか？",
+                "answer": "カードの能力によって手札にあるこのカードを相手に公開することで発動する能力です。"
+              },
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:1c10b8b60af91f5812e2c109edd0c5edeaa1e2807b9a69b86625685bbb26d252",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL09",
+            "fetched_at": "2026-11-25T06:40:57.614539Z"
+          },
+          "document_ref": "documents-682830219d58929b"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL10",
+      "documents": {
+        "documents-b47f71b6e137824d": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL10",
+            "faces": [
+              {
+                "name": "閃耀の双剣・カトル",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "水属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "4",
+                "hp": "2",
+                "text": "【最終上限解放可能】\nこれが上限解放したとき、相手の場のフォロワー1体を選ぶ。それに4ダメージ。\nこれが最終上限解放したとき、相手のリーダーすべてに4ダメージ。\n{Q}{起動}{コスト3}手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。それに4ダメージ。1枚引く。",
+                "sections": [],
+                "flavor": "守るべきものを守るには、どうすればいいと思います？\n簡単です。それは、ただただ強く、力あること。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl10.png",
+                "trait_raw": "グラブル・十天衆・水属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2896",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイして1枚引くことができますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの《起動》能力をプレイすることができず、1枚引くことができません。"
+              },
+              {
+                "id": "Q2895",
+                "date": "2026-11-24",
+                "question": "「《Q》《起動》《コスト3》手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。〜」という能力は、『閃耀の双剣・カトル』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『閃耀の双剣・カトル』が手札にある場合に有効となる能力です。"
+              },
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:f7285193c86ac8c960b0eebf488eba602e0e0f301783a4cea698ba01abf99847",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL10",
+            "fetched_at": "2026-11-25T06:41:00.398787Z"
+          },
+          "document_ref": "documents-b47f71b6e137824d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL11",
+      "documents": {
+        "documents-1fc0da95e9a2bedc": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL11",
+            "faces": [
+              {
+                "name": "水の理・ワムデュス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "水属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "1",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキの上3枚を見る。その中から、{クイック}を持つスペルや{Q}{起動}能力を持つフォロワー2枚まで公開して手札に加えてよい。残りを墓場に置く。\n{Q}{起動}{コスト1}手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。それに2ダメージ。",
+                "sections": [],
+                "flavor": "ある時はなぞのすごすご遊びにん。\nある時は波とたわむれる水辺のミステリアスしょうじょ。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl11.png",
+                "trait_raw": "グラブル・六竜・水属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2897",
+                "date": "2026-11-24",
+                "question": "「《Q》《起動》《コスト1》手札のこれを捨てる：相手の場のフォロワー1体を選ぶ。それに2ダメージ。」という能力は、『水の理・ワムデュス』が手札にある場合に有効となる能力ですか？",
+                "answer": "はい。『水の理・ワムデュス』が手札にある場合に有効となる能力です。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL12"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d563d53289a10195f5b6a9b9601885565a7c82ef1b53a472b7a2bd148e85b290",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL11",
+            "fetched_at": "2026-11-25T06:41:03.004352Z"
+          },
+          "document_ref": "documents-1fc0da95e9a2bedc"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL12",
+      "documents": {
+        "documents-252f591ec522c8d2": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL12",
+            "faces": [
+              {
+                "name": "水の理・ワムデュス",
+                "card_class": "ウィッチ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "水属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "2",
+                "hp": "4",
+                "text": "自分のエンドフェイズが来たとき、自分のPPを3回復する。\n【超進化時】これは「これが場にいる限り、自分が{クイック}を持つスペルや{Q}{起動}能力を持つフォロワーや{Q}{起動}能力をプレイする際、コストを-1する」を持つ。",
+                "sections": [],
+                "flavor": "ワムの正体は、六竜の『碧』・ワムデュスだったり。\nもちろん、しごともきちんとしてる。ワムはえらいので。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl12.png",
+                "trait_raw": "グラブル・六竜・水属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2898",
+                "date": "2026-11-24",
+                "question": "上限解放を行った『真紅の穿光・ゼタ』の【攻撃時】能力によって、超進化したこのフォロワーが破壊されました。\nその後のクイックタイミングで《クイック》を持つスペルや《Q》《起動》能力をプレイする場合、そのコストは-1されますか？",
+                "answer": "いいえ。コストは-1されません。\n【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。\nそのため、クイックタイミングで場にいない『水の理・ワムデュス（EVOLVE）』の能力は適用されません。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL11"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:745fce4da61b374d37c5f850e5d76b8bc90db3ce2d504c0af5de9f17ce3026fe",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL12",
+            "fetched_at": "2026-11-25T06:41:05.740627Z"
+          },
+          "document_ref": "documents-252f591ec522c8d2"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL13",
+      "documents": {
+        "documents-fc5d343dedd25e2d": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL13",
+            "faces": [
+              {
+                "name": "怪力乱神・サラーサ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "土属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "4",
+                "power": "3",
+                "hp": "3",
+                "text": "【最終上限解放可能】\nこれが上限解放したとき、自分のエボルヴデッキの裏向きの土属性・エボルヴフォロワー2枚まで表向きにしてよい。\nこれが最終上限解放したとき、相手のリーダーすべてと相手の場のフォロワーすべてに「自分のエボルヴデッキの表向きの土属性・エボルヴフォロワー」2枚につき1ダメージ。",
+                "sections": [],
+                "flavor": "なぁなぁなぁ！煮るのと焼くの、どっちがいい？\n何って……さっき狩ったドラゴン、食うだろ？",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl13.png",
+                "trait_raw": "グラブル・十天衆・土属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:b1249a7fda83de64e63df963e60c98d262d715863a21fc7acf651055c638f0b2",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL13",
+            "fetched_at": "2026-11-25T06:41:08.448636Z"
+          },
+          "document_ref": "documents-fc5d343dedd25e2d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL14",
+      "documents": {
+        "documents-94451dfea54bbefb": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL14",
+            "faces": [
+              {
+                "name": "大いなる調停者・ゾーイ",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "光属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "5",
+                "power": "5",
+                "hp": "5",
+                "text": "【最終上限解放可能】\nこれが上限解放したとき、相手の場のフォロワー1体を選ぶ。それに5ダメージ。自分のPP最大値を+1する。\nこれが最終上限解放したとき、{コスト1}：自分の場の他の元のコスト5のグラブル・フォロワーすべては{攻撃力}+2/{体力}+2する。",
+                "sections": [],
+                "flavor": "世界の均衡が崩れる可能性が生まれた時、私は顕現する。\nさぁ、私と共に戦おう。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl14.png",
+                "trait_raw": "グラブル・光属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2905",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが上限解放したとき、～」という能力をプレイして自分のPP最大値を+1することはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが上限解放したとき、～」という能力をプレイすることができず、自分のPP最大値を+1することができません。"
+              },
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:578461ac141032ad40da14591da7ea6ba487293015a62b0c3dd7d84aaa21b356",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL14",
+            "fetched_at": "2026-11-25T06:41:11.199674Z"
+          },
+          "document_ref": "documents-94451dfea54bbefb"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL15",
+      "documents": {
+        "documents-cab1544228b96abf": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL15",
+            "faces": [
+              {
+                "name": "炎の理・ウィルナス",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "火属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "4",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のデッキの上1枚を見る。その中から、火属性・カード1枚を公開して手札に加えてよい。",
+                "sections": [],
+                "flavor": "失敬、失敬！ヒトの姿の身となれば改めて名乗ろう！\n鼎は六竜の『朱』、炎の理たる存在、ウィルナス！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl15.png",
+                "trait_raw": "グラブル・六竜・火属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL16"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:07117fb6db700a25c6ff0e762b767cd3385a4a58b7d345029aa248c0a8b49449",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL15",
+            "fetched_at": "2026-11-25T06:41:13.759311Z"
+          },
+          "document_ref": "documents-cab1544228b96abf"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL16",
+      "documents": {
+        "documents-89da4f9a89ee5901": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL16",
+            "faces": [
+              {
+                "name": "炎の理・ウィルナス",
+                "card_class": "ドラゴン",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "火属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【進化時】手札の火属性・カードX枚を公開：相手の場のフォロワー2体まで選ぶ。それにXダメージを割りふる。\n【超進化時】手札の火属性・カードX枚を公開：相手の場のフォロワー1体を選ぶ。それとそれのリーダーにXダメージ。",
+                "sections": [],
+                "flavor": "小さく弱々しく脆き命よ、なんと必死に生きやがる！\n過酷に克ち御して利用する文明……真に天晴れ、天晴れ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl16.png",
+                "trait_raw": "グラブル・六竜・火属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2907",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【超進化時】能力をプレイして手札の火属性・カードを公開することはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの【超進化時】能力をプレイすることができず、相手のリーダーに公開した手札の火属性・カードの枚数分のダメージを与えることができません。"
+              },
+              {
+                "id": "Q2906",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、このフォロワーの【進化時】能力をプレイすることができます。"
+              },
+              {
+                "id": "Q2872",
+                "date": "2026-11-24",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2871",
+                "date": "2026-11-24",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL15"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:3e24e553e73222a5c9366c1fe85adef596b87ee09cf25063a2b47e0a7d584f8f",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL16",
+            "fetched_at": "2026-11-25T06:41:16.506573Z"
+          },
+          "document_ref": "documents-89da4f9a89ee5901"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL17",
+      "documents": {
+        "documents-380b678062048d41": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL17",
+            "faces": [
+              {
+                "name": "神狼・シス",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "闇属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "6",
+                "power": "3",
+                "hp": "2",
+                "text": "自分のターン中、自分の闇属性・カードの能力によってこれを自分の手札から捨てたとき、{コスト3}：これを場に出す。\n【最終上限解放可能】\nこれが上限解放したとき、これは【疾走】を持つ。\nこれが最終上限解放したとき、{コスト2}：自分のデッキから『神狼・シス』1枚を探し、場に出す。",
+                "sections": [],
+                "flavor": "お前は似ている……俺を孤独の闇から救い出してくれた男に。\nその力、見極めさせて……や、やめろ！仮面に触るな！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl17.png",
+                "trait_raw": "グラブル・十天衆・闇属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:5eab8d5f6cb4bff20ed053060f232553dbfe42d82b928228215f13dbf16e5314",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL17",
+            "fetched_at": "2026-11-25T06:41:19.051781Z"
+          },
+          "document_ref": "documents-380b678062048d41"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL18",
+      "documents": {
+        "documents-97b306c3fc26d794": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL18",
+            "faces": [
+              {
+                "name": "繊細の魔奏者・ニオ",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "風属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【最終上限解放可能】\nこれが上限解放したとき、相手の場のフォロワー1体を選ぶ。それは{攻撃力}-1/{体力}-1する。\nこれが最終上限解放したとき、相手の場のフォロワー1体を選ぶ。それは{攻撃力}-2/{体力}-2する。",
+                "sections": [],
+                "flavor": "世界は、沢山の命と、旋律で溢れてる。\nもっと穏やかで、心地よい旋律に満ちていればいいのに。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl18.png",
+                "trait_raw": "グラブル・十天衆・風属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:ff592776300f9cb2eb3269d4bcd78ec8589e8dbbcc7d30b55fda02884410f050",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL18",
+            "fetched_at": "2026-11-25T06:41:21.872125Z"
+          },
+          "document_ref": "documents-97b306c3fc26d794"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL19",
+      "documents": {
+        "documents-dd37d322c1aef20f": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL19",
+            "faces": [
+              {
+                "name": "闇の理・フェディエル",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "闇属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "3",
+                "power": "3",
+                "hp": "3",
+                "text": "{進化}{コスト1}：これは進化する。\n自分が手札の闇属性・カード1枚を捨てたとき、相手のリーダーすべてと相手の場のフォロワーすべてに1ダメージ。",
+                "sections": [],
+                "flavor": "死を、安寧を、終焉を、絶望を――\n闇を統べる六竜の『黒』！フェディエルぞ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl19.png",
+                "trait_raw": "グラブル・六竜・闇属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2916",
+                "date": "2026-11-24",
+                "question": "自分の場に『闇の理・フェディエル』がいる状況で『コラプション』をプレイしました。\n『コラプション』の追加コストとして手札の闇属性・カード1枚を捨て、その後『コラプション』の効果で『闇の理・フェディエル』が破壊された場合、『闇の理・フェディエル』が持つ「自分が手札の闇属性・カード1枚を捨てたとき、～」という能力は誘発しますか？",
+                "answer": "はい、誘発します。\n『コラプション』の追加コストとして手札の闇属性・カード1枚を捨てた時点では『闇の理・フェディエル』は場にいるため、「自分の手札の闇属性・カード1枚を捨てたとき、～」という能力が待機状態になります。\nその後、体力が0になった『闇の理・フェディエル』はチェックタイミングで場を離れますが、『闇の理・フェディエル』の「自分の手札の闇属性・カード1枚を捨てたとき、～」という能力はすでに待機状態になっているため、相手のリーダーすべてと相手の場のフォロワーすべてに1ダメージを与えます。"
+              },
+              {
+                "id": "Q2915",
+                "date": "2026-11-24",
+                "question": "自分が手札の闇属性・カード2枚を同時に捨てたとき、このフォロワーの能力は2回誘発しますか？",
+                "answer": "はい。2回誘発します。"
+              },
+              {
+                "id": "Q2914",
+                "date": "2026-11-24",
+                "question": "何らかの能力により、相手のターン中に自分が自分の手札の闇属性・カードを捨てた場合、「自分が手札の闇属性・カード1枚を捨てたとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL20"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:504df117b631718050a5af72cc8be91a1f7e34725f7485a5c698ac94a36427c6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL19",
+            "fetched_at": "2026-11-25T06:41:24.761517Z"
+          },
+          "document_ref": "documents-dd37d322c1aef20f"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL20",
+      "documents": {
+        "documents-824be546c678f7a5": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL20",
+            "faces": [
+              {
+                "name": "闇の理・フェディエル",
+                "card_class": "ナイトメア",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "闇属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "4",
+                "hp": "4",
+                "text": "自分が手札の闇属性・カード1枚を捨てたとき、相手のリーダーすべてと相手の場のフォロワーすべてに1ダメージ。\n【進化時】手札2枚を捨てる：2枚引く。\n【超進化時】自分の墓場の「これと同名を除くカード」をカード名が異なるように2枚まで選ぶ。それを手札に加える。自分の手札1枚を捨てる。",
+                "sections": [],
+                "flavor": "空に普く火灯しの風は対成し世代を紡ぐ……\n空に在る様々な番、『受け継がれるもの』を見たいぞよ！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl20.png",
+                "trait_raw": "グラブル・六竜・闇属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2916",
+                "date": "2026-11-24",
+                "question": "自分の場に『闇の理・フェディエル』がいる状況で『コラプション』をプレイしました。\n『コラプション』の追加コストとして手札の闇属性・カード1枚を捨て、その後『コラプション』の効果で『闇の理・フェディエル』が破壊された場合、『闇の理・フェディエル』が持つ「自分が手札の闇属性・カード1枚を捨てたとき、～」という能力は誘発しますか？",
+                "answer": "はい、誘発します。\n『コラプション』の追加コストとして手札の闇属性・カード1枚を捨てた時点では『闇の理・フェディエル』は場にいるため、「自分の手札の闇属性・カード1枚を捨てたとき、～」という能力が待機状態になります。\nその後、体力が0になった『闇の理・フェディエル』はチェックタイミングで場を離れますが、『闇の理・フェディエル』の「自分の手札の闇属性・カード1枚を捨てたとき、～」という能力はすでに待機状態になっているため、相手のリーダーすべてと相手の場のフォロワーすべてに1ダメージを与えます。"
+              },
+              {
+                "id": "Q2915",
+                "date": "2026-11-24",
+                "question": "自分が手札の闇属性・カード2枚を同時に捨てたとき、このフォロワーの能力は2回誘発しますか？",
+                "answer": "はい。2回誘発します。"
+              },
+              {
+                "id": "Q2914",
+                "date": "2026-11-24",
+                "question": "何らかの能力により、相手のターン中に自分が自分の手札の闇属性・カードを捨てた場合、「自分が手札の闇属性・カード1枚を捨てたとき、～」という能力は誘発しますか？",
+                "answer": "はい。相手のターン中であっても誘発します。"
+              },
+              {
+                "id": "Q2872",
+                "date": "2026-11-24",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2871",
+                "date": "2026-11-24",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL19"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:adb67a3f1a9e36bce67d0acbc4165d2a20f0e08750f707a6bc7c002277a307b6",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL20",
+            "fetched_at": "2026-11-25T06:41:27.451976Z"
+          },
+          "document_ref": "documents-824be546c678f7a5"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL21",
+      "documents": {
+        "documents-d7f25738a335125c": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL21",
+            "faces": [
+              {
+                "name": "開眼者・ウーノ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "水属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "1",
+                "power": "1",
+                "hp": "1",
+                "text": "【守護】【最終上限解放可能】\nこれが上限解放したとき、1枚引く。自分の手札1枚を捨てる。\nこれが最終上限解放したとき、相手の場のフォロワー1体を選ぶ。それに4ダメージ。\n{Q}{起動}{コスト1}これを{アクト}：自分のリーダーは{体力}+1する。",
+                "sections": [],
+                "flavor": "そうさ……争いはいつだって空しい。ならば未然に防げばいい。\n戦う気すら起きないような力……全空の脅威を以てね。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl21.png",
+                "trait_raw": "グラブル・十天衆・水属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:9a3dc24593f3681192828d9439b90d3e8c8425a186e9e485eb712522bca27155",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL21",
+            "fetched_at": "2026-11-25T06:41:30.109010Z"
+          },
+          "document_ref": "documents-d7f25738a335125c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL22",
+      "documents": {
+        "documents-8b2de26b4ca7f324": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL22",
+            "faces": [
+              {
+                "name": "魔導の申し子・フュンフ",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "十天衆",
+                  "光属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "5",
+                "power": "2",
+                "hp": "3",
+                "text": "【最終上限解放可能】\nこれが上限解放したとき、自分の手札の元のコスト5のグラブル・フォロワー1枚を場に出してよい。\nこれが最終上限解放したとき、{コスト2}：自分のデッキの上5枚を見る。その中から、「これと同名を除く元のコスト5のグラブル・フォロワー」1枚を場に出してよい。残りを好きな順にデッキの下に置く。",
+                "sections": [],
+                "flavor": "困ったことがあったら、あちしを頼っちゃって！\nめっちゃ強いしすっごく役に立っちゃうぞ～！",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl22.png",
+                "trait_raw": "グラブル・十天衆・光属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2868",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で、まだ上限解放していない【最終上限解放可能】を持つこのフォロワーを最終上限解放した場合、「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力はどちらも誘発しますか？",
+                "answer": "はい。『ヒヒイロカネ』の《起動》能力によって、上限解放と最終上限解放の両方を行うため、両方の能力が誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2867",
+                "date": "2026-11-24",
+                "question": "『ヒヒイロカネ』の《起動》能力で「これが上限解放したとき、〜」という能力と「これが最終上限解放したとき、〜」という能力を持つこのフォロワーを最終上限解放した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": []
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:aeeee97daa9a789756113b08081ee65faf9ed1cf1eb424bfaa2ab221f1b6cbf7",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL22",
+            "fetched_at": "2026-11-25T06:41:32.812593Z"
+          },
+          "document_ref": "documents-8b2de26b4ca7f324"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL23",
+      "documents": {
+        "documents-59cfd70cd5e4189c": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL23",
+            "faces": [
+              {
+                "name": "土の理・ガレヲン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "土属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "2",
+                "hp": "2",
+                "text": "{進化}{コスト1}：これは進化する。\n{ファンファーレ}自分のエボルヴデッキの裏向きの土属性・エボルヴフォロワー1枚を表向きにしてよい。自分のエボルヴデッキの表向きの土属性・エボルヴフォロワーが4枚以上なら、1枚引く。",
+                "sections": [],
+                "flavor": "祝福。（歪な大地で生きる命へ祝福を。\nそれこそが六竜の『金』、ガレヲンの務めなれば）",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl23.png",
+                "trait_raw": "グラブル・六竜・土属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL24"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:314463e509d469027564fcc1d00e1c8870840dd3aaf5ea7293fac42e6df09512",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL23",
+            "fetched_at": "2026-11-25T06:41:35.460061Z"
+          },
+          "document_ref": "documents-59cfd70cd5e4189c"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL24",
+      "documents": {
+        "documents-1108379b7fc003b1": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL24",
+            "faces": [
+              {
+                "name": "土の理・ガレヲン",
+                "card_class": "ビショップ",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "六竜",
+                  "土属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "3",
+                "hp": "3",
+                "text": "【進化時】自分のデッキの上4枚を見る。その中から、グラブル・カード1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n【超進化時】『土晶のエレメント』X枚をEXエリアに置く。自分のリーダーは{体力}+Xする。Xは「自分のエボルヴデッキの表向きの土属性・エボルヴフォロワーの枚数の半分（端数切り上げ）」である。",
+                "sections": [],
+                "flavor": "恩寵。\n（ヒトの子よ。貴方の努力と愛おしさに、相応しき褒賞を）",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl24.png",
+                "trait_raw": "グラブル・六竜・土属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2872",
+                "date": "2026-11-24",
+                "question": "【進化時】能力を持つフォロワーが超進化した場合、そのフォロワーの【進化時】能力は誘発しますか？",
+                "answer": "はい。【超進化時】能力だけではなく、【進化時】能力も誘発します。また誘発した2つの能力は任意の順番で解決することができます。"
+              },
+              {
+                "id": "Q2871",
+                "date": "2026-11-24",
+                "question": "【進化時】能力と【超進化時】能力を持つフォロワーが超進化した場合、誘発した2つの能力はどちらから解決しますか？",
+                "answer": "任意の順番で解決することができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-P95"
+              },
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL23"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:8dff41f29e61cffefa7bd2031d170a165938b57f52355833c592e0f74d420afa",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL24",
+            "fetched_at": "2026-11-25T06:41:38.267142Z"
+          },
+          "document_ref": "documents-1108379b7fc003b1"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL25",
+      "documents": {
+        "documents-2b2c79018c334e89": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL25",
+            "faces": [
+              {
+                "name": "天司長の後継・サンダルフォン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "光属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "5",
+                "power": "4",
+                "hp": "4",
+                "text": "{進化}{コスト1}：これは進化する。\n【守護】\n{ファンファーレ}相手の場のフォロワー2体まで選ぶ。それに2ダメージ。相手のリーダーすべてに2ダメージ。自分のSEPが0なら、これは進化する。自分のリーダーは{体力}+2する。",
+                "sections": [],
+                "flavor": "俺の背に……この羽は白すぎる……。\nだが、約束したんだ。空の脅威を排除する事を。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl25.png",
+                "trait_raw": "グラブル・光属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2924",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの《ファンファーレ》能力をプレイすることができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、このフォロワーの《ファンファーレ》能力をプレイすることができます。"
+              },
+              {
+                "id": "Q2923",
+                "date": "2026-11-24",
+                "question": "このフォロワーが《ファンファーレ》能力によって進化した場合、その進化は、進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）をプレイすることができる回数である1ターンに1回に含まれますか？",
+                "answer": "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL26"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:01ee44e7ab158f5d775e9bea4b68da4b5c45b7db6865d69ae55e5a6c1e96cb9b",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL25",
+            "fetched_at": "2026-11-25T06:41:41.103556Z"
+          },
+          "document_ref": "documents-2b2c79018c334e89"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL26",
+      "documents": {
+        "documents-d312a5ffa317244d": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL26",
+            "faces": [
+              {
+                "name": "天司長の後継・サンダルフォン",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー・エボルヴ",
+                "traits": [
+                  "グラブル",
+                  "光属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "-",
+                "power": "5",
+                "hp": "5",
+                "text": "【守護】\n【進化時】相手の場のフォロワー2体まで選ぶ。それに2ダメージ。相手のリーダーすべてに2ダメージ。自分の場の元のコスト5のグラブル・フォロワーが3体以上なら、選んだフォロワーに2ダメージ。相手のリーダーすべてに2ダメージ。",
+                "sections": [],
+                "flavor": "あの御方の意思のために俺は在る。\nこの六枚羽に懸けて……今、ここで終わらせてやる。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl26.png",
+                "trait_raw": "グラブル・光属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2906",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの【進化時】能力をプレイすることができますか？",
+                "answer": "はい。相手の場にフォロワーがいない場合でも、相手の場のフォロワー0体を選ぶことによって、このフォロワーの【進化時】能力をプレイすることができます。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-SL25"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:276562ed327bcebd4cccd1869af3ae1d411f89ab6f23db37deff8e7694eba5ed",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL26",
+            "fetched_at": "2026-11-25T06:41:43.680840Z"
+          },
+          "document_ref": "documents-d312a5ffa317244d"
+        }
+      ]
+    },
+    {
+      "card_no": "CP05-SL27",
+      "documents": {
+        "documents-7e1b23ee6f71f1a2": {
+          "region": "jp",
+          "record": {
+            "number": "CP05-SL27",
+            "faces": [
+              {
+                "name": "グラン＆ジータ",
+                "card_class": "ニュートラル",
+                "card_type": "フォロワー",
+                "traits": [
+                  "グラブル",
+                  "全属性"
+                ],
+                "rarity": "SL",
+                "product": "コラボパック「グランブルーファンタジー」",
+                "title": "グランブルーファンタジー",
+                "cost": "2",
+                "power": "2",
+                "hp": "3",
+                "text": "これが上限解放したとき、{コスト3}：相手の場のフォロワー1体を選ぶ。それに4ダメージ。それのリーダーに2ダメージ。『ヒヒイロカネ』1枚をEXエリアに置く。\n{ファンファーレ}手札のグラブル・カード1枚を捨てる：2枚引く。",
+                "sections": [],
+                "flavor": "空の彼方、約束の地へ――。",
+                "illustrator": null,
+                "image": "/wordpress/wp-content/images/cardlist/CP05/cp05-sl27.png",
+                "trait_raw": "グラブル・全属性"
+              }
+            ],
+            "release_date": "2026-11-27",
+            "errata_url": null,
+            "notes": [],
+            "qa": [
+              {
+                "id": "Q2925",
+                "date": "2026-11-24",
+                "question": "相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが上限解放したとき、《コスト3》：～」という能力をプレイして相手のリーダーに2ダメージ与えることはできますか？",
+                "answer": "いいえ。相手の場のフォロワーを選ぶことができない場合、このフォロワーの「これが上限解放したとき、《コスト3》：～」という能力をプレイすることができず、相手のリーダーに2ダメージを与えることができません。"
+              }
+            ],
+            "products_ref": "products-dae0a33142c6d851",
+            "related_cards": [
+              {
+                "label": "",
+                "href": "/cardlist/?cardno=CP05-P99"
+              }
+            ]
+          }
+        }
+      },
+      "observations": [
+        {
+          "source": {
+            "id": "src:v1:d1c0f2d5c596fb662d448b845dfe00cbc47a3b8476ec1ac73d65245f7e00ec70",
+            "url": "https://shadowverse-evolve.com/cardlist/?cardno=CP05-SL27",
+            "fetched_at": "2026-11-25T06:41:46.599189Z"
+          },
+          "document_ref": "documents-7e1b23ee6f71f1a2"
+        }
+      ]
+    }
+  ]
+}
