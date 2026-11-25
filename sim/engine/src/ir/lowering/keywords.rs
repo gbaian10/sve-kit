@@ -120,6 +120,8 @@ pub(super) fn ability_filter_id(name: &str) -> Option<KeywordId> {
     match name {
         "earth_rite" => Some(KeywordId::EarthRite),
         "lastword" => Some(KeywordId::Lastword),
+        "quick_activation" => Some(KeywordId::QuickActivation),
+        "quick_spell" => Some(KeywordId::QuickSpell),
         _ => None,
     }
 }

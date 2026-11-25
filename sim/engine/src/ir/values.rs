@@ -610,6 +610,8 @@ tags!(KeywordId {
     OnAttack,
     OnSuperEvolve,
     Quick,
+    QuickActivation,
+    QuickSpell,
     Ward,
     Storm,
     Rush,

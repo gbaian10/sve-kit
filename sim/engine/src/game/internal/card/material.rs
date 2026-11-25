@@ -14,7 +14,7 @@ use crate::game::internal::{
     DecisionToken, DecisionView, DistributionMember, InputDomain, Slot, Wait, contains, search,
 };
 use crate::game::legal::subsets;
-use crate::ir::quick::{card_permission, is_printed_quick};
+use crate::ir::quick::{card_permission, printed_activation};
 use crate::ir::reveal_cost as reveal_payment;
 use crate::ir::shuffle::{self, Placement};
 use crate::ir::{
@@ -1207,7 +1207,7 @@ pub(super) fn check_card(card: &WellFormedCardProgram) -> Result<()> {
             if materials.is_empty() {
                 continue;
             }
-            if ability.node.kind == AbilityKind::Activated && is_printed_quick(&ability.node) {
+            if printed_activation(&ability.node) {
                 for decision in materials {
                     check_quick_parameter(decision)?;
                 }

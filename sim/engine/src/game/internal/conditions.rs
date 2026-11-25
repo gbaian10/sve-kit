@@ -363,7 +363,13 @@ fn keyword_filter(
         && (predicate.keyword == Some(KeywordId::Evolution)
             || matches!(
                 predicate.keyword,
-                Some(KeywordId::Stack | KeywordId::EarthRite | KeywordId::Lastword)
+                Some(
+                    KeywordId::Stack
+                        | KeywordId::EarthRite
+                        | KeywordId::Lastword
+                        | KeywordId::QuickActivation
+                        | KeywordId::QuickSpell
+                )
             )
             || predicate.keyword.and_then(super::grant::keyword).is_some())
 }
