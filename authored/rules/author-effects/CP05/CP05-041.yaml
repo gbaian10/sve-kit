@@ -1,0 +1,61 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-041:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        evolve:
+          cost:
+            pp: 1
+      - line: 2
+        fanfare:
+          do:
+            - if:
+                cond:
+                  cmp:
+                    left:
+                      resource:
+                        kind: pp_max
+                        who: self
+                    op: ge
+                    right: 7
+                then:
+                  - create:
+                      token:
+                        - アルス・マグナ
+                        - ヒヒイロカネ
+                      n: 1
+                      to: ex
+      - line: 3
+        activate:
+          targets:
+            - bind: enemy
+              from:
+                who: opp
+                zone: field
+                kind: follower
+              n: 1
+          do:
+            - damage:
+                to: enemy
+                n: 2
+          cost:
+            steps:
+              - act_self: true
+              - discard:
+                  sel:
+                    who: self
+                    zone: hand
+                    trait: グラブル
+                  n: 1
+    token_sources:
+      - section: 1
+        line: 1
+        card: CP05-T08
