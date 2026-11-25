@@ -417,3 +417,48 @@ fn randall_costs_one_after_three_stages_and_returns_at_end() {
     end_phase(&mut game);
     assert!(has_card(&game, "hand", "CP05-036"));
 }
+
+#[test]
+fn evolved_mirin_remembers_whether_she_limit_broke_when_another_trigger_returns_her() {
+    let mut tree = expanded::tree().clone();
+    let mut row = tree["cards"]["BP01-041"].clone();
+    let mut entry = row["abilities"][0].clone();
+    entry.as_object_mut().unwrap().remove("activate");
+    entry["auto"] = json!({
+        "on":{"evolved":{"who":"self","sel":{"kind":"follower"}}},
+        "targets":[{"bind":"returned","from":{"who":"self","zone":"field","kind":"follower"},"n":1_u8}],
+        "do":[{"move":{"ref":"returned","to":"hand"}}]
+    });
+    row["abilities"] = json!([entry]);
+    tree["cards"] = json!({"producer":row});
+    let bounce = lowerer().lower(&tree).unwrap().remove("producer").unwrap();
+
+    for break_source in [false, true] {
+        let mut initial = enemy_position("CP05-027", "field");
+        initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"CP05-028"}]);
+        initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"gold","card":GOLD}]);
+        let mut game = with_selected_producer_program(&initial, &bounce, producer_selection());
+        if break_source {
+            let own_break = break_with(&mut game, "gold", "CP05-027");
+            settle(&mut game, Some(own_break));
+        }
+
+        assert_eq!(
+            game.internal_rule_action(&json!({
+                "do":"evolve","source":"source","evolve_card":"form","pay":{"pp":1_u8}
+            }))
+            .unwrap()
+            .outcome,
+            "resolved"
+        );
+        finish_checks(&mut game);
+        let first = resolve_pending_card(&mut game, "producer");
+        resolved(choose_card_by_number(&mut game, first, "CP05-027"));
+        finish_checks(&mut game);
+        assert_eq!(state(&game)["P1"]["hand"], json!(["source"]));
+
+        let mirin = resolve_pending_card(&mut game, "CP05-028");
+        resolved(choose_card_by_number(&mut game, mirin, ENEMY));
+        assert_eq!(enemy_hp(&game), if break_source { 16_u8 } else { 18_u8 });
+    }
+}

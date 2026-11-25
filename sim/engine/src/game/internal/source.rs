@@ -43,6 +43,7 @@ pub(in crate::game) struct SourceSnapshot {
     pub(super) zone: String,
     pub(super) subject: PublicCharacteristics,
     counters: BTreeMap<String, Nat>,
+    pub(super) limit_broken: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -696,6 +697,7 @@ impl Game {
                 id,
                 self.card_names(id)?.into_iter().map(CardName).collect(),
             )?,
+            limit_broken: self.is_limit_broken(id, false)?,
             counters: current
                 .state
                 .get("counters")

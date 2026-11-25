@@ -7,6 +7,7 @@ use super::{
     invalid, player_id, seat_name, unsupported,
 };
 use crate::ir::AttackEvent;
+use crate::ir::LimitBreakState;
 use crate::ir::ObjectRelation;
 use crate::ir::dice as ir_dice;
 use crate::ir::events::attack::target_plan;
@@ -1376,11 +1377,21 @@ impl Execution {
     fn live_boolean(&self, game: &Game, read: &BoolRead) -> Result<Bool> {
         match read {
             BoolRead::LimitBreak { object, state } => {
-                let Some(reference) = self.current_limit_break_subject(game, object)? else {
-                    return Ok(Bool(false));
-                };
-                game.limit_break_condition(self.object_id(reference)?, *state)
-                    .map(Bool)
+                if let Some(reference) = self.current_limit_break_subject(game, object)? {
+                    return game
+                        .limit_break_condition(self.object_id(reference)?, *state)
+                        .map(Bool);
+                }
+                // Historical source status can use LKI; eligibility requires a current follower.
+                if *state == LimitBreakState::Normal
+                    && *object == (ObjectOperand::SourceHolder {})
+                    && self.source_information.is_some()
+                {
+                    return self
+                        .source_snapshot(game)
+                        .map(|snapshot| Bool(snapshot.limit_broken));
+                }
+                Ok(Bool(false))
             }
             BoolRead::HistoryExists { query } => {
                 let plan =
