@@ -12,6 +12,7 @@ use crate::game::player::observation::InstalledEffect;
 
 use super::duration::{EffectEnd, TurnInterval};
 use super::number_plan::AmountPlan;
+use super::observation::EffectOrigin;
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
 use crate::ir::dice as ir_dice;
 use crate::ir::{
@@ -21,6 +22,7 @@ use crate::ir::{
     ObjectRef, Program, RuntimeHolder, Selector, SnapshotId, Stat, StatChangeEvent,
     StatChangeReason, StatDelta, StatOperation, TimeAnchor, TimestampBasis, ZoneKind,
 };
+use alloc::sync::Arc;
 use core::iter::once;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -72,7 +74,7 @@ impl Change {
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 struct Modifier {
-    origin_record: super::observation::EffectOrigin,
+    origin: ModifierOrigin,
     effect: u64,
     timestamp: u64,
     execution: u64,
@@ -82,6 +84,12 @@ struct Modifier {
     enabled: bool,
     attack: Option<Change>,
     life: Option<Change>,
+}
+
+#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+enum ModifierOrigin {
+    Ability(Arc<EffectOrigin>),
+    LimitBreak { material: String },
 }
 
 impl Modifier {
@@ -412,6 +420,75 @@ impl Game {
         Ok(())
     }
 
+    pub(in crate::game) fn add_limit_break_bonus(
+        &mut self,
+        holder: &str,
+        material: &str,
+        final_break: bool,
+        timestamp: u64,
+    ) -> Result<()> {
+        let object = self.object(holder)?;
+        let maximum = number(&object.state, "max_hp")?;
+        let mut state = if let Some(state) = self.numeric_state(holder) {
+            state.clone()
+        } else {
+            NumericState {
+                generation: object.generation,
+                attack: number(&object.state, "power")?,
+                life: maximum,
+                effects: vec![],
+                pilot: None,
+            }
+        };
+        let effect = self.state.next_ir_effect;
+        self.state.next_ir_effect = effect
+            .checked_add(1)
+            .ok_or_else(|| invalid("numeric effect identity exhausted"))?;
+        state.effects.push(Modifier {
+            origin: ModifierOrigin::LimitBreak {
+                material: material.into(),
+            },
+            effect,
+            timestamp,
+            execution: 0,
+            end: EffectEnd::NoTemporalExpiry,
+            main_live: true,
+            intervals: vec![],
+            enabled: true,
+            attack: Some(Change::Add(1)),
+            life: final_break.then_some(Change::Add(1)),
+        });
+        self.commit_limit_break_modifiers(holder, state)
+    }
+
+    pub(in crate::game) fn remove_limit_break_modifiers(
+        &mut self,
+        holder: &str,
+        material: &str,
+    ) -> Result<()> {
+        if let Some(mut state) = self.numeric_state(holder).cloned() {
+            state.effects.retain(|effect| {
+                !matches!(&effect.origin, ModifierOrigin::LimitBreak { material: source } if source == material)
+            });
+            self.commit_limit_break_modifiers(holder, state)?;
+        }
+        Ok(())
+    }
+
+    fn commit_limit_break_modifiers(&mut self, holder: &str, state: NumericState) -> Result<()> {
+        let object = self.object(holder)?;
+        let damage = number(&object.state, "max_hp")?
+            .checked_sub(number(&object.state, "hp")?)
+            .ok_or_else(|| invalid("numeric damage overflow"))?;
+        self.internal_numeric_cache(holder, state.effective(damage)?)?;
+        if state.effects.is_empty() && state.pilot.is_none() {
+            self.state.ir_numeric.remove(holder);
+        } else {
+            self.state.ir_numeric.insert(holder.into(), state);
+        }
+        Ok(())
+    }
+
     /// Legacy prototype arithmetic saturates, so only checked-safe operands may meet checked layers.
     pub(in crate::game) fn numeric_prototype_operand(&self, id: &str, safe: bool) -> Result<()> {
         if !safe && self.numeric_state(id).is_some() {
@@ -659,8 +736,7 @@ impl Game {
         check_patch(patch)?;
         let (attack, life) = changes(execution, self, patch)?;
         let end = EffectEnd::at(self, execution, &expires.end)?;
-        let origin_record =
-            super::observation::EffectOrigin::capture(self, execution, &instruction.source)?;
+        let origin = Arc::new(EffectOrigin::capture(self, execution, &instruction.source)?);
         let effect = EffectId(self.state.next_ir_effect);
         let mut plans = Vec::new();
         for subject in subjects {
@@ -720,7 +796,7 @@ impl Game {
                 value => value,
             };
             state.effects.push(Modifier {
-                origin_record: origin_record.clone(),
+                origin: ModifierOrigin::Ability(Arc::clone(&origin)),
                 effect: effect.0,
                 timestamp: execution.timestamp,
                 execution: execution.id.0,
@@ -1005,8 +1081,11 @@ impl Game {
             result.push(pilot.observed(self, perspective)?);
         }
         for effect in &state.effects {
+            let ModifierOrigin::Ability(origin) = &effect.origin else {
+                continue;
+            };
             result.push(InstalledEffect {
-                source: effect.origin_record.observed(self, perspective),
+                source: origin.observed(self, perspective),
                 expires: effect.end.observed()?,
                 main_live: effect.main_live,
                 intervals: effect

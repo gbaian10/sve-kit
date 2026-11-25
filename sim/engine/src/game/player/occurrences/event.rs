@@ -58,6 +58,10 @@ pub enum PendingEvent {
     },
     /// Equipment was attached.
     Equip,
+    /// The follower completed a normal limit break.
+    LimitBreak,
+    /// The follower completed a final limit break.
+    FinalLimitBreak,
     /// Cards moved between zones.
     Move {
         /// Player whose zone they left.

@@ -477,6 +477,8 @@ pub(super) enum Step {
     Move(Move),
     Create(Create),
     Equip(Equip),
+    LimitBreak(LimitBreak),
+    FinalLimitBreak(LimitBreak),
     Pilot(Pilot),
     #[serde(rename = "box")]
     Boxed(Boxed),
@@ -675,6 +677,12 @@ pub(super) struct NamedEffectEvolution {
 pub(super) struct Equip {
     pub on: This,
     pub token: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct LimitBreak {
+    pub on: String,
 }
 
 #[derive(Deserialize)]
@@ -1720,6 +1728,7 @@ pub(super) struct SearchPower {
 #[derive(Clone, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
 pub(super) enum SearchKind {
+    Treasure,
     EvolveFollower,
     Follower,
     Spell,
@@ -2543,6 +2552,7 @@ pub(super) enum CountKind {
     Spell,
     Amulet,
     Crest,
+    Treasure,
 }
 impl CountKind {
     pub(super) const fn kind(self) -> CardKind {
@@ -2552,6 +2562,7 @@ impl CountKind {
             Self::Spell => CardKind::Spell,
             Self::Amulet => CardKind::Amulet,
             Self::Crest => CardKind::Crest,
+            Self::Treasure => CardKind::Treasure,
         }
     }
 }
@@ -2655,6 +2666,10 @@ pub(super) enum PhaseSubscription {
     AnyOf(Vec<Self>),
     #[serde(rename = "equipped")]
     Equipped(EquippedSubscription),
+    #[serde(rename = "limit_broke")]
+    LimitBroke(SelfLimitBreak),
+    #[serde(rename = "final_limit_broke")]
+    FinalLimitBroke(SelfLimitBreak),
     #[serde(rename = "targeted")]
     Targeted(TargetedSubscription),
     #[serde(rename = "drew")]
@@ -2747,6 +2762,13 @@ pub(super) struct FusedAsMaterialSource {
 #[serde(deny_unknown_fields)]
 pub(super) struct FusedMaterial {
     pub r#trait: String,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct SelfLimitBreak {
+    #[serde(rename = "ref")]
+    pub reference: This,
 }
 
 #[derive(Deserialize)]
@@ -3367,6 +3389,9 @@ pub(super) enum Condition {
     PlayedFrom(PlayedFromCondition),
     Exists(Box<ExistsQuery>),
     Standing(This),
+    LimitBroken(String),
+    FinalLimitBroken(String),
+    FinalLimitBreakPossible(String),
     Awakened(bool),
     LeaderLife(PlayerThreshold),
 

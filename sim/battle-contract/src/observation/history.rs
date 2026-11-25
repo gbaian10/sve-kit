@@ -25,6 +25,8 @@ pub enum HistoryEvent {
 pub enum CardKind {
     /// Crest.
     Crest,
+    /// Treasure token.
+    Treasure,
     /// Evolved follower.
     EvolveFollower,
     /// Follower.

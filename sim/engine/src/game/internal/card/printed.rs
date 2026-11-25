@@ -2,6 +2,7 @@
 use super::{Game, Result, invalid, player_id, printed_origin};
 use crate::EngineFailure;
 use crate::game::Object;
+use crate::game::limit_break::TREASURE;
 use crate::ir::names;
 use crate::ir::{
     AbilityQualification, AssociationId, CardKind, CardName, Characteristics, ClassId,
@@ -131,6 +132,9 @@ impl Game {
         holder: &str,
     ) -> Result<Vec<super::super::admission::PlannedAbility>> {
         let object = self.object(holder)?;
+        if self.treasure_abilities_inactive(holder)? {
+            return Ok(Vec::new());
+        }
         let field = object.zone == "field";
         let ub_enabled = self.internal_ub_enabled(holder)?;
         Ok(self
@@ -358,6 +362,7 @@ impl Game {
                 CardKind::Amulet
             }
             "クレスト・トークン" => CardKind::Crest,
+            TREASURE => CardKind::Treasure,
             _ => return Err(EngineFailure::Unsupported("event card kind".into())),
         };
         let traits = if printed_only {

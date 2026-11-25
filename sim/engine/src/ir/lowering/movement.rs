@@ -123,6 +123,8 @@ pub(super) fn subscription(
         | ast::PhaseSubscription::Banished(_)
         | ast::PhaseSubscription::LifeChanged(_)
         | ast::PhaseSubscription::Equipped(_)
+        | ast::PhaseSubscription::LimitBroke(_)
+        | ast::PhaseSubscription::FinalLimitBroke(_)
         | ast::PhaseSubscription::Targeted(_) => Err(unsupported(path)),
     }
 }

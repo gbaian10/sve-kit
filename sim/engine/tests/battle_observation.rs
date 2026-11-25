@@ -273,7 +273,8 @@ fn board_capacities_follow_movement_limits_without_inventing_other_limits() {
                     | ObservedZone::Race
                     | ObservedZone::Drive
                     | ObservedZone::Trigger
-                    | ObservedZone::Equipment => None,
+                    | ObservedZone::Equipment
+                    | ObservedZone::LimitBreak => None,
                 };
                 assert_eq!(zone.capacity, expected);
             }

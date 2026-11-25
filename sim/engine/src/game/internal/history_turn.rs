@@ -15,6 +15,7 @@ use crate::ir::history_turn::source_link::SourceLink;
 use crate::ir::history_turn::{
     HistoryPlan, NumericHistoryPlan, PlayedBy, PlayedHistoryFilter, SubjectHistoryKind,
 };
+use crate::ir::trait_matches;
 use crate::ir::{Action, Bool, Control, Expr, Node, Program};
 use crate::ir::{CardKind, CardName, ClassId, HistoryCount, Int, Selector, TraitId};
 use crate::ir::{ExecutionRef, Location, PlayerRef, Requirement, Requirements};
@@ -669,11 +670,11 @@ impl Game {
                     fact.source == (holder.id.0, holder.generation.0)
                 } else {
                     fact.controller == controller.seat
-                        && link
-                            .source
-                            .trait_id
-                            .as_ref()
-                            .is_some_and(|id| fact.traits.contains(&id.0))
+                        && link.source.trait_id.as_ref().is_some_and(|id| {
+                            fact.traits
+                                .iter()
+                                .any(|actual| trait_matches(actual, &id.0))
+                        })
                 }
         })
     }

@@ -136,7 +136,8 @@ const fn wire_destination(destination: SelectionDestination) -> Result<wire::Des
         | ObservedZone::Race
         | ObservedZone::Drive
         | ObservedZone::Trigger
-        | ObservedZone::Equipment => return Err(ProjectionError::Unavailable),
+        | ObservedZone::Equipment
+        | ObservedZone::LimitBreak => return Err(ProjectionError::Unavailable),
     };
     Ok(wire::Destination {
         player: seat(destination.player),

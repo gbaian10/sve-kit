@@ -169,6 +169,7 @@ const ZONES: &[&str] = &[
     "drive",
     "trigger",
     "equipment",
+    "limit_break",
 ];
 
 const SELECT_TYPES: &[&str] = &["follower", "evolved_follower", "amulet", "spell", "crest"];

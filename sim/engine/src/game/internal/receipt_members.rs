@@ -1,6 +1,7 @@
 //! Receipt adapters expose only information retained by their checked producer.
 
 use super::{Execution, Fact, Game, InstructionOutcome, Result, invalid, unsupported};
+use crate::game::limit_break::TREASURE;
 use crate::ir::paid_names as ir_paid_names;
 use crate::ir::receipt_reads::paid_movement_id;
 use crate::ir::{
@@ -459,6 +460,7 @@ fn printed_card(game: &Game, execution: &Execution, before: ObjectRef) -> Result
         kind if kind.contains("フォロワー") => CardKind::Follower,
         kind if kind.starts_with("スペル") => CardKind::Spell,
         kind if kind.starts_with("アミュレット") => CardKind::Amulet,
+        TREASURE => CardKind::Treasure,
         _ => return Err(unsupported("receipt member card kind")),
     };
     let text = |value: &serde_json::Value| {

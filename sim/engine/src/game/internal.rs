@@ -12,6 +12,7 @@ use crate::game::player::ExchangeRouteChoice;
 use crate::game::player::observation::CardFace;
 use crate::game::player::{IntegerSource, Viewer};
 use crate::ir::BatchOutcome;
+use crate::ir::LimitBreakEvent;
 use crate::ir::ScheduleToken;
 use crate::ir::effect_evolution::Specification;
 use crate::ir::{
@@ -82,6 +83,7 @@ pub(in crate::game) use drive::LeaderAttackLock;
 mod flip;
 mod grant;
 mod history_turn;
+mod limit_break;
 mod transfer;
 pub(in crate::game) use history_turn::{DamageHistoryFact, DiceHistoryFact};
 pub(super) use history_turn::{
@@ -394,6 +396,8 @@ pub enum InstructionOutcome {
     },
     /// Tokens successfully created and placed, after applying destination capacity.
     Token(TokenOutcome),
+    /// One completed limit break, if the source and follower could perform it.
+    LimitBreak(Option<LimitBreakEvent>),
     /// Successful equipment associations, after physical token creation.
     Equipped(Vec<EquipEvent>),
     /// Source generations successfully changed from printed amulets into followers.
@@ -1908,6 +1912,7 @@ impl Game {
             Action::MealRace { .. } => self.internal_race(execution, &instruction)?,
             Action::Evolve { .. } => self.internal_effect_evolve(execution, &instruction)?,
             Action::Token { .. } => self.internal_tokens(execution, &instruction)?,
+            Action::LimitBreak { .. } => self.internal_limit_break(execution, &instruction)?,
             Action::Equip { .. } => self.internal_equip(execution, &instruction)?,
             Action::BoxPilot {
                 mode: BoxPilotMode::Boxed { .. },

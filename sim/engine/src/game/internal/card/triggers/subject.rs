@@ -117,7 +117,7 @@ impl Game {
                 CardKind::Follower => "follower",
                 CardKind::Spell => "spell",
                 CardKind::Amulet => "amulet",
-                CardKind::EvolveFollower | CardKind::Crest => {
+                CardKind::EvolveFollower | CardKind::Crest | CardKind::Treasure => {
                     return Err(unsupported("history subject kind"));
                 }
             }

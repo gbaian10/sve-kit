@@ -941,6 +941,7 @@ impl Checker {
                 }
                 Ok(())
             }
+            Action::LimitBreak { holder, .. } => self.object(holder),
             Action::Equip {
                 holder, template, ..
             } => {
@@ -1275,6 +1276,7 @@ const fn outcome(action: &Action) -> TypeId {
         | Action::RideDrive { .. }
         | Action::DriveCheck { .. }
         | Action::Equip { .. }
+        | Action::LimitBreak { .. }
         | Action::Dice { .. }
         | Action::Declare { .. }
         | Action::ScheduleTurn { .. }

@@ -4,6 +4,7 @@
 )]
 use serde_json::json;
 
+use super::limit_break::Attachment;
 use super::{Frame, Game, int};
 use crate::{EngineFailure, Result};
 
@@ -12,41 +13,48 @@ use crate::{EngineFailure, Result};
     reason = "State-based cleanup batches share the authoritative game state."
 )]
 impl Game {
-    pub(super) fn clean_equipment_rules(&mut self) -> Result<bool> {
-        let equipment = self
+    pub(super) fn clean_attachment_rules(&mut self) -> Result<bool> {
+        let equipment_changed = self.clean_attachments(Attachment::Equipment)?;
+        let limit_break_changed = self.clean_attachments(Attachment::LimitBreak)?;
+        Ok(equipment_changed || limit_break_changed)
+    }
+
+    fn clean_attachments(&mut self, kind: Attachment) -> Result<bool> {
+        let zone = kind.zone();
+        let attachments = self
             .state
             .objects
             .values()
-            .filter(|object| object.zone == "equipment")
+            .filter(|object| object.zone == zone)
             .cloned()
             .collect::<Vec<_>>();
         let mut changed = false;
-        for object in equipment {
-            let holder = object.state["equipped_to"]
+        for object in attachments {
+            let holder = object.state[kind.link()]
                 .as_str()
                 .and_then(|id| self.state.objects.get(id))
                 .filter(|holder| holder.zone == "field");
             let Some(controller) = holder.map(|holder| holder.controller.clone()) else {
-                self.erase_equipment(&object.id)?;
+                self.erase_attachment(&object.id, kind)?;
                 changed = true;
                 continue;
             };
             if controller != object.controller {
                 self.player_mut(&object.controller)?
                     .zones
-                    .entry("equipment".into())
+                    .entry(zone.into())
                     .or_default()
                     .retain(|id| id != &object.id);
                 self.player_mut(&controller)?
                     .zones
-                    .entry("equipment".into())
+                    .entry(zone.into())
                     .or_default()
                     .push(json!(&object.id));
                 self.object_mut(&object.id)?
                     .controller
                     .clone_from(&controller);
                 let group = self.group();
-                self.emit(json!({"kind":"支配変更","object":object.id,"from":object.controller,"to":controller}), &json!({"rule":"11.11.2"}), group);
+                self.emit(json!({"kind":"支配変更","object":object.id,"from":object.controller,"to":controller}), &json!({"rule":kind.controller_rule()}), group);
                 changed = true;
             }
         }

@@ -33,6 +33,7 @@ pub const ZONES: &[&str] = &[
     "drive",
     "trigger",
     "equipment",
+    "limit_break",
 ];
 
 /// `expected` matches `actual` when every key written in `expected` matches.

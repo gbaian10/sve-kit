@@ -2,6 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
+use super::limit_break::Attachment;
 use super::{Frame, Game, Object, int, list, scalar, string};
 use crate::ir::SnapshotId;
 use crate::{Result, invalid};
@@ -334,26 +335,26 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn erase_equipment(&mut self, id: &str) -> Result<()> {
+    pub(super) fn erase_attachment(&mut self, id: &str, kind: Attachment) -> Result<()> {
         let player_subject = self.player_subject_before(id);
         let object = self.object(id)?.clone();
         let generation = object
             .generation
             .checked_add(1)
-            .ok_or_else(|| invalid("equipment generation exhausted"))?;
+            .ok_or_else(|| invalid("attachment generation exhausted"))?;
         self.player_mut(&object.controller)?
             .zones
-            .entry("equipment".into())
+            .entry(kind.zone().into())
             .or_default()
             .retain(|value| value != id);
-        let equipment = self.object_mut(id)?;
-        equipment.zone = "void".into();
-        equipment.generation = generation;
-        equipment.state["equipped_to"] = Value::Null;
+        let attachment = self.object_mut(id)?;
+        attachment.zone = "void".into();
+        attachment.generation = generation;
+        attachment.state[kind.link()] = Value::Null;
         let group = self.group();
         let player_step = self.emit(
-            json!({"kind":"消去","object":id,"by":"rule-11.11.1"}),
-            &json!({"rule":"11.11.1"}),
+            json!({"kind":"消去","object":id,"by":format!("rule-{}", kind.erasure_rule())}),
+            &json!({"rule":kind.erasure_rule()}),
             group,
         );
         self.player_subject_after(&player_step, player_subject);
@@ -362,7 +363,7 @@ impl Game {
 
     pub(super) fn release_links(&mut self, leaving: &[Object], frame: &Frame) -> Result<()> {
         let mut resources = BTreeSet::new();
-        let mut equipment = BTreeSet::new();
+        let mut attachments = BTreeSet::new();
         for object in leaving {
             if let Some(evolve) = object.state["evolved_with"].as_str() {
                 resources.insert(evolve.to_owned());
@@ -377,15 +378,17 @@ impl Game {
                     );
                 }
             }
-            equipment.extend(
-                self.state
-                    .objects
-                    .values()
-                    .filter(|item| {
-                        item.zone == "equipment" && item.state["equipped_to"] == object.id
-                    })
-                    .map(|item| item.id.clone()),
-            );
+            for kind in [Attachment::Equipment, Attachment::LimitBreak] {
+                attachments.extend(
+                    self.state
+                        .objects
+                        .values()
+                        .filter(|item| {
+                            item.zone == kind.zone() && item.state[kind.link()] == object.id
+                        })
+                        .map(|item| (kind, item.id.clone())),
+                );
+            }
         }
         for id in resources {
             let rule = match self.object(&id)?.zone.as_str() {
@@ -402,8 +405,8 @@ impl Game {
             self.move_objects(from_ref(&id), "evolve_deck", None, None, &rule_frame)?;
             self.object_mut(&id)?.state["face_up"] = json!(true);
         }
-        for id in equipment {
-            self.erase_equipment(&id)?;
+        for (kind, id) in attachments {
+            self.erase_attachment(&id, kind)?;
         }
         Ok(())
     }

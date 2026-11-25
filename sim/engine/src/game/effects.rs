@@ -13,6 +13,7 @@ use crate::{EngineFailure, Result, invalid};
 pub(super) fn token_erasure_zone(kind: &str, destination: &str) -> bool {
     match kind {
         "イクイップメント・トークン" => destination != "equipment",
+        super::limit_break::TREASURE => !matches!(destination, "ex" | "limit_break"),
         "クレスト・トークン" => destination != "ex",
         "スペル・トークン" => !matches!(destination, "ex" | "resolution"),
         _ => kind.contains("トークン") && !matches!(destination, "field" | "ex" | "resolution"),
@@ -785,6 +786,11 @@ impl Game {
         }
         for (viewer, members) in learned {
             self.learn_members(&viewer, &members, true)?;
+        }
+        for plan in &plans {
+            if plan.changed && plan.previous.zone == "limit_break" {
+                self.remove_limit_break_bonus(&plan.previous)?;
+            }
         }
         self.internal_commit_departures(typed_departures)?;
         self.internal_numeric_cleanup()?;

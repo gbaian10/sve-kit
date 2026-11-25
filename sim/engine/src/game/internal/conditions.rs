@@ -1,7 +1,9 @@
 //! Candidate conditions can only read properties supplied by their authorized adapter.
 
 use super::{Result, unsupported, values};
+use crate::game::limit_break::TREASURE;
 use crate::ir::public_numbers;
+use crate::ir::trait_matches;
 use crate::ir::{
     AbilitiesRead, AbilityPredicate, AbilityReference, Binding, Bool, BoolRead, BooleanState,
     CardKind, CardName, CharacteristicView, ClassRead, Comparison, CounterKind, EvolutionRead,
@@ -613,12 +615,10 @@ impl PreparedAtom {
             }
             Self::Labels(property, Operand::Value(expected)) => {
                 reader.matches_labels(property, &|actual| {
-                    expected.iter().any(|expected| {
-                        if matches!(property, LabelsProperty::Kind(_)) {
-                            actual.contains(expected)
-                        } else {
-                            actual == expected
-                        }
+                    expected.iter().any(|expected| match property {
+                        LabelsProperty::Kind(_) => actual.contains(expected),
+                        LabelsProperty::Traits(_) => trait_matches(actual, expected),
+                        LabelsProperty::Names | LabelsProperty::Class(_) => actual == expected,
                     })
                 })
             }
@@ -641,5 +641,6 @@ const fn kind_name(kind: CardKind) -> &'static str {
         CardKind::Amulet => "アミュレット",
         CardKind::EvolveFollower => "フォロワー・エボルヴ",
         CardKind::Crest => "クレスト",
+        CardKind::Treasure => TREASURE,
     }
 }

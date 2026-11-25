@@ -134,6 +134,8 @@ pub enum PrintedKeyword {
     TwinDrive,
     /// Printed Start Amulet; only the title opening reads it.
     StartAmulet,
+    /// Printed eligibility for a final limit break.
+    FinalLimitBreakPossible,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Deserialize, Serialize)]
@@ -291,7 +293,7 @@ impl PrintedKeywordsObligation {
             && permanent(&self.frame_id, "frame:", 64)
             && permanent(&self.interface_key, "", 64)
             && !self.declaration.keywords.is_empty()
-            && self.declaration.keywords.len() <= 7
+            && self.declaration.keywords.len() <= 8
             && self
                 .declaration
                 .keywords

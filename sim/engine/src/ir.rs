@@ -214,6 +214,16 @@ pub use events::*;
 pub use flow::*;
 pub use projections::*;
 pub use runtime::*;
+
+/// CR 14.6.2 broadens references to the six elemental types.
+pub(crate) fn trait_matches(actual: &str, expected: &str) -> bool {
+    actual == expected
+        || (actual == "全属性"
+            && matches!(
+                expected,
+                "火属性" | "水属性" | "土属性" | "風属性" | "光属性" | "闇属性"
+            ))
+}
 pub use values::*;
 pub use wellformed::{
     WellFormedCardProgram, WellFormedError, WellFormedProcedure, WellFormedProgram,

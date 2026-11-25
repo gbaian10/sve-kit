@@ -250,6 +250,7 @@ pub(super) fn object_filter(
 pub(super) const fn card_kind(kind: &ast::SearchKind) -> CardKind {
     match kind {
         ast::SearchKind::Follower => CardKind::Follower,
+        ast::SearchKind::Treasure => CardKind::Treasure,
         ast::SearchKind::Spell => CardKind::Spell,
         ast::SearchKind::Amulet => CardKind::Amulet,
         ast::SearchKind::EvolveFollower => CardKind::EvolveFollower,

@@ -79,6 +79,7 @@ pub(super) fn keyword_id(keyword: &str) -> Option<KeywordId> {
     match keyword {
         "stack" => Some(KeywordId::Stack),
         "ward" => Some(KeywordId::Ward),
+        "final_limit_break_possible" => Some(KeywordId::FinalLimitBreakPossible),
         "aura" => Some(KeywordId::Aura),
         "storm" => Some(KeywordId::Storm),
         "rush" => Some(KeywordId::Rush),

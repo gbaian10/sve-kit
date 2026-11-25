@@ -285,6 +285,7 @@ function observe(table: TableSpec, viewer: Seat): BattleObservation {
         drive: EMPTY,
         trigger: EMPTY,
         equipment: EMPTY,
+        limit_break: EMPTY,
       },
     }
   }

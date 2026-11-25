@@ -5,6 +5,7 @@ use super::{
 };
 use crate::game::Object;
 use crate::game::effects::token_erasure_zone;
+use crate::game::limit_break::TREASURE;
 use crate::ir::Requirements;
 use crate::ir::events::timing::opponent;
 use crate::ir::hand_position;
@@ -523,6 +524,7 @@ impl Game {
                     | "スペル・トークン"
                     | "イクイップメント・トークン"
                     | "クレスト・トークン"
+                    | TREASURE
             ))
             || (previous
                 .state

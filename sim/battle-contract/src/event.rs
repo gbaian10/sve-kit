@@ -377,6 +377,15 @@ pub enum EventBody {
         /// Rules action or effect.
         role: EvolutionRole,
     },
+    /// A follower completed a limit break.
+    LimitBroken {
+        /// The treasure used.
+        material: Option<Subject>,
+        /// The follower that completed the limit break.
+        follower: Option<Subject>,
+        /// Whether this was a final limit break.
+        final_break: bool,
+    },
     /// Equipment was attached.
     Equipped {
         /// The equipment.

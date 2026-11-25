@@ -52,10 +52,20 @@ runtime_variants!(EventPayload {
     DriveTrigger { event: DriveTriggerEvent },
     UbActivated { event: UbActivatedEvent },
     Fused { event: FusedEvent },
+    LimitBreak { event: LimitBreakEvent },
     Equip { event: EquipEvent },
     Dice { event: DiceEvent },
     DriveChecked { event: DriveCheckedEvent }
 });
+
+runtime_record!(
+    #[derive(Copy)]
+    LimitBreakEvent {
+        holder: ObjectRef,
+        material: ObjectRef,
+        final_break: bool
+    }
+);
 
 runtime_variants!(#[derive(Copy)] PlaySubject { Card { object: ObjectRef }, Ability { ability: RuntimeAbilityReference } });
 

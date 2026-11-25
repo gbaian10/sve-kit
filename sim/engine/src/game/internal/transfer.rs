@@ -72,7 +72,7 @@ impl Game {
             let previous_controller = object.controller.clone();
             let group = self.group();
             self.transfer_field_controller(id, controller, &execution.frame().cause, group)?;
-            self.clean_equipment_rules()?;
+            self.clean_attachment_rules()?;
             execution.record_transferred_controller(member, &previous_controller, controller);
             transferred.push(member);
         }

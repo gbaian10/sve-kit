@@ -65,6 +65,7 @@ const fn zone(zone: Option<ObservedZone>) -> u8 {
         Some(ObservedZone::Drive) => 11,
         Some(ObservedZone::Trigger) => 12,
         Some(ObservedZone::Equipment) => 13,
+        Some(ObservedZone::LimitBreak) => 14,
     }
 }
 

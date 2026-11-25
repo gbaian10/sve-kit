@@ -1130,12 +1130,12 @@ impl SubjectFilter {
             && self
                 .trait_id
                 .as_ref()
-                .is_none_or(|id| characters.traits.contains(id))
+                .is_none_or(|id| id.matches_any(characters.traits))
             && (self.traits_any.is_empty()
                 || self
                     .traits_any
                     .iter()
-                    .any(|id| characters.traits.contains(id)))
+                    .any(|id| id.matches_any(characters.traits)))
             && self
                 .name
                 .as_ref()

@@ -107,6 +107,10 @@ pub enum TriggerTiming {
     Dice,
     /// Equipment is attached.
     Equip,
+    /// The follower completed a normal limit break.
+    LimitBreak,
+    /// The follower completed a final limit break.
+    FinalLimitBreak,
     /// A card moves.
     Move,
     /// A race completes.

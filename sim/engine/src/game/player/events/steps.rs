@@ -39,6 +39,8 @@ fn action_kind(tag: &str) -> Result<ActionKind, EventError> {
         "取代" => ActionKind::Replacement,
         "消去" => ActionKind::Erase,
         "装備" => ActionKind::Equip,
+        "上限解放" => ActionKind::LimitBreak,
+        "最終上限解放" => ActionKind::FinalLimitBreak,
         "進化" | "超進化" => ActionKind::Evolve,
         "カウンター" => ActionKind::Counter,
         "回復" | "PP最大値変化" | "EP変化" | "体力増加" => ActionKind::Resource,
@@ -115,7 +117,10 @@ impl Game {
             Some(zone(&object.zone).map_err(|_authority_error| EventError::ProjectionGap)?)
         };
         let card = self.event_card(perspective, id, false)?;
-        let position = if card.is_some() && (object.zone != "hand" || perspective == player) {
+        let position = if card.is_some()
+            && object.zone != "limit_break"
+            && (object.zone != "hand" || perspective == player)
+        {
             self.object_position(id)
                 .map_err(|_authority_error| EventError::ProjectionGap)?
         } else {
@@ -617,6 +622,7 @@ impl Game {
                 "attacker",
                 "target",
                 "equipment",
+                "material",
                 "with",
             ] {
                 if let Some(id) = event[key].as_str() {

@@ -532,6 +532,9 @@ impl Game {
         &self,
         holder: &str,
     ) -> Result<Vec<EffectiveAbility>> {
+        if self.treasure_abilities_inactive(holder)? {
+            return Ok(Vec::new());
+        }
         let mut result = self.internal_local_abilities(holder)?;
         for (ability, origin) in self.internal_static_grants(holder)? {
             if let GrantedAbility::Definition { ability } = ability {

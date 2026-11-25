@@ -652,7 +652,8 @@ impl Checker {
                     | ZoneKind::Race
                     | ZoneKind::Drive
                     | ZoneKind::Trigger
-                    | ZoneKind::Equipment,
+                    | ZoneKind::Equipment
+                    | ZoneKind::LimitBreak,
                 ..
             }
             | Selector::Filter { .. }

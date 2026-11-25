@@ -2,6 +2,7 @@
 
 use super::observation::{EffectOrigin, SourceIdentity};
 use super::{Execution, Game, Result, Slot, invalid, unsupported};
+use crate::game::limit_break::TREASURE;
 use crate::game::player::Viewer;
 use crate::game::{Frame, Object};
 use crate::ir::events::numbers;
@@ -609,6 +610,7 @@ impl Game {
             "アミュレット" | "アミュレット・トークン" | "アミュレット・エボルヴ" => {
                 Some(CardKind::Amulet)
             }
+            TREASURE => Some(CardKind::Treasure),
             _ => None,
         };
         Ok(PublicCharacteristics {

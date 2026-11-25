@@ -1,6 +1,28 @@
 {
   "viewer": "p1",
   "objects": {
+    "o6": {
+      "card": {
+        "printing_id": "SYN01-006",
+        "face": 0
+      },
+      "effective_face": {
+        "printing_id": "SYN01-006",
+        "face": 0
+      },
+      "owner": "p1",
+      "controller": "p1",
+      "knowledge": "public",
+      "facing": "up",
+      "characteristics": {
+        "rules_names": ["合成上限解放素材"],
+        "card_type": "トレジャー・トークン",
+        "traits": ["火属性"],
+        "classes": ["合成クラス"],
+        "cost": null
+      },
+      "state": null
+    },
     "o1": {
       "card": {
         "printing_id": "SYN01-001",
@@ -782,6 +804,11 @@
           "count": 0,
           "capacity": null,
           "cards": []
+        },
+        "limit_break": {
+          "count": 1,
+          "capacity": null,
+          "cards": [{ "position": null, "object": "o6" }]
         }
       }
     },
@@ -871,6 +898,11 @@
           "count": 0,
           "capacity": null,
           "cards": []
+        },
+        "limit_break": {
+          "count": 0,
+          "capacity": null,
+          "cards": []
         }
       }
     }
@@ -879,6 +911,11 @@
     {
       "kind": "evolution",
       "from": "o4",
+      "to": "o1"
+    },
+    {
+      "kind": "limit_break",
+      "from": "o6",
       "to": "o1"
     }
   ],

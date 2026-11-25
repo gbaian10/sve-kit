@@ -20,6 +20,7 @@ pub mod internal;
 mod keywords;
 mod knowledge;
 mod legal;
+mod limit_break;
 mod movement;
 mod nested;
 mod opening;
@@ -366,7 +367,7 @@ impl fmt::Debug for Game {
     }
 }
 
-const ZONES: [&str; 14] = [
+const ZONES: [&str; 15] = [
     "deck",
     "evolve_deck",
     "hand",
@@ -380,6 +381,7 @@ const ZONES: [&str; 14] = [
     "drive",
     "trigger",
     "equipment",
+    "limit_break",
     "void",
 ];
 
@@ -485,6 +487,11 @@ impl Game {
                         usize::try_from(int(&item["state"]["face"])).map_err(invalid)?
                     };
                     let face = catalog.face(&card, face_index)?;
+                    if face["card_type"] == limit_break::TREASURE
+                        && !matches!(zone, "ex" | "limit_break" | "void")
+                    {
+                        return Err(invalid("treasure outside EX or limit-break area"));
+                    }
                     let mut attrs = json!({"power":scalar(&face["power"]),"hp":scalar(&face["hp"]),"max_hp":scalar(&face["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":face_index,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
                     if let Some(patch) = item["state"].as_object() {
                         for (key, value) in patch {
@@ -666,6 +673,7 @@ impl Game {
             referee_events: None,
         };
         game.initialize_evolved(&position)?;
+        game.initialize_limit_breaks()?;
         game.initialize_history(&position)?;
         for seat in ["P1", "P2"] {
             let visible = game
@@ -847,7 +855,8 @@ impl Game {
             return Ok(Vec::new());
         }
         let source = self.information_source(id)?;
-        if self.card_runtime.is_loaded(&source.card)
+        if self.treasure_abilities_inactive(id)?
+            || self.card_runtime.is_loaded(&source.card)
             || self.internal_evolution_resource(&source.id)?
         {
             return Ok(Vec::new());

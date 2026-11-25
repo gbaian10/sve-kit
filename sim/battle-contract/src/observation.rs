@@ -223,6 +223,8 @@ pub struct Zones {
     pub trigger: ZoneView,
     /// Equipment area.
     pub equipment: ZoneView,
+    /// Public area for attached limit-break materials.
+    pub limit_break: ZoneView,
 }
 
 /// One player's public resources, effects and zones; the leader is not an object.
@@ -286,6 +288,8 @@ pub enum RelationshipKind {
     Evolution,
     /// Equipment on its bearer.
     Equipment,
+    /// A treasure supplying a normal or final limit break.
+    LimitBreak,
     /// A rider on its mount.
     Ride,
     /// A card in the race area and its field card.
