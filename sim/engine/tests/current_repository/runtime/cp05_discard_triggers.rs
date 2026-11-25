@@ -35,7 +35,7 @@ fn discard_everything(game: &mut Game, actor: PlayerId, side: &str) -> CardPlay 
     let mut tree = expanded::tree().clone();
     let mut row = tree["cards"]["BP01-041"].clone();
     let mut entry = row["abilities"][0].clone();
-    entry["activate"] = json!({"cost":{"pp":0},"do":[{"discard":{"who":side,"all":true}}]});
+    entry["activate"] = json!({"cost":{"pp":0_u8},"do":[{"discard":{"who":side,"all":true}}]});
     row["abilities"] = json!([entry]);
     tree["cards"] = json!({"producer":row});
     let discard = lowerer().lower(&tree).unwrap().remove("producer").unwrap();
@@ -58,9 +58,12 @@ fn pending_card(game: &mut Game, number: &str, count: usize) -> CardPlay {
     let InputDomain::Pending(options) = &question.domain else {
         panic!("expected printed pending abilities");
     };
-    assert_eq!(options.len(), count);
+    assert_eq!(options.len(), count, "only matching discards may trigger");
     let occurrence = options.iter().find(|option| option.card == number).unwrap();
-    assert_eq!(occurrence.event, "Discard");
+    assert_eq!(
+        occurrence.event, "Discard",
+        "the printed ability observes discard"
+    );
     game.answer_internal_card(
         question.actor,
         question.token,
