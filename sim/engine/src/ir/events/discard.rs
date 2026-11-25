@@ -137,23 +137,25 @@ impl DiscardCard {
             let Expr::Compute(operation) = predicate else {
                 continue;
             };
-            match operation.as_ref() {
-                Predicate::KindEquals {
-                    right: Expr::Literal(kind),
-                    ..
-                } => {
-                    card.kind = Some(*kind);
-                }
-                Predicate::ClassEquals {
-                    right: Expr::Literal(Info::Present(class)),
-                    ..
-                } if !class.0.trim().is_empty() => {
-                    card.class = Some(class.clone());
-                }
-                Predicate::HasTrait { trait_id, .. } if !trait_id.0.trim().is_empty() => {
-                    card.trait_id = Some(trait_id.clone());
-                }
-                _ => {}
+            if let Predicate::KindEquals {
+                right: Expr::Literal(kind),
+                ..
+            } = operation.as_ref()
+            {
+                card.kind = Some(*kind);
+            }
+            if let Predicate::ClassEquals {
+                right: Expr::Literal(Info::Present(class)),
+                ..
+            } = operation.as_ref()
+                && !class.0.trim().is_empty()
+            {
+                card.class = Some(class.clone());
+            }
+            if let Predicate::HasTrait { trait_id, .. } = operation.as_ref()
+                && !trait_id.0.trim().is_empty()
+            {
+                card.trait_id = Some(trait_id.clone());
             }
         }
         (card.kind.is_some() || card.class.is_some() || card.trait_id.is_some()).then_some(card)
