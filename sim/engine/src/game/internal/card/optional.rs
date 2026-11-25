@@ -853,6 +853,7 @@ impl Game {
             match self.internal_probe_hand_payments(&mut probe, &[&payment.costs]) {
                 Ok(()) => {}
                 Err(crate::EngineFailure::IllegalPlay(_)) => {
+                    // Only player answers are recorded as declarations.
                     payment.accepted = Some(false);
                     return self.internal_optional_decision(execution, play);
                 }

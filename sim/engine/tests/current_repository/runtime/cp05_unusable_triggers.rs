@@ -41,7 +41,8 @@ fn play(game: &mut Game, printing: &str) {
             },
         )
         .kind,
-        SubmissionKind::Applied
+        SubmissionKind::Applied,
+        "the follower must enter before its Fanfare is checked"
     );
 }
 
@@ -59,7 +60,7 @@ fn cancel_unusable_trigger(game: &mut Game) {
     let QuestionShape::Decision(DecisionShape::Pending(options)) = &order.shape else {
         panic!("expected the pending ability");
     };
-    assert_eq!(options.len(), 1);
+    assert_eq!(options.len(), 1, "only the tested ability should be pending");
     assert_eq!(
         game.submit_player(
             Viewer::P1,
@@ -118,6 +119,22 @@ fn cp05_unusable_triggers_skip_fanfare_with_only_two_reveals() {
     assert_eq!(view["P1"]["hand"], json!(["fire1", "fire2", "other"]));
     assert_eq!(view["P1"]["leader"]["life"], 15_u8);
     assert_eq!(view["P1"]["ex"], json!([]));
+}
+
+#[test]
+fn cp05_unusable_triggers_skip_fanfare_when_no_discard_matches() {
+    let mut initial = draw_position();
+    let zones = &mut initial["players"]["P1"]["zones"];
+    zones["hand"] = json!([{"id":"meg","card":"CP05-058"},{"id":"other","card":"BP01-171"}]);
+    zones["deck"] = json!([{"id":"top","card":"BP01-171"}]);
+    let mut game = game(&initial);
+    play(&mut game, "CP05-058");
+    cancel_unusable_trigger(&mut game);
+    assert_main(&game);
+    let view = game.projection(View::Referee).unwrap();
+    assert_eq!(view["P1"]["field"], json!(["meg"]));
+    assert_eq!(view["P1"]["hand"], json!(["other"]));
+    assert_eq!(view["P1"]["deck"], json!(["top"]));
 }
 
 #[test]
@@ -227,4 +244,45 @@ fn cp05_unusable_triggers_continue_the_attack_without_a_required_target() {
     let view = game.projection(View::Referee).unwrap();
     assert_eq!(view["P2"]["leader"]["life"], 14_u8);
     assert_eq!(view["P1"]["hand"], json!(["fire1", "fire2", "fire3"]));
+}
+
+#[test]
+fn cp05_unusable_triggers_keep_the_limit_break_when_its_ability_cannot_be_played() {
+    for (pp, enemy) in [(2_u8, true), (3, false)] {
+        let mut initial = draw_position();
+        let p1 = &mut initial["players"]["P1"];
+        p1["pp"]["current"] = json!(pp);
+        p1["zones"]["field"] = json!([{"id":"source","card":"CP05-107"}]);
+        p1["zones"]["ex"] = json!([{"id":"material","card":"CP05-T15"}]);
+        if enemy {
+            initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP01-037"}]);
+        }
+        let mut game = game(&initial);
+        let activation = game.internal_activated_sources("material").unwrap()[0].definition;
+        let CardPlay::Awaiting(target) =
+            game.activate_internal_card("material", activation, P1).unwrap()
+        else {
+            panic!("the material must target Gran and Djeeta");
+        };
+        let InputDomain::Targets(domain) = &target.domain else {
+            panic!("expected an allied follower target");
+        };
+        assert_eq!(domain.members.len(), 1);
+        resolved(
+            game.answer_internal_card(
+                target.actor,
+                target.token,
+                Answer::Targets(vec![domain.members[0].handle]),
+            )
+            .unwrap(),
+        );
+        game.advance_player_input();
+        cancel_unusable_trigger(&mut game);
+        assert_main(&game);
+        let view = game.projection(View::Referee).unwrap();
+        assert_eq!(view["P1"]["limit_break"], json!(["material"]));
+        assert_eq!(view["P1"]["ex"], json!([]));
+        assert_eq!(view["P1"]["pp"]["current"], pp);
+        assert_eq!(view["P2"]["leader"]["life"], 20_u8);
+    }
 }

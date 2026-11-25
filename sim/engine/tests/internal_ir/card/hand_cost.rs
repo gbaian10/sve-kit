@@ -331,13 +331,7 @@ fn filtered_trigger_head_declares_before_private_materials_and_can_decline_or_fa
         assert_eq!(declare.domain, InputDomain::OptionalCost);
         let play =
             game.answer_internal_card(declare.actor, declare.token, Answer::OptionalCost(accept));
-        if !accept {
-            assert!(matches!(play.unwrap(), CardPlay::Cancelled));
-            assert_eq!(
-                game.projection(View::Referee).unwrap()["P1"]["hand"],
-                json!(["h"])
-            );
-        } else {
+        if accept {
             let CardPlay::Awaiting(materials) = play.unwrap() else {
                 panic!("private hand materials");
             };
@@ -361,6 +355,12 @@ fn filtered_trigger_head_declares_before_private_materials_and_can_decline_or_fa
             );
             assert_eq!(
                 game.projection(View::Referee).unwrap()["P1"]["cemetery"],
+                json!(["h"])
+            );
+        } else {
+            assert!(matches!(play.unwrap(), CardPlay::Cancelled));
+            assert_eq!(
+                game.projection(View::Referee).unwrap()["P1"]["hand"],
                 json!(["h"])
             );
         }
