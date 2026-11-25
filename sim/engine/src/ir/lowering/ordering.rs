@@ -67,6 +67,14 @@ impl BodyContext<'_> {
             let maximum = match (&value.any, &value.n) {
                 (Some(_), None) | (None, Some(ast::DiscardCount::Number(_))) => None,
                 (None, Some(ast::DiscardCount::Fixed(1))) => Some(Nat(1)),
+                (None, None)
+                    if value
+                        .reference
+                        .as_ref()
+                        .is_some_and(|reference| self.hand_targets.contains(reference)) =>
+                {
+                    None
+                }
                 _ => return Err(unsupported(path)),
             };
             return super::payment::record_discard(

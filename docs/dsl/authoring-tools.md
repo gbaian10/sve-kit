@@ -740,7 +740,9 @@ BP18-007 的 Fanfare 以 `not: {entered_from: {ref: this, from: hand}}` 判斷�
 
 牌庫送墓用 `moved: {from: {who: opp, zone: deck}, to: cemetery}`，例如 BP05-029 的「自分のターン中、相手のデッキ1枚が墓場に置かれたとき」再加 `during: {turn: self}`。每張從牌庫移到墓場的卡各觸發一次；被移動的卡沒有場上資訊，`who` 必填，`ref`、`sel` 與其他目的地拒絕。這個訂閱只由場上的卡觀察。
 
-`discard: {any: true, who: self, result: discarded}` 讓控制者從自己的現有手牌選任意張數（含零），透過私有選擇問題回答。`count_of: discarded` 讀取實際捨棄成功的張數，可用 `draw: {n: {plus: [{count_of: discarded}, 1]}}` 接續抽牌。效果本文的 `discard: {who: self, n: 1, result: discarded}` 也可讀取成功張數：幼狼奮闘以 `optional` 包住捨棄，再用 `count_of: discarded` 等於 1 決定是否堆墓；空手牌接受時仍是零張，拒絕時不執行分支。單張回條也沿用既有 `count: {in: {objects_of: discarded, view: before}, kind: spell}` 的牌面條件計數，空回條為零；這不是保證支付的一張成本，不能用 `cost_of` 讀原費。這次不開放多張固定數量、隨機、全捨、對手或手牌篩選的結果命名。
+`discard: {any: true, who: self, result: discarded}` 讓控制者從自己的現有手牌選任意張數（含零），透過私有選擇問題回答。`count_of: discarded` 讀取實際捨棄成功的張數，可用 `draw: {n: {plus: [{count_of: discarded}, 1]}}` 接續抽牌。效果本文的 `discard: {who: self, n: 1, result: discarded}` 也可讀取成功張數：幼狼奮闘以 `optional` 包住捨棄，再用 `count_of: discarded` 等於 1 決定是否堆墓；空手牌接受時仍是零張，拒絕時不執行分支。單張回條也沿用既有 `count: {in: {objects_of: discarded, view: before}, kind: spell}` 的牌面條件計數，空回條為零；這不是保證支付的一張成本，不能用 `cost_of` 讀原費。多張固定數量、隨機、全捨或對手棄牌不接受結果命名。
+
+本文可先由 `choose.from: {who: self, zone: hand, ...}` 私下篩選，再以 `discard: {ref: chosen, result: discarded}` 命名捨棄回條。`upto: 1` 允許不選；只有仍在自己手牌的選取世代能捨棄，`count_of: discarded` 依實際成功的張數決定後續指示（CP05-104 的搜尋）。這個回條的張數上限未定，不開放保證單張的屬性讀取。
 
 效果本文的 `discard: {who: self, n: {x_paid: fairies}}` 讓控制者從自己的現有手牌私下選擇與數值相同的張數（BP22-002「EXエリアの妖精・カードX枚を消滅：X枚引く。自分の手札X枚を捨てる。」）。數值在該指示結算時讀取（之前的指示已生效），這裡是頭付款實際消滅的張數，抽牌與棄牌讀同一個回條；零或負數不棄牌也不發問，手牌不足時捨棄全部。`who: opp` 由對手從自己的手牌選；`random: true` 從整個手牌隨機捨棄該數值張數；`result` 可命名實際捨棄的回條，上限與任意張數捨棄相同視為未定。動態數量降低為 `DiscardMode::ChosenCount`，隨機時降低為讀同一數值的 `DiscardMode::Random`；`n` 與 `any`／`all`／`ref` 是不同的捨棄形狀，不能並用。手牌篩選（`sel`）仍是捨棄的共同缺口，常值與數值張數都尚未支援。
 
@@ -913,6 +915,8 @@ apply:
 印刷的自身移動免疫使用 `static.effects`：`cannot: {what: destroy, on: this, by: ability}` 阻止能力直接破壞，`cannot: {what: banish, on: this}` 阻止消滅；`on` 省略也指自身。每次處理依持有者當下有效卡面及能力重讀，失去能力後不再保護；不另安裝有期限的狀態。禁止的指示沒有成功移動回條，也不產生離場或破壞事件。能力傷害或交戰傷害造成體力歸零仍會規則破壞，直接送墓不等於破壞（Q802、Q2263、Q2836）。本入口只接受無條件的自身宣告，不接受其他接受者、`static.while`、施加式免疫、未限定原因的 `destroy` 或 `banish:by:ability`。同一段印刷能力同時包含自身能力防傷時，須保留為一個 `static` 宣告；能力防傷可用靜態專用的 `if: {cond, then: [{prevent: {kind: ability}}]}` 控制，無條件的 `cannot` 放在同層。此形式只收自身能力防傷與自身移動免疫，不接受 `else`、巢狀分支或其他持續效果。
 
 私有看牌後，`choose.from: {in: seen, kind: follower, trait: かげろう, except: {in: seen, name: ドラゴンナイト アリフ}}` 可排除同一批已觀察牌中的單一字面名字，並保留其餘種類、特徵條件。它與排除持有者同名的 `not_same_name_as_this` 不同；此例的持有者是進化後異名卡。`except` 的觀察綁定必須相同、名字非空；不開放公開目標、手牌選卡、搜尋、聯集或分組選卡，也不接受和 `not_same_name_as_this` 合用。未選牌仍沿既有 Look receipt 的成功移動差集與排序流程處理。
+
+依能力持有者排除同名時，在同一觀察查詢加 `not_same_name_as_this: true`。它可與卡種、類型及印刷原費一起篩選。若選中的牌要入場，用具名的 `move.result` 記錄實際入場者，再從同一 Look 的餘牌扣除該回條的成功 Before 成員（CP05-090）。
 
 移動結果的數值後續可寫 `agg: {of: {in: {follow: placed}}, attr: orig_cost, fn: sum}`（BP13-050）或 `agg: {of: {in: {follow: entered}}, attr: hp, fn: sum}`（BP20-066／PR-548）。生產者限自己的牌庫頂端移動，以及私有 Look 選牌後的移動；`orig_cost` 只讀實際到達 EX 的成員，`hp` 只讀實際入場從者的當前有效體力，包含已生效的數值修正及傷害。數值本身須是這個 `agg`，消費端限 `life.delta` 或同量傷害的 `damage.n`；不開放其他算術包裝、費用／攻擊力、min／max、before、搜尋或建立 token 的結果，也不接受額外集合篩選。
 

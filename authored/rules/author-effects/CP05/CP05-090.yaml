@@ -1,0 +1,51 @@
+format: 2
+kind: author_effect_set
+cards:
+  CP05-090:
+    admission: light
+    meta:
+      written_by:
+        - actor:
+            who: Codex
+            model: gpt-6.2-sol
+          date: "2026-11-25"
+    abilities:
+      - line: 1
+        keywords: [final_limit_break_possible]
+      - line: 2
+        auto:
+          on:
+            limit_broke: { ref: this }
+          do:
+            - choose:
+                bind: picked
+                from: { who: self, zone: hand, kind: follower, orig_cost_eq: 5, trait: グラブル }
+                upto: 1
+            - move: { ref: picked, to: field, result: entered }
+      - line: 3
+        auto:
+          on:
+            final_limit_broke: { ref: this }
+          cost: { pp: 2 }
+          do:
+            - look:
+                bind: seen
+                top: { who: self, n: 5 }
+            - choose:
+                bind: picked
+                from:
+                  in: seen
+                  kind: follower
+                  orig_cost_eq: 5
+                  trait: グラブル
+                  not_same_name_as_this: true
+                upto: 1
+            - move: { ref: picked, to: field, result: entered }
+            - move:
+                ref:
+                  in: seen
+                  except:
+                    in: { objects_of: entered, view: before }
+                to: deck
+                position: bottom
+                order: chooser
