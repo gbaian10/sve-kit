@@ -37,8 +37,8 @@ jobs:
       python_runtime: ${{ steps.filter.outputs.python_runtime == 'true' || steps.filter.outputs.shared == 'true' }}
       rust: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true') }}
       web: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true') }}
-      # Engine changes must still compile to WebAssembly; the web job builds its own copy.
-      engine_wasm: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true') }}
+      # Rust-only changes still need a WASM build. Web runs already build and measure it.
+      engine_wasm: ${{ github.event.pull_request.draft != true && steps.filter.outputs.rust == 'true' && steps.filter.outputs.web != 'true' && steps.filter.outputs.shared != 'true' }}
       scan: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.scan == 'true' || steps.filter.outputs.shared == 'true') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -831,7 +831,6 @@ jobs:
         with:
           cache: true
           cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
-      # Every web script first generates the battle contract types and validator from sim/battle-contract.
       - name: Install the pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2.9.3
@@ -852,9 +851,11 @@ jobs:
         with:
           tool: wasm-bindgen@0.2.129
       - name: Build the engine to WebAssembly
-        run: bun run build:engine
+        run: |
+          bun run build:engine
+          bun run scripts/engine/size.ts >> "$GITHUB_STEP_SUMMARY"
       - name: Web formatting, lint, types and both Knip modes
-        run: bun run format:check && bun run lint:all && bun run typecheck && bun run knip
+        run: bun run format:check && bun run lint:prepared && bun run typecheck:prepared && bun run knip:prepared
       - name: Vitest
         id: tests
         env:
@@ -866,7 +867,7 @@ jobs:
           status=0
           start=$SECONDS
           export SVE_PUBLIC_JUNIT="$REPORT_DIR/junit-public.xml"
-          bun run test:all --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
+          bun run test:prepared --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
             --reporter=./scripts/ci/public-junit-reporter.ts \
             --retry=2 --coverage --coverage.reportsDirectory="$REPORT_DIR/coverage" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
@@ -926,7 +927,7 @@ jobs:
       - name: Web build
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-        run: bun run build:all
+        run: bun run build:prepared
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:

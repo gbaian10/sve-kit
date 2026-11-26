@@ -113,7 +113,7 @@ job = "repo"
 [hooks.yaml-block-style]
 job = "repo"
 
-# The web job calls the same package.json scripts in separate steps.
+# The web job shares these checks through the prepared package.json scripts.
 [hooks.web-eslint]
 job = "web"
 
