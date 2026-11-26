@@ -160,6 +160,23 @@ export function KeywordFilter({
       </div>
       <div role="tabpanel" aria-labelledby={`${id}-${relation}`}>
         <p className="mt-2 text-12 text-text-2">{t(`filters.keywordRelationHints.${relation}`)}</p>
+        {/* Gaps in the tags sit above the buttons so a short popover never hides them. */}
+        <p className="mt-1 text-12 text-text-2 empty:hidden" role="status">
+          {loading
+            ? t("filters.keywordLoading")
+            : disabled
+              ? edition === "en"
+                ? t("filters.keywordEnglishUnknown")
+                : t("filters.keywordUnknown")
+              : unknownCards !== undefined && unknownCards > 0
+                ? t("filters.keywordUnknownCount", {
+                    count: unknownCards,
+                    relation: t(`filters.keywordRelations.${relation}`),
+                  })
+                : coverage === "partial"
+                  ? t("filters.keywordPartial")
+                  : null}
+        </p>
         <div className="mt-2 grid grid-cols-4 gap-2">
           {PANEL_KEYWORDS.flatMap((keywordId) => {
             const keyword = options?.keywords.find((item) => item.id === keywordId)
@@ -208,24 +225,7 @@ export function KeywordFilter({
             )
           })}
         </div>
-        <p className="mt-2 text-11 text-text-3">{t("filters.keywordCycle")}</p>
-        {/* The match control above already states any/all, so only gaps in the tags are reported. */}
-        <p className="mt-1 text-12 text-text-3 empty:hidden" role="status">
-          {loading
-            ? t("filters.keywordLoading")
-            : disabled
-              ? edition === "en"
-                ? t("filters.keywordEnglishUnknown")
-                : t("filters.keywordUnknown")
-              : unknownCards !== undefined && unknownCards > 0
-                ? t("filters.keywordUnknownCount", {
-                    count: unknownCards,
-                    relation: t(`filters.keywordRelations.${relation}`),
-                  })
-                : coverage === "partial"
-                  ? t("filters.keywordPartial")
-                  : null}
-        </p>
+        {!disabled && <p className="mt-2 text-11 text-text-3">{t("filters.keywordCycle")}</p>}
       </div>
     </FilterDropdown>
   )
