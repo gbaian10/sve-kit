@@ -108,16 +108,16 @@ fn bp14_076_revived_motor_grave_digger_carries_its_set_stat_delta_into_evolution
     initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP12-073"}]);
     initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"milled","card":"BP01-037"}]);
     let mut game = game(&initial);
-    let step = game
+    let revival = game
         .activate_internal_card("source", activated("BP14-076"), actor())
         .unwrap();
-    answer(&mut game, step, "BP12-072");
+    answer(&mut game, revival, "BP12-072");
     let before = game.projection(View::Referee).unwrap();
     assert_eq!(before["objects"]["revived"]["power"], 1_u8);
     assert_eq!(before["objects"]["revived"]["hp"], 1_u8);
 
-    let step = resolve_pending_card(&mut game, "BP12-072");
-    answer(&mut game, step, "BP12-073");
+    let evolution = resolve_pending_card(&mut game, "BP12-072");
+    answer(&mut game, evolution, "BP12-073");
     let after = game.projection(View::Referee).unwrap();
     assert_eq!(after["objects"]["revived"]["power"], 2_u8);
     assert_eq!(after["objects"]["revived"]["hp"], 2_u8);
