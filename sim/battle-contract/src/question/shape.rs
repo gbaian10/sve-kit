@@ -148,6 +148,8 @@ pub enum TriggerEvent {
     FusedAsMaterial,
     /// A card was played.
     Play,
+    /// The source itself was chosen by an ability.
+    Targeted,
     /// Cards were discarded.
     Discard,
     /// Cards were banished.
