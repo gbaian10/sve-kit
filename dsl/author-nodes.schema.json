@@ -20841,36 +20841,6 @@
       ],
       "type": "object"
     },
-    "A.body-shard": {
-      "additionalProperties": false,
-      "properties": {
-        "format": {
-          "const": 1,
-          "type": "integer"
-        },
-        "kind": {
-          "const": "effect_body_shard",
-          "type": "string"
-        },
-        "scope": {
-          "const": "shared",
-          "type": "string"
-        },
-        "records": {
-          "items": {
-            "$ref": "#/$defs/Companion"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "format",
-        "kind",
-        "scope",
-        "records"
-      ],
-      "type": "object"
-    },
     "authored": {
       "$ref": "#/$defs/A.file"
     },

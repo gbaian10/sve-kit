@@ -8,31 +8,10 @@
 
 ## 容器與共用葉
 
-下列父容器已具封閉 Schema、Python 型別與結構 reader；[入口矩陣](author-entry-shapes-1.0.md)列出逐 variant、局部 invariant 與未涵蓋的來源／展開責任。
-
-| 上下文 | 欄位／形狀 | 分開驗證的責任 |
-| --- | --- | --- |
-| A.file | format=1、kind=author_effect_set、scope、cards | cards 為原樣 CardNumber → A.card；逐卡 meta.dsl 不能另選 schema |
-| A.card | meta、note?、abilities?、faces?、deck_rule? | faces 為 Map<FaceId,{abilities}>，以穩定 FaceId 定位；不附另一份卡表 |
-| A.ability | line、section?、sources、imports?、一個能力頭或 generated_by | inline 另必填 ports；generated_by 不覆寫 ports |
-| sources[] | binding_id、occurrence、ability_scope | 恰一筆；occurrence 沿四層型別，segments 可多段 |
-| ports | imports、exports | Code → {path,bind}；path 元素為字串鍵／Nat 索引；imports path 必空 |
-| imports | Code → {binding_id,ability_scope,port} | 引用可見上游 export；不是葉參數 |
-| generated_by | macro、version、params | macro={frame_id,ability_scope,applicability_scope}；version 為完整 body_version |
-| effect_body_shard | format=1、kind、scope=shared、records | companion 不進逐卡索引 |
-| records[]（companion） | frame_id、ability_scope、body_version、dsl、params、body、ports、written_by、registrations、note? | body 只有能力頭／payload，不含位置或 generated_by |
-| registrations[] | id、domain、reviews | domain={regions}；body review 與 use review 分開 |
-| effects_index | format=1、kind=effects_index、records | (card_id,scope) 唯一 |
-| records[]（index） | card_id、scope、file、kind、record_key | file 原樣 POSIX 相對路徑；effect_set 只准 shared；候選閉包另驗 |
-| A.param | {param:ParamName} | 只准承載 §3 白名單的葉位置 |
-| ParamDecl | {type,source:{slot,component}} | 八種 type；component=value/constant/negated_magnitude；來源角色由接線驗證 |
-| ParamValue | {type,value} | Int／Nat／CardName／Concept／CardKind／Player／Zone／Phase 的封閉和型別 |
-| meta | dsl、source、written_by、reviewed_by、status、verified_by_exam、rulings | 宣告不授予資格；不以空 do 代替來源判定 |
-| written_by[]／Actor | {actor:{who,model},date} | model 可 null；真實身分由作業填入 |
-| Review | kind=body/use、reviewer、date、verdict、reason、dependencies、rekey? | disputed 的 reason 非空；依賴型別按 kind 分開 |
-| macro_mechanical | kind、body、use_dependencies | 沒有虛構 reviewer |
-
-CardNumber 沿現有身分登錄的非空字串，保留小寫與 `Ⓢ` 等原字；存在性及卡號／永久 ID 對應另查登錄，不靠新正規式推算。ParamName 為 `[A-Za-z][A-Za-z0-9_]*`，來源 Code 為 `[a-z][a-z0-9_.-]*`，兩者不可合併。
+[入口矩陣](author-entry-shapes-1.0.md)列出作者主檔、具名本體、索引與降低交接的形狀。
+主檔以印刷卡號選取卡片，以行與面定位能力。具名本體以 id 和 edition 選版，
+只在已登錄的葉位置代入整數或字串。展開後的來源座標保存永久面、現行 revision 及覆蓋行。
+卡號保留官網原字，包括小寫與 `Ⓢ`。卡號與永久 ID 透過既有登錄確認。
 
 ## 能力、費用與控制流程
 

@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord
-from sve_carddb.core.json import canonical, object_value
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
 from ...contracts.test_author_abilities import HEADS
@@ -50,37 +50,12 @@ def document(entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
     }
 
 
-def companion(head: dict[str, JsonValue]) -> dict[str, JsonValue]:
-    return {
-        "frame_id": "frame:" + "1" * 64,
-        "ability_scope": "ability_0",
-        "body_version": "effect-body-v1:sha256:" + "2" * 64,
-        "dsl": "1.0",
-        "params": {
-            "N": {"type": "Nat", "source": {"slot": "count", "component": "value"}}
-        },
-        "body": head,
-        "ports": {"imports": {}, "exports": {}},
-        "written_by": meta()["written_by"],
-        "registrations": [],
-    }
-
-
-def shard(record: dict[str, JsonValue]) -> dict[str, JsonValue]:
-    return {
-        "format": 1,
-        "kind": "effect_body_shard",
-        "scope": "shared",
-        "records": [record],
-    }
-
-
 @pytest.mark.parametrize(("key", "payload"), HEADS.items())
 def test_all_inline_variants(
     schemas: AuthorSchemas, key: str, payload: JsonValue
 ) -> None:
     value = document(ability({key: payload}))
-    decoded = schemas.document(canonical(value))
+    decoded = schemas.expanded(canonical(value))
     assert decoded.model_dump(mode="json") == value
 
 
@@ -91,14 +66,14 @@ def test_inline_rejects_missing_source_and_unknown_fields(
         bad = ability({"spell": {"do": []}})
         del bad[field]
         with pytest.raises(AuthorInputError):
-            schemas.document(canonical(document(bad)))
+            schemas.expanded(canonical(document(bad)))
     bad = ability({"spell": {"do": []}}) | {"typo": True}
     with pytest.raises(AuthorInputError):
-        schemas.document(canonical(document(bad)))
+        schemas.expanded(canonical(document(bad)))
 
 
 def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> None:
-    value = schemas.document(GOLDEN.read_bytes()).model_dump(mode="json")
+    value = schemas.expanded(GOLDEN.read_bytes()).model_dump(mode="json")
     cards = value["cards"]
     bp = cards["BP08-038"]["abilities"][0]["fanfare"]
     expected_bp = b'{"fanfare":{"define":{"X":{"minus":[{"count":{"who":"self","zone":"deck"}},5]}},"do":[{"draw":{"n":"X"}}]}}'
@@ -120,72 +95,15 @@ def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> Non
         == sha256(canonical(expected_face)).digest()
     )
     assert canonical(
-        schemas.document(
+        schemas.expanded(
             json.dumps(value, ensure_ascii=False, sort_keys=True).encode()
         ).model_dump(mode="json")
     ) == canonical(value)
     reversed_value = deepcopy(value)
     reversed_value["cards"]["CP04-060"]["abilities"][0]["evolve_time"]["do"].reverse()
     assert canonical(
-        schemas.document(json.dumps(reversed_value).encode()).model_dump(mode="json")
+        schemas.expanded(json.dumps(reversed_value).encode()).model_dump(mode="json")
     ) != canonical(value)
-
-
-PARAM_STEP: dict[str, JsonValue] = {"draw": {"n": {"param": "N"}}}
-NESTED: list[tuple[dict[str, JsonValue], tuple[str | int, ...]]] = [
-    ({"spell": {"do": [PARAM_STEP]}}, ("spell", "do", 0, "draw", "n")),
-    (
-        {
-            "spell": {
-                "do": [
-                    {
-                        "grant": {
-                            "on": "this",
-                            "abilities": [{"fanfare": {"do": [PARAM_STEP]}}],
-                        }
-                    }
-                ]
-            }
-        },
-        ("spell", "do", 0, "grant", "abilities", 0, "fanfare", "do", 0, "draw", "n"),
-    ),
-]
-
-
-@pytest.mark.parametrize(
-    ("head", "path"),
-    NESTED,
-    ids=["draw", "grant"],
-)
-@pytest.mark.parametrize("face", [False, True])
-def test_inline_param_is_local_error_at_wire_path(
-    schemas: AuthorSchemas,
-    head: dict[str, JsonValue],
-    path: tuple[str | int, ...],
-    face: bool,
-) -> None:
-    entry = ability(head)
-    value = document(entry)
-    prefix: tuple[str | int, ...] = ("cards", "FIX-001", "abilities", 0)
-    if face:
-        card = object_value(object_value(value["cards"])["FIX-001"])
-        del card["abilities"]
-        card["faces"] = {"f:" + "1" * 32: {"abilities": [entry]}}
-        prefix = ("cards", "FIX-001", "faces", "f:" + "1" * 32, "abilities", 0)
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.document(json.dumps(value, indent=2).encode())
-    diagnostic = caught.value.diagnostic
-    assert diagnostic.reason == "inline_param_reference"
-    assert diagnostic.path == (*prefix, *path)
-    assert diagnostic.line is not None
-    assert diagnostic.column is not None
-    assert diagnostic.card_no == "FIX-001"
-    assert diagnostic.scope == "shared"
-    assert diagnostic.source is not None
-    accepted = schemas.document(canonical(shard(companion(head)))).model_dump(
-        mode="json"
-    )
-    assert accepted["records"][0]["body"]
 
 
 @pytest.mark.parametrize(
@@ -203,15 +121,14 @@ def test_selected_index_context_survives_boundary_errors(
         kind="author_effect_set",
         record_key="FIX-001",
     )
-    for read in (schemas.document, schemas.author_tree):
-        with pytest.raises(AuthorInputError) as caught:
-            read(raw, context=context)
-        diagnostic = caught.value.diagnostic
-        assert (diagnostic.card_id, diagnostic.card_no, diagnostic.scope) == (
-            context.card_id,
-            "FIX-001",
-            "shared",
-        )
+    with pytest.raises(AuthorInputError) as caught:
+        schemas.expanded(raw, context=context)
+    diagnostic = caught.value.diagnostic
+    assert (diagnostic.card_id, diagnostic.card_no, diagnostic.scope) == (
+        context.card_id,
+        "FIX-001",
+        "shared",
+    )
 
 
 @pytest.mark.parametrize(

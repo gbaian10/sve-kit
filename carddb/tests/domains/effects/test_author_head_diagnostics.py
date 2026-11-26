@@ -31,7 +31,7 @@ def test_registered_heads_conflict_before_unknown_keys(
     other = "spell" if head == "keywords" else "keywords"
     entry = ability({head: payload, other: HEADS[other], "unknown": "private_value"})
     with pytest.raises(AuthorInputError) as caught:
-        schemas.document(canonical(document(entry)))
+        schemas.expanded(canonical(document(entry)))
     diagnostic = caught.value.diagnostic
     assert diagnostic.reason == "ability_head_conflict"
     assert diagnostic.path == ABILITY_PATH
@@ -69,7 +69,7 @@ def test_ability_header_failures_keep_exact_container_paths(
         card["faces"] = {"f:" + "1" * 32: {"abilities": [entry]}}
         path = ("cards", "FIX-001", "faces", "f:" + "1" * 32, "abilities", 0)
     with pytest.raises(AuthorInputError) as caught:
-        schemas.document(json.dumps(value, indent=2).encode())
+        schemas.expanded(json.dumps(value, indent=2).encode())
     diagnostic = caught.value.diagnostic
     assert diagnostic.reason == reason
     assert diagnostic.path == (*path, *suffix)
@@ -94,7 +94,7 @@ def test_nested_granted_head_conflict_is_not_reported_as_an_outer_typo(
         }
     }
     with pytest.raises(AuthorInputError) as caught:
-        schemas.document(canonical(document(ability(head))))
+        schemas.expanded(canonical(document(ability(head))))
     assert caught.value.diagnostic.reason == "ability_head_conflict"
     assert caught.value.diagnostic.path == (
         *ABILITY_PATH,

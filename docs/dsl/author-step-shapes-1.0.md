@@ -98,7 +98,7 @@ delayed 與 grant.abilities 沿同一遞迴圖，完整形狀見[能力矩陣](a
 | grant | keywords:[Concept或ParamRef]、abilities:[GrantedAbilityHead] 可並用 | keywords BP15-029 sections/0；abilities 合成 |
 | create | n:CountAmount或upto:Q、to:CreateDestination | ETD01-018、BP07-P20；to 合成 |
 | draw | n:CountAmount | 同型合成 |
-| search | sel:ObjectSel、n或upto:SelectionQuantity、to:SearchDestination或per_group | 同型合成；BP13-035 完整替換群組 |
+| search | sel:ObjectSel、n或upto:SelectionQuantity、to:SearchDestination | 同型合成；BP13-035 完整替換群組 |
 | banish/destroy | ref:O | 合成 |
 
 if 在原指示開始讀，search.instead 不能讀 found；找到之後的取代只放 search.to.instead。數量差異取代整個數量 variant（n→upto 時清掉 n）；合併後須驗完整合法 payload。after 只在取代成功適用後執行；禁止重入循環，C1 驗依賴及執行身分。

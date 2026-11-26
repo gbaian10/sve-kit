@@ -30,7 +30,7 @@ O／R 見[物件查詢](author-object-query-shapes-1.0.md)與[選取形狀](auth
 P／Ref 見[參照形狀](author-reference-shapes-1.0.md)，N／Q 見[運算式形狀](author-expression-shapes-1.0.md)。
 各葉原有的巢狀參數權限仍成立，例如 N 內 plus 的已登錄參數位置；效果不增加通用參數權限。
 所有列表均保序、保留重數；不新增 uniqueItems。
-canonical 只依[承載契約 §4](author-contract-1.0.md)處理，
+canonical 依[建置 DB 雜湊規則](../schema/build/build-db.md)處理，
 不補語義預設、不做代數化簡；省略與明寫 `next_only:false`、`kind:any` 或
 `on:affected` 不推定同 hash。
 

@@ -7,8 +7,8 @@ Zone=field/hand/deck/evolve_deck/cemetery/ex；Phase=start/main/end。
 During={turn:PlayerRef}，By={ability_of:EventObjectSel}。SubjectFilter／EventRecipient 的形狀見事件與歷史形狀文件。
 主體 ref 與 sel 互斥；一般空事件 payload 合法，不表示任意 it／讀值可用。
 Ref／PlayerRef 見[參照形狀](author-reference-shapes-1.0.md)，不繼承 selector 的直接參數權限。
-`A.nat-threshold` 恰一鍵 `{eq|le|ge: Nat}`；`A.die-threshold` 恰一鍵
-`{eq|le|ge: 1..6}`，兩者都只收整數常值，不收 bool、運算式或參數。
+`A.die-threshold` 恰一鍵
+`{eq|le|ge: 1..6}`，只收整數常值。
 `A.move-origin` 必填 `{who: PlayerRef, zone: Zone}`；Condition 見[運算式形狀](author-expression-shapes-1.0.md)。
 直接事件與歷史的主體窄化、來源角色、讀值及 LKI 仍需 C1／D0 接線。
 

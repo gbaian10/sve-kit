@@ -143,7 +143,7 @@ CP03-SL16（GAP-A-054）、BP07-SL20 母なる君（GAP-A-060）支持。
 | --- | --- | --- | --- |
 | A.expr.hand | `{hand:PlayerRef}` | 不收 `{who:…}`、PlayerSet 或 param | BP01-007 白銀の矢、BP13-113；ECP02-020 的 master_of |
 | A.expr.leader-life | `{leader_life:PlayerRef}` | 同上，回該玩家領袖生命 | 讀值形狀合成；ECP01-046 的領袖目標接線仍待定 |
-| A.expr.counter-payload | `{on:Ref或LkiOf,name:CounterName}` | 不接受 Sel／param；CounterName 為非空文字 | BP13-038、BP21-060 |
+| A.expr.counter-payload | `{on:Ref,name:CounterName}` | 不接受 Sel／param；CounterName 為非空文字 | BP13-038、BP21-060 |
 | A.expr.counter | `{counter:A.expr.counter-payload}` | Ref 讀取目前的指示物數量 | 同上 |
 | A.expr.distinct-names | `{distinct_names:S}` | 依規則名稱等價類去重，非字串數量相加 | BP09-001 ユグドラシル、BP09-007 |
 | A.expr.distinct-orig-costs | `{distinct_orig_costs:S}` | 計算不同原始費用的種類數 | BP10-011 喝采の獣使い、BP11-036 |

@@ -321,10 +321,3 @@ class CompanionFields(TypedDict):
 
 
 type Companion = CompanionFields
-
-
-class EffectBodyShard(RecordData):
-    format: Annotated[Literal[1], BeforeValidator(integer)]
-    kind: Literal["effect_body_shard"]
-    scope: Literal["shared"]
-    records: tuple[Companion, ...]

@@ -146,11 +146,12 @@ def _inventory(files: tuple[InputFile, ...], area: str) -> dict[str, InputFile]:
 
 
 def _tree(schemas: AuthorSchemas, item: InputFile) -> dict[str, JsonValue]:
+    prototype = item.path.startswith(_PROTOTYPE + "/")
     try:
-        if item.path.startswith(_PROTOTYPE + "/"):
+        if prototype:
             return object_value(schemas.prototype_tree(item.raw))
         if object_value(parse_document(item.raw).value).get("format") != STORAGE_FORMAT:
-            _reject("unsupported_storage_format", item.path)
+            _reject("unsupported_storage_format", "format")
         return object_value(schemas.storage_tree(item.raw, "author_effect_set"))
     except AuthorInputError as error:
         raise AuthorInputError(
