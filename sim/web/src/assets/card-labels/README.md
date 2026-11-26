@@ -25,6 +25,7 @@ All glyphs are paths from SIL Open Font License 1.1 fonts:
 | `amulet.svg`                                            | Marcellus 400 + 0.00px native-card-px                                                                                | BP01-150, BP21-018                                                                                                                                                            |
 | `crest.svg`                                             | Caudex 700                                                                                                           | BP20-P64, pale ice-blue rounded label                                                                                                                                         |
 | `equipment.svg`                                         | Marcellus 400, light fill with a dark outline                                                                        | CP04-PR15, grey metal rounded label                                                                                                                                           |
+| `treasure.svg`                                          | Libre Caslon Text 400 + 0.28px native-card-px, white fill with a dark blue outline                                   | CP05-P93, blue rounded label on the Follower plate frame                                                                                                                      |
 | `ep.svg`                                                | No lettering                                                                                                         | PR-445, gold evolve-point orb                                                                                                                                                 |
 | `sep.svg`                                               | No lettering                                                                                                         | Official SEP card art: outline and feathers traced, colours measured from the card; centre disc and border are drawn geometry; flat (no highlights)                           |
 | `main-deck.svg`                                         | No lettering                                                                                                         | Official card back: black card, white corner frame, cyan magic circle; logo reduced to lines                                                                                  |
@@ -66,7 +67,7 @@ rights holders.
 
 The vector reconstructions were produced with Codex gpt-6.1-sol (EVOLVE to Amulet), Claude Opus 5.5
 (Crest, Equipment, EP, SEP, main deck, blank cost, counters, cost digits) and Claude Fable 5.2
-(playmat printing) and are distributed under
+(Treasure, playmat printing) and are distributed under
 Apache-2.0. The imitated official designs are excluded from the project license
 grants; see [LICENSING.md](../../../../../LICENSING.md). Font copyright and
 license notices above are included with trailing whitespace removed.

@@ -6,6 +6,7 @@ import equipment from "../../assets/card-labels/equipment.svg"
 import follower from "../../assets/card-labels/follower.svg"
 import mainDeck from "../../assets/card-labels/main-deck.svg"
 import spell from "../../assets/card-labels/spell.svg"
+import treasure from "../../assets/card-labels/treasure.svg"
 import type { SearchOptions } from "../../data"
 import { leaderFrameTokens, LOCATION_ORDER, tokenKindTokens } from "../../domain/deckLocation"
 import type { TextLang } from "../../domain/search"
@@ -20,6 +21,7 @@ const TOKEN_KIND_PLATES: Readonly<Record<string, string>> = {
   amulet,
   crest,
   equipment,
+  treasure,
 }
 
 // Where a printing goes in a deck; a chip's sub-values (Token kinds, leader frames) sit behind its
