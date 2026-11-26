@@ -69,7 +69,8 @@ describe("decoder worker boundary", () => {
     await rejected
     expect(previous?.terminated).toBe(true)
     const next = decode({ kind: "manifest", bytes: canonical({}) })
-    const current = FakeWorker.instances[1] as PausedWorker
+    const current = FakeWorker.instances[1]
+    if (!(current instanceof PausedWorker)) throw new Error("expected the replacement worker")
     lateError?.()
     expect(current.terminated).toBe(false)
     current.onmessage?.({ data: { id: current.message?.id ?? -1, code: "shape" } })
