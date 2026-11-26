@@ -11,7 +11,7 @@ from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
 from ...contracts.test_author_abilities import HEADS
-from .test_author_entries import NESTED, ability, document
+from .test_author_entries import ability, document
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -38,7 +38,28 @@ def test_expanded_accepts_each_concrete_head(
     assert schemas.expanded(canonical(value)).model_dump(mode="json") == value
 
 
-@pytest.mark.parametrize("head", [head for head, _ in NESTED])
+PARAM_DRAW: dict[str, JsonValue] = {"draw": {"n": {"param": "N"}}}
+
+
+@pytest.mark.parametrize(
+    "head",
+    [
+        {"spell": {"do": [PARAM_DRAW]}},
+        {
+            "spell": {
+                "do": [
+                    {
+                        "grant": {
+                            "on": "this",
+                            "abilities": [{"fanfare": {"do": [PARAM_DRAW]}}],
+                        }
+                    }
+                ]
+            }
+        },
+    ],
+    ids=["draw", "grant"],
+)
 def test_recursive_profile_rejects_parameters(
     schemas: AuthorSchemas, head: dict[str, JsonValue]
 ) -> None:

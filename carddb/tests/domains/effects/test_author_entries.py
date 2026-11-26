@@ -12,7 +12,6 @@ from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.core.json import canonical
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
-from ...contracts.test_author_abilities import HEADS
 from .author_entry_cases import meta, source_use
 
 if TYPE_CHECKING:
@@ -48,15 +47,6 @@ def document(entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
         "scope": "shared",
         "cards": {"FIX-001": {"meta": meta(), "abilities": [entry]}},
     }
-
-
-@pytest.mark.parametrize(("key", "payload"), HEADS.items())
-def test_all_inline_variants(
-    schemas: AuthorSchemas, key: str, payload: JsonValue
-) -> None:
-    value = document(ability({key: payload}))
-    decoded = schemas.expanded(canonical(value))
-    assert decoded.model_dump(mode="json") == value
 
 
 def test_inline_rejects_missing_source_and_unknown_fields(
