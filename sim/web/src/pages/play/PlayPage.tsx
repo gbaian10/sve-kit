@@ -5,19 +5,25 @@ import { Link, useSearchParams } from "react-router"
 
 import { useUiLanguageSync } from "../../app/language"
 import { useThemeAttributes } from "../../app/theme-attributes"
+import { battleBuild } from "../../battle/engine/assets"
 import { type Scene, SCENES } from "../../battle/fixtures/scenes"
 import { scriptedTable } from "../../battle/fixtures/scripted"
 import { BattleScreen } from "./BattleScreen"
+import { PracticeMatch } from "./PracticeMatch"
 
-/**
- * The battle page. Until the local engine is wired in it plays fixture scenes: `?scene=` picks
- * one, and `?dual=1` puts both seats side by side, each on its own source, to compare what the
- * two players are told.
- */
 export function PlayPage() {
-  const { t } = useTranslation()
   useThemeAttributes()
   useUiLanguageSync()
+  const [params] = useSearchParams()
+  return battleBuild !== null && !params.has("scene") && params.get("dual") !== "1" ? (
+    <PracticeMatch build={battleBuild} />
+  ) : (
+    <FixturePage />
+  )
+}
+
+function FixturePage() {
+  const { t } = useTranslation()
   const [params, setParams] = useSearchParams()
   const scene: Scene = SCENES.find((entry) => entry.id === params.get("scene")) ?? SCENES[0]
   const dual = params.get("dual") === "1"

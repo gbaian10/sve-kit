@@ -75,6 +75,8 @@ export interface SnapshotClientOptions {
   readonly fetch?: Fetcher
   /** `index`: the current/previous version index (format §4.1); `preview`: a preview root's pointer file. */
   readonly entry?: "index" | "preview"
+  /** One immutable manifest, supplied by a trusted match build. */
+  readonly pinnedManifest?: string
   readonly detailCacheSize?: number
   readonly cacheStorage?: CacheStorage
 }
@@ -136,6 +138,7 @@ function snapshotClient(
   const requests = options.fetch ? requestQueue(options.fetch) : appRequests
   const fetcher = requests.foreground
   const entry = options.entry ?? "index"
+  const pinned = options.pinnedManifest
   const decode = createDecoder()
   const raw = new RawBlobStore(
     base,
@@ -219,8 +222,18 @@ function snapshotClient(
     })
 
   const chooseEntry = async (
-    bytes: Promise<Uint8Array>,
+    bytes?: Promise<Uint8Array>,
   ): Promise<{ chosen: JsonObject; source: "current" | "previous" }> => {
+    if (pinned !== undefined) {
+      return {
+        chosen: {
+          manifest_path: `snapshots/manifests/${pinned.slice(7)}.json`,
+          manifest_sha256: pinned,
+        },
+        source: "current",
+      }
+    }
+    bytes ??= requestEntry()
     if (entry === "preview") {
       const pointer = objectValue(parseJson(await bytes))
       return {
@@ -256,7 +269,7 @@ function snapshotClient(
   }
 
   const matchEntry = (chosen: JsonObject, manifest: JsonObject): void => {
-    if (entry === "index") checkEntry(chosen, manifest)
+    if (entry === "index" && pinned === undefined) checkEntry(chosen, manifest)
   }
 
   // A record holds what one full download verified, so it replaces the manifest, every startup
@@ -353,7 +366,7 @@ function snapshotClient(
       )
     }
     progress("index")
-    const { chosen, source } = await chooseEntry(entryBytes ?? requestEntry())
+    const { chosen, source } = await chooseEntry(entryBytes)
     check()
     // A check that finds the same manifest keeps the loaded snapshot and its caches as they are.
     if (
@@ -528,6 +541,7 @@ function snapshotClient(
       index: lastIndex,
     }
     if (writeSnapshot) await persist(snapshot)
+    if (pinned !== undefined) return
     // A slower serialization must not replace the selection of a newer adopted snapshot.
     if (
       loaded?.manifestHash !== snapshot.manifestHash ||
@@ -622,6 +636,10 @@ function snapshotClient(
     // the previous failure while the local record is still being read.
     if (status.state === "error") set({ state: "loading", phase: "index" })
     try {
+      if (pinned !== undefined) {
+        await run()
+        return
+      }
       const entryBytes = requestEntry()
       // Network can fail before local storage finishes; run still classifies the original rejection.
       void entryBytes.catch(() => undefined)

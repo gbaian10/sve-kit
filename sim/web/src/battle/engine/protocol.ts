@@ -1,6 +1,14 @@
 // Local-battle messages. Every host message is the generated battle contract's `HostMessage`;
 // only the Worker init, the port requests and the two local wrappers below are local.
-import type { BattleUpdate, Command, HostMessage, Receipt, Seat, Submit } from "../contract"
+import type {
+  BattleUpdate,
+  CardRef,
+  Command,
+  HostMessage,
+  Receipt,
+  Seat,
+  Submit,
+} from "../contract"
 
 export type { BattleUpdate, Command, Receipt, Seat }
 export const SEATS: readonly Seat[] = ["p1", "p2"]
@@ -24,6 +32,18 @@ export interface MatchOptions {
   max_submissions: number
   seed?: string
   first_chooser?: Seat
+}
+
+export interface BattleBuild {
+  readonly manifest: string
+  readonly programs: {
+    readonly key: string
+    readonly path: string
+    readonly sha256: string
+    readonly bytes: number
+  }
+  readonly leaders: Readonly<Record<Seat, CardRef>>
+  readonly options: MatchOptions
 }
 
 export type LoadErrorCode = "format" | "selection" | "identity" | "references" | "match" | "engine"

@@ -10,6 +10,7 @@ import { actions } from "../../battle/view/actions"
 import { inspect, type ZoneName } from "../../battle/view/inspect"
 import { type SlotArrangement, tableModel } from "../../battle/view/table"
 import { cn } from "../../components/ui/cn"
+import type { SnapshotClient } from "../../data"
 import { prefsStore, useBattleMatPicture, usePrefs } from "../../settings"
 import { BattleCardsContext, useBattleCards } from "./battle-cards"
 import { BattleNotices } from "./hud/BattleNotices"
@@ -33,6 +34,7 @@ import {
   type Zoomed,
 } from "./inspector"
 import { computeLayout, type Layout, matBox, sidebarFloats, useViewport } from "./layout"
+import { PracticeControls } from "./PracticeControls"
 import { Board } from "./table/Board"
 import { DualHand, Hand, OppHand } from "./table/Hand"
 import { MatArt, type MatPhoto } from "./table/mats"
@@ -154,8 +156,12 @@ export function BattleScreen({
   slots,
   corner,
   onDual,
+  client,
+  practice = false,
 }: {
   readonly source: BattleSource
+  readonly client?: SnapshotClient
+  readonly practice?: boolean
   /** The other seat's source: both screens side by side, to compare what each player is told. */
   readonly opposite?: BattleSource | undefined
   /** Each seat's leader card, from the match setup. */
@@ -170,7 +176,7 @@ export function BattleScreen({
   const { t } = useTranslation()
   const { vw, vh } = useViewport()
   const battle = useBattle(source, slots)
-  const cards = useBattleCards(battle.ready?.identity.region)
+  const cards = useBattleCards(battle.ready?.identity.region, client)
   const prefs = usePrefs()
   const dual = opposite !== undefined
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -285,7 +291,7 @@ export function BattleScreen({
   const selfPlate = (
     <Plate seat={model.self} leader={leaders[model.self.seat]} self compact={layout.compact} />
   )
-  const turn = <TurnPill model={model} />
+  const turn = <TurnPill model={model} showDisabledEnd={!practice} />
   const colBottom = layout.handReserve + 8
   const board = battle.board
   const describe = (target: Picked, preview: boolean): Shown | null => {
@@ -353,6 +359,18 @@ export function BattleScreen({
               style={{ left: layout.boardLeft, top: Math.max(4, layout.boardTop - 30) }}
             >
               {corner}
+            </div>
+          )}
+          {practice && (
+            <div
+              className="bp-practice-controls"
+              style={{
+                right: Math.max(4, vw - layout.boardLeft - layout.matW * layout.u),
+                top: Math.max(4, layout.boardTop - 30),
+                maxWidth: Math.max(100, layout.matW * layout.u - 60),
+              }}
+            >
+              <PracticeControls source={source} battle={battle} />
             </div>
           )}
 

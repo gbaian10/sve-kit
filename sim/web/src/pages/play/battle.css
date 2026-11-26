@@ -1753,6 +1753,19 @@
   gap: 4px;
 }
 
+.bp-practice-controls {
+  position: absolute;
+  z-index: 25;
+  text-align: right;
+}
+
+.bp-practice-outcome {
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+
 .bp-scene-chip {
   position: absolute;
   z-index: 25;

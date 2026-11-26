@@ -53,8 +53,12 @@ export function useCards(): BattleCards {
 }
 
 /** Names and images of the match's cards, read from the snapshot of the match's region. */
-export function useBattleCards(region: Region | undefined): BattleCards {
-  const client = snapshotClient(useSnapshotRoot())
+export function useBattleCards(
+  region: Region | undefined,
+  matchClient?: SnapshotClient,
+): BattleCards {
+  const root = useSnapshotRoot()
+  const client = matchClient ?? snapshotClient(root)
   const status = useSnapshotStatus(client)
   const prefs = usePrefs()
   useEffect(() => {

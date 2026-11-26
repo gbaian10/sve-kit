@@ -3,7 +3,13 @@ import { useTranslation } from "react-i18next"
 import type { TableModel } from "../../../battle/view/table"
 
 /** Whose turn and which phase, with the button that ends the turn. */
-export function TurnPill({ model }: { readonly model: TableModel }) {
+export function TurnPill({
+  model,
+  showDisabledEnd = true,
+}: {
+  readonly model: TableModel
+  readonly showDisabledEnd?: boolean
+}) {
   const { t } = useTranslation()
   const active = model.self.active ? model.self : model.opponent.active ? model.opponent : null
   const side = model.self.active ? "self" : "opponent"
@@ -20,10 +26,11 @@ export function TurnPill({ model }: { readonly model: TableModel }) {
           {t(`play.turn.${side}.${model.phase}`)}
         </span>
       )}
-      {/* The table cannot be answered yet, so there is no turn of the viewer's to end. */}
-      <button type="button" className="bp-end" disabled>
-        {t("play.turn.end")}
-      </button>
+      {showDisabledEnd && (
+        <button type="button" className="bp-end" disabled>
+          {t("play.turn.end")}
+        </button>
+      )}
     </section>
   )
 }

@@ -1,12 +1,11 @@
 // @vitest-environment node
-// The generated engine itself (built by `build:engine`), on inputs too small to start a match.
 import { createHash } from "node:crypto"
 import { readFileSync } from "node:fs"
 import path from "node:path"
 
 import { beforeAll, describe, expect, it } from "vitest"
 
-import { initSync, Session } from "./generated/engine"
+import { initSync, PreparedMatch } from "./generated/engine"
 
 beforeAll(() => {
   initSync({ module: readFileSync(path.join(import.meta.dirname, "generated/engine_bg.wasm")) })
@@ -14,49 +13,40 @@ beforeAll(() => {
 
 const sha256 = (text: string) => createHash("sha256").update(text).digest("hex")
 const content = (id: string, sha: string) => ({ id, sha256: sha })
-const selection = JSON.stringify({ documents: [], authors: [] })
+const programs = JSON.stringify({ format_version: "4.2.0", entries: [], printings: {} })
+const manifest = "1".repeat(64)
 
-/** A battle inputs document over an empty snapshot whose identity names the stated programs. */
-function inputs(
-  edit: { selection?: string; references?: unknown; programs?: string } = {},
-): string {
-  const programs = edit.selection ?? selection
+function inputs(programHash = sha256(programs)): string {
   return JSON.stringify({
     snapshot: "",
     keywords: JSON.stringify({ format: 1, kind: "keyword_registry", keywords: {} }),
-    selection: programs,
     rules: "{}",
-    references: edit.references ?? {
+    references: {
       region: "jp",
       snapshot_sha256: sha256(""),
       faces: [],
-      wording: null,
+      wording: { manifest_sha256: `sha256:${manifest}`, faces: [] },
       rules: null,
     },
+    printings: [],
+    engine_identity: "LegacyJp",
     identity: {
-      snapshot: content("snapshot", "1".repeat(64)),
-      programs: content("programs", sha256(edit.programs ?? programs)),
+      snapshot: content("snapshot", manifest),
+      programs: content("programs", programHash),
       engine: content("engine", "2".repeat(64)),
       rules: content("rules", sha256("{}")),
       region: "jp",
     },
   })
 }
-const deck = { construction: { kind: "class", value: "c" }, main: ["x"], evolve: [] }
-const setup = JSON.stringify({
-  decks: [deck, deck],
-  first_chooser: "p1",
-  seed: "s",
-  control: ["player", "policy"],
-  max_submissions: 1,
-})
 
 describe("engine WebAssembly", () => {
-  it("rejects malformed setup and unusable inputs with codes only", () => {
-    expect(() => new Session(inputs(), "{}")).toThrow(/^format$/)
-    expect(() => new Session(inputs({ selection: "[" }), setup)).toThrow(/^format$/)
-    expect(() => new Session(inputs({ references: {} }), setup)).toThrow(/^format$/)
-    expect(() => new Session(inputs({ programs: "[]" }), setup)).toThrow(/^identity$/)
-    expect(() => new Session(inputs(), setup)).toThrow(/^selection$/)
+  it("rejects malformed inputs, an unpinned attachment and unusable programs with codes only", () => {
+    expect(() => new PreparedMatch("{}", programs)).toThrow(/^format$/)
+    expect(() => new PreparedMatch(inputs(), programs.replace("4.2.0", "4.1.0"))).toThrow(
+      /^identity$/,
+    )
+    expect(() => new PreparedMatch(inputs(sha256("[")), "[")).toThrow(/^selection$/)
+    expect(() => new PreparedMatch(inputs(), programs)).toThrow(/^selection$/)
   })
 })
