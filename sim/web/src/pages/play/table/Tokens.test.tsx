@@ -49,10 +49,10 @@ describe("CounterTokens", () => {
     expect(stack.parentElement).toHaveClass("is-several")
   })
 
-  it("counts a kind it has no name for without printing its rules name", async () => {
+  it("uses the rules name when a counter has no localized name", async () => {
     await show([{ name: "ナゾカウンター", amount: 4 }])
-    const chip = await screen.findByRole("img", { name: "指示物：指示物 ×4" })
-    expect(chip).toHaveAttribute("title", "指示物 ×4")
+    const chip = await screen.findByRole("img", { name: "指示物：ナゾカウンター ×4" })
+    expect(chip).toHaveAttribute("title", "ナゾカウンター ×4")
     expect(chip).toHaveTextContent(/^4$/)
     expect(chip.parentElement).not.toHaveClass("is-several")
   })

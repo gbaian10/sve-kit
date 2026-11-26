@@ -1223,7 +1223,6 @@ export default {
       label: "カウンター",
       names: { stack: "スタック", fusion: "融合", refund: "返戻" },
       count: "{{name}} ×{{n}}",
-      unnamed: "カウンター ×{{n}}",
       spoken: "カウンター：{{text}}",
     },
     turn: {
