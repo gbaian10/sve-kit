@@ -11,11 +11,10 @@ from sve_carddb.core.json import array, object_value, parse, string
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
-from ..support.authoring_cli_fixtures import RepositoryCheck, repository_check
 from ..support.time_budget import slow_fixture
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Iterator
 
     from pydantic import JsonValue
 
@@ -39,24 +38,6 @@ def authoring_inputs() -> authoring.Inputs:
         jp_batch_id=batch,
         revision="1036aa89bb1ce52cf4a964df8461663ab644b614",
     )
-
-
-@pytest.fixture(scope="session")
-@slow_fixture(
-    reason="Build the real public profile, source database and translation registry once per worker for authoring integration tests"
-)
-def repository_workspace(
-    authoring_inputs: authoring.Inputs,
-) -> Iterator[authoring.Workspace]:
-    with authoring.prepare(
-        authoring_inputs,
-        cards=frozenset(
-            {"BP09-005", "BP01-138", "BP19-P32", "BP01-048", "BP01-046", "BP01-176"}
-        ),
-    ) as prepared:
-        # Tests write authored copies; the shared source database stays read-only.
-        prepared.current.db._connection.execute("PRAGMA query_only=ON")
-        yield prepared
 
 
 @pytest.fixture(scope="session")
@@ -172,17 +153,3 @@ def workspace(
 @pytest.fixture
 def output_root(tmp_path: Path, authoring_inventory: Path) -> Path:
     return Path(shutil.copytree(authoring_inventory, tmp_path / "authored"))
-
-
-@pytest.fixture(scope="session")
-def complete_repository_check(
-    authoring_inputs: authoring.Inputs,
-    tmp_path_factory: pytest.TempPathFactory,
-    worker_id: str,
-) -> Callable[[], RepositoryCheck]:
-    root = tmp_path_factory.getbasetemp()
-    if worker_id != "master":
-        root = root.parent
-    root /= "complete-authoring-check"
-    # The writer proves byte equality before reusing the CLI validation of these inputs.
-    return lambda: repository_check(root, authoring_inputs)
