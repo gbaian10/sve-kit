@@ -46,6 +46,6 @@ cards:
                 then:
                   - evolve:
                       ref: this
-            - life:
-                who: self
-                delta: 2
+                  - life:
+                      who: self
+                      delta: 2
