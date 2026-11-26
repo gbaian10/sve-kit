@@ -26,7 +26,8 @@ fn handoff() -> Value {
         "tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{
             ADVANCE:{
                 "meta":{"dsl":"1.0","source":"direct","admission":"light",
-                    "written_by":[{"actor":{"who":"synthetic fixture","model":null},"date":"2026-10-26"}]},
+                    "written_by":[{"actor":{"who":"synthetic fixture","model":null},"date":"2026-10-26"}],
+                    "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
                 "faces":{FACE:{"abilities":[ability]}}
             }
         }},
