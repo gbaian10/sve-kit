@@ -36,7 +36,7 @@ bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.sta
 | 集合名、`集合名_partition` | 完整邏輯 row tuple、各欄位分割 row tuple |
 | RegionView、PrintingFace、Section 等 | 固定巢狀 tuple，含 PrintingFaceBootstrap／Detail |
 | ParameterSchema、CorrectionValue | 保留為 JSON 的有限值域；field 與更正值另於所屬 tuple 綁定 |
-| Programs、DSLProgram（4.1） | 4.0 空程式包；4.1 已展開的正式 DSL 1.0 程式包 |
+| Programs、DSLProgram（4.1／4.2） | 4.0 空程式包。4.1 承載展開後的 DSL 1.0。4.2 加上對戰版次關聯 |
 | Changes、Index、IndexEntry | 變動摘要與 index_format=2 的 current／previous 入口 |
 
 可直接以 `#/$defs/Manifest` 等片段作驗證入口。`x-columns`、`x-types`、`x-primary-key`、`x-fragments`、`x-tables` 是供固定 accessor 使用的註記；接受／拒絕 JSON 形狀使用標準 keywords。資料內 types 另以 const 驗完整 descriptor，不能讓 payload 的註記改變解碼方式。

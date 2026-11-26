@@ -25,7 +25,7 @@
 - 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配，只能進開發桶的版本索引，不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
 - `required_capabilities` 是排序、唯一的非空 Code 陣列，4.0 的固定集合依 §5.4，4.1 與 4.2 的 DSL 增量依 §3.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。已發布格式新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本；尚未發布的 4.0.0 可同步原地替換，不留雙格式 parser，也不另增 capability。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
-- 未凍結期間，舊 reader 會讀錯的原地變更須提高 reader 契約的 patch，並同步 producer 的最低 reader 版本。4.0 新產出固定寫 min_reader_version=4.0.3，4.1 固定寫 4.1.1；Python 與 Web reader 按 profile 准入這兩個最低版本，版本索引略過 4.0.0／4.0.1／4.0.2 與 4.1.0 minimum 的舊 preview，沒有相容入口就回報不支援。舊 preview 須以新 data_version 重建，不以新配置解讀舊 band，也不加舊配置 fallback。Schema 保留舊 minimum 以辨識索引與留存封套；發布器仍可核對舊 manifest 封套與 JSON 保留閉包，但不能把它當成可讀快照或用來重算圖片閉包。
+- 未凍結期間，舊 reader 會讀錯的原地變更須提高 reader 契約的 patch，並同步 producer 的最低 reader 版本。4.0 新產出固定寫 min_reader_version=4.0.3，4.1 固定寫 4.1.1，4.2 固定寫 4.2.0；Python 與 Web reader 按 profile 核對最低版本，版本索引略過 4.0.0／4.0.1／4.0.2 與 4.1.0 minimum 的舊 preview，沒有相容入口就回報不支援。舊 preview 須以新 data_version 重建，不以新配置解讀舊 band，也不加舊配置 fallback。Schema 保留舊 minimum 以辨識索引與留存封套；發布器仍可核對舊 manifest 封套與 JSON 保留閉包，但不能把它當成可讀快照或用來重算圖片閉包。
 - 分片 bucket 的算法與數目由每個 format 版本的配置釘死；已發布配置調整至少升 minor；尚未發布的 4.0.0 依前項同步替換，不能只更換 data_version。`search.grammar_version/normalizer_version` 是搜尋契約的獨立 Code，不宣稱特定搜尋實作已完成；reader 必須明示支援這一對值，未知值停用搜尋並告知，不能用舊 normalizer 建錯索引。
 
 例如 reader 可以讀兩個 data_version 不同的 `4.0.0` 快照，但仍須驗證固定能力集合。
@@ -222,9 +222,9 @@ DSL 1.0 的公開 AST 由 `dsl/program.schema.json` 定義，重用 `dsl/author-
 
 4.2.0 在 4.1.0 能力集合上增加 `dsl-program-dependencies-v1`，最低 reader 版本為 4.2.0。程式包封套為 `{format_version:"4.2.0",entries,printings}`。entries 沿用 DSL 1.0 的 AST、內容定址 ID 與 ProgramRef。printings 以 AST 的永久 CardId 為鍵，與 entries 的卡片一一對應。每筆恰含 `representative` 與 `tokens`。
 
-- representative 是同一張卡在作者准入時的效果登錄版次，以快照中的官網 JP 永久版次 ID 保存。對戰依該版次檢查程式來源與規則事實，衍生物的別名亦解析至原代表版次。
+- representative 是同一張卡在作者准入時的效果登錄版次，以快照中的官網 JP 永久版次 ID 保存。對戰依該版次檢查程式來源與規則事實，衍生物的別名亦解析至原效果登錄版次。
 - tokens 保存已准入的開局閉包關聯，值為唯一且排序的官網 JP 永久版次 ID 陣列。目標必須存在於該快照，其採納的面須為衍生物，且所屬卡片須有 DSL 程式。允許自身關聯。空陣列表示此程式無明示關聯。
-- 此封套的 manifest File hash 涵蓋程式和版次關聯。跨區讀取仍適用 region_blocks。
+- 此封套的 manifest File hash 涵蓋程式和版次關聯。其他地區不得自行推導這些 JP 版次的對應版次，跨區讀取仍適用 region_blocks。
 
 打包範圍是 effects-index 的全部准入卡，包含 light；來源／展開驗證失敗即拒絕建置，不能靜默漏卡。准入並不代表通過指定引擎：尚無 exact engine target／實跑紀錄時，status 依作者候選維持 draft 或 reviewed（不因 light 准入升為 reviewed）、reasons=[engine_unassigned]，保留手動處理。EN 是否可自動執行仍受既有 region_blocks 限制。AST 是另行下載的對戰附件；文字分片不以它為強依賴，查卡不用下載 AST。容量帳依 size-budget 分別報告程式包 raw／Brotli 與原有逐區文字閉包，不把 AST 計成首屏或基本目錄。
 
