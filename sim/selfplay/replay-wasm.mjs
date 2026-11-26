@@ -34,6 +34,8 @@ function replay(record) {
   try {
     session = prepared.open(JSON.stringify(record.setup))
   } catch (error) {
+    // A trap is not a refusal: let the caller record it and stop using this instance.
+    if (error instanceof WebAssembly.RuntimeError) throw error
     // The host throws its stage code when the decks do not open.
     return { end: `load: ${String(error.message)}`, micros }
   }
@@ -50,6 +52,8 @@ function replay(record) {
     const deliveries = JSON.parse(text)
     const receipt = deliveries.find(({ message: sent }) => sent.kind === "receipt")
     end = standing(deliveries, end)
+    // A stopped host answers nothing more; the commands left in the record are not a divergence.
+    if (end.startsWith("host_error")) break
     if (receipt?.message.result !== step.result) {
       end = `replay: step ${String(index)} got ${String(receipt?.message.result)}`
       break
@@ -60,6 +64,7 @@ function replay(record) {
 }
 
 writeFileSync(output, "")
+let diverged = 0
 for (const line of readFileSync(records, "utf8").split("\n")) {
   if (line === "") continue
   // A line of failures.jsonl wraps its record; a line of records.jsonl is one.
@@ -76,9 +81,14 @@ for (const line of readFileSync(records, "utf8").split("\n")) {
     )
     process.exit(1)
   }
+  if (result.end.startsWith("replay")) diverged += 1
   appendFileSync(
     output,
     `${JSON.stringify({ seed: record.seed, end: result.end, engine_micros: result.micros })}\n`,
   )
 }
 prepared.free()
+if (diverged > 0) {
+  console.error(`${String(diverged)} records did not replay to their receipts`)
+  process.exit(1)
+}

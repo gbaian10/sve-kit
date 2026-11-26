@@ -137,7 +137,8 @@ pub struct Match {
     pub record: Record,
     /// Result or failure.
     pub end: End,
-    /// Cost of every submission, in record order, the one that ended the match included.
+    /// Cost of every submission, in record order, the one that ended the match included;
+    /// a submission that panicked inside the host has none.
     pub costs: Vec<StepCost>,
     /// The slowest submissions, slowest first.
     pub slow: Vec<StepContext>,

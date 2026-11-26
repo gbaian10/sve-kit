@@ -78,7 +78,9 @@ Invariants, read from the two seats' updates alone:
 
 Every submission, the one that ended the match included, records the host time to the next
 stable stop, the time to serialize the resulting messages and the committed events it produced.
-The summary gives p50, p95, p99 and
+The summary gives p50, p95, p99 and the maximum, and the slowest submissions with their
+question, cards and board size. A submission that panics inside the host is the exception:
+it has no cost and its recorded receipt is a placeholder.
 
 To time the WebAssembly build on the same records:
 
@@ -91,7 +93,10 @@ node sim/selfplay/replay-wasm.mjs <work>/wasm/sve_battle_host.js \
 ```
 
 The WebAssembly call includes decoding the command and encoding the messages, so compare it
-with `engine_micros + encode_micros` of the native replay.
+with `engine_micros + encode_micros` of the native replay. Its `end` is `finished`,
+`engine_fault`, `host_error: <reason>`, `load: <stage>`, `replay: …` for a receipt that
+differs (the script then exits with 1), `panic: …` for a trap (it stops there), or
+`unfinished` for every other way a recorded match stopped short.
 
 ## Tests
 

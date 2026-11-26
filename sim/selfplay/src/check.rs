@@ -61,7 +61,7 @@ const fn zones(zones: &Zones) -> [(&'static str, &ZoneView); 14] {
     ]
 }
 
-/// Zones in which both seats identify every card.
+/// Zones whose face-up cards both seats identify.
 const PUBLIC_ZONES: [&str; 11] = [
     "field",
     "ex",
@@ -199,6 +199,25 @@ impl Checker {
             printings(notices, &mut seen.noticed);
         }
         moved_in_public(json, &mut seen.moved_in_public);
+        // A card put face down into a public zone is still the owner's alone.
+        for (name, zone) in update
+            .observation
+            .players
+            .iter()
+            .flat_map(|player| zones(&player.zones))
+        {
+            if !PUBLIC_ZONES.contains(&name) {
+                continue;
+            }
+            for object in zone
+                .cards
+                .iter()
+                .filter_map(|member| update.observation.objects.get(&member.object))
+                .filter(|object| object.knowledge == Knowledge::Private)
+            {
+                seen.moved_in_public.remove(&object.card.printing_id);
+            }
+        }
         seen.public = update
             .observation
             .objects
@@ -323,21 +342,23 @@ impl Checker {
 
 /// Whether both seats must see the same public board. A seat declaring or paying for a play
 /// runs ahead of the other: the host shows a play to the other seat only once it is played.
+/// The main action window is asked before any declaration, although its stage is `Declare`.
 fn settled(first: &BattleUpdate, second: &BattleUpdate) -> bool {
     [first, second]
         .into_iter()
         .all(|update| match &update.input {
             BattleInput::Question { question } => {
-                question.purpose != QuestionPurpose::PlayParameter
-                    && !matches!(
-                        question.processing.stage,
-                        Some(
-                            ProcessingStage::Declare
-                                | ProcessingStage::Target
-                                | ProcessingStage::Allocate
-                                | ProcessingStage::Pay
+                question.purpose == QuestionPurpose::MainAction
+                    || question.purpose != QuestionPurpose::PlayParameter
+                        && !matches!(
+                            question.processing.stage,
+                            Some(
+                                ProcessingStage::Declare
+                                    | ProcessingStage::Target
+                                    | ProcessingStage::Allocate
+                                    | ProcessingStage::Pay
+                            )
                         )
-                    )
             }
             BattleInput::Waiting { .. }
             | BattleInput::Finished { .. }

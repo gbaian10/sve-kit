@@ -129,6 +129,19 @@ fn an_event_shows_a_card_only_when_it_passes_through_a_public_zone() {
         view["events"] = movement("b7", "deck", "hand");
     }
     assert_eq!(broken(&drawn), Some("hidden_information"));
+
+    // A card put face down onto the field is in a public zone and still only its owner's.
+    let mut face_down = pair();
+    for view in &mut face_down {
+        let zones = &mut view["observation"]["players"][1]["zones"];
+        zones["deck"]["count"] = json!(49);
+        zones["field"] = json!({"count":1,"capacity":5,"cards":[]});
+        view["events"] = movement("b7", "deck", "field");
+    }
+    face_down[1]["observation"]["objects"]["o-set"] = object("b7", "private");
+    face_down[1]["observation"]["players"][1]["zones"]["field"]["cards"] =
+        json!([{"position":0,"object":"o-set"}]);
+    assert_eq!(broken(&face_down), Some("hidden_information"));
 }
 
 #[test]
@@ -194,6 +207,17 @@ fn a_seat_still_declaring_or_paying_for_a_play_may_be_ahead_of_the_other() {
     assert_eq!(broken(&ward("pay")), None);
     // Any other rule choice is asked on a board both seats already share.
     assert_eq!(broken(&ward("resolve")), Some("view_agreement"));
+
+    // The main action window carries the declare stage but precedes every declaration.
+    let mut main: [Value; 2] = pair();
+    let asked = &mut main[0]["input"]["question"];
+    asked["purpose"] = json!("main_action");
+    asked["use"] = json!("main_action");
+    asked["shape"] = json!({"kind":"action_window","intents":[{"kind":"end_phase","id":"end"}]});
+    asked["processing"]["stage"] = json!("declare");
+    assert_eq!(broken(&main), None);
+    main[1]["observation"]["players"][0]["life"] = json!(19);
+    assert_eq!(broken(&main), Some("view_agreement"));
 }
 
 #[test]
