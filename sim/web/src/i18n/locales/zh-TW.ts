@@ -1174,7 +1174,6 @@ const zhTW = {
       label: "指示物",
       names: { stack: "蓄積", fusion: "融合", refund: "返還" },
       count: "{{name}} ×{{n}}",
-      unnamed: "指示物 ×{{n}}",
       spoken: "指示物：{{text}}",
     },
     turn: {

@@ -1,7 +1,6 @@
 import { useTranslation } from "react-i18next"
 
-// Counters as the authority names them: the rules names of the keyword registry's counter entries
-// (authored/rules/keywords.yaml). The screen names a counter's kind in the reader's language.
+// The authority supplies the Japanese rules name when local wording is unavailable.
 const COUNTERS = {
   スタックカウンター: "stack",
   融合カウンター: "fusion",
@@ -15,7 +14,7 @@ function counterKey(name: string): CounterKey | null {
   return Object.hasOwn(COUNTERS, name) ? COUNTERS[name as keyof typeof COUNTERS] : null
 }
 
-/** A counter in words, kind and amount; a kind without a name here is only counted. */
+/** Display the localized counter name when available and its current amount. */
 export function useCounterText(): (counter: {
   readonly name: string
   readonly amount: number
@@ -23,8 +22,9 @@ export function useCounterText(): (counter: {
   const { t } = useTranslation()
   return ({ name, amount }) => {
     const key = counterKey(name)
-    return key === null
-      ? t("play.counter.unnamed", { n: amount })
-      : t("play.counter.count", { name: t(`play.counter.names.${key}`), n: amount })
+    return t("play.counter.count", {
+      name: key === null ? name : t(`play.counter.names.${key}`),
+      n: amount,
+    })
   }
 }
