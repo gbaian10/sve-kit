@@ -421,7 +421,7 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 
 建置資料庫的 `card_engine_support` 可逐 card/region 保存推導；卡表快照合併共用狀態，每卡一列＋只對真正區域差異存 overrides，不重複日英文件。shared 文件以 JP 全面卡文為 source；EN 無對照/未完成語義核對/差異尚未解決，不繼承 automatic。正式 DSL 1.0 的作者主檔只支援 shared，見 DSL 承載 §2.1。
 
-手寫 reviewed：不同於寫檔者的語意審核 ok。巨集需兩個模型審核與測試，逐卡三項機械檢查（句型、參數、反譯）全過。驗證政策要求新卡載入＋基本局面以及所有必要題本；每次 run 追加，exact program/source/exam/engine build/policy/測試輸入 manifest 取最新結果，最新 fail 不沿用舊 pass。`policy_id`、`engine_version/build`、source/program/candidate hash 任何變更都重算；測試輸入 manifest 不必等於包含結果的新 manifest，避免自我 hash 循環。
+手寫 reviewed：不同於寫檔者的語意審核 ok。 以 Git 歷史與 PR trailer 確認寫檔者。巨集需兩個模型審核與測試，逐卡三項機械檢查（句型、參數、反譯）全過。驗證政策要求新卡載入＋基本局面以及所有必要題本；每次 run 追加，exact program/source/exam/engine build/policy/測試輸入 manifest 取最新結果，最新 fail 不沿用舊 pass。`policy_id`、`engine_version/build`、source/program/candidate hash 任何變更都重算；測試輸入 manifest 不必等於包含結果的新 manifest，避免自我 hash 循環。
 
 | support status  | 必要事實                                                                 | automatic |
 | --------------- | ------------------------------------------------------------------------ | --------- |
