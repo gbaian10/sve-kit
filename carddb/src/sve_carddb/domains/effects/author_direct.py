@@ -1,6 +1,7 @@
 """Expand named bodies against card coordinates, without translation-frame proofs."""
 
 from copy import deepcopy
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
@@ -17,7 +18,7 @@ from sve_carddb.domains.effects.author_expansion import (
     ability_nodes,
 )
 from sve_carddb.domains.effects.author_handwritten import Locator, RuleSection, decode
-from sve_carddb.domains.effects.author_inputs import parse_document
+from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
 from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.translations.four_layer_sources import card_field
 
@@ -27,7 +28,7 @@ if TYPE_CHECKING:
     from sve_carddb.build import Value
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
-    from sve_carddb.domains.effects.author_handwritten import Handwritten
+    from sve_carddb.domains.effects.author_handwritten import Body, Handwritten
 
 _LOCATION = frozenset({"line", "face", "section", "scope", "covers", "admission"})
 _USE = frozenset({"use", "edition", "params", "registration"})
@@ -60,17 +61,33 @@ def _scalar(value: Value) -> str | int | None:
 
 
 def direct(handwritten: Handwritten, number: str) -> bool:
-    """An explicit card, use or body admission selects the direct author path."""
+    """Select direct admission from the card, use or selected body edition."""
     card = handwritten.cards[number]
-    return "admission" in card or any(
-        "admission" in (value := object_value(a))
-        or any(
-            body.admission is not None
-            for (name, _), body in handwritten.bodies.items()
-            if name == value.get("use")
-        )
-        for a in array(card["abilities"])
-    )
+    if "admission" in card:
+        return True
+    for index, raw in enumerate(array(card["abilities"])):
+        value = object_value(raw)
+        if "admission" in value:
+            return True
+        if "use" not in value:
+            continue
+        try:
+            body = _body_definition(value, handwritten)
+        except SourceError as error:
+            cursor = handwritten.documents[number].diagnostic(
+                "source", error.reason, ("cards", number, "abilities", index)
+            )
+            line = value.get("line")
+            raise AuthorInputError(
+                replace(
+                    cursor,
+                    card_no=number,
+                    card_line=line if type(line) is int else None,
+                )
+            ) from None
+        if body.admission is not None:
+            return True
+    return False
 
 
 def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and its complete line inventory at one boundary
@@ -402,13 +419,7 @@ def _substitute(
     return node
 
 
-def _body(
-    value: dict[str, JsonValue], handwritten: Handwritten
-) -> tuple[dict[str, JsonValue], str | None]:
-    if "use" not in value:
-        return {k: v for k, v in value.items() if k not in _LOCATION}, None
-    if value.keys() - (_LOCATION | _USE):
-        raise SourceError("ability_head_conflict")
+def _body_definition(value: dict[str, JsonValue], handwritten: Handwritten) -> Body:
     definitions = [
         b
         for (name, edition), b in handwritten.bodies.items()
@@ -417,7 +428,17 @@ def _body(
     ]
     if len(definitions) != 1:
         raise SourceError("ambiguous_body_version" if definitions else "body_missing")
-    definition = definitions[0]
+    return definitions[0]
+
+
+def _body(
+    value: dict[str, JsonValue], handwritten: Handwritten
+) -> tuple[dict[str, JsonValue], str | None]:
+    if "use" not in value:
+        return {k: v for k, v in value.items() if k not in _LOCATION}, None
+    if value.keys() - (_LOCATION | _USE):
+        raise SourceError("ability_head_conflict")
+    definition = _body_definition(value, handwritten)
     if any(
         object_value(r).get("verdict") in {"disputed", "revise"}
         for registration in definition.registrations
