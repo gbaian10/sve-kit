@@ -155,6 +155,7 @@ class ReviewSources:
         self.review_root = review_root
         self._providers: dict[tuple[RegionalSource, ...], FrozenRegions] = {}
         self._batches: dict[str, FrozenSources] = {}
+        self._metadata_batches: dict[str, FrozenSources] = {}
 
     def _batch(self, batch_id: str, *, image: bool = False) -> FrozenSources:
         if batch_id not in self._batches:
@@ -189,6 +190,64 @@ class ReviewSources:
                 ),
             )
         return self._providers[sources]
+
+    def _metadata_batch(self, batch: str) -> FrozenSources:
+        if batch not in self._metadata_batches:
+            self._metadata_batches[batch] = FrozenSources(
+                self.archive, self.store_id, batch, trusted_inventory=True
+            )
+        return self._metadata_batches[batch]
+
+    def trusted_uses(self, record: Transition) -> tuple[SourceUse, ...]:
+        """Retain build provenance from admitted evidence and sealed batch metadata."""
+        config = configuration(record)
+        _, jp = config.regions()
+        parsers: dict[str, str] = {
+            source.region: source.parser_version for source in config.sources
+        }
+        usage = {
+            "identity_observation": "identity_transition_observation",
+            "art_observation": "identity_transition_art",
+            "art_image": "identity_transition_art_image",
+        }
+        uses: list[SourceUse] = []
+        for evidence in record.evidence:
+            if evidence.role == "mapping_coverage":
+                continue
+            batch = self._metadata_batch(evidence.batch_id)
+            parser = (
+                "registry-art-image-v1"
+                if evidence.role == "art_image"
+                else parsers[batch.descriptor(evidence.source_version_id).provider]
+            )
+            source, _ = batch.metadata(
+                evidence.source_version_id, parser_version=parser
+            )
+            uses.append(
+                SourceUse(
+                    source=source, usage=usage[evidence.role], locator=evidence.locator
+                )
+            )
+        if config.review_input is not None:
+            # The transition stores a single representative pin for the reviewed JP scope.
+            scope = RegistryReviewInputs(config.review_pin(self.review_root))
+            batch = self._metadata_batch(jp.card_batch)
+            versions = {
+                item.url: item.source_version_id for item in batch.current_versions
+            }
+            for number in sorted(scope.card_numbers):
+                source, _ = batch.metadata(
+                    versions[official_jp.card_url(number)],
+                    parser_version=jp.parser_version,
+                )
+                uses.append(
+                    SourceUse(
+                        source=source,
+                        usage="identity_transition_coverage",
+                        locator=number,
+                    )
+                )
+        return tuple(uses)
 
     def verify(
         self,

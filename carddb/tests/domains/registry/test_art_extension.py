@@ -17,6 +17,7 @@ from sve_carddb.domains.registry.transitions.renewal import (
     load_candidate_registry,
     load_identity_registry,
     load_renewed_registry,
+    load_trusted_registry,
 )
 from sve_carddb.domains.registry.transitions.writer import (
     ArtDecisions,
@@ -152,6 +153,7 @@ def test_complete_art_extension_preserves_original_bytes_and_projects_both_uses(
     assert (root / planned.shard.path).stat().st_mode & 0o777 == 0o644
     assert all(path.read_bytes() == raw for path, raw in before.items())
     snapshot = load_renewed_registry(root, art_case.recipe.evidence())
+    assert load_trusted_registry(root, art_case.recipe.evidence()) == snapshot
     updated = snapshot.records["art:" + art_case.original.id].data
     assert isinstance(updated, ArtData)
     assert len(updated.uses) == 2

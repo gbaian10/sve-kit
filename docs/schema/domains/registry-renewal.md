@@ -109,7 +109,8 @@ uv --directory /absolute/checkout/carddb run sve-carddb registry extend-art \
   dependencies 鎖檔 pin、portable artifact pin 與各區批次在 configuration，沒有加入私人根。
 - absence 續版 evidence 列全部受審 EN 觀測與完整 JP 覆蓋的來源批次代表；實際重建及 F1 uses
   仍涵蓋 JP 全集的每張來源，不以一張代表卡證明全集。art evidence 逐一列全部成員卡頁與原圖。
-- 文字／圖片建置先驗整條已支援的 transition 歷史，再做地區及來源新鮮度投影。
+- 文字／圖片建置核對 transition 鏈與前件，按序套用寫入時已驗的更新，再做地區及來源新鮮度投影。
+  建置從封存批次中繼資料重建來源使用閉包。
   importer 保留原 registry、歷史 transition 的 authored source_record（identity-transition-v1）與 raw uses；
   DB review 只投影最後有效內容。壞前件／缺來源拒絕建置；新 JP 未受審仍列 review_scope_outdated。
 - 正常舊 reader／append 呼叫仍拒絕非空 transitions。後續追加可在原 registry module CLI 明示
@@ -125,7 +126,7 @@ uv --directory /absolute/checkout/carddb run sve-carddb registry extend-art \
 未知種類及實際 Card／Face／Printing 身分改動仍拒絕。這個入口不重播私人凍結證據，
 回傳值排除 art 與 region_mapping_review，不提供同圖或無對應批准，也不供正式匯出使用。
 
-database 作者工具仍由離線配方完整驗證歷史來源；非空 transitions 缺少
+database 作者工具沿離線配方套用已驗更新；非空 transitions 缺少
 registry_review_inputs 時拒絕。EN inventory 可明示 `--renewal-inputs`，配方的 repo、
 archive、store_id、日英卡頁批次與 program_revision 必須吻合本次參數，再完整驗證有效登錄。
 沒有明示配方的舊 reader 仍拒絕非空 transitions。上述入口不改 transition 或快照格式。

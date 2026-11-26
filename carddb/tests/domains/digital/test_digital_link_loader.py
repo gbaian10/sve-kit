@@ -116,7 +116,7 @@ def test_include_refusals(tmp_path: Path, name: str, message: str) -> None:
         load_links(tmp_path)
 
 
-def test_unindexed_and_hash(tmp_path: Path) -> None:
+def test_unindexed_and_invalid_shard(tmp_path: Path) -> None:
     write(tmp_path, {SHARD: envelope([record()])})
     extra = tmp_path / "digital/links/unindexed.json"
     extra.write_text("{}")
@@ -126,7 +126,7 @@ def test_unindexed_and_hash(tmp_path: Path) -> None:
         load_links(tmp_path)
     extra.unlink()
     (tmp_path / SHARD).write_text("{}")
-    with pytest.raises(ValueError, match=r"^Digital-link shard hash mismatch$"):
+    with pytest.raises(ValueError, match=r"^Invalid digital-link fields$"):
         load_links(tmp_path)
 
 

@@ -14,6 +14,7 @@ from sve_carddb.ingest.archive.source_archive import (
     Current,
     Descriptor,
     Receipt,
+    read_sealed_inventory,
     verify_batch,
 )
 from sve_carddb.ingest.archive.store import resolve_within
@@ -30,9 +31,19 @@ class FrozenSources:
         return cls(root, name, batch_id)
 
     def __init__(
-        self, root: Path, store_id: str, batch_id: str, *, verify_raw: bool = True
+        self,
+        root: Path,
+        store_id: str,
+        batch_id: str,
+        *,
+        verify_raw: bool = True,
+        trusted_inventory: bool = False,
     ) -> None:
-        self.inventory = verify_batch(root, store_id, batch_id, verify_raw=verify_raw)
+        self.inventory = (
+            read_sealed_inventory(root, batch_id)
+            if trusted_inventory
+            else verify_batch(root, store_id, batch_id, verify_raw=verify_raw)
+        )
         self.entries = {
             entry.source_version_id: entry for entry in self.inventory.entries
         }
@@ -90,6 +101,8 @@ class FrozenSources:
         entry = self.entries.get(version)
         if entry is None:
             raise ArchiveError("Source version is absent from pinned batch")
+        if entry.blob.store_id != self.store_id:
+            raise ArchiveError("Frozen source belongs to another store")
         try:
             descriptor = self.descriptor(version)
             receipt = Receipt.model_validate_json(

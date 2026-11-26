@@ -7,13 +7,15 @@
 ## 入口
 
 入口由 `domains.digital.art_matches.loader.load` 一次驗完整檔案閉包、
-canonical shard hash、欄位與唯一 subject；未知欄位、符號連結、未列檔案、
+欄位與唯一 subject；未知欄位、符號連結、未列檔案、
 重複 art/game 或不合法結論均拒絕。每檔嚴格小於 1 MiB。
 
 | 路徑 | 欄位 |
 | --- | --- |
 | `digital/art-matches/index.yaml` | `format:1, kind:digital_art_match_index, recipe, opencv_version, as_of, includes` |
 | `digital/art-matches/<filing_key>/<sequence>.yaml` | `format:1, kind:digital_art_match_shard, records` |
+
+`includes` 列出全部分片的完整路徑。空集合以 `[]` 表示。
 
 每筆 record 包含 `art_id, card_id, face_id, game, state, same_card_targets,
 witness, candidates, complete, review_level, reason`。art 沿有效 registry 採納分組，

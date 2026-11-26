@@ -153,7 +153,7 @@ class AdoptionFixture:
         if authored.exists():
             shutil.rmtree(authored)
         authored.mkdir(parents=True)
-        includes: dict[str, JsonValue] = {}
+        includes: list[JsonValue] = []
         for kind, records in groups.items():
             members = sorted(
                 [
@@ -193,7 +193,7 @@ class AdoptionFixture:
             target = self.repository / "authored" / name
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(content)
-            includes[name] = digest(content)
+            includes.append(name)
         (authored / "index.yaml").write_bytes(
             canonical(
                 {
@@ -282,9 +282,9 @@ def append_successor(fixture: AdoptionFixture, *, broken: bool = False) -> None:
         target.write_bytes(raw)
     (entry / "restrictions/jp/standard/002.yaml").write_bytes(newest)
     index = object_value(parse(previous[Path("index.yaml")]))
-    object_value(index["includes"])[
+    array(index["includes"]).append(
         "construction-adoptions/restrictions/jp/standard/002.yaml"
-    ] = digest(newest)
+    )
     (entry / "index.yaml").write_bytes(canonical(index))
     git(fixture.repository, "add", "authored")
     git(fixture.repository, "commit", "-qm", "Synthetic append-only successor")

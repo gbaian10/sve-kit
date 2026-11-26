@@ -23,7 +23,7 @@
 | 部分實作 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`；已採納 JP／EN Standard 的 24 筆 main 禁限（含已解除區間與未來生效項）、2 profiles，保留 2026-09-25／2026-10-26 單日 coverage，以 2026-10-26 官方一覽為準；見[構築採納契約](construction-adoption.md#14-現行一覽的單日-human-confirmed-入口)。roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；CR、一般張數算法與 policy 採納仍未實作 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
 | 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital/links/index.yaml`、`digital/links/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
-| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values,candidates}/<sequence>.yaml`、`translations/{glossary,overrides,labels}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |
+| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/templates/{definitions,values}/<sequence>.yaml`、`translations/{glossary,overrides,labels}/<filing_key>/<sequence>.yaml`；形式位於 `translations/forms/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案 | 勘誤片段譯文 | `translations/errata/<filing_key>.yaml`，按公告 URL、日期與前後原文 hash 配對；見[勘誤譯文](errata-translations.md) |
 | 定案 | 綜合規則原文（網站顯示用） | `rules/comprehensive/<region>/<version>/{index,chNN,appendix-x}.json`（`jp`、`en` 各自版本），節點以條號或 `<context>:<number>` 為 key；見[該目錄 README](../../../authored/rules/comprehensive/README.md) |
 | 定案 | 綜合規則譯文 | `translations/comprehensive-rules/<language>/<version>/<原文同檔名>.json`，以原文節點 key 對應、`source_sha256` 釘原文；見[該目錄 README](../../../authored/translations/comprehensive-rules/README.md) |
@@ -168,7 +168,7 @@ data:
   variant_key: standard
   home_set_id: BP02
   source_face_map:
-    - {source_index: 0, face_id: "f:<32 hex>"}
+    - { source_index: 0, face_id: "f:<32 hex>" }
   observation:
     region: en
     card_no: "BP02-070EN"

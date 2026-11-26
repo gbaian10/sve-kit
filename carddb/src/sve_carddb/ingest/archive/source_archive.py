@@ -988,10 +988,8 @@ def _rename_no_replace(source: Path, destination: Path) -> None:
         raise OSError(error, os.strerror(error), destination)
 
 
-def verify_batch(  # ruff: ignore[complex-structure] -- sealed closure and image-only raw verification share one inventory boundary
-    root: Path, store_id: str, batch_id: str, *, verify_raw: bool = True
-) -> Inventory:
-    """Verify sealed closure; image-only consumers may defer complete raw hashing."""
+def read_sealed_inventory(root: Path, batch_id: str) -> Inventory:
+    """Read the exact sealed inventory for metadata from an already admitted batch."""
     batch = root / "batches" / _hex(batch_id)
     _require_safe_file(root, batch / "seal.json")
     seal = _load_model(Seal, batch / "seal.json")
@@ -1011,6 +1009,15 @@ def verify_batch(  # ruff: ignore[complex-structure] -- sealed closure and image
     ):
         msg = "sealed batch has missing inputs or unsorted scope"
         raise ArchiveError(msg)
+    return inventory
+
+
+def verify_batch(
+    root: Path, store_id: str, batch_id: str, *, verify_raw: bool = True
+) -> Inventory:
+    """Verify sealed closure; image-only consumers may defer complete raw hashing."""
+    inventory = read_sealed_inventory(root, batch_id)
+    batch = root / "batches" / _hex(batch_id)
     manifest_path = batch / inventory.manifest.path
     _require_hash(
         root, manifest_path, inventory.manifest.sha256, inventory.manifest.bytes

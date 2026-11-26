@@ -80,7 +80,7 @@ def load(root: Path) -> Snapshot | None:
     shards = []
     subjects = set()
     images: dict[tuple[str, str, str, str], tuple[str, str]] = {}
-    for path, expected in sorted(index.includes.items()):
+    for path in sorted(index.includes):
         if (
             re.fullmatch(r"digital/art-matches/[A-Za-z0-9_-]+/[0-9]{3,}\.yaml", path)
             is None
@@ -90,8 +90,6 @@ def load(root: Path) -> Snapshot | None:
         check_path(root, file)
         raw = file.read_bytes()
         value = read_yaml(file)
-        if digest(canonical(value)) != expected:
-            raise ValueError("Art match shard hash mismatch")
         shard = _model(Shard, value)
         _images(shard, images)
         for record in shard.records:

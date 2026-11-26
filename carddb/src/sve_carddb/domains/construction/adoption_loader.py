@@ -112,7 +112,7 @@ def load(root: Path, repository: Path, revision: str) -> Snapshot:
         )
     loaded: list[LoadedShard] = []
     sequences: dict[tuple[str, str], list[int]] = {}
-    for name, expected in sorted(index.includes.items()):
+    for name in sorted(index.includes):
         match = _PATH.fullmatch(name)
         if match is None:
             raise ValueError("Unsupported or unsafe construction shard path")
@@ -122,11 +122,10 @@ def load(root: Path, repository: Path, revision: str) -> Snapshot:
             raise ValueError("Construction shard sequence must be canonical")
         sequences.setdefault((area, region), []).append(number)
         raw, content = read(root / name, root=root)
-        if (
-            digest(content) != expected
-            or committed(repository, revision, "authored/" + name) != raw
-        ):
-            raise ValueError("Construction shard hash or immutable bytes mismatch")
+        if committed(repository, revision, "authored/" + name) != raw:
+            raise ValueError(
+                "Construction shard differs from immutable authored revision"
+            )
         shard = Shard.model_validate_json(content)
         _envelope(shard, area, region)
         loaded.append(LoadedShard(name, raw, content, shard))

@@ -16,7 +16,7 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `translations/errata/<filing_key>.yaml` — Japanese errata before/after translations paired by source URL, date and wording hash; see [errata translations](../docs/schema/domains/errata-translations.md)
 
 Every YAML document explicitly declares integer `format` and enumerated `kind`.
-Templates use `translations/templates/{definitions,values,candidates}/`; products
+Templates use `translations/templates/{definitions,values}/`; products
 use `products/{family,product,inclusion,identities}/`; catalog data lives under
 `catalog/{adoptions,overrides}/`, and digital policies are
 `digital/policies/{names,links}.yaml`. Rules also include `rules/keywords.yaml`
@@ -38,8 +38,6 @@ does not relax the daily append-only tools or add a general rewrite command.
 
 The glossary input follows the [translation contract](../docs/schema/domains/translation-contract.md)
 and [glossary adoption rules](../docs/schema/domains/glossary-adoption.md). Readers load the dedicated working-tree data directories once; keep documentation and audit reports outside `translations/`.
-The controlled `translations/templates/candidates/` area is the exception for
-validated template candidates; candidates never supply formal template translations.
 Concept keys are permanent. Edit translation YAML directly and review it in a PR; Git keeps the
 history (ADR-0014). Official wording stays out of git. Mark quality with `low_confidence`
 and `origin`; a `source_claim` is optional and only holds a work, URL or claimed source.

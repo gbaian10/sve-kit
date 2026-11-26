@@ -32,7 +32,6 @@ from sve_carddb.domains.translations.english_records import (
     EnglishTargetRecord,
     EnglishUseRecord,
 )
-from sve_carddb.domains.translations.four_layer_candidates import CandidateRecord
 from sve_carddb.domains.translations.four_layer_expressions import verify_target_shape
 from sve_carddb.domains.translations.four_layer_normalizer import VERSION
 from sve_carddb.domains.translations.four_layer_render import validate_form
@@ -258,7 +257,6 @@ Record = Annotated[
     | FrameRecord
     | TargetRecord
     | TargetVariantRecord
-    | CandidateRecord
     | FormRecord
     | ChoiceVariantRecord
     | MatchRecord
@@ -313,7 +311,7 @@ class Inputs:
 
 
 _PATH = re.compile(
-    r"translations/(?:(glossary|overrides|labels)/[A-Za-z0-9_-]+|templates/(definitions|values|candidates)|(forms))/[0-9]{3,}\.yaml\Z"
+    r"translations/(?:(glossary|overrides|labels)/[A-Za-z0-9_-]+|templates/(definitions|values)|(forms))/[0-9]{3,}\.yaml\Z"
 )
 _KINDS = {
     "labels": frozenset({"product_family_label"}),
@@ -338,7 +336,6 @@ _KINDS = {
     ),
     "definitions": frozenset({"sentence_template"}),
     "values": frozenset({"template_translation", "template_translation_variant"}),
-    "candidates": frozenset({"template_translation_candidate"}),
     "forms": frozenset({"translation_form"}),
 }
 

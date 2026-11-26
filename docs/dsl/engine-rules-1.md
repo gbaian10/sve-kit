@@ -8,6 +8,8 @@
 ## 1. 封套與版本背景
 
 檔案位置是 `authored/rules/engine/index.yaml`，首版一個檔案，不另設分片或新的採納入口。
+產生對戰輸入時以配對卡表的完整位元組計算 `input.snapshot_sha256`，寫入交給引擎的規則檔。
+提交的作者範本省略此欄。JSON Schema 驗證填入雜湊後的規則檔。
 依 [LICENSING](../../LICENSING.md)，本專案在此路徑的貢獻採 Apache-2.0；官方及第三方內容仍排除。
 公開設定只記代碼、身分參照、卡號定位器、來源版本及核對紀錄，不複製官方名稱或引文。
 
@@ -16,7 +18,7 @@
 | `format` | 恰為整數 1 |
 | `kind` | 恰為 `engine_rules`；原 engine-rules/1 設定語意不變 |
 | `scope` | `region` 僅 jp／en，`rules_version` 保留當區官版字串，`rules_source_version_id` 指向該官版的正式凍結來源 |
-| `input` | `kind` 僅 legacy-jp／resolved；`snapshot_sha256` 是完整輸入 exact bytes 的 64 位小寫 hex |
+| `input` | `kind` 僅 legacy-jp／resolved。引擎讀取的 `snapshot_sha256` 是完整輸入 exact bytes 的 64 位小寫 hex |
 | `titles` | 作品代碼、定位 face、有限能力及 evidence ID；不收顯示名稱欄 |
 | `resources` | 有限角色、規則名稱身分參照、必要 template 及 evidence ID |
 | `evidence` | 核對紀錄的精確全集，不能以 schema valid 冒充人工確認或採納 |
@@ -182,8 +184,8 @@ resources: []
 evidence:
   - id: synthetic_review
     source_version_id: src:v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
-    rule_refs: ['1.2.3']
-    checked_on: '2026-10-03'
+    rule_refs: ["1.2.3"]
+    checked_on: "2026-10-03"
 ```
 
 實際資料必須替換為釘版真實輸入、已登錄 code 與能驗回的來源；

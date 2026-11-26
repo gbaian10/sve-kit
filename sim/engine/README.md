@@ -55,8 +55,8 @@ The private background records each document kind/format and validation Schema
 `schema_id`. This migration rebuilds authored/settings/schema fingerprints and
 does not accept former backgrounds or replay fingerprints.
 
-`Catalog::load` reads `authored/rules/engine/index.yaml` and verifies its exact
-snapshot SHA-256. Its default identity boundary is explicitly `legacy-jp`.
+`Catalog::load` verifies the exact snapshot SHA-256 in the bound rules document.
+Its default identity boundary is explicitly `legacy-jp`.
 `Catalog::load_with_identity` and `Catalog::from_documents_with_rules` accept an
 explicit `EngineIdentityInput`; the latter uses only the supplied bytes. A
 `Resolved` projection supplies existing face/rules-name IDs, region and snapshot

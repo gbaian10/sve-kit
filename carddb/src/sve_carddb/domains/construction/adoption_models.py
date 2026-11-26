@@ -270,7 +270,7 @@ class Shard(RecordData):
 class Index(RecordData):
     construction_adoption_format: Literal[1]
     kind: Literal["construction_adoption_index"]
-    includes: dict[str, Hash]
+    includes: tuple[str, ...]
 
     @field_validator("construction_adoption_format", mode="before")
     @classmethod

@@ -144,6 +144,30 @@ def load_renewed_registry(
     return _replay(root, sources.history, sources=sources, candidate=candidate)
 
 
+def load_trusted_registry(root: Path, sources: ReviewSources) -> RegistrySnapshot:
+    """Apply written transitions to the current append-only base for a build."""
+    shards = load_transitions(root).shards
+    records = tuple(shard.envelope().records[0] for shard in shards)
+    current = read_base_files(root)
+    targets = {update.target_key for record in records for update in record.updates}
+    state = {
+        entry.record_key: (entry, shard.path, reference(entry, None))
+        for shard in current.shards
+        for entry in shard.envelope().records
+        if entry.record_key in targets
+    }
+    uses: list[SourceUse] = []
+    for shard, record in zip(shards, records, strict=True):
+        _apply(record, shard.path, state)
+        uses.extend(sources.trusted_uses(record))
+    return from_files(
+        current,
+        replacements=tuple((entry, path) for entry, path, _ in state.values()),
+        transitions=shards,
+        transition_uses=uses_sorted(uses),
+    )
+
+
 def load_candidate_registry(
     root: Path, *, repository: Path | None = None
 ) -> RegistrySnapshot:

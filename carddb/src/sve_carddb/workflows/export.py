@@ -1,6 +1,5 @@
 """Explicit preview mode and fail-closed formal publication command boundary."""
 
-import re
 from dataclasses import replace
 from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Typer resolves runtime annotations
 from typing import TYPE_CHECKING, Annotated
@@ -9,7 +8,7 @@ import typer
 
 from sve_carddb.cli_paths import required_root
 from sve_carddb.contracts.profiles import profile
-from sve_carddb.core.json import canonical, digest, object_value, string
+from sve_carddb.core.json import canonical, digest, object_value
 from sve_carddb.core.stage_log import mark
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.export.construction_index import (
@@ -138,19 +137,14 @@ def battle_inputs_command(
 def _bound_rules(path: Path, region: str, snapshot: bytes) -> dict[str, JsonValue]:
     """Bind the authored engine rules to the snapshot this reader produced.
 
-    The authored pin names the reviewed card batch; the engine requires the exact bytes it loads.
-    Only the pin is replaced, so it must first be what the engine rules schema requires; the
-    engine still validates every other field.
+    The engine validates the rules against the exact snapshot bytes it loads.
     """
     try:
         rules = object_value(JSON_VALUE.validate_python(parse_yaml(path.read_bytes())))
         covered = object_value(rules["scope"])["region"]
         source = object_value(rules["input"])
-        pinned = re.fullmatch(r"[a-f0-9]{64}", string(source["snapshot_sha256"]))
     except ValueError, KeyError, TypeError:
         raise ExportError("Engine rules are unusable") from None
-    if pinned is None:
-        raise ExportError("Engine rules are unusable")
     if covered != region:
         raise ExportError("Engine rules cover another region")
     source["snapshot_sha256"] = digest(snapshot)[7:]

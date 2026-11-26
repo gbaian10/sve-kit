@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.core.json import canonical, digest
+from sve_carddb.core.json import canonical
 
 from .translation_fixtures import reference
 
@@ -53,7 +53,7 @@ def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
     index: dict[str, JsonValue] = {
         "format": 2,
         "kind": "digital_link_index",
-        "includes": {p: digest(canonical(v)) for p, v in shards.items()},
+        "includes": list[JsonValue](sorted(shards)),
     }
     for name, value in {"digital/links/index.yaml": index, **shards}.items():
         path = root / name

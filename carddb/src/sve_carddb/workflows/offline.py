@@ -82,7 +82,7 @@ from sve_carddb.domains.registry.records import EnglishPrintingData, PrintingDat
 from sve_carddb.domains.registry.reprints import load_reprints, populate_reprints
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.transitions.files import read_transition_files
-from sve_carddb.domains.registry.transitions.renewal import load_renewed_registry
+from sve_carddb.domains.registry.transitions.renewal import load_trusted_registry
 from sve_carddb.domains.registry.transitions.review_sources import ReviewSources
 from sve_carddb.domains.routes import populate_routes
 from sve_carddb.domains.rulings.historical import rebuild as rebuild_rulings
@@ -239,7 +239,7 @@ def registry_provider(inputs: Inputs, batches: FrozenBatches) -> FrozenRegions:
 def registry_snapshot(
     inputs: Inputs, *, authored: Path | None = None
 ) -> RegistrySnapshot:
-    """Fully verify the publication registry, including historical frozen evidence."""
+    """Read the published registry and the effective values already checked on write."""
     root = authored if authored is not None else authored_root(inputs.repo)
     if read_transition_files(root).shards:
         if inputs.registry_review_inputs is None:
@@ -252,7 +252,7 @@ def registry_snapshot(
             inputs.store_id,
             inputs.registry_review_inputs.root,
         )
-        return load_renewed_registry(root, sources)
+        return load_trusted_registry(root, sources)
     return load_registry(root)
 
 
