@@ -2,11 +2,11 @@
 # requires-python = ">=3.12"
 # dependencies = ["pyyaml>=6.0.3"]
 # ///
-"""Map pre-commit hooks to CI jobs using .github/ci/hooks.toml.
+"""Map prek hooks to CI jobs using .github/ci/hooks.toml.
 
 Usage:
   uv run .github/ci/hooks.py check
-  uv run .github/ci/hooks.py skip JOB     # SKIP value for `pre-commit run` in that job
+  uv run .github/ci/hooks.py skip JOB     # SKIP value for `prek run` in that job
   uv run .github/ci/hooks.py stages JOB   # hook stages that job runs
 """
 
@@ -20,7 +20,7 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 JOBS = frozenset({"repo", "python", "rust", "web", "none"})
-# Stages each CI job passes to `pre-commit run --hook-stage`; a job's hooks must run at one of them.
+# Stages each CI job passes to `prek run --hook-stage`; a job's hooks must run at one of them.
 # `manual` also picks up every hook left on default_stages.
 JOB_STAGES: dict[str, tuple[str, ...]] = {
     "repo": ("manual",),

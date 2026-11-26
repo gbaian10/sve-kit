@@ -1,5 +1,4 @@
-# See https://pre-commit.com for more information
-# See https://pre-commit.com/hooks.html for more hooks
+# This configuration requires prek. The tool version is pinned in mise.toml.
 
 default_install_hook_types: [pre-commit, commit-msg, pre-push]
 default_stages: [pre-commit, manual]
@@ -7,33 +6,44 @@ default_language_version:
   python: python3.14
 
 repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
+  - repo: builtin
     hooks:
       # Synthetic HTML preserves parser whitespace; official fixtures retain pinned bytes. Web snapshots
       # are canonical JSON whose sha256 is pinned (no trailing newline).
-      - id: trailing-whitespace
-        exclude: ^(carddb/tests/fixtures/(synthetic|official)_(jp|en)/.*\.html$|sim/web/fixtures/)
       - id: end-of-file-fixer
-        exclude: ^(carddb/tests/fixtures/(synthetic|official)_(jp|en)/.*\.html$|sim/web/fixtures/)
+        exclude: &verbatim_fixtures ^(carddb/tests/fixtures/(synthetic|official)_(jp|en)/.*\.html$|sim/web/fixtures/)
+      - id: fix-byte-order-marker
+        exclude: *verbatim_fixtures
+      - id: mixed-line-ending
+        args: [--fix=lf]
+        exclude: *verbatim_fixtures
+      - id: trailing-whitespace
+        exclude: *verbatim_fixtures
       - id: check-added-large-files
         args: [--maxkb=1024, --enforce-all]
         # The generated v4 snapshot contract embeds the DSL schemas. Its content
         # is checked against the sources and version lock by snapshot-format.
         exclude: ^carddb/src/sve_carddb/contracts/schema/v4/contract\.schema\.json$
-      - id: check-ast
       - id: check-case-conflict
+      - id: check-executables-have-shebangs
+      - id: check-illegal-windows-names
       - id: check-merge-conflict
+        args: [--assume-in-merge] # Check committed conflict markers in CI too.
+      - id: check-shebang-scripts-are-executable
+        exclude_types: [rust] # Rust source may begin with an inner attribute (#![...]).
+      - id: check-toml
       # Registry and id shards are read by carddb's strict loader (safe YAML 1.2, one document,
       # no tags or duplicate keys) and validated in full by the carddb tests; skip only those.
       - id: check-yaml
         exclude: ^authored/(registry|ids)/.*\.yaml$
-      - id: check-toml
-
-  - repo: https://gitlab.com/bmares/check-json5
-    rev: v1.0.1
-    hooks:
-      - id: check-json5
+        args: [--disallow-unknown-tags]
+      # Knip documents its exclusions in comments, and Wrangler accepts trailing commas.
+      - id: check-json
+        exclude: &jsonc_files ^sim/web/(knip|wrangler\.dev)\.jsonc$
+      - id: check-jsonc
+        types_or: [json, jsonc]
+        files: *jsonc_files
+        args: [--allow-trailing-commas]
 
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
@@ -44,12 +54,13 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.5
     hooks:
-      # Standalone Python tools extend the carddb settings; scan/ keeps its own.
+      # Limit these hooks to Python source and stubs. Markdown has its own lint hook.
+      # Ruff uses the nearest project config and defaults for Python outside configured directories.
       - id: ruff-format
         args: [--check]
-        files: ^(carddb|publish|scan|tools/schema-er|sim/web/scripts/rules|\.github/ci)/
+        types_or: [python, pyi]
       - id: ruff-check
-        files: ^(carddb|publish|scan|tools/schema-er|sim/web/scripts/rules|\.github/ci)/
+        types_or: [python, pyi]
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.24.1
@@ -57,7 +68,7 @@ repos:
       # The Node hook installs the exact version pinned by `rev` (the Docker image tag was mutable);
       # a pinned Node (same as mise.toml) keeps it off whatever `node` happens to be on PATH.
       - id: markdownlint-cli2
-        language_version: 24.19.0
+        language_version: 26.13.1
         args: [--fix]
 
   # Relative links and anchors (including CJK headings) must point to files that exist. --offline checks
@@ -154,10 +165,10 @@ repos:
         entry: python3 .github/ci/rust_tests.py
         pass_filenames: false
         # Manual locally; the wrapper generates public test input, as CI does:
-        # `pre-commit run --hook-stage manual cargo-test`.
+        # `prek run --hook-stage manual cargo-test`.
         always_run: true
         stages: [manual]
-      # Slow (minutes): run by hand with `pre-commit run --hook-stage manual cargo-mutants`.
+      # Slow (minutes): run by hand with `prek run --hook-stage manual cargo-mutants`.
       - id: cargo-mutants
         name: cargo mutants (tests catch every injected bug)
         language: system
@@ -238,7 +249,7 @@ repos:
         always_run: true
         stages: [manual]
       # Manual locally (a full run takes minutes); CI runs it on every PR:
-      # `pre-commit run --hook-stage manual pytest`.
+      # `prek run --hook-stage manual pytest`.
       - id: pytest
         name: pytest (carddb)
         language: system
@@ -247,7 +258,7 @@ repos:
         always_run: true
         stages: [manual]
       # Optional strict check on all Python, run by hand; not in CI (mypy is the gate):
-      # `pre-commit run --hook-stage manual pyright`.
+      # `prek run --hook-stage manual pyright`.
       - id: pyright
         name: pyright (carddb, tools/schema-er)
         language: system

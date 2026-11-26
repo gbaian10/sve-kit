@@ -1,4 +1,4 @@
-# Which CI job runs each pre-commit hook (keyed by alias when a hook has one). `hooks.py check` fails when a hook in
+# Which CI job runs each prek hook (keyed by alias when a hook has one). `hooks.py check` fails when a hook in
 # .pre-commit-config.yaml has no entry here, so a new hook cannot silently skip CI.
 # job = "none" means CI does not run the hook itself; `reason` says what covers it instead.
 
@@ -8,16 +8,28 @@ job = "repo"
 [hooks.end-of-file-fixer]
 job = "repo"
 
-[hooks.check-added-large-files]
+[hooks.fix-byte-order-marker]
 job = "repo"
 
-[hooks.check-ast]
+[hooks.mixed-line-ending]
+job = "repo"
+
+[hooks.check-added-large-files]
 job = "repo"
 
 [hooks.check-case-conflict]
 job = "repo"
 
+[hooks.check-executables-have-shebangs]
+job = "repo"
+
+[hooks.check-illegal-windows-names]
+job = "repo"
+
 [hooks.check-merge-conflict]
+job = "repo"
+
+[hooks.check-shebang-scripts-are-executable]
 job = "repo"
 
 [hooks.check-yaml]
@@ -26,7 +38,10 @@ job = "repo"
 [hooks.check-toml]
 job = "repo"
 
-[hooks.check-json5]
+[hooks.check-json]
+job = "repo"
+
+[hooks.check-jsonc]
 job = "repo"
 
 [hooks.taplo-format]
@@ -60,11 +75,12 @@ job = "repo"
 [hooks.snapshot-format-lock]
 job = "repo"
 
+# Python files in any directory need both checks, including on PRs without a Python job.
 [hooks.ruff-format]
-job = "python"
+job = "repo"
 
 [hooks.ruff-check]
-job = "python"
+job = "repo"
 
 [hooks.pytest]
 job = "python"

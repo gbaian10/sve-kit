@@ -232,7 +232,7 @@ The pre-commit hooks run bun fmt and Stylelint on changed files. bun fmt reads t
 together. The pre-push hook runs ESLint over all of sim/web, as CI does: type-aware rules load the
 whole TypeScript project however few files they check. The hook runs `typecheck` and CI uses its
 prepared variant. Both use `--threads=4` to limit the thread count for `bun check`. Vitest is a
-manual hook (`pre-commit run --hook-stage manual web-test`); CI runs the steps of `check:all` on
+manual hook (`prek run --hook-stage manual web-test`); CI runs the steps of `check:all` on
 every web change.
 
 ## Theme tokens

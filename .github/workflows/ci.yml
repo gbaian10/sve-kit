@@ -173,7 +173,7 @@ jobs:
           fetch-depth: 0 # gitleaks-range scans the whole pushed commit range
           persist-credentials: false
           clean: true
-      # The bun-fmt hook runs Bun from mise.toml.
+      # Install prek and Bun for the repository hooks.
       - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
         with:
           cache: true
@@ -191,16 +191,16 @@ jobs:
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
-          path: ~/.cache/pre-commit
+          path: ~/.cache/prek
           # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
           # partial cache that the others hit exactly and then could never update.
-          key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
-          restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
+          key: prek-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml', 'mise.toml') }}
+          restore-keys: prek-${{ github.job }}-${{ runner.os }}-py3.14-
       - name: Every hook has a CI owner and every job reaches ci-ok
         run: |
           uv run .github/ci/hooks.py check
-          uv run --project carddb --locked --no-default-groups --group dev python -m unittest discover -s .github/ci -p 'test_*.py'
-      - name: pre-commit (repo-wide hooks, including the gitleaks commit-range scan)
+          uv run --project carddb --locked --no-default-groups python -m unittest discover -s .github/ci -p 'test_*.py'
+      - name: prek (repo-wide hooks, including the gitleaks commit-range scan)
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
@@ -210,33 +210,39 @@ jobs:
           export SVE_FORMAT_BASE_REF="$BASE"
           # Shared configuration and action metadata can invalidate otherwise unchanged files.
           full_scan_inputs=(
-            .pre-commit-config.yaml .github/ci/hooks.toml .github/ci/hooks.py
+            .pre-commit-config.yaml .github/ci/hooks.toml .github/ci/hooks.py mise.toml
             .github/workflows .github/actionlint.yaml .github/actionlint.yml
             .github/zizmor.yml zizmor.yml
             ':(glob)**/action.yml' ':(glob)**/action.yaml'
             ':(glob)**/.markdownlint*' ':(glob)**/.editorconfig'
             ':(glob)**/.gitattributes' ':(glob)**/.gitleaks*'
+            ':(glob)**/ruff.toml' ':(glob)**/.ruff.toml' ':(glob)**/pyproject.toml'
             bunfig.toml taplo.toml .taplo.toml uv.toml carddb/uv.toml
-            pyproject.toml uv.lock carddb/pyproject.toml publish/pyproject.toml
+            uv.lock
           )
           scope=(--all-files)
-          # Deleted inputs never reach pre-commit's filename filters, but can break the ER build or leave
+          # Deleted inputs never reach prek's filename filters, but can break the ER build or leave
           # Markdown links to a deleted or renamed file in files the PR did not touch.
           if git diff --quiet "${BASE}...${HEAD}" -- "${full_scan_inputs[@]}" &&
             git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}" -- docs/schema/ ':(glob)**/*.md'; then
             scope=(--from-ref "$BASE" --to-ref "$HEAD")
+            if ! git diff --quiet --no-renames "${BASE}...${HEAD}" -- ':(glob)**/*.py' ':(glob)**/*.pyi'; then
+              # Adding or removing a module can change imports in untouched Python files.
+              prek run --config .pre-commit-config.yaml ruff-check --all-files --hook-stage manual
+              SKIP="$SKIP,ruff-check"
+            fi
             if ! git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}"; then
               # Links can also point from untouched Markdown to scripts, images and data.
-              uv run --project carddb --locked --no-default-groups --group dev pre-commit run lychee --all-files --hook-stage manual
+              prek run --config .pre-commit-config.yaml lychee --all-files --hook-stage manual
               SKIP="$SKIP,lychee"
             fi
           fi
-          echo "pre-commit scope: ${scope[*]}"
-          uv run --project carddb --locked --no-default-groups --group dev pre-commit run "${scope[@]}" --hook-stage manual --show-diff-on-failure
+          echo "prek scope: ${scope[*]}"
+          prek run --config .pre-commit-config.yaml "${scope[@]}" --hook-stage manual --show-diff-on-failure
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
-          path: ~/.cache/pre-commit
+          path: ~/.cache/prek
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   author-data:
@@ -313,7 +319,7 @@ jobs:
           python-version: "3.14.10"
       - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
         with:
-          install: false
+          install_args: prek
           cache: false
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
@@ -324,11 +330,11 @@ jobs:
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
-          path: ~/.cache/pre-commit
+          path: ~/.cache/prek
           # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
           # partial cache that the others hit exactly and then could never update.
-          key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
-          restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
+          key: prek-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml', 'mise.toml') }}
+          restore-keys: prek-${{ github.job }}-${{ runner.os }}-py3.14-
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: mypy-cache
         with:
@@ -342,13 +348,13 @@ jobs:
       - name: Runner CPU count
         run: nproc
       # Test hooks are owned by this job but run directly below.
-      - name: pre-commit (python hooks)
+      - name: prek (python hooks)
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip python)"
           export SKIP SVE_DATA_DIR="${RUNNER_TEMP}/sve-carddb-test-data"
           for stage in $(uv run .github/ci/hooks.py stages python); do
             echo "::group::stage $stage"
-            uv run --project carddb --locked pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
+            prek run --config .pre-commit-config.yaml --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
       - name: Installed carddb wheel smoke
@@ -408,7 +414,7 @@ jobs:
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
-          path: ~/.cache/pre-commit
+          path: ~/.cache/prek
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   python-tests:
@@ -606,7 +612,7 @@ jobs:
           tool: cargo-deny@0.19.9,cargo-machete@0.9.2
       - uses: jdx/mise-action@236a21c3b91f5db6d4e174b348674a0f0caac06d # v5.2.9
         with:
-          install: false
+          install_args: prek
           cache: false
       - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
         with:
@@ -617,19 +623,19 @@ jobs:
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
         with:
-          path: ~/.cache/pre-commit
+          path: ~/.cache/prek
           # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
           # partial cache that the others hit exactly and then could never update.
-          key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
-          restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
+          key: prek-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml', 'mise.toml') }}
+          restore-keys: prek-${{ github.job }}-${{ runner.os }}-py3.14-
       # The coverage test hook runs in rust-tests; the other checks keep their local hooks.
-      - name: pre-commit (rust hooks)
+      - name: prek (rust hooks)
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip rust)"
           export SKIP
           for stage in $(uv run .github/ci/hooks.py stages rust); do
             echo "::group::stage $stage"
-            uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
+            prek run --config .pre-commit-config.yaml --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
       # llvm-cov covers unit/integration tests, but does not run stable compile-fail doctests.
@@ -638,7 +644,7 @@ jobs:
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
-          path: ~/.cache/pre-commit
+          path: ~/.cache/prek
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   rust-tests:
