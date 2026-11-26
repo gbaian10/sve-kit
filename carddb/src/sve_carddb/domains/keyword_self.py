@@ -9,12 +9,13 @@ from pydantic import JsonValue
 from sve_carddb.build import Json
 from sve_carddb.core.json import array
 from sve_carddb.core.wording import quote_after
+from sve_carddb.domains.printed_mechanisms import section_owner
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build import Database, Value
-    from sve_carddb.domains.mechanics import Inputs, Settings
+    from sve_carddb.domains.mechanics import Inputs
 
 ADAPTER = "printed-self-keywords-v1"
 _JP_DECLARATION = re.compile(r"(?:【[^【】\n]+】\s*)+(?:[（(].*[）)])?")
@@ -227,15 +228,18 @@ def _project(
 def apply(
     db: Database,
     inputs: Inputs,
-    settings: Settings,
     fields: Mapping[tuple[str, str], CurrentFields],
 ) -> dict[str, JsonValue]:
     """Inspect every regional current face; missing faces and ambiguous uses stay unknown."""
     universe = {record.id for record in inputs.registry.records}
+    japanese = {
+        str(row.values["id"]): str(row.values["source_ja"])
+        for row in db.rows("glossary_term")
+    }
     counts: dict[str, JsonValue] = {}
     for region in ("jp", "en"):
         spellings = {
-            record.id: settings.classifier.terms[record.term_id].source_ja
+            record.id: japanese[record.term_id]
             if region == "jp"
             else record.english or record.code.title()
             for record in inputs.registry.records
@@ -252,11 +256,17 @@ def apply(
                 found, uncertain = classify(main, region, spellings)
                 present.update(found)
                 unknown.update(uncertain)
-            # Supplemental token definitions never give their native keywords to the owner.
             for section in selected.sections:
                 found, uncertain = classify(section, region, spellings)
+                owner = section_owner(section, region)
+                # A token definition never gives its native keywords to the owner.
+                if owner == "self":
+                    present.update(found)
+                elif owner == "unknown":
+                    unknown.update(found)
+                else:
+                    unknown.update(found & _SECTION_DECLARATIONS)
                 unknown.update(uncertain)
-                unknown.update(found & _SECTION_DECLARATIONS)
             complete = universe - unknown
             positive = _project(
                 db,

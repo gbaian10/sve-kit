@@ -4,14 +4,13 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build import Database, Json
+from sve_carddb.build import Json
 from sve_carddb.core.json import array
-from sve_carddb.domains import mechanics
 from sve_carddb.domains.keyword_self import classify
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 
-from .test_mechanics import case
+from .test_mechanics import case, printing, project
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -49,36 +48,10 @@ def test_only_standalone_quick_icon_declares_the_keyword(
     assert classify(f'"{icon}"', region, spelling) == (set(), {"kw:quick"})
 
 
-def printing(db: Database, cid: str, region: str) -> None:
-    card = db.select("card", db.columns("card"), where={"id": cid})[0].values
-    db.insert(
-        "printing",
-        {
-            "id": region + "-printing",
-            "card_id": cid,
-            "region": region,
-            "card_no": region + "-001",
-            "card_no_state": "official",
-            "catalog_state": "official",
-            "decklog_available": True,
-            "decklog_verification": "unverified",
-            "variant_key": "default",
-            "home_set_id": card["home_set_id"],
-            "rarity_raw": "-",
-            "source_id": "source",
-        },
-    )
-
-
 def test_all_faces_and_region_owned_english_are_inspected(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with case(tmp_path, monkeypatch, "", back="【守護】", first_batch="synthetic") as (
-        db,
-        inputs,
-        settings,
-        cid,
-    ):
+    with case(tmp_path, monkeypatch, "", back="【守護】") as (db, inputs, cid):
         with db.transaction():
             printing(db, cid, "jp")
             printing(db, cid, "en")
@@ -106,7 +79,7 @@ def test_all_faces_and_region_owned_english_are_inspected(
                     "face_current",
                     dict(row.values) | {"region": "en", "revision_id": identifier},
                 )
-            report = mechanics.apply(db, inputs, settings)
+            report = project(db, inputs)
         positives = {
             (row.values["scope"], row.values["keyword_id"])
             for row in db.rows("mechanic_projection")
@@ -137,11 +110,10 @@ def test_token_definition_does_not_label_its_owner(
         monkeypatch,
         "Synthetic text.",
         sections=("『Token』【守護】",),
-        first_batch="synthetic",
-    ) as (db, inputs, settings, cid):
+    ) as (db, inputs, cid):
         with db.transaction():
             printing(db, cid, "jp")
-            mechanics.apply(db, inputs, settings)
+            project(db, inputs)
         assert not db.rows("mechanic_projection")
         covered = db.rows("card_mechanic_coverage")[0].values[
             "has_complete_keyword_ids"
@@ -154,21 +126,43 @@ def test_token_definition_does_not_label_its_owner(
 def test_section_quick_declaration_does_not_prove_absence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with case(tmp_path, monkeypatch, "", sections=("{クイック}",)) as (
-        db,
-        inputs,
-        settings,
-        cid,
-    ):
-        first, *others = inputs.registry.records
-        quick = first.model_copy(update={"id": "kw:quick", "code": "quick"})
-        registry = inputs.registry.model_copy(update={"records": (quick, *others)})
+    with case(tmp_path, monkeypatch, "", sections=("{クイック}",)) as (db, inputs, cid):
         with db.transaction():
             printing(db, cid, "jp")
-            mechanics.apply(db, mechanics.Inputs(registry, inputs.exact), settings)
+            project(db, inputs)
         assert not db.rows("mechanic_projection")
         covered = db.rows("card_mechanic_coverage")[0].values[
             "has_complete_keyword_ids"
         ]
         assert isinstance(covered, Json)
         assert "kw:quick" not in array(covered.value)
+
+
+@pytest.mark.parametrize(
+    ("section", "state"),
+    [
+        ("【守護】\nSynthetic continuation.", "present"),
+        ("Synthetic text.\n【守護】", "unknown"),
+    ],
+    ids=["own-continuation", "unclear-owner"],
+)
+def test_section_declaration_follows_the_section_owner(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, section: str, state: str
+) -> None:
+    with case(tmp_path, monkeypatch, "Synthetic text.", sections=(section,)) as (
+        db,
+        inputs,
+        cid,
+    ):
+        with db.transaction():
+            printing(db, cid, "jp")
+            project(db, inputs)
+        held = {str(row.values["keyword_id"]) for row in db.rows("mechanic_projection")}
+        covered = db.rows("card_mechanic_coverage")[0].values[
+            "has_complete_keyword_ids"
+        ]
+        assert isinstance(covered, Json)
+        assert ("kw:ward" in held) is (state == "present")
+        # An unclear owner must not read as a confirmed absence.
+        assert "kw:ward" not in array(covered.value) or state == "present"
+        assert "kw:storm" in array(covered.value)

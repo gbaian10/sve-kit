@@ -1,9 +1,8 @@
 # 關鍵字登錄與機制投影
 
-自身宣告（內部代號 H1）指「整行只有關鍵字」，表示卡片本身具有該能力。
-
-本入口依[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)與
-[快照三態](../export/snapshot-format.md)提供查卡正標籤，不產生 DSL，不變更引擎支援狀態。
+查卡的關鍵字篩選分四種關係：卡片本身有（has）、給別的卡（grants）、效果提到（refers）、
+依數量計算（counts）。本入口依[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)與
+[快照三態](../export/snapshot-format.md)提供查卡正標籤與已檢查範圍，不變更引擎支援狀態。
 
 ## 採納輸入
 
@@ -16,7 +15,7 @@ kind: keyword_registry
 decision:
   id: decision:keyword-registry-v1
   state: confirmed
-  note: Adopt the explicit existing keyword concepts for the manual H1 source adapter.
+  note: Adopt the explicit existing keyword concepts for card mechanic projection.
 records:
   - {id: 'kw:ward', code: ward, term_id: 'term:keyword.ward'}
 suppressions: []
@@ -30,368 +29,70 @@ records 明示永久 `kw:<code>` ID、英文 code 與既有 glossary term ID。
 source_id 與來源權威；已驗的官方數位詞典選詞為 official／digital_official，
 不得改成 project／unofficial，也不得冒充實體 SVE 官文。品質合併 term／choice 的 low_confidence。
 
-decision 是 mapping 與有限 H1 adapter 的明示採納，不是逐卡真人審核、DSL review
-或 engine pass。建置保存 registry exact bytes 的 source_record、decision 及引用；
-F1 configuration 納入 registry hash 與 adapter 版本。
+decision 是 mapping 的明示採納，不是逐卡真人審核、DSL review 或 engine pass。
+建置保存 registry exact bytes 的 source_record、decision 及引用；configuration 納入
+registry hash 與各 adapter 版本。
 此檔與舊 `authored/rules/keywords.yaml` 的 astra/1 原型是不同入口；後者不會被這條管線匯入。
 
-## 來源與關係
+## 由 DSL 推導的四種關係
 
-只檢查已確認 card 的 JP face_current 主效果，逐面保留 exact owner。
-雙面卡採「任一面有即標 has」：任一面證明自身宣告，就在 card 層級標記，
-不表示正面一定具有該能力；公開投影沒有面向維度。
-預設建置由已審查解析輸入取得來源版本及 locator；sealed/raw bytes 在產生解析資料及明示 `archive` 模式驗證，
-不在普通建置重跑，見[解析卡片輸入〈建置入口〉](../ingest/parsed-card-inputs.md#建置入口)。更正沿用既有 corrected-source recipe。
-H1 略過空主文；完整欄位 adapter 另驗來源的空值，不合併所有 printing、歷史 revision 或他 owner binding。
+`dsl-keyword-relations-v1` 讀已准入的整卡程式（`dsl_document.ast`，已展開），不比對卡文。
+只處理八個持有性質的關鍵字：ward、storm、rush、bane、assail、intimidate、aura、drain。
+其餘登錄概念（Quick、Stack、兩種 Drive、Starting Amulet、最終上限解放可能）在 DSL 以各自的
+語意節點表達（例如增減 Stack、上限解放條件、Quick 篩選），哪些算「提到」尚無採納的定義；
+這條 producer 不為它們產標籤，也不提交檢查，授予／提到／計數三種關係維持未知。
 
-H1 只接受 `card_keywords.v2` 的完整 body part：整個片段由唯一解析的 keyword
-宣告組成，葉皆為 Concept／keyword／GlossaryReference。SourceBinding 與來源位置重驗後，
-每個已登錄概念產 `relation=has`。同欄位其他片段未翻譯或 pending 不妨礙這個正標籤，
-卻仍阻止完整 coverage。不依翻譯 target、annotation、加粗或 HTML 圖示推論。
+走訪每個能力（卡片層與各面），不讀 Token 身分與建牌規則。對照如下：
 
-授予、選擇／數量參照、引號內能力、未知句型及 sections 均不由 H1 產生標籤。
-token 定義的 keyword 不表示原卡自身具有。H1 不產 grants／refers／counts，
-沒有標籤亦不代表沒有能力。
-
-有限授予 adapter `manual-keywords-grants-bp01-v2` 只檢查首批固定永久 card ID 集合，
-由 `mechanic_batch.FIRST_BATCH_CARDS` 承載。209 張來自固定解析輸入及 identity recipe 中
-JP printing 原樣卡號以 `BP01-` 開頭、card 為 confirmed（排除 retired）的去重集合；
-後續批次或新增 printing 不會自動擴張這份集合。執行時仍重驗 confirmed 與 JP current owner。
-只使用既有 ward、storm、rush、bane、assail、intimidate、aura、drain 八個已登錄 ID，
-依相同 glossary 的唯一日文拼寫匹配，不新增概念。
-
-grants 只接受主文整行的有限句型：明示選擇自方從者、從墓場選擇並出場或產生具名 token 後，
-「それは【keyword】を持つ。」（可有指定格式的攻防增加）；以及
-「これがある限り、自分の『具名 token』すべては【keyword】を持つ。」。
-前綴僅接受已列出的ファンファーレ、ラストワード或指定 PP／act 費用格式的起動；
-尾句僅接受指定的任意數量 act 句。其他費用、條件、片段、引號能力及未知句型均不算已檢查。
-除下述 BP01-005 整欄例外外，含「」的主文整欄保守略過，避免跨行引述；sections（含 token_definition）不交給這個 producer，
-token 原生 keyword 不會掛到母卡。主文明示額外授予生成 token 的 keyword 則屬母卡 grants。
-來源 descriptor、current revision、exact field bytes 與凍結來源重驗後才交出正標籤，與翻譯無關。
-
-額外只對下列七個永久 card ID 接受 `mechanic_grants` 中逐字固定的**完整主文**。
-不以卡號重新選集合；卡號僅在此說明對應版次。必須先通過 confirmed／JP current owner、
-exact 來源與唯一已採納 keyword mapping 的相同檢查，才產以下正標籤：
-
-| 卡號 | 關係與 keyword | 整欄證明邊界 |
+| 節點 | 條件 | 關係 |
 | --- | --- | --- |
-| BP01-005 | has storm | 進化時二選一完整主文：選項一自身疾走；選項二對相手一體造成自身攻擊力的傷害，含完整引號公式。 |
-| BP01-028／SL06 | has aura | 突進／指定攻擊／守護完整宣告，以及 fanfare 選相手主戰者、其場上至少 3 張、自身 +2/+2 並取得オーラ的兩行全文。 |
-| BP01-112 | has rush | fanfare 真紅條件、自身 +1/+1 並取得突進的完整行。 |
-| BP01-113／P24 | has storm | fanfare 真紅條件下自身取得疾走的完整行。 |
-| BP01-119 | has rush | 必殺宣告與 fanfare 支付主戰者體力 2、自身取得突進、己方牌庫頂一張置墓的兩行全文。 |
-| BP01-141 | grants ward | 己方每回合一次、另一 amulet 離場時產生一體ホーリータイガー，再授予該 token 守護的完整行。 |
-| BP01-078／SL12 | grants rush | fanfare 將一張ドラゴン放入 EX，以及支付 2 PP／自身 act、從 EX 選一張ドラゴン進場、授予突進、覚醒時回復 2 PP 的兩行全文。 |
+| 能力層 `keywords: [...]` | 卡片自己的宣告 | has |
+| 授予：步驟 `grant.keywords`、`grant.instead[].keywords`；效果 `grant.keywords`、`keywords.list` | 對象是這張卡自己 | has |
+| 同上 | 對象是其他物件 | grants |
+| 物件篩選器的 `keyword` | 位於計數運算式內 | counts |
+| 同上 | 其他位置（選擇、搜尋、費用、事件對象、存在條件、群組對象、減費條件） | refers |
+| 效果 `ignore_ward` | 無視守護 | refers ward |
 
-自身條件授予屬 has，不屬 grants；005 的選項及引號、119 的支付與置墓、078 的
-EX 移動及 PP 回復不可省略。只有 005 這份 exact 全文可繞過原本整欄引號保守檢查，
-不接受外層引述、改字、額外尾句、替代換行或其他 owner。其餘既有正標籤沿原 producer 產生。
-七份完整主文規則、永久 ID、keyword／關係與拼寫均納入授予 producer_version；
-F1 configuration 釘授予 adapter v2。這裡只提交正標籤與局部 relation 檢查，
-不替代完整欄位 adapter 或未證明的其他面／sections。
+授予對象的判定：
 
-有限 refers／counts adapter `manual-keywords-references-bp01-v1` 沿用相同 209 張永久 ID、
-八個 keyword 及來源重驗。語意依用途分配：費用中依 keyword 選定捨棄的牌，以及依 keyword
-選擇目標，屬 refers；明示符合 keyword 的從者數量門檻，屬 counts，不因同時提到 keyword 再加 refers。
-固定捨棄一張牌是費用選擇，並非對 keyword 數量的統計。
+- 明寫 `on`：`this`，或同一能力內對自己操作的步驟所產生的 `result`（含 `{follow: 名稱}`）是自己。
+  步驟的 `ref` 是 `this` 或前一個這類結果時，它的 `result` 仍是自己，可以連續傳遞；
+  變身（`transform`）的結果是另一個物件。綁定名、`it`、其他 `follow`、群組選擇器都是其他物件。
+  群組可能包含自己時仍只算 grants，has 只認明確指自己的寫法。
+- 省略 `on`（只有效果層可省略）依外層決定：卡片自己的 `static.effects`（含其中的 `if`）是自己；
+  `apply` 看它的 `on`；移動（`move`）自己時的 `entry_effects` 是自己；
+  產生、搜尋、變身及移動其他卡的 `entry_effects` 是其他物件。
+- 裝備區的 static、`player_effect` 及其他未列出的外層沒有可判定的對象；
+  這種授予只要含八個關鍵字之一就視為未分類。
+- 被授予的能力有自己的綁定名稱，不與外層步驟互通。
+- 授予給其他物件的能力（`grant.abilities`）內部的 `this` 指被授予者：其中的關鍵字授予一律是 grants，
+  篩選器仍依位置算 refers／counts。
 
-目前只接受三種主文完整行（K 必須唯一對應已登錄日文名稱，N 為數字）：
+計數運算式為 `count`、`count_of`、`distinct_names`、`distinct_orig_costs`、`agg`、`history_count`、
+`history_sum`。計數內的篩選器只算 counts，不另加 refers。分類以 DSL 的寫法為準：
+以 `count` 比較門檻（即使是 1 以上）屬 counts，以 `exists` 判斷有無屬 refers。Token 原生的關鍵字屬於 Token 自己的程式，
+不掛到產生它的卡。
 
-- `{起動}{コストN}これを{アクト}墓場に置く：【K】を持つ自分のフォロワー1体を選ぶ。それは{攻撃力}+N/{体力}+Nする。` → refers。
-- `{起動}{コストN}手札の【K】を持つフォロワー1枚を捨てる：1枚引く。` → refers。
-- `{ファンファーレ}自分の場の【K】を持つフォロワーがN体以上なら、1枚引く。` → counts（門檻 N 至少 1）。
+未分類的用法不能被准入：能力樹內任何值等於八個 code 之一的位置必須已由上表處理；
+鍵名以 `_` 切詞後含八個 code 之一的節點必須列在語意節點表（目前只有 `ignore_ward`）。
+不符時作者工具以 lint `unclassified_keyword_use` 拒絕該卡，建置不會為它提交完整檢查。
+這項檢查看不到鍵名與值都不含 code 的新節點；**新增 DSL 節點時須判斷它是否隱含提到這八個關鍵字**，
+是的話同時補上對照規則。綁定名稱因此不能取成八個 code。
 
-各 N 獨立，費用及攻防增量可為 0。不接受未知前後句、關鍵字字串命中或引號內能力；
-含「」的主文整欄略過，sections 全不檢查，因此 token 的原生能力仍屬 token。
-只在匹配行提交相應 relation 的局部檢查，`whole_field=false`；四關係都有 producer 仍不構成 complete。
+### 已檢查的範圍
 
-完整欄位 adapter `manual-keywords-fields-bp01-v14` 沿用固定首批集合、confirmed JP current
-及八個已登錄 keyword。每個面先驗 exact owner 主文與凍結來源的完整有序 section 清單；
-來源與資料庫的 section 數量、順序或原文字節不符時，該面不提交完整檢查。
-空主文須明驗凍結來源為 null 或空字串、已 intern 的原文確為空字串；空 section 也須驗自己的來源位置。
-非空主文另共用上述七份逐 owner 限定、正標籤 producer 已完整匹配的全文判定；
-一般入口只接受整欄由下列已證明的 body part 及 layout 組成，至少須有一個 body：
+- 身分已確認且有程式的卡：正標籤使用 `source_kind=dsl` 並記錄 `dsl_id`；
+  對八個關鍵字各提交所有已選現行面的主文與每個補充段落 × 四種關係的 `whole_field=true`。
+  程式是整卡的完整表示，所以沒有正標籤的關係即為已確認沒有。
+- 缺現行面的卡仍交出已知正標籤，但缺的面無法提交檢查，該卡維持 partial，不授予否定結果。
+- 沒有程式、身分已確認、各面現行主文皆為空且沒有補充段落的卡，沒有可推導的內容，
+  同樣提交完整檢查（`source_kind=manual`、無 `dsl_id`）。有任何卡文卻沒有程式的卡不提交檢查。
+- 身分未確認的卡不產標籤也不提交檢查。
 
-- H1 的 `card_keywords.v2` 自身宣告：所有葉均為已登錄的 Concept／keyword／GlossaryReference，
-  逐 part 重驗 binding 與來源座標。
-- 固定 PP 進化整行：exact 原文為 `{進化}{コストN}：これは進化する。`，N 為一位以上 ASCII 數字。
-  以單一連續 body span 的原文字節完整匹配，不依正標籤、翻譯或 normalizer 的語意辨識結果。
-  這句只支付 PP 並讓自身進化，不宣告、授予、參照或計數這八個 keyword；不產正標籤。
-- 固定傷害整行：`相手のフォロワー1体を選ぶ。それにNダメージ。`，N 為一位以上 ASCII 數字；
-  目標也可為 `相手のリーダー1人か相手のフォロワー1体`，兩者的フォロワー前均可有 `場の`。
-  亦接受 `フォロワーすべてにNダメージ。`，フォロワー前可有 `相手の`、`相手の場の` 或 `自分の他の`；
-  `リーダーすべてにNダメージ。`（リーダー前可有 `相手の`）；以及 `自分のリーダーにNダメージ。`。
-  傷害後可恰接一次固定 `N枚引く。`。
-- 固定抽牌整行：`N枚引く。`。
-- 固定主戰者體力回復整行：`自分のリーダーは{体力}+Nする。`，後可恰接一次 `N枚引く。`。
-
-上述三組固定數值效果的各 N 獨立，均為一位以上 ASCII 數字。
-行首只可無能力頭、`{ファンファーレ}`、`{ラストワード}`、`【進化時】`、
-`自分のエンドフェイズが来たとき、`、`これが場を離れたとき、`、
-`{起動}{コストN}これを{アクト}：` 或 `{起動}{コストN}これを{アクト}墓場に置く：`；
-最後一種的 PP 費用可省略，但自身 act 與置入墓場不可省略。
-這些能力頭、觸發時點、目標、固定 PP／自身 act／自身置入墓場費用與數值效果
-均不宣告、授予、參照或計數八個 keyword，不產正標籤。
-整行仍須以單一連續 body span 的 exact 原文完整匹配；不接受其他任意效果排列、
-條件、其他費用、次數限制、未知能力頭或額外前後句。
-
-另接受下列三組有限完整行；各 N 獨立，仍限一位以上 ASCII 數字：
-
-- 固定從者增幅：增量為 `{攻撃力}+N`、`{攻撃力}+N/{体力}+N` 或 `{体力}+N`，
-  後接 `する。`。對象限 `自分のフォロワーすべて`、`自分の他のフォロワーすべて`、
-  `自分の{ロイヤル}フォロワーすべて`，或 `自分のフォロワー1体を選ぶ。それ`（フォロワー前可有 `他の`）；
-  以 `は` 接增幅。只可無能力頭、fanfare、lastword 或自己 end phase 到來時點；
-  選一體的分支可恰接一次 `N枚引く。`，全體分支不可。
-  另接受 `自分の場に他のフォロワーが出たとき、これは` 及
-  `自分の場に{ロイヤル}フォロワーが出たとき、それは` 接同樣增幅。
-  雙區域分支只接受 fanfare 後 `自分の場の他の妖精・フォロワーすべてと、
-  自分のEXエリアの妖精・フォロワーすべては` 接同樣增幅，原文在同一行，逗號後沒有換行。
-  傷害與增幅串接只接受 `【進化時】相手のフォロワーすべてにNダメージ。自分の他のフォロワーすべては`
-  接同樣增幅；不作任意句子組合。
-- 有限條件自身增幅：`{ファンファーレ}【覚醒】状態なら、これは` 或
-  `{ファンファーレ}【真紅】状態なら、これは` 接上述增幅；這兩個狀態不屬於八個 keyword。
-  不接受其他條件、能力授予或額外尾句。
-- 獨立 `{クイック}` body 行：只證明該行不涉及八個 keyword，其他 body 仍須各自完整證明。
-  不接受與效果黏在同一行的形式，也不能藉此關閉未知效果。
-
-以上各分支也須單一連續 body span fullmatch；royal 類別、妖精名稱及雙區域目標
-均為有限 exact 原文，與 keyword 參照無關。token 名稱不授予 token 原生能力。
-
-另接受三組有限卡片移動整行，仍須單一連續 body span 的 exact 原文 fullmatch：
-
-- 有限移除只接受下列七種完整排列：
-  `【進化時】アクト状態の相手のフォロワー1体を選ぶ。それを破壊する。`；
-  `自分のフォロワー1体を選ぶ。それを破壊する。N枚引く。`；
-  `場のフォロワーすべてを破壊する。`；
-  `体力N以下の相手のフォロワー1体を選ぶ。それを消滅させる。`；
-  `自分の場のカード1枚を選ぶ。それを破壊する。自分のリーダーは{体力}+Nする。N枚引く。`；
-  `【進化時】相手のEXエリアのカード1枚を選ぶ。それを消滅させる。`；
-  `相手の場のカード1枚を選ぶ。それを破壊する。`。
-  不互換目標、區域、act 狀態、移除種類、能力頭及前後效果。
-- 抽牌後移動手牌：`【攻撃時】` 或 `{ファンファーレ}` 後恰接
-  `N枚引く。自分の手札N枚を捨てる。`；另接受 `{ファンファーレ}` 後恰接
-  `N枚引く。自分の手札N枚をデッキの下に置く。`。各 N 獨立且限一位以上 ASCII 數字，
-  有限移除的 N 亦同。不接受其他時點、任意手牌條件、其他費用或次數限制。
-- 有限牌庫搜尋：`【進化時】自分のデッキから` 後只接受
-  `{進化}を持つフォロワー` 或 `アミュレット`；
-  `{ファンファーレ}自分のデッキから` 後只接受 `{ロイヤル}フォロワー`、`忍者・カード` 或 `スペル`。
-  兩分支皆恰接 `1枚を探し、手札に加える。`，不改變數量或目的地。
-  進化、royal 類別、忍者名稱與卡片種類均不屬於八個 keyword；沒有任意 keyword 篩選。
-
-這三組只證明八個 keyword 的四種關係均不涉及，不產正標籤；獨立 quick、進化、
-自身 keyword 宣告、其他面與 sections 仍須各自證明，不能由已證明的移動行補滿。
-
-另接受三組有限觸發、墓場移動與 act／移除整行；各 N 獨立且限一位以上 ASCII 數字，
-仍須單一連續 body span 的 exact 原文 fullmatch：
-
-- 有限觸發傷害只接受下列排列：
-  `これが場から手札に戻ったとき、相手のフォロワー1体を選ぶ。それにNダメージ。`；
-  `自分の場に他のフォロワーが出たとき、相手のフォロワー1体を選ぶ。それにNダメージ。`
-  （此分支目標亦可恰為 `2体まで選ぶ`）；
-  `自分の妖精・フォロワーが攻撃するとき、相手のリーダー1人か相手のフォロワー1体を選ぶ。それにNダメージ。`；
-  `相手のフォロワーが破壊されたとき、それのリーダーにNダメージ。自分のリーダーは{体力}+Nする。`。
-  觸發事件、妖精名稱、傷害目標與最後分支的回復順序均固定，不互換能力頭或目標。
-- 有限墓場移動只接受下列排列：
-  `{起動}これを{アクト}墓場に置く：自分の墓場のコストN以上のフォロワー1枚を選ぶ。それを手札に加える。`；
-  `{ファンファーレ}自分の墓場のフォロワー2枚まで選ぶ。それを手札に加える。`；
-  `自分の墓場のコストN以下のアミュレット3枚まで選ぶ。それを場に出す。`；
-  `{ファンファーレ}自分の墓場のコストN以下のアミュレット1枚を選ぶ。それを場に出す。`；
-  `{ファンファーレ}自分のデッキの上N枚を墓場に置く。`。
-  數量（除牌庫頂分支外）、區域、費用上下限方向、卡片種類、回手或進場與起動費用均固定；
-  `コスト` 不擴張為 `元のコスト`，也不接受任意 keyword 篩選或移動後授予能力。
-- 有限 act／移除只接受下列排列：
-  `{ファンファーレ}` 或 `{起動}これを{アクト}：` 後恰接
-  `相手のフォロワー1体を選ぶ。それをアクトする。`；
-  `これはアクト状態で場に出る。`；
-  `{起動}これを{アクト}墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。`；
-  `自分のエンドフェイズが来たとき、これは消滅する。`；
-  `【進化時】フォロワー1体を墓場に置く：相手のフォロワー1体を選ぶ。それを破壊する。`。
-  自身進場狀態、觸發時點、費用與移除種類各自固定，不接受額外 PP 或其他犧牲條件。
-
-這三組不宣告、授予、參照或計數八個 keyword，不新增正標籤；既有自身宣告、
-固定 PP 進化、其他 body、面與 sections 仍須各自證明。token 原生能力仍屬於 token。
-
-另接受三組有限條件、狀態規則與已有正標籤的授予整行；各 N 獨立且限一位以上 ASCII 數字，
-仍須單一連續 body span 的 exact 原文 fullmatch：
-
-- 條件固定效果只接受：
-  `【進化時】【覚醒】状態なら、N枚引く。`；
-  `相手のフォロワー1体を選ぶ。それにNダメージ。【覚醒】状態なら、N枚引く。`；
-  `フォロワーすべてにNダメージ。【覚醒】状態なら、代わりにNダメージ。`；
-  `{ファンファーレ}相手のフォロワー1体を選ぶ。それにNダメージ。【コンボ_N】代わりにNダメージ。`；
-  `相手のフォロワー1体を選ぶ。それにNダメージ。【スペルチェイン_N】代わりにNダメージ。`
-  （只此分支可帶 fanfare，且可恰接一次 `【SC_N】それのリーダーにNダメージ。`）；
-  `{ファンファーレ}自分の場にアミュレットがあるなら、自分のリーダーは{体力}+Nする。`。
-  覚醒、コンボ、スペルチェイン／SC 及 amulet 存在條件不涉及八個 keyword；
-  不擴張其他條件、任意 SC 別名排列、目標、能力頭或 reminder。
-- 有限狀態規則只接受：`これが受けるダメージを-Nする。`；
-  `相手のターン中、これが与えるダメージを+Nする。`；`これは相手を攻撃できない。`；
-  `{ラストワード}自分のPP最大値を+Nする。`；
-  `{進化}リーダーの{体力}-N：これは進化する。`；
-  `【攻撃時】フォロワーへの攻撃なら、これは{攻撃力}+Nする。`；
-  `自分のエンドフェイズが来たとき、これは{体力}+Nする。`。
-  傷害方向與正負、回合、PP 最大值、支付主戰者體力及攻擊對象各自固定，均不涉及八個 keyword。
-- 有限授予只接受 `{ファンファーレ}自分の他のフォロワー1体を選ぶ。` 或
-  `自分の墓場のコストN以下のフォロワー1枚を選ぶ。それを場に出す。` 後恰接
-  `それは【K】を持つ。`，`それは` 後可有 `{攻撃力}+N/{体力}+Nして、`。
-  K 必須唯一匹配已登錄八個 keyword 的日文名稱，不能因正標籤已存在就略過未知效果。
-  整行可完整證明 grants，其他三種關係均不涉及；正標籤仍由有限 grants adapter 產生，
-  完整欄位 adapter 不新增正標籤。自身條件授予、其他選擇／目的地、未知或歧義 K 仍留缺口。
-
-這三組仍須逐行、逐面及逐 section 證明，不能關閉未知前後句；
-獨立 quick、H1 自身宣告、其他能力與來源閉包的原有條件不變。
-
-另接受三組有限牌庫檢視、費用與條件效果整行；各 N 獨立且限一位以上 ASCII 數字，
-仍須單一連續 body span 的 exact 原文 fullmatch：
-
-- 有限牌庫頂檢視：`{ファンファーレ}自分のデッキの上1枚を見る。その中から、スペル1枚を公開して手札に加えてよい。`；
-  或 `自分のデッキの上N枚を見る。その中から、` 後恰接以下四種之一：
-  `アミュレット1枚を公開して手札に加えてよい。`、
-  `スペル1枚を公開して手札に加えてよい。スペル1枚を墓場に置いてよい。`、
-  `コストN以上の{ドラゴン}カード1枚を公開して手札に加えてよい。`、
-  `コストNのフォロワー1枚を場に出してよい。`，再恰接 `残りを好きな順にデッキの下に置く。`。
-  此四分支行首可帶 fanfare。另接受 `各プレイヤーは、自身のメインフェイズが来たとき、デッキの上1枚を見る。その中から、フォロワー1枚を場に出してよい。`。
-  檢視、公開、可選加入手牌／進場／置墓、剩餘牌置底及時點均完整固定，不接受任意 keyword 篩選；
-  被移動卡片的原生能力不歸屬本卡。
-- 有限費用與條件效果只接受：
-  `【進化時】場の他のカード1枚を手札に戻す：これは` 接前述固定增幅；
-  `{ファンファーレ}自分の妖精・フォロワー1体を選ぶ。それは` 接前述固定增幅；
-  `{起動}{コストN}これを{アクト}：これを手札に戻す。`；
-  `【進化時】手札のスペル1枚を捨てる：相手のフォロワー1体を選ぶ。それにNダメージ。`；
-  `N枚引く。【スペルチェイン_N】自分のPPをN回復する。`；
-  `相手のフォロワー1体を選ぶ。それを破壊する。【スペルチェイン_N】それのリーダーにNダメージ。`；
-  `{ラストワード}リーダーの{体力}-N：これを場に出す。`；
-  `{起動}EXエリアの妖精・フォロワー1枚を消滅：自分のリーダーは{体力}+Nする。N枚引く。この能力は1ターンに1回使える。`；
-  `自分のエンドフェイズが来たとき、自分のリーダーの{体力}N以下なら、これを{アクト}墓場に置く：相手のフォロワーすべてにNダメージ。`；
-  `{ファンファーレ}N枚引く。自分のリーダーにNダメージ。`。
-  費用的區域、卡片種類、數量、體力方向、一次限制、條件、時點及效果次序各自固定；
-  不能借另一行的正標籤省略任一部分，也不接受任意條件或額外尾句。
-- 有限費用調整只接受：
-  `【進化時】自分の墓場の元のコストN以下のスペル1枚を選ぶ。それのコストを0にしてプレイする。`；
-  `これをプレイする際、【スペルチェイン_N】コストを-Nする。【SC_N】代わりに-Nする。【SC_N】代わりに-Nする。`；
-  `これをプレイする際、【真紅】状態なら、コストを-Nする。`；
-  `これをプレイする際、【ネクロチャージ_N】コストを-Nする。`；
-  以及獨立 `{起動}これを{アクト}：相手のフォロワー1体を選ぶ。それを破壊する。`。
-  元のコスト、免費施放、SC 三段替換及真紅／ネクロチャージ條件不可互換或省略。
-
-這三組只證明八個 keyword 的四種關係均不涉及，不產正標籤；進場或施放另一張卡
-不把它的原生 keyword 掛到本卡。各行以外的自身宣告、其他面與 sections 仍須各自完整證明。
-
-另接受下列三組有限整行；N 仍為一位以上 ASCII 數字，各 N 獨立。區域、種類、
-時點、條件與句子次序固定，不以任意關鍵字或具名卡片替換目標條件：
-
-- 固定移動與 reminder：
-  `{ファンファーレ}場の他のカード1枚を手札に戻す：これは` 接前述固定增幅，
-  或 `自分の場のカード1枚を選ぶ。それを手札に戻す。N枚引く。`，
-  兩者均須恰接 `（手札に戻ったトークンはゲームから取り除く）`；
-  `相手の場のフォロワー1体を選ぶ。それにNダメージ。【覚醒】状態なら、代わりにNダメージ。`
-  恰接 `(自分のPP最大値が7以上なら、【覚醒】状態になる)`（半形括號，門檻固定 7）；
-  `{ファンファーレ}相手のフォロワー1体を選ぶ。それをEXエリアに置く。`
-  恰接 `（EXエリアに置いたエボルヴフォロワーはゲームから取り除く）`；
-  `相手のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの上か下に置く。`
-  恰接 `【コンボ_N】それをデッキに置く代わりに、相手のフォロワーすべてをそれのプレイヤーはデッキの上か下に置く。`
-  與 `（1体ずつ上か下か決める）（デッキに置いたトークンはゲームから取り除く）`。
-  這組先以 exact 原文完整匹配單行（包含全部括號），再確認該行的 body 與 reminder
-  原始 span 均落在已證明行內；不移除 reminder、不單獨核可括號，也不接受換行分離的 reminder。
-  token 與 evolve follower 的移除、傷害替換及每體獨立選擇上下均包含在證明中。
-- 有限狀態與數值替換：
-  `相手のフォロワー1体を選ぶ。このターン、それはダメージを与えない。`；
-  `これが場にいる限り、自分がゴーレム・フォロワーをプレイする際、コストを-Nする。`；
-  `自分の場にゴーレム・フォロワーが出たとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それにNダメージ。`；
-  `これがいる限り、自分のフォロワーは攻撃力ではなく体力と同じダメージを与える。`；
-  `【攻撃時】相手のフォロワーすべてにNダメージ。自分の墓場に『ツインプリズナー・フラム』と『ツインプリズナー・グラス』があるなら、代わりにNダメージ。`。
-  golem 種類、傷害改用體力、具名墓場的兩張卡與且條件均固定；不涉及 keyword 條件。
-- 有限區域移動與費用替換：
-  `{ファンファーレ}自分のデッキの上1枚をEXエリアに置く。それをプレイする際、コストを-Nする。`；
-  `各プレイヤーは、手札すべてをデッキに戻し、シャッフルし、戻した枚数と同じだけ引く。自分は、さらにN枚引く。`；
-  `これをプレイする際、場のスタンド状態の{ナイトメア}カード4枚を墓場に置く、または、EXエリアの{ナイトメア}カード4枚を消滅：コストを-Nする。`；
-  `これをプレイする際、墓場のスペル10枚を消滅：コストをNにする。`；
-  `このターンのあと、自分の追加ターンを行う。`；
-  `自分のデッキの上1枚をEXエリアに置く。これをEXエリアが上限になるまでくり返す。`；
-  `次に自分のエンドフェイズが来たとき、自分のEXエリアのカードすべてを消滅させる。`。
-  費用支付的區域、stand 狀態、數量 4／10、減費或定值、追加回合時點、EX 上限重複及
-  下一次 end phase 清除各自固定；不接受任意卡片篩選或未證明尾句。
-
-這三組只證明八個 keyword 的四種關係均不涉及，不產正標籤；被移動卡片的原生能力
-仍屬該卡。其他行、其他面與 sections 各自證明，JP complete 不授 EN 資格。
-
-另接受兩組有限整行，均以單一連續 body span 完整匹配；下列各 N 獨立，
-為一位以上 ASCII 數字。具名卡片、能力頭、選項、區域與數量詞不可任意替換：
-
-- 具名 token 放置／生成與具名搜尋進場：
-  `【進化時】『乙姫お守り隊』3枚を、場が上限になるまで出す。残りをEXエリアに置く。`；
-  `{ファンファーレ}『防御型ゴーレム』1体か『攻撃型ゴーレム』1体を出す。`；
-  `{起動}これを{アクト}：『大地の魔片』1つを出す。`；
-  `{起動}これを{アクト}【土の秘術】：『防御型ゴーレム』1体か『攻撃型ゴーレム』1体を出す。`；
-  `{ファンファーレ}『冥焔の右腕・ミミ』1枚か『冥焔の左腕・ココ』1枚をEXエリアに置く。【ネクロチャージ_N】代わりに1枚ずつ置く。`；
-  `【進化時】『冥焔の右腕・ミミ』『冥焔の左腕・ココ』1枚ずつEXエリアに置く。`；
-  `{起動}{コストN}これと『ツインプリズナー・グラス』1体を墓場に置く：自分のデッキから『フラム＝グラス』1枚を探し、場に出す。`。
-  場上限及剩餘卡的 EX 移動、二擇一或各一張、necrocharge 替換、act／土の秘術／
-  具名從者置墓費用均包含在完整證明內；不把 token 或搜尋進場卡的原生能力掛到本卡。
-- stack 與 counter：
-  獨立 `【スタック】`；
-  `{ファンファーレ}体力N以下の相手のフォロワー1体を選ぶ。それを消滅させる。`；
-  `{ラストワード}『大地の魔片』1つを出す。自分の場の【スタック】を+Nする。`；
-  `{ファンファーレ}【土の秘術】相手のフォロワー1体を選ぶ。それにNダメージ。それのリーダーにNダメージ。`；
-  `{起動}これを{アクト}【土の秘術】：相手のフォロワー1体を選ぶ。それにNダメージ。それのリーダーにNダメージ。`；
-  `自分がスペルをプレイしたとき、これにスペルカウンターNつを置く。`；
-  `{起動}これのスペルカウンターNつを取る：相手のフォロワー1体を選ぶ。それにNダメージ。`。
-  stack 不是本批八個 keyword；其獨立宣告與上述放置／增加不產正標籤。
-  spell 施放觸發、自身 counter 累積與支付、土の秘術費用及傷害的兩個目標各自完整證明。
-  stack 宣告不核可附帶的 reminder，更不核可其中引號內能力；BP01-T10 只由下方精確列出的四段 reminder 整欄證明。
-
-這兩組只證明八個 keyword 的四種關係均不涉及，不產正標籤；其他行、面與 sections
-仍須各自證明，JP complete 不授 EN 資格。
-
-另接受三組逐字固定的完整主文；含「」的主文只有前兩組列出的四種可通過引號保守檢查，第三組公開手牌棄置不含引號：
-
-- `{進化}{コスト0}：これは進化する。\n【突進】\n{ファンファーレ}これは{攻撃力}+Xする。Xは「これを含めず、このターン中に自分がプレイしたカードの枚数」である。`；
-  `{クイック}\n相手のリーダー1人か相手のフォロワー1体を選ぶ。1枚引く。それに「自分の手札の枚数」と同じダメージ。`；
-  `【突進】\n{ファンファーレ}他のフォロワー1体を選ぶ。これは{攻撃力}+Xする。Xは「選んだフォロワーの攻撃力」である。`。
-  各公式、選項、目標、抽牌次序、傷害／增幅及其他主文均在整欄逐字比對；不以通用 reminder、引號內片段或正標籤補證。
-- `【スタック】（【スタック】を持つアミュレットは、下記の能力を持つ。「これはスタックカウンター1個を置いた状態で場に出る」「これが場を離れる際、代わりにこれのスタックカウンター1個を取る」「これのスタックカウンターが0個なら、これを墓場に置く」「{起動}これを{アクト}：自分の場の他の【スタック】を持つアミュレット1つを選ぶ。それにこれのスタックカウンターすべてを移す」）`。
-  BP01-T10 的四段引號能力各自完整限定為進場時置一枚 counter、離場時取一枚 counter 代替、counter 為零時置入墓場，以及 act 後選另一 stack amulet 並移轉全部 counter；整欄 exact match 同時涵蓋 stack 宣告與四段 reminder。`スタック` 不在八個追蹤 keyword 中，四段只描述 stack counter，不產正標籤；任一段改字或增刪內容都不核可。
-- `【進化時】自分のリーダーに2ダメージ。相手プレイヤー1人は手札を公開する。自分はその中から1枚を選ぶ。相手はそれを捨てる。`。
-  公開者、選擇者、張數、棄置者及前置傷害次序固定，不接受其他效果或目標替換。
-
-以上 exact field 只證明八個 keyword 的四種關係均不涉及，不產正標籤。含 `「」` 的其他主文仍不完整；另有上述逐 owner 限定的 BP01-005 自身條件授予整欄例外；任何改字、額外效果、其他面或非空 sections 都各自留下缺口。
-
-任何其他未證明句型、pending、未證明 reminder 或引號能力
-都留下缺口，不能以另一個正標籤補滿；固定句本身可獨立證明，不要求翻譯已實作。
-非空 section 只在同面主文完整證明、完整有序來源清單已重驗後，逐 ordinal 檢查以下有限入口：
-
-- 全文為固定張數抽牌句。
-- 全文逐行為具名 token 定義；逐行 fullmatch，不忽略空白、未知尾句或缺漏行。
-  follower 的名稱／class／trait 組合限フェアリー、フェアリーウィスプ、ナイト、
-  スティールナイト、ヴァイキング、乙姫お守り隊、攻撃型ゴーレム、防御型ゴーレム、
-  ドラゴン、ゴースト、ホーリータイガー；cost／attack／health 均須明示 ASCII 數值。
-  原生 keyword suffix 依名稱固定為無、疾走、守護或突進；ゴースト並須完整附上 end phase 消滅句。
-  ホーリータイガー只接受ビショップ／獣・フォロワー與原生突進，不能把守護取代或附加為原生 suffix。
-  amulet 僅大地の魔片的土の印／stack 定義；spell 僅薔薇の一撃的植物族／固定傷害及抽牌定義。
-  一個 section 含多個定義時，每行均須證明。
-
-section kind（包括 unknown）不授證明資格，也不因本檢查重新分類；上述入口靠 exact 原文結構
-證明八個 keyword 四關係，不授 verified DSL。token 原生 keyword 仍只屬 token，
-不把它掛到母卡。未知 section、未知主文、未證其他面各自保留缺口。
-主文與 section 不接受 CR、Unicode 行界等替代換行；定義以 LF 分行完整檢查。
-
-配套主文有限入口另檢查：discard 觸發固定抽牌、具名生成／EX 放置、傷害後 EX 放置、
-土の秘術的 choice／費用／ゴーレム增幅、combo 破壞後對手生成、三具名 token 生成、
-附固定 PP 費用的 act，以及破壞後由該從者玩家生成ドラゴン。每行完整 fullmatch；
-自身宣告、進化句、其他 body 仍各自證明。grants 行共用正標籤 producer 的有限句型與
-唯一 keyword mapping 判定；只對 BP01-149 的永久 card ID，refers／counts 整行共用既有正標籤 producer 的完整判定。
-同文出現在其他卡時不授予新的完整欄位證明。
-例如 BP01-149 的 fanfare 授予守護及起動支付 PP／act／自身置墓後選守護從者增幅，
-其 grants／refers 正標籤已存在，本入口只新增完整四關係證明。完整欄位不產正標籤，
-不證現有 producer 未涵蓋的 keyword 用途。
-含引號主文仍拒絕，唯一新增例外是整欄恰為兩行：EX 妖精任意張數變身薔薇の一撃，
-再以アクト費用回復等於 EX 薔薇の一撃張數的 PP；全文必須完全匹配，沒有其他字元或行。
-
-已證明的空欄位與上述完整主文，對八個 keyword 的 has／grants／refers／counts 各提交
-`whole_field=true`。一般自身宣告的 has 由 H1 產生；上述七份全文的條件 has／grants
-由授予 adapter v2 產生，完整欄位 adapter 不產正標籤。
-缺 current 的面不提交檢查，也不從必要範圍刪除。
-因此同卡另一面或任一 section 未證明時仍為 partial；沒有任何檢查的 keyword 維持 unknown。
+程式的範圍是 shared，由日文卡文寫成。EN 的自身關鍵字、能力種類與印刷機制由英文卡文各自檢查並寫入
+`en_override`；consumer 與 manifest coverage 只要該卡有 `en_override` 列就選用它、不讀 shared，
+因此 EN 的授予／提到／計數目前一律是未知。要讓 EN 沿用 shared 的推導，須先有英日卡文核對紀錄，
+並讓範圍選擇能按關係分開；不能只因 JP 有程式就套用到 EN。
 
 ## 新鮮度與補正
 
@@ -399,49 +100,41 @@ section kind（包括 unknown）不授證明資格，也不因本檢查重新分
 所選 revision／來源、current basis、主文及有序 section kind／exact hash 計算 source_text_hash。
 其他面、補充段落或 basis 變動因此使舊標籤失效；bundle 本身不是完整語意檢查證明。
 
-producer_version 包含 `manual-keywords-h1-v1`、來源 normalizer／葉規則、keyword mapping
-與 keyword 概念集合，不含中文呈現、無關 commit 或 suppression。
-grants producer_version 另含自身 adapter、固定 card 集合及八個已登錄概念的 mapping／日文名稱；
-refers／counts 的 producer_version 同樣釘自身 adapter、固定 card 集合及 keyword mapping；
-F1 configuration 也釘兩個有限 adapter 與固定 card 集合 hash。
-完整欄位 producer_version 另釘自身 adapter、固定 card 集合、授予與參照 adapter 版本及 H1 producer_version（含 normalizer、
-葉規則與完整 keyword mapping）；F1 configuration 同時釘完整欄位 adapter。
-抽取或 bundle 演算法變更必須更新 adapter／recipe 版本；keyword/action universe 與 coverage 每次重建。
-
-card_mechanic 使用 `source_kind=manual, dsl_id=null`，source_id 指實際原文，
-decision_id 指採納的 mapping。候選 ID 由精確 binding、card／keyword／scope、
-source hash 與 producer 決定。fresh 正標籤依 `(card_id,keyword_id,scope)` 合併，
-relations／actions 排序去重，不公開原始證據或 unknown／absent 列。
+producer_version 包含 adapter 名稱與八個關鍵字中已登錄的集合，不含中文呈現或無關 commit。
+正標籤 ID 由 card／keyword／scope／relation、source hash、producer 與 `dsl_id` 決定；
+程式內容改變即產生新的 `dsl_id` 與標籤 ID。對照規則變更必須更新 adapter 版本；
+keyword universe 與 coverage 每次重建。fresh 正標籤依 `(card_id,keyword_id,scope)` 合併，
+relations 排序去重，不公開原始證據或 unknown／absent 列。
 
 選填 suppressions 每筆必有 `id,target_tag_id,source_text_hash,producer_version,reason,decision`；
 decision 同上例且必須 confirmed。只有候選 ID、source hash 及 producer 完全相符才寫入並套用；
-不相符報 stale_suppression，不遮蔽新候選，不把 partial 改 complete。
+不相符報 stale_suppression，不遮蔽新候選。補正只移除正標籤，不改變已提交的檢查範圍。
 補正使用獨立的 mechanic_suppression decision category；只有實際寫入 override
 時才保存其 decision 與來源，不為 stale suppression 留下未使用的 confirmed decision。
 
 ## Coverage 與承載
 
-H1 提交已驗正標籤及自身宣告所在面／主文的局部 has 檢查，由共用 coverage reducer 合併；
-不把局部宣告當整欄位已查。內部範圍與 producer 鍵見[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)。
-H1、grants、refers／counts 與完整欄位檢查均儲存後，才在共同編排點套用 suppression，並傳入全部有效 producer_version 投影一次。
-授予 adapter 只提交所在面／主文的局部 has 或 grants 檢查；has＋grants 也不能補滿 refers／counts 或 sections。
+producer 只提交正標籤與檢查，不提交結論；共用 coverage reducer 合併後才判定。
+內部範圍與 producer 鍵見[建置資料庫 §10](../build/build-db.md#10-dsl驗證與未實作卡片頁)。
+建置在程式入庫之後執行：DSL producer 儲存證據、套用 suppression、投影一次，
+再由卡文 adapter 補上各地區的自身關鍵字、能力種類與印刷機制。
 公開每 card／shared 一列，只有所有必要範圍均已完整檢查的 keyword 才進 complete 集合；
-全部 keyword 都完整時使用 complete_all。complete／partial 選較短 include／exclude，同長選 include；只投影 fresh coverage。
-has present 不證 grants absent；缺標籤且 partial／缺 coverage 仍 unknown。
+全部 keyword 都完整時使用 complete_all。八個關鍵字以外的登錄概念沒有四關係檢查，
+所以有程式的卡通常以 exclude 清單列出這些概念。complete／partial 選較短 include／exclude，
+同長選 include；只投影 fresh coverage。has present 不證 grants absent；缺標籤且 partial／缺 coverage 仍 unknown。
 reducer 重驗內部 state 與 checked_ranges 一致，不能用手填 complete 冒充完整檢查結果。
 
-目前不產 en_override，不授予 shared 跨區資格；reader 沿既有 aligned／region block 條件，
-不能因 JP 繁中可顯示就套用 EN 機制。分母依 manifest 全地區 non-retired，含 provisional。
-
+分母依 manifest 全地區 non-retired，含 provisional。
 公開 keyword／mechanic_projection／card_mechanic_coverage 使用既有欄位與分片配置；
 前者在共用 catalog，後兩者在 card 原有 engine 檔案。不改格式、capabilities、band width，
 不新增邏輯分片。report.mechanics 保存 adapter／producer、證據／投影／coverage 列數及
-拒絕原因，不含官方句子。建置 keyword 子能力包含七張機制表，DSL 仍未啟用。
+拒絕原因，不含官方句子。
 
 ## 本身有的日英全卡表檢查
 
-`printed-self-keywords-v1` 在原有四關係 reducer 之後檢查所有非 retired 卡的各地區
-current 主文，包含進化面與 token 卡自己的主文，不依賴 DSL。沿 registry 的永久概念，
+`printed-self-keywords-v1` 在四關係 reducer 之後檢查所有非 retired 卡的各地區
+current 主文，包含進化面與 token 卡自己的主文，不依賴 DSL。它涵蓋 EN 以及八個關鍵字以外的登錄概念；
+JP 的八個關鍵字同時有 DSL 的結果，正標籤取聯集。沿 registry 的永久概念，
 JP 用已採納的日文拼寫，EN 預設用同一 code 的英文能力名。多詞名稱可由 `english` 明示
 官方表記，例如 Starting Amulet。Quick 另辨識日英各自的獨立 Quick 圖示。
 JP 寫 shared，EN 只寫 en_override，兩區獨立檢查。
@@ -451,15 +144,18 @@ JP 寫 shared，EN 只寫 en_override，兩區獨立檢查。
 不從引述內的相同句子產生正標籤；未識別的自身取得句型仍保守保留未知。
 主文未提到某 keyword 時，可確認沒有明印該 keyword；出現在授予、條件、選擇、數量、
 引號能力或未識別句型中的 keyword 保持未知，既有已採納 has 正標籤仍有效。
-補充段落不產母卡的 has；不明用途保留未知。補充段落出現 Quick、Stack、Starting Amulet、
+
+補充段落依[印刷機制](#職業與合作作品的印刷機制)的同一套段落歸屬判定處理：可辨識為本卡續文的段落
+與主文相同，宣告產生 has 正標籤；Token 定義與 reminder 段落不產母卡的 has；無法確認歸屬的段落中
+出現的宣告保留未知，不能當成沒有。非本卡續文的段落出現 Quick、Stack、Starting Amulet、
 Single Drive 或 Twin Drive 的獨立宣告時，該關鍵字保留未知。跨行引述中的宣告也不能掛到母卡。
 缺 current 面、未確認 identity 不授全卡否定完整性；任一已確認面有宣告即為 present。
 
 結果合併到 `mechanic_projection`，完整性另放 `card_mechanic_coverage.has_complete_keyword_ids`。
 此集合每次建置從 current 重新計算，不重用另一地區、印刷版或歷史 revision。
-既有四關係 complete 與 manifest coverage 維持原義；「本身有」完整不能令它們變完整。
-前端按地區的非 retired card 去重計數；所有 keyword 均為 present／absent 才算該卡已確認。
-有未知卡時顯示確切張數，為零才移除不完整提示；unknown 不能命中否定搜尋。
+四關係 complete 與 manifest coverage 維持原義；「本身有」完整不能令它們變完整。
+前端按地區的非 retired card 去重計數；有未知卡時顯示確切張數，為零才移除不完整提示；
+unknown 不能命中否定搜尋。
 
 ## 能力種類
 

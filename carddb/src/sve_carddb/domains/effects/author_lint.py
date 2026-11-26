@@ -6,6 +6,10 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_inputs import Diagnostic, ability_nodes
+from sve_carddb.domains.effects.keyword_relations import (
+    UnclassifiedKeywordError,
+    ability_relations,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -16,7 +20,9 @@ if TYPE_CHECKING:
 
 _REQUIRED_CHOOSE = "required_choose_use_targets"
 _SPLIT_CREATE = "combine_consecutive_create"
+_UNCLASSIFIED_KEYWORD = "unclassified_keyword_use"
 _MESSAGES = {
+    _UNCLASSIFIED_KEYWORD: "Add a keyword relation rule before using this form.",
     _REQUIRED_CHOOSE: "Declare an unconditional required selection in targets.",
     _SPLIT_CREATE: "Use one create with a token list for a single instruction.",
 }
@@ -82,6 +88,17 @@ def lint(tree: JsonValue, exceptions: JsonValue) -> Diagnostic | None:
     remaining = set(range(len(waivers)))
     for ability_path, ability in ability_nodes(tree):
         line = ability.get("line")
+        # Search labels claim whole-card coverage, so an unknown keyword form cannot be admitted.
+        try:
+            ability_relations(ability)
+        except UnclassifiedKeywordError as error:
+            return Diagnostic(
+                "lint",
+                _UNCLASSIFIED_KEYWORD,
+                (*ability_path, *error.path),
+                expected=_MESSAGES[_UNCLASSIFIED_KEYWORD],
+                card_line=line if type(line) is int else None,
+            )
         for finding in findings(ability):
             path = "/" + "/".join(str(part) for part in finding.path)
             for index in sorted(remaining):

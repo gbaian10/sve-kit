@@ -49,9 +49,9 @@ from sve_carddb.domains.manual_printings import (
     load_manual_printings,
     populate_manual_printings,
 )
-from sve_carddb.domains.mechanics import Settings as MechanicSettings
 from sve_carddb.domains.mechanics import apply as apply_mechanics
 from sve_carddb.domains.mechanics import load as load_mechanics
+from sve_carddb.domains.mechanics import register as register_mechanics
 from sve_carddb.domains.parsed_cards.reader import read as read_parsed
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.products import (
@@ -104,7 +104,6 @@ from sve_carddb.domains.translations.flavor import apply as apply_flavor
 from sve_carddb.domains.translations.flavor import load as load_flavor
 from sve_carddb.domains.translations.four_layer_build import Settings as FrameSettings
 from sve_carddb.domains.translations.four_layer_build import apply as apply_templates
-from sve_carddb.domains.translations.four_layer_pipeline import prepare_classifier
 from sve_carddb.domains.translations.glossary.records import (
     ChoiceRecord,
     ConceptRecord,
@@ -861,27 +860,12 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 raise ValueError(
                     "Keyword registration requires adopted glossary inputs"
                 )
-            mechanic_report = (
-                None
-                if translation is None or not mechanics.registry.records
-                else apply_mechanics(
-                    db,
-                    mechanics,
-                    MechanicSettings(
-                        name_sources,
-                        prepare_classifier(
-                            db,
-                            translation.load(),
-                            name_sources,
-                            vocabulary,
-                            load_rules(inputs.repo),
-                        ),
-                        jp.card_batch,
-                        inputs.revision,
-                    ),
-                )
-            )
-            mark("db: self keyword declaration projection")
+            if translation is not None:
+                # Label selection reads sources after the template step stored its own.
+                insert_raw_sources(db, (use.source for use in name_sources.uses))
+                if mechanics.registry.records:
+                    register_mechanics(db, mechanics, inputs.revision)
+            mark("db: keyword registration")
             link_uses = () if link_result is None else link_result.record.uses
             ruling_report = write_rulings(
                 db,
@@ -968,6 +952,12 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                     expander,
                 )
             mark("db: admitted author programs")
+        mechanic_report = None
+        if translation is not None and mechanics.registry.records:
+            # Program-derived relations need the admitted programs stored first.
+            with db.transaction():
+                mechanic_report = apply_mechanics(db, mechanics, inputs.revision)
+            mark("db: keyword and mechanism projection")
         projection = project(
             db,
             regions=("en", "jp"),

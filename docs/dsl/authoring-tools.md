@@ -984,7 +984,7 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 - 無條件、必選固定正張數的公開目標寫在能力的 `targets`，宣告時確認合法目標。本文的條件或選項分支，以及可少選的 `choose`，仍依卡文在結算時處理。固定次數的 `repeat` 沿用外層選取時點，條件式重複保留結算時的選取。
 - 同一道指示建立多種衍生物時，用一個 `create` 和 `token` 清單。作者檢查會標示相鄰的不同衍生物建立步驟，空位不足時清單讓玩家選擇要放入的衍生物。
 
-確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。
+確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。`unclassified_keyword_use` 不能用例外放行：查卡的關鍵字關係由程式推導並宣告整卡已檢查，未分類的寫法須先補上對照規則，見[關鍵字機制契約](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)。
 
 `check` 和 `write` 會驗證展開後使用的指示物。使用具名指示物前，先在 `authored/rules/keywords.yaml` 以 `role: counter` 登錄規則名稱。
 

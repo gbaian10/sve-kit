@@ -5,12 +5,10 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import Json
-from sve_carddb.domains import mechanics
 from sve_carddb.domains.keyword_self import CurrentFields
 from sve_carddb.domains.printed_mechanisms import apply, parse
 
-from .test_keyword_self import printing
-from .test_mechanics import case
+from .test_mechanics import case, printing, project
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -43,13 +41,15 @@ def test_thresholds_and_unclosed_quotes() -> None:
 def test_current_faces_and_supplement_owners(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with case(
-        tmp_path, monkeypatch, "【スペルチェイン_5】Synthetic.", first_batch="synthetic"
-    ) as (db, inputs, settings, cid):
+    with case(tmp_path, monkeypatch, "【スペルチェイン_5】Synthetic.") as (
+        db,
+        inputs,
+        cid,
+    ):
         with db.transaction():
             printing(db, cid, "jp")
             printing(db, cid, "en")
-            mechanics.apply(db, inputs, settings)
+            project(db, inputs)
             apply(
                 db,
                 {
@@ -90,15 +90,10 @@ def test_current_faces_and_supplement_owners(
 def test_missing_faces_keep_positive_continuations_without_claiming_absence(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    with case(tmp_path, monkeypatch, "Synthetic.", first_batch="synthetic") as (
-        db,
-        inputs,
-        settings,
-        cid,
-    ):
+    with case(tmp_path, monkeypatch, "Synthetic.") as (db, inputs, cid):
         with db.transaction():
             printing(db, cid, "jp")
-            mechanics.apply(db, inputs, settings)
+            project(db, inputs)
             apply(
                 db,
                 {

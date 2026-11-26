@@ -7,6 +7,7 @@ from pydantic import JsonValue
 
 from sve_carddb.core.json import array, object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError
+from sve_carddb.domains.effects.author_lint import lint
 
 from ...support.direct_author_fixture import direct_author_input
 
@@ -128,3 +129,21 @@ def test_author_write_rejects_stale_exception(tmp_path: Path) -> None:
     with pytest.raises(AuthorInputError) as caught:
         direct_author_input(tmp_path, lint_exceptions=[_EXCEPTION])
     assert caught.value.diagnostic.reason == "unused_lint_exception"
+
+
+def test_lint_rejects_keyword_use_without_a_relation_rule() -> None:
+    # A player effect names no object, so the granted keyword has no known recipient.
+    step: JsonValue = {
+        "player_effect": {"who": "self", "effect": {"grant": {"keywords": ["ward"]}}}
+    }
+    tree: JsonValue = {
+        "cards": {"SYN-01": {"abilities": [{"line": 3, "fanfare": {"do": [step]}}]}}
+    }
+    diagnostic = lint(tree, [])
+    assert diagnostic is not None
+    assert (diagnostic.stage, diagnostic.reason) == ("lint", "unclassified_keyword_use")
+    assert diagnostic.card_line == 3
+    assert diagnostic.path == (
+        *("cards", "SYN-01", "abilities", 0),
+        *("fanfare", "do", 0, "player_effect", "effect", "grant"),
+    )
