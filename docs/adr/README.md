@@ -30,7 +30,12 @@
 | [ADR-0016](0016-four-layer-translation.md) | 翻譯與 DSL 共用四層來源綁定 |
 | [ADR-0017](0017-trust-image-inventory.md) | 卡圖上傳與快照分開並信任成功清單 |
 | [ADR-0018](0018-review-parsed-card-inputs.md) | 已審查的解析卡片輸入以純文字進版控 |
-| [ADR-0019](0019-publish-typed-ir.md) | 公開程式包承載已展開的有型別 IR |
+| [ADR-0019](0019-publish-typed-ir.md) | 公開程式包承載已展開的有型別 IR（尚未實施） |
 | [ADR-0020](0020-effect-anchors.md) | 手寫效果與精確來源錨點分開保存 |
 | [ADR-0021](0021-direct-effect-admission.md) | 以直接作者准入取代機器錨點與巨集資格 |
 | [ADR-0022](0022-battle-contract.md) | 本機與線上共用有型別的對戰契約 |
+
+現行 4.1.0 公開程式包承載 expanded AST，見 [DSL 承載契約](../dsl/author-contract-1.0.md#7-公開-typed-ir-與引擎能力)。
+
+作者工具另行產生可信的 [C0 交接](../dsl/author-contract-1.0.md#6-c0-與-d0-的交接)。
+引擎的 [`ExpandedLowerer::lower_current`](../../sim/engine/src/ir/lowering.rs) 讀取這份交接並降低成有型別 IR。
