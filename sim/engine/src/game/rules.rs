@@ -13,45 +13,6 @@ use crate::ir::SnapshotId;
 use crate::{EngineFailure, Result, invalid};
 
 impl Game {
-    /// Allocates a causal identity for an ordinary match input.
-    ///
-    /// # Errors
-    /// The same transport and semantic errors as `decide`.
-    // Test and runner driver only: players and hosts submit through the player interface.
-    #[cfg(feature = "runner")]
-    pub fn submit(&mut self, decision: &Value) -> Result<Step> {
-        let node = format!("decision-{}", self.state.next_decision);
-        let step = self.decide(decision, &node)?;
-        self.state.next_decision = self.state.next_decision.saturating_add(1);
-        Ok(step)
-    }
-
-    /// Applies one complete protocol decision and stops at the next player input.
-    ///
-    /// # Errors
-    /// Returns unsupported semantics or malformed transport data; legal rejections are outcomes.
-    // Test and runner driver only: players and hosts submit through the player interface.
-    #[cfg(feature = "runner")]
-    pub fn decide(&mut self, decision: &Value, node: &str) -> Result<Step> {
-        if !self.card_runtime.is_empty() {
-            self.check_internal_resources()?;
-        }
-        if self.typed.is_some()
-            || self.card_runtime.checkpoint.is_some()
-            || self.card_runtime.requires_typed_play()
-            || self.card_runtime.has_pending()
-            || (!self.card_runtime.is_empty() && self.input_point()["at"] == "quick")
-        {
-            return Err(invalid("typed execution owns the input point"));
-        }
-        if !self.prepared.is_empty() {
-            return Err(EngineFailure::Unsupported(
-                "prototype decisions cannot mix with prepared typed plays".into(),
-            ));
-        }
-        self.apply_rule_decision(decision, node)
-    }
-
     pub(in crate::game) fn apply_rule_decision(
         &mut self,
         decision: &Value,

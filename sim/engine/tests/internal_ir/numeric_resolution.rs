@@ -190,7 +190,7 @@ fn expiring_earlier_add_recomputes_remaining_set_by_proper_play() {
         run(&mut restored, vec![], seat);
         stats(&restored, 1, 1, 1, 0);
         restored
-            .decide(&json!({"do":"end-phase"}), "still-layered")
+            .internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap();
         stats(&restored, 1, 1, 1, 0);
     }

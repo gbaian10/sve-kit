@@ -65,8 +65,10 @@ fn run(board: &mut Game, steps: Vec<Located<Node>>) -> Progress {
 }
 
 fn end(board: &mut Game) {
-    board.decide(&json!({"do":"end-phase"}), "end").unwrap();
-    board.decide(&json!({"do":"pass"}), "pass").unwrap();
+    board
+        .internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    pass_quick(board);
 }
 
 #[test]

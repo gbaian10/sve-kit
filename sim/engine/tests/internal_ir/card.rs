@@ -105,7 +105,7 @@ mod target_union;
 mod token_follower_union;
 #[path = "card/top_banish.rs"]
 mod top_banish;
-use second::lowerer;
+pub(super) use second::lowerer;
 
 #[path = "card/grouped_search_followup.rs"]
 mod grouped_search_followup;
@@ -259,6 +259,7 @@ mod timing;
 
 #[path = "card/quick.rs"]
 mod quick;
+pub(super) use quick::pass as pass_quick;
 #[path = "card/quick_activation_history.rs"]
 mod quick_activation_history;
 
@@ -302,7 +303,7 @@ fn ability(id: u64, steps: Vec<Located<Node>>) -> Located<Ability> {
     history_fixture::ability(id, steps).unwrap()
 }
 
-fn card(abilities: Vec<Located<Ability>>) -> WellFormedCardProgram {
+pub(super) fn card(abilities: Vec<Located<Ability>>) -> WellFormedCardProgram {
     history_fixture::card(abilities).unwrap()
 }
 
@@ -367,8 +368,8 @@ fn whole_card_activation_fixes_instance_and_distinct_executions_both_seats() {
         game.activate_internal_card("s", AbilityId(1), PlayerId { seat })
             .unwrap_err();
         assert_eq!(before, exact_authority(&game));
-        assert_eq!(game.legal().unwrap(), Vec::<Value>::new());
-        game.decide(&json!({"do":"end-phase"}), "test").unwrap_err();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap_err();
         game.execute_internal(&checked(vec![]), &source("synthetic"), context(seat))
             .unwrap_err();
         let step = game.resume_internal_card().unwrap();
@@ -665,7 +666,8 @@ fn multiple_supported_abilities_keep_distinct_instances_and_effect_producers() {
 fn end_quick_window_rejection_does_not_advance_to_discard() {
     for seat in [1, 2] {
         let mut game = position(seat, vec![draw(1, 0)]);
-        game.submit(&json!({"do":"end-phase"})).unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
         let before = exact_authority(&game);
         game.activate_internal_card("s", AbilityId(1), PlayerId { seat })
             .unwrap_err();
@@ -806,6 +808,7 @@ mod discard_event;
 
 #[path = "card/equipment_played.rs"]
 mod equipment_played;
+pub(super) use equipment_played::tree as ability_tree;
 
 #[path = "card/filtered_mill.rs"]
 mod filtered_mill;

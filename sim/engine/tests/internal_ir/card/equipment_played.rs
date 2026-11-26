@@ -1,7 +1,7 @@
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 
-pub(super) fn tree(head: &Value, number: &str) -> Value {
+pub(crate) fn tree(head: &Value, number: &str) -> Value {
     let mut tree = fanfare::expanded::tree().clone();
     let mut entry = tree["cards"]["BP08-038"]["abilities"][0].clone();
     entry.as_object_mut().unwrap().remove("fanfare");

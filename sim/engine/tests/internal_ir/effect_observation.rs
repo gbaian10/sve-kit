@@ -86,8 +86,9 @@ fn numeric_effects_explain_effective_values_and_expire_with_the_authority() {
         origin.holder.as_ref(),
         Some(&observed_card(&observation, Viewer::P1, ObservedZone::Field).handle)
     );
-    game.decide(&json!({"do":"end-phase"}), "end").unwrap();
-    game.decide(&json!({"do":"pass"}), "pass").unwrap();
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    pass_quick(&mut game);
     let after = game.observe(Viewer::P2).unwrap();
     let state = observed_card(&after, Viewer::P2, ObservedZone::Field)
         .properties

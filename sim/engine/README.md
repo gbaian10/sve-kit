@@ -1,7 +1,7 @@
 # Independent rules prototype
 
-Card facts come from the versioned card database snapshot. The engine has two
-effect paths sharing one `Game` and authority state:
+Card facts come from the versioned card database snapshot. The engine uses one
+`Game` and authority state for typed effects and shared rules.
 
 - The typed path reads the complete accepted author selection from
   `authored/rules/author-effects/` and named `effect-bodies/`. DSL Schemas, the
@@ -9,18 +9,13 @@ effect paths sharing one `Game` and authority state:
   syntax validation alone does not establish execution support.
   `Catalog::from_current_selection` and `Game::from_selected_effects` admit current
   whole cards. See [the author contract](../../docs/dsl/author-contract-1.0.md).
-- The frozen prototype reads `authored/rules/effects/`, validated against
-  `dsl/effects.schema.json` before and after macro expansion. Only engine tests
-  still drive this path, through the old `decide`/`legal` and player packet.
 
 The shared rule exam runs on the typed path: `TypedAdapter` plays both seats
 through the player interface only, and `sim/engine/tests/typed_exam.rs` compares the
 result with [tests/engine/typed-known-results.yaml](../../tests/engine/typed-known-results.yaml).
 See [engine status](../../docs/sim/engine-status.md#驗證方式) for the list rules.
 
-The player match interface is being built on the typed path. The old
-`decide`/`legal`/`projection` and JSON interpreter are frozen test drivers. The
-prototype replay, assist and AI were removed; their typed successors are tracked in
+The player match interface uses the typed path. Typed replay, assist and AI are tracked in
 [#2206](https://github.com/gbaian10/sve-kit/issues/2206),
 [#2207](https://github.com/gbaian10/sve-kit/issues/2207) and
 [#2208](https://github.com/gbaian10/sve-kit/issues/2208). Draw, movement,
@@ -55,12 +50,10 @@ The private background records each document kind/format and validation Schema
 `schema_id`. This migration rebuilds authored/settings/schema fingerprints and
 does not accept former backgrounds or replay fingerprints.
 
-`Catalog::load` verifies the exact snapshot SHA-256 in the bound rules document.
-Its default identity boundary is explicitly `legacy-jp`.
-`Catalog::load_with_identity` and `Catalog::from_documents_with_rules` accept an
-explicit `EngineIdentityInput`; the latter uses only the supplied bytes. A
-`Resolved` projection supplies existing face/rules-name IDs, region and snapshot
-hash from that same input. It does not infer JP/EN counterparts or invent IDs.
+`Catalog::from_documents_with_rules` accepts an explicit `EngineIdentityInput`
+and verifies the exact snapshot SHA-256 using the supplied bytes. A `Resolved`
+projection supplies the existing face and rules-name IDs, region and snapshot
+hash from that same input.
 See [engine rule identities](../../docs/dsl/engine-rules-1.md) for the contract.
 
 Player setup may provide `title_code`. Frozen runner title labels resolve through
@@ -87,8 +80,8 @@ current cards never acquire prototype programs. Source proof stays inside the
 authority, including after departure. Loaded internal cards still reject saves;
 this entry does not publish capabilities or grant use qualification.
 
-The default `runner` feature enables the evaluation adapters and the old test
-drivers: `Game::decide`, `submit`, `legal`, `internal_rule_action` and the seat
+The default `runner` feature enables the evaluation adapters and test
+drivers including `internal_rule_action` and the seat
 packets `View::P1`/`View::P2`. Hosts build without it and use the player interface;
 referee reads (`projection(View::Referee)`, `query`) stay available. The
 library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser

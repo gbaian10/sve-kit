@@ -186,7 +186,7 @@ Spell 本文完成後，僅把仍在 Resolution 的同世代卡移去 owner 墓�
 `IllegalPlay`、協定 `Invalid` 與執行器 `Unsupported` 分開回報。沒有任意取消或隨機成本重抽入口。
 
 成功 Activation 明示 `ResumeStage::CheckTiming`，Game 同時保存 checkpoint；`resume_internal_card()`
-才做既有規則檢查。在 checkpoint 前不能插入原型 decide／submit 或另一個 typed 入口。
+才做既有規則檢查。checkpoint 期間拒絕其他規則動作與另一個 typed 入口。
 整卡與待答續體尚無儲存／digest 格式，相關操作明確失敗，不靜默遺失程式或 producer。
 
 ### Fanfare／Lastword 的 authority 待機
@@ -488,7 +488,7 @@ typed ObjectId 由 State 內的持久映射配發給原型物件 ID，同一局�
 有效回答後的執行失敗依〈互動回答的交易分界〉回復 execution 前的 Game 並取消續體；
 僅保留已外發 epoch 的高水位，避免舊 token 因回復而復活。
 便利入口回復到準備前；明示預備入口保留已提交的 play 與時間，可用同一 handle 重試，但舊答案 token 仍失效。
-執行入口不允許原型 decide／submit 插入待答中的 typed 解算。尚無 typed save 格式；
+待答中的 typed 解算拒絕插入規則動作。尚無 typed save 格式；
 序列化或計算 digest 待答 Game 會明確失敗，不能靜默遺失續體。
 
 ## 抽牌與傷害
@@ -979,7 +979,7 @@ NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩�
 到期造成 hp≤0 時，先執行下一實際回合的重置、PP、站立與抽牌，在 7.2.5 處理規則破壞，
 再進入主要階段並收集 main_start 觸發。到期、重算不發 stat_changed。
 
-原型 decide 可在數值層存在時繼續執行；傷害透過同一有效值重算並保留目前 D，
+共用規則動作可在數值層存在時繼續執行；傷害透過同一有效值重算並保留目前 D，
 原型純 Add 以 checked 基礎差額重算。普通／超進化與效果進化接受固定對象、已捕捉操作數的無期限 Add／Set。
 普通／超進化也接受無附加區間的 CurrentTurnEnd／NextTurnEnd Add。
 按進化面的印刷差額平移基礎與既有 Set，保留 EffectId、ProperPlay timestamp、原期限錨與目前傷害；超進化 +1/+1 獨立保留。
@@ -1002,7 +1002,7 @@ Typed `BoxPilot::Pilot` 只承接來源自身、CurrentTurnEnd／Installation �
 期限玩家可使用已捕捉的 Player 值；Capture::Player 允許 Current 來源的 controller／owner，
 世代失效時拒絕，不追蹤新世代或當作缺資訊回零。live role 不直接充當 actor／audience。
 NextTurnEdge、phase edge、DuringNextPhase、SetKind 與下節以外的 Continuous 仍拒絕。
-尚有預備 play 時也拒絕原型 decide；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
+尚有預備 play 時也拒絕規則動作；同一期間的 observation 在 `semantic_state` 只多一個 `typed_numeric_layers: true`
 布林摘要，不含 effect、execution 或加數明細。
 
 `prepare_internal_play` 是合成 closed Program 的可信適正 play 提交入口：先驗整棵樹及 context，
@@ -1238,9 +1238,8 @@ WF 只對 Cost 語境、無前提且綁定公開自方場上費用材料的 Act 
 不新增通用事件欄位求值器。待機公開標籤只含 `Draw`，不揭露所抽卡片、私有物件或指示身分。
 其他玩家、其他排除階段、來源篩選、抽牌歷史與事件物件讀取仍未准入。
 
-既有權威邊界已禁止原型抽牌與此觀測者混合：載入觸發能力後，`decide` 與合成 play
-不能繞過 typed 入口；原型能力讀取也要求卡片已准入，已載入卡不再提供原型能力。
-因此事件沿 typed 抽牌的真實 `InstructionId`，不替原型或規則動作捏造指示身分。
+載入觸發能力後，打出使用 typed 入口。抽牌事件記錄 typed 指示的真實 `InstructionId`；
+規則抽牌沒有此身分。
 將來放寬混合執行時，須先補齊可誠實表達來源的 Draw 契約。
 
 ## 本回合的起動能力禁止

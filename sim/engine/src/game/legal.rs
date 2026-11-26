@@ -196,16 +196,6 @@ impl Game {
             .collect())
     }
 
-    /// Complete prototype decision set. Parameterized actions are expanded.
-    ///
-    /// # Errors
-    /// A live card uses semantics the prototype cannot enumerate.
-    // Test and runner driver only: players and hosts read questions through the player interface.
-    #[cfg(feature = "runner")]
-    pub fn legal(&self) -> Result<Vec<Value>> {
-        self.legal_actions()
-    }
-
     /// The referee packet still lists the prototype decision set.
     #[expect(
         clippy::too_many_lines,

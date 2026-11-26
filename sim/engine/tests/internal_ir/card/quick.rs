@@ -76,7 +76,7 @@ fn choose(game: &mut Game, q: &DecisionView, handle: Option<u64>) -> CardPlay {
         .unwrap()
 }
 
-pub(super) fn pass(game: &mut Game) -> Step {
+pub(crate) fn pass(game: &mut Game) -> Step {
     let q = question(game);
     let CardPlay::Continued(step) = choose(game, &q, None) else {
         panic!("expected Quick Pass");
@@ -122,7 +122,6 @@ fn attack_quick_repeats_after_pending_even_without_the_attacker() {
     assert_eq!(q.actor, PlayerId { seat: 2 });
     let before = exact_authority(&game);
     game.play_internal_card("q1", q.actor).unwrap_err();
-    game.submit(&json!({"do":"pass"})).unwrap_err();
     assert_eq!(before, exact_authority(&game));
     let first = resolved(choose(&mut game, &q, Some(0)));
     assert!(matches!(

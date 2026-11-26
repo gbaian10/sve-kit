@@ -236,12 +236,8 @@ fn run_cases(cases: &[EvolutionCase]) {
                 );
                 continue;
             }
-            // Evolution must retain the pending printed abilities after paying its resource cost.
-            assert_eq!(
-                game.legal().unwrap(),
-                Vec::<Value>::new(),
-                "{base} resource ability remains pending, so no further action is legal"
-            );
+            game.internal_rule_action(&json!({"do":"end-phase"}))
+                .unwrap_err();
             if resource == "BP19-002" {
                 let question = game.internal_pending_choice().unwrap().unwrap();
                 assert!(

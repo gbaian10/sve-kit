@@ -1,6 +1,6 @@
 use super::*;
 
-const fn insertion() -> Action {
+pub(super) const fn insertion() -> Action {
     Action::ScheduleTurn {
         player: PlayerRef::Controller {},
         operation: TurnOperation::InsertBefore {

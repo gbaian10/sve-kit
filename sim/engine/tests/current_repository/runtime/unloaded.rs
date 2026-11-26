@@ -199,9 +199,6 @@ fn a_loaded_eighty_object_position_can_advance_to_the_end_phase() {
         80
     );
     assert_eq!(game.query(View::P1, "P1.void_count").unwrap(), None);
-    let legal_start = Instant::now();
-    assert_eq!(game.legal().unwrap(), Vec::<Value>::new());
-    let legal = legal_start.elapsed();
     let phase_start = Instant::now();
     let step = game
         .internal_rule_action(&json!({"do":"end-phase"}))
@@ -209,8 +206,7 @@ fn a_loaded_eighty_object_position_can_advance_to_the_end_phase() {
     let end_phase = phase_start.elapsed();
     assert_eq!(step.outcome, "resolved");
     eprintln!(
-        "B1 80 loaded objects: legal={}us end-phase={}us",
-        legal.as_micros(),
+        "B1 80 loaded objects: end-phase={}us",
         end_phase.as_micros()
     );
 }

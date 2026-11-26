@@ -39,14 +39,23 @@ fn position(seat: u32, full: bool) -> Game {
                 .collect::<Vec<_>>()
         );
     }
-    Game::new(
+    let mut game = Game::new(
         catalogue(),
         &initial,
         &Value::Null,
         &Value::Null,
         "cost-fragment",
     )
-    .unwrap()
+    .unwrap();
+    let empty = WellFormedCardProgram::check(CardProgram {
+        abilities: vec![],
+        card_play_costs: vec![],
+    })
+    .unwrap();
+    for number in ["unit-follower", "unit-spell"] {
+        game.load_internal_card(number, &empty).unwrap();
+    }
+    game
 }
 
 const fn seat_name(seat: u32) -> &'static str {
@@ -89,8 +98,9 @@ pub(super) fn reduce(id: u64, moved: MovementReceipt) -> Located<Node> {
 }
 
 fn end(game: &mut Game) {
-    game.submit(&json!({"do":"end-phase"})).unwrap();
-    game.submit(&json!({"do":"pass"})).unwrap();
+    game.internal_rule_action(&json!({"do":"end-phase"}))
+        .unwrap();
+    pass_quick(game);
 }
 
 #[test]
@@ -137,7 +147,7 @@ fn search_successful_after_reduces_actual_play_cost_until_current_turn_end() {
             0
         );
         let mut expired = game.clone();
-        game.submit(&json!({"do":"play","card":"d"})).unwrap();
+        game.play_internal_card("d", PlayerId { seat }).unwrap();
         assert_eq!(
             game.projection(View::Referee).unwrap()[seat_name(seat)]["pp"]["current"],
             2
@@ -147,7 +157,7 @@ fn search_successful_after_reduces_actual_play_cost_until_current_turn_end() {
         let before = expired.projection(View::Referee).unwrap()[seat_name(seat)]["pp"]["current"]
             .as_i64()
             .unwrap();
-        expired.submit(&json!({"do":"play","card":"d"})).unwrap();
+        expired.play_internal_card("d", PlayerId { seat }).unwrap();
         assert_eq!(
             expired.projection(View::Referee).unwrap()[seat_name(seat)]["pp"]["current"],
             before - 3
@@ -200,7 +210,7 @@ fn look_successful_after_installs_but_a_full_ex_keeps_zero_subjects() {
         };
         assert_eq!(subjects.len(), usize::from(!full));
         if !full {
-            game.submit(&json!({"do":"play","card":"d"})).unwrap();
+            game.play_internal_card("d", PlayerId { seat }).unwrap();
             assert_eq!(
                 game.projection(View::Referee).unwrap()[seat_name(seat)]["pp"]["current"],
                 2

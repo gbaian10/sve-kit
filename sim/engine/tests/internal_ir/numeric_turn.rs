@@ -1,4 +1,6 @@
 use super::*;
+use sve_engine::EngineFailure;
+use sve_engine::game::internal::{CardPlay, InputDomain};
 
 fn position(seat: u32) -> Value {
     let mut position = setup(seat, json!([]));
@@ -14,36 +16,21 @@ fn position(seat: u32) -> Value {
     position
 }
 
-fn loaded(spell: Value, abilities: Value) -> Arc<Catalog> {
-    loaded_with_evolved_stats(spell, abilities, ("4", "5"))
+fn load_card(board: &mut Game, number: &str, head: &Value) -> AbilityId {
+    let program = card::lowerer()
+        .lower(&card::ability_tree(head, number))
+        .unwrap()
+        .remove(number)
+        .unwrap();
+    board.load_internal_card(number, &program).unwrap();
+    program.card().abilities[0].node.id
 }
 
-fn loaded_with_evolved_stats(
-    spell: Value,
-    abilities: Value,
-    evolved: (&str, &str),
-) -> Arc<Catalog> {
-    let snapshot = ["unit-spell", "unit-follower", "evolved"].iter().map(|card| {
-        let (kind, power, hp) = if *card == "unit-spell" { ("スペル", "2", "3") }
-            else if *card == "evolved" { ("フォロワー・エボルヴ", evolved.0, evolved.1) }
-            else { ("フォロワー", "2", "3") };
-        json!({"number":card,"faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":kind,"cost":"1","power":power,"hp":hp,"traits":[],"text":null,"sections":[]}]}).to_string()
-    }).collect::<Vec<_>>().join("\n");
-    let mut document = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-spell":{"status":"complete","review":"synthetic","abilities":[{"kind":"spell","line":1,"body":null}]},
-        "unit-follower":{"status":"complete","review":"synthetic","abilities":[]},
-        "evolved":{"status":"complete","review":"synthetic","abilities":[]}
-    }});
-    document["cards"]["unit-spell"]["abilities"][0]["body"] = spell;
-    document["cards"]["unit-follower"]["abilities"] = abilities;
-    Arc::new(
-        Catalog::from_documents(
-            &snapshot,
-            &json!({"format":1,"kind":"keyword_registry","keywords":{"guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}}}}).to_string(),
-            &[("turn.yaml".into(), document.to_string())],
-        )
-        .unwrap(),
-    )
+fn load_follower(board: &mut Game, head: &Value) -> AbilityId {
+    board
+        .load_internal_card("unit-spell", &card::card(vec![]))
+        .unwrap();
+    load_card(board, "unit-follower", head)
 }
 
 fn turn_game(seat: u32) -> Game {
@@ -112,16 +99,36 @@ fn stats(board: &Game, attack: i64, hp: i64, maximum: i64) {
 
 fn end(board: &mut Game) -> Vec<Value> {
     let mut events = board
-        .decide(&json!({"do":"end-phase"}), "end")
+        .internal_rule_action(&json!({"do":"end-phase"}))
         .unwrap()
         .events;
-    events.extend(
-        board
-            .decide(&json!({"do":"pass"}), "quick-pass")
-            .unwrap()
-            .events,
-    );
+    events.extend(pass_quick(board).events);
     events
+}
+
+fn resolve_only_pending(board: &mut Game, card: &str) {
+    let question = board.internal_pending_choice().unwrap().unwrap();
+    let InputDomain::Pending(options) = &question.domain else {
+        panic!("expected a pending trigger");
+    };
+    assert_eq!(
+        options.len(),
+        1,
+        "only the expected holder contributes a trigger"
+    );
+    let option = &options[0];
+    assert_eq!(
+        option.card, card,
+        "the pending trigger belongs to the expected card"
+    );
+    board
+        .answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Pending(option.handle),
+        )
+        .unwrap();
+    board.resume_internal_card().unwrap();
 }
 
 fn continuous(id: u64, enabled: bool, end: DurationEnd) -> Located<Node> {
@@ -233,17 +240,7 @@ fn continuous_source_exit_preserves_damage_and_false_instances_without_stat_fact
 #[test]
 fn added_turn_interval_is_inactive_in_the_gap_and_resumes_for_the_actual_opponent_turn() {
     for seat in [1, 2] {
-        let mut board = Game::new(
-            loaded(
-                json!({"op":"extra_turn","side":"self","count":1}),
-                json!([]),
-            ),
-            &position(seat),
-            &Value::Null,
-            &Value::Null,
-            "interval",
-        )
-        .unwrap();
+        let mut board = turn_game(seat);
         let mut step = current(pair(1, 2));
         if let Node::Instruction { instruction } = &mut step.node
             && let Action::Modify { expires, .. } = &mut instruction.action
@@ -255,7 +252,11 @@ fn added_turn_interval_is_inactive_in_the_gap_and_resumes_for_the_actual_opponen
             });
         }
         run(&mut board, vec![step], seat);
-        board.submit(&json!({"do":"play","card":"s"})).unwrap();
+        run(
+            &mut board,
+            vec![instruction(1, scheduled_turn::insertion())],
+            seat,
+        );
         stats(&board, 3, 5, 5);
         end(&mut board);
         assert_eq!(
@@ -273,10 +274,7 @@ fn added_turn_interval_is_inactive_in_the_gap_and_resumes_for_the_actual_opponen
                     },
                 )]),
                 &source("synthetic"),
-                Context {
-                    generation: Generation(2),
-                    ..context(seat)
-                },
+                context(seat),
             )
             .unwrap();
         end(&mut departed);
@@ -304,43 +302,34 @@ fn current_turn_end_remains_through_end_triggers_quick_and_discard_checks() {
         position["players"][actor]["zones"]["hand"] = json!((0..8)
             .map(|index| json!({"id":if index == 0 { "s".into() } else { format!("h{index}") },"card":"unit-spell"}))
             .collect::<Vec<_>>());
-        let abilities = json!([{"kind":"trigger","line":1,"event":"end","side":"both","body":{"op":"draw","side":"self","count":1}}]);
-        let mut board = Game::new(
-            loaded(json!({"op":"draw","count":1,"side":"self"}), abilities),
-            &position,
-            &Value::Null,
-            &Value::Null,
-            "end",
-        )
-        .unwrap();
+        let mut board = Game::new(catalog(), &position, &Value::Null, &Value::Null, "end").unwrap();
         let progress = run(&mut board, vec![current(pair(1, 2))], seat);
+        load_follower(
+            &mut board,
+            &json!({"auto":{"on":{"phase":{"whose":"opp","which":"end"}},"do":[{"draw":{"who":"self","n":1}}]}}),
+        );
         assert_eq!(changes(&progress).len(), 1, "one explicit numeric fact");
-        board.decide(&json!({"do":"end-phase"}), "end").unwrap();
-        stats(&board, 3, 5, 5);
-        let pending = board
-            .legal()
-            .unwrap()
-            .into_iter()
-            .find(|choice| choice["do"] == "choose-pending")
+        board
+            .internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap();
-        board.decide(&pending, "end-trigger").unwrap();
         stats(&board, 3, 5, 5);
-        board.decide(&json!({"do":"pass"}), "quick").unwrap();
+        resolve_only_pending(&mut board, "unit-follower");
         stats(&board, 3, 5, 5);
-        let discard = board
-            .legal()
-            .unwrap()
-            .into_iter()
-            .find(|choice| choice["do"] == "end-discard")
-            .unwrap();
-        let mut wrong = discard.clone();
-        wrong["by"] = json!(seat_name(3 - seat));
+        pass_quick(&mut board);
+        stats(&board, 3, 5, 5);
         assert_eq!(
-            board.decide(&wrong, "bad-actor").unwrap().outcome,
+            board
+                .internal_rule_action(
+                    &json!({"do":"end-discard","by":seat_name(3-seat),"select":["s"]})
+                )
+                .unwrap()
+                .outcome,
             "cannot-play"
         );
         stats(&board, 3, 5, 5);
-        board.decide(&discard, "discard").unwrap();
+        board
+            .internal_rule_action(&json!({"do":"end-discard","select":["s"]}))
+            .unwrap();
         stats(&board, 2, 3, 3);
         assert_eq!(
             board.projection(View::Referee).unwrap()["turn"]["active"],
@@ -429,44 +418,46 @@ fn skipped_turns_have_no_occurrence_and_extra_turns_bind_only_when_they_begin() 
 #[test]
 fn schedule_changes_after_installation_move_next_turn_expiry() {
     for seat in [1, 2] {
-        // Each case: spell body, waited player, and the active player after each end before expiry.
-        for (body, waiting, actives) in [
+        let opponent = || PlayerRef::RequireOne {
+            players: Box::new(players(PlayerRelation::Opponents)),
+        };
+        for (schedule, actor, waiting, actives) in [
             (
-                json!({"op":"extra_turn","side":"self","count":1}),
+                scheduled_turn::insertion(),
+                seat,
                 PlayerRef::Controller {},
                 vec![seat],
             ),
             (
-                json!({"op":"extra_turn","side":"self","count":1}),
-                PlayerRef::RequireOne {
-                    players: Box::new(players(PlayerRelation::Opponents)),
-                },
+                scheduled_turn::insertion(),
+                seat,
+                opponent(),
                 vec![seat, 3 - seat],
             ),
             (
-                json!({"op":"skip_turn","side":"opponent","count":1}),
-                PlayerRef::RequireOne {
-                    players: Box::new(players(PlayerRelation::Opponents)),
+                Action::ScheduleTurn {
+                    player: PlayerRef::Controller {},
+                    operation: TurnOperation::SkipNext {},
+                    occurrence: Binding::new(99, ScopeId(1)),
                 },
+                3 - seat,
+                opponent(),
                 vec![seat, 3 - seat],
             ),
         ] {
-            let mut board = Game::new(
-                loaded(body, json!([])),
-                &position(seat),
-                &Value::Null,
-                &Value::Null,
-                "late-schedule",
-            )
-            .unwrap();
+            let mut board = turn_game(seat);
             run(&mut board, vec![next(waiting)], seat);
-            let play = board
-                .legal()
-                .unwrap()
-                .into_iter()
-                .find(|choice| choice["do"] == "play")
+            let mut schedule_context = context(actor);
+            if actor != seat {
+                schedule_context.source = "f".into();
+            }
+            board
+                .execute_internal(
+                    &checked(vec![instruction(1, schedule)]),
+                    &source("synthetic"),
+                    schedule_context,
+                )
                 .unwrap();
-            board.decide(&play, "schedule").unwrap();
             stats(&board, 3, 5, 5);
             for active in actives {
                 end(&mut board);
@@ -485,16 +476,34 @@ fn schedule_changes_after_installation_move_next_turn_expiry() {
 
 #[test]
 fn expiry_lethal_is_destroyed_before_main_start_triggers_wait_for_a_choice() {
+    let (mut snapshot, keywords, document) = catalog_documents(&json!("1"));
+    let mut survivor = snapshot
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .find(|card| card["number"] == "unit-follower")
+        .unwrap();
+    survivor["number"] = json!("survivor");
+    snapshot.push('\n');
+    snapshot.push_str(&survivor.to_string());
+    let mut document: Value = serde_json::from_str(&document).unwrap();
+    document["cards"]["survivor"] = json!({"status":"complete","abilities":[]});
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot,
+            &keywords,
+            &[("main-start".into(), document.to_string())],
+        )
+        .unwrap(),
+    );
     for seat in [1, 2] {
         let opponent = seat_name(3 - seat);
         let mut position = position(seat);
         position["players"][opponent]["zones"]["field"] = json!([
             {"id":"f","card":"unit-follower"},
-            {"id":"g","card":"unit-follower","state":{"hp":9,"max_hp":9}}
+            {"id":"g","card":"survivor","state":{"hp":9,"max_hp":9}}
         ]);
-        let abilities = json!([{"kind":"trigger","line":1,"event":"main_start","side":"self","body":{"op":"draw","side":"self","count":1}}]);
         let mut board = Game::new(
-            loaded(json!({"op":"draw","side":"self","count":1}), abilities),
+            Arc::clone(&catalog),
             &position,
             &Value::Null,
             &Value::Null,
@@ -502,6 +511,9 @@ fn expiry_lethal_is_destroyed_before_main_start_triggers_wait_for_a_choice() {
         )
         .unwrap();
         run(&mut board, vec![current(pair(0, 2)), hit(2, 4)], seat);
+        let head = json!({"auto":{"on":{"phase":{"whose":"self","which":"main"}},"do":[{"draw":{"who":"self","n":1}}]}});
+        load_follower(&mut board, &head);
+        load_card(&mut board, "survivor", &head);
         stats(&board, 2, 1, 5);
         let hand = |board: &Game| {
             board.projection(View::Referee).unwrap()[opponent]["hand"]
@@ -522,24 +534,12 @@ fn expiry_lethal_is_destroyed_before_main_start_triggers_wait_for_a_choice() {
             projection["objects"]["g"]["hp"], 5,
             "the survivor expires too"
         );
-        let pending = board
-            .legal()
-            .unwrap()
-            .into_iter()
-            .filter(|choice| choice["do"] == "choose-pending")
-            .collect::<Vec<_>>();
-        assert_eq!(
-            pending.len(),
-            1,
-            "only the survivor's main_start trigger waits"
-        );
-        assert_eq!(pending[0]["pending"]["ability"]["source"], "g");
         assert_eq!(
             hand(&board),
             before + 1,
             "only the 7.2.4 draw has happened before the choice"
         );
-        board.decide(&pending[0], "main-start").unwrap();
+        resolve_only_pending(&mut board, "survivor");
         assert_eq!(
             hand(&board),
             before + 2,
@@ -593,13 +593,23 @@ fn numeric_expiry_overflow_rolls_back_the_pass_and_turn_schedule() {
         );
         run(&mut board, vec![current(pair(-1, 0))], seat);
         run(&mut board, vec![buff(1, 1, 0)], seat);
-        board.decide(&json!({"do":"end-phase"}), "end").unwrap();
-        let before = exact_authority(&board);
-        board.decide(&json!({"do":"pass"}), "overflow").unwrap_err();
+        board
+            .internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        let question = board.internal_quick_choice().unwrap().unwrap();
+        let before = board.projection(View::Referee).unwrap();
+        board
+            .answer_internal_card(question.actor, question.token, Answer::Quick(None))
+            .unwrap_err();
+        let mut after = board.projection(View::Referee).unwrap();
+        assert!(
+            after["awaiting"]["epoch"].as_u64().unwrap()
+                > before["awaiting"]["epoch"].as_u64().unwrap()
+        );
+        after["awaiting"]["epoch"] = before["awaiting"]["epoch"].clone();
         assert_eq!(
-            exact_authority(&board),
-            before,
-            "rollback includes closed flag, IDs, layers, RNG and input"
+            after, before,
+            "the failed pass preserves the board and reissues the same question"
         );
         stats(&board, i64::MAX, 3, 3);
     }
@@ -635,15 +645,12 @@ fn installation_captures_controller_instead_of_owner_or_a_future_controller() {
             position["players"][seat_name(seat)]["zones"]["hand"] = json!([]);
             position["players"][seat_name(seat)]["zones"]["field"] =
                 json!([{"id":"s","card":"unit-follower","owner":seat_name(3-seat)}]);
-            let abilities = json!([{"kind":"activated","line":1,"body":{"op":"control","subjects":"self","side":"opponent"}}]);
-            let mut board = Game::new(
-                loaded(json!({"op":"draw","side":"self","count":1}), abilities),
-                &position,
-                &Value::Null,
-                &Value::Null,
-                "capture",
-            )
-            .unwrap();
+            let mut board =
+                Game::new(catalog(), &position, &Value::Null, &Value::Null, "capture").unwrap();
+            let ability = load_follower(
+                &mut board,
+                &json!({"activate":{"cost":{"pp":0},"targets":[{"bind":"own","from":{"who":"self","zone":"field","kind":"follower"},"n":1}],"do":[{"give":{"ref":"own","to":"opp"}}]}}),
+            );
             let captured = CaptureRef {
                 binding: Binding::new(33, ScopeId(1)),
             };
@@ -675,13 +682,23 @@ fn installation_captures_controller_instead_of_owner_or_a_future_controller() {
                 ],
                 seat,
             );
-            let activation = board
-                .legal()
+            let CardPlay::Awaiting(question) = board
+                .activate_internal_card("s", ability, PlayerId { seat })
                 .unwrap()
-                .into_iter()
-                .find(|choice| choice["do"] == "activate" && choice["ability"]["source"] == "s")
+            else {
+                panic!("expected the transfer target");
+            };
+            let InputDomain::Targets(domain) = &question.domain else {
+                panic!("expected a field target");
+            };
+            board
+                .answer_internal_card(
+                    question.actor,
+                    question.token,
+                    Answer::Targets(vec![domain.members[0].handle]),
+                )
                 .unwrap();
-            board.decide(&activation, "control").unwrap();
+            board.resume_internal_card().unwrap();
             assert!(
                 board.projection(View::Referee).unwrap()[seat_name(3 - seat)]["field"]
                     .as_array()
@@ -720,70 +737,86 @@ fn timed_add_evolution_expires_from_evolved_base_and_timed_set_rejects() {
     position["players"]["P2"]["zones"]["field"] = json!([]);
     position["players"]["P1"]["zones"]["field"] = json!([{"id":"f","card":"unit-follower"}]);
     position["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"e","card":"evolved"}]);
-    let abilities = json!([
-        {"kind":"evolve","line":1,"costs":[{"op":"pp","amount":1}],"body":{"op":"evolve","subjects":"self"}},
-        {"kind":"activated","line":2,"body":{"op":"evolve","subjects":"self"}}
-    ]);
-    let loaded = loaded_with_evolved_stats(
-        json!({"op":"draw","side":"self","count":1}),
-        abilities,
-        ("3", "4"),
+    let (mut snapshot, keywords, document) = catalog_documents(&json!("1"));
+    snapshot.push('\n');
+    snapshot.push_str(&json!({"number":"evolved","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"3","hp":"4","traits":[],"sections":[]}]}).to_string());
+    let mut document: Value = serde_json::from_str(&document).unwrap();
+    document["cards"]["evolved"] = json!({"status":"complete","abilities":[]});
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot,
+            &keywords,
+            &[("numeric-turn".into(), document.to_string())],
+        )
+        .unwrap(),
     );
-    let mut board = Game::new(
-        Arc::clone(&loaded),
-        &position,
-        &Value::Null,
-        &Value::Null,
-        "evolution",
-    )
-    .unwrap();
+    let mut board = Game::new(catalog, &position, &Value::Null, &Value::Null, "evolution").unwrap();
+    let mut set_board = board.clone();
     let progress = run(&mut board, vec![current(pair(2, 2)), hit(2, 1)], 1);
     assert_eq!(changes(&progress).len(), 1);
     stats(&board, 4, 4, 5);
-    let installed = serde_json::to_value(&board).unwrap()["state"]["ir_numeric"].clone();
-    let evolve = board
-        .legal()
-        .unwrap()
-        .into_iter()
-        .find(|choice| choice["do"] == "evolve")
-        .unwrap();
-    let mut set_board = Game::new(
-        loaded,
-        &position,
-        &Value::Null,
-        &Value::Null,
-        "set-evolution",
-    )
-    .unwrap();
+    let mut effect_board = board.clone();
+    let evolve = json!({"do":"evolve","source":"f","evolve_card":"e","pay":{"pp":1}});
     run(
         &mut set_board,
         vec![current(set::set_pair(4)), hit(2, 1)],
         1,
     );
+    let evolved = card::lowerer()
+        .lower(&card::ability_tree(
+            &json!({"activate":{"cost":{"pp":0},"do":[{"damage":{"to":"this","n":1}}]}}),
+            "evolved",
+        ))
+        .unwrap()
+        .remove("evolved")
+        .unwrap();
+    for game in [&mut board, &mut set_board] {
+        load_follower(game, &json!({"evolve":{"cost":{"pp":1}}}));
+        game.load_internal_card("evolved", &evolved).unwrap();
+    }
     let before = exact_authority(&set_board);
-    set_board.decide(&evolve, "set-evolution").unwrap_err();
+    set_board.internal_rule_action(&evolve).unwrap_err();
     assert_eq!(exact_authority(&set_board), before);
-    // Effect-text evolution is outside the timed-Add subset and keeps rejecting.
-    let mut effect_board = board.clone();
+    let ability = load_follower(
+        &mut effect_board,
+        &json!({"activate":{"cost":{"pp":0},"do":[{"evolve":{"ref":"this","into":"unit-follower"}}]}}),
+    );
     effect_board
-        .decide(
-            &json!({"do":"activate","ability":{"source":"f","line":2}}),
-            "effect-evolution",
+        .load_internal_card("evolved", &evolved)
+        .unwrap();
+    let before = effect_board.projection(View::Referee).unwrap();
+    let CardPlay::Awaiting(question) = effect_board
+        .activate_internal_card("f", ability, PlayerId { seat: 1 })
+        .unwrap()
+    else {
+        panic!("expected an evolution form choice");
+    };
+    let InputDomain::Targets(domain) = &question.domain else {
+        panic!("expected an evolution form domain");
+    };
+    assert_eq!(domain.members.len(), 1);
+    assert!(matches!(
+        effect_board.answer_internal_card(
+            question.actor,
+            question.token,
+            Answer::Targets(vec![domain.members[0].handle]),
+        ),
+        Err(EngineFailure::Unsupported(reason)) if reason.contains("evolution outside supported numeric layers")
+    ));
+    assert_eq!(effect_board.projection(View::Referee).unwrap(), before);
+    assert_eq!(
+        board.internal_rule_action(&evolve).unwrap().outcome,
+        "resolved"
+    );
+    stats(&board, 5, 5, 6);
+    board
+        .activate_internal_card(
+            "f",
+            evolved.card().abilities[0].node.id,
+            PlayerId { seat: 1 },
         )
         .unwrap();
-    let before = exact_authority(&effect_board);
-    effect_board
-        .decide(
-            &json!({"do":"resolve-choice","select":["e"]}),
-            "effect-evolution",
-        )
-        .unwrap_err();
-    assert_eq!(exact_authority(&effect_board), before);
-    board.decide(&evolve, "add-evolution").unwrap();
-    stats(&board, 5, 5, 6);
-    let after = serde_json::to_value(&board).unwrap()["state"]["ir_numeric"].clone();
-    assert_eq!(installed["f"]["effects"], after["f"]["effects"]);
-    run(&mut board, vec![hit(3, 1)], 1);
+    board.resume_internal_card().unwrap();
     stats(&board, 5, 4, 6);
     end(&mut board);
     stats(&board, 3, 2, 4);
@@ -842,7 +875,7 @@ fn pending_resolution_cannot_advance_the_turn_and_late_end_installation_still_ex
         );
         let before = exact_authority(&board);
         board
-            .decide(&json!({"do":"end-phase"}), "busy")
+            .internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap_err();
         assert_eq!(
             exact_authority(&board),
@@ -857,12 +890,12 @@ fn pending_resolution_cannot_advance_the_turn_and_late_end_installation_still_ex
         end(&mut board);
         stats(&board, 2, 3, 3);
         board
-            .decide(&json!({"do":"end-phase"}), "late-end")
+            .internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap();
         // The source remains controlled by the original actor during the opponent's Quick window.
         run(&mut board, vec![current(pair(2, 2))], seat);
         stats(&board, 4, 5, 5);
-        board.decide(&json!({"do":"pass"}), "late-pass").unwrap();
+        pass_quick(&mut board);
         stats(&board, 2, 3, 3);
     }
 }
