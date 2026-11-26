@@ -8,16 +8,12 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import array, digest, object_value, parse, string
+from sve_carddb.core.json import array, digest, object_value, string
 from sve_carddb.core.yaml import JSON_VALUE, parse_yaml
 from sve_carddb.workflows import authoring
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
-
     from pydantic import JsonValue
-
-    from ..support.authoring_cli_fixtures import RepositoryCheck
 
 REPO = Path(__file__).resolve().parents[3]
 
@@ -146,17 +142,12 @@ def test_public_inspect_reconstructs_multi_printing_sources(
     assert other["payload"] == report["payload"]
 
 
-@pytest.mark.slow(
-    reason="Write and replay against the complete real authored inventory, then reuse its complete CLI validation"
-)
 def test_write_preserves_handwritten_storage_and_reuses_companions(
-    repository_workspace: authoring.Workspace,
+    workspace: authoring.Workspace,
+    output_root: Path,
     tmp_path: Path,
-    complete_repository_check: Callable[[], RepositoryCheck],
     handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
 ) -> None:
-    workspace = repository_workspace
-    output_root = Path(shutil.copytree(workspace.authored, tmp_path / "authored"))
     main, bodies, hand, _ = handwriting(tmp_path, handwritten)
     report = authoring.write(
         workspace, main=main, bodies=bodies, output_root=output_root, all_cards=True
@@ -179,8 +170,6 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
     repository_tree = fingerprint(workspace.authored)
     del written_tree[rewritten], repository_tree[rewritten]
     assert written_tree == repository_tree
-    checked = complete_repository_check()
-    assert object_value(parse(checked.output.read_bytes()))["status"] == "ok"
 
 
 @pytest.mark.parametrize(

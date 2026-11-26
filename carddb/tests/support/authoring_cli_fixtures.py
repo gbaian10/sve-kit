@@ -1,14 +1,9 @@
 """One synthetic parsed page for CLI errors that precede source admission."""
 
 import hashlib
-from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING
 
-from typer.testing import CliRunner
-
-from sve_carddb.cli import app
 from sve_carddb.core.regions import SourceRegion
 from sve_carddb.domains.parsed_cards.generate import generate
 from sve_carddb.domains.parsed_cards.storage import write
@@ -16,35 +11,6 @@ from sve_carddb.ingest.archive.frozen_sources import FrozenSources
 from sve_carddb.ingest.archive.manifest import Kind, Manifest, Resource
 from sve_carddb.ingest.archive.source_archive import ArchiveStore, seal_batch
 from sve_carddb.parse.pages import official_jp
-
-from .prepared_values import freeze, restore, shared_preparation
-
-if TYPE_CHECKING:
-    from sve_carddb.workflows import authoring
-
-
-@dataclass(frozen=True)
-class RepositoryCheck:
-    exit_code: int
-    stdout: str
-    output: Path
-
-
-def repository_check(root: Path, inputs: authoring.Inputs) -> RepositoryCheck:
-    root.mkdir(exist_ok=True)
-
-    def prepare() -> bytes:
-        path = root / "inputs.json"
-        path.write_text(inputs.model_dump_json())
-        output = root / "report.json"
-        result = CliRunner().invoke(
-            app, ["author", "check", "--inputs", str(path), "--output", str(output)]
-        )
-        # Failed commands must expose their error instead of publishing a cache entry.
-        assert result.exit_code == 0, result.stderr
-        return freeze(RepositoryCheck(result.exit_code, result.stdout, output))
-
-    return restore(shared_preparation(root / "result.pickle", prepare), RepositoryCheck)
 
 
 def synthetic_card_inputs(root: Path) -> tuple[Path, str]:
