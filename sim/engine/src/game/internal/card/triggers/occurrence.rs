@@ -9,6 +9,10 @@ fn event_viewer(player: PlayerId) -> Option<Viewer> {
     viewer(super::super::seat_name(player).ok()?).ok()
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "One arm per event kind keeps the whole mapping in view."
+)]
 pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<PendingEventContext> {
     let (event, positioned) = match pending.timing.as_ref() {
         Some(EventPayload::DriveGained { .. }) => (PendingEvent::DriveGained, true),
@@ -48,6 +52,7 @@ pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<Pendin
         }
         Some(EventPayload::Fused { .. }) => (PendingEvent::Fusion, true),
         Some(EventPayload::Play { .. }) => (PendingEvent::Play, true),
+        Some(EventPayload::Targeted { .. }) => (PendingEvent::Targeted, true),
         Some(EventPayload::Discard { .. }) => (PendingEvent::Discard, false),
         Some(EventPayload::HandReveal { .. }) => (PendingEvent::HandReveal, false),
         Some(EventPayload::Banish { .. }) => (PendingEvent::Banish, false),
