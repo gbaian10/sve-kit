@@ -123,12 +123,13 @@ def test_direct_rejects_incomplete_or_invalid_cards(
     handwritten = Handwritten(
         {"SYN-01": card}, bodies, {"SYN-01": parse_document(canonical(card))}
     )
+    error_type = AuthorInputError if mutation == "bad_param" else SourceError
     with (
         synthetic_current(
             tmp_path / "source",
             page("jp", '<div class="detail">Unknown wording.</div>'),
         ) as current,
-        pytest.raises(SourceError, match=expected),
+        pytest.raises(error_type, match=expected),
     ):
         materialize(current, "SYN-01", handwritten)
 
