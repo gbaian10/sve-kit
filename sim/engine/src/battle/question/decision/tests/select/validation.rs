@@ -121,7 +121,8 @@ fn missing_board_facts_context_and_unencodable_constraints_refuse_the_whole_ques
         Err(ProjectionError::Unavailable)
     ));
     let mut unsupported_purpose = native.clone();
-    unsupported_purpose.purpose = player::QuestionPurpose::RuleChoice;
+    // A rule choice among objects is the Stack recipient; a Quick window never selects targets.
+    unsupported_purpose.purpose = player::QuestionPurpose::QuickWindow;
     assert!(matches!(
         project_question(&unsupported_purpose, &observation, &id),
         Err(ProjectionError::Unavailable)
