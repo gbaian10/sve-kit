@@ -74,7 +74,7 @@ token 定義須接至衍生物本體。D0 拒絕尚未支援的 token 接線與�
 
 ## 7. 公開 typed IR 與引擎能力
 
-傳輸 4.0.0 的 dsl-programs.entries 維持空陣列。4.1.0 以必要能力 `dsl-programs-v1` 打包已准入的 expanded AST，移除作者與來源稽核資訊。4.2.0 在相同程式內容外增加永久版次關聯，見[快照傳輸](../schema/export/snapshot-transport.md#34-dsl-程式包與版本准入)。這不是 typed IR 的公開 wire；傳輸准入不授予指定引擎的執行資格，沒有 exact target 實跑紀錄時仍須手動處理。
+傳輸 4.0.0 的 dsl-programs.entries 維持空陣列。4.1.0 以必要能力 `dsl-programs-v1` 打包已准入的 expanded AST，移除作者與來源稽核資訊。4.2.0 在相同程式內容外增加永久版次關聯，見[快照傳輸](../schema/export/snapshot-transport.md#34-dsl-程式包與版本准入)。公開包維持 expanded AST。生產端覆核整卡來源閉包，對戰宿主須以同一快照綁定版次和來源，在載入時降低成內部 typed IR 並完成嚴格開局准入。公開支援度仍以指定引擎目標的實跑紀錄為據。
 
 IR 所需語義能力仍由節點與參數形狀推導，runtime 必須實際支援；light 或 shared 標記不授予缺失的付款、事件、取代、token 或私有資訊機制。actor、合法回答與玩家／AI 觀察隔離保持不變。
 
