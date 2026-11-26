@@ -246,6 +246,21 @@ fn giving_a_drive_follower_to_the_title_opponent_requires_icon_facts() {
         }],
     );
     assert!(preflight.gaps(Viewer::P2).is_empty());
+
+    players[0].main.retain(|number| number != "BP13-043");
+    for transfer_card in ["BP13-043", "BP03-109"] {
+        let mut receiving_title = players.clone();
+        receiving_title[1].main.push(transfer_card.into());
+        let report = Game::check_player_decks(selection_with_rules(), &receiving_title).unwrap();
+        assert!(report.gaps(Viewer::P1).is_empty());
+        assert_eq!(
+            report.gaps(Viewer::P2),
+            [AdmissionGap {
+                card_no: transfer_card.into(),
+                reason: AdmissionGapReason::MissingTriggerIcons,
+            }],
+        );
+    }
 }
 
 #[test]

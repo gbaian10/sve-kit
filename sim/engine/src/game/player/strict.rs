@@ -95,7 +95,13 @@ struct Dependencies {
 struct TriggerIconUse {
     reads_icon: bool,
     starts_drive: bool,
-    can_give_control: bool,
+    control_transfer: Option<ControlTransfer>,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ControlTransfer {
+    Receive,
+    MayGive,
 }
 
 #[derive(Default)]
@@ -110,7 +116,7 @@ impl DeckClosure {
     fn can_give_control(&self) -> bool {
         self.trigger_icons
             .values()
-            .any(|uses| uses.can_give_control)
+            .any(|uses| uses.control_transfer == Some(ControlTransfer::MayGive))
     }
 
     fn require_template(
@@ -192,9 +198,17 @@ impl Visitor for Dependencies {
                 },
             ) => self.trigger_icons.starts_drive = true,
             NodeRef::Action(Action::Transfer {
-                destination_controller: PlayerRef::RequireOne { .. },
+                destination_controller,
                 ..
-            }) => self.trigger_icons.can_give_control = true,
+            }) => {
+                if matches!(destination_controller, PlayerRef::RequireOne { .. }) {
+                    self.trigger_icons.control_transfer = Some(ControlTransfer::MayGive);
+                } else {
+                    self.trigger_icons
+                        .control_transfer
+                        .get_or_insert(ControlTransfer::Receive);
+                }
+            }
             NodeRef::Source(_)
             | NodeRef::Program(_)
             | NodeRef::Ability(_)
@@ -393,21 +407,26 @@ impl Game {
             .each_ref()
             .map(|deck| matches!(deck.construction, DeckConstruction::Title(_)));
         // CR 14.4.5 uses the checking player's basis, including after a control transfer.
-        let drive_needs_icons = [
+        let drive_icon_requirements = [
             first_title || (second_title && closures[0].can_give_control()),
             second_title || (first_title && closures[1].can_give_control()),
         ];
         for ((closure, result), (deck, drive_needs_icons)) in closures
             .into_iter()
             .zip(&mut report.gaps)
-            .zip(decks.iter().zip(drive_needs_icons))
+            .zip(decks.iter().zip(drive_icon_requirements))
         {
             let mut gaps = closure.gaps.clone();
+            let is_title = matches!(deck.construction, DeckConstruction::Title(_));
             gaps.extend(
                 closure
                     .trigger_icons
                     .iter()
-                    .filter(|(_, uses)| uses.reads_icon || (drive_needs_icons && uses.starts_drive))
+                    .filter(|(_, uses)| {
+                        uses.reads_icon
+                            || (drive_needs_icons && uses.starts_drive)
+                            || (is_title && uses.control_transfer.is_some())
+                    })
                     .map(|(card_no, _)| AdmissionGap {
                         card_no: card_no.clone(),
                         reason: AdmissionGapReason::MissingTriggerIcons,
