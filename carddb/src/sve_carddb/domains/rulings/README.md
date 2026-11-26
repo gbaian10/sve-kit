@@ -88,7 +88,6 @@ remain pending.
 
 Its callbacks retain supplied objects for the resolver; they do not repeat
 admission checks. Source changes and frame rekeying are handled by current
-candidate matching, not by rerunning the old normalizer. The historical revision
-choice still requires review against frozen full-face evidence: identical body
-bytes cannot identify which revision the old snapshot used. One-off evidence
+candidate matching, not by rerunning the old normalizer. Review the complete historical domain
+and revision choices against the frozen full-face evidence. One-off evidence
 collection and reconciliation scripts and outputs stay outside this repository.

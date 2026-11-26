@@ -1,4 +1,4 @@
-"""Authored domains cannot borrow or duplicate historical source uses."""
+"""Historical ruling references retain their authored scope."""
 
 from dataclasses import replace
 from typing import TYPE_CHECKING
