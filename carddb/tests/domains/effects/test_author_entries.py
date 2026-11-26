@@ -49,6 +49,20 @@ def document(entry: dict[str, JsonValue]) -> dict[str, JsonValue]:
     }
 
 
+def test_prototype_requires_its_own_explicit_entry(schemas: AuthorSchemas) -> None:
+    prototype: JsonValue = {
+        "format": 1,
+        "kind": "effect_set",
+        "cards": {"FIX-001": {"status": "unsupported", "abilities": []}},
+    }
+    raw = canonical(prototype)
+    assert schemas.prototype_tree(raw) == prototype
+    with pytest.raises(AuthorInputError, match="unsupported_kind"):
+        schemas.expanded(raw)
+    with pytest.raises(AuthorInputError, match="unsupported_kind"):
+        schemas.prototype_tree(canonical(document(ability({"keywords": ["quick"]}))))
+
+
 def test_inline_rejects_missing_source_and_unknown_fields(
     schemas: AuthorSchemas,
 ) -> None:

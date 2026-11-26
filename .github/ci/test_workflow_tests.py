@@ -87,7 +87,7 @@ class DirectTestTests(unittest.TestCase):
             "carddb/tests/support/repository_current.py": python | {"rust"},
             "carddb/tests/support/battle_projection.py": python | {"rust"},
             "carddb/tests/support/snapshot_project_fixtures.py": python | {"rust"},
-            "carddb/tests/support/current_lowering_fixtures.py": python | {"rust"},
+            "carddb/tests/support/direct_current_fixture.py": python | {"rust"},
             "carddb/tests/support/direct_author_fixture.py": python | {"rust"},
             "carddb/tests/fixtures/author_entries/golden.yaml": python | {"rust"},
             "carddb/tests/domains/registry/test_registry.py": python | {"rust"},

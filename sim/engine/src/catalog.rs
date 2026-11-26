@@ -115,7 +115,7 @@ impl Catalog {
         )
     }
 
-    /// Consume `CurrentAuthorSources.selection_input()` from the trusted Python reader.
+    /// Consume `CurrentAuthorSources.selection_from_results()` from the trusted Python reader.
     ///
     /// # Errors
     /// Rejects the entire selection on any rejected card, overlap or D0 failure;
