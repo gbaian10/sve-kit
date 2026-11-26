@@ -1,32 +1,18 @@
 # typed 對局的版本與權威恢復契約
 
-本頁整理 typed 入口對外定版前必須具備的版本、保存責任與恢復驗收。
-公開程式的承載依 [ADR-0019](../adr/0019-publish-typed-ir.md)，
-權威與觀看資料的分界依 [ADR-0001](../adr/0001-engine-skeleton.md)；
-不新增 wire Schema、持久化 API 或 save 格式，也不代表線上恢復已實作。
+本頁規定對局恢復所需的版本、保存責任與驗收。
+公開程式包依 [ADR-0023](../adr/0023-publish-expanded-ast.md)，
+權威與觀看資料的分界依 [ADR-0001](../adr/0001-engine-skeleton.md)。
 
 ## 公開程式與版本准入
 
-公開程式包承載完整展開並通過 lowering 的 typed IR，由生產端負責編譯及來源驗證。
-這項決定不改成由瀏覽器重新 lowering 作者 DSL。
-公開程式是卡片的靜態邏輯；對局中的私有候選、receipt 值、隨機權威與續體仍留在權威端。
+公開 DSL 程式包承載已展開的 AST，生產端驗證整卡來源。宿主從同一份已驗證卡表快照取得程式與身分，引擎在載入時降低成內部有型別 IR。對局中的私有候選、receipt 值、隨機權威與續體留在權威端。
 
-依 [DSL 承載契約 §7](../dsl/author-contract-1.0.md#7-公開-typed-ir-與引擎能力)及
-[快照傳輸 §3.4](../schema/export/snapshot-transport.md#34-dsl-程式包與版本准入)：
+[DSL 承載契約 §7](../dsl/author-contract-1.0.md#7-公開-dsl-程式包與引擎能力)與[快照傳輸 §3.4](../schema/export/snapshot-transport.md#34-dsl-程式包與版本准入)規定已發布的封套與版本准入。4.0.0 保留空程式包，4.1.0 承載展開後的 AST，4.2.0 增加對局需要的永久版次關聯。封套的 DSL 版號規範 AST 語法，公開封套的 reader 能力由快照格式決定。
 
-- 傳輸 `4.0.0` 的 programs 附件必須存在，而且 `entries` 只能是 `[]`；非空整包拒收。
-- 啟用非空程式包必須另升 format，至少 minor，明列 DSL／IR 的權威 Schema 映射、
-  必要能力及最低 reader 版本；依傳輸 §1.1 判斷是否需要 major。不能改寫 `4.0.0` 的空集合。
-- Schema、公開 IR 解釋、producer、reader、共用樣本及拒收案例須一起對齊。
-  IR 良構、整卡能力准入和執行時的付款、世代、來源及揭露重驗各有責任，不能互相替代。
-
-程式封套的 `dsl_version` 不凍結 Rust enum 或 serde 的布局。
-非空版本須明列公開 IR 的實際 wire 解釋，不能直接把內部 `CardProgram` JSON 當成已定版的承載。
-
-目前 [`SelectedEffects`](../../sim/engine/src/catalog/selection.rs)及
-[`Game::from_selected_effects`](../../sim/engine/src/game/internal/card.rs)
-是行程內的選用與整卡准入入口，不是非空公開程式包的 reader。
-已准入的計畫或共享 `Arc` 也不是可持久化的公開 IR 版本。
+本機 Worker 依已驗證快照的附件描述讀取 DSL 程式包，宿主的 `PreparedBattle` 核對程式與快照投影的身分。
+[`SelectedEffects`](../../sim/engine/src/catalog/selection.rs) 與
+[`Game::from_selected_effects`](../../sim/engine/src/game/internal/card.rs) 承接行程內的整卡准入。編譯後的 IR、准入計畫與共享 `Arc` 的生命週期屬於引擎行程。提供重播與恢復的宿主須保存其確切公開輸入與執行版本。
 
 ## 必須保存什麼、由誰保存
 
@@ -94,13 +80,13 @@ manifest 的 `engine_support_target` 是快照的支援目標，允許全 null�
 
 ## 對外定版的工作邊界
 
-後續公開程式包工作須完成格式／能力協商、權威 Schema 與 reader 的一致性及正反例，
-保持 `4.0.0` 空包規則。後續玩家 wire 須定義認證席位、對局與題目身分、候選／代號編碼、
+公開程式包的版本與能力准入由快照傳輸契約管理。
+後續玩家 wire 須定義認證席位、對局與題目身分、候選／代號編碼、
 重送結果及事件流重新建立的規則；後續權威持久化須定義受理前綴與必要輸入的原子保存及恢復驗收。
 三者不能共用一個「版本已相同」判斷代替各自的准入。
 
 權威狀態的中點存檔只作可另評估的恢復加速：必須與同一版本的完整重播對照，
 不能成為省略權威決定與隨機輸入的理由，也不能混入玩家封包。
-目前不新增跨版相容 reader 或自動遷移；正式持久化格式、伺服器及 WASM 綁定另行實作。
+正式跨程序恢復須另行定義持久化格式、跨版本相容性及宿主的持久化介面。
 儲存目的地、清理、保存期限與下載授權仍依[部署／回放邊界](../deployment/replays.md)，
 不由本頁替代維護者對線上生命週期的確認。
