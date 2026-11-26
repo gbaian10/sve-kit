@@ -363,7 +363,9 @@ uv sync --all-packages --all-groups
 cargo install --locked cargo-deny cargo-machete cargo-llvm-cov cargo-mutants
 ```
 
-Run `prek install` after `mise install` if Git does not already run prek through global hooks.
+To install prek separately from mise, use `uv tool install prek`.
+Run `prek install` if Git does not already run prek through global hooks.
+
 The Git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
 are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
 that component or a shared input. The Python manual hook enforces 90% combined line and branch
@@ -484,7 +486,7 @@ Repository-wide hooks normally check changed files on pull requests and pushes t
 The gitleaks scan still covers the whole commit range. Changes to shared
 hook configuration, workflow/action metadata or Python lock inputs trigger a full scan, as do
 schema input deletions or renames. The `full_scan_inputs` list in `.github/workflows/ci.yml`
-includes mise, Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings.
+includes mise, Markdown, EditorConfig, Git attributes, gitleaks, Ruff, Taplo and uv settings.
 Other deletions and renames run the link check over all Markdown files.
 
 Open **Actions → a workflow run → Summary** for test totals, passed/skipped/failed counts,

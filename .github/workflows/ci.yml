@@ -216,8 +216,9 @@ jobs:
             ':(glob)**/action.yml' ':(glob)**/action.yaml'
             ':(glob)**/.markdownlint*' ':(glob)**/.editorconfig'
             ':(glob)**/.gitattributes' ':(glob)**/.gitleaks*'
+            ':(glob)**/ruff.toml' ':(glob)**/.ruff.toml' ':(glob)**/pyproject.toml'
             bunfig.toml taplo.toml .taplo.toml uv.toml carddb/uv.toml
-            pyproject.toml uv.lock carddb/pyproject.toml publish/pyproject.toml
+            uv.lock
           )
           scope=(--all-files)
           # Deleted inputs never reach prek's filename filters, but can break the ER build or leave

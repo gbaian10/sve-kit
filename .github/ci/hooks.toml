@@ -79,7 +79,8 @@ job = "repo"
 job = "python"
 
 [hooks.ruff-check]
-job = "python"
+# Rust scenario and Web rules scripts may change without a Python job.
+job = "repo"
 
 [hooks.pytest]
 job = "python"

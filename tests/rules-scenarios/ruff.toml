@@ -1,0 +1,4 @@
+extend = "../../carddb/pyproject.toml"
+
+# Match the standalone validator's PEP 723 script metadata.
+target-version = "py311"

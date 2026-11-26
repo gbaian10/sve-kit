@@ -11,7 +11,7 @@ Usage: uv run validate.py <cards.jsonl> <file-or-dir>...
 
 # A CLI checklist: printing is its output, YAML data is untyped, and each check is
 # one flat branch, so splitting them up would only scatter the list.
-# ruff: file-ignore[print, any-type, complex-structure, too-many-branches]
+# ruff: file-ignore[print, any-type, complex-structure, too-many-branches, too-many-locals, too-many-statements]
 
 from __future__ import annotations
 
