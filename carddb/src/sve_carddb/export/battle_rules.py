@@ -52,7 +52,7 @@ def rule_identities(snapshot: Snapshot, region: str) -> dict[str, JsonValue]:
 def resolve_engine_rules(
     rules: dict[str, JsonValue], faces: dict[tuple[str, int], dict[str, JsonValue]]
 ) -> dict[str, JsonValue]:
-    """Retain the exact printed and rules-name selectors under permanent face identities."""
+    """Resolve rule anchors in place and return their matching engine identity binding."""
     source = object_value(rules["input"])
     region = string(object_value(rules["scope"])["region"])
     selected: dict[str, dict[str, JsonValue]] = {}

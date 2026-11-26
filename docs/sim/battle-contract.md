@@ -193,7 +193,8 @@ section 固定為 `effect`（該版主要效果原文）或 `section:<ordinal>`�
 
 RuleRef 使用公開來源的穩定身分：CR 的 id=cr_clause.number、revision=cr_version.id；QA 的 id=qa.id、revision=qa_version.id；裁定的 id=ruling_id、revision=ruling_revision.id。人可讀版本標籤、QA 官網號及內部 RuleId 都不是 wire 定位值。resolver 只驗可定位，呼叫端必須明示逐使用點 strength，裁定須符合該 revision 的登錄，不預設 official。
 引用輸入由 `sve_carddb.export.read_api.load_battle_inputs` 讀取同一份已驗證的公開匯出閉包產生：native JSONL 的精確 bytes 與 `ReferenceInput` 一起回傳，後者包含地區、native bytes 的 SHA-256、完整印刷／面映射，以及綁定公開 manifest 的永久卡面／卡文版本／原文欄位和規則來源身分。目錄不依牌組或已降低的作者縮減，可到達 token 與未選用面仍須保留；人工 EP／SEP 資源版次不成為 native 卡片。
-本機宿主由 `build:engine` 以 `sve-carddb snapshot battle-inputs` 寫出這兩者及改綁到同一 native bytes 的引擎規則，宿主可驗證此投影綁定的 4.2.0 程式附件，依版次身分還原對戰目錄。資產與程式分別準備後，同一場對戰只使用該 manifest 的目錄、規則、文字與程式。
+目前 Web 的 `build:engine` 以 `sve-carddb snapshot battle-inputs` 寫出這兩者及改綁到同一 native bytes 的引擎規則，再把作者 selection 放進 Worker 的輸入文件。宿主會核對各輸入的雜湊及身分。
+另有 `PreparedBattle` 入口，可使用 `snapshot battle-inputs --published` 的 4.2.0 投影和由呼叫端依同一已驗證 manifest 取得的 DSL 程式包，依永久版次還原對戰目錄。
 
 native 卡文讀該版次唯一可用的來源觀測。4.2.0 宿主投影遇官網版次的觀測非空且全為 missing_effect 時，可用該面同區唯一採納的卡文版本取得規則事實。無法表示完整目錄、來源模糊或關係不完整時拒絕整批；原文缺失保持 null，不當成空文字。wording 輸入未提供時，印刷引用仍可用，但不能成立精確卡文引用。`BattleReferences` 檢查同一 native 背景、完整面閉包與卡文身分的一致性；公開 manifest／原文欄位存在性的信任邊界仍是既有驗證 reader，不是任意宿主 JSON。確認 owner 與 field 只代表位置存在，不自行證明 line、step、授予者或觀看者授權。
 
