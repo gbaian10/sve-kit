@@ -220,19 +220,12 @@ def test_prototype_inventory_uses_database_identity(
                 load_author_set(tmp_path, expander.schemas), expander
             )
         prototype(tmp_path, "FIX-001")
-        for scope in ("shared", "en_override"):
-            author(tmp_path, "FIX-001", scope=scope)
-            index(tmp_path, selection(scope=scope))
-            if scope == "shared":
-                with pytest.raises(AuthorInputError, match="prototype_author_overlap"):
-                    current.validate_inputs(
-                        load_author_set(tmp_path, expander.schemas), expander
-                    )
-            else:
-                with pytest.raises(AuthorInputError, match="schema/const"):
-                    current.validate_inputs(
-                        load_author_set(tmp_path, expander.schemas), expander
-                    )
+        author(tmp_path, "FIX-001")
+        index(tmp_path, selection())
+        with pytest.raises(AuthorInputError, match="prototype_author_overlap"):
+            current.validate_inputs(
+                load_author_set(tmp_path, expander.schemas), expander
+            )
 
 
 def test_complete_inventory_retains_bytes_and_unused_bodies(

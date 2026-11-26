@@ -44,10 +44,6 @@ def test_yaml_canary_strings(schemas: AuthorSchemas, name: str) -> None:
         (b"{param: true}", "A.param"),
         (b"{true: x}", "A.param"),
         (b"{param: x, param: y}", "A.param"),
-        (
-            b"{type: Nat, source: {slot: count, component: value}, default: 1}",
-            "ParamDecl",
-        ),
     ],
     ids=repr,
 )
@@ -75,10 +71,10 @@ def _record(**overrides: str) -> dict[str, str]:
 
 
 def test_index_preserves_exact_identifiers(schemas: AuthorSchemas) -> None:
-    index = schemas.effects_index(_index(_record(scope="en_override"), _record()))
+    index = schemas.effects_index(_index(_record()))
     assert index.records[0].record_key == "SYN-001aⓈ"
     assert index.records[0].file == "rules/author-effects/SYN/001.yaml"
-    assert [record.scope for record in index.records] == ["en_override", "shared"]
+    assert index.records[0].scope == "shared"
     assert schemas.effects_index(_index()).records == ()
     assert (
         schemas.effects_index(_index(_record(kind="effect_set"))).records[0].kind
@@ -101,15 +97,6 @@ def test_index_rejects_unsorted_records_with_sort_order(
         "records_not_sorted_by_record_key_then_scope"
     )
     assert caught.value.diagnostic.expected == "record_key, then scope"
-
-
-def test_index_rejects_unsorted_scope_tiebreaker(schemas: AuthorSchemas) -> None:
-    with pytest.raises(AuthorInputError) as caught:
-        schemas.effects_index(_index(_record(), _record(scope="en_override")))
-
-    assert caught.value.diagnostic.reason == (
-        "records_not_sorted_by_record_key_then_scope"
-    )
 
 
 @pytest.mark.parametrize(

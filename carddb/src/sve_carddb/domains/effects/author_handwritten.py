@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 
 from pydantic import BeforeValidator, Field, JsonValue, TypeAdapter, ValidationError
 
-from sve_carddb.contracts.author_leaves import ParamSource, ParamType
+from sve_carddb.contracts.author_leaves import ParamType
 from sve_carddb.core.authored import check_path
 from sve_carddb.core.json import canonical, integer
 from sve_carddb.core.models import RecordData, Text
@@ -36,26 +36,16 @@ class MainFile(RecordData):
     cards: dict[Text, dict[str, JsonValue]]
 
 
-class Parameter(RecordData):
-    type: ParamType
-    source: ParamSource | None = None
-
-
 class Body(RecordData):
     id: Text
     admission: Literal["light", "shared"] | None = None
     body: dict[str, JsonValue]
     written_by: Annotated[list[JsonValue], Field(min_length=1)]
-    params: dict[str, ParamType | Parameter] = Field(default_factory=dict)
+    params: dict[str, ParamType] = Field(default_factory=dict)
     ability_scope: str = "ability_0"
     edition: Positive = 1
     ports: dict[str, JsonValue] = Field(
         default_factory=lambda: dict[str, JsonValue](imports={}, exports={})
-    )
-    registrations: list[JsonValue] = Field(
-        default_factory=lambda: list[JsonValue](
-            [{"id": "jp", "domain": {"regions": ["jp"]}, "reviews": []}]
-        )
     )
     note: Text | None = None
 

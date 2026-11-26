@@ -36,10 +36,7 @@
     },
     "Scope": {
       "type": "string",
-      "enum": [
-        "shared",
-        "en_override"
-      ]
+      "const": "shared"
     },
     "PrototypeIndexRecord": {
       "type": "object",

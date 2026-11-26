@@ -172,7 +172,6 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
         ("face", "missing_face"),
         ("param", "param_type_mismatch"),
         ("body_author", "body_metadata_conflict"),
-        ("body_review", "body_metadata_conflict"),
         ("body_syntax", "additionalProperties"),
         ("status", "author_metadata_conflict"),
         ("closure", "source_line_closure_mismatch"),
@@ -202,18 +201,6 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
         case "body_author":
             definition["written_by"] = [
                 {"actor": {"who": "Another"}, "date": "2026-10-26"}
-            ]
-        case "body_registration":
-            definition["registrations"] = [
-                {"id": "jp", "domain": {"regions": ["en"]}, "reviews": []}
-            ]
-        case "body_review":
-            definition["registrations"] = [
-                {
-                    "id": "jp",
-                    "domain": {"regions": ["jp"]},
-                    "reviews": [{"invalid": True}],
-                }
             ]
         case "body_syntax":
             definition["body"] = {"unknown": {}}
