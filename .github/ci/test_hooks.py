@@ -28,7 +28,16 @@ class WorkflowGateTests(unittest.TestCase):
         steps = cast("list[dict[str, object]]", self.jobs["ci-ok"]["steps"])
         self.gate = str(steps[0]["run"])
         self.outputs = dict.fromkeys(
-            ("python", "rust", "web", "card_data", "scan", "engine_wasm"), "false"
+            (
+                "python",
+                "rust",
+                "web",
+                "card_data",
+                "author_data",
+                "scan",
+                "engine_wasm",
+            ),
+            "false",
         )
         self.needs: dict[str, object] = {
             job: {"result": "success" if job in {"changes", "repo"} else "skipped"}
@@ -55,6 +64,7 @@ class WorkflowGateTests(unittest.TestCase):
         """Failure, cancellation and unexpected skipping must block every component."""
         for component, jobs in {
             "card_data": ("card-data",),
+            "author_data": ("author-data",),
             "python": ("python",),
             "rust": ("rust",),
             "web": ("web",),
