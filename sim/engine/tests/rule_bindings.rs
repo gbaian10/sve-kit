@@ -50,16 +50,15 @@ impl Fixture {
             ("alias", "synthetic-alias", "スペル", ""),
         ];
         let facts = definitions.iter().map(|(number, name, kind, title)| json!({"number":number,"faces":[{"name":name,"card_type":kind,"title":title,"card_class":"ニュートラル","cost":"0","power":"2","hp":"3","traits":[],"sections":[]}]})).collect();
-        let mut programs = json!({"format":1_u8,"kind":"effect_set","cards":{}});
+        let mut programs = json!({"format":1_u8,"kind":"fixture_cards","cards":{}});
         for (number, ..) in definitions {
-            programs["cards"][number] = json!({"status":"complete","abilities":[]});
+            programs["cards"][number] = json!({"status":"complete"});
         }
         programs["cards"]["lesson"]["rules_name"] = json!("synthetic-lesson");
-        programs["cards"]["alias"]["abilities"] = json!([{"kind":"static","line":1_u8,"body":{"op":"name_alias","subjects":"self","name":"synthetic-lesson","while_zone":"any"}}]);
         let mut fixture = Self {
             facts,
             programs,
-            keywords: json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}),
+            keywords: json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}),
             rules: Value::Null,
         };
         fixture.rules = rule_fixtures::rules(
@@ -106,12 +105,11 @@ impl Fixture {
     }
 
     fn load(&self) -> Result<Catalog, EngineFailure> {
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             &self.snapshot(),
             &self.keywords.to_string(),
             &self.documents(),
             &self.rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
     }
 
@@ -249,18 +247,18 @@ fn malformed_settings_business_keys_references_templates_and_background_fail() {
 fn document_envelopes_are_exclusive_and_background_names_the_grammar() {
     let original = Fixture::new();
     original.load().unwrap();
-    for area in ["effects", "keywords", "engine"] {
+    for area in ["fixtures", "keywords", "engine"] {
         for (field, value) in [
             ("format", json!(true)),
             ("format", json!("1")),
             ("format", json!(1.0_f64)),
             ("format", json!(999_u16)),
             ("kind", json!("unknown")),
-            ("version", json!("astra/1")),
+            ("version", json!("1.0")),
         ] {
             let mut fixture = original.clone();
             let document = match area {
-                "effects" => &mut fixture.programs,
+                "fixtures" => &mut fixture.programs,
                 "keywords" => &mut fixture.keywords,
                 _ => &mut fixture.rules,
             };
@@ -270,7 +268,7 @@ fn document_envelopes_are_exclusive_and_background_names_the_grammar() {
         for field in ["format", "kind"] {
             let mut fixture = original.clone();
             let document = match area {
-                "effects" => &mut fixture.programs,
+                "fixtures" => &mut fixture.programs,
                 "keywords" => &mut fixture.keywords,
                 _ => &mut fixture.rules,
             };
@@ -282,17 +280,58 @@ fn document_envelopes_are_exclusive_and_background_names_the_grammar() {
     let saved = serde_json::to_value(&game).unwrap();
     let versions = &saved["catalog"]["rule_bindings"]["background"]["Bound"]["schema_versions"];
     assert_eq!(
-        versions["effects"],
-        json!({"kind":"effect_set","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"})
-    );
-    assert_eq!(
         versions["keywords"],
-        json!({"kind":"keyword_registry","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"})
+        json!({"kind":"keyword_registry","format":1_u8})
     );
     assert_eq!(
         versions["engine_rules"],
         json!({"kind":"engine_rules","format":1_u8,"schema_id":"https://svekit.app/dsl/engine-rules.schema.json"})
     );
+}
+
+#[test]
+fn published_names_use_their_resolved_face_and_declared_name_source() {
+    let mut fixture = Fixture::new();
+    fixture.programs["cards"]["meal"]["rules_name"] = json!("synthetic-adopted-meal");
+    let snapshot = fixture.snapshot();
+    let (document, identity) =
+        rule_fixtures::resolved(&snapshot, &fixture.rules.to_string()).unwrap();
+    let rules: Value = serde_json::from_str(&document).unwrap();
+    let load = |settings: &Value| {
+        Catalog::from_fixture_documents_with_rules(
+            &snapshot,
+            &fixture.keywords.to_string(),
+            &fixture.documents(),
+            &settings.to_string(),
+            &identity,
+        )
+    };
+    for (source, present, absent) in [
+        ("printed", "synthetic-meal", "synthetic-adopted-meal"),
+        ("rules", "synthetic-adopted-meal", "synthetic-meal"),
+    ] {
+        let mut settings = rules.clone();
+        settings["resources"][1]["names"][0]["name_source"] = json!(source);
+        let catalog = serde_json::to_value(load(&settings).unwrap()).unwrap();
+        let labels = &catalog["rule_bindings"]["name_labels"];
+        assert!(labels.get(present).is_some());
+        assert!(labels.get(absent).is_none());
+    }
+    let mut invalid = rules.clone();
+    invalid["resources"][1]["names"][0]["face"] = rule_fixtures::face("meal");
+    load(&invalid).unwrap_err();
+    invalid = rules.clone();
+    invalid["resources"][1]["names"][0]["face"]["region"] = json!("en");
+    load(&invalid).unwrap_err();
+    invalid = rules.clone();
+    invalid["titles"][0]["anchor"]["region"] = json!("en");
+    load(&invalid).unwrap_err();
+    invalid = rules.clone();
+    invalid["resources"][0]["template"]["region"] = json!("en");
+    load(&invalid).unwrap_err();
+    invalid = rules;
+    invalid["input"]["kind"] = json!("legacy-jp");
+    load(&invalid).unwrap_err();
 }
 
 fn project(fixture: &Fixture) -> (Value, EngineIdentityInput) {
@@ -347,7 +386,7 @@ fn resolved_projection_is_explicit_and_rejects_unknown_or_inconsistent_identitie
     let fixture = Fixture::new();
     let (rules, identity) = project(&fixture);
     let load = |settings: &Value, input: &EngineIdentityInput| {
-        Catalog::from_documents_with_rules(
+        Catalog::from_fixture_documents_with_rules(
             &fixture.snapshot(),
             &fixture.keywords.to_string(),
             &fixture.documents(),
@@ -369,20 +408,18 @@ fn resolved_projection_is_explicit_and_rejects_unknown_or_inconsistent_identitie
     .unwrap();
     for mutation in 0_u8..6 {
         let mut changed = identity.clone();
-        if let EngineIdentityInput::Resolved {
+        let EngineIdentityInput::Resolved {
             region,
             snapshot_sha256,
             faces,
-        } = &mut changed
-        {
-            match mutation {
-                0 => *region = "en".into(),
-                1 => *snapshot_sha256 = "c".repeat(64),
-                2 => faces[0].card_no = "absent".into(),
-                3 => faces[0].title_code = Some("synthetic_empty".into()),
-                4 => faces[0].face_id = faces[1].face_id.clone(),
-                _ => faces[0].rules_name_id = faces[1].rules_name_id.clone(),
-            }
+        } = &mut changed;
+        match mutation {
+            0 => *region = "en".into(),
+            1 => *snapshot_sha256 = "c".repeat(64),
+            2 => faces[0].card_no = "absent".into(),
+            3 => faces[0].title_code = Some("synthetic_empty".into()),
+            4 => faces[0].face_id = faces[1].face_id.clone(),
+            _ => faces[0].rules_name_id = faces[1].rules_name_id.clone(),
         }
         assert!(
             load(&rules, &changed).is_err(),
@@ -390,6 +427,9 @@ fn resolved_projection_is_explicit_and_rejects_unknown_or_inconsistent_identitie
         );
     }
     let mut changed = rules.clone();
+    changed["resources"][0]["names"][0]["region"] = json!("en");
+    load(&changed, &identity).unwrap_err();
+    changed = rules.clone();
     changed["resources"][0]["names"][0]["rules_name_id"] = json!("absent");
     load(&changed, &identity).unwrap_err();
     changed = rules;
@@ -397,35 +437,9 @@ fn resolved_projection_is_explicit_and_rejects_unknown_or_inconsistent_identitie
     load(&changed, &identity).unwrap_err();
 }
 
-fn resource_programs(fixture: &mut Fixture) {
-    fixture.programs["cards"]["actor"]["abilities"] = json!([
-        {"line":1_u8,"kind":"activated","costs":[{"op":"lesson","count":1_u8}],"body":{"op":"draw","count":0_u8}},
-        {"line":2_u8,"kind":"activated","costs":[{"op":"eat","subjects":"self","count":1_u8}],"body":{"op":"draw","count":0_u8}},
-        {"line":3_u8,"kind":"ride","costs":[{"op":"pp","amount":0_u8}],"body":{"op":"gain_drive","subjects":"self"}},
-        {"line":4_u8,"kind":"activated","ub":true,"body":{"op":"pp","amount":1_u8}},
-        {"line":5_u8,"kind":"activated","targets":[{"key":"1","select":{"side":"both","zone":"any"},"min":1_u8,"max":1_u8}],"body":{"op":"banish","subjects":"target.1"}},
-        {"line":6_u8,"kind":"activated","body":{"op":"stack","amount":1_u8}},
-        {"line":7_u8,"kind":"activated","targets":[{"key":"1","select":{"side":"both","zone":"any"},"min":1_u8,"max":1_u8}],"body":{"op":"move","subjects":"target.1","to":"cemetery"}}
-    ]);
-    fixture.keywords["keywords"]["stack"] =
-        json!({"ja":"synthetic-stack-keyword","expansion":{"op":"keyword","name":"stack"}});
-    fixture.keywords["keywords"]["stack_counter"] = json!({"ja":"synthetic-stack-counter","role":"counter","expansion":{"op":"keyword","name":"stack_counter"}});
-    fixture.programs["cards"]["stack"]["abilities"] =
-        json!([{"kind":"static","line":1_u8,"body":{"op":"keyword","name":"stack"}}]);
-}
-
 #[test]
-fn role_dependencies_and_opening_templates_fail_at_load_without_partial_state() {
-    let mut fixture = Fixture::new();
-    resource_programs(&mut fixture);
-    for role in ["meal_item", "drive_point", "stack_base"] {
-        let mut changed = fixture.clone();
-        changed.rules["resources"]
-            .as_array_mut()
-            .unwrap()
-            .retain(|entry| entry["role"] != role);
-        assert!(changed.load().is_err(), "{role}");
-    }
+fn opening_templates_are_required() {
+    let fixture = Fixture::new();
     for role in ["lesson_item", "stack_base"] {
         let mut changed = fixture.clone();
         changed.rules["resources"]
@@ -455,10 +469,9 @@ fn resolved_en_input_keeps_exact_locators_and_never_uses_the_jp_fallback() {
             resource["template"]["region"] = json!("en");
         }
     }
-    if let EngineIdentityInput::Resolved { region, .. } = &mut identity {
-        *region = "en".into();
-    }
-    Catalog::from_documents_with_rules(
+    let EngineIdentityInput::Resolved { region, .. } = &mut identity;
+    *region = "en".into();
+    Catalog::from_fixture_documents_with_rules(
         &fixture.snapshot(),
         &fixture.keywords.to_string(),
         &fixture.documents(),
@@ -466,18 +479,16 @@ fn resolved_en_input_keeps_exact_locators_and_never_uses_the_jp_fallback() {
         &identity,
     )
     .unwrap();
-    Catalog::from_documents_with_rules(
+    rule_fixtures::catalog(
         &fixture.snapshot(),
         &fixture.keywords.to_string(),
         &fixture.documents(),
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap_err();
-    if let EngineIdentityInput::Resolved { faces, .. } = &mut identity {
-        faces[5].title_code = Some("synthetic_ub".into());
-    }
-    Catalog::from_documents_with_rules(
+    let EngineIdentityInput::Resolved { faces, .. } = &mut identity;
+    faces[5].title_code = Some("synthetic_ub".into());
+    Catalog::from_fixture_documents_with_rules(
         &fixture.snapshot(),
         &fixture.keywords.to_string(),
         &fixture.documents(),
@@ -493,7 +504,7 @@ fn equal_display_labels_cannot_hide_conflicting_permanent_name_ids() {
     fixture.facts[5]["faces"][0]["name"] = json!("synthetic-drive");
     fixture.repin();
     let (rules, identity) = project(&fixture);
-    Catalog::from_documents_with_rules(
+    Catalog::from_fixture_documents_with_rules(
         &fixture.snapshot(),
         &fixture.keywords.to_string(),
         &fixture.documents(),

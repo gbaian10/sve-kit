@@ -552,7 +552,8 @@ fn public_token_counts_filter_identity_owner_and_zone() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     for zone in ["field", "ex"] {
         for token in [false, true] {

@@ -159,7 +159,8 @@ fn traits_catalog(missing: bool, token: bool) -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     )
 }
 fn initial() -> Value {
@@ -710,8 +711,12 @@ fn played_union_matches_each_branch_once_including_an_overlapping_spell() {
             .collect::<Vec<_>>()
             .join("\n");
         let catalog = Arc::new(
-            Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
-                .unwrap(),
+            Catalog::from_fixture_documents(
+                &snapshot,
+                &keywords,
+                &[("unit.yaml".into(), document)],
+            )
+            .unwrap(),
         );
         let mut initial = initial();
         initial["players"]["P2"]["zones"]["field"] = json!([]);

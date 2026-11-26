@@ -12,7 +12,7 @@ fn selected() -> &'static SelectedEffects {
         }]}).to_string());
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
-            "timing-base.yaml", "format: 1\nkind: effect_set\ncards:\n  timing-base:\n    status: complete\n    abilities: []\n"
+            "timing-base.yaml", "format: 1\nkind: fixture_cards\ncards:\n  timing-base:\n    status: complete\n"
         ]));
         repository::selection_with_rules_from(&snapshot, &keywords, &input)
     })

@@ -33,8 +33,12 @@ fn ex_departure_batch_counts_only_successful_own_members_and_preserves_a_departe
         let (snapshot, registry, document) = catalog_documents(&json!("1"));
         let snapshot = snapshot.replace("スペル", "スペル・トークン");
         let catalog = Arc::new(
-            Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
-                .unwrap(),
+            Catalog::from_fixture_documents(
+                &snapshot,
+                &registry,
+                &[("unit.yaml".into(), document)],
+            )
+            .unwrap(),
         );
         let mut initial = setup(1, json!([]));
         initial["turn"]["active"] = json!("P1");

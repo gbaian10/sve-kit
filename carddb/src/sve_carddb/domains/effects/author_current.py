@@ -5,8 +5,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.author_leaves import AuthorIndexRecord
-from sve_carddb.core.json import canonical, object_value
+from sve_carddb.core.json import canonical
 from sve_carddb.domains.effects.author_direct import inventory, materialize
 from sve_carddb.domains.effects.author_inputs import (
     AuthorInputError,
@@ -21,7 +20,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build import Database, Row, Value
-    from sve_carddb.contracts.author_leaves import IndexRecord
+    from sve_carddb.contracts.author_leaves import AuthorIndexRecord
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
     from sve_carddb.domains.effects.author_set import AuthorInputSet
 
@@ -45,7 +44,7 @@ class CardAccepted:
 
 @dataclass(frozen=True)
 class CardRejected:
-    record: IndexRecord
+    record: AuthorIndexRecord
     diagnostic: Diagnostic
 
 
@@ -84,22 +83,14 @@ class CurrentAuthorSources:
             self._jp_printings = revision, numbers
         return self._jp_printings[1].get(number, [])
 
-    def printing_card(self, number: str, *, prototype: bool = False) -> str:
+    def printing_card(self, number: str) -> str:
         """Resolve an official JP printing only when all rows agree on identity."""
         rows = self._printings(number)
         identities = {_text(row.values["card_id"]) for row in rows}
         if len(identities) != 1:
-            raise SourceError(
-                "prototype_identity_unresolved"
-                if prototype
-                else "record_key_identity_mismatch"
-            )
+            raise SourceError("record_key_identity_mismatch")
         if any(row.values["card_no_state"] != "official" for row in rows):
-            raise SourceError(
-                "prototype_identity_unresolved"
-                if prototype
-                else "provisional_record_key"
-            )
+            raise SourceError("provisional_record_key")
         return identities.pop()
 
     def printing_numbers(self, card_id: str) -> list[str]:
@@ -146,51 +137,17 @@ class CurrentAuthorSources:
             )
         return names
 
-    def _inventory(self, inputs: AuthorInputSet, expander: AuthorExpander) -> None:
-        prototypes: set[str] = set()
-        for file in inputs.prototype_files:
-            tree = object_value(expander.schemas.prototype_tree(file.raw))
-            prototypes.update(
-                self.printing_card(number, prototype=True)
-                for number in object_value(tree["cards"])
-            )
-        if prototypes & {
-            record.card_id
-            for record in inputs.index.records
-            if isinstance(record, AuthorIndexRecord) and record.scope == "shared"
-        }:
-            raise SourceError("prototype_author_overlap")
-        for record in inputs.index.records:
-            if (
-                not isinstance(record, AuthorIndexRecord)
-                and self.printing_card(record.record_key, prototype=True)
-                != record.card_id
-            ):
-                raise SourceError("prototype_index_identity_mismatch")
-
-    @staticmethod
-    def _supported(record: IndexRecord) -> AuthorIndexRecord:
-        if not isinstance(record, AuthorIndexRecord):
-            raise SourceError("unsupported_prototype")
-        return record
-
     def validate_inputs(
         self, inputs: AuthorInputSet, expander: AuthorExpander
     ) -> tuple[CardResult, ...]:
         """Validate an in-memory complete inventory before writing any authored file."""
         validate_author_set(inputs, expander.schemas)
-        try:
-            self._inventory(inputs, expander)
-        except SourceError as error:
-            raise AuthorInputError(Diagnostic("source", error.reason)) from None
-
         authored = handwriting(inputs)
         results: list[CardResult] = []
         for record in inputs.index.records:
             number = record.record_key
             try:
-                supported = self._supported(record)
-                payload = inventory(self, number, card_id=supported.card_id)
+                payload = inventory(self, number, card_id=record.card_id)
                 card = materialize(self, number, authored)
             except (AuthorInputError, SourceError) as error:
                 diagnostic = (
@@ -216,32 +173,28 @@ class CurrentAuthorSources:
                 "scope": "shared",
                 "cards": {number: card},
             }
-            expander.schemas.expanded(canonical(tree), context=supported)
+            expander.schemas.expanded(canonical(tree), context=record)
             violation = lint(tree, authored.cards[number].get("lint_exceptions", []))
             if violation is None:
-                results.append(CardAccepted(supported, tree, payload))
+                results.append(CardAccepted(record, tree, payload))
             else:
                 results.append(
                     CardRejected(
-                        supported,
+                        record,
                         replace(
                             violation,
-                            card_id=supported.card_id,
+                            card_id=record.card_id,
                             card_no=number,
-                            scope=supported.scope,
+                            scope=record.scope,
                         ),
                     )
                 )
         return tuple(results)
 
-    def selection_from_results(
-        self, inputs: AuthorInputSet, results: tuple[CardResult, ...]
-    ) -> JsonValue:
+    def selection_from_results(self, results: tuple[CardResult, ...]) -> JsonValue:
         """Serialize one completed current-source check without repeating admission."""
         authors: list[JsonValue] = []
         for result in results:
-            if not isinstance(result.record, AuthorIndexRecord):
-                continue
             numbers = self.printing_numbers(result.record.card_id)
             if isinstance(result, CardAccepted):
                 authors.append(
@@ -262,8 +215,6 @@ class CurrentAuthorSources:
                     for number in numbers or [result.record.record_key]
                 )
         return {
-            "documents": [
-                [file.path, file.raw.decode("utf-8")] for file in inputs.prototype_files
-            ],
+            "documents": [],
             "authors": authors,
         }

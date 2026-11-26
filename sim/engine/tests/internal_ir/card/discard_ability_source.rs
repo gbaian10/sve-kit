@@ -62,7 +62,8 @@ fn fixture(head: &Value, source: &Value, traits: Option<&str>, state: &Value) ->
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut game = Game::new(
         catalog,

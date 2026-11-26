@@ -1,7 +1,7 @@
 use super::*;
 use crate::battle::tests::{current_fixture, rule_fixtures};
 use crate::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput, build_observation};
-use crate::catalog::{Catalog, EngineIdentityInput, SelectedEffects};
+use crate::catalog::{Catalog, SelectedEffects};
 use crate::game::Game;
 use serde_json::Value;
 use sve_battle_contract::{CardRef, Nat};
@@ -53,15 +53,14 @@ fn fixture(granted: bool) -> (SelectedEffects, BattleReferences) {
         )]),
         json!([]),
     );
-    let selected = Catalog::from_current_selection_with_rules(
+    let selected = rule_fixtures::selection(
         &snapshot,
-        &json!({"format":1_i32,"kind":"keyword_registry","keywords":{}}).to_string(),
+        &json!({"format":1_i32,"kind":"keyword_registry","rule_names":{}}).to_string(),
         &json!({"documents":[],"authors":[author,equipment_author]}),
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
-    let references = references(&selected.prototypes, &snapshot);
+    let references = references(&selected.catalogue, &snapshot);
     (selected, references)
 }
 
@@ -146,7 +145,7 @@ fn admitted_current_printed_and_granted_abilities_keep_exact_wording_and_native_
             let mut game = board(&selected, actor, granted);
             let native = question(&game, actor).unwrap();
             let before = board_fixtures::exact_authority(&game);
-            let catalog = &selected.prototypes;
+            let catalog = &selected.catalogue;
             let observation =
                 build_observation(catalog, &references, &game.observe(actor).unwrap(), vec![])
                     .unwrap();

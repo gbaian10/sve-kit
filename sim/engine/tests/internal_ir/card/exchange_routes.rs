@@ -162,7 +162,8 @@ fn player_question_exchange_preserves_the_only_affordable_route_index() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"s","card":"unit-follower"}]);

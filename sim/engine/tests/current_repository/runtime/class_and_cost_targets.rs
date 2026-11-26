@@ -74,7 +74,7 @@ fn prepared() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgr
             let follower = kind.starts_with("フォロワー");
             snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":class,"card_type":kind,"cost":cost,"power":if number == "weak" {"1"} else if follower {"2"} else {"-"},"hp":if follower {"8"} else {"-"},"traits":traits,"text":if kind.contains("エボルヴ") {json!("")} else {Value::Null},"sections":[]}]}).to_string());
             snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
         }
         let selected = repository::selection_with_rules_from(&snapshot, &keywords, &input);
         let mut tree = expanded::tree().clone();

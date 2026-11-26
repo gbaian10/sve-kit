@@ -276,15 +276,16 @@ impl Game {
     ) -> Result<i64> {
         let holder = &execution.context.source;
         let object = self.object(holder)?;
-        let has_prototype_layers = !self.state.continuous.is_empty();
-        if object.state.get("cost").is_some() || has_prototype_layers {
+        if object.state.get("cost").is_some() {
             // A saved cost override belongs to this card and cannot witness typed payment.
-            if !has_prototype_layers && execution.probing_declaration() {
+            if execution.probing_declaration() {
                 return Err(crate::EngineFailure::IllegalPlay(
-                    "cannot prove payment with a prototype cost override".into(),
+                    "cannot prove payment with a fixture cost override".into(),
                 ));
             }
-            return Err(unsupported("typed payment state or prototype cost layers"));
+            return Err(unsupported(
+                "fixture cost override cannot witness typed payment",
+            ));
         }
         let printed_base = super::super::cost::printed_play_cost(&self.face(holder)?["cost"])?;
         let mut base =

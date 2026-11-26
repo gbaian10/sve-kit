@@ -112,8 +112,8 @@ fn boundary_selection() -> &'static SelectedEffects {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             "evolve-wrong-kind.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{
-                "evolve-wrong-kind":{"status":"complete","abilities":[]}
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{
+                "evolve-wrong-kind":{"status":"complete"}
             }})
             .to_string()
         ]));

@@ -1,4 +1,4 @@
-use super::super::{Step, list};
+use super::super::Step;
 use super::processing;
 use super::tokens::PaidX;
 use super::{
@@ -345,8 +345,7 @@ impl Game {
         seed: &str,
     ) -> Result<Self> {
         selected.check_runtime()?;
-        let mut game =
-            Self::unopened(Arc::clone(&selected.prototypes), setup, facts, random, seed)?;
+        let mut game = Self::unopened(Arc::clone(&selected.catalogue), setup, facts, random, seed)?;
         if game.state.objects.values().any(|object| {
             game.catalog
                 .rejected
@@ -546,9 +545,7 @@ impl Game {
             Some(current) if card != &current.candidate.program => {
                 return Err(invalid("card differs from accepted current selection"));
             }
-            None if !list(&self.catalog.program(card_no)?["abilities"]).is_empty() => {
-                return Err(unsupported("typed card mixed with prototype abilities"));
-            }
+            None => self.catalog.require_fixture_card(card_no)?,
             _ => {}
         }
         let mut origins = BTreeSet::new();

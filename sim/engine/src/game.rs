@@ -9,11 +9,9 @@ use crate::ir::{AdditionalMaterial, RuntimeReceiptId};
 
 pub mod assist;
 mod combat;
-mod costs;
 mod damage;
 mod effects;
 mod extensions;
-mod history;
 pub mod internal;
 mod keywords;
 mod knowledge;
@@ -43,7 +41,6 @@ mod state_rules;
 mod statistics;
 mod temporal;
 mod tokens;
-mod trigger_choices;
 mod turns;
 mod view;
 
@@ -134,69 +131,17 @@ fn sep_unlock_turn(first_player: &str, seat: &str) -> u64 {
     if first_player == seat { 7 } else { 6 }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct Pending {
-    controller: String,
-    reference: Value,
-    event: Value,
-    code: Value,
-    source: String,
-    cause: Value,
-    retained: bool,
-    id: Option<String>,
-    context: Option<Frame>,
-    #[serde(default)]
-    alternatives: Vec<TriggerAlternative>,
-}
-
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-struct TriggerAlternative {
-    event: Value,
-    context: Frame,
-}
-
-#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default)]
 struct Frame {
     source: String,
-    #[serde(default)]
     source_generation: Option<u64>,
-    // Serialized legacy frames cannot provide the typed ability-source evidence.
-    #[serde(skip)]
     entry_source: Option<internal::EntrySource>,
-    #[serde(skip)]
     entry_payment: Option<(RuntimeReceiptId, Vec<AdditionalMaterial>)>,
     controller: String,
-    #[serde(default)]
-    event: Value,
-    #[serde(default)]
     values: BTreeMap<String, Value>,
     reference: Value,
     decision: Value,
-    bindings: BTreeMap<String, Vec<String>>,
-    #[serde(default)]
-    ordering: BTreeMap<String, String>,
-    captured: BTreeMap<String, Value>,
-    frozen: BTreeMap<String, Value>,
-    todo: Vec<Value>,
     cause: Value,
-    occurrence: u64,
-    performed: i64,
-    paid: bool,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct Prompt {
-    by: String,
-    choices: Vec<Value>,
-    resume: Value,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-struct AbilityUse {
-    ability: Value,
-    #[serde(default)]
-    generation: u64,
-    count: u64,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -207,19 +152,14 @@ struct EventOccurrence {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
 struct State {
     players: BTreeMap<String, Player>,
     objects: BTreeMap<String, Object>,
     turn: Value,
     room: Value,
-    pending: Vec<Pending>,
-    frame: Option<Frame>,
-    prompt: Option<Prompt>,
     flow: Value,
     counters: BTreeMap<String, i64>,
-    continuous: Vec<Value>,
-    delayed: Vec<Value>,
-    used: BTreeMap<String, AbilityUse>,
     #[serde(default)]
     event_occurrences: BTreeMap<String, EventOccurrence>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -568,14 +508,8 @@ impl Game {
             objects,
             turn: position["turn"].clone(),
             room: position["room"].clone(),
-            pending: Vec::new(),
-            frame: None,
-            prompt: None,
             flow: json!({"kind":"main"}),
             counters: BTreeMap::new(),
-            continuous: list(&position["semantic_state"]["continuous_effects"]),
-            delayed: Vec::new(),
-            used: BTreeMap::new(),
             event_occurrences: BTreeMap::new(),
             ir_subject_history: Vec::new(),
             ir_discard_traits: BTreeMap::new(),
@@ -725,50 +659,22 @@ impl Game {
                 object.state["attacks_this_turn"] = json!(count);
             }
         }
-        self.import_cost_history()?;
-        self.import_numeric_history(setup)?;
-        self.import_event_occurrences(&setup["semantic_state"])?;
-        if let Some(used) = setup["semantic_state"].get("used_this_turn") {
-            let entries: Vec<AbilityUse> = serde_json::from_value(used.clone()).map_err(invalid)?;
-            for mut entry in entries {
-                let source = string(&entry.ability["source"]);
-                let code = self.ability(source, &entry.ability)?;
-                let key = Self::usage_key(source, entry.generation, &code);
-                entry.ability = self.reference(source, &code);
-                if self.state.used.insert(key, entry).is_some() {
-                    return Err(invalid("duplicate ability usage in history"));
-                }
+        let semantic = &setup["semantic_state"];
+        for key in [
+            "continuous_effects",
+            "used_this_turn",
+            "pending_triggers",
+            "delayed_triggers",
+        ] {
+            if semantic.get(key).is_some_and(|entries| {
+                !entries.is_null() && !entries.as_array().is_some_and(Vec::is_empty)
+            }) {
+                return Err(EngineFailure::Unsupported(format!(
+                    "fixture requires typed history for {key}"
+                )));
             }
         }
-        for pending in list(&setup["semantic_state"]["pending_triggers"]) {
-            let reference = &pending["ability"];
-            let source = string(&reference["source"]).to_owned();
-            let code = pending
-                .get("program")
-                .map_or_else(|| self.ability(&source, reference), |code| Ok(code.clone()))?;
-            self.push_pending(Pending {
-                controller: string(&pending["controller"]).into(),
-                reference: reference.clone(),
-                event: pending["event"].clone(),
-                code,
-                source,
-                cause: json!({"rule":"fixture"}),
-                retained: pending["event_discriminator"] == true,
-                id: pending["id"].as_str().map(str::to_owned),
-                context: pending
-                    .get("context")
-                    .map(|value| serde_json::from_value(value.clone()).map_err(invalid))
-                    .transpose()?,
-                alternatives: Self::import_trigger_alternatives(&pending)?,
-            });
-        }
-        self.validate_trigger_choices()?;
-        if !list(&setup["semantic_state"]["delayed_triggers"]).is_empty() {
-            return Err(EngineFailure::Unsupported(
-                "neutral historical delayed text requires a typed history import".into(),
-            ));
-        }
-        Ok(())
+        self.import_event_occurrences(semantic)
     }
 
     fn object(&self, id: &str) -> Result<&Object> {
@@ -839,74 +745,9 @@ impl Game {
             .as_str()
             .unwrap_or(string(&self.face(id)?["card_type"])))
     }
-    pub(super) fn printed_abilities(&self, id: &str) -> Result<Vec<Value>> {
-        if !self.card_runtime.is_empty() {
-            self.require_internal_abilities(id, "printed ability set")?;
-        }
-        let object = self.object(id)?;
-        if object.state["silenced"] == true {
-            return Ok(Vec::new());
-        }
-        let source = self.information_source(id)?;
-        if self.treasure_abilities_inactive(id)?
-            || self.card_runtime.is_loaded(&source.card)
-            || self.internal_evolution_resource(&source.id)?
-        {
-            return Ok(Vec::new());
-        }
-        let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
-        self.prototype_printed_abilities(&source.card, face)
-    }
-
-    pub(super) fn prototype_printed_abilities(
-        &self,
-        card: &str,
-        ordinal: usize,
-    ) -> Result<Vec<Value>> {
-        Ok(list(&self.catalog.program(card)?["abilities"])
-            .into_iter()
-            .filter(|ability| {
-                ability.get("face").is_none_or(|face| {
-                    face.as_u64().and_then(|face| usize::try_from(face).ok()) == Some(ordinal)
-                })
-            })
-            .flat_map(|ability| {
-                if ability["kind"] == "static" && ability["body"]["op"] == "seq" {
-                    list(&ability["body"]["steps"])
-                        .into_iter()
-                        .map(|body| {
-                            let mut code = ability.clone();
-                            code["body"] = body;
-                            code
-                        })
-                        .collect::<Vec<_>>()
-                } else {
-                    vec![ability]
-                }
-            })
-            .collect())
-    }
-    fn object_attributes(&self, id: &str) -> Result<Value> {
-        let object = self.object(id)?;
-        let mut value = self.face(id)?.clone();
-        if let Some(attrs) = object.state.as_object() {
-            for (key, attr) in attrs {
-                value[key] = attr.clone();
-            }
-        }
-        value["id"] = json!(id);
-        value["name"] = json!(self.card_name(id)?);
-        value["face"] = self.information_source(id)?.state["face"].clone();
-        value["zone"] = json!(object.zone);
-        value["cost"] = json!(scalar(&self.face(id)?["cost"]));
-        value["token"] = json!(string(&self.face(id)?["card_type"]).contains("トークン"));
-        value["generation"] = json!(object.generation);
-        value["controller"] = json!(object.controller);
-        Ok(value)
-    }
     fn require_ability_sources(&self, query: &str) -> Result<()> {
         if !self.card_runtime.is_empty() {
-            // Off-field subscriptions cannot be excluded using unadmitted prototype headers.
+            // A subscription can originate outside the field.
             let query = format!("{query} active zones");
             for object in self.state.objects.values() {
                 self.require_object_abilities(object, &query)?;
@@ -915,39 +756,6 @@ impl Game {
         Ok(())
     }
 
-    fn ability(&self, id: &str, reference: &Value) -> Result<Value> {
-        if let Some(code) = self.printed_abilities(id)?.into_iter().find(|code| {
-            legal::reference_matches(
-                reference,
-                &self.reference(id, code),
-                self.keyword_label(code),
-            )
-        }) {
-            return Ok(code);
-        }
-        let number = reference["card"]
-            .as_str()
-            .unwrap_or(&self.information_source(id)?.card);
-        list(&self.catalog.program(number)?["abilities"])
-            .into_iter()
-            .find(|a| {
-                a["line"] == reference["line"]
-                    && a.get("face").is_none_or(|face| {
-                        *face
-                            == reference.get("face").cloned().unwrap_or_else(|| {
-                                self.information_source(id)
-                                    .ok()
-                                    .map_or(Value::Null, |object| object.state["face"].clone())
-                            })
-                    })
-                    && (reference["section"].is_null() || a["section"] == reference["section"])
-                    && (reference["keyword"].is_null()
-                        || a["keyword"] == reference["keyword"]
-                        || self.catalog.keyword_name(string(&a["keyword"]))
-                            == string(&reference["keyword"]))
-            })
-            .ok_or_else(|| EngineFailure::Unsupported(format!("ability not authored: {reference}")))
-    }
     fn reference(&self, id: &str, ability: &Value) -> Value {
         if ability["granted_reference"].is_object() {
             let mut reference = ability["granted_reference"].clone();
@@ -973,12 +781,6 @@ impl Game {
             }
         }
         value
-    }
-    fn keyword_label(&self, ability: &Value) -> Option<&str> {
-        ability["keyword"]
-            .as_str()
-            .map(|keyword| self.catalog.keyword_name(keyword))
-            .filter(|name| !name.is_empty())
     }
     fn active(&self) -> &str {
         string(&self.state.turn["active"])

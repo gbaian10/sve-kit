@@ -34,7 +34,7 @@ fn fixture() -> &'static Fixture {
         ] {
             let face = json!({"name":name,"card_type":if spell {"スペル"} else {"フォロワー"},"card_class":"ニュートラル","cost":cost.to_string(),"power":if spell {"-"} else {"1"},"hp":if spell {"-"} else {"1"},"traits":traits,"text":null,"sections":[]});
             snapshot.push_str(&json!({"number":id,"faces":[face]}).to_string()); snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{id}.yaml"),json!({"format":1,"kind":"effect_set","cards":{id:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{id}.yaml"),json!({"format":1,"kind":"fixture_cards","cards":{id:{"status":"complete"}}}).to_string()]));
             let program = if evolve {
                 let mut tree = expanded::tree().clone();
                 tree["cards"] = json!({id:tree["cards"]["synthetic-evolution"]});

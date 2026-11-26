@@ -15,7 +15,7 @@ use serde_json::Value;
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
 use sve_battle_contract::{CardRef, Nat};
 use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
-use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
+use sve_engine::catalog::{CurrentSelectionLoader, SelectedEffects};
 use sve_engine::game::Game;
 use sve_engine::game::player::PlayerDeck;
 use sve_engine::ir::lowering::ExpandedLowerer;
@@ -29,7 +29,7 @@ pub(crate) fn inputs() -> &'static (String, String, Value) {
             &read_to_string(var_os("SVE_TEST_CURRENT_SELECTION").unwrap()).unwrap(),
         )
         .unwrap();
-        let keywords = read_to_string(root.join("authored/rules/keywords.yaml")).unwrap();
+        let keywords = read_to_string(root.join("authored/rules/keyword-registry.yaml")).unwrap();
         (snapshot, keywords, input)
     })
 }
@@ -72,7 +72,7 @@ pub(crate) fn battle_references() -> &'static BattleReferences {
             }
         }
         BattleReferences::new(
-            &selection_with_rules().prototypes,
+            &selection_with_rules().catalogue,
             ReferenceInput {
                 rules: None,
                 wording: None,
@@ -127,13 +127,7 @@ pub(crate) fn select(
     input: &Value,
 ) -> sve_engine::Result<SelectedEffects> {
     // Full repository selections include cards whose admitted text depends on bound rule resources.
-    select_with_rules(
-        snapshot,
-        keywords,
-        input,
-        &bound_rules(snapshot),
-        &EngineIdentityInput::LegacyJp,
-    )
+    select_with_rules(snapshot, keywords, input, &bound_rules(snapshot))
 }
 
 pub(crate) fn select_with_rules(
@@ -141,21 +135,21 @@ pub(crate) fn select_with_rules(
     keywords: &str,
     input: &Value,
     rules: &str,
-    identity: &EngineIdentityInput,
 ) -> sve_engine::Result<SelectedEffects> {
-    loader().select_with_rules(snapshot, keywords, input, rules, identity)
+    let (rules, identity) = rule_fixtures::resolved(snapshot, rules)?;
+    loader().select_with_rules(snapshot, keywords, input, &rules, &identity)
 }
 
 /// Only what these decks can reach, from the same inputs and loader as the whole selection.
 pub(crate) fn select_decks(decks: &[PlayerDeck; 2]) -> sve_engine::Result<SelectedEffects> {
     let (snapshot, keywords, input) = inputs();
-    let rules = bound_rules(snapshot);
+    let (rules, identity) = rule_fixtures::resolved(snapshot, &bound_rules(snapshot))?;
     Game::select_player_decks(
         loader(),
         snapshot,
         keywords,
         input,
-        Some((&rules, &EngineIdentityInput::LegacyJp)),
+        Some((&rules, &identity)),
         decks,
     )
 }

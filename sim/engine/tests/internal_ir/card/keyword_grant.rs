@@ -107,11 +107,13 @@ fn keyword_grant_expires_at_the_actual_turn_boundary() {
 fn grant_game() -> Game {
     let (snapshot, _, document) = catalog_documents(&json!("1"));
     let registry = read_to_string(
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/keywords.yaml"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../authored/rules/keyword-registry.yaml"),
     )
     .unwrap();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([{"id":"d","card":"unit-spell"}]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

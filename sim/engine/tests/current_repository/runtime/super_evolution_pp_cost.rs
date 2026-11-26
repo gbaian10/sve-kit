@@ -1,7 +1,6 @@
 use super::*;
 use crate::{expanded, rule_fixtures};
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::SearchAnswer;
 
 fn position(card: &str) -> Value {
@@ -150,7 +149,7 @@ pub(super) fn synthetic_base(form: &str, initial: &Value) -> Game {
     }]});
     let snapshot = format!("{}\n{companion_card}", snapshot.trim_end());
     input["documents"].as_array_mut().unwrap().push(json!(["ready-c-companion.yaml",json!({
-        "format":1_u8,"kind":"effect_set","cards":{"synthetic-evolution":{"status":"complete","abilities":[]}}
+        "format":1_u8,"kind":"fixture_cards","cards":{"synthetic-evolution":{"status":"complete"}}
     }).to_string()]));
     let mut tree = expanded::tree().clone();
     tree["cards"] = json!({"synthetic-evolution":tree["cards"]["synthetic-evolution"]});
@@ -173,7 +172,6 @@ pub(super) fn synthetic_base(form: &str, initial: &Value) -> Game {
         &keywords,
         &input,
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
     let mut game = Game::from_selected_effects(

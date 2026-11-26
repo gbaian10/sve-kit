@@ -7,7 +7,6 @@ use crate::battle_costs::object;
 use std::sync::OnceLock;
 use sve_battle_contract::{MAX_SAFE_INTEGER, ObjectHandle, Seat, observation as wire};
 use sve_engine::battle::ProjectionError;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::player::{Viewer, observation as native};
 
 fn handle(game: &Game, viewer: Viewer, owner: Viewer, zone: native::ObservedZone) -> ObjectHandle {
@@ -47,7 +46,7 @@ fn counter_catalog() -> Arc<Catalog> {
     static CATALOG: OnceLock<Arc<Catalog>> = OnceLock::new();
     Arc::clone(CATALOG.get_or_init(|| {
         let (_, _, document) = catalog_documents(&json!("1"));
-        let registry = json!({"format":1,"kind":"keyword_registry","keywords":{
+        let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{
             "known_counter":{"ja":"Known counter","role":"counter"}
         }});
         let rules = rule_fixtures::rules(
@@ -60,12 +59,11 @@ fn counter_catalog() -> Arc<Catalog> {
             json!([]),
         );
         Arc::new(
-            Catalog::from_documents_with_rules(
+            rule_fixtures::catalog(
                 &fixture().snapshot,
                 &registry.to_string(),
                 &[("synthetic".into(), document)],
                 &rules.to_string(),
-                &EngineIdentityInput::LegacyJp,
             )
             .unwrap(),
         )

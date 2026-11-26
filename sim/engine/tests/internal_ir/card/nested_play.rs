@@ -224,9 +224,11 @@ pub(super) fn build_position(
         leaf["faces"][0]["name"] = json!("unit-leaf");
         snapshot.push('\n');
         snapshot.push_str(&leaf.to_string());
-        let extra = json!({"format":1,"kind":"effect_set","cards":{"unit-leaf":{"status":"complete","abilities":[]}}}).to_string();
+        let extra =
+            json!({"format":1,"kind":"fixture_cards","cards":{"unit-leaf":{"status":"complete"}}})
+                .to_string();
         Arc::new(
-            Catalog::from_documents(
+            Catalog::from_fixture_documents(
                 &snapshot,
                 &keywords,
                 &[("unit.yaml".into(), document), ("leaf.yaml".into(), extra)],

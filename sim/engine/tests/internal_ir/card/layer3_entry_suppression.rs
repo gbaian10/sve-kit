@@ -47,7 +47,8 @@ fn board(free: u8) -> (Game, AbilityId) {
     let programs = lowerer().lower(&input()).unwrap();
     let (snapshot, keywords, document) = catalog_documents(&json!("1"));
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(
         1,

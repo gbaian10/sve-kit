@@ -49,7 +49,7 @@ fn catalogue() -> Arc<Catalog> {
             json!([])
         };
         rows.push(row);
-        effects["cards"][number] = json!({"status":"complete","review":"synthetic","abilities":[]});
+        effects["cards"][number] = json!({"status":"complete"});
     }
     let snapshot = rows
         .iter()
@@ -57,7 +57,7 @@ fn catalogue() -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &keywords,
             &[("unit.yaml".into(), effects.to_string())],

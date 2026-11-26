@@ -363,15 +363,15 @@ fn printed_bp02_052_uniform_fragment_aggregates_three_frozen_hand_cards() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     // Only the fixed-count damage fragment is exercised; evolution and discarding remain outside it.
-    let fragments = json!({"format":1,"kind":"effect_set","cards":{
-        "BP02-052":{"status":"complete","review":"synthetic fragment harness","abilities":[]},
-        "BP01-006":{"status":"complete","review":"synthetic fragment harness","abilities":[]}
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":{
+        "BP02-052":{"status":"complete"},
+        "BP01-006":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

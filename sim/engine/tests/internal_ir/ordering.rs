@@ -467,15 +467,15 @@ fn printed_bp07_sl09_and_bp06_024_zero_selected_remainder_fragments() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     // Zero selected is a legal fragment; selection, summation, field entry and other abilities stay outside it.
-    let fragments = json!({"format":1,"kind":"effect_set","cards":{
-        "BP07-SL09":{"status":"complete","review":"synthetic fragment harness","abilities":[]},
-        "BP06-024":{"status":"complete","review":"synthetic fragment harness","abilities":[]}
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":{
+        "BP07-SL09":{"status":"complete"},
+        "BP06-024":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

@@ -62,9 +62,9 @@ fn board_with_spell(spell: &WellFormedCardProgram) -> Game {
     form["faces"][0]["card_type"] = json!("フォロワー・エボルヴ");
     rows.push(form);
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-form"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["unit-form"] = json!({"status":"complete"});
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &rows
                 .iter()
                 .map(Value::to_string)

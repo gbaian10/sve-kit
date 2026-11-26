@@ -156,7 +156,7 @@ impl TypedReplayAdapter {
                 )
             })
             .collect();
-        let exact = serde_json::to_vec(&(&self.selected.prototypes, programs))
+        let exact = serde_json::to_vec(&(&self.selected.catalogue, programs))
             .map_err(|e| adapter(e.to_string()))?;
         Ok(Sha256::digest(exact).to_vec())
     }
@@ -167,16 +167,12 @@ impl TypedReplayAdapter {
         decision: &Value,
     ) -> Result<(NodeId, Step), EngineError> {
         let native = self.node(at)?.native;
-        let initial = self
-            .initial
-            .as_ref()
-            .ok_or_else(|| adapter("replay not started"))?;
         let replay = self
             .replay
             .as_mut()
             .ok_or_else(|| adapter("replay not started"))?;
         let (next, step) = replay.advance(native, error, |game, commands| {
-            decide_on(game, &initial.setup, decision, Some(commands))
+            decide_on(game, decision, Some(commands))
         })?;
         if next == native {
             return Ok((at.clone(), step));

@@ -98,29 +98,6 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
             target = root / source.relative_to(REPO / "authored")
             target.parent.mkdir(parents=True, exist_ok=True)
             shutil.copyfile(source, target)
-    # A BP01 sibling keeps deletion past the nonempty-card schema check.
-    for owner, prototypes in (
-        ("BP01", ("BP01-001", "BP01-013")),
-        ("BP10", ("BP10-020",)),
-    ):
-        source = REPO / f"authored/rules/effects/{owner}.yaml"
-        # Fully admitted packs no longer retain an empty prototype shard.
-        prototype: dict[str, JsonValue] = (
-            read_tree(source)
-            if source.is_file()
-            else {"format": 1, "kind": "effect_set", "cards": {}}
-        )
-        current_cards = object_value(prototype["cards"])
-        # Admitted cards left the prototype set; a minimal program keeps the sibling.
-        prototype["cards"] = {
-            number: current_cards.get(
-                number, {"status": "complete", "review": "synthetic", "abilities": []}
-            )
-            for number in prototypes
-        }
-        target = root / f"rules/effects/{owner}.yaml"
-        target.parent.mkdir(parents=True, exist_ok=True)
-        target.write_bytes(authoring.format_yaml(prototype))
     (root / "rules/effects-index").mkdir(parents=True, exist_ok=True)
     for owner in ("BP01", "BP06", "BP10", "ECP01"):
         pack_index: dict[str, JsonValue] = dict(

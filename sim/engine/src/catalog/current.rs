@@ -19,10 +19,10 @@ impl Catalog {
             .get(number)
             .ok_or_else(|| invalid("current printing missing"))?;
         if card.faces.len() != current.faces.len()
-            || self.programs.contains_key(number)
+            || self.fixtures.contains_key(number)
             || self.rejected.contains_key(number)
         {
-            return Err(invalid("current snapshot closure or prototype overlap"));
+            return Err(invalid("current snapshot closure or fixture overlap"));
         }
         Ok(())
     }
@@ -38,10 +38,10 @@ impl Catalog {
         let faces = candidate.face_ordinals.clone();
         if faces.len() != card.faces.len()
             || faces.values().copied().collect::<BTreeSet<_>>() != (0..card.faces.len()).collect()
-            || self.programs.contains_key(&candidate.card_no)
+            || self.fixtures.contains_key(&candidate.card_no)
             || self.rejected.contains_key(&candidate.card_no)
         {
-            return Err(invalid("current snapshot closure or prototype overlap"));
+            return Err(invalid("current snapshot closure or fixture overlap"));
         }
         Ok(CurrentCard { candidate, faces })
     }

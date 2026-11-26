@@ -16,7 +16,7 @@ fn fixture() -> &'static SelectedEffects {
   snapshot.push_str(&json!({"number":"ready-lastdaylight","faces":[{"name":"ラストデイライト","card_class":"ニュートラル","card_type":"スペル","cost":"2","power":"-","hp":"-","traits":["デレマス"],"text":"","sections":[]}]}).to_string());snapshot.push('\n');
   for row in snapshot.lines().map(|line|serde_json::from_str::<Value>(line).unwrap()).filter(|row|row["number"].as_str().unwrap().starts_with("ready-")) {
    let number=row["number"].as_str().unwrap();
-   input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+   input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
   }
   repository::selection_with_rules_from(&snapshot,&keywords,&input)
  })

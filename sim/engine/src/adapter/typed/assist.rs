@@ -16,7 +16,6 @@ use sve_scenario_runner::{EngineError, Fixture, Step, View};
 pub struct TypedAssistAdapter {
     selected: SelectedEffects,
     assist: Option<Assist>,
-    setup: Value,
 }
 
 impl TypedAssistAdapter {
@@ -26,7 +25,6 @@ impl TypedAssistAdapter {
         Self {
             selected,
             assist: None,
-            setup: Value::Null,
         }
     }
 
@@ -56,7 +54,6 @@ impl AssistEngine for TypedAssistAdapter {
         )
         .map_err(error)?;
         self.assist = Some(Assist::new(replay).map_err(error)?);
-        self.setup = fixture.setup.clone();
         Ok(())
     }
 
@@ -68,9 +65,7 @@ impl AssistEngine for TypedAssistAdapter {
         if op.get("manual") == Some(&Value::Bool(true)) {
             return manual(assist, op);
         }
-        let step = assist.advance(error, |game, commands| {
-            decide_on(game, &self.setup, op, Some(commands))
-        })?;
+        let step = assist.advance(error, |game, commands| decide_on(game, op, Some(commands)))?;
         let applied = Applied {
             decision: assist.node(assist::Layer::Shadow).to_string(),
             step,

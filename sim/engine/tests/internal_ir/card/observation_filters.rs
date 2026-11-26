@@ -1260,7 +1260,8 @@ fn three_trait_groups_can_take_one_card_when_the_other_groups_have_no_candidates
         .collect::<Vec<_>>()
         .join("\n");
     let source = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), legacy)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), legacy)])
+            .unwrap(),
     );
     let mut initial = setup(
         1,

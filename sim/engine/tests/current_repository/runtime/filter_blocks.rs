@@ -1,7 +1,6 @@
 //! Posture, evolution, entry-turn, power and exclusion filters on printed cards.
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::SearchAnswer;
 
 pub(super) struct Fixture {
@@ -79,7 +78,6 @@ pub(super) fn fixture() -> &'static Fixture {
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         Fixture {
@@ -94,7 +92,7 @@ fn add_card(snapshot: &mut String, input: &mut Value, name: &str, face: &Value) 
     snapshot.push('\n');
     input["documents"].as_array_mut().unwrap().push(json!([
         format!("{name}.yaml"),
-        json!({"format":1_u8,"kind":"effect_set","cards":{name:{"status":"complete","abilities":[]}}}).to_string()
+        json!({"format":1_u8,"kind":"fixture_cards","cards":{name:{"status":"complete"}}}).to_string()
     ]));
 }
 

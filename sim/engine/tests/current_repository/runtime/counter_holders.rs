@@ -106,8 +106,8 @@ fn blade_game(initial: &Value) -> Game {
         );
         input["documents"].as_array_mut().unwrap().push(json!([
             "counter-blade.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{
-                "counter-blade":{"status":"complete","abilities":[]}
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{
+                "counter-blade":{"status":"complete"}
             }})
             .to_string()
         ]));

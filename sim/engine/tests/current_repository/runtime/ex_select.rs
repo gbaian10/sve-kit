@@ -1,6 +1,5 @@
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 pub(super) use crate::{expanded, rule_fixtures};
 
@@ -17,7 +16,7 @@ fn evolution_companion(snapshot: &str, input: &mut Value) -> (String, WellFormed
     }]});
     let snapshot = format!("{}\n{companion}", snapshot.trim_end());
     input["documents"].as_array_mut().unwrap().push(json!(["ex-companion.yaml",json!({
-        "format":1_u8,"kind":"effect_set","cards":{"synthetic-evolution":{"status":"complete","abilities":[]}}
+        "format":1_u8,"kind":"fixture_cards","cards":{"synthetic-evolution":{"status":"complete"}}
     }).to_string()]));
     let mut tree = expanded::tree().clone();
     tree["cards"] = json!({"synthetic-evolution":tree["cards"]["synthetic-evolution"]});
@@ -57,7 +56,6 @@ fn bp01_156_evolution_chooses_only_opposing_ex_and_banishes() {
         &keywords,
         &input,
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
     for available in [false, true] {

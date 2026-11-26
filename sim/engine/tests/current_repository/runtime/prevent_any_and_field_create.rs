@@ -20,7 +20,7 @@ fn append(snapshot: &mut String, input: &mut Value, number: &str, face: &Value) 
     snapshot.push('\n');
     input["documents"].as_array_mut().unwrap().push(json!([
         format!("{number}.yaml"),
-        json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()
+        json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()
     ]));
 }
 

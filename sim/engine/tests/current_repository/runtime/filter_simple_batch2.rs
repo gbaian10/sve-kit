@@ -1,7 +1,6 @@
 use super::*;
 use alloc::collections::BTreeMap;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgram>) {
     static PREPARED: OnceLock<(SelectedEffects, BTreeMap<String, WellFormedCardProgram>)> =
@@ -25,8 +24,8 @@ fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormed
             snapshot.push_str(&companion.to_string());
             snapshot.push('\n');
             let document = json!({
-                "format": 1_u8, "kind": "effect_set",
-                "cards": {number.clone(): {"status": "complete", "abilities": []}}
+                "format": 1_u8, "kind": "fixture_cards",
+                "cards": {number.clone(): {"status": "complete"}}
             });
             input["documents"]
                 .as_array_mut()
@@ -46,7 +45,6 @@ fn evolution_fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormed
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         (selected, programs)
@@ -210,10 +208,10 @@ fn vanguard_game(initial: &Value) -> Game {
         snapshot.push('\n');
         cards.insert(
             number.to_owned(),
-            json!({"status":"complete", "abilities":[]}),
+            json!({"status":"complete"}),
         );
     }
-    let document = json!({"format":1_u8,"kind":"effect_set","cards":cards});
+    let document = json!({"format":1_u8,"kind":"fixture_cards","cards":cards});
     input["documents"]
         .as_array_mut()
         .unwrap()
@@ -227,7 +225,6 @@ fn vanguard_game(initial: &Value) -> Game {
         &keywords,
         &input,
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
     let mut game = Game::from_selected_effects(

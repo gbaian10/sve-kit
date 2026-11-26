@@ -1,6 +1,5 @@
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 const CONTROLS: [(&str, &str, &[&str], u8); 12] = [
     ("plain", "普通の仲間", &[], 2),
@@ -22,15 +21,15 @@ fn prepared() -> &'static SelectedEffects {
         let(mut snapshot,keywords,mut input)=inputs().clone();
         for(number,name,traits,cost) in CONTROLS {
             snapshot.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":"フォロワー","traits":traits,"cost":cost.to_string(),"power":"3","hp":"6","text":null,"sections":[]}]}).to_string());snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
         }
         snapshot.push_str(&json!({"number":"external-form-BP15-084","faces":[{"name":"愛絶の崇拝者","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","traits":[],"cost":"-","power":"3","hp":"6","text":null,"sections":[]}]}).to_string());
         snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["external-form.yaml",json!({"format":1_u8,"kind":"effect_set","cards":{"external-form-BP15-084":{"status":"complete","abilities":[]}}}).to_string()]));
+        input["documents"].as_array_mut().unwrap().push(json!(["external-form.yaml",json!({"format":1_u8,"kind":"fixture_cards","cards":{"external-form-BP15-084":{"status":"complete"}}}).to_string()]));
         let path=PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml");
         let mut rules:Value=serde_saphyr::from_str(&read_to_string(path).unwrap()).unwrap();
         rules["input"]=rule_fixtures::rules(&snapshot,json!([]),json!([]))["input"].clone();
-        repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),&EngineIdentityInput::LegacyJp).unwrap()
+        repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),).unwrap()
     })
 }
 fn position(number: &str, zone: &str) -> Value {

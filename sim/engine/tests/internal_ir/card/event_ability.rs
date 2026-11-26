@@ -1,7 +1,6 @@
 use super::*;
 use crate::rule_fixtures;
 use std::sync::OnceLock;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::InputDomain;
 
 fn header() -> Value {
@@ -75,12 +74,11 @@ pub(super) fn title_catalog() -> Arc<Catalog> {
             json!([]),
         );
         Arc::new(
-            Catalog::from_documents_with_rules(
+            rule_fixtures::catalog(
                 &snapshot,
                 &keywords,
                 &[("unit.yaml".into(), document)],
                 &rules.to_string(),
-                &EngineIdentityInput::LegacyJp,
             )
             .unwrap(),
         )

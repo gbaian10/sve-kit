@@ -4,7 +4,6 @@ use crate::player_pipeline::question;
 use core::error::Error;
 use sve_battle_contract::{CardRef, Nat as WireNat, Seat, Subject, observation as wire};
 use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::player::observation::ObservedZone;
 use sve_engine::game::player::{
     Command, EvolutionAnswer, EvolutionQuestion, MainActionAnswer, MainIntentKind, QuestionShape,
@@ -46,12 +45,11 @@ pub(super) fn fixture_from_documents(
         json!([rule_fixtures::title("synthetic", "unit-form", json!([]))]),
         json!([]),
     );
-    let catalog = Arc::new(Catalog::from_documents_with_rules(
+    let catalog = Arc::new(rule_fixtures::catalog(
         &snapshot,
         &registry,
         &[("evolution.yaml".into(), document)],
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )?);
     let mut faces = Vec::new();
     for (number, printing, count) in [

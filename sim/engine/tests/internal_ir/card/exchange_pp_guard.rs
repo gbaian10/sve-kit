@@ -44,11 +44,11 @@ fn position(resource: &str, installed: bool) -> Game {
     );
     let (snapshot, _, document) = catalog_documents(&json!("4"));
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document)],
         )

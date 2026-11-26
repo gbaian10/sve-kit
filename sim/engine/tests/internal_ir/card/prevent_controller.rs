@@ -68,8 +68,7 @@ fn union_catalog() -> Arc<Catalog> {
         row["faces"][0]["name"] = json!(name);
         row["faces"][0]["traits"] = traits;
         rows.push(row);
-        document["cards"][number] =
-            json!({"status":"complete","review":"synthetic","abilities":[]});
+        document["cards"][number] = json!({"status":"complete"});
     }
     let snapshot = rows
         .iter()
@@ -77,7 +76,7 @@ fn union_catalog() -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("unit.yaml".into(), document.to_string())],

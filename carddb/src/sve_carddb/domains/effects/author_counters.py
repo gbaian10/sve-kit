@@ -2,10 +2,9 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.authored import read
-from sve_carddb.core.json import array, object_value, parse, string
 from sve_carddb.domains.effects.author_current import CardAccepted
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, Diagnostic
+from sve_carddb.domains.mechanics import load
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -49,15 +48,12 @@ def counter_uses(
 
 
 def _registered_names(authored: Path) -> set[str]:
-    _, content = read(authored / "rules/keywords.yaml", root=authored)
-    entries = object_value(object_value(parse(content))["keywords"])
-    names: set[str] = set()
-    for key, value in entries.items():
-        entry = object_value(value)
-        if entry.get("role") == "counter":
-            names.update((key, string(entry["ja"])))
-            names.update(string(alias) for alias in array(entry.get("aliases", [])))
-    return names
+    return {
+        name
+        for code, rule in load(authored).registry.rule_names.items()
+        if rule.role == "counter"
+        for name in (code, rule.ja, *rule.aliases)
+    }
 
 
 def check_counter_registration(authored: Path, results: tuple[CardResult, ...]) -> None:

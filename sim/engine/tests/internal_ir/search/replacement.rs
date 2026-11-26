@@ -386,18 +386,19 @@ fn printed_bp03_002_fragment_uses_the_public_beast_traits_and_costs() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     let mut cards = serde_json::Map::new();
     for number in ["BP03-002", "BP03-009", "BP03-001"] {
-        cards.insert(
-            number.into(),
-            json!({"status":"complete","review":"fragment harness only","abilities":[]}),
-        );
+        cards.insert(number.into(), json!({"status":"complete"}));
     }
-    let document = json!({"format":1,"kind":"effect_set","cards":cards}).to_string();
+    let document = json!({"format":1,"kind":"fixture_cards","cards":cards}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("fragments.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("fragments.yaml".into(), document)],
+        )
+        .unwrap(),
     );
     for seat in [1, 2] {
         for (number, expected) in [("BP03-009", ZoneKind::Field), ("BP03-001", ZoneKind::Hand)] {

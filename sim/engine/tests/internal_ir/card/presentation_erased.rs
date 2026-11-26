@@ -38,7 +38,8 @@ fn stopped_after(removal: &[Value], victim: bool, baseline: bool) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

@@ -26,13 +26,13 @@ fn named_position(base: &WellFormedCardProgram) -> Game {
             .to_string(),
         );
     }
-    let forms = json!({"format":1_u8,"kind":"effect_set","cards":{
-        "named-form":{"status":"complete","abilities":[]},
-        "same-form":{"status":"complete","abilities":[]}
+    let forms = json!({"format":1_u8,"kind":"fixture_cards","cards":{
+        "named-form":{"status":"complete"},
+        "same-form":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[

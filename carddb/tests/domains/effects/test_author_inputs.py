@@ -76,10 +76,8 @@ def test_index_preserves_exact_identifiers(schemas: AuthorSchemas) -> None:
     assert index.records[0].file == "rules/author-effects/SYN/001.yaml"
     assert index.records[0].scope == "shared"
     assert schemas.effects_index(_index()).records == ()
-    assert (
-        schemas.effects_index(_index(_record(kind="effect_set"))).records[0].kind
-        == "effect_set"
-    )
+    with pytest.raises(AuthorInputError):
+        schemas.effects_index(_index(_record(kind="effect_set")))
 
 
 def test_index_rejects_unsorted_records_with_sort_order(

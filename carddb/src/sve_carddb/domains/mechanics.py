@@ -42,12 +42,23 @@ class Adoption(RecordData):
     note: Text
 
 
+class RuleName(RecordData):
+    ja: Text
+    rule: Text | None = None
+    aliases: tuple[Text, ...] = ()
+
+
+class NamedRule(RuleName):
+    role: Literal["keyword", "ability-label", "counter"]
+
+
 class Keyword(RecordData):
     id: Text
     code: Code
     term_id: Text
     term_category: Literal["keyword", "ability", "rule_term"] = "keyword"
     english: Text | None = None
+    rule_name: RuleName | None = None
 
     @model_validator(mode="after")
     def permanent_id(self) -> Keyword:
@@ -71,6 +82,7 @@ class Registry(RecordData):
     kind: Literal["keyword_registry"]
     decision: Adoption
     records: tuple[Keyword, ...]
+    rule_names: dict[Code, NamedRule] = Field(default_factory=dict)
     suppressions: tuple[Suppression, ...] = ()
 
     @field_validator("format", mode="before")
@@ -89,6 +101,8 @@ class Registry(RecordData):
                 self.records
             ):
                 raise ValueError("Duplicate keyword registration " + field)
+        if self.rule_names.keys() & {record.code for record in self.records}:
+            raise ValueError("A rule name may only be registered once per code")
         if len({record.id for record in self.suppressions}) != len(self.suppressions):
             raise ValueError("Duplicate mechanic suppression ID")
         return self

@@ -23,7 +23,7 @@ fn commander_game(initial: &Value, kind: &str, command: bool) -> Game {
     face["sections"] = json!([]);
     snapshot.push_str(&json!({"number":"commander-companion","faces":[face]}).to_string());
     snapshot.push('\n');
-    input["documents"].as_array_mut().unwrap().push(json!(["commander-companion.yaml", "format: 1\nkind: effect_set\ncards:\n  commander-companion:\n    status: complete\n    abilities: []\n"]));
+    input["documents"].as_array_mut().unwrap().push(json!(["commander-companion.yaml", "format: 1\nkind: fixture_cards\ncards:\n  commander-companion:\n    status: complete\n"]));
     let mut game = game_from_selection(initial, &snapshot, &keywords, &input);
     game.load_internal_card(
         "commander-companion",

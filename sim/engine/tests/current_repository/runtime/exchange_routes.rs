@@ -6,7 +6,7 @@ fn prepared() -> &'static SelectedEffects {
     SELECTED.get_or_init(|| {
         let (mut snapshot, keywords, mut input) = inputs().clone();
         snapshot.push_str(&json!({"number":"route-neutral","faces":[{"name":"route-neutral","card_class":"ニュートラル","card_type":"フォロワー","traits":[],"cost":"1","power":"1","hp":"20","text":null,"sections":[]}]}).to_string());snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["route-neutral.yaml",json!({"format":1_u8,"kind":"effect_set","cards":{"route-neutral":{"status":"complete","abilities":[]}}}).to_string()]));
+        input["documents"].as_array_mut().unwrap().push(json!(["route-neutral.yaml",json!({"format":1_u8,"kind":"fixture_cards","cards":{"route-neutral":{"status":"complete"}}}).to_string()]));
         repository::selection_with_rules_from(&snapshot,&keywords,&input)
     })
 }

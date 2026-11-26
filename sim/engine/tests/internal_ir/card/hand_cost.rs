@@ -156,7 +156,8 @@ fn filtered_hand_cost_uses_class_cost_and_all_traits_without_leaking_other_candi
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("filter.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("filter.yaml".into(), document)])
+            .unwrap(),
     );
     for (filter, expected) in [
         (
@@ -581,7 +582,8 @@ fn negative_class_hand_cost_selects_only_the_eligible_private_card() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([{"id":"drawn","card":"unit-spell"}]));
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);

@@ -218,13 +218,19 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             array(body_tree["records"]).append({**definition, "edition": 2})
             card["abilities"] = [{**ability, "edition": 1}, ability]
         case "counter":
-            registry = output_root / "rules/keywords.yaml"
+            registry = output_root / "rules/keyword-registry.yaml"
             registry.write_bytes(
                 authoring.format_yaml(
                     {
                         "format": 1,
                         "kind": "keyword_registry",
-                        "keywords": {
+                        "records": [],
+                        "decision": {
+                            "id": "synthetic",
+                            "state": "confirmed",
+                            "note": "Synthetic registry",
+                        },
+                        "rule_names": {
                             "fairy_tale_counter": {
                                 "ja": "童話カウンター",
                                 "role": "ability-label",
@@ -472,10 +478,6 @@ def test_keyword_shorthand_keeps_the_existing_lowercase_boundary(
     handwritten: tuple[dict[str, JsonValue], dict[str, JsonValue]],
     uppercase: bool,
 ) -> None:
-    prototype = output_root / "rules/effects/BP01.yaml"
-    value = tree(prototype)
-    object_value(value["cards"]).pop("BP01-138", None)
-    prototype.write_bytes(authoring.format_yaml(value))
     main, _, main_tree, _ = handwriting(tmp_path, handwritten)
     main_tree["cards"] = {
         "BP01-138": {

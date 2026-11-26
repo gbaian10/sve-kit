@@ -263,7 +263,8 @@ fn effect_sources_resolve_legacy_faces_and_refuse_invalid_coordinates_atomically
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("synthetic".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("synthetic".into(), document)])
+            .unwrap(),
     );
     for (face, expected) in [
         ("base", Some(0)),

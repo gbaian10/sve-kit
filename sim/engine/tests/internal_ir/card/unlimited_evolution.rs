@@ -64,16 +64,20 @@ fn fixture(provider_zone: &str, seat: &str, silenced: bool) -> (Game, AbilityId)
     })
     .collect::<Vec<_>>()
     .join("\n");
-    let document = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-follower":{"status":"complete","abilities":[]},
-        "unit-form":{"status":"complete","abilities":[]},
-        "unit-amulet":{"status":"complete","abilities":[]}
+    let document = json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-follower":{"status":"complete"},
+        "unit-form":{"status":"complete"},
+        "unit-amulet":{"status":"complete"}
     }})
     .to_string();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unlimited.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("unlimited.yaml".into(), document)],
+        )
+        .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     for player in ["P1", "P2"] {

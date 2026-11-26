@@ -24,11 +24,15 @@ use alloc::sync::Arc;
 
 fn catalog() -> Arc<Catalog> {
     let snapshot = [json!({"number":"shield","faces":[{"name":"shield","card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}), json!({"number":"source","faces":[{"name":"source","card_class":"ニュートラル","card_type":"スペル","cost":"1","power":"-","hp":"-","traits":[],"text":null,"sections":[]}]})].map(|v|v.to_string()).join("\n");
-    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document = json!({"format":1_u8,"kind":"effect_set","cards":{"shield":{"status":"complete","review":"synthetic","abilities":[]},"source":{"status":"complete","review":"synthetic","abilities":[]}}}).to_string();
+    let registry = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let document = json!({"format":1_u8,"kind":"fixture_cards","cards":{"shield":{"status":"complete"},"source":{"status":"complete"}}}).to_string();
     Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("synthetic.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("synthetic.yaml".into(), document)],
+        )
+        .unwrap(),
     )
 }
 

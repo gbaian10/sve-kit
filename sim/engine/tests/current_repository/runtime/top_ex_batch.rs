@@ -2,7 +2,6 @@ use super::*;
 use alloc::collections::BTreeMap;
 use serde_json::Map;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 const CONTROLS: [(&str, &str, &str, bool); 3] = [
     ("ocean", "海洋の魔法", "スペル", true),
@@ -30,7 +29,7 @@ fn add_controls(snapshot: &mut String, input: &mut Value) {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             format!("{number}.yaml"),
-            json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()
         ]));
     }
 }
@@ -59,12 +58,12 @@ fn add_bases(snapshot: &mut String, input: &mut Value) -> BTreeMap<String, WellF
             .to_string(),
         );
         snapshot.push('\n');
-        cards.insert(base.into(), json!({"status":"complete","abilities":[]}));
+        cards.insert(base.into(), json!({"status":"complete"}));
         programs.insert(base.into(), template.clone());
     }
     input["documents"].as_array_mut().unwrap().push(json!([
         "top-bp14-bases.yaml",
-        json!({"format":1_u8,"kind":"effect_set","cards":cards}).to_string()
+        json!({"format":1_u8,"kind":"fixture_cards","cards":cards}).to_string()
     ]));
     tree["cards"] = Value::Object(programs);
     lowerer().lower(&tree).unwrap()
@@ -85,7 +84,6 @@ fn prepared() -> &'static Fixture {
             &keywords,
             &input,
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         Fixture { selected, bases }

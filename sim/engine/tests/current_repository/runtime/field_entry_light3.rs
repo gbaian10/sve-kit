@@ -38,7 +38,7 @@ fn fixture() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgra
         for (number, card_face) in controls {
             snapshot.push_str(&json!({"number":number,"faces":[card_face]}).to_string());
             snapshot.push('\n');
-            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()]));
+            input["documents"].as_array_mut().unwrap().push(json!([format!("{number}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()]));
         }
         let mut tree = expanded::tree().clone();
         let mut producer = tree["cards"]["synthetic-evolution"].clone();

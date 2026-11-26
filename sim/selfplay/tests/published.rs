@@ -233,7 +233,7 @@ fn a_seed_names_one_match_and_a_changed_record_fails_its_replay() {
     let (reader, programs) = export();
     let inputs = json!({
         "snapshot": reader["snapshot"], "rules": reader["rules"],
-        "keywords": r#"{"format":1,"kind":"keyword_registry","keywords":{}}"#,
+        "keywords": r#"{"format":1,"kind":"keyword_registry","rule_names":{}}"#,
         "references": reader["references"],
         "printings": reader["projection"]["printings"],
         "engine_identity": reader["projection"]["engine_identity"],

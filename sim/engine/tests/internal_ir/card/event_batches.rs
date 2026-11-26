@@ -447,7 +447,8 @@ fn event_batches_simultaneous_token_deaths_erase_together_after_moving() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     initial["players"]["P2"]["zones"]["field"] = json!([
@@ -547,7 +548,7 @@ fn counter_names(game: &Game, viewer: Viewer) -> Vec<Option<String>> {
 
 #[test]
 fn a_stack_removed_instead_of_leaving_states_the_count_before_and_after() {
-    let unnamed = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let unnamed = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
     let game = stacked_departure(&unnamed);
     for viewer in [Viewer::P1, Viewer::P2] {
         let changes = batches(&game, viewer)
@@ -579,7 +580,7 @@ fn a_stack_removed_instead_of_leaving_states_the_count_before_and_after() {
 
 #[test]
 fn a_counter_the_registry_does_not_name_is_recorded_under_its_identifier() {
-    let unnamed = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let unnamed = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
     let game = stacked_departure(&unnamed);
     for viewer in [Viewer::P1, Viewer::P2] {
         assert_eq!(
@@ -594,7 +595,7 @@ fn a_counter_the_registry_does_not_name_is_recorded_under_its_identifier() {
 fn event_batches_stack_replacements_counters_and_successful_movement_stay_together() {
     let game = stacked_departure(include_str!(concat!(
         env!("CARGO_MANIFEST_DIR"),
-        "/../../authored/rules/keywords.yaml"
+        "/../../authored/rules/keyword-registry.yaml"
     )));
     for viewer in [Viewer::P1, Viewer::P2] {
         assert!(

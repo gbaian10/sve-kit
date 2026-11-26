@@ -362,7 +362,8 @@ fn conditional_play_cost_reads_face_up_evolve_followers() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     for (count, paid) in [(1_usize, 3_u8), (2, 1)] {
         let mut initial = initial();

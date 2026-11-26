@@ -47,18 +47,18 @@ fn fixture() -> &'static Fixture {
             json!({"number":"nativeⓈ","faces":[face, face]}),
             json!({"number":"nativeⓈEN","faces":[face]}),
         ].iter().map(Value::to_string).collect::<Vec<_>>().join("\n");
-        let keywords = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
-        let documents = vec![("synthetic.yaml".into(), json!({"format":1_u8,"kind":"effect_set","cards":{
-            "nativeⓈ":{"status":"complete","abilities":[]},
-            "nativeⓈEN":{"status":"complete","abilities":[]}
+        let keywords = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
+        let documents = vec![("synthetic.yaml".into(), json!({"format":1_u8,"kind":"fixture_cards","cards":{
+            "nativeⓈ":{"status":"complete"},
+            "nativeⓈEN":{"status":"complete"}
         }}).to_string())];
         let rules = rule_fixtures::rules(
             &snapshot,
             json!([rule_fixtures::title("synthetic", "nativeⓈ", json!([]))]),
             json!([]),
         );
-        let catalog = Catalog::from_documents_with_rules(
-            &snapshot, &keywords, &documents, &rules.to_string(), &EngineIdentityInput::LegacyJp,
+        let catalog = rule_fixtures::catalog(
+            &snapshot, &keywords, &documents, &rules.to_string(),
         ).unwrap();
         let input = ReferenceInput {
             rules: None,
@@ -107,7 +107,8 @@ fn explicit_printings_and_face_coordinates_are_preserved_without_number_inferenc
 fn references_require_a_matching_bound_region_and_exact_snapshot() {
     let source = fixture();
     let unbound =
-        Catalog::from_documents(&source.snapshot, &source.keywords, &source.documents).unwrap();
+        Catalog::from_fixture_documents(&source.snapshot, &source.keywords, &source.documents)
+            .unwrap();
     assert_eq!(
         BattleReferences::new(&unbound, source.input.clone()).unwrap_err(),
         ProjectionError::Unavailable
@@ -157,7 +158,7 @@ fn resolved_en_background_accepts_explicit_permanent_printings() {
             })
             .collect(),
     };
-    let catalog = Catalog::from_documents_with_rules(
+    let catalog = Catalog::from_fixture_documents_with_rules(
         &source.snapshot,
         &source.keywords,
         &source.documents,
@@ -207,12 +208,11 @@ fn lookup_rechecks_the_catalogue_even_when_native_coordinates_are_identical() {
         json!([rule_fixtures::title("synthetic", "nativeⓈ", json!([]))]),
         json!([]),
     );
-    let other = Catalog::from_documents_with_rules(
+    let other = rule_fixtures::catalog(
         &snapshot,
         &source.keywords,
         &source.documents,
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
     let references = bind(source.input.clone()).unwrap();
@@ -476,7 +476,7 @@ fn wording_lookup_cannot_replace_missing_evidence_or_cross_catalogues() {
         ProjectionError::Unavailable
     );
     let references = bind(serde_json::from_value(wording_input()).unwrap()).unwrap();
-    let foreign = Catalog::from_documents(
+    let foreign = Catalog::from_fixture_documents(
         &fixture().snapshot,
         &fixture().keywords,
         &fixture().documents,
@@ -677,7 +677,7 @@ fn rule_locations_reject_guessed_ids_versions_strengths_and_missing_closures() {
             .validate_rule(&fixture().catalog, &reference),
         Err(ProjectionError::Unavailable)
     );
-    let unbound = Catalog::from_documents(
+    let unbound = Catalog::from_fixture_documents(
         &fixture().snapshot,
         &fixture().keywords,
         &fixture().documents,

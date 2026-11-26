@@ -108,11 +108,11 @@ fn program(amount: i64, end: DurationEnd) -> WellFormedCardProgram {
 fn named_catalog() -> Arc<Catalog> {
     let (snapshot, _, document) = catalog_documents(&json!("5"));
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document)],
         )

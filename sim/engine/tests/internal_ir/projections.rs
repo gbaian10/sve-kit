@@ -441,15 +441,15 @@ fn printed_bp18_059_and_sl14_remainder_fragments_use_successful_generations() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     // The first observed card is predetermined; selection, discount and the other abilities remain unadmitted.
-    let fragments = json!({"format":1,"kind":"effect_set","cards":{
-        "BP18-059":{"status":"complete","review":"synthetic fragment harness","abilities":[]},
-        "BP18-SL14":{"status":"complete","review":"synthetic fragment harness","abilities":[]}
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":{
+        "BP18-059":{"status":"complete"},
+        "BP18-SL14":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

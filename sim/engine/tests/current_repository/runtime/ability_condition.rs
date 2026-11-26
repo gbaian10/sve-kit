@@ -146,7 +146,7 @@ fn with_form(value: &Value) -> Game {
         snapshot.push_str(&json!({"number":"condition-form","faces":[face]}).to_string());
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!(["condition-form.yaml",
-            "format: 1\nkind: effect_set\ncards:\n  condition-form:\n    status: complete\n    abilities: []\n"]));
+            "format: 1\nkind: fixture_cards\ncards:\n  condition-form:\n    status: complete\n"]));
         repository::select(&snapshot, &keywords, &input).unwrap()
     });
     let mut game = Game::from_selected_effects(

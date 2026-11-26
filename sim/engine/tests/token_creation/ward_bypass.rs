@@ -28,7 +28,7 @@ fn inputs(abilities: Vec<Value>) -> (String, String, Value) {
     );
     (
         format!("{source}\n{guard}\n{ordinary}\n"),
-        include_str!("../../../../authored/rules/keywords.yaml").into(),
+        include_str!("../../../../authored/rules/keyword-registry.yaml").into(),
         json!({"documents":[],"authors":[source_author,guard_author,ordinary_author]}),
     )
 }

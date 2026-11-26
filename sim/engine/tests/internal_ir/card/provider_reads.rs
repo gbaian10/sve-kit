@@ -177,13 +177,13 @@ fn lifetime_game() -> Game {
     row["number"] = json!("unit-other");
     let snapshot = format!("{snapshot}\n{row}");
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-other"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["unit-other"] = json!({"status":"complete"});
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document.to_string())],
         )

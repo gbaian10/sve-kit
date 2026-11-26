@@ -17,21 +17,21 @@ fn selected() -> &'static SelectedEffects {
         snapshot.push_str(&departurer.to_string());
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!(["departurer.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{"departurer":{"status":"complete","abilities":[]}}}).to_string()
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{"departurer":{"status":"complete"}}}).to_string()
         ]));
         departurer["number"] = json!("other-producer");
         departurer["faces"][0]["traits"] = json!(["反例"]);
         snapshot.push_str(&departurer.to_string());
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!(["other-producer.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{"other-producer":{"status":"complete","abilities":[]}}}).to_string()
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{"other-producer":{"status":"complete"}}}).to_string()
         ]));
         departurer["number"] = json!("returner");
         departurer["faces"][0]["traits"] = json!(["ウマ娘"]);
         snapshot.push_str(&departurer.to_string());
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!(["returner.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{"returner":{"status":"complete","abilities":[]}}}).to_string()
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{"returner":{"status":"complete"}}}).to_string()
         ]));
         repository::selection_with_rules_from(&snapshot, &keywords, &input)
     })

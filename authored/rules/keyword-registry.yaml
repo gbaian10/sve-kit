@@ -1,41 +1,197 @@
-format: 1
-kind: keyword_registry
 decision:
   id: decision:keyword-registry-v1
-  state: confirmed
   note: Adopt the explicit existing keyword concepts for card mechanic projection.
+  state: confirmed
+format: 1
+kind: keyword_registry
 records:
-  - { id: kw:ward, code: ward, term_id: term:keyword.ward }
-  - { id: kw:storm, code: storm, term_id: term:keyword.storm }
-  - { id: kw:rush, code: rush, term_id: term:keyword.rush }
-  - { id: kw:bane, code: bane, term_id: term:keyword.bane }
-  - { id: kw:assail, code: assail, term_id: term:keyword.assail }
-  - { id: kw:intimidate, code: intimidate, term_id: term:keyword.intimidate }
-  - { id: kw:aura, code: aura, term_id: term:keyword.aura }
-  - { id: kw:drain, code: drain, term_id: term:keyword.drain }
-  - id: kw:final_limit_break_possible
-    code: final_limit_break_possible
+  - code: ward
+    id: kw:ward
+    rule_name:
+      ja: 守護
+      rule: "12.8"
+    term_id: term:keyword.ward
+  - code: storm
+    id: kw:storm
+    rule_name:
+      ja: 疾走
+      rule: "12.9"
+    term_id: term:keyword.storm
+  - code: rush
+    id: kw:rush
+    rule_name:
+      ja: 突進
+      rule: "12.10"
+    term_id: term:keyword.rush
+  - code: bane
+    id: kw:bane
+    rule_name:
+      ja: 必殺
+      rule: "12.14"
+    term_id: term:keyword.bane
+  - code: assail
+    id: kw:assail
+    rule_name:
+      ja: 指定攻撃
+      rule: "12.11"
+    term_id: term:keyword.assail
+  - code: intimidate
+    id: kw:intimidate
+    rule_name:
+      ja: 威圧
+      rule: "12.12"
+    term_id: term:keyword.intimidate
+  - code: aura
+    id: kw:aura
+    rule_name:
+      ja: オーラ
+      rule: "12.15"
+    term_id: term:keyword.aura
+  - code: drain
+    id: kw:drain
+    rule_name:
+      ja: ドレイン
+      rule: "12.13"
+    term_id: term:keyword.drain
+  - code: final_limit_break_possible
+    id: kw:final_limit_break_possible
     term_id: term:keyword.final_limit_break_possible
-  - id: kw:quick
-    code: quick
+  - code: quick
+    id: kw:quick
+    rule_name:
+      ja: クイック
+      rule: "12.3"
+    term_category: ability
     term_id: term:ability.quick
-    term_category: ability
-  - id: kw:single_drive
-    code: single_drive
-    term_id: term:ability.single_drive
-    term_category: ability
+  - code: single_drive
     english: Single Drive
-  - id: kw:stack
-    code: stack
+    id: kw:single_drive
+    rule_name:
+      ja: シングルドライブ
+      rule: 14.4.6.2
+    term_category: ability
+    term_id: term:ability.single_drive
+  - code: stack
+    id: kw:stack
+    rule_name:
+      ja: スタック
+      rule: 13.3.2
+    term_category: ability
     term_id: term:ability.stack
-    term_category: ability
-  - id: kw:start_amulet
-    code: start_amulet
-    term_id: term:object.start_amulet
-    term_category: rule_term
+  - code: start_amulet
     english: Starting Amulet
-  - id: kw:twin_drive
-    code: twin_drive
-    term_id: term:ability.twin_drive
-    term_category: ability
+    id: kw:start_amulet
+    rule_name:
+      ja: スタートアミュレット
+      rule: 14.4.3
+    term_category: rule_term
+    term_id: term:object.start_amulet
+  - code: twin_drive
     english: Twin Drive
+    id: kw:twin_drive
+    rule_name:
+      ja: ツインドライブ
+      rule: 14.4.6.3
+    term_category: ability
+    term_id: term:ability.twin_drive
+rule_names:
+  arrow_counter:
+    ja: 矢カウンター
+    role: counter
+  battery_counter:
+    ja: バッテリーカウンター
+    role: counter
+  blessing_counter:
+    ja: 恩寵カウンター
+    role: counter
+  calamity_counter:
+    ja: 災いカウンター
+    role: counter
+  curse_counter:
+    ja: 呪いカウンター
+    role: counter
+  dormancy_counter:
+    ja: 休眠カウンター
+    role: counter
+  drive:
+    ja: ドライブ
+    role: keyword
+    rule: 14.4.7
+  earth_rite:
+    ja: 土の秘術
+    role: keyword
+    rule: 13.3.3
+  fairy_tale_counter:
+    ja: 童話カウンター
+    role: counter
+  fanfare:
+    ja: ファンファーレ
+    role: ability-label
+    rule: "12.4"
+  fighting_spirit_counter:
+    ja: 戦意カウンター
+    role: counter
+  fusion:
+    ja: 融合
+    role: ability-label
+    rule: "12.18"
+  fusion_counter:
+    ja: 融合カウンター
+    role: counter
+  giga_counter:
+    ja: ギガカウンター
+    role: counter
+  kababan_kun_counter:
+    ja: かばばん君カウンター
+    role: counter
+  last_words:
+    ja: ラストワード
+    role: ability-label
+    rule: "12.5"
+  lightning_counter:
+    ja: 雷カウンター
+    role: counter
+  magic_counter:
+    ja: 魔力カウンター
+    role: counter
+  on_attack:
+    ja: 攻撃時
+    role: ability-label
+    rule: "12.7"
+  on_drive_gain:
+    ja: ドライブ獲得時
+    role: ability-label
+    rule: 14.4.8
+  on_evolve:
+    ja: 進化時
+    role: ability-label
+    rule: "12.6"
+  passion_counter:
+    ja: 情熱カウンター
+    role: counter
+  prayer_counter:
+    ja: 祈りカウンター
+    role: counter
+  refund_counter:
+    aliases:
+      - 返戻
+    ja: 返戻カウンター
+    role: counter
+  sadism_counter:
+    ja: 加虐カウンター
+    role: counter
+  season_counter:
+    ja: 四季カウンター
+    role: counter
+  soul_counter:
+    ja: 魂カウンター
+    role: counter
+  spell_counter:
+    ja: スペルカウンター
+    role: counter
+  spring_counter:
+    ja: 神湯カウンター
+    role: counter
+  stack_counter:
+    ja: スタックカウンター
+    role: counter

@@ -2,7 +2,7 @@
 
 新增卡片時，主檔放在 `authored/rules/author-effects/<卡包>/<record_key>.yaml`（例如 `BP02/BP02-084.yaml`）；寫入工具依卡號建立分片，不再取下一個數字，既有 `NNN.yaml` 保留原名。索引寫入 `authored/rules/effects-index/<卡包>.yaml`，每檔依 `record_key`、`scope` 排序，卡包取第一個 `-` 前的前綴。新增 runtime 測試只需新增 `sim/engine/tests/current_repository/runtime/*.rs`；build script 會自動探索並排序，不須修改 `runtime.rs`。
 
-`sve-carddb author inspect/write/check` 使用同一個 current 選用入口。作者直接編輯 `authored/rules/author-effects/` 及 `effect-bodies/`，無需機器錨點、驗證檔或原型 baseline。
+`sve-carddb author inspect/write/check` 使用同一個 current 選用入口。作者直接編輯 `authored/rules/author-effects/` 及 `effect-bodies/`，無需機器錨點或驗證檔。
 
 ## 輸入 profile
 
@@ -419,7 +419,7 @@ name:
 
 「本回合下一張」使用 `player_effect: {who: self, effect: {cost_mod: {when_playing: {who: self, trait: 武闘竜人}, delta: -3, next_only: true}}, until: turn}`。此安裝保存玩家與打出篩選，涵蓋稍後才取得的卡片，不捕捉隱藏手牌。整組共用一次額度，僅在符合篩選的卡適正打出且全部付款成功時消耗；預覽、非符合卡及失敗宣告均不消耗。安裝者離場不提早失效，未用額度在本回合結束時移除。`delta` 與非負整數 `set` 二擇一；各費用層的增減合計後才以零為下限。
 
-整卡 DSL 在索引中以永久 CardId 登錄一個代表卡號。current 選用依身分登錄展開同 CardId 的所有官方 JP 印刷卡號，共用代表卡的程式及來源定位；卡面仍讀各印刷的快照資料。不從卡號字串推測別名，也不為別名另登索引或保留原型程式。未解決的裁定同時阻擋這些別名。
+整卡 DSL 在索引中以永久 CardId 登錄一個代表卡號。current 選用依身分登錄展開同 CardId 的所有官方 JP 印刷卡號，共用代表卡的程式及來源定位；卡面仍讀各印刷的快照資料。不從卡號字串推測別名，別名共用同一筆索引。未解決的裁定同時阻擋這些別名。
 
 實體 token 使用同一主檔、具名本體及行覆蓋入口。卡片層的 `token: {name: 操り人形, template: true}` 指定規則名稱與同名 token 的代表印刷；`template` 預設為 false，省略整個 `token` 時使用快照卡名。同名 token 有多個已選用程式時須恰有一個代表。卡面、數值與型別仍來自快照，`token` 只能標在單面的 token 卡上；印刷的突進、守護等以 `keywords` 宣告，與一般從者共用 lowering 與執行規則。
 
@@ -622,7 +622,7 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 
 `entered_from`、`entered_by`、`played_from` 的 `ref: this` 在入場曲與 `auto.on.enter_field: {ref: this}` 讀取自身入場事件。監看他者入場時，可用 `entered_from: {ref: it, from: cemetery}` 讀取該次事件主體的來源；不把能力持有者當成事件主體，其他事件不提供此讀值。進化能力的 `usable_if` 另可用 `entered_from: {ref: this, from: cemetery}` 查詢持有者本次場上世代的入場來源；離場再回場即重新記錄，普通進化不改變來源，進化資格目前限查詢墓場來源。入場事件接受手牌、牌庫及墓場，`not` 可表示非手牌；不由入場方式推斷來源區域。入場來源條件亦可控制唯一的チョイス群組是否出現；`choice.instead` 另接受墓場來源條件以改變可選模式數，仍在宣告時選模式，並沿用同一事件的凍結來源。自身回場及離場後移 EX 需要該次離場確定落在墓場，目前只有謝幕符合；一般 `left_field` 不開放這兩種動作。
 
-入場事件中的 `entered_by: {ref: this, by: ability, source: {trait: ウマ娘}}` 讀取造成本次進場的能力來源，在進場當時凍結的有效特徵；不讀入場者自己的特徵，也不因來源之後離場或改變而重算。來源先離場再由該能力入場時沿用權威 LKI。`source` 只接受單一 `trait`，且僅能搭配 `by: ability`；省略時保留原來的進場方式判斷。這個條件也可放進 `choice.instead`，例如ゼファー以 `n: 1` 配合符合條件時 `upto: 2`；一般打出仍只選一個模式。來源證據缺失的原型執行回報 unsupported，不以物件初始旗標或目前場上的其他卡補造來源。
+入場事件中的 `entered_by: {ref: this, by: ability, source: {trait: ウマ娘}}` 讀取造成本次進場的能力來源，在進場當時凍結的有效特徵；不讀入場者自己的特徵，也不因來源之後離場或改變而重算。來源先離場再由該能力入場時沿用權威 LKI。`source` 只接受單一 `trait`，且僅能搭配 `by: ability`；省略時保留原來的進場方式判斷。這個條件也可放進 `choice.instead`，例如ゼファー以 `n: 1` 配合符合條件時 `upto: 2`；一般打出仍只選一個模式。來源證據缺失時回報 unsupported，不以物件初始旗標或目前場上的其他卡補造來源。
 
 監看他者從場上進墓場的 `auto.on.moved: {from: {who: self, zone: field}, to: cemetery, ...}`，本文可寫 `move: {ref: it, to: field}` 把該次離場的主體放回擁有者的場上（BP19-074「それを場に出す」）；觀察的是對手的卡時，放回的是對手的場，不是觀察者的場。標頭限定送墓，所以 `it` 跟隨這次離場在墓場產生的世代；結算前該卡已被其他效果移出墓場就不追取。可加 `entry_effects: [{cannot: {what: play_ability, ability: {keyword: fanfare}}}]` 讓回場的卡不誘發入場曲，與 BP04-038 的放場相同。
 
@@ -970,12 +970,12 @@ scenario runner 的 AI 決定比對將選取與各角色成員當集合，仍區
 uv --directory /absolute/project/carddb run sve-carddb author write \
   --inputs /absolute/work/public.json --main /absolute/work/main.yaml \
   --bodies /absolute/work/bodies.yaml --output-root /absolute/project/authored \
-  --card SYN-01 --remove-prototype
+  --card SYN-01
 uv --directory /absolute/project/carddb run sve-carddb author check \
   --inputs /absolute/work/public.json --output /absolute/work/check.json
 ```
 
-`--card` 可重複，或用 `--all` 選全部輸入卡。只有替換既有原型時帶 `--remove-prototype`；不再要求 `--base`、`--baseline-root` 或 `--storage anchors`。工具先驗整份候選、索引閉包與原型互斥，再寫主檔／本體及索引；I/O 中斷回報已完成檔案，由作者修復 Git diff。
+`--card` 可重複，或用 `--all` 選全部輸入卡。工具先驗整份候選與索引閉包，再寫主檔、本體及索引。I/O 中斷時會回報已完成的檔案，供作者依 Git diff 修復。
 
 `check` 檢查全部索引作者卡；`body_usage` 依永久 CardId 去重，達三張提示整理共用本體，無額外資格 consumer。review 紀錄只報實際 verdict，不以 SHA freshness 授予核可或阻擋。source pending 不擋直接入口，真正 disputed／revise 只擋受影響卡。
 
@@ -986,7 +986,7 @@ uv --directory /absolute/project/carddb run sve-carddb author check \
 
 確實應於結算中選取的固定張數（例如本次看牌的結果），或卡文分開的建立指示，可在該卡的 `lint_exceptions` 放一筆例外。填入診斷的 `rule`、印刷 `line`、能力內相對 `path`（例如 `/fanfare/do/1/choose`）及非空 `reason`。每筆只允許對應的一個診斷，無對應時作者檢查會拒絕。`unclassified_keyword_use` 不能用例外放行：查卡的關鍵字關係由程式推導並宣告整卡已檢查，未分類的寫法須先補上對照規則，見[關鍵字機制契約](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)。
 
-`check` 和 `write` 會驗證展開後使用的指示物。使用具名指示物前，先在 `authored/rules/keywords.yaml` 以 `role: counter` 登錄規則名稱。
+`check` 和 `write` 會驗證展開後使用的指示物。使用具名指示物前，先在 `authored/rules/keyword-registry.yaml` 以 `role: counter` 登錄規則名稱。
 
 check 成功代表來源定位、行覆蓋與 DSL 結構通過；Rust lowering／runtime 能力准入及對局行為測試仍須通過。錯誤回傳位置及分類，不印整行卡文。完整回歸交 CI，無需額外證據 JSON 或結果 DB。
 

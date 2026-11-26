@@ -72,7 +72,7 @@ class DirectTestTests(unittest.TestCase):
                 "rust",
                 "web",
             },
-            "authored/rules/keywords.yaml": {"python", "rust", "web"},
+            "authored/rules/keyword-registry.yaml": {"python", "rust", "web"},
             "docs/sim/deck-construction-cases.json": {"web"},
             "sim/battle-host/src/lib.rs": {"rust", "web"},
             "sim/battle-contract/src/lib.rs": {"rust", "web"},

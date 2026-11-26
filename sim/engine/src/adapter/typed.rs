@@ -2,11 +2,6 @@
 //! builds the game, resolves fixture labels to capabilities, and reads authority state
 //! and raw rules events for checkpoint comparison.
 
-#![expect(
-    clippy::indexing_slicing,
-    reason = "Exam decisions are read through serde_json's total indexing; a missing key is null."
-)]
-
 mod assist;
 pub use assist::TypedAssistAdapter;
 mod labels;
@@ -33,7 +28,6 @@ use turn::{Turn, act, settle};
 pub struct TypedAdapter {
     selected: SelectedEffects,
     game: Option<Game>,
-    setup: Value,
 }
 
 impl TypedAdapter {
@@ -43,20 +37,7 @@ impl TypedAdapter {
         Self {
             selected,
             game: None,
-            setup: Value::Null,
         }
-    }
-
-    /// The exam's pending reference as `{ability, event}`, following a setup id.
-    fn pending_reference(setup: &Value, pending: &Value) -> Value {
-        if let Some(id) = pending.as_str() {
-            return setup["semantic_state"]["pending_triggers"]
-                .as_array()
-                .and_then(|items| items.iter().find(|item| item["id"] == id))
-                .cloned()
-                .unwrap_or(Value::Null);
-        }
-        pending.clone()
     }
 
     fn game(&self) -> Result<&Game, EngineError> {
@@ -120,7 +101,6 @@ impl Engine for TypedAdapter {
         if game.referee_fault().is_some() {
             return Err(fault(&game));
         }
-        self.setup = fixture.setup.clone();
         self.game = Some(game);
         Ok(())
     }
@@ -130,7 +110,7 @@ impl Engine for TypedAdapter {
             .game
             .as_mut()
             .ok_or_else(|| adapter("game not loaded"))?;
-        decide_on(game, &self.setup, decision, None)
+        decide_on(game, decision, None)
     }
 
     fn query(&self, view: View, path: &str) -> Result<Option<Value>, EngineError> {
@@ -148,15 +128,13 @@ impl Engine for TypedAdapter {
 
 fn decide_on(
     game: &mut Game,
-    setup: &Value,
     decision: &Value,
     mut record: Option<&mut Vec<RecordedCommand>>,
 ) -> Result<Step, EngineError> {
     let by = seat(&decision["by"])?;
-    let pending = TypedAdapter::pending_reference(setup, &decision["pending"]);
     let settled = settle(game, decision, by, record.as_deref_mut());
     let mut turn = Turn { game, by, record };
-    let result = settled.and_then(|()| act(&mut turn, decision, &pending));
+    let result = settled.and_then(|()| act(&mut turn, decision, &decision["pending"]));
     let outcome = match result {
         Err(_error)
             if turn

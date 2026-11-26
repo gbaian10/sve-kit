@@ -136,8 +136,8 @@ fn named_probe(initial: &Value) -> Game {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             "exchange-light-elraade.yaml",
-            json!({"format":1_u8,"kind":"effect_set",
-                "cards":{"exchange-light-elraade":{"status":"complete","abilities":[]}}})
+            json!({"format":1_u8,"kind":"fixture_cards",
+                "cards":{"exchange-light-elraade":{"status":"complete"}}})
             .to_string()
         ]));
         repository::selection_with_rules_from(&snapshot, &keywords, &input)

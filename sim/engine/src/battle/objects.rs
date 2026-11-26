@@ -114,15 +114,7 @@ fn card_state(
             .iter()
             .map(|counter| {
                 let name = catalog
-                    .keywords
-                    .iter()
-                    .find_map(|(key, entry)| {
-                        let name = entry["ja"].as_str()?;
-                        (entry["role"] == "counter"
-                            && !name.is_empty()
-                            && (key == &counter.name || name == counter.name))
-                            .then_some(name)
-                    })
+                    .registered_counter_name(&counter.name)
                     .ok_or(ProjectionError::Unavailable)?;
                 Ok(wire::Counter {
                     name: name.into(),

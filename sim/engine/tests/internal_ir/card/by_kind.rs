@@ -94,15 +94,12 @@ fn named_catalog() -> Arc<Catalog> {
         ("other", "フォロワー"),
     ] {
         lines.push(json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"1","hp":"1","traits":[],"text":null,"sections":[]}]}).to_string());
-        cards.insert(
-            number.into(),
-            json!({"status":"complete","review":"synthetic","abilities":[]}),
-        );
+        cards.insert(number.into(), json!({"status":"complete"}));
     }
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document = json!({"format":1,"kind":"effect_set","cards":cards}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let document = json!({"format":1,"kind":"fixture_cards","cards":cards}).to_string();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &lines.join("\n"),
             &registry,
             &[("unit.yaml".into(), document)],

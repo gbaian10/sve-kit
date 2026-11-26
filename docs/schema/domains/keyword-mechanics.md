@@ -17,7 +17,7 @@ decision:
   state: confirmed
   note: Adopt the explicit existing keyword concepts for card mechanic projection.
 records:
-  - {id: 'kw:ward', code: ward, term_id: 'term:keyword.ward'}
+  - { id: "kw:ward", code: ward, term_id: "term:keyword.ward" }
 suppressions: []
 ```
 
@@ -32,7 +32,7 @@ source_id 與來源權威；已驗的官方數位詞典選詞為 official／digi
 decision 是 mapping 的明示採納，不是逐卡真人審核、DSL review 或 engine pass。
 建置保存 registry exact bytes 的 source_record、decision 及引用；configuration 納入
 registry hash 與各 adapter 版本。
-此檔與舊 `authored/rules/keywords.yaml` 的 astra/1 原型是不同入口；後者不會被這條管線匯入。
+共用關鍵字的日文規則名稱登錄在 `records[].rule_name`。指示物、能力標記與其他僅供引擎使用的名稱登錄在 `rule_names`。`ward` 是採納代碼，Rust 將它轉成對戰狀態既有的 `guard` 鍵。
 
 ## 由 DSL 推導的四種關係
 
@@ -45,7 +45,7 @@ registry hash 與各 adapter 版本。
 走訪每個能力（卡片層與各面），不讀 Token 身分與建牌規則。對照如下：
 
 | 節點 | 條件 | 關係 |
-| --- | --- | --- |
+| ----------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- | ----------- |
 | 能力層 `keywords: [...]` | 卡片自己的宣告 | has |
 | 授予：步驟 `grant.keywords`、`grant.instead[].keywords`；效果 `grant.keywords`、`keywords.list` | 對象是這張卡自己 | has |
 | 同上 | 對象是其他物件 | grants |
@@ -180,7 +180,7 @@ unknown 不能命中否定搜尋。
 Token 定義、reminder 或單純提及。能力種類與既有八種關鍵字仍各自獨立。
 
 | 組別 | code | 日文／英文表記 |
-| --- | --- | --- |
+| ------------ | --------------- | -------------------------------------- |
 | 職業機制 | combo | コンボ／Combo |
 | 職業機制 | spellchain | スペルチェイン、SC／Spellchain、SC |
 | 職業機制 | stack | スタック／Stack（自身宣告） |

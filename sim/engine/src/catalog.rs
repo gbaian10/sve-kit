@@ -1,16 +1,10 @@
-//! Immutable card snapshot and schema-validated authored effects.
-
-#![expect(
-    clippy::indexing_slicing,
-    reason = "Validated JSON uses total read indexing; writes target constructed objects."
-)]
+//! Immutable snapshot facts and battle rule names.
 
 use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use core::iter::once;
-use jsonschema::validator_for;
 
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, de::IgnoredAny};
 use serde_json::{Value, json};
 
 use crate::{EngineFailure, Result, invalid};
@@ -41,12 +35,78 @@ pub(crate) struct TokenDefinition {
     pub(crate) alias_of: Option<String>,
 }
 
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct KeywordRegistry {
+    format: Value,
+    kind: String,
+    #[serde(default)]
+    records: Vec<RegisteredKeyword>,
+    #[serde(default)]
+    rule_names: BTreeMap<String, RuleName>,
+    #[serde(default, rename = "decision")]
+    _decision: Option<IgnoredAny>,
+    #[serde(default, rename = "suppressions")]
+    _suppressions: Option<IgnoredAny>,
+}
+
+#[derive(Deserialize)]
+struct RegisteredKeyword {
+    code: String,
+    rule_name: Option<RuleName>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct RuleName {
+    ja: String,
+    #[serde(rename = "rule", skip_serializing_if = "Option::is_none")]
+    _rule: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    role: Option<RuleNameRole>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    aliases: Vec<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "kebab-case")]
+enum RuleNameRole {
+    Keyword,
+    AbilityLabel,
+    Counter,
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+struct FixtureCards {
+    format: Value,
+    kind: String,
+    cards: BTreeMap<String, FixtureCard>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(deny_unknown_fields)]
+struct FixtureCard {
+    status: FixtureStatus,
+    rules_name: Option<String>,
+    #[serde(default)]
+    token_template: bool,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum FixtureStatus {
+    Complete,
+    Partial,
+    Unsupported,
+}
+
 /// Shared immutable catalogue, serializable into a self-contained server save.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct Catalog {
     pub(crate) cards: BTreeMap<String, Arc<Card>>,
-    pub(crate) programs: BTreeMap<String, Value>,
-    pub(crate) keywords: BTreeMap<String, Value>,
+    fixtures: BTreeMap<String, FixtureCard>,
+    keywords: BTreeMap<String, RuleName>,
     pub(crate) token_definitions: BTreeMap<String, TokenDefinition>,
     pub(crate) rule_bindings: rule_bindings::RuleBindings,
     /// Current selection rejections carried for unresolved source rulings.
@@ -63,7 +123,7 @@ impl Catalog {
     ///
     /// # Errors
     /// Rejects the entire selection on any rejected card, overlap or D0 failure;
-    /// callers never receive a partial selection or an implicit prototype fallback.
+    /// callers never receive a partial selection.
     pub fn from_current_selection(
         snapshot: &str,
         keywords: &str,
@@ -90,14 +150,14 @@ impl Catalog {
     ///
     /// # Errors
     /// Rejects unknown, ambiguous, missing or inconsistent identities and templates.
-    pub fn from_documents_with_rules(
+    pub fn from_fixture_documents_with_rules(
         snapshot: &str,
         keywords: &str,
         documents: &[(String, String)],
         rules: &str,
         identity: &EngineIdentityInput,
     ) -> Result<Self> {
-        let mut catalog = Self::from_documents(snapshot, keywords, documents)?;
+        let mut catalog = Self::from_fixture_documents(snapshot, keywords, documents)?;
         catalog.bind_rules(snapshot, keywords, documents, rules, identity)?;
         Ok(catalog)
     }
@@ -121,36 +181,50 @@ impl Catalog {
         Ok(())
     }
 
-    /// Portable loader for caller-supplied snapshot and YAML bytes, including browser hosts.
+    /// Load snapshot facts and rule names without binding any card programs.
     ///
     /// # Errors
-    /// Rejects malformed snapshot facts, keyword definitions and synthetic programs.
-    pub fn from_documents(
+    /// Rejects malformed or duplicated snapshot facts and rule names.
+    pub fn from_snapshot(snapshot: &str, keywords: &str) -> Result<Self> {
+        Self::read_snapshot_using(snapshot, keywords, Self::read_snapshot_card)
+    }
+
+    /// Load synthetic card metadata for an in-process rules fixture.
+    ///
+    /// # Errors
+    /// Rejects invalid snapshot facts, rule names or fixture metadata.
+    pub fn from_fixture_documents(
         snapshot: &str,
         keywords: &str,
         documents: &[(String, String)],
     ) -> Result<Self> {
-        let catalog = Self::read_documents(snapshot, keywords, documents)?;
+        let mut catalog = Self::from_snapshot(snapshot, keywords)?;
+        catalog.load_fixtures(documents)?;
         catalog.validate_token_templates()?;
         Ok(catalog)
     }
 
-    fn read_documents(
-        snapshot: &str,
-        keywords: &str,
-        documents: &[(String, String)],
-    ) -> Result<Self> {
-        Self::read_documents_using(snapshot, keywords, documents, Self::read_snapshot_card)
+    fn load_fixtures(&mut self, documents: &[(String, String)]) -> Result<()> {
+        for (name, text) in documents {
+            let document: FixtureCards =
+                yaml(text).map_err(|error| invalid(format!("{name}: {error}")))?;
+            if document.format.as_u64() != Some(1) || document.kind != "fixture_cards" {
+                return Err(invalid("invalid fixture card envelope"));
+            }
+            for (number, fixture) in document.cards {
+                self.add_fixture(number, fixture)?;
+            }
+        }
+        Ok(())
     }
 
     fn read_snapshot_card(line: &str) -> Result<Arc<Card>> {
         serde_json::from_str(line).map(Arc::new).map_err(invalid)
     }
 
-    fn read_documents_using(
+    fn read_snapshot_using(
         snapshot: &str,
         keywords: &str,
-        documents: &[(String, String)],
         mut read_card: impl FnMut(&str) -> Result<Arc<Card>>,
     ) -> Result<Self> {
         let mut catalog = Self::default();
@@ -163,75 +237,63 @@ impl Catalog {
                 )));
             }
         }
-        let registry: Value = yaml(keywords)?;
-        if !registry["format"].is_u64() {
-            return Err(invalid("keyword registry format must be an integer"));
+        let registry: KeywordRegistry = yaml(keywords)?;
+        if registry.format.as_u64() != Some(1) || registry.kind != "keyword_registry" {
+            return Err(invalid("invalid keyword registry envelope"));
         }
-        catalog.keywords = serde_json::from_value(registry["keywords"].clone()).map_err(invalid)?;
-        let schema: Value = serde_json::from_str(include_str!("../../../dsl/effects.schema.json"))
-            .map_err(invalid)?;
-        let registry_schema = json!({"$ref":"#/$defs/keywordRegistry","$defs":schema["$defs"]});
-        validator_for(&registry_schema)
-            .map_err(invalid)?
-            .validate(&registry)
-            .map_err(invalid)?;
+        catalog.keywords = registry.rule_names;
+        let mut codes = BTreeSet::new();
+        for record in registry.records {
+            if !codes.insert(record.code.clone()) || catalog.keywords.contains_key(&record.code) {
+                return Err(invalid("duplicate keyword code"));
+            }
+            if let Some(name) = record.rule_name {
+                // The existing battle state and its fixtures identify Ward as guard.
+                let key = if record.code == "ward" {
+                    "guard".to_owned()
+                } else {
+                    record.code
+                };
+                if catalog.keywords.insert(key, name).is_some() {
+                    return Err(invalid("duplicate battle rule name"));
+                }
+            }
+        }
         catalog.validate_keyword_names()?;
-        if documents.is_empty() {
-            return Ok(catalog);
-        }
-        let validator = validator_for(&schema).map_err(invalid)?;
-        for (name, text) in documents {
-            let document: Value = yaml(text)?;
-            if !document["format"].is_u64() {
-                return Err(invalid("effect document format must be an integer"));
-            }
-            validator
-                .validate(&document)
-                .map_err(|error| EngineFailure::Invalid(format!("{name}: {error}")))?;
-            let entries = document["cards"]
-                .as_object()
-                .ok_or_else(|| invalid("cards map"))?;
-            for (number, program) in entries {
-                if !catalog.cards.contains_key(number) {
-                    return Err(invalid(format!("unknown snapshot card: {number}")));
-                }
-                let program = expand(program, &catalog.keywords, 0)?;
-                validator
-                    .validate(&json!({"format":1_u8,"kind":"effect_set","cards":{number:program}}))
-                    .map_err(invalid)?;
-                if catalog.programs.contains_key(number) || catalog.rejected.contains_key(number) {
-                    return Err(invalid(format!("duplicate program: {number}")));
-                }
-                catalog.programs.insert(number.clone(), program);
-            }
-        }
-        for (number, program) in &catalog.programs {
-            let face = catalog.face(number, 0)?;
-            let token = face["card_type"]
-                .as_str()
-                .is_some_and(|kind| kind.contains("トークン"));
-            if program["token_template"] == true && (!token || program["status"] != "complete") {
-                return Err(invalid("token template requires a complete token program"));
-            }
-            if token {
-                let name = program["rules_name"]
-                    .as_str()
-                    .or_else(|| face["name"].as_str())
-                    .ok_or_else(|| invalid("token requires a rules name"))?
-                    .to_owned();
-                catalog.token_definitions.insert(
-                    number.clone(),
-                    TokenDefinition {
-                        name,
-                        name_override: program["rules_name"].is_string(),
-                        template: program["token_template"] == true,
-                        alias_of: None,
-                        complete: program["status"] == "complete",
-                    },
-                );
-            }
-        }
         Ok(catalog)
+    }
+
+    fn add_fixture(&mut self, number: String, fixture: FixtureCard) -> Result<()> {
+        let face = self.face(&number, 0)?;
+        let token = face["card_type"]
+            .as_str()
+            .is_some_and(|kind| kind.contains("トークン"));
+        let complete = fixture.status == FixtureStatus::Complete;
+        if fixture.token_template && (!token || !complete) {
+            return Err(invalid("token template requires a complete token fixture"));
+        }
+        if token {
+            let name = fixture
+                .rules_name
+                .as_deref()
+                .or_else(|| face["name"].as_str())
+                .ok_or_else(|| invalid("token requires a rules name"))?
+                .to_owned();
+            self.token_definitions.insert(
+                number.clone(),
+                TokenDefinition {
+                    name,
+                    name_override: fixture.rules_name.is_some(),
+                    template: fixture.token_template,
+                    alias_of: None,
+                    complete,
+                },
+            );
+        }
+        if self.fixtures.insert(number, fixture).is_some() {
+            return Err(invalid("duplicate fixture card"));
+        }
+        Ok(())
     }
 
     pub(super) fn rules_label(&self, card: &str, ordinal: usize) -> Result<String> {
@@ -240,10 +302,7 @@ impl Catalog {
             .get(card)
             .filter(|definition| definition.name_override)
             .map(|definition| definition.name.as_str())
-            .or_else(|| {
-                let program = self.programs.get(card)?;
-                program["rules_name"].as_str()
-            })
+            .or_else(|| self.fixtures.get(card)?.rules_name.as_deref())
             .or_else(|| self.rules_names.get(card)?.get(ordinal)?.as_deref())
             .or_else(|| face["name"].as_str())
             .map(str::to_owned)
@@ -270,30 +329,28 @@ impl Catalog {
             .ok_or_else(|| invalid(format!("unknown card face: {number}/{index}")))
     }
 
-    pub(crate) fn program(&self, number: &str) -> Result<&Value> {
-        if let Some(findings) = self.rejected.get(number) {
-            return Err(EngineFailure::Unsupported(format!(
-                "card program rejected at load: {number}: {}",
-                findings.join("; ")
-            )));
-        }
-        let program = self
-            .programs
+    pub(crate) fn require_fixture_card(&self, number: &str) -> Result<()> {
+        if self
+            .fixtures
             .get(number)
-            .ok_or_else(|| EngineFailure::Unsupported(format!("no authored program: {number}")))?;
-        if program["status"] != "complete" {
-            return Err(EngineFailure::Unsupported(format!(
-                "partial card program: {number}"
-            )));
+            .is_some_and(|fixture| fixture.status == FixtureStatus::Complete)
+        {
+            return Ok(());
         }
-        Ok(program)
+        Err(EngineFailure::Unsupported(format!(
+            "card lacks complete fixture metadata: {number}"
+        )))
     }
 
     pub(crate) fn keyword_name(&self, id: &str) -> &str {
-        self.keywords
-            .get(id)
-            .and_then(|entry| entry["ja"].as_str())
-            .unwrap_or("")
+        self.keywords.get(id).map_or("", |entry| entry.ja.as_str())
+    }
+
+    pub(crate) fn registered_counter_name(&self, name: &str) -> Option<&str> {
+        self.keywords.iter().find_map(|(code, entry)| {
+            (entry.role == Some(RuleNameRole::Counter) && (code == name || entry.ja == name))
+                .then_some(entry.ja.as_str())
+        })
     }
 
     /// The name a counter change is recorded under: its registered name, or its identifier
@@ -357,12 +414,13 @@ impl Catalog {
     fn validate_keyword_names(&self) -> Result<()> {
         let mut owners = BTreeMap::new();
         for (id, entry) in &self.keywords {
-            let aliases = entry["aliases"]
-                .as_array()
-                .into_iter()
-                .flatten()
-                .filter_map(Value::as_str);
-            for name in once(id.as_str()).chain(entry["ja"].as_str()).chain(aliases) {
+            for name in once(id.as_str())
+                .chain(once(entry.ja.as_str()))
+                .chain(entry.aliases.iter().map(String::as_str))
+            {
+                if name.is_empty() {
+                    return Err(invalid("empty keyword name"));
+                }
                 if owners.insert(name, id).is_some_and(|other| other != id) {
                     return Err(invalid(format!("ambiguous keyword name: {name}")));
                 }
@@ -418,12 +476,7 @@ impl Catalog {
     pub(crate) fn keyword_id(&self, name: &str) -> String {
         self.keywords
             .iter()
-            .find(|(_, value)| {
-                value["ja"] == name
-                    || value["aliases"]
-                        .as_array()
-                        .is_some_and(|aliases| aliases.iter().any(|alias| alias == name))
-            })
+            .find(|(_, value)| value.ja == name || value.aliases.iter().any(|alias| alias == name))
             .map_or_else(|| name.to_owned(), |(key, _)| key.clone())
     }
 }
@@ -434,68 +487,4 @@ where
 {
     serde_saphyr::from_str_with_options(text, serde_saphyr::options! { strict_booleans: true })
         .map_err(invalid)
-}
-
-fn validate_choice_labels(value: &Value, registry: &BTreeMap<String, Value>) -> Result<()> {
-    let Some(labels) = value["labels"].as_array() else {
-        return Ok(());
-    };
-    if value["modes"].as_array().map(Vec::len) != Some(labels.len()) {
-        return Err(invalid("choice labels must match the number of modes"));
-    }
-    let mut unique = BTreeSet::new();
-    for label in labels {
-        let mut localized = label.clone();
-        if let Some(keyword) = label["keyword"].as_str() {
-            let name = registry
-                .get(keyword)
-                .and_then(|entry| entry["ja"].as_str())
-                .filter(|name| !name.is_empty())
-                .ok_or_else(|| invalid("choice label needs a registered keyword"))?;
-            localized["keyword"] = json!(name);
-        }
-        if !unique.insert(localized.to_string()) {
-            return Err(invalid(
-                "choice labels must remain distinct after localization",
-            ));
-        }
-    }
-    Ok(())
-}
-
-fn expand(value: &Value, registry: &BTreeMap<String, Value>, depth: usize) -> Result<Value> {
-    if depth > 64 {
-        return Err(invalid("macro expansion depth exceeds 64"));
-    }
-    if value["op"] == "macro" {
-        let name = value["name"].as_str().unwrap_or_default();
-        let entry = registry
-            .get(name)
-            .ok_or_else(|| invalid(format!("unknown macro: {name}")))?;
-        let expansion = entry
-            .get("expansion")
-            .ok_or_else(|| invalid(format!("ability label has no macro expansion: {name}")))?;
-        return expand(expansion, registry, depth.saturating_add(1));
-    }
-    if value["op"] == "keyword"
-        && !registry.contains_key(value["name"].as_str().unwrap_or_default())
-    {
-        return Err(invalid("unknown keyword id"));
-    }
-    if value["op"] == "choice" {
-        validate_choice_labels(value, registry)?;
-    }
-    match value {
-        Value::Array(values) => values
-            .iter()
-            .map(|v| expand(v, registry, depth))
-            .collect::<Result<Vec<_>>>()
-            .map(Value::Array),
-        Value::Object(values) => values
-            .iter()
-            .map(|(key, member)| Ok((key.clone(), expand(member, registry, depth)?)))
-            .collect::<Result<_>>()
-            .map(Value::Object),
-        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => Ok(value.clone()),
-    }
 }

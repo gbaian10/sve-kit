@@ -31,7 +31,8 @@ fn school_catalog(trait_name: &str) -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), documents)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), documents)])
+            .unwrap(),
     )
 }
 

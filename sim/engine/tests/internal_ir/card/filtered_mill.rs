@@ -161,7 +161,8 @@ fn filtered_count_uses_only_the_successful_top_members_for_either_controller() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalogue = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let program = lowerer().lower(&tree(&count())).unwrap()["unit-follower"].clone();
     let blank = WellFormedCardProgram::check(CardProgram {

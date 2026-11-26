@@ -27,14 +27,13 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
-    from sve_carddb.contracts.author_leaves import IndexRecord
+    from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 
 STORAGE_FORMAT = 2
 
 _INDEX = "rules/effects-index"
 _AUTHOR = "rules/author-effects"
 _BODIES = "rules/effect-bodies"
-_PROTOTYPE = "rules/effects"
 _OWNER = r"[A-Za-z0-9_-]+"
 _SHARD = r"[0-9]{3,}\.yaml"
 
@@ -52,10 +51,9 @@ class AuthorInputSet:
     index_files: tuple[InputFile, ...]
     author_files: tuple[InputFile, ...]
     body_files: tuple[InputFile, ...]
-    prototype_files: tuple[InputFile, ...]
 
 
-def _reject(reason: str, path: str, record: IndexRecord | None = None) -> Never:
+def _reject(reason: str, path: str, record: AuthorIndexRecord | None = None) -> Never:
     raise AuthorInputError(
         Diagnostic(
             "index",
@@ -126,7 +124,7 @@ def _files(root: Path, area: str, *, sharded: bool) -> tuple[InputFile, ...]:
 def _path_matches(path: str, area: str) -> bool:
     suffix = (
         _OWNER + r"\.yaml"
-        if area in {_PROTOTYPE, _INDEX}
+        if area == _INDEX
         else _OWNER + "/" + (MAIN_SHARD_PATTERN if area == _AUTHOR else _SHARD)
     )
     return re.fullmatch(re.escape(area) + "/" + suffix, path) is not None
@@ -146,10 +144,7 @@ def _inventory(files: tuple[InputFile, ...], area: str) -> dict[str, InputFile]:
 
 
 def _tree(schemas: AuthorSchemas, item: InputFile) -> dict[str, JsonValue]:
-    prototype = item.path.startswith(_PROTOTYPE + "/")
     try:
-        if prototype:
-            return object_value(schemas.prototype_tree(item.raw))
         if object_value(parse_document(item.raw).value).get("format") != STORAGE_FORMAT:
             _reject("unsupported_storage_format", "format")
         return object_value(schemas.storage_tree(item.raw, "author_effect_set"))
@@ -162,18 +157,16 @@ def _tree(schemas: AuthorSchemas, item: InputFile) -> dict[str, JsonValue]:
 def _selections(
     index: EffectsIndex,
     authors: dict[str, InputFile],
-    prototypes: dict[str, InputFile],
-) -> dict[str, dict[str, IndexRecord]]:
-    selections: dict[str, dict[str, IndexRecord]] = {}
+) -> dict[str, dict[str, AuthorIndexRecord]]:
+    selections: dict[str, dict[str, AuthorIndexRecord]] = {}
     for record in index.records:
-        expected = _AUTHOR if record.kind == "author_effect_set" else _PROTOTYPE
-        if not _path_matches(record.file, expected):
+        if not _path_matches(record.file, _AUTHOR):
             _reject("invalid_index_path", record.file, record)
         selected = selections.setdefault(record.file, {})
         if record.record_key in selected:
             _reject("duplicate_record_selection", record.file, record)
         selected[record.record_key] = record
-        if record.file not in (authors if expected == _AUTHOR else prototypes):
+        if record.file not in authors:
             _reject("index_file_missing", record.file, record)
     return selections
 
@@ -182,7 +175,7 @@ def merge_index_files(
     files: tuple[InputFile, ...], schemas: AuthorSchemas
 ) -> EffectsIndex:
     """Validate pack ownership and retain global identity/scope uniqueness."""
-    records: list[IndexRecord] = []
+    records: list[AuthorIndexRecord] = []
     seen: set[tuple[str, str]] = set()
     for path, item in _inventory(files, _INDEX).items():
         index = schemas.effects_index(item.raw)
@@ -212,24 +205,22 @@ def validate_author_set(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
     """Revalidate the explicit byte inventory; only the loader inspects disk."""
     _validate_index(inputs, schemas)
     authors = _inventory(inputs.author_files, _AUTHOR)
-    prototypes = _inventory(inputs.prototype_files, _PROTOTYPE)
     _inventory(inputs.body_files, _BODIES)
-    selections = _selections(inputs.index, authors, prototypes)
-    for path, item in {**authors, **prototypes}.items():
+    selections = _selections(inputs.index, authors)
+    for path, item in authors.items():
         selected = selections.get(path, {})
         tree = _tree(schemas, item)
-        if path in authors and not selected:
+        if not selected:
             _reject("orphan_author_file", path)
-        if selected:
-            cards = object_value(tree["cards"])
-            if set(cards) != set(selected):
-                _reject("index_record_closure", path)
-            for record in selected.values():
-                if (
-                    tree["kind"] != record.kind
-                    or tree.get("scope", "shared") != record.scope
-                ):
-                    _reject("index_envelope_mismatch", path, record)
+        cards = object_value(tree["cards"])
+        if set(cards) != set(selected):
+            _reject("index_record_closure", path)
+        for record in selected.values():
+            if (
+                tree["kind"] != record.kind
+                or tree.get("scope", "shared") != record.scope
+            ):
+                _reject("index_envelope_mismatch", path, record)
 
     _handwritten_inventory(inputs, schemas)
 
@@ -249,7 +240,6 @@ def load_author_set(authored_root: Path, schemas: AuthorSchemas) -> AuthorInputS
         index_files,
         _files(authored_root, _AUTHOR, sharded=True),
         _files(authored_root, _BODIES, sharded=True),
-        _files(authored_root, _PROTOTYPE, sharded=False),
     )
     for item in (*result.author_files, *result.body_files):
         if object_value(parse_document(item.raw).value).get("format") != STORAGE_FORMAT:

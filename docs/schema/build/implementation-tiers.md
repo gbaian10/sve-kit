@@ -17,14 +17,14 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 
 若首發納入現有 EN 登錄，另啟用 `region_mapping_review`、`art`、`region_text_review`、`region_divergence`，最低集合成為 60 表；60 是含 EN 條件組的結果，不是所有發布無條件必建的數量，其他非空引用仍須補齊閉包。
 
-目前不提供規則等義投影；身分分組不視為規則等義證明。`effect_set`／`keyword_registry` format 1 選定的 `astra/1` 原型不符合 [正式候選入口](../domains/authored-layout.md#7-dsl-與拒絕輸入) 與 DSL 1.0 Schema，不構成正式 DSL 候選；沒有正式候選的卡依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 輸出 `missing_dsl`，`dsl_id/dsl_version` 為 null、`automatic=false`；未指定引擎時引擎目標為 null；公開 automatic 仍由支援狀態推導，不新增傳輸欄位。預覽快照通過其已啟用能力的驗證，不代表正式首發 56 表已驗收。
+目前不提供規則等義投影；身分分組不視為規則等義證明。正式候選依 [DSL 1.0 入口](../domains/authored-layout.md#7-dsl-與拒絕輸入) 驗證。沒有正式候選的卡依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 輸出 `missing_dsl`，`dsl_id/dsl_version` 為 null、`automatic=false`；未指定引擎時引擎目標為 null；公開 automatic 仍由支援狀態推導，不新增傳輸欄位。預覽快照通過其已啟用能力的驗證，不代表正式首發 56 表已驗收。
 
-| `tier` | 用途                               | 啟用/未啟用行為                                                                                                                                                                          | 表數 |
-| ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
-| T0     | 查卡與構築共同必要集合             | 必做；缺 DSL 仍輸出 `missing_dsl`。建置資料庫的 `card_engine_support` 未啟用引擎時 dsl/load/engine 欄為 null；`printing_face.art_id=null`、加工未知、printed unknown，頁面仍能顯示原文。 | 43   |
-| T1     | 來源/策展資料到齊才啟用            | 有該類來源即在該批發布前完成；SNC 需要 references、非官方 metadata；EN 需要 mapping review/語義核對；已知更正/勘誤不能因 tier 而丟掉。                                                   | 25   |
-| T2     | 翻譯、數位、裁定有資料時           | 首個翻譯就做 context/template 引用閉包；數位/語音/裁定可獨立啟用，未上線則 unknown/無提示，不假造翻譯。                                                                                  | 39   |
-| T3     | 引擎/機制能力啟用前                | 首個 manual mechanism 可先做 keyword/action/coverage/projection 及其依賴；DSL/巨集/實跑子組有資料才做。沒實跑永不輸出 `engine_passed`，未檢查機制仍 unknown。                            | 17   |
+| `tier` | 用途                     | 啟用/未啟用行為                                                                                                                                                                          | 表數 |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
+| T0     | 查卡與構築共同必要集合   | 必做；缺 DSL 仍輸出 `missing_dsl`。建置資料庫的 `card_engine_support` 未啟用引擎時 dsl/load/engine 欄為 null；`printing_face.art_id=null`、加工未知、printed unknown，頁面仍能顯示原文。 | 43   |
+| T1     | 來源/策展資料到齊才啟用  | 有該類來源即在該批發布前完成；SNC 需要 references、非官方 metadata；EN 需要 mapping review/語義核對；已知更正/勘誤不能因 tier 而丟掉。                                                   | 25   |
+| T2     | 翻譯、數位、裁定有資料時 | 首個翻譯就做 context/template 引用閉包；數位/語音/裁定可獨立啟用，未上線則 unknown/無提示，不假造翻譯。                                                                                  | 39   |
+| T3     | 引擎/機制能力啟用前      | 首個 manual mechanism 可先做 keyword/action/coverage/projection 及其依賴；DSL/巨集/實跑子組有資料才做。沒實跑永不輸出 `engine_passed`，未檢查機制仍 unknown。                            | 17   |
 
 ## 逐表分配（每張恰一次）
 

@@ -49,9 +49,9 @@ fn board(pp: u8, face_up: bool) -> Game {
     wrong["number"] = json!("wrong-kind");
     wrong["faces"][0]["card_type"] = json!("スペル・エボルヴ");
     rows.extend([other, wrong]);
-    let extra=json!({"format":1,"kind":"effect_set","cards":{"other-spell":{"status":"complete","abilities":[]},"wrong-kind":{"status":"complete","abilities":[]}}}).to_string();
+    let extra=json!({"format":1,"kind":"fixture_cards","cards":{"other-spell":{"status":"complete"},"wrong-kind":{"status":"complete"}}}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &rows
                 .iter()
                 .map(Value::to_string)

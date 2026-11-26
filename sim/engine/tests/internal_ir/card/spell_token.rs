@@ -16,7 +16,8 @@ fn token_board(zone: &str, kind: &str, cost: &str) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([{"id":"d","card":"unit-follower"}]));
     initial["players"]["P1"]["pp"] = json!({"current":4,"max":4});

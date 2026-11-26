@@ -417,16 +417,20 @@ fn original_cost_boundary_ignores_effective_cost_changes() {
     })
     .collect::<Vec<_>>()
     .join("\n");
-    let document = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-amulet":{"status":"complete","abilities":[]},
-        "cost-three":{"status":"complete","abilities":[]},
-        "cost-four":{"status":"complete","abilities":[]}
+    let document = json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-amulet":{"status":"complete"},
+        "cost-three":{"status":"complete"},
+        "cost-four":{"status":"complete"}
     }})
     .to_string();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("boundary.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("boundary.yaml".into(), document)],
+        )
+        .unwrap(),
     );
     let program = lowerer()
         .lower(&tree())

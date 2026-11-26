@@ -3,7 +3,6 @@ use super::ex_select::{expanded, rule_fixtures};
 use super::*;
 use serde_json::Map;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 fn position(card: &str, zone: &str) -> Value {
     let mut initial = draw_position();
@@ -382,12 +381,12 @@ fn rose_game(initial: &Value) -> Game {
         snapshot.push('\n');
         snapshot.push_str(&json!({"number":"backfill-rose-base","faces":[face]}).to_string());
         input["documents"].as_array_mut().unwrap().push(json!(["backfill-rose-base.yaml",
-            "format: 1\nkind: effect_set\ncards:\n  backfill-rose-base:\n    status: complete\n    abilities: []\n"]));
+            "format: 1\nkind: fixture_cards\ncards:\n  backfill-rose-base:\n    status: complete\n"]));
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(root.join("authored/rules/engine/index.yaml")).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
         let selected = repository::select_with_rules(&snapshot, &keywords, &input,
-            &rules.to_string(), &EngineIdentityInput::LegacyJp).unwrap();
+            &rules.to_string(),).unwrap();
         let mut tree = expanded::tree().clone();
         let mut cards = Map::new();
         cards.insert("backfill-rose-base".into(), tree["cards"]["synthetic-evolution"].clone());

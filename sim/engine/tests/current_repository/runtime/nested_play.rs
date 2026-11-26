@@ -1,7 +1,6 @@
 use super::union_burst_batch1::{finish, pending};
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 
 struct Fixture {
     selection: SelectedEffects,
@@ -17,7 +16,7 @@ fn fixture() -> &'static Fixture {
         }
         snapshot.push_str(&json!({"number":base_name,"faces":[{"name":"マーリン","card_type":"フォロワー","card_class":"ウィッチ","cost":"3","power":"3","hp":"2","traits":["魔法使い"],"text":null,"sections":[]}]}).to_string());
         snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["nested-base.yaml",json!({"format":1_u8,"kind":"effect_set","cards":{base_name:{"status":"complete","abilities":[]}}}).to_string()]));
+        input["documents"].as_array_mut().unwrap().push(json!(["nested-base.yaml",json!({"format":1_u8,"kind":"fixture_cards","cards":{base_name:{"status":"complete"}}}).to_string()]));
         let mut tree = expanded::tree().clone();
         let mut base_template = tree["cards"]["synthetic-evolution"].clone();
         base_template["abilities"][0]["evolve"]["cost"]["pp"] = json!(2_u8);
@@ -25,7 +24,7 @@ fn fixture() -> &'static Fixture {
         let base_program = lowerer().lower(&tree).unwrap().remove(base_name).unwrap();
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml")).unwrap()).unwrap();
         rules["input"]["snapshot_sha256"] = json!(rule_fixtures::hash(snapshot.as_bytes()));
-        let selection = repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),&EngineIdentityInput::LegacyJp).unwrap();
+        let selection = repository::select_with_rules(&snapshot,&keywords,&input,&rules.to_string(),).unwrap();
         Fixture { selection, base: base_program }
     })
 }

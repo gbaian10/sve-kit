@@ -305,18 +305,17 @@ fn with_program(initial: &Value, producer: &WellFormedCardProgram) -> Game {
     }]}).to_string()).collect::<Vec<_>>().join("\n");
     let definitions = rows
         .iter()
-        .map(|(number, _)| {
-            (
-                (*number).to_owned(),
-                json!({"status":"complete","abilities":[]}),
-            )
-        })
+        .map(|(number, _)| ((*number).to_owned(), json!({"status":"complete"})))
         .collect::<serde_json::Map<_, _>>();
-    let document = json!({"format":1,"kind":"effect_set","cards":definitions}).to_string();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let document = json!({"format":1,"kind":"fixture_cards","cards":definitions}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("synthetic.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &registry,
+            &[("synthetic.yaml".into(), document)],
+        )
+        .unwrap(),
     );
     let mut initial = initial.clone();
     let actor = initial["turn"]["active"].as_str().unwrap().to_owned();

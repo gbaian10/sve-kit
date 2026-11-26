@@ -11,18 +11,15 @@ fn catalog() -> Arc<Catalog> {
     for (number, traits) in CARDS {
         let traits: Vec<&str> = traits.split('・').filter(|t| !t.is_empty()).collect();
         lines.push(json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"2","traits":traits,"text":null,"sections":[]}]}).to_string());
-        cards.insert(
-            number.into(),
-            json!({"status":"complete","review":"synthetic","abilities":[]}),
-        );
+        cards.insert(number.into(), json!({"status":"complete"}));
     }
-    let document = json!({"format":1,"kind":"effect_set","cards":cards}).to_string();
+    let document = json!({"format":1,"kind":"fixture_cards","cards":cards}).to_string();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &lines.join("\n"),
             include_str!(concat!(
                 env!("CARGO_MANIFEST_DIR"),
-                "/../../authored/rules/keywords.yaml"
+                "/../../authored/rules/keyword-registry.yaml"
             )),
             &[("unit.yaml".into(), document)],
         )

@@ -874,15 +874,15 @@ fn printed_bp01_065_and_bp01_006_fragments_use_the_generated_snapshot() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     // The synthetic harness supplies no prototype abilities; the IR below covers fragments only.
-    let fragments = json!({"format":1,"kind":"effect_set","cards":{
-        "BP01-065":{"status":"complete","review":"synthetic fragment harness","abilities":[]},
-        "BP01-006":{"status":"complete","review":"synthetic fragment harness","abilities":[]}
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":{
+        "BP01-065":{"status":"complete"},
+        "BP01-006":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

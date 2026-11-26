@@ -43,18 +43,13 @@ fn catalog() -> Arc<Catalog> {
             .join("\n");
         let cards = ["base", "evolved", "secret-a", "secret-b"]
             .into_iter()
-            .map(|number| {
-                (
-                    number.to_owned(),
-                    json!({"status":"complete","review":"synthetic","abilities":[]}),
-                )
-            })
+            .map(|number| (number.to_owned(), json!({"status":"complete"})))
             .collect::<serde_json::Map<_, _>>();
-        let document = json!({"format":1_u8,"kind":"effect_set","cards":cards});
+        let document = json!({"format":1_u8,"kind":"fixture_cards","cards":cards});
         Arc::new(
-            Catalog::from_documents(
+            Catalog::from_fixture_documents(
                 &snapshot,
-                "{\"format\":1,\"kind\":\"keyword_registry\",\"keywords\":{}}",
+                "{\"format\":1,\"kind\":\"keyword_registry\",\"rule_names\":{}}",
                 &[("synthetic.yaml".into(), document.to_string())],
             )
             .unwrap(),

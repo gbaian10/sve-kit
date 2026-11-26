@@ -83,7 +83,7 @@ impl SnapshotPrograms {
         {
             return Err(invalid("unsupported battle program profile or region"));
         }
-        let mut catalogue = Catalog::from_documents(snapshot, keywords, &[])?;
+        let mut catalogue = Catalog::from_snapshot(snapshot, keywords)?;
         let verified = PrintingIndex::new(&catalogue, printings)?;
         let bound = verified.bind(package, &mut catalogue)?;
         catalogue.validate_token_templates()?;

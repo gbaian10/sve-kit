@@ -35,7 +35,7 @@ fn batch_selection() -> &'static SelectedEffects {
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
                 format!("{number}.yaml"),
-                format!("format: 1\nkind: effect_set\ncards:\n  {number}:\n    status: complete\n    abilities: []\n")
+                format!("format: 1\nkind: fixture_cards\ncards:\n  {number}:\n    status: complete\n")
             ]));
         }
         repository::select(&snapshot, &keywords, &input).unwrap()

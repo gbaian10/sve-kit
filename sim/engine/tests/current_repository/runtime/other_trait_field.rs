@@ -19,7 +19,7 @@ fn companion_game(initial: &Value, kind: &str, trait_name: &str) -> Game {
     }
     snapshot.push_str(&json!({"number":"trait-companion","faces":[face]}).to_string());
     snapshot.push('\n');
-    input["documents"].as_array_mut().unwrap().push(json!(["trait-companion.yaml", "format: 1\nkind: effect_set\ncards:\n  trait-companion:\n    status: complete\n    abilities: []\n"]));
+    input["documents"].as_array_mut().unwrap().push(json!(["trait-companion.yaml", "format: 1\nkind: fixture_cards\ncards:\n  trait-companion:\n    status: complete\n"]));
     let mut game = game_from_selection(initial, &snapshot, &keywords, &input);
     game.load_internal_card(
         "trait-companion",

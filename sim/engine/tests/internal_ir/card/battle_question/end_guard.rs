@@ -5,14 +5,13 @@ use sve_battle_contract::{
     observation::{Posture, ProcessingStage},
 };
 use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::player::{ClosingAnswer, ClosingQuestion, DecisionShape};
 
 fn fixture() -> (Arc<Catalog>, BattleReferences) {
     let snapshot = &board_fixture::fixture().unwrap().snapshot;
     let (_, _, document) = board_fixtures::catalog_documents(&json!("1"));
-    let keywords = json!({"format":1_i32,"kind":"keyword_registry","keywords":{
-        "guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}}
+    let keywords = json!({"format":1_i32,"kind":"keyword_registry","rule_names":{
+        "guard":{"ja":"守護","rule":"12.8"}
     }});
     let rules = rule_fixtures::rules(
         snapshot,
@@ -24,12 +23,11 @@ fn fixture() -> (Arc<Catalog>, BattleReferences) {
         json!([]),
     );
     let catalog = Arc::new(
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             snapshot,
             &keywords.to_string(),
             &[("guard".into(), document)],
             &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     );

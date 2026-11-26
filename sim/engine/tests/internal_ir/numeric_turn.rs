@@ -486,9 +486,9 @@ fn expiry_lethal_is_destroyed_before_main_start_triggers_wait_for_a_choice() {
     snapshot.push('\n');
     snapshot.push_str(&survivor.to_string());
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["survivor"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["survivor"] = json!({"status":"complete"});
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &keywords,
             &[("main-start".into(), document.to_string())],
@@ -741,9 +741,9 @@ fn timed_add_evolution_expires_from_evolved_base_and_timed_set_rejects() {
     snapshot.push('\n');
     snapshot.push_str(&json!({"number":"evolved","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"3","hp":"4","traits":[],"sections":[]}]}).to_string());
     let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["evolved"] = json!({"status":"complete","abilities":[]});
+    document["cards"]["evolved"] = json!({"status":"complete"});
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &keywords,
             &[("numeric-turn".into(), document.to_string())],

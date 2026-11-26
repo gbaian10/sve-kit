@@ -1,12 +1,11 @@
 use super::*;
 use crate::rule_fixtures;
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::{DecisionView, InputDomain, SearchAnswer};
 
 fn ex_catalog() -> Arc<Catalog> {
     let snapshot=[("unit-spell","スペル"),("unit-follower","フォロワー"),("unit-amulet","アミュレット"),("lesson","スペル・トークン")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":if *kind=="アミュレット" {"-"} else {"2"},"hp":if *kind=="アミュレット" {"-"} else {"3"},"traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n");
-    let document=json!({"format":1,"kind":"effect_set","cards":{
-        "unit-spell":{"status":"complete","abilities":[]},"unit-follower":{"status":"complete","abilities":[]},"unit-amulet":{"status":"complete","abilities":[]},"lesson":{"status":"complete","abilities":[]}
+    let document=json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-spell":{"status":"complete"},"unit-follower":{"status":"complete"},"unit-amulet":{"status":"complete"},"lesson":{"status":"complete"}
     }}).to_string();
     let rules = rule_fixtures::rules(
         &snapshot,
@@ -20,12 +19,11 @@ fn ex_catalog() -> Arc<Catalog> {
     )
     .to_string();
     Arc::new(
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             &snapshot,
-            "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+            "format: 1\nkind: keyword_registry\nrule_names: {}\n",
             &[("ex.yaml".into(), document)],
             &rules,
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     )

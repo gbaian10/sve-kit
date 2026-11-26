@@ -329,7 +329,7 @@ impl Game {
         references: &BattleReferences,
     ) -> Result<StrictAdmission> {
         references
-            .validate_catalog(&selected.prototypes)
+            .validate_catalog(&selected.catalogue)
             .map_err(|_reference| crate::invalid("battle reference background mismatch"))?;
         let (admitted, report) = Self::prepare_strict_player_decks(selected, decks)?;
         if report.is_admitted() {
@@ -387,15 +387,15 @@ impl Game {
         selected.check_runtime()?;
         let mut provide = |number: &str| Ok(selected.current.get(number).cloned());
         let closures = [
-            closure(&selected.prototypes, &mut provide, &decks[0])?,
-            closure(&selected.prototypes, &mut provide, &decks[1])?,
+            closure(&selected.catalogue, &mut provide, &decks[0])?,
+            closure(&selected.catalogue, &mut provide, &decks[1])?,
         ];
         let required = closures
             .iter()
             .flat_map(|closure| closure.cards.iter().cloned())
             .collect();
         let mut probe = Self::unopened(
-            Arc::clone(&selected.prototypes),
+            Arc::clone(&selected.catalogue),
             &Value::Null,
             &Value::Null,
             &Value::Null,

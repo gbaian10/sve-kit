@@ -15,7 +15,7 @@
     "records": {
       "type": "array",
       "items": {
-        "$ref": "#/$defs/IndexRecord"
+        "$ref": "#/$defs/AuthorIndexRecord"
       }
     }
   },
@@ -37,36 +37,6 @@
     "Scope": {
       "type": "string",
       "const": "shared"
-    },
-    "PrototypeIndexRecord": {
-      "type": "object",
-      "properties": {
-        "card_id": {
-          "$ref": "#/$defs/CardId"
-        },
-        "scope": {
-          "type": "string",
-          "const": "shared"
-        },
-        "file": {
-          "$ref": "#/$defs/RelativeFile"
-        },
-        "kind": {
-          "type": "string",
-          "const": "effect_set"
-        },
-        "record_key": {
-          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/NonemptyText"
-        }
-      },
-      "required": [
-        "card_id",
-        "scope",
-        "file",
-        "kind",
-        "record_key"
-      ],
-      "additionalProperties": false
     },
     "AuthorIndexRecord": {
       "type": "object",
@@ -96,16 +66,6 @@
         "record_key"
       ],
       "additionalProperties": false
-    },
-    "IndexRecord": {
-      "oneOf": [
-        {
-          "$ref": "#/$defs/PrototypeIndexRecord"
-        },
-        {
-          "$ref": "#/$defs/AuthorIndexRecord"
-        }
-      ]
     }
   }
 }

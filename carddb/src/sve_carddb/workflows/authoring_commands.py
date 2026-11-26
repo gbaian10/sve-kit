@@ -94,7 +94,7 @@ def inspect_command(
 
 
 @app.command("write")
-def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete ordered boundary in one operation
+def write_command(
     *,
     inputs: InputOption,
     main: Annotated[Path, typer.Option("--main")],
@@ -102,9 +102,8 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
     bodies: Annotated[Path | None, typer.Option("--bodies")] = None,
     card: Annotated[list[str] | None, typer.Option("--card")] = None,
     all_cards: Annotated[bool, typer.Option("--all")] = False,
-    remove_prototype: Annotated[bool, typer.Option("--remove-prototype")] = False,
 ) -> None:
-    """Write validated author shards and optionally replace their prototypes."""
+    """Write validated author shards and their index."""
     if bool(card) == all_cards:
         raise typer.BadParameter("Specify --card or --all")
 
@@ -120,7 +119,6 @@ def write_command(  # ruff: ignore[too-many-arguments] -- keep the complete orde
                 output_root=output_root,
                 cards=frozenset(card or ()),
                 all_cards=all_cards,
-                remove_prototype=remove_prototype,
             )
 
     _run(action)

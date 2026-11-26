@@ -7,7 +7,7 @@ use crate::ir::{ELEMENTAL_TRAITS, trait_matches};
 use core::mem::take;
 use serde_json::{Value, json};
 
-use super::{Frame, Game, Pending, Step, int, list, other, string};
+use super::{Frame, Game, Step, int, list, other, string};
 use crate::ir::SnapshotId;
 use crate::{EngineFailure, Result, invalid};
 
@@ -32,11 +32,10 @@ impl Game {
             }
         }
         match self.decide_inner(&request).and_then(|outcome| {
-            self.validate_trigger_choices()?;
             // Grants or new objects could add triggers whose waits typed layers cannot order yet;
             // the last layer may expire within this input after such a wait already happened.
             if layered || self.internal_numeric_active() {
-                self.internal_prototype_abilities()?;
+                self.check_internal_fixture()?;
             }
             Ok(outcome)
         }) {
@@ -140,12 +139,6 @@ impl Game {
         if self.state.flow["kind"] == "pregame" {
             return self.opening_point();
         }
-        if let Some(prompt) = &self.state.prompt {
-            return json!({"by":prompt.by,"at":"resolve"});
-        }
-        if let Some(seat) = self.pending_player() {
-            return json!({"by":seat,"at":"check-timing"});
-        }
         match string(&self.state.flow["kind"]) {
             "battle" => json!({"by":other(self.active()),"at":"quick"}),
             "end" => {
@@ -158,18 +151,6 @@ impl Game {
             _ => json!({"by":self.active(),"at":"main"}),
         }
     }
-    pub(super) fn pending_player(&self) -> Option<&str> {
-        if self
-            .state
-            .pending
-            .iter()
-            .any(|p| p.controller == self.active())
-        {
-            Some(self.active())
-        } else {
-            self.state.pending.first().map(|p| p.controller.as_str())
-        }
-    }
     pub(super) fn start_frame(
         &self,
         source: &str,
@@ -180,25 +161,6 @@ impl Game {
         frame.reference = reference;
         frame.decision = decision.clone();
         frame.cause = json!({"decision":self.node});
-        let mut ids = vec![source.to_owned()];
-        for key in ["targets", "costs"] {
-            if let Some(entries) = decision[key].as_object() {
-                for targets in entries.values() {
-                    ids.extend(
-                        list(targets)
-                            .iter()
-                            .filter_map(Value::as_str)
-                            .map(str::to_owned),
-                    );
-                }
-            }
-        }
-        for id in ids {
-            if self.state.objects.contains_key(&id) {
-                let state = self.object_attributes(&id)?;
-                frame.captured.insert(id, state);
-            }
-        }
         Ok(frame)
     }
 
@@ -415,7 +377,6 @@ impl Game {
             json!(int(&self.state.turn["elapsed_turns"][&seat]).saturating_add(1));
         self.record_player_phase();
         self.internal_reset_turn_counters_and_facts();
-        self.state.used.clear();
         self.internal_reset_object_turn_marks();
         let prevent_gain = self.restricted(&format!("{seat}.leader"), "normal_max_pp_gain")?;
         let prevent_draw = self.restricted(&format!("{seat}.leader"), "normal_draw")?;
@@ -485,9 +446,6 @@ impl Game {
             self.internal_terminal_cleanup();
             return Ok(());
         }
-        if self.state.frame.is_some() {
-            return Ok(());
-        }
         let mut losers = Vec::new();
         for seat in ["P1", "P2"] {
             if self.restricted(&format!("{seat}.leader"), "lose")? {
@@ -527,14 +485,10 @@ impl Game {
         if self.clean_attachment_rules()? || self.clean_field_rules()? {
             return self.checks();
         }
-        if self.state.pending.is_empty()
-            && !self.card_runtime.has_pending()
-            && self.state.flow["stage"] == "start-check"
-        {
+        if !self.card_runtime.has_pending() && self.state.flow["stage"] == "start-check" {
             self.start_main()?;
         }
-        if self.state.pending.is_empty()
-            && !self.card_runtime.has_pending()
+        if !self.card_runtime.has_pending()
             && self.state.flow["kind"] == "end"
             && self.state.flow["stage"] == "triggers"
         {
@@ -548,8 +502,7 @@ impl Game {
             }
             self.state.flow["stage"] = json!(if guards { "guard" } else { "quick" });
         }
-        if self.state.pending.is_empty()
-            && !self.card_runtime.has_pending()
+        if !self.card_runtime.has_pending()
             && self.state.flow["kind"] == "end"
             && self.state.flow["stage"] == "discard"
             && self.zone_count(self.active(), "hand") <= 7
@@ -558,22 +511,5 @@ impl Game {
             return self.checks();
         }
         Ok(())
-    }
-
-    pub(super) fn push_pending(&mut self, mut pending: Pending) {
-        self.disambiguate_unkeyed_pending(&mut pending);
-        if pending.id.is_none() {
-            for other in self.state.pending.iter_mut().filter(|other| {
-                other.id.is_none()
-                    && other.controller == pending.controller
-                    && other.reference == pending.reference
-                    && other.event != pending.event
-            }) {
-                // An instance keeps its discriminator after its siblings resolve.
-                other.retained = true;
-                pending.retained = true;
-            }
-        }
-        self.state.pending.push(pending);
     }
 }

@@ -1,8 +1,8 @@
 # Shared exam scenarios (tests/rules-scenarios) that do not yet pass on the typed player entry.
 # The typed gate fails on any other non-pass, on a listed scenario that now passes (delete its
 # entry), and on a listed scenario whose verdict kind changed. `error` names the reason class:
-#   unadmitted <card>: a card in the position still has only a prototype program
-#   legacy-state: the position writes prototype semantic_state that typed cannot import
+#   unadmitted <card>: a card in the position lacks a typed program
+#   legacy-state: the fixture requires a typed import of historical state
 #   typed-gap: typed rules support is missing or the run differs from the exam
 #   interface: serial typed questions or player events differ from the exam's shape
 # `reason` pins the exact cause: the engine reason, or every mismatched checkpoint, view and
@@ -13,22 +13,22 @@ known:
     scenario: "變身 0"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-001"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP01-001"
     scenario: "變身 1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-001"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP01-001"
     scenario: "變身 2"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-001"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP01-001"
     scenario: "變身後以 new-1 打出新玫瑰"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-001"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP01-056"
     scenario: "原 EX 5"
     status: fail
@@ -68,12 +68,12 @@ known:
     scenario: "[fable] A 用 +2 後攻擊力 4 的ファイター付費 → 對リーダー 4 傷害"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP06-072"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP05-057"
     scenario: "[fable] B 目標改為從者：天剣の乙女受 4"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP06-072"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP05-092"
     scenario: "[fable] A 異形攻擊リーダー致體力 −3：勝利被禁止、敗北被禁止；護り手把體力設為 1 並進墓場"
     status: fail
@@ -218,7 +218,7 @@ known:
     scenario: "A 隠者 攻擊力 −2 → 對手メインフェイズ 開始 → 0 傷害，什麼都沒發生"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-081"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP15-113"
     scenario: "B 體力 10 → 攻擊リーダー → ドレイン 回復 2"
     status: fail
@@ -323,17 +323,17 @@ known:
     scenario: "本回合減費=True 追加費用=True"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP18-SL14"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP18-SL13"
     scenario: "本回合減費=True 追加費用=False"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP18-SL14"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP18-SL13"
     scenario: "保留EX卡跨過本回合結束，下次自回合減費失效"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP18-SL14"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP18-SL16"
     scenario: "B P2 用「これを墓場に置く」當費用 → 被換成消滅，費用仍算已支付 → 照樣放 2 張到墓場"
     status: fail
@@ -373,27 +373,27 @@ known:
     scenario: "A 攻擊力 −2 的從者攻擊リーダー → 沒有傷害"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-081"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP19-081"
     scenario: "A2 攻擊力 −2 的從者攻擊アクト狀態的ファイター → 只有ファイター 對它造成 2 傷害"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-081"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP19-081"
     scenario: "B +2 之後攻擊力是 0 → 攻擊リーダー 仍沒有傷害"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-081"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP19-081"
     scenario: "C 兩次 +2 之後攻擊力是 2 → 造成 2 傷害"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-081"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP19-081"
     scenario: "D 4/6 → 1/3 的天剣の乙女攻擊ファイター → 互相造成 1 與 2"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-081"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "card-BP19-086"
     scenario: "A 對手回合：LW 復活特攻隊長 → ファンファーレ 自傷並進化 → ピアシィ 與根際 在對手回合誘發"
     status: fail
@@ -428,32 +428,32 @@ known:
     scenario: "NC=9 模式=1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP19-P25"
     scenario: "NC=10 模式=1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP19-P25"
     scenario: "NC=9 模式=2"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP19-P31"
     scenario: "nine-distinct"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-P31"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP19-P31"
     scenario: "nine-duplicate"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-P31"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP19-P31"
     scenario: "eight-distinct"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-P31"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP19-SL22"
     scenario: "A 一張エルラーデ → 結束階段的能力待機 2 次 → 一次選【1】4 傷害、一次選【3】抽 1"
     status: unsupported
@@ -478,12 +478,12 @@ known:
     scenario: "返戻原有 6 個"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP20-P61"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP20-P61"
     scenario: "返戻原有 7 個"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP20-P61"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-BP20-P65"
     scenario: "シャム＝ナクア的紋章在 EX 時仍不能選零個模式"
     status: adapter-error
@@ -548,12 +548,12 @@ known:
     scenario: "只餘一格，選 x"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: CP04-SL10"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-CP04-SL09"
     scenario: "只餘一格，選 y"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: CP04-SL10"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-EBD02-005"
     scenario: "A 墓場 10 張法術 → 打出運命の導き（費用 0）→ 墓場只剩 9 → 不回復 PP → 解決後回墓場"
     status: fail
@@ -618,12 +618,12 @@ known:
     scenario: "場上 4 張"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: PCS01-048"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-PCS01-048"
     scenario: "場上 5 張"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: PCS01-048"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "card-SCS01-006"
     scenario: "場只剩一格仍翻到兩張，兩位玩家都看得到公開牌"
     status: fail
@@ -663,12 +663,12 @@ known:
     scenario: "PP=2"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: CP04-019"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "flow-equipment-capacity-r3-01"
     scenario: "PP=1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: CP04-019"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "flow-ex-full-remainder-01"
     scenario: "エル選中的武闘竜人因 EX 已滿未移動，與另外兩張一起放底"
     status: ineligible
@@ -723,7 +723,7 @@ known:
     scenario: "C 費用固定值先於增減：「7にする」→ −4 → 3；並取得追加回合"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP03-SL07"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "rule-10.10-02"
     scenario: "A P2 選「+1 → −1」→ シオン受 1；反擊破壞一ツ尾狐 → ギンセツ誘發"
     status: fail
@@ -753,7 +753,7 @@ known:
     scenario: "[astra] 非回合玩家尚有待機時，優先回到回合玩家的新待機"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.5.2-01"
     scenario: "[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及"
     status: fail
@@ -768,12 +768,12 @@ known:
     scenario: "[astra] 回合玩家 P1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.5.2-02"
     scenario: "[astra] 回合玩家 P2"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.5.2-02"
     scenario: "[fable] A 雙方各兩個ラストワード；P1 先清完；P2 的サロメ選不到目標取消，デモンビーター照常"
     status: fail
@@ -838,7 +838,7 @@ known:
     scenario: "本回合已用過仍不能再起動"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP20-P38"
+    reason: "fixture requires typed history for used_this_turn"
   - question: "rule-10.7-01"
     scenario: "A 兩隻ゴースト同時離場 → 只待機 1 次 → 出 1 隻ゴースト；同回合再離場不誘發"
     status: unsupported
@@ -853,27 +853,27 @@ known:
     scenario: "同能力待機 1 次"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP14-027"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.7.2.1-01"
     scenario: "同能力待機 2 次"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP14-027"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.7.3.2-01"
     scenario: "[astra] 可選目標 0"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-078"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.7.3.2-01"
     scenario: "[astra] 可選目標 1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-078"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.7.3.2-01"
     scenario: "[astra] 可選目標 2"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-078"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-10.7.3.2-01"
     scenario: "[fable] A PP 不足付不出ファンファーレ費用 → 待機取消一次"
     status: fail
@@ -908,47 +908,47 @@ known:
     scenario: "A 先「+2」後「1にする」→ 1/1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP06-072"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "rule-10.9-01"
     scenario: "B 先「1にする」後「+2」→ 3/1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP16-049"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "rule-10.9-01"
     scenario: "C 被設成 1/1 的 2/2 進化成 3/3 → 差額法 2/2（Q1923）"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP16-049"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "rule-10.9.1.6-01"
     scenario: "buff→set"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP06-072"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "rule-10.9.1.6-01"
     scenario: "set→buff"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP16-049"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "rule-10.9.1.6-02"
     scenario: "同時留下雙方的數值效果，回合玩家的 +2 先於對手設為 1"
     status: unsupported
     error: "legacy-state: simultaneous continuous effects"
-    reason: "no authored program: BP16-049"
+    reason: "fixture requires typed history for continuous_effects"
   - question: "rule-11.2.1-01"
     scenario: "生命 1"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-11.2.1-01"
     scenario: "生命 2"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-11.2.1-01"
     scenario: "生命 3"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP01-P25"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-12.15-01"
     scenario: "1 オーラ：粛清の一刀 不能選它（唯一目標時不能打出）；テミス 的全體破壞照樣破壞它"
     status: adapter-error
@@ -978,7 +978,7 @@ known:
     scenario: "ファンファーレ自動進化"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP19-009"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-13.5.1.3.2-01"
     scenario: "選項數 NC10：墓場 9 嘗試兩模式"
     status: adapter-error
@@ -988,12 +988,12 @@ known:
     scenario: "解決 NC20 固定：起始 19，先移走魂の一刀"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: EBD03-008"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-13.5.1.3.2-01"
     scenario: "解決 NC20 固定：起始 20，先移走魂の一刀"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: EBD03-008"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-14.2-01"
     scenario: "A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張"
     status: unsupported
@@ -1063,19 +1063,19 @@ known:
     scenario: "EX 紋章 2 枚"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP20-P66"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-9.1.5.1.1-01"
     scenario: "EX 紋章 3 枚"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP20-P66"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-9.1.5.1.1-01"
     scenario: "EX 紋章 4 枚"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP20-P66"
+    reason: "fixture requires typed history for pending_triggers"
   - question: "rule-9.1.5.1.1-01"
     scenario: "EX 紋章 5 枚"
     status: unsupported
     error: "legacy-state (#2008)"
-    reason: "no authored program: BP20-P66"
+    reason: "fixture requires typed history for pending_triggers"

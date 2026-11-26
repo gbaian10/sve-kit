@@ -79,7 +79,7 @@ fn prepared() -> &'static (SelectedEffects, BTreeMap<String, WellFormedCardProgr
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
                 format!("{number}.yaml"),
-                json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()
+                json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()
             ]));
         }
         let selected = repository::selection_with_rules_from(&snapshot, &keywords, &input);

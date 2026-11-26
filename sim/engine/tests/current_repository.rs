@@ -56,8 +56,8 @@ fn b4(input: &Value) -> &Value {
 #[test]
 fn repository_lastword_keeps_its_permanent_source_and_complete_damage_body() {
     let selected = selection().clone();
-    let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
-    assert!(prototypes["programs"].get("BP01-P25").is_none());
+    let catalogue = serde_json::to_value(&*selected.catalogue).unwrap();
+    assert!(catalogue["fixtures"].get("BP01-P25").is_none());
     let card = &selected.current["BP01-P25"];
     assert_eq!(card.card_id, "c:efb62b3ef53e576797625688d75164d9");
     assert_eq!(card.program.card().abilities.len(), 1);
@@ -146,12 +146,12 @@ fn repository_keywords_lower_as_complete_current_candidates() {
 #[test]
 fn repository_named_search_lowers_as_a_complete_current_candidate() {
     let selected = selection().clone();
-    let prototypes = serde_json::to_value(&selected.prototypes).unwrap();
+    let catalogue = serde_json::to_value(&selected.catalogue).unwrap();
     let card_no = "BP06-048";
     let card_id = "c:e7b93196e1175515a42771a72c7b12da";
     let face_id = "f:e9d8deca215953a99d12bd07acd566fa";
 
-    assert!(prototypes["programs"].get(card_no).is_none());
+    assert!(catalogue["fixtures"].get(card_no).is_none());
     let card = &selected.current[card_no];
     assert_eq!(card.card_id, card_id);
     assert_eq!(card.program.card().abilities.len(), 1);
@@ -445,7 +445,7 @@ fn current_loader_preserves_snapshot_facts_and_validation_across_selections() {
     changed_card["faces"][0]["cost"] = json!("9");
     let first_snapshot = first_card.to_string();
     let changed_snapshot = changed_card.to_string();
-    let keywords = "format: 1\nkind: keyword_registry\nkeywords: {}";
+    let keywords = "format: 1\nkind: keyword_registry\nrule_names: {}";
     let handoff = json!({"documents":[],"authors":[]});
     let loader = CurrentSelectionLoader::new().unwrap();
     let barrier = Barrier::new(2);
@@ -458,20 +458,20 @@ fn current_loader_preserves_snapshot_facts_and_validation_across_selections() {
         let changed = scope.spawn(|| select(&changed_snapshot));
         (first.join().unwrap(), changed.join().unwrap())
     });
-    let first_wire = serde_json::to_value(&first.prototypes).unwrap();
+    let first_wire = serde_json::to_value(&first.catalogue).unwrap();
     assert_eq!(first_wire["cards"]["unit"], first_card);
     assert_eq!(
-        serde_json::to_value(&changed.prototypes).unwrap()["cards"]["unit"],
+        serde_json::to_value(&changed.catalogue).unwrap()["cards"]["unit"],
         changed_card
     );
     let repeated = loader.select(&first_snapshot, keywords, &handoff).unwrap();
     assert_eq!(
-        serde_json::to_value(&repeated.prototypes).unwrap(),
+        serde_json::to_value(&repeated.catalogue).unwrap(),
         first_wire
     );
     let restored: Catalog = serde_json::from_value(first_wire.clone()).unwrap();
     assert_eq!(serde_json::to_value(restored).unwrap(), first_wire);
-    let independent = Catalog::from_documents(&first_snapshot, keywords, &[]).unwrap();
+    let independent = Catalog::from_fixture_documents(&first_snapshot, keywords, &[]).unwrap();
     assert_eq!(serde_json::to_value(independent).unwrap(), first_wire);
 
     let duplicate = format!("{first_snapshot}\n{first_snapshot}");
@@ -484,11 +484,11 @@ fn current_loader_preserves_snapshot_facts_and_validation_across_selections() {
     assert!(matches!(
         loader.select(
             &first_snapshot,
-            "format: 2\nkind: keyword_registry\nkeywords: {}",
+            "format: 2\nkind: keyword_registry\nrule_names: {}",
             &handoff
         ),
         Err(EngineFailure::Invalid(_))
     ));
     loader.select(&first_snapshot, keywords, &handoff).unwrap();
-    assert_eq!(serde_json::to_value(&first.prototypes).unwrap(), first_wire);
+    assert_eq!(serde_json::to_value(&first.catalogue).unwrap(), first_wire);
 }

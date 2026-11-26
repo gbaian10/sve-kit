@@ -26,7 +26,6 @@ use sve_battle_host::wire::{
 };
 use sve_battle_host::{Delivery, LocalSession, SeatControl};
 use sve_engine::battle::BattleReferences;
-use sve_engine::catalog::{Catalog, EngineIdentityInput};
 use sve_engine::game::Game;
 use sve_engine::host::HostLimits;
 
@@ -45,21 +44,16 @@ fn game(start_amulets: bool) -> (Game, BattleReferences) {
         return typed_start_game();
     }
     let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3")].join("\n");
-    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
-    let effects = json!({"format":1_u8,"kind":"effect_set","cards":{
-        "t-small":{"status":"complete","review":"synthetic","abilities":[]},
-        "t-large":{"status":"complete","review":"synthetic","abilities":[]}
+    let registry = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let effects = json!({"format":1_u8,"kind":"fixture_cards","cards":{
+        "t-small":{"status":"complete"},
+        "t-large":{"status":"complete"}
     }})
     .to_string();
     let rules = fixture::rules(&snapshot, "t-small");
-    let catalog = Catalog::from_documents_with_rules(
-        &snapshot,
-        &registry,
-        &[("t.yaml".into(), effects)],
-        &rules,
-        &EngineIdentityInput::LegacyJp,
-    )
-    .unwrap();
+    let catalog =
+        rule_fixtures::catalog(&snapshot, &registry, &[("t.yaml".into(), effects)], &rules)
+            .unwrap();
     let references = BattleReferences::new(&catalog, fixture::references(&snapshot)).unwrap();
     let player = |seat: &str| {
         let deck = (0..10_u32)

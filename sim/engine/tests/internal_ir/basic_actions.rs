@@ -1,7 +1,6 @@
 use super::*;
 
 use super::rule_fixtures;
-use sve_engine::catalog::EngineIdentityInput;
 
 fn banish(id: u64, objects: Selector) -> Located<Node> {
     instruction(id, Action::Banish { objects })
@@ -21,10 +20,10 @@ fn position(seat: u32) -> Game {
     let snapshot = [("unit-spell", "スペル"), ("unit-follower", "フォロワー"), ("lesson", "スペル・トークン")].iter().map(|(number, kind)| {
         json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()
     }).collect::<Vec<_>>().join("\n");
-    let document = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-spell":{"status":"complete","abilities":[]},
-        "unit-follower":{"status":"complete","abilities":[]},
-        "lesson":{"status":"complete","abilities":[]}
+    let document = json!({"format":1,"kind":"fixture_cards","cards":{
+        "unit-spell":{"status":"complete"},
+        "unit-follower":{"status":"complete"},
+        "lesson":{"status":"complete"}
     }})
     .to_string();
     let rules = rule_fixtures::rules(
@@ -39,12 +38,11 @@ fn position(seat: u32) -> Game {
     )
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents_with_rules(
+        rule_fixtures::catalog(
             &snapshot,
-            "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+            "format: 1\nkind: keyword_registry\nrule_names: {}\n",
             &[("synthetic".into(), document)],
             &rules,
-            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     );

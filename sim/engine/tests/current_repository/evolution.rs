@@ -42,9 +42,9 @@ fn selected_game(initial: &Value, card: &str) -> Game {
         selected.current.contains_key(card),
         "{card} is formally selected"
     );
-    let prototypes = serde_json::to_value(&*selected.prototypes).unwrap();
+    let catalogue = serde_json::to_value(&*selected.catalogue).unwrap();
     assert!(
-        prototypes["programs"].get(card).is_none(),
+        catalogue["fixtures"].get(card).is_none(),
         "{card} has no prototype executor"
     );
     Game::from_selected_effects(

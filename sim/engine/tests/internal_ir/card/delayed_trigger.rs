@@ -382,7 +382,8 @@ fn a_delayed_token_body_keeps_its_plan_when_its_callback_id_matches_a_printed_ab
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)])
+            .unwrap(),
     );
     let mut initial = setup(1, json!([]));
     initial["players"]["P1"]["zones"]["hand"] = json!([]);

@@ -37,7 +37,7 @@ fn catalog_with_leaf() -> Arc<Catalog> {
     let mut document: Value = serde_json::from_str(&document).unwrap();
     document["cards"]["leaf"] = document["cards"]["unit-spell"].clone();
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &keywords,
             &[("unit.yaml".into(), document.to_string())],
@@ -264,7 +264,8 @@ fn cost_board(seat: u32, late: bool, copies: usize, cost: u64) -> Game {
         .collect::<Vec<_>>()
         .join("\n");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let own = if seat == 1 { "P1" } else { "P2" };
     let active = if late {

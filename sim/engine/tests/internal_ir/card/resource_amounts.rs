@@ -119,7 +119,8 @@ fn resources_read_only_filtered_successful_deck_to_cemetery_members() {
         .collect::<Vec<_>>()
         .join("\n");
     let catalogue = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     for (kind, resource) in [
         ("pp", Resource::PpCurrent),
@@ -248,7 +249,7 @@ fn pp_counts_dragon_spells_instead_of_all_dragons_or_all_spells() {
     let mut document: Value = serde_json::from_str(&document).unwrap();
     document["cards"]["unit-neutral-spell"] = document["cards"]["unit-spell"].clone();
     let catalogue = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("unit.yaml".into(), document.to_string())],

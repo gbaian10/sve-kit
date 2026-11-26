@@ -55,18 +55,6 @@ pub(super) fn permutations(items: &[Value]) -> Vec<Vec<Value>> {
     out
 }
 
-/// `label` is the ability's own keyword; a query may name it even when the short
-/// reference omits it (unique line), but a different keyword never matches.
-pub(super) fn reference_matches(query: &Value, actual: &Value, label: Option<&str>) -> bool {
-    query.as_object().is_some_and(|fields| {
-        fields.iter().all(|(key, value)| {
-            actual.get(key).map_or_else(
-                || key == "keyword" && label.is_none_or(|label| value == label),
-                |own| own == value,
-            )
-        })
-    })
-}
 pub(super) fn decision_matches(candidate: &Value, decision: &Value) -> bool {
     if candidate["choice"] == "decline"
         && (decision.get("select").is_some() || decision.get("order").is_some())
@@ -254,9 +242,5 @@ impl Game {
             return self.keywords(id).map(|keywords| !keywords.contains("aura"));
         }
         Ok(true)
-    }
-
-    pub(super) fn usage_key(id: &str, generation: u64, code: &Value) -> String {
-        json!({"source":id,"generation":generation,"line":code["line"],"section":code["section"],"face":code["face"],"keyword":code["keyword"]}).to_string()
     }
 }

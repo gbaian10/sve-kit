@@ -9,7 +9,7 @@ use serde_json::{Value, json};
 use std::sync::OnceLock;
 use sve_battle_contract::{CardRef, Nat};
 use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
-use sve_engine::catalog::{Catalog, EngineIdentityInput};
+use sve_engine::catalog::Catalog;
 use sve_engine::game::Game;
 use sve_engine::game::player::Viewer;
 use sve_engine::ir::{CardProgram, WellFormedCardProgram};
@@ -32,12 +32,11 @@ pub(crate) fn catalog_for(snapshot: &str) -> Result<Catalog> {
         )]),
         json!([]),
     );
-    Catalog::from_documents_with_rules(
+    rule_fixtures::catalog(
         snapshot,
         &keywords,
         &[("synthetic".into(), document)],
         &rules.to_string(),
-        &EngineIdentityInput::LegacyJp,
     )
 }
 

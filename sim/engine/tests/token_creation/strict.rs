@@ -141,7 +141,7 @@ fn strict_rejects_prototype_only_token_dependencies() {
     input["authors"].as_array_mut().unwrap().push(source);
     input["documents"] = json!([[
         "synthetic",
-        "format: 1\nkind: effect_set\ncards:\n  token:\n    status: complete\n    abilities: []\n"
+        "format: 1\nkind: fixture_cards\ncards:\n  token:\n    status: complete\n"
     ]]);
     let mut decks = decks();
     decks[1].main = vec!["plain".into(); 8];

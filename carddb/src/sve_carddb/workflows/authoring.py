@@ -408,16 +408,11 @@ def check(
     """Check every authored card and full inventory, independently of display filters."""
     inputs = load_author_set(workspace.authored, workspace.expander.schemas)
     results = workspace.current.validate_inputs(inputs, workspace.expander)
-    rejected = [
-        result
-        for result in results
-        if isinstance(result, CardRejected)
-        and result.record.kind == "author_effect_set"
-    ]
+    rejected = [result for result in results if isinstance(result, CardRejected)]
     if rejected:
         raise AuthorInputError(rejected[0].diagnostic)
     check_counter_registration(workspace.authored, results)
-    selection = workspace.current.selection_from_results(inputs, results)
+    selection = workspace.current.selection_from_results(results)
     if compare_public is not None:
         if workspace.inputs.profile != "database" or compare_public.profile != "public":
             raise ConfigurationError(

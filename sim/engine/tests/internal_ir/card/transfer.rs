@@ -53,8 +53,12 @@ fn transfer_catalog(wrong_trait: bool) -> Arc<Catalog> {
         .collect::<Vec<_>>()
         .join("\n");
     Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("transfer.yaml".into(), document)])
-            .unwrap(),
+        Catalog::from_fixture_documents(
+            &snapshot,
+            &keywords,
+            &[("transfer.yaml".into(), document)],
+        )
+        .unwrap(),
     )
 }
 fn initial(seat: u32, full: bool) -> Value {
@@ -368,10 +372,10 @@ fn model_catalog() -> Arc<Catalog> {
     }
     let mut document: Value = serde_json::from_str(&document).unwrap();
     for number in ["unit-form", "unit-gear"] {
-        document["cards"][number] = json!({"status":"complete","abilities":[]});
+        document["cards"][number] = json!({"status":"complete"});
     }
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &rows.join("\n"),
             &keywords,
             &[("model.yaml".into(), document.to_string())],

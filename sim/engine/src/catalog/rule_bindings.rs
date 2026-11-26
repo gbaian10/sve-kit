@@ -31,8 +31,6 @@ pub struct FaceIdentity {
 /// Explicit input boundary; a regionless JSONL never implies an EN mapping.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum EngineIdentityInput {
-    /// Resolve reviewed JP locators from this exact legacy JSONL and authored programs.
-    LegacyJp,
     /// Resolve existing identifiers supplied by the same snapshot's projection.
     Resolved {
         /// Region of every projected member.
@@ -53,7 +51,7 @@ enum Background {
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Ord, Serialize, Deserialize)]
 enum ResolvedRulesName {
-    Legacy(String),
+    FaceReference(String),
     Permanent(String),
 }
 
@@ -112,7 +110,7 @@ where
 struct Projection<'input> {
     catalog: &'input Catalog,
     region: &'input str,
-    identity: &'input EngineIdentityInput,
+    faces: &'input [FaceIdentity],
     ids: BTreeMap<String, &'input FaceIdentity>,
     names: BTreeMap<String, String>,
 }
@@ -127,59 +125,51 @@ impl<'input> Projection<'input> {
         let region = text(&rules["scope"], "region")?;
         let mut ids = BTreeMap::new();
         let mut names = BTreeMap::new();
-        match identity {
-            EngineIdentityInput::LegacyJp => {
-                if region != "jp" || rules["input"]["kind"] != "legacy-jp" {
-                    return Err(invalid("legacy JP identity boundary mismatch"));
-                }
+        let EngineIdentityInput::Resolved {
+            region: projected,
+            snapshot_sha256,
+            faces,
+        } = identity;
+        if projected != region
+            || snapshot_sha256 != snapshot_hash
+            || rules["input"]["kind"] != "resolved"
+        {
+            return Err(invalid("resolved identity background mismatch"));
+        }
+        let mut locators = BTreeSet::new();
+        let mut label_ids = BTreeMap::new();
+        for face in faces {
+            let printed = catalog.face(&face.card_no, face.face_ordinal)?;
+            if face.face_id.is_empty()
+                || face.rules_name_id.is_empty()
+                || !locators.insert((&face.card_no, face.face_ordinal))
+            {
+                return Err(invalid("invalid or repeated projected identity"));
             }
-            EngineIdentityInput::Resolved {
-                region: projected,
-                snapshot_sha256,
-                faces,
-            } => {
-                if projected != region
-                    || snapshot_sha256 != snapshot_hash
-                    || rules["input"]["kind"] != "resolved"
-                {
-                    return Err(invalid("resolved identity background mismatch"));
-                }
-                let mut locators = BTreeSet::new();
-                let mut label_ids = BTreeMap::new();
-                for face in faces {
-                    let printed = catalog.face(&face.card_no, face.face_ordinal)?;
-                    if face.face_id.is_empty()
-                        || face.rules_name_id.is_empty()
-                        || !locators.insert((&face.card_no, face.face_ordinal))
-                    {
-                        return Err(invalid("invalid or repeated projected identity"));
-                    }
-                    unique_insert(&mut ids, face.face_id.clone(), face)?;
-                    let label = catalog.rules_label(&face.card_no, face.face_ordinal)?;
-                    if names
-                        .insert(face.rules_name_id.clone(), label.clone())
-                        .is_some_and(|old| old != label)
-                    {
-                        return Err(invalid("ambiguous projected rules-name identity"));
-                    }
-                    if label_ids
-                        .insert(label, &face.rules_name_id)
-                        .is_some_and(|previous| previous != &face.rules_name_id)
-                    {
-                        return Err(invalid("ambiguous projected rules-name label"));
-                    }
-                    if face.title_code.as_ref().is_some_and(String::is_empty)
-                        || (face.title_code.is_some() && printed["title"].as_str().is_none())
-                    {
-                        return Err(invalid("invalid projected title identity"));
-                    }
-                }
+            unique_insert(&mut ids, face.face_id.clone(), face)?;
+            let label = catalog.rules_label(&face.card_no, face.face_ordinal)?;
+            if names
+                .insert(face.rules_name_id.clone(), label.clone())
+                .is_some_and(|old| old != label)
+            {
+                return Err(invalid("ambiguous projected rules-name identity"));
+            }
+            if label_ids
+                .insert(label, &face.rules_name_id)
+                .is_some_and(|previous| previous != &face.rules_name_id)
+            {
+                return Err(invalid("ambiguous projected rules-name label"));
+            }
+            if face.title_code.as_ref().is_some_and(String::is_empty)
+                || (face.title_code.is_some() && printed["title"].as_str().is_none())
+            {
+                return Err(invalid("invalid projected title identity"));
             }
         }
         Ok(Self {
             catalog,
             region,
-            identity,
+            faces,
             ids,
             names,
         })
@@ -189,28 +179,49 @@ impl<'input> Projection<'input> {
         if text(reference, "region")? != self.region {
             return Err(invalid("cross-region engine face reference"));
         }
-        let locator = match text(reference, "kind")? {
-            "legacy-face" => TemplateRef {
-                card_no: text(reference, "card_no")?.into(),
-                face_ordinal: reference["face_ordinal"]
-                    .as_u64()
-                    .and_then(|n| usize::try_from(n).ok())
-                    .ok_or_else(|| invalid("invalid face ordinal"))?,
-            },
-            "face-id" => {
-                let projected = self
-                    .ids
-                    .get(text(reference, "face_id")?)
-                    .ok_or_else(|| invalid("missing projected face identity"))?;
-                TemplateRef {
-                    card_no: projected.card_no.clone(),
-                    face_ordinal: projected.face_ordinal,
-                }
-            }
-            _ => return Err(invalid("unknown face reference")),
+        if text(reference, "kind")? != "face-id" {
+            return Err(invalid("expected resolved face identity"));
+        }
+        let projected = self
+            .ids
+            .get(text(reference, "face_id")?)
+            .ok_or_else(|| invalid("missing projected face identity"))?;
+        let locator = TemplateRef {
+            card_no: projected.card_no.clone(),
+            face_ordinal: projected.face_ordinal,
         };
         self.catalog.face(&locator.card_no, locator.face_ordinal)?;
         Ok(locator)
+    }
+    fn rules_name(&self, reference: &Value) -> Result<(ResolvedRulesName, String)> {
+        match text(reference, "kind")? {
+            "legacy-name" => {
+                // Published inputs retain the name source but resolve the enclosed face identity.
+                let face = self.face(&reference["face"])?;
+                let label = if reference["name_source"] == "rules" {
+                    self.catalog.rules_label(&face.card_no, face.face_ordinal)?
+                } else {
+                    text(self.catalog.face(&face.card_no, face.face_ordinal)?, "name")?.to_owned()
+                };
+                Ok((
+                    ResolvedRulesName::FaceReference(reference.to_string()),
+                    label,
+                ))
+            }
+            "rules-name-id" => {
+                if text(reference, "region")? != self.region {
+                    return Err(invalid("cross-region rules-name reference"));
+                }
+                let id = text(reference, "rules_name_id")?;
+                let label = self
+                    .names
+                    .get(id)
+                    .ok_or_else(|| invalid("missing projected rules-name identity"))?
+                    .clone();
+                Ok((ResolvedRulesName::Permanent(id.into()), label))
+            }
+            _ => Err(invalid("unknown name reference")),
+        }
     }
 }
 
@@ -266,69 +277,29 @@ impl RuleBindings {
             }
         }
         result.validate_projected_titles(&projection)?;
-        for program in catalog.programs.values() {
-            result.validate_dependencies(program)?;
-        }
         result.background = Background::Bound(
             json!({"region":region,"kind":rules["input"]["kind"],"snapshot_sha256":snapshot_hash,
             "settings_sha256":digest(document.as_bytes()),"authored_sha256":authored_digest,
             "identity_sha256":digest(&serde_json::to_vec(identity).map_err(invalid)?),
             "schema_versions":{
-                "effects":{"kind":"effect_set","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"},
-                "keywords":{"kind":"keyword_registry","format":1_u8,"schema_id":"urn:sve-kit:effects:astra:1"},
+                "keywords":{"kind":"keyword_registry","format":1_u8},
                 "engine_rules":{"kind":"engine_rules","format":1_u8,"schema_id":schema["$id"]}},
-            "schemas_sha256":digest(&serde_json::to_vec(&json!({"effects":include_str!("../../../../dsl/effects.schema.json"),"engine_rules":include_str!("../../../../dsl/engine-rules.schema.json")})).map_err(invalid)?),
+            "schemas_sha256":digest(&serde_json::to_vec(&json!({"engine_rules":include_str!("../../../../dsl/engine-rules.schema.json")})).map_err(invalid)?),
             "scope":rules["scope"]}),
         );
         Ok(result)
     }
 
     fn validate_projected_titles(&self, projection: &Projection<'_>) -> Result<()> {
-        if let EngineIdentityInput::Resolved { faces, .. } = projection.identity {
-            for face in faces {
-                let label = projection.catalog.face(&face.card_no, face.face_ordinal)?["title"]
-                    .as_str()
-                    .unwrap_or_default();
-                if let Some(code) = &face.title_code
-                    && self.title_labels.get(label) != Some(code)
-                {
-                    return Err(invalid("projected title disagrees with resolved binding"));
-                }
+        for face in projection.faces {
+            let label = projection.catalog.face(&face.card_no, face.face_ordinal)?["title"]
+                .as_str()
+                .unwrap_or_default();
+            if let Some(code) = &face.title_code
+                && self.title_labels.get(label) != Some(code)
+            {
+                return Err(invalid("projected title disagrees with resolved binding"));
             }
-        }
-        Ok(())
-    }
-
-    fn validate_dependencies(&self, node: &Value) -> Result<()> {
-        match node {
-            Value::Object(fields) => {
-                let role = node["resource_role"]
-                    .as_str()
-                    .or_else(|| match node["op"].as_str() {
-                        Some("lesson") => Some("lesson_item"),
-                        Some("eat") => Some("meal_item"),
-                        Some("stack") => Some("stack_base"),
-                        _ if node["kind"] == "ride" => Some("drive_point"),
-                        _ => None,
-                    });
-                if let Some(role) = role {
-                    if !self.resources.contains_key(role) {
-                        return Err(invalid("program requires an unbound resource role"));
-                    }
-                    if node["op"] == "stack" {
-                        self.template(role)?;
-                    }
-                }
-                for child in fields.values() {
-                    self.validate_dependencies(child)?;
-                }
-            }
-            Value::Array(values) => {
-                for child in values {
-                    self.validate_dependencies(child)?;
-                }
-            }
-            Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
         }
         Ok(())
     }
@@ -349,13 +320,11 @@ impl RuleBindings {
                 .filter(|label| !label.is_empty())
                 .ok_or_else(|| invalid("title anchor has no title"))?
                 .to_owned();
-            if let EngineIdentityInput::Resolved { faces, .. } = projection.identity {
-                let projected = faces.iter().find(|face| {
-                    face.card_no == anchor.card_no && face.face_ordinal == anchor.face_ordinal
-                });
-                if projected.and_then(|face| face.title_code.as_deref()) != Some(code) {
-                    return Err(invalid("title code disagrees with projected anchor"));
-                }
+            let projected = projection.faces.iter().find(|face| {
+                face.card_no == anchor.card_no && face.face_ordinal == anchor.face_ordinal
+            });
+            if projected.and_then(|face| face.title_code.as_deref()) != Some(code) {
+                return Err(invalid("title code disagrees with projected anchor"));
             }
             let mut capabilities = BTreeSet::new();
             for capability in array(&entry["capabilities"])? {
@@ -386,36 +355,7 @@ impl RuleBindings {
             let mut keys = BTreeSet::new();
             let mut labels = BTreeSet::new();
             for reference in array(&entry["names"])? {
-                let (key, label) = match text(reference, "kind")? {
-                    "legacy-name" => {
-                        let face = projection.face(&reference["face"])?;
-                        let label = if reference["name_source"] == "rules" {
-                            projection
-                                .catalog
-                                .rules_label(&face.card_no, face.face_ordinal)?
-                        } else {
-                            text(
-                                projection.catalog.face(&face.card_no, face.face_ordinal)?,
-                                "name",
-                            )?
-                            .to_owned()
-                        };
-                        (ResolvedRulesName::Legacy(reference.to_string()), label)
-                    }
-                    "rules-name-id" => {
-                        if text(reference, "region")? != projection.region {
-                            return Err(invalid("cross-region rules-name reference"));
-                        }
-                        let id = text(reference, "rules_name_id")?;
-                        let label = projection
-                            .names
-                            .get(id)
-                            .ok_or_else(|| invalid("missing projected rules-name identity"))?
-                            .clone();
-                        (ResolvedRulesName::Permanent(id.into()), label)
-                    }
-                    _ => return Err(invalid("unknown name reference")),
-                };
+                let (key, label) = projection.rules_name(reference)?;
                 if label.is_empty() || !keys.insert(key.clone()) || !labels.insert(label.clone()) {
                     return Err(invalid("empty or duplicate resolved role name"));
                 }

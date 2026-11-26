@@ -8,7 +8,7 @@ Human-maintained data and permanent identity allocations, read by `carddb` at bu
 - `registry/art/` — reviewed English original-art uses
 - `registry/card-related/` — source-pinned reskin relationships
 - `registry/source-correction/` — confirmed corrections and separately marked review candidates; raw observations remain unchanged
-- `rules/effects/` — effect data in the DSL defined by `../dsl/`
+- `rules/author-effects/` and `rules/effect-bodies/` — DSL 1.0 cards and named bodies
 - `rules/rulings/` — evidence-backed interpretations; see `../docs/adr/0009-rulings-evidence.md`
 - `rules/comprehensive/<region>/<version>/` — the official comprehensive rules parsed for the website's rules page, keyed by clause number; translations live in `translations/comprehensive-rules/`
 - `translations/glossary/<filing_key>/*.yaml` — current glossary concepts and editable current translations
@@ -19,7 +19,7 @@ Every YAML document explicitly declares integer `format` and enumerated `kind`.
 Templates use `translations/templates/{definitions,values}/`; products
 use `products/{family,product,inclusion,identities}/`; catalog data lives under
 `catalog/{adoptions,overrides}/`, and digital policies are
-`digital/policies/{names,links}.yaml`. Rules also include `rules/keywords.yaml`
+`digital/policies/{names,links}.yaml`. Rules also include `rules/keyword-registry.yaml`
 and `rules/engine/index.yaml`; source-bound crops are `images/crops.yaml`.
 
 The identity registry format is defined in [authored layout](../docs/schema/domains/authored-layout.md).

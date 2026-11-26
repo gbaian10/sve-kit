@@ -19,7 +19,7 @@ use sve_battle_host::wire::{
 };
 use sve_battle_host::{Delivery, LocalSession, SeatControl};
 use sve_engine::battle::BattleReferences;
-use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
+use sve_engine::catalog::{CurrentSelectionLoader, SelectedEffects};
 use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck, Viewer};
 use sve_engine::host::HostLimits;
@@ -31,7 +31,7 @@ fn texts() -> &'static [String; 4] {
         let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
         let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
         let selection = read_to_string(var_os("SVE_TEST_CURRENT_SELECTION").unwrap()).unwrap();
-        let keywords = read_to_string(root.join("authored/rules/keywords.yaml")).unwrap();
+        let keywords = read_to_string(root.join("authored/rules/keyword-registry.yaml")).unwrap();
         let mut rules: Value = serde_saphyr::from_str(
             &read_to_string(root.join("authored/rules/engine/index.yaml")).unwrap(),
         )
@@ -48,18 +48,22 @@ fn texts() -> &'static [String; 4] {
     })
 }
 
+#[path = "../../engine/tests/support/rule_fixtures.rs"]
+mod rule_fixtures;
+
 fn selection() -> &'static SelectedEffects {
     static SELECTED: OnceLock<SelectedEffects> = OnceLock::new();
     SELECTED.get_or_init(|| {
         let [snapshot, keywords, selection, rules] = texts();
+        let (rules, identity) = rule_fixtures::resolved(snapshot, rules).unwrap();
         CurrentSelectionLoader::new()
             .unwrap()
             .select_with_rules(
                 snapshot,
                 keywords,
                 &serde_json::from_str(selection).unwrap(),
-                rules,
-                &EngineIdentityInput::LegacyJp,
+                &rules,
+                &identity,
             )
             .unwrap()
     })
@@ -78,7 +82,7 @@ fn session(control: [SeatControl; 2]) -> LocalSession {
         evolve: Vec::new(),
     });
     let references =
-        BattleReferences::new(&selection().prototypes, fixture::references(&texts()[0])).unwrap();
+        BattleReferences::new(&selection().catalogue, fixture::references(&texts()[0])).unwrap();
     let game =
         Game::start_player_game(selection().clone(), decks, Viewer::P2, "battle-host").unwrap();
     LocalSession::new(
@@ -216,7 +220,7 @@ fn private_look(deck: &str) -> LocalSession {
     )
     .unwrap();
     let references =
-        BattleReferences::new(&selection().prototypes, fixture::references(&texts()[0])).unwrap();
+        BattleReferences::new(&selection().catalogue, fixture::references(&texts()[0])).unwrap();
     LocalSession::new(
         game,
         references,
@@ -359,7 +363,7 @@ fn evolution() -> LocalSession {
     )
     .unwrap();
     let references =
-        BattleReferences::new(&selection().prototypes, fixture::references(&texts()[0])).unwrap();
+        BattleReferences::new(&selection().catalogue, fixture::references(&texts()[0])).unwrap();
     LocalSession::new(
         game,
         references,

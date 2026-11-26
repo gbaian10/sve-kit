@@ -16,8 +16,8 @@ fn fixture() -> &'static SelectedEffects {
         snapshot.push('\n');
         input["documents"].as_array_mut().unwrap().push(json!([
             "condition-fuel.yaml",
-            json!({"format":1_u8,"kind":"effect_set","cards":{
-                "condition-fuel":{"status":"complete","abilities":[]}
+            json!({"format":1_u8,"kind":"fixture_cards","cards":{
+                "condition-fuel":{"status":"complete"}
             }})
             .to_string()
         ]));

@@ -102,7 +102,7 @@ fn title_anchor_is_in_the_snapshot_and_rules_bound_selection() {
     assert!(inputs().0.lines().any(|line| {
         serde_json::from_str::<Value>(line).is_ok_and(|card| card["number"] == "ECP02-001")
     }));
-    let catalog = serde_json::to_value(&*selection_with_rules().prototypes).unwrap();
+    let catalog = serde_json::to_value(&*selection_with_rules().catalogue).unwrap();
     assert!(
         catalog["rule_bindings"]["titles"]["idolmaster_cinderella_girls"]
             .as_array()

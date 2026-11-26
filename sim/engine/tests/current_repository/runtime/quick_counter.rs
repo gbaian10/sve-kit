@@ -53,11 +53,11 @@ fn fixture() -> &'static Fixture {
         let cards = ["BP02-037", "BP03-038", "BP01-065", "BP01-097"]
             .into_iter()
             .map(|number| (number.to_owned(), json!({
-                "status":"complete", "review":"payment fixture only", "abilities":[]
+                "status":"complete"
             })))
             .collect::<serde_json::Map<_, _>>();
         input["documents"] = json!([["quick-payment-fixture.yaml", json!({
-            "format":1_u8, "kind":"effect_set", "cards":cards
+            "format":1_u8, "kind":"fixture_cards", "cards":cards
         }).to_string()]]);
         let selection = repository::select_without_rules(snapshot, keywords, &input).unwrap();
         let pamela = [

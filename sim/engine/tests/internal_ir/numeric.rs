@@ -393,14 +393,14 @@ fn printed_cp02_007_and_bp01_011_add_fragments_use_snapshot_stats() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let fragments = json!({"format":1,"kind":"effect_set","cards":{
-        "CP02-007":{"status":"complete","review":"synthetic fragment harness","abilities":[]},
-        "BP01-011":{"status":"complete","review":"synthetic fragment harness","abilities":[]}
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":{
+        "CP02-007":{"status":"complete"},
+        "BP01-011":{"status":"complete"}
     }})
     .to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

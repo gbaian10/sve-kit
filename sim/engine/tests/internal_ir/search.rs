@@ -633,20 +633,17 @@ fn printed_cp04_060_search_and_bp13_035_paid_groups_fragments() {
         var_os("SVE_TEST_SNAPSHOT").expect("generate public card input first"),
     ))
     .unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
     let mut cards = serde_json::Map::new();
     for number in [
         "CP04-060", "CP04-059", "CP04-057", "CP04-071", "BP13-035", "BP13-030", "BP13-032",
         "BP13-033",
     ] {
-        cards.insert(
-            number.into(),
-            json!({"status":"complete","review":"fragment harness only","abilities":[]}),
-        );
+        cards.insert(number.into(), json!({"status":"complete"}));
     }
-    let fragments = json!({"format":1,"kind":"effect_set","cards":cards}).to_string();
+    let fragments = json!({"format":1,"kind":"fixture_cards","cards":cards}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("fragments.yaml".into(), fragments)],

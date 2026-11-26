@@ -257,9 +257,9 @@ fn fixture_catalog(depart: bool) -> Arc<Catalog> {
     snapshot.push('\n');
     snapshot.push_str(&json!({"number":"unit-form","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"5","traits":[],"text":null,"sections":[]}]}).to_string());
     let mut definitions: Value = serde_json::from_str(&document).unwrap();
-    definitions["cards"]["unit-form"] = json!({"status":"complete","abilities":[]});
+    definitions["cards"]["unit-form"] = json!({"status":"complete"});
     Arc::new(
-        Catalog::from_documents(
+        Catalog::from_fixture_documents(
             &snapshot,
             &registry,
             &[("unit.yaml".into(), definitions.to_string())],

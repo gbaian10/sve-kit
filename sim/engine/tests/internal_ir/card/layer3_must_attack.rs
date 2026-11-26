@@ -218,9 +218,10 @@ fn next_turn_keyword_grants_wait_through_extra_and_skipped_turns_then_expire() {
     initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
     let (snapshot, _, document) = catalog_documents(&json!("1"));
     let registry =
-        json!({"format":1,"kind":"keyword_registry","keywords":{"bane":{"ja":"必殺","rule":"12.14","expansion":{"op":"keyword","name":"bane"}}}}).to_string();
+        json!({"format":1,"kind":"keyword_registry","rule_names":{"bane":{"ja":"必殺","rule":"12.14"}}}).to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("unit.yaml".into(), document)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("unit.yaml".into(), document)])
+            .unwrap(),
     );
     let mut board = Game::new(
         catalog,

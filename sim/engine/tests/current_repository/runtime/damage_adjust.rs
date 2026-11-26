@@ -288,7 +288,7 @@ fn different_cap_selection() -> &'static SelectedEffects {
         face["sections"]=json!([]);
         snapshot.push_str(&json!({"number":"cap-provider","faces":[face]}).to_string());
         snapshot.push('\n');
-        input["documents"].as_array_mut().unwrap().push(json!(["cap-provider.yaml","format: 1\nkind: effect_set\ncards:\n  cap-provider:\n    status: complete\n    abilities: []\n"]));
+        input["documents"].as_array_mut().unwrap().push(json!(["cap-provider.yaml","format: 1\nkind: fixture_cards\ncards:\n  cap-provider:\n    status: complete\n"]));
         repository::select(&snapshot,&keywords,&input).unwrap()
     })
 }

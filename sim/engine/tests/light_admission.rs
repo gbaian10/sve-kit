@@ -47,7 +47,7 @@ fn pending_wording_and_shared_body_execute_without_hash_proofs() {
     let snapshot = json!({"number":"SYN-01","faces":[{"name":"synthetic","card_type":"スペル","cost":"1","text":"A sentence outside the classifier.","sections":[]}]}).to_string();
     let selected = Catalog::from_current_selection(
         &snapshot,
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        "format: 1\nkind: keyword_registry\nrule_names: {}\n",
         selection(),
     )
     .unwrap();
@@ -79,7 +79,7 @@ fn unresolved_ruling_only_blocks_games_using_that_card() {
         .push(json!({"status":"rejected","card_no":"SYN-02","reason":"source_unresolved_issue"}));
     let selected = Catalog::from_current_selection(
         &snapshot,
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        "format: 1\nkind: keyword_registry\nrule_names: {}\n",
         &input,
     )
     .unwrap();
@@ -87,7 +87,7 @@ fn unresolved_ruling_only_blocks_games_using_that_card() {
         .unwrap();
     let affected_selection = Catalog::from_current_selection(
         &snapshot,
-        "format: 1\nkind: keyword_registry\nkeywords: {}\n",
+        "format: 1\nkind: keyword_registry\nrule_names: {}\n",
         &input,
     )
     .unwrap();

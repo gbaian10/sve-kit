@@ -273,7 +273,7 @@ impl Game {
         {
             return Err(unsupported("internal rule action or timing"));
         }
-        self.internal_prototype_abilities()?;
+        self.check_internal_fixture()?;
         self.check_internal_resources()
     }
 

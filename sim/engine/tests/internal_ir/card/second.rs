@@ -474,7 +474,8 @@ fn filtered_field_count_ignores_opponent_nonfollowers_and_other_zones() {
     let (snapshot, keywords, effects) = catalog_documents(&json!(0));
     let snapshot = snapshot.replace("\"traits\":[]", "\"traits\":[\"mage\"]");
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &keywords, &[("unit.yaml".into(), effects)])
+            .unwrap(),
     );
     for count in [1_usize, 2] {
         let mut initial = setup(1, json!([]));

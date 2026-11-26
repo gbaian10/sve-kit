@@ -1,6 +1,5 @@
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::DecisionView;
 
 struct Fixture {
@@ -42,14 +41,14 @@ fn fixture() -> &'static Fixture {
         }
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml")).unwrap()).unwrap();
         rules["input"]["snapshot_sha256"] = json!(rule_fixtures::hash(snapshot.as_bytes()));
-        let selected = repository::select_with_rules(&snapshot, &keywords, &input, &rules.to_string(), &EngineIdentityInput::LegacyJp).unwrap();
+        let selected = repository::select_with_rules(&snapshot, &keywords, &input, &rules.to_string(),).unwrap();
         Fixture {selection: selected, programs: loaded}
     })
 }
 fn add_card(snapshot: &mut String, input: &mut Value, name: &str, face: &Value) {
     snapshot.push_str(&json!({"number":name,"faces":[face]}).to_string());
     snapshot.push('\n');
-    input["documents"].as_array_mut().unwrap().push(json!([format!("{name}.yaml"),json!({"format":1_u8,"kind":"effect_set","cards":{name:{"status":"complete","abilities":[]}}}).to_string()]));
+    input["documents"].as_array_mut().unwrap().push(json!([format!("{name}.yaml"),json!({"format":1_u8,"kind":"fixture_cards","cards":{name:{"status":"complete"}}}).to_string()]));
 }
 pub(super) fn position(card: &str, zone: &str) -> Value {
     let mut initial = draw_position();

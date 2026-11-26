@@ -21,9 +21,9 @@ fn selection_with_forms() -> &'static SelectedEffects {
             }]});
             snapshot.push('\n');
             snapshot.push_str(&record.to_string());
-            form_effects.insert(number.into(), json!({"status":"complete","abilities":[]}));
+            form_effects.insert(number.into(), json!({"status":"complete"}));
         }
-        let document = json!({"format":1_u8,"kind":"effect_set","cards":form_effects});
+        let document = json!({"format":1_u8,"kind":"fixture_cards","cards":form_effects});
         input["documents"]
             .as_array_mut()
             .unwrap()

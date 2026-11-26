@@ -1,6 +1,5 @@
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::DecisionView;
 
 const CONTROLS: [(&str, &str, &str, u8, bool); 5] = [
@@ -26,13 +25,13 @@ fn prepared() -> &'static SelectedEffects {
             snapshot.push('\n');
             input["documents"].as_array_mut().unwrap().push(json!([
                 format!("{number}.yaml"),
-                json!({"format":1_u8,"kind":"effect_set","cards":{number:{"status":"complete","abilities":[]}}}).to_string()
+                json!({"format":1_u8,"kind":"fixture_cards","cards":{number:{"status":"complete"}}}).to_string()
             ]));
         }
         let path = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml");
         let mut rules: Value = serde_saphyr::from_str(&read_to_string(path).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        repository::select_with_rules(&snapshot, &keywords, &input, &rules.to_string(), &EngineIdentityInput::LegacyJp).unwrap()
+        repository::select_with_rules(&snapshot, &keywords, &input, &rules.to_string(),).unwrap()
     })
 }
 

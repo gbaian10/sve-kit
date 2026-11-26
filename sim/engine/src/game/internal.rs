@@ -151,7 +151,7 @@ pub use search::{SearchAnswer, SearchDomain, SearchGroup, SearchPartitionDomain}
 /// Internal context pinned to the game's immutable catalogue and one source generation.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Context {
-    /// Physical source in the prototype authority, never an author identifier.
+    /// Physical source in the match authority, never an author identifier.
     pub source: String,
     /// The generation that owns this execution.
     pub generation: Generation,
@@ -475,7 +475,7 @@ pub struct Progress {
     pub facts: Vec<Fact>,
 }
 
-/// First-slice physical facts, sharing the prototype mutation and causal pipeline.
+/// Physical facts used by the shared rule transitions.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Fact {
     /// One Fusion execution with its frozen material traits and explicit source follow.
@@ -1481,60 +1481,37 @@ impl Game {
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.has_pending()
             || self.card_runtime.quick.is_some()
-            || self.state.frame.is_some()
-            || self.state.prompt.is_some()
-            || !self.state.pending.is_empty()
-            || !self.state.continuous.is_empty()
-            || !self.state.delayed.is_empty()
             || self.state.game["ended"] == true
             || self.state.flow["kind"] == "pregame"
         {
             return Err(unsupported("busy or unsupported execution context"));
         }
-        self.internal_prototype_abilities()
+        self.check_internal_fixture()
     }
 
-    /// Reject unsupported abilities and continuations carried by a trusted fixture.
-    pub(in crate::game) fn internal_prototype_abilities(&self) -> Result<()> {
-        if !self.card_runtime.is_empty() {
-            if !self.state.pending.is_empty()
-                || !self.state.delayed.is_empty()
-                || !self.state.continuous.is_empty()
-            {
-                return Err(unsupported(
-                    "current game contains prototype pending, delayed or continuous abilities",
-                ));
-            }
-            for object in self.state.objects.values() {
-                if self.card_runtime.is_loaded(&object.card)
-                    && !self.internal_resource_links_valid(&object.id)?
-                {
-                    return Err(unsupported(
-                        "current holder carries unadmitted resource links",
-                    ));
-                }
-                if self.card_runtime.is_loaded(&object.card)
-                    && !super::list(&object.state["keywords"]).is_empty()
-                {
-                    return Err(unsupported("current holder carries prototype keywords"));
-                }
-            }
-            return Ok(());
-        }
+    pub(in crate::game) fn check_internal_fixture(&self) -> Result<()> {
         for object in self.state.objects.values() {
-            if !self.printed_abilities(&object.id)?.is_empty()
-                || !self.setup_keywords(&object.id)?.is_empty()
+            if self.card_runtime.is_empty() && object.state["silenced"] != true {
+                let source = self.information_source(&object.id)?;
+                if !self.treasure_abilities_inactive(&object.id)?
+                    && !self.internal_evolution_resource(&source.id)?
+                {
+                    self.catalog.require_fixture_card(&source.card)?;
+                }
+            }
+            if self.card_runtime.is_loaded(&object.card)
+                && !self.internal_resource_links_valid(&object.id)?
             {
                 return Err(unsupported(
-                    "context requires prototype abilities or keywords",
+                    "current holder carries unadmitted resource links",
                 ));
             }
-        }
-        if !self.state.pending.is_empty()
-            || !self.state.delayed.is_empty()
-            || !self.state.continuous.is_empty()
-        {
-            return Err(unsupported("fixture carries prototype continuation state"));
+            if (self.card_runtime.is_empty() && !self.setup_keywords(&object.id)?.is_empty())
+                || (self.card_runtime.is_loaded(&object.card)
+                    && !super::list(&object.state["keywords"]).is_empty())
+            {
+                return Err(unsupported("fixture carries unadmitted keywords"));
+            }
         }
         Ok(())
     }
@@ -2071,7 +2048,7 @@ impl Game {
     }
 
     fn internal_damage_arithmetic(&self, target: &str, amount: i64) -> Result<()> {
-        // The shared prototype primitive saturates; typed execution must reject overflow first.
+        // Check the arithmetic before applying the shared damage transition.
         let valid = if let Some(seat) = target.strip_suffix(".leader") {
             int(&self.player(seat)?.leader["life"])
                 .checked_sub(amount)

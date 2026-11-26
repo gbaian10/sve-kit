@@ -54,7 +54,7 @@ fn selection(count: u64) -> (String, String, Value) {
     );
     (
         format!("{creator}\n{token}\n"),
-        json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string(),
+        json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string(),
         json!({"documents":[],"authors":[source,template]}),
     )
 }
@@ -208,7 +208,7 @@ fn printing_aliases_share_a_candidate_without_selecting_unrelated_numbers() {
     input["authors"][0]["printings"] = json!(["creator", "creator-alt"]);
     input["documents"] = json!([[
         "prototype.yaml",
-        "format: 1\nkind: effect_set\ncards:\n  creator-alt:\n    status: complete\n    abilities: []\n"
+        "format: 1\nkind: fixture_cards\ncards:\n  creator-alt:\n    status: complete\n"
     ]]);
     Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap_err();
 }
@@ -226,7 +226,7 @@ fn amulet_token_play_and_activation_use_ex_and_reject_a_hand_origin() {
     token["faces"][0]["power"] = json!("-");
     token["faces"][0]["hp"] = json!("-");
     let snapshot = token.to_string();
-    let keywords = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
+    let keywords = json!({"format":1_u8,"kind":"keyword_registry","rule_names":{}}).to_string();
     let input = json!({"documents":[],"authors":[input]});
     for zone in ["ex", "hand"] {
         let selected = Catalog::from_current_selection(&snapshot, &keywords, &input).unwrap();

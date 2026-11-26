@@ -2,7 +2,6 @@
 use super::*;
 use crate::{expanded, rule_fixtures};
 use std::{fs::read_to_string, path::PathBuf, sync::OnceLock};
-use sve_engine::catalog::EngineIdentityInput;
 use sve_engine::game::internal::DecisionView;
 
 fn awaiting(play: CardPlay) -> DecisionView {
@@ -26,7 +25,7 @@ fn evolution_selection() -> &'static (SelectedEffects, WellFormedCardProgram) {
         }]});
         let snapshot = format!("{}\n{companion_card}", snapshot.trim_end());
         input["documents"].as_array_mut().unwrap().push(json!(["trigger-companion.yaml",json!({
-            "format":1_u8,"kind":"effect_set","cards":{"synthetic-evolution":{"status":"complete","abilities":[]}}
+            "format":1_u8,"kind":"fixture_cards","cards":{"synthetic-evolution":{"status":"complete"}}
         }).to_string()]));
         let mut tree = expanded::tree().clone();
         tree["cards"] = json!({"synthetic-evolution":tree["cards"]["synthetic-evolution"]});
@@ -35,7 +34,7 @@ fn evolution_selection() -> &'static (SelectedEffects, WellFormedCardProgram) {
             PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/engine/index.yaml")
         ).unwrap()).unwrap();
         rules["input"] = rule_fixtures::rules(&snapshot, json!([]), json!([]))["input"].clone();
-        let selected = repository::select_with_rules(&snapshot, &keywords, &input, &rules.to_string(), &EngineIdentityInput::LegacyJp).unwrap();
+        let selected = repository::select_with_rules(&snapshot, &keywords, &input, &rules.to_string(),).unwrap();
         (selected, companion)
     })
 }

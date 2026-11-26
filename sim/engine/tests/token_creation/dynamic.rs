@@ -40,7 +40,7 @@ fn selected(steps: Value, ward: bool) -> (String, String, Value) {
     input["authors"][1] = author;
     (
         snapshot,
-        include_str!("../../../../authored/rules/keywords.yaml").into(),
+        include_str!("../../../../authored/rules/keyword-registry.yaml").into(),
         input,
     )
 }

@@ -48,17 +48,17 @@ pub(super) fn fragment_setup(
     deck: Value,
 ) -> (Arc<Catalog>, Value) {
     let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let mut effects = json!({"format":1,"kind":"effect_set","cards":{
-        (card_no):{"status":"complete","review":"candidate execution harness","abilities":[]}
+    let registry = json!({"format":1,"kind":"keyword_registry","rule_names":{}}).to_string();
+    let mut effects = json!({"format":1,"kind":"fixture_cards","cards":{
+        (card_no):{"status":"complete"}
     }});
     for card in deck.as_array().unwrap() {
-        effects["cards"][card["card"].as_str().unwrap()] =
-            json!({"status":"complete","review":"candidate execution harness","abilities":[]});
+        effects["cards"][card["card"].as_str().unwrap()] = json!({"status":"complete"});
     }
     let effects = effects.to_string();
     let catalog = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("candidate".into(), effects)]).unwrap(),
+        Catalog::from_fixture_documents(&snapshot, &registry, &[("candidate".into(), effects)])
+            .unwrap(),
     );
     let actor = if seat == 1 { "P1" } else { "P2" };
     let opponent = if seat == 1 { "P2" } else { "P1" };

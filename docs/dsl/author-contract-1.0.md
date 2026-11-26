@@ -5,12 +5,12 @@
 ## 1. 版本承諾與入口
 
 | format／kind | Schema |
-| --- | --- |
+| ----------------------- | ------------------------------------- |
 | `2 / author_effect_set` | `dsl/author-storage.schema.json` |
 | `2 / effect_body_shard` | `dsl/effect-body-storage.schema.json` |
 | `1 / effects_index` | `dsl/effects-index.schema.json` |
 
-主檔與本體格式為 2；記憶體內材料化的完整能力樹仍用 format 1 author／expanded 資源。astra/1 原型與 DSL 1.0 分開驗證，不能混用 Schema。公開格式 4.1.0 與 4.2.0 可打包已准入且展開的 DSL 1.0 AST（含 light），其語法由 `dsl/program.schema.json` 定義；內部作者資料可同步修訂。
+主檔與本體格式為 2；記憶體內材料化的完整能力樹仍用 format 1 author／expanded 資源。公開格式 4.1.0 與 4.2.0 可打包已准入且展開的 DSL 1.0 AST（含 light），其語法由 `dsl/program.schema.json` 定義；內部作者資料可同步修訂。
 
 ## 2. 卡片、本體與用途
 
@@ -38,7 +38,7 @@
 
 索引位於 `authored/rules/effects-index/<卡包>.yaml`，卡包是 `record_key` 第一個 `-` 前的前綴（如 BP06、CP02、PR）。每檔沿用 format 1／effects_index 封套，只收該卡包且依 `record_key`、`scope` 排序；讀取整個目錄合併後仍驗證跨檔 CardId／scope 唯一。新增卡片只更新對應卡包索引，不使用舊單檔路徑。
 
-索引每個永久 CardId／scope 唯一，檔案與紀錄雙向閉合。同卡原型與 current 互斥；切換時主檔、索引與原型移除在同次寫入完成，拒絕卡不回退原型。
+索引每個永久 CardId／scope 唯一，檔案與紀錄雙向閉合。作者工具先驗證整份候選，再寫入主檔、本體與索引。
 
 ### 2.5 每包機器錨點
 
@@ -85,4 +85,4 @@ IR 所需語義能力仍由節點與參數形狀推導，runtime 必須實際支
 
 write 先驗完整候選再寫入；check 與建置只讀作者資料，不改 reviewed 或重算證據檔。Rust 選用驗 lowering，建立對局時再驗實際引擎能力。測試只跑相關範圍，完整回歸交 CI。
 
-診斷保留 stage／reason、卡號、面、欄、行及 DSL 路徑；不列整行卡文、私人路徑或秘密。原型 baseline 的 AST／exact bytes 不再是切換門檻，有用的對局回歸斷言繼續保留。
+診斷保留 stage／reason、卡號、面、欄、行及 DSL 路徑；不列整行卡文、私人路徑或秘密。

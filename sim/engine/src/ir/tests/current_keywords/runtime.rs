@@ -185,10 +185,10 @@ fn selected_game(
     snapshot: &str,
     program: &WellFormedCardProgram,
 ) -> Game {
-    let empty = json!({"status":"complete","abilities":[]});
+    let empty = json!({"status":"complete"});
     selection["documents"] = json!([[
         "synthetic.yaml",
-        json!({"format":1_u8,"kind":"effect_set","cards":{
+        json!({"format":1_u8,"kind":"fixture_cards","cards":{
             "producer":empty,"plain":empty,"amulet":empty
         }})
         .to_string()
@@ -199,7 +199,7 @@ fn selected_game(
             "text":"","sections":[],"traits":[]}]}).to_string()).join("\n");
     let snapshot = format!("{}\n{extra}", snapshot.trim_end());
     let registry = read_to_string(
-        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/keywords.yaml"),
+        Path::new(env!("CARGO_MANIFEST_DIR")).join("../../authored/rules/keyword-registry.yaml"),
     )
     .unwrap();
     let selected = Catalog::from_current_selection(&snapshot, &registry, &selection).unwrap();
