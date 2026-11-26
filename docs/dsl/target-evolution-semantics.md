@@ -79,10 +79,10 @@ kind／trait 讀值不變的子集。這是**支援限制**，不是規則未定
 
 ### 3.1 可開放的子集
 
-首批只開放固定對象、安裝時已捕捉操作數的 Numeric Add（Attack／Life），
-其已受驗期限限 NoTemporalExpiry、CurrentTurnEnd、NextTurnEnd；無附加 intervals、
-條件翻轉、live 操作數、static、Set、來源離區期限或其他基礎替換。既有合法的普通／
-超進化程序可使用本節；不擴大效果本文 Evolve、退化、換面、操縦或種類轉換的准入。
+本小節定義純 Add，無期限的固定 Set 見 §3.3。Numeric Add（Attack／Life）限固定對象、
+安裝時已捕捉操作數、NoTemporalExpiry／CurrentTurnEnd／NextTurnEnd，且無附加 intervals、
+條件翻轉、live 操作數、static、來源離區期限或其他基礎替換。普通／超進化可使用此子集；
+效果本文進化只接受其中的無期限 Add。
 
 直接規則：5.16.2 保留同一張卡及既有效果；5.16.2.1 承接與進化前元值的差額；
 10.9.1.1.1 改用進化面基礎資訊、費用除外；7.4.8 移除到期效果。
