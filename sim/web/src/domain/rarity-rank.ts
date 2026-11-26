@@ -1,4 +1,4 @@
-export const RARITY_LADDER = ["br", "sr", "gr", "lg", "sl", "ur", "sp", "ssp"] as const
+export const RARITY_LADDER = ["br", "sr", "gr", "lg", "sl", "ur", "sp", "ssp", "gbf"] as const
 
 /** Ladder position of a rarity code; anything off the ladder (no rarity, "-", PR) sits below BR. */
 export function rarityRank(code: string | null | undefined): number {

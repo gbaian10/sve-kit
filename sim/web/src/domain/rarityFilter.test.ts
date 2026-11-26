@@ -63,4 +63,14 @@ describe("premium rarity selection", () => {
       "pr",
     ])
   })
+
+  it("orders GBF after SSP and its PR appearance after the other drawn ones", () => {
+    expect(orderRarityTokens(["pr:none", "pr:gbf", "gbf", "pr:sp", "ssp"])).toEqual([
+      "ssp",
+      "gbf",
+      "pr:sp",
+      "pr:gbf",
+      "pr:none",
+    ])
+  })
 })

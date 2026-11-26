@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest"
 
 import br from "../../assets/rarity/br.svg"
 import brEn from "../../assets/rarity/br-en.svg"
+import gbf from "../../assets/rarity/gbf.svg"
 import pr from "../../assets/rarity/pr.svg"
 import prBronze from "../../assets/rarity/pr-bronze.svg"
 import type { Region } from "../../domain/search"
@@ -15,10 +16,12 @@ function Harness({
   initial = [],
   edition = "jp",
   omitPr = false,
+  gbfCount,
 }: {
   readonly initial?: string[]
   readonly edition?: Region
   readonly omitPr?: boolean
+  readonly gbfCount?: number
 }) {
   const [selected, onChange] = useState(initial)
   return (
@@ -29,6 +32,7 @@ function Harness({
           { code: "ssp", label: "SSP" },
           { code: "pr", label: "PR" },
           { code: "br", label: "BR" },
+          ...(gbfCount === undefined ? [] : [{ code: "gbf", label: "GBF" }]),
         ].filter((rarity) => !omitPr || rarity.code !== "pr")}
         options={{
           styles: ["br", "none", "unknown"],
@@ -42,6 +46,7 @@ function Harness({
             "pr:unknown": 1,
             unrated: 4,
             br: 9,
+            ...(gbfCount === undefined ? {} : { gbf: gbfCount }),
           },
         }}
         edition={edition}
@@ -77,6 +82,18 @@ describe("rarity chips", () => {
       "src",
       brEn,
     )
+  })
+
+  it("draws GBF after SSP and leaves it out of an edition without GBF printings", async () => {
+    const { unmount } = await renderInRouter(<Harness gbfCount={3} />)
+    expect(chips()).toEqual(["BR", "SP", "SSP", "GBF", "PR", "無分類"])
+    expect(screen.getByRole("button", { name: "GBF" }).querySelector("img")).toHaveAttribute(
+      "src",
+      gbf,
+    )
+    unmount()
+    await renderInRouter(<Harness gbfCount={0} edition="en" />)
+    expect(chips()).toEqual(["BR", "SP", "SSP", "PR", "無分類"])
   })
 
   it("shows premium after SSP even when the vocabulary has no PR option", async () => {

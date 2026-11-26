@@ -1,6 +1,8 @@
 import { screen } from "@testing-library/react"
 import { describe, expect, it } from "vitest"
 
+import gbf from "../../assets/rarity/gbf.svg"
+import prGbf from "../../assets/rarity/pr-gbf.svg"
 import { renderInRouter } from "../../test-utils"
 import { RarityBadges } from "./RarityBadges"
 
@@ -48,15 +50,17 @@ describe("accessible rarity badges", () => {
     expect(document.querySelector("img")).toBeNull()
   })
 
-  it("falls back to plain PR for a GBF appearance", async () => {
+  it("draws the GBF frame's own badges for official GBF and for a PR printed on that frame", async () => {
+    const { unmount } = await renderInRouter(<RarityBadges region="jp" rarityCode="gbf" />, {
+      language: "en",
+    })
+    expect(screen.getByRole("img", { name: "Official rarity: GBF" })).toHaveAttribute("src", gbf)
+    unmount()
     await renderInRouter(
       <RarityBadges region="jp" rarityCode="pr" rarityBadge={{ style: "gbf", text: "PR" }} />,
-      {
-        language: "en",
-      },
+      { language: "en" },
     )
-    expect(screen.getByRole("img", { name: "Official rarity: PR" })).toHaveTextContent(/^PR$/u)
-    expect(document.querySelector("img")).toBeNull()
+    expect(screen.getByRole("img", { name: "Official rarity: PR" })).toHaveAttribute("src", prGbf)
   })
 
   it("shows only plain PR when a Premium printing has no appearance", async () => {
