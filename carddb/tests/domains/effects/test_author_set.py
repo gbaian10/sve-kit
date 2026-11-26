@@ -6,12 +6,18 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.provenance import BuildContext
+from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
-from sve_carddb.domains.effects.author_set import load_author_set, validate_author_set
+from sve_carddb.domains.effects.author_set import (
+    InputFile,
+    load_author_set,
+    merge_index_files,
+    validate_author_set,
+)
 from sve_carddb.domains.text_observations import Vocabulary
 from sve_carddb.domains.translations.inputs import Snapshot
 from sve_carddb.domains.translations.recognition.rules import load
@@ -306,6 +312,29 @@ def test_pack_indexes_merge_and_retain_exact_bytes(
         validate_author_set(
             replace(inputs, index_files=(forged, *inputs.index_files[1:])), schemas
         )
+
+
+def test_pack_indexes_can_merge_beyond_one_mib(schemas: AuthorSchemas) -> None:
+    header: dict[str, JsonValue] = {"format": 1, "kind": "effects_index"}
+    all_records: list[JsonValue] = []
+    files: list[InputFile] = []
+    for pack_number in range(8):
+        owner = f"PACK{pack_number:02d}"
+        rows: list[JsonValue] = [
+            selection(
+                f"{owner}-{number:03d}", path=f"rules/author-effects/{owner}/001.yaml"
+            )
+            | {"card_id": f"c:{pack_number * 900 + number:032x}"}
+            for number in range(900)
+        ]
+        raw = canonical({**header, "records": rows})
+        assert len(raw) < MAX_BYTES
+        files.append(InputFile(f"rules/effects-index/{owner}.yaml", raw, digest(raw)))
+        all_records.extend(rows)
+    assert len(canonical({**header, "records": all_records})) > MAX_BYTES
+
+    merged = merge_index_files(tuple(files), schemas)
+    assert len(merged.records) == len(all_records)
 
 
 @pytest.mark.parametrize("failure", ["owner", "identity", "order"])
