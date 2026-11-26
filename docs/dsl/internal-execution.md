@@ -2,7 +2,7 @@
 
 `Game::execute_internal` 接受 `WellFormedProgram`、來源座標及 authority 提供的來源物件／世代／控制者。
 它只供合成與卡片段測試使用，不接DSL YAML、不執行整張 `CardProgram`，也不發布公開 capability。
-`Registry::current().supported()` 仍為空；良構通過不能取代本入口的執行准入。
+已驗程式體仍經過執行准入，核對語義能力需求與執行環境。
 
 正式卡片與能力打出的程序以[正式 play 契約](play-semantics.md)為準；以下列出執行器已驗子集。
 已選目標與純固定 Add 跨進化依[目標與進化契約](target-evolution-semantics.md)執行；
@@ -102,8 +102,7 @@ Spell Advance 的合法 EX 打出沿既有清理移往 owner 墓地，再由 CR9
 
 護符的 Fanfare、Lastword、已支援的 Printed EnterField 與 End Begin 沿共同 producer、
 pending 與 LKI，不另設護符待機。護符入場仍可被「從者入場」條件排除。
-lowering 與良構檢查原已按能力形狀而非卡種承載上述成本／觸發，這片不新增DSL 語法或 IR 欄位，
-亦不擴大 `Registry::current().supported()`。
+lowering 與良構檢查按能力形狀處理上述成本／觸發，執行仍受上述准入範圍約束。
 
 BP01-041 的候選起動片段由 C0 展開、lowering、良構與整卡執行驗 PP／Act；BP20-100
 只以合成來源座標驗抽牌 Fanfare 與 Act／自身送墓／傷害片段。後者的 `usable_if`
