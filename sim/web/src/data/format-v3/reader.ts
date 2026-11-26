@@ -13,8 +13,6 @@ import {
 } from "./json"
 import { primaryKey, rowType } from "./schema"
 
-/** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "4.1.1"
 const CAPABILITIES: readonly string[] = [
   "column-partition-v1",
   "fragment-container-v1",
@@ -25,6 +23,19 @@ const CAPABILITIES: readonly string[] = [
   "jp-source-translation-v1",
   "public-annotation-v1",
 ]
+
+/** Minimum reader versions belong to the wire profiles (transport §1.1). */
+const FORMAT_PROFILES = new Map([
+  ["4.0.0", { reader: "4.0.3", capabilities: CAPABILITIES }],
+  ["4.1.0", { reader: "4.1.1", capabilities: [...CAPABILITIES, "dsl-programs-v1"] }],
+  [
+    "4.2.0",
+    {
+      reader: "4.2.0",
+      capabilities: [...CAPABILITIES, "dsl-programs-v1", "dsl-program-dependencies-v1"],
+    },
+  ],
+])
 
 export type View = Record<string, Row[]>
 
@@ -46,10 +57,10 @@ export function isCompatible(entry: JsonObject): boolean {
     stringValue(item),
   )
   const version = stringValue(entry["format_version"])
-  const expected = version === "4.1.0" ? [...CAPABILITIES, "dsl-programs-v1"] : CAPABILITIES
-  const reader = version === "4.1.0" ? READER_CONTRACT_VERSION : "4.0.3"
+  const profile = FORMAT_PROFILES.get(version)
+  if (!profile) return false
+  const { reader, capabilities: expected } = profile
   return (
-    (version === "4.0.0" || version === "4.1.0") &&
     entry["min_reader_version"] === reader &&
     capabilities.length === expected.length &&
     expected.every((capability) => capabilities.includes(capability)) &&

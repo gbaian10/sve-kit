@@ -24,12 +24,24 @@ describe("DSL program snapshot profile", () => {
       isCompatible({ ...current, required_capabilities: previous["required_capabilities"] ?? [] }),
     ).toBe(false)
     expect(isCompatible({ ...current, min_reader_version: "4.1.2" })).toBe(false)
-    expect(isCompatible({ ...current, format_version: "4.2.0" })).toBe(false)
+    expect(isCompatible({ ...current, format_version: "4.3.0" })).toBe(false)
+  })
+  it("requires the 4.2 dependency capability and reader together", () => {
+    const sample = objectValue(v3Fixture("programs-4.2.json"))
+    const profile = objectValue(sample["manifest"])
+    const previous = objectValue(v3Fixture("manifest.json"))
+    const manifest = { ...previous, ...profile }
+    expect(readManifest(manifest).manifest).toEqual(manifest)
+    expect(isCompatible({ ...manifest, min_reader_version: "4.1.1" })).toBe(false)
+    const oldCapabilities = arrayValue(profile["required_capabilities"]).filter(
+      (capability) => capability !== "dsl-program-dependencies-v1",
+    )
+    expect(isCompatible({ ...manifest, required_capabilities: oldCapabilities })).toBe(false)
   })
 })
 
 describe("DSL profile tuple decoding", () => {
-  it("decodes the shared engine rows using the 4.1 profile", () => {
+  it.each(["4.1.0", "4.2.0"])("decodes reused engine rows in profile %s", (version) => {
     const native = objectValue(v3Fixture("mentioned-by-native.json"))
     const manifest = objectValue(native["manifest"])
     const file = arrayValue(manifest["files"])
@@ -37,7 +49,7 @@ describe("DSL profile tuple decoding", () => {
       .find((item) => item["key"] === "engine/shared/family-family/0")
     if (!file) throw new Error("missing synthetic engine file")
     const value = objectValue(objectValue(native["payloads"])[stringValue(file["key"])])
-    const fragments = readContainer(file, { ...value, format_version: "4.1.0" }, "4.1.0")
+    const fragments = readContainer(file, { ...value, format_version: "4.1.0" }, version)
     expect(fragments.find((fragment) => fragment.table === "card_mentioned_by")?.rows).toEqual([
       { card_id: "old_card", region: "jp", from_card_id: "card" },
     ])

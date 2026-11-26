@@ -2,12 +2,12 @@ import contract from "../../../../../carddb/src/sve_carddb/contracts/schema/v3/c
 import { fail } from "./errors"
 import { arrayValue, type JsonObject, type JsonValue, objectValue, stringValue } from "./json"
 
-// Profiles 4.0 and 4.1 share tuple descriptors; programs are a separate attachment.
+// Profiles 4.0 through 4.2 share tuple descriptors; programs are a separate attachment.
 const schemaRoot: JsonObject = objectValue(contract)
 const definitions = objectValue(schemaRoot["$defs"])
 
 export function definition(name: string, version = "4.0.0"): JsonObject {
-  if (version !== "4.0.0" && version !== "4.1.0")
+  if (version !== "4.0.0" && version !== "4.1.0" && version !== "4.2.0")
     fail("unsupported-version", "unsupported schema profile")
   const value = definitions[name]
   if (value === undefined) throw new Error(`unknown schema definition ${name}`)
