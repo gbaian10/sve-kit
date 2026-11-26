@@ -26973,7 +26973,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/DSLNodes.Concept"
+                "$ref": "#/$defs/DSLNodes.NonemptyText"
               },
               {
                 "not": {}
@@ -27016,7 +27016,7 @@
           "$ref": "#/$defs/DSLNodes.Ports"
         },
         "lastword": {
-          "$ref": "#/$defs/DSLNodes.A.head.lastword"
+          "$ref": "#/$defs/DSLNodes.A.head.trigger"
         }
       },
       "required": [
@@ -27267,23 +27267,8 @@
           "$ref": "#/$defs/DSLNodes.A.ref"
         },
         {
-          "$ref": "#/$defs/DSLNodes.A.act.act.long"
+          "$ref": "#/$defs/DSLNodes.A.act.object-ref"
         }
-      ]
-    },
-    "DSLNodes.A.act.act.long": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
       ]
     },
     "DSLNodes.A.act.apply": {
@@ -27337,7 +27322,7 @@
         "instead": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.A.instead.banish"
+            "$ref": "#/$defs/DSLNodes.A.instead.removal"
           },
           "minItems": 1
         }
@@ -27359,7 +27344,7 @@
         "instead": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.A.instead.banish"
+            "$ref": "#/$defs/DSLNodes.A.instead.removal"
           },
           "minItems": 1
         }
@@ -27429,6 +27414,32 @@
             "hp"
           ]
         }
+      ]
+    },
+    "DSLNodes.A.act.change-control": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/DSLNodes.A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        },
+        "to": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DSLNodes.A.player-ref"
+            },
+            {
+              "type": "string",
+              "const": "other_players"
+            }
+          ]
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
       ]
     },
     "DSLNodes.A.act.choose": {
@@ -27606,7 +27617,7 @@
           "$ref": "#/$defs/DSLNodes.A.effect-object"
         },
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "delta": {
           "$ref": "#/$defs/DSLNodes.A.expr.numeric"
@@ -27647,7 +27658,7 @@
         "counters": {
           "type": "object",
           "propertyNames": {
-            "$ref": "#/$defs/DSLNodes.CounterName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "additionalProperties": {
             "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -27771,7 +27782,7 @@
           "$ref": "#/$defs/DSLNodes.A.effect-recipient"
         },
         "n": {
-          "$ref": "#/$defs/DSLNodes.A.damage-amount"
+          "$ref": "#/$defs/DSLNodes.A.selection-quantity"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -27943,7 +27954,7 @@
         "instead": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.A.instead.destroy"
+            "$ref": "#/$defs/DSLNodes.A.instead.removal"
           },
           "minItems": 1
         }
@@ -28123,25 +28134,6 @@
         "n"
       ]
     },
-    "DSLNodes.A.act.ep": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "delta": {
-          "$ref": "#/$defs/DSLNodes.A.expr.numeric"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who",
-        "delta"
-      ]
-    },
     "DSLNodes.A.act.equip": {
       "type": "object",
       "properties": {
@@ -28149,7 +28141,7 @@
           "$ref": "#/$defs/DSLNodes.A.effect-object"
         },
         "token": {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -28179,44 +28171,14 @@
         "ref"
       ]
     },
-    "DSLNodes.A.act.extra-turn": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
-    },
     "DSLNodes.A.act.flip-down": {
       "anyOf": [
         {
           "$ref": "#/$defs/DSLNodes.A.ref"
         },
         {
-          "$ref": "#/$defs/DSLNodes.A.act.flip-down.long"
+          "$ref": "#/$defs/DSLNodes.A.act.object-ref"
         }
-      ]
-    },
-    "DSLNodes.A.act.flip-down.long": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
       ]
     },
     "DSLNodes.A.act.flip-up": {
@@ -28225,26 +28187,11 @@
           "$ref": "#/$defs/DSLNodes.A.ref"
         },
         {
-          "$ref": "#/$defs/DSLNodes.A.act.flip-up.long"
+          "$ref": "#/$defs/DSLNodes.A.act.object-ref"
         },
         {
           "$ref": "#/$defs/DSLNodes.A.act.flip-up.selection"
         }
-      ]
-    },
-    "DSLNodes.A.act.flip-up.long": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
       ]
     },
     "DSLNodes.A.act.flip-up.selection": {
@@ -28270,13 +28217,13 @@
               "type": "boolean"
             },
             "name": {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             "name_contains": {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             "trait": {
-              "$ref": "#/$defs/DSLNodes.Concept"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             }
           },
           "required": [
@@ -28298,47 +28245,6 @@
       ],
       "additionalProperties": false
     },
-    "DSLNodes.A.act.gain-drive": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
-      ]
-    },
-    "DSLNodes.A.act.give": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "to": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DSLNodes.A.player-ref"
-            },
-            {
-              "type": "string",
-              "const": "other_players"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
-      ]
-    },
     "DSLNodes.A.act.grant": {
       "type": "object",
       "properties": {
@@ -28350,7 +28256,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/DSLNodes.Concept"
+                "$ref": "#/$defs/DSLNodes.NonemptyText"
               },
               {
                 "not": {}
@@ -28438,58 +28344,11 @@
     "DSLNodes.A.act.look": {
       "anyOf": [
         {
-          "$ref": "#/$defs/DSLNodes.A.act.look.ref"
+          "$ref": "#/$defs/DSLNodes.A.act.observe-ref"
         },
         {
-          "$ref": "#/$defs/DSLNodes.A.act.look.top"
+          "$ref": "#/$defs/DSLNodes.A.act.observe-top"
         }
-      ]
-    },
-    "DSLNodes.A.act.look.ref": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "bind": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        },
-        "random": {
-          "$ref": "#/$defs/DSLNodes.A.random-sample"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref",
-        "bind"
-      ]
-    },
-    "DSLNodes.A.act.look.top": {
-      "type": "object",
-      "properties": {
-        "top": {
-          "$ref": "#/$defs/DSLNodes.A.deck-slice"
-        },
-        "bind": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "top",
-        "bind"
       ]
     },
     "DSLNodes.A.act.lose-abilities": {
@@ -28772,6 +28631,68 @@
         ]
       }
     },
+    "DSLNodes.A.act.object-ref": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/DSLNodes.A.effect-object"
+        },
+        "result": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref"
+      ]
+    },
+    "DSLNodes.A.act.observe-ref": {
+      "type": "object",
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/DSLNodes.A.effect-object"
+        },
+        "bind": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        },
+        "by": {
+          "$ref": "#/$defs/DSLNodes.A.player-ref"
+        },
+        "random": {
+          "$ref": "#/$defs/DSLNodes.A.random-sample"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "ref",
+        "bind"
+      ]
+    },
+    "DSLNodes.A.act.observe-top": {
+      "type": "object",
+      "properties": {
+        "top": {
+          "$ref": "#/$defs/DSLNodes.A.deck-slice"
+        },
+        "bind": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        },
+        "result": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        },
+        "by": {
+          "$ref": "#/$defs/DSLNodes.A.player-ref"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "top",
+        "bind"
+      ]
+    },
     "DSLNodes.A.act.pilot": {
       "type": "object",
       "properties": {
@@ -28874,6 +28795,40 @@
         "ref"
       ]
     },
+    "DSLNodes.A.act.player-action": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/DSLNodes.A.effect-players"
+        },
+        "result": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who"
+      ]
+    },
+    "DSLNodes.A.act.player-delta": {
+      "type": "object",
+      "properties": {
+        "who": {
+          "$ref": "#/$defs/DSLNodes.A.effect-players"
+        },
+        "delta": {
+          "$ref": "#/$defs/DSLNodes.A.expr.numeric"
+        },
+        "result": {
+          "$ref": "#/$defs/DSLNodes.BindingName"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "who",
+        "delta"
+      ]
+    },
     "DSLNodes.A.act.player-effect": {
       "type": "object",
       "properties": {
@@ -28899,49 +28854,11 @@
     "DSLNodes.A.act.pp": {
       "anyOf": [
         {
-          "$ref": "#/$defs/DSLNodes.A.act.pp.delta"
+          "$ref": "#/$defs/DSLNodes.A.act.player-delta"
         },
         {
           "$ref": "#/$defs/DSLNodes.A.act.pp.to-max"
         }
-      ]
-    },
-    "DSLNodes.A.act.pp-max": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "delta": {
-          "$ref": "#/$defs/DSLNodes.A.expr.numeric"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who",
-        "delta"
-      ]
-    },
-    "DSLNodes.A.act.pp.delta": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "delta": {
-          "$ref": "#/$defs/DSLNodes.A.expr.numeric"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who",
-        "delta"
       ]
     },
     "DSLNodes.A.act.pp.to-max": {
@@ -28985,10 +28902,10 @@
     "DSLNodes.A.act.reveal": {
       "anyOf": [
         {
-          "$ref": "#/$defs/DSLNodes.A.act.reveal.ref"
+          "$ref": "#/$defs/DSLNodes.A.act.observe-ref"
         },
         {
-          "$ref": "#/$defs/DSLNodes.A.act.reveal.top"
+          "$ref": "#/$defs/DSLNodes.A.act.observe-top"
         }
       ]
     },
@@ -29017,53 +28934,6 @@
         "n",
         "bind",
         "matched"
-      ]
-    },
-    "DSLNodes.A.act.reveal.ref": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "bind": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        },
-        "random": {
-          "$ref": "#/$defs/DSLNodes.A.random-sample"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref",
-        "bind"
-      ]
-    },
-    "DSLNodes.A.act.reveal.top": {
-      "type": "object",
-      "properties": {
-        "top": {
-          "$ref": "#/$defs/DSLNodes.A.deck-slice"
-        },
-        "bind": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "top",
-        "bind"
       ]
     },
     "DSLNodes.A.act.search": {
@@ -29234,25 +29104,6 @@
         "to"
       ]
     },
-    "DSLNodes.A.act.sep": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "delta": {
-          "$ref": "#/$defs/DSLNodes.A.expr.numeric"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who",
-        "delta"
-      ]
-    },
     "DSLNodes.A.act.set-life": {
       "type": "object",
       "properties": {
@@ -29322,85 +29173,14 @@
         }
       ]
     },
-    "DSLNodes.A.act.shuffle": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
-    },
-    "DSLNodes.A.act.skip-turn": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
-    },
     "DSLNodes.A.act.stand": {
       "anyOf": [
         {
           "$ref": "#/$defs/DSLNodes.A.ref"
         },
         {
-          "$ref": "#/$defs/DSLNodes.A.act.stand.long"
+          "$ref": "#/$defs/DSLNodes.A.act.object-ref"
         }
-      ]
-    },
-    "DSLNodes.A.act.stand.long": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
-      ]
-    },
-    "DSLNodes.A.act.steal": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        },
-        "to": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DSLNodes.A.player-ref"
-            },
-            {
-              "type": "string",
-              "const": "other_players"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
       ]
     },
     "DSLNodes.A.act.transform": {
@@ -29412,7 +29192,7 @@
         "into": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "$ref": "#/$defs/DSLNodes.A.transform.allocated"
@@ -29434,21 +29214,6 @@
       "required": [
         "ref",
         "into"
-      ]
-    },
-    "DSLNodes.A.act.win": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.effect-players"
-        },
-        "result": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
       ]
     },
     "DSLNodes.A.capture.cost-of": {
@@ -29614,14 +29379,14 @@
       },
       "properties": {
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -29640,7 +29405,7 @@
           "$ref": "#/$defs/DSLNodes.A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -29669,7 +29434,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -29709,7 +29474,7 @@
           "type": "boolean"
         },
         "class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "kind": {
           "anyOf": [
@@ -29722,11 +29487,11 @@
           ]
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -29734,10 +29499,10 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
-              "$ref": "#/$defs/DSLNodes.A.expr.declared-name"
+              "$ref": "#/$defs/DSLNodes.A.expr.bound"
             },
             {
               "$ref": "#/$defs/DSLNodes.A.same-as"
@@ -29806,14 +29571,14 @@
       },
       "properties": {
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -29832,7 +29597,7 @@
           "$ref": "#/$defs/DSLNodes.A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -29861,7 +29626,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -29901,7 +29666,7 @@
           "type": "boolean"
         },
         "class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "kind": {
           "anyOf": [
@@ -29914,11 +29679,11 @@
           ]
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -29926,7 +29691,7 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "$ref": "#/$defs/DSLNodes.A.same-as"
@@ -30223,7 +29988,7 @@
       "additionalProperties": false,
       "properties": {
         "construction": {
-          "$ref": "#/$defs/DSLNodes.Title"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         }
       },
       "required": [
@@ -30315,7 +30080,7 @@
           "type": "object",
           "properties": {
             "trait": {
-              "$ref": "#/$defs/DSLNodes.Concept"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             }
           },
           "required": [
@@ -31888,7 +31653,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -31916,7 +31681,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -31943,7 +31708,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -31983,7 +31748,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -32008,7 +31773,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -32032,7 +31797,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/DSLNodes.BindingName"
@@ -32915,16 +32680,7 @@
       "additionalProperties": false
     },
     "DSLNodes.A.cost.skip-turn": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
-      "required": [
-        "who"
-      ],
-      "additionalProperties": false
+      "$ref": "#/$defs/DSLNodes.A.expr.turn-number-payload"
     },
     "DSLNodes.A.cost.step": {
       "type": "object",
@@ -33152,14 +32908,7 @@
       ]
     },
     "DSLNodes.A.count-amount": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/DSLNodes.A.quantity"
-        },
-        {
-          "not": {}
-        }
-      ]
+      "$ref": "#/$defs/DSLNodes.A.selection-quantity"
     },
     "DSLNodes.A.create.allocated": {
       "type": "object",
@@ -33179,7 +32928,7 @@
         "among": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -33259,7 +33008,7 @@
     "DSLNodes.A.create.token": {
       "anyOf": [
         {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         {
           "not": {}
@@ -33269,7 +33018,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/DSLNodes.CardName"
+                "$ref": "#/$defs/DSLNodes.NonemptyText"
               },
               {
                 "not": {}
@@ -33283,16 +33032,6 @@
         },
         {
           "$ref": "#/$defs/DSLNodes.A.create.same-name"
-        }
-      ]
-    },
-    "DSLNodes.A.damage-amount": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/DSLNodes.A.quantity"
-        },
-        {
-          "not": {}
         }
       ]
     },
@@ -33571,7 +33310,7 @@
           "$ref": "#/$defs/DSLNodes.A.effect-object"
         },
         "name": {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         }
       },
       "required": [
@@ -33938,14 +33677,14 @@
       },
       "properties": {
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -33964,7 +33703,7 @@
           "$ref": "#/$defs/DSLNodes.A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -33994,7 +33733,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -34033,7 +33772,7 @@
           "type": "boolean"
         },
         "class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "kind": {
           "anyOf": [
@@ -34046,19 +33785,19 @@
           ]
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_all": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "$ref": "#/$defs/DSLNodes.A.same-as"
@@ -34291,7 +34030,7 @@
         "keywords": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -34325,7 +34064,7 @@
         },
         "list": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -34559,7 +34298,7 @@
           "$ref": "#/$defs/DSLNodes.A.effect-object"
         },
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "max": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -34655,7 +34394,7 @@
           "$ref": "#/$defs/DSLNodes.A.effect-object"
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         }
       },
       "required": [
@@ -34871,7 +34610,7 @@
       },
       "properties": {
         "class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "where": {
           "$ref": "#/$defs/DSLNodes.A.cond"
@@ -34880,14 +34619,14 @@
           "$ref": "#/$defs/DSLNodes.BindingName"
         },
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -34906,7 +34645,7 @@
           "$ref": "#/$defs/DSLNodes.Nat"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -34935,7 +34674,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -34978,17 +34717,17 @@
           "$ref": "#/$defs/DSLNodes.Code"
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
         },
         "name": {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "who": {
           "$ref": "#/$defs/DSLNodes.A.player-ref"
@@ -35114,7 +34853,7 @@
       },
       "properties": {
         "class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "where": {
           "$ref": "#/$defs/DSLNodes.A.cond"
@@ -35123,14 +34862,14 @@
           "$ref": "#/$defs/DSLNodes.BindingName"
         },
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -35149,7 +34888,7 @@
           "$ref": "#/$defs/DSLNodes.Nat"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -35178,7 +34917,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -35221,34 +34960,22 @@
           "$ref": "#/$defs/DSLNodes.Code"
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
         },
         "name": {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         }
       },
       "type": "object"
     },
-    "DSLNodes.A.event.ability-played": {
-      "additionalProperties": false,
-      "properties": {
-        "ability_played": {
-          "$ref": "#/$defs/DSLNodes.A.event.ability-played-payload"
-        }
-      },
-      "required": [
-        "ability_played"
-      ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.ability-played-payload": {
+    "DSLNodes.A.event.ability-holder-payload": {
       "additionalProperties": false,
       "properties": {
         "who": {
@@ -35267,37 +34994,28 @@
       },
       "type": "object"
     },
+    "DSLNodes.A.event.ability-played": {
+      "additionalProperties": false,
+      "properties": {
+        "ability_played": {
+          "$ref": "#/$defs/DSLNodes.A.event.ability-holder-payload"
+        }
+      },
+      "required": [
+        "ability_played"
+      ],
+      "type": "object"
+    },
     "DSLNodes.A.event.acted": {
       "additionalProperties": false,
       "properties": {
         "acted": {
-          "$ref": "#/$defs/DSLNodes.A.event.acted-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.subject-payload"
         }
       },
       "required": [
         "acted"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.acted-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.any-of": {
@@ -35320,33 +35038,12 @@
       "additionalProperties": false,
       "properties": {
         "attack_target": {
-          "$ref": "#/$defs/DSLNodes.A.event.attack-target-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.subject-payload"
         }
       },
       "required": [
         "attack_target"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.attack-target-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.attacked": {
@@ -35389,42 +35086,12 @@
       "additionalProperties": false,
       "properties": {
         "banished": {
-          "$ref": "#/$defs/DSLNodes.A.event.banished-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.zone-entry-payload"
         }
       },
       "required": [
         "banished"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.banished-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "from": {
-          "$ref": "#/$defs/DSLNodes.Zone"
-        },
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.damaged": {
@@ -35519,39 +35186,12 @@
       "additionalProperties": false,
       "properties": {
         "destroyed": {
-          "$ref": "#/$defs/DSLNodes.A.event.destroyed-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.field-departure-payload"
         }
       },
       "required": [
         "destroyed"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.destroyed-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.dice-rolled": {
@@ -35677,33 +35317,12 @@
       "additionalProperties": false,
       "properties": {
         "drive_gained": {
-          "$ref": "#/$defs/DSLNodes.A.event.drive-gained-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.subject-payload"
         }
       },
       "required": [
         "drive_gained"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.drive-gained-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.drive-trigger": {
@@ -35843,6 +35462,33 @@
       },
       "type": "object"
     },
+    "DSLNodes.A.event.field-departure-payload": {
+      "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
+      "properties": {
+        "ref": {
+          "$ref": "#/$defs/DSLNodes.A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
+        },
+        "who": {
+          "$ref": "#/$defs/DSLNodes.A.player-ref"
+        },
+        "during": {
+          "$ref": "#/$defs/DSLNodes.A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/DSLNodes.A.event-by"
+        }
+      },
+      "type": "object"
+    },
     "DSLNodes.A.event.final-limit-broke": {
       "additionalProperties": false,
       "properties": {
@@ -35929,39 +35575,12 @@
       "additionalProperties": false,
       "properties": {
         "left_field": {
-          "$ref": "#/$defs/DSLNodes.A.event.left-field-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.field-departure-payload"
         }
       },
       "required": [
         "left_field"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.left-field-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.life-changed": {
@@ -36102,42 +35721,12 @@
       "additionalProperties": false,
       "properties": {
         "placed_ex": {
-          "$ref": "#/$defs/DSLNodes.A.event.placed-ex-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.zone-entry-payload"
         }
       },
       "required": [
         "placed_ex"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.placed-ex-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "from": {
-          "$ref": "#/$defs/DSLNodes.Zone"
-        },
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.played": {
@@ -36198,33 +35787,12 @@
       "additionalProperties": false,
       "properties": {
         "raced": {
-          "$ref": "#/$defs/DSLNodes.A.event.raced-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.subject-payload"
         }
       },
       "required": [
         "raced"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.raced-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.self-limit-break": {
@@ -36306,7 +35874,7 @@
       "additionalProperties": false,
       "properties": {
         "stood": {
-          "$ref": "#/$defs/DSLNodes.A.event.stood-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.subject-payload"
         }
       },
       "required": [
@@ -36314,7 +35882,7 @@
       ],
       "type": "object"
     },
-    "DSLNodes.A.event.stood-payload": {
+    "DSLNodes.A.event.subject-payload": {
       "additionalProperties": false,
       "not": {
         "required": [
@@ -36339,36 +35907,12 @@
       "additionalProperties": false,
       "properties": {
         "super_evolved": {
-          "$ref": "#/$defs/DSLNodes.A.event.super-evolved-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.evolved-payload"
         }
       },
       "required": [
         "super_evolved"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.event.super-evolved-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.event.targeted": {
@@ -36402,7 +35946,7 @@
       "additionalProperties": false,
       "properties": {
         "ub_activated": {
-          "$ref": "#/$defs/DSLNodes.A.event.ub-activated-payload"
+          "$ref": "#/$defs/DSLNodes.A.event.ability-holder-payload"
         }
       },
       "required": [
@@ -36410,21 +35954,32 @@
       ],
       "type": "object"
     },
-    "DSLNodes.A.event.ub-activated-payload": {
+    "DSLNodes.A.event.zone-entry-payload": {
       "additionalProperties": false,
+      "not": {
+        "required": [
+          "ref",
+          "sel"
+        ]
+      },
       "properties": {
+        "from": {
+          "$ref": "#/$defs/DSLNodes.Zone"
+        },
+        "ref": {
+          "$ref": "#/$defs/DSLNodes.A.ref"
+        },
+        "sel": {
+          "$ref": "#/$defs/DSLNodes.A.event-subject-filter"
+        },
         "who": {
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
-        "holder": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DSLNodes.A.ref"
-            },
-            {
-              "$ref": "#/$defs/DSLNodes.A.event-object-sel"
-            }
-          ]
+        "during": {
+          "$ref": "#/$defs/DSLNodes.A.during"
+        },
+        "by": {
+          "$ref": "#/$defs/DSLNodes.A.event-by"
         }
       },
       "type": "object"
@@ -36432,12 +35987,12 @@
     "DSLNodes.A.evolution-destination": {
       "anyOf": [
         {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -36566,22 +36121,22 @@
           ]
         },
         "class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_all": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "$ref": "#/$defs/DSLNodes.A.same-as"
@@ -36591,7 +36146,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -36664,14 +36219,14 @@
           ]
         },
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -36690,7 +36245,7 @@
           "$ref": "#/$defs/DSLNodes.A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -36871,7 +36426,7 @@
           "$ref": "#/$defs/DSLNodes.A.ref"
         },
         "name": {
-          "$ref": "#/$defs/DSLNodes.CounterName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         }
       },
       "required": [
@@ -36879,18 +36434,6 @@
         "name"
       ],
       "type": "object"
-    },
-    "DSLNodes.A.expr.declared-name": {
-      "type": "object",
-      "properties": {
-        "bound": {
-          "$ref": "#/$defs/DSLNodes.BindingName"
-        }
-      },
-      "required": [
-        "bound"
-      ],
-      "additionalProperties": false
     },
     "DSLNodes.A.expr.dice": {
       "additionalProperties": false,
@@ -37564,7 +37107,7 @@
           "$ref": "#/$defs/DSLNodes.A.head.trigger"
         },
         "lastword": {
-          "$ref": "#/$defs/DSLNodes.A.head.lastword"
+          "$ref": "#/$defs/DSLNodes.A.head.trigger"
         },
         "evolve_time": {
           "$ref": "#/$defs/DSLNodes.A.head.trigger"
@@ -37782,42 +37325,6 @@
       "additionalProperties": false,
       "required": [
         "cost"
-      ]
-    },
-    "DSLNodes.A.head.lastword": {
-      "type": "object",
-      "properties": {
-        "do": {
-          "$ref": "#/$defs/DSLNodes.A.steps"
-        },
-        "targets": {
-          "$ref": "#/$defs/DSLNodes.A.targets"
-        },
-        "optional_cost": {
-          "$ref": "#/$defs/DSLNodes.A.cost.optionals"
-        },
-        "x": {
-          "$ref": "#/$defs/DSLNodes.A.x"
-        },
-        "define": {
-          "$ref": "#/$defs/DSLNodes.A.define"
-        },
-        "per_turn": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 9007199254740991
-        },
-        "ub": {
-          "type": "boolean",
-          "const": true
-        },
-        "cost": {
-          "$ref": "#/$defs/DSLNodes.A.cost"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "do"
       ]
     },
     "DSLNodes.A.head.play": {
@@ -38425,7 +37932,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.acted-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         }
       },
       "required": [
@@ -38475,7 +37982,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.acted-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -38489,16 +37996,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.acted-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.attack-target": {
@@ -38542,7 +38039,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.attack-target-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         }
       },
       "required": [
@@ -38592,7 +38089,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.attack-target-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -38606,16 +38103,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.attack-target-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.attacked": {
@@ -38782,7 +38269,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.banished-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         }
       },
       "required": [
@@ -38835,7 +38322,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.banished-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -38851,15 +38338,12 @@
       ],
       "type": "object"
     },
-    "DSLNodes.A.history.banished-where": {
+    "DSLNodes.A.history.by-ref-where": {
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
         "ref": {
           "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
         },
         "by": {
           "$ref": "#/$defs/DSLNodes.A.event-by"
@@ -39268,7 +38752,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.destroyed-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         }
       },
       "required": [
@@ -39318,7 +38802,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.destroyed-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -39332,22 +38816,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.destroyed-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.dice-rolled": {
@@ -39506,7 +38974,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.discarded-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         }
       },
       "required": [
@@ -39560,7 +39028,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.discarded-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -39574,22 +39042,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.discarded-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.drew": {
@@ -39741,7 +39193,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.drive-checked-where"
+          "$ref": "#/$defs/DSLNodes.A.history.holder-where"
         }
       },
       "required": [
@@ -39785,7 +39237,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.drive-checked-where"
+          "$ref": "#/$defs/DSLNodes.A.history.holder-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -39799,23 +39251,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.drive-checked-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "holder": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DSLNodes.A.ref"
-            },
-            {
-              "$ref": "#/$defs/DSLNodes.A.event-object-sel"
-            }
-          ]
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.drive-gained": {
@@ -39859,7 +39294,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.drive-gained-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         }
       },
       "required": [
@@ -39909,7 +39344,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.drive-gained-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -39923,16 +39358,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.drive-gained-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.drive-trigger": {
@@ -40319,7 +39744,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.evolved-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         }
       },
       "required": [
@@ -40369,7 +39794,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.evolved-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -40383,19 +39808,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.evolved-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.fused": {
@@ -40480,7 +39892,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.fused-as-material-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         }
       },
       "required": [
@@ -40524,7 +39936,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.fused-as-material-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -40538,19 +39950,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.fused-as-material-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.fused-condition": {
@@ -40617,6 +40016,23 @@
       },
       "type": "object"
     },
+    "DSLNodes.A.history.holder-where": {
+      "additionalProperties": false,
+      "minProperties": 1,
+      "properties": {
+        "holder": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DSLNodes.A.ref"
+            },
+            {
+              "$ref": "#/$defs/DSLNodes.A.event-object-sel"
+            }
+          ]
+        }
+      },
+      "type": "object"
+    },
     "DSLNodes.A.history.left-field": {
       "additionalProperties": false,
       "not": {
@@ -40658,7 +40074,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.left-field-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         }
       },
       "required": [
@@ -40708,7 +40124,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.left-field-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -40722,22 +40138,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.left-field-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.life-changed": {
@@ -41034,7 +40434,7 @@
           "$ref": "#/$defs/DSLNodes.Zone"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.moved-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         }
       },
       "required": [
@@ -41094,7 +40494,7 @@
           "$ref": "#/$defs/DSLNodes.Zone"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.moved-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -41110,7 +40510,7 @@
       ],
       "type": "object"
     },
-    "DSLNodes.A.history.moved-where": {
+    "DSLNodes.A.history.movement-where": {
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
@@ -41411,7 +40811,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.placed-ex-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         }
       },
       "required": [
@@ -41464,7 +40864,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.placed-ex-where"
+          "$ref": "#/$defs/DSLNodes.A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -41478,22 +40878,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.placed-ex-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/DSLNodes.A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.played": {
@@ -41660,7 +41044,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.raced-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         }
       },
       "required": [
@@ -41710,7 +41094,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.raced-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -41726,7 +41110,7 @@
       ],
       "type": "object"
     },
-    "DSLNodes.A.history.raced-where": {
+    "DSLNodes.A.history.ref-where": {
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
@@ -41911,7 +41295,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.stood-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         }
       },
       "required": [
@@ -41961,7 +41345,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.stood-where"
+          "$ref": "#/$defs/DSLNodes.A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -41975,16 +41359,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.stood-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.super-evolved": {
@@ -42028,7 +41402,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.super-evolved-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         }
       },
       "required": [
@@ -42078,7 +41452,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.super-evolved-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -42092,19 +41466,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.super-evolved-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.targeted": {
@@ -42142,7 +41503,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.targeted-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         }
       },
       "required": [
@@ -42186,7 +41547,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.targeted-where"
+          "$ref": "#/$defs/DSLNodes.A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -42200,19 +41561,6 @@
         "window",
         "event"
       ],
-      "type": "object"
-    },
-    "DSLNodes.A.history.targeted-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/DSLNodes.A.event-by"
-        }
-      },
       "type": "object"
     },
     "DSLNodes.A.history.ub-activated": {
@@ -42253,7 +41601,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.ub-activated-where"
+          "$ref": "#/$defs/DSLNodes.A.history.holder-where"
         }
       },
       "required": [
@@ -42300,7 +41648,7 @@
           "$ref": "#/$defs/DSLNodes.A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/DSLNodes.A.history.ub-activated-where"
+          "$ref": "#/$defs/DSLNodes.A.history.holder-where"
         },
         "at_least": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -42315,48 +41663,6 @@
         "event"
       ],
       "type": "object"
-    },
-    "DSLNodes.A.history.ub-activated-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "holder": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/DSLNodes.A.ref"
-            },
-            {
-              "$ref": "#/$defs/DSLNodes.A.event-object-sel"
-            }
-          ]
-        }
-      },
-      "type": "object"
-    },
-    "DSLNodes.A.instead.banish": {
-      "type": "object",
-      "properties": {
-        "if": {
-          "$ref": "#/$defs/DSLNodes.A.cond"
-        },
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "after": {
-          "$ref": "#/$defs/DSLNodes.A.steps"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "if"
-      ],
-      "anyOf": [
-        {
-          "required": [
-            "ref"
-          ]
-        }
-      ]
     },
     "DSLNodes.A.instead.buff": {
       "type": "object",
@@ -42490,7 +41796,7 @@
           "$ref": "#/$defs/DSLNodes.A.effect-recipient"
         },
         "n": {
-          "$ref": "#/$defs/DSLNodes.A.damage-amount"
+          "$ref": "#/$defs/DSLNodes.A.selection-quantity"
         },
         "after": {
           "$ref": "#/$defs/DSLNodes.A.steps"
@@ -42509,31 +41815,6 @@
         {
           "required": [
             "n"
-          ]
-        }
-      ]
-    },
-    "DSLNodes.A.instead.destroy": {
-      "type": "object",
-      "properties": {
-        "if": {
-          "$ref": "#/$defs/DSLNodes.A.cond"
-        },
-        "ref": {
-          "$ref": "#/$defs/DSLNodes.A.effect-object"
-        },
-        "after": {
-          "$ref": "#/$defs/DSLNodes.A.steps"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "if"
-      ],
-      "anyOf": [
-        {
-          "required": [
-            "ref"
           ]
         }
       ]
@@ -42574,7 +41855,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/DSLNodes.Concept"
+                "$ref": "#/$defs/DSLNodes.NonemptyText"
               },
               {
                 "not": {}
@@ -42700,6 +41981,31 @@
         }
       ]
     },
+    "DSLNodes.A.instead.removal": {
+      "type": "object",
+      "properties": {
+        "if": {
+          "$ref": "#/$defs/DSLNodes.A.cond"
+        },
+        "ref": {
+          "$ref": "#/$defs/DSLNodes.A.effect-object"
+        },
+        "after": {
+          "$ref": "#/$defs/DSLNodes.A.steps"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "if"
+      ],
+      "anyOf": [
+        {
+          "required": [
+            "ref"
+          ]
+        }
+      ]
+    },
     "DSLNodes.A.instead.search": {
       "type": "object",
       "properties": {
@@ -42797,7 +42103,7 @@
       "minProperties": 1,
       "properties": {
         "name": {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "zone": {
           "$ref": "#/$defs/DSLNodes.Zone"
@@ -42806,10 +42112,10 @@
           "$ref": "#/$defs/DSLNodes.Code"
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "orig_cost_eq": {
           "$ref": "#/$defs/DSLNodes.A.quantity"
@@ -43262,7 +42568,7 @@
           "$ref": "#/$defs/DSLNodes.BindingName"
         },
         "name": {
-          "$ref": "#/$defs/DSLNodes.RoleName"
+          "$ref": "#/$defs/DSLNodes.Identifier"
         }
       },
       "required": [
@@ -43337,43 +42643,11 @@
     "DSLNodes.A.search.group": {
       "anyOf": [
         {
-          "$ref": "#/$defs/DSLNodes.A.search.group.exact"
+          "$ref": "#/$defs/DSLNodes.A.cost.material-group.exact"
         },
         {
-          "$ref": "#/$defs/DSLNodes.A.search.group.up-to"
+          "$ref": "#/$defs/DSLNodes.A.cost.material-group.up-to"
         }
-      ]
-    },
-    "DSLNodes.A.search.group.exact": {
-      "type": "object",
-      "properties": {
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.sel.object-core"
-        },
-        "n": {
-          "$ref": "#/$defs/DSLNodes.A.quantity"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "sel",
-        "n"
-      ]
-    },
-    "DSLNodes.A.search.group.up-to": {
-      "type": "object",
-      "properties": {
-        "sel": {
-          "$ref": "#/$defs/DSLNodes.A.sel.object-core"
-        },
-        "upto": {
-          "$ref": "#/$defs/DSLNodes.A.quantity"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "sel",
-        "upto"
       ]
     },
     "DSLNodes.A.search.partition": {
@@ -43463,7 +42737,7 @@
         "class": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.Concept"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "not": {}
@@ -43473,7 +42747,7 @@
         "trait": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.Concept"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "not": {}
@@ -43485,7 +42759,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/DSLNodes.Concept"
+                "$ref": "#/$defs/DSLNodes.NonemptyText"
               },
               {
                 "not": {}
@@ -43497,7 +42771,7 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "not": {}
@@ -43510,7 +42784,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -43568,14 +42842,14 @@
           ]
         },
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -43594,7 +42868,7 @@
           "$ref": "#/$defs/DSLNodes.A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -43927,7 +43201,7 @@
         "class": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.Concept"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "not": {}
@@ -43937,7 +43211,7 @@
         "trait": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.Concept"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "not": {}
@@ -43949,7 +43223,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/DSLNodes.Concept"
+                "$ref": "#/$defs/DSLNodes.NonemptyText"
               },
               {
                 "not": {}
@@ -43961,7 +43235,7 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "not": {}
@@ -43974,7 +43248,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -44064,14 +43338,14 @@
           ]
         },
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -44090,7 +43364,7 @@
           "$ref": "#/$defs/DSLNodes.A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -44486,19 +43760,19 @@
           "$ref": "#/$defs/DSLNodes.A.act.counter"
         },
         "pp_max": {
-          "$ref": "#/$defs/DSLNodes.A.act.pp-max"
+          "$ref": "#/$defs/DSLNodes.A.act.player-delta"
         },
         "ep": {
-          "$ref": "#/$defs/DSLNodes.A.act.ep"
+          "$ref": "#/$defs/DSLNodes.A.act.player-delta"
         },
         "sep": {
-          "$ref": "#/$defs/DSLNodes.A.act.sep"
+          "$ref": "#/$defs/DSLNodes.A.act.player-delta"
         },
         "pp": {
           "$ref": "#/$defs/DSLNodes.A.act.pp"
         },
         "shuffle": {
-          "$ref": "#/$defs/DSLNodes.A.act.shuffle"
+          "$ref": "#/$defs/DSLNodes.A.act.player-action"
         },
         "dice": {
           "$ref": "#/$defs/DSLNodes.A.act.dice"
@@ -44516,10 +43790,10 @@
           "$ref": "#/$defs/DSLNodes.A.act.limit-break"
         },
         "steal": {
-          "$ref": "#/$defs/DSLNodes.A.act.steal"
+          "$ref": "#/$defs/DSLNodes.A.act.change-control"
         },
         "give": {
-          "$ref": "#/$defs/DSLNodes.A.act.give"
+          "$ref": "#/$defs/DSLNodes.A.act.change-control"
         },
         "stack_plus": {
           "$ref": "#/$defs/DSLNodes.A.expr.numeric"
@@ -44531,7 +43805,7 @@
           "$ref": "#/$defs/DSLNodes.A.act.race"
         },
         "gain_drive": {
-          "$ref": "#/$defs/DSLNodes.A.act.gain-drive"
+          "$ref": "#/$defs/DSLNodes.A.act.object-ref"
         },
         "play_card": {
           "$ref": "#/$defs/DSLNodes.A.act.play-card"
@@ -44546,13 +43820,13 @@
           "$ref": "#/$defs/DSLNodes.A.act.player-effect"
         },
         "win": {
-          "$ref": "#/$defs/DSLNodes.A.act.win"
+          "$ref": "#/$defs/DSLNodes.A.act.player-action"
         },
         "skip_turn": {
-          "$ref": "#/$defs/DSLNodes.A.act.skip-turn"
+          "$ref": "#/$defs/DSLNodes.A.act.player-action"
         },
         "extra_turn": {
-          "$ref": "#/$defs/DSLNodes.A.act.extra-turn"
+          "$ref": "#/$defs/DSLNodes.A.act.player-action"
         },
         "make_type": {
           "$ref": "#/$defs/DSLNodes.A.act.make-type"
@@ -44735,22 +44009,22 @@
           ]
         },
         "class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_all": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/DSLNodes.CardName"
+              "$ref": "#/$defs/DSLNodes.NonemptyText"
             },
             {
               "$ref": "#/$defs/DSLNodes.A.same-as"
@@ -44760,7 +44034,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -44799,14 +44073,14 @@
           "const": true
         },
         "not_class": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/DSLNodes.Concept"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -44825,7 +44099,7 @@
           "$ref": "#/$defs/DSLNodes.A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/DSLNodes.Concept"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -45069,7 +44343,7 @@
       "type": "object",
       "minProperties": 1,
       "propertyNames": {
-        "$ref": "#/$defs/DSLNodes.RoleName"
+        "$ref": "#/$defs/DSLNodes.Identifier"
       },
       "additionalProperties": {
         "$ref": "#/$defs/DSLNodes.A.target.role-value"
@@ -45144,7 +44418,7 @@
         "among": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/DSLNodes.CardName"
+            "$ref": "#/$defs/DSLNodes.NonemptyText"
           },
           "minItems": 1
         },
@@ -45174,18 +44448,6 @@
         "edge"
       ],
       "additionalProperties": false
-    },
-    "DSLNodes.A.turn-interval": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/DSLNodes.A.player-ref"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
     },
     "DSLNodes.A.until": {
       "anyOf": [
@@ -45228,7 +44490,7 @@
       "type": "object",
       "properties": {
         "during_next_turn": {
-          "$ref": "#/$defs/DSLNodes.A.turn-interval"
+          "$ref": "#/$defs/DSLNodes.A.expr.turn-number-payload"
         }
       },
       "additionalProperties": false,
@@ -45311,17 +44573,9 @@
     "DSLNodes.CardKind": {
       "$ref": "#/$defs/DSLNodes.Code"
     },
-    "DSLNodes.CardName": {
-      "type": "string",
-      "minLength": 1
-    },
     "DSLNodes.Code": {
       "type": "string",
       "pattern": "^[a-z][a-z0-9_.-]*$(?![\\s\\S])"
-    },
-    "DSLNodes.Concept": {
-      "type": "string",
-      "minLength": 1
     },
     "DSLNodes.ConditionalDeckRule": {
       "additionalProperties": false,
@@ -45343,7 +44597,7 @@
           "uniqueItems": true
         },
         "exclude_name_contains": {
-          "$ref": "#/$defs/DSLNodes.CardName"
+          "$ref": "#/$defs/DSLNodes.NonemptyText"
         },
         "same_name_max": {
           "$ref": "#/$defs/DSLNodes.Nat"
@@ -45356,10 +44610,6 @@
         "same_name_max"
       ],
       "type": "object"
-    },
-    "DSLNodes.CounterName": {
-      "type": "string",
-      "minLength": 1
     },
     "DSLNodes.DeckRule": {
       "additionalProperties": false,
@@ -45426,6 +44676,10 @@
       ],
       "type": "object"
     },
+    "DSLNodes.Identifier": {
+      "type": "string",
+      "pattern": "^[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
+    },
     "DSLNodes.ImportBinding": {
       "additionalProperties": false,
       "properties": {
@@ -45490,6 +44744,10 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 9007199254740991
+    },
+    "DSLNodes.NonemptyText": {
+      "type": "string",
+      "minLength": 1
     },
     "DSLNodes.Phase": {
       "type": "string",
@@ -45560,10 +44818,6 @@
         "cost1"
       ]
     },
-    "DSLNodes.RoleName": {
-      "type": "string",
-      "pattern": "^[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
-    },
     "DSLNodes.StructuralPath": {
       "items": {
         "anyOf": [
@@ -45576,10 +44830,6 @@
         ]
       },
       "type": "array"
-    },
-    "DSLNodes.Title": {
-      "minLength": 1,
-      "type": "string"
     },
     "DSLNodes.TokenIdentity": {
       "type": "object",
