@@ -42,7 +42,7 @@ use core::result;
 use serde_json::Value;
 use sve_battle_contract::{
     QuestionId, Seat,
-    observation::{self as wire, TurnView},
+    observation::{self as wire, LimitBreakStage, TurnView},
 };
 
 /// Player-visible zones, including attached evolution cards.
@@ -156,6 +156,8 @@ pub struct CardState {
     pub posture: Posture,
     /// Current evolution state.
     pub evolution: EvolutionState,
+    /// Current limit-break stage, public to both seats.
+    pub limit_break: LimitBreakStage,
     /// Effective field or EX follower stats, if applicable.
     pub stats: Option<Stats>,
     /// Effective rules keywords.
@@ -867,9 +869,9 @@ impl Game {
                 });
             }
         }
-        let stats = if matches!(object.zone.as_str(), "field" | "ex")
-            && self.object_type(id)?.contains("フォロワー")
-        {
+        let follower_with_stats = matches!(object.zone.as_str(), "field" | "ex")
+            && self.object_type(id)?.contains("フォロワー");
+        let stats = if follower_with_stats {
             let read = |stat| {
                 if object.zone == "ex" {
                     self.internal_ex_follower_stat(id, stat)
@@ -896,6 +898,11 @@ impl Game {
                 EvolutionState::Evolved
             } else {
                 EvolutionState::Base
+            },
+            limit_break: if follower_with_stats && object.zone == "field" {
+                self.limit_break_stage(id)
+            } else {
+                LimitBreakStage::None
             },
             stats,
             keywords: self

@@ -199,6 +199,33 @@ fn assert_public_attachments(game: &Game) {
     }
 }
 
+#[test]
+fn a_departed_follower_loses_its_public_limit_break_stage() {
+    use sve_battle_contract::observation::LimitBreakStage;
+
+    let mut game = board(&setup_board(1), element("風属性"), follower_program(true));
+    game.advance_player_input();
+    activate_material(&mut game, "m1");
+    assert_eq!(drain_pending(&mut game), 1);
+    activate(&mut game, 1);
+    assert_eq!(drain_pending(&mut game), 0);
+
+    let observed = game.observe(Viewer::P2).unwrap();
+    let cemetery = observed.players[0]
+        .zones
+        .iter()
+        .find(|zone| zone.kind == ObservedZone::Cemetery)
+        .unwrap();
+    let [departed] = cemetery.cards.as_slice() else {
+        panic!("only the departed follower is in the cemetery");
+    };
+    assert_eq!(
+        departed.card.properties.state.as_ref().unwrap().limit_break,
+        LimitBreakStage::None
+    );
+    assert_eq!(observed.relationships.as_slice(), &[]);
+}
+
 fn assert_public_break_events(game: &mut Game) {
     game.advance_player_input();
     let breaks = game

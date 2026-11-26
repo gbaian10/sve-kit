@@ -123,6 +123,7 @@ function fieldState(spec: FieldSpec): CardState {
         : spec.superEvolved === true
           ? "super_evolved"
           : "evolved",
+    limit_break: "none",
     stats: stats === null ? null : { attack: stats[0], life: stats[1] },
     keywords: [...(spec.keywords ?? [])],
     counters: (spec.counters ?? []).map(([name, amount]) => ({ name, amount })),

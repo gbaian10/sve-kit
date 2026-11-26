@@ -147,8 +147,12 @@ BattleObservation 完整保留[玩家輸入](player-input.md)的觀察語義，�
 | remembered | 曾看過的卡面與 owner；沒有現位置、實體副本數或可追蹤暗牌標記 |
 
 `limit_break` 是公開無序區域。素材成員的 `position` 為 null，`relationships` 的
-`limit_break` 由素材指向場上的關聯卡。完成解放時公開 `limit_broken` 事件，
-以 `final_break` 表示是否為最終上限解放。
+`limit_break` 由素材指向場上的關聯卡。雙方的完整盤面都以必填的
+`CardState.limit_break` 表示場上從者的目前階段：`none`（未解放）、`broken`（已上限解放）、
+`final`（已最終上限解放）。其他有 `CardState` 的卡片使用 `none`。
+階段取自仍在上限解放領域且與從者關聯的素材，最終階段優先。同一張素材可以同時提供兩個階段。
+從者離場時失去階段。素材移走時，其提供的階段也會消失（綜合規則 4.17、11.12、14.6.4）。
+完成解放時公開 `limit_broken` 事件，以 `final_break` 表示該次解放是否為最終上限解放。
 
 玩家資源皆由引擎狀態提供，畫面不硬編先後手的配置或開放時機：
 

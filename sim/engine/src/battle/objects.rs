@@ -98,6 +98,7 @@ fn card_state(
             EvolutionState::Evolved => wire::EvolutionState::Evolved,
             EvolutionState::SuperEvolved => wire::EvolutionState::SuperEvolved,
         },
+        limit_break: state.limit_break,
         stats: state
             .stats
             .map(|stats| -> Result<_> {
