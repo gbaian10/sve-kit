@@ -584,7 +584,9 @@ EX 起動的 `cost.steps` 可依序組合 PP、`banish_self: true`、`self_to_ce
 
 `static.effects[].cannot: {what: attack, on: {who: all, zone: field, kind: follower, orig_cost_le: 3}}` 依每次宣告攻擊時的場上集合，限制雙方符合印刷原費條件的從者（BP09-040，Q1173、Q1174）。領袖與從者對象均受禁止；來源失去能力或離場後停止提供限制。
 
-`keywords: [single_drive]` 與 `keywords: [twin_drive]` 展開為自身攻擊時的完整 Drive check；Twin Drive 先完成第一張的圖示處理與去向，再取第二張牌頂。非作品構築不讀圖示、直接放回牌底；作品構築從權威端既有 card facts 讀取已驗證的 `trigger_icon`，缺資料時拒絕，不從提醒文推算。接受圖示後依一般抽牌、生命、數值與姿態規則處理並送墓，拒絕或無圖示則回牌底；Critical 只增加攻擊力 2，Stand 的領袖攻擊限制持續至本回合結束。
+`keywords: [single_drive]` 與 `keywords: [twin_drive]` 展開為自身攻擊時的完整 Drive check；Twin Drive 先完成第一張的圖示處理與去向，再取第二張牌頂。非作品構築直接放回牌底；作品構築從權威端既有 card facts 讀取已驗證的 `trigger_icon`。接受圖示後依一般抽牌、生命、數值與姿態規則處理並送墓，拒絕或無圖示則回牌底；Critical 只增加攻擊力 2，Stand 的領袖攻擊限制持續至本回合結束。
+
+正式開局快照目前缺少可信的 Trigger icon 投影。預檢以 `MissingTriggerIcons` 向各席回報其牌組中可發起作品構築 Drive check 的卡，包括能轉交給作品構築對手的 Drive 來源。作品構築也檢查該席能取得對手從者的控制轉移能力。直接使用 `has_trigger` 篩選的卡在兩種構築都依賴此資料。圖示與無圖示都須有版次來源證據，提醒文不作圖示資料。
 
 `keywords: [start_amulet]` 只能寫在アミュレット的印刷關鍵字行。作品構築的開局（CR 14.4.3）直接從牌組中已准入卡片的印刷特徵讀取，不經由場上關鍵字；篩選、授予與觸發條件都不能指名它。牌組只能放一種起始護符屬於構築規則，不在對局中檢查。CSD03a／b 卡上的開局說明 section 標 `ignored: reminder`。
 
