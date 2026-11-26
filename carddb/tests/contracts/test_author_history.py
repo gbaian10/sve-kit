@@ -48,7 +48,6 @@ EVENT_CASES: list[tuple[str, dict[str, JsonValue]]] = [
     ("ability_played", {"who": "self", "holder": {"who": "self", "kind": "follower"}}),
     ("life_changed", {"who": "self", "direction": "up"}),
     ("stat_changed", {"ref": "this", "stat": ["power", "hp"], "direction": "up"}),
-    ("counter_changed", {"ref": "this", "name": "stack", "after": {"ge": 2}}),
     ("acted", {"ref": "this"}),
     ("stood", {"ref": "this"}),
     ("raced", {"ref": "this"}),

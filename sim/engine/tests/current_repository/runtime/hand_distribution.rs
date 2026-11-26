@@ -53,11 +53,11 @@ fn bp04_001_and_002_share_one_source_and_every_registered_printing() {
                 CARDS[0].0
             ))
             .unwrap();
-        assert_eq!(source.source.card_id, card_id);
-        assert_eq!(source.source.face, face);
-        assert_eq!(source.source.field, "effect");
-        assert_eq!(source.source.line, 1);
-        assert_eq!(source.source.section, None);
+        assert_eq!(source.card_id, card_id);
+        assert_eq!(source.face, face);
+        assert_eq!(source.field, "effect");
+        assert_eq!(source.line, 1);
+        assert_eq!(source.section, None);
     }
 }
 

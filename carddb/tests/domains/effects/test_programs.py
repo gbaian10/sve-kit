@@ -7,17 +7,17 @@ from pydantic import JsonValue
 from sve_carddb.build import Json
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord
 from sve_carddb.core.json import canonical, object_value
-from sve_carddb.domains.effects.author_current import CardAccepted, CurrentAuthorSources
-from sve_carddb.domains.effects.author_expansion import ExpansionCandidate
+from sve_carddb.domains.effects.author_current import CardAccepted
 from sve_carddb.domains.effects.author_set import load_author_set
 from sve_carddb.domains.effects.programs import populate, public_program
+
+from ...support.direct_current_fixture import CARD, synthetic_current
+from ..text_observations.test_effect_presence import page
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
-
-    from ...support.author_current_fixtures import CurrentSourceFixture
 
 
 def test_public_program_keeps_face_nodes_and_omits_author_and_source_evidence() -> None:
@@ -36,26 +36,21 @@ def test_public_program_keeps_face_nodes_and_omits_author_and_source_evidence() 
     }
     result = CardAccepted(
         record,
-        ExpansionCandidate(
-            {
-                "format": 1,
-                "kind": "author_effect_set",
-                "scope": "shared",
-                "cards": {
-                    "SYN-001": {
-                        "meta": {"written_by": "Synthetic author", "status": "draft"},
-                        "note": "Private review context",
-                        "ignored": [],
-                        "abilities": [ability],
-                        "faces": {"face": {"abilities": [ability]}},
-                    }
-                },
+        {
+            "format": 1,
+            "kind": "author_effect_set",
+            "scope": "shared",
+            "cards": {
+                "SYN-001": {
+                    "meta": {"written_by": "Synthetic author", "status": "draft"},
+                    "note": "Private review context",
+                    "ignored": [],
+                    "abilities": [ability],
+                    "faces": {"face": {"abilities": [ability]}},
+                }
             },
-            (),
-        ),
-        b"{}",
-        "direct",
-        b"{}",
+        },
+        {},
     )
     program = public_program(result)
     expected = {
@@ -72,12 +67,11 @@ def test_public_program_keeps_face_nodes_and_omits_author_and_source_evidence() 
 
 
 def test_light_admission_populates_programs_and_manual_states_for_every_card(
-    program_current_fixture: CurrentSourceFixture,
     expander: AuthorExpander,
     tmp_path: Path,
 ) -> None:
     root = tmp_path / "authored"
-    main = root / "rules/author-effects/BP01/000.yaml"
+    main = root / "rules/author-effects/SYN/000.yaml"
     main.parent.mkdir(parents=True)
     main.write_bytes(
         canonical(
@@ -86,9 +80,8 @@ def test_light_admission_populates_programs_and_manual_states_for_every_card(
                 "kind": "author_effect_set",
                 "scope": "shared",
                 "cards": {
-                    "BP01-009": {
+                    "SYN-01": {
                         "admission": "light",
-                        "container": "card",
                         "meta": {
                             "written_by": [
                                 {
@@ -103,9 +96,9 @@ def test_light_admission_populates_programs_and_manual_states_for_every_card(
             }
         )
     )
-    index = root / "rules/effects-index/BP01.yaml"
+    index = root / "rules/effects-index/SYN.yaml"
     index.parent.mkdir()
-    identifier = "c:9c5459446e0254818099800b4208cd96"
+    identifier = CARD
     index.write_bytes(
         canonical(
             {
@@ -116,26 +109,25 @@ def test_light_admission_populates_programs_and_manual_states_for_every_card(
                         "card_id": identifier,
                         "scope": "shared",
                         "kind": "author_effect_set",
-                        "record_key": "BP01-009",
-                        "file": "rules/author-effects/BP01/000.yaml",
+                        "record_key": "SYN-01",
+                        "file": "rules/author-effects/SYN/000.yaml",
                     }
                 ],
             }
         )
     )
     inputs = load_author_set(root, expander.schemas)
-    with program_current_fixture.template.copy() as db:
-        current = CurrentAuthorSources(
-            db,
-            program_current_fixture.sources.stage(
-                program_current_fixture.sources.build
-            ),
-            program_current_fixture.snapshot,
-            program_current_fixture.vocabulary,
-            program_current_fixture.rules,
-            program_current_fixture.jp_batch_id,
-        )
+    raw = page("jp", '<div class="detail">Synthetic evolution.</div>')
+    with synthetic_current(tmp_path / "source", raw, capabilities=("dsl",)) as current:
+        db = current.db
         with db.transaction():
+            other_card = "c:" + "2" * 32
+            db.insert("card", dict(db.rows("card")[0].values) | {"id": other_card})
+            db.insert(
+                "printing",
+                dict(db.rows("printing")[0].values)
+                | {"id": "other-printing", "card_id": other_card, "card_no": "SYN-02"},
+            )
             populate(db, current, inputs, expander)
         documents = db.rows("dsl_document")
         assert len(documents) == 1

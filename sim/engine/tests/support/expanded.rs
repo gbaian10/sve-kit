@@ -1,4 +1,4 @@
-//! Real C0 expansion shared by candidate golden tests.
+//! Load expanded test fixtures for the lowering and runtime tests.
 
 use serde_json::Value;
 use std::path::PathBuf;
@@ -6,31 +6,54 @@ use std::process::Command;
 use std::sync::OnceLock;
 
 pub(crate) fn tree() -> &'static Value {
-    &candidate(false)["tree"]
+    static TREE: OnceLock<Value> = OnceLock::new();
+    TREE.get_or_init(batch)
 }
 
 pub(crate) fn spell_tree() -> &'static Value {
-    &candidate(true)["tree"]
+    static SPELL: OnceLock<Value> = OnceLock::new();
+    SPELL.get_or_init(|| {
+        let mut tree = tree().clone();
+        let mut values = load(&["sim/engine/tests/fixtures/lowering/spell.yaml"]);
+        append_cards(&mut tree, values.pop().unwrap());
+        tree
+    })
 }
 
-pub(crate) fn candidate(spell: bool) -> &'static Value {
-    static TREE: OnceLock<Value> = OnceLock::new();
-    static SPELL: OnceLock<Value> = OnceLock::new();
-    if spell {
-        SPELL.get_or_init(|| expand(true))
-    } else {
-        TREE.get_or_init(|| expand(false))
+fn batch() -> Value {
+    let mut trees = load(&[
+        "carddb/tests/fixtures/author_entries/golden.yaml",
+        "sim/engine/tests/fixtures/lowering/bp01-118.yaml",
+        "sim/engine/tests/fixtures/lowering/numeric.yaml",
+        "sim/engine/tests/fixtures/lowering/search.yaml",
+        "sim/engine/tests/fixtures/lowering/activated.yaml",
+        "sim/engine/tests/fixtures/lowering/discard-all.yaml",
+        "sim/engine/tests/fixtures/lowering/look-order.yaml",
+    ])
+    .into_iter();
+    let mut first = trees.next().unwrap();
+    first["cards"]
+        .as_object_mut()
+        .unwrap()
+        .retain(|number, _| number == "BP08-038");
+    for tree in trees {
+        append_cards(&mut first, tree);
     }
+    first
+}
+
+fn append_cards(batch: &mut Value, mut tree: Value) {
+    let cards = tree["cards"].as_object_mut().unwrap();
+    batch["cards"].as_object_mut().unwrap().append(cards);
 }
 
 #[allow(
     clippy::expect_used,
-    reason = "Missing C0 or invalid fixture input must fail tests."
+    reason = "Missing or invalid fixture input must fail tests."
 )]
-fn expand(spell: bool) -> Value {
+pub(crate) fn load(paths: &[&str]) -> Vec<Value> {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-    let mut command = Command::new("uv");
-    command
+    let output = Command::new("uv")
         .arg("run")
         .arg("--directory")
         .arg(root.join("carddb"))
@@ -43,38 +66,17 @@ fn expand(spell: bool) -> Value {
 import json
 import sys
 from pathlib import Path
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
-expander = AuthorExpander(Path(sys.argv[1]))
-initial = expander.expand(Path(sys.argv[2]).read_bytes(), [])
-first = initial.tree
-evidence = list(initial.sidecar)
-first['cards'] = {'BP08-038': first['cards']['BP08-038']}
-for path in sys.argv[3:]:
-    candidate = expander.expand(Path(path).read_bytes(), [])
-    first['cards'].update(candidate.tree['cards'])
-    evidence.extend(candidate.sidecar)
-print(json.dumps({'tree': first, 'evidence': [
-    {'path': list(entry.path), 'source_proof': entry.source_proof}
-    for entry in evidence if entry.path[1] in first['cards']
-]}))
+from sve_carddb.core.yaml import parse_yaml
+print(json.dumps([parse_yaml(Path(p).read_bytes()) for p in sys.argv[1:]]))
 ",
         ])
-        .arg(root.join("dsl"))
-        .arg(root.join("carddb/tests/fixtures/author_entries/golden.yaml"))
-        .arg(root.join("sim/engine/tests/fixtures/lowering/bp01-118.yaml"))
-        .arg(root.join("sim/engine/tests/fixtures/lowering/numeric.yaml"))
-        .arg(root.join("sim/engine/tests/fixtures/lowering/search.yaml"))
-        .arg(root.join("sim/engine/tests/fixtures/lowering/activated.yaml"))
-        .arg(root.join("sim/engine/tests/fixtures/lowering/discard-all.yaml"))
-        .arg(root.join("sim/engine/tests/fixtures/lowering/look-order.yaml"));
-    if spell {
-        command.arg(root.join("sim/engine/tests/fixtures/lowering/spell.yaml"));
-    }
-    let output = command.output().expect("run C0 fixture expansion");
+        .args(paths.iter().map(|path| root.join(path)))
+        .output()
+        .expect("read expanded YAML fixture");
     assert!(
         output.status.success(),
-        "C0 expansion failed: {}",
+        "fixture YAML loading failed: {}",
         output.status
     );
-    serde_json::from_slice(&output.stdout).expect("C0 expanded JSON")
+    serde_json::from_slice(&output.stdout).expect("expanded fixture JSON")
 }

@@ -11,14 +11,14 @@ from sve_carddb.domains.effects.author_handwritten import Handwritten
 from sve_carddb.domains.effects.author_inputs import (
     AuthorInputError,
     AuthorSchemas,
+    SourceError,
     parse_document,
 )
-from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 
+from ...support.direct_current_fixture import synthetic_current
 from ..text_observations.test_effect_presence import page
-from .test_author_current_absent import synthetic_current
 
 if TYPE_CHECKING:
     from pydantic import JsonValue

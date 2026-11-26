@@ -686,7 +686,6 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         expander = AuthorExpander(inputs.repo / "dsl")
         author_inputs = load_author_set(root, expander.schemas)
         configuration["author_programs"] = {
-            "expansion_recipe": expander.expansion_recipe,
             "files": {
                 item.path: item.input_hash
                 for item in (
@@ -960,19 +959,10 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         mark("views + decisions")
         if author_inputs is not None and author_inputs.index.records:
             assert expander is not None
-            if translation is None:
-                raise ValueError("Author programs require adopted source inputs")
             with db.transaction():
                 populate_programs(
                     db,
-                    CurrentAuthorSources(
-                        db,
-                        name_sources,
-                        translation.load(),
-                        vocabulary,
-                        load_rules(inputs.repo),
-                        jp.card_batch,
-                    ),
+                    CurrentAuthorSources(db),
                     author_inputs,
                     expander,
                 )

@@ -1,7 +1,6 @@
 //! Synthetic whole cards prove runtime entry, not any official card's current-source qualification.
 use super::*;
 use serde_json::{Value, json};
-use sha2::{Digest as _, Sha256};
 use sve_engine::game::internal::{
     Activation, Answer, CardPlay, Fact, InputDomain, InstructionOutcome,
 };
@@ -12,42 +11,31 @@ const ADVANCE: &str = "synthetic-advance";
 const FACE: &str = "f:00000000000000000000000000000001";
 const CARD: &str = "c:00000000000000000000000000000001";
 
-fn digest(text: &str) -> String {
-    // sha2 0.11 digests do not implement LowerHex.
-    const HEX: &[u8] = b"0123456789abcdef";
-    let mut result = String::with_capacity(64);
-    for byte in Sha256::digest(text.as_bytes()) {
-        result.push(char::from(HEX[usize::from(byte >> 4_u8)]));
-        result.push(char::from(HEX[usize::from(byte & 15)]));
-    }
-    result
-}
-
 fn handoff() -> Value {
-    let text = "Synthetic fanfare: deal 1 damage to all leaders.";
-    let source = json!({"binding_id":"synthetic-binding","ability_scope":"synthetic-fanfare",
-        "occurrence":{"owner":{"kind":"face_revision","revision_id":"synthetic-revision"},
-        "field":"effect","ordinal":null,"line_ordinal":0_u8,"source_hash":digest(text),"role":"body","segments":[{"start":0_u8,"end":1_u8}]}});
-    let body = json!({"fanfare":{"do":[{"damage":{"to":{"leaders":"all"},"n":1_u8}}]},
-        "ports":{"imports":{},"exports":{}}});
-    let mut ability = body.clone();
-    ability["line"] = json!(1_u8);
-    ability["sources"] = json!([source]);
-    let version = format!("effect-source-v1:sha256:{}", digest("synthetic-only"));
-    json!({"tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{
-        ADVANCE:{"meta":{"dsl":"1.0","source":version,"written_by":[{"actor":{"who":"synthetic fixture","model":null},"date":"2026-10-26"}],"reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},"abilities":[ability]}}},
-        "card_id":CARD,"card_no":ADVANCE,"source_version":version,
-        "source_payload":{"recipe":"effect-source-v1","region":"jp","token_links":[],
-            "faces":[{"face_id":FACE,"revision_id":"synthetic-revision",
-                "attributes":{"cost":{"state":"known","value":1_u8},
-                    "attack":{"state":"known","value":2_u8},"defense":{"state":"known","value":3_u8}},
-                "texts":[{"field":"name","ordinal":null,"state":"present","source_hash":digest(ADVANCE)},
-                    {"field":"effect","ordinal":null,"state":"present","source_hash":digest(text)}]}]},
-        "source_inventory":{"abilities":[{"source_use":source,"body":body}],"non_body":[]},
-        "declaration_sidecar":[],
-        "sidecar":[{"path":["cards",ADVANCE,"abilities",0_u8],"source_proof":"current_source_checked",
-            "source_use":source,"input_hash":format!("sha256:{}",digest("synthetic-input")),
-            "source_input_hash":format!("sha256:{}",digest(text))}]})
+    let owner = json!({"kind":"face_revision","revision_id":"synthetic-revision"});
+    let source = json!({
+        "admission":"light","owner":owner,"face_id":FACE,"field":"effect",
+        "ordinal":null,"line":1_u8,"scope":"ability_0","covers":[1_u8]
+    });
+    let ability = json!({
+        "line":1_u8,"sources":[source],"ports":{"imports":{},"exports":{}},
+        "fanfare":{"do":[{"damage":{"to":{"leaders":"all"},"n":1_u8}}]}
+    });
+    json!({
+        "admission":"direct","card_id":CARD,"card_no":ADVANCE,
+        "tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{
+            ADVANCE:{
+                "meta":{"dsl":"1.0","source":"direct","admission":"light",
+                    "written_by":[{"actor":{"who":"synthetic fixture","model":null},"date":"2026-10-26"}]},
+                "faces":{FACE:{"abilities":[ability]}}
+            }
+        }},
+        "source_payload":{"card_id":CARD,"faces":[{
+            "face_id":FACE,"revision_id":"synthetic-revision","ordinal":0_u8,
+            "side":"front","cost":1_u8,
+            "fields":[{"field":"effect","ordinal":null,"lines":[1_u8],"section_kind":null}]
+        }]}
+    })
 }
 
 fn selector(zone: ZoneKind) -> Selector {
@@ -148,14 +136,14 @@ fn game_steps(initial: &Value, actions: Vec<Action>, kind: &str) -> Game {
         "the accepted handoff keeps the permanent card id"
     );
     let evidence = selected.current[ADVANCE]
-        .source_at(&format!("/cards/{ADVANCE}/abilities/0"))
+        .source_at(&format!("/cards/{ADVANCE}/faces/{FACE}/abilities/0"))
         .unwrap();
     assert_eq!(
-        evidence.source.face, FACE,
+        evidence.face, FACE,
         "the source holder keeps the permanent face id"
     );
     assert_eq!(
-        evidence.source.owner,
+        evidence.owner,
         json!({"kind":"face_revision","revision_id":"synthetic-revision"}).to_string(),
         "the source holder keeps the revision owner"
     );

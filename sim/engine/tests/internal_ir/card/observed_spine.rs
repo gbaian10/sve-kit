@@ -3,7 +3,7 @@
     reason = "Unexpected public decisions invalidate these observation regressions."
 )]
 use super::*;
-use std::{path::PathBuf, process::Command, sync::OnceLock};
+use std::sync::OnceLock;
 use sve_engine::{
     EngineFailure,
     game::internal::{DecisionView, InputDomain},
@@ -12,32 +12,9 @@ use sve_engine::{
 fn tree() -> &'static Value {
     static TREE: OnceLock<Value> = OnceLock::new();
     TREE.get_or_init(|| {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-        let output = Command::new("uv")
-            .args(["run", "--directory"])
-            .arg(root.join("carddb"))
-            .args([
-                "--locked",
-                "--no-default-groups",
-                "python",
-                "-c",
-                "
-import json, sys
-from pathlib import Path
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
-result = AuthorExpander(Path(sys.argv[1])).expand(Path(sys.argv[2]).read_bytes(), [])
-print(json.dumps(result.tree))
-",
-            ])
-            .arg(root.join("dsl"))
-            .arg(root.join("sim/engine/tests/fixtures/lowering/observed-spine.yaml"))
-            .output()
-            .unwrap();
-        assert!(
-            output.status.success(),
-            "C0 observation fixture expansion failed"
-        );
-        serde_json::from_slice(&output.stdout).unwrap()
+        fanfare::expanded::load(&["sim/engine/tests/fixtures/lowering/observed-spine.yaml"])
+            .pop()
+            .unwrap()
     })
 }
 

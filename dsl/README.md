@@ -92,8 +92,8 @@ lowering. The [event and history matrix](../docs/dsl/author-history-shapes-1.0.m
 registers event/history narrowing, history_count/history_sum, event numeric reads,
 LKI operands, capture wrappers, chosen, paid, x_paid, dice, PlayerExpr equality,
 material filter extensions and agg.hp. The [per-event matrix](../docs/dsl/author-event-matrix-1.0.md)
-separates required and optional payload fields from history.where for all 33 base
-event keys, plus the counter_reached macro. The
+separates required and optional payload fields from history.where for each
+event key. The
 [effect matrix](../docs/dsl/author-effect-shapes-1.0.md) adds 27 closed EffectSpec keys,
 cannot variants and rule overrides. The [ability matrix](../docs/dsl/author-ability-shapes-1.0.md)
 defines complete ability heads, the granted-head subset, conditional play modifiers,
@@ -137,119 +137,28 @@ keys, unknown fields, wrong envelope versions and duplicate index card/scope
 pairs. Diagnostics expose structural paths and available YAML coordinates without
 source excerpts. Parameter placement, source-role compatibility, candidate-file
 closure and registry membership are separate checks, not implemented by this reader.
-Source-role checks include the allowed type/component combinations in contract §3.
 Concept values are nonempty author strings, including Japanese trait/class names;
 they are not restricted to the ASCII `Code` syntax used for source-slot names.
 For non-string keys and merged keys without direct cursors, coordinates identify
 the containing mapping; ordinary property paths locate their value node.
 Reference syntax does not validate binding scope, event-field availability,
 singleton cardinality or permission to follow a movement receipt.
-The complete-container APIs below add `author_effect_set`, `effect_body_shard` and
-the recursive `authored` profile. Explicit expansion also uses the `expanded`
-profile; structural acceptance is not runtime support.
 
-## Complete author containers
+## Direct author handoff
 
-[author.schema.json](author.schema.json) and [effect-bodies.schema.json](effect-bodies.schema.json)
-select the shared `authored` and `A.body-shard` definitions. `AuthorSchemas.document`
-dispatches by registered kind; `author_effect_set` and `effect_body_shard` decode
-closed typed containers. `author_effect_set` and `document` accept an optional
-validated `AuthorIndexRecord` context for diagnostics, including parser failures.
-The [entry shape matrix](../docs/dsl/author-entry-shapes-1.0.md) describes all fields.
+The storage schemas cover format 2 main shards and named bodies. `load_author_set`
+checks the two-way index closure and unique body editions. The current build
+supplies permanent JP identities, current revisions and the complete rule-line
+inventory.
 
-The reader checks strict YAML/JSON, local duplicate and evidence invariants, and
-rejects typed `ParamRef` leaves anywhere in inline abilities. The shared schema
-and decoder graph alone still accept these leaves; companion bodies need them.
-`author_tree` and `body_tree` apply the same checks and return the original strict-loader
-JSON tree, preserving optional fields instead of reconstructing hash payloads from
-models. `document` reuses its parsed document when dispatching. Mechanical review
-body references must match their use dependencies in frame, ability scope, body
-version and applicability scope. Nonempty `verified_by_exam` remains unsupported.
-These readers do not establish source admission, qualification or executable support.
-No prototype data is migrated.
+Named bodies substitute declared parameters before expanded-schema validation.
+The expanded profile shares the author graph through dynamic anchors and
+excludes parameter and generated branches recursively. Each expanded ability
+carries a direct position in its permanent face. Independent keyword declarations
+retain their original order and direct source coordinates.
 
-Independent `A.ability.keywords` declarations use exactly one
-`CardKeywordSourceUse {binding_id, occurrence}`, without `ability_scope`.
-Other heads still require the scoped `SourceUse`. Keyword declarations require
-empty ports, distinct keywords, and no imports or `generated_by`; companion
-bodies use `A.companion-head`, which excludes this declaration head. Cards with
-these declarations currently require draft status and empty review/exam evidence.
-Current-source reconstruction, author declaration reconciliation, and D0 source-closure
-checks are implemented for Ward/Aura through a separate declaration sidecar. Pure
-expansion does not grant current-source proof. Keyword source coordinates use the
-compiler-local `keyword_declaration:<author_path>` namespace, which never supplies
-a source Projection scope. Ward/Aura executable lowering and runtime admission
-remain unsupported; source reconciliation does not grant use qualification.
-
-## Expansion candidates
-
-`AuthorExpander` in `carddb/src/sve_carddb/domains/effects/author_expansion.py`
-selects exact body versions and registrations, verifies `effect-body-v1` against
-original JSON payloads, and compares full canonical payloads even when hashes match.
-It replaces only typed parameter leaves and preserves array order, bindings and
-arithmetic. Canonical ability comparison removes only top-level use locations
-(`line`, `section`, `sources`); ports and imports remain significant.
-
-| API | Result and evidence boundary |
-| --- | --- |
-| `AuthorExpander.expand` | `ExpansionCandidate.tree` plus a separate `sidecar`; each ability has `source_proof=none` |
-| `AuthorExpander.expand_sources` | Reconstructs supplied source candidates and validates supported role/operand mappings; successful evidence has `source_proof=derived_self_consistent` |
-| `load_author_set` | Reads every file in the fixed author/body/prototype areas and validates two-way index closure; companion versions and keys are checked across shards |
-| `CurrentAuthorSources.validate(authored_root, expander)` | Loads the complete inventory from disk and returns one accepted candidate or rejection per indexed card/scope; accepted evidence has `source_proof=current_source_checked` |
-| `CardAccepted.lowering_input()` → Rust `ExpandedLowerer.lower_current` | Internal handoff of the accepted tree, current-checked source sidecar, permanent CardId, current face/revision mapping and explicit token links; returns candidate IR, the expanded tree and a separate checked source sidecar. `CurrentCardProgram.source_at(author_path)` resolves expanded descendants and IR instruction paths to permanent owners, original coordinates and checked SourceUse evidence |
-| `AuthorSchemas.expanded` | Validates the complete tree against `$defs/expanded` and independently rejects decoded `ParamRef` and `GeneratedBy` nodes |
-
-No evidence state means qualified or executable. The current boundary loads the
-complete inventory from the authored root itself; a caller-supplied or reduced
-`AuthorInputSet` cannot grant current proof. It then verifies JP
-current revisions, exact registry Frame/Binding matches, the complete
-`effect-source-v1` fingerprint and supported entry payloads. All companion records
-are checked against the registry, including unused bodies. Historical
-qualification, complete use dependencies and engine exams remain separate.
-File/schema/index failures reject the inventory; ordinary unsupported sources reject
-only that card/scope. An EN inventory reader closes file/index references but always
-rejects EN source admission. Unindexed prototypes are validated and checked for
-shared-card overlap, without requiring their migration into the new index.
-
-The current handoff resolves ability owners from their exact current revision,
-including abilities in face containers. It does not infer identity from card numbers
-or names. Token sources currently fail current admission; Rust also rejects nonempty
-token links until their source contract is supported. The handoff grants no use
-qualification and does not enable the prototype runtime loader for permanent owners.
-
-Its internal `source_inventory` is derived independently from all current face and
-section sources, not from the supplied tree or sidecar. D0 requires an exact match
-of every `(binding_id, ability_scope)`, complete SourceUse and complete ability body
-(including costs, ports and all mode branches). Removing both an ability and its
-sidecar cannot hide a missing obligation; extra or duplicate abilities also reject
-the whole card. Non-body declarations are retained separately in
-`CurrentCardProgram.non_body_sources`; face facts and ordinary costs remain in
-`source_payload`. Neither category counts as executed abilities. This reuses the
-existing source hashes and does not extend the supported source adapters.
-
-The supported current ability mappings are evolve, feed, ride, evolve/feed and
-evolve/ride entry variants, with exact root scopes and literal PP costs. Full payload
-comparison rejects extra costs or conditions; identical numbers do not authorize
-borrowing another operand. These variants require empty ports and no imports.
-Real whole-card cases cover BP01-009, BP01-034 and BP01-092; the remaining variants
-have synthetic mechanism tests, not real whole-card admission claims.
-Source adapters accept only supported named constructs: offsets use registered
-expression operands, never numeric or textual guesswork. Nonempty source or author
-ports/imports are rejected by the source route until source-role/scope mappings are
-specified. Concept, CardKind, Phase and negated-magnitude source conversions remain
-unsupported; ambiguous direct `instead`, grouped Target quantity and grouped search
-destination parameter sites fail closed. Pure local binding and import-graph checks do not establish those
-source mappings.
-
-The expanded profile shares the author graph through dynamic anchors and excludes
-parameter and generated branches recursively. D0 consumes the expanded JSON tree;
-the C0 sidecar is separate and is not a new public wire format. Candidate goldens
-can exercise lowering, but production admission still requires complete use
-dependencies and qualification checks. The owning face comes from SourceUse.owner;
-card/face containers record placement, and a card-level ability on a multi-face card
-does not imply an ability that remains active on every face.
-Rust must verify the same profile's dynamic-scope positive
-and negative cases with locked `jsonschema` 0.58.1; that Rust check is not yet complete.
-BP08-038 and CP04-060 are pure expansion/canonical goldens only. Their existing
-source fixtures remain negative cases (pending semantics and signed-number review,
-respectively), not successful source admission.
+`CardAccepted.lowering_input()` hands Rust the expanded tree, permanent identity
+and complete face and line inventory. `ExpandedLowerer.lower_current` checks the
+coverage and lowers the supported ability shapes. Game admission checks the
+whole card before using it in a match. The author and runtime interfaces are
+specified in the [author contract](../docs/dsl/author-contract-1.0.md).

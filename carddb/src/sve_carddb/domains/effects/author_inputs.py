@@ -93,6 +93,14 @@ class Diagnostic:
     card_line: int | None = None
 
 
+class SourceError(ValueError):
+    """Diagnostics expose reason codes without copying candidate source wording."""
+
+    def __init__(self, reason: str) -> None:
+        self.reason = reason
+        super().__init__(reason)
+
+
 class AuthorInputError(ValueError):
     """Only structural locations and categories may leave the input boundary."""
 

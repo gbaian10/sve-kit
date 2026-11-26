@@ -3,36 +3,15 @@
     reason = "Unexpected public decisions invalidate these Look selection regressions."
 )]
 use super::*;
-use std::{path::PathBuf, process::Command, sync::OnceLock};
+use std::sync::OnceLock;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 
 fn tree() -> &'static Value {
     static TREE: OnceLock<Value> = OnceLock::new();
     TREE.get_or_init(|| {
-        let root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
-        let output = Command::new("uv")
-            .args(["run", "--directory"])
-            .arg(root.join("carddb"))
-            .args([
-                "--locked",
-                "--no-default-groups",
-                "python",
-                "-c",
-                "
-import json
-import sys
-from pathlib import Path
-from sve_carddb.domains.effects.author_expansion import AuthorExpander
-result = AuthorExpander(Path(sys.argv[1])).expand(Path(sys.argv[2]).read_bytes(), [])
-print(json.dumps(result.tree))
-",
-            ])
-            .arg(root.join("dsl"))
-            .arg(root.join("sim/engine/tests/fixtures/lowering/look-names.yaml"))
-            .output()
-            .unwrap();
-        assert!(output.status.success(), "C0 Look fixture expansion failed");
-        serde_json::from_slice(&output.stdout).unwrap()
+        fanfare::expanded::load(&["sim/engine/tests/fixtures/lowering/look-names.yaml"])
+            .pop()
+            .unwrap()
     })
 }
 

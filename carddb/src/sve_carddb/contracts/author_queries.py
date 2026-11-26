@@ -217,7 +217,6 @@ type Condition = (
     | CondZoneFree
     | CondHistory
     | CondPaid
-    | CondPaymentDecided
     | CondChosen
 )
 
@@ -460,7 +459,7 @@ class ExprLeaderLife(RecordData):
 
 
 class ExprCounterPayload(RecordData):
-    on: Ref | LkiOf
+    on: Ref
     name: CounterName
 
 
@@ -801,10 +800,6 @@ class CondDid(RecordData):
     did: ReceiptRef | DidFiltered
 
 
-class LkiOf(RecordData):
-    lki_of: Ref
-
-
 class ExprOrigCostOf(RecordData):
     orig_cost_of: Ref | SnapshotRead
 
@@ -823,10 +818,6 @@ class ExprXPaid(RecordData):
 
 class PaidReceipt(RecordData):
     receipt: BindingName | EntryPaymentRef
-
-
-class CondPaymentDecided(RecordData):
-    payment_decided: Literal["optional"]
 
 
 class CondPaid(RecordData):
@@ -2049,58 +2040,6 @@ type HistoryStatChangedCondition = Annotated[
 ]
 
 
-@with_config(SHAPE_CONFIG)
-class EventCounterChangedFields(TypedDict):
-    ref: NotRequired[Ref]
-    name: NotRequired[CounterName]
-    after: NotRequired[NatThreshold]
-    direction: NotRequired[Literal["up", "down"]]
-
-
-type EventCounterChangedPayload = Annotated[
-    EventCounterChangedFields, AfterValidator(_subject_exclusive)
-]
-
-
-class EventCounterChanged(RecordData):
-    counter_changed: EventCounterChangedPayload
-
-
-@with_config(NONEMPTY_CONFIG)
-class CounterChangedHistoryWhereFields(TypedDict):
-    ref: NotRequired[Ref]
-    name: NotRequired[CounterName]
-    after: NotRequired[NatThreshold]
-    direction: NotRequired[Literal["up", "down"]]
-
-
-type CounterChangedHistoryWhere = Annotated[
-    CounterChangedHistoryWhereFields, AfterValidator(_nonempty)
-]
-
-
-@with_config(HISTORY_CONFIG)
-class HistoryCounterChangedFields(HistoryOptions):
-    event: Literal["counter_changed"]
-    where: NotRequired[CounterChangedHistoryWhere]
-
-
-type HistoryCounterChanged = Annotated[
-    HistoryCounterChangedFields, AfterValidator(_history_subject)
-]
-
-
-@with_config(HISTORY_CONFIG)
-class HistoryCounterChangedConditionFields(HistoryCounterChangedFields):
-    at_least: NotRequired[Quantity]
-    at: NotRequired[Literal["event"]]
-
-
-type HistoryCounterChangedCondition = Annotated[
-    HistoryCounterChangedConditionFields, AfterValidator(_history_subject)
-]
-
-
 @with_config(SUBJECT_CONFIG)
 class EventActedFields(TypedDict):
     ref: NotRequired[Ref]
@@ -2815,16 +2754,6 @@ class HistoryPaymentSumFields(HistorySumOptions):
 type HistoryPaymentSum = HistoryPaymentSumFields
 
 
-class CounterReachedPayload(RecordData):
-    ref: Ref
-    name: CounterName
-    value: UInt
-
-
-class EventCounterReached(RecordData):
-    counter_reached: CounterReachedPayload
-
-
 class EventState(RecordData):
     state: Condition
 
@@ -2847,7 +2776,6 @@ type EventAtom = (
     | EventAbilityPlayed
     | EventLifeChanged
     | EventStatChanged
-    | EventCounterChanged
     | EventActed
     | EventStood
     | EventRaced
@@ -2865,7 +2793,6 @@ type EventAtom = (
     | EventHandRevealed
     | EventFinalLimitBroke
     | EventFusedAsMaterial
-    | EventCounterReached
 )
 
 
@@ -2894,7 +2821,6 @@ type HistoryQuery = (
     | HistoryAbilityPlayed
     | HistoryLifeChanged
     | HistoryStatChanged
-    | HistoryCounterChanged
     | HistoryActed
     | HistoryStood
     | HistoryRaced
@@ -2932,7 +2858,6 @@ type HistoryConditionQuery = (
     | HistoryAbilityPlayedCondition
     | HistoryLifeChangedCondition
     | HistoryStatChangedCondition
-    | HistoryCounterChangedCondition
     | HistoryActedCondition
     | HistoryStoodCondition
     | HistoryRacedCondition

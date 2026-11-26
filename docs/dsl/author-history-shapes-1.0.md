@@ -146,7 +146,6 @@ where 內獨立 count／exists／算術節點保留原有的參數位置白名�
 | ability_played | who、holder:Ref 或 EventObjectSel | 能力 controller | 合成 |
 | life_changed | who、direction:up/down、during、by、crosses_zero:true | 生命變動玩家 | BP02-095、BP19-075、BP05-092；by 合成 |
 | stat_changed | ref、stat:power/hp 或非空列表、direction:up/down | 無 | BP11-082、BP21-100；不收 subject/property/by |
-| counter_changed | ref、name:CounterName、after:{eq/le/ge:Nat} 恰一、direction:up/down | 無 | 合成；不把 Stack 提醒文另造誘發 |
 | acted | 主、who | 姿態改變時 controller | CP04-102、BP11-069 |
 | stood | 主、who | 姿態改變時 controller | 合成 |
 | raced | 主、who | 從者 controller | CP01-082、CP01-032 |
@@ -164,8 +163,7 @@ where 內獨立 count／exists／算術節點保留原有的參數位置白名�
 | fused_as_material | ref、by | 無 | BP19-048 |
 
 每個直接事件都有 `A.event.<事件以連字號分隔>` 及 `-payload` 定義。
-另有 `counter_reached:{ref,name,value:Nat}`，三鍵必填，降為 counter_changed.after.eq；
-`any_of` 必須是非空直接事件原子或 counter_reached 列表，不含 state，不巢狀。
+`any_of` 必須是非空直接事件原子列表，不含 state，不巢狀。
 `A.event-atom` 不含 state；`A.event` 另收單一 state。這與 IR 的事件／狀態觸發分工一致。
 
 Damaged 的主體只用 recipient；dealt_damage 的主體是來源。
@@ -192,7 +190,7 @@ phase.where.which/whose 必填，which 只收 Phase；on 的 phase 參數權限�
 dice_rolled.where 額外收 `value:{eq/le/ge:1..6}` 恰一（BP21-081、PR-573）。
 ability_played.where 在歷史額外收 `kind: quick_activation`，只計成功付款的印刷 Quick 起動能力，不含 Quick 法術（CP05-002）。
 payment 只在歷史：who 選填，where 必填且恰為 `{cost_kind:earth_rite}`，不收 phase。
-state、any_of、counter_reached 不作 history.event。歷史保存事件當時特徵，不查目前卡片。
+state、any_of 不作 history.event。歷史保存事件當時特徵，不查目前卡片。
 
 目前 `evolve.usable_if` 的 `stat_changed` 歷史接通 `window: this_turn`、`where.ref: this` 與 `where.direction: up`。指定一或兩個相異的 `stat`，任一正差額即符合。省略 `stat` 會同時檢查攻擊力與體力。舊世代或前回合的事件不符合，`at_least` 只收省略或 1。此入口只讀存在條件，完整形狀表仍以 schema 為準。
 
@@ -238,7 +236,7 @@ any_of 只能讀所有可能事件共有的同型欄位。片段驗證不驗 enc
 | damaged | 受傷物件；領袖分支不冒充 Ref |
 | dealt_damage、attacked、attack_target | 依序為傷害來源、攻擊者、目標 |
 | evolved、super_evolved | 進化後的同物件世代 |
-| acted、stood、raced、drive_gained、counter_changed、stat_changed | 事件主體 |
+| acted、stood、raced、drive_gained、stat_changed | 事件主體 |
 | ub_activated、ability_played | holder |
 | drive_checked | 發起者；holder filter 可匹配其他對象 |
 | fused、fused_as_material | 依序為融合能力主體、材料 |
@@ -267,10 +265,9 @@ PP 短費用沒有 result，不能宣稱可供 x_paid；自由 X 的值不因費
 
 ## LKI 與捕捉
 
-`A.lki-of={lki_of:Ref}` 只進 counter.on（Ref 或 LkiOf）；不進可操作 Ref、PlayerRef、Sel。
 BP07-088、BP10-102、BP17-008 支持離場／支付後的 counter 快照；一般 counter.on:Ref 仍為 Live。
 
-power_of、hp_of、cost_of、orig_cost_of 接 Ref 或 SnapshotRead。Ref 保留依法 LKI；不另收 lki_of。
+power_of、hp_of、cost_of、orig_cost_of 接 Ref 或 SnapshotRead。Ref 保留依法 LKI。
 SnapshotRead 必須是單一成功材料、指定 view 且屬性可用，不能包任意 Sel 或以 agg 冒充單物件。
 BP05-057、BP04-116 支持付款材料 before；after 與 hp 的材料屬性格標合成。
 orig_cost_of 支持 BP12-114、BP13-053。agg.attr 新增 hp，sum/min/max 三格皆合成。
@@ -284,7 +281,7 @@ orig_cost_of 支持 BP12-114、BP13-053。agg.attr 新增 hp，sum/min/max 三�
 count、hand、leader_life、resource、turn_number、zone_free、distinct_names、distinct_orig_costs、agg、
 power_of、hp_of、cost_of、orig_cost_of、history_count、history_sum。
 其中四個屬性讀值使用不同的 `A.capture.*-of`／Captured*Of 型別，只收 Ref，不收 SnapshotRead。
-沒有 counter、算術根、常量根、bound、paid、dice、x_paid、event、objects_of、lki_of 或巢狀 capture。
+沒有 counter、算術根、常量根、bound、paid、dice、x_paid、event、objects_of 或巢狀 capture。
 算術的各 operand 可獨立包捕捉；不能把任意整棵 Expr freeze。
 
 15 類 × 5 時點均有形狀正反例；真例只確認 history_count×event 的序數截止，

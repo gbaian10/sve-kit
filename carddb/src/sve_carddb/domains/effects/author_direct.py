@@ -13,13 +13,13 @@ from sve_carddb.contracts.construction_rules import (
 )
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value, string
-from sve_carddb.domains.effects.author_expansion import (
-    ExpansionCandidate,
-    ability_nodes,
-)
+from sve_carddb.domains.effects.author_expansion import ability_nodes
 from sve_carddb.domains.effects.author_handwritten import Locator, RuleSection, decode
-from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
-from sve_carddb.domains.effects.author_sources import SourceError
+from sve_carddb.domains.effects.author_inputs import (
+    AuthorInputError,
+    SourceError,
+    parse_document,
+)
 from sve_carddb.domains.translations.four_layer_sources import card_field
 
 if TYPE_CHECKING:
@@ -27,7 +27,6 @@ if TYPE_CHECKING:
 
     from sve_carddb.build import Value
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
-    from sve_carddb.domains.effects.author_expansion import AuthorExpander
     from sve_carddb.domains.effects.author_handwritten import Body, Handwritten
 
 _LOCATION = frozenset({"line", "face", "section", "scope", "covers", "admission"})
@@ -40,7 +39,6 @@ _CARD_KEYS = frozenset(
         "ignored",
         "note",
         "deck_rule",
-        "container",
         "token",
         "token_sources",
         "rule_sections",
@@ -58,36 +56,6 @@ def _scalar(value: Value) -> str | int | None:
         assert value is None or isinstance(value, str | int)
         return value
     raise SourceError("source_database_shape")
-
-
-def direct(handwritten: Handwritten, number: str) -> bool:
-    """Select direct admission from the card, use or selected body edition."""
-    card = handwritten.cards[number]
-    if "admission" in card:
-        return True
-    for index, raw in enumerate(array(card["abilities"])):
-        value = object_value(raw)
-        if "admission" in value:
-            return True
-        if "use" not in value:
-            continue
-        try:
-            body = _body_definition(value, handwritten)
-        except SourceError as error:
-            cursor = handwritten.documents[number].diagnostic(
-                "source", error.reason, ("cards", number, "abilities", index)
-            )
-            line = value.get("line")
-            raise AuthorInputError(
-                replace(
-                    cursor,
-                    card_no=number,
-                    card_line=line if type(line) is int else None,
-                )
-            ) from None
-        if body.admission is not None:
-            return True
-    return False
 
 
 def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and its complete line inventory at one boundary
@@ -435,6 +403,11 @@ def _body(
     value: dict[str, JsonValue], handwritten: Handwritten
 ) -> tuple[dict[str, JsonValue], str | None]:
     if "use" not in value:
+        if "keywords" in value and any(
+            isinstance(keyword, str) and keyword != keyword.lower()
+            for keyword in array(value["keywords"])
+        ):
+            raise SourceError("unsupported_keyword_declaration")
         return {k: v for k, v in value.items() if k not in _LOCATION}, None
     if value.keys() - (_LOCATION | _USE):
         raise SourceError("ability_head_conflict")
@@ -481,10 +454,23 @@ def materialize(
         raise SourceError("source_unresolved_issue")
     payload = inventory(current, number)
     faces: dict[str, JsonValue] = {}
-    for raw in array(card["abilities"]):
+    for index, raw in enumerate(array(card["abilities"])):
         value = object_value(raw)
+        try:
+            body, admission = _body(value, handwritten)
+        except SourceError as error:
+            cursor = handwritten.documents[number].diagnostic(
+                "source", error.reason, ("cards", number, "abilities", index)
+            )
+            line = value.get("line")
+            raise AuthorInputError(
+                replace(
+                    cursor,
+                    card_no=number,
+                    card_line=line if type(line) is int else None,
+                )
+            ) from None
         source = _position(payload, value)
-        body, admission = _body(value, handwritten)
         source["admission"] = value.get(
             "admission", admission or card.get("admission", "shared")
         )
@@ -597,9 +583,3 @@ def check_coverage(
         covered.update(keys)
     if covered != expected:
         raise SourceError("source_line_closure_mismatch")
-
-
-def candidate(tree: JsonValue, expander: AuthorExpander) -> ExpansionCandidate:
-    """Expanded-schema and ordinary lowering retain all structural checks."""
-    expander.schemas.expanded(canonical(tree))
-    return ExpansionCandidate(tree, ())

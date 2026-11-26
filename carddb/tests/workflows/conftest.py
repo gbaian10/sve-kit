@@ -42,24 +42,18 @@ def authoring_inputs() -> authoring.Inputs:
 
 @pytest.fixture(scope="session")
 @slow_fixture(
-    reason="Build the historical public source profile once per worker for legacy source-projection tests"
+    reason="Build the real public profile, source database once per worker for authoring integration tests"
 )
-def source_projection_workspace(
+def repository_workspace(
     authoring_inputs: authoring.Inputs,
 ) -> Iterator[authoring.Workspace]:
-    # These source-projection cases require the previously reviewed classifications;
-    # current whole-repository admission is checked with the engine input batch.
-    inputs = authoring_inputs.model_copy(
-        update={
-            "jp_batch_id": "sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4"
-        }
-    )
     with authoring.prepare(
-        inputs,
+        authoring_inputs,
         cards=frozenset(
             {"BP09-005", "BP01-138", "BP19-P32", "BP01-048", "BP01-046", "BP01-176"}
         ),
     ) as prepared:
+        # Tests write authored copies; the shared source database stays read-only.
         prepared.current.db._connection.execute("PRAGMA query_only=ON")
         yield prepared
 
@@ -145,9 +139,9 @@ def authoring_inventory(tmp_path_factory: pytest.TempPathFactory) -> Path:
 
 @pytest.fixture(scope="session")
 def workspace(
-    source_projection_workspace: authoring.Workspace, authoring_inventory: Path
+    repository_workspace: authoring.Workspace, authoring_inventory: Path
 ) -> authoring.Workspace:
-    return replace(source_projection_workspace, authored=authoring_inventory)
+    return replace(repository_workspace, authored=authoring_inventory)
 
 
 @pytest.fixture

@@ -90,7 +90,7 @@ all、any、min、max 均允許單元素列表；min/max 非空另有 GAP-A-028 
 
 | 定義 | 必填形狀 | 選填 | 互斥／值域 | 依據 |
 | --- | --- | --- | --- | --- |
-| A.expr.objects-of | `{objects_of:A.receipt-ref,view:before或after}` | 無 | view 必填，不接受 null；不得混入 follow、lki_of | §6、GAP-A-057 |
+| A.expr.objects-of | `{objects_of:A.receipt-ref,view:before或after}` | 無 | view 必填，不接受 null；不得混入 follow | §6、GAP-A-057 |
 | A.snapshot-read | A.expr.objects-of | 無 | 快照讀值的共用入口，不是數值或可操作引用 | 同上 |
 | A.same-as | `{same_as:A.snapshot-read}` | 無 | 不收裸 Ref、param 或任意 Sel | GAP-A-057 的名稱／種類對照 |
 | A.material-filter | name、zone、kind、trait、not_class、orig_cost_eq、orig_cost_ge 至少一項 | 其餘屬性 | name/trait/not_class 為非空文字；zone 為 Zone、kind 為 Code；費用比較為 Quantity；多項 AND | GAP-A-035／054；BP03-045、ECP01-045、ECP01-036、BP08-103 |
@@ -144,7 +144,7 @@ CP03-SL16（GAP-A-054）、BP07-SL20 母なる君（GAP-A-060）支持。
 | A.expr.hand | `{hand:PlayerRef}` | 不收 `{who:…}`、PlayerSet 或 param | BP01-007 白銀の矢、BP13-113；ECP02-020 的 master_of |
 | A.expr.leader-life | `{leader_life:PlayerRef}` | 同上，回該玩家領袖生命 | 讀值形狀合成；ECP01-046 的領袖目標接線仍待定 |
 | A.expr.counter-payload | `{on:Ref或LkiOf,name:CounterName}` | 不接受 Sel／param；CounterName 為非空文字 | BP13-038、BP21-060 |
-| A.expr.counter | `{counter:A.expr.counter-payload}` | 普通 Ref 為 Live；明示 lki_of 讀已登錄 LKI | 同上 |
+| A.expr.counter | `{counter:A.expr.counter-payload}` | Ref 讀取目前的指示物數量 | 同上 |
 | A.expr.distinct-names | `{distinct_names:S}` | 依規則名稱等價類去重，非字串數量相加 | BP09-001 ユグドラシル、BP09-007 |
 | A.expr.distinct-orig-costs | `{distinct_orig_costs:S}` | 計算不同原始費用的種類數 | BP10-011 喝采の獣使い、BP11-036 |
 | A.expr.agg-payload | `{of:S,attr:cost或orig_cost或power或hp,fn:sum或min或max}` | 不收任意屬性／函數或 param；hp 三格合成 | 下列矩陣與 history shapes 的 hp 補充 |

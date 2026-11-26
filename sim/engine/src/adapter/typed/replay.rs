@@ -149,7 +149,7 @@ impl TypedReplayAdapter {
             .map(|(printing, card)| {
                 (
                     printing,
-                    &card.source_version,
+                    "direct",
                     &card.expanded,
                     &card.source_payload,
                     &card.face_ordinals,

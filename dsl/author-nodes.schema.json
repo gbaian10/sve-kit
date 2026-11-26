@@ -1211,9 +1211,6 @@
         },
         {
           "$ref": "#/$defs/A.cond.chosen"
-        },
-        {
-          "$ref": "#/$defs/A.cond.payment-decided"
         }
       ]
     },
@@ -2821,9 +2818,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "cost_sum_le": {
           "$ref": "#/$defs/A.quantity"
         },
@@ -2889,9 +2883,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "cost_sum_le": {
           "$ref": "#/$defs/A.quantity"
@@ -3205,14 +3196,7 @@
       "additionalProperties": false,
       "properties": {
         "on": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/A.ref"
-            },
-            {
-              "$ref": "#/$defs/A.lki-of"
-            }
-          ]
+          "$ref": "#/$defs/A.ref"
         },
         "name": {
           "$ref": "#/$defs/CounterName"
@@ -4279,18 +4263,6 @@
       },
       "required": [
         "x_paid"
-      ],
-      "type": "object"
-    },
-    "A.lki-of": {
-      "additionalProperties": false,
-      "properties": {
-        "lki_of": {
-          "$ref": "#/$defs/A.ref"
-        }
-      },
-      "required": [
-        "lki_of"
       ],
       "type": "object"
     },
@@ -7941,158 +7913,6 @@
       ],
       "type": "object"
     },
-    "A.event.counter-changed-payload": {
-      "additionalProperties": false,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "name": {
-          "$ref": "#/$defs/CounterName"
-        },
-        "after": {
-          "$ref": "#/$defs/A.nat-threshold"
-        },
-        "direction": {
-          "enum": [
-            "up",
-            "down"
-          ],
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "A.event.counter-changed": {
-      "additionalProperties": false,
-      "properties": {
-        "counter_changed": {
-          "$ref": "#/$defs/A.event.counter-changed-payload"
-        }
-      },
-      "required": [
-        "counter_changed"
-      ],
-      "type": "object"
-    },
-    "A.history.counter-changed-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "name": {
-          "$ref": "#/$defs/CounterName"
-        },
-        "after": {
-          "$ref": "#/$defs/A.nat-threshold"
-        },
-        "direction": {
-          "enum": [
-            "up",
-            "down"
-          ],
-          "type": "string"
-        }
-      },
-      "type": "object"
-    },
-    "A.history.counter-changed": {
-      "additionalProperties": false,
-      "not": {
-        "properties": {
-          "where": {
-            "required": [
-              "ref"
-            ]
-          }
-        },
-        "required": [
-          "sel",
-          "where"
-        ]
-      },
-      "properties": {
-        "window": {
-          "$ref": "#/$defs/A.history-window"
-        },
-        "distinct": {
-          "enum": [
-            "facts",
-            "subjects"
-          ],
-          "type": "string"
-        },
-        "exclude": {
-          "const": "this_execution",
-          "type": "string"
-        },
-        "event": {
-          "const": "counter_changed",
-          "type": "string"
-        },
-        "where": {
-          "$ref": "#/$defs/A.history.counter-changed-where"
-        }
-      },
-      "required": [
-        "window",
-        "event"
-      ],
-      "type": "object"
-    },
-    "A.history.counter-changed-condition": {
-      "additionalProperties": false,
-      "not": {
-        "properties": {
-          "where": {
-            "required": [
-              "ref"
-            ]
-          }
-        },
-        "required": [
-          "sel",
-          "where"
-        ]
-      },
-      "properties": {
-        "window": {
-          "$ref": "#/$defs/A.history-window"
-        },
-        "distinct": {
-          "enum": [
-            "facts",
-            "subjects"
-          ],
-          "type": "string"
-        },
-        "exclude": {
-          "const": "this_execution",
-          "type": "string"
-        },
-        "event": {
-          "const": "counter_changed",
-          "type": "string"
-        },
-        "where": {
-          "$ref": "#/$defs/A.history.counter-changed-where"
-        },
-        "at_least": {
-          "$ref": "#/$defs/A.quantity"
-        },
-        "at": {
-          "const": "event",
-          "type": "string"
-        }
-      },
-      "required": [
-        "window",
-        "event"
-      ],
-      "type": "object"
-    },
     "A.event.acted-payload": {
       "additionalProperties": false,
       "not": {
@@ -10343,38 +10163,6 @@
       ],
       "type": "object"
     },
-    "A.event.counter-reached-payload": {
-      "additionalProperties": false,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "name": {
-          "$ref": "#/$defs/CounterName"
-        },
-        "value": {
-          "$ref": "#/$defs/Nat"
-        }
-      },
-      "required": [
-        "ref",
-        "name",
-        "value"
-      ],
-      "type": "object"
-    },
-    "A.event.counter-reached": {
-      "additionalProperties": false,
-      "properties": {
-        "counter_reached": {
-          "$ref": "#/$defs/A.event.counter-reached-payload"
-        }
-      },
-      "required": [
-        "counter_reached"
-      ],
-      "type": "object"
-    },
     "A.event.state": {
       "additionalProperties": false,
       "properties": {
@@ -10441,9 +10229,6 @@
           "$ref": "#/$defs/A.event.stat-changed"
         },
         {
-          "$ref": "#/$defs/A.event.counter-changed"
-        },
-        {
           "$ref": "#/$defs/A.event.acted"
         },
         {
@@ -10493,9 +10278,6 @@
         },
         {
           "$ref": "#/$defs/A.event.fused-as-material"
-        },
-        {
-          "$ref": "#/$defs/A.event.counter-reached"
         }
       ]
     },
@@ -10580,9 +10362,6 @@
         },
         {
           "$ref": "#/$defs/A.history.stat-changed"
-        },
-        {
-          "$ref": "#/$defs/A.history.counter-changed"
         },
         {
           "$ref": "#/$defs/A.history.acted"
@@ -10686,9 +10465,6 @@
         },
         {
           "$ref": "#/$defs/A.history.stat-changed-condition"
-        },
-        {
-          "$ref": "#/$defs/A.history.counter-changed-condition"
         },
         {
           "$ref": "#/$defs/A.history.acted-condition"
@@ -14363,9 +14139,6 @@
         "add_trait": {
           "$ref": "#/$defs/A.effect.trait"
         },
-        "remove_trait": {
-          "$ref": "#/$defs/A.effect.trait"
-        },
         "make_type": {
           "$ref": "#/$defs/A.effect.make-type"
         },
@@ -14658,32 +14431,6 @@
         }
       ]
     },
-    "A.search.per-group": {
-      "type": "object",
-      "properties": {
-        "per_group": {
-          "type": "array",
-          "items": {
-            "$ref": "#/$defs/Zone"
-          },
-          "minItems": 2
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "per_group"
-      ]
-    },
-    "A.search.grouped-destination": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/A.search.destination"
-        },
-        {
-          "$ref": "#/$defs/A.search.per-group"
-        }
-      ]
-    },
     "A.search.group.exact": {
       "type": "object",
       "properties": {
@@ -14738,9 +14485,6 @@
         "n": {
           "$ref": "#/$defs/A.damage-amount"
         },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
-        },
         "after": {
           "$ref": "#/$defs/A.steps"
         }
@@ -14759,29 +14503,8 @@
           "required": [
             "n"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "to"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "n"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.instead.move": {
       "type": "object",
@@ -14810,9 +14533,6 @@
         },
         "acted": {
           "type": "boolean"
-        },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -14847,47 +14567,8 @@
           "required": [
             "acted"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "ref"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "to"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "position"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "order"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "acted"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.instead.buff": {
       "type": "object",
@@ -14900,9 +14581,6 @@
         },
         "hp": {
           "$ref": "#/$defs/A.expr.numeric"
-        },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -14922,29 +14600,8 @@
           "required": [
             "hp"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "power"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "hp"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.instead.life": {
       "type": "object",
@@ -14954,9 +14611,6 @@
         },
         "delta": {
           "$ref": "#/$defs/A.recovery-delta"
-        },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -14971,23 +14625,8 @@
           "required": [
             "delta"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "delta"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.instead.grant": {
       "type": "object",
@@ -15008,9 +14647,6 @@
             ]
           },
           "minItems": 1
-        },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -15035,31 +14671,10 @@
         },
         {
           "required": [
-            "replace_with"
-          ]
-        },
-        {
-          "required": [
             "abilities"
           ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "keywords"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "abilities"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.instead.create": {
       "type": "object",
@@ -15075,9 +14690,6 @@
         },
         "to": {
           "$ref": "#/$defs/A.create.destination"
-        },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -15102,39 +14714,12 @@
           "required": [
             "to"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
       ],
       "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "n"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "upto"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "to"
-            ]
-          },
-          {
-            "required": [
-              "n",
-              "upto"
-            ]
-          }
+        "required": [
+          "n",
+          "upto"
         ]
       }
     },
@@ -15146,9 +14731,6 @@
         },
         "n": {
           "$ref": "#/$defs/A.count-amount"
-        },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -15163,23 +14745,8 @@
           "required": [
             "n"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "n"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.instead.search": {
       "type": "object",
@@ -15197,10 +14764,7 @@
           "$ref": "#/$defs/A.selection-quantity"
         },
         "to": {
-          "$ref": "#/$defs/A.search.grouped-destination"
-        },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
+          "$ref": "#/$defs/A.search.destination"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -15230,45 +14794,12 @@
           "required": [
             "to"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
       ],
       "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "sel"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "n"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "upto"
-            ]
-          },
-          {
-            "required": [
-              "replace_with",
-              "to"
-            ]
-          },
-          {
-            "required": [
-              "n",
-              "upto"
-            ]
-          }
+        "required": [
+          "n",
+          "upto"
         ]
       }
     },
@@ -15281,9 +14812,6 @@
         "ref": {
           "$ref": "#/$defs/A.effect-object"
         },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
-        },
         "after": {
           "$ref": "#/$defs/A.steps"
         }
@@ -15297,23 +14825,8 @@
           "required": [
             "ref"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "ref"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.instead.destroy": {
       "type": "object",
@@ -15324,9 +14837,6 @@
         "ref": {
           "$ref": "#/$defs/A.effect-object"
         },
-        "replace_with": {
-          "$ref": "#/$defs/A.action"
-        },
         "after": {
           "$ref": "#/$defs/A.steps"
         }
@@ -15340,23 +14850,8 @@
           "required": [
             "ref"
           ]
-        },
-        {
-          "required": [
-            "replace_with"
-          ]
         }
-      ],
-      "not": {
-        "anyOf": [
-          {
-            "required": [
-              "replace_with",
-              "ref"
-            ]
-          }
-        ]
-      }
+      ]
     },
     "A.act.search.grouped": {
       "type": "object",
@@ -15369,13 +14864,10 @@
           "minItems": 2
         },
         "to": {
-          "$ref": "#/$defs/A.search.grouped-destination"
+          "$ref": "#/$defs/A.search.destination"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "cost_sum_le": {
           "$ref": "#/$defs/A.quantity"
@@ -15413,9 +14905,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "who": {
           "anyOf": [
             {
@@ -15448,9 +14937,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "who": {
           "$ref": "#/$defs/A.effect-players"
         },
@@ -15476,9 +14962,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "who": {
           "$ref": "#/$defs/A.effect-players"
         }
@@ -15496,9 +14979,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "who": {
           "$ref": "#/$defs/A.effect-players"
@@ -15518,9 +14998,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "who": {
           "$ref": "#/$defs/A.effect-players"
@@ -15542,9 +15019,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "who": {
           "$ref": "#/$defs/A.effect-players"
@@ -15586,9 +15060,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "distribute": {
           "type": "boolean",
           "const": true
@@ -15628,9 +15099,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "instead": {
           "type": "array",
           "items": {
@@ -15663,9 +15131,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "instead": {
           "type": "array",
           "items": {
@@ -15687,9 +15152,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "instead": {
           "type": "array",
@@ -15725,9 +15187,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -15753,9 +15212,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -15781,9 +15237,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -15809,9 +15262,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -15901,9 +15351,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "position": {
           "$ref": "#/$defs/A.position"
@@ -16019,9 +15466,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "position": {
           "$ref": "#/$defs/A.position"
@@ -16153,9 +15597,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "by": {
           "$ref": "#/$defs/A.player-ref"
         },
@@ -16180,9 +15621,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "by": {
           "$ref": "#/$defs/A.player-ref"
@@ -16216,9 +15654,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "by": {
           "$ref": "#/$defs/A.player-ref"
         },
@@ -16243,9 +15678,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "by": {
           "$ref": "#/$defs/A.player-ref"
@@ -16300,9 +15732,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16324,9 +15753,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "instead": {
           "type": "array",
@@ -16353,9 +15779,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16372,9 +15795,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "power": {
           "$ref": "#/$defs/A.expr.numeric"
@@ -16431,9 +15851,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "power": {
           "anyOf": [
@@ -16499,9 +15916,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "until": {
           "$ref": "#/$defs/A.until"
         },
@@ -16546,9 +15960,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "until": {
           "$ref": "#/$defs/A.until"
         }
@@ -16572,9 +15983,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16582,37 +15990,6 @@
         "on",
         "name",
         "delta"
-      ]
-    },
-    "A.act.move-counters": {
-      "type": "object",
-      "properties": {
-        "from": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "to": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "name": {
-          "$ref": "#/$defs/CounterName"
-        },
-        "all": {
-          "type": "boolean",
-          "const": true
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "from",
-        "to",
-        "name",
-        "all"
       ]
     },
     "A.act.pp-max": {
@@ -16626,9 +16003,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16648,9 +16022,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16670,9 +16041,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16692,9 +16060,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16715,9 +16080,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16744,9 +16106,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16762,9 +16121,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "who": {
           "$ref": "#/$defs/A.player-ref"
@@ -16787,9 +16143,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "who": {
           "$ref": "#/$defs/A.player-ref"
@@ -16819,9 +16172,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "who": {
           "$ref": "#/$defs/A.player-ref"
@@ -16854,9 +16204,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16886,9 +16233,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "to": {
           "anyOf": [
             {
@@ -16914,9 +16258,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "to": {
           "anyOf": [
@@ -16946,9 +16287,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -16965,9 +16303,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "n": {
           "$ref": "#/$defs/A.quantity"
@@ -16986,9 +16321,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -17004,9 +16336,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "cost": {
           "type": "integer",
@@ -17058,9 +16387,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "cost_policy": {
           "type": "string",
           "enum": [
@@ -17086,9 +16412,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "cost_policy": {
           "type": "string",
@@ -17126,9 +16449,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "until": {
           "$ref": "#/$defs/A.until"
         },
@@ -17155,9 +16475,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "until": {
           "$ref": "#/$defs/A.until"
         }
@@ -17176,9 +16493,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -17194,9 +16508,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -17212,9 +16523,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,
@@ -17233,9 +16541,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "until": {
           "$ref": "#/$defs/A.until"
@@ -17367,9 +16672,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "n": {
           "$ref": "#/$defs/A.count-amount"
@@ -17510,9 +16812,6 @@
         "result": {
           "$ref": "#/$defs/BindingName"
         },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
-        },
         "into": {
           "$ref": "#/$defs/A.evolution-destination"
         }
@@ -17573,9 +16872,6 @@
         },
         "result": {
           "$ref": "#/$defs/BindingName"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         },
         "entry_effects": {
           "type": "array",
@@ -17898,38 +17194,6 @@
         }
       ]
     },
-    "A.control.repeat-ability": {
-      "type": "object",
-      "properties": {
-        "while": {
-          "$ref": "#/$defs/A.cond"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "while"
-      ]
-    },
-    "A.control.foreach": {
-      "type": "object",
-      "properties": {
-        "in": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "as": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "do": {
-          "$ref": "#/$defs/A.steps"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "in",
-        "as",
-        "do"
-      ]
-    },
     "A.stage.mode": {
       "type": "object",
       "properties": {
@@ -18119,9 +17383,6 @@
         "counter": {
           "$ref": "#/$defs/A.act.counter"
         },
-        "move_counters": {
-          "$ref": "#/$defs/A.act.move-counters"
-        },
         "pp_max": {
           "$ref": "#/$defs/A.act.pp-max"
         },
@@ -18283,9 +17544,6 @@
         "counter": {
           "$ref": "#/$defs/A.act.counter"
         },
-        "move_counters": {
-          "$ref": "#/$defs/A.act.move-counters"
-        },
         "pp_max": {
           "$ref": "#/$defs/A.act.pp-max"
         },
@@ -18385,12 +17643,6 @@
         "repeat": {
           "$ref": "#/$defs/A.control.repeat"
         },
-        "repeat_ability": {
-          "$ref": "#/$defs/A.control.repeat-ability"
-        },
-        "foreach": {
-          "$ref": "#/$defs/A.control.foreach"
-        },
         "each_player": {
           "$ref": "#/$defs/A.control.each-player"
         },
@@ -18416,19 +17668,6 @@
       "items": {
         "$ref": "#/$defs/A.step"
       }
-    },
-    "A.cond.payment-decided": {
-      "type": "object",
-      "properties": {
-        "payment_decided": {
-          "type": "string",
-          "const": "optional"
-        }
-      },
-      "required": [
-        "payment_decided"
-      ],
-      "additionalProperties": false
     },
     "A.play.conditional-delta": {
       "type": "object",
@@ -19274,9 +18513,6 @@
         },
         "until": {
           "$ref": "#/$defs/A.until"
-        },
-        "precondition": {
-          "$ref": "#/$defs/A.cond"
         }
       },
       "additionalProperties": false,

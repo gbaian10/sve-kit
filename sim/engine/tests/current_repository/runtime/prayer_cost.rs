@@ -48,11 +48,11 @@ fn bp18_104_current_covers_both_lines_and_exactly_the_registered_printings() {
         let source = card
             .source_at(&format!("/cards/{CARD}/faces/{FACE}/abilities/{path}"))
             .unwrap();
-        assert_eq!(source.source.card_id, CARD_ID);
-        assert_eq!(source.source.face, FACE);
-        assert_eq!(source.source.field, "effect");
-        assert_eq!(source.source.line, line);
-        assert_eq!(source.source.section, None);
+        assert_eq!(source.card_id, CARD_ID);
+        assert_eq!(source.face, FACE);
+        assert_eq!(source.field, "effect");
+        assert_eq!(source.line, line);
+        assert_eq!(source.section, None);
     }
 }
 

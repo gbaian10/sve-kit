@@ -10,17 +10,14 @@
 | --- | --- | --- |
 | 作者 Schema | 封閉物件、欄位型別、互斥鍵、局部組合與數域；`author-nodes.schema.json`、`author-storage.schema.json` | 名稱的 producer 是否存在、scope／付款分支可見性、來源閉包、runtime 是否實作 |
 | Python typed boundary | `contracts/author_*.py` 把外部值解碼為封閉型別；局部驗證須與 Schema 對齊，`test_author_schema_drift.py` 比對兩者 | 語法可解碼不表示可執行；不得以未驗證 dict 取代解碼結果 |
-| 具名本體與參數展開 | `domains/effects/author_direct.py` 的 `materialize`／`_body`、`author_expansion.py`；確認本體選擇、參數名稱與型別，保留來源位置；`author_validation.py` 排除殘留參數 | 宣稱 import 型別不構成其來源或語義證明 |
-| 非局部 binding 與 ports | `author_bindings.py` 的 `analyze_bindings`／`validate_author_ports`：依 producer 順序、種類、分支、execution、alias 使用點與匯入匯出 scope 驗證 | Schema 只驗單一片段，不能承接；此分析本身亦不證明 source port 的語義 |
+| 具名本體與參數展開 | `domains/effects/author_direct.py` 的 `materialize`／`_body`；確認本體選擇、參數名稱與型別，保留來源位置；`author_validation.py` 排除殘留參數 | 宣稱 import 型別不構成其來源或語義證明 |
 | 來源與整卡准入 | `author_direct.py` 的 `check_coverage`、`author_set.py`：永久身分、所有印刷、面／版本／區段來源與作者選擇閉包；已辨識能力及明示 reminder／token 區段完整對應 | 行數相同不等於來源閉包；來源分類 pending 不等於禁止輕量准入；此層不證明卡文與效果語義等價 |
 | Rust 作者解碼與 lowering | `ir/lowering/ast.rs` 封閉解碼；`ExpandedLowerer` 把支援的作者結構轉成帶來源的 IR，建立 binding 與數域轉換 | 作者語法全集不等於 backend 支援集合；不能為繞過 lowering 改用 raw IR |
 | Rust IR 良構 | `ir/wellformed.rs` 及其子模組：raw IR 和 lowering 產物均檢查型別、scope、producer、來源、付款 dominance、觀察與讀取權限，產生私有建構的 `WellFormedProgram`／`WellFormedCardProgram` | 良構不等於 executor 已支援所有動作與讀值組合 |
 | Rust 執行能力准入 | `game/internal/admission.rs`、`card.rs` 與各 consumer 的檢查：確認已良構程式在現有 backend 可執行，拒絕未實作形狀 | 目前的形狀辨識不是通用求值保證；未來共用計畫亦須保留 raw IR 邊界 |
 | 執行時動態重驗 | `game/internal/` 的付款、選擇、receipt、移區及揭露處理：本次付款成功、物件世代／位置、實際成功成員與 reveal 授權 | 靜態准入不能預先保證局面仍相同，亦不能把選中成員當作實際成功成員 |
 
-`author_bindings.py` 已先經 `AbilityHead` typed boundary，再按 Schema sites 走訪。
-其中 dict 是已驗證型別的承載方式，不是允許任意輸入直接進分析器。
-Rust 的作者路徑、raw IR 路徑與最終動態使用點均有自己的信任邊界，不能因前一層檢查過就移除。
+Rust 的作者解碼、IR 良構與動態使用各自核對所在階段的輸入。
 
 ## 接受集合對照
 
@@ -45,13 +42,11 @@ Rust 欄位及控制分派的說明是程式盤點，不宣稱這些合成案例
 本責任表不刪除任何驗證，也不將 Python 縮成 Schema 加行數檢查。
 後續每項實際刪除都須在同一變更列出原檢查、承接入口、等價負例及兩種入口的結果。
 
-| 候選重複／防護 | 承接責任與同等負例 | 可刪範圍 |
-| --- | --- | --- |
-| 手寫 Schema／Python 局部形狀鏡像 | 保留 Schema 權威與 typed 解碼；`test_author_schema_drift.py::test_schema_alignment_detects_an_open_object` 驗證多餘欄位不會被放過；本文件的 consumer 案例驗證實際接受集合 | 只有等價局部形狀可改由同一封閉型別生成／共用；本次不刪 |
-| consumer 重複辨識同一靜態合法形狀 | 由唯一 backend admission/compiler 承接，計畫綁定受驗 immutable IR 與定義；須補 raw IR bypass、未知讀值／能力、未授權來源的負例，再替換 consumer 的重猜 | 在承接計畫實際落地前不可刪；`WellFormedProgram` 不充當執行許可 |
-| binding、Pay、跨 execution、alias | `test_author_bindings.py` 的 `test_local_failures`、`test_branch_local_and_unsupported_join`、`test_new_execution_cannot_capture_local`、`test_unused_alias_cycles_are_rejected`；Rust `ir/tests/wellformed/decisions/payments.rs` 的 `zero_payment_and_every_alternative_are_checked` | 不交給局部 Schema；新 walker 只承接結構走訪，scope／dominance 政策保留 |
-| port 與來源閉包 | `validate_author_ports` 保留 export 種類、唯一性與 scope；`test_author_direct.py::test_direct_rejects_incomplete_or_invalid_cards`、`test_author_set.py::test_two_way_record_closure` 保護整卡／登錄閉包 | 不以行數或來源欄位存在取代；本次不刪 |
-| raw IR producer 與動態授權 | Rust `ir/tests/wellformed/decisions/producers.rs` 的 `token_inputs_are_checked_before_output_and_siblings_share_no_outputs`；runtime 的付款／世代／揭露負例仍由所屬 consumer 維護 | 靜態計畫不得取代動態重驗；本責任表不授權刪除 |
+| 候選重複／防護                    | 承接責任與同等負例                                                                                                                                                                | 可刪範圍                                                       |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| 手寫 Schema／Python 局部形狀鏡像  | 保留 Schema 權威與 typed 解碼；`test_author_schema_drift.py::test_schema_alignment_detects_an_open_object` 驗證多餘欄位不會被放過；本文件的 consumer 案例驗證實際接受集合         | 只有等價局部形狀可改由同一封閉型別生成／共用；本次不刪         |
+| consumer 重複辨識同一靜態合法形狀 | 由唯一 backend admission/compiler 承接，計畫綁定受驗 immutable IR 與定義；須補 raw IR bypass、未知讀值／能力、未授權來源的負例，再替換 consumer 的重猜                            | 在承接計畫實際落地前不可刪；`WellFormedProgram` 不充當執行許可 |
+| raw IR producer 與動態授權        | Rust `ir/tests/wellformed/decisions/producers.rs` 的 `token_inputs_are_checked_before_output_and_siblings_share_no_outputs`；runtime 的付款／世代／揭露負例仍由所屬 consumer 維護 | 靜態計畫不得取代動態重驗；本責任表不授權刪除                   |
 
 表中既有測試提供責任的反例入口，並不代表它們足以證明任意未來刪除等價。
 新增語法時同步修改 Schema、Python 對應型別及接受集合測試；

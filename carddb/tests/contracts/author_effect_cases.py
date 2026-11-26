@@ -170,7 +170,6 @@ SYNTHETIC_EFFECTS: list[dict[str, JsonValue]] = [
     {"stat": {"on": "this", "power": -1}},
     {"set_stat": {"on": "this", "power": 1, "hp": 1}},
     {"lose_abilities": {"on": "this"}},
-    {"remove_trait": {"on": "this", "trait": "武装"}},
     {"make_type": {"on": "this", "type": "amulet"}},
     {"must_attack": {"on": {"who": "opp", "zone": "field", "kind": "follower"}}},
     {"play_permission": {"on": "this", "from": ["cemetery"]}},

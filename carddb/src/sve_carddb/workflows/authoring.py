@@ -12,7 +12,7 @@ from pydantic import JsonValue
 from sve_carddb.build import create_database
 from sve_carddb.build.database import open_database
 from sve_carddb.build.t1 import MINIMUM_CAPABILITIES, compile_build
-from sve_carddb.contracts.four_layer import CardNameReference, GlossaryReference
+from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.core.models import RecordData
 from sve_carddb.core.provenance import BuildContext, Revision
@@ -20,13 +20,20 @@ from sve_carddb.domains.catalog.adoption_loader import load_adoptions
 from sve_carddb.domains.catalog.rules_name_adoptions import collab_hashes, evaluate
 from sve_carddb.domains.catalog.rules_names import populate_rules_names
 from sve_carddb.domains.effects.author_current import CardRejected, CurrentAuthorSources
+from sve_carddb.domains.effects.author_direct import inventory, materialize
 from sve_carddb.domains.effects.author_expansion import AuthorExpander
-from sve_carddb.domains.effects.author_handwritten import ConfigurationError, positions
-from sve_carddb.domains.effects.author_inputs import AuthorInputError, Diagnostic
-from sve_carddb.domains.effects.author_resolution import body_usage, review_states
+from sve_carddb.domains.effects.author_handwritten import ConfigurationError
+from sve_carddb.domains.effects.author_inputs import (
+    AuthorInputError,
+    Diagnostic,
+    SourceError,
+)
+from sve_carddb.domains.effects.author_resolution import (
+    body_usage,
+    handwriting,
+    review_states,
+)
 from sve_carddb.domains.effects.author_set import load_author_set
-from sve_carddb.domains.effects.author_source_hash import source_version
-from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.parsed_cards.reader import read as read_parsed
 from sve_carddb.domains.parsed_cards.sources import ParsedBatches
 from sve_carddb.domains.products import (
@@ -38,24 +45,15 @@ from sve_carddb.domains.products import (
 )
 from sve_carddb.domains.registry.preview import FrozenJP, plan_preview
 from sve_carddb.domains.registry.records import PrintingData
-from sve_carddb.domains.registry.transitions.files import read_transition_files
 from sve_carddb.domains.registry.transitions.renewal import load_identity_registry
 from sve_carddb.domains.text_observations import FrozenTexts, TextObservations
 from sve_carddb.domains.text_observations.closure import close_preview
-from sve_carddb.domains.translations.corrected_sources import Corrections
-from sve_carddb.domains.translations.four_layer_authored import FrameRecord
-from sve_carddb.domains.translations.glossary.records import TermRecord
-from sve_carddb.domains.translations.inputs import Snapshot, load_glossary
-from sve_carddb.domains.translations.recognition.rules import load as load_rules
-from sve_carddb.domains.translations.sources import Sources
-from sve_carddb.workflows import offline
+from sve_carddb.domains.translations.four_layer_sources import card_field
 from sve_carddb.workflows.authoring_storage import WriteError, format_yaml, write
 
 if TYPE_CHECKING:
     from collections.abc import Generator
 
-    from sve_carddb.domains.effects.author_inputs import AuthorSchemas
-    from sve_carddb.domains.effects.author_set import AuthorInputSet
     from sve_carddb.domains.parsed_cards.storage import Catalog
     from sve_carddb.domains.products import OfficialProducts
     from sve_carddb.domains.registry.preview import PreviewPlan
@@ -129,56 +127,6 @@ def author_numbers(authored: Path, expander: AuthorExpander) -> frozenset[str]:
     return frozenset(record.record_key for record in inputs.index.records)
 
 
-def _public_snapshot(snapshot: Snapshot, batch: str) -> Snapshot:
-    # Public authoring admits only concepts whose source is available in this profile.
-    terms = tuple(
-        record
-        for record in snapshot.current_records()
-        if isinstance(record, TermRecord)
-        and (record.data.source_ref is None or record.data.source_ref.batch_id == batch)
-    )
-    identifiers = {record.data.id for record in terms}
-    frames = tuple(
-        record
-        for record in snapshot.four_layer.records
-        if isinstance(record, FrameRecord)
-        and all(
-            (
-                reference.key
-                if isinstance(reference, GlossaryReference)
-                else reference.term_id
-            )
-            in identifiers
-            for slot in record.data.leaf_schema.slots
-            for reference in slot.domain.values
-            if isinstance(reference, GlossaryReference | CardNameReference)
-        )
-    )
-
-    frame_ids = {record.data.id for record in frames}
-    files = []
-    for path, raw, content in snapshot.closure:
-        if path.startswith("translations/semantic-definitions/"):
-            files.append((path, raw, content))
-            continue
-        tree = object_value(parse(content))
-        records = [
-            record
-            for value in array(tree["records"])
-            if (record := object_value(value))["kind"]
-            in {"glossary_term", "sentence_template"}
-            and object_value(record["data"]).get("id") in (identifiers | frame_ids)
-        ]
-        if records:
-            encoded = canonical({**tree, "records": list[JsonValue](records)})
-            files.append((path, encoded, encoded))
-    closure = tuple(files)
-    return Snapshot(
-        tuple(file for file in closure if file[0].startswith("translations/glossary/")),
-        closure,
-    )
-
-
 def _public_products(
     inputs: Inputs,
     authored: Path,
@@ -208,14 +156,14 @@ def _public_products(
 
 
 @contextmanager
-def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the complete ordered boundary in one operation
+def prepare(  # ruff: ignore[too-many-locals] -- keep the complete ordered boundary in one operation
     inputs: Inputs,
     *,
     cards: frozenset[str] = frozenset(),
     main: Path | None = None,
     parsed: Catalog | None = None,
 ) -> Generator[Workspace]:
-    """Prepare production identity, vocabulary, sources and the immutable JP reader."""
+    """Prepare the current JP identities, source texts and construction names."""
     from sve_carddb.domains.catalog.loader import prepare as prepare_catalog  # ruff: ignore[import-outside-top-level] -- initialize the production text interner before catalog imports
 
     _configuration(inputs)
@@ -241,15 +189,13 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
         if parsed is not None
         else read_parsed(inputs.card_data or inputs.repo / "card-data")
     )
-    snapshot = load_glossary(authored)
-    rules = load_rules(inputs.repo)
     capabilities = (*MINIMUM_CAPABILITIES, "en", "translation_evidence")
     if inputs.profile == "database":
         assert inputs.database is not None
         assert inputs.recipe is not None
         assert inputs.frozen_inputs is not None
         recipe = object_value(parse(inputs.recipe.read_bytes()))
-        context = BuildContext.model_validate_json(
+        BuildContext.model_validate_json(
             canonical(object_value(parse(inputs.frozen_inputs.read_bytes()))["context"])
         )
         if [
@@ -258,22 +204,6 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
             if (pin := object_value(value))["region"] == "jp"
         ] != [inputs.jp_batch_id]:
             raise ConfigurationError("Authoring JP batch mismatch")
-        stores = {string(recipe["store_id"]): Path(string(recipe["archive"]))}
-        registry = None
-        if read_transition_files(authored).shards:
-            pinned = offline.Inputs.model_validate_json(inputs.recipe.read_bytes())
-            if pinned.repo.resolve() != inputs.repo.resolve():
-                raise ConfigurationError("Authoring recipe repository mismatch")
-            registry = offline.registry_snapshot(pinned, authored=authored)
-        prepared = prepare_catalog(
-            (load_adoptions(authored, entry="catalog/adoptions"),),
-            inputs.repo,
-            context,
-            stores,
-            registry,
-            batches=batches,
-        )
-        sources = Sources(stores, inputs.repo, context, registry, batches=batches)
         schema = compile_build(
             (
                 *capabilities,
@@ -286,19 +216,11 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
         with open_database(schema, inputs.database) as db:
             yield Workspace(
                 inputs,
-                CurrentAuthorSources(
-                    db,
-                    sources,
-                    snapshot,
-                    prepared.projection.vocabulary,
-                    rules,
-                    inputs.jp_batch_id,
-                ),
+                CurrentAuthorSources(db),
                 expander,
                 authored,
             )
         return
-    snapshot = _public_snapshot(snapshot, inputs.jp_batch_id)
     store = inputs.card_data or inputs.repo / "card-data"
     frozen = batches.batch(store, "public-authoring", inputs.jp_batch_id)
     identity = plan_preview(
@@ -369,14 +291,6 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
         observations.configuration(vocabulary, ())
         | {"product_identity": official.identities.configuration()},
     )
-    sources = Sources(
-        stores,
-        inputs.repo,
-        context,
-        identity.snapshot,
-        batches=batches,
-        corrections=Corrections(observations.plan),
-    )
     with create_database(compile_build(capabilities)) as db:
         with db.transaction():
             populate_product_preview(
@@ -396,111 +310,86 @@ def prepare(  # ruff: ignore[too-many-locals, too-many-statements] -- keep the c
             populate_rules_names(db, evaluate(prepared.names, observations.plan)[0])
         yield Workspace(
             inputs,
-            CurrentAuthorSources(
-                db, sources, snapshot, vocabulary, rules, inputs.jp_batch_id
-            ),
+            CurrentAuthorSources(db),
             expander,
             authored,
         )
 
 
-def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
-    """Report all source lines, including unsupported candidates, without admission."""
-    current = workspace.current
-    card_id = current.printing_card(card)
-    payload = current.card_payload(card_id, inspect=True)
-    fields: list[JsonValue] = [
-        {
-            "owner": field.field.source.model_dump(mode="json"),
-            "lines": [
-                {"line": index + 1, "text": text}
-                for index, text in enumerate(field.source.text.splitlines())
-            ],
-        }
-        for field in payload.fields
-    ]
-    candidates = positions(payload, current.classifier)
-    inputs = load_author_set(workspace.authored, workspace.expander.schemas)
-    stored_inputs = inputs
-    inputs, failures = current.resolve_inputs(inputs, workspace.expander)
-    uses: list[JsonValue] = []
-    record_keys = {
-        record.record_key
-        for record in inputs.index.records
-        if record.card_id == card_id and record.kind == "author_effect_set"
-    }
-    for file in inputs.author_files:
-        tree = object_value(workspace.expander.schemas.author_tree(file.raw))
-        uses.extend(
-            {
-                "file": file.path,
-                "record_key": key,
-                "card": object_value(tree["cards"])[key],
-            }
-            for key in object_value(tree["cards"]).keys() & record_keys
+def _inspection_lines(
+    current: CurrentAuthorSources, payload: dict[str, JsonValue]
+) -> list[JsonValue]:
+    fields: list[JsonValue] = []
+    for raw_face in array(payload["faces"]):
+        face = object_value(raw_face)
+        owner = FaceRevisionOwner(
+            kind="face_revision", revision_id=string(face["revision_id"])
         )
-    bodies = [
-        workspace.expander.schemas.body_tree(file.raw) for file in inputs.body_files
-    ]
-    stored = _stored_inspection(
-        stored_inputs, workspace.expander.schemas, record_keys, failures
-    )
-    card_gap = None
-    try:
-        current.keyword_obligations(card_id)
-    except SourceError as error:
-        card_gap = error.reason
+        for raw_field in array(face["fields"]):
+            field = object_value(raw_field)
+            ordinal = field["ordinal"]
+            assert ordinal is None or type(ordinal) is int
+            address = OwnerField(
+                owner=owner,
+                field="effect" if ordinal is None else "section",
+                ordinal=ordinal,
+            )
+            text = card_field(current.db, address).text
+            fields.append(
+                {
+                    "owner": address.model_dump(mode="json"),
+                    "face_id": face["face_id"],
+                    "lines": [
+                        {"line": index + 1, "text": line}
+                        for index, line in enumerate(text.splitlines())
+                    ],
+                }
+            )
+
+    return fields
+
+
+def inspect(workspace: Workspace, card: str) -> dict[str, JsonValue]:
+    """Report current rule lines and the existing author records for a permanent card."""
+    current = workspace.current
+    payload = inventory(current, card)
+    card_id = string(payload["card_id"])
+
+    schemas = workspace.expander.schemas
+    inputs = load_author_set(workspace.authored, schemas)
+    authored = handwriting(inputs)
+    handwritten: list[JsonValue] = []
+    existing: list[JsonValue] = []
+    resolution_diagnostic: JsonValue = None
+    for record in inputs.index.records:
+        if record.card_id != card_id or record.kind != "author_effect_set":
+            continue
+        number = record.record_key
+        entry: dict[str, JsonValue] = {"file": record.file, "record_key": number}
+        handwritten.append({**entry, "card": authored.cards[number]})
+        try:
+            existing.append({**entry, "card": materialize(current, number, authored)})
+        except SourceError as error:
+            resolution_diagnostic = {
+                "stage": "source",
+                "reason": error.reason,
+                "card_no": number,
+            }
+        except AuthorInputError as error:
+            diagnostic = error.diagnostic
+            resolution_diagnostic = {
+                "stage": diagnostic.stage,
+                "reason": diagnostic.reason,
+                "card_no": number,
+                "card_line": diagnostic.card_line,
+                "path": list[JsonValue](diagnostic.path),
+            }
     return {
         "card_no": card,
         "card_id": card_id,
-        "source": source_version(payload.payload),
-        "payload": payload.payload.model_dump(mode="json"),
-        "fields": fields,
-        "candidates": [candidate.report() for candidate in candidates],
-        "existing": uses,
-        **stored,
-        "bodies": bodies,
-        "gaps": [
-            candidate.report() for candidate in candidates if not candidate.supported
-        ],
-        "card_gap": card_gap,
-    }
-
-
-def _stored_inspection(
-    inputs: AuthorInputSet,
-    schemas: AuthorSchemas,
-    record_keys: set[str],
-    failures: dict[str, Diagnostic],
-) -> dict[str, JsonValue]:
-    handwritten: list[JsonValue] = []
-    for file in inputs.author_files:
-        tree = object_value(schemas.storage_tree(file.raw, "author_effect_set"))
-        handwritten.extend(
-            {
-                "file": file.path,
-                "record_key": key,
-                "card": object_value(tree["cards"])[key],
-            }
-            for key in object_value(tree["cards"]).keys() & record_keys
-        )
-    failure = next(
-        (failure for number, failure in failures.items() if number in record_keys), None
-    )
-    resolution_diagnostic: JsonValue = (
-        None
-        if failure is None
-        else {
-            "stage": failure.stage,
-            "reason": failure.reason,
-            "card_no": failure.card_no,
-            "card_line": failure.card_line,
-            "path": list[JsonValue](failure.path),
-            "expected": failure.expected,
-            "actual": failure.actual,
-        }
-    )
-    return {
+        "payload": payload,
+        "fields": _inspection_lines(current, payload),
+        "existing": existing,
         "handwritten": handwritten,
         "resolution_diagnostic": resolution_diagnostic,
         "body_definitions": [

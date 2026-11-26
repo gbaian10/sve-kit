@@ -8,7 +8,6 @@ import pytest
 
 from sve_carddb.core.json import object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
-from sve_carddb.domains.effects.author_sites import NodeSites
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -263,13 +262,6 @@ def test_conditional_ability_prevention_is_a_static_only_shape(
             }
         ),
         "author_effect_set",
-    )
-    NodeSites.decode_head(
-        {
-            "static": {
-                "effects": [guarded, {"cannot": {"what": "destroy", "by": "ability"}}]
-            }
-        }
     )
     with pytest.raises(AuthorInputError):
         schemas.storage_tree(

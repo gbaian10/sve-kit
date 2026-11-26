@@ -95,11 +95,7 @@ use super::{
     SourceSpan, StepwiseMode, TextQuantifier, TriggerCondition, TriggerSpec, WellFormedCardProgram,
     ZoneKind,
 };
-pub use current::{
-    CardKeywordSourceUse, CurrentCardProgram, CurrentKeywordEvidence, CurrentSourceCheck,
-    CurrentSourceEvidence, KeywordDeclarationPayload, MetadataObligation, NonBodySource,
-    PrintedKeyword, PrintedKeywordsObligation,
-};
+pub use current::{CurrentCardProgram, CurrentKeywordEvidence, PrintedKeyword};
 pub use deck_rules::{CardDeckRule, DeckRuleCondition, DeckSection};
 
 use super::AbilityQualification::{Ordinary, UnionBurst};
@@ -193,27 +189,14 @@ impl ExpandedLowerer {
 
     /// Consume only `CardAccepted.lowering_input()` from the current Python reader.
     ///
-    /// This is an internal trusted boundary, not a public program encoding or a
-    /// replacement for source reconstruction, use qualification or runtime admission.
-    /// The reader currently rejects token sources; a nonempty token selection is
-    /// rejected here too, rather than selecting a template by display name.
+    /// The handoff supplies a complete direct author tree and the current line inventory.
+    /// Lowered programs still pass whole-card runtime admission.
     ///
     /// # Errors
     /// Rejects absent/ambiguous identities, unknown current owners, token selections
     /// without a supported source contract and every unsupported expanded construct.
     pub fn lower_current(&self, input: &Value) -> Result<CurrentCardProgram, LoweringError> {
-        current::lower(self, input)
-    }
-
-    /// Reconcile a complete trusted C0 handoff before attempting executable lowering.
-    ///
-    /// Success preserves declaration provenance but grants no runtime support. C0
-    /// remains responsible for original author bytes and current registry admission.
-    ///
-    /// # Errors
-    /// Rejects malformed wire, source or author mismatches and unconsumed obligations.
-    pub fn check_current(&self, input: &Value) -> Result<CurrentSourceCheck, LoweringError> {
-        current::check(self, input)
+        current::direct::lower(self, input)
     }
 
     fn lower_coordinates(
@@ -2472,22 +2455,11 @@ fn source_span(
             .map(str::to_owned)
             .ok_or_else(|| unsupported(path))
     };
-    let (card_id, face) = key.identity.map_or_else(
-        || Ok((key.key.to_owned(), "base".to_owned())),
-        |identity| identity.owner(&source, path),
-    )?;
-    if key.identity.is_some()
-        && path.contains("/faces/")
-        && !path.starts_with(&format!(
-            "/cards/{}/faces/{}/abilities/",
-            pointer_key(key.key),
-            pointer_key(&face)
-        ))
-    {
+    if key.identity.is_some() {
         return Err(error("invalid_current_identity", path));
     }
     Ok(SourceSpan {
-        card_id,
+        card_id: key.key.to_owned(),
         card_no: key.key.to_owned(),
         scope: match &entry.sources[0] {
             ast::SourceUse::Direct(direct_source) => direct_source.scope.clone(),
@@ -2498,7 +2470,7 @@ fn source_span(
             .pointer("/occurrence/owner")
             .ok_or_else(|| unsupported(path))?
             .to_string(),
-        face,
+        face: "base".into(),
         field: text("/occurrence/field")?,
         section: entry.section.map(|section| section.to_string()),
         line: entry.line,

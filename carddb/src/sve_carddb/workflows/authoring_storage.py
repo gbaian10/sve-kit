@@ -29,7 +29,7 @@ from sve_carddb.domains.effects.author_inputs import (
     Diagnostic,
     parse_document,
 )
-from sve_carddb.domains.effects.author_resolution import handwriting, materialize_inputs
+from sve_carddb.domains.effects.author_resolution import handwriting
 from sve_carddb.domains.effects.author_set import (
     AuthorInputSet,
     InputFile,
@@ -405,22 +405,10 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
         tuple(companions.values()),
         tuple(prototypes.values()),
     )
-    from sve_carddb.domains.effects.author_set import validate_author_set  # ruff: ignore[import-outside-top-level] -- candidate inventory validation follows complete construction
-
     try:
-        validate_author_set(candidate, schemas)
+        results = workspace.current.validate_inputs(candidate, workspace.expander)
     except AuthorInputError as error:
         raise _located_error(candidate, supplied, error.diagnostic) from None
-    materialized = materialize_inputs(
-        candidate,
-        workspace.current,
-        workspace.expander,
-    )
-    if materialized.failures:
-        raise _located_error(
-            candidate, supplied, next(iter(materialized.failures.values()))
-        )
-    results = workspace.current.validate_inputs(candidate, workspace.expander)
     rejected = [
         r
         for r in results

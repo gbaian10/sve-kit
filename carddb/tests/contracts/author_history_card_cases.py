@@ -189,11 +189,6 @@ CARD_HISTORY_CASES: list[tuple[str, str, JsonValue]] = [
         {"chosen": {"ref": "t", "where": {"name_contains": "リオード"}}},
     ),
     (
-        "BP07-088",
-        "A.expr.numeric",
-        {"counter": {"on": {"lki_of": "this"}, "name": "祈り"}},
-    ),
-    (
         "BP05-057",
         "A.expr.numeric",
         {"power_of": {"objects_of": "sacrificed", "view": "before"}},

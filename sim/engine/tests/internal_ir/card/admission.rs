@@ -1,4 +1,4 @@
-//! Candidate diagnostics; C1 source and qualification proofs are not available here.
+//! Whole-card runtime guards for synthetic lowering fixtures.
 
 use super::*;
 use alloc::collections::BTreeMap;
@@ -6,9 +6,7 @@ use std::env::var_os;
 use std::fs::read_to_string;
 use sve_engine::EngineFailure;
 
-fn report_candidates(candidate: &Value, snapshot: &str) -> BTreeMap<String, Value> {
-    let tree = &candidate["tree"];
-    let evidence = candidate["evidence"].as_array().unwrap();
+fn runtime_support(tree: &Value, snapshot: &str) -> BTreeMap<String, Value> {
     let printings = snapshot
         .lines()
         .map(|line| serde_json::from_str::<Value>(line).unwrap())
@@ -29,26 +27,17 @@ fn report_candidates(candidate: &Value, snapshot: &str) -> BTreeMap<String, Valu
         .unwrap()
         .iter()
         .map(|(key, card)| {
-            let proofs = evidence
-                .iter()
-                .filter(|entry| entry["path"][1] == *key)
-                .map(|entry| entry["source_proof"].clone())
-                .collect::<Vec<_>>();
-            // Source-checked expansion alone cannot replace the missing C1 use proofs.
-            let mut reasons = vec!["use_qualification_unavailable", "ability_closure_unverified"];
-            if proofs.is_empty() || proofs.iter().any(|proof| proof != "current_source_checked") {
-                reasons.push("current_source_unverified");
-            }
-            if printings.get(key).and_then(|card| card.get("card_id")).is_none() {
-                reasons.push("snapshot_identity_unavailable");
-            }
             let selected = json!({
                 "format":tree["format"], "kind":tree["kind"], "scope":tree["scope"],
                 "cards":{key:card}
             });
             let runtime = match lowerer.lower_with_printed_costs(&selected, &costs) {
-                Err(failure) => json!({"status":"rejected", "code":failure.code, "path":failure.path}),
-                Ok(_) if !printings.contains_key(key) => json!({"status":"rejected", "reason":"snapshot_printing_missing"}),
+                Err(failure) => {
+                    json!({"status":"rejected", "code":failure.code, "path":failure.path})
+                }
+                Ok(_) if !printings.contains_key(key) => {
+                    json!({"status":"rejected", "reason":"snapshot_printing_missing"})
+                }
                 Ok(cards) => {
                     let mut game = fanfare::fragment_position(1, key, 10, json!([]));
                     match game.load_internal_card(key, &cards[key]) {
@@ -57,45 +46,25 @@ fn report_candidates(candidate: &Value, snapshot: &str) -> BTreeMap<String, Valu
                     }
                 }
             };
-            (key.clone(), json!({
-                "status":"rejected", "reasons":reasons, "source_proofs":proofs, "runtime":runtime
-            }))
+            (key.clone(), runtime)
         })
         .collect()
 }
 
 #[test]
-fn author_fixture_admission_report() {
+fn expanded_fixtures_obey_whole_card_runtime_guards() {
     let snapshot = read_to_string(var_os("SVE_TEST_SNAPSHOT").unwrap()).unwrap();
-    let mut candidate = fanfare::expanded::candidate(true).clone();
-    // A synthetic candidate also exercises an unsupported printed amulet shape.
-    candidate["tree"]["cards"]["BP16-U06"] = candidate["tree"]["cards"]["BP01-041"].clone();
-    let reports = report_candidates(&candidate, &snapshot);
-    assert_eq!(reports["BP03-002"]["runtime"]["status"], "supported");
-    assert_eq!(reports["SD03-005"]["runtime"]["status"], "supported");
-    assert_eq!(reports["BP01-041"]["runtime"]["status"], "supported");
-    assert_eq!(reports["BP16-U06"]["runtime"]["status"], "rejected");
+    let mut tree = fanfare::expanded::spell_tree().clone();
+    tree["cards"]["BP16-U06"] = tree["cards"]["BP01-041"].clone();
+    let reports = runtime_support(&tree, &snapshot);
+    assert_eq!(reports["BP03-002"]["status"], "supported");
+    assert_eq!(reports["SD03-005"]["status"], "supported");
+    assert_eq!(reports["BP01-041"]["status"], "supported");
+    assert_eq!(reports["BP16-U06"]["status"], "rejected");
     assert_eq!(
-        reports["BP16-U06"]["runtime"]["reason"],
+        reports["BP16-U06"]["reason"],
         "unsupported: internal D1 does not support amulet with printed combat statistics"
     );
-    for report in reports.values() {
-        assert_eq!(report["status"], "rejected");
-        assert!(
-            report["source_proofs"]
-                .as_array()
-                .unwrap()
-                .iter()
-                .all(|proof| proof == "none")
-        );
-        assert!(
-            report["reasons"]
-                .as_array()
-                .unwrap()
-                .contains(&json!("current_source_unverified"))
-        );
-    }
-    println!("{}", serde_json::to_string(&reports).unwrap());
 }
 
 #[test]

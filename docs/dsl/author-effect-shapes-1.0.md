@@ -30,7 +30,7 @@ O／R 見[物件查詢](author-object-query-shapes-1.0.md)與[選取形狀](auth
 P／Ref 見[參照形狀](author-reference-shapes-1.0.md)，N／Q 見[運算式形狀](author-expression-shapes-1.0.md)。
 各葉原有的巢狀參數權限仍成立，例如 N 內 plus 的已登錄參數位置；效果不增加通用參數權限。
 所有列表均保序、保留重數；不新增 uniqueItems。
-canonical 只依[承載契約 §4.1](author-contract-1.0.md#41-body-recipe)處理，
+canonical 只依[承載契約 §4](author-contract-1.0.md)處理，
 不補語義預設、不做代數化簡；省略與明寫 `next_only:false`、`kind:any` 或
 `on:affected` 不推定同 hash。
 
@@ -45,7 +45,7 @@ canonical 只依[承載契約 §4.1](author-contract-1.0.md#41-body-recipe)處�
 | keywords | list:非空 Text[] | on:O | 與 Sel.keyword 共用 Concept；不是直接參數位置 |
 | lose_abilities | 無 | on:O | AllAtTime；空 payload 可由父位置提供範圍 |
 | also_named | name:Text | on:O | CardName 葉 |
-| add_trait、remove_trait | trait:Text | on:O | Concept 葉 |
+| add_trait | trait:Text | on:O | Concept 葉 |
 | make_type | type:Code | on:O | CardKind 葉 |
 | cost_mod | when_playing:ObjectSel；delta:N 或 set:Q 二擇一 | next_only:bool | delta／set 另收直接 ParamRef；when_playing 不收裸 Ref |
 | damage_mod | delta:N 或 multiply:Q 二擇一 | on:R、source:O、kind:any/attack/combat/ability、next_only:bool | 有 source 而無 on 的例外見 §4 |
@@ -143,7 +143,6 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 | lose_abilities、make_type | 本文已有專用動作 | EffectSpec 正例合成 |
 | also_named | token section static，BP08-004 | name:操り人形 |
 | add_trait | apply，BP02-T07 | trait:武装 |
-| remove_trait | 未找到直接效果位置 | 合成 |
 | cost_mod.delta／set | apply BP18-001；player_effect BP14-046 | delta:-2；set:0,next_only:true，集合型範圍 |
 | damage_mod.delta | static BP01-134／BP01-137 | 收到 -1／輸出 +4；後者省略父回合條件 |
 | damage_mod.multiply | static BP02-067 | 限領袖的 attack ×2 與 combat ×2 分兩片，避免攻擊從者乘兩次 |
