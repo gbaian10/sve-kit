@@ -111,7 +111,12 @@ fn x_pp_counts_repeated_payments_and_fixed_fees_and_uses_one_immutable_answer() 
     );
     let cost = active(&game).unwrap();
     let projected = project_costs(&game.observe(Viewer::P1).unwrap()).unwrap();
-    let quoted = projected.current_play.unwrap().cost;
+    let play = projected.current_play.unwrap();
+    assert!(
+        play.source.is_some(),
+        "a holder still on the field is named"
+    );
+    let quoted = play.cost;
     assert_eq!(quoted.total_pp, None);
     assert_eq!(quoted.pending, [wire::PendingCost::X]);
     assert!(quoted.groups[0].lines.iter().any(|line| matches!(line,
