@@ -3,6 +3,7 @@
 use crate::play::{End, Limits, Record, StepCost, replay};
 use crate::published::{Published, compose};
 use crate::report::{Report, run_seeds};
+use alloc::collections::BTreeMap;
 use core::fmt::Display;
 use serde_json::{Value, json};
 use std::fs::{File, create_dir_all, read_to_string, write};
@@ -126,13 +127,22 @@ fn replay_records(arguments: &[String], log: &mut dyn Write) -> Result<(), Strin
     };
     let published = load(inputs, programs, log)?;
     let mut out = BufWriter::new(File::create(timings).map_err(failed)?);
-    for line in read_to_string(records).map_err(failed)?.lines() {
-        let record: Record = serde_json::from_str(line).map_err(failed)?;
+    let mut ends = BTreeMap::<String, u64>::new();
+    for text in read_to_string(records).map_err(failed)?.lines() {
+        // A line of `failures.jsonl` wraps its record; a line of `records.jsonl` is one.
+        let mut entry: Value = serde_json::from_str(text).map_err(failed)?;
+        let wrapped = entry.get_mut("record").map(Value::take);
+        let record: Record = serde_json::from_value(wrapped.unwrap_or(entry)).map_err(failed)?;
         let played = replay(&published.arena, &record, Limits::default());
-        let end = match &played.end {
-            End::Finished { .. } => "finished".to_owned(),
-            End::Failed(failure) => format!("{}: {}", failure.kind, failure.detail),
+        let (kind, end) = match &played.end {
+            End::Finished { .. } => ("finished", "finished".to_owned()),
+            End::Failed(failure) => (
+                failure.kind,
+                format!("{}: {}", failure.kind, failure.detail),
+            ),
         };
+        let count = ends.entry(kind.to_owned()).or_default();
+        *count = count.saturating_add(1);
         let costs = |pick: fn(&StepCost) -> u64| played.costs.iter().map(pick).collect::<Vec<_>>();
         write_line(
             &mut out,
@@ -144,7 +154,14 @@ fn replay_records(arguments: &[String], log: &mut dyn Write) -> Result<(), Strin
             }),
         )?;
     }
-    out.flush().map_err(failed)
+    out.flush().map_err(failed)?;
+    writeln!(log, "replayed: {}", json!(ends)).map_err(failed)?;
+    // Timings are written either way; a receipt that changed is still the caller's failure.
+    ends.get("replay").map_or(Ok(()), |diverged| {
+        Err(format!(
+            "{diverged} records did not replay to their receipts"
+        ))
+    })
 }
 
 fn prepare(arguments: &[String]) -> Result<(), String> {

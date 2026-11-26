@@ -3,7 +3,7 @@
 //! Only the question is read: an answer the stated constraints allow and the host still
 //! refuses is a finding about the question, not about this player.
 
-use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::collections::BTreeMap;
 use rand::RngExt as _;
 use rand::seq::{IndexedRandom as _, SliceRandom as _};
 use rand_chacha::ChaCha8Rng;
@@ -76,96 +76,48 @@ fn cost_within(selection: &Selection, chosen: &[&Candidate]) -> bool {
         && limits.max.is_none_or(|maximum| total <= maximum.get())
 }
 
-/// Put one candidate in an eligible group, moving earlier ones along an augmenting path.
-fn place(
-    candidate: usize,
-    groups: &[SelectionGroup],
-    chosen: &[&Candidate],
-    capacity: &[usize],
-    members: &mut [Vec<usize>],
-    visited: &mut BTreeSet<usize>,
-) -> bool {
-    let Some(id) = chosen.get(candidate).map(|member| &member.id) else {
+/// Place the remaining candidates one by one, each in an eligible group with room, and accept
+/// only when every group reached its minimum.
+fn place(groups: &[SelectionGroup], rest: &[&Candidate], members: &mut [Vec<OptionId>]) -> bool {
+    let missing = groups
+        .iter()
+        .zip(&*members)
+        .map(|(group, placed)| count(group.bounds.min).saturating_sub(placed.len()))
+        .fold(0_usize, usize::saturating_add);
+    // Too few candidates are left to fill the minimums still open.
+    if missing > rest.len() {
         return false;
+    }
+    let Some((candidate, later)) = rest.split_first() else {
+        return true;
     };
     for (index, group) in groups.iter().enumerate() {
-        if !group.eligible.contains(id) || !visited.insert(index) {
+        let full = group.bounds.max.is_some_and(|maximum| {
+            members
+                .get(index)
+                .is_none_or(|placed| placed.len() >= count(maximum))
+        });
+        if full || !group.eligible.contains(&candidate.id) {
             continue;
         }
-        let room = capacity.get(index).copied().unwrap_or(0);
-        let current = members.get(index).map_or(0, Vec::len);
-        if current < room {
-            if let Some(slot) = members.get_mut(index) {
-                slot.push(candidate);
-            }
+        if let Some(placed) = members.get_mut(index) {
+            placed.push(candidate.id.clone());
+        }
+        if place(groups, later, members) {
             return true;
         }
-        let occupants = members.get(index).cloned().unwrap_or_default();
-        for (position, occupant) in occupants.into_iter().enumerate() {
-            if place(occupant, groups, chosen, capacity, members, visited) {
-                if let Some(slot) = members.get_mut(index)
-                    && let Some(entry) = slot.get_mut(position)
-                {
-                    *entry = candidate;
-                }
-                return true;
-            }
+        if let Some(placed) = members.get_mut(index) {
+            placed.pop();
         }
     }
     false
 }
 
 /// A disjoint assignment of every chosen candidate to an eligible group within each group's
-/// bounds, by augmenting paths over group slots.
+/// bounds, found by exhaustive backtracking: selections are small.
 fn assign_groups(groups: &[SelectionGroup], chosen: &[&Candidate]) -> Option<Vec<Vec<OptionId>>> {
-    let mut members: Vec<Vec<usize>> = groups.iter().map(|_| Vec::new()).collect();
-    let capacity: Vec<usize> = groups
-        .iter()
-        .map(|group| group.bounds.max.map_or(chosen.len(), count))
-        .collect();
-    for candidate in 0..chosen.len() {
-        if !place(
-            candidate,
-            groups,
-            chosen,
-            &capacity,
-            &mut members,
-            &mut BTreeSet::new(),
-        ) {
-            return None;
-        }
-    }
-    // Minimums: a maximal matching need not fill them, so move members from groups with spare.
-    for index in 0..groups.len() {
-        let minimum = groups.get(index).map_or(0, |group| count(group.bounds.min));
-        while members.get(index).map_or(0, Vec::len) < minimum {
-            let donor = (0..groups.len()).find_map(|other| {
-                let spare = members.get(other)?.len()
-                    > groups.get(other).map_or(0, |group| count(group.bounds.min));
-                let eligible = &groups.get(index)?.eligible;
-                let position = members.get(other)?.iter().position(|candidate| {
-                    chosen
-                        .get(*candidate)
-                        .is_some_and(|member| eligible.contains(&member.id))
-                })?;
-                (other != index && spare).then_some((other, position))
-            });
-            let (other, position) = donor?;
-            let moved = members.get_mut(other)?.remove(position);
-            members.get_mut(index)?.push(moved);
-        }
-    }
-    Some(
-        members
-            .into_iter()
-            .map(|group| {
-                group
-                    .into_iter()
-                    .filter_map(|candidate| chosen.get(candidate).map(|member| member.id.clone()))
-                    .collect()
-            })
-            .collect(),
-    )
+    let mut members = vec![Vec::new(); groups.len()];
+    place(groups, chosen, &mut members).then_some(members)
 }
 
 /// Sizes for every role that partition `total` selected candidates.
@@ -581,17 +533,25 @@ pub fn choose(question: &Question, rng: &mut ChaCha8Rng) -> Result<Answer, NoAns
             target_bounds,
             ..
         } => {
-            let accept = *allowed.choose(rng).ok_or(NoAnswer::Proven)?;
-            let target = if accept {
-                let (minimum, maximum) =
-                    sizes(*target_bounds, targets.len()).ok_or(NoAnswer::Proven)?;
-                (maximum > 0 && (minimum > 0 || rng.random()))
-                    .then(|| targets.choose(rng).map(|target| target.id.clone()))
-                    .flatten()
-            } else {
-                None
-            };
-            Ok(Answer::DriveTrigger { accept, target })
+            let mut answers = allowed.clone();
+            answers.shuffle(rng);
+            // Accepting may need a target that does not exist; another listed answer may not.
+            answers
+                .into_iter()
+                .find_map(|accept| {
+                    if !accept {
+                        return Some(Answer::DriveTrigger {
+                            accept,
+                            target: None,
+                        });
+                    }
+                    let (minimum, maximum) = sizes(*target_bounds, targets.len())?;
+                    let target = (maximum > 0 && (minimum > 0 || rng.random()))
+                        .then(|| targets.choose(rng).map(|target| target.id.clone()))
+                        .flatten();
+                    Some(Answer::DriveTrigger { accept, target })
+                })
+                .ok_or(NoAnswer::Proven)
         }
         QuestionShape::Partition { items, buckets } => partition(items, buckets, rng),
         QuestionShape::Distribute {

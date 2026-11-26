@@ -102,6 +102,35 @@ fn a_card_of_the_other_deck_must_be_shown_before_it_is_named() {
     assert_eq!(broken(&own), None);
 }
 
+/// One committed movement of a card of the second seat's deck, as that event reads on the wire.
+fn movement(printing: &str, from: &str, to: &str) -> Value {
+    let end =
+        |zone: &str, card: Value| json!({"player":"p2","zone":zone,"position":null,"card":card});
+    let card = json!({"card":{"printing_id":printing,"face":0},"object":null});
+    json!({"status":"available","animate":[],"batches":[{"id":"b1","events":[{
+        "id":"e1","cause":"k1","parent":null,"about":[],"presentation_id":null,
+        "body":{"kind":"movement","method":"procedure","by_effect":false,
+            "before":end(from, Value::Null),"after":end(to, card)}}]}]})
+}
+
+#[test]
+fn an_event_shows_a_card_only_when_it_passes_through_a_public_zone() {
+    // A Drive check turns the top card face up in the trigger zone: both seats saw it.
+    let mut checked = pair();
+    for view in &mut checked {
+        view["events"] = movement("b7", "deck", "trigger");
+    }
+    assert_eq!(broken(&checked), None);
+
+    // A draw names the card to its owner only. Telling the other seat is a leak even though
+    // the owner's own event names it too.
+    let mut drawn = pair();
+    for view in &mut drawn {
+        view["events"] = movement("b7", "deck", "hand");
+    }
+    assert_eq!(broken(&drawn), Some("hidden_information"));
+}
+
 #[test]
 fn the_seats_must_agree_on_public_numbers_and_public_cards() {
     let mut life = pair();
@@ -141,7 +170,7 @@ fn cards_cannot_appear_from_nothing_but_generated_objects_are_not_counted() {
 }
 
 #[test]
-fn a_seat_still_declaring_a_play_may_be_ahead_of_the_other() {
+fn a_seat_still_declaring_or_paying_for_a_play_may_be_ahead_of_the_other() {
     let mut declaring = pair();
     declaring[0]["input"]["question"]["purpose"] = json!("play_parameter");
     declaring[0]["input"]["question"]["use"] = json!("optional_cost");
@@ -149,6 +178,22 @@ fn a_seat_still_declaring_a_play_may_be_ahead_of_the_other() {
         json!({"kind":"confirm","allowed":[true, false],"subject":null,"origin":null});
     declaring[0]["observation"]["players"][0]["pp"] = json!(-1);
     assert_eq!(broken(&declaring), None);
+
+    // The posture of a card entering with Ward is a rule choice asked while its play is paid.
+    let ward = |stage: &str| {
+        let mut entering = pair();
+        let question = &mut entering[0]["input"]["question"];
+        question["purpose"] = json!("rule_choice");
+        question["use"] = json!("ward_entry");
+        question["shape"] =
+            json!({"kind":"confirm","allowed":[true, false],"subject":null,"origin":null});
+        question["processing"]["stage"] = json!(stage);
+        entering[0]["observation"]["players"][0]["pp"] = json!(-1);
+        entering
+    };
+    assert_eq!(broken(&ward("pay")), None);
+    // Any other rule choice is asked on a board both seats already share.
+    assert_eq!(broken(&ward("resolve")), Some("view_agreement"));
 }
 
 #[test]
@@ -175,7 +220,11 @@ fn an_update_must_be_well_formed_and_the_seats_must_agree_on_who_acts() {
     let mut checker = Checker::new(&decks());
     let mut later = first.clone();
     later["update_seq"] = json!(3);
-    for (json, expected) in [(&later, None), (&first, Some("update_sequence"))] {
+    for (json, expected) in [
+        (&later, None),
+        (&later, Some("update_sequence")),
+        (&first, Some("update_sequence")),
+    ] {
         let update: BattleUpdate = serde_json::from_value(json.clone()).unwrap();
         assert_eq!(
             checker

@@ -5,6 +5,7 @@ use crate::arena::{Arena, Control, Setup};
 use crate::check::{Checker, printings};
 use crate::pool::{Basis, Deck};
 use alloc::collections::{BTreeSet, VecDeque};
+use core::any::Any;
 use core::cmp::Reverse;
 use core::panic::AssertUnwindSafe;
 use core::slice::Iter;
@@ -102,7 +103,7 @@ pub struct StepContext {
 #[derive(Clone, Debug, PartialEq, Eq, Serialize)]
 pub struct Failure {
     /// Stable class: `engine_fault`, `host_error`, `invariant`, `no_answer`, `rejected`,
-    /// `decision_limit`, `event_limit`, `load`, `panic` or `replay`.
+    /// `decision_limit`, `event_limit`, `load`, `panic`, `replay` or `record_end`.
     pub kind: &'static str,
     /// Authority diagnostic or the broken invariant.
     pub detail: String,
@@ -136,7 +137,7 @@ pub struct Match {
     pub record: Record,
     /// Result or failure.
     pub end: End,
-    /// Cost of every submission, in record order.
+    /// Cost of every submission, in record order, the one that ended the match included.
     pub costs: Vec<StepCost>,
     /// The slowest submissions, slowest first.
     pub slow: Vec<StepContext>,
@@ -332,6 +333,8 @@ struct Absorbed {
     receipt: Option<ReceiptResult>,
     events: usize,
     encode_micros: u64,
+    /// The first message that ended the match; what came before it is still counted.
+    failure: Option<Box<Failure>>,
 }
 
 fn micros(start: Instant) -> u64 {
@@ -340,83 +343,94 @@ fn micros(start: Instant) -> u64 {
 
 impl Table<'_> {
     /// Take in what the host sent: check every message and keep each seat's newest update.
-    fn absorb(
-        &mut self,
-        deliveries: &[Delivery],
-        progress: &mut Progress,
-    ) -> Result<Absorbed, Box<Failure>> {
+    fn absorb(&mut self, deliveries: &[Delivery], progress: &mut Progress) -> Absorbed {
         let mut absorbed = Absorbed {
             receipt: None,
             events: 0,
             encode_micros: 0,
+            failure: None,
         };
         for delivery in deliveries {
-            let start = Instant::now();
-            let text = serde_json::to_string(&delivery.message)
-                .map_err(|error| progress.fail("invariant", format!("unserializable: {error}")))?;
-            absorbed.encode_micros = absorbed.encode_micros.saturating_add(micros(start));
-            match &delivery.message {
-                HostMessage::Ready(_) => {}
-                HostMessage::Receipt(receipt) => absorbed.receipt = Some(receipt.result()),
-                HostMessage::HostError(error) => {
-                    return Err(progress.fail(
-                        "host_error",
-                        format!("{}: {}", label(&error.reason), diagnose(&self.session)),
-                    ));
-                }
-                HostMessage::Update(update) => {
-                    if sve_battle_contract::decode::<HostMessage>(&text)
-                        .ok()
-                        .as_ref()
-                        != Some(&delivery.message)
-                    {
-                        return Err(progress.fail(
-                            "invariant",
-                            "wire_round_trip: the contract does not decode what the host sent"
-                                .into(),
-                        ));
-                    }
-                    let json: Value = serde_json::from_str(&text).unwrap_or_default();
-                    self.checker.update(update, &json).map_err(|broken| {
-                        progress.fail("invariant", format!("{}: {}", broken.name, broken.detail))
-                    })?;
-                    let events = json
-                        .pointer("/events/batches")
-                        .and_then(Value::as_array)
-                        .map_or(0, |batches| {
-                            batches
-                                .iter()
-                                .filter_map(|batch| batch.get("events").and_then(Value::as_array))
-                                .map(Vec::len)
-                                .sum()
-                        });
-                    absorbed.events = absorbed.events.max(events);
-                    progress.seen.extend(
-                        update
-                            .observation
-                            .objects
-                            .values()
-                            .filter(|object| object.knowledge == Knowledge::Public)
-                            .map(|object| self.arena.number(&object.card.printing_id).to_owned()),
-                    );
-                    progress.turns = update
-                        .observation
-                        .turn
-                        .elapsed_turns
-                        .iter()
-                        .map(|turns| turns.get())
-                        .fold(0, u64::saturating_add);
-                    let slot = match delivery.seat {
-                        Seat::P1 => self.latest.first_mut(),
-                        Seat::P2 => self.latest.last_mut(),
-                    };
-                    if let Some(slot) = slot {
-                        *slot = Some((**update).clone());
-                    }
-                }
+            if let Err(failure) = self.take(delivery, progress, &mut absorbed) {
+                absorbed.failure = Some(failure);
+                break;
             }
         }
-        Ok(absorbed)
+        absorbed
+    }
+
+    fn take(
+        &mut self,
+        delivery: &Delivery,
+        progress: &mut Progress,
+        absorbed: &mut Absorbed,
+    ) -> Result<(), Box<Failure>> {
+        let start = Instant::now();
+        let text = serde_json::to_string(&delivery.message)
+            .map_err(|error| progress.fail("invariant", format!("unserializable: {error}")))?;
+        absorbed.encode_micros = absorbed.encode_micros.saturating_add(micros(start));
+        let update = match &delivery.message {
+            HostMessage::Ready(_) => return Ok(()),
+            HostMessage::Receipt(receipt) => {
+                absorbed.receipt = Some(receipt.result());
+                return Ok(());
+            }
+            HostMessage::HostError(error) => {
+                return Err(progress.fail(
+                    "host_error",
+                    format!("{}: {}", label(&error.reason), diagnose(&self.session)),
+                ));
+            }
+            HostMessage::Update(update) => update,
+        };
+        if sve_battle_contract::decode::<HostMessage>(&text)
+            .ok()
+            .as_ref()
+            != Some(&delivery.message)
+        {
+            return Err(progress.fail(
+                "invariant",
+                "wire_round_trip: the contract does not decode what the host sent".into(),
+            ));
+        }
+        let json: Value = serde_json::from_str(&text).unwrap_or_default();
+        self.checker.update(update, &json).map_err(|broken| {
+            progress.fail("invariant", format!("{}: {}", broken.name, broken.detail))
+        })?;
+        let events = json
+            .pointer("/events/batches")
+            .and_then(Value::as_array)
+            .map_or(0, |batches| {
+                batches
+                    .iter()
+                    .filter_map(|batch| batch.get("events").and_then(Value::as_array))
+                    .map(Vec::len)
+                    .sum()
+            });
+        absorbed.events = absorbed.events.max(events);
+        progress.seen.extend(
+            update
+                .observation
+                .objects
+                .values()
+                .filter(|object| object.knowledge == Knowledge::Public)
+                .map(|object| self.arena.number(&object.card.printing_id).to_owned()),
+        );
+        progress.turns = update
+            .observation
+            .turn
+            .elapsed_turns
+            .iter()
+            .map(|turns| turns.get())
+            .fold(0, u64::saturating_add);
+        let slot = match delivery.seat {
+            Seat::P1 => self.latest.first_mut(),
+            Seat::P2 => self.latest.last_mut(),
+        };
+        if let Some(slot) = slot {
+            *slot = Some((**update).clone());
+        }
+        Ok(())
     }
 
     fn open_question(&self) -> Option<(Seat, &BattleUpdate, &Question)> {
@@ -445,50 +459,57 @@ impl Table<'_> {
         let mut pending: Option<(StepContext, Instant)> = None;
         loop {
             let engine_micros = pending.as_ref().map_or(0, |(_, start)| micros(*start));
-            let absorbed = self.absorb(&deliveries, progress)?;
+            let mut absorbed = self.absorb(&deliveries, progress);
             if let Some((mut context, _)) = pending.take() {
+                // The cost and receipt of a submission are kept even when it ended the match.
                 context.cost = StepCost {
                     engine_micros,
                     encode_micros: absorbed.encode_micros,
                     events: absorbed.events,
                 };
+                let (number, events) = (context.step, context.cost.events);
                 progress.costs.push(context.cost);
+                progress.note_slow(context);
+                let recorded = progress.steps.last().map(|step| step.result);
+                if let (Some(result), Some(step)) = (absorbed.receipt, progress.steps.last_mut()) {
+                    step.result = result;
+                }
+                if let Some(failure) = absorbed.failure.take() {
+                    return Err(failure);
+                }
                 let result = absorbed.receipt.ok_or_else(|| {
                     progress.fail("invariant", "receipt: a submission got no receipt".into())
                 })?;
-                if let Some(step) = progress.steps.last_mut() {
-                    let recorded = step.result;
-                    step.result = result;
-                    if matches!(source, Source::Recorded(_)) && recorded != result {
-                        return Err(progress.fail(
-                            "replay",
-                            format!(
-                                "step {} got {} where the record says {}",
-                                context.step,
-                                label(&result),
-                                label(&recorded)
-                            ),
-                        ));
-                    }
+                if matches!(source, Source::Recorded(_)) && recorded != Some(result) {
+                    return Err(progress.fail(
+                        "replay",
+                        format!(
+                            "step {number} got {} where the record says {}",
+                            label(&result),
+                            recorded.map(|kind| label(&kind)).unwrap_or_default()
+                        ),
+                    ));
                 }
                 rejections = if result == ReceiptResult::Rejected {
                     rejections.saturating_add(1)
                 } else {
                     0
                 };
-                if context.cost.events > self.limits.events {
+                if events > self.limits.events {
                     return Err(progress.fail(
                         "event_limit",
-                        format!("one submission produced {} events", context.cost.events),
+                        format!("one submission produced {events} events"),
                     ));
                 }
-                progress.note_slow(context);
                 if rejections > REJECTIONS_ALLOWED {
                     return Err(progress.fail(
                         "rejected",
                         "the host refused answers inside the question's stated domain".into(),
                     ));
                 }
+            }
+            if let Some(failure) = absorbed.failure {
+                return Err(failure);
             }
             self.checker.stop(&self.latest).map_err(|broken| {
                 progress.fail("invariant", format!("{}: {}", broken.name, broken.detail))
@@ -502,6 +523,9 @@ impl Table<'_> {
                     .map(|update| &update.input)
                     .next()
                 {
+                    Some(BattleInput::Finished { .. }) if matches!(source, Source::Recorded(steps) if steps.len() > 0) => {
+                        Err(progress.fail("replay", "the match ends before the record does".into()))
+                    }
                     Some(BattleInput::Finished { winner, .. }) => Ok(*winner),
                     Some(BattleInput::EngineFault { .. }) => {
                         Err(progress.fail("engine_fault", diagnose(&self.session)))
@@ -548,10 +572,15 @@ impl Table<'_> {
                 }
                 Source::Recorded(steps) => match steps.next() {
                     Some(step) => (step.seat, step.command.clone(), step.result),
+                    // Where the recorded match stopped without submitting: not a divergence.
                     None => {
-                        return Err(
-                            progress.fail("replay", "the record ends before the match does".into())
-                        );
+                        return Err(progress.fail(
+                            "record_end",
+                            format!(
+                                "the record has no answer for this {}",
+                                label(&question.usage)
+                            ),
+                        ));
                     }
                 },
             };
@@ -599,6 +628,15 @@ impl Table<'_> {
     }
 }
 
+fn panic_message(payload: &(dyn Any + Send)) -> String {
+    payload
+        .downcast_ref::<String>()
+        .map(String::as_str)
+        .or_else(|| payload.downcast_ref::<&str>().copied())
+        .unwrap_or("unknown panic payload")
+        .to_owned()
+}
+
 fn finish(seed: u64, setup: Setup, progress: Progress, end: End) -> Match {
     Match {
         record: Record {
@@ -630,10 +668,16 @@ fn drive(arena: &Arena, seed: u64, setup: Setup, mut source: Source<'_>, limits:
             .collect::<Vec<_>>()
     };
     let decks = [wire(&setup.decks[0]), wire(&setup.decks[1])];
-    let session = match (arena.open)(&setup) {
-        Ok(session) => session,
-        Err(stage) => {
+    // Opening lowers and admits the decks; a panic there must not take the whole run down.
+    let opened = catch_unwind(AssertUnwindSafe(|| (arena.open)(&setup)));
+    let session = match opened {
+        Ok(Ok(session)) => session,
+        Ok(Err(stage)) => {
             let failure = progress.fail("load", stage);
+            return finish(seed, setup, progress, End::Failed(*failure));
+        }
+        Err(payload) => {
+            let failure = progress.fail("panic", panic_message(payload.as_ref()));
             return finish(seed, setup, progress, End::Failed(*failure));
         }
     };
@@ -655,14 +699,7 @@ fn drive(arena: &Arena, seed: u64, setup: Setup, mut source: Source<'_>, limits:
     let end = match result {
         Ok(Ok(winner)) => End::Finished { winner },
         Ok(Err(failure)) => failed(failure),
-        Err(payload) => {
-            let message = payload
-                .downcast_ref::<String>()
-                .map(String::as_str)
-                .or_else(|| payload.downcast_ref::<&str>().copied())
-                .unwrap_or("unknown panic payload");
-            failed(progress.fail("panic", message.to_owned()))
-        }
+        Err(payload) => failed(progress.fail("panic", panic_message(payload.as_ref()))),
     };
     finish(seed, setup, progress, end)
 }

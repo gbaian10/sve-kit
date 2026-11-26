@@ -32,12 +32,15 @@ many of the first seeds also keep their record (default 0). It writes:
 | `summary.json`   | Outcomes, failure groups with seeds and cards, receipt counts, cost percentiles, the 20 slowest submissions, cards never built or never seen |
 | `failures.jsonl` | One line per failed match: the failure, both seats' last updates and the record                                                              |
 | `records.jsonl`  | Records of the first seeds, for timing replays                                                                                               |
-| `excluded.json`  | Printings with a program that failed lowering or admission and so entered no deck, or no deck of their title                                 |
+| `excluded.json`  | Printings with a program that entered no deck, or no deck of their title: failed lowering or admission, or in no construction pool           |
 
 `replay <inputs.json> <programs.json> <records.jsonl> <timings.jsonl>` submits each record's
 commands again and writes the cost of every submission. A record holds the host's setup and
-every command, so it replays without this crate's generators; a receipt that differs from
-the record is a `replay` failure.
+every command, so it replays without this crate's generators. Lines of `failures.jsonl` are
+accepted as they are. A receipt that differs from the record, or a match that ends while the
+record still has commands, is a `replay` failure and fails the command. A record that stops
+before the match does replays to `record_end`: the `no_answer` matches stop that way,
+because the question that had no answer was never submitted.
 
 ## What counts as a failure
 
@@ -52,27 +55,30 @@ the record is a `replay` failure.
 | `event_limit`    | One submission committed more than 2,000 events for a seat                                  |
 | `load`           | The decks did not open                                                                      |
 | `panic`          | The host panicked                                                                           |
+| `replay`         | Only in a replay: the match no longer follows the record                                    |
+| `record_end`     | Only in a replay: the record has no command for the open question                           |
 
 Both limits count; neither is a wall-clock limit. A submission that never returns cannot be
 counted from outside the engine and shows as a run that stops making progress.
 
 Invariants, read from the two seats' updates alone:
 
-- every update survives the contract's strict decoder unchanged, and its sequence never goes back
+- every update survives the contract's strict decoder unchanged, and its sequence always grows
 - zone members exist in the object table exactly once; no zone exceeds its capacity
 - exactly one seat is asked, or both see the same result
-- at a settled stop (a main, Quick or resolution question, or the end) both seats see the
-  same turn, resources, zone sizes and public cards; while a seat is still declaring a play
-  its own view runs ahead by design
+- both seats see the same turn, resources, zone sizes and public cards, except while a seat
+  is declaring, targeting, allocating or paying for a play: the host shows a play to the
+  other seat only once it is played
 - deck cards never increase: zone sizes minus generated objects stay at or below the last count
 - a seat is told a printing only the other deck contains only after it was shown: public in
-  the owner's view, named by an event both seats received, or in the seat's own notices
+  the owner's view, moved through a public zone by an event of the owner's own feed, or in
+  the seat's own notices. A movement between hidden zones shows nothing
 
 ## Costs
 
-Every submission records the host time to the next stable stop, the time to serialize the
-resulting messages and the committed events it produced. The summary gives p50, p95, p99 and
-the maximum, and the slowest submissions with their question, cards and board size.
+Every submission, the one that ended the match included, records the host time to the next
+stable stop, the time to serialize the resulting messages and the committed events it produced.
+The summary gives p50, p95, p99 and
 
 To time the WebAssembly build on the same records:
 
@@ -89,6 +95,6 @@ with `engine_micros + encode_micros` of the native replay.
 
 ## Tests
 
-`cargo test -p sve-selfplay` plays a synthetic export end to end and, on the public card
-inputs that `.github/ci/rust_tests.py` generates, two fixed seeds for 30 submissions each.
-Large runs are a local job.
+`python3 .github/ci/rust_tests.py test --locked -p sve-selfplay` plays a synthetic export end
+to end and, on the public card inputs the wrapper generates, two fixed seeds for 30
+submissions each. Large runs are a local job.

@@ -154,6 +154,17 @@ impl Pools {
             .collect()
     }
 
+    /// Admitted printings no pool holds: no class, and a title that cannot field a deck.
+    #[must_use]
+    pub fn unpooled(&self) -> Vec<&str> {
+        let eligible = self.eligible();
+        self.cards
+            .iter()
+            .map(|card| card.number.as_str())
+            .filter(|number| !eligible.contains(number))
+            .collect()
+    }
+
     /// A random legal deck; `copies` caps the cards per rules name (one to three).
     ///
     /// Returns `None` only when no pool exists.
@@ -283,6 +294,7 @@ mod tests {
         assert!(!pools.is_empty());
         assert!(pools.eligible().contains("ロイヤル-0"));
         assert!(!pools.eligible().contains("tiny-0"));
+        assert_eq!(pools.unpooled(), ["tiny-0", "tiny-1", "tiny-2", "tiny-3"]);
         let mut bases = BTreeSet::new();
         for seed in 0..60_u64 {
             let copies = usize::try_from(seed.rem_euclid(3))

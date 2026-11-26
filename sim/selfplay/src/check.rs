@@ -2,7 +2,9 @@
 
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde_json::Value;
-use sve_battle_contract::observation::{BattleObservation, Knowledge, PlayerView, ZoneView, Zones};
+use sve_battle_contract::observation::{
+    BattleObservation, Knowledge, PlayerView, ProcessingStage, ZoneView, Zones,
+};
 use sve_battle_contract::question::QuestionPurpose;
 use sve_battle_contract::{BattleInput, BattleUpdate, CardRef, Seat};
 
@@ -59,6 +61,43 @@ const fn zones(zones: &Zones) -> [(&'static str, &ZoneView); 14] {
     ]
 }
 
+/// Zones in which both seats identify every card.
+const PUBLIC_ZONES: [&str; 11] = [
+    "field",
+    "ex",
+    "cemetery",
+    "banish",
+    "resolution",
+    "evolution",
+    "race",
+    "drive",
+    "trigger",
+    "equipment",
+    "limit_break",
+];
+
+/// Printings of this update's movements that start or end in a public zone. A movement
+/// between hidden zones names its card to the owner alone and shows nothing.
+fn moved_in_public(update: &Value, found: &mut BTreeSet<String>) {
+    let events = update
+        .pointer("/events/batches")
+        .and_then(Value::as_array)
+        .into_iter()
+        .flatten()
+        .filter_map(|batch| batch.get("events")?.as_array())
+        .flatten();
+    for body in events.filter_map(|event| event.get("body")) {
+        let public = ["/before/zone", "/after/zone"].iter().any(|end| {
+            body.pointer(end)
+                .and_then(Value::as_str)
+                .is_some_and(|zone| PUBLIC_ZONES.contains(&zone))
+        });
+        if public && body.get("kind").and_then(Value::as_str) == Some("movement") {
+            printings(body, found);
+        }
+    }
+}
+
 /// Every `printing_id` string anywhere in a serialized message.
 pub(crate) fn printings(value: &Value, found: &mut BTreeSet<String>) {
     match value {
@@ -88,10 +127,8 @@ struct Seen {
     mentioned: BTreeSet<String>,
     public: BTreeSet<String>,
     noticed: BTreeSet<String>,
-    /// Printings named by the committed events of this update.
-    events: BTreeSet<String>,
-    /// Whether this update arrived since the previous stop.
-    fresh: bool,
+    /// Printings this seat's events moved into or out of a zone both seats can read.
+    moved_in_public: BTreeSet<String>,
 }
 
 /// Checks across a whole match; it remembers what each seat has legitimately been shown.
@@ -133,15 +170,16 @@ impl Checker {
     /// Record one delivered update: its sequence must grow and its own structure must hold.
     ///
     /// # Errors
-    /// The update repeats a sequence number or contradicts itself.
+    /// The update repeats or precedes an earlier sequence number, or contradicts itself.
     pub fn update(&mut self, update: &BattleUpdate, json: &Value) -> Result<(), Violation> {
         let seat = index(update.viewer);
         let sequence = update.update_seq.get();
         if let Some(slot) = self.sequence.get_mut(seat) {
-            if slot.is_some_and(|previous| sequence < previous) {
+            // Self-play never asks for a baseline, the only update that keeps its number.
+            if slot.is_some_and(|previous| sequence <= previous) {
                 return Err(violation(
                     "update_sequence",
-                    format!("update {sequence} follows a later one"),
+                    format!("update {sequence} does not follow the previous one"),
                 ));
             }
             *slot = Some(sequence);
@@ -160,10 +198,7 @@ impl Checker {
         if let Some(notices) = json.get("notices") {
             printings(notices, &mut seen.noticed);
         }
-        if let Some(events) = json.get("events") {
-            printings(events, &mut seen.events);
-        }
-        seen.fresh = true;
+        moved_in_public(json, &mut seen.moved_in_public);
         seen.public = update
             .observation
             .objects
@@ -193,26 +228,16 @@ impl Checker {
         }
         self.conservation(&first.observation)?;
         self.conservation(&second.observation)?;
-        // An event both seats were told at this stop names cards both seats saw.
-        let [one, two] = &mut self.seen;
-        let shared: Vec<String> = if one.fresh && two.fresh {
-            one.events.intersection(&two.events).cloned().collect()
-        } else {
-            Vec::new()
-        };
-        one.fresh = false;
-        two.fresh = false;
-        for exposed in &mut self.exposed {
-            exposed.extend(shared.iter().cloned());
-        }
         for viewer in [Seat::P1, Seat::P2] {
             let (mine, theirs) = (index(viewer), index(other(viewer)));
             let (Some(own), Some(opponent)) = (self.seen.get(mine), self.seen.get(theirs)) else {
                 continue;
             };
+            // The owner's own view and events say what it showed; they cannot be a leak to it.
             let shown: Vec<String> = opponent
                 .public
                 .iter()
+                .chain(&opponent.moved_in_public)
                 .chain(&own.noticed)
                 .cloned()
                 .collect();
@@ -296,18 +321,24 @@ impl Checker {
     }
 }
 
-/// Whether both seats must see the same public board: while a seat is still declaring a play,
-/// its own view runs ahead of what the other seat has been told.
+/// Whether both seats must see the same public board. A seat declaring or paying for a play
+/// runs ahead of the other: the host shows a play to the other seat only once it is played.
 fn settled(first: &BattleUpdate, second: &BattleUpdate) -> bool {
     [first, second]
         .into_iter()
         .all(|update| match &update.input {
-            BattleInput::Question { question } => match question.purpose {
-                QuestionPurpose::MainAction
-                | QuestionPurpose::QuickWindow
-                | QuestionPurpose::ResolutionChoice => true,
-                QuestionPurpose::PlayParameter | QuestionPurpose::RuleChoice => false,
-            },
+            BattleInput::Question { question } => {
+                question.purpose != QuestionPurpose::PlayParameter
+                    && !matches!(
+                        question.processing.stage,
+                        Some(
+                            ProcessingStage::Declare
+                                | ProcessingStage::Target
+                                | ProcessingStage::Allocate
+                                | ProcessingStage::Pay
+                        )
+                    )
+            }
             BattleInput::Waiting { .. }
             | BattleInput::Finished { .. }
             | BattleInput::EngineFault { .. } => true,

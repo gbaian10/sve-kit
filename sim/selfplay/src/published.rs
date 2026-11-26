@@ -1,6 +1,6 @@
 //! An arena over a verified public export: the same inputs and loader as the browser Worker.
 
-use crate::arena::{Arena, Setup};
+use crate::arena::{Arena, Open, Setup};
 use crate::pool::{PoolCard, Pools};
 use alloc::collections::{BTreeMap, BTreeSet};
 use serde_json::{Value, json};
@@ -76,12 +76,12 @@ pub fn compose(reader: &Path, export: &Path) -> Result<(String, String), String>
     Ok((inputs.to_string(), programs))
 }
 
-/// Why a printing with a program cannot enter a deck.
+/// Why a printing with a program cannot enter a deck, or a deck of its title.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Excluded {
     /// Native card number.
     pub number: String,
-    /// `lowering` or the admission gap reasons.
+    /// `lowering`, the admission gap reasons, or `no construction pool`.
     pub reason: String,
 }
 
@@ -177,6 +177,15 @@ fn probe(
         .map(|gap| format!("{:?}", gap.reason))
         .collect();
     Err(reasons.into_iter().collect::<Vec<_>>().join("+"))
+}
+
+fn opener(prepared: PreparedBattle) -> Open {
+    Box::new(move |setup: &Setup| {
+        let encoded = serde_json::to_string(setup).map_err(|error| error.to_string())?;
+        prepared
+            .open(&encoded)
+            .map_err(|error| error.code().to_owned())
+    })
 }
 
 /// The same programs the host prepares, held separately to probe single printings.
@@ -291,16 +300,15 @@ impl Published {
                 start_amulet: amulets.contains(card),
             });
         }
+        let pools = Pools::new(cards, &amulet_titles);
+        excluded.extend(pools.unpooled().into_iter().map(|number| Excluded {
+            number: number.to_owned(),
+            reason: "no construction pool".into(),
+        }));
         Ok(Self {
             arena: Arena {
-                open: Box::new(move |setup: &Setup| {
-                    let encoded =
-                        serde_json::to_string(setup).map_err(|error| error.to_string())?;
-                    prepared
-                        .open(&encoded)
-                        .map_err(|error| error.code().to_owned())
-                }),
-                pools: Pools::new(cards, &amulet_titles),
+                open: opener(prepared),
+                pools,
                 printings: arena_printings,
                 numbers,
             },

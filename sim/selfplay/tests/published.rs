@@ -19,7 +19,7 @@ use std::fs::{create_dir_all, read_to_string, remove_dir_all, write};
 use std::path::{Path, PathBuf};
 use std::process::id;
 use sve_selfplay::cli::command;
-use sve_selfplay::play::{End, Limits, play, replay};
+use sve_selfplay::play::{End, Limits, Record, play, replay};
 use sve_selfplay::published::Published;
 
 const CARDS: usize = 60;
@@ -193,7 +193,11 @@ fn seeds_run_from_a_composed_export_and_their_records_replay() {
     let records = folder.text("out/records.jsonl");
     assert_eq!(json_lines(Path::new(&records)).len(), 2);
     let timings = folder.text("out/timings.jsonl");
-    run(&["replay", &inputs, &programs, &records, &timings]).unwrap();
+    let replay_log = run(&["replay", &inputs, &programs, &records, &timings]).unwrap();
+    assert!(
+        replay_log.contains(r#"replayed: {"finished":2}"#),
+        "{replay_log}"
+    );
     let replayed = json_lines(Path::new(&timings));
     assert_eq!(replayed.len(), 2);
     for (line, record) in replayed.iter().zip(json_lines(Path::new(&records))) {
@@ -204,6 +208,24 @@ fn seeds_run_from_a_composed_export_and_their_records_replay() {
             record["steps"].as_array().unwrap().len()
         );
     }
+
+    // A failure line wraps its record; one whose receipts no longer hold fails the command.
+    let mut kept = json_lines(Path::new(&records));
+    let wrapped = json!({"seed": kept[0]["seed"], "failure": {}, "record": kept[0]});
+    kept[1]["steps"].as_array_mut().unwrap().remove(0);
+    let mixed = folder.text("out/mixed.jsonl");
+    write(&mixed, format!("{wrapped}\n{}\n", kept[1])).unwrap();
+    let diverged = run(&["replay", &inputs, &programs, &mixed, &timings]).unwrap_err();
+    assert_eq!(diverged, "1 records did not replay to their receipts");
+    let ends: Vec<String> = json_lines(Path::new(&timings))
+        .iter()
+        .map(|line| line["end"].as_str().unwrap().to_owned())
+        .collect();
+    assert_eq!(ends[0], "finished");
+    assert!(
+        ends[1].starts_with("replay: step 0 got rejected"),
+        "{ends:?}"
+    );
 }
 
 #[test]
@@ -236,13 +258,25 @@ fn a_seed_names_one_match_and_a_changed_record_fails_its_replay() {
     assert_eq!(replayed.end, first.end);
     assert_eq!(replayed.record, first.record);
 
-    // Dropping the first answer makes every later command name a question that no longer exists.
-    let mut changed = first.record;
-    changed.steps.remove(0);
-    let End::Failed(failure) = replay(&published.arena, &changed, limits).end else {
-        panic!("a changed record must not replay");
+    let failure_of = |record: &Record| match replay(&published.arena, record, limits).end {
+        End::Failed(failure) => (failure.kind, failure.detail),
+        End::Finished { .. } => panic!("a changed record must not replay to a result"),
     };
-    assert_eq!(failure.kind, "replay");
+    // Dropping the first answer makes every later command name a question that no longer exists.
+    let mut changed = first.record.clone();
+    changed.steps.remove(0);
+    assert_eq!(failure_of(&changed).0, "replay");
+    // A match that ends while the record still has commands diverged just as much.
+    let mut longer = first.record.clone();
+    longer.steps.push(longer.steps[0].clone());
+    assert_eq!(
+        failure_of(&longer),
+        ("replay", "the match ends before the record does".into())
+    );
+    // A record that stops early is not a divergence: it replays as far as it goes.
+    let mut shorter = first.record;
+    shorter.steps.pop();
+    assert_eq!(failure_of(&shorter).0, "record_end");
 
     let stopped = play(
         &published.arena,

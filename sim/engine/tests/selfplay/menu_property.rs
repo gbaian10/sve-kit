@@ -512,8 +512,6 @@ fn check_window(game: &Game, question: &Question) -> Result<usize, (String, Bloc
 fn known_engine_issue(error: &str) -> Option<u16> {
     // Remove each temporary diagnostic exception when the corresponding issue is fixed.
     [
-        (2474, "Trigger icon requires verified facts"),
-        (2478, "evolution outside fixed Add numeric layers"),
         (
             2479,
             "exchange material has unsupported movement or permission",
@@ -638,7 +636,7 @@ fn check_games(
         }
     }
     eprintln!(
-        "menu property: {games} games, {windows} windows, {options} options in completed windows, {skipped} known interruptions, {failures} failures, {:.2}s",
+        "menu property: {games} games, {windows} windows, {options} options in completed windows, {skipped} skipped matches, {failures} failures, {:.2}s",
         started.elapsed().as_secs_f64()
     );
     assert!(

@@ -122,6 +122,26 @@ fn explicit_groups_and_roles_partition_the_selection() {
         assert_eq!(selected, assigned);
     }
 
+    // Minimums that only one assignment meets: `b` must leave the group a greedy pass gives it.
+    let mut chained = selection(&candidates, 2, Some(2));
+    chained["groups"] = json!([
+        {"group":0,"eligible":["c"],"bounds":{"min":0,"max":1}},
+        {"group":1,"eligible":["b","c"],"bounds":{"min":1,"max":1}},
+        {"group":2,"eligible":["b"],"bounds":{"min":1,"max":1}},
+    ]);
+    chained["group_assignment"] = json!("explicit");
+    let chain = question("search", &json!({"kind":"select","selection":chained}));
+    for answer in answers(&chain) {
+        let answer = serde_json::to_value(&answer).unwrap();
+        assert_eq!(
+            ids(&answer, "/groups/0/selected"),
+            Vec::<String>::new(),
+            "{answer}"
+        );
+        assert_eq!(ids(&answer, "/groups/1/selected"), ["c"], "{answer}");
+        assert_eq!(ids(&answer, "/groups/2/selected"), ["b"], "{answer}");
+    }
+
     let mut with_roles = selection(&candidates, 0, Some(3));
     with_roles["roles"] = json!([
         {"role":0,"size":{"kind":"if_nonempty","count":1},"destination":null},
@@ -332,4 +352,23 @@ fn each_simple_shape_answers_inside_its_listed_domain() {
         choose(&empty, &mut ChaCha8Rng::seed_from_u64(0)),
         Err(NoAnswer::Proven)
     );
+}
+
+#[test]
+fn a_trigger_that_cannot_be_accepted_still_has_its_listed_refusal() {
+    // A trigger whose acceptance needs a missing target still has its listed refusal.
+    let refusal = question(
+        "drive_trigger",
+        &json!({"kind":"drive_trigger","icon":"critical","allowed":[true, false],
+            "targets":[],"target_bounds":{"min":1,"max":1}}),
+    );
+    for answer in answers(&refusal) {
+        assert_eq!(
+            answer,
+            Answer::DriveTrigger {
+                accept: false,
+                target: None
+            }
+        );
+    }
 }
