@@ -1,4 +1,4 @@
-"""Admission owns complete-domain checks; ordinary mapping reads reviewed data."""
+"""Admission validates historical source uses; ordinary mapping reads reviewed data."""
 
 import json
 from typing import TYPE_CHECKING
@@ -15,7 +15,6 @@ from sve_carddb.domains.rulings.historical import rebuild
 from sve_carddb.domains.rulings.resolution import build
 
 from ...support.build_db_fixtures import seed
-from ..effects.test_storage import write_catalog
 from .test_historical import reference
 from .test_rulings import ruling
 
@@ -26,11 +25,6 @@ if TYPE_CHECKING:
 @pytest.fixture
 def candidate(tmp_path: Path) -> tuple[Path, Path]:
     repo = tmp_path / "repo"
-    records, sources = write_catalog(repo / "authored")
-    for path in (records, sources):
-        content = json.loads(path.read_bytes())
-        content["namespace"] = "classification-v0"
-        path.write_text(json.dumps(content).replace("T-example", "T0123456789"))
     ref = reference()
     use = ref.uses[0].model_copy(
         update={
@@ -63,7 +57,7 @@ def candidate(tmp_path: Path) -> tuple[Path, Path]:
     return repo, database
 
 
-def test_validate_command_checks_real_catalog_and_closed_build(
+def test_validate_command_checks_historical_uses_in_closed_build(
     candidate: tuple[Path, Path],
 ) -> None:
     repo, database = candidate
@@ -84,29 +78,7 @@ def test_validate_command_rejects_unadmitted_data_without_echoing_text(
     repo, database = candidate
     ruling_path = repo / "authored/rules/rulings/R-0001.yaml"
     doc = json.loads(ruling_path.read_bytes())
-    if change == "body":
-        path = repo / "authored/rules/classification-sources/TEST/001.yaml"
-        content = json.loads(path.read_bytes())
-        text = "protected"
-        checksum = digest(canonical({"raw": text, "body": text}))
-        content["records"][0] = {"raw": text, "id": checksum}
-        path.write_text(json.dumps(content))
-        path = repo / "authored/rules/classifications/TEST/001.yaml"
-        content = json.loads(path.read_bytes())
-        content["records"][1]["source"] = checksum
-        path.write_text(json.dumps(content))
-    elif change == "member":
-        path = repo / "authored/rules/classifications/TEST/001.yaml"
-        content = json.loads(path.read_bytes())
-        member = content["records"][1]
-        extra = member | {
-            "id": "TEST-002:effect:0",
-            "position": member["position"] | {"card_no": "TEST-002"},
-        }
-        content["records"].append(extra)
-        content["records"][0]["members"].append(extra["id"])
-        path.write_text(json.dumps(content))
-    elif change == "missing_db":
+    if change == "missing_db":
         database.unlink()
     else:
         use = doc["applies_to"][0]["uses"][0]
@@ -122,13 +94,11 @@ def test_validate_command_rejects_unadmitted_data_without_echoing_text(
     )
     assert result.exit_code == 1
     assert "Historical ruling validation failed" in result.output
-    assert "protected" not in result.output
+    assert "synthetic" not in result.output
     assert str(database) not in result.output
 
 
-def test_ordinary_rebuild_reads_admitted_domains_without_source_or_catalog_inputs() -> (
-    None
-):
+def test_ordinary_rebuild_uses_reviewed_historical_domains() -> None:
     ref = reference()
     documents = (ruling(applies_to=[ref.model_dump(mode="json")]),)
     report = build(documents, rebuild(documents, ()))
