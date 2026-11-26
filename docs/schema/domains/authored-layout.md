@@ -38,9 +38,6 @@
 | 結構、檔案／索引閉包、展開與有限 current 來源驗證已實作；資格未實作 | DSL 1.0 與本體伴隨檔 | `rules/author-effects/<卡包>/<record_key>.yaml`（既有數字分片保留）、`rules/effect-bodies/<owner>/<sequence>.yaml`、`rules/effects-index/<卡包>.yaml`；來源能力限五類 entry／空 ports，見[入口形狀](../../dsl/author-entry-shapes-1.0.md)與[DSL 承載契約](../../dsl/author-contract-1.0.md) |
 | 原型／提案設定 | DSL、設定 | `rules/effects/`、`rules/keywords.yaml`、`rules/engine/index.yaml`；其他 macros／config 仍為提案，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 | 定案（技術契約） | 查卡 keyword 登錄與 manual H1 | `rules/keyword-registry.yaml`，明示既有 glossary mapping 與 confirmed 採納；沿既有投影，只產 has／partial，見[關鍵字機制契約](keyword-mechanics.md)。與 astra/1 原型入口不同 |
-| 定案（內部候選格式） | 效果分類與來源範圍 | `rules/classifications/<owner>/<sequence>.yaml`，`format: 2, kind: effect_classification_shard`；只保存候選，見[效果分類候選](effect-classifications.md)，不作 DSL 或公開搜尋選項 |
-| 定案（內部候選格式） | 分類文字版本 | `rules/classification-sources/<owner>/<sequence>.yaml`，`format: 1, kind: classification_source_shard`；依 owner 保存候選引用的精確 raw／body，見[效果分類候選](effect-classifications.md#分類文字版本) |
-| 草案（不採納語義） | 分類差異與手寫回歸判讀 | `rules/effect-reviews/<owner>.yaml`；來源反查、反向位置分類與修正方向，見 [v0 回歸契約](../../dsl/v0-regression.md) |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 
@@ -64,9 +61,9 @@ Anchor／alias／merge 與顯式 tag **讀取允許，寫入不產生**；普通
 | translation_shard | 3 |
 | ruling | 2 |
 | registry_index、catalog_adoption_shard、display_override_shard | 2 |
-| digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules、effect_classification_shard | 2 |
+| digital_name_policy、digital_link_index、digital_link_shard、template_parameter_rules | 2 |
 | author_effect_set、effect_body_shard、effects_index、frame_semantics_index、frame_semantics_shard | 1 |
-| effect_set、keyword_registry、engine_rules、flavor_translation_shard、qa_translation_shard、image_crop_overrides、classification_source_shard | 1 |
+| effect_set、keyword_registry、engine_rules、flavor_translation_shard、qa_translation_shard、image_crop_overrides | 1 |
 
 `effect_set`／`keyword_registry` format 1 精確選定 astra/1 原型文法，保留 Schema `$id: urn:sve-kit:effects:astra:1`；不是 DSL 1.0，正式 DSL 1.0 使用 author_effect_set／effect_body_shard，資源映射及已實作驗證邊界依[DSL 承載契約 §1](../../dsl/author-contract-1.0.md#1-版本承諾與入口)。ruling 的 format 2 production reader 已實作，revision 必填並保留原頂層本文。
 

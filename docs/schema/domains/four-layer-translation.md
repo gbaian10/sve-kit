@@ -742,26 +742,20 @@ segments 須按順序且互不重疊。同一命名空間與 T 在不同裁定�
 同一 T 不得在不同裁定或同份裁定中混用裸字串與明示域，以免替未補證引用借用其他裁定的域。
 不把 frame ID、候選、處置或逐用途核可記錄寫進 authored。
 
-完整驗證只在資料寫入端執行，普通建置信任已審查資料。修改裁定引用或 A1 分類資料後，
-提交前執行獨立指令：
+修改歷史裁定引用後，提交前核對各用途記錄的來源：
 
 ```bash
 sve-carddb rulings validate --repo /absolute/candidate-repository --build-db /absolute/validated-build.sqlite
 ```
 
-`build-db` 必須是已驗證、關閉且包含所選歷史來源版次的 offline 建置 DB；
-指令只讀取它，不產生或修補來源證據。產生器亦可於採納前呼叫
-`domains.rulings.historical.validate`，由已驗的來源邊界提供觀測。驗證內容包括：
-全部 cards × face／field／ordinal／line 必須恰好分割原模板的成員集合，
-每個 span 的文字長度與 hash 必須等於原成員 body。來源觀測由已驗的建置提供；
-同字不同 revision 的歷史選擇仍須以凍結舊快照與完整 face 證據審查，
-不能只靠當前 body 相同便宣稱證明了舊域。一次性遷移腳本與對帳產物不進版控。
+`build-db` 必須是已驗證、關閉且包含所選歷史來源版次的 offline 建置 DB。
+指令會檢查 owner 與欄位存在、欄位全文 hash 相等、span 在指定行內（只有 LF 推進行號），
+以及 cards 確實屬於該來源 face。任一來源事實有誤即拒絕准入。
+產生器亦可呼叫 `domains.rulings.historical.validate`，由已驗的來源邊界提供觀測。
+完整適用域與歷史版次的選擇仍須以凍結舊快照與完整 face 證據審查。
+一次性遷移腳本與對帳產物不進版控。
 
-寫入端驗證明示來源域的 owner 存在、
-欄位全文 hash 相等、span 在指定行內（只有 LF 推進行號），以及 cards 確實屬於該來源 face。
-這些來源事實錯誤直接使資料驗證失敗，不得採納。普通建置透過 `historical.rebuild`
-直接讀取已審查的用途清單，不載入 A1 catalog、不重查舊來源欄位，也不重驗成員、hash 或長度；
-不重跑舊 normalizer，也不在執行時讀 Git 歷史。
+普通建置透過 `historical.rebuild` 直接讀取已審查的用途清單。
 新舊 scope 均從 occurrence 的 role 與 field 產生，domain 使用 `effect` 或 `section`，
 它只界定來源欄位，不宣稱 token 定義的執行語義。
 
@@ -847,7 +841,7 @@ unknown_legacy_scope 只用在引用層級。source_changed 表示舊 occurrence
 ### 9.4 完整性與執行邊界
 
 B 逐筆保留裁定原始 applies_to 清單與 ordinal，重複文字的引用仍各有一筆記錄。
-明示舊域的完整用途集合於寫入端依 §9.1.1 對 A1 catalog 驗證。
+明示舊域的各個用途於寫入端依 §9.1.1 對已驗證的建置核對來源。
 對帳同時列出模板引用、非模板引用、引用層級 pending、用途層級 resolved／pending；
 不把引用數和用途列數相加，不以「輸出 0 個裁定」宣稱驗收完成。
 N0 的 resolution.build 依現行裁定的原始 ordinal 產生引用列；DB 檢查 SQL PK／FK 與逐列封閉型別。
