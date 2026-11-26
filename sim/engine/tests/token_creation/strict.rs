@@ -91,6 +91,21 @@ fn deck_scoped_selection_keeps_gaps_and_acceptance_checks() {
 }
 
 #[test]
+fn both_selection_entries_reject_a_repeated_printing() {
+    let (snapshot, keywords, mut input) = selection(1);
+    input["authors"][0]["printings"] = json!(["creator", "creator"]);
+    for result in [
+        loader().select(&snapshot, &keywords, &input),
+        reachable(&snapshot, &keywords, &input, &decks()),
+    ] {
+        assert!(matches!(
+            result,
+            Err(EngineFailure::Invalid(reason)) if reason == "duplicate current printing"
+        ));
+    }
+}
+
+#[test]
 fn strict_gaps_are_deduplicated_and_only_returned_to_the_deck_owner() {
     let (snapshot, keywords, input) = selection(1);
     let mut decks = decks();

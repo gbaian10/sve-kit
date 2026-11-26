@@ -38,7 +38,11 @@ impl BodyContext<'_> {
 
     #[expect(
         clippy::too_many_lines,
-        reason = "The exhaustive author-step match keeps observation receipts closed."
+        reason = "Observation bindings are validated in one place before entering the current scope."
+    )]
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "A step must explicitly grant permission before its receipt becomes readable."
     )]
     pub(super) fn remember(
         &mut self,
@@ -248,60 +252,7 @@ impl BodyContext<'_> {
                     },
                 ))
             }
-            ast::Step::Simultaneous(_)
-            | ast::Step::Shuffle(_)
-            | ast::Step::StackPlus(_)
-            | ast::Step::Win(_)
-            | ast::Step::ExtraTurn(_)
-            | ast::Step::PlayAbility(_)
-            | ast::Step::Counter(_)
-            | ast::Step::Reveal(_)
-            | ast::Step::RevealUntil(_)
-            | ast::Step::Optional(_)
-            | ast::Step::Pay(_)
-            | ast::Step::EachPlayer(_)
-            | ast::Step::GainDrive(_)
-            | ast::Step::Race(_)
-            | ast::Step::Evolve(_)
-            | ast::Step::If(_)
-            | ast::Step::ByKind(_)
-            | ast::Step::Choose(_)
-            | ast::Step::Choice(_)
-            | ast::Step::Either(_)
-            | ast::Step::Dice(_)
-            | ast::Step::Repeat(_)
-            | ast::Step::Draw(_)
-            | ast::Step::Pp(_)
-            | ast::Step::Discard(_)
-            | ast::Step::PpMax(_)
-            | ast::Step::Ep(_)
-            | ast::Step::Damage(_)
-            | ast::Step::Life(_)
-            | ast::Step::SetLife(_)
-            | ast::Step::Destroy(_)
-            | ast::Step::Banish(_)
-            | ast::Step::Transform(_)
-            | ast::Step::Act(_)
-            | ast::Step::Stand(_)
-            | ast::Step::Steal(_)
-            | ast::Step::Give(_)
-            | ast::Step::FlipDown(_)
-            | ast::Step::FlipUp(_)
-            | ast::Step::MakeType(_)
-            | ast::Step::Buff(_)
-            | ast::Step::Grant(_)
-            | ast::Step::SetStat(_)
-            | ast::Step::Apply(_)
-            | ast::Step::PlayerEffect(_)
-            | ast::Step::PlayCard(_)
-            | ast::Step::Create(_)
-            | ast::Step::Equip(_)
-            | ast::Step::LimitBreak(_)
-            | ast::Step::FinalLimitBreak(_)
-            | ast::Step::Pilot(_)
-            | ast::Step::Delayed(_)
-            | ast::Step::Boxed(_)
-            | ast::Step::Declare(_) => None,
+            _ => None,
         };
         if let Some((name, saved_receipt)) = saved
             && (self.targets.contains_key(name)

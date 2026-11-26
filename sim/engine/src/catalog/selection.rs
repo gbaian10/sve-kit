@@ -54,6 +54,21 @@ impl fmt::Debug for RuntimeCards {
 }
 
 impl SelectedEffects {
+    fn new(prototypes: Catalog, accepted: BTreeMap<String, Arc<CandidateAdmission>>) -> Self {
+        let current = accepted
+            .iter()
+            .map(|(number, admission)| (number.clone(), Arc::clone(admission.candidate())))
+            .collect();
+        let prototypes = Arc::new(prototypes);
+        Self {
+            runtime: Arc::default(),
+            accepted_prototypes: Arc::clone(&prototypes),
+            prototypes,
+            accepted: Arc::new(accepted),
+            current,
+        }
+    }
+
     pub(crate) fn runtime_cards(
         &self,
         prepare: impl FnOnce() -> Result<Arc<RuntimeCards>>,
@@ -163,30 +178,7 @@ impl CurrentSelectionLoader {
             Catalog::read_documents_using(snapshot, keywords, &handoff.documents, |line| {
                 self.read_card(line)
             })?;
-        let mut owners = BTreeMap::new();
-        let mut identities = BTreeSet::new();
-        for author in handoff.authors {
-            let (candidate, printings, rules_names) = match author {
-                Author::Accepted {
-                    input,
-                    printings,
-                    rules_names,
-                } => (input, printings, rules_names),
-                Author::Rejected { card_no, reason } => {
-                    record_rejection(&mut prototypes, card_no, reason)?;
-                    continue;
-                }
-            };
-            let owner =
-                Owner::of_input(candidate).ok_or_else(|| invalid("invalid current selection"))?;
-            claim_identity(&mut identities, owner.card_id, owner.card_no, &printings)?;
-            for number in printings {
-                register_printing(&mut prototypes, &number, &owner, &rules_names)?;
-                if owners.insert(number, candidate).is_some() {
-                    return Err(invalid("duplicate current printing"));
-                }
-            }
-        }
+        let owners = register_authors(handoff.authors, &mut prototypes, Ok)?;
         prototypes.validate_token_templates()?;
         if let Some((document, identity)) = rules {
             prototypes.bind_rules(snapshot, keywords, &handoff.documents, document, identity)?;
@@ -348,22 +340,69 @@ impl<'owner> Owner<'owner> {
     }
 }
 
-/// One author per permanent card, whose own printing is among those it claims.
-fn claim_identity<Id>(
-    identities: &mut BTreeSet<Id>,
-    card_id: Id,
-    card_no: &str,
-    printings: &[String],
-) -> Result<()>
-where
-    Id: Ord,
-{
-    if !identities.insert(card_id) || !printings.iter().any(|number| number == card_no) {
-        return Err(invalid(
-            "current selection identity or representative missing",
-        ));
+// Keep handoff identities borrowed until their printings need lowering.
+trait SelectionEntry: Clone {
+    type Identity: Ord;
+
+    fn registration(&self) -> Result<(Owner<'_>, Self::Identity)>;
+}
+
+impl<'input> SelectionEntry for &'input Value {
+    type Identity = &'input str;
+
+    fn registration(&self) -> Result<(Owner<'_>, Self::Identity)> {
+        let owner = Owner::of_input(self).ok_or_else(|| invalid("invalid current selection"))?;
+        let identity = owner.card_id;
+        Ok((owner, identity))
     }
-    Ok(())
+}
+
+impl SelectionEntry for Arc<CandidateAdmission> {
+    type Identity = String;
+
+    fn registration(&self) -> Result<(Owner<'_>, Self::Identity)> {
+        let program = self.candidate();
+        Ok((Owner::of_program(program), program.card_id.clone()))
+    }
+}
+
+fn register_authors<'input, Entry>(
+    authors: Vec<Author<'input>>,
+    prototypes: &mut Catalog,
+    mut resolve: impl FnMut(&'input Value) -> Result<Entry>,
+) -> Result<BTreeMap<String, Entry>>
+where
+    Entry: SelectionEntry,
+{
+    let mut entries = BTreeMap::new();
+    let mut identities = BTreeSet::new();
+    for author in authors {
+        let (input, printings, rules_names) = match author {
+            Author::Accepted {
+                input,
+                printings,
+                rules_names,
+            } => (input, printings, rules_names),
+            Author::Rejected { card_no, reason } => {
+                record_rejection(prototypes, card_no, reason)?;
+                continue;
+            }
+        };
+        let entry = resolve(input)?;
+        let (owner, identity) = entry.registration()?;
+        if !identities.insert(identity) || !printings.iter().any(|number| number == owner.card_no) {
+            return Err(invalid(
+                "current selection identity or representative missing",
+            ));
+        }
+        for number in printings {
+            register_printing(prototypes, &number, &owner, &rules_names)?;
+            if entries.insert(number, entry.clone()).is_some() {
+                return Err(invalid("duplicate current printing"));
+            }
+        }
+    }
+    Ok(entries)
 }
 
 fn record_rejection(prototypes: &mut Catalog, card_no: &str, reason: &str) -> Result<()> {
@@ -384,18 +423,24 @@ fn record_rejection(prototypes: &mut Catalog, card_no: &str, reason: &str) -> Re
     Ok(())
 }
 
-fn check_token_sources(prototypes: &Catalog, program: &CurrentCardProgram) -> Result<()> {
-    let card = &program.expanded["cards"][&program.card_no];
-    for link in card["token_sources"].as_array().into_iter().flatten() {
-        let number = link["card_no"]
-            .as_str()
-            .ok_or_else(|| invalid("invalid token source"))?;
-        if prototypes
-            .token_definitions
-            .get(number)
-            .is_none_or(|token| !token.complete)
-        {
-            return Err(invalid("token source requires a complete token card"));
+fn check_token_sources(
+    prototypes: &Catalog,
+    accepted: &BTreeMap<String, Arc<CandidateAdmission>>,
+) -> Result<()> {
+    for admission in accepted.values() {
+        let program = admission.candidate();
+        let card = &program.expanded["cards"][&program.card_no];
+        for link in card["token_sources"].as_array().into_iter().flatten() {
+            let number = link["card_no"]
+                .as_str()
+                .ok_or_else(|| invalid("invalid token source"))?;
+            if prototypes
+                .token_definitions
+                .get(number)
+                .is_none_or(|token| !token.complete)
+            {
+                return Err(invalid("token source requires a complete token card"));
+            }
         }
     }
     Ok(())
@@ -414,62 +459,19 @@ fn select_using(
     keywords: &str,
     handoff: &Value,
     rules: Option<(&str, &EngineIdentityInput)>,
-    mut compile: impl FnMut(&Value) -> Result<Arc<CandidateAdmission>>,
+    compile: impl FnMut(&Value) -> Result<Arc<CandidateAdmission>>,
     read_card: impl FnMut(&str) -> Result<Arc<Card>>,
 ) -> Result<SelectedEffects> {
     let handoff = read_handoff(handoff)?;
     let mut prototypes =
         Catalog::read_documents_using(snapshot, keywords, &handoff.documents, read_card)?;
-    let mut current = BTreeMap::new();
-    let mut accepted = BTreeMap::new();
-    let mut identities = BTreeSet::new();
-    for author in handoff.authors {
-        let (input, printings, rules_names) = match author {
-            Author::Accepted {
-                input,
-                printings,
-                rules_names,
-            } => (input, printings, rules_names),
-            Author::Rejected { card_no, reason } => {
-                record_rejection(&mut prototypes, card_no, reason)?;
-                continue;
-            }
-        };
-        let admission = compile(input)?;
-        let program = admission.candidate();
-        claim_identity(
-            &mut identities,
-            program.card_id.clone(),
-            &program.card_no,
-            &printings,
-        )?;
-        let owner = Owner::of_program(program);
-        for number in printings {
-            register_printing(&mut prototypes, &number, &owner, &rules_names)?;
-            if current
-                .insert(number.clone(), Arc::clone(program))
-                .is_some()
-            {
-                return Err(invalid("duplicate current printing"));
-            }
-            accepted.insert(number, Arc::clone(&admission));
-        }
-    }
+    let accepted = register_authors(handoff.authors, &mut prototypes, compile)?;
     prototypes.validate_token_templates()?;
-    for program in current.values() {
-        check_token_sources(&prototypes, program)?;
-    }
+    check_token_sources(&prototypes, &accepted)?;
     if let Some((document, identity)) = rules {
         prototypes.bind_rules(snapshot, keywords, &handoff.documents, document, identity)?;
     }
-    let prototypes = Arc::new(prototypes);
-    Ok(SelectedEffects {
-        runtime: Arc::default(),
-        accepted_prototypes: Arc::clone(&prototypes),
-        prototypes,
-        accepted: Arc::new(accepted),
-        current,
-    })
+    Ok(SelectedEffects::new(prototypes, accepted))
 }
 
 /// A checked selection whose authors are lowered only when a printing is requested.
@@ -520,22 +522,8 @@ impl PendingSelection<'_> {
 
     /// Accept exactly the requested printings.
     pub(crate) fn finish(self) -> Result<SelectedEffects> {
-        for accepted in self.loaded.values() {
-            check_token_sources(&self.prototypes, accepted.candidate())?;
-        }
-        let current = self
-            .loaded
-            .iter()
-            .map(|(number, accepted)| (number.clone(), Arc::clone(accepted.candidate())))
-            .collect();
-        let prototypes = Arc::new(self.prototypes);
-        Ok(SelectedEffects {
-            runtime: Arc::default(),
-            accepted_prototypes: Arc::clone(&prototypes),
-            prototypes,
-            accepted: Arc::new(self.loaded),
-            current,
-        })
+        check_token_sources(&self.prototypes, &self.loaded)?;
+        Ok(SelectedEffects::new(self.prototypes, self.loaded))
     }
 }
 

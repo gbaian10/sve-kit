@@ -1699,6 +1699,10 @@ pub(super) fn choice_body(body: &ast::Body, path: &str) -> Result<bool, Lowering
     }
 }
 
+#[expect(
+    clippy::wildcard_enum_match_arm,
+    reason = "Only steps exposing a mode in this scope affect the triggered choice."
+)]
 fn contains_choice(steps: &[ast::Step]) -> bool {
     steps.iter().any(|step| match step {
         ast::Step::Choice(_) => true,
@@ -1723,55 +1727,7 @@ fn contains_choice(steps: &[ast::Step]) -> bool {
         ast::Step::ByKind(by_kind) => {
             contains_choice(&by_kind.leader) || contains_choice(&by_kind.follower)
         }
-        ast::Step::Dice(_)
-        | ast::Step::Declare(_)
-        | ast::Step::Shuffle(_)
-        | ast::Step::PlayCard(_)
-        | ast::Step::PlayAbility(_)
-        | ast::Step::StackPlus(_)
-        | ast::Step::Counter(_)
-        | ast::Step::GainDrive(_)
-        | ast::Step::Race(_)
-        | ast::Step::Evolve(_)
-        | ast::Step::Either(_)
-        | ast::Step::Choose(_)
-        | ast::Step::Draw(_)
-        | ast::Step::Pp(_)
-        | ast::Step::Discard(_)
-        | ast::Step::PpMax(_)
-        | ast::Step::Ep(_)
-        | ast::Step::Damage(_)
-        | ast::Step::Life(_)
-        | ast::Step::SetLife(_)
-        | ast::Step::Destroy(_)
-        | ast::Step::Banish(_)
-        | ast::Step::Transform(_)
-        | ast::Step::Act(_)
-        | ast::Step::Stand(_)
-        | ast::Step::Steal(_)
-        | ast::Step::Give(_)
-        | ast::Step::FlipDown(_)
-        | ast::Step::FlipUp(_)
-        | ast::Step::MakeType(_)
-        | ast::Step::Buff(_)
-        | ast::Step::Grant(_)
-        | ast::Step::SetStat(_)
-        | ast::Step::Apply(_)
-        | ast::Step::PlayerEffect(_)
-        | ast::Step::Search(_)
-        | ast::Step::Look(_)
-        | ast::Step::Reveal(_)
-        | ast::Step::RevealUntil(_)
-        | ast::Step::Move(_)
-        | ast::Step::Create(_)
-        | ast::Step::Equip(_)
-        | ast::Step::LimitBreak(_)
-        | ast::Step::FinalLimitBreak(_)
-        | ast::Step::Pilot(_)
-        | ast::Step::Boxed(_)
-        | ast::Step::Win(_)
-        | ast::Step::Delayed(_)
-        | ast::Step::ExtraTurn(_) => false,
+        _ => false,
     })
 }
 
