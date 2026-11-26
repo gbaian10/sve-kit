@@ -238,7 +238,7 @@ code.
 ## Lint and types
 
 Ruff checks Python on commit and in CI using the nearest project configuration.
-Directories without their own configuration use Ruff's defaults from the root `ruff.toml`.
+The empty `[tool.ruff]` table in the root `pyproject.toml` gives other directories Ruff's defaults.
 Mypy strict is the type-checking gate in CI and runs locally before push.
 Type hints are required. pyright strict is an optional local check (a manual hook, not run in CI,
 because it bundles a large Node.js runtime); run it when you like and fix what it reports as you go:

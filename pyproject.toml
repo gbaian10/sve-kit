@@ -8,3 +8,6 @@ exclude = ["scan"]
 
 [tool.uv]
 default-groups = ["dev", "test"]
+
+# Use Ruff defaults outside directories with their own configuration, regardless of user settings.
+[tool.ruff]
