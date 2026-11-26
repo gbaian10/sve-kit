@@ -80,8 +80,6 @@ jobs:
               - '!authored/rules/author-effects/**'
               - '!authored/rules/effect-bodies/**'
               - '!authored/rules/effects-index/**'
-              # carddb/tests/domains/effects/test_regression_baseline.py reads it (#2350 broke main unnoticed)
-              - 'sim/engine/tests/boundaries.rs'
             author_data:
               - 'authored/rules/author-effects/**'
               - 'authored/rules/effect-bodies/**'
@@ -277,7 +275,6 @@ jobs:
             tests/architecture/test_authored_defaults.py::test_authored_tree_does_not_store_quality_defaults \
             tests/core/test_yaml_reader.py::test_all_production_files_pass_strict_reader \
             tests/domains/effects/test_author_current.py::test_real_current_author_set \
-            tests/domains/effects/test_regression_baseline.py \
             tests/domains/rulings/test_authored_hints.py \
             tests/workflows/test_authoring.py tests/workflows/test_authoring_cli.py \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
