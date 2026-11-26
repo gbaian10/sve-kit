@@ -4,12 +4,10 @@ use crate::session::{LocalSession, SeatControl};
 use crate::wire::{Identity, Region, Seat, viewer_of};
 use alloc::collections::BTreeMap;
 use serde::Deserialize;
-use serde_json::Value;
 use sha2::{Digest as _, Sha256};
 use sve_engine::battle::{BattleReferences, ReferenceInput};
 use sve_engine::catalog::{
-    Catalog, CurrentSelectionLoader, EngineIdentityInput, ProgramPrinting, SelectedEffects,
-    SnapshotPrograms,
+    Catalog, EngineIdentityInput, ProgramPrinting, SelectedEffects, SnapshotPrograms,
 };
 use sve_engine::game::Game;
 use sve_engine::game::player::{DeckConstruction, PlayerDeck};
@@ -66,9 +64,9 @@ pub enum Control {
 /// Why a session could not be created; engine diagnostics stay out of the message.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LoadError {
-    /// A malformed selection or setup document.
+    /// A malformed inputs or setup document.
     Format,
-    /// The snapshot, keywords, selection or rules were rejected.
+    /// The snapshot, keywords, programs or rules were rejected.
     Selection,
     /// The stated content identity does not match the loaded programs or rules.
     Identity,
@@ -90,77 +88,6 @@ impl LoadError {
             Self::Match => "match",
         }
     }
-}
-
-/// The battle inputs document `build:engine` writes from one verified public export: the
-/// reader's native snapshot and references, the programs and engine rules bound to those exact
-/// snapshot bytes, and the content identity naming them.
-#[derive(Deserialize)]
-#[serde(deny_unknown_fields)]
-struct Inputs {
-    /// Engine card snapshot (JSON lines).
-    snapshot: String,
-    /// Keyword registry.
-    keywords: String,
-    /// Current effect selection (JSON).
-    selection: String,
-    /// Engine rule resources bound to this snapshot.
-    rules: String,
-    /// Printing, wording and rule identities produced with the snapshot by the same reader.
-    references: ReferenceInput,
-    /// The verified public manifest, the programs, the engine build and the rules; each seat
-    /// receives it in `Ready`.
-    identity: Identity,
-}
-
-/// Select the effects the decks can reach, bind the snapshot's references, check the whole
-/// match closure, start the opening and bind the seat controls.
-///
-/// `inputs` is the battle inputs document (JSON) exactly as `build:engine` wrote it.
-///
-/// # Errors
-/// Returns the failing stage without engine diagnostics.
-pub fn load(inputs: &str, setup: &str) -> Result<LocalSession, LoadError> {
-    let setup: MatchSetup = serde_json::from_str(setup).map_err(|_error| LoadError::Format)?;
-    let Inputs {
-        snapshot,
-        keywords,
-        selection: programs,
-        rules,
-        references,
-        identity,
-    } = serde_json::from_str(inputs).map_err(|_error| LoadError::Format)?;
-    let selection: Value = serde_json::from_str(&programs).map_err(|_error| LoadError::Format)?;
-    let region = match identity.region {
-        Region::Jp => "jp",
-        Region::En => "en",
-    };
-    // The engine build cannot hash itself; the other identities must name exactly these bytes.
-    if identity.programs.sha256 != hex(&programs) || identity.rules.sha256 != hex(&rules) {
-        return Err(LoadError::Identity);
-    }
-    // The references name the exact native bytes they were read with, not a display catalogue.
-    if references.region != region || references.snapshot_sha256 != hex(&snapshot) {
-        return Err(LoadError::References);
-    }
-    let [first, second] = setup.decks.clone();
-    let decks = [deck(first), deck(second)];
-    let selected = CurrentSelectionLoader::new()
-        .and_then(|loader| {
-            // Lowering every author took seconds in the browser; only the decks' reach is needed.
-            // Permanent printing identities arrive separately as references, never inferred.
-            Game::select_player_decks(
-                &loader,
-                &snapshot,
-                &keywords,
-                &selection,
-                Some((&rules, &EngineIdentityInput::LegacyJp)),
-                &decks,
-            )
-        })
-        .map_err(|_error| LoadError::Selection)?;
-    let references = bind_references(&selected.prototypes, references, &identity)?;
-    open(selected, decks, references, identity, &setup)
 }
 
 #[derive(Deserialize)]
@@ -230,14 +157,18 @@ impl PreparedBattle {
     /// Refuses malformed setups, illegal decks or reachable programs the engine cannot admit.
     pub fn open(&self, setup: &str) -> Result<LocalSession, LoadError> {
         let setup: MatchSetup = serde_json::from_str(setup).map_err(|_error| LoadError::Format)?;
-        let decks = setup.decks.clone().map(|mut input| {
-            for number in input.main.iter_mut().chain(&mut input.evolve) {
-                if let Some(locator) = self.programs.native_printing(number) {
-                    *number = locator.to_owned();
-                }
+        let resolve = |mut input: DeckSetup| {
+            for printing in input.main.iter_mut().chain(&mut input.evolve) {
+                *printing = self
+                    .programs
+                    .native_printing(printing)
+                    .ok_or(LoadError::Match)?
+                    .to_owned();
             }
-            deck(input)
-        });
+            Ok(deck(input))
+        };
+        let [first, second] = setup.decks.clone();
+        let decks = [resolve(first)?, resolve(second)?];
         let selected = Game::select_snapshot_decks(&self.programs, &decks)
             .map_err(|_error| LoadError::Selection)?;
         open(
