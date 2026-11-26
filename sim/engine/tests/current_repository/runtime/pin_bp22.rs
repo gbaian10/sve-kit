@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions indicate a broken game fixture."
-)]
 use super::*;
 
 fn position(card: &str) -> Value {

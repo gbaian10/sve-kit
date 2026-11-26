@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real cards declare mandatory trigger, mode and material choices."
-)]
 use super::*;
 use sve_engine::game::player::{
     Command, Input, MainActionAnswer, MainIntentKind, QuestionShape, SubmissionKind, Viewer,

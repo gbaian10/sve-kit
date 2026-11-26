@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed count scenarios."
-)]
 use super::*;
 use sve_engine::game::player::{DecisionShape, QuestionShape, SubmissionKind};
 

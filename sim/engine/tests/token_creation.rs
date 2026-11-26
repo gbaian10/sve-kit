@@ -1,5 +1,10 @@
 //! Small synthetic selections exercise capacity without rebuilding the repository.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
 #![expect(
     clippy::unwrap_used,
     reason = "Synthetic fixture failures must stop the test."

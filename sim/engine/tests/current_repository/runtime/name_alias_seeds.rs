@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected choices invalidate the printed alias scenarios."
-)]
 use super::*;
 
 fn finish(game: &mut Game, mut play: CardPlay) -> CardPlay {

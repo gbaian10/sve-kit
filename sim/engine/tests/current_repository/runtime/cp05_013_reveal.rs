@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the real CP05-013 payment scenario."
-)]
 
 use super::*;
 

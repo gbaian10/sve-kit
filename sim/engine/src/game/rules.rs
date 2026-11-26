@@ -12,10 +12,6 @@ use super::{EventSubject, Frame, Game, Object, Pending, Step, int, list, other, 
 use crate::ir::SnapshotId;
 use crate::{EngineFailure, Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     /// Allocates a causal identity for an ordinary match input.
     ///

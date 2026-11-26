@@ -37,10 +37,6 @@ enum Action {
     Discard(Vec<String>),
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Closing adapters share the existing rule authority."
-)]
 impl Game {
     pub(super) fn player_closing_question(&self) -> Result<Option<Question>> {
         if self.state.flow["kind"] != "end" {

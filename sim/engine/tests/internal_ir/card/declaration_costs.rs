@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions fail these focused payment scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::{

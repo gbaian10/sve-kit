@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the complete printed card scenarios."
-)]
 use super::admission_fixture::{position, settle};
 use super::*;
 

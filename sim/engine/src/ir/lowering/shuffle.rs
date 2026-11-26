@@ -13,10 +13,6 @@ use crate::ir::{
 };
 use core::slice::from_ref;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Paired instructions share the enclosing lowering scope and allocator."
-)]
 impl BodyContext<'_> {
     pub(super) fn shuffle(
         &self,

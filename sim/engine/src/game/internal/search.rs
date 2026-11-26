@@ -461,10 +461,6 @@ pub(super) fn matches_candidate(
     super::conditions::candidate::matches(condition, game, id)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Search shares authoritative movement and shuffle primitives."
-)]
 impl Game {
     #[expect(
         clippy::too_many_lines,
@@ -1317,10 +1313,6 @@ fn zone_name(kind: ZoneKind) -> Result<&'static str> {
 }
 
 #[cfg(feature = "runner")]
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The referee translates native search choices for neutral fixture inputs."
-)]
 impl Game {
     pub(crate) fn referee_search_member(&self, actor: Viewer, handle: u64) -> Option<&str> {
         // Only the replay runner needs frozen fixture labels for hidden candidates.

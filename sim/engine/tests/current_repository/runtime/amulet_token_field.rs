@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the real card scenario."
-)]
 use super::*;
 
 fn initial(card: &str) -> Value {

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected search decision invalidates the printed card scenarios."
-)]
 
 use super::ability_combinations::{
     activate_card, decision_answer, evolve_position, finish, loaded, position, view,

@@ -134,10 +134,6 @@ pub(super) fn unordered_selection_matches(candidate: &Value, decision: &Value) -
     candidate["do"] == decision["do"] && actual == expected
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     pub(super) fn normalize_replacement_order(&self, decision: &mut Value) {
         if decision["do"] != "order-replacements" {

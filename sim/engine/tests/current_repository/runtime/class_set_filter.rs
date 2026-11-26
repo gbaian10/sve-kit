@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected decision invalidates the scenario."
-)]
 use super::*;
 use std::sync::LazyLock;
 use sve_engine::game::internal::DecisionView;

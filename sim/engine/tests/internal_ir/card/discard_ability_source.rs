@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decision kinds invalidate the discard authority scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 

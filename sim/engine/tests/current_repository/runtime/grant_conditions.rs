@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The fixture must ask only its declared public targets."
-)]
 use super::*;
 use alloc::collections::BTreeSet;
 

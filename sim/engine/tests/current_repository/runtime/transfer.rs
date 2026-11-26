@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Native steal must declare its follower and all three payment cards."
-)]
 use super::*;
 
 fn position(number: &str, full: bool) -> Value {

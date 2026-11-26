@@ -1,8 +1,4 @@
 // These scenarios share the real repository fixture, whose initial load dominates cold runs.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed movement scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

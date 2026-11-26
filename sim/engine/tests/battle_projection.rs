@@ -1,5 +1,11 @@
 //! Selection projection preserves frozen constraints and opaque answer coordinates.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
+
 extern crate alloc;
 
 use alloc::collections::BTreeMap;

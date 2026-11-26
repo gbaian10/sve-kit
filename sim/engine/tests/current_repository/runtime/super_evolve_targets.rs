@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected question invalidates the real evolution scenario."
-)]
 
 use super::*;
 

@@ -7,10 +7,6 @@ use crate::ir::{
     QuantityUnit, SnapshotId,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Leader life changes use the same authoritative Game mutation boundary."
-)]
 impl Game {
     pub(super) fn internal_pay_life(
         &mut self,

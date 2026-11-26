@@ -350,10 +350,6 @@ impl EffectOrigin {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Installed effect observations share their authoritative providers."
-)]
 impl Game {
     pub(in crate::game) fn observed_player_effects(
         &self,

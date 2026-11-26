@@ -83,6 +83,8 @@ pub_use = "allow"
 missing_trait_methods = "allow"
 # LTO inlines across crates; forcing `#[inline]` bloats the WASM build.
 missing_inline_in_public_items = "allow"
+# Engine types share their inherent methods across modules by responsibility.
+multiple_inherent_impl = "allow"
 # CONTRIBUTING: comment only where a reader would get it wrong.
 missing_docs_in_private_items = "allow"
 

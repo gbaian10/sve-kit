@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected player declaration domains fail the fixture."
-)]
-
 use super::*;
 use crate::player_pipeline::question;
 use sve_engine::game::player::events::{ActionKind, EventKind};

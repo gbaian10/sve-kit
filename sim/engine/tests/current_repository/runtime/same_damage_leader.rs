@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the simultaneous damage scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DamageShare, InstructionOutcome};
 

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the real Sahaquiel and Israfil scenarios."
-)]
 use super::*;
 
 fn position(controller: &str, owner: &str, full: bool, target: &str) -> Value {

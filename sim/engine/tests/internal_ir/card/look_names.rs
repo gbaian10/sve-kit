@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected public decisions invalidate these Look selection regressions."
-)]
 use super::*;
 use std::sync::OnceLock;
 use sve_engine::game::internal::{DecisionView, InputDomain};

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected choices invalidate these printed arithmetic scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 const PLAYER: PlayerId = PlayerId { seat: 1 };

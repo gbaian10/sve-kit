@@ -7,10 +7,6 @@ use crate::ir::{
     Selector, TimeAnchor, ZoneKind,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Prevention uses the existing structural environment."
-)]
 impl Checker {
     pub(super) fn prevention(&mut self, effect: &Effect, zones: &[ZoneKind]) -> Checked {
         let shape = projection(effect).ok_or_else(|| self.error(WellFormedReason::InvalidEntry))?;

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate the printed ability-play scenarios."
-)]
 use super::union_burst_batch1::{finish, pending};
 use super::*;
 use sve_engine::EngineFailure;

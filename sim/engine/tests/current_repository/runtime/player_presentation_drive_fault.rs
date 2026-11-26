@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real-card protocol must expose the expected typed question."
-)]
 
 use super::drive::{drive_game, position};
 use super::player_presentation::{SEATS, is_action, kinds, present, promoted, question, recorded};

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the real kind change scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::union_burst_batch1::{finish, pending};
 use super::*;

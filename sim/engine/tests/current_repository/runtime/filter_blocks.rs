@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed card scenarios."
-)]
 //! Posture, evolution, entry-turn, power and exclusion filters on printed cards.
 use super::*;
 use std::{fs::read_to_string, path::PathBuf};

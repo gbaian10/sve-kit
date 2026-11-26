@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "The scenarios answer only the questions printed on these two cards."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::DecisionView;

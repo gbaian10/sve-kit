@@ -1,8 +1,4 @@
 #![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the cost scenario."
-)]
-#![expect(
     clippy::default_numeric_fallback,
     reason = "Synthetic card costs and expected PP use signed integers."
 )]

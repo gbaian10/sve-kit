@@ -121,10 +121,6 @@ pub(in crate::game) struct ActivationOption {
     pub(in crate::game) line: u64,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Main intents share authority validation and its rollback boundary."
-)]
 impl Game {
     pub(super) fn player_main_actions(
         &self,

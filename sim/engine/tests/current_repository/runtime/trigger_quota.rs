@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed quota scenarios."
-)]
 use super::*;
 
 fn selected() -> &'static SelectedEffects {

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A fixture whose lowered shape changed must fail immediately."
-)]
-
 use super::super::player_pipeline::answer;
 use super::*;
 use sve_engine::game::player::events::{EventKind, PresentationOp, ScopeId};

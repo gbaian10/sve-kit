@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected question invalidates the synthetic union scenario."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};

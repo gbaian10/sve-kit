@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "The complete printed material procedures must expose their declared choices."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

@@ -11,10 +11,6 @@ use crate::ir::{
 };
 use crate::ir::{flip_cost, material_sets};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Exchange has a closed cost entry separate from general payments."
-)]
 impl Checker {
     pub(super) fn additional(&mut self, payment: &PlayCostPayment) -> Checked {
         if !self.scopes.insert(payment.scope) {

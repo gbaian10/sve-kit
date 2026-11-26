@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected public decisions invalidate these scenarios."
-)]
 use super::*;
 
 fn game(initial: &Value) -> Game {

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate these printed material scenarios."
-)]
 use super::*;
 
 fn prepared() -> &'static SelectedEffects {

@@ -397,10 +397,6 @@ fn check_patch(patch: &CharacteristicPatch) -> Result<()> {
     shape(patch).map(|_| ())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Numeric layers share the authoritative objects and instruction transaction."
-)]
 impl Game {
     fn numeric_state(&self, id: &str) -> Option<&NumericState> {
         self.state.ir_numeric.get(id).filter(|state| {
@@ -1057,10 +1053,6 @@ fn add(left: i64, right: i64) -> Result<i64> {
         .ok_or_else(|| invalid("numeric addition overflow"))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Observation uses installed numeric layers without recalculating them."
-)]
 impl Game {
     pub(super) fn observed_numeric_effects(
         &self,

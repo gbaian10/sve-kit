@@ -1,9 +1,4 @@
 //! Printed payment fragments do not admit Pamela, Oz or the external test producer as complete cards.
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the payment scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, QuickOption};

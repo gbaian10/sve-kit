@@ -7,10 +7,6 @@ use serde_json::Value;
 use super::{Game, Pending, TriggerAlternative};
 use crate::{EngineFailure, Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Trigger formation shares the authoritative usage and pending state."
-)]
 impl Game {
     pub(super) fn limit_trigger_batch(
         &mut self,

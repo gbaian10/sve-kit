@@ -17,10 +17,6 @@ use crate::ir::{
 };
 use alloc::collections::BTreeSet;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Mode input regions share the structural checker state."
-)]
 impl Checker {
     pub(super) fn guarded_play_mode(control: &Control) -> bool {
         let Control::If {

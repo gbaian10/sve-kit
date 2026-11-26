@@ -13,10 +13,6 @@ pub(super) fn check_population(population: &Selector) -> Result<()> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "SpellChain reads the live printed providers through the shared game authority."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_spell_chain(&self, player: PlayerId) -> Result<Nat> {
         let mut population = BTreeSet::new();

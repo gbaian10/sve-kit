@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate these payment and event scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
 

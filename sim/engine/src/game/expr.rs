@@ -10,10 +10,6 @@ use serde_json::{Value, json};
 use super::{Frame, Game, int, list, other, scalar, string};
 use crate::{Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     pub(super) fn select(&self, selector: &Value, frame: &Frame) -> Result<Vec<String>> {
         self.check_selector_binding(selector)?;

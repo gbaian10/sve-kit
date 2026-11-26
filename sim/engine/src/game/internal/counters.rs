@@ -66,10 +66,6 @@ pub(super) fn is_cost(action: &Action) -> bool {
         && check_action(action).is_ok()
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Counter reads retain the referenced object generation."
-)]
 impl Execution {
     pub(super) fn counter(&self, game: &Game, holder: &Holder, kind: &CounterKind) -> Result<Nat> {
         let Holder::Object { object: operand } = holder else {
@@ -92,10 +88,6 @@ impl Execution {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Selection predicates and instructions share the authoritative counter read."
-)]
 impl Game {
     pub(super) fn card_counter(&self, id: &str, kind: &CounterKind) -> Result<Nat> {
         let object = self.object(id)?;
@@ -114,10 +106,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Counter costs and effects mutate the authoritative object counter map."
-)]
 impl Game {
     fn counter_headroom(&self, id: &str, kind: &CounterKind, before: Nat) -> Result<Option<u64>> {
         if self.object(id)?.zone != "field" {
@@ -388,10 +376,6 @@ pub(super) fn iteration(
     Some((input, *binding, instruction))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Object iteration delegates to the shared counter instruction."
-)]
 impl Game {
     pub(super) fn internal_counter_iteration(
         &mut self,

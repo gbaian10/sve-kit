@@ -5,10 +5,6 @@ use crate::ir::{
     Predicate, ReceiptLocation, RuntimeObjectView, Selector,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Receipt counts use the body's checked producer environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn discarded_cost(
         &self,

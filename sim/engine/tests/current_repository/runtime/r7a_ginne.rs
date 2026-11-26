@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Printed mode and private-hand choices must have the expected domain."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::{DecisionView, TargetRoleAssignment};

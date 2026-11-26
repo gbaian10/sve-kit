@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing decision invalidates the private choice scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};

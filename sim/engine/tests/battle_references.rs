@@ -1,5 +1,11 @@
 //! Printing identities are explicit, complete and bound to exact snapshot bytes.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
+
 use serde_json::{Value, json};
 use std::sync::OnceLock;
 use sve_battle_contract::{CardRef, Nat};

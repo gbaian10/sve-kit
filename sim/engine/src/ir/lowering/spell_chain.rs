@@ -57,10 +57,6 @@ pub(super) fn lower(
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Resolution SpellChain uses the same capture boundary as other population counts."
-)]
 impl BodyContext<'_> {
     pub(super) fn spell_chain_condition(
         &mut self,

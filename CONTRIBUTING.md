@@ -214,6 +214,8 @@ AI-generated code tends to over-comment. Keep comments few and short:
   for numbering and supersession. Put contracts in `docs/schema/` or `docs/dsl/`,
   and progress, scheduling and open questions in issues or milestones.
 
+- For new DSL syntax, update the schema and tests. Edit `docs/dsl/` only when
+  semantic rules change.
 - Verify references to implemented modules, classes, files and commands; label
   planned ones explicitly.
 - Keep claims about current behaviour within what the tests guarantee. Distinguish

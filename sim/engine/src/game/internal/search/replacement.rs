@@ -80,10 +80,6 @@ fn cost_limit(value: &Expr<Bool>, binding: Binding<ObjectRef>) -> Result<i64> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The optional continuation shares Search's one movement and shuffle path."
-)]
 impl Game {
     pub(super) fn internal_search_replacement_validate(
         &self,

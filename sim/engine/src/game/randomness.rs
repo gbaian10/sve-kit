@@ -7,10 +7,6 @@ use crate::{EngineFailure, Result, invalid};
 use alloc::collections::BTreeSet;
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Random operations share authoritative state and private script cursors."
-)]
 impl Game {
     fn next_random_script(&mut self, kind: &str) -> Result<Option<Value>> {
         let Some(script) = self.state.random.get(kind) else {

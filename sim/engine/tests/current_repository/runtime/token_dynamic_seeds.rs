@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these real-card scenarios."
-)]
 use super::*;
 
 fn finish(game: &mut Game, mut play: CardPlay, mode: usize, expect_targets: bool) -> CardPlay {

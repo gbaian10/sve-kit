@@ -3,10 +3,6 @@ use super::{
     PlayerSet, Selector, TextQuantifier, ast, unsupported,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Steal and give lowering share target bindings."
-)]
 impl BodyContext<'_> {
     pub(super) fn remember_transfer_target(
         &mut self,

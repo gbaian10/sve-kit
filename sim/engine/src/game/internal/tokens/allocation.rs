@@ -215,10 +215,6 @@ fn zone(kind: ZoneKind) -> Result<(ObservedZone, &'static str)> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Allocated tokens use the same authoritative creation and movement methods."
-)]
 impl Game {
     pub(super) fn allocate_split_tokens(
         &mut self,

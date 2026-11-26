@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed top-to-EX scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use serde_json::Map;

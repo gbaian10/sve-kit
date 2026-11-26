@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the entry and recipient migration scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeSet;
 use sve_engine::game::internal::{InstructionOutcome, SearchAnswer};

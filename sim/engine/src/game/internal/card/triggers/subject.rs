@@ -15,10 +15,6 @@ pub(super) struct EventSubjectInformation {
     names: Vec<CardName>,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The card play commit boundary owns observer admission."
-)]
 impl Game {
     // This subset avoids unrelated title bindings.
     pub(super) fn event_subject_information(
@@ -64,10 +60,6 @@ impl EventSubjectInformation {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "History freezes the same public event subject at commit."
-)]
 impl Game {
     pub(in crate::game) fn internal_departure_history(
         &mut self,

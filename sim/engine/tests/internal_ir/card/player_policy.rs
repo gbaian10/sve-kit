@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected policy choices fail these small public-data fixtures."
-)]
-
 use super::*;
 use crate::player_pipeline::question;
 use std::sync::OnceLock;

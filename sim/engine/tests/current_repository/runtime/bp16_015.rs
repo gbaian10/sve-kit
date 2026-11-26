@@ -1,4 +1,3 @@
-#![expect(clippy::panic, reason = "A missing trigger invalidates the scenario.")]
 use super::*;
 
 fn resolve_trigger(game: &mut Game, seat: &str, event: &str) -> Activation {

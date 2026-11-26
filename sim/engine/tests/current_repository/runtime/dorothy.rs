@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed Dorothy scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

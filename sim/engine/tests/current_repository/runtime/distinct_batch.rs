@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the scenario."
-)]
 use super::distinct_count::{fixture, position};
 use super::*;
 

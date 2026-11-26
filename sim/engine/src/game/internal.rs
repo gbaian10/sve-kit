@@ -755,10 +755,6 @@ where
     serializer.serialize_none()
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Internal execution shares the authoritative game and its rule primitives."
-)]
 impl Game {
     /// Execute a fully checked closed body after checking every runtime requirement.
     ///
@@ -2160,10 +2156,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Value evaluation shares the private execution environment."
-)]
 impl Execution {
     const fn probing_declaration(&self) -> bool {
         matches!(self.declaration_mode, DeclarationMode::Probe)

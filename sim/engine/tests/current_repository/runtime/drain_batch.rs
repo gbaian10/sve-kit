@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these real-card scenarios."
-)]
 use super::*;
 
 fn pending_line(game: &mut Game, number: &str, line: u64) {

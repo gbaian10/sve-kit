@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the complete printed Millteo scenarios."
-)]
 use super::*;
 
 fn position() -> Value {

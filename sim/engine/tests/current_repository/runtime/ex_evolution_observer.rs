@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed Kagemitsu chain."
-)]
 use super::*;
 fn finish(game: &mut Game) {
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {

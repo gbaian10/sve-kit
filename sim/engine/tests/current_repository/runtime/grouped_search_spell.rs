@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Complete printed grouped-search scenarios require the declared domains."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::{DecisionView, SearchAnswer};

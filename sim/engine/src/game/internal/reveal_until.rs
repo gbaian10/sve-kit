@@ -9,10 +9,6 @@ use crate::ir::{
     SnapshotId, reveal_until,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Prefix revelation uses the same authoritative deck and public knowledge."
-)]
 impl Game {
     pub(super) fn internal_reveal_until(
         &mut self,
@@ -83,10 +79,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Public observations use the same authority-owned receipt map as ordinary values."
-)]
 impl Execution {
     pub(super) fn revealed_objects(
         &self,

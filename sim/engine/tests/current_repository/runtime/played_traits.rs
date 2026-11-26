@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Only printed pending, target and Storm/Drain choices belong to these complete-card probes."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::DecisionView;

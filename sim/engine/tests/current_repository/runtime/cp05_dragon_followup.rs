@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unrelated questions indicate that the printed scenario took a different path."
-)]
 
 use super::*;
 

@@ -10,10 +10,6 @@ use sve_battle_contract::{
     question::{PublicDice, PublicWaiting},
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Input projection shares the authoritative player readers."
-)]
 impl Game {
     /// Bind this seat's complete board, wire input and answer entry to one stable stop.
     ///

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these printed card scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeSet;
 use sve_engine::game::internal::SearchAnswer;

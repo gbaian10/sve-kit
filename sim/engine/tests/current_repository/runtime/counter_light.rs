@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected choices invalidate the printed counter scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 

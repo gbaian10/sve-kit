@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the complete printed unlimited evolution scenarios."
-)]
 use super::*;
 
 fn position() -> Value {

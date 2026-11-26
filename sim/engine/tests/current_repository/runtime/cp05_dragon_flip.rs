@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected selection domains invalidate these printed scenarios."
-)]
 
 use super::*;
 

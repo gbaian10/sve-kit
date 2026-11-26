@@ -1,5 +1,10 @@
 //! Python's direct writer reaches current selection and the ordinary card runtime.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
 #![expect(
     clippy::unwrap_used,
     reason = "Synthetic fixtures fail immediately on malformed test construction."

@@ -1,4 +1,3 @@
-#![expect(clippy::panic, reason = "Printed Zephyr scenarios require their explicit Ward, mode and search questions.")]
 use super::event_cemetery::finish_checks;
 use super::union_burst_batch1::{pending, question};
 use super::*;

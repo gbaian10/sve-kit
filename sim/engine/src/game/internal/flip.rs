@@ -23,10 +23,6 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Flip instructions and payments share the authoritative Game state."
-)]
 impl Game {
     pub(super) fn internal_flip_down(
         &mut self,

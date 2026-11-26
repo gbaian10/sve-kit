@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected fixture decisions fail the timing scenario."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the printed grant scenario."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Synthetic entry fixtures require the resource payment question."
-)]
-
 use super::*;
 use crate::rule_fixtures;
 use std::sync::OnceLock;

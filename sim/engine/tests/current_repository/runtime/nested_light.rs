@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected public decisions invalidate these printed nested plays."
-)]
 use super::union_burst_batch1::pending;
 use super::*;
 use sve_engine::game::internal::SearchAnswer;

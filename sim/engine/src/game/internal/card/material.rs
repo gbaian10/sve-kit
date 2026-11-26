@@ -665,10 +665,6 @@ fn cost_zone(action: &Action, zone: ZoneKind) -> bool {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Material choice and payment share the play transaction."
-)]
 impl Game {
     pub(super) fn material_candidates(
         &self,
@@ -1317,10 +1313,6 @@ pub(super) fn check_quick_parameter(decision: &Decision) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Quick quotations reuse the authoritative material payment transaction."
-)]
 impl Game {
     pub(super) fn internal_quick_material_costs_available(
         &self,

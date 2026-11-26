@@ -19,10 +19,6 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Removal permissions use effective printed abilities on the authoritative object."
-)]
 impl Game {
     pub(in crate::game) fn internal_removal_restricted(
         &self,

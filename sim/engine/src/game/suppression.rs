@@ -7,10 +7,6 @@ use serde_json::{Value, json};
 use super::{Frame, Game, int, list, string};
 use crate::{EngineFailure, Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Trigger permission must precede usage recording and pending creation."
-)]
 impl Game {
     pub(super) fn permit_trigger(
         &mut self,

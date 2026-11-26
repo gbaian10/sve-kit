@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected fixture shapes must fail the test."
-)]
 use super::*;
 use sve_engine::game::player::Viewer;
 

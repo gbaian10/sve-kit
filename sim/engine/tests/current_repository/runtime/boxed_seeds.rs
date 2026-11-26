@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Printed box seeds ask only their declared targets and searches."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, SearchAnswer};
 

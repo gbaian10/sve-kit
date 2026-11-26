@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate these printed card scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 

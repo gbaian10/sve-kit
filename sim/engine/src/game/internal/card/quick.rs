@@ -140,10 +140,6 @@ fn procedure(window: QuickWindow) -> Result<WellFormedProcedure> {
     .map_err(invalid)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Quick shares the formal play authority."
-)]
 impl Game {
     pub(in crate::game) fn publicly_empty_quick(&self, actor: Viewer) -> bool {
         let Ok(seat) = seat_name(actor.player()) else {

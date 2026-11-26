@@ -9,10 +9,6 @@ use crate::ir::{
 };
 use crate::ir::{ObjectRef, Program, effect_evolution};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The intrinsic evolution projection shares the closed checker state."
-)]
 impl Checker {
     pub(super) fn evolution_entry(&mut self, ability: &Ability) -> Checked {
         let Some(play) = &ability.play else {

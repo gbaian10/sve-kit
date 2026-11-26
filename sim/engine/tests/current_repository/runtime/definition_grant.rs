@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these grant scenarios."
-)]
 use super::*;
 
 fn target(game: &mut Game, play: CardPlay, card: &str) -> CardPlay {

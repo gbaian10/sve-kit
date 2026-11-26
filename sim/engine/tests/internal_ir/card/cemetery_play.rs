@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected authority questions invalidate these synthetic scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 

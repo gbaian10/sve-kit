@@ -10,10 +10,6 @@ use crate::ir::{
     ReceiptReference, RepeatBody, Termination,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Repeat lowering shares the enclosing typed environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn repeated_move(
         &mut self,

@@ -1,10 +1,6 @@
 use super::{BindingKind, Checked, Checker, WellFormedReason};
 use crate::ir::{Action, Instruction, advance_entry};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The closed private entry projection shares lexical scope and identity checks."
-)]
 impl Checker {
     pub(super) fn check_advance_spell_instruction(&self, instruction: &Instruction) -> Checked {
         if matches!(

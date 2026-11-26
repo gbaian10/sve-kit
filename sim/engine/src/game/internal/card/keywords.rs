@@ -13,10 +13,6 @@ use core::slice::from_ref;
 use serde_json::Value;
 use serde_json::json;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Keyword availability and entry choices share the admitted printed definitions."
-)]
 impl Game {
     /// CR 14.4.3 reads Start Amulet from a deck card, where printed keywords are otherwise idle.
     pub(in crate::game) fn internal_start_amulet(&self, holder: &str) -> Result<Option<bool>> {

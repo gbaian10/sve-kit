@@ -348,10 +348,6 @@ pub(in crate::game::internal) fn choose_route(
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Exchange shares the card play transaction and public state."
-)]
 impl Game {
     pub(super) fn internal_exchange(&self, execution: &Execution) -> Result<Option<ExchangeState>> {
         let object = self.object(&execution.context.source)?;

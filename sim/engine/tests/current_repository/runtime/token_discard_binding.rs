@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate this real-card scenario."
-)]
 
 use super::*;
 use sve_engine::game::internal::DecisionView;

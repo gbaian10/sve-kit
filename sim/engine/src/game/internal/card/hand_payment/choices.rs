@@ -42,10 +42,6 @@ fn witness(choices: &[Choice]) -> Result<Vec<Vec<ObjectRef>>> {
     Ok(assignment)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Hand choices share the card play transaction."
-)]
 impl Game {
     pub(super) fn internal_hand_payment_question(
         &mut self,

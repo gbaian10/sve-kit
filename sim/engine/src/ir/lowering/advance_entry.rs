@@ -4,10 +4,6 @@ use super::{
 use crate::ir::advance_entry::{self, AdvanceName, AdvanceUse};
 use crate::ir::{CardName, DecisionId, InstructionId, ReceiptId};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The adjacent private choice and movement share the ability's scope allocator."
-)]
 impl BodyContext<'_> {
     pub(super) fn advance_entry(
         &mut self,

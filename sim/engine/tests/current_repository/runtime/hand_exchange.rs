@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate these real exchange scenarios."
-)]
 use super::*;
 
 // Synthetic material values isolate the printed filters within the complete selection.

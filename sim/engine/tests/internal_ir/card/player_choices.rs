@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing decision invalidates the player choice scenarios."
-)]
 use super::*;
 use sve_battle_contract::{
     Nat as WireNat, QuestionId, Seat,

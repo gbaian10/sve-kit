@@ -63,10 +63,6 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Installed permissions share authoritative activation and rule movements."
-)]
 impl Game {
     pub(in crate::game::internal) fn observed_ability_locks(
         &self,

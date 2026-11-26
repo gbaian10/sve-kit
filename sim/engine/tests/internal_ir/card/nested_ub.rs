@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the effect-play UB scenarios."
-)]
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::{DecisionView, InputDomain};

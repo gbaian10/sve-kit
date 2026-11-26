@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Capacity fixtures require their explicit question sequence."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionToken, DecisionView, InputDomain};
 use sve_engine::game::player::observation::ObservedZone;

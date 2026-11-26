@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these printed payment scenarios."
-)]
 use super::hand_exchange::{exchange_game, finish, position};
 use super::*;
 use sve_engine::game::internal::SearchAnswer;

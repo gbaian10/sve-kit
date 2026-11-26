@@ -6,10 +6,6 @@ use super::{Frame, Game, string};
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Nested plays use the same payment, targeting and execution engine."
-)]
 impl Game {
     pub(super) fn nested_play(&self, node: &Value, frame: &mut Frame) -> Result<()> {
         let ids = self.select(&node["subjects"], frame)?;

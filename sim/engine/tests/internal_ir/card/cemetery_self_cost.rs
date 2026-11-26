@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Only the cemetery entry fixture's declared questions may occur."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 

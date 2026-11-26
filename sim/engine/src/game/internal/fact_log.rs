@@ -54,10 +54,6 @@ const fn number(amount: i64) -> NumberFacet {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Fact production shares the existing execution."
-)]
 impl Execution {
     pub(super) fn record_fact(&mut self, game: &mut Game, fact: Fact) {
         if game.player_events.active() {

@@ -1,5 +1,4 @@
 #![expect(
-    clippy::panic,
     clippy::too_many_lines,
     reason = "Opening questions and serial protocol assertions fail as one scenario."
 )]

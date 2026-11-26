@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these game scenarios."
-)]
 use super::*;
 
 fn cards(prefix: &str, card: &str, count: usize) -> Vec<Value> {

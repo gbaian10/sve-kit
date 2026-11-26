@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the printed Bunny scenario."
-)]
 use super::*;
 
 fn finish(game: &mut Game, mut play: CardPlay) -> (Activation, u8) {

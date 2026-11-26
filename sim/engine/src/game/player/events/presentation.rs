@@ -373,10 +373,6 @@ impl Presentation {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Presentation shares the game authority without changing its readers."
-)]
 impl Game {
     /// Record for this viewer every complete uncommitted batch that rules can no longer take
     /// back, then read it with [`Game::presentation`].

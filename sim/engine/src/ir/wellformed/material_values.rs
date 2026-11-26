@@ -5,10 +5,6 @@ use crate::ir::{
     PlaySlot, PlayerRef, PlayerRelation, Posture, Selector, Visibility, ZoneKind, receipt_reads,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Paid material reads share the closed program receipt environment."
-)]
 impl Checker {
     pub(super) fn record_field_material(&mut self, decision: &Decision) {
         if !matches!(

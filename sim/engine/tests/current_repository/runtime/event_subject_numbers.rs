@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions or shapes invalidate the numeric event scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::union_burst_batch1::finish;
 use super::*;

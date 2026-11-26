@@ -1,10 +1,6 @@
 use super::{Game, Result};
 use crate::ir::{PlayerRelation, draw_restrictions};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Printed restrictions use the shared draw prohibition query."
-)]
 impl Game {
     pub(in crate::game) fn internal_draw_forbidden(&self, seat: &str) -> Result<bool> {
         if self.state.turn["phase"] == "start" {

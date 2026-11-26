@@ -664,10 +664,6 @@ pub(in crate::game::internal) fn check_control(control: &Control) -> Result<()> 
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Declaration and payment share the play transaction."
-)]
 impl Game {
     pub(in crate::game::internal) fn begin_internal_payment(
         &mut self,
@@ -910,10 +906,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Head payment cancellation is shared by live play and menu probes."
-)]
 impl Execution {
     pub(super) fn declines_required_head(&self, answer: &Answer) -> bool {
         self.nested.is_none()

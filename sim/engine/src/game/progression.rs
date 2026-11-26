@@ -10,10 +10,6 @@ use super::{Frame, Game, int, list, scalar, string};
 use crate::ir::{Ability, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     pub(super) fn evolution_actions(&self, seat: &str) -> Result<Vec<Value>> {
         let mut result = Vec::new();

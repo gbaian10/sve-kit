@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the history and target scenarios."
-)]
 use super::event_cemetery::{finish_checks, move_named};
 use super::event_subject_capture::{enter, finish, position, prepared, prepared_program, resolve};
 use super::*;

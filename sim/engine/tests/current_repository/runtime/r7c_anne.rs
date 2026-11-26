@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "The printed Anne procedures must expose only their declared choices."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

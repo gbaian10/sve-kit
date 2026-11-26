@@ -14,10 +14,6 @@ use core::iter::once;
 /// An intent without a proven payment in this budget is omitted.
 pub(in crate::game::internal::card) const MAX_ANSWERS: u32 = 128;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Declaration probes use the same question and payment authority as live play."
-)]
 impl Game {
     pub(in crate::game::internal::card) fn declaration_probe(&self) -> Self {
         let mut probe = self.clone();

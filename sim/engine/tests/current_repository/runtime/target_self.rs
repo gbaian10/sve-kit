@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate printed target and source scenarios."
-)]
 use super::*;
 
 fn checks(board: &mut Game) {

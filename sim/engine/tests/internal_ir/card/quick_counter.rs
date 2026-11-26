@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected fixture questions invalidate the cost proof."
-)]
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::{DecisionView, InputDomain};

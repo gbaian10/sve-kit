@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The printed spell must ask for its formal target and its exact optional action."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

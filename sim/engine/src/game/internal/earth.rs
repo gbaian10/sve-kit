@@ -7,10 +7,6 @@ use crate::ir::{
 };
 use core::slice::from_ref;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The keyword adds its rule movement to an ordinary counter cost."
-)]
 impl Game {
     pub(super) fn check_keyword_cost(&self, execution: &Execution, step: &CostStep) -> Result<()> {
         let Some(keyword) = step.keyword else {

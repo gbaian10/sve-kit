@@ -61,10 +61,6 @@ fn check_numeric_history(entry: &Value, node: &Value) -> Result<i64> {
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "History imports resolve existing authored nodes against the authoritative catalog."
-)]
 impl Game {
     pub(super) fn historical_effect(
         &self,

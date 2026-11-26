@@ -91,10 +91,6 @@ pub(super) fn check_objects(objects: &Selector) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Scoped revelation shares the authoritative Game visibility state."
-)]
 impl Game {
     pub(in crate::game) fn public_card_disclosure(&self, id: &str) -> Result<bool> {
         let object = self.object(id)?;
@@ -361,10 +357,6 @@ pub(super) fn look_sum(objects: &Selector, property: NumericProperty) -> Option<
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Revelation authority is shared by value and movement consumers."
-)]
 impl Execution {
     pub(super) fn public_look_objects(
         &self,

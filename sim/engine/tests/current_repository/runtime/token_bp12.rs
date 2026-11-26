@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "These real-card scenarios require the printed resolution choice."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

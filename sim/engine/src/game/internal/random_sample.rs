@@ -71,10 +71,6 @@ pub(super) fn mask(node: &mut Node) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Hand sampling uses the authoritative RNG and receipt store."
-)]
 impl Game {
     pub(super) fn internal_random_sample(
         &mut self,

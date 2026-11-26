@@ -18,10 +18,6 @@ impl DeclaredBinding {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Declarations use the body's lexical binding environment."
-)]
 impl BodyContext<'_> {
     #[expect(
         clippy::wildcard_enum_match_arm,

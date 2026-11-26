@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed entry scenarios."
-)]
 use super::*;
 
 fn selected() -> &'static SelectedEffects {

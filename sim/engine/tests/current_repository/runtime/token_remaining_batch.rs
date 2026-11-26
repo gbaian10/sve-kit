@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these real-card scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::SearchAnswer;

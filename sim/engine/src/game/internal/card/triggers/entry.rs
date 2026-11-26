@@ -138,10 +138,6 @@ fn entry_cause(frame: &Frame) -> Result<(Cause, PlayerId, EntryMethod)> {
     )
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The shared movement boundary owns entry event admission."
-)]
 impl Game {
     /// Cemetery and EX cards observe only through abilities active in their own zone.
     fn entry_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {

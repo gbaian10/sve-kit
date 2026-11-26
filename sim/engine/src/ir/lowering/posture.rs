@@ -12,10 +12,6 @@ pub(super) fn player(who: ast::StandPlayer) -> PlayerRef {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Posture permissions own their closed lowering shape."
-)]
 impl BodyContext<'_> {
     pub(super) fn no_stand(
         &mut self,

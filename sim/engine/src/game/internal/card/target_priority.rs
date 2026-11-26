@@ -28,10 +28,6 @@ pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Resu
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Target requirements read effective abilities at the target decision."
-)]
 impl Game {
     pub(super) fn target_requirements(
         &self,

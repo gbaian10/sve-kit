@@ -24,10 +24,6 @@ const fn actor(seat: PlayerId) -> Option<Viewer> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The player boundary shares the existing game authority."
-)]
 impl Game {
     /// Hand a trusted authority fixture or action to the player submission pipeline.
     /// This mutating entry is unnecessary between player answers; input itself is read-only.

@@ -50,10 +50,6 @@ pub(super) fn check_header(ability: &Ability) -> bool {
         && matches!(steps.as_slice(), [step] if check_cost(&step.instruction.action))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Fusion shares material choices and atomic card payment."
-)]
 impl Game {
     pub(super) fn internal_fusion_materials(
         &self,

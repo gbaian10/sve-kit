@@ -8,10 +8,6 @@ use crate::ir::quick::is_printed_quick;
 use crate::ir::{AbilityInstanceId, AbilityKind, Generation, PlayerId, TurnId, ZoneKind};
 use crate::{Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Activation eligibility belongs to the existing game authority."
-)]
 impl Game {
     pub(in crate::game::internal) fn check_internal_activation(
         &self,

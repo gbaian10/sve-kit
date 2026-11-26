@@ -38,10 +38,6 @@ impl CapacityWait {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Token capacity shares the existing creation transaction and Ward continuation."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_token_choice_faces<F>(
         &self,

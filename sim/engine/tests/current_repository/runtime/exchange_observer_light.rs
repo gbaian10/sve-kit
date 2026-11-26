@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate the printed exchange scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, SearchAnswer};
 

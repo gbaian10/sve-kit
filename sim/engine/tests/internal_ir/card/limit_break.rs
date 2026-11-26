@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Synthetic activations must offer the expected target or pending question."
-)]
-
 use super::*;
 
 use sve_engine::catalog::SelectedEffects;

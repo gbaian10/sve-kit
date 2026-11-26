@@ -1,5 +1,11 @@
 //! Pure policy tests import public player data, never Game or internal authority.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
+
 use sve_engine::game::player::{
     CardOption, DamageShare, DistributionQuestion, SearchAnswer, SearchQuestion, SelectionGroup,
     SelectionMember, SelectionQuestion, SelectionRole, TargetRoleAssignment, Viewer,

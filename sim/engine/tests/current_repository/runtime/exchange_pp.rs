@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate the printed PP exchange scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeSet;
 use sve_engine::game::internal::SearchAnswer;

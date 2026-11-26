@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these game scenarios."
-)]
 use super::event_combat_life::life;
 use super::*;
 

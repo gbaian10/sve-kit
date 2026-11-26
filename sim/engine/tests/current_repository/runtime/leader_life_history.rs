@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate printed life scenarios."
-)]
 use super::event_combat_life::life;
 use super::*;
 

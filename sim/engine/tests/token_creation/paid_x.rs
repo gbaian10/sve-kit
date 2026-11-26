@@ -1,7 +1,6 @@
 #![expect(
     clippy::indexing_slicing,
     clippy::default_numeric_fallback,
-    clippy::panic,
     reason = "Fixed synthetic coordinates and questions must fail immediately when changed."
 )]
 

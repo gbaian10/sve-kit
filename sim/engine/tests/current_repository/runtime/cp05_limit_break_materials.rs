@@ -1,5 +1,3 @@
-#![expect(clippy::panic, reason = "Each material must offer its printed target.")]
-
 use super::*;
 
 const ELEMENTS: [(&str, &str, &str, &str); 6] = [

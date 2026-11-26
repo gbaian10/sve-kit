@@ -369,10 +369,6 @@ const fn rule_stage(shape: &QuestionShape) -> Option<wire::ProcessingStage> {
     Some(stage)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Player observations share authoritative readers."
-)]
 impl Game {
     /// Inspect authorized state without allocating handles or advancing the game.
     ///

@@ -1,5 +1,11 @@
 //! Synthetic vectors pin named random continuation and reject unversioned state.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
+
 extern crate alloc;
 
 use serde_json::{Value, json};

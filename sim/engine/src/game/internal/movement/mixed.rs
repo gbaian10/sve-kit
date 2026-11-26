@@ -65,10 +65,6 @@ pub(in crate::game::internal) fn inspection(control: &Control, scope: ScopeId) -
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The batch reuses the shared planner, capacity selection and atomic commit."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_mixed_ex(
         &mut self,

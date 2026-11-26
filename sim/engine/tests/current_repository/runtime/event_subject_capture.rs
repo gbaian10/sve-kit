@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the subject and capture scenarios."
-)]
 use super::event_cemetery::{finish_checks, move_named};
 use super::*;
 use alloc::collections::BTreeMap;

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected synthetic decisions invalidate the event subject oracle."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::InputDomain;

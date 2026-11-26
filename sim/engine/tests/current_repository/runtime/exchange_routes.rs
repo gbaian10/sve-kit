@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected exchange questions invalidate the printed route protocol."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

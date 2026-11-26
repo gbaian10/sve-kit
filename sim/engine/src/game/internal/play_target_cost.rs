@@ -14,10 +14,6 @@ pub(super) struct SelectedNames {
     pub(super) names: Vec<CardName>,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "A quote uses the actual declared spell's authority."
-)]
 impl Execution {
     pub(super) fn play_target_match(&self, game: &Game, read: &BoolRead) -> Result<bool> {
         let BoolRead::CardPlayTarget {
@@ -62,10 +58,6 @@ impl Execution {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The source is resolved from authority, never from a supplied face or name."
-)]
 impl Game {
     fn target_cost_source<'game>(
         &'game self,

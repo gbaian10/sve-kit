@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Only the declared hand or field choices and granted pending abilities may occur."
-)]
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
 

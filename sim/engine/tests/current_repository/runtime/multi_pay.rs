@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate these payment scenarios."
-)]
 use super::*;
 
 fn run(number: &str, hand: Value) -> (Game, Value) {

@@ -7,10 +7,6 @@ use serde_json::Value;
 use super::{Frame, Game, int, string};
 use crate::{EngineFailure, Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "All action prohibitions share the authoritative state and duration checks."
-)]
 impl Game {
     pub(super) fn card_play_prohibited(&self, id: &str) -> Result<bool> {
         let leader = format!("{}.leader", self.object(id)?.controller);

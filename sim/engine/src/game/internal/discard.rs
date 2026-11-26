@@ -408,10 +408,6 @@ impl HandWait {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Private choice and movement use the same authoritative Game."
-)]
 impl Game {
     pub(super) fn internal_discard_wait(
         &mut self,

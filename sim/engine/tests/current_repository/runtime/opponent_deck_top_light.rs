@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these game scenarios."
-)]
 use super::*;
 
 /// P2 has `deck` hidden cards and `grave` cards already in its cemetery.

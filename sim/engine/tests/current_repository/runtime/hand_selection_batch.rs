@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate printed hand scenarios."
-)]
 use super::*;
 
 fn aliases(number: &str) -> Vec<String> {

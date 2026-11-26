@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions or receipts invalidate the replacement scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{InstructionOutcome, ResumeStage};
 

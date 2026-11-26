@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected program and choice shapes invalidate these history probes."
-)]
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
 use sve_engine::game::player::Viewer;

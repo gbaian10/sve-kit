@@ -8,10 +8,6 @@ use super::movement::Attachment;
 use super::{Frame, Game, int};
 use crate::{EngineFailure, Result};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "State-based cleanup batches share the authoritative game state."
-)]
 impl Game {
     pub(super) fn clean_attachment_rules(&mut self) -> Result<bool> {
         let equipment_changed = self.clean_attachments(Attachment::Equipment)?;

@@ -65,10 +65,6 @@ pub(super) fn prints_for_names(
         .collect())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     pub(super) fn new_named_object(&mut self, name: &str, controller: &str) -> Result<String> {
         let card = self.catalog.token_print(name)?;

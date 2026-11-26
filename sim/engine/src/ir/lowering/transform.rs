@@ -1,10 +1,6 @@
 use super::{Action, Binding, BodyContext, Expr, LoweringError, Nat, PlayerRef, ast, unsupported};
 use crate::ir::{DecisionId, TokenAllocation, TokenTemplateId};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Transformation shares the body binding allocator."
-)]
 impl BodyContext<'_> {
     pub(super) fn transform(
         &mut self,

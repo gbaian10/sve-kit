@@ -145,10 +145,6 @@ pub(super) fn printed_play_cost(value: &Value) -> Result<i64> {
         .ok_or_else(|| unsupported("missing printed card cost or nonnumeric/negative cost"))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Cost modifiers share authoritative movement and turn occurrences."
-)]
 impl Game {
     fn resolved_cost_change(&self, change: Change) -> Result<Change> {
         if let Change::LiveDelta(id) = change {
@@ -520,10 +516,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Observation reads the same generation-bound cost layers."
-)]
 impl Game {
     pub(super) fn observed_cost_effects(
         &self,

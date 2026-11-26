@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Only the accepted fixture's instruction shape may occur."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 

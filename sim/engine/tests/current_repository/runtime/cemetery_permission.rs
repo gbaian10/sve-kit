@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed cemetery permission scenarios."
-)]
 use super::*;
 
 const ACTOR: PlayerId = PlayerId { seat: 1 };

@@ -2,10 +2,6 @@ use super::{Checked, Checker, WellFormedReason};
 use crate::ir::trigger_multiplicity::projection;
 use crate::ir::{Effect, ZoneKind};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule declaration validation shares the structural scope environment."
-)]
 impl Checker {
     pub(super) fn trigger_multiplicity(&mut self, effect: &Effect, zones: &[ZoneKind]) -> Checked {
         let Some(shape) = projection(effect) else {

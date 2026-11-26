@@ -1,8 +1,4 @@
 // The shared real repository fixture dominates cold runs; each printing uses the same selection.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed extra-turn scenario."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use core::iter::once;

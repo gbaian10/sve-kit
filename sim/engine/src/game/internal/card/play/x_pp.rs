@@ -68,10 +68,6 @@ impl Budget {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "X uses the same play plan and quoted PP as ordinary payment."
-)]
 impl Game {
     pub(super) fn internal_x_parameter(
         &mut self,

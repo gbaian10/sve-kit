@@ -147,10 +147,6 @@ fn require_counter(
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Counter lowering shares the ability binding environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn counter_change(
         &mut self,

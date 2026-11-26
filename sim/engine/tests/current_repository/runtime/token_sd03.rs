@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real Quick spell requires its authority window and printed either choice."
-)]
 use super::*;
 
 fn position(occupied: usize) -> Value {

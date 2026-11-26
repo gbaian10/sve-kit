@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed Mother resurrection scenarios."
-)]
 use super::*;
 
 fn position(number: &str, foreign: bool, full: bool, form: bool) -> Value {

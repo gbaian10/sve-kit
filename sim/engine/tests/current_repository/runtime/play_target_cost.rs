@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A changed formal question invalidates these printed scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 use sve_engine::game::player::{

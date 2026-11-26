@@ -63,10 +63,6 @@ fn stat_gain_exists(execution: &Execution, game: &Game, plan: &StatFilter) -> Re
     })))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Public history observations share the game state."
-)]
 impl Game {
     pub(in crate::game) fn observed_history(&self, perspective: Viewer) -> Result<TurnHistory> {
         use crate::game::player::observation::{
@@ -724,10 +720,6 @@ pub(in crate::game) struct DamageHistoryFact {
     traits: Vec<String>,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Damage history shares committed game state."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_damage_source_link(
         &self,

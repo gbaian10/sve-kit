@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these game scenarios."
-)]
 //! Cards needing only the result-card, mode-condition and opponent-discard wiring.
 use super::*;
 use sve_engine::game::internal::SearchAnswer;

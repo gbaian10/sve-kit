@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected declarations invalidate these printed discard scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

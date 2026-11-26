@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected real-card evolution stages fail the scenario."
-)]
 
 use super::*;
 use sve_engine::game::player::{

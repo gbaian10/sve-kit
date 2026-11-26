@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate equipment Play scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 

@@ -4,10 +4,6 @@ use crate::ir::{
     ReceiptReference,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Material values share the checked body receipt environment."
-)]
 impl BodyContext<'_> {
     #[expect(
         clippy::wildcard_enum_match_arm,

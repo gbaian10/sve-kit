@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "An unexpected decision invalidates the printed-card scenario."
-)]
 
 use super::*;
 

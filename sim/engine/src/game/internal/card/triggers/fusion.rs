@@ -40,10 +40,6 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Fusion resolution shares pending observer admission."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_prepare_fused_materials(
         &mut self,

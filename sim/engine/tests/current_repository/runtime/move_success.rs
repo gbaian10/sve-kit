@@ -1,5 +1,3 @@
-#![expect(clippy::panic, reason = "Unexpected decisions invalidate the real Move scenario.")]
-
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

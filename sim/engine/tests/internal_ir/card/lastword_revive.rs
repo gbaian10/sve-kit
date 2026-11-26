@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing Lastword authority question invalidates these synthetic scenarios."
-)]
 use super::evolution_linked_movement::{loaded, tree};
 use super::*;
 use sve_engine::game::internal::{Fact, InputDomain};

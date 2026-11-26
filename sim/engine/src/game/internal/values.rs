@@ -28,10 +28,6 @@ use crate::ir::{NumericProperty, Posture, PostureRead};
 use alloc::collections::BTreeSet;
 use core::convert::identity;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Value evaluation and ordering share the same execution slots."
-)]
 impl Execution {
     pub(super) fn player(&self, game: &Game, player: &PlayerRef) -> Result<PlayerId> {
         match player {

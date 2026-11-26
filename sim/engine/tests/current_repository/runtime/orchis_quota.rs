@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected choices invalidate the printed Orchis scenarios."
-)]
 use super::*;
 
 fn answer(game: &mut Game, mut step: CardPlay, chosen: &str) {

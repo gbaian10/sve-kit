@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected decision invalidates the printed payment scenario."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

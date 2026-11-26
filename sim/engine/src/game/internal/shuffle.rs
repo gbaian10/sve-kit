@@ -8,10 +8,6 @@ use crate::ir::{
 };
 use core::num::NonZeroU64;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Shuffling uses the existing game transaction and random authority."
-)]
 impl Game {
     pub(super) fn internal_shuffle(
         &mut self,

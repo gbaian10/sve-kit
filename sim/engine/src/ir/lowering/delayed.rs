@@ -10,10 +10,6 @@ use crate::ir::{
 };
 use crate::ir::{Phase, PlayerRef};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Delayed bodies share the enclosing lowering allocator."
-)]
 impl BodyContext<'_> {
     pub(super) fn delayed(
         &mut self,

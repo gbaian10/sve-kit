@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected fixture structure invalidates these counter scenarios."
-)]
-
 use super::*;
 use core::mem;
 use sve_engine::EngineFailure;

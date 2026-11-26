@@ -218,10 +218,6 @@ fn typed(
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Player shapes read the existing authority's cached questions."
-)]
 impl Game {
     pub(in crate::game) fn player_decision_shape(&self) -> Result<DecisionShape> {
         if let Some(execution) = &self.typed

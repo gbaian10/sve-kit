@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Synthetic questions must retain their declared target and payment kinds."
-)]
 use super::presentation_feed::Board;
 use super::*;
 use alloc::collections::BTreeMap;

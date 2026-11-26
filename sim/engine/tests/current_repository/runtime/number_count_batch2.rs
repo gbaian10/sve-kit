@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these numeric consumer scenarios."
-)]
 use super::*;
 const PLAYER: PlayerId = PlayerId { seat: 1 };
 

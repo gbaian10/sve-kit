@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the synthetic history scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use core::slice::from_ref;

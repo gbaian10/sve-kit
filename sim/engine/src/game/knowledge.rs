@@ -113,10 +113,6 @@ impl Knowledge {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Knowledge owns player identity periods."
-)]
 impl Game {
     /// Handles of the objects on this viewer's board right now. An erased object keeps its
     /// authority handle until its knowledge is cleared, but it is on no board.

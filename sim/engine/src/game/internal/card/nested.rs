@@ -37,10 +37,6 @@ pub(in crate::game::internal) fn check(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Nested plays share the ordinary formal play authority and its continuation."
-)]
 impl Game {
     pub(super) fn prepare_card_execution(
         &mut self,
@@ -350,10 +346,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Only the private continuation module can inspect parent execution ownership."
-)]
 impl Execution {
     pub(in crate::game::internal) fn root_ability(&self) -> Option<RuntimeAbilitySource> {
         self.nested

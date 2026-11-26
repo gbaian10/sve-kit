@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Only the printed Look choice and remainder ordering are expected."
-)]
 use super::*;
 
 const PLAYER: PlayerId = PlayerId { seat: 1 };

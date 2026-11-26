@@ -44,10 +44,6 @@ pub(in crate::game::internal) struct Installed {
     captures: Vec<((ScopeId, u64), Slot)>,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Installed observers join the common trigger machinery."
-)]
 impl Game {
     pub(in crate::game::internal) fn observed_delayed(
         &self,

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed-card scenarios."
-)]
 use super::*;
 
 fn companion_game(initial: &Value, kind: &str, trait_name: &str) -> Game {

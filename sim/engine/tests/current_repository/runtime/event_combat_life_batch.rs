@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate printed migration scenarios."
-)]
 use super::event_cemetery::{finish_checks, prepared};
 use super::event_combat_life::{attack, combat, grant, initial, life, resolve};
 use super::*;

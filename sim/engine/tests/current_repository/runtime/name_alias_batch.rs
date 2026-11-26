@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected choices invalidate these complete printed-card scenarios."
-)]
 use super::*;
 
 fn finish(board: &mut Game, mut play: CardPlay) {

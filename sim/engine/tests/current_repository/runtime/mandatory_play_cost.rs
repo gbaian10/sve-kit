@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate printed payment scenarios."
-)]
 use super::*;
 
 // Share the real repository boundary once; blank companions isolate material payment.

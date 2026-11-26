@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing trigger domain means the game fixture cannot continue."
-)]
 
 use super::*;
 

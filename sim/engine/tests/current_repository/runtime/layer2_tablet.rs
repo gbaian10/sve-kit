@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the real Tablet allocation scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{InstructionOutcome, SearchAnswer};
 

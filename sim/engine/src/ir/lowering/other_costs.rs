@@ -254,10 +254,6 @@ pub(super) fn lower_at_source(
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Player installations share the body binding allocator."
-)]
 impl BodyContext<'_> {
     pub(super) fn player_cost(
         &mut self,

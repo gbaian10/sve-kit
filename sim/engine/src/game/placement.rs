@@ -58,10 +58,6 @@ fn insert_at(items: &mut Vec<Value>, id: &str, offset: u64) {
     items.push(json!(id));
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Ordered zone placement shares the authoritative object and zone state."
-)]
 impl Game {
     pub(super) fn placement_controller(
         &self,

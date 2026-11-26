@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected player question invalidates these printed card scenarios."
-)]
 
 use super::*;
 use sve_engine::game::player::{

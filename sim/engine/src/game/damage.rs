@@ -36,10 +36,6 @@ pub(super) struct DamageReplacement {
     pub(super) consumption: Option<DamageUse>,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Damage replacement and simultaneous application share authoritative state."
-)]
 impl Game {
     pub(super) fn damage_batch(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let hits = list(&node["hits"]);

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Incorrect decision shapes invalidate the Quick sequence."
-)]
-
 use super::*;
 
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};

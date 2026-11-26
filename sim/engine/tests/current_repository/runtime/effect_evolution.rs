@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected printed decisions invalidate these effect-evolution scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

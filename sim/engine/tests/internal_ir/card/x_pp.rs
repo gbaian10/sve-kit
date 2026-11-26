@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the X payment scenarios."
-)]
 use super::*;
 use crate::payment_fixtures;
 use alloc::collections::BTreeMap;

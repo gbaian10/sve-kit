@@ -1,8 +1,4 @@
 //! BP07-004 uses the ordinary Field Put exchange, including tokens.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected exchange questions invalidate these scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 

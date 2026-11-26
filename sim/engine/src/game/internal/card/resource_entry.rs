@@ -292,10 +292,6 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Meal shares proper-play payment, movement and rollback authority."
-)]
 impl Game {
     pub(in crate::game) fn internal_resource_links_valid(&self, holder: &str) -> Result<bool> {
         let source = self.object(holder)?;

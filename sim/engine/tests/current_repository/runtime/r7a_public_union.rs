@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Only the printed target and flip decisions may occur."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

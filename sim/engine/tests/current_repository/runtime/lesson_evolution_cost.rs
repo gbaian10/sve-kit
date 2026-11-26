@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate printed card scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 fn fixture() -> &'static SelectedEffects {

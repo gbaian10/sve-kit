@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed grant scenarios."
-)]
 use super::*;
 
 fn pass_quick(game: &mut Game) {

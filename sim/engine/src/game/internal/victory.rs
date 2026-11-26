@@ -45,10 +45,6 @@ pub(super) fn check_static(located: &Located<Ability>) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Typed victory uses the common authoritative game result."
-)]
 impl Game {
     pub(in crate::game) fn internal_result_forbidden(&self, seat: &str, win: bool) -> Result<bool> {
         for provider in self.field_ids() {

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these printed card scenarios."
-)]
 use super::*;
 use core::iter::once;
 use std::{fs::read_to_string, path::PathBuf};

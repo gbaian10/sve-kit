@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected real-card input domains fail this serial scenario."
-)]
 
 use super::*;
 use sve_engine::game::player::{

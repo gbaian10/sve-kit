@@ -7,10 +7,6 @@ use crate::EngineFailure;
 use core::mem::take;
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Referee reads share the game authority without widening the player boundary."
-)]
 impl Game {
     /// Fixture label of a viewer capability, while that viewer can still identify it.
     pub(crate) fn referee_label(&self, viewer: Viewer, handle: &ObjectHandle) -> Option<String> {

@@ -82,10 +82,6 @@ fn origin_zone(zone: &str) -> Option<ZoneKind> {
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Banish uses the existing movement transaction and pending queue."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_prepare_banish_events(
         &mut self,

@@ -34,10 +34,6 @@ const fn damage_kind(kind: Option<&ast::PreventionKind>) -> DamageKind {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Prevention lowering shares the existing body binding allocator."
-)]
 impl BodyContext<'_> {
     fn prevention_recipients(
         &mut self,

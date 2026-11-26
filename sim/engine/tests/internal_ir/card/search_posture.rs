@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected private search decisions invalidate the entry scenarios."
-)]
 use super::evolution_linked_movement::{loaded, tree};
 use super::*;
 use sve_engine::game::internal::{Fact, InputDomain, SearchAnswer};

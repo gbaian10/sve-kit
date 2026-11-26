@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real mixed creation has only its capacity and Ward entry questions."
-)]
 use super::*;
 
 fn position(number: &str, occupied: usize) -> Value {

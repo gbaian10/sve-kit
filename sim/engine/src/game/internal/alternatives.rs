@@ -59,10 +59,6 @@ impl AlternativeWait {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Resolution alternatives share the existing mode decision boundary."
-)]
 impl Game {
     pub(super) fn internal_may(
         &mut self,

@@ -152,10 +152,6 @@ fn origin(previous: &Object) -> Result<EntryOrigin> {
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Both projections belong to the common movement transaction."
-)]
 impl Game {
     pub(super) fn movement_header(
         &mut self,

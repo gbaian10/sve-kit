@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected pending domain means the card did not reach its printed trigger."
-)]
 
 use super::*;
 

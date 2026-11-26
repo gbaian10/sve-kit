@@ -15,10 +15,6 @@ use alloc::collections::BTreeSet;
 use core::iter::once;
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Committed history bookkeeping shares the game transaction state."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_record_stat_gains(
         &mut self,

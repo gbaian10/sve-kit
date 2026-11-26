@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate delayed event scenarios."
-)]
 use super::event_cemetery::{finish_checks, move_named, prepared, prepared_program};
 use super::event_combat_life::life;
 use super::event_subject_capture::production;

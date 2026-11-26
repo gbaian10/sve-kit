@@ -12,10 +12,6 @@ use crate::ir::{
     Predicate, Role, ScopeId, Stat,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Selection captures share the target parameter environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn subject_number(
         &self,

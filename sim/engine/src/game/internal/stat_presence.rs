@@ -2,10 +2,6 @@
 use super::{Execution, Game, Result, invalid, unsupported};
 use crate::ir::{CardKind, NumberRead, ObjectOperand, ObjectView, Selector, stat_presence};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Stat presence consumes the execution's existing number authority."
-)]
 impl Execution {
     pub(super) fn stat_information_present(
         &self,

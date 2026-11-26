@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected fixture questions invalidate the printed card path."
-)]
 use super::*;
 
 fn pending(game: &mut Game, printing: &str) -> CardPlay {

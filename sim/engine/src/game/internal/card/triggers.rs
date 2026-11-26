@@ -201,10 +201,6 @@ const fn is_lastword(ability: &Ability) -> bool {
     )
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Pending order and departure producers share the authoritative game."
-)]
 impl Game {
     pub(in crate::game) fn observed_pending(
         &self,
@@ -1050,10 +1046,6 @@ const fn trigger_timing(event: &EventPayload) -> TriggerTiming {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Pending projection reads the same cached occurrence identities as native answers."
-)]
 impl Game {
     /// Physical holder behind a current pending-order option; the trusted exam runner
     /// resolves fixture labels with it after the holder stops being identifiable.

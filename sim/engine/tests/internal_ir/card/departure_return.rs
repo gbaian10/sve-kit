@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these synthetic departures."
-)]
 //! 「場から墓場に置かれたとき、それを場に出す」 needs a header that guarantees the cemetery.
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};

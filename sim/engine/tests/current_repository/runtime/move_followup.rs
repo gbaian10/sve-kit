@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Complete printed movement scenarios require their declared choices."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, SearchAnswer};
 

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the real hand-reveal scenario."
-)]
 
 use super::*;
 

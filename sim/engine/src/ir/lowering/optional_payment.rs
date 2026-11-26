@@ -10,10 +10,6 @@ pub(super) struct PaymentDeclaration {
     pub parameters: Vec<Decision>,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Optional payment shares the body binding environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn resolution_payment(
         &mut self,

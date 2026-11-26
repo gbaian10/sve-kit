@@ -34,10 +34,6 @@ fn is_installed_activation_permission(
         && matches!(predicate.except.as_slice(), [] | [KeywordId::Evolution])
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Installed effects share the structural checker's closed environment."
-)]
 impl Checker {
     pub(super) fn modify(
         &mut self,

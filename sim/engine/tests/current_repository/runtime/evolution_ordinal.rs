@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The ordinal probe requires the real Fencer chain's declared pending and target domains."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::DecisionView;

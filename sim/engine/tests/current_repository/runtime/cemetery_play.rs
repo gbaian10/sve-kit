@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected authority questions invalidate these real printed-card paths."
-)]
 use super::*;
 
 fn position(base: &str) -> Value {

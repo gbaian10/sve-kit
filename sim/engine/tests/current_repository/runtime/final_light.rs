@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected public decisions invalidate these printed mode scenarios."
-)]
 use super::union_burst_batch1::{pending, ub};
 use super::*;
 

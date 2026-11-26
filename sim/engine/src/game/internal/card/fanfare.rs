@@ -42,10 +42,6 @@ pub(super) fn check_header(ability: &Ability) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Fanfare has its own authority producer and continuation."
-)]
 impl Game {
     pub(super) fn check_field_play_capacity(&self, actor: PlayerId) -> Result<()> {
         if self.zone_count(seat_name(actor)?, "field") >= 5 {

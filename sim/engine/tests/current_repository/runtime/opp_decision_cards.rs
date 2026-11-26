@@ -1,10 +1,5 @@
 //! Real cards whose decisions belong to a player other than the effect controller, driven
 //! through the player interface.
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected player questions invalidate the real-card scenarios."
-)]
 use super::*;
 use sve_engine::game::player::{
     Command, DecisionShape, Input, MainActionAnswer, MainIntentKind, QuestionShape,

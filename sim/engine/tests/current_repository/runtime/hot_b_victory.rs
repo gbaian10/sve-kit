@@ -1,8 +1,4 @@
 // The shared repository selection is loaded once; cold source preparation dominates these cases.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed victory scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

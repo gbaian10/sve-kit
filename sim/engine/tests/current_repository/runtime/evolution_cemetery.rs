@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed card scenario."
-)]
 use super::*;
 use sve_engine::game::Step;
 

@@ -1,5 +1,11 @@
 //! Board face identity and disclosure come from authority readers, never UI guesses.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
+
 use serde_json::{Value, json};
 extern crate alloc;
 

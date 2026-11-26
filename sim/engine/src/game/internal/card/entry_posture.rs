@@ -30,10 +30,6 @@ pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Resu
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Every movement route shares the prospective printed entry rule."
-)]
 impl Game {
     pub(in crate::game) fn internal_entry_acted(&self, card: &str, face: usize) -> Result<bool> {
         let Some(program) = self.card_runtime.definitions.cards.get(card) else {

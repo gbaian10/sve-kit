@@ -6,10 +6,6 @@ use crate::ir::{
     Selector, SourceSpan, StepwiseMode, TextQuantifier, Visibility, ZoneKind, ZoneRef,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Public observations share the body's existing Look receipts."
-)]
 impl BodyContext<'_> {
     pub(super) fn random_reveal(
         &mut self,

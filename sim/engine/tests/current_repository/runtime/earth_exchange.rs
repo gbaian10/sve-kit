@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed Earth Rite exchange scenario."
-)]
 use super::*;
 use sve_engine::game::player::{
     Command, DecisionShape, Input, MainActionAnswer, MainIntentId, MainIntentKind, Question,

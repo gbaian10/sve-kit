@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected IR or question shape invalidates this boundary regression."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 

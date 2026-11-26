@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected public questions invalidate the cost scenarios."
-)]
 use super::*;
 use crate::player_pipeline::{answer, end_command, question};
 use std::sync::OnceLock;

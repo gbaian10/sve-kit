@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the nested ability scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 

@@ -66,10 +66,6 @@ impl Notices {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Notice capture and delivery share authority and per-seat knowledge."
-)]
 impl Game {
     pub(in crate::game) fn record_battle_notice(
         &mut self,

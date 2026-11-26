@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "The complete Hishi procedures require their declared choices."
-)]
 use super::*;
 
 const PRINTS: [(&str, &str); 4] = [

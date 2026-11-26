@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected pending decisions invalidate these occurrence scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::InputDomain;

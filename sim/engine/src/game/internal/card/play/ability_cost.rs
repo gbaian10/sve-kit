@@ -63,10 +63,6 @@ fn remaining_parameters(
     Ok(retained)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Original-cost authorization changes the common play plan, not its executor."
-)]
 impl PlayState {
     pub(super) fn waive_original_costs(&mut self, execution: &mut Execution) -> Result<()> {
         if self.cost_policy != AbilityCostPolicy::WaiveOriginal {

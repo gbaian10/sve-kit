@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the printed discard scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::event_subject_capture::prepared_program;
 use super::*;

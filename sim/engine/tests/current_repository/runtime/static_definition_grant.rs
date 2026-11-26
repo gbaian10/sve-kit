@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these real grant scenarios."
-)]
 use super::*;
 
 #[expect(

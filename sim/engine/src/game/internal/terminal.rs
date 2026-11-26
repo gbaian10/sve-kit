@@ -16,10 +16,6 @@ pub struct Terminal {
     pub step: Step,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Termination owns the same authority as prepared continuations."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_effect_terminal(
         &mut self,

@@ -5,10 +5,6 @@ use crate::ir::{
     Predicate, Selector, Stat, stat_presence,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Presence uses the same checked source and target bindings as number lowering."
-)]
 impl BodyContext<'_> {
     #[expect(
         clippy::wildcard_enum_match_arm,

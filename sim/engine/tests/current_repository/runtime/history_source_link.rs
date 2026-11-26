@@ -1,4 +1,3 @@
-#![expect(clippy::panic, reason = "Printed history choices must have the expected domains.")]
 use super::*;
 use super::damage_prevent::field_name;
 use super::event_cemetery::finish_checks;

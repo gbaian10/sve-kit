@@ -23,10 +23,6 @@ use crate::ir::{ObjectRelation, stat_presence};
 
 use core::any::TypeId;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Control and value rules share one checker state but live in separate modules."
-)]
 impl Checker {
     pub(super) fn integer(&mut self, expression: &Expr<Int>) -> Checked {
         if self.event_capture() && matches!(expression, Expr::Live(_)) {

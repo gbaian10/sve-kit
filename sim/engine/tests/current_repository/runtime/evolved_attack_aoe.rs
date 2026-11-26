@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the real attack scenario."
-)]
 
 use super::*;
 

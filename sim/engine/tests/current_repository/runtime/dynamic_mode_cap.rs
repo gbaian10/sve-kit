@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the dynamic printed mode scenario."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

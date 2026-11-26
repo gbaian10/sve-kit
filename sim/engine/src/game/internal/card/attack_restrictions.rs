@@ -101,10 +101,6 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Attack permissions use the authoritative combat position."
-)]
 impl Game {
     pub(in crate::game::internal) fn observed_attack_locks(
         &self,
@@ -398,10 +394,6 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Installed attack restrictions share generation-bound authority."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_install_attack_restriction(
         &mut self,

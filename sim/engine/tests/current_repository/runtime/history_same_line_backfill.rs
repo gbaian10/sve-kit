@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate real-card scenarios."
-)]
 
 use super::ex_select::{expanded, rule_fixtures};
 use super::*;

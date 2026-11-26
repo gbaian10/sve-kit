@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real-card protocol must expose the expected typed question."
-)]
 
 use super::player_presentation::{SEATS, answer, declare, is_action, kinds, present, question};
 use super::*;

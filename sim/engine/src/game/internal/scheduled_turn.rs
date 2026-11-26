@@ -21,10 +21,6 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Typed extra turns mutate the shared authoritative schedule."
-)]
 impl Game {
     pub(super) fn internal_schedule_turn(
         &mut self,

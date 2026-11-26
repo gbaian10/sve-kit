@@ -12,10 +12,6 @@ use crate::ir::{
     Cause, DriveGainedEvent, EventPattern, EventPayload, RaceEvent, SnapshotId, TriggerCondition,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Race facts share the authority's pending queue."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_race_event(
         &mut self,
@@ -84,10 +80,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Drive gain shares the authority's pending queue."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_drive_gained_event(
         &mut self,

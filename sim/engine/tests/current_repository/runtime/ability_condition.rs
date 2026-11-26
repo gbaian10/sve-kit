@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the printed scenarios."
-)]
 use super::*;
 use std::sync::OnceLock;
 

@@ -185,10 +185,6 @@ pub(super) fn leader_life_condition(
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Body expressions share the ability binding and definition environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn attack_target_objects(&mut self, path: &str) -> Result<Selector, LoweringError> {
         let Some(super::super::events::subject::SubjectFields::Attack(event)) = self.subject_event
