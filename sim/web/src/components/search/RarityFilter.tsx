@@ -38,7 +38,8 @@ export function RarityFilter({
     const style = code.slice("pr:".length)
     return { code, label: prStyleLabel(t, style), ...visual(prStyleVisual(style, edition)) }
   })
-  // A rarity the edition has no printings of stays out, as in the location row: GBF is JP only.
+  // A rarity the edition has no non-Premium printings of stays out, as in the location row: GBF is
+  // JP only.
   const counts = options?.counts
   const items: FacetChip[] = orderRarities(rarities)
     .filter((rarity) => !counts || (counts[rarity.code] ?? 0) > 0)
