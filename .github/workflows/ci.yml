@@ -46,9 +46,12 @@ jobs:
           fetch-depth: 0 # push events diff against the previous commit with git
           persist-credentials: false
           clean: true
+      - name: Prepare one author data change for the routing probe
+        run: printf '\n# Temporary CI routing probe\n' >> authored/rules/author-effects/BP01/000.yaml
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
+          base: HEAD
           predicate-quantifier: some-with-excludes
           # Transitive inputs count: the engine compiles in dsl/ and its tests read tests/ and authored/.
           filters: |
@@ -1003,3 +1006,7 @@ jobs:
             status=1
           fi
           exit "$status"
+      - name: Require the normal full CI run before merge
+        run: |
+          echo "The temporary author-only routing probe completed."
+          exit 1
