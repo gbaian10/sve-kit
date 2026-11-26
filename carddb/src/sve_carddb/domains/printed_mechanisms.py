@@ -182,7 +182,8 @@ def parse(text: str, region: str) -> Parsed:
     return result
 
 
-def _section_owner(text: str, region: str) -> str:
+def section_owner(text: str, region: str) -> str:
+    """Tell this card's own continuation from a token definition or a reminder."""
     line = text.lstrip()
     if not line or line.startswith(("（", "(")):
         return "reminder"
@@ -217,7 +218,7 @@ def apply(
             uncertain = set(CODES) if current.missing else set[str]()
             thresholds: dict[str, set[int]] = {}
             for text, owner in [(text, "self") for text in current.main] + [
-                (text, _section_owner(text, region)) for text in current.sections
+                (text, section_owner(text, region)) for text in current.sections
             ]:
                 if owner in {"token", "reminder"}:
                     continue

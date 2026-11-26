@@ -131,9 +131,9 @@ semantics. Project table requirements remain in `docs/schema/build/build-db.md` 
 tables: 44 tables. The default selects only T0. Image metadata is supplied by
 the separate image index, without image tables in this database.
 DSL remains a reserved, unavailable capability; disabled nullable references remain
-NULL-only. The optional `keyword` capability includes seven manual mechanism tables
-and their glossary/translation dependencies. The offline workflow supplies the H1
-producer with partial coverage; see `docs/schema/domains/keyword-mechanics.md`.
+NULL-only. The optional `keyword` capability includes seven mechanism tables
+and their glossary/translation dependencies. The offline workflow derives keyword
+relations from admitted programs; see `docs/schema/domains/keyword-mechanics.md`.
 Enabling CR installs the existing
 `rules_profile_revision.cr_version_id` FK. This selection is smaller than the
 minimum 55-table DDL inventory.

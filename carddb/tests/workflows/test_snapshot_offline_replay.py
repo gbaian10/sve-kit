@@ -374,10 +374,8 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         "jp": {"total_cards": 1, "known_cards": 1, "unknown_cards": 0},
         "en": {"total_cards": 1, "known_cards": 0, "unknown_cards": 1},
     }
-    assert (
-        mechanism["description"]
-        == "Self keyword declarations: body parts containing only keywords."
-    )
+    # Without admitted programs the wording adapters still report every card.
+    assert object_value(mechanism["dsl"])["programs"] == 0
     record = InputRecord.model_validate_json(
         (tmp_path / "bundle/inputs.json").read_bytes()
     )

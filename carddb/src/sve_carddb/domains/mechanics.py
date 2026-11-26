@@ -1,4 +1,4 @@
-"""Compose keyword producers from exact current owners, independently of rendering."""
+"""Register keyword concepts, then project card mechanics from programs and wording."""
 
 from collections import Counter
 from dataclasses import dataclass
@@ -7,12 +7,6 @@ from typing import TYPE_CHECKING, Annotated, Literal, cast
 from pydantic import Field, JsonValue, ValidationError, field_validator, model_validator
 
 from sve_carddb.build.rows import insert_exact
-from sve_carddb.build.source_rows import insert_raw_sources
-from sve_carddb.contracts.four_layer import (
-    FaceRevisionOwner,
-    GlossaryReference,
-    OwnerField,
-)
 from sve_carddb.core.authored import read
 from sve_carddb.core.json import canonical, digest
 from sve_carddb.core.models import Hash, RecordData, Text
@@ -21,43 +15,24 @@ from sve_carddb.domains.ability_types import apply as apply_abilities
 from sve_carddb.domains.keyword_self import ADAPTER as SELF_ADAPTER
 from sve_carddb.domains.keyword_self import apply as apply_self
 from sve_carddb.domains.keyword_self import current_fields
-from sve_carddb.domains.mechanic_batch import FIRST_BATCH_CARDS
-from sve_carddb.domains.mechanic_coverage import (
-    FieldCheck,
-    Inspection,
-    project_current,
-    store_evidence,
-)
-from sve_carddb.domains.mechanic_fields import ADAPTER as FIELDS_ADAPTER
-from sve_carddb.domains.mechanic_fields import apply as apply_fields
-from sve_carddb.domains.mechanic_grants import ADAPTER as GRANTS_ADAPTER
-from sve_carddb.domains.mechanic_grants import apply as apply_grants
-from sve_carddb.domains.mechanic_references import ADAPTER as REFERENCES_ADAPTER
-from sve_carddb.domains.mechanic_references import apply as apply_references
+from sve_carddb.domains.mechanic_coverage import project_current
+from sve_carddb.domains.mechanic_dsl import ADAPTER as DSL_ADAPTER
+from sve_carddb.domains.mechanic_dsl import apply as apply_dsl
 from sve_carddb.domains.printed_mechanisms import ADAPTER as PRINTED_ADAPTER
 from sve_carddb.domains.printed_mechanisms import apply as apply_printed
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 from sve_carddb.domains.translations.direct import write
-from sve_carddb.domains.translations.four_layer_analysis import analyze_source
-from sve_carddb.domains.translations.four_layer_normalizer import VERSION as NORMALIZER
-from sve_carddb.domains.translations.four_layer_sources import (
-    card_source,
-    descriptor,
-    empty_field,
-)
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
     from sve_carddb.build import Database, Value
-    from sve_carddb.domains.translations.four_layer_classification import Classifier
     from sve_carddb.domains.translations.models import Origin
-    from sve_carddb.domains.translations.sources import Sources
 
 FILE = "rules/keyword-registry.yaml"
-ADAPTER = "manual-keywords-h1-v1"
+REGISTRY_PARSER = "keyword-registry-v1"
 Code = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_-]*\Z")]
 
 
@@ -127,17 +102,11 @@ class Inputs:
     def configuration(self) -> dict[str, JsonValue]:
         """Pin accepted authored bytes without recording a machine-local location."""
         return {
-            "adapter": ADAPTER,
             "registry_sha256": digest(self.exact),
-            "grants_adapter": GRANTS_ADAPTER,
-            "references_adapter": REFERENCES_ADAPTER,
-            "fields_adapter": FIELDS_ADAPTER,
+            "dsl_adapter": DSL_ADAPTER,
             "self_adapter": SELF_ADAPTER,
             "ability_adapter": ABILITY_ADAPTER,
             "printed_adapter": PRINTED_ADAPTER,
-            "grants_batch_sha256": digest(
-                canonical(list[JsonValue](sorted(FIRST_BATCH_CARDS)))
-            ),
         }
 
 
@@ -153,15 +122,6 @@ def load(authored: Path) -> Inputs:
         ]
         raise ValueError("Invalid keyword registry: " + ";".join(locations)) from None
     return Inputs(registry, exact)
-
-
-@dataclass(frozen=True)
-class Settings:
-    sources: Sources
-    classifier: Classifier
-    batch_id: str
-    authored_revision: str
-    first_batch_cards: frozenset[str] = FIRST_BATCH_CARDS
 
 
 def _adoption(
@@ -196,11 +156,16 @@ def _adoption(
     )
 
 
-def _register(db: Database, inputs: Inputs, revision: str) -> str:
-    source_id = (
+def _registry_source(inputs: Inputs, revision: str) -> str:
+    return (
         "authored:mechanics:"
         + digest(canonical([revision, FILE, digest(inputs.exact)]))[7:]
     )
+
+
+def register(db: Database, inputs: Inputs, revision: str) -> None:
+    """Store the adopted keyword concepts and their glossary names."""
+    source_id = _registry_source(inputs, revision)
     insert_exact(
         db,
         "source_record",
@@ -210,7 +175,7 @@ def _register(db: Database, inputs: Inputs, revision: str) -> str:
             "sha256": digest(inputs.exact),
             "authored_path": "authored/" + FILE,
             "authored_revision": revision,
-            "parser_version": ADAPTER,
+            "parser_version": REGISTRY_PARSER,
         },
         ("id",),
     )
@@ -259,27 +224,6 @@ def _register(db: Database, inputs: Inputs, revision: str) -> str:
                 if value["source_id"] is None
                 else str(value["source_id"]),
             )
-    return source_id
-
-
-def producer_version(inputs: Inputs, classifier: Classifier) -> str:
-    """Presentation choices and unrelated commits cannot invalidate source labels."""
-    registered = {record.term_id for record in inputs.registry.records}
-    payload: dict[str, JsonValue] = {
-        "adapter": ADAPTER,
-        "normalizer": NORMALIZER,
-        "rules": classifier.rules.model_dump(mode="json"),
-        "keywords": [
-            record.model_dump(mode="json", exclude_defaults=True)
-            for record in sorted(inputs.registry.records, key=lambda record: record.id)
-        ],
-        "concepts": [
-            [term.id, term.category, term.source_ja]
-            for term in sorted(classifier.terms.values(), key=lambda term: term.id)
-            if term.category == "keyword" or term.id in registered
-        ],
-    }
-    return ADAPTER + ":" + digest(canonical(payload))
 
 
 def source_bundles(db: Database) -> dict[str, str]:
@@ -340,158 +284,27 @@ def source_bundles(db: Database) -> dict[str, str]:
     }
 
 
-def apply(  # ruff: ignore[complex-structure,too-many-locals] -- one owner-checked declaration pass retains all rejection reasons without render dependencies
-    db: Database, inputs: Inputs, settings: Settings
-) -> dict[str, JsonValue]:
-    """Store every producer before suppression and one shared coverage projection."""
-    registry_source_id = _register(db, inputs, settings.authored_revision)
+def apply(db: Database, inputs: Inputs, revision: str) -> dict[str, JsonValue]:
+    """Store program evidence before suppression and one shared coverage projection."""
     hashes = source_bundles(db)
-    version = producer_version(inputs, settings.classifier)
-    keywords = {record.term_id: record.id for record in inputs.registry.records}
-    faces = {
-        str(row.values["id"]): str(row.values["card_id"]) for row in db.rows("face")
-    }
-    cards = {
-        str(row.values["id"]): row.values["identity_state"] for row in db.rows("card")
-    }
-    reasons: Counter[str] = Counter()
-    positives: dict[str, dict[str, Value]] = {}
-    checked: dict[tuple[str, str], set[FieldCheck]] = {}
-    for row in db.rows("face_current"):
-        current = row.values
-        if current["region"] != "jp":
-            continue
-        cid = faces[str(current["face_id"])]
-        if cards[cid] != "confirmed":
-            reasons["unconfirmed_identity"] += 1
-            continue
-        field = OwnerField(
-            owner=FaceRevisionOwner(
-                kind="face_revision", revision_id=str(current["revision_id"])
-            ),
-            field="effect",
-            ordinal=None,
-        )
-        if empty_field(db, field):
-            reasons["empty_source_field"] += 1
-            continue
-        source = descriptor(db, settings.sources, field, settings.batch_id)
-        original = card_source(db, settings.sources, source)
-        derived = analyze_source(original.text, source, settings.classifier)
-        for part, found in zip(derived.field.parts, derived.recognized, strict=True):
-            if part.source_span.role != "body":
-                continue
-            if (
-                found.issues
-                or found.semantics is None
-                or found.semantics.key != "card_keywords.v2"
-            ):
-                reasons["not_h1_declaration"] += 1
-                continue
-            frame, binding = found.bind(source, part)
-            part.verify(original.text, frame, binding, settings.classifier.domains)
-            for slot in frame.leaf_schema.slots:
-                concept = binding.values[slot.name]
-                if (
-                    slot.type != "Concept"
-                    or slot.role != "keyword"
-                    or not isinstance(concept, GlossaryReference)
-                ):
-                    raise ValueError(
-                        "Self keyword declaration requires only typed keyword concepts"
-                    )
-                keyword = keywords.get(concept.key)
-                if keyword is None:
-                    reasons["unregistered_keyword"] += 1
-                    continue
-                identifier = (
-                    "mechanic:"
-                    + digest(
-                        canonical(
-                            {
-                                "card_id": cid,
-                                "keyword_id": keyword,
-                                "scope": "shared",
-                                "relation": "has",
-                                "source_text_hash": hashes[cid],
-                                "producer_version": version,
-                                "binding_id": binding.id,
-                            }
-                        )
-                    )[7:]
-                )
-                positives[identifier] = {
-                    "id": identifier,
-                    "card_id": cid,
-                    "keyword_id": keyword,
-                    "relation": "has",
-                    "action": None,
-                    "scope": "shared",
-                    "source_kind": "manual",
-                    "source_text_hash": hashes[cid],
-                    "producer_version": version,
-                    "dsl_id": None,
-                    "source_id": original.source_id,
-                    "decision_id": inputs.registry.decision.id,
-                }
-                checked.setdefault((cid, keyword), set()).add(
-                    FieldCheck(
-                        face_id=str(current["face_id"]),
-                        revision_id=str(current["revision_id"]),
-                        field="effect",
-                        ordinal=None,
-                        relation="has",
-                        whole_field=False,
-                    )
-                )
-    store_evidence(
-        db,
-        tuple(positives.values()),
-        tuple(
-            Inspection(
-                card_id=cid,
-                keyword_id=keyword,
-                scope="shared",
-                source_kind="manual",
-                source_text_hash=hashes[cid],
-                producer_version=version,
-                decision_id=inputs.registry.decision.id,
-                dsl_id=None,
-                checks=tuple(sorted(checks, key=lambda check: check.model_dump_json())),
-            )
-            for (cid, keyword), checks in sorted(checked.items())
-        ),
-    )
-    grants = apply_grants(db, inputs, settings, hashes)
-    references = apply_references(db, inputs, settings, hashes)
-    fields = apply_fields(db, inputs, settings, hashes, version)
-    insert_raw_sources(db, (use.source for use in settings.sources.uses))
-    tags = {str(row.values["id"]): row.values for row in db.rows("card_mechanic")}
-    _suppress(db, inputs.registry.suppressions, tags, registry_source_id, reasons)
-    project_current(
-        db,
-        hashes,
-        frozenset(
-            {
-                version,
-                str(grants["producer_version"]),
-                str(references["producer_version"]),
-                str(fields["producer_version"]),
-            }
-        ),
-    )
     native_fields = current_fields(db)
+    dsl = apply_dsl(db, inputs, hashes, native_fields)
+    tags = {str(row.values["id"]): row.values for row in db.rows("card_mechanic")}
+    reasons: Counter[str] = Counter()
+    _suppress(
+        db,
+        inputs.registry.suppressions,
+        tags,
+        _registry_source(inputs, revision),
+        reasons,
+    )
+    project_current(db, hashes, frozenset({str(dsl["producer_version"])}))
     return {
-        "adapter": ADAPTER,
-        "self": apply_self(db, inputs, settings, native_fields),
+        "dsl": dsl,
+        "self": apply_self(db, inputs, native_fields),
         "ability_types": apply_abilities(db, native_fields),
         "printed_mechanisms": apply_printed(db, native_fields),
-        "description": "Self keyword declarations: body parts containing only keywords.",
-        "producer_version": version,
-        "grants": grants,
-        "references": references,
-        "fields": fields,
-        "keywords": len(keywords),
+        "keywords": len(inputs.registry.records),
         "positive_tags": len(tags),
         "projection_rows": len(db.rows("mechanic_projection")),
         "coverage_rows": len(db.rows("card_mechanic_coverage")),

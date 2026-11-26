@@ -443,16 +443,12 @@ EN 接收端引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；�
 producer_version 是內部鍵的一部分，不同 producer 不互覆；每列 state 只描述自身證據，公開 coverage 由全部 fresh 範圍聯集重算。
 reducer 依目前全部面（含缺 current 的面）、主文與所有 sections 建必要範圍，四種 relation 全部滿足才 complete；
 缺範圍為 partial，沒有檢查維持 unknown。新鮮度仍依完整 source bundle、當次 producer 集合及重建的 keyword universe，不能沿用舊 complete。
-目前 producer 為 H1 與固定首批集合的有限自身條件 has／grants（授予 adapter v2）、refers／counts（僅局部檢查），
-以及同批完整欄位 adapter（驗來源閉包後，空欄位及僅含自身宣告／固定 PP 進化句／有限固定傷害、抽牌、主戰者體力回復、從者增幅、覚醒／真紅條件自身增幅、獨立クイック、有限移除、抽牌後移動手牌、有限牌庫搜尋、有限觸發傷害、墓場移動、act／移除、有限條件固定效果、狀態規則、有限授予、有限牌庫頂檢視、有限費用與條件效果、有限費用調整、固定移動與完整 reminder、有限狀態與數值替換、有限區域移動與費用替換、具名 token 放置／生成與具名搜尋進場或 stack／counter 整行、具名生成及有序 section 定義、精確引號／數值相依整欄、BP01-T10 四段 stack reminder 與公開手牌選棄的有限主文可完整檢查），scope 仍僅 shared；
-全部 producer 儲存、suppression 套用後才以當次完整 producer_version 集合投影一次。
-完整欄位 adapter 為 `manual-keywords-fields-bp01-v14`；另共用授予 producer 逐 owner 限定的七份
-exact 全文（含 BP01-005 引號二選一）與僅限 BP01-149 的既有參照整行判定，不以正標籤片段補證整欄。
-非空 section 僅在同面主文證完後，
-依 exact owner／來源與有序 ordinal 檢查有限固定抽牌或逐行具名 token 定義。
-kind 不授完整證明或 verified DSL，token 原生 keyword 不掛到母卡。
-四關係的局部檢查仍不滿足完整欄位及 sections；缺 current 面與未知 sections 保留缺口。
-完整欄位的有限判定與 source section 清單重驗依[關鍵字機制契約](../domains/keyword-mechanics.md)；公開 coverage 粒度與 EN 資格不變。
+目前 producer 為 `dsl-keyword-relations-v1`：讀已准入的整卡程式，對八個持有性質的關鍵字提交
+has／grants／refers／counts 正標籤（`source_kind=dsl`、記錄 `dsl_id`），並對所有已選現行面的主文與
+每個補充段落提交四種 relation 的完整檢查；沒有程式且卡文全空的卡同樣提交完整檢查（`source_kind=manual`）。
+scope 僅 shared；證據儲存、suppression 套用後才以當次 producer_version 投影一次。
+缺 current 面的卡交不出該面的檢查，保留缺口；其餘登錄概念沒有四關係檢查，維持 unknown。
+節點對照、未確認條件與 EN 範圍依[關鍵字機制契約](../domains/keyword-mechanics.md)；公開 coverage 粒度不變。
 
 機制只出稀疏正標籤 projection＋每卡每 scope 一列 coverage。查特定 keyword/relation/action：存在吻合正標籤→present；無吻合但 `complete_all` 或 keyword 在解碼後 complete 集合→absent；其餘 unknown。某 relation 正標籤不證明其他 relation 不存在；partial 集合只表示有檢查但未完整。`complete_mode/include` 表示列出完整集合，exclude 表示在本快照清單 universe U 的補集；`partial_mode` 的基底為 U 減去已解碼 complete 集合。producer 分別選 ID 數較少的正集/補集，同數選 include；每個列表最多基底一半，reader 先解 complete 再解 partial，不能把 omitted 的未查項當完整。`complete_all` 為特例。缺正標籤不必然 unknown，必須合併 coverage；缺 coverage 才全部按 unknown。
 

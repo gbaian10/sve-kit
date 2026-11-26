@@ -5,13 +5,11 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build import Json
-from sve_carddb.domains import mechanics
 from sve_carddb.domains.ability_types import parse
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
 
-from .test_keyword_self import printing
-from .test_mechanics import case
+from .test_mechanics import case, printing, project
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -53,8 +51,7 @@ def test_regions_faces_and_token_sections(
         "{ファンファーレ}Synthetic.",
         back="{起動}Synthetic.",
         sections=("【超進化時】Token.",),
-        first_batch="synthetic",
-    ) as (db, inputs, settings, cid):
+    ) as (db, inputs, cid):
         with db.transaction():
             printing(db, cid, "jp")
             printing(db, cid, "en")
@@ -85,7 +82,7 @@ def test_regions_faces_and_token_sections(
                     "basis": "latest_observed_no_errata",
                 },
             )
-            mechanics.apply(db, inputs, settings)
+            project(db, inputs)
         coverage = {
             row.values["scope"]: row.values for row in db.rows("card_mechanic_coverage")
         }
