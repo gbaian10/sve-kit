@@ -34,14 +34,18 @@ matching binary. `build:all` (so also `deploy:dev`) and `check:all` run it first
 web job. Type checking (including the pre-push hook) and Vitest import the generated glue, so run
 `bun run build:engine` once after a fresh checkout and again after engine changes.
 
-The Worker loads every match from `generated/battle-inputs.json` beside the engine; callers pass
-only decks, controls and limits, never inputs. With `SVE_BATTLE_EXPORT` set to the absolute root of
-a verified public export, `build:engine` writes that document: carddb's `snapshot battle-inputs` reads the export into the
-native snapshot, its reference identities for every catalogue face and the engine rules bound to
-those exact bytes; `author check` supplies the whole current effect selection over the JP card batch
-in `tests/engine/card-input.json`. Its identity names the export's manifest, the selection, the rules
-and the built `engine_bg.wasm`. The host refuses any of these that do not match each other. Without
-the document the Worker reports a load error.
+With `SVE_BATTLE_EXPORT` set to a verified 4.2.0 JP export, `build:engine` runs
+`carddb snapshot battle-inputs --published` and writes the native catalogue projection, reference
+identities, resolved engine rules and content identities beside the engine. The Worker reads the
+DSL program package at its immutable CDN path, sharing the site's raw snapshot cache. The
+package's exact length and SHA-256 come from the verified export manifest. The host checks the
+input hashes and identity bindings before selecting the programs the decks can reach.
+
+Serve the same snapshot at the build's `VITE_CDN_BASE` (default `/cdn`), for example by passing
+its root as `SVE_EXPORT_DIR` to a local Vite server or preview. `/play` prepares a practice match
+against the local policy while the player is in the lobby. On entry the opening question and
+board are ready. Card facts and wording use the match's pinned manifest. Builds without a battle
+export still run the fixture scenes.
 
 Set `SVE_DEV_TLS_CERT` and `SVE_DEV_TLS_KEY` to absolute paths to use a certificate issued by a locally trusted CA, such as a mkcert certificate for a LAN IP. For example: `SVE_DEV_TLS_CERT=/path/to/cert.pem SVE_DEV_TLS_KEY=/path/to/key.pem bun run dev:lan`.
 
@@ -70,8 +74,7 @@ in builds made with `VITE_DEV_ONLY_PLAY=1`, which `dev`, `dev:lan` and `deploy:d
 without the variable contains none of its code. `src/app/routes.tsx` reads the variable in place:
 through another module the bundler still emits the page as an unreferenced chunk.
 
-Until the local engine supplies contract updates, the page plays fixture scenes
-(`src/battle/fixtures/`): each scene describes one table and is turned into the complete update each
+Fixture scenes (`src/battle/fixtures/`) remain available through `?scene=`: each scene describes one table and is turned into the complete update each
 seat would receive, validated by the generated contract validator in the tests. Nothing in the
 fixtures computes rules. The seat whose main phase it is also gets the main-phase question its
 table describes: which hand cards may be played and what may attack what. `scriptedTable` plays

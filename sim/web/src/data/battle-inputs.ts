@@ -1,9 +1,13 @@
-// The battle inputs document `build:engine` wrote from the pinned public export, beside the engine.
-// The local battle Worker reads only this; nothing a caller assembles reaches the session.
-const INPUTS = new URL("../battle/engine/generated/battle-inputs.json", import.meta.url)
+import { type RawBlobDescriptor, RawBlobStore } from "./raw-blobs"
+import { appRequests } from "./request-queue"
 
-export async function loadBattleInputs(): Promise<string> {
-  const response = await fetch(INPUTS)
-  if (!response.ok) throw new Error(`battle inputs unavailable: ${String(response.status)}`)
-  return response.text()
+export async function loadBattleAssets(
+  base: string,
+  inputs: URL,
+  descriptor: RawBlobDescriptor,
+): Promise<readonly [string, string]> {
+  const raw = new RawBlobStore(base, appRequests.foreground, globalThis.caches)
+  const [response, program] = await Promise.all([fetch(inputs), raw.read(descriptor)])
+  if (!response.ok) throw new Error("format")
+  return [await response.text(), new TextDecoder("utf-8", { fatal: true }).decode(program)]
 }

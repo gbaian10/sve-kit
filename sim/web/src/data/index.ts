@@ -9,7 +9,7 @@ export {
 } from "./annotated-text"
 export { artCredits, type FaceArtist } from "./artists"
 export { appBackgroundDownloads } from "./background-downloads"
-export { loadBattleInputs } from "./battle-inputs"
+export { loadBattleAssets } from "./battle-inputs"
 export { type CardReportResult, sendCardReport } from "./card-report"
 export { type CardRouteInput, locateCard, type LocatedCard } from "./card-route"
 export {
@@ -20,7 +20,12 @@ export {
   nameOf,
   printingTypeCode,
 } from "./catalog"
-export { type LoadedSnapshot, type SnapshotClient, type SnapshotStatus } from "./client"
+export {
+  createSnapshotClient,
+  type LoadedSnapshot,
+  type SnapshotClient,
+  type SnapshotStatus,
+} from "./client"
 export { loadConstructionIndex } from "./construction-index"
 export { type DigitalLink, digitalLinkUrl, loadCardDigitalLinks } from "./digital-links"
 export { cardPrintings, locateEdition } from "./edition"

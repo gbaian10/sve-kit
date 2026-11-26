@@ -8,6 +8,9 @@ import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import path from "node:path"
 
+import type { CardRef } from "../../src/battle/contract"
+import type { BattleBuild } from "../../src/battle/engine/protocol"
+
 const repo = path.resolve(import.meta.dirname, "../../../..")
 export const GENERATED = path.resolve(import.meta.dirname, "../../src/battle/engine/generated")
 const TARGET = "wasm32-unknown-unknown"
@@ -47,44 +50,58 @@ export function wasmArtifact(messages: string): string {
   return file
 }
 
-/** The carddb reader's outputs and the programs, all for one region. */
-interface BattleParts {
-  /** Native snapshot (JSON lines), exactly as the reader wrote it. */
-  snapshot: string
-  /** The reader's reference identities (JSON). */
-  references: string
-  /** The engine rules the reader bound to that snapshot (JSON). */
-  rules: string
-  keywords: string
-  /** The whole current effect selection (JSON), never a deck's subset. */
-  selection: string
+interface ProgramProjection {
+  descriptor: BattleBuild["programs"]
+  printings: { card_no: string; printing_id: string }[]
+  engine_identity: unknown
 }
 
 const sha256 = (bytes: string | Uint8Array) => createHash("sha256").update(bytes).digest("hex")
 
-/** The battle inputs document; its identity names exactly these bytes and this engine build. */
-function battleInputs(parts: BattleParts, engine: Uint8Array): string {
-  const references = JSON.parse(parts.references) as {
-    region: "jp" | "en"
-    wording: { manifest_sha256: string } | null
-  }
-  const manifest = references.wording?.manifest_sha256.replace(/^sha256:/, "")
-  if (manifest === undefined) throw new Error("the reader's references name no public manifest")
-  return JSON.stringify({
-    snapshot: parts.snapshot,
-    keywords: parts.keywords,
-    selection: parts.selection,
-    rules: parts.rules,
-    references,
-    identity: {
-      snapshot: { id: "public-export", sha256: manifest },
-      programs: { id: "current-selection", sha256: sha256(parts.selection) },
-      engine: { id: "sve-battle-host", sha256: sha256(engine) },
-      rules: { id: "engine-rules", sha256: sha256(parts.rules) },
-      region: references.region,
-    },
-  })
-}
+// The practice mirror uses one copy per rules name. The reader resolves its native locators
+// to permanent printing IDs in the build's verified JP snapshot.
+const PRACTICE_MAIN = [
+  "BP01-151",
+  "BP01-152",
+  "BP01-154",
+  "BP01-155",
+  "BP01-157",
+  "BP01-158",
+  "BP01-159",
+  "BP01-163",
+  "BP01-164",
+  "BP01-166",
+  "BP01-167",
+  "BP01-171",
+  "BP01-173",
+  "BP01-174",
+  "BP01-176",
+  "BP01-177",
+  "BP02-106",
+  "BP02-107",
+  "BP02-109",
+  "BP02-110",
+  "BP02-113",
+  "BP02-115",
+  "BP02-117",
+  "BP02-118",
+  "BP03-107",
+  "BP03-109",
+  "BP03-110",
+  "BP03-111",
+  "BP03-112",
+  "BP03-114",
+  "BP03-115",
+  "BP03-118",
+  "BP03-119",
+  "BP04-116",
+  "BP04-117",
+  "BP04-119",
+  "BP04-121",
+  "BP04-123",
+  "BP04-124",
+  "BP04-127",
+]
 
 function run(command: string, args: string[], capture = false): string {
   const result = spawnSync(command, args, {
@@ -98,14 +115,17 @@ function run(command: string, args: string[], capture = false): string {
   return result.stdout
 }
 
-/** Read one verified public export and the repository's programs into the inputs document. */
+/** Keep the native projection beside the engine; fetch the immutable program at runtime. */
 function writeBattleInputs(exportRoot: string, engine: Uint8Array): void {
   const work = mkdtempSync(path.join(tmpdir(), "sve-battle-inputs-"))
-  const carddb = (...args: string[]) =>
-    run("uv", ["--directory", "carddb", "run", "--locked", "sve-carddb", ...args])
   try {
-    const reader = path.join(work, "reader")
-    carddb(
+    const output = path.join(work, "reader")
+    run("uv", [
+      "--directory",
+      "carddb",
+      "run",
+      "--locked",
+      "sve-carddb",
       "snapshot",
       "battle-inputs",
       "--export-dir",
@@ -115,30 +135,72 @@ function writeBattleInputs(exportRoot: string, engine: Uint8Array): void {
       "--engine-rules",
       path.join(repo, "authored/rules/engine/index.yaml"),
       "--output",
-      reader,
-    )
-    // The programs come from the authored effects over the JP card batch the engine's public
-    // inputs pin; the engine rejects them if that batch's facts differ from the export's.
-    const { batch_id } = JSON.parse(
-      readFileSync(path.join(repo, "tests/engine/card-input.json"), "utf8"),
-    ) as { batch_id: string }
-    const profile = path.join(work, "profile.json")
-    writeFileSync(profile, JSON.stringify({ profile: "public", repo, jp_batch_id: batch_id }))
-    const check = path.join(work, "check.json")
-    carddb("author", "check", "--inputs", profile, "--output", check)
-    const { selection } = JSON.parse(readFileSync(check, "utf8")) as { selection: unknown }
-    const read = (name: string) => readFileSync(path.join(reader, name), "utf8")
-    const parts = {
-      snapshot: read("snapshot.jsonl"),
-      references: read("references.json"),
-      rules: read("rules.json"),
-      keywords: readFileSync(path.join(repo, "authored/rules/keywords.yaml"), "utf8"),
-      selection: JSON.stringify(selection),
+      output,
+      "--published",
+    ])
+    const read = (name: string) => readFileSync(path.join(output, name), "utf8")
+    const references = JSON.parse(read("references.json")) as {
+      region: "jp"
+      wording: { manifest_sha256: string }
+      faces: { card_no: string; native_face: number; card: CardRef }[]
     }
-    writeFileSync(path.join(GENERATED, "battle-inputs.json"), battleInputs(parts, engine))
+    const { descriptor, printings, engine_identity } = JSON.parse(
+      read("program-projection.json"),
+    ) as ProgramProjection
+    const { key, path: programPath, sha256: programHash, bytes } = descriptor
+    const manifest = references.wording.manifest_sha256
+    const rules = read("rules.json")
+    const input = {
+      snapshot: read("snapshot.jsonl"),
+      keywords: readFileSync(path.join(repo, "authored/rules/keywords.yaml"), "utf8"),
+      rules,
+      references,
+      printings,
+      engine_identity,
+      identity: {
+        snapshot: { id: "public-export", sha256: manifest.replace(/^sha256:/, "") },
+        programs: { id: key, sha256: programHash.replace(/^sha256:/, "") },
+        engine: { id: "sve-battle-host", sha256: sha256(engine) },
+        rules: { id: "engine-rules", sha256: sha256(rules) },
+        region: references.region,
+      },
+    }
+    const front = new Map(
+      references.faces
+        .filter((face) => face.native_face === 0)
+        .map(({ card_no, card }) => [card_no, card]),
+    )
+    const printing = (number: string): CardRef => {
+      const card = front.get(number)
+      if (card === undefined) throw new Error(`practice printing is missing: ${number}`)
+      return card
+    }
+    const deck = {
+      construction: { kind: "class", value: "ニュートラル" } as const,
+      main: PRACTICE_MAIN.map((number) => printing(number).printing_id),
+      evolve: [],
+    }
+    const build: BattleBuild = {
+      manifest,
+      programs: { key, path: programPath, sha256: programHash, bytes },
+      leaders: { p1: printing("BP10-LD05"), p2: printing("BP05-LD02") },
+      options: { decks: [deck, deck], control: ["player", "policy"], max_submissions: 300 },
+    }
+    writeBuild(build)
+    writeFileSync(path.join(GENERATED, "battle-inputs.json"), JSON.stringify(input))
   } finally {
     rmSync(work, { recursive: true, force: true })
   }
+}
+
+function writeBuild(build: BattleBuild | null): void {
+  writeFileSync(
+    path.join(GENERATED, "battle-build.ts"),
+    `import type { BattleBuild } from "../protocol"
+const build: BattleBuild | null = ${JSON.stringify(build)}
+export default build
+`,
+  )
 }
 
 function main(): void {
@@ -186,8 +248,11 @@ function main(): void {
     wasmArtifact(messages),
   ])
   const exportRoot = process.env["SVE_BATTLE_EXPORT"]
-  if (exportRoot !== undefined) {
+  if (exportRoot) {
     writeBattleInputs(exportRoot, readFileSync(path.join(GENERATED, "engine_bg.wasm")))
+  } else {
+    writeBuild(null)
+    writeFileSync(path.join(GENERATED, "battle-inputs.json"), "null")
   }
 }
 

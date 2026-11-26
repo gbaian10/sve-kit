@@ -71,6 +71,30 @@ function serve(base: string, files = new Map(built.files)): Served {
 }
 
 describe("createSnapshotClient", () => {
+  it("reads a pinned match manifest without consulting or adopting the current selection", async () => {
+    const served = serve("/cdn")
+    const path = [...served.files.keys()].find((item) => item.startsWith("snapshots/manifests/"))
+    const bytes = path === undefined ? undefined : served.files.get(path)
+    if (path === undefined || bytes === undefined) throw new Error("missing fixture manifest")
+    const hash = await transferDigest(bytes)
+    const cacheStorage = memoryCache()
+    served.fail((item) => item === "snapshots/versions/index.json")
+    const client = createSnapshotClient("/cdn", {
+      fetch: served.fetcher,
+      cacheStorage,
+      pinnedManifest: hash,
+    })
+    await client.load()
+    expect(client.snapshot()?.manifestHash).toBe(hash)
+    expect(served.requests).toContain(path)
+    expect(served.requests).not.toContain("snapshots/versions/index.json")
+
+    const current = createSnapshotClient("/cdn", { fetch: served.fetcher, cacheStorage })
+    await current.load()
+    expect(current.snapshot()).toBeNull()
+    expect(current.status()).toMatchObject({ state: "error", kind: "network" })
+  })
+
   it("retains finite regional rows across same-version switches without duplicating background printings", async () => {
     const client = createSnapshotClient("/cdn", {
       fetch: serve("/cdn").fetcher,
