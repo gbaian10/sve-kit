@@ -116,32 +116,34 @@ Add 烘焙成永久差值、不清除傷害。每個 EffectId、目標世代、�
 不是恢復進化前數值，也不是把當前 hp 與 max_hp 一起重設。
 
 §3.1 的純固定 Add 可交換，不引入新 tie 選序；timestamp 仍按 numeric-timing §2
-保存，未來安裝的 Set 不得因前面曾進化就失去原排序。進化完成後才新安裝 Set 的
-非進化行為仍依原規格；只要 Set 仍可能適用，就不能再通過本節的進化入口。
+保存。進化完成後才安裝的 Set 依原規格使用當時的指定值與時序。
 超進化的明示 +1/+1 與原期限 Add 分開保存，不能在原期限結束一起扣掉。
 基礎進化、到期與重算不另發 stat_changed；超進化明示加值沿 GAP-S-008 發事實。
 checked 算術及到期後致死的 check timing 完全沿用 numeric-timing §1、§3。
 
-### 3.3 Set 的保守界線
+### 3.3 固定 Set 跨進化
 
 [numeric-timing §1.1](numeric-timing.md#11-進化時的差額)的 Q1923／Q1983 只確定
 進化當下的差額結果。它們沒有回答多層 Set／Add 之後個別到期、傷害改變、條件暫停
 再恢復的還原。CR 5.16.2 的效果持續與 10.9 的重新求值還不足以唯一決定實作表示。
 
-因此含 Set 的數值實例，只要尚未永久終止、未來仍可能適用，就對該主體的進化拒絕，
-即使現在被較晚修正遮住或條件為 false。預檢必須早於支付進化成本／消耗 EP、SEP／
-移動進化資源；若後續發現未受驗交互，完整 rollback。不得把 Set 永久改成安裝時
-Add，也不得進化時刪 Set 或重抓 D_set。Set 已確實到期、無未來區間時才可按純 Add
-子集判定。此拒絕是 executor 支援界線，不是說遊戲規則禁止該從者進化。
+普通、超進化及效果進化承接固定對象、已捕捉操作數、無期限且無附加區間的 Set。
+按各數值的進化面與原面印刷差額，同時平移基礎值及既有的 Set 指定值。
+這使任意已准入的固定 Add／Set 時序求值得到「進化後印刷值＋進化前差額」，
+保留目前傷害、D_set、效果身分與原排序。超進化在此之後再加 1／1，並獨立發出加值事實。
+規則進化時已准入的限期 Add 仍可與固定 Set 共存，到期只移除該 Add，依原排序重算。
+
+限期或帶附加區間的 Set 仍在進化付款及移動進化資源前拒絕，包括被較晚修正遮住的 Set。
+若後續發現未受驗交互，完整 rollback。進化時保留 Set 的指定操作，沿用原有 D_set。
 
 ## 4. D1 接點與 lowering
 
-| 接點 | 要接的輸入／輸出 | 拒絕與解鎖範圍 |
-| --- | --- | --- |
-| `game/internal/card/selection.rs` 的 selector gate、`TargetWait`／binding | 保存既有選擇 producer 與 selector；固定 kind／trait 的有效視圖 | 解除恆真 predicate 限制只到 §1 穩定子集；保留 group／roles 等原限制 |
-| 目標的 Damage／Modify／Move 消費端 | 原已選集合 → 當次可作用集合 → 原有 receipt／facts | 依 §2 逐指示檢查；不能過濾原 binding 或 requested，也不能把未知當 false |
-| `game/internal/numeric.rs` 的進化 guard、base 更新與期限清理 | 原基礎／D／effects＋進化面 → 新基礎、原 effects／期限 | 只解除 §3.1 純 Add 的限期 guard；Set 與其他替換繼續拒絕 |
-| 正式 card／ability play 與規則進化入口 | 全能力閉包、來源證據、成本與外層 origin | 上述子集成功不等於 C1 qualified；預檢與 rollback 不能只包內層本文 |
+| 接點                                                                      | 要接的輸入／輸出                                                      | 拒絕與解鎖範圍                                                          |
+| ------------------------------------------------------------------------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `game/internal/card/selection.rs` 的 selector gate、`TargetWait`／binding | 保存既有選擇 producer 與 selector；固定 kind／trait 的有效視圖        | 解除恆真 predicate 限制只到 §1 穩定子集；保留 group／roles 等原限制     |
+| 目標的 Damage／Modify／Move 消費端                                        | 原已選集合 → 當次可作用集合 → 原有 receipt／facts                     | 依 §2 逐指示檢查；不能過濾原 binding 或 requested，也不能把未知當 false |
+| `game/internal/numeric.rs` 的進化 guard、base 更新與期限清理              | 原基礎／D／effects＋進化面 → 新基礎、依印刷差額平移的固定 Set、原期限 | 限 §3.1 與 §3.3 的已准入層，其他基礎替換繼續拒絕                        |
+| 正式 card／ability play 與規則進化入口                                    | 全能力閉包、來源證據、成本與外層 origin                               | 上述子集成功不等於 C1 qualified；預檢與 rollback 不能只包內層本文       |
 
 不需要新增 IR 型別或公開欄位。`Decision`、`SelectionConstraint`、`Selector`、
 `CharacteristicView`、`Binding` 與 `Duration` 足以承載；runtime 的穩定性證明不由
@@ -169,5 +171,5 @@ lowering 接續 `ir/lowering/play.rs` 的 target 產生點，將DSL 已存在的
    （max_hp=4、D=2）。EffectId／timestamp／原期限不變，不因進化或到期另發數值事件。
    同一局面把 Add 換成 Set 則在進化付款前拒絕，原局面與資源保持不變。
 
-Q1923 的 0／1 Set 1／1 → 進化表記 1／2 得 2／2 仍只作規則參照，不冒充已准入
-的成功測試。NextTurnEnd 沿既有期限驗收，毋須重建跳過／額外回合交叉格。
+Q1923 的 0／1 Set 1／1 → 進化表記 1／2 得 2／2，經 BP14-076 回場和 BP12-072 自身能力進化驗收。
+NextTurnEnd 沿既有期限驗收，毋須重建跳過／額外回合交叉格。

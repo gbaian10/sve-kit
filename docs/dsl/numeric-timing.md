@@ -53,9 +53,9 @@ Set 為 1／1，之後進化（表記 1／2）為 **2／2**，不是 1／1；
 Q1983 也以同一條回答 Set 體力 1 後的進化。因此 Set 有效的主體進化後，
 當前值為「進化後表記值＋（進化前當前值－進化前元の値）」，Set 不再把值指定回 S。
 
-上述 Set 結果有官方依據；Set／Add 混合層的個別到期、條件翻轉與受傷量拆分仍未有
-足夠依據，不能只以當下差額推定還原。純固定 Add（含已受驗限期）的進化承接與
-到期重算、Set 尚可能適用時的拒絕界線，依[目標與進化契約 §3](target-evolution-semantics.md#3-純-add-跨進化與到期)。
+上述 Set 結果有官方依據；限期 Set 到期、多層條件翻轉與受傷量拆分仍未有
+足夠依據。無期限的固定 Set 隨印刷差額平移，保留時序與 D_set；固定 Add 的進化承接、
+到期重算與其餘 Set 的准入界線，依[目標與進化契約 §3](target-evolution-semantics.md#3-純-add-跨進化與到期)。
 executor 已驗範圍見[內部執行](internal-execution.md)；其他基礎替換仍拒絕。
 
 `I.modify` 在第一個主體被修改前固定全部 subjects／數值運算元／每主體 D_set，
@@ -230,26 +230,26 @@ SetKind 與授予能力的現行執行子集見[卡種的獨立非數值層](int
 closed Program，真實卡只借指定片段；兩席互換再跑。共同斷言 effective read、合法性、
 事件 snapshot、view 一致，以及拒絕後狀態／RNG／身分／pending／排程完整 rollback。
 
-| ID | 輸入與期望輸出 | 反例／拒絕條件 |
-| --- | --- | --- |
-| N-A | 基礎 2／3、D=1，BP16-049 Set 1／1：hp=1、max_hp=2、D=1；Attack −1、Life −1 同一事實 | 不得 hp=0、清傷、兩個 fact；負 Set、不能證明非負的動態 Set 拒絕 |
-| N-B | N-A 後再傷害 1：hp=0、max_hp=2、D=2；重讀不恢復；合成到期在 check 前則 hp=1、max_hp=3 | 到期不能再發 stat_changed；先經 check 已破壞者不能因到期復活 |
-| N-C | 基礎 2／3、D=1，較早 play 的 Add 1／1、較晚 play 的 Set 1／1：1／1；兩者 play 先後對調：2／2，D 均為 1 | 不得固定 Set／Add 分層；對不同 D 的兩目標不能共用 D_set |
-| N-D | 基礎 Attack=2，play A(Set 1)早於 B(Add 2)，即使 B 先安裝，最終 Attack=3 | 用安裝順序會得 1；來源無合法 ProperPlay、外來 execution 拒絕 |
-| N-E | 同 timestamp Set 1 與 Add 2，回答 Set→Add 得 3、Add→Set 得 1，保存後讀取不重問 | 無 tie 輸入程序整棵拒絕；錯 actor／epoch、漏項、重項、重播不改狀態 |
-| N-F | 遞迴 Combined 的 Attack Add 1、Life Add 2 同一 fact；純 Add 同 stat 可合併 | 空 Combined、混層由良構拒絕；同 stat 非交換 Set／Add 在 runtime 拒絕 |
-| N-G | 基礎 Life=3，較早 Add 2 及較晚 Set 1；前者到期後仍為 1；Set 到期後回 3 | 安裝時不能永久儲存 Set 當時的差值代替指定值；兩個零差 Set 不造事件 |
-| N-H | 規則 fixture：BP14-076 Q1923，0／1 Set 1／1 後進化（表記 1／2）為 2／2 | Set 層有效時 executor 對進化／基礎替換整棵拒絕並完整 rollback；不得得 1／1，也不得只刪原型 guard |
-| T-A | CurrentTurnEnd 在 end phase 誘發、Quick、棄牌 check 仍有效，7.4.8 才消失 | 不得在 7.4.1、7.4.5 或下一回合才清；到期無 stat_changed |
-| T-B | 合成：P1 回合安裝 NextTurnEnd(P1)，P1 本回合結束仍有效，下個實際 P1 的 7.4.8 到期 | 同錨點 NextTurnEdge(P1,End) 可命中本回合，兩者不可混同 |
-| T-C | P1 安裝 NextTurnEnd(P2)，插入 P1 額外回合再跳過預定 P2 回合，等真正 P2 開始後的 7.4.8 | 不得全域 turn+1／+2，也不得 skipped 回合造 start／end |
-| T-D | CurrentTurnEnd＋DuringNextTurn(P2)：本回合有效，中間 P1 額外回合無效，真正 P2 回合恢復（Q1066） | 主區間到期不能刪待來區間；target 換世代後不能恢復 |
-| T-E | 基礎 Life=1，合成 EndResolution AddLife(−2)：本文可見 −1，解算清理後回 1，check 不破壞 | 不得每 instruction 檢查致死；無期限 −2 在後續 check 必須破壞 |
-| T-F | 基礎 Life=1，EndResolution AddLife(2) 後傷害 2：本文 hp=1；到期 hp=−1，check 破壞 | 不得先檢查存活再忘記到期後重算；pending 問答期間不可提早到期 |
-| T-G | CurrentTurnEnd 到期後 hp≤0：先下一實際回合的 start 程序，再 7.2.5 破壞 | 不得在 7.4.8 插 check；next start／turn trigger 的待機與解算分開驗 |
-| T-H | 安裝時 P2 為 target controller，之後轉交 P1，仍等待所捕捉的 P2 occurrence | 不得用 owner 或每次 live controller；缺排程能力整棵拒絕 |
-| R-A | 合法已捕捉值來源離場，修正仍在；Current SourceHolder live read 需 LKI | LKI 未接整棵拒絕，不能 InformationOrZero=0、追新世代或取印刷值 |
-| R-B | 合法同世代護符的 Attack／Life 為 AbsentByRules，直接取值 0、比較 false | 不是缺來源回 0；只沿已驗證的來源、公開單張目標或事件證據判斷資訊存在 |
+| ID  | 輸入與期望輸出                                                                                         | 反例／拒絕條件                                                       |
+| --- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------- |
+| N-A | 基礎 2／3、D=1，BP16-049 Set 1／1：hp=1、max_hp=2、D=1；Attack −1、Life −1 同一事實                    | 不得 hp=0、清傷、兩個 fact；負 Set、不能證明非負的動態 Set 拒絕      |
+| N-B | N-A 後再傷害 1：hp=0、max_hp=2、D=2；重讀不恢復；合成到期在 check 前則 hp=1、max_hp=3                  | 到期不能再發 stat_changed；先經 check 已破壞者不能因到期復活         |
+| N-C | 基礎 2／3、D=1，較早 play 的 Add 1／1、較晚 play 的 Set 1／1：1／1；兩者 play 先後對調：2／2，D 均為 1 | 不得固定 Set／Add 分層；對不同 D 的兩目標不能共用 D_set              |
+| N-D | 基礎 Attack=2，play A(Set 1)早於 B(Add 2)，即使 B 先安裝，最終 Attack=3                                | 用安裝順序會得 1；來源無合法 ProperPlay、外來 execution 拒絕         |
+| N-E | 同 timestamp Set 1 與 Add 2，回答 Set→Add 得 3、Add→Set 得 1，保存後讀取不重問                         | 無 tie 輸入程序整棵拒絕；錯 actor／epoch、漏項、重項、重播不改狀態   |
+| N-F | 遞迴 Combined 的 Attack Add 1、Life Add 2 同一 fact；純 Add 同 stat 可合併                             | 空 Combined、混層由良構拒絕；同 stat 非交換 Set／Add 在 runtime 拒絕 |
+| N-G | 基礎 Life=3，較早 Add 2 及較晚 Set 1；前者到期後仍為 1；Set 到期後回 3                                 | 安裝時不能永久儲存 Set 當時的差值代替指定值；兩個零差 Set 不造事件   |
+| N-H | 規則 fixture：BP14-076 Q1923，0／1 Set 1／1 後進化（表記 1／2）為 2／2                                 | 既有 Set 隨印刷差額平移；限期 Set 與其他基礎替換依准入界線拒絕       |
+| T-A | CurrentTurnEnd 在 end phase 誘發、Quick、棄牌 check 仍有效，7.4.8 才消失                               | 不得在 7.4.1、7.4.5 或下一回合才清；到期無 stat_changed              |
+| T-B | 合成：P1 回合安裝 NextTurnEnd(P1)，P1 本回合結束仍有效，下個實際 P1 的 7.4.8 到期                      | 同錨點 NextTurnEdge(P1,End) 可命中本回合，兩者不可混同               |
+| T-C | P1 安裝 NextTurnEnd(P2)，插入 P1 額外回合再跳過預定 P2 回合，等真正 P2 開始後的 7.4.8                  | 不得全域 turn+1／+2，也不得 skipped 回合造 start／end                |
+| T-D | CurrentTurnEnd＋DuringNextTurn(P2)：本回合有效，中間 P1 額外回合無效，真正 P2 回合恢復（Q1066）        | 主區間到期不能刪待來區間；target 換世代後不能恢復                    |
+| T-E | 基礎 Life=1，合成 EndResolution AddLife(−2)：本文可見 −1，解算清理後回 1，check 不破壞                 | 不得每 instruction 檢查致死；無期限 −2 在後續 check 必須破壞         |
+| T-F | 基礎 Life=1，EndResolution AddLife(2) 後傷害 2：本文 hp=1；到期 hp=−1，check 破壞                      | 不得先檢查存活再忘記到期後重算；pending 問答期間不可提早到期         |
+| T-G | CurrentTurnEnd 到期後 hp≤0：先下一實際回合的 start 程序，再 7.2.5 破壞                                 | 不得在 7.4.8 插 check；next start／turn trigger 的待機與解算分開驗   |
+| T-H | 安裝時 P2 為 target controller，之後轉交 P1，仍等待所捕捉的 P2 occurrence                              | 不得用 owner 或每次 live controller；缺排程能力整棵拒絕              |
+| R-A | 合法已捕捉值來源離場，修正仍在；Current SourceHolder live read 需 LKI                                  | LKI 未接整棵拒絕，不能 InformationOrZero=0、追新世代或取印刷值       |
+| R-B | 合法同世代護符的 Attack／Life 為 AbsentByRules，直接取值 0、比較 false                                 | 不是缺來源回 0；只沿已驗證的來源、公開單張目標或事件證據判斷資訊存在 |
 
 負 Set、Modify usage、未定義的來源實例／EffectId producer、RuleCarry、Grant／RemoveAbility
 與跨層 Continuous 仍依既有界線拒絕；不能以新增期限契約繞過整棵預檢。

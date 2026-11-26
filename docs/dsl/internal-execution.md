@@ -365,7 +365,7 @@ PlaySpec 沿用共同准入。進化相當能力仍拒絕；OnSuperEvolve 見〈
 進化保持場上持有者世代；進化卡另有物件世代與受驗關聯。事件保存完整 before／after characteristics，
 新印刷定義依卡號、face、局部 AbilityId 配發新 instance，不與進化前同號能力相撞。
 成本依規則 5.16.1.2 保留 base face 0 的印刷值與既有成本修正；Original 攻／體改讀進化卡。
-跨進化僅接受下文的純固定 Add 子集，Set 與其他期限／區間仍拒絕。BP20-R14 只取進化時抽一片段，
+跨進化接受下文的固定 Add／Set 子集。BP20-R14 只取進化時抽一片段，
 固有進化 PP 入口為明示合成案例；同一代表局面驗一般／超進化 facet、新 instance 及進化後 Lastword。
 
 長寫 EnterField 限 Printed、自身或自方／對手的從者入場，可排除自身、匹配受驗特徵及自回合條件。
@@ -980,12 +980,11 @@ NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩�
 再進入主要階段並收集 main_start 觸發。到期、重算不發 stat_changed。
 
 原型 decide 可在數值層存在時繼續執行；傷害透過同一有效值重算並保留目前 D，
-原型純 Add 以 checked 基礎差額重算。普通／超進化接受固定對象、已捕捉操作數的純 Add，
-期限限 NoTemporalExpiry、CurrentTurnEnd、NextTurnEnd，無附加 intervals。只替換基礎，
-保留 EffectId、ProperPlay timestamp、原期限錨與目前傷害，不重複加上修正差額；超進化 +1/+1 獨立保留。
-到期從進化後基礎與其餘修正重算，不另發 stat_changed；限期到期還原是目標與進化契約 §3 的
-`inferred` 專案解讀，沒有宣稱官方裁定。尚可能適用的 Set、其他期限／區間與基礎替換仍在進化付款前拒絕；效果本文進化仍只接受無期限 Add。
-prototype Set／種類或 pilot 基礎替換與有效數值層混用仍拒絕；Set 有效時任何基礎差額也拒絕，
+原型純 Add 以 checked 基礎差額重算。普通／超進化與效果進化接受固定對象、已捕捉操作數的無期限 Add／Set。
+普通／超進化也接受無附加區間的 CurrentTurnEnd／NextTurnEnd Add。
+按進化面的印刷差額平移基礎與既有 Set，保留 EffectId、ProperPlay timestamp、原期限錨與目前傷害；超進化 +1/+1 獨立保留。
+到期從進化後基礎與其餘修正重算，不另發 stat_changed；限期 Add 到期還原依目標與進化契約 §3 的 `inferred` 解讀。
+限期 Set、其他期限及附加區間在進化付款前拒絕。原型 Set／種類或 pilot 基礎替換與有效數值層混用仍拒絕；Set 有效時也拒絕原型 Add，
 不為原型的非交換指示捏造 ProperPlay 時間。原型 pilot 仍不接受 typed 數值安裝。
 Typed `BoxPilot::Pilot` 只承接來源自身、CurrentTurnEnd／Installation 且無額外區間。來源是場上護符且印刷攻體皆存在時，
 沿同一 NumericState 保存世代、期限與原狀態，以印刷攻體建立從者基礎並歸零傷害；保留 token 特殊種類、姿態、入場回合與能力。
@@ -1019,7 +1018,6 @@ EffectId 仍在成功安裝才分配；反序安裝、唯讀查詢及存檔恢�
 
 Continuous 的 Live 條件與操作數、一般動態依存、下節以外的 interval、SetKind、
 Grant／RemoveAbility、Modify usage、負 Set 與非常值 Set，包括未執行分支，仍整棵拒絕。
-Set 層有效時的進化／基礎替換由數值寫入邊界拒絕，未宣稱差額換算完成。
 CP02-007 與 BP01-011 只驗已選場上從者的 +1/+1 片段；不包含成本、選牌、EX、
 觸發或整卡准入。BP16-049 的數值片段驗證受傷對象的 Set 1／1。完整法術另由作者 DSL
 及實卡測試覆蓋解決起始的 SpellChain 計數，以及條件成立時移除目標的全部能力。
@@ -1041,7 +1039,7 @@ CurrentTurnEnd 的主區間與 DuringNextTurn 附加區間採聯集。主區間�
 該 occurrence 並重新適用，到其 7.4.8 結束；不使用 turn.phase、elapsed_turns 或預定序號冒充。
 目標換世代仍清除整個舊實例，後面的附加區間不能讓舊目標復活。
 本子集不接受 interval-only、EndResolution＋非空 interval 或 phase 區間；缺少 phase occurrence
-時保持拒絕。Set 及帶附加區間 Add 的進化限制仍維持；純固定限期 Add 僅開放上節所列子集。
+時保持拒絕。帶附加區間的 Add／Set 仍不得跨進化；固定限期 Add 僅開放上節所列子集。
 
 ## 整副手牌的公開
 
