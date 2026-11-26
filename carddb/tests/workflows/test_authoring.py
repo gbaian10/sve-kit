@@ -218,9 +218,25 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             array(body_tree["records"]).append({**definition, "edition": 2})
             card["abilities"] = [{**ability, "edition": 1}, ability]
         case "counter":
+            registry = output_root / "rules/keywords.yaml"
+            registry.write_bytes(
+                authoring.format_yaml(
+                    {
+                        "format": 1,
+                        "kind": "keyword_registry",
+                        "keywords": {
+                            "fairy_tale_counter": {
+                                "ja": "童話カウンター",
+                                "role": "ability-label",
+                            }
+                        },
+                    }
+                )
+            )
+            workspace = replace(workspace, authored=output_root)
             body = object_value(object_value(definition["body"])["attack_time"])
             array(body["do"]).append(
-                {"counter": {"on": "this", "name": "ward", "delta": 1}}
+                {"counter": {"on": "this", "name": "fairy_tale_counter", "delta": 1}}
             )
     main.write_bytes(authoring.format_yaml(main_tree))
     bodies.write_bytes(authoring.format_yaml(body_tree))

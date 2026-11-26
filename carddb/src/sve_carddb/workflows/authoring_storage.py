@@ -416,7 +416,7 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
     if rejected:
         raise _located_error(candidate, supplied, rejected[0].diagnostic)
     try:
-        check_counter_registration(workspace.inputs.repo / "authored", results)
+        check_counter_registration(workspace.authored, results)
     except AuthorInputError as error:
         raise _located_error(candidate, supplied, error.diagnostic) from None
     outputs = {

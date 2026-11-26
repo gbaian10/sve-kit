@@ -416,7 +416,7 @@ def check(
     ]
     if rejected:
         raise AuthorInputError(rejected[0].diagnostic)
-    check_counter_registration(workspace.inputs.repo / "authored", results)
+    check_counter_registration(workspace.authored, results)
     selection = workspace.current.selection_from_results(inputs, results)
     if compare_public is not None:
         if workspace.inputs.profile != "database" or compare_public.profile != "public":
