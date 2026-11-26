@@ -165,21 +165,24 @@ def register_name(db: Database, binding: NameBinding) -> None:
     """Add an explicitly confirmed special name only to a face present in that region."""
     if binding.role == "primary":
         raise ValueError("Primary construction names are derived, not registered")
-    printings = {row.values["id"]: row.values["region"] for row in db.rows("printing")}
     if not any(
-        row.values["face_id"] == binding.face_id
-        and printings[row.values["printing_id"]] == binding.region
-        for row in db.rows("printing_face")
+        db.select(
+            "printing",
+            ("id",),
+            where={"id": row.values["printing_id"], "region": binding.region},
+        )
+        for row in db.select(
+            "printing_face", ("printing_id",), where={"face_id": binding.face_id}
+        )
     ):
         raise ValueError("Special construction name has no face in its region")
-    names = [
-        row.values
-        for row in db.rows("rules_name")
-        if (row.values["region"], row.values["official_name"])
-        == (binding.region, binding.official_name)
-    ]
+    names = db.select(
+        "rules_name",
+        ("id",),
+        where={"region": binding.region, "official_name": binding.official_name},
+    )
     if names:
-        identifier = names[0]["id"]
+        identifier = names[0].values["id"]
     else:
         identifier = "rn:v1:" + digest(
             canonical([binding.region, binding.official_name])
@@ -200,15 +203,14 @@ def register_name(db: Database, binding: NameBinding) -> None:
         "role": binding.role,
         "decision_id": binding.decision_id,
     }
-    existing = [
-        row.values
-        for row in db.rows("face_rules_name")
-        if all(
-            row.values[key] == values[key]
-            for key in ("face_id", "region", "rules_name_id", "role")
-        )
-    ]
-    if existing and existing != [values]:
+    existing = db.select(
+        "face_rules_name",
+        ("decision_id",),
+        where={
+            key: values[key] for key in ("face_id", "region", "rules_name_id", "role")
+        },
+    )
+    if existing and existing[0].values["decision_id"] != binding.decision_id:
         raise ValueError("Conflicting special construction name decision")
     if not existing:
         db.insert("face_rules_name", values)

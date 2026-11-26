@@ -148,7 +148,7 @@ class Index(RecordData):
     recipe: Literal["sift800-ratio075-ransac5-v1"] = RECIPE
     opencv_version: Text
     as_of: Date
-    includes: dict[str, Hash]
+    includes: tuple[str, ...]
 
 
 class Shard(RecordData):

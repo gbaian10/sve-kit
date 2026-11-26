@@ -21,6 +21,7 @@ from sve_carddb.domains.registry.records import (
 from sve_carddb.domains.registry.snapshot import load_registry
 from sve_carddb.domains.registry.transitions.renewal import (
     load_identity_registry,
+    load_renewed_registry,
     reference,
 )
 from sve_carddb.domains.registry.transitions.writer import plan, write
@@ -409,6 +410,8 @@ def test_full_registry_for_database_authoring_requires_review_evidence(
         update={"registry_review_inputs": recipe.registry_review_inputs}
     )
     snapshot = offline.registry_snapshot(inputs)
+    replayed = load_renewed_registry(recipe.repo / "authored", recipe.evidence())
+    assert snapshot == replayed
     review = next(
         r.data
         for r in snapshot.records.values()

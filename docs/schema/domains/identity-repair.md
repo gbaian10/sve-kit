@@ -217,6 +217,10 @@ revert 只從有效集合移除被指名 transaction 的全部邊，不新增 B�
 
 ## 5. 有效投影順序與原子性
 
+寫入確認無對應審核續版或插畫用途延伸時，依以下順序重建歷史並驗證原始證據。
+普通建置按序套用已驗證的更新，依封存批次的來源中繼資料保留使用閉包，
+再核對當前來源與新增版次。
+
 1. 釘住本次 authored revision、registry 與 transitions 目錄。先驗全區所有分片、
    配號及歷史 bytes；不是先濾 JP 再重算。
 2. 依 sequence 重建每次 registry_basis 及之前 transition 的有效狀態。basis 之間只容許原始登錄追加；

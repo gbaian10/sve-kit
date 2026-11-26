@@ -3,8 +3,9 @@
 import re
 from functools import lru_cache
 from types import MappingProxyType
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
+import orjson
 from jsonschema import Draft202012Validator, ValidationError
 from pydantic import JsonValue
 
@@ -160,7 +161,9 @@ def encode(column: Column, value: Value, rules: Rules) -> SQLValue:
     return _text(column, value)
 
 
-def decode(column: Column, value: object, rules: Rules) -> Value:
+def decode(
+    column: Column, value: object, rules: Rules, *, trusted: bool = False
+) -> Value:
     """Check raw SQLite storage classes and reconstruct logical Bool/JSON values."""
     if value is None:
         encode(column, None, rules)
@@ -172,12 +175,15 @@ def decode(column: Column, value: object, rules: Rules) -> Value:
             if value not in {0, 1}:
                 raise ValueError("SQLite returned an invalid boolean")
             return bool(value)
-        encode(column, value, rules)
+        if not trusted:
+            encode(column, value, rules)
         return value
     if not isinstance(value, str):
         raise TypeError("SQLite returned a non-text storage class")
     if column.kind == Kind.JSON:
+        if trusted:
+            return Json(cast("JsonValue", orjson.loads(value)))
         parsed = Json(parse(value.encode()))
         encode(column, parsed, rules)
         return parsed
-    return _text(column, value)
+    return value if trusted else _text(column, value)

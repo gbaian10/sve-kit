@@ -65,11 +65,17 @@ class Database:
     """Provide typed writes and reads; all mutations require an explicit transaction."""
 
     def __init__(
-        self, connection: sqlite3.Connection, schema: CompiledSchema, rules: Rules
+        self,
+        connection: sqlite3.Connection,
+        schema: CompiledSchema,
+        rules: Rules,
+        *,
+        trusted_writes: bool = False,
     ) -> None:
         self._connection = connection
         self._tables = {table.name: table for table in schema.tables}
         self._rules = rules
+        self._trusted_writes = trusted_writes
         self._version = schema.version
         self._query_checks = schema.query_checks
         self._transaction_revision = 0
@@ -294,7 +300,9 @@ class Database:
                 name,
                 MappingProxyType(
                     {
-                        column.name: decode(column, value, self._rules)
+                        column.name: decode(
+                            column, value, self._rules, trusted=self._trusted_writes
+                        )
                         for column, value in zip(declarations, row, strict=True)
                     }
                 ),
@@ -363,7 +371,7 @@ def create_database(
     try:
         rules = install_functions(connection, schema)
         connection.execute("PRAGMA foreign_keys = ON")
-        database = Database(connection, schema, rules)
+        database = Database(connection, schema, rules, trusted_writes=path is None)
         with database.transaction():
             for statement in schema.statements:
                 connection.execute(statement)

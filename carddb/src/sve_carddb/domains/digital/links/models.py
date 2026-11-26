@@ -4,7 +4,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, field_validator, model_validator
 
-from sve_carddb.core.models import Hash, RecordData, Text
+from sve_carddb.core.models import RecordData, Text
 from sve_carddb.domains.catalog.adoption_models import SourceRef
 from sve_carddb.domains.products.models import Lang
 from sve_carddb.domains.registry.records import CardId, FaceId, PrintingId
@@ -80,7 +80,7 @@ class Envelope(RecordData):
 
 class Index(Envelope):
     kind: Literal["digital_link_index"]
-    includes: dict[str, Hash]
+    includes: tuple[str, ...]
 
 
 class Shard(Envelope):

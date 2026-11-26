@@ -38,9 +38,7 @@ fn texts() -> &'static [String; 4] {
             &read_to_string(root.join("authored/rules/engine/index.yaml")).unwrap(),
         )
         .unwrap();
-        // The pin names the reviewed batch; generated test inputs keep the same rule capabilities.
-        *rules.pointer_mut("/input/snapshot_sha256").unwrap() =
-            Value::String(fixture::hex(snapshot.as_bytes()));
+        rules["input"]["snapshot_sha256"] = Value::String(fixture::hex(snapshot.as_bytes()));
         [snapshot, keywords, selection, rules.to_string()]
     })
 }

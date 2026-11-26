@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Literal
 
 import pytest
 
-from sve_carddb.core.json import canonical, digest, object_value, parse
+from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.domains.digital.art_matches.importer import populate
 from sve_carddb.domains.digital.art_matches.loader import load
 from sve_carddb.domains.digital.art_matches.models import (
@@ -93,7 +93,7 @@ def entry(root: Path, records: tuple[Record, ...]) -> Snapshot:
         kind="digital_art_match_index",
         opencv_version="synthetic",
         as_of="2026-11-16",
-        includes={path: digest(canonical(shard.model_dump(mode="json")))},
+        includes=(path,),
     )
     (root / "digital/art-matches/index.yaml").write_bytes(encode(index))
     result = load(root)

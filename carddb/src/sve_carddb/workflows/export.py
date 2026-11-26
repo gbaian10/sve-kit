@@ -138,18 +138,20 @@ def battle_inputs_command(
 def _bound_rules(path: Path, region: str, snapshot: bytes) -> dict[str, JsonValue]:
     """Bind the authored engine rules to the snapshot this reader produced.
 
-    The authored pin names the reviewed card batch; the engine requires the exact bytes it loads.
-    Only the pin is replaced, so it must first be what the engine rules schema requires; the
-    engine still validates every other field.
+    The engine validates the rules against the exact snapshot bytes it loads.
     """
     try:
         rules = object_value(JSON_VALUE.validate_python(parse_yaml(path.read_bytes())))
         covered = object_value(rules["scope"])["region"]
         source = object_value(rules["input"])
-        pinned = re.fullmatch(r"[a-f0-9]{64}", string(source["snapshot_sha256"]))
+        valid_pin = (
+            "snapshot_sha256" not in source
+            or re.fullmatch(r"[a-f0-9]{64}", string(source["snapshot_sha256"]))
+            is not None
+        )
     except ValueError, KeyError, TypeError:
         raise ExportError("Engine rules are unusable") from None
-    if pinned is None:
+    if not valid_pin:
         raise ExportError("Engine rules are unusable")
     if covered != region:
         raise ExportError("Engine rules cover another region")

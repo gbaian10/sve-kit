@@ -66,9 +66,9 @@ class Snapshot:
         }
 
 
-def _model[T: RecordData](model: type[T], raw: JsonValue) -> T:
+def _model[T: RecordData](model: type[T], content: bytes) -> T:
     try:
-        return model.model_validate_json(canonical(raw))
+        return model.model_validate_json(content)
     except ValidationError:
         # Source-bearing inputs must not be copied into Pydantic error reports.
         raise ValueError("Invalid digital-link fields") from None
@@ -88,7 +88,7 @@ def load_links(  # ruff: ignore[complex-structure] -- whole-entry validation pre
     directory = root.absolute() / "digital/links"
     index_path = directory / "index.yaml"
     _safe(index_path)
-    index = _model(Index, read_yaml(index_path))
+    index = _model(Index, canonical(read_yaml(index_path)))
     sequences: dict[str, list[int]] = defaultdict(list)
     for name in index.includes:
         if name.startswith("digital/links/coverage/"):
@@ -111,13 +111,11 @@ def load_links(  # ruff: ignore[complex-structure] -- whole-entry validation pre
     ):
         raise ValueError("Digital-link shard sequence gap")
     shards = []
-    for name, checksum in sorted(index.includes.items()):
+    for name in sorted(index.includes):
         file = root / name
         _safe(file)
         content = canonical(read_yaml(file))
-        if digest(content) != checksum:
-            raise ValueError("Digital-link shard hash mismatch")
-        for record in _model(Shard, read_yaml(file)).records:
+        for record in _model(Shard, content).records:
             _evidence(record)
         shards.append((name, file.read_bytes(), content))
     snapshot = Snapshot(index_path.read_bytes(), tuple(shards))

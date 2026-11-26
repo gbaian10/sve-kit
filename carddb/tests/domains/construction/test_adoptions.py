@@ -526,12 +526,6 @@ def test_invalid_human_envelopes_fail_closed(  # ruff: ignore[complex-structure]
             decision["sample_ids"] = [pair[0] for pair in members]
         shard["default_decision_id"] = decision["id"]
         path.write_bytes(canonical(shard))
-        index_path = authored.repository / "authored/construction-adoptions/index.yaml"
-        index = object_value(parse(index_path.read_bytes()))
-        object_value(index["includes"])[
-            path.relative_to(authored.repository / "authored").as_posix()
-        ] = digest(path.read_bytes())
-        index_path.write_bytes(canonical(index))
         git(authored.repository, "add", "authored")
         git(authored.repository, "commit", "-qm", "Synthetic malformed envelope")
         authored.revision = git(authored.repository, "rev-parse", "HEAD")

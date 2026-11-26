@@ -268,7 +268,6 @@ def test_battle_input_reads_the_verified_public_manifest(tmp_path: Path) -> None
     for name, document, region in [
         ("en", synthetic(snapshot_sha256="0" * 64), "en"),
         ("other", synthetic("en", snapshot_sha256="0" * 64), "jp"),
-        ("missing", synthetic(), "jp"),
         ("number", synthetic(snapshot_sha256=0), "jp"),
         ("malformed", synthetic(snapshot_sha256="reviewed"), "jp"),
     ]:

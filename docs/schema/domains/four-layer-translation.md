@@ -62,11 +62,10 @@ glossary_choice_variant 與 translation_override 沿原欄位與來源規則；�
 | sentence_template；templates/definitions | id | §3 Frame authored 欄位；移除舊 normalized_hash、parameter_schema，改 source、leaf_schema |
 | template_translation；templates/values | template_id,lang | `{template_id:FrameID,lang:Lang,target:Target,expression_targets:{Code:Target}}`；map 可省略為空；variant 另以 variant_key 選完整稿件，A/B/C 驗引用與完整使用，FL-005 |
 | template_translation_variant；templates/values | template_id,lang,variant_key | 上列加 `variant_key:Code`，不可 default；不是 semantic_variant，FL-001／FL-005 |
-| template_translation_candidate；templates/candidates | source_kind,candidate_id,lang | 保留未啟用的七欄草稿，依翻譯契約 §2.1；不能被 LeafRef／pin 引用，FL-029 |
 | translation_form；forms | id,lang | §5 FormDefinition；封閉文法表，不保存官方全文，FL-012 |
 | template_match；overrides | context_key | `{context_key,source_hash,matches}`；matches 為 null 或 `{frame_id,source_span,values}` 陣列；values 依 §4，A/B 驗唯一匹配、來源與全覆蓋，FL-007／FL-008 |
 
-新增 `forms/<sequence>.yaml`；definitions／values／candidates 及既有 glossary／overrides 路徑不改。
+新增 `forms/<sequence>.yaml`；definitions／values 及既有 glossary／overrides 路徑不改。
 template_match 不容手填未驗來源值；null 僅撤回人工指定，回本次自動匹配。
 context_key.variant 指 context_assignment 的具名 variant（缺省 default），不是 §8 建置後的 context 聚合鍵。
 source_exception 整個 kind 移除，divergence/default_jp 都沒有新入口；切換必須列出舊記錄及處置，遇遺留記錄拒絕，不靜默跳過。
@@ -725,13 +724,13 @@ namespace: classification-v0
 uses:
   - cards: [BP20-041, BP20-SL13, BP20-U04]
     occurrence:
-      owner: {kind: face_revision, revision_id: "rev:v1:..."}
+      owner: { kind: face_revision, revision_id: "rev:v1:..." }
       field: effect
       ordinal: null
       source_hash: "..."
       line_ordinal: 1
       role: body
-      segments: [{start: 0, end: 1}]
+      segments: [{ start: 0, end: 1 }]
 ```
 
 以上座標與 hash 是形狀示意，不能直接當成資料。`legacy` 保存原 T ID；
