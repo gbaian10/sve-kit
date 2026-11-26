@@ -101,17 +101,12 @@ fn simultaneous(members: Vec<Located<Node>>, receipt: u64) -> Located<Node> {
 }
 
 #[test]
-fn checked_body_is_owned_and_capabilities_are_not_a_certificate() {
+fn checked_body_owns_its_ir_and_checks_bindings() {
     let mut original = bp08_body();
     let checked = WellFormedProgram::check(original.clone()).expect("BP08-038 signed live count");
     original.steps.clear();
     assert_eq!(checked.program().steps.len(), 1);
-    assert!(Registry::current().supported().is_empty());
     let invalid = body(1, vec![draw(1, Expr::Bound(Binding::new(1, ScopeId(1))))]);
-    let seed = card(invalid.clone(), "synthetic");
-    Registry::test_support(&seed)
-        .check_capabilities(&seed)
-        .unwrap();
     reject(invalid, WellFormedReason::UnavailableBinding);
 }
 

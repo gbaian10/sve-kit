@@ -205,10 +205,7 @@ mod wellformed;
 
 pub use actions::*;
 pub use answers::*;
-pub use capabilities::{
-    AdmissionError, Capability, DependencyMismatch, Identity, Location, Registry, Requirement,
-    Requirements,
-};
+pub use capabilities::{Capability, Location, Requirement, Requirements};
 pub use effects::*;
 pub use events::*;
 pub use flow::*;
