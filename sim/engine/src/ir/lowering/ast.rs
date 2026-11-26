@@ -41,8 +41,7 @@ pub(super) struct Card {
 #[serde(deny_unknown_fields)]
 pub(super) struct TokenSource {
     pub source: DirectSourceUse,
-    #[serde(rename = "card_no")]
-    pub _card_no: String,
+    pub card_no: String,
 }
 
 #[derive(Deserialize)]
@@ -82,8 +81,17 @@ pub(super) struct Ability {
 #[serde(untagged)]
 pub(super) enum SourceUse {
     Direct(DirectSourceUse),
+    Published(PublishedSourceUse),
     Ability(AbilitySourceUse),
     CardKeyword(CardKeywordSourceUse),
+}
+
+#[derive(Deserialize)]
+#[serde(deny_unknown_fields)]
+pub(super) struct PublishedSourceUse {
+    pub owner: Value,
+    pub face_id: String,
+    pub scope: String,
 }
 
 #[derive(Clone, Deserialize)]
@@ -122,6 +130,9 @@ impl SourceUse {
                 "face_id": source.face_id, "field": source.field,
                 "ordinal": source.ordinal, "line": source.line,
                 "scope": source.scope, "covers": source.covers,
+            }),
+            Self::Published(source) => serde_json::json!({
+                "owner": source.owner, "face_id": source.face_id, "scope": source.scope,
             }),
             Self::Ability(source) => serde_json::json!({
                 "binding_id": source.binding_id,

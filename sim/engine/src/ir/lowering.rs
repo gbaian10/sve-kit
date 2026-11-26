@@ -95,6 +95,8 @@ use super::{
     SourceSpan, StepwiseMode, TextQuantifier, TriggerCondition, TriggerSpec, WellFormedCardProgram,
     ZoneKind,
 };
+pub use current::published::ProgramFace;
+pub(crate) use current::published::lower_program;
 pub use current::{CurrentCardProgram, CurrentKeywordEvidence, PrintedKeyword};
 pub use deck_rules::{CardDeckRule, DeckRuleCondition, DeckSection};
 
@@ -224,83 +226,91 @@ impl ExpandedLowerer {
                 identity,
             };
             let entries = ability_entries(card, &path)?;
-            let mut allocator = Allocator {
-                next: 0,
-                next_scope: u64::try_from(entries.len())
-                    .ok()
-                    .and_then(|count| count.checked_mul(3))
-                    .ok_or_else(|| unsupported(&path))?,
-                ..Allocator::default()
-            };
-            let mut abilities = Vec::new();
-            let LoweredPlayCosts {
-                mut modifiers,
-                exchange,
-                additional,
-                payment_result,
-            } = lower_play_costs(&coordinates, &entries, &mut allocator, &path)?;
-            let initial_play_faces = play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
-                .ok_or_else(|| unsupported(&path))?;
-            for (index, (entry_path, ability)) in entries.iter().enumerate() {
-                if allocator.declarations(
-                    &coordinates,
-                    entry_path,
-                    ability,
-                    index,
-                    &mut abilities,
-                )? {
-                    continue;
-                }
-                optional_payment::check_entry(ability, exchange.is_some(), entry_path)?;
-                let branches = if hand_exit::check(ability, entry_path)? {
-                    vec![
-                        Some(hand_exit::Branch::Discard),
-                        Some(hand_exit::Branch::Banish),
-                    ]
-                } else {
-                    vec![None]
-                };
-                for (alternative, branch) in branches.into_iter().enumerate() {
-                    let scope = if alternative == 0 {
-                        entry_scope(index, entry_path)?
-                    } else {
-                        allocator.granted_scope(entry_path)?
-                    };
-                    abilities.push(allocator.ability(
-                        &coordinates,
-                        entry_path,
-                        hand_exit::AbilityInput {
-                            entry: ability,
-                            branch,
-                        },
-                        scope,
-                        match identity {
-                            Some(identity) => {
-                                identity.printed_cost(&ability.sources[0].json(), entry_path)?
-                            }
-                            None => printed_costs.get(&key).copied(),
-                        },
-                        payment_result.clone().filter(|_| {
-                            source_span(&coordinates, entry_path, ability)
-                                .is_ok_and(|source| initial_play_faces.contains(&source.face))
-                        }),
-                    )?);
-                }
-            }
-            costs::lower_selected(&coordinates, &entries, &mut allocator, &mut modifiers)?;
-            play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
-                .ok_or_else(|| unsupported(&path))?;
-            let checked = check_card(
-                CardProgram {
-                    abilities,
-                    card_play_costs: face_play_costs(modifiers, exchange, additional),
-                },
+            let checked = lower_entries(
+                &coordinates,
+                &entries,
+                printed_costs.get(&key).copied(),
                 &path,
             )?;
             cards.insert(key, checked);
         }
         Ok(cards)
     }
+}
+
+fn lower_entries(
+    coordinates: &CardCoordinates<'_>,
+    entries: &[(String, ast::Ability)],
+    printed_cost: Option<Nat>,
+    path: &str,
+) -> Result<WellFormedCardProgram, LoweringError> {
+    let mut allocator = Allocator {
+        next: 0,
+        next_scope: u64::try_from(entries.len())
+            .ok()
+            .and_then(|count| count.checked_mul(3))
+            .ok_or_else(|| unsupported(path))?,
+        ..Allocator::default()
+    };
+    let mut abilities = Vec::new();
+    let LoweredPlayCosts {
+        mut modifiers,
+        exchange,
+        additional,
+        payment_result,
+    } = lower_play_costs(coordinates, entries, &mut allocator, path)?;
+    let initial_play_faces = play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
+        .ok_or_else(|| unsupported(path))?;
+    for (index, (entry_path, ability)) in entries.iter().enumerate() {
+        if allocator.declarations(coordinates, entry_path, ability, index, &mut abilities)? {
+            continue;
+        }
+        optional_payment::check_entry(ability, exchange.is_some(), entry_path)?;
+        let branches = if hand_exit::check(ability, entry_path)? {
+            vec![
+                Some(hand_exit::Branch::Discard),
+                Some(hand_exit::Branch::Banish),
+            ]
+        } else {
+            vec![None]
+        };
+        for (alternative, branch) in branches.into_iter().enumerate() {
+            let scope = if alternative == 0 {
+                entry_scope(index, entry_path)?
+            } else {
+                allocator.granted_scope(entry_path)?
+            };
+            abilities.push(allocator.ability(
+                coordinates,
+                entry_path,
+                hand_exit::AbilityInput {
+                    entry: ability,
+                    branch,
+                },
+                scope,
+                match coordinates.identity {
+                    Some(identity) => {
+                        identity.printed_cost(&ability.sources[0].json(), entry_path)?
+                    }
+                    None => printed_cost,
+                },
+                payment_result.clone().filter(|_| {
+                    source_span(coordinates, entry_path, ability)
+                        .is_ok_and(|source| initial_play_faces.contains(&source.face))
+                }),
+            )?);
+        }
+    }
+    costs::lower_selected(coordinates, entries, &mut allocator, &mut modifiers)?;
+    play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
+        .ok_or_else(|| unsupported(path))?;
+    check_card(
+        CardProgram {
+            abilities,
+            card_play_costs: face_play_costs(modifiers, exchange, additional),
+        },
+        path,
+    )
 }
 
 struct LoweredPlayCosts {
@@ -441,11 +451,19 @@ fn ability_entries(
     card: ast::Card,
     path: &str,
 ) -> Result<Vec<(String, ast::Ability)>, LoweringError> {
-    card.abilities
+    decode_abilities(card.abilities, card.faces, path)
+}
+
+fn decode_abilities(
+    abilities: Vec<Value>,
+    faces: BTreeMap<String, ast::Face>,
+    path: &str,
+) -> Result<Vec<(String, ast::Ability)>, LoweringError> {
+    abilities
         .into_iter()
         .enumerate()
         .map(|(index, value)| (format!("{path}/abilities/{index}"), value))
-        .chain(card.faces.into_iter().flat_map(|(face, container)| {
+        .chain(faces.into_iter().flat_map(|(face, container)| {
             container
                 .abilities
                 .into_iter()
@@ -463,7 +481,7 @@ fn ability_entries(
                 (&ability.sources[0], ability.keywords.is_some()),
                 (ast::SourceUse::CardKeyword(_), true)
                     | (ast::SourceUse::Ability(_), false)
-                    | (ast::SourceUse::Direct(_), _)
+                    | (ast::SourceUse::Direct(_) | ast::SourceUse::Published(_), _)
             ) {
                 return Err(unsupported(&entry_path));
             }
@@ -2444,8 +2462,14 @@ fn source_span(
     path: &str,
     entry: &ast::Ability,
 ) -> Result<SourceSpan, LoweringError> {
-    if let ast::SourceUse::Direct(source) = &entry.sources[0] {
-        return current::direct::source_span(key, path, entry, source);
+    match &entry.sources[0] {
+        ast::SourceUse::Direct(source) => {
+            return current::direct::source_span(key, path, entry, source);
+        }
+        ast::SourceUse::Published(source) => {
+            return current::published::source_span(key, path, entry, source);
+        }
+        ast::SourceUse::Ability(_) | ast::SourceUse::CardKeyword(_) => {}
     }
     let source = entry.sources[0].json();
     let text = |pointer| {
@@ -2462,7 +2486,9 @@ fn source_span(
         card_id: key.key.to_owned(),
         card_no: key.key.to_owned(),
         scope: match &entry.sources[0] {
-            ast::SourceUse::Direct(direct_source) => direct_source.scope.clone(),
+            ast::SourceUse::Direct(_) | ast::SourceUse::Published(_) => {
+                return Err(unsupported(path));
+            }
             ast::SourceUse::Ability(scoped) => scoped.ability_scope.clone(),
             ast::SourceUse::CardKeyword(_) => format!("keyword_declaration:{path}"),
         },

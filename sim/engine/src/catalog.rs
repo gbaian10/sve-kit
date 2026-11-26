@@ -24,7 +24,7 @@ mod semantics;
 
 pub use rule_bindings::{EngineIdentityInput, FaceIdentity};
 pub(crate) use selection::RuntimeCards;
-pub use selection::{CurrentSelectionLoader, SelectedEffects};
+pub use selection::{CurrentSelectionLoader, ProgramPrinting, SelectedEffects, SnapshotPrograms};
 
 /// Card facts from the sole versioned card database snapshot.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -232,6 +232,9 @@ impl Catalog {
             .validate(&registry)
             .map_err(invalid)?;
         catalog.validate_keyword_names()?;
+        if documents.is_empty() {
+            return Ok(catalog);
+        }
         let validator = validator_for(&schema).map_err(invalid)?;
         for (name, text) in documents {
             let document: Value = yaml(text)?;

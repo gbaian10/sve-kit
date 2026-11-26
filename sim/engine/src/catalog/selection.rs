@@ -11,6 +11,9 @@ use serde::Deserialize as _;
 use serde_json::Value;
 use std::sync::{Mutex, OnceLock};
 
+mod published;
+pub use published::{ProgramPrinting, SnapshotPrograms};
+
 /// Disjoint prototype programs and complete, current-source checked D0 candidates.
 #[derive(Clone, Debug)]
 #[expect(
@@ -55,11 +58,17 @@ impl fmt::Debug for RuntimeCards {
 
 impl SelectedEffects {
     fn new(prototypes: Catalog, accepted: BTreeMap<String, Arc<CandidateAdmission>>) -> Self {
+        Self::from_shared(Arc::new(prototypes), accepted)
+    }
+
+    fn from_shared(
+        prototypes: Arc<Catalog>,
+        accepted: BTreeMap<String, Arc<CandidateAdmission>>,
+    ) -> Self {
         let current = accepted
             .iter()
             .map(|(number, admission)| (number.clone(), Arc::clone(admission.candidate())))
             .collect();
-        let prototypes = Arc::new(prototypes);
         Self {
             runtime: Arc::default(),
             accepted_prototypes: Arc::clone(&prototypes),
@@ -429,11 +438,7 @@ fn check_token_sources(
 ) -> Result<()> {
     for admission in accepted.values() {
         let program = admission.candidate();
-        let card = &program.expanded["cards"][&program.card_no];
-        for link in card["token_sources"].as_array().into_iter().flatten() {
-            let number = link["card_no"]
-                .as_str()
-                .ok_or_else(|| invalid("invalid token source"))?;
+        for number in &program.token_printings {
             if prototypes
                 .token_definitions
                 .get(number)
