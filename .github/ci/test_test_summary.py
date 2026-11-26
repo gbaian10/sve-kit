@@ -5,9 +5,12 @@ import contextlib
 import io
 import json
 import os
+import re
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- set up a synthetic Git index
 import tempfile
 import unittest
 from pathlib import Path
+from shutil import which
 from typing import override
 from unittest.mock import patch
 
@@ -25,14 +28,46 @@ class SummaryTests(unittest.TestCase):
         temporary = tempfile.TemporaryDirectory()
         self.addCleanup(temporary.cleanup)
         self.folder = Path(temporary.name)
+        self.checkout = self.folder / "checkout"
+        self.checkout.mkdir()
+        self.git("init", "--quiet")
+        root = patch("test_summary.ROOT", self.checkout)
+        root.start()
+        self.addCleanup(root.stop)
+
+    def git(self, *args: str) -> None:
+        """Use a real index for the distinction between tracked and untracked paths."""
+        git = which("git")
+        assert git is not None
+        subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Git commands on the synthetic checkout
+            [git, "-C", str(self.checkout), *args],
+            capture_output=True,
+            check=True,
+        )
+
+    def source(self, filename: str, lines: int, *, tracked: bool = True) -> None:
+        """Create an actual file with the line count emitted by a synthetic reporter."""
+        path = self.checkout / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(b"\n" * lines)
+        if tracked:
+            self.git("add", "--", filename)
 
     def write_junit(self) -> None:
         """Cover nested suites, parameters, errors, failures and skips."""
+        for component in ("carddb", "publish"):
+            self.source(f"{component}/tests/test_alpha.py", 25)
+            self.source(f"{component}/tests/test_beta.py", 5)
         (self.folder / "junit.xml").write_text(
             f"""<testsuites><testsuite time="9.5">
 <testcase classname="tests.test_alpha.TestGroup" name="test_ok[{PRIVATE}]" time="1"/>
-<testcase classname="tests.test_alpha" name="test_fail" time="2"><failure message="{PRIVATE}">{PRIVATE}</failure><system-out>{PRIVATE}</system-out></testcase>
-<testcase classname="tests.test_beta" name="test_error" time="3"><error>{PRIVATE}</error></testcase>
+<testcase classname="tests.test_alpha" name="test_fail" time="2"><failure message="AssertionError: assert '{PRIVATE}' == 'expected'">
+tests/test_alpha.py:17: AssertionError
+</failure><system-out>{PRIVATE}</system-out></testcase>
+<testcase classname="tests.test_beta" name="test_error" line="4" time="3"><error>
+tests/private_pytrace_marker.py:1: AssertionError
+{PRIVATE}
+</error></testcase>
 <testcase classname="tests.test_beta" name="test_skip" time="0"><skipped message="{PRIVATE}"/></testcase>
 <testcase classname="tests.test_beta" name="test_other" time="0.5"/>
 </testsuite></testsuites>""",
@@ -65,7 +100,11 @@ class SummaryTests(unittest.TestCase):
         path = self.folder / "junit.xml"
         before = junit_summary("python", self.folder)
         path.write_text(
-            path.read_text().replace('" time=', '@tests/test_alpha.py" time=')
+            re.sub(
+                r'(<testcase\b[^>]*\bname="[^"]+)(")',
+                r"\1@tests/test_alpha.py\2",
+                path.read_text(),
+            )
         )
         assert junit_summary("python", self.folder) == before
 
@@ -77,6 +116,10 @@ class SummaryTests(unittest.TestCase):
         assert "required **92%**" in summary
         assert "no private test data required" in summary
         assert "tests/test_alpha.py::test_fail" in summary
+        assert "publish/tests/test_alpha.py:17" in summary
+        assert "publish/tests/test_beta.py:5 (test definition)" in summary
+        assert "Assertion failed (details omitted)" in summary
+        assert "private_pytrace_marker" not in summary
         assert PRIVATE not in summary
         with contextlib.redirect_stdout(io.StringIO()):
             assert main(["publish", str(self.folder)]) == 1
@@ -85,6 +128,26 @@ class SummaryTests(unittest.TestCase):
                 encoding="utf-8",
             )
             assert main(["publish", str(self.folder)]) == 0
+
+    def test_publish_traceback_uses_the_carddb_source_path(self) -> None:
+        """Resolve cross-package and intermediate frames before considering a fallback."""
+        self.source("carddb/src/sve_carddb/export/read_api.py", 33)
+        self.source("publish/tests/test_export.py", 15)
+        (self.folder / "junit.xml").write_text(
+            """<testsuite><testcase classname="tests.test_export" name="test_read" line="2" time="1">
+<failure message="assert []">
+tests/test_export.py:13: in test_read
+../carddb/src/sve_carddb/export/read_api.py:31:
+../carddb/src/sve_carddb/export/read_api.py:999: AssertionError
+../.venv/lib/python3.14/site-packages/vendor/src/private_module.py:4: AssertionError
+</failure></testcase></testsuite>""",
+            encoding="utf-8",
+        )
+        summary = junit_summary("publish", self.folder)
+        assert "carddb/src/sve_carddb/export/read_api.py:31" in summary
+        assert "private_module" not in summary
+        assert ":999" not in summary
+        assert "Assertion failed (details omitted)" in summary
 
     def test_python_shard_must_run_every_assigned_test(self) -> None:
         """A shard fails when its report lacks assigned tests or its counts."""
@@ -244,19 +307,29 @@ class SummaryTests(unittest.TestCase):
 
     def test_fast_web_failure_uses_file_and_ordinal(self) -> None:
         """A fast Vitest failure stays visible without publishing its description."""
+        self.source("sim/web/src/fast.test.tsx", 80)
+        self.source("sim/web/src/private-marker-hijack.ts", 2, tracked=False)
         passed = "".join(
             f'<testcase classname="src/slow.test.ts" name="{PRIVATE}" time="10"/>'
             for _ in range(35)
         )
-        failed = f'<testcase classname="src/fast.test.tsx" name="{PRIVATE}" time="0"><failure>{PRIVATE}</failure></testcase>'
+        failed = f"""<testcase classname="src/fast.test.tsx" name="{PRIVATE}" time="0">
+<failure type="AssertionError" message="expected '{PRIVATE}' to be 'expected' // Object.is equality">
+ ❯ src/private-marker-hijack.ts:1:1
+ ❯ user_label_from_report src/fast.test.tsx:72:15
+ {PRIVATE}
+</failure></testcase>"""
         (self.folder / "junit.xml").write_text(
             f"<testsuite>{passed}{failed}</testsuite>", encoding="utf-8"
         )
         summary = junit_summary("web", self.folder)
         failures, slowest = summary.split("### Slowest 30 cases", 1)
-        assert "- `src/fast.test.tsx::case 36`" in failures
+        assert "sim/web/src/fast.test.tsx:72 · src/fast.test.tsx::case 36" in failures
+        assert "Object.is equality assertion failed (operands omitted)" in failures
         assert "::case 36" not in slowest
         assert PRIVATE not in summary
+        assert "private-marker-hijack" not in summary
+        assert "user_label_from_report" not in summary
 
     def test_rust_binary_headers_keep_private_paths_and_listing_labels_out(
         self,
@@ -297,7 +370,9 @@ class SummaryTests(unittest.TestCase):
                     assert "| safe (tests/safe.rs) | 1 | 0.20 |" in rendered
 
     def test_rust_shard_counts_and_wall_time(self) -> None:
-        """Aggregate multiple binaries and doctests; never include panics or source."""
+        """Aggregate multiple binaries and expose only safe panic coordinates."""
+        self.source("sim/engine/tests/boundaries.rs", 30)
+        self.source("sim/engine/tests/private-marker-printed.rs", 3)
         (self.folder / "test.log").write_text(
             f"""panic: {PRIVATE}
 test boundaries::test_failure ... FAILED
@@ -310,6 +385,16 @@ test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; fini
      Running tests/{PRIVATE}.rs (target/llvm-cov-target/debug/deps/x-0123abcd)
      Running tests/listed_only.rs (target/llvm-cov-target/debug/deps/listed_only-0123abcd)
      Running tests/current_repository.rs (target/llvm-cov-target/debug/deps/current_repository-89ef)
+---- boundaries::test_failure stdout ----
+
+thread 'x' panicked at sim/engine/tests/private-marker-printed.rs:2:1:
+{PRIVATE}
+
+thread 'boundaries::test_failure' (123) panicked at sim/engine/tests/boundaries.rs:19:7:
+assertion `left == right` failed
+  left: "{PRIVATE}"
+ right: "expected"
+
 test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
 """,
             encoding="utf-8",
@@ -324,7 +409,8 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         )
         assert "**12.00 s**" in summary
         assert "**1.50 s**" in summary
-        assert "### Failed tests\n\n- `boundaries::test_failure`" in summary
+        assert "sim/engine/tests/boundaries.rs:19 · boundaries::test_failure" in summary
+        assert "Assertion failed (left == right, operands omitted)" in summary
         assert "| sve_engine (src/lib.rs) | 4 | 1.20 |" in summary
         assert (
             "| current_repository (tests/current_repository.rs) | 3 | 0.30 |" in summary
@@ -333,6 +419,7 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         assert "- `module::r#type::test_error`" in summary
         assert "test_ok" not in summary
         assert "unsafe" not in summary
+        assert "private-marker-printed" not in summary
         assert PRIVATE not in summary
         with contextlib.redirect_stdout(io.StringIO()):
             assert main(["rust", str(self.folder)]) == 0

@@ -271,7 +271,8 @@ jobs:
           status=0
           # rust-tests also checks the complete selection while generating its public inputs.
           uv --directory carddb run --locked --python 3.14.10 pytest -n "$PYTEST_WORKERS" --no-cov \
-            --shard=1/1 --shard-report="$REPORT_DIR/shard.json" --junitxml="$REPORT_DIR/junit.xml" \
+            --shard=1/1 --shard-report="$REPORT_DIR/shard.json" \
+            --junitxml="$REPORT_DIR/junit.xml" -o junit_family=xunit1 \
             tests/architecture/test_authored_defaults.py::test_authored_tree_does_not_store_quality_defaults \
             tests/core/test_yaml_reader.py::test_all_production_files_pass_strict_reader \
             tests/domains/effects/test_author_current.py::test_real_current_author_set \
@@ -381,7 +382,8 @@ jobs:
           [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
           status=0
           uv --directory ./publish run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
-            --junitxml="$REPORT_DIR/junit.xml" --cov-report="json:$REPORT_DIR/coverage.json" \
+            --junitxml="$REPORT_DIR/junit.xml" -o junit_family=xunit1 \
+            --cov-report="json:$REPORT_DIR/coverage.json" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "publish pytest exit status: $status (statistics in the next step)"
@@ -466,7 +468,7 @@ jobs:
           # One shard's coverage is partial, so the 90% fail-under applies in python-coverage instead.
           uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
             --cov-fail-under=0 --shard="$SHARD" --shard-report="$REPORT_DIR/shard.json" \
-            --junitxml="$REPORT_DIR/junit.xml" "${selection[@]}" \
+            --junitxml="$REPORT_DIR/junit.xml" -o junit_family=xunit1 "${selection[@]}" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "pytest exit status: $status (statistics in the next step; raw output stays private)"
