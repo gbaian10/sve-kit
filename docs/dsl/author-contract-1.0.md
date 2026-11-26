@@ -18,7 +18,7 @@
 
 主檔 `{format:2,kind:author_effect_set,scope?,dsl?,cards}`，預設 shared／1.0。每卡含 `meta, abilities`，可含 `admission, ignored, rule_sections, note, deck_rule, container`；container 只保留既有卡級／面級樹的呈現。meta.written_by 必填，其餘 status 預設 draft，reviews／rulings 預設空。
 
-作者檔位於 `authored/rules/author-effects/<owner>/<sequence>.yaml`，具名本體位於 `effect-bodies/<owner>/<sequence>.yaml`，每檔小於 1 MiB。身分由既有登錄及 printing 解出，不由卡號或文字 hash 推測。英文 override 的來源契約仍未提供。
+作者主檔位於 `authored/rules/author-effects/<owner>/`，可用 `<卡號>.yaml` 或至少三位數的 `<sequence>.yaml`。同一個卡包目錄可混用兩種檔名，新增卡片預設以卡號命名。具名本體位於 `effect-bodies/<owner>/<sequence>.yaml`，使用至少三位數的序號。每檔小於 1 MiB。身分由既有登錄及 printing 解出，不由卡號或文字 hash 推測。英文 override 的來源契約仍未提供。
 
 ### 2.2 材料化 companion record
 

@@ -10,7 +10,12 @@ from sve_carddb.core.authored import check_path, require_directory
 from sve_carddb.core.json import canonical, digest, object_value
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_expansion import BodyLibrary
-from sve_carddb.domains.effects.author_handwritten import BodyFile, MainFile, decode
+from sve_carddb.domains.effects.author_handwritten import (
+    MAIN_SHARD_PATTERN,
+    BodyFile,
+    MainFile,
+    decode,
+)
 from sve_carddb.domains.effects.author_inputs import (
     AuthorInputError,
     AuthorSchemas,
@@ -33,7 +38,6 @@ _BODIES = "rules/effect-bodies"
 _PROTOTYPE = "rules/effects"
 _OWNER = r"[A-Za-z0-9_-]+"
 _SHARD = r"[0-9]{3,}\.yaml"
-_AUTHOR_SHARD = r"(?:[0-9]{3,}|[A-Za-z0-9_]+-[^/\\\x00-\x1f\x7f]+)\.yaml"
 
 
 @dataclass(frozen=True)
@@ -108,7 +112,7 @@ def _files(root: Path, area: str, *, sharded: bool) -> tuple[InputFile, ...]:
             for shard in sorted(entry.iterdir()):
                 if (
                     re.fullmatch(
-                        _AUTHOR_SHARD if area == _AUTHOR else _SHARD, shard.name
+                        MAIN_SHARD_PATTERN if area == _AUTHOR else _SHARD, shard.name
                     )
                     is None
                 ):
@@ -125,7 +129,7 @@ def _path_matches(path: str, area: str) -> bool:
     suffix = (
         _OWNER + r"\.yaml"
         if area in {_PROTOTYPE, _INDEX}
-        else _OWNER + "/" + (_AUTHOR_SHARD if area == _AUTHOR else _SHARD)
+        else _OWNER + "/" + (MAIN_SHARD_PATTERN if area == _AUTHOR else _SHARD)
     )
     return re.fullmatch(re.escape(area) + "/" + suffix, path) is not None
 

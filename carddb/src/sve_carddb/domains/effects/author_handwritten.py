@@ -1,5 +1,6 @@
 """Decode author shorthand and resolve only explicit source positions."""
 
+import re
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Annotated, Literal
@@ -34,6 +35,7 @@ if TYPE_CHECKING:
 
 Positive = Annotated[int, Field(gt=0)]
 Version = Annotated[Literal[2], BeforeValidator(integer)]
+MAIN_SHARD_PATTERN = r"(?:[0-9]{3,}|[A-Za-z0-9_]+-[^/\\\x00-\x1f\x7f]+)\.yaml"
 
 
 class ConfigurationError(ValueError):
@@ -111,8 +113,10 @@ class Handwritten:
     documents: dict[str, ParsedDocument]
 
 
-def read_files(path: Path) -> tuple[tuple[Path, ParsedDocument], ...]:
-    """Read one input or numeric owner shards; reject links at every level."""
+def read_files(
+    path: Path, *, main: bool = False
+) -> tuple[tuple[Path, ParsedDocument], ...]:
+    """Read one input or owner shards; reject links at every level."""
     check_path(Path(path.anchor), path)
     if path.is_file():
         with path.open("rb") as stream:
@@ -120,11 +124,12 @@ def read_files(path: Path) -> tuple[tuple[Path, ParsedDocument], ...]:
     if not path.is_dir():
         raise FileNotFoundError(path)
     files: list[tuple[Path, ParsedDocument]] = []
+    pattern = MAIN_SHARD_PATTERN if main else r"\d+\.yaml"
     for entry in sorted(path.iterdir()):
         check_path(path, entry)
         if entry.is_dir():
-            files.extend(read_files(entry))
-        elif entry.suffix == ".yaml" and entry.stem.isdecimal():
+            files.extend(read_files(entry, main=main))
+        elif re.fullmatch(pattern, entry.name) and entry.is_file():
             files.append((entry, parse_document(entry.read_bytes())))
         else:
             raise AuthorInputError(Diagnostic("yaml", "invalid_input_path"))
@@ -136,7 +141,7 @@ def read(main: Path, bodies: Path | None) -> Handwritten:
     cards: dict[str, dict[str, JsonValue]] = {}
     documents: dict[str, ParsedDocument] = {}
     definitions: dict[tuple[str, int], Body] = {}
-    for path, document in read_files(main):
+    for path, document in read_files(main, main=True):
         parsed = decode(document, MainFile)
         for number, card in parsed.cards.items():
             if number in cards:

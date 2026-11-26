@@ -6,7 +6,7 @@ import pytest
 
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_direct import materialize
-from sve_carddb.domains.effects.author_handwritten import Body, Handwritten
+from sve_carddb.domains.effects.author_handwritten import Body, Handwritten, read
 from sve_carddb.domains.effects.author_inputs import parse_document
 from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.products.models import LocalizedText
@@ -20,6 +20,27 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pydantic import JsonValue
+
+
+def test_main_directory_reads_numeric_and_card_number_filenames(tmp_path: Path) -> None:
+    owner = tmp_path / "SYN"
+    owner.mkdir()
+    cards: dict[str, JsonValue] = {
+        "SYN-01": {"admission": "light", "abilities": []},
+        "SYN-02": {"admission": "shared", "abilities": []},
+    }
+    for filename, number in (("001.yaml", "SYN-01"), ("SYN-02.yaml", "SYN-02")):
+        (owner / filename).write_bytes(
+            canonical(
+                {
+                    "format": 2,
+                    "kind": "author_effect_set",
+                    "cards": {number: cards[number]},
+                }
+            )
+        )
+
+    assert read(owner, None).cards == cards
 
 
 def test_direct_writer_selects_pending_text_without_machine_anchors(
