@@ -1,4 +1,4 @@
-# 卡表快照傳輸契約（4.0.0／4.1.0）
+# 卡表快照傳輸契約（4.0.0／4.1.0／4.2.0）
 
 本文的格式與一致性「驗證／拒絕」由 carddb 匯出、Python 完整 reader 與上傳前離線檢查執行。
 瀏覽器 runtime 信任這些已驗的自有公開 JSON，只在下載／快取邊界以 WebCrypto 驗未壓縮 bytes 的 SHA-256（同一份 bytes 不在 decoder 重算），並核對檔案長度；仍保留格式版本、最低 reader 版本與必要能力的准入，以及版本索引的常數成本一致性核對（[格式 §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)）。
@@ -7,7 +7,7 @@
 
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
 
-目前 producer／reader 支援 4.0.0 與 4.1.0（DSL 程式附件，見 §3.4）；§4.4 的基本目錄裝檔及 role／partition 解耦為尚未發布的 4.0.0 設計要求，機器 Schema／producer／reader 尚未依該裝檔替換。圖片契約與配置見 §5.4。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
+目前 producer／reader 支援 4.0.0、4.1.0 與 4.2.0（DSL 程式附件及對戰版次關聯，見 §3.4）；§4.4 的基本目錄裝檔及 role／partition 解耦為尚未發布的 4.0.0 設計要求，機器 Schema／producer／reader 尚未依該裝檔替換。圖片契約與配置見 §5.4。機器資源依 [snapshot-contract](snapshot-contract.md) 維護。
 4.0.0 的標註與來源閉包依[公開 annotation 契約](public-annotation.md)及本文 §8；所有欄序以現行 profile 為準。
 
 ## 1. 基本型別與 canonical bytes
@@ -21,9 +21,9 @@
 ### 1.1 版本與相容判斷
 
 - `format_version`、`min_reader_version` 為不含 prerelease/build 的 SemVer；後者屬獨立的快照 reader 契約版本，不是 web、Python 套件或 Git tag 版號。reader 明示自身契約版本、支援的 format 範圍及 capabilities。
-- 「發布凍結」是維護者將該 `format_version` 的 wire 解釋與配置定案，並在[格式鎖定檔](../../../.github/ci/snapshot-format.lock)將 `frozen` 設為 `true`。凍結時機由維護者決定，必須在正式站上線前完成；開發桶曾部署不代表已凍結。目前 `4.0.0` 與 `4.1.0` 尚未凍結。凍結後不得改寫指紋、解除凍結或刪除該紀錄；格式變更依下列 major／minor 規則建立新版紀錄。檢查程式本身與鎖定檔路徑的變更須由維護者審核。
+- 「發布凍結」是維護者將該 `format_version` 的 wire 解釋與配置定案，並在[格式鎖定檔](../../../.github/ci/snapshot-format.lock)將 `frozen` 設為 `true`。凍結時機由維護者決定，必須在正式站上線前完成；開發桶曾部署不代表已凍結。目前 `4.0.0`、`4.1.0` 與 `4.2.0` 尚未凍結。凍結後不得改寫指紋、解除凍結或刪除該紀錄；格式變更依下列 major／minor 規則建立新版紀錄。檢查程式本身與鎖定檔路徑的變更須由維護者審核。
 - 正式 `data_version` 為 `YYYYMMDDTHHMMSSZ-NNNN`，NNNN 是同 UTC 秒內從 0001 起的四位流水號。預覽為 `preview-YYYYMMDDTHHMMSSZ-NNNN`；只在隔離根中分配，只能進開發桶的版本索引，不能進正式版本索引。`published_at` 是該批次 UTC Instant；預覽填產出時間，不代表公開發布。
-- `required_capabilities` 是排序、唯一的非空 Code 陣列，4.0 的固定集合依 §5.4，4.1 的 DSL 增量依 §3.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
+- `required_capabilities` 是排序、唯一的非空 Code 陣列，4.0 的固定集合依 §5.4，4.1 與 4.2 的 DSL 增量依 §3.4。reader 需同時滿足 format 範圍、最低契約版本、所有 capabilities，才能啟用；不因 major 相同就接受未知 minor。
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。已發布格式新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本；尚未發布的 4.0.0 可同步原地替換，不留雙格式 parser，也不另增 capability。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
 - 未凍結期間，舊 reader 會讀錯的原地變更須提高 reader 契約的 patch，並同步 producer 的最低 reader 版本。4.0 新產出固定寫 min_reader_version=4.0.3，4.1 固定寫 4.1.1；Python 與 Web reader 按 profile 准入這兩個最低版本，版本索引略過 4.0.0／4.0.1／4.0.2 與 4.1.0 minimum 的舊 preview，沒有相容入口就回報不支援。舊 preview 須以新 data_version 重建，不以新配置解讀舊 band，也不加舊配置 fallback。Schema 保留舊 minimum 以辨識索引與留存封套；發布器仍可核對舊 manifest 封套與 JSON 保留閉包，但不能把它當成可讀快照或用來重算圖片閉包。
 - 分片 bucket 的算法與數目由每個 format 版本的配置釘死；已發布配置調整至少升 minor；尚未發布的 4.0.0 依前項同步替換，不能只更換 data_version。`search.grammar_version/normalizer_version` 是搜尋契約的獨立 Code，不宣稱特定搜尋實作已完成；reader 必須明示支援這一對值，未知值停用搜尋並告知，不能用舊 normalizer 建錯索引。
@@ -208,17 +208,23 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 ### 3.4 DSL 程式包與版本准入
 
-DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得有額外鍵，format_version 與所屬 manifest 相同，entries 是陣列、不可 null。程式項目的封套為 `{id:ID,dsl_version:Text,ast:JSON}`，三鍵皆 required 且不得有額外鍵；id 在包內唯一並排序，dsl_version 採 `主版.次版`（非負十進位整數，除 0 外無前導零）。ast 保留 JSON，不轉 tuple，其合法形狀只由該 DSL 版本在 `dsl/` 的正式 Schema 定義。
+DSL 程式包的 format_version 與所屬 manifest 相同，entries 是陣列且不可 null。4.0 與 4.1 的封套恰含 format_version 與 entries。4.2 多一個 required 的 printings。程式項目的封套為 `{id:ID,dsl_version:Text,ast:JSON}`，三鍵皆 required 且不得有額外鍵；id 在包內唯一並排序，dsl_version 採 `主版.次版`（非負十進位整數，除 0 外無前導零）。ast 保留 JSON，不轉 tuple，其合法形狀只由該 DSL 版本在 `dsl/` 的正式 Schema 定義。
 
 format_version=`4.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
 
 此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（`{"format_version":"4.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。下載文字分片不依賴此附件；驗完整快照時另外取得。
 
-format_version=`4.1.0` 啟用 DSL `1.0`，最低 reader 版本為 `4.1.1`，必要能力在 4.0 的集合上新增 `dsl-programs-v1`。`4.0.0` 的空集合規則不變。producer 有程式時預設選用 4.1，明示選用 4.0 且程式非空即拒絕，不能丟棄程式降級。未知 DSL 版本仍拒絕整包。
+format_version=`4.1.0` 啟用 DSL `1.0`，最低 reader 版本為 `4.1.1`，必要能力在 4.0 的集合上新增 `dsl-programs-v1`。`4.0.0` 的空集合規則不變。無版次關聯的程式輸入選用 4.1，有完整版次關聯的作者建置選用 4.2。要求以 4.0 匯出非空程式，或以 4.0／4.1 匯出已有版次關聯的程式，一律拒絕。未知 DSL 版本仍拒絕整包。
 
 DSL 1.0 的公開 AST 由 `dsl/program.schema.json` 定義，重用 `dsl/author-nodes.schema.json` 的執行節點；snapshot Schema 產生器將必要閉包編入 wheel 的本地 `$defs`，reader 不依賴 repo checkout 或遠端 Schema。公開 AST 恰保留 `card_id,scope` 及存在的 `abilities,faces,deck_rule,token`；scope 目前只允許 shared，faces 以永久 face ID 為鍵。能力保留執行節點、ports、imports 及 line／section，移除 sources；作者、審核、來源證據、ignored、note 與具名本體的 use／registration 都不出貨。所有具名本體必須先展開，參數與 generated 節點一律拒絕。
 
 4.1 每份 manifest 仍恰有一個 role=programs、key=`programs` 的 File，容器為 `{format_version:"4.1.0",entries:[...]}`；封套的 id/dsl_version/ast 三欄、排序唯一、row_counts=[]、dependencies=[] 與 canonical bytes 規則沿用。`ProgramRef.file_key` 必須指向此 File，entry_id 必須存在，與 support 的 dsl_id／dsl_version 和 AST 的 card_id 相符；所有 entries 都必須被本卡支援度引用，不接受懸空、重複或無引用項目。
+
+4.2.0 在 4.1.0 能力集合上增加 `dsl-program-dependencies-v1`，最低 reader 版本為 4.2.0。程式包封套為 `{format_version:"4.2.0",entries,printings}`。entries 沿用 DSL 1.0 的 AST、內容定址 ID 與 ProgramRef。printings 以 AST 的永久 CardId 為鍵，與 entries 的卡片一一對應。每筆恰含 `representative` 與 `tokens`。
+
+- representative 是同一張卡在作者准入時的效果登錄版次，以快照中的官網 JP 永久版次 ID 保存。對戰依該版次檢查程式來源與規則事實，衍生物的別名亦解析至原代表版次。
+- tokens 保存已准入的開局閉包關聯，值為唯一且排序的官網 JP 永久版次 ID 陣列。目標必須存在於該快照，其採納的面須為衍生物，且所屬卡片須有 DSL 程式。允許自身關聯。空陣列表示此程式無明示關聯。
+- 此封套的 manifest File hash 涵蓋程式和版次關聯。跨區讀取仍適用 region_blocks。
 
 打包範圍是 effects-index 的全部准入卡，包含 light；來源／展開驗證失敗即拒絕建置，不能靜默漏卡。准入並不代表通過指定引擎：尚無 exact engine target／實跑紀錄時，status 依作者候選維持 draft 或 reviewed（不因 light 准入升為 reviewed）、reasons=[engine_unassigned]，保留手動處理。EN 是否可自動執行仍受既有 region_blocks 限制。AST 是另行下載的對戰附件；文字分片不以它為強依賴，查卡不用下載 AST。容量帳依 size-budget 分別報告程式包 raw／Brotli 與原有逐區文字閉包，不把 AST 計成首屏或基本目錄。
 
@@ -385,7 +391,7 @@ format_version 為 `4.0.0`，min_reader_version 為 `4.0.3`，完整八個 requi
 translation 在 bootstrap／detail 均為完整八欄；FieldTranslation 的七格欄序與 basis 依 §8。
 canonical、owner、分片鍵及裝檔規則沿前述配置，producer、Python reader、共用 golden 與 Web 解碼欄序須同步。
 
-所有容器、config、programs、changes 的 format_version 都必須一致；空圖片／same_name 也不省能力。
+4.0 與 4.1 的所有容器、config、programs、changes 的 format_version 都與 manifest 一致。4.2 的 manifest 與 programs 固定使用 4.2.0，其餘容器、config 與 changes 固定使用 4.1.0。空圖片／same_name 也不省能力。
 索引以獨立 `index_format:2` 協商，形狀依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)，不混同於 reader 契約版號。
 producer 與 reader 須各自驗 same_name 的卡層 null、effect_similarity=null、review_level=unreviewed
 及完整公開引用閉包，不只驗 enum 合法。config.digital_endpoints 依 game 排序，

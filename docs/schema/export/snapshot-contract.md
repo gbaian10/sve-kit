@@ -1,6 +1,6 @@
 # 快照機器契約與共用樣本
 
-套件 Schema、Python reader 與 TS 解碼器使用 `4.0.0`（空程式包）與 `4.1.0`（DSL 1.0）profile，整合
+套件 Schema、Python reader 與 TS 解碼器使用 `4.0.0`（空程式包）、`4.1.0`（DSL 1.0）與 `4.2.0`（DSL 1.0 及對戰版次關聯）profile，整合
 [公開 annotation 契約](public-annotation.md)的欄序、形狀、來源指標；格式與語義檢查在匯出及上傳前離線執行。
 [public-annotation.schema.json](public-annotation.schema.json)及
 [固定案例](public-annotation-cases.json)仍供指定邊界的元件驗證，完整快照以套件 Schema 與共用 golden 驗收。
@@ -60,10 +60,12 @@ uv --directory carddb run pytest tests/contracts/test_snapshot_contract.py
 
 `test_schema_regeneration_matches_committed_structure` 從來源重新產生並比較提交版的解析結構；另以未啟用 format checker 的 Draft 2020-12 驗證器拒絕共用形狀反例。產生器只產生 Schema，不生成 golden 或預期 logical view。欄位變更仍須對照 snapshot-format／snapshot-transport 審核，並依傳輸契約判定版本變動。
 
+4.2 資源產生到 `schema/v5/`。沿用 4.1 的 tuple、分片、config、changes 與 DSL AST Schema，另定義擴充的 manifest／Programs 封套與永久版次關聯。最低 reader 為 4.2.0，必要能力包含 `dsl-program-dependencies-v1`。非程式附件固定用 4.1 wire，程式包用 4.2。
+
 ## 格式指紋鎖定
 
 `.github/ci/snapshot-format.lock` 記錄
-`format_version → {fingerprint, frozen}`，保留歷史凍結紀錄；目前 `4.0.0` 為未凍結。
+`format_version → {fingerprint, frozen}`，保留歷史凍結紀錄。目前 4.0.0、4.1.0、4.2.0 均未凍結。
 `.github/ci/snapshot_format.py` 是正式的本機 hook／CI 檢查，不需私有資料或匯出根。
 
 指紋的來源只有正式定義：
