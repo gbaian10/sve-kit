@@ -1,6 +1,7 @@
 """Expand named bodies against card coordinates, without translation-frame proofs."""
 
 from copy import deepcopy
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
@@ -17,7 +18,7 @@ from sve_carddb.domains.effects.author_expansion import (
     ability_nodes,
 )
 from sve_carddb.domains.effects.author_handwritten import Locator, RuleSection, decode
-from sve_carddb.domains.effects.author_inputs import parse_document
+from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
 from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.translations.four_layer_sources import card_field
 
@@ -62,14 +63,31 @@ def _scalar(value: Value) -> str | int | None:
 def direct(handwritten: Handwritten, number: str) -> bool:
     """Select direct admission from the card, use or selected body edition."""
     card = handwritten.cards[number]
-    return "admission" in card or any(
-        "admission" in (value := object_value(a))
-        or (
-            "use" in value
-            and _body_definition(value, handwritten).admission is not None
-        )
-        for a in array(card["abilities"])
-    )
+    if "admission" in card:
+        return True
+    for index, raw in enumerate(array(card["abilities"])):
+        value = object_value(raw)
+        if "admission" in value:
+            return True
+        if "use" not in value:
+            continue
+        try:
+            body = _body_definition(value, handwritten)
+        except SourceError as error:
+            cursor = handwritten.documents[number].diagnostic(
+                "source", error.reason, ("cards", number, "abilities", index)
+            )
+            line = value.get("line")
+            raise AuthorInputError(
+                replace(
+                    cursor,
+                    card_no=number,
+                    card_line=line if type(line) is int else None,
+                )
+            ) from None
+        if body.admission is not None:
+            return True
+    return False
 
 
 def inventory(  # ruff: ignore[complex-structure] -- keep permanent identity and its complete line inventory at one boundary

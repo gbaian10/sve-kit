@@ -256,6 +256,7 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             array(body_tree["records"]).append(deepcopy(definition))
         case "editions":
             array(body_tree["records"]).append({**definition, "edition": 2})
+            card["abilities"] = [{**ability, "edition": 1}, ability]
     main.write_bytes(authoring.format_yaml(main_tree))
     bodies.write_bytes(authoring.format_yaml(body_tree))
     before = fingerprint(output_root)
@@ -268,9 +269,11 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             cards=frozenset({"BP10-122"}),
         )
     assert error.value.diagnostic.reason == reason
-    if mutation in {"param", "body_source", "body_syntax"}:
+    if mutation in {"param", "body_source", "body_syntax", "editions"}:
         assert error.value.diagnostic.card_line == 1
         assert error.value.diagnostic.line is not None
+    if mutation == "editions":
+        assert error.value.diagnostic.path == ("cards", "BP10-122", "abilities", 1)
     assert fingerprint(output_root) == before
 
 
