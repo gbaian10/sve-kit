@@ -77,6 +77,18 @@ pub enum EvolutionState {
     SuperEvolved,
 }
 
+/// Current limit-break stage of a field follower.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
+#[serde(rename_all = "snake_case")]
+pub enum LimitBreakStage {
+    /// No stage is active, including for other cards.
+    None,
+    /// Normal limit break.
+    Broken,
+    /// Final limit break.
+    Final,
+}
+
 /// Rules phase of a turn.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "snake_case")]
@@ -133,6 +145,8 @@ pub struct CardState {
     pub posture: Posture,
     /// Current evolution state.
     pub evolution: EvolutionState,
+    /// Current limit-break stage, public to both seats.
+    pub limit_break: LimitBreakStage,
     /// Effective numbers of a field or EX follower; absent for anything else.
     pub stats: Option<Stats>,
     /// Effective keywords.
