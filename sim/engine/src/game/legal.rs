@@ -2,13 +2,12 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use alloc::collections::{BTreeMap, BTreeSet};
 
 use serde_json::{Value, json};
 
-use super::{AbilityUse, Frame, Game, int, list, other, string};
+use super::{Game, list, other, string};
 use crate::ir::EffectDefinitionId;
-use crate::{EngineFailure, Result, invalid};
+use crate::{Result, invalid};
 
 pub(super) fn subsets(items: &[String], min: usize, max: usize) -> Vec<Vec<String>> {
     fn visit(
@@ -51,31 +50,6 @@ pub(super) fn permutations(items: &[Value]) -> Vec<Vec<Value>> {
         for mut tail in permutations(&rest) {
             tail.insert(0, item.clone());
             out.push(tail);
-        }
-    }
-    out
-}
-
-fn distributions(ids: &[String], total: i64) -> Vec<Value> {
-    let Some((first, rest)) = ids.split_first() else {
-        return if total == 0 {
-            vec![json!({})]
-        } else {
-            Vec::new()
-        };
-    };
-    if rest.is_empty() {
-        return if total > 0 {
-            vec![json!({first:total})]
-        } else {
-            Vec::new()
-        };
-    }
-    let mut out = Vec::new();
-    for amount in 1..total {
-        for mut remaining in distributions(rest, total.saturating_sub(amount)) {
-            remaining[first] = json!(amount);
-            out.push(remaining);
         }
     }
     out
@@ -135,46 +109,6 @@ pub(super) fn unordered_selection_matches(candidate: &Value, decision: &Value) -
 }
 
 impl Game {
-    pub(super) fn normalize_replacement_order(&self, decision: &mut Value) {
-        if decision["do"] != "order-replacements" {
-            return;
-        }
-        let Some(order) = decision["order"].as_array() else {
-            return;
-        };
-        let Some(prompt) = &self.state.prompt else {
-            return;
-        };
-        let normalized = order
-            .iter()
-            .map(|reference| self.without_default_card(reference))
-            .collect::<Vec<_>>();
-        for candidate in &prompt.choices {
-            if candidate["do"] == "order-replacements"
-                && candidate["order"].as_array().is_some_and(|items| {
-                    items
-                        .iter()
-                        .map(|reference| self.without_default_card(reference))
-                        .eq(normalized.iter().cloned())
-                })
-            {
-                decision["order"] = candidate["order"].clone();
-                return;
-            }
-        }
-    }
-
-    fn without_default_card(&self, reference: &Value) -> Value {
-        let mut normalized = reference.clone();
-        if let Some(object) = self.state.objects.get(string(&reference["source"]))
-            && reference["card"] == object.card
-            && let Some(fields) = normalized.as_object_mut()
-        {
-            fields.remove("card");
-        }
-        normalized
-    }
-
     pub(super) fn end_choices(&self, seat: &str) -> Result<Vec<Value>> {
         if self.state.flow["stage"] == "discard" {
             let excess = usize::try_from(self.zone_count(seat, "hand").saturating_sub(7).max(0))
@@ -196,11 +130,6 @@ impl Game {
             .collect())
     }
 
-    /// The referee packet still lists the prototype decision set.
-    #[expect(
-        clippy::too_many_lines,
-        reason = "The legal decision union enumerates each distinct input kind once."
-    )]
     pub(crate) fn legal_actions(&self) -> Result<Vec<Value>> {
         if !self.card_runtime.is_empty() {
             self.check_internal_resources()?;
@@ -209,151 +138,38 @@ impl Game {
             || self.card_runtime.checkpoint.is_some()
             || self.card_runtime.requires_typed_play()
             || self.card_runtime.has_pending()
+            || self.state.game["ended"] == true
             || (!self.card_runtime.is_empty() && self.input_point()["at"] == "quick")
         {
-            return Ok(Vec::new());
-        }
-        if self.state.game["ended"] == true {
             return Ok(Vec::new());
         }
         if self.state.flow["kind"] == "pregame" {
             return self.opening_choices();
         }
-        if let Some(prompt) = &self.state.prompt {
-            return Ok(prompt.choices.clone());
-        }
-        if let Some(seat) = self.pending_player() {
-            return self.pending_actions(seat);
-        }
         let point = self.input_point();
         let seat = string(&point["by"]);
-        let quick = point["at"] == "quick";
-        if point["at"] == "end" {
-            return self.end_choices(seat);
-        }
-        let mut out = if quick {
-            vec![json!({"do":"pass"})]
-        } else if self.attack_required()? {
-            Vec::new()
-        } else {
-            vec![json!({"do":"end-phase"})]
-        };
-        if !quick {
-            out.extend(self.evolution_actions(seat)?);
-            let mut targets = vec![format!("{}.leader", other(seat))];
-            targets.extend(self.zone_ids(other(seat), "field"));
-            for attacker in self.zone_ids(seat, "field") {
-                for target in &targets {
-                    if self.can_attack(&attacker, target)? {
-                        out.push(json!({"do":"attack","attacker":attacker,"target":target}));
+        match string(&point["at"]) {
+            "end" => self.end_choices(seat),
+            "quick" => Ok(vec![json!({"do":"pass"})]),
+            "main" => {
+                let mut actions = Vec::new();
+                if !self.attack_required()? {
+                    actions.push(json!({"do":"end-phase"}));
+                }
+                let mut targets = vec![format!("{}.leader", other(seat))];
+                targets.extend(self.zone_ids(other(seat), "field"));
+                for attacker in self.zone_ids(seat, "field") {
+                    for target in &targets {
+                        if self.can_attack(&attacker, target)? {
+                            actions
+                                .push(json!({"do":"attack","attacker":attacker,"target":target}));
+                        }
                     }
                 }
+                Ok(actions)
             }
+            _ => Ok(Vec::new()),
         }
-        for id in self
-            .zone_ids(seat, "hand")
-            .into_iter()
-            .chain(self.zone_ids(seat, "ex"))
-            .chain(self.zone_ids(seat, "cemetery"))
-        {
-            if !self.playable_zone(&id)? || self.card_play_prohibited(&id)? {
-                continue;
-            }
-            if quick && !self.keywords(&id)?.contains("quick") {
-                continue;
-            }
-            let is_spell = string(&self.face(&id)?["card_type"]).contains("スペル");
-            if !is_spell && self.zone_count(seat, "field") >= 5 {
-                continue;
-            }
-            let mut options = vec![json!({"do":"play","card":id})];
-            let frame = self.frame_for(&id)?;
-            for code in self.abilities(&id)?.iter().filter(|a| a["kind"] == "spell") {
-                let mut next = Vec::new();
-                for option in options {
-                    next.extend(self.parameterize(option, code, &frame)?);
-                }
-                options = next;
-            }
-            for option in options {
-                let mut payment = frame.clone();
-                payment.decision = option.clone();
-                for code in self
-                    .abilities(&id)?
-                    .iter()
-                    .filter(|code| code["kind"] == "spell")
-                {
-                    self.prepare_additional(code, &mut payment)?;
-                }
-                let mut costs =
-                    vec![json!({"op":"pp","amount":self.play_cost_context(&id,&payment)?})];
-                costs.extend(
-                    self.abilities(&id)?
-                        .iter()
-                        .filter(|code| code["kind"] == "spell")
-                        .flat_map(|code| Self::payment_nodes(code, &payment)),
-                );
-                if self.can_pay(&costs, &payment)? {
-                    out.push(option);
-                }
-            }
-        }
-        for id in ["field", "hand", "ex", "cemetery"]
-            .into_iter()
-            .flat_map(|zone| self.zone_ids(seat, zone))
-        {
-            for code in self.abilities(&id)?.iter().filter(|a| {
-                matches!(string(&a["kind"]), "activated" | "meal" | "ride")
-                    && (!quick || a["quick"] == true)
-            }) {
-                if !self.ability_zone(&id, code)? || !self.can_use(&id, code)? {
-                    continue;
-                }
-                if (matches!(string(&code["kind"]), "meal" | "ride") || code["advance"] == true) {
-                    out.extend(self.resource_options(&id, code)?);
-                    continue;
-                }
-                let reference = self.reference(&id, code);
-                let frame = self.frame_for(&id)?;
-                out.extend(self.parameterize(
-                    json!({"do":"activate","ability":reference}),
-                    code,
-                    &frame,
-                )?);
-            }
-        }
-        Ok(out)
-    }
-
-    fn pending_actions(&self, seat: &str) -> Result<Vec<Value>> {
-        self.validate_trigger_choices()?;
-        let mut out = Vec::new();
-        for pending in self
-            .state
-            .pending
-            .iter()
-            .filter(|p| p.controller == seat)
-            .flat_map(Self::pending_variants)
-        {
-            let base = self.pending_choice(&pending);
-            let frame = self.pending_frame(&pending, &base)?;
-            let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
-            if choices.is_empty() {
-                let mut cancellation = base;
-                if !list(&pending.code["costs"]).is_empty() {
-                    cancellation["costs"] = json!("decline");
-                }
-                out.push(cancellation);
-            } else {
-                out.extend(choices);
-                if !list(&pending.code["costs"]).is_empty() {
-                    let mut decline = base;
-                    decline["costs"] = json!("decline");
-                    out.push(decline);
-                }
-            }
-        }
-        Ok(out)
     }
 
     pub(super) fn can_attack(&self, id: &str, target: &str) -> Result<bool> {
@@ -430,344 +246,6 @@ impl Game {
         Ok(guards.is_empty() || guards.iter().any(|guard_id| guard_id == target))
     }
 
-    pub(super) fn can_pay(&self, costs: &[Value], frame: &Frame) -> Result<bool> {
-        let mut pp = 0_i64;
-        let mut acted = BTreeSet::new();
-        let mut flipped = BTreeMap::new();
-        let mut counters = BTreeMap::new();
-        let mut atoms = Vec::new();
-        self.cost_atoms(costs, frame, &mut atoms)?;
-        let has_movement = atoms
-            .iter()
-            .any(|(cost, _)| matches!(string(&cost["op"]), "move" | "discard" | "banish"));
-        for (cost, context) in atoms {
-            match string(&cost["op"]) {
-                "pp" => pp = pp.saturating_add(self.number(&cost["amount"], &context)?.max(0)),
-                "earth_rite" => {
-                    let count = self.number(&cost["count"], &context)?;
-                    if !self
-                        .select(
-                            &json!({"side":"self","zone":"field","keyword":"stack"}),
-                            &context,
-                        )?
-                        .iter()
-                        .any(|id| {
-                            self.object(id).is_ok_and(|object| {
-                                int(&object.state["counters"]["stack_counter"]) >= count
-                            })
-                        })
-                    {
-                        return Ok(false);
-                    }
-                }
-                "act" => {
-                    for id in self.select(&cost["subjects"], &context)? {
-                        if self.object(&id)?.state["acted"] == true || !acted.insert(id) {
-                            return Ok(false);
-                        }
-                    }
-                }
-                "flip" => {
-                    for id in self.select(&cost["subjects"], &context)? {
-                        let face_up = flipped
-                            .entry(id.clone())
-                            .or_insert(self.object(&id)?.state["face_up"] == true);
-                        if *face_up == (cost["face"] == "up") {
-                            return Ok(false);
-                        }
-                        *face_up = cost["face"] == "up";
-                    }
-                }
-                "skip_turn" => {
-                    if self.number(&cost["count"], &context)? < 0 {
-                        return Ok(false);
-                    }
-                }
-                "counter" => {
-                    let amount = self.number(&cost["amount"], &context)?;
-                    let name = string(&cost["name"]);
-                    for id in self.select(&cost["subjects"], &context)? {
-                        let count = counters
-                            .entry((id.clone(), name.to_owned()))
-                            .or_insert(int(&self.object(&id)?.state["counters"][name]));
-                        let after = count.checked_add(amount).ok_or_else(|| {
-                            EngineFailure::Unsupported("counter cost exceeds numeric range".into())
-                        })?;
-                        if after < 0 {
-                            return Ok(false);
-                        }
-                        *count = after;
-                    }
-                }
-                "move" | "discard" | "banish" | "lesson" | "eat" | "reveal" | "_drive_point"
-                | "_earth_payment" => {}
-                unknown => {
-                    return Err(EngineFailure::Unsupported(format!(
-                        "cost opcode: {unknown}"
-                    )));
-                }
-            }
-        }
-        if int(&self.player(&frame.controller)?.pp["current"]) < pp {
-            return Ok(false);
-        }
-        if has_movement {
-            return self.movement_payment_possible(costs, frame);
-        }
-        Ok(true)
-    }
-
-    pub(super) fn valid_parameters(&self, code: &Value, frame: &Frame) -> Result<bool> {
-        if !self.valid_play_conditions(code, frame)? {
-            return Ok(false);
-        }
-        for (field, specs) in [
-            ("targets", list(&code["targets"])),
-            ("costs", list(&code["cost_selections"])),
-        ] {
-            for spec in specs {
-                if !Self::mode_applies(&spec, frame) {
-                    continue;
-                }
-                let candidates = self.select(&spec["select"], frame)?;
-                let key = string(&spec["key"]);
-                let chosen = list(&frame.decision[field][key]);
-                let min = self.number(&spec["min"], frame)?.max(0);
-                let max = self.number(&spec["max"], frame)?.max(0);
-                let count = i64::try_from(chosen.len()).unwrap_or(i64::MAX);
-                if count < min
-                    || count > max
-                    || (frame.decision[field].get(key).is_none() && max > 0)
-                {
-                    return Ok(false);
-                }
-                let mut seen = BTreeSet::new();
-                for target in &chosen {
-                    if !candidates.iter().any(|c| c == string(target))
-                        || !seen.insert(target.to_string())
-                    {
-                        return Ok(false);
-                    }
-                    if field == "targets" && !self.targetable(string(target), frame)? {
-                        return Ok(false);
-                    }
-                }
-                let selected = chosen
-                    .iter()
-                    .map(|id| string(id).to_owned())
-                    .collect::<Vec<_>>();
-                if !self.selection_constraints(&spec, &selected, &frame.decision[field])? {
-                    return Ok(false);
-                }
-                if let Some(constraint) = spec.get("constraint")
-                    && !self.truth(constraint, frame)?
-                {
-                    return Ok(false);
-                }
-                if let Some(total) = spec.get("distribute") {
-                    if chosen.is_empty() {
-                        continue;
-                    }
-                    let total = self.number(total, frame)?;
-                    let distribution = &frame.decision["distribute"][key];
-                    if distribution
-                        .as_object()
-                        .is_none_or(|m| m.len() != chosen.len())
-                        || chosen.iter().any(|id| int(&distribution[string(id)]) <= 0)
-                        || chosen
-                            .iter()
-                            .map(|id| int(&distribution[string(id)]))
-                            .sum::<i64>()
-                            != total
-                    {
-                        return Ok(false);
-                    }
-                }
-            }
-        }
-        let body = &code["body"];
-        if body["op"] == "choice" && body["timing"] != "resolve" && body.get("by").is_none() {
-            let options = list(&frame.decision["options"]);
-            let (min, max) = self.choice_bounds(body, frame, &frame.controller)?;
-            if options.len() < min
-                || options.len() > max
-                || options
-                    .iter()
-                    .map(Value::to_string)
-                    .collect::<BTreeSet<_>>()
-                    .len()
-                    != options.len()
-            {
-                return Ok(false);
-            }
-            if options.iter().any(|option| {
-                int(option) < 1
-                    || usize::try_from(int(option)).is_ok_and(|n| n > list(&body["modes"]).len())
-            }) {
-                return Ok(false);
-            }
-        }
-        Ok(true)
-    }
-
-    fn valid_play_conditions(&self, code: &Value, frame: &Frame) -> Result<bool> {
-        if !self.prepare_additional(code, &mut frame.clone())? {
-            return Ok(false);
-        }
-        if let Some(condition) = code.get("play_if")
-            && !self.truth(condition, frame)?
-        {
-            return Ok(false);
-        }
-        if let Some(domain) = code["variables"].get("x") {
-            let Some(x) = frame.decision["x"].as_i64() else {
-                return Ok(false);
-            };
-            if x < self.number(&domain["min"], frame)?.max(0)
-                || x > self.number(&domain["max"], frame)?
-            {
-                return Ok(false);
-            }
-        }
-        Ok(true)
-    }
-
-    pub(super) fn mode_applies(spec: &Value, frame: &Frame) -> bool {
-        spec.get("modes").is_none_or(|modes| {
-            list(modes)
-                .iter()
-                .any(|m| list(&frame.decision["options"]).contains(m))
-        })
-    }
-
-    pub(super) fn parameterize(
-        &self,
-        base: Value,
-        code: &Value,
-        initial: &Frame,
-    ) -> Result<Vec<Value>> {
-        if let Some(domain) = code["variables"].get("x") {
-            let min = self.number(&domain["min"], initial)?.max(0);
-            let max = self.number(&domain["max"], initial)?;
-            if max.saturating_sub(min) > 10_000 {
-                return Err(EngineFailure::Unsupported(
-                    "X domain exceeds exhaustive prototype limit".into(),
-                ));
-            }
-            let mut result = Vec::new();
-            for x in min..=max {
-                let mut choice = base.clone();
-                choice["x"] = json!(x);
-                result.extend(self.parameterize_fixed(choice, code, initial)?);
-            }
-            return Ok(result);
-        }
-        self.parameterize_fixed(base, code, initial)
-    }
-
-    fn parameterize_fixed(&self, base: Value, code: &Value, initial: &Frame) -> Result<Vec<Value>> {
-        let mut frame = initial.clone();
-        frame.decision = base.clone();
-        self.freeze(code, "play-start", &mut frame)?;
-        let mut options = vec![base];
-        let body = &code["body"];
-        if body["op"] == "choice" && body["timing"] != "resolve" && body.get("by").is_none() {
-            let ids = (1..=list(&body["modes"]).len())
-                .map(|n| n.to_string())
-                .collect::<Vec<_>>();
-            let (min, max) = self.choice_bounds(body, &frame, &frame.controller)?;
-            let mut expanded = Vec::new();
-            for option in options {
-                for subset in subsets(&ids, min, max) {
-                    let mut option = option.clone();
-                    option["options"] = json!(
-                        subset
-                            .iter()
-                            .filter_map(|s| s.parse::<i64>().ok())
-                            .collect::<Vec<_>>()
-                    );
-                    expanded.push(option);
-                }
-            }
-            options = expanded;
-        }
-        for (field, specs) in [
-            ("targets", list(&code["targets"])),
-            ("costs", list(&code["cost_selections"])),
-        ] {
-            for spec in specs {
-                let mut expanded = Vec::new();
-                for option in options {
-                    let mut context = frame.clone();
-                    context.decision = option.clone();
-                    if !Self::mode_applies(&spec, &context) {
-                        expanded.push(option);
-                        continue;
-                    }
-                    let mut ids = Vec::new();
-                    for id in self.select(&spec["select"], &context)? {
-                        if field != "targets" || self.targetable(&id, &context)? {
-                            ids.push(id);
-                        }
-                    }
-                    let min = usize::try_from(self.number(&spec["min"], &context)?.max(0))
-                        .map_err(invalid)?;
-                    let max = usize::try_from(self.number(&spec["max"], &context)?.max(0))
-                        .map_err(invalid)?;
-                    for subset in self.selection_subsets(&ids, min, max, &spec, &option[field])? {
-                        let mut option = option.clone();
-                        option[field][string(&spec["key"])] = json!(subset);
-                        if let Some(total) = spec.get("distribute")
-                            && !subset.is_empty()
-                        {
-                            for distribution in
-                                distributions(&subset, self.number(total, &context)?)
-                            {
-                                let mut option = option.clone();
-                                option["distribute"][string(&spec["key"])] = distribution;
-                                expanded.push(option);
-                            }
-                            continue;
-                        }
-                        expanded.push(option);
-                    }
-                }
-                options = expanded;
-            }
-        }
-        let mut with_additional = Vec::new();
-        for option in options {
-            with_additional.extend(self.additional_choices(option, code, &frame)?);
-        }
-        with_additional
-            .into_iter()
-            .filter_map(|option| {
-                let mut context = frame.clone();
-                context.decision = option.clone();
-                match self
-                    .prepare_additional(code, &mut context)
-                    .and_then(|ready| {
-                        if ready {
-                            self.valid_parameters(code, &context)
-                        } else {
-                            Ok(false)
-                        }
-                    })
-                    .and_then(|valid| {
-                        if valid {
-                            self.can_pay(&Self::payment_nodes(code, &context), &context)
-                        } else {
-                            Ok(false)
-                        }
-                    }) {
-                    Ok(true) => Some(Ok(option)),
-                    Ok(false) => None,
-                    Err(e) => Some(Err(e)),
-                }
-            })
-            .collect()
-    }
-
     pub(super) fn targetable_by(&self, id: &str, controller: &str) -> Result<bool> {
         if let Some(object) = self.state.objects.get(id)
             && object.controller != controller
@@ -778,62 +256,7 @@ impl Game {
         Ok(true)
     }
 
-    fn targetable(&self, id: &str, frame: &Frame) -> Result<bool> {
-        self.targetable_by(id, &frame.controller)
-    }
-
-    pub(super) fn ability_zone(&self, id: &str, code: &Value) -> Result<bool> {
-        let object = self.object(id)?;
-        let player = self.player(&object.controller)?;
-        if code["ub"] == true
-            && (player.construction != "title"
-                || !self
-                    .catalog
-                    .rule_bindings
-                    .capability(&player.title_code, "ub_enabled"))
-        {
-            return Ok(false);
-        }
-        Ok(code.get("active_zones").map_or_else(
-            || object.zone == "field",
-            |zones| list(zones).contains(&json!(object.zone)),
-        ))
-    }
-
     pub(super) fn usage_key(id: &str, generation: u64, code: &Value) -> String {
         json!({"source":id,"generation":generation,"line":code["line"],"section":code["section"],"face":code["face"],"keyword":code["keyword"]}).to_string()
-    }
-
-    pub(super) fn can_use(&self, id: &str, code: &Value) -> Result<bool> {
-        Ok(self
-            .remaining_uses(id, code)?
-            .is_none_or(|remaining| remaining > 0))
-    }
-
-    pub(super) fn remaining_uses(&self, id: &str, code: &Value) -> Result<Option<u64>> {
-        let Some(limit) = code["limit"].as_u64() else {
-            return Ok(None);
-        };
-        let used = self
-            .state
-            .used
-            .get(&Self::usage_key(id, self.object(id)?.generation, code))
-            .map_or(0, |entry| entry.count);
-        Ok(Some(limit.saturating_sub(used)))
-    }
-
-    pub(super) fn mark_use(&mut self, id: &str, code: &Value) -> Result<()> {
-        if code.get("limit").is_some() {
-            let generation = self.object(id)?.generation;
-            let key = Self::usage_key(id, generation, code);
-            let ability = self.reference(id, code);
-            let entry = self.state.used.entry(key).or_insert(AbilityUse {
-                ability,
-                generation,
-                count: 0,
-            });
-            entry.count = entry.count.saturating_add(1);
-        }
-        Ok(())
     }
 }

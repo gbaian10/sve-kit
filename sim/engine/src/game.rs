@@ -12,9 +12,7 @@ mod combat;
 mod costs;
 mod damage;
 mod effects;
-mod expr;
 mod extensions;
-mod grants;
 mod history;
 pub mod internal;
 mod keywords;
@@ -22,9 +20,7 @@ mod knowledge;
 mod legal;
 mod limit_break;
 mod movement;
-mod nested;
 mod opening;
-mod payments;
 mod placement;
 pub mod player;
 mod progression;
@@ -40,13 +36,11 @@ pub mod replay;
 mod resources;
 mod restrictions;
 mod rules;
-mod selections;
 #[cfg(all(test, feature = "runner"))]
 #[path = "../tests/selfplay/run.rs"]
 mod selfplay;
 mod state_rules;
 mod statistics;
-mod suppression;
 mod temporal;
 mod tokens;
 mod trigger_choices;
@@ -108,12 +102,6 @@ struct Object {
     zone: String,
     generation: u64,
     state: Value,
-}
-
-#[derive(Debug, Clone)]
-struct EventSubject {
-    id: String,
-    attributes: Value,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -893,40 +881,7 @@ impl Game {
                     vec![ability]
                 }
             })
-            .map(|code| self.resource_code(code))
             .collect())
-    }
-    fn abilities(&self, id: &str) -> Result<Vec<Value>> {
-        let mut abilities = self.local_abilities(id)?;
-        if self.object(id)?.zone == "field" {
-            self.require_ability_sources("granted abilities")?;
-            if self.prototype_field_abilities_absent() {
-                return Ok(abilities);
-            }
-            for source in self.field_ids() {
-                for ability in self.local_abilities(&source)? {
-                    let body = &ability["body"];
-                    if body["op"] != "aura" || body.get("abilities").is_none() {
-                        continue;
-                    }
-                    let frame = self.frame_for(&source)?;
-                    if self.matches(id, &body["subjects"], &frame)?
-                        && body
-                            .get("condition")
-                            .map_or(Ok(true), |condition| self.truth(condition, &frame))?
-                    {
-                        for mut granted in list(&body["abilities"])
-                            .into_iter()
-                            .map(|code| self.resource_code(code))
-                        {
-                            granted["granted_by"] = json!(source);
-                            abilities.push(granted);
-                        }
-                    }
-                }
-            }
-        }
-        Ok(abilities)
     }
     fn object_attributes(&self, id: &str) -> Result<Value> {
         let object = self.object(id)?;
@@ -957,40 +912,8 @@ impl Game {
         Ok(())
     }
 
-    fn prototype_field_abilities_absent(&self) -> bool {
-        // Checked typed field sources contribute no prototype abilities of their own.
-        !self.card_runtime.is_empty() && self.state.continuous.is_empty()
-    }
-
-    fn ability_sources(&self, query: &str) -> Result<Vec<String>> {
-        self.require_ability_sources(query)?;
-        if self.prototype_field_abilities_absent() {
-            return Ok(Vec::new());
-        }
-        if !self.card_runtime.is_empty() {
-            return Ok(self.field_ids());
-        }
-        Ok(self
-            .state
-            .objects
-            .values()
-            .filter(|object| {
-                object.zone == "field"
-                    || self
-                        .catalog
-                        .programs
-                        .get(&object.card)
-                        .is_some_and(|program| {
-                            list(&program["abilities"]).iter().any(|code| {
-                                list(&code["active_zones"]).contains(&json!(object.zone))
-                            })
-                        })
-            })
-            .map(|object| object.id.clone())
-            .collect())
-    }
     fn ability(&self, id: &str, reference: &Value) -> Result<Value> {
-        if let Some(code) = self.abilities(id)?.into_iter().find(|code| {
+        if let Some(code) = self.printed_abilities(id)?.into_iter().find(|code| {
             legal::reference_matches(
                 reference,
                 &self.reference(id, code),
@@ -998,15 +921,6 @@ impl Game {
             )
         }) {
             return Ok(code);
-        }
-        if let Some(source) = reference["granted_by"].as_str() {
-            return self
-                .abilities(id)?
-                .into_iter()
-                .find(|ability| {
-                    ability["granted_by"] == source && ability["line"] == reference["line"]
-                })
-                .ok_or_else(|| invalid("granted ability is no longer present"));
         }
         let number = reference["card"]
             .as_str()
@@ -1054,18 +968,6 @@ impl Game {
             if let Some(v) = ability.get(key) {
                 value[key] = v.clone();
             }
-        }
-        let shared_line = self.abilities(id).is_ok_and(|abilities| {
-            abilities
-                .iter()
-                .filter(|other| {
-                    other["line"] == ability["line"] && other["section"] == ability["section"]
-                })
-                .nth(1)
-                .is_some()
-        });
-        if shared_line && let Some(keyword) = ability["keyword"].as_str() {
-            value["keyword"] = json!(self.catalog.keyword_name(keyword));
         }
         value
     }

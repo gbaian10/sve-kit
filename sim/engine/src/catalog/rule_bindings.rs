@@ -527,14 +527,6 @@ impl RuleBindings {
             .any(|key| resource.names.contains(key)))
     }
 
-    pub(crate) fn legacy_resource(&self, label: &str) -> Option<&str> {
-        let key = self.name_labels.get(label)?;
-        self.resources
-            .iter()
-            .find(|(_, resource)| resource.names.contains(key))
-            .map(|(role, _)| role.as_str())
-    }
-
     pub(crate) fn template(&self, role: &str) -> Result<TemplateRef> {
         self.resources
             .get(role)

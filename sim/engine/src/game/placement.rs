@@ -5,9 +5,8 @@
 use alloc::collections::BTreeMap;
 use serde_json::{Value, json};
 
-use super::legal::subsets;
-use super::{Frame, Game, Object, other, string};
-use crate::{EngineFailure, Result, invalid};
+use super::{Frame, Game, Object, other};
+use crate::{EngineFailure, Result};
 
 pub(super) struct Placement {
     pub(super) previous: Object,
@@ -59,6 +58,16 @@ fn insert_at(items: &mut Vec<Value>, id: &str, offset: u64) {
 }
 
 impl Game {
+    pub(super) fn seats(&self, side: &str, frame: &Frame) -> Vec<String> {
+        match side {
+            "both" => vec!["P1".into(), "P2".into()],
+            "opponent" => vec![other(&frame.controller).into()],
+            "active" => vec![self.active().into()],
+            "P1" | "P2" => vec![side.into()],
+            _ => vec![frame.controller.clone()],
+        }
+    }
+
     pub(super) fn placement_controller(
         &self,
         object: &Object,
@@ -88,67 +97,6 @@ impl Game {
             ));
         }
         Ok(controller)
-    }
-
-    pub(super) fn movement_capacity_choices(
-        &self,
-        node: &Value,
-        ids: &[String],
-        frame: &Frame,
-    ) -> Result<Option<Vec<Value>>> {
-        let zone = string(&node["to"]);
-        if !matches!(zone, "field" | "ex") || node["capacity_checked"] == true {
-            return Ok(None);
-        }
-        let mut groups = BTreeMap::<String, Vec<String>>::new();
-        for id in ids {
-            let object = self.object(id)?;
-            let controller =
-                self.placement_controller(object, zone, node["side"].as_str(), frame)?;
-            if object.zone != zone {
-                groups.entry(controller).or_default().push(id.clone());
-            }
-        }
-        let mut overflow = false;
-        let mut combined = vec![Vec::new()];
-        for (controller, arrivals) in groups {
-            let available = usize::try_from(
-                5_i64
-                    .saturating_sub(self.zone_count(&controller, zone))
-                    .max(0),
-            )
-            .map_err(invalid)?;
-            overflow |= arrivals.len() > available;
-            let count = available.min(arrivals.len());
-            let subsets = subsets(&arrivals, count, count);
-            if combined.len().saturating_mul(subsets.len()) > 10_000 {
-                return Err(EngineFailure::Unsupported(
-                    "movement capacity choices exceed prototype limit".into(),
-                ));
-            }
-            combined = combined
-                .into_iter()
-                .flat_map(|prefix| {
-                    subsets.iter().map(move |selected| {
-                        let mut joined = prefix.clone();
-                        joined.extend(selected.clone());
-                        joined
-                    })
-                })
-                .collect();
-        }
-        Ok(overflow.then(|| {
-            combined
-                .into_iter()
-                .map(|selected| {
-                    let ordered = ids
-                        .iter()
-                        .filter(|id| selected.contains(id))
-                        .collect::<Vec<_>>();
-                    json!({"do":"resolve-choice","select":ordered})
-                })
-                .collect()
-        }))
     }
 
     pub(super) fn conceal_placement_order(&mut self, plans: &[Placement], frame: &Frame) {

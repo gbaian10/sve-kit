@@ -7,8 +7,7 @@ use crate::ir::{ELEMENTAL_TRAITS, trait_matches};
 use core::mem::take;
 use serde_json::{Value, json};
 
-use super::costs::CostKind;
-use super::{EventSubject, Frame, Game, Object, Pending, Step, int, list, other, string};
+use super::{Frame, Game, Pending, Step, int, list, other, string};
 use crate::ir::SnapshotId;
 use crate::{EngineFailure, Result, invalid};
 
@@ -32,7 +31,6 @@ impl Game {
                 request[field] = point[field].clone();
             }
         }
-        self.normalize_replacement_order(&mut request);
         match self.decide_inner(&request).and_then(|outcome| {
             self.validate_trigger_choices()?;
             // Grants or new objects could add triggers whose waits typed layers cannot order yet;
@@ -72,16 +70,8 @@ impl Game {
             return Ok(Self::rejection(operation).into());
         }
         let timing_matches = match at {
-            "main" => matches!(
-                operation,
-                "play" | "activate" | "evolve" | "attack" | "end-phase"
-            ),
-            "quick" => matches!(operation, "play" | "activate" | "pass"),
-            "check-timing" => operation == "choose-pending",
-            "resolve" => matches!(
-                operation,
-                "resolve-choice" | "place-acted" | "order-replacements"
-            ),
+            "main" => matches!(operation, "evolve" | "attack" | "end-phase"),
+            "quick" => operation == "pass",
             "pregame" => matches!(
                 operation,
                 "choose-start-amulet" | "choose-first" | "mulligan"
@@ -96,24 +86,8 @@ impl Game {
             "choose-start-amulet" | "choose-first" | "mulligan" => {
                 self.opening_decision(decision)?
             }
-            "play" => self.play(decision)?,
-            "activate" => self.activate(decision)?,
             "evolve" => self.evolve_decision(decision)?,
             "attack" => self.attack(decision)?,
-            "choose-pending" => return self.choose_pending(decision),
-            "resolve-choice" | "place-acted" | "order-replacements" => {
-                let matches = self.state.prompt.as_ref().is_some_and(|prompt| {
-                    (prompt.resume["resume"] == "declare" && decision["declare"].as_i64().is_some())
-                        || prompt
-                            .choices
-                            .iter()
-                            .any(|choice| super::legal::decision_matches(choice, decision))
-                });
-                if matches {
-                    self.resume(decision)?;
-                }
-                matches
-            }
             "end-phase" => {
                 if self.attack_required()? {
                     false
@@ -145,8 +119,6 @@ impl Game {
         }
         Ok(if self.state.game["ended"] == true {
             "game-end"
-        } else if self.state.prompt.is_some() && operation != "pass" {
-            "paused"
         } else {
             "resolved"
         }
@@ -156,7 +128,6 @@ impl Game {
     fn rejection(operation: &str) -> &'static str {
         match operation {
             "attack" => "cannot-attack",
-            "activate" => "cannot-activate",
             "evolve" => "cannot-evolve",
             _ => "cannot-play",
         }
@@ -199,26 +170,6 @@ impl Game {
             self.state.pending.first().map(|p| p.controller.as_str())
         }
     }
-    /// Contract 34: the offered choice names the ability, never a setup label; the
-    /// label is kept only when the reference and event cannot tell two instances apart.
-    pub(super) fn pending_choice(&self, pending: &Pending) -> Value {
-        let mut choice = json!({"do":"choose-pending","pending":{"ability":pending.reference}});
-        let retained = pending.retained;
-        if retained {
-            choice["pending"]["event"] = pending.event.clone();
-        }
-        let indistinct = self.state.pending.iter().any(|other| {
-            other.controller == pending.controller
-                && other.reference == pending.reference
-                && (!retained || other.event == pending.event)
-                && (other.code != pending.code || other.context != pending.context)
-        });
-        if indistinct && let Some(id) = &pending.id {
-            choice["pending"] = json!(id);
-        }
-        choice
-    }
-
     pub(super) fn start_frame(
         &self,
         source: &str,
@@ -251,399 +202,10 @@ impl Game {
         Ok(frame)
     }
 
-    pub(super) fn pending_frame(&self, pending: &Pending, decision: &Value) -> Result<Frame> {
-        let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
-        // A pending occurrence must not borrow a later incarnation of its source.
-        frame.source_generation = None;
-        frame.controller.clone_from(&pending.controller);
-        if let Some(context) = &pending.context {
-            if context.source == pending.source {
-                frame.source_generation = context.source_generation;
-            }
-            frame.bindings.clone_from(&context.bindings);
-            for (id, attributes) in &context.captured {
-                if id == &context.source {
-                    frame.captured.insert(id.clone(), attributes.clone());
-                    continue;
-                }
-                frame
-                    .captured
-                    .entry(id.clone())
-                    .or_insert_with(|| attributes.clone());
-            }
-            frame.event.clone_from(&context.event);
-            frame.values.clone_from(&context.values);
-        }
-        Ok(frame)
-    }
-
-    fn play(&mut self, decision: &Value) -> Result<bool> {
-        let Some(frame) = self.prepare_card_play(decision, None)? else {
-            return Ok(false);
-        };
-        self.run_frame(frame)?;
-        Ok(true)
-    }
-
-    pub(super) fn prepare_card_play(
-        &mut self,
-        decision: &Value,
-        forced_cost: Option<i64>,
-    ) -> Result<Option<Frame>> {
-        let source = string(&decision["card"]);
-        let object = self.object(source)?.clone();
-        let controller = string(&decision["by"]);
-        if object.controller != controller
-            || (forced_cost.is_none() && !self.playable_zone(source)?)
-            || self.card_play_prohibited(source)?
-        {
-            return Ok(None);
-        }
-        if decision["at"] == "quick" && !self.keywords(source)?.contains("quick") {
-            return Ok(None);
-        }
-        let face = self.face(source)?.clone();
-        let is_spell = string(&face["card_type"]).contains("スペル");
-        if !is_spell && self.zone_count(controller, "field") >= 5 {
-            return Ok(None);
-        }
-        let abilities = self.abilities(source)?;
-        let spells = abilities
-            .iter()
-            .filter(|a| a["kind"] == "spell")
-            .cloned()
-            .collect::<Vec<_>>();
-        let mut frame = self.start_frame(source, Value::Null, decision)?;
-        for ability in &spells {
-            if !self.prepare_additional(ability, &mut frame)? {
-                return Ok(None);
-            }
-            self.freeze(ability, "play-start", &mut frame)?;
-            if !self.valid_parameters(ability, &frame)? {
-                return Ok(None);
-            }
-        }
-        let cost = forced_cost.map_or_else(
-            || self.play_cost_context(source, &frame),
-            |base| {
-                Ok(base.saturating_add(int(frame
-                    .values
-                    .get("additional_pp")
-                    .unwrap_or(&Value::Null))))
-            },
-        )?;
-        if int(&self.player(controller)?.pp["current"]) < cost {
-            return Ok(None);
-        }
-        self.player_mut(controller)?.pp["current"] =
-            json!(int(&self.player(controller)?.pp["current"]).saturating_sub(cost));
-        let mandatory = spells
-            .iter()
-            .flat_map(|code| Self::payment_nodes(code, &frame))
-            .collect::<Vec<_>>();
-        if !self.can_pay(&mandatory, &frame)? {
-            return Ok(None);
-        }
-        self.consume_cost_adjustments(source, CostKind::Play)?;
-        for code in &spells {
-            self.pay_costs(code, &mut frame)?;
-        }
-        for code in &spells {
-            self.notify_ability_start(&frame, code)?;
-        }
-        self.move_objects(&[source.into()], "resolution", None, None, &frame)?;
-        self.object_mut(source)?.state["entered_from"] = json!(object.zone);
-        self.internal_commit_card_play(source, controller)?;
-        let group = self.group();
-        let cause = self.emit(
-            json!({"kind":"プレイ","object":source}),
-            &frame.cause,
-            group,
-        );
-        frame.cause = json!({"event":cause});
-        let played = [self.object(source)?.clone()];
-        let pending = self.collect_triggers("card_play", &played, &frame.cause)?;
-        self.enqueue(pending);
-        if is_spell {
-            for ability in &spells {
-                self.freeze(ability, "resolution-start", &mut frame)?;
-            }
-            frame.todo = spells
-                .iter()
-                .flat_map(|code| {
-                    [
-                        json!({"op":"_reference","reference":self.reference(source,code)}),
-                        code["body"].clone(),
-                    ]
-                })
-                .collect();
-        } else {
-            frame
-                .todo
-                .push(json!({"op":"move","subjects":"self","to":"field"}));
-        }
-        frame.todo.push(json!({"op":"_finish_card"}));
-        Ok(Some(frame))
-    }
-
-    fn activate(&mut self, decision: &Value) -> Result<bool> {
-        let reference = &decision["ability"];
-        let source = string(&reference["source"]);
-        let Some(code) = self.current_activated_ability(source, reference)? else {
-            return Ok(false);
-        };
-        if (matches!(string(&code["kind"]), "meal" | "ride") || code["advance"] == true) {
-            return self.resource_activation(decision, &code);
-        }
-        if code["kind"] != "activated"
-            || !self.ability_zone(source, &code)?
-            || !self.can_use(source, &code)?
-        {
-            return Ok(false);
-        }
-        if self.object(source)?.controller != string(&decision["by"]) {
-            return Ok(false);
-        }
-        if decision["at"] == "quick" && code["quick"] != true {
-            return Ok(false);
-        }
-        let mut frame = self.start_frame(source, reference.clone(), decision)?;
-        self.freeze(&code, "play-start", &mut frame)?;
-        if !self.prepare_additional(&code, &mut frame)? {
-            return Ok(false);
-        }
-        if !self.valid_parameters(&code, &frame)? || !self.can_pay(&list(&code["costs"]), &frame)? {
-            return Ok(false);
-        }
-        self.mark_use(source, &code)?;
-        self.pay_costs(&code, &mut frame)?;
-        self.begin_ability(&mut frame, &code)?;
-        Ok(true)
-    }
-
-    fn choose_pending(&mut self, decision: &Value) -> Result<String> {
-        let choice = &decision["pending"];
-        self.validate_trigger_choices()?;
-        let mut matches = self
-            .state
-            .pending
-            .iter()
-            .enumerate()
-            .flat_map(|(index, pending)| {
-                Self::pending_variants(pending)
-                    .into_iter()
-                    .map(move |variant| (index, variant))
-            })
-            .filter(|(_, p)| {
-                if choice.is_string() {
-                    return p.id.as_deref() == choice.as_str();
-                }
-                super::legal::reference_matches(
-                    &choice["ability"],
-                    &p.reference,
-                    self.keyword_label(&p.code),
-                ) && (choice["event"].is_null() || choice["event"] == p.event)
-            });
-        let (index, first) = matches
-            .next()
-            .ok_or_else(|| invalid(format!("pending ability not present: {choice}")))?;
-        if matches.any(|(_, pending)| {
-            pending.reference != first.reference
-                || pending.event != first.event
-                || pending.code != first.code
-                || pending.controller != first.controller
-                || pending.context != first.context
-        }) {
-            return Err(invalid(format!("pending ability is ambiguous: {choice}")));
-        }
-        let pending = first;
-        if pending.controller != string(&decision["by"]) {
-            return Err(invalid("wrong pending controller"));
-        }
-        if decision["costs"] == "decline" && list(&pending.code["costs"]).is_empty() {
-            return Err(invalid("a cost-free pending ability cannot be declined"));
-        }
-        let mut frame = self.pending_frame(&pending, decision)?;
-        self.freeze(&pending.code, "play-start", &mut frame)?;
-        let valid = decision["costs"] != "decline"
-            && self.prepare_additional(&pending.code, &mut frame)?
-            && self.valid_parameters(&pending.code, &frame)?
-            && self.can_pay(&Self::payment_nodes(&pending.code, &frame), &frame)?;
-        let cancelled = decision["costs"] == "decline" || !valid;
-        if cancelled && decision["costs"] != "decline" {
-            let base = self.pending_choice(&pending);
-            let initial = self.pending_frame(&pending, &base)?;
-            if !self.parameterize(base, &pending.code, &initial)?.is_empty() {
-                return Ok("cannot-play".into());
-            }
-        }
-        self.state.pending.remove(index);
-        if cancelled {
-            let group = self.group();
-            self.emit(
-                json!({"kind":"待機取消","ability":pending.reference,"event":pending.event}),
-                &json!({"decision":self.node}),
-                group,
-            );
-            self.checks()?;
-            return Ok("pending-cancelled".into());
-        }
-        self.pay_costs(&pending.code, &mut frame)?;
-        self.begin_ability(&mut frame, &pending.code)?;
-        self.checks()?;
-        Ok(if self.state.game["ended"] == true {
-            "game-end"
-        } else if self.state.prompt.is_some() {
-            "paused"
-        } else {
-            "resolved"
-        }
-        .into())
-    }
-
-    /// 融合 (13.x): the fused materials are the ability's cost selections; the event
-    /// records which traits they had so "財宝・カードを融合したとき" can be checked.
-    fn notify_fusion(&mut self, frame: &Frame, code: &Value) -> Result<()> {
-        if code["keyword"] != "fusion" {
-            return Ok(());
-        }
-        let mut traits = serde_json::Map::new();
-        for selected in frame.decision["costs"]
-            .as_object()
-            .into_iter()
-            .flat_map(|costs| costs.values())
-        {
-            for id in list(selected) {
-                for name in self.card_traits(string(&id))? {
-                    traits.insert(name, json!(true));
-                }
-            }
-        }
-        let fused = [self.object(&frame.source)?.clone()];
-        let pending = self.collect_event(
-            "fusion",
-            &fused,
-            &frame.cause,
-            &json!({"fused_trait":traits}),
-        )?;
-        self.enqueue(pending);
-        Ok(())
-    }
-
-    fn notify_ability_start(&mut self, frame: &Frame, code: &Value) -> Result<()> {
-        self.notify_fusion(frame, code)?;
-        let mut targets = Vec::new();
-        if let Some(selections) = frame.decision["targets"].as_object() {
-            for selected in selections.values() {
-                for id in list(selected) {
-                    if let Some(object) = self.state.objects.get(string(&id))
-                        && !targets.iter().any(|target: &Object| target.id == object.id)
-                    {
-                        targets.push(object.clone());
-                    }
-                }
-            }
-        }
-        let pending = self.collect_triggers("targeted", &targets, &frame.cause)?;
-        self.enqueue(pending);
-        if code["ub"] == true {
-            self.bump(&format!("{}.ub_activated", frame.controller), 1);
-            let affected = [self.object(&frame.source)?.clone()];
-            let pending_ub = self.collect_triggers("ub_activated", &affected, &frame.cause)?;
-            self.enqueue(pending_ub);
-        }
-        Ok(())
-    }
-
-    pub(super) fn begin_ability(&mut self, frame: &mut Frame, code: &Value) -> Result<()> {
-        self.prepare_ability(frame, code)?;
-        self.run_frame(frame.clone())
-    }
-
-    pub(super) fn prepare_ability(&mut self, frame: &mut Frame, code: &Value) -> Result<()> {
-        self.notify_ability_start(frame, code)?;
-        self.freeze(code, "resolution-start", frame)?;
-        let group = self.group();
-        let id = self.emit(
-            json!({"kind":"プレイ","ability":frame.reference}),
-            &frame.cause,
-            group,
-        );
-        frame.cause = json!({"event":id});
-        frame.todo = vec![code["body"].clone(), json!({"op":"_finish_ability"})];
-        Ok(())
-    }
-
-    pub(super) fn pay_costs(&mut self, code: &Value, frame: &mut Frame) -> Result<()> {
-        let costs = Self::payment_nodes(code, frame);
-        if costs.is_empty() {
-            return Ok(());
-        }
-        let mut atoms = Vec::new();
-        self.cost_atoms(&costs, frame, &mut atoms)?;
-        let zero = atoms
-            .iter()
-            .all(|(cost, context)| match string(&cost["op"]) {
-                "pp" => self
-                    .number(&cost["amount"], context)
-                    .is_ok_and(|amount| amount == 0),
-                "counter" => {
-                    self.number(&cost["amount"], context)
-                        .is_ok_and(|amount| amount == 0)
-                        || self
-                            .select(&cost["subjects"], context)
-                            .is_ok_and(|ids| ids.is_empty())
-                }
-                "_earth_payment" => self
-                    .number(&cost["count"], context)
-                    .is_ok_and(|count| count == 0),
-                _ => self
-                    .select(&cost["subjects"], context)
-                    .is_ok_and(|ids| ids.is_empty()),
-            });
-        let start = self.emitted.len();
-        let group = self.group();
-        let mut cost_frame = frame.clone();
-        cost_frame.todo.clone_from(&costs);
-        cost_frame.values.insert("paying_cost".into(), json!(true));
-        self.run_frame(cost_frame)?;
-        if self.state.prompt.is_some() {
-            return Err(EngineFailure::Unsupported(
-                "cost execution requires an unplanned input".into(),
-            ));
-        }
-        for event in self.emitted.iter_mut().skip(start) {
-            event["group"] = json!(group);
-        }
-        let replaced = self
-            .emitted
-            .iter()
-            .skip(start)
-            .any(|event| event["kind"] == "取代");
-        let paid_group = self.group();
-        let mut event = json!({"kind":"費用成立","ability":frame.reference});
-        if zero {
-            event["zero"] = json!(true);
-        }
-        if replaced {
-            event["replaced"] = json!(true);
-        }
-        self.emit(event, &frame.cause, paid_group);
-        frame.paid = true;
-        Ok(())
-    }
-
     fn evolve_decision(&mut self, decision: &Value) -> Result<bool> {
-        // A loaded card evolves only through its checked intrinsic proof; prototype holders keep theirs.
         let source = self.object(string(&decision["source"]))?;
-        if !self.card_runtime.is_empty() {
-            self.require_internal_abilities(&source.id, "evolution")?;
-        }
-        if self.card_runtime.is_loaded(&source.card) {
-            self.internal_evolve_action(decision)
-        } else {
-            self.evolve_action(decision)
-        }
+        self.require_internal_abilities(&source.id, "evolution")?;
+        self.internal_evolve_action(decision)
     }
 
     fn attack(&mut self, decision: &Value) -> Result<bool> {
@@ -658,7 +220,7 @@ impl Game {
         target: &str,
         original: Option<&Value>,
     ) -> Result<bool> {
-        // Prototype frames retain their original decision metadata.
+        // Preserve the attack's declaration in the referee flow.
         let request =
             json!({"do":"attack","attacker":id,"target":target,"by":self.active(),"at":"main"});
         let decision = original.unwrap_or(&request);
@@ -693,12 +255,8 @@ impl Game {
         let actor = self.active().to_owned();
         self.player_step_actor(&event, &actor);
         self.state.flow = json!({"kind":"battle","attacker":id,"attacker_generation":self.object(id)?.generation,"target":target,"target_generation":if target.ends_with(".leader") { None } else { Some(self.object(target)?.generation) },"decision":decision,"cause":{"event":event}});
-        let pending = self.collect_triggers(
-            "attack",
-            &[self.object(id)?.clone()],
-            &json!({"event":event}),
-        )?;
-        self.enqueue(pending);
+        self.require_ability_sources("event attack subscriptions")?;
+        self.group();
         self.internal_attack_event(id, target, before)?;
         Ok(true)
     }
@@ -742,12 +300,7 @@ impl Game {
                         self.object_mut(source)?.state["bane_damaged"] = json!(true);
                     }
                 }
-                if self.card_runtime.quick_start {
-                    self.internal_battle_damage(frame, hits)?;
-                } else {
-                    frame.todo = vec![json!({"op":"_damage","hits":hits,"orders":{}})];
-                    self.run_frame(frame)?;
-                }
+                self.internal_battle_damage(frame, hits)?;
             }
             "end" => self.state.flow["stage"] = json!("discard"),
             _ => return Err(invalid("pass outside Quick")),
@@ -761,8 +314,8 @@ impl Game {
         self.record_player_phase();
         self.state.flow = json!({"kind":"main"});
         self.internal_phase_event(Phase::Main, SnapshotId(self.state.ir_epoch))?;
-        let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
-        self.enqueue(pending);
+        self.require_ability_sources("event main_start subscriptions")?;
+        self.group();
         Ok(())
     }
 
@@ -771,9 +324,10 @@ impl Game {
         self.state.turn["phase"] = json!("end");
         self.record_player_phase();
         self.state.flow = json!({"kind":"end","stage":"triggers"});
-        let pending = self.collect_triggers("end", &[], &json!({"decision":self.node}))?;
-        self.enqueue(pending);
-        self.enqueue_delayed_end()?;
+        self.require_ability_sources("event end subscriptions")?;
+        // Preserve the coordinates of the end-phase and delayed-event batches in the referee trace.
+        self.group();
+        self.group();
         self.internal_phase_event(Phase::End, before)?;
         Ok(())
     }
@@ -846,7 +400,6 @@ impl Game {
         self.internal_player_play_end_turn(turn);
         self.internal_preventions_end_turn(turn);
         self.internal_phase_restrictions_end_turn();
-        self.expire_effects()?;
         let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);
         self.state.schedule.begin()?;
@@ -898,19 +451,9 @@ impl Game {
         if !prevent_draw {
             drop(self.draw(&seat, &frame, super::player::events::MovementMethod::Draw)?);
         }
-        let elapsed = int(&self.state.turn["elapsed_turns"][&seat]);
-        self.state.continuous.retain(|entry| {
-            !(entry["window_phase"] == "start"
-                && entry["window_player"] == seat
-                && int(&entry["window_turn"]) <= elapsed)
-        });
         // Start checks can leave typed occurrences that must finish before Main begins.
         self.state.flow = json!({"kind":"main","stage":"start-check"});
         self.checks()
-    }
-
-    pub(super) fn win_by_effect(&mut self, node: &Value, frame: &Frame) -> Result<()> {
-        self.win_for_players(self.seats(string(&node["side"]), frame), frame)
     }
 
     pub(super) fn win_for_players(&mut self, players: Vec<String>, frame: &Frame) -> Result<()> {
@@ -1017,213 +560,6 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn collect_triggers(
-        &mut self,
-        event: &str,
-        affected: &[Object],
-        cause: &Value,
-    ) -> Result<Vec<Pending>> {
-        self.collect_event(event, affected, cause, &Value::Null)
-    }
-
-    pub(super) fn collect_event(
-        &mut self,
-        event: &str,
-        affected: &[Object],
-        cause: &Value,
-        metadata: &Value,
-    ) -> Result<Vec<Pending>> {
-        let subjects = affected
-            .iter()
-            .map(|object| self.event_subject(&object.id))
-            .collect::<Result<Vec<_>>>()?;
-        self.collect_subject_event(event, &subjects, cause, metadata)
-    }
-
-    pub(super) fn event_subject(&self, id: &str) -> Result<EventSubject> {
-        let attributes = if let Some(seat) = id.strip_suffix(".leader") {
-            json!({"id":id,"controller":seat,"owner":seat,"zone":"leader","life":self.player(seat)?.leader["life"]})
-        } else {
-            self.object_attributes(id)?
-        };
-        Ok(EventSubject {
-            id: id.into(),
-            attributes,
-        })
-    }
-
-    pub(super) fn collect_subject_event(
-        &mut self,
-        event: &str,
-        affected: &[EventSubject],
-        cause: &Value,
-        metadata: &Value,
-    ) -> Result<Vec<Pending>> {
-        self.collect_permitted_event(event, affected, cause, metadata, None)
-    }
-
-    pub(super) fn collect_permitted_event(
-        &mut self,
-        event: &str,
-        affected: &[EventSubject],
-        cause: &Value,
-        metadata: &Value,
-        fanfare_reason: Option<&str>,
-    ) -> Result<Vec<Pending>> {
-        if affected.is_empty() && !matches!(event, "end" | "main_start" | "drive_trigger") {
-            return Ok(Vec::new());
-        }
-        let mut result = Vec::new();
-        for source in self.ability_sources(&format!("event {event} subscriptions"))? {
-            for code in self.abilities(&source)? {
-                if code["kind"] != "trigger"
-                    || code["event"] != event
-                    || !self.ability_zone(&source, &code)?
-                {
-                    continue;
-                }
-                let mut frame = self.frame_for(&source)?;
-                let phase_event = matches!(event, "end" | "main_start" | "drive_trigger");
-                if phase_event
-                    && !self
-                        .seats(string(&code["side"]), &frame)
-                        .iter()
-                        .any(|seat| seat == self.active())
-                {
-                    continue;
-                }
-                frame
-                    .captured
-                    .insert(source.clone(), self.object_attributes(&source)?);
-                let candidates = if phase_event {
-                    vec![None]
-                } else {
-                    affected.iter().map(Some).collect()
-                };
-                let mut batch = Vec::new();
-                for object in candidates {
-                    if let Some(object) = object
-                        && let Some(selector) = code.get("subject")
-                        && !self.matches(&object.id, selector, &frame)?
-                    {
-                        continue;
-                    }
-                    frame.event = if metadata.is_object() {
-                        metadata.clone()
-                    } else {
-                        json!({})
-                    };
-                    if let Some(object) = object {
-                        frame.event["subject"] = object.attributes.clone();
-                        frame.event["subject_id"] = json!(object.id);
-                    }
-                    if event == "attack" {
-                        frame.event["target"] = self.state.flow["target"].clone();
-                        frame.event["target_is_follower"] =
-                            json!(!string(&self.state.flow["target"]).ends_with(".leader"));
-                    }
-                    if let Some(condition) = code.get("trigger_if")
-                        && !self.truth(condition, &frame)?
-                    {
-                        continue;
-                    }
-                    if !self.can_use(&source, &code)?
-                        || !self.permit_trigger(&frame, &code, event, cause, fanfare_reason)?
-                    {
-                        continue;
-                    }
-                    let detail = Self::trigger_event(event, object, metadata);
-                    let copies = self.trigger_copies(event, &frame.controller)?;
-                    if copies > 10_000 {
-                        return Err(EngineFailure::Unsupported(
-                            "trigger copies exceed prototype limit".into(),
-                        ));
-                    }
-                    for _ in 0..copies {
-                        batch.push(Pending {
-                            controller: frame.controller.clone(),
-                            reference: self.reference(&source, &code),
-                            event: detail.clone(),
-                            code: code.clone(),
-                            source: source.clone(),
-                            cause: cause.clone(),
-                            retained: false,
-                            id: None,
-                            context: Some(frame.clone()),
-                            alternatives: Vec::new(),
-                        });
-                    }
-                }
-                result.extend(self.limit_trigger_batch(&source, &code, batch)?);
-            }
-        }
-        Ok(result)
-    }
-
-    fn trigger_event(event: &str, object: Option<&EventSubject>, metadata: &Value) -> Value {
-        if matches!(
-            event,
-            "hp_increase" | "power_increase" | "hp_decrease" | "power_decrease"
-        ) {
-            return Value::Null;
-        }
-        let event_key = match event {
-            "enter" => "entered_field",
-            "ex_enter" => "entered_ex",
-            "leave" | "field_to_cemetery" => "left_field",
-            "damage" => "damaged",
-            "deal_damage" => "damage_source",
-            "leader_life_change" => "leader",
-            "discard" => "discarded",
-            "evolve" | "super_evolve" => "evolved",
-            "attack" => "attacked",
-            "act" => "acted",
-            "stand" => "stood",
-            "race" => "raced",
-            _ => "",
-        };
-        let mut detail = object.map_or(Value::Null, |object| json!({event_key:object.id}));
-        if !detail.is_null()
-            && let Some(n) = metadata.get("n")
-        {
-            detail["n"] = n.clone();
-        }
-        detail
-    }
-
-    fn trigger_copies(&self, event: &str, controller: &str) -> Result<i64> {
-        self.require_ability_sources("trigger copies")?;
-        let mut count = 1_i64;
-        for source in self.field_ids() {
-            for code in self.abilities(&source)? {
-                let body = &code["body"];
-                if body["op"] != "repeat_triggers" || body["event"] != event {
-                    continue;
-                }
-                let frame = self.frame_for(&source)?;
-                if self
-                    .seats(string(&body["side"]), &frame)
-                    .iter()
-                    .any(|seat| seat == controller)
-                {
-                    count = count.saturating_add(self.number(&body["additional"], &frame)?);
-                }
-            }
-        }
-        Ok(count.max(0))
-    }
-    pub(super) fn enqueue(&mut self, batch: Vec<Pending>) {
-        let group = self.group();
-        for pending in batch {
-            let mut event =
-                json!({"kind":"待機","ability":pending.reference,"controller":pending.controller});
-            if !pending.event.is_null() {
-                event["event"] = pending.event.clone();
-            }
-            self.emit(event, &pending.cause, group);
-            self.push_pending(pending);
-        }
-    }
     pub(super) fn push_pending(&mut self, mut pending: Pending) {
         self.disambiguate_unkeyed_pending(&mut pending);
         if pending.id.is_none() {

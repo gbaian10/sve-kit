@@ -258,8 +258,7 @@ BP01-118 與 BP01-P25 的測試由 C0 展開、lowering、整卡載入及 author
 P25 的送墓成本來自明示的合成測試輔助能力。來源座標為候選 fixture，不宣稱永久來源驗證或公開 capability。
 
 `internal_rule_action` 僅接受 evolve、attack、end-phase、end-discard 與開局 mulligan 的既有規則動作，
-沿原有時機、目標與支付／姿勢驗證；忙碌、待機及未完成 CheckTiming 時拒絕，不接原型 play／activate。
-守護屬原型 keyword，載入整卡的局面整體拒絕，所以不開 guard-act。時機不符的動作回 `cannot-play` 等拒絕結果，不視為成功。
+沿原有時機、目標與支付／姿勢驗證。忙碌、待機及未完成 CheckTiming 時拒絕。時機不符的動作回 `cannot-play` 等拒絕結果，不視為成功。
 OnAttack 限 Printed 關鍵字、自身 Attack、AfterEntry、PerFact，PlaySpec 沿用共同准入；事件在合法目標與 act
 完成後、Quick 與傷害前保存精確 attacker、target、controller 與當回合 ordinal。
 End Begin 限 Printed、Phase(End, Begin)、自己的／對手的／每個 end phase，依事件回合玩家匹配；
@@ -314,7 +313,7 @@ LifeChange、一般 Move 訂閱、Grant／Delay、非 Field 入口與離場取�
 模式、目標及付款仍依原 play 詢問。自己 main 繼續用普通打出與起動入口。
 
 `answer_internal_card` 的 Quick 回答驗證 actor、完整 token、程序續體與固定 domain；
-外部不能自製 source 或 window，原型 pass 與直接 Quick play 都不能繞過題目。
+Quick 的行動與 Pass 都須使用當前題目。
 成功 play 仍交 `CheckTiming`，排空待機後同一窗口再配新 token；攻擊者離場也不提早關閉。
 Pass 回傳 `CardPlay::Continued(Step)`，才續接原攻擊或 end 棄牌程序；戰鬥比對宣告時的
 攻擊者及目標世代。合法選擇後失敗則回本次 play origin，以新 epoch 恢復原窗口，
@@ -341,8 +340,7 @@ main 階段也沿正式付款程序打出。可選手牌費用沿既有 `spell.o
 Quick 法術的公開材料、墓地材料、Field＋EX 聯集、變動張數與多組材料仍拒絕。
 
 進化規則入口只承接受驗的固有進化正規形：同名、自方未公開 EvolveDeck 資源、Reveal 後支付固定 PP，
-以及單一普通 Evolve 指示；不開一般本文的 Evolve 或 EachObject。只有已載入整卡的持有者走此入口，
-未載入的原型持有者照舊使用原型進化。來源及資源只收 face 0，
+以及單一普通 Evolve 指示。只有已載入整卡的持有者走此入口，
 沿既有時機、每回合次數、PP／EP／SEP 規則驗證；一般與合法超進化的 evolve facet 由實際付款決定，
 不信任輸入的 kind。全部程序完成後才從進化卡有效印刷面取得 Printed OnEvolve，自身、AfterEntry、PerFact、
 PlaySpec 沿用共同准入。進化相當能力仍拒絕；OnSuperEvolve 見〈第二批自動能力入口〉。
@@ -439,7 +437,6 @@ NoTemporalExpiry。內外 Duration 必須相同，不接受 usage、intervals、
 搜尋的 found-local 費用條件、IR Effective Cost 與 SourceInformation 只讀卡片 Cost 資訊，
 不套用 `when_playing` 修正；原有無費用資訊的搜尋 fallback 見搜尋替代目的地一節。
 進化來源依受驗關聯讀 base face 0 的成本，未知或無效關聯拒絕。
-原型付款仍承接已安裝的減費，typed 與 prototype continuous 費用層不得混用。
 
 ### 自身打出費用修正
 
@@ -979,26 +976,19 @@ NextTurnEnd 在安裝時捕捉玩家，等唯一回合排程實際開始該玩�
 到期造成 hp≤0 時，先執行下一實際回合的重置、PP、站立與抽牌，在 7.2.5 處理規則破壞，
 再進入主要階段並收集 main_start 觸發。到期、重算不發 stat_changed。
 
-共用規則動作可在數值層存在時繼續執行；傷害透過同一有效值重算並保留目前 D，
-原型純 Add 以 checked 基礎差額重算。普通／超進化與效果進化接受固定對象、已捕捉操作數的無期限 Add／Set。
+共用規則動作可在數值層存在時繼續執行。傷害透過同一有效值重算並保留目前 D。
+普通／超進化與效果進化接受固定對象、已捕捉操作數的無期限 Add／Set。
 普通／超進化也接受無附加區間的 CurrentTurnEnd／NextTurnEnd Add。
 按進化面的印刷差額平移基礎與既有 Set，保留 EffectId、ProperPlay timestamp、原期限錨與目前傷害；超進化 +1/+1 獨立保留。
 到期從進化後基礎與其餘修正重算，不另發 stat_changed；限期 Add 到期還原依目標與進化契約 §3 的 `inferred` 解讀。
-限期 Set、其他期限及附加區間在進化付款前拒絕。原型 Set／種類或 pilot 基礎替換與有效數值層混用仍拒絕；Set 有效時也拒絕原型 Add，
-不為原型的非交換指示捏造 ProperPlay 時間。原型 pilot 仍不接受 typed 數值安裝。
+限期 Set、其他期限及附加區間在進化付款前拒絕。
 Typed `BoxPilot::Pilot` 只承接來源自身、CurrentTurnEnd／Installation 且無額外區間。來源是場上護符且印刷攻體皆存在時，
 沿同一 NumericState 保存世代、期限與原狀態，以印刷攻體建立從者基礎並歸零傷害；保留 token 特殊種類、姿態、入場回合與能力。
 已是從者或缺任一印刷值時不做任何變更。到期先還原護符並丟棄這次操縱的數值修正，再清理其餘數值期限；
 授予能力保留，之後再次操縱從印刷值重新開始（CR5.25、5.32；Q1581～Q1583）。換區世代清理沿用既有數值流程。
-原型運算式仍是飽和算術，因此對有效數值層的目標，原型 Add 與傷害量只接受整數常值，
-傷害替換（其增減與指定量同樣走飽和算術）一律拒絕；沒有數值層的目標維持原型既有算術。
-換區重建基礎時清除舊世代數值層，不把修正帶入新世代。
+換區重建基礎時清除舊世代數值層。
 
-合成入口允許不消費 typed 事實的 prototype spell／activated／evolve 及 end／main_start 觸發並存；
-其他 prototype 觸發、static 與關鍵字仍整體拒絕，尚未接 typed 事實的觸發消費。
-數值層存在期間（輸入開始或結束時有層），每個原型輸入結束時以同一白名單重驗全部物件的能力與關鍵字、
-待機中的能力及延遲觸發；授予、產生物件或登記非 end 延遲監看而越界時整次回復。
-這避免 7.2.5 規則破壞引出的待機能力和 main_start 觸發混在同一次待機。
+合成執行入口拒絕原型能力與續體。數值層存在期間，規則動作沿用型別化的期限、傷害與觸發處理。
 期限玩家可使用已捕捉的 Player 值；Capture::Player 允許 Current 來源的 controller／owner，
 世代失效時拒絕，不追蹤新世代或當作缺資訊回零。live role 不直接充當 actor／audience。
 NextTurnEdge、phase edge、DuringNextPhase、SetKind 與下節以外的 Continuous 仍拒絕。

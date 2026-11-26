@@ -127,10 +127,9 @@ impl Game {
         let mut affected = BTreeSet::new();
         for index in ordered.values() {
             let entry = &entries[*index];
-            let context = self.frame_for(string(&entry["source"]))?;
             for id in list(&entry["applies_to"]) {
                 let id = string(&id);
-                self.modify_numbers(id, &entry["effect"], &context)?;
+                self.modify_historical_numbers(id, &entry["effect"])?;
                 affected.insert(id.to_owned());
             }
         }

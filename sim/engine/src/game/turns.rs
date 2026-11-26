@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
-use super::{Frame, Game, other, string};
+use super::{Game, other};
 use crate::{EngineFailure, Result, invalid};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -130,26 +130,6 @@ impl Game {
             .schedule
             .skipped
             .push(TurnDirective { player, count: 1 });
-        self.state.schedule.check_size()
-    }
-
-    pub(super) fn schedule_turns(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
-        let count = u32::try_from(self.number(&node["count"], frame)?.max(0)).map_err(invalid)?;
-        frame.performed = 0;
-        if count == 0 {
-            return Ok(());
-        }
-        for player in self.seats(string(&node["side"]), frame) {
-            if node["op"] == "extra_turn" {
-                self.insert_extra_turns(player, count)?;
-            } else {
-                self.state
-                    .schedule
-                    .skipped
-                    .push(TurnDirective { player, count });
-            }
-            frame.performed = frame.performed.saturating_add(i64::from(count));
-        }
         self.state.schedule.check_size()
     }
 

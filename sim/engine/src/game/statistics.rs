@@ -2,42 +2,26 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use serde_json::{Value, json};
+use serde_json::json;
 
 use super::{Game, Object, Pending, int};
 use crate::Result;
 
 impl Game {
-    pub(super) fn stat_change_triggers(
-        &mut self,
-        previous: &[Object],
-        cause: &Value,
-    ) -> Result<Vec<Pending>> {
-        let mut pending = Vec::new();
-        for before in previous {
-            for field in ["power", "hp"] {
-                let old = int(&before.state[field]);
-                let new = int(&self.object(&before.id)?.state[field]);
-                if old == new {
-                    continue;
-                }
-                if new > old {
-                    self.object_mut(&before.id)?.state["stats_increased_this_turn"] = json!(true);
-                }
-                let event = format!(
-                    "{field}_{}",
-                    if new > old { "increase" } else { "decrease" }
-                );
-                let subject = self.event_subject(&before.id)?;
-                pending.extend(self.collect_subject_event(
-                    &event,
-                    &[subject],
-                    cause,
-                    &json!({"stat":field,"before":old,"after":new}),
-                )?);
+    pub(super) fn record_evolution_stat_change(&mut self, previous: &Object) -> Result<()> {
+        for field in ["power", "hp"] {
+            let old = int(&previous.state[field]);
+            let new = int(&self.object(&previous.id)?.state[field]);
+            if old == new {
+                continue;
             }
+            if new > old {
+                self.object_mut(&previous.id)?.state["stats_increased_this_turn"] = json!(true);
+            }
+            let direction = if new > old { "increase" } else { "decrease" };
+            self.require_ability_sources(&format!("event {field}_{direction} subscriptions"))?;
         }
-        Ok(pending)
+        Ok(())
     }
 
     pub(super) fn disambiguate_unkeyed_pending(&mut self, pending: &mut Pending) {

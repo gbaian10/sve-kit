@@ -37,6 +37,9 @@ mod payment_fixtures;
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
 
+#[path = "support/repository.rs"]
+mod repository;
+
 #[path = "internal_ir/battle_costs.rs"]
 mod battle_costs;
 

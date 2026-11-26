@@ -63,8 +63,7 @@ impl Game {
         let probe = self.clone();
         // Current evolution cost readers depend on the source, never the selected form or face.
         let decision = json!({"do":"evolve","source":source,"by":actor,"at":"main"});
-        let mut frame = probe.start_frame(source, probe.reference(source, code), &decision)?;
-        probe.freeze(code, "play-start", &mut frame)?;
+        let frame = probe.start_frame(source, probe.reference(source, code), &decision)?;
         let total_pp = probe.evolution_pp(code, &frame)?;
         let player = self.player(actor)?;
         Ok(EvolutionPayment {

@@ -113,9 +113,14 @@ impl Game {
         }
         self.seal_player_event_batch(player_batch);
         self.internal_posture_events(&changed, acted, cause, before)?;
-        let pending =
-            self.collect_triggers(if acted { "act" } else { "stand" }, &changed, cause)?;
-        self.enqueue(pending);
+        if !changed.is_empty() {
+            self.require_ability_sources(if acted {
+                "event act subscriptions"
+            } else {
+                "event stand subscriptions"
+            })?;
+        }
+        self.group();
         Ok(changed.into_iter().map(|object| object.id).collect())
     }
 
@@ -144,56 +149,6 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn banish_objects(&mut self, candidates: &[String], frame: &Frame) -> Result<()> {
-        let mut permitted = Vec::new();
-        for id in candidates {
-            if !self.restricted(id, "banish")? {
-                permitted.push(id.clone());
-            }
-        }
-        if permitted.is_empty() {
-            return Ok(());
-        }
-        let ids = &permitted;
-
-        let mut movement = frame.clone();
-        movement
-            .values
-            .insert("banish_instruction".into(), json!(true));
-        // Like discard, "消滅したとき" looks back at the zone the card left, so the
-        // triggers are collected first and kept only for cards that really moved.
-        let before = ids
-            .iter()
-            .filter_map(|id| self.state.objects.get(id))
-            .cloned()
-            .collect::<Vec<_>>();
-        let pending = self.collect_triggers("banish", &before, &frame.cause)?;
-        self.move_objects(ids, "banish", None, None, &movement)?;
-        let banished = before
-            .iter()
-            .filter(|object| {
-                self.state.objects.get(&object.id).is_some_and(|now| {
-                    now.generation != object.generation
-                        && matches!(now.zone.as_str(), "banish" | "void")
-                })
-            })
-            .map(|object| object.id.clone())
-            .collect::<Vec<_>>();
-        self.enqueue(
-            pending
-                .into_iter()
-                .filter(|pending| {
-                    pending.context.as_ref().is_some_and(|context| {
-                        context.event["subject_id"]
-                            .as_str()
-                            .is_some_and(|id| banished.iter().any(|done| done == id))
-                    })
-                })
-                .collect(),
-        );
-        Ok(())
-    }
-
     pub(super) fn discard(&mut self, ids: &[String], frame: &Frame) -> Result<()> {
         let discarded = ids
             .iter()
@@ -214,7 +169,9 @@ impl Game {
                 group,
             );
         }
-        let pending = self.collect_triggers("discard", &discarded, &frame.cause)?;
+        if !discarded.is_empty() {
+            self.require_ability_sources("event discard subscriptions")?;
+        }
         let actual = discarded
             .iter()
             .map(|object| object.id.clone())
@@ -231,7 +188,7 @@ impl Game {
             &actual,
             super::player::events::MovementMethod::Discard,
         );
-        self.enqueue(pending);
+        self.group();
         Ok(())
     }
 
@@ -268,14 +225,87 @@ impl Game {
         Ok(attributes)
     }
 
-    pub(super) fn movable_subjects(&self, node: &Value, frame: &Frame) -> Result<Vec<String>> {
-        let mut ids = Vec::new();
-        for id in self.select(&node["subjects"], frame)? {
-            if node["op"] != "banish" || !self.restricted(&id, "banish")? {
-                ids.push(id);
-            }
+    pub(super) fn single_rules_name_matches_role(&self, id: &str, role: &str) -> Result<bool> {
+        self.catalog
+            .rule_bindings
+            .matches_resource(role, &[self.card_name(id)?])
+    }
+
+    pub(super) fn card_matches_resource(&self, id: &str, role: &str) -> Result<bool> {
+        Ok(self.single_rules_name_matches_role(id, role)?
+            || self
+                .catalog
+                .rule_bindings
+                .matches_resource(role, &self.card_names(id)?)?)
+    }
+
+    pub(super) fn card_names(&self, id: &str) -> Result<Vec<String>> {
+        let source = self.information_source(id)?;
+        let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
+        self.card_names_for_print(id, &source.card, face)
+    }
+
+    pub(super) fn card_names_for_print(
+        &self,
+        id: &str,
+        card: &str,
+        face: usize,
+    ) -> Result<Vec<String>> {
+        let object = self.object(id)?;
+        let mut names = self.printed_card_names(card, face, &object.zone)?;
+        if object.state["silenced"] == true || self.internal_suppresses_printed(id, card, face) {
+            names.truncate(1);
         }
-        Ok(ids)
+        Ok(names)
+    }
+
+    pub(super) fn card_name_matches(
+        &self,
+        id: &str,
+        predicate: impl Fn(&str) -> bool,
+    ) -> Result<bool> {
+        let source = self.information_source(id)?;
+        let face = usize::try_from(int(&source.state["face"])).map_err(invalid)?;
+        self.card_name_matches_print(id, &source.card, face, predicate)
+    }
+
+    pub(super) fn card_name_matches_print(
+        &self,
+        id: &str,
+        card: &str,
+        face: usize,
+        predicate: impl Fn(&str) -> bool,
+    ) -> Result<bool> {
+        // An additional name cannot invalidate a match already proven by the printed name.
+        if predicate(&self.catalog.rules_label(card, face)?) {
+            return Ok(true);
+        }
+        Ok(self
+            .card_names_for_print(id, card, face)?
+            .iter()
+            .any(|name| predicate(name)))
+    }
+
+    pub(super) fn printed_card_names(
+        &self,
+        card: &str,
+        face: usize,
+        zone: &str,
+    ) -> Result<Vec<String>> {
+        let mut names = vec![self.catalog.rules_label(card, face)?];
+        if !self.card_runtime.is_empty() {
+            names.extend(self.internal_printed_name_aliases(card, face, zone == "field")?);
+        }
+        let mut seen = BTreeSet::new();
+        names.retain(|name| seen.insert(name.clone()));
+        Ok(names)
+    }
+
+    pub(super) fn field_ids(&self) -> Vec<String> {
+        ["P1", "P2"]
+            .iter()
+            .flat_map(|seat| self.zone_ids(seat, "field"))
+            .collect()
     }
 
     pub(super) fn card_name(&self, id: &str) -> Result<String> {
@@ -294,34 +324,11 @@ impl Game {
         let group = self.group();
         for id in ids {
             self.require_ability_sources("movement replacement")?;
-            let mut destination = if self.internal_banish_replaces_move(id, zone)? {
+            let destination = if self.internal_banish_replaces_move(id, zone)? {
                 "banish".into()
             } else {
                 zone.to_owned()
             };
-            for source in self.field_ids() {
-                for code in self.abilities(&source)? {
-                    let body = &code["body"];
-                    if body["op"] != "replace_move"
-                        || body["from"] != self.object(id)?.zone
-                        || body["to"] != zone
-                    {
-                        continue;
-                    }
-                    let context = self.frame_for(&source)?;
-                    if !self.matches(id, &body["subjects"], &context)? {
-                        continue;
-                    }
-                    if body["replacement"] == "banish" && self.restricted(id, "banish")? {
-                        continue;
-                    }
-                    destination = string(&body["replacement"]).into();
-                    break;
-                }
-                if destination != zone {
-                    break;
-                }
-            }
             if destination != zone {
                 self.emit(json!({"kind":"取代","object":id,"original":if frame.values.get("paying_cost") == Some(&json!(true)) && id == &frame.source {"これを墓場に置く"} else {"場から墓場に置く"},"replacement":"消滅させる"}),&frame.cause,group);
                 if destination == "banish" {

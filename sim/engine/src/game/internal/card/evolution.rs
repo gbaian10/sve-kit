@@ -328,7 +328,7 @@ impl Game {
         if self.catalog.face(&resource.card, face).is_err() {
             return Ok(false);
         }
-        self.evolve_with_code(decision, &code, Some(&entry.node), probe)
+        self.evolve_with_code(decision, &code, &entry.node, probe)
     }
 }
 
