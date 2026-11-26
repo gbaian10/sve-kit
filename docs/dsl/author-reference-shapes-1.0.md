@@ -87,5 +87,5 @@ holder 是否存在於該 on 事件仍須由事件型別推導。
 不表示整棵樹的兩個遞迴入口已實作。
 
 Schema 根仍拒絕 standalone 文件；沒有新的完整DSL reader。
-Python 型別與每個定義的結構及合成正反例同步驗證。
+Schema 的參照欄位與型別由作者入口驗證。
 這些驗證不提供來源准入、作用域、事件投影、receipt 授權或引擎 capability 保證。

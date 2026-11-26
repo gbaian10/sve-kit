@@ -2,7 +2,7 @@
 
 本表細化[語法 §3](author-syntax-1.0.md#3-費用目標與打出程序)。
 [author-nodes.schema.json](../../dsl/author-nodes.schema.json) 是機器語法權威；
-Python 的 `author_costs`、`author_selection_parents` 提供對應的封閉節點型別。
+
 節點檢查不提供完整能力頭、DSL reader、binding／來源准入或付款執行。
 
 Q＝Quantity，T＝SelectionQuantity；[數量矩陣](author-quantity-shapes-1.0.md)的非負字面量、
@@ -11,7 +11,7 @@ Q＝Quantity，T＝SelectionQuantity；[數量矩陣](author-quantity-shapes-1.0
 
 ## 材料與特殊 payload
 
-| 機器定義／Python | 必填 | 可選 |
+| 機器Schema 定義 | 必填 | 可選 |
 | --- | --- | --- |
 | A.cost.material-group.exact／MaterialGroupExact | sel:ObjectSel、n:Q | 無 |
 | A.cost.material-group.up-to／MaterialGroupUpTo | sel:ObjectSel、upto:Q | 無 |
@@ -47,7 +47,7 @@ include_self 與 stack_counter_from 僅有舊名稱登錄、沒有接受形狀�
 
 ## Cost 結構與操作矩陣
 
-| 定義／Python | 結構 | metadata |
+| Schema 定義 | 結構 | metadata |
 | --- | --- | --- |
 | A.cost.step／CostStep | 下表恰一操作 | 無 |
 | A.cost／Cost | 單一操作，或 steps:CostStep[]（至少兩項） | 無 |
@@ -95,7 +95,7 @@ one_of 至少兩個 CostAlternative，只選一支；禁止直接 one_of 套 one
 付款收據使用 `QuantityUnit::Life`，並保留實際生命變動事實；BP08-084 同時驗證每回合兩次上限。
 
 CounterCost 六個數量分支及 holders 的必要性沿[要求量矩陣](author-quantity-shapes-1.0.md#單組父變體矩陣)，
-已併入 author_costs 模組。self 的 on:this 不收 holders；selected 的 on:ObjectSel 必有 holders:Q。
+費用形狀由 Schema 管理。self 的 on:this 不收 holders；selected 的 on:ObjectSel 必有 holders:Q。
 所有 counter 數量不接受直接 selection_count 參數，不能借用 Target 的 T。
 CR 10.4.3 規定費用未明指玩家的「場の」等所屬域是要求該費用的卡／能力之 master；
 Q806 確認不能以對手使用的卡付費。BP14-063／BP14-055 的「場の『竜山温泉』」
@@ -160,7 +160,7 @@ Quick 多群組、隨機或非棄牌的隱藏材料付款。
 
 ## wrapper、X 與打出費用欄
 
-| 定義／Python | 必填／可選 | 真例與界線 |
+| Schema 定義 | 必填／可選 | 真例與界線 |
 | --- | --- | --- |
 | OptionalCost | Cost＋result?＋option? | 短 CP03-029；長 BP10-019／BP10-SL05／BP10-U02（選項 4：pp:4 後 self_to_cemetery） |
 | OptionalCosts 列表 | 每項 Cost＋option＋result? | BP16-081、BP19-090、BP21-090；各組獨立決定、獨立完整付款 receipt |
@@ -193,7 +193,7 @@ steps（一次整體決定）或 one_of（只付一支）。
 
 ## Target 變體與承載
 
-| 定義／Python | 必填 | 可選 |
+| Schema 定義 | 必填 | 可選 |
 | --- | --- | --- |
 | A.target.exact／TargetExact | bind、from:RecipientSel、n:T | Target 共通欄 |
 | A.target.up-to／TargetUpTo | bind、from:RecipientSel、upto:T | Target 共通欄 |
@@ -263,13 +263,9 @@ C1／D0 不得讓前一欄任意讀另一欄的 receipt。one_of 分支內 resul
 及其 text／sections，未將 Q&A 當卡例。上述是節點片段，非整卡 DSL；未找到直接真例的格
 明列合成，不能把文字搜尋零命中當不存在的證明。官方卡文權利依 [LICENSING](../../LICENSING.md)。
 
-所有新增具名定義均對照 Python 型別漂移，並突變 required、額外欄位、操作互斥、相依、
-最小長度、數值下限與 group filter 約束。代表正例／錯上下文／錯型別／互斥反例
-同時驗 schema 及解碼；Target 數量聯集驗單一分支命中。
+Schema 定義必填欄位、額外欄位、互斥、相依、清單長度、數域與 group filter。Rust lowering 驗候選集合與付款在實際能力中的位置和可用性。
 
-以真正 Cost／Targets 節點解碼再 canonical：payload mapping 換鍵序 bytes 相同，
-steps／targets 對調 bytes 不同，重複步驟不能去重，單元素 steps 形狀拒絕。
-不改 body recipe、不在 hash 前語義正規化，也不聲稱完整DSL reader 已整合此驗收。
+驗證後的 JSON 值直接進 canonical 序列化。物件鍵排序，steps／targets 保持原本順序與重數。Cost Schema 要求 steps 至少含兩項。
 
 ## 正式選擇支付窄片
 

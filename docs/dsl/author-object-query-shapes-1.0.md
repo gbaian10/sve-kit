@@ -179,7 +179,7 @@ CountObjects 只有 who／zone 接受 ParamRef，不因 `count: Sel` 的文法�
 count.except 的區域來源沒有 counted 角色，故不接受參數；ObjectSel.except 保持 source 角色。
 where 內若另有 count 節點，該 count 的 who／zone 仍接受自己的合法參數。
 
-Python TypedDict 的嚴格度、未知鍵、互斥及 as→where 均有對應 Schema 約束與反例。
+物件查詢的未知鍵、互斥及 as→where 依賴由 Schema 檢查。
 這些結構不是深層不可變物件，消費者不得假設可 hash。
 去重、順序、binding／參數角色、scope 與操作能力都是接線義務，不是本片段已執行的行為。
 

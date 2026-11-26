@@ -2,7 +2,7 @@
 
 本文件定義 `A.effect`（EffectSpec）的封閉形狀及安裝位置契約。
 語法唯一權威為 [`author-nodes.schema.json`](../../dsl/author-nodes.schema.json)；
-Python 對應型別在 `contracts/author_programs.py`，與 selector／數值共用同一遞迴圖。
+效果、selector 與數值節點使用同一份遞迴 Schema。
 本片段不是完整能力、Steps、DSL 入口或 expanded profile，不能據此宣稱可執行。
 
 ## 1. 共通邊界
@@ -133,8 +133,7 @@ cost_mod.when_playing 是獨立的打出篩選，不從這張表補範圍。
 
 來源為遞迴檢查 `card-data/jp` 凍結卡檔的 documents／faces／text／sections；
 不把 Q&A 或本文動作命中冒充效果位置證據。以下是片段，不含完整父頭、條件或期限；
-「合成」只驗形狀。測試用正例在 `carddb/tests/contracts/author_effect_cases.py`
-記錄來源位置，並由雙端驗證測試 round-trip。卡號代表 frozen 記錄，不主張所有歷史版本相同。
+「合成」標記語法形狀的例子。卡號指向本表檢查的凍結版次。
 
 | variant | 來源能力位置／代表卡 | 本片片段與缺口 |
 | --- | --- | --- |

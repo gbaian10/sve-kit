@@ -1,8 +1,7 @@
 # 事件、歷史與捕捉節點形狀（1.0）
 
 本表補完已登錄的 E/C 讀值形狀。機器語法唯一權威是
-[`author-nodes.schema.json`](../../dsl/author-nodes.schema.json)；Python 對應在
-`contracts/author_queries.py`，與 NumericExpr、Quantity、Condition、ObjectSel、RecipientSel
+[`author-nodes.schema.json`](../../dsl/author-nodes.schema.json)，與 NumericExpr、Quantity、Condition、ObjectSel、RecipientSel
 共用同一遞迴圖。不存在第二個歷史專用表達式核心，也不新增泛型 A.expr 消費入口。
 A.define 仍只收數值；LKI、材料快照與 PlayerExpr 只能進各自列出的 operand。
 
@@ -297,7 +296,5 @@ power_of、hp_of、cost_of、orig_cost_of、history_count、history_sum。
 表中「合成」表示有契約形狀與測試，沒有直接實卡支持該格；事件主體的 power_ge、keyword 聯集、
 多人 opp 與各玩家自己的 phase 語義，均未因此獲授權。
 
-新定義逐一對照 Python，測試移除 required、開放 extra、改錯值域與分支；獨立行為例驗
-事件角色、主體互斥、phase 參數位置、history 頂層／where 分工、sum 窄化、骰值邊界、
-LKI 消費、paid 關鍵字撞名、Player cmp 同型，以及捕捉矩陣。
+Schema 檢查必填鍵、封閉欄位、事件主體互斥、歷史過濾及讀值範圍。Rust lowering 與整卡對局驗證實際事件角色、LKI、付款和 capture。
 這些檢查不取代完整 Cost／Target、父動作、DSL 入口、Rust decoder 或引擎行為測試。

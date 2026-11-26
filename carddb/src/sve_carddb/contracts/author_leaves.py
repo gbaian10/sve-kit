@@ -1,4 +1,4 @@
-"""Python leaf types corresponding to the author schema; not execution admission."""
+"""Python types for the stored author index and body parameter declarations."""
 
 from typing import Annotated, Literal
 
@@ -6,13 +6,8 @@ from pydantic import BeforeValidator, Field
 
 from sve_carddb.contracts.four_layer import Code
 from sve_carddb.core.json import integer
-from sve_carddb.core.models import RecordData, Text, UInt
+from sve_carddb.core.models import RecordData, Text
 
-Int = Annotated[int, Field(ge=-9007199254740991, le=9007199254740991)]
-ParamName = Annotated[str, Field(pattern=r"^[A-Za-z][A-Za-z0-9_]*$(?![\s\S])")]
-Player = Literal["self", "opp"]
-Zone = Literal["field", "hand", "deck", "evolve_deck", "cemetery", "ex"]
-Phase = Literal["start", "main", "end"]
 ParamType = Literal[
     "Int", "Nat", "CardName", "Concept", "CardKind", "Player", "Zone", "Phase"
 ]
@@ -22,68 +17,6 @@ class ParamSource(RecordData):
     slot: Code
     component: Literal["value", "constant", "negated_magnitude"]
 
-
-class ParamDecl(RecordData):
-    type: ParamType
-    source: ParamSource
-
-
-class ParamRef(RecordData):
-    param: ParamName
-
-
-class IntParamValue(RecordData):
-    type: Literal["Int"]
-    value: Int
-
-
-class NatParamValue(RecordData):
-    type: Literal["Nat"]
-    value: UInt
-
-
-class CardNameParamValue(RecordData):
-    type: Literal["CardName"]
-    value: Text
-
-
-class ConceptParamValue(RecordData):
-    type: Literal["Concept"]
-    value: Text
-
-
-class CardKindParamValue(RecordData):
-    type: Literal["CardKind"]
-    value: Code
-
-
-class PlayerParamValue(RecordData):
-    type: Literal["Player"]
-    value: Player
-
-
-class ZoneParamValue(RecordData):
-    type: Literal["Zone"]
-    value: Zone
-
-
-class PhaseParamValue(RecordData):
-    type: Literal["Phase"]
-    value: Phase
-
-
-type ParamValue = (
-    IntParamValue
-    | NatParamValue
-    | CardNameParamValue
-    | ConceptParamValue
-    | CardKindParamValue
-    | PlayerParamValue
-    | ZoneParamValue
-    | PhaseParamValue
-)
-type ParamDeclarations = dict[ParamName, ParamDecl]
-type ParamValues = dict[ParamName, ParamValue]
 
 CardId = Annotated[str, Field(pattern=r"^c:[0-9a-f]{32}$(?![\s\S])")]
 RelativeFile = Annotated[
@@ -118,19 +51,3 @@ class EffectsIndex(RecordData):
     format: Annotated[Literal[1], BeforeValidator(integer)]
     kind: Literal["effects_index"]
     records: tuple[IndexRecord, ...]
-
-
-def _true(value: object) -> Literal[True]:
-    # Literal[True] alone also accepts the integer 1.
-    if value is not True:
-        raise ValueError("Expected true")
-    return True
-
-
-TrueFlag = Annotated[Literal[True], BeforeValidator(_true)]
-type CounterName = Text
-type Title = Text
-
-
-type Concept = Text
-type CardName = Text

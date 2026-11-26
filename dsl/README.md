@@ -97,8 +97,8 @@ event key. The
 [effect matrix](../docs/dsl/author-effect-shapes-1.0.md) adds 27 closed EffectSpec keys,
 cannot variants and rule overrides. The [ability matrix](../docs/dsl/author-ability-shapes-1.0.md)
 defines complete ability heads, the granted-head subset, conditional play modifiers,
-and delayed triggers. `contracts/author_programs.py` owns their shared recursive
-ability/effect/step graph. Grant payloads can combine keywords and abilities and
+and delayed triggers. Its recursive definitions share the ability, effect and
+step graph. Grant payloads can combine keywords and abilities and
 accept leader recipients; equipment and nested static grants use the same graph.
 Effect parent defaults, source scopes and execution capabilities require C1/D0;
 fragment acceptance is not enclosing-context validation. Full authored file/card
@@ -111,26 +111,11 @@ equivalence with count_of/did. Rust decoding and execution remain separate.
 `carddb/src/sve_carddb/domains/effects/author_inputs.py` takes the explicit schema
 directory and validates leaf and index inputs with local resources only.
 It does not expose a reader for the reference atoms, target roles or numeric fragments.
-Python types in
-`contracts/author_leaves.py`, `contracts/author_references.py` and
-`contracts/author_queries.py`, plus target roles in `contracts/author_selections.py`, are checked
-against every implemented definition by structural drift tests. Reference
-acceptance tests also check reserved-name separation, required fields, exclusive
-variants and nested rejection of parameter nodes.
-Leader union checks flatten nested unions, reject duplicate branches and require
-each accepted example to match exactly one leaf. Role declarations reject empty
-maps, invalid names and booleans masquerading as the integer literal 1.
-Numeric drift checks preserve named reference targets and compare every recursive
-definition individually. Numeric acceptance tests check signed bounds, arity,
-exclusive operators, parameter placement and wire-key round trips.
-`contracts/author_receipts.py` retains the nonrecursive snapshot and same-as leaves.
-Material filters, count_of, did, object and recipient shapes share the recursive
-graph in `contracts/author_queries.py`. Omitted material fields remain absent and
-explicit nulls are rejected. Drift and acceptance checks cover that graph,
-including negative mutations of union membership and `contains`.
-The drift checker rejects unsupported constraints beside `$ref` rather than
-silently ignoring them. Index format literals reject booleans and floating points
-in the Python contract as well as at the public reader boundary.
+CardDB and the Rust lowerer use the same expanded schema profile. That profile
+rejects residual parameter and generated ability nodes. The reader keeps the
+validated JSON tree and its authored values. CardDB checks review metadata at
+printed keyword entries. Rust decodes the tree into the author's typed AST
+and checks bindings, lowering and runtime capabilities at their own boundaries.
 
 The reader rejects non-JSON YAML values, unsafe numbers, duplicate/non-string
 keys, unknown fields, wrong envelope versions and duplicate index card/scope

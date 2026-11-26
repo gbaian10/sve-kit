@@ -10,7 +10,7 @@ from referencing import Registry, Resource
 from sve_carddb.core.json import canonical, object_value, parse
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
-from ...contracts.test_author_abilities import HEADS
+from .author_entry_cases import HEADS
 from .test_author_entries import ability, document
 
 if TYPE_CHECKING:
@@ -35,7 +35,7 @@ def test_expanded_accepts_each_concrete_head(
     schemas: AuthorSchemas, key: str, payload: JsonValue
 ) -> None:
     value = document(ability({key: payload}))
-    assert schemas.expanded(canonical(value)).model_dump(mode="json") == value
+    assert schemas.expanded(canonical(value)) == value
 
 
 PARAM_DRAW: dict[str, JsonValue] = {"draw": {"n": {"param": "N"}}}

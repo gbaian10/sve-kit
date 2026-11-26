@@ -9,7 +9,7 @@ import pytest
 from sve_carddb.core.json import canonical, object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
-from ...contracts.test_author_abilities import HEADS
+from .author_entry_cases import HEADS
 from .test_author_entries import ability, document
 
 if TYPE_CHECKING:

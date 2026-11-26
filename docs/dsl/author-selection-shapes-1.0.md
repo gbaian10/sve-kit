@@ -29,9 +29,7 @@ Schema 只檢查這些形狀；接線還須確認 `role.of` 指向宣告角色�
 `first/second/rest` 的順序引用尚未定編碼；A.ref 仍不接受 `{first:t}` 或 `"first:t"` 等候選拼法。
 有角色的集合不等於有順序，無序集合不能任取第一項。
 
-Pydantic 的 `Literal[1]` 即使 strict 也可能接受 bool 或浮點；Python 型別在字面值檢查前，
-使用共用的嚴格整數邊界拒絕這些值。JSON Schema 的 integer 本身不區分 `1` 與 `1.0`，
-浮點仍由嚴格 JSON／YAML 入口拒絕。
+嚴格 YAML／JSON 入口拒絕浮點常值。Schema 的字面數量欄位依定義接受整數。
 
 ## 數量位置規則
 
@@ -72,12 +70,12 @@ A.leader-recipient 只各引用一次，另含 A.multiple-leaders。
 `RecipientSel` 是物件與領袖的具名 sum type；`ObjectSel` 始終只含物件。
 下表 mapping 封閉，未列欄位拒絕；選填省略不補 null。
 
-| 定義／Python | 必填 | 選填 | 互斥／值域 |
-| --- | --- | --- | --- |
-| A.sel.leader-or／LeaderOr | who:PlayerRef、kind:follower、leader_or:嚴格 true | zone:field | who 不收 PlayerSet／param；不收 F、except、where、as，zone 不收列表 |
-| A.sel.recipient-atom／RecipientAtom | ObjectAtom／LeaderRecipient／LeaderOr／BindingName | 依各型 | 不收頂層 any_of；三種領袖原子經 A.leader-recipient 各納入一次；BindingName 指正式目標，不含保留名稱 |
-| A.sel.recipient-union／RecipientUnion | any_of: 至少一個領袖類 limb 的非空 RecipientAtom 列表，或恰一個 BindingName 與 this | 無 | 純物件列表不屬本型；不收巢狀 any_of 或 wrapper 的 filter |
-| A.sel.recipient／RecipientSel | ObjectSel／LeaderRecipient／LeaderOr／RecipientUnion | 依各型 | 各 shape 只命中一個葉分支 |
+| Schema 定義                           | 必填                                                                                | 選填       | 互斥／值域                                                                                          |
+| ------------------------------------- | ----------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------- |
+| A.sel.leader-or／LeaderOr             | who:PlayerRef、kind:follower、leader_or:嚴格 true                                   | zone:field | who 不收 PlayerSet／param；不收 F、except、where、as，zone 不收列表                                 |
+| A.sel.recipient-atom／RecipientAtom   | ObjectAtom／LeaderRecipient／LeaderOr／BindingName                                  | 依各型     | 不收頂層 any_of；三種領袖原子經 A.leader-recipient 各納入一次；BindingName 指正式目標，不含保留名稱 |
+| A.sel.recipient-union／RecipientUnion | any_of: 至少一個領袖類 limb 的非空 RecipientAtom 列表，或恰一個 BindingName 與 this | 無         | 純物件列表不屬本型；不收巢狀 any_of 或 wrapper 的 filter                                            |
+| A.sel.recipient／RecipientSel         | ObjectSel／LeaderRecipient／LeaderOr／RecipientUnion                                | 依各型     | 各 shape 只命中一個葉分支                                                                           |
 
 領袖類 limb 指 SingleLeader、MultipleLeaders、LeaderOf、LeaderOr。
 不含 `this` 的 RecipientUnion 在 any_of 陣列層以 `contains` 要求至少一個領袖類；
