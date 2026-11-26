@@ -249,7 +249,7 @@ concept_evidence 以 name/tooltip/copy_pattern 為鍵；origin 為整筆來源�
 未知日期排已知之後，month/year 不補成某日。
 
 稀有度配置權威為 [registry.rarity](../../../carddb/src/sve_carddb/domains/registry/rarity.py)，
-已評級的非 PR 順序為 BR、SR、GR、LG、SL、UR、SP、SSP，兩區原標籤正規化後共用 code。
+已評級的非 PR 順序為 BR、SR、GR、LG、SL、GBF、UR、SP、SSP，兩區原標籤正規化後共用 code。
 完整選取順序為 BR…SSP → 無代碼（「-」或未知原值）→ PR → 純 premium。
 原值與 premium 仍保留；未知原值、純 premium 與「-」不捏造 code。
 其中純 premium 已知不是普通版，排在 PR 之後，避免 token 等卡改選 premium 版。

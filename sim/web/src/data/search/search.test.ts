@@ -1059,7 +1059,7 @@ it("retains badge, Premium and raw dash metadata in compact and restored search 
   }
 })
 
-it("keeps GBF appearances in the PR fallback group alongside other rarity filters", async () => {
+it("gives GBF appearances their own PR group alongside other rarity filters", async () => {
   const client = createSnapshotClient(base, { fetch: origin().fetcher })
   await client.load()
   await client.prefetchPrintings?.()
@@ -1103,10 +1103,10 @@ it("keeps GBF appearances in the PR fallback group alongside other rarity filter
     expect(ids(["pr:none"])).toContain("p:bp01-001")
     expect(ids(["pr"])).toContain("p:bp01-021")
     expect(ids(["pr:none"])).not.toContain("p:bp01-021")
-    expect(ids(["pr:unknown"])).toContain("p:bp01-021")
-    expect(index.options.prBadgeStyles).toContain("unknown")
-    expect(index.options.prBadgeStyles).not.toContain("gbf")
-    expect(index.options.rarityCounts["pr:unknown"]).toBe(ids(["pr:unknown"]).length)
+    expect(ids(["pr:gbf"])).toEqual(["p:bp01-021"])
+    expect(ids(["pr:unknown"])).not.toContain("p:bp01-021")
+    expect(index.options.prBadgeStyles).toContain("gbf")
+    expect(index.options.rarityCounts["pr:gbf"]).toBe(1)
     expect(ids(["pr:none", "unrated"]).sort()).toEqual([...ids(["pr:none"]), ...unrated].sort())
     expect(index.options.rarityCounts["unrated"]).toBe(unrated.length)
   }

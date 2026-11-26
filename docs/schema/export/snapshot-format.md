@@ -138,6 +138,7 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 | GR | Gold | `gr` |
 | LG | Legendary | `lg` |
 | SL | Super Legendary | `sl` |
+| GBF | （EN 無此稀有度） | `gbf` |
 | UR | Ultimate | `ur` |
 | SP | Special | `sp` |
 | SSP | Super Special | `ssp` |
@@ -149,7 +150,7 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 依[詞彙契約 §1、§4.1、§7](../domains/catalog-route-adoption.md)，單獨 Premium 不捏造基礎階級，「-」也不採為稀有度代碼，
 兩者 `rarity_code=null`，但不列為未辨識。
 未辨識拼法（例如「-・プレミアム」）保持 `rarity_code/premium=null`，私人建置報告逐版次列出原值與原因。
-版次列固定分 JP、EN 行，各行依無代碼→BR→SR→GR→LG→SL→UR→SP→SSP→單獨 premium→PR；
+版次列固定分 JP、EN 行，各行依無代碼→BR→SR→GR→LG→SL→GBF→UR→SP→SSP→單獨 premium→PR；
 無代碼的排序位置由 `premium` 區分，不另造稀有度代碼。相同階級先一般版再 premium；
 同一階級、同一 premium 狀態內，一般編號（卡號連字號後為純數字、`T` 或 `LD` 字首）先於特殊編號
 （`SL`、`PR`、`EP`、`SEP`、`UT` 等其他字首），再依卡號自然排序、永久版次 ID 定序。
@@ -166,9 +167,9 @@ PR 父項目全選時 URL 寫 `pr`，部分選取時寫 `pr:<style>`（含 `none
 不由同名卡、另一地區或卡號前綴推導。採物件讓「無資料」和「無標籤」各自有明確表示，且 style／text 同屬一筆外觀。
 
 稀有度篩選 `pr` 只依官方 `rarity_code=pr`，包含全部 PR 外觀與待確認版次；
-子選項 `pr:br / pr:sr / pr:gr / pr:lg / pr:sl / pr:sp / pr:none` 同時要求
-**同一版次**的官方 pr 與對應 style。早期印 BR 的 PR 仍屬 PR（BR）；六種外觀子項的三語標籤皆由 style 大寫產生。
-Web 將外觀為 null 或尚無對應顯示的官方 PR 歸至 `pr:unknown`，例如 `gbf`。該區沒有這類版次時隱藏子選項。
+子選項 `pr:br / pr:sr / pr:gr / pr:lg / pr:sl / pr:gbf / pr:sp / pr:none` 同時要求
+**同一版次**的官方 pr 與對應 style。早期印 BR 的 PR 仍屬 PR（BR）；七種外觀子項的三語標籤皆由 style 大寫產生。
+Web 將外觀為 null 的官方 PR 歸至 `pr:unknown`。該區沒有這類版次時隱藏子選項。
 多選稀有度時為聯集，其他版次條件仍需同一版次滿足；排序與預設版次照官方代碼，外觀全空時原有行為不變。
 
 ### 主戰者卡名框篩選

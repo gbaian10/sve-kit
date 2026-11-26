@@ -29,7 +29,8 @@ const PR = printing("PR-010", "pr", 9)
 
 describe("rarity ladder", () => {
   // The maintainer's order, written out here rather than read from the module under test.
-  const LADDER = ["BR", "SR", "GR", "LG", "SL", "UR", "SP", "SSP"]
+  // GBF (the collaboration frame's parallel rarity) sits between SL and UR, as in the card database.
+  const LADDER = ["BR", "SR", "GR", "LG", "SL", "GBF", "UR", "SP", "SSP"]
   const printings = LADDER.map((code, index) => printing(`BP01-${code}`, code.toLowerCase(), index))
 
   it.each(LADDER.slice(0, -1).map((lower, index) => [lower, LADDER[index + 1] ?? ""]))(

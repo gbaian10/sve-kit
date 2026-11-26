@@ -28,10 +28,14 @@ describe("deck location tokens", () => {
   })
 
   it("offers only the sub-values with printings, in display order", () => {
-    expect(tokenKindTokens({ "token:crest": 1, "token:follower": 2, "token:spell": 0 })).toEqual([
-      "token:follower",
-      "token:crest",
-    ])
+    expect(
+      tokenKindTokens({
+        "token:treasure": 1,
+        "token:crest": 1,
+        "token:follower": 2,
+        "token:spell": 0,
+      }),
+    ).toEqual(["token:follower", "token:crest", "token:treasure"])
     expect(leaderFrameTokens({ "leader:unknown": 1, "leader:gold": 3 })).toEqual([
       "leader:gold",
       "leader:unknown",

@@ -442,11 +442,10 @@ impl Game {
             .filter(|execution| execution.context.controller == perspective.player())
             .and_then(|execution| {
                 execution.play.as_ref().map(|play| PlayCostQuote {
+                    // A token that left the game keeps its handle but is in no zone any more.
                     source: self
-                        .state
-                        .knowledge
-                        .get(seat(perspective))
-                        .and_then(|knowledge| knowledge.handle(&execution.context.source)),
+                        .observed_object_handle(perspective, &execution.context.source)
+                        .ok(),
                     cost: play_cost(play, self, execution),
                 })
             });

@@ -27,6 +27,7 @@ pub(super) fn project(event: &PendingEvent) -> Result<TriggerEvent, ProjectionEr
         PendingEvent::Fusion => TriggerEvent::Fusion,
         PendingEvent::FusedAsMaterial => TriggerEvent::FusedAsMaterial,
         PendingEvent::Play => TriggerEvent::Play,
+        PendingEvent::Targeted => TriggerEvent::Targeted,
         PendingEvent::Discard => TriggerEvent::Discard,
         PendingEvent::HandReveal => TriggerEvent::HandReveal,
         PendingEvent::Banish => TriggerEvent::Banish,

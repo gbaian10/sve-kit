@@ -17,11 +17,11 @@ def test_region_labels_share_a_code(jp: str, en: str, code: str) -> None:
     assert normalize("jp", jp) == normalize("en", en) == (code, False)
 
 
-def test_japanese_granblue_rarity_follows_super_special() -> None:
+def test_japanese_granblue_rarity_sits_between_super_legendary_and_ultimate() -> None:
     assert normalize("jp", "GBF") == ("gbf", False)
     assert normalize("jp", "GBF・プレミアム") == ("gbf", True)
     assert normalize("en", "GBF") is None
-    assert RARITY_ORDER[-3:] == ("ssp", "gbf", "pr")
+    assert RARITY_ORDER[4:7] == ("sl", "gbf", "ur")
 
 
 @pytest.mark.parametrize(
