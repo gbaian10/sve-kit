@@ -7,7 +7,7 @@ from typing import TYPE_CHECKING, Never
 
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord, EffectsIndex
 from sve_carddb.core.authored import check_path, require_directory
-from sve_carddb.core.json import canonical, digest, object_value
+from sve_carddb.core.json import digest, object_value
 from sve_carddb.core.yaml import MAX_BYTES
 from sve_carddb.domains.effects.author_expansion import BodyLibrary
 from sve_carddb.domains.effects.author_handwritten import (
@@ -186,21 +186,20 @@ def merge_index_files(
 ) -> EffectsIndex:
     """Validate pack ownership and retain global identity/scope uniqueness."""
     records: list[IndexRecord] = []
+    seen: set[tuple[str, str]] = set()
     for path, item in _inventory(files, _INDEX).items():
         index = schemas.effects_index(item.raw)
         owner = path.rsplit("/", 1)[-1].removesuffix(".yaml")
         for record in index.records:
             if record.record_key.split("-", 1)[0] != owner:
                 _reject("wrong_index_owner", path, record)
-        records.extend(index.records)
+            key = record.card_id, record.scope
+            if key in seen:
+                _reject("duplicate_card_scope", path, record)
+            seen.add(key)
+            records.append(record)
     records.sort(key=lambda record: (record.record_key, record.scope))
-    return schemas.effects_index(
-        canonical(
-            EffectsIndex(
-                format=1, kind="effects_index", records=tuple(records)
-            ).model_dump(mode="json")
-        )
-    )
+    return EffectsIndex(format=1, kind="effects_index", records=tuple(records))
 
 
 def _validate_index(inputs: AuthorInputSet, schemas: AuthorSchemas) -> None:
