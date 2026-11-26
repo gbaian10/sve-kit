@@ -1,5 +1,6 @@
 use super::*;
 use sve_battle_contract::observation::{LimitBreakStage, RelationshipKind};
+use sve_engine::catalog::EngineIdentityInput;
 
 const ELEMENTS: [(&str, &str, &str, &str); 6] = [
     ("CP05-T09", "CP05-P93", "fire", "火属性"),
@@ -56,14 +57,22 @@ fn materials() -> &'static (SelectedEffects, BattleReferences) {
                 vec![json!({"keywords":["final_limit_break_possible"]})],
             );
             record["faces"][0]["traits"] = json!([trait_name]);
+            record["faces"][0]["title"] = json!("synthetic");
             snapshot.push(record.to_string());
             authors.push(author);
         }
         let snapshot = snapshot.join("\n");
-        let selected = Catalog::from_current_selection(
+        let rules = rule_fixtures::rules(
+            &snapshot,
+            json!([rule_fixtures::title("synthetic", "granblue", json!([]))]),
+            json!([]),
+        );
+        let selected = Catalog::from_current_selection_with_rules(
             &snapshot,
             keywords,
             &json!({"documents":[],"authors":authors}),
+            &rules.to_string(),
+            &EngineIdentityInput::LegacyJp,
         )
         .unwrap();
         let references = test_battle_references(&selected, &snapshot);
@@ -207,8 +216,6 @@ fn gold_targets_own_granblue_follower_and_supplies_both_stages_at_once() {
 
 #[test]
 fn fresh_public_observations_report_the_stage_for_both_seats() {
-    use LimitBreakStage::{Broken, Final, None};
-
     let (_, references) = materials();
     let assert_stage = |game: &Game, bearer: &str, stage, attached| {
         for viewer in [Viewer::P1, Viewer::P2] {
@@ -234,14 +241,14 @@ fn fresh_public_observations_report_the_stage_for_both_seats() {
     };
 
     let mut wind = board(["CP05-T12", "CP05-T12"], "wind");
-    assert_stage(&wind, "wind", None, 0);
+    assert_stage(&wind, "wind", LimitBreakStage::None, 0);
     use_material(&mut wind, "first", "wind");
-    assert_stage(&wind, "wind", Broken, 1);
+    assert_stage(&wind, "wind", LimitBreakStage::Broken, 1);
     use_material(&mut wind, "second", "wind");
-    assert_stage(&wind, "wind", Final, 2);
+    assert_stage(&wind, "wind", LimitBreakStage::Final, 2);
 
     let mut gold = board(["CP05-T15", "CP05-T12"], "granblue");
-    assert_stage(&gold, "granblue", None, 0);
+    assert_stage(&gold, "granblue", LimitBreakStage::None, 0);
     use_material(&mut gold, "first", "granblue");
-    assert_stage(&gold, "granblue", Final, 1);
+    assert_stage(&gold, "granblue", LimitBreakStage::Final, 1);
 }
