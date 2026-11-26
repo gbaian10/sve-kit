@@ -274,6 +274,34 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
     assert fingerprint(output_root) == before
 
 
+@pytest.mark.parametrize(("edition", "expected_admission"), [(1, None), (2, "direct")])
+def test_current_handoff_uses_selected_body_edition(
+    workspace: authoring.Workspace,
+    output_root: Path,
+    edition: int,
+    expected_admission: str | None,
+) -> None:
+    main = output_root / "rules/author-effects/BP10/000.yaml"
+    main_tree = tree(main)
+    card = object_value(object_value(main_tree["cards"])["BP10-122"])
+    object_value(array(card["abilities"])[0])["edition"] = edition
+    main.write_bytes(authoring.format_yaml(main_tree))
+    companion = output_root / "rules/effect-bodies/BP10/000.yaml"
+    body_tree = tree(companion)
+    records = array(body_tree["records"])
+    records.append({**object_value(records[0]), "edition": 2, "admission": "shared"})
+    companion.write_bytes(authoring.format_yaml(body_tree))
+
+    report = authoring.check(replace(workspace, authored=output_root))
+    authors = array(object_value(report["selection"])["authors"])
+    handoff = next(
+        item
+        for row in authors
+        if (item := object_value(object_value(row)["input"]))["card_no"] == "BP10-122"
+    )
+    assert handoff.get("admission") == expected_admission
+
+
 def test_real_multiface_ambiguity_precedes_pending(
     workspace: authoring.Workspace,
     output_root: Path,

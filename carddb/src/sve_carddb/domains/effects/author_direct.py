@@ -27,7 +27,7 @@ if TYPE_CHECKING:
     from sve_carddb.build import Value
     from sve_carddb.domains.effects.author_current import CurrentAuthorSources
     from sve_carddb.domains.effects.author_expansion import AuthorExpander
-    from sve_carddb.domains.effects.author_handwritten import Handwritten
+    from sve_carddb.domains.effects.author_handwritten import Body, Handwritten
 
 _LOCATION = frozenset({"line", "face", "section", "scope", "covers", "admission"})
 _USE = frozenset({"use", "edition", "params", "registration"})
@@ -60,14 +60,13 @@ def _scalar(value: Value) -> str | int | None:
 
 
 def direct(handwritten: Handwritten, number: str) -> bool:
-    """An explicit card, use or body admission selects the direct author path."""
+    """Select direct admission from the card, use or selected body edition."""
     card = handwritten.cards[number]
     return "admission" in card or any(
         "admission" in (value := object_value(a))
-        or any(
-            body.admission is not None
-            for (name, _), body in handwritten.bodies.items()
-            if name == value.get("use")
+        or (
+            "use" in value
+            and _body_definition(value, handwritten).admission is not None
         )
         for a in array(card["abilities"])
     )
@@ -402,13 +401,7 @@ def _substitute(
     return node
 
 
-def _body(
-    value: dict[str, JsonValue], handwritten: Handwritten
-) -> tuple[dict[str, JsonValue], str | None]:
-    if "use" not in value:
-        return {k: v for k, v in value.items() if k not in _LOCATION}, None
-    if value.keys() - (_LOCATION | _USE):
-        raise SourceError("ability_head_conflict")
+def _body_definition(value: dict[str, JsonValue], handwritten: Handwritten) -> Body:
     definitions = [
         b
         for (name, edition), b in handwritten.bodies.items()
@@ -417,7 +410,17 @@ def _body(
     ]
     if len(definitions) != 1:
         raise SourceError("ambiguous_body_version" if definitions else "body_missing")
-    definition = definitions[0]
+    return definitions[0]
+
+
+def _body(
+    value: dict[str, JsonValue], handwritten: Handwritten
+) -> tuple[dict[str, JsonValue], str | None]:
+    if "use" not in value:
+        return {k: v for k, v in value.items() if k not in _LOCATION}, None
+    if value.keys() - (_LOCATION | _USE):
+        raise SourceError("ability_head_conflict")
+    definition = _body_definition(value, handwritten)
     if any(
         object_value(r).get("verdict") in {"disputed", "revise"}
         for registration in definition.registrations
