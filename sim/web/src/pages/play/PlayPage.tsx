@@ -15,7 +15,7 @@ export function PlayPage() {
   useThemeAttributes()
   useUiLanguageSync()
   const [params] = useSearchParams()
-  return battleBuild !== null && !params.has("scene") && !params.has("dual") ? (
+  return battleBuild !== null && !params.has("scene") && params.get("dual") !== "1" ? (
     <PracticeMatch build={battleBuild} />
   ) : (
     <FixturePage />

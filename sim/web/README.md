@@ -35,7 +35,7 @@ web job. Type checking (including the pre-push hook) and Vitest import the gener
 `bun run build:engine` once after a fresh checkout and again after engine changes.
 
 With `SVE_BATTLE_EXPORT` set to a verified 4.2.0 JP export, `build:engine` runs
-`carddb snapshot battle-inputs --published` and writes the native catalogue projection, reference
+`sve-carddb snapshot battle-inputs --published` and writes the native catalogue projection, reference
 identities, resolved engine rules and content identities beside the engine. The Worker reads the
 DSL program package at its immutable CDN path, sharing the site's raw snapshot cache. The
 package's exact length and SHA-256 come from the verified export manifest. The host checks the
@@ -44,7 +44,7 @@ input hashes and identity bindings before selecting the programs the decks can r
 Serve the same snapshot at the build's `VITE_CDN_BASE` (default `/cdn`), for example by passing
 its root as `SVE_EXPORT_DIR` to a local Vite server or preview. `/play` prepares a practice match
 against the local policy while the player is in the lobby. On entry the opening question and
-board are ready. Card facts and wording use the match's pinned manifest. Builds without a battle
+board are ready. The lobby verifies the exact manifest and printing catalogue before enabling the start button. Card facts and wording use that manifest. Builds without a battle
 export still run the fixture scenes.
 
 Set `SVE_DEV_TLS_CERT` and `SVE_DEV_TLS_KEY` to absolute paths to use a certificate issued by a locally trusted CA, such as a mkcert certificate for a LAN IP. For example: `SVE_DEV_TLS_CERT=/path/to/cert.pem SVE_DEV_TLS_KEY=/path/to/key.pem bun run dev:lan`.

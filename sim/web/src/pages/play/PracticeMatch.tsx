@@ -16,6 +16,7 @@ export function PracticeMatch({ build }: { readonly build: BattleBuild }) {
   const [source, setSource] = useState<BattleSource>()
   const [opened, setOpened] = useState(false)
   const [failed, setFailed] = useState(false)
+  const [catalogueReady, setCatalogueReady] = useState(false)
   const client = useMemo(
     () => createSnapshotClient(BATTLE_CDN, { region: "jp", pinnedManifest: build.manifest }),
     [build.manifest],
@@ -62,13 +63,28 @@ export function PracticeMatch({ build }: { readonly build: BattleBuild }) {
       }
       if (message.kind === "update" && message.input.kind === "question") setSource(source)
     })
-    void client.load()
+    let mounted = true
+    const loadCatalogue = async () => {
+      await client.load()
+      if (client.status().state !== "ready") throw new Error("match manifest is unavailable")
+      await client.prefetchPrintings?.()
+      const snapshot = client.snapshot()
+      if (snapshot?.manifestHash !== build.manifest || snapshot.printingReady !== true) {
+        throw new Error("match printing catalogue is incomplete")
+      }
+      if (mounted) setCatalogueReady(true)
+    }
+    void loadCatalogue().catch(() => {
+      if (mounted) setFailed(true)
+    })
     return () => {
+      mounted = false
       unsubscribe()
       source.close()
     }
   }, [build, client])
 
+  const ready = source !== undefined && catalogueReady && !failed
   const leave = (
     <Link to="/" className="bp-chip-link">
       <ArrowLeft aria-hidden="true" className="bp-chip-icon" />
@@ -92,7 +108,7 @@ export function PracticeMatch({ build }: { readonly build: BattleBuild }) {
             <button
               type="button"
               className="bp-chip-link"
-              disabled={source === undefined || failed}
+              disabled={!ready}
               onClick={() => {
                 setOpened(true)
               }}
@@ -101,7 +117,7 @@ export function PracticeMatch({ build }: { readonly build: BattleBuild }) {
             </button>
             {failed ? (
               <span role="alert">{t("play.stopped")}</span>
-            ) : source === undefined ? (
+            ) : !ready ? (
               <span role="status">{t("play.loading")}</span>
             ) : null}
             <div className="flex gap-3">

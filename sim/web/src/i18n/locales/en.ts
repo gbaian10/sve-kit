@@ -1092,6 +1092,8 @@ export default {
   },
   play: {
     practice: {
+      attack: "Attack {{target}} with {{name}}",
+      opponentLeader: "opposing leader",
       resolve: "Resolve {{name}}",
       accept: "Accept",
       decline: "Decline",

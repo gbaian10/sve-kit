@@ -7,8 +7,8 @@ import { act, actions, actQuick, quick } from "../../battle/view/actions"
 import {
   choice,
   chooseAnswer,
-  confirmation,
   confirmAnswer,
+  confirmation,
   mulligan,
   mulliganAnswer,
 } from "../../battle/view/choices"
@@ -64,7 +64,7 @@ export function PracticeControls({
       const card =
         origin.kind === "text"
           ? origin.text.card
-          : origin.kind === "card" && origin.face !== null
+          : origin.face !== null
             ? { printing_id: origin.printing_id, face: origin.face }
             : null
       const name =
@@ -91,10 +91,10 @@ export function PracticeControls({
     }
   }
   const select = selection(question, source.seat)
-  if (select?.selection.bounds.max === 1) {
-    if (problems(select, NO_PICKS).length === 0) {
-      buttons.push({ label: t("play.practice.pass"), command: selectAnswer(select, NO_PICKS) })
-    }
+  if (select && problems(select, NO_PICKS).length === 0) {
+    buttons.push({ label: t("play.practice.pass"), command: selectAnswer(select, NO_PICKS) })
+  }
+  if (select && (select.selection.bounds.max === 1 || question.use === "end_guard")) {
     for (const candidate of select.selection.candidates) {
       const picks = toggle(select, NO_PICKS, candidate.id)
       if (problems(select, picks).length > 0) continue
@@ -113,14 +113,31 @@ export function PracticeControls({
       })
     }
   }
+  const nameOf = (holder: Parameters<typeof inspect>[1]): string => {
+    const face = inspect(board, holder)?.card.face
+    return (face === undefined ? undefined : cards.find(face)?.name.text) ?? t("play.card.unknown")
+  }
   const main = actions(question, source.seat)
   if (main) {
     for (const [holder, plays] of main.play) {
-      const face = inspect(board, holder)?.card.face
-      const known = face === undefined ? undefined : cards.find(face)
-      const name = known?.name.text ?? t("play.card.unknown")
+      const name = nameOf(holder)
       for (const play of plays) {
         buttons.push({ label: t("play.practice.play", { name }), command: act(main, play.option) })
+      }
+    }
+    for (const [holder, attack] of main.attack) {
+      const name = nameOf(holder)
+      if (attack.leader !== null) {
+        buttons.push({
+          label: t("play.practice.attack", { name, target: t("play.practice.opponentLeader") }),
+          command: act(main, attack.option, attack.leader),
+        })
+      }
+      for (const [target, option] of attack.cards) {
+        buttons.push({
+          label: t("play.practice.attack", { name, target: nameOf(target) }),
+          command: act(main, attack.option, option),
+        })
       }
     }
     if (main.endPhase !== null) {

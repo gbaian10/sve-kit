@@ -1030,6 +1030,8 @@ const zhTW = {
   },
   play: {
     practice: {
+      attack: "以{{name}}攻擊{{target}}",
+      opponentLeader: "對手主戰者",
       resolve: "結算{{name}}的能力",
       accept: "接受",
       decline: "拒絕",

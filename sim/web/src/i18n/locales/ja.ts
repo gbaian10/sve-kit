@@ -1078,6 +1078,8 @@ export default {
   },
   play: {
     practice: {
+      attack: "{{name}}で{{target}}を攻撃",
+      opponentLeader: "相手のリーダー",
       resolve: "{{name}}の能力を解決",
       accept: "はい",
       decline: "いいえ",

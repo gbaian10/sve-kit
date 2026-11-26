@@ -58,49 +58,22 @@ interface ProgramProjection {
 
 const sha256 = (bytes: string | Uint8Array) => createHash("sha256").update(bytes).digest("hex")
 
-// The practice mirror uses one copy per rules name. The reader resolves its native locators
-// to permanent printing IDs in the build's verified JP snapshot.
-const PRACTICE_MAIN = [
-  "BP01-151",
-  "BP01-152",
-  "BP01-154",
-  "BP01-155",
-  "BP01-157",
+// Keep the practice mirror to cards whose questions the preview can answer. The verified
+// reader resolves these locators to permanent printing IDs, with at most three per rules name.
+const PRACTICE_FOLLOWERS = [
+  "BP01-042",
+  "BP01-046",
+  "BP01-048",
   "BP01-158",
-  "BP01-159",
   "BP01-163",
-  "BP01-164",
-  "BP01-166",
-  "BP01-167",
-  "BP01-171",
   "BP01-173",
-  "BP01-174",
   "BP01-176",
-  "BP01-177",
-  "BP02-106",
-  "BP02-107",
-  "BP02-109",
-  "BP02-110",
-  "BP02-113",
-  "BP02-115",
-  "BP02-117",
-  "BP02-118",
-  "BP03-107",
-  "BP03-109",
-  "BP03-110",
-  "BP03-111",
-  "BP03-112",
-  "BP03-114",
-  "BP03-115",
-  "BP03-118",
-  "BP03-119",
-  "BP04-116",
-  "BP04-117",
-  "BP04-119",
-  "BP04-121",
-  "BP04-123",
-  "BP04-124",
-  "BP04-127",
+  "BP03-033",
+  "BP03-036",
+  "BP04-025",
+  "BP04-034",
+  "BP08-112",
+  "BP08-117",
 ]
 
 function run(command: string, args: string[], capture = false): string {
@@ -176,14 +149,16 @@ function writeBattleInputs(exportRoot: string, engine: Uint8Array): void {
       return card
     }
     const deck = {
-      construction: { kind: "class", value: "ニュートラル" } as const,
-      main: PRACTICE_MAIN.map((number) => printing(number).printing_id),
+      construction: { kind: "class", value: "ロイヤル" } as const,
+      main: [...PRACTICE_FOLLOWERS.flatMap((number) => [number, number, number]), "CP03-038"].map(
+        (number) => printing(number).printing_id,
+      ),
       evolve: [],
     }
     const build: BattleBuild = {
       manifest,
       programs: { key, path: programPath, sha256: programHash, bytes },
-      leaders: { p1: printing("BP10-LD05"), p2: printing("BP05-LD02") },
+      leaders: { p1: printing("BP01-LD03"), p2: printing("BP05-LD02") },
       options: { decks: [deck, deck], control: ["player", "policy"], max_submissions: 300 },
     }
     writeBuild(build)
