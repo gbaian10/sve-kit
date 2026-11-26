@@ -109,7 +109,14 @@ pub(super) fn player_event_context(pending: &PendingOccurrence) -> Option<Pendin
         Some(EventPayload::LeaveField { .. }) | None if pending.leave.is_some() => {
             (PendingEvent::LeaveField, true)
         }
-        _ => return None,
+        // No current card waits on these; each needs its own wire event before one does.
+        Some(
+            EventPayload::LeaveField { .. }
+            | EventPayload::Resolve { .. }
+            | EventPayload::Payment { .. }
+            | EventPayload::CounterChange { .. },
+        )
+        | None => return None,
     };
     Some(PendingEventContext {
         event,
