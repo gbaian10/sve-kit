@@ -311,10 +311,9 @@ export default {
     keywordLoading: "タグを読み込み中",
     keywordEnglishUnknown: "英語版は未タグ付け",
     keywordUnknown: "タグ付けは未着手です",
-    keywordIncomplete: "タグ付けは未完了",
-    keywordPartial: "いずれかに一致。未完了・漏れの可能性あり",
     keywordUnknownCount: "「{{relation}}」が未判定のカード：{{count}}枚",
     keywordRelation: "キーワードとの関係",
+    keywordRelationSelected: "{{count}}件選択中",
     keywordRelations: {
       has: "持つ",
       grants: "与える",

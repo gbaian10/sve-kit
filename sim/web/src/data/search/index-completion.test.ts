@@ -434,6 +434,16 @@ it("completes English self coverage independently of shared engine eligibility a
     expect(find("has")).toContain("c:bp01-031")
     expect(find("not")).not.toContain("c:bp01-031")
     expect(find("not")).toContain("c:bp01-051")
+    // An untagged relation must refuse the query even while another relation has answers.
+    for (const state of ["has", "not"] as const) {
+      expect(() =>
+        index.search({
+          edition: "en",
+          state: { ...DEFAULT_QUERY, mechanics: { "kw:ward.grants": state } },
+          limit: 100,
+        }),
+      ).toThrow(SearchQueryError)
+    }
   }
 })
 

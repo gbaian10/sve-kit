@@ -297,10 +297,9 @@ const zhTW = {
     keywordLoading: "標註載入中",
     keywordEnglishUnknown: "英文版尚未標註",
     keywordUnknown: "尚未開始標註",
-    keywordIncomplete: "標註尚未完整",
-    keywordPartial: "符合任一關鍵字；標註尚未完整，可能有遺漏",
     keywordUnknownCount: "仍有 {{count}} 張卡的「{{relation}}」尚無法判定",
     keywordRelation: "關鍵字的關係",
+    keywordRelationSelected: "已選 {{count}} 項",
     keywordRelations: {
       has: "本身有",
       grants: "給別的卡",

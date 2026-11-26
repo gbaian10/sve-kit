@@ -259,12 +259,10 @@ export function CardBrowser({
               ),
           ).map((relation) => (
             <p key={relation} className="text-11">
-              {printingOptions?.keyword.unknownCards
-                ? t("filters.keywordUnknownCount", {
-                    count: printingOptions.keyword.unknownCards[relation],
-                    relation: t(`filters.keywordRelations.${relation}`),
-                  })
-                : t("filters.keywordIncomplete")}
+              {t("filters.keywordUnknownCount", {
+                count: printingOptions?.keyword.unknownCards?.[relation] ?? 0,
+                relation: t(`filters.keywordRelations.${relation}`),
+              })}
             </p>
           ))}
         </>

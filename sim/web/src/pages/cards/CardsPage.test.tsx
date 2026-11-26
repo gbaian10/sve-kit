@@ -676,7 +676,7 @@ describe("CardsPage", () => {
       expect(router.state.location.search).toBe("?mech=kw%3Award&unit=card")
       await userEvent.click(screen.getByRole("button", { name: "移除條件：關鍵字：守護" }))
       expect(router.state.location.search).toBe("?unit=card")
-      expect(ward).toHaveAttribute("aria-pressed", "false")
+      expect(ward).toHaveAccessibleName("守護")
     })
   })
 })

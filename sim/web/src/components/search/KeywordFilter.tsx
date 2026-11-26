@@ -1,4 +1,4 @@
-import { X } from "lucide-react"
+import { Check, X } from "lucide-react"
 import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
@@ -35,7 +35,8 @@ const KEYWORD_ICONS: Readonly<Record<string, string | undefined>> = {
 }
 
 type ChoiceState = MechanicState | "off"
-// One click wants the keyword, the next excludes it, the third clears the condition.
+// One click wants the keyword, the next excludes it, the third clears the condition. Three states
+// do not fit aria-pressed, so the button's name carries the state instead.
 const NEXT_STATE: Readonly<Record<ChoiceState, ChoiceState>> = {
   off: "has",
   has: "not",
@@ -133,6 +134,7 @@ export function KeywordFilter({
               role="tab"
               id={`${id}-${value}`}
               aria-selected={active}
+              aria-controls={`${id}-panel`}
               tabIndex={active ? 0 : -1}
               onClick={() => {
                 setRelation(value)
@@ -151,14 +153,15 @@ export function KeywordFilter({
               <span className="block truncate">{t(`filters.keywordRelations.${value}`)}</span>
               {count > 0 && (
                 <span className="absolute top-0 right-0 min-w-4 rounded-pill bg-text-1 px-1 text-11 leading-4 text-surface-1 tabular-nums">
-                  {count}
+                  <span aria-hidden="true">{count}</span>
+                  <span className="sr-only">{t("filters.keywordRelationSelected", { count })}</span>
                 </span>
               )}
             </button>
           )
         })}
       </div>
-      <div role="tabpanel" aria-labelledby={`${id}-${relation}`}>
+      <div role="tabpanel" id={`${id}-panel`} aria-labelledby={`${id}-${relation}`}>
         <p className="mt-2 text-12 text-text-2">{t(`filters.keywordRelationHints.${relation}`)}</p>
         {/* Gaps in the tags sit above the buttons so a short popover never hides them. */}
         <p className="mt-1 text-12 text-text-2 empty:hidden" role="status">
@@ -173,9 +176,7 @@ export function KeywordFilter({
                     count: unknownCards,
                     relation: t(`filters.keywordRelations.${relation}`),
                   })
-                : coverage === "partial"
-                  ? t("filters.keywordPartial")
-                  : null}
+                : null}
         </p>
         <div className="mt-2 grid grid-cols-4 gap-2">
           {PANEL_KEYWORDS.flatMap((keywordId) => {
@@ -189,7 +190,6 @@ export function KeywordFilter({
               <button
                 key={keywordId}
                 type="button"
-                aria-pressed={state !== "off"}
                 aria-label={
                   state === "off"
                     ? undefined
@@ -215,7 +215,9 @@ export function KeywordFilter({
                   state === "off" && "border-border bg-surface-1 text-text-2 hover:bg-surface-2",
                 )}
               >
-                {state === "not" ? (
+                {state === "has" ? (
+                  <Check aria-hidden="true" className="size-3.5 shrink-0" />
+                ) : state === "not" ? (
                   <X aria-hidden="true" className="size-3.5 shrink-0" />
                 ) : (
                   icon && <img src={icon} alt="" className="size-3.5 shrink-0 object-contain" />

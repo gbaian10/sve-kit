@@ -253,6 +253,7 @@ relation 是 `has`（本身有）、`grants`（給別的卡）、`refers`（效�
 搜尋索引以同樣的鍵保存每張卡的 present／absent；`has` 涵蓋全部登錄 keyword，其他三種關係只涵蓋查卡面板的八個關鍵字
 （由 DSL 推導的範圍，見[關鍵字機制](../schema/domains/keyword-mechanics.md#由-dsl-推導的四種關係)）。
 `SearchOptions.keywordCoverage`／`keywordUnknownCards` 按關係分開，未確認張數只算面板的八個關鍵字。
+面板以外的 keyword 只能從網址帶入 `has` 條件；它們未確認的卡同樣不會命中否定條件，但不計入這個張數提示。
 某關係在目前地區沒有任何卡被標註時為 `unknown`，帶該關係的查詢回 unsupported-query，不回 0 筆。
 
 另一個 keyword 是 present 不能推本項 absent。

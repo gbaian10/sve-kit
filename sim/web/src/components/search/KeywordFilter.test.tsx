@@ -62,7 +62,11 @@ function Harness({ textLang = "zh-Hant" }: { readonly textLang?: TextLang }) {
   return (
     <>
       <KeywordFilter
-        options={{ keywords, coverage: perRelation("partial") }}
+        options={{
+          keywords,
+          coverage: perRelation("partial"),
+          unknownCards: perRelation(5),
+        }}
         edition="jp"
         textLang={textLang}
         selected={query.mechanics}
@@ -101,23 +105,21 @@ function Harness({ textLang = "zh-Hant" }: { readonly textLang?: TextLang }) {
 it("cycles a keyword through wanted, excluded and off, and removes conditions independently", async () => {
   await renderInRouter(<Harness />)
   await userEvent.click(screen.getByRole("button", { name: /^關鍵字/u }))
-  expect(screen.getByText(/標註尚未完整/u)).toBeVisible()
+  expect(screen.getByText("仍有 5 張卡的「本身有」尚無法判定")).toBeVisible()
   await userEvent.click(screen.getByRole("button", { name: "守護" }))
   await userEvent.click(screen.getByRole("button", { name: "疾馳" }))
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe("mech=kw:storm,kw:ward")
+  // The name carries the state; a three-state choice has no pressed/unpressed reading.
   const ward = screen.getByRole("button", { name: "要有：守護" })
-  expect(ward).toHaveAttribute("aria-pressed", "true")
+  expect(ward).not.toHaveAttribute("aria-pressed")
   await userEvent.click(ward)
-  expect(screen.getByRole("button", { name: "不要有：守護" })).toHaveAttribute(
-    "aria-pressed",
-    "true",
-  )
+  expect(screen.getByRole("button", { name: "不要有：守護" })).toBeVisible()
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe(
     "mech=kw:storm,-kw:ward",
   )
   await userEvent.click(screen.getByRole("button", { name: "移除條件：沒有關鍵字：守護" }))
   await userEvent.click(screen.getByRole("button", { name: /^關鍵字:/u }))
-  expect(screen.getByRole("button", { name: "守護" })).toHaveAttribute("aria-pressed", "false")
+  expect(screen.getByRole("button", { name: "守護" })).toBeVisible()
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe("mech=kw:storm")
   await userEvent.click(screen.getByRole("button", { name: "要有：疾馳" }))
   await userEvent.click(screen.getByRole("button", { name: "不要有：疾馳" }))
@@ -130,7 +132,7 @@ it("keeps conditions per relation tab and names the relation in chips and the UR
   const tabs = screen.getByRole("tablist", { name: "關鍵字的關係" })
   await userEvent.click(within(tabs).getByRole("tab", { name: "給別的卡" }))
   // The same keyword is a separate condition under another relation.
-  expect(screen.getByRole("button", { name: "守護" })).toHaveAttribute("aria-pressed", "false")
+  expect(screen.getByRole("button", { name: "守護" })).toBeVisible()
   await userEvent.click(screen.getByRole("button", { name: "突進" }))
   await userEvent.keyboard("{Tab}")
   within(tabs)
@@ -146,7 +148,7 @@ it("keeps conditions per relation tab and names the relation in chips and the UR
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe(
     "mech=kw:rush.grants,kw:ward,-kw:ward.refers",
   )
-  expect(within(tabs).getByRole("tab", { name: /本身有/u })).toHaveTextContent("本身有1")
+  expect(within(tabs).getByRole("tab", { name: /^本身有\s*已選 1 項$/u })).toBeVisible()
   expect(screen.getByRole("button", { name: "移除條件：給別的卡：突進" })).toBeVisible()
   await userEvent.click(screen.getByRole("button", { name: "移除條件：效果提到：不含守護" }))
   expect(decodeURIComponent(screen.getByLabelText("url").textContent)).toBe(
