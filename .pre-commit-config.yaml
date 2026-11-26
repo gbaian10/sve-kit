@@ -54,6 +54,7 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.17.5
     hooks:
+      # Limit these hooks to Python source and stubs. Markdown has its own lint hook.
       # Ruff uses the nearest project config and defaults for Python outside configured directories.
       - id: ruff-format
         args: [--check]
