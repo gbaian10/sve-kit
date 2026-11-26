@@ -156,7 +156,7 @@ def load_trusted_registry(root: Path, sources: ReviewSources) -> RegistrySnapsho
         for entry in shard.envelope().records
         if entry.record_key in targets
     }
-    uses = []
+    uses: list[SourceUse] = []
     for shard, record in zip(shards, records, strict=True):
         _apply(record, shard.path, state)
         uses.extend(sources.trusted_uses(record))

@@ -63,8 +63,14 @@ fn bound_rules(snapshot: &str) -> String {
     .unwrap();
     let mut rules_document: Value = serde_saphyr::from_str(&rules_source).unwrap();
     // Batch upgrades change snapshot bytes without changing these rule capabilities.
-    rules_document["input"]["snapshot_sha256"] =
-        Value::String(rule_fixtures::hash(snapshot.as_bytes()));
+    rules_document
+        .pointer_mut("/input")
+        .and_then(Value::as_object_mut)
+        .unwrap()
+        .insert(
+            "snapshot_sha256".into(),
+            Value::String(rule_fixtures::hash(snapshot.as_bytes())),
+        );
     serde_json::to_string(&rules_document).unwrap()
 }
 

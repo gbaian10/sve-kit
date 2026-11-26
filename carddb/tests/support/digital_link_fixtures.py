@@ -53,7 +53,7 @@ def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
     index: dict[str, JsonValue] = {
         "format": 2,
         "kind": "digital_link_index",
-        "includes": sorted(shards),
+        "includes": list[JsonValue](sorted(shards)),
     }
     for name, value in {"digital/links/index.yaml": index, **shards}.items():
         path = root / name
