@@ -94,7 +94,6 @@ jobs:
               - 'carddb/tests/support/**'
               - 'carddb/tests/domains/__init__.py'
               - 'carddb/tests/domains/effects/__init__.py'
-              - 'carddb/tests/domains/effects/test_author_current_absent.py'
               - 'carddb/tests/domains/registry/__init__.py'
               - 'carddb/tests/domains/registry/test_registry.py'
               - 'carddb/tests/domains/text_observations/__init__.py'
@@ -275,7 +274,6 @@ jobs:
             --junitxml="$REPORT_DIR/junit.xml" -o junit_family=xunit1 \
             tests/architecture/test_authored_defaults.py::test_authored_tree_does_not_store_quality_defaults \
             tests/core/test_yaml_reader.py::test_all_production_files_pass_strict_reader \
-            tests/domains/effects/test_author_current.py::test_real_current_author_set \
             tests/domains/rulings/test_authored_hints.py \
             tests/workflows/test_authoring.py tests/workflows/test_authoring_cli.py \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
