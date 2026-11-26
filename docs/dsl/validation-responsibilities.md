@@ -6,16 +6,16 @@
 
 ## 責任表
 
-| 邊界                     | 負責的保證與現行入口                                                                                                                                                                        | 不保證的事項                                                                              |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| 作者 Schema              | 封閉物件、欄位型別、互斥鍵、局部組合與數域；`author-nodes.schema.json`、`author-storage.schema.json`                                                                                        | 名稱的 producer 是否存在、scope／付款分支可見性、來源閉包、runtime 是否實作               |
-| 具名本體與參數展開       | `domains/effects/author_direct.py` 的 `materialize`／`_body`；確認本體選擇、參數名稱與型別，保留來源位置；expanded Schema 排除殘留參數與 generated ability                                  | 宣稱 import 型別不構成其來源或語義證明                                                    |
-| 來源與整卡准入           | `author_direct.py` 的 `check_coverage`、`author_set.py`：永久身分、所有印刷、面／版本／區段來源與作者選擇閉包；已辨識能力及明示 reminder／token 區段完整對應                                | 行數相同不等於來源閉包；來源分類 pending 不等於禁止輕量准入；此層不證明卡文與效果語義等價 |
-| Rust 作者解碼與 lowering | `ExpandedLowerer` 先驗同一份 expanded Schema，再以 `ir/lowering/ast.rs` 封閉解碼並建立帶來源的 IR                                                                                           | 作者語法全集不等於 backend 支援集合；不能為繞過 lowering 改用 raw IR                      |
-| 公開 DSL 程式包          | 快照 reader 核對封套、附件與永久版次關聯，生產端覆核整卡來源；Rust 嚴格解碼 expanded AST，再降低成內部 IR                                                                                   | 實際可否開局由對局准入判斷                                                                |
-| Rust IR 良構             | `ir/wellformed.rs` 及其子模組檢查 lowering、執行器與合成 Rust IR 的型別、scope、producer、來源、付款 dominance、觀察與讀取權限，產生私有建構的 `WellFormedProgram`／`WellFormedCardProgram` | 良構不等於 executor 已支援所有動作與讀值組合                                              |
-| Rust 執行能力准入        | `game/internal/admission.rs`、`card.rs` 與各 consumer 的檢查：確認已良構程式在現有 backend 可執行，拒絕未實作形狀                                                                           | 目前的形狀辨識不是通用求值保證；共用計畫仍須建立在已驗結構上                              |
-| 執行時動態重驗           | `game/internal/` 的付款、選擇、receipt、移區及揭露處理：本次付款成功、物件世代／位置、實際成功成員與 reveal 授權                                                                            | 靜態准入不能預先保證局面仍相同，亦不能把選中成員當作實際成功成員                          |
+| 邊界                     | 負責的保證與現行入口                                                                                                                                                                                             | 不保證的事項                                                                              |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| 作者 Schema              | 封閉物件、欄位型別、互斥鍵、局部組合與數域；`author-nodes.schema.json`、`author-storage.schema.json`                                                                                                             | 名稱的 producer 是否存在、scope／付款分支可見性、來源閉包、runtime 是否實作               |
+| 具名本體與參數展開       | `domains/effects/author_direct.py` 的 `materialize`／`_body`；確認本體選擇、參數名稱與型別，保留來源位置；expanded Schema 排除殘留參數與 generated ability                                                       | 宣稱 import 型別不構成其來源或語義證明                                                    |
+| 來源與整卡准入           | `author_direct.py` 的 `check_coverage`、`author_set.py`：永久身分、所有印刷、面／版本／區段來源與作者選擇閉包；已辨識能力及明示 reminder／token 區段完整對應                                                     | 行數相同不等於來源閉包；來源分類 pending 不等於禁止輕量准入；此層不證明卡文與效果語義等價 |
+| Rust 作者解碼與 lowering | `ExpandedLowerer` 先驗同一份 expanded Schema，再以 `ir/lowering/ast.rs` 封閉解碼並建立帶來源的 IR                                                                                                                | 作者語法全集不等於 backend 支援集合；不能為繞過 lowering 改用 raw IR                      |
+| 公開 DSL 程式包          | 快照 reader 核對封套、附件與永久版次關聯，生產端覆核整卡來源；Rust 嚴格解碼 expanded AST，再降低成內部 IR                                                                                                        | 實際可否開局由對局准入判斷                                                                |
+| Rust IR 良構             | `ir/wellformed.rs` 及其子模組檢查 lowering 產物、執行器 Quick 程序與良構 Rust 測試 IR 的型別、scope、producer、來源、付款 dominance、觀察與讀取權限，產生私有建構的 `WellFormedProgram`／`WellFormedCardProgram` | 良構不等於 executor 已支援所有動作與讀值組合                                              |
+| Rust 執行能力准入        | `game/internal/admission.rs`、`card.rs` 與各 consumer 的檢查：確認已良構程式在現有 backend 可執行，拒絕未實作形狀                                                                                                | 目前的形狀辨識不是通用求值保證；共用計畫仍須建立在已驗結構上                              |
+| 執行時動態重驗           | `game/internal/` 的付款、選擇、receipt、移區及揭露處理：本次付款成功、物件世代／位置、實際成功成員與 reveal 授權                                                                                                 | 靜態准入不能預先保證局面仍相同，亦不能把選中成員當作實際成功成員                          |
 
 Rust 在 AST 解碼、內部 IR 建構與動態執行各自核對該階段的保證。
 
@@ -43,7 +43,7 @@ Rust 欄位及控制分派的說明是程式盤點，不宣稱這些合成案例
 
 | 候選重複／防護                    | 承接責任與同等負例                                                                                                                                                                | 可刪範圍                                                       |
 | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| consumer 重複辨識同一靜態合法形狀 | 由唯一 backend admission/compiler 承接，計畫綁定受驗 immutable IR 與定義；須補 繞過內部 IR 結構檢查、未知讀值／能力、未授權來源的負例，再替換 consumer 的重猜                     | 在承接計畫實際落地前不可刪；`WellFormedProgram` 不充當執行許可 |
+| consumer 重複辨識同一靜態合法形狀 | 由唯一 backend admission/compiler 承接，計畫綁定受驗 immutable IR 與定義；須補繞過內部 IR 結構檢查、未知讀值／能力、未授權來源的負例，再替換 consumer 的重猜                      | 在承接計畫實際落地前不可刪；`WellFormedProgram` 不充當執行許可 |
 | 內部 IR producer 與動態授權       | Rust `ir/tests/wellformed/decisions/producers.rs` 的 `token_inputs_are_checked_before_output_and_siblings_share_no_outputs`；runtime 的付款／世代／揭露負例仍由所屬 consumer 維護 | 靜態計畫不得取代動態重驗；本責任表不授權刪除                   |
 
 表中既有測試提供責任的反例入口，並不代表它們足以證明任意未來刪除等價。

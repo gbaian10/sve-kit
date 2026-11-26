@@ -1,4 +1,4 @@
-//! Internal structural invariants for IR built by lowering, runtime constructors and Rust tests.
+//! Internal structural invariants for lowered IR, Quick procedures and checked Rust test fixtures.
 
 use super::{
     AbilityChoiceKind, AbilityCostPolicy, AbilityOperand, AbilityOrigin, AbilitySource,

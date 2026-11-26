@@ -1,6 +1,6 @@
 # 內部 typed IR 的良構不變量
 
-`sim/engine/src/ir/wellformed.rs` 檢查 lowering、執行器與 Rust 測試組裝的內部 IR。公開 DSL 程式包在同一快照的驗證 reader 與 AST 解碼入口處理，整卡來源由生產端驗證。
+`sim/engine/src/ir/wellformed.rs` 檢查 lowering 產物、執行器的 Quick 程序與經良構型別建構的 Rust 測試 IR。能力准入或需求推導的探針只供分析。公開 DSL 程式包在同一快照的驗證 reader 與 AST 解碼入口處理，整卡來源由生產端驗證。
 
 `WellFormedProgram::check` 接收並持有一個封閉 `Program`。成功後可取得不可變參照，root 具有一次執行自己的 binding 和 receipt 範圍。`SourceHolder`、控制者與持有者由執行環境提供。
 
