@@ -234,6 +234,7 @@ impl Trace {
 enum MatchEnd {
     Finished(Option<Viewer>),
     Sampled,
+    MissingTriggerIcons,
 }
 
 type Inspect = Result<ControlFlow<()>, (&'static str, String)>;
@@ -246,20 +247,25 @@ fn play(
     trace: &mut Trace,
     mut inspect: impl FnMut(&Game, &Question, usize) -> Inspect,
 ) -> Result<MatchEnd, (&'static str, String)> {
-    use super::player::{StrictStartError, SubmissionKind};
+    use super::player::{AdmissionGapReason, StrictStartError, SubmissionKind};
     let first = if rng.random() { Viewer::P1 } else { Viewer::P2 };
-    let mut game = Game::start_player_game(selected.clone(), decks, first, &seed.to_string())
-        .map_err(|error| match error {
-            StrictStartError::Initialization(fault) => diagnostic(&fault),
-            StrictStartError::Admission(report) => (
-                "admission",
-                format!(
-                    "{:?} {:?}",
-                    report.gaps(Viewer::P1),
-                    report.gaps(Viewer::P2)
-                ),
-            ),
-        })?;
+    let mut game = match Game::start_player_game(selected.clone(), decks, first, &seed.to_string())
+    {
+        Ok(game) => game,
+        Err(StrictStartError::Initialization(fault)) => return Err(diagnostic(&fault)),
+        Err(StrictStartError::Admission(report)) => {
+            let first_gaps = report.gaps(Viewer::P1);
+            let second_gaps = report.gaps(Viewer::P2);
+            if first_gaps
+                .iter()
+                .chain(second_gaps)
+                .all(|gap| gap.reason == AdmissionGapReason::MissingTriggerIcons)
+            {
+                return Ok(MatchEnd::MissingTriggerIcons);
+            }
+            return Err(("admission", format!("{first_gaps:?} {second_gaps:?}")));
+        }
+    };
     let mut input = game.input(Viewer::P1);
     for step in 0..=STEP_LIMIT {
         trace.step = step;
@@ -356,6 +362,14 @@ pub(super) struct MatchReport {
     cancellations: usize,
 }
 
+const MISSING_TRIGGER_ICONS: &str = "missing_trigger_icons";
+
+impl MatchReport {
+    pub(super) fn missing_trigger_icons(&self) -> bool {
+        self.outcome == MISSING_TRIGGER_ICONS
+    }
+}
+
 pub(super) fn run_match(
     selected: &SelectedEffects,
     pools: &[DeckPool],
@@ -390,6 +404,7 @@ pub(super) fn run_match(
         Ok(MatchEnd::Finished(Some(Viewer::P2))) => ("P2", None),
         Ok(MatchEnd::Finished(None)) => ("draw", None),
         Ok(MatchEnd::Sampled) => ("sampled", None),
+        Ok(MatchEnd::MissingTriggerIcons) => (MISSING_TRIGGER_ICONS, None),
         Err((kind, message)) => (
             kind,
             Some(json!({
