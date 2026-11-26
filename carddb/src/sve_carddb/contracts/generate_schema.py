@@ -6,7 +6,14 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
-from sve_carddb.contracts.profiles import MEDIA, PROFILES, PROGRAMS, profile
+from sve_carddb.contracts.profiles import (
+    MEDIA,
+    PROFILES,
+    PROGRAM_DEPENDENCIES,
+    PROGRAMS,
+    Profile,
+    profile,
+)
 from sve_carddb.contracts.program_schema import definitions as program_definitions
 from sve_carddb.contracts.schema_patterns import patterns
 from sve_carddb.core.json import array, object_value, parse, string
@@ -120,22 +127,60 @@ def _changes(
     return {"type": "array", "items": {"oneOf": branches}}
 
 
+def _program_dependencies(source: dict[str, JsonValue], selected: Profile) -> None:
+    envelope = object_value(source["envelope"])
+    envelope["$id"] = f"urn:sve-kit:snapshot:{selected.version}"
+    envelope["$comment"] = "4.2 program dependencies with 4.1 data containers."
+    definitions = object_value(source["definitions"])
+    manifest = object_value(object_value(definitions["Manifest"])["properties"])
+    programs = object_value(definitions["Programs"])
+    properties = object_value(programs["properties"])
+    version: dict[str, JsonValue] = {"const": selected.version}
+    manifest["format_version"] = version
+    manifest["min_reader_version"] = {"const": selected.min_reader_version}
+    manifest["required_capabilities"] = {
+        "const": list[JsonValue](selected.capabilities)
+    }
+    properties["format_version"] = version
+    properties["printings"] = {
+        "type": "object",
+        "propertyNames": _ref("ID"),
+        "additionalProperties": _object(
+            {
+                "representative": _ref("ID"),
+                "tokens": {
+                    "type": "array",
+                    "items": _ref("ID"),
+                    "uniqueItems": True,
+                },
+            }
+        ),
+    }
+    programs["required"] = [*array(programs["required"]), "printings"]
+
+
 def generate(format_version: str = MEDIA) -> bytes:
     """Regenerate from wire sources and the checkout's authoritative DSL schemas."""
     selected = profile(format_version)
     directory = files("sve_carddb.contracts").joinpath("schema")
     source = object_value(parse(directory.joinpath("v3/source.json").read_bytes()))
-    if selected.version == PROGRAMS:
+    if format_version != MEDIA:
         overrides = object_value(
-            parse(directory.joinpath(selected.resource + "/source.json").read_bytes())
+            parse(
+                directory.joinpath(
+                    profile(PROGRAMS).resource + "/source.json"
+                ).read_bytes()
+            )
         )
         for section in ("envelope", "definitions"):
             source[section] = object_value(source[section]) | object_value(
                 overrides[section]
             )
+    if format_version == PROGRAM_DEPENDENCIES:
+        _program_dependencies(source, selected)
     _patterns(source)
     definitions = object_value(source["definitions"])
-    if selected.version == PROGRAMS:
+    if format_version != MEDIA:
         extra = program_definitions()
         definitions.update(extra)
         source["order"] = [*array(source["order"]), *sorted(extra)]

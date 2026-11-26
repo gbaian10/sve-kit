@@ -59,6 +59,7 @@ class Projection:
     config: Record
     metadata: Record
     programs: tuple[Record, ...] = ()
+    program_printings: Record | None = None
 
 
 def _sort(view: dict[str, list[Record]]) -> None:

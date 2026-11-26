@@ -957,10 +957,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             digital_art_assets=True,
         ).with_text_views(views.wording, views.observed)
         mark("views + decisions")
+        program_printings = None
         if author_inputs is not None and author_inputs.index.records:
             assert expander is not None
             with db.transaction():
-                populate_programs(
+                program_printings = populate_programs(
                     db,
                     CurrentAuthorSources(db),
                     author_inputs,
@@ -976,10 +977,13 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             decisions=decisions,
             publication_printings=printings,
         )
+        projection = replace(projection, program_printings=program_printings)
         if author_inputs is not None and len(projection.programs) != len(
             author_inputs.index.records
         ):
             raise ValueError("Admitted author program is missing from public snapshot")
+        if projection.programs and projection.program_printings is None:
+            raise ValueError("Admitted author programs require printing references")
         require_offline_coverage(
             projection, errata=bool(errata), construction=construction_result
         )
