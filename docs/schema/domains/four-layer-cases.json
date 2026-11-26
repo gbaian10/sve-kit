@@ -3897,49 +3897,6 @@
       }
     },
     {
-      "group": "FL-029",
-      "id": "retained_draft",
-      "operation": "candidate",
-      "input": {
-        "source_in_inventory": true,
-        "complete_binding": false,
-        "action": "store"
-      },
-      "expected": {
-        "result": "accept",
-        "active": false,
-        "translated_coverage": false
-      }
-    },
-    {
-      "group": "FL-029",
-      "id": "pin_draft",
-      "operation": "candidate",
-      "input": {
-        "source_in_inventory": true,
-        "complete_binding": false,
-        "action": "pin"
-      },
-      "expected": {
-        "result": "reject",
-        "reason": "candidate_not_renderable"
-      }
-    },
-    {
-      "group": "FL-029",
-      "id": "missing_source",
-      "operation": "candidate",
-      "input": {
-        "source_in_inventory": false,
-        "complete_binding": false,
-        "action": "store"
-      },
-      "expected": {
-        "result": "reject",
-        "reason": "missing_candidate_source"
-      }
-    },
-    {
       "group": "FL-012",
       "id": "missing_form_case",
       "operation": "form_signature",

@@ -106,7 +106,7 @@ inverse state, dependency closure and route restoration are stage C.
 
 The loader checks parsed raw canonical bytes against model serialization before
 using model-based reference hashes, rejecting any normalization. `0001.yaml`
-remains accepted: the approved wire contract says *at least* three digits, not a
+remains accepted: the approved wire contract says _at least_ three digits, not a
 unique minimal padding. Other files of any extension (including temporary and
 hidden files) remain rejected.
 
@@ -131,7 +131,9 @@ reviewed EN observation, or every old/new art member and its original image.
 `renewal.load_renewed_registry` applies only these two profiles; unsupported repair,
 revert, deactivation and ownership changes continue to fail closed. All historical
 contexts and raw uses remain in the build input closure. The normal text/image
-workflow shares `registry_plan`, and authored transition source records use
+workflow shares `registry_plan`, which applies admitted transitions with
+`load_trusted_registry` and reads sealed metadata for provenance.
+Authored transition source records use
 `identity-transition-v1`. Pure renewal never emits public identity-change events.
 
 The allocator module CLI can take `--renewal-inputs` to verify the complete existing

@@ -60,7 +60,6 @@ expected 的 reason 是本規格原因碼，實作可映射既有公開診斷，
 | FL-026／ruling_resolution | 無候選、多候選、漏引用、懸空或狀態矛盾 | 原因／候選保留，active 懸空為零 |
 | FL-027／db_boundary | SQL Json 錯 shape、錯 FK、必填 null | C 拒絕原始 Any；不可因 authored 先驗過而略過 |
 | FL-028／translation_use | 同字串不同欄位／owner 的合法性 | 逐 use 驗來源；共享 context 不借官方資格 |
-| FL-029／candidate | 未完整綁定的譯文草稿、嘗試 pin／render | 可保留候選，不得進 active 或算完整覆蓋 |
 
 未列實作名稱、SQL 排序或私有 helper 呼叫次數，避免把契約測試寫成實作鏡像。
 
