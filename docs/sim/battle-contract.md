@@ -283,7 +283,7 @@ Answer 用表中的語義 tag；use 可以區分同形狀的規則目的，不�
 | D.MovementCapacity | movement_capacity | select 恰 available 張到達候選，帶目的玩家／區域 |
 | D.Distribution | damage_distribution | distribute：每目標份額、上下限、總量及空集合語義 |
 | D.SearchReplacement | search_replacement | choose 原路／替代目的地；producer 補完整目的地資料 |
-| D.Targets | targets／resolution_selection | select：完整集合、群組及角色；正式指定與結算選牌分開 |
+| D.Targets | targets／resolution_selection／stack_recipient | select：完整集合、群組及角色；正式指定與結算選牌分開。stack_recipient 是 rule_choice 的スタック增加對象，只有一個候選也要問 |
 | D.TokenCapacity | token_capacity | choose 完整 token 名稱組合；未建立 token 沒有物件代號 |
 | D.Modes／D.ResolutionAlternative | modes／resolution_alternative | choose 模式集合；有效 count、界限與原印刷序 |
 

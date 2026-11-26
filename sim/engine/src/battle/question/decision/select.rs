@@ -32,9 +32,11 @@ pub(super) fn project(
         Kind::Targets => match context.purpose {
             player::QuestionPurpose::PlayParameter => wire::QuestionUse::Targets,
             player::QuestionPurpose::ResolutionChoice => wire::QuestionUse::ResolutionSelection,
-            player::QuestionPurpose::RuleChoice
-            | player::QuestionPurpose::QuickWindow
-            | player::QuestionPurpose::MainAction => return Err(ProjectionError::Unavailable),
+            // Well-formed programs make one rule choice among objects: the Stack recipient.
+            player::QuestionPurpose::RuleChoice => wire::QuestionUse::StackRecipient,
+            player::QuestionPurpose::QuickWindow | player::QuestionPurpose::MainAction => {
+                return Err(ProjectionError::Unavailable);
+            }
         },
         Kind::CostDiscard | Kind::CostMaterial => {
             if context.purpose != player::QuestionPurpose::PlayParameter || !domain.roles.is_empty()

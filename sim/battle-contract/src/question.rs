@@ -157,6 +157,8 @@ pub enum QuestionUse {
     Targets,
     /// Select cards during resolution.
     ResolutionSelection,
+    /// Choose which card receives a Stack increase.
+    StackRecipient,
     /// Choose which tokens fit the remaining space.
     TokenCapacity,
     /// Declare one public rules card name.
@@ -183,7 +185,8 @@ impl QuestionUse {
             | Self::Search
             | Self::MovementCapacity
             | Self::Targets
-            | Self::ResolutionSelection => ShapeKind::Select,
+            | Self::ResolutionSelection
+            | Self::StackRecipient => ShapeKind::Select,
             Self::FirstPlayer
             | Self::Ability
             | Self::EvolutionForm
