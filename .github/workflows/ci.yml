@@ -32,7 +32,9 @@ jobs:
       # Drafts cannot merge, so they skip the component test jobs; ci-ok fails until the PR is ready.
       draft: ${{ github.event.pull_request.draft == true }}
       card_data: ${{ github.event.pull_request.draft != true && steps.filter.outputs.card_data == 'true' }}
+      author_data: ${{ github.event.pull_request.draft != true && steps.filter.outputs.author_data == 'true' && steps.filter.outputs.python != 'true' && steps.filter.outputs.shared != 'true' }}
       python: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.python == 'true' || steps.filter.outputs.shared == 'true') }}
+      python_runtime: ${{ steps.filter.outputs.python_runtime == 'true' || steps.filter.outputs.shared == 'true' }}
       rust: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true') }}
       web: ${{ github.event.pull_request.draft != true && (steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true') }}
       # Engine changes must still compile to WebAssembly; the web job builds its own copy.
@@ -47,6 +49,7 @@ jobs:
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
+          predicate-quantifier: some-with-excludes
           # Transitive inputs count: the engine compiles in dsl/ and its tests read tests/ and authored/.
           filters: |
             shared:
@@ -58,25 +61,49 @@ jobs:
               - 'card-data/**'
               - 'carddb/src/**' # includes transitive schema and admission dependencies
               - 'carddb/pyproject.toml'
+              - 'publish/pyproject.toml'
               - 'pyproject.toml'
               - 'uv.lock'
               - '.github/workflows/ci.yml'
               - '.github/ci/**'
-            python:
+            python_runtime: &python_runtime
               - 'pyproject.toml'
               - 'uv.lock'
               - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
               - 'dsl/**' # schema changes must run the Python type drift checks
               - 'publish/**'
-              - 'docs/schema/**'
               - 'tools/schema-er/**'
+            python:
+              - *python_runtime
+              - 'docs/schema/**'
               - 'authored/**' # the registry tests load and validate the real authored data
+              - '!authored/rules/author-effects/**'
+              - '!authored/rules/effect-bodies/**'
+              - '!authored/rules/effects-index/**'
               # carddb/tests/domains/effects/test_regression_baseline.py reads it (#2350 broke main unnoticed)
               - 'sim/engine/tests/boundaries.rs'
+            author_data:
+              - 'authored/rules/author-effects/**'
+              - 'authored/rules/effect-bodies/**'
+              - 'authored/rules/effects-index/**'
             rust:
               - 'card-data/**'
               - 'carddb/src/**' # engine projection and its transitive schema/CLI dependencies
               - 'carddb/pyproject.toml'
+              - 'publish/pyproject.toml'
+              # The generator hashes support/, and engine tests also call Python fixtures.
+              - 'carddb/tests/__init__.py'
+              - 'carddb/tests/support/**'
+              - 'carddb/tests/domains/__init__.py'
+              - 'carddb/tests/domains/effects/__init__.py'
+              - 'carddb/tests/domains/effects/test_author_current_absent.py'
+              - 'carddb/tests/domains/registry/__init__.py'
+              - 'carddb/tests/domains/registry/test_registry.py'
+              - 'carddb/tests/domains/text_observations/__init__.py'
+              - 'carddb/tests/domains/text_observations/test_effect_presence.py'
+              - 'carddb/tests/ingest/__init__.py'
+              - 'carddb/tests/ingest/test_source_archive.py'
+              - 'carddb/tests/fixtures/author_entries/golden.yaml'
               - 'pyproject.toml'
               - 'uv.lock'
               - 'sim/battle-contract/**'
@@ -92,15 +119,19 @@ jobs:
               - 'dsl/**'
               - 'tests/**'
               - 'authored/**'
-              - 'tests/engine/*.yaml'
             web:
               - 'sim/web/**'
               - 'sim/battle-contract/**' # the web contract types and validator are generated from this crate
+              - 'sim/battle-host/**' # the browser loads its WASM bindings
               - 'Cargo.toml'
               - 'Cargo.lock'
               - 'rust-toolchain.toml'
               - 'bunfig.toml' # bun fmt settings; Tailwind class order is only checked here, with node_modules
               - 'docs/schema/export/public-annotation-cases.json'
+              - 'docs/sim/deck-construction-cases.json'
+              - 'authored/rules/comprehensive/**'
+              - 'authored/translations/comprehensive-rules/**'
+              - 'authored/rules/keywords.yaml'
               - 'carddb/src/sve_carddb/contracts/schema/**' # the web reader validates against the published schema
             scan:
               - 'scan/**'
@@ -194,10 +225,14 @@ jobs:
           scope=(--all-files)
           # Deleted inputs never reach pre-commit's filename filters, but can break the ER build or leave
           # Markdown links to a deleted or renamed file in files the PR did not touch.
-          if [ "$GITHUB_EVENT_NAME" = pull_request ] &&
-            git diff --quiet "${BASE}...${HEAD}" -- "${full_scan_inputs[@]}" &&
+          if git diff --quiet "${BASE}...${HEAD}" -- "${full_scan_inputs[@]}" &&
             git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}" -- docs/schema/ ':(glob)**/*.md'; then
             scope=(--from-ref "$BASE" --to-ref "$HEAD")
+            if ! git diff --quiet --no-renames --diff-filter=D "${BASE}...${HEAD}"; then
+              # Links can also point from untouched Markdown to scripts, images and data.
+              uv run --project carddb --locked --no-default-groups --group dev pre-commit run lychee --all-files --hook-stage manual
+              SKIP="$SKIP,lychee"
+            fi
           fi
           echo "pre-commit scope: ${scope[*]}"
           uv run --project carddb --locked --no-default-groups --group dev pre-commit run "${scope[@]}" --hook-stage manual --show-diff-on-failure
@@ -206,6 +241,60 @@ jobs:
         with:
           path: ~/.cache/pre-commit
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
+
+  author-data:
+    needs: changes
+    if: needs.changes.outputs.author_data == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # identity-only authoring verifies committed transition bases
+          persist-credentials: false
+          clean: true
+      - uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+        with:
+          enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
+          cache-dependency-glob: uv.lock
+      - name: Validate the authored data
+        id: tests
+        env:
+          TMPDIR: ${{ runner.temp }}
+          SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
+          REPORT_DIR: ${{ runner.temp }}/sve-author-reports
+        run: |
+          umask 077
+          mkdir -p "$REPORT_DIR"
+          start=$SECONDS
+          [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
+          status=0
+          # rust-tests also checks the complete selection while generating its public inputs.
+          uv --directory carddb run --locked --python 3.14.10 pytest -n "$PYTEST_WORKERS" --no-cov \
+            --shard=1/1 --shard-report="$REPORT_DIR/shard.json" --junitxml="$REPORT_DIR/junit.xml" \
+            tests/architecture/test_authored_defaults.py::test_authored_tree_does_not_store_quality_defaults \
+            tests/core/test_yaml_reader.py::test_all_production_files_pass_strict_reader \
+            tests/domains/effects/test_author_current.py::test_real_current_author_set \
+            tests/domains/effects/test_regression_baseline.py \
+            tests/domains/rulings/test_authored_hints.py \
+            tests/workflows/test_authoring.py tests/workflows/test_authoring_cli.py \
+            > "$REPORT_DIR/test.log" 2>&1 || status=$?
+          echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
+          echo "pytest exit status: $status (statistics in the next step; raw output stays private)"
+          exit "$status"
+      - name: Author data test summary
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-author-reports
+        run: python3 .github/ci/test_summary.py python "$REPORT_DIR"
+      - name: Remove Python reports and test data
+        if: always()
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-author-reports
+          SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
+        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache "${RUNNER_TEMP}"/pytest-of-*
 
   python:
     needs: changes
@@ -365,6 +454,7 @@ jobs:
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
           COVERAGE_DIR: ${{ runner.temp }}/sve-python-coverage
           SHARD: ${{ matrix.shard }}/${{ strategy.job-total }}
+          PYTHON_RUNTIME: ${{ needs.changes.outputs.python_runtime }}
         run: |
           umask 077
           rm -rf "$REPORT_DIR" "$SVE_DATA_DIR"
@@ -372,10 +462,14 @@ jobs:
           start=$SECONDS
           [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
           status=0
+          selection=()
+          if [[ "$PYTHON_RUNTIME" == false ]]; then
+            selection+=(--deselect=tests/architecture/test_module_imports.py::test_module_first_import_in_fresh_process)
+          fi
           # One shard's coverage is partial, so the 90% fail-under applies in python-coverage instead.
           uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
             --cov-fail-under=0 --shard="$SHARD" --shard-report="$REPORT_DIR/shard.json" \
-            --junitxml="$REPORT_DIR/junit.xml" \
+            --junitxml="$REPORT_DIR/junit.xml" "${selection[@]}" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "pytest exit status: $status (statistics in the next step; raw output stays private)"
@@ -872,6 +966,7 @@ jobs:
       - changes
       - repo
       - card-data
+      - author-data
       - python
       - python-tests
       - python-coverage
@@ -889,7 +984,7 @@ jobs:
           NEEDS: ${{ toJSON(needs) }}
         run: |
           # Unmapped jobs are mandatory; only unchanged components may skip.
-          component='{"card-data":"card_data","python":"python","python-tests":"python","python-coverage":"python","rust":"rust","rust-tests":"rust","rust-coverage":"rust","engine-wasm":"engine_wasm","web":"web","scan":"scan"}'
+          component='{"card-data":"card_data","author-data":"author_data","python":"python","python-tests":"python","python-coverage":"python","rust":"rust","rust-tests":"rust","rust-coverage":"rust","engine-wasm":"engine_wasm","web":"web","scan":"scan"}'
           jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "changes: $(jq -r .changes.result <<<"$NEEDS")"; exit 1; }
           status=0
           for job in $(jq -r 'keys[] | select(. != "changes")' <<<"$NEEDS"); do

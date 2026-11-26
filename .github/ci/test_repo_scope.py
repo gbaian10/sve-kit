@@ -38,6 +38,7 @@ class RepoScopeTests(unittest.TestCase):
         self.command("config", "user.email", "scope@example.invalid")
         self.write("README.md", "# Baseline\n")
         self.write("docs/schema/build/build-db.md", "# Schema\n")
+        self.write("dsl/engine-rules.schema.json", "{}\n")
         self.write(".markdownlint-cli2.yaml", "config: {}\n")
         self.base = self.commit()
         workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
@@ -95,18 +96,20 @@ class RepoScopeTests(unittest.TestCase):
             check=True,
         )
         assert f"range={base}..{head}" in result.stdout
-        return next(
+        return "\n".join(
             line
             for line in result.stdout.splitlines()
             if line.startswith("pre-commit argv:")
         )
 
     def test_changed_files_and_public_push(self) -> None:
-        """Ordinary PRs use a range; public pushes retain the complete scan."""
+        """Ordinary PRs and pushes both use a range."""
         self.write("README.md", "# Updated\n")
         head = self.commit()
         assert f"--from-ref {self.base} --to-ref {head}" in self.scope(self.base, head)
-        assert "--all-files" in self.scope(self.base, head, event="push")
+        assert f"--from-ref {self.base} --to-ref {head}" in self.scope(
+            self.base, head, event="push"
+        )
         assert "--from-ref" in self.scope(head, head)
 
     def test_shared_inputs(self) -> None:
@@ -137,6 +140,7 @@ class RepoScopeTests(unittest.TestCase):
                 self.write(name)
                 head = self.commit()
                 assert "--all-files" in self.scope(self.base, head)
+                assert "--all-files" in self.scope(self.base, head, event="push")
 
     def test_deleted_or_renamed_inputs(self) -> None:
         """Pre-commit drops removed inputs; retain aggregate checks for their consumers."""
@@ -149,7 +153,20 @@ class RepoScopeTests(unittest.TestCase):
                     else:
                         self.command("rm", name)
                     head = self.commit()
-                    assert "--all-files" in self.scope(self.base, head)
+                    for event in ("pull_request", "push"):
+                        scope = self.scope(self.base, head, event=event)
+                        assert "pre-commit run --all-files" in scope
+                        assert "--from-ref" not in scope
+
+    def test_non_markdown_deletions_only_expand_the_link_check(self) -> None:
+        """An unchanged Markdown file may link to a removed schema, image or script."""
+        self.command("rm", "dsl/engine-rules.schema.json")
+        head = self.commit()
+        for event in ("pull_request", "push"):
+            with self.subTest(event=event):
+                scope = self.scope(self.base, head, event=event)
+                assert scope.count("run lychee --all-files") == 1
+                assert f"run --from-ref {self.base} --to-ref {head}" in scope
 
     def changed_files(self, base: str, head: str) -> list[str]:
         """Query the installed pre-commit implementation in the synthetic checkout."""
