@@ -1,8 +1,8 @@
 # 動作與 Steps 形狀矩陣
 
-本文件對應 `author-nodes.schema.json` 的 `A.action`、`A.step`、`A.steps` 與內層定義；Python 對照為 `author_programs`。JSON Schema 是語法權威。這些是封閉片段，完整能力頭見[能力矩陣](author-ability-shapes-1.0.md)，不含DSL 入口、展開或執行准入。通過形狀不代表來源、作用域、物件世代或 capability 已驗證。
+本文件對應 `author-nodes.schema.json` 的 `A.step`、`A.steps` 與內層定義。JSON Schema 是語法權威。這些是封閉片段，完整能力頭見[能力矩陣](author-ability-shapes-1.0.md)，不含DSL 入口、展開或執行准入。通過形狀不代表來源、作用域、物件世代或 capability 已驗證。
 
-`A.action` 恰一動作鍵；`A.step` 恰一動作或控制鍵；`A.steps` 是保序列表，保留重複步驟和空列表。所有固定物件拒絕未知鍵，不補預設。`optional.do` 需要最後一個指示的 receipt，`simultaneous.do` 沿 IR 批次契約，這兩處要求非空。其他空 Steps 仍須通過 C1 的來源及終止檢查。
+`A.step` 恰有一個動作或控制鍵。`A.steps` 是保序列表，保留重複步驟和空列表。所有固定物件拒絕未知鍵，不補預設。`optional.do` 需要最後一個指示的 receipt，`simultaneous.do` 沿 IR 批次契約，這兩處要求非空。其他空 Steps 仍須通過 C1 的來源及終止檢查。
 
 ## 共用型別
 
@@ -124,4 +124,4 @@ Stage=Steps 或 `{do:Steps,mode:choice|nonchoice}` 或 `{do:Steps,mode:explicit,
 
 ## 准入責任
 
-驗證範圍含每個定義的 Python/schema 漂移、負向 schema 突變、獨立卡例與合成 variant、未知鍵／錯型別／互斥／錯上下文、遞迴與 canonical roundtrip。卡例核對遞迴涵蓋凍結 JP 302 檔、7369 documents、7383 faces，以及 EN 297 檔、7420 documents、7437 faces 的 text/sections；Q&A 不作卡例。未找到直接卡例的格明列合成，不將 shape 通過宣稱為全卡語義驗收。
+驗證範圍含負向 schema 突變、獨立卡例與合成 variant、未知鍵／錯型別／互斥／錯上下文、遞迴與 canonical roundtrip。卡例核對遞迴涵蓋凍結 JP 302 檔、7369 documents、7383 faces，以及 EN 297 檔、7420 documents、7437 faces 的 text/sections；Q&A 不作卡例。未找到直接卡例的格明列合成，不將 shape 通過宣稱為全卡語義驗收。

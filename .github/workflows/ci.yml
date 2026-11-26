@@ -70,7 +70,7 @@ jobs:
               - 'pyproject.toml'
               - 'uv.lock'
               - 'carddb/**' # includes read_api, contracts and lock inputs used by publish
-              - 'dsl/**' # schema changes must run the Python type drift checks
+              - 'dsl/**' # schema changes affect Python validation and snapshot contracts
               - 'publish/**'
               - 'tools/schema-er/**'
             python:

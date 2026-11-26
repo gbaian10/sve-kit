@@ -10,7 +10,7 @@
 [事件與歷史矩陣](author-history-shapes-1.0.md)。其他同型值比較尚未登錄。
 非 Int 的全部分支抽為同一 A.expr.numeric-operation／NumericOperation，
 NumericExpr 為 Int 或 NumericOperation；Condition、ObjectSel、CountSource、CollectionSource
-與 Quantity 在 Python 的 author_queries 中共同解析遞迴，不另立平行的核心圖。
+與 Quantity 共用 Schema 的遞迴圖。
 [要求量矩陣](author-quantity-shapes-1.0.md)
 以 Nat 配同一 operation 建立 Quantity，沒有另複製一份算式清單。
 
@@ -110,7 +110,7 @@ all、any、min、max 均允許單元素列表；min/max 非空另有 GAP-A-028 
 
 ### 降低時的 receipt 型別與成功責任
 
-以下是 D0／lowering 的接線契約，**不是節點 Schema 或 Python 型別已驗證的執行行為**。
+以下是 D0／lowering 的接線契約，**不是節點 Schema已驗證的執行行為**。
 形狀只能確認 ReceiptRef；實際 receipt 類別、可見性、材料投影與操作授權取自宣告。
 
 - 短形 did 採[DSL 語法 §6](author-syntax-1.0.md#6-玩家引用結果)的類別判準。

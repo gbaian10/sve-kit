@@ -5,15 +5,14 @@ from itertools import pairwise
 from typing import TYPE_CHECKING
 
 from sve_carddb.core.json import array, canonical, object_value
-from sve_carddb.domains.effects.author_expansion import ability_nodes
-from sve_carddb.domains.effects.author_inputs import Diagnostic
+from sve_carddb.domains.effects.author_inputs import Diagnostic, ability_nodes
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
     from pydantic import JsonValue
 
-    from sve_carddb.domains.effects.author_validation import PathParts
+    from sve_carddb.domains.effects.author_inputs import PathParts
 
 _REQUIRED_CHOOSE = "required_choose_use_targets"
 _SPLIT_CREATE = "combine_consecutive_create"

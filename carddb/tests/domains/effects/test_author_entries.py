@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord
-from sve_carddb.core.json import canonical
+from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_inputs import AuthorInputError, AuthorSchemas
 
 from .author_entry_cases import meta, source_use
@@ -76,38 +76,68 @@ def test_inline_rejects_missing_source_and_unknown_fields(
         schemas.expanded(canonical(document(bad)))
 
 
+def first_ability(card: JsonValue) -> dict[str, JsonValue]:
+    return object_value(array(object_value(card)["abilities"])[0])
+
+
 def test_fixed_goldens_preserve_content_and_order(schemas: AuthorSchemas) -> None:
-    value = schemas.expanded(GOLDEN.read_bytes()).model_dump(mode="json")
-    cards = value["cards"]
-    bp = cards["BP08-038"]["abilities"][0]["fanfare"]
+    value = schemas.expanded(GOLDEN.read_bytes())
+    cards = object_value(object_value(value)["cards"])
+    bp = first_ability(cards["BP08-038"])["fanfare"]
     expected_bp = b'{"fanfare":{"define":{"X":{"minus":[{"count":{"who":"self","zone":"deck"}},5]}},"do":[{"draw":{"n":"X"}}]}}'
     assert sha256(canonical({"fanfare": bp})).digest() == sha256(expected_bp).digest()
-    cp = cards["CP04-060"]["abilities"][0]["evolve_time"]
+    cp = first_ability(cards["CP04-060"])["evolve_time"]
     expected_cp = '{"evolve_time":{"do":[{"search":{"n":1,"result":"searched","sel":{"not_same_name_as_this":true,"trait":"ドラゴンズネスト","who":"self","zone":"deck"},"to":"ex"}},{"apply":{"effect":{"cost_mod":{"delta":-2,"when_playing":{"in":"affected"}}},"on":{"follow":"searched"},"until":"turn"}}],"ub":true}}'.encode()
     assert (
         sha256(canonical({"evolve_time": cp})).digest() == sha256(expected_cp).digest()
     )
-    assert cards["ECP01-058"]["deck_rule"] == {"deck": "evolve", "same_name_max": 10}
-    face = cards["BP09-SL05"]["faces"]["f:" + "2" * 32]
+    assert object_value(cards["ECP01-058"])["deck_rule"] == {
+        "deck": "evolve",
+        "same_name_max": 10,
+    }
+    face = object_value(object_value(cards["BP09-SL05"])["faces"])["f:" + "2" * 32]
     expected_face: JsonValue = {
         "do": [
             {"create": {"token": ["スティールナイト", "ナイト"], "n": 1, "to": "field"}}
         ]
     }
     assert (
-        sha256(canonical(face["abilities"][0]["evolve_time"])).digest()
+        sha256(canonical(first_ability(face)["evolve_time"])).digest()
         == sha256(canonical(expected_face)).digest()
     )
     assert canonical(
-        schemas.expanded(
-            json.dumps(value, ensure_ascii=False, sort_keys=True).encode()
-        ).model_dump(mode="json")
+        schemas.expanded(json.dumps(value, ensure_ascii=False, sort_keys=True).encode())
     ) == canonical(value)
     reversed_value = deepcopy(value)
-    reversed_value["cards"]["CP04-060"]["abilities"][0]["evolve_time"]["do"].reverse()
+    reversed_cards = object_value(object_value(reversed_value)["cards"])
+    array(
+        object_value(first_ability(reversed_cards["CP04-060"])["evolve_time"])["do"]
+    ).reverse()
     assert canonical(
-        schemas.expanded(json.dumps(reversed_value).encode()).model_dump(mode="json")
+        schemas.expanded(json.dumps(reversed_value).encode())
     ) != canonical(value)
+
+
+@pytest.mark.parametrize(
+    "date", ["2026-02-29", "0000-01-01", "2026-10-21\n", "2026-1-01"]
+)
+def test_writer_date_is_real_exact_calendar_date(
+    schemas: AuthorSchemas, date: str
+) -> None:
+    value = document(ability({"spell": {"do": []}}))
+    card = object_value(object_value(value["cards"])["FIX-001"])
+    author = object_value(array(object_value(card["meta"])["written_by"])[0])
+    author["date"] = date
+    with pytest.raises(AuthorInputError):
+        schemas.expanded(canonical(value))
+
+
+def test_keyword_review_requires_draft_metadata(schemas: AuthorSchemas) -> None:
+    value = document(ability({"keywords": ["ward"]}))
+    card = object_value(object_value(value["cards"])["FIX-001"])
+    object_value(card["meta"])["status"] = "reviewed"
+    with pytest.raises(AuthorInputError, match="unsupported_keyword_review_evidence"):
+        schemas.expanded(canonical(value))
 
 
 @pytest.mark.parametrize(

@@ -1,12 +1,10 @@
 # 能力頭、授予與延遲形狀矩陣
 
-JSON Schema `dsl/author-nodes.schema.json` 是語法權威；Python 對照為 `contracts/author_programs.py`。本文只定義封閉節點；完整DSL 入口、展開與執行准入另驗。
+JSON Schema `dsl/author-nodes.schema.json` 是語法權威。本文只定義封閉節點；完整DSL 入口、展開與執行准入另驗。
 
 ## 單一遞迴圖與封閉邊界
 
 A.ability-head 恰含一個頭，不含用途 line/section/sources/ports/imports/generated_by。inline 的能力／宣告內容使用它；companion.body 使用排除獨立 keywords 的 A.companion-head，不能經 generated_by 引入非本體宣告。完整容器由獨立契約承載。GrantedAbilityHead 為同一頭 payload 的子集合（見下表），不是另一套能力語法。遞迴路徑為 ability→Steps→grant/delayed→ability，以及 static→EffectSpec.grant→ability。
-
-Python 的 author_programs 承載能力、效果、Steps 的強連通圖，不使用動態 namespace 注入。Action／Step／GrantedAbilityHead 使用透明 RootModel 名目入口，避免型別檢查器逐路徑展開遞迴別名；內部仍是相同封閉 Fields，序列化不新增 root 鍵。Python 消費者以 `.root` 取得這三種入口的 Fields；Steps 是 Step 的 tuple，授予清單是 GrantedAbilityHead 的 tuple，D0 遍歷時須在這些邊界解包。Cost／Event／Target／Until 保留原模組與公開型別。Schema 現有 ID 保留，根仍拒絕裸片段。名稱使用 Concept／CardName 具名葉（Python alias 與 schema 同步），目前均沿 Text 的非空值域；registry 不是 C0 字串形狀。
 
 ## 完整頭矩陣
 
@@ -92,7 +90,7 @@ BP01-056 無期限一次；BP03-089 turn＋next_only:true；SP01-026 批次；BP
 
 ## 凍結卡文證據
 
-掃描遞迴涵蓋 JP 302 檔、7383 faces、8192 個非空 text／sections，EN 297 檔、7437 faces、7834 列。未以 Q&A 命中充當卡例，日英也未由卡號推定配對。下表定位 JP 主文；同卡 sections 另列。`author_ability_cases.py` 的片段不是整卡完成聲明：`partial`、`fragment`、`mode-fragment` 省略了其他指示／外層 choice，局部 binding 由外層提供；SP01-026 的選取解讀仍需 C1 規則准入。
+掃描遞迴涵蓋 JP 302 檔、7383 faces、8192 個非空 text／sections，EN 297 檔、7437 faces、7834 列。未以 Q&A 命中充當卡例，日英也未由卡號推定配對。下表定位 JP 主文；同卡 sections 另列。卡文片段須另做整卡驗證聲明：`partial`、`fragment`、`mode-fragment` 省略了其他指示／外層 choice，局部 binding 由外層提供；SP01-026 的選取解讀仍需 C1 規則准入。
 
 所有檔案相對 `card-data/jp/`；document 是文件鍵，face 是 0 起算索引。
 
@@ -174,9 +172,9 @@ BP01-056 無期限一次；BP03-089 turn＋next_only:true；SP01-026 批次；BP
 
 ## 驗證邊界
 
-逐頭與融合數量變體、限次安全整數、錯上下文／型別／互斥、深層遞迴、列表保序與重數，由 JSON Schema 及 Python decoder 雙邊檢查並比較 roundtrip。所有具名定義有結構漂移對照；突變覆蓋 required、ref、enum、union、minItems、未知鍵與單鍵限制。Action／Step 的共用 payload 與 GrantedAbilityHead 的子集合引用另有結構保護。合成組合只證明 C0 形狀，不等於正式卡片或執行能力。
+Schema 管理各能力頭的型別、互斥、值域與遞迴結構。Rust lowering 驗證使用上下文、來源及實際支援的形狀。
 
-矩陣中的卡號是凍結卡文的設計證據，不全是已轉寫的驗證片段；實際驗證片段以 `author_ability_cases.py` 的清單與 partial／fragment 標記為準。未轉寫的交叉格仍由 C1 全卡工作補齊。
+矩陣中的卡號指向凍結卡文的設計證據。整卡執行仍依實際對局驗證。
 
 ### 同次 Spell play 的正式目標費用條件
 

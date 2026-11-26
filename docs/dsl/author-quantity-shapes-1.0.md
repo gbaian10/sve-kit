@@ -8,7 +8,7 @@ Target.groups 與其餘 Cost 另見[費用與目標矩陣](author-cost-target-sh
 
 ## 共用數量與參數
 
-| 定義／Python | 值域 | 限制 |
+| Schema 定義 | 值域 | 限制 |
 | --- | --- | --- |
 | A.expr.numeric-operation／NumericOperation | [NumericExpr](author-expression-shapes-1.0.md) 除 Int 的全部分支，含 BindingName | 算術、別名與讀值只列一次；不代表僅有算術 |
 | A.expr.numeric／NumericExpr | Int 或 NumericOperation | 保留有號常量與原有遞迴 operand |
@@ -21,7 +21,7 @@ Target.groups 與其餘 Cost 另見[費用與目標矩陣](author-cost-target-sh
 Quantity 共用於 DeckSlice.n、counter 的 n／upto／holders、cost_sum_le、
 已登錄的物件比較 filter 與 hand／leader_life／zone_free 條件門檻。
 它限制的是**直接字面量**，不將算式結果截零。負算式與來源不足的規則處理不由 shape 決定。
-bool、數字字串與超過安全整數界的常量拒絕；float 由嚴格入口及 Python 解碼拒絕。
+bool、數字字串與超過安全整數界的常量拒絕；嚴格 YAML／JSON 入口拒絕浮點常值。
 
 SelectionQuantity 的直接參數須為 Nat／selection_count／constant；
 n 匹配來源 exact、upto 匹配 up_to。來源是 X、bound 或 expression 時，

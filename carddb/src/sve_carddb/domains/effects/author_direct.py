@@ -13,11 +13,11 @@ from sve_carddb.contracts.construction_rules import (
 )
 from sve_carddb.contracts.four_layer import FaceRevisionOwner, OwnerField
 from sve_carddb.core.json import array, canonical, object_value, string
-from sve_carddb.domains.effects.author_expansion import ability_nodes
 from sve_carddb.domains.effects.author_handwritten import Locator, RuleSection, decode
 from sve_carddb.domains.effects.author_inputs import (
     AuthorInputError,
     SourceError,
+    ability_nodes,
     parse_document,
 )
 from sve_carddb.domains.translations.four_layer_sources import card_field

@@ -13,19 +13,9 @@ from pydantic import JsonValue, TypeAdapter, ValidationError
 from referencing import Registry, Resource
 from referencing.exceptions import Unresolvable
 
-from sve_carddb.contracts.author_entries import Ability, AuthorEffectSet
-from sve_carddb.contracts.author_evidence import (
-    CardKeywordSourceUse,
-    DirectSourceUse,
-    SourceUse,
-)
 from sve_carddb.contracts.author_leaves import AuthorIndexRecord, EffectsIndex
-from sve_carddb.core.json import canonical, object_value, parse
+from sve_carddb.core.json import array, canonical, object_value, parse, string
 from sve_carddb.core.yaml import JSON_VALUE, MAX_BYTES, YamlSyntaxError, parse_yaml
-from sve_carddb.domains.effects.author_validation import (
-    expanded_residuals,
-    inline_parameters,
-)
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -47,7 +37,6 @@ _RESOURCES = {
     "effect-body-storage.schema.json": "urn:sve-kit:effect-body-storage:2",
 }
 _INDEX_VALUE = TypeAdapter(EffectsIndex)
-_AUTHOR_VALUE = TypeAdapter(AuthorEffectSet)
 type Stage = Literal[
     "yaml",
     "json",
@@ -79,7 +68,7 @@ class Diagnostic:
     card_id: str | None = None
     card_no: str | None = None
     scope: str | None = None
-    source: SourceUse | CardKeywordSourceUse | DirectSourceUse | None = None
+    source: dict[str, JsonValue] | None = None
     card_line: int | None = None
 
 
@@ -142,9 +131,7 @@ def _contextual(
     )
 
 
-def _source_at(
-    value: JsonValue, path: PathParts
-) -> SourceUse | CardKeywordSourceUse | None:
+def _source_at(value: JsonValue, path: PathParts) -> dict[str, JsonValue] | None:
     prefixes = (
         ("cards", str, "abilities", int),
         ("cards", str, "faces", str, "abilities", int),
@@ -175,13 +162,12 @@ def _source_at(
             return None
     if isinstance(node, dict):
         sources = node.get("sources")
-        if not isinstance(sources, list) or len(sources) != 1:
-            return None
-        try:
-            source_type = CardKeywordSourceUse if "keywords" in node else SourceUse
-            return source_type.model_validate_json(canonical(sources[0]), strict=True)
-        except ValidationError:
-            return None
+        if (
+            isinstance(sources, list)
+            and len(sources) == 1
+            and isinstance(sources[0], dict)
+        ):
+            return sources[0]
     return None
 
 
@@ -217,33 +203,6 @@ def _references(value: JsonValue) -> list[str]:
         elif isinstance(node, list):
             pending.extend(node)
     return result
-
-
-def _entry_decode[T](document: ParsedDocument, adapter: TypeAdapter[T]) -> T:
-    try:
-        return adapter.validate_json(canonical(document.value), strict=True)
-    except ValidationError as error:
-        detail = error.errors(include_input=False, include_context=False)[0]
-        node = document.value
-        path: PathParts = ()
-        # Pydantic union labels are not wire keys and must not leak into cursors.
-        for part in detail["loc"]:
-            if isinstance(node, dict) and isinstance(part, str) and part in node:
-                node = node[part]
-                path = (*path, part)
-                continue
-            if (
-                isinstance(node, list)
-                and isinstance(part, int)
-                and 0 <= part < len(node)
-            ):
-                node = node[part]
-                path = (*path, part)
-        raise AuthorInputError(
-            _located(
-                document, document.diagnostic("schema", "decoder_constraint", path)
-            )
-        ) from None
 
 
 def _envelope(document: ParsedDocument, expected: str) -> dict[str, JsonValue]:
@@ -317,40 +276,41 @@ def _candidate_checks(
             )
 
 
-def _abilities(decoded: AuthorEffectSet) -> Iterator[tuple[PathParts, Ability]]:
-    for key, card in decoded.cards.items():
-        for index, ability in enumerate(card.get("abilities", ())):
-            yield ("cards", key, "abilities", index), ability
-        for face_id, face in card.get("faces", {}).items():
-            for index, ability in enumerate(face.abilities):
-                yield ("cards", key, "faces", face_id, "abilities", index), ability
-
-
-def _local_invariants(document: ParsedDocument, decoded: AuthorEffectSet) -> None:
-    for path, ability in _abilities(decoded):
-        node = ability.root
-        if "keywords" in node:
-            key = str(path[1])
-            metadata = decoded.cards[key]["meta"]
-            if metadata.status != "draft" or metadata.reviewed_by:
-                raise AuthorInputError(
-                    _located(
-                        document,
-                        document.diagnostic(
-                            "container",
-                            "unsupported_keyword_review_evidence",
-                            ("cards", key, "meta"),
-                        ),
-                    )
+def ability_nodes(tree: JsonValue) -> Iterator[tuple[PathParts, dict[str, JsonValue]]]:
+    """Visit explicit card/face containers without guessing metadata key names."""
+    cards = object_value(object_value(tree)["cards"])
+    for key, card_value in cards.items():
+        card = object_value(card_value)
+        for index, ability in enumerate(array(card.get("abilities", []))):
+            yield ("cards", key, "abilities", index), object_value(ability)
+        for face_id, face_value in object_value(card.get("faces", {})).items():
+            face = object_value(face_value)
+            for index, ability in enumerate(array(face["abilities"])):
+                yield (
+                    ("cards", key, "faces", face_id, "abilities", index),
+                    object_value(ability),
                 )
-        if "generated_by" in node:
+
+
+def _keyword_review_metadata(document: ParsedDocument) -> None:
+    cards = object_value(object_value(document.value)["cards"])
+    for path, ability in ability_nodes(document.value):
+        if "keywords" not in ability:
             continue
-        for violation in inline_parameters(node, path):
-            diagnostic = _located(
+        number = string(path[1])
+        meta = object_value(object_value(cards[number])["meta"])
+        if meta["status"] == "draft" and not meta["reviewed_by"]:
+            continue
+        raise AuthorInputError(
+            _located(
                 document,
-                document.diagnostic("container", violation.reason, violation.path),
+                document.diagnostic(
+                    "container",
+                    "unsupported_keyword_review_evidence",
+                    ("cards", number, "meta"),
+                ),
             )
-            raise AuthorInputError(replace(diagnostic, source=node["sources"][0]))
+        )
 
 
 def _json_value(
@@ -698,21 +658,13 @@ class AuthorSchemas:
 
     def expanded(
         self, raw: bytes, *, context: AuthorIndexRecord | None = None
-    ) -> AuthorEffectSet:
-        """Read a fully expanded tree; this does not establish source admission."""
+    ) -> JsonValue:
+        """Validate the complete expanded AST and keep its exact wire values."""
         document = _document(raw, context)
         _entry_preflight(document, "author_effect_set")
         self._validate(document, _NODES + "#/$defs/expanded")
-        decoded = _entry_decode(document, _AUTHOR_VALUE)
-        for violation in expanded_residuals(decoded):
-            raise AuthorInputError(
-                _located(
-                    document,
-                    document.diagnostic("container", violation.reason, violation.path),
-                )
-            )
-        _local_invariants(document, decoded)
-        return decoded
+        _keyword_review_metadata(document)
+        return document.value
 
     def leaf(self, raw: bytes, definition: Leaf) -> JsonValue:
         """Validate a fragment; this grants no placement or source-role permission."""

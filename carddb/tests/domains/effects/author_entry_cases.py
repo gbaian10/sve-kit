@@ -31,3 +31,27 @@ def meta() -> dict[str, JsonValue]:
         "verified_by_exam": [],
         "rulings": [],
     }
+
+
+EVENT: dict[str, JsonValue] = {"phase": {"which": "end", "whose": "self"}}
+TRIGGERS = (
+    "fanfare",
+    "lastword",
+    "evolve_time",
+    "super_evolve_time",
+    "attack_time",
+    "race_time",
+    "drive_time",
+)
+HEADS: dict[str, JsonValue] = {
+    **{key: {"do": []} for key in TRIGGERS},
+    "keywords": ["quick", "ward"],
+    "auto": {"on": EVENT, "do": []},
+    "activate": {"cost": {"pp": 1}, "do": []},
+    "spell": {"do": []},
+    "evolve": {"cost": {"pp": 1}},
+    "ride": {"cost": {"pp": 1}},
+    "feed": {"cost": {"pp": 1}},
+    "static": {"effects": [{"keywords": {"on": "this", "list": ["ward"]}}]},
+    "play": {"cost_delta": -1},
+}
