@@ -2,7 +2,7 @@
 //! exactly one runs at a time. Seat names and messages are validated by the session, so
 //! a malformed call stops interaction instead of throwing past it.
 
-use crate::load::load;
+use crate::load::{PreparedBattle, load};
 use crate::session::{Delivery, LocalSession};
 use wasm_bindgen::prelude::{JsError, wasm_bindgen};
 
@@ -47,4 +47,36 @@ impl Session {
 fn deliveries(out: &[Delivery]) -> String {
     // Contract messages hold only strings, booleans and checked integers, so serialization cannot fail.
     serde_json::to_string(out).unwrap_or_default()
+}
+
+/// Reusable verified inputs for local matches in this Worker.
+#[derive(Debug)]
+#[wasm_bindgen]
+pub struct PreparedMatch {
+    inner: PreparedBattle,
+}
+
+#[wasm_bindgen]
+impl PreparedMatch {
+    /// Validate and prepare the assets for one snapshot.
+    ///
+    /// # Errors
+    /// Throws the host's stable code for the failed stage.
+    #[wasm_bindgen(constructor)]
+    pub fn new(inputs: &str, programs: &str) -> Result<Self, JsError> {
+        PreparedBattle::new(inputs, programs)
+            .map(|inner| Self { inner })
+            .map_err(|error| JsError::new(error.code()))
+    }
+
+    /// Start a match using the verified inputs and its own setup.
+    ///
+    /// # Errors
+    /// Throws the host's stable code for the failed stage.
+    pub fn open(&self, setup: &str) -> Result<Session, JsError> {
+        self.inner
+            .open(setup)
+            .map(|inner| Session { inner })
+            .map_err(|error| JsError::new(error.code()))
+    }
 }

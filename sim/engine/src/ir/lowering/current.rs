@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
 pub(super) mod direct;
+pub(super) mod published;
 
 /// Current source facts and their lowered candidate, without use qualification.
 #[expect(
@@ -26,6 +27,8 @@ pub struct CurrentCardProgram {
     pub source_payload: Value,
     /// Expanded author tree and its direct author coordinates.
     pub expanded: Value,
+    /// Explicit native token printings required by the closed program.
+    pub(crate) token_printings: Vec<String>,
     /// One current-checked source per ability, keyed by its author JSON pointer.
     sources: BTreeMap<String, SourceSpan>,
     /// Printed declaration evidence; an empty map for body-only cards.

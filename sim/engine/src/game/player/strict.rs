@@ -2,7 +2,9 @@
 
 use super::{DeckConstruction, PlayerDeck, Viewer};
 use crate::battle::BattleReferences;
-use crate::catalog::{Catalog, CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
+use crate::catalog::{
+    Catalog, CurrentSelectionLoader, EngineIdentityInput, SelectedEffects, SnapshotPrograms,
+};
 use crate::game::Game;
 use crate::ir::lowering::CurrentCardProgram;
 use crate::ir::walk::{self, NodeRef, Traversal, Visitor};
@@ -241,14 +243,7 @@ fn closure(
                 closure.require_template(catalog, &token.name, printing, &mut required)?;
             }
         }
-        let authored = &candidate.expanded["cards"][&candidate.card_no];
-        required.extend(
-            authored["token_sources"]
-                .as_array()
-                .into_iter()
-                .flatten()
-                .filter_map(|link| link["card_no"].as_str().map(str::to_owned)),
-        );
+        required.extend(candidate.token_printings.iter().cloned());
         pending.extend(required.iter().cloned());
         closure.dependencies.insert(number, required);
     }
@@ -318,6 +313,22 @@ impl Game {
             }
         }
         pending.finish()
+    }
+
+    /// Select the executable closure for these decks from the prepared public snapshot.
+    ///
+    /// # Errors
+    /// Refuses a reachable program that cannot lower or has unresolved dependencies.
+    pub fn select_snapshot_decks(
+        programs: &SnapshotPrograms,
+        decks: &[PlayerDeck; 2],
+    ) -> Result<SelectedEffects> {
+        programs.select(|catalogue, lower| {
+            for deck in decks {
+                closure(catalogue, &mut |number| lower(number), deck)?;
+            }
+            Ok(())
+        })
     }
 
     pub(super) fn prepare_strict_player_decks(

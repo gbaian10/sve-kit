@@ -2,7 +2,7 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.core.json import canonical, object_value, string
+from sve_carddb.core.json import array, canonical, integer, object_value, string
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -46,4 +46,43 @@ def rule_identities(snapshot: Snapshot, region: str) -> dict[str, JsonValue]:
     return {
         "manifest_sha256": snapshot.manifest_sha256,
         "entries": sorted(entries, key=canonical),
+    }
+
+
+def resolve_engine_rules(
+    rules: dict[str, JsonValue], faces: dict[tuple[str, int], dict[str, JsonValue]]
+) -> dict[str, JsonValue]:
+    """Resolve rule anchors in place and return their matching engine identity binding."""
+    source = object_value(rules["input"])
+    region = string(object_value(rules["scope"])["region"])
+    selected: dict[str, dict[str, JsonValue]] = {}
+
+    def anchor(raw: JsonValue) -> dict[str, JsonValue]:
+        ref = object_value(raw)
+        if ref["kind"] != "legacy-face" or ref["region"] != region:
+            raise ValueError("Unusable published battle rule anchor")
+        face = faces[string(ref["card_no"]), integer(ref["face_ordinal"])]
+        face_id = string(face["face_id"])
+        if face["rules_name_id"] is None or selected.setdefault(face_id, face) != face:
+            raise ValueError("Ambiguous published battle rule anchor")
+        return {"kind": "face-id", "region": region, "face_id": face_id}
+
+    for raw in array(rules["titles"]):
+        title = object_value(raw)
+        title["anchor"] = anchor(title["anchor"])
+    for raw in array(rules["resources"]):
+        resource = object_value(raw)
+        if "template" in resource:
+            resource["template"] = anchor(resource["template"])
+        for raw_name in array(resource["names"]):
+            name = object_value(raw_name)
+            name["face"] = anchor(name["face"])
+    source["kind"] = "resolved"
+    projected: list[JsonValue] = list(selected.values())
+    return {
+        "Resolved": {
+            "region": region,
+            "snapshot_sha256": source["snapshot_sha256"],
+            "faces": projected,
+        }
     }

@@ -371,6 +371,7 @@ pub(in crate::ir::lowering) fn lower(
         source_payload: value["source_payload"].clone(),
         expanded: input.tree,
         face_ordinals: ordinals,
+        token_printings: tokens.into_iter().map(|token| token.card_no).collect(),
         sources,
         declarations,
         program: programs

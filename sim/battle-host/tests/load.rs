@@ -8,9 +8,9 @@
 #[path = "support/fixture.rs"]
 mod fixture;
 
-use serde_json::json;
-use sve_battle_contract::Identity;
-use sve_battle_host::load::{LoadError, load};
+use serde_json::{Value, json};
+use sve_battle_contract::{HostMessage, Identity};
+use sve_battle_host::load::{LoadError, PreparedBattle, load};
 use sve_engine::battle::{ReferenceInput, RuleIdentity, RuleInput};
 
 const KEYWORDS: &str = r#"{"format":1,"kind":"keyword_registry","keywords":{}}"#;
@@ -154,4 +154,65 @@ fn references_must_bind_exactly_this_whole_snapshot() {
             "{label}"
         );
     }
+}
+
+#[test]
+fn a_published_program_opens_a_deck_by_permanent_printing() {
+    let native = snapshot();
+    let card = format!("c:{}", "a".repeat(32));
+    let face = format!("f:{}", "b".repeat(32));
+    let unused = format!("f:{}", "c".repeat(32));
+    let mut rules: Value = serde_json::from_str(&fixture::rules(&native, "t-anchor")).unwrap();
+    rules["input"]["kind"] = json!("resolved");
+    rules["titles"][0_usize]["anchor"] = json!({"kind":"face-id","region":"jp","face_id":face});
+    let rules = rules.to_string();
+    let mut refs = fixture::references(&native);
+    refs.wording = Some(
+        serde_json::from_value(json!({
+            "manifest_sha256": format!("sha256:{}", fixture::MANIFEST),
+            "faces": [
+                {"card_no":"t-anchor","native_face":0_u8,"face_id":face,
+                    "revisions":[{"revision_id":"revision","fields":[]}]},
+                {"card_no":"t-unused","native_face":0_u8,"face_id":unused,
+                    "revisions":[{"revision_id":"unused","fields":[]}]}
+            ]
+        }))
+        .unwrap(),
+    );
+    let programs = json!({
+        "format_version":"4.2.0",
+        "entries": [{"id":"synthetic","dsl_version":"1.0",
+            "ast":{"card_id":card,"scope":"shared","faces":{(face.clone()):{"abilities":[]}}}}],
+        "printings": {(card.clone()):{"representative":"test-t-anchor","tokens":[]}}
+    })
+    .to_string();
+    let identity = fixture::identity(&programs, &rules);
+    let mut document = json!({
+        "snapshot":native,"keywords":KEYWORDS,"references":refs,"rules":rules,"identity":identity,
+        "engine_identity":{"Resolved":{"region":"jp","snapshot_sha256":refs.snapshot_sha256,
+            "faces":[{"card_no":"t-anchor","face_ordinal":0_u8,"face_id":face,
+                "rules_name_id":"synthetic-name","title_code":"synthetic_empty"}]}},
+        "printings":[
+            {"printing_id":"test-t-anchor","card_no":"t-anchor","card_id":card,
+                "faces":[{"face_id":face,"revision_id":"revision","cost":1_u8,"rules_name":"t-anchor"}]},
+            {"printing_id":"test-t-unused","card_no":"t-unused","card_id":format!("c:{}", "c".repeat(32)),
+                "faces":[{"face_id":unused,"revision_id":"unused","cost":1_u8,"rules_name":"t-unused"}]}
+        ],
+    });
+    let prepared = PreparedBattle::new(&document.to_string(), &programs).unwrap();
+    let opening = prepared.open(&setup("test-t-anchor")).unwrap().start();
+    assert!(
+        opening
+            .iter()
+            .any(|delivery| matches!(delivery.message, HostMessage::Ready(_)))
+    );
+    assert_eq!(
+        prepared.open(&setup("test-t-unused")).err(),
+        Some(LoadError::Match)
+    );
+    document["printings"][0_usize]["faces"][0_usize]["revision_id"] = json!("foreign");
+    assert_eq!(
+        PreparedBattle::new(&document.to_string(), &programs).err(),
+        Some(LoadError::References)
+    );
 }

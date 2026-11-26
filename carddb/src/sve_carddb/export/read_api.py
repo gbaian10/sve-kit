@@ -265,11 +265,13 @@ def load_snapshot(root: Path) -> Snapshot:
     return Snapshot(manifest, digest(raw), tables)
 
 
-def load_battle_inputs(root: Path, region: str) -> BattleInputs:
+def load_battle_inputs(
+    root: Path, region: str, *, published: bool = False
+) -> BattleInputs:
     """Build native bytes and reference bindings from the same verified public closure."""
     snapshot = load_snapshot(root)
     try:
-        return build_battle_inputs(snapshot, region)
+        return build_battle_inputs(snapshot, region, published=published)
     except ValueError:
         raise ExportError("Battle snapshot projection is unavailable") from None
 

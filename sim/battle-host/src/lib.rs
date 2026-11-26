@@ -8,6 +8,8 @@
     reason = "The engine's dependencies already pull two syn and getrandom generations."
 )]
 
+extern crate alloc;
+
 pub mod load;
 pub mod session;
 #[cfg(target_arch = "wasm32")]

@@ -113,6 +113,52 @@ def source() -> Snapshot:
     return Snapshot({"regions": ["jp"]}, "sha256:" + "a" * 64, tables)
 
 
+def test_published_input_uses_an_adopted_face_for_missing_printed_wording() -> None:
+    snapshot = source()
+    snapshot.manifest.update(
+        {
+            "format_version": "4.2.0",
+            "files": [{"role": "programs"}],
+        }
+    )
+    for name, revision in [("face-front", "rev-front"), ("face-back", "rev-back")]:
+        face = next(row for row in snapshot.tables["face"] if row["id"] == name)
+        face["current"] = [{"region": "jp", "revision_id": revision}]
+    snapshot.tables["rules_name"] = [
+        {"id": "rules-front", "region": "jp", "official_name": "Synthetic rule name"}
+    ]
+    snapshot.tables["face_rules_name"] = [
+        {
+            "face_id": "face-front",
+            "region": "jp",
+            "rules_name_id": "rules-front",
+            "role": "primary",
+        }
+    ]
+    printing = snapshot.tables["printing"][0]
+    front = next(
+        face
+        for face in map(object_value, array(printing["faces"]))
+        if face["face_id"] == "face-front"
+    )
+    front["observations"] = [{"state": "missing_effect", "revision_id": None}]
+    inputs = build_battle_inputs(snapshot, "jp", published=True)
+    assert inputs.programs is not None
+    facts = object_value(array(object_value(inputs.programs.printings[0])["faces"])[0])
+    assert facts == {
+        "face_id": "face-front",
+        "revision_id": "rev-front",
+        "cost": 1,
+        "rules_name": "Synthetic rule name",
+    }
+    assert inputs.programs.rule_faces["SYNⓈa", 0]["rules_name_id"] == "rules-front"
+    array(front["observations"]).append(
+        {"state": "available", "revision_id": "rev-front"}
+    )
+    with pytest.raises(ValueError, match="Battle snapshot projection"):
+        build_battle_inputs(snapshot, "jp", published=True)
+
+
 def test_battle_input_preserves_all_faces_and_exact_native_bytes() -> None:
     result = build_battle_inputs(source(), "jp")
     rows = [object_value(parse(line)) for line in result.snapshot.splitlines()]
