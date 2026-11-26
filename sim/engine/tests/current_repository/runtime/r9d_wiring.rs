@@ -236,3 +236,37 @@ fn snow_awake_sets_both_stats_and_at_spellchain_ten_removes_ward() {
         );
     }
 }
+
+#[test]
+fn snow_awakes_set_stats_carry_over_when_the_opponent_super_evolves() {
+    let mut initial = draw_position();
+    initial["turn"]["elapsed_turns"] = json!({"P1":6_u8,"P2":5_u8});
+    initial["players"]["P1"]["leader"]["class"] = json!("ウィッチ");
+    initial["players"]["P1"]["zones"]["hand"] = json!([{"id":"spell","card":"BP16-049"}]);
+    initial["players"]["P2"]["sep"] = json!(1_u8);
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"enemy","card":"BP08-103"}]);
+    initial["players"]["P2"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP08-104"}]);
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"draw","card":"BP01-037"}]);
+    let mut board = game(&initial);
+    let play = board.play_internal_card("spell", PLAYER).unwrap();
+    resolved(target(&mut board, play, "BP08-103"));
+    finish_checks(&mut board);
+    let before = board.projection(View::Referee).unwrap();
+    assert_eq!(before["objects"]["enemy"]["power"], 1_u8);
+    assert_eq!(before["objects"]["enemy"]["hp"], 1_u8);
+
+    board.internal_rule_action(&json!({"do":"end-phase"})).unwrap();
+    finish_checks(&mut board);
+    pass_quick(&mut board);
+    finish_checks(&mut board);
+    let evolution = board
+        .internal_rule_action(
+            &json!({"do":"evolve","source":"enemy","evolve_card":"form","pay":{"pp":2_u8,"sep":1_u8}}),
+        )
+        .unwrap();
+    assert_eq!(evolution.outcome, "resolved");
+    let after = board.projection(View::Referee).unwrap();
+    assert_eq!(after["objects"]["enemy"]["power"], 3_u8);
+    assert_eq!(after["objects"]["enemy"]["hp"], 3_u8);
+    assert_eq!(after["P2"]["sep"], 0_u8);
+}

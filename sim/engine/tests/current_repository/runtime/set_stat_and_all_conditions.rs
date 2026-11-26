@@ -101,6 +101,34 @@ fn bp14_076_revives_at_one_one_then_its_lastword_banishes_the_cemetery_card() {
 }
 
 #[test]
+fn bp14_076_revived_motor_grave_digger_carries_its_set_stat_delta_into_evolution() {
+    let mut initial = draw_position();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"source","card":"BP14-076"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"revived","card":"BP12-072"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"form","card":"BP12-073"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"milled","card":"BP01-037"}]);
+    let mut game = game(&initial);
+    let step = game
+        .activate_internal_card("source", activated("BP14-076"), actor())
+        .unwrap();
+    answer(&mut game, step, "BP12-072");
+    let before = game.projection(View::Referee).unwrap();
+    assert_eq!(before["objects"]["revived"]["power"], 1_u8);
+    assert_eq!(before["objects"]["revived"]["hp"], 1_u8);
+
+    let step = resolve_pending_card(&mut game, "BP12-072");
+    answer(&mut game, step, "BP12-073");
+    let after = game.projection(View::Referee).unwrap();
+    assert_eq!(after["objects"]["revived"]["power"], 2_u8);
+    assert_eq!(after["objects"]["revived"]["hp"], 2_u8);
+
+    only_pending(&mut game);
+    let after_trigger = game.projection(View::Referee).unwrap();
+    assert_eq!(after_trigger["P1"]["field"].as_array().unwrap().len(), 3);
+    assert_eq!(after_trigger["P1"]["cemetery"], json!(["milled"]));
+}
+
+#[test]
 fn bp12_071_granted_lastword_banishes_the_cemetery_generation() {
     let mut cemetery = vec![json!({"id":"source","card":"BP12-071"})];
     cemetery.extend((0_u8..9).map(|i| json!({"id":format!("royal{i}"),"card":"BP01-037"})));

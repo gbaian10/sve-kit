@@ -927,7 +927,7 @@ impl Game {
             if let Some(expr) = node.get(field) {
                 self.numeric_prototype_operand(id, expr.is_i64())?;
                 let amount = self.number(expr, frame)?;
-                self.numeric_add_base(
+                self.numeric_prototype_add_base(
                     id,
                     if field == "power" { amount } else { 0 },
                     if field == "hp" { amount } else { 0 },
