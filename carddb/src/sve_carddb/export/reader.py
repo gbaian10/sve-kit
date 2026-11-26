@@ -211,7 +211,7 @@ def _load(
         payload_version = selected.payload_version(role)
         value = object_value(_payload(file, payloads[key]))
         if value["format_version"] != payload_version:
-            raise ValueError("Payload format differs from manifest profile")
+            raise ValueError("Payload format differs from manifest")
         if role in {"config", "programs"}:
             validate(
                 "Config" if role == "config" else "Programs", value, payload_version
