@@ -1,4 +1,4 @@
-//! Structural validation of a closed program body, independent of execution support.
+//! Internal structural invariants for IR built by lowering, runtime constructors and Rust tests.
 
 use super::{
     AbilityChoiceKind, AbilityCostPolicy, AbilityOperand, AbilityOrigin, AbilitySource,
@@ -37,7 +37,7 @@ mod values;
 mod visibility;
 pub use entries::{WellFormedCardProgram, WellFormedProcedure};
 
-/// An owned program body whose supported shapes passed structural validation.
+/// An owned internal program body whose supported shapes satisfy the structural invariants.
 ///
 /// This is not capability admission, a checked ability, or permission to execute.
 /// Neither mutable access nor a constructor bypassing validation is exposed.
@@ -54,7 +54,7 @@ pub struct WellFormedProgram {
     program: Program,
 }
 impl WellFormedProgram {
-    /// Validate a closed body with no externally supplied bindings or receipts.
+    /// Check a constructed closed body in its own binding and receipt scope.
     ///
     /// # Errors
     /// Returns the first structural error, including shapes not yet checked.

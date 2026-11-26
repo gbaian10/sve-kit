@@ -137,7 +137,11 @@ fn procedure(window: QuickWindow) -> Result<WellFormedProcedure> {
             },
         },
     })
-    .map_err(invalid)
+    .map_err(|failure| {
+        invalid(format_args!(
+            "internal Quick procedure invariant: {failure}"
+        ))
+    })
 }
 
 impl Game {

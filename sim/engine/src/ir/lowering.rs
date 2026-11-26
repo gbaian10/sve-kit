@@ -109,7 +109,7 @@ use serde_json::{Value, json};
 #[derive(Clone, Debug, PartialEq, Eq, thiserror::Error)]
 #[error("{code} at {path}")]
 pub struct LoweringError {
-    /// `unsupported_construct`, `invalid_expanded`, `invalid_schema`, or `ill_formed`.
+    /// Stable diagnostic code, including `ill_formed` for an internal IR invariant failure.
     pub code: &'static str,
     /// RFC 6901 pointer in the candidate tree.
     pub path: String,
@@ -304,7 +304,7 @@ fn lower_entries(
     costs::lower_selected(coordinates, entries, &mut allocator, &mut modifiers)?;
     play_faces(&modifiers, exchange.as_ref(), additional.as_ref())
         .ok_or_else(|| unsupported(path))?;
-    check_card(
+    check_lowered_card(
         CardProgram {
             abilities,
             card_play_costs: face_play_costs(modifiers, exchange, additional),
@@ -435,7 +435,12 @@ fn face_play_costs(
         })
 }
 
-fn check_card(card: CardProgram, path: &str) -> Result<WellFormedCardProgram, LoweringError> {
+fn check_lowered_card(
+    card: CardProgram,
+    path: &str,
+) -> Result<WellFormedCardProgram, LoweringError> {
+    // AST decoding has produced internal instructions. Check the compiler's output before
+    // it can become the immutable IR used by runtime admission, including in release builds.
     WellFormedCardProgram::check(card).map_err(|failure| {
         error(
             "ill_formed",
