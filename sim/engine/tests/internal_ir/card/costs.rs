@@ -418,10 +418,6 @@ fn one_matching_play_consumes_all_stacked_player_discounts() {
         .unwrap();
     assert!(matches!(activation, CardPlay::Resolved(_)));
     game.resume_internal_card().unwrap();
-    assert!(
-        game.legal().unwrap().is_empty(),
-        "prototype enumeration cannot bypass a player cost layer"
-    );
     let observed = game.observe(Viewer::P1).unwrap();
     let player = observed
         .players

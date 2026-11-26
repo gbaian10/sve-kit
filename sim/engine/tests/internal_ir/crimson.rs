@@ -82,8 +82,9 @@ fn crimson_does_not_carry_a_decrease_into_the_next_own_turn() {
     )
     .unwrap();
     for _ in 0..2 {
-        game.decide(&json!({"do":"end-phase"}), "end").unwrap();
-        game.decide(&json!({"do":"pass"}), "quick-pass").unwrap();
+        game.internal_rule_action(&json!({"do":"end-phase"}))
+            .unwrap();
+        pass_quick(&mut game);
     }
     assert_eq!(
         game.projection(View::Referee).unwrap()["turn"]["active"],

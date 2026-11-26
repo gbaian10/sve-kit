@@ -7,7 +7,7 @@
 
 use self::card::play::PlayState;
 use super::knowledge::PublishedKnowledge;
-use super::{Frame, Game, View, int, string};
+use super::{Frame, Game, View, int};
 use crate::game::player::ExchangeRouteChoice;
 use crate::game::player::observation::CardFace;
 use crate::game::player::{IntegerSource, Viewer};
@@ -1494,8 +1494,7 @@ impl Game {
         self.internal_prototype_abilities()
     }
 
-    /// Only future prototype actions and phase triggers can coexist without consuming typed facts.
-    /// Waiting and delayed codes count too: a grant can outlive its holder's generation there.
+    /// Reject unsupported abilities and continuations carried by a trusted fixture.
     pub(in crate::game) fn internal_prototype_abilities(&self) -> Result<()> {
         if !self.card_runtime.is_empty() {
             if !self.state.pending.is_empty()
@@ -1522,34 +1521,20 @@ impl Game {
             }
             return Ok(());
         }
-        let admitted = |ability: &Value| match string(&ability["kind"]) {
-            "spell" | "activated" | "evolve" => true,
-            "trigger" => matches!(string(&ability["event"]), "end" | "main_start"),
-            _ => false,
-        };
         for object in self.state.objects.values() {
-            if !self.abilities(&object.id)?.iter().all(admitted)
-                || !self.prototype_keywords(&object.id)?.is_empty()
+            if !self.printed_abilities(&object.id)?.is_empty()
+                || !self.setup_keywords(&object.id)?.is_empty()
             {
                 return Err(unsupported(
                     "context requires prototype abilities or keywords",
                 ));
             }
         }
-        if !self
-            .state
-            .pending
-            .iter()
-            .all(|pending| admitted(&pending.code))
-            || self
-                .state
-                .delayed
-                .iter()
-                .any(|entry| entry["event"] != "end")
+        if !self.state.pending.is_empty()
+            || !self.state.delayed.is_empty()
+            || !self.state.continuous.is_empty()
         {
-            return Err(unsupported(
-                "context requires prototype waits outside phase triggers",
-            ));
+            return Err(unsupported("fixture carries prototype continuation state"));
         }
         Ok(())
     }

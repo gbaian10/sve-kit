@@ -1,92 +1,34 @@
 use super::*;
-use crate::{board_fixtures, rule_fixtures};
-use sve_battle_contract::{CardRef, Nat, RoleChoice, observation::Facing};
-use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
-use sve_engine::catalog::EngineIdentityInput;
+use crate::repository;
+use sve_battle_contract::{Nat, RoleChoice, observation::Facing};
+use sve_engine::battle::BattleReferences;
+use sve_engine::catalog::SelectedEffects;
 
-fn fixture() -> (Arc<Catalog>, BattleReferences) {
-    let (base_snapshot, keywords, document) = board_fixtures::catalog_documents(&json!("1"));
-    let mut rows: Vec<Value> = base_snapshot
-        .lines()
-        .map(|line| serde_json::from_str(line).unwrap())
-        .collect();
-    for row in &mut rows {
-        if row["number"] == "unit-follower" {
-            row["faces"][0]["title"] = json!("synthetic-start-label");
-        }
-    }
-    let snapshot = rows
-        .iter()
-        .map(Value::to_string)
-        .collect::<Vec<_>>()
-        .join("\n");
-    let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-follower"]["abilities"] = json!([
-        {"kind":"static","line":1_i32,"body":{"op":"keyword","name":"start_amulet"}}
-    ]);
-    let mut keywords: Value = serde_json::from_str(&keywords).unwrap();
-    keywords["keywords"]["start_amulet"] = json!({"ja":"スタートアミュレット","rule":"14.4.3",
-        "expansion":{"op":"keyword","name":"start_amulet"}});
-    let rules = rule_fixtures::rules(
-        &snapshot,
-        json!([rule_fixtures::title(
-            "synthetic_start",
-            "unit-follower",
-            json!([{"kind":"opening_start_amulet"}])
-        )]),
-        json!([]),
-    );
-    let catalog = Arc::new(
-        Catalog::from_documents_with_rules(
-            &snapshot,
-            &keywords.to_string(),
-            &[("synthetic-start".into(), document.to_string())],
-            &rules.to_string(),
-            &EngineIdentityInput::LegacyJp,
-        )
-        .unwrap(),
-    );
-    let faces = ["unit-follower", "unit-spell", "unit-amulet"]
-        .into_iter()
-        .map(|number| PrintingFaceIdentity {
-            card_no: number.into(),
-            native_face: 0,
-            card: CardRef {
-                printing_id: format!("printing-{number}"),
-                face: Nat::from(0_u32),
-            },
-        })
-        .collect();
-    let references = BattleReferences::new(
-        &catalog,
-        ReferenceInput {
-            rules: None,
-            wording: None,
-            region: "jp".into(),
-            snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
-            faces,
-        },
+const START_AMULET: &str = "CSD03a-016";
+const AMULET: &str = "BP09-102";
+const SPELL: &str = "BP01-024";
+
+fn fixture() -> (&'static SelectedEffects, &'static BattleReferences) {
+    (
+        repository::selection_with_rules(),
+        repository::battle_references(),
     )
-    .unwrap();
-    (catalog, references)
 }
 
-fn make_start(catalog: &Arc<Catalog>, fillers: [&str; 2]) -> Game {
+fn make_start(selected: &SelectedEffects, fillers: [&str; 2]) -> Game {
     let mut players = json!({});
     for (player, filler) in ["P1", "P2"].into_iter().zip(fillers) {
         let mut deck = (0_u32..8)
             .map(|index| json!({"id":format!("physical-{player}-{index}"),"card":filler}))
             .collect::<Vec<_>>();
         for index in 0_u32..2 {
-            deck.push(
-                json!({"id":format!("physical-{player}-start-{index}"),"card":"unit-follower"}),
-            );
+            deck.push(json!({"id":format!("physical-{player}-start-{index}"),"card":START_AMULET}));
         }
-        players[player] = json!({"construction":"title","title_code":"synthetic_start",
+        players[player] = json!({"construction":"title","title_code":"cardfight_vanguard",
             "leader":{"class":"ニュートラル"},"deck_list":deck,"evolve_deck_list":[]});
     }
-    Game::new(
-        Arc::clone(catalog),
+    Game::from_selected_effects(
+        selected.clone(),
         &json!({"pregame":true,"players":players}),
         &Value::Null,
         &json!({"first_chooser":"P2"}),
@@ -213,8 +155,8 @@ fn assert_candidates(
 
 #[test]
 fn wire_start_amulet_selects_the_second_same_printing_for_each_seat() {
-    let (catalog, references) = fixture();
-    let mut game = make_start(&catalog, ["unit-spell", "unit-amulet"]);
+    let (selected, references) = fixture();
+    let mut game = make_start(selected, [SPELL, AMULET]);
     for actor in [Viewer::P1, Viewer::P2] {
         let Input::Question(native) = game.input(actor) else {
             panic!("native start question")
@@ -224,11 +166,11 @@ fn wire_start_amulet_selects_the_second_same_printing_for_each_seat() {
         };
         assert_eq!(cards.len(), 2);
         assert!(
-            game.battle_observation(actor, &references).is_ok(),
+            game.battle_observation(actor, references).is_ok(),
             "the native board is independently projectable"
         );
         let before = exact_authority(&game);
-        let projection = projected(&game, actor, &references, &format!("host-start-{actor:?}"));
+        let projection = projected(&game, actor, references, &format!("host-start-{actor:?}"));
         assert!(
             exact_authority(&game) == before,
             "projection cannot advance the opening"
@@ -236,7 +178,7 @@ fn wire_start_amulet_selects_the_second_same_printing_for_each_seat() {
         assert_eq!(assert_candidates(&projection, &cards, actor), Some(()));
         assert_eq!(
             projection.observation(),
-            &game.battle_observation(actor, &references).unwrap()
+            &game.battle_observation(actor, references).unwrap()
         );
         assert_eq!(projection.question().usage, wire::QuestionUse::StartAmulet);
         assert!(projection.question().is_coherent());
@@ -244,7 +186,7 @@ fn wire_start_amulet_selects_the_second_same_printing_for_each_seat() {
             game.battle_question(
                 opposite(actor),
                 &QuestionId::new("waiting".into()),
-                &references
+                references
             )
             .unwrap()
             .is_none()
@@ -281,7 +223,7 @@ fn wire_start_amulet_selects_the_second_same_printing_for_each_seat() {
             game.submit_player(actor, command).kind,
             SubmissionKind::Applied
         );
-        assert_field(&game, &references, actor, false);
+        assert_field(&game, references, actor, false);
     }
 }
 
@@ -319,11 +261,11 @@ fn assert_field(game: &Game, references: &BattleReferences, owner: Viewer, publi
 
 #[test]
 fn wire_start_amulet_forgets_unselected_handles_and_reveals_after_both_mulligans() {
-    let (catalog, references) = fixture();
-    let mut game = make_start(&catalog, ["unit-spell", "unit-amulet"]);
+    let (selected, references) = fixture();
+    let mut game = make_start(selected, [SPELL, AMULET]);
     let mut leftovers = Vec::new();
     for actor in [Viewer::P1, Viewer::P2] {
-        let projection = projected(&game, actor, &references, &format!("host-start-{actor:?}"));
+        let projection = projected(&game, actor, references, &format!("host-start-{actor:?}"));
         let Some(Subject::Card {
             object: Some(handle),
             ..
@@ -332,19 +274,19 @@ fn wire_start_amulet_forgets_unselected_handles_and_reveals_after_both_mulligans
             panic!("card subject")
         };
         leftovers.push((actor, handle.clone()));
-        choose_last(&mut game, actor, &references);
+        choose_last(&mut game, actor, references);
     }
     for (actor, old_handle) in leftovers {
         assert!(
             !game
-                .battle_observation(actor, &references)
+                .battle_observation(actor, references)
                 .unwrap()
                 .objects
                 .contains_key(&old_handle),
             "shuffling the unselected deck card must retire its former capability"
         );
     }
-    let first = projected(&game, Viewer::P2, &references, "host-first");
+    let first = projected(&game, Viewer::P2, references, "host-first");
     let command = first
         .answer(
             Viewer::P2,
@@ -358,9 +300,9 @@ fn wire_start_amulet_forgets_unselected_handles_and_reveals_after_both_mulligans
     );
     for actor in [Viewer::P1, Viewer::P2] {
         for owner in [Viewer::P1, Viewer::P2] {
-            assert_field(&game, &references, owner, false);
+            assert_field(&game, references, owner, false);
         }
-        let projection = projected(&game, actor, &references, &format!("host-hand-{actor:?}"));
+        let projection = projected(&game, actor, references, &format!("host-hand-{actor:?}"));
         assert_eq!(projection.question().usage, wire::QuestionUse::Mulligan);
         let keep = WireAnswer::Mulligan {
             redraw: false,
@@ -375,15 +317,15 @@ fn wire_start_amulet_forgets_unselected_handles_and_reveals_after_both_mulligans
         );
     }
     for owner in [Viewer::P1, Viewer::P2] {
-        assert_field(&game, &references, owner, true);
+        assert_field(&game, references, owner, true);
     }
 }
 
 #[test]
 fn wire_start_amulet_rejects_invalid_selections_without_advancing_authority() {
-    let (catalog, references) = fixture();
-    let mut game = make_start(&catalog, ["unit-spell", "unit-amulet"]);
-    let projection = projected(&game, Viewer::P1, &references, "host-start-P1");
+    let (selected, references) = fixture();
+    let mut game = make_start(selected, [SPELL, AMULET]);
+    let projection = projected(&game, Viewer::P1, references, "host-start-P1");
     let candidates = &selection(&projection).unwrap().candidates;
     let chosen = candidates[0].id.clone();
     let before = exact_authority(&game);
@@ -471,20 +413,20 @@ fn wire_start_amulet_rejects_invalid_selections_without_advancing_authority() {
 
 #[test]
 fn wire_start_amulet_board_and_question_do_not_depend_on_the_other_deck() {
-    let (catalog, references) = fixture();
+    let (selected, references) = fixture();
     for actor in [Viewer::P1, Viewer::P2] {
         let mut projections = Vec::new();
-        for secret in ["unit-spell", "unit-amulet"] {
+        for secret in [SPELL, AMULET] {
             let fillers = if actor == Viewer::P1 {
-                ["unit-spell", secret]
+                [SPELL, secret]
             } else {
-                [secret, "unit-spell"]
+                [secret, SPELL]
             };
-            let mut game = make_start(&catalog, fillers);
+            let mut game = make_start(selected, fillers);
             if actor == Viewer::P2 {
-                choose_last(&mut game, Viewer::P1, &references);
+                choose_last(&mut game, Viewer::P1, references);
             }
-            let projection = projected(&game, actor, &references, &format!("host-start-{actor:?}"));
+            let projection = projected(&game, actor, references, &format!("host-start-{actor:?}"));
             let serialized =
                 serde_json::to_string(&(projection.observation(), projection.question())).unwrap();
             for private in ["physical-", "token", "serial", "epoch"] {

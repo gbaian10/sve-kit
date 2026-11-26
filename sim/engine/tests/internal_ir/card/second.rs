@@ -3,7 +3,7 @@ use std::sync::OnceLock;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::ir::lowering::ExpandedLowerer;
 
-pub(super) fn lowerer() -> &'static ExpandedLowerer {
+pub(crate) fn lowerer() -> &'static ExpandedLowerer {
     static LOWERER: OnceLock<ExpandedLowerer> = OnceLock::new();
     LOWERER.get_or_init(|| ExpandedLowerer::new().unwrap())
 }

@@ -206,10 +206,6 @@ impl Game {
         }
     }
 
-    pub(in crate::game) fn internal_installed_play_cost(&self, id: &str, base: i64) -> Result<i64> {
-        self.installed_cost_with(id, base, CostKind::Play, None)
-    }
-
     pub(in crate::game::internal) fn internal_installed_play_parts(
         &self,
         id: &str,

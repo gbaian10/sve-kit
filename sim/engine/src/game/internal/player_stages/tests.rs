@@ -194,12 +194,35 @@ fn player_stages_advance_each_draw_instruction_snapshot() {
 #[test]
 fn prohibited_empty_deck_does_not_fail_while_the_other_player_finishes_drawing() {
     let mut game = fixture();
+    let origin = AbilitySource {
+        holder: ObjectOperand::SourceHolder {},
+        origin: AbilityOrigin::Printed {
+            face: FaceId("0".into()),
+            line: Nat(1),
+        },
+        controller: PlayerRef::Controller {},
+    };
+    let card = WellFormedCardProgram::check(CardProgram {
+        card_play_costs: vec![],
+        abilities: vec![Located {
+            source: SourceSpan {
+                card_id: "unit".into(),
+                card_no: "unit".into(),
+                face: "0".into(),
+                owner: "card".into(),
+                field: "text".into(),
+                line: 1,
+                fragment: None,
+                section: None,
+                scope: "fragment".into(),
+                author_path: "synthetic".into(),
+            },
+            node: draw_restrictions::ability(origin, ScopeId(1), PlayerRelation::Opponents),
+        }],
+    })
+    .unwrap();
+    game.load_internal_card("unit", &card).unwrap();
     let mut execution = execution(&mut game);
-    game.state.continuous.push(json!({
-        "effect":{"op":"restrict","action":"draw"},
-        "applies_to":["P1.leader"],
-        "context":serde_json::to_value(execution.frame()).unwrap()
-    }));
     let instruction = Instruction {
         id: InstructionId(1),
         receipt: ReceiptId(1),

@@ -5,74 +5,11 @@
 
 use serde_json::{Value, json};
 
-use super::costs::CostKind;
 use super::{Frame, Game, int, list, scalar, string};
 use crate::ir::{Ability, SnapshotId};
 use crate::{EngineFailure, Result, invalid};
 
 impl Game {
-    pub(super) fn evolution_actions(&self, seat: &str) -> Result<Vec<Value>> {
-        let mut result = Vec::new();
-        for source in self.zone_ids(seat, "field") {
-            for code in self
-                .abilities(&source)?
-                .iter()
-                .filter(|code| code["kind"] == "evolve")
-            {
-                for evolve in self.zone_ids(seat, "evolve_deck") {
-                    let card = &self.object(&evolve)?.card;
-                    let count = self
-                        .catalog
-                        .cards
-                        .get(card)
-                        .map_or(0, |card| card.faces.len());
-                    for face in 0..count {
-                        result.extend(self.evolution_options(&source, &evolve, face, code)?);
-                    }
-                }
-            }
-        }
-        Ok(result)
-    }
-
-    fn evolution_options(
-        &self,
-        source: &str,
-        evolve: &str,
-        face: usize,
-        code: &Value,
-    ) -> Result<Vec<Value>> {
-        if !self.evolution_pair(source, evolve, face, code)? {
-            return Ok(Vec::new());
-        }
-        let frame = self.frame_for(source)?;
-        let cost = self.evolution_pp(code, &frame)?;
-        let seat = &frame.controller;
-        let player = self.player(seat)?;
-        let mut result = Vec::new();
-        let mut non_pp = code.clone();
-        non_pp["costs"] = json!(
-            list(&code["costs"])
-                .into_iter()
-                .filter(|payment| payment["op"] != "pp")
-                .collect::<Vec<_>>()
-        );
-        for ep in 0..=player.ep.min(1).min(cost) {
-            let pp = cost.saturating_sub(ep);
-            if pp > int(&player.pp["current"]) {
-                continue;
-            }
-            for sep in 0..=i64::from(player.sep > 0 && self.can_super_evolve(seat)) {
-                let mut decision = json!({"do":"evolve","source":source,"evolve_card":evolve,"ability":self.reference(source,code),"pay":{"pp":pp,"ep":ep,"sep":sep}});
-                if face > 0 {
-                    decision["face"] = json!(face);
-                }
-                result.extend(self.parameterize(decision, &non_pp, &frame)?);
-            }
-        }
-        Ok(result)
-    }
-
     pub(in crate::game) fn evolution_pair(
         &self,
         source: &str,
@@ -83,7 +20,7 @@ impl Game {
         let object = self.object(source)?;
         if code["kind"] != "evolve"
             || !self.evolution_resource_matches(source, evolve, face, &code["body"])?
-            || (!self.unlimited_evolution(&object.controller)?
+            || (!self.internal_unlimited_evolution(&object.controller)?
                 && self
                     .state
                     .counters
@@ -94,9 +31,7 @@ impl Game {
         {
             return Ok(false);
         }
-        let frame = self.frame_for(source)?;
-        code.get("play_if")
-            .map_or(Ok(true), |condition| self.truth(condition, &frame))
+        Ok(true)
     }
 
     pub(in crate::game) fn can_receive_evolution(&self, source: &str) -> Result<bool> {
@@ -156,93 +91,9 @@ impl Game {
         })
     }
 
-    pub(super) fn evolution_effect(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
-        frame.performed = 0;
-        let mut subjects = Vec::new();
-        for subject in self.select(&node["subjects"], frame)? {
-            if self.can_receive_evolution(&subject)? {
-                subjects.push(subject);
-            }
-        }
-        if subjects.len() > 1 {
-            return Err(EngineFailure::Unsupported(
-                "simultaneous evolution of multiple subjects".into(),
-            ));
-        }
-        let Some(source) = subjects.first() else {
-            return Ok(());
-        };
-        let mut choices = self.effect_evolution_choices(source, node)?;
-        if choices.is_empty() {
-            choices.push(json!({"do":"resolve-choice","select":[]}));
-        }
-        self.prompt(frame, choices, json!({"resume":"effect-evolve","source":source,"generation":self.object(source)?.generation,"node":node}));
-        let controller = self.object(source)?.controller.clone();
-        if let Some(prompt) = self.state.prompt.as_mut() {
-            prompt.by = controller;
-        }
-        Ok(())
-    }
-
-    fn effect_evolution_choices(&self, source: &str, node: &Value) -> Result<Vec<Value>> {
-        let mut choices = Vec::new();
-        for resource in self.zone_ids(&self.object(source)?.controller, "evolve_deck") {
-            let card = &self.object(&resource)?.card;
-            let count = self
-                .catalog
-                .cards
-                .get(card)
-                .map_or(0, |card| card.faces.len());
-            for face in 0..count {
-                if self.evolution_resource_matches(source, &resource, face, node)? {
-                    let mut choice = json!({"do":"resolve-choice","select":[resource]});
-                    if count > 1 {
-                        choice["face"] = json!(face);
-                    }
-                    choices.push(choice);
-                }
-            }
-        }
-        Ok(choices)
-    }
-
-    pub(super) fn resume_effect_evolution(
-        &mut self,
-        task: &Value,
-        decision: &Value,
-        frame: &mut Frame,
-    ) -> Result<()> {
-        frame.performed = 0;
-        let selected = list(&decision["select"]);
-        let Some(resource) = selected.first().and_then(Value::as_str) else {
-            return Ok(());
-        };
-        let source = string(&task["source"]);
-        let face = usize::try_from(int(&decision["face"])).map_err(invalid)?;
-        if task["generation"].as_u64() != Some(self.object(source)?.generation)
-            || !self.evolution_resource_matches(source, resource, face, &task["node"])?
-        {
-            return Err(invalid(
-                "effect evolution no longer matches its saved subjects",
-            ));
-        }
-        self.numeric_evolution_allowed(source, false)?;
-        self.object_mut(resource)?.state["face"] = json!(face);
-        self.reveal(&[resource.into()], "all", frame, false)?;
-        self.apply_evolution(source, resource, face, 0, frame)?;
-        frame.performed = 1;
-        Ok(())
-    }
-
     pub(in crate::game) fn evolution_pp(&self, code: &Value, frame: &Frame) -> Result<i64> {
-        let base = list(&code["costs"])
-            .iter()
-            .filter(|cost| cost["op"] == "pp")
-            .try_fold(0_i64, |sum, cost| {
-                self.number(&cost["amount"], frame)
-                    .map(|amount| sum.saturating_add(amount.max(0)))
-            })?;
-        let base = self.adjusted_pp_cost(&frame.source, base, frame, CostKind::Evolution)?;
+        let base = int(&code["costs"][0]["amount"]).max(0);
+        self.require_ability_sources("cost adjustment")?;
         self.internal_installed_evolution_cost(&frame.source, base)
             .map(|cost| cost.max(0))
     }
@@ -257,28 +108,11 @@ impl Game {
             })
     }
 
-    pub(super) fn evolve_action(&mut self, decision: &Value) -> Result<bool> {
-        let source = string(&decision["source"]);
-        let code = if decision.get("ability").is_some() {
-            self.ability(source, &decision["ability"])?
-        } else {
-            let Some(code) = self
-                .abilities(source)?
-                .into_iter()
-                .find(|code| code["kind"] == "evolve")
-            else {
-                return Ok(false);
-            };
-            code
-        };
-        self.evolve_with_code(decision, &code, None, false)
-    }
-
     pub(in crate::game) fn evolve_with_code(
         &mut self,
         decision: &Value,
         code: &Value,
-        intrinsic: Option<&Ability>,
+        intrinsic: &Ability,
         probe: bool,
     ) -> Result<bool> {
         let source = string(&decision["source"]);
@@ -290,7 +124,6 @@ impl Game {
             return Ok(false);
         }
         let mut frame = self.start_frame(source, self.reference(source, code), decision)?;
-        self.freeze(code, "play-start", &mut frame)?;
         let cost = self.evolution_pp(code, &frame)?;
         let pp = int(&decision["pay"]["pp"]);
         let ep = int(&decision["pay"]["ep"]);
@@ -304,35 +137,18 @@ impl Game {
             || player.ep < ep
             || player.sep < sep
             || (sep > 0 && !self.can_super_evolve(&frame.controller))
-            || !self.valid_parameters(code, &frame)?
         {
-            return Ok(false);
-        }
-        let mut non_pp = code.clone();
-        non_pp["costs"] = json!(
-            list(&code["costs"])
-                .into_iter()
-                .filter(|payment| payment["op"] != "pp")
-                .collect::<Vec<_>>()
-        );
-        if !self.can_pay(&list(&non_pp["costs"]), &frame)? {
             return Ok(false);
         }
         self.numeric_evolution_allowed(source, true)?;
-        if let Some(ability) = intrinsic
-            && !self.internal_evolution_payment(ability, decision)?
-        {
+        if !self.internal_evolution_payment(intrinsic, decision)? {
             return Ok(false);
         }
         if probe {
             return Ok(true);
         }
-        if intrinsic.is_some() {
-            self.object_mut(evolve)?.state["face"] = json!(face);
-            self.reveal(&[evolve.into()], "all", &frame, false)?;
-        }
-        self.consume_cost_adjustments(source, CostKind::Evolution)?;
-        self.pay_costs(&non_pp, &mut frame)?;
+        self.object_mut(evolve)?.state["face"] = json!(face);
+        self.reveal(&[evolve.into()], "all", &frame, false)?;
         if self.object(source)?.zone != "field" {
             return Err(EngineFailure::Unsupported(
                 "evolution cost moved its source".into(),
@@ -401,10 +217,9 @@ impl Game {
         );
         self.player_step_actor(&event, &frame.controller);
         frame.cause = json!({"event":event});
-        let affected = [self.object(source)?.clone()];
-        let mut pending = self.stat_change_triggers(&[previous], &frame.cause)?;
-        pending.extend(self.collect_triggers("evolve", &affected, &frame.cause)?);
-        self.enqueue(pending);
+        self.record_evolution_stat_change(&previous)?;
+        self.require_ability_sources("event evolve subscriptions")?;
+        self.group();
         let mut player_super_step = None;
         if sep > 0 {
             let super_group = self.group();
@@ -415,8 +230,8 @@ impl Game {
             );
             self.player_step_actor(&player_step, &frame.controller);
             player_super_step = Some(player_step);
-            let super_pending = self.collect_triggers("super_evolve", &affected, &frame.cause)?;
-            self.enqueue(super_pending);
+            self.require_ability_sources("event super_evolve subscriptions")?;
+            self.group();
         }
         if !self.card_runtime.is_empty() {
             self.object_mut(source)?.state["super_evolved"] = json!(sep > 0);

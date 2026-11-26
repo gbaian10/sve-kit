@@ -74,7 +74,7 @@ pending 先解決。每次 Quick 的新待機必須處理完，才列下一題�
 
 authority 保存規則續體：Attack 或 EndPhase、該次程序身分、原攻擊 context（如適用）、
 下一個規則步驟，以及有無未完成的 play／CheckTiming。typed 的 Awaiting／Resolved／
-CheckTiming 不可漏接回原窗口；既有原型 `decide`／`submit` 不能繞過 typed pending。
+CheckTiming 須回到原窗口，先完成 typed pending。
 整段只走一條 CheckTiming 排程，不重複發事件。沒有待答不表示 Pass。
 
 依[觸發與 LKI 的終局規則](trigger-lki-semantics.md#52-prepared-play回復與終局)，

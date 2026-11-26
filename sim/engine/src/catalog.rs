@@ -9,8 +9,6 @@ use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use core::iter::once;
 use jsonschema::validator_for;
-use std::fs::{read_dir, read_to_string};
-use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
@@ -20,7 +18,6 @@ use crate::{EngineFailure, Result, invalid};
 pub(crate) mod current;
 mod rule_bindings;
 mod selection;
-mod semantics;
 
 pub use rule_bindings::{EngineIdentityInput, FaceIdentity};
 pub(crate) use selection::RuntimeCards;
@@ -52,8 +49,7 @@ pub struct Catalog {
     pub(crate) keywords: BTreeMap<String, Value>,
     pub(crate) token_definitions: BTreeMap<String, TokenDefinition>,
     pub(crate) rule_bindings: rule_bindings::RuleBindings,
-    /// Schema-valid programs that failed the load-time semantic checks, with every
-    /// finding as `file:line: message`. They are never executed.
+    /// Current selection rejections carried for unresolved source rulings.
     #[serde(default)]
     pub(crate) rejected: BTreeMap<String, Vec<String>>,
     /// Current construction names per printing number and face, from the selection.
@@ -63,58 +59,6 @@ pub struct Catalog {
 }
 
 impl Catalog {
-    /// Loads snapshot facts, validates YAML against the authoritative schema, then expands macros.
-    ///
-    /// # Errors
-    /// Rejects missing files, duplicate cards, unknown macros and invalid programs.
-    pub fn load(snapshot: &Path, authored: &Path) -> Result<Self> {
-        Self::load_with_identity(snapshot, authored, &EngineIdentityInput::LegacyJp)
-    }
-
-    /// Loads explicit identity input; the default loader is restricted to legacy JP.
-    ///
-    /// # Errors
-    /// Rejects inconsistent input, missing bindings and the ordinary catalogue errors.
-    pub fn load_with_identity(
-        snapshot: &Path,
-        authored: &Path,
-        identity: &EngineIdentityInput,
-    ) -> Result<Self> {
-        for area in [
-            "rules/effects-index",
-            "rules/author-effects",
-            "rules/effect-bodies",
-        ] {
-            if authored.join(area).try_exists().map_err(invalid)? {
-                return Err(EngineFailure::Unsupported(
-                    "current author inventory requires Catalog::from_current_selection".into(),
-                ));
-            }
-        }
-        let mut paths: Vec<_> = read_dir(authored.join("rules/effects"))
-            .map_err(invalid)?
-            .map(|entry| entry.map(|entry| entry.path()).map_err(invalid))
-            .collect::<Result<_>>()?;
-        paths.sort();
-        let documents = paths
-            .iter()
-            .filter(|path| path.extension().is_some_and(|ext| ext == "yaml"))
-            .map(|path| {
-                Ok((
-                    path.display().to_string(),
-                    read_to_string(path).map_err(invalid)?,
-                ))
-            })
-            .collect::<Result<Vec<_>>>()?;
-        Self::from_documents_with_rules(
-            &read_to_string(snapshot).map_err(invalid)?,
-            &read_to_string(authored.join("rules/keywords.yaml")).map_err(invalid)?,
-            &documents,
-            &read_to_string(authored.join("rules/engine/index.yaml")).map_err(invalid)?,
-            identity,
-        )
-    }
-
     /// Consume `CurrentAuthorSources.selection_from_results()` from the trusted Python reader.
     ///
     /// # Errors
@@ -180,7 +124,7 @@ impl Catalog {
     /// Portable loader for caller-supplied snapshot and YAML bytes, including browser hosts.
     ///
     /// # Errors
-    /// The same validation failures as the filesystem loader.
+    /// Rejects malformed snapshot facts, keyword definitions and synthetic programs.
     pub fn from_documents(
         snapshot: &str,
         keywords: &str,
@@ -258,28 +202,7 @@ impl Catalog {
                 if catalog.programs.contains_key(number) || catalog.rejected.contains_key(number) {
                     return Err(invalid(format!("duplicate program: {number}")));
                 }
-                let card_type = catalog
-                    .face(number, 0)
-                    .ok()
-                    .and_then(|face| face["card_type"].as_str())
-                    .unwrap_or_default()
-                    .to_owned();
-                let findings = semantics::check_program(&program, &catalog.keywords, &card_type);
-                if findings.is_empty() {
-                    catalog.programs.insert(number.clone(), program);
-                } else {
-                    let located = findings
-                        .iter()
-                        .map(|finding| {
-                            format!(
-                                "{name}:{}: {}",
-                                locate(text, number, &finding.needle),
-                                finding.message
-                            )
-                        })
-                        .collect();
-                    catalog.rejected.insert(number.clone(), located);
-                }
+                catalog.programs.insert(number.clone(), program);
             }
         }
         for (number, program) in &catalog.programs {
@@ -340,23 +263,11 @@ impl Catalog {
         Ok(names.into_iter().collect())
     }
 
-    /// Number of authored card programs, including explicit partial programs.
-    #[must_use]
-    pub fn authored_count(&self) -> usize {
-        self.programs.len()
-    }
-
     pub(crate) fn face(&self, number: &str, index: usize) -> Result<&Value> {
         self.cards
             .get(number)
             .and_then(|card| card.faces.get(index))
             .ok_or_else(|| invalid(format!("unknown card face: {number}/{index}")))
-    }
-
-    /// Cards whose authored program was rejected at load, with located findings.
-    #[must_use]
-    pub const fn rejections(&self) -> &BTreeMap<String, Vec<String>> {
-        &self.rejected
     }
 
     pub(crate) fn program(&self, number: &str) -> Result<&Value> {
@@ -515,26 +426,6 @@ impl Catalog {
             })
             .map_or_else(|| name.to_owned(), |(key, _)| key.clone())
     }
-}
-
-/// 1-based line of `needle` inside the card's block, or of the card key itself.
-fn locate(text: &str, number: &str, needle: &str) -> usize {
-    let key = format!("  {number}:");
-    let lines = text.lines().collect::<Vec<_>>();
-    let Some(start) = lines.iter().position(|line| *line == key) else {
-        return 0;
-    };
-    let block = lines
-        .iter()
-        .enumerate()
-        .skip(start.saturating_add(1))
-        .take_while(|(_, line)| !line.starts_with("  ") || line.starts_with("   "));
-    block
-        .filter(|(_, line)| line.contains(needle))
-        .map(|(index, _)| index)
-        .next()
-        .unwrap_or(start)
-        .saturating_add(1)
 }
 
 pub(crate) fn yaml<'de, T>(text: &'de str) -> Result<T>

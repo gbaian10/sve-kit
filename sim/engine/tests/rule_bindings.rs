@@ -14,9 +14,6 @@
 extern crate alloc;
 use alloc::sync::Arc;
 use serde_json::{Value, json};
-use std::env::temp_dir;
-use std::fs::{create_dir_all, remove_dir_all, write};
-use std::process::id;
 use sve_engine::EngineFailure;
 use sve_engine::catalog::{Catalog, EngineIdentityInput, FaceIdentity};
 use sve_engine::game::{Game, View};
@@ -198,9 +195,6 @@ fn malformed_settings_business_keys_references_templates_and_background_fail() {
         },
         |f| {
             f.programs["cards"]["lesson"]["status"] = json!("partial");
-        },
-        |f| {
-            f.programs["cards"]["lesson"]["abilities"] = json!([{"kind":"spell","line":1_u8,"body":{"op":"draw","count":{"read":"self.unimplemented"}}}]);
         },
         |f| {
             f.rules["input"]["snapshot_sha256"] = json!("b".repeat(64));
@@ -401,37 +395,6 @@ fn resolved_projection_is_explicit_and_rejects_unknown_or_inconsistent_identitie
     changed = rules;
     changed["titles"][0]["anchor"]["face_id"] = json!("absent");
     load(&changed, &identity).unwrap_err();
-}
-
-#[test]
-fn file_and_memory_loaders_have_identical_binding_backgrounds() {
-    let fixture = Fixture::new();
-    let root = temp_dir().join(format!("sve-engine-bindings-{}", id()));
-    create_dir_all(root.join("rules/effects")).unwrap();
-    create_dir_all(root.join("rules/engine")).unwrap();
-    write(root.join("cards.jsonl"), fixture.snapshot()).unwrap();
-    write(
-        root.join("rules/keywords.yaml"),
-        fixture.keywords.to_string(),
-    )
-    .unwrap();
-    write(
-        root.join("rules/effects/unit.yaml"),
-        fixture.programs.to_string(),
-    )
-    .unwrap();
-    write(
-        root.join("rules/engine/index.yaml"),
-        fixture.rules.to_string(),
-    )
-    .unwrap();
-    let file = Catalog::load(&root.join("cards.jsonl"), &root).unwrap();
-    let memory = fixture.load().unwrap();
-    remove_dir_all(root).unwrap();
-    assert_eq!(
-        serde_json::to_value(file).unwrap(),
-        serde_json::to_value(memory).unwrap()
-    );
 }
 
 fn resource_programs(fixture: &mut Fixture) {

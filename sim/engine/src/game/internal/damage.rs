@@ -3,7 +3,7 @@ use super::{
     Context, Execution, Fact, Game, InputDomain, InstructionOutcome, Result, Wait, invalid,
     player_id, seat_name, unsupported,
 };
-use crate::game::damage::{DamageReplacement, DamageUse};
+use crate::game::damage::DamageReplacement;
 use crate::game::player::ReplacementChoice;
 use crate::game::player::Viewer;
 use crate::game::{BTreeMap, Frame, int, string};
@@ -59,7 +59,7 @@ pub(super) struct DamageRun {
     origin: DamageOrigin,
     remaining: Vec<(RuntimeDamageRecipient, Value)>,
     hits: Vec<Value>,
-    consumed: BTreeMap<DamageUse, i64>,
+    consumed: BTreeMap<u64, i64>,
     facts: Vec<DamageOccurrence>,
     choices: Vec<DamageReplacement>,
     choice_links: BTreeMap<u64, super::observation::ObjectLink>,
@@ -147,14 +147,12 @@ fn order_independent(replacements: &[DamageReplacement]) -> bool {
         || replacements.iter().all(|effect| {
             !effect.prevent
                 && effect.cap.is_none()
-                && effect.set.is_none()
                 && effect.multiply.is_none()
                 && effect.delta >= 0
         })
         || replacements.iter().all(|effect| {
             !effect.prevent
                 && effect.cap.is_none()
-                && effect.set.is_none()
                 && effect.multiply.is_none()
                 && effect.delta <= 0
         })
@@ -327,13 +325,6 @@ impl Game {
                     ability.map(|ability| &ability.source),
                 )?
             };
-            if ability.is_some()
-                && replacements.iter().any(|replacement| {
-                    matches!(replacement.consumption, Some(DamageUse::Legacy(_)))
-                })
-            {
-                return Err(unsupported("typed limited damage replacement"));
-            }
             if !order_independent(&replacements) && run.choices.is_empty() {
                 let actor = match recipient {
                     RuntimeDamageRecipient::Leader { player } => player,

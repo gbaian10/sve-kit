@@ -1,8 +1,4 @@
-#![expect(
-    clippy::indexing_slicing,
-    reason = "Validated static attack requirements use total JSON indexing."
-)]
-use super::{Game, int, other};
+use super::Game;
 use crate::Result;
 
 impl Game {
@@ -10,38 +6,7 @@ impl Game {
         if self.internal_attack_required()? {
             return Ok(true);
         }
-        let mut targets = self.zone_ids(other(self.active()), "field");
-        targets.push(format!("{}.leader", other(self.active())));
-        for source in self.ability_sources("attack requirement")? {
-            let frame = self.frame_for(&source)?;
-            for code in self.abilities(&source)? {
-                let body = &code["body"];
-                if code["kind"] != "static"
-                    || body["op"] != "require_attack"
-                    || !self.ability_zone(&source, &code)?
-                {
-                    continue;
-                }
-                if let Some(condition) = body.get("condition")
-                    && !self.truth(condition, &frame)?
-                {
-                    continue;
-                }
-                let count = self.number(&body["count"], &frame)?.max(0);
-                for id in self.select(&body["subjects"], &frame)? {
-                    if self.object(&id)?.controller != self.active()
-                        || int(&self.object(&id)?.state["attacks_this_turn"]) >= count
-                    {
-                        continue;
-                    }
-                    for target in &targets {
-                        if self.can_attack(&id, target)? {
-                            return Ok(true);
-                        }
-                    }
-                }
-            }
-        }
+        self.require_ability_sources("attack requirement")?;
         Ok(false)
     }
 }

@@ -9,6 +9,10 @@
 mod fixture;
 #[path = "boundaries/notices.rs"]
 mod notices;
+#[path = "../../engine/tests/support/repository.rs"]
+mod repository;
+#[path = "../../engine/tests/support/rule_fixtures.rs"]
+mod rule_fixtures;
 
 use serde_json::{Value, json};
 extern crate alloc;
@@ -37,61 +41,35 @@ fn card(number: &str, power: &str, hp: &str) -> String {
 /// With `start_amulets`, each seat first chooses a start amulet, so questions precede the
 /// opening shuffle.
 fn game(start_amulets: bool) -> (Game, BattleReferences) {
-    let amulet = json!({"number":"t-start","faces":[{"name":"t-start","card_class":"ニュートラル",
-        "card_type":"アミュレット","cost":"1","power":null,"hp":null,"traits":[],"text":null,
-        "sections":[],"title":"synthetic"}]})
-    .to_string();
-    let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3"), amulet].join("\n");
-    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{
-        "start_amulet":{"ja":"スタートアミュレット","rule":"14.4.3",
-            "expansion":{"op":"keyword","name":"start_amulet"}}
-    }})
-    .to_string();
-    let start = if start_amulets {
-        json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"start_amulet"}}])
-    } else {
-        json!([])
-    };
+    if start_amulets {
+        return typed_start_game();
+    }
+    let snapshot = [card("t-small", "1", "1"), card("t-large", "3", "3")].join("\n");
+    let registry = json!({"format":1_u8,"kind":"keyword_registry","keywords":{}}).to_string();
     let effects = json!({"format":1_u8,"kind":"effect_set","cards":{
         "t-small":{"status":"complete","review":"synthetic","abilities":[]},
-        "t-large":{"status":"complete","review":"synthetic","abilities":[]},
-        "t-start":{"status":"complete","review":"synthetic","abilities":start}
+        "t-large":{"status":"complete","review":"synthetic","abilities":[]}
     }})
     .to_string();
-    let mut rules: Value = serde_json::from_str(&fixture::rules(&snapshot, "t-small")).unwrap();
-    if let Some(title) = rules.pointer_mut("/titles/0") {
-        title["title_code"] = json!("synthetic_start");
-        title["capabilities"] = json!([{"kind":"opening_start_amulet"}]);
-    }
+    let rules = fixture::rules(&snapshot, "t-small");
     let catalog = Catalog::from_documents_with_rules(
         &snapshot,
         &registry,
         &[("t.yaml".into(), effects)],
-        &rules.to_string(),
+        &rules,
         &EngineIdentityInput::LegacyJp,
     )
     .unwrap();
     let references = BattleReferences::new(&catalog, fixture::references(&snapshot)).unwrap();
-    let deck = |seat: &str| {
-        (0..10_u32)
-            .map(|index| {
-                let number = match index {
-                    0 if start_amulets => "t-start",
-                    _ if index % 2 == 0 => "t-small",
-                    _ => "t-large",
-                };
-                json!({"id":format!("{seat}/deck/{index}"),"card":number})
-            })
-            .collect::<Vec<_>>()
-    };
     let player = |seat: &str| {
-        if start_amulets {
-            json!({"leader":{"class":"ニュートラル"},"construction":"title",
-                "title_code":"synthetic_start","deck_list":deck(seat),"evolve_deck_list":[]})
-        } else {
-            json!({"leader":{"class":"ニュートラル"},"construction":"class",
-                "deck_list":deck(seat),"evolve_deck_list":[]})
-        }
+        let deck = (0..10_u32)
+            .map(|index| {
+                let card = if index % 2 == 0 { "t-small" } else { "t-large" };
+                json!({"id":format!("{seat}/deck/{index}"),"card":card})
+            })
+            .collect::<Vec<_>>();
+        json!({"leader":{"class":"ニュートラル"},"construction":"class",
+            "deck_list":deck,"evolve_deck_list":[]})
     };
     let setup = json!({"pregame":true,"players":{"P1":player("P1"),"P2":player("P2")}});
     let mut game = Game::new(
@@ -104,6 +82,34 @@ fn game(start_amulets: bool) -> (Game, BattleReferences) {
     .unwrap();
     game.advance_player_input();
     (game, references)
+}
+
+fn typed_start_game() -> (Game, BattleReferences) {
+    let player = |seat: &str| {
+        let deck = (0..10_u32)
+            .map(|index| {
+                let card = match index {
+                    0 => "CSD03a-016",
+                    _ if index % 2 == 0 => "BP01-037",
+                    _ => "BP01-024",
+                };
+                json!({"id":format!("{seat}/deck/{index}"),"card":card})
+            })
+            .collect::<Vec<_>>();
+        json!({"leader":{"class":"ニュートラル"},"construction":"title",
+            "title_code":"cardfight_vanguard","deck_list":deck,"evolve_deck_list":[]})
+    };
+    let setup = json!({"pregame":true,"players":{"P1":player("P1"),"P2":player("P2")}});
+    let mut game = Game::from_selected_effects(
+        repository::selection_with_rules().clone(),
+        &setup,
+        &Value::Null,
+        &json!({"first_chooser":"P1"}),
+        "battle-host-typed-start",
+    )
+    .unwrap();
+    game.advance_player_input();
+    (game, repository::battle_references().clone())
 }
 
 fn session(control: [SeatControl; 2], max_submissions: u64) -> LocalSession {

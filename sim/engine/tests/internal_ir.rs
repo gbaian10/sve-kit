@@ -37,6 +37,9 @@ mod payment_fixtures;
 #[path = "support/rule_fixtures.rs"]
 mod rule_fixtures;
 
+#[path = "support/repository.rs"]
+mod repository;
+
 #[path = "internal_ir/battle_costs.rs"]
 mod battle_costs;
 
@@ -46,6 +49,7 @@ mod allocation;
 mod basic_actions;
 #[path = "internal_ir/card.rs"]
 mod card;
+use card::pass_quick;
 #[path = "internal_ir/cost.rs"]
 mod cost;
 #[path = "internal_ir/cost_observation.rs"]
@@ -213,6 +217,7 @@ fn catalog_documents(cost: &Value) -> (String, String, String) {
 fn catalog_with_cost(cost: &Value) -> Arc<Catalog> {
     board_fixtures::catalog_with_cost(cost).unwrap()
 }
+
 fn game(seat: u32, count: usize) -> Game {
     let deck = (0..count)
         .map(|index| json!({"id":format!("d{index}"),"card":"unit-follower"}))
@@ -333,7 +338,6 @@ fn before_draw_occurrences_stop_and_reject_stale_actor_and_payload_atomically() 
         let first = game.internal_decision(view).unwrap();
         assert!(game.internal_decision(other_view).is_none());
         assert!(game.projection(other_view).unwrap()["awaiting"].is_null());
-        assert_eq!(game.legal().unwrap(), Vec::<Value>::new());
         serde_json::to_value(&game).unwrap_err();
         game.digest().unwrap_err();
         for answer in [
@@ -353,7 +357,7 @@ fn before_draw_occurrences_stop_and_reject_stale_actor_and_payload_atomically() 
             assert_eq!(exact_authority(&game), before);
         }
         let before = exact_authority(&game);
-        game.decide(&json!({"do":"end"}), "wrong-channel")
+        game.internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap_err();
         assert_eq!(exact_authority(&game), before);
         let next = game

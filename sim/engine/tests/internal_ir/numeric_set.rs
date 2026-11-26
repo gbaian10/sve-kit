@@ -404,7 +404,7 @@ fn printed_bp16_049_injured_set_fragment_uses_snapshot_follower() {
 }
 
 #[test]
-fn prepared_play_rechecks_context_and_blocks_prototype_mutations() {
+fn prepared_play_rechecks_context_and_blocks_rule_actions() {
     for seat in [1, 2] {
         let mut board = follower_source(seat);
         let mut bad = context(seat);
@@ -427,7 +427,7 @@ fn prepared_play_rechecks_context_and_blocks_prototype_mutations() {
             .unwrap();
         let before = format!("{board:?}");
         board
-            .decide(&json!({"do":"end"}), "blocked-prepared")
+            .internal_rule_action(&json!({"do":"end-phase"}))
             .unwrap_err();
         assert_eq!(format!("{board:?}"), before);
         for view in [View::P1, View::P2] {

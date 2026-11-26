@@ -11,25 +11,18 @@
 - 玩家資訊與執行要求：[引擎執行與資訊邊界](../dsl/engine-boundaries.md)
 - 公開程式與恢復定版條件：[版本與權威恢復契約](authority-recovery.md)
 
-## 兩條執行路徑
+## 執行路徑
 
-兩條路徑共用 `Game`／權威狀態及部分規則基本動作，不能按新舊檔案目錄整批刪除。
-卡片事實均來自有版號快照；兩條路徑的差別是效果輸入與執行方式，不是真卡與測試卡的差別。
-
-| 路徑 | 作者資料與載入 | 執行與使用邊界 |
-| --- | --- | --- |
-| typed | `authored/rules/author-effects/` 與 `effect-bodies/`；Schema 由 `dsl/author-nodes.schema.json` 等定義；Python current reader 展開完整作者選擇，Rust `ExpandedLowerer` 產生受驗 IR | `Catalog::from_current_selection`／`Game::from_selected_effects` 建立已准入整卡的局面，`game/internal/` 執行 typed IR；有 Rust authority API，宿主接通狀態以 #1971 為準 |
-| 舊原型 | `authored/rules/effects/*.yaml`，`dsl/effects.schema.json` 的 `format: 1, kind: effect_set` 選定 `astra/1` 文法；keywords 為 format 1 的 `keyword_registry` | 舊 `decide`／`legal`／`projection` 與 JSON 效果解譯器，只剩引擎測試驅動；共同規則題本已改由 typed 玩家入口執行，原型回放、輔助與 AI 已移除 |
-
-DSL 1.0 已有 Schema、Python typed boundary、作者載入器、Rust lowering、IR 良構與 runtime 准入。
-作者儲存格式與展開入口依[承載契約](../dsl/author-contract-1.0.md)及[作者工具](../dsl/authoring-tools.md)，
-不能再以舊原型的單一封套概括；語法通過、良構及實際可執行是不同保證。
+卡片事實來自有版號快照。對戰宿主載入快照的公開程式包，Rust 將 expanded AST lowering 為受驗 IR，
+再由 `game/internal/` 執行。引擎與作者工具也可從完整作者選擇建立已准入整卡的局面。
+作者儲存格式與展開入口依[承載契約](../dsl/author-contract-1.0.md)及[作者工具](../dsl/authoring-tools.md)。
+語法通過、良構及執行准入各自驗證。
 
 ## 已定的開發邊界
 
 依 [#1971 的維護者決定](https://github.com/gbaian10/sve-kit/issues/1971)，
-舊 façade（`decide`／`legal`）、JSON 效果解譯器與舊玩家封包凍結不修，只供引擎測試驅動，並收在 `runner` feature 後；
-對局入口建在 typed 路徑。原型 AI、回放與輔助已移除，typed 後繼由 #2206、#2207、#2208 追蹤。typed 仍呼叫的抽牌、移區、攻擊、回合、終局等共用規則基本動作不在凍結範圍。
+對局入口使用 typed 路徑，typed 的回放、輔助與 AI 由 #2206、#2207、#2208 追蹤。
+抽牌、移區、攻擊、回合與終局等共用規則基本動作持續維護。
 
 重構期間不新增窄積木或准入卡片以繞過共同地基；同一合法範圍先等價合併，
 組合放寬另列驗收。來源、raw IR、付款、物件世代與揭露權限的檢查仍保留。
@@ -45,9 +38,6 @@ AI 第一版使用基礎 policy，僅靠與玩家相同的觀察及決定介面�
 typed 的 current selection 保存永久身分、整卡及來源閉包；Rust lowering、良構及 backend
 執行准入各有責任，不能以 Schema 通過代替。未知或未支援的構造須拒絕，
 不得回退到原型卡片程式。整卡可執行仍須逐卡對局測試及語義審查。
-
-舊 `Catalog` 載入原型 YAML 時，除 Schema 外，還以 `catalog/semantics.rs` 比對
-opcode、誘發事件、讀值路徑、選擇器及期間；載入期拒絕結果不代表 typed backend 的接受集合。
 
 ## 驗證方式
 
@@ -79,7 +69,6 @@ typed 重播與輔助模式由 #2206、#2207 追蹤。恢復與對外入口的�
 
 ## 執行與建置邊界
 
-原型解算燃料與列舉上限是實作防護，不是 CR 15.2 的循環判定。
 場上容量依規則為五；牌組構築驗證屬建牌器，對戰宿主不能把載入效果等同驗牌完成。
 
 函式庫可用 `--no-default-features` 建置至 `wasm32-unknown-unknown`；

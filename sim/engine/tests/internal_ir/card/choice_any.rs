@@ -87,10 +87,6 @@ fn choice_any_accepts_one_or_all_but_not_zero_and_executes_in_printed_order_with
     let programs = programs();
     for selected in [vec![ModeId(1)], vec![ModeId(3), ModeId(2), ModeId(1)]] {
         let mut game = game(&programs, &initial("own", false));
-        assert_eq!(game.legal().unwrap(), Vec::<Value>::new());
-        let before = game.projection(View::Referee).unwrap();
-        game.submit(&json!({"do":"end"})).unwrap_err();
-        assert_eq!(game.projection(View::Referee).unwrap(), before);
         let question = activate(&mut game, &programs);
         let InputDomain::Modes {
             modes,

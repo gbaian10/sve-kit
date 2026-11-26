@@ -13,6 +13,8 @@ use super::rule_fixtures;
 
 use serde_json::Value;
 use std::{env::var_os, fs::read_to_string, path::PathBuf, sync::OnceLock};
+use sve_battle_contract::{CardRef, Nat};
+use sve_engine::battle::{BattleReferences, PrintingFaceIdentity, ReferenceInput};
 use sve_engine::catalog::{CurrentSelectionLoader, EngineIdentityInput, SelectedEffects};
 use sve_engine::game::Game;
 use sve_engine::game::player::PlayerDeck;
@@ -45,6 +47,41 @@ pub(crate) fn selection_with_rules() -> &'static SelectedEffects {
     SELECTED.get_or_init(|| {
         let (snapshot, keywords, input) = inputs();
         selection_with_rules_from(snapshot, keywords, input)
+    })
+}
+
+/// Wire printing identities for the JP repository test snapshot.
+pub(crate) fn battle_references() -> &'static BattleReferences {
+    static REFERENCES: OnceLock<BattleReferences> = OnceLock::new();
+    REFERENCES.get_or_init(|| {
+        let (snapshot, _, _) = inputs();
+        let mut faces = Vec::new();
+        for line in snapshot.lines() {
+            let row: Value = serde_json::from_str(line).unwrap();
+            let number = row.get("number").and_then(Value::as_str).unwrap();
+            let count = row.get("faces").and_then(Value::as_array).unwrap().len();
+            for ordinal in 0..count {
+                faces.push(PrintingFaceIdentity {
+                    card_no: number.into(),
+                    native_face: u64::try_from(ordinal).unwrap(),
+                    card: CardRef {
+                        printing_id: format!("printing-{number}"),
+                        face: Nat::try_from(ordinal).unwrap(),
+                    },
+                });
+            }
+        }
+        BattleReferences::new(
+            &selection_with_rules().prototypes,
+            ReferenceInput {
+                rules: None,
+                wording: None,
+                region: "jp".into(),
+                snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
+                faces,
+            },
+        )
+        .unwrap()
     })
 }
 
