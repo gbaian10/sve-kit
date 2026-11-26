@@ -69,43 +69,6 @@
         "Phase"
       ]
     },
-    "ParamSource": {
-      "type": "object",
-      "properties": {
-        "slot": {
-          "$ref": "#/$defs/Code"
-        },
-        "component": {
-          "type": "string",
-          "enum": [
-            "value",
-            "constant",
-            "negated_magnitude"
-          ]
-        }
-      },
-      "required": [
-        "slot",
-        "component"
-      ],
-      "additionalProperties": false
-    },
-    "ParamDecl": {
-      "type": "object",
-      "properties": {
-        "type": {
-          "$ref": "#/$defs/ParamType"
-        },
-        "source": {
-          "$ref": "#/$defs/ParamSource"
-        }
-      },
-      "required": [
-        "type",
-        "source"
-      ],
-      "additionalProperties": false
-    },
     "A.param": {
       "type": "object",
       "properties": {
@@ -290,7 +253,7 @@
         "$ref": "#/$defs/Identifier"
       },
       "additionalProperties": {
-        "$ref": "#/$defs/ParamDecl"
+        "$ref": "#/$defs/ParamType"
       }
     },
     "ParamValues": {
@@ -19572,144 +19535,6 @@
       ],
       "type": "object"
     },
-    "BodyDependencies": {
-      "additionalProperties": false,
-      "properties": {
-        "frame_id": {
-          "pattern": "^frame:[0-9a-f]{64}$(?![\\s\\S])",
-          "type": "string"
-        },
-        "ability_scope": {
-          "$ref": "#/$defs/Code"
-        },
-        "body_version": {
-          "pattern": "^effect-body-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
-          "type": "string"
-        },
-        "applicability_scope": {
-          "$ref": "#/$defs/Code"
-        },
-        "domain_hash": {
-          "pattern": "^sha256:[0-9a-f]{64}$(?![\\s\\S])",
-          "type": "string"
-        },
-        "interfaces": {
-          "items": {
-            "$ref": "#/$defs/InterfaceDependency"
-          },
-          "type": "array"
-        },
-        "sources": {
-          "items": {
-            "$ref": "#/$defs/ReviewedSource"
-          },
-          "type": "array"
-        },
-        "rulings": {
-          "items": {
-            "$ref": "#/$defs/RulingDependency"
-          },
-          "type": "array"
-        },
-        "expansion_recipe": {
-          "$ref": "#/$defs/RecipePin"
-        },
-        "adapter_recipe": {
-          "$ref": "#/$defs/RecipePin"
-        }
-      },
-      "required": [
-        "frame_id",
-        "ability_scope",
-        "body_version",
-        "applicability_scope",
-        "domain_hash",
-        "interfaces",
-        "sources",
-        "rulings",
-        "expansion_recipe",
-        "adapter_recipe"
-      ],
-      "type": "object"
-    },
-    "BodyRekey": {
-      "additionalProperties": false,
-      "properties": {
-        "original": {
-          "$ref": "#/$defs/OriginalEvidence"
-        },
-        "before": {
-          "$ref": "#/$defs/BodyDependencies"
-        },
-        "after": {
-          "$ref": "#/$defs/BodyDependencies"
-        },
-        "mapping_recipe": {
-          "$ref": "#/$defs/RecipePin"
-        }
-      },
-      "required": [
-        "original",
-        "before",
-        "after",
-        "mapping_recipe"
-      ],
-      "type": "object"
-    },
-    "BodyReview": {
-      "additionalProperties": false,
-      "properties": {
-        "reviewer": {
-          "$ref": "#/$defs/Actor"
-        },
-        "date": {
-          "pattern": "^^(?:(?!0000)[0-9]{4}-(?:(?:01|03|05|07|08|10|12)-(?:0[1-9]|[12][0-9]|3[01])|(?:04|06|09|11)-(?:0[1-9]|[12][0-9]|30)|02-(?:0[1-9]|1[0-9]|2[0-8]))|(?:[0-9]{2}(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00)-02-29)$(?![\\s\\S])$",
-          "type": "string"
-        },
-        "verdict": {
-          "enum": [
-            "ok",
-            "revise",
-            "disputed"
-          ],
-          "type": "string"
-        },
-        "reason": {
-          "anyOf": [
-            {
-              "minLength": 1,
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "kind": {
-          "const": "body",
-          "type": "string"
-        },
-        "dependencies": {
-          "$ref": "#/$defs/BodyDependencies"
-        },
-        "rekey": {
-          "$ref": "#/$defs/BodyRekey"
-        },
-        "anchor": {
-          "type": "string",
-          "pattern": "^effect-anchor-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])"
-        }
-      },
-      "required": [
-        "reviewer",
-        "date",
-        "verdict",
-        "reason",
-        "kind",
-        "dependencies"
-      ],
-      "type": "object"
-    },
     "Companion": {
       "additionalProperties": false,
       "properties": {
@@ -19744,12 +19569,6 @@
           "minItems": 1,
           "type": "array"
         },
-        "registrations": {
-          "items": {
-            "$ref": "#/$defs/Registration"
-          },
-          "type": "array"
-        },
         "note": {
           "minLength": 1,
           "type": "string"
@@ -19763,77 +19582,7 @@
         "params",
         "body",
         "ports",
-        "written_by",
-        "registrations"
-      ],
-      "type": "object"
-    },
-    "Domain": {
-      "additionalProperties": false,
-      "properties": {
-        "regions": {
-          "items": {
-            "enum": [
-              "jp",
-              "en"
-            ],
-            "type": "string"
-          },
-          "minItems": 1,
-          "type": "array"
-        }
-      },
-      "required": [
-        "regions"
-      ],
-      "type": "object"
-    },
-    "Registration": {
-      "additionalProperties": false,
-      "properties": {
-        "id": {
-          "$ref": "#/$defs/Code"
-        },
-        "domain": {
-          "$ref": "#/$defs/Domain"
-        },
-        "reviews": {
-          "items": {
-            "$ref": "#/$defs/BodyReview"
-          },
-          "type": "array"
-        }
-      },
-      "required": [
-        "id",
-        "domain",
-        "reviews"
-      ],
-      "type": "object"
-    },
-    "ReviewedSource": {
-      "additionalProperties": false,
-      "properties": {
-        "binding_id": {
-          "minLength": 1,
-          "type": "string"
-        },
-        "occurrence": {
-          "$ref": "#/$defs/OccurrenceKey"
-        },
-        "ability_scope": {
-          "$ref": "#/$defs/Code"
-        },
-        "source": {
-          "pattern": "^effect-source-v1:sha256:[0-9a-f]{64}$(?![\\s\\S])",
-          "type": "string"
-        }
-      },
-      "required": [
-        "binding_id",
-        "occurrence",
-        "ability_scope",
-        "source"
+        "written_by"
       ],
       "type": "object"
     },
@@ -19849,11 +19598,8 @@
           "type": "string"
         },
         "scope": {
-          "enum": [
-            "shared",
-            "en_override"
-          ],
-          "type": "string"
+          "type": "string",
+          "const": "shared"
         },
         "cards": {
           "additionalProperties": {

@@ -4,18 +4,12 @@ from typing import Annotated, Literal
 
 from pydantic import BeforeValidator, Field
 
-from sve_carddb.contracts.four_layer import Code
 from sve_carddb.core.json import integer
 from sve_carddb.core.models import RecordData, Text
 
 ParamType = Literal[
     "Int", "Nat", "CardName", "Concept", "CardKind", "Player", "Zone", "Phase"
 ]
-
-
-class ParamSource(RecordData):
-    slot: Code
-    component: Literal["value", "constant", "negated_magnitude"]
 
 
 CardId = Annotated[str, Field(pattern=r"^c:[0-9a-f]{32}$(?![\s\S])")]
@@ -25,7 +19,6 @@ RelativeFile = Annotated[
         pattern=r"^(?!/)(?![\s\S]*\\)(?![\s\S]*[\x00-\x1f\x7f])(?!(?:[^/]+/)*\.{1,2}(?:/|$))[^/]+(?:/[^/]+)*$(?![\s\S])"
     ),
 ]
-Scope = Literal["shared", "en_override"]
 
 
 class PrototypeIndexRecord(RecordData):
@@ -38,7 +31,7 @@ class PrototypeIndexRecord(RecordData):
 
 class AuthorIndexRecord(RecordData):
     card_id: CardId
-    scope: Scope
+    scope: Literal["shared"]
     file: RelativeFile
     kind: Literal["author_effect_set"]
     record_key: Text

@@ -172,8 +172,6 @@ class CurrentAuthorSources:
     def _supported(record: IndexRecord) -> AuthorIndexRecord:
         if not isinstance(record, AuthorIndexRecord):
             raise SourceError("unsupported_prototype")
-        if record.scope == "en_override":
-            raise SourceError("en_source_contract_unavailable")
         return record
 
     def validate_inputs(

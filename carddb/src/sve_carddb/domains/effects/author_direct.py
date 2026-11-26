@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from sve_carddb.domains.effects.author_handwritten import Body, Handwritten
 
 _LOCATION = frozenset({"line", "face", "section", "scope", "covers", "admission"})
-_USE = frozenset({"use", "edition", "params", "registration"})
+_USE = frozenset({"use", "edition", "params"})
 _CARD_KEYS = frozenset(
     {
         "admission",
@@ -412,17 +412,10 @@ def _body(
     if value.keys() - (_LOCATION | _USE):
         raise SourceError("ability_head_conflict")
     definition = _body_definition(value, handwritten)
-    if any(
-        object_value(r).get("verdict") in {"disputed", "revise"}
-        for registration in definition.registrations
-        for r in array(object_value(registration).get("reviews", []))
-    ):
-        raise SourceError("source_unresolved_issue")
     values = object_value(value.get("params", {}))
     if values.keys() != definition.params.keys():
         raise SourceError("parameter_name_mismatch")
-    for name, parameter in definition.params.items():
-        kind = parameter if isinstance(parameter, str) else parameter.type
+    for name, kind in definition.params.items():
         item = values[name]
         numeric = kind in {"Nat", "Int"}
         valid = type(item) is int if numeric else isinstance(item, str) and bool(item)

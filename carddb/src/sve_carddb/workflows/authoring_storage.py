@@ -359,7 +359,6 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             old_body = previous.bodies[key]
             if (
                 old_body.written_by != definition.written_by
-                or old_body.registrations != definition.registrations
                 or old_body.note != definition.note
             ):
                 raise AuthorInputError(Diagnostic("source", "body_metadata_conflict"))

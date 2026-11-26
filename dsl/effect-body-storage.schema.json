@@ -42,26 +42,7 @@
               "pattern": "^[A-Za-z_][A-Za-z0-9_]*$"
             },
             "additionalProperties": {
-              "oneOf": [
-                {
-                  "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamDecl/properties/type"
-                },
-                {
-                  "type": "object",
-                  "additionalProperties": false,
-                  "properties": {
-                    "type": {
-                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamDecl/properties/type"
-                    },
-                    "source": {
-                      "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamDecl/properties/source"
-                    }
-                  },
-                  "required": [
-                    "type"
-                  ]
-                }
-              ]
+              "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamType"
             }
           },
           "body": {
@@ -72,9 +53,6 @@
           },
           "written_by": {
             "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/written_by"
-          },
-          "registrations": {
-            "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Companion/properties/registrations"
           },
           "note": {
             "type": "string",

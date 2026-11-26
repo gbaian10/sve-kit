@@ -18,7 +18,7 @@
 
 主檔 `{format:2,kind:author_effect_set,scope?,dsl?,cards}`，預設 shared／1.0。每卡含 `meta, abilities`，可含 `admission, ignored, rule_sections, note, deck_rule, token, token_sources`。meta.written_by 必填，其餘 status 預設 draft，reviews／rulings 預設空。
 
-作者主檔位於 `authored/rules/author-effects/<owner>/`，可用 `<卡號>.yaml` 或至少三位數的 `<sequence>.yaml`。同一個卡包目錄可混用兩種檔名，新增卡片預設以卡號命名。具名本體位於 `effect-bodies/<owner>/<sequence>.yaml`，使用至少三位數的序號。每檔小於 1 MiB。身分由既有登錄及 printing 解出，不由卡號或文字 hash 推測。英文 override 的來源契約仍未提供。
+作者主檔位於 `authored/rules/author-effects/<owner>/`，可用 `<卡號>.yaml` 或至少三位數的 `<sequence>.yaml`。同一個卡包目錄可混用兩種檔名，新增卡片預設以卡號命名。具名本體位於 `effect-bodies/<owner>/<sequence>.yaml`，使用至少三位數的序號。每檔小於 1 MiB。身分由既有登錄及 printing 解出，不由卡號或文字 hash 推測。作者主檔的 scope 為 shared，來源為日文卡文。
 
 ### 2.2 材料化 companion record
 
@@ -46,7 +46,7 @@
 
 ## 3. 封閉葉參數
 
-直接本體宣告 `params: {name: Nat | Int | CardName | Concept | CardKind | Player | Zone | Phase}`，也接受既有 `{type,source?}` 宣告；用途只提供整數或字串，不接受布林冒整數或整棵程式。宣告名稱與實值必須完整對應且均有使用。替換後由 DSL Schema 驗目的位置型別及封閉值域，scope／binding／receipt 良構由 lowering 檢查。
+直接本體宣告 `params: {name: Nat | Int | CardName | Concept | CardKind | Player | Zone | Phase}`；用途只提供整數或字串，不接受布林冒整數或整棵程式。宣告名稱與實值必須完整對應且均有使用。替換後由 DSL Schema 驗目的位置型別及封閉值域，scope／binding／receipt 良構由 lowering 檢查。
 
 ## 4. 本體版本與新鮮度
 

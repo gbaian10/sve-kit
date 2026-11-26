@@ -388,7 +388,7 @@ official 缺來源或文字不一致即拒絕；project／machine 不得附此�
 
 ## 7. DSL 與拒絕輸入
 
-正式 DSL 1.0 的封套、scope、逐卡 meta、本體伴隨檔、effects-index、來源新鮮度與資格依[DSL 承載契約](../../dsl/author-contract-1.0.md)。DSL／companion Schema、strict reader、完整檔案集合與有限 current JP 來源驗證已實作；完整用途依賴、資格與採納結果接線尚未實作；既有 effect_set 仍是 astra/1。shared 是預設，EN exception 才 scope=en_override，但本版來源准入拒絕該入口，見承載 §2.1；不把新的本體欄位塞入 translation_shard。
+正式 DSL 1.0 的封套、scope、逐卡 meta、本體伴隨檔、effects-index、來源新鮮度與資格依[DSL 承載契約](../../dsl/author-contract-1.0.md)。作者主檔的 scope 為 shared，來源為日文卡文，見承載 §2.1。
 
 `authored/rules/effects-index/<卡包>.yaml` 依 record_key 第一個 `-` 前的卡包前綴分檔，各檔依 record_key／scope 排序，合併後驗全域唯一性；以 card_id＋scope 定位 file／kind／record_key，封閉形狀見DSL 承載 §2.4；候選 YAML 解析失敗仍可定位卡。current 入口從 authored 根目錄載入完整集合，不能由外部刪減的檔案清單取得來源證明。candidate hash 取 exact authored bytes。後續建置接線須由 load_report 記 accepted/rejected＋目標版本，valid AST 才進 dsl_document；無效候選不進公開附件，support 仍可列 rejected_yaml。
 

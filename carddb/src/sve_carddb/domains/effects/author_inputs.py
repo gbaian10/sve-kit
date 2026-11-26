@@ -25,7 +25,7 @@ if TYPE_CHECKING:
     from referencing.jsonschema import Schema
 
 PathParts = tuple[str | int, ...]
-Leaf = Literal["A.param", "ParamDecl", "ParamValue", "ParamDeclarations", "ParamValues"]
+Leaf = Literal["A.param", "ParamValue", "ParamDeclarations", "ParamValues"]
 _NODES = "urn:sve-kit:author-nodes:1.0"
 _INDEX = "urn:sve-kit:effects-index:1"
 _PROTOTYPE = "urn:sve-kit:effects:astra:1"
@@ -229,15 +229,6 @@ def _envelope(document: ParsedDocument, expected: str) -> dict[str, JsonValue]:
 
 def _entry_preflight(document: ParsedDocument, expected: str) -> None:
     value = _envelope(document, expected)
-    if expected == "author_effect_set" and value.get("scope") == "en_override":
-        raise AuthorInputError(
-            _located(
-                document,
-                document.diagnostic(
-                    "source", "en_source_contract_unavailable", ("scope",)
-                ),
-            )
-        )
     candidates: list[tuple[PathParts, JsonValue]] = []
     cards = value.get("cards")
     if expected == "author_effect_set" and isinstance(cards, dict):
