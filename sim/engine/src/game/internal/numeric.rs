@@ -96,6 +96,10 @@ impl Modifier {
     fn active(&self) -> bool {
         self.enabled && (self.main_live || self.intervals.iter().copied().any(TurnInterval::active))
     }
+
+    const fn sets_stat(&self) -> bool {
+        matches!(self.attack, Some(Change::Set(_))) || matches!(self.life, Some(Change::Set(_)))
+    }
 }
 
 impl NumericState {
@@ -454,7 +458,7 @@ impl Game {
             attack: Some(Change::Add(1)),
             life: final_break.then_some(Change::Add(1)),
         });
-        self.commit_limit_break_modifiers(holder, state)
+        self.commit_numeric_state(holder, state)
     }
 
     pub(in crate::game) fn remove_limit_break_modifiers(
@@ -466,12 +470,12 @@ impl Game {
             state.effects.retain(|effect| {
                 !matches!(&effect.origin, ModifierOrigin::LimitBreak { material: source } if source == material)
             });
-            self.commit_limit_break_modifiers(holder, state)?;
+            self.commit_numeric_state(holder, state)?;
         }
         Ok(())
     }
 
-    fn commit_limit_break_modifiers(&mut self, holder: &str, state: NumericState) -> Result<()> {
+    fn commit_numeric_state(&mut self, holder: &str, state: NumericState) -> Result<()> {
         let object = self.object(holder)?;
         let damage = number(&object.state, "max_hp")?
             .checked_sub(number(&object.state, "hp")?)
@@ -495,8 +499,7 @@ impl Game {
         Ok(())
     }
 
-    // Timed Add expiry follows the project inference in target-evolution-semantics §3,
-    // which covers rule evolution only; effect-text evolution keeps the untimed-Add limit.
+    // Only rule evolution supports timed Add expiry across the change (target-evolution-semantics §3).
     pub(in crate::game) fn numeric_evolution_allowed(
         &self,
         id: &str,
@@ -504,20 +507,33 @@ impl Game {
     ) -> Result<()> {
         if self.numeric_state(id).is_some_and(|state| {
             state.effects.iter().any(|effect| {
-                !(effect.end == EffectEnd::NoTemporalExpiry
-                    || (rule_evolution
-                        && matches!(effect.end, EffectEnd::Turn(_) | EffectEnd::NextTurn { .. })))
-                    || !effect.intervals.is_empty()
-                    || matches!(effect.attack, Some(Change::Set(_)))
-                    || matches!(effect.life, Some(Change::Set(_)))
+                let timed_add = rule_evolution
+                    && !effect.sets_stat()
+                    && matches!(effect.end, EffectEnd::Turn(_) | EffectEnd::NextTurn { .. });
+                !effect.intervals.is_empty()
+                    || !(effect.end == EffectEnd::NoTemporalExpiry || timed_add)
             })
         }) {
-            return Err(unsupported("evolution outside fixed Add numeric layers"));
+            return Err(unsupported("evolution outside supported numeric layers"));
         }
         Ok(())
     }
 
-    /// Add-only layers commute with a base delta; Set evolution still needs a rule decision.
+    pub(in crate::game) fn numeric_prototype_add_base(
+        &mut self,
+        id: &str,
+        attack: i64,
+        life: i64,
+    ) -> Result<()> {
+        if self
+            .numeric_state(id)
+            .is_some_and(|state| state.effects.iter().any(Modifier::sets_stat))
+        {
+            return Err(unsupported("base delta while Set is active"));
+        }
+        self.numeric_add_base(id, attack, life)
+    }
+
     pub(in crate::game) fn numeric_add_base(
         &mut self,
         id: &str,
@@ -525,9 +541,6 @@ impl Game {
         life: i64,
     ) -> Result<()> {
         let object = self.object(id)?;
-        let damage = number(&object.state, "max_hp")?
-            .checked_sub(number(&object.state, "hp")?)
-            .ok_or_else(|| invalid("numeric damage overflow"))?;
         let mut state = self
             .numeric_state(id)
             .cloned()
@@ -538,19 +551,18 @@ impl Game {
                 effects: Vec::new(),
                 pilot: None,
             });
-        if state.effects.iter().any(|effect| {
-            matches!(effect.attack, Some(Change::Set(_)))
-                || matches!(effect.life, Some(Change::Set(_)))
-        }) {
-            return Err(unsupported("base delta while Set is active"));
-        }
         state.attack = add(state.attack, attack)?;
         state.life = add(state.life, life)?;
-        let after = state.effective(damage)?;
-        if !state.effects.is_empty() || state.pilot.is_some() {
-            self.state.ir_numeric.insert(id.into(), state);
+        // CR 5.16.2.1 carries the effective delta across evolution even when a Set masks the base.
+        let shift_set = |change, delta| match change {
+            Some(Change::Set(value)) => add(value, delta).map(|value| Some(Change::Set(value))),
+            _ => Ok(change),
+        };
+        for effect in &mut state.effects {
+            effect.attack = shift_set(effect.attack, attack)?;
+            effect.life = shift_set(effect.life, life)?;
         }
-        self.internal_numeric_cache(id, after)
+        self.commit_numeric_state(id, state)
     }
 
     pub(in crate::game) fn numeric_damage(&mut self, id: &str, amount: i64) -> Result<()> {

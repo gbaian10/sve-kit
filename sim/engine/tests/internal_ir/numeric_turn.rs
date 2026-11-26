@@ -715,7 +715,7 @@ fn installation_captures_controller_instead_of_owner_or_a_future_controller() {
 }
 
 #[test]
-fn timed_add_evolution_expires_from_evolved_base_under_project_inference_and_set_rejects() {
+fn timed_add_evolution_expires_from_evolved_base_and_timed_set_rejects() {
     let mut position = position(1);
     position["players"]["P2"]["zones"]["field"] = json!([]);
     position["players"]["P1"]["zones"]["field"] = json!([{"id":"f","card":"unit-follower"}]);
@@ -757,7 +757,7 @@ fn timed_add_evolution_expires_from_evolved_base_under_project_inference_and_set
     .unwrap();
     run(
         &mut set_board,
-        vec![set::fixed(set::set_pair(4)), hit(2, 1)],
+        vec![current(set::set_pair(4)), hit(2, 1)],
         1,
     );
     let before = exact_authority(&set_board);

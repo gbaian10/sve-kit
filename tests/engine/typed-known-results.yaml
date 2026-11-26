@@ -166,9 +166,9 @@ known:
     reason: "after-decision-3 omniscient events"
   - question: "card-BP12-072"
     scenario: "A 由能力從墓場出場 → ファンファーレ進化 → 2/2 → 進化時；之後仍可用進化能力"
-    status: unsupported
-    error: "typed-gap: evolution outside fixed Add numeric layers (#2008)"
-    reason: "internal D1 does not support evolution outside fixed Add numeric layers"
+    status: fail
+    error: "typed-gap: missing pending event and evolved printing in awaiting (#2008)"
+    reason: "after-decision-1 omniscient events; after-decision-3 omniscient awaiting"
   - question: "card-BP13-043"
     scenario: "[fable] A P1 先指定、P2 後指定；交換後被渡的不能攻擊；被渡的デモンビーター被破壞 → 回 P1 墓場、LW 由 P2 打出讓 P2 回體力"
     status: fail

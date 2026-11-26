@@ -368,6 +368,11 @@ impl Game {
         let evolution_cause = frame.cause.clone();
         let old = self.face(source)?.clone();
         let new = self.catalog.face(&self.object(evolve)?.card, face)?.clone();
+        let printed_delta = |field: &str| {
+            scalar(&new[field])
+                .checked_sub(scalar(&old[field]))
+                .ok_or_else(|| invalid("evolution delta overflow"))
+        };
         self.object_mut(evolve)?.state["face"] = json!(face);
         self.move_objects(&[evolve.into()], "evolution", None, None, frame)?;
         self.object_mut(source)?.state["evolved"] = json!(true);
@@ -376,16 +381,7 @@ impl Game {
         }
         self.object_mut(source)?.state["evolved_with"] = json!(evolve);
         self.object_mut(source)?.state["face"] = json!(face);
-        for field in ["power", "hp"] {
-            let delta = scalar(&new[field])
-                .checked_sub(scalar(&old[field]))
-                .ok_or_else(|| invalid("evolution delta overflow"))?;
-            self.numeric_add_base(
-                source,
-                if field == "power" { delta } else { 0 },
-                if field == "hp" { delta } else { 0 },
-            )?;
-        }
+        self.numeric_add_base(source, printed_delta("power")?, printed_delta("hp")?)?;
         // Base replacement is not a stat-change event; only super evolution's explicit +1/+1 counts.
         let previous = self.object(source)?.clone();
         let stat_before = SnapshotId(self.state.ir_epoch);

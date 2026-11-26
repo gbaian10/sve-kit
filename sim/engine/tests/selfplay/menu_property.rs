@@ -513,7 +513,6 @@ fn known_engine_issue(error: &str) -> Option<u16> {
     // Remove each temporary diagnostic exception when the corresponding issue is fixed.
     [
         (2474, "Trigger icon requires verified facts"),
-        (2478, "evolution outside fixed Add numeric layers"),
         (
             2479,
             "exchange material has unsupported movement or permission",
