@@ -72,9 +72,9 @@ token 定義須接至衍生物本體。D0 拒絕尚未支援的 token 接線與�
 
 印刷 keywords 經完整清單降低、逐元素來源定位及 runtime 有效印刷能力視圖消費。持有者、controller、有效區域、silence 與物件世代責任維持；宣告名稱不代表任意關鍵字均可執行。
 
-## 7. 公開 typed IR 與引擎能力
+## 7. 公開 DSL 程式包與引擎能力
 
-傳輸 4.0.0 的 dsl-programs.entries 維持空陣列。4.1.0 以必要能力 `dsl-programs-v1` 打包已准入的 expanded AST，移除作者與來源稽核資訊。4.2.0 在相同程式內容外增加永久版次關聯，見[快照傳輸](../schema/export/snapshot-transport.md#34-dsl-程式包與版本准入)。公開包維持 expanded AST。生產端覆核整卡來源閉包，對戰宿主須以同一快照綁定版次和來源，在載入時降低成內部 typed IR 並完成嚴格開局准入。公開支援度仍以指定引擎目標的實跑紀錄為據。
+傳輸 4.0.0 的 dsl-programs.entries 維持空陣列。4.1.0 以必要能力 `dsl-programs-v1` 打包已准入的 expanded AST，移除作者與來源稽核資訊。4.2.0 在相同程式內容外增加永久版次關聯，見[快照傳輸](../schema/export/snapshot-transport.md#34-dsl-程式包與版本准入)。依 [ADR-0023](../adr/0023-publish-expanded-ast.md)，公開 DSL 程式包承載已展開的 AST。生產端覆核整卡來源閉包，對戰宿主須以同一快照綁定版次和來源，在載入時降低成內部 typed IR 並完成嚴格開局准入。公開支援度仍以指定引擎目標的實跑紀錄為據。
 
 IR 所需語義能力仍由節點與參數形狀推導，runtime 必須實際支援；light 或 shared 標記不授予缺失的付款、事件、取代、token 或私有資訊機制。actor、合法回答與玩家／AI 觀察隔離保持不變。
 

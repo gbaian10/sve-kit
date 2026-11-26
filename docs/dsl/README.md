@@ -45,7 +45,7 @@ Schema 與規格不一致時要修到一致，不能讓任一邊默默降級。
 | PlayerRef／PlayerSet | [玩家型別規格](ir-vocabulary-1.0.md#1-型別身分與能力來源) | DSL §6；IR §1 |
 | 分層證據與測試 | [DSL 驗收規格](validation.md) | DSL §10、§12；IR §12 |
 | 裁定登錄與證據強度 | [ADR-0009](../adr/0009-rulings-evidence.md) | DSL §12；IR §0、§11 |
-| 公開程式包 | [ADR-0019](../adr/0019-publish-typed-ir.md) | 承載 §7 |
+| 公開程式包 | [ADR-0023](../adr/0023-publish-expanded-ast.md) | 承載 §7 |
 | 版本與每卡 meta | [ADR-0010](../adr/0010-version-meta.md) | DSL §1 |
 
 ## 執行與驗收
