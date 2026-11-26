@@ -59,7 +59,7 @@
           "const": "effect_set"
         },
         "record_key": {
-          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/CardNumber"
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/NonemptyText"
         }
       },
       "required": [
@@ -88,7 +88,7 @@
           "const": "author_effect_set"
         },
         "record_key": {
-          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/CardNumber"
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/NonemptyText"
         }
       },
       "required": [

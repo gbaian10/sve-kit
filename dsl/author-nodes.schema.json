@@ -19,19 +19,11 @@
       "type": "string",
       "pattern": "^[a-z][a-z0-9_.-]*$(?![\\s\\S])"
     },
-    "ParamName": {
+    "Identifier": {
       "type": "string",
       "pattern": "^[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
     },
-    "CardNumber": {
-      "type": "string",
-      "minLength": 1
-    },
-    "CardName": {
-      "type": "string",
-      "minLength": 1
-    },
-    "Concept": {
+    "NonemptyText": {
       "type": "string",
       "minLength": 1
     },
@@ -118,7 +110,7 @@
       "type": "object",
       "properties": {
         "param": {
-          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/ParamName"
+          "$ref": "urn:sve-kit:author-nodes:1.0#/$defs/Identifier"
         }
       },
       "required": [
@@ -170,7 +162,7 @@
           "const": "CardName"
         },
         "value": {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         }
       },
       "required": [
@@ -187,7 +179,7 @@
           "const": "Concept"
         },
         "value": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         }
       },
       "required": [
@@ -295,7 +287,7 @@
     "ParamDeclarations": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/$defs/ParamName"
+        "$ref": "#/$defs/Identifier"
       },
       "additionalProperties": {
         "$ref": "#/$defs/ParamDecl"
@@ -304,7 +296,7 @@
     "ParamValues": {
       "type": "object",
       "propertyNames": {
-        "$ref": "#/$defs/ParamName"
+        "$ref": "#/$defs/Identifier"
       },
       "additionalProperties": {
         "$ref": "#/$defs/ParamValue"
@@ -313,10 +305,6 @@
     "BindingName": {
       "type": "string",
       "pattern": "^(?!(?:this|it|item|affected|found|entering|attack_target|host|cost1|self|opp|turn|non_turn|current|opponents|each|other_players)$(?![\\s\\S]))[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
-    },
-    "RoleName": {
-      "type": "string",
-      "pattern": "^[A-Za-z][A-Za-z0-9_]*$(?![\\s\\S])"
     },
     "ReservedRefName": {
       "type": "string",
@@ -423,7 +411,7 @@
           "$ref": "#/$defs/BindingName"
         },
         "name": {
-          "$ref": "#/$defs/RoleName"
+          "$ref": "#/$defs/Identifier"
         }
       },
       "required": [
@@ -1254,7 +1242,7 @@
       "type": "object",
       "minProperties": 1,
       "propertyNames": {
-        "$ref": "#/$defs/RoleName"
+        "$ref": "#/$defs/Identifier"
       },
       "additionalProperties": {
         "$ref": "#/$defs/A.target.role-value"
@@ -1300,7 +1288,7 @@
       "minProperties": 1,
       "properties": {
         "name": {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "zone": {
           "$ref": "#/$defs/Zone"
@@ -1309,10 +1297,10 @@
           "$ref": "#/$defs/Code"
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "orig_cost_eq": {
           "$ref": "#/$defs/A.quantity"
@@ -1422,22 +1410,22 @@
           ]
         },
         "class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_all": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -1447,7 +1435,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -1520,14 +1508,14 @@
           ]
         },
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -1546,7 +1534,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -1696,7 +1684,7 @@
         "class": {
           "anyOf": [
             {
-              "$ref": "#/$defs/Concept"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -1706,7 +1694,7 @@
         "trait": {
           "anyOf": [
             {
-              "$ref": "#/$defs/Concept"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -1718,7 +1706,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Concept"
+                "$ref": "#/$defs/NonemptyText"
               },
               {
                 "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -1730,7 +1718,7 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -1743,7 +1731,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -1833,14 +1821,14 @@
           ]
         },
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -1859,7 +1847,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -1954,7 +1942,7 @@
         "class": {
           "anyOf": [
             {
-              "$ref": "#/$defs/Concept"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -1964,7 +1952,7 @@
         "trait": {
           "anyOf": [
             {
-              "$ref": "#/$defs/Concept"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -1976,7 +1964,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Concept"
+                "$ref": "#/$defs/NonemptyText"
               },
               {
                 "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -1988,7 +1976,7 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -2001,7 +1989,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -2059,14 +2047,14 @@
           ]
         },
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -2085,7 +2073,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -2464,10 +2452,6 @@
         "n"
       ],
       "additionalProperties": false
-    },
-    "CounterName": {
-      "type": "string",
-      "minLength": 1
     },
     "DistinctBy": {
       "type": "string",
@@ -2929,7 +2913,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -2953,7 +2937,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -2977,7 +2961,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -3015,7 +2999,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -3042,7 +3026,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -3069,7 +3053,7 @@
       "type": "object",
       "properties": {
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -3115,10 +3099,6 @@
           "$ref": "#/$defs/A.cost.counter.selected"
         }
       ]
-    },
-    "Title": {
-      "minLength": 1,
-      "type": "string"
     },
     "A.expr.hand": {
       "additionalProperties": false,
@@ -3199,7 +3179,7 @@
           "$ref": "#/$defs/A.ref"
         },
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         }
       },
       "required": [
@@ -3360,7 +3340,7 @@
           "type": "object",
           "properties": {
             "trait": {
-              "$ref": "#/$defs/Concept"
+              "$ref": "#/$defs/NonemptyText"
             }
           },
           "required": [
@@ -3522,7 +3502,7 @@
       "additionalProperties": false,
       "properties": {
         "construction": {
-          "$ref": "#/$defs/Title"
+          "$ref": "#/$defs/NonemptyText"
         }
       },
       "required": [
@@ -3800,14 +3780,14 @@
       },
       "properties": {
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -3826,7 +3806,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -3855,7 +3835,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -3895,7 +3875,7 @@
           "type": "boolean"
         },
         "class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "kind": {
           "anyOf": [
@@ -3908,11 +3888,11 @@
           ]
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -3920,10 +3900,10 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
-              "$ref": "#/$defs/A.expr.declared-name"
+              "$ref": "#/$defs/A.expr.bound"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -3992,14 +3972,14 @@
       },
       "properties": {
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -4018,7 +3998,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -4047,7 +4027,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -4087,7 +4067,7 @@
           "type": "boolean"
         },
         "class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "kind": {
           "anyOf": [
@@ -4100,11 +4080,11 @@
           ]
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -4112,7 +4092,7 @@
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -4229,18 +4209,6 @@
         "event"
       ],
       "type": "object"
-    },
-    "A.expr.declared-name": {
-      "type": "object",
-      "properties": {
-        "bound": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "required": [
-        "bound"
-      ],
-      "additionalProperties": false
     },
     "A.expr.dice": {
       "additionalProperties": false,
@@ -4382,7 +4350,7 @@
       },
       "properties": {
         "class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "where": {
           "$ref": "#/$defs/A.cond"
@@ -4391,14 +4359,14 @@
           "$ref": "#/$defs/BindingName"
         },
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -4417,7 +4385,7 @@
           "$ref": "#/$defs/Nat"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -4446,7 +4414,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -4489,17 +4457,17 @@
           "$ref": "#/$defs/Code"
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
         },
         "name": {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         }
       },
       "type": "object"
@@ -4542,7 +4510,7 @@
       },
       "properties": {
         "class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "where": {
           "$ref": "#/$defs/A.cond"
@@ -4551,14 +4519,14 @@
           "$ref": "#/$defs/BindingName"
         },
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -4577,7 +4545,7 @@
           "$ref": "#/$defs/Nat"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -4606,7 +4574,7 @@
         },
         "names": {
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -4649,17 +4617,17 @@
           "$ref": "#/$defs/Code"
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_all": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
         },
         "name": {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "who": {
           "$ref": "#/$defs/A.player-ref"
@@ -5080,7 +5048,7 @@
       ],
       "type": "object"
     },
-    "A.event.left-field-payload": {
+    "A.event.field-departure-payload": {
       "additionalProperties": false,
       "not": {
         "required": [
@@ -5111,7 +5079,7 @@
       "additionalProperties": false,
       "properties": {
         "left_field": {
-          "$ref": "#/$defs/A.event.left-field-payload"
+          "$ref": "#/$defs/A.event.field-departure-payload"
         }
       },
       "required": [
@@ -5119,7 +5087,7 @@
       ],
       "type": "object"
     },
-    "A.history.left-field-where": {
+    "A.history.movement-where": {
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
@@ -5176,7 +5144,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.left-field-where"
+          "$ref": "#/$defs/A.history.movement-where"
         }
       },
       "required": [
@@ -5226,7 +5194,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.left-field-where"
+          "$ref": "#/$defs/A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -5242,7 +5210,7 @@
       ],
       "type": "object"
     },
-    "A.event.placed-ex-payload": {
+    "A.event.zone-entry-payload": {
       "additionalProperties": false,
       "not": {
         "required": [
@@ -5276,28 +5244,12 @@
       "additionalProperties": false,
       "properties": {
         "placed_ex": {
-          "$ref": "#/$defs/A.event.placed-ex-payload"
+          "$ref": "#/$defs/A.event.zone-entry-payload"
         }
       },
       "required": [
         "placed_ex"
       ],
-      "type": "object"
-    },
-    "A.history.placed-ex-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
       "type": "object"
     },
     "A.history.placed-ex": {
@@ -5344,7 +5296,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.placed-ex-where"
+          "$ref": "#/$defs/A.history.movement-where"
         }
       },
       "required": [
@@ -5397,7 +5349,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.placed-ex-where"
+          "$ref": "#/$defs/A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -5456,22 +5408,6 @@
       ],
       "type": "object"
     },
-    "A.history.discarded-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        },
-        "during": {
-          "$ref": "#/$defs/A.during"
-        }
-      },
-      "type": "object"
-    },
     "A.history.discarded": {
       "additionalProperties": false,
       "not": {
@@ -5517,7 +5453,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.discarded-where"
+          "$ref": "#/$defs/A.history.movement-where"
         }
       },
       "required": [
@@ -5571,7 +5507,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.discarded-where"
+          "$ref": "#/$defs/A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -5587,62 +5523,16 @@
       ],
       "type": "object"
     },
-    "A.event.banished-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "from": {
-          "$ref": "#/$defs/Zone"
-        },
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        },
-        "during": {
-          "$ref": "#/$defs/A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
-      "type": "object"
-    },
     "A.event.banished": {
       "additionalProperties": false,
       "properties": {
         "banished": {
-          "$ref": "#/$defs/A.event.banished-payload"
+          "$ref": "#/$defs/A.event.zone-entry-payload"
         }
       },
       "required": [
         "banished"
       ],
-      "type": "object"
-    },
-    "A.history.banished-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
       "type": "object"
     },
     "A.history.banished": {
@@ -5689,7 +5579,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.banished-where"
+          "$ref": "#/$defs/A.history.movement-where"
         }
       },
       "required": [
@@ -5742,7 +5632,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.banished-where"
+          "$ref": "#/$defs/A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -5758,59 +5648,16 @@
       ],
       "type": "object"
     },
-    "A.event.destroyed-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        },
-        "during": {
-          "$ref": "#/$defs/A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
-      "type": "object"
-    },
     "A.event.destroyed": {
       "additionalProperties": false,
       "properties": {
         "destroyed": {
-          "$ref": "#/$defs/A.event.destroyed-payload"
+          "$ref": "#/$defs/A.event.field-departure-payload"
         }
       },
       "required": [
         "destroyed"
       ],
-      "type": "object"
-    },
-    "A.history.destroyed-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
       "type": "object"
     },
     "A.history.destroyed": {
@@ -5854,7 +5701,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.destroyed-where"
+          "$ref": "#/$defs/A.history.movement-where"
         }
       },
       "required": [
@@ -5904,7 +5751,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.destroyed-where"
+          "$ref": "#/$defs/A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -6524,7 +6371,7 @@
       ],
       "type": "object"
     },
-    "A.event.attack-target-payload": {
+    "A.event.subject-payload": {
       "additionalProperties": false,
       "not": {
         "required": [
@@ -6549,7 +6396,7 @@
       "additionalProperties": false,
       "properties": {
         "attack_target": {
-          "$ref": "#/$defs/A.event.attack-target-payload"
+          "$ref": "#/$defs/A.event.subject-payload"
         }
       },
       "required": [
@@ -6557,7 +6404,7 @@
       ],
       "type": "object"
     },
-    "A.history.attack-target-where": {
+    "A.history.ref-where": {
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
@@ -6608,7 +6455,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.attack-target-where"
+          "$ref": "#/$defs/A.history.ref-where"
         }
       },
       "required": [
@@ -6658,7 +6505,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.attack-target-where"
+          "$ref": "#/$defs/A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -6710,7 +6557,7 @@
       ],
       "type": "object"
     },
-    "A.history.evolved-where": {
+    "A.history.by-ref-where": {
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
@@ -6764,7 +6611,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.evolved-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         }
       },
       "required": [
@@ -6814,7 +6661,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.evolved-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -6830,53 +6677,16 @@
       ],
       "type": "object"
     },
-    "A.event.super-evolved-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
-      "type": "object"
-    },
     "A.event.super-evolved": {
       "additionalProperties": false,
       "properties": {
         "super_evolved": {
-          "$ref": "#/$defs/A.event.super-evolved-payload"
+          "$ref": "#/$defs/A.event.evolved-payload"
         }
       },
       "required": [
         "super_evolved"
       ],
-      "type": "object"
-    },
-    "A.history.super-evolved-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
       "type": "object"
     },
     "A.history.super-evolved": {
@@ -6920,7 +6730,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.super-evolved-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         }
       },
       "required": [
@@ -6970,7 +6780,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.super-evolved-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -7295,7 +7105,7 @@
       ],
       "type": "object"
     },
-    "A.event.ability-played-payload": {
+    "A.event.ability-holder-payload": {
       "additionalProperties": false,
       "properties": {
         "who": {
@@ -7318,7 +7128,7 @@
       "additionalProperties": false,
       "properties": {
         "ability_played": {
-          "$ref": "#/$defs/A.event.ability-played-payload"
+          "$ref": "#/$defs/A.event.ability-holder-payload"
         }
       },
       "required": [
@@ -7864,47 +7674,16 @@
       ],
       "type": "object"
     },
-    "A.event.acted-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        }
-      },
-      "type": "object"
-    },
     "A.event.acted": {
       "additionalProperties": false,
       "properties": {
         "acted": {
-          "$ref": "#/$defs/A.event.acted-payload"
+          "$ref": "#/$defs/A.event.subject-payload"
         }
       },
       "required": [
         "acted"
       ],
-      "type": "object"
-    },
-    "A.history.acted-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        }
-      },
       "type": "object"
     },
     "A.history.acted": {
@@ -7948,7 +7727,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.acted-where"
+          "$ref": "#/$defs/A.history.ref-where"
         }
       },
       "required": [
@@ -7998,7 +7777,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.acted-where"
+          "$ref": "#/$defs/A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -8014,47 +7793,16 @@
       ],
       "type": "object"
     },
-    "A.event.stood-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        }
-      },
-      "type": "object"
-    },
     "A.event.stood": {
       "additionalProperties": false,
       "properties": {
         "stood": {
-          "$ref": "#/$defs/A.event.stood-payload"
+          "$ref": "#/$defs/A.event.subject-payload"
         }
       },
       "required": [
         "stood"
       ],
-      "type": "object"
-    },
-    "A.history.stood-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        }
-      },
       "type": "object"
     },
     "A.history.stood": {
@@ -8098,7 +7846,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.stood-where"
+          "$ref": "#/$defs/A.history.ref-where"
         }
       },
       "required": [
@@ -8148,7 +7896,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.stood-where"
+          "$ref": "#/$defs/A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -8164,47 +7912,16 @@
       ],
       "type": "object"
     },
-    "A.event.raced-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        }
-      },
-      "type": "object"
-    },
     "A.event.raced": {
       "additionalProperties": false,
       "properties": {
         "raced": {
-          "$ref": "#/$defs/A.event.raced-payload"
+          "$ref": "#/$defs/A.event.subject-payload"
         }
       },
       "required": [
         "raced"
       ],
-      "type": "object"
-    },
-    "A.history.raced-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        }
-      },
       "type": "object"
     },
     "A.history.raced": {
@@ -8248,7 +7965,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.raced-where"
+          "$ref": "#/$defs/A.history.ref-where"
         }
       },
       "required": [
@@ -8298,7 +8015,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.raced-where"
+          "$ref": "#/$defs/A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -8314,47 +8031,16 @@
       ],
       "type": "object"
     },
-    "A.event.drive-gained-payload": {
-      "additionalProperties": false,
-      "not": {
-        "required": [
-          "ref",
-          "sel"
-        ]
-      },
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "sel": {
-          "$ref": "#/$defs/A.event-subject-filter"
-        },
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        }
-      },
-      "type": "object"
-    },
     "A.event.drive-gained": {
       "additionalProperties": false,
       "properties": {
         "drive_gained": {
-          "$ref": "#/$defs/A.event.drive-gained-payload"
+          "$ref": "#/$defs/A.event.subject-payload"
         }
       },
       "required": [
         "drive_gained"
       ],
-      "type": "object"
-    },
-    "A.history.drive-gained-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        }
-      },
       "type": "object"
     },
     "A.history.drive-gained": {
@@ -8398,7 +8084,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.drive-gained-where"
+          "$ref": "#/$defs/A.history.ref-where"
         }
       },
       "required": [
@@ -8448,7 +8134,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.drive-gained-where"
+          "$ref": "#/$defs/A.history.ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -8464,30 +8150,11 @@
       ],
       "type": "object"
     },
-    "A.event.ub-activated-payload": {
-      "additionalProperties": false,
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        },
-        "holder": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/A.ref"
-            },
-            {
-              "$ref": "#/$defs/A.event-object-sel"
-            }
-          ]
-        }
-      },
-      "type": "object"
-    },
     "A.event.ub-activated": {
       "additionalProperties": false,
       "properties": {
         "ub_activated": {
-          "$ref": "#/$defs/A.event.ub-activated-payload"
+          "$ref": "#/$defs/A.event.ability-holder-payload"
         }
       },
       "required": [
@@ -8495,7 +8162,7 @@
       ],
       "type": "object"
     },
-    "A.history.ub-activated-where": {
+    "A.history.holder-where": {
       "additionalProperties": false,
       "minProperties": 1,
       "properties": {
@@ -8550,7 +8217,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.ub-activated-where"
+          "$ref": "#/$defs/A.history.holder-where"
         }
       },
       "required": [
@@ -8597,7 +8264,7 @@
           "$ref": "#/$defs/A.player-ref"
         },
         "where": {
-          "$ref": "#/$defs/A.history.ub-activated-where"
+          "$ref": "#/$defs/A.history.holder-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -8824,19 +8491,6 @@
       ],
       "type": "object"
     },
-    "A.history.targeted-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
-      "type": "object"
-    },
     "A.history.targeted": {
       "additionalProperties": false,
       "not": {
@@ -8872,7 +8526,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/A.history.targeted-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         }
       },
       "required": [
@@ -8916,7 +8570,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/A.history.targeted-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -9092,23 +8746,6 @@
       ],
       "type": "object"
     },
-    "A.history.drive-checked-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "holder": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/A.ref"
-            },
-            {
-              "$ref": "#/$defs/A.event-object-sel"
-            }
-          ]
-        }
-      },
-      "type": "object"
-    },
     "A.history.drive-checked": {
       "additionalProperties": false,
       "not": {
@@ -9144,7 +8781,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/A.history.drive-checked-where"
+          "$ref": "#/$defs/A.history.holder-where"
         }
       },
       "required": [
@@ -9188,7 +8825,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/A.history.drive-checked-where"
+          "$ref": "#/$defs/A.history.holder-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -9372,22 +9009,6 @@
       ],
       "type": "object"
     },
-    "A.history.moved-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "during": {
-          "$ref": "#/$defs/A.during"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
-      "type": "object"
-    },
     "A.history.moved": {
       "additionalProperties": false,
       "not": {
@@ -9439,7 +9060,7 @@
           "$ref": "#/$defs/Zone"
         },
         "where": {
-          "$ref": "#/$defs/A.history.moved-where"
+          "$ref": "#/$defs/A.history.movement-where"
         }
       },
       "required": [
@@ -9499,7 +9120,7 @@
           "$ref": "#/$defs/Zone"
         },
         "where": {
-          "$ref": "#/$defs/A.history.moved-where"
+          "$ref": "#/$defs/A.history.movement-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -9879,19 +9500,6 @@
       ],
       "type": "object"
     },
-    "A.history.fused-as-material-where": {
-      "additionalProperties": false,
-      "minProperties": 1,
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.ref"
-        },
-        "by": {
-          "$ref": "#/$defs/A.event-by"
-        }
-      },
-      "type": "object"
-    },
     "A.history.fused-as-material": {
       "additionalProperties": false,
       "not": {
@@ -9927,7 +9535,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/A.history.fused-as-material-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         }
       },
       "required": [
@@ -9971,7 +9579,7 @@
           "type": "string"
         },
         "where": {
-          "$ref": "#/$defs/A.history.fused-as-material-where"
+          "$ref": "#/$defs/A.history.by-ref-where"
         },
         "at_least": {
           "$ref": "#/$defs/A.quantity"
@@ -11040,16 +10648,7 @@
       ]
     },
     "A.cost.skip-turn": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        }
-      },
-      "required": [
-        "who"
-      ],
-      "additionalProperties": false
+      "$ref": "#/$defs/A.expr.turn-number-payload"
     },
     "A.cost.step": {
       "type": "object",
@@ -12608,22 +12207,22 @@
           ]
         },
         "class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_all": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -12633,7 +12232,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -12672,14 +12271,14 @@
           "const": true
         },
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -12698,7 +12297,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -13013,7 +12612,7 @@
         },
         "list": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -13040,7 +12639,7 @@
           "$ref": "#/$defs/A.effect-object"
         },
         "name": {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         }
       },
       "required": [
@@ -13055,7 +12654,7 @@
           "$ref": "#/$defs/A.effect-object"
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         }
       },
       "required": [
@@ -13484,7 +13083,7 @@
           "$ref": "#/$defs/A.effect-object"
         },
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "max": {
           "$ref": "#/$defs/A.quantity"
@@ -13566,14 +13165,14 @@
       },
       "properties": {
         "not_class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "not_trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_any": {
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1,
           "type": "array"
@@ -13592,7 +13191,7 @@
           "$ref": "#/$defs/A.quantity"
         },
         "keyword": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "has_trigger": {
           "const": true,
@@ -13622,7 +13221,7 @@
         "names": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -13661,7 +13260,7 @@
           "type": "boolean"
         },
         "class": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "kind": {
           "anyOf": [
@@ -13674,19 +13273,19 @@
           ]
         },
         "trait": {
-          "$ref": "#/$defs/Concept"
+          "$ref": "#/$defs/NonemptyText"
         },
         "traits_all": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
         "name": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$ref": "#/$defs/A.same-as"
@@ -14154,24 +13753,7 @@
       "type": "object"
     },
     "A.count-amount": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/A.quantity"
-        },
-        {
-          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
-        }
-      ]
-    },
-    "A.damage-amount": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/A.quantity"
-        },
-        {
-          "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
-        }
-      ]
+      "$ref": "#/$defs/A.selection-quantity"
     },
     "A.recovery-delta": {
       "anyOf": [
@@ -14382,45 +13964,13 @@
         }
       ]
     },
-    "A.search.group.exact": {
-      "type": "object",
-      "properties": {
-        "sel": {
-          "$ref": "#/$defs/A.sel.object-core"
-        },
-        "n": {
-          "$ref": "#/$defs/A.quantity"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "sel",
-        "n"
-      ]
-    },
-    "A.search.group.up-to": {
-      "type": "object",
-      "properties": {
-        "sel": {
-          "$ref": "#/$defs/A.sel.object-core"
-        },
-        "upto": {
-          "$ref": "#/$defs/A.quantity"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "sel",
-        "upto"
-      ]
-    },
     "A.search.group": {
       "anyOf": [
         {
-          "$ref": "#/$defs/A.search.group.exact"
+          "$ref": "#/$defs/A.cost.material-group.exact"
         },
         {
-          "$ref": "#/$defs/A.search.group.up-to"
+          "$ref": "#/$defs/A.cost.material-group.up-to"
         }
       ]
     },
@@ -14434,7 +13984,7 @@
           "$ref": "#/$defs/A.effect-recipient"
         },
         "n": {
-          "$ref": "#/$defs/A.damage-amount"
+          "$ref": "#/$defs/A.selection-quantity"
         },
         "after": {
           "$ref": "#/$defs/A.steps"
@@ -14590,7 +14140,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Concept"
+                "$ref": "#/$defs/NonemptyText"
               },
               {
                 "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -14754,32 +14304,7 @@
         ]
       }
     },
-    "A.instead.banish": {
-      "type": "object",
-      "properties": {
-        "if": {
-          "$ref": "#/$defs/A.cond"
-        },
-        "ref": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "after": {
-          "$ref": "#/$defs/A.steps"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "if"
-      ],
-      "anyOf": [
-        {
-          "required": [
-            "ref"
-          ]
-        }
-      ]
-    },
-    "A.instead.destroy": {
+    "A.instead.removal": {
       "type": "object",
       "properties": {
         "if": {
@@ -15006,7 +14531,7 @@
           "$ref": "#/$defs/A.effect-recipient"
         },
         "n": {
-          "$ref": "#/$defs/A.damage-amount"
+          "$ref": "#/$defs/A.selection-quantity"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -15053,7 +14578,7 @@
         "instead": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.instead.destroy"
+            "$ref": "#/$defs/A.instead.removal"
           },
           "minItems": 1
         }
@@ -15085,7 +14610,7 @@
         "instead": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.instead.banish"
+            "$ref": "#/$defs/A.instead.removal"
           },
           "minItems": 1
         }
@@ -15107,7 +14632,7 @@
         "instead": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/A.instead.banish"
+            "$ref": "#/$defs/A.instead.removal"
           },
           "minItems": 1
         }
@@ -15130,7 +14655,7 @@
         }
       ]
     },
-    "A.act.act.long": {
+    "A.act.object-ref": {
       "type": "object",
       "properties": {
         "ref": {
@@ -15151,23 +14676,8 @@
           "$ref": "#/$defs/A.ref"
         },
         {
-          "$ref": "#/$defs/A.act.act.long"
+          "$ref": "#/$defs/A.act.object-ref"
         }
-      ]
-    },
-    "A.act.stand.long": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
       ]
     },
     "A.act.stand": {
@@ -15176,23 +14686,8 @@
           "$ref": "#/$defs/A.ref"
         },
         {
-          "$ref": "#/$defs/A.act.stand.long"
+          "$ref": "#/$defs/A.act.object-ref"
         }
-      ]
-    },
-    "A.act.flip-down.long": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
       ]
     },
     "A.act.flip-down": {
@@ -15201,23 +14696,8 @@
           "$ref": "#/$defs/A.ref"
         },
         {
-          "$ref": "#/$defs/A.act.flip-down.long"
+          "$ref": "#/$defs/A.act.object-ref"
         }
-      ]
-    },
-    "A.act.flip-up.long": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
       ]
     },
     "A.act.flip-up.selection": {
@@ -15243,13 +14723,13 @@
               "type": "boolean"
             },
             "name": {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             "name_contains": {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             "trait": {
-              "$ref": "#/$defs/Concept"
+              "$ref": "#/$defs/NonemptyText"
             }
           },
           "required": [
@@ -15277,7 +14757,7 @@
           "$ref": "#/$defs/A.ref"
         },
         {
-          "$ref": "#/$defs/A.act.flip-up.long"
+          "$ref": "#/$defs/A.act.object-ref"
         },
         {
           "$ref": "#/$defs/A.act.flip-up.selection"
@@ -15536,7 +15016,7 @@
         "n"
       ]
     },
-    "A.act.look.ref": {
+    "A.act.observe-ref": {
       "type": "object",
       "properties": {
         "ref": {
@@ -15561,7 +15041,7 @@
         "bind"
       ]
     },
-    "A.act.look.top": {
+    "A.act.observe-top": {
       "type": "object",
       "properties": {
         "top": {
@@ -15586,67 +15066,20 @@
     "A.act.look": {
       "anyOf": [
         {
-          "$ref": "#/$defs/A.act.look.ref"
+          "$ref": "#/$defs/A.act.observe-ref"
         },
         {
-          "$ref": "#/$defs/A.act.look.top"
+          "$ref": "#/$defs/A.act.observe-top"
         }
-      ]
-    },
-    "A.act.reveal.ref": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "bind": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "by": {
-          "$ref": "#/$defs/A.player-ref"
-        },
-        "random": {
-          "$ref": "#/$defs/A.random-sample"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref",
-        "bind"
-      ]
-    },
-    "A.act.reveal.top": {
-      "type": "object",
-      "properties": {
-        "top": {
-          "$ref": "#/$defs/A.deck-slice"
-        },
-        "bind": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "by": {
-          "$ref": "#/$defs/A.player-ref"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "top",
-        "bind"
       ]
     },
     "A.act.reveal": {
       "anyOf": [
         {
-          "$ref": "#/$defs/A.act.reveal.ref"
+          "$ref": "#/$defs/A.act.observe-ref"
         },
         {
-          "$ref": "#/$defs/A.act.reveal.top"
+          "$ref": "#/$defs/A.act.observe-top"
         }
       ]
     },
@@ -15855,7 +15288,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Concept"
+                "$ref": "#/$defs/NonemptyText"
               },
               {
                 "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -15927,7 +15360,7 @@
           "$ref": "#/$defs/A.effect-object"
         },
         "name": {
-          "$ref": "#/$defs/CounterName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "delta": {
           "$ref": "#/$defs/A.expr.numeric"
@@ -15943,64 +15376,7 @@
         "delta"
       ]
     },
-    "A.act.pp-max": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.effect-players"
-        },
-        "delta": {
-          "$ref": "#/$defs/A.expr.numeric"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who",
-        "delta"
-      ]
-    },
-    "A.act.ep": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.effect-players"
-        },
-        "delta": {
-          "$ref": "#/$defs/A.expr.numeric"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who",
-        "delta"
-      ]
-    },
-    "A.act.sep": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.effect-players"
-        },
-        "delta": {
-          "$ref": "#/$defs/A.expr.numeric"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who",
-        "delta"
-      ]
-    },
-    "A.act.pp.delta": {
+    "A.act.player-delta": {
       "type": "object",
       "properties": {
         "who": {
@@ -16042,14 +15418,14 @@
     "A.act.pp": {
       "anyOf": [
         {
-          "$ref": "#/$defs/A.act.pp.delta"
+          "$ref": "#/$defs/A.act.player-delta"
         },
         {
           "$ref": "#/$defs/A.act.pp.to-max"
         }
       ]
     },
-    "A.act.shuffle": {
+    "A.act.player-action": {
       "type": "object",
       "properties": {
         "who": {
@@ -16151,7 +15527,7 @@
           "$ref": "#/$defs/A.effect-object"
         },
         "token": {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "result": {
           "$ref": "#/$defs/BindingName"
@@ -16175,33 +15551,7 @@
       ],
       "type": "object"
     },
-    "A.act.steal": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        },
-        "to": {
-          "anyOf": [
-            {
-              "$ref": "#/$defs/A.player-ref"
-            },
-            {
-              "type": "string",
-              "const": "other_players"
-            }
-          ]
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
-      ]
-    },
-    "A.act.give": {
+    "A.act.change-control": {
       "type": "object",
       "properties": {
         "ref": {
@@ -16257,21 +15607,6 @@
         },
         "n": {
           "$ref": "#/$defs/A.quantity"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "ref"
-      ]
-    },
-    "A.act.gain-drive": {
-      "type": "object",
-      "properties": {
-        "ref": {
-          "$ref": "#/$defs/A.effect-object"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
         }
       },
       "additionalProperties": false,
@@ -16436,51 +15771,6 @@
         "effect"
       ]
     },
-    "A.act.win": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.effect-players"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
-    },
-    "A.act.skip-turn": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.effect-players"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
-    },
-    "A.act.extra-turn": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.effect-players"
-        },
-        "result": {
-          "$ref": "#/$defs/BindingName"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
-    },
     "A.act.make-type": {
       "type": "object",
       "properties": {
@@ -16509,7 +15799,7 @@
         "among": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -16541,7 +15831,7 @@
     "A.create.token": {
       "anyOf": [
         {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         },
         {
           "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -16551,7 +15841,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/CardName"
+                "$ref": "#/$defs/NonemptyText"
               },
               {
                 "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -16637,7 +15927,7 @@
         "counters": {
           "type": "object",
           "propertyNames": {
-            "$ref": "#/$defs/CounterName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "additionalProperties": {
             "$ref": "#/$defs/A.quantity"
@@ -16778,7 +16068,7 @@
         "among": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -16814,7 +16104,7 @@
         "into": {
           "anyOf": [
             {
-              "$ref": "#/$defs/CardName"
+              "$ref": "#/$defs/NonemptyText"
             },
             {
               "$ref": "#/$defs/A.transform.allocated"
@@ -17335,19 +16625,19 @@
           "$ref": "#/$defs/A.act.counter"
         },
         "pp_max": {
-          "$ref": "#/$defs/A.act.pp-max"
+          "$ref": "#/$defs/A.act.player-delta"
         },
         "ep": {
-          "$ref": "#/$defs/A.act.ep"
+          "$ref": "#/$defs/A.act.player-delta"
         },
         "sep": {
-          "$ref": "#/$defs/A.act.sep"
+          "$ref": "#/$defs/A.act.player-delta"
         },
         "pp": {
           "$ref": "#/$defs/A.act.pp"
         },
         "shuffle": {
-          "$ref": "#/$defs/A.act.shuffle"
+          "$ref": "#/$defs/A.act.player-action"
         },
         "dice": {
           "$ref": "#/$defs/A.act.dice"
@@ -17365,10 +16655,10 @@
           "$ref": "#/$defs/A.act.limit-break"
         },
         "steal": {
-          "$ref": "#/$defs/A.act.steal"
+          "$ref": "#/$defs/A.act.change-control"
         },
         "give": {
-          "$ref": "#/$defs/A.act.give"
+          "$ref": "#/$defs/A.act.change-control"
         },
         "stack_plus": {
           "$ref": "#/$defs/A.expr.numeric"
@@ -17380,7 +16670,7 @@
           "$ref": "#/$defs/A.act.race"
         },
         "gain_drive": {
-          "$ref": "#/$defs/A.act.gain-drive"
+          "$ref": "#/$defs/A.act.object-ref"
         },
         "play_card": {
           "$ref": "#/$defs/A.act.play-card"
@@ -17395,13 +16685,13 @@
           "$ref": "#/$defs/A.act.player-effect"
         },
         "win": {
-          "$ref": "#/$defs/A.act.win"
+          "$ref": "#/$defs/A.act.player-action"
         },
         "skip_turn": {
-          "$ref": "#/$defs/A.act.skip-turn"
+          "$ref": "#/$defs/A.act.player-action"
         },
         "extra_turn": {
-          "$ref": "#/$defs/A.act.extra-turn"
+          "$ref": "#/$defs/A.act.player-action"
         },
         "make_type": {
           "$ref": "#/$defs/A.act.make-type"
@@ -17577,12 +16867,12 @@
     "A.evolution-destination": {
       "anyOf": [
         {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         },
         {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/CardName"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -17663,42 +16953,6 @@
       ]
     },
     "A.head.trigger": {
-      "type": "object",
-      "properties": {
-        "do": {
-          "$ref": "#/$defs/A.steps"
-        },
-        "targets": {
-          "$ref": "#/$defs/A.targets"
-        },
-        "optional_cost": {
-          "$ref": "#/$defs/A.cost.optionals"
-        },
-        "x": {
-          "$ref": "#/$defs/A.x"
-        },
-        "define": {
-          "$ref": "#/$defs/A.define"
-        },
-        "per_turn": {
-          "type": "integer",
-          "minimum": 1,
-          "maximum": 9007199254740991
-        },
-        "ub": {
-          "type": "boolean",
-          "const": true
-        },
-        "cost": {
-          "$ref": "#/$defs/A.cost"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "do"
-      ]
-    },
-    "A.head.lastword": {
       "type": "object",
       "properties": {
         "do": {
@@ -18137,7 +17391,7 @@
           "$ref": "#/$defs/A.head.trigger"
         },
         "lastword": {
-          "$ref": "#/$defs/A.head.lastword"
+          "$ref": "#/$defs/A.head.trigger"
         },
         "evolve_time": {
           "$ref": "#/$defs/A.head.trigger"
@@ -18178,7 +17432,7 @@
           "$ref": "#/$defs/A.head.trigger"
         },
         "lastword": {
-          "$ref": "#/$defs/A.head.lastword"
+          "$ref": "#/$defs/A.head.trigger"
         },
         "evolve_time": {
           "$ref": "#/$defs/A.head.trigger"
@@ -18212,7 +17466,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Concept"
+                "$ref": "#/$defs/NonemptyText"
               },
               {
                 "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -18247,7 +17501,7 @@
         "keywords": {
           "type": "array",
           "items": {
-            "$ref": "#/$defs/Concept"
+            "$ref": "#/$defs/NonemptyText"
           },
           "minItems": 1
         },
@@ -18326,23 +17580,11 @@
         ]
       }
     },
-    "A.turn-interval": {
-      "type": "object",
-      "properties": {
-        "who": {
-          "$ref": "#/$defs/A.player-ref"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "who"
-      ]
-    },
     "A.until-during-next-turn": {
       "type": "object",
       "properties": {
         "during_next_turn": {
-          "$ref": "#/$defs/A.turn-interval"
+          "$ref": "#/$defs/A.expr.turn-number-payload"
         }
       },
       "additionalProperties": false,
@@ -19315,7 +18557,7 @@
           "items": {
             "anyOf": [
               {
-                "$ref": "#/$defs/Concept"
+                "$ref": "#/$defs/NonemptyText"
               },
               {
                 "$dynamicRef": "urn:sve-kit:author-nodes:1.0:authorParam#authorParam"
@@ -19374,7 +18616,7 @@
           "$ref": "#/$defs/Ports"
         },
         "lastword": {
-          "$ref": "#/$defs/A.head.lastword"
+          "$ref": "#/$defs/A.head.trigger"
         }
       },
       "required": [
@@ -20702,7 +19944,7 @@
           "$ref": "#/$defs/A.head.trigger"
         },
         "lastword": {
-          "$ref": "#/$defs/A.head.lastword"
+          "$ref": "#/$defs/A.head.trigger"
         },
         "evolve_time": {
           "$ref": "#/$defs/A.head.trigger"
@@ -21124,7 +20366,7 @@
           "uniqueItems": true
         },
         "exclude_name_contains": {
-          "$ref": "#/$defs/CardName"
+          "$ref": "#/$defs/NonemptyText"
         },
         "same_name_max": {
           "$ref": "#/$defs/Nat"
