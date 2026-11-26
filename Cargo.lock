@@ -1055,6 +1055,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "sve-selfplay"
+version = "0.1.0"
+dependencies = [
+ "rand",
+ "rand_chacha",
+ "serde",
+ "serde-saphyr",
+ "serde_json",
+ "sha2",
+ "sve-battle-contract",
+ "sve-battle-host",
+ "sve-engine",
+]
+
+[[package]]
 name = "syn"
 version = "2.0.119"
 source = "registry+https://github.com/rust-lang/crates.io-index"

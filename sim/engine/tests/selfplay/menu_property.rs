@@ -512,6 +512,8 @@ fn check_window(game: &Game, question: &Question) -> Result<usize, (String, Bloc
 fn known_engine_issue(error: &str) -> Option<u16> {
     // Remove each temporary diagnostic exception when the corresponding issue is fixed.
     [
+        (2474, "Trigger icon requires verified facts"),
+        (2478, "evolution outside fixed Add numeric layers"),
         (
             2479,
             "exchange material has unsupported movement or permission",
@@ -559,10 +561,7 @@ enum GameResult {
     Failed,
 }
 
-fn report_game(failure: Option<Value>, seed: u64, reprints: bool) -> GameResult {
-    let Some(mut failure) = failure else {
-        return GameResult::Checked;
-    };
+fn report_game(mut failure: Value, seed: u64, reprints: bool) -> GameResult {
     failure["reprints"] = json!(reprints);
     if failure["kind"] == "menu_property" {
         let property = serde_json::from_str::<Value>(failure["error"].as_str().unwrap()).unwrap();
@@ -589,7 +588,7 @@ fn check_games(
     let reports = selfplay::run_seeds(seeds, |seed| {
         let mut windows = 0_usize;
         let mut options = 0_usize;
-        let report = selfplay::run_match(selected, &pools, seed, |game, question, step| {
+        let outcome = selfplay::run_match(selected, &pools, seed, |game, question, step| {
             if !matches!(question.shape, QuestionShape::ActionWindow(_)) {
                 return Ok(ControlFlow::Continue(()));
             }
@@ -614,11 +613,13 @@ fn check_games(
             })
         });
         eprintln!("menu property seed {seed}: {windows} windows checked");
-        let result = if report.missing_trigger_icons() {
-            eprintln!("menu property seed {seed}: opening requires verified Trigger icons");
-            GameResult::Skipped
-        } else {
-            report_game(report.failure, seed, reprints)
+        let result = match outcome {
+            selfplay::MatchOutcome::Completed => GameResult::Checked,
+            selfplay::MatchOutcome::MissingTriggerIcons => {
+                eprintln!("menu property seed {seed}: opening requires verified Trigger icons");
+                GameResult::Skipped
+            }
+            selfplay::MatchOutcome::Failed(failure) => report_game(failure, seed, reprints),
         };
         (windows, options, result)
     });
@@ -637,7 +638,7 @@ fn check_games(
         }
     }
     eprintln!(
-        "menu property: {games} games, {windows} windows, {options} options in completed windows, {skipped} skipped matches, {failures} failures, {:.2}s",
+        "menu property: {games} games, {windows} windows, {options} options in completed windows, {skipped} known interruptions, {failures} failures, {:.2}s",
         started.elapsed().as_secs_f64()
     );
     assert!(

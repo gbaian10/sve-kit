@@ -16,7 +16,8 @@ impl Game {
     }
 
     /// Why player progression stopped; never part of a player answer.
-    pub(crate) const fn referee_fault(&self) -> Option<&EngineFailure> {
+    #[must_use]
+    pub const fn referee_fault(&self) -> Option<&EngineFailure> {
         self.player_fault.as_ref()
     }
 
