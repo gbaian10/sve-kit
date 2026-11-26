@@ -4,27 +4,51 @@ import json
 import math
 import os
 import re
+import subprocess  # ruff: ignore[suspicious-subprocess-import] -- read the checkout's tracked source paths
 import sys
 import xml.etree.ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- local reports; DTDs rejected before parsing
 from collections import defaultdict
 from dataclasses import dataclass
+from functools import cache
+from itertools import islice
 from pathlib import Path
+from shutil import which
 from typing import cast
 
 EXPECTED_ARGS = 2
 FULL_THRESHOLD = 90
 # python and rust summarise one CI shard; the -coverage kinds gate the merged shards.
 KINDS = ("python", "publish", "web", "rust", "python-coverage", "rust-coverage")
+ROOT = Path(__file__).resolve().parents[2]
+PYTEST_LOCATION = re.compile(
+    r"^(?P<file>[A-Za-z0-9_./-]+\.py):(?P<line>[1-9][0-9]{0,6}):"
+    r"[ \t]*(?:in [A-Za-z_.<>][A-Za-z0-9_.<>]*|[A-Za-z_]+)?$",
+    re.MULTILINE,
+)
+VITEST_LOCATION = re.compile(
+    r"^[ \t]*❯ (?:[^\n]*? )?(?P<file>[A-Za-z0-9_./-]+\.[jt]sx?):"
+    r"(?P<line>[1-9][0-9]{0,6})(?::[0-9]+)?$",
+    re.MULTILINE,
+)
+
+
+@dataclass(frozen=True)
+class Failure:
+    """Display-ready location and an allowlisted diagnostic."""
+
+    location: str
+    reason: str
 
 
 @dataclass(frozen=True)
 class Case:
-    """Safe test location and numeric result, excluding parameters and diagnostics."""
+    """Safe test location, result and filtered failure details."""
 
     file: str
     name: str
     seconds: float
     state: str
+    failure: Failure | None
 
 
 def number(value: object) -> float:
@@ -52,8 +76,84 @@ def without_file_group(raw: str) -> str:
     return raw
 
 
-def junit(path: Path, *, python: bool) -> tuple[list[Case], float]:
-    """Read pytest/Vitest JUnit while dropping all messages and captured output."""
+@cache
+def tracked_paths(root: Path) -> frozenset[bytes]:
+    """Use the index to avoid publishing paths supplied only by the test."""
+    git = which("git")
+    if git is None:
+        return frozenset()
+    try:
+        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- arguments only read tracked paths
+            [git, "-C", str(root), "ls-files", "-z"],
+            capture_output=True,
+            check=True,
+        )
+    except (OSError, subprocess.CalledProcessError):
+        return frozenset()
+    return frozenset(result.stdout.split(b"\0"))
+
+
+def source_location(filename: str, line: int, project: str = "") -> str | None:
+    """Only publish real source coordinates relative to the checkout."""
+    try:
+        path = (ROOT / project / filename).resolve()
+        relative = path.relative_to(ROOT).as_posix()
+    except (OSError, RuntimeError, ValueError):
+        return None
+    if (
+        not re.fullmatch(r"[A-Za-z0-9_./-]+\.(?:py|rs|[jt]sx?)", relative)
+        or relative.encode() not in tracked_paths(ROOT)
+        or not path.is_file()
+    ):
+        return None
+    try:
+        with path.open("rb") as source:
+            if next(islice(source, line - 1, None), None) is None:
+                return None
+    except OSError:
+        return None
+    return f"{relative}:{line}"
+
+
+def junit_failure(
+    node: ET.Element, filename: str, project: str, *, python: bool
+) -> Failure | None:
+    """Use traceback locations and fixed assertion text without copying any operands."""
+    failure = node.find("failure")
+    if failure is None:
+        failure = node.find("error")
+    if failure is None:
+        return None
+    source = failure.text or ""
+    frames = list((PYTEST_LOCATION if python else VITEST_LOCATION).finditer(source))
+    location = ""
+    for frame in reversed(frames) if python else frames:
+        if path := source_location(frame["file"], int(frame["line"]), project):
+            location = path
+            break
+    if python and not location and filename != "unknown test file":
+        line = node.get("line", "")
+        if re.fullmatch(r"[0-9]{1,7}", line) and (
+            path := source_location(filename, int(line) + 1, project)
+        ):
+            location = f"{path} (test definition)"
+
+    message = failure.get("message", "").split("\n", 1)[0]
+    reason = "Test failure (details omitted)"
+    if (
+        message.startswith(("AssertionError", "assert "))
+        or failure.get("type") == "AssertionError"
+    ):
+        reason = "Assertion failed (details omitted)"
+        if message.endswith(" // Object.is equality"):
+            reason = "Object.is equality assertion failed (operands omitted)"
+    return Failure(location, reason)
+
+
+def junit(
+    path: Path, *, python: bool, project: str = "carddb"
+) -> tuple[list[Case], float]:
+    """Read pytest/Vitest JUnit, retaining only safe diagnostics."""
     source = path.read_text(encoding="utf-8")
     if "<!DOCTYPE" in source or "<!ENTITY" in source:
         msg = "Report DTDs are forbidden"
@@ -75,15 +175,17 @@ def junit(path: Path, *, python: bool) -> tuple[list[Case], float]:
             if python and re.fullmatch(r"test_[A-Za-z0-9_]+", name)
             else f"case {index}"
         )
+        filename = safe_file(filename)
+        failure = junit_failure(node, filename, project, python=python)
         state = (
             "failed"
-            if node.find("failure") is not None or node.find("error") is not None
+            if failure
             else "skipped"
             if node.find("skipped") is not None
             else "passed"
         )
         cases.append(
-            Case(safe_file(filename), label, number(node.get("time", "0")), state)
+            Case(filename, label, number(node.get("time", "0")), state, failure)
         )
     suites = [root] if root.tag == "testsuite" else list(root.findall("testsuite"))
     elapsed = (
@@ -227,7 +329,10 @@ def combined_summary(kind: str, folder: Path) -> tuple[str, int]:
 
 def junit_summary(kind: str, folder: Path) -> str:
     """Render counts, timings and safe locations for Python or Web."""
-    cases, elapsed = junit(folder / "junit.xml", python=kind in {"python", "publish"})
+    project = {"python": "carddb", "publish": "publish", "web": "sim/web"}[kind]
+    cases, elapsed = junit(
+        folder / "junit.xml", python=kind in {"python", "publish"}, project=project
+    )
     if not cases:
         msg = "Report has no test cases"
         raise ValueError(msg)
@@ -255,11 +360,15 @@ def junit_summary(kind: str, folder: Path) -> str:
         )
     if kind == "python":
         lines.append(shard_description(folder, len(cases))[0])
-    lines.extend(
-        failure_section(
-            [f"{case.file}::{case.name}" for case in cases if case.state == "failed"]
-        )
-    )
+    failures = []
+    for case in cases:
+        if case.failure is None:
+            continue
+        identity = f"{case.file}::{case.name}"
+        if case.failure.location:
+            identity = f"{case.failure.location} · {identity}"
+        failures.append(f"{identity} · {case.failure.reason}")
+    lines.extend(failure_section(failures))
     lines.extend(
         [
             "",
@@ -344,6 +453,47 @@ def binary_section(source: str) -> list[str]:
     ]
 
 
+RUST_TEST_NAME = r"(?:r#)?[A-Za-z_][A-Za-z0-9_]*(?:::(?:r#)?[A-Za-z_][A-Za-z0-9_]*)*"
+RUST_FAILED = re.compile(rf"^test ({RUST_TEST_NAME}) \.\.\. FAILED$", re.MULTILINE)
+RUST_BLOCK = re.compile(rf"^---- ({RUST_TEST_NAME}) stdout ----$", re.MULTILINE)
+RUST_PANIC = re.compile(
+    r"^thread '[^\n]*?'(?: \([0-9]+\))? panicked at "
+    r"(?P<file>sim/(?:engine|scenario-runner|battle-host|battle-contract)/[A-Za-z0-9_./-]+\.rs):(?P<line>[1-9][0-9]{0,6}):[0-9]+:"
+    r"(?=\n(?P<message>[^\n]*))",
+    re.MULTILINE,
+)
+
+
+def rust_failure(block: str) -> Failure | None:
+    """The panic follows captured test output in a libtest failure block."""
+    for panic in reversed(list(RUST_PANIC.finditer(block))):
+        if location := source_location(panic["file"], int(panic["line"])):
+            message = panic["message"]
+            if comparison := re.match(
+                r"assertion `left (==|!=) right` failed", message
+            ):
+                reason = (
+                    f"Assertion failed (left {comparison[1]} right, operands omitted)"
+                )
+            elif message.startswith("assertion failed"):
+                reason = "Assertion failed (details omitted)"
+            else:
+                reason = "Rust test panic (details omitted)"
+            return Failure(location, reason)
+    return None
+
+
+def rust_failures(source: str) -> list[str]:
+    """Report only source coordinates and fixed libtest panic categories."""
+    names = RUST_FAILED.findall(source)
+    details = {}
+    blocks = RUST_BLOCK.split(source)
+    for name, block in zip(blocks[1::2], blocks[2::2], strict=True):
+        if failure := rust_failure(block):
+            details[name] = f"{failure.location} · {name} · {failure.reason}"
+    return [details.get(name, name) for name in names]
+
+
 def rust_summary(folder: Path) -> str:
     """Aggregate stable libtest result lines without exposing panic output."""
     source, results = rust_results(folder)
@@ -353,12 +503,9 @@ def rust_summary(folder: Path) -> str:
     elapsed = number((folder / "elapsed.txt").read_text(encoding="utf-8").strip())
     seconds = sum(number(row[3]) for row in results)
     shard_line, _ = shard_description(folder, passed + failed + skipped)
-    locations = re.findall(
-        r"^test ((?:r#)?[A-Za-z_][A-Za-z0-9_]*(?:::(?:r#)?[A-Za-z_][A-Za-z0-9_]*)*) \.\.\. FAILED$",
-        source,
-        re.MULTILINE,
+    failures = "\n".join(
+        failure_section(rust_failures(source)) + binary_section(source)
     )
-    failures = "\n".join(failure_section(locations) + binary_section(source))
     return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{shard_line}\n{failures}\n"
 
 

@@ -426,7 +426,7 @@ Run them yourself when you change the code they cover:
 pre-commit run --hook-stage manual pytest-publish # publish tests with a separate 92% gate
 pre-commit run --hook-stage manual pytest       # carddb tests with the 90% combined line/branch gate
 pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
-pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI calls the same package scripts in separate steps)
+pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI runs test:prepared after generation)
 ```
 
 ### CI tests and summaries
@@ -492,17 +492,18 @@ source file. Case times include setup/teardown and overlap under parallel execut
 are not wall time. Rust reports aggregate test-binary counts/time and build/coverage wall time.
 Each shard has its own test summary; the coverage jobs add the shard totals and merged coverage.
 Rust per-case timings are not collected by the stable libtest reporter.
-The **Failed tests** section lists all reported failures regardless of duration: Python
-file/function with parameters removed, Web file/case ordinal, and Rust libtest test paths.
+The **Failed tests** section lists all reported failures regardless of duration. It shows
+the repository path and line from the traceback or panic when available, plus a fixed
+failure description. The test function, Web case ordinal or Rust libtest path identifies
+the case.
 
 Raw test output and JUnit may contain official card wording. They stay in runner temporary
 files, are removed after the job and are never uploaded or cached. Only each passing shard's
 coverage data and test counts reach the coverage job, as a one-day workflow artifact: carddb
 coverage data (source paths, line and branch hits) or the Rust profile with the objects'
-coverage sections (function names, source paths and counters). Summaries omit failure
-messages, captured output, parameter values and arbitrary Web case descriptions; use the
-safe file/function location (or Web case ordinal) to reproduce failures locally. A missing
-report is reported explicitly and cannot make a failing test step pass.
+coverage sections (function names, source paths and counters). Summaries omit raw failure
+messages, assertion operands, captured output, parameter values and arbitrary Web case
+descriptions. A missing report is reported explicitly and cannot make a failing test step pass.
 
 Every job uses GitHub-hosted `ubuntu-latest`. **Before merging, the PR must be rebased onto
 the latest `main` and its CI must be green**; the ruleset does not enforce this prerequisite,
