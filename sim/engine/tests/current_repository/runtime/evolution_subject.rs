@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these complete printed subject evolution scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InstructionOutcome, SearchAnswer};
 

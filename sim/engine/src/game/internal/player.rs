@@ -61,10 +61,6 @@ impl Wait {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Answer validation marks the existing execution's origin handoff."
-)]
 impl Execution {
     pub(super) const fn answer_origin(&mut self, validated: &mut bool) -> Option<Box<Game>> {
         *validated = true;
@@ -93,10 +89,6 @@ impl Execution {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The player adapter shares existing authority dispatch and rollback."
-)]
 impl Game {
     /// A real input stop inside an established play that keeps its origin: from here only an
     /// internal fault can discard what has completed. Procedures that are not plays, and

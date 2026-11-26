@@ -65,10 +65,6 @@ pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Resu
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "All movement routes query the same live declarations."
-)]
 impl Game {
     pub(in crate::game) fn internal_banish_replaces_move(
         &self,

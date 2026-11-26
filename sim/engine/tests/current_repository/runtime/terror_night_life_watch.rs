@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the real-card scenario."
-)]
 use super::*;
 
 /// BP17-074 in hand with its evolved form ready; one spare テラーナイト already waits in EX.

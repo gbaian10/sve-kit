@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate grant lifetime tests."
-)]
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 use sve_engine::game::player::Viewer;

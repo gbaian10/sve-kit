@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Only the printed selection decisions are expected."
-)]
 use super::*;
 
 #[test]

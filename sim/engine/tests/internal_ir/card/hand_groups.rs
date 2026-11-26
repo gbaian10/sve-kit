@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected fixture domains must fail the focused payment scenarios."
-)]
 use super::*;
 use crate::player_pipeline::{answer, question};
 use std::sync::OnceLock;

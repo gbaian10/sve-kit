@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the distribution scenarios."
-)]
 use super::dynamic_declarations::lower_body;
 use super::*;
 use sve_engine::game::internal::{DamageShare, DecisionView, InputDomain};

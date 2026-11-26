@@ -160,10 +160,6 @@ fn order_independent(replacements: &[DamageReplacement]) -> bool {
         })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Damage instructions share the ordinary replacement and simultaneous commit boundary."
-)]
 impl Game {
     pub(super) fn internal_damage(
         &mut self,

@@ -6,10 +6,6 @@ use crate::ir::{
     Requirement, RuntimeDamageRecipient,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Kind branches read the same authoritative object state as other controls."
-)]
 impl Game {
     pub(super) fn internal_by_kind(
         &self,

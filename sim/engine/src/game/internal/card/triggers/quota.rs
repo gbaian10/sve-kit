@@ -49,10 +49,6 @@ struct QuotaGroup {
     remaining: u64,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Quota selection and pending admission share one transaction."
-)]
 impl Game {
     pub(in crate::game) fn observed_admission_group(&self, perspective: Viewer) -> Result<bool> {
         let Some(group) = self

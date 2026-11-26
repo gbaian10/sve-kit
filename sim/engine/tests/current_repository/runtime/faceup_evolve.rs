@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate printed face-up evolution scenarios."
-)]
 use super::*;
 
 fn position(card: &str, count: usize) -> Value {

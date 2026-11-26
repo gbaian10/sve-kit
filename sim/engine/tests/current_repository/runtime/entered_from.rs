@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the entry-origin scenarios."
-)]
 use super::*;
 
 fn initial(card: &str, zone: &str) -> Value {

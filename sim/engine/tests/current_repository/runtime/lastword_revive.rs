@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate these printed resurrection paths."
-)]
 use super::*;
 
 fn initial(card: &str, pp: u8) -> Value {

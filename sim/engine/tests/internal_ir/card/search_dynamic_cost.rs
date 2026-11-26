@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "An unexpected question invalidates the synthetic search scenario."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{InputDomain, SearchAnswer};

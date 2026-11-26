@@ -22,10 +22,6 @@ pub(super) fn check(located: &Located<Ability>) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Trigger permissions inspect the effective field at the occurrence boundary."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_trigger_forbidden(
         &self,

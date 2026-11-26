@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected input invalidates printed payment scenarios."
-)]
 use super::*;
 
 fn position(card: &str, form: &str) -> Value {

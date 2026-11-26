@@ -16,10 +16,6 @@ impl CostKind {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Cost layers and their consumption share the authoritative game state."
-)]
 impl Game {
     pub(super) fn import_cost_history(&mut self) -> Result<()> {
         let mut entries = Vec::new();

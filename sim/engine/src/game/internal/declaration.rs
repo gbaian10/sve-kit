@@ -43,10 +43,6 @@ pub(super) fn check(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Declarations share the existing public input transaction."
-)]
 impl Game {
     pub(super) fn internal_declare(
         &mut self,

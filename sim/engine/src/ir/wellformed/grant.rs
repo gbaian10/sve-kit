@@ -3,10 +3,6 @@ use crate::ir::{
     Duration, DurationEnd, GrantedAbility, Interval, KeywordId, ObjectOperand, ObjectView,
     Selector, TextProvider, TimeAnchor,
 };
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Grant validation shares the card's definition identities and lexical environment."
-)]
 impl Checker {
     pub(super) fn grant(
         &mut self,

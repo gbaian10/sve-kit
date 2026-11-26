@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate printed extra-trigger scenarios."
-)]
 use super::*;
 
 fn finish(game: &mut Game) {

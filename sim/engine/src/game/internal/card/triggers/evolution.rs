@@ -42,10 +42,6 @@ pub(in crate::game) struct EvolutionPlan {
     at: SnapshotId,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Evolution shares the authority's rule commit boundary."
-)]
 impl Game {
     fn evolution_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         self.field_ids()

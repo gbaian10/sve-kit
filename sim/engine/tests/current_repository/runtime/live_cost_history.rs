@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed live-history discount scenario."
-)]
 use super::*;
 
 fn finish(game: &mut Game) {

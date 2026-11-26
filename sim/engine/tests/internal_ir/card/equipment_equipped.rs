@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Synthetic attachment fixtures must preserve their declared body shape."
-)]
 use super::*;
 use sve_engine::game::internal::{Answer, InputDomain};
 

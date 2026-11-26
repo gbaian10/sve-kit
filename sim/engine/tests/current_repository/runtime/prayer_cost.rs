@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected public questions invalidate the printed prayer scenario."
-)]
 use super::*;
 use alloc::collections::BTreeSet;
 use sve_engine::game::player::observation::{InstalledChange, NumberChange, ObservedZone};

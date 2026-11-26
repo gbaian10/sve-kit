@@ -105,10 +105,6 @@ pub enum EvolutionAnswer {
     },
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Evolution answers share player rollback and publication."
-)]
 impl Game {
     pub(super) fn player_evolution_question(&self, viewer: Viewer) -> Result<Option<Input>> {
         let Some(actor) = self.evolution_actor() else {

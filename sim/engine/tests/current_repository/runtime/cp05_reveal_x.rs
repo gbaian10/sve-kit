@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected answers invalidate the real variable-reveal scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::DamageShare;
 

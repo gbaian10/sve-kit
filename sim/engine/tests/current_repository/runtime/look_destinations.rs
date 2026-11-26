@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate the printed Look destination scenario."
-)]
 use super::*;
 
 fn position(full_ex: bool) -> Value {

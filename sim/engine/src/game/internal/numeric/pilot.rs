@@ -35,10 +35,6 @@ pub(in crate::game::internal) fn check_action(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Pilot shares the generation-bound numeric lifetime."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_pilot(
         &mut self,

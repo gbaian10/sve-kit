@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A different pending domain or decision invalidates these scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{InstructionOutcome, ResourceOutcome};
 

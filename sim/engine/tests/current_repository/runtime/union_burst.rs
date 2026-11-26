@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the UB scenarios."
-)]
 use super::*;
 
 fn position(card: &str, zone: &str, construction: &str, title: &str) -> Value {

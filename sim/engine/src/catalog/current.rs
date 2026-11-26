@@ -12,10 +12,6 @@ pub(crate) struct CurrentCard {
     faces: BTreeMap<String, usize>,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Current identity resolution enforces snapshot face closure."
-)]
 impl Catalog {
     pub(crate) fn check_current_printing(&self, number: &str, current: &CurrentCard) -> Result<()> {
         let card = self

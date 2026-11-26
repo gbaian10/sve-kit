@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected synthetic decisions invalidate the event oracle."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use core::slice::from_ref;

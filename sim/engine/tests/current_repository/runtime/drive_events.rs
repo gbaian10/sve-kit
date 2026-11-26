@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected prompts invalidate the printed Drive observer scenarios."
-)]
 use super::*;
 
 fn position(observer: &str) -> Value {

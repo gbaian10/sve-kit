@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The complete printed Advance scenarios require their declared private and token choices."
-)]
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::DecisionView;

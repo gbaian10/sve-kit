@@ -15,10 +15,6 @@ struct ActivationCandidate {
 
 pub(super) mod probe;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Main declarations share the existing whole-card authority."
-)]
 impl Game {
     pub(in crate::game) fn main_card_declaration_available(
         &self,

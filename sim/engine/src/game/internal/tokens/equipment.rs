@@ -31,10 +31,6 @@ pub(in crate::game::internal) fn check_catalog(game: &Game, action: &Action) -> 
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Equipment reuses token allocation, physical movement and generation-bound associations."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_equipment_host(
         &self,

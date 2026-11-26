@@ -150,10 +150,6 @@ fn holder_move_paths(program: &Program, prefix: &str, paths: &mut BTreeSet<Strin
 
 use super::subject::EventSubjectInformation;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Card play commits share observer admission."
-)]
 impl Game {
     fn played_observers(
         &self,

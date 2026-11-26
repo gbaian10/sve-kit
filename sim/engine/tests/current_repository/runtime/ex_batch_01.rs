@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate printed card scenarios."
-)]
 use super::*;
 
 fn finish_mode(game: &mut Game, mut play: CardPlay, mode: u64) {

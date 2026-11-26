@@ -145,10 +145,6 @@ impl CandidateLinks {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Question projection reads the authority's frozen candidate sources."
-)]
 impl Game {
     pub(in crate::game::internal) fn player_members(
         &self,

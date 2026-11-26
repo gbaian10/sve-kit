@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the printed meal scenarios."
-)]
 use super::*;
 
 fn position(card: &str, carrots: u8) -> Value {

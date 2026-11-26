@@ -220,10 +220,6 @@ pub(in crate::game::internal) fn payment_dependent(located: &Located<Ability>) -
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Static grants share printed keyword queries."
-)]
 impl Game {
     pub(super) fn internal_static_keywords(&self, holder: &str) -> Result<BTreeSet<String>> {
         self.internal_static_keyword_grants(holder)?

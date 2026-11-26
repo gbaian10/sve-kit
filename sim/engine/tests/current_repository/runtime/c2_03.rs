@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Malformed typed questions fail this test scenario."
-)]
 use super::*;
 use sve_engine::game::internal::DamageShare;
 fn actor(seat: &str) -> PlayerId {

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A different decision invalidates the scenario."
-)]
 
 use super::*;
 use alloc::collections::BTreeMap;

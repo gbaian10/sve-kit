@@ -2,10 +2,6 @@ use super::{Cause, EventPayload, Game, PendingOccurrence, Result, SnapshotId, in
 use crate::game::internal::Execution;
 use crate::ir::{Nat, TargetedEvent, events::timing::targeted_filter};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Formal targets use the same pending occurrences as other timing events."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_targeted_occurrences(
         &mut self,

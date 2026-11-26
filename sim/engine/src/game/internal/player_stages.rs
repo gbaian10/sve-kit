@@ -19,10 +19,6 @@ use crate::ir::player_stages::{
 use crate::ir::{RuntimeZoneRef, shuffle};
 use core::slice::from_ref;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Whole-zone movement requires a closed selector without exposing hand selection."
-)]
 impl Execution {
     pub(super) fn whole_return_members(
         &self,
@@ -61,10 +57,6 @@ impl Execution {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "A player's own draw count reads the same stage receipts."
-)]
 impl Execution {
     fn player_draw_count(&self, count: &Expr<Int>, player: PlayerId) -> Result<u64> {
         if let Expr::Literal(Int(count)) = count {
@@ -89,10 +81,6 @@ impl Execution {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Player stages use the shared authority transaction."
-)]
 impl Game {
     pub(super) fn internal_look_remainders(
         &mut self,
@@ -389,10 +377,6 @@ where
         .collect()
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Switching the procedure player swaps only that procedure's local results."
-)]
 impl Execution {
     pub(super) fn begin_procedure(&mut self, locals: ProcedureLocals) {
         self.processing_disclosure

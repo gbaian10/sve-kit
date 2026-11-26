@@ -20,10 +20,6 @@ use crate::ir::{
 use crate::ir::{Bool, BoolRead, Effect, Expr, RuleModifier};
 use crate::ir::{EventPattern, FollowPermission, TraitId};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Effect evolution uses the same authority-scoped evolution projection."
-)]
 impl super::BodyContext<'_> {
     pub(super) fn effect_evolution(
         &mut self,

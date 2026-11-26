@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Malformed constructors invalidate the cost boundary tests."
-)]
 use super::*;
 use alloc::collections::BTreeSet;
 use sve_engine::game::internal::{Answer, InputDomain};

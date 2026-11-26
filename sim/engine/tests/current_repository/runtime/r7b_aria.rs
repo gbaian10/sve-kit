@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Aria has a single search, optional return and the removal spell's formal target."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::SearchAnswer;

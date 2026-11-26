@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed class-distinct Look scenario."
-)]
 use super::*;
 use sve_engine::game::player::{DecisionShape, Input, QuestionShape, Viewer};
 

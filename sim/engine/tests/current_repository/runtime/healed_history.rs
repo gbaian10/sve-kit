@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate these complete printed-card probes."
-)]
 use super::event_cemetery::finish_checks;
 use super::event_combat_life::life;
 use super::*;

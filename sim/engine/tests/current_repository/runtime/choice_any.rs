@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real Oceanus observer must ask for its printed modes."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected decision domain means the game scenario is malformed."
-)]
 
 use super::*;
 

@@ -24,10 +24,6 @@ use crate::ir::{public_evolve, public_numbers};
 use alloc::collections::BTreeSet;
 use core::iter::once;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Decision and payment rules share the structural checker state."
-)]
 impl Checker {
     pub(super) fn program_steps(&mut self, program: &Program) -> Checked {
         if !shuffle::closed(&program.steps)

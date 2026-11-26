@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Only the fixture's declared choices may occur."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::Viewer;

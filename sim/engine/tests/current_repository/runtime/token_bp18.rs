@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real card requires its Ward posture and printed either choices."
-)]
 use super::*;
 
 fn choose(game: &mut Game, play: CardPlay, index: usize) {

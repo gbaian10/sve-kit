@@ -1,9 +1,5 @@
 //! A deck-edge partition orders only its own piles (Q156): a later multi-card deck move of the
 //! question's whole selection still needs its own order choice.
-#![expect(
-    clippy::panic,
-    reason = "A missing placement question invalidates the scenario."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::TargetRoleAssignment;

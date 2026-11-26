@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The scenario must expose the printed target or mode question."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::DecisionView;

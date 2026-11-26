@@ -1,8 +1,4 @@
 //! Search regressions keep found cards separate from arrivals under field capacity.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate these Search scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain, SearchAnswer};
 

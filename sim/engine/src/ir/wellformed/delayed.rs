@@ -4,10 +4,6 @@ use crate::ir::delayed as delayed_ir;
 use crate::ir::events::subject::SubjectFields;
 use crate::ir::{Action, TriggerCondition, Visibility};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Delayed callbacks isolate the shared checker environment."
-)]
 impl Checker {
     pub(super) fn delay(&mut self, action: &Action) -> Checked {
         let Action::Delay {

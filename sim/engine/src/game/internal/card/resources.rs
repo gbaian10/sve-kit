@@ -2,10 +2,6 @@
 use super::{Game, Result, invalid};
 use crate::game::string;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Resource admission and its live role check share one private boundary."
-)]
 impl Game {
     pub(super) fn admit_evolution_resources(&mut self) -> Result<()> {
         for object in self.state.objects.values() {

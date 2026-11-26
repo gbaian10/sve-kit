@@ -317,10 +317,6 @@ const fn self_player(player: PlayerRef) -> PlayerSet {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Entry checks share the structural checker state."
-)]
 impl Checker {
     pub(super) fn ability(&mut self, ability: &Ability) -> Checked {
         let previous_payment = self.card_payment_body.take();

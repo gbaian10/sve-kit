@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate printed card scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::SearchAnswer;

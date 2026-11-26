@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate printed event scenarios."
-)]
 use super::event_cemetery::{finish_checks, move_named, position, prepared};
 use super::*;
 

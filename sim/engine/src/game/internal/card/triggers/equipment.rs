@@ -41,10 +41,6 @@ pub(in crate::game::internal) fn check_header(ability: &Ability) -> Result<bool>
     Ok(true)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Equipment triggers use the existing event source and pending authority."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_equipped_event(
         &mut self,

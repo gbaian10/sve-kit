@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Entry-source fixtures require the explicit pending and mode questions."
-)]
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::{DecisionView, InputDomain};

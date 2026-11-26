@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these game scenarios."
-)]
 //! Subscriptions outside a field card's own events: deck-to-cemetery moves and cemetery observers.
 use super::*;
 

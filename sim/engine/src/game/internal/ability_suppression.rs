@@ -60,10 +60,6 @@ pub(super) fn check_loss(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Ability suppression shares the existing authority and effect lifetime."
-)]
 impl Game {
     fn suppression_state(&self, holder: &str) -> Option<&SuppressionState> {
         let object = self.state.objects.get(holder)?;
@@ -234,10 +230,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Suppression observation uses the active generation-bound entries."
-)]
 impl Game {
     pub(super) fn observed_suppression_effects(
         &self,

@@ -1312,10 +1312,6 @@ pub(in crate::game::internal) fn packet(domain: &TargetDomain) -> Value {
     packet
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Target evaluation uses the play's frozen authority view."
-)]
 impl Game {
     pub(in crate::game::internal) fn current_observed_deck(
         &self,
@@ -1961,10 +1957,6 @@ fn next_combination(mut indices: Vec<usize>, len: usize) -> Option<Vec<usize>> {
     Some(indices)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Selected targets retain a checked producer separate from installation locals."
-)]
 impl Execution {
     pub(in crate::game::internal) fn record_transferred_controller(
         &mut self,

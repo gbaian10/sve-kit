@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real-card protocol must expose the expected typed question."
-)]
 
 use sve_engine::game::player::DecisionShape;
 use super::*;

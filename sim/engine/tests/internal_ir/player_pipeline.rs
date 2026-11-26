@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected public input shapes fail the fixture."
-)]
-
 #[path = "player_pipeline/selection.rs"]
 mod selection;
 pub(super) use selection::{choose as choose_selection, search as choose_search};

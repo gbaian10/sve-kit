@@ -5,10 +5,6 @@ use super::legal::{permutations, subsets};
 use super::{Frame, Game, list, string};
 use crate::{EngineFailure, Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Play and resolution selections share their set and ordering constraints."
-)]
 impl Game {
     pub(super) fn resolution_optional(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let mut choices = self.combine_selection_choices(

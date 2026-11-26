@@ -165,10 +165,6 @@ impl RecipientWait {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Recipient targets share the formal play snapshot."
-)]
 impl Game {
     pub(in crate::game::internal) fn recipient_target_domain(
         &self,

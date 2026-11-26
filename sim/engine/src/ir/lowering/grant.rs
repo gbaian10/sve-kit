@@ -4,10 +4,6 @@ use crate::ir::{
     Selector, TextProvider, TimeAnchor, ZoneKind,
 };
 use serde_json::{Value, json};
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Keyword grants use the body's object bindings."
-)]
 impl BodyContext<'_> {
     pub(super) fn grant(
         &mut self,

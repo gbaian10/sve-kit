@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "An unexpected question invalidates the synthetic material scenario."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 

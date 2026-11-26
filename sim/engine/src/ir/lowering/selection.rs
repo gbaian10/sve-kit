@@ -3,10 +3,6 @@ use super::groups::{Groups, TotalBounds};
 use super::{BodyContext, Located, LoweringError, Node, PlayerRef, SourceSpan, ast, unsupported};
 use crate::ir::public_numbers;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Resolution choices share the ability's object binding environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn optional(
         &mut self,
@@ -1066,10 +1062,6 @@ fn number_limit_of(
     }))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Public numeric filters share body definitions and checked expression lowering."
-)]
 impl BodyContext<'_> {
     pub(super) fn numeric_limits(
         &mut self,

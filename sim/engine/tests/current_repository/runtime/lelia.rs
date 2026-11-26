@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed Lelia scenarios."
-)]
 use super::damage_prevent::pass_quick;
 use super::event_cemetery::finish_checks;
 use super::*;

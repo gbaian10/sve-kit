@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "These printed abilities must expose their target and search questions."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::SearchAnswer;

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected synthetic trigger domains fail the regression."
-)]
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
 

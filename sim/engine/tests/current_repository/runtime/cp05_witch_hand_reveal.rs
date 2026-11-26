@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A different decision invalidates the printed-card scenario."
-)]
 
 use super::*;
 

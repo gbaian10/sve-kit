@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected replacement questions fail the scenario."
-)]
 use super::*;
 use sve_engine::game::internal::InputDomain;
 use sve_engine::game::player::Viewer;

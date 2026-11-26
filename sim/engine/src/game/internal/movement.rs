@@ -401,10 +401,6 @@ pub(super) fn observed_banish(action: &Action) -> bool {
         if observation::visit(objects, Consumer::ObservedMove, &mut |_| {}))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Movement shares the authoritative Game and its mutation primitive."
-)]
 impl Game {
     fn departing_evolution(&self, object: &Object) -> Result<Option<(String, u64)>> {
         let Some(link) = object

@@ -4,10 +4,6 @@ use super::super::search;
 use super::{Execution, Game, Result, seat_name, unsupported};
 use crate::ir::{Decision, ObjectRef, PlaySpec, Selector, flip_cost};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "All flip payments share one candidate filter and authority state."
-)]
 impl Game {
     pub(super) fn flip_payment_available(
         &self,

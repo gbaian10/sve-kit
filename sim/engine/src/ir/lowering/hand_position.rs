@@ -9,10 +9,6 @@ use crate::ir::{
     SelectionGroup, Selector, TargetRole, TargetRoleSpec, Visibility, hand_position,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The canonical pair shares the ordinary private-hand selector and mover."
-)]
 impl BodyContext<'_> {
     pub(super) fn hand_position_pair(
         &mut self,

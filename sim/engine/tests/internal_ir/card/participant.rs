@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing decision invalidates the participant scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};

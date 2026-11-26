@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these game scenarios."
-)]
 //! Numeric modifications of EX followers, carried onto the field when played (CR 4.8.3.3).
 use super::*;
 

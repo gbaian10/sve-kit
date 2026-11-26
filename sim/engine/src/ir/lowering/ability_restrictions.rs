@@ -5,10 +5,6 @@ use crate::ir::{
     Selector,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Ability permissions share the body binding environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn no_activation(
         &mut self,

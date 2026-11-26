@@ -930,10 +930,6 @@ fn quick_cost_shape(action: &Action) -> bool {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Formal plays share the authority's execution and rollback boundary."
-)]
 impl Game {
     fn internal_choice_any(&self, actor: PlayerId) -> Result<bool> {
         for holder in self.zone_ids(seat_name(actor)?, "ex") {
@@ -2525,10 +2521,6 @@ fn independent_selector(selector: &Selector) -> bool {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Field plays share the card payment continuation."
-)]
 impl Game {
     pub(super) fn prepare_intrinsic_card_play(&self, execution: &mut Execution) -> Result<()> {
         execution.field_entry = !execution.spell;

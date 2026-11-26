@@ -13,10 +13,6 @@ use crate::ir::{
 };
 use alloc::collections::BTreeSet;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Token creation shares the body binding allocator."
-)]
 impl BodyContext<'_> {
     pub(super) fn create(
         &mut self,

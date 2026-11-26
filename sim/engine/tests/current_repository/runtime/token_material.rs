@@ -1,4 +1,3 @@
-#![expect(clippy::panic, reason = "The scenario requires its printed choice.")]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

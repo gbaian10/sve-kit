@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate same-name token scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeSet;
 use sve_engine::game::internal::{Answer, InputDomain};

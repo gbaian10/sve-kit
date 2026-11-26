@@ -24,10 +24,6 @@ pub(super) fn check(located: &Located<Ability>, ordinal: usize) -> Result<bool> 
     Ok(true)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Printed restrictions share the authoritative card play boundary."
-)]
 impl Game {
     pub(in crate::game::internal) fn observed_banish_permission(
         &self,
@@ -135,10 +131,6 @@ pub(in crate::game::internal) fn check_install(action: &Action) -> Result<()> {
     }
     Ok(())
 }
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Player play permissions share the authoritative play gate."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_install_banish_play(
         &mut self,

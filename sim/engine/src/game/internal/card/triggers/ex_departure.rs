@@ -57,10 +57,6 @@ pub(in crate::game) struct ExDeparturePlan {
     active: PlayerId,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "EX batches share the common movement transaction."
-)]
 impl Game {
     pub(in crate::game) fn internal_before_ex_departures(
         &mut self,

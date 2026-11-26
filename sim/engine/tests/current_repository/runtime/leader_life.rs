@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A different pending domain fails the scenario immediately."
-)]
 
 use super::*;
 

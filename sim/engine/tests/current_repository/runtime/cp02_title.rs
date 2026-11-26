@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected card decisions invalidate the real-card scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{Answer, CardPlay, InputDomain, ResumeStage};
 use sve_engine::game::{Game, View};

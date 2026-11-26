@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the printed-card scenarios."
-)]
 use super::*;
 
 const ACTOR: PlayerId = PlayerId { seat: 1 };

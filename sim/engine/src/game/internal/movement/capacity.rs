@@ -135,10 +135,6 @@ fn capacity_zone(zone: ZoneKind) -> Result<(&'static str, i64)> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Capacity questions suspend the existing atomic movement transaction."
-)]
 impl Game {
     fn movement_capacity_facts(
         &self,

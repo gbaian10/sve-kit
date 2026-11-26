@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected fixture shapes fail the test immediately."
-)]
-
 use super::*;
 use sve_engine::game::Step;
 use sve_engine::game::internal::{Answer, DecisionView, InputDomain};

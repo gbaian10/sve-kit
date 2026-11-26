@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A different question invalidates the scenario."
-)]
 
 use super::*;
 use crate::{expanded, rule_fixtures};

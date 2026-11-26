@@ -28,10 +28,6 @@ impl From<EntryMethod> for RecordedMethod {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Movement commits entry facts alongside the new field generation."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_entry_effect_source(
         &self,

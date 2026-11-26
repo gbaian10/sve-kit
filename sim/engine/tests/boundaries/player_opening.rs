@@ -1,7 +1,6 @@
 #![expect(
     clippy::unwrap_used,
     clippy::indexing_slicing,
-    clippy::panic,
     reason = "Literal opening fixtures fail immediately on malformed state or questions."
 )]
 

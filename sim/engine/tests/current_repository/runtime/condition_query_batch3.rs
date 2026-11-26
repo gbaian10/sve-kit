@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these printed card scenarios."
-)]
 use super::*;
 fn position(number: &str, zone: &str) -> Value {
     let mut state = draw_position();

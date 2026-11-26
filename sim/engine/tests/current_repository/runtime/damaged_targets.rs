@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these real damage-trigger scenarios."
-)]
 use super::*;
 
 fn position(lethal: bool, targets_remain: bool) -> Value {

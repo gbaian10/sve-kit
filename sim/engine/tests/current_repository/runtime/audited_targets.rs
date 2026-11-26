@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected question invalidates the printed card scenario."
-)]
 use super::admission_fixture::finish;
 use super::event_cemetery::finish_checks;
 use super::*;

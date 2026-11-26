@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the whole-card scenario."
-)]
 use super::*;
 
 fn finish(game: &mut Game) {

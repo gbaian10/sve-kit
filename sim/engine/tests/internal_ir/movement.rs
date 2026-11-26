@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A different typed outcome or node fails the fixture immediately."
-)]
-
 use super::*;
 use core::num::NonZeroU64;
 

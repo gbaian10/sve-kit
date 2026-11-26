@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed top-deck cost scenarios."
-)]
 use super::*;
 
 fn initial(card: &str, count: usize, fuel: bool) -> Value {

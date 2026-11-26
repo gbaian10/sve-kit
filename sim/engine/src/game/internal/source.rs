@@ -117,10 +117,6 @@ pub(super) fn count_zone(requirements: &Requirements, requirement: &Requirement)
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Source reads share the execution's private authority proof."
-)]
 impl Execution {
     pub(super) fn entry_frame(&self, game: &Game, destination: ZoneKind) -> Result<Frame> {
         let mut frame = self.frame();
@@ -595,10 +591,6 @@ impl SourceSnapshot {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Pending and executing abilities share the same numeric information boundary."
-)]
 impl Game {
     pub(super) fn public_characteristics(
         &self,

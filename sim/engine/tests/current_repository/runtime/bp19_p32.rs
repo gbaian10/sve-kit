@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected pending domain means the scenario did not reach the Fanfare."
-)]
 
 use super::*;
 

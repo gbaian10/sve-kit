@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected public input domains fail the fixture."
-)]
-
 use super::*;
 use crate::{board_fixture, board_fixtures};
 use sve_battle_contract::{

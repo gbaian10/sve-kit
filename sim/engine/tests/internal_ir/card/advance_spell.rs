@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The named private spell procedures must expose their declared choices."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::game::internal::{DecisionView, InputDomain};

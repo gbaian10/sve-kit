@@ -1,4 +1,3 @@
-#![expect(clippy::panic, reason = "Unexpected questions invalidate the printed draw scenarios.")]
 use super::*;
 use super::event_cemetery::finish_checks;
 

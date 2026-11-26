@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The fixture must reach the main action window."
-)]
 
 use super::*;
 use sve_engine::game::player::{Input, MainActions, MainIntentKind, QuestionShape};

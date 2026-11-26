@@ -19,10 +19,6 @@ enum ObservationUse {
     Remainder,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Observation receipts are only exposed to the private movement spine."
-)]
 impl BodyContext<'_> {
     pub(super) fn look_remainder_actor(&self, step: &ast::Step) -> Option<PlayerRef> {
         let ast::Step::Move(ast::Move {

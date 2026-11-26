@@ -7,10 +7,6 @@ use crate::{EngineFailure, Result};
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Payment preparation and execution share game state."
-)]
 impl Game {
     pub(super) fn movement_payment_possible(&self, costs: &[Value], frame: &Frame) -> Result<bool> {
         // Replay costs in an isolated state so earlier departures and replacements affect capacity.

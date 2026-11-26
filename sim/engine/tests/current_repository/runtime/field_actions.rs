@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing target question fails the scenario."
-)]
 
 use super::*;
 

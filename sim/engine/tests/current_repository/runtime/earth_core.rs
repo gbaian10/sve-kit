@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate the printed Earth Rite scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::Result;

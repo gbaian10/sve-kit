@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected formal questions invalidate these printed activation scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

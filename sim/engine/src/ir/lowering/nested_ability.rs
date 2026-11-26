@@ -7,10 +7,6 @@ use crate::ir::{
     InstructionContext, InstructionId, Nat, ObjectOperand, PlayerRef, ReceiptId, Visibility,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Nested ability plays use the existing lexical target and instruction environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn ability_play(
         &mut self,

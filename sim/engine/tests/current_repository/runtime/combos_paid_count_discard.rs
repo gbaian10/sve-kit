@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the real-card scenarios."
-)]
 use super::*;
 use core::iter::once;
 use sve_engine::game::internal::DistributionMember;

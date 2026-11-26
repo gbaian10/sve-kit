@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Synthetic Advance procedures must ask only their declared payment and private choices."
-)]
 use super::*;
 use sve_engine::EngineFailure;
 use sve_engine::game::internal::{DecisionView, InputDomain};

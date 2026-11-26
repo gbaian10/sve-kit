@@ -196,10 +196,6 @@ pub(super) fn check(game: &Game, ability: &Located<Ability>) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The intrinsic proof delegates to the existing validated rule procedure."
-)]
 impl Game {
     fn evolution_selection(
         &mut self,
@@ -418,10 +414,6 @@ pub(in crate::game::internal) fn resource_association(
     }))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Evolution rule permissions share the authoritative intrinsic procedure."
-)]
 impl Game {
     pub(in crate::game) fn internal_unlimited_evolution(&self, seat: &str) -> Result<bool> {
         for provider in self.zone_ids(seat, "field") {

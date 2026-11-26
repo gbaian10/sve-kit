@@ -13,10 +13,6 @@ pub(super) struct Installed {
     action: &'static str,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Player restrictions follow the authoritative turn and phase state."
-)]
 impl Game {
     pub(super) fn internal_install_phase_restriction(
         &mut self,

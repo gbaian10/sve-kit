@@ -83,10 +83,6 @@ pub(super) fn lower(
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Player play permissions share the body allocator."
-)]
 impl BodyContext<'_> {
     pub(super) fn player_play_permission(
         &mut self,

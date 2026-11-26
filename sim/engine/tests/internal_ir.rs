@@ -1,5 +1,10 @@
 //! Authority-only regressions. Printed ability fragments carry no production source admission.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
 #![expect(
     clippy::unwrap_used,
     clippy::indexing_slicing,

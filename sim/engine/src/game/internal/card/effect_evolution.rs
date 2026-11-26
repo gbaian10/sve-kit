@@ -9,10 +9,6 @@ use crate::ir::{
 };
 use core::slice::from_ref;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Effect evolution delegates to the shared evolution rule procedure."
-)]
 impl Game {
     pub(super) fn effect_evolution_members(
         &self,

@@ -26,10 +26,6 @@ macro_rules! movement_dispatch {
     };
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Movement checks share the closed environment."
-)]
 impl Checker {
     pub(super) fn discard_movement(
         &self,

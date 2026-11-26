@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected program and choice shapes invalidate these history probes."
-)]
 //! 「これと同名を除く」 in current-turn movement history: saved subject names against the holder's
 //! names as they are when the query is read.
 use super::*;

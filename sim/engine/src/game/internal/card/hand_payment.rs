@@ -159,10 +159,6 @@ pub(super) fn single_additional(costs: &CostSpec) -> bool {
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Hand cost choice and commit share the play transaction."
-)]
 impl Game {
     pub(super) fn internal_play_hand_materials(
         &mut self,

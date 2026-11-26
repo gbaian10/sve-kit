@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The real-card protocol must expose the expected typed question."
-)]
 
 use super::*;
 use sve_engine::game::player::events::{

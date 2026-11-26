@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing decision fails the scenario immediately."
-)]
-
 use super::*;
 use crate::rule_fixtures;
 use sve_engine::catalog::EngineIdentityInput;

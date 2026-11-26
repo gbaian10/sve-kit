@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these printed card scenarios."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

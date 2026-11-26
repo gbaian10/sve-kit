@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed scenarios."
-)]
 use super::*;
 
 /// Answers printed questions: targets prefer `chosen` (else the first member), orders keep the offer.

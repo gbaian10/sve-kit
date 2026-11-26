@@ -72,10 +72,6 @@ pub(super) fn check_install(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Posture instructions mutate the same authoritative Game."
-)]
 impl Game {
     pub(super) fn observed_stand_locks(
         &self,
@@ -182,10 +178,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule stand restrictions are separate from effect posture changes."
-)]
 impl Game {
     pub(super) fn internal_install_no_stand(
         &mut self,

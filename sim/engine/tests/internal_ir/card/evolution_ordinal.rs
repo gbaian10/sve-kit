@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected shapes or questions invalidate the ordinal authority fixtures."
-)]
 use super::*;
 
 fn query() -> Value {

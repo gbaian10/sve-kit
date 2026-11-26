@@ -307,10 +307,6 @@ struct Checker {
     card_discards: BTreeMap<String, ReceiptId>,
     path: String,
 }
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Control and value rules share one checker state but live in separate modules."
-)]
 impl Checker {
     fn new(scope: ScopeId) -> Self {
         let env = Environment {

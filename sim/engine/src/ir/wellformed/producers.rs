@@ -4,10 +4,6 @@ use crate::ir::{
     TokenDestination, TokenInitialState, TokenSpec, TokenTemplate, ZoneKind, ZoneOperation,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Producer validation shares the closed program environment."
-)]
 impl Checker {
     pub(super) fn recipients(&mut self, recipients: &RecipientSet) -> Checked {
         match recipients {

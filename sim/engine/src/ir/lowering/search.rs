@@ -329,10 +329,6 @@ const fn movement(zone: &ast::SearchZone, initial_posture: Option<Posture>) -> M
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Search owns its private selectors and movement continuations."
-)]
 impl BodyContext<'_> {
     pub(super) fn search_result(
         &mut self,

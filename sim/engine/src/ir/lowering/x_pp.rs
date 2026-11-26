@@ -11,10 +11,6 @@ pub(super) struct Parameter {
     paid: bool,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "X shares the ability's existing binding and parameter scope."
-)]
 impl BodyContext<'_> {
     pub(super) fn prepare_x(&mut self, body: &ast::Body, path: &str) -> Result<(), LoweringError> {
         let Some(declaration) = &body.x else {

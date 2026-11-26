@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate printed card scenarios."
-)]
 use super::*;
 
 fn trigger(game: &mut Game) {

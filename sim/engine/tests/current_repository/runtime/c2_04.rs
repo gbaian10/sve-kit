@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A malformed pending domain fails this test scenario."
-)]
 use super::*;
 use sve_engine::game::internal::SearchAnswer;
 

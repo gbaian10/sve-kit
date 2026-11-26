@@ -77,10 +77,6 @@ fn name(kind: CardKind, token: bool) -> Result<&'static str> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Every kind query and installation shares the authoritative Game."
-)]
 impl Game {
     pub(in crate::game) fn internal_effective_kind(
         &self,

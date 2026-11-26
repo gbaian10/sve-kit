@@ -78,10 +78,6 @@ pub(super) fn lower_at_source(
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Kind changes share the body's selected object bindings."
-)]
 impl BodyContext<'_> {
     pub(super) fn make_type(
         &mut self,

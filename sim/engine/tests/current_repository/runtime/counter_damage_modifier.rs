@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the real-card scenarios."
-)]
 use super::*;
 
 const FUSION: &str = "融合カウンター";

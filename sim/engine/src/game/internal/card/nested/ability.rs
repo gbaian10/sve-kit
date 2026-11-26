@@ -121,10 +121,6 @@ fn matches(ability: &Ability, filter: AbilityChoiceKind) -> bool {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Effect-selected abilities share effective sources and the ordinary formal play pipeline."
-)]
 impl Game {
     fn effective_ability_candidates(
         &mut self,

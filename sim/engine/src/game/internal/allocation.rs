@@ -151,10 +151,6 @@ pub(super) fn packet(domain: &DistributionDomain) -> Value {
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Distribution uses the shared authority and continuation."
-)]
 impl Game {
     pub(super) fn internal_distribution(
         &mut self,
@@ -281,10 +277,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Allocation reads the same private execution environment."
-)]
 impl Execution {
     pub(super) fn distribution_answer(
         &mut self,

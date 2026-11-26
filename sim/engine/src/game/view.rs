@@ -10,10 +10,6 @@ use sha2::{Digest as _, Sha256};
 use super::{Game, View, int, string};
 use crate::{EngineFailure, Result, invalid};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     /// The actual outgoing packet. No adapter applies a second visibility filter.
     ///

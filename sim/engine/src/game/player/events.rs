@@ -321,10 +321,6 @@ pub enum EventError {
     ProjectionGap,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Events share the game authority without changing its readers."
-)]
 impl Game {
     /// The catalogue this game is pinned to, shared so a projection can hold it across an
     /// exclusive use of the game.

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected choices invalidate the complete printed Tokyo light scenarios."
-)]
 use super::*;
 
 fn initial() -> Value {

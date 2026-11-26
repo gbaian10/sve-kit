@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate the printed shuffle scenarios."
-)]
 use super::*;
 use crate::rule_fixtures;
 use std::{fs::read_to_string, path::PathBuf};

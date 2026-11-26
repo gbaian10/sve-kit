@@ -1,10 +1,6 @@
 use super::{Game, Result, invalid};
 use crate::ir::battle_damage_basis;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Combat reads live printed providers from the shared game authority."
-)]
 impl Game {
     pub(in crate::game) fn internal_combat_damage(&self, source: &str) -> Result<i64> {
         let health = self.health_combat_basis(source)?;

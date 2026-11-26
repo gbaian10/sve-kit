@@ -7,10 +7,6 @@ use super::{Frame, Game, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Opening procedures operate on the same authoritative game state."
-)]
 impl Game {
     pub(super) fn prepare_opening(setup: &Value) -> Value {
         let mut position = setup.clone();

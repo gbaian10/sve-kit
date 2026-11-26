@@ -8,10 +8,6 @@ use crate::{EngineFailure, Result, invalid};
 use core::mem::take;
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     pub(super) fn life_change_triggers(
         &mut self,

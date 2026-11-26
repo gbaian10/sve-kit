@@ -40,10 +40,6 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Dice observers share the authoritative pending queue."
-)]
 impl Game {
     fn dice_observers(&self, seat: &str) -> Result<Vec<(String, PlannedAbility)>> {
         let mut observers = Vec::new();

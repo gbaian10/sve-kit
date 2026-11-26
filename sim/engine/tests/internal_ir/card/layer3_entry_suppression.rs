@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate entry suppression scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{InputDomain, SearchAnswer};
 

@@ -88,10 +88,6 @@ pub(in crate::game) struct RuleDiscard {
     pending: DiscardPlan,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Discard shares the authoritative pending queue and movement transaction."
-)]
 impl Game {
     fn has_discard_headers(&self) -> bool {
         self.card_runtime.definitions.cards.values().any(|program| {

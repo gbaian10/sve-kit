@@ -789,10 +789,6 @@ fn mask_public_predicate(selector: &mut Selector) {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Ordering mutates the same authoritative deck and observation state."
-)]
 impl Game {
     pub(super) fn internal_look(
         &mut self,
@@ -1051,10 +1047,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Observed selectors share execution receipts with ordinary value evaluation."
-)]
 impl Execution {
     pub(super) fn observed_objects(
         &self,

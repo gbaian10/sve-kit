@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Printed capacity seeds have a fixed set of payment, allocation and ordering questions."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

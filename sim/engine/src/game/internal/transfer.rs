@@ -33,10 +33,6 @@ pub(super) fn check_action(action: &Action) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Control changes use the authoritative field mutation."
-)]
 impl Game {
     pub(super) fn internal_transfer(
         &mut self,

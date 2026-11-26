@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the printed evolution sequence."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

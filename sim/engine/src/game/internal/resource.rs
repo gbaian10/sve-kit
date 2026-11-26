@@ -64,10 +64,6 @@ pub(super) const fn maximum_pp_cost(action: &Action) -> bool {
     } if amount.0 > 0)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Body resource increases mutate the authoritative player resource."
-)]
 impl Game {
     pub(super) fn internal_pay_maximum_pp(
         &mut self,

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "These real evolution scenarios have only the printed capacity choice."
-)]
 use super::*;
 
 fn position(form: &str, occupied: usize) -> Value {

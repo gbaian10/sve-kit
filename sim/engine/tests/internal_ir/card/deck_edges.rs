@@ -1,9 +1,5 @@
 //! BP01-008's shape: the chosen follower's player puts it, or every opposing follower, at the
 //! deck top or bottom, deciding each one and the order it is put there (Q156).
-#![expect(
-    clippy::panic,
-    reason = "A missing placement question invalidates the scenario."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use sve_engine::EngineFailure;

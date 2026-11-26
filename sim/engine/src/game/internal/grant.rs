@@ -290,10 +290,6 @@ pub(super) fn static_cost(ability: &Ability) -> bool {
         && matches!(ability.declarations.as_slice(), [effect] if granted_cost::delta(effect).is_some())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Keyword installation and expiry share generation-bound authority."
-)]
 impl Game {
     pub(super) fn granted_text_origin(
         &self,
@@ -1224,10 +1220,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Box captures existing grant identities at installation."
-)]
 impl Game {
     pub(super) fn internal_suppression_origins(
         &self,
@@ -1254,10 +1246,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Observation shares grant generation and suppression checks."
-)]
 impl Game {
     pub(super) fn observed_grant_effects(
         &self,

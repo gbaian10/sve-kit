@@ -45,10 +45,6 @@ impl Attachment {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     pub(super) fn emit_zone_movement(
         &mut self,

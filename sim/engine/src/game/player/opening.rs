@@ -57,10 +57,6 @@ pub enum OpeningAnswer {
     Mulligan(Vec<ObjectHandle>),
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Opening adapters share the game authority."
-)]
 impl Game {
     /// Create a typed game from host-validated decks and a source-checked effect selection.
     /// The host keeps the seed private and supplies the already determined first chooser.

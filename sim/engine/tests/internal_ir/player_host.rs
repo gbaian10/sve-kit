@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected native questions invalidate these protocol fixtures."
-)]
 use super::*;
 use sve_engine::game::player::{
     Answer, Command, DecisionShape, Input, Question, QuestionShape, Submission, SubmissionKind,

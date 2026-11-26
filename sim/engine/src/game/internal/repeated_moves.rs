@@ -38,10 +38,6 @@ impl State {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Repeat continuations share Game's live values and execution queue."
-)]
 impl Game {
     pub(super) fn internal_repeat_control(
         &self,

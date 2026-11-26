@@ -68,10 +68,6 @@ pub(super) fn history_count(
     Ok(Nat(u64::try_from(count).map_err(invalid)?))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Dice shares the game's seeded stream and transaction boundary."
-)]
 impl Game {
     pub(super) fn observed_dice_history(&self) -> Result<Vec<DiceHistory>> {
         use crate::game::player::observation::{DiceHistory, viewer};

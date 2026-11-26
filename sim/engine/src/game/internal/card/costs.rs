@@ -241,10 +241,6 @@ fn check_additional(
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Payment replacements use the same authoritative Resolution state."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_card_play_cost(
         &self,

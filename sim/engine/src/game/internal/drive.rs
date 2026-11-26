@@ -105,10 +105,6 @@ impl DriveWait {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Drive's rule procedure shares the authoritative typed execution."
-)]
 impl Game {
     pub(super) fn observed_drive_locks(
         &self,
@@ -421,10 +417,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Drive gain uses ordinary generation-bound grants and pending occurrences."
-)]
 impl Game {
     pub(super) fn internal_gain_drive(
         &mut self,

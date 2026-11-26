@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the paid damage scenarios."
-)]
 use super::event_paid_consumer::{lower, position, question, state};
 use super::*;
 use sve_engine::game::internal::InputDomain;

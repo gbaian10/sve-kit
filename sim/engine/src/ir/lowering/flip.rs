@@ -10,10 +10,6 @@ use crate::ir::{
     InstructionId, Nat, Program, ReceiptId, Selector,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Flip lowering shares the body's selected-object environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn flip_up(
         &mut self,

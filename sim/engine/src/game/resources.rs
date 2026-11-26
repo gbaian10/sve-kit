@@ -6,10 +6,6 @@ use super::{EventOccurrence, Frame, Game, int, list, string};
 use crate::{Result, invalid};
 use serde_json::{Value, json};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Resource rules share the authoritative game state."
-)]
 impl Game {
     pub(super) fn change_counters(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let amount = self.number(&node["amount"], frame)?;

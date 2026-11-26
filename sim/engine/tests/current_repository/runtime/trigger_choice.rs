@@ -1,5 +1,3 @@
-#![expect(clippy::panic, reason = "A different prompt invalidates the scenario.")]
-
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

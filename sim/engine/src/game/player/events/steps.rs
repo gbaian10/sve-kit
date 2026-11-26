@@ -55,10 +55,6 @@ fn action_kind(tag: &str) -> Result<ActionKind, EventError> {
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Source adapters freeze permissions at the mutator."
-)]
 impl Game {
     pub(in crate::game) fn event_card(
         &self,

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the paid event scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 

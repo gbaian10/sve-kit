@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the real-card scenarios."
-)]
 
 use super::ability_combinations::{finish, loaded, play, position, view};
 use super::*;

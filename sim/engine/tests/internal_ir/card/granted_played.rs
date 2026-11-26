@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the granted observer scenarios."
-)]
 use super::*;
 use alloc::collections::BTreeMap;
 use std::sync::OnceLock;

@@ -147,10 +147,6 @@ impl TemplateWait {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Transformation reuses authoritative banishment and token creation."
-)]
 impl Game {
     pub(super) fn internal_transform(
         &mut self,

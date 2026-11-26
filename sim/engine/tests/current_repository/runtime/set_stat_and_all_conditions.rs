@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed scenarios."
-)]
 use super::*;
 
 fn position(card: &str, cemetery: Value) -> Value {

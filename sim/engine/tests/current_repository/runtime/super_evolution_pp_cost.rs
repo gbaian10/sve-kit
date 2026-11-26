@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these game scenarios."
-)]
 use super::*;
 use crate::{expanded, rule_fixtures};
 use std::{fs::read_to_string, path::PathBuf};

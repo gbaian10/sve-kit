@@ -281,10 +281,6 @@ pub(super) fn check_template(game: &Game, name: &str, zone: ZoneKind) -> Result<
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Creation uses the shared physical object and movement boundaries."
-)]
 impl Game {
     pub(super) fn internal_tokens(
         &mut self,

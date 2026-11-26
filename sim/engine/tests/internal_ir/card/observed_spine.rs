@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected public decisions invalidate these observation regressions."
-)]
 use super::*;
 use std::sync::OnceLock;
 use sve_engine::{

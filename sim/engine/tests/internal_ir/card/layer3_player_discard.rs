@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A missing private discard question invalidates the fixture."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionToken, DecisionView, InputDomain};
 use sve_engine::game::player::{Input, Viewer};

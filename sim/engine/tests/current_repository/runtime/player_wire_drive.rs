@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Each check reads a few of the many wire event bodies."
-)]
 
 use super::drive::{drive_game, position};
 use super::player_presentation::{SEATS, question};

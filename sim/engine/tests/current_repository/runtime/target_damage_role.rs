@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "The printed role scenario must ask only its declared decisions."
-)]
 use super::*;
 use sve_engine::game::internal::TargetRoleAssignment;
 

@@ -1,5 +1,3 @@
-#![expect(clippy::panic, reason = "Unexpected player domains fail the fixture.")]
-
 use super::*;
 use crate::player_pipeline::{answer, end_command, question};
 use core::iter::once;

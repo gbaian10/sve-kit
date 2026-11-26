@@ -57,10 +57,6 @@ fn illegal(message: &str) -> EngineFailure {
     EngineFailure::IllegalPlay(message.into())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Normal evolution keeps its native rule authority."
-)]
 impl Game {
     fn evolution_quote(&self, source: &str, code: &Value) -> Result<EvolutionPayment> {
         let actor = &self.object(source)?.controller;

@@ -40,10 +40,6 @@ pub struct Relationship {
     pub to: ObjectHandle,
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Board observations share the attack authority and current knowledge."
-)]
 impl Game {
     pub(super) fn observed_relationships(&self, perspective: Viewer) -> Result<Vec<Relationship>> {
         let mut relationships = BTreeSet::new();

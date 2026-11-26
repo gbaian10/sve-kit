@@ -7,10 +7,6 @@ use super::{
 };
 use crate::ir::{DiceOperation, IterationCheck, RepeatBody, RuleId, Termination};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Dice lowering shares the body's typed binding environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn dice(&mut self, value: &ast::Dice, path: &str) -> Result<Action, LoweringError> {
         if self.dice_results.contains_key(&value.bind) {

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate these real Lastword scenarios."
-)]
 use super::*;
 
 fn position(card: &str, zone: &str, enemy: &str) -> Value {

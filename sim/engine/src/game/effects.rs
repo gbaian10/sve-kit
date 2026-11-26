@@ -20,10 +20,6 @@ pub(super) fn token_erasure_zone(kind: &str, destination: &str) -> bool {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     pub(super) fn run_frame(&mut self, mut frame: Frame) -> Result<()> {
         let mut fuel = 20_000_u32;

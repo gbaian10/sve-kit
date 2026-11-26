@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate the printed cost scenarios."
-)]
 use super::*;
 
 fn position(card: &str, zone: &str) -> Value {

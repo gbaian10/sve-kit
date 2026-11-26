@@ -468,10 +468,6 @@ fn source_matches(
     Ok(false)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Prevention shares authoritative damage and duration state."
-)]
 impl Game {
     fn observed_prevention(
         &self,
@@ -1065,10 +1061,6 @@ pub(in crate::game::internal) fn mask_pattern(
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Replacement choices share captured prevention providers."
-)]
 impl Game {
     pub(in crate::game::internal) fn player_replacement_origin(
         &self,

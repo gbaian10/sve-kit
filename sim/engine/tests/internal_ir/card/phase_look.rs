@@ -1,10 +1,6 @@
 //! BP01-083's shape: whenever a player's main phase begins, that player looks at its own deck
 //! top and may put a follower from it onto its field. The ability's controller stays the
 //! amulet's controller (Q204).
-#![expect(
-    clippy::panic,
-    reason = "A missing look question invalidates the scenario."
-)]
 use super::evolution_linked_movement::tree;
 use super::*;
 use alloc::collections::BTreeMap;

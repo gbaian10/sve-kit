@@ -9,10 +9,6 @@ use crate::ir::{
 };
 use core::any::TypeId;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Observation provenance shares the structural checker environment."
-)]
 impl Checker {
     pub(super) fn visible(&self, access: Option<&Visibility>) -> Checked {
         if self.env.chooser.is_none() || access == Some(&Visibility::Public {}) {

@@ -10,10 +10,6 @@ const fn property(attribute: ast::AggregateAttribute) -> NumericProperty {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Public aggregate queries share the body's allocator and source scope."
-)]
 impl BodyContext<'_> {
     pub(super) fn aggregate(
         &mut self,

@@ -392,10 +392,6 @@ pub(in crate::game::internal::card) fn exchange_route(
     )
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Cost observations read the same card context and play state as payment."
-)]
 impl Game {
     pub(in crate::game) fn observed_costs(&self, perspective: Viewer) -> Result<CostObservation> {
         let mut cards = Vec::new();

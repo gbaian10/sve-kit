@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A malformed typed search response means the scenario cannot provide its assertion target."
-)]
 
 use super::*;
 use sve_engine::game::internal::{InstructionOutcome, SearchAnswer};

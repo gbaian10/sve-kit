@@ -459,10 +459,6 @@ impl Journal {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Journal publication follows the player authority boundary."
-)]
 impl Game {
     /// The journal position after the last recorded result.
     pub(in crate::game) const fn player_event_serial(&self) -> u64 {

@@ -1,8 +1,4 @@
 #![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate migration scenarios."
-)]
-#![expect(
     clippy::default_numeric_fallback,
     reason = "Synthetic costs and PP expectations use signed integers."
 )]

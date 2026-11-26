@@ -53,10 +53,6 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Change events share the common pending authority."
-)]
 impl Game {
     pub(in crate::game) fn internal_posture_events(
         &mut self,
@@ -244,10 +240,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Super evolution's explicit addition shares change-event admission."
-)]
 impl Game {
     pub(in crate::game) fn internal_super_stat_event(
         &mut self,

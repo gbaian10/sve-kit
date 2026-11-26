@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Synthetic movement fixtures require their declared decision domains."
-)]
 use super::*;
 use sve_engine::game::internal::{InputDomain, SearchAnswer};
 

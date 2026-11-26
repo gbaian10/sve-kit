@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions cannot complete a real-card scenario."
-)]
 use super::*;
 
 #[expect(

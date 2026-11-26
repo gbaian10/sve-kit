@@ -7,10 +7,6 @@ use serde_json::Value;
 use super::{Game, list, string};
 use crate::{EngineFailure, Result};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Granted abilities share the same authoritative object and effect history."
-)]
 impl Game {
     pub(super) fn check_granted_abilities(node: &Value) -> Result<()> {
         let Some(abilities) = node["abilities"].as_array() else {

@@ -269,10 +269,6 @@ impl Projected for ReceiptMovesRead {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Event scopes and projections share the structural checker."
-)]
 impl Checker {
     pub(super) fn event_field<T>(&self, binding: Binding<T>) -> Checked
     where

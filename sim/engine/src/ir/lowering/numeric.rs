@@ -669,10 +669,6 @@ pub(super) fn pilot(value: &ast::Pilot, path: &str) -> Result<Action, LoweringEr
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Box uses the formal target's checked binding."
-)]
 impl BodyContext<'_> {
     pub(super) fn boxed(&self, value: &ast::Boxed, path: &str) -> Result<Action, LoweringError> {
         if !matches!(value.until, ast::Until::NextOppTurn) {

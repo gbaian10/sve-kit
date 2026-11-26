@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "A different question invalidates the printed payment scenario."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

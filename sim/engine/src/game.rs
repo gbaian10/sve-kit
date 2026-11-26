@@ -411,10 +411,6 @@ pub(crate) fn scalar(value: &Value) -> i64 {
         .unwrap_or_default()
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule domains share one private state and are split into focused modules."
-)]
 impl Game {
     /// Builds a neutral position without reading question identifiers or expected answers.
     /// The host keeps the seed private: it protects shuffles and viewer handle streams.

@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected questions invalidate the printed evolution and Quick sequence."
-)]
 use super::followup_materials::{board, declare};
 use super::*;
 use sve_engine::game::internal::{DamageShare, DecisionView};

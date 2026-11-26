@@ -2,10 +2,6 @@ use super::super::{Context, Execution, player_id};
 use super::{Game, Result};
 use crate::ir::{Generation, ObjectId};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Live providers share a read-only execution without installing an effect."
-)]
 impl Game {
     pub(in crate::game::internal) fn provider_execution(
         &self,

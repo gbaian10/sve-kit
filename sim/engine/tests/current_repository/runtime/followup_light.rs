@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate these printed light scenarios."
-)]
 use super::union_burst_batch1::{pending, ub};
 use super::*;
 use sve_engine::game::internal::SearchAnswer;

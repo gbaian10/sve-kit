@@ -273,10 +273,6 @@ fn apply(change: &CostChange, base: &mut i64, delta: &mut i64) -> Result<()> {
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "All card payment paths share the installed cost layer."
-)]
 impl Game {
     pub(in crate::game::internal) fn observed_player_costs(
         &self,
@@ -582,10 +578,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Evolution quotes reuse live printed cost modifiers without installing state."
-)]
 impl Game {
     pub(in crate::game) fn internal_static_evolution_delta(&self, holder: &str) -> Result<i64> {
         let object = self.object(holder)?;

@@ -7,10 +7,6 @@ use serde_json::{Value, json};
 use super::{Game, Object, Pending, int};
 use crate::Result;
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Stat events and their private contexts share the authoritative game state."
-)]
 impl Game {
     pub(super) fn stat_change_triggers(
         &mut self,

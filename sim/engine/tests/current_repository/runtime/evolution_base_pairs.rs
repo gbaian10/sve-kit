@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these real evolution paths."
-)]
 use super::*;
 
 fn position(base: &str, form: &str) -> Value {

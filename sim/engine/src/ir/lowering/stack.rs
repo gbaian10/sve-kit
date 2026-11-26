@@ -7,10 +7,6 @@ use crate::ir::{
     TokenTemplate, TokenTemplateId, ZoneKind, ZoneRef, printed_keywords,
 };
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The rule expansion shares the body's allocators and source."
-)]
 impl BodyContext<'_> {
     pub(super) fn stack_plus(
         &mut self,

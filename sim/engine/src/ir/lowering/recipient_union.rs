@@ -12,10 +12,6 @@ fn contains_source(recipients: &ast::Recipients) -> bool {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Source recipient unions share the formal target binding environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn recipient_union(
         &mut self,

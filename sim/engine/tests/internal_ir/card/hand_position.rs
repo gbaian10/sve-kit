@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the combined private choice."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain, TargetRoleAssignment};
 

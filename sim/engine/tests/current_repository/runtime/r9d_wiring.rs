@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decision domains invalidate the printed card scenarios."
-)]
 
 use super::damage_prevent::pass_quick;
 use super::event_cemetery::finish_checks;

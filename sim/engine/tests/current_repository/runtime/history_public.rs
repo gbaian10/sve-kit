@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "The complete printed cards must expose only their declared pending and target choices."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 use sve_engine::game::internal::DecisionView;

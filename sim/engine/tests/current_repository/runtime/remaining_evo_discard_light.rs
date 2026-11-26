@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Complete printed discard and McQueen chains require only their declared decisions."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InstructionOutcome};
 

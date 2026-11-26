@@ -235,10 +235,6 @@ pub(super) fn public_event(event: &Event, position: u64) -> Result<String> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Rule actions and event producers share the authoritative game."
-)]
 impl Game {
     /// Apply an admitted rule action with loaded internal cards, stopping before pending abilities.
     ///

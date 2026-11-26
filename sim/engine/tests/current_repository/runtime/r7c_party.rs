@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "Unexpected decisions invalidate the printed Party scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::DecisionView;
 

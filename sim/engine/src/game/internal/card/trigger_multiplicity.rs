@@ -31,10 +31,6 @@ pub(super) fn check(located: &Located<Ability>, declarations: &[Effect]) -> Resu
     Ok(())
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "The phase producer reads live rule providers before admitting occurrences."
-)]
 impl Game {
     pub(in crate::game::internal) fn additional_phase_triggers(
         &self,

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected authority question invalidates these printed-card scenarios."
-)]
 use super::*;
 
 fn actor(seat: &str) -> PlayerId {

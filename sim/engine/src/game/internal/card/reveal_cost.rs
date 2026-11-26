@@ -12,10 +12,6 @@ pub(super) fn selected(execution: &Execution, action: &Action) -> bool {
         if execution.material_selections.get(&reference.key()).is_some_and(super::material::MaterialWait::is_hand))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Revelation uses the existing play payment transaction."
-)]
 impl Game {
     pub(super) fn check_hand_material_cost_entry(
         &self,
@@ -210,10 +206,6 @@ impl Game {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "A selected hand cost retains its private material proof through banishment."
-)]
 impl Execution {
     pub(in crate::game::internal) fn private_hand_banish_materials(
         &self,

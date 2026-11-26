@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Dice scenarios pick their own facts out of the full progress."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::DecisionShape;

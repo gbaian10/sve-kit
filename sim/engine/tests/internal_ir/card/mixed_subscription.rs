@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate mixed-family subscription scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{InputDomain, ResumeStage};
 fn finish(game: &mut Game) {

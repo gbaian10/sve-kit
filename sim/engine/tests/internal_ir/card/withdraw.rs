@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "An unexpected declaration stage fails the scenario."
-)]
-
 use super::*;
 use crate::player_pipeline::{answer, question};
 use sve_engine::game::player::events::PlayerEvent;

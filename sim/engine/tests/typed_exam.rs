@@ -1,5 +1,10 @@
 //! The shared rule exam on the typed player entry, against a reviewed results list.
 
+#![allow(
+    clippy::panic,
+    clippy::wildcard_enum_match_arm,
+    reason = "Fixture assertions can panic and pattern checks only handle the expected variants."
+)]
 #![cfg(feature = "runner")]
 
 use std::path::PathBuf;

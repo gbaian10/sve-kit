@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the printed Plumeria scenario."
-)]
 use super::*;
 fn finish(game: &mut Game) {
     while game.internal_card_stage() == Some(ResumeStage::CheckTiming) {

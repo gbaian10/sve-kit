@@ -1,8 +1,4 @@
 //! Original-cost distinctness remains a constraint on the ordinary material route.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate these material scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 use sve_engine::game::player::{

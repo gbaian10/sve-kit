@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the printed event scenarios."
-)]
 use super::*;
 
 fn selected() -> &'static SelectedEffects {

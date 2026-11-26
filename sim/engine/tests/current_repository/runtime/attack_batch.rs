@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected decisions invalidate the complete printed-card scenarios."
-)]
 use super::*;
 
 fn game(initial: &Value) -> Game {

@@ -28,10 +28,6 @@ fn hand_zone(player: &PlayerRef, binding: Binding<ObjectRef>) -> Selector {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Discard shares the body's binding allocator."
-)]
 impl BodyContext<'_> {
     fn whole_hand(&mut self, player: &PlayerRef, path: &str) -> Result<Selector, LoweringError> {
         Ok(hand_zone(

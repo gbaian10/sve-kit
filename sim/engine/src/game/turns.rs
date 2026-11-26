@@ -116,10 +116,6 @@ impl TurnSchedule {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Turn scheduling owns ordering before the common start-of-turn procedure."
-)]
 impl Game {
     pub(super) fn insert_extra_turns(&mut self, player: String, count: u32) -> Result<()> {
         self.state

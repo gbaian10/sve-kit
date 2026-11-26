@@ -1,8 +1,4 @@
 //! Fixed Fusion quantities use the existing material payment and carry path.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected choices invalidate these Fusion scenarios."
-)]
 use super::*;
 use sve_engine::game::internal::{DecisionView, InputDomain};
 

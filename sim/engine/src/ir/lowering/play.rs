@@ -143,10 +143,6 @@ pub(super) fn trigger_play_spec(
         })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Formal play shares the ability's binding environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn targets(
         &mut self,

@@ -19,10 +19,6 @@ pub(super) const fn stage(final_break: bool) -> &'static str {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Limit breaks and rule attachments share authoritative movement and numeric layers."
-)]
 impl Game {
     pub(super) fn treasure_abilities_inactive(&self, id: &str) -> Result<bool> {
         Ok(self.object(id)?.zone != "ex" && self.face(id)?["card_type"] == TREASURE)

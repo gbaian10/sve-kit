@@ -42,10 +42,6 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Completed limit breaks use the normal pending queue."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_limit_break_event(
         &mut self,

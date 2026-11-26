@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected evolution stages fail the scenario."
-)]
-
 use super::*;
 use crate::player_pipeline::question;
 use sve_engine::game::player::events::{ActionKind, EventKind};

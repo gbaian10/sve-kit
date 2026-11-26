@@ -30,10 +30,6 @@ fn unavailable(
     ))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Printed abilities and immutable event characteristics share the catalogue boundary."
-)]
 impl Game {
     pub(in crate::game::internal) fn internal_ub_enabled(&self, holder: &str) -> Result<bool> {
         let player = self.player(&self.object(holder)?.controller)?;

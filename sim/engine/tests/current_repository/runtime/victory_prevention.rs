@@ -1,8 +1,4 @@
 // The shared repository selection makes the first printed scenario pay the source preparation cost.
-#![expect(
-    clippy::panic,
-    reason = "Unexpected questions invalidate the guardian's printed timing."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

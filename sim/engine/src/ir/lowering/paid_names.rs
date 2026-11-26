@@ -1,10 +1,6 @@
 use super::{BodyContext, LoweringError, ast, unsupported};
 use crate::ir::{Binding, Bool, Expr, ObjectReceipt, ObjectRef, paid_names};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Named payment objects share the body's checked receipt environment."
-)]
 impl BodyContext<'_> {
     pub(super) fn record_paid_name(
         &mut self,

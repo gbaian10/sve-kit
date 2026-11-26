@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "The printed cemetery seeds have explicit target, payment and ordering choices."
-)]
 use super::*;
 
 fn pending(game: &mut Game, card: &str) -> CardPlay {

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Unexpected player questions invalidate the printed distribution scenario."
-)]
 use super::*;
 use sve_engine::game::internal::DamageShare;
 use sve_engine::game::player::{

@@ -1,7 +1,3 @@
-#![expect(
-    clippy::wildcard_enum_match_arm,
-    reason = "Only the printed evolution, Look and Ward entry decisions may occur."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

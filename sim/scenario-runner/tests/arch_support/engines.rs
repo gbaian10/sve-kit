@@ -7,9 +7,8 @@
 
 #![allow(dead_code, reason = "each test binary uses a different subset")]
 #![allow(
-    clippy::multiple_inherent_impl,
     clippy::struct_excessive_bools,
-    reason = "a scripted test engine: tables grouped by topic, flags mirror the fixture"
+    reason = "The scripted engine flags mirror the fixture."
 )]
 
 use core::hash::{Hash, Hasher as _};

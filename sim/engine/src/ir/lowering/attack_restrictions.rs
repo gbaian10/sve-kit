@@ -215,10 +215,6 @@ fn conditional_attacker(
     })
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Attack permission installation shares body bindings."
-)]
 impl BodyContext<'_> {
     pub(super) fn no_attack(
         &mut self,

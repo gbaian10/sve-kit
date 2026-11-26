@@ -47,10 +47,6 @@ impl Visitor for Sources<'_> {
     }
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Preflight reads the same admitted definitions as source producers."
-)]
 impl Game {
     pub(in crate::game) fn validate_battle_sources(
         &self,

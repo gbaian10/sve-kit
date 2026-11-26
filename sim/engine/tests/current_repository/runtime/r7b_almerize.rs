@@ -1,8 +1,3 @@
-#![expect(
-    clippy::panic,
-    clippy::wildcard_enum_match_arm,
-    reason = "The printed base, super evolution and activated choice have explicit decision domains."
-)]
 use super::event_cemetery::finish_checks;
 use super::*;
 

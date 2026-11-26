@@ -45,10 +45,6 @@ pub(super) fn check_header(ability: &Ability) -> Result<bool> {
     Ok(true)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Mill observers share the common movement transaction."
-)]
 impl Game {
     fn mill_observers(&self) -> Result<Vec<(String, Vec<PlannedAbility>)>> {
         if !self.card_runtime.definitions.cards.values().any(|program| {

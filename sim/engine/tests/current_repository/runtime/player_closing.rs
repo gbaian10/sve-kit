@@ -1,7 +1,3 @@
-#![expect(
-    clippy::panic,
-    reason = "Serial real-card rule scenarios stop on unexpected public input."
-)]
 
 use sve_engine::game::player::{DecisionShape, DiscardKind};
 use super::*;

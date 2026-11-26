@@ -275,10 +275,6 @@ where
     ))
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Whole-card admission and activation share the authoritative game."
-)]
 impl Game {
     pub(in crate::game) fn observed_quotas(
         &self,

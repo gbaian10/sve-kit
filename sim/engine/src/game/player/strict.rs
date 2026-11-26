@@ -255,10 +255,6 @@ fn closure(
     Ok(closure)
 }
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Strict startup shares the game authority."
-)]
 impl Game {
     /// Check both decks, their evolve cards, generated EX resources and token dependencies.
     /// No game, opening candidate or opponent card list is published.

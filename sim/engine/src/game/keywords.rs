@@ -8,10 +8,6 @@ use serde_json::{Value, json};
 use super::{Game, Pending, list, string};
 use crate::{EngineFailure, Result};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Keyword availability and provenance share the authoritative game state."
-)]
 impl Game {
     fn keyword_grants(&self, id: &str) -> Result<Vec<(String, Value)>> {
         self.require_ability_sources("keyword grants")?;

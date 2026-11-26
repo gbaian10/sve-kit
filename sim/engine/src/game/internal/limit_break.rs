@@ -3,10 +3,6 @@ use crate::game::limit_break::TREASURE;
 use crate::ir::ObjectOperand;
 use crate::ir::{Action, Instruction, LimitBreakEvent, SnapshotId};
 
-#[expect(
-    clippy::multiple_inherent_impl,
-    reason = "Resolution retains the source reference that paid for the limit break."
-)]
 impl Game {
     pub(super) fn internal_limit_break(
         &mut self,
