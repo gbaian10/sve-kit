@@ -138,10 +138,10 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 | GR | Gold | `gr` |
 | LG | Legendary | `lg` |
 | SL | Super Legendary | `sl` |
+| GBF | （EN 無此稀有度） | `gbf` |
 | UR | Ultimate | `ur` |
 | SP | Special | `sp` |
 | SSP | Super Special | `ssp` |
-| GBF | （EN 無此稀有度） | `gbf` |
 | PR | Promo | `pr` |
 | - | - | null（`premium=null`） |
 | プレミアム | Premium | null（`premium=true`） |
@@ -150,7 +150,7 @@ producer／reader／合成 fixture 同步更新，既有 preview 必須重新匯
 依[詞彙契約 §1、§4.1、§7](../domains/catalog-route-adoption.md)，單獨 Premium 不捏造基礎階級，「-」也不採為稀有度代碼，
 兩者 `rarity_code=null`，但不列為未辨識。
 未辨識拼法（例如「-・プレミアム」）保持 `rarity_code/premium=null`，私人建置報告逐版次列出原值與原因。
-版次列固定分 JP、EN 行，各行依無代碼→BR→SR→GR→LG→SL→UR→SP→SSP→GBF→單獨 premium→PR；
+版次列固定分 JP、EN 行，各行依無代碼→BR→SR→GR→LG→SL→GBF→UR→SP→SSP→單獨 premium→PR；
 無代碼的排序位置由 `premium` 區分，不另造稀有度代碼。相同階級先一般版再 premium；
 同一階級、同一 premium 狀態內，一般編號（卡號連字號後為純數字、`T` 或 `LD` 字首）先於特殊編號
 （`SL`、`PR`、`EP`、`SEP`、`UT` 等其他字首），再依卡號自然排序、永久版次 ID 定序。
