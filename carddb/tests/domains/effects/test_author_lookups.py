@@ -15,7 +15,6 @@ from sve_carddb.domains.effects.author_inputs import (
 from sve_carddb.workflows import authoring
 
 from ...support.direct_current_fixture import synthetic_current
-from .author_entry_cases import meta
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -52,7 +51,6 @@ def main(tmp_path: Path) -> Path:
                 "kind": "author_effect_set",
                 "cards": {
                     "SYN-01": {
-                        "meta": {"written_by": meta()["written_by"]},
                         "abilities": [],
                     }
                 },

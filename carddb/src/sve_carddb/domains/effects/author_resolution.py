@@ -41,7 +41,9 @@ def review_states(inputs: AuthorInputSet) -> list[JsonValue]:
     for file in inputs.author_files:
         cards = object_value(object_value(parse_document(file.raw).value)["cards"])
         for number, value in cards.items():
-            reviews = object_value(object_value(value)["meta"]).get("reviewed_by", [])
+            reviews = object_value(object_value(value).get("meta", {})).get(
+                "reviewed_by", []
+            )
             for index, review in enumerate(array(reviews)):
                 reports.append(
                     {

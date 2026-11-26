@@ -42,7 +42,7 @@ def test_public_program_keeps_face_nodes_and_omits_author_and_source_evidence() 
             "scope": "shared",
             "cards": {
                 "SYN-001": {
-                    "meta": {"written_by": "Synthetic author", "status": "draft"},
+                    "meta": {"status": "draft"},
                     "note": "Private review context",
                     "ignored": [],
                     "abilities": [ability],
@@ -82,14 +82,6 @@ def test_light_admission_populates_programs_and_manual_states_for_every_card(
                 "cards": {
                     "SYN-01": {
                         "admission": "light",
-                        "meta": {
-                            "written_by": [
-                                {
-                                    "actor": {"who": "Synthetic author", "model": None},
-                                    "date": "2026-10-23",
-                                }
-                            ]
-                        },
                         "abilities": [{"line": 1, "evolve": {"cost": {"pp": 1}}}],
                     },
                 },

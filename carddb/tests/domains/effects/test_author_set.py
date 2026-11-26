@@ -109,7 +109,6 @@ def author(root: Path, *keys: str, scope: str = "shared") -> None:
             "scope": scope,
             "cards": {
                 key: {
-                    "meta": {"written_by": meta()["written_by"]},
                     "abilities": [{"line": 1, "evolve": {"cost": {"pp": 1}}}],
                 }
                 for key in keys
@@ -141,7 +140,12 @@ def companion(root: Path, path: str = BODY) -> None:
                 {
                     "id": "synthetic",
                     "body": {"evolve": {"cost": {"pp": 1}}},
-                    "written_by": meta()["written_by"],
+                    "written_by": [
+                        {
+                            "actor": {"who": "synthetic author", "model": None},
+                            "date": "2026-10-21",
+                        }
+                    ],
                 }
             ],
         },

@@ -27,9 +27,3 @@ cards:
                   - create: { token: ドラゴウェポン, n: 1, to: field }
     token_sources:
       - { card: BP02-T07, line: 1, section: 1 }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

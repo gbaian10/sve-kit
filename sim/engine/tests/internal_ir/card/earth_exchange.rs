@@ -32,7 +32,6 @@ fn stack_selection(snapshot: &str, document: &str) -> SelectedEffects {
         }]},
         "tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{"unit-amulet":{
             "meta":{"dsl":"1.0","source":"direct","admission":"light",
-                "written_by":[{"actor":{"who":"test","model":null},"date":"2026-11-14"}],
                 "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
             "faces":{face:{"abilities":[{"line":1_u8,"keywords":["stack"],
                 "ports":{"imports":{},"exports":{}},"sources":[{

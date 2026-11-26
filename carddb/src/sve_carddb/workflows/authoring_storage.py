@@ -109,7 +109,6 @@ def _facts(
     before: dict[str, JsonValue], after: dict[str, JsonValue], number: str
 ) -> None:
     defaults: tuple[tuple[str, JsonValue], ...] = (
-        ("written_by", None),
         ("reviewed_by", []),
         ("status", "draft"),
         ("verified_by_exam", []),
@@ -256,8 +255,8 @@ def write(  # ruff: ignore[complex-structure, too-many-arguments, too-many-branc
             )
         if number in previous.cards:
             _facts(
-                object_value(previous.cards[number]["meta"]),
-                object_value(supplied.cards[number]["meta"]),
+                object_value(previous.cards[number].get("meta", {})),
+                object_value(supplied.cards[number].get("meta", {})),
                 number,
             )
             if "note" in previous.cards[number] and previous.cards[number].get(

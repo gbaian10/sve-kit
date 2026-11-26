@@ -18,9 +18,3 @@ cards:
                 cost: { earth_rite: 1 }
                 do:
                   - damage: { to: { leader_of: enemy }, n: 2 }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

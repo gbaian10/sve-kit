@@ -45,9 +45,7 @@ _CARD_KEYS = frozenset(
         "lint_exceptions",
     }
 )
-_META_KEYS = frozenset(
-    {"written_by", "reviewed_by", "status", "verified_by_exam", "rulings"}
-)
+_META_KEYS = frozenset({"reviewed_by", "status", "verified_by_exam", "rulings"})
 _EMPTY_PORTS: dict[str, JsonValue] = {"imports": {}, "exports": {}}
 
 
@@ -435,10 +433,10 @@ def materialize(
 ) -> dict[str, JsonValue]:
     """Keep source coordinates explicit while allowing equivalent wording to share a body."""
     card = handwritten.cards[number]
-    if card.keys() - _CARD_KEYS or not {"meta", "abilities"} <= card.keys():
+    if card.keys() - _CARD_KEYS or "abilities" not in card:
         raise SourceError("invalid_card_keys")
-    meta = object_value(card["meta"])
-    if meta.keys() - _META_KEYS or not meta.get("written_by"):
+    meta = object_value(card.get("meta", {}))
+    if meta.keys() - _META_KEYS:
         raise SourceError("invalid_card_metadata")
     if meta.get("status") == "disputed" or any(
         object_value(r).get("verdict") in {"disputed", "revise"}
@@ -499,7 +497,6 @@ def materialize(
             "dsl": "1.0",
             "source": "direct",
             "admission": card.get("admission", "light"),
-            "written_by": meta["written_by"],
             "status": meta.get("status", "draft"),
             "reviewed_by": meta.get("reviewed_by", []),
             "verified_by_exam": [],

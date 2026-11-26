@@ -39,7 +39,6 @@ def handwritten() -> tuple[dict[str, JsonValue], dict[str, JsonValue]]:
                 ]
             )[number]
         )
-        meta = object_value(previous["meta"])
         ability: dict[str, JsonValue] = {"line": 1}
         if name:
             definition = object_value(
@@ -60,10 +59,7 @@ def handwritten() -> tuple[dict[str, JsonValue], dict[str, JsonValue]]:
             ability.update({"use": name, "params": {"n": 1}})
         else:
             ability["evolve"] = {"cost": {"pp": 1}}
-        cards[number] = {
-            "meta": {"written_by": meta["written_by"]},
-            "abilities": [ability],
-        }
+        cards[number] = {"abilities": [ability]}
         if "admission" in previous:
             object_value(cards[number])["admission"] = previous["admission"]
     main_tree: dict[str, JsonValue] = {
@@ -151,7 +147,7 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
     assert document["format"] == 2
     card = object_value(object_value(document["cards"])["BP10-122"])
     assert card == object_value(object_value(hand["cards"])["BP10-122"])
-    assert "source" not in object_value(card["meta"])
+    assert "meta" not in card
     assert not tuple((output_root / "rules/effect-anchors").glob("*.yaml"))
     second = authoring.write(
         workspace, main=main, bodies=bodies, output_root=output_root, all_cards=True
@@ -173,6 +169,7 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
         ("param", "param_type_mismatch"),
         ("body_author", "body_metadata_conflict"),
         ("body_syntax", "additionalProperties"),
+        ("card_writer", "additionalProperties"),
         ("status", "author_metadata_conflict"),
         ("closure", "source_line_closure_mismatch"),
         ("duplicate_body", "duplicate_body_id"),
@@ -204,12 +201,12 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
             ]
         case "body_syntax":
             definition["body"] = {"unknown": {}}
-        case "author":
-            object_value(card["meta"])["written_by"] = [
-                {"actor": {"who": "Another"}, "date": "2026-10-26"}
-            ]
+        case "card_writer":
+            card["meta"] = {
+                "written_by": [{"actor": {"who": "Another"}, "date": "2026-10-26"}]
+            }
         case "status":
-            object_value(card["meta"])["status"] = "disputed"
+            card["meta"] = {"status": "disputed"}
         case "closure":
             card["abilities"] = []
         case "unknown":
@@ -455,12 +452,8 @@ def test_keyword_shorthand_keeps_the_existing_lowercase_boundary(
     object_value(value["cards"]).pop("BP01-138", None)
     prototype.write_bytes(authoring.format_yaml(value))
     main, _, main_tree, _ = handwriting(tmp_path, handwritten)
-    meta = object_value(
-        object_value(object_value(main_tree["cards"])["BP01-110"])["meta"]
-    )
     main_tree["cards"] = {
         "BP01-138": {
-            "meta": meta,
             "abilities": [
                 {
                     "line": 1,
@@ -539,7 +532,7 @@ def test_wrong_owner_and_symlink_inputs_are_rejected(
         b"format: 2\nformat: 2\nkind: author_effect_set\ncards: {}\n",
         b"format: true\nkind: author_effect_set\ncards: {}\n",
         b"format: 2\nkind: author_effect_set\ncards: {}\nunknown: 1\n",
-        b"format: 2\nkind: author_effect_set\ncards: {x: {meta: {written_by: [1]}, abilities: [{line: 9007199254740992}]}}\n",
+        b"format: 2\nkind: author_effect_set\ncards: {x: {abilities: [{line: 9007199254740992}]}}\n",
     ],
     ids=["duplicate", "bool-format", "unknown-key", "unsafe-integer"],
 )

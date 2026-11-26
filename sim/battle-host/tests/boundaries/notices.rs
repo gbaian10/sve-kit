@@ -73,7 +73,6 @@ fn load_activation(game: &mut Game, number: &str, steps: &Value) -> AbilityId {
         .lower(&json!({
             "format":1_i32,"kind":"author_effect_set","scope":"shared","cards":{(number):{
                 "meta":{"dsl":"1.0","source":format!("effect-source-v1:sha256:{}", "3".repeat(64)),
-                    "written_by":[{"actor":{"who":"synthetic","model":null},"date":"2026-10-22"}],
                     "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
                 "abilities":[{"line":1_i32,"sources":[{"binding_id":"binding:notice",
                     "ability_scope":"ability_0","occurrence":{

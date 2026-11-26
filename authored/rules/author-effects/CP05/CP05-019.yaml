@@ -3,12 +3,6 @@ kind: author_effect_set
 cards:
   CP05-019:
     admission: light
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-25"
     lint_exceptions:
       - rule: required_choose_use_targets
         line: 2

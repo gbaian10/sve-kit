@@ -65,16 +65,6 @@ cards:
         face: 2
         line: 3
     admission: light
-    meta:
-      written_by:
-        - actor:
-            model: claude-opus-5-5
-            who: Claude
-          date: "2026-11-07"
-        - actor:
-            model: gpt-6.1-sol
-            who: Codex
-          date: "2026-11-07"
     token_sources:
       - card: BP08-T09
         face: 1

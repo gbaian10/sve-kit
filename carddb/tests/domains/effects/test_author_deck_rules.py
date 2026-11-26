@@ -11,7 +11,6 @@ from sve_carddb.domains.effects.author_inputs import SourceError, parse_document
 
 from ...support.direct_current_fixture import synthetic_current
 from ..text_observations.test_effect_presence import page
-from .author_entry_cases import meta
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -22,7 +21,6 @@ if TYPE_CHECKING:
 def card(rule: JsonValue) -> Handwritten:
     tree: dict[str, JsonValue] = {
         "admission": "light",
-        "meta": {"written_by": meta()["written_by"]},
         "abilities": [],
     }
     if rule is not None:

@@ -37,12 +37,6 @@ cards:
                         zone: deck
                       to: field
     admission: light
-    meta:
-      written_by:
-        - actor:
-            model: claude-opus-5-5
-            who: Claude
-          date: "2026-11-07"
     token_sources:
       - card: BP02-T04
         line: 1

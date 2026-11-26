@@ -22,9 +22,3 @@ cards:
             - create: { token: ドラゴン, n: 1, to: field, by: { master_of: chosen } }
     token_sources:
       - { card: BP01-T11, line: 1, section: 1 }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

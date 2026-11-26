@@ -25,9 +25,3 @@ cards:
                 position: bottom
                 order: chooser
             - destroy: { follow: entered }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

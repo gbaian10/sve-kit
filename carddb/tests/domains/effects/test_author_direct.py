@@ -83,11 +83,6 @@ def test_direct_rejects_incomplete_or_invalid_cards(
 ) -> None:
     card: dict[str, JsonValue] = {
         "admission": "light",
-        "meta": {
-            "written_by": [
-                {"actor": {"who": "test", "model": None}, "date": "2026-10-27"}
-            ]
-        },
         "abilities": [
             {"line": 1, "spell": {"do": [{"draw": {"who": "self", "n": 1}}]}}
         ],
@@ -118,7 +113,7 @@ def test_direct_rejects_incomplete_or_invalid_cards(
         card["deck_rules"] = []
         expected = "invalid_card_keys"
     else:
-        object_value(card["meta"])["status"] = "disputed"
+        card["meta"] = {"status": "disputed"}
         expected = "source_unresolved_issue"
     handwritten = Handwritten(
         {"SYN-01": card}, bodies, {"SYN-01": parse_document(canonical(card))}
@@ -148,11 +143,6 @@ def test_unknown_section_requires_complete_explicit_reminder_coverage(
 ) -> None:
     card: dict[str, JsonValue] = {
         "admission": "shared",
-        "meta": {
-            "written_by": [
-                {"actor": {"who": "test", "model": None}, "date": "2026-10-27"}
-            ]
-        },
         "abilities": [{"line": 1, "fanfare": {"do": [{"draw": {"n": 1}}]}}],
         "ignored": [{"section": 1, "line": 1, "reason": "reminder"}] if ignore else [],
     }
@@ -188,11 +178,6 @@ def test_token_section_links_a_shared_card_without_creating_a_mother_ability(
 ) -> None:
     card: dict[str, JsonValue] = {
         "admission": "light",
-        "meta": {
-            "written_by": [
-                {"actor": {"who": "test", "model": None}, "date": "2026-10-28"}
-            ]
-        },
         "abilities": [{"line": 1, "fanfare": {"do": [{"draw": {"n": 1}}]}}],
         "token_sources": [{"section": 1, "line": 1, "card": "TOKEN-01"}],
     }

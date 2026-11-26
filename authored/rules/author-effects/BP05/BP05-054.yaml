@@ -34,9 +34,3 @@ cards:
                 any: true
             - move: { ref: returned, to: deck }
             - shuffle: { who: self }
-    meta:
-      written_by:
-        - actor:
-            who: Codex
-            model: gpt-6.2-sol
-          date: "2026-11-19"

@@ -39,7 +39,6 @@ pub(crate) fn author(
         }]},
         "tree":{"format":1_u8,"kind":"author_effect_set","scope":"shared","cards":{number:{
             "meta":{"dsl":"1.0","source":"direct","admission":"light",
-                "written_by":[{"actor":{"who":"test","model":null},"date":"2026-10-28"}],
                 "reviewed_by":[],"status":"draft","verified_by_exam":[],"rulings":[]},
             "faces":{face:{"abilities":abilities}}
         }}}
