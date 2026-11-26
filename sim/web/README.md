@@ -184,10 +184,9 @@ How the screen is put together:
   wherever the authority gives its current numbers.
 - A counter on a card is a chip with its number (`table/Tokens.tsx`): one chip per kind, showing
   the chip's back. A card holds one kind at most today; more would lie side by side. The authority
-  names a counter by its rules name (the keyword registry's, `authored/rules/keywords.yaml`);
-  `table/counters.ts` maps that name to the wording of each interface language, shown on hover and
-  in the info column, and a test fails when the registry lists a counter the screen has no name
-  for.
+  gives each counter its Japanese rules name from `authored/rules/keywords.yaml`.
+  `table/counters.ts` uses a localized name where available and the Japanese rules name otherwise.
+  The name appears on hover and in the info column.
 - What the info column, the selection bar and the large view say about a card (`hud/reading.ts`):
   the kind is the one the card has now, as the authority reports it, with the printed kind beside
   it when that is another; the cost is the authority's quote where cards are played from (hand,

@@ -54,7 +54,7 @@ describe("counter names", () => {
     ])
     const chips = await screen.findAllByRole("img", { name: /^指示物：/ })
     expect(chips).toHaveLength(names.length)
-    // A kind without a name of its own is only counted: none of the registry's may end up there.
-    expect(chips.filter((chip) => chip.getAttribute("title") === "指示物 ×1")).toEqual([])
+    expect(screen.getByRole("img", { name: "指示物：童話カウンター ×1" })).toBeVisible()
+    expect(new Set(chips.map((chip) => chip.getAttribute("title"))).size).toBe(names.length)
   })
 })

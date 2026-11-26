@@ -174,6 +174,7 @@ def test_write_preserves_handwritten_storage_and_reuses_companions(
         ("closure", "source_line_closure_mismatch"),
         ("duplicate_body", "duplicate_body_id"),
         ("editions", "ambiguous_body_version"),
+        ("counter", "unregistered_counter"),
     ],
 )
 def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, too-many-branches] -- exercise independent rejected shorthand mutations against the same public writer
@@ -216,6 +217,27 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
         case "editions":
             array(body_tree["records"]).append({**definition, "edition": 2})
             card["abilities"] = [{**ability, "edition": 1}, ability]
+        case "counter":
+            registry = output_root / "rules/keywords.yaml"
+            registry.write_bytes(
+                authoring.format_yaml(
+                    {
+                        "format": 1,
+                        "kind": "keyword_registry",
+                        "keywords": {
+                            "fairy_tale_counter": {
+                                "ja": "童話カウンター",
+                                "role": "ability-label",
+                            }
+                        },
+                    }
+                )
+            )
+            workspace = replace(workspace, authored=output_root)
+            body = object_value(object_value(definition["body"])["attack_time"])
+            array(body["do"]).append(
+                {"counter": {"on": "this", "name": "fairy_tale_counter", "delta": 1}}
+            )
     main.write_bytes(authoring.format_yaml(main_tree))
     bodies.write_bytes(authoring.format_yaml(body_tree))
     before = fingerprint(output_root)
@@ -233,6 +255,9 @@ def test_write_rejects_without_any_writes(  # ruff: ignore[complex-structure, to
         assert error.value.diagnostic.line is not None
     if mutation == "editions":
         assert error.value.diagnostic.path == ("cards", "BP10-122", "abilities", 1)
+    if mutation == "counter":
+        assert error.value.diagnostic.card_no == "BP10-122"
+        assert error.value.diagnostic.path[-2:] == ("counter", "name")
     assert fingerprint(output_root) == before
 
 

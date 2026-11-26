@@ -35,10 +35,7 @@ fn calamity_circle_uses_declared_counters_and_destroys_only_matching_original_co
         matches!(fact, Fact::Declared { player, value: Nat(2) } if *player == actor())
     }));
     checks(&mut board);
-    assert_eq!(
-        board.projection(View::Referee).unwrap()["objects"]["source"]["counters"]["災いカウンター"],
-        2_u8
-    );
+    assert_battle_counter(&board, "BP10-102", "災いカウンター", 2);
 
     let ability = selection().current["BP10-102"]
         .program

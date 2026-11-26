@@ -148,13 +148,12 @@ fn alice_and_printing_spend_the_fanfare_counter_on_a_real_ex_fairy_tale_follower
             json!([{"id":"field","card":"BP03-090"},{"id":"wrong","card":"BP14-059"}]);
         initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"extra","card":"BP03-004"}]);
         initial["players"]["P2"]["zones"]["ex"] = json!([{"id":"opposing","card":"BP03-004"}]);
-        let mut game = prepared(&initial);
+        initial["players"]["P2"]["zones"]["field"] = json!([]);
+        initial["players"]["P2"]["leader"]["life"] = json!(1_u8);
+        let mut game = game(&initial);
         play(&mut game);
         trigger(&mut game, number, 2, None, true);
-        assert_eq!(
-            game.projection(View::Referee).unwrap()["objects"]["source"]["counters"]["童話カウンター"],
-            1_u8
-        );
+        assert_battle_counter(&game, number, "童話カウンター", 1);
         let activation = game
             .activate_internal_card("source", definition(number, 3), PLAYER)
             .unwrap();
@@ -177,12 +176,13 @@ fn alice_and_printing_spend_the_fanfare_counter_on_a_real_ex_fairy_tale_follower
             "only own Field or EX fairy tale followers qualify"
         );
         finish(&mut game, activation, &["BP03-004"], &[], true);
+        finish_checks(&mut game);
         let view = game.projection(View::Referee).unwrap();
         assert_eq!(
             view["objects"]["source"]["counters"]["童話カウンター"],
             0_u8
         );
-        assert_eq!(view["objects"]["extra"]["counters"]["童話カウンター"], 1_u8);
+        assert_battle_counter(&game, "BP03-004", "童話カウンター", 1);
         for id in ["field", "wrong", "opposing"] {
             assert_eq!(
                 view["objects"][id]["counters"]["童話カウンター"]
@@ -191,6 +191,16 @@ fn alice_and_printing_spend_the_fanfare_counter_on_a_real_ex_fairy_tale_follower
                 0
             );
         }
+        let attack = game
+            .internal_rule_action(&json!({"do":"attack","attacker":"field","target":"P2.leader"}))
+            .unwrap();
+        assert_eq!(attack.outcome, "resolved");
+        pass_quick(&mut game);
+        finish_checks(&mut game);
+        assert_eq!(
+            game.projection(View::Referee).unwrap()["game"]["winner"],
+            "P1"
+        );
     }
 }
 

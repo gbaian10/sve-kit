@@ -1238,7 +1238,6 @@ export default {
       label: "Counters",
       names: { stack: "Stack", fusion: "Fusion", refund: "Reversal" },
       count: "{{name}} ×{{n}}",
-      unnamed: "Counter ×{{n}}",
       spoken: "Counter: {{text}}",
     },
     turn: {
