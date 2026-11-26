@@ -242,7 +242,7 @@ Type hints are required. pyright strict is an optional local check (a manual hoo
 because it bundles a large Node.js runtime); run it when you like and fix what it reports as you go:
 
 ```bash
-pre-commit run --hook-stage manual pyright   # carddb and tools/schema-er
+prek run --hook-stage manual pyright   # carddb and tools/schema-er
 ```
 
 Follow the rules; if a rule is wrong for the whole project, propose changing the config
@@ -278,7 +278,7 @@ use `#[allow]` only when the lint does not fire everywhere the attribute applies
   and permitted official SVE Japanese/English test fixtures.
 - **Out:** regenerable data outside those explicit exceptions (crawl caches, images, audio, build output),
   personal settings, secrets and local notes.
-- Files larger than 1 MiB (1024 KiB) are rejected by pre-commit. Split `authored/` data per card set.
+- Files larger than 1 MiB (1024 KiB) are rejected by prek. Split `authored/` data per card set.
   The generated v4 snapshot contract schema is exempt. The `snapshot-format-lock` hook checks it
   against its sources and version lock.
 
@@ -290,12 +290,12 @@ Install these tools with their own installers (each is one command; see the link
 | -------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
 | [rustup](https://rustup.rs)      | Rust; the toolchain version is pinned in `rust-toolchain.toml` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
 | [uv](https://docs.astral.sh/uv/) | Python (`carddb`, `tools/schema-er`)                           | `curl -LsSf https://astral.sh/uv/install.sh \| sh`                |
-| [mise](https://mise.jdx.dev)     | Bun and Node.js plus shared project environment variables      | `curl https://mise.run \| sh`, then `mise install` in the repo    |
+| [mise](https://mise.jdx.dev)     | Bun, Node.js, prek and shared project environment variables    | `curl https://mise.run \| sh`, then `mise install` in the repo    |
 
 `sim/web` needs both mise and rustup: its scripts generate the battle contract's TypeScript types and
 validator from the Rust types in `sim/battle-contract` with cargo, and nothing generated is committed.
 
-mise manages Bun and Node.js versions and shared project environment variables.
+mise manages Bun, Node.js and prek versions and shared project environment variables.
 Rust and Python toolchains remain managed by rustup and uv; do not add them to
 `mise.toml`. Machine-specific paths and secrets stay in ignored `mise.local.toml`
 or a private parent-directory mise configuration. No project variable currently
@@ -361,11 +361,10 @@ Then:
 ```bash
 uv sync --all-packages --all-groups
 cargo install --locked cargo-deny cargo-machete cargo-llvm-cov cargo-mutants
-uv tool install pre-commit
-pre-commit install
 ```
 
-The git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
+Run `prek install` after `mise install` if Git does not already run prek through global hooks.
+The Git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
 are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
 that component or a shared input. The Python manual hook enforces 90% combined line and branch
 coverage; Rust tests enforce 90% line coverage for both project and fork PRs.
@@ -425,10 +424,10 @@ Layer directions in carddb and publish are enforced by
 Run them yourself when you change the code they cover:
 
 ```bash
-pre-commit run --hook-stage manual pytest-publish # publish tests with a separate 92% gate
-pre-commit run --hook-stage manual pytest       # carddb tests with the 90% combined line/branch gate
-pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
-pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI runs test:prepared after generation)
+prek run --hook-stage manual pytest-publish # publish tests with a separate 92% gate
+prek run --hook-stage manual pytest       # carddb tests with the 90% combined line/branch gate
+prek run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
+prek run --hook-stage manual web-test     # sim/web Vitest (CI runs test:prepared after generation)
 ```
 
 ### CI tests and summaries
@@ -459,7 +458,7 @@ builds WebAssembly once, and shares the outputs across formatting, lint, types, 
 checks and the Vite build. The separate `engine-wasm` job builds and measures WASM on Rust changes
 that skip Web CI. Local manual test hooks
 remain available and run the whole suite at once. The hook ownership table marks direct steps
-so pre-commit skips them.
+so prek skips them.
 
 CI also uploads the carddb, Web and Rust coverage reports (file names and line hits, no card text) and the
 Web bundle size to Codecov for reference; carddb and Rust upload the merged coverage from the coverage jobs.
@@ -485,7 +484,7 @@ Repository-wide hooks normally check changed files on pull requests and pushes t
 The gitleaks scan still covers the whole commit range. Changes to shared
 hook configuration, workflow/action metadata or Python lock inputs trigger a full scan, as do
 schema input deletions or renames. The `full_scan_inputs` list in `.github/workflows/ci.yml`
-includes Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings.
+includes mise, Markdown, EditorConfig, Git attributes, gitleaks, Taplo and uv settings.
 Other deletions and renames run the link check over all Markdown files.
 
 Open **Actions → a workflow run → Summary** for test totals, passed/skipped/failed counts,
@@ -517,7 +516,7 @@ slowest suites are sharded, three ways each; every Rust shard builds the same bi
 because building once would add a sequential job and a large artifact to the critical path. Concurrency cancels older PR runs; `main` runs are never cancelled by a
 newer push. Dependency caches retain their existing keys and only `main` writes them;
 PRs read the default-branch caches. Each hook cache is restored,
-prepared and saved separately to avoid mixing pre-commit databases. Existing mypy data
+prepared and saved separately to keep prek environments separate by job. Existing mypy data
 is carried forward; PR mypy still validates source hashes and checks changed modules,
 so a retained cache is never proof that current types passed. Rust target caching remains
 enabled: official test data is read at runtime and is not embedded in the compiled tests.
@@ -570,7 +569,7 @@ Now and then, and before a release, run the mutation test. Every surviving mutan
 is a bug the tests would not notice; add a test, or explain why it cannot change behaviour:
 
 ```bash
-pre-commit run --hook-stage manual cargo-mutants
+prek run --hook-stage manual cargo-mutants
 ```
 
 Run `mise run vulture` for Python dead-code checks, or `mise run vulture:dev`
@@ -594,11 +593,11 @@ that identifies the caller.
 | Python dependencies of `scan/` except PyTorch                       | Dependabot, weekly, one grouped pull request                                                        |
 | PyTorch and torchvision in `scan/`                                  | By hand, with a training run that checks the new version                                            |
 | Bun dependencies (`sim/web`)                                        | `bun update` and `bun audit` by hand, monthly (Dependabot cannot read `bun.lock` version 2 yet)     |
-| pre-commit hook versions (`rev:`)                                   | Dependabot, weekly, one grouped pull request                                                        |
+| Remote prek hook versions (`rev:`)                                  | Dependabot, weekly, one grouped pull request                                                        |
 | `cz-conventional-gitmoji` in the commitizen hook                    | Pinned in `.pre-commit-config.yaml`; bump it with its hook's `rev:` and the `carddb` dev dependency |
 | Node for the markdownlint hook                                      | `language_version` in `.pre-commit-config.yaml`; keep it equal to `node` in `mise.toml`             |
 | Image for the lychee link-check hook                                | Tag and digest in `.pre-commit-config.yaml`, by hand                                                |
-| Bun and Node                                                        | `mise.toml`, by hand                                                                                |
+| Bun, Node and prek                                                  | `mise.toml`, by hand                                                                                |
 | Rust toolchain                                                      | `rust-toolchain.toml`, by hand, together with `rust-version` in `Cargo.toml`                        |
 | cargo tools in CI (`cargo-llvm-cov`, `cargo-deny`, `cargo-machete`) | The `tool:` versions in `.github/workflows/ci.yml`, by hand                                         |
 

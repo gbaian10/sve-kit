@@ -3,7 +3,6 @@
 import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- runs Git and the workflow against synthetic repositories
-import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -12,6 +11,17 @@ from typing import override
 import yaml
 
 from hooks import ROOT
+
+LIST_FILES_CONFIG = """\
+repos:
+  - repo: local
+    hooks:
+      - id: files
+        name: files
+        language: system
+        entry: bash -c 'printf "CHANGED:%s\\n" "$@"' --
+        verbose: true
+"""
 
 
 class RepoScopeTests(unittest.TestCase):
@@ -45,7 +55,7 @@ class RepoScopeTests(unittest.TestCase):
         self.script = next(
             step["run"]
             for step in workflow["jobs"]["repo"]["steps"]
-            if str(step.get("name", "")).startswith("pre-commit (")
+            if str(step.get("name", "")).startswith("prek (")
         )
 
     def command(self, *args: str) -> str:
@@ -72,7 +82,7 @@ class RepoScopeTests(unittest.TestCase):
         return self.command("rev-parse", "HEAD")
 
     def scope(self, base: str, head: str, *, event: str = "pull_request") -> str:
-        """Stub only uv; execute the unchanged workflow selection under Bash errexit."""
+        """Stub the hook runner and its selector; execute the workflow shell under errexit."""
         result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Bash script with synthetic context
             [
                 shutil.which("bash") or "bash",
@@ -80,8 +90,8 @@ class RepoScopeTests(unittest.TestCase):
                 "-o",
                 "pipefail",
                 "-c",
-                'uv() { if [[ "$*" == *"pre-commit run"* ]]; then '
-                'printf "pre-commit argv: %s\\nrange=%s\\n" "$*" "$GITLEAKS_RANGE"; fi; };\n'
+                "uv() { :; }\n"
+                'prek() { printf "prek argv: %s\\nrange=%s\\n" "$*" "$GITLEAKS_RANGE"; }\n'
                 + self.script,
             ],
             cwd=self.repo,
@@ -97,9 +107,7 @@ class RepoScopeTests(unittest.TestCase):
         )
         assert f"range={base}..{head}" in result.stdout
         return "\n".join(
-            line
-            for line in result.stdout.splitlines()
-            if line.startswith("pre-commit argv:")
+            line for line in result.stdout.splitlines() if line.startswith("prek argv:")
         )
 
     def test_changed_files_and_public_push(self) -> None:
@@ -118,6 +126,7 @@ class RepoScopeTests(unittest.TestCase):
             ".pre-commit-config.yaml",
             ".github/ci/hooks.toml",
             ".github/ci/hooks.py",
+            "mise.toml",
             ".markdownlint-cli2.yaml",
             "docs/.markdownlint.json",
             ".editorconfig",
@@ -143,7 +152,7 @@ class RepoScopeTests(unittest.TestCase):
                 assert "--all-files" in self.scope(self.base, head, event="push")
 
     def test_deleted_or_renamed_inputs(self) -> None:
-        """Pre-commit drops removed inputs; retain aggregate checks for their consumers."""
+        """Prek drops removed inputs; retain aggregate checks for their consumers."""
         for name in ("docs/schema/build/build-db.md", ".markdownlint-cli2.yaml"):
             for rename in (False, True):
                 with self.subTest(name=name, rename=rename):
@@ -155,7 +164,10 @@ class RepoScopeTests(unittest.TestCase):
                     head = self.commit()
                     for event in ("pull_request", "push"):
                         scope = self.scope(self.base, head, event=event)
-                        assert "pre-commit run --all-files" in scope
+                        assert (
+                            "prek argv: run --config .pre-commit-config.yaml --all-files"
+                            in scope
+                        )
                         assert "--from-ref" not in scope
 
     def test_non_markdown_deletions_only_expand_the_link_check(self) -> None:
@@ -165,21 +177,32 @@ class RepoScopeTests(unittest.TestCase):
         for event in ("pull_request", "push"):
             with self.subTest(event=event):
                 scope = self.scope(self.base, head, event=event)
-                assert scope.count("run lychee --all-files") == 1
-                assert f"run --from-ref {self.base} --to-ref {head}" in scope
+                assert scope.count("lychee --all-files") == 1
+                assert f"--from-ref {self.base} --to-ref {head}" in scope
 
     def changed_files(self, base: str, head: str) -> list[str]:
-        """Query the installed pre-commit implementation in the synthetic checkout."""
-        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed interpreter, source and commit arguments
+        """Ask prek which paths it passes to a hook for this range."""
+        prek = shutil.which("prek")
+        if prek is None:
+            raise RuntimeError(
+                "prek is required on PATH; run mise install and activate mise"
+            )
+        # Keep the hook config outside the synthetic Git history.
+        config = (
+            Path(self.enterContext(tempfile.TemporaryDirectory())) / "list-files.yaml"
+        )
+        config.write_text(LIST_FILES_CONFIG)
+        result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed executable, hook and commit arguments
             [
-                sys.executable,
-                "-c",
-                (
-                    "import sys; from pre_commit.git import get_changed_files; "
-                    "print('\\n'.join(get_changed_files(*sys.argv[1:])))"
-                ),
+                prek,
+                "run",
+                "--config",
+                str(config),
+                "--from-ref",
                 base,
+                "--to-ref",
                 head,
+                "files",
             ],
             cwd=self.repo,
             env=self.git_env,
@@ -187,7 +210,11 @@ class RepoScopeTests(unittest.TestCase):
             capture_output=True,
             text=True,
         )
-        return result.stdout.splitlines()
+        return [
+            line.lstrip().removeprefix("CHANGED:")
+            for line in result.stdout.splitlines()
+            if line.lstrip().startswith("CHANGED:")
+        ]
 
     def test_diverged_base_and_rebased_head(self) -> None:
         """Compare against the merge base, including after rebasing past the event base."""
@@ -198,6 +225,7 @@ class RepoScopeTests(unittest.TestCase):
         self.write("topic.md")
         head = self.commit()
         assert self.changed_files(target, head) == ["topic.md"]
+        assert self.changed_files(head, head) == []
         assert "--from-ref" in self.scope(target, head)
         self.command("rebase", "target")
         head = self.command("rev-parse", "HEAD")
