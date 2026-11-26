@@ -245,18 +245,6 @@ fn player_pipeline_failed_draw_ends_by_rules_after_the_answer() {
 }
 
 #[test]
-fn player_pipeline_prototype_prompt_cannot_appear_as_an_action_window() {
-    let mut state = serde_json::to_value(game(1, 3)).unwrap();
-    state["state"]["prompt"] = json!({"by":"P1","choices":[],"resume":null});
-    let mut game: Game = serde_json::from_value(state).unwrap();
-    assert_eq!(game.input(Viewer::P1), Input::EngineFault);
-    let before = serde_json::to_value(&game).unwrap();
-    game.advance_player_input();
-    assert_eq!(game.input(Viewer::P2), Input::EngineFault);
-    assert_eq!(serde_json::to_value(&game).unwrap(), before);
-}
-
-#[test]
 fn player_pipeline_unknown_procedure_cannot_appear_as_a_rule_choice() {
     let mut state = serde_json::to_value(game(1, 3)).unwrap();
     state["state"]["flow"] = json!({"kind":"unknown-procedure"});

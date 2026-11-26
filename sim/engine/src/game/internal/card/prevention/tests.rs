@@ -19,7 +19,6 @@ fn proposed_damage_controller_requires_an_explicit_valid_seat() {
 }
 
 use crate::catalog::Catalog;
-use crate::game::View;
 use crate::ir::*;
 use alloc::sync::Arc;
 
@@ -140,26 +139,6 @@ fn board_with_source(source_filter: Option<SourcePredicate>) -> Game {
 }
 
 #[test]
-fn legacy_damage_passes_frame_controller_even_when_source_object_is_controlled_elsewhere() {
-    for controller in ["P1", "P2"] {
-        let mut board = board(true);
-        let mut frame = board.frame_for("s").unwrap();
-        frame.controller = controller.into();
-        board
-            .execute(
-                &json!({"op":"damage","subjects":"f","amount":2_u8}),
-                &mut frame,
-            )
-            .unwrap();
-        board.run_frame(frame).unwrap();
-        assert_eq!(
-            board.projection(View::Referee).unwrap()["objects"]["f"]["damage"],
-            if controller == "P1" { 0_u8 } else { 2_u8 }
-        );
-    }
-}
-
-#[test]
 fn missing_proposed_controller_is_rejected_only_by_filtered_ability_prevention() {
     for filtered in [false, true] {
         let board = board(filtered);
@@ -187,29 +166,4 @@ fn missing_proposed_controller_is_rejected_only_by_filtered_ability_prevention()
             assert_eq!(references, Vec::<Value>::new());
         }
     }
-}
-
-#[test]
-fn prototype_without_a_damage_source_snapshot_is_unsupported() {
-    let trait_id = TraitId("academy".into());
-    let source = prevention::source_filter::Filter {
-        own: false,
-        kind: CardKind::Spell,
-        trait_id: &trait_id,
-    }
-    .predicate(Binding::new(1, ScopeId(3)));
-    let mut board = board_with_source(Some(source));
-    let mut frame = board.frame_for("s").unwrap();
-    let error = board
-        .execute(
-            &json!({"op":"damage","subjects":"f","amount":2_u8}),
-            &mut frame,
-        )
-        .and_then(|()| board.run_frame(frame))
-        .unwrap_err();
-    assert!(matches!(error, crate::EngineFailure::Unsupported(_)));
-    assert_eq!(
-        board.projection(View::Referee).unwrap()["objects"]["f"]["damage"],
-        0_u8
-    );
 }

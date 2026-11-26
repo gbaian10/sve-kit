@@ -492,39 +492,37 @@ fn event_batches_simultaneous_token_deaths_erase_together_after_moving() {
     }
 }
 
-/// A spell moves the opponent's field to the cemetery: two Stack amulets stay by removing
-/// a counter each and one follower leaves. `registry` supplies the keyword names.
+/// Two Stack amulets stay by removing a counter each and one follower leaves.
 fn stacked_departure(registry: &str) -> Game {
     let (snapshot, _, document) = catalog_documents(&json!("1"));
-    let mut document: Value = serde_json::from_str(&document).unwrap();
-    document["cards"]["unit-spell"]["abilities"] = json!([{
-        "kind":"spell","line":1,
-        "body":{"op":"move","subjects":{"zone":"field","side":"opponent"},"to":"cemetery"}
-    }]);
-    let catalog = Arc::new(
-        Catalog::from_documents(
-            &snapshot,
-            registry,
-            &[("unit.yaml".into(), document.to_string())],
-        )
-        .unwrap(),
-    );
+    let selected = earth_exchange::stack_selection(&snapshot, registry, &document);
     let mut initial = setup(1, json!([]));
     initial["players"]["P2"]["zones"]["field"] = json!([
-        {"id":"f","card":"unit-amulet","state":{"keywords":["stack"],"counters":{"stack_counter":2}}},
-        {"id":"g","card":"unit-amulet","state":{"keywords":["stack"],"counters":{"stack_counter":2}}},
+        {"id":"f","card":"unit-amulet","state":{"counters":{"stack_counter":2}}},
+        {"id":"g","card":"unit-amulet","state":{"counters":{"stack_counter":2}}},
         {"id":"h","card":"unit-follower"}
     ]);
-    let mut game = Game::new(
-        catalog,
+    let mut game = Game::from_selected_effects(
+        selected,
         &initial,
         &Value::Null,
         &Value::Null,
         "stack-batches",
     )
     .unwrap();
+    for number in ["unit-follower", "unit-spell"] {
+        game.load_internal_card(number, &card(vec![])).unwrap();
+    }
     game.advance_player_input();
-    game.decide(&json!({"do":"play","card":"s"}), "stack-move")
+    let field = Selector::Zone {
+        players: players(PlayerRelation::Opponents),
+        zone: ZoneKind::Field,
+        view: SelectionView::Current {},
+        binding: Binding::new(1, ScopeId(1)),
+        predicate: Box::new(Expr::Literal(Bool(true))),
+    };
+    let put = movement::put(1, field, OwnerZone::Cemetery);
+    game.execute_internal(&checked(vec![put]), &source("synthetic"), context(1))
         .unwrap();
     game.advance_player_input();
     game
@@ -640,7 +638,7 @@ fn event_batches_stack_replacements_counters_and_successful_movement_stay_togeth
                 .filter(|event| matches!(
                     &event.kind,
                     EventKind::Movement {
-                        method: MovementMethod::Procedure,
+                        method: MovementMethod::Effect(MoveMethod::Put),
                         ..
                     }
                 ))

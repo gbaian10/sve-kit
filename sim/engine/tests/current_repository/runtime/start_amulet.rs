@@ -1,4 +1,7 @@
 use super::*;
+use sve_engine::game::player::{
+    Command, Input, OpeningAnswer, OpeningQuestion, QuestionShape, SubmissionKind, Viewer,
+};
 
 const PLAYER: PlayerId = PlayerId { seat: 1 };
 /// Every JP printing that declares 【スタートアミュレット】.
@@ -21,7 +24,7 @@ const START_AMULETS: [&str; 16] = [
     "PR-293",
 ];
 
-fn vanguard_opening(amulet: &str) -> Game {
+fn vanguard_opening(amulet: &str, random: &Value) -> Game {
     let filler = |seat: &str| -> Vec<Value> {
         (0_u8..8)
             .map(|index| json!({"id":format!("{seat}-filler{index}"),"card":"BP01-037"}))
@@ -39,7 +42,7 @@ fn vanguard_opening(amulet: &str) -> Game {
         selection_with_rules().clone(),
         &position,
         &Value::Null,
-        &Value::Null,
+        random,
         "start-amulet",
     )
     .unwrap()
@@ -48,15 +51,19 @@ fn vanguard_opening(amulet: &str) -> Game {
 #[test]
 fn every_start_amulet_printing_is_offered_at_a_vanguard_opening() {
     for amulet in START_AMULETS {
-        let mut game = vanguard_opening(amulet);
-        let ordinary = game
-            .internal_rule_action(&json!({"do":"choose-start-amulet","object":"P1-filler0"}));
+        let mut game = vanguard_opening(amulet, &Value::Null);
+        let ordinary =
+            game.internal_rule_action(&json!({"do":"choose-start-amulet","object":"P1-filler0"}));
         assert!(
             ordinary.is_err() || ordinary.is_ok_and(|step| step.outcome != "resolved"),
             "an ordinary card is not a start amulet"
         );
         let refused = game.projection(View::Referee).unwrap();
-        assert_eq!(refused["P1"]["field"], json!([]), "the refusal places nothing");
+        assert_eq!(
+            refused["P1"]["field"],
+            json!([]),
+            "the refusal places nothing"
+        );
         assert_eq!(
             game.internal_rule_action(&json!({"do":"choose-start-amulet","object":"amulet"}))
                 .unwrap()
@@ -73,6 +80,37 @@ fn every_start_amulet_printing_is_offered_at_a_vanguard_opening() {
         let state = game.projection(View::Referee).unwrap();
         assert_eq!(state["P1"]["field"], json!(["amulet"]), "{amulet}");
     }
+}
+
+#[test]
+fn start_amulet_shuffle_fault_rolls_back_placement_and_closes_input() {
+    let mut game = vanguard_opening(
+        "CP03-021",
+        &json!({"shuffles":[{"player":"P2","zone":"deck","result":[]}]}),
+    );
+    let Input::Question(question) = game.input(Viewer::P1) else {
+        panic!("expected start amulet choice");
+    };
+    let QuestionShape::Opening(OpeningQuestion::StartAmulet(cards)) = question.shape else {
+        panic!("expected start amulet candidates");
+    };
+    let command = Command::Opening {
+        token: question.token,
+        answer: OpeningAnswer::StartAmulet(cards.first().unwrap().handle.clone()),
+    };
+    let before = [Viewer::P1, Viewer::P2].map(|viewer| game.observe(viewer).unwrap());
+    assert_eq!(
+        game.submit_player(Viewer::P1, command.clone()).kind,
+        SubmissionKind::EngineFault
+    );
+    for (viewer, observation) in [Viewer::P1, Viewer::P2].into_iter().zip(before) {
+        assert_eq!(game.observe(viewer).unwrap(), observation);
+        assert_eq!(game.input(viewer), Input::EngineFault);
+    }
+    assert_eq!(
+        game.submit_player(Viewer::P1, command).kind,
+        SubmissionKind::EngineFault
+    );
 }
 
 #[test]
@@ -108,7 +146,11 @@ fn csd03_start_amulets_sacrifice_themselves_to_buff_only_a_vanguard_follower() {
             let InputDomain::Targets(domain) = &question.domain else {
                 panic!("formal target")
             };
-            assert_eq!(domain.members.len(), 1, "only the Vanguard follower qualifies");
+            assert_eq!(
+                domain.members.len(),
+                1,
+                "only the Vanguard follower qualifies"
+            );
             play = game
                 .answer_internal_card(
                     question.actor,

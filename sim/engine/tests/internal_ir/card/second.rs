@@ -173,45 +173,6 @@ fn reject_hidden_after_follow() {
     );
 }
 
-/// Without a departure subscription, a destination outside the typed producers stays a plain move.
-fn keep_unsubscribed_prototype_destination() {
-    let snapshot = [("unit-follower", "フォロワー"), ("unit-spell", "スペル")]
-        .map(|(number, kind)| json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string())
-        .join("\n");
-    let registry = json!({"format":1,"kind":"keyword_registry","keywords":{}}).to_string();
-    let document = json!({"format":1,"kind":"effect_set","cards":{
-        "unit-follower":{"status":"complete","abilities":[{"line":1,"kind":"activated","body":{"op":"move","subjects":"self","to":"evolve_deck"}}]},
-        "unit-spell":{"status":"complete","abilities":[]}
-    }})
-    .to_string();
-    let prototype = Arc::new(
-        Catalog::from_documents(&snapshot, &registry, &[("prototype.yaml".into(), document)])
-            .unwrap(),
-    );
-    let mut initial = setup(1, json!([]));
-    initial["players"]["P1"]["zones"]["hand"] = json!([]);
-    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"s","card":"unit-follower"}]);
-    let mut game = Game::new(prototype, &initial, &Value::Null, &Value::Null, "prototype").unwrap();
-    let activate = game
-        .legal()
-        .unwrap()
-        .into_iter()
-        .find(|choice| choice["do"] == "activate")
-        .unwrap();
-    assert_eq!(
-        game.submit(&activate).unwrap().outcome,
-        "resolved",
-        "the prototype move still resolves"
-    );
-    assert_eq!(
-        game.query(View::Referee, "P1.evolve_deck")
-            .unwrap()
-            .unwrap(),
-        json!(["s"]),
-        "an unsubscribed departure keeps its destination"
-    );
-}
-
 #[test]
 fn self_leave_bounce_uses_public_before_and_destroy_prevention_emits_nothing() {
     let trigger = lowered(
@@ -281,7 +242,6 @@ fn self_leave_bounce_uses_public_before_and_destroy_prevention_emits_nothing() {
         game.query(View::Referee, "P1.field").unwrap().unwrap(),
         json!(["s"])
     );
-    keep_unsubscribed_prototype_destination();
 }
 
 #[test]

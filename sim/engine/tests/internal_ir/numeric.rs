@@ -385,42 +385,6 @@ fn unsupported_numeric_shapes_are_rejected_in_dead_branches_before_draw() {
     }
 }
 
-#[test]
-fn prototype_decisions_preserve_numeric_layers_and_reject_invalid_transport() {
-    let mut game = game(1, 1);
-    game.execute_internal(
-        &checked(vec![buff(1, 1, 1)]),
-        &source("synthetic"),
-        context(1),
-    )
-    .unwrap();
-    let before = format!("{game:?}");
-    game.decide(&Value::Null, "blocked").unwrap_err();
-    assert_eq!(before, format!("{game:?}"));
-    game.decide(&json!({"do":"end-phase"}), "allowed-with-layers")
-        .unwrap();
-    assert_eq!(
-        game.projection(View::Referee).unwrap()["objects"]["f"]["power"],
-        3
-    );
-    // The layer leaves with its generation, so no live layer remains.
-    let mut moved = super::game(1, 1);
-    moved
-        .execute_internal(
-            &checked(vec![
-                buff(1, 1, 1),
-                movement::put(2, zone(ZoneKind::Field, 131), OwnerZone::Cemetery),
-            ]),
-            &source("synthetic"),
-            context(1),
-        )
-        .unwrap();
-    moved.decide(&json!({"do":"end"}), "allowed").unwrap();
-    super::game(1, 1)
-        .decide(&json!({"do":"end"}), "fresh")
-        .unwrap();
-}
-
 #[cfg(feature = "runner")]
 #[test]
 fn printed_cp02_007_and_bp01_011_add_fragments_use_snapshot_stats() {
