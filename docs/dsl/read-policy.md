@@ -95,8 +95,8 @@ BodyReference 仍是參照節點；結構走訪不追蹤並展開它指向的定
 
 walk 的 enter／leave 是語法結構通知，不是 dominance、執行時順序或授權證明。
 各驗證器在各分支建立自己的環境，只有原規則明示允許的輸出才向外發布。
-raw IR 仍由 wellformed 檢查，作者路徑仍保留來源閉包與 lowering；
-未付、跨迴圈／execution、錯誤 producer 或未授權私有讀取的拒絕不因共用走訪而消失。
+wellformed 檢查 lowering 與執行器建構的內部 IR，作者路徑保留來源閉包與 lowering。
+結構檢查拒絕未付款、跨迴圈／execution、錯誤 producer 或未授權私有讀取。
 靜態計畫建立後，使用時仍重驗付款、世代、位置、follow 與實際 reveal。
 
 ## 候選條件核心
