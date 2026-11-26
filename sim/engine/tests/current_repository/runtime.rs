@@ -47,35 +47,39 @@ pub(super) fn game(initial: &Value) -> Game {
     .unwrap()
 }
 
+fn test_battle_references(selected: &SelectedEffects, snapshot: &str) -> BattleReferences {
+    let faces = snapshot
+        .lines()
+        .map(|line| serde_json::from_str::<Card>(line).unwrap())
+        .flat_map(|card| {
+            (0..card.faces.len()).map(move |ordinal| PrintingFaceIdentity {
+                card_no: card.number.clone(),
+                native_face: u64::try_from(ordinal).unwrap(),
+                card: CardRef {
+                    printing_id: card.number.clone(),
+                    face: WireNat::from(u32::try_from(ordinal).unwrap()),
+                },
+            })
+        })
+        .collect();
+    BattleReferences::new(
+        &selected.prototypes,
+        ReferenceInput {
+            region: "jp".into(),
+            snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
+            faces,
+            wording: None,
+            rules: None,
+        },
+    )
+    .unwrap()
+}
+
 fn assert_battle_counter(game: &Game, card_no: &str, name: &str, amount: u32) {
     static REFERENCES: OnceLock<BattleReferences> = OnceLock::new();
     let references = REFERENCES.get_or_init(|| {
         let (snapshot, _, _) = inputs();
-        let faces = snapshot
-            .lines()
-            .map(|line| serde_json::from_str::<Card>(line).unwrap())
-            .flat_map(|card| {
-                (0..card.faces.len()).map(move |ordinal| PrintingFaceIdentity {
-                    card_no: card.number.clone(),
-                    native_face: u64::try_from(ordinal).unwrap(),
-                    card: CardRef {
-                        printing_id: card.number.clone(),
-                        face: WireNat::from(u32::try_from(ordinal).unwrap()),
-                    },
-                })
-            })
-            .collect();
-        BattleReferences::new(
-            &selection().prototypes,
-            ReferenceInput {
-                region: "jp".into(),
-                snapshot_sha256: rule_fixtures::hash(snapshot.as_bytes()),
-                faces,
-                wording: None,
-                rules: None,
-            },
-        )
-        .unwrap()
+        test_battle_references(selection(), &snapshot)
     });
     let objects = game.battle_objects(Viewer::P1, references).unwrap();
     let expected = Counter {

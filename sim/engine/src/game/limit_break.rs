@@ -6,6 +6,7 @@ use super::{Frame, Game, Object};
 use crate::Result;
 use crate::ir::LimitBreakState;
 use serde_json::json;
+use sve_battle_contract::observation::LimitBreakStage;
 
 pub(super) const TREASURE: &str = "トレジャー・トークン";
 pub(super) const FINAL_LIMIT_BREAK_POSSIBLE: &str = "final_limit_break_possible";
@@ -26,11 +27,28 @@ impl Game {
 
     pub(super) fn is_limit_broken(&self, id: &str, final_break: bool) -> Result<bool> {
         Ok(self.object(id)?.zone == "field"
-            && self.state.objects.values().any(|material| {
-                material.zone == "limit_break"
-                    && material.state["limit_break_of"] == id
-                    && material.state[stage(final_break)] == true
-            }))
+            && self
+                .limit_break_materials(id)
+                .any(|material| material.state[stage(final_break)] == true))
+    }
+
+    pub(super) fn limit_break_stage(&self, id: &str) -> LimitBreakStage {
+        let mut current = LimitBreakStage::None;
+        for material in self.limit_break_materials(id) {
+            if material.state[stage(true)] == true {
+                return LimitBreakStage::Final;
+            }
+            if material.state[stage(false)] == true {
+                current = LimitBreakStage::Broken;
+            }
+        }
+        current
+    }
+
+    fn limit_break_materials<'a>(&'a self, id: &'a str) -> impl Iterator<Item = &'a Object> {
+        self.state.objects.values().filter(move |material| {
+            material.zone == "limit_break" && material.state["limit_break_of"] == id
+        })
     }
 
     pub(super) fn limit_break_condition(&self, id: &str, state: LimitBreakState) -> Result<bool> {
