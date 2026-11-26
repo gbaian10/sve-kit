@@ -120,7 +120,11 @@ def test_light_admission_populates_programs_and_manual_states_for_every_card(
                 dict(db.rows("printing")[0].values)
                 | {"id": "other-printing", "card_id": other_card, "card_no": "SYN-02"},
             )
-            populate(db, current, inputs, expander)
+            references = populate(db, current, inputs, expander)
+        printing = db.select("printing", ("id",), where={"card_no": "SYN-01"})[0].values
+        assert references == {
+            identifier: {"representative": printing["id"], "tokens": []}
+        }
         documents = db.rows("dsl_document")
         assert len(documents) == 1
         assert documents[0].values["card_id"] == identifier

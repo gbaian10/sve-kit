@@ -982,6 +982,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             author_inputs.index.records
         ):
             raise ValueError("Admitted author program is missing from public snapshot")
+        if projection.programs and projection.program_printings is None:
+            raise ValueError("Admitted author programs require printing references")
         require_offline_coverage(
             projection, errata=bool(errata), construction=construction_result
         )
