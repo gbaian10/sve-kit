@@ -7,7 +7,7 @@ import pytest
 from sve_carddb.core.json import array, canonical, object_value
 from sve_carddb.domains.effects.author_direct import materialize
 from sve_carddb.domains.effects.author_handwritten import Body, Handwritten, read
-from sve_carddb.domains.effects.author_inputs import parse_document
+from sve_carddb.domains.effects.author_inputs import AuthorInputError, parse_document
 from sve_carddb.domains.effects.author_sources import SourceError
 from sve_carddb.domains.products.models import LocalizedText
 from sve_carddb.domains.text_observations.intern import TextInterner
@@ -41,6 +41,14 @@ def test_main_directory_reads_numeric_and_card_number_filenames(tmp_path: Path) 
         )
 
     assert read(owner, None).cards == cards
+
+    bodies = tmp_path / "bodies"
+    bodies.mkdir()
+    (bodies / "SYN-02.yaml").write_bytes(
+        canonical({"format": 2, "kind": "effect_body_shard", "records": []})
+    )
+    with pytest.raises(AuthorInputError, match="invalid_input_path"):
+        read(owner, bodies)
 
 
 def test_direct_writer_selects_pending_text_without_machine_anchors(
